@@ -3078,6 +3078,31 @@ z.size(), active_npc.size(), events.size());
                 }
                 add_msg(_("(you: %d:%d)"), u.posx, u.posy);
 			}
+			{
+				std::ostringstream buffer;
+ for(int i = 0; i < cur_om->zg.size(); i++) { // For each valid group...
+ 	if (cur_om->zg[i].posz != levz) { continue; } // skip other levels - hack
+  unsigned int pop = cur_om->zg[i].population;
+  unsigned int rad = cur_om->zg[i].radius;
+  int dist;
+  if(cur_om->zg[i].diffuse)
+   dist = rl_dist(levx, levy, cur_om->zg[i].posx, cur_om->zg[i].posy);
+  else
+   dist = trig_dist(levx, levy, cur_om->zg[i].posx, cur_om->zg[i].posy);
+  if (dist <= rad * 4) {
+// (The area of the group's territory) in (population/square at this range)
+// chance of adding one monster; cap at the population OR 16
+ 	buffer << "MG @" << cur_om->zg[i].posx << "," << cur_om->zg[i].posy << ": " << cur_om->zg[i].type << ": " << (cur_om->zg[i].diffuse ? "D " : "");
+	buffer << "POP: " << pop << " RAD: " << rad;
+    buffer << "\n";
+  }
+ }
+ buffer << "Pos is: " << levx << ", " << levy;
+ full_screen_popup(buffer.str().c_str());
+			}
+
+
+
    break;
 
   case 8:
@@ -5919,6 +5944,19 @@ bool game::choose_adjacent(std::string verb, int &x, int &y)
     return true;
 }
 
+bool game::vehicle_with_tank_near()
+{
+ for (int dx = -1; dx <= 1; dx++) {
+  for (int dy = -1; dy <= 1; dy++) {
+   vehicle *veh = m.veh_at(u.posx + dx, u.posy + dy);
+   if(veh && veh->fuel_capacity(AT_GAS) > 0) {
+    return true;
+   }
+  }
+ }
+ return false;
+}
+
 bool game::vehicle_near ()
 {
  for (int dx = -1; dx <= 1; dx++) {
@@ -6525,7 +6563,7 @@ void advprintItems(advanced_inv_pane &pane, advanced_inv_area* squares, bool act
 // should probably move to an adv_inv_pane class
 
 enum advanced_inv_sortby {
-    SORTBY_NONE = 1 , SORTBY_NAME, SORTBY_WEIGHT, SORTBY_VOLUME, SORTBY_CHARGES, SORTBY_CATEGORY, NUM_SORTBY
+    SORTBY_NONE = 1 , SORTBY_NAME, SORTBY_WEIGHT, SORTBY_VOLUME, SORTBY_CHARGES, SORTBY_CATEGORY, SORTBY_DAMAGE, SORTBY_TYPE, NUM_SORTBY
 };
 
 struct advanced_inv_sort_case_insensitive_less : public std::binary_function< char,char,bool > {
@@ -6562,6 +6600,22 @@ struct advanced_inv_sorter {
                     }
                     break;
                 }
+				case SORTBY_DAMAGE: {
+					if(d1.it != 0 && d2.it != 0) {
+						if(d1.it->damage != d2.it->damage) {
+							return d1.it->damage < d2.it->damage;
+						}
+					}
+					break;
+				}
+				case SORTBY_TYPE: {
+					if(d1.it != 0 && d2.it != 0) {
+						if(d1.it->typeId() != d2.it->typeId()) {
+							return d1.it->typeId() < d2.it->typeId();
+						}
+					}
+					break;
+				}
                 default: return d1.idx > d2.idx; break;
             };
         }
@@ -6678,7 +6732,7 @@ void game::advanced_inv()
     const int right = 1;
     const int isinventory = 0;
     const int isall = 10;
-    std::string sortnames[8] = { "-none-", _("none"), _("name"), _("weight"), _("volume"), _("charges"), _("category"), "-" };
+    std::string sortnames[10] = { "-none-", _("none"), _("name"), _("weight"), _("volume"), _("charges"), _("category"), _("damage"), _("type"), "-" };
     std::string invcats[10] = { _("guns"), _("ammo"), _("weapons"), _("tools"), _("clothing"), _("food"), _("drugs"), _("books"), _("mods"), _("other") };
     bool checkshowmsg=false;
     bool showmsg=false;
@@ -6955,7 +7009,7 @@ void game::advanced_inv()
                 wattron(panes[i].window, c_cyan);
             }
             wborder(panes[i].window,LINE_XOXO,LINE_XOXO,LINE_OXOX,LINE_OXOX,LINE_OXXO,LINE_OOXX,LINE_XXOO,LINE_XOOX);
-            mvwprintw(panes[i].window, 0, 3, _("< [s]ort: %s >"), sortnames[ ( panes[i].sortby <= 6 ? panes[i].sortby : 0 ) ].c_str() );
+            mvwprintw(panes[i].window, 0, 3, _("< [s]ort: %s >"), sortnames[ ( panes[i].sortby < NUM_SORTBY ? panes[i].sortby : 0 ) ].c_str() );
             int max=( panes[i].area == isinventory ? max_inv : MAX_ITEM_IN_SQUARE );
             if ( panes[i].area == isall ) max *= 9;
             int fmtw=7 + ( panes[i].size > 99 ? 3 : panes[i].size > 9 ? 2 : 1 ) + ( max > 99 ? 3 : max > 9 ? 2 : 1 );
@@ -7281,6 +7335,8 @@ void game::advanced_inv()
             sm.entries.push_back(uimenu_entry(SORTBY_VOLUME, true, 'v', sortnames[SORTBY_VOLUME]));
             sm.entries.push_back(uimenu_entry(SORTBY_CHARGES, true, 'x', sortnames[SORTBY_CHARGES]));
             sm.entries.push_back(uimenu_entry(SORTBY_CATEGORY, true, 'c', sortnames[SORTBY_CATEGORY]));
+            sm.entries.push_back(uimenu_entry(SORTBY_DAMAGE, true, 'd', sortnames[SORTBY_DAMAGE]));
+            sm.entries.push_back(uimenu_entry(SORTBY_TYPE, true, 't', sortnames[SORTBY_TYPE]));
             sm.selected=panes[src].sortby-1; /* pre-select current sort. uimenu.selected is entries[index] (starting at 0), not return value */
             sm.query(); /* calculate key and window variables, generate window, and loop until we get a valid answer */
             if(sm.ret < 1) continue; /* didn't get a valid answer =[ */
@@ -9047,7 +9103,7 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite)
   debugmsg("Tried to handle_liquid a non-liquid!");
   return false;
  }
- if (liquid.type->id == "gasoline" && vehicle_near() && query_yn(_("Refill vehicle?"))) {
+ if (liquid.type->id == "gasoline" && vehicle_with_tank_near() && query_yn(_("Refill vehicle?"))) {
   int vx = u.posx, vy = u.posy;
   refresh_all();
   if (choose_adjacent(_("Refill vehicle"), vx, vy)) {
@@ -9087,7 +9143,7 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite)
 
   std::stringstream text;
   text << _("Container for ") << liquid.tname(this);
-  char ch = inv_type(text.str().c_str(), IC_CONTAINER);
+  char ch = inv_type_container(text.str().c_str(), liquid.type->id);
   if (!u.has_item(ch)) {
     // No container selected (escaped, ...), ask to pour
     // we asked to pour rotten already

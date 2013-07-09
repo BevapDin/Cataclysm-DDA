@@ -201,8 +201,12 @@ inventory inventory::operator+ (const item &rhs)
  return inventory(*this) += rhs;
 }
 
-
 inventory inventory::filter_by_category(item_cat cat, const player& u) const
+{
+	return filter_by_category(cat, u, NULL);
+}
+
+inventory inventory::filter_by_category(item_cat cat, const player& u, const std::string *liquid) const
 {
     inventory reduced_inv;
     for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter)
@@ -252,7 +256,10 @@ inventory inventory::filter_by_category(item_cat cat, const player& u) const
             {
                 if (it.is_container())
                 {
-                    reduced_inv += *iter;
+					if(liquid == 0 || it.contents.empty() || it.contents[0].type->id == *liquid)
+					{
+	                    reduced_inv += *iter;
+					}
                 }
             }
             break;

@@ -237,6 +237,8 @@ class game
   std::string list_item_downvote;
   char inv(std::string title);
   char inv_type(std::string title, item_cat inv_item_type = IC_NULL);
+  char inv_type(std::string title, item_cat inv_item_type, const std::string *liquid);
+  char inv_type_container(std::string title, std::string liquid);
   int inventory_item_menu(char chItem, int startx = 0, int width = 50);
   std::vector<item> multidrop();
   faction* list_factions(std::string title = "FACTIONS:");
@@ -413,6 +415,7 @@ void load_artifacts(); // Load artifact data
   void place_construction(constructable *con); // See construction.cpp
   void complete_construction();               // See construction.cpp
   bool vehicle_near ();
+  bool vehicle_with_tank_near();
   void handbrake ();
   void control_vehicle(); // Use vehicle controls  '^'
   void examine();// Examine nearby terrain	'e'

@@ -282,6 +282,7 @@ public:
 
 // Get combined power of solar panels
     int solar_power ();
+	int real_solar_power ();
 
 // Get acceleration gained by combined power of all engines. If fueled == true, then only engines which
 // vehicle have fuel for are accounted

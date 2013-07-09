@@ -257,6 +257,16 @@ char game::inv(std::string title)
 
 char game::inv_type(std::string title, item_cat inv_item_type)
 {
+	return inv_type(title, inv_item_type, NULL);
+}
+
+char game::inv_type_container(std::string title, std::string liquid)
+{
+	return inv_type(title, IC_CONTAINER, &liquid);
+}
+
+char game::inv_type(std::string title, item_cat inv_item_type, const std::string *liquid)
+{
 // this function lists inventory objects by type
 // refer to enum item_cat in itype.h for list of categories
 
@@ -271,7 +281,7 @@ char game::inv_type(std::string title, item_cat inv_item_type)
 // Gun, ammo, weapon, armor, food, tool, book, other
 
 // Create the reduced inventory
- inventory reduced_inv = u.inv.filter_by_category(inv_item_type, u);
+ inventory reduced_inv = u.inv.filter_by_category(inv_item_type, u, liquid);
 
  invslice slice = reduced_inv.slice(0, reduced_inv.size());
  std::vector<int> firsts = find_firsts(slice);

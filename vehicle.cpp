@@ -578,10 +578,10 @@ void vehicle::give_part_properties_to_item(game* g, int partnum, item& i){
     itype* itemtype = g->itypes[pitmid];
     if(itemtype->is_var_veh_part())
        i.bigness = parts[partnum].bigness;
-       
+
     // remove charges if part is made of a tool
     if(itemtype->is_tool())
-        i.charges = 0;       
+        i.charges = 0;
 
     // translate part damage to item damage.
     // max damage is 4, min damage 0.
@@ -1779,7 +1779,7 @@ bool vehicle::add_item (int part, item itm)
 
     if (!part_flag(part, vpf_cargo))
         return false;
-    
+
     if (parts[part].items.size() >= max_storage)
         return false;
     it_ammo *ammo = dynamic_cast<it_ammo*> (itm.type);
@@ -1799,7 +1799,7 @@ bool vehicle::add_item (int part, item itm)
           return true;
         }
       }
-    
+
     if ( cur_volume + add_volume > maxvolume ) {
       return false;
     }
@@ -1813,6 +1813,33 @@ void vehicle::remove_item (int part, int itemdex)
         return;
     parts[part].items.erase (parts[part].items.begin() + itemdex);
 }
+
+int vehicle::real_solar_power ()
+{
+	// Taken from game::is_in_sunlight
+	// Note: game::is_in_sunlight checks the weather (sunny, clear)
+	// the inside/outside status and the light_level.
+	// This is done here too, first the weather (is global)
+	if(g->weather != WEATHER_CLEAR && g->weather != WEATHER_SUNNY) {
+		return 0;
+	}
+	int pwr = 0;
+	// Now the light level
+	if(g->light_level() >= 40) {
+		const int x = global_x();
+		const int y = global_y();
+		for (int p = 0; p < parts.size(); p++) {
+			if(part_flag(p, vpf_solar_panel) && parts[p].hp > 0) {
+				// Now the outside status
+				if(g->m.is_outside(x + parts[p].precalc_dx[0], y + parts[p].precalc_dy[0])) {
+					pwr += part_power(p);
+				}
+			}
+		}
+	}
+    return pwr;
+}
+
 
 void vehicle::gain_moves (int mp)
 {
@@ -1838,6 +1865,11 @@ void vehicle::gain_moves (int mp)
     }
 
     refill ("battery", solar_power());
+
+    // If the vehicle is moving, trickle-charge storage batteries.
+    if (velocity && one_in(10)) {
+      refill (AT_BATT, abs(velocity) / 100);
+    }
 
     // check for smoking parts
     for (int ep = 0; ep < external_parts.size(); ep++)
@@ -2031,6 +2063,8 @@ int vehicle::damage_direct (int p, int dmg, int type)
     if (tsh > 20)
         tsh = 20;
     int dres = dmg;
+	vehicle *vehofp = g->m.veh_at(g->u.posx, g->u.posy);
+	bool show_msg = vehofp == this && g->u.controlling_vehicle;
     if (dmg >= tsh || type != 1)
     {
         dres -= parts[p].hp;
@@ -2040,6 +2074,9 @@ int vehicle::damage_direct (int p, int dmg, int type)
             parts[p].hp = 0;
         if (!parts[p].hp && last_hp > 0)
             insides_dirty = true;
+		if(last_hp > 0 && show_msg) {
+			g->add_msg("Your %s takes %d damage", part_info(p).name, dmg);
+		}
         if (part_flag(p, vpf_fuel_tank))
         {
             ammotype ft = part_info(p).fuel_type;
