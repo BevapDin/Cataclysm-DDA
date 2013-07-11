@@ -916,6 +916,38 @@ void iuse::sew(game *g, player *p, item *it, bool t)
         return;
     }
     char ch = g->inv_type(_("Repair what?"), IC_ARMOR);
+	if(ch == ' ') {
+		int choice = menu(true, 
+    "Choose:", "Repair damaged item", "Fit item", "Enchange item", "Cancel", NULL);
+		if(choice < 1 || choice > 3) {
+			return;
+		}
+		std::vector<item*> tmp_inv;
+		g->u.inv.dump(tmp_inv);
+		for (std::vector<item*>::const_iterator iter = tmp_inv.begin(); ch == ' ' && iter != tmp_inv.end(); ++iter)
+		{
+			const item& it = **iter;
+			if (it.is_armor())
+			{
+				if (it.made_of("cotton") || it.made_of("wool") || it.made_of("leather") || it.made_of("fur"))
+				{
+					if(choice == 1 && it.damage > 0) {
+						ch = it.invlet;
+					}
+					if(choice == 2 && it.damage == 0 && it.has_flag("VARSIZE") && !it.has_flag("FIT")) {
+						ch = it.invlet;
+					}
+					if(choice == 3 && it.damage == 0 && (!it.has_flag("VARSIZE") || (it.has_flag("VARSIZE") && it.has_flag("FIT")))) {
+						ch = it.invlet;
+					}
+				}
+			}
+		}
+		if(ch == ' ') {
+			g->add_msg("You have no matching item");
+			return;
+		}
+	}
     item* fix = &(p->i_at(ch));
     if (fix == NULL || fix->is_null())
 	{

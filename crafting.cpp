@@ -1117,15 +1117,15 @@ void game::complete_craft()
   }
  if (!newit.craft_has_charges())
   newit.charges = 0;
- do {
-  newit.invlet = nextinv;
-  advance_nextinv();
-  iter++;
- } while (u.has_item(newit.invlet) && iter < inv_chars.size());
  //newit = newit.in_its_container(&itypes);
  if (newit.made_of(LIQUID))
   handle_liquid(newit, false, false);
  else {
+  do {
+   newit.invlet = nextinv;
+   advance_nextinv();
+   iter++;
+  } while (u.has_item(newit.invlet) && iter < inv_chars.size());
 // We might not have space for the item
   if (iter == inv_chars.size() || !u.can_pickVolume(newit.volume())) {
    add_msg(_("There's no room in your inventory for the %s, so you drop it."),

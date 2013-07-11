@@ -3082,8 +3082,8 @@ z.size(), active_npc.size(), events.size());
 				std::ostringstream buffer;
  for(int i = 0; i < cur_om->zg.size(); i++) { // For each valid group...
  	if (cur_om->zg[i].posz != levz) { continue; } // skip other levels - hack
-  unsigned int pop = cur_om->zg[i].population;
-  unsigned int rad = cur_om->zg[i].radius;
+  int pop = cur_om->zg[i].population;
+  int rad = cur_om->zg[i].radius;
   int dist;
   if(cur_om->zg[i].diffuse)
    dist = rl_dist(levx, levy, cur_om->zg[i].posx, cur_om->zg[i].posy);
@@ -3093,12 +3093,12 @@ z.size(), active_npc.size(), events.size());
 // (The area of the group's territory) in (population/square at this range)
 // chance of adding one monster; cap at the population OR 16
  	buffer << "MG @" << cur_om->zg[i].posx << "," << cur_om->zg[i].posy << ": " << cur_om->zg[i].type << ": " << (cur_om->zg[i].diffuse ? "D " : "");
-	buffer << "POP: " << pop << " RAD: " << rad;
+	buffer << "POP: " << pop << " RAD: " << rad << " dist: " << dist;
     buffer << "\n";
   }
  }
- buffer << "Pos is: " << levx << ", " << levy;
- full_screen_popup(buffer.str().c_str());
+ buffer << "\nPos is: " << levx << ", " << levy;
+ popup_top(buffer.str().c_str());
 			}
 
 
@@ -9327,6 +9327,7 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite)
           liquid.charges = container->contains * default_charges;
           cont->put_in(liquid);
           liquid.charges = oldcharges;
+		  u.inv.sort();
           return false;
         }
         cont->put_in(liquid);
