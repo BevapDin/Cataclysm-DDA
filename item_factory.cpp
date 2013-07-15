@@ -181,6 +181,7 @@ void Item_factory::init(){
     // It examines the item's artifact-specific properties
     // See artifact.h for a list
     iuse_function_list["ARTIFACT"] = &iuse::artifact;
+    iuse_function_list["DECREASE_SCENT"] = &iuse::decrease_scent;
 
     // Offensive Techniques
     techniques_list["SWEEP"] = mfb(TEC_SWEEP);

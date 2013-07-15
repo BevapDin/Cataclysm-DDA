@@ -164,7 +164,8 @@ bool game::making_would_work(recipe *making)
     	return false;
     }
 
-    if(can_make(making))
+    inventory crafting_inv = crafting_inventory(&u);
+    if(can_make(making, crafting_inv))
     {
         if (item_controller->find_template((making->result))->phase == LIQUID)
         {
@@ -189,10 +190,10 @@ bool game::making_would_work(recipe *making)
 
     return false;
 }
-bool game::can_make(recipe *r)
+bool game::can_make(recipe *r, inventory &crafting_inv)
 {
     bool RET_VAL = true;
-    inventory crafting_inv = crafting_inventory(&u);
+//    inventory crafting_inv = crafting_inventory(&u);
     if(!u.knows_recipe(r))
     {
         return false;
@@ -283,7 +284,7 @@ bool game::can_make(recipe *r)
     return check_enough_materials(r, crafting_inv) && RET_VAL;
 }
 
-bool game::check_enough_materials(recipe *r, inventory crafting_inv)
+bool game::check_enough_materials(recipe *r, inventory &crafting_inv)
 {
     bool RET_VAL = true;
     std::vector<std::vector<component> > &components = r->components;
@@ -911,16 +912,32 @@ void draw_recipe_tabs(WINDOW *w, craft_cat tab,bool filtered)
     wrefresh(w);
 }
 
+void add_bio_toolset(player *p, const std::string &tool,calendar &turn, inventory &crafting_inv) {
+	std::string bionic_name("bio_tools_");
+	bionic_name += tool;
+	if(p->has_bionic(bionic_name)) {
+		std::string tool_name("toolset_");
+		tool_name += tool;
+		item tools(item_controller->find_template(tool_name), turn);
+		tools.charges = p->power_level;
+		crafting_inv += tools;
+	}
+}
+
 inventory game::crafting_inventory(player *p){
  inventory crafting_inv;
  crafting_inv.form_from_map(this, point(p->posx, p->posy), PICKUP_RANGE);
  crafting_inv += p->inv;
  crafting_inv += p->weapon;
- if (p->has_bionic("bio_tools")) {
-  item tools(item_controller->find_template("toolset"), turn);
-  tools.charges = p->power_level;
-  crafting_inv += tools;
- }
+ 
+ add_bio_toolset(p, "knife", turn, crafting_inv);
+ add_bio_toolset(p, "screwdriver", turn, crafting_inv);
+ add_bio_toolset(p, "wrench", turn, crafting_inv);
+ add_bio_toolset(p, "hacksaw", turn, crafting_inv);
+ add_bio_toolset(p, "hammer", turn, crafting_inv);
+ add_bio_toolset(p, "welder", turn, crafting_inv);
+ add_bio_toolset(p, "hotplate", turn, crafting_inv);
+ add_bio_toolset(p, "soldering_iron", turn, crafting_inv);
  return crafting_inv;
 }
 
@@ -941,11 +958,13 @@ void game::pick_recipes(std::vector<recipe*> &current,
             add_known_recipes(current, iter->second, filter);
         }
     }
+	
+	inventory crafting_inv = crafting_inventory(&u);
 
     for (int i = 0; i < current.size(); i++)
     {
         //Check if we have the requisite tools and components
-        if(can_make(current[i]))
+        if(can_make(current[i], crafting_inv))
         {
             available.push_back(true);
         }
@@ -1167,7 +1186,7 @@ std::list<item> game::consume_items(player *p, std::vector<component> components
             continue;
         }
 
-        if (item_controller->find_template(type)->count_by_charges() && count > 0)
+        if (count > 0 && item_controller->find_template(type)->count_by_charges())
         {
             if (p->has_charges(type, count))
             {
@@ -1440,7 +1459,7 @@ void game::disassemble(char ch)
                             if (type == "welder")
                             {
                                 if (crafting_inv.has_amount("hacksaw", 1) ||
-                                    crafting_inv.has_amount("toolset", 1))
+                                    crafting_inv.has_amount("toolset_hacksaw", 1))
                                 {
                                     have_this_tool = true;
                                 }
@@ -1483,7 +1502,7 @@ void game::disassemble(char ch)
                   {
                    return;
                   }
-                    u.assign_activity(this, ACT_DISASSEMBLE, cur_recipe->time, cur_recipe->id);
+                    u.assign_activity(this, ACT_DISASSEMBLE, cur_recipe->time / 2, cur_recipe->id);
                     u.moves = 0;
                     std::vector<int> dis_items;
                     dis_items.push_back(ch);

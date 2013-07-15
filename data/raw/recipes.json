@@ -26,7 +26,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -71,7 +71,7 @@
             "tools": [
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ]
                      ],
             "components": [
@@ -105,7 +105,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -192,7 +192,8 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1],
+                             ["toolset_screwdriver", -1],
+                             ["toolset_knife", -1],
                              ["screwdriver", -1]
                          ]
                      ],
@@ -262,7 +263,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -418,7 +419,7 @@
                              ["knife_butcher", -1],
                              ["pockknife", -1],
                              ["scalpel", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -452,7 +453,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -484,7 +485,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ],
                          [
                              ["fire", -1]
@@ -533,7 +534,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ],
                          [
                              ["fire", -1]
@@ -609,7 +610,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -643,7 +644,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -677,7 +678,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -711,7 +712,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -742,7 +743,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -770,7 +771,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -823,7 +824,7 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ]
                      ],
             "components": [
@@ -855,7 +856,7 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ]
                      ],
             "components": [
@@ -880,7 +881,7 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ],
                          [
                              ["goggles_welding", -1]
@@ -888,7 +889,7 @@
                          [
                              ["welder", 30],
                              ["welder_crude", 45],
-                             ["toolset", 3]
+                             ["toolset_welder", 3]
                          ]
                      ],
             "components": [
@@ -910,7 +911,7 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ]
                      ],
             "components": [
@@ -936,22 +937,22 @@
                              ["knife_combat", -1],
                              ["pockknife", -1],
                              ["scalpel", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                           ],
                           [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                           ],
                           [
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                           ],
                           [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                           ]
                      ],
             "components": [
@@ -987,11 +988,11 @@
             "tools": [
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ],
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -1021,30 +1022,30 @@
                              ["knife_butcher", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ],
 
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ],
                          [
                              ["saw", -1]
                          ],
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ],
                          [
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -1090,18 +1091,18 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ],
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -1133,11 +1134,11 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ],
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -1161,11 +1162,11 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ],
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -1189,7 +1190,7 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ]
                      ],
             "components": [
@@ -1212,11 +1213,11 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ],
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -1242,18 +1243,18 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ],
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -1282,18 +1283,18 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ],
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -1322,11 +1323,11 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ],
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -1359,7 +1360,7 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ]
                      ],
             "components": [
@@ -1388,7 +1389,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -1416,7 +1417,8 @@
             "tools": [
                          [
                              ["hotplate", 5],
-                             ["toolset", 1]
+                             ["installed_kitchen_unit", 5],
+                             ["toolset_hotplate", 1]
                          ]
                      ],
             "components": [
@@ -1441,7 +1443,7 @@
             "tools": [
                          [
                              ["screwdriver",-1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -1466,7 +1468,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -1508,18 +1510,18 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ]
                      ],
             "components": [
@@ -1546,7 +1548,7 @@
                          [
                              ["screwdriver", -1],
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ]
                      ],
             "components": [
@@ -1588,7 +1590,7 @@
                          [
                              ["screwdriver", -1],
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ]
                      ],
             "components": [
@@ -1622,11 +1624,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 6],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -1655,11 +1657,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ]
                      ],
             "components": [
@@ -1700,7 +1702,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -1730,7 +1732,7 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ]
          ],
          "components" : [
@@ -1762,7 +1764,7 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ]
          ],
          "components" : [
@@ -1787,14 +1789,14 @@
          "tools" : [
             [
                ["hacksaw", -1],
-               ["toolset", -1]
+               ["toolset_hacksaw", -1]
             ],
             [
                ["rock", -1],
                ["primitive_hammer", -1],
                ["hammer", -1],
                ["hatchet", -1],
-               ["toolset", -1]
+               ["toolset_hammer", -1]
             ]
          ],
          "components" : [
@@ -1819,7 +1821,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
             ]
          ],
          "components" : [
@@ -1848,7 +1850,7 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ]
          ],
          "components" : [
@@ -1881,7 +1883,7 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ],
             [
                ["fire", -1]
@@ -1912,14 +1914,14 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ],
             [
                ["rock", -1],
                ["primitive_hammer", -1],
                ["hammer", -1],
                ["hatchet", -1],
-               ["toolset", -1]
+               ["toolset_hammer", -1]
             ]
          ],
          "components" : [
@@ -1953,7 +1955,7 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ]
          ],
          "components" : [
@@ -1985,7 +1987,7 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ]
          ],
          "components" : [
@@ -2016,7 +2018,7 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ]
          ],
          "components" : [
@@ -2047,7 +2049,7 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ]
          ],
          "components" : [
@@ -2094,7 +2096,7 @@
             	["scalpel", -1],
             	["machete", -1],
             	["broadsword", -1],
-            	["toolset", -1]
+            	["toolset_knife", -1]
             ]
          ],
          "components" : [
@@ -2121,14 +2123,14 @@
          "tools" : [
             [
                ["hacksaw", -1],
-               ["toolset", -1]
+               ["toolset_hacksaw", -1]
             ],
             [
                ["rock", -1],
                ["primitive_hammer", -1],
                ["hammer", -1],
                ["hatchet", -1],
-               ["toolset", -1]
+               ["toolset_hammer", -1]
             ]
          ],
          "components" : [
@@ -2157,7 +2159,7 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ],
             [
                ["fire", -1]
@@ -2191,7 +2193,7 @@
                ["scalpel", -1],
                ["machete", -1],
                ["broadsword", -1],
-               ["toolset", -1]
+               ["toolset_knife", -1]
             ]
          ],
          "components" : [
@@ -2228,7 +2230,7 @@
             	["scalpel", -1],
             	["machete", -1],
             	["broadsword", -1],
-            	["toolset", -1]
+            	["toolset_knife", -1]
             ]
          ],
          "components" : [
@@ -2262,18 +2264,18 @@
          		["scalpel", -1],
          		["machete", -1],
          		["broadsword", -1],
-         		["toolset", -1]
+         		["toolset_knife", -1]
          	],
          	[
          		["hacksaw", -1],
-         		["toolset", -1]
+         		["toolset_hacksaw", -1]
          	],
          	[
                 ["rock", -1],
                 ["primitive_hammer", -1],
                 ["hammer", -1],
                 ["hatchet", -1],
-                ["toolset", -1]
+                ["toolset_hammer", -1]
          	]
          ],
          "components" : [
@@ -2300,11 +2302,11 @@
          "tools" : [
          	[
          		["screwdriver", -1],
-         		["toolset", -1]
+         		["toolset_screwdriver", -1]
          	],
          	[
          		["hacksaw", -1],
-         		["toolset", -1]
+         		["toolset_hacksaw", -1]
          	]
          ],
          "components" : [
@@ -2334,18 +2336,18 @@
          "tools" : [
             [
          		["soldering_iron", 10],
-         		["toolset", 1]
+         		["toolset_soldering_iron", 1]
          	],
          	[
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
          	],
          	[
          		["screwdriver", -1],
-         		["toolset", -1]
+         		["toolset_screwdriver", -1]
          	]
          ],
          "components" : [
@@ -2390,7 +2392,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -2420,10 +2422,11 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
+                     "__comment" : "^^ possible other toolset?",
             "components": [
                               [
                                   ["9mm_casing", 50]
@@ -2456,7 +2459,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2492,7 +2495,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2528,7 +2531,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2564,7 +2567,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2600,7 +2603,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2636,7 +2639,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2672,7 +2675,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2708,7 +2711,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2744,7 +2747,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2885,7 +2888,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2921,7 +2924,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2957,7 +2960,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -2993,7 +2996,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3028,7 +3031,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3067,7 +3070,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3105,7 +3108,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3144,7 +3147,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3180,7 +3183,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3216,7 +3219,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3252,7 +3255,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3288,7 +3291,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3324,7 +3327,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3360,7 +3363,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3396,7 +3399,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3432,7 +3435,7 @@
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["press", 2]
                          ]
                      ],
@@ -3464,12 +3467,14 @@
             "tools": [
                          [
                              ["hotplate", 3],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 3],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pan", -1],
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -3491,12 +3496,14 @@
             "tools": [
                          [
                              ["hotplate", 3],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 3],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pan", -1],
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -3520,7 +3527,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -3543,12 +3550,14 @@
             "tools": [
                          [
                              ["hotplate", 7],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 7],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pan", -1],
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1],
                              ["spear_wood", -1],
                              ["pointy_stick", -1],
@@ -3576,12 +3585,14 @@
             "tools": [
                          [
                              ["hotplate", 7],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 7],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pan", -1],
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1],
                              ["spear_wood", -1],
                              ["pointy_stick", -1],
@@ -3608,11 +3619,13 @@
             "tools": [
                          [
                              ["hotplate", 6],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 6],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -3643,11 +3656,13 @@
             "tools": [
                          [
                              ["hotplate", 5],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 5],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pan", -1],
+                             ["installed_kitchen_unit", -1],
                              ["pot", -1],
                              ["rock_pot", -1],
                              ["spear_wood", -1],
@@ -3675,12 +3690,14 @@
             "tools": [
                          [
                              ["hotplate", 5],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 5],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pan", -1],
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -3703,11 +3720,13 @@
             "tools": [
                          [
                              ["hotplate", 4],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 4],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -3734,7 +3753,8 @@
             "tools": [
                          [
                              ["hotplate", 3],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 3],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ]
                      ],
@@ -3757,11 +3777,13 @@
             "tools": [
                          [
                              ["hotplate", 4],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 4],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -3788,12 +3810,14 @@
             "tools": [
                          [
                              ["hotplate", 3],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 3],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pan", -1],
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -3816,11 +3840,13 @@
             "tools": [
                          [
                              ["hotplate", 2],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 2],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -3846,11 +3872,13 @@
             "tools": [
                          [
                              ["hotplate", 2],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 2],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -3885,11 +3913,13 @@
             "tools": [
                          [
                              ["hotplate", 2],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 2],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -3916,7 +3946,7 @@
             "tools": [
                          [
                              ["rock", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -3942,7 +3972,7 @@
             "tools": [
                          [
                              ["rock", -1],
-                             ["toolset", 1]
+                             ["toolset_hammer", 1]
                          ]
                      ],
             "components": [
@@ -4030,7 +4060,8 @@
             "tools": [
                          [
                              ["hotplate", 10],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 10],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ]
                      ],
@@ -4058,7 +4089,8 @@
             "tools": [
                          [
                              ["hotplate", 10],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 10],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ]
                      ],
@@ -4107,11 +4139,13 @@
             "tools": [
                          [
                              ["hotplate", 5],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 5],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -4142,11 +4176,13 @@
             "tools": [
                          [
                              ["hotplate", 6],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 6],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -4173,11 +4209,13 @@
             "tools": [
                          [
                              ["hotplate", 5],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 5],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -4211,11 +4249,13 @@
             "tools": [
                          [
                              ["hotplate", 5],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 5],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -4244,11 +4284,13 @@
             "tools": [
                          [
                              ["hotplate", 5],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 5],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -4279,11 +4321,13 @@
             "tools": [
                          [
                              ["hotplate", 5],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 5],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -4313,11 +4357,13 @@
             "tools": [
                          [
                              ["hotplate", 8],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 8],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -4344,11 +4390,13 @@
             "tools": [
                          [
                              ["hotplate", 6],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 6],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
-                             ["pan", -1]
+                             ["pan", -1],
+                             ["installed_kitchen_unit", -1]
                          ]
                      ],
             "components": [
@@ -4385,11 +4433,13 @@
             "tools": [
                          [
                              ["hotplate", 8],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 8],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
-                             ["pan", -1]
+                             ["pan", -1],
+                             ["installed_kitchen_unit", -1]
                          ]
                      ],
             "components": [
@@ -4428,11 +4478,13 @@
             "tools": [
                          [
                              ["hotplate", 8],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 8],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
-                             ["pan", -1]
+                             ["pan", -1],
+                             ["installed_kitchen_unit", -1]
                          ]
                      ],
             "components": [
@@ -4467,7 +4519,8 @@
             "tools": [
                          [
                              ["hotplate", 6],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 6],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
@@ -4479,10 +4532,11 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -4519,7 +4573,8 @@
             "tools": [
                          [
                              ["hotplate", 4],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 4],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
@@ -4527,10 +4582,11 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -4565,7 +4621,8 @@
             "tools": [
                          [
                              ["hotplate", 15],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 15],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
@@ -4601,12 +4658,14 @@
             "tools": [
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ],
                          [
                              ["fire", -1],
                              ["hotplate", 8],
-                             ["toolset", 1]
+                             ["installed_kitchen_unit", 8],
+                             ["toolset_hotplate", 1]
                          ]
                      ],
             "components": [
@@ -4636,11 +4695,13 @@
             "tools": [
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
+                             ["installed_kitchen_unit", 2],
                              ["hotplate", 2]
                          ]
                      ],
@@ -4667,11 +4728,13 @@
             "tools": [
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ],
                          [
                              ["fire", -1],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
+                             ["installed_kitchen_unit", 2],
                              ["hotplate", 2]
                          ]
                      ],
@@ -4717,12 +4780,14 @@
             "tools": [
                          [
                              ["hotplate", 3],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 3],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pan", -1],
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -4750,7 +4815,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -4784,7 +4850,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -4814,7 +4881,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -4846,7 +4914,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -4876,7 +4945,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -4906,7 +4976,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -4937,7 +5008,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -4967,7 +5039,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -4997,7 +5070,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -5027,7 +5101,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -5057,7 +5132,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -5087,7 +5163,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -5117,7 +5194,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -5146,7 +5224,8 @@
             "tools": [
                          [
                              ["hotplate", 25],
-                             ["toolset", 2],
+                             ["installed_kitchen_unit", 25],
+                             ["toolset_hotplate", 2],
                              ["fire", -1]
                          ]
                      ],
@@ -5175,7 +5254,7 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ]
                      ],
             "components": [
@@ -5195,13 +5274,13 @@
             "reversible": true,
             "autolearn": true,
             "tools": [
-                       [["hacksaw", -1], ["toolset", -1]],
+                       [["hacksaw", -1], ["toolset_hacksaw", -1]],
                        [
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
 					   ]
                      ],
             "components": [
@@ -5224,7 +5303,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -5246,11 +5325,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 3],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5275,11 +5354,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 4],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5304,11 +5383,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 7],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5412,7 +5491,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -5453,11 +5532,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 5],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5482,11 +5561,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 10],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5521,11 +5600,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 5],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5551,11 +5630,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 10],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5586,11 +5665,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 10],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5622,7 +5701,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -5657,7 +5736,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -5671,6 +5750,7 @@
                                   ["scrap", 2],
                                   ["pan", 1],
                                   ["pot", 1],
+                                  ["installed_kitchen_unit", -1],
                                   ["knife_butcher", 2],
                                   ["knife_steak", 6],
                                   ["knife_butter", 6],
@@ -5694,11 +5774,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 10],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5726,11 +5806,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 14],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5768,11 +5848,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 10],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5803,11 +5883,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 6],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5844,11 +5924,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 5],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5879,11 +5959,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 14],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -5915,11 +5995,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 24],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -5952,11 +6032,11 @@
            "tools" : [
               [
                  ["screwdriver", -1],
-                 ["toolset", -1]
+                 ["toolset_screwdriver", -1]
               ],
               [
                  ["soldering_iron", 24],
-                 ["toolset", 2]
+                 ["toolset_soldering_iron", 2]
               ]
            ],
            "components" : [
@@ -5989,11 +6069,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6026,11 +6106,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 32],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6064,11 +6144,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6100,11 +6180,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6133,11 +6213,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6166,11 +6246,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6203,11 +6283,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6237,11 +6317,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6274,11 +6354,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6311,11 +6391,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6348,20 +6428,20 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ],
                          [
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6388,20 +6468,20 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ],
                          [
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6428,20 +6508,20 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ],
                          [
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6468,20 +6548,20 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ],
                          [
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6508,11 +6588,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6535,11 +6615,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6562,11 +6642,11 @@
             "tools": [
                          [
                              ["screwdriver", 20],
-                             ["toolset", 2]
+                             ["toolset_screwdriver", 2]
                          ],
                          [
                              ["soldering_iron", -1],
-                             ["toolset", -1]
+                             ["toolset_soldering_iron", -1]
                          ]
                      ],
             "components": [
@@ -6589,11 +6669,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6616,11 +6696,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6643,11 +6723,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6670,11 +6750,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 20],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6696,11 +6776,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 35],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -6731,15 +6811,15 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ],
                          [
                              ["soldering_iron", 16],
-                             ["toolset", 2]
+                             ["toolset_soldering_iron", 2]
                          ]
                      ],
             "components": [
@@ -7251,7 +7331,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -7324,7 +7404,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -7394,7 +7474,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -7443,7 +7523,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -7566,7 +7646,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -7592,7 +7672,7 @@
             "tools": [
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ]
                      ],
             "components": [
@@ -7623,7 +7703,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -7916,7 +7996,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -7952,7 +8032,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -7980,7 +8060,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1],
+                             ["toolset_knife", -1],
                              ["hatchet", -1]
                          ]
                      ],
@@ -8064,7 +8144,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -8095,7 +8175,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -8129,7 +8209,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -8277,7 +8357,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1]
+                             ["toolset_knife", -1]
                          ]
                      ],
             "components": [
@@ -8339,14 +8419,14 @@
             "tools": [
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ],
                          [
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["goggles_welding", -1]
@@ -8354,11 +8434,11 @@
                          [
                              ["welder", 100],
                              ["welder_crude", 150],
-                             ["toolset", 5]
+                             ["toolset_welder", 5]
                          ],
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ]
                      ],
             "components": [
@@ -8393,14 +8473,14 @@
             "tools": [
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ],
                          [
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -8431,7 +8511,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["goggles_welding", -1]
@@ -8439,11 +8519,11 @@
                          [
                              ["welder", 50],
                              ["welder_crude", 75],
-                             ["toolset", 2]
+                             ["toolset_welder", 2]
                          ],
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ]
                      ],
             "components": [
@@ -8472,7 +8552,7 @@
                          [
                              ["welder", 50],
                              ["welder_crude", 75],
-                             ["toolset", 2]
+                             ["toolset_welder", 2]
                          ],
                          [
                              ["sewing_kit", 50],
@@ -8507,7 +8587,8 @@
                          [
                              ["fire", -1],
                              ["hotplate", 3],
-                             ["toolset", 1]
+                             ["installed_kitchen_unit", 3],
+                             ["toolset_hotplate", 1]
                          ]
                      ],
             "components": [
@@ -8553,14 +8634,14 @@
             "tools": [
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ],
                          [
                              ["rock", -1],
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["goggles_welding", -1]
@@ -8568,11 +8649,11 @@
                          [
                              ["welder", 50],
                              ["welder_crude", 75],
-                             ["toolset", 2]
+                             ["toolset_welder", 2]
                          ],
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ]
                      ],
             "components": [
@@ -8730,7 +8811,7 @@
                          [
                              ["lighter", 5],
                              ["fire", -1],
-                             ["toolset", 1]
+                             ["toolset_hotplate", 1]
                          ]
                      ],
             "components": [
@@ -8760,7 +8841,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -8786,7 +8867,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -8821,7 +8902,8 @@
             "tools": [
                          [
                              ["hotplate", 5],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
+                             ["installed_kitchen_unit", 5],
                              ["fire", -1]
                          ]
                      ],
@@ -8853,7 +8935,7 @@
                          [
                              ["welder", 20],
                              ["welder_crude", 30],
-                             ["toolset", 1]
+                             ["toolset_welder", 1]
                          ]
                      ],
             "components": [
@@ -8899,7 +8981,7 @@
                          [
                              ["welder", 50],
                              ["welder_crude", 75],
-                             ["toolset", 2]
+                             ["toolset_welder", 2]
                          ]
                      ],
             "components": [
@@ -8925,7 +9007,7 @@
                          [
                              ["welder", 20],
                              ["welder_crude", 30],
-                             ["toolset", 1]
+                             ["toolset_welder", 1]
                          ]
                      ],
             "components": [
@@ -8951,7 +9033,7 @@
                          [
                              ["welder", 100],
                              ["welder_crude", 150],
-                             ["toolset", 5]
+                             ["toolset_welder", 5]
                          ]
                      ],
             "components": [
@@ -8977,7 +9059,7 @@
                          [
                              ["welder", 120],
                              ["welder_crude", 180],
-                             ["toolset", 6]
+                             ["toolset_welder", 6]
                          ]
                      ],
             "components": [
@@ -9009,7 +9091,7 @@
                          [
                              ["welder", 300],
                              ["welder_crude", 450],
-                             ["toolset", 15]
+                             ["toolset_welder", 15]
                          ]
                      ],
             "components": [
@@ -9034,7 +9116,7 @@
                             ["primitive_hammer", -1],
                             ["hammer", -1],
                             ["hatchet", -1],
-                            ["toolset", -1]
+                            ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -9059,7 +9141,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -9122,7 +9204,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -9148,7 +9230,7 @@
             "tools": [
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ]
                      ],
             "components": [
@@ -9223,7 +9305,7 @@
             "tools": [
                          [
                              ["wrench", -1],
-                             ["toolset", -1]
+                             ["toolset_wrench", -1]
                          ]
                      ],
             "components": [
@@ -9275,7 +9357,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -9318,7 +9400,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ]
                      ],
             "components": [
@@ -9343,7 +9425,7 @@
                              ["primitive_hammer", -1],
                              ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["goggles_welding", -1]
@@ -9351,7 +9433,7 @@
                          [
                              ["welder", 50],
                              ["welder_crude", 75],
-                             ["toolset", 2]
+                             ["toolset_welder", 2]
                          ]
                      ],
             "components": [
@@ -9443,7 +9525,7 @@
             "tools": [
                          [
                              ["hacksaw", -1],
-                             ["toolset", -1]
+                             ["toolset_hacksaw", -1]
                          ]
                      ],
             "components": [
@@ -9480,7 +9562,8 @@
             "tools": [
                          [
                              ["hotplate", 18],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 10],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ]
                      ],
@@ -9506,7 +9589,7 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ]
                      ],
             "components": [
@@ -9532,11 +9615,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 10],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -9569,11 +9652,11 @@
             "tools": [
                          [
                              ["screwdriver", -1],
-                             ["toolset", -1]
+                             ["toolset_screwdriver", -1]
                          ],
                          [
                              ["soldering_iron", 14],
-                             ["toolset", 1]
+                             ["toolset_soldering_iron", 1]
                          ]
                      ],
             "components": [
@@ -9616,16 +9699,18 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1],
+                             ["toolset_knife", -1],
                              ["hatchet", -1]
                          ],
                          [
                              ["hotplate", 10],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 10],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -9663,16 +9748,18 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1],
+                             ["toolset_knife", -1],
                              ["hatchet", -1]
                          ],
                          [
                              ["hotplate", 10],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 10],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -9709,16 +9796,18 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1],
+                             ["toolset_knife", -1],
                              ["hatchet", -1]
                          ],
                          [
                              ["hotplate", 10],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 10],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -9756,16 +9845,18 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1],
+                             ["toolset_knife", -1],
                              ["hatchet", -1]
                          ],
                          [
                              ["hotplate", 10],
-                             ["toolset", 1],
+                             ["installed_kitchen_unit", 10],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -9802,7 +9893,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1],
+                             ["toolset_knife", -1],
                              ["hatchet", -1]
                          ],
                          [
@@ -9810,6 +9901,7 @@
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -9850,7 +9942,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1],
+                             ["toolset_knife", -1],
                              ["hatchet", -1]
                          ],
                          [
@@ -9858,6 +9950,7 @@
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -9920,7 +10013,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1],
+                             ["toolset_knife", -1],
                              ["hatchet", -1]
                          ],
                          [
@@ -9928,6 +10021,7 @@
                          ],
                          [
                              ["pot", -1],
+                             ["installed_kitchen_unit", -1],
                              ["rock_pot", -1]
                          ]
                      ],
@@ -10006,7 +10100,7 @@
                          [
                              ["welder", 20],
                              ["welder_crude", 30],
-                             ["toolset", 1]
+                             ["toolset_welder", 1]
                          ]
                      ],
             "components": [
@@ -10058,7 +10152,7 @@
                              ["scalpel", -1],
                              ["machete", -1],
                              ["broadsword", -1],
-                             ["toolset", -1],
+                             ["toolset_knife", -1],
                              ["screwdriver", -1]
                          ]
                      ],
@@ -10084,11 +10178,11 @@
             "autolearn": true,
             "tools": [
                          [
-                             ["toolset", -1],
+                             ["toolset_screwdriver", -1],
                              ["screwdriver", -1]
                          ],
                          [
-                             ["toolset", -1],
+                             ["toolset_hacksaw", -1],
                              ["hacksaw", -1]
                          ]
                      ],
@@ -10116,11 +10210,11 @@
                 "tools": [
                              [
                                  ["hacksaw", -1],
-                                 ["toolset", -1]
+                                 ["toolset_hacksaw", -1]
                              ],
                              [
                                  ["screwdriver", -1],
-                                 ["toolset", -1]
+                                 ["toolset_screwdriver", -1]
                              ]
                          ],
                 "components": [
@@ -10147,7 +10241,7 @@
             "tools": [
                          [
                              ["hammer", -1],
-                             ["toolset", -1]
+                             ["toolset_hammer", -1]
                          ],
                          [
                              ["screwdriver", -1]
@@ -10491,6 +10585,66 @@
                             [ ["whiskey", 2] ],
                             [ ["rum", 2] ],
                             [ ["bottle_glass", 1] ] ]
+        },
+        {
+         "result" : "arrow_metal",
+         "category" : "CC_AMMO",
+         "id_suffix": "simpler",
+         "skill_pri" : "archery",
+         "skill_sec" : "mechanics",
+         "difficulty" : 20,
+         "time" : 20000,
+         "reversible" : false,
+         "autolearn" : true,
+         "tools" : [
+         	[
+         		["hatchet", -1],
+         		["knife_steak", -1],
+         		["knife_combat", -1],
+         		["knife_butcher", -1],
+         		["pockknife", -1],
+         		["scalpel", -1],
+         		["machete", -1],
+         		["broadsword", -1],
+         		["toolset_knife", -1]
+         	],
+         	[
+                ["rock", -1],
+                ["primitive_hammer", -1],
+                ["hammer", -1],
+                ["hatchet", -1],
+                ["toolset_hammer", -1]
+         	]
+        ],
+         "components" : [
+            [
+               ["scrap", 9],
+               ["steel_chunk", 3]
+            ],
+            [
+               ["feather", 10],
+               ["duct_tape", 40],
+               ["bag_plastic", 1]
+            ]
+         ]
+         },
+        {
+            "result": "bone_staple",
+            "category": "CC_MISC",
+            "difficulty": 0,
+            "time": 100,
+            "reversible": true,
+            "autolearn": true,
+            "tools": [],
+            "components": [
+
+                              [
+                                  ["string_6", 1]
+                              ],
+                              [
+                                  ["bone", 30]
+                              ]
+                          ]
         }
     ]
 }

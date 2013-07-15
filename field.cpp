@@ -287,12 +287,12 @@ bool map::process_fields_in_submap(game *g, int gridn)
 				case fd_gibs_flesh:
 				case fd_gibs_veggy:
 					if (has_flag(swimmable, x, y))	// Dissipate faster in water
-						cur->setFieldAge(cur->getFieldAge() + 250);
+						cur->increaseFieldAge(250);
 					break;
 
 				case fd_acid:
 					if (has_flag(swimmable, x, y))	// Dissipate faster in water
-						cur->setFieldAge(cur->getFieldAge() + 20);
+						cur->increaseFieldAge(20);
 					for (int i = 0; i < i_at(x, y).size(); i++) {
 						item *melting = &(i_at(x, y)[i]); //For each item on the tile...
 
@@ -313,7 +313,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
 						if (melting->damage >= 5)
 						{
 							//Destroy the object, age the field.
-							cur->setFieldAge(cur->getFieldAge() + melting->volume());
+							cur->increaseFieldAge(melting->volume());
 							for (int m = 0; m < i_at(x, y)[i].contents.size(); m++)
 								i_at(x, y).push_back( i_at(x, y)[i].contents[m] );
 							i_at(x, y).erase(i_at(x, y).begin() + i);
@@ -373,7 +373,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
 							destroyed = it->burn(cur->getFieldDensity() * 3);
 							consumed++;
 							if (cur->getFieldDensity() == 1)
-								cur->setFieldAge(cur->getFieldAge() - vol * 10); //lower age is a longer lasting fire
+								cur->decreaseFieldAge(vol * 10); //lower age is a longer lasting fire
 							if (vol >= 4)
 								smoke++; //Large paper items give chance to smoke.
 
@@ -392,7 +392,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
 						} else if ((it->made_of("cotton") || it->made_of("wool"))) {
 							//Cotton and Wool burn slowly but don't feed the fire much.
 							if (vol <= cur->getFieldDensity() * 5 || cur->getFieldDensity() == 3) {
-								cur->setFieldAge(cur->getFieldAge() - 1);
+								cur->decreaseFieldAge(1);
 								destroyed = it->burn(cur->getFieldDensity());
 								smoke++;
 								consumed++;
@@ -401,10 +401,10 @@ bool map::process_fields_in_submap(game *g, int gridn)
 								smoke++;
 							}
 
-						} else if ((it->made_of("flesh"))||(it->made_of("hflesh"))) {
+						} else if (it->made_of("flesh")||it->made_of("hflesh")||it->made_of("leather")||it->made_of("fur")) {
 							//Same as cotton/wool really but more smokey.
 							if (vol <= cur->getFieldDensity() * 5 || (cur->getFieldDensity() == 3 && one_in(vol / 20))) {
-								cur->setFieldAge(cur->getFieldAge() - 1);
+								cur->decreaseFieldAge(1);
 								destroyed = it->burn(cur->getFieldDensity());
 								smoke += 3;
 								consumed++;
@@ -417,10 +417,10 @@ bool map::process_fields_in_submap(game *g, int gridn)
 							//Lots of smoke if alcohol, and LOTS of fire fueling power, kills a fire otherwise.
 							if(it->type->id == "tequila" || it->type->id == "whiskey" ||
 								it->type->id == "vodka" || it->type->id == "rum" || it->type->id == "gasoline") {
-									cur->setFieldAge(cur->getFieldAge() - 300);
+									cur->decreaseFieldAge(300);
 									smoke += 6;
 							} else {
-								cur->setFieldAge(cur->getFieldAge() + rng(80 * vol, 300 * vol));
+								cur->increaseFieldAge(rng(80 * vol, 300 * vol));
 								smoke++;
 							}
 							it->charges -= cur->getFieldDensity();
@@ -430,7 +430,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
 								consumed++;
 						} else if (it->made_of("powder")) {
 							//Any powder will fuel the fire as much as its volume but be immediately destroyed.
-							cur->setFieldAge(cur->getFieldAge() - vol);
+							cur->decreaseFieldAge(vol);
 							destroyed = true;
 							smoke += 2;
 
@@ -440,7 +440,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
 							if (it->burnt <= cur->getFieldDensity() * 2 || (cur->getFieldDensity() == 3 && one_in(vol))) {
 								destroyed = it->burn(cur->getFieldDensity());
 								if (one_in(vol + it->burnt))
-									cur->setFieldAge(cur->getFieldAge() - 1);
+									cur->decreaseFieldAge(1);
 							}
 						}
 
@@ -468,14 +468,14 @@ bool map::process_fields_in_submap(game *g, int gridn)
 
 						} else if (has_flag(flammable, x, y) && one_in(32 - cur->getFieldDensity() * 10)) {
 							//The fire feeds on the ground itself until max density.
-							cur->setFieldAge(cur->getFieldAge() - cur->getFieldDensity() * cur->getFieldDensity() * 40);
+							cur->decreaseFieldAge(cur->getFieldDensity() * cur->getFieldDensity() * 40);
 							smoke += 15;
 							if (cur->getFieldDensity() == 3)
 								g->m.destroy(g, x, y, false);
 
 						} else if (has_flag(flammable2, x, y) && one_in(32 - cur->getFieldDensity() * 10)) {
 							//The fire feeds on the ground itself until max density.
-							cur->setFieldAge(cur->getFieldAge() - cur->getFieldDensity() * cur->getFieldDensity() * 40);
+							cur->decreaseFieldAge(cur->getFieldDensity() * cur->getFieldDensity() * 40);
 							smoke += 15;
 							if (cur->getFieldDensity() == 3){
 								ter_set(x, y, t_ash);
@@ -485,19 +485,19 @@ bool map::process_fields_in_submap(game *g, int gridn)
 
 						} else if (has_flag(l_flammable, x, y) && one_in(62 - cur->getFieldDensity() * 10)) {
 							//The fire feeds on the ground itself until max density.
-							cur->setFieldAge(cur->getFieldAge() - cur->getFieldDensity() * cur->getFieldDensity() * 30);
+							cur->decreaseFieldAge(cur->getFieldDensity() * cur->getFieldDensity() * 30);
 							smoke += 10;
 							if (cur->getFieldDensity() == 3)
 								g->m.destroy(g, x, y, false);
 
 						} else if (terlist[ter(x, y)].flags & mfb(swimmable))
-							cur->setFieldAge(cur->getFieldAge() + 800);	// Flames die quickly on water
+							cur->increaseFieldAge(800);	// Flames die quickly on water
 					}
 
 					// If we consumed a lot, the flames grow higher
 					while (cur->getFieldDensity() < 3 && cur->getFieldAge() < 0) {
 						//Fires under 0 age grow in size. Level 3 fires under 0 spread later on.
-						cur->setFieldAge(cur->getFieldAge() + 300);
+						cur->increaseFieldAge(300);
 						cur->setFieldDensity(cur->getFieldDensity() + 1);
 					}
 
@@ -563,7 +563,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
 										tmpfld = nearby_field.findField(fd_fire);
 										if(tmpfld){
 											tmpfld->setFieldAge(100);
-											cur->setFieldAge(cur->getFieldAge() + 50);
+											cur->increaseFieldAge(50);
 										}
 										if(nearwebfld)
 											g->m.remove_field(fx,fy,fd_web);
@@ -817,7 +817,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
 				} // switch (curtype)
 
 				bool should_dissipate = false;
-				cur->setFieldAge(cur->getFieldAge() + 1);
+				cur->increaseFieldAge(1);
 				if (fieldlist[cur->getFieldType()].halflife > 0) {
 					if (cur->getFieldAge() > 0 &&
 						dice(2, cur->getFieldAge()) > fieldlist[cur->getFieldType()].halflife) {
@@ -1415,6 +1415,20 @@ signed char field_entry::setFieldDensity(const signed char new_density){
 int field_entry::setFieldAge(const int new_age){
 
 	age = new_age;
+
+	return age;
+}
+
+int field_entry::increaseFieldAge(const int diff){
+	
+	age += diff;
+
+	return age;
+}
+
+int field_entry::decreaseFieldAge(const int diff){
+	
+	age -= diff;
 
 	return age;
 }

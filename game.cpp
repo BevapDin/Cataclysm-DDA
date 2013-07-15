@@ -696,6 +696,18 @@ bool game::do_turn()
  m.process_fields(this);
  m.process_active_items(this);
  m.step_in_field(u.posx, u.posy, this);
+ 
+ if(turn % HOURS(1) == 0 && !u.worn.empty() && one_in(10)) {
+	int i = rng(0, u.worn.size() - 1);
+	item &it = u.worn[i];
+	it.damage++;
+	if(it.damage >= 5) {
+		add_msg("Your %s wears completly away", it.name.c_str());
+		u.worn.erase(u.worn.begin() + i);
+	} else {
+		add_msg("Your %s wears further", it.name.c_str());
+	}
+ }
 
  monmove();
  update_stair_monsters();
@@ -2171,74 +2183,90 @@ void game::update_scent()
  if (!u.has_active_bionic("bio_scent_mask"))
   grscent[u.posx][u.posy] = u.scent;
 
- for (int x = u.posx - SCENT_RADIUS; x <= u.posx + SCENT_RADIUS; x++) {
-  for (int y = u.posy - SCENT_RADIUS; y <= u.posy + SCENT_RADIUS; y++) {
+ const int x0 = u.posx - SCENT_RADIUS;
+ const int y0 = u.posy - SCENT_RADIUS;
+ const int x1 = u.posx + SCENT_RADIUS;
+ const int y1 = u.posy + SCENT_RADIUS;
+ 
+#pragma omp parallel for
+ for (int x = x0; x <= x1; x++) {
+  for (int y = y0; y <= y1; y++) {
    const int move_cost = m.move_cost_ter_furn(x, y);
    field &field_at = m.field_at(x, y);
    const bool is_bashable = m.has_flag(bashable, x, y);
-   newscent[x][y] = 0;
-   scale[x][y] = 1;
+   int &nscen = newscent[x][y];
+   int &sc = scale[x][y];
+   nscen = 0;
+   sc = 1;
    if (move_cost != 0 || is_bashable) {
     int squares_used = 0;
     const int this_field = grscent[x][y];
-    /*
-    for (int i = x - 1; i <= x + 1; i++) {
-        for (int j = y - 1; j <= y + 1; j++) {
-           const int scent = grscent[i][j];
-           newscent[x][y] += (scent >= this_field) * scent;
-           squares_used += (scent >= this_field);
+    
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+           const int scent = grscent[x + i][y + j];
+		   if(scent >= this_field) {
+				nscen += scent;
+				squares_used++;
+		   }
         }
     }
-    */
+    
     // Unrolled for performance.  The above block is the rolled up equivalent.
-    newscent[x][y] += grscent[x - 1] [y - 1] * (grscent  [x - 1] [y - 1] >= this_field);
+    /*
+    nscen += grscent[x - 1] [y - 1] * (grscent  [x - 1] [y - 1] >= this_field);
     squares_used +=   grscent[x - 1] [y - 1] >= this_field;
-    newscent[x][y] += grscent[x - 1] [y]     * (grscent  [x - 1] [y]     >= this_field);
+    nscen += grscent[x - 1] [y]     * (grscent  [x - 1] [y]     >= this_field);
     squares_used +=   grscent[x - 1] [y]     >= this_field;
-    newscent[x][y] += grscent[x - 1] [y + 1] * (grscent  [x - 1] [y + 1] >= this_field);
+    nscen += grscent[x - 1] [y + 1] * (grscent  [x - 1] [y + 1] >= this_field);
     squares_used +=   grscent[x - 1] [y + 1] >= this_field;
-    newscent[x][y] += grscent[x]     [y - 1] * (grscent  [x]     [y - 1] >= this_field);
+    nscen += grscent[x]     [y - 1] * (grscent  [x]     [y - 1] >= this_field);
     squares_used +=   grscent[x]     [y - 1] >= this_field;
-    newscent[x][y] += grscent[x]     [y]     * (grscent  [x]     [y]     >= this_field);
+    nscen += grscent[x]     [y]     * (grscent  [x]     [y]     >= this_field);
     squares_used +=   grscent[x]     [y]     >= this_field;
-    newscent[x][y] += grscent[x]     [y + 1] * (grscent  [x]     [y + 1] >= this_field);
+    nscen += grscent[x]     [y + 1] * (grscent  [x]     [y + 1] >= this_field);
     squares_used +=   grscent[x]     [y + 1] >= this_field;
-    newscent[x][y] += grscent[x + 1] [y - 1] * (grscent  [x + 1] [y - 1] >= this_field);
+    nscen += grscent[x + 1] [y - 1] * (grscent  [x + 1] [y - 1] >= this_field);
     squares_used +=   grscent[x + 1] [y - 1] >= this_field;
-    newscent[x][y] += grscent[x + 1] [y]     * (grscent  [x + 1] [y]     >= this_field);
+    nscen += grscent[x + 1] [y]     * (grscent  [x + 1] [y]     >= this_field);
     squares_used +=   grscent[x + 1] [y]     >= this_field;
-    newscent[x][y] += grscent[x + 1] [y + 1] * (grscent  [x + 1] [y + 1] >= this_field);
+    nscen += grscent[x + 1] [y + 1] * (grscent  [x + 1] [y + 1] >= this_field);
     squares_used +=   grscent[x + 1] [y + 1] >= this_field;
+	*/
 
-    scale[x][y] += squares_used;
-    if (field_at.findField(fd_slime) && newscent[x][y] < 10 * field_at.findField(fd_slime)->getFieldDensity())
+    sc += squares_used;
+    field_entry* f_slim = field_at.findField(fd_slime);
+	
+    if (f_slim && nscen < 10 * f_slim->getFieldDensity())
     {
-        newscent[x][y] = 10 * field_at.findField(fd_slime)->getFieldDensity();
+        nscen = 10 * f_slim->getFieldDensity();
     }
-    if (newscent[x][y] > 10000)
+    if (nscen > 10000)
     {
      dbg(D_ERROR) << "game:update_scent: Wacky scent at " << x << ","
-                  << y << " (" << newscent[x][y] << ")";
-     debugmsg("Wacky scent at %d, %d (%d)", x, y, newscent[x][y]);
-     newscent[x][y] = 0; // Scent should never be higher
+                  << y << " (" << nscen << ")";
+     debugmsg("Wacky scent at %d, %d (%d)", x, y, nscen);
+     nscen = 0; // Scent should never be higher
     }
     //Greatly reduce scent for bashable barriers, even more for ductaped barriers
     if( move_cost == 0 && is_bashable)
     {
         if( m.has_flag(reduce_scent, x, y))
         {
-            scale[x][y] *= 12;
+            sc *= 12;
         } else {
-            scale[x][y] *= 4;
+            sc *= 4;
         }
     }
    }
   }
  }
+ 
  // Simultaneously copy the scent values back and scale them down based on factors determined in
  // the first loop.
- for (int x = u.posx - SCENT_RADIUS; x <= u.posx + SCENT_RADIUS; x++) {
-     for (int y = u.posy - SCENT_RADIUS; y <= u.posy + SCENT_RADIUS; y++) {
+#pragma omp parallel for
+ for (int x = x0; x <= x1; x++) {
+  for (int y = y0; y <= y1; y++) {
          grscent[x][y] = newscent[x][y] / scale[x][y];
      }
  }
@@ -6082,9 +6110,27 @@ void game::exam_vehicle(vehicle &veh, int examx, int examy, int cx, int cy)
 //    debugmsg ("exam_vehicle cmd=%c %d", vehint.sel_cmd, (int) vehint.sel_cmd);
     if (vehint.sel_cmd != ' ')
     {                                                        // TODO: different activity times
+		int move_points;
+		if(vehint.sel_cmd == 'f' || vehint.sel_cmd == 's') {
+			move_points = 200;
+		} else {
+			move_points = 20000;
+			int skill = u.skillLevel("mechanics");
+			if(skill > 4) {
+				skill -= 4;
+				move_points /= 2;
+				// Ex: skill level = 14 -> skill == 10
+				// -> move_points = 20000 / 2 + (20000 / 2) / (10 * 10)
+				// = 10000 + 100 = 10100 
+				// Ex: skill level = 6 -> skill == 2
+				// -> move_points = 20000 / 2 + (20000 / 2) / (2 * 2)
+				// = 10000 + 10000 / 4 = 12500
+				move_points += static_cast<double>(move_points) / (skill * skill);
+			}
+		}
+    
         u.activity = player_activity(ACT_VEHICLE,
-                                     vehint.sel_cmd == 'f' || vehint.sel_cmd == 's' ||
-                                     vehint.sel_cmd == 'c' ? 200 : 20000,
+                                     move_points,
                                      (int) vehint.sel_cmd, 0, "");
         u.activity.values.push_back (veh.global_x());    // values[0]
         u.activity.values.push_back (veh.global_y());    // values[1]
@@ -6289,7 +6335,9 @@ void game::examine()
   int vpcargo = veh->part_with_feature(veh_part, vpf_cargo, false);
   int vpkitchen = veh->part_with_feature(veh_part, vpf_kitchen, true);
   if ((vpcargo >= 0 && veh->parts[vpcargo].items.size() > 0) || vpkitchen >= 0)
+  {
    pickup(examx, examy, 0);
+  }
   else if (u.in_vehicle)
    add_msg (_("You can't do that while onboard."));
   else if (abs(veh->velocity) > 0)
@@ -8611,6 +8659,15 @@ void game::pickup(int posx, int posy, int min)
         item water(itypes["water_clean"], 0);
         u.eat(this, u.inv.add_item(water).invlet);
         u.moves -= 250;
+      } else if(query_yn("Fill water into a container?")) {
+        item water(itypes["water_clean"], turn);
+        int wamount = veh->fuel_left(AT_WATER);
+        water.charges = wamount;
+        g->handle_liquid(water, false, false);
+        if(water.charges != wamount) {
+          veh->drain(AT_WATER, wamount - water.charges);
+          u.moves -= 100;
+        }
       }
     } else {
       add_msg(_("The water tank is empty."));
@@ -9328,6 +9385,7 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite)
           cont->put_in(liquid);
           liquid.charges = oldcharges;
 		  u.inv.sort();
+		  u.inv.restack(&u);
           return false;
         }
         cont->put_in(liquid);

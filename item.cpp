@@ -1067,7 +1067,7 @@ int item::damage_cut() const
  return type->melee_cut;
 }
 
-bool item::has_flag(std::string f) const
+bool item::has_flag(const std::string &f) const
 {
  bool ret = false;
 
@@ -2312,4 +2312,56 @@ itype_id item::typeId() const
 
 item item::clone(){
     return item(type, bday);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bool item::use_charges(const itype_id &type_to_use, int &amount, std::list<item> &usedup) {
+	// Check contents first
+	for (int m = 0; m < contents.size() && amount > 0; m++) {
+		item &con = contents[m];
+		if(con.use_charges(type_to_use, amount, usedup)) {
+			contents.erase(contents.begin() + m);
+			m--;
+		}
+	}
+	if (amount <= 0) {
+		return false;
+	}
+	if (type->id != type_to_use) {
+		return false;
+	}
+	// Now check the actual item
+	// 1. store used charges in resulting list,
+	// 2. decrease charges
+	// 3. decide if item must be destroyed
+	if (charges <= amount) {
+		usedup.push_back(*this);
+		amount -= charges;
+		charges = 0;
+		if (destroyed_at_zero_charges()) {
+			return true;
+		}
+	} else {
+		item tmp = *this;
+		tmp.charges = amount;
+		usedup.push_back(tmp);
+		charges -= amount;
+	}
+	return false;
 }

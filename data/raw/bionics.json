@@ -133,12 +133,64 @@
     "description":    "You have been outfitted with three synthetic stomachs and industrial-grade\nintestines.  Not only can you extract much more nutrition from food, but you\nare highly resistant to foodborne illness, and can sometimes eat rotten food."
 },
 {
-    "id"         :    "bio_tools",
-    "name"       :    "Integrated Toolset",
+    "id"         :    "bio_tools_knife",
+    "name"       :    "Integrated knife",
     "cost"       :    0,
     "time"       :    0,
-    "description":    "Implanted in your hands and fingers is a complete tool set - screwdriver,\nhammer, wrench, and heating elements.  You can use this in place of many\ntools when crafting."
+    "description":    "Implanted in your hands and fingers is a knife tool set\n.  You can use this in place of many\ntools when crafting."
 },
+{
+    "id"         :    "bio_tools_screwdriver",
+    "name"       :    "Integrated screwdriver",
+    "cost"       :    0,
+    "time"       :    0,
+    "description":    "Implanted in your hands and fingers is a screwdriver tool set\n.  You can use this in place of many\ntools when crafting."
+},
+{
+    "id"         :    "bio_tools_wrench",
+    "name"       :    "Integrated wrench",
+    "cost"       :    0,
+    "time"       :    0,
+    "description":    "Implanted in your hands and fingers is a wrench\n.  You can use this in place of many\ntools when crafting."
+},
+{
+    "id"         :    "bio_tools_hacksaw",
+    "name"       :    "Integrated hacksaw",
+    "cost"       :    0,
+    "time"       :    0,
+    "description":    "Implanted in your hands and fingers is a hacksaw\n.  You can use this in place of many\ntools when crafting."
+},
+{
+    "id"         :    "bio_tools_hammer",
+    "name"       :    "Integrated hammer",
+    "cost"       :    0,
+    "time"       :    0,
+    "description":    "Implanted in your hands and fingers is a hammer\n.  You can use this in place of many\ntools when crafting."
+},
+{
+    "id"         :    "bio_tools_welder",
+    "name"       :    "Integrated welder",
+    "cost"       :    0,
+    "time"       :    0,
+    "description":    "Implanted in your hands and fingers is a welder\n.  You can use this in place of many\ntools when crafting."
+},
+{
+    "id"         :    "bio_tools_hotplate",
+    "name"       :    "Integrated hotplate",
+    "cost"       :    0,
+    "time"       :    0,
+    "description":    "Implanted in your hands and fingers is a hotplate\n.  You can use this in place of many\ntools when crafting."
+},
+{
+    "id"         :    "bio_tools_soldering_iron",
+    "name"       :    "Integrated soldering iron",
+    "cost"       :    0,
+    "time"       :    0,
+    "description":    "Implanted in your hands and fingers is a soldering iron\n.  You can use this in place of many\ntools when crafting."
+},
+
+
+
 {
     "id"         :    "bio_shock",
     "name"       :    "Electroshock Unit",

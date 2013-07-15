@@ -31,6 +31,7 @@
 WARNINGS = -Wall -Wextra -Wno-switch -Wno-sign-compare -Wno-missing-braces -Wno-unused-parameter
 # Uncomment below to disable warnings
 #WARNINGS = -w
+#DEBUG = -g -fopenmp
 DEBUG = -g
 #PROFILE = -pg
 #OTHERS = -O3
@@ -217,6 +218,10 @@ all: version $(TARGET)
 
 $(TARGET): $(ODIR) $(DDIR) $(OBJS)
 	$(LD) $(W32FLAGS) -o $(TARGET) $(DEFINES) $(CXXFLAGS) \
+          $(OBJS) $(LDFLAGS)
+
+$(TARGET).prof: $(ODIR) $(DDIR) $(OBJS)
+	$(LD) $(W32FLAGS) -o $(TARGET).prof -pg $(DEFINES) $(CXXFLAGS) \
           $(OBJS) $(LDFLAGS)
 
 .PHONY: version

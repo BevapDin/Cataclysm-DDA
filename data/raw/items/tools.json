@@ -4087,5 +4087,27 @@
     "turns_per_charge": 0,
     "ammo": "none",
     "revert_to": "null"
+  },
+  {
+    "id": "bone_staple",
+    "type": "TOOL",
+    "symbol": "%",
+    "color": "white",
+    "name": "bone staple",
+    "description": "Staple of bones",
+    "rarity": 1,
+    "price": 1,
+    "material": "flesh",
+    "weight": 0,
+    "volume": 0,
+    "bashing": 0,
+    "cutting": 0,
+    "to_hit": 0,
+    "max_charges": 0,
+    "initial_charges": 0,
+    "charges_per_use": 0,
+    "turns_per_charge": 0,
+    "ammo": "none",
+    "revert_to": "null"
   }
 ]

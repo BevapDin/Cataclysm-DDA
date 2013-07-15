@@ -5638,8 +5638,8 @@ bool player::has_fire(const int quantity)
         return true;
     } else if (has_charges("candle_lit", 1)) {
         return true;
-    } else if (has_bionic("bio_tools")) {
-        return true;
+//    } else if (has_bionic("bio_tools")) {
+//        return true;
     } else if (has_bionic("bio_lighter")) {
         return true;
     } else if (has_bionic("bio_laser")) {
@@ -5674,8 +5674,8 @@ void player::use_fire(const int quantity)
         return;
     } else if (has_charges("candle_lit", 1)) {
         return;
-    } else if (has_bionic("bio_tools")) {
-        return;
+//    } else if (has_bionic("bio_tools")) {
+//        return;
     } else if (has_bionic("bio_lighter")) {
         return;
     } else if (has_bionic("bio_laser")) {
@@ -5709,7 +5709,7 @@ std::list<item> player::use_charges(itype_id it, int quantity)
 {
  std::list<item> ret;
  // the first two cases *probably* don't need to be tracked for now...
- if (it == "toolset") {
+ if (it.compare(0, 8, "toolset_") == 0) {
   power_level -= quantity;
   if (power_level < 0)
    power_level = 0;
@@ -5772,7 +5772,7 @@ std::list<item> player::use_charges(itype_id it, int quantity)
 int player::butcher_factor()
 {
  int lowest_factor = 999;
- if (has_bionic("bio_tools"))
+ if (has_bionic("bio_tools_knife"))
  	lowest_factor=100;
  int inv_factor = inv.butcher_factor();
  if (inv_factor < lowest_factor) {
@@ -5805,7 +5805,7 @@ item* player::pick_usb()
  return drives[ select - 1 ];
 }
 
-bool player::is_wearing(itype_id it)
+bool player::is_wearing(const itype_id &it)
 {
  for (int i = 0; i < worn.size(); i++) {
   if (worn[i].type->id == it)
@@ -5814,7 +5814,7 @@ bool player::is_wearing(itype_id it)
  return false;
 }
 
-bool player::worn_with_flag( std::string flag ) const
+bool player::worn_with_flag( const std::string &flag ) const
 {
     for (int i = 0; i < worn.size(); i++) {
         if (worn[i].has_flag( flag )) {
@@ -5824,7 +5824,7 @@ bool player::worn_with_flag( std::string flag ) const
     return false;
 }
 
-bool player::has_artifact_with(art_effect_passive effect)
+bool player::has_artifact_with(const art_effect_passive &effect)
 {
  if (weapon.is_artifact() && weapon.is_tool()) {
   it_artifact_tool *tool = dynamic_cast<it_artifact_tool*>(weapon.type);
@@ -5854,18 +5854,19 @@ bool player::has_artifact_with(art_effect_passive effect)
 
 bool player::has_amount(itype_id it, int quantity)
 {
-    if (it == "toolset")
+	if (it.compare(0, 8, "toolset_") == 0)
     {
-        return has_bionic("bio_tools");
+        return has_bionic(std::string("bio_tools_") + it.substr(8));
     }
     return (amount_of(it) >= quantity);
 }
 
 int player::amount_of(itype_id it)
 {
-    if (it == "toolset" && has_bionic("bio_tools"))
-    {
-        return 1;
+	if (it.compare(0, 8, "toolset_") == 0) {
+        if(has_bionic(std::string("bio_tools_") + it.substr(8))) {
+			return 1;
+		}
     }
     if (it == "apparatus")
     {
@@ -5902,8 +5903,8 @@ bool player::has_charges(itype_id it, int quantity)
 
 int player::charges_of(itype_id it)
 {
- if (it == "toolset") {
-  if (has_bionic("bio_tools"))
+ if (it.compare(0, 8, "toolset_") == 0) {
+  if (has_bionic(std::string("bio_tools_") + it.substr(8)))
    return power_level;
   else
    return 0;
@@ -7394,7 +7395,7 @@ hint_rating player::rate_action_disassemble(item *it, game *g) {
                             if (type == "welder")
                             {
                                 if (crafting_inv.has_amount("hacksaw", 1) ||
-                                    crafting_inv.has_amount("toolset", 1))
+                                    crafting_inv.has_amount("toolset_hacksaw", 1))
                                 {
                                     have_tool = true;
                                 }

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include "itype.h"
 #include "mtype.h"
 //#include "npc.h"
@@ -101,7 +102,7 @@ public:
  int attack_time();
  int damage_bash();
  int damage_cut() const;
- bool has_flag(std::string f) const;
+ bool has_flag(const std::string &f) const;
  bool has_technique(technique_id t, player *p = NULL);
  int has_gunmod(itype_id type);
  item* active_gunmod();
@@ -162,6 +163,16 @@ public:
  bool is_artifact() const;
 
  bool operator<(const item& other) const;
+
+ /**
+  * Use up some charges of the item if it matches the type.
+  * If charges have been used, an item matching those charges is added
+  * to usedup and the amount is decreased.
+  * @returns true if the item should be destroyed (because of 0 chrages left
+  * and destroyed_at_zero_charges returns true).
+  * Otherwise it returns false.
+  */
+ bool use_charges(const itype_id &type, int &amount, std::list<item> &usedup);
 
  itype_id typeId() const;
  itype* type;

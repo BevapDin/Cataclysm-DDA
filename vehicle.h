@@ -78,6 +78,7 @@ struct vehicle_part
         int amount;         // amount of fuel for tank
         int open;           // door is open
         int direction;      // direction the part is facing
+        int inactive;       // inactive engine (counts as non-existing)
     };
     std::vector<item> items;// inventory
 
@@ -195,8 +196,12 @@ public:
 
 // install a new part to vehicle (force to skip possibility check)
     int install_part (int dx, int dy, vpart_id id, int hp = -1, bool force = false);
+	int install_base_part(); // installs the first frame
 
     void remove_part (int p);
+// Generate the corresponding item from a vehicle part.
+// Still needs to be removed.
+    item item_from_part( int part );
 
 // Generate the corresponding item from a vehicle part.
 // Still needs to be removed.

@@ -165,6 +165,7 @@ class iuse
 // See artifact.h for a list
   void artifact		(game *g, player *p, item *it, bool t);
 
+  void decrease_scent(game *g, player *p, item *it, bool t);
 };
 
 #endif

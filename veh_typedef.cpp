@@ -25,6 +25,87 @@
 // To determine, what parts can be external, and what can not, check
 //  vpart_id enum in veh_type.h file
 // If you use wrong config, installation of part will fail
+enum vpart_id_
+{
+    vp_null_ = 0,
+
+// external parts
+    vp_seat,
+    vp_saddle,
+    vp_bed,
+    vp_frame_h,
+    vp_frame_v,
+    vp_frame_c,
+    vp_frame_y,
+    vp_frame_u,
+    vp_frame_n,
+    vp_frame_b,
+    vp_frame_h2,
+    vp_frame_v2,
+    vp_frame_cover,
+    vp_frame_handle,
+    vp_board_h,
+    vp_board_v,
+    vp_board_y,
+    vp_board_u,
+    vp_board_n,
+    vp_board_b,
+    vp_aisle_h2,
+    vp_aisle_v2,
+    vp_floor_trunk,
+    vp_roof,
+    vp_door,
+    vp_door_o,
+    vp_door_i,
+    vp_window,
+    vp_blade_h,
+    vp_blade_v,
+    vp_spike_h,
+    vp_spike_v = vp_spike_h,
+
+    vp_wheel,
+    vp_wheel_wide,
+    vp_wheel_bicycle,
+    vp_wheel_motorbike,
+    vp_wheel_small,
+
+    vp_engine_gas_1cyl,
+    vp_engine_gas_v2,
+    vp_engine_gas_i4,
+    vp_engine_gas_v6,
+    vp_engine_gas_v8,
+    vp_engine_motor,
+    vp_engine_motor_large,
+    vp_engine_plasma,
+    vp_engine_foot_crank,
+    vp_fuel_tank_gas,
+    vp_fuel_tank_batt,
+    vp_fuel_tank_plut,
+    vp_fuel_tank_hydrogen,
+    vp_fuel_tank_water,
+    vp_cargo_trunk, // over
+    vp_cargo_box,   // over
+
+// pure internal parts
+    vp_controls,
+    vp_muffler,
+    vp_seatbelt,
+    vp_solar_panel,
+    vp_kitchen_unit,
+    vp_m249,
+    vp_flamethrower,
+    vp_plasmagun,
+
+// plating -- special case. mounted as internal, work as first line
+// of defence and gives color to external part
+    vp_steel_plate,
+    vp_superalloy_plate,
+    vp_spiked_plate,
+    vp_hard_plate,
+
+    vp_head_light,
+    vp_longbow
+};
 
 void game::init_vehicles()
 {
@@ -35,8 +116,8 @@ void game::init_vehicles()
     vtypes.push_back(new vehicle(this, (vhtype_id)index++)); // veh_custom
 
 #define VEHICLE(nm) { veh = new vehicle(this, (vhtype_id)index++); veh->name = nm; vtypes.push_back(veh); }
-#define PART(mdx, mdy, id) { pi = veh->install_part(mdx, mdy, id); \
-    if (pi < 0) debugmsg("init_vehicles: '%s' part '%s'(%d) can't be installed to %d,%d", veh->name.c_str(), vpart_list[id].name, veh->parts.size(), mdx, mdy); }
+#define PART(mdx, mdy, id) { pi = veh->install_part(mdx, mdy, (vpart_id) id); \
+    if (pi < 0) debugmsg("init_vehicles: '%s' part '%s'(%d) can't be installed to %d,%d", veh->name.c_str(), vpart_info::getVehiclePartInfo((vpart_id) id).name, veh->parts.size(), mdx, mdy); }
 
     //        name
     VEHICLE (_("Bicycle"));
@@ -165,6 +246,7 @@ void game::init_vehicles()
     PART (2, 0,     vp_frame_h);
     PART (2, 0,     vp_engine_gas_v6);
     PART (2, 1,     vp_frame_h);
+    PART (2, 1,     vp_fuel_tank_batt);
     PART (2, -1,    vp_wheel);
     PART (2, 2,     vp_wheel);
     PART (-2, 0,     vp_frame_v);
@@ -252,6 +334,7 @@ void game::init_vehicles()
     PART (2, 0,     vp_frame_cover);
     PART (2, 0,     vp_engine_gas_v6);
     PART (2, 1,     vp_frame_h);
+    PART (2, 1,     vp_fuel_tank_batt);
     PART (2, -2,    vp_wheel_wide);
     PART (2,  2,    vp_wheel_wide);
 
@@ -377,6 +460,7 @@ void game::init_vehicles()
 	PART (-3, -3, vp_wheel_wide);
 
 	PART (4, 0, vp_frame_v2);
+    PART (4, 0, vp_fuel_tank_batt);
 	PART (4, -1, vp_frame_v2);
 	PART (4, -1, vp_engine_gas_v8);
 	PART (4, 1, vp_frame_h);
@@ -994,3 +1078,7 @@ void game::init_vehicles()
         debugmsg("%d vehicles, %d types", vtypes.size(), num_vehicles);
 }
 
+
+int vehicle::install_base_part() {
+	return install_part (0, 0, (vpart_id) vp_frame_v2);
+}

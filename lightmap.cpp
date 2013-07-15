@@ -24,6 +24,7 @@ void map::generate_lightmap(game* g)
  if (natural_light > LIGHT_SOURCE_BRIGHT)
  {
      // Apply sunlight, first light source so just assign
+#pragma omp parallel for
      for(int sx = 0; sx < LIGHTMAP_CACHE_X; ++sx)
      {
          for(int sy = 0; sy < LIGHTMAP_CACHE_Y; ++sy)

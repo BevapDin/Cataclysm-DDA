@@ -19,6 +19,7 @@ public:
     int cy;
     int ddx;
     int ddy;
+//    vpart_id sel_part;
     int sel_part;
     char sel_cmd;
     int sel_type;
@@ -75,9 +76,11 @@ private:
     void display_mode (char mode);
     void display_list (int pos);
 
+//    std::vector<vpart_id> can_mount;
     std::vector<int> can_mount;
     std::vector<bool> has_mats;
     std::vector<int> need_repair;
+//    std::vector<vpart_id> parts_here;
     std::vector<int> parts_here;
     int ptank;
     int wheel;

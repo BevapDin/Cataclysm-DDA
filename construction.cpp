@@ -13,6 +13,8 @@
 bool will_flood_stop(map *m, bool (&fill)[SEEX * MAPSIZE][SEEY * MAPSIZE],
                      int x, int y);
 
+double toolfactors(player &p, inventory &pinv, construction_stage &stage);
+
 void game::init_construction()
 {
  int id = -1;
@@ -97,9 +99,10 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("rock");
    TOOLCONT("hatchet");
+   TOOLCONT("toolset_hammer");
    TOOL("screwdriver");
    TOOLCONT("knife_butter");
-   TOOLCONT("toolset");
+   TOOLCONT("toolset_knife");
 */
 
  CONSTRUCT(_("Repair Door"), 1, &construct::able_door_broken,
@@ -109,6 +112,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("2x4", 3);
    COMP("nail", 12);
 
@@ -119,6 +123,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("2x4", 4);
    COMP("nail", 8);
 
@@ -130,6 +135,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("2x4", 4);
    COMP("nail", 8);
 
@@ -139,6 +145,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("2x4", 10);
    COMP("nail", 20);
   STAGE(t_wall_wood, 10);
@@ -146,6 +153,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("2x4", 10);
    COMP("nail", 20);
 
@@ -212,6 +220,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("2x4", 15);
    COMPCONT("log", 2);
    COMP("nail", 30);
@@ -231,6 +240,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("2x4", 12);
    COMP("nail", 24);
   STAGE(t_door_c, 15);
@@ -238,6 +248,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("2x4", 4);
    COMP("nail", 12);
 
@@ -248,6 +259,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("rock");
+   TOOLCONT("toolset_hammer");
    COMP("pipe", 6);
    COMP("scrap", 8);
   STAGE(t_chainfence_v, 20);
@@ -284,6 +296,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("2x4", 8);
    COMP("nail", 40);
 
@@ -293,12 +306,65 @@ void game::init_construction()
    TOOL("hammer");
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
+   TOOLCONT("toolset_hammer");
    TOOL("shovel");
    TOOLCONT("primitive_shovel");
    COMP("log", 2);
    COMP("stick", 4);
    COMPCONT("2x4", 8);
 
+ CONSTRUCT("Build metal roof", 10, &construct::able_between_walls,
+                            &construct::done_nothing);
+  STAGE(t_metal_floor, 30);
+   TOOL("wrench");
+   TOOLCONT("toolset_wrench");
+   TOOL("welder");
+   TOOLCONT("toolset_welder");
+   TOOL("hacksaw");
+   TOOLCONT("toolset_hacksaw");
+   TOOL("shovel");
+   TOOLCONT("primitive_shovel");
+   COMP("frame", 3);
+   COMP("steel_plate", 2);
+   COMPCONT("sheet_metal", 4);
+
+ CONSTRUCT("Build metal wall (v)", 10, &construct::able_dig, &construct::done_nothing);
+  STAGE(t_pit_shallow, 10);
+   TOOL("shovel");
+   TOOLCONT("primitive_shovel");
+   TOOLCONT("digging_stick");
+  STAGE(t_pit, 10);
+   TOOL("shovel");
+   TOOLCONT("primitive_shovel");
+  STAGE(t_wall_metal_v, 30);
+   TOOL("wrench");
+   TOOLCONT("toolset_wrench");
+   TOOL("welder");
+   TOOLCONT("toolset_welder");
+   TOOL("hacksaw");
+   TOOLCONT("toolset_hacksaw");
+   COMP("frame", 4);
+   COMP("steel_plate", 1);
+   COMPCONT("sheet_metal", 2);
+   
+ CONSTRUCT("Build metal wall (h)", 10, &construct::able_dig, &construct::done_nothing);
+  STAGE(t_pit_shallow, 10);
+   TOOL("shovel");
+   TOOLCONT("primitive_shovel");
+   TOOLCONT("digging_stick");
+  STAGE(t_pit, 10);
+   TOOL("shovel");
+   TOOLCONT("primitive_shovel");
+  STAGE(t_wall_metal_h, 30);
+   TOOL("wrench");
+   TOOLCONT("toolset_wrench");
+   TOOL("welder");
+   TOOLCONT("toolset_welder");
+   TOOL("hacksaw");
+   TOOLCONT("toolset_hacksaw");
+   COMP("frame", 4);
+   COMP("steel_plate", 1);
+   COMPCONT("sheet_metal", 2);
 
 // Base stuff
  CONSTRUCT(_("Build Bulletin Board"), 0, &construct::able_empty,
@@ -308,6 +374,7 @@ void game::init_construction()
    TOOL("hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("2x4", 4);
    COMP("nail", 8);
 
@@ -320,6 +387,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("nail", 8);
    COMP("2x4", 6);
 
@@ -331,6 +399,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("nail", 16);
    COMP("2x4", 12);
 
@@ -340,6 +409,7 @@ void game::init_construction()
    TOOL("hammer");
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
+   TOOLCONT("toolset_hammer");
    TOOL("wrench");
    COMP("sheet_metal", 2);
    COMP("pipe", 8);
@@ -350,6 +420,7 @@ void game::init_construction()
    TOOL("hammer");
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
+   TOOLCONT("toolset_hammer");
    TOOL("wrench");
    COMP("pipe", 12);
 
@@ -360,6 +431,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("nail", 8);
    COMP("2x4", 6);
 
@@ -370,6 +442,7 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    COMP("nail", 8);
    COMP("2x4", 10);
    COMP("blanket", 1);
@@ -386,8 +459,9 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
    TOOL("screwdriver");
-   TOOLCONT("toolset");
+   TOOLCONT("toolset_screwdriver");
 
  CONSTRUCT(_("Start vehicle construction"), 0, &construct::able_empty, &construct::done_vehicle);
   STAGE(10);
@@ -411,6 +485,7 @@ void game::init_construction()
  		                                   &construct::done_nothing);
   STAGE(f_woodstove, 10);
    TOOL("hacksaw");
+   TOOLCONT("toolset_hacksaw");
    COMP("metal_tank", 1);
    COMP("pipe", 1);
 
@@ -421,7 +496,27 @@ void game::init_construction()
    TOOLCONT("primitive_hammer");
    TOOLCONT("shovel");
    TOOLCONT("primitive_shovel");
+   TOOLCONT("toolset_hammer");
    COMP("rock", 40);
+   
+ CONSTRUCT("Build steel compactor", 10, &construct::able_empty,
+                              &construct::done_nothing);
+  STAGE(t_recycler, 120);
+   TOOL("hammer");
+   TOOLCONT("primitive_hammer");
+   TOOLCONT("hatchet");
+   TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
+   TOOL("hacksaw");
+   TOOLCONT("toolset_hacksaw");
+   TOOL("shovel");
+   TOOLCONT("primitive_shovel");
+   TOOL("wrench");
+   TOOLCONT("toolset_wrench");
+   COMP("steel_plate", 4);
+   COMP("frame", 8);
+   COMP("battery", 200); // for welder
+   COMP("2x4", 8);
 }
 
 void game::construction_menu()
@@ -667,6 +762,98 @@ void game::construction_menu()
  refresh_all();
 }
 
+double toolfactor(const item &it) {
+	double basefactor = 1.0;
+	if(it.type->id == "digging_stick") {
+		// realllly primitive tool
+		basefactor *= 0.25;
+	} else if(it.type->id == "chainsaw_on") {
+		// Faster with fuel!
+		basefactor *= 4;
+	} else if(it.type->id == "rock") {
+		// realllly primitive tool
+		basefactor *= 0.25;
+	} else if(it.type->id == "nailgun") {
+		// Faster, because automatic
+		basefactor *= 3;
+	} else if(it.type->id == "hammer_sledge") {
+		basefactor *= 3;
+	}
+	
+	if(it.type->id.compare(0, 10, "primitive_") == 0) {
+		// prmitive tool, bad working with
+		basefactor *= 0.5;
+	} else if(it.type->id.compare(0, 8, "toolset_") == 0) {
+		// integrated tool, allways easyer usage
+		basefactor *= 2.0;
+	}
+
+	if(it.damage > 0) {
+		// damaged tool -> smaller factor
+		basefactor /= (it.damage + 1.0);
+	} else if(it.damage < 0) {
+		// Reinforced tools? damage=-1 -> basefactor *= 1.5
+		basefactor *= (1.0 + 1.0 / (-it.damage + 1.0));
+	}
+	if(it.burnt > 0) {
+		// burnt tool -> smaller factor
+		basefactor /= (it.damage + 1.0);
+	}
+	return basefactor;
+}
+
+double toolfactors(player &p, inventory &pinv, construction_stage &stage) {
+	double factor = 1.0;
+	for(size_t j = 0; j < 10; j++) {
+		std::vector<component> &tools = stage.tools[j];
+		if(tools.empty()) {
+			continue;
+		}
+		double besttool = 0.0;
+		for(size_t k = 0; k < tools.size(); k++) {
+			const itype_id &type = tools[k].type;
+			std::vector<item*> items = pinv.all_items_by_type(type);
+			if(items.empty()) {
+				continue;
+			}
+			for(size_t l = 0; l < items.size(); l++) {
+				double toolfactor = ::toolfactor(*items[l]);
+				if(besttool == 0.0 || besttool < toolfactor) {
+					besttool = toolfactor;
+				}
+			}
+		}
+		if(besttool > 0) {
+			factor *= besttool;
+		}
+	}
+	return factor;
+}
+
+int move_ppoints_for_construction(constructable *con, size_t stage_index, inventory &total_inv) {
+	int move_points = con->stages[stage_index].time * 1000;
+	const double toolfactor = ::toolfactors(g->u, total_inv, con->stages[stage_index]);
+	if(toolfactor > 0) {
+		move_points = static_cast<int>(move_points * toolfactor);
+	}
+	int skill = g->u.skillLevel("carpentry");
+	if(skill > 0 && skill > con->difficulty) {
+		// if skill is big enough, the construction time changes
+		// up to half the time (for infinit skill level)
+		double factor;
+		if(con->difficulty > 1.0) {
+			factor = static_cast<double>(con->difficulty) / skill;
+		} else {
+			factor = 1.0 / skill;
+		}
+		// factor should be in the range (0, 1]
+		move_points /= 2;
+		move_points += static_cast<double>(move_points) * factor;
+	}
+	g->add_msg("Buildtime: %d <> %d (f: %f)", con->stages[stage_index].time * 1000, move_points, toolfactor);
+	return move_points;
+}
+
 bool game::player_can_build(player &p, inventory pinv, constructable* con,
                             const int level, bool cont, bool exact_level)
 {
@@ -828,7 +1015,8 @@ void game::place_construction(constructable *con)
  if (starting_stage == con->stages.size() && con->loopstages)
   starting_stage = 0; // Looping stages
 
- u.assign_activity(this, ACT_BUILD, con->stages[starting_stage].time * 1000, con->id);
+	int move_points = move_ppoints_for_construction(con, starting_stage, total_inv);
+ u.assign_activity(this, ACT_BUILD, move_points, con->id);
 
  u.moves = 0;
  std::vector<int> stages;
@@ -865,8 +1053,9 @@ void game::complete_construction()
  u.activity.values.erase(u.activity.values.begin());
 // ...and start the next one, if it exists
  if (u.activity.values.size() > 0) {
-  construction_stage next = built->stages[u.activity.values[0]];
-  u.activity.moves_left = next.time * 1000;
+//  construction_stage &next = built->stages[u.activity.values[0]];
+  inventory total_inv = crafting_inventory(&u);
+  u.activity.moves_left = move_ppoints_for_construction(built, u.activity.values[0], total_inv);
  } else // We're finished!
   u.activity.type = ACT_NULL;
 
@@ -1078,7 +1267,7 @@ void construct::done_vehicle(game *g, point p)
         return;
     }
     veh->name = name;
-    veh->install_part (0, 0, vp_frame_v2);
+	veh->install_base_part();
 
     //Update the vehicle cache immediately, or the vehicle will be invisible for the first couple of turns.
     g->m.update_vehicle_cache(veh, true);

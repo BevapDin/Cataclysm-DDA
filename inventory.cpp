@@ -425,7 +425,7 @@ item& inventory::add_item(item newit, bool keep_invlet)
     return items.back().back();
 }
 
-void inventory::add_item_by_type(itype_id type, int count, int charges)
+void inventory::add_item_by_type(const itype_id &type, int count, int charges)
 {
     // TODO add proper birthday
     while (count > 0)
@@ -554,18 +554,30 @@ void inventory::form_from_map(game *g, point origin, int range)
      const int kpart = veh->part_with_feature(vpart, vpf_kitchen);
 
      if (kpart >= 0) {
-       item hotplate(g->itypes["hotplate"], 0);
+       item hotplate(g->itypes["installed_kitchen_unit"], 0);
        hotplate.charges = veh->fuel_left("battery", true);
        add_item(hotplate);
 
        item water(g->itypes["water_clean"], 0);
        water.charges = veh->fuel_left("water");
        add_item(water);
-
+	   // Note: those two items may be used as components in a crafting and may
+	   // therfor be used up, but this is not actuall possible as they are build
+	   // into the kitchen unit!
+/*
        item pot(g->itypes["pot"], 0);
        add_item(pot);
        item pan(g->itypes["pan"], 0);
        add_item(pan);
+*/
+     }
+     
+     const int cpart = veh->part_with_feature(vpart, vpf_cargo);
+     if (cpart >= 0) {
+		 
+      for (int i = 0; i < veh->parts[cpart].items.size(); i++)
+       if (!veh->parts[cpart].items[i].made_of(LIQUID))
+        add_item(veh->parts[cpart].items[i]);
      }
    }
 
@@ -637,7 +649,7 @@ item inventory::remove_item(invstack::iterator iter)
     return ret;
 }
 
-item inventory::remove_item_by_type(itype_id type)
+item inventory::remove_item_by_type(const itype_id &type)
 {
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
     {
@@ -757,7 +769,7 @@ item& inventory::item_by_letter(char ch)
     return nullitem;
 }
 
-item& inventory::item_by_type(itype_id type)
+item& inventory::item_by_type(const itype_id &type)
 {
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
     {
@@ -769,7 +781,7 @@ item& inventory::item_by_type(itype_id type)
     return nullitem;
 }
 
-item& inventory::item_or_container(itype_id type)
+item& inventory::item_or_container(const itype_id &type)
 {
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
     {
@@ -793,7 +805,7 @@ item& inventory::item_or_container(itype_id type)
     return nullitem;
 }
 
-std::vector<item*> inventory::all_items_by_type(itype_id type)
+std::vector<item*> inventory::all_items_by_type(const itype_id &type)
 {
     std::vector<item*> ret;
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
@@ -838,7 +850,7 @@ std::vector<item*> inventory::all_ammo(ammotype type)
     return ret;
 }
 
-int inventory::amount_of(itype_id it) const
+int inventory::amount_of(const itype_id &it) const
 {
     int count = 0;
     for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter)
@@ -874,7 +886,7 @@ int inventory::amount_of(itype_id it) const
     return count;
 }
 
-int inventory::charges_of(itype_id it) const
+int inventory::charges_of(const itype_id &it) const
 {
     int count = 0;
     for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter)
@@ -913,7 +925,7 @@ int inventory::charges_of(itype_id it) const
     return count;
 }
 
-std::list<item> inventory::use_amount(itype_id it, int quantity, bool use_container)
+std::list<item> inventory::use_amount(const itype_id &it, int quantity, bool use_container)
 {
     sort();
     std::list<item> ret;
@@ -972,7 +984,7 @@ std::list<item> inventory::use_amount(itype_id it, int quantity, bool use_contai
     return ret;
 }
 
-std::list<item> inventory::use_charges(itype_id it, int quantity)
+std::list<item> inventory::use_charges(const itype_id &it, int quantity)
 {
     sort();
     std::list<item> ret;
@@ -1052,12 +1064,12 @@ std::list<item> inventory::use_charges(itype_id it, int quantity)
     return ret;
 }
 
-bool inventory::has_amount(itype_id it, int quantity) const
+bool inventory::has_amount(const itype_id &it, int quantity) const
 {
  return (amount_of(it) >= quantity);
 }
 
-bool inventory::has_charges(itype_id it, int quantity) const
+bool inventory::has_charges(const itype_id &it, int quantity) const
 {
  return (charges_of(it) >= quantity);
 }
@@ -1114,7 +1126,7 @@ bool inventory::has_gun_for_ammo(ammotype type) const
     return false;
 }
 
-bool inventory::has_active_item(itype_id type) const
+bool inventory::has_active_item(const itype_id &type) const
 {
     for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter)
     {
@@ -1199,7 +1211,7 @@ bool inventory::has_artifact_with(art_effect_passive effect) const
     return false;
 }
 
-bool inventory::has_liquid(itype_id type) const
+bool inventory::has_liquid(const itype_id &type) const
 {
     for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter)
     {
@@ -1298,7 +1310,7 @@ item& inventory::most_appropriate_painkiller(int pain)
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
     {
         int diff = 9999;
-        itype_id type = iter->front().type->id;
+        const itype_id &type = iter->front().type->id;
         if (type == "aspirin")
         {
             diff = abs(pain - 15);
@@ -1406,7 +1418,7 @@ int inventory::volume() const
     return ret;
 }
 
-int inventory::max_active_item_charges(itype_id id) const
+int inventory::max_active_item_charges(const itype_id &id) const
 {
     int max = 0;
     for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter)

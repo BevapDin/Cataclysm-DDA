@@ -118,6 +118,8 @@ public:
 
     //Allows you to modify the age of the current field entry.
     int setFieldAge(const int new_age);
+    int increaseFieldAge(const int diff);
+    int decreaseFieldAge(const int diff);
 
     //Get the move cost for this field
     int getFieldMoveCost();

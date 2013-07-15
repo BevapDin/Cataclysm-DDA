@@ -2593,31 +2593,33 @@ void map::process_active_items_in_submap(game *g, const int nonant)
 		for (int j = 0; j < SEEY; j++) {
 			std::vector<item> *items = &(grid[nonant]->itm[i][j]);
 			for (int n = 0; n < items->size(); n++) {
-				if ((*items)[n].active ||
-				((*items)[n].is_container() && (*items)[n].contents.size() > 0 && (*items)[n].contents[0].active))
+				item &it = (*items)[n];
+				if (it.active ||
+				(it.is_container() && it.contents.size() > 0 && it.contents[0].active))
 				{
-					if ((*items)[n].is_food()) {	// food items
-						if ((*items)[n].has_flag("HOT")) {
-							(*items)[n].item_counter--;
-							if ((*items)[n].item_counter == 0) {
-								(*items)[n].item_tags.erase("HOT");
-								(*items)[n].active = false;
+					if (it.is_food()) {	// food items
+						if (it.has_flag("HOT")) {
+							it.item_counter--;
+							if (it.item_counter == 0) {
+								it.item_tags.erase("HOT");
+								it.active = false;
 								grid[nonant]->active_item_count--;
 							}
 						}
-					} else if ((*items)[n].is_food_container()) {	// food in containers
-						if ((*items)[n].contents[0].has_flag("HOT")) {
-							(*items)[n].contents[0].item_counter--;
-							if ((*items)[n].contents[0].item_counter == 0) {
-								(*items)[n].contents[0].item_tags.erase("HOT");
-								(*items)[n].contents[0].active = false;
+					} else if (it.is_food_container()) {	// food in containers
+						item &food = it.contents[0];
+						if (food.has_flag("HOT")) {
+							food.item_counter--;
+							if (food.item_counter == 0) {
+								food.item_tags.erase("HOT");
+								food.active = false;
 								grid[nonant]->active_item_count--;
 							}
 						}
-					} else if ((*items)[n].type->id == "corpse") { // some corpses rez over time
-					    if ((*items)[n].ready_to_revive(g))
+					} else if (it.type->id == "corpse") { // some corpses rez over time
+					    if (it.ready_to_revive(g))
 					    {
-             if (rng(0,(*items)[n].volume()) > (*items)[n].burnt)
+             if (rng(0,it.volume()) > it.burnt)
              {
                  int mapx = (nonant % my_MAPSIZE) * SEEX + i;
                  int mapy = (nonant / my_MAPSIZE) * SEEY + j;
@@ -2627,31 +2629,31 @@ void map::process_active_items_in_submap(game *g, const int nonant)
                  }
                  g->revive_corpse(mapx, mapy, n);
              } else {
-                 (*items)[n].active = false;
+                 it.active = false;
              }
 					    }
-					} else if	(!(*items)[n].is_tool()) { // It's probably a charger gun
-						(*items)[n].active = false;
-						(*items)[n].charges = 0;
+					} else if	(!it.is_tool()) { // It's probably a charger gun
+						it.active = false;
+						it.charges = 0;
 					} else {
-						tmp = dynamic_cast<it_tool*>((*items)[n].type);
+						tmp = dynamic_cast<it_tool*>(it.type);
 						if (tmp->use != &iuse::none)
 						{
-						    (use.*tmp->use)(g, &(g->u), &((*items)[n]), true);
+						    (use.*tmp->use)(g, &(g->u), &(it), true);
 						}
 						if (tmp->turns_per_charge > 0 && int(g->turn) % tmp->turns_per_charge ==0)
-						(*items)[n].charges--;
-						if ((*items)[n].charges <= 0) {
+						it.charges--;
+						if (it.charges <= 0) {
 						    if (tmp->use != &iuse::none)
 						    {
-							    (use.*tmp->use)(g, &(g->u), &((*items)[n]), false);
+							    (use.*tmp->use)(g, &(g->u), &(it), false);
 							}
-							if (tmp->revert_to == "null" || (*items)[n].charges == -1) {
+							if (tmp->revert_to == "null" || it.charges == -1) {
 								items->erase(items->begin() + n);
 								grid[nonant]->active_item_count--;
 								n--;
 							} else
-								(*items)[n].type = g->itypes[tmp->revert_to];
+								it.type = g->itypes[tmp->revert_to];
 						}
 					}
 				}
@@ -2666,8 +2668,8 @@ std::list<item> map::use_amount(const point origin, const int range, const itype
  std::list<item> ret;
  int quantity = amount;
  for (int radius = 0; radius <= range && quantity > 0; radius++) {
-  for (int x = origin.x - radius; x <= origin.x + radius; x++) {
-   for (int y = origin.y - radius; y <= origin.y + radius; y++) {
+  for (int x = origin.x - radius; quantity > 0 && x <= origin.x + radius; x++) {
+   for (int y = origin.y - radius; quantity > 0 && y <= origin.y + radius; y++) {
     if (rl_dist(origin.x, origin.y, x, y) >= radius) {
      for (int n = 0; n < i_at(x, y).size() && quantity > 0; n++) {
       item* curit = &(i_at(x, y)[n]);
@@ -2691,6 +2693,37 @@ std::list<item> map::use_amount(const point origin, const int range, const itype
        n--;
       }
      }
+     int vpart = -1;
+     vehicle *veh = veh_at(x, y, vpart);
+
+     if (veh && quantity > 0) {
+      const int cpart = veh->part_with_feature(vpart, vpf_cargo);
+      if (cpart >= 0) {
+		  std::vector<item> &items = veh->parts[cpart].items;
+       for (int i = 0; i < items.size() && quantity > 0; i++) {
+        item* curit = &(items[i]);
+        bool used_contents = false;
+        for (int m = 0; m < curit->contents.size() && quantity > 0; m++) {
+         if (curit->contents[m].type->id == type) {
+          ret.push_back(curit->contents[m]);
+          quantity--;
+          curit->contents.erase(curit->contents.begin() + m);
+          m--;
+          used_contents = true;
+         }
+        }
+        if (use_container && used_contents) {
+         items.erase(items.begin() + i);
+         i--;
+        } else if (curit->type->id == type && quantity > 0) {
+         ret.push_back(*curit);
+         quantity--;
+         items.erase(items.begin() + i);
+         i--;
+        }
+	   }
+      }
+     }
     }
    }
   }
@@ -2703,8 +2736,8 @@ std::list<item> map::use_charges(const point origin, const int range, const ityp
  std::list<item> ret;
  int quantity = amount;
  for (int radius = 0; radius <= range && quantity > 0; radius++) {
-  for (int x = origin.x - radius; x <= origin.x + radius; x++) {
-   for (int y = origin.y - radius; y <= origin.y + radius; y++) {
+  for (int x = origin.x - radius; x <= origin.x + radius && quantity > 0; x++) {
+   for (int y = origin.y - radius; y <= origin.y + radius && quantity > 0; y++) {
     if (rl_dist(origin.x, origin.y, x, y) >= radius) {
       int vpart = -1;
       vehicle *veh = veh_at(x, y, vpart);
@@ -2717,7 +2750,7 @@ std::list<item> map::use_charges(const point origin, const int range, const ityp
 
           if (type == "water_clean")
             ftype = "water";
-          else if (type == "hotplate")
+          else if (type == "installed_kitchen_unit")
             ftype = "battery";
 
           item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
@@ -2725,52 +2758,29 @@ std::list<item> map::use_charges(const point origin, const int range, const ityp
           quantity -= tmp.charges;
           ret.push_back(tmp);
 
-          if (quantity == 0)
-            return ret;
-        }
-      }
+				if (quantity == 0)
+					return ret;
+			}
+			const int cpart = veh->part_with_feature(vpart, vpf_cargo);
+			if (cpart >= 0 && quantity > 0) {
+				std::vector<item> &items = veh->parts[cpart].items;
+				for (int i = 0; i < items.size() && quantity > 0; i++) {
+					item &curit = items[i];
+					if(curit.use_charges(type, quantity, ret)) {
+						items.erase(items.begin() + i);
+						i--;
+					}
+				}
+			}
+		}
 
-     for (int n = 0; n < i_at(x, y).size(); n++) {
-      item* curit = &(i_at(x, y)[n]);
-// Check contents first
-      for (int m = 0; m < curit->contents.size() && quantity > 0; m++) {
-       if (curit->contents[m].type->id == type) {
-        if (curit->contents[m].charges <= quantity) {
-         ret.push_back(curit->contents[m]);
-         quantity -= curit->contents[m].charges;
-         if (curit->contents[m].destroyed_at_zero_charges()) {
-          curit->contents.erase(curit->contents.begin() + m);
-          m--;
-         } else
-          curit->contents[m].charges = 0;
-        } else {
-         item tmp = curit->contents[m];
-         tmp.charges = quantity;
-         ret.push_back(tmp);
-         curit->contents[m].charges -= quantity;
-         return ret;
-        }
-       }
-      }
-// Now check the actual item
-      if (curit->type->id == type) {
-       if (curit->charges <= quantity) {
-        ret.push_back(*curit);
-        quantity -= curit->charges;
-        if (curit->destroyed_at_zero_charges()) {
-         i_rem(x, y, n);
-         n--;
-        } else
-         curit->charges = 0;
-       } else {
-        item tmp = *curit;
-        tmp.charges = quantity;
-        ret.push_back(tmp);
-        curit->charges -= quantity;
-        return ret;
-       }
-      }
-     }
+		for (int n = 0; n < i_at(x, y).size() && quantity > 0; n++) {
+			item &curit = i_at(x, y)[n];
+			if(curit.use_charges(type, quantity, ret)) {
+				i_rem(x, y, n);
+				n--;
+			}
+		}
     }
    }
   }
@@ -2871,7 +2881,7 @@ void map::disarm_trap(game *g, const int x, const int y)
 field& map::field_at(const int x, const int y)
 {
  if (!INBOUNDS(x, y)) {
-  nulfield = field();
+  static field nulfield;
   return nulfield;
  }
 

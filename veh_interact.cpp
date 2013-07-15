@@ -91,15 +91,15 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
     int charges = ((it_tool *) g->itypes["welder"])->charges_per_use;
     int charges_crude = ((it_tool *) g->itypes["welder_crude"])->charges_per_use;
     has_wrench = crafting_inv.has_amount("wrench", 1) ||
-        crafting_inv.has_amount("toolset", 1);
+        crafting_inv.has_amount("toolset_wrench", 1);
     has_hacksaw = crafting_inv.has_amount("hacksaw", 1) ||
-        crafting_inv.has_amount("toolset", 1);
+        crafting_inv.has_amount("toolset_hacksaw", 1);
     has_welder = (crafting_inv.has_amount("welder", 1) &&
                   crafting_inv.has_charges("welder", charges)) ||
                   (crafting_inv.has_amount("welder_crude", 1) &&
                   crafting_inv.has_charges("welder_crude", charges_crude)) ||
-                (crafting_inv.has_amount("toolset", 1) &&
-                 crafting_inv.has_charges("toolset", charges/20));
+                (crafting_inv.has_amount("toolset_welder", 1) &&
+                 crafting_inv.has_charges("toolset_welder", charges/20));
     has_jack = crafting_inv.has_amount("jack", 1);
     has_siphon = crafting_inv.has_amount("hose", 1);
 
@@ -263,9 +263,10 @@ void veh_interact::do_install(int reason)
     {
         sel_part = can_mount[pos];
         display_list (pos);
-        itype_id itm = vpart_list[sel_part].item;
+		const vpart_info &part_info = vpart_info::getVehiclePartInfo((vpart_id) sel_part);
+        itype_id itm = part_info.item;
         bool has_comps = crafting_inv.has_amount(itm, 1);
-        bool has_skill = g->u.skillLevel("mechanics") >= vpart_list[sel_part].difficulty;
+        bool has_skill = g->u.skillLevel("mechanics") >= part_info.difficulty;
         bool has_tools = has_welder && has_wrench;
         werase (w_msg);
         mvwprintz(w_msg, 0, 1, c_ltgray, rm_prefix(_("<veh>Needs ")).c_str());
@@ -537,21 +538,11 @@ void veh_interact::do_tirechange(int reason)
     int pos = 0;
     while (true)
     {
-        bool is_wheel = false;
         sel_part = can_mount[pos];
-        switch(sel_part) {
-        case vp_wheel:
-        case vp_wheel_wide:
-        case vp_wheel_bicycle:
-        case vp_wheel_motorbike:
-        case vp_wheel_small:
-            is_wheel = true;
-            break;
-        default:
-            break;
-        }
+        const vpart_info &part_info = vpart_info::getVehiclePartInfo((vpart_id) sel_part);
+		bool is_wheel = part_info.isWheel();
         display_list (pos);
-        itype_id itm = vpart_list[sel_part].item;
+        itype_id itm = part_info.item;
         bool has_comps = crafting_inv.has_amount(itm, 1);
         bool has_tools = has_jack && has_wrench;
         werase (w_msg);
@@ -661,7 +652,7 @@ void veh_interact::move_cursor (int dx, int dy)
     can_mount.clear();
     has_mats.clear();
     if (!obstruct)
-        for (int i = 1; i < num_vparts; i++)
+        for (int i = 1; i < vpart_info::getNumberOfParts(); i++)
         {
             if (veh->can_mount (vdx, vdy, (vpart_id) i))
                 can_mount.push_back (i);
@@ -837,14 +828,14 @@ void veh_interact::display_list (int pos)
     for (int i = page * page_size; i < (page + 1) * page_size && i < can_mount.size(); i++)
     {
         int y = i - page * page_size;
-        itype_id itm = vpart_list[can_mount[i]].item;
+		const vpart_info &vpart = vpart_info::getVehiclePartInfo((vpart_id) can_mount[i]);
+        itype_id itm = vpart.item;
         bool has_comps = crafting_inv.has_amount(itm, 1);
-        bool has_skill = g->u.skillLevel("mechanics") >= vpart_list[can_mount[i]].difficulty;
-        bool is_wheel = vpart_list[can_mount[i]].flags & mfb(vpf_wheel);
+        bool has_skill = g->u.skillLevel("mechanics") >= vpart.difficulty;
+        bool is_wheel = vpart.flags & mfb(vpf_wheel);
         nc_color col = has_comps && (has_skill || is_wheel) ? c_white : c_dkgray;
-        mvwprintz(w_list, y, 3, pos == i? hilite (col) : col, vpart_list[can_mount[i]].name);
-        mvwputch (w_list, y, 1,
-                  vpart_list[can_mount[i]].color, special_symbol (vpart_list[can_mount[i]].sym));
+        mvwprintz(w_list, y, 3, pos == i? hilite (col) : col, vpart.name);
+        mvwputch (w_list, y, 1, vpart.color, special_symbol (vpart.sym));
     }
     wrefresh (w_list);
 }
@@ -865,13 +856,33 @@ struct candidate_vpart {
         in_inventory(true),mapx(-1),mapy(-1),invlet(ch) { vpart_item = vpitem; }
 };
 
+bool all_equal(const std::vector<candidate_vpart> &candidates) {
+	for(int i = 1; i<candidates.size(); i++) {
+		const candidate_vpart &prev = candidates[i - 1];
+		const candidate_vpart &cur = candidates[i];
+		if(prev.vpart_item.type != cur.vpart_item.type) {
+			return false;
+		}
+		if(prev.vpart_item.damage != cur.vpart_item.damage) {
+			return false;
+		}
+		if(prev.vpart_item.burnt != cur.vpart_item.burnt) {
+			return false;
+		}
+		if(prev.vpart_item.bigness != cur.vpart_item.bigness) {
+			return false;
+		}
+	}
+	return true;
+}
+
 // given vpart type, give a choice from inventory items & nearby items.
 // not using consume_items in crafting.cpp
 // because it got into weird cases, & it doesn't consider
 // characteristics like item hp & bigness.
 item consume_vpart_item (game *g, vpart_id vpid){
     std::vector<candidate_vpart> candidates;
-    const itype_id itid = vpart_list[vpid].item;
+    const itype_id itid = vpart_info::getVehiclePartInfo(vpid).item;
     for (int x = g->u.posx - PICKUP_RANGE; x <= g->u.posx + PICKUP_RANGE; x++)
         for (int y = g->u.posy - PICKUP_RANGE; y <= g->u.posy + PICKUP_RANGE; y++)
             for(int i=0; i < g->m.i_at(x,y).size(); i++){
@@ -900,7 +911,9 @@ item consume_vpart_item (game *g, vpart_id vpid){
     // no choice?
     if(candidates.size() == 1) {
         selection = 0;
-    } else {
+    } else if(all_equal(candidates)) {
+		selection = 0;
+	} else {
         // popup menu!?
         std::vector<std::string> options;
         for(int i=0;i<candidates.size(); i++){
@@ -950,7 +963,7 @@ void complete_vehicle (game *g)
     char cmd = (char) g->u.activity.index;
     int dx = g->u.activity.values[4];
     int dy = g->u.activity.values[5];
-    int part = g->u.activity.values[6];
+    vpart_id part = (vpart_id) g->u.activity.values[6];
     int type = g->u.activity.values[7];
     std::vector<component> tools;
     int welder_charges = ((it_tool *) g->itypes["welder"])->charges_per_use;
@@ -1019,12 +1032,12 @@ void complete_vehicle (game *g)
         }
         tools.push_back(component("welder", welder_charges));
         tools.push_back(component("welder_crude", welder_crude_charges));
-        tools.push_back(component("toolset", welder_charges/20));
+        tools.push_back(component("toolset_welder", welder_charges/20));
         g->consume_tools(&g->u, tools, true);
         veh->parts[part].hp = veh->part_info(part).durability;
         g->add_msg (_("You repair the %s's %s."),
                     veh->name.c_str(), veh->part_info(part).name);
-        g->u.practice (g->turn, "mechanics", (vpart_list[part].difficulty + dd) * 5 + 20);
+        g->u.practice (g->turn, "mechanics", (vpart_info::getVehiclePartInfo(part).difficulty + dd) * 5 + 20);
         break;
     case 'f':
         if (!g->pl_refill_vehicle(*veh, part, true))
@@ -1070,7 +1083,7 @@ void complete_vehicle (game *g)
                 removed_wheel = veh->item_from_part( replaced_wheel );
                 veh->remove_part( replaced_wheel );
                 g->add_msg( _("You replace one of the %s's tires with %s."),
-                            veh->name.c_str(), vpart_list[part].name );
+                            veh->name.c_str(), vpart_info::getVehiclePartInfo(part).name.c_str() );
             } else {
                 debugmsg( "no wheel to remove when changing wheels." );
                 return;

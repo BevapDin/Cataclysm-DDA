@@ -104,6 +104,12 @@ static bool inscribe_item( game *g, player *p, std::string verb, std::string ger
     return true;
 }
 
+void iuse::decrease_scent(game *g, player *p, item *it, bool t)
+{
+	p->scent = 0;
+	g->add_msg("You feel much cleaner");
+}
+
 void iuse::none(game *g, player *p, item *it, bool t)
 {
   g->add_msg(_("You can't do anything interesting with your %s."),
