@@ -476,7 +476,7 @@ bool vehicle::can_mount (int dx, int dy, vpart_id id)
 	}
 
     // Override for replacing a tire.
-    if( vpart_list[id].flags & mfb(vpf_wheel) &&
+    if( new_part.flags & mfb(vpf_wheel) &&
         -1 != part_with_feature(parts_here[0], vpf_wheel, false) )
     {
         return true;
