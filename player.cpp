@@ -7357,6 +7357,7 @@ hint_rating player::rate_action_unload(item *it) {
 
 //TODO refactor stuff so we don't need to have this code mirroring game::disassemble
 hint_rating player::rate_action_disassemble(item *it, game *g) {
+ crafting_inventory_t crafting_inv(g, this);
  for (recipe_map::iterator cat_iter = g->recipes.begin(); cat_iter != g->recipes.end(); ++cat_iter)
     {
         for (recipe_list::iterator list_iter = cat_iter->second.begin();
@@ -7370,7 +7371,6 @@ hint_rating player::rate_action_disassemble(item *it, game *g) {
             {
                 // check tools are available
                 // loop over the tools and see what's required...again
-                inventory crafting_inv = g->crafting_inventory(this);
                 for (int j = 0; j < cur_recipe->tools.size(); j++)
                 {
                     bool have_tool = false;

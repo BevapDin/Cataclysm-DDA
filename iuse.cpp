@@ -999,7 +999,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
 
     // this will cause issues if/when NPCs start being able to sew.
     // but, then again, it'll cause issues when they start crafting, too.
-    inventory crafting_inv = g->crafting_inventory(p);
+    crafting_inventory_t crafting_inv(g, p);
     bool bFound = false;
     //go through all discovered repair items and see if we have any of them available
     for(unsigned int i = 0; i< repair_items.size(); i++)
@@ -1057,7 +1057,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
 	    {
             g->add_msg_if_player(p, _("You make your %s extra sturdy."), fix->tname().c_str());
             fix->damage--;
-            g->consume_items(p, comps);
+            crafting_inv.consume_items(comps);
         }
         else
 		{
@@ -1098,7 +1098,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
         else if (rn <= 8)
 	    {
             g->add_msg_if_player(p,_("You repair your %s, but waste lots of thread."), fix->tname().c_str());
-            if (fix->damage>=3) {g->consume_items(p, comps);}
+            if (fix->damage>=3) {crafting_inv.consume_items(comps);}
             fix->damage--;
             int waste = rng(1, 8);
         if (waste > it->charges)
@@ -1109,13 +1109,13 @@ void iuse::sew(game *g, player *p, item *it, bool t)
 	    else if (rn <= 16)
 	    {
             g->add_msg_if_player(p,_("You repair your %s!"), fix->tname().c_str());
-            if (fix->damage>=3) {g->consume_items(p, comps);}
+            if (fix->damage>=3) {crafting_inv.consume_items(comps);}
             fix->damage--;
         }
 	    else
 	    {
             g->add_msg_if_player(p,_("You repair your %s completely!"), fix->tname().c_str());
-            if (fix->damage>=3) {g->consume_items(p, comps);}
+            if (fix->damage>=3) {crafting_inv.consume_items(comps);}
             fix->damage = 0;
         }
     }
@@ -1308,6 +1308,43 @@ void iuse::hammer(game *g, player *p, item *it, bool t)
 
     if (x == p->posx && y == p->posy)
     {
+		if(query_yn("Hammer some metal item to scraps?")) {
+			char ch = g->inv("Select item to hammer");
+			if(!p->has_item(ch)) {
+				return;
+			}
+			item &it = p->i_at(ch);
+			if(it.is_null() || !it.made_of("steel") || !it.contents.empty()) {
+				g->add_msg_if_player(p, "That %s is not made of steel or not empty", it.tname(g).c_str());
+				return;
+			}
+			const int w = it.weight();
+			if(w == 0 || it.volume() == 0) {
+				g->add_msg_if_player(p, "That %s is too small", it.tname(g).c_str());
+				return;
+			}
+			itype *scrap = g->itypes["scrap"];
+			int num_scraps = (w / scrap->weight) / 2;
+			if(num_scraps == 0) {
+				num_scraps = 1;
+			}
+			if(num_scraps > 8 && !p->has_amount("hacksaw", 1)) {
+				g->add_msg_if_player(p, "That %s is too big, if only you had a hacksaw", it.tname(g).c_str());
+				return;
+			}
+			for (int i = 0; i < num_scraps; i++) {
+				g->m.spawn_item(p->posx, p->posy, "scrap", 0);
+			}
+			g->add_msg_if_player(p, "You hammer the %s into %d scraps", it.tname(g).c_str(), num_scraps);
+			p->moves -= 40 * num_scraps;
+			if(num_scraps > 8) {
+				g->sound(p->posx, p->posy, 20, "hammering");
+			} else {
+				g->sound(p->posx, p->posy, 10, "hammering");
+			}
+			p->i_rem(ch);
+			return;
+		}
         g->add_msg_if_player(p, _("You try to hit yourself with the hammer."));
         g->add_msg_if_player(p, _("But you can't touch this."));
         return;
@@ -1399,6 +1436,34 @@ void iuse::light_on(game *g, player *p, item *it, bool t)
  } else {	// Turning it off
   g->add_msg_if_player(p,_("The flashlight flicks off."));
   it->make(g->itypes["flashlight"]);
+  it->active = false;
+ }
+}
+
+void iuse::simple_off(game *g, player *p, item *it, bool t)
+{
+ if (it->charges == 0)
+  g->add_msg_if_player(p, "The %s needs %s to work.", it->tname(g).c_str(), ammo_name(it->ammo_type()).c_str());
+ else {
+  g->add_msg_if_player(p,"You turn the %s on.", it->tname(g).c_str());
+  std::string on_type = it->typeId();
+  on_type.erase(on_type.length() - 3, 3);
+  on_type += "on";
+  it->make(g->itypes[on_type]);
+  it->active = true;
+ }
+}
+
+void iuse::simple_on(game *g, player *p, item *it, bool t)
+{
+ if (t) {	// Normal use
+// Do nothing... 
+ } else {	// Turning it off
+  g->add_msg_if_player(p,"The %s goes off.", it->tname(g).c_str());
+  std::string off_type = it->typeId();
+  off_type.erase(off_type.length() - 2, 2);
+  off_type += "off";
+  it->make(g->itypes[off_type]);
   it->active = false;
  }
 }
@@ -1528,7 +1593,7 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
 
             // this will cause issues if/when NPCs start being able to sew.
             // but, then again, it'll cause issues when they start crafting, too.
-            inventory crafting_inv = g->crafting_inventory(p);
+			crafting_inventory_t crafting_inv(g, p);
 
              bool bFound = false;
             //go through all discovered repair items and see if we have any of them available
@@ -1585,7 +1650,7 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
                 {
                     g->add_msg_if_player(p, _("You make your %s extra sturdy."), fix->tname().c_str());
                     fix->damage--;
-                    g->consume_items(p, comps);
+                    crafting_inv.consume_items(comps);
                 }
                 else
                 {
@@ -1626,7 +1691,7 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
                 else if (rn <= 8)
                 {
                     g->add_msg_if_player(p,_("You repair your %s, but you waste lots of charge."), fix->tname().c_str());
-                    if (fix->damage>=3) {g->consume_items(p, comps);}
+                    if (fix->damage>=3) {crafting_inv.consume_items(comps);}
                     fix->damage--;
                     int waste = rng(1, 8);
                 if (waste > it->charges)
@@ -1637,13 +1702,13 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
                 else if (rn <= 16)
                 {
                     g->add_msg_if_player(p,_("You repair your %s!"), fix->tname().c_str());
-                    if (fix->damage>=3) {g->consume_items(p, comps);}
+                    if (fix->damage>=3) {crafting_inv.consume_items(comps);}
                     fix->damage--;
                 }
                 else
                 {
                     g->add_msg_if_player(p,_("You repair your %s completely!"), fix->tname().c_str());
-                    if (fix->damage>=3) {g->consume_items(p, comps);}
+                    if (fix->damage>=3) {crafting_inv.consume_items(comps);}
                     fix->damage = 0;
                 }
             }

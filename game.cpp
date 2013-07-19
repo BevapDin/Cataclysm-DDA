@@ -46,6 +46,8 @@
 #include <tchar.h>
 #endif
 
+#define MON_POP_CHANGE 1
+
 #ifdef _MSC_VER
 // MSVC doesn't have c99-compatible "snprintf", so do what picojson does and use _snprintf_s instead
 #define snprintf _snprintf_s
@@ -5977,7 +5979,7 @@ bool game::vehicle_with_tank_near()
  for (int dx = -1; dx <= 1; dx++) {
   for (int dy = -1; dy <= 1; dy++) {
    vehicle *veh = m.veh_at(u.posx + dx, u.posy + dy);
-   if(veh && veh->fuel_capacity(AT_GAS) > 0) {
+   if(veh && veh->fuel_capacity("gasoline") > 0) {
     return true;
    }
   }
@@ -8006,6 +8008,27 @@ point game::look_around()
 			mvwprintz(w_look, off, 1, fieldlist[cur->getFieldType()].color[cur->getFieldDensity()-1], "%s",
 				fieldlist[cur->getFieldType()].name[cur->getFieldDensity()-1].c_str());
 			off++; // 4ish
+			if(cur->getFieldType() == fd_fire && u.skillLevel("survival").level() >= 2) {
+				int burntime = 0;
+				burntime = -cur->getFieldAge();
+				switch(cur->getFieldDensity()) {
+					case 3:
+						burntime += fieldlist[fd_fire].halflife / 2;
+					case 2:
+						burntime += fieldlist[fd_fire].halflife / 2;
+					case 1:
+						burntime += fieldlist[fd_fire].halflife / 2;
+				}
+				if(burntime > MINUTES(5)) {
+					burntime = burntime / MINUTES(1);
+					mvwprintw(w_look, off, 1, "Will burn for about %d minutes", burntime);
+					off++;
+					if(u.skillLevel("survival").level() >= 5) {
+						mvwprintw(w_look, off, 1, "Density: %d, age: %d", cur->getFieldDensity(), cur->getFieldAge());
+						off++;
+					}
+				}
+			}
 		}
     }
    //if (tmpfield.type != fd_null)
@@ -11434,12 +11457,14 @@ void game::despawn_monsters(const bool stairs, const int shiftx, const int shift
   } else {
    	// No spawn site, so absorb them back into a group.
    int group = valid_group((mon_id)(z[i].type->id), levx + shiftx, levy + shifty, levz);
+#if MON_POP_CHANGE
    if (group != -1) {
     cur_om->zg[group].population++;
     if (cur_om->zg[group].population / (cur_om->zg[group].radius * cur_om->zg[group].radius) > 5 &&
         !cur_om->zg[group].diffuse)
      cur_om->zg[group].radius++;
    }
+#endif
   }
   // Shifting needs some cleanup for despawned monsters since they won't be cleared afterwards.
   if(shiftx != 0 || shifty != 0) {
@@ -11498,12 +11523,14 @@ void game::spawn_mon(int shiftx, int shifty)
           rng(0, MAPSIZE * 4) > group && group < pop && group < MAPSIZE * 3)
     group++;
 
+#if MON_POP_CHANGE
    cur_om->zg[i].population -= group;
    // Reduce group radius proportionally to remaining
    // population to maintain a minimal population density.
    if (cur_om->zg[i].population / (cur_om->zg[i].radius * cur_om->zg[i].radius) < 1.0 &&
        !cur_om->zg[i].diffuse)
      cur_om->zg[i].radius--;
+#endif
 
    if (group > 0) // If we spawned some zombies, advance the timer
     nextspawn += rng(group * 4 + z.size() * 4, group * 10 + z.size() * 10);

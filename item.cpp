@@ -745,6 +745,13 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
     dump->push_back(iteminfo("DESCRIPTION", contents[0].type->description));
   }
  }
+ 
+ if(get_material(1) != "null") {
+   dump->push_back(iteminfo("DESCRIPTION", "Material: " + get_material(1)));
+ }
+ if(get_material(2) != "null") {
+   dump->push_back(iteminfo("DESCRIPTION", "Material: " + get_material(2)));
+ }
 
  temp1.str("");
  std::vector<iteminfo>& vecData = *dump; // vector is not copied here

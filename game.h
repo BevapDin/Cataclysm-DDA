@@ -245,9 +245,9 @@ class game
   point find_item(item *it);
   void remove_item(item *it);
 
-  inventory crafting_inventory(player *p);  // inv_from_map, inv, & 'weapon'
-  std::list<item> consume_items(player *p, std::vector<component> components);
-  void consume_tools(player *p, std::vector<component> tools, bool force_available);
+//  inventory crafting_inventory(player *p);  // inv_from_map, inv, & 'weapon'
+//  std::list<item> consume_items(player *p, std::vector<component> components);
+//  void consume_tools(player *p, std::vector<component> tools, bool force_available);
 
   bool has_gametype() const { return gamemode && gamemode->id() != SGAME_NULL; }
   special_game_id gametype() const { return (gamemode) ? gamemode->id() : SGAME_NULL; }
@@ -394,8 +394,8 @@ void load_artifacts(); // Load artifact data
   bool crafting_allowed();             // See crafting.cpp
   recipe* select_crafting_recipe();    // See crafting.cpp
   bool making_would_work(recipe *r);   // See crafting.cpp
-  bool can_make(recipe *r, inventory &crafting_inv);            // See crafting.cpp
-    bool check_enough_materials(recipe *r, inventory &crafting_inv);
+  bool can_make(recipe *r, crafting_inventory_t &crafting_inv);            // See crafting.cpp
+    bool check_enough_materials(recipe *r, crafting_inventory_t &crafting_inv);
   void make_craft(recipe *making);     // See crafting.cpp
   void make_all_craft(recipe *making); // See crafting.cpp
   void complete_craft();               // See crafting.cpp
@@ -409,7 +409,7 @@ void load_artifacts(); // Load artifact data
   void complete_disassemble();         // See crafting.cpp
   recipe* recipe_by_index(int index);  // See crafting.cpp
   void construction_menu();            // See construction.cpp
-  bool player_can_build(player &p, inventory inv, constructable* con,
+  bool player_can_build(player &p, crafting_inventory_t &inv, constructable* con,
                         const int level = -1, bool cont = false,
                         bool exact_level=false);
   void place_construction(constructable *con); // See construction.cpp

@@ -8,6 +8,16 @@
 #define THUNDER_CHANCE 50
 #define LIGHTNING_CHANCE 600
 
+bool player_wields_umbrella(game *g) {
+	if(g->u.weapon.typeId() == "umbrella" || g->u.weapon.typeId() == "primitive_umbrella") {
+		if(g->u.weapon.damage <= 0) {
+			return true;
+		}
+		return one_in(6 - g->u.weapon.damage);
+	}
+	return false;
+}
+
 void weather_effect::glare(game *g)
 {
  if (PLAYER_OUTSIDE && g->is_in_sunlight(g->u.posx, g->u.posy) && !g->u.is_wearing("sunglasses"))
@@ -85,6 +95,15 @@ void weather_effect::light_acid(game *g)
         if (g->u.weapon.has_flag("RAIN_PROTECT") && one_in(2))
         {
             g->add_msg(_("Your umbrella protects you from the acidic drizzle."));
+			if(one_in(90)) {
+				g->u.weapon.damage++;
+				if(g->u.weapon.damage >= 5) {
+					g->add_msg("Your %s is destroyed by the acid", g->u.weapon.name.c_str());
+					g->u.remove_weapon();
+				} else {
+					g->add_msg("Your %s is damaged by the acid", g->u.weapon.name.c_str());
+				}
+			}
         }
         else
         {
@@ -108,6 +127,15 @@ void weather_effect::acid(game *g)
         if (g->u.weapon.has_flag("RAIN_PROTECT") && one_in(4))
         {
             g->add_msg(_("Your umbrella protects you from the acid rain."));
+			if(one_in(40)) {
+				g->u.weapon.damage++;
+				if(g->u.weapon.damage >= 5) {
+					g->add_msg("Your %s is destroyed by the acid", g->u.weapon.name.c_str());
+					g->u.remove_weapon();
+				} else {
+					g->add_msg("Your %s is damaged by the acid", g->u.weapon.name.c_str());
+				}
+			}
         }
         else
         {

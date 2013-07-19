@@ -3571,6 +3571,31 @@
                               ]
                           ]
         },
+        {
+            "result": "meat_smoked",
+            "category": "CC_FOOD",
+            "skill_pri": "cooking",
+            "difficulty": 0,
+            "time": 50000,
+            "reversible": false,
+            "autolearn": true,
+            "tools": [
+                         [
+                             ["fire", -1]
+                         ],
+                         [
+                             ["spear_wood", -1],
+                             ["pointy_stick", -1],
+                             ["skewer", -1],
+                             ["javelin", -1]
+                         ]
+                     ],
+            "components": [
+                              [
+                                  ["meat", 1]
+                              ]
+                          ]
+        },
 
 
         {
@@ -5750,7 +5775,6 @@
                                   ["scrap", 2],
                                   ["pan", 1],
                                   ["pot", 1],
-                                  ["installed_kitchen_unit", -1],
                                   ["knife_butcher", 2],
                                   ["knife_steak", 6],
                                   ["knife_butter", 6],
@@ -8763,7 +8787,7 @@
             "reversible": false,
             "autolearn": true,
             "tools": [
-                     [ ["boltcutters", -1], ["toolset", -1] ],
+                     [ ["boltcutters", -1], ["toolset_hammer", -1] ],
                      [ ["hammer", -1], ["hatchet", -1] ]
                  ],
             "components": [ [ ["wire", 2] ] ]
@@ -8886,7 +8910,7 @@
             "time": 2000,
             "reversible": false,
             "autolearn": true,
-            "tools": [ [ ["hammer", -1], ["toolset", -1], ["hatchet", -1] ] ],
+            "tools": [ [ ["hammer", -1], ["toolset_hammer", -1], ["hatchet", -1] ] ],
             "components": [ [ ["steel_chunk", 2] ],
                             [ ["duct_tape", 30] ] ]
 
@@ -10643,6 +10667,30 @@
                               ],
                               [
                                   ["bone", 30]
+                              ]
+                          ]
+        },
+        {
+            "result": "primitive_umbrella",
+            "category": "CC_MISC",
+            "skill_pri": "tailor",
+            "skill_sec": "mechanics",
+            "difficulty": 4,
+            "time": 10000,
+            "reversible": false,
+            "autolearn": true,
+            "tools": [
+                         [
+                             ["soldering_iron", 4],
+                             ["toolset_soldering_iron", 1]
+                         ]
+            ],
+            "components": [
+                              [ ["leather", 6] ]
+                              [ ["string_6", 1] ]
+                              [
+                                ["stick", 1 ],
+                                ["2x4", 1]
                               ]
                           ]
         }

@@ -2073,6 +2073,23 @@
     "techniques": ["WBLOCK_1"]
   },
   {
+    "id" : "primitive_umbrella",
+    "symbol" : "/",
+    "color": "magenta",
+    "name": "simple umbrella",
+    "description": "A simple umbrella, protects you from rain (including the nasty ones), but only if wielded.",
+    "material": [ "leather", "wood" ],
+    "rarity": 60,
+    "price": 10,
+    "volume": 11,
+    "weight": 9,
+    "bashing": 2,
+    "cutting": 5,
+    "to_hit": 1,
+    "flags": ["STAB","RAIN_PROTECT"],
+    "techniques": ["WBLOCK_1"]
+  },
+  {
     "id": "fish_bowl",
     "symbol": "u",
     "color": "light_cyan",

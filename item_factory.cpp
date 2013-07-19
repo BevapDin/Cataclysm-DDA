@@ -174,6 +174,9 @@ void Item_factory::init(){
     iuse_function_list["BOOTS"] = &iuse::boots;
     iuse_function_list["ABSORBENT"] = &iuse::towel;
     iuse_function_list["UNFOLD_BICYCLE"] = &iuse::unfold_bicycle;
+    iuse_function_list["DECREASE_SCENT"] = &iuse::decrease_scent;
+    iuse_function_list["SIMPLE_ON"] = &iuse::simple_on;
+    iuse_function_list["SIMPLE_OFF"] = &iuse::simple_off;
     // MACGUFFINS
     iuse_function_list["MCG_NOTE"] = &iuse::mcg_note;
     // ARTIFACTS
@@ -181,7 +184,6 @@ void Item_factory::init(){
     // It examines the item's artifact-specific properties
     // See artifact.h for a list
     iuse_function_list["ARTIFACT"] = &iuse::artifact;
-    iuse_function_list["DECREASE_SCENT"] = &iuse::decrease_scent;
 
     // Offensive Techniques
     techniques_list["SWEEP"] = mfb(TEC_SWEEP);

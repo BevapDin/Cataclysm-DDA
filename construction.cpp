@@ -547,7 +547,7 @@ void game::construction_menu()
  long ch;
  bool exit = false;
 
- inventory total_inv = crafting_inventory(&u);
+ crafting_inventory_t total_inv(this, &u);
 
  do {
 // Erase existing list of constructions
@@ -802,7 +802,7 @@ double toolfactor(const item &it) {
 	return basefactor;
 }
 
-double toolfactors(player &p, inventory &pinv, construction_stage &stage) {
+double toolfactors(player &p, crafting_inventory_t &pinv, construction_stage &stage) {
 	double factor = 1.0;
 	for(size_t j = 0; j < 10; j++) {
 		std::vector<component> &tools = stage.tools[j];
@@ -812,7 +812,7 @@ double toolfactors(player &p, inventory &pinv, construction_stage &stage) {
 		double besttool = 0.0;
 		for(size_t k = 0; k < tools.size(); k++) {
 			const itype_id &type = tools[k].type;
-			std::vector<item*> items = pinv.all_items_by_type(type);
+			std::vector<const item*> items = pinv.all_items_by_type(type);
 			if(items.empty()) {
 				continue;
 			}
@@ -830,7 +830,7 @@ double toolfactors(player &p, inventory &pinv, construction_stage &stage) {
 	return factor;
 }
 
-int move_ppoints_for_construction(constructable *con, size_t stage_index, inventory &total_inv) {
+int move_ppoints_for_construction(constructable *con, size_t stage_index, crafting_inventory_t &total_inv) {
 	int move_points = con->stages[stage_index].time * 1000;
 	const double toolfactor = ::toolfactors(g->u, total_inv, con->stages[stage_index]);
 	if(toolfactor > 0) {
@@ -854,7 +854,7 @@ int move_ppoints_for_construction(constructable *con, size_t stage_index, invent
 	return move_points;
 }
 
-bool game::player_can_build(player &p, inventory pinv, constructable* con,
+bool game::player_can_build(player &p, crafting_inventory_t &pinv, constructable* con,
                             const int level, bool cont, bool exact_level)
 {
  int last_level = level;
@@ -934,7 +934,7 @@ bool game::player_can_build(player &p, inventory pinv, constructable* con,
 void game::place_construction(constructable *con)
 {
  refresh_all();
- inventory total_inv = crafting_inventory(&u);
+ crafting_inventory_t total_inv(this, &u);
 
  std::vector<point> valid;
  for (int x = u.posx - 1; x <= u.posx + 1; x++) {
@@ -1038,8 +1038,10 @@ void game::complete_construction()
  if (built->difficulty == 0)
    u.practice(turn, "carpentry", 10);
  for (int i = 0; i < 10; i++) {
-  if (!stage.components[i].empty())
-   consume_items(&u, stage.components[i]);
+  if (!stage.components[i].empty()) {
+	crafting_inventory_t total_inv(this, &u);
+	total_inv.consume_items(stage.components[i]);
+  }
  }
 
 // Make the terrain change
@@ -1054,7 +1056,7 @@ void game::complete_construction()
 // ...and start the next one, if it exists
  if (u.activity.values.size() > 0) {
 //  construction_stage &next = built->stages[u.activity.values[0]];
-  inventory total_inv = crafting_inventory(&u);
+  crafting_inventory_t total_inv(this, &u);
   u.activity.moves_left = move_ppoints_for_construction(built, u.activity.values[0], total_inv);
  } else // We're finished!
   u.activity.type = ACT_NULL;

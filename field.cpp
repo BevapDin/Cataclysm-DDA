@@ -334,6 +334,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
 					bool destroyed = false; //Is the item destroyed?
      // Volume, Smoke generation probability, consumed items count
 					int vol = 0, smoke = 0, consumed = 0;
+					const bool is_in_container = (tr_brazier == tr_at(x, y)) || (has_flag(fire_container, x, y));
 					for (int i = 0; i < i_at(x, y).size() && consumed < cur->getFieldDensity() * 2; i++) {
 						//Stop when we hit the end of the item buffer OR we consumed enough items given our fire size.
 						destroyed = false;
@@ -450,6 +451,11 @@ bool map::process_fields_in_submap(game *g, int gridn)
 								i_at(x, y).push_back( i_at(x, y)[i].contents[m] );
 							i_at(x, y).erase(i_at(x, y).begin() + i);
 							i--;
+							// Fire in containers grow slowly,
+							// they consume at most one item per turn
+							if(is_in_container) {
+								break;
+							}
 						}
 					}
 
@@ -457,7 +463,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
 					if (veh)
 						veh->damage (part, cur->getFieldDensity() * 10, false); //Damage the vehicle in the fire.
 					// If the flames are in a brazier, they're fully contained, so skip consuming terrain
-					if((tr_brazier != tr_at(x, y))&&(has_flag(fire_container, x, y) != true )) {
+					if(!is_in_container) {
 						// Consume the terrain we're on
 						if (has_flag(explodes, x, y)) {
 							//This is what destroys houses so fast.
@@ -495,7 +501,10 @@ bool map::process_fields_in_submap(game *g, int gridn)
 					}
 
 					// If we consumed a lot, the flames grow higher
-					while (cur->getFieldDensity() < 3 && cur->getFieldAge() < 0) {
+					// Bu not to density 3 if the fire is inside of a container (woodstove/braizer/...)
+					// In that case the fire only grows to density 2 at most.
+					while (cur->getFieldDensity() < 3 && cur->getFieldAge() < 0
+						&& (!is_in_container || cur->getFieldDensity() < 2)) {
 						//Fires under 0 age grow in size. Level 3 fires under 0 spread later on.
 						cur->increaseFieldAge(300);
 						cur->setFieldDensity(cur->getFieldDensity() + 1);
@@ -504,8 +513,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
 					// If the flames are in a pit, it can't spread to non-pit
 					bool in_pit = (ter(x, y) == t_pit);
 					// If the flames are REALLY big, they contribute to adjacent flames
-					if (cur->getFieldDensity() == 3 && cur->getFieldAge() < 0 && tr_brazier != tr_at(x, y)
-						&& (has_flag(fire_container, x, y) != true  ) ){
+					if (cur->getFieldDensity() == 3 && cur->getFieldAge() < 0 && !is_in_container) {
 							// Randomly offset our x/y shifts by 0-2, to randomly pick a square to spread to
 							int starti = rng(0, 2);
 							int startj = rng(0, 2);
@@ -533,7 +541,11 @@ bool map::process_fields_in_submap(game *g, int gridn)
 					//the fire won't keep crawling endlessly across the map.
 					int starti = rng(0, 2);
 					int startj = rng(0, 2);
-					for (int i = 0; i < 3; i++) {
+					// This loop does two things: spread the fire to other tiles and create
+					// smoke. If the fire is in a container it can not spread. If the tile has
+					// the suppress_smoke flag it can not create smoke.
+					// So if both conditionas are met, skip the loop completly
+					for (int i = 0; i < 3 && (!has_flag(suppress_smoke, x, y) || !is_in_container); i++) {
 						for (int j = 0; j < 3; j++) {
 							int fx = x + ((i + starti) % 3) - 1, fy = y + ((j + startj) % 3) - 1;
 							if (INBOUNDS(fx, fy)) {
@@ -543,12 +555,11 @@ bool map::process_fields_in_submap(game *g, int gridn)
 								if (nearwebfld)
 									spread_chance = 50 + spread_chance / 2;
 								if (has_flag(explodes, fx, fy) && one_in(8 - cur->getFieldDensity()) &&
-									tr_brazier != tr_at(x, y) && (has_flag(fire_container, x, y) != true ) ) {
+									!is_in_container ) {
 										ter_set(fx, fy, ter_id(int(ter(fx, fy)) + 1));
 										g->explosion(fx, fy, 40, 0, true); //Nearby explodables? blow em up.
 								} else if ((i != 0 || j != 0) && rng(1, 100) < spread_chance && cur->getFieldAge() < 200 &&
-									tr_brazier != tr_at(x, y) &&
-									(has_flag(fire_container, x, y) != true )&&
+									!is_in_container &&
 									(in_pit == (ter(fx, fy) == t_pit)) &&
 									(
 									(cur->getFieldDensity() >= 2 &&

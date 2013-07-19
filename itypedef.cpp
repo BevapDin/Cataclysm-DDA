@@ -236,14 +236,14 @@ BIO_SINGLE("bio_furnace", 2, 4500, c_yellow, 4);
 BIO_SINGLE("bio_ethanol", 6, 1200, c_yellow, 4);
 BIO_SINGLE("bio_torsionratchet", 2, 3800, c_yellow, 4);
 // utilities
-BIO_SINGLE_TOOLSET("knife", 3, 8000, c_ltgray, 6);
-BIO_SINGLE_TOOLSET("screwdriver", 3, 8000, c_ltgray, 6);
-BIO_SINGLE_TOOLSET("wrench", 3, 8000, c_ltgray, 6);
+BIO_SINGLE_TOOLSET("knife", 3, 8000, c_ltgray, 2);
+BIO_SINGLE_TOOLSET("screwdriver", 3, 8000, c_ltgray, 2);
+BIO_SINGLE_TOOLSET("wrench", 3, 8000, c_ltgray, 5);
 BIO_SINGLE_TOOLSET("hacksaw", 3, 8000, c_ltgray, 6);
-BIO_SINGLE_TOOLSET("hammer", 3, 8000, c_ltgray, 6);
+BIO_SINGLE_TOOLSET("hammer", 3, 8000, c_ltgray, 3);
 BIO_SINGLE_TOOLSET("welder", 3, 8000, c_ltgray, 6);
-BIO_SINGLE_TOOLSET("hotplate", 3, 8000, c_ltgray, 6);
-BIO_SINGLE_TOOLSET("soldering_iron", 3, 8000, c_ltgray, 6);
+BIO_SINGLE_TOOLSET("hotplate", 3, 8000, c_ltgray, 5);
+BIO_SINGLE_TOOLSET("soldering_iron", 3, 8000, c_ltgray, 5);
 
 BIO_SINGLE("bio_storage", 3, 4000, c_ltgray, 7);
 BIO_SINGLE("bio_flashlight", 8, 200, c_ltgray, 2);

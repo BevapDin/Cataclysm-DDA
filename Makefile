@@ -284,3 +284,13 @@ clean-tests:
 
 -include $(SOURCES:%.cpp=$(DEPDIR)/%.P)
 -include ${OBJS:.o=.d}
+
+
+
+
+
+git-add:
+	git add $(filter-out version.h $(wildcard *.h *.cpp))
+
+git-diff:
+	git diff --color --cached --word-diff

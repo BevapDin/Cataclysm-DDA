@@ -86,7 +86,7 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
     }
     wrefresh(w_grid);
 
-    crafting_inv = gm->crafting_inventory(&gm->u);
+    crafting_inventory_t crafting_inv(gm, &gm->u);
 
     int charges = ((it_tool *) g->itypes["welder"])->charges_per_use;
     int charges_crude = ((it_tool *) g->itypes["welder_crude"])->charges_per_use;
@@ -841,19 +841,33 @@ void veh_interact::display_list (int pos)
 }
 
 struct candidate_vpart {
-    bool in_inventory;
-    int mapx;
-    int mapy;
-    union
-    {
-        signed char invlet;
-        int index;
+    enum { in_inventory, on_map, in_vehicle, weapon } location;
+	union
+	{
+		struct
+		{
+			int mapx;
+			int mapy;
+			int mindex;
+		};
+		struct {
+			signed char invlet;
+		};
+		struct {
+			vehicle *veh;
+			int part_num;
+			int vindex;
+		};
     };
     item vpart_item;
-    candidate_vpart(int x, int y, int i, item vpitem):
-        in_inventory(false),mapx(x),mapy(y),index(i) { vpart_item = vpitem; }
-    candidate_vpart(char ch, item vpitem):
-        in_inventory(true),mapx(-1),mapy(-1),invlet(ch) { vpart_item = vpitem; }
+    candidate_vpart(const item &vpitem):
+        location(weapon), vpart_item(vpitem) { }
+    candidate_vpart(int x, int y, int i, const item &vpitem):
+        location(on_map),mapx(x),mapy(y),mindex(i), vpart_item(vpitem) { }
+    candidate_vpart(char ch, const item &vpitem):
+        location(in_inventory),invlet(ch), vpart_item(vpitem) { }
+    candidate_vpart(vehicle *veh, int part_num, int i, const item &vpitem):
+        location(in_vehicle),veh(veh), part_num(part_num), vindex(i), vpart_item(vpitem) { }
 };
 
 bool all_equal(const std::vector<candidate_vpart> &candidates) {
@@ -880,25 +894,33 @@ bool all_equal(const std::vector<candidate_vpart> &candidates) {
 // not using consume_items in crafting.cpp
 // because it got into weird cases, & it doesn't consider
 // characteristics like item hp & bigness.
-item consume_vpart_item (game *g, vpart_id vpid){
+item crafting_inventory_t::consume_vpart_item (game *g, const itype_id &itid) {
     std::vector<candidate_vpart> candidates;
-    const itype_id itid = vpart_info::getVehiclePartInfo(vpid).item;
-    for (int x = g->u.posx - PICKUP_RANGE; x <= g->u.posx + PICKUP_RANGE; x++)
-        for (int y = g->u.posy - PICKUP_RANGE; y <= g->u.posy + PICKUP_RANGE; y++)
-            for(int i=0; i < g->m.i_at(x,y).size(); i++){
-                item* ith_item = &(g->m.i_at(x,y)[i]);
-                if (ith_item->type->id == itid)
-                    candidates.push_back (candidate_vpart(x,y,i,*ith_item));
-            }
-
-    std::vector<item*> cand_from_inv = g->u.inv.all_items_by_type(itid);
+	
+	for(std::list<item_on_map>::const_iterator a = on_map.begin(); a != on_map.end(); ++a) {
+		const std::vector<item> &items = *(a->items);
+		for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
+			if(b->type->id == itid) {
+				candidates.push_back (candidate_vpart(a->origin.x, a->origin.y, b - items.begin(), *b));
+			}
+		}
+	}
+	for(std::list<item_in_vehicle>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
+		const std::vector<item> &items = *(a->items);
+		for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
+			if(b->type->id == itid) {
+				candidates.push_back(candidate_vpart(a->veh, a->part_num, b - items.begin(), *b));
+			}
+		}
+	}
+    std::vector<item*> cand_from_inv = p->inv.all_items_by_type(itid);
     for (int i=0; i < cand_from_inv.size(); i++){
         item* ith_item = cand_from_inv[i];
         if (ith_item->type->id  == itid)
             candidates.push_back (candidate_vpart(ith_item->invlet,*ith_item));
     }
     if (g->u.weapon.type->id == itid) {
-        candidates.push_back (candidate_vpart(-1,g->u.weapon));
+        candidates.push_back (candidate_vpart(g->u.weapon));
     }
 
     // bug?
@@ -917,34 +939,51 @@ item consume_vpart_item (game *g, vpart_id vpid){
         // popup menu!?
         std::vector<std::string> options;
         for(int i=0;i<candidates.size(); i++){
-            if(candidates[i].in_inventory){
-                if (candidates[i].invlet == -1)
-                    options.push_back(candidates[i].vpart_item.tname() + _(" (wielded)"));
-                else
+			switch(candidates[i].location) {
+				case candidate_vpart::in_inventory:
                     options.push_back(candidates[i].vpart_item.tname());
-            }
-            else { //nearby.
-                options.push_back(candidates[i].vpart_item.tname() + _(" (nearby)"));
+					break;
+				case candidate_vpart::in_vehicle:
+					options.push_back(candidates[i].vpart_item.tname() + " (in car)");
+					break;
+				case candidate_vpart::on_map:
+					options.push_back(candidates[i].vpart_item.tname() + " (nearby)");
+					break;
+				case candidate_vpart::weapon:
+				default:
+                    options.push_back(candidates[i].vpart_item.tname() + " (wielded)");
+					break;
             }
         }
         selection = menu_vec(false, _("Use which gizmo?"), options);
         selection -= 1;
     }
-    //remove item from inventory. or map.
-    if(candidates[selection].in_inventory){
-        if(candidates[selection].invlet == -1) //weapon
-            g->u.remove_weapon();
-        else //non-weapon inventory
-            g->u.inv.remove_item_by_letter(candidates[selection].invlet);
-    } else { //map.
-        int x = candidates[selection].mapx;
-        int y = candidates[selection].mapy;
-        int i = candidates[selection].index;
-        g->m.i_rem(x,y,i);
-    }
-    return candidates[selection].vpart_item;
-    //item ret = candidates[selection].vpart_item;
-    //return ret;
+	switch(candidates[selection].location) {
+		case candidate_vpart::in_inventory:
+            p->inv.remove_item_by_letter(candidates[selection].invlet);
+			break;
+		case candidate_vpart::in_vehicle:
+			{
+				vehicle *v = candidates[selection].veh;
+				int part_num = candidates[selection].part_num;
+				int i = candidates[selection].vindex;
+				v->remove_item(part_num, i);
+			}
+			break;
+		case candidate_vpart::on_map:
+			{
+				int x = candidates[selection].mapx;
+				int y = candidates[selection].mapy;
+				int i = candidates[selection].mindex;
+				g->m.i_rem(x,y,i);
+			}
+			break;
+		case candidate_vpart::weapon:
+		default:
+			g->u.remove_weapon();
+			break;
+	}
+	return candidates[selection].vpart_item;
 }
 
 void complete_vehicle (game *g)
@@ -975,18 +1014,19 @@ void complete_vehicle (game *g)
     int replaced_wheel;
     std::vector<int> parts;
     int dd = 2;
+	crafting_inventory_t crafting_inv(g, &g->u);
     switch (cmd)
     {
     case 'i':
         partnum = veh->install_part (dx, dy, (vpart_id) part);
         if(partnum < 0)
             debugmsg ("complete_vehicle install part fails dx=%d dy=%d id=%d", dx, dy, part);
-        used_item = consume_vpart_item (g, (vpart_id) part);
+        used_item = crafting_inv.consume_vpart_item(g, vpart_info::getVehiclePartInfo((vpart_id) part).item);
         veh->get_part_properties_from_item(g, partnum, used_item); //transfer damage, etc.
         tools.push_back(component("welder", welder_charges));
         tools.push_back(component("welder_crude", welder_crude_charges));
-        tools.push_back(component("toolset", welder_charges/20));
-        g->consume_tools(&g->u, tools, true);
+        tools.push_back(component("toolset_welder", welder_charges/20));
+        crafting_inv.consume_tools(tools, true);
 
         if ( part == vp_head_light ) {
             // Need map-relative coordinates to compare to output of look_around.
@@ -1023,9 +1063,9 @@ void complete_vehicle (game *g)
     case 'r':
         if (veh->parts[part].hp <= 0)
         {
-            used_item = consume_vpart_item (g, veh->parts[part].id);
+            used_item = crafting_inv.consume_vpart_item(g, vpart_info::getVehiclePartInfo(veh->parts[part].id).item);
             tools.push_back(component("wrench", -1));
-            g->consume_tools(&g->u, tools, true);
+            crafting_inv.consume_tools(tools, true);
             tools.clear();
             dd = 0;
             veh->insides_dirty = true;
@@ -1033,7 +1073,7 @@ void complete_vehicle (game *g)
         tools.push_back(component("welder", welder_charges));
         tools.push_back(component("welder_crude", welder_crude_charges));
         tools.push_back(component("toolset_welder", welder_charges/20));
-        g->consume_tools(&g->u, tools, true);
+        crafting_inv.consume_tools(tools, true);
         veh->parts[part].hp = veh->part_info(part).durability;
         g->add_msg (_("You repair the %s's %s."),
                     veh->name.c_str(), veh->part_info(part).name);
@@ -1091,7 +1131,7 @@ void complete_vehicle (game *g)
             partnum = veh->install_part( dx, dy, (vpart_id) part );
             if( partnum < 0 )
                 debugmsg ("complete_vehicle tire change fails dx=%d dy=%d id=%d", dx, dy, part);
-            used_item = consume_vpart_item( g, (vpart_id) part );
+            used_item = crafting_inv.consume_vpart_item( g, vpart_info::getVehiclePartInfo((vpart_id) part).item);
             veh->get_part_properties_from_item( g, partnum, used_item ); //transfer damage, etc.
             // Place the removed wheel on the map last so consume_vpart_item() doesn't pick it.
             if ( !broken ) {
