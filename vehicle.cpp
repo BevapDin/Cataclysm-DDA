@@ -10,6 +10,9 @@
 
 const ammotype fuel_types[num_fuel_types] = { "gasoline", "battery", "plutonium", "PLAS", "water" };
 
+// Flag for vehicle_part::flags
+#define INACTIVE 8
+
 enum vehicle_controls {
  toggle_cruise_control,
  toggle_lights,
@@ -315,7 +318,7 @@ std::string vehicle::use_controls()
 	for(int i = 0; i < engines.size(); i++) {
 		int p = engines[i];
 		std::ostringstream buffer;
-		buffer << (parts[p].inactive ? "activate" : "deactivate");
+		buffer << (parts[p].active() ? "deactivate" : "activate");
 		buffer << " " << part_info(p).name << " at " << parts[p].mount_dx << "," << parts[p].mount_dy;
 		options_choice.push_back(static_cast<vehicle_controls>(toogle_engine + i));
 		options_message.push_back(uimenu_entry(buffer.str(), i < 10 ? '0' + i : 'A' + i));
@@ -402,14 +405,20 @@ std::string vehicle::use_controls()
   {
 	  int engine = options_choice[select] - toogle_engine;
 	  if(engine >= 0 && engine < engines.size()) {
-		  parts[engines[engine]].inactive = (parts[engines[engine]].inactive + 1) % 2;
+		  const int e = engines[engine];
+		  vehicle_part &part = parts[e];
+		  if(part.active()) {
+			  part.flags |= mfb(INACTIVE);
+		  } else {
+			  part.flags &= ~mfb(INACTIVE);
+		  }
 	  }
   }
  }
  return message;
 }
 
-const vpart_info& vehicle::part_info (int index)
+const vpart_info& vehicle::part_info (int index) const
 {
     vpart_id id = vp_null;
     if (index < 0 || index >= parts.size())
@@ -422,12 +431,12 @@ const vpart_info& vehicle::part_info (int index)
 // engines & solar panels all have power.
 // engines consume, whilst panels provide.
 int vehicle::part_power (int index){
-   if ((!part_flag(index, vpf_engine) || parts[index].inactive) &&
+   if ((!part_flag(index, vpf_engine) || parts[index].inactive()) &&
        !part_flag(index, vpf_solar_panel))
-      return 0; //not an engine. or an engine, but inactice
+      return 0; //not an engine. or an engine, but inactive
    if(parts[index].hp <= 0)
       return 0; //broken.
-   if(parts[index].inactive)
+   if(parts[index].inactive())
       return 0; //not active
    if(part_flag (index, vpf_variable_size)){ // example: 2.42-L V-twin engine
       return parts[index].bigness;
@@ -468,12 +477,6 @@ bool vehicle::can_mount (int dx, int dy, vpart_id id)
         int res = new_part.flags & mfb(vpf_external);
         return res; // can be mounted if first and external
     }
-    // Override for replacing a tire.
-    if( new_part.flags & mfb(vpf_wheel) &&
-		-1 != part_with_feature(parts_here[0], vpf_wheel, false) )
-	{
-		return true;
-	}
 
     // Override for replacing a tire.
     if( new_part.flags & mfb(vpf_wheel) &&
@@ -579,7 +582,6 @@ int vehicle::install_part (int dx, int dy, vpart_id id, int hp, bool force)
     new_part.hp = hp < 0? vpart_info::getVehiclePartInfo(id).durability : hp;
     new_part.amount = 0;
     new_part.blood = 0;
-	new_part.inactive = 0;
     item tmp(g->itypes[vpart_info::getVehiclePartInfo(id).item], 0);
     new_part.bigness = tmp.bigness;
     parts.push_back (new_part);
@@ -680,7 +682,7 @@ int vehicle::part_with_feature (int p, unsigned int f, bool unbroken)
     return -1;
 }
 
-bool vehicle::part_flag (int p, unsigned int f)
+bool vehicle::part_flag (int p, unsigned int f) const
 {
     if (p < 0 || p >= parts.size())
         return false;
@@ -985,7 +987,7 @@ int vehicle::basic_consumption (ammotype ftype)
     for (int p = 0; p < parts.size(); p++)
         if (part_flag(p, vpf_engine) &&
             ftype == part_info(p).fuel_type &&
-            parts[p].hp > 0 && parts[p].inactive == 0)
+            parts[p].hp > 0 && parts[p].active())
         {
             fcon += part_power(p);
             cnt++;
@@ -1000,7 +1002,7 @@ int vehicle::total_power (bool fueled)
     int pwr = 0;
     int cnt = 0;
     for (int p = 0; p < parts.size(); p++)
-        if (part_flag(p, vpf_engine) && parts[p].inactive == 0 &&
+        if (part_flag(p, vpf_engine) && parts[p].active() &&
             (fuel_left (part_info(p).fuel_type, true) || !fueled ||
              part_info(p).fuel_type == "muscle") &&
             parts[p].hp > 0)
@@ -1044,7 +1046,7 @@ int vehicle::safe_velocity (bool fueled)
     int pwrs = 0;
     int cnt = 0;
     for (int p = 0; p < parts.size(); p++)
-        if (part_flag(p, vpf_engine) && parts[p].inactive == 0 &&
+        if (part_flag(p, vpf_engine) && parts[p].active() &&
             (fuel_left (part_info(p).fuel_type, true) || !fueled ||
              part_info(p).fuel_type == "muscle") &&
             parts[p].hp > 0)
@@ -1074,7 +1076,7 @@ int vehicle::noise (bool fueled, bool gas_only)
             muffle = part_info(p).bonus;
 
     for (int p = 0; p < parts.size(); p++)
-        if (part_flag(p, vpf_engine) && parts[p].inactive == 0 &&
+        if (part_flag(p, vpf_engine) && parts[p].active() &&
             (fuel_left (part_info(p).fuel_type, true) || !fueled ||
              part_info(p).fuel_type == "muscle") &&
             parts[p].hp > 0)
@@ -1311,7 +1313,7 @@ void vehicle::thrust (int thd)
         int strn = (int) (strain () * strain() * 100);
 
         for (int p = 0; p < parts.size(); p++)
-            if (part_flag(p, vpf_engine) && parts[p].inactive == 0 &&
+            if (part_flag(p, vpf_engine) && parts[p].active() &&
                 (fuel_left (part_info(p).fuel_type, true)) && parts[p].hp > 0 &&
                 rng (1, 100) < strn)
             {
@@ -1911,7 +1913,7 @@ void vehicle::gain_moves (int mp)
         if (parts[p].blood > 0)
             parts[p].blood--;
         int p_eng = part_with_feature (p, vpf_engine, false);
-        if (p_eng < 0 || parts[p_eng].hp > 0 || parts[p_eng].amount < 1 || parts[p].inactive)
+        if (p_eng < 0 || parts[p_eng].hp > 0 || parts[p_eng].amount < 1 || parts[p].inactive())
             continue;
         parts[p_eng].amount--;
         int x = global_x() + parts[p_eng].precalc_dx[0];
@@ -1949,7 +1951,7 @@ void vehicle::find_exhaust ()
 {
     int en = -1;
     for (int p = 0; p < parts.size(); p++)
-        if (part_flag(p, vpf_engine) && part_info(p).fuel_type == "gasoline" && parts[p].inactive == 0)
+        if (part_flag(p, vpf_engine) && part_info(p).fuel_type == "gasoline" && parts[p].active())
         {
             en = p;
             break;
@@ -2341,3 +2343,29 @@ rl_vec2d vehicle::face_vec(){
     return ret;
 }
 
+bool vehicle_part::inactive() const {
+	return flags & mfb(INACTIVE);
+}
+
+bool vehicle_part::active() const {
+	return !inactive();
+}
+
+bool vehicle::isWheelbarrow() const {
+	bool has_wheel = false;
+	bool has_box = false;
+	for(size_t p = 0; p < parts.size(); p++) {
+		const vehicle_part &part = parts[p];
+		if(part.mount_dx != 0 || part.mount_dy != 0) {
+			return false;
+		}
+		if(part_flag(p, vpf_wheel)) {
+			has_wheel = true;
+		} else if(part_flag(p, vpf_cargo)) {
+			has_box = true;
+		} else {
+			return false;
+		}
+	}
+	return has_wheel && has_box;
+}

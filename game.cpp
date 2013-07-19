@@ -10622,6 +10622,28 @@ void game::plmove(int x, int y)
              return;
       }
 
+	if(veh0 != veh1 && veh1 != 0 && veh1->isWheelbarrow()) {
+		int vpart2 = -1;
+		int dx = x - u.posx;
+		int dy = y - u.posy;
+		int wx = x + dx;
+		int wy = y + dy;
+		vehicle *veh2 = m.veh_at(wx, wy, vpart2);
+		if(veh2 == 0 && mon_at(wx, wy) < 0 && npc_at(wx, wy) < 0 && m.move_cost(wx, wy) > 0) {
+			VehicleList vehs = m.get_vehicles();
+			for(int v = 0; v < vehs.size(); ++v) {
+				if(vehs[v].v == veh1) {
+					int x = vehs[v].x;
+					int y = vehs[v].y;
+					m.displace_vehicle(this, x, y, dx, dy, false);
+					veh1 = 0; // No vehicle in the way anomore
+					u.moves -= 50; // more moves for pushing the wheelbarrow
+					break;
+				}
+			}
+		}
+	 }
+      
 // Calculate cost of moving
   bool diag = trigdist && u.posx != x && u.posy != y;
   u.moves -= u.run_cost(m.combined_movecost(u.posx, u.posy, x, y), diag);

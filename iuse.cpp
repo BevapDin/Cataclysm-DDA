@@ -4759,3 +4759,61 @@ void iuse::unfold_bicycle(game *g, player *p, item *it, bool t)
         g->add_msg_if_player(p, _("There's no room to unfold the bicycle."));
     }
 }
+
+void iuse::wood_gas(game *g, player *p, item *, bool t)
+{
+    char ch = g->inv("Burn what?");
+	if(!p->has_item(ch)) {
+		return;
+	}
+	item &it = p->i_at(ch);
+	if(it.is_null()) {
+		return;
+	}
+	std::list<item> *stack = &(p->inv.stack_by_letter(ch));
+	std::list<item> tmpStack;
+	if(stack->size() > 1) {
+		if(!query_yn("Use whole stack?")) {
+			tmpStack.push_back(it);
+			stack = &tmpStack;
+		}
+	}
+	int vol_fac = 0;
+	for(std::list<item>::const_iterator a = stack->begin(); a != stack->end(); a++) {
+		const item &it = *a;
+		if(it.made_of("cotton") || it.made_of("wool")) {
+			vol_fac += it.volume() * 1;
+		}
+		else if(it.made_of("leather") || it.made_of("fur")) {
+			vol_fac += it.volume() * 1;
+		}
+		else if(it.made_of("wood")) {
+			vol_fac += it.volume() * 6;
+		}
+		else if(it.made_of("veggy")) {
+			vol_fac += it.volume() * 1;
+		}
+		else if(it.made_of("bone")) {
+			vol_fac += it.volume() * 2;
+		}
+		else if(it.made_of("paper")) {
+			vol_fac += it.volume() * 2;
+		}
+		else if(it.made_of("flesh") || it.made_of("hflesh")) {
+			vol_fac += it.volume() * 1;
+		}
+	}
+	if(vol_fac == 0) {
+		g->add_msg_if_player(p, "Your %s is is too small or not organic at all.", it.tname(g).c_str());
+		return;
+	}
+	if(stack->size() > 1) {
+		p->inv.remove_stack_by_letter(ch);
+	} else {
+		p->i_rem(ch);
+	}
+	p->moves -= 10 * vol_fac;
+	item gasoline(g->itypes["gasoline"], g->turn);
+	gasoline.charges = vol_fac * 10;
+	while(!g->handle_liquid(gasoline, false, false)) { }
+}

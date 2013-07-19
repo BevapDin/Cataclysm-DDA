@@ -78,10 +78,11 @@ struct vehicle_part
         int amount;         // amount of fuel for tank
         int open;           // door is open
         int direction;      // direction the part is facing
-        int inactive;       // inactive engine (counts as non-existing)
     };
     std::vector<item> items;// inventory
 
+    bool inactive() const;       // inactive engine (counts as non-existing)
+    bool active() const;
 };
 
 /**
@@ -183,7 +184,7 @@ public:
     std::string use_controls();
 
 // get vpart type info for part number (part at given vector index)
-    const vpart_info& part_info (int index);
+    const vpart_info& part_info (int index) const;
 
 // get vpart powerinfo for part number, accounting for variable-sized parts.
     int part_power (int index);
@@ -218,7 +219,7 @@ public:
     int part_with_feature (int p, unsigned int f, bool unbroken = true);
 
 // returns true if given flag is present for given part index (WARNING: without mfb!)
-    bool part_flag (int p, unsigned int f);
+    bool part_flag (int p, unsigned int f) const;
 
 // Translate seat-relative mount coords into tile coords
     void coord_translate (int reldx, int reldy, int &dx, int &dy);
@@ -330,6 +331,8 @@ public:
 
 // turn vehicle left (negative) or right (positive), degrees
     void turn (int deg);
+	
+	bool isWheelbarrow() const;
 
 // handle given part collision with vehicle, monster/NPC/player or terrain obstacle
 // return collision, which has type, impulse, part, & target.

@@ -2122,7 +2122,8 @@ bool item::reload(player &u, char ammo_invlet)
  bool single_load = false;
  int max_load = 1;
  item *reload_target = NULL;
- item *ammo_to_use = (ammo_invlet != 0 ? &u.inv.item_by_letter(ammo_invlet) : NULL);
+ item *ammo_container = (ammo_invlet != 0 ? &u.inv.item_by_letter(ammo_invlet) : NULL);
+ item *ammo_to_use = ammo_container;
 
  // Handle ammo in containers, currently only gasoline
  if(ammo_to_use && ammo_to_use->is_container())
@@ -2230,9 +2231,9 @@ bool item::reload(player &u, char ammo_invlet)
   }
   if (ammo_to_use->charges == 0)
   {
-      if (ammo_to_use->is_container())
+      if (ammo_to_use != ammo_container)
       {
-          ammo_to_use->contents.erase(ammo_to_use->contents.begin());
+          ammo_container->contents.erase(ammo_container->contents.begin());
       }
       else
       {

@@ -192,6 +192,8 @@ enum vhtype_id
     veh_armytruck,  //Army M35A2 6L gas and/or hydrogen engine if commented parts uncommented.
     veh_schoolbus,  //Standard schoolbus
     veh_car_electric, // electric version of standard car.
+	
+	veh_wheelbarrow,
 
     num_vehicles
 };

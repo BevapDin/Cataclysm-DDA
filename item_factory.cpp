@@ -177,6 +177,7 @@ void Item_factory::init(){
     iuse_function_list["DECREASE_SCENT"] = &iuse::decrease_scent;
     iuse_function_list["SIMPLE_ON"] = &iuse::simple_on;
     iuse_function_list["SIMPLE_OFF"] = &iuse::simple_off;
+    iuse_function_list["WOOD_GAS"] = &iuse::wood_gas;
     // MACGUFFINS
     iuse_function_list["MCG_NOTE"] = &iuse::mcg_note;
     // ARTIFACTS
@@ -246,7 +247,11 @@ itype* Item_factory::find_template(const Item_tag id){
         return found->second;
     }
     else{
-        return m_missing_item;
+		itype *&x = m_templates[id];
+		x = new itype();
+		x->name = std::string("Error: Item Missing: ") + id;
+		x->description = _("There is only the space where an object should be, but isn't. No item template of this type exists.");
+        return x;
     }
 }
 
@@ -272,6 +277,7 @@ const Item_tag Item_factory::id_from(const Item_tag group_tag){
     if(group_iter != m_template_groups.end()){
         return group_iter->second->get_id();
     } else {
+		debugmsg("Tag no found: %s", group_tag.c_str());
         return "MISSING_ITEM";
     }
 }

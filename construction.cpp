@@ -517,6 +517,20 @@ void game::init_construction()
    COMP("frame", 8);
    COMP("battery", 200); // for welder
    COMP("2x4", 8);
+
+ CONSTRUCT("Place wheelbarrow", 0, &construct::able_empty, &construct::done_wheelbarrow);
+  STAGE(30);
+   TOOL("screwdriver");
+   TOOLCONT("toolset_screwdriver");
+   TOOL("hammer");
+   TOOLCONT("primitive_hammer");
+   TOOLCONT("hatchet");
+   TOOLCONT("nailgun");
+   TOOLCONT("toolset_hammer");
+   COMP("nail", 4);
+   COMP("wheel", 1);
+   COMP("frame", 1);
+
 }
 
 void game::construction_menu()
@@ -1274,6 +1288,16 @@ void construct::done_vehicle(game *g, point p)
     //Update the vehicle cache immediately, or the vehicle will be invisible for the first couple of turns.
     g->m.update_vehicle_cache(veh, true);
 
+}
+
+void construct::done_wheelbarrow(game *g, point p)
+{
+    vehicle *wheelbarrow = g->m.add_vehicle( g, veh_wheelbarrow, p.x, p.y, 0, 0, 0);
+    if( wheelbarrow ) {
+        g->add_msg("You place your wheelbarrow.");
+    } else {
+        g->add_msg("There's no room to place the wheelbarrow.");
+    }
 }
 
 void construct::done_tape(game *g, point p)

@@ -1027,38 +1027,14 @@ void complete_vehicle (game *g)
         tools.push_back(component("welder_crude", welder_crude_charges));
         tools.push_back(component("toolset_welder", welder_charges/20));
         crafting_inv.consume_tools(tools, true);
-
-        if ( part == vp_head_light ) {
-            // Need map-relative coordinates to compare to output of look_around.
-            int gx, gy;
-            // Need to call coord_translate() directly since it's a new part.
-            veh->coord_translate(dx, dy, gx, gy);
-            // Stash offset and set it to the location of the part so look_around will start there.
-            int px = g->u.view_offset_x;
-            int py = g->u.view_offset_y;
-            g->u.view_offset_x = veh->global_x() + gx - g->u.posx;
-            g->u.view_offset_y = veh->global_y() + gy - g->u.posy;
-            popup("Choose a facing direction for the new headlight.");
-            point headlight_target = g->look_around();
-            // Restore previous view offsets.
-            g->u.view_offset_x = px;
-            g->u.view_offset_y = py;
-
-            int delta_x = headlight_target.x - (veh->global_x() + gx);
-            int delta_y = headlight_target.y - (veh->global_y() + gy);
-
-            const double PI = 3.14159265358979f;
-            int dir = (atan2(delta_y, delta_x) * 180.0 / PI);
-            dir -= veh->face.dir();
-            while(dir < 0) dir += 360;
-            while(dir > 360) dir -= 360;
-
-            veh->parts[partnum].direction = dir;
+        if (vpart_info::getVehiclePartInfo(part).flags & mfb(vpf_light)) { 
+           int choice = menu(true, "Choose facing direction:", "N", "NW", "W", "SW", "S", "SE", "E", "NE", NULL); 
+           int dir = (choice - 1) * 45;
+           veh->parts[partnum].direction = dir; 
         }
-
-        g->add_msg (_("You install a %s into the %s."),
-                    vpart_list[part].name, veh->name.c_str());
-        g->u.practice (g->turn, "mechanics", vpart_list[part].difficulty * 5 + 20);
+        g->add_msg ("You install a %s into the %s.",
+                    vpart_info::getVehiclePartInfo(part).name, veh->name.c_str());
+        g->u.practice (g->turn, "mechanics", vpart_info::getVehiclePartInfo(part).difficulty * 5 + 20);
         break;
     case 'r':
         if (veh->parts[part].hp <= 0)

@@ -1074,6 +1074,15 @@ void game::init_vehicles()
     PART (-3, 1,     vp_door);
     PART (-3, 2,     vp_wheel);
 
+    //        name
+    VEHICLE ("Wheelbarrow");
+    //   #
+
+    //   dx, dy,    part_id
+    PART (0, 0,     vp_wheel);
+//    PART (0, 0,     vp_frame_cover);
+    PART (0, 0,     vp_floor_trunk);
+
     if (vtypes.size() != num_vehicles)
         debugmsg("%d vehicles, %d types", vtypes.size(), num_vehicles);
 }
