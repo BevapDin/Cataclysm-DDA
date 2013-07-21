@@ -571,10 +571,10 @@ void inventory::form_from_map(game *g, point origin, int range)
        add_item(pan);
 */
      }
-     
+
      const int cpart = veh->part_with_feature(vpart, vpf_cargo);
      if (cpart >= 0) {
-		 
+
       for (int i = 0; i < veh->parts[cpart].items.size(); i++)
        if (!veh->parts[cpart].items[i].made_of(LIQUID))
         add_item(veh->parts[cpart].items[i]);
@@ -814,7 +814,7 @@ std::vector<item*> inventory::all_items_by_type(const itype_id &type)
              stack_iter != iter->end();
              ++stack_iter)
         {
-            if (stack_iter->type->id == type)
+            if (stack_iter->matches_type(type))
             {
                 ret.push_back(&*stack_iter);
             }
@@ -859,7 +859,7 @@ int inventory::amount_of(const itype_id &it) const
              stack_iter != iter->end();
              ++stack_iter)
         {
-            if (stack_iter->type->id == it)
+            if (stack_iter->matches_type(it))
             {
                 // check if it's a container, if so, it should be empty
                 if (stack_iter->type->is_container())
@@ -876,7 +876,7 @@ int inventory::amount_of(const itype_id &it) const
             }
             for (int k = 0; k < stack_iter->contents.size(); k++)
             {
-                if (stack_iter->contents[k].type->id == it)
+                if (stack_iter->contents[k].matches_type(it))
                 {
                     count++;
                 }
@@ -895,7 +895,7 @@ int inventory::charges_of(const itype_id &it) const
              stack_iter != iter->end();
              ++stack_iter)
         {
-            if (stack_iter->type->id == it)
+            if (stack_iter->matches_type(it))
             {
                 if (stack_iter->charges < 0)
                 {
@@ -908,7 +908,7 @@ int inventory::charges_of(const itype_id &it) const
             }
             for (int k = 0; k < stack_iter->contents.size(); k++)
             {
-                if (stack_iter->contents[k].type->id == it)
+                if (stack_iter->contents[k].matches_type(it))
                 {
                     if (stack_iter->contents[k].charges < 0)
                     {
@@ -939,7 +939,7 @@ std::list<item> inventory::use_amount(const itype_id &it, int quantity, bool use
             bool used_item_contents = false;
             for (int k = 0; k < stack_iter->contents.size() && quantity > 0; k++)
             {
-                if (stack_iter->contents[k].type->id == it)
+                if (stack_iter->contents[k].matches_type(it))
                 {
                     ret.push_back(stack_iter->contents[k]);
                     quantity--;
@@ -963,7 +963,7 @@ std::list<item> inventory::use_amount(const itype_id &it, int quantity, bool use
                     --stack_iter;
                 }
             }
-            else if (stack_iter->type->id == it && quantity > 0)
+            else if (stack_iter->matches_type(it) && quantity > 0)
             {
                 ret.push_back(*stack_iter);
                 quantity--;
@@ -997,7 +997,7 @@ std::list<item> inventory::use_charges(const itype_id &it, int quantity)
             // First, check contents
             for (int k = 0; k < stack_iter->contents.size() && quantity > 0; k++)
             {
-                if (stack_iter->contents[k].type->id == it)
+                if (stack_iter->contents[k].matches_type(it))
                 {
                     if (stack_iter->contents[k].charges <= quantity)
                     {
@@ -1025,7 +1025,7 @@ std::list<item> inventory::use_charges(const itype_id &it, int quantity)
             }
 
             // Now check the item itself
-            if (stack_iter->type->id == it)
+            if (stack_iter->matches_type(it))
             {
                 if (stack_iter->charges <= quantity)
                 {
@@ -1132,7 +1132,7 @@ bool inventory::has_active_item(const itype_id &type) const
     {
         for (std::list<item>::const_iterator stack_iter = iter->begin(); stack_iter != iter->end(); ++stack_iter)
         {
-            if (stack_iter->type->id == type && stack_iter->active)
+            if (stack_iter->matches_type(type) && stack_iter->active)
             {
                 return true;
             }

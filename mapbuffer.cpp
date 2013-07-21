@@ -127,11 +127,12 @@ void mapbuffer::save()
  // Designate it with a C if it's contained in the prior item.
  // Also, this wastes space since we print the coords for each item, when we
  //   could be printing a list of items for each coord (except the empty ones)
-  item tmp;
   for (int j = 0; j < SEEY; j++) {
    for (int i = 0; i < SEEX; i++) {
-    for (int k = 0; k < sm->itm[i][j].size(); k++) {
-     tmp = sm->itm[i][j][k];
+    std::vector<item> &items = sm->itm[i][j];
+    for (int k = 0; k < items.size(); k++) {
+     item &tmp = items[k];
+     if(tmp.is_null()) { continue; }
      fout << "I " << i << " " << j << std::endl;
      fout << tmp.save_info() << std::endl;
      for (int l = 0; l < tmp.contents.size(); l++)
@@ -163,9 +164,8 @@ void mapbuffer::save()
    }
   }
  // Output the spawn points
-  spawn_point tmpsp;
   for (int i = 0; i < sm->spawns.size(); i++) {
-   tmpsp = sm->spawns[i];
+   spawn_point &tmpsp = sm->spawns[i];
    fout << "S " << int(tmpsp.type) << " " << tmpsp.count << " " << tmpsp.posx <<
            " " << tmpsp.posy << " " << tmpsp.faction_id << " " <<
            tmpsp.mission_id << (tmpsp.friendly ? " 1 " : " 0 ") <<

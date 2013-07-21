@@ -259,19 +259,19 @@ public:
 
 // Checks how much certain fuel left in tanks. If for_engine == true that means
 // ftype == "battery" is also takes in account "plutonium" fuel (electric motors can use both)
-    int fuel_left (ammotype ftype, bool for_engine = false);
-    int fuel_capacity (ammotype ftype);
+    int fuel_left (const ammotype &ftype, bool for_engine = false);
+    int fuel_capacity (const ammotype &ftype);
 
     // refill fuel tank(s) with given type of fuel
     // returns amount of leftover fuel
-    int refill (ammotype ftype, int amount);
+    int refill (const ammotype &ftype, int amount);
 
     // drains a fuel type (e.g. for the kitchen unit)
     // returns amount actually drained, does not engage reactor
-    int drain (ammotype ftype, int amount);
+    int drain (const ammotype &ftype, int amount);
 
 // fuel consumption of vehicle engines of given type, in one-hundreth of fuel
-    int basic_consumption (ammotype ftype);
+    int basic_consumption (const ammotype &ftype);
 
     void consume_fuel ();
 
@@ -331,7 +331,7 @@ public:
 
 // turn vehicle left (negative) or right (positive), degrees
     void turn (int deg);
-	
+
 	bool isWheelbarrow() const;
 
 // handle given part collision with vehicle, monster/NPC/player or terrain obstacle

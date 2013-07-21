@@ -685,7 +685,7 @@ recipe* game::select_crafting_recipe()
                     mvwputch(w_data, ypos, 30, col, '>');
                     for (int j = 0; j < current[line]->tools[i].size(); j++)
                     {
-                        itype_id type = current[line]->tools[i][j].type;
+                        const itype_id &type = current[line]->tools[i][j].type;
                         int charges = current[line]->tools[i][j].count;
                         nc_color toolcol = c_red;
 
@@ -965,35 +965,33 @@ int crafting_inventory_t::map_charges_of(const itype_id &it) const
 
 int crafting_inventory_t::amount_of(const itype_id &type, const item &it)
 {
-	if (it.type->id == type)
+	int count = 0;
+	if(it.matches_type(type))
 	{
 		// check if it's a container, if so, it should be empty
 		if (it.type->is_container())
 		{
 			if (it.contents.empty())
 			{
-				return 1;
+				count++;
 			}
 		}
 		else
 		{
-			return 1;
+			count++;
 		}
 	}
 	for (int k = 0; k < it.contents.size(); k++)
 	{
-		if (it.contents[k].type->id == type)
-		{
-			return 1;
-		}
+		count += amount_of(type, it.contents[k]);
 	}
-	return 0;
+	return count;
 }
 
 int crafting_inventory_t::charges_of(const itype_id &type, const item &it)
 {
     int count = 0;
-	if (it.type->id == type)
+	if(it.matches_type(type))
 	{
 		if (it.charges < 0)
 		{
@@ -1006,17 +1004,7 @@ int crafting_inventory_t::charges_of(const itype_id &type, const item &it)
 	}
 	for (int k = 0; k < it.contents.size(); k++)
 	{
-		if (it.contents[k].type->id == type)
-		{
-			if (it.contents[k].charges < 0)
-			{
-				count++;
-			}
-			else
-			{
-				count += it.contents[k].charges;
-			}
-		}
+		count += charges_of(type, it.contents[k]);
 	}
     return count;
 }
@@ -1136,7 +1124,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range) {
 			point p(x, y);
 			item_on_map items(p, &(g->m.i_at(x, y)));
 			on_map.push_back(items);
-   
+
 			ter_id terrain_id = g->m.ter(x, y);
 			furn_id furniture_id = g->m.furn(x, y);
 			if ((g->m.field_at(x, y).findField(fd_fire)) || (terrain_id == t_lava)) {
@@ -1166,7 +1154,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range) {
 					water.charges = veh->fuel_left("water");
 					souround.push_back(item_from_souround(p, water));
 				}
-		
+
 				const int cpart = veh->part_with_feature(vpart, vpf_cargo);
 				if (cpart >= 0) {
 					item_in_vehicle inveh(veh, cpart, &(veh->parts[cpart].items));
@@ -1179,7 +1167,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range) {
 
 crafting_inventory_t::crafting_inventory_t(game *g, player *p) : p(p) {
 	form_from_map(g, point(p->posx, p->posy), PICKUP_RANGE);
-	
+
 	add_bio_toolset("knife", g->turn);
 	add_bio_toolset("screwdriver", g->turn);
 	add_bio_toolset("wrench", g->turn);
@@ -1207,7 +1195,7 @@ void game::pick_recipes(std::vector<recipe*> &current,
             add_known_recipes(current, iter->second, filter);
         }
     }
-	
+
 	crafting_inventory_t crafting_inv(this, &u);
 
     for (int i = 0; i < current.size(); i++)
@@ -1307,7 +1295,7 @@ void game::complete_craft()
   u.practice(turn, making->sk_primary, making->difficulty * 5 + 20);
  if (making->sk_secondary)
   u.practice(turn, making->sk_secondary, 5);
- 
+
  crafting_inventory_t crafting_inv(this, &u);
 
 // Messed up badly; waste some components.
@@ -1873,15 +1861,18 @@ void game::complete_disassemble()
       do
       {
         item newit(item_controller->find_template(dis->components[j][0].type), turn);
+		if(newit.type->id.compare(0, 5, "func:") == 0) {
+          newit.make(item_controller->find_template(newit.type->id.substr(5)));
+		}
         // skip item addition if component is a consumable like superglue
-        if (dis->components[j][0].type == "superglue" || dis->components[j][0].type == "duct_tape")
+        if (newit.type->id == "superglue" || newit.type->id == "duct_tape")
           compcount--;
         else
         {
           if (newit.count_by_charges())
           {
             if (dis->difficulty == 0 || comp_success)
-              m.spawn_item(u.posx, u.posy, dis->components[j][0].type, 0, 0, compcount);
+              m.spawn_item(u.posx, u.posy, newit.type->id, 0, 0, compcount);
             else
               add_msg(_("You fail to recover a component."));
             compcount = 0;

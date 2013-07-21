@@ -1234,7 +1234,7 @@ switch (furn(x, y)) {
    return true;
   }
   break;
-  
+
  case f_skin_wall:
  case f_skin_door:
  case f_skin_door_o:
@@ -2108,7 +2108,7 @@ void map::shoot(game *g, const int x, const int y, int &dam,
     {
         bool destroyed = false;
         int chance = (i_at(x, y)[i].volume() > 0 ? i_at(x, y)[i].volume() : 1);   // volume dependent chance
-  
+
         if (dam > i_at(x, y)[i].bash_resist() && one_in(chance))
         {
             i_at(x, y)[i].damage++;
@@ -2117,7 +2117,7 @@ void map::shoot(game *g, const int x, const int y, int &dam,
         {
             destroyed = true;
         }
-  
+
         if (destroyed)
         {
             for (int j = 0; j < i_at(x, y)[i].contents.size(); j++)
@@ -2675,7 +2675,7 @@ std::list<item> map::use_amount(const point origin, const int range, const itype
       item* curit = &(i_at(x, y)[n]);
       bool used_contents = false;
       for (int m = 0; m < curit->contents.size() && quantity > 0; m++) {
-       if (curit->contents[m].type->id == type) {
+       if (curit->contents[m].matches_type(type)) {
         ret.push_back(curit->contents[m]);
         quantity--;
         curit->contents.erase(curit->contents.begin() + m);
@@ -2686,7 +2686,7 @@ std::list<item> map::use_amount(const point origin, const int range, const itype
       if (use_container && used_contents) {
        i_rem(x, y, n);
        n--;
-      } else if (curit->type->id == type && quantity > 0) {
+      } else if (curit->matches_type(type) && quantity > 0) {
        ret.push_back(*curit);
        quantity--;
        i_rem(x, y, n);
@@ -2704,7 +2704,7 @@ std::list<item> map::use_amount(const point origin, const int range, const itype
         item* curit = &(items[i]);
         bool used_contents = false;
         for (int m = 0; m < curit->contents.size() && quantity > 0; m++) {
-         if (curit->contents[m].type->id == type) {
+         if (curit->contents[m].matches_type(type)) {
           ret.push_back(curit->contents[m]);
           quantity--;
           curit->contents.erase(curit->contents.begin() + m);
@@ -2715,7 +2715,7 @@ std::list<item> map::use_amount(const point origin, const int range, const itype
         if (use_container && used_contents) {
          items.erase(items.begin() + i);
          i--;
-        } else if (curit->type->id == type && quantity > 0) {
+        } else if (curit->matches_type(type) && quantity > 0) {
          ret.push_back(*curit);
          quantity--;
          items.erase(items.begin() + i);
@@ -2750,7 +2750,7 @@ std::list<item> map::use_charges(const point origin, const int range, const ityp
 
           if (type == "water_clean")
             ftype = "water";
-          else if (type == "installed_kitchen_unit")
+          else if (type == "func:hotplate" || type == "hotplate")
             ftype = "battery";
 
           item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg

@@ -46,8 +46,6 @@
 #include <tchar.h>
 #endif
 
-#define MON_POP_CHANGE 1
-
 #ifdef _MSC_VER
 // MSVC doesn't have c99-compatible "snprintf", so do what picojson does and use _snprintf_s instead
 #define snprintf _snprintf_s
@@ -673,6 +671,33 @@ bool game::do_turn()
   nextspawn = turn;
  }
 
+ if(u.in_vehicle) {
+	vehicle *veh = m.veh_at(u.posx, u.posy);
+	if(veh != 0) {
+		if(veh->velocity < 0.0161f * 10) {
+			u.view_offset_x = 0;
+			u.view_offset_y = 0;
+		} else {
+			rl_vec2d offset;
+			if(veh->skidding)
+				offset = veh->move_vec();
+			else
+				offset = veh->face_vec();
+			offset = offset.normalized();
+			// Have a offset of 0 at velocity = 10km/h,
+			// have a offset of 1 at velocity = 100km/h
+			// 0.0161 = factor for calculation of speed in km/h
+			offset = offset * (((veh->velocity * 0.0161f) - 10.0f) / 90.0f);
+			offset.x = std::min(std::max(offset.x, -1.0f), 1.0f);
+			offset.y = std::min(std::max(offset.y, -1.0f), 1.0f);
+			int offx = getmaxx(w_terrain) / 2 - 5;
+			int offy = getmaxy(w_terrain) / 2 - 5;
+			u.view_offset_x = (offx * offset.x);
+			u.view_offset_y = (offy * offset.y);
+		}
+	}
+ }
+
  process_activity();
  if(u.moves > 0) {
      while (u.moves > 0) {
@@ -698,8 +723,16 @@ bool game::do_turn()
  m.process_fields(this);
  m.process_active_items(this);
  m.step_in_field(u.posx, u.posy, this);
- 
+
  if(turn % HOURS(1) == 0 && !u.worn.empty() && one_in(10)) {
+	std::vector<item*> items[6];
+	for(std::vector<item>::iterator a = u.worn.begin(); a != u.worn.end(); ++a) {
+		item &it = *a;
+		if(it.damage >= -1 && it.damage < 5) {
+			items[it.damage + 1].push_back(&*a);
+		}
+	}
+
 	int i = rng(0, u.worn.size() - 1);
 	item &it = u.worn[i];
 	it.damage++;
@@ -2189,7 +2222,7 @@ void game::update_scent()
  const int y0 = u.posy - SCENT_RADIUS;
  const int x1 = u.posx + SCENT_RADIUS;
  const int y1 = u.posy + SCENT_RADIUS;
- 
+
 #pragma omp parallel for
  for (int x = x0; x <= x1; x++) {
   for (int y = y0; y <= y1; y++) {
@@ -2203,7 +2236,7 @@ void game::update_scent()
    if (move_cost != 0 || is_bashable) {
     int squares_used = 0;
     const int this_field = grscent[x][y];
-    
+
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
            const int scent = grscent[x + i][y + j];
@@ -2213,7 +2246,7 @@ void game::update_scent()
 		   }
         }
     }
-    
+
     // Unrolled for performance.  The above block is the rolled up equivalent.
     /*
     nscen += grscent[x - 1] [y - 1] * (grscent  [x - 1] [y - 1] >= this_field);
@@ -2238,7 +2271,7 @@ void game::update_scent()
 
     sc += squares_used;
     field_entry* f_slim = field_at.findField(fd_slime);
-	
+
     if (f_slim && nscen < 10 * f_slim->getFieldDensity())
     {
         nscen = 10 * f_slim->getFieldDensity();
@@ -2263,7 +2296,7 @@ void game::update_scent()
    }
   }
  }
- 
+
  // Simultaneously copy the scent values back and scale them down based on factors determined in
  // the first loop.
 #pragma omp parallel for
@@ -6123,14 +6156,14 @@ void game::exam_vehicle(vehicle &veh, int examx, int examy, int cx, int cy)
 				move_points /= 2;
 				// Ex: skill level = 14 -> skill == 10
 				// -> move_points = 20000 / 2 + (20000 / 2) / (10 * 10)
-				// = 10000 + 100 = 10100 
+				// = 10000 + 100 = 10100
 				// Ex: skill level = 6 -> skill == 2
 				// -> move_points = 20000 / 2 + (20000 / 2) / (2 * 2)
 				// = 10000 + 10000 / 4 = 12500
 				move_points += static_cast<double>(move_points) / (skill * skill);
 			}
 		}
-    
+
         u.activity = player_activity(ACT_VEHICLE,
                                      move_points,
                                      (int) vehint.sel_cmd, 0, "");
@@ -6337,9 +6370,7 @@ void game::examine()
   int vpcargo = veh->part_with_feature(veh_part, vpf_cargo, false);
   int vpkitchen = veh->part_with_feature(veh_part, vpf_kitchen, true);
   if ((vpcargo >= 0 && veh->parts[vpcargo].items.size() > 0) || vpkitchen >= 0)
-  {
    pickup(examx, examy, 0);
-  }
   else if (u.in_vehicle)
    add_msg (_("You can't do that while onboard."));
   else if (abs(veh->velocity) > 0)
@@ -7653,7 +7684,7 @@ point game::look_debug(point coords) {
     mvwprintw(w_look, off, 1, "%s %s", m.features(lx, ly).c_str(),extras.c_str());
     off++;
 
-    field &curfield = m.field_at(lx, ly);
+    field curfield = m.field_at(lx, ly);
     if (curfield.fieldCount() > 0) {
 		field_entry *cur = NULL;
 		for(std::map<field_id, field_entry*>::iterator field_list_it = curfield.getFieldStart(); field_list_it != curfield.getFieldEnd(); ++field_list_it){
@@ -7998,7 +8029,7 @@ point game::look_around()
                                                     m.move_cost(lx, ly) * 50);
    mvwprintw(w_look, 2, 1, "%s", m.features(lx, ly).c_str());
 
-   field &tmpfield = m.field_at(lx, ly);
+   field tmpfield = m.field_at(lx, ly);
 
    if (tmpfield.fieldCount() > 0) {
 		field_entry *cur = NULL;
@@ -9407,8 +9438,6 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite)
           liquid.charges = container->contains * default_charges;
           cont->put_in(liquid);
           liquid.charges = oldcharges;
-		  u.inv.sort();
-		  u.inv.restack(&u);
           return false;
         }
         cont->put_in(liquid);
@@ -10643,7 +10672,7 @@ void game::plmove(int x, int y)
 			}
 		}
 	 }
-      
+
 // Calculate cost of moving
   bool diag = trigdist && u.posx != x && u.posy != y;
   u.moves -= u.run_cost(m.combined_movecost(u.posx, u.posy, x, y), diag);
@@ -11479,14 +11508,12 @@ void game::despawn_monsters(const bool stairs, const int shiftx, const int shift
   } else {
    	// No spawn site, so absorb them back into a group.
    int group = valid_group((mon_id)(z[i].type->id), levx + shiftx, levy + shifty, levz);
-#if MON_POP_CHANGE
    if (group != -1) {
     cur_om->zg[group].population++;
     if (cur_om->zg[group].population / (cur_om->zg[group].radius * cur_om->zg[group].radius) > 5 &&
         !cur_om->zg[group].diffuse)
      cur_om->zg[group].radius++;
    }
-#endif
   }
   // Shifting needs some cleanup for despawned monsters since they won't be cleared afterwards.
   if(shiftx != 0 || shifty != 0) {
@@ -11545,14 +11572,12 @@ void game::spawn_mon(int shiftx, int shifty)
           rng(0, MAPSIZE * 4) > group && group < pop && group < MAPSIZE * 3)
     group++;
 
-#if MON_POP_CHANGE
    cur_om->zg[i].population -= group;
    // Reduce group radius proportionally to remaining
    // population to maintain a minimal population density.
    if (cur_om->zg[i].population / (cur_om->zg[i].radius * cur_om->zg[i].radius) < 1.0 &&
        !cur_om->zg[i].diffuse)
      cur_om->zg[i].radius--;
-#endif
 
    if (group > 0) // If we spawned some zombies, advance the timer
     nextspawn += rng(group * 4 + z.size() * 4, group * 10 + z.size() * 10);

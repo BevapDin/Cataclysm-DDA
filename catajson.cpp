@@ -288,7 +288,7 @@ bool catajson::has_curr() const
     }
     else if (val.is<picojson::object>())
     {
-        return has(obj_iter->first);
+        return obj_iter != val.get<picojson::object>().end();
     }
     else
     {
@@ -319,4 +319,17 @@ catajson catajson::curr() const
         debugmsg("JSON error at %s: not an array or object", path_msg.c_str());
     }
     return catajson();
+}
+
+std::string catajson::curr_key() const
+{
+    if (val.is<picojson::object>())
+    {
+        return obj_iter->first;
+    }
+    else
+    {
+        debugmsg("JSON error at %s: not an object", path_msg.c_str());
+    }
+    return std::string();
 }

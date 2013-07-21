@@ -4,6 +4,7 @@
 #include <vector>
 #include "output.h"
 #include "inventory.h"
+#include "crafting.h"
 
 enum sel_types {
   SEL_NULL, SEL_JACK
@@ -19,7 +20,6 @@ public:
     int cy;
     int ddx;
     int ddy;
-//    vpart_id sel_part;
     int sel_part;
     char sel_cmd;
     int sel_type;
@@ -56,7 +56,7 @@ private:
     bool has_jack;
     bool has_siphon;
     bool has_wheel;
-    inventory crafting_inv;
+    crafting_inventory_t *crafting_inv;
 
     int part_at (int dx, int dy);
     void move_cursor (int dx, int dy);
@@ -76,17 +76,16 @@ private:
     void display_mode (char mode);
     void display_list (int pos);
 
-//    std::vector<vpart_id> can_mount;
     std::vector<int> can_mount;
     std::vector<bool> has_mats;
     std::vector<int> need_repair;
-//    std::vector<vpart_id> parts_here;
     std::vector<int> parts_here;
     int ptank;
     int wheel;
     bool has_fuel;
 public:
     veh_interact ();
+	~veh_interact ();
     void exec (game *gm, vehicle *v, int x, int y);
 };
 

@@ -559,10 +559,13 @@ namespace picojson {
     std::string num_str;
     while (1) {
       int ch = in.getc();
-      if (('0' <= ch && ch <= '9') || ch == '+' || ch == '-' || ch == '.'
+      if (('0' <= ch && ch <= '9') || ch == '+' || ch == '-'
 	  || ch == 'e' || ch == 'E') {
 	num_str.push_back(ch);
-      } else {
+      } else if(ch == '.') {
+		  static std::locale loc("");
+		  num_str.push_back(std::use_facet< std::numpunct<char> >(loc).decimal_point());
+	  } else {
 	in.ungetc();
 	break;
       }

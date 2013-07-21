@@ -289,6 +289,8 @@ std::string vehicle::use_controls()
 	for(int p = 0; p < parts.size(); p++) {
 		if(part_flag(p, vpf_engine) && parts[p].hp > 0) {
 			engines.push_back(p);
+		} else if(part_flag(p, vpf_light) && parts[p].hp > 0) {
+			engines.push_back(p);
 		}
 	}
 
@@ -302,7 +304,7 @@ std::string vehicle::use_controls()
  }
 
  // Lights if they are there - Note you can turn them on even when damaged, they just don't work
- if (has_lights) {
+ if (has_lights && fuel_left("battery", false) > 0) {
   options_choice.push_back(toggle_lights);
   options_message.push_back(uimenu_entry((lights_on) ? _("Turn off headlights") : _("Turn on headlights"), 'h'));
   curent++;
@@ -557,11 +559,13 @@ bool vehicle::can_unmount (int p)
             {
                 int jdx = j < 2? (j == 0? -1 : 1) : 0;
                 int jdy = j < 2? 0 : (j == 2? - 1: 1);
+				// Don't count the part in question
+				if(ndx + jdx == 0 && ndy + jdy == 0) { continue; }
                 std::vector<int> pc = parts_at_relative (dx + ndx + jdx, dy + ndy + jdy);
                 if (pc.size() > 0 && part_with_feature (pc[0], vpf_mount_point) >= 0)
                     cnt++;
             }
-            if (cnt < 2)
+            if (cnt < 1)
                 return false;
         }
     }
@@ -673,7 +677,7 @@ std::vector<int> vehicle::internal_parts (int p)
 
 int vehicle::part_with_feature (int p, unsigned int f, bool unbroken)
 {
-    if (part_flag(p, f))
+    if (part_flag(p, f) && (!unbroken || parts[p].hp > 0))
         return p;
     std::vector<int> parts_here = internal_parts (p);
     for (int i = 0; i < parts_here.size(); i++)
@@ -915,7 +919,7 @@ int vehicle::total_mass ()
     return m/1000;
 }
 
-int vehicle::fuel_left (ammotype ftype, bool for_engine)
+int vehicle::fuel_left (const ammotype &ftype, bool for_engine)
 {
     int fl = 0;
     for (int p = 0; p < parts.size(); p++)
@@ -926,7 +930,7 @@ int vehicle::fuel_left (ammotype ftype, bool for_engine)
     return fl;
 }
 
-int vehicle::fuel_capacity (ammotype ftype)
+int vehicle::fuel_capacity (const ammotype &ftype)
 {
     int cap = 0;
     for (int p = 0; p < parts.size(); p++)
@@ -935,7 +939,7 @@ int vehicle::fuel_capacity (ammotype ftype)
     return cap;
 }
 
-int vehicle::refill (ammotype ftype, int amount)
+int vehicle::refill (const ammotype &ftype, int amount)
 {
     for (int p = 0; p < parts.size(); p++)
     {
@@ -959,7 +963,7 @@ int vehicle::refill (ammotype ftype, int amount)
     return amount;
 }
 
-int vehicle::drain (ammotype ftype, int amount) {
+int vehicle::drain (const ammotype &ftype, int amount) {
   int drained = 0;
 
   for (int p = 0; p < parts.size(); p++) {
@@ -978,10 +982,10 @@ int vehicle::drain (ammotype ftype, int amount) {
   return drained;
 }
 
-int vehicle::basic_consumption (ammotype ftype)
+int vehicle::basic_consumption (const ammotype &ftype)
 {
     if (ftype == "plutonium")
-      ftype = "battery";
+      return basic_consumption("battery");
     int cnt = 0;
     int fcon = 0;
     for (int p = 0; p < parts.size(); p++)
@@ -1229,15 +1233,16 @@ bool vehicle::valid_wheel_config ()
 
 void vehicle::consume_fuel ()
 {
-    ammotype ftypes[3] = { "gasoline", "battery", "plasma" };
+    static const ammotype ftypes[3] = { "gasoline", "battery", "plasma" };
     for (int ft = 0; ft < 3; ft++)
     {
+        const bool elec = ftypes[ft] == "battery";
+        const int factor = elec ? 1 : 100;
         float st = strain() * 10;
         int amnt = (int) (basic_consumption (ftypes[ft]) * (1.0 + st * st) /
-                          (ftypes[ft] == "battery" ? 1 : 100));
+                          factor);
         if (!amnt)
             continue; // no engines of that type
-        bool elec = ftypes[ft] == "battery";
         bool found = false;
         for (int j = 0; j < (elec? 2 : 1); j++)
         {
@@ -1312,7 +1317,7 @@ void vehicle::thrust (int thd)
 
         int strn = (int) (strain () * strain() * 100);
 
-        for (int p = 0; p < parts.size(); p++)
+        for (int p = 0; p < parts.size() && strn != 0; p++)
             if (part_flag(p, vpf_engine) && parts[p].active() &&
                 (fuel_left (part_info(p).fuel_type, true)) && parts[p].hp > 0 &&
                 rng (1, 100) < strn)
@@ -1849,33 +1854,6 @@ void vehicle::remove_item (int part, int itemdex)
     parts[part].items.erase (parts[part].items.begin() + itemdex);
 }
 
-int vehicle::real_solar_power ()
-{
-	// Taken from game::is_in_sunlight
-	// Note: game::is_in_sunlight checks the weather (sunny, clear)
-	// the inside/outside status and the light_level.
-	// This is done here too, first the weather (is global)
-	if(g->weather != WEATHER_CLEAR && g->weather != WEATHER_SUNNY) {
-		return 0;
-	}
-	int pwr = 0;
-	// Now the light level
-	if(g->light_level() >= 40) {
-		const int x = global_x();
-		const int y = global_y();
-		for (int p = 0; p < parts.size(); p++) {
-			if(part_flag(p, vpf_solar_panel) && parts[p].hp > 0) {
-				// Now the outside status
-				if(g->m.is_outside(x + parts[p].precalc_dx[0], y + parts[p].precalc_dy[0])) {
-					pwr += part_power(p);
-				}
-			}
-		}
-	}
-    return pwr;
-}
-
-
 void vehicle::gain_moves (int mp)
 {
     if (velocity)
@@ -1905,6 +1883,25 @@ void vehicle::gain_moves (int mp)
     if (velocity && one_in(10)) {
       refill (AT_BATT, abs(velocity) / 100);
     }
+
+	if(lights_on) {
+		const int batt_left = fuel_left("battery", false);
+		if(batt_left <= 0) {
+			lights_on = false;
+		} else {
+			int lights = 0;
+			for(int i = 0; i < parts.size(); i++) {
+				if(part_flag(i, vpf_light) && parts[i].active() && parts[i].hp > 0) {
+					lights++;
+				}
+			}
+			if(lights == 0) {
+				lights_on = false;
+			} else {
+				drain("battery", std::min(batt_left, lights));
+			}
+		}
+	}
 
     // check for smoking parts
     for (int ep = 0; ep < external_parts.size(); ep++)
@@ -2114,7 +2111,7 @@ int vehicle::damage_direct (int p, int dmg, int type)
 		}
         if (part_flag(p, vpf_fuel_tank))
         {
-            ammotype ft = part_info(p).fuel_type;
+            const ammotype &ft = part_info(p).fuel_type;
             if (ft == "gasoline" || ft == "plasma")
             {
                 int pow = parts[p].amount / 40;
@@ -2148,7 +2145,7 @@ void vehicle::leak_fuel (int p)
 {
     if (!part_flag(p, vpf_fuel_tank))
         return;
-    ammotype ft = part_info(p).fuel_type;
+    const ammotype &ft = part_info(p).fuel_type;
     if (ft == "gasoline")
     {
         int x = global_x();
@@ -2180,7 +2177,7 @@ void vehicle::fire_turret (int p, bool burst)
     int charges = burst? gun->burst : 1;
     if (!charges)
         charges = 1;
-    ammotype amt = part_info (p).fuel_type;
+    const ammotype &amt = part_info (p).fuel_type;
     if (amt == "gasoline" || amt == "plasma")
     {
         if (amt == "gasoline")

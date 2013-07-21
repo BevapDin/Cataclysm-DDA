@@ -43,6 +43,8 @@ public:
     bool has_curr() const; // would curr() be valid?
     catajson curr() const; // get the current element
 
+    std::string curr_key() const;
+
 private:
     picojson::value val;
     picojson::array::const_iterator ar_iter;

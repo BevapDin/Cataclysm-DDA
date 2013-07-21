@@ -143,6 +143,28 @@ struct itype
  std::set<std::string> item_tags;
  unsigned techniques : NUM_TECHNIQUES;
 
+ /**
+  * A functionality is a specific usage that can be
+  * made with an item. Items may have several (or none at all)
+  * functionalities. Each has its own modifactors:
+  * time_modi: changes how long a task takes.
+  * charges_modi: changes how many charges a task takes.
+  * (if 0 or negativ the task can be done without any charges)
+  */
+ struct functionality_t {
+	 float time_modi;
+	 float charges_modi;
+ };
+ typedef std::map<std::string, functionality_t> FunctionalityMap;
+ FunctionalityMap functionalityMap;
+
+ itype *addFunctionality(const std::string &name, float time_modi, float charges_modi) {
+	 functionality_t &fu = functionalityMap[name];
+	 fu.time_modi = time_modi;
+	 fu.charges_modi = charges_modi;
+	 return this;
+ }
+
  virtual bool is_food()          { return false; }
  virtual bool is_ammo()          { return false; }
  virtual bool is_gun()           { return false; }

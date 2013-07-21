@@ -116,7 +116,7 @@ enum vpart_flags
     vpf_wheel,              // this part touches ground (trigger traps)
     vpf_seat,               // is seat
     vpf_bed,                // is bed (like seat, but can't be boarded)
-    vpf_aisle,              // is aisle (no extra movement cost)
+    vpf_aisle,               // is aisle (no extra movement cost)
     vpf_engine,             // is engine
     vpf_kitchen,            // is kitchen
     vpf_fuel_tank,          // is fuel tank
@@ -160,7 +160,7 @@ struct vpart_info
 
     static int getNumberOfParts();
 	static const vpart_info &getVehiclePartInfo(vpart_id index);
-	
+
 	bool isKitchen() const;
 	bool isFireplace() const;
 	bool isWheel() const;
@@ -192,7 +192,7 @@ enum vhtype_id
     veh_armytruck,  //Army M35A2 6L gas and/or hydrogen engine if commented parts uncommented.
     veh_schoolbus,  //Standard schoolbus
     veh_car_electric, // electric version of standard car.
-	
+
 	veh_wheelbarrow,
 
     num_vehicles

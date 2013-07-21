@@ -1,0 +1,73 @@
+[
+  { "id":"func:blade",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "some tool with a blade",
+    "description": "???"
+  },
+  { "id":"func:sewing_kit",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "some kind of sewing kit",
+    "description": "???"
+  },
+  { "id":"func:hammer",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "a hammer or similar",
+    "description": "???"
+  },
+  { "id":"func:screwdriver",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "screwdriver",
+    "description": "???"
+  },
+  { "id":"func:wrench",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "wrench",
+    "description": "???"
+  },
+  { "id":"func:hacksaw",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "hacksaw",
+    "description": "???"
+  },
+  { "id":"func:pan",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "frying pan",
+    "description": "???"
+  },
+  { "id":"func:pot",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "pot",
+    "description": "???"
+  },
+  { "id":"func:hotplate",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "hotplate",
+    "description": "???"
+  },
+  { "id":"func:thread",
+    "type": "AMMO",
+    "symbol": " ",
+    "color": "white",
+    "name": "thread of some kind",
+    "ammo_type" : "THREAD",
+    "description": "???"
+  }
+]

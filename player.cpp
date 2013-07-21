@@ -5310,7 +5310,7 @@ item& player::i_add(item it, game *g)
 
 bool player::has_active_item(itype_id id)
 {
-    if (weapon.type->id == id && weapon.active)
+    if (weapon.matches_type(id) && weapon.active)
     {
         return true;
     }
@@ -5320,7 +5320,7 @@ bool player::has_active_item(itype_id id)
 int player::active_item_charges(itype_id id)
 {
     int max = 0;
-    if (weapon.type->id == id && weapon.active)
+    if (weapon.matches_type(id) && weapon.active)
     {
         max = weapon.charges;
     }
@@ -5599,7 +5599,7 @@ std::list<item> player::use_amount(itype_id it, int quantity, bool use_container
  std::list<item> ret;
  bool used_weapon_contents = false;
  for (int i = 0; i < weapon.contents.size(); i++) {
-  if (weapon.contents[i].type->id == it) {
+  if (weapon.contents[i].matches_type(it)) {
    ret.push_back(weapon.contents[i]);
    quantity--;
    weapon.contents.erase(weapon.contents.begin() + i);
@@ -5610,7 +5610,7 @@ std::list<item> player::use_amount(itype_id it, int quantity, bool use_container
  if (use_container && used_weapon_contents)
   remove_weapon();
 
- if (weapon.type->id == it) {
+ if (weapon.matches_type(it)) {
   quantity--;
   ret.push_back(remove_weapon());
  }
@@ -5723,7 +5723,7 @@ std::list<item> player::use_charges(itype_id it, int quantity)
 
 // Start by checking weapon contents
  for (int i = 0; i < weapon.contents.size(); i++) {
-  if (weapon.contents[i].type->id == it) {
+  if (weapon.contents[i].matches_type(it)) {
    if (weapon.contents[i].charges > 0 &&
        weapon.contents[i].charges <= quantity) {
     ret.push_back(weapon.contents[i]);
@@ -5745,7 +5745,7 @@ std::list<item> player::use_charges(itype_id it, int quantity)
   }
  }
 
- if (weapon.type->id == it) {
+ if (weapon.matches_type(it)) {
   if (weapon.charges > 0 && weapon.charges <= quantity) {
    ret.push_back(weapon);
    quantity -= weapon.charges;
@@ -5876,14 +5876,14 @@ int player::amount_of(itype_id it)
         }
     }
     int quantity = 0;
-    if (weapon.type->id == it)
+    if (weapon.matches_type(it))
     {
         quantity++;
     }
 
     for (int i = 0; i < weapon.contents.size(); i++)
     {
-        if (weapon.contents[i].type->id == it)
+        if (weapon.contents[i].matches_type(it))
         {
             quantity++;
         }
@@ -5910,10 +5910,10 @@ int player::charges_of(itype_id it)
    return 0;
  }
  int quantity = 0;
- if (weapon.type->id == it)
+ if (weapon.matches_type(it))
   quantity += weapon.charges;
  for (int i = 0; i < weapon.contents.size(); i++) {
-  if (weapon.contents[i].type->id == it)
+  if (weapon.contents[i].matches_type(it))
    quantity += weapon.contents[i].charges;
  }
  quantity += inv.charges_of(it);
@@ -7472,7 +7472,9 @@ void player::use(game *g, char let)
   if (tool->charges_per_use == 0 || used->charges >= tool->charges_per_use) {
    iuse use;
    (use.*tool->use)(g, this, used, false);
-   used->charges -= tool->charges_per_use;
+   if(tool->use != & iuse::none) {
+     used->charges -= tool->charges_per_use;
+   }
   } else
    g->add_msg(_("Your %s has %d charges but needs %d."), used->tname(g).c_str(),
               used->charges, tool->charges_per_use);
@@ -7892,8 +7894,7 @@ bool player::can_sleep(game *g)
  const trap_id trap_at_pos = g->m.tr_at(posx, posy);
  const ter_id ter_at_pos = g->m.ter(posx, posy);
  const furn_id furn_at_pos = g->m.furn(posx, posy);
- if ((veh && veh->part_with_feature (vpart, vpf_seat) >= 0) ||
- 	(veh && veh->part_with_feature (vpart, vpf_bed) >= 0) ||
+ if ((veh && veh->part_with_feature (vpart, vpf_bed) >= 0) ||
      furn_at_pos == f_makeshift_bed || trap_at_pos == tr_cot ||
      furn_at_pos == f_sofa)
   sleepy += 4;

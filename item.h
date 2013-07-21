@@ -96,6 +96,8 @@ public:
  bool stacks_with(item rhs);
  void put_in(item payload);
 
+ bool matches_type(const itype_id &type) const;
+
  int weight() const;
  int volume() const;
  int volume_contained();

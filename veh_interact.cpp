@@ -9,7 +9,7 @@
 #include "options.h"
 #include "debug.h"
 
-veh_interact::veh_interact ()
+veh_interact::veh_interact () : crafting_inv(0)
 {
     cx = 0;
     cy = 0;
@@ -18,6 +18,10 @@ veh_interact::veh_interact ()
     ddy = 0;
     sel_cmd = ' ';
     sel_type=0;
+}
+
+veh_interact::~veh_interact () {
+	delete crafting_inv;
 }
 
 void veh_interact::exec (game *gm, vehicle *v, int x, int y)
@@ -45,11 +49,16 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
     winy1 = winh1;
     winy2 = winh1 + winh2 + 1;
 
+	if(crafting_inv != 0) {
+		delete crafting_inv;
+	}
+	crafting_inv = new crafting_inventory_t(gm, &gm->u);
+
     // changed FALSE value to 1, to keep w_border from starting at a negative x,y
     const int iOffsetX = (TERMX > FULL_SCREEN_WIDTH) ? (TERMX-FULL_SCREEN_WIDTH)/2 : 1;
     const int iOffsetY = (TERMY > FULL_SCREEN_HEIGHT) ? (TERMY-FULL_SCREEN_HEIGHT)/2 : 1;
 
-    page_size = winh23;
+    page_size = winh23 - 2;
 
     //               h   w    y     x
     WINDOW *w_border= newwin(FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,  -1 + iOffsetY,    -1 + iOffsetX);
@@ -86,14 +95,10 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
     }
     wrefresh(w_grid);
 
-    crafting_inventory_t crafting_inv(gm, &gm->u);
-
     int charges = ((it_tool *) g->itypes["welder"])->charges_per_use;
     int charges_crude = ((it_tool *) g->itypes["welder_crude"])->charges_per_use;
-    has_wrench = crafting_inv.has_amount("wrench", 1) ||
-        crafting_inv.has_amount("toolset_wrench", 1);
-    has_hacksaw = crafting_inv.has_amount("hacksaw", 1) ||
-        crafting_inv.has_amount("toolset_hacksaw", 1);
+    has_wrench = crafting_inv.has_amount("func:wrench", 1);
+    has_hacksaw = crafting_inv.has_amount("func:hacksaw", 1);
     has_welder = (crafting_inv.has_amount("welder", 1) &&
                   crafting_inv.has_charges("welder", charges)) ||
                   (crafting_inv.has_amount("welder_crude", 1) &&
@@ -104,11 +109,11 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
     has_siphon = crafting_inv.has_amount("hose", 1);
 
     has_wheel = 0;
-    has_wheel |= crafting_inv.has_amount( "wheel", 1 );
-    has_wheel |= crafting_inv.has_amount( "wheel_wide", 1 );
-    has_wheel |= crafting_inv.has_amount( "wheel_bicycle", 1 );
-    has_wheel |= crafting_inv.has_amount( "wheel_motorbike", 1 );
-    has_wheel |= crafting_inv.has_amount( "wheel_small", 1 );
+    has_wheel |= crafting_inv->has_amount( "wheel", 1 );
+    has_wheel |= crafting_inv->has_amount( "wheel_wide", 1 );
+    has_wheel |= crafting_inv->has_amount( "wheel_bicycle", 1 );
+    has_wheel |= crafting_inv->has_amount( "wheel_motorbike", 1 );
+    has_wheel |= crafting_inv->has_amount( "wheel_small", 1 );
 
     display_stats ();
     display_veh   ();
@@ -265,7 +270,7 @@ void veh_interact::do_install(int reason)
         display_list (pos);
 		const vpart_info &part_info = vpart_info::getVehiclePartInfo((vpart_id) sel_part);
         itype_id itm = part_info.item;
-        bool has_comps = crafting_inv.has_amount(itm, 1);
+        bool has_comps = crafting_inv->has_amount(itm, 1);
         bool has_skill = g->u.skillLevel("mechanics") >= part_info.difficulty;
         bool has_tools = has_welder && has_wrench;
         werase (w_msg);
@@ -292,7 +297,7 @@ void veh_interact::do_install(int reason)
         get_direction (g, dx, dy, ch);
         if ((ch == '\n' || ch == ' ') && has_comps && has_tools && has_skill && has_skill2)
         {
-            //if(itm.is_var_veh_part() && crafting_inv.has_amount(itm, 2);
+            //if(itm.is_var_veh_part() && crafting_inv->has_amount(itm, 2);
             sel_cmd = 'i';
             return;
         }
@@ -362,7 +367,7 @@ void veh_interact::do_repair(int reason)
         if (veh->parts[sel_part].hp <= 0)
         {
             itype_id itm = veh->part_info(sel_part).item;
-            has_comps = crafting_inv.has_amount(itm, 1);
+            has_comps = crafting_inv->has_amount(itm, 1);
             mvwprintz(w_msg, 1, 1, c_ltgray, _("You also need a wrench and %s to replace broken one."),
                       g->itypes[itm]->name.c_str());
             mvwprintz(w_msg, 1, 17, has_wrench? c_ltgreen : c_red, _("wrench"));
@@ -543,7 +548,7 @@ void veh_interact::do_tirechange(int reason)
 		bool is_wheel = part_info.isWheel();
         display_list (pos);
         itype_id itm = part_info.item;
-        bool has_comps = crafting_inv.has_amount(itm, 1);
+        bool has_comps = crafting_inv->has_amount(itm, 1);
         bool has_tools = has_jack && has_wrench;
         werase (w_msg);
         wrefresh (w_msg);
@@ -830,7 +835,7 @@ void veh_interact::display_list (int pos)
         int y = i - page * page_size;
 		const vpart_info &vpart = vpart_info::getVehiclePartInfo((vpart_id) can_mount[i]);
         itype_id itm = vpart.item;
-        bool has_comps = crafting_inv.has_amount(itm, 1);
+        bool has_comps = crafting_inv->has_amount(itm, 1);
         bool has_skill = g->u.skillLevel("mechanics") >= vpart.difficulty;
         bool is_wheel = vpart.flags & mfb(vpf_wheel);
         nc_color col = has_comps && (has_skill || is_wheel) ? c_white : c_dkgray;
@@ -896,7 +901,7 @@ bool all_equal(const std::vector<candidate_vpart> &candidates) {
 // characteristics like item hp & bigness.
 item crafting_inventory_t::consume_vpart_item (game *g, const itype_id &itid) {
     std::vector<candidate_vpart> candidates;
-	
+
 	for(std::list<item_on_map>::const_iterator a = on_map.begin(); a != on_map.end(); ++a) {
 		const std::vector<item> &items = *(a->items);
 		for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
@@ -1027,10 +1032,10 @@ void complete_vehicle (game *g)
         tools.push_back(component("welder_crude", welder_crude_charges));
         tools.push_back(component("toolset_welder", welder_charges/20));
         crafting_inv.consume_tools(tools, true);
-        if (vpart_info::getVehiclePartInfo(part).flags & mfb(vpf_light)) { 
-           int choice = menu(true, "Choose facing direction:", "N", "NW", "W", "SW", "S", "SE", "E", "NE", NULL); 
+        if (vpart_info::getVehiclePartInfo(part).flags & mfb(vpf_light)) {
+           int choice = menu(true, "Choose facing direction:", "N", "NW", "W", "SW", "S", "SE", "E", "NE", NULL);
            int dir = (choice - 1) * 45;
-           veh->parts[partnum].direction = dir; 
+           veh->parts[partnum].direction = dir;
         }
         g->add_msg ("You install a %s into the %s.",
                     vpart_info::getVehiclePartInfo(part).name, veh->name.c_str());

@@ -41,6 +41,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "functions": [ [ "func:thread" ] ],
         "count" : 50
     },
     {   "type" : "AMMO",
@@ -63,6 +64,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "functions": [ [ "func:thread" ] ],
         "count" : 10
     },
     {   "type" : "AMMO",
@@ -85,6 +87,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "functions": [ [ "func:thread" ] ],
         "count" : 10
     },
     {   "type" : "AMMO",

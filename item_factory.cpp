@@ -3,6 +3,7 @@
 #include "enums.h"
 #include "catajson.h"
 #include "addiction.h"
+#include "debug.h"
 #include "translations.h"
 #include <algorithm>
 #include <cstdlib>
@@ -10,12 +11,33 @@
 #include <fstream>
 #include <stdio.h>
 
+#ifndef _MSC_VER
+#include <unistd.h>
+#include <dirent.h>
+#endif
+
 // mfb(n) converts a flag to its appropriate position in covers's bitfield
 #ifndef mfb
 #define mfb(n) long(1 << (n))
 #endif
 
 Item_factory* item_controller = new Item_factory();
+
+int getint(const catajson &e, const char *name, int def = 0) {
+	if(e.has(name)) {
+		return e.get(name).as_int();
+	} else {
+		return def;
+	}
+}
+
+std::string getstring(const catajson &e, const char *name, const char *def = 0) {
+	if(e.has(name)) {
+		return e.get(name).as_string();
+	} else {
+		return def == 0 ? "" : def;
+	}
+}
 
 //Every item factory comes with a missing item
 Item_factory::Item_factory(){
@@ -247,6 +269,13 @@ itype* Item_factory::find_template(const Item_tag id){
         return found->second;
     }
     else{
+		if(id.compare(0, 5, "func:") == 0) {
+			itype *&x = m_templates[id];
+			x = new itype();
+			x->name = std::string("something with the functionality of a ") + id.substr(5);
+			x->description = _("OHHHHH NOOOOO");
+			return x;
+		}
 		itype *&x = m_templates[id];
 		x = new itype();
 		x->name = std::string("Error: Item Missing: ") + id;
@@ -337,6 +366,38 @@ void Item_factory::load_item_templates() throw(std::string){
     load_item_templates_from("data/raw/items/armor.json");
     load_item_templates_from("data/raw/items/books.json");
     load_item_templates_from("data/raw/items/archery.json");
+#if (defined _WIN32 || defined __WIN32__)
+    WIN32_FIND_DATA FindFileData;
+    HANDLE hFind;
+    TCHAR Buffer[MAX_PATH];
+
+    GetCurrentDirectory(MAX_PATH, Buffer);
+    SetCurrentDirectory("data/raw/mods");
+    hFind = FindFirstFile("*.json", &FindFileData);
+    if(INVALID_HANDLE_VALUE != hFind) {
+        do {
+            load_item_templates_from(FindFileData.cFileName);
+        } while(FindNextFile(hFind, &FindFileData) != 0);
+        FindClose(hFind);
+    }
+    SetCurrentDirectory(Buffer);
+#else
+    DIR *save_dir = opendir("data/raw/mods");
+    struct dirent *save_dirent = NULL;
+    if(save_dir != NULL)
+    {
+        while ((save_dirent = readdir(save_dir)) != NULL)
+        {
+            std::string path("data/raw/mods/");
+			path += save_dirent->d_name;
+			if(path.length() > 5 && path.compare(path.length() - 5, 5, ".json") == 0) {
+				load_item_templates_from(path);
+            }
+        }
+        (void)closedir(save_dir);
+    }
+#endif
+    load_item_groups_from("data/raw/item_groups.json");
     }
     catch (std::string &error_message) {
         throw;
@@ -437,12 +498,12 @@ void Item_factory::load_item_templates_from(const std::string file_name) throw (
                     else if (type_label == "TOOL")
                     {
                         it_tool* tool_template = new it_tool();
-                        tool_template->ammo = entry.get("ammo").as_string();
-                        tool_template->max_charges = entry.get("max_charges").as_int();
-                        tool_template->def_charges = entry.get("initial_charges").as_int();
-                        tool_template->charges_per_use = entry.get("charges_per_use").as_int();
-                        tool_template->turns_per_charge = entry.get("turns_per_charge").as_int();
-                        tool_template->revert_to = entry.get("revert_to").as_string();
+                        tool_template->ammo = getstring(entry, "ammo", "NULL");
+                        tool_template->max_charges = getint(entry, "max_charges");
+                        tool_template->def_charges = getint(entry, "initial_charges");
+                        tool_template->charges_per_use = getint(entry, "charges_per_use");
+                        tool_template->turns_per_charge = getint(entry, "turns_per_charge");
+                        tool_template->revert_to = getstring(entry, "revert_to", "null");
 
                         new_item_template = tool_template;
                     }
@@ -450,13 +511,13 @@ void Item_factory::load_item_templates_from(const std::string file_name) throw (
                     {
                         it_ammo* ammo_template = new it_ammo();
                         ammo_template->type = entry.get("ammo_type").as_string();
-                        ammo_template->damage = entry.get("damage").as_int();
-                        ammo_template->pierce = entry.get("pierce").as_int();
-                        ammo_template->range = entry.get("range").as_int();
+                        ammo_template->damage = getint(entry, "damage");
+                        ammo_template->pierce = getint(entry, "pierce");
+                        ammo_template->range = getint(entry, "range");
                         ammo_template->dispersion =
-                            entry.get("dispersion").as_int();
-                        ammo_template->recoil = entry.get("recoil").as_int();
-                        ammo_template->count = entry.get("count").as_int();
+                            getint(entry, "dispersion");
+                        ammo_template->recoil = getint(entry, "recoil");
+                        ammo_template->count = getint(entry, "count");
                         if( entry.has("effects") ) {
                             tags_from_json(entry.get("effects"), ammo_template->ammo_effects);
                         }
@@ -511,8 +572,8 @@ void Item_factory::load_item_templates_from(const std::string file_name) throw (
                 m_templates[new_id] = new_item_template;
 
                 // And then proceed to assign the correct field
-                new_item_template->rarity = entry.get("rarity").as_int();
-                new_item_template->price = entry.get("price").as_int();
+                new_item_template->rarity = getint(entry, "rarity");
+                new_item_template->price = getint(entry, "price");
                 new_item_template->name = _(entry.get("name").as_string().c_str());
                 new_item_template->sym = entry.get("symbol").as_char();
                 new_item_template->color = color_from_string(entry.get("color").as_string());
@@ -520,6 +581,7 @@ void Item_factory::load_item_templates_from(const std::string file_name) throw (
                 if(entry.has("material")){
                   set_material_from_json(new_id, entry.get("material"));
                 } else {
+                  dout() << "item has no material at all: " << new_item_template->name << "\n";
                   new_item_template->m1 = "null";
                   new_item_template->m2 = "null";
                 }
@@ -528,11 +590,39 @@ void Item_factory::load_item_templates_from(const std::string file_name) throw (
                     new_phase = entry.get("phase").as_string();
                 }
                 new_item_template->phase = phase_from_tag(new_phase);
-                new_item_template->volume = entry.get("volume").as_int();
-                new_item_template->weight = entry.get("weight").as_int();
-                new_item_template->melee_dam = entry.get("bashing").as_int();
-                new_item_template->melee_cut = entry.get("cutting").as_int();
-                new_item_template->m_to_hit = entry.get("to_hit").as_int();
+                new_item_template->volume = getint(entry, "volume");
+                new_item_template->weight = getint(entry, "weight");
+                new_item_template->melee_dam = getint(entry, "bashing");
+                new_item_template->melee_cut = getint(entry, "cutting");
+                new_item_template->m_to_hit = getint(entry, "to_hit");
+
+				if(entry.has("functions")) {
+					catajson funcs = entry.get("functions");
+					if(funcs.is_array()) {
+						for(funcs.set_begin(); funcs.has_curr(); funcs.next()) {
+							catajson func = funcs.curr();
+							if(func.is_array()) {
+								if(func.has(0)) {
+									std::string key = func.get(0).as_string();
+									itype::functionality_t &fu = new_item_template->functionalityMap[key];
+									if(func.has(1)) {
+										fu.time_modi = func.get(1).as_double();
+									} else {
+										fu.time_modi = 1;
+									}
+									if(func.has(2)) {
+										fu.charges_modi = func.get(2).as_double();
+									} else {
+										fu.charges_modi = fu.time_modi;
+									}
+									if(key.compare(0, 5, "func:") != 0) {
+										new_item_template->functionalityMap[std::string("func:") + key] = fu;
+									}
+								}
+							}
+						}
+					}
+				}
 
                 if( entry.has("flags") )
                 {

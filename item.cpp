@@ -745,12 +745,16 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
     dump->push_back(iteminfo("DESCRIPTION", contents[0].type->description));
   }
  }
- 
+
  if(get_material(1) != "null") {
    dump->push_back(iteminfo("DESCRIPTION", "Material: " + get_material(1)));
  }
  if(get_material(2) != "null") {
    dump->push_back(iteminfo("DESCRIPTION", "Material: " + get_material(2)));
+ }
+
+ for(itype::FunctionalityMap::const_iterator a = type->functionalityMap.begin(); a != type->functionalityMap.end(); ++a) {
+   dump->push_back(iteminfo("DESCRIPTION", "Function: " + a->first));
  }
 
  temp1.str("");
@@ -920,6 +924,9 @@ std::string item::tname(game *g)
  if (food != NULL && g != NULL && food_type->spoils != 0 &&
    int(g->turn) - (int)(food->bday) > food_type->spoils * 600)
    ret << _(" (rotten)");
+ if (food != NULL && g != NULL && food_type->spoils != 0 &&
+   int(g->turn) - (int)(food->bday) > (food_type->spoils * 600 * 3) / 4)
+   ret << " (nearly rotten)";
 
  if (has_flag("FIT")){
      ret << " (fits)";
@@ -2351,7 +2358,8 @@ bool item::use_charges(const itype_id &type_to_use, int &amount, std::list<item>
 	if (amount <= 0) {
 		return false;
 	}
-	if (type->id != type_to_use) {
+	if(!matches_type(type_to_use)) {
+//	if (type->id != type_to_use) {
 		return false;
 	}
 	// Now check the actual item
@@ -2370,6 +2378,15 @@ bool item::use_charges(const itype_id &type_to_use, int &amount, std::list<item>
 		tmp.charges = amount;
 		usedup.push_back(tmp);
 		charges -= amount;
+	}
+	return false;
+}
+
+bool item::matches_type(const itype_id &type_) const {
+	if(type != 0 && type->functionalityMap.find(type_) != type->functionalityMap.end()) {
+		return true;
+	} else if(type->id == type_) {
+		return true;
 	}
 	return false;
 }

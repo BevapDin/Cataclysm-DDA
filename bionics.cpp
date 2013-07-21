@@ -698,4 +698,3 @@ void game::init_bionics() throw (std::string)
     if(!json_good())
         throw (std::string)"There was an error reading data/raw/bionics.json";
 }
-

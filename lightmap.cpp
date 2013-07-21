@@ -14,9 +14,9 @@ void map::generate_lightmap(game* g)
  memset(lm, 0, sizeof(lm));
  memset(sm, 0, sizeof(sm));
 
- static const int dir_x[] = { 1, 0 , -1,  0 };
- static const int dir_y[] = { 0, 1 ,  0, -1 };
- static const int dir_d[] = { 180, 270, 0, 90 };
+ const int dir_x[] = { 1, 0 , -1,  0 };
+ const int dir_y[] = { 0, 1 ,  0, -1 };
+ const int dir_d[] = { 180, 270, 0, 90 };
  const float held_luminance = g->u.active_light();
  const float natural_light = g->natural_light_level();
 
@@ -158,7 +158,7 @@ void map::generate_lightmap(game* g)
      for (std::vector<int>::iterator part = vehs[v].v->external_parts.begin();
           part != vehs[v].v->external_parts.end(); ++part) {
          int dpart = vehs[v].v->part_with_feature(*part , vpf_light);
-         if (dpart >= 0 && !vehs[v].v->parts[dpart].inactive()) {
+         if (dpart >= 0 && vehs[v].v->parts[dpart].active()) {
              veh_luminance += ( vehs[v].v->part_info(dpart).power / iteration );
              iteration=iteration * 1.1;
          }
@@ -171,7 +171,7 @@ void map::generate_lightmap(game* g)
          if(INBOUNDS(px, py)) {
            int dpart = vehs[v].v->part_with_feature(*part , vpf_light);
 
-           if (dpart >= 0 && !vehs[v].v->parts[dpart].inactive()) {
+           if (dpart >= 0 && vehs[v].v->parts[dpart].active()) {
              apply_light_arc(px, py, dir + vehs[v].v->parts[dpart].direction, veh_luminance, 45);
            }
          }

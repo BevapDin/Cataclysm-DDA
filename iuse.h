@@ -169,6 +169,9 @@ class iuse
   void simple_off	    (game *g, player *p, item *it, bool t);
   void simple_on        (game *g, player *p, item *it, bool t);
   void wood_gas         (game *g, player *p, item *it, bool t);
+
+
+  int wood_gas_amount(const item &it);
 };
 
 #endif
