@@ -323,7 +323,7 @@ std::string vehicle::use_controls()
 		buffer << (parts[p].active() ? "deactivate" : "activate");
 		buffer << " " << part_info(p).name << " at " << parts[p].mount_dx << "," << parts[p].mount_dy;
 		options_choice.push_back(static_cast<vehicle_controls>(toogle_engine + i));
-		options_message.push_back(uimenu_entry(buffer.str(), i < 10 ? '0' + i : 'A' + i));
+		options_message.push_back(uimenu_entry(buffer.str(), i < 10 ? '0' + i : 'A' + i - 10));
 		curent++;
 	}
 

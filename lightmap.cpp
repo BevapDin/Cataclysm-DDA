@@ -335,6 +335,9 @@ void map::apply_light_arc(int x, int y, int angle, float luminance, int wideangl
  const double wangle=wideangle/2.0;
 
  int nangle = angle % 360;
+ while(nangle < 0) {
+	 nangle = (nangle + 3600) % 360;
+ }
 
  int endx, endy;
  double rad = PI * (double)nangle / 180;

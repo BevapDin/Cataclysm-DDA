@@ -134,6 +134,7 @@ mon(_("squirrel"),	species_mammal, 'r',	c_ltgray,	MS_TINY,	"flesh",
 A small woodland animal.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR, MF_BONES);
+FEARS(MTRIG_PLAYER_CLOSE, MTRIG_HURT, MTRIG_FIRE, MTRIG_SOUND);
 CATEGORIES(MC_WILDLIFE);
 
 mon(_("rabbit"),	species_mammal, 'r',	c_white,	MS_TINY,	"flesh",
@@ -144,6 +145,7 @@ A cute wiggling nose, cotton tail, and\n\
 delicious flesh.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR, MF_BONES);
+FEARS(MTRIG_PLAYER_CLOSE, MTRIG_HURT, MTRIG_FIRE, MTRIG_SOUND);
 CATEGORIES(MC_WILDLIFE);
 
 mon(_("deer"),	species_mammal, 'd',	c_brown,	MS_LARGE,	"flesh",
@@ -153,6 +155,7 @@ mon(_("deer"),	species_mammal, 'd',	c_brown,	MS_LARGE,	"flesh",
 A large buck, fast-moving and strong.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR, MF_BONES);
+FEARS(MTRIG_PLAYER_CLOSE, MTRIG_HURT, MTRIG_FIRE, MTRIG_SOUND);
 CATEGORIES(MC_WILDLIFE);
 
 mon(_("moose"), species_mammal, 'M',	c_brown,	MS_LARGE,	"flesh",
@@ -163,7 +166,7 @@ A buck of the largest deer species.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR, MF_BLEED, MF_VIS40, MF_BONES);
 ANGER(MTRIG_PLAYER_CLOSE, MTRIG_HURT);
-FEARS(MTRIG_FIRE);
+FEARS(MTRIG_FIRE, MTRIG_SOUND);
 CATEGORIES(MC_WILDLIFE);
 
 mon(_("wolf"),	species_mammal, 'w',	c_ltgray,	MS_MEDIUM,	"flesh",
@@ -173,7 +176,7 @@ mon(_("wolf"),	species_mammal, 'w',	c_ltgray,	MS_MEDIUM,	"flesh",
 A grey wolf. A vicious and fast pack hunter.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR, MF_HIT_AND_RUN, MF_KEENNOSE, MF_BLEED, MF_ATTACKMON, MF_BONES, MF_VIS50);
-ANGER(MTRIG_PLAYER_CLOSE, MTRIG_FRIEND_ATTACKED, MTRIG_PLAYER_WEAK, MTRIG_HURT);
+ANGER(MTRIG_PLAYER_CLOSE, MTRIG_FRIEND_ATTACKED, MTRIG_PLAYER_WEAK, MTRIG_HURT, MTRIG_SOUND);
 PLACATE(MTRIG_MEAT);
 FEARS(MTRIG_FIRE, MTRIG_FRIEND_DIED);
 CATEGORIES(MC_WILDLIFE);
@@ -185,7 +188,7 @@ mon(_("coyote"),	species_mammal, 'w',	c_brown,	MS_MEDIUM,	"flesh",
 An eastern coyote, also called tweed wolf. It is an hybrid of grey wolves and the smaller western coyotes.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR, MF_HIT_AND_RUN, MF_KEENNOSE, MF_BLEED, MF_ATTACKMON, MF_BONES, MF_VIS50);
-ANGER(MTRIG_PLAYER_CLOSE, MTRIG_FRIEND_ATTACKED, MTRIG_PLAYER_WEAK, MTRIG_HURT);
+ANGER(MTRIG_PLAYER_CLOSE, MTRIG_FRIEND_ATTACKED, MTRIG_PLAYER_WEAK, MTRIG_HURT, MTRIG_SOUND);
 PLACATE(MTRIG_MEAT);
 FEARS(MTRIG_FIRE, MTRIG_FRIEND_DIED);
 CATEGORIES(MC_WILDLIFE);
@@ -197,7 +200,7 @@ mon(_("bear"),	species_mammal, 'B',	c_dkgray,	MS_LARGE,	"flesh",
 An american black bear. Remember, only YOU can prevent forest fires.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR, MF_BLEED, MF_VIS40, MF_BONES);
-ANGER(MTRIG_PLAYER_CLOSE, MTRIG_HURT);
+ANGER(MTRIG_PLAYER_CLOSE, MTRIG_HURT, MTRIG_SOUND);
 PLACATE(MTRIG_MEAT);
 FEARS(MTRIG_FIRE);
 CATEGORIES(MC_WILDLIFE);
@@ -209,7 +212,7 @@ mon(_("cougar"),	species_mammal, 'C',	c_brown,	MS_MEDIUM,	"flesh",
 A vicious and fast hunter.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_ANIMAL, MF_WARM, MF_FUR, MF_HIT_AND_RUN, MF_KEENNOSE, MF_BLEED, MF_VIS50, MF_BONES);
-ANGER(MTRIG_STALK, MTRIG_PLAYER_WEAK, MTRIG_HURT, MTRIG_PLAYER_CLOSE);
+ANGER(MTRIG_STALK, MTRIG_PLAYER_WEAK, MTRIG_HURT, MTRIG_PLAYER_CLOSE, MTRIG_SOUND);
 PLACATE(MTRIG_MEAT);
 FEARS(MTRIG_FIRE, MTRIG_FRIEND_DIED);
 CATEGORIES(MC_WILDLIFE);
@@ -370,7 +373,7 @@ A sluglike creature, eight feet long and the width of a refrigerator, it's black
 body glistens as it oozes it's way along the ground. Eye stalks occassionally push their \
 way out of the oily mass and look around.")
 );
-FLAGS(MF_NOHEAD, MF_SEES, MF_POISON, MF_HEARS, MF_REGENERATES_50, MF_SMELLS, MF_VIS30, 
+FLAGS(MF_NOHEAD, MF_SEES, MF_POISON, MF_HEARS, MF_REGENERATES_50, MF_SMELLS, MF_VIS30,
 MF_SLUDGEPROOF, MF_SLUDGETRAIL, MF_SWIMS, MF_FLAMMABLE);
 
 
@@ -384,6 +387,7 @@ uncertain legs, possessed with an unstoppable\n\
 rage.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_BLEED, MF_NO_BREATHE, MF_VIS40);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 CATEGORIES(MC_CLASSIC);
 
 mon(_("zombie cop"),	species_zombie, 'Z',	c_blue,	MS_MEDIUM,	"flesh",
@@ -395,6 +399,7 @@ armour, this zombie was clearly a cop gearing\n\
 up to fight the infection.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_BLEED, MF_NO_BREATHE, MF_VIS30);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 CATEGORIES(MC_CLASSIC);
 
 mon(_("shrieker zombie"),species_zombie, 'Z',c_magenta,	MS_MEDIUM,	"flesh",
@@ -405,6 +410,7 @@ This zombie's jaw has been torn off, leaving\n\
 a gaping hole from mid-neck up.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_NO_BREATHE, MF_VIS50);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("spitter zombie"),species_zombie, 'Z',c_yellow,	MS_MEDIUM,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -416,6 +422,7 @@ yellow fluid.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON,
       MF_ACIDPROOF, MF_NO_BREATHE, MF_VIS40);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("shocker zombie"),species_zombie,'Z',c_ltcyan,	MS_MEDIUM,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -427,6 +434,7 @@ lightning.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON,
       MF_ELECTRIC, MF_CBM, MF_NO_BREATHE,  MF_VIS40);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("smoker zombie"),species_zombie,'Z',c_ltgray,	MS_MEDIUM,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -437,6 +445,7 @@ thick, obfuscating smoke.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON,
       MF_HARDTOSHOOT, MF_FRIENDLY_SPECIAL, MF_NO_BREATHE, MF_VIS40);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("zombie dog"),species_zombie, 'd',	c_ltgreen,	MS_MEDIUM,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -448,6 +457,7 @@ humans ever could.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON,
       MF_HIT_AND_RUN, MF_NO_BREATHE, MF_VIS50);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 CATEGORIES(MC_CLASSIC);
 
 mon(_("zombie brute"),species_zombie, 'Z',	c_red,		MS_MEDIUM,	"flesh",
@@ -458,6 +468,7 @@ A hideous beast of a zombie, bulging with\n\
 distended muscles on both arms and legs.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_NO_BREATHE, MF_VIS40);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("zombie hulk"),species_zombie, 'Z',	c_ltred,		MS_HUGE,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -468,6 +479,7 @@ A zombie that has somehow grown to the size of\n\
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES,
       MF_DESTROYS, MF_POISON, MF_ATTACKMON, MF_LEATHER, MF_NO_BREATHE, MF_VIS50);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("fungal zombie"),species_fungus, 'Z',c_ltgray,	MS_MEDIUM,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -478,6 +490,7 @@ mouth and eyes, and thick gray mold grows all\n\
 over its translucent flesh.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_NO_BREATHE, MF_VIS30);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("boomer"),	species_zombie, 'Z',	c_pink,		MS_LARGE,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -488,6 +501,7 @@ horrible odor, and putrid, pink sludge drips\n\
 from its mouth.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_NO_BREATHE, MF_VIS40);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("fungal boomer"),species_fungus, 'B',c_ltgray,	MS_LARGE,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -498,6 +512,7 @@ gray mold. Its flesh is translucent and gray,\n\
 and it dribbles a gray sludge from its mouth.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_NO_BREATHE, MF_VIS30);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("skeleton"),	species_zombie, 'Z',	c_white,	MS_MEDIUM,	"stone",
 //	 dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -508,6 +523,7 @@ rotten scraps of flesh, somehow still in\n\
 motion.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_BLEED, MF_HARDTOSHOOT, MF_NO_BREATHE, MF_VIS30);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("zombie necromancer"),species_zombie, 'Z',c_dkgray,	MS_MEDIUM,	"flesh",
 //	 dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -519,6 +535,7 @@ feeling of dread and terror.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_NO_BREATHE, MF_NO_BREATHE, MF_VIS50);
 ANGER(MTRIG_HURT, MTRIG_PLAYER_WEAK);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("zombie scientist"),species_zombie, 'Z',c_ltgray,	MS_MEDIUM,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -530,6 +547,7 @@ than most zombies, but more resourceful too.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_BLEED,
       MF_ACIDPROOF, MF_NO_BREATHE, MF_VIS50);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("zombie soldier"),	species_zombie,	'Z',c_ltblue,	MS_MEDIUM,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -541,6 +559,7 @@ and it is much more physically fit than\n\
 most zombies.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_WARM, MF_BASHES, MF_POISON, MF_BLEED, MF_NO_BREATHE, MF_VIS30);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 CATEGORIES(MC_CLASSIC);
 
 mon(_("grabber zombie"),	species_zombie,	'Z',c_green,	MS_MEDIUM,	"flesh",
@@ -553,6 +572,7 @@ at its surroundings as it moves.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_BLEED,
       MF_GRABS, MF_NO_BREATHE, MF_VIS30);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("master zombie"),	species_zombie, 'M',c_yellow,	MS_MEDIUM,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -563,7 +583,7 @@ dust surrounding it.  It also seems to have\n\
 a better grasp of movement than most...")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_WARM, MF_BASHES, MF_POISON, MF_NO_BREATHE, MF_VIS50);
-ANGER(MTRIG_HURT, MTRIG_PLAYER_WEAK);
+ANGER(MTRIG_HURT, MTRIG_PLAYER_WEAK, MTRIG_MEAT, MTRIG_SOUND);
 
 mon(_("scarred zombie"),	species_zombie, 'Z',	c_yellow,	MS_MEDIUM,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -575,6 +595,7 @@ much harder to damage than an ordinary zombie\n\
 but moves a bit slower")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_POISON, MF_NO_BREATHE, MF_VIS30);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 
  mon(_("child zombie"),species_zombie, 'z',	c_ltgreen,	MS_SMALL,	"flesh",
 //	dif agr mor spd msk mdi m## cut dge bsh cut itm  HP special freq
@@ -585,6 +606,7 @@ a twinge of remorse looking at it.")
 );
 FLAGS(MF_SEES, MF_HEARS, MF_SMELLS, MF_STUMBLES, MF_WARM, MF_BASHES, MF_BLEED,
       MF_POISON, MF_GUILT, MF_NO_BREATHE, MF_VIS30);
+ANGER(MTRIG_MEAT, MTRIG_SOUND);
 CATEGORIES(MC_CLASSIC);
 
 //Somewhere between a zombie and a blob creature

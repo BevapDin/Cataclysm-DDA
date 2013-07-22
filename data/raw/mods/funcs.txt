@@ -1,0 +1,20 @@
+functionality:
+
+when searching for items that are used as either tool or component in a crafting recipe cata normaly compares "type.id" of the item with a value from the recipe.
+This has been advanced: the value from the recipe searched for in the functionalityMap. If found it is assumed that this item is a valid replacement for the required object.
+
+The functionalityMap is filled per json file:
+add the item "functions" to the item definition. It must contain an array of arrays:
+"functions" : [ [ "a" ] , [ "func:b" ] ]
+Here the functionalities "a" and "func:b" are declared.
+In the recipe you may use either of those or the item name itself:
+"tools" : [ ..., [ [ "item", -1 ] , [ "a", -1 ], [ "func:b", -1 ] ] ]
+
+Note: in disasebling the "func:" part is stripped and the remaining name is used.
+Example for thread: "sinew", "thread" and "plant_fiber" have all the functionality "func:thread". Therfor the recipe for "string_6" contains only
+["func:thread", 50]
+as component. When dissambling the program finds this component, removes the "func:" part and makes "thread".
+If you defined it as "func:sinew" (and changed it to this for "plant_fiber", "thread" and "sinew"), the disasebling would give 50 sinew instead.
+Also note that you should define a item in "funcs.json" with the id of your functionality (e.g. "func:thread"). This is needed as the program interprets the functionality as a item type, gets the item type template from the item_factory and uses this template to display the item name. The item_factory has a hack that creates item types starting with "func:" automaticly if there is no definition for it.
+But this looks not so good and in case of ammo (with is counted in charges) this becames ugly as the game looks for 50 x "func:thread" and assumes the "func:thread" objects are counted by item (that means not stacked). This also means that a stack of 50 sinew is recognized as 1 item instead of 50.
+To prevent this, one must define "func:thread" to be an ammo type.
