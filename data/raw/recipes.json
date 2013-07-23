@@ -464,7 +464,7 @@
                                   ["fur", 1]
                               ],
                               [
-                                  ["func::thread", 20],
+                                  ["func:thread", 20],
                                   ["duct_tape", 20]
                               ]
                           ]
@@ -3244,6 +3244,7 @@
             "time": 50000,
             "reversible": false,
             "autolearn": true,
+            "count": 5,
             "tools": [
                          [
                              ["fire", -1]
@@ -3257,7 +3258,7 @@
                      ],
             "components": [
                               [
-                                  ["meat", 1]
+                                  ["meat", 5]
                               ]
                           ]
         },

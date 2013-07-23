@@ -140,6 +140,9 @@ class overmap
   std::vector<city> cities;
   std::vector<city> roads_out;
   std::vector<settlement> towns;
+  std::vector<monhorde> zh;
+  
+  std::vector<mongroup*> getMonGroupByType(const std::string &type);
 
  private:
   point loc;

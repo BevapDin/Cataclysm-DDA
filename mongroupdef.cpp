@@ -73,7 +73,7 @@ bool MonsterGroupManager::IsMonsterInGroup(std::string group, mon_id monster)
     {
         if(it->first == monster) return true;
     }
-    return false;
+    return g.defaultMonster == monster;
 }
 
 std::string MonsterGroupManager::Monster2Group(mon_id monster)

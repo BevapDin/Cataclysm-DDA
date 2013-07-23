@@ -72,6 +72,17 @@ void game::init_recipes() throw (std::string)
                 debugmsg("Recipe name collision (set a unique value for the id_suffix field to fix): %s", rec_name.c_str());
             }
         }
+        
+        if(curr.has("count")) {
+            last_rec->count = curr.get("count").as_int();
+        }
+        if(curr.has("count_range")) {
+            last_rec->count_range = curr.get("count_range").as_int();
+        }
+        if(curr.has("noise") && curr.has("noise_string")) {
+            last_rec->noise = curr.get("noise").as_int();
+            last_rec->noise_string = curr.get("noise_string").as_string();
+        }
 
         recipeNames.push_back(rec_name);
 
@@ -1249,6 +1260,10 @@ void game::make_all_craft(recipe *making)
 void game::complete_craft()
 {
  recipe* making = recipe_by_index(u.activity.index); // Which recipe is it?
+ 
+ if(making->noise > 0) {
+  sound(u.posx, u.posy, making->noise, making->noise_string);
+ }
 
 // # of dice is 75% primary skill, 25% secondary (unless secondary is null)
  int skill_dice = u.skillLevel(making->sk_primary) * 3;
@@ -1340,6 +1355,13 @@ void game::complete_craft()
   // Set up the new item, and pick an inventory letter
  int iter = 0;
  item newit(item_controller->find_template(making->result), turn, nextinv);
+ int new_count = 1;
+ if(making->count > 0) {
+   new_count = making->count;
+   if(making->count_range > 0) {
+     new_count += rng(0, making->count_range);
+   }
+ }
 
     if (newit.is_armor() && newit.has_flag("VARSIZE"))
     {
@@ -1376,9 +1398,16 @@ void game::complete_craft()
  if (!newit.craft_has_charges())
   newit.charges = 0;
  //newit = newit.in_its_container(&itypes);
- if (newit.made_of(LIQUID))
+ if (newit.made_of(LIQUID)) {
+  newit.charges *= new_count;
   handle_liquid(newit, false, false);
- else {
+ } else {
+  if(newit.count_by_charges()) {
+    newit.charges *= new_count;
+    new_count = 1;
+  }
+  for(int i = 0; i < new_count; i++) {
+  iter = 0;
   do {
    newit.invlet = nextinv;
    advance_nextinv();
@@ -1397,6 +1426,7 @@ void game::complete_craft()
    newit = u.i_add(newit);
    add_msg("%c - %s", newit.invlet, newit.tname().c_str());
   }
+ }
  }
 }
 
@@ -1672,7 +1702,7 @@ void game::disassemble(char ch)
              ++list_iter)
         {
             recipe* cur_recipe = *list_iter;
-            if (dis_item->type == item_controller->find_template(cur_recipe->result) && cur_recipe->reversible)
+            if (dis_item->type == item_controller->find_template(cur_recipe->result) && cur_recipe->reversible && cur_recipe->count <= 1 && cur_recipe->count_range <= 0)
             // ok, a valid recipe exists for the item, and it is reversible
             // assign the activity
             {

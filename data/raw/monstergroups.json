@@ -64,9 +64,12 @@
     "name" : "GROUP_WANDERING_ZOMBIE",
     "default" : "mon_zombie",
     "monsters" : [
-      { "monster" : "mon_zombie_shrieker", "freq" : 90, "multiplier" : 5 },
-      { "monster" : "mon_zombie_electric", "freq" : 50, "multiplier" : 5 },
-      { "monster" : "mon_zombie_master", "freq" : 10, "multiplier" : 25 }
+      { "monster" : "mon_zombie_shrieker", "freq" : 90, "multiplier" : 0 },
+      { "monster" : "mon_zombie_cop", "freq" : 40, "multiplier" : 0 },
+      { "monster" : "mon_zombie_child", "freq" : 20, "multiplier" : 0 },
+      { "monster" : "mon_zombie_scientist", "freq" : 20, "multiplier" : 0 },
+      { "monster" : "mon_zombie_soldier", "freq" : 20, "multiplier" : 0 },
+      { "monster" : "mon_zombie_master", "freq" : 10, "multiplier" : 0 }
     ]
   },
   {

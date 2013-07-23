@@ -629,6 +629,7 @@ overmap::overmap(overmap const& o)
     , cities(o.cities)
     , roads_out(o.roads_out)
     , towns(o.towns)
+    , zh(o.zh)
     , loc(o.loc)
     , prefix(o.prefix)
     , name(o.name)
@@ -662,6 +663,7 @@ overmap& overmap::operator=(overmap const& o)
     cities = o.cities;
     roads_out = o.roads_out;
     towns = o.towns;
+    zh = o.zh;
     loc = o.loc;
     prefix = o.prefix;
     name = o.name;
@@ -1586,6 +1588,54 @@ int overmap::dist_from_city(point p)
  return distance;
 }
 
+bool hasHorde(const std::vector<monhorde> &zh, int x, int y) {
+	typedef std::vector<monhorde> MHVec;
+	for(size_t i = 0; i < zh.size(); i++) {
+		const monhorde &horde = zh[i];
+		if(horde.population == 0) {
+			continue;
+		}
+		if((horde.posx / 2) != x || (horde.posy / 2) != y) {
+			continue;
+		}
+		return true;
+	}
+	return false;
+}
+
+bool game::player_can_see_on_overmap(int x, int y) {
+ int omx = (levx + int(MAPSIZE / 2)) / 2, omy = (levy + int(MAPSIZE / 2)) / 2;
+ int dist = u.overmap_sight_range(light_level());
+ if(omx == x && omy == y) {
+	 return true;
+ }
+ std::vector<point> line = line_to(omx, omy, x, y, 0);
+ int sight_points = dist;
+ int cost = 0;
+ for (int i = 0; i < line.size() && sight_points >= 0; i++) {
+  int lx = line[i].x, ly = line[i].y;
+  if (lx >= 0 && lx < OMAPX && ly >= 0 && ly < OMAPY)
+   cost = oterlist[cur_om->ter(lx, ly, levz)].see_cost;
+  else if ((lx < 0 || lx >= OMAPX) && (ly < 0 || ly >= OMAPY)) {
+   if (lx < 0) lx += OMAPX;
+   else        lx -= OMAPX;
+   if (ly < 0) ly += OMAPY;
+   else        ly -= OMAPY;
+   cost = oterlist[om_diag->ter(lx, ly, levz)].see_cost;
+  } else if (lx < 0 || lx >= OMAPX) {
+   if (lx < 0) lx += OMAPX;
+   else        lx -= OMAPX;
+   cost = oterlist[om_hori->ter(lx, ly, levz)].see_cost;
+  } else if (ly < 0 || ly >= OMAPY) {
+   if (ly < 0) ly += OMAPY;
+   else        ly -= OMAPY;
+   cost = oterlist[om_vert->ter(lx, ly, levz)].see_cost;
+  }
+  sight_points -= cost;
+ }
+ return (sight_points >= 0);
+}
+
 void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
                    int &origx, int &origy, signed char &ch, bool blink,
                    overmap &hori, overmap &vert, overmap &diag)
@@ -1648,10 +1698,12 @@ void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
     omx = cursx + i;
     omy = cursy + j;
     see = false;
+	bool horde = false;
     npc_here = false;
     if (omx >= 0 && omx < OMAPX && omy >= 0 && omy < OMAPY) { // It's in-bounds
      cur_ter = ter(omx, omy, z);
      see = seen(omx, omy, z);
+	 horde = hasHorde(zh, omx, omy);
      note_here = has_note(omx, omy, z);
      if (note_here)
       note_text = note(omx, omy, z);
@@ -1664,12 +1716,14 @@ void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
       omy += (omy < 0 ? OMAPY : 0 - OMAPY);
       cur_ter = diag.ter(omx, omy, z);
       see = diag.seen(omx, omy, z);
+      horde = hasHorde(diag.zh, omx, omy);
       note_here = diag.has_note(omx, omy, z);
       if (note_here)
        note_text = diag.note(omx, omy, z);
      } else {
       cur_ter = hori.ter(omx, omy, z);
       see = hori.seen(omx, omy, z);
+      horde = hasHorde(hori.zh, omx, omy);
       note_here = hori.has_note(omx, omy, z);
       if (note_here)
        note_text = hori.note(omx, omy, z);
@@ -1680,12 +1734,14 @@ void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
       omy += (omy < 0 ? OMAPY : 0 - OMAPY);
       cur_ter = diag.ter(omx, omy, z);
       see = diag.seen(omx, omy, z);
+      horde = hasHorde(diag.zh, omx, omy);
       note_here = diag.has_note(omx, omy, z);
       if (note_here)
        note_text = diag.note(omx, omy, z);
      } else {
       cur_ter = hori.ter(omx, omy, z);
       see = hori.seen(omx, omy, z);
+      horde = hasHorde(hori.zh, omx, omy);
       note_here = hori.has_note(omx, omy, z);
       if (note_here)
        note_text = hori.note(omx, omy, z);
@@ -1694,6 +1750,7 @@ void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
      omy += OMAPY;
      cur_ter = vert.ter(omx, omy, z);
      see = vert.seen(omx, omy, z);
+     horde = hasHorde(vert.zh, omx, omy);
      note_here = vert.has_note(omx, omy, z);
      if (note_here)
       note_text = vert.note(omx, omy, z);
@@ -1701,6 +1758,7 @@ void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
      omy -= OMAPY;
      cur_ter = vert.ter(omx, omy, z);
      see = vert.seen(omx, omy, z);
+     horde = hasHorde(vert.zh, omx, omy);
      note_here = vert.has_note(omx, omy, z);
      if (note_here)
       note_text = vert.note(omx, omy, z);
@@ -1729,6 +1787,7 @@ void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
       ter_color = oterlist[cur_ter].color;
       ter_sym = oterlist[cur_ter].sym;
      }
+     if(horde && g->player_can_see_on_overmap(omx, omy)) { ter_sym = 'Z'; ter_color = c_ltgreen; }
     } else { // We haven't explored this tile yet
      ter_color = c_dkgray;
      ter_sym = '#';
@@ -3341,6 +3400,11 @@ void overmap::save()
   fout << "Z " << zg[i].type << " " << zg[i].posx << " " << zg[i].posy << " " << zg[i].posz << " " <<
     int(zg[i].radius) << " " << zg[i].population << " " << zg[i].diffuse << " " << zg[i].dying <<
     std::endl;
+ for (int i = 0; i < zh.size(); i++)
+  fout << "H " << zh[i].type << " " << zh[i].posx << " " << zh[i].posy << " " << zh[i].posz << " " <<
+    zh[i].pop_normal << " " << zh[i].pop_master << " " << zh[i].targetx << " " << zh[i].targety << " " <<
+    zh[i].last_move << " " << zh[i].wandf << " " << zh[i].flags <<
+    std::endl;
  for (int i = 0; i < cities.size(); i++)
   fout << "t " << cities[i].x << " " << cities[i].y << " " << cities[i].s <<
           std::endl;
@@ -3400,6 +3464,17 @@ void overmap::open(game *g)
     zg.back().diffuse = cd;
     zg.back().dying = cdying;
     nummg++;
+   } else if (datatype == 'H') {	// monster horde
+    int cpn, cpm, clm, cw, cf, tx, ty;
+    fin >> cstr >> cx >> cy >> cz >> cpn >> cpm >> tx >> ty >> clm >> cw >> cf;
+    zh.push_back(monhorde(cstr, cx, cy, cz, 0, 0));
+    zh.back().pop_normal = cpn;
+    zh.back().pop_master = cpm;
+    zh.back().targetx = tx;
+    zh.back().targety = ty;
+    zh.back().last_move = clm;
+    zh.back().wandf = cw;
+    zh.back().flags = cf;
    } else if (datatype == 't') {	// City
     fin >> cx >> cy >> cs;
     tmp.x = cx; tmp.y = cy; tmp.s = cs;
@@ -3657,3 +3732,17 @@ bool omspec_place::by_highway(overmap *om, unsigned long f, tripoint p)
   return false;
  return true;
 }
+
+std::vector<mongroup*> overmap::getMonGroupByType(const std::string &type) {
+	std::vector<mongroup*> result;
+	typedef std::vector<mongroup> MGVec;
+	for(MGVec::iterator a = zg.begin(); a != zg.end(); ++a) {
+		mongroup &group = *a;
+		if(group.type != type) {
+			continue;
+		}
+		result.push_back(&group);
+	}
+	return result;
+}
+

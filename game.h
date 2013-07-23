@@ -324,6 +324,8 @@ void load_artifacts(); // Load artifact data
  // ignore_player determines if player is affected, useful for bionic, etc.
  void shockwave(int x, int y, int radius, int force, int stun, int dam_mult, bool ignore_player);
 
+ bool player_can_see_on_overmap(int x, int y);
+
  private:
 // Game-start procedures
   bool opening_screen();// Warn about screen size, then present the main menu
@@ -500,8 +502,34 @@ void load_artifacts(); // Load artifact data
   void display_scent();   // Displays the scent map
   void mondebug();        // Debug monster behavior directly
   void groupdebug();      // Get into on monster groups
-
-
+  
+  overmap *getOverMap(int &omx, int &omy);
+  /**
+   * Try to spawn a new horde. This may fail because of different reasons.
+   * Simply call this method every n turns (or each turn witha one-in-n change).
+   */
+  void spawn_horde();
+  /**
+   * Goes through all the hordes and moves them.
+   */
+  void move_hordes();
+  /**
+   * Attract the nearby hordes to the sound.
+   * called from sound(), x and y are local coordinates!
+   */
+  void attract_hordes(int x, int y, int vol);
+  /**
+   * If hordes are in the current map area, spawn some of the member
+   * of that horde.
+   */
+  void spawn_horde_members();
+  /**
+   * If the monster is a horde-monster (part of the matching monster group),
+   * put it back into a horde.
+   * @returns true if this monster has been despawned. Otherwise false.
+   * The monster is not despawned if it is not a horde monster (not a zombie).
+   */
+  bool try_despawn_to_horde(monster &m, int shiftx = 0, int shifty = 0);
 
 // ########################## DATA ################################
 

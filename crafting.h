@@ -28,6 +28,10 @@ struct recipe {
   std::string ident;
   int id;
   itype_id result;
+  int count;
+  int count_range;
+  int noise;
+  std::string noise_string;
   craft_cat cat;
   Skill *sk_primary;
   Skill *sk_secondary;
@@ -39,10 +43,14 @@ struct recipe {
 
   std::vector<std::vector<component> > tools;
   std::vector<std::vector<component> > components;
-
+  
   recipe() {
     id = 0;
     result = "null";
+	count = -1;
+	count_range = -1;
+	noise = -1;
+	noise_string = "";
     sk_primary = NULL;
     sk_secondary = NULL;
     difficulty = 0;
@@ -57,6 +65,8 @@ recipe(std::string pident, int pid, itype_id pres, craft_cat pcat, std::string &
   ident (pident), id (pid), result (pres), cat(pcat), difficulty (pdiff), time (ptime),
   reversible (preversible), autolearn (pautolearn), learn_by_disassembly (plearn_dis)
   {
+	count = -1;
+	count_range = -1;
     sk_primary = p1.size()?Skill::skill(p1):NULL;
     sk_secondary = p2.size()?Skill::skill(p2):NULL;
   }

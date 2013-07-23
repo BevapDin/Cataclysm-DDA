@@ -924,9 +924,12 @@ std::string item::tname(game *g)
  if (food != NULL && g != NULL && food_type->spoils != 0 &&
    int(g->turn) - (int)(food->bday) > food_type->spoils * 600)
    ret << _(" (rotten)");
- if (food != NULL && g != NULL && food_type->spoils != 0 &&
+ else if (food != NULL && g != NULL && food_type->spoils != 0 &&
    int(g->turn) - (int)(food->bday) > (food_type->spoils * 600 * 3) / 4)
    ret << " (nearly rotten)";
+ 
+  if (has_flag("FIT"))
+   ret << " (fits)";
 
  if (has_flag("FIT")){
      ret << " (fits)";
@@ -2383,10 +2386,20 @@ bool item::use_charges(const itype_id &type_to_use, int &amount, std::list<item>
 }
 
 bool item::matches_type(const itype_id &type_) const {
-	if(type != 0 && type->functionalityMap.find(type_) != type->functionalityMap.end()) {
-		return true;
-	} else if(type->id == type_) {
-		return true;
+	if(type != 0) {
+		if(type->id == type_) {
+			return true; // exact match: this item is what we searched for
+		} else if(type->functionalityMap.find(type_) != type->functionalityMap.end()) {
+			return true; // OK, this item has the needed functionality.
+		} else if(type_.compare(0, 5, "func:") == 0 &&
+			type_.compare(5, std::string::npos, type->id) == 0) {
+			// We search for a functionality (func:...) and
+			// the type of this item happens to have the same name as the
+			// functionality
+			// You can use "func:pot" in a recipe, and it will match the
+			// "pot" item, even if that item has an empty functionalityMap.
+			return true;
+		}
 	}
 	return false;
 }

@@ -1881,7 +1881,7 @@ void vehicle::gain_moves (int mp)
 
     // If the vehicle is moving, trickle-charge storage batteries.
     if (velocity && one_in(10)) {
-      refill (AT_BATT, abs(velocity) / 100);
+      refill ("battery", abs(velocity) / 100);
     }
 
 	if(lights_on) {

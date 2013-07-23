@@ -55,6 +55,8 @@
 void intro();
 nc_color sev(int a);	// Right now, ONLY used for scent debugging....
 
+#define ENABLE_HORDES 1
+
 //The one and only game instance
 game *g;
 
@@ -670,6 +672,10 @@ bool game::do_turn()
   spawn_mon(-1 + 2 * rng(0, 1), -1 + 2 * rng(0, 1));
   nextspawn = turn;
  }
+ 
+#if ENABLE_HORDES
+ spawn_horde_members();
+#endif
 
  if(u.in_vehicle) {
 	vehicle *veh = m.veh_at(u.posx, u.posy);
@@ -744,6 +750,10 @@ bool game::do_turn()
 	}
  }
 
+#if ENABLE_HORDES
+ spawn_horde();
+ move_hordes();
+#endif
  monmove();
  update_stair_monsters();
  u.reset(this);
@@ -3152,13 +3162,25 @@ z.size(), active_npc.size(), events.size());
    dist = rl_dist(levx, levy, cur_om->zg[i].posx, cur_om->zg[i].posy);
   else
    dist = trig_dist(levx, levy, cur_om->zg[i].posx, cur_om->zg[i].posy);
-  if (dist <= rad * 4) {
+  if (dist <= rad * 4 || cur_om->zg[i].type == "GROUP_WANDERING_ZOMBIE") {
 // (The area of the group's territory) in (population/square at this range)
 // chance of adding one monster; cap at the population OR 16
  	buffer << "MG @" << cur_om->zg[i].posx << "," << cur_om->zg[i].posy << ": " << cur_om->zg[i].type << ": " << (cur_om->zg[i].diffuse ? "D " : "");
 	buffer << "POP: " << pop << " RAD: " << rad << " dist: " << dist;
     buffer << "\n";
   }
+ }
+ for(int i = 0; i < cur_om->zh.size() && i < 15; i++) {
+ 	if (cur_om->zh[i].posz != levz) { continue; }
+  int dist = rl_dist(levx, levy, cur_om->zh[i].posx, cur_om->zh[i].posy);
+  if(dist <= 40) {
+ 	buffer << "MH @" << cur_om->zh[i].posx << "," << cur_om->zh[i].posy << ": " << cur_om->zh[i].type << ": ";
+	buffer << "POP: " << cur_om->zh[i].pop_normal << "/" << cur_om->zh[i].pop_master << " > " << cur_om->zh[i].targetx << "," << cur_om->zh[i].targety;
+    buffer << "\n";
+  }
+ }
+ for(int i = 0; i < z.size() && i < 10; i++) {
+  buffer << "M: " << z[i].name() << " @ " << z[i].posx << "," << z[i].posy << "\n";
  }
  buffer << "\nPos is: " << levx << ", " << levy;
  popup_top(buffer.str().c_str());
@@ -4717,6 +4739,10 @@ void game::monmove()
      if (cur_om->zg[group].population / (cur_om->zg[group].radius * cur_om->zg[group].radius) > 5 &&
          !cur_om->zg[group].diffuse )
       cur_om->zg[group].radius++;
+#if ENABLE_HORDES
+    } else if (try_despawn_to_horde(z[i])) {
+      // all done in try_despawn_to_horde^^
+#endif
     } else if (MonsterGroupManager::Monster2Group((mon_id)(z[i].type->id)) != "GROUP_NULL") {
      cur_om->zg.push_back(mongroup(MonsterGroupManager::Monster2Group((mon_id)(z[i].type->id)),
                                   levx, levy, levz, 1, 1));
@@ -4763,6 +4789,9 @@ bool game::sound(int x, int y, int vol, std::string description)
    z[i].process_trigger(MTRIG_SOUND, volume);
   }
  }
+#if ENABLE_HORDES
+ attract_hordes(x, y, vol);
+#endif
 // Loud sounds make the next spawn sooner!
  int spawn_range = int(MAPSIZE / 2) * SEEX;
  if (vol >= spawn_range) {
@@ -8715,11 +8744,11 @@ void game::pickup(int posx, int posy, int min)
         u.moves -= 250;
       } else if(query_yn("Fill water into a container?")) {
         item water(itypes["water_clean"], turn);
-        int wamount = veh->fuel_left(AT_WATER);
+        int wamount = veh->fuel_left("water");
         water.charges = wamount;
         g->handle_liquid(water, false, false);
         if(water.charges != wamount) {
-          veh->drain(AT_WATER, wamount - water.charges);
+          veh->drain("water", wamount - water.charges);
           u.moves -= 100;
         }
       }
@@ -11513,6 +11542,10 @@ void game::despawn_monsters(const bool stairs, const int shiftx, const int shift
     if (cur_om->zg[group].population / (cur_om->zg[group].radius * cur_om->zg[group].radius) > 5 &&
         !cur_om->zg[group].diffuse)
      cur_om->zg[group].radius++;
+#if ENABLE_HORDES
+   } else if (try_despawn_to_horde(z[i], shiftx, shifty)) {
+     // All done int try_despawn_to_horde^^
+#endif
    }
   }
   // Shifting needs some cleanup for despawned monsters since they won't be cleared afterwards.
@@ -11555,6 +11588,7 @@ void game::spawn_mon(int shiftx, int shifty)
  monster zom;
  for (int i = 0; i < cur_om->zg.size(); i++) { // For each valid group...
  	if (cur_om->zg[i].posz != levz) { continue; } // skip other levels - hack
+ 	if(cur_om->zg[i].type == "GROUP_WANDERING_ZOMBIE") { continue; } // handled separat
   group = 0;
   if(cur_om->zg[i].diffuse)
    dist = square_dist(nlevx, nlevy, cur_om->zg[i].posx, cur_om->zg[i].posy);
@@ -11571,13 +11605,6 @@ void game::spawn_mon(int shiftx, int shifty)
 	  > rng(0, (rad * rad)) &&
           rng(0, MAPSIZE * 4) > group && group < pop && group < MAPSIZE * 3)
     group++;
-
-   cur_om->zg[i].population -= group;
-   // Reduce group radius proportionally to remaining
-   // population to maintain a minimal population density.
-   if (cur_om->zg[i].population / (cur_om->zg[i].radius * cur_om->zg[i].radius) < 1.0 &&
-       !cur_om->zg[i].diffuse)
-     cur_om->zg[i].radius--;
 
    if (group > 0) // If we spawned some zombies, advance the timer
     nextspawn += rng(group * 4 + z.size() * 4, group * 10 + z.size() * 10);
@@ -11614,8 +11641,15 @@ void game::spawn_mon(int shiftx, int shifty)
      if (iter < 50) {
       zom.spawn(monx, mony);
       z.push_back(zom);
+      cur_om->zg[i].population--;
      }
    }	// Placing monsters of this group is done!
+   // Reduce group radius proportionally to remaining
+   // population to maintain a minimal population density.
+   if (cur_om->zg[i].population / (cur_om->zg[i].radius * cur_om->zg[i].radius) < 1.0 &&
+       !cur_om->zg[i].diffuse)
+     cur_om->zg[i].radius--;
+
    if (cur_om->zg[i].population <= 0) { // Last monster in the group spawned...
     cur_om->zg.erase(cur_om->zg.begin() + i); // ...so remove that group
     i--;	// And don't increment i.

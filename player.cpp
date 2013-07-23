@@ -1253,6 +1253,8 @@ void player::update_bodytemp(game *g)
     {
         // Skip eyes
         if (i == bp_eyes) { continue; }
+        // Hooves don't generate heat, nor do the cool
+        if (i == bp_feet && has_trait(PF_HOOVES)) { continue; }
         // Represents the fact that the body generates heat when it is cold. TODO : should this increase hunger?
         float homeostasis_adjustement = (temp_cur[i] > BODYTEMP_NORM ? 30.0 : 60.0);
         int clothing_warmth_adjustement = homeostasis_adjustement * warmth(body_part(i));
@@ -1469,7 +1471,7 @@ void player::update_bodytemp(game *g)
         if (temp_cur[i] != temp_conv[i])
         {
             if      ((ter_at_pos == t_water_sh || ter_at_pos == t_sewage)
-                    && (i == bp_feet || i == bp_legs))
+                    && ((i == bp_feet && !has_trait(PF_HOOVES)) || i == bp_legs))
             {
                 temp_cur[i] = temp_difference*exp(-0.004) + temp_conv[i] + rounding_error;
             }
@@ -1601,6 +1603,10 @@ void player::update_bodytemp(game *g)
 
 void player::temp_equalizer(body_part bp1, body_part bp2)
 {
+ // Hooves do not heat up
+ if(bp2 == bp_feet && has_trait(PF_HOOVES)) {
+  return;
+ }
  // Body heat is moved around.
  // Shift in one direction only, will be shifted in the other direction seperately.
  int diff = (temp_cur[bp2] - temp_cur[bp1])*0.0001; // If bp1 is warmer, it will lose heat
@@ -3280,6 +3286,7 @@ void player::disp_status(WINDOW *w, WINDOW *w2, game *g)
  // Find hottest/coldest bodypart
  int min = 0, max = 0;
  for (int i = 0; i < num_bp ; i++ ){
+  if(i == bp_feet && has_trait(PF_HOOVES)) { continue; }
   if      (temp_cur[i] > BODYTEMP_HOT  && temp_cur[i] > temp_cur[max]) max = i;
   else if (temp_cur[i] < BODYTEMP_COLD && temp_cur[i] < temp_cur[min]) min = i;
  }
