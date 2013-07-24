@@ -100,7 +100,7 @@ bool hordeNear(overmap &om, int gx, int gy, int mindist) {
 }
 
 void game::spawn_horde() {
-	if(cur_om->zh.size() >= 1 && !one_in(HOURS(12))) {
+	if(cur_om->zh.size() >= 1 && !one_in(HOURS(36))) {
 		// Spawn a horde if there are  currently no hordes at all present
 		// otherwise only spawn once about ever 12 hours
 		return;
@@ -168,6 +168,7 @@ bool merge(std::vector<monhorde> &monhordes, int p) {
 			continue;
 		}
 		if(horde.merge(hordeX)) {
+			add_msg("Horde merged @ (rel: %d,%d): %d", x - (levx + MAPSIZE / 2), y - (levy + MAPSIZE / 2), horde.getPopulation());
 			return true;
 		}
 	}
@@ -259,16 +260,17 @@ void game::move_hordes() {
 }
 
 bool monhorde::move(game &g) {
-	const int move_points = g.turn - last_move;
+	int t = (int) g.turn;
+	const int move_points = t - last_move;
 	if(move_points < SEEX * 2) {
 		if(move_points < 0) {
-			last_move = g.turn;
+			last_move = t;
 		}
 		return false;
 	}
 	rest_here(g);
-	last_move += move_points;
-	if(one_in(10)) { // zombies are slow, the skip this move.
+	last_move = t;
+	if(!one_in(10)) { // zombies are slow, the skip this move.
 		return false;
 	}
 	if(wandf > 0) {
@@ -376,7 +378,7 @@ void game::spawn_horde_members() {
 				zom.spawn(monx, mony);
 				z.push_back(zom);
 				if(tarx != posx || tary != posy) {
-					z.back().wander_to(tarx, tary, MAPSIZE * SEEX * MAPSIZE * SEEY);
+					z.back().wander_to(tarx + rng(0, SEEX - 1), tary + rng(0, SEEY - 1), MAPSIZE * SEEX * MAPSIZE * SEEY);
 				}
 				add_msg("Horde-Zombie (rel: %d,%d) spawned at (rel: %d,%d)", horde.posx - (levx + MAPSIZE / 2), horde.posy - (levy + MAPSIZE / 2), monx - u.posx, mony - u.posy);
 				if(type == mon_zombie_master) {

@@ -3658,23 +3658,7 @@ bool map::loadn(game *g, const int worldx, const int worldy, const int worldz, c
     update_vehicle_cache(*it);
    }
   }
-
-  // check spoiled stuff
-  for(int x = 0; x < 12; x++) {
-      for(int y = 0; y < 12; y++) {
-          for(std::vector<item, std::allocator<item> >::iterator it = tmpsub->itm[x][y].begin();
-              it != tmpsub->itm[x][y].end();) {
-              if(it->goes_bad()) {
-                  it_comest *food = dynamic_cast<it_comest*>(it->type);
-                  int maxShelfLife = it->bday + (food->spoils * 600)*2;
-                  if(g->turn >= maxShelfLife) {
-                      it = tmpsub->itm[x][y].erase(it);
-                  } else { ++it; }
-              } else { ++it; }
-          }
-      }
-  }
-
+  check_spoiled(*tmpsub);
  } else { // It doesn't exist; we must generate it!
   dbg(D_INFO|D_WARNING) << "map::loadn: Missing mapbuffer data. Regenerating.";
   tinymap tmp_map(traps);
@@ -4037,6 +4021,65 @@ std::vector<point> closest_points_first(int radius, int center_x, int center_y)
         y += dy;
     }
     return points;
+}
+
+void map::check_spoiled(submap &sm)
+{
+    // check spoiled stuff
+    for(int x = 0; x < SEEX; x++)
+    {
+        for(int y = 0; y < SEEY; y++)
+        {
+            std::vector<item> &items = sm.itm[x][y];
+            for(std::vector<item>::iterator it = items.begin(); it != items.end(); )
+            {
+                it_comest *food = dynamic_cast<it_comest *>(it->type);
+                if(it->goes_bad() && food != 0)
+                {
+                    const int maxShelfLife = it->bday + (food->spoils * 600) * 2;
+                    if(g->turn >= maxShelfLife)
+                    {
+                        it = items.erase(it);
+                    }
+                    else
+                    {
+                        ++it;
+                    }
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+        }
+    }
+    for(std::vector<vehicle*>::iterator it = sm.vehicles.begin(); it != sm.vehicles.end(); it++) {
+		vehicle *veh = *it;
+		for(std::vector<vehicle_part>::iterator p = veh->parts.begin(); p != veh->parts.end(); p++) {
+			vehicle_part &part = *p;
+            std::vector<item> &items = part.items;
+            for(std::vector<item>::iterator it = items.begin(); it != items.end(); )
+            {
+                it_comest *food = dynamic_cast<it_comest *>(it->type);
+                if(it->goes_bad() && food != 0)
+                {
+                    const int maxShelfLife = it->bday + (food->spoils * 600) * 2;
+                    if(g->turn >= maxShelfLife)
+                    {
+                        it = items.erase(it);
+                    }
+                    else
+                    {
+                        ++it;
+                    }
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+		}
+	}
 }
 
 tinymap::tinymap()

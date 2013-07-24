@@ -69,5 +69,33 @@
     "name": "thread of some kind",
     "ammo_type" : "THREAD",
     "description": "???"
+  },
+  { "id":"func:soldering_iron",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "soldering iron",
+    "description": "???"
+  },
+  { "id":"func:welder",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "welder",
+    "description": "???"
+  },
+  { "id":"func:ax",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "ax",
+    "description": "???"
+  },
+  { "id":"func:shovel",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "shovel",
+    "description": "???"
   }
 ]

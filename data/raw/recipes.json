@@ -10048,6 +10048,75 @@
                                 ["2x4", 1]
                               ]
                           ]
+        },
+        {
+            "result": "set_of_tools_small",
+            "category": "CC_MISC",
+            "skill_pri": "mechanics",
+            "skill_sec": "survival",
+            "difficulty": 8,
+            "time": 10000,
+            "reversible": false,
+            "autolearn": true,
+            "tools": [
+                         [
+                             ["func:soldering_iron", 10],
+                             ["toolset_soldering_iron", 1]
+                         ],
+                         [
+							[ "func:hammer", -1 ]
+						],
+						[
+							[ "func:wrench", -1 ]
+						],
+						[
+							[ "func:screwdriver", -1 ]
+						]
+            ],
+            "components": [
+                              [ ["screwdriver", 1] ],
+                              [ ["hammer", 1] ],
+                              [ ["scissors", 1] ],
+                              [
+								["xacto", 1],
+								["knife_steak", 1],
+								["knife_butcher", 1],
+								["knife_combat", 1],
+								["pockknife", 1]
+							  ]
+                          ]
+        },
+        {
+            "result": "set_of_car_tools",
+            "category": "CC_MISC",
+            "skill_pri": "mechanics",
+            "skill_sec": "survival",
+            "difficulty": 10,
+            "time": 20000,
+            "reversible": false,
+            "autolearn": true,
+            "tools": [
+                         [
+                             ["func:welder", 20],
+                             ["toolset_welder", 1]
+                         ],
+                         [
+							[ "func:hammer", -1 ]
+						],
+						[
+							[ "func:screwdriver", -1 ]
+						],
+						[
+							[ "func:wrench", -1 ]
+						]
+            ],
+            "components": [
+                              [ ["wrench", 1] ],
+                              [ ["welder", 1] ],
+                              [ ["jack", 1] ],
+                              [ ["hose", 1] ],
+                              [ ["hacksaw", 1] ]
+                          ]
         }
     ]
 }

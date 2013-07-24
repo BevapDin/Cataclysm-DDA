@@ -159,6 +159,8 @@ class map
  void spawn_monsters(game *g);
  void clear_spawns();
  void clear_traps();
+ 
+ static void check_spoiled(submap &sm);
 
 // Movement and LOS
 

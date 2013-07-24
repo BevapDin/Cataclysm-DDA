@@ -105,8 +105,8 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
                   crafting_inv.has_charges("welder_crude", charges_crude)) ||
                 (crafting_inv.has_amount("toolset_welder", 1) &&
                  crafting_inv.has_charges("toolset_welder", charges/20));
-    has_jack = crafting_inv.has_amount("jack", 1);
-    has_siphon = crafting_inv.has_amount("hose", 1);
+    has_jack = crafting_inv.has_amount("func:jack", 1);
+    has_siphon = crafting_inv.has_amount("func:hose", 1);
 
     has_wheel = 0;
     has_wheel |= crafting_inv->has_amount( "wheel", 1 );
@@ -1045,7 +1045,7 @@ void complete_vehicle (game *g)
         if (veh->parts[part].hp <= 0)
         {
             used_item = crafting_inv.consume_vpart_item(g, vpart_info::getVehiclePartInfo(veh->parts[part].id).item);
-            tools.push_back(component("wrench", -1));
+            tools.push_back(component("func:wrench", -1));
             crafting_inv.consume_tools(tools, true);
             tools.clear();
             dd = 0;

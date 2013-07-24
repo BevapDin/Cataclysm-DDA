@@ -274,6 +274,20 @@ void vehicle::init_state(game* g, int init_veh_fuel, int init_veh_status)
     }
 }
 
+// Sort by part type,
+struct part_type_comparator {
+	vehicle *veh;
+	part_type_comparator(vehicle *v) : veh(v) { }
+	bool operator()(int a, int b) const {
+		if(&(veh->part_info(a)) != &(veh->part_info(b))) {
+			return &(veh->part_info(a)) < &(veh->part_info(b));
+		}
+		return a < b;
+	}
+};
+
+#include <algorithm>
+
 std::string vehicle::use_controls()
 {
  std::vector<vehicle_controls> options_choice;
@@ -285,7 +299,7 @@ std::string vehicle::use_controls()
  options_message.push_back(uimenu_entry((cruise_on) ? _("Disable cruise control") : _("Enable cruise control"), 'c'));
  curent++;
 
- std::vector<int> engines;
+	std::vector<int> engines;
 	for(int p = 0; p < parts.size(); p++) {
 		if(part_flag(p, vpf_engine) && parts[p].hp > 0) {
 			engines.push_back(p);
@@ -293,6 +307,7 @@ std::string vehicle::use_controls()
 			engines.push_back(p);
 		}
 	}
+	std::sort(engines.begin(), engines.end(), part_type_comparator(this));
 
  bool has_lights = false;
  bool has_turrets = false;
