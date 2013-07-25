@@ -1756,8 +1756,17 @@ int item::reload_time(player &u)
   if (skill_bonus > .75)
    skill_bonus = .75;
   ret -= double(ret) * skill_bonus;
- } else if (is_tool())
-  ret = 100 + volume() + (weight() / 113);
+ } else if (is_tool()) {
+  it_tool* tool = dynamic_cast<it_tool*>(type);
+  if(tool->ammo == "muscle") {
+    ret = (tool->max_charges - charges) * 10 * u.str_cur;
+    if(ret < 100) {
+      ret = 100;
+    }
+  } else {
+    ret = 100 + volume() + (weight() / 113);
+  }
+ }
 
  if (has_flag("STR_RELOAD"))
   ret -= u.str_cur * 20;
@@ -2133,8 +2142,19 @@ bool item::reload(player &u, char ammo_invlet)
  int max_load = 1;
  item *reload_target = NULL;
  item *ammo_container = (ammo_invlet != 0 ? &u.inv.item_by_letter(ammo_invlet) : NULL);
- item *ammo_to_use = ammo_container;
+ 
+ item muscle_ammo;
+ if(ammo_container == 0 && ammo_type() == "muscle") {
+   muscle_ammo = item_controller->create("muscle", 0);
+   muscle_ammo.charges = 10000;
+   ammo_container = &muscle_ammo;
+   ammo_invlet = 1;
+ } else if(ammo_container == 0) {
+  debugmsg("NULL item to reload");
+  return false;
+ }
 
+ item *ammo_to_use = ammo_container;
  // Handle ammo in containers, currently only gasoline
  if(ammo_to_use && ammo_to_use->is_container())
    ammo_to_use = &ammo_to_use->contents[0];

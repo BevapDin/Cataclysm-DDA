@@ -168,7 +168,7 @@ bool merge(std::vector<monhorde> &monhordes, int p) {
 			continue;
 		}
 		if(horde.merge(hordeX)) {
-			add_msg("Horde merged @ (rel: %d,%d): %d", x - (levx + MAPSIZE / 2), y - (levy + MAPSIZE / 2), horde.getPopulation());
+			g->add_msg("Horde merged @ (rel: %d,%d): %d", horde.posx - (g->levx + MAPSIZE / 2), horde.posy - (g->levy + MAPSIZE / 2), horde.getPopulation());
 			return true;
 		}
 	}
@@ -281,7 +281,6 @@ bool monhorde::move(game &g) {
 		targetx = posx + rng(-10, +10);
 		targety = posy + rng(-10, +10);
 		wandf = rng(1, 5); // Just stay with this target for a while
-		g.add_msg("Horde (rel: %d,%d) changes direction to %d,%d", posx - (g.levx + MAPSIZE / 2), posy - (g.levy + MAPSIZE / 2), targetx - posx, targety - posy);
 	}
 	if(posx == targetx && posy == targety) {
 		// Nothing to do, try to increase/decrease the population.
@@ -294,7 +293,6 @@ bool monhorde::move(game &g) {
 	} else {
 		posy += sign(targety - posy);
 	}
-	g.add_msg("Horde (rel: %d,%d) moves towards %d,%d", oldx - (g.levx + MAPSIZE / 2), oldy - (g.levy + MAPSIZE / 2), posx - oldx, posy - oldy);
 	if(posx == targetx && posy == targety) {
 		wandf = 0;
 	}
@@ -342,10 +340,10 @@ void game::spawn_horde_members() {
 	for(size_t i = 0; i < monhordes.size(); i++) {
 		monhorde &horde = monhordes[i];
 		// Check if we are in the area of the loaded map
-		if(horde.posx < levx + 1 || horde.posx >= levx + MAPSIZE - 1) {
+		if(horde.posx < levx || horde.posx >= levx + MAPSIZE) {
 			continue;
 		}
-		if(horde.posy < levy + 1 || horde.posy >= levy + MAPSIZE - 1) {
+		if(horde.posy < levy || horde.posy >= levy + MAPSIZE) {
 			continue;
 		}
 		int tarx = (horde.targetx - levx) * SEEX;
@@ -368,6 +366,7 @@ void game::spawn_horde_members() {
 				}
 			}
 			zom = monster(mtypes[type]);
+			zom.no_extra_death_drops = false;
 			for(int iter = 0; iter < 10; iter++) {
 				int monx = rng(0, SEEX - 1) + posx;
 				int mony = rng(0, SEEY - 1) + posy;

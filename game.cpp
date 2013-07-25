@@ -9643,6 +9643,7 @@ void game::reassign_item(char ch)
  }
  change_from->invlet = newch;
  add_msg("%c - %s", newch, change_from->tname().c_str());
+ //UPDATE INVLET-CACHE
 }
 
 void game::plthrow(char chInput)
@@ -10199,11 +10200,16 @@ single action."), u.weapon.tname().c_str());
    add_msg(_("You can't reload a %s!"), u.weapon.tname(this).c_str());
    return;
   }
-  char invlet = u.weapon.pick_reload_ammo(u, true);
-  if (invlet == 0) {
-// Reload failed
-   add_msg(_("Out of %s!"), ammo_name(tool->ammo).c_str());
-   return;
+  char invlet;
+  if(tool->ammo == "muscle") {
+    invlet = 0;
+  } else {
+    invlet = u.weapon.pick_reload_ammo(u, true);
+    if (invlet == 0) {
+      // Reload failed
+      add_msg(_("Out of %s!"), ammo_name(tool->ammo).c_str());
+      return;
+    }
   }
   u.assign_activity(this, ACT_RELOAD, u.weapon.reload_time(u), -1, invlet);
   u.moves = 0;

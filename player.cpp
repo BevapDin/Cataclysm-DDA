@@ -3601,11 +3601,16 @@ float player::active_light()
     float lumination = 0;
 
     int flashlight = active_item_charges("flashlight_on");
+    int dynamo_flashlight = active_item_charges("dynamo_flashlight_on");
     int torch = active_item_charges("torch_lit");
     int gasoline_lantern = active_item_charges("gasoline_lantern_on");
     if (flashlight > 0)
     {
         lumination = std::min(100, flashlight * 5);    // Will do for now
+    }
+    else if (dynamo_flashlight > 0)
+    {
+        lumination = std::min(100, dynamo_flashlight * 3);
     }
     else if (torch > 0)
     {

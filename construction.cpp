@@ -47,11 +47,9 @@ void game::init_construction()
  CONSTRUCT(_("Dig Pit"), 0, &construct::able_dig, &construct::done_nothing);
   STAGE(t_pit_shallow, 10);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
    TOOLCONT("digging_stick");
   STAGE(t_pit, 10);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
 
  CONSTRUCT(_("Spike Pit"), 0, &construct::able_pit, &construct::done_nothing);
   STAGE(t_pit_spiked, 5);
@@ -61,10 +59,8 @@ void game::init_construction()
  CONSTRUCT(_("Fill Pit"), 0, &construct::able_pit, &construct::done_nothing);
   STAGE(t_pit_shallow, 5);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
   STAGE(t_dirt, 5);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
 
  CONSTRUCT(_("Chop Down Tree"), 0, &construct::able_tree, &construct::done_tree);
   STAGE(t_dirt, 10);
@@ -109,10 +105,8 @@ void game::init_construction()
                              &construct::done_nothing);
   STAGE(t_door_c, 10);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("2x4", 3);
    COMP("nail", 12);
 
@@ -120,10 +114,8 @@ void game::init_construction()
   STAGE(t_door_boarded, 8);
    TOOL("func:hammer");
    TOOLCONT("hammer_sledge");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("2x4", 4);
    COMP("nail", 8);
 
@@ -132,48 +124,38 @@ void game::init_construction()
   STAGE(t_window_boarded, 5);
    TOOL("func:hammer");
    TOOLCONT("hammer_sledge");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("2x4", 4);
    COMP("nail", 8);
 
  CONSTRUCT(_("Build Wall"), 2, &construct::able_empty, &construct::done_nothing);
   STAGE(t_wall_half, 10);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("2x4", 10);
    COMP("nail", 20);
   STAGE(t_wall_wood, 10);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("2x4", 10);
    COMP("nail", 20);
 
  CONSTRUCT(_("Build Log Wall"), 2, &construct::able_dig, &construct::done_nothing);
   STAGE(t_pit_shallow, 10);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
    TOOLCONT("digging_stick");
   STAGE(t_pit, 10);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
   STAGE(t_wall_log_half, 20);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
    COMP("log", 2);
    COMP("stick", 3);
    COMPCONT("2x4", 6);
   STAGE(t_wall_log, 20);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
    COMP("log", 2);
    COMP("stick", 3);
    COMPCONT("2x4", 6);
@@ -181,14 +163,11 @@ void game::init_construction()
  CONSTRUCT(_("Build Palisade Wall"), 2, &construct::able_dig, &construct::done_nothing);
   STAGE(t_pit_shallow, 10);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
    TOOLCONT("digging_stick");
   STAGE(t_pit, 10);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
   STAGE(t_palisade, 20);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
    COMP("log", 3);
    COMP("rope_6", 2);
 
@@ -201,14 +180,11 @@ void game::init_construction()
  CONSTRUCT(_("Build Palisade Gate"), 2, &construct::able_dig, &construct::done_nothing);
   STAGE(t_pit_shallow, 10);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
    TOOLCONT("digging_stick");
   STAGE(t_pit, 10);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
   STAGE(t_palisade_gate, 20);
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
    COMP("log", 2);
    COMP("2x4", 3);
    COMP("rope_6", 2);
@@ -217,10 +193,8 @@ void game::init_construction()
                               &construct::done_nothing);
   STAGE(t_window_empty, 10);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("2x4", 15);
    COMPCONT("log", 2);
    COMP("nail", 30);
@@ -237,18 +211,14 @@ void game::init_construction()
                               &construct::done_nothing);
   STAGE(t_door_frame, 15);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("2x4", 12);
    COMP("nail", 24);
   STAGE(t_door_c, 15);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("2x4", 4);
    COMP("nail", 12);
 
@@ -256,10 +226,7 @@ void game::init_construction()
                                  &construct::done_nothing);
   STAGE(t_chainfence_posts, 20);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
-   TOOLCONT("rock");
-   TOOLCONT("toolset_hammer");
    COMP("pipe", 6);
    COMP("scrap", 8);
   STAGE(t_chainfence_v, 20);
@@ -293,10 +260,8 @@ void game::init_construction()
                             &construct::done_nothing);
   STAGE(t_floor, 40);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("2x4", 8);
    COMP("nail", 40);
 
@@ -304,67 +269,11 @@ void game::init_construction()
                             &construct::done_nothing);
   STAGE(t_floor, 80);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
-   TOOLCONT("toolset_hammer");
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
    COMP("log", 2);
    COMP("stick", 4);
    COMPCONT("2x4", 8);
-
- CONSTRUCT("Build metal roof", 10, &construct::able_between_walls,
-                            &construct::done_nothing);
-  STAGE(t_metal_floor, 30);
-   TOOL("func:wrench");
-   TOOLCONT("toolset_wrench");
-   TOOL("func:welder");
-   TOOLCONT("toolset_welder");
-   TOOL("func:hacksaw");
-   TOOLCONT("toolset_hacksaw");
-   TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
-   COMP("frame", 3);
-   COMP("steel_plate", 2);
-   COMPCONT("sheet_metal", 4);
-
- CONSTRUCT("Build metal wall (v)", 10, &construct::able_dig, &construct::done_nothing);
-  STAGE(t_pit_shallow, 10);
-   TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
-   TOOLCONT("digging_stick");
-  STAGE(t_pit, 10);
-   TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
-  STAGE(t_wall_metal_v, 30);
-   TOOL("wrench");
-   TOOLCONT("toolset_wrench");
-   TOOL("func:welder");
-   TOOLCONT("toolset_welder");
-   TOOL("func:hacksaw");
-   TOOLCONT("toolset_hacksaw");
-   COMP("frame", 4);
-   COMP("steel_plate", 1);
-   COMPCONT("sheet_metal", 2);
-   
- CONSTRUCT("Build metal wall (h)", 10, &construct::able_dig, &construct::done_nothing);
-  STAGE(t_pit_shallow, 10);
-   TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
-   TOOLCONT("digging_stick");
-  STAGE(t_pit, 10);
-   TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
-  STAGE(t_wall_metal_h, 30);
-   TOOL("func:wrench");
-   TOOLCONT("toolset_wrench");
-   TOOL("func:welder");
-   TOOLCONT("toolset_welder");
-   TOOL("func:hacksaw");
-   TOOLCONT("toolset_hacksaw");
-   COMP("frame", 4);
-   COMP("steel_plate", 1);
-   COMPCONT("sheet_metal", 2);
 
 // Base stuff
  CONSTRUCT(_("Build Bulletin Board"), 0, &construct::able_empty,
@@ -374,7 +283,6 @@ void game::init_construction()
    TOOL("func:hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("2x4", 4);
    COMP("nail", 8);
 
@@ -384,10 +292,8 @@ void game::init_construction()
   STAGE(f_dresser, 20);
    TOOL("func:saw");
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("nail", 8);
    COMP("2x4", 6);
 
@@ -396,10 +302,8 @@ void game::init_construction()
   STAGE(f_bookcase, 20);
    TOOL("func:saw");
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("nail", 16);
    COMP("2x4", 12);
 
@@ -407,9 +311,7 @@ void game::init_construction()
                                 &construct::done_nothing);
   STAGE(f_locker, 20);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
-   TOOLCONT("toolset_hammer");
    TOOL("func:wrench");
    COMP("sheet_metal", 2);
    COMP("pipe", 8);
@@ -418,9 +320,7 @@ void game::init_construction()
                                 &construct::done_nothing);
   STAGE(f_rack, 20);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
-   TOOLCONT("toolset_hammer");
    TOOL("func:wrench");
    COMP("pipe", 12);
 
@@ -428,10 +328,8 @@ void game::init_construction()
                                 &construct::done_nothing);
   STAGE(f_counter, 20);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("nail", 8);
    COMP("2x4", 6);
 
@@ -439,10 +337,8 @@ void game::init_construction()
                                 &construct::done_nothing);
   STAGE(f_makeshift_bed, 20);
    TOOL("func:hammer");
-//   TOOLCONT("primitive_hammer");
-//   TOOLCONT("hatchet");
-//   TOOLCONT("nailgun");
-//   TOOLCONT("toolset_hammer");
+   TOOLCONT("hatchet");
+   TOOLCONT("nailgun");
    COMP("nail", 8);
    COMP("2x4", 10);
    COMP("blanket", 1);
@@ -456,12 +352,9 @@ void game::init_construction()
                                 &construct::done_deconstruct);
   STAGE(20);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    TOOL("func:screwdriver");
-   TOOLCONT("toolset_screwdriver");
 
  CONSTRUCT(_("Start vehicle construction"), 0, &construct::able_empty, &construct::done_vehicle);
   STAGE(10);
@@ -473,12 +366,9 @@ void game::init_construction()
  CONSTRUCT("Place wheelbarrow", 0, &construct::able_empty, &construct::done_wheelbarrow);
   STAGE(30);
    TOOL("func:screwdriver");
-   TOOLCONT("toolset_screwdriver");
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
    TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    COMP("nail", 4);
    COMP("wheel", 1);
    COMP("frame", 1);
@@ -488,10 +378,7 @@ void game::init_construction()
                              &construct::done_nothing);
   STAGE(t_fence_post, 5);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("func:shovel");
-   TOOLCONT("primitive_shovel");
-   TOOLCONT("rock");
    TOOLCONT("hatchet");
    TOOLCONT("func:ax");
    TOOLCONT("primitive_axe");
@@ -502,7 +389,6 @@ void game::init_construction()
  		                                   &construct::done_nothing);
   STAGE(f_woodstove, 10);
    TOOL("hacksaw");
-   TOOLCONT("toolset_hacksaw");
    COMP("metal_tank", 1);
    COMP("pipe", 1);
 
@@ -510,26 +396,61 @@ void game::init_construction()
  		                                   &construct::done_nothing);
   STAGE(f_fireplace, 40);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("func:shovel");
-   TOOLCONT("primitive_shovel");
-   TOOLCONT("toolset_hammer");
    COMP("rock", 40);
+
+ CONSTRUCT("Build metal roof", 10, &construct::able_between_walls,
+                            &construct::done_nothing);
+  STAGE(t_metal_floor, 30);
+   TOOL("func:wrench");
+   TOOL("func:welder");
+   TOOLCONT("toolset_welder");
+   TOOL("func:hacksaw");
+   TOOL("func:shovel");
+   COMP("frame", 3);
+   COMP("steel_plate", 2);
+   COMPCONT("sheet_metal", 4);
+
+ CONSTRUCT("Build metal wall (v)", 10, &construct::able_dig, &construct::done_nothing);
+  STAGE(t_pit_shallow, 10);
+   TOOL("func:shovel");
+   TOOLCONT("digging_stick");
+  STAGE(t_pit, 10);
+   TOOL("func:shovel");
+  STAGE(t_wall_metal_v, 30);
+   TOOL("wrench");
+   TOOL("func:welder");
+   TOOLCONT("toolset_welder");
+   TOOL("func:hacksaw");
+   COMP("frame", 4);
+   COMP("steel_plate", 1);
+   COMPCONT("sheet_metal", 2);
+   
+ CONSTRUCT("Build metal wall (h)", 10, &construct::able_dig, &construct::done_nothing);
+  STAGE(t_pit_shallow, 10);
+   TOOL("func:shovel");
+   TOOLCONT("digging_stick");
+  STAGE(t_pit, 10);
+   TOOL("func:shovel");
+  STAGE(t_wall_metal_h, 30);
+   TOOL("func:wrench");
+   TOOL("func:welder");
+   TOOLCONT("toolset_welder");
+   TOOL("func:hacksaw");
+   COMP("frame", 4);
+   COMP("steel_plate", 1);
+   COMPCONT("sheet_metal", 2);
    
  CONSTRUCT("Build steel compactor", 10, &construct::able_empty,
                               &construct::done_nothing);
   STAGE(t_recycler, 120);
    TOOL("func:hammer");
-   TOOLCONT("primitive_hammer");
    TOOLCONT("hatchet");
-   TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
    TOOL("func:hacksaw");
-   TOOLCONT("toolset_hacksaw");
+   TOOL("func:welder");
+   TOOLCONT("toolset_welder");
    TOOL("func:shovel");
-   TOOLCONT("primitive_shovel");
    TOOL("func:wrench");
-   TOOLCONT("toolset_wrench");
    COMP("steel_plate", 4);
    COMP("frame", 8);
    COMP("battery", 200); // for welder
