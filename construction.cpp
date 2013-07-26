@@ -9,6 +9,7 @@
 #include "crafting.h" // For the use_comps use_tools functions
 #include "item_factory.h"
 #include "catacharset.h"
+#include "crafting_inventory_t.h"
 
 bool will_flood_stop(map *m, bool (&fill)[SEEX * MAPSIZE][SEEY * MAPSIZE],
                      int x, int y);
@@ -740,46 +741,38 @@ double toolfactor(const item &it) {
 		basefactor *= 2.0;
 	}
 
-	if(it.damage > 0) {
+	if(it.get_damaged() > 0) {
 		// damaged tool -> smaller factor
-		basefactor /= (it.damage + 1.0);
-	} else if(it.damage < 0) {
+		basefactor /= (it.get_damaged() + 1.0);
+	} else if(it.get_damaged() < 0) {
 		// Reinforced tools? damage=-1 -> basefactor *= 1.5
-		basefactor *= (1.0 + 1.0 / (-it.damage + 1.0));
+		basefactor *= (1.0 + 1.0 / (-it.get_damaged() + 1.0));
 	}
 	if(it.burnt > 0) {
 		// burnt tool -> smaller factor
-		basefactor /= (it.damage + 1.0);
+		basefactor /= (it.get_damaged() + 1.0);
 	}
 	return basefactor;
 }
 
 double toolfactors(player &p, crafting_inventory_t &pinv, construction_stage &stage) {
-	double factor = 1.0;
+	double best_modi = 0.0;
 	for(size_t j = 0; j < 10; j++) {
+		// tools: we need one (any) tool from this vector:
 		std::vector<component> &tools = stage.tools[j];
 		if(tools.empty()) {
 			continue;
 		}
-		double besttool = 0.0;
-		for(size_t k = 0; k < tools.size(); k++) {
-			const itype_id &type = tools[k].type;
-			std::vector<const item*> items = pinv.all_items_by_type(type);
-			if(items.empty()) {
-				continue;
-			}
-			for(size_t l = 0; l < items.size(); l++) {
-				double toolfactor = ::toolfactor(*items[l]);
-				if(besttool == 0.0 || besttool < toolfactor) {
-					besttool = toolfactor;
-				}
-			}
-		}
-		if(besttool > 0) {
-			factor *= besttool;
+		const double modi = pinv.compute_time_modi(tools);
+		// We must take the worst (largest) modi here, because
+		// if several tools are required (think hammer+screwdriver)
+		// it does not matter if one of those is super-mega-good,
+		// if the other is bad and damaged
+		if(modi > 0.0 && best_modi < modi) {
+			best_modi = modi;
 		}
 	}
-	return factor;
+	return best_modi;
 }
 
 int move_ppoints_for_construction(constructable *con, size_t stage_index, crafting_inventory_t &total_inv) {
@@ -788,21 +781,21 @@ int move_ppoints_for_construction(constructable *con, size_t stage_index, crafti
 	if(toolfactor > 0) {
 		move_points = static_cast<int>(move_points * toolfactor);
 	}
+	double skillfactor = 1.0;
 	int skill = g->u.skillLevel("carpentry");
 	if(skill > 0 && skill > con->difficulty) {
 		// if skill is big enough, the construction time changes
 		// up to half the time (for infinit skill level)
-		double factor;
 		if(con->difficulty > 1.0) {
-			factor = static_cast<double>(con->difficulty) / skill;
+			skillfactor = static_cast<double>(con->difficulty) / skill;
 		} else {
-			factor = 1.0 / skill;
+			skillfactor = 1.0 / skill;
 		}
 		// factor should be in the range (0, 1]
 		move_points /= 2;
-		move_points += static_cast<double>(move_points) * factor;
+		move_points += static_cast<double>(move_points) * skillfactor;
 	}
-	g->add_msg("Buildtime: %d <> %d (f: %f)", con->stages[stage_index].time * 1000, move_points, toolfactor);
+	g->add_msg("constr-factors: skill: %f tool: %f", skillfactor, toolfactor);
 	return move_points;
 }
 
@@ -983,8 +976,6 @@ void game::complete_construction()
  int stage_num = u.activity.values[0];
  constructable *built = constructions[u.activity.index];
  construction_stage stage = built->stages[stage_num];
- std::vector<component> player_use;
- std::vector<component> map_use;
 
  u.practice(turn, "carpentry", built->difficulty * 10);
  if (built->difficulty == 0)

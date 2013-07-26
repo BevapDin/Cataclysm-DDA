@@ -6236,6 +6236,42 @@
                           ]
         },
 
+        {
+            "result": "vehicle_horn",
+            "category": "CC_ELECTRONIC",
+            "skill_pri": "mechanics",
+            "skill_sec": "electronics",
+            "difficulty": 3,
+            "time": 5000,
+            "reversible": false,
+            "autolearn": true,
+            "tools": [
+                         [
+                             ["func:screwdriver", -1]
+                         ],
+                         [
+                             ["func:hammer", -1]
+                         ],
+                         [
+                             ["soldering_iron", 10],
+                             ["toolset_soldering_iron", 1]
+                         ]
+                     ],
+            "components": [
+                              [
+                                  ["wire", 4]
+                              ],
+                              [
+                                  ["scrap", 2]
+                              ],
+                              [
+                                  ["pipe", 1]
+                              ],
+                              [
+                                  ["plastic_chunk", 4]
+                              ]
+                          ]
+        },
 
         {
             "result": "bio_recycler",
@@ -8441,7 +8477,7 @@
                      ],
             "components": [
                               [
-                                  ["steel_chunk", 4]
+                                  ["steel_chunk", 10]
                               ]
                           ]
         },
@@ -8539,7 +8575,8 @@
                      ],
             "components": [
                               [
-                                  ["steel_lump", 8]
+                                  ["steel_lump", 7],
+                                  ["steel_chunk", 100]
                               ]
                           ]
         },
@@ -8565,7 +8602,7 @@
                      ],
             "components": [
                               [
-                                  ["steel_lump", 8],
+                                  ["steel_lump", 7],
                                   ["steel_plate", 1]
                               ],
                               [
@@ -8597,7 +8634,8 @@
                      ],
             "components": [
                               [
-                                  ["steel_lump", 24]
+                                  ["steel_lump", 24],
+                                  ["steel_plate", 3]
                               ]
                           ]
         },
@@ -9509,7 +9547,7 @@
                      ],
             "components": [
                               [
-                                  ["scrap", 3]
+                                  ["scrap", 6]
                               ]
                           ]
         },

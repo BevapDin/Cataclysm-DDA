@@ -8,6 +8,8 @@
 #define mfb(n) long(1 << (n))
 #endif
 
+class vehicle;
+
 enum vpart_id
 {
     vp_null = 0,
@@ -109,35 +111,38 @@ enum vpart_flags
     vpf_sharp,              // cutting damage instead of bashing
     vpf_unmount_on_damage,  // when damaged, part is unmounted, rather than broken
     vpf_boardable,          // part can carry passengers
+    vpf_variable_size,      // has 'bigness' for power, wheel radius, etc.
+   
+	num_vpflags
+};
 
 // functional flags (only one of each can be mounted per tile)
-    vpf_over,               // can be mounted over other part
-    vpf_roof,               // is a roof (cover)
-    vpf_wheel,              // this part touches ground (trigger traps)
-    vpf_seat,               // is seat
-    vpf_bed,                // is bed (like seat, but can't be boarded)
-    vpf_aisle,               // is aisle (no extra movement cost)
-    vpf_engine,             // is engine
-    vpf_kitchen,            // is kitchen
-    vpf_fuel_tank,          // is fuel tank
-    vpf_cargo,              // is cargo
-    vpf_controls,           // is controls
-    vpf_muffler,            // is muffler
-    vpf_seatbelt,           // is seatbelt
-    vpf_solar_panel,        // is solar panel
-    vpf_turret,             // is turret
-    vpf_armor,              // is armor plating
-    vpf_light,              // generates light arc
-    vpf_variable_size,      // has 'bigness' for power, wheel radius, etc.
-    vpf_func_begin  = vpf_over,
-    vpf_func_end    = vpf_light,
-
-    num_vpflags
+enum vpart_function {
+    vpc_over,               // can be mounted over other part
+    vpc_roof,               // is a roof (cover)
+    vpc_wheel,              // this part touches ground (trigger traps)
+    vpc_seat,               // is seat
+    vpc_bed,                // is bed (like seat, but can't be boarded)
+    vpc_aisle,              // is aisle (no extra movement cost)
+    vpc_engine,             // is engine
+    vpc_kitchen,            // is kitchen
+    vpc_fuel_tank,          // is fuel tank
+    vpc_cargo,              // is cargo
+    vpc_controls,           // is controls
+    vpc_muffler,            // is muffler
+    vpc_seatbelt,           // is seatbelt
+    vpc_solar_panel,        // is solar panel
+    vpc_turret,             // is turret
+    vpc_armor,              // is armor plating
+    vpc_light,              // generates light arc
+	vpc_horn,               // vehicle horn
+    
+	num_vpfunctions
 };
 
 struct vpart_info
 {
-    const char *name;       // part name
+    std::string name;       // part name
     long sym;               // symbol of part as if it's looking north
     nc_color color;         // color
     char sym_broken;        // symbol of broken part as if it's looking north
@@ -156,14 +161,42 @@ struct vpart_info
     std::string fuel_type;  // engine, fuel tank
     itype_id item;      // corresponding item
     int difficulty;     // installation difficulty (mechanics requirement)
-    unsigned long flags;    // flags
+    
+private:
+    unsigned long flags;    // flags (vpart_flags)
+    unsigned long functions;    // functions (vpart_function)
+public:
+	
+	vpart_info(
+		const std::string &name, long sym, nc_color color, char sym_broken,
+		nc_color color_broken, int dmg_mod, int durability, int par1, int par2,
+		const std::string &fuel_type, const itype_id &item, int difficulty,
+		int flags, int functions
+  	) : name(name), sym(sym), color(color), sym_broken(sym_broken),
+  	color_broken(color_broken), dmg_mod(dmg_mod), durability(durability),
+  	par1(par1), par2(par2), fuel_type(fuel_type), item(item),
+  	difficulty(difficulty), flags(flags), functions(functions) { }
 
     static int getNumberOfParts();
 	static const vpart_info &getVehiclePartInfo(vpart_id index);
 
-	bool isKitchen() const;
-	bool isFireplace() const;
-	bool isWheel() const;
+	bool has_function(vpart_function function) const;
+	bool has_flag(vpart_flags flag) const;
+	
+	typedef std::pair<itype_id, int> type_count_pair;
+	typedef std::vector<type_count_pair> type_count_pair_vector;
+	
+	/**
+	 * Get the materials needed for repairing this part,
+	 * @param hp the current hp of the part.
+	 */
+	type_count_pair_vector get_repair_materials(int hp) const;
+	
+	/**
+	 * Do something, is called each turn from vehicle::gain_moves,
+	 * for each part of the car.
+	 */
+	void on_turn(vehicle *veh, int part) const;
 };
 
 

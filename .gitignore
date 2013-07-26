@@ -3,6 +3,7 @@ cataclysm-tiles
 data/*.template
 save/
 memorial/
+save.*/
 obj/
 debug.log
 logg.txt
@@ -34,3 +35,12 @@ gmon.out
 # System Files
 Thumbs.db
 .DS_Store
+
+core
+cataclysm.prof
+astyle.sh
+data/auto_pickup.txt
+gprof.output
+c
+cur/
+

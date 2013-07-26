@@ -69,7 +69,7 @@ void mdeath::normal(game *g, monster *z)
     {
         item tmp;
         tmp.make_corpse(g->itypes["corpse"], z->type, g->turn);
-        tmp.damage = corpse_damage;
+        tmp.set_damaged(corpse_damage);
         g->m.add_item_or_charges(z->posx, z->posy, tmp);
     }
 

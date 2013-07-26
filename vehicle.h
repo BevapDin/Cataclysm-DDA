@@ -216,10 +216,12 @@ public:
     std::vector<int> internal_parts (int p);
 
 // returns index of part, inner to given, with certain flag (WARNING: without mfb!), or -1
-    int part_with_feature (int p, unsigned int f, bool unbroken = true);
+    int part_with_flag(int p, vpart_flags f, bool unbroken = true);
+    int part_with_function(int p, vpart_function f, bool unbroken = true);
 
 // returns true if given flag is present for given part index (WARNING: without mfb!)
-    bool part_flag (int p, unsigned int f) const;
+    bool part_flag (int p, vpart_flags f) const;
+    bool part_function (int p, vpart_function f) const;
 
 // Translate seat-relative mount coords into tile coords
     void coord_translate (int reldx, int reldy, int &dx, int &dy);
@@ -395,6 +397,7 @@ public:
 
     // upgrades/refilling/etc. see veh_interact.cpp
     void interact ();
+	bool toogle_active_menu(const std::vector<int> &parts_to_toggle, const std::string &title);
 
     // return a vector w/ 'direction' & 'magnitude', in its own sense of the words.
     rl_vec2d velo_vec();

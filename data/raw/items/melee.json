@@ -429,7 +429,7 @@
     "bashing": 12,
     "cutting": 12,
     "flags" : ["CHOP"],
-    "functions" : [ [ "func:hammer" ] , [ "func:blade" ] ],
+    "functions" : [ [ "func:hammer" ] , [ "func:blade", 0.98 ] ],
     "to_hit": 1
   },
 
@@ -1204,7 +1204,7 @@
     "volume": 9,
     "bashing": 4,
     "cutting": 0,
-    "functions": [ [ "func:pot", 0.2 ] ],
+    "functions": [ [ "func:pot" ] ],
     "to_hit": -1
   },
 

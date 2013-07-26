@@ -10,10 +10,10 @@
 
 bool player_wields_umbrella(game *g) {
 	if(g->u.weapon.typeId() == "umbrella" || g->u.weapon.typeId() == "primitive_umbrella") {
-		if(g->u.weapon.damage <= 3) {
+		if(g->u.weapon.get_damaged() <= 3) {
 			return true;
 		}
-		return one_in((6 - g->u.weapon.damage) * 3);
+		return one_in((6 - g->u.weapon.get_damaged()) * 3);
 	}
 	return false;
 }
@@ -96,8 +96,8 @@ void weather_effect::light_acid(game *g)
         {
             g->add_msg(_("Your umbrella protects you from the acidic drizzle."));
 			if(one_in(90)) {
-				g->u.weapon.damage++;
-				if(g->u.weapon.damage >= 5) {
+				g->u.weapon.increase_damaged(1);
+				if(g->u.weapon.is_destroyed()) {
 					g->add_msg("Your %s is destroyed by the acid drizzle!", g->u.weapon.name.c_str());
 					g->u.remove_weapon();
 				} else {
@@ -128,8 +128,8 @@ void weather_effect::acid(game *g)
         {
             g->add_msg(_("Your umbrella protects you from the acid rain."));
 			if(one_in(40)) {
-				g->u.weapon.damage++;
-				if(g->u.weapon.damage >= 5) {
+				g->u.weapon.increase_damaged(1);
+				if(g->u.weapon.is_destroyed()) {
 					g->add_msg("Your %s is destroyed by the acid rain!", g->u.weapon.name.c_str());
 					g->u.remove_weapon();
 				} else {

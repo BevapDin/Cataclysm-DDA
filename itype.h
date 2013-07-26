@@ -150,6 +150,8 @@ struct itype
   * time_modi: changes how long a task takes.
   * charges_modi: changes how many charges a task takes.
   * (if 0 or negativ the task can be done without any charges)
+  * As these numbers are used as factors, smaller means better
+  * (less time, less charges).
   */
  struct functionality_t {
 	 float time_modi;

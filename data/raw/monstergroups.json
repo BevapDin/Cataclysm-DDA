@@ -66,10 +66,11 @@
     "monsters" : [
       { "monster" : "mon_zombie_shrieker", "freq" : 90, "multiplier" : 0 },
       { "monster" : "mon_zombie_cop", "freq" : 40, "multiplier" : 0 },
-      { "monster" : "mon_zombie_child", "freq" : 20, "multiplier" : 0 },
-      { "monster" : "mon_zombie_scientist", "freq" : 20, "multiplier" : 0 },
-      { "monster" : "mon_zombie_soldier", "freq" : 20, "multiplier" : 0 },
-      { "monster" : "mon_zombie_master", "freq" : 10, "multiplier" : 0 }
+      { "monster" : "mon_zombie_child", "freq" : 60, "multiplier" : 0 },
+      { "monster" : "mon_zombie_scientist", "freq" : 10, "multiplier" : 0 },
+      { "monster" : "mon_zombie_electric", "freq" : 30, "multiplier" : 0 },
+      { "monster" : "mon_zombie_soldier", "freq" : 10, "multiplier" : 0 },
+      { "monster" : "mon_zombie_brute", "freq" : 10, "multiplier" : 0 }
     ]
   },
   {

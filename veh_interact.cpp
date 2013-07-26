@@ -8,6 +8,7 @@
 #include "crafting.h"
 #include "options.h"
 #include "debug.h"
+#include "crafting_inventory_t.h"
 
 veh_interact::veh_interact () : crafting_inv(0)
 {
@@ -258,7 +259,7 @@ void veh_interact::do_install(int reason)
     int dif_eng = 0;
     for (int p = 0; p < veh->parts.size(); p++)
     {
-        if (veh->part_flag (p, vpf_engine))
+        if (veh->part_function (p, vpc_engine))
         {
             engines++;
             dif_eng = dif_eng / 2 + 12;
@@ -283,7 +284,7 @@ void veh_interact::do_install(int reason)
         wprintz(w_msg, c_ltgray, rm_prefix(_("<veh>, and level ")).c_str());
         wprintz(w_msg, has_skill? c_ltgreen : c_red, "%d", vpart_list[sel_part].difficulty);
         wprintz(w_msg, c_ltgray, rm_prefix(_("<veh> skill in mechanics.")).c_str());
-        bool eng = vpart_list[sel_part].flags & mfb (vpf_engine);
+        bool eng = part_info.has_function(vpc_engine);
         bool has_skill2 = !eng || (g->u.skillLevel("mechanics") >= dif_eng);
         if (engines && eng) // already has engine
         {
@@ -355,23 +356,33 @@ void veh_interact::do_repair(int reason)
     while (true)
     {
         sel_part = parts_here[need_repair[pos]];
+        const vpart_info &pinfo = veh->part_info(sel_part);
+		vpart_info::type_count_pair_vector items_needed = pinfo.get_repair_materials(veh->parts[sel_part].hp);
         werase (w_parts);
         veh->print_part_desc (w_parts, 0, winw2, cpart, need_repair[pos]);
         wrefresh (w_parts);
         werase (w_msg);
         bool has_comps = true;
-        int dif = veh->part_info(sel_part).difficulty + (veh->parts[sel_part].hp <= 0? 0 : 2);
+        int dif = pinfo.difficulty + (veh->parts[sel_part].hp <= 0? 0 : 2);
         bool has_skill = g->u.skillLevel("mechanics") >= dif;
         mvwprintz(w_msg, 0, 1, c_ltgray, _("You need level %d skill in mechanics."), dif);
         mvwprintz(w_msg, 0, 16, has_skill? c_ltgreen : c_red, "%d", dif);
-        if (veh->parts[sel_part].hp <= 0)
+        if (!items_needed.empty())
         {
-            itype_id itm = veh->part_info(sel_part).item;
-            has_comps = crafting_inv->has_amount(itm, 1);
-            mvwprintz(w_msg, 1, 1, c_ltgray, _("You also need a wrench and %s to replace broken one."),
-                      g->itypes[itm]->name.c_str());
-            mvwprintz(w_msg, 1, 17, has_wrench? c_ltgreen : c_red, _("wrench"));
-            mvwprintz(w_msg, 1, 28, has_comps? c_ltgreen : c_red, g->itypes[itm]->name.c_str());
+            mvwprintz(w_msg, 1, 1, c_ltgray, "You also need a ");
+            wprintz(w_msg, has_wrench? c_ltgreen : c_red, "wrench");
+			for(size_t a = 0; a < items_needed.size(); a++) {
+				const itype_id &itm = items_needed[a].first;
+				int count = items_needed[a].second;
+				const itype *type = g->itypes[itm];
+				bool has = crafting_inv->has_amount(itm, count);
+				if(count > 1) {
+					wprintz(w_msg, has ? c_ltgreen : c_red, ", %d %ss", count, type->name.c_str());
+				} else {
+					wprintz(w_msg, has ? c_ltgreen : c_red, ", a %s", type->name.c_str());
+				}
+				has_comps |= has;
+			}
         }
         wrefresh (w_msg);
         char ch = input(); // See keypress.h
@@ -545,7 +556,7 @@ void veh_interact::do_tirechange(int reason)
     {
         sel_part = can_mount[pos];
         const vpart_info &part_info = vpart_info::getVehiclePartInfo((vpart_id) sel_part);
-		bool is_wheel = part_info.isWheel();
+		bool is_wheel = part_info.has_function(vpc_wheel);
         display_list (pos);
         itype_id itm = part_info.item;
         bool has_comps = crafting_inv->has_amount(itm, 1);
@@ -677,11 +688,11 @@ void veh_interact::move_cursor (int dx, int dy)
             {
                 need_repair.push_back (i);
             }
-            if (veh->part_flag(p, vpf_fuel_tank) && veh->parts[p].amount < veh->part_info(p).size)
+            if (veh->part_function(p, vpc_fuel_tank) && veh->parts[p].amount < veh->part_info(p).size)
             {
                 ptank = p;
             }
-            if (veh->part_flag(p, vpf_wheel) && veh->parts[p].amount < veh->part_info(p).size)
+            if (veh->part_function(p, vpc_wheel) && veh->parts[p].amount < veh->part_info(p).size)
             {
                 wheel = p;
             }
@@ -837,9 +848,9 @@ void veh_interact::display_list (int pos)
         itype_id itm = vpart.item;
         bool has_comps = crafting_inv->has_amount(itm, 1);
         bool has_skill = g->u.skillLevel("mechanics") >= vpart.difficulty;
-        bool is_wheel = vpart.flags & mfb(vpf_wheel);
+        bool is_wheel = vpart.has_function(vpc_wheel);
         nc_color col = has_comps && (has_skill || is_wheel) ? c_white : c_dkgray;
-        mvwprintz(w_list, y, 3, pos == i? hilite (col) : col, vpart.name);
+        mvwprintz(w_list, y, 3, pos == i? hilite (col) : col, vpart.name.c_str());
         mvwputch (w_list, y, 1, vpart.color, special_symbol (vpart.sym));
     }
     wrefresh (w_list);
@@ -882,7 +893,7 @@ bool all_equal(const std::vector<candidate_vpart> &candidates) {
 		if(prev.vpart_item.type != cur.vpart_item.type) {
 			return false;
 		}
-		if(prev.vpart_item.damage != cur.vpart_item.damage) {
+		if(prev.vpart_item.get_damaged() != cur.vpart_item.get_damaged()) {
 			return false;
 		}
 		if(prev.vpart_item.burnt != cur.vpart_item.burnt) {
@@ -1032,32 +1043,39 @@ void complete_vehicle (game *g)
         tools.push_back(component("welder_crude", welder_crude_charges));
         tools.push_back(component("toolset_welder", welder_charges/20));
         crafting_inv.consume_tools(tools, true);
-        if (vpart_info::getVehiclePartInfo(part).flags & mfb(vpf_light)) {
+        if (vpart_info::getVehiclePartInfo(part).has_function(vpc_light)) {
            int choice = menu(true, "Choose facing direction:", "N", "NW", "W", "SW", "S", "SE", "E", "NE", NULL);
            int dir = (choice - 1) * 45;
            veh->parts[partnum].direction = dir;
         }
         g->add_msg ("You install a %s into the %s.",
-                    vpart_info::getVehiclePartInfo(part).name, veh->name.c_str());
+                    vpart_info::getVehiclePartInfo(part).name.c_str(), veh->name.c_str());
         g->u.practice (g->turn, "mechanics", vpart_info::getVehiclePartInfo(part).difficulty * 5 + 20);
         break;
     case 'r':
-        if (veh->parts[part].hp <= 0)
-        {
-            used_item = crafting_inv.consume_vpart_item(g, vpart_info::getVehiclePartInfo(veh->parts[part].id).item);
-            tools.push_back(component("func:wrench", -1));
-            crafting_inv.consume_tools(tools, true);
-            tools.clear();
-            dd = 0;
-            veh->insides_dirty = true;
-        }
+		{
+			const vpart_info &pinfo = veh->part_info(part);
+			vpart_info::type_count_pair_vector items_needed = pinfo.get_repair_materials(veh->parts[part].hp);
+			for(size_t a = 0; a < items_needed.size(); a++) {
+				if(items_needed[a].first == pinfo.item) {
+					used_item = crafting_inv.consume_vpart_item(g, pinfo.item);
+					tools.push_back(component("func:wrench", -1));
+					crafting_inv.consume_tools(tools, true);
+					tools.clear();
+					dd = 0;
+					veh->insides_dirty = true;
+				} else {
+					crafting_inv.consume_items(items_needed[a].first, items_needed[a].second);
+				}
+			}
+		}
         tools.push_back(component("welder", welder_charges));
         tools.push_back(component("welder_crude", welder_crude_charges));
         tools.push_back(component("toolset_welder", welder_charges/20));
         crafting_inv.consume_tools(tools, true);
         veh->parts[part].hp = veh->part_info(part).durability;
         g->add_msg (_("You repair the %s's %s."),
-                    veh->name.c_str(), veh->part_info(part).name);
+                    veh->name.c_str(), veh->part_info(part).name.c_str());
         g->u.practice (g->turn, "mechanics", (vpart_info::getVehiclePartInfo(part).difficulty + dd) * 5 + 20);
         break;
     case 'f':
@@ -1087,7 +1105,7 @@ void complete_vehicle (game *g)
         else
         {
             g->add_msg (_("You remove %s%s from %s."), broken? rm_prefix(_("<veh>broken ")).c_str() : "",
-                        veh->part_info(part).name, veh->name.c_str());
+                        veh->part_info(part).name.c_str(), veh->name.c_str());
             veh->remove_part (part);
         }
         break;
@@ -1098,7 +1116,7 @@ void complete_vehicle (game *g)
         parts = veh->parts_at_relative( dx, dy );
         if( parts.size() ) {
             item removed_wheel;
-            replaced_wheel = veh->part_with_feature( parts[0], vpf_wheel, false );
+            replaced_wheel = veh->part_with_function( parts[0], vpc_wheel, false );
             broken = veh->parts[replaced_wheel].hp <= 0;
             if( replaced_wheel != -1 ) {
                 removed_wheel = veh->item_from_part( replaced_wheel );

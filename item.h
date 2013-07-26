@@ -97,6 +97,7 @@ public:
  void put_in(item payload);
 
  bool matches_type(const itype_id &type) const;
+ double get_functionality_time_modi(const itype_id &func) const;
 
  int weight() const;
  int volume() const;
@@ -187,7 +188,20 @@ public:
  char invlet;           // Inventory letter
  int charges;
  bool active;           // If true, it has active effects to be processed
+private:
  signed char damage;    // How much damage it's sustained; generally, max is 5
+public:
+ // Returns how much damaged this object is (-1 ... 5)
+ int get_damaged() const;
+ // Sets how much this item is damaged (-1 ... 5)
+ void set_damaged(int damage);
+ // Adds the amount of damage to this item
+ void increase_damaged(int rel_damage);
+ // Removes the amount of damage from this item (repairs it)
+ void decrease_damaged(int rel_damage);
+ // Returns true if the item is so much damaged that it is actually destroyed
+ bool is_destroyed() const;
+ 
  int burnt;	         // How badly we're burnt
  unsigned int bday;     // The turn on which it was created
  int owned;	            // UID of NPC owner; 0 = player, -1 = unowned

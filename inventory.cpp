@@ -551,7 +551,7 @@ void inventory::form_from_map(game *g, point origin, int range)
    vehicle *veh = g->m.veh_at(x, y, vpart);
 
    if (veh) {
-     const int kpart = veh->part_with_feature(vpart, vpf_kitchen);
+     const int kpart = veh->part_with_function(vpart, vpc_kitchen);
 
      if (kpart >= 0) {
        item hotplate(g->itypes["installed_kitchen_unit"], 0);
@@ -572,7 +572,7 @@ void inventory::form_from_map(game *g, point origin, int range)
 */
      }
 
-     const int cpart = veh->part_with_feature(vpart, vpf_cargo);
+     const int cpart = veh->part_with_function(vpart, vpc_cargo);
      if (cpart >= 0) {
 
       for (int i = 0; i < veh->parts[cpart].items.size(); i++)
@@ -1380,9 +1380,10 @@ void inventory::rust_iron_items()
              stack_iter != iter->end();
              ++stack_iter)
         {
-            if (stack_iter->type->m1 == "iron" && stack_iter->damage < 5 && one_in(8))
+            if (stack_iter->type->m1 == "iron" && stack_iter->get_damaged() < 5 && one_in(8))
             {
-                stack_iter->damage++;
+                stack_iter->increase_damaged(1);
+				// TODO: earse item from inventory if it is destroyed
             }
         }
     }

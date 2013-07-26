@@ -404,7 +404,7 @@ void load_artifacts(); // Load artifact data
   void pick_recipes(std::vector<recipe*> &current,
                     std::vector<bool> &available, craft_cat tab,std::string filter);// crafting.cpp
   void add_known_recipes(std::vector<recipe*> &current, recipe_list source,
-                             std::string filter = ""); //crafting.cpp
+                             crafting_inventory_t &crafting_inv, std::string filter = ""); //crafting.cpp
   craft_cat next_craft_cat(craft_cat cat); // crafting.cpp
   craft_cat prev_craft_cat(craft_cat cat); // crafting.cpp
   void disassemble(char ch = 0);       // See crafting.cpp

@@ -677,7 +677,7 @@ bool game::do_turn()
  spawn_horde_members();
 #endif
 
- if(u.in_vehicle) {
+ if(u.in_vehicle && u.controlling_vehicle) {
 	vehicle *veh = m.veh_at(u.posx, u.posy);
 	if(veh != 0) {
 		if(veh->velocity < 0.0161f * 10) {
@@ -734,15 +734,15 @@ bool game::do_turn()
 	std::vector<item*> items[6];
 	for(std::vector<item>::iterator a = u.worn.begin(); a != u.worn.end(); ++a) {
 		item &it = *a;
-		if(it.damage >= -1 && it.damage < 5) {
-			items[it.damage + 1].push_back(&*a);
+		if(it.get_damaged() >= -1 && it.get_damaged() < 5) {
+			items[it.get_damaged() + 1].push_back(&*a);
 		}
 	}
 
 	int i = rng(0, u.worn.size() - 1);
 	item &it = u.worn[i];
-	it.damage++;
-	if(it.damage >= 5) {
+	it.increase_damaged(1);
+	if(it.is_destroyed()) {
 		add_msg("Your %s wears completly away", it.name.c_str());
 		u.worn.erase(u.worn.begin() + i);
 	} else {
@@ -5774,10 +5774,10 @@ void game::revive_corpse(int x, int y, item *it)
     monster mon(it->corpse, x, y);
     mon.speed = int(mon.speed * .8) - burnt_penalty / 2;
     mon.hp    = int(mon.hp    * .7) - burnt_penalty;
-    if (it->damage > 0)
+    if (it->get_damaged() > 0)
     {
-        mon.speed /= it->damage + 1;
-        mon.hp /= it->damage + 1;
+        mon.speed /= it->get_damaged() + 1;
+        mon.hp /= it->get_damaged() + 1;
     }
     mon.no_extra_death_drops = true;
     z.push_back(mon);
@@ -5882,7 +5882,7 @@ void game::smash()
     for (int i = 0; i < m.i_at(smashx, smashy).size(); ++i)
     {
         item *it = &m.i_at(smashx, smashy)[i];
-        if (it->type->id == "corpse" && it->damage < full_pulp_threshold)
+        if (it->type->id == "corpse" && it->get_damaged() < full_pulp_threshold)
         {
             corpses.push_back(it);
         }
@@ -5909,9 +5909,9 @@ void game::smash()
             item *it = corpses.front();
             corpses.pop_front();
             int damage = rn / it->volume();
-            if (damage + it->damage > full_pulp_threshold)
+            if (damage + it->get_damaged() > full_pulp_threshold)
             {
-                damage = full_pulp_threshold - it->damage;
+                damage = full_pulp_threshold - it->get_damaged();
             }
             rn -= (damage + 1) * it->volume(); // slight efficiency loss to swing
 
@@ -5925,11 +5925,11 @@ void game::smash()
             if (damage > 0)
             {
                 add_msg(_("You %sdamage the %s!"), (damage > 1 ? _("greatly ") : ""), it->tname().c_str());
-                it->damage += damage;
-                if (it->damage >= 4)
+                it->increase_damaged(damage);
+                if (it->get_damaged() >= 4)
                 {
                     add_msg(_("The corpse is now thoroughly pulped."));
-                    it->damage = 4;
+                    it->set_damaged(4);
                     // TODO mark corpses as inactive when appropriate
                 }
                 // Splatter some blood around
@@ -6062,7 +6062,7 @@ bool game::vehicle_near ()
 
 bool game::pl_refill_vehicle (vehicle &veh, int part, bool test)
 {
-    if (!veh.part_flag(part, vpf_fuel_tank))
+    if (!veh.part_function(part, vpc_fuel_tank))
         return false;
     item* it = NULL;
     item *p_itm = NULL;
@@ -6364,7 +6364,7 @@ void game::control_vehicle()
         std::string message = veh->use_controls();
         if (!message.empty())
             add_msg(message.c_str());
-    } else if (veh && veh->part_with_feature(veh_part, vpf_controls) >= 0
+    } else if (veh && veh->part_with_function(veh_part, vpc_controls) >= 0
                    && u.in_vehicle) {
         u.controlling_vehicle = true;
         add_msg(_("You take control of the %s."), veh->name.c_str());
@@ -6377,7 +6377,7 @@ void game::control_vehicle()
             add_msg(_("No vehicle there."));
             return;
         }
-        if (veh->part_with_feature(veh_part, vpf_controls) < 0) {
+        if (veh->part_with_function(veh_part, vpc_controls) < 0) {
             add_msg(_("No controls there."));
             return;
         }
@@ -6396,8 +6396,8 @@ void game::examine()
  int veh_part = 0;
  vehicle *veh = m.veh_at (examx, examy, veh_part);
  if (veh) {
-  int vpcargo = veh->part_with_feature(veh_part, vpf_cargo, false);
-  int vpkitchen = veh->part_with_feature(veh_part, vpf_kitchen, true);
+  int vpcargo = veh->part_with_function(veh_part, vpc_cargo, false);
+  int vpkitchen = veh->part_with_function(veh_part, vpc_kitchen, true);
   if ((vpcargo >= 0 && veh->parts[vpcargo].items.size() > 0) || vpkitchen >= 0)
    pickup(examx, examy, 0);
   else if (u.in_vehicle)
@@ -6712,8 +6712,8 @@ struct advanced_inv_sorter {
                 }
 				case SORTBY_DAMAGE: {
 					if(d1.it != 0 && d2.it != 0) {
-						if(d1.it->damage != d2.it->damage) {
-							return d1.it->damage < d2.it->damage;
+						if(d1.it->get_damaged() != d2.it->get_damaged()) {
+							return d1.it->get_damaged() < d2.it->get_damaged();
 						}
 					}
 					break;
@@ -6784,7 +6784,7 @@ void advanced_inv_update_area( advanced_inv_area &area, game *g ) {
         int vp = 0;
         area.veh = g->m.veh_at( u.posx+area.offx,u.posy+area.offy, vp );
         if ( area.veh ) {
-            area.vstor = area.veh->part_with_feature(vp, vpf_cargo, false);
+            area.vstor = area.veh->part_with_function(vp, vpc_cargo, false);
         }
         if ( area.vstor >= 0 ) {
             area.desc = area.veh->name;
@@ -8728,34 +8728,63 @@ void game::pickup(int posx, int posy, int min)
  int k_part = 0;
  vehicle *veh = m.veh_at (posx, posy, veh_part);
  if (min != -1 && veh) {
-  k_part = veh->part_with_feature(veh_part, vpf_kitchen);
-  veh_part = veh->part_with_feature(veh_part, vpf_cargo, false);
-  from_veh = veh && veh_part >= 0 &&
-             veh->parts[veh_part].items.size() > 0 &&
-             query_yn(_("Get items from %s?"), veh->part_info(veh_part).name);
-
-  if (!from_veh && k_part >= 0) {
-    if (veh->fuel_left("water")) {
-      if (query_yn(_("Have a drink?"))) {
-        veh->drain("water", 1);
-
-        item water(itypes["water_clean"], 0);
-        u.eat(this, u.inv.add_item(water).invlet);
-        u.moves -= 250;
-      } else if(query_yn("Fill water into a container?")) {
-        item water(itypes["water_clean"], turn);
-        int wamount = veh->fuel_left("water");
-        water.charges = wamount;
-        g->handle_liquid(water, false, false);
-        if(water.charges != wamount) {
-          veh->drain("water", wamount - water.charges);
-          u.moves -= 100;
+    k_part = veh->part_with_function(veh_part, vpc_kitchen);
+    veh_part = veh->part_with_function(veh_part, vpc_cargo, false);
+    bool has_items = veh_part >= 0 && veh->parts[veh_part].items.size() > 0;
+    
+    int wamount = veh->fuel_left("water");
+    if (k_part >= 0 && (wamount > 0 || has_items))
+    {
+        uimenu task_menu;
+        task_menu.entries.push_back(uimenu_entry(1, has_items ? 1 : 0, -1, std::string("Get items from ") + veh->part_info(veh_part).name));
+        task_menu.entries.push_back(uimenu_entry(2, wamount > 0 ? 1 : 0, -1, std::string("Have a drink")));
+        task_menu.entries.push_back(uimenu_entry(3, wamount > 0 ? 1 : 0, -1, std::string("Fill water into a container")));
+        task_menu.entries.push_back(uimenu_entry(4, 1, -1, "cancel"));
+        task_menu.query();
+        if(task_menu.ret == 1)
+        {
+            from_veh = true;
+            // fall through as with normal cargo units
         }
-      }
-    } else {
-      add_msg(_("The water tank is empty."));
+        else if(task_menu.ret == 2)
+        {
+            veh->drain("water", 1);
+            item water(itypes["water_clean"], 0);
+            u.eat(this, u.inv.add_item(water).invlet);
+            u.moves -= 250;
+            return;
+        }
+        else if(task_menu.ret == 3)
+        {
+            item water(itypes["water_clean"], turn);
+            water.charges = wamount;
+            handle_liquid(water, false, false);
+            if(water.charges != wamount)
+            {
+                veh->drain("water", wamount - water.charges);
+                u.moves -= 100;
+            }
+            return;
+        }
+        else if(task_menu.ret == 4)
+		{
+			return;
+        }
     }
-  }
+    else if(k_part >= 0)
+    {
+        // no items in kitchen and no water -> no use at all
+        from_veh = false;
+    }
+    else if(has_items)
+    {
+        from_veh = query_yn(_("Get items from %s?"), veh->part_info(veh_part).name.c_str());
+    }
+    else
+    {
+        // No items here
+        from_veh = false;
+    }
  }
  if ((!from_veh) && m.i_at(posx, posy).size() == 0)
  {
@@ -9510,14 +9539,14 @@ void game::drop(char chInput)
  bool to_veh = false;
  vehicle *veh = m.veh_at(u.posx, u.posy, veh_part);
  if (veh) {
-  veh_part = veh->part_with_feature (veh_part, vpf_cargo);
+  veh_part = veh->part_with_function (veh_part, vpc_cargo);
   to_veh = veh_part >= 0;
  }
  if (dropped.size() == 1 || same) {
   if (to_veh) {
    add_msg(_("You put your %s%s in the %s's %s."), dropped[0].tname(this).c_str(),
           (dropped.size() == 1 ? "" : _("s")), veh->name.c_str(),
-          veh->part_info(veh_part).name);
+          veh->part_info(veh_part).name.c_str());
   } else {
    add_msg(ngettext("You drop your %s.", "You drop your %ss", dropped.size()),
            dropped[0].tname(this).c_str()); // FIXME: real plurals... someday
@@ -9525,7 +9554,7 @@ void game::drop(char chInput)
  } else {
   if (to_veh)
    add_msg(_("You put several items in the %s's %s."), veh->name.c_str(),
-           veh->part_info(veh_part).name);
+           veh->part_info(veh_part).name.c_str());
   else
    add_msg(_("You drop several items."));
  }
@@ -9555,7 +9584,7 @@ void game::drop_in_direction()
  bool to_veh = false;
  vehicle *veh = m.veh_at(dirx, diry, veh_part);
  if (veh) {
-  veh_part = veh->part_with_feature (veh_part, vpf_cargo);
+  veh_part = veh->part_with_function (veh_part, vpc_cargo);
   to_veh = veh->type != veh_null && veh_part >= 0;
  }
 
@@ -9587,7 +9616,7 @@ void game::drop_in_direction()
   if (to_veh)
    add_msg(_("You put your %s%s in the %s's %s."), dropped[0].tname(this).c_str(),
           (dropped.size() == 1 ? "" : _("s")), veh->name.c_str(),
-          veh->part_info(veh_part).name);
+          veh->part_info(veh_part).name.c_str());
   else
    add_msg(_("You %s your %s%s %s the %s."), verb.c_str(),
            dropped[0].tname(this).c_str(),
@@ -9596,7 +9625,7 @@ void game::drop_in_direction()
  } else {
   if (to_veh)
    add_msg(_("You put several items in the %s's %s."), veh->name.c_str(),
-           veh->part_info(veh_part).name);
+           veh->part_info(veh_part).name.c_str());
   else
    add_msg(_("You %s several items %s the %s."), verb.c_str(), prep.c_str(),
            m.name(dirx, diry).c_str());
@@ -10487,7 +10516,7 @@ void game::pldrive(int x, int y) {
   u.in_vehicle = false;
   return;
  }
- int pctr = veh->part_with_feature (part, vpf_controls);
+ int pctr = veh->part_with_function (part, vpc_controls);
  if (pctr < 0) {
   add_msg (_("You can't drive the vehicle from here. You need controls!"));
   return;
@@ -10633,7 +10662,7 @@ void game::plmove(int x, int y)
  vehicle *veh1 = m.veh_at(x, y, vpart1);
  bool veh_closed_door = false;
  if (veh1) {
-  dpart = veh1->part_with_feature (vpart1, vpf_openable);
+  dpart = veh1->part_with_flag (vpart1, vpf_openable);
   veh_closed_door = dpart >= 0 && !veh1->parts[dpart].open;
  }
 
@@ -10646,7 +10675,7 @@ void game::plmove(int x, int y)
   } else if (veh1 != veh0) {
    add_msg(_("There is another vehicle in the way."));
    return;
-  } else if (veh1->part_with_feature(vpart1, vpf_boardable) < 0) {
+  } else if (veh1->part_with_flag(vpart1, vpf_boardable) < 0) {
    add_msg(_("That part of the vehicle is currently unsafe."));
    return;
   }
@@ -10725,7 +10754,7 @@ void game::plmove(int x, int y)
       ( u.has_trait(PF_PARKOUR) && m.move_cost(x, y) > 4    ))
   {
    if (veh1 && m.move_cost(x,y) != 2)
-    add_msg(_("Moving past this %s is slow!"), veh1->part_info(vpart1).name);
+    add_msg(_("Moving past this %s is slow!"), veh1->part_info(vpart1).name.c_str());
    else
     add_msg(_("Moving past this %s is slow!"), m.name(x, y).c_str());
   }
@@ -10797,7 +10826,7 @@ void game::plmove(int x, int y)
   }
 
 // If the new tile is a boardable part, board it
-  if (veh1 && veh1->part_with_feature(vpart1, vpf_boardable) >= 0)
+  if (veh1 && veh1->part_with_flag(vpart1, vpf_boardable) >= 0)
    m.board_vehicle(this, u.posx, u.posy, &u);
 
   if (m.tr_at(x, y) != tr_null) { // We stepped on a trap!
@@ -10853,7 +10882,7 @@ void game::plmove(int x, int y)
    add_msg(buff.c_str());
   } else if (m.i_at(x, y).size() != 0)
    add_msg(_("There are many items here."));
-  if (veh1 && veh1->part_with_feature(vpart1, vpf_controls) >= 0
+  if (veh1 && veh1->part_with_function(vpart1, vpc_controls) >= 0
            && u.in_vehicle)
       add_msg(_("There are vehicle controls here.  %s to drive."),
               press_x(ACTION_CONTROL_VEHICLE).c_str() );
@@ -10894,7 +10923,7 @@ void game::plmove(int x, int y)
     u.posx += (tunneldist + 1) * (x - u.posx); //move us the number of tiles we tunneled in the x direction, plus 1 for the last tile
     u.posy += (tunneldist + 1) * (y - u.posy); //ditto for y
     add_msg(_("You quantum tunnel through the %d-tile wide barrier!"), tunneldist);
-    if (m.veh_at(u.posx, u.posy, vpart1) && m.veh_at(u.posx, u.posy, vpart1)->part_with_feature(vpart1, vpf_boardable) >= 0)
+    if (m.veh_at(u.posx, u.posy, vpart1) && m.veh_at(u.posx, u.posy, vpart1)->part_with_flag(vpart1, vpf_boardable) >= 0)
         m.board_vehicle(this, u.posx, u.posy, &u);
   }
   else //or you couldn't tunnel due to lack of energy
@@ -10907,7 +10936,7 @@ void game::plmove(int x, int y)
   veh1->insides_dirty = true;
   u.moves -= 100;
   add_msg (_("You open the %s's %s."), veh1->name.c_str(),
-                                    veh1->part_info(dpart).name);
+                                    veh1->part_info(dpart).name.c_str());
 
  } else if (m.has_flag(swimmable, x, y)) { // Dive into water!
 // Requires confirmation if we were on dry land previously

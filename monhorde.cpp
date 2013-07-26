@@ -1,6 +1,8 @@
 #include "game.h"
 #include "mongroup.h"
 
+#define MASTER_ZOMBIE_ID mon_zombie_soldier
+
 
 overmap *game::getOverMap(int &omx, int &omy) {
  if (omx >= 0 && omx < OMAPX * 2 && omy >= 0 && omy < OMAPY * 2) {
@@ -25,7 +27,7 @@ overmap *game::getOverMap(int &omx, int &omy) {
 }
 
 bool monhorde::despawn(monster &m, game &g) {
-	if(m.type->id == mon_zombie_master) {
+	if(m.type->id == MASTER_ZOMBIE_ID) {
 		pop_master++;
 	} else {
 		pop_normal++;
@@ -180,6 +182,9 @@ void monhorde::rest_here(game &g) {
 		pop_normal--;
 	}
 	change_pop_by_terrain(g);
+	if(pop_normal == 0 && pop_master > 0) {
+		pop_master--;
+	}
 }
 
 void monhorde::change_pop_by_terrain(game &g) {
@@ -286,8 +291,6 @@ bool monhorde::move(game &g) {
 		// Nothing to do, try to increase/decrease the population.
 		return false;
 	}
-	int oldx = posx;
-	int oldy = posy;
 	if(abs(posx - targetx) > abs(posy - targety)) {
 		posx += sign(targetx - posx);
 	} else {
@@ -357,11 +360,11 @@ void game::spawn_horde_members() {
 		for(int j = 0; j < spawn_count && !horde.isEmpty(); j++) {
 			mon_id type;
 			if(horde.pop_normal == 0) {
-				type = mon_zombie_master;
+				type = MASTER_ZOMBIE_ID;
 			} else {
 				type = MonsterGroupManager::GetMonsterFromGroup(horde.type, &mtypes, &spawn_count, (int)turn);
 				// Special check: each horde has one master to begin with, if this one is lost, the group may shrink over time
-				if(type == mon_zombie_master && horde.pop_master == 0) {
+				if(type == MASTER_ZOMBIE_ID && horde.pop_master == 0) {
 					continue; // try again
 				}
 			}
@@ -380,7 +383,7 @@ void game::spawn_horde_members() {
 					z.back().wander_to(tarx + rng(0, SEEX - 1), tary + rng(0, SEEY - 1), MAPSIZE * SEEX * MAPSIZE * SEEY);
 				}
 				add_msg("Horde-Zombie (rel: %d,%d) spawned at (rel: %d,%d)", horde.posx - (levx + MAPSIZE / 2), horde.posy - (levy + MAPSIZE / 2), monx - u.posx, mony - u.posy);
-				if(type == mon_zombie_master) {
+				if(type == MASTER_ZOMBIE_ID) {
 					horde.pop_master--;
 				} else {
 					horde.pop_normal--;

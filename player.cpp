@@ -24,6 +24,7 @@
 #include "get_version.h"
 
 #include <ctime>
+#include "crafting_inventory_t.h"
 
 nc_color encumb_color(int level);
 bool activity_is_suspendable(activity_type type);
@@ -1289,11 +1290,11 @@ void player::update_bodytemp(game *g)
             {
                 temp_conv[i] -= 1000;
             }
-            else if (veh && veh->part_with_feature (vpart, vpf_seat) >= 0)
+            else if (veh && veh->part_with_function (vpart, vpc_seat) >= 0)
             {
                 temp_conv[i] += 200;
             }
-            else if (veh && veh->part_with_feature (vpart, vpf_bed) >= 0)
+            else if (veh && veh->part_with_function (vpart, vpc_bed) >= 0)
             {
                 temp_conv[i] += 300;
             }
@@ -3408,7 +3409,7 @@ void player::disp_status(WINDOW *w, WINDOW *w2, game *g)
 
   bool has_turrets = false;
   for (int p = 0; p < veh->parts.size(); p++) {
-   if (veh->part_flag (p, vpf_turret)) {
+   if (veh->part_function (p, vpc_turret)) {
     has_turrets = true;
     break;
    }
@@ -7060,7 +7061,7 @@ void player::sort_armor(game *g)
 
             werase(w_arm_info);
             wborder(w_arm_info, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX, LINE_XXXO, LINE_XOXX, LINE_XXXO, LINE_XOXX );
-            mvwprintz(w_arm_info, 1, 1, dam_color[int(worn[cursor_y].damage + 1)], worn[cursor_y].tname(g).c_str());
+            mvwprintz(w_arm_info, 1, 1, dam_color[int(worn[cursor_y].get_damaged() + 1)], worn[cursor_y].tname(g).c_str());
             wprintz(w_arm_info, c_ltgray, " - ");
             wprintz(w_arm_info, c_ltgray, temp1.str().c_str());
 
@@ -7098,10 +7099,10 @@ void player::sort_armor(game *g)
                 if (i == cursor_y)
                     mvwprintz(w_all_worn, 3+cursor_y, 2, c_yellow, ">>");
                 if (selected >= 0 && i == selected)
-                    mvwprintz(w_all_worn, i+3, 5, dam_color[int(worn[i].damage + 1)], each_armor->name.c_str());
+                    mvwprintz(w_all_worn, i+3, 5, dam_color[int(worn[i].get_damaged() + 1)], each_armor->name.c_str());
                 else
-                    mvwprintz(w_all_worn, i+3, 4, dam_color[int(worn[i].damage + 1)], each_armor->name.c_str());
-                mvwprintz(w_all_worn, i+3, iCol1WinX-4, dam_color[int(worn[i].damage + 1)], "%2d", int(each_armor->storage));
+                    mvwprintz(w_all_worn, i+3, 4, dam_color[int(worn[i].get_damaged() + 1)], each_armor->name.c_str());
+                mvwprintz(w_all_worn, i+3, iCol1WinX-4, dam_color[int(worn[i].get_damaged() + 1)], "%2d", int(each_armor->storage));
             }
             mvwprintz(w_all_worn, 3 + worn.size(), 1, c_ltgray, _("(Outermost)"));
 
@@ -7148,37 +7149,37 @@ void player::sort_armor(game *g)
 
                 if (each_armor->covers & mfb(bp_torso))
                 {
-                    mvwprintz(w_torso_worn, torso_item_count + 2, 3, dam_color[int(worn[i].damage + 1)], each_armor->name.c_str());
+                    mvwprintz(w_torso_worn, torso_item_count + 2, 3, dam_color[int(worn[i].get_damaged() + 1)], each_armor->name.c_str());
                     mvwprintz(w_torso_worn, torso_item_count + 2, iCol2WinX-4, fitc, "%2d", int(each_armor->encumber) - (worn[i].has_flag("FIT") ? 1 : 0 ) );
                     torso_item_count++;
                 }
                 if (each_armor->covers & mfb(bp_eyes))
                 {
-                    mvwprintz(w_eyes_worn, eyes_item_count + 2, 3, dam_color[int(worn[i].damage + 1)], each_armor->name.c_str());
+                    mvwprintz(w_eyes_worn, eyes_item_count + 2, 3, dam_color[int(worn[i].get_damaged() + 1)], each_armor->name.c_str());
                     mvwprintz(w_eyes_worn, eyes_item_count + 2, iCol3WinX-4, fitc, "%2d", int(each_armor->encumber) - (worn[i].has_flag("FIT") ? 1 : 0 ) );
                     eyes_item_count++;
                 }
                 if (each_armor->covers & mfb(bp_mouth))
                 {
-                    mvwprintz(w_mouth_worn, mouth_item_count + 2, 3, dam_color[int(worn[i].damage + 1)], each_armor->name.c_str());
+                    mvwprintz(w_mouth_worn, mouth_item_count + 2, 3, dam_color[int(worn[i].get_damaged() + 1)], each_armor->name.c_str());
                     mvwprintz(w_mouth_worn, mouth_item_count + 2, iCol3WinX-4, fitc, "%2d", int(each_armor->encumber) - (worn[i].has_flag("FIT") ? 1 : 0 ) );
                     mouth_item_count++;
                 }
                 if (each_armor->covers & mfb(bp_arms))
                 {
-                    mvwprintz(w_arms_worn, arms_item_count + 2, 3, dam_color[int(worn[i].damage + 1)], each_armor->name.c_str());
+                    mvwprintz(w_arms_worn, arms_item_count + 2, 3, dam_color[int(worn[i].get_damaged() + 1)], each_armor->name.c_str());
                     mvwprintz(w_arms_worn, arms_item_count + 2, iCol2WinX-4, fitc, "%2d", int(each_armor->encumber) - (worn[i].has_flag("FIT") ? 1 : 0 ) );
                     arms_item_count++;
                 }
                 if (each_armor->covers & mfb(bp_hands))
                 {
-                    mvwprintz(w_hands_worn, hands_item_count + 2, 3, dam_color[int(worn[i].damage + 1)], each_armor->name.c_str());
+                    mvwprintz(w_hands_worn, hands_item_count + 2, 3, dam_color[int(worn[i].get_damaged() + 1)], each_armor->name.c_str());
                     mvwprintz(w_hands_worn, hands_item_count + 2, iCol2WinX-4, fitc, "%2d", int(each_armor->encumber) - (worn[i].has_flag("FIT") ? 1 : 0 ) );
                     hands_item_count++;
                 }
                 if (each_armor->covers & mfb(bp_legs))
                 {
-                    mvwprintz(w_legs_worn, legs_item_count + 2, 3, dam_color[int(worn[i].damage + 1)], each_armor->name.c_str());
+                    mvwprintz(w_legs_worn, legs_item_count + 2, 3, dam_color[int(worn[i].get_damaged() + 1)], each_armor->name.c_str());
                     mvwprintz(w_legs_worn, legs_item_count + 2, iCol3WinX-4, fitc, "%2d", int(each_armor->encumber) - (worn[i].has_flag("FIT") ? 1 : 0 ) );
                     legs_item_count++;
                 }
@@ -7881,8 +7882,8 @@ void player::try_to_sleep(game *g)
  if (furn_at_pos == f_bed || furn_at_pos == f_makeshift_bed ||
      trap_at_pos == tr_cot || trap_at_pos == tr_rollmat ||
      furn_at_pos == f_armchair || furn_at_pos == f_sofa ||
-     (veh && veh->part_with_feature (vpart, vpf_seat) >= 0) ||
-      (veh && veh->part_with_feature (vpart, vpf_bed) >= 0))
+     (veh && veh->part_with_function (vpart, vpc_seat) >= 0) ||
+      (veh && veh->part_with_function (vpart, vpc_bed) >= 0))
   g->add_msg(_("This is a comfortable place to sleep."));
  else if (ter_at_pos != t_floor)
   g->add_msg(
@@ -7906,11 +7907,11 @@ bool player::can_sleep(game *g)
  const trap_id trap_at_pos = g->m.tr_at(posx, posy);
  const ter_id ter_at_pos = g->m.ter(posx, posy);
  const furn_id furn_at_pos = g->m.furn(posx, posy);
- if ((veh && veh->part_with_feature (vpart, vpf_bed) >= 0) ||
+ if ((veh && veh->part_with_function (vpart, vpc_bed) >= 0) ||
      furn_at_pos == f_makeshift_bed || trap_at_pos == tr_cot ||
      furn_at_pos == f_sofa)
   sleepy += 4;
- else if ((veh && veh->part_with_feature (vpart, vpf_seat) >= 0) ||
+ else if ((veh && veh->part_with_function (vpart, vpc_seat) >= 0) ||
       trap_at_pos == tr_rollmat || furn_at_pos == f_armchair)
   sleepy += 3;
  else if (furn_at_pos == f_bed)
@@ -8198,7 +8199,7 @@ void player::absorb(game *g, body_part bp, int &dam, int &cut)
                     if (cut > arm_cut * 2 || dam > arm_bash * 2)
                     {
                         g->add_msg_if_player(this,_("Your %s is damaged!"), worn[i].tname(g).c_str());
-                        worn[i].damage++;
+                        worn[i].increase_damaged(1);
                     }
                 }
                 else // normal armour
@@ -8216,7 +8217,7 @@ void player::absorb(game *g, body_part bp, int &dam, int &cut)
                         (diff_bash == -1 && one_in(50)))
                     {
                         armor_damaged = true;
-                        worn[i].damage++;
+                        worn[i].increase_damaged(1);
                     }
                     bash_absorb += arm_bash;
 
@@ -8227,7 +8228,7 @@ void player::absorb(game *g, body_part bp, int &dam, int &cut)
                             (diff_cut == -1 && one_in(50)))
                         {
                             armor_damaged = true;
-                            worn[i].damage++;
+                            worn[i].increase_damaged(1);
                         }
                         else // layer of clothing was not damaged, so stop cutting damage from penetrating
                         {
@@ -8236,7 +8237,7 @@ void player::absorb(game *g, body_part bp, int &dam, int &cut)
                     }
 
                     // now check if armour was completely destroyed and display relevant messages
-                    if (worn[i].damage >= 5)
+                    if (worn[i].is_destroyed())
                     {
                         g->add_msg_player_or_npc( this, _("Your %s is completely destroyed!"),
                                                   _("<npcname>'s %s is completely destroyed!"),

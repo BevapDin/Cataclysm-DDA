@@ -2423,3 +2423,40 @@ bool item::matches_type(const itype_id &type_) const {
 	}
 	return false;
 }
+
+double item::get_functionality_time_modi(const itype_id &func) const {
+	if(type != 0) {
+		if(type->id == func) {
+			return 1.0;
+		}
+		itype::FunctionalityMap::const_iterator a = type->functionalityMap.find(func);
+		if(a != type->functionalityMap.end()) {
+			return a->second.time_modi;
+		}
+		if(func.compare(0, 5, "func:") == 0 &&
+			func.compare(5, std::string::npos, type->id) == 0) {
+			return 1.0;
+		}
+	}
+	return 0.0;
+}
+
+int item::get_damaged() const {
+	return damage;
+}
+
+void item::set_damaged(int damage) {
+	this->damage = std::min(5, std::max(-1, damage));
+}
+
+void item::increase_damaged(int rel_damage) {
+	set_damaged(this->damage + rel_damage);
+}
+
+void item::decrease_damaged(int rel_damage) {
+	set_damaged(this->damage - rel_damage);
+}
+
+bool item::is_destroyed() const {
+	return damage >= 5;
+}

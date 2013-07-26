@@ -107,17 +107,20 @@ enum vpart_id_
     vp_longbow
 };
 
+void install_part(vehicle *veh, int mdx, int mdy, int id) {
+	int pi = veh->install_part(mdx, mdy, (vpart_id) id);
+	if (pi < 0) debugmsg("init_vehicles: '%s' part '%s'(%d) can't be installed to %d,%d", veh->name.c_str(), vpart_info::getVehiclePartInfo((vpart_id) id).name.c_str(), veh->parts.size(), mdx, mdy);
+}
+
 void game::init_vehicles()
 {
     vehicle *veh;
     int index = 0;
-    int pi;
     vtypes.push_back(new vehicle(this, (vhtype_id)index++)); // veh_null
     vtypes.push_back(new vehicle(this, (vhtype_id)index++)); // veh_custom
 
 #define VEHICLE(nm) { veh = new vehicle(this, (vhtype_id)index++); veh->name = nm; vtypes.push_back(veh); }
-#define PART(mdx, mdy, id) { pi = veh->install_part(mdx, mdy, (vpart_id) id); \
-    if (pi < 0) debugmsg("init_vehicles: '%s' part '%s'(%d) can't be installed to %d,%d", veh->name.c_str(), vpart_info::getVehiclePartInfo((vpart_id) id).name, veh->parts.size(), mdx, mdy); }
+#define PART(mdx, mdy, id) ::install_part(veh, mdx, mdy, id)
 
     //        name
     VEHICLE (_("Bicycle"));

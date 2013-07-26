@@ -9,6 +9,7 @@
 #include "mutation.h"
 #include "player.h"
 #include "vehicle.h"
+#include "crafting_inventory_t.h"
 #include <sstream>
 #include <algorithm>
 
@@ -937,13 +938,13 @@ void iuse::sew(game *g, player *p, item *it, bool t)
 			{
 				if (it.made_of("cotton") || it.made_of("wool") || it.made_of("leather") || it.made_of("fur"))
 				{
-					if(choice == 1 && it.damage > 0) {
+					if(choice == 1 && it.get_damaged() > 0) {
 						ch = it.invlet;
 					}
-					if(choice == 2 && it.damage == 0 && it.has_flag("VARSIZE") && !it.has_flag("FIT")) {
+					if(choice == 2 && it.get_damaged() == 0 && it.has_flag("VARSIZE") && !it.has_flag("FIT")) {
 						ch = it.invlet;
 					}
-					if(choice == 3 && it.damage == 0 && (!it.has_flag("VARSIZE") || (it.has_flag("VARSIZE") && it.has_flag("FIT")))) {
+					if(choice == 3 && it.get_damaged() == 0 && (!it.has_flag("VARSIZE") || (it.has_flag("VARSIZE") && it.has_flag("FIT")))) {
 						ch = it.invlet;
 					}
 				}
@@ -995,7 +996,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
         return;
     }
 
-    int items_needed=(fix->damage>2||fix->damage==0)?1:0;
+    int items_needed=(fix->get_damaged()>2||fix->get_damaged()==0)?1:0;
 
     // this will cause issues if/when NPCs start being able to sew.
     // but, then again, it'll cause issues when they start crafting, too.
@@ -1020,7 +1021,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
         it->charges++;
         return;
     }
-    if (fix->damage < 0)
+    if (fix->get_damaged() < 0)
 	{
         g->add_msg_if_player(p,_("Your %s is already enhanced."), fix->tname().c_str());
         it->charges++;
@@ -1032,7 +1033,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
     comps.back().available = true;
 
 
-    if (fix->damage == 0)
+    if (fix->get_damaged() == 0)
     {
         p->moves -= 500 * p->fine_detail_vision_mod(g);
         p->practice(g->turn, "tailor", 10);
@@ -1046,7 +1047,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
         if (rn <= 4)
 	    {
             g->add_msg_if_player(p,_("You damage your %s!"), fix->tname().c_str());
-            fix->damage++;
+            fix->increase_damaged(1);
         }
         else if (rn >= 12 && p->i_at(ch).has_flag("VARSIZE") && !p->i_at(ch).has_flag("FIT"))
 	    {
@@ -1056,7 +1057,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
         else if (rn >= 12 && (p->i_at(ch).has_flag("FIT") || !p->i_at(ch).has_flag("VARSIZE")))
 	    {
             g->add_msg_if_player(p, _("You make your %s extra sturdy."), fix->tname().c_str());
-            fix->damage--;
+            fix->decrease_damaged(1);
             crafting_inv.consume_items(comps);
         }
         else
@@ -1069,7 +1070,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
         p->moves -= 500 * p->fine_detail_vision_mod(g);
         p->practice(g->turn, "tailor", 8);
         int rn = dice(4, 2 + p->skillLevel("tailor"));
-        rn -= rng(fix->damage, fix->damage * 2);
+        rn -= rng(fix->get_damaged(), fix->get_damaged() * 2);
         if (p->dex_cur < 8 && one_in(p->dex_cur))
             {rn -= rng(2, 6);}
         if (p->dex_cur >= 8 && (p->dex_cur >= 16 || one_in(16 - p->dex_cur)))
@@ -1079,8 +1080,8 @@ void iuse::sew(game *g, player *p, item *it, bool t)
         if (rn <= 4)
 	    {
             g->add_msg_if_player(p,_("You damage your %s further!"), fix->tname().c_str());
-            fix->damage++;
-            if (fix->damage >= 5)
+            fix->increase_damaged(1);
+            if (fix->is_destroyed())
 		    {
                 g->add_msg_if_player(p,_("You destroy it!"));
                 p->i_rem(ch);
@@ -1098,8 +1099,8 @@ void iuse::sew(game *g, player *p, item *it, bool t)
         else if (rn <= 8)
 	    {
             g->add_msg_if_player(p,_("You repair your %s, but waste lots of thread."), fix->tname().c_str());
-            if (fix->damage>=3) {crafting_inv.consume_items(comps);}
-            fix->damage--;
+            if (fix->get_damaged()>=3) {crafting_inv.consume_items(comps);}
+            fix->decrease_damaged(1);
             int waste = rng(1, 8);
         if (waste > it->charges)
             {it->charges = 1;}
@@ -1109,14 +1110,14 @@ void iuse::sew(game *g, player *p, item *it, bool t)
 	    else if (rn <= 16)
 	    {
             g->add_msg_if_player(p,_("You repair your %s!"), fix->tname().c_str());
-            if (fix->damage>=3) {crafting_inv.consume_items(comps);}
-            fix->damage--;
+            if (fix->get_damaged()>=3) {crafting_inv.consume_items(comps);}
+            fix->decrease_damaged(1);
         }
 	    else
 	    {
             g->add_msg_if_player(p,_("You repair your %s completely!"), fix->tname().c_str());
-            if (fix->damage>=3) {crafting_inv.consume_items(comps);}
-            fix->damage = 0;
+            if (fix->get_damaged()>=3) {crafting_inv.consume_items(comps);}
+            fix->set_damaged(0);
         }
     }
 
@@ -1200,9 +1201,9 @@ void iuse::scissors(game *g, player *p, item *it, bool t)
         count -= rng(1, 3);
     }
 
-    if (cut->damage>2 || cut->damage<0)
+    if (cut->get_damaged()>2 || cut->get_damaged()<0)
     {
-        count-= cut->damage;
+        count-= cut->get_damaged();
     }
 
     //scrap_text is result string of worthless scraps
@@ -1614,7 +1615,7 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
                 }
                 return;
             }
-            if (fix->damage < 0)
+            if (fix->get_damaged() < 0)
             {
                 g->add_msg_if_player(p,_("Your %s is already enhanced."), fix->tname().c_str());
                 return;
@@ -1625,7 +1626,7 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
             comps.back().available = true;
 
 
-            if (fix->damage == 0)
+            if (fix->get_damaged() == 0)
             {
                 p->moves -= 500 * p->fine_detail_vision_mod(g);
                 p->practice(g->turn, "mechanics", 10);
@@ -1639,7 +1640,7 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
                 if (rn <= 4)
                 {
                     g->add_msg_if_player(p,_("You damage your %s!"), fix->tname().c_str());
-                    fix->damage++;
+                    fix->increase_damaged(1);
                 }
                 else if (rn >= 12 && p->i_at(ch).has_flag("VARSIZE") && !p->i_at(ch).has_flag("FIT"))
                 {
@@ -1649,7 +1650,7 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
                 else if (rn >= 12 && (p->i_at(ch).has_flag("FIT") || !p->i_at(ch).has_flag("VARSIZE")))
                 {
                     g->add_msg_if_player(p, _("You make your %s extra sturdy."), fix->tname().c_str());
-                    fix->damage--;
+                    fix->decrease_damaged(1);
                     crafting_inv.consume_items(comps);
                 }
                 else
@@ -1662,7 +1663,7 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
                 p->moves -= 500 * p->fine_detail_vision_mod(g);
                 p->practice(g->turn, "mechanics", 8);
                 int rn = dice(4, 2 + p->skillLevel("mechanics"));
-                rn -= rng(fix->damage, fix->damage * 2);
+                rn -= rng(fix->get_damaged(), fix->get_damaged() * 2);
                 if (p->dex_cur < 8 && one_in(p->dex_cur))
                     {rn -= rng(2, 6);}
                 if (p->dex_cur >= 8 && (p->dex_cur >= 16 || one_in(16 - p->dex_cur)))
@@ -1672,8 +1673,8 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
                 if (rn <= 4)
                 {
                     g->add_msg_if_player(p,_("You damage your %s further!"), fix->tname().c_str());
-                    fix->damage++;
-                    if (fix->damage >= 5)
+                    fix->increase_damaged(1);
+                    if (fix->is_destroyed())
                     {
                         g->add_msg_if_player(p,_("You destroy it!"));
                         p->i_rem(ch);
@@ -1691,8 +1692,8 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
                 else if (rn <= 8)
                 {
                     g->add_msg_if_player(p,_("You repair your %s, but you waste lots of charge."), fix->tname().c_str());
-                    if (fix->damage>=3) {crafting_inv.consume_items(comps);}
-                    fix->damage--;
+                    if (fix->get_damaged()>=3) {crafting_inv.consume_items(comps);}
+                    fix->decrease_damaged(1);
                     int waste = rng(1, 8);
                 if (waste > it->charges)
                     {it->charges = 1;}
@@ -1702,14 +1703,14 @@ void iuse::solder_weld(game *g, player *p, item *it, bool t)
                 else if (rn <= 16)
                 {
                     g->add_msg_if_player(p,_("You repair your %s!"), fix->tname().c_str());
-                    if (fix->damage>=3) {crafting_inv.consume_items(comps);}
-                    fix->damage--;
+                    if (fix->get_damaged()>=3) {crafting_inv.consume_items(comps);}
+                    fix->decrease_damaged(1);
                 }
                 else
                 {
                     g->add_msg_if_player(p,_("You repair your %s completely!"), fix->tname().c_str());
-                    if (fix->damage>=3) {crafting_inv.consume_items(comps);}
-                    fix->damage = 0;
+                    if (fix->get_damaged()>=3) {crafting_inv.consume_items(comps);}
+                    fix->set_damaged(0);
                 }
             }
 
@@ -2129,17 +2130,17 @@ void iuse::picklock(game *g, player *p, item *it, bool t)
 
  p->practice(g->turn, "mechanics", 1);
  p->moves -= (1000 - (pick_quality * 100)) - (p->dex_cur + p->skillLevel("mechanics")) * 5;
- int pick_roll = (dice(2, p->skillLevel("mechanics")) + dice(2, p->dex_cur) - it->damage / 2) * pick_quality;
+ int pick_roll = (dice(2, p->skillLevel("mechanics")) + dice(2, p->dex_cur) - it->get_damaged() / 2) * pick_quality;
  int door_roll = dice(4, 30);
  if (pick_roll >= door_roll) {
   p->practice(g->turn, "mechanics", 1);
   g->add_msg_if_player(p,_("With a satisfying click, the lock on the %s opens."), door_name.c_str());
   g->m.ter_set(dirx, diry, new_type);
- } else if (door_roll > (1.5 * pick_roll) && it->damage < 100) {
-  it->damage++;
+ } else if (door_roll > (1.5 * pick_roll) && it->get_damaged() < 100) {
+  it->increase_damaged(1);
 
   std::string sStatus = rm_prefix(_("<door_status>damage"));
-  if (it->damage >= 5) {
+  if (it->is_destroyed()) {
    sStatus = rm_prefix(_("<door_status>destroy"));
    it->invlet = 0; // no copy to inventory in player.cpp:4472 ->
   }
@@ -2317,7 +2318,7 @@ void iuse::siphon(game *g, player *p, item *it, bool t)
 void iuse::chainsaw_off(game *g, player *p, item *it, bool t)
 {
  p->moves -= 80;
- if (rng(0, 10) - it->damage > 5 && it->charges > 0) {
+ if (rng(0, 10) - it->get_damaged() > 5 && it->charges > 0) {
   g->sound(p->posx, p->posy, 20,
            _("With a roar, the chainsaw leaps to life!"));
   it->make(g->itypes["chainsaw_on"]);
@@ -3046,7 +3047,7 @@ void iuse::firecracker_pack_act(game *g, player *p, item *it, bool t)
  int timer = current_turn - it->bday;
  if(timer < 2) {
   g->sound(pos.x, pos.y, 0, _("ssss..."));
-  it->damage += 1;
+  it->increase_damaged(1);
  } else if(it->charges > 0) {
   int ex = rng(3,5);
   int i = 0;

@@ -301,16 +301,16 @@ bool map::process_fields_in_submap(game *g, int gridn)
 						int chance = melting->acid_resist();
 						if (chance == 0)
 						{
-							melting->damage++;
+							melting->increase_damaged(1);
 						}
 						else if (chance > 0 && chance < 9)
 						{
 							if (one_in(chance))
 							{
-								melting->damage++;
+								melting->increase_damaged(1);
 							}
 						}
-						if (melting->damage >= 5)
+						if (melting->is_destroyed())
 						{
 							//Destroy the object, age the field.
 							cur->setFieldAge(cur->getFieldAge() + melting->volume());
@@ -1086,7 +1086,7 @@ void map::mon_in_field(int x, int y, game *g, monster *z)
 {
  if (z->has_flag(MF_DIGS))
   return;	// Digging monsters are immune to fields
-	field &curfield = field_at(x, y);
+	field curfield = field_at(x, y);
 	field_entry *cur = NULL;
 
 for(std::map<field_id, field_entry*>::iterator field_list_it = curfield.getFieldStart(); field_list_it != curfield.getFieldEnd(); ++field_list_it){
