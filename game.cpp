@@ -6397,8 +6397,8 @@ void game::examine()
  vehicle *veh = m.veh_at (examx, examy, veh_part);
  if (veh) {
   int vpcargo = veh->part_with_function(veh_part, vpc_cargo, false);
-  int vpkitchen = veh->part_with_function(veh_part, vpc_kitchen, true);
-  if ((vpcargo >= 0 && veh->parts[vpcargo].items.size() > 0) || vpkitchen >= 0)
+  int vpexamine = veh->part_with_function(veh_part, vpc_examine, true);
+  if ((vpcargo >= 0 && veh->parts[vpcargo].items.size() > 0) || vpexamine >= 0)
    pickup(examx, examy, 0);
   else if (u.in_vehicle)
    add_msg (_("You can't do that while onboard."));
@@ -8728,55 +8728,17 @@ void game::pickup(int posx, int posy, int min)
  int k_part = 0;
  vehicle *veh = m.veh_at (posx, posy, veh_part);
  if (min != -1 && veh) {
-    k_part = veh->part_with_function(veh_part, vpc_kitchen);
+    k_part = veh->part_with_function(veh_part, vpc_examine);
     veh_part = veh->part_with_function(veh_part, vpc_cargo, false);
     bool has_items = veh_part >= 0 && veh->parts[veh_part].items.size() > 0;
-    
-    int wamount = veh->fuel_left("water");
-    if (k_part >= 0 && (wamount > 0 || has_items))
-    {
-        uimenu task_menu;
-        task_menu.entries.push_back(uimenu_entry(1, has_items ? 1 : 0, -1, std::string("Get items from ") + veh->part_info(veh_part).name));
-        task_menu.entries.push_back(uimenu_entry(2, wamount > 0 ? 1 : 0, -1, std::string("Have a drink")));
-        task_menu.entries.push_back(uimenu_entry(3, wamount > 0 ? 1 : 0, -1, std::string("Fill water into a container")));
-        task_menu.entries.push_back(uimenu_entry(4, 1, -1, "cancel"));
-        task_menu.query();
-        if(task_menu.ret == 1)
-        {
-            from_veh = true;
-            // fall through as with normal cargo units
-        }
-        else if(task_menu.ret == 2)
-        {
-            veh->drain("water", 1);
-            item water(itypes["water_clean"], 0);
-            u.eat(this, u.inv.add_item(water).invlet);
-            u.moves -= 250;
-            return;
-        }
-        else if(task_menu.ret == 3)
-        {
-            item water(itypes["water_clean"], turn);
-            water.charges = wamount;
-            handle_liquid(water, false, false);
-            if(water.charges != wamount)
-            {
-                veh->drain("water", wamount - water.charges);
-                u.moves -= 100;
-            }
-            return;
-        }
-        else if(task_menu.ret == 4)
-		{
+	
+	if(k_part >= 0) {
+		bool b = veh->part_info(k_part).examine(veh, k_part);
+		if(b) {
 			return;
-        }
-    }
-    else if(k_part >= 0)
-    {
-        // no items in kitchen and no water -> no use at all
-        from_veh = false;
-    }
-    else if(has_items)
+		}
+	}
+    if(has_items)
     {
         from_veh = query_yn(_("Get items from %s?"), veh->part_info(veh_part).name.c_str());
     }

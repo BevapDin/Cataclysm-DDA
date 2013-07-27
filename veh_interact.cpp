@@ -369,19 +369,27 @@ void veh_interact::do_repair(int reason)
         mvwprintz(w_msg, 0, 16, has_skill? c_ltgreen : c_red, "%d", dif);
         if (!items_needed.empty())
         {
-            mvwprintz(w_msg, 1, 1, c_ltgray, "You also need a ");
-            wprintz(w_msg, has_wrench? c_ltgreen : c_red, "wrench");
+			int cc = 0;
+            mvwprintz(w_msg, 1, 1, c_ltgray, "You also need ");
+			if(veh->parts[sel_part].hp <= 0) {
+              wprintz(w_msg, has_wrench? c_ltgreen : c_red, "a wrench");
+			  cc++;
+			}
 			for(size_t a = 0; a < items_needed.size(); a++) {
 				const itype_id &itm = items_needed[a].first;
 				int count = items_needed[a].second;
 				const itype *type = g->itypes[itm];
 				bool has = crafting_inv->has_amount(itm, count);
-				if(count > 1) {
-					wprintz(w_msg, has ? c_ltgreen : c_red, ", %d %ss", count, type->name.c_str());
-				} else {
-					wprintz(w_msg, has ? c_ltgreen : c_red, ", a %s", type->name.c_str());
+				if(cc > 0) {
+					wprintz(w_msg, c_ltgray, ", ");
 				}
-				has_comps |= has;
+				cc++;
+				if(count > 1) {
+					wprintz(w_msg, has ? c_ltgreen : c_red, "%d %ss", count, type->name.c_str());
+				} else {
+					wprintz(w_msg, has ? c_ltgreen : c_red, "a %s", type->name.c_str());
+				}
+				has_comps &= has;
 			}
         }
         wrefresh (w_msg);

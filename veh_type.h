@@ -136,6 +136,7 @@ enum vpart_function {
     vpc_armor,              // is armor plating
     vpc_light,              // generates light arc
 	vpc_horn,               // vehicle horn
+	vpc_examine,            // can be examined, use vpart_info::examine to do so
     
 	num_vpfunctions
 };
@@ -197,6 +198,15 @@ public:
 	 * for each part of the car.
 	 */
 	void on_turn(vehicle *veh, int part) const;
+	
+	/**
+	 * Examine the part.
+	 * @return false - if the normal examine function should continue.
+	 * (that means this examine function did nothing).
+	 * true - we had some interaction with the player, eaxamining
+	 * has finished, return to main loop.
+	 */
+	bool examine(vehicle *veh, int part) const;
 };
 
 

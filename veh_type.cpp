@@ -1,5 +1,7 @@
 #include "veh_type.h"
 #include "game.h"
+#include "ui.h"
+#include "item.h"
 
 // following symbols will be translated:
 // y, u, n, b to NW, NE, SE, SW lines correspondingly
@@ -369,7 +371,7 @@ static vpart_info_vector &get_vpart_list() {
         "kitchen unit", '&', c_ltcyan, 'x', c_ltcyan, 10, 20, 0, 0, "NULL",
 		"kitchen_unit", 4,
         mfb(vpf_no_reinforce) | mfb(vpf_obstacle),
-		mfb(vpc_over) | mfb(vpc_cargo) | mfb(vpc_roof) | mfb(vpc_kitchen)
+		mfb(vpc_over) | mfb(vpc_cargo) | mfb(vpc_roof) | mfb(vpc_kitchen) | mfb(vpc_examine)
     ));
     vpart_list.push_back(vpart_info(
         "mounted M249",         't', c_cyan,    '#', c_cyan,    80, 400, 0, 0,
@@ -433,6 +435,14 @@ static vpart_info_vector &get_vpart_list() {
 		"NULL", "vehicle_horn", 1,
 		mfb(vpf_internal),
 		mfb(vpc_horn)
+    ));
+	
+	// car horn, makes a loud noise
+    vpart_list.push_back(vpart_info(
+        "water collector",        'V', c_blue,  '*', c_white,  10, 20, 480, 0,
+		"NULL", "water_collector", 1,
+		mfb(vpf_internal),
+		mfb(vpc_examine)
     ));
 	
 	// remote control of car horn, allows you to remotly active the car horn
@@ -510,6 +520,126 @@ vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) cons
 	return result;
 }
 
+bool vpart_info::examine(vehicle *veh, int part) const {
+	vehicle_part &vp = veh->parts[part];
+	if(has_function(vpc_kitchen)) {
+		int wamount = veh->fuel_left("water");
+		if(wamount == 0 && vp.items.empty()) {
+			return false;
+		}
+		uimenu task_menu;
+		task_menu.entries.push_back(uimenu_entry(1, (!vp.items.empty()) ? 1 : 0, -1, std::string("Get items from ") + name));
+		task_menu.entries.push_back(uimenu_entry(2, wamount > 0 ? 1 : 0, -1, std::string("Have a drink")));
+		task_menu.entries.push_back(uimenu_entry(3, wamount > 0 ? 1 : 0, -1, std::string("Fill water into a container")));
+		task_menu.entries.push_back(uimenu_entry(4, 1, -1, "cancel"));
+		task_menu.query();
+		if(task_menu.ret == 1)
+		{
+			// fall through as with normal cargo units
+			return false;
+		}
+		else if(task_menu.ret == 2)
+		{
+			veh->drain("water", 1);
+			typename ::item water(g->itypes["water_clean"], 0);
+			g->u.eat(g, g->u.inv.add_item(water).invlet);
+			g->u.moves -= 250;
+			return true;
+		}
+		else if(task_menu.ret == 3)
+		{
+			typename ::item water(g->itypes["water_clean"], g->turn);
+			water.charges = wamount;
+			g->handle_liquid(water, false, false);
+			if(water.charges != wamount)
+			{
+				veh->drain("water", wamount - water.charges);
+				g->u.moves -= 100;
+			}
+			return true;
+		}
+		else if(task_menu.ret == 4)
+		{
+			return true;
+		}
+	}
+	if(item == "water_collector") {
+		vehicle_part &vp = veh->parts[part];
+		if(vp.items.empty() || vp.items[0].charges == 0) {
+			return false;
+		}
+		std::ostringstream buffer; buffer << "there are " << vp.items[0].charges << " units of " << vp.items[0].tname() << " here";
+		uimenu menu;
+		menu.text = buffer.str();
+		menu.entries.push_back(uimenu_entry("empty tank"));
+		menu.entries.push_back(uimenu_entry("fill into container"));
+		menu.entries.push_back(uimenu_entry("cancel"));
+		menu.query();
+		if(menu.selected == 0) {
+			vp.items.clear();
+			return false;
+		} else if(menu.selected == 1) {
+			g->handle_liquid(vp.items[0], false, false);
+			if(vp.items[0].charges == 0) {
+				vp.items.clear();
+			}
+			return false;
+		} else {
+			return false;
+		}
+		return false;
+	}
+	return false;
+}
+
 void vpart_info::on_turn(vehicle *veh, int part) const {
+	if(item == "water_collector") {
+		vehicle_part &vp = veh->parts[part];
+		int part_x = veh->global_x() + vp.precalc_dx[0];
+		int part_y = veh->global_y() + vp.precalc_dy[0];
+		if(g->m.has_flag_ter_or_furn(indoors, part_x, part_y)) {
+			return;
+		}
+		itype_id type;
+		int amount = 0;
+		switch(g->weather) {
+			case WEATHER_DRIZZLE:
+				type = "water";
+				amount = 1;
+				break;
+			case WEATHER_RAINY:
+				type = "water";
+				amount = 2;
+				break;
+			case WEATHER_THUNDER:
+				type = "water";
+				amount = 3;
+				break;
+			case WEATHER_LIGHTNING:
+				type = "water";
+				amount = 3;
+				break;
+			case WEATHER_ACID_DRIZZLE:
+				type = "water_acid";
+				amount = 1;
+				break;
+			case WEATHER_ACID_RAIN:
+				type = "water_acid";
+				amount = 2;
+				break;
+		}
+		if(amount == 0) {
+			return;
+		}
+		if(vp.items.empty()) {
+			vp.items.push_back(typename ::item(g->itypes[type], 0));
+		}
+		if(vp.items[0].type->id != type) {
+			if(type == "water_acid") {
+				vp.items[0].make(g->itypes[type]);
+			}
+		}
+		vp.items[0].charges = std::min(vp.items[0].charges + amount, 200);
+	}
 }
 

@@ -1982,7 +1982,9 @@ void vehicle::gain_moves (int mp)
     }
    
 	for(int i = 0; i < parts.size(); i++) {
-		part_info(i).on_turn(this, i);
+		if(parts[i].hp > 0 && parts[i].active()) {
+			part_info(i).on_turn(this, i);
+		}
 	}
 
 	if(lights_on) {
