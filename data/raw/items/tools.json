@@ -4255,7 +4255,7 @@
     "initial_charges": 0,
     "charges_per_use": 0,
     "turns_per_charge": 0,
-    "ammo": "none",
+    "ammo": "none"
   },
   {
     "id": "wood_gas_producer",

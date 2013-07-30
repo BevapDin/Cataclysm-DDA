@@ -68,7 +68,7 @@ void game::init_morale()
 
     _("Masochism"),
     _("Hoarder"),
-    _("Cross-Dresser"),
+//    _("Cross-Dresser"),
     _("Optimist")
     };
     for(int i=0; i<NUM_MORALE_TYPES; i++){morale_data[i]=tmp_morale_data[i];}
@@ -148,7 +148,7 @@ close to you.")},
 {_("Masochist"), 2, 0, 0, _("\
 Although you still suffer the negative effects of pain, it also brings a \
 unique pleasure to you.")},
-{_("Cross-Dresser"), 2, 0, 0, _("\
+//{_("Cross-Dresser"), 2, 0, 0, _("\
 Covering your body in clothing typical for the opposite gender makes you feel better.")},
 {_("Light Step"), 1, 0, 0, _("\
 You make less noise while walking.  You're also less likely to set off traps.")},
@@ -1048,6 +1048,7 @@ void player::apply_persistent_morale()
 
     // Cross-dressers get a morale bonus for each body part covered in an
     // item of the opposite gender(MALE_TYPICAL/FEMALE_TYPICAL item flags).
+    /*
     if (has_trait(PF_CROSSDRESSER))
     {
         int bonus = 0;
@@ -1080,6 +1081,7 @@ void player::apply_persistent_morale()
             add_morale(MORALE_PERM_CROSSDRESSER, bonus, bonus, 5, 5, true);
         }
     }
+    */
 
     // Masochists get a morale bonus from pain.
     if (has_trait(PF_MASOCHIST))
@@ -8713,11 +8715,14 @@ point player::adjacent_tile()
 }
 
 int player::get_food_enjoyability(const itype &type) {
+	if(type.id == "water" || type.id == "water_clean") {
+		return 0;
+	}
 	FoodEnjoyabilitMapy::const_iterator a = food_enjoyability.find(&type);
 	if(a != food_enjoyability.end()) {
 		return a->second;
 	}
-	int f = rng(-5, + 5);
+	int f = rng(-5, +5);
 	food_enjoyability[&type] = f;
 	if(f > 3) {
 		g->add_msg_if_player(this, "You think you might like this %s.", type.name.c_str());
@@ -8728,13 +8733,15 @@ int player::get_food_enjoyability(const itype &type) {
 }
 
 int player::add_least_recently_meal(const itype &type) {
-	int r;
+	int r = 0;
 	for(int a = 0; a < least_recently_meals.size(); a++) {
 		if(&type == least_recently_meals[a]) {
 			r += a + 1;
 		}
 	}
-	r = r / least_recently_meals.size();
+	if(least_recently_meals.size() > 0) {
+		r = r / least_recently_meals.size();
+	}
 	least_recently_meals.push_back(&type);
 	while(least_recently_meals.size() > 50) {
 		least_recently_meals.erase(least_recently_meals.begin());

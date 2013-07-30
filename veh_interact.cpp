@@ -282,7 +282,7 @@ void veh_interact::do_install(int reason)
         wprintz(w_msg, c_ltgray, rm_prefix(_("<veh>, a ")).c_str());
         wprintz(w_msg, has_welder? c_ltgreen : c_red, _("powered welder"));
         wprintz(w_msg, c_ltgray, rm_prefix(_("<veh>, and level ")).c_str());
-        wprintz(w_msg, has_skill? c_ltgreen : c_red, "%d", vpart_list[sel_part].difficulty);
+        wprintz(w_msg, has_skill? c_ltgreen : c_red, "%d", vpart_info::getVehiclePartInfo((vpart_id) sel_part).difficulty);
         wprintz(w_msg, c_ltgray, rm_prefix(_("<veh> skill in mechanics.")).c_str());
         bool eng = part_info.has_function(vpc_engine);
         bool has_skill2 = !eng || (g->u.skillLevel("mechanics") >= dif_eng);

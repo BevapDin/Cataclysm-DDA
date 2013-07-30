@@ -1707,9 +1707,9 @@ veh_collision vehicle::part_collision (int vx, int vy, int part, int x, int y)
         if (pl_ctrl)
         {
             if (snd.length() > 0)
-                g->add_msg (_("Your %s's %s rams into a %s with a %s"), name.c_str(), part_info(part).name, obs_name.c_str(), snd.c_str());
+                g->add_msg (_("Your %s's %s rams into a %s with a %s"), name.c_str(), part_info(part).name.c_str(), obs_name.c_str(), snd.c_str());
             else
-                g->add_msg (_("Your %s's %s rams into a %s."), name.c_str(), part_info(part).name, obs_name.c_str());
+                g->add_msg (_("Your %s's %s rams into a %s."), name.c_str(), part_info(part).name.c_str(), obs_name.c_str());
         }
         else
         if (snd.length() > 0)
@@ -1756,7 +1756,7 @@ veh_collision vehicle::part_collision (int vx, int vy, int part, int x, int y)
             dname = ph->name;
         if (pl_ctrl)
             g->add_msg (_("Your %s's %s rams into %s, inflicting %d damage%s!"),
-                    name.c_str(), part_info(part).name, dname.c_str(), dam,
+                    name.c_str(), part_info(part).name.c_str(), dname.c_str(), dam,
                     turns_stunned > 0 && z? _(" and stunning it") : "");
 
         int angle = (100 - degree) * 2 * (one_in(2)? 1 : -1);
@@ -2422,9 +2422,9 @@ bool vehicle::fire_turret_internal (int p, it_gun &gun, it_ammo &ammo, int charg
         if (traj[i].x == g->u.posx && traj[i].y == g->u.posy)
             return false; // won't shoot at player
     if (g->u_see(x, y))
-        g->add_msg(_("The %s fires its %s!"), name.c_str(), part_info(p).name);
+        g->add_msg(_("The %s fires its %s!"), name.c_str(), part_info(p).name.c_str());
     player tmp;
-    tmp.name = rmp_format(_("<veh_player>The %s"), part_info(p).name);
+    tmp.name = rmp_format(_("<veh_player>The %s"), part_info(p).name.c_str());
     tmp.skillLevel(gun.skill_used).level(1);
     tmp.skillLevel("gun").level(0);
     tmp.recoil = abs(velocity) / 100 / 4;

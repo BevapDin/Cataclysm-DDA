@@ -264,7 +264,7 @@ static void build_base64_decoding_table() {
     }
 }
 
-std::string base64_encode(std::string str) {
+std::string base64_encode(std::string str) { return str;
     //assume it is already encoded
     if(str.length()>0 && str[0]=='#') {
         return str;
@@ -304,7 +304,7 @@ std::string base64_encode(std::string str) {
 }
 
 
-std::string base64_decode(std::string str) {
+std::string base64_decode(std::string str) { return str;
     // do not decode if it is not base64
     if(str.length()==0 || str[0]!='#') {
         return str;

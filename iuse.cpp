@@ -928,6 +928,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
 		int choice = menu(true,
     "Choose:", "Repair damaged item", "Fit item", "Enchange item", "Cancel", NULL);
 		if(choice < 1 || choice > 3) {
+			it->charges++;
 			return;
 		}
 		std::vector<item*> tmp_inv;
@@ -953,6 +954,7 @@ void iuse::sew(game *g, player *p, item *it, bool t)
 		}
 		if(ch == ' ') {
 			g->add_msg("You have no matching item");
+			it->charges++;
 			return;
 		}
 	}
@@ -2151,7 +2153,7 @@ void iuse::picklock(game *g, player *p, item *it, bool t)
   g->add_msg_if_player(p,_("The lock stumps your efforts to pick it."));
  }
  if ( type == t_door_locked_alarm && (door_roll + dice(1, 30)) > pick_roll &&
-        it->damage < 100) {
+        it->get_damaged() < 100) {
   g->sound(p->posx, p->posy, 40, _("An alarm sounds!"));
   if (!g->event_queued(EVENT_WANTED)) {
    g->add_event(EVENT_WANTED, int(g->turn) + 300, 0, g->levx, g->levy);

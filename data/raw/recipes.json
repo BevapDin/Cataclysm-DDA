@@ -269,14 +269,7 @@
             "tools": [
                          [
                              ["hatchet", -1],
-                             ["knife_steak", -1],
-                             ["knife_combat", -1],
-                             ["knife_butcher", -1],
-                             ["pockknife", -1],
-                             ["scalpel", -1],
-                             ["machete", -1],
-                             ["broadsword", -1],
-                             ["toolset", -1]
+                             ["func:blade", -1]
                          ]
                      ],
             "components": [
@@ -298,21 +291,11 @@
             "tools": [
                          [
                              ["hatchet", -1],
-                             ["knife_steak", -1],
-                             ["knife_combat", -1],
-                             ["knife_butcher", -1],
-                             ["pockknife", -1],
-                             ["scalpel", -1],
-                             ["machete", -1],
-                             ["broadsword", -1],
-                             ["toolset", -1]
+                             ["func:blade", -1]
                          ],
 						 [
-                             ["rock", -1],
-                             ["primitive_hammer", -1],
-                             ["hammer", -1],
                              ["hatchet", -1],
-                             ["toolset", -1]
+                             ["func:hammer", -1]
                          ]
                      ],
             "components": [
@@ -336,11 +319,7 @@
             "autolearn": true,
             "tools": [
 						 [
-                             ["rock", -1],
-                             ["primitive_hammer", -1],
-                             ["hammer", -1],
-                             ["hatchet", -1],
-                             ["toolset", -1]
+                             ["func:hammer", -1]
                          ]
                      ],
             "components": [
@@ -364,14 +343,10 @@
             "autolearn": false,
             "tools": [
 						 [
-                             ["rock", -1],
-                             ["primitive_hammer", -1],
-                             ["hammer", -1],
-                             ["hatchet", -1],
-                             ["toolset", -1]
+                             ["func:hammer", -1]
                          ],
 						  [
-                             ["toolset", 10],
+                             ["toolset_hotplate", 10],
                              ["fire", -1]
                          ]
                      ],
@@ -9580,7 +9555,7 @@
             "tools": [
                          [
                              ["hotplate", 2],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
@@ -9781,16 +9756,16 @@
                              ["goggles_welding", -1]
                          ],
                          [
-                             ["hacksaw", -1], ["toolset", -1]
+                             ["func:hacksaw", -1]
                          ],
                          [
-                             ["screwdriver", -1], ["toolset", -1]
+                             ["func:screwdriver", -1]
                          ],
                          [
-                             ["wrench", -1], ["toolset", -1]
+                             ["func:wrench", -1]
                          ],
                          [
-                             ["welder", 150], ["welder_crude", 225], ["toolset", 6]
+                             ["welder", 150], ["welder_crude", 225], ["toolset_welder", 6]
                          ]
                      ],
             "components": [
@@ -9829,16 +9804,20 @@
                              ["goggles_welding", -1]
                          ],
                          [
-                             ["hacksaw", -1], ["toolset", -1]
+                             ["func:hacksaw", -1]
                          ],
                          [
-                             ["screwdriver", -1], ["toolset", -1]
+                             ["func:screwdriver", -1]
                          ],
                          [
-                             ["wrench", -1], ["toolset", -1]
+                             ["func:wrench", -1]
                          ],
                          [
+<<<<<<< HEAD
                              ["welder", 300], ["welder_crude", 450], ["toolset", 12]
+=======
+                             ["welder", 300], ["toolset_welder", 12]
+>>>>>>> correct previous merge
                          ]
                      ],
             "components": [
@@ -9877,16 +9856,20 @@
                              ["goggles_welding", -1]
                          ],
                          [
-                             ["hacksaw", -1], ["toolset", -1]
+                             ["func:hacksaw", -1]
                          ],
                          [
-                             ["screwdriver", -1], ["toolset", -1]
+                             ["func:screwdriver", -1]
                          ],
                          [
-                             ["wrench", -1], ["toolset", -1]
+                             ["func:wrench", -1]
                          ],
                          [
+<<<<<<< HEAD
                              ["welder", 100], ["welder_crude", 150], ["toolset", 4]
+=======
+                             ["welder", 100], ["toolset_welder", 4]
+>>>>>>> correct previous merge
                          ]
                      ],
             "components": [
@@ -9912,21 +9895,14 @@
             "tools": [
                          [
                              ["hotplate", 5],
-                             ["toolset", 1],
+                             ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
                          [
                              ["pan", -1]
                          ],
                          [
-                             ["knife_steak", -1],
-                             ["knife_combat", -1],
-                             ["knife_butcher", -1],
-                             ["pockknife", -1],
-                             ["scalpel", -1],
-                             ["machete", -1],
-                             ["broadsword", -1],
-                             ["toolset", -1]
+                             ["func:blade", -1]
                          ]
                      ],
             "components": [
@@ -9943,8 +9919,7 @@
             "time": 12000,
             "reversible": true,
             "autolearn": true,
-            "tools": [ [ ["rock", -1], ["primitive_hammer", -1],
-                         ["hammer", -1], ["hatchet", -1], ["toolset", -1] ] ],
+            "tools": [ [ ["func:hammer", -1], ["hatchet", -1]  ] ],
             "components": [ [ ["element", 3] ],
                             [ ["scrap", 2] ],
                             [ ["cable", 8] ] ]
@@ -9957,11 +9932,8 @@
             "time": 5000,
             "reversible": false,
             "autolearn": true,
-            "tools": [ [ ["knife_steak", -1], ["knife_combat", -1],
-                         ["knife_butcher", -1], ["pockknife", -1],
-                         ["scalpel", -1], ["machete", -1],
-                         ["broadsword", -1], ["toolset", -1],
-                         ["screwdriver", -1] ] ],
+            "tools": [ [ ["func:blade", -1],
+                         ["func:screwdriver", -1] ] ],
             "components": [ [ ["spray_can", 1] ],
                             [ ["duct_tape", 25] ],
                             [ ["lighter", 1] ] ]
@@ -9985,13 +9957,8 @@
             "time": 200000,
             "reversible": false,
             "autolearn": true,
-            "tools": [ [ ["knife_steak", -1], ["knife_combat", -1],
-                         ["knife_butcher", -1], ["pockknife", -1],
-                         ["scalpel", -1], ["machete", -1],
-                         ["broadsword", -1], ["toolset", -1],
-                         ["screwdriver", -1] ],
-                       [ ["rock", -1], ["primitive_hammer", -1],
-                         ["hammer", -1], ["hatchet", -1], ["toolset", -1] ] ],
+            "tools": [ [ ["func:blade", -1], ["func:screwdriver", -1] ],
+                       [ ["func:hammer", -1], ["hatchet", -1] ] ],
             "components": [ [ ["pot", 1] ],
                             [ ["hose", 2] ],
                             [ ["metal_tank", 1] ] ]
@@ -10046,11 +10013,7 @@
             "time": 10000,
             "reversible": false,
             "autolearn": true,
-            "tools": [ [ ["knife_steak", -1], ["knife_combat", -1],
-                         ["knife_butcher", -1], ["pockknife", -1],
-                         ["scalpel", -1], ["machete", -1],
-                         ["broadsword", -1], ["toolset", -1],
-                         ["screwdriver", -1] ] ],
+            "tools": [ [ ["func:blade", -1], ["func:screwdriver", -1] ] ],
             "components": [ [ ["paper", 300] ],
                             [ ["duct_tape", 150] ] ]
         },
@@ -10063,10 +10026,8 @@
             "time": 20000,
             "reversible": false,
             "autolearn": true,
-            "tools": [ [ ["hacksaw", -1], ["toolset", -1] ],
-                       [ ["rock", -1], ["primitive_hammer", -1],
-                         ["hammer", -1], ["hatchet", -1],
-                         ["toolset", -1] ] ],
+            "tools": [ [ ["func:hacksaw", -1] ],
+                       [ ["func:hammer", -1] ] ],
             "components": [ [ ["rag", 4] ],
                             [ ["scrap", 4] ] ]
         },
@@ -10079,8 +10040,8 @@
             "time": 30000,
             "reversible": false,
             "autolearn": true,
-            "tools": [ [ ["hacksaw", -1], ["toolset", -1] ],
-                       [ ["screwdriver", -1], ["toolset", -1] ] ],
+            "tools": [ [ ["func:hacksaw", -1] ],
+                       [ ["func:screwdriver", -1] ] ],
             "components": [ [ ["2x4", 4] ],
                             [ ["rebar", 5] ] ]
         },
