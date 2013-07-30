@@ -89,10 +89,23 @@ void mapbuffer::save()
  std::ofstream fout;
  fout.open("save/maps.txt");
 
+ std::map<ter_id, int> termap;
+ fout << num_terrain_types << std::endl;
+ for(int t = t_null; t < num_terrain_types; t++) {
+  const ter_t &terx = terlist[t];
+  fout << t << " ";
+  fout << terx.sym << " ";
+  fout << ((int) terx.color) << " ";
+  fout << ((int) terx.movecost) << " ";
+  fout << ((int) terx.trap) << " ";
+  fout << terx.name << std::endl;
+  termap[(ter_id) t] = (int) t;
+ }
+
  fout << submap_list.size() << std::endl;
  int num_saved_submaps = 0;
  int num_total_submaps = submap_list.size();
-
+ 
  for (it = submaps.begin(); it != submaps.end(); it++) {
   if (num_saved_submaps % 100 == 0)
    popup_nowait(_("Please wait as the map saves [%d/%d]"),
@@ -104,7 +117,7 @@ void mapbuffer::save()
 // Dump the terrain.
   for (int j = 0; j < SEEY; j++) {
    for (int i = 0; i < SEEX; i++)
-    fout << int(sm->ter[i][j]) << " ";
+    fout << termap[sm->ter[i][j]] << " ";
    fout << std::endl;
   }
  // Dump the radiation
@@ -199,6 +212,33 @@ void mapbuffer::save()
  fout.close();
 }
 
+void add_terrain(int tn, long ts, int tc, int tm, int tt, const std::string &tname, std::map<int, ter_id> &tmap) {
+ if(tn >= t_null && tn < num_terrain_types) {
+  const ter_t &terx = terlist[tn];
+  if(ts == terx.sym && tc == ((int) terx.color) && tm == ((int) terx.movecost) && tt == ((int) terx.trap) && tname == terx.name) {
+   tmap[tn] = (ter_id) tn;
+  } else if(ts == terx.sym && tname == terx.name) {
+   tmap[tn] = (ter_id) tn;
+  }
+  return;
+ }
+ for(int t = t_null; t < num_terrain_types; t++) {
+  const ter_t &terx = terlist[t];
+  if(ts == terx.sym && tc == ((int) terx.color) && tm == ((int) terx.movecost) && tt == ((int) terx.trap) && tname == terx.name) {
+   tmap[tn] = (ter_id) t;
+  } else if(ts == terx.sym && tname == terx.name) {
+   tmap[tn] = (ter_id) t;
+  }
+  return;
+ }
+ if(tmap.find(tn) != tmap.end()) {
+  tmap[tn] = (ter_id) tn;
+  popup("Could not find terrain %s (id: %d)", tname.c_str(), tn);
+ } else {
+  popup("Could not find terrain %s (id: %d), id already used", tname.c_str(), tn);
+ }
+}
+
 void mapbuffer::load()
 {
  if (!master_game) {
@@ -210,6 +250,32 @@ void mapbuffer::load()
  fin.open("save/maps.txt");
  if (!fin.is_open())
   return;
+
+ std::map<int, ter_id> termap;
+ if(true) {
+  int tnum;
+  fin >> tnum;
+  if(tnum > num_terrain_types) {
+   popup("Map has more terrain types than this version knows of");
+   return;
+  }
+  for(int t = 0; t < tnum; t++) {
+   int tn, tc, tm, tt;
+   long ts;
+   std::string tname;
+   fin >> tn >> ts >> tc >> tm >> tt;
+   getline(fin, tname);
+   const int g = tname.find_first_not_of(" ");
+   if(g != 0 && g != std::string::npos) {
+    tname.erase(0, g);
+   }
+   add_terrain(tn, ts, tc, tm, tt, tname, termap);
+  }
+ } else {
+  for(int t = t_null; t < num_terrain_types; t++) {
+   termap[(int) t] = (ter_id) t;
+  }
+ }
 
  int itx, ity, t, d, a, num_submaps, num_loaded = 0;
  item it_tmp;
@@ -232,7 +298,7 @@ void mapbuffer::load()
    for (int i = 0; i < SEEX; i++) {
     int tmpter;
     fin >> tmpter;
-    sm->ter[i][j] = ter_id(tmpter);
+    sm->ter[i][j] = termap[tmpter];
     sm->frn[i][j] = f_null;
     sm->itm[i][j].clear();
     sm->trp[i][j] = tr_null;

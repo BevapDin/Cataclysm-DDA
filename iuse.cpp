@@ -9,6 +9,7 @@
 #include "mutation.h"
 #include "player.h"
 #include "vehicle.h"
+#include "ui.h"
 #include "crafting_inventory_t.h"
 #include <sstream>
 #include <algorithm>
@@ -4823,3 +4824,49 @@ void iuse::wood_gas(game *g, player *p, item *, bool t)
 	gasoline.charges = vol_fac;
 	while(!g->handle_liquid(gasoline, false, false)) { }
 }
+
+void iuse::remote_controll(game *g, player *p, item *it, bool t) {
+	VehicleList vehicles = g->m.get_vehicles();
+	if(vehicles.empty()) {
+		g->add_msg_if_player(p, "There are no vehicles in range");
+		return;
+	}
+	uimenu menu_car;
+	std::vector<vehicle*> cars;
+	for(VehicleList::iterator a = vehicles.begin(); a != vehicles.end(); a++) {
+		vehicle *veh = a->v;
+		if(veh != 0 && veh->has_part_with_function(vpc_remote_controll) && veh->fuel_left("battery", false) > 10) {
+			menu_car.entries.push_back(uimenu_entry(std::string("vehicle ") + veh->name));
+			cars.push_back(veh);
+		}
+	}
+	if(menu_car.entries.empty() || cars.empty()) {
+		g->add_msg_if_player(p, "There are no vehicles in range");
+		return;
+	}
+	menu_car.entries.push_back(uimenu_entry("cancel"));
+	menu_car.query();
+	if(menu_car.selected < 0 || menu_car.selected >= cars.size()) {
+		return;
+	}
+	vehicle *veh = cars[menu_car.selected];
+	
+	uimenu menu_func;
+	menu_func.entries.push_back(uimenu_entry("toogle headlights"));
+	menu_func.entries.push_back(uimenu_entry("honk horn"));
+	menu_func.entries.push_back(uimenu_entry("cancel"));
+	menu_func.query();
+	if(menu_func.selected == 0) {
+		veh->drain("battery", 10);
+		veh->lights_on = !veh->lights_on;
+		g->add_msg_if_player(p, "Lights hould now be %s", veh->lights_on ? "on" : "off");
+		p->moves -= 50;
+	} else if(menu_func.selected == 1) {
+		veh->drain("battery", 10);
+		if(!veh->honk()) {
+			g->add_msg_if_player(p, "The cars honk does not work");
+		}
+		p->moves -= 50;
+	}
+}
+

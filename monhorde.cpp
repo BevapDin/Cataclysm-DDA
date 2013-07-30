@@ -303,6 +303,9 @@ bool monhorde::move(game &g) {
 }
 
 void monhorde::attract_by_sound(int x, int y, int vol) {
+	if(g->levz != posz) {
+		return;
+	}
 	vol = vol / SEEX;
 	if(vol <= 0) {
 		return;

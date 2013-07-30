@@ -860,6 +860,8 @@ player& player::operator= (const player & rhs)
 
  illness = rhs.illness;
  addictions = rhs.addictions;
+ food_enjoyability = rhs.food_enjoyability;
+ least_recently_meals = rhs.least_recently_meals;
 
  nv_cached = false;
 
@@ -6300,14 +6302,16 @@ bool player::eat(game *g, signed char ch)
             if (comest->nutr >= 2)
                 hunger += int(comest->nutr * .75);
         }
+        int meal_enjoy = get_combined_food_enjoyability(*eaten->type);
+		const int fun = comest->fun + meal_enjoy;
         if (eaten->has_flag("HOT") && eaten->has_flag("EATEN_HOT"))
             add_morale(MORALE_FOOD_HOT, 5, 10);
         if (has_trait(PF_GOURMAND))
         {
-            if (comest->fun < -2)
-                add_morale(MORALE_FOOD_BAD, comest->fun * 2, comest->fun * 4, 60, 30, comest);
-            else if (comest->fun > 0)
-                add_morale(MORALE_FOOD_GOOD, comest->fun * 3, comest->fun * 6, 60, 30, comest);
+            if (fun < -2)
+                add_morale(MORALE_FOOD_BAD, fun * 2, fun * 4, 60, 30, comest);
+            else if (fun > 0)
+                add_morale(MORALE_FOOD_GOOD, fun * 3, fun * 6, 60, 30, comest);
             if (hunger < -60 || thirst < -60)
                 g->add_msg_if_player(this,_("You can't finish it all!"));
             if (hunger < -60)
@@ -6317,10 +6321,10 @@ bool player::eat(game *g, signed char ch)
         }
         else
         {
-            if (comest->fun < 0)
-                add_morale(MORALE_FOOD_BAD, comest->fun * 2, comest->fun * 6, 60, 30, comest);
-            else if (comest->fun > 0)
-                add_morale(MORALE_FOOD_GOOD, comest->fun * 2, comest->fun * 4, 60, 30, comest);
+            if (fun < 0)
+                add_morale(MORALE_FOOD_BAD, fun * 2, fun * 6, 60, 30, comest);
+            else if (fun > 0)
+                add_morale(MORALE_FOOD_GOOD, fun * 2, fun * 4, 60, 30, comest);
             if (hunger < -20 || thirst < -20)
                 g->add_msg_if_player(this,_("You can't finish it all!"));
             if (hunger < -20)
@@ -8706,4 +8710,47 @@ point player::adjacent_tile()
         return ret[rng(0, ret.size()-1)];   // return a random valid adjacent tile
     else
         return point(posx, posy);           // or return player position if no valid adjacent tiles
+}
+
+int player::get_food_enjoyability(const itype &type) {
+	FoodEnjoyabilitMapy::const_iterator a = food_enjoyability.find(&type);
+	if(a != food_enjoyability.end()) {
+		return a->second;
+	}
+	int f = rng(-5, + 5);
+	food_enjoyability[&type] = f;
+	if(f > 3) {
+		g->add_msg_if_player(this, "You think you might like this %s.", type.name.c_str());
+	} else if(f < -3) {
+		g->add_msg_if_player(this, "You think you might hate this %s", type.name.c_str());
+	}
+	return f;
+}
+
+int player::add_least_recently_meal(const itype &type) {
+	int r;
+	for(int a = 0; a < least_recently_meals.size(); a++) {
+		if(&type == least_recently_meals[a]) {
+			r += a + 1;
+		}
+	}
+	r = r / least_recently_meals.size();
+	least_recently_meals.push_back(&type);
+	while(least_recently_meals.size() > 50) {
+		least_recently_meals.erase(least_recently_meals.begin());
+	}
+	return r / 60;
+}
+
+int player::get_combined_food_enjoyability(const itype &type) {
+	int fe = get_food_enjoyability(type);
+	int lrf = add_least_recently_meal(type);
+	if(lrf > 3) {
+		g->add_msg_if_player(this, "You think about eating other stuff, too.");
+	} else if(lrf > 8) {
+		g->add_msg_if_player(this, "You'r tired of eating the same %s", type.name.c_str());
+	} else if(lrf > 16) {
+		g->add_msg_if_player(this, "You really don't like this %s anymore", type.name.c_str());
+	}
+	return fe - lrf;
 }

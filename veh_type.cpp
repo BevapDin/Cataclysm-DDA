@@ -437,12 +437,18 @@ static vpart_info_vector &get_vpart_list() {
 		mfb(vpc_horn)
     ));
 	
-	// car horn, makes a loud noise
     vpart_list.push_back(vpart_info(
         "water collector",        'V', c_blue,  '*', c_white,  10, 20, 480, 0,
 		"NULL", "water_collector", 1,
 		mfb(vpf_internal),
 		mfb(vpc_examine)
+    ));
+	
+    vpart_list.push_back(vpart_info(
+        "remote controll",        '*', c_green,  '*', c_white,  10, 20, 480, 0,
+		"NULL", "vehicle_remote_controll", 1,
+		mfb(vpf_internal),
+		mfb(vpc_remote_controll)
     ));
 	
 	// remote control of car horn, allows you to remotly active the car horn

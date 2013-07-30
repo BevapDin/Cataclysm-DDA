@@ -11585,7 +11585,6 @@ void game::spawn_mon(int shiftx, int shifty)
  monster zom;
  for (int i = 0; i < cur_om->zg.size(); i++) { // For each valid group...
  	if (cur_om->zg[i].posz != levz) { continue; } // skip other levels - hack
- 	if(cur_om->zg[i].type == "GROUP_WANDERING_ZOMBIE") { continue; } // handled separat
   group = 0;
   if(cur_om->zg[i].diffuse)
    dist = square_dist(nlevx, nlevy, cur_om->zg[i].posx, cur_om->zg[i].posy);
@@ -11610,6 +11609,8 @@ void game::spawn_mon(int shiftx, int shifty)
      mon_id type = MonsterGroupManager::GetMonsterFromGroup( cur_om->zg[i].type, &mtypes,
                                                              &group, (int)turn );
      zom = monster(mtypes[type]);
+	 if(cur_om->zg[i].type == "GROUP_FOREST" && mtypes[type]->size > MS_TINY) {
+	 }
      iter = 0;
      do {
       monx = rng(0, SEEX * MAPSIZE - 1);

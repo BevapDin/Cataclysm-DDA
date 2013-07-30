@@ -28,22 +28,22 @@ bool crafting_inventory_t::has_amount(const std::vector<std::pair<itype_id, int>
 
 bool crafting_inventory_t::has_amount(const itype_id &it, int quantity) const
 {
-	return (count(it, &amount_of, quantity) >= quantity);
+	return (count(it, &amount_of, quantity, S_ALL) >= quantity);
 }
 
 bool crafting_inventory_t::has_charges(const itype_id &it, int quantity) const
 {
-	return (count(it, &charges_of, quantity) >= quantity);
+	return (count(it, &charges_of, quantity, S_ALL) >= quantity);
 }
 
 int crafting_inventory_t::amount_of(const itype_id &it) const
 {
-	return count(it, &amount_of);
+	return count(it, &amount_of, -1, S_ALL);
 }
 
 int crafting_inventory_t::charges_of(const itype_id &it) const
 {
-	return count(it, &charges_of);
+	return count(it, &charges_of, -1, S_ALL);
 }
 
 bool crafting_inventory_t::map_has_amount(const itype_id &it, int quantity) const
@@ -58,12 +58,12 @@ bool crafting_inventory_t::map_has_charges(const itype_id &it, int quantity) con
 
 int crafting_inventory_t::map_amount_of(const itype_id &it) const
 {
-	return count(it, &amount_of, S_MAP | S_VEHICLE);
+	return count(it, &amount_of, -1, S_MAP | S_VEHICLE);
 }
 
 int crafting_inventory_t::map_charges_of(const itype_id &it) const
 {
-	return count(it, &charges_of, S_MAP | S_VEHICLE);
+	return count(it, &charges_of, -1, S_MAP | S_VEHICLE);
 }
 
 int crafting_inventory_t::amount_of(const itype_id &type, const item &it)

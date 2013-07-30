@@ -731,6 +731,30 @@
   },
 
   {
+    "id": "vehicle_remote_controll",
+    "type": "TOOL",
+    "symbol": ",",
+    "color": "light_cyan",
+    "name": "remote controll",
+    "description": "A small remote controll. Can be used to controll some functions of nearby cars that have a remote controll installed.",
+    "rarity": 1,
+    "price": 1000,
+    "material": "iron",
+    "weight": 1,
+    "volume": 1,
+    "bashing": 0,
+    "cutting": 0,
+    "to_hit": 0,
+    "max_charges": 20,
+    "initial_charges": 0,
+    "charges_per_use": 1,
+    "turns_per_charge": 0,
+    "ammo": "battery",
+    "revert_to": "null",
+    "use_action": "REMOTE_CONTROLL"
+  },
+
+  {
     "id": "black_box",
     "type": "TOOL",
     "symbol": ";",

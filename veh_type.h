@@ -137,6 +137,7 @@ enum vpart_function {
     vpc_light,              // generates light arc
 	vpc_horn,               // vehicle horn
 	vpc_examine,            // can be examined, use vpart_info::examine to do so
+	vpc_remote_controll,    // can be remotly controlled
     
 	num_vpfunctions
 };

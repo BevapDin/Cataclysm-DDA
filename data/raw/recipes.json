@@ -6311,6 +6311,51 @@
                               ]
                           ]
         },
+        {
+            "result": "vehicle_remote_controll",
+            "category": "CC_ELECTRONIC",
+            "skill_pri": "electronics",
+            "skill_sec": "mechanics",
+            "difficulty": 10,
+            "time": 50000,
+            "reversible": false,
+            "autolearn": true,
+            "tools": [
+                         [
+                             ["func:screwdriver", -1]
+                         ],
+                         [
+                             ["func:hammer", -1]
+                         ],
+                         [
+                             ["soldering_iron", 80],
+                             ["toolset_soldering_iron", 16]
+                         ]
+                     ],
+            "components": [
+                              [
+                                  ["scrap", 6]
+                              ],
+                              [
+                                  ["antenna", 2]
+                              ],
+                              [
+                                  ["power_supply", 1]
+                              ],
+                              [
+                                  ["transponder", 1]
+                              ],
+                              [
+                                  ["amplifier", 1]
+                              ],
+                              [
+                                  ["cable", 10]
+                              ],
+                              [
+                                  ["plastic_chunk", 2]
+                              ]
+                          ]
+        },
 
         {
             "result": "bio_recycler",
@@ -6822,7 +6867,7 @@
                      ],
             "components": [
                               [
-                                  ["rag", 10],
+                                  ["rag", 11],
                                   ["fur", 6]
                               ]
                           ]

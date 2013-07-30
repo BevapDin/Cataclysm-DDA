@@ -86,6 +86,45 @@ void square(map *m, furn_id type, int x1, int y1, int x2, int y2);
 void rough_circle(map *m, ter_id type, int x, int y, int rad);
 void add_corpse(game *g, map *m, int x, int y);
 
+void break_windows(map &m) {
+	if(!one_in(10)) { return; }
+	for (int i = 0; i < SEEX * 2; i++) {
+		for (int j = 0; j < SEEY * 2; j++) {
+			if( m.ter(i, j) == t_window_domestic) {
+				if(one_in(4)) {
+					m.ter_set(i, j, t_window_frame);
+					m.spawn_item(i, j, "rag", 0, rng(0, 3));
+				}
+			} else if( m.ter(i, j) == t_window) {
+				if(one_in(5)) {
+					m.ter_set(i, j, t_window_frame);
+				}
+			} else if( m.ter(i, j) == t_door_c) {
+				if(one_in(6)) {
+					m.ter_set(i, j, t_door_frame);
+					m.spawn_item(i, j, "2x4", 0, rng(0, 2));
+					m.spawn_item(i, j, "nail", 0, rng(0, 8));
+					m.spawn_item(i, j, "splinter", 0, rng(0, 2));
+				}
+			}
+		}
+	}
+	for(int i = 0; i < 4; i++) {
+		int rnx = rng(3, SEEX * 2 - 4);
+		int rny = rng(3, SEEX * 2 - 4);
+		if(m.ter(rnx, rny) != t_floor) {
+			continue;
+		}
+		if(one_in(5)) {
+			m.add_spawn(mon_zombie, 1, rnx, rny);
+		} else {
+			item body;
+			body.make_corpse(g->itypes["corpse"], g->mtypes[mon_null], 0);
+			m.add_item(rnx, rny, body);
+		}
+	}
+}
+
 void map::generate(game *g, overmap *om, const int x, const int y, const int z, const int turn)
 {
  dbg(D_INFO) << "map::generate( g["<<g<<"], om["<<(void*)om<<"], x["<<x<<"], "
@@ -1287,6 +1326,8 @@ t   t\n\
   } else { // Just boring old zombies
    place_spawns(g, "GROUP_ZOMBIE", 2, 0, 0, SEEX * 2 - 1, SEEX * 2 - 1, density);
   }
+  
+  break_windows(*this);
 
   if (terrain_type == ot_house_east  || terrain_type == ot_house_base_east)
    rotate(1);

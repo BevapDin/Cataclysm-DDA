@@ -198,6 +198,7 @@ public:
 // install a new part to vehicle (force to skip possibility check)
     int install_part (int dx, int dy, vpart_id id, int hp = -1, bool force = false);
 	int install_base_part(); // installs the first frame
+    bool replace_part (int part, vpart_id id);
 
     void remove_part (int p);
 // Generate the corresponding item from a vehicle part.
@@ -218,6 +219,11 @@ public:
 // returns index of part, inner to given, with certain flag (WARNING: without mfb!), or -1
     int part_with_flag(int p, vpart_flags f, bool unbroken = true);
     int part_with_function(int p, vpart_function f, bool unbroken = true);
+	
+	// Any part anywhere
+    bool has_part_with_function(vpart_function f, bool unbroken = true) const;
+	
+	bool honk();
 
 // returns true if given flag is present for given part index (WARNING: without mfb!)
     bool part_flag (int p, vpart_flags f) const;

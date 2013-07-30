@@ -200,6 +200,7 @@ void Item_factory::init(){
     iuse_function_list["SIMPLE_ON"] = &iuse::simple_on;
     iuse_function_list["SIMPLE_OFF"] = &iuse::simple_off;
     iuse_function_list["WOOD_GAS"] = &iuse::wood_gas;
+    iuse_function_list["REMOTE_CONTROLL"] = &iuse::remote_controll;
     // MACGUFFINS
     iuse_function_list["MCG_NOTE"] = &iuse::mcg_note;
     // ARTIFACTS

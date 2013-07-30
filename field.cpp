@@ -859,7 +859,7 @@ If you wish for a field effect to do something over time (propagate, interact wi
 */
 void map::step_in_field(int x, int y, game *g)
 {
-	field &curfield = field_at(x, y); //A copy of the current field for reference. Do not add fields to it, use map::add_field
+	field curfield = field_at(x, y); //A copy of the current field for reference. Do not add fields to it, use map::add_field
  field_entry *cur = NULL; //The current field effect.
  int veh_part; //vehicle part existing on this tile.
  vehicle *veh = NULL; //Vehicle reference if there is one.

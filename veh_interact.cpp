@@ -129,8 +129,8 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
             finish = true;
         else
             if (dx != -2 && (dx || dy) &&
-                cx + dx >= -6 && cx + dx < 6 &&
-                cy + dy >= -6 && cy + dy < 6)
+                cx + dx >= -9 && cx + dx < 9 &&
+                cy + dy >= -9 && cy + dy < 9)
                 move_cursor(dx, dy);
             else
             {
@@ -1125,19 +1125,16 @@ void complete_vehicle (game *g)
         if( parts.size() ) {
             item removed_wheel;
             replaced_wheel = veh->part_with_function( parts[0], vpc_wheel, false );
-            broken = veh->parts[replaced_wheel].hp <= 0;
-            if( replaced_wheel != -1 ) {
-                removed_wheel = veh->item_from_part( replaced_wheel );
-                veh->remove_part( replaced_wheel );
-                g->add_msg( _("You replace one of the %s's tires with %s."),
-                            veh->name.c_str(), vpart_info::getVehiclePartInfo(part).name.c_str() );
-            } else {
+            if( replaced_wheel == -1 ) {
                 debugmsg( "no wheel to remove when changing wheels." );
                 return;
-            }
-            partnum = veh->install_part( dx, dy, (vpart_id) part );
-            if( partnum < 0 )
-                debugmsg ("complete_vehicle tire change fails dx=%d dy=%d id=%d", dx, dy, part);
+			}
+			broken = veh->parts[replaced_wheel].hp <= 0;
+            removed_wheel = veh->item_from_part( replaced_wheel );
+            veh->replace_part( replaced_wheel, (vpart_id) part );
+            g->add_msg( "You replace one of the %s's tires with %s.",
+                        veh->name.c_str(), vpart_info::getVehiclePartInfo(part).name.c_str() );
+            partnum = replaced_wheel;
             used_item = crafting_inv.consume_vpart_item( g, vpart_info::getVehiclePartInfo((vpart_id) part).item);
             veh->get_part_properties_from_item( g, partnum, used_item ); //transfer damage, etc.
             // Place the removed wheel on the map last so consume_vpart_item() doesn't pick it.

@@ -2401,6 +2401,7 @@ bool item::use_charges(const itype_id &type_to_use, int &amount, std::list<item>
 		tmp.charges = amount;
 		usedup.push_back(tmp);
 		charges -= amount;
+		amount = 0;
 	}
 	return false;
 }

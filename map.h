@@ -277,6 +277,7 @@ class map
 // Terrain
  ter_id ter(const int x, const int y) const; // Terrain at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
  void ter_set(const int x, const int y, const ter_id new_terrain);
+ ter_id find_floor(const int x, const int y, const ter_id new_terrain) const;
  std::string tername(const int x, const int y) const; // Name of terrain at (x, y)
  std::string features(const int x, const int y); // Words relevant to terrain (sharp, etc)
  bool has_flag(const t_flag flag, const int x, const int y);  // checks terrain, furniture and vehicles

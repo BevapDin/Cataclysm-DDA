@@ -29,7 +29,9 @@ void game::init_construction()
   tl = -1; cl = -1; sl++; \
   constructions[id]->stages.push_back(construction_stage(__VA_ARGS__));
  #define TOOL(item)  ++tl; constructions[id]->stages[sl].tools[tl].push_back(component(item, -1))
+ #define TOOLN(item,N)  ++tl; constructions[id]->stages[sl].tools[tl].push_back(component(item, N))
  #define TOOLCONT(item) constructions[id]->stages[sl].tools[tl].push_back(component(item, -1))
+ #define TOOLCONTN(item,N) constructions[id]->stages[sl].tools[tl].push_back(component(item, N))
  #define COMP(item, amount)  ++cl; constructions[id]->stages[sl].components[cl].push_back(component(item,amount))
  #define COMPCONT(item, amount) constructions[id]->stages[sl].components[cl].push_back(component(item,amount))
 
@@ -361,21 +363,7 @@ void game::init_construction()
   STAGE(10);
    COMP("frame", 1);
 
-<<<<<<< HEAD
  CONSTRUCT(_("Fence Posts"), 0, &construct::able_dig,
-=======
- CONSTRUCT("Place wheelbarrow", 0, &construct::able_empty, &construct::done_wheelbarrow);
-  STAGE(30);
-   TOOL("func:screwdriver");
-   TOOL("func:hammer");
-   TOOLCONT("hatchet");
-   TOOLCONT("nailgun");
-   COMP("nail", 4);
-   COMP("wheel", 1);
-   COMP("frame", 1);
-
- CONSTRUCT("Fence Posts", 0, &construct::able_dig,
->>>>>>> toolsets: combine the funct. of several tools
                              &construct::done_nothing);
   STAGE(t_fence_post, 5);
    TOOL("func:hammer");
@@ -404,8 +392,8 @@ void game::init_construction()
                             &construct::done_nothing);
   STAGE(t_metal_floor, 30);
    TOOL("func:wrench");
-   TOOL("func:welder");
-   TOOLCONT("toolset_welder");
+   TOOLN("func:welder", 200);
+   TOOLCONTN("toolset_welder", 40);
    TOOL("func:hacksaw");
    TOOL("func:shovel");
    COMP("frame", 3);
@@ -420,8 +408,8 @@ void game::init_construction()
    TOOL("func:shovel");
   STAGE(t_wall_metal_v, 30);
    TOOL("wrench");
-   TOOL("func:welder");
-   TOOLCONT("toolset_welder");
+   TOOLN("func:welder", 200);
+   TOOLCONTN("toolset_welder", 40);
    TOOL("func:hacksaw");
    COMP("frame", 4);
    COMP("steel_plate", 1);
@@ -435,8 +423,8 @@ void game::init_construction()
    TOOL("func:shovel");
   STAGE(t_wall_metal_h, 30);
    TOOL("func:wrench");
-   TOOL("func:welder");
-   TOOLCONT("toolset_welder");
+   TOOLN("func:welder", 200);
+   TOOLCONTN("toolset_welder", 40);
    TOOL("func:hacksaw");
    COMP("frame", 4);
    COMP("steel_plate", 1);
@@ -448,13 +436,12 @@ void game::init_construction()
    TOOL("func:hammer");
    TOOLCONT("hatchet");
    TOOL("func:hacksaw");
-   TOOL("func:welder");
-   TOOLCONT("toolset_welder");
+   TOOLN("func:welder", 70);
+   TOOLCONTN("toolset_welder", 20);
    TOOL("func:shovel");
    TOOL("func:wrench");
    COMP("steel_plate", 4);
    COMP("frame", 8);
-   COMP("battery", 200); // for welder
    COMP("2x4", 8);
 
  CONSTRUCT("Place wheelbarrow", 0, &construct::able_empty, &construct::done_wheelbarrow);

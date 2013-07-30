@@ -832,6 +832,44 @@ ter_id map::ter(const int x, const int y) const
  return grid[nonant]->ter[lx][ly];
 }
 
+#define is_corner(x, y, t) \
+	((ter((x)+1,(y))==t || ter((x)-1,(y))==t) && \
+	 (ter((x),(y)+1)==t || ter((x),(y)-1)==t)) \
+
+ter_id map::find_floor(const int x, const int y, const ter_id new_terrain) const {
+	typedef std::map<ter_id, int> Map;
+	Map tm;
+	const ter_id old_ter = ter(x, y);
+	for(int dx = -2; dx <= +2; dx++) {
+		for(int dy = -2; dy <= +2; dy++) {
+			if(dx == 0 && dy == 0) { continue; }
+			const ter_id t = ter(x + dx, y + dy);
+			if(t == old_ter) { continue; }
+			if(terlist[t].flags & mfb(flat)) {
+				tm[t]++;
+			}
+		}
+	}
+	if(tm.size() == 0) {
+		return new_terrain;
+	} else if(tm.size() == 1) {
+		return tm.begin()->first;
+	}
+	for(Map::const_iterator a = tm.begin(); a != tm.end(); ++a) {
+		if(is_corner(x, y, a->first)) {
+			return a->first;
+		}
+	}
+	int index = rng(0, tm.size() - 1);
+	for(Map::const_iterator a = tm.begin(); a != tm.end(); ++a) {
+		if(index == 0) {
+			return a->first;
+		}
+		index--;
+	}
+	return new_terrain;
+}
+
 void map::ter_set(const int x, const int y, const ter_id new_terrain)
 {
  if (!INBOUNDS(x, y)) {
@@ -3072,8 +3110,13 @@ void map::draw(game *g, WINDOW* w, const point center)
     else
      mvwputch(w, realy+getmaxy(w)/2 - center.y, realx+getmaxx(w)/2 - center.x, c_ltgray, '#');
    } else if (dist <= u_clairvoyance || can_see) {
-    if (bRainOutside && INBOUNDS(realx, realy) && is_outside(realx, realy))
-     g->mapRain[realy + getmaxy(w)/2 - center.y][realx + getmaxx(w)/2 - center.x] = true;
+    if (bRainOutside && INBOUNDS(realx, realy) && is_outside(realx, realy)) {
+     int part;
+     vehicle *veh = veh_at(realx, realy, part);
+     if(veh == 0 || veh->part_with_flag(part, vpf_obstacle) < 0) {
+      g->mapRain[realy + getmaxy(w)/2 - center.y][realx + getmaxx(w)/2 - center.x] = true;
+	 }
+	}
     drawsq(w, g->u, realx, realy, false, true, center.x, center.y,
            (dist > low_sight_range && LL_LIT > lit) ||
 	   (dist > sight_range && LL_LOW == lit),

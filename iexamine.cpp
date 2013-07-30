@@ -76,7 +76,7 @@ void iexamine::cardreader(game *g, player *p, map *m, int examx, int examy) {
   for (int i = -3; i <= 3; i++) {
    for (int j = -3; j <= 3; j++) {
     if (m->ter(examx + i, examy + j) == t_door_metal_locked)
-     m->ter_set(examx + i, examy + j, t_floor);
+     m->ter_set(examx + i, examy + j, m->find_floor(examx, examy, t_floor));
      }
   }
   for (int i = 0; i < g->z.size(); i++) {
@@ -126,7 +126,7 @@ void iexamine::cardreader(game *g, player *p, map *m, int examx, int examy) {
        for (int i = -3; i <= 3; i++) {
         for (int j = -3; j <= 3; j++) {
          if (m->ter(examx + i, examy + j) == t_door_metal_locked)
-          m->ter_set(examx + i, examy + j, t_floor);
+          m->ter_set(examx + i, examy + j, m->find_floor(examx, examy, t_floor));
           }
        }
       }
@@ -155,9 +155,9 @@ void iexamine::rubble(game *g, player *p, map *m, int examx, int examy) {
 
    // "Refloor"
   if (g->levz < 0) {
-   m->ter_set(examx, examy, t_rock_floor);
+   m->ter_set(examx, examy, m->find_floor(examx, examy, t_rock_floor));
   } else {
-   m->ter_set(examx, examy, t_dirt);
+   m->ter_set(examx, examy, m->find_floor(examx, examy, t_dirt));
   }
 
    // "Remind"
@@ -216,7 +216,7 @@ void iexamine::wreckage(game *g, player *p, map *m, int examx, int examy) {
 
  if (query_yn(_("Clear up that wreckage?"))) {
   p->moves -= 200;
-  m->ter_set(examx, examy, t_dirt);
+  m->ter_set(examx, examy, m->find_floor(examx, examy, t_dirt));
   item chunk(g->itypes["steel_chunk"], g->turn);
   item scrap(g->itypes["scrap"], g->turn);
   item pipe(g->itypes["pipe"], g->turn);

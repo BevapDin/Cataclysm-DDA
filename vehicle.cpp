@@ -409,7 +409,7 @@ std::string vehicle::use_controls()
    g->add_msg(_("You let go of the controls."));
    break;
   case honk_horn:
-   g->sound(g->u.posx, g->u.posy, 40, "hooonk");
+   honk();
    g->u.moves -= 100;
    break;
   case convert_vehicle:
@@ -671,6 +671,45 @@ int vehicle::install_part (int dx, int dy, vpart_id id, int hp, bool force)
     return parts.size() - 1;
 }
 
+bool vehicle::replace_part (int part, vpart_id id)
+{
+	if(part < 0 || part >= parts.size()) {
+		return false;
+	}
+    vehicle_part &new_part = parts[part];
+	// cache old position values
+	int dx = new_part.mount_dx;
+	int dy = new_part.mount_dy;
+	std::vector<item> tmpItems;
+	if(part_function(part, vpc_cargo) && !new_part.items.empty()) {
+		if(vpart_info::getVehiclePartInfo(id).has_function(vpc_cargo)) {
+			tmpItems.swap(new_part.items);
+		} else {
+			for(size_t i = 0; i < new_part.items.size(); i++) {
+				g->m.add_item(global_x() + dx, global_y() + dy, new_part.items[i], 1024);
+			}
+			new_part.items.clear();
+		}
+	}
+	// reinitialize the part
+	new_part = vehicle_part();
+    new_part.id = id;
+    new_part.mount_dx = dx;
+    new_part.mount_dy = dy;
+    new_part.hp = vpart_info::getVehiclePartInfo(id).durability;
+    new_part.amount = 0;
+    new_part.blood = 0;
+	new_part.items.swap(tmpItems);
+    item tmp(g->itypes[vpart_info::getVehiclePartInfo(id).item], 0);
+    new_part.bigness = tmp.bigness;
+
+    find_external_parts ();
+    find_exhaust ();
+    precalc_mounts (0, face.dir());
+    insides_dirty = true;
+    return true;
+}
+
 // share damage & bigness betwixt veh_parts & items.
 void vehicle::get_part_properties_from_item(game* g, int partnum, item& i){
     //transfer bigness if relevant.
@@ -748,6 +787,32 @@ std::vector<int> vehicle::internal_parts (int p)
         if (parts[i].mount_dx == parts[p].mount_dx && parts[i].mount_dy == parts[p].mount_dy)
             res.push_back (i);
     return res;
+}
+
+bool vehicle::honk() {
+	if(fuel_left("battery", false) < 10) {
+		return false;
+	}
+	for(int p = 0; p < parts.size(); p++) {
+		if(parts[p].hp > 0 && part_function(p, vpc_horn)) {
+			g->sound(
+				global_x() + parts[p].precalc_dx[0], 
+				global_y() + parts[p].precalc_dy[0], 
+				40, "hooonk");
+			drain("battery", 10);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool vehicle::has_part_with_function(vpart_function f, bool unbroken) const {
+	for(int p = 0; p < parts.size(); p++) {
+		if((parts[p].hp > 0 || !unbroken) && part_function(p, f)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 int vehicle::part_with_flag (int p, vpart_flags f, bool unbroken)

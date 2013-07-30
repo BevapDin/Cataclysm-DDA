@@ -855,16 +855,18 @@ int inventory::amount_of(const itype_id &it) const
     int count = 0;
     for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter)
     {
-        for (std::list<item>::const_iterator stack_iter = iter->begin();
-             stack_iter != iter->end();
+		const std::list<item> &stack = *iter;
+        for (std::list<item>::const_iterator stack_iter = stack.begin();
+             stack_iter != stack.end();
              ++stack_iter)
         {
-            if (stack_iter->matches_type(it))
+			const item &ite = *stack_iter;
+            if (ite.matches_type(it))
             {
                 // check if it's a container, if so, it should be empty
-                if (stack_iter->type->is_container())
+                if (ite.type->is_container())
                 {
-                    if (stack_iter->contents.empty())
+                    if (ite.contents.empty())
                     {
                         count++;
                     }
@@ -874,9 +876,9 @@ int inventory::amount_of(const itype_id &it) const
                     count++;
                 }
             }
-            for (int k = 0; k < stack_iter->contents.size(); k++)
+            for (int k = 0; k < ite.contents.size(); k++)
             {
-                if (stack_iter->contents[k].matches_type(it))
+                if (ite.contents[k].matches_type(it))
                 {
                     count++;
                 }

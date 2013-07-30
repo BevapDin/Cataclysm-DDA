@@ -137,7 +137,7 @@ protected:
 	} source_flags;
 
 	/** Returns the number of charges of this item type. Stops counting when reaching max charges */
-	int count(const itype_id &type, CountFunction function, int max = -1, int sources = S_ALL) const;
+	int count(const itype_id &type, CountFunction function, int max, int sources) const;
 
 	static int charges_of(const itype_id &type, const item &it);
 	static int amount_of(const itype_id &type, const item &it);
