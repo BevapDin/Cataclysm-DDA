@@ -98,16 +98,16 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
 
     int charges = ((it_tool *) g->itypes["welder"])->charges_per_use;
     int charges_crude = ((it_tool *) g->itypes["welder_crude"])->charges_per_use;
-    has_wrench = crafting_inv.has_amount("func:wrench", 1);
-    has_hacksaw = crafting_inv.has_amount("func:hacksaw", 1);
-    has_welder = (crafting_inv.has_amount("welder", 1) &&
-                  crafting_inv.has_charges("welder", charges)) ||
-                  (crafting_inv.has_amount("welder_crude", 1) &&
-                  crafting_inv.has_charges("welder_crude", charges_crude)) ||
-                (crafting_inv.has_amount("toolset_welder", 1) &&
-                 crafting_inv.has_charges("toolset_welder", charges/20));
-    has_jack = crafting_inv.has_amount("func:jack", 1);
-    has_siphon = crafting_inv.has_amount("func:hose", 1);
+    has_wrench = crafting_inv->has_amount("func:wrench", 1);
+    has_hacksaw = crafting_inv->has_amount("func:hacksaw", 1);
+    has_welder = (crafting_inv->has_amount("welder", 1) &&
+                  crafting_inv->has_charges("welder", charges)) ||
+                  (crafting_inv->has_amount("welder_crude", 1) &&
+                  crafting_inv->has_charges("welder_crude", charges_crude)) ||
+                (crafting_inv->has_amount("toolset_welder", 1) &&
+                 crafting_inv->has_charges("toolset_welder", charges/20));
+    has_jack = crafting_inv->has_amount("func:jack", 1);
+    has_siphon = crafting_inv->has_amount("func:hose", 1);
 
     has_wheel = 0;
     has_wheel |= crafting_inv->has_amount( "wheel", 1 );
@@ -1045,12 +1045,12 @@ void complete_vehicle (game *g)
         partnum = veh->install_part (dx, dy, (vpart_id) part);
         if(partnum < 0)
             debugmsg ("complete_vehicle install part fails dx=%d dy=%d id=%d", dx, dy, part);
-        used_item = crafting_inv.consume_vpart_item(g, vpart_info::getVehiclePartInfo((vpart_id) part).item);
+        used_item = crafting_inv->consume_vpart_item(g, vpart_info::getVehiclePartInfo((vpart_id) part).item);
         veh->get_part_properties_from_item(g, partnum, used_item); //transfer damage, etc.
         tools.push_back(component("welder", welder_charges));
         tools.push_back(component("welder_crude", welder_crude_charges));
         tools.push_back(component("toolset_welder", welder_charges/20));
-        crafting_inv.consume_tools(tools, true);
+        crafting_inv->consume_tools(tools, true);
         if (vpart_info::getVehiclePartInfo(part).has_function(vpc_light)) {
            int choice = menu(true, "Choose facing direction:", "N", "NW", "W", "SW", "S", "SE", "E", "NE", NULL);
            int dir = (choice - 1) * 45;
@@ -1066,21 +1066,21 @@ void complete_vehicle (game *g)
 			vpart_info::type_count_pair_vector items_needed = pinfo.get_repair_materials(veh->parts[part].hp);
 			for(size_t a = 0; a < items_needed.size(); a++) {
 				if(items_needed[a].first == pinfo.item) {
-					used_item = crafting_inv.consume_vpart_item(g, pinfo.item);
+					used_item = crafting_inv->consume_vpart_item(g, pinfo.item);
 					tools.push_back(component("func:wrench", -1));
-					crafting_inv.consume_tools(tools, true);
+					crafting_inv->consume_tools(tools, true);
 					tools.clear();
 					dd = 0;
 					veh->insides_dirty = true;
 				} else {
-					crafting_inv.consume_items(items_needed[a].first, items_needed[a].second);
+					crafting_inv->consume_items(items_needed[a].first, items_needed[a].second);
 				}
 			}
 		}
         tools.push_back(component("welder", welder_charges));
         tools.push_back(component("welder_crude", welder_crude_charges));
         tools.push_back(component("toolset_welder", welder_charges/20));
-        crafting_inv.consume_tools(tools, true);
+        crafting_inv->consume_tools(tools, true);
         veh->parts[part].hp = veh->part_info(part).durability;
         g->add_msg (_("You repair the %s's %s."),
                     veh->name.c_str(), veh->part_info(part).name.c_str());
@@ -1135,7 +1135,7 @@ void complete_vehicle (game *g)
             g->add_msg( "You replace one of the %s's tires with %s.",
                         veh->name.c_str(), vpart_info::getVehiclePartInfo(part).name.c_str() );
             partnum = replaced_wheel;
-            used_item = crafting_inv.consume_vpart_item( g, vpart_info::getVehiclePartInfo((vpart_id) part).item);
+            used_item = crafting_inv->consume_vpart_item( g, vpart_info::getVehiclePartInfo((vpart_id) part).item);
             veh->get_part_properties_from_item( g, partnum, used_item ); //transfer damage, etc.
             // Place the removed wheel on the map last so consume_vpart_item() doesn't pick it.
             if ( !broken ) {

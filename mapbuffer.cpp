@@ -118,21 +118,21 @@ void mapbuffer::save()
   for (int j = 0; j < SEEY; j++) {
    for (int i = 0; i < SEEX; i++)
     fout << termap[sm->ter[i][j]] << " ";
-   fout << std::endl;
+   fout << "\n";
   }
  // Dump the radiation
   for (int j = 0; j < SEEY; j++) {
    for (int i = 0; i < SEEX; i++)
     fout << sm->rad[i][j] << " ";
   }
-  fout << std::endl;
+  fout << "\n";
 
  // Furniture
   for (int j = 0; j < SEEY; j++) {
    for (int i = 0; i < SEEX; i++) {
     if (sm->frn[i][j] != f_null)
      fout << "f " << i << " " << j << " " << sm->frn[i][j] <<
-     std::endl;
+     "\n";
    }
   }
  // Items section; designate it with an I.  Then check itm[][] for each square

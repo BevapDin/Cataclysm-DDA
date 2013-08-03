@@ -517,12 +517,19 @@ vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) cons
 	// amount (as weight) of damage that must be repaired
 	const double amount = rel_damage * type->weight;
 	// material     item-type for repair   relative-damage
+	::add_item(type, "steel", "steel_chunk", amount, result);
+	if(result.empty()) {
+		// Try again, this time use the smaller scraps, this is for
+		// when the damage is to small to require a full chunk
+		::add_item(type, "steel", "scrap", amount, result);
+	}
 	::add_item(type, "leather", "leather", amount, result);
 	::add_item(type, "fur", "fur", amount, result);
 	::add_item(type, "cotton", "rag", amount, result);
 	::add_item(type, "iron", "scrap", amount, result);
-	::add_item(type, "steel", "steel_chunk", amount, result);
 	::add_item(type, "plastic", "plastic_chunk", amount, result);
+	// for now:
+	::add_item(type, "glass", "plastic_chunk", amount, result);
 	return result;
 }
 
@@ -538,6 +545,7 @@ bool vpart_info::examine(vehicle *veh, int part) const {
 		task_menu.entries.push_back(uimenu_entry(2, wamount > 0 ? 1 : 0, -1, std::string("Have a drink")));
 		task_menu.entries.push_back(uimenu_entry(3, wamount > 0 ? 1 : 0, -1, std::string("Fill water into a container")));
 		task_menu.entries.push_back(uimenu_entry(4, 1, -1, "cancel"));
+		task_menu.selected = 3;
 		task_menu.query();
 		if(task_menu.ret == 1)
 		{

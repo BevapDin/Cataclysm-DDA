@@ -43,6 +43,10 @@ void game::init_recipes() throw (std::string)
         catajson curr = recipeList.curr();
         // required fields
         std::string result = curr.get("result").as_string();
+		if(itypes.find(result) == itypes.end()) {
+			debugmsg("No itype definition for %s", result.c_str());
+			continue;
+		}
         std::string category = curr.get("category").as_string();
         int difficulty = curr.get("difficulty").as_int();
         int time = curr.get("time").as_int();
@@ -88,39 +92,53 @@ void game::init_recipes() throw (std::string)
         recipeNames.push_back(rec_name);
 
         catajson compList = curr.get("components");
-        for (compList.set_begin(); compList.has_curr(); compList.next())
+        for (compList.set_begin(); compList.has_curr() && last_rec != 0; compList.next())
         {
             ++cl;
             std::vector<component> component_choices;
             catajson comp = compList.curr();
             // interchangable components
-            for (comp.set_begin(); comp.has_curr(); comp.next())
+            for (comp.set_begin(); comp.has_curr() && last_rec != 0; comp.next())
             {
                 std::string name = comp.curr().get(0).as_string();
+				if(itypes.find(name) == itypes.end()) {
+					debugmsg("No itype definition for %s", name.c_str());
+					delete last_rec;
+					last_rec = 0;
+					continue;
+				}
                 int quant = comp.curr().get(1).as_int();
                 component_choices.push_back(component(name, quant));
             }
             last_rec->components.push_back(component_choices);
         }
+        if(last_rec == 0) { continue; }
 
         if (curr.has("tools"))
         {
             catajson toolList = curr.get("tools");
-            for (toolList.set_begin(); toolList.has_curr(); toolList.next())
+            for (toolList.set_begin(); toolList.has_curr() && last_rec != 0; toolList.next())
             {
                 ++tl;
                 std::vector<component> tool_choices;
                 catajson tool = toolList.curr();
                 // interchangable tools
-                for (tool.set_begin(); tool.has_curr(); tool.next())
+                for (tool.set_begin(); tool.has_curr() && last_rec != 0; tool.next())
                 {
                     std::string name = tool.curr().get(0).as_string();
+					if(itypes.find(name) == itypes.end()) {
+						debugmsg("No itype definition for %s", name.c_str());
+						delete last_rec;
+						last_rec = 0;
+						continue;
+					}
                     int quant = tool.curr().get(1).as_int();
                     tool_choices.push_back(component(name, quant));
                 }
                 last_rec->tools.push_back(tool_choices);
             }
         }
+        if(last_rec == 0) { continue; }
 
         if (curr.has("book_learn"))
         {
@@ -1075,9 +1093,7 @@ void game::complete_craft()
    crafting_inv.consume_tools(making->tools[i], false);
  }
 
-  // Set up the new item, and pick an inventory letter
- int iter = 0;
- item newit(item_controller->find_template(making->result), turn, nextinv);
+ item newit(item_controller->find_template(making->result), turn);
  int new_count = 1;
  if(making->count > 0) {
    new_count = making->count;
@@ -1129,27 +1145,7 @@ void game::complete_craft()
     newit.charges *= new_count;
     new_count = 1;
   }
-  for(int i = 0; i < new_count; i++) {
-  iter = 0;
-  do {
-   newit.invlet = nextinv;
-   advance_nextinv();
-   iter++;
-  } while (u.has_item(newit.invlet) && iter < inv_chars.size());
-// We might not have space for the item
-  if (iter == inv_chars.size() || !u.can_pickVolume(newit.volume())) {
-   add_msg(_("There's no room in your inventory for the %s, so you drop it."),
-             newit.tname().c_str());
-   m.add_item(u.posx, u.posy, newit, MAX_ITEM_IN_SQUARE);
-  } else if (!u.can_pickWeight(newit.weight(), !OPTIONS[OPT_DANGEROUS_PICKUPS])) {
-   add_msg(_("The %s is too heavy to carry, so you drop it."),
-           newit.tname().c_str());
-   m.add_item_or_charges(u.posx, u.posy, newit);
-  } else {
-   newit = u.i_add(newit);
-   add_msg("%c - %s", newit.invlet, newit.tname().c_str());
-  }
- }
+  u.add_or_drop(newit, this, new_count);
  }
 }
 

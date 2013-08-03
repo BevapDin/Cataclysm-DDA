@@ -23,9 +23,7 @@
 
 static void add_or_drop_item(game *g, player *p, item *it)
 {
-  item replacement(g->itypes[it->type->id], int(g->turn), g->nextinv);
-  bool drop = false;
-  int iter = 0;
+  item replacement(g->itypes[it->type->id], int(g->turn));
   // Should this vary based on how many charges get consumed by default?
   if (replacement.charges >= 0)
   {
@@ -35,18 +33,8 @@ static void add_or_drop_item(game *g, player *p, item *it)
       it->charges++;
       return;
   }
-
-  while (p->has_item(replacement.invlet)) {
-    replacement.invlet = g->nextinv;
-    g->advance_nextinv();
-    iter++;
-  }
-  if (!drop && (iter == inv_chars.size() || p->volume_carried() >= p->volume_capacity()))
-    drop = true;
-  if (drop)
-    g->m.add_item_or_charges(p->posx, p->posy, replacement);
-  else
-    p->i_add(replacement, g);
+  
+  p->add_or_drop(replacement, g);
 }
 
 static bool use_fire(game *g, player *p, item *it)
@@ -1232,25 +1220,9 @@ void iuse::scissors(game *g, player *p, item *it, bool t)
         return;
     }
     g->add_msg_if_player(p, sliced_text.c_str(), cut->tname().c_str(), count);
-    item result(g->itypes[type], int(g->turn), g->nextinv);
+    item result(g->itypes[type], int(g->turn));
     p->i_rem(ch);
-    bool drop = false;
-    for (int i = 0; i < count; i++)
-    {
-        int iter = 0;
-        while (p->has_item(result.invlet) && iter < inv_chars.size())
-        {
-            result.invlet = g->nextinv;
-            g->advance_nextinv();
-            iter++;
-        }
-        if (!drop && (iter == inv_chars.size() || p->volume_carried() >= p->volume_capacity()))
-            drop = true;
-        if (drop)
-            g->m.add_item_or_charges(p->posx, p->posy, result);
-        else
-            p->i_add(result, g);
-    }
+	p->add_or_drop(result, g, count);
     return;
 }
 
@@ -3503,25 +3475,9 @@ void iuse::knife(game *g, player *p, item *it, bool t)
 
                 g->add_msg(ngettext("You cut the %1$s into one %2$i chunk.","You cut the %1$s into %2$i plastic chunks.", amount), cut->tname().c_str(), amount);
                 int count = amount;
-                item result(g->itypes["plastic_chunk"], int(g->turn), g->nextinv);
+                item result(g->itypes["plastic_chunk"], int(g->turn));
                 p->i_rem(ch);
-                bool drop = false;
-                for (int i = 0; i < count; i++)
-                {
-                    int iter = 0;
-                    while (p->has_item(result.invlet) && iter < inv_chars.size())
-                    {
-                        result.invlet = g->nextinv;
-                        g->advance_nextinv();
-                        iter++;
-                    }
-                    if (!drop && (iter == inv_chars.size() || p->volume_carried() >= p->volume_capacity()))
-                    drop = true;
-                    if (drop)
-                    g->m.add_item_or_charges(p->posx, p->posy, result);
-                    else
-                    p->i_add(result);
-                }
+				p->add_or_drop(result, g, count);
             }
             else if(cut->made_of("kevlar"))
             {
@@ -3534,25 +3490,9 @@ void iuse::knife(game *g, player *p, item *it, bool t)
 
                 g->add_msg(ngettext("You cut the %1$s into one %2$i chunk.","You cut the %1$s into %2$i plastic chunks.", amount), cut->tname().c_str(), amount);
                 int count = amount;
-                item result(g->itypes["kevlar_plate"], int(g->turn), g->nextinv);
+                item result(g->itypes["kevlar_plate"], int(g->turn));
                 p->i_rem(ch);
-                bool drop = false;
-                for (int i = 0; i < count; i++)
-                {
-                    int iter = 0;
-                    while (p->has_item(result.invlet) && iter < inv_chars.size())
-                    {
-                        result.invlet = g->nextinv;
-                        g->advance_nextinv();
-                        iter++;
-                    }
-                    if (!drop && (iter == inv_chars.size() || p->volume_carried() >= p->volume_capacity()))
-                    drop = true;
-                    if (drop)
-                    g->m.add_item_or_charges(p->posx, p->posy, result);
-                    else
-                    p->i_add(result);
-                }
+				p->add_or_drop(result, g, count);
             }
             else
             {
@@ -3573,25 +3513,9 @@ void iuse::knife(game *g, player *p, item *it, bool t)
             {
                 g->add_msg(_("You carve several skewers from the %s."), cut->tname().c_str());
                 int count = 12;
-                item skewer(g->itypes["skewer"], int(g->turn), g->nextinv);
+                item skewer(g->itypes["skewer"], int(g->turn));
                 p->i_rem(ch);
-                bool drop = false;
-                for (int i = 0; i < count; i++)
-                {
-                    int iter = 0;
-                    while (p->has_item(skewer.invlet) && iter < inv_chars.size())
-                    {
-                        skewer.invlet = g->nextinv;
-                        g->advance_nextinv();
-                        iter++;
-                    }
-                    if (!drop && (iter == inv_chars.size() || p->volume_carried() >= p->volume_capacity()))
-                    drop = true;
-                    if (drop)
-                    g->m.add_item_or_charges(p->posx, p->posy, skewer);
-                    else
-                    p->i_add(skewer);
-                }
+				p->add_or_drop(skewer, g, count);
             }
             else
             {
@@ -3621,9 +3545,8 @@ void iuse::cut_log_into_planks(game *g, player *p, item *it)
 {
     p->moves -= 300;
     g->add_msg(_("You cut the log into planks."));
-    item plank(g->itypes["2x4"], int(g->turn), g->nextinv);
-    item scrap(g->itypes["splinter"], int(g->turn), g->nextinv);
-    bool drop = false;
+    item plank(g->itypes["2x4"], int(g->turn));
+    item scrap(g->itypes["splinter"], int(g->turn));
     int planks = (rng(1, 3) + (p->skillLevel("carpentry") * 2));
     int scraps = 12 - planks;
     if (planks >= 12) {
@@ -3632,36 +3555,8 @@ void iuse::cut_log_into_planks(game *g, player *p, item *it)
     if (scraps >= planks) {
         g->add_msg(_("You waste a lot of the wood."));
     }
-    for (int i = 0; i < planks; i++) {
-        int iter = 0;
-        while (p->has_item(plank.invlet)) {
-            plank.invlet = g->nextinv;
-            g->advance_nextinv();
-            iter++;
-        }
-        if (!drop && (iter == inv_chars.size() || p->volume_carried() >= p->volume_capacity())) {
-            drop = true;
-        }
-        if (drop) {
-            g->m.add_item_or_charges(p->posx, p->posy, plank);
-        } else {
-            p->i_add(plank);
-        }
-    }
-    for (int i = 0; i < scraps; i++) {
-        int iter = 0;
-        while (p->has_item(scrap.invlet)) {
-            scrap.invlet = g->nextinv;
-            g->advance_nextinv();
-            iter++;
-        }
-        if (!drop && (iter == inv_chars.size() || p->volume_carried() >= p->volume_capacity()))
-            drop = true;
-        if (drop)
-            g->m.add_item_or_charges(p->posx, p->posy, scrap);
-        else
-            p->i_add(scrap);
-    }
+	p->add_or_drop(plank, g, planks);
+	p->add_or_drop(scrap, g, scraps);
 }
 
 void iuse::lumber(game *g, player *p, item *it, bool t)
@@ -3846,16 +3741,17 @@ void iuse::candle_lit(game *g, player *p, item *it, bool t)
 
 void iuse::bullet_puller(game *g, player *p, item *it, bool t)
 {
+ if (p->skillLevel("gun") < 2) {
+  g->add_msg(_("You need to be at least level 2 in the firearms skill before you\
+  can disassemble ammunition."));
+  return;
+ }
  char ch = g->inv(_("Disassemble what?"));
  item* pull = &(p->i_at(ch));
  if (pull->type->id == "null") {
   g->add_msg(_("You do not have that item!"));
   return;
  }
- if (p->skillLevel("gun") < 2) {
-  g->add_msg(_("You need to be at least level 2 in the firearms skill before you\
-  can disassemble ammunition."));
-  return;}
  int multiply = pull->charges;
  if (multiply > 20)
  multiply = 20;
@@ -4052,7 +3948,7 @@ void iuse::bullet_puller(game *g, player *p, item *it, bool t)
  lead.charges = 6*multiply;
  }
  else {
- g->add_msg(_("You cannot disassemble that."));
+ g->add_msg_if_player(p, _("You cannot disassemble that."));
   return;
  }
  pull->charges = pull->charges - multiply;
@@ -4060,52 +3956,18 @@ void iuse::bullet_puller(game *g, player *p, item *it, bool t)
  p->i_rem(ch);
  g->add_msg(_("You take apart the ammunition."));
  p->moves -= 500;
- if (casing.type->id != "null"){
+ 
+ // Note: add_or_drop ignores null-items, so no need to test this here.
  casing.charges = multiply;
- int iter = 0;
-   while ((casing.invlet == 0 || p->has_item(casing.invlet)) && iter < inv_chars.size()) {
-    casing.invlet = g->nextinv;
-    g->advance_nextinv();
-    iter++;}
-    if (p->can_pickWeight(casing.weight(), !OPTIONS[OPT_DANGEROUS_PICKUPS]) &&
-      p->can_pickVolume(casing.volume()) && iter < inv_chars.size()) {
-    p->i_add(casing);}
-    else
-   g->m.add_item_or_charges(p->posx, p->posy, casing);}
- if (primer.type->id != "null"){
+ p->add_or_drop(casing, g);
+ 
  primer.charges = multiply;
- int iter = 0;
-   while ((primer.invlet == 0 || p->has_item(primer.invlet)) && iter < inv_chars.size()) {
-    primer.invlet = g->nextinv;
-    g->advance_nextinv();
-    iter++;}
-    if (p->can_pickWeight(primer.weight(), !OPTIONS[OPT_DANGEROUS_PICKUPS]) &&
-      p->can_pickVolume(primer.volume()) && iter < inv_chars.size()) {
-    p->i_add(primer);}
-    else
-   g->m.add_item_or_charges(p->posx, p->posy, primer);}
- int iter = 0;
-   while ((gunpowder.invlet == 0 || p->has_item(gunpowder.invlet)) && iter < inv_chars.size()) {
-    gunpowder.invlet = g->nextinv;
-    g->advance_nextinv();
-    iter++;}
-    if (p->can_pickWeight(gunpowder.weight(), !OPTIONS[OPT_DANGEROUS_PICKUPS]) &&
-      p->can_pickVolume(gunpowder.volume()) && iter < inv_chars.size()) {
-    p->i_add(gunpowder);}
-    else
-   g->m.add_item_or_charges(p->posx, p->posy, gunpowder);
- iter = 0;
-   while ((lead.invlet == 0 || p->has_item(lead.invlet)) && iter < inv_chars.size()) {
-    lead.invlet = g->nextinv;
-    g->advance_nextinv();
-    iter++;}
-    if (p->can_pickWeight(lead.weight(), !OPTIONS[OPT_DANGEROUS_PICKUPS]) &&
-      p->can_pickVolume(lead.volume()) && iter < inv_chars.size()) {
-    p->i_add(lead);}
-    else
-   g->m.add_item_or_charges(p->posx, p->posy, lead);
+ p->add_or_drop(primer, g);
+ 
+ p->add_or_drop(gunpowder, g);
+ p->add_or_drop(lead, g);
 
-  p->practice(g->turn, "gun", rng(1, multiply / 5 + 1));
+ p->practice(g->turn, "gun", rng(1, multiply / 5 + 1));
 }
 
 void iuse::boltcutters(game *g, player *p, item *it, bool t)

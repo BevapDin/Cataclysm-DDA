@@ -217,15 +217,13 @@ void game::wish()
 
  item granted = item_controller->create(standard_itype_ids[a + shift], turn);
  mvprintw(2, 0, _("Wish granted - %d x %s."), count, granted.type->name.c_str());
- tmp.invlet = nextinv;
  for (int i=0; i<count; i++)
  {
   if (!incontainer)
-   u.i_add(granted);
+   u.add_or_drop(granted, this);
   else
-   u.i_add(granted.in_its_container(&itypes));
+   u.add_or_drop(granted.in_its_container(&itypes), this);
  }
- advance_nextinv();
  getch();
  delwin(w_info);
  delwin(w_list);

@@ -680,26 +680,27 @@ bool game::do_turn()
  if(u.in_vehicle && u.controlling_vehicle) {
 	vehicle *veh = m.veh_at(u.posx, u.posy);
 	if(veh != 0) {
-		if(veh->velocity < 0.0161f * 10) {
-			u.view_offset_x = 0;
-			u.view_offset_y = 0;
-		} else {
-			rl_vec2d offset;
-			if(veh->skidding)
-				offset = veh->move_vec();
-			else
-				offset = veh->face_vec();
-			offset = offset.normalized();
-			// Have a offset of 0 at velocity = 10km/h,
-			// have a offset of 1 at velocity = 100km/h
-			// 0.0161 = factor for calculation of speed in km/h
-			offset = offset * (((veh->velocity * 0.0161f) - 10.0f) / 90.0f);
-			offset.x = std::min(std::max(offset.x, -1.0f), 1.0f);
-			offset.y = std::min(std::max(offset.y, -1.0f), 1.0f);
-			int offx = getmaxx(w_terrain) / 2 - 5;
-			int offy = getmaxy(w_terrain) / 2 - 5;
-			u.view_offset_x = (offx * offset.x);
-			u.view_offset_y = (offy * offset.y);
+		rl_vec2d offset;
+		if(veh->skidding)
+			offset = veh->move_vec();
+		else
+			offset = veh->face_vec();
+		offset = offset.normalized();
+		// Have a offset of 0 at velocity = 10km/h,
+		// have a offset of 1 at velocity = 100km/h
+		// 0.0161 = factor for calculation of speed in km/h
+		offset = offset * (((veh->velocity * 0.0161f) - 10.0f) / 90.0f);
+		offset.x = std::min(std::max(offset.x, -1.0f), 1.0f);
+		offset.y = std::min(std::max(offset.y, -1.0f), 1.0f);
+		int offx = getmaxx(w_terrain) / 2 - 5;
+		int offy = getmaxy(w_terrain) / 2 - 5;
+		offx = offx * offset.x;
+		offy = offy * offset.y;
+		if(abs(u.view_offset_x - offx) > 1) {
+			u.view_offset_x = offx;
+		}
+		if(abs(u.view_offset_y - offy) > 1) {
+			u.view_offset_y = offy;
 		}
 	}
  }
@@ -4780,6 +4781,9 @@ void game::monmove()
 bool game::sound(int x, int y, int vol, std::string description)
 {
  vol *= 1.5; // Scale it a little
+ if(abs(x - u.posx) <= 1 && abs(y - u.posy) <= 1) {
+  u.volume = vol;
+ }
 // First, alert all monsters (that can hear) to the sound
  for (int i = 0; i < z.size(); i++) {
   if (z[i].can_hear()) {
@@ -8725,28 +8729,29 @@ void game::pickup(int posx, int posy, int min)
  bool volume_is_okay = (u.volume_carried() <= u.volume_capacity() -  2);
  bool from_veh = false;
  int veh_part = 0;
- int k_part = 0;
  vehicle *veh = m.veh_at (posx, posy, veh_part);
  if (min != -1 && veh) {
-    k_part = veh->part_with_function(veh_part, vpc_examine);
+    int e_part = veh->part_with_function(veh_part, vpc_examine);
     veh_part = veh->part_with_function(veh_part, vpc_cargo, false);
-    bool has_items = veh_part >= 0 && veh->parts[veh_part].items.size() > 0;
+	bool has_items = veh_part >= 0 && veh->parts[veh_part].items.size() > 0;
 	
-	if(k_part >= 0) {
-		bool b = veh->part_info(k_part).examine(veh, k_part);
+	if(e_part >= 0) {
+		bool b = veh->part_info(e_part).examine(veh, e_part);
 		if(b) {
+			// Examining the part is done
 			return;
 		}
+		// Further examing is needed or at least possible
+		// Happens for e.g. kitchen, kitchen has items, user
+		// selected grab items in the menu, so don't ask again
+		from_veh = has_items;
+	} else if(e_part != veh_part && has_items) {
+		// There is a part with cargo function, but without
+		// the examine function
+		from_veh = query_yn(_("Get items from %s?"), veh->part_info(veh_part).name.c_str());
 	}
-    if(has_items)
-    {
-        from_veh = query_yn(_("Get items from %s?"), veh->part_info(veh_part).name.c_str());
-    }
-    else
-    {
-        // No items here
-        from_veh = false;
-    }
+	// If none of the above: part has no items, or no cargo flag,
+	// from_veh remains false.
  }
  if ((!from_veh) && m.i_at(posx, posy).size() == 0)
  {
@@ -9414,10 +9419,12 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite)
             int extra = cont->contents[0].charges - holding_container_charges;
             cont->contents[0].charges = holding_container_charges;
             liquid.charges = extra;
+            u.inv.restack();
             add_msg(_("There's some left over!"));
             // Why not try to find another container here?
             return false;
           }
+          u.inv.restack();
           return true;
         }
       }
@@ -9453,14 +9460,15 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite)
         {
           add_msg(_("You fill your %s with some of the %s."), cont->tname(this).c_str(),
                                                     liquid.tname(this).c_str());
-          u.inv.unsort();
           int oldcharges = liquid.charges - container->contains * default_charges;
           liquid.charges = container->contains * default_charges;
           cont->put_in(liquid);
           liquid.charges = oldcharges;
+		  u.inv.restack();
           return false;
         }
         cont->put_in(liquid);
+        u.inv.restack();
         return true;
       }
     }
@@ -9864,7 +9872,7 @@ void game::butcher()
 // vector of indices.
  for (int i = corpses.size() - 1; i >= 0; i--) {
   mtype *corpse = m.i_at(u.posx, u.posy)[corpses[i]].corpse;
-  if (query_yn(_("Butcher the %s corpse?"), corpse->name.c_str())) {
+  if (corpses.size() == 1 || query_yn(_("Butcher the %s corpse?"), corpse->name.c_str())) {
    int time_to_cut;
    switch (corpse->size) {	// Time in turns to cut up te corpse
     case MS_TINY:   time_to_cut =  2; break;
@@ -10285,14 +10293,6 @@ void game::unload(item& it)
         while (it.contents.size() > 0)
         {
             item content = it.contents[0];
-            int iter = 0;
-// Pick an inventory item for the contents
-            while ((content.invlet == 0 || u.has_item(content.invlet)) && iter < inv_chars.size())
-            {
-                content.invlet = nextinv;
-                advance_nextinv();
-                iter++;
-            }
             if (content.made_of(LIQUID))
             {
                 if (!handle_liquid(content, false, false))
@@ -10300,14 +10300,10 @@ void game::unload(item& it)
                     new_contents.push_back(content);// Put it back in (we canceled)
                 }
             } else {
-                if (u.can_pickVolume(content.volume()) && u.can_pickWeight(content.weight(), !OPTIONS[OPT_DANGEROUS_PICKUPS]) &&
-                    iter < inv_chars.size())
-                {
+				if(u.add_or_drop(content, this)) {
                     add_msg(_("You put the %s in your inventory."), content.tname(this).c_str());
-                    u.i_add(content, this);
                 } else {
                     add_msg(_("You drop the %s on the ground."), content.tname(this).c_str());
-                    m.add_item_or_charges(u.posx, u.posy, content, 1);
                 }
             }
             it.contents.erase(it.contents.begin());
@@ -10364,18 +10360,7 @@ void game::unload(item& it)
   if (!handle_liquid(newam, false, false))
    weapon->charges += newam.charges;	// Put it back in
  } else if(newam.charges > 0) {
-  int iter = 0;
-  while ((newam.invlet == 0 || u.has_item(newam.invlet)) && iter < inv_chars.size()) {
-   newam.invlet = nextinv;
-   advance_nextinv();
-   iter++;
-  }
-  if (u.can_pickWeight(newam.weight(), !OPTIONS[OPT_DANGEROUS_PICKUPS]) &&
-      u.can_pickVolume(newam.volume()) && iter < inv_chars.size()) {
-   u.i_add(newam, this);
-  } else {
-   m.add_item_or_charges(u.posx, u.posy, newam, 1);
-  }
+  u.add_or_drop(newam, this);
  }
  // null the curammo, but only if we did empty the item
  if (weapon->charges == 0) {

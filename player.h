@@ -266,6 +266,24 @@ public:
  std::string weapname(bool charges = true);
 
  item& i_add(item it, game *g = NULL);
+ 
+ // Add an item to the inventory of the player or drop it
+ // on the players location on the map, if the player can
+ // not carry that much items.
+ // @return true if the item has been added to the players
+ // inventory, false if it has been dropped.
+ bool add_or_drop(const item &it, game *g);
+ void add_or_drop(const item &it, game *g, int count);
+ // Why (and if) pickup failed:
+ // Reasons are: none (pickup did not fail at all),
+ // to much volume / weight / count of items
+ typedef enum { PFR_NONE, PFR_VOLUME, PFR_WEIGHT, PFR_COUNT } PickupFailReason;
+ // Try to add an item to the players inventory, might fail
+ // because of volume/weight/count restriction.
+ // @return PFR_NONE if the the item has been added, otherwise
+ // the reason why it could not be added.
+ PickupFailReason add_item(const item &it);
+ 
  bool has_active_item(itype_id id);
  int  active_item_charges(itype_id id);
  void process_active_items(game *g);

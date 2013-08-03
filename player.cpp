@@ -1874,6 +1874,26 @@ void player::load_info(game *g, std::string data)
   addictions.push_back(addtmp);
  }
 
+ numadd = 0;
+ dump >> numadd;
+ for (int i = 0; i < numadd; i++) {
+  std::string item_id;
+  dump >> item_id >> typetmp;
+  if(g->itypes.find(item_id) != g->itypes.end()) {
+   food_enjoyability[g->itypes[item_id]] = typetmp;
+  }
+ }
+ 
+ numadd = 0;
+ dump >> numadd;
+ for (int i = 0; i < numadd; i++) {
+  std::string item_id;
+  dump >> item_id;
+  if(g->itypes.find(item_id) != g->itypes.end()) {
+   least_recently_meals.push_back(g->itypes[item_id]);
+  }
+ }
+
  int numbio = 0;
  bionic_id biotype;
  bionic biotmp;
@@ -1974,6 +1994,14 @@ std::string player::save_info()
  for (int i = 0; i < addictions.size(); i++)
   dump << int(addictions[i].type) << " " << addictions[i].intensity << " " <<
           addictions[i].sated << " ";
+
+ dump << food_enjoyability.size() << " ";
+ for (FoodEnjoyabilitMapy::const_iterator i = food_enjoyability.begin(); i != food_enjoyability.end(); i++)
+  dump << i->first->id << " " << i->second << " ";
+
+ dump << least_recently_meals.size() << " ";
+ for (int i = 0; i < least_recently_meals.size(); i++)
+  dump << least_recently_meals[i]->id << " ";
 
  dump << my_bionics.size() << " ";
  for (int i = 0; i < my_bionics.size(); i++)
@@ -3589,6 +3617,8 @@ void player::add_bionic(bionic_id b)
   newinv = 'a';
  else
   newinv = my_bionics[my_bionics.size() - 1].invlet + 1;
+ if(newinv == 'z' + 1)
+  newinv = 'A';
  my_bionics.push_back(bionic(b, newinv));
 }
 
@@ -6252,88 +6282,93 @@ bool player::eat(game *g, signed char ch)
                                       eaten->tname(g).c_str());
         }
 
-        if (g->itypes[comest->tool]->is_tool())
-            use_charges(comest->tool, 1); // Tools like lighters get used
-        if (comest->stim > 0)
-        {
-            if (comest->stim < 10 && stim < comest->stim)
-            {
-                stim += comest->stim;
-                if (stim > comest->stim)
-                    stim = comest->stim;
-            }
-            else if (comest->stim >= 10 && stim < comest->stim * 3)
-                stim += comest->stim;
-        }
+		if(comest != 0) {
+			if (g->itypes[comest->tool]->is_tool())
+				use_charges(comest->tool, 1); // Tools like lighters get used
+			if (comest->stim > 0)
+			{
+				if (comest->stim < 10 && stim < comest->stim)
+				{
+					stim += comest->stim;
+					if (stim > comest->stim)
+						stim = comest->stim;
+				}
+				else if (comest->stim >= 10 && stim < comest->stim * 3)
+					stim += comest->stim;
+			}
 
-        iuse use;
-        if (comest->use != &iuse::none)
-        {
-            (use.*comest->use)(g, this, eaten, false);
-        }
-        add_addiction(comest->add, comest->addict);
-        if (addiction_craving(comest->add) != MORALE_NULL)
-            rem_morale(addiction_craving(comest->add));
+			iuse use;
+			if (comest->use != &iuse::none)
+			{
+				(use.*comest->use)(g, this, eaten, false);
+			}
+			add_addiction(comest->add, comest->addict);
+			if (addiction_craving(comest->add) != MORALE_NULL)
+				rem_morale(addiction_craving(comest->add));
 
-        if (has_bionic("bio_ethanol") && comest->use == &iuse::alcohol)
-            charge_power(rng(2, 8));
-        if (has_bionic("bio_ethanol") && comest->use == &iuse::alcohol_weak)
-            charge_power(rng(1, 4));
+			if (has_bionic("bio_ethanol") && comest->use == &iuse::alcohol)
+				charge_power(rng(2, 8));
+			if (has_bionic("bio_ethanol") && comest->use == &iuse::alcohol_weak)
+				charge_power(rng(1, 4));
 
-        if (eaten->made_of("hflesh")) {
-          if (has_trait(PF_CANNIBAL)) {
-              g->add_msg_if_player(this, _("You feast upon the human flesh."));
-              add_morale(MORALE_CANNIBAL, 15, 100);
-          } else {
-              g->add_msg_if_player(this, _("You feel horrible for eating a person.."));
-              add_morale(MORALE_CANNIBAL, -60, -400, 600, 300);
-          }
-        }
-        if (has_trait(PF_VEGETARIAN) && (eaten->made_of("flesh") || eaten->made_of("hflesh")))
-        {
-            g->add_msg_if_player(this,_("Almost instantly you feel a familiar pain in your stomach"));
-            add_morale(MORALE_VEGETARIAN, -75, -400, 300, 240);
-        }
-        if ((has_trait(PF_HERBIVORE) || has_trait(PF_RUMINANT)) &&
-                eaten->made_of("flesh"))
-        {
-            if (!one_in(3))
-                vomit(g);
-            if (comest->quench >= 2)
-                thirst += int(comest->quench / 2);
-            if (comest->nutr >= 2)
-                hunger += int(comest->nutr * .75);
-        }
-        int meal_enjoy = get_combined_food_enjoyability(*eaten->type);
-		const int fun = comest->fun + meal_enjoy;
-        if (eaten->has_flag("HOT") && eaten->has_flag("EATEN_HOT"))
-            add_morale(MORALE_FOOD_HOT, 5, 10);
-        if (has_trait(PF_GOURMAND))
-        {
-            if (fun < -2)
-                add_morale(MORALE_FOOD_BAD, fun * 2, fun * 4, 60, 30, comest);
-            else if (fun > 0)
-                add_morale(MORALE_FOOD_GOOD, fun * 3, fun * 6, 60, 30, comest);
-            if (hunger < -60 || thirst < -60)
-                g->add_msg_if_player(this,_("You can't finish it all!"));
-            if (hunger < -60)
-                hunger = -60;
-            if (thirst < -60)
-                thirst = -60;
-        }
-        else
-        {
-            if (fun < 0)
-                add_morale(MORALE_FOOD_BAD, fun * 2, fun * 6, 60, 30, comest);
-            else if (fun > 0)
-                add_morale(MORALE_FOOD_GOOD, fun * 2, fun * 4, 60, 30, comest);
-            if (hunger < -20 || thirst < -20)
-                g->add_msg_if_player(this,_("You can't finish it all!"));
-            if (hunger < -20)
-                hunger = -20;
-            if (thirst < -20)
-                thirst = -20;
-        }
+			if (eaten->made_of("hflesh")) {
+			if (has_trait(PF_CANNIBAL)) {
+				g->add_msg_if_player(this, _("You feast upon the human flesh."));
+				add_morale(MORALE_CANNIBAL, 15, 100);
+			} else {
+				g->add_msg_if_player(this, _("You feel horrible for eating a person.."));
+				add_morale(MORALE_CANNIBAL, -60, -400, 600, 300);
+			}
+			}
+			if (has_trait(PF_VEGETARIAN) && (eaten->made_of("flesh") || eaten->made_of("hflesh")))
+			{
+				g->add_msg_if_player(this,_("Almost instantly you feel a familiar pain in your stomach"));
+				add_morale(MORALE_VEGETARIAN, -75, -400, 300, 240);
+			}
+			if ((has_trait(PF_HERBIVORE) || has_trait(PF_RUMINANT)) &&
+					eaten->made_of("flesh"))
+			{
+				if (!one_in(3))
+					vomit(g);
+				if (comest->quench >= 2)
+					thirst += int(comest->quench / 2);
+				if (comest->nutr >= 2)
+					hunger += int(comest->nutr * .75);
+			}
+			int fun = comest->fun;
+			if(comest->nutr != 0 || comest->quench != 0) {
+				int meal_enjoy = get_combined_food_enjoyability(*eaten->type);
+				fun += meal_enjoy;
+			}
+			if (eaten->has_flag("HOT") && eaten->has_flag("EATEN_HOT"))
+				add_morale(MORALE_FOOD_HOT, 5, 10);
+			if (has_trait(PF_GOURMAND))
+			{
+				if (fun < -2)
+					add_morale(MORALE_FOOD_BAD, fun * 2, fun * 4, 60, 30, comest);
+				else if (fun > 0)
+					add_morale(MORALE_FOOD_GOOD, fun * 3, fun * 6, 60, 30, comest);
+				if (hunger < -60 || thirst < -60)
+					g->add_msg_if_player(this,_("You can't finish it all!"));
+				if (hunger < -60)
+					hunger = -60;
+				if (thirst < -60)
+					thirst = -60;
+			}
+			else
+			{
+				if (fun < 0)
+					add_morale(MORALE_FOOD_BAD, fun * 2, fun * 6, 60, 30, comest);
+				else if (fun > 0)
+					add_morale(MORALE_FOOD_GOOD, fun * 2, fun * 4, 60, 30, comest);
+				if (hunger < -20 || thirst < -20)
+					g->add_msg_if_player(this,_("You can't finish it all!"));
+				if (hunger < -20)
+					hunger = -20;
+				if (thirst < -20)
+					thirst = -20;
+			}
+		}
     }
 
     eaten->charges--;
@@ -8733,6 +8768,9 @@ int player::get_food_enjoyability(const itype &type) {
 }
 
 int player::add_least_recently_meal(const itype &type) {
+	if(type.id == "water" || type.id == "water_clean") {
+		return 0;
+	}
 	int r = 0;
 	for(int a = 0; a < least_recently_meals.size(); a++) {
 		if(&type == least_recently_meals[a]) {
@@ -8743,21 +8781,81 @@ int player::add_least_recently_meal(const itype &type) {
 		r = r / least_recently_meals.size();
 	}
 	least_recently_meals.push_back(&type);
-	while(least_recently_meals.size() > 50) {
+	while(least_recently_meals.size() > 100) {
 		least_recently_meals.erase(least_recently_meals.begin());
 	}
-	return r / 60;
+	return (r / 10) + 4;
 }
 
 int player::get_combined_food_enjoyability(const itype &type) {
+	if(type.id == "water" || type.id == "water_clean") {
+		return 0;
+	}
 	int fe = get_food_enjoyability(type);
 	int lrf = add_least_recently_meal(type);
-	if(lrf > 3) {
-		g->add_msg_if_player(this, "You think about eating other stuff, too.");
+	if(lrf > 16) {
+		g->add_msg_if_player(this, "You really don't like this %s anymore", type.name.c_str());
 	} else if(lrf > 8) {
 		g->add_msg_if_player(this, "You'r tired of eating the same %s", type.name.c_str());
-	} else if(lrf > 16) {
-		g->add_msg_if_player(this, "You really don't like this %s anymore", type.name.c_str());
+	} else if(lrf > 3) {
+		g->add_msg_if_player(this, "You think about eating other stuff, too.");
 	}
+	g->add_msg_if_player(this, "fe: %d, lrf: %d", fe, lrf);
 	return fe - lrf;
+}
+
+player::PickupFailReason player::add_item(const item &it) {
+    if(volume_carried() >= volume_capacity()) {
+		return PFR_VOLUME;
+    }
+    if (weight_carried() >= weight_capacity()) {
+		return PFR_WEIGHT;
+	}
+	item replacement(it);
+	int iter = 0;
+	while(has_item(replacement.invlet)) {
+		replacement.invlet = g->nextinv;
+		g->advance_nextinv();
+		iter++;
+	}
+	if(iter == inv_chars.size()) {
+		return PFR_COUNT;
+	}
+	i_add(replacement);
+	return PFR_NONE;
+}
+
+void player::add_or_drop(const item &it, game *g, int count) {
+	// Null-items, or style-pseudo-items or no items at all,
+	// ignore those
+	if(it.is_null() || it.is_style() || count <= 0) {
+		return;
+	}
+	// Try adding the item, if it works, decrement the count
+	while(count > 0) {
+		if(add_item(it) == PFR_NONE) {
+			count--;
+		} else {
+			break;
+		}
+	}
+	// If there is a remaining count, drop it onto the map.
+	while(count > 0) {
+		g->m.add_item_or_charges(posx, posy, it);
+		// Asssume this ^^ works always?
+		count--;
+	}
+}
+
+bool player::add_or_drop(const item &it, game *g) {
+	// Null-items, or style-pseudo-items or no items at all,
+	// ignore those
+	if(it.is_null() || it.is_style()) {
+		return false;
+	}
+	if(add_item(it) == PFR_NONE) {
+		return true;
+	}
+	g->m.add_item_or_charges(posx, posy, it);
+	return false;
 }

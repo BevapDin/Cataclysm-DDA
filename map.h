@@ -269,16 +269,16 @@ class map
 
 // Furniture
  void set(const int x, const int y, const ter_id new_terrain, const furn_id new_furniture);
- std::string name(const int x, const int y);
+ const std::string &name(const int x, const int y);
  bool has_furn(const int x, const int y);
  furn_id furn(const int x, const int y); // Furniture at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
  void furn_set(const int x, const int y, const furn_id new_furniture);
- std::string furnname(const int x, const int y);
+ const std::string &furnname(const int x, const int y);
 // Terrain
  ter_id ter(const int x, const int y) const; // Terrain at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
  void ter_set(const int x, const int y, const ter_id new_terrain);
  ter_id find_floor(const int x, const int y, const ter_id new_terrain) const;
- std::string tername(const int x, const int y) const; // Name of terrain at (x, y)
+ const std::string &tername(const int x, const int y) const; // Name of terrain at (x, y)
  std::string features(const int x, const int y); // Words relevant to terrain (sharp, etc)
  bool has_flag(const t_flag flag, const int x, const int y);  // checks terrain, furniture and vehicles
  bool has_flag_ter_or_furn(const t_flag flag, const int x, const int y); // checks terrain or furniture
@@ -316,7 +316,7 @@ class map
  void i_rem(const int x, const int y, const int index);
  point find_item(const item *it);
  void spawn_artifact(const int x, const int y, itype* type, int bday);
- void spawn_item(const int x, const int y, std::string itype_id, int birthday, int quantity = 0, int charges = 0, int damlevel = 0);
+ void spawn_item(const int x, const int y, const std::string &itype_id, int birthday, int quantity = 0, int charges = 0, int damlevel = 0);
  int max_volume(const int x, const int y);
  int free_volume(const int x, const int y);
  int stored_volume(const int x, const int y);
@@ -327,9 +327,9 @@ class map
  void process_active_items_in_submap(game *g, const int nonant);
  void process_vehicles(game *g);
 
- std::list<item> use_amount(const point origin, const int range, const itype_id type, const int amount,
+ std::list<item> use_amount(const point origin, const int range, const itype_id &type, const int amount,
                               const bool use_container = false);
- std::list<item> use_charges(const point origin, const int range, const itype_id type, const int amount);
+ std::list<item> use_charges(const point origin, const int range, const itype_id &type, const int amount);
 
 // Traps
  trap_id& tr_at(const int x, const int y);

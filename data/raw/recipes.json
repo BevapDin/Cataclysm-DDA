@@ -5398,7 +5398,7 @@
 
 
         {
-            "result": "func:hotplate",
+            "result": "hotplate",
             "category": "CC_ELECTRONIC",
             "skill_pri": "electronics",
             "difficulty": 3,
@@ -9554,7 +9554,7 @@
             "autolearn": true,
             "tools": [
                          [
-                             ["hotplate", 2],
+                             ["func:hotplate", 2],
                              ["toolset_hotplate", 1],
                              ["fire", -1]
                          ],
@@ -9562,8 +9562,7 @@
                              ["vac_sealer", 10]
                          ],
                          [
-                             ["pot", -1],
-                             ["rock_pot", -1]
+                             ["func:pot", -1]
                          ]
                      ],
             "components": [
@@ -9899,7 +9898,7 @@
                              ["fire", -1]
                          ],
                          [
-                             ["pan", -1]
+                             ["func:pan", -1]
                          ],
                          [
                              ["func:blade", -1]
@@ -10087,12 +10086,15 @@
             [
                ["feather", 10],
                ["duct_tape", 40],
-               ["bag_plastic", 1]
+               ["bag_plastic", 1],
+               ["bottle_plastic", 1],
+               ["box_small", 1],
+               ["plastic_chunk", 1]
             ]
          ]
          },
         {
-            "result": "bone_staple",
+            "result": "rag_bundle",
             "category": "CC_MISC",
             "difficulty": 0,
             "time": 100,
@@ -10105,7 +10107,25 @@
                                   ["string_6", 1]
                               ],
                               [
-                                  ["bone", 30]
+                                  ["rag", 200]
+                              ]
+                          ]
+        },
+        {
+            "result": "leather_bundle",
+            "category": "CC_MISC",
+            "difficulty": 0,
+            "time": 100,
+            "reversible": true,
+            "autolearn": true,
+            "tools": [],
+            "components": [
+
+                              [
+                                  ["string_6", 1]
+                              ],
+                              [
+                                  ["leather", 200]
                               ]
                           ]
         },
@@ -10194,7 +10214,6 @@
 						]
             ],
             "components": [
-                              [ ["wrench", 1] ],
                               [ ["welder", 1] ],
                               [ ["jack", 1] ],
                               [ ["hose", 1] ],

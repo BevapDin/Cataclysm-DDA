@@ -778,7 +778,7 @@ void map::set(const int x, const int y, const ter_id new_terrain, const furn_id 
 	ter_set(x, y, new_terrain);
 }
 
-std::string map::name(const int x, const int y)
+const std::string &map::name(const int x, const int y)
 {
  return has_furn(x, y) ? furnlist[furn(x, y)].name : terlist[ter(x, y)].name;
 }
@@ -814,7 +814,7 @@ void map::furn_set(const int x, const int y, const furn_id new_furniture)
  grid[nonant]->frn[lx][ly] = new_furniture;
 }
 
-std::string map::furnname(const int x, const int y)
+const std::string &map::furnname(const int x, const int y)
 {
  return furnlist[furn(x, y)].name;
 }
@@ -883,7 +883,7 @@ void map::ter_set(const int x, const int y, const ter_id new_terrain)
  grid[nonant]->ter[lx][ly] = new_terrain;
 }
 
-std::string map::tername(const int x, const int y) const
+const std::string &map::tername(const int x, const int y) const
 {
  return terlist[ter(x, y)].name;
 }
@@ -2476,7 +2476,7 @@ void map::spawn_artifact(const int x, const int y, itype* type, const int bday)
 
 //New spawn_item method, using item factory
 // added argument to spawn at various damage levels
-void map::spawn_item(const int x, const int y, std::string type_id, const int birthday,
+void map::spawn_item(const int x, const int y, const std::string &type_id, const int birthday,
                      const int quantity, const int charges, const int damlevel)
 {
     item new_item = item_controller->create(type_id, birthday);
@@ -2686,7 +2686,7 @@ void map::process_active_items_in_submap(game *g, const int nonant)
 	}
 }
 
-std::list<item> map::use_amount(const point origin, const int range, const itype_id type, const int amount,
+std::list<item> map::use_amount(const point origin, const int range, const itype_id &type, const int amount,
                      const bool use_container)
 {
  std::list<item> ret;
@@ -2755,7 +2755,7 @@ std::list<item> map::use_amount(const point origin, const int range, const itype
  return ret;
 }
 
-std::list<item> map::use_charges(const point origin, const int range, const itype_id type, const int amount)
+std::list<item> map::use_charges(const point origin, const int range, const itype_id &type, const int amount)
 {
  std::list<item> ret;
  int quantity = amount;
@@ -3974,6 +3974,29 @@ void map::build_transparency_cache()
 		   // TODO: [lightmap] Have glass reduce light as well
 	   }
    }
+   switch(ter(x, y)) {
+	   case t_wreckage:
+	   case t_grate:
+	   case t_wall_glass_v:
+	   case t_wall_glass_h:
+	   case t_wall_glass_v_alarm:
+	   case t_wall_glass_h_alarm:
+	   case t_reinforced_glass_v:
+	   case t_reinforced_glass_h:
+	   case t_bars:
+	   case t_door_glass_c:
+	   case t_door_glass_o:
+	   case t_window_domestic:
+	   case t_curtains:
+	   case t_window_alarm:
+	   case t_tree_young:
+	   case t_underbrush:
+	   case t_fence_v:
+	   case t_fence_h:
+	   case t_chainfence_v:
+	   case t_chainfence_h:
+         transparency_cache[x][y] *= 0.5;
+	}
   }
  }
 }
