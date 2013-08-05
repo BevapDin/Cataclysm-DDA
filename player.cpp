@@ -8784,7 +8784,7 @@ int player::add_least_recently_meal(const itype &type) {
 	while(least_recently_meals.size() > 100) {
 		least_recently_meals.erase(least_recently_meals.begin());
 	}
-	return (r / 10) + 4;
+	return (r / 10) - 4;
 }
 
 int player::get_combined_food_enjoyability(const itype &type) {

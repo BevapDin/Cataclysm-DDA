@@ -11,6 +11,8 @@
 #include <fstream>
 #include <stdio.h>
 
+#include "material.h"
+
 #ifndef _MSC_VER
 #include <unistd.h>
 #include <dirent.h>
@@ -582,10 +584,18 @@ void Item_factory::load_item_templates_from(const std::string file_name) throw (
                 if(entry.has("material")){
                   set_material_from_json(new_id, entry.get("material"));
                 } else {
-                  dout() << "item has no material at all: " << new_item_template->name << "\n";
+//                  debugmsg("item %s has no material at all", new_item_template->name.c_str());
                   new_item_template->m1 = "null";
                   new_item_template->m2 = "null";
                 }
+                if(!material_type::has_material(new_item_template->m1)) {
+                  debugmsg("item %s has unknown material %s", new_item_template->name.c_str(), new_item_template->m1.c_str());
+				  new_item_template->m1 = "null";
+				}
+                if(!material_type::has_material(new_item_template->m2)) {
+                  debugmsg("item %s has unknown material %s", new_item_template->name.c_str(), new_item_template->m2.c_str());
+				  new_item_template->m2 = "null";
+				}
                 Item_tag new_phase = "solid";
                 if(entry.has("phase")){
                     new_phase = entry.get("phase").as_string();
@@ -938,8 +948,10 @@ void Item_factory::set_material_from_json(Item_tag new_id, catajson mat_list){
         {
             debugmsg("Too many materials provided for item %s", new_id.c_str());
         }
-        material_list[0] = mat_list.get(0).as_string();
-        material_list[1] = mat_list.get(1).as_string();
+        if (mat_list.has(0))
+			material_list[0] = mat_list.get(0).as_string();
+        if (mat_list.has(1))
+			material_list[1] = mat_list.get(1).as_string();
     }
     else
     {

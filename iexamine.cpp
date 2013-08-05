@@ -702,22 +702,22 @@ void iexamine::recycler(game *g, player *p, map *m, int examx, int examy) {
 
     for (int i = 0; i < num_lumps; i++)
     {
-        m->spawn_item(p->posx, p->posy, "steel_lump", 0);
+        m->add_item_or_charges(p->posx, p->posy, item(g->itypes["steel_lump"], g->turn));
     }
 
     for (int i = 0; i < num_sheets; i++)
     {
-        m->spawn_item(p->posx, p->posy, "sheet_metal", 0);
+        m->add_item_or_charges(p->posx, p->posy, item(g->itypes["sheet_metal"], g->turn));
     }
 
     for (int i = 0; i < num_chunks; i++)
     {
-        m->spawn_item(p->posx, p->posy, "steel_chunk", 0);
+        m->add_item_or_charges(p->posx, p->posy, item(g->itypes["steel_chunk"], g->turn));
     }
 
     for (int i = 0; i < num_scraps; i++)
     {
-        m->spawn_item(p->posx, p->posy, "scrap", 0);
+        m->add_item_or_charges(p->posx, p->posy, item(g->itypes["scrap"], g->turn));
     }
 }
 

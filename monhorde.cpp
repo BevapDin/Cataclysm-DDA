@@ -212,11 +212,15 @@ void monhorde::change_pop_by_terrain(game &g) {
 			pop_normal--;
 		}
 	} else if(ter >= ot_river_center && ter <= ot_river_nw) {
-		pop_normal -= rng(0, 4);
+		if(one_in(20)) {
+			pop_normal -= rng(0, 4);
+		}
 	} else if(ter >= ot_house_north && ter <= ot_shelter_under) {
-		pop_normal += rng(0, 10) / 10; // 10% chance of +1
-		if(pop_master > 0) {
-			pop_normal += rng(0, 3);
+		if(one_in(20)) {
+			pop_normal += rng(0, 10) / 10; // 10% chance of +1
+			if(pop_master > 0) {
+				pop_normal += rng(0, 3);
+			}
 		}
 	}
 	if(pop_normal < 0) { pop_normal = 0; }
@@ -336,9 +340,11 @@ void game::attract_hordes(int x, int y, int vol) {
 }
 
 void game::spawn_horde_members() {
+	/*
 	if((turn % MINUTES(1)) != 0) {
 		return; // Spawn every minute
 	}
+	*/
 	monster zom;
 	typedef std::vector<monhorde> MHVec;
 	MHVec &monhordes = cur_om->zh;
@@ -359,7 +365,7 @@ void game::spawn_horde_members() {
 		// determine how many we spawn,
 		// as this function is called every turn, this will quickly
 		// reduce the population to 0 (all monsters are than spawned)
-		int spawn_count = rng(1, std::min<int>(5, horde.getPopulation()));
+		int spawn_count = rng(1, std::min<int>(20, horde.getPopulation()));
 		for(int j = 0; j < spawn_count && !horde.isEmpty(); j++) {
 			mon_id type;
 			if(horde.pop_normal == 0) {
@@ -372,7 +378,7 @@ void game::spawn_horde_members() {
 				}
 			}
 			zom = monster(mtypes[type]);
-			zom.no_extra_death_drops = false;
+			zom.no_extra_death_drops = true;
 			for(int iter = 0; iter < 10; iter++) {
 				int monx = rng(0, SEEX - 1) + posx;
 				int mony = rng(0, SEEY - 1) + posy;

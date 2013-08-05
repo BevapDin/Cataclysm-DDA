@@ -38,7 +38,8 @@ public:
     static material_map load_materials();
 
     // functions
-    static material_type* find_material(std::string ident);
+    static material_type* find_material(const std::string &ident);
+    static bool has_material(const std::string &ident);
 //  static material_type* find_material_from_tag(material mat);
     static material_type* base_material();  // null material
 

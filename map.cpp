@@ -4073,6 +4073,33 @@ std::vector<point> closest_points_first(int radius, int center_x, int center_y)
     return points;
 }
 
+void map::check_spoiled(std::vector<item> &items)
+{
+	for(std::vector<item>::iterator it = items.begin(); it != items.end(); )
+	{
+		if(it->active) {
+			continue;
+		}
+		it_comest *food = dynamic_cast<it_comest *>(it->type);
+		if(food != 0 && it->goes_bad())
+		{
+			const int maxShelfLife = it->bday + (food->spoils * 600) * 2;
+			if(g->turn >= maxShelfLife)
+			{
+				it = items.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
 void map::check_spoiled(submap &sm)
 {
     // check spoiled stuff
@@ -4080,54 +4107,14 @@ void map::check_spoiled(submap &sm)
     {
         for(int y = 0; y < SEEY; y++)
         {
-            std::vector<item> &items = sm.itm[x][y];
-            for(std::vector<item>::iterator it = items.begin(); it != items.end(); )
-            {
-                it_comest *food = dynamic_cast<it_comest *>(it->type);
-                if(it->goes_bad() && food != 0)
-                {
-                    const int maxShelfLife = it->bday + (food->spoils * 600) * 2;
-                    if(g->turn >= maxShelfLife)
-                    {
-                        it = items.erase(it);
-                    }
-                    else
-                    {
-                        ++it;
-                    }
-                }
-                else
-                {
-                    ++it;
-                }
-            }
+            check_spoiled(sm.itm[x][y]);
         }
     }
     for(std::vector<vehicle*>::iterator it = sm.vehicles.begin(); it != sm.vehicles.end(); it++) {
 		vehicle *veh = *it;
 		for(std::vector<vehicle_part>::iterator p = veh->parts.begin(); p != veh->parts.end(); p++) {
 			vehicle_part &part = *p;
-            std::vector<item> &items = part.items;
-            for(std::vector<item>::iterator it = items.begin(); it != items.end(); )
-            {
-                it_comest *food = dynamic_cast<it_comest *>(it->type);
-                if(it->goes_bad() && food != 0)
-                {
-                    const int maxShelfLife = it->bday + (food->spoils * 600) * 2;
-                    if(g->turn >= maxShelfLife)
-                    {
-                        it = items.erase(it);
-                    }
-                    else
-                    {
-                        ++it;
-                    }
-                }
-                else
-                {
-                    ++it;
-                }
-            }
+            check_spoiled(part.items);
 		}
 	}
 }

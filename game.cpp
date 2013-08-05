@@ -730,6 +730,12 @@ bool game::do_turn()
  m.process_fields(this);
  m.process_active_items(this);
  m.step_in_field(u.posx, u.posy, this);
+ 
+ {
+  int x = rng(0, SEEX * MAPSIZE - 1);
+  int y = rng(0, SEEY * MAPSIZE - 1);
+  map::check_spoiled(m.i_at(x, y));
+ }
 
  if(turn % HOURS(1) == 0 && !u.worn.empty() && one_in(10)) {
 	std::vector<item*> items[6];

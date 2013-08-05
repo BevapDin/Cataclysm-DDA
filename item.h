@@ -130,7 +130,8 @@ public:
 // Returns the data associated with tech, if we are an it_style
  style_move style_data(technique_id tech);
  bool is_two_handed(player *u);
- bool made_of(std::string mat_ident) const;
+ bool made_of(const std::string &mat_ident) const;
+ bool made_of(const char *mat_ident) const;
  std::string get_material(int m) const;
  bool made_of(phase_id phase) const;
  bool conductive() const; // Electricity

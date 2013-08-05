@@ -161,6 +161,7 @@ class map
  void clear_traps();
  
  static void check_spoiled(submap &sm);
+ static void check_spoiled(std::vector<item> &sm);
 
 // Movement and LOS
 

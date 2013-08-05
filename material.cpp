@@ -120,11 +120,16 @@ material_map material_type::load_materials()
 
     if(!json_good())
         exit(1);
+	
+	if(allMaterials.find("null") == allMaterials.end()) {
+		debugmsg("No null-material defined!");
+		exit(1);
+	}
 
     return allMaterials;
 }
 
-material_type* material_type::find_material(std::string ident)
+material_type* material_type::find_material(const std::string &ident)
 {
     material_map::iterator found = _all_materials.find(ident);
     if(found != _all_materials.end()){
@@ -133,8 +138,14 @@ material_type* material_type::find_material(std::string ident)
     else
     {
         debugmsg("Tried to get invalid material: %s", ident.c_str());
-        return NULL;
+        return base_material();
     }
+}
+
+bool material_type::has_material(const std::string &ident)
+{
+    material_map::iterator found = _all_materials.find(ident);
+    return (found != _all_materials.end());
 }
 
 material_type* material_type::base_material()
