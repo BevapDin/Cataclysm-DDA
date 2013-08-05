@@ -9812,11 +9812,7 @@
                              ["func:wrench", -1]
                          ],
                          [
-<<<<<<< HEAD
-                             ["welder", 300], ["welder_crude", 450], ["toolset", 12]
-=======
-                             ["welder", 300], ["toolset_welder", 12]
->>>>>>> correct previous merge
+                             ["welder", 300], ["welder_crude", 450], ["toolset_welder", 12]
                          ]
                      ],
             "components": [
@@ -9864,11 +9860,7 @@
                              ["func:wrench", -1]
                          ],
                          [
-<<<<<<< HEAD
-                             ["welder", 100], ["welder_crude", 150], ["toolset", 4]
-=======
-                             ["welder", 100], ["toolset_welder", 4]
->>>>>>> correct previous merge
+                             ["welder", 100], ["welder_crude", 150], ["toolset_welder", 4]
                          ]
                      ],
             "components": [

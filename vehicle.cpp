@@ -939,10 +939,10 @@ void vehicle::print_part_desc (void *w, int y1, int width, int p, int hl)
         std::stringstream nom; //part name
         // part bigness, if that's relevant.
         if (part_flag(pl[i], vpf_variable_size)){
-           if (part_flag(pl[i], vpf_engine)){ //bigness == liters
+           if (part_function(pl[i], vpc_engine)){ //bigness == liters
               nom << rmp_format(_("<veh_adj>%4.2f-Liter "), (float)(parts[pl[i]].bigness) / 100);
            }
-           else if (part_flag(pl[i], vpf_wheel)){ //bigness == inches
+           else if (part_function(pl[i], vpc_wheel)){ //bigness == inches
               nom << rmp_format(_("<veh_adj>%d\" "), parts[pl[i]].bigness);
            }
         }

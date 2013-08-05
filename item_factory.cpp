@@ -400,7 +400,6 @@ void Item_factory::load_item_templates() throw(std::string){
         (void)closedir(save_dir);
     }
 #endif
-    load_item_groups_from("data/raw/item_groups.json");
     }
     catch (std::string &error_message) {
         throw;
