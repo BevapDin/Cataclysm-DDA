@@ -4078,6 +4078,7 @@ void map::check_spoiled(std::vector<item> &items)
 	for(std::vector<item>::iterator it = items.begin(); it != items.end(); )
 	{
 		if(it->active) {
+			++it;
 			continue;
 		}
 		it_comest *food = dynamic_cast<it_comest *>(it->type);
