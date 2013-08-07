@@ -1020,6 +1020,7 @@
     "turns_per_charge": 1,
     "ammo": "gasoline",
     "revert_to": "chainsaw_off",
+    "functions": [ [ "saw", 0.2 ], [ "ax", 0.2 ] ],
     "use_action": "CHAINSAW_ON"
   },
 

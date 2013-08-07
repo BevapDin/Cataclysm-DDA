@@ -2433,18 +2433,35 @@ bool item::matches_type(const itype_id &type_) const {
 	return false;
 }
 
+double item::get_damaged_modi() const {
+	double basefactor = 1.0;
+	if(get_damaged() > 0) {
+		// damaged tool -> larger factor
+		basefactor *= (get_damaged() + 1.0);
+	} else if(get_damaged() < 0) {
+		// Reinforced tools? damage=-1 -> basefactor /= 1.5
+		basefactor /= (-get_damaged() * 0.5);
+	}
+	if(burnt > 0) {
+		// burnt tool -> larger factor
+		basefactor *= (burnt + 1.0);
+	}
+	return basefactor;
+}
+
 double item::get_functionality_time_modi(const itype_id &func) const {
 	if(type != 0) {
+		const double dmodi = get_damaged_modi();
 		if(type->id == func) {
-			return 1.0;
+			return 1.0 * dmodi;
 		}
 		itype::FunctionalityMap::const_iterator a = type->functionalityMap.find(func);
 		if(a != type->functionalityMap.end()) {
-			return a->second.time_modi;
+			return a->second.time_modi * dmodi;
 		}
 		if(func.compare(0, 5, "func:") == 0 &&
 			func.compare(5, std::string::npos, type->id) == 0) {
-			return 1.0;
+			return 1.0 * dmodi;
 		}
 	}
 	return 0.0;

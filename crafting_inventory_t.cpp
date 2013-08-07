@@ -649,20 +649,7 @@ bool crafting_inventory_t::has_any_component(std::vector<component> &set_of_comp
 
 bool crafting_inventory_t::has_component(component &comp) const
 {
-    const itype_id &type = comp.type;
-    if (item_controller->find_template(type)->count_by_charges() && comp.count > 0)
-    {
-        if (has_charges(type, comp.count))
-        {
-            comp.available = 1;
-        }
-        else
-        {
-            comp.available = -1;
-        }
-    }
-    else if (has_amount(type, abs(comp.count)))
-    {
+	if(has(comp)) {
         comp.available = 1;
     }
     else
@@ -670,4 +657,17 @@ bool crafting_inventory_t::has_component(component &comp) const
         comp.available = -1;
     }
     return comp.available == 1;
+}
+
+bool crafting_inventory_t::has(const component &comp) const
+{
+    const itype_id &type = comp.type;
+    if (item_controller->find_template(type)->count_by_charges() && comp.count > 0)
+    {
+        return has_charges(type, comp.count);
+    }
+    else
+    {
+        return has_amount(type, abs(comp.count));
+    }
 }

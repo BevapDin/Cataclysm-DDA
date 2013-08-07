@@ -69,19 +69,16 @@ void game::init_construction()
   STAGE(t_dirt, 10);
    TOOL("func:ax");
    TOOLCONT("primitive_axe");
-   TOOLCONT("chainsaw_on");
 
  CONSTRUCT(_("Chop Tree trunk into logs"), 0, &construct::able_trunk, &construct::done_trunk_log);
   STAGE(t_dirt, 20);
    TOOL("func:ax");
    TOOLCONT("primitive_axe");
-   TOOLCONT("chainsaw_on");
 
  CONSTRUCT(_("Chop Tree trunk into planks"), 0, &construct::able_trunk, &construct::done_trunk_plank);
   STAGE(t_dirt, 23);
    TOOL("func:ax");
    TOOLCONT("primitive_axe");
-   TOOLCONT("chainsaw_on");
    TOOLCONT("func:saw");
 
  CONSTRUCT(_("Move Furniture"), -1, &construct::able_move, &construct::done_move);
@@ -702,46 +699,6 @@ void game::construction_menu()
  refresh_all();
 }
 
-double toolfactor(const item &it) {
-	double basefactor = 1.0;
-	if(it.type->id == "digging_stick") {
-		// realllly primitive tool
-		basefactor *= 0.25;
-	} else if(it.type->id == "chainsaw_on") {
-		// Faster with fuel!
-		basefactor *= 4;
-	} else if(it.type->id == "rock") {
-		// realllly primitive tool
-		basefactor *= 0.25;
-	} else if(it.type->id == "nailgun") {
-		// Faster, because automatic
-		basefactor *= 3;
-	} else if(it.type->id == "hammer_sledge") {
-		basefactor *= 3;
-	}
-	
-	if(it.type->id.compare(0, 10, "primitive_") == 0) {
-		// prmitive tool, bad working with
-		basefactor *= 0.5;
-	} else if(it.type->id.compare(0, 8, "toolset_") == 0) {
-		// integrated tool, allways easyer usage
-		basefactor *= 2.0;
-	}
-
-	if(it.get_damaged() > 0) {
-		// damaged tool -> smaller factor
-		basefactor /= (it.get_damaged() + 1.0);
-	} else if(it.get_damaged() < 0) {
-		// Reinforced tools? damage=-1 -> basefactor *= 1.5
-		basefactor *= (1.0 + 1.0 / (-it.get_damaged() + 1.0));
-	}
-	if(it.burnt > 0) {
-		// burnt tool -> smaller factor
-		basefactor /= (it.get_damaged() + 1.0);
-	}
-	return basefactor;
-}
-
 double toolfactors(player &p, crafting_inventory_t &pinv, construction_stage &stage) {
 	double best_modi = 0.0;
 	for(size_t j = 0; j < 10; j++) {
@@ -765,7 +722,7 @@ double toolfactors(player &p, crafting_inventory_t &pinv, construction_stage &st
 int move_ppoints_for_construction(constructable *con, size_t stage_index, crafting_inventory_t &total_inv) {
 	int move_points = con->stages[stage_index].time * 1000;
 	const double toolfactor = ::toolfactors(g->u, total_inv, con->stages[stage_index]);
-	if(toolfactor > 0) {
+	if(toolfactor > 0 && toolfactor != 1) {
 		move_points = static_cast<int>(move_points * toolfactor);
 	}
 	double skillfactor = 1.0;

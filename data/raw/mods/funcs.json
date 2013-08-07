@@ -97,5 +97,12 @@
     "color": "white",
     "name": "shovel",
     "description": "???"
+  },
+  { "id":"func:saw",
+    "type": "TOOL",
+    "symbol": " ",
+    "color": "white",
+    "name": "wood saw",
+    "description": "???"
   }
 ]

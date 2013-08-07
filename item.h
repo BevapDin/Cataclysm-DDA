@@ -98,6 +98,7 @@ public:
 
  bool matches_type(const itype_id &type) const;
  double get_functionality_time_modi(const itype_id &func) const;
+ double get_damaged_modi() const;
 
  int weight() const;
  int volume() const;

@@ -459,7 +459,11 @@ craft_cat game::next_craft_cat(craft_cat cat)
     {
         if ((*iter) == cat)
         {
-            return *(++iter);
+			++iter;
+			if(iter == craft_cat_list.end()) {
+				return craft_cat_list.front();
+			}
+            return *iter;
         }
     }
     return NULL;
@@ -473,6 +477,9 @@ craft_cat game::prev_craft_cat(craft_cat cat)
     {
         if ((*iter) == cat)
         {
+			if(iter == craft_cat_list.begin()) {
+				return craft_cat_list.back();
+			}
             return *(--iter);
         }
     }
@@ -489,9 +496,10 @@ recipe* game::select_crafting_recipe()
     WINDOW *w_data = newwin(dataHeight, FULL_SCREEN_WIDTH, 3, (TERMX  > FULL_SCREEN_WIDTH) ? (TERMX -FULL_SCREEN_WIDTH)/2 : 0);
 
 
-    craft_cat tab = "CC_WEAPON";
-    std::vector<recipe*> current;
-    std::vector<bool> available;
+    craft_cat tab = craft_cat_list.front();
+	
+	std::map<craft_cat, std::vector<recipe*> > list_of_current;
+	std::map<craft_cat, std::vector<bool> > list_of_available;
     item tmp;
     int line = 0, xpos, ypos;
     bool redraw = true;
@@ -502,15 +510,19 @@ recipe* game::select_crafting_recipe()
     crafting_inventory_t crafting_inv(this, &u);
     std::string filterstring = "";
     do {
+		std::vector<recipe*> &current = list_of_current[tab];
+		std::vector<bool> &available = list_of_available[tab];
         if (redraw)
         { // When we switch tabs, redraw the header
             redraw = false;
             line = 0;
             draw_recipe_tabs(w_head, tab, (filterstring == "")?false:true);
-            current.clear();
-            available.clear();
+//            current.clear();
+//            available.clear();
             // Set current to all recipes in the current tab; available are possible to make
-            pick_recipes(current, available, tab,filterstring);
+            if(current.empty() || !filterstring.empty()) {
+				pick_recipes(current, available, tab,filterstring);
+			}
         }
 
         // Clear the screen of recipe data, and draw it anew
@@ -721,15 +733,8 @@ recipe* game::select_crafting_recipe()
                     {
                         compcol = c_brown;
                     }
-                    else if (item_controller->find_template(type)->count_by_charges() && count > 0)
-                    {
-                        if (crafting_inv.has_charges(type, count))
-                        {
-                            compcol = c_green;
-                        }
-                    }
-                    else if (crafting_inv.has_amount(type, abs(count)))
-                    {
+                    else if (crafting_inv.has(current[line]->components[i][j]))
+					{
                         compcol = c_green;
                     }
                     std::stringstream dump;
@@ -764,26 +769,12 @@ recipe* game::select_crafting_recipe()
         {
             case DirectionW:
             case DirectionUp:
-                if (tab == "CC_WEAPON")
-                {
-                    tab = "CC_MISC";
-                }
-                else
-                {
-                    tab = prev_craft_cat(tab);
-                }
+                tab = prev_craft_cat(tab);
                 redraw = true;
                 break;
             case DirectionE:
             case DirectionDown:
-                if (tab == "CC_MISC")
-                {
-                    tab = "CC_WEAPON";
-                }
-                else
-                {
-                    tab = next_craft_cat(tab);
-                }
+                tab = next_craft_cat(tab);
                 redraw = true;
                 break;
             case DirectionS:
@@ -960,26 +951,10 @@ int move_ppoints_for_crafting(const recipe &making) {
 	crafting_inventory_t total_inv(g, &g->u);
 	int move_points = making.time;
 	const double toolfactor = ::toolfactors(making, total_inv);
-	if(toolfactor > 0) {
+	if(toolfactor > 0 && toolfactor != 1) {
 		move_points = static_cast<int>(move_points * toolfactor);
+		g->add_msg("craft-factors: tool: %f", toolfactor);
 	}
-	/*
-	int skill = g->u.skillLevel("carpentry");
-	if(skill > 0 && skill > con->difficulty) {
-		// if skill is big enough, the construction time changes
-		// up to half the time (for infinit skill level)
-		double factor;
-		if(con->difficulty > 1.0) {
-			factor = static_cast<double>(con->difficulty) / skill;
-		} else {
-			factor = 1.0 / skill;
-		}
-		// factor should be in the range (0, 1]
-		move_points /= 2;
-		move_points += static_cast<double>(move_points) * factor;
-	}
-	*/
-	g->add_msg("craft-factors: tool: %f", toolfactor);
 	return move_points;
 }
 

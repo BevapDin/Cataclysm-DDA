@@ -754,10 +754,10 @@ bool game::do_turn()
 	item &it = u.worn[i];
 	it.increase_damaged(1);
 	if(it.is_destroyed()) {
-		add_msg("Your %s wears completly away", it.name.c_str());
+		add_msg("Your %s wears completly away", it.tname(this).c_str());
 		u.worn.erase(u.worn.begin() + i);
 	} else {
-		add_msg("Your %s wears further", it.name.c_str());
+		add_msg("Your %s wears further", it.tname(this).c_str());
 	}
  }
 

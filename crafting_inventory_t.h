@@ -95,6 +95,8 @@ public:
 	bool has_any_tool(std::vector<component> &set_of_tools) const;
 	bool has_component(component &component) const;
 	bool has_any_component(std::vector<component> &set_of_components) const;
+	
+	bool has(const component &component) const;
 
 
 	std::list<item> consume_items(const std::vector<component> &components);
