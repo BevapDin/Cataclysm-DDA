@@ -1,7 +1,6 @@
 {
     "categories":
     [
-        "CC_NONCRAFT",
         "CC_WEAPON",
         "CC_AMMO",
         "CC_FOOD",
@@ -9,8 +8,7 @@
         "CC_CHEM",
         "CC_ELECTRONIC",
         "CC_ARMOR",
-        "CC_MISC",
-        "CC_NONCRAFT"
+        "CC_MISC"
     ],
 
     "recipes":
