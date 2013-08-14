@@ -574,7 +574,6 @@ void Item_factory::load_item_templates_from(const std::string file_name) throw (
                 m_templates[new_id] = new_item_template;
 
                 // And then proceed to assign the correct field
-                new_item_template->rarity = getint(entry, "rarity");
                 new_item_template->price = getint(entry, "price");
                 new_item_template->name = _(entry.get("name").as_string().c_str());
                 new_item_template->sym = entry.get("symbol").as_char();
