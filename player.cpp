@@ -3619,6 +3619,8 @@ void player::add_bionic(bionic_id b)
   newinv = my_bionics[my_bionics.size() - 1].invlet + 1;
  if(newinv == 'z' + 1)
   newinv = 'A';
+ if(newinv == 'Z' + 1)
+  newinv = '0';
  my_bionics.push_back(bionic(b, newinv));
 }
 
@@ -5464,7 +5466,7 @@ bool player::process_single_active_item(game *g, item *it)
                 it->item_counter--;
                 if (it->item_counter == 0)
                 {
-                    it->item_tags.erase("HOT");
+                    it->remove_flag("HOT");
                     it->active = false;
                 }
             }
@@ -5476,7 +5478,7 @@ bool player::process_single_active_item(game *g, item *it)
                 it->contents[0].item_counter--;
                 if (it->contents[0].item_counter == 0)
                 {
-                    it->contents[0].item_tags.erase("HOT");
+                    it->contents[0].remove_flag("HOT");
                     it->contents[0].active = false;
                 }
             }

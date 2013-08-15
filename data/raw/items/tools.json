@@ -4370,5 +4370,20 @@
     "turns_per_charge": 0,
     "ammo": "none",
     "revert_to": "null"
+  },
+  {
+    "id": "wireglass",
+    "symbol": "]",
+    "color": "light_cyan",
+    "name": "wireglass",
+    "description": "",
+    "rarity": 5,
+    "price": 135,
+    "material": [ "iron", "glass" ],
+    "weight": 20176,
+    "volume": 50,
+    "bashing": 16,
+    "cutting": 0,
+    "to_hit": -5
   }
 ]

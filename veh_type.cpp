@@ -444,14 +444,20 @@ static vpart_info_vector &get_vpart_list() {
 		mfb(vpc_examine)
     ));
 	
+	// remote control of car horn, allows you to remotly active the car horn
     vpart_list.push_back(vpart_info(
         "remote controll",        '*', c_green,  '*', c_white,  10, 20, 480, 0,
 		"NULL", "vehicle_remote_controll", 1,
 		mfb(vpf_internal),
 		mfb(vpc_remote_controll)
     ));
+    vpart_list.push_back(vpart_info(
+        "wireglass", '"', c_ltgray,  '0', c_ltgray,  80, 300, 0, 0,
+		"NULL", "wireglass", 3,
+        mfb(vpf_obstacle) | mfb(vpf_no_reinforce),
+		mfb(vpc_over)
+    ));
 	
-	// remote control of car horn, allows you to remotly active the car horn
 	
 	return vpart_list;
 }
@@ -528,8 +534,9 @@ vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) cons
 	::add_item(type, "cotton", "rag", amount, result);
 	::add_item(type, "iron", "scrap", amount, result);
 	::add_item(type, "plastic", "plastic_chunk", amount, result);
-	// for now:
-	::add_item(type, "glass", "plastic_chunk", amount, result);
+	::add_item(type, "kevlar", "kevlar_plate", amount, result);
+	::add_item(type, "chitin", "chitin_piece", amount, result);
+	::add_item(type, "bone", "bone", amount, result);
 	return result;
 }
 

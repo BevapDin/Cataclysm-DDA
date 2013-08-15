@@ -71,6 +71,9 @@ class mapbuffer
   std::list<submap*> submap_list;
   game *master_game;
   bool dirty;
+
+  submap *load_submap(const tripoint &p);
+  void save_submap(const tripoint &p, submap *sm);
 };
 
 extern mapbuffer MAPBUFFER;

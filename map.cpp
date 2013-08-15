@@ -2625,7 +2625,7 @@ void map::process_active_items_in_submap(game *g, const int nonant)
 						if (it.has_flag("HOT")) {
 							it.item_counter--;
 							if (it.item_counter == 0) {
-								it.item_tags.erase("HOT");
+								it.remove_flag("HOT");
 								it.active = false;
 								grid[nonant]->active_item_count--;
 							}
@@ -2635,7 +2635,7 @@ void map::process_active_items_in_submap(game *g, const int nonant)
 						if (food.has_flag("HOT")) {
 							food.item_counter--;
 							if (food.item_counter == 0) {
-								food.item_tags.erase("HOT");
+								food.remove_flag("HOT");
 								food.active = false;
 								grid[nonant]->active_item_count--;
 							}
@@ -3674,7 +3674,7 @@ bool map::loadn(game *g, const int worldx, const int worldy, const int worldz, c
 
   // Update vehicle data
   for( std::vector<vehicle*>::iterator it = tmpsub->vehicles.begin(),
-        end = tmpsub->vehicles.end(); update_vehicles && it != end; ++it ) {
+        end = tmpsub->vehicles.end(); (update_vehicles||true) && it != end; ++it ) {
 
    // Only add if not tracking already.
    if( vehicle_list.find( *it ) == vehicle_list.end() ) {

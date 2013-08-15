@@ -1079,7 +1079,7 @@ void game::complete_craft()
 
     if (newit.is_armor() && newit.has_flag("VARSIZE"))
     {
-        newit.item_tags.insert("FIT");
+        newit.add_flag("FIT");
     }
     float used_age_tally = 0;
     int used_age_count = 0;
@@ -1104,7 +1104,7 @@ void game::complete_craft()
     newit.bday = int(newit.bday) + 3600 - bday_tmp;
 
 		if (newit.has_flag("EATEN_HOT")) {	// hot foods generated
-			newit.item_tags.insert("HOT");
+			newit.add_flag("HOT");
 			newit.active = true;
 			newit.item_counter = 600;
 		}

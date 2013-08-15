@@ -215,7 +215,12 @@ public:
    int irridation;      // Tracks radiation dosage.
  };
  std::string mode;    // Mode of operation, can be changed by the player.
+private:
  std::set<std::string> item_tags;		// generic item specific flags
+public:
+ void add_flag(const std::string &flag);
+ void remove_flag(const std::string &flag);
+ size_t item_tags_count(const std::string &flag) const;
  unsigned item_counter;	// generic counter to be used with item flags
  int mission_id;// Refers to a mission in game's master list
  int player_id;	// Only give a mission to the right player!

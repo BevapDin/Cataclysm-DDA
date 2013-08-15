@@ -375,7 +375,7 @@ bool player::create(game *g, character_type type, std::string tempname)
         {
             if( (*i)->has_flag("VARSIZE"))
             {
-                (*i)->item_tags.insert("FIT");
+                (*i)->add_flag("FIT");
             }
             // It might be more elegant to use player::wear_item, but then we have to implement our own inventory removal.
             wear(g, (*i)->invlet, false);

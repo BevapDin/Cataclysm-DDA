@@ -2486,3 +2486,18 @@ void item::decrease_damaged(int rel_damage) {
 bool item::is_destroyed() const {
 	return damage >= 5;
 }
+
+void item::add_flag(const std::string &flag) {
+	item_tags.insert(flag);
+}
+
+void item::remove_flag(const std::string &flag) {
+	std::set<std::string>::iterator a = item_tags.find(flag);
+	if(a != item_tags.end()) {
+		item_tags.erase(a);
+	}
+}
+
+size_t item::item_tags_count(const std::string &flag) const {
+	return item_tags.count(flag);
+}
