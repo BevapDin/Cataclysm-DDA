@@ -1,0 +1,103 @@
+Coordinates:
+x: horizontal, left is negativ, right positiv
+y: vertical, up is negativ, down positiv
+
+
+Each overmap contains OMAPX x OMAPY overmap-tiles.
+Each overmap tile represents 2x2 submaps.
+Each submap has SEEX x SEEY tiles.
+One tile is the smallest unit of volume, area and distance.
+(Tiles are cubic, a distance of n tiles means a distance of n x tile-width)
+
+All submaps are loaded at the game start / loading of an existing game. They are
+stored in the mapbuffer.
+The map class takes some of those submaps from the buffer and stores pointers to them.
+(The map class is only a wrapper, it simply contains the currently surrounding submaps.)
+During the game only those submaps that the map currently references are used.
+(active items decay, fields decay, ...)
+The map can be seen as a window into all the submaps.
+That window shows only a small part of the world, but the window can move around and therefor show different parts.
+The map is always centered on the player.
+The position of the map is given with
+game::levx and game::levy and game::levz
+They define the position of the top left submap loaded in the map.
+The map than contains MAPSIZE x MAPSIZE pointers to submaps
+The position of player, monsters, NPCs,... are all stored relativ the map position.
+That means the coordinates (2, 3) are located in the submap (0,0) inside the map.
+As the map itself is located at levx,levy the global coordinates of the tile
+would be (levx*SEEX + 2, levy*SEEY + 3).
+As the map is always centered on the player, if the player moves into another submap,
+the map has to be adjusted.
+This adjustment is called shift. It goes like this:
+Calculate the shifting of the submaps:
+The player is on the middle of the map if
+u.posx >= SEEX * int(MAPSIZE / 2) &&
+u.posx <  SEEX * int(MAPSIZE / 2) + SEEX
+(This gives SEEX possible vlaues, each position on a submap)
+If the player is outside, we move the map:
+Change the map location: levx++ or levx--
+(levx is the coordinate of a submap)
+If we do so, we must change the coordinate of the player as well because the player position is relativ to the map position which has just changed:
+u.posx += SEEX or u.posx -= SEEX
+This brings the player position back into the middle of the map.
+At the same time we must do this for all monsters, NPCs, ...
+
+
+Note: to get the overmap-tile where the player is currently on do this:
+ox = (levx + int(MAPSIZE / 2)) / 2
+Actually this should be:
+ox = (levx + (u.posx / SEEX)) / 2
+But because the player is always centerd on the map, these two condition are always true:
+u.posx >= SEEX * int(MAPSIZE / 2) &&
+u.posx <  SEEX * int(MAPSIZE / 2) + SEEX
+Which leads to (u.posx / SEEX) == int(MAPSIZE / 2)
+
+Similar to the player coordinates to the map, levx and levy are coordinates into the current overmap.
+If levx leaves the current overmap (because of a shift: levx < 0 or levx >= OMAPX * 2 (OMAPX * 2 is the number of horizontal submaps per overmap)),
+a new current overmap must be selected (and again levx must be changed accordingly).
+This is again a shift, but this time the cur_om is shifted (the pointer, not the overmap itself).
+We also need adjacent overmaps, (for example when levx=0 and the player wants to see the surrounding overmap-tiles).
+Therfor a shift calls game::set_adjacent_overmaps after all the other things above have been done.
+This function sets those:
+game::om_hori - horizontal adjacent overmap
+game::om_vert - vertical adjacent overmap
+game::om_diag - diagonal adjacent overmap
+It sets them to the nearest overmaps. If the player is for example at
+(10, 10) the nearest overmaps are those to the left, to the top and to the diagonal top and left.
+If he is at (OMAPX*2 - 10, 10) the nearest are to the right (positiv x-axis), to the top and diagonal top and right.
+
+
+game::levx and game::levy
+
+
+They define the current position of the map inside the current overmap in terms of the submap.
+Therefor the range from 0 to OMAPX*2-1.
+(OMAPX twice because each overmap-tile contains 2x2 submaps)
+
+To get a overmap-tile:
+ox = (levx + int(MAPSIZE / 2)) / 2
+The division by 2 is because of the 2 submaps per overmap.
+The offset is 
+
+
+(levx + int(MAPSIZE / 2)) / 2;
+
+The absolute coordinates of a submap are:
+g->cur_om->pos().x * OMAPX * 2 + levx
+
+
+
+ - they cover all 4 currently loaded overmaps.
+The overmap-tile the player is currently on is this:
+
+It seems that the coordinates of cur_om are used as reference.
+
+So if the game wants to load om_vert, it adds 1 to cur_om->pos().y
+
+
+
+
+
+
+
+Each map has MAPSIZE x MAPSIZE submaps.

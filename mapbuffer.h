@@ -41,7 +41,8 @@ class mapbuffer
 
   /** Load the entire world from savefiles into submaps in this instance. **/
   void load();
-
+  void unserialize(std::ifstream & fin);
+  bool unserialize_legacy(std::ifstream & fin);
   /** Store all submaps in this instance into savefiles. **/
   void save();
 
@@ -71,9 +72,6 @@ class mapbuffer
   std::list<submap*> submap_list;
   game *master_game;
   bool dirty;
-
-  submap *load_submap(const tripoint &p);
-  void save_submap(const tripoint &p, submap *sm);
 };
 
 extern mapbuffer MAPBUFFER;

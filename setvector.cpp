@@ -64,16 +64,6 @@ template <class T> void setvec(std::vector<T> *vec, ... )
  va_end(ap);
 }
 
-void setvector(std::vector<pl_flag> *vec, ... )
-{
- va_list ap;
- va_start(ap, vec);
- pl_flag tmp;
- while ((tmp = (pl_flag)va_arg(ap, int)))
-  vec->push_back(tmp);
- va_end(ap);
-}
-
 void setvector(std::vector<m_flag> *vec, ... )
 {
  va_list ap;
@@ -104,20 +94,3 @@ void setvector(std::vector<monster_trigger> *vec, ... )
  va_end(ap);
 }
 
-void setvector(std::vector<style_move> *vec, ... )
-{
- va_list ap;
- va_start(ap, vec);
- char *tmpname, *tmpverb1, *tmpverb2;
- technique_id tmptech;
- int tmplevel;
-
- while ((tmpname = va_arg(ap, char *))) {
-  tmpverb1 = va_arg(ap, char *);
-  tmpverb2 = va_arg(ap, char *);
-  tmptech = (technique_id)va_arg(ap, int);
-  tmplevel = (int)va_arg(ap, int);
-  vec->push_back( style_move(tmpname, tmpverb1, tmpverb2, tmptech, tmplevel) );
- }
- va_end(ap);
-}

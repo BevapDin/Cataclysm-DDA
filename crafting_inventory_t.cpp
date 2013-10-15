@@ -26,6 +26,68 @@ bool crafting_inventory_t::has_amount(const std::vector<std::pair<itype_id, int>
 	return true;
 }
 
+bool hasQuality(const item &it, const std::string &name, int level) {
+	const std::map<std::string,int> &qualities = it.type->qualities;
+	const std::map<std::string,int>::const_iterator quality_iter = qualities.find(name);
+	return (quality_iter != qualities.end() && level >= quality_iter->second);
+}
+
+bool crafting_inventory_t::has_items_with_quality(const std::string &name, int level, int amount) const {
+	for(invstack::const_iterator iter = p->inv.getItems().begin(); iter != p->inv.getItems().end(); ++iter) {
+		for(std::list<item>::const_iterator stack_iter = iter->begin(); stack_iter != iter->end(); ++stack_iter){
+			if(::hasQuality(*stack_iter, name, level)) {
+				amount--;
+				if(amount <= 0) {
+					return true;
+				}
+			}
+		}
+	}
+	for(std::list<item_on_map>::const_iterator a = on_map.begin(); a != on_map.end(); ++a) {
+		const std::vector<item> &items = *(a->items);
+		for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
+			if(b->made_of(LIQUID)) {
+				continue;
+			}
+			if(::hasQuality(*b, name, level)) {
+				amount--;
+				if(amount <= 0) {
+					return true;
+				}
+			}
+		}
+	}
+	for(std::list<item_in_vehicle>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
+		const std::vector<item> &items = *(a->items);
+		for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
+			if(::hasQuality(*b, name, level)) {
+				amount--;
+				if(amount <= 0) {
+					return true;
+				}
+			}
+		}
+	}
+	for(std::list<item_from_bionic>::const_iterator a = by_bionic.begin(); a != by_bionic.end(); ++a) {
+		const item &it = *a;
+		if(::hasQuality(it, name, level)) {
+			amount--;
+			if(amount <= 0) {
+				return true;
+			}
+		}
+	}
+	for(std::list<item_from_souround>::const_iterator a = souround.begin(); a != souround.end(); ++a) {
+		if(::hasQuality(a->it, name, level)) {
+			amount--;
+			if(amount <= 0) {
+				return true;
+			}
+		}
+	}
+	return amount <= 0;
+}
+
 bool crafting_inventory_t::has_amount(const itype_id &it, int quantity) const
 {
 	return (count(it, &amount_of, quantity, S_ALL) >= quantity);
@@ -253,7 +315,7 @@ int crafting_inventory_t::count(const itype_id &type, CountFunction func, int ma
 void crafting_inventory_t::form_from_map(game *g, point origin, int range) {
 	for (int x = origin.x - range; x <= origin.x + range; x++) {
 		for (int y = origin.y - range; y <= origin.y + range; y++) {
-			if (g->m.has_flag(sealed, x, y)) {
+			if (g->m.has_flag("SEALED", x, y)) {
 				continue;
 			}
 			point p(x, y);
@@ -278,7 +340,8 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range) {
 			int vpart = -1;
 			vehicle *veh = g->m.veh_at(x, y, vpart);
 			if (veh) {
-				const int kpart = veh->part_with_function(vpart, vpc_kitchen);
+				const int kpart = veh->part_with_feature(vpart, "KITCHEN");
+				const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
 
 				if (kpart >= 0) {
 					item kitchen(g->itypes["installed_kitchen_unit"], 0);
@@ -289,8 +352,18 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range) {
 					water.charges = veh->fuel_left("water");
 					souround.push_back(item_from_souround(p, water));
 				}
+				
+				if (weldpart >= 0) {
+					item welder(g->itypes["func:welder"], 0);
+					welder.charges = veh->fuel_left("battery", true);
+					souround.push_back(item_from_souround(p, welder));
 
-				const int cpart = veh->part_with_function(vpart, vpc_cargo);
+					item soldering_iron(g->itypes["func:soldering_iron"], 0);
+					soldering_iron.charges = veh->fuel_left("battery", true);
+					souround.push_back(item_from_souround(p, soldering_iron));
+				}
+
+				const int cpart = veh->part_with_feature(vpart, "CARGO");
 				if (cpart >= 0) {
 					item_in_vehicle inveh(veh, cpart, &(veh->parts[cpart].items));
 					in_veh.push_back(inveh);
@@ -312,16 +385,23 @@ void crafting_inventory_t::add_bio_toolset(const std::string &tool, calendar &tu
 	}
 }
 
+bool isBioTools(std::string &id, const std::string &prefixIn, const std::string &prefixOut) {
+	if(id.compare(0, prefixIn.length(), prefixIn) == 0) {
+		id = prefixOut + id.substr(prefixIn.length());
+		return true;
+	}
+	return false;
+}
+
 crafting_inventory_t::crafting_inventory_t(game *g, player *p) : p(p) {
 	form_from_map(g, point(p->posx, p->posy), PICKUP_RANGE);
 
 	// iterator of all bionics of the player and grab the toolsets automaticly
 	// This allows easy addition of more toolsets
-	for(std::vector<bionic>::const_iterator a = p->my_bionics.begin(); a != p->my_bionics.end(); ++a) {
+	for(std::vector<bionic>::const_iterator a = p->getMyBionics().begin(); a != p->getMyBionics().end(); ++a) {
 		const bionic &bio = *a;
-		if(bio.id.compare(0, 10, "bio_tools_") == 0) {
-			std::string tool_name("toolset_");
-			tool_name += bio.id.substr(10);
+		std::string tool_name = bio.id;
+		if(::isBioTools(tool_name, "bio_tools_", "toolset_")) {
 			item tools(item_controller->find_template(tool_name), g->turn);
 			tools.charges = p->power_level;
 			by_bionic.push_back(tools);

@@ -12,9 +12,11 @@
 #include <stdlib.h>
 #include "cursesdef.h"
 #include "name.h"
+#include "input.h"
 
 class npc;
 struct settlement;
+#include "monhorde.h"
 
 #define OVERMAP_DEPTH 10
 #define OVERMAP_HEIGHT 0
@@ -135,14 +137,12 @@ class overmap
 
   // TODO: make private
   std::vector<mongroup> zg;
+  std::vector<monhorde> zh;
   std::vector<radio_tower> radios;
   std::vector<npc *> npcs;
   std::vector<city> cities;
   std::vector<city> roads_out;
   std::vector<settlement> towns;
-  std::vector<monhorde> zh;
-  
-  std::vector<mongroup*> getMonGroupByType(const std::string &type);
 
  private:
   point loc;
@@ -158,7 +158,13 @@ class overmap
 
   // Initialise
   void init_layers();
+  // open existing overmap, or generate a new one
   void open(game *g);
+  // parse data in an opened overmap file
+  void unserialize(game *g, std::ifstream & fin, std::string const & plrfilename, std::string const & terfilename);
+  // parse data in an old overmap file
+  bool unserialize_legacy(game *g, std::ifstream & fin, std::string const & plrfilename, std::string const & terfilename);
+
   void generate(game *g, overmap* north, overmap* east, overmap* south,
                 overmap* west);
   bool generate_sub(int const z);
@@ -166,7 +172,7 @@ class overmap
   //Drawing
   void draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
             int &origx, int &origy, signed char &ch, bool blink,
-            overmap &hori, overmap &vert, overmap &diag);
+            overmap &hori, overmap &vert, overmap &diag, input_context* inp_ctxt);
   // Overall terrain
   void place_river(point pa, point pb);
   void place_forest();
@@ -175,6 +181,7 @@ class overmap
   void put_buildings(int x, int y, int dir, city town);
   void make_road(int cx, int cy, int cs, int dir, city town);
   bool build_lab(int x, int y, int z, int s);
+  bool build_ice_lab(int x, int y, int z, int s);
   void build_anthill(int x, int y, int z, int s);
   void build_tunnel(int x, int y, int z, int s, int dir);
   bool build_slimepit(int x, int y, int z, int s);

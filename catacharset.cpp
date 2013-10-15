@@ -133,7 +133,7 @@ int utf8_width(const char* s)
     {
         unsigned ch = UTF8_getch(&ptr, &len);
         if(ch!=UNKNOWN_UNICODE) {
-            w += mk_wcwidth((wchar_t)ch);
+            w += mk_wcwidth(ch);
         } else {
             continue;
         }
@@ -148,23 +148,24 @@ int utf8_width(const char* s)
 // should be a different value.
 int cursorx_to_position(const char* line, int cursorx, int* prevpos)
 {
-	int dummy;
-	int i=0, c=0, *p=prevpos?prevpos:&dummy;
-	*p = 0;
-	while(c<cursorx)
-	{
-		const char* utf8str = line+i;
-		int len = ANY_LENGTH;
-		unsigned ch = UTF8_getch(&utf8str, &len);
-		int cw = mk_wcwidth((wchar_t)ch);
-		len = ANY_LENGTH-len;
+    int dummy;
+    int i=0, c=0, *p=prevpos?prevpos:&dummy;
+    *p = 0;
+    while(c<cursorx)
+    {
+        const char* utf8str = line+i;
+        int len = ANY_LENGTH;
+        unsigned ch = UTF8_getch(&utf8str, &len);
+        int cw = mk_wcwidth(ch);
+        len = ANY_LENGTH-len;
+
         if(len<=0) len=1;
-		i+=len;
-		if(cw<=0) cw=1;
-		c+=cw;
-		if(c<=cursorx) *p = i;
-	}
-	return i;
+        i+=len;
+        if(cw<=0) cw=1;
+        c+=cw;
+        if(c<=cursorx) *p = i;
+    }
+    return i;
 }
 
 //Erase character by unicode char width.
@@ -176,15 +177,16 @@ int erease_utf8_by_cw( char* t, int cw, int clen, int maxlen)
     int c=0,i=0;
     while(c<cw)
     {
-		const char* utf8str = t+i;
-		int len = ANY_LENGTH;
-		unsigned ch = UTF8_getch(&utf8str, &len);
-		int cw = mk_wcwidth((wchar_t)ch);
-		len = ANY_LENGTH-len;
+        const char* utf8str = t+i;
+        int len = ANY_LENGTH;
+        unsigned ch = UTF8_getch(&utf8str, &len);
+        int cw = mk_wcwidth(ch);
+        len = ANY_LENGTH-len;
+
         if(len<=0) len=1;
-		i+=len;
-		if(cw<=0) cw=1;
-		c+=cw;
+        i+=len;
+        if(cw<=0) cw=1;
+        c+=cw;
     }
     if(cw==c && clen==i)
     {
@@ -215,12 +217,11 @@ std::string utf8_substr(std::string s, int start, int size)
     int begin = cursorx_to_position(buf, start, &pos);
     if(begin!=pos)
     {
-		const char* ts = buf+pos;
-		int l = ANY_LENGTH;
-		unsigned tc = UTF8_getch(&ts, &l);
-		int tw = mk_wcwidth((wchar_t)tc);
-		erease_utf8_by_cw(buf+pos, tw, tw, len-pos-1);
-		begin = pos+tw-1;
+        const char* ts = buf+pos;
+        int l = ANY_LENGTH;
+        unsigned tc = UTF8_getch(&ts, &l);
+        int tw = mk_wcwidth(tc);
+        erease_utf8_by_cw(buf+pos, tw, tw, len-pos-1);
     }
 
     if(size>0) 
@@ -231,7 +232,7 @@ std::string utf8_substr(std::string s, int start, int size)
             const char* ts = buf+pos;
             int l = ANY_LENGTH;
             unsigned tc = UTF8_getch(&ts, &l);
-            int tw = mk_wcwidth((wchar_t)tc);
+            int tw = mk_wcwidth(tc);
             erease_utf8_by_cw(buf+pos, tw, tw, len-pos-1);
             end = pos+tw-1;
         }
@@ -264,7 +265,7 @@ static void build_base64_decoding_table() {
     }
 }
 
-std::string base64_encode(std::string str) { return str;
+std::string base64_encode(std::string str) {
     //assume it is already encoded
     if(str.length()>0 && str[0]=='#') {
         return str;
@@ -296,7 +297,7 @@ std::string base64_encode(std::string str) { return str;
     encoded_data[output_length] = '\0';
     std::string ret = "#";
     ret += encoded_data;
-    delete encoded_data;
+    delete[] encoded_data;
 
     //DebugLog()<<"base64 encoded: \n"<<str<<"\n"<<ret<<"\n";
 
@@ -304,7 +305,7 @@ std::string base64_encode(std::string str) { return str;
 }
 
 
-std::string base64_decode(std::string str) { return str;
+std::string base64_decode(std::string str) {
     // do not decode if it is not base64
     if(str.length()==0 || str[0]!='#') {
         return str;
@@ -348,7 +349,7 @@ std::string base64_decode(std::string str) { return str;
     decoded_data[output_length] = 0;
 
     std::string ret = (char*)decoded_data;
-    delete decoded_data;
+    delete[] decoded_data;
 
     //DebugLog()<<"base64 decoded: \n"<<str<<"\n"<<ret<<"\n";
 

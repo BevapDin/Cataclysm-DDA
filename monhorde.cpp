@@ -1,7 +1,9 @@
 #include "game.h"
 #include "mongroup.h"
+#include "monhorde.h"
+#include "monstergenerator.h"
 
-#define MASTER_ZOMBIE_ID mon_zombie_soldier
+#define MASTER_ZOMBIE_ID "mon_zombie_soldier"
 
 
 overmap *game::getOverMap(int &omx, int &omy) {
@@ -54,14 +56,14 @@ bool game::try_despawn_to_horde(monster &m, int shiftx, int shifty) {
 		return false;
 	}
 	// Not a horde monster (not a zombie at all?)
-	if(!MonsterGroupManager::IsMonsterInGroup("GROUP_WANDERING_ZOMBIE", (mon_id)(m.type->id))) {
+	if(!MonsterGroupManager::IsMonsterInGroup("GROUP_WANDERING_ZOMBIE", m.type->id)) {
 		return false;
 	}
 	// coords of submap-tile of the monster
-	int lx = m.posx / SEEX + levx + shiftx;
-	int ly = m.posy / SEEY + levy + shifty;
+	int lx = m.posx() / SEEX + levx + shiftx;
+	int ly = m.posy() / SEEY + levy + shifty;
 	
-	add_msg("Despawn a horde member @ %d,%d", m.posx - u.posx, m.posy - u.posy); 
+	add_msg("Despawn a horde member @ %d,%d", m.posx() - u.posx, m.posy() - u.posy); 
 	
 	typedef std::vector<monhorde> MHVec;
 	MHVec &monhordes = cur_om->zh;
@@ -367,7 +369,7 @@ void game::spawn_horde_members() {
 		// reduce the population to 0 (all monsters are than spawned)
 		int spawn_count = rng(1, std::min<int>(20, horde.getPopulation()));
 		for(int j = 0; j < spawn_count && !horde.isEmpty(); j++) {
-			mon_id type;
+			std::string type;
 			if(horde.pop_normal == 0) {
 				type = MASTER_ZOMBIE_ID;
 			} else {
@@ -377,7 +379,7 @@ void game::spawn_horde_members() {
 					continue; // try again
 				}
 			}
-			zom = monster(mtypes[type]);
+			zom = monster(GetMType(type));
 			zom.no_extra_death_drops = true;
 			for(int iter = 0; iter < 10; iter++) {
 				int monx = rng(0, SEEX - 1) + posx;
@@ -387,9 +389,13 @@ void game::spawn_horde_members() {
 					continue;
 				}
 				zom.spawn(monx, mony);
-				z.push_back(zom);
+				add_zombie(zom);
 				if(tarx != posx || tary != posy) {
-					z.back().wander_to(tarx + rng(0, SEEX - 1), tary + rng(0, SEEY - 1), MAPSIZE * SEEX * MAPSIZE * SEEY);
+					int mondex = mon_at(monx, mony);
+					if (mondex != -1) {
+						monster &z = _active_monsters[mondex];
+						z.wander_to(tarx + rng(0, SEEX - 1), tary + rng(0, SEEY - 1), MAPSIZE * SEEX * MAPSIZE * SEEY);
+					}
 				}
 				add_msg("Horde-Zombie (rel: %d,%d) spawned at (rel: %d,%d)", horde.posx - (levx + MAPSIZE / 2), horde.posy - (levy + MAPSIZE / 2), monx - u.posx, mony - u.posy);
 				if(type == MASTER_ZOMBIE_ID) {

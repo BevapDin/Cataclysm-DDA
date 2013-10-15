@@ -106,6 +106,8 @@ public:
 	std::list<item> consume_items(const itype_id &type, int count);
 	void consume_tools(const itype_id &type, int charges, bool force_available);
 
+	bool has_items_with_quality(const std::string &name, int level, int amount) const;
+
 	// See veh_interact.cpp
 	item consume_vpart_item (game *g, const itype_id &itid);
 

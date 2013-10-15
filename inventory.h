@@ -37,6 +37,7 @@ class inventory
   inventory  operator+  (const item &rhs);
   inventory  operator+  (const std::list<item> &rhs);
 
+  inventory filter_by_activation(player& u);
   inventory filter_by_category(item_cat cat, const player& u) const;
   inventory filter_by_category(item_cat cat, const player& u, const std::string *liquid) const;
 
@@ -44,9 +45,11 @@ class inventory
   void sort();
   void clear();
   void add_stack(std::list<item> newits);
+  void clone_stack(const std::list<item> &rhs);
   void push_back(std::list<item> newits);
+  char get_invlet_for_item( std::string item_type );
   item& add_item (item newit, bool keep_invlet = false); //returns a ref to the added item
-  void add_item_by_type(const itype_id &type, int count = 1, int charges = -1);
+  void add_item_by_type(itype_id type, int count = 1, int charges = -1);
   void add_item_keep_invlet(item newit);
   void push_back(item newit);
 
@@ -61,36 +64,38 @@ class inventory
   std::list<item> remove_stack_by_letter(char ch);
   std::list<item> remove_partial_stack(char ch, int amount);
   item  remove_item(item *it);
-  item  remove_item_by_type(const itype_id &type);
+  item  remove_item_by_type(itype_id type);
   item  remove_item_by_letter(char ch);
   item  remove_item_by_charges(char ch, int quantity); // charged items, not stacks
   std::vector<item>  remove_mission_items(int mission_id);
   item& item_by_letter(char ch);
-  item& item_by_type(const itype_id &type);
-  item& item_or_container(const itype_id &type); // returns an item, or a container of it
+  item& item_by_type(itype_id type);
+  item& item_or_container(itype_id type); // returns an item, or a container of it
 
-  std::vector<item*> all_items_by_type(const itype_id &type);
+  std::vector<item*> all_items_by_type(itype_id type);
   std::vector<item*> all_ammo(ammotype type);
+  std::vector<item*> all_items_with_flag( const std::string flag );
 
 // Below, "amount" refers to quantity
 //        "charges" refers to charges
-  int  amount_of (const itype_id &it) const;
-  int  charges_of(const itype_id &it) const;
+  int  amount_of (itype_id it) const;
+  int  charges_of(itype_id it) const;
 
-  std::list<item> use_amount (const itype_id &it, int quantity, bool use_container = false);
-  std::list<item> use_charges(const itype_id &it, int quantity);
+  std::list<item> use_amount (itype_id it, int quantity, bool use_container = false);
+  std::list<item> use_charges(itype_id it, int quantity);
 
-  bool has_amount (const itype_id &it, int quantity) const;
-  bool has_charges(const itype_id &it, int quantity) const;
+  bool has_amount (itype_id it, int quantity) const;
+  bool has_charges(itype_id it, int quantity) const;
   bool has_flag(std::string flag) const; //Inventory item has flag
   bool has_item(item *it) const; // Looks for a specific item
+  bool has_items_with_quality(std::string name, int level, int amount) const;
   bool has_gun_for_ammo(ammotype type) const;
-  bool has_active_item(const itype_id &) const;
+  bool has_active_item(itype_id) const;
 
   bool has_mission_item(int mission_id) const;
   int butcher_factor() const;
   bool has_artifact_with(art_effect_passive effect) const;
-  bool has_liquid(const itype_id &type) const;
+  bool has_liquid(itype_id type) const;
   item& watertight_container();
 
   // NPC/AI functions
@@ -104,25 +109,25 @@ class inventory
 
   int weight() const;
   int volume() const;
-  int max_active_item_charges(const itype_id &id) const;
+  int max_active_item_charges(itype_id id) const;
 
   void dump(std::vector<item*>& dest); // dumps contents into dest (does not delete contents)
 
   // vector rather than list because it's NOT an item stack
   std::vector<item*> active_items();
 
-  void load_invlet_cache( std::ifstream &fin );
+  void load_invlet_cache( std::ifstream &fin ); // see savegame_legacy.cpp
 
-  // hack to account for players saving inventory data (including weapon, etc.)
-  std::string save_str_no_quant() const;
+  void json_load_invcache(picojson::value & parsed);
+  void json_load_items(picojson::value & parsed, game * g);
 
-/* TODO: This stuff, I guess?
-  std::string save();
-  void load(std::string data);
-*/
+  picojson::value json_save_invcache() const;
+  picojson::value json_save_items() const;
 
   item nullitem;
   std::list<item> nullstack;
+  
+  const invstack &getItems() const { return items; }
 
  private:
   // For each item ID, store a set of "favorite" inventory letters.

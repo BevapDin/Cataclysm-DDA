@@ -3,6 +3,7 @@
 #include "uistate.h"
 #include "keypress.h"
 #include "translations.h"
+#include "options.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -13,7 +14,7 @@
 std::string CATEGORIES[iCategorieNum] =
  {_("GROUND:"), _("FIREARMS:"), _("AMMUNITION:"), _("CLOTHING:"),
   _("FOOD/DRINKS:"), _("TOOLS:"), _("BOOKS:"), _("WEAPONS:"),
-  _("MODS/BIONICS"), _("MEDICINE/DRUGS"), _("OTHER:")};
+  _("MODS/BIONICS:"), _("MEDICINE/DRUGS:"), _("OTHER:")};
 
 //TODO: make this function not have issues with items that are classed as multiple things
 std::vector<int> find_firsts(invslice &slice)
@@ -107,10 +108,6 @@ void print_inv_statics(game *g, WINDOW* w_inv, std::string title,
   else
    mvwprintz(w_inv, 3, 45, g->u.weapon.color_in_inventory(&(g->u)), "%c - %s",
              g->u.weapon.invlet, g->u.weapname().c_str());
- } else if (g->u.weapon.is_style()) {
-  n_items++;
-  mvwprintz(w_inv, 3, 45, c_ltgray, "%c - %s",
-            g->u.weapon.invlet, g->u.weapname().c_str());
  } else
   mvwprintz(w_inv, 3, 45, c_ltgray, g->u.weapname().c_str());
 // Print worn items
@@ -133,161 +130,29 @@ void print_inv_statics(game *g, WINDOW* w_inv, std::string title,
 
  // Print items carried
  for (std::string::const_iterator invlet = inv_chars.begin();
-      invlet != inv_chars.end(); invlet++) {
+      invlet != inv_chars.end(); ++invlet) {
    n_items += ((g->u.inv.item_by_letter(*invlet).is_null()) ? 0 : 1);
  }
  mvwprintw(w_inv, 1, 62, _("Items:  %d/%d "), n_items, inv_chars.size());
 }
 
-// Display current inventory.
-char game::inv(std::string title)
+char game::inv(inventory inv, std::string title)
 {
- WINDOW* w_inv = newwin(((VIEWY < 12) ? 25 : VIEWY*2+1), ((VIEWX < 12) ? FULL_SCREEN_WIDTH : VIEWX*2+56), VIEW_OFFSET_Y, VIEW_OFFSET_X);
- const int maxitems = (VIEWY < 12) ? 20 : VIEWY*2-4;    // Number of items to show at one time.
+    WINDOW* w_inv = newwin(TERRAIN_WINDOW_HEIGHT, TERRAIN_WINDOW_WIDTH + (use_narrow_sidebar() ? 45 : 55), VIEW_OFFSET_Y, VIEW_OFFSET_X);
+    const int maxitems = TERRAIN_WINDOW_HEIGHT - 5;
+
  int ch = (int)'.';
- int start = 0, cur_it, max_it;
- u.inv.sort();
- u.inv.restack(&u);
- invslice slice = u.inv.slice(0, u.inv.size());
- std::vector<char> null_vector;
- print_inv_statics(this, w_inv, title, null_vector);
-// Gun, ammo, weapon, armor, food, tool, book, other
- std::vector<int> firsts = find_firsts(slice);
- int selected=-1;
- int selected_char=(int)' ';
-
- if( uistate.last_inv_start >= 0 ) start = uistate.last_inv_start;
- if( uistate.last_inv_sel >= 0 ) selected = uistate.last_inv_sel;
- do {
-  selected_char=(int)' ';
-  if (( ch == '<' || ch == KEY_PPAGE ) && start > 0) { // Clear lines and shift
-   for (int i = 1; i < maxitems+4; i++)
-    mvwprintz(w_inv, i, 0, c_black, "                                             ");
-   start -= maxitems;
-   if (start < 0)
-    start = 0;
-   mvwprintw(w_inv, maxitems + 4, 0, "         ");
-   if ( selected > -1 ) selected = start; // oy, the cheese
-  }
-  if ((ch == '>' || ch == KEY_NPAGE ) && cur_it < u.inv.size()) { // Clear lines and shift
-   start = cur_it;
-   mvwprintw(w_inv, maxitems + 4, 12, "            ");
-   for (int i = 1; i < maxitems+4; i++)
-    mvwprintz(w_inv, i, 0, c_black, "                                             ");
-   if ( selected < start && selected > -1 ) selected = start;
-  }
-  int cur_line = 2;
-  max_it = 0;
-  for (cur_it = start; cur_it < start + maxitems && cur_line < maxitems+3; cur_it++) {
-// Clear the current line;
-   mvwprintw(w_inv, cur_line, 0, "                                             ");
-// Print category header
-   for (int i = 1; i < iCategorieNum; i++) {
-    if (cur_it == firsts[i-1]) {
-     mvwprintz(w_inv, cur_line, 0, c_magenta, _(CATEGORIES[i].c_str()));
-     cur_line++;
-    }
-   }
-   if (cur_it < slice.size()) {
-    item& it = slice[cur_it]->front();
-    if(cur_it==selected) selected_char=(int)it.invlet;
-    mvwputch (w_inv, cur_line, 0, (cur_it == selected ? h_white : c_white), it.invlet);
-    mvwprintz(w_inv, cur_line, 1, (cur_it == selected ? h_white : it.color_in_inventory(&u) ), " %s",
-              it.tname(this).c_str());
-    if (slice[cur_it]->size() > 1)
-     wprintw(w_inv, " [%d]", slice[cur_it]->size());
-    if (it.charges > 0)
-     wprintw(w_inv, " (%d)", it.charges);
-    else if (it.contents.size() == 1 &&
-             it.contents[0].charges > 0)
-     wprintw(w_inv, " (%d)", it.contents[0].charges);
-    max_it=cur_it;
-   }
-   cur_line++;
-  }
-  if (start > 0)
-   mvwprintw(w_inv, maxitems + 4, 0, _("< Go Back"));
-  if (cur_it < u.inv.size())
-   mvwprintw(w_inv, maxitems + 4, 12, _("> More items"));
-  wrefresh(w_inv);
-
-  ch = getch();
-
-  if ( ch == KEY_DOWN ) {
-    if ( selected < 0 ) {
-      selected = start;
-    } else {
-      selected++;
-    }
-    if ( selected > max_it ) {
-      if( cur_it < u.inv.size() ) {
-        ch='>';
-      } else {
-        selected = u.inv.size() - 1; // wraparound?
-      }
-    }
-  } else if ( ch == KEY_UP ) {
-    selected--;
-    if ( selected < -1 ) {
-      selected = -1; // wraparound?
-    } else if ( selected < start ) {
-      if ( start > 0 ) {
-        for (int i = 1; i < maxitems+4; i++)
-         mvwprintz(w_inv, i, 0, c_black, "                                             ");
-        start -= maxitems;
-        if (start < 0)
-         start = 0;
-        mvwprintw(w_inv, maxitems + 4, 0, "         ");
-      }
-    }
-  } else if ( ch == '\n' || ch == KEY_RIGHT ) {
-//    if ( uistate.last_inv_start > -2 && uistate.last_inv_sel > -2 ) {
-      uistate.last_inv_start=start;
-      uistate.last_inv_sel=selected;
-//    }
-    ch = selected_char;
-  }
- } while (ch == '<' || ch == '>' || ch == KEY_NPAGE || ch == KEY_PPAGE || ch == KEY_UP || ch == KEY_DOWN );
- werase(w_inv);
- delwin(w_inv);
- erase();
- refresh_all();
- return (char)ch;
-}
-
-char game::inv_type(std::string title, item_cat inv_item_type)
-{
-	return inv_type(title, inv_item_type, NULL);
-}
-
-char game::inv_type_container(std::string title, std::string liquid)
-{
-	return inv_type(title, IC_CONTAINER, &liquid);
-}
-
-char game::inv_type(std::string title, item_cat inv_item_type, const std::string *liquid)
-{
-// this function lists inventory objects by type
-// refer to enum item_cat in itype.h for list of categories
-
- WINDOW* w_inv = newwin(((VIEWY < 12) ? 25 : VIEWY*2+1), ((VIEWX < 12) ? FULL_SCREEN_WIDTH : VIEWX*2+56), VIEW_OFFSET_Y, VIEW_OFFSET_X);
- const int maxitems = (VIEWY < 12) ? 20 : VIEWY*2-4;    // Number of items to show at one time.
- int ch = (int)'.';
- int start = 0, cur_it, max_it;
- u.inv.sort();
- u.inv.restack(&u);
+ int start = 0, cur_it = 0, max_it;
+ inv.sort();
  std::vector<char> null_vector;
  print_inv_statics(this, w_inv, title, null_vector);
 // Gun, ammo, weapon, armor, food, tool, book, other
 
-// Create the reduced inventory
- inventory reduced_inv = u.inv.filter_by_category(inv_item_type, u, liquid);
-
- invslice slice = reduced_inv.slice(0, reduced_inv.size());
+ invslice slice = inv.slice(0, inv.size());
  std::vector<int> firsts = find_firsts(slice);
 
- int selected=-1;
- int selected_char=(int)' ';
+ int selected =- 1;
+ int selected_char = (int)' ';
  do {
   if (( ch == '<' || ch == KEY_PPAGE ) && start > 0) { // Clear lines and shift
    for (int i = 1; i < maxitems+4; i++)
@@ -298,7 +163,7 @@ char game::inv_type(std::string title, item_cat inv_item_type, const std::string
    mvwprintw(w_inv, maxitems + 4, 0, "         ");
    if ( selected > -1 ) selected = start; // oy, the cheese
   }
-  if (( ch == '>' || ch == KEY_NPAGE ) && cur_it < reduced_inv.size()) { // Clear lines and shift
+  if (( ch == '>' || ch == KEY_NPAGE ) && cur_it < inv.size()) { // Clear lines and shift
    start = cur_it;
    mvwprintw(w_inv, maxitems + 4, 12, "            ");
    for (int i = 1; i < maxitems+4; i++)
@@ -339,7 +204,7 @@ char game::inv_type(std::string title, item_cat inv_item_type, const std::string
   }
   if (start > 0)
    mvwprintw(w_inv, maxitems + 4, 0, _("< Go Back"));
-  if (cur_it < reduced_inv.size())
+  if (cur_it < inv.size())
    mvwprintw(w_inv, maxitems + 4, 12, _("> More items"));
   wrefresh(w_inv);
 
@@ -384,14 +249,47 @@ char game::inv_type(std::string title, item_cat inv_item_type, const std::string
  return (char)ch;
 }
 
+// Display current inventory.
+char game::inv(std::string title)
+{
+ u.inv.restack(&u);
+ u.inv.sort();
+ return inv(u.inv,title);
+}
+
+char game::inv_activatable(std::string title)
+{
+ u.inv.restack(&u);
+ u.inv.sort();
+ inventory activatables = u.inv.filter_by_activation(u);
+ return inv(activatables,title);
+}
+
+char game::inv_type(std::string title, item_cat inv_item_type)
+{
+ u.inv.restack(&u);
+ u.inv.sort();
+ inventory reduced_inv = u.inv.filter_by_category(inv_item_type, u);
+ return inv(reduced_inv,title);
+}
+
+char game::inv_type(std::string title, item_cat inv_item_type, const std::string *liquid)
+{
+ u.inv.restack(&u);
+ u.inv.sort();
+ inventory reduced_inv = u.inv.filter_by_category(inv_item_type, u, liquid);
+ return inv(reduced_inv,title);
+}
+
 std::vector<item> game::multidrop()
 {
- u.inv.sort();
+    WINDOW* w_inv = newwin(TERRAIN_WINDOW_HEIGHT, TERRAIN_WINDOW_WIDTH + (use_narrow_sidebar() ? 45 : 55), VIEW_OFFSET_Y, VIEW_OFFSET_X);
+    const int maxitems = TERRAIN_WINDOW_HEIGHT - 5;
+
  u.inv.restack(&u);
- WINDOW* w_inv = newwin(((VIEWY < 12) ? 25 : VIEWY*2+1), ((VIEWX < 12) ? FULL_SCREEN_WIDTH : VIEWX*2+56), VIEW_OFFSET_Y, VIEW_OFFSET_X);
+ u.inv.sort();
  int drp_line_width=getmaxx(w_inv)-90;
  const std::string drp_line_padding = ( drp_line_width > 1 ? std::string(drp_line_width, ' ') : " ");
- const int maxitems = (VIEWY < 12) ? 20 : VIEWY*2-4;    // Number of items to show at one time.
  std::map<char, int> dropping; // Count of how many we'll drop from each stack
  int count = 0; // The current count
  std::vector<char> weapon_and_armor; // Always single, not counted
@@ -401,7 +299,7 @@ std::vector<item> game::multidrop()
  int base_volume = u.volume_carried();
 
  int ch = (int)'.';
- int start = 0, cur_it, max_it;
+ int start = 0, cur_it = 0, max_it;
  invslice stacks = u.inv.slice(0, u.inv.size());
  std::vector<int> firsts = find_firsts(stacks);
  int selected=-1;
@@ -638,7 +536,7 @@ std::vector<item> game::multidrop()
  if (ch != '\n')
   return ret; // Canceled!
 
- for (std::map<char,int>::iterator it = dropping.begin(); it != dropping.end(); it++) {
+ for (std::map<char,int>::iterator it = dropping.begin(); it != dropping.end(); ++it) {
   if (it->second == -1)
    ret.push_back( u.inv.remove_item_by_letter( it->first));
   else if (it->second && u.inv.item_by_letter( it->first).count_by_charges()) {
@@ -672,7 +570,7 @@ void game::compare(int iCompareX, int iCompareY)
  std::vector <item> grounditems;
  int ch = (int)'.';
 
- if (iCompareX != -999 && iCompareX != -999) {
+ if (iCompareX != -999 && iCompareY != -999) {
   examx = u.posx + iCompareX;
   examy = u.posy + iCompareY;
  } else if (!choose_adjacent("Compare",examx,examy)) {
@@ -690,8 +588,8 @@ void game::compare(int iCompareX, int iCompareY)
  }
  //Only the first 10 Items due to numbering 0-9
  const int groundsize = (grounditems.size() > 10 ? 10 : grounditems.size());
- u.inv.sort();
  u.inv.restack(&u);
+ u.inv.sort();
 
  invslice stacks = u.inv.slice(0, u.inv.size());
 
@@ -700,7 +598,7 @@ void game::compare(int iCompareX, int iCompareY)
  std::vector<int> compare_list; // Count of how many we'll drop from each stack
  bool bFirst = false; // First Item selected
  bool bShowCompare = false;
- char cLastCh;
+ char cLastCh = 0;
  compare_list.resize(u.inv.size() + groundsize, 0);
  std::vector<char> weapon_and_armor; // Always single, not counted
  print_inv_statics(this, w_inv, "Compare:", weapon_and_armor);
@@ -714,7 +612,7 @@ void game::compare(int iCompareX, int iCompareY)
   firsts.push_back((first[i] >= 0) ? first[i]+groundsize : -1);
  }
  ch = '.';
- int start = 0, cur_it;
+ int start = 0, cur_it = 0;
  do {
   if (( ch == '<' || ch == KEY_PPAGE ) && start > 0) {
    for (int i = 1; i < maxitems+4; i++)

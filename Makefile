@@ -291,7 +291,7 @@ clean-tests:
 
 git-add:
 	git add $(filter-out version.h, $(wildcard *.h *.cpp))
-	find data/raw/ -type f -iname '*.json' -print0 | xargs -0 git add
+	find data/json/ -type f -iname '*.json' -print0 | xargs -0 git add
 
 git-diff:
 	git diff --color --cached --word-diff

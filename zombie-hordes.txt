@@ -1,0 +1,33 @@
+New monster group: GROUP_WANDERING_ZOMBIE
+
+Every n-th move is one-in-X change that a horde is created:
+A starting point is chooses which must match these conditions:
+Minimum and maximum distance to player:
+Don't bother with hordes far away and don't spawn hordes directly on the player.
+And hordes will not spawn near another horder. But they may move to where another horder already is.
+
+The horde has a target. Every SEEX turns, the horde moves towards that target.
+The horde position is stored in the overmap as coordinates of the submap they are currently on,
+therfor the time the need to move from one submap to another should be the same as a normal zombie needs to go over a submap.
+
+After each move there is a change that the horde changes its direction.
+TODO: Change into any direction or change by a maximum degree?
+TODO: Allow standing still (no direction)?
+
+Loud noise will attract nearby hordes, this uses different numbers than the normal noise system,
+Noise sets the direction vector if nearby hordes towards the source of the noise.
+
+Spawn:
+Every n turns (or every turn with a one-in-n chance?) the game looks at all hordes and
+checks if their position is within the loaded submaps.
+If so, it starts spawing monsters from that horde, but only inside that submap.
+The usual spawn requirements still apply (outside, not seen by player, ...).
+Spawn monsters decrement the population counter as usual.
+The spawn monsters get a direction (monster::wander_to) with a very big timeout for this (monster::wandf).
+
+Upon despawn, the monsters are either put into an existing monstergroup (if the horde moves into a town),
+but this must match the monstertypes of that group (zombies won't despawn into a anthill).
+
+If there is no matching group around, the zombies are put into a new horde with 1 as population.
+Normally (and if the monster is not part of the zombie-horde group), the monster will despawn into their on little group (e.g. a giant ant far away from their home will despawn into a ant-group with population 1).
+

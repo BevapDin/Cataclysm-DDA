@@ -2,18 +2,26 @@
 #define _ITEM_H_
 
 #include <string>
-#include <vector>
 #include <list>
+#include <vector>
 #include "itype.h"
 #include "mtype.h"
 //#include "npc.h"
 
 class player;
 class npc;
+struct itype;
 
 // Thresholds for radiation dosage for the radiation film badge.
 const int rad_dosage_thresholds[] = { 0, 30, 60, 120, 240, 500};
 const std::string rad_threshold_colors[] = { "green", "blue", "yellow", "orange", "red", "black"};
+
+struct light_emission {
+  unsigned short luminance;
+  short width;
+  short direction;
+};
+extern light_emission nolight;
 
 struct iteminfo{
  public:
@@ -26,7 +34,8 @@ struct iteminfo{
   std::string sPlus; //number +
   bool bNewLine; //New line at the end
   bool bLowerIsBetter; //Lower values are better (red <-> green)
-
+  
+  //Inputs are: ItemType, main text, text between main text and value, value, if the value should be an int instead of a double, text after number, if there should be a newline after this item, if lower values are better
   iteminfo(std::string sIn0, std::string sIn1, std::string sIn2 = "", double dIn0 = -999, bool bIn0 = true, std::string sIn3 = "", bool bIn1 = true, bool bIn2 = false) {
     sType = sIn0;
     sName = sIn1;
@@ -39,7 +48,7 @@ struct iteminfo{
     convert << dIn0i;
     } else {
     convert.precision(1);
-    convert << dIn0;
+    convert << std::fixed << dIn0;
     }
     sValue = convert.str();
     sPlus = sIn3;
@@ -54,9 +63,11 @@ public:
  item();
  item(itype* it, unsigned int turn);
  item(itype* it, unsigned int turn, char let);
- void make_corpse(itype* it, mtype* mt, unsigned int turn);	// Corpse
+ void make_corpse(itype* it, mtype* mt, unsigned int turn); // Corpse
  item(std::string itemdata, game *g);
- ~item();
+ item(picojson::value & parsed, game * g);
+ virtual ~item();
+ void init();
  void make(itype* it);
  void clear(); // cleanup that's required to re-use an item variable
 
@@ -74,6 +85,7 @@ public:
  int clip_size();
  int dispersion();
  int gun_damage(bool with_ammo = true);
+ int gun_pierce(bool with_ammo = true);
  int noise() const;
  int burst_size();
  int recoil(bool with_ammo = true);
@@ -82,10 +94,13 @@ public:
  char pick_reload_ammo(player &u, bool interactive);
  bool reload(player &u, char invlet);
  void next_mode();
-
- std::string save_info() const;	// Formatted for save files
+ bool json_load(picojson::value & parsed, game * g);
+ virtual picojson::value json_save(bool save_contents=false) const;
+ std::string save_info() const; // Formatted for save files
+ //
+ void load_legacy(game * g, std::stringstream & dump);
  void load_info(std::string data, game *g);
- //std::string info(bool showtext = false);	// Formatted for human viewing
+ //std::string info(bool showtext = false); // Formatted for human viewing
  std::string info(bool showtext = false);
  std::string info(bool showtext, std::vector<iteminfo> *dump, game *g = NULL, bool debug = false);
  char symbol() const;
@@ -106,19 +121,25 @@ public:
  int attack_time();
  int damage_bash();
  int damage_cut() const;
- bool has_flag(const std::string &f) const;
- bool has_technique(technique_id t, player *p = NULL);
+ bool has_flag(std::string f) const;
+ bool has_quality(std::string quality_name) const;
+ bool has_quality(std::string quality_name, int quality_value) const;
+ bool has_technique(std::string t, player *p = NULL);
  int has_gunmod(itype_id type);
  item* active_gunmod();
  item const* inspect_active_gunmod() const;
- std::vector<technique_id> techniques();
  bool goes_bad();
  bool count_by_charges() const;
+ int max_charges() const;
  bool craft_has_charges();
  int num_charges();
  bool rotten(game *g);
  bool ready_to_revive(game *g); // used for corpses
-
+// light emission, determined by type->light_emission (LIGHT_???) tag (circular),
+// overridden by light.* struct (shaped)
+ bool getlight(float & luminance, int & width, int & direction, bool calculate_dimming = true) const;
+// for quick iterative loops
+ int getlight_emit(bool calculate_dimming = true) const;
 // Our value as a weapon, given particular skills
  int  weapon_value(player *p) const;
 // As above, but discounts its use as a ranged weapon
@@ -128,8 +149,6 @@ public:
  int cut_resist() const;
  // elemental resistances
  int acid_resist() const;
-// Returns the data associated with tech, if we are an it_style
- style_move style_data(technique_id tech);
  bool is_two_handed(player *u);
  bool made_of(const std::string &mat_ident) const;
  bool made_of(const char *mat_ident) const;
@@ -161,7 +180,6 @@ public:
  bool is_tool() const;
  bool is_software() const;
  bool is_macguffin() const;
- bool is_style() const;
  bool is_stationary() const;
  bool is_other() const; // Doesn't belong in other categories
  bool is_var_veh_part() const;
@@ -190,40 +208,23 @@ public:
  char invlet;           // Inventory letter
  int charges;
  bool active;           // If true, it has active effects to be processed
-private:
  signed char damage;    // How much damage it's sustained; generally, max is 5
-public:
- // Returns how much damaged this object is (-1 ... 5)
- int get_damaged() const;
- // Sets how much this item is damaged (-1 ... 5)
- void set_damaged(int damage);
- // Adds the amount of damage to this item
- void increase_damaged(int rel_damage);
- // Removes the amount of damage from this item (repairs it)
- void decrease_damaged(int rel_damage);
- // Returns true if the item is so much damaged that it is actually destroyed
- bool is_destroyed() const;
- 
- int burnt;	         // How badly we're burnt
- unsigned int bday;     // The turn on which it was created
- int owned;	            // UID of NPC owner; 0 = player, -1 = unowned
+ int burnt;             // How badly we're burnt
+ int bday;              // The turn on which it was created
+ int owned;             // UID of NPC owner; 0 = player, -1 = unowned
+ light_emission light;
  union{
-   int poison;	         // How badly poisoned is it?
+   int poison;          // How badly poisoned is it?
    int bigness;         // engine power, wheel size
    int frequency;       // Radio frequency
    int note;            // Associated dynamic text snippet.
    int irridation;      // Tracks radiation dosage.
  };
  std::string mode;    // Mode of operation, can be changed by the player.
-private:
- std::set<std::string> item_tags;		// generic item specific flags
-public:
- void add_flag(const std::string &flag);
- void remove_flag(const std::string &flag);
- size_t item_tags_count(const std::string &flag) const;
- unsigned item_counter;	// generic counter to be used with item flags
- int mission_id;// Refers to a mission in game's master list
- int player_id;	// Only give a mission to the right player!
+ std::set<std::string> item_tags; // generic item specific flags
+ unsigned item_counter; // generic counter to be used with item flags
+ int mission_id; // Refers to a mission in game's master list
+ int player_id; // Only give a mission to the right player!
  std::map<std::string, std::string> item_vars;
  static itype * nullitem();
 
@@ -236,31 +237,67 @@ private:
 std::ostream & operator<<(std::ostream &, const item &);
 std::ostream & operator<<(std::ostream &, const item *);
 
-struct map_item_stack
+class map_item_stack
 {
-public:
-    item example; //an example item for showing stats, etc.
-    int x;
-    int y;
-    int count;
+    private:
+        class item_group
+        {
+            public:
+                int x;
+                int y;
+                int count;
 
-    //only expected to be used for things like lists and vectors
-    map_item_stack()
-    {
-        example = item();
-        x = 0;
-        y = 0;
-        count = 0;
-    }
+                //only expected to be used for things like lists and vectors
+                item_group() {
+                    x = 0;
+                    y = 0;
+                    count = 0;
+                }
 
-    map_item_stack(item it, int arg_x, int arg_y)
-    {
-        example = it;
-        x = arg_x;
-        y = arg_y;
-        count = 1;
-    }
+                item_group(const int arg_x, const int arg_y, const int arg_count) {
+                    x = arg_x;
+                    y = arg_y;
+                    count = arg_count;
+                }
+
+                ~item_group() {};
+        };
+    public:
+        item example; //an example item for showing stats, etc.
+        std::vector<item_group> vIG;
+        int totalcount;
+
+        //only expected to be used for things like lists and vectors
+        map_item_stack() {
+            example = item();
+            vIG.push_back(item_group());
+            totalcount = 0;
+        }
+
+        map_item_stack(const item it, const int arg_x, const int arg_y) {
+            example = it;
+            vIG.push_back(item_group(arg_x, arg_y, 1));
+            totalcount = 1;
+        }
+
+        ~map_item_stack() {};
+
+        void addNewPos(const int arg_x, const int arg_y) {
+            vIG.push_back(item_group(arg_x, arg_y, 1));
+            totalcount++;
+        }
+
+        void incCount() {
+            const int iVGsize = vIG.size();
+            if (iVGsize > 0) {
+                vIG[iVGsize-1].count++;
+            }
+            totalcount++;
+        }
 };
+
+//this is an attempt for functional programming
+bool is_edible(item i, player const*u);
 
 //the assigned numbers are a result of legacy stuff in compare_split_screen_popup(),
 //it would be better long-term to rewrite stuff so that we don't need that hack

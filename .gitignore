@@ -2,25 +2,27 @@ cataclysm
 cataclysm-tiles
 data/*.template
 save/
-memorial/
 save.*/
+graveyard/
+memorial/
 obj/
 debug.log
 logg.txt
 bindist/
 cataclysmdda-*
 objwin/
-cataclysm.exe
 version.h
-Cataclysm.exe
+CataclysmWin.cscope_file_list
 CataclysmWin.depend
 CataclysmWin.layout
+*.exe
 *.dll
 
 # Visual Studio files
 *.suo
-*.user
-Cataclysm.sdf
+*.sdf
+*.pdb
+*.ilk
 Release*/
 Debug*/
 *.opensdf
@@ -30,16 +32,19 @@ Debug*/
 \#*
 *.bak
 *.cbTemp
+*.sw?
 gmon.out
 
 # System Files
 Thumbs.db
 .DS_Store
-
 core
+tags
+cscope.*
 cataclysm.prof
 astyle.sh
 data/auto_pickup.txt
+fontlist.txt
 gprof.output
 c
 cur/
