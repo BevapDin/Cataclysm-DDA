@@ -867,9 +867,12 @@ double crafting_inventory_t::compute_time_modi(const std::vector<component> &too
 {
     const item *it = 0;
     const double modi = compute_time_modi(tools, it);
+	// Debug info, ignore for now
+	/*
     if(it != 0) {
         debugmsg("tool that got used: %s - modi is %f", const_cast<item*>(it)->tname().c_str(), modi);
     }
+	*/
     return modi;
 }
 
@@ -901,7 +904,7 @@ void use_modi(const item &it, const itype_id &type, int count, double &best_modi
     if(it.get_charges_of(type) < count) {
         return;
     }
-    g->add_msg("use %s?", const_cast<item&>(it).tname().c_str());
+//    g->add_msg("use %s?", const_cast<item&>(it).tname().c_str());
     const double modi = it.get_functionality_time_modi(type);
     if(modi > 0.0 && (best_modi == 0.0 || best_modi > modi)) {
         best_modi = modi;
