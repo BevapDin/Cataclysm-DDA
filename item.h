@@ -112,6 +112,7 @@ public:
  void put_in(item payload);
 
  bool matches_type(const itype_id &type) const;
+ int get_charges_of(const itype_id &type) const;
  double get_functionality_time_modi(const itype_id &func) const;
  double get_damaged_modi() const;
 
@@ -150,7 +151,7 @@ public:
  // elemental resistances
  int acid_resist() const;
  bool is_two_handed(player *u);
- bool made_of(const std::string &mat_ident) const;
+ bool made_of(std::string mat_ident) const;
  bool made_of(const char *mat_ident) const;
  std::string get_material(int m) const;
  bool made_of(phase_id phase) const;
@@ -191,11 +192,12 @@ public:
   * Use up some charges of the item if it matches the type.
   * If charges have been used, an item matching those charges is added
   * to usedup and the amount is decreased.
-  * @returns true if the item should be destroyed (because of 0 chrages left
-  * and destroyed_at_zero_charges returns true).
+  * The function also checks the content of this item if check_contents is true.
+  * @returns true if the item should be destroyed (because of 0 charges left
+  * and destroyed_at_zero_charges returned true).
   * Otherwise it returns false.
   */
- bool use_charges(const itype_id &type, int &amount, std::list<item> &usedup);
+ bool use_charges(const itype_id &type, int &amount, std::list<item> &usedup, bool check_contents = true);
 
  itype_id typeId() const;
  itype* type;

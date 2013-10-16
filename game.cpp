@@ -72,12 +72,6 @@ game *g;
 
 uistatedata uistate;
 
-
-
-#define ENABLE_HORDES 1
-
-
-
 // This is the main game set-up process.
 game::game() :
  w_terrain(NULL),
@@ -684,31 +678,31 @@ bool game::do_turn()
 #endif
 
  if(u.in_vehicle && u.controlling_vehicle) {
-	vehicle *veh = m.veh_at(u.posx, u.posy);
-	if(veh != 0) {
-		rl_vec2d offset;
-		if(veh->skidding)
-			offset = veh->move_vec();
-		else
-			offset = veh->face_vec();
-		offset = offset.normalized();
-		// Have a offset of 0 at velocity = 10km/h,
-		// have a offset of 1 at velocity = 100km/h
-		// 0.0161 = factor for calculation of speed in km/h
-		offset = offset * (((veh->velocity * 0.0161f) - 10.0f) / 90.0f);
-		offset.x = std::min(std::max(offset.x, -1.0f), 1.0f);
-		offset.y = std::min(std::max(offset.y, -1.0f), 1.0f);
-		int offx = getmaxx(w_terrain) / 2 - 5;
-		int offy = getmaxy(w_terrain) / 2 - 5;
-		offx = offx * offset.x;
-		offy = offy * offset.y;
-		if(abs(u.view_offset_x - offx) > 1) {
-			u.view_offset_x = offx;
-		}
-		if(abs(u.view_offset_y - offy) > 1) {
-			u.view_offset_y = offy;
-		}
-	}
+    vehicle *veh = m.veh_at(u.posx, u.posy);
+    if(veh != 0) {
+        rl_vec2d offset;
+        if(veh->skidding)
+            offset = veh->move_vec();
+        else
+            offset = veh->face_vec();
+        offset = offset.normalized();
+        // Have a offset of 0 at velocity = 10km/h,
+        // have a offset of 1 at velocity = 100km/h
+        // 0.0161 = factor for calculation of speed in km/h
+        offset = offset * (((veh->velocity * 0.0161f) - 10.0f) / 90.0f);
+        offset.x = std::min(std::max(offset.x, -1.0f), 1.0f);
+        offset.y = std::min(std::max(offset.y, -1.0f), 1.0f);
+        int offx = getmaxx(w_terrain) / 2 - 5;
+        int offy = getmaxy(w_terrain) / 2 - 5;
+        offx = offx * offset.x;
+        offy = offy * offset.y;
+        if(abs(u.view_offset_x - offx) > 1) {
+            u.view_offset_x = offx;
+        }
+        if(abs(u.view_offset_y - offy) > 1) {
+            u.view_offset_y = offy;
+        }
+    }
  }
 
  process_activity();
@@ -748,15 +742,15 @@ bool game::do_turn()
  }
 
  if(turn % HOURS(1) == 0 && !u.worn.empty() && one_in(10)) {
-	std::vector<item*> items[6];
-	for(std::vector<item>::iterator a = u.worn.begin(); a != u.worn.end(); ++a) {
-		item &it = *a;
-		if(it.damage >= -1 && it.damage < 5) {
-			items[it.damage + 1].push_back(&it);
-		}
-	}
-	std::vector<item*> item_to_wear;
-	for(int i = 0; i < 6; i++) {
+    std::vector<item*> items[6];
+    for(std::vector<item>::iterator a = u.worn.begin(); a != u.worn.end(); ++a) {
+        item &it = *a;
+        if(it.damage >= -1 && it.damage < 5) {
+            items[it.damage + 1].push_back(&it);
+        }
+    }
+    std::vector<item*> item_to_wear;
+    for(int i = 0; i < 6; i++) {
         item_to_wear.insert(item_to_wear.begin(), items[i].begin(), items[i].end());
         if(item_to_wear.size() >= 3) {
             break;
@@ -775,7 +769,7 @@ bool game::do_turn()
         } else {
             add_msg("Your %s wears further", it.tname(this).c_str());
         }
-	}
+    }
  }
 
 #if ENABLE_HORDES
@@ -3211,48 +3205,6 @@ Current turn: %d; Next spawn %d.\n\
        }
        add_msg(_("(you: %d:%d)"), u.posx, u.posy);
    }
-    {
-        std::ostringstream buffer;
-        for(int i = 0; i < cur_om->zg.size(); i++) { // For each valid group...
-            if (cur_om->zg[i].posz != levz) {
-                continue;    // skip other levels - hack
-            }
-            int pop = cur_om->zg[i].population;
-            int rad = cur_om->zg[i].radius;
-            int dist;
-            if(cur_om->zg[i].diffuse) {
-                dist = rl_dist(levx, levy, cur_om->zg[i].posx, cur_om->zg[i].posy);
-            } else {
-                dist = trig_dist(levx, levy, cur_om->zg[i].posx, cur_om->zg[i].posy);
-            }
-            if (dist <= rad * 4 || cur_om->zg[i].type == "GROUP_WANDERING_ZOMBIE") {
-                // (The area of the group's territory) in (population/square at this range)
-                // chance of adding one monster; cap at the population OR 16
-                buffer << "MG @" << cur_om->zg[i].posx << "," << cur_om->zg[i].posy << ": " << cur_om->zg[i].type <<
-                    ": " << (cur_om->zg[i].diffuse ? "D " : "");
-                buffer << "POP: " << pop << " RAD: " << rad << " dist: " << dist;
-                buffer << "\n";
-            }
-        }
-        for(int i = 0; i < cur_om->zh.size() && i < 15; i++) {
-            if (cur_om->zh[i].posz != levz) {
-                continue;
-            }
-            int dist = rl_dist(levx, levy, cur_om->zh[i].posx, cur_om->zh[i].posy);
-            if(dist <= 40) {
-                buffer << "MH @" << cur_om->zh[i].posx << "," << cur_om->zh[i].posy << ": " << cur_om->zh[i].type <<
-                    ": ";
-                buffer << "POP: " << cur_om->zh[i].pop_normal << "/" << cur_om->zh[i].pop_master << " > " <<
-                    cur_om->zh[i].targetx << "," << cur_om->zh[i].targety;
-                buffer << "\n";
-            }
-        }
-        for(int i = 0; i < _active_monsters.size() && i < 10; i++) {
-            buffer << "M: " << _active_monsters[i].name() << " @ " << _active_monsters[i].posx() << "," << _active_monsters[i].posy() << "\n";
-        }
-        buffer << "\nPos is: " << levx << ", " << levy;
-        popup_top(buffer.str().c_str());
-    }
    break;
 
   case 8:
@@ -3479,7 +3431,7 @@ void game::disp_kills()
     count.push_back(kill->second);
  }
 
- mvwprintz(w, 1, 32, c_white, "KILL COUNT:");
+ mvwprintz(w, 1, 32, c_white, _("KILL COUNT:"));
 
  if (types.size() == 0) {
   mvwprintz(w, 2, 2, c_white, _("You haven't killed any monsters yet!"));
@@ -3680,7 +3632,7 @@ void game::list_missions()
 
   draw_tab(w_missions, 7, _("ACTIVE MISSIONS"), (tab == 0) ? true : false);
   draw_tab(w_missions, 30, _("COMPLETED MISSIONS"), (tab == 1) ? true : false);
-  draw_tab(w_missions, 56, "FAILED MISSIONS", (tab == 2) ? true : false);
+  draw_tab(w_missions, 56, _("FAILED MISSIONS"), (tab == 2) ? true : false);
 
   mvwputch(w_missions, 2,  0, c_white, LINE_OXXO); // |^
   mvwputch(w_missions, 2, FULL_SCREEN_WIDTH-1, c_white, LINE_OOXX); // ^|
@@ -4417,8 +4369,8 @@ bool game::u_see(monster *mon)
  if (u.has_trait("ANTENNAE") && dist <= 3) {
   return true;
  }
- if (mon->has_flag(MF_DIGS) && !u.has_active_bionic("bio_ground_sonar") &&
-     dist > 1) {
+ if ((mon->has_flag(MF_DIGS) || (mon->has_flag(MF_CAN_DIG) && g->m.has_flag("DIGGABLE", mon->posx(), mon->posy()))) &&
+      !u.has_active_bionic("bio_ground_sonar") && dist > 1) {
   return false; // Can't see digging monsters until we're right next to them
  }
  if (m.is_divable(mon->posx(), mon->posy()) && mon->can_submerge()
@@ -4433,8 +4385,9 @@ bool game::u_see(monster *mon)
 bool game::pl_sees(player *p, monster *mon, int &t)
 {
  // TODO: [lightmap] Allow npcs to use the lightmap
- if (mon->has_flag(MF_DIGS) && !p->has_active_bionic("bio_ground_sonar") &&
-     rl_dist(p->posx, p->posy, mon->posx(), mon->posy()) > 1)
+ if ((mon->has_flag(MF_DIGS) || (mon->has_flag(MF_CAN_DIG) && g->m.has_flag("DIGGABLE", mon->posx(), mon->posy()))) &&
+      !p->has_active_bionic("bio_ground_sonar") && 
+       rl_dist(p->posx, p->posy, mon->posx(), mon->posy()) > 1)
   return false; // Can't see digging monsters until we're right next to them
  int range = p->sight_range(light_level());
  return m.sees(p->posx, p->posy, mon->posx(), mon->posy(), range, t);
@@ -4883,16 +4836,12 @@ void game::monmove()
      if (cur_om->zg[group].population / (cur_om->zg[group].radius * cur_om->zg[group].radius) > 5 &&
          !cur_om->zg[group].diffuse )
       cur_om->zg[group].radius++;
-#if ENABLE_HORDES
-    } else if (try_despawn_to_horde(z)) {
-      // all done in try_despawn_to_horde^^
-#endif
     } else if (MonsterGroupManager::Monster2Group((z.type->id)) != "GROUP_NULL") {
      cur_om->zg.push_back(mongroup(MonsterGroupManager::Monster2Group((z.type->id)),
-                                   levx, levy, levz, 1, 1));
-     }
+                                  levx, levy, levz, 1, 1));
+    }
     z.dead = true;
-    } else
+   } else
     z.receive_moves();
   }
  }
@@ -4936,19 +4885,31 @@ bool game::sound(int x, int y, int vol, std::string description)
             const bool goodhearing = z.has_flag(MF_GOODHEARING);
             int volume = goodhearing ? vol_goodhearing : (vol - dist);
             if (volume > 0) {
+                int max_error = 0;
+                if(volume < 2) {
+                    max_error = 10;
+                } else if(volume < 5) {
+                    max_error = 5;
+                } else if(volume < 10) {
+                    max_error = 3;
+                } else if(volume < 20) {
+                    max_error = 1;
+                }
+
+                int target_x = x + rng(-max_error, max_error);
+                int target_y = y + rng(-max_error, max_error);
+
                 int wander_turns = volume * (goodhearing ? 6 : 1);
-                z.wander_to(x, y, wander_turns);
+                z.wander_to(target_x, target_y, wander_turns);
                 z.process_trigger(MTRIG_SOUND, volume);
             }
         }
     }
 
 
-
 #if ENABLE_HORDES
- attract_hordes(x, y, vol);
+    attract_hordes(x, y, vol);
 #endif
-
 
 
 // Loud sounds make the next spawn sooner!
@@ -5229,7 +5190,7 @@ void game::flashbang(int x, int y, bool player_immune)
             if (u.has_bionic("bio_sunglasses")) {
                 flash_mod = 6;
             }
-            u.infect("blind", bp_eyes, (12 - flash_mod - dist) / 2, 10 - dist, this);
+            u.infect("blind", bp_eyes, (12 - flash_mod - dist) / 2, 10 - dist);
         }
     }
     for (int i = 0; i < num_zombies(); i++) {
@@ -5781,7 +5742,7 @@ bool game::add_zombie(monster& m)
     if (m.type->id == "mon_null"){ // Don't wanna spawn null monsters o.O
         return false;
     }
-    if (-1 != mon_at(m.posx(), m.posy())) {
+    if (-1 != mon_at(m.pos())) {
         debugmsg("add_zombie: there's already a monster at %d,%d", m.posx(), m.posy());
         return false;
     }
@@ -5883,6 +5844,11 @@ int game::mon_at(const int x, const int y) const
         }
     }
     return -1;
+}
+
+int game::mon_at(point p) const
+{
+    return mon_at(p.x, p.y);
 }
 
 void game::rebuild_mon_at_cache()
@@ -6329,19 +6295,6 @@ bool game::choose_adjacent(std::string verb, int &x, int &y)
     return true;
 }
 
-bool game::vehicle_with_tank_near()
-{
- for (int dx = -1; dx <= 1; dx++) {
-  for (int dy = -1; dy <= 1; dy++) {
-   vehicle *veh = m.veh_at(u.posx + dx, u.posy + dy);
-   if(veh && veh->fuel_capacity("gasoline") > 0) {
-    return true;
-   }
-  }
- }
- return false;
-}
-
 bool game::vehicle_near ()
 {
  for (int dx = -1; dx <= 1; dx++) {
@@ -6678,7 +6631,8 @@ void game::examine()
  if (veh) {
   int vpcargo = veh->part_with_feature(veh_part, "CARGO", false);
   int vpkitchen = veh->part_with_feature(veh_part, "KITCHEN", true);
-  if ((vpcargo >= 0 && veh->parts[vpcargo].items.size() > 0) || vpkitchen >= 0)
+  int vpweldrig = veh->part_with_feature(veh_part, "WELDRIG", true);
+  if ((vpcargo >= 0 && veh->parts[vpcargo].items.size() > 0) || vpkitchen >= 0 || vpweldrig >=0)
    pickup(examx, examy, 0);
   else if (u.in_vehicle)
    add_msg (_("You can't do that while onboard."));
@@ -6809,25 +6763,6 @@ point game::look_around()
             mvwprintz(w_look, off, 1, fieldlist[cur->getFieldType()].color[cur->getFieldDensity()-1], "%s",
                 fieldlist[cur->getFieldType()].name[cur->getFieldDensity()-1].c_str());
             off++; // 4ish
-			if(cur->getFieldType() == fd_fire && u.skillLevel("survival").level() >= 2) {
-				int burntime = 0;
-				burntime = -cur->getFieldAge();
-				switch(cur->getFieldDensity()) {
-					case 3: burntime += fieldlist[fd_fire].halflife / 2; // falthrought
-					case 2: burntime += fieldlist[fd_fire].halflife / 2; // falthrought
-					case 1: burntime += fieldlist[fd_fire].halflife / 2; // falthrought
-					default: break;
-				}
-				if(burntime > MINUTES(5)) {
-					burntime = burntime / MINUTES(1);
-					mvwprintw(w_look, off, 1, "Will burn for about %d minutes", burntime);
-					off++;
-					if(u.skillLevel("survival").level() >= 5) {
-						mvwprintw(w_look, off, 1, "Density: %d, age: %d", cur->getFieldDensity(), cur->getFieldAge());
-						off++;
-					}
-				}
-			}
         }
     }
    //if (tmpfield.type != fd_null)
@@ -7500,52 +7435,137 @@ void game::pickup(int posx, int posy, int min)
  bool from_veh = false;
  int veh_part = 0;
  int k_part = 0;
+ int w_part = 0;
  vehicle *veh = m.veh_at (posx, posy, veh_part);
  if (min != -1 && veh) {
   k_part = veh->part_with_feature(veh_part, "KITCHEN");
+  w_part = veh->part_with_feature(veh_part, "WELDRIG");
   veh_part = veh->part_with_feature(veh_part, "CARGO", false);
   from_veh = veh && veh_part >= 0 &&
              veh->parts[veh_part].items.size() > 0;
 
-  if(from_veh) {
-    if(!query_yn(_("Get items from %s?"), veh->part_info(veh_part).name.c_str())) {
-      from_veh = false;
-    }
-  }
-
-  if(!from_veh) {
-
-    //Either no cargo to grab, or we declined; what about water?
-    bool got_water = false;
-    if (k_part >= 0) {
-      if (veh->fuel_left("water") > 0) { //Will be -1 if no water at all
-        if (query_yn(_("Fill a container?"))) {
-          int amt = veh->drain("water", veh->fuel_left("water"));
-          item fill_water(g->itypes[default_ammo("water")], g->turn);
-          fill_water.charges = amt;
-          int back = g->move_liquid(fill_water);
-          if(back >= 0) {
-            veh->refill("water", back);
-            got_water = true;
-          } else {
-            veh->refill("water", amt);
-          }
+        if(from_veh)
+        {
+            if(!query_yn(_("Get items from %s?"), veh->part_info(veh_part).name.c_str()))
+            {
+                from_veh = false;
+            }
         }
-        if (query_yn(_("Have a drink?"))) {
-          veh->drain("water", 1);
 
-          item water(itypes["water_clean"], 0);
-          u.eat(this, u.inv.add_item(water).invlet);
-          u.moves -= 250;
-          got_water = true;
-        }
-      } else {
-        add_msg(_("The water tank is empty."));
-      }
-    }
+        if(!from_veh)
+        {
+
+            //Either no cargo to grab, or we declined; what about RV kitchen?
+            bool used_feature = false;
+            if (k_part >= 0)
+            {
+                int choice = menu(true,
+                _("RV kitchen:"), _("Use the hotplate"), _("Fill a container with water"), _("Have a drink"), _("Examine vehicle"), NULL);
+                switch (choice)
+                {
+                    if (choice == 3)
+                        break;
+                case 1:
+                {
+                    used_feature = true;
+                    if (veh->fuel_left("battery") > 0) //Will be -1 if no battery at all
+                    {
+                        item tmp_hotplate( g->itypes["hotplate"], 0 );
+                        // Drain a ton of power
+                        tmp_hotplate.charges = veh->drain( "battery", 100 );
+                        if( tmp_hotplate.is_tool() )
+                        {
+                            it_tool * tmptool = static_cast<it_tool*>((&tmp_hotplate)->type);
+                            if ( tmp_hotplate.charges >= tmptool->charges_per_use )
+                            {
+                                iuse tmpuse;
+                                (tmpuse.*tmptool->use)(g, &u, &tmp_hotplate, false);
+                                tmp_hotplate.charges -= tmptool->charges_per_use;
+                                veh->refill( "battery", tmp_hotplate.charges );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        add_msg(_("The battery is dead."));
+                    }
+                }
+                break;
+                case 2:
+                {
+                    used_feature = true;
+                    if (veh->fuel_left("water") > 0)   //Will be -1 if no water at all
+                    {
+                        int amt = veh->drain("water", veh->fuel_left("water"));
+                        item fill_water(g->itypes[default_ammo("water")], g->turn);
+                        fill_water.charges = amt;
+                        int back = g->move_liquid(fill_water);
+                        if(back >= 0)
+                        {
+                            veh->refill("water", back);
+                        }
+                        else
+                        {
+                            veh->refill("water", amt);
+                        }
+                    }
+                    else
+                    {
+                        add_msg(_("The water tank is empty."));
+                    }
+                }
+                break;
+                case 3:
+                {
+                    used_feature = true;
+                    if (veh->fuel_left("water") > 0)   //Will be -1 if no water at all
+                    {
+                        veh->drain("water", 1);
+
+                        item water(itypes["water_clean"], 0);
+                        u.eat(this, u.inv.add_item(water).invlet);
+                        u.moves -= 250;
+                    }
+
+                    else
+                    {
+                        add_msg(_("The water tank is empty."));
+                    }
+                }
+                }
+            }
+
+            if (w_part >= 0)
+            {
+                if (query_yn(_("Use the welding rig?")))
+                {
+                    used_feature = true;
+                    if (veh->fuel_left("battery") > 0) //Will be -1 if no battery at all
+                    {
+                        item tmp_welder( g->itypes["welder"], 0 );
+                        // Drain a ton of power
+                        tmp_welder.charges = veh->drain( "battery", 1000 );
+                        if( tmp_welder.is_tool() )
+                        {
+                            it_tool * tmptool = static_cast<it_tool*>((&tmp_welder)->type);
+                            if ( tmp_welder.charges >= tmptool->charges_per_use )
+                            {
+                                iuse tmpuse;
+                                (tmpuse.*tmptool->use)(g, &u, &tmp_welder, false);
+                                tmp_welder.charges -= tmptool->charges_per_use;
+                                veh->refill( "battery", tmp_welder.charges );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        add_msg(_("The battery is dead."));
+                    }
+                }
+            }
 
     //If we still haven't done anything, we probably want to examine the vehicle
-    if(!got_water) {
+    if(!used_feature) {
       exam_vehicle(*veh, posx, posy);
     }
 
@@ -10069,19 +10089,19 @@ void game::plmove(int dx, int dy)
 // Some martial art styles have special effects that trigger when we move
   if(u.weapon.type->id == "style_capoeira"){
     if (u.disease_duration("attack_boost") < 2)
-     u.add_disease("attack_boost", 2, 2, 2);
+     u.add_disease("attack_boost", 2, false, 2, 2);
     if (u.disease_duration("dodge_boost") < 2)
-     u.add_disease("dodge_boost", 2, 2, 2);
+     u.add_disease("dodge_boost", 2, false, 2, 2);
   } else if(u.weapon.type->id == "style_ninjutsu"){
-    u.add_disease("attack_boost", 2, 1, 3);
+    u.add_disease("attack_boost", 2, false, 1, 3);
   } else if(u.weapon.type->id == "style_crane"){
     if (!u.has_disease("dodge_boost"))
-     u.add_disease("dodge_boost", 1, 3, 3);
+     u.add_disease("dodge_boost", 1, false, 3, 3);
   } else if(u.weapon.type->id == "style_leopard"){
-    u.add_disease("attack_boost", 2, 1, 4);
+    u.add_disease("attack_boost", 2, false, 1, 4);
   } else if(u.weapon.type->id == "style_dragon"){
     if (!u.has_disease("damage_boost"))
-     u.add_disease("damage_boost", 2, 3, 3);
+     u.add_disease("damage_boost", 2, false, 3, 3);
   } else if(u.weapon.type->id == "style_lizard"){
     bool wall = false;
     for (int wallx = x - 1; wallx <= x + 1 && !wall; wallx++) {
@@ -10091,7 +10111,7 @@ void game::plmove(int dx, int dy)
      }
     }
     if (wall)
-     u.add_disease("attack_boost", 2, 2, 8);
+     u.add_disease("attack_boost", 2, false, 2, 8);
     else
      u.rem_disease("attack_boost");
   }
@@ -10760,6 +10780,8 @@ void game::replace_stair_monsters()
  coming_to_stairs.clear();
 }
 
+//TODO: abstract out the location checking code
+//TODO: refactor so zombies can follow up and down stairs instead of this mess
 void game::update_stair_monsters()
 {
  if (abs(levx - monstairx) > 1 || abs(levy - monstairy) > 1)
@@ -10784,7 +10806,7 @@ void game::update_stair_monsters()
        tries++;
       }
       if (tries < 10) {
-       coming_to_stairs[i].mon.setpos(sx, sy, true);
+       coming_to_stairs[i].mon.setpos(mposx, mposy, true);
        add_zombie( coming_to_stairs[i].mon );
        if (u_see(sx, sy)) {
         if (m.has_flag("GOES_UP", sx, sy)) {
@@ -10842,10 +10864,6 @@ void game::despawn_monsters(const bool stairs, const int shiftx, const int shift
             tmp.load(this, z.spawnmapx, z.spawnmapy, levz, false);
             tmp.add_spawn(&z);
             tmp.save(cur_om, turn, z.spawnmapx, z.spawnmapy, levz);
-#if ENABLE_HORDES
-        } else if (try_despawn_to_horde(z, shiftx, shifty)) {
-            // All done int try_despawn_to_horde^^
-#endif
         } else {
             // No spawn site, so absorb them back into a group.
             int group = valid_group((z.type->id), levx + shiftx, levy + shifty, levz);
@@ -11242,6 +11260,184 @@ void game::nuke(int x, int y)
     for(int i = 0; i < cur_om->npcs.size();i++)
         if(cur_om->npcs[i]->mapx/2== x && cur_om->npcs[i]->mapy/2 == y && cur_om->npcs[i]->omz == 0)
             cur_om->npcs[i]->marked_for_death = true;
+}
+
+bool game::spread_fungus(int x, int y)
+{
+    int growth = 1;
+    for (int i = x - 1; i <= x + 1; i++) {
+        for (int j = y - 1; j <= y + 1; j++) {
+            if (i == x && j == y) {
+                continue;
+            }
+            if (m.has_flag("FUNGUS", i, j)) {
+                growth += 1;
+            }
+        }
+    }
+
+    bool converted = false;
+    if (!m.has_flag_ter("FUNGUS", x, y)) {
+        // Terrain conversion
+        if (m.has_flag_ter("DIGGABLE", x, y)) {
+            if (x_in_y(growth * 10, 100)) {
+                m.ter_set(x, y, t_fungus);
+                converted = true;
+            }
+        } else if (m.has_flag("FLAT", x, y)) {
+            if (m.has_flag("INDOORS", x, y)) {
+                if (x_in_y(growth * 10, 500)) {
+                    m.ter_set(x, y, t_fungus_floor_in);
+                    converted = true;
+                }
+            } else if (m.has_flag("SUPPORTS_ROOF", x, y)) {
+                if (x_in_y(growth * 10, 1000)) {
+                    m.ter_set(x, y, t_fungus_floor_sup);
+                    converted = true;
+                }
+            } else {
+                if (x_in_y(growth * 10, 2500)) {
+                    m.ter_set(x, y, t_fungus_floor_out);
+                    converted = true;
+                }
+            }
+        } else if (m.has_flag("SHRUB", x, y)) {
+            if (x_in_y(growth * 10, 200)) {
+                m.ter_set(x, y, t_shrub_fungal);
+                converted = true;
+            } else if (x_in_y(growth, 1000)) {
+                m.ter_set(x, y, t_marloss);
+                converted = true;
+            }
+        } else if (m.has_flag("THIN_OBSTACLE", x, y)) {
+            if (x_in_y(growth * 10, 150)) {
+                m.ter_set(x, y, t_fungus_mound);
+                converted = true;
+            }
+        } else if (m.has_flag("YOUNG", x, y)) {
+            if (x_in_y(growth * 10, 500)) {
+                m.ter_set(x, y, t_tree_fungal_young);
+                converted = true;
+            }
+        } else if (m.has_flag("WALL", x, y)) {
+            if (x_in_y(growth * 10, 5000)) {
+                converted = true;
+                if (m.ter_at(x, y).sym == LINE_OXOX) {
+                    m.ter_set(x, y, t_fungus_wall_h);
+                } else if (m.ter_at(x, y).sym == LINE_XOXO) {
+                    m.ter_set(x, y, t_fungus_wall_v);
+                } else {
+                    m.ter_set(x, y, t_fungus_wall);
+                }
+            }
+        }
+        // Furniture conversion
+        if (converted) {
+            if (m.has_flag("FLOWER", x, y)){
+                m.furn_set(x, y, f_flower_fungal);
+            } else if (m.has_flag("ORGANIC", x, y)){
+                if (m.furn_at(x, y).movecost == -10) {
+                    m.furn_set(x, y, f_fungal_mass);
+                } else {
+                    m.furn_set(x, y, f_fungal_clump);
+                }
+            } else if (m.has_flag("PLANT", x, y)) {
+                for (int k = 0; k < g->m.i_at(x, y).size(); k++) {
+                    m.i_rem(x, y, k);
+                }
+                item seeds(g->itypes["fungal_seeds"], int(g->turn));
+                m.add_item(x, y, seeds);
+            }
+        }
+        return true;
+    } else {
+        // Everything is already fungus
+        if (growth == 9) {
+            return false;
+        }
+        for (int i = x - 1; i <= x + 1; i++) {
+            for (int j = y - 1; j <= y + 1; j++) {
+                // One spread on average
+                if (!m.has_flag("FUNGUS", i, j) && one_in(9 - growth)) {
+                    //growth chance is 100 in X simplified 
+                    if (m.has_flag("DIGGABLE", i, j)) {
+                        m.ter_set(i, j, t_fungus);
+                        converted = true;
+                    } else if (m.has_flag("FLAT", i, j)) {
+                        if (m.has_flag("INDOORS", i, j)) {
+                            if (one_in(5)) {
+                                m.ter_set(i, j, t_fungus_floor_in);
+                                converted = true;
+                            }
+                        } else if (m.has_flag("SUPPORTS_ROOF", i, j)) {
+                            if (one_in(10)) {
+                                m.ter_set(i, j, t_fungus_floor_sup);
+                                converted = true;
+                            }
+                        } else {
+                            if (one_in(25)) {
+                                m.ter_set(i, j, t_fungus_floor_out);
+                                converted = true;
+                            }
+                        }
+                    } else if (m.has_flag("SHRUB", i, j)) {
+                        if (one_in(2)) {
+                            m.ter_set(i, j, t_shrub_fungal);
+                            converted = true;
+                        } else if (one_in(25)) {
+                            m.ter_set(i, j, t_marloss);
+                            converted = true;
+                        }
+                    } else if (m.has_flag("THIN_OBSTACLE", i, j)) {
+                        if (x_in_y(10, 15)) {
+                            m.ter_set(i, j, t_fungus_mound);
+                            converted = true;
+                        }
+                    } else if (m.has_flag("YOUNG", i, j)) {
+                        if (one_in(5)) {
+                            m.ter_set(i, j, t_tree_fungal_young);
+                            converted = true;
+                        }
+                    } else if (m.has_flag("TREE", i, j)) {
+                        if (one_in(10)) {
+                            m.ter_set(i, j, t_tree_fungal);
+                            converted = true;
+                        }
+                    } else if (m.has_flag("WALL", i, j)) {
+                        if (one_in(50)) {
+                            converted = true;
+                            if (m.ter_at(i, j).sym == LINE_OXOX) {
+                                m.ter_set(i, j, t_fungus_wall_h);
+                            } else if (m.ter_at(i, j).sym == LINE_XOXO) {
+                                m.ter_set(i, j, t_fungus_wall_v);
+                            } else {
+                                m.ter_set(i, j, t_fungus_wall);
+                            }
+                        }
+                    }
+
+                    if (converted) {
+                        if (m.has_flag("FLOWER", i, j)) {
+                            m.furn_set(i, j, f_flower_fungal);
+                        } else if (m.has_flag("ORGANIC", i, j)) {
+                            if (m.furn_at(i, j).movecost == -10) {
+                                m.furn_set(i, j, f_fungal_mass);
+                            } else {
+                                m.furn_set(i, j, f_fungal_clump);
+                            }
+                        } else if (m.has_flag("PLANT", i, j)) {
+                            for (int k = 0; k < g->m.i_at(i, j).size(); k++) {
+                                m.i_rem(i, j, k);
+                            }
+                            item seeds(g->itypes["fungal_seeds"], int(g->turn));
+                            m.add_item(x, y, seeds);
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }
 
 std::vector<faction *> game::factions_at(int x, int y)

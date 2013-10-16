@@ -1,20 +1,6 @@
 [
   {
-    "id": "wrapper",
-    "symbol": ",",
-    "color": "light_gray",
-    "name": "paper wrapper",
-    "description": "Just a piece of butcher's paper. Good for starting fires.",
-    "price": 1,
-    "material": "paper",
-    "weight": 3,
-    "volume": 1,
-    "bashing": -8,
-    "cutting": 0,
-    "to_hit": -2
-  },
-
-  {
+    "type":"GENERIC",
     "id": "withered",
     "symbol": "t",
     "color": "light_gray",
@@ -30,6 +16,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "fur",
     "symbol": ",",
     "color": "brown",
@@ -45,6 +32,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "leather",
     "symbol": ",",
     "color": "red",
@@ -53,13 +41,14 @@
     "price": 20,
     "material": ["leather", "flesh"],
     "weight": 100,
-    "volume": 2,
+    "volume": 1,
     "bashing": -2,
     "cutting": 0,
     "to_hit": -1
   },
 
   {
+    "type":"GENERIC",
     "id": "superglue",
     "symbol": ",",
     "color": "white",
@@ -75,6 +64,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "id_science",
     "symbol": ",",
     "color": "pink",
@@ -90,6 +80,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "id_military",
     "symbol": ",",
     "color": "pink",
@@ -105,6 +96,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "electrohack",
     "symbol": ",",
     "color": "green",
@@ -120,6 +112,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "string_6",
     "symbol": ",",
     "color": "light_gray",
@@ -135,6 +128,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "string_36",
     "symbol": ",",
     "color": "light_gray",
@@ -150,13 +144,14 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "rope_30",
     "symbol": ",",
     "color": "yellow",
     "name": "rope - 30 ft",
     "description": "A long nylon rope. Useful for keeping yourself safe from falls.",
     "price": 100,
-    "material": "wood",
+    "material": "cotton",
     "weight": 1080,
     "volume": 10,
     "bashing": 1,
@@ -165,6 +160,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "processor",
     "symbol": ",",
     "color": "light_cyan",
@@ -180,6 +176,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "RAM",
     "symbol": ",",
     "color": "light_cyan",
@@ -195,6 +192,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "power_supply",
     "symbol": ",",
     "color": "light_cyan",
@@ -210,6 +208,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "amplifier",
     "symbol": ",",
     "color": "light_cyan",
@@ -225,6 +224,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "transponder",
     "symbol": ",",
     "color": "light_cyan",
@@ -240,6 +240,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "receiver",
     "symbol": ",",
     "color": "light_cyan",
@@ -255,6 +256,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "small_lcd_screen",
     "symbol": ",",
     "color": "light_cyan",
@@ -270,6 +272,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "lens",
     "symbol": ".",
     "color": "light_cyan",
@@ -285,6 +288,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "burnt_out_bionic",
     "symbol": ",",
     "color": "light_red",
@@ -300,6 +304,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "antenna",
     "symbol": ",",
     "color": "light_cyan",
@@ -315,6 +320,39 @@
   },
 
   {
+    "type":"GENERIC",
+    "id": "circuit",
+    "symbol": ",",
+    "color": "green",
+    "name": "circuit board",
+    "description": "A printed card that supports and electrically connects electronic components on a non-conductive substrate.",
+    "price": 50,
+    "material": "steel",
+    "weight": 26,
+    "volume": 0,
+    "bashing": -6,
+    "cutting": 0,
+    "to_hit": 2
+  },
+
+  {
+    "type":"GENERIC",
+    "id": "e_scrap",
+    "symbol": ",",
+    "color": "green",
+    "name": "electronic scrap",
+    "description": "A random collection of resistors, capacitors, and diodes which have been stripped from printed circuits.",
+    "price": 30,
+    "material": "steel",
+    "weight": 14,
+    "volume": 0,
+    "bashing": -6,
+    "cutting": 0,
+    "to_hit": 2
+  },
+
+  {
+    "type":"GENERIC",
     "id": "steel_chunk",
     "symbol": ",",
     "color": "light_blue",
@@ -330,6 +368,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "steel_lump",
     "symbol": ",",
     "color": "light_blue",
@@ -345,6 +384,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "scrap",
     "symbol": ",",
     "color": "light_blue",
@@ -360,6 +400,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "glass_sheet",
     "symbol": "]",
     "color": "light_cyan",
@@ -375,6 +416,39 @@
   },
 
   {
+    "type":"GENERIC",
+    "id": "reinforced_glass_sheet",
+    "symbol": "]",
+    "color": "light_blue",
+    "name": "sheet of reinforced glass",
+    "description": "A large sheet of glass strengthened with steel wiring.",
+    "price": 1135,
+    "material": [ "glass", "steel" ],
+    "weight": 40123,
+    "volume": 50,
+    "bashing": 18,
+    "cutting": 0,
+    "to_hit": -6
+  },
+  
+  {
+    "type":"GENERIC",
+    "id": "reinforced_glass_pane",
+    "symbol": "]",
+    "color": "light_blue",
+    "name": "pane of reinforced glass",
+    "description": "A small pane of glass strengthened with steel wiring.",
+    "price": 284,
+    "material": [ "glass", "steel" ],
+    "weight": 10040,
+    "volume": 12,
+    "bashing": 5,
+    "cutting": 0,
+    "to_hit": -2
+  },
+
+  {
+    "type":"GENERIC",
     "id": "manhole_cover",
     "symbol": "]",
     "color": "dark_gray",
@@ -390,6 +464,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "stick",
     "symbol": "/",
     "color": "brown",
@@ -405,6 +480,41 @@
   },
 
   {
+    "type":"GENERIC",
+    "id": "q_staff",
+    "symbol": "/",
+    "color": "brown",
+    "name": "quarterstaff",
+    "description": "A smooth and sturdy staff with a leather-wrapped grip. Light and well-balanced, it is surprisingly easy to handle.",
+    "price": 40,
+    "material": "wood",
+    "techniques" : ["WBLOCK_1", "RAPID"],
+    "weight": 1400,
+    "volume": 18,
+    "bashing": 22,
+    "cutting": 0,
+    "to_hit": 3
+  },
+
+  {
+    "type":"GENERIC",
+    "id": "i_staff",
+    "symbol": "/",
+    "color": "brown",
+    "name": "ironshod quarterstaff",
+    "description": "A smooth and sturdy staff with a leather-wrapped grip, which has been reinforced with metal bands and caps. Durable and well-balanced, it is surprisingly easy to handle.",
+    "price": 80,
+    "material": [ "wood", "steel" ],
+    "techniques" : ["WBLOCK_1", "RAPID"],
+    "weight": 2200,
+    "volume": 18,
+    "bashing": 32,
+    "cutting": 0,
+    "to_hit": 3
+  },
+
+  {
+    "type":"GENERIC",
     "id": "hatchet",
     "symbol": ";",
     "color": "light_gray",
@@ -418,10 +528,12 @@
     "cutting": 12,
     "flags" : ["CHOP"],
     "functions" : [ [ "func:hammer" ] , [ "func:blade", 0.98 ] ],
-    "to_hit": 1
+    "to_hit": 1,
+    "qualities": [["CUT", 1]]
   },
 
   {
+    "type":"GENERIC",
     "id": "pot",
     "symbol": ")",
     "color": "light_gray",
@@ -438,6 +550,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "pan",
     "symbol": ")",
     "color": "light_gray",
@@ -454,6 +567,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "knife_butter",
     "symbol": ";",
     "color": "light_cyan",
@@ -470,6 +584,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "chitin_piece",
     "symbol": ",",
     "color": "red",
@@ -485,6 +600,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "biollante_bud",
     "symbol": ",",
     "color": "magenta",
@@ -500,6 +616,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "canister_empty",
     "symbol": "*",
     "color": "light_gray",
@@ -515,13 +632,14 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "gold",
     "symbol": "/",
     "color": "yellow",
     "name": "gold bar",
     "description": "A large bar of gold. Before the apocalypse, this would've been worth a small fortune; now its value is greatly diminished.",
     "price": 3000,
-    "material": "steel",
+    "material": "gold",
     "weight": 9650,
     "volume": 2,
     "bashing": 14,
@@ -530,6 +648,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "coal",
     "symbol": "/",
     "color": "dark_gray",
@@ -545,6 +664,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "petrified_eye",
     "symbol": "*",
     "color": "dark_gray",
@@ -560,6 +680,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "spiral_stone",
     "symbol": "*",
     "color": "pink",
@@ -575,6 +696,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "binoculars",
     "symbol": ";",
     "color": "light_gray",
@@ -590,6 +712,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "usb_drive",
     "symbol": ",",
     "color": "white",
@@ -605,6 +728,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "pool_ball",
     "symbol": "*",
     "color": "blue",
@@ -620,13 +744,14 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "candlestick",
     "symbol": "/",
     "color": "yellow",
     "name": "candlestick",
     "description": "A gold candlestick.",
     "price": 100,
-    "material": "silver",
+    "material": "gold",
     "weight": 1514,
     "volume": 1,
     "bashing": 12,
@@ -635,6 +760,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "blade",
     "symbol": "/",
     "color": "blue",
@@ -650,6 +776,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "wire",
     "symbol": ";",
     "color": "blue",
@@ -665,6 +792,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "wire_barbed",
     "symbol": ";",
     "color": "blue",
@@ -680,6 +808,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "rebar",
     "symbol": "/",
     "color": "light_red",
@@ -695,11 +824,12 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "log",
     "symbol": "/",
     "color": "brown",
     "name": "log",
-    "description": "A large log, cut from a tree. (a)ctivate a wood ax or wood saw to cut it into planks",
+    "description": "A large log, cut from a tree. (a)ctivate a wood axe or wood saw to cut it into planks",
     "price": 100,
     "material": "wood",
     "weight": 9071,
@@ -710,6 +840,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "splinter",
     "symbol": "/",
     "color": "light_red",
@@ -725,6 +856,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "skewer",
     "symbol": ",",
     "color": "brown",
@@ -740,21 +872,7 @@
   },
 
   {
-    "id": "crackpipe",
-    "symbol": ",",
-    "color": "light_cyan",
-    "name": "crack pipe",
-    "description": "A fine glass pipe, with a bulb on the end, used for partaking of certain illicit substances.",
-    "price": 35,
-    "material": "glass",
-    "weight": 242,
-    "volume": 1,
-    "bashing": 0,
-    "cutting": 0,
-    "to_hit": -10
-  },
-
-  {
+    "type":"GENERIC",
     "id": "torch_done",
     "symbol": "/",
     "color": "brown",
@@ -770,6 +888,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "spring",
     "symbol": ",",
     "color": "light_gray",
@@ -785,6 +904,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "lawnmower",
     "symbol": ";",
     "color": "red",
@@ -800,6 +920,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "sheet",
     "symbol": ";",
     "color": "dark_gray",
@@ -815,13 +936,14 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "broketent",
     "symbol": ";",
     "color": "green",
     "name": "damaged tent",
     "description": "A small tent, just big enough to fit a person comfortably. This tent is broken and cannot be deployed",
     "price": 65,
-    "material": "iron",
+    "material": ["plastic", "iron"],
     "weight": 1133,
     "volume": 10,
     "bashing": 4,
@@ -830,6 +952,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "element",
     "symbol": ",",
     "color": "cyan",
@@ -845,6 +968,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "television",
     "symbol": ";",
     "color": "dark_gray",
@@ -860,6 +984,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "pilot_light",
     "symbol": ",",
     "color": "cyan",
@@ -875,6 +1000,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "toaster",
     "symbol": ",",
     "color": "cyan",
@@ -890,6 +1016,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "microwave",
     "symbol": ",",
     "color": "cyan",
@@ -905,6 +1032,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "laptop",
     "symbol": ",",
     "color": "cyan",
@@ -920,6 +1048,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "fan",
     "symbol": ",",
     "color": "cyan",
@@ -935,6 +1064,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "ceramic_plate",
     "symbol": ",",
     "color": "cyan",
@@ -950,6 +1080,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "ceramic_bowl",
     "symbol": ",",
     "color": "cyan",
@@ -965,6 +1096,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "ceramic_cup",
     "symbol": ",",
     "color": "cyan",
@@ -980,6 +1112,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "glass_plate",
     "symbol": ",",
     "color": "cyan",
@@ -995,6 +1128,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "glass_bowl",
     "symbol": ",",
     "color": "cyan",
@@ -1010,6 +1144,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "glass",
     "symbol": ",",
     "color": "cyan",
@@ -1025,6 +1160,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "tin_plate",
     "symbol": ",",
     "color": "cyan",
@@ -1040,6 +1176,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "fork",
     "symbol": ";",
     "color": "light_cyan",
@@ -1056,6 +1193,23 @@
   },
 
   {
+    "type":"GENERIC",
+    "id": "spoon",
+    "symbol": ";",
+    "color": "light_cyan",
+    "name": "fork",
+    "description": "Do not try to bend the spoon. That is impossible.",
+    "price": 15,
+    "material": "steel",
+    "weight": 48,
+    "volume": 1,
+    "bashing": 2,
+    "cutting": 0,
+    "to_hit": -2
+  },
+
+  {
+    "type":"GENERIC",
     "id": "spork",
     "symbol": ";",
     "color": "light_cyan",
@@ -1072,6 +1226,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "foon",
     "symbol": ";",
     "color": "light_cyan",
@@ -1088,6 +1243,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "rag_bloody",
     "symbol": ",",
     "color": "red",
@@ -1103,6 +1259,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "clock",
     "symbol": ";",
     "color": "light_cyan",
@@ -1118,6 +1275,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "clockworks",
     "symbol": ";",
     "color": "light_cyan",
@@ -1133,6 +1291,7 @@
   },
 
   {
+    "type":"GENERIC",
     "id": "rock_pot",
     "symbol": ";",
     "color": "dark_gray",
@@ -1148,7 +1307,8 @@
     "to_hit": -1
   },
 
-  { "id":"rock",
+  { "type":"GENERIC",
+ "id":"rock",
     "symbol": "*",
     "color": "light_gray",
     "name":"rock",
@@ -1165,7 +1325,70 @@
         ["HAMMER", 1]
     ]
   },
-  { "id": "syringe",
+  {
+    "type":"GENERIC",
+    "id": "baseball",
+    "symbol": "*",
+    "color": "white",
+    "name": "baseball",
+    "description": "A baseball, good for throwing at enemies. Getting hit with one of these hurts a lot more than you might think.",
+    "price": 10,
+    "material": "leather",
+    "weight": 150,
+    "volume": 1,
+    "bashing": 12,
+    "cutting": 0,
+    "to_hit": 3
+  },
+  {
+    "type":"GENERIC",
+    "id": "puck",
+    "symbol": "*",
+    "color": "dark_gray",
+    "name": "hockey puck",
+    "description": "A heavy circular block of solid rubber, normally used for playing hockey. You can throw it to cause some serious harm.",
+    "price": 10,
+    "material": "plastic",
+    "weight": 170,
+    "volume": 1,
+    "bashing": 12,
+    "cutting": 0,
+    "to_hit": 2,
+    "tool": [
+        ["HAMMER", 1]
+    ]
+  },
+  {
+    "type":"GENERIC",
+    "id": "football",
+    "symbol": "*",
+    "color": "red",
+    "name": "football",
+    "description": "An oval made of leather and string, it's easily thrown but does little damage. You could take it apart into leather if you wanted.",
+    "price": 10,
+    "material": "leather",
+    "weight": 400,
+    "volume": 2,
+    "bashing": 4,
+    "cutting": 0,
+    "to_hit": 5
+  },
+  { "type":"GENERIC",
+ "id":"fertilizer",
+    "symbol": "*",
+    "color": "green",
+    "name":"fertilizer",
+    "description": "A token, representing fertilization of a plant.",
+    "price": 0,
+    "material": "veggy",
+    "weight": 0,
+    "volume": 0,
+    "bashing": 0,
+    "cutting": 0,
+    "to_hit": 0
+  },
+  { "type":"GENERIC",
+ "id": "syringe",
     "symbol": ",",
     "color": "light_cyan",
     "name": "syringe",
@@ -1179,7 +1402,8 @@
     "to_hit": -2,
     "flags": "SPEAR"
   },
-  { "id": "pointy_stick",
+  { "type":"GENERIC",
+ "id": "pointy_stick",
     "symbol" : "/",
     "color": "light_red",
     "name": "pointy stick",
@@ -1194,7 +1418,8 @@
     "flags": "SPEAR",
     "techniques": ["WBLOCK_1"]
   },
-   { "id": "sword_wood",
+   { "type":"GENERIC",
+ "id": "sword_wood",
     "symbol" : "!",
     "color": "light_red",
     "name": "2-by-sword",
@@ -1208,11 +1433,12 @@
     "to_hit": 1,
     "techniques": ["WBLOCK_1"]
   },
-   { "id": "sword_nail",
+   { "type":"GENERIC",
+ "id": "sword_nail",
     "symbol" : "!",
     "color": "red",
-    "name": "Nord",
-    "description": "The nail sword, or Nord for short. This wooden sword has a dozen nails sticking at jagged angles from edge of the blade, making it much better at chopping than slashing.",
+    "name": "nord",
+    "description": "The nail sword, or nord for short. This wooden sword has a dozen nails sticking at jagged angles from edge of the blade, making it much better at chopping than slashing.",
     "material": "wood",
     "price": 0,
     "volume": 7,
@@ -1223,7 +1449,8 @@
 	"flags" : ["CHOP"],
     "techniques": ["WBLOCK_1"]
   },
-  { "id": "sword_crude",
+  { "type":"GENERIC",
+ "id": "sword_crude",
     "symbol" : "!",
     "color": "green",
     "name": "crude sword",
@@ -1237,7 +1464,8 @@
     "to_hit": -1,
     "techniques": ["WBLOCK_1"]
   },
-   { "id": "sword_forged",
+   { "type":"GENERIC",
+ "id": "sword_forged",
     "symbol" : "!",
     "color": "green",
     "name": "forged sword",
@@ -1252,6 +1480,7 @@
     "techniques": ["WBLOCK_2"]
   },
     {
+        "type":"GENERIC",
         "id" : "rope_6",
         "name" : "rope - 6 ft",
         "description" : "A short piece of nylon rope. Too small to be of much use.",
@@ -1259,7 +1488,7 @@
         "to_hit" : 1,
         "color" : "yellow",
         "symbol" : ",",
-        "material" : ["wood", "null"],
+        "material" : ["cotton", "null"],
         "volume" : 2,
         "bashing" : 1,
         "cutting" : 0,
@@ -1267,6 +1496,7 @@
         "price" : 45
     },
     {
+        "type":"GENERIC",
         "id" : "chain",
         "name" : "steel chain",
         "description" : "A heavy steel chain. Useful as a weapon, or for crafting. It has a chance to wrap around your target, allowing for a bonus unarmed attack.",
@@ -1283,6 +1513,7 @@
         "price" : 80
     },
     {
+        "type":"GENERIC",
         "id" : "broom",
         "name" : "broom",
         "description" : "A long-handled broom. Makes a terrible weapon unless you're chasing cats.",
@@ -1298,6 +1529,7 @@
         "price" : 24
     },
     {
+        "type":"GENERIC",
         "id" : "hammer_sledge",
         "name" : "sledge hammer",
         "description" : "A large, heavy hammer. Makes a good melee weapon for the very strong, but is nearly useless in the hands of the weak.",
@@ -1313,6 +1545,7 @@
         "price" : 120
     },
     {
+        "type":"GENERIC",
         "id" : "nailboard",
         "name" : "nail board",
         "description" : "A long piece of wood with several nails through one end; essentially a simple mace. Makes a great melee weapon.",
@@ -1329,6 +1562,7 @@
         "price" : 80
     },
     {
+        "type":"GENERIC",
         "id" : "nailbat",
         "name" : "nail bat",
         "description" : "A baseball bat with several nails driven through it, an excellent melee weapon.",
@@ -1345,6 +1579,7 @@
         "price" : 160
     },
     {
+        "type":"GENERIC",
         "id" : "2x4",
         "name" : "two by four",
         "description" : "A plank of wood. Makes a decent melee weapon, and can be used to board up doors and windows if you have a hammer and nails.",
@@ -1360,6 +1595,7 @@
         "price" : 80
     },
     {
+        "type":"GENERIC",
         "id" : "muffler",
         "name" : "muffler",
         "description" : "A muffler from a car. Very unwieldy as a weapon. Useful in a few crafting recipes.",
@@ -1375,6 +1611,7 @@
         "price" : 30
     },
     {
+        "type":"GENERIC",
         "id" : "pipe",
         "name" : "pipe",
         "description" : "A steel pipe, makes a good melee weapon. Useful in a few crafting recipes.",
@@ -1390,6 +1627,7 @@
         "price" : 75
     },
     {
+        "type":"GENERIC",
         "id" : "bat",
         "name" : "baseball bat",
         "description" : "A sturdy wood bat. Makes a great melee weapon.",
@@ -1405,6 +1643,7 @@
         "price" : 160
     },
     {
+        "type":"GENERIC",
         "id" : "bat_metal",
         "name" : "aluminium bat",
         "description" : "An aluminium baseball bat, smaller and lighter than a wooden bat and a little less damaging as a result.",
@@ -1420,6 +1659,7 @@
         "price" : 160
     },
     {
+        "type":"GENERIC",
         "id" : "spear_wood",
         "name" : "wood spear",
         "description" : "A stout pole with an improvised grip and a fire-hardened point.",
@@ -1436,6 +1676,7 @@
         "price" : 40
     },
     {
+        "type":"GENERIC",
         "id" : "baton",
         "name" : "expandable baton",
         "description" : "A telescoping baton that collapses for easy storage. Makes an excellent melee weapon.",
@@ -1451,6 +1692,7 @@
         "price" : 175
     },
     {
+        "type":"GENERIC",
         "id" : "bee_sting",
         "name" : "bee sting",
         "description" : "A six-inch stinger from a giant bee. Makes a good melee weapon.",
@@ -1467,6 +1709,24 @@
         "price" : 70
     },
     {
+        "type":"GENERIC",
+        "id" : "fighter_sting",
+        "name" : "fungal fighter sting",
+        "description" : "A short dart from a fungal fighter. Makes an average melee weapon.",
+        "weight" : 270,
+        "to_hit" : -1,
+        "color" : "green",
+        "symbol" : ",",
+        "material" : ["veggy", "null"],
+        "techniques" : ["PRECISE"],
+        "volume" : 1,
+        "bashing" : 0,
+        "cutting" : 8,
+        "flags" : ["SPEAR"],
+        "price" : 70
+    },
+    {
+        "type":"GENERIC",
         "id" : "wasp_sting",
         "name" : "wasp sting",
         "description" : "A six-inch stinger from a giant wasp. Makes a good melee weapon.",
@@ -1483,6 +1743,7 @@
         "price" : 90
     },
     {
+        "type":"GENERIC",
         "id" : "cane",
         "name" : "walking cane",
         "description" : "Handicapped or not, you always walk in style. Consisting of a metal headpiece and a wooden body, this makes a great bashing weapon in a pinch.",
@@ -1498,6 +1759,7 @@
         "price" : 160
     },
     {
+        "type":"GENERIC",
         "id" : "mace",
         "name" : "mace",
         "description" : "A medieval weapon consisting of a wood handle with a heavy iron end. It is heavy and slow, but its crushing damage is devastating.",
@@ -1513,6 +1775,7 @@
         "price" : 1000
     },
     {
+        "type":"GENERIC",
         "id" : "morningstar",
         "name" : "morningstar",
         "description" : "A medieval weapon consisting of a wood handle with a heavy, spiked iron ball on the end. It deals devastating crushing damage, with a small amount of piercing to boot.",
@@ -1529,6 +1792,7 @@
         "price" : 1200
     },
     {
+        "type":"GENERIC",
         "id" : "pool_cue",
         "name" : "pool cue",
         "description" : "A hard-wood stick designed for hitting colorful balls around a felt table. Truly, the coolest of sports.",
@@ -1544,6 +1808,7 @@
         "price" : 80
     },
     {
+        "type":"GENERIC",
         "id" : "spike",
         "name" : "spike",
         "description" : "A large and slightly misshapen spike, could do some damage mounted on a vehicle.",
@@ -1559,6 +1824,7 @@
         "price" : 0
     },
     {
+        "type":"GENERIC",
         "id" : "javelin",
         "name" : "wooden javelin",
         "description" : "A wooden spear, honed to a sharper point and fire hardened for toughness. The grip area has also be carved and covered for better grip.",
@@ -1575,288 +1841,7 @@
         "price" : 40
     },
     {
-        "id" : "frame",
-        "name" : "steel frame",
-        "description" : "A large frame made of steel. Useful for crafting.",
-        "weight" : 13607,
-        "to_hit" : -5,
-        "color" : "cyan",
-        "symbol" : "]",
-        "material" : ["steel", "null"],
-        "techniques" : ["DEF_DISARM"],
-        "volume" : 60,
-        "bashing" : 20,
-        "cutting" : 0,
-        "price" : 55
-    },
-    {
-        "id" : "seat",
-        "name" : "seat",
-        "description" : "A soft car seat covered with leather.",
-        "weight" : 9071,
-        "to_hit" : -4,
-        "color" : "red",
-        "symbol" : "0",
-        "material" : ["plastic", "null"],
-        "volume" : 30,
-        "bashing" : 4,
-        "cutting" : 0,
-        "price" : 250
-    },
-    {
-        "id" : "saddle",
-        "name" : "saddle",
-        "description" : "A leather-covered seat designed to be straddled.",
-        "weight" : 300,
-        "to_hit" : -4,
-        "color" : "red",
-        "symbol" : "0",
-        "material" : ["plastic", "null"],
-        "volume" : 5,
-        "bashing" : 2,
-        "cutting" : 0,
-        "price" : 25
-    },
-    {
-        "id" : "vehicle_controls",
-        "name" : "vehicle controls",
-        "description" : "A set of various vehicle controls. Useful for crafting.",
-        "weight" : 2721,
-        "to_hit" : -4,
-        "color" : "light_cyan",
-        "symbol" : "$",
-        "material" : ["plastic", "steel"],
-        "volume" : 12,
-        "bashing" : 2,
-        "cutting" : 0,
-        "price" : 400
-    },
-    {
-        "id" : "motor",
-        "name" : "electric motor",
-        "description" : "A powerful electric motor. Useful for crafting.",
-        "weight" : 9071,
-        "to_hit" : 0,
-        "color" : "light_cyan",
-        "symbol" : ",",
-        "material" : ["iron", "null"],
-        "volume" : 6,
-        "bashing" : 4,
-        "cutting" : 0,
-        "price" : 120
-    },
-    {
-        "id" : "motor_large",
-        "name" : "large electric motor",
-        "description" : "A large and very powerful electric motor. Useful for crafting.",
-        "weight" : 73708,
-        "to_hit" : -3,
-        "color" : "light_cyan",
-        "symbol" : ":",
-        "material" : ["iron", "null"],
-        "volume" : 15,
-        "bashing" : 9,
-        "cutting" : 0,
-        "price" : 220
-    },
-    {
-        "id" : "plasma_engine",
-        "name" : "plasma engine",
-        "description" : "High technology engine, working on hydrgen fuel.",
-        "weight" : 39689,
-        "to_hit" : -2,
-        "color" : "light_cyan",
-        "symbol" : ":",
-        "material" : ["steel", "null"],
-        "volume" : 12,
-        "bashing" : 7,
-        "cutting" : 0,
-        "price" : 900
-    },
-    {
-        "id" : "foot_crank",
-        "name" : "foot crank",
-        "description" : "The pedal and gear assembly from a bicycle.",
-        "weight" : 816,
-        "to_hit" : -1,
-        "color" : "light_gray",
-        "symbol" : ":",
-        "material" : ["iron", "null"],
-        "volume" : 2,
-        "bashing" : 10,
-        "cutting" : 0,
-        "price" : 90
-    },
-    {
-        "id" : "metal_tank",
-        "name" : "metal tank",
-        "description" : "A metal tank for holding liquids. Useful for crafting.",
-        "weight" : 2834,
-        "to_hit" : -2,
-        "color" : "light_cyan",
-        "symbol" : "}",
-        "material" : ["steel", "null"],
-        "volume" : 18,
-        "bashing" : 3,
-        "cutting" : 0,
-        "price" : 40
-    },
-    {
-        "id" : "storage_battery",
-        "name" : "storage battery",
-        "description" : "A large storage battery. Useful for crafting.",
-        "weight" : 22679,
-        "to_hit" : -2,
-        "color" : "light_cyan",
-        "symbol" : ":",
-        "material" : ["iron", "null"],
-        "volume" : 8,
-        "bashing" : 6,
-        "cutting" : 0,
-        "price" : 80
-    },
-    {
-        "id" : "minireactor",
-        "name" : "minireactor",
-        "description" : "A small portable plutonium reactor. Handle with great care!",
-        "weight" : 27215,
-        "to_hit" : -4,
-        "color" : "light_cyan",
-        "symbol" : ":",
-        "material" : ["steel", "null"],
-        "volume" : 6,
-        "bashing" : 11,
-        "cutting" : 0,
-        "price" : 900
-    },
-    {
-        "id" : "solar_panel",
-        "name" : "solar panel",
-        "description" : "Electronic device that can convert solar radiation into electric power. Useful for crafting.",
-        "weight" : 14000,
-        "to_hit" : -4,
-        "color" : "yellow",
-        "symbol" : "]",
-        "material" : ["glass", "null"],
-        "volume" : 12,
-        "bashing" : 1,
-        "cutting" : 0,
-        "price" : 900
-    },
-    {
-        "id" : "solar_cell",
-        "name" : "solar cell",
-        "description" : "A small electronic device that can convert solar radiation into electric power. Useful for crafting.",
-        "weight" : 1000,
-        "to_hit" : -4,
-        "color" : "yellow",
-        "symbol" : ";",
-        "material" : ["glass", "null"],
-        "volume" : 1,
-        "bashing" : 1,
-        "cutting" : 0,
-        "price" : 50
-    },
-    {
-        "id" : "sheet_metal",
-        "name" : "sheet metal",
-        "description" : "A thin sheet of metal.",
-        "weight" : 1000,
-        "to_hit" : -2,
-        "color" : "light_cyan",
-        "symbol" : "]",
-        "material" : ["steel", "null"],
-        "volume" : 4,
-        "bashing" : 5,
-        "cutting" : 0,
-        "price" : 60
-    },
-    {
-        "id" : "steel_plate",
-        "name" : "steel plating",
-        "description" : "A piece of armor plating made of steel.",
-        "weight" : 12880,
-        "to_hit" : -1,
-        "color" : "light_cyan",
-        "symbol" : "]",
-        "material" : ["steel", "null"],
-        "volume" : 12,
-        "bashing" : 6,
-        "cutting" : 0,
-        "price" : 120
-    },
-    {
-        "id" : "alloy_plate",
-        "name" : "superalloy plating",
-        "description" : "A piece of armor plating made of sturdy superalloy.",
-        "weight" : 10800,
-        "to_hit" : -1,
-        "color" : "light_cyan",
-        "symbol" : "]",
-        "material" : ["steel", "null"],
-        "volume" : 12,
-        "bashing" : 6,
-        "cutting" : 0,
-        "price" : 185
-    },
-    {
-        "id" : "alloy_sheet",
-        "name" : "superalloy sheet",
-        "description" : "A sheet sturdy superalloy, incredibly hard, yet incredibly malleable.",
-        "weight" : 900,
-        "to_hit" : -2,
-        "color" : "light_cyan",
-        "symbol" : ",",
-        "material" : ["steel", "null"],
-        "volume" : 2,
-        "bashing" : -2,
-        "cutting" : 0,
-        "price" : 85
-    },
-    {
-        "id" : "spiked_plate",
-        "name" : "spiked plating",
-        "description" : "A piece of armor plating made of steel. It is covered by menacing spikes.",
-        "weight" : 12240,
-        "to_hit" : -1,
-        "color" : "light_cyan",
-        "symbol" : "]",
-        "material" : ["steel", "null"],
-        "volume" : 14,
-        "bashing" : 6,
-        "cutting" : 3,
-        "flags" : ["STAB"],
-        "price" : 185
-    },
-    {
-        "id" : "hard_plate",
-        "name" : "hard plating",
-        "description" : "A piece of very thick armor plating made of steel.",
-        "weight" : 32640,
-        "to_hit" : -1,
-        "color" : "light_cyan",
-        "symbol" : "]",
-        "material" : ["steel", "null"],
-        "volume" : 12,
-        "bashing" : 6,
-        "cutting" : 0,
-        "price" : 160
-    },
-    {
-        "id" : "kitchen_unit",
-        "name" : "RV kitchen unit",
-        "description" : "A vehicle mountable electric range and sink unit with integrated tool storage for cooking utensils.",
-        "weight" : 102058,
-        "to_hit" : -2,
-        "color" : "light_cyan",
-        "symbol" : "&",
-        "material" : ["steel", "null"],
-        "volume" : 80,
-        "bashing" : 0,
-        "cutting" : 0,
-        "price" : 400
-    },
-    {
+        "type":"GENERIC",
         "id" : "poppy_flower",
         "name" : "poppy flower",
         "description" : "A poppy stalk with some petals.",
@@ -1871,6 +1856,7 @@
         "price" : 400
     },
     {
+        "type":"GENERIC",
         "id" : "poppy_bud",
         "name" : "a poppy bud",
         "description" : "Contains some substances commonly produced by mutated poppy flower",
@@ -1885,6 +1871,7 @@
         "price" : 400
     },
     {
+        "type":"GENERIC",
         "id" : "bio_claws_weapon",
         "name" : "adamantite claws",
         "description" : "Short and sharp claws made from a high-tech metal.",
@@ -1899,7 +1886,24 @@
         "flags" : ["STAB", "UNARMED_WEAPON", "NO_UNWIELD"],
         "price" : 0
     },
+    {
+        "type":"GENERIC",
+        "id" : "punch_dagger",
+        "name" : "punch dagger",
+        "description" : "A short and sharp double edged dagger made to be gripped in the palm, with the blade protruding between the fingers.",
+        "weight" : 168,
+        "to_hit" : 4,
+        "color" : "dark_gray",
+        "symbol" : "{",
+        "material" : ["steel", "null"],
+        "volume" : 1,
+        "bashing" : 2,
+        "cutting" : 12,
+        "flags" : ["STAB", "UNARMED_WEAPON"],
+        "price" : 0
+    },
   {
+    "type":"GENERIC",
     "id": "bag_bundle_10",
     "symbol": ",",
     "color": "light_gray",
@@ -1914,6 +1918,7 @@
     "to_hit": 1
   },
   {
+    "type":"GENERIC",
     "id" : "money_bundle",
     "name" : "money bundle",
     "description" : "A bundle holding many 20 dollar bills, pretty useless now though",
@@ -1932,9 +1937,10 @@
     "price" : 0
   },
   {
+    "type":"GENERIC",
     "id" : "cell_phone",
     "name" : "cell phone",
-    "description" : "A simple cell phone. Nowadays only useful for telling the time or as a alarm-clock. Can also be disasembled into some useful parts.",
+    "description" : "A simple cell phone. Nowadays only useful for telling the time or as an alarm clock. Can also be disassembled into some useful parts.",
     "weight" : 113,
     "to_hit" : -3,
     "color" : "light_gray",
@@ -1947,6 +1953,23 @@
     "flags" : ["WATCH", "ALARMCLOCK"]
   },
   {
+    "type":"GENERIC",
+    "id" : "pocketwatch",
+    "name" : "pocket watch",
+    "description" : "An old fashioned pocket watch. This one tells you the time and looks good doing it. Can also be disassembled into some useful parts.",
+    "weight" : 42,
+    "to_hit" : -3,
+    "color" : "light_gray",
+    "symbol" : ",",
+    "material" : ["steel", "glass"],
+    "volume" : 0,
+    "bashing" : -8,
+    "cutting" : 0,
+    "price" : 250,
+    "flags" : ["WATCH"]
+  },
+  {
+    "type":"GENERIC",
     "id" : "umbrella",
     "symbol" : "/",
     "color": "magenta",
@@ -1963,6 +1986,7 @@
     "techniques": ["WBLOCK_1"]
   },
   {
+    "type":"GENERIC",
     "id" : "primitive_umbrella",
     "symbol" : "/",
     "color": "magenta",
@@ -1979,6 +2003,7 @@
     "techniques": ["WBLOCK_1"]
   },
   {
+    "type":"GENERIC",
     "id": "fish_bowl",
     "symbol": "u",
     "color": "light_cyan",
@@ -1992,7 +2017,8 @@
     "cutting": 0,
     "to_hit": -2
   },
-  { "id": "knuckle_steel",
+  { "type":"GENERIC",
+ "id": "knuckle_steel",
     "symbol" : "3",
     "color": "red",
     "name": "steel knuckles",
@@ -2003,10 +2029,12 @@
     "weight": 430,
     "bashing": 8,
     "cutting": 0,
+    "flags" : ["UNARMED_WEAPON"],
     "to_hit": 0
   },
 
-  { "id": "knuckle_katar",
+  { "type":"GENERIC",
+ "id": "knuckle_katar",
     "symbol" : "!",
     "color": "light_red",
     "name": "razorbar katar",
@@ -2018,6 +2046,113 @@
     "bashing": 0,
     "cutting": 16,
     "to_hit": 1,
+    "flags" : ["UNARMED_WEAPON"],
     "techniques": ["WBLOCK_1"]
+  },
+  { "type":"GENERIC",
+ "id": "cestus",
+    "symbol" : "3",
+    "color": "red",
+    "name": "cestus",
+    "description": "A heavy metal guard that covers the fist and increases striking power, with stout padding underneath to protect the wearers hand.",
+    "material": ["steel","leather"],
+    "price": 0,
+    "volume": 2,
+    "weight": 970,
+    "bashing": 14,
+    "cutting": 0,
+    "flags" : ["UNARMED_WEAPON"],
+    "to_hit": 0
+  },
+  { "type":"GENERIC",
+ "id": "knuckle_brass",
+    "symbol" : "3",
+    "color": "red",
+    "name": "brass knuckles",
+    "description": "A metal weapon made of brass, designed to be gripped in the palm and cause punches to do extra damage. A good, quick weapon - but you have to get within punching range to use it.",
+    "material": "steel",
+    "price": 0,
+    "volume": 0,
+    "weight": 320,
+    "bashing": 6,
+    "cutting": 0,
+    "flags" : ["UNARMED_WEAPON"],
+    "to_hit": 0
+  },
+  {
+    "type":"GENERIC",
+    "id": "hockey_stick",
+    "symbol": ";",
+    "color": "light_blue",
+    "name": "hockey stick",
+    "description": "A curved wooden stick with a wide and flat end. Commonly used by hockey players.",
+    "price": 110,
+    "material" : ["wood", "plastic"],
+    "weight": 420,
+    "volume": 4,
+    "bashing": 18,
+    "cutting": 1,
+    "to_hit": 2
+  },
+  {
+    "type":"GENERIC",
+    "id": "golf_club",
+    "symbol": ";",
+    "color": "light_gray",
+    "name": "golf club",
+    "description": "A long handle with a big metal head, flat on one side, for driving golf balls. Fore!",
+    "price": 130,
+    "material": "steel",
+    "weight": 300,
+    "volume": 4,
+    "bashing": 20,
+    "cutting": 0,
+    "to_hit": 1
+  },
+  {
+    "type":"GENERIC",
+    "id": "rock_sock",
+    "symbol": ";",
+    "color": "light_blue",
+    "name": "rock in a sock",
+    "description": "A sock with a rock tied into the end of it. A true weapon of desperation.",
+    "price": 10,
+    "material" : ["cotton", "stone"],
+    "weight": 1007,
+    "volume": 2,
+    "bashing": 16,
+    "cutting": 0,
+    "to_hit": 1
+  },
+  {
+    "type":"GENERIC",
+    "id": "char_kiln",
+    "symbol": ";",
+    "color": "dark_gray",
+    "name": "charcoal kiln",
+    "description": "A stout metal box used for producing charcoal via pyrolysis; the incomplete burning of organic materials in the absence of oxygen.",
+    "price": 160,
+    "material": "steel",
+    "weight": 6400,
+    "volume": 40,
+    "bashing": 10,
+    "cutting": 0,
+    "to_hit": -2
+  },
+  {
+    "type":"GENERIC",
+    "id" : "cu_pipe",
+    "name" : "copper tubing",
+    "description" : "A copper tube, too thin to be much use ad a melee weapon, but will do if nothing else is available. Useful in a few crafting recipes.",
+    "weight" : 345,
+    "to_hit" : -1,
+    "color" : "yellow",
+    "symbol" : "/",
+    "material" : ["steel", "null"],
+    "techniques" : ["WBLOCK_1"],
+    "volume" : 2,
+    "bashing" : 5,
+    "cutting" : 0,
+    "price" : 75
   }
 ]

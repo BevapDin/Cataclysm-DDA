@@ -16,8 +16,6 @@
 bool will_flood_stop(map *m, bool (&fill)[SEEX * MAPSIZE][SEEY * MAPSIZE],
                      int x, int y);
 
-double toolfactors(player &p, inventory &pinv, construction_stage &stage);
-
 void game::init_construction()
 {
  int id = -1;
@@ -280,7 +278,7 @@ void game::init_construction()
 
 // Base stuff
  CONSTRUCT(_("Build Bulletin Board"), 0, &construct::able_empty,
-                                            &construct::done_nothing);
+                                         &construct::done_nothing);
   STAGE(furnlist[f_bulletin], 10)
    TOOL("func:saw");
    TOOL("func:hammer");
@@ -375,14 +373,14 @@ void game::init_construction()
    COMPCONT("spear_wood", 2);
 
  CONSTRUCT(_("Build Wood Stove"), 0, &construct::able_empty,
-                                            &construct::done_nothing);
+                                     &construct::done_nothing);
   STAGE(furnlist[f_woodstove], 10);
    TOOL("hacksaw");
    COMP("metal_tank", 1);
    COMP("pipe", 1);
 
  CONSTRUCT(_("Build Stone Fireplace"), 0, &construct::able_empty,
-                                            &construct::done_nothing);
+                                          &construct::done_nothing);
   STAGE(furnlist[f_fireplace], 40);
    TOOL("func:hammer");
    TOOLCONT("func:shovel");
@@ -710,32 +708,10 @@ void game::construction_menu()
  refresh_all();
 }
 
-double toolfactors(player &p, crafting_inventory_t &pinv, construction_stage &stage) {
-    double best_modi = 0.0;
-    for(size_t j = 0; j < 10; j++) {
-        // tools: we need one (any) tool from this vector:
-        std::vector<component> &tools = stage.tools[j];
-        if(tools.empty()) {
-            continue;
-        }
-        const double modi = pinv.compute_time_modi(tools);
-        // We must take the worst (largest) modi here, because
-        // if several tools are required (think hammer+screwdriver)
-        // it does not matter if one of those is super-mega-good,
-        // if the other is bad and damaged
-        if(modi > 0.0 && best_modi < modi) {
-            best_modi = modi;
-        }
-    }
-    return best_modi;
-}
-
 int move_ppoints_for_construction(constructable *con, size_t stage_index, crafting_inventory_t &total_inv) {
     int move_points = con->stages[stage_index].time * 1000;
-    const double toolfactor = ::toolfactors(g->u, total_inv, con->stages[stage_index]);
-    if(toolfactor > 0 && toolfactor != 1) {
-        move_points = static_cast<int>(move_points * toolfactor);
-    }
+    const double toolfactor = total_inv.compute_time_modi(con->stages[stage_index]);
+    move_points = static_cast<int>(move_points * toolfactor);
     double skillfactor = 1.0;
     int skill = g->u.skillLevel("carpentry");
     if(skill > 0 && skill > con->difficulty) {
@@ -754,7 +730,7 @@ int move_ppoints_for_construction(constructable *con, size_t stage_index, crafti
     return move_points;
 }
 
-bool game::player_can_build(player &p, crafting_inventory_t &pinv, constructable* con,
+bool game::player_can_build(player &p, crafting_inventory_t &crafting_inv, constructable* con,
                             const int level, bool cont, bool exact_level)
 {
  int last_level = level;
@@ -784,7 +760,7 @@ bool game::player_can_build(player &p, crafting_inventory_t &pinv, constructable
     tools_required = true;
     has_tool = false;
     for (int k = 0; k < stage->tools[j].size(); k++) {
-     if (pinv.has_amount(stage->tools[j][k].type, 1))
+     if (crafting_inv.has_amount(stage->tools[j][k].type, 1))
      {
          has_tool = true;
          stage->tools[j][k].available = 1;
@@ -802,10 +778,10 @@ bool game::player_can_build(player &p, crafting_inventory_t &pinv, constructable
     has_component = false;
     for (int k = 0; k < stage->components[j].size(); k++) {
      if (( item_controller->find_template(stage->components[j][k].type)->is_ammo() &&
-           pinv.has_charges(stage->components[j][k].type,
+           crafting_inv.has_charges(stage->components[j][k].type,
                             stage->components[j][k].count)    ) ||
          (!item_controller->find_template(stage->components[j][k].type)->is_ammo() &&
-          pinv.has_amount (stage->components[j][k].type,
+          crafting_inv.has_amount (stage->components[j][k].type,
                           stage->components[j][k].count)    ))
      {
          has_component = true;

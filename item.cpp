@@ -633,6 +633,11 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
         dump->push_back(iteminfo("DESCRIPTION", "\n\n"));
         dump->push_back(iteminfo("DESCRIPTION", _("This piece of clothing has a hood to keep your head warm.")));
     }
+    if (is_armor() && has_flag("RAINPROOF"))
+    {
+        dump->push_back(iteminfo("DESCRIPTION", "\n\n"));
+        dump->push_back(iteminfo("DESCRIPTION", _("This piece of clothing is designed to keep you dry in the rain.")));
+    }
     if (is_armor() && type->id == "rad_badge")
     {
         int i;
@@ -683,7 +688,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
  }
 
  for(itype::FunctionalityMap::const_iterator a = type->functionalityMap.begin(); a != type->functionalityMap.end(); ++a) {
-   dump->push_back(iteminfo("DESCRIPTION", "Function: " + a->first));
+   dump->push_back(iteminfo("DESCRIPTION", "Functions as " + item_controller->find_template(a->first)->name));
  }
 
  temp1.str("");
@@ -1316,18 +1321,7 @@ bool item::is_two_handed(player *u)
     return ((weight() / 113) > u->str_cur * 4);
 }
 
-bool item::made_of(const std::string &mat_ident) const
-{
-    if( is_null() )
-        return false;
-
-    if (corpse != NULL && typeId() == "corpse" )
-        return (corpse->mat == mat_ident);
-
-    return (type->m1 == mat_ident || type->m2 == mat_ident);
-}
-
-bool item::made_of(const char *mat_ident) const
+bool item::made_of(std::string mat_ident) const
 {
     if( is_null() )
         return false;
@@ -1344,6 +1338,17 @@ std::string item::get_material(int m) const
         return corpse->mat;
 
     return (m==2)?type->m2:type->m1;
+}
+
+bool item::made_of(const char *mat_ident) const
+{
+    if( is_null() )
+        return false;
+
+    if (corpse != NULL && typeId() == "corpse" )
+        return (corpse->mat == mat_ident);
+
+    return (type->m1 == mat_ident || type->m2 == mat_ident);
 }
 
 bool item::made_of(phase_id phase) const
@@ -2100,7 +2105,7 @@ bool item::reload(player &u, char ammo_invlet)
 
  item *ammo_to_use = ammo_container;
  // Handle ammo in containers, currently only gasoline
- if(ammo_to_use && ammo_to_use->is_container())
+ if(ammo_to_use->is_container() && !ammo_to_use->contents.empty())
    ammo_to_use = &ammo_to_use->contents[0];
 
  if (is_gun()) {
@@ -2347,60 +2352,70 @@ int item::getlight_emit(bool calculate_dimming) const {
 
 
 
-bool item::use_charges(const itype_id &type_to_use, int &amount, std::list<item> &usedup) {
+bool item::use_charges(const itype_id &type_to_use, int &amount, std::list<item> &usedup, bool check_contents) {
 	// Check contents first
-	for (int m = 0; m < contents.size() && amount > 0; m++) {
-		item &con = contents[m];
-		if(con.use_charges(type_to_use, amount, usedup)) {
+	for (int m = 0; check_contents && m < contents.size() && amount > 0; m++) {
+		if(contents[m].use_charges(type_to_use, amount, usedup)) {
 			contents.erase(contents.begin() + m);
 			m--;
 		}
+        if (amount <= 0) {
+            return false;
+        }
 	}
 	if (amount <= 0) {
 		return false;
 	}
 	if(!matches_type(type_to_use)) {
-//	if (type->id != type_to_use) {
 		return false;
 	}
+    const int modi = (type == 0) ? 1 : type->getChargesModi(type_to_use);
 	// Now check the actual item
 	// 1. store used charges in resulting list,
 	// 2. decrease charges
 	// 3. decide if item must be destroyed
-	if (charges <= amount) {
-		usedup.push_back(*this);
-		amount -= charges;
-		charges = 0;
-		if (destroyed_at_zero_charges()) {
-			return true;
-		}
-	} else {
-		item tmp = *this;
-		tmp.charges = amount;
-		usedup.push_back(tmp);
-		charges -= amount;
-		amount = 0;
-	}
-	return false;
+    const int used_charges = std::min(amount, (charges / modi));
+    item tmp = *this;
+    tmp.charges = used_charges * modi;
+    charges -= tmp.charges;
+    amount -= used_charges;
+    assert(charges >= 0);
+    usedup.push_back(tmp);
+    return (charges == 0 && destroyed_at_zero_charges());
 }
 
 bool item::matches_type(const itype_id &type_) const {
 	if(type != 0) {
 		if(type->id == type_) {
-			return true; // exact match: this item is what we searched for
-		} else if(type->functionalityMap.find(type_) != type->functionalityMap.end()) {
-			return true; // OK, this item has the needed functionality.
+			return true; // exact match: this item is what we searched for,
+            // this is compatibel with the existing system that used
+            // item.type->id == type_ instead of item.matech(type_)
+		} else if(type->functionalityMap.count(type_) > 0) {
+			return true; // OK, this item has the needed functionality,
+            // this is new and only possible with addition to the raws.
 		} else if(type_.compare(0, 5, "func:") == 0 &&
 			type_.compare(5, std::string::npos, type->id) == 0) {
 			// We search for a functionality (func:...) and
 			// the type of this item happens to have the same name as the
-			// functionality
+			// functionality.
 			// You can use "func:pot" in a recipe, and it will match the
 			// "pot" item, even if that item has an empty functionalityMap.
+			// But note that "pot" does not match any item that has
+			// the functionality "func:pot", you can therefor enforce
+			// a "real" pot be using "pot" (for example as a compontent),
+			// but you should use "func:pot" in the tools-section of the
+			// recipes.
 			return true;
 		}
 	}
 	return false;
+}
+
+int item::get_charges_of(const itype_id &type_) const {
+    if(!matches_type(type_) || type == 0) {
+        return 0;
+    }
+    return charges / type->getChargesModi(type_);
 }
 
 double item::get_damaged_modi() const {

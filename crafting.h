@@ -101,6 +101,8 @@ recipe(std::string pident, int pid, itype_id pres, craft_cat pcat, std::string &
   reversible (preversible), autolearn (pautolearn), learn_by_disassembly (plearn_dis) {
     count = -1;
     count_range = -1;
+    noise = -1;
+    noise_string = "";
     skill_used = to_use.size()?Skill::skill(to_use):NULL;
     if(!to_require.empty()){
         for(std::map<std::string,int>::iterator iter=to_require.begin(); iter!=to_require.end(); ++iter){

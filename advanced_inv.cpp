@@ -257,22 +257,22 @@ struct advanced_inv_sorter {
                     }
                     break;
                 }
-				case SORTBY_DAMAGE: {
-					if(d1.it != 0 && d2.it != 0) {
-						if(d1.it->damage != d2.it->damage) {
-							return d1.it->damage < d2.it->damage;
-						}
-					}
-					break;
-				}
-				case SORTBY_TYPE: {
-					if(d1.it != 0 && d2.it != 0) {
-						if(d1.it->typeId() != d2.it->typeId()) {
-							return d1.it->typeId() < d2.it->typeId();
-						}
-					}
-					break;
-				}
+                case SORTBY_DAMAGE: {
+                    if(d1.it != 0 && d2.it != 0) {
+                        if(d1.it->damage != d2.it->damage) {
+                            return d1.it->damage < d2.it->damage;
+                        }
+                    }
+                    break;
+                }
+                case SORTBY_TYPE: {
+                    if(d1.it != 0 && d2.it != 0) {
+                        if(d1.it->typeId() != d2.it->typeId()) {
+                            return d1.it->typeId() < d2.it->typeId();
+                        }
+                    }
+                    break;
+                }
                 default: return d1.idx > d2.idx; break;
             };
         }
@@ -614,7 +614,7 @@ void advanced_inventory::recalc_pane(int i)
 
 void advanced_inventory::redraw_pane( int i )
 {
-    std::string sortnames[8] = { "-none-", _("none"), _("name"), _("weight"), _("volume"), _("charges"), _("category"), "-" };
+    std::string sortnames[] = { "-none-", _("none"), _("name"), _("weight"), _("volume"), _("charges"), _("category"), _("damage"), _("type"), "-" };
     // calculate the offset.
     getsquare(panes[i].area, panes[i].offx, panes[i].offy, panes[i].area_string, squares);
 

@@ -48,38 +48,46 @@ void game::init_itypes ()
   new itype("fire", 0, _("nearby fire"),
             "Some fire - if you are reading this it's a bug! (itypdef:fire)",
             '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0);
-
-// kitchen unit - only appears in crafting recipes
- itypes["installed_kitchen_unit"]=
-  new itype("installed_kitchen_unit", 0, "kitchen",
-            "An installed kitchen unit - if you are reading this it's a bug! (itypdef:installed_kitchen_unit)",
-            '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0);
-  itypes["installed_kitchen_unit"]->addFunctionality("func:pan", 1, 1)->addFunctionality("func:pot", 1, 1)->addFunctionality("func:hotplate", 1, 1);
-
 // Integrated toolset - ditto
 #define INTEGRATED_TOOLSET(toolname) \
  itypes["toolset_"toolname]= \
   new itype("toolset_"toolname, 0, "integrated "toolname, \
-            "A fake item. If you are reading this it's a bug! (itypdef:toolset_"toolname")", \
+            "A fake item. If you are reading this it's a bug! (itypdef.cpp)", \
             '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0)
 
-			(INTEGRATED_TOOLSET("knife"))->addFunctionality("func:blade", 1, 1);
-			(INTEGRATED_TOOLSET("screwdriver"))->addFunctionality("func:screwdriver", 1, 1);
-			(INTEGRATED_TOOLSET("wrench"))->addFunctionality("func:wrench", 1, 1);
-			(INTEGRATED_TOOLSET("hacksaw"))->addFunctionality("func:hacksaw", 1, 1);
-			(INTEGRATED_TOOLSET("hammer"))->addFunctionality("func:hammer", 1, 1);
-			INTEGRATED_TOOLSET("welder");
-			INTEGRATED_TOOLSET("hotplate");
-			INTEGRATED_TOOLSET("soldering_iron");
-			/**
-			 * Note: to add a new integrated toolset type, add it here and
-			 * add it in crafting.cpp (game::crafting_inventory)
-			 * and add them at the of of this (search for BIO_SINGLE_TOOLSET)
-			 * */
+            (INTEGRATED_TOOLSET("knife"))->addFunctionality("func:blade", 1, 1);
+            (INTEGRATED_TOOLSET("screwdriver"))->addFunctionality("func:screwdriver", 1, 1);
+            (INTEGRATED_TOOLSET("wrench"))->addFunctionality("func:wrench", 1, 1);
+            (INTEGRATED_TOOLSET("hacksaw"))->addFunctionality("func:hacksaw", 1, 1);
+            (INTEGRATED_TOOLSET("hammer"))->addFunctionality("func:hammer", 1, 1);
+            (INTEGRATED_TOOLSET("welder"))->addFunctionality("func:welder", 1, 1);
+            (INTEGRATED_TOOLSET("hotplate"))->addFunctionality("func:hotplate", 1, 1);
+            (INTEGRATED_TOOLSET("soldering_iron"))->addFunctionality("func:soldering_iron", 1, 1);
+            /**
+             * Note: to add a new integrated toolset type, add it here and
+             * add it in crafting.cpp (game::crafting_inventory)
+             * and add them at the of of this (search for BIO_SINGLE_TOOLSET)
+             * */
+// kitchen unit - only appears in crafting recipes
+    (itypes["vpart_kitchen_unit"] =
+        new itype("vpart_kitchen_unit", 0, "kitchen",
+            "An installed kitchen unit - if you are reading this it's a bug! (itypdef.cpp)",
+            '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0))
+    ->addFunctionality("func:pan", 1, 1)
+    ->addFunctionality("func:pot", 1, 1)
+    ->addFunctionality("func:hotplate", 1, 7);
+// kitchen unit - only appears in crafting recipes
+    (itypes["vpart_welding_rig"] =
+        new itype("vpart_welding_rig", 0, "welding rig",
+            "An installed welding rig - if you are reading this it's a bug! (itypdef.cpp)",
+            '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0))
+    ->addFunctionality("func:welder", 1, 20)
+    ->addFunctionality("func:soldering_iron", 1, 5);
 
 
 
-// For smoking crack or meth
+
+// For smoking drugs
  itypes["apparatus"]=
   new itype("apparatus", 0, _("a smoking device and a source of flame"),
             "A fake item. If you are reading this it's a bug! (itypdef:apparatus)",
@@ -191,9 +199,6 @@ itypes[id]=new it_macguffin(id, price, name, description,\
     sym, color, mat1, mat2, volume, wgt, dam, cut, to_hit, readable,\
     function)
 
-#define BIO_SINGLE_TOOLSET(tool,price,color,difficulty) \
-    BIO_SINGLE("bio_tools_" tool, price,color,difficulty)
-
 // BIONIC IMPLANTS
 // Sometimes a bionic needs to set you up with a dummy weapon, or something
 // similar.  For the sake of clarity, no matter what the type of item, place
@@ -212,6 +217,8 @@ BIO_SINGLE("bio_furnace", 4500, c_yellow, 4);
 BIO_SINGLE("bio_ethanol", 1200, c_yellow, 4);
 BIO_SINGLE("bio_torsionratchet", 3800, c_yellow, 4);
 // utilities
+#define BIO_SINGLE_TOOLSET(tool,price,color,difficulty) \
+    BIO_SINGLE("bio_tools_" tool, price,color,difficulty)
 BIO_SINGLE_TOOLSET("knife", 8000, c_ltgray, 2);
 BIO_SINGLE_TOOLSET("screwdriver", 8000, c_ltgray, 2);
 BIO_SINGLE_TOOLSET("wrench", 8000, c_ltgray, 5);
@@ -220,7 +227,6 @@ BIO_SINGLE_TOOLSET("hammer", 8000, c_ltgray, 3);
 BIO_SINGLE_TOOLSET("welder", 8000, c_ltgray, 6);
 BIO_SINGLE_TOOLSET("hotplate", 8000, c_ltgray, 5);
 BIO_SINGLE_TOOLSET("soldering_iron", 8000, c_ltgray, 5);
-
 BIO_SINGLE("bio_storage", 4000, c_ltgray, 7);
 BIO_SINGLE("bio_flashlight", 200, c_ltgray, 2);
 BIO_SINGLE("bio_lighter", 1300, c_ltgray, 4);
@@ -325,7 +331,7 @@ STATIONARY("flyer", _("flyer"), 1, "flier", _("A scrap of paper."));
 
 // Finally, add all the keys from the map to a vector of all possible items
 for(std::map<std::string,itype*>::iterator iter = itypes.begin(); iter != itypes.end(); ++iter){
-    if(iter->first == "null" || iter->first == "corpse" || iter->first.compare(0, 8, "toolset_") == 0 || iter->first == "fire" || iter->first == "apparatus" || iter->first == "installed_kitchen_unit"){
+    if(iter->first == "null" || iter->first == "corpse" || iter->first == "fire" || iter->first == "apparatus" || iter->first == "vpart_kitchen_unit" || iter->first == "vpart_welding_rig" || iter->first.compare(0, 8, "toolset_") == 0){
         pseudo_itype_ids.push_back(iter->first);
     } else {
         standard_itype_ids.push_back(iter->first);

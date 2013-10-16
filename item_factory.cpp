@@ -44,6 +44,7 @@ void Item_factory::init(){
     iuse_function_list["XANAX"] = &iuse::xanax;
     iuse_function_list["CIG"] = &iuse::cig;
     iuse_function_list["ANTIBIOTIC"] = &iuse::antibiotic;
+    iuse_function_list["FUNGICIDE"] = &iuse::fungicide;
     iuse_function_list["WEED"] = &iuse::weed;
     iuse_function_list["COKE"] = &iuse::coke;
     iuse_function_list["CRACK"] = &iuse::crack;
@@ -247,17 +248,18 @@ itype* Item_factory::find_template(const Item_tag id){
         return found->second;
     }
     else{
-		if(id.compare(0, 5, "func:") == 0) {
-			itype *&x = m_templates[id];
-			x = new itype();
-			x->name = std::string("something with the functionality of a ") + id.substr(5);
-			x->description = _("OHHHHH NOOOOO");
-			return x;
-		}
-		itype *&x = m_templates[id];
-		x = new itype();
-		x->name = std::string("Error: Item Missing: ") + id;
-		x->description = _("There is only the space where an object should be, but isn't. No item template of this type exists.");
+        if(id.compare(0, 5, "func:") == 0) {
+            itype *&x = m_templates[id];
+            x = new itype();
+            x->name = std::string("something with the functionality of a ") + id.substr(5);
+            x->description = _("OHHHHH NOOOOO");
+            return x;
+        }
+        itype *&x = m_templates[id];
+        x = new itype();
+        x->name = std::string("Error: Item Missing: ") + id;
+        x->description = _("There is only the space where an object should be, but isn't. No item template of this type exists.");
+        debugmsg("Missing item (check item_groups.json): %s", id.c_str());
         return x;
     }
 }
@@ -511,14 +513,6 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
       new_item_template->m1 = "null";
       new_item_template->m2 = "null";
     }
-	if(!material_type::has_material(new_item_template->m1)) {
-		debugmsg("item %s has unknown material %s", new_item_template->name.c_str(), new_item_template->m1.c_str());
-		new_item_template->m1 = "null";
-	}
-	if(!material_type::has_material(new_item_template->m2)) {
-		debugmsg("item %s has unknown material %s", new_item_template->name.c_str(), new_item_template->m2.c_str());
-		new_item_template->m2 = "null";
-	}
     Item_tag new_phase = "solid";
     if(jo.has_member("phase")){
         new_phase = jo.get_string("phase");
@@ -530,36 +524,7 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
     new_item_template->melee_cut = jo.get_int("cutting");
     new_item_template->m_to_hit = jo.get_int("to_hit");
 
-
-
-
-	if(jo.has_member("functions") && jo.is_array("functions")) {
-		JsonArray funcs = jo.get_array("functions");
-		while(funcs.has_more()) {
-			JsonArray func = funcs.next_array();
-			if(func.size() > 0) {
-				std::string key = func.get_string(0);
-				itype::functionality_t &fu = new_item_template->functionalityMap[key];
-				if(func.size() > 1) {
-					fu.time_modi = func.get_float(1);
-				} else {
-					fu.time_modi = 1;
-				}
-				if(func.size() > 2) {
-					fu.charges_modi = func.get_float(2);
-				} else {
-					fu.charges_modi = fu.time_modi;
-				}
-				if(key.compare(0, 5, "func:") != 0) {
-					new_item_template->functionalityMap[std::string("func:") + key] = fu;
-				}
-			}
-		}
-	}
-
-
-
-   new_item_template->light_emission = 0;
+    new_item_template->light_emission = 0;
     if( jo.has_member("flags") ){
         tags_from_json(jo, "flags", new_item_template->item_tags);
         /*
@@ -569,6 +534,7 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
         OVERSIZE - Can always be worn no matter encumbrance/mutations/bionics/etc 
         POCKETS - Will increase warmth for hands if hands are cold and the player is wielding nothing
         HOOD - Will increase warmth for head if head is cold and player's head isn't encumbered
+        RAINPROOF - Works like a raincoat to protect from rain effects
         WATCH - Shows the current time, instead of sun/moon position
         ALARMCLOCK - Has an alarmclock feature
         FANCY - Less than practical clothing meant primarily to convey a certain image.
@@ -591,6 +557,25 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
 
     if( jo.has_member("qualities") ){
         set_qualities_from_json(jo, "qualities", new_item_template);
+    }
+    if( jo.has_member("functions") && jo.is_array("functions") ){
+        JsonArray funcs = jo.get_array("functions");
+        while(funcs.has_more()) {
+            JsonArray func = funcs.next_array();
+            if(func.size() >= 1) {
+                const std::string key = func.get_string(0);
+                itype::functionality_t &fu = new_item_template->functionalityMap[key];
+                if(func.size() >= 3) {
+                    fu.time_modi = func.get_float(1);
+                    fu.charges_modi = func.get_float(2);
+                } else if(func.size() >= 2) {
+                    fu.time_modi = fu.charges_modi = func.get_float(1);
+                }
+                if(key.compare(0, 5, "func:") != 0) {
+                    debugmsg("item %s's functionality %s does not have func: prefix", new_item_template->name.c_str(), key.c_str());
+                }
+            }
+        }
     }
 
     if (jo.has_member("techniques")){
@@ -660,6 +645,14 @@ void Item_factory::set_material_from_json(JsonObject& jo, std::string member, it
     }
     new_item_template->m1 = material_list[0];
     new_item_template->m2 = material_list[1];
+    if(!material_type::has_material(new_item_template->m1)) {
+        debugmsg("item %s has unknown material %s", new_item_template->name.c_str(), new_item_template->m1.c_str());
+        new_item_template->m1 = "null";
+    }
+    if(!material_type::has_material(new_item_template->m2)) {
+        debugmsg("item %s has unknown material %s", new_item_template->name.c_str(), new_item_template->m2.c_str());
+        new_item_template->m2 = "null";
+    }
 }
 
 bool Item_factory::is_mod_target(JsonObject& jo, std::string member, std::string weapon)

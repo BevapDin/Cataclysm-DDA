@@ -13,11 +13,19 @@ then
     fi
 fi
 
-# extract translatable strings from .json files
-python lang/extract_json_strings.py
+# try to extract translatable strings from .json files
+if python lang/extract_json_strings.py 
+then
+    # update cataclysm-dda.pot
+    xgettext -d cataclysm-dda -F -c~ -o lang/po/cataclysm-dda.pot --keyword=_ --keyword=pgettext:1c,2 *.cpp *.h lang/json/*.py
+else
+    echo 'UPDATE ABORTED'
+    cd $oldpwd
+    exit 1
+fi
 
-# update cataclysm-dda.pot
-xgettext -d cataclysm-dda -F -c~ -o lang/po/cataclysm-dda.pot --keyword=_ *.cpp *.h lang/json/*.py
+# strip line-numbers from the .pot file
+python lang/strip_line_numbers.py lang/po/cataclysm-dda.pot
 
 cd $oldpwd
 

@@ -67,14 +67,13 @@ void load_recipe(JsonObject &jsobj)
         }
     }
 
-        
     recipe_names.push_back(rec_name);
     int id = recipe_names.size();
 
     recipe* rec = new recipe(rec_name, id, result, category, skill_used,
                              requires_skills, difficulty, time, reversible,
                              autolearn, learn_by_disassembly);
-    
+
 
     if(jsobj.has_member("count")) {
         rec->count = jsobj.get_int("count");
@@ -229,86 +228,12 @@ bool game::can_make(recipe *r, crafting_inventory_t &crafting_inv)
     }
 
     // check all tools
-    std::vector<std::vector<component> > &tools = r->tools;
-    std::vector<std::vector<component> >::iterator tool_set_it = tools.begin();
-    while (tool_set_it != tools.end())
-    {
-        std::vector<component> &set_of_tools = *tool_set_it;
-        // if current tool is null(size 0), assume that there is no more after it.
-        if(set_of_tools.empty())
-        {
-            break;
-        }
-        bool has_tool_in_set = false;
-        std::vector<component>::iterator tool_it = set_of_tools.begin();
-        while(tool_it != set_of_tools.end())
-        {
-            component &tool = *tool_it;
-            itype_id type = tool.type;
-            int req = tool.count;
-            if((req<= 0 && crafting_inv.has_amount(type, 1)) ||
-               (req > 0 && crafting_inv.has_charges(type, req)))
-            {
-                has_tool_in_set = true;
-                tool.available = 1;
-            }
-            else
-            {
-                tool.available = -1;
-            }
-            ++tool_it;
-        }
-        if(!has_tool_in_set)
-        {
-            RET_VAL = false;
-        }
-        ++tool_set_it;
+    if(!crafting_inv.has_all_tools(r->tools)) {
+        RET_VAL = false;
     }
     // check all components
-    std::vector<std::vector<component> > &components = r->components;
-    std::vector<std::vector<component> >::iterator comp_set_it = components.begin();
-    while (comp_set_it != components.end())
-    {
-        std::vector<component> &set_of_components = *comp_set_it;
-        if(set_of_components.empty())
-        {
-            break;
-        }
-        bool has_comp_in_set = false;
-        std::vector<component>::iterator comp_it = set_of_components.begin();
-        while(comp_it != set_of_components.end())
-        {
-            component &comp = *comp_it;
-            itype_id type = comp.type;
-            int req = comp.count;
-            if (item_controller->find_template(type)->count_by_charges() && req > 0)
-            {
-                if (crafting_inv.has_charges(type, req))
-                {
-                    has_comp_in_set = true;
-                    comp.available = 1;
-                }
-                else
-                {
-                    comp.available = -1;
-                }
-            }
-            else if (crafting_inv.has_amount(type, abs(req)))
-            {
-                has_comp_in_set = true;
-                comp.available = 1;
-            }
-            else
-            {
-                comp.available = -1;
-            }
-            ++comp_it;
-        }
-        if(!has_comp_in_set)
-        {
-            RET_VAL = false;
-        }
-        ++comp_set_it;
+    if(!crafting_inv.has_all_components(r->components)) {
+        RET_VAL = false;
     }
     return check_enough_materials(r, crafting_inv) && RET_VAL;
 }
@@ -999,30 +924,10 @@ void game::add_known_recipes(std::vector<recipe*> &current, recipe_list source, 
     current.insert(current.begin(),can_craft.begin(),can_craft.end());
 }
 
-double toolfactors(const recipe &making, const crafting_inventory_t &pinv) {
-	double best_modi = 0.0;
-	for(size_t j = 0; j < making.tools.size(); j++) {
-		// tools: we need one (any) tool from this vector:
-		const std::vector<component> &tools = making.tools[j];
-		if(tools.empty()) {
-			continue;
-		}
-		const double modi = pinv.compute_time_modi(tools);
-		// We must take the worst (largest) modi here, because
-		// if several tools are required (think hammer+screwdriver)
-		// it does not matter if one of those is super-mega-good,
-		// if the other is bad and damaged
-		if(modi > 0.0 && best_modi < modi) {
-			best_modi = modi;
-		}
-	}
-	return best_modi;
-}
-
 int move_ppoints_for_crafting(const recipe &making) {
 	crafting_inventory_t total_inv(g, &g->u);
 	int move_points = making.time;
-	const double toolfactor = ::toolfactors(making, total_inv);
+	const double toolfactor = total_inv.compute_time_modi(making);
 	if(toolfactor > 0 && toolfactor != 1) {
 		move_points = static_cast<int>(move_points * toolfactor);
 		g->add_msg("craft-factors: tool: %f", toolfactor);
@@ -1222,76 +1127,58 @@ void game::disassemble(char ch)
                 bool have_all_tools = true;
                 for (int j = 0; j < cur_recipe->tools.size(); j++)
                 {
-                    bool have_this_tool = false;
                     if (cur_recipe->tools[j].size() == 0) // no tools required, may change this
                     {
-                        have_this_tool = true;
+                        continue;
                     }
-                    else
+                    bool have_this_tool = false;
+                    for (int k = 0; k < cur_recipe->tools[j].size(); k++)
                     {
-                        for (int k = 0; k < cur_recipe->tools[j].size(); k++)
-                        {
-                            itype_id type = cur_recipe->tools[j][k].type;
-                            int req = cur_recipe->tools[j][k].count;	// -1 => 1
+                        itype_id type = cur_recipe->tools[j][k].type;
+                        int req = cur_recipe->tools[j][k].count;	// -1 => 1
 
-                            if ((req <= 0 && crafting_inv.has_amount (type, 1)) ||
-                                (req >  0 && crafting_inv.has_charges(type, req)))
+                        // if crafting recipe required a welder, disassembly requires a hacksaw or super toolkit
+                        if (type == "welder" || type == "func:welder")
+                        {
+                            if (crafting_inv.has_amount("func:hacksaw", 1))
                             {
                                 have_this_tool = true;
-                                k = cur_recipe->tools[j].size();
-                            }
-                            // if crafting recipe required a welder, disassembly requires a hacksaw or super toolkit
-                            if (type == "welder")
-                            {
-                                if (crafting_inv.has_amount("hacksaw", 1) ||
-                                    crafting_inv.has_amount("toolset_hacksaw", 1))
-                                {
-                                    have_this_tool = true;
-                                }
-                                else
-                                {
-                                    have_this_tool = false;
-                                }
-                            }
-                            else if (type == "sewing_kit")
-                            {
-                                if (crafting_inv.has_amount("scissors", 1))
-                                {
-                                    have_this_tool = true;
-                                }
-                                else
-                                {
-                                    have_this_tool = false;
-                                }
-                            }
-                        }
-
-                        if (!have_this_tool)
-                        {
-                            have_all_tools = false;
-                            int req = cur_recipe->tools[j][0].count;
-                            if (cur_recipe->tools[j][0].type == "welder")
-                            {
-                                add_msg(_("You need a hacksaw to disassemble this."));
-                            }
-                            else if (cur_recipe->tools[j][0].type == "sewing_kit")
-                            {
-                                add_msg("You need scissors to disassemble this.");
                             }
                             else
                             {
-                                if (req <= 0)
-                                {
-                                    add_msg(_("You need a %s to disassemble this."),
-                                    item_controller->find_template(cur_recipe->tools[j][0].type)->name.c_str());
-                                }
-                                else
-                                {
-                                    add_msg(_("You need a %s with %d charges to disassemble this."),
-                                    item_controller->find_template(cur_recipe->tools[j][0].type)->name.c_str(), req);
-                                }
+                                add_msg(_("You need a hacksaw to disassemble this."));
                             }
                         }
+                        else if (type == "sewing_kit" || type == "func:sewing_kit")
+                        {
+                            if (crafting_inv.has_amount("scissors", 1) ||
+                                crafting_inv.has_amount("func:blade", 1))
+                            {
+                                have_this_tool = true;
+                            }
+                            else
+                            {
+                                add_msg("You need scissors or somthing with a blade to disassemble this.");
+                            }
+                        }
+                        else if ((req <= 0 && crafting_inv.has_amount (type, 1)) ||
+                                 (req >  0 && crafting_inv.has_charges(type, req)))
+                        {
+                            have_this_tool = true;
+                            k = cur_recipe->tools[j].size();
+                        } else {
+                            add_msg(_("You need a %s with %d charges to disassemble this."),
+                            item_controller->find_template(type)->name.c_str(), req);
+                            have_this_tool = false;
+                        }
+                        if(have_this_tool) {
+                            break;
+                        }
+                            
+                    }
+                    if (!have_this_tool)
+                    {
+                        have_all_tools = false;
                     }
                 }
                 // all tools present, so assign the activity
@@ -1416,7 +1303,7 @@ void game::complete_disassemble()
           } else
           {
             if (dis->difficulty == 0 || comp_success)
-              m.add_item_or_charges(u.posx, u.posy, newit);
+              m.add_item(u.posx, u.posy, newit, MAX_ITEM_IN_SQUARE);
             else
               add_msg(_("You fail to recover a component."));
             compcount--;

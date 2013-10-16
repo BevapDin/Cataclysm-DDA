@@ -39,7 +39,7 @@ static void add_or_drop_item(game *g, player *p, item *it)
       it->charges++;
       return;
   }
-  
+
   while (p->has_item(replacement.invlet)) {
     replacement.invlet = g->nextinv;
     g->advance_nextinv();
@@ -168,11 +168,12 @@ void iuse::royal_jelly(game *g, player *p, item *it, bool t)
   p->rem_disease("blind");
  }
  if (p->has_disease("poison") || p->has_disease("foodpoison") ||
-     p->has_disease("badpoison")) {
+     p->has_disease("badpoison") || p->has_disease("paralyzepoison")) {
   message = _("You feel much better!");
   p->rem_disease("poison");
   p->rem_disease("badpoison");
   p->rem_disease("foodpoison");
+  p->rem_disease("paralyzepoison");
  }
  if (p->has_disease("asthma")) {
   message = _("Your breathing clears up!");
@@ -638,6 +639,51 @@ void iuse::antibiotic(game *g, player *p, item *it, bool t) {
     }
 }
 
+void iuse::fungicide(game *g, player *p, item *it, bool t) {
+    g->add_msg_if_player(p,_("You take some fungicide."));
+    if (p->has_disease("fungus")) {
+        p->rem_disease("infected");
+    }
+    if (p->has_disease("spores")) {
+        int fungus_int = p->disease_intensity("spores", true);
+        p->rem_disease("spores");
+        int spore_count = rng(fungus_int / 5, fungus_int);
+        if (spore_count > 0) {
+            monster spore(GetMType("mon_spore"));
+            for (int i = p->posx - 1; i <= p->posx + 1; i++) {
+                for (int j = p->posy - 1; j <= p->posy + 1; j++) {
+                    if (spore_count == 0) {
+                        break;
+                    }
+                    if (i == p->posx && j == p->posy) {
+                        continue;
+                    }
+                    if (g->m.move_cost(i, j) > 0 && x_in_y(spore_count, 8)) {
+                        const int zid = g->mon_at(i, j);
+                        if (zid >= 0) {  // Spores hit a monster
+                            if (g->u_see(i, j) &&
+                                  !g->zombie(zid).type->in_species("FUNGUS")) {
+                                g->add_msg(_("The %s is covered in tiny spores!"),
+                                           g->zombie(zid).name().c_str());
+                            }
+                            if (!g->zombie(zid).make_fungus(g)) {
+                                g->kill_mon(zid);
+                            }
+                        } else {
+                            spore.spawn(i, j);
+                            g->add_zombie(spore);
+                        }
+                        spore_count--;
+                    }
+                }
+                if (spore_count == 0) {
+                    break;
+                }
+            }
+        }
+    }
+}
+
 void iuse::weed(game *g, player *p, item *it, bool t) {
     // Requires flame and something to smoke with.
     bool alreadyHigh = (p->has_disease("weed_high"));
@@ -1092,40 +1138,40 @@ void iuse::sew(game *g, player *p, item *it, bool t)
         return;
     }
     char ch = g->inv_type(_("Repair what?"), IC_ARMOR);
-	if(ch == ' ') {
-		int choice = menu(true,
+    if(ch == ' ') {
+        int choice = menu(true,
     "Choose:", "Repair damaged item", "Fit item", "Enchange item", "Cancel", NULL);
-		if(choice < 1 || choice > 3) {
-			it->charges++;
-			return;
-		}
-		std::vector<item*> tmp_inv;
-		g->u.inv.dump(tmp_inv);
-		for (std::vector<item*>::const_iterator iter = tmp_inv.begin(); ch == ' ' && iter != tmp_inv.end(); ++iter)
-		{
-			const item& it = **iter;
-			if (it.is_armor())
-			{
-				if (it.made_of("cotton") || it.made_of("wool") || it.made_of("leather") || it.made_of("fur"))
-				{
-					if(choice == 1 && it.damage > 0) {
-						ch = it.invlet;
-					}
-					if(choice == 2 && it.damage == 0 && it.has_flag("VARSIZE") && !it.has_flag("FIT")) {
-						ch = it.invlet;
-					}
-					if(choice == 3 && it.damage == 0 && (!it.has_flag("VARSIZE") || (it.has_flag("VARSIZE") && it.has_flag("FIT")))) {
-						ch = it.invlet;
-					}
-				}
-			}
-		}
-		if(ch == ' ') {
-			g->add_msg("You have no matching item");
-			it->charges++;
-			return;
-		}
-	}
+        if(choice < 1 || choice > 3) {
+            it->charges++;
+            return;
+        }
+        std::vector<item*> tmp_inv;
+        g->u.inv.dump(tmp_inv);
+        for (std::vector<item*>::const_iterator iter = tmp_inv.begin(); ch == ' ' && iter != tmp_inv.end(); ++iter)
+        {
+            const item& it = **iter;
+            if (it.is_armor())
+            {
+                if (it.made_of("cotton") || it.made_of("wool") || it.made_of("leather") || it.made_of("fur"))
+                {
+                    if(choice == 1 && it.damage > 0) {
+                        ch = it.invlet;
+                    }
+                    if(choice == 2 && it.damage == 0 && it.has_flag("VARSIZE") && !it.has_flag("FIT")) {
+                        ch = it.invlet;
+                    }
+                    if(choice == 3 && it.damage == 0 && (!it.has_flag("VARSIZE") || (it.has_flag("VARSIZE") && it.has_flag("FIT")))) {
+                        ch = it.invlet;
+                    }
+                }
+            }
+        }
+        if(ch == ' ') {
+            g->add_msg("You have no matching item");
+            it->charges++;
+            return;
+        }
+    }
     item* fix = &(p->i_at(ch));
     if (fix == NULL || fix->is_null()) {
         g->add_msg_if_player(p,_("You do not have that item!"));
@@ -1366,7 +1412,23 @@ void iuse::cut_up(game *g, player *p, item *it, item *cut, bool t)
     g->add_msg_if_player(p, sliced_text.c_str(), cut->tname().c_str(), count);
     item result(g->itypes[type], int(g->turn));
     p->i_rem(ch);
-	p->add_or_drop(result, g, count);
+    bool drop = false;
+    for (int i = 0; i < count; i++) {
+        int iter = 0;
+        while (p->has_item(result.invlet) && iter < inv_chars.size()) {
+            result.invlet = g->nextinv;
+            g->advance_nextinv();
+            iter++;
+        }
+        if (!drop && (iter == inv_chars.size() || p->volume_carried() >= p->volume_capacity())) {
+            drop = true;
+        }
+        if (drop) {
+            g->m.add_item_or_charges(p->posx, p->posy, result);
+        } else {
+            p->i_add(result, g);
+        }
+    }
     return;
 }
 
@@ -1440,43 +1502,43 @@ void iuse::hammer(game *g, player *p, item *it, bool t)
 
     if (x == p->posx && y == p->posy)
     {
-		if(query_yn("Hammer some metal item to scraps?")) {
-			char ch = g->inv("Select item to hammer");
-			if(!p->has_item(ch)) {
-				return;
-			}
-			item &it = p->i_at(ch);
-			if(it.is_null() || !it.made_of("steel") || !it.contents.empty()) {
-				g->add_msg_if_player(p, "That %s is not made of steel or not empty", it.tname(g).c_str());
-				return;
-			}
-			const int w = it.weight();
-			if(w == 0 || it.volume() == 0) {
-				g->add_msg_if_player(p, "That %s is too small", it.tname(g).c_str());
-				return;
-			}
-			itype *scrap = g->itypes["scrap"];
-			int num_scraps = (w / scrap->weight) / 2;
-			if(num_scraps == 0) {
-				num_scraps = 1;
-			}
-			if(num_scraps > 8 && !p->has_amount("hacksaw", 1)) {
-				g->add_msg_if_player(p, "That %s is too big, if only you had a hacksaw", it.tname(g).c_str());
-				return;
-			}
-			for (int i = 0; i < num_scraps; i++) {
-				g->m.spawn_item(p->posx, p->posy, "scrap", 0);
-			}
-			g->add_msg_if_player(p, "You hammer the %s into %d scraps", it.tname(g).c_str(), num_scraps);
-			p->moves -= 40 * num_scraps;
-			if(num_scraps > 8) {
-				g->sound(p->posx, p->posy, 20, "hammering");
-			} else {
-				g->sound(p->posx, p->posy, 10, "hammering");
-			}
-			p->i_rem(ch);
-			return;
-		}
+        if(query_yn("Hammer some metal item to scraps?")) {
+            char ch = g->inv("Select item to hammer");
+            if(!p->has_item(ch)) {
+                return;
+            }
+            item &it = p->i_at(ch);
+            if(it.is_null() || !it.made_of("steel") || !it.contents.empty()) {
+                g->add_msg_if_player(p, "That %s is not made of steel or not empty", it.tname(g).c_str());
+                return;
+            }
+            const int w = it.weight();
+            if(w == 0 || it.volume() == 0) {
+                g->add_msg_if_player(p, "That %s is too small", it.tname(g).c_str());
+                return;
+            }
+            itype *scrap = g->itypes["scrap"];
+            int num_scraps = (w / scrap->weight) / 2;
+            if(num_scraps == 0) {
+                num_scraps = 1;
+            }
+            if(num_scraps > 8 && !p->has_amount("hacksaw", 1)) {
+                g->add_msg_if_player(p, "That %s is too big, if only you had a hacksaw", it.tname(g).c_str());
+                return;
+            }
+            for (int i = 0; i < num_scraps; i++) {
+                g->m.spawn_item(p->posx, p->posy, "scrap", 0);
+            }
+            g->add_msg_if_player(p, "You hammer the %s into %d scraps", it.tname(g).c_str(), num_scraps);
+            p->moves -= 40 * num_scraps;
+            if(num_scraps > 8) {
+                g->sound(p->posx, p->posy, 20, "hammering");
+            } else {
+                g->sound(p->posx, p->posy, 10, "hammering");
+            }
+            p->i_rem(ch);
+            return;
+        }
         g->add_msg_if_player(p, _("You try to hit yourself with the hammer."));
         g->add_msg_if_player(p, _("But you can't touch this."));
         return;
@@ -1588,9 +1650,9 @@ void iuse::simple_off(game *g, player *p, item *it, bool t)
 
 void iuse::simple_on(game *g, player *p, item *it, bool t)
 {
- if (t) {	// Normal use
+ if (t) {    // Normal use
 // Do nothing...
- } else {	// Turning it off
+ } else {    // Turning it off
   g->add_msg_if_player(p,"The %s goes off.", it->tname(g).c_str());
   std::string off_type = it->typeId();
   off_type.erase(off_type.length() - 2, 2);
@@ -1660,7 +1722,7 @@ void iuse::cauterize_effect(player *p, item *it, bool force)
         int side = -1;
         p->hp_convert(hpart, bp, side);
         if (p->has_disease("bite", bp, side)) {
-            g->u.add_disease("bite", 2600, 1, 1, bp, side, true, -1);
+            g->u.add_disease("bite", 2600, false, 1, 1, 0, -1, bp, side, true);
         }
     }
 }
@@ -2272,7 +2334,7 @@ void iuse::picklock(game *g, player *p, item *it, bool t)
  }
 
  int pick_quality = 1;
- if( it->typeId() == "picklock" ) {
+ if( it->typeId() == "picklocks" ) {
      pick_quality = 5;
  }
  else if( it->typeId() == "crude_picklock" ) {
@@ -2843,10 +2905,12 @@ void iuse::zweifire_on(game *g, player *p, item *it, bool t)
     if (t)    // Effects while simply on
     {
         if (one_in(35))
+            //~ (Flammenschwert) "The fire on your blade burns brightly!"
             g->add_msg_if_player(p,_("Das Feuer um deine Schwertklinge leuchtet hell!"));
     }
     else if (it->charges == 0)
     {
+        //~ (Flammenschwert) "Your Flammenscwhert (firesword) is out of fuel!"
         g->add_msg_if_player(p,_("Deinem Flammenschwert ist der Brennstoff ausgegangen!"));
         it->make(g->itypes["zweifire_off"]);
         it->active = false;
@@ -2854,13 +2918,21 @@ void iuse::zweifire_on(game *g, player *p, item *it, bool t)
     else
     {
         int choice = menu(true,
-                          _("Was willst du tun?"), _("Die Flamme erloschen."), _("Ein Feuer entfachen."), _("Nichts tun."), NULL);
+                          //~ (Flammenschwert) "What will you do?"
+                          _("Was willst du tun?"),
+                          //~ (Flammenschwert) "Extinguish the flame."
+                          _("Die Flamme erloschen."),
+                          //~ (Flammenschwert) "Start a fire."
+                          _("Ein Feuer entfachen."),
+                          //~ (Flammenschwert) "Do nothing."
+                          _("Nichts tun."), NULL);
         switch (choice)
         {
             if (choice == 2)
                 break;
         case 1:
         {
+            //~ (Flammenschwert) "The flames on your sword die out."
             g->add_msg_if_player(p,_("Die Flamme deines Schwertes erlischt."));
             it->make(g->itypes["zweifire_off"]);
             it->active = false;
@@ -2909,16 +2981,21 @@ void iuse::jackhammer(game *g, player *p, item *it, bool t)
 
 void iuse::jacqueshammer(game *g, player *p, item *it, bool t)
 {
+ // translator comments for everything to reduce confusion
  int dirx, diry;
  g->draw();
+ //~ (jacqueshammer) "Drill where?"
  mvprintw(0, 0, _("Percer dans quelle direction?"));
  get_direction(dirx, diry, input());
  if (dirx == -2) {
+  //~ (jacqueshammer) "Invalid direction"
   g->add_msg_if_player(p,_("Direction invalide"));
   return;
  }
  if (dirx == 0 && diry == 0) {
+  //~ (jacqueshammer) "My god! Let's talk it over, OK?"
   g->add_msg_if_player(p,_("Mon dieu! Nous allons en parler OK?"));
+  //~ (jacqueshammer) "Don't do anything rash."
   g->add_msg_if_player(p,_("Ne pas faire eruption rien.."));
   return;
  }
@@ -2928,7 +3005,7 @@ void iuse::jacqueshammer(game *g, player *p, item *it, bool t)
      g->m.ter(dirx, diry) != t_tree) {
   g->m.destroy(g, dirx, diry, false);
   p->moves -= 500;
-  //~ the sound of a "jaqueshammer"
+  //~ the sound of a "jacqueshammer"
   g->sound(dirx, diry, 45, _("OHOHOHOHOHOHOHOHO!"));
  } else if (g->m.move_cost(dirx, diry) == 2 && g->levz != -1 &&
             g->m.ter(dirx, diry) != t_dirt && g->m.ter(dirx, diry) != t_grass) {
@@ -2936,6 +3013,7 @@ void iuse::jacqueshammer(game *g, player *p, item *it, bool t)
   p->moves -= 500;
   g->sound(dirx, diry, 45, _("OHOHOHOHOHOHOHOHO!"));
  } else {
+  //~ (jacqueshammer) "You can't drill there."
   g->add_msg_if_player(p,_("Vous ne pouvez pas percer la-bas.."));
   it->charges += (dynamic_cast<it_tool*>(it->type))->charges_per_use;
  }
@@ -5660,59 +5738,62 @@ void iuse::adrenaline_injector(game *g, player *p, item *it, bool t)
   }
 }
 
+
+
+
 int iuse::wood_gas_amount(const item &it)
 {
-	if(it.made_of("cotton") || it.made_of("wool") || it.made_of("fur")) {
-		return it.weight() * 3;
-	} else if(it.made_of("leather")) {
-		return it.weight() * 2;
-	} else if(it.made_of("wood")) {
-		return it.weight() * 10 + it.volume() * 5;
-	} else if(it.made_of("veggy")) {
-		return it.weight() * 8;
-	} else if(it.made_of("bone")) {
-		return it.weight() * 2;
-	} else if(it.made_of("paper")) {
-		return it.weight() * 3;
-	} else if(it.made_of("flesh") || it.made_of("hflesh")) {
-		return it.weight() * 2;
-	}
-	return 0;
+    if(it.made_of("cotton") || it.made_of("wool") || it.made_of("fur")) {
+        return it.weight() * 3;
+    } else if(it.made_of("leather")) {
+        return it.weight() * 2;
+    } else if(it.made_of("wood")) {
+        return it.weight() * 10 + it.volume() * 5;
+    } else if(it.made_of("veggy")) {
+        return it.weight() * 8;
+    } else if(it.made_of("bone")) {
+        return it.weight() * 2;
+    } else if(it.made_of("paper")) {
+        return it.weight() * 3;
+    } else if(it.made_of("flesh") || it.made_of("hflesh")) {
+        return it.weight() * 2;
+    }
+    return 0;
 }
 
 void iuse::wood_gas(game *g, player *p, item *, bool t)
 {
     char ch = g->inv("Burn what?");
-	if(!p->has_item(ch)) {
-		return;
-	}
-	item &it = p->i_at(ch);
-	if(it.is_null()) {
-		return;
-	}
-	int vol_fac = 0;
-	bool useStack = false;
-	std::list<item> &stack = p->inv.stack_by_letter(ch);
-	if(stack.size() > 1 && query_yn("Use whole stack?")) {
-		for(std::list<item>::const_iterator a = stack.begin(); a != stack.end(); a++) {
-			const item &it = *a;
-			vol_fac += wood_gas_amount(it);
-		}
-		useStack = true;
-	} else {
-		vol_fac += wood_gas_amount(it);
-	}
-	if(vol_fac == 0) {
-		g->add_msg_if_player(p, "Your %s is is too small or not organic at all.", it.tname(g).c_str());
-		return;
-	}
-	if(useStack) {
-		p->inv.remove_stack_by_letter(ch);
-	} else {
-		p->i_rem(ch);
-	}
-	p->moves -= 30 * vol_fac;
-	item gasoline(g->itypes["gasoline"], g->turn);
-	gasoline.charges = vol_fac;
-	while(!g->handle_liquid(gasoline, false, false)) { }
+    if(!p->has_item(ch)) {
+        return;
+    }
+    item &it = p->i_at(ch);
+    if(it.is_null()) {
+        return;
+    }
+    int vol_fac = 0;
+    bool useStack = false;
+    std::list<item> &stack = p->inv.stack_by_letter(ch);
+    if(stack.size() > 1 && query_yn("Use whole stack?")) {
+        for(std::list<item>::const_iterator a = stack.begin(); a != stack.end(); a++) {
+            const item &it = *a;
+            vol_fac += wood_gas_amount(it);
+        }
+        useStack = true;
+    } else {
+        vol_fac += wood_gas_amount(it);
+    }
+    if(vol_fac == 0) {
+        g->add_msg_if_player(p, "Your %s is is too small or not organic at all.", it.tname(g).c_str());
+        return;
+    }
+    if(useStack) {
+        p->inv.remove_stack_by_letter(ch);
+    } else {
+        p->i_rem(ch);
+    }
+    p->moves -= 30 * vol_fac;
+    item gasoline(g->itypes["gasoline"], g->turn);
+    gasoline.charges = vol_fac;
+    while(!g->handle_liquid(gasoline, false, false)) { }
 }

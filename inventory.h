@@ -59,8 +59,6 @@ class inventory
  */
   void restack(player *p = NULL);
 
-  void form_from_map(game *g, point origin, int distance);
-
   std::list<item> remove_stack_by_letter(char ch);
   std::list<item> remove_partial_stack(char ch, int amount);
   item  remove_item(item *it);

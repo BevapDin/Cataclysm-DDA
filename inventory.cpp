@@ -4,6 +4,7 @@
 #include "keypress.h"
 #include "mapdata.h"
 #include "item_factory.h"
+#include "crafting_inventory_t.h"
 
 const std::string inv_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#&()*+./:;=?@[\\]^_{|}";
 
@@ -215,7 +216,7 @@ inventory inventory::filter_by_activation(player& u)
 
 inventory inventory::filter_by_category(item_cat cat, const player& u) const
 {
-	return filter_by_category(cat, u, NULL);
+    return filter_by_category(cat, u, NULL);
 }
 
 inventory inventory::filter_by_category(item_cat cat, const player& u, const std::string *liquid) const
@@ -560,79 +561,66 @@ void inventory::restack(player *p)
     }
 }
 
-void inventory::form_from_map(game *g, point origin, int range)
+void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 {
- items.clear();
- for (int x = origin.x - range; x <= origin.x + range; x++) {
-  for (int y = origin.y - range; y <= origin.y + range; y++) {
-   int junk;
-   if (g->m.has_flag("SEALED", x, y) ||
-       ((origin.x != x || origin.y != y) &&
-        !g->m.clear_path( origin.x, origin.y, x, y, range, 1, 100, junk ) ) ) {
-     continue;
-   }
-   for (int i = 0; i < g->m.i_at(x, y).size(); i++)
-    if (!g->m.i_at(x, y)[i].made_of(LIQUID))
-     add_item(g->m.i_at(x, y)[i]);
-// Kludges for now!
-   ter_id terrain_id = g->m.ter(x, y);
-   if ((g->m.field_at(x, y).findField(fd_fire)) || (terrain_id == t_lava)) {
-    item fire(g->itypes["fire"], 0);
-    fire.charges = 1;
-    add_item(fire);
-   }
-   if (terrain_id == t_water_sh || terrain_id == t_water_dp){
-    item water(g->itypes["water"], 0);
-    water.charges = 50;
-    add_item(water);
-   }
+    int junk = 0;
+    for (int x = origin.x - range; x <= origin.x + range; x++) {
+        for (int y = origin.y - range; y <= origin.y + range; y++) {
+            if (g->m.has_flag("SEALED", x, y) ||
+                ((origin.x != x || origin.y != y) &&
+                !g->m.clear_path( origin.x, origin.y, x, y, range, 1, 100, junk ) ) ) {
+                continue;
+            }
+            const point p(x, y);
+            items_on_map items(p, &(g->m.i_at(x, y)));
+            if(!items.items->empty()) {
+                on_map.push_back(items);
+            }
 
-   int vpart = -1;
-   vehicle *veh = g->m.veh_at(x, y, vpart);
+            // Kludges for now!
+            ter_id terrain_id = g->m.ter(x, y);
+            if ((g->m.field_at(x, y).findField(fd_fire)) || (terrain_id == t_lava)) {
+                item fire(g->itypes["fire"], 0);
+                fire.charges = 1;
+                souround.push_back(item_from_souround(p, fire));
+            }
+            if (terrain_id == t_water_sh || terrain_id == t_water_dp) {
+                item water(g->itypes["water"], 0);
+                water.charges = 50;
+                souround.push_back(item_from_souround(p, water));
+            }
 
-   if (veh) {
-     const int kpart = veh->part_with_feature(vpart, "KITCHEN");
-     const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
+            int vpart = -1;
+            vehicle *veh = g->m.veh_at(x, y, vpart);
+            if (veh) {
+                const int kpart = veh->part_with_feature(vpart, "KITCHEN");
+                if (kpart >= 0) {
+                    item kitchen(g->itypes["vpart_kitchen_unit"], 0);
+                    kitchen.charges = veh->fuel_left("battery", true);
+                    this->vpart.push_back(item_from_vpart(veh, kpart, kitchen));
 
-     if (kpart >= 0) {
-       item hotplate(g->itypes["installed_kitchen_unit"], 0);
-       hotplate.charges = veh->fuel_left("battery", true);
-       add_item(hotplate);
+                    item water(g->itypes["water_clean"], 0);
+                    water.charges = veh->fuel_left("water");
+                    this->vpart.push_back(item_from_vpart(veh, kpart, water));
+                }
 
-       item water(g->itypes["water_clean"], 0);
-       water.charges = veh->fuel_left("water");
-       add_item(water);
-	   // Note: those two items may be used as components in a crafting and may
-	   // therfor be used up, but this is not actuall possible as they are build
-	   // into the kitchen unit!
-/*
-       item pot(g->itypes["pot"], 0);
-       add_item(pot);
-       item pan(g->itypes["pan"], 0);
-       add_item(pan);
-*/
-     }
-     if (weldpart >= 0) {
-       item welder(g->itypes["func:welder"], 0);
-       welder.charges = veh->fuel_left("battery", true);
-       add_item(welder);
+                const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
+                if (weldpart >= 0) {
+                    item welder(g->itypes["vpart_welding_rig"], 0);
+                    welder.charges = veh->fuel_left("battery", true);
+                    this->vpart.push_back(item_from_vpart(veh, weldpart, welder));
+                }
 
-       item soldering_iron(g->itypes["func:soldering_iron"], 0);
-       soldering_iron.charges = veh->fuel_left("battery", true);
-       add_item(soldering_iron);
-      }
-
-     const int cpart = veh->part_with_feature(vpart, "CARGO");
-     if (cpart >= 0) {
-
-      for (int i = 0; i < veh->parts[cpart].items.size(); i++)
-       if (!veh->parts[cpart].items[i].made_of(LIQUID))
-        add_item(veh->parts[cpart].items[i]);
-     }
-   }
-
-  }
- }
+                const int cpart = veh->part_with_feature(vpart, "CARGO");
+                if (cpart >= 0) {
+                    items_in_vehicle inveh(veh, cpart, &(veh->parts[cpart].items));
+                    if(!inveh.items->empty()) {
+                        in_veh.push_back(inveh);
+                    }
+                }
+            }
+        }
+    }
 }
 
 std::list<item> inventory::remove_stack_by_letter(char ch)
@@ -963,7 +951,7 @@ int inventory::charges_of(itype_id it) const
                     if (stack_iter->charges < 0) {
                         count++;
                     } else {
-                        count += stack_iter->charges;
+                        count += stack_iter->get_charges_of(it);
                     }
                 }
             }
@@ -972,7 +960,7 @@ int inventory::charges_of(itype_id it) const
                     if (stack_iter->contents[k].charges < 0) {
                         count++;
                     } else {
-                        count += stack_iter->contents[k].charges;
+                        count += stack_iter->contents[k].get_charges_of(it);
                     }
                 }
             }
@@ -1050,74 +1038,22 @@ std::list<item> inventory::use_charges(itype_id it, int quantity)
              stack_iter != iter->end() && quantity > 0;
              ++stack_iter)
         {
-            // First, check contents
-            for (int k = 0; k < stack_iter->contents.size() && quantity > 0; k++)
+            if (stack_iter->use_charges(it, quantity, ret))
             {
-                if (stack_iter->contents[k].matches_type(it))
+                stack_iter = iter->erase(stack_iter);
+                if (iter->empty())
                 {
-                    if (stack_iter->contents[k].charges <= quantity)
-                    {
-                        ret.push_back(stack_iter->contents[k]);
-                        quantity -= stack_iter->contents[k].charges;
-                        if (stack_iter->contents[k].destroyed_at_zero_charges())
-                        {
-                            stack_iter->contents.erase(stack_iter->contents.begin() + k);
-                            k--;
-                        }
-                        else
-                        {
-                            stack_iter->contents[k].charges = 0;
-                        }
-                    }
-                    else
-                    {
-                        item tmp = stack_iter->contents[k];
-                        tmp.charges = quantity;
-                        ret.push_back(tmp);
-                        stack_iter->contents[k].charges -= quantity;
-                        return ret;
-                    }
-                }
-            }
-
-            // Now check the item itself
-            if (stack_iter->matches_type(it) || stack_iter->ammo_type() == it)
-            {
-                if (stack_iter->charges <= quantity)
-                {
-                    ret.push_back(*stack_iter);
-                    if (stack_iter->charges < 0) {
-                        quantity--;
-                    } else {
-                        quantity -= stack_iter->charges;
-                    }
-                    if (stack_iter->destroyed_at_zero_charges())
-                    {
-                        stack_iter = iter->erase(stack_iter);
-                        if (iter->empty())
-                        {
-                            iter = items.erase(iter);
-                            --iter;
-                            break;
-                        }
-                        else
-                        {
-                            --stack_iter;
-                        }
-                    }
-                    else
-                    {
-                        stack_iter->charges = 0;
-                    }
+                    iter = items.erase(iter);
+                    --iter;
+                    break;
                 }
                 else
                 {
-                    item tmp = *stack_iter;
-                    tmp.charges = quantity;
-                    ret.push_back(tmp);
-                    stack_iter->charges -= quantity;
-                    return ret;
+                    --stack_iter;
                 }
+            }
+            if(quantity <= 0) {
+                return ret;
             }
         }
     }
@@ -1506,10 +1442,9 @@ int inventory::max_active_item_charges(itype_id id) const
              stack_iter != iter->end();
              ++stack_iter)
         {
-            if (stack_iter->type->id == id && stack_iter->active &&
-                stack_iter->charges > max)
+            if (stack_iter->type->id == id && stack_iter->active)
             {
-                max = stack_iter->charges;
+                max = std::max(max, stack_iter->get_charges_of(id));
             }
         }
     }

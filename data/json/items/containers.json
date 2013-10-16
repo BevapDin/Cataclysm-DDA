@@ -21,7 +21,7 @@
         "symbol": ")",
         "color": "light_cyan",
         "name": "plastic bottle",
-        "description": "A resealable plastic bottle, holds 500mls of liquid.",
+        "description": "A resealable plastic bottle, holds 500 ml of liquid.",
         "price": 8,
         "weight": 13,
         "volume": 2,
@@ -38,7 +38,7 @@
         "symbol": ")",
         "color": "cyan",
         "name": "glass bottle",
-        "description": "A resealable glass bottle, holds 750mls of liquid.",
+        "description": "A resealable glass bottle, holds 750 ml of liquid.",
         "price": 1,
         "weight": 200,
         "volume": 3,
@@ -233,7 +233,7 @@
         "cutting": 0,
         "to_hit": 1,
         "material": "glass",
-        "contains": 1,
+        "contains": 2,
         "flags": ["RIGID", "SEALS", "WATERTIGHT"]
     },
     {
@@ -250,7 +250,24 @@
         "cutting": 0,
         "to_hit": 1,
         "material": "glass",
-        "contains": 5,
+        "contains": 12,
+        "flags": ["RIGID", "SEALS", "WATERTIGHT"]
+    },
+    {
+        "id": "flask_hip",
+        "type": "CONTAINER",
+        "symbol": ")",
+        "color": "light_gray",
+        "name": "hip flask",
+        "description": "A 250 ml metal flask with a hinged screw-on lid, commonly used to discreetly transport alcohol.",
+        "price": 2500,
+        "weight": 120,
+        "volume": 1,
+        "bashing": 8,
+        "cutting": 0,
+        "to_hit": 1,
+        "material": "steel",
+        "contains": 1,
         "flags": ["RIGID", "SEALS", "WATERTIGHT"]
     },
     {
@@ -259,7 +276,7 @@
         "color":"light_cyan",
         "symbol":")","to_hit":1,
         "name":"plastic bowl",
-        "description":"A plastic bowl. Can be used as a container or as a tool. Holds 250 mls of liquid.",
+        "description":"A plastic bowl. Can be used as a container or as a tool. Holds 250 ml of liquid.",
         "cutting":0,
         "price":1,
         "weight":0,
@@ -270,5 +287,21 @@
         "material":"plastic",
         "contains":1,
         "flags":[ "RIGID" ]
+    },
+    {
+        "id": "wrapper",
+        "type": "CONTAINER"
+        "symbol": ",",
+        "color": "light_gray",
+        "name": "paper wrapper",
+        "description": "Just a piece of butcher's paper. Good for starting fires.",
+        "price": 1,
+        "weight": 3,
+        "volume": 1,
+        "bashing": -8,
+        "cutting": 0,
+        "to_hit": -2,
+        "contains": 10
+        "material": "paper"
     }
 ]

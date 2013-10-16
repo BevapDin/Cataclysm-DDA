@@ -143,6 +143,7 @@ struct itype
  struct functionality_t {
 	 float time_modi;
 	 float charges_modi;
+     functionality_t() : time_modi(1), charges_modi(1) { }
  };
  typedef std::map<std::string, functionality_t> FunctionalityMap;
  FunctionalityMap functionalityMap;
@@ -152,6 +153,13 @@ struct itype
 	 fu.time_modi = time_modi;
 	 fu.charges_modi = charges_modi;
 	 return this;
+ }
+ int getChargesModi(const std::string &name) const {
+     const FunctionalityMap::const_iterator a = functionalityMap.find(name);
+     if(a != functionalityMap.end()) {
+         return a->second.charges_modi;
+     }
+     return 1;
  }
 
  virtual bool is_food()          { return false; }
