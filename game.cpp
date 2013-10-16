@@ -8656,6 +8656,15 @@ void game::drop_in_direction()
     }
 }
 
+typedef std::pair<monster *, int> MIndex;
+struct cmp_mindex {
+ const point plpos;
+ cmp_mindex(const point &p) : plpos(p) { };
+ bool operator()(const MIndex &a, const MIndex &b) const {
+  return rl_dist(a.first->pos(), plpos) < rl_dist(b.first->pos(), plpos);
+ }
+};
+
 void game::reassign_item(char ch)
 {
  if (ch == '.') {
@@ -8713,20 +8722,26 @@ void game::plthrow(char chInput)
 
  m.draw(this, w_terrain, point(u.posx, u.posy));
 
- std::vector <monster> mon_targets;
- std::vector <int> targetindices;
- int passtarget = -1;
+ std::vector<MIndex> mindexes;
  for (int i = 0; i < num_zombies(); i++) {
    monster &z = _active_monsters[i];
    if (u_see(&z)) {
      z.draw(w_terrain, u.posx, u.posy, true);
      if(rl_dist( u.posx, u.posy, z.posx(), z.posy() ) <= range) {
-       mon_targets.push_back(z);
-       targetindices.push_back(i);
-       if (i == last_target) {
-         passtarget = mon_targets.size() - 1;
-       }
-     }
+       mindexes.push_back(MIndex(&z, i));
+	 }
+   }
+ }
+ std::sort(mindexes.begin(), mindexes.end(), cmp_mindex(u.pos()));
+
+ std::vector <monster> mon_targets;
+ std::vector <int> targetindices;
+ int passtarget = -1;
+ for (int i = 0; i < mindexes.size(); i++) {
+   mon_targets.push_back(*mindexes[i].first);
+   targetindices.push_back(mindexes[i].second);
+   if (mindexes[i].second == last_target) {
+	 passtarget = mon_targets.size() - 1;
    }
  }
 
