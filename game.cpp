@@ -119,6 +119,8 @@ void game::init_data()
 
     MonsterGenerator::generator().finalize_mtypes();
     finalize_vehicles();
+    item_controller->check_items_of_groups_exist();
+    check_recipes();
  } catch(std::string &error_message)
  {
      uquit = QUIT_ERROR;

@@ -1363,3 +1363,26 @@ recipe* recipe_by_name(std::string name)
     }
     return NULL;
 }
+
+static void check(const std::vector<std::vector<component> > &vec, const std::string &rName) {
+    for(std::vector<std::vector<component> >::const_iterator b = vec.begin(); b != vec.end(); b++) {
+        for(std::vector<component>::const_iterator c = b->begin(); c != b->end(); c++) {
+            if(!item_controller->has_template(c->type)) {
+                debugmsg("%s in recipe %s is not a valid item template", c->type.c_str(), rName.c_str());
+            }
+        }
+    }
+}
+
+void check_recipes() {
+    for(recipe_map::const_iterator a = recipes.begin(); a != recipes.end(); a++) {
+        for(recipe_list::const_iterator b = a->second.begin(); b != a->second.end(); b++) {
+            const recipe &r = **b;
+            ::check(r.tools, r.ident);
+            ::check(r.components, r.ident);
+            if(!item_controller->has_template(r.result)) {
+                debugmsg("result %s in recipe %s is not a valid item template", r.result.c_str(), r.ident.c_str());
+            }
+        }
+    }
+}
