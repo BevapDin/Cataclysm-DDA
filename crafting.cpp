@@ -1380,6 +1380,9 @@ void check_recipes() {
             const recipe &r = **b;
             ::check(r.tools, r.ident);
             ::check(r.components, r.ident);
+            if(!item_controller->has_template(r.result)) {
+                debugmsg("result %s in recipe %s is not a valid item template", r.result.c_str(), r.ident.c_str());
+            }
         }
     }
 }
