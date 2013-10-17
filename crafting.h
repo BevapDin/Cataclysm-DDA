@@ -121,4 +121,6 @@ recipe* recipe_by_name(std::string name);
 
 extern recipe_map recipes; // The list of valid recipes
 
+void check_recipes();
+
 #endif

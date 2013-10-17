@@ -84,7 +84,6 @@ void Item_factory::init(){
     iuse_function_list["GLOWSTICK"] = &iuse::glowstick;
     iuse_function_list["GLOWSTICK_ACTIVE"] = &iuse::glowstick_active;
     iuse_function_list["DIRECTIONAL_ANTENNA"] = &iuse::directional_antenna;
-    iuse_function_list["CAUTERIZE_ELEC"] = &iuse::cauterize_elec;
     iuse_function_list["SOLDER_WELD"] = &iuse::solder_weld;
     iuse_function_list["WATER_PURIFIER"] = &iuse::water_purifier;
     iuse_function_list["TWO_WAY_RADIO"] = &iuse::two_way_radio;
@@ -94,9 +93,6 @@ void Item_factory::init(){
     iuse_function_list["NOISE_EMITTER_OFF"] = &iuse::noise_emitter_off;
     iuse_function_list["NOISE_EMITTER_ON"] = &iuse::noise_emitter_on;
     iuse_function_list["ROADMAP"] = &iuse::roadmap;
-    //// These have special arguments and won't work here
-    //iuse_function_list["ROADMAP_A_TARGET"] = &iuse::roadmap_a_target;
-    //iuse_function_list["ROADMAP_TARGETS"] = &iuse::roadmap_targets;
     iuse_function_list["PICKLOCK"] = &iuse::picklock;
     iuse_function_list["CROWBAR"] = &iuse::crowbar;
     iuse_function_list["MAKEMOUND"] = &iuse::makemound;
@@ -239,6 +235,16 @@ void Item_factory::init(game* main_game) throw(std::string){
     for(std::map<Item_tag, itype*>::iterator iter = new_templates.begin(); iter != new_templates.end(); ++iter) {
       standard_itype_ids.push_back(iter->first);
     }
+}
+
+void Item_factory::check_items_of_groups_exist() const {
+    for(std::map<Item_tag, Item_group*>::const_iterator a = m_template_groups.begin(); a != m_template_groups.end(); a++) {
+        a->second->check_items_exist();
+    }
+}
+
+bool Item_factory::has_template(Item_tag id) const {
+    return m_templates.count(id) > 0;
 }
 
 //Returns the template with the given identification tag

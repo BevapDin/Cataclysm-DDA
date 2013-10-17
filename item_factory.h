@@ -17,7 +17,7 @@
 
 typedef std::string Item_tag;
 typedef std::vector<item> Item_list;
-typedef void (iuse::*Use_function)(game*,player*,item*,bool);
+typedef int (iuse::*Use_function)(game*,player*,item*,bool);
 
 //For the iuse arguments
 class game;
@@ -32,6 +32,8 @@ public:
     void init(game* main_game) throw (std::string);
 
     void load_item_group(JsonObject &jsobj);
+    
+    bool has_template(Item_tag id) const;
 
     //Intermediary Methods - Will probably be removed at final stage
     itype* find_template(Item_tag id);
@@ -59,6 +61,9 @@ public:
     void load_gunmod    (JsonObject &jo);
     void load_generic   (JsonObject &jo);
 
+    // Check that all items referenced in the groups
+    // do actually exist (are defined)
+    void check_items_of_groups_exist() const;
 private:
     std::map<Item_tag, itype*> m_templates;
     itype*  m_missing_item;
