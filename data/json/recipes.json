@@ -1818,7 +1818,7 @@
     ],
     "components": [
       [
-        [ "scrap", 5 ]
+        [ "scrap", 5 ],
         [ "lead", 50 ],
         [ "gold_small", 50 ]
       ]
@@ -5353,7 +5353,7 @@
     ],
     [
       [ "jam_strawberries", 1 ],
-      [ "jam_blueberries", 1 ]
+      [ "jam_blueberries", 1 ],
       [ "jam_fruit", 1 ],
       [ "strawberries", 1 ],
       [ "blueberries", 1 ],
@@ -15401,7 +15401,7 @@
   "tools": [
     [
       [ "func:hotplate", 2 ],
-      [ "char_smoker", 1 ]
+      [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
     [
@@ -15781,7 +15781,7 @@
       [ "func:sewing_kit", 10 ]
     ],
     [
-      [ "func:hotplate", 1]
+      [ "func:hotplate", 1],
       ["fire", -1]
     ]
   ],
@@ -16036,7 +16036,7 @@
         [ "press", -1 ]
       ],
       [
-        [ "fire", -1 ]
+        [ "fire", -1 ],
         [ "press", 2 ]
           ]
     ],
@@ -16447,7 +16447,7 @@
   "components": [
     [
        [ "apple", 2 ],
-       [ "blueberries", 2 ]
+       [ "blueberries", 2 ],
        [ "orange", 2 ],
        [ "lemon", 2 ],
        [ "banana", 2 ],
