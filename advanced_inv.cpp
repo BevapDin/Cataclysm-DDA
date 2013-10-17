@@ -222,6 +222,7 @@ void advanced_inventory::print_items(advanced_inventory_pane &pane, bool active)
 enum advanced_inv_sortby {
     SORTBY_NONE = 1 , SORTBY_NAME, SORTBY_WEIGHT, SORTBY_VOLUME, SORTBY_CHARGES, SORTBY_CATEGORY, SORTBY_DAMAGE, SORTBY_TYPE, NUM_SORTBY
 };
+static const std::string sortnames[] = { "-none-", _("none"), _("name"), _("weight"), _("volume"), _("charges"), _("category"), _("damage"), _("type"), "-" };
 
 struct advanced_inv_sort_case_insensitive_less : public std::binary_function< char,char,bool > {
     bool operator () (char x, char y) const {
@@ -614,7 +615,6 @@ void advanced_inventory::recalc_pane(int i)
 
 void advanced_inventory::redraw_pane( int i )
 {
-    std::string sortnames[] = { "-none-", _("none"), _("name"), _("weight"), _("volume"), _("charges"), _("category"), _("damage"), _("type"), "-" };
     // calculate the offset.
     getsquare(panes[i].area, panes[i].offx, panes[i].offy, panes[i].area_string, squares);
 
@@ -703,8 +703,6 @@ void advanced_inventory::display(game * gp, player * pp) {
 
     u.inv.sort();
     u.inv.restack((&g->u));
-
-    std::string sortnames[8] = { "-none-", _("none"), _("name"), _("weight"), _("volume"), _("charges"), _("category"), "-" };
 
     WINDOW *head = newwin(head_height,w_width, headstart, colstart);
     WINDOW *left_window = newwin(w_height,w_width/2, headstart+head_height,colstart);

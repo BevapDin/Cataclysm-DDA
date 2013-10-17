@@ -1129,8 +1129,7 @@ int iuse::sew(game *g, player *p, item *it, bool t)
         int choice = menu(true,
     "Choose:", "Repair damaged item", "Fit item", "Enchange item", "Cancel", NULL);
         if(choice < 1 || choice > 3) {
-            it->charges++;
-            return;
+            return 0;
         }
         std::vector<item*> tmp_inv;
         g->u.inv.dump(tmp_inv);
@@ -1155,8 +1154,7 @@ int iuse::sew(game *g, player *p, item *it, bool t)
         }
         if(ch == ' ') {
             g->add_msg("You have no matching item");
-            it->charges++;
-            return;
+            return 0;
         }
     }
     item* fix = &(p->i_at(ch));
@@ -1491,17 +1489,17 @@ int iuse::hammer(game *g, player *p, item *it, bool t)
         if(query_yn("Hammer some metal item to scraps?")) {
             char ch = g->inv("Select item to hammer");
             if(!p->has_item(ch)) {
-                return;
+                return 0;
             }
             item &it = p->i_at(ch);
             if(it.is_null() || !it.made_of("steel") || !it.contents.empty()) {
                 g->add_msg_if_player(p, "That %s is not made of steel or not empty", it.tname(g).c_str());
-                return;
+                return 0;
             }
             const int w = it.weight();
             if(w == 0 || it.volume() == 0) {
                 g->add_msg_if_player(p, "That %s is too small", it.tname(g).c_str());
-                return;
+                return 0;
             }
             itype *scrap = g->itypes["scrap"];
             int num_scraps = (w / scrap->weight) / 2;
@@ -1510,7 +1508,7 @@ int iuse::hammer(game *g, player *p, item *it, bool t)
             }
             if(num_scraps > 8 && !p->has_amount("hacksaw", 1)) {
                 g->add_msg_if_player(p, "That %s is too big, if only you had a hacksaw", it.tname(g).c_str());
-                return;
+                return 0;
             }
             for (int i = 0; i < num_scraps; i++) {
                 g->m.spawn_item(p->posx, p->posy, "scrap", 0);
@@ -5867,7 +5865,7 @@ int iuse::wood_gas(game *g, player *p, item *, bool t)
     }
     if(vol_fac == 0) {
         g->add_msg_if_player(p, "Your %s is is too small or not organic at all.", it.tname(g).c_str());
-        return;
+        return 0;
     }
     if(useStack) {
         p->inv.remove_stack_by_letter(ch);
@@ -5878,5 +5876,5 @@ int iuse::wood_gas(game *g, player *p, item *, bool t)
     item gasoline(g->itypes["gasoline"], g->turn);
     gasoline.charges = vol_fac;
     while(!g->handle_liquid(gasoline, false, false)) { }
-    return it->type->charges_to_use();
+    return 0;
 }
