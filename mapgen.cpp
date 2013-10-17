@@ -122,7 +122,7 @@ void break_windows(map &m) {
 			m.add_spawn("mon_zombie", 1, rnx, rny);
 		} else {
 			item body;
-			body.make_corpse(g->itypes["corpse"], g->mtypes[mon_null], 0);
+			body.make_corpse(g->itypes["corpse"], GetMType("mon_null"), 0);
 			m.add_item(rnx, rny, body);
 		}
 	}
