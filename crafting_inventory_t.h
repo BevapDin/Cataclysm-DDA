@@ -239,6 +239,10 @@ protected:
      * time_modi.
      */
     double compute_time_modi(const std::vector<component> &tools) const;
+    /**
+     * Same as other compute_time_modi, but stores the item
+     * which was choosen in item_that_got_used.
+     */
     double compute_time_modi(const std::vector<component> &tools, const item *&item_that_got_used) const;
     double compute_time_modi(const itype_id &itid, int count, const item *&item_that_got_used) const;
     double compute_time_modi(const std::vector<component> *begin, size_t count) const;
@@ -249,7 +253,12 @@ protected:
      * level of the player as charges) to by_bionic.
      */
     void add_bio_toolset(const bionic &bio, const calendar &turn);
-    
+    /**
+     * Populate on_map with references to items on map, 
+     * in_veh with references to items in vehicles (as cargo),
+     * vpart with pseudo items as wrapper for vehicle vparts.
+     * souround with pseudo items from the sourounding.
+     */
     void form_from_map(game *g, point origin, int distance);
     
     typedef enum { assume_components, assume_tools, assume_tools_force_available } consume_flags;
@@ -345,7 +354,10 @@ public:
      * <code>consume_tools(std::vector(1, component(type, charges)));</code>
      */
     void consume_tools(const itype_id &type, int charges, bool force_available);
-    // See veh_interact.cpp
+    /**
+     * This is similar to consume_items, but is used in vehilce
+     * interaction.
+     */
     item consume_vpart_item(game *g, const itype_id &itid);
 
     

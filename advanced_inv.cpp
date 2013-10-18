@@ -267,9 +267,9 @@ struct advanced_inv_sorter {
                     break;
                 }
                 case SORTBY_TYPE: {
-                    if(d1.it != 0 && d2.it != 0) {
-                        if(d1.it->typeId() != d2.it->typeId()) {
-                            return d1.it->typeId() < d2.it->typeId();
+                    if(d1.it != 0 && d2.it != 0 && d1.it->type != 0 && d2.it->type != 0) {
+                        if(d1.it->type->name != d2.it->type->name) {
+                            return d1.it->type->name < d2.it->type->name;
                         }
                     }
                     break;
