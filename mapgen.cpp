@@ -1339,7 +1339,8 @@ t   t\n\
           } else if (rc <= 50) { vt = "car";
           } else if (rc <= 60) { vt = "electric_car";
           } else if (rc <= 65) { vt = "hippie_van";
-          } else if (rc <= 75) { vt = "bicycle";
+          } else if (rc <= 73) { vt = "bicycle";
+          } else if (rc <= 75) { vt = "unicycle";
           } else if (rc <= 90) { vt = "motorcycle";
           } else {               vt = "motorcycle_sidecart";
           }
@@ -12495,9 +12496,10 @@ void map::place_spawns(game *g, std::string group, const int chance,
    } while( move_cost(x, y) == 0 && tries );
 
    // Pick a monster type
-   std::string monster = MonsterGroupManager::GetMonsterFromGroup( group, &g->mtypes, &num );
-
-   add_spawn(monster, 1, x, y);
+   MonsterGroupResult spawn_details = MonsterGroupManager::GetResultFromGroup( group, &g->mtypes, &num );
+  
+   //Hoping that if I pass a count of pack_size instead of 1, then more monsters will spawn. Who knows though amiright?
+   add_spawn(spawn_details.name, spawn_details.pack_size, x, y);
   }
  }
 }
@@ -12630,6 +12632,7 @@ vehicle *map::add_vehicle(game *g, std::string type, const int x, const int y, c
  veh->posy = y % SEEY;
  veh->smx = smx;
  veh->smy = smy;
+ veh->place_spawn_items();
  veh->face.init(dir);
  veh->turn_dir = dir;
  veh->precalc_mounts (0, dir);
@@ -14407,7 +14410,7 @@ void map::add_extra(map_extra type, game *g)
       case 1:
       case 2:
       case 3: placed = tr_beartrap; break;
-      case 4:
+      case 4: placed = tr_caltrops; break;
       case 5: placed = tr_nailboard; break;
       case 6: placed = tr_crossbow; break;
       case 7: placed = tr_shotgun_2; break;
@@ -14600,22 +14603,19 @@ void map::add_extra(map_extra type, game *g)
  }
  break;
 
- case mx_wolfpack:
-  add_spawn("mon_wolf", rng(3, 6), SEEX, SEEY);
-  break;
-
-  case mx_cougar:
-  add_spawn("mon_cougar", 1, SEEX, SEEY);
-  break;
-
  case mx_crater:
  {
   int size = rng(2, 6);
+  int size_squared = size * size;
   int x = rng(size, SEEX * 2 - 1 - size), y = rng(size, SEEY * 2 - 1 - size);
   for (int i = x - size; i <= x + size; i++) {
    for (int j = y - size; j <= y + size; j++) {
-    ter_set(i, j, t_rubble);
-    radiation(i, j) += rng(20, 40);
+    //If we're using circular distances, make circular craters
+    //Pythagoras to the rescue, x^2 + y^2 = hypotenuse^2
+    if(!trigdist || (((i-x)*(i-x) + (j-y)*(j-y)) <= size_squared)) {
+     destroy(g, i, j, false);
+     radiation(i, j) += rng(20, 40);
+    }
    }
   }
  }

@@ -74,6 +74,7 @@ uistatedata uistate;
 
 // This is the main game set-up process.
 game::game() :
+ uquit(QUIT_NO),
  w_terrain(NULL),
  w_minimap(NULL),
  w_HP(NULL),
@@ -84,6 +85,8 @@ game::game() :
  om_hori(NULL),
  om_vert(NULL),
  om_diag(NULL),
+ run_mode(1),
+ mostseen(0),
  gamemode(NULL)
 {
     // do nothing, everything that was in here is moved to init_data() which is called immediately after g = new game; in main.cpp
@@ -147,6 +150,9 @@ game::~game()
  delwin(w_location);
  delwin(w_status);
  delwin(w_status2);
+
+ release_traps();
+ release_data_structures();
 }
 
 // Fixed window sizes
@@ -1002,13 +1008,7 @@ void game::process_activity()
      add_msg(_("You learn a little about %s! (%d%%%%)"), reading->type->name().c_str(),
              u.skillLevel(reading->type).exercise());
 
-     if (u.skillLevel(reading->type) == originalSkillLevel && (u.activity.continuous || query_yn(_("Study %s?"), reading->type->name().c_str()))) {
-      //If we just started studying, tell the player how to stop
-      if(!u.activity.continuous) {
-        add_msg(_("Now studying %s, %s to stop early."),
-              reading->type->name().c_str(),
-              press_x(ACTION_PAUSE).c_str());
-      }
+     if (u.skillLevel(reading->type) == originalSkillLevel && u.activity.continuous) {
       u.cancel_activity();
       if (u.activity.index == -2) {
        u.read(this,u.weapon.invlet);
@@ -5586,7 +5586,7 @@ void game::resonance_cascade(int x, int y)
 {
  int maxglow = 100 - 5 * trig_dist(x, y, u.posx, u.posy);
  int minglow =  60 - 5 * trig_dist(x, y, u.posx, u.posy);
- std::string spawn;
+ MonsterGroupResult spawn_details;
  monster invader;
  if (minglow < 0)
   minglow = 0;
@@ -5635,8 +5635,8 @@ void game::resonance_cascade(int x, int y)
    case 13:
    case 14:
    case 15:
-    spawn = MonsterGroupManager::GetMonsterFromGroup("GROUP_NETHER", &mtypes);
-    invader = monster(GetMType(spawn), i, j);
+    spawn_details = MonsterGroupManager::GetResultFromGroup("GROUP_NETHER", &mtypes);
+    invader = monster(GetMType(spawn_details.name), i, j);
     add_zombie(invader);
     break;
    case 16:
@@ -6716,7 +6716,7 @@ point game::look_around()
  draw_ter();
  int lx = u.posx + u.view_offset_x, ly = u.posy + u.view_offset_y;
  int mx, my;
- InputEvent input;
+ mapped_input input;
 
  const int lookHeight = 13;
  const int lookWidth = getmaxx(w_messages);
@@ -6874,19 +6874,25 @@ point game::look_around()
   wrefresh(w_terrain);
 
   DebugLog() << __FUNCTION__ << ": calling get_input() \n";
-  input = get_input();
+  input = get_input_from_kyb_mouse();
   if (!u_see(lx, ly))
    mvwputch(w_terrain, POSY + (ly - u.posy), POSX + (lx - u.posx), c_black, ' ');
-  get_direction(mx, my, input);
-  if (mx != -2 && my != -2) { // Directional key pressed
-   lx += mx;
-   ly += my;
+  if (input.evt.type != CATA_INPUT_MOUSE) {
+      get_direction(mx, my, input.command);
+      if (mx != -2 && my != -2) { // Directional key pressed
+       lx += mx;
+       ly += my;
+      }
+  } else if (input.evt.get_first_input() == MOUSE_BUTTON_LEFT) {
+      // Left click on map
+      lx = input.evt.mouse_x;
+      ly = input.evt.mouse_y;
   }
- } while (input != Close && input != Cancel && input != Confirm);
+ } while (input.command != Close && input.command != Cancel && input.command != Confirm);
 
  werase(w_look);
  delwin(w_look);
- if (input == Confirm)
+ if (input.command == Confirm)
   return point(lx, ly);
  return point(-1, -1);
 }
@@ -7709,6 +7715,9 @@ void game::pickup(int posx, int posy, int min)
  int selected=0;
  int last_selected=-1;
 
+ int itemcount = 0;
+ std::map<int, unsigned int> pickup_count; // Count of how many we'll pick up from each stack
+
  if (min == -1) { //Auto Pickup, select matching items
     bool bFoundSomething = false;
 
@@ -7756,12 +7765,16 @@ void game::pickup(int posx, int posy, int min)
  // Now print the two lists; those on the ground and about to be added to inv
  // Continue until we hit return or space
   do {
-   static const std::string pickup_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:;";
+   static const std::string pickup_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:;";
    size_t idx=-1;
    for (int i = 1; i < pickupH; i++) {
      mvwprintw(w_pickup, i, 0, "                                                ");
    }
-   if ((ch == '<' || ch == KEY_PPAGE) && start > 0) {
+   if (ch >= '0' && ch <= '9') {
+       ch = (char)ch - '0';
+       itemcount *= 10;
+       itemcount += ch;
+   } else if ((ch == '<' || ch == KEY_PPAGE) && start > 0) {
     start -= maxitems;
     selected = start;
     mvwprintw(w_pickup, maxitems + 2, 0, "         ");
@@ -7804,6 +7817,16 @@ void game::pickup(int posx, int posy, int min)
        idx = pickup_chars.find(ch);
    }
 
+   if(idx != -1)
+   {
+       if(itemcount != 0 || pickup_count[idx] == 0)
+       {
+           pickup_count[idx] = itemcount;
+           itemcount = 0;
+
+       }
+   }
+
    if ( idx < here.size()) {
     getitem[idx] = ( ch == KEY_RIGHT ? true : ( ch == KEY_LEFT ? false : !getitem[idx] ) );
     if ( ch != KEY_RIGHT && ch != KEY_LEFT) {
@@ -7812,11 +7835,28 @@ void game::pickup(int posx, int posy, int min)
     }
 
     if (getitem[idx]) {
-        new_weight += here[idx].weight();
-        new_volume += here[idx].volume();
+        if((pickup_count[idx] != 0) && (pickup_count[idx] < here[idx].charges))
+        {
+            item temp = here[idx].clone();
+            temp.charges = pickup_count[idx];
+            new_weight += temp.weight();
+            new_volume += temp.volume();
+        } else {
+            new_weight += here[idx].weight();
+            new_volume += here[idx].volume();
+        }
     } else {
-        new_weight -= here[idx].weight();
-        new_volume -= here[idx].volume();
+        if((pickup_count[idx] != 0) && (pickup_count[idx] < here[idx].charges))
+        {
+            item temp = here[idx].clone();
+            temp.charges = pickup_count[idx];
+            new_weight -= temp.weight();
+            new_volume -= temp.volume();
+            pickup_count[idx] = 0;
+        } else {
+            new_weight -= here[idx].weight();
+            new_volume -= here[idx].volume();
+        }
     }
     update = true;
    }
@@ -7870,7 +7910,12 @@ void game::pickup(int posx, int posy, int min)
         mvwprintz(w_pickup, 1 + (cur_it % maxitems), 0, icolor, "`%c%c",char(pickup_chars[p1]),char(pickup_chars[p2]));
      }
      if (getitem[cur_it])
-      wprintz(w_pickup, c_ltblue, " + ");
+         if(pickup_count[cur_it] == 0)
+         {
+             wprintz(w_pickup, c_ltblue, " + ");
+         } else {
+             wprintz(w_pickup, c_ltblue, " # ");
+         }
      else
       wprintw(w_pickup, " - ");
      wprintz(w_pickup, icolor, here[cur_it].tname(this).c_str());
@@ -7945,6 +7990,19 @@ void game::pickup(int posx, int posy, int min)
     iter++;
     advance_nextinv();
    }
+
+   if(pickup_count[i] != 0)
+   {
+       int leftover_charges = here[i].charges - pickup_count[i];
+       if(leftover_charges > 0)
+       {
+           item temp = here[i].clone();
+           temp.charges = leftover_charges;
+           here[i].charges = pickup_count[i];
+           m.add_item(posx, posy, temp);
+       }
+   }
+
    if (iter == inv_chars.size()) {
     add_msg(_("You're carrying too many items!"));
     werase(w_pickup);
@@ -10949,38 +11007,40 @@ void game::spawn_mon(int shiftx, int shifty)
    if (group > 0) // If we spawned some zombies, advance the timer
     nextspawn += rng(group * 4 + num_zombies() * 4, group * 10 + num_zombies() * 10);
 
-   for (int j = 0; j < group; j++) { // For each monster in the group...
-     std::string type = MonsterGroupManager::GetMonsterFromGroup( cur_om->zg[i].type, &mtypes,
+   for (int j = 0; j < group; j++) { // For each monster in the group get some spawn details
+     MonsterGroupResult spawn_details = MonsterGroupManager::GetResultFromGroup( cur_om->zg[i].type, &mtypes,
                                                              &group, (int)turn );
-     zom = monster(GetMType(type));
-     iter = 0;
-     do {
-      monx = rng(0, SEEX * MAPSIZE - 1);
-      mony = rng(0, SEEY * MAPSIZE - 1);
-      if (shiftx == 0 && shifty == 0) {
-       if (one_in(2))
-        shiftx = 1 - 2 * rng(0, 1);
-       else
-        shifty = 1 - 2 * rng(0, 1);
-      }
-      if (shiftx == -1)
-       monx = (SEEX * MAPSIZE) / 6;
-      else if (shiftx == 1)
-       monx = (SEEX * MAPSIZE * 5) / 6;
-      if (shifty == -1)
-       mony = (SEEY * MAPSIZE) / 6;
-      if (shifty == 1)
-       mony = (SEEY * MAPSIZE * 5) / 6;
-      monx += rng(-5, 5);
-      mony += rng(-5, 5);
-      iter++;
+     zom = monster(GetMType(spawn_details.name));
+     for (int kk = 0; kk < spawn_details.pack_size; kk++){
+       iter = 0;
+       do {
+        monx = rng(0, SEEX * MAPSIZE - 1);
+        mony = rng(0, SEEY * MAPSIZE - 1);
+        if (shiftx == 0 && shifty == 0) {
+         if (one_in(2))
+          shiftx = 1 - 2 * rng(0, 1);
+         else
+          shifty = 1 - 2 * rng(0, 1);
+        }
+        if (shiftx == -1)
+         monx = (SEEX * MAPSIZE) / 6;
+        else if (shiftx == 1)
+         monx = (SEEX * MAPSIZE * 5) / 6;
+        if (shifty == -1)
+         mony = (SEEY * MAPSIZE) / 6;
+        if (shifty == 1)
+         mony = (SEEY * MAPSIZE * 5) / 6;
+        monx += rng(-5, 5);
+        mony += rng(-5, 5);
+        iter++;
 
-     } while ((!zom.can_move_to(this, monx, mony) || !is_empty(monx, mony) ||
-               m.sees(u.posx, u.posy, monx, mony, SEEX, t) || !m.is_outside(monx, mony) ||
-               rl_dist(u.posx, u.posy, monx, mony) < 8) && iter < 50);
-     if (iter < 50) {
-      zom.spawn(monx, mony);
-      add_zombie(zom);
+       } while ((!zom.can_move_to(this, monx, mony) || !is_empty(monx, mony) ||
+                 m.sees(u.posx, u.posy, monx, mony, SEEX, t) || !m.is_outside(monx, mony) ||
+                 rl_dist(u.posx, u.posy, monx, mony) < 8) && iter < 50);
+       if (iter < 50) {
+        zom.spawn(monx, mony);
+        add_zombie(zom);
+       }
      }
    } // Placing monsters of this group is done!
    if (cur_om->zg[i].population <= 0) { // Last monster in the group spawned...
