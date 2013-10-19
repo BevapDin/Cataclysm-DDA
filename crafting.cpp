@@ -924,8 +924,7 @@ void game::add_known_recipes(std::vector<recipe*> &current, recipe_list source, 
     current.insert(current.begin(),can_craft.begin(),can_craft.end());
 }
 
-int move_ppoints_for_crafting(const recipe &making) {
-	crafting_inventory_t total_inv(g, &g->u);
+int move_ppoints_for_crafting(const recipe &making, crafting_inventory_t &total_inv) {
 	int move_points = making.time;
 	const double toolfactor = total_inv.compute_time_modi(making);
 	if(toolfactor > 0 && toolfactor != 1) {
@@ -937,7 +936,9 @@ int move_ppoints_for_crafting(const recipe &making) {
 
 void game::make_craft(recipe *making)
 {
- u.assign_activity(this, ACT_CRAFT, move_ppoints_for_crafting(*making), making->id);
+ crafting_inventory_t craft_inv(g, &g->u);
+ u.assign_activity(this, ACT_CRAFT, move_ppoints_for_crafting(*making, craft_inv), making->id);
+ craft_inv.gather_input(*making, u.activity.str_values);
  u.moves = 0;
  u.lastrecipe = making;
 }
@@ -1022,17 +1023,9 @@ void game::complete_craft()
  }
 // If we're here, the craft was a success!
 // Use up the components and tools
- std::list<item> used;
- for (int i = 0; i < making->components.size(); i++) {
-  if (making->components[i].size() > 0) {
-   std::list<item> tmp = crafting_inv.consume_items(making->components[i]);
-   used.splice(used.end(), tmp);
-  }
- }
- for (int i = 0; i < making->tools.size(); i++) {
-  if (making->tools[i].size() > 0)
-   crafting_inv.consume_tools(making->tools[i], false);
- }
+// std::list<item> used = crafting_inv.consume_items(making->components);
+// crafting_inv.consume_tools(making->tools, false);
+ std::list<item> used = crafting_inv.consume_gathered(*making, u.activity.str_values);
 
  item newit(item_controller->find_template(making->result), turn);
  int new_count = 1;

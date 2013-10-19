@@ -582,17 +582,19 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
             if ((g->m.field_at(x, y).findField(fd_fire)) || (terrain_id == t_lava)) {
                 item fire(g->itypes["fire"], 0);
                 fire.charges = 1;
-                souround.push_back(item_from_souround(p, fire));
+                surround.push_back(item_from_surrounding(p, fire));
             }
             if (terrain_id == t_water_sh || terrain_id == t_water_dp) {
                 item water(g->itypes["water"], 0);
                 water.charges = 50;
-                souround.push_back(item_from_souround(p, water));
+                surround.push_back(item_from_surrounding(p, water));
             }
 
             int vpart = -1;
             vehicle *veh = g->m.veh_at(x, y, vpart);
-            if (veh) {
+            // include only non-moving cars. This ensures that the car
+            // is still there _after_ the crafting.
+            if (veh && veh->cruise_velocity == 0 && veh->velocity == 0) {
                 const int kpart = veh->part_with_feature(vpart, "KITCHEN");
                 if (kpart >= 0) {
                     item kitchen(g->itypes["vpart_kitchen_unit"], 0);
@@ -613,7 +615,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 
                 const int cpart = veh->part_with_feature(vpart, "CARGO");
                 if (cpart >= 0) {
-                    items_in_vehicle inveh(veh, cpart, &(veh->parts[cpart].items));
+                    items_in_vehicle_cargo inveh(veh, cpart, &(veh->parts[cpart].items));
                     if(!inveh.items->empty()) {
                         in_veh.push_back(inveh);
                     }

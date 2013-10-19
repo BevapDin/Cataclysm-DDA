@@ -7,6 +7,10 @@
 #include "crafting.h"
 #include <algorithm>
 
+bool operator==(const point &a, const point &b) {
+    return a.x == b.x && a.y == b.y;
+}
+
 crafting_inventory_t::crafting_inventory_t(game *g, player *p)
 : p(p)
 {
@@ -98,37 +102,37 @@ bool crafting_inventory_t::has_all(std::vector< std::vector<component> > &xs, bo
 }
 
 
-int crafting_inventory_t::amount_of(const itype_id &type, const item &it)
+int crafting_inventory_t::amount_of(const itype_id &type, const item &the_item)
 {
     int count = 0;
-    if(it.matches_type(type)) {
-        // check if it's a container, if so, it should be empty
-        if (it.type->is_container()) {
-            if (it.contents.empty()) {
+    if(the_item.matches_type(type)) {
+        // check if the_item's a container, if so, the_item should be empty
+        if (the_item.type->is_container()) {
+            if (the_item.contents.empty()) {
                 count++;
             }
         } else {
             count++;
         }
     }
-    for (int k = 0; k < it.contents.size(); k++) {
-        count += amount_of(type, it.contents[k]);
+    for (int k = 0; k < the_item.contents.size(); k++) {
+        count += amount_of(type, the_item.contents[k]);
     }
     return count;
 }
 
-int crafting_inventory_t::charges_of(const itype_id &type, const item &it)
+int crafting_inventory_t::charges_of(const itype_id &type, const item &the_item)
 {
     int count = 0;
-    if(it.matches_type(type)) {
-        if (it.charges < 0) {
+    if(the_item.matches_type(type)) {
+        if (the_item.charges < 0) {
             count++;
         } else {
-            count += it.get_charges_of(type);
+            count += the_item.get_charges_of(type);
         }
     }
-    for (int k = 0; k < it.contents.size(); k++) {
-        count += charges_of(type, it.contents[k]);
+    for (int k = 0; k < the_item.contents.size(); k++) {
+        count += charges_of(type, the_item.contents[k]);
     }
     return count;
 }
@@ -165,7 +169,7 @@ int crafting_inventory_t::count(const itype_id &type, count_type what, int max, 
         }
     }
     if(sources & S_VEHICLE) {
-        for(std::list<items_in_vehicle>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
+        for(std::list<items_in_vehicle_cargo>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
             const std::vector<item> &items = *(a->items);
             for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
                 if(b->made_of(LIQUID)) {
@@ -175,27 +179,202 @@ int crafting_inventory_t::count(const itype_id &type, count_type what, int max, 
             }
         }
         for(std::list<item_from_vpart>::const_iterator a = vpart.begin(); a != vpart.end(); ++a) {
-            COUNT_IT_(a->it);
+            COUNT_IT_(a->the_item);
         }
     }
     if(sources & S_PLAYER) {
         for(std::list<item_from_bionic>::const_iterator a = by_bionic.begin(); a != by_bionic.end(); ++a) {
-            COUNT_IT_(a->it);
+            COUNT_IT_(a->the_item);
         }
     }
     if(sources & S_MAP) {
-        for(std::list<item_from_souround>::const_iterator a = souround.begin(); a != souround.end(); ++a) {
-            COUNT_IT_(a->it);
+        for(std::list<item_from_surrounding>::const_iterator a = surround.begin(); a != surround.end(); ++a) {
+            COUNT_IT_(a->the_item);
         }
     }
     return count;
 }
 #undef COUNT_IT_
 
+bool crafting_inventory_t::candidate_item::valid() const {
+    switch(location) {
+        case LT_MAP:
+            return mapitems != NULL && mindex < mapitems->items->size();
+        case LT_SURROUNDING:
+            return surroundings != NULL;
+        case LT_VEHICLE_CARGO:
+            return vitems != NULL && iindex < vitems->items->size();
+        case LT_VPART:
+            return vpartitem != NULL;
+        case LT_WEAPON:
+            return true;
+        case LT_INVENTORY:
+            return invlet > ' '; // Or something else?
+        case LT_BIONIC:
+            return bionic != NULL;
+        default:
+            return false;
+    }
+}
+
+#include "picojson.h"
+void crafting_inventory_t::candidate_item::deserialize(crafting_inventory_t &cinv, const std::string &data) {
+    picojson::value pjv;
+    const char *s = data.c_str();
+    std::string err = picojson::parse(pjv, s, s + data.length());
+    assert(err.empty());
+    deserialize(cinv, pjv);
+}
+
+void crafting_inventory_t::candidate_item::deserialize(crafting_inventory_t &cinv, const picojson::value &pjv) {
+    using namespace picojson;
+    assert(pjv.is<object>());
+    assert(pjv.contains("location"));
+    assert(pjv.get("location").is<int>());
+    location = (LocationType) pjv.get("location").get<double>();
+    point tmppnt;
+    std::string tmpstr;
+    switch(location) {
+        case LT_MAP:
+            tmppnt.x = (int) pjv.get("x").get<double>();
+            tmppnt.y = (int) pjv.get("y").get<double>();
+            mapitems = NULL;
+            for(std::list<items_on_map>::iterator a = cinv.on_map.begin(); a != cinv.on_map.end(); ++a) {
+                if(a->position == tmppnt) {
+                    mapitems = &(*a);
+                    break;
+                }
+            }
+            mindex = (int) pjv.get("index").get<double>();
+            break;
+        case LT_SURROUNDING:
+            tmppnt.x = (int) pjv.get("x").get<double>();
+            tmppnt.y = (int) pjv.get("y").get<double>();
+            tmpstr = pjv.get("type").get<std::string>();
+            surroundings = NULL;
+            for(std::list<item_from_surrounding>::iterator a = cinv.surround.begin(); a != cinv.surround.end(); ++a) {
+                if(a->position == tmppnt
+                    && a->the_item.type->id == tmpstr
+                ) {
+                    surroundings = &(*a);
+                }
+            }
+            break;
+        case LT_VEHICLE_CARGO:
+            tmppnt.x = (int) pjv.get("vehptr").get<double>();
+            tmppnt.y = (int) pjv.get("part").get<double>();
+            vitems = NULL;
+            for(std::list<items_in_vehicle_cargo>::iterator a = cinv.in_veh.begin(); a != cinv.in_veh.end(); ++a) {
+                if(reinterpret_cast<int>(a->veh) == tmppnt.x
+                    && a->part_num == tmppnt.y
+                ) {
+                    vitems = &(*a);
+                    break;
+                }
+            }
+            iindex = (int) pjv.get("index").get<double>();
+            break;
+        case LT_VPART:
+            tmppnt.x = (int) pjv.get("vehptr").get<double>();
+            tmppnt.y = (int) pjv.get("part").get<double>();
+            vpartitem = NULL;
+            tmpstr = pjv.get("type").get<std::string>();
+            for(std::list<item_from_vpart>::iterator a = cinv.vpart.begin(); a != cinv.vpart.end(); ++a) {
+                if(reinterpret_cast<int>(a->veh) == tmppnt.x
+                    && a->part_num == tmppnt.y
+                    && a->the_item.type->id == tmpstr
+                ) {
+                    vpartitem = &(*a);
+                    break;
+                }
+            }
+            break;
+        case LT_WEAPON:
+            break;
+        case LT_INVENTORY:
+            invlet = (char) ((int) pjv.get("invlet").get<double>());
+            break;
+        case LT_BIONIC:
+            bionic = NULL;
+            tmpstr = pjv.get("bio_id").get<std::string>();
+            for(std::list<item_from_bionic>::iterator a = cinv.by_bionic.begin(); a != cinv.by_bionic.end(); ++a) {
+                if(a->bio_id == tmpstr) {
+                    bionic = &(*a);
+                    break;
+                }
+            }
+            break;
+        default:
+            debugmsg("Unknown %d location in candidate_item::deserialize", (int) location);
+            break;
+    }
+}
+
+
+std::string crafting_inventory_t::candidate_item::serialize() const {
+    picojson::value v;
+    serialize(v);
+    return v.serialize();
+}
+
+#define pv(x) picojson::value(x)
+void crafting_inventory_t::candidate_item::serialize(picojson::value &v) const {
+    picojson::object pjmap;
+    pjmap["location"] = pv((int) location);
+    switch(location) {
+        case LT_MAP:
+            pjmap["x"] = pv(mapitems->position.x);
+            pjmap["y"] = pv(mapitems->position.y);
+            pjmap["index"] = pv(mindex);
+            break;
+        case LT_SURROUNDING:
+            pjmap["x"] = pv(surroundings->position.x);
+            pjmap["y"] = pv(surroundings->position.y);
+            pjmap["type"] = pv(surroundings->the_item.type->id);
+            break;
+        case LT_VEHICLE_CARGO:
+            // Note: this casts a pointer to int, this is not stable after
+            // e.g. restarting.
+            // BUT: this value is read in and searched for in the crafting_inventory_t,
+            // if there is no matching vehicle found, than we reset the_item to NULL.
+            pjmap["vehptr"] = pv(reinterpret_cast<int>(vitems->veh));
+            pjmap["part"] = pv(vitems->part_num);
+            pjmap["index"] = pv(iindex);
+            break;
+        case LT_VPART:
+            // Note: see above case LT_VEHICLE_CARGO
+            pjmap["vehptr"] = pv(reinterpret_cast<int>(vitems->veh));
+            pjmap["part"] = pv(vitems->part_num);
+            pjmap["type"] = pv(vpartitem->the_item.type->id);
+            break;
+        case LT_WEAPON:
+            break;
+        case LT_INVENTORY:
+            pjmap["invlet"] = pv(static_cast<int>(invlet));
+            break;
+        case LT_BIONIC:
+            pjmap["bio_id"] = pv(bionic->bio_id);
+            break;
+        default:
+            debugmsg("Unknown %d location in candidate_item", (int) location);
+            break;
+    }
+    v = picojson::value(pjmap);
+}
+#undef pv
+
+
+void crafting_inventory_t::consume_tools(const std::vector< std::vector<component> > &tools, bool force_available)
+{
+    for(size_t i = 0; i < tools.size(); i++) {
+        consume_tools(tools[i], force_available);
+    }
+}
 
 void crafting_inventory_t::consume_tools(const std::vector<component> &tools, bool force_available)
 {
-    consume(tools, force_available ? assume_tools_force_available : assume_tools);
+    std::list<item> tmplist;
+    consume(tools, force_available ? assume_tools_force_available : assume_tools, tmplist);
 }
 
 #if 0
@@ -260,14 +439,6 @@ void crafting_inventory_t::consume_tools(const std::vector<component> &tools, bo
 }
 #endif
 
-#if 0
-void crafting_inventory_t::consume_tools(const std::vector< std::vector<component> > &tools, bool force_available)
-{
-    for (int i = 0; i < tools.size(); i++) {
-        crafting_inv.consume_tools(tools[i], force_available);
-    }
-}
-#endif
 void crafting_inventory_t::consume_tools(const itype_id &type, int charges, bool force_available)
 {
     std::vector<component> components;
@@ -276,7 +447,7 @@ void crafting_inventory_t::consume_tools(const itype_id &type, int charges, bool
     consume_tools(components, force_available);
 }
 
-bool crafting_inventory_t::has_different_types(const std::vector<candidate_item> &cv) {
+bool crafting_inventory_t::has_different_types(const civec &cv) {
     for(size_t i = 0; i + 1 < cv.size(); i++) {
         if(cv[i].the_item.type != cv[i + 1].the_item.type) {
             return true;
@@ -285,7 +456,7 @@ bool crafting_inventory_t::has_different_types(const std::vector<candidate_item>
     return false;
 }
 
-void crafting_inventory_t::filter(std::vector<candidate_item> &cv, source_flags sources) {
+void crafting_inventory_t::filter(civec &cv, source_flags sources) {
     for(size_t i = 0; i < cv.size(); ) {
         if(!cv[i].is_source(sources)) {
             cv.erase(cv.begin() + i);
@@ -295,182 +466,353 @@ void crafting_inventory_t::filter(std::vector<candidate_item> &cv, source_flags 
     }
 }
 
-std::list<item> crafting_inventory_t::consume_items(const std::vector<component> &components)
+std::list<item> crafting_inventory_t::consume_gathered(const std::vector< std::vector<component> > &components, consume_flags flags, std::vector<std::string> &strVec)
 {
-    return consume(components, assume_components);
+    std::list<item> used_items;
+    size_t indexInStrVec = 0;
+    for (int i = 0; i < components.size(); i++) {
+        const std::vector<component> &cv = components[i];
+        if(cv.empty()) {
+            continue;
+        }
+        civec vec_to_consume_from;
+        int index_of_component;
+        if(indexInStrVec < strVec.size()) {
+            index_of_component = deserialize(strVec[indexInStrVec], vec_to_consume_from);
+            if(index_of_component == -1) {
+                strVec.clear();
+            }
+            indexInStrVec++;
+        }
+        if(vec_to_consume_from.empty()) {
+            index_of_component = select_items_to_use(cv, flags, vec_to_consume_from);
+        }
+        if(index_of_component >= 0) {
+            const requirement reqToRemove(cv[index_of_component], flags != assume_components);
+            consume(reqToRemove, vec_to_consume_from, used_items);
+        } else {
+            debugmsg("no suitable component recovered");
+        }
+    }
+    if(indexInStrVec == strVec.size() && indexInStrVec > 0) {
+        strVec.clear();
+    } else if(indexInStrVec > 0 && indexInStrVec < strVec.size()) {
+        strVec.erase(strVec.begin(), strVec.begin() + indexInStrVec);
+    }
+    return used_items;
 }
 
-std::list<item> crafting_inventory_t::consume(const std::vector<component> &components, consume_flags flags)
+std::list<item> crafting_inventory_t::consume_gathered(const recipe &making, std::vector<std::string> &strVec) {
+    consume_gathered(making.tools, assume_tools, strVec);
+    std::list<item> used_items = consume_gathered(making.components, assume_components, strVec);
+    return used_items;
+}
+
+int crafting_inventory_t::deserialize(const std::string &data, civec &vec) {
+    using namespace picojson;
+    picojson::value pjv;
+    const char *s = data.c_str();
+    std::string err = picojson::parse(pjv, s, s + data.length());
+    assert(err.empty());
+    assert(pjv.is<picojson::array>());
+    assert(pjv.contains(0));
+    const int index = (int) pjv.get(0).get<double>();
+    vec.clear();
+    for(size_t i = 1; pjv.contains(i); i++) {
+        candidate_item ci(*this, pjv.get(i));
+        if(!ci.valid()) {
+            debugmsg("failed to deserialize");
+            vec.clear();
+            return -1;
+        }
+        vec.push_back(ci);
+    }
+    return index;
+}
+
+std::string crafting_inventory_t::serialize(int index, const civec &vec) {
+    assert(!vec.empty());
+    std::ostringstream buffer;
+    buffer << "[" << index;
+    for(size_t i = 0; i < vec.size(); i++) {
+        buffer << "," << vec[i].serialize();
+    }
+    buffer << "]";
+    return buffer.str();
+}
+
+void crafting_inventory_t::gather_inputs(const std::vector< std::vector<component> > &components, consume_flags flags, std::vector<std::string> &strVec)
 {
-    std::list<item> ret;
+    for (int i = 0; i < components.size(); i++) {
+        const std::vector<component> &cv = components[i];
+        if(cv.empty()) {
+            continue;
+        }
+        civec vec_to_consume_from;
+        const int index_of_component = select_items_to_use(cv, flags, vec_to_consume_from);
+        if(index_of_component >= 0) {
+            strVec.push_back(serialize(index_of_component, vec_to_consume_from));
+        } else {
+            strVec.push_back(std::string(""));
+        }
+    }
+}
+
+void crafting_inventory_t::gather_input(const recipe &making, std::vector<std::string> &strVec) {
+    gather_inputs(making.tools, assume_tools, strVec);
+    gather_inputs(making.components, assume_components, strVec);
+}
+
+std::list<item> crafting_inventory_t::consume_items(const std::vector< std::vector<component> > &components)
+{
+    std::list<item> result;
+    for (int i = 0; i < components.size(); i++) {
+        consume(components[i], assume_components, result);
+    }
+    return result;
+}
+
+std::list<item> crafting_inventory_t::consume_items(const std::vector<component> &components)
+{
+    std::list<item> tmplist;
+    consume(components, assume_components, tmplist);
+    return tmplist;
+}
+
+typedef enum {
+    single_choise,
+    ask_again,
+    nearby,
+    person,
+    mixed
+} menu_entry_type;
+
+int crafting_inventory_t::select_items_to_use(const std::vector<component> &components, consume_flags flags, civec &selected_items)
+{
     if(components.empty()) {
-        return ret;
+        return -1;
     }
     typedef std::vector<civec> civecvec;
     
     // for each component of the set, this array
-    // contains a civec with all the items that can be used
-    // as component (basicly those items matches_type the component::type).
-    civecvec has(components.size());
-     // List for the menu_vec below, contains the menu entries that should be displayed.
+    // contains a civec with all the candidate items that can be used
+    // as component (basicly those items for witch
+    // matches_type(component::type) return true).
+    civecvec available_items(components.size());
+    // List for the menu_vec below, contains the menu entries
+    // that should be displayed. This is used to display possible
+    // choises to the user.
     std::vector<std::string> options;
-    // pair<int, int> = { menu_entry_type, index into has }
     // the menu_entry_type defines what we do if the user selects that menu entry.
-    // the second value is just the index into the has array that belongs
+    // the second value is just the index into the available_items array that belongs
     // to this option.
-    std::vector< std::pair<int, int> > optionsIndizes;
+    std::vector< std::pair<menu_entry_type, int> > optionsIndizes;
     
     for (int i = 0; i < components.size(); i++) {
+        // stores the candidates that can be used as components[i]
+        civec &candids = available_items[i];
+        // Requirement for components[i]
         const requirement req(components[i], flags != assume_components);
-        const int pc = collect_candidates(req, S_FROM_PLAYER, has[i]);
-        const int mc = collect_candidates(req, S_FROM_MAP, has[i]);
+        // Collect candidates from map and from player
+        // note: collect_candidates appends to the vector
+        const int pc = collect_candidates(req, S_FROM_PLAYER, candids);
+        const int mc = collect_candidates(req, S_FROM_MAP, candids);
         if(mc + pc < req.count) {
-            // Not enough items of this type
+            // Not enough items of this type, the requirement can not
+            // be fullfilled, so skip this component
             continue;
         }
-        assert(has[i].size() > 0);
-        if(has[i].size() == 1) {
+        assert(candids.size() > 0); // must have at least one, otherwise mc+pc==0
+        if(candids.size() == 1) {
             // Only one possible choice
-            options.push_back(has[i].front().to_string());
-            optionsIndizes.push_back(std::pair<int, int>(-1, i));
-        } else if(has_different_types(has[i])) {
+            options.push_back(candids.front().to_string());
+            optionsIndizes.push_back(std::make_pair(single_choise, i));
+        } else if(has_different_types(candids)) {
             // several items to choose, and they are of different types, 
             // make another menu later if the user chooses this
             options.push_back(item_controller->find_template(req.type)->name + " (different items)");
-            optionsIndizes.push_back(std::pair<int, int>(-2, i));
+            optionsIndizes.push_back(std::make_pair(ask_again, i));
         } else {
             // several items, but they are all of the same type, list by location,
             const std::string &name = item_controller->find_template(req.type)->name;
-            // Rules here are: show entry for on person, for nearby (if any of
-            // them apply
-            // also show the mixed entry, but only if none of the other two
+            // Rules here are: show entry for "on person",
+            // for "nearby" (if any of them apply).
+            // Also show the mixed entry, but only if none of the other two
             // are shown
             if(mc >= req.count) {
                 options.push_back(name + " (nearby)");
-                optionsIndizes.push_back(std::pair<int, int>(-3, i));
+                optionsIndizes.push_back(std::make_pair(nearby, i));
             }
             if(pc >= req.count) {
                 options.push_back(name);
-                optionsIndizes.push_back(std::pair<int, int>(-4, i));
+                optionsIndizes.push_back(std::make_pair(person, i));
             }
             if(mc < req.count && pc < req.count) {
                 assert(mc + pc >= req.count);
                 options.push_back(name + " (on person & nearby)");
-                optionsIndizes.push_back(std::pair<int, int>(-5, i));
+                optionsIndizes.push_back(std::make_pair(mixed, i));
             }
         }
     }
     if(options.size() == 0) {
-        debugmsg("Attempted a recipe with no available components!");
-        return ret;
+        debugmsg("Attempted to select_items_to_use with no available components!");
+        return -1;
     }
     int selection = 0;
-    if(options.size() != 1) { // no user-interaction needed if only one choise
+    if(options.size() != 1) {
+        // no user-interaction needed if only one choise
         selection = menu_vec(false, "Use which component?", options) - 1;
     }
     assert(selection >= 0 && selection < options.size());
     assert(options.size() == optionsIndizes.size());
-    const int menu_entry_type = optionsIndizes[selection].first;
     const int index_of_component = optionsIndizes[selection].second;
     // The user has choosen this selection of items:
-    civec &vec_to_consume_from = has[index_of_component];
+    civec &vec_to_consume_from = available_items[index_of_component];
     // They are based on components[index_of_component], make a requirement
-    // from it.
+    // from the_item.
     requirement reqToRemove(components[index_of_component], flags != assume_components);
-    if(menu_entry_type == -1) {
-        // only one item in list, use this anyway, their is no choice
-    } else if(menu_entry_type == -3) {
-        // use only items from map
-        filter(vec_to_consume_from, S_MAP);
-    } else if(menu_entry_type == -4) {
-        // use only items from player
-        filter(vec_to_consume_from, S_PLAYER);
-    } else if(menu_entry_type == -5) {
-        // use items from both sources, no filtering or changes needed
-    } else if(menu_entry_type == -2) {
-        // ask user for specific items
-        // sort to make it nicer looking
-        std::sort(vec_to_consume_from.begin(), vec_to_consume_from.end(), std::less<candidate_item>());
-        // stores which items the user has selected (
-        std::vector<bool> selected(vec_to_consume_from.size(), false);
-        // the (summed up) charges (as told by requirement::get_charges_or_amount)
-        // of all selected items. If this reaches the required count, we can break out
-        // of this loop.
-        int cntFromSelectedOnes = 0;
-        int minCount = reqToRemove.get_charges_or_amount(vec_to_consume_from[0].the_item);
-        for(size_t i = 1; i < vec_to_consume_from.size(); i++) {
-            minCount = std::min(minCount, reqToRemove.get_charges_or_amount(vec_to_consume_from[i].the_item));
-        }
-        // minCount means each item of vec_to_consume_from has at least
-        // that much to give. Now if minCount >= reqToRemove.count
-        // than exactly one item of the vector is always enough
-        // this changes the algorithm to not go to select/unselect
-        // single items, to directly select the item to use.
-        while(true) {
-            options.clear();
-            for(size_t i = 0; i < vec_to_consume_from.size(); i++) {
-                if(minCount >= reqToRemove.count) {
-                    options.push_back(vec_to_consume_from[i].to_string());
-                } else {
-                    const std::string prefix(selected[i] ? "    selected " : "not selected ");
-                    options.push_back(prefix + vec_to_consume_from[i].to_string());
-                }
-            }
-            if(minCount < reqToRemove.count) {
-                if(cntFromSelectedOnes >= reqToRemove.count) {
-                    options.push_back("OK");
-                }
-                selection = menu_vec(false, "Select the components to use?", options) - 1;
-                if(selection >= vec_to_consume_from.size()) {
-                    civec tmpVec;
-                    for(size_t i = 0; i < vec_to_consume_from.size(); i++) {
-                        if(selected[i]) {
-                            tmpVec.push_back(vec_to_consume_from[i]);
-                        }
-                    }
-                    tmpVec.swap(vec_to_consume_from);
-                    break;
-                }
-            } else {
-                selection = menu_vec(false, "Select the component to use?", options) - 1;
-                civec tmpVec(1, vec_to_consume_from[selection]);
-                tmpVec.swap(vec_to_consume_from);
-                break;
-            }
-            if(!selected[selection] && cntFromSelectedOnes >= reqToRemove.count) {
-                popup("You can't slect more items, deselect some before selecting more");
-            } else {
-                selected[selection] = !selected[selection];
-                if(selected[selection]) {
-                    cntFromSelectedOnes += reqToRemove.get_charges_or_amount(vec_to_consume_from[selection].the_item);
-                } else {
-                    cntFromSelectedOnes -= reqToRemove.get_charges_or_amount(vec_to_consume_from[selection].the_item);
-                }
-            }
-        }
-    } else {
-        assert(false);
+    switch(optionsIndizes[selection].first) {
+        case single_choise:
+            // only one item in list, use this anyway, their is no choice
+            reduce(reqToRemove, vec_to_consume_from);
+            break;
+        case nearby:
+            // use only items from map
+            filter(vec_to_consume_from, S_MAP);
+            reduce(reqToRemove, vec_to_consume_from);
+            break;
+        case person:
+            // use only items from player
+            filter(vec_to_consume_from, S_PLAYER);
+            reduce(reqToRemove, vec_to_consume_from);
+            break;
+        case mixed:
+            // use items from both sources, no filtering or changes needed
+            // This essential means use all items available
+            reduce(reqToRemove, vec_to_consume_from);
+            break;
+        case ask_again:
+            ask_for_items_to_use(reqToRemove, vec_to_consume_from);
+            selected_items.swap(vec_to_consume_from);
+            break;
+        default:
+            assert(false);
     }
-    while(reqToRemove.count > 0 && !vec_to_consume_from.empty()) {
-        vec_to_consume_from[0].consume(g, p, reqToRemove, ret);
-        vec_to_consume_from.erase(vec_to_consume_from.begin());
-    }
-    if(reqToRemove.count > 0) {
-        debugmsg("Their are still %d charges/amounts missing (not used) for %s", reqToRemove.count, reqToRemove.type.c_str());
-    }
-    return ret;
+    selected_items.swap(vec_to_consume_from);
+    return index_of_component;
 }
-#if 0
-std::list<item> crafting_inventory_t::consume_items(const std::vector< std::vector<component> > &components)
+
+void crafting_inventory_t::reduce(requirement req, civec &candidates) {
+    for(size_t i = 0; i < candidates.size(); i++) {
+        if(req.count <= 0) {
+            candidates.erase(candidates.begin() + i, candidates.end());
+            break;
+        }
+    }
+}
+
+int crafting_inventory_t::consume(const std::vector<component> &x, consume_flags flags, std::list<item> &used_items) {
+    civec vec_to_consume_from;
+    const int index_of_component = select_items_to_use(x, flags, vec_to_consume_from);
+    if(index_of_component >= 0) {
+        const requirement reqToRemove(x[index_of_component], flags != assume_components);
+        consume(reqToRemove, vec_to_consume_from, used_items);
+    }
+    return index_of_component;
+}
+
+void crafting_inventory_t::consume(requirement req, const civec &selected_items, std::list<item> &used_items) {
+    for(civec::const_iterator a = selected_items.begin(); req.count > 0 && a != selected_items.end(); ++a) {
+        // use up components and change the requirement according
+        a->consume(g, p, req, used_items);
+    }
+    if(req.count > 0) {
+        debugmsg("Their are still %d charges/amounts missing (not used) for %s", req.count, req.type.c_str());
+    }
+}
+
+crafting_inventory_t::candidate_item crafting_inventory_t::ask_for_single_item(const civec &candidates)
 {
-    std::list<item> ret;
-    for (int i = 0; i < components.size(); i++) {
-        std::list<item> tmp = consume_items(components[i]);
-        used.splice(used.end(), tmp);
+    assert(candidates.size() != 0);
+    if(candidates.size() == 1) {
+        return candidates[0];
+    } else if(all_equal(candidates)) {
+        return candidates[0];
     }
-    return ret;
+    std::vector<std::string> options;
+    for(civec::const_iterator a = candidates.begin(); a != candidates.end(); ++a) {
+        options.push_back(a->to_string());
+    }
+    const int selection = menu_vec(false, _("Use which gizmo?"), options) - 1;
+    assert(selection >= 0 && selection < candidates.size());
+    return candidates[selection];
 }
-#endif
+
+void crafting_inventory_t::ask_for_items_to_use(const requirement &req, civec &candidates) {
+    civec tmpVec;
+    ask_for_items_to_use(req, candidates, tmpVec);
+    tmpVec.swap(candidates);
+}
+
+void crafting_inventory_t::ask_for_items_to_use(const requirement &req, const civec &candidates, civec &selected_candidates) {
+    assert(candidates.size() > 0);
+    int minCount = req(candidates[0].the_item);
+    for(civec::const_iterator a = candidates.begin(); a != candidates.end(); ++a) {
+        minCount = std::min(minCount, req(a->the_item));
+    }
+    // minCount means each item of candidates has at least
+    // that much to give. Now if minCount >= req.count
+    // than exactly one item of the vector is always enough
+    // this changes the algorithm to not go to select/unselect
+    // single items, but to directly select the item to use.
+    if(minCount >= req.count) {
+        const candidate_item ci = ask_for_single_item(candidates);
+        selected_candidates.push_back(ci);
+        return;
+    }
+    
+    // sort to make the_item nicer looking
+    // sorts by location first
+    std::sort(const_cast<civec&>(candidates).begin(), const_cast<civec&>(candidates).end(), std::less<candidate_item>());
+    // stores which items the user has selected
+    std::vector<bool> selected(candidates.size(), false);
+    // the (summed up) charges (as told by requirement::get_charges_or_amount)
+    // of all selected items. If this reaches the required count, we can break out
+    // of this loop.
+    int cntFromSelectedOnes = 0;
+    // FIXME make this better, like a real menu that is not regenerated in each loop
+    while(true) {
+        // FIXME condens identical lines (e.g. 10 x "2x4 (on person)" -> "10 x 2x4 (on person)")
+        std::vector<std::string> options;
+        for(size_t i = 0; i < candidates.size(); i++) {
+            const std::string prefix(selected[i] ? "    using " : "not using ");
+            options.push_back(prefix + candidates[i].to_string());
+        }
+        if(cntFromSelectedOnes >= req.count) {
+            options.push_back("OK");
+        }
+        const int selection = menu_vec(false, "Select the components to use?", options) - 1;
+        if(selection >= candidates.size()) {
+            for(size_t i = 0; i < candidates.size(); i++) {
+                if(selected[i]) {
+                    selected_candidates.push_back(candidates[i]);
+                }
+            }
+            return;
+        }
+        if(!selected[selection] && cntFromSelectedOnes >= req.count) {
+            popup("You can't select more items, deselect some before selecting more");
+        } else {
+            selected[selection] = !selected[selection];
+            if(selected[selection]) {
+                cntFromSelectedOnes += req(candidates[selection].the_item);
+            } else {
+                cntFromSelectedOnes -= req(candidates[selection].the_item);
+            }
+        }
+    }
+}
+
 std::list<item> crafting_inventory_t::consume_items(const itype_id &type, int count)
 {
     std::vector<component> components;
@@ -528,27 +870,36 @@ int crafting_inventory_t::player_charges_of(const itype_id &type) const
 bool crafting_inventory_t::candidate_item::operator<(const candidate_item &other) const {
     CMP_IF(location);
     switch(location) {
-        case in_inventory:
+        case LT_INVENTORY:
             CMP_IF(invlet);
             break;
-        case on_map:
-            CMP_IF(mapx);
-            CMP_IF(mapy);
+        case LT_MAP:
+            CMP_IF(mapitems->position.x);
+            CMP_IF(mapitems->position.y);
             CMP_IF(mindex);
             break;
-        case in_vehicle:
-            CMP_IF(veh);
-            CMP_IF(part_num);
-            CMP_IF(vindex);
+        case LT_VEHICLE_CARGO:
+            CMP_IF(vitems->veh);
+            CMP_IF(vitems->part_num);
+            CMP_IF(iindex);
             break;
-        case weapon:
+        case LT_VPART:
+            CMP_IF(vpartitem->veh);
+            CMP_IF(vpartitem->part_num);
             break;
-        case from_bionic:
-            CMP_IF(bionic);
+        case LT_WEAPON:
             break;
-        case from_souround:
-            CMP_IF(souroundings);
+        case LT_BIONIC:
+            CMP_IF(bionic->bio_id);
             break;
+        case LT_SURROUNDING:
+            CMP_IF(mapitems->position.x);
+            CMP_IF(mapitems->position.y);
+            CMP_IF(surroundings->the_item.type->name);
+            break;
+    }
+    if(the_item.type != other.the_item.type) {
+        return the_item.type->name < other.the_item.type->name;
     }
     return ::memcmp(this, &other, sizeof(*this));
 }
@@ -556,13 +907,13 @@ bool crafting_inventory_t::candidate_item::operator<(const candidate_item &other
 
 bool crafting_inventory_t::candidate_item::is_source(source_flags sources) const {
     switch(location) {
-        case in_vehicle: return sources & S_VEHICLE;
-        case in_vpart: return sources & S_VEHICLE;
-        case on_map: return sources & S_MAP;
-        case from_souround: return sources & S_MAP;
-        case weapon: return sources & S_PLAYER;
-        case in_inventory: return sources & S_PLAYER;
-        case from_bionic: return sources & S_PLAYER;
+        case LT_VEHICLE_CARGO: return sources & S_VEHICLE;
+        case LT_VPART: return sources & S_VEHICLE;
+        case LT_MAP: return sources & S_MAP;
+        case LT_SURROUNDING: return sources & S_MAP;
+        case LT_WEAPON: return sources & S_PLAYER;
+        case LT_INVENTORY: return sources & S_PLAYER;
+        case LT_BIONIC: return sources & S_PLAYER;
 //        default: return false;
     }
     assert(false);
@@ -571,15 +922,15 @@ bool crafting_inventory_t::candidate_item::is_source(source_flags sources) const
 
 std::string crafting_inventory_t::candidate_item::to_string() const {
     switch(location) {
-        case in_vehicle:
-        case in_vpart:
+        case LT_VEHICLE_CARGO:
+        case LT_VPART:
             return const_cast<item&>(the_item).tname() + " (in car)";
-        case on_map:
-        case from_souround:
+        case LT_MAP:
+        case LT_SURROUNDING:
             return const_cast<item&>(the_item).tname() + " (nearby)";
-        case weapon:
-        case in_inventory:
-        case from_bionic:
+        case LT_WEAPON:
+        case LT_INVENTORY:
+        case LT_BIONIC:
             return const_cast<item&>(the_item).tname();
 //        default:
 //            return const_cast<item&>(the_item).tname();
@@ -588,7 +939,19 @@ std::string crafting_inventory_t::candidate_item::to_string() const {
     return "";
 }
 
-int crafting_inventory_t::candidate_item::drainVehicle(const std::string &ftype, int amount, std::list<item> &ret) {
+int crafting_inventory_t::candidate_item::drainVehicle(const std::string &ftype, int amount, std::list<item> &ret) const {
+    vehicle *veh = NULL;
+    switch(location) {
+        case LT_VEHICLE_CARGO:
+            veh = vitems->veh;
+            break;
+        case LT_VPART:
+            veh = vpartitem->veh;
+            break;
+        default:
+            assert(false);
+            return 0;
+    }
     item tmp = item_controller->create(ftype, g->turn);
     tmp.charges = veh->drain(ftype, amount);
     amount -= tmp.charges;
@@ -596,33 +959,33 @@ int crafting_inventory_t::candidate_item::drainVehicle(const std::string &ftype,
     return amount;
 }
 
-void crafting_inventory_t::candidate_item::consume(game *g, player *p, requirement &req, std::list<item> &ret) {
+void crafting_inventory_t::candidate_item::consume(game *g, player *p, requirement &req, std::list<item> &used_items) const {
     assert(req.count > 0);
     if(req.ctype == C_AMOUNT) {
         switch(location) {
-            case in_inventory:
-                ret.push_back(p->inv.remove_item_by_letter(invlet));
+            case LT_INVENTORY:
+                used_items.push_back(p->inv.remove_item_by_letter(invlet));
                 break;
-            case in_vehicle:
-                ret.push_back(veh->parts[part_num].items[vindex]);
-                veh->remove_item(part_num, vindex);
+            case LT_VEHICLE_CARGO:
+                used_items.push_back(vitems->veh->parts[vitems->part_num].items[iindex]);
+                vitems->veh->remove_item(vitems->part_num, iindex);
                 break;
-            case on_map:
-                ret.push_back(g->m.i_at(mapx, mapy)[mindex]);
-                g->m.i_rem(mapx, mapy, mindex);
+            case LT_MAP:
+                used_items.push_back(g->m.i_at(mapitems->position.x, mapitems->position.y)[mindex]);
+                g->m.i_rem(mapitems->position.x, mapitems->position.y, mindex);
                 break;
-            case weapon:
-                ret.push_back(p->weapon);
+            case LT_WEAPON:
+                used_items.push_back(p->weapon);
                 p->remove_weapon();
                 break;
-            case in_vpart:
-                debugmsg("attempted to consume a pseudo vehicle part item %s", the_item.tname().c_str());
-                break; // can not remove souroundings pseudo-item
-            case from_souround:
-                debugmsg("attempted to consume a pseudo sourounding item %s", the_item.tname().c_str());
-                break; // can not remove souroundings pseudo-item
-            case from_bionic:
-                debugmsg("attempted to consume a pseudo bionic item %s", the_item.tname().c_str());
+            case LT_VPART:
+                debugmsg("attempted to consume a pseudo vehicle part item %s", the_item.name.c_str());
+                break; // can not remove surroundings pseudo-item
+            case LT_SURROUNDING:
+                debugmsg("attempted to consume a pseudo surrounding item %s", the_item.name.c_str());
+                break; // can not remove surroundings pseudo-item
+            case LT_BIONIC:
+                debugmsg("attempted to consume a pseudo bionic item %s", the_item.name.c_str());
                 break; // can not remove bionic pseudo-item
             default:
                 debugmsg("dont know what to consume!");
@@ -632,49 +995,49 @@ void crafting_inventory_t::candidate_item::consume(game *g, player *p, requireme
         return;
     }
     switch(location) {
-        case in_inventory:
-            if(p->inv.item_by_letter(invlet).use_charges(req.type, req.count, ret, true)) {
+        case LT_INVENTORY:
+            if(p->inv.item_by_letter(invlet).use_charges(req.type, req.count, used_items, true)) {
                 p->inv.remove_item_by_letter(invlet);
             }
             break;
-        case in_vehicle:
-            if(veh->parts[part_num].items[vindex].use_charges(req.type, req.count, ret, true)) {
-                veh->remove_item(part_num, vindex);
+        case LT_VEHICLE_CARGO:
+            if(vitems->veh->parts[vitems->part_num].items[iindex].use_charges(req.type, req.count, used_items, true)) {
+                vitems->veh->remove_item(vitems->part_num, iindex);
             }
             break;
-        case on_map:
-            if(g->m.i_at(mapx, mapy)[vindex].use_charges(req.type, req.count, ret, true)) {
-                g->m.i_rem(mapx, mapy, mindex);
+        case LT_MAP:
+            if(g->m.i_at(mapitems->position.x, mapitems->position.y)[iindex].use_charges(req.type, req.count, used_items, true)) {
+                g->m.i_rem(mapitems->position.x, mapitems->position.y, mindex);
             }
             break;
-        case weapon:
-            if(p->weapon.use_charges(req.type, req.count, ret, true)) {
+        case LT_WEAPON:
+            if(p->weapon.use_charges(req.type, req.count, used_items, true)) {
                 p->remove_weapon();
             }
             break;
-        case in_vpart:
-            if(veh->part_flag(part_num, "KITCHEN")) {
+        case LT_VPART:
+            if(vpartitem->veh->part_flag(vpartitem->part_num, "KITCHEN")) {
                 if(req.type == "func:hotplate") {
                     const int modi = the_item.type->getChargesModi(req.type);
-                    const int remains = drainVehicle("battery", req.count * modi, ret);
+                    const int remains = drainVehicle("battery", req.count * modi, used_items);
                     req.count -= remains / modi;
                 } else if(req.type == "water_clean") {
-                    drainVehicle("water", req.count, ret);
+                    drainVehicle("water", req.count, used_items);
                 }
             }
-            if(veh->part_flag(part_num, "WELDRIG")) {
+            if(vpartitem->veh->part_flag(vpartitem->part_num, "WELDRIG")) {
                 if(req.type == "func:hotplate" || req.type == "func:soldering_iron") {
                     const int modi = the_item.type->getChargesModi(req.type);
-                    const int remains = drainVehicle("battery", req.count * modi, ret);
+                    const int remains = drainVehicle("battery", req.count * modi, used_items);
                     req.count -= remains / modi;
                 }
             }
             break;
-        case from_souround:
+        case LT_SURROUNDING:
             // Basicly this is an inifinte amount of things
-            // like fire, or a water source, in this case we can ignore it.
+            // like fire, or a water source, in this case we can ignore the_item.
             break;
-        case from_bionic:
+        case LT_BIONIC:
             if(req.count >= p->power_level) {
                 req.count -= p->power_level;
                 p->power_level = 0;
@@ -682,6 +1045,7 @@ void crafting_inventory_t::candidate_item::consume(game *g, player *p, requireme
                 p->power_level -= req.count;
                 req.count = 0;
             }
+            // FIXME: return and used_up item
             break;
         default:
             debugmsg("dont know what to consume!");
@@ -689,7 +1053,7 @@ void crafting_inventory_t::candidate_item::consume(game *g, player *p, requireme
     }
 }
 
-bool crafting_inventory_t::all_equal(const std::vector<candidate_item> &candidates) {
+bool crafting_inventory_t::all_equal(const civec &candidates) {
     for(int i = 0; i + 1 < candidates.size(); i++) {
         const candidate_item &prev = candidates[i];
         const candidate_item &cur = candidates[i + 1];
@@ -710,37 +1074,37 @@ bool crafting_inventory_t::all_equal(const std::vector<candidate_item> &candidat
 }
 
 
-// basicly: ignore the item if we count by charges (not amount) and the item has no charges left
+// basicly: ignore the item if we count by charges (not amount) and the item available_items no charges left
 #define XMATCH(item_) \
     ((item_).matches_type(req.type) && (req.ctype == C_AMOUNT || (item_).charges > 0))
 
-int crafting_inventory_t::collect_candidates(const requirement &req, int sources, std::vector<candidate_item> &candidates) {
+int crafting_inventory_t::collect_candidates(const requirement &req, int sources, civec &candidates) {
     int count = 0;
     if(sources & S_MAP) {
         for(std::list<items_on_map>::iterator a = on_map.begin(); a != on_map.end(); ++a) {
             std::vector<item> &items = *(a->items);
             for(std::vector<item>::iterator b = items.begin(); b != items.end(); ++b) {
                 if(XMATCH(*b)) {
-                    count += req.get_charges_or_amount(*b);
-                    candidates.push_back(candidate_item(a->origin.x, a->origin.y, b - items.begin(), *b));
+                    count += req(*b);
+                    candidates.push_back(candidate_item(*a, b - items.begin(), *b));
                 }
             }
         }
     }
     if(sources & S_VEHICLE) {
-        for(std::list<items_in_vehicle>::iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
+        for(std::list<items_in_vehicle_cargo>::iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
             std::vector<item> &items = *a->items;
             for(size_t b = 0; b < items.size(); b++) {
                 if(XMATCH(items[b])) {
-                    count += req.get_charges_or_amount(items[b]);
-                    candidates.push_back(candidate_item(a->veh, a->part_num, b, items[b]));
+                    count += req(items[b]);
+                    candidates.push_back(candidate_item(*a, b, items[b]));
                 }
             }
         }
         for(std::list<item_from_vpart>::iterator a = vpart.begin(); a != vpart.end(); ++a) {
-            if(XMATCH(a->it)) {
-                count += req.get_charges_or_amount(a->it);
-                candidates.push_back(candidate_item(a->veh, a->part_num, *a));
+            if(XMATCH(a->the_item)) {
+                count += req(a->the_item);
+                candidates.push_back(candidate_item(*a));
             }
         }
     }
@@ -750,26 +1114,26 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
             for(std::list<item>::const_iterator stack_iter = iter->begin(); stack_iter != iter->end();
                 ++stack_iter) {
                 if(XMATCH(*stack_iter)) {
-                    count += req.get_charges_or_amount(*stack_iter);
+                    count += req(*stack_iter);
                     candidates.push_back(candidate_item(stack_iter->invlet, *stack_iter));
                 }
             }
         }
         if(XMATCH(p->weapon)) {
-            count += req.get_charges_or_amount(p->weapon);
+            count += req(p->weapon);
             candidates.push_back(candidate_item(p->weapon));
         }
         for(std::list<item_from_bionic>::iterator a = by_bionic.begin(); a != by_bionic.end(); ++a) {
-            if(XMATCH(a->it)) {
-                count += req.get_charges_or_amount(a->it);
+            if(XMATCH(a->the_item)) {
+                count += req(a->the_item);
                 candidates.push_back(candidate_item(*a));
             }
         }
     }
     if(sources & S_MAP) {
-        for(std::list<item_from_souround>::iterator a = souround.begin(); a != souround.end(); ++a) {
-            if(XMATCH(a->it)) {
-                count += req.get_charges_or_amount(a->it);
+        for(std::list<item_from_surrounding>::iterator a = surround.begin(); a != surround.end(); ++a) {
+            if(XMATCH(a->the_item)) {
+                count += req(a->the_item);
                 candidates.push_back(candidate_item(*a));
             }
         }
@@ -803,11 +1167,13 @@ crafting_inventory_t::requirement::requirement(const component &comp, bool as_to
     }
 }
 
-int crafting_inventory_t::requirement::get_charges_or_amount(const item &it) const {
+int crafting_inventory_t::requirement::get_charges_or_amount(const item &the_item) const {
     if(ctype == C_CHARGES) {
-        return it.get_charges_of(type);
-    } else {
+        return the_item.get_charges_of(type);
+    } else if(the_item.matches_type(type)) {
         return 1;
+    } else {
+        return 0;
     }
 }
 
@@ -815,8 +1181,8 @@ int crafting_inventory_t::requirement::get_charges_or_amount(const item &it) con
 #if 0
 std::list<item> crafting_inventory_t::p_use_charges(const itype_id &type, int amount) {
     for(std::list<item_from_bionic>::const_iterator a = by_bionic.begin(); a != by_bionic.end(); ++a) {
-        if(a->it.matches_type(type)) {
-            return p->use_charges(a->it.type->id, amount);
+        if(a->the_item.matches_type(type)) {
+            return p->use_charges(a->the_item.type->id, amount);
         }
     }
     return p->use_charges(type, amount);
@@ -840,7 +1206,7 @@ double crafting_inventory_t::compute_time_modi(const std::vector<component> *beg
         const double modi = compute_time_modi(tools);
         // We must take the worst (largest) modi here, because
         // if several tools are required (think hammer+screwdriver)
-        // it does not matter if one of those is super-mega-good,
+        // the_item does not matter if one of those is super-mega-good,
         // if the other is bad and damaged
         if(modi > 0.0 && worst_modi < modi) {
             worst_modi = modi;
@@ -865,12 +1231,12 @@ double crafting_inventory_t::compute_time_modi(const construction_stage &stage) 
 
 double crafting_inventory_t::compute_time_modi(const std::vector<component> &tools) const
 {
-    const item *it = 0;
-    const double modi = compute_time_modi(tools, it);
+    const item *the_item = 0;
+    const double modi = compute_time_modi(tools, the_item);
 	// Debug info, ignore for now
 	/*
-    if(it != 0) {
-        debugmsg("tool that got used: %s - modi is %f", const_cast<item*>(it)->tname().c_str(), modi);
+    if(the_item != 0) {
+        debugmsg("tool that got used: %s - modi is %f", const_cast<item*>(the_item)->tname().c_str(), modi);
     }
 	*/
     return modi;
@@ -884,11 +1250,11 @@ double crafting_inventory_t::compute_time_modi(const std::vector<component> &too
     double best_modi = 0.0;
     for(std::vector<component>::const_iterator a = tools.begin(); a != tools.end(); a++) {
         const itype_id &type = a->type;
-        const item *it = 0;
-        const double modi = compute_time_modi(type, a->count, it);
+        const item *the_item = 0;
+        const double modi = compute_time_modi(type, a->count, the_item);
         if(modi > 0.0 && (best_modi == 0.0 || best_modi > modi)) {
             best_modi = modi;
-            item_that_got_used = it;
+            item_that_got_used = the_item;
         }
     }
     if(best_modi > 0.0) {
@@ -897,18 +1263,18 @@ double crafting_inventory_t::compute_time_modi(const std::vector<component> &too
     return 1.0;
 }
 
-void use_modi(const item &it, const itype_id &type, int count, double &best_modi, const item *&item_that_got_used) {
-    if(!it.matches_type(type)) {
+void use_modi(const item &the_item, const itype_id &type, int count, double &best_modi, const item *&item_that_got_used) {
+    if(!the_item.matches_type(type)) {
         return;
     }
-    if(it.get_charges_of(type) < count) {
+    if(the_item.get_charges_of(type) < count) {
         return;
     }
-//    g->add_msg("use %s?", const_cast<item&>(it).tname().c_str());
-    const double modi = it.get_functionality_time_modi(type);
+//    g->add_msg("use %s?", const_cast<item&>(the_item).tname().c_str());
+    const double modi = the_item.get_functionality_time_modi(type);
     if(modi > 0.0 && (best_modi == 0.0 || best_modi > modi)) {
         best_modi = modi;
-        item_that_got_used = &it;
+        item_that_got_used = &the_item;
     }
 }
 
@@ -928,17 +1294,17 @@ double crafting_inventory_t::compute_time_modi(const itype_id &type, int count, 
             ::use_modi(*b, type, count, best_modi, item_that_got_used);
         }
     }
-    for(std::list<items_in_vehicle>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
+    for(std::list<items_in_vehicle_cargo>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
         const std::vector<item> &items = *(a->items);
         for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
             ::use_modi(*b, type, count, best_modi, item_that_got_used);
         }
     }
     for(std::list<item_from_bionic>::const_iterator a = by_bionic.begin(); a != by_bionic.end(); ++a) {
-        ::use_modi(a->it, type, count, best_modi, item_that_got_used);
+        ::use_modi(a->the_item, type, count, best_modi, item_that_got_used);
     }
-    for(std::list<item_from_souround>::const_iterator a = souround.begin(); a != souround.end(); ++a) {
-        ::use_modi(a->it, type, count, best_modi, item_that_got_used);
+    for(std::list<item_from_surrounding>::const_iterator a = surround.begin(); a != surround.end(); ++a) {
+        ::use_modi(a->the_item, type, count, best_modi, item_that_got_used);
     }
     if(best_modi > 0.0) {
         return best_modi;
@@ -946,9 +1312,9 @@ double crafting_inventory_t::compute_time_modi(const itype_id &type, int count, 
     return 1.0;
 }
 
-bool hasQuality(const item &it, const std::string &name, int level)
+bool hasQuality(const item &the_item, const std::string &name, int level)
 {
-    const std::map<std::string, int> &qualities = it.type->qualities;
+    const std::map<std::string, int> &qualities = the_item.type->qualities;
     const std::map<std::string, int>::const_iterator quality_iter = qualities.find(name);
     return (quality_iter != qualities.end() && level >= quality_iter->second);
 }
@@ -982,7 +1348,7 @@ bool crafting_inventory_t::has_items_with_quality(const std::string &name, int l
             }
         }
     }
-    for(std::list<items_in_vehicle>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
+    for(std::list<items_in_vehicle_cargo>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
         const std::vector<item> &items = *(a->items);
         for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
             if(::hasQuality(*b, name, level)) {
@@ -994,16 +1360,16 @@ bool crafting_inventory_t::has_items_with_quality(const std::string &name, int l
         }
     }
     for(std::list<item_from_bionic>::const_iterator a = by_bionic.begin(); a != by_bionic.end(); ++a) {
-        const item &it = a->it;
-        if(::hasQuality(it, name, level)) {
+        const item &the_item = a->the_item;
+        if(::hasQuality(the_item, name, level)) {
             amount--;
             if(amount <= 0) {
                 return true;
             }
         }
     }
-    for(std::list<item_from_souround>::const_iterator a = souround.begin(); a != souround.end(); ++a) {
-        if(::hasQuality(a->it, name, level)) {
+    for(std::list<item_from_surrounding>::const_iterator a = surround.begin(); a != surround.end(); ++a) {
+        if(::hasQuality(a->the_item, name, level)) {
             amount--;
             if(amount <= 0) {
                 return true;

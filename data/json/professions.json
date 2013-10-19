@@ -1,6 +1,64 @@
 [
     {
         "type": "profession",
+        "description": "debuging",
+        "ident": "debuging",
+        "items": [
+            "sewing_kit",
+            "thread",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag",
+            "rag"
+        ],
+        "name": "debuging",
+        "points": 0
+        "skills": [
+            {
+                "level": 10,
+                "name": "tailor"
+            },
+            {
+                "level": 10,
+                "name": "fabrication"
+            }
+        ]
+    },
+    {
+        "type": "profession",
         "description": "They say you don't have any \"useful skills\", but at least your clothes fit well.",
         "ident": "unemployed",
         "items": [

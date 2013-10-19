@@ -78,7 +78,7 @@ bool player_activity::json_load(picojson::value & parsed) {
     picojson::object &data = parsed.get<picojson::object>();
     int tmptype;
     int tmpinv;
-    if ( picoint(data,"type",tmptype) && type < NUM_ACTIVITIES ) {
+    if ( picoint(data,"type",tmptype) && tmptype < NUM_ACTIVITIES ) {
         type = activity_type(tmptype);
         picoint(data,"moves_left",moves_left);
         picoint(data,"index",index);
