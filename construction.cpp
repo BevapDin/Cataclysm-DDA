@@ -695,13 +695,10 @@ void game::construction_menu()
  refresh_all();
 }
 
-int move_ppoints_for_construction(constructable *con, size_t stage_index, crafting_inventory_t &total_inv) {
-    int move_points = con->stages[stage_index].time * 1000;
-    const double toolfactor = total_inv.compute_time_modi(con->stages[stage_index]);
-    move_points = static_cast<int>(move_points * toolfactor);
-    double skillfactor = 1.0;
+void move_ppoints_for_construction(constructable *con, int &moves_left) {
     int skill = g->u.skillLevel("carpentry");
     if(skill > 0 && skill > con->difficulty) {
+        double skillfactor = 1.0;
         // if skill is big enough, the construction time changes
         // up to half the time (for infinit skill level)
         if(con->difficulty > 1.0) {
@@ -710,11 +707,10 @@ int move_ppoints_for_construction(constructable *con, size_t stage_index, crafti
             skillfactor = 1.0 / skill;
         }
         // factor should be in the range (0, 1]
-        move_points /= 2;
-        move_points += static_cast<double>(move_points) * skillfactor;
+        moves_left /= 2;
+        moves_left += static_cast<double>(moves_left) * skillfactor;
+        g->add_msg("constr-factors: skill: %f", skillfactor);
     }
-    g->add_msg("constr-factors: skill: %f tool: %f", skillfactor, toolfactor);
-    return move_points;
 }
 
 bool game::player_can_build(player &p, crafting_inventory_t &crafting_inv, constructable* con,
@@ -876,8 +872,9 @@ void game::place_construction(constructable *con)
  if (starting_stage == con->stages.size() && con->loopstages)
   starting_stage = 0; // Looping stages
 
-    int move_points = move_ppoints_for_construction(con, starting_stage, total_inv);
- u.assign_activity(this, ACT_BUILD, move_points, con->id);
+ u.assign_activity(this, ACT_BUILD, con->stages[starting_stage].time * 1000, con->id);
+ total_inv.gather_input(con->stages[starting_stage], u.activity);
+ move_ppoints_for_construction(con, u.activity.moves_left);
 
  u.moves = 0;
  std::vector<int> stages;
@@ -891,15 +888,14 @@ void game::complete_construction()
 {
     int stage_num = u.activity.values[0];
     constructable *built = constructions[u.activity.index];
-    construction_stage stage = built->stages[stage_num];
+    const construction_stage &stage = built->stages[stage_num];
 
     u.practice(turn, "carpentry", std::max(built->difficulty, 1) * 10);
-    for (int i = 0; i < 10; i++) {
-        if (!stage.components[i].empty()) {
-            crafting_inventory_t total_inv(this, &u);
-            total_inv.consume_items(stage.components[i]);
-        }
-    }
+
+    crafting_inventory_t total_inv(this, &u);
+    std::list<item> used_items;
+    std::list<item> used_tools;
+    total_inv.consume_gathered(stage, u.activity, used_items, used_tools);
 
     // Make the terrain change
     int terx = u.activity.placement.x, tery = u.activity.placement.y;
@@ -910,8 +906,10 @@ void game::complete_construction()
     u.activity.values.erase(u.activity.values.begin());
     // ...and start the next one, if it exists
     if (u.activity.values.size() > 0) {
-        crafting_inventory_t total_inv(this, &u);
-        u.activity.moves_left = move_ppoints_for_construction(built, u.activity.values[0], total_inv);
+        stage_num = u.activity.values[0];
+        u.activity.moves_left = built->stages[stage_num].time * 1000;
+        total_inv.gather_input(built->stages[stage_num], u.activity);
+        move_ppoints_for_construction(built, u.activity.moves_left);
     } else { // We're finished!
         u.activity.type = ACT_NULL;
     }

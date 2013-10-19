@@ -298,7 +298,7 @@ void iexamine::pit(game *g, player *p, map *m, int examx, int examy)
     if (query_yn(_("Place a plank over the pit?")))
     {
         // if both have, then ask to use the one on the map
-        map_inv.consume_items("2x4", 1);
+        map_inv.consume_components("2x4", 1);
         if( m->ter(examx, examy) == t_pit )
         {
             m->ter_set(examx, examy, t_pit_covered);

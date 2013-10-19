@@ -227,12 +227,8 @@ bool game::can_make(recipe *r, crafting_inventory_t &crafting_inv)
         ++quality_iter;
     }
 
-    // check all tools
-    if(!crafting_inv.has_all_tools(r->tools)) {
-        RET_VAL = false;
-    }
-    // check all components
-    if(!crafting_inv.has_all_components(r->components)) {
+    // check all tools and check all components
+    if(!crafting_inv.has_all_requirements(*r)) {
         RET_VAL = false;
     }
     return check_enough_materials(r, crafting_inv) && RET_VAL;
@@ -924,21 +920,11 @@ void game::add_known_recipes(std::vector<recipe*> &current, recipe_list source, 
     current.insert(current.begin(),can_craft.begin(),can_craft.end());
 }
 
-int move_ppoints_for_crafting(const recipe &making, crafting_inventory_t &total_inv) {
-	int move_points = making.time;
-	const double toolfactor = total_inv.compute_time_modi(making);
-	if(toolfactor > 0 && toolfactor != 1) {
-		move_points = static_cast<int>(move_points * toolfactor);
-		g->add_msg("craft-factors: tool: %f", toolfactor);
-	}
-	return move_points;
-}
-
 void game::make_craft(recipe *making)
 {
+ u.assign_activity(this, ACT_CRAFT, making->time, making->id);
  crafting_inventory_t craft_inv(g, &g->u);
- u.assign_activity(this, ACT_CRAFT, move_ppoints_for_crafting(*making, craft_inv), making->id);
- craft_inv.gather_input(*making, u.activity.str_values);
+ craft_inv.gather_input(*making, u.activity);
  u.moves = 0;
  u.lastrecipe = making;
 }
@@ -1000,16 +986,9 @@ void game::complete_craft()
  if (making->difficulty != 0 && diff_roll > skill_roll * (1 + 0.1 * rng(1, 5))) {
   add_msg(_("You fail to make the %s, and waste some materials."),
           item_controller->find_template(making->result)->name.c_str());
-    for (int i = 0; i < making->components.size(); i++)
-    {
-        if (making->components[i].size() > 0)
-        crafting_inv.consume_items(making->components[i]);
-    }
-
-  for (int i = 0; i < making->tools.size(); i++) {
-   if (making->tools[i].size() > 0)
-    crafting_inv.consume_tools(making->tools[i], false);
-  }
+  std::list<item> used;
+  std::list<item> used_tools;
+  crafting_inv.consume_gathered(*making, u.activity, used, used_tools);
   u.activity.type = ACT_NULL;
   return;
   // Messed up slightly; no components wasted.
@@ -1025,7 +1004,9 @@ void game::complete_craft()
 // Use up the components and tools
 // std::list<item> used = crafting_inv.consume_items(making->components);
 // crafting_inv.consume_tools(making->tools, false);
- std::list<item> used = crafting_inv.consume_gathered(*making, u.activity.str_values);
+ std::list<item> used;
+ std::list<item> used_tools;
+ crafting_inv.consume_gathered(*making, u.activity, used, used_tools);
 
  item newit(item_controller->find_template(making->result), turn);
  int new_count = 1;
@@ -1250,7 +1231,7 @@ void game::complete_disassemble()
   for (int j = 0; j < dis->tools.size(); j++)
   {
     if (dis->tools[j].size() > 0)
-    crafting_inv.consume_tools(dis->tools[j], false);
+    crafting_inv.consume_any_tools(dis->tools[j], false);
   }
 
   // add the components to the map

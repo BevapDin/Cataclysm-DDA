@@ -1044,32 +1044,18 @@ void veh_interact::display_list (int pos, std::vector<vpart_info> list)
  */
 item crafting_inventory_t::consume_vpart_item (game *g, const itype_id &itid)
 {
-    civec candidates;
-    requirement req(itid, 1, C_AMOUNT); // not a tool
-    collect_candidates(req, S_ALL, candidates);
-    // bug?
-    if(candidates.size() == 0) {
+    candvec candidates;
+    std::vector<component> components(1, component(itid, 1));
+    const int jj = select_items_to_use(components, assume_components, candidates);
+    if(jj != 0 || candidates.size() != 1) {
         debugmsg("part not found");
         return item();
     }
-    int selection;
-    if(candidates.size() == 1) {
-        selection = 0;
-    } else if(all_equal(candidates)) {
-        selection = 0;
-    } else {
-        // popup menu!?
-        std::vector<std::string> options;
-        for(int i=0;i<candidates.size(); i++)
-        {
-            options.push_back(candidates[i].to_string());
-        }
-        selection = menu_vec(false, _("Use which gizmo?"), options) - 1;
-    }
-    item it = candidates[selection].the_item;
+    requirement req(itid, 1, C_AMOUNT);
     std::list<item> ret;
-    candidates[selection].consume(g, p, req, ret);
-    return it;
+    candidates[0].consume(g, p, req, ret);
+    assert(ret.size() == 1);
+    return *(ret.begin());
 }
 
 /**
@@ -1116,7 +1102,7 @@ void complete_vehicle (game *g)
         used_item = crafting_inv.consume_vpart_item(g, part_id);
         veh->get_part_properties_from_item(g, partnum, used_item); //transfer damage, etc.
         tools.push_back(component("func:welder", welder_charges ));
-        crafting_inv.consume_tools(tools, true);
+        crafting_inv.consume_any_tools(tools, true);
 
         if ( vehicle_part_types[part_id].has_flag("CONE_LIGHT") ) {
             // Need map-relative coordinates to compare to output of look_around.
@@ -1163,11 +1149,11 @@ void complete_vehicle (game *g)
                 dd = 0;
                 veh->insides_dirty = true;
             } else {
-                crafting_inv.consume_items(items_needed[a].first, items_needed[a].second);
+                crafting_inv.consume_components(items_needed[a].first, items_needed[a].second);
             }
         }
         tools.push_back(component("func:welder", welder_charges ));
-        crafting_inv.consume_tools(tools, true);
+        crafting_inv.consume_any_tools(tools, true);
         veh->parts[vehicle_part].hp = veh->part_info(vehicle_part).durability;
         g->add_msg (_("You repair the %s's %s."),
                     veh->name.c_str(), veh->part_info(vehicle_part).name.c_str());

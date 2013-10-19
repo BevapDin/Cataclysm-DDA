@@ -161,6 +161,13 @@ struct itype
      }
      return 1;
  }
+ float getTimeModi(const itype_id &name) const {
+     const FunctionalityMap::const_iterator a = functionalityMap.find(name);
+     if(a != functionalityMap.end()) {
+         return a->second.time_modi;
+     }
+     return 1.0;
+ }
 
  virtual bool is_food()          { return false; }
  virtual bool is_ammo()          { return false; }
