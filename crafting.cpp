@@ -780,8 +780,26 @@ recipe* game::select_crafting_recipe()
                         msg += _("requirements for ");
                         msg += current[line]->result;
                         msg += ":\n";
-                        msg += s.to_string(crafting_inventory_t::single_req::ts_overlays | crafting_inventory_t::single_req::ts_compress | crafting_inventory_t::single_req::ts_found_items);
+                        msg += s.to_string(crafting_inventory_t::simple_req::ts_overlays | crafting_inventory_t::simple_req::ts_compress | crafting_inventory_t::simple_req::ts_found_items);
                         popup_top(msg.c_str());
+                    }
+                    if(s.is_possible()) {
+                        player_activity pa;
+                        crafting_inv.gather_input(*(current[line]), s, pa);
+                        std::ostringstream buffer;
+                        buffer << "selected:\n";
+                        buffer << s.to_string(crafting_inventory_t::simple_req::ts_selected);
+                        buffer << "serialized:\n";
+                        for(size_t i = 0; i < pa.str_values.size(); i++) {
+                            buffer << pa.str_values[i] << "\n";
+                        }
+                        crafting_inventory_t::solution s2;
+                        crafting_inventory_t cv2(g, &(g->u));
+                        s2.init(*(current[line]));
+                        s2.deserialize(cv2, pa);
+                        buffer << "selected:\n";
+                        buffer << s2.to_string(crafting_inventory_t::simple_req::ts_selected);
+                        popup_top(buffer.str().c_str());
                     }
                 }
                 break;

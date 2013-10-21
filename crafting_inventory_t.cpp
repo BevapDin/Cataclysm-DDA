@@ -70,24 +70,145 @@ const tidvec &get_tidvec(const itype_id &type) {
     return types;
 }
 
+void copy(const std::vector<component> *src, std::vector< std::vector<component> > &dest, size_t count) {
+    dest.clear();
+    for(size_t i = 0; i < count; i++, src++) {
+        if(!src->empty()) {
+            dest.push_back(*src);
+        }
+    }
+}
+
 bool crafting_inventory_t::has_all_requirements(recipe &making) {
+    solution s;
+    return has_all_requirements(making, s);
+}
+
+std::string crafting_inventory_t::complex_req::serialize() const {
+    assert(!simple_reqs.empty());
+    assert(!selected_items.empty());
+    assert(selected_simple_req_index >= 0);
+    assert(selected_simple_req_index < simple_reqs.size());
+    return crafting_inventory_t::serialize(selected_simple_req_index, selected_items);
+}
+
+void crafting_inventory_t::complex_req::deserialize(crafting_inventory_t &cinv, const std::string &data) {
+    selected_simple_req_index = cinv.deserialize(data, selected_items);
+    if(selected_simple_req_index < 0 || selected_simple_req_index >= simple_reqs.size()) {
+        selected_simple_req_index = -1;
+        selected_items.clear();
+    } else {
+        simple_reqs[selected_simple_req_index].available = 1;
+        simple_reqs[selected_simple_req_index].comp->available = 1;
+    }
+}
+
+void crafting_inventory_t::complex_req::consume(crafting_inventory_t &cinv, std::list<item> &used_items) {
+    assert(selected_simple_req_index != -1);
+    assert(selected_simple_req_index >= 0);
+    assert(selected_simple_req_index < simple_reqs.size());
+    cinv.consume(simple_reqs[selected_simple_req_index].req, as_tool ? assume_tools : assume_components , selected_items, used_items);
+}
+
+void crafting_inventory_t::solution::serialize(player_activity &activity) const {
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        std::string str = complex_reqs[i].serialize();
+        activity.str_values.push_back(str);
+    }
+}
+
+void crafting_inventory_t::solution::deserialize(crafting_inventory_t &cinv, player_activity &activity) {
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        complex_req &cr = complex_reqs[i];
+        if(activity.str_values.empty()) {
+            debugmsg("player_activity::str_values is empty");
+            break;
+        }
+        cr.deserialize(cinv, activity.str_values.front());
+        activity.str_values.erase(activity.str_values.begin());
+    }
+}
+
+void crafting_inventory_t::solution::consume(crafting_inventory_t &cinv, std::list<item> &used_items) {
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        complex_req &cr = complex_reqs[i];
+        if(cr.selected_simple_req_index != -1) {
+            cr.consume(cinv, used_items);
+            complex_reqs.erase(complex_reqs.begin() + 1);
+            i--;
+        }
+    }
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        complex_req &cr = complex_reqs[i];
+        cr.gather(cinv, true);
+    }
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        complex_req &cr = complex_reqs[i];
+        cr.select_items_to_use();
+        cr.consume(cinv, used_items);
+    }
+}
+
+void crafting_inventory_t::solution::select_items_to_use() {
+    toolfactor = 0.0;
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        complex_reqs[i].select_items_to_use();
+        merge_time_modi(complex_reqs[i].toolfactor, toolfactor);
+    }
+}
+
+void crafting_inventory_t::gather_input(recipe &making, player_activity &activity) {
+    solution s;
+    gather_input(making, s, activity);
+}
+
+void crafting_inventory_t::consume_gathered(
+    const construction_stage &stage,
+    player_activity &activity,
+    std::list<item> &used_items,
+    std::list<item> &used_tools
+) {
+    recipe r;
+    copy(stage.tools, r.tools, sizeof(stage.tools) / sizeof(stage.tools[0]));
+    copy(stage.components, r.components, sizeof(stage.components) / sizeof(stage.components[0]));
+    solution s;
+    consume_gathered(r, s, activity, used_items, used_tools);
+}
+
+void crafting_inventory_t::consume_gathered(
+    recipe &making,
+    player_activity &activity,
+    std::list<item> &used_items,
+    std::list<item> &used_tools
+) {
+    solution s;
+    consume_gathered(making, s, activity, used_items, used_tools);
+}
+
+void crafting_inventory_t::consume_gathered(
+    recipe &making,
+    solution &s,
+    player_activity &activity,
+    std::list<item> &used_items,
+    std::list<item> &used_tools
+) {
     s.init(making);
-    s.gather(*this, false);
-    return s.is_possible();
-    /*
-    bool isSomethingMissing = false;
-    for(size_t i = 0; i < making.components.size(); i++) {
-        if(!has_any_components(making.components[i])) {
-            isSomethingMissing = true;
-        }
+    s.deserialize(*this, activity);
+    s.consume(*this, used_items);
+}
+
+void crafting_inventory_t::gather_input(recipe &making, solution &s, player_activity &activity) {
+    s.init(making);
+    s.gather(*this, true);
+    s.select_items_to_use();
+    s.serialize(activity);
+    const double toolfactor = s.toolfactor;
+    if(toolfactor > 0.0 && toolfactor != 1.0) {
+        int move_points = activity.moves_left;
+        move_points = static_cast<int>(move_points * toolfactor);
+        g->add_msg("craft-factors: tool: %f", toolfactor);
+        activity.moves_left = move_points;
     }
-    for(size_t i = 0; i < making.tools.size(); i++) {
-        if(!has_any_tools(making.tools[i])) {
-            isSomethingMissing = true;
-        }
-    }
-    return !isSomethingMissing;
-    */
 }
 
 void crafting_inventory_t::solution::init(recipe &making) {
@@ -117,14 +238,14 @@ void crafting_inventory_t::solution::init(recipe &making) {
     for(size_t i = 0; i < complex_reqs.size(); i++) {
         complex_req &rc1 = complex_reqs[i];
         for(size_t j = 0; j < rc1.simple_reqs.size(); j++) {
-            single_req &rc2 = rc1.simple_reqs[j];
+            simple_req &rc2 = rc1.simple_reqs[j];
             for(size_t j1 = j + 1; j1 < rc1.simple_reqs.size(); j1++) {
-                single_req &rc3 = rc1.simple_reqs[j1];
+                simple_req &rc3 = rc1.simple_reqs[j1];
                 rc3.find_overlays(rc2);
             }
         }
         for(size_t j = 0; j < rc1.simple_reqs.size(); j++) {
-            single_req &rc2 = rc1.simple_reqs[j];
+            simple_req &rc2 = rc1.simple_reqs[j];
             for(size_t i1 = i + 1; i1 < complex_reqs.size(); i1++) {
                 complex_req &rc3 = complex_reqs[i1];
                 for(size_t j1 = 0; j1 < rc3.simple_reqs.size(); j1++) {
@@ -155,7 +276,7 @@ bool crafting_inventory_t::complex_req::contains_req_type(const itype_id &type) 
     return false;
 }
 
-crafting_inventory_t::single_req* crafting_inventory_t::complex_req::get_req_type(const itype_id &type) {
+crafting_inventory_t::simple_req* crafting_inventory_t::complex_req::get_req_type(const itype_id &type) {
     for(size_t k = 0; k < simple_reqs.size(); k++) {
         if(simple_reqs[k].req.type == type) {
             return &(simple_reqs[k]);
@@ -164,7 +285,7 @@ crafting_inventory_t::single_req* crafting_inventory_t::complex_req::get_req_typ
     return NULL;
 }
 
-bool crafting_inventory_t::single_req::merge(const requirement &otherReq) {
+bool crafting_inventory_t::simple_req::merge(const requirement &otherReq) {
     assert(req.type == otherReq.type);
     if(req.ctype != otherReq.ctype) {
         return false;
@@ -173,9 +294,9 @@ bool crafting_inventory_t::single_req::merge(const requirement &otherReq) {
     return true;
 }
 
-void crafting_inventory_t::complex_req::add_or_merge(const single_req &rs2) {
+void crafting_inventory_t::complex_req::add_or_merge(const simple_req &rs2) {
     assert(rs2.req.type.compare(0, 5, "func:") != 0);
-    single_req *ot = get_req_type(rs2.req.type);
+    simple_req *ot = get_req_type(rs2.req.type);
     if(ot != NULL && ot->merge(rs2.req)) {
         if(
             ot->comp->type.compare(0, 5, "func:") == 0
@@ -192,7 +313,7 @@ void crafting_inventory_t::complex_req::add_or_merge(const single_req &rs2) {
 void crafting_inventory_t::complex_req::add(component &c, bool as_tool) {
     c.available = -1;
     requirement req(c, as_tool);
-    single_req rs2(req, &c);
+    simple_req rs2(req, &c);
     if(rs2.req.type.compare(0, 5, "func:") != 0) {
         add_or_merge(rs2);
         return;
@@ -220,7 +341,7 @@ void crafting_inventory_t::complex_req::init(std::vector<component> &components,
     assert(!simple_reqs.empty());
 }
 
-void crafting_inventory_t::single_req::find_overlays(single_req &rc) {
+void crafting_inventory_t::simple_req::find_overlays(simple_req &rc) {
     if(rc.req.type != req.type) {
         return;
     }
@@ -254,16 +375,13 @@ bool crafting_inventory_t::complex_req::is_possible() {
     return false;
 }
 
-bool crafting_inventory_t::single_req::is_possible() {
+bool crafting_inventory_t::simple_req::is_possible() {
     return available == 1;
 }
 
 void crafting_inventory_t::solution::gather(crafting_inventory_t &cinv, bool store) {
     for(size_t i = 0; i < complex_reqs.size(); i++) {
         complex_reqs[i].gather(cinv, store);
-    }
-    for(size_t i = 0; i < complex_reqs.size(); i++) {
-        complex_reqs[i].gather2(cinv, store);
     }
 }
 
@@ -272,22 +390,18 @@ void crafting_inventory_t::complex_req::gather(crafting_inventory_t &cinv, bool 
     for(size_t i = 0; i < simple_reqs.size(); i++) {
         simple_reqs[i].gather(cinv, store);
     }
-}
-
-void crafting_inventory_t::complex_req::gather2(crafting_inventory_t &cinv, bool store) {
-    assert(!simple_reqs.empty());
     for(size_t i = 0; i < simple_reqs.size(); i++) {
-        simple_reqs[i].gather2(cinv, store);
+        simple_req &sr = simple_reqs[i];
+        sr.comp->available = std::max(sr.available, sr.comp->available);
     }
 }
 
-void crafting_inventory_t::single_req::gather(crafting_inventory_t &cinv, bool store) {
+void crafting_inventory_t::simple_req::gather(crafting_inventory_t &cinv, bool store) {
     comp->available = -1;
     if(store) {
-        items_on_map.clear();
-        items_on_player.clear();
-        cnt_on_player = cinv.collect_candidates(req, S_PLAYER, items_on_player);
-        cnt_on_map = cinv.collect_candidates(req, S_MAP, items_on_map);
+        candidate_items.clear();
+        cnt_on_player = cinv.collect_candidates(req, S_PLAYER, candidate_items);
+        cnt_on_map = cinv.collect_candidates(req, S_MAP, candidate_items);
         available = (cnt_on_map + cnt_on_player) >= req.count ? +1 : -1;
     } else {
         available = cinv.has(req) ? +1 : -1;
@@ -297,7 +411,7 @@ void crafting_inventory_t::single_req::gather(crafting_inventory_t &cinv, bool s
     }
     for(size_t j = 0; j < overlays.size(); j++) {
         requirement newReq = req;
-        single_req &orq = *(overlays[j]);
+        simple_req &orq = *(overlays[j]);
         if(orq.available != 1) {
             // Might be possible of orq needs more items than this
             continue;
@@ -330,14 +444,6 @@ void crafting_inventory_t::single_req::gather(crafting_inventory_t &cinv, bool s
         available = 0;
         return;
     }
-}
-
-void crafting_inventory_t::single_req::gather2(crafting_inventory_t &cinv, bool store) {
-    if(available > comp->available) {
-        comp->available = available;
-    }
-    (void) cinv;
-    (void) store;
 }
 
 const std::string &name(const itype_id &type) {
@@ -400,7 +506,7 @@ void crafting_inventory_t::solution::save(recipe &making) const {
 
 bool crafting_inventory_t::has_all_requirements(recipe &making, solution &s) {
     s.init(making);
-    s.gather(*this, true);
+    s.gather(*this, false);
     return s.is_possible();
 }
 
@@ -427,9 +533,13 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
     std::ostringstream buffer;
     const component* last_comp = NULL;
     for(size_t j = 0; j < simple_reqs.size(); j++) {
-        const single_req &rc = simple_reqs[j];
+        const simple_req &rc = simple_reqs[j];
         
-        if((flags & single_req::ts_compress) != 0) {
+        if((flags & simple_req::ts_selected) != 0 && j != selected_simple_req_index) {
+            continue;
+        }
+        
+        if((flags & simple_req::ts_compress) != 0) {
             if(rc.comp == last_comp) {
             } else {
                 if(j != 0) { buffer << " OR\n  "; }
@@ -451,9 +561,9 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
                 }
             }
             
-            if((flags & single_req::ts_overlays) != 0 && !rc.overlays.empty()) {
+            if((flags & simple_req::ts_overlays) != 0 && !rc.overlays.empty()) {
                 buffer << " overlays with: ";
-                for(std::vector<single_req*>::const_iterator a = rc.overlays.begin(); a != rc.overlays.end(); a++) {
+                for(std::vector<simple_req*>::const_iterator a = rc.overlays.begin(); a != rc.overlays.end(); a++) {
                     assert(*a != NULL);
                     if(a != rc.overlays.begin()) { buffer << ", "; }
                     buffer << name((*a)->req.type);
@@ -461,14 +571,10 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
             }
         }
         
-        if(rc.cnt_on_map + rc.cnt_on_player > 0 && (flags & single_req::ts_found_items) != 0) {
+        if(rc.cnt_on_map + rc.cnt_on_player > 0 && (flags & simple_req::ts_found_items) != 0) {
             buffer << "\n     found: ";
             bool needs_comma = false;
-            for(candvec::const_iterator a = rc.items_on_map.begin(); a != rc.items_on_map.end(); ++a) {
-                if(needs_comma) { buffer << ", "; } else { needs_comma = true; }
-                buffer << a->to_string(false);
-            }
-            for(candvec::const_iterator a = rc.items_on_player.begin(); a != rc.items_on_player.end(); ++a) {
+            for(candvec::const_iterator a = rc.candidate_items.begin(); a != rc.candidate_items.end(); ++a) {
                 if(needs_comma) { buffer << ", "; } else { needs_comma = true; }
                 buffer << a->to_string(false);
             }
@@ -920,16 +1026,6 @@ void crafting_inventory_t::consume_gathered(const std::vector< std::vector<compo
     }
 }
 
-void crafting_inventory_t::consume_gathered(
-    const recipe &making,
-    player_activity &activity,
-    std::list<item> &used_items,
-    std::list<item> &used_tools
-) {
-    consume_gathered(making.components, assume_components, activity.str_values, used_items);
-    consume_gathered(making.tools, assume_tools, activity.str_values, used_tools);
-}
-
 int crafting_inventory_t::deserialize(const std::string &data, candvec &vec) {
     using namespace picojson;
     picojson::value pjv;
@@ -987,7 +1083,10 @@ void crafting_inventory_t::gather_inputs(const std::vector<component> &cv, consu
     if(timeModi == NULL) {
         return;
     }
-    const double modi = calc_time_modi(cv[index_of_component].type, selected_items);
+    merge_time_modi(calc_time_modi(selected_items), *timeModi);
+}
+
+void crafting_inventory_t::merge_time_modi(double modi, double &result) {
     if(modi == 1.0 || modi == 0.0) {
         return;
     }
@@ -996,12 +1095,12 @@ void crafting_inventory_t::gather_inputs(const std::vector<component> &cv, consu
     // if several tools are required (think hammer+screwdriver)
     // it does not matter if one of those is super-mega-good,
     // if the other is bad and damaged
-    if(*timeModi == 0.0 || *timeModi < modi) {
-        *timeModi = modi;
+    if(result == 0.0 || result < modi) {
+        result = modi;
     }
 }
 
-double crafting_inventory_t::calc_time_modi(const itype_id &type, const candvec &tools) const {
+double crafting_inventory_t::calc_time_modi(const candvec &tools) {
     double worst_modi = 0.0;
     for(candvec::const_iterator a = tools.begin(); a != tools.end(); a++) {
         const double modi = a->timeModi;
@@ -1017,53 +1116,12 @@ double crafting_inventory_t::calc_time_modi(const itype_id &type, const candvec 
     return worst_modi;
 }
 
-void crafting_inventory_t::gather_input(const recipe &making, player_activity &activity) {
-    double toolfactor = 0.0;
-    gather_inputs(making.tools, assume_tools, activity.str_values, &toolfactor);
-    gather_inputs(making.components, assume_components, activity.str_values, NULL);
-    if(toolfactor > 0.0 && toolfactor != 1.0) {
-        int move_points = activity.moves_left;
-        move_points = static_cast<int>(move_points * toolfactor);
-        g->add_msg("craft-factors: tool: %f", toolfactor);
-        activity.moves_left = move_points;
-    }
-}
-
-void copy(const std::vector<component> *src, std::vector< std::vector<component> > &dest, size_t count) {
-    dest.clear();
-    for(size_t i = 0; i < count; i++, src++) {
-        if(!src->empty()) {
-            dest.push_back(*src);
-        }
-    }
-}
-
 void crafting_inventory_t::gather_input(const construction_stage &stage, player_activity &activity) {
-    double toolfactor = 0.0;
-    std::vector< std::vector<component> > tmpvec;
-    copy(stage.tools, tmpvec, sizeof(stage.tools) / sizeof(stage.tools[0]));
-    gather_inputs(tmpvec, assume_tools, activity.str_values, &toolfactor);
-    copy(stage.components, tmpvec, sizeof(stage.components) / sizeof(stage.components[0]));
-    gather_inputs(tmpvec, assume_components, activity.str_values, NULL);
-    if(toolfactor > 0.0 && toolfactor != 1.0) {
-        int move_points = activity.moves_left;
-        move_points = static_cast<int>(move_points * toolfactor);
-        g->add_msg("construction-factors: tool: %f", toolfactor);
-        activity.moves_left = move_points;
-    }
-}
-
-void crafting_inventory_t::consume_gathered(
-    const construction_stage &stage,
-    player_activity &activity,
-    std::list<item> &used_items,
-    std::list<item> &used_tools
-) {
-    std::vector< std::vector<component> > tmpvec;
-    copy(stage.tools, tmpvec, sizeof(stage.tools) / sizeof(stage.tools[0]));
-    consume_gathered(tmpvec, assume_components, activity.str_values, used_items);
-    copy(stage.components, tmpvec, sizeof(stage.components) / sizeof(stage.components[0]));
-    consume_gathered(tmpvec, assume_tools, activity.str_values, used_tools);
+    recipe r;
+    copy(stage.tools, r.tools, sizeof(stage.tools) / sizeof(stage.tools[0]));
+    copy(stage.components, r.components, sizeof(stage.components) / sizeof(stage.components[0]));
+    solution s;
+    gather_input(r, s, activity);
 }
 
 typedef enum {
@@ -1201,6 +1259,108 @@ int crafting_inventory_t::select_items_to_use(const std::vector<component> &comp
     return index_of_component;
 }
 
+void crafting_inventory_t::complex_req::select_items_to_use() {
+    selected_items.clear();
+    selected_simple_req_index = -1;
+    toolfactor = 0.0;
+    assert(!simple_reqs.empty());
+    // List for the menu_vec below, contains the menu entries
+    // that should be displayed. This is used to display possible
+    // choises to the user.
+    std::vector<std::string> options;
+    // the menu_entry_type defines what we do if the user selects that menu entry.
+    // the second value is just the index into the available_items array that belongs
+    // to this option.
+    std::vector< std::pair<menu_entry_type, size_t> > optionsIndizes;
+    
+    for(size_t i = 0; i < simple_reqs.size(); i++) {
+        const simple_req &sr = simple_reqs[i];
+        const requirement &req = sr.req;
+        const candvec &candidate_items = sr.candidate_items;
+        const int count = req.count;
+        if(sr.cnt_on_map + sr.cnt_on_player < count) {
+            continue;
+        }
+        if(candidate_items.size() == 1) {
+            // Only one possible choice
+            options.push_back(candidate_items.front().to_string(false));
+            optionsIndizes.push_back(std::make_pair(single_choise, i));
+        } else if(!all_equal(candidate_items)) {
+            // several items with differing properties - list by location,
+            options.push_back(::name(req.type) + " (different items possible)");
+            optionsIndizes.push_back(std::make_pair(ask_again, i));
+        } else {
+            // several items, but they are all of the same type, list by location,
+            const std::string name = ::name(req.type);
+            // Rules here are: show entry for "on person",
+            // for "nearby" (if any of them apply).
+            // Also show the mixed entry, but only if none of the other two
+            // are shown
+            if(sr.cnt_on_map >= count) {
+                options.push_back(name + " (nearby)");
+                optionsIndizes.push_back(std::make_pair(nearby, i));
+            }
+            if(sr.cnt_on_player >= count) {
+                options.push_back(name);
+                optionsIndizes.push_back(std::make_pair(person, i));
+            }
+            if(sr.cnt_on_map < count && sr.cnt_on_player < count) {
+                assert(sr.cnt_on_map + sr.cnt_on_player >= count);
+                options.push_back(name + " (on person & nearby)");
+                optionsIndizes.push_back(std::make_pair(mixed, i));
+            }
+        }
+    }
+    if(options.size() == 0) {
+        debugmsg("Attempted to select_items_to_use with no available simple_reqs!");
+        return;
+    }
+    size_t selection = 0;
+    if(options.size() != 1) {
+        // no user-interaction needed if only one choise
+        selection = (size_t) menu_vec(false, "Use which items?", options) - 1;
+    }
+    assert(selection < options.size());
+    assert(options.size() == optionsIndizes.size());
+    const size_t index_of_component = optionsIndizes[selection].second;
+    simple_req &sr = simple_reqs[index_of_component];
+    // The user has choosen this selection of items:
+    candvec &vec_to_consume_from = sr.candidate_items;
+    assert(!vec_to_consume_from.empty());
+    const requirement reqToRemove = sr.req;
+    switch(optionsIndizes[selection].first) {
+        case single_choise:
+            // only one item in list, use this anyway, their is no choice
+            crafting_inventory_t::reduce(reqToRemove, vec_to_consume_from);
+            break;
+        case nearby:
+            // use only items from map
+            crafting_inventory_t::filter(vec_to_consume_from, S_MAP);
+            assert(!vec_to_consume_from.empty());
+            crafting_inventory_t::reduce(reqToRemove, vec_to_consume_from);
+            break;
+        case person:
+            // use only items from player
+            crafting_inventory_t::filter(vec_to_consume_from, S_PLAYER);
+            assert(!vec_to_consume_from.empty());
+            crafting_inventory_t::reduce(reqToRemove, vec_to_consume_from);
+            break;
+        case mixed:
+            // use items from both sources, no filtering or changes needed
+            // This essential means use all items available
+            crafting_inventory_t::reduce(reqToRemove, vec_to_consume_from);
+            break;
+        case ask_again:
+            crafting_inventory_t::ask_for_items_to_use(reqToRemove, as_tool ? assume_tools : assume_components, vec_to_consume_from);
+            break;
+        default:
+            assert(false);
+    }
+    selected_items.swap(vec_to_consume_from);
+    selected_simple_req_index = index_of_component;
+    toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
+}
+
 void crafting_inventory_t::reduce(requirement req, candvec &candidates) {
     assert(!candidates.empty());
     assert(req.count > 0);
@@ -1211,6 +1371,7 @@ void crafting_inventory_t::reduce(requirement req, candvec &candidates) {
         }
         req.count -= req(candidates[i].get_item());
     }
+    assert(!candidates.empty());
 }
 
 int crafting_inventory_t::consume(const std::vector<component> &x, consume_flags flags, std::list<item> &used_items) {

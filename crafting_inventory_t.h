@@ -338,7 +338,7 @@ public:
      * item types (which is one for this requirement), not to the
      * amount.
      */
-    class single_req {
+    class simple_req {
     public:
         /**
          * The single item-type requirement.
@@ -354,60 +354,113 @@ public:
          */
         int available;
         complex_req *parent;
-        std::vector<single_req*> overlays;
+        std::vector<simple_req*> overlays;
         
         int cnt_on_map;
-        candvec items_on_map;
         int cnt_on_player;
-        candvec items_on_player;
+        candvec candidate_items;
         
-        single_req(const requirement &r, component *c) : req(r), comp(c) { }
+        simple_req(const requirement &r, component *c) : req(r), comp(c) { }
         
         bool is_possible();
-        void find_overlays(single_req &rc);
-        void gather(crafting_inventory_t &cinv, bool store);
-        void gather2(crafting_inventory_t &cinv, bool store);
-        bool merge(const requirement &otherReq);
         
         typedef enum {
             ts_normal      = (0 <<  0),
             ts_found_items = (1 <<  1), // list found items too
             ts_compress    = (1 <<  2), // list only the complex_req.
             ts_overlays    = (1 <<  3), // allways list overlays
+            ts_selected    = (1 <<  4), // list the selected items
         } to_string_flags;
         std::string to_string(int flags = ts_normal) const;
+    protected:
+        friend class solution;
+        friend class complex_req;
+        
+        // Called during solution::gather
+        void gather(crafting_inventory_t &cinv, bool store);
+        
+        // Called during solution::init
+        void find_overlays(simple_req &rc);
+        /**
+         * Possible merge the other requirement into this->req,
+         * assumes that the type is equal, fails if
+         * the ctype of the other req. is different (returns false).
+         * Otherwise adds the count and return true.
+         */
+        bool merge(const requirement &otherReq);
     };
 
     class complex_req {
     public:
-        typedef std::vector<single_req> SimpReqVec;
+    protected:
+        typedef std::vector<simple_req> SimpReqVec;
+        /**
+         * Input, a list of single requirements.
+         */
         SimpReqVec simple_reqs;
+        /**
+         * Input, is this input used as tools?
+         * Tools are sometimes differntly handled than components.
+         * Tools are not destroyed like components, but charges
+         * of the tools might be consumed.
+         * Also the amount of a required tool is always 1.
+         */
         bool as_tool;
-        complex_req() { }
+        /**
+         * Output, which items the user selected that should be used
+         */
+        candvec selected_items;
+        /**
+         * Index into #simple_reqs of which the user choose to use.
+         */
+        int selected_simple_req_index;
+        double toolfactor;
+    public:
+        complex_req() : selected_simple_req_index(-1) { }
+        
+        void select_items_to_use();
+        
         bool is_possible();
-        void init(std::vector<component> &components, bool as_tool, solution &s);
-        void add(component &c, bool as_tool);
-        void add_or_merge(const single_req &rs2);
-        void init_pointers();
-        void gather(crafting_inventory_t &cinv, bool store);
-        void gather2(crafting_inventory_t &cinv, bool store);
         
         bool contains_req_type(const itype_id &type) const;
-        single_req *get_req_type(const itype_id &type);
+        simple_req *get_req_type(const itype_id &type);
         
-        std::string to_string(int flags = single_req::ts_normal) const;
+        std::string to_string(int flags = simple_req::ts_normal) const;
+        
+        // Serialize to json string
+        std::string serialize() const;
+        // Deserialize from json
+        void deserialize(crafting_inventory_t &cinv, const std::string &data);
+    protected:
+        friend class solution;
+        friend class simple_req;
+        
+        // Called during solution::gather
+        void gather(crafting_inventory_t &cinv, bool store);
+        
+        // Called during solution::init
+        void init(std::vector<component> &components, bool as_tool, solution &s);
+        void add(component &c, bool as_tool);
+        void add_or_merge(const simple_req &rs2);
+        void init_pointers();
+        void consume(crafting_inventory_t &cinv, std::list<item> &used_items);
     };
 
     class solution {
     public:
         typedef std::vector<complex_req> CompReqVec;
         CompReqVec complex_reqs;
+        double toolfactor;
         
+        void serialize(player_activity &activity) const;
+        void deserialize(crafting_inventory_t &cinv, player_activity &activity);
         void init(recipe &making);
+        void select_items_to_use();
         void gather(crafting_inventory_t &cinv, bool store);
         bool is_possible();
-        std::string to_string(int flags = single_req::ts_normal) const;
+        std::string to_string(int flags = simple_req::ts_normal) const;
         void save(recipe &making) const;
+        void consume(crafting_inventory_t &cinv, std::list<item> &used_items);
     };
     
 protected:
@@ -478,7 +531,7 @@ protected:
      * @param candidates The items the user can choose from - must not be empty!.
      * @return The selected candidate
      */
-    candidate_t ask_for_single_item(const requirement &req, consume_flags flags, const candvec &candidates);
+    static candidate_t ask_for_single_item(const requirement &req, consume_flags flags, const candvec &candidates);
     /**
      * Given a list of candidate items and a requirement, ask the
      * user for enough items to fullfill the given requirement.
@@ -491,19 +544,19 @@ protected:
      * @param selected_candidates [out] The selected candidates, this will be
      * a subset of of the candidates that fullfiles the requirement.
      */
-    void ask_for_items_to_use(const requirement &req, consume_flags flags, const candvec &candidates, candvec &selected_candidates);
+    static void ask_for_items_to_use(const requirement &req, consume_flags flags, const candvec &candidates, candvec &selected_candidates);
     
     /**
      * Wrapper for ask_for_items_to_use, that stores the selected
      * items inthe input list.
      */
-    void ask_for_items_to_use(const requirement &req, consume_flags flags, candvec &candidates);
+    static void ask_for_items_to_use(const requirement &req, consume_flags flags, candvec &candidates);
     
     /**
      * Reduce the list of candidates but still match the requirement.
      * This function removes candidates from the end of the list.
      */
-    void reduce(requirement req, candvec &candidates);
+    static void reduce(requirement req, candvec &candidates);
     
     /**
      * Ask the user to select items according to the requirements in
@@ -523,7 +576,7 @@ protected:
      */
     int select_items_to_use(const std::vector<component> &components, consume_flags flags, candvec &selected_items);
     
-    std::string serialize(int index, const candvec &vec);
+    static std::string serialize(int index, const candvec &vec);
     int deserialize(const std::string &data, candvec &vec);
     
     /**
@@ -542,7 +595,8 @@ protected:
      * expect a value of 0.0. In most cases this means simply to ignore
      * these tools for calculation of the modi.
      */
-    double calc_time_modi(const itype_id &type, const candvec &tools) const;
+    static double calc_time_modi(const candvec &tools);
+    static void merge_time_modi(double modi, double &result);
     
     void gather_inputs(const std::vector< std::vector<component> > &components, consume_flags flags, std::vector<std::string> &strVec, double *timeModi);
     void gather_inputs(const std::vector<component> &cv, consume_flags flags, std::vector<std::string> &strVec, double *timeModi);
@@ -597,7 +651,8 @@ public:
      * here (in str_values), also the turns left for this activity
      * might be changed.
      */
-    void gather_input(const recipe &making, player_activity &activity);
+    void gather_input(recipe &making, player_activity &activity);
+    void gather_input(recipe &making, solution &s, player_activity &activity);
     void gather_input(const construction_stage &stage, player_activity &activity);
     /**
      * Loads the tools/components that the user selected in gather_input,
@@ -612,13 +667,20 @@ public:
      * dissabmling the item.
      */
     void consume_gathered(
-        const recipe &making,
+        recipe &making,
         player_activity &activity,
         std::list<item> &used_items,
         std::list<item> &used_tools
     );
     void consume_gathered(
         const construction_stage &stage,
+        player_activity &activity,
+        std::list<item> &used_items,
+        std::list<item> &used_tools
+    );
+    void consume_gathered(
+        recipe &making,
+        solution &s,
         player_activity &activity,
         std::list<item> &used_items,
         std::list<item> &used_tools
