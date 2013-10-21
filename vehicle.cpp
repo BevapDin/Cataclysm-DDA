@@ -395,13 +395,13 @@ void vehicle::use_controls()
 
     if (engines.size() > 1) {
         options_choice.push_back(control_engines);
-        options_message.push_back(uimenu_entry(_T("Control engines"), 'e'));
+        options_message.push_back(uimenu_entry(_("Control engines"), 'e'));
         curent++;
     }
 
     if (lights.size() > 1) {
         options_choice.push_back(control_lights);
-        options_message.push_back(uimenu_entry(_T("Control lights"), 'L'));
+        options_message.push_back(uimenu_entry(_("Control lights"), 'L'));
         curent++;
     }
 

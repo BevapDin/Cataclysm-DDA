@@ -549,22 +549,20 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
     if( jo.has_member("qualities") ){
         set_qualities_from_json(jo, "qualities", new_item_template);
     }
-    if( jo.has_member("functions") && jo.is_array("functions") ){
-        JsonArray funcs = jo.get_array("functions");
-        while(funcs.has_more()) {
-            JsonArray func = funcs.next_array();
-            if(func.size() >= 1) {
-                const std::string key = func.get_string(0);
-                itype::functionality_t &fu = new_item_template->functionalityMap[key];
-                if(func.size() >= 3) {
-                    fu.time_modi = func.get_float(1);
-                    fu.charges_modi = func.get_float(2);
-                } else if(func.size() >= 2) {
-                    fu.time_modi = fu.charges_modi = func.get_float(1);
-                }
-                if(key.compare(0, 5, "func:") != 0) {
-                    debugmsg("item %s's functionality %s does not have func: prefix", new_item_template->name.c_str(), key.c_str());
-                }
+    JsonArray funcs = jo.get_array("functions");
+    while(funcs.has_more()) {
+        JsonArray func = funcs.next_array();
+        if(func.size() >= 1) {
+            const std::string key = func.get_string(0);
+            itype::functionality_t &fu = new_item_template->functionalityMap[key];
+            if(func.size() >= 3) {
+                fu.time_modi = func.get_float(1);
+                fu.charges_modi = func.get_float(2);
+            } else if(func.size() >= 2) {
+                fu.time_modi = fu.charges_modi = func.get_float(1);
+            }
+            if(key.compare(0, 5, "func:") != 0) {
+                debugmsg("item %s's functionality %s does not have func: prefix", new_item_template->name.c_str(), key.c_str());
             }
         }
     }
