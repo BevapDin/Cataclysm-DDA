@@ -25,42 +25,42 @@
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "screwdriver",
+    "name": "screwdriver-tool",
     "description": "???"
   },
   { "id":"func:wrench",
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "wrench",
+    "name": "wrench-tool",
     "description": "???"
   },
   { "id":"func:hacksaw",
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "hacksaw",
+    "name": "hacksaw-tool",
     "description": "???"
   },
   { "id":"func:pan",
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "frying pan",
+    "name": "frying pan-tool",
     "description": "???"
   },
   { "id":"func:pot",
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "pot",
+    "name": "pot-tool",
     "description": "???"
   },
   { "id":"func:hotplate",
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "hotplate",
+    "name": "hotplate-tool",
     "charges_per_use": 7,
     "description": "???"
   },
@@ -77,7 +77,7 @@
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "soldering iron",
+    "name": "soldering iron-tool",
     "charges_per_use": 6,
     "description": "???"
   },
@@ -85,7 +85,7 @@
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "welder",
+    "name": "welder-tool",
     "charges_per_use": 5,
     "description": "???"
   },
@@ -93,21 +93,28 @@
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "ax",
+    "name": "ax-tool",
     "description": "???"
   },
   { "id":"func:shovel",
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "shovel",
+    "name": "shovel-tool",
     "description": "???"
   },
+  { "id":"func:boltcutters",
+    "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
+    "symbol": " ",
+    "color": "white",
+    "name": "bolt cutters-tool",
+    "description": "???"
+  }
   { "id":"func:saw",
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",
     "color": "white",
-    "name": "wood saw",
+    "name": "wood saw-tool",
     "description": "???"
   }
 ]

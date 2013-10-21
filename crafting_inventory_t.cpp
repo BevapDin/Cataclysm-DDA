@@ -48,7 +48,33 @@ void crafting_inventory_t::add_bio_toolset(const bionic &bio, const calendar &tu
     by_bionic.push_back(item_from_bionic(bio.id, tools));
 }
 
+typedef std::pair<itype_id, int> funcWithModi;
+typedef std::vector<funcWithModi> tidvec;
+typedef std::map<itype_id, tidvec> funcmap;
+const tidvec &get_tidvec(const itype_id &type) {
+    static funcmap functionTypes;
+    tidvec &types = functionTypes[type];
+    if(types.empty()) {
+        for(std::map<std::string, itype*>::iterator a = g->itypes.begin(); a != g->itypes.end(); ++a) {
+            itype *t = a->second;
+            itype::FunctionalityMap::iterator fn = t->functionalityMap.find(type);
+            if(fn == t->functionalityMap.end()) {
+                if(type.compare(5, t->id.length(), t->id) == 0) {
+                    types.push_back(funcWithModi(a->first, 1));
+                }
+                continue;
+            }
+            types.push_back(funcWithModi(a->first, fn->second.charges_modi));
+        }
+    }
+    return types;
+}
+
 bool crafting_inventory_t::has_all_requirements(recipe &making) {
+    s.init(making);
+    s.gather(*this, false);
+    return s.is_possible();
+    /*
     bool isSomethingMissing = false;
     for(size_t i = 0; i < making.components.size(); i++) {
         if(!has_any_components(making.components[i])) {
@@ -61,6 +87,394 @@ bool crafting_inventory_t::has_all_requirements(recipe &making) {
         }
     }
     return !isSomethingMissing;
+    */
+}
+
+void crafting_inventory_t::solution::init(recipe &making) {
+    complex_reqs.resize(making.tools.size() + making.components.size());
+    size_t nr = 0;
+    for(size_t i = 0; i < making.tools.size(); i++, nr++) {
+        complex_reqs[nr].init(making.tools[i], true, *this);
+    }
+    for(size_t i = 0; i < making.components.size(); i++, nr++) {
+        complex_reqs[nr].init(making.components[i], false, *this);
+    }
+    // Some complex_req might end up empty, because their content
+    // been merged into other other complex_req.
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        if(complex_reqs[i].simple_reqs.empty()) {
+            complex_reqs.erase(complex_reqs.begin() + i);
+            i--;
+        }
+    }
+    assert(!complex_reqs.empty());
+    // Set up the pointers to the parent
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        complex_reqs[i].init_pointers();
+    }
+    // set up overlays
+    assert(!complex_reqs.empty());
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        complex_req &rc1 = complex_reqs[i];
+        for(size_t j = 0; j < rc1.simple_reqs.size(); j++) {
+            single_req &rc2 = rc1.simple_reqs[j];
+            for(size_t j1 = j + 1; j1 < rc1.simple_reqs.size(); j1++) {
+                single_req &rc3 = rc1.simple_reqs[j1];
+                rc3.find_overlays(rc2);
+            }
+        }
+        for(size_t j = 0; j < rc1.simple_reqs.size(); j++) {
+            single_req &rc2 = rc1.simple_reqs[j];
+            for(size_t i1 = i + 1; i1 < complex_reqs.size(); i1++) {
+                complex_req &rc3 = complex_reqs[i1];
+                for(size_t j1 = 0; j1 < rc3.simple_reqs.size(); j1++) {
+                    rc3.simple_reqs[j1].find_overlays(rc2);
+                }
+            }
+        }
+    }
+}
+
+bool operator==(const crafting_inventory_t::requirement &a, const crafting_inventory_t::requirement &b) {
+    return a.ctype == b.ctype && a.type == b.type && a.count == b.count;
+}
+
+void crafting_inventory_t::complex_req::init_pointers() {
+    assert(!simple_reqs.empty());
+    for(size_t k = 0; k < simple_reqs.size(); k++) {
+        simple_reqs[k].parent = this;
+    }
+}
+
+bool crafting_inventory_t::complex_req::contains_req_type(const itype_id &type) const {
+    for(size_t k = 0; k < simple_reqs.size(); k++) {
+        if(simple_reqs[k].req.type == type) {
+            return true;
+        }
+    }
+    return false;
+}
+
+crafting_inventory_t::single_req* crafting_inventory_t::complex_req::get_req_type(const itype_id &type) {
+    for(size_t k = 0; k < simple_reqs.size(); k++) {
+        if(simple_reqs[k].req.type == type) {
+            return &(simple_reqs[k]);
+        }
+    }
+    return NULL;
+}
+
+bool crafting_inventory_t::single_req::merge(const requirement &otherReq) {
+    assert(req.type == otherReq.type);
+    if(req.ctype != otherReq.ctype) {
+        return false;
+    }
+    req.count = std::max(req.count, otherReq.count);
+    return true;
+}
+
+void crafting_inventory_t::complex_req::add_or_merge(const single_req &rs2) {
+    assert(rs2.req.type.compare(0, 5, "func:") != 0);
+    single_req *ot = get_req_type(rs2.req.type);
+    if(ot != NULL && ot->merge(rs2.req)) {
+        if(
+            ot->comp->type.compare(0, 5, "func:") == 0
+            && rs2.comp->type.compare(0, 5, "func:") != 0) {
+            ot->comp = rs2.comp;
+        }
+        // a item that has this function is explictly listed,
+        // or a item has several functions.
+        return;
+    }
+    simple_reqs.push_back(rs2);
+}
+
+void crafting_inventory_t::complex_req::add(component &c, bool as_tool) {
+    c.available = -1;
+    requirement req(c, as_tool);
+    single_req rs2(req, &c);
+    if(rs2.req.type.compare(0, 5, "func:") != 0) {
+        add_or_merge(rs2);
+        return;
+    }
+    const tidvec &types = get_tidvec(rs2.req.type);
+    assert(!types.empty());
+    const int org_count = rs2.req.count;
+    for(size_t i = 0; i < types.size(); i++) {
+        rs2.req.type = types[i].first;
+        if(req.ctype == C_CHARGES) {
+            rs2.req.count = org_count * types[i].second;
+        } else {
+            rs2.req.count = org_count;
+        }
+        add_or_merge(rs2);
+    }
+}
+
+void crafting_inventory_t::complex_req::init(std::vector<component> &components, bool as_tool, solution &s) {
+    assert(!components.empty());
+    this->as_tool = as_tool;
+    for(size_t j = 0; j < components.size(); j++) {
+        add(components[j], as_tool);
+    }
+    assert(!simple_reqs.empty());
+}
+
+void crafting_inventory_t::single_req::find_overlays(single_req &rc) {
+    if(rc.req.type != req.type) {
+        return;
+    }
+    if(parent->as_tool && rc.parent->as_tool) {
+        // Both are used as tool, if they require an amount,
+        // there is no real overlay, a tool can be used
+        // knife and as screwdriver and as hammer.
+        if(rc.req.ctype == C_AMOUNT || req.ctype == C_AMOUNT) {
+            return;
+        }
+    }
+    overlays.push_back(&rc);
+}
+
+bool crafting_inventory_t::solution::is_possible() {
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        if(!complex_reqs[i].is_possible()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool crafting_inventory_t::complex_req::is_possible() {
+    assert(!simple_reqs.empty());
+    for(size_t i = 0; i < simple_reqs.size(); i++) {
+        if(simple_reqs[i].is_possible()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool crafting_inventory_t::single_req::is_possible() {
+    return available == 1;
+}
+
+void crafting_inventory_t::solution::gather(crafting_inventory_t &cinv, bool store) {
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        complex_reqs[i].gather(cinv, store);
+    }
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        complex_reqs[i].gather2(cinv, store);
+    }
+}
+
+void crafting_inventory_t::complex_req::gather(crafting_inventory_t &cinv, bool store) {
+    assert(!simple_reqs.empty());
+    for(size_t i = 0; i < simple_reqs.size(); i++) {
+        simple_reqs[i].gather(cinv, store);
+    }
+}
+
+void crafting_inventory_t::complex_req::gather2(crafting_inventory_t &cinv, bool store) {
+    assert(!simple_reqs.empty());
+    for(size_t i = 0; i < simple_reqs.size(); i++) {
+        simple_reqs[i].gather2(cinv, store);
+    }
+}
+
+void crafting_inventory_t::single_req::gather(crafting_inventory_t &cinv, bool store) {
+    comp->available = -1;
+    if(store) {
+        items_on_map.clear();
+        items_on_player.clear();
+        cnt_on_player = cinv.collect_candidates(req, S_PLAYER, items_on_player);
+        cnt_on_map = cinv.collect_candidates(req, S_MAP, items_on_map);
+        available = (cnt_on_map + cnt_on_player) >= req.count ? +1 : -1;
+    } else {
+        available = cinv.has(req) ? +1 : -1;
+    }
+    if(available != 1) {
+        return;
+    }
+    for(size_t j = 0; j < overlays.size(); j++) {
+        requirement newReq = req;
+        single_req &orq = *(overlays[j]);
+        if(orq.available != 1) {
+            // Might be possible of orq needs more items than this
+            continue;
+        }
+        if(orq.req.ctype == C_AMOUNT) {
+            if(newReq.ctype == C_AMOUNT) {
+                newReq.count += orq.req.count;
+            } else {
+                newReq.count++;
+            }
+        } else {
+            if(newReq.ctype == C_AMOUNT) {
+                newReq.count++;
+            } else {
+                newReq.count += orq.req.count;
+            }
+        }
+        if(cinv.has(newReq)) {
+            continue;
+        }
+        orq.available = 0;
+        assert(orq.parent != parent);
+        if(orq.parent->is_possible()) {
+            // deselect the other component, still works
+            orq.overlays.push_back(this);
+            continue;
+        }
+        orq.available = +1;
+        // Nope the other component is needed, deselect this one.
+        available = 0;
+        return;
+    }
+}
+
+void crafting_inventory_t::single_req::gather2(crafting_inventory_t &cinv, bool store) {
+    if(available > comp->available) {
+        comp->available = available;
+    }
+    (void) cinv;
+    (void) store;
+}
+
+const std::string &name(const itype_id &type) {
+    const std::map<itype_id, itype*>::const_iterator a = g->itypes.find(type);
+    if(a == g->itypes.end()) {
+        return type;
+    }
+    return a->second->name;
+}
+
+std::string pname(const itype_id &type) {
+    const std::string &n = name(type);
+    assert(!n.empty());
+    switch(n[n.length() - 1]) {
+        case 's': return n;
+        case 'y': return n.substr(0, n.length() - 1) + "ies";
+        case 'h': return n + "es";
+        default:  return n + "s";
+    }
+}
+
+std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requirement &req) {
+    if(req.ctype == crafting_inventory_t::C_CHARGES) {
+        buffer << name(req.type) << " (" << req.count << ")";
+    } else if(req.count == 1) {
+        const std::string &n = name(req.type);
+        assert(!n.empty());
+        if(n[n.length() - 1] == 's') {
+            buffer << n;
+        } else {
+            static const std::string vowels("aeiou");
+            if(vowels.find(n[0]) != std::string::npos) {
+                buffer << "an " << n;
+            } else {
+                buffer << "a " << n;
+            }
+        }
+    } else {
+        buffer << req.count << " " << pname(req.type);
+    }
+    return buffer;
+}
+
+void crafting_inventory_t::solution::save(recipe &making) const {
+    making.components.clear();
+    making.tools.clear();
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        const complex_req &rc = complex_reqs[i];
+        std::vector<std::vector<component> > &vv = (rc.as_tool ? making.tools : making.components);
+        vv.resize(vv.size() + 1);
+        for(size_t j = 0; j < rc.simple_reqs.size(); j++) {
+            int count = rc.simple_reqs[j].req.count;
+            if(rc.as_tool && rc.simple_reqs[j].req.ctype == C_AMOUNT) {
+                count = -1;
+            }
+            vv.back().push_back(component(rc.simple_reqs[j].req.type, count));
+        }
+    }
+}
+
+bool crafting_inventory_t::has_all_requirements(recipe &making, solution &s) {
+    s.init(making);
+    s.gather(*this, true);
+    return s.is_possible();
+}
+
+std::string avail_to_string(int a) {
+    switch(a) {
+        case -1: return "-";
+        case +1: return "+";
+        case  0: return "#";
+        default: return "?";
+    }
+}
+
+std::string crafting_inventory_t::solution::to_string(int flags) const {
+    std::ostringstream buffer;
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        const complex_req &rs = complex_reqs[i];
+        if(i < 9) { buffer << " " << (i+1); } else { buffer << (i+1); }
+        buffer << rs.to_string(flags) << "\n";
+    }
+    return buffer.str();
+}
+
+std::string crafting_inventory_t::complex_req::to_string(int flags) const {
+    std::ostringstream buffer;
+    const component* last_comp = NULL;
+    for(size_t j = 0; j < simple_reqs.size(); j++) {
+        const single_req &rc = simple_reqs[j];
+        
+        if((flags & single_req::ts_compress) != 0) {
+            if(rc.comp == last_comp) {
+            } else {
+                if(j != 0) { buffer << " OR\n  "; }
+                last_comp = rc.comp;
+                int avail = rc.available;
+                for(size_t k = j + 1; avail != 1 && k < simple_reqs.size(); k++) {
+                    avail = std::max(avail, simple_reqs[k].available);
+                }
+                buffer << " " << avail_to_string(avail) << " ";
+                buffer << requirement(*rc.comp, as_tool);
+            }
+        } else {
+            if(j != 0) { buffer << " OR\n  "; }
+            buffer << " " << avail_to_string(rc.available) << " ";
+            buffer << rc.req;
+            if(rc.req.type != rc.comp->type) {
+                if(rc.comp->type.compare(5, rc.req.type.length(), rc.req.type) != 0) {
+                    buffer << " (used as " << name(rc.comp->type) << ")";
+                }
+            }
+            
+            if((flags & single_req::ts_overlays) != 0 && !rc.overlays.empty()) {
+                buffer << " overlays with: ";
+                for(std::vector<single_req*>::const_iterator a = rc.overlays.begin(); a != rc.overlays.end(); a++) {
+                    assert(*a != NULL);
+                    if(a != rc.overlays.begin()) { buffer << ", "; }
+                    buffer << name((*a)->req.type);
+                }
+            }
+        }
+        
+        if(rc.cnt_on_map + rc.cnt_on_player > 0 && (flags & single_req::ts_found_items) != 0) {
+            buffer << "\n     found: ";
+            bool needs_comma = false;
+            for(candvec::const_iterator a = rc.items_on_map.begin(); a != rc.items_on_map.end(); ++a) {
+                if(needs_comma) { buffer << ", "; } else { needs_comma = true; }
+                buffer << a->to_string(false);
+            }
+            for(candvec::const_iterator a = rc.items_on_player.begin(); a != rc.items_on_player.end(); ++a) {
+                if(needs_comma) { buffer << ", "; } else { needs_comma = true; }
+                buffer << a->to_string(false);
+            }
+        }
+    }
+    return buffer.str();
 }
 
 bool crafting_inventory_t::has(const requirement &req, source_flags sources) const {
@@ -125,17 +539,29 @@ int charges_of(const itype_id &type, const item &the_item)
 
 int crafting_inventory_t::count(const itype_id &type, count_type what, int max, int sources) const
 {
-    int count = 0;
+    CacheMap &cm = (what == C_CHARGES ? counted_by_charges : counted_by_amount);
+    std::pair<CacheMap::iterator, bool> xf = cm.insert(CacheMap::value_type(type, 0));
+    if(!xf.second) {
+        return xf.first->second;
+    }
+    int &count = xf.first->second;
+    max = -1; // force complete counting
+    
     if(sources & LT_WEAPON) {
         COUNT_IT_(p->weapon);
     }
     if(sources & LT_INVENTORY) {
         for(invstack::const_iterator iter = p->inv.getItems().begin(); iter != p->inv.getItems().end();
             ++iter) {
-            for(std::list<item>::const_iterator stack_iter = iter->begin(); stack_iter != iter->end();
-                ++stack_iter) {
-                    COUNT_IT_(*stack_iter);
+            assert(!iter->empty());
+            const item &it = iter->front();
+            // Assume all items in the stack are equal (same charges, ...)
+            switch(what) {
+                case C_CHARGES: count += charges_of(type, it) * iter->size(); break;
+                case C_AMOUNT: count += amount_of(type, it) * iter->size(); break;
+                default: debugmsg("Invalid %d count type", (int) what);
             }
+            if(max > 0 && count >= max) { return count; }
         }
     }
     if(sources & LT_MAP) {
@@ -192,10 +618,11 @@ mindex(i),
 usageType(type)
 { postInit(); }
 
-crafting_inventory_t::candidate_t::candidate_t(player *p, char ch, const item &vpitem, const itype_id &type):
+crafting_inventory_t::candidate_t::candidate_t(player *p, char ch, const item &vpitem, int count, const itype_id &type):
 location(LT_INVENTORY),
 the_player(p),
 invlet(ch),
+invcount(count),
 usageType(type)
 { postInit(); }
 
@@ -237,7 +664,7 @@ bool crafting_inventory_t::candidate_t::valid() const {
         case LT_WEAPON:
             return weapon != NULL;
         case LT_INVENTORY:
-            return the_player != NULL && !the_player->inv.item_by_letter(invlet).is_null();
+            return the_player != NULL && the_player->inv.stack_by_letter(invlet).size() >= invcount;
         case LT_BIONIC:
             return bionic != NULL;
         default:
@@ -335,6 +762,7 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
         case LT_INVENTORY:
             the_player = cinv.p;
             invlet = (char) ((int) pjv.get("invlet").get<double>());
+            invcount = (int) pjv.get("invcount").get<double>();
             break;
         case LT_BIONIC:
             bionic = NULL;
@@ -427,6 +855,7 @@ void crafting_inventory_t::candidate_t::serialize(picojson::value &v) const {
             break;
         case LT_INVENTORY:
             pjmap["invlet"] = pv(static_cast<int>(invlet));
+            pjmap["invcount"] = pv(invcount);
             break;
         case LT_BIONIC:
             pjmap["bio_id"] = pv(bionic->bio_id);
@@ -980,7 +1409,11 @@ std::string crafting_inventory_t::candidate_t::to_string(bool withTime) const {
             buffer << " (nearby)";
             break;
         case LT_WEAPON:
+            break;
         case LT_INVENTORY:
+            if(invcount > 1) {
+                buffer << " (" << invcount << " items)";
+            }
             break;
         case LT_BIONIC:
             buffer << " (bionic)";
@@ -1016,8 +1449,15 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
     if(req.ctype == C_AMOUNT) {
         switch(location) {
             case LT_INVENTORY:
-                used_items.push_back(p->inv.remove_item_by_letter(invlet));
-                break;
+                for(size_t i = 0; req.count > 0 && i < invcount; i++) {
+                    item it = p->inv.remove_item_by_letter(invlet);
+                    if(it.is_null()) {
+                        break;
+                    }
+                    used_items.push_back(it);
+                    req.count--;
+                }
+                return; // skip the req.count--; below
             case LT_VEHICLE_CARGO:
                 used_items.push_back(vitems->veh->parts[vitems->part_num].items[iindex]);
                 vitems->veh->remove_item(vitems->part_num, iindex);
@@ -1050,8 +1490,10 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
     }
     switch(location) {
         case LT_INVENTORY:
-            if(p->inv.item_by_letter(invlet).use_charges(req.type, req.count, used_items, true)) {
-                p->inv.remove_item_by_letter(invlet);
+            for(size_t i = 0; req.count > 0 && i < invcount; i++) {
+                if(p->inv.item_by_letter(invlet).use_charges(req.type, req.count, used_items, true)) {
+                    p->inv.remove_item_by_letter(invlet);
+                }
             }
             break;
         case LT_VEHICLE_CARGO:
@@ -1170,12 +1612,10 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
     if(sources & LT_INVENTORY) {
         for(invstack::const_iterator iter = p->inv.getItems().begin(); iter != p->inv.getItems().end();
             ++iter) {
-            for(std::list<item>::const_iterator stack_iter = iter->begin(); stack_iter != iter->end();
-                ++stack_iter) {
-                if(XMATCH(*stack_iter)) {
-                    count += req(*stack_iter);
-                    candidates.push_back(candidate_t(p, stack_iter->invlet, *stack_iter, req.type));
-                }
+            const item &it = iter->front();
+            if(XMATCH(it)) {
+                count += req(it) * iter->size();
+                candidates.push_back(candidate_t(p, it.invlet, it, iter->size(), req.type));
             }
         }
     }

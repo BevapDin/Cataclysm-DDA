@@ -736,6 +736,7 @@ recipe* game::select_crafting_recipe()
         wrefresh(w_data);
         int ch=(int)getch();
         if(ch=='e'||ch=='E') { ch=(int)'?'; } // get_input is inflexible
+        if(ch=='d'||ch=='D') { input = (InputEvent) 'd'; } else
         input = get_input(ch);
         switch (input)
         {
@@ -768,6 +769,21 @@ recipe* game::select_crafting_recipe()
                 break;
             case DirectionN:
                 line--;
+                break;
+            case 'd':
+                {
+                    crafting_inventory_t::solution s;
+                    crafting_inv.has_all_requirements(*(current[line]), s);
+                    
+                    {
+                        std::string msg;
+                        msg += _("requirements for ");
+                        msg += current[line]->result;
+                        msg += ":\n";
+                        msg += s.to_string(crafting_inventory_t::single_req::ts_overlays | crafting_inventory_t::single_req::ts_compress | crafting_inventory_t::single_req::ts_found_items);
+                        popup_top(msg.c_str());
+                    }
+                }
                 break;
             case Confirm:
                 if (!available[line])

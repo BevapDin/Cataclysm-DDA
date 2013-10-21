@@ -10575,8 +10575,8 @@
   "tools": [
     [
       [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "hatchet", -1 ],
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -11149,9 +11149,7 @@
   "autolearn": true,
   "components": [
     [
-      [ "thread", 50 ],
-      [ "sinew", 50 ],
-      [ "plant_fibre", 50 ]
+      [ "func:thread", 50 ]
     ]
   ]
 },{
@@ -16798,7 +16796,7 @@
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "boltcutters", -1 ]
+      [ "func:boltcutters", -1 ]
     ]
   ],
   "components": [
@@ -16842,7 +16840,7 @@
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "boltcutters", -1 ]
+      [ "func:boltcutters", -1 ]
     ]
   ],
   "components": [

@@ -240,6 +240,7 @@ public:
                 player *the_player;
                 // invlet of item in player's inventory (or worn, weapon has its own location)
                 signed char invlet;
+                int invcount;
             };
             struct {
                 items_in_vehicle_cargo *vitems;
@@ -269,7 +270,7 @@ public:
         // beeing constrcuted this way.
         candidate_t(player *p, const itype_id &type);
         candidate_t(items_on_map &ifm, int i, const item &vpitem, const itype_id &type);
-        candidate_t(player *p, char ch, const item &vpitem, const itype_id &type);
+        candidate_t(player *p, char ch, const item &vpitem, int count, const itype_id &type);
         candidate_t(items_in_vehicle_cargo &ifv, int i, const item &vpitem, const itype_id &type);
         candidate_t(item_from_vpart &ifv, const itype_id &type);
         candidate_t(item_from_bionic &ifb, const itype_id &type);
@@ -329,6 +330,86 @@ public:
     };
     typedef std::vector<candidate_t> candvec;
     
+    class solution;
+    class complex_req;
+    /**
+     * A sinle requirement. This is always of an actuall type,
+     * never of a functionality. Single referces to the number of
+     * item types (which is one for this requirement), not to the
+     * amount.
+     */
+    class single_req {
+    public:
+        /**
+         * The single item-type requirement.
+         */
+        requirement req;
+        /**
+         * Points to the component object that is stored
+         * in a recipe.
+         */
+        component *comp;
+        /**
+         * Indicates if this requirement is fullfilled.
+         */
+        int available;
+        complex_req *parent;
+        std::vector<single_req*> overlays;
+        
+        int cnt_on_map;
+        candvec items_on_map;
+        int cnt_on_player;
+        candvec items_on_player;
+        
+        single_req(const requirement &r, component *c) : req(r), comp(c) { }
+        
+        bool is_possible();
+        void find_overlays(single_req &rc);
+        void gather(crafting_inventory_t &cinv, bool store);
+        void gather2(crafting_inventory_t &cinv, bool store);
+        bool merge(const requirement &otherReq);
+        
+        typedef enum {
+            ts_normal      = (0 <<  0),
+            ts_found_items = (1 <<  1), // list found items too
+            ts_compress    = (1 <<  2), // list only the complex_req.
+            ts_overlays    = (1 <<  3), // allways list overlays
+        } to_string_flags;
+        std::string to_string(int flags = ts_normal) const;
+    };
+
+    class complex_req {
+    public:
+        typedef std::vector<single_req> SimpReqVec;
+        SimpReqVec simple_reqs;
+        bool as_tool;
+        complex_req() { }
+        bool is_possible();
+        void init(std::vector<component> &components, bool as_tool, solution &s);
+        void add(component &c, bool as_tool);
+        void add_or_merge(const single_req &rs2);
+        void init_pointers();
+        void gather(crafting_inventory_t &cinv, bool store);
+        void gather2(crafting_inventory_t &cinv, bool store);
+        
+        bool contains_req_type(const itype_id &type) const;
+        single_req *get_req_type(const itype_id &type);
+        
+        std::string to_string(int flags = single_req::ts_normal) const;
+    };
+
+    class solution {
+    public:
+        typedef std::vector<complex_req> CompReqVec;
+        CompReqVec complex_reqs;
+        
+        void init(recipe &making);
+        void gather(crafting_inventory_t &cinv, bool store);
+        bool is_possible();
+        std::string to_string(int flags = single_req::ts_normal) const;
+        void save(recipe &making) const;
+    };
+    
 protected:
     static bool has_different_types(const candvec &cv);
     // check if all items int he vector are actually equal (same type, same damage, ...)
@@ -340,6 +421,7 @@ protected:
     int collect_candidates(const requirement &req, int source, candvec &result);
     
     friend candidate_t; // for deserialize
+    friend solution;
 
     player *p;
     std::list<items_on_map> on_map;
@@ -503,6 +585,7 @@ public:
      * This simply calls has_all_components and has_all_tools
      */
     bool has_all_requirements(recipe &making);
+    bool has_all_requirements(recipe &making, solution &s);
     
     // Interface for recipes: gather what tools and components to use
     /**
@@ -649,6 +732,11 @@ public:
      * FIXME: legacy, should be changed to "func:" system
      */
     bool has_items_with_quality(const std::string &name, int level, int amount) const;
+    
+private:
+    typedef std::map<itype_id, int> CacheMap;
+    mutable CacheMap counted_by_charges;
+    mutable CacheMap counted_by_amount;
 };
 
 #endif

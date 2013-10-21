@@ -3298,7 +3298,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:hacksaw" ] ],
+    "functions": [ [ "func:hacksaw" ] , [ "func:hammer" ] ],
     "use_action": "HACKSAW"
   },
 
@@ -4655,7 +4655,7 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "functions": [ [ "func:welder" , 1.3 , 20 ] ],
+    "functions": [ [ "func:welder" , 1.3 , 30 ] ],
     "use_action": "SOLDER_WELD"
   },
   
