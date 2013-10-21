@@ -1118,7 +1118,7 @@ void complete_vehicle (game *g)
         tools.push_back(component("func:welder", welder_charges ));
         crafting_inv.consume_tools(tools, true);
 
-        if ( vehicle_part_types[part_id].has_flag("LIGHT") ) {
+        if ( vehicle_part_types[part_id].has_flag("CONE_LIGHT") ) {
             // Need map-relative coordinates to compare to output of look_around.
             int gx, gy;
             // Need to call coord_translate() directly since it's a new part.

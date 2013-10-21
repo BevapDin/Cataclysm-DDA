@@ -154,6 +154,7 @@
       ["hat_fur", 15],
       ["helmet_bike", 35],
       ["helmet_motor", 40],
+      ["touring_suit", 15],
       ["mag_tv", 40],
       ["mag_dude", 40],
       ["mag_glam", 40],
@@ -2150,6 +2151,7 @@
       ["tazer", 3],
       ["shot_beanbag", 15],
       ["tac_helmet", 15],
+      ["tonfa", 30],
       ["swat_armor", 10]
     ]
   },{
@@ -3504,6 +3506,7 @@
       ["e_tool", 2],
       ["knife_trench", 7],
       ["switchblade", 4],
+      ["tonfa", 10],
       ["nodachi", 1]
     ]
   },{
@@ -3541,6 +3544,7 @@
       ["helmet_ball", 45],
       ["helmet_riot", 25],
       ["helmet_motor", 40],
+      ["touring_suit", 15],
       ["holster", 8],
       ["bootstrap", 3],
       ["UPS_off", 5],
@@ -4069,6 +4073,7 @@
       ["baton", 8],
       ["tazer", 3],
       ["kevlar_plate", 10],
+      ["tonfa", 10],
       ["alloy_plate", 10]
     ]
   },{
@@ -4678,5 +4683,13 @@
       ["vaccine_shot", 10],
       ["bio_claws_weapon", 0]
     ]
+  },{
+    "type":"item_group",
+    "id":"shia_stuff",
+    "items":[
+      ["knife_steak", 3],
+      ["ax", 1],
+    ]
   }
+
 ]

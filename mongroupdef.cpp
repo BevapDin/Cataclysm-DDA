@@ -54,7 +54,57 @@ MonsterGroupResult MonsterGroupManager::GetResultFromGroup( std::string group_na
         if(OPTIONS["CLASSIC_ZOMBIES"]){
             valid_entry = valid_entry && (GetMType(it->name)->in_category("CLASSIC") || GetMType(it->name)->in_category("WILDLIFE"));
         }
-
+        //Check to insure the various conditions for this spawn definition are met
+        for(std::vector<std::string>::iterator condition = it->conditions.begin(); condition != it->conditions.end(); ++condition){
+            if((*condition) == "DAY"){
+                //Unless day, invalid
+                if(!(g->turn.get_turn() > g->turn.sunrise().get_turn() && g->turn.get_turn() < g->turn.sunset().get_turn())){
+                    valid_entry = false;
+                }
+            } else if((*condition) == "NIGHT"){
+                //Unless night, invalid
+                if( !(g->turn.get_turn() < g->turn.sunrise().get_turn() || g->turn.get_turn() > g->turn.sunset().get_turn()) ){
+                    valid_entry = false;
+                }
+            } else if((*condition) == "DUSK"){
+                //Unless we're a certain distance from sundown
+                if( !(g->turn.get_turn() > (g->turn.sunset().get_turn()-HOURS(1) ) &&
+                      g->turn.get_turn() < (g->turn.sunset().get_turn()+HOURS(1) )) ){
+                    valid_entry = false;
+                }
+            } else if((*condition) == "DAWN"){
+                //Unless we're a certain distance from sunup
+                if( !(g->turn.get_turn() > (g->turn.sunrise().get_turn()-HOURS(1) ) &&
+                      g->turn.get_turn() < (g->turn.sunrise().get_turn()+HOURS(1) )) ){
+                    valid_entry = false;
+                }
+            } else if((*condition) == "TWILIGHT"){
+                //Unless we're a certain distance from sunup OR sundown
+                if(!((g->turn.get_turn() > (g->turn.sunset().get_turn()-HOURS(1) ) && 
+                      g->turn.get_turn() < (g->turn.sunset().get_turn()+HOURS(1) ))|| //dusk OR
+                     (g->turn.get_turn() > (g->turn.sunrise().get_turn()-HOURS(1) ) && //dawn
+                      g->turn.get_turn() < (g->turn.sunrise().get_turn()+HOURS(1) )))){
+                    valid_entry = false;
+                }
+            }
+            if((*condition) == "SUMMER"){
+                if(g->turn.get_season() != SUMMER){
+                    valid_entry = false;
+                }
+            } else if((*condition) == "WINTER"){
+                if(g->turn.get_season() != WINTER){
+                    valid_entry = false;
+                }
+            } else if((*condition) == "AUTUMN"){
+                if(g->turn.get_season() != AUTUMN){
+                    valid_entry = false;
+                }
+            } else if((*condition) == "SPRING"){
+                if(g->turn.get_season() != SPRING){
+                    valid_entry = false;
+                }
+            }
+        }
         //If the entry was valid, check to see if we actually spawn it
         if(valid_entry){
             //If the monsters frequency is greater than the spawn_chance, select this spawn rule
@@ -67,14 +117,14 @@ MonsterGroupResult MonsterGroupManager::GetResultFromGroup( std::string group_na
                 //And if a quantity pointer with remaining value was passed, will will modify the external value as a side effect
                 //We will reduce it by the spawn rule's cost multiplier
                 if(quantity){ 
-                    *quantity -= it->cost_multiplier; 
+                    *quantity -= it->cost_multiplier * spawn_details.pack_size; 
                 }
                 monster_found = true;
             //Otherwise, subtract the frequency from spawn result for the next loop around
             }else{ 
                 spawn_chance -= it->frequency;
             }
-        }
+        } 
     }
 
     return spawn_details;
@@ -155,7 +205,14 @@ void MonsterGroupManager::LoadMonsterGroup(JsonObject &jo)
                 pack_min = packarr.next_int();
                 pack_max = packarr.next_int();
             }
-            g.monsters.push_back(MonsterGroupEntry(name,freq,cost,pack_min,pack_max));
+            MonsterGroupEntry new_mon_group = MonsterGroupEntry(name,freq,cost,pack_min,pack_max);
+            if(mon.has_member("conditions")){
+              JsonArray conditions_arr = mon.get_array("conditions");
+              while(conditions_arr.has_more()){
+                new_mon_group.conditions.push_back(conditions_arr.next_string());
+              }
+            }
+            g.monsters.push_back(new_mon_group);
         }
     }
 

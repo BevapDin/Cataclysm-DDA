@@ -4040,7 +4040,14 @@ case ot_shelter: {
   mapf::basic_bind("b c l", f_bench, f_counter, f_locker));
   tmpcomp = add_computer(SEEX+6, 5, _("Evac shelter computer"), 0);
   tmpcomp->add_option(_("Emergency Message"), COMPACT_EMERG_MESS, 0);
- }
+  if(OPTIONS["BLACK_ROAD"]) {
+      //place zombies outside
+      place_spawns(g, "GROUP_ZOMBIE", OPTIONS["SPAWN_DENSITY"], 0, 0, SEEX * 2 - 1, 3, 0.4f);
+      place_spawns(g, "GROUP_ZOMBIE", OPTIONS["SPAWN_DENSITY"], 0, 4, 3, SEEX * 2 - 4, 0.4f);
+      place_spawns(g, "GROUP_ZOMBIE", OPTIONS["SPAWN_DENSITY"], SEEX * 2 - 3, 4, SEEX * 2 - 1, SEEX * 2 - 4, 0.4f);
+      place_spawns(g, "GROUP_ZOMBIE", OPTIONS["SPAWN_DENSITY"], 0, SEEX * 2 - 3, SEEX * 2 - 1, SEEX * 2 - 1, 0.4f);
+  }
+  }
 
   break;
 //....
@@ -4948,7 +4955,7 @@ ff.......|....|WWWWWWWW|\n\
       else if (j == tw + 2)
        ter_set(i, j, t_concrete_h);
       else { // Empty space holds monsters!
-       std::string type = nethercreatures[(rng(0, 10))];
+       std::string type = nethercreatures[(rng(0, 9))];
        add_spawn(type, 1, i, j);
       }
      }
@@ -12498,7 +12505,6 @@ void map::place_spawns(game *g, std::string group, const int chance,
    // Pick a monster type
    MonsterGroupResult spawn_details = MonsterGroupManager::GetResultFromGroup( group, &g->mtypes, &num );
   
-   //Hoping that if I pass a count of pack_size instead of 1, then more monsters will spawn. Who knows though amiright?
    add_spawn(spawn_details.name, spawn_details.pack_size, x, y);
   }
  }
@@ -14870,8 +14876,12 @@ void map::add_road_vehicles(bool city, int facing)
             int vx = rng(0, 3) * 4 + 5;
             int vy = rng(0, 3) * 4 + 5;
             int car_type = rng(1, 100);
-            if (car_type <= 35) {
+            if (car_type <= 25) {
                 add_vehicle(g, "car", vx, vy, facing, -1, 1);
+            } else if (car_type <= 30) {
+                add_vehicle(g, "policecar", vx, vy, facing, -1, 1);
+            } else if (car_type <= 40) {
+                add_vehicle(g, "ambulance", vx, vy, facing, -1, 1);
             } else if (car_type <= 45) {
                 add_vehicle(g, "beetle", vx, vy, facing, -1, 1);
             } else if (car_type <= 50) {

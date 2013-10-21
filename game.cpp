@@ -340,7 +340,7 @@ void game::setup()
  messages.clear();
  events.clear();
 
- turn.set_season(SUMMER);    // ... with winter conveniently a long ways off
+ turn.set_season(SUMMER);    // ... with winter conveniently a long ways off   (not sure if we need this...)
 
  // reset kill counts
  kills.clear();
@@ -363,6 +363,15 @@ void game::setup()
 void game::start_game()
 {
  turn = HOURS(OPTIONS["INITIAL_TIME"]);
+
+ if (OPTIONS["INITIAL_SEASON"].getValue() == "spring");
+ else if (OPTIONS["INITIAL_SEASON"].getValue() == "summer")
+    turn += DAYS( (int) OPTIONS["SEASON_LENGTH"]);
+ else if (OPTIONS["INITIAL_SEASON"].getValue() == "autumn")
+    turn += DAYS( (int) OPTIONS["SEASON_LENGTH"] * 2);
+ else
+    turn += DAYS( (int) OPTIONS["SEASON_LENGTH"] * 3);
+
  run_mode = (OPTIONS["SAFEMODE"] ? 1 : 0);
  mostseen = 0; // ...and mostseen is 0, we haven't seen any monsters yet.
 
@@ -1772,7 +1781,6 @@ bool game::handle_action()
 
         int iCh;
 
-        timeout(125);
         /*
         Location to add rain drop animation bits! Since it refreshes w_terrain it can be added to the animation section easily
         Get tile information from above's weather information:
@@ -1813,8 +1821,9 @@ bool game::handle_action()
             draw_weather(wPrint);
 
             wrefresh(w_terrain);
-        } while ((iCh = getch()) == ERR);
-        timeout(-1);
+            // Reset timeout before each call to input(), it sets it back to -1.
+            timeout(125);
+        } while ((iCh = input()) == ERR);
 
         ch = input(iCh);
     } else {
@@ -3998,16 +4007,18 @@ void game::draw_HP()
 
     static const char *body_parts[] = { _("HEAD"), _("TORSO"), _("L ARM"),
                            _("R ARM"), _("L LEG"), _("R LEG"), _("POWER") };
+    static body_part part[] = { bp_head, bp_torso, bp_arms,
+                           bp_arms, bp_legs, bp_legs, num_bp};
+    static int side[] = { -1, -1, 0, 1, 0, 1, -1};
     int num_parts = sizeof(body_parts) / sizeof(body_parts[0]);
     for (int i = 0; i < num_parts; i++) {
-        nc_color c = c_ltgray;
         const char *str = body_parts[i];
         wmove(w_HP, i * dy, 0);
         if (wide)
-            wprintz(w_HP, c, " ");
-        wprintz(w_HP, c, str);
+            wprintz(w_HP, limb_color(&u, part[i], side[i]), " ");
+        wprintz(w_HP, limb_color(&u, part[i], side[i]), str);
         if (!wide)
-            wprintz(w_HP, c, ":");
+            wprintz(w_HP, limb_color(&u, part[i], side[i]), ":");
     }
 
     int powx = hpx;
@@ -4032,6 +4043,43 @@ void game::draw_HP()
         mvwprintz(w_HP, powy, powx, color, "%-3d", u.power_level);
     }
     wrefresh(w_HP);
+}
+
+nc_color game::limb_color(player *p, body_part bp, int side, bool bleed, bool bite, bool infect)
+{
+    if (bp == num_bp) {
+        return c_ltgray;
+    }
+
+    int color_bit = 0;
+    nc_color i_color = c_ltgray;
+    if (bleed && p->has_disease("bleed", bp, side)) {
+        color_bit += 1;
+    }
+    if (bite && p->has_disease("bite", bp, side)) {
+        color_bit += 10;
+    }
+    if (infect && p->has_disease("infected", bp, side)) {
+        color_bit += 100;
+    }
+    switch (color_bit) {
+        case 1:
+            i_color = c_red;
+            break;
+        case 10:
+            i_color = c_blue;
+            break;
+        case 100:
+            i_color = c_green;
+            break;
+        case 11:
+            i_color = c_magenta;
+            break;
+        case 101:
+            i_color = c_yellow;
+            break;
+    }
+    return i_color;
 }
 
 void game::draw_minimap()
@@ -4388,7 +4436,7 @@ bool game::pl_sees(player *p, monster *mon, int &t)
 {
  // TODO: [lightmap] Allow npcs to use the lightmap
  if ((mon->has_flag(MF_DIGS) || (mon->has_flag(MF_CAN_DIG) && g->m.has_flag("DIGGABLE", mon->posx(), mon->posy()))) &&
-      !p->has_active_bionic("bio_ground_sonar") && 
+      !p->has_active_bionic("bio_ground_sonar") &&
        rl_dist(p->posx, p->posy, mon->posx(), mon->posy()) > 1)
   return false; // Can't see digging monsters until we're right next to them
  int range = p->sight_range(light_level());
@@ -4913,22 +4961,6 @@ bool game::sound(int x, int y, int vol, std::string description)
     attract_hordes(x, y, vol);
 #endif
 
-
-// Loud sounds make the next spawn sooner!
- int spawn_range = int(MAPSIZE / 2) * SEEX;
- if (vol >= spawn_range) {
-  int max = (vol - spawn_range);
-  int min = int(max / 6);
-  if (max > spawn_range * 4)
-   max = spawn_range * 4;
-  if (min > spawn_range * 4)
-   min = spawn_range * 4;
-  int change = rng(min, max);
-  if (nextspawn < change)
-   nextspawn = 0;
-  else
-   nextspawn -= change;
- }
 // Next, display the sound as the player hears it
  if (description == "")
   return false; // No description (e.g., footsteps)
@@ -6262,7 +6294,7 @@ void game::use_item(char chInput)
  else
   ch = chInput;
 
- if (ch == ' ') {
+ if (ch == ' ' || ch == KEY_ESCAPE) {
   add_msg(_("Never mind."));
   return;
  }
@@ -7259,7 +7291,7 @@ void game::list_items()
                     break;
                 case DirectionE:
                     iPage++;
-                    if (iPage >= filtered_items[iActive].vIG.size()) {
+                    if ( !filtered_items.empty() && iPage >= filtered_items[iActive].vIG.size()) {
                         iPage = filtered_items[iActive].vIG.size()-1;
                     }
                     break;
@@ -8122,7 +8154,7 @@ void game::grab()
         if( veh ) {
             add_msg(_("You release the %s."), veh->name.c_str() );
         } else if ( m.can_move_furniture( u.posx + u.grab_point.x, u.posy + u.grab_point.y ) ) {
-            add_msg(_("You release the %s."), m.furnname( u.posx + u.grab_point.x, u.posy + u.grab_point.y ).c_str() ); 
+            add_msg(_("You release the %s."), m.furnname( u.posx + u.grab_point.x, u.posy + u.grab_point.y ).c_str() );
         }
         u.grab_point.x = 0;
         u.grab_point.y = 0;
@@ -9233,7 +9265,7 @@ void game::eat(char chInput)
  else
   ch = chInput;
 
- if (ch == ' ') {
+ if (ch == ' ' || ch == KEY_ESCAPE) {
   add_msg(_("Never mind."));
   return;
  }
@@ -9268,6 +9300,11 @@ void game::takeoff(char chInput)
  else
   ch = chInput;
 
+ if (ch == ' ' || ch == KEY_ESCAPE) {
+  add_msg(_("Never mind."));
+  return;
+ }
+    
  if (u.takeoff(this, ch))
   u.moves -= 250; // TODO: Make this variable
  else
@@ -9554,6 +9591,11 @@ void game::wield(char chInput)
  else
   ch = chInput;
 
+ if (ch == ' ' || ch == KEY_ESCAPE) {
+  add_msg(_("Never mind."));
+  return;
+ }
+
  bool success = false;
  if (ch == '-')
   success = u.wield(this, -3);
@@ -9567,6 +9609,11 @@ void game::wield(char chInput)
 void game::read()
 {
  char ch = inv_type(_("Read:"), IC_BOOK);
+
+ if (ch == ' ' || ch == KEY_ESCAPE) {
+  add_msg(_("Never mind."));
+  return;
+ }
  u.read(this, ch);
 }
 
@@ -9782,8 +9829,8 @@ void game::plmove(int dx, int dy)
  int vpart0 = -1, vpart1 = -1, dpart = -1;
  vehicle *veh0 = m.veh_at(u.posx, u.posy, vpart0);
  vehicle *veh1 = m.veh_at(x, y, vpart1);
- bool pushing_furniture = false;  // moving -into- furniture tile; skip check for move_cost > 0 
- bool pulling_furniture = false;  // moving -away- from furniture tile; check for move_cost > 0 
+ bool pushing_furniture = false;  // moving -into- furniture tile; skip check for move_cost > 0
+ bool pulling_furniture = false;  // moving -away- from furniture tile; check for move_cost > 0
  bool shifting_furniture = false; // moving furniture and staying still; skip check for move_cost > 0
  int movecost_modifier = 0;       // pulling moves furniture into our origin square, so this changes to subtract it.
 
@@ -9945,11 +9992,11 @@ void game::plmove(int dx, int dy)
           u.grab_type = OBJECT_NONE;
       } else {
           point fdest( fpos.x + dx, fpos.y + dy ); // intended destination of furniture.
-          
+
           // unfortunately, game::is_empty fails for tiles we're standing on, which will forbid pulling, so:
           bool canmove = (
                ( m.move_cost(fdest.x, fdest.y) > 0 || m.has_flag("LIQUID", fdest.x, fdest.y) ) &&
-               npc_at(fdest.x, fdest.y) == -1 && 
+               npc_at(fdest.x, fdest.y) == -1 &&
                mon_at(fdest.x, fdest.y) == -1 &&
                m.has_flag("FLAT", fdest.x, fdest.y) &&
                !m.has_furn(fdest.x, fdest.y) &&
@@ -9961,7 +10008,7 @@ void game::plmove(int dx, int dy)
           const int src_items = m.i_at(fpos.x, fpos.y).size();
           const int dst_items = m.i_at(fdest.x, fdest.y).size();
           bool dst_item_ok = ( ! m.has_flag("NOITEM", fdest.x, fdest.y) &&
-                               ! m.has_flag("SWIMMABLE", fdest.x, fdest.y) && 
+                               ! m.has_flag("SWIMMABLE", fdest.x, fdest.y) &&
                                ! m.has_flag("DESTROY_ITEM", fdest.x, fdest.y) );
           bool src_item_ok = ( m.furn_at(fpos.x, fpos.y).has_flag("CONTAINER") ||
                                m.furn_at(fpos.x, fpos.y).has_flag("SEALED") );
@@ -9979,7 +10026,7 @@ void game::plmove(int dx, int dy)
               u.moves -= 50; // "oh was that your stuffed parrot? Sorry :-O"
               return;
           }
-          
+
           if ( pulling_furniture ) { // normalize movecost for pulling: furniture moves into our current square -then- we move away
               if ( furncost < 0 ) {  // this will make our exit-tile move cost 0
                    movecost_modifier += m.ter_at(fpos.x, fpos.y).movecost; // so add the base cost of our exit-tile's terrain.
@@ -10014,7 +10061,7 @@ void game::plmove(int dx, int dy)
           }
 
           if ( shifting_furniture ) { // we didn't move
-              if ( abs( u.grab_point.x + dx ) < 2 && abs( u.grab_point.y + dy ) < 2 ) { 
+              if ( abs( u.grab_point.x + dx ) < 2 && abs( u.grab_point.y + dy ) < 2 ) {
                   u.grab_point = point ( u.grab_point.x + dx , u.grab_point.y + dy ); // furniture moved relative to us
               } else { // we pushed furniture out of reach
                   add_msg( _("You let go of the %s"), furntype.name.c_str() );
@@ -10033,7 +10080,7 @@ void game::plmove(int dx, int dy)
        add_msg( _("Nothing at grabbed point %d,%d."),u.grab_point.x,u.grab_point.y );
        u.grab_point.x = 0;
        u.grab_point.y = 0;
-       u.grab_type = OBJECT_NONE;      
+       u.grab_type = OBJECT_NONE;
     }
   }
 
@@ -11421,7 +11468,7 @@ bool game::spread_fungus(int x, int y)
             for (int j = y - 1; j <= y + 1; j++) {
                 // One spread on average
                 if (!m.has_flag("FUNGUS", i, j) && one_in(9 - growth)) {
-                    //growth chance is 100 in X simplified 
+                    //growth chance is 100 in X simplified
                     if (m.has_flag("DIGGABLE", i, j)) {
                         m.ter_set(i, j, t_fungus);
                         converted = true;
