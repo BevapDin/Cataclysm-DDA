@@ -25,6 +25,7 @@
 #endif
 
 void exit_handler(int s);
+void abort_handler(int s);
 
 #ifdef USE_WINMAIN
 int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -95,6 +96,10 @@ int main(int argc, char *argv[])
   sigemptyset(&sigIntHandler.sa_mask);
   sigIntHandler.sa_flags = 0;
   sigaction(SIGINT, &sigIntHandler, NULL);
+  
+  sigIntHandler.sa_handler = abort_handler;
+  sigaction(SIGABRT, &sigIntHandler, NULL);
+  
  #endif
 
  do {
@@ -109,6 +114,10 @@ int main(int argc, char *argv[])
  exit_handler(-999);
 
  return 0;
+}
+
+void abort_handler(int s) {
+    query_yn(_("recived SIGABRT, waiting for debugger"));
 }
 
 void exit_handler(int s) {

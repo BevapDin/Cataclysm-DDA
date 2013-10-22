@@ -209,15 +209,21 @@ public:
          * (returns 0). For compatible items (item.type == required type)
          * it return either 1 if counted by amount or the charges
          * of the item if counted by charges.
+         * This is recursive and checks the content of the items too.
          */
         int get_charges_or_amount(const item &the_item) const;
-        
+        /**
+         * Use up the mathcing items up to #count.
+         * This also decreases the #count (not below 0).
+         * The used up items are stored in used_items.
+         * This is recursive and checks the content of the items too.
+         * @return tru if the item should delete (charges==0, or
+         * ctype==C_AMOUNT and item was used up).
+         */
+        bool use(item &it, std::list<item> &used_items);
+       
         int operator()(const item &the_item) const {
             return get_charges_or_amount(the_item);
-        }
-        requirement& operator-=(const item& the_item) {
-            count -= get_charges_or_amount(the_item);
-            return *this;
         }
     };
     
@@ -326,7 +332,6 @@ public:
         void postInit();
         void deserialize(crafting_inventory_t &cinv, const std::string &data);
         void deserialize(crafting_inventory_t &cinv, const picojson::value &v);
-        int drainVehicle(const std::string &ftype, int amount, std::list<item> &ret) const;
     };
     typedef std::vector<candidate_t> candvec;
     
@@ -497,7 +502,7 @@ protected:
      * @param sources A or-ed collection of source_flags. Only items
      * from these sources are considered.
      */
-    int count(const itype_id &type, count_type what, int max, int sources) const;
+    int count(const requirement &req, int max, int sources) const;
     
     /**
      * This is called during #init, with each bionic that is installed.

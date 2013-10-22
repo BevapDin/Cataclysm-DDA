@@ -7,6 +7,10 @@
 #include "crafting.h"
 #include <algorithm>
 
+void resort_item_vectors();
+   
+std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requirement &req);
+
 bool operator==(const point &a, const point &b) {
     return a.x == b.x && a.y == b.y;
 }
@@ -42,6 +46,7 @@ void crafting_inventory_t::add_bio_toolset(const bionic &bio, const calendar &tu
     if(bio.id.compare(0, prefixIn.length(), prefixIn) != 0) {
         return;
     }
+    // FIXME: bionics _share_ the power!
     const std::string tool_name = prefixOut + bio.id.substr(prefixIn.length());
     item tools(item_controller->find_template(tool_name), turn);
     tools.charges = p->power_level;
@@ -134,8 +139,10 @@ void crafting_inventory_t::solution::consume(crafting_inventory_t &cinv, std::li
         complex_req &cr = complex_reqs[i];
         if(cr.selected_simple_req_index != -1) {
             cr.consume(cinv, used_items);
-            complex_reqs.erase(complex_reqs.begin() + 1);
+            complex_reqs.erase(complex_reqs.begin() + i);
             i--;
+        } else {
+            debugmsg("Must gather requirement %d again", i);
         }
     }
     for(size_t i = 0; i < complex_reqs.size(); i++) {
@@ -147,6 +154,7 @@ void crafting_inventory_t::solution::consume(crafting_inventory_t &cinv, std::li
         cr.select_items_to_use();
         cr.consume(cinv, used_items);
     }
+    resort_item_vectors();
 }
 
 void crafting_inventory_t::solution::select_items_to_use() {
@@ -400,12 +408,13 @@ void crafting_inventory_t::complex_req::gather(crafting_inventory_t &cinv, bool 
 }
 
 void crafting_inventory_t::simple_req::gather(crafting_inventory_t &cinv, bool store) {
+    assert(req.type.compare(0, 5, "func:") != 0);
     comp->available = -1;
     if(store) {
         candidate_items.clear();
         cnt_on_player = cinv.collect_candidates(req, S_PLAYER, candidate_items);
         cnt_on_map = cinv.collect_candidates(req, S_MAP, candidate_items);
-        available = (cnt_on_map + cnt_on_player) >= req.count ? +1 : -1;
+        available = ((cnt_on_map + cnt_on_player) >= req.count) ? +1 : -1;
     } else {
         available = cinv.has(req) ? +1 : -1;
     }
@@ -549,7 +558,9 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
                 last_comp = rc.comp;
                 int avail = rc.available;
                 for(size_t k = j + 1; avail != 1 && k < simple_reqs.size(); k++) {
-                    avail = std::max(avail, simple_reqs[k].available);
+                    if(simple_reqs[k].comp == last_comp) {
+                        avail = std::max(avail, simple_reqs[k].available);
+                    }
                 }
                 buffer << " " << avail_to_string(avail) << " ";
                 buffer << requirement(*rc.comp, as_tool);
@@ -587,11 +598,11 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
 }
 
 bool crafting_inventory_t::has(const requirement &req, source_flags sources) const {
-    return count(req.type, req.ctype, req.count, sources) >= req.count;
+    return count(req, req.count, sources) >= req.count;
 }
 
 int crafting_inventory_t::count(const requirement &req, source_flags sources) const {
-    return count(req.type, req.ctype, -1, sources);
+    return count(req, -1, sources);
 }
 
 bool crafting_inventory_t::has(component &x, bool as_tool) const {
@@ -603,74 +614,31 @@ bool crafting_inventory_t::has(component &x, bool as_tool) const {
     return x.available == 1;
 }
 
-int amount_of(const itype_id &type, const item &the_item)
+
+#define COUNT_IT_(item_, factor) \
+    do { \
+        count += req(item_) * factor; \
+        if(max > 0 && count >= max) { return count; } \
+    } while(false)
+
+int crafting_inventory_t::count(const requirement &req, int max, int sources) const
 {
-    int count = 0;
-    if(the_item.matches_type(type)) {
-        // check if the_item's a container, if so, the_item should be empty
-        if (the_item.type->is_container()) {
-            if (the_item.contents.empty()) {
-                count++;
-            }
-        } else {
-            count++;
-        }
-    }
-    for (int k = 0; k < the_item.contents.size(); k++) {
-        count += amount_of(type, the_item.contents[k]);
-    }
-    return count;
-}
-
-int charges_of(const itype_id &type, const item &the_item)
-{
-    int count = 0;
-    if(the_item.matches_type(type)) {
-        if (the_item.charges < 0) {
-            count++;
-        } else {
-            count += the_item.get_charges_of(type);
-        }
-    }
-    for (int k = 0; k < the_item.contents.size(); k++) {
-        count += charges_of(type, the_item.contents[k]);
-    }
-    return count;
-}
-
-
-#define COUNT_IT_(item_) \
-    do { switch(what) { \
-        case C_CHARGES: count += charges_of(type, (item_)); break; \
-        case C_AMOUNT: count += amount_of(type, (item_)); break; \
-        default: debugmsg("Invalid %d count type", (int) what); \
-    } if(max > 0 && count >= max) { return count; } } while(false)
-
-int crafting_inventory_t::count(const itype_id &type, count_type what, int max, int sources) const
-{
-    CacheMap &cm = (what == C_CHARGES ? counted_by_charges : counted_by_amount);
-    std::pair<CacheMap::iterator, bool> xf = cm.insert(CacheMap::value_type(type, 0));
+    CacheMap &cm = (req.ctype == C_CHARGES ? counted_by_charges : counted_by_amount);
+    std::pair<CacheMap::iterator, bool> xf = cm.insert(CacheMap::value_type(req.type, 0));
     if(!xf.second) {
         return xf.first->second;
     }
     int &count = xf.first->second;
     max = -1; // force complete counting
     
-    if(sources & LT_WEAPON) {
-        COUNT_IT_(p->weapon);
+    if(sources & LT_WEAPON && !p->weapon.is_null()) {
+        COUNT_IT_(p->weapon, 1);
     }
     if(sources & LT_INVENTORY) {
         for(invstack::const_iterator iter = p->inv.getItems().begin(); iter != p->inv.getItems().end();
             ++iter) {
             assert(!iter->empty());
-            const item &it = iter->front();
-            // Assume all items in the stack are equal (same charges, ...)
-            switch(what) {
-                case C_CHARGES: count += charges_of(type, it) * iter->size(); break;
-                case C_AMOUNT: count += amount_of(type, it) * iter->size(); break;
-                default: debugmsg("Invalid %d count type", (int) what);
-            }
-            if(max > 0 && count >= max) { return count; }
+            COUNT_IT_(iter->front(), iter->size());
         }
     }
     if(sources & LT_MAP) {
@@ -680,7 +648,7 @@ int crafting_inventory_t::count(const itype_id &type, count_type what, int max, 
                 if(b->made_of(LIQUID)) {
                     continue;
                 }
-                COUNT_IT_(*b);
+                COUNT_IT_(*b, 1);
             }
         }
     }
@@ -691,23 +659,23 @@ int crafting_inventory_t::count(const itype_id &type, count_type what, int max, 
                 if(b->made_of(LIQUID)) {
                     continue;
                 }
-                COUNT_IT_(*b);
+                COUNT_IT_(*b, 1);
             }
         }
     }
     if(sources & LT_VPART) {
         for(std::list<item_from_vpart>::const_iterator a = vpart.begin(); a != vpart.end(); ++a) {
-            COUNT_IT_(a->the_item);
+            COUNT_IT_(a->the_item, 1);
         }
     }
     if(sources & LT_BIONIC) {
         for(std::list<item_from_bionic>::const_iterator a = by_bionic.begin(); a != by_bionic.end(); ++a) {
-            COUNT_IT_(a->the_item);
+            COUNT_IT_(a->the_item, 1);
         }
     }
     if(sources & LT_SURROUNDING) {
         for(std::list<item_from_surrounding>::const_iterator a = surround.begin(); a != surround.end(); ++a) {
-            COUNT_IT_(a->the_item);
+            COUNT_IT_(a->the_item, 1);
         }
     }
     return count;
@@ -771,9 +739,9 @@ bool crafting_inventory_t::candidate_t::valid() const {
         case LT_VPART:
             return vpartitem != NULL;
         case LT_WEAPON:
-            return weapon != NULL;
+            return weapon != NULL && !weapon->is_null();
         case LT_INVENTORY:
-            return the_player != NULL && the_player->inv.stack_by_letter(invlet).size() >= invcount;
+            return the_player != NULL && invcount > 0 && the_player->inv.stack_by_letter(invlet).size() >= invcount;
         case LT_BIONIC:
             return bionic != NULL;
         default:
@@ -835,6 +803,13 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
                     break;
                 }
             }
+            if(surroundings == NULL) {
+                debugmsg("surrounding %s is gone - will recreate it", tmpstr.c_str());
+                item it(g->itypes[tmpstr], (int) g->turn);
+                it.charges = 50;
+                cinv.surround.push_back(item_from_surrounding(tmppnt, it));
+                surroundings = &(cinv.surround.back());
+            }
             break;
         case LT_VEHICLE_CARGO:
             tmppnt.x = (int) pjv.get("vehptr").get<double>();
@@ -866,7 +841,11 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
             }
             break;
         case LT_WEAPON:
-            weapon = &(cinv.p->weapon);
+            if(cinv.p->weapon.is_null()) {
+                weapon = NULL;
+            } else {
+                weapon = &(cinv.p->weapon);
+            }
             break;
         case LT_INVENTORY:
             the_player = cinv.p;
@@ -996,47 +975,18 @@ void crafting_inventory_t::filter(candvec &cv, source_flags sources) {
     }
 }
 
-void crafting_inventory_t::consume_gathered(const std::vector< std::vector<component> > &components, consume_flags flags, std::vector<std::string> &strVec, std::list<item> &used_items) {
-    size_t indexInStrVec = 0;
-    for (int i = 0; i < components.size(); i++) {
-        const std::vector<component> &cv = components[i];
-        if(cv.empty()) {
-            continue;
-        }
-        candvec vec_to_consume_from;
-        int index_of_component;
-        if(indexInStrVec < strVec.size()) {
-            index_of_component = deserialize(strVec[indexInStrVec], vec_to_consume_from);
-            if(index_of_component == -1) {
-                strVec.clear();
-            }
-            indexInStrVec++;
-        }
-        if(vec_to_consume_from.empty()) {
-            index_of_component = select_items_to_use(cv, flags, vec_to_consume_from);
-        }
-        if(index_of_component >= 0) {
-            const requirement reqToRemove(cv[index_of_component], flags != assume_components);
-            consume(reqToRemove, flags, vec_to_consume_from, used_items);
-        } else {
-            debugmsg("no suitable component recovered");
-        }
-    }
-    if(indexInStrVec == strVec.size() && indexInStrVec > 0) {
-        strVec.clear();
-    } else if(indexInStrVec > 0 && indexInStrVec < strVec.size()) {
-        strVec.erase(strVec.begin(), strVec.begin() + indexInStrVec);
-    }
-}
-
 int crafting_inventory_t::deserialize(const std::string &data, candvec &vec) {
-    using namespace picojson;
     picojson::value pjv;
     const char *s = data.c_str();
     std::string err = picojson::parse(pjv, s, s + data.length());
-    assert(err.empty());
-    assert(pjv.is<picojson::array>());
-    assert(pjv.contains(0));
+    if(!err.empty()) {
+        debugmsg("failed to deserialize: %s for %s", err.c_str(), data.c_str());
+        return -1;
+    }
+    if(!pjv.is<picojson::array>() || !pjv.contains(0)) {
+        debugmsg("failed to deserialize: input %s is not an array or empty", data.c_str());
+        return -1;
+    }
     const int index = (int) pjv.get(0).get<double>();
     vec.clear();
     for(size_t i = 1; pjv.contains(i); i++) {
@@ -1282,7 +1232,7 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
     for(size_t i = 0; i < simple_reqs.size(); i++) {
         const simple_req &sr = simple_reqs[i];
         if(sr.available != 1) {
-            continue;
+//            continue;
         }
         const requirement &req = sr.req;
         const candvec &candidate_items = sr.candidate_items;
@@ -1290,32 +1240,35 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
         if(sr.cnt_on_map + sr.cnt_on_player < count) {
             continue;
         }
+        std::ostringstream buffer;
+        buffer << "As " << req << ": ";
         if(candidate_items.size() == 1) {
             // Only one possible choice
-            options.push_back(candidate_items.front().to_string(false));
+            options.push_back(buffer.str() + candidate_items.front().to_string(false));
             optionsIndizes.push_back(std::make_pair(single_choise, i));
         } else if(!all_equal(candidate_items)) {
             // several items with differing properties - list by location,
-            options.push_back(::name(req.type) + " (different items possible)");
+            options.push_back(buffer.str() + " different items possible");
             optionsIndizes.push_back(std::make_pair(ask_again, i));
         } else {
-            // several items, but they are all of the same type, list by location,
-            const std::string name = ::name(req.type);
+            // several items, they are all of the same type and same
+            // properties, list by location,
             // Rules here are: show entry for "on person",
             // for "nearby" (if any of them apply).
             // Also show the mixed entry, but only if none of the other two
             // are shown
+            buffer << ::name(req.type);
             if(sr.cnt_on_map >= count) {
-                options.push_back(name + " (nearby)");
+                options.push_back(buffer.str() + " (nearby)");
                 optionsIndizes.push_back(std::make_pair(nearby, i));
             }
             if(sr.cnt_on_player >= count) {
-                options.push_back(name);
+                options.push_back(buffer.str());
                 optionsIndizes.push_back(std::make_pair(person, i));
             }
             if(sr.cnt_on_map < count && sr.cnt_on_player < count) {
                 assert(sr.cnt_on_map + sr.cnt_on_player >= count);
-                options.push_back(name + " (on person & nearby)");
+                options.push_back(buffer.str() + " (on person & nearby)");
                 optionsIndizes.push_back(std::make_pair(mixed, i));
             }
         }
@@ -1327,7 +1280,13 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
     size_t selection = 0;
     if(options.size() != 1) {
         // no user-interaction needed if only one choise
-        selection = (size_t) menu_vec(false, "Use which items?", options) - 1;
+        std::string msg;
+        if(as_tool) {
+            msg = _("Use witch item(s) as tool");
+        } else {
+            msg = _("Use witch item(s) as component");
+        }
+        selection = (size_t) menu_vec(false, msg.c_str(), options) - 1;
     }
     assert(selection < options.size());
     assert(options.size() == optionsIndizes.size());
@@ -1438,7 +1397,9 @@ crafting_inventory_t::candidate_t crafting_inventory_t::ask_for_single_item(cons
                 options[i].erase(0, 3 + 3);
             }
         }
-        selection = menu_vec(false, _("Use which gizmo?"), options) - 1;
+        std::ostringstream buffer;
+        buffer << "Select the item to use as " << req;
+        selection = menu_vec(false, buffer.str().c_str(), options) - 1;
     }
     assert(selection >= 0 && selection < indizes.size());
     return candidates[indizes[selection]];
@@ -1477,6 +1438,8 @@ void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_
     // of this loop.
     int cntFromSelectedOnes = 0;
     // FIXME make this better, like a real menu that is not regenerated in each loop
+    std::ostringstream buffer;
+    buffer << "Select the items to use as " << req;
     while(true) {
         // FIXME condens identical lines (e.g. 10 x "2x4 (on person)" -> "10 x 2x4 (on person)")
         std::vector<std::string> options;
@@ -1487,7 +1450,7 @@ void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_
         if(cntFromSelectedOnes >= req.count) {
             options.push_back("OK");
         }
-        const int selection = menu_vec(false, "Select the components to use?", options) - 1;
+        const int selection = menu_vec(false, buffer.str().c_str(), options) - 1;
         if(selection >= candidates.size()) {
             for(size_t i = 0; i < candidates.size(); i++) {
                 if(selected[i]) {
@@ -1508,9 +1471,6 @@ void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_
         }
     }
 }
-
-
-
 
 #define CMP_IF(_w) \
     do { if(_w != other._w) { return _w < other._w; } } while(false)
@@ -1594,116 +1554,176 @@ std::string crafting_inventory_t::candidate_t::to_string(bool withTime) const {
     return buffer.str();
 }
 
-int crafting_inventory_t::candidate_t::drainVehicle(const std::string &ftype, int amount, std::list<item> &ret) const {
-    vehicle *veh = NULL;
-    switch(location) {
-        case LT_VEHICLE_CARGO:
-            veh = vitems->veh;
-            break;
-        case LT_VPART:
-            veh = vpartitem->veh;
-            break;
-        default:
-            assert(false);
-            return 0;
-    }
+static void drainVehicle(vehicle *veh, const std::string &ftype, int &amount, std::list<item> &used_items) {
     item tmp = item_controller->create(ftype, g->turn);
     tmp.charges = veh->drain(ftype, amount);
     amount -= tmp.charges;
-    ret.push_back(tmp);
-    return amount;
+    used_items.push_back(tmp);
+}
+
+int crafting_inventory_t::requirement::get_charges_or_amount(const item &the_item) const {
+    int count = 0;
+    for(size_t k = 0; k < the_item.contents.size(); k++) {
+        count += get_charges_or_amount(the_item.contents[k]);
+    }
+    if(!the_item.contents.empty()) {
+        // Non-empty container, never gets used
+        return count;
+    }
+    if(!the_item.matches_type(type)) {
+        // Wrong item type
+        return count;
+    }
+    if(ctype == C_CHARGES) {
+        int modi = 1;
+        if(type.compare(0, 5, "func:") == 0 && the_item.type != NULL) {
+            modi = the_item.type->getChargesModi(type);
+            assert(modi > 0);
+        }
+        return count + (the_item.charges / modi);
+    }
+    return count + 1; // +1 for the it itself
+}
+
+bool crafting_inventory_t::requirement::use(item &the_item, std::list<item> &used_items) {
+    if(count == 0) {
+        return false;
+    }
+    assert(!the_item.is_null());
+    for(size_t k = 0; k < the_item.contents.size() && count > 0; k++) {
+        if(use(the_item.contents[k], used_items)) {
+            the_item.contents.erase(the_item.contents.begin() + k);
+            k--;
+        }
+    }
+    assert(count >= 0);
+    if(count == 0) {
+        return false;
+    }
+    if(!the_item.contents.empty()) {
+        // Non-empty container, never gets used
+        return false;
+    }
+    if(!the_item.matches_type(type)) {
+        // Wrong item type
+        return false;
+    }
+    if(ctype == C_CHARGES) {
+        int modi = 1;
+        if(type.compare(0, 5, "func:") == 0 && the_item.type != NULL) {
+            modi = the_item.type->getChargesModi(type);
+            assert(modi > 0);
+        }
+        const int used_charges = std::min(count, (the_item.charges / modi));
+        item tmp = the_item;
+        tmp.charges = used_charges * modi;
+        the_item.charges -= tmp.charges;
+        assert(the_item.charges >= 0);
+        count -= used_charges;
+        assert(count >= 0);
+        used_items.push_back(tmp);
+        // Tell the caller if to destroy the item
+        return (the_item.charges == 0 && the_item.destroyed_at_zero_charges());
+    }
+    // Use up the item itself
+    used_items.push_back(the_item);
+    count--;
+    // Let the caller destroy the item
+    return true;
+}
+
+typedef std::set< std::vector<item>* > item_vector_set_t;
+static item_vector_set_t item_vector_resort_set;
+
+void remove_releated(crafting_inventory_t::requirement &req, std::vector<item> &v, int index, std::list<item> &used_items) {
+    assert(index >= 0 && index < v.size());
+    if(req.use(v[index], used_items)) {
+        item_vector_resort_set.insert(&v);
+        v[index] = item();
+    }
+}
+
+void resort_item_vectors() {
+    for(item_vector_set_t::iterator a = item_vector_resort_set.begin(); a != item_vector_resort_set.end(); ++a) {
+        std::vector<item> &v = **a;
+        for(size_t i = 0; i < v.size(); i++) {
+            if(v[i].is_null()) {
+                v.erase(v.begin() + i);
+                i--;
+            }
+        }
+    }
+    item_vector_resort_set.clear();
 }
 
 void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement &req, std::list<item> &used_items) const {
     assert(req.count > 0);
-    if(req.ctype == C_AMOUNT) {
-        switch(location) {
-            case LT_INVENTORY:
-                for(size_t i = 0; req.count > 0 && i < invcount; i++) {
-                    item it = p->inv.remove_item_by_letter(invlet);
-                    if(it.is_null()) {
-                        break;
-                    }
-                    used_items.push_back(it);
-                    req.count--;
-                }
-                return; // skip the req.count--; below
-            case LT_VEHICLE_CARGO:
-                used_items.push_back(vitems->veh->parts[vitems->part_num].items[iindex]);
-                vitems->veh->remove_item(vitems->part_num, iindex);
-                break;
-            case LT_MAP:
-                used_items.push_back(g->m.i_at(mapitems->position.x, mapitems->position.y)[mindex]);
-                g->m.i_rem(mapitems->position.x, mapitems->position.y, mindex);
-                break;
-            case LT_WEAPON:
-                used_items.push_back(p->weapon);
-                p->remove_weapon();
-                break;
-            // Below are pseudo item. They should not be used in recipes
-            // as they can not be removed (used up).
-            case LT_VPART:
-                debugmsg("attempted to consume a pseudo vehicle part item %s", get_item().name.c_str());
-                break; // can not remove surroundings pseudo-item
-            case LT_SURROUNDING:
-                debugmsg("attempted to consume a pseudo surrounding item %s", get_item().name.c_str());
-                break; // can not remove surroundings pseudo-item
-            case LT_BIONIC:
-                debugmsg("attempted to consume a pseudo bionic item %s", get_item().name.c_str());
-                break; // can not remove bionic pseudo-item
-            default:
-                debugmsg("dont know what to consume!");
-                break;
-        }
-        req.count--;
-        return;
-    }
+    assert(valid());
+    const item *ix;
     switch(location) {
         case LT_INVENTORY:
             for(size_t i = 0; req.count > 0 && i < invcount; i++) {
-                if(p->inv.item_by_letter(invlet).use_charges(req.type, req.count, used_items, true)) {
+                if(req.use(p->inv.item_by_letter(invlet), used_items)) {
                     p->inv.remove_item_by_letter(invlet);
                 }
             }
-            break;
+            return;
         case LT_VEHICLE_CARGO:
-            if(vitems->veh->parts[vitems->part_num].items[iindex].use_charges(req.type, req.count, used_items, true)) {
-                vitems->veh->remove_item(vitems->part_num, iindex);
-            }
-            break;
+            remove_releated(
+                req,
+                vitems->veh->parts[vitems->part_num].items,
+                iindex,
+                used_items
+            );
+            return;
         case LT_MAP:
-            if(g->m.i_at(mapitems->position.x, mapitems->position.y)[iindex].use_charges(req.type, req.count, used_items, true)) {
-                g->m.i_rem(mapitems->position.x, mapitems->position.y, mindex);
-            }
-            break;
+            remove_releated(
+                req,
+                g->m.i_at(mapitems->position.x, mapitems->position.y),
+                mindex,
+                used_items
+            );
+            return;
         case LT_WEAPON:
-            if(p->weapon.use_charges(req.type, req.count, used_items, true)) {
+            if(req.use(p->weapon, used_items)) {
                 p->remove_weapon();
             }
-            break;
+            return;
+        // Below are pseudo item. They should not be used in recipes
+        // as they can not be removed (used up).
         case LT_VPART:
-            if(get_item().type->id == "installed_kitchen_unit") {
-                if(req.type == "func:hotplate") {
-                    const int modi = get_item().type->getChargesModi(req.type);
-                    const int remains = drainVehicle("battery", req.count * modi, used_items);
-                    req.count -= remains / modi;
-                } else if(req.type == "water_clean") {
-                    drainVehicle("water", req.count, used_items);
-                }
+            ix = &(get_item());
+            if(req.ctype == C_AMOUNT) {
+                debugmsg("attempted to consume a pseudo vehicle part item %s for %s", ix->name.c_str(), req.type.c_str());
+                return;
             }
-            if(vpartitem->veh->part_flag(vpartitem->part_num, "WELDRIG")) {
-                if(req.type == "func:hotplate" || req.type == "func:soldering_iron") {
-                    const int modi = get_item().type->getChargesModi(req.type);
-                    const int remains = drainVehicle("battery", req.count * modi, used_items);
-                    req.count -= remains / modi;
-                }
+            if(ix->type->id == "vpart_kitchen_unit") {
+                drainVehicle(vpartitem->veh, "battery", req.count, used_items);
+            } else if(ix->type->id == "water_clean") {
+                drainVehicle(vpartitem->veh, "water", req.count, used_items);
+            } else if(ix->type->id == "vpart_welding_rig") {
+                drainVehicle(vpartitem->veh, "battery", req.count, used_items);
+            } else {
+                debugmsg("unknown pseudo vehicle part item %s for %s", ix->name.c_str(), req.type.c_str());
             }
-            break;
+            return;
         case LT_SURROUNDING:
+            ix = &(get_item());
+            if(req.ctype == C_AMOUNT) {
+                debugmsg("attempted to consume a pseudo surrounding item %s for %s", ix->name.c_str(), req.type.c_str());
+                return;
+            }
             // Basicly this is an inifinte amount of things
             // like fire, or a water source, in this case we can ignore it.
-            break;
+            req.count = 0;
+            // FIXME: return and used_up item
+            return;
         case LT_BIONIC:
+            ix = &(get_item());
+            if(req.ctype == C_AMOUNT) {
+                debugmsg("attempted to consume a pseudo bionc item %s for %s", ix->name.c_str(), req.type.c_str());
+                return;
+            }
             if(req.count >= p->power_level) {
                 req.count -= p->power_level;
                 p->power_level = 0;
@@ -1712,7 +1732,7 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                 req.count = 0;
             }
             // FIXME: return and used_up item
-            break;
+            return; // can not remove bionic pseudo-item
         default:
             debugmsg("dont know what to consume!");
             break;
@@ -1741,18 +1761,23 @@ bool crafting_inventory_t::all_equal(const candvec &candidates) {
 }
 
 
-// basicly: ignore the item if we count by charges (not amount) and the item available_items no charges left
-#define XMATCH(item_) \
-    ((item_).matches_type(req.type) && (req.ctype == C_AMOUNT || (item_).charges > 0))
+inline bool match_and_count(const item &it, const crafting_inventory_t::requirement &req, int factor, int &countSum) {
+    const int c = req(it);
+    if(c > 0) {
+        countSum += c * factor;
+        return true;
+    }
+    return false;
+}
 
+#define XMATCH(item_, factor) ::match_and_count(item_, req, factor, count)
 int crafting_inventory_t::collect_candidates(const requirement &req, int sources, candvec &candidates) {
     int count = 0;
     if(sources & LT_MAP) {
         for(std::list<items_on_map>::iterator a = on_map.begin(); a != on_map.end(); ++a) {
             std::vector<item> &items = *(a->items);
             for(std::vector<item>::iterator b = items.begin(); b != items.end(); ++b) {
-                if(XMATCH(*b)) {
-                    count += req(*b);
+                if(XMATCH(*b, 1)) {
                     candidates.push_back(candidate_t(*a, b - items.begin(), *b, req.type));
                 }
             }
@@ -1762,8 +1787,7 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
         for(std::list<items_in_vehicle_cargo>::iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
             std::vector<item> &items = *a->items;
             for(size_t b = 0; b < items.size(); b++) {
-                if(XMATCH(items[b])) {
-                    count += req(items[b]);
+                if(XMATCH(items[b], 1)) {
                     candidates.push_back(candidate_t(*a, b, items[b], req.type));
                 }
             }
@@ -1771,8 +1795,7 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
     }
     if(sources & LT_VPART) {
         for(std::list<item_from_vpart>::iterator a = vpart.begin(); a != vpart.end(); ++a) {
-            if(XMATCH(a->the_item)) {
-                count += req(a->the_item);
+            if(XMATCH(a->the_item, 1)) {
                 candidates.push_back(candidate_t(*a, req.type));
             }
         }
@@ -1781,30 +1804,26 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
         for(invstack::const_iterator iter = p->inv.getItems().begin(); iter != p->inv.getItems().end();
             ++iter) {
             const item &it = iter->front();
-            if(XMATCH(it)) {
-                count += req(it) * iter->size();
+            if(XMATCH(it, iter->size())) {
                 candidates.push_back(candidate_t(p, it.invlet, it, iter->size(), req.type));
             }
         }
     }
-    if(sources & LT_WEAPON) {
-        if(XMATCH(p->weapon)) {
-            count += req(p->weapon);
+    if(sources & LT_WEAPON && !p->weapon.is_null()) {
+        if(XMATCH(p->weapon, 1)) {
             candidates.push_back(candidate_t(p, req.type));
         }
     }
     if(sources & LT_BIONIC) {
         for(std::list<item_from_bionic>::iterator a = by_bionic.begin(); a != by_bionic.end(); ++a) {
-            if(XMATCH(a->the_item)) {
-                count += req(a->the_item);
+            if(XMATCH(a->the_item, 1)) {
                 candidates.push_back(candidate_t(*a, req.type));
             }
         }
     }
     if(sources & LT_SURROUNDING) {
         for(std::list<item_from_surrounding>::iterator a = surround.begin(); a != surround.end(); ++a) {
-            if(XMATCH(a->the_item)) {
-                count += req(a->the_item);
+            if(XMATCH(a->the_item, 1)) {
                 candidates.push_back(candidate_t(*a, req.type));
             }
         }
@@ -1896,18 +1915,6 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 }
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-
 bool crafting_inventory_t::has_all_components(std::vector<component> &comps) const {
     bool isSomethingMissing = false;
     for(size_t i = 0; i < comps.size(); i++) {
@@ -1978,7 +1985,11 @@ bool crafting_inventory_t::has_tools(component &tools) const {
 std::list<item> crafting_inventory_t::consume_any_tools(const std::vector<component> &tools, bool force_available)
 {
     std::list<item> result;
+    for(size_t i = 0; i < tools.size(); i++) {
+        const_cast<std::vector<component>&>(tools)[i].available = 1;
+    }
     consume(tools, force_available ? assume_tools_force_available : assume_tools, result);
+    resort_item_vectors();
     return result;
 }
 
@@ -1987,16 +1998,20 @@ std::list<item> crafting_inventory_t::consume_all_tools(const std::vector<compon
     std::list<item> result;
     for(size_t i = 0; i < tools.size(); i++) {
         std::vector<component> tmpcomps(1, tools[i]);
+        tmpcomps.back().available = 1;
         consume(tmpcomps, force_available ? assume_tools_force_available : assume_tools, result);
     }
+    resort_item_vectors();
     return result;
 }
 
 std::list<item> crafting_inventory_t::consume_tools(const component &tools, bool force_available)
 {
     std::vector<component> tmpcomps(1, tools);
+    tmpcomps.back().available = 1;
     std::list<item> result;
     consume(tmpcomps, force_available ? assume_tools_force_available : assume_tools, result);
+    resort_item_vectors();
     return result;
 }
 
@@ -2015,7 +2030,11 @@ std::list<item> crafting_inventory_t::consume_tools(const itype_id &type) {
 std::list<item> crafting_inventory_t::consume_any_components(const std::vector<component> &comps)
 {
     std::list<item> result;
+    for(size_t i = 0; i < comps.size(); i++) {
+        const_cast<std::vector<component>&>(comps)[i].available = 1;
+    }
     consume(comps, assume_components, result);
+    resort_item_vectors();
     return result;
 }
 
@@ -2024,7 +2043,9 @@ std::list<item> crafting_inventory_t::consume_all_components(const std::vector<c
     std::list<item> result;
     for(size_t i = 0; i < comps.size(); i++) {
         std::vector<component> tmpcomps(1, comps[i]);
+        tmpcomps.back().available = 1;
         consume(tmpcomps, assume_components, result);
+        resort_item_vectors();
     }
     return result;
 }
@@ -2032,8 +2053,10 @@ std::list<item> crafting_inventory_t::consume_all_components(const std::vector<c
 std::list<item> crafting_inventory_t::consume_components(const component &comps)
 {
     std::vector<component> tmpcomps(1, comps);
+    tmpcomps.back().available = 1;
     std::list<item> result;
     consume(tmpcomps, assume_components, result);
+    resort_item_vectors();
     return result;
 }
 
@@ -2043,15 +2066,6 @@ std::list<item> crafting_inventory_t::consume_components(const itype_id &type, i
 }
 
 
-int crafting_inventory_t::requirement::get_charges_or_amount(const item &the_item) const {
-    if(ctype == C_CHARGES) {
-        return the_item.get_charges_of(type);
-    } else if(the_item.matches_type(type)) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
 
 bool hasQuality(const item &the_item, const std::string &name, int level)
 {

@@ -780,7 +780,7 @@ recipe* game::select_crafting_recipe()
                         msg += _("requirements for ");
                         msg += current[line]->result;
                         msg += ":\n";
-                        msg += s.to_string(crafting_inventory_t::simple_req::ts_overlays | crafting_inventory_t::simple_req::ts_compress | crafting_inventory_t::simple_req::ts_found_items);
+                        msg += s.to_string(crafting_inventory_t::simple_req::ts_overlays | /*crafting_inventory_t::simple_req::ts_compress | */crafting_inventory_t::simple_req::ts_found_items);
                         popup_top(msg.c_str());
                     }
                     if(s.is_possible()) {
