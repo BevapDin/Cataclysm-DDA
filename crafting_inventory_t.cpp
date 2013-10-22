@@ -1275,6 +1275,9 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
     
     for(size_t i = 0; i < simple_reqs.size(); i++) {
         const simple_req &sr = simple_reqs[i];
+        if(sr.available != 1) {
+            continue;
+        }
         const requirement &req = sr.req;
         const candvec &candidate_items = sr.candidate_items;
         const int count = req.count;
