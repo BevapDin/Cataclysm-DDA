@@ -168,6 +168,9 @@ void crafting_inventory_t::consume_gathered(
     std::list<item> &used_items,
     std::list<item> &used_tools
 ) {
+    if(stage.tools[0].empty() && stage.components[0].empty()) {
+        return;
+    }
     recipe r;
     copy(stage.tools, r.tools, sizeof(stage.tools) / sizeof(stage.tools[0]));
     copy(stage.components, r.components, sizeof(stage.components) / sizeof(stage.components[0]));
@@ -1117,6 +1120,9 @@ double crafting_inventory_t::calc_time_modi(const candvec &tools) {
 }
 
 void crafting_inventory_t::gather_input(const construction_stage &stage, player_activity &activity) {
+    if(stage.tools[0].empty() && stage.components[0].empty()) {
+        return;
+    }
     recipe r;
     copy(stage.tools, r.tools, sizeof(stage.tools) / sizeof(stage.tools[0]));
     copy(stage.components, r.components, sizeof(stage.components) / sizeof(stage.components[0]));
@@ -1685,7 +1691,6 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                     drainVehicle("water", req.count, used_items);
                 }
             }
-            /*
             if(vpartitem->veh->part_flag(vpartitem->part_num, "WELDRIG")) {
                 if(req.type == "func:hotplate" || req.type == "func:soldering_iron") {
                     const int modi = get_item().type->getChargesModi(req.type);
@@ -1693,7 +1698,6 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                     req.count -= remains / modi;
                 }
             }
-            */
             break;
         case LT_SURROUNDING:
             // Basicly this is an inifinte amount of things
