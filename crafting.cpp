@@ -24,6 +24,18 @@ void load_recipe_category(JsonObject &jsobj)
     craft_cat_list.push_back(jsobj.get_string("id"));
 }
 
+bool recipe_sorter(const recipe * const &a, const recipe * const &b) {
+    if(a->difficulty != b->difficulty) {
+        return a->difficulty < b->difficulty;
+    }
+    /*
+    if(a->time != b->time) {
+        return a->time < b->time;
+    }
+    */
+    return a->ident < b->ident;
+}
+
 void load_recipe(JsonObject &jsobj)
 {
     JsonArray jsarr;
@@ -143,6 +155,7 @@ void load_recipe(JsonObject &jsobj)
     }
 
     recipes[category].push_back(rec);
+    std::sort(recipes[category].begin(), recipes[category].end(), recipe_sorter);
 }
 
 bool game::crafting_allowed()
