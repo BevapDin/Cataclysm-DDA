@@ -587,7 +587,17 @@ recipe* game::select_crafting_recipe()
                 // Macs don't seem to like passing this as a class, so force it to int
                 (int)u.skillLevel(current[line]->skill_used));
             }
-            if (current[line]->time >= 1000)
+            if (current[line]->time >= 60 * 1000)
+            {
+                if (current[line]->time % 60000 == 0) {
+                    mvwprintz(w_data, 4, 30, col, _("Time to complete: %d hours"),
+                    int(current[line]->time / 60000));
+                } else {
+                    mvwprintz(w_data, 4, 30, col, _("Time to complete: %d hours %d minutes"),
+                    int(current[line]->time / 60000), int((current[line]->time % 60000) / 1000));
+                }
+            }
+            else if (current[line]->time >= 1000)
             {
                 mvwprintz(w_data, 4, 30, col, _("Time to complete: %d minutes"),
                 int(current[line]->time / 1000));
