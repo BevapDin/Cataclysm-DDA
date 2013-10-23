@@ -442,19 +442,6 @@ void game::init_construction()
    COMP("frame", 8);
    COMP("2x4", 8);
 
- CONSTRUCT("Place wheelbarrow", 0, &construct::able_empty, &construct::done_wheelbarrow);
-  STAGE(30);
-   TOOL("screwdriver");
-   TOOLCONT("toolset_screwdriver");
-   TOOL("hammer");
-   TOOLCONT("primitive_hammer");
-   TOOLCONT("hatchet");
-   TOOLCONT("nailgun");
-   TOOLCONT("toolset_hammer");
-   COMP("nail", 4);
-   COMP("wheel", 1);
-   COMP("frame", 1);
-
 }
 
 void game::construction_menu()

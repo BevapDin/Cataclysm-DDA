@@ -375,7 +375,6 @@ public:
 // turn vehicle left (negative) or right (positive), degrees
     void turn (int deg);
 
-	bool isWheelbarrow() const;
     bool collision( std::vector<veh_collision> &veh_veh_colls, int dx, int dy,
                     bool &can_move, int &imp, bool just_detect = false );
 
