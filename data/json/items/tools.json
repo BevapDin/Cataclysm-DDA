@@ -580,6 +580,7 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
+    "functions": [ [ "func:soldering_iron" , 1.0 , 7 ] ],
     "use_action": "SOLDER_WELD"
   },
 
@@ -2542,7 +2543,7 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "functions": [ [ "func:welder" , 1 , 20 ] ],
+    "functions": [ [ "func:welder" , 1 , 10 ] ],
     "use_action": "SOLDER_WELD"
   },
 
@@ -3298,7 +3299,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:hacksaw" ] , [ "func:hammer" ] ],
+    "functions": [ [ "func:hacksaw" ] ],
     "use_action": "HACKSAW"
   },
 
@@ -4655,7 +4656,7 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "functions": [ [ "func:welder" , 1.3 , 30 ] ],
+    "functions": [ [ "func:welder" , 1.3 , 15 ] ],
     "use_action": "SOLDER_WELD"
   },
   
