@@ -1155,7 +1155,7 @@ void advanced_inventory::display(game * gp, player * pp) {
                 uistate.adv_inv_rightsort=sm.ret;
             }
             recalc = true;
-        } else if( 'f' == c || '.' == c || '/' == c) {
+        } else if( 'f' == c || 'F' == c || '.' == c || '/' == c) {
             long key = 0;
             int spos = -1;
             std::string filter=panes[src].filter;
@@ -1173,6 +1173,9 @@ void advanced_inventory::display(game * gp, player * pp) {
                 }
             } while(key != '\n' && key != KEY_ESCAPE);
             filter_edit = false;
+            redraw_pane(src);
+        } else if( 'r' == c || 'R' == c) {
+            panes[src].filter.clear();
             redraw_pane(src);
         } else if('p' == c) {
             if(panes[src].size == 0) {

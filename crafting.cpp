@@ -181,6 +181,10 @@ void game::recraft()
  }
 }
 
+// See crafting_inventory_t.cpp
+extern void list_missing_ones(std::ostream &, const recipe &);
+extern const std::string &name(const itype_id &type);
+
 //TODO clean up this function to give better status messages (e.g., "no fire available")
 bool game::making_would_work(recipe *making)
 {
@@ -207,7 +211,10 @@ bool game::making_would_work(recipe *making)
     }
     else
     {
-        popup(_("You can no longer make that craft!"));
+        std::ostringstream buffer;
+        buffer << _("You can no longer make ") << ::name(making->result) << "\n";
+        ::list_missing_ones(buffer, *making);
+        popup_top(buffer.str().c_str());
     }
 
     return false;

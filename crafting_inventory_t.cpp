@@ -2163,3 +2163,34 @@ bool crafting_inventory_t::has_items_with_quality(const std::string &name, int l
     }
     return amount <= 0;
 }
+
+bool has_any(const std::vector<component> &v) {
+    if(v.empty()) { return true; }
+    for(size_t i = 0; i < v.size(); i++) {
+        if(v[i].available == 1) { return true; }
+    }
+    return false;
+}
+
+void list_missing_ones(std::ostream &stream, const std::vector< std::vector<component> > &vv, bool as_tool) {
+    bool had_printed_header = false;
+    for(size_t i = 0; i < vv.size(); i++) {
+        if(::has_any(vv[i])) {
+            continue;
+        }
+        if(!had_printed_header) {
+            had_printed_header = true;
+            stream << (as_tool ? _("Missing tools") : _("Missing components")) << ":\n";
+        }
+        for(size_t j = 0; j < vv[i].size(); j++) {
+            if(j != 0) { stream << " or "; }
+            stream << crafting_inventory_t::requirement(vv[i][j], as_tool);
+        }
+        stream << "\n";
+    }
+}
+
+void list_missing_ones(std::ostream &stream, const recipe &r) {
+    list_missing_ones(stream, r.tools, true);
+    list_missing_ones(stream, r.components, false);
+}
