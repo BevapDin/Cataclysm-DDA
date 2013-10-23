@@ -1093,16 +1093,6 @@ void construct::done_vehicle(game *g, point p)
 
 }
 
-void construct::done_wheelbarrow(game *g, point p)
-{
-    vehicle *wheelbarrow = g->m.add_vehicle( g, "wheelbarrow", p.x, p.y, 0, 0, 0);
-    if( wheelbarrow ) {
-        g->add_msg("You place your wheelbarrow.");
-    } else {
-        g->add_msg("There's no room to place the wheelbarrow.");
-    }
-}
-
 void construct::done_tape(game *g, point p)
 {
   g->add_msg(_("You tape up the %s."), g->m.tername(p.x, p.y).c_str());
