@@ -532,7 +532,7 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "functions": [ [ "func:hotplate" , 1 , 5 ] ],
+    "functions": [ [ "func:hotplate" , 1 , 1 ] ],
     "use_action": "HOTPLATE"
   },
 
@@ -580,7 +580,7 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "functions": [ [ "func:soldering_iron" , 1.0 , 7 ] ],
+    "functions": [ [ "func:soldering_iron" , 1.0 , 1 ] ],
     "use_action": "SOLDER_WELD"
   },
 
@@ -2543,7 +2543,7 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "functions": [ [ "func:welder" , 1 , 10 ] ],
+    "functions": [ [ "func:welder" , 1 , 1 ] ],
     "use_action": "SOLDER_WELD"
   },
 
@@ -4656,7 +4656,7 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "functions": [ [ "func:welder" , 1.3 , 15 ] ],
+    "functions": [ [ "func:welder" , 1.3 , 1.5 ] ],
     "use_action": "SOLDER_WELD"
   },
   

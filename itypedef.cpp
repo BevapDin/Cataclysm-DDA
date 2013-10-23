@@ -60,9 +60,9 @@ void game::init_itypes ()
             (INTEGRATED_TOOLSET("wrench"))->addFunctionality("func:wrench", 1, 1);
             (INTEGRATED_TOOLSET("hacksaw"))->addFunctionality("func:hacksaw", 1, 1);
             (INTEGRATED_TOOLSET("hammer"))->addFunctionality("func:hammer", 1, 1);
-            (INTEGRATED_TOOLSET("welder"))->addFunctionality("func:welder", 1, 1);
-            (INTEGRATED_TOOLSET("hotplate"))->addFunctionality("func:hotplate", 1, 1);
-            (INTEGRATED_TOOLSET("soldering_iron"))->addFunctionality("func:soldering_iron", 1, 1);
+            (INTEGRATED_TOOLSET("welder"))->addFunctionality("func:welder", 1, 0.1f);
+            (INTEGRATED_TOOLSET("hotplate"))->addFunctionality("func:hotplate", 1, 0.1);
+            (INTEGRATED_TOOLSET("soldering_iron"))->addFunctionality("func:soldering_iron", 1, 0.1f);
             /**
              * Note: to add a new integrated toolset type, add it here and
              * add it in crafting.cpp (game::crafting_inventory)
@@ -75,14 +75,14 @@ void game::init_itypes ()
             '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0))
     ->addFunctionality("func:pan", 1, 1)
     ->addFunctionality("func:pot", 1, 1)
-    ->addFunctionality("func:hotplate", 1, 7);
+    ->addFunctionality("func:hotplate", 1, 1);
 // kitchen unit - only appears in crafting recipes
     (itypes["vpart_welding_rig"] =
         new itype("vpart_welding_rig", 0, "welding rig",
             "An installed welding rig - if you are reading this it's a bug! (itypdef.cpp)",
             '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0))
-    ->addFunctionality("func:welder", 1, 20)
-    ->addFunctionality("func:soldering_iron", 1, 5);
+    ->addFunctionality("func:welder", 1, 1)
+    ->addFunctionality("func:soldering_iron", 1, 1);
 
 
 

@@ -1042,7 +1042,7 @@
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 3 ]
+      [ "func:welder", 30 ]
     ]
   ],
   "components": [
@@ -1087,9 +1087,7 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "func:screwdriver", -1 ]
@@ -1158,15 +1156,13 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "saw", -1 ]
+      [ "func:saw", -1 ]
     ],
     [
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "func:screwdriver", -1 ]
@@ -1377,9 +1373,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
         ]
   ],
   "components": [
@@ -1542,7 +1536,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ]
+      [ "func:hotplate", 5 ]
     ]
   ],
   "components": [
@@ -1630,15 +1624,13 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "func:wrench", -1 ]
     ],
     [
-      [ "func:welder", 4 ]
+      [ "func:welder", 100 ]
     ]
   ],
   "components": [
@@ -1743,7 +1735,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 6 ]
     ]
   ],
   "components": [
@@ -1827,9 +1819,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
         ]
   ],
   "components": [
@@ -2170,9 +2160,7 @@
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
         ]
   ],
   "components" : [
@@ -2275,9 +2263,7 @@
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
         ]
   ],
   "components" : [
@@ -2335,12 +2321,10 @@
   "autolearn" : true,
   "tools" : [
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 10 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "func:screwdriver", -1 ]
@@ -2402,9 +2386,7 @@
       [ "func:sewing_kit", 8 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -2453,9 +2435,7 @@
         [ "func:hacksaw", -1 ]
     ],
     [
-      ["rock", -1],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -3603,7 +3583,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 3 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -3646,7 +3626,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 3 ],
       [ "fire", -1 ]
     ],
     [
@@ -3692,7 +3672,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 7 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -3863,7 +3843,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -3886,7 +3866,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -3914,7 +3894,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4041,7 +4021,7 @@
   "book_learn": [[ "cookbook_human", 3 ]],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 7 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4130,7 +4110,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 6 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4162,7 +4142,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 5 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4193,7 +4173,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 5 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4218,7 +4198,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 4 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4248,7 +4228,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 3 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ]
@@ -4269,7 +4249,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 4 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4303,7 +4283,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 3 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4331,7 +4311,7 @@
    ],
    "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 3 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4360,7 +4340,7 @@
   "autolearn": true,
   "tools": [
       [
-        [ "func:hotplate", 1 ],
+        [ "func:hotplate", 2 ],
         [ "char_smoker", 1 ],
         [ "fire", -1 ]
       ],
@@ -4404,7 +4384,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4432,7 +4412,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4484,7 +4464,7 @@
   "autolearn": true,
   "tools": [
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 2],
       [ "char_smoker", 1 ],
       ["fire", -1]
     ],
@@ -4509,7 +4489,7 @@
   "autolearn": true,
   "tools": [
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 2],
       [ "char_smoker", 1 ],
       ["fire", -1]
     ],
@@ -4534,7 +4514,7 @@
   "autolearn": true,
   "tools": [
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 2],
       [ "char_smoker", 1 ],
       ["fire", -1]
     ],
@@ -4562,7 +4542,7 @@
   "autolearn": true,
   "tools": [
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 2],
       [ "char_smoker", 1 ],
       ["fire", -1]
     ],
@@ -4590,7 +4570,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4643,7 +4623,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4823,7 +4803,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 10 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ]
@@ -4851,7 +4831,7 @@
   "book_learn": [[ "cookbook_human", 3 ]],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 10 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ]
@@ -4898,7 +4878,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 5 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4934,7 +4914,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 6 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -4962,7 +4942,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 5 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5000,7 +4980,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 5 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5034,7 +5014,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 5 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5075,7 +5055,7 @@
   "book_learn": [[ "cookbook_human", 2 ]],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 5 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5108,7 +5088,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 5 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5145,7 +5125,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 8 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5173,7 +5153,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 8 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5201,7 +5181,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 2 ],
+      [ "func:hotplate", 16 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5233,7 +5213,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 8 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5263,7 +5243,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 8 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5291,7 +5271,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5320,7 +5300,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5368,7 +5348,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5397,7 +5377,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5442,12 +5422,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 8 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
     [
-      [ "pan", -1 ]
+      [ "func:pan", -1 ]
     ]
   ],
   "components": [
@@ -5482,12 +5462,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 8 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
     [
-      [ "pan", -1 ]
+      [ "func:pan", -1 ]
     ]
   ],
   "components": [
@@ -5540,12 +5520,12 @@
   ],
   "tools" : [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 8 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
     [
-      [ "pan", -1 ]
+      [ "func:pan", -1 ]
     ]
   ],
   "components": [
@@ -5591,7 +5571,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 8 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5657,7 +5637,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5694,12 +5674,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 6 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
     [
-      [ "pan", -1 ]
+      [ "func:pan", -1 ]
     ]
   ],
   "components": [
@@ -5756,12 +5736,12 @@
   "book_learn": [[ "cookbook_italian", 2 ]],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 8 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
     [
-      [ "pan", -1 ]
+      [ "func:pan", -1 ]
     ]
   ],
   "components": [
@@ -5799,12 +5779,12 @@
   "book_learn": [[ "cookbook_italian", 2 ]],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 8 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
     [
-      [ "pan", -1 ]
+      [ "func:pan", -1 ]
     ]
   ],
   "components": [
@@ -5842,7 +5822,7 @@
   ],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 6 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -5882,14 +5862,12 @@
   "book_learn": [[ "cookbook_italian", 3 ]],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 4 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "func:pot", -1 ]
@@ -5925,7 +5903,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 2 ],
+      [ "func:hotplate", 15 ],
       [ "fire", -1 ]
     ],
     [
@@ -5964,7 +5942,7 @@
     ],
     [
       [ "fire", -1 ],
-      [ "func:hotplate", 1 ]
+      [ "func:hotplate", 8 ]
     ]
   ],
   "components": [
@@ -5996,7 +5974,7 @@
     ],
     [
       [ "fire", -1 ],
-      [ "func:hotplate", 1 ]
+      [ "func:hotplate", 2 ]
     ]
   ],
   "components": [
@@ -6024,7 +6002,7 @@
     ],
     [
       [ "fire", -1 ],
-      [ "func:hotplate", 1 ]
+      [ "func:hotplate", 2 ]
     ]
   ],
   "components": [
@@ -6052,7 +6030,7 @@
     ],
     [
       [ "fire", -1 ],
-      [ "func:hotplate", 1 ]
+      [ "func:hotplate", 2 ]
     ]
   ],
   "qualities" : [
@@ -6101,7 +6079,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 3 ],
       [ "fire", -1 ]
     ],
     [
@@ -6131,7 +6109,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6167,7 +6145,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6198,7 +6176,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6231,7 +6209,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6262,7 +6240,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6293,7 +6271,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6327,7 +6305,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6358,7 +6336,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6389,7 +6367,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6420,7 +6398,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6452,7 +6430,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6483,7 +6461,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6514,7 +6492,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6545,7 +6523,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6578,7 +6556,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6614,7 +6592,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6641,7 +6619,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6717,7 +6695,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ]
+      [ "func:hotplate", 25 ]
     ],
     [
       [ "chemistry_set", -1 ]
@@ -6767,7 +6745,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 5 ]
+      [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]
@@ -6813,7 +6791,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 3 ]
+      [ "func:hotplate", 25 ]
     ],
     [
       [ "chemistry_set", -1 ]
@@ -6839,7 +6817,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "fire", -1 ]
     ],
     [
@@ -6873,7 +6851,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 5 ]
+      [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]
@@ -6903,7 +6881,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 5 ]
+      [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]
@@ -6933,7 +6911,7 @@
   "tools": [
     [
       [ "press", 50 ],
-      [ "func:hotplate", 5 ]
+      [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]
@@ -6973,7 +6951,7 @@
   "tools": [
     [
       [ "press", 50 ],
-      [ "func:hotplate", 5 ]
+      [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]
@@ -7248,9 +7226,7 @@
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -7281,7 +7257,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 4 ]
     ]
   ],
   "components": [
@@ -7309,7 +7285,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 3 ]
     ]
   ],
   "components": [
@@ -7334,7 +7310,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 4 ]
     ]
   ],
   "components": [
@@ -7362,7 +7338,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 7 ]
     ]
   ],
   "components": [
@@ -7500,7 +7476,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 5 ]
     ]
   ],
   "components": [
@@ -7526,7 +7502,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 10 ]
     ]
   ],
   "components": [
@@ -7561,7 +7537,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 5 ]
     ]
   ],
   "components": [
@@ -7587,7 +7563,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 10 ]
     ]
   ],
   "components": [
@@ -7618,7 +7594,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 10 ]
     ]
   ],
   "components": [
@@ -7716,7 +7692,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 10 ]
     ]
   ],
   "components": [
@@ -7744,7 +7720,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 14 ]
     ]
   ],
   "components": [
@@ -7782,7 +7758,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 10 ]
     ]
   ],
   "components": [
@@ -7813,7 +7789,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 6 ]
     ]
   ],
   "components": [
@@ -7850,7 +7826,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 5 ]
     ]
   ],
   "components": [
@@ -7882,7 +7858,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      ["func:soldering_iron", 2]
+      ["func:soldering_iron", 10 ]
     ]
   ],
   "components": [
@@ -7922,7 +7898,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 14 ]
     ]
   ],
   "components": [
@@ -7954,7 +7930,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 24 ]
     ]
   ],
   "components": [
@@ -7987,7 +7963,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 24 ]
     ]
   ],
   "components" : [
@@ -8022,7 +7998,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8056,7 +8032,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 32 ]
     ]
   ],
   "components": [
@@ -8091,7 +8067,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8124,7 +8100,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8154,7 +8130,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8184,7 +8160,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8218,7 +8194,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8249,7 +8225,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8283,7 +8259,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8317,7 +8293,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8354,11 +8330,10 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8389,11 +8364,10 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8424,11 +8398,10 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8459,11 +8432,10 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8491,7 +8463,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8515,7 +8487,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8539,7 +8511,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8563,7 +8535,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8587,7 +8559,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8611,7 +8583,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8635,7 +8607,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -8657,7 +8629,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 35 ]
     ]
   ],
   "components": [
@@ -8688,7 +8660,7 @@
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "func:welder", 2 ]
+      [ "func:welder", 52 ]
     ]
   ],
   "components": [
@@ -8716,7 +8688,7 @@
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "func:welder", 2 ]
+      [ "func:welder", 52 ]
     ]
   ],
   "components": [
@@ -8747,7 +8719,7 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 16 ]
     ]
   ],
   "components": [
@@ -9594,9 +9566,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "func:sewing_kit", 10 ]
@@ -9678,9 +9648,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -9704,9 +9672,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -9751,8 +9717,7 @@
   ],
   "tools": [
     [
-      [ "needle_bone", 12 ],
-      [ "sewing_kit", 12 ]
+      [ "func:sewing_kit", 12 ]
     ]
   ],
   "components": [
@@ -9781,8 +9746,7 @@
   ],
   "tools": [
     [
-      [ "needle_bone", 12 ],
-      [ "sewing_kit", 12 ]
+      [ "func:sewing_kit", 12 ]
     ]
   ],
   "components": [
@@ -9910,8 +9874,8 @@
   "autolearn": true,
   "tools": [
       [
-      [ "welder", 56 ],
-      [ "func:soldering_iron", 4 ]
+      [ "func:welder", 56 ],
+      [ "func:soldering_iron", 56 ]
       ]
   ],
   "components": [
@@ -10144,7 +10108,7 @@
       [ "func:pot", -1 ]
     ],
     [
-      [ "func:hotplate", 2 ],
+      [ "func:hotplate", 20 ],
       [ "fire", -1 ]
     ]
   ],
@@ -10426,9 +10390,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -10546,9 +10508,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -10574,8 +10534,6 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "hatchet", -1 ],
       [ "func:hammer", -1 ]
     ]
   ],
@@ -10606,9 +10564,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -10846,15 +10802,13 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 5 ]
+      [ "func:welder", 100 ]
     ],
     [
       [ "func:hacksaw", -1 ]
@@ -10892,15 +10846,13 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 5 ]
+      [ "func:welder", 100 ]
     ],
     [
       [ "func:hacksaw", -1 ]
@@ -10936,9 +10888,7 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -10964,15 +10914,13 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 2 ]
+      [ "func:welder", 50 ]
     ],
     [
       [ "func:hacksaw", -1 ]
@@ -11000,7 +10948,7 @@
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 2 ]
+      [ "func:welder", 50 ]
     ],
     [
       [ "func:sewing_kit", 50 ]
@@ -11031,7 +10979,7 @@
   "tools": [
     [
       [ "fire", -1 ],
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 3 ],
       [ "char_smoker", 1 ]
     ]
   ],
@@ -11076,15 +11024,13 @@
       [ "func:wrench", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 2 ]
+      [ "func:welder", 50 ]
     ],
     [
       [ "func:hacksaw", -1 ]
@@ -11119,7 +11065,7 @@
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 12 ]
+      [ "func:welder", 300 ]
     ]
   ],
   "components": [
@@ -11208,8 +11154,7 @@
       [ "boltcutters", -1 ]
     ],
     [
-      [ "hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -11284,7 +11229,7 @@
       [ "lighter", 5 ],
       [ "ref_lighter", 5 ],
       [ "fire", -1 ],
-      [ "func:hotplate", 1 ]
+      [ "toolset_hotplate", 1 ]
     ]
   ],
   "components": [
@@ -11308,9 +11253,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -11330,9 +11273,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -11353,9 +11294,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -11382,7 +11321,7 @@
       [ "func:pan", -1 ]
     ],
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 5 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ]
@@ -11417,7 +11356,7 @@
       [ "func:pan", -1 ]
     ],
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 5 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ]
@@ -11453,7 +11392,7 @@
       [ "crucible", -1 ]
     ],
     [
-      [ "func:welder", 1 ],
+      [ "func:welder", 20 ],
       [ "forge", 10],
       [ "char_forge", 2]
     ]
@@ -11475,7 +11414,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "saw", -1 ]
+      [ "func:saw", -1 ]
     ]
   ],
   "components": [
@@ -11499,7 +11438,7 @@
       [ "crucible", -1 ]
     ],
     [
-      [ "func:welder", 2 ],
+      [ "func:welder", 50 ],
       [ "forge", 50 ],
       [ "char_forge", 10]
     ]
@@ -11523,7 +11462,7 @@
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 1 ]
+      [ "func:welder", 20 ]
     ]
   ],
   "components": [
@@ -11546,7 +11485,7 @@
       [ "crucible", -1 ]
     ],
     [
-      [ "func:welder", 5 ],
+      [ "func:welder", 100 ],
       [ "forge", 100 ],
       [ "char_forge", 20]
     ]
@@ -11570,7 +11509,7 @@
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 6 ]
+      [ "func:welder", 120 ]
     ]
   ],
   "components": [
@@ -11598,7 +11537,7 @@
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 15 ]
+      [ "func:welder", 300 ]
     ]
   ],
   "components": [
@@ -11617,9 +11556,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -11638,9 +11575,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -11710,9 +11645,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -11886,9 +11819,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -11907,15 +11838,13 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 2 ]
+      [ "func:welder", 50 ]
     ]
   ],
   "components": [
@@ -12066,7 +11995,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 2 ],
+      [ "func:hotplate", 18 ],
       [ "fire", -1 ]
     ]
   ],
@@ -12116,7 +12045,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 10 ]
     ]
   ],
   "components": [
@@ -12149,7 +12078,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 1 ]
+      [ "func:soldering_iron", 14 ]
     ]
   ],
   "components": [
@@ -12185,7 +12114,7 @@
   ],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 10 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -12220,7 +12149,7 @@
   ],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 10 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -12254,7 +12183,7 @@
   ],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 10 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -12289,7 +12218,7 @@
   ],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 10 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -12490,7 +12419,7 @@
       [ "crucible", -1 ]
     ],
     [
-      [ "func:welder", 1 ],
+      [ "func:welder", 20 ],
       [ "forge", 5],
       [ "char_forge", 1]
     ]
@@ -12632,9 +12561,7 @@
   ],
   "tools" : [
     [
-      ["rock", -1],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -12657,9 +12584,7 @@
   "autolearn": true,
   "tools": [
     [
-      ["rock", -1],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ]
   ],
   "components": [
@@ -12681,9 +12606,7 @@
   "autolearn": false,
   "tools": [
     [
-      ["rock", -1],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       ["fire", -1],
@@ -12736,7 +12659,7 @@
       ["goggles_welding", -1]
     ],
     [
-      ["func:welder", 1]
+      ["func:welder", 20]
     ]
   ],
   "components": [
@@ -12767,7 +12690,7 @@
     ["goggles_welding", -1]
   ],
   [
-    ["func:welder", 1]
+    ["func:welder", 20]
   ]
   ],
   "components": [
@@ -12798,7 +12721,7 @@
       ["goggles_welding", -1]
     ],
     [
-      ["func:welder", 1]
+      ["func:welder", 20]
     ]
     ],
   "components": [
@@ -12829,7 +12752,7 @@
       ["goggles_welding", -1]
     ],
     [
-      ["func:welder", 1]
+      ["func:welder", 20]
     ]
     ],
   "components": [
@@ -12857,7 +12780,7 @@
   "autolearn": true,
   "tools": [
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 2],
       ["fire", -1]
     ]
   ],
@@ -12878,7 +12801,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -12937,7 +12860,8 @@
   "autolearn": true,
   "tools": [
     [
-      ["func:hotplate", 1 ],      ["fire", -1]
+      ["func:hotplate", 5 ],
+      ["fire", -1]
     ]
   ],
   "components": [
@@ -12959,7 +12883,8 @@
       ["mold_plastic", -1]
     ],
     [
-      ["func:hotplate", 1 ],      ["fire", -1]
+      ["func:hotplate", 5 ],
+      ["fire", -1]
     ]
   ],
   "components": [
@@ -12979,7 +12904,7 @@
   "autolearn" : true,
   "tools" : [ [ ["mold_plastic", -1] ],
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 5],
       ["fire", -1]
     ]
   ],
@@ -13000,7 +12925,7 @@
   "autolearn" : true,
   "tools" : [ [ ["mold_plastic", -1] ],
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 5],
       ["fire", -1]
     ]
   ],
@@ -13017,7 +12942,7 @@
   "autolearn" : true,
   "tools" : [ [ ["mold_plastic", -1] ],
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 5],
       ["fire", -1]
     ]
   ],
@@ -13076,7 +13001,7 @@
       ["func:hacksaw", -1]
     ],
     [
-      [ "func:screwdriver", -1 ]
+      ["func:screwdriver", -1]
     ]
   ],
   "components": [
@@ -13127,7 +13052,7 @@
         ["func:hammer", -1 ]
       ],
       [
-        [ "func:screwdriver", -1 ]
+        ["func:screwdriver", -1]
       ]
     ],
     "components": [
@@ -13153,13 +13078,13 @@
       ["func:hacksaw", -1]
     ],
     [
-      [ "func:screwdriver", -1 ]
+      ["func:screwdriver", -1]
     ],
     [
-      [ "func:wrench", -1 ]
+      ["func:wrench", -1]
     ],
     [
-      ["func:welder", 6]
+      ["func:welder", 150]
     ]
   ],
   "components": [
@@ -13209,7 +13134,7 @@
       [ "func:wrench", -1 ]
     ],
     [
-      ["func:welder", 12]
+      ["func:welder", 300]
     ]
   ],
   "components": [
@@ -13259,7 +13184,7 @@
       [ "func:wrench", -1 ]
     ],
     [
-      ["func:welder", 4]
+      ["func:welder", 100]
     ]
   ],
   "components": [
@@ -13288,7 +13213,7 @@
   ],
   "tools": [
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 5],
       [ "char_smoker", 1 ],
       ["fire", -1]
     ],
@@ -13321,7 +13246,7 @@
   "time": 45000,
   "reversible": false,
   "autolearn": true,
-  "tools": [    [ [ "func:hotplate", 1 ], [ "char_smoker", 1 ], [ "fire", -1 ] ],
+  "tools": [    [ [ "func:hotplate", 5 ], [ "char_smoker", 1 ], [ "fire", -1 ] ],
                 [ ["rock_quern", -1] ] ],
   "components": [ [ ["corn", 2] ] ]
 },{
@@ -13357,7 +13282,7 @@
   "reversible": false,
   "autolearn": true,
   "tools": [
-    [ [ "func:hotplate", 1 ], [ "char_smoker", 1 ], [ "fire", -1 ] ],
+    [ [ "func:hotplate", 5 ], [ "char_smoker", 1 ], [ "fire", -1 ] ],
     [ [ "chemistry_set", -1 ], [ "func:pan", -1 ], [ "func:pot", -1 ] ]
   ],
   "components": [
@@ -13377,7 +13302,7 @@
   "autolearn": true,
   "tools": [
     [
-      ["func:hotplate", 3],
+      ["func:hotplate", 25],
       [ "char_smoker", 1 ],
       ["fire", -1]
     ],
@@ -13400,8 +13325,7 @@
   "time": 5000,
   "reversible": false,
   "autolearn": true,
-  "tools": [ [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ] ],
+  "tools": [ [ ["func:hammer", -1] ] ],
   "components": [ [ ["stick", 2], [ "2x4", 1 ] ], [ ["rock", 6] ] ]
 },{
         "type" : "recipe",
@@ -13412,8 +13336,7 @@
   "time": 12000,
   "reversible": true,
   "autolearn": true,
-  "tools": [ [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ] ],
+  "tools": [ [ ["func:hammer", -1] ] ],
   "components": [ [ ["element", 3] ],
     [ ["scrap", 2] ],
     [ ["cable", 8] ] ]
@@ -13458,8 +13381,7 @@
     {"name":"CUT","level":1,"amount":1}
   ],
   "tools": [
-    [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ] ],
+    [ ["func:hammer", -1] ] ],
   "components": [ [ ["pot", 1] ],
     [ ["hose", 2] ],
     [ ["metal_tank", 1] ] ]
@@ -13527,8 +13449,7 @@
   "reversible": false,
   "autolearn": true,
   "tools": [ [ ["func:hacksaw", -1] ],
-    [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ] ],
+    [ ["func:hammer", -1] ] ],
   "components": [ [ ["rag", 4] ],
     [ ["scrap", 4] ] ]
 },{
@@ -13556,8 +13477,7 @@
   "reversible": false,
   "autolearn": true,
   "tools": [ [ ["func:hacksaw", -1] ],
-    [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ] ],
+    [ ["func:hammer", -1] ] ],
   "components": [ [ ["leather", 4] ],
     [ ["scrap", 8] ] ]
 },{
@@ -13589,7 +13509,7 @@
   ],
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 10 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -13627,8 +13547,7 @@
   "time": 180000,
   "reversible": true,
   "autolearn": true,
-  "tools": [ [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ] ,
+  "tools": [ [ ["func:hammer", -1] ] ,
       [
       [ "func:screwdriver", -1 ]
       ],
@@ -13639,8 +13558,8 @@
       [ "func:hacksaw", -1 ]
       ],
       [
-      [ "func:welder", 20 ],
-      [ "func:soldering_iron", 20 ]
+      [ "func:welder", 200 ],
+      [ "func:soldering_iron", 200 ]
       ] ],
   "components":
     [
@@ -13664,8 +13583,7 @@
   "time": 240000,
   "reversible": true,
   "autolearn": true,
-  "tools": [ [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ],
+  "tools": [ [ ["func:hammer", -1] ],
       [
       ["crucible", -1]
       ],
@@ -13687,8 +13605,7 @@
   "time": 240000,
   "reversible": false,
   "autolearn": true,
-  "tools": [ [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ],
+  "tools": [ [ ["func:hammer", -1] ],
       [
       [ "forge", 100],
       [ "char_forge", 20]
@@ -13712,8 +13629,7 @@
   "time": 30000,
   "reversible": false,
   "autolearn": true,
-  "tools": [ [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ],
+  "tools": [ [ ["func:hammer", -1] ],
       [
       ["anvil", -1]
       ],
@@ -13740,8 +13656,7 @@
   "time": 45000,
   "reversible": true,
   "autolearn": true,
-  "tools": [ [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ],
+  "tools": [ [ ["func:hammer", -1] ],
       [
       ["tongs", -1]
       ],
@@ -13771,8 +13686,7 @@
   "time": 120000,
   "reversible": false,
   "autolearn": true,
-  "tools": [ [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ],
+  "tools": [ [ ["func:hammer", -1] ],
       [
       ["tongs", -1]
       ],
@@ -13805,8 +13719,7 @@
   "time": 120000,
   "reversible": false,
   "autolearn": true,
-  "tools": [ [ ["rock", -1],
-    ["func:hammer", -1], ["hatchet", -1] ],
+  "tools": [ [ ["func:hammer", -1] ],
       [
       ["tongs", -1]
       ],
@@ -15353,7 +15266,7 @@
    ],
    "tools": [
    [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 10 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -15430,7 +15343,7 @@
    ],
    "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 10 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -15499,8 +15412,8 @@
   ],
   "tools": [
      [
-      [ "func:welder", 6 ],
-      [ "func:soldering_iron", 2 ]
+      [ "func:welder", 28 ],
+      [ "func:soldering_iron", 28 ]
      ],
      [
       [ "func:sewing_kit", 100 ]
@@ -15547,7 +15460,7 @@
   "tools": [
      [
       [ "func:welder", 28 ],
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 28 ]
      ],
      [
       [ "func:sewing_kit", 150 ]
@@ -15596,8 +15509,8 @@
   ],
   "tools": [
     [
-      [ "func:welder", 10 ],
-      [ "func:soldering_iron", 4
+      [ "func:welder", 56 ],
+      [ "func:soldering_iron", 56
       ]
     ],
     [
@@ -15655,8 +15568,8 @@
       [ "broadsword", -1 ]
     ],
     [
-      [ "func:welder", 4 ],
-      [ "func:soldering_iron", 2 ]
+      [ "func:welder", 28 ],
+      [ "func:soldering_iron", 28 ]
     ],
     [
       [ "func:sewing_kit", 200 ]
@@ -15713,8 +15626,8 @@
       [ "broadsword", -1 ]
     ],
     [
-      [ "func:welder", 8 ],
-      [ "func:soldering_iron", 3 ]
+      [ "func:welder", 42 ],
+      [ "func:soldering_iron", 42 ]
     ],
     [
       [ "func:sewing_kit", 10 ]
@@ -15773,8 +15686,8 @@
       [ "broadsword", -1 ]
     ],
     [
-      [ "func:welder", 6 ],
-      [ "func:soldering_iron", 2 ]
+      [ "func:welder", 28 ],
+      [ "func:soldering_iron", 28 ]
     ],
     [
       [ "func:sewing_kit", 40 ]
@@ -15825,8 +15738,8 @@
       [ "broadsword", -1 ]
     ],
     [
-      [ "func:welder", 7 ],
-      [ "func:soldering_iron", 3 ]
+      [ "func:welder", 42 ],
+      [ "func:soldering_iron", 42 ]
     ],
     [
       [ "func:sewing_kit", 60 ]
@@ -15868,8 +15781,8 @@
   ],
   "tools": [
     [
-      [ "welder", 112 ],
-      [ "func:soldering_iron", 8 ]
+      [ "func:welder", 112 ],
+      [ "func:soldering_iron", 112 ]
     ]
   ],
   "components": [
@@ -15900,8 +15813,8 @@
   ],
   "tools": [
     [
-      [ "welder", 112 ],
-      [ "func:soldering_iron", 8 ]
+      [ "func:welder", 112 ],
+      [ "func:soldering_iron", 112 ]
     ]
   ],
   "components": [
@@ -15931,15 +15844,13 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "func:hammer", -1 ],
-      [ "hatchet", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "func:wrench", -1 ]
     ],
     [
-      [ "func:welder", 4]
+      [ "func:welder", 100]
     ]
   ],
   "components": [
@@ -15991,7 +15902,7 @@
   ],
   "tools": [
     [
-      [ "func:hotplate", 2 ],
+      [ "func:hotplate", 20 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -16037,7 +15948,7 @@
   ],
   "tools": [
     [
-      [ "func:hotplate", 2 ],
+      [ "func:hotplate", 20 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -16076,7 +15987,7 @@
   ],
  "tools": [
     [
-      [ "func:hotplate", 2 ],
+      [ "func:hotplate", 20 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -16181,7 +16092,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 2 ],
+      [ "func:hotplate", 18 ],
       [ "fire", -1 ]
     ],
     [
@@ -16219,8 +16130,8 @@
       [ "func:hacksaw", -1 ]
      ],
      [
-      [ "func:welder", 10 ],
-      [ "func:soldering_iron", 10 ]
+      [ "func:welder", 100 ],
+      [ "func:soldering_iron", 100 ]
      ]
     ],
   "components":
@@ -16261,8 +16172,8 @@
       [ "func:hacksaw", -1 ]
      ],
      [
-      [ "func:welder", 5 ],
-      [ "func:soldering_iron", 5 ]
+      [ "func:welder", 50 ],
+      [ "func:soldering_iron", 50 ]
      ]
     ],
   "components":
@@ -16296,8 +16207,8 @@
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "func:welder", 15 ],
-      [ "func:soldering_iron", 15 ]
+      [ "func:welder", 150 ],
+      [ "func:soldering_iron", 150 ]
     ] ],
   "components":
     [
@@ -16328,7 +16239,6 @@
       [ "ref_lighter", 1 ],
       [ "matches", 1 ],
       [ "fire_drill", 1 ],
-      [ "func:soldering_iron", 1 ],
       [ "fire", -1 ]
     ],
     [
@@ -16381,7 +16291,7 @@
       [ "func:sewing_kit", 10 ]
     ],
     [
-      [ "func:hotplate", 1],
+      [ "func:hotplate", 5],
       ["fire", -1]
     ]
   ],
@@ -16407,7 +16317,7 @@
       [ "func:sewing_kit", 10 ]
     ],
     [
-      [ "func:hotplate", 1],
+      [ "func:hotplate", 5],
       [ "fire", -1]
     ]
   ],
@@ -16436,7 +16346,7 @@
       [ "func:sewing_kit", 10 ]
     ],
     [
-      [ "func:hotplate", 1],
+      [ "func:hotplate", 5],
       [ "fire", -1]
     ]
   ],
@@ -16470,7 +16380,7 @@
       [ "func:sewing_kit", 10 ]
     ],
     [
-      [ "func:hotplate", 1],
+      [ "func:hotplate", 5],
       ["fire", -1]
     ]
   ],
@@ -16504,7 +16414,7 @@
       [ "func:sewing_kit", 5 ]
     ],
     [
-      [ "func:soldering_iron", 1],
+      [ "func:soldering_iron", 10],
       ["fire", -1]
     ]
   ],
@@ -16533,7 +16443,7 @@
       [ "func:sewing_kit", 5 ]
     ],
     [
-      [ "func:soldering_iron", 1],
+      [ "func:soldering_iron", 10],
       ["fire", -1]
     ]
   ],
@@ -16600,7 +16510,7 @@
       [ "func:screwdriver", -1 ]
     ],
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ]
   ],
   "components": [
@@ -16874,7 +16784,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:soldering_iron", 2 ]
+      [ "func:soldering_iron", 20 ]
     ],
     [
       [ "func:screwdriver", -1 ]
@@ -16948,7 +16858,7 @@
   "autolearn": true,
   "tools": [
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 2],
       [ "char_smoker", 1 ],
       ["fire", -1]
     ],
@@ -16993,7 +16903,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "func:hotplate", 1 ],
+      [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
@@ -17060,7 +16970,7 @@
   "autolearn" : true,
   "tools" : [ [ ["mold_plastic", -1] ],
     [
-      ["func:hotplate", 1],
+      ["func:hotplate", 10],
       ["fire", -1]
     ]
   ],

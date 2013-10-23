@@ -154,19 +154,22 @@ struct itype
 	 fu.charges_modi = charges_modi;
 	 return this;
  }
- int getChargesModi(const std::string &name) const {
+ bool hasFunc(const std::string &name) const {
+     return functionalityMap.count(name) > 0;
+ }
+ float getChargesModi(const std::string &name) const {
      const FunctionalityMap::const_iterator a = functionalityMap.find(name);
      if(a != functionalityMap.end()) {
          return a->second.charges_modi;
      }
-     return 1;
+     return 1.0f;
  }
  float getTimeModi(const itype_id &name) const {
      const FunctionalityMap::const_iterator a = functionalityMap.find(name);
      if(a != functionalityMap.end()) {
          return a->second.time_modi;
      }
-     return 1.0;
+     return 1.0f;
  }
 
  virtual bool is_food()          { return false; }

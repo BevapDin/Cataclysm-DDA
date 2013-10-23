@@ -6,6 +6,7 @@
 #include "inventory.h"
 #include "crafting.h"
 #include <algorithm>
+#include <cmath>
 
 void resort_item_vectors();
    
@@ -53,7 +54,7 @@ void crafting_inventory_t::add_bio_toolset(const bionic &bio, const calendar &tu
     by_bionic.push_back(item_from_bionic(bio.id, tools));
 }
 
-typedef std::pair<itype_id, int> funcWithModi;
+typedef std::pair<itype_id, float> funcWithModi;
 typedef std::vector<funcWithModi> tidvec;
 typedef std::map<itype_id, tidvec> funcmap;
 const tidvec &get_tidvec(const itype_id &type) {
@@ -62,14 +63,13 @@ const tidvec &get_tidvec(const itype_id &type) {
     if(types.empty()) {
         for(std::map<std::string, itype*>::iterator a = g->itypes.begin(); a != g->itypes.end(); ++a) {
             itype *t = a->second;
-            itype::FunctionalityMap::iterator fn = t->functionalityMap.find(type);
-            if(fn == t->functionalityMap.end()) {
-                if(type.compare(5, t->id.length(), t->id) == 0) {
-                    types.push_back(funcWithModi(a->first, 1));
+            if(!t->hasFunc(type)) {
+                if(type.compare(5, std::string::npos, t->id) == 0) {
+                    types.push_back(funcWithModi(a->first, 1.0f));
                 }
                 continue;
             }
-            types.push_back(funcWithModi(a->first, fn->second.charges_modi));
+            types.push_back(funcWithModi(a->first, t->getChargesModi(type)));
         }
     }
     return types;
@@ -335,7 +335,11 @@ void crafting_inventory_t::complex_req::add(component &c, bool as_tool) {
     for(size_t i = 0; i < types.size(); i++) {
         rs2.req.type = types[i].first;
         if(req.ctype == C_CHARGES) {
-            rs2.req.count = org_count * types[i].second;
+            rs2.req.count = static_cast<int>(std::ceil(org_count * types[i].second));
+            if(rs2.req.count <= 0) {
+                // Need at least a charge, nothing is free
+                rs2.req.count = 1;
+            }
         } else {
             rs2.req.count = org_count;
         }
@@ -1562,27 +1566,27 @@ static void drainVehicle(vehicle *veh, const std::string &ftype, int &amount, st
 }
 
 int crafting_inventory_t::requirement::get_charges_or_amount(const item &the_item) const {
-    int count = 0;
+    int result = 0;
     for(size_t k = 0; k < the_item.contents.size(); k++) {
-        count += get_charges_or_amount(the_item.contents[k]);
+        result += get_charges_or_amount(the_item.contents[k]);
     }
     if(!the_item.contents.empty()) {
         // Non-empty container, never gets used
-        return count;
+        return result;
     }
     if(!the_item.matches_type(type)) {
         // Wrong item type
-        return count;
+        return result;
     }
-    if(ctype == C_CHARGES) {
-        int modi = 1;
-        if(type.compare(0, 5, "func:") == 0 && the_item.type != NULL) {
-            modi = the_item.type->getChargesModi(type);
-            assert(modi > 0);
-        }
-        return count + (the_item.charges / modi);
+    if(ctype == C_AMOUNT) {
+        return result + 1; // +1 for the it itself
     }
-    return count + 1; // +1 for the it itself
+    if(type.compare(0, 5, "func:") != 0 || the_item.type == NULL) {
+        return result + the_item.charges;
+    }
+    const float modi = the_item.type->getChargesModi(type);
+    assert(modi > 0.0f);
+    return result + static_cast<int>(the_item.charges / modi);
 }
 
 bool crafting_inventory_t::requirement::use(item &the_item, std::list<item> &used_items) {
@@ -1608,28 +1612,31 @@ bool crafting_inventory_t::requirement::use(item &the_item, std::list<item> &use
         // Wrong item type
         return false;
     }
-    if(ctype == C_CHARGES) {
-        int modi = 1;
-        if(type.compare(0, 5, "func:") == 0 && the_item.type != NULL) {
-            modi = the_item.type->getChargesModi(type);
-            assert(modi > 0);
-        }
-        const int used_charges = std::min(count, (the_item.charges / modi));
-        item tmp = the_item;
-        tmp.charges = used_charges * modi;
-        the_item.charges -= tmp.charges;
-        assert(the_item.charges >= 0);
-        count -= used_charges;
-        assert(count >= 0);
-        used_items.push_back(tmp);
-        // Tell the caller if to destroy the item
-        return (the_item.charges == 0 && the_item.destroyed_at_zero_charges());
+    if(ctype == C_AMOUNT) {
+        // Use up the item itself
+        used_items.push_back(the_item);
+        count--;
+        // Let the caller destroy the item
+        return true;
     }
-    // Use up the item itself
-    used_items.push_back(the_item);
-    count--;
-    // Let the caller destroy the item
-    return true;
+    item tmp = the_item;
+    if(type.compare(0, 5, "func:") == 0) {
+        const float modi = the_item.type->getChargesModi(type);
+        const int charges_norm = static_cast<int>(the_item.charges / modi);
+        const int used_charges = std::min(count, charges_norm);
+        tmp.charges = static_cast<int>(used_charges * modi);
+        count -= used_charges;
+    } else {
+        const int used_charges = std::min(count, the_item.charges);
+        tmp.charges = used_charges;
+        count -= used_charges;
+    }
+    the_item.charges -= tmp.charges;
+    assert(tmp.charges >= 0);
+    assert(the_item.charges >= 0);
+    used_items.push_back(tmp);
+    // Tell the caller if to destroy the item
+    return (the_item.charges == 0 && the_item.destroyed_at_zero_charges());
 }
 
 typedef std::set< std::vector<item>* > item_vector_set_t;

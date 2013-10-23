@@ -2390,29 +2390,34 @@ int item::getlight_emit(bool calculate_dimming) const {
 
 bool item::use_charges(const itype_id &type_to_use, int &amount, std::list<item> &usedup, bool check_contents) {
 	// Check contents first
-	for (int m = 0; check_contents && m < contents.size() && amount > 0; m++) {
+	for(size_t m = 0; check_contents && m < contents.size() && amount > 0; m++) {
 		if(contents[m].use_charges(type_to_use, amount, usedup)) {
 			contents.erase(contents.begin() + m);
 			m--;
 		}
-        if (amount <= 0) {
-            return false;
-        }
 	}
-	if (amount <= 0) {
+	if(amount <= 0 || charges <= 0 || type == NULL) {
 		return false;
 	}
 	if(!matches_type(type_to_use)) {
 		return false;
 	}
-    const int modi = (type == 0) ? 1 : type->getChargesModi(type_to_use);
+    const float modi = type->getChargesModi(type_to_use);
 	// Now check the actual item
 	// 1. store used charges in resulting list,
 	// 2. decrease charges
 	// 3. decide if item must be destroyed
-    const int used_charges = std::min(amount, (charges / modi));
+    // Normalized count of charges e.g. for a crude welder wwith
+    // 150 charges this becames 100.
+    const int charges_norm = static_cast<int>(charges / modi);
+    // Number of charges that get used up
+    const int used_charges = std::min(amount, charges_norm);
     item tmp = *this;
-    tmp.charges = used_charges * modi;
+    // item.charges is behind the modifier, so if 50 charges
+    // get used up, but the item is a crude welder the
+    // actually used up charges for this item are 75.
+    tmp.charges = static_cast<int>(used_charges * modi);
+    assert(tmp.charges <= charges); // Don't consume more than we have
     charges -= tmp.charges;
     amount -= used_charges;
     assert(charges >= 0);
@@ -2451,11 +2456,15 @@ int item::get_charges_of(const itype_id &type_) const {
     if(!matches_type(type_) || type == 0) {
         return 0;
     }
-    return charges / type->getChargesModi(type_);
+    // e.g. crude welder has charges modi 1.5 -it needs 1.5 times
+    // as mutch charges for the same task as a welder (charges modi 1.0)
+    // Therfor a crude welder with 150 charges is equal to a
+    // normal welder with 100 charges
+    return static_cast<int>(charges / type->getChargesModi(type_));
 }
 
-double item::get_damaged_modi() const {
-	double basefactor = 1.0;
+float item::get_damaged_modi() const {
+	float basefactor = 1.0;
 	if(damage > 0) {
 		// damaged tool -> larger factor
 		basefactor *= (damage + 1.0);
@@ -2470,20 +2479,11 @@ double item::get_damaged_modi() const {
 	return basefactor;
 }
 
-double item::get_functionality_time_modi(const itype_id &func) const {
+float item::get_functionality_time_modi(const itype_id &func) const {
 	if(type != 0) {
-		const double dmodi = get_damaged_modi();
-		if(type->id == func) {
-			return 1.0 * dmodi;
-		}
-		itype::FunctionalityMap::const_iterator a = type->functionalityMap.find(func);
-		if(a != type->functionalityMap.end()) {
-			return a->second.time_modi * dmodi;
-		}
-		if(func.compare(0, 5, "func:") == 0 &&
-			func.compare(5, std::string::npos, type->id) == 0) {
-			return 1.0 * dmodi;
-		}
+        const float tm = type->getTimeModi(func);
+        const float dm = get_damaged_modi();
+        return tm * dm;
 	}
 	return 0.0;
 }
