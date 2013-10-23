@@ -4610,6 +4610,30 @@
   ]
 },{
         "type" : "recipe",
+  "result": "milk",
+  "id_suffix": "from powder",
+  "category": "CC_DRINK",
+  "skill_used": "cooking",
+  "difficulty": 0,
+  "time": 1000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "pot", -1 ],
+      [ "rock_pot", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "milk_powder", 1 ]
+    ],
+    [
+      [ "water_clean", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "coffee_syrup",
   "category": "CC_DRINK",
   "skill_used": "cooking",
@@ -11936,7 +11960,7 @@
   "category": "CC_MISC",
   "skill_used": "firstaid",
   "requires_skills": [ "survival", 1 ],
-  "difficulty": 2,
+  "difficulty": 1,
   "time": 1000,
   "reversible": false,
   "autolearn": true,
@@ -11965,7 +11989,7 @@
   "category": "CC_MISC",
   "skill_used": "firstaid",
   "requires_skills": [ "survival", 1 ],
-  "difficulty": 2,
+  "difficulty": 1,
   "time": 1000,
   "reversible": false,
   "autolearn": true,

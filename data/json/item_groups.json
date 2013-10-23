@@ -17,7 +17,7 @@
       ["child_book", 50],
       ["tall_tales", 20],
       ["story_book", 4],
-      ["novel_pulp", 16],,
+      ["novel_pulp", 16],
       ["fairy_tales", 20],
       ["mag_comic", 20]
     ]
@@ -107,7 +107,7 @@
       ["child_book", 50],
       ["tall_tales", 10],
       ["story_book", 4],
-      ["novel_pulp", 16],,
+      ["novel_pulp", 16],
       ["fairy_tales", 10],
       ["mag_unarmed", 10],
       ["tailor_portfolio", 1],
@@ -223,6 +223,7 @@
       ["bleach", 20],
       ["ammonia", 24],
       ["flour", 50],
+      ["milk_powder", 15],
       ["cornmeal", 40],
       ["powder_eggs", 20],
       ["protein_powder", 15],
@@ -489,7 +490,7 @@
       ["child_book", 20],
       ["tall_tales", 10],
       ["story_book", 4],
-      ["novel_pulp", 16],,
+      ["novel_pulp", 16],
       ["fairy_tales", 10],
       ["tailor_portfolio", 1],
       ["laptop", 10],
@@ -654,6 +655,7 @@
       ["flashlight", 40],
       ["suit", 60],
       ["tophat", 10],
+      ["bowhat", 10],
       ["glasses_monocle", 2],
       ["duct_tape", 60],
       ["firecracker_pack", 5],
@@ -719,7 +721,7 @@
     "items":[
       ["water_clean", 90],
       ["oj", 50],
-      ["juice", 50]
+      ["juice", 50],
       ["cranberry_juice", 50],
       ["sports_drink", 50],
       ["apple_cider", 50],
@@ -789,7 +791,7 @@
       ["choc_drink", 40],
       ["rootbeer", 65],
       ["purple_drink", 35],
-      ["juice", 20]
+      ["juice", 20],
       ["sandwich_t", 30],
       ["pizza_veggy", 8],
       ["pizza_meat", 8],
@@ -964,6 +966,7 @@
       ["soup_veggy", 15],
       ["soup_meat", 15],
       ["flour", 30],
+      ["milk_powder", 20],
       ["cornmeal", 30],
       ["powder_eggs", 20],
       ["protein_powder", 15],
@@ -1931,6 +1934,7 @@
       ["pants", 75],
       ["suit", 60],
       ["tophat", 10],
+      ["bowhat", 10],
       ["glasses_monocle", 2],
       ["pants_leather", 60],
       ["pants_cargo", 70],
@@ -2630,6 +2634,7 @@
       ["glasses_monocle", 2],
       ["cell_phone", 20],
       ["tophat", 10],
+      ["bowhat", 10],
       ["hat_chef", 5],
       ["jacket_chef", 5],
       ["pda", 15],
@@ -4688,7 +4693,7 @@
     "id":"shia_stuff",
     "items":[
       ["knife_steak", 3],
-      ["ax", 1],
+      ["ax", 1]
     ]
   }
 
