@@ -7619,8 +7619,9 @@ void player::use(game *g, char let)
 
     if (used->is_tool()) {
         it_tool *tool = dynamic_cast<it_tool*>(used->type);
+        int charges_used = 0;
         if (tool->charges_per_use == 0 || used->charges >= tool->charges_per_use) {
-            int charges_used = tool->use.call(g, this, used, false);
+            charges_used = tool->use.call(g, this, used, false);
             if ( charges_used >= 1 ) {
                 used->charges -= std::min(used->charges, (int)tool->charges_per_use);
             }
@@ -7629,8 +7630,10 @@ void player::use(game *g, char let)
                        used->charges, tool->charges_per_use);
         }
 
-        if (tool->use == &iuse::dogfood) {
-            replace_item = false;
+        if (tool->use == &iuse::dogfood || tool->use == &iuse::set_trap) {
+            if(charges_used != 0) { // charges_used == 0 means the user canceled the action
+                replace_item = false;
+            }
         }
 
         if (replace_item && used->invlet != 0) {

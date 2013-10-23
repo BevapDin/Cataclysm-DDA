@@ -1014,7 +1014,8 @@ int iuse::dogfood(game *g, player *p, item *it, bool t)
     } else {
         g->add_msg_if_player(p,_("You spill the dogfood all over the ground."));
     }
-    return it->type->charges_to_use();
+    return 1;
+//    return it->type->charges_to_use();
 }
 
 
@@ -3147,7 +3148,8 @@ if(it->type->id == "cot"){
    }
   }
  }
- return it->type->charges_to_use();
+ return 1;
+// return it->type->charges_to_use();
 }
 
 int iuse::geiger(game *g, player *p, item *it, bool t)

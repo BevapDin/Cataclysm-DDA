@@ -115,11 +115,20 @@ void fill_funnels(game *g, int rain_depth_mm_per_hour, bool acid, trap_id t)
                 item *it = &(items[j]);
                 if (it->is_container() && it->has_flag("WATERTIGHT") && it->has_flag("SEALS")) {
                     it_container* ct = dynamic_cast<it_container*>(it->type);
-                    if (ct->contains > maxcontains && (
-                            it->contents.empty() ||
-                            it->contents[0].typeId() == "water" ||
+                    if(ct->contains < maxcontains) {
+                        continue;
+                    }
+                    if(it->contents.empty()) {
+                        c = it;
+                        maxcontains = ct->contains;
+                        continue;
+                    }
+                    if(it->contents[0].charges >= ct->contains) {
+                        continue; // full
+                    }
+                    if(it->contents[0].typeId() == "water" ||
                             it->contents[0].typeId() == "water_acid" ||
-                            it->contents[0].typeId() == "water_acid_weak")) {
+                            it->contents[0].typeId() == "water_acid_weak") {
                         c = it;
                         maxcontains = ct->contains;
                     }
