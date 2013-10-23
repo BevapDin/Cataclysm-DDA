@@ -270,6 +270,8 @@ public:
         itype_id usageType;
         double timeModi;
         
+        LocationType getLocation() const { return location; }
+        
         // These constructors initialize the object
         // and set the location member.
         // The candidate is valid (valid() == true) after

@@ -100,6 +100,11 @@ std::string crafting_inventory_t::complex_req::serialize() const {
 void crafting_inventory_t::complex_req::deserialize(crafting_inventory_t &cinv, const std::string &data) {
     selected_simple_req_index = cinv.deserialize(data, selected_items);
     if(selected_simple_req_index < 0 || selected_simple_req_index >= simple_reqs.size()) {
+        if(as_tool) {
+            popup(_("a tool you used has vanished while crafting"));
+        } else {
+            popup(_("a component you used has vanished while crafting"));
+        }
         selected_simple_req_index = -1;
         selected_items.clear();
     } else {
@@ -347,6 +352,16 @@ void crafting_inventory_t::complex_req::add(component &c, bool as_tool) {
     }
 }
 
+bool cmp_simple_req(const crafting_inventory_t::simple_req &a, const crafting_inventory_t::simple_req &b) {
+    if(a.req.ctype != b.req.ctype) {
+        return a.req.ctype == crafting_inventory_t::C_AMOUNT;
+    }
+    if(a.req.count != b.req.count) {
+        return a.req.count < b.req.count;
+    }
+    return a.req.type < b.req.type;
+}
+
 void crafting_inventory_t::complex_req::init(std::vector<component> &components, bool as_tool, solution &s) {
     assert(!components.empty());
     this->as_tool = as_tool;
@@ -354,6 +369,7 @@ void crafting_inventory_t::complex_req::init(std::vector<component> &components,
         add(components[j], as_tool);
     }
     assert(!simple_reqs.empty());
+    std::sort(simple_reqs.begin(), simple_reqs.end(), cmp_simple_req);
 }
 
 void crafting_inventory_t::simple_req::find_overlays(simple_req &rc) {
@@ -808,7 +824,7 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
                 }
             }
             if(surroundings == NULL) {
-                debugmsg("surrounding %s is gone - will recreate it", tmpstr.c_str());
+//                debugmsg("surrounding %s is gone - will recreate it", tmpstr.c_str());
                 item it(g->itypes[tmpstr], (int) g->turn);
                 it.charges = 50;
                 cinv.surround.push_back(item_from_surrounding(tmppnt, it));
@@ -996,7 +1012,6 @@ int crafting_inventory_t::deserialize(const std::string &data, candvec &vec) {
     for(size_t i = 1; pjv.contains(i); i++) {
         candidate_t ci(*this, pjv.get(i));
         if(!ci.valid()) {
-            debugmsg("failed to deserialize");
             vec.clear();
             return -1;
         }
@@ -1233,6 +1248,8 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
     // to this option.
     std::vector< std::pair<menu_entry_type, size_t> > optionsIndizes;
     
+    int single_req_index = -1;
+    int single_req_cand_index = -1;
     for(size_t i = 0; i < simple_reqs.size(); i++) {
         const simple_req &sr = simple_reqs[i];
         if(sr.available != 1) {
@@ -1243,6 +1260,33 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
         const int count = req.count;
         if(sr.cnt_on_map + sr.cnt_on_player < count) {
             continue;
+        }
+        for(candvec::const_iterator a = candidate_items.begin(); a != candidate_items.end(); a++) {
+            const candidate_t &can = *a;
+            if(req(can.get_item()) < req.count) {
+                // That item aone does not work, need several items
+                continue;
+            }
+            if(can.getLocation() == LT_SURROUNDING) {
+                // Prefer surrounding objects (like fire)
+                selected_items.push_back(can);
+                selected_simple_req_index = i;
+                toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
+                return;
+            }
+            if(as_tool && req.ctype == C_AMOUNT) {
+                selected_items.push_back(can);
+                selected_simple_req_index = i;
+                toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
+                return;
+                // Tool requirement, without charges better than any tool with charges
+                if(single_req_index == -1) {
+                    single_req_index = i;
+                    single_req_cand_index = a - candidate_items.begin();
+                } else {
+                    single_req_cand_index = -1;
+                }
+            }
         }
         std::ostringstream buffer;
         buffer << "As " << req << ": ";
@@ -1276,6 +1320,12 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
                 optionsIndizes.push_back(std::make_pair(mixed, i));
             }
         }
+    }
+    if(single_req_index != -1 && single_req_cand_index != -1) {
+        selected_items.push_back(simple_reqs[single_req_index].candidate_items[single_req_cand_index]);
+        selected_simple_req_index = single_req_index;
+        toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
+        return;
     }
     if(options.size() == 0) {
         debugmsg("Attempted to select_items_to_use with no available simple_reqs!");
