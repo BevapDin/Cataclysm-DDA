@@ -3,13 +3,11 @@
 #include "crafting.h"
 struct construct;
 
-struct construction_stage
+struct construction_stage : public recipe
 {
  ter_id terrain;
  furn_id furniture;
  int time; // In minutes, i.e. 10 turns
- std::vector<component> tools[10];
- std::vector<component> components[10];
 
  construction_stage(ter_id Terrain, int Time) :
     terrain (Terrain), furniture(f_null), time (Time) { };
@@ -17,6 +15,11 @@ struct construction_stage
     terrain (t_null), furniture (Furniture.loadid), time (Time) { };
  construction_stage(int Time) :
     terrain (t_null), furniture (f_null), time (Time) { };
+    
+    void add_tool(const component &c);
+    void add_alternativ_tool(const component &c);
+    void add_component(const component &c);
+    void add_alternativ_component(const component &c);
 };
 
 struct constructable

@@ -75,15 +75,6 @@ const tidvec &get_tidvec(const itype_id &type) {
     return types;
 }
 
-void copy(const std::vector<component> *src, std::vector< std::vector<component> > &dest, size_t count) {
-    dest.clear();
-    for(size_t i = 0; i < count; i++, src++) {
-        if(!src->empty()) {
-            dest.push_back(*src);
-        }
-    }
-}
-
 bool crafting_inventory_t::has_all_requirements(recipe &making) {
     solution s;
     return has_all_requirements(making, s);
@@ -176,22 +167,6 @@ void crafting_inventory_t::gather_input(recipe &making, player_activity &activit
 }
 
 void crafting_inventory_t::consume_gathered(
-    const construction_stage &stage,
-    player_activity &activity,
-    std::list<item> &used_items,
-    std::list<item> &used_tools
-) {
-    if(stage.tools[0].empty() && stage.components[0].empty()) {
-        return;
-    }
-    recipe r;
-    copy(stage.tools, r.tools, sizeof(stage.tools) / sizeof(stage.tools[0]));
-    copy(stage.components, r.components, sizeof(stage.components) / sizeof(stage.components[0]));
-    solution s;
-    consume_gathered(r, s, activity, used_items, used_tools);
-}
-
-void crafting_inventory_t::consume_gathered(
     recipe &making,
     player_activity &activity,
     std::list<item> &used_items,
@@ -208,12 +183,18 @@ void crafting_inventory_t::consume_gathered(
     std::list<item> &used_items,
     std::list<item> &used_tools
 ) {
+    if(making.tools.empty() && making.components.empty()) {
+        return;
+    }
     s.init(making);
     s.deserialize(*this, activity);
     s.consume(*this, used_items);
 }
 
 void crafting_inventory_t::gather_input(recipe &making, solution &s, player_activity &activity) {
+    if(making.tools.empty() && making.components.empty()) {
+        return;
+    }
     s.init(making);
     s.gather(*this, true);
     s.select_items_to_use();
@@ -537,6 +518,9 @@ void crafting_inventory_t::solution::save(recipe &making) const {
 }
 
 bool crafting_inventory_t::has_all_requirements(recipe &making, solution &s) {
+    if(making.tools.empty() && making.components.empty()) {
+        return true;
+    }
     s.init(making);
     s.gather(*this, false);
     return s.is_possible();
@@ -1086,17 +1070,6 @@ double crafting_inventory_t::calc_time_modi(const candvec &tools) {
         }
     }
     return worst_modi;
-}
-
-void crafting_inventory_t::gather_input(const construction_stage &stage, player_activity &activity) {
-    if(stage.tools[0].empty() && stage.components[0].empty()) {
-        return;
-    }
-    recipe r;
-    copy(stage.tools, r.tools, sizeof(stage.tools) / sizeof(stage.tools[0]));
-    copy(stage.components, r.components, sizeof(stage.components) / sizeof(stage.components[0]));
-    solution s;
-    gather_input(r, s, activity);
 }
 
 typedef enum {

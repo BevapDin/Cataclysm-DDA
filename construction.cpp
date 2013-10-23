@@ -16,24 +16,46 @@
 bool will_flood_stop(map *m, bool (&fill)[SEEX * MAPSIZE][SEEY * MAPSIZE],
                      int x, int y);
 
+
+void construction_stage::add_tool(const component &c) {
+    tools.resize(tools.size() + 1);
+    add_alternativ_tool(c);
+}
+
+void construction_stage::add_alternativ_tool(const component &c) {
+    assert(tools.size() > 0);
+    tools.back().push_back(c);
+}
+
+void construction_stage::add_component(const component &c) {
+    components.resize(components.size() + 1);
+    add_alternativ_component(c);
+}
+
+void construction_stage::add_alternativ_component(const component &c) {
+    assert(components.size() > 0);
+    components.back().push_back(c);
+}
+
 void game::init_construction()
 {
  int id = -1;
- int tl, cl, sl;
+ construction_stage *cur_stage = NULL;
 
  #define CONSTRUCT(name, difficulty, able, done) \
-  sl = -1; id++; \
+  id++; \
   constructions.push_back( new constructable(id, name, difficulty, able, done))
+  
 
  #define STAGE(...)\
-  tl = -1; cl = -1; sl++; \
-  constructions[id]->stages.push_back(construction_stage(__VA_ARGS__));
- #define TOOL(item)  ++tl; constructions[id]->stages[sl].tools[tl].push_back(component(item, -1))
- #define TOOLN(item,N)  ++tl; constructions[id]->stages[sl].tools[tl].push_back(component(item, N))
- #define TOOLCONT(item) constructions[id]->stages[sl].tools[tl].push_back(component(item, -1))
- #define TOOLCONTN(item,N) constructions[id]->stages[sl].tools[tl].push_back(component(item, N))
- #define COMP(item, amount)  ++cl; constructions[id]->stages[sl].components[cl].push_back(component(item,amount))
- #define COMPCONT(item, amount) constructions[id]->stages[sl].components[cl].push_back(component(item,amount))
+  constructions[id]->stages.push_back(construction_stage(__VA_ARGS__)); \
+  cur_stage = &(constructions[id]->stages.back());
+ #define TOOL(item)             cur_stage->add_tool(component(item, -1))
+ #define TOOLN(item,N)          cur_stage->add_tool(component(item, N))
+ #define TOOLCONT(item)         cur_stage->add_alternativ_tool(component(item, -1))
+ #define TOOLCONTN(item,N)      cur_stage->add_alternativ_tool(component(item, N))
+ #define COMP(item, amount)     cur_stage->add_component(component(item,amount))
+ #define COMPCONT(item, amount) cur_stage->add_alternativ_component(component(item,amount))
 
 
 /* CONSTRUCT( name, time, able, done )
@@ -537,26 +559,16 @@ void game::construction_menu()
     posy++;
     mvwprintz(w_con, posy, 31, color_stage, _("Time: %1d minutes"), current_con->stages[n].time);
 // Print tools
-    construction_stage stage = current_con->stages[n];
-    bool has_tool[10] = {stage.tools[0].empty(),
-                         stage.tools[1].empty(),
-                         stage.tools[2].empty(),
-                         stage.tools[3].empty(),
-                         stage.tools[4].empty(),
-                         stage.tools[5].empty(),
-                         stage.tools[6].empty(),
-                         stage.tools[7].empty(),
-                         stage.tools[8].empty(),
-                         stage.tools[9].empty()};
+    construction_stage &stage = current_con->stages[n];
     posy++;
     posx = 33;
-    for (int i = 0; i < 9 && !has_tool[i]; i++) {
+    for (int i = 0; i < stage.tools.size(); i++) {
      mvwprintz(w_con, posy, posx-2, c_white, ">");
+     total_inv.has_any_tools(stage.tools[i]);
      for (int j = 0; j < stage.tools[i].size(); j++) {
       itype_id tool = stage.tools[i][j].type;
       nc_color col = c_red;
-      if (total_inv.has_amount(tool, 1)) {
-       has_tool[i] = true;
+      if(stage.tools[i][j].available == 1) {
        col = c_green;
       }
       int length = utf8_width(item_controller->find_template(tool)->name.c_str());
@@ -580,28 +592,13 @@ void game::construction_menu()
     }
 // Print components
     posx = 33;
-    bool has_component[10] = {stage.components[0].empty(),
-                              stage.components[1].empty(),
-                              stage.components[2].empty(),
-                              stage.components[3].empty(),
-                              stage.components[4].empty(),
-                              stage.components[5].empty(),
-                              stage.components[6].empty(),
-                              stage.components[7].empty(),
-                              stage.components[8].empty(),
-                              stage.components[9].empty()};
-    for (int i = 0; i < 10; i++) {
-     if (has_component[i])
-       continue;
+    for (int i = 0; i < stage.components.size(); i++) {
+     total_inv.has_any_components(stage.components[i]);
      mvwprintz(w_con, posy, posx-2, c_white, ">");
-     for (int j = 0; j < stage.components[i].size() && i < 10; j++) {
+     for (int j = 0; j < stage.components[i].size(); j++) {
       nc_color col = c_red;
-      component comp = stage.components[i][j];
-      if (( item_controller->find_template(comp.type)->is_ammo() &&
-           total_inv.has_charges(comp.type, comp.count)) ||
-          (!item_controller->find_template(comp.type)->is_ammo() &&
-           total_inv.has_amount(comp.type, comp.count))) {
-       has_component[i] = true;
+      component &comp = stage.components[i][j];
+      if(comp.available == 1) {
        col = c_green;
       }
       int length = utf8_width(item_controller->find_template(comp.type)->name.c_str());
@@ -732,59 +729,11 @@ bool game::player_can_build(player &p, crafting_inventory_t &crafting_inv, const
 
  bool can_build_any = false;
  for (int i = start; i < con->stages.size() && i <= last_level; i++) {
-  construction_stage* stage = &(con->stages[i]);
-  bool has_tool = false;
-  bool has_component = false;
-  bool tools_required = false;
-  bool components_required = false;
-
-  for (int j = 0; j < 10; j++) {
-   if (stage->tools[j].size() > 0) {
-    tools_required = true;
-    has_tool = false;
-    for (int k = 0; k < stage->tools[j].size(); k++) {
-     if (crafting_inv.has_amount(stage->tools[j][k].type, 1))
-     {
-         has_tool = true;
-         stage->tools[j][k].available = 1;
-     }
-     else
-     {
-         stage->tools[j][k].available = -1;
-     }
-    }
-    if (!has_tool)  // missing one of the tools for this stage
-     break;
-   }
-   if (stage->components[j].size() > 0) {
-    components_required = true;
-    has_component = false;
-    for (int k = 0; k < stage->components[j].size(); k++) {
-     if (( item_controller->find_template(stage->components[j][k].type)->is_ammo() &&
-           crafting_inv.has_charges(stage->components[j][k].type,
-                            stage->components[j][k].count)    ) ||
-         (!item_controller->find_template(stage->components[j][k].type)->is_ammo() &&
-          crafting_inv.has_amount (stage->components[j][k].type,
-                          stage->components[j][k].count)    ))
-     {
-         has_component = true;
-         stage->components[j][k].available = 1;
-     }
-     else
-     {
-         stage->components[j][k].available = -1;
-     }
-    }
-    if (!has_component)  // missing one of the comps for this stage
-     break;
-   }
-
-  }  // j in [0,2]
-  can_build_any |= (has_component || !components_required) &&
-    (has_tool || !tools_required);
+  construction_stage &stage = con->stages[i];
+  const bool can_do = crafting_inv.has_all_requirements(stage);
+  can_build_any |= can_do;
   if (exact_level && (i == level)) {
-      return ((has_component || !components_required) &&
-              (has_tool || !tools_required));
+      return can_do;
   }
  }  // stage[i]
  return can_build_any;
@@ -888,7 +837,7 @@ void game::complete_construction()
 {
     int stage_num = u.activity.values[0];
     constructable *built = constructions[u.activity.index];
-    const construction_stage &stage = built->stages[stage_num];
+    construction_stage &stage = built->stages[stage_num];
 
     u.practice(turn, "carpentry", std::max(built->difficulty, 1) * 10);
 
@@ -907,9 +856,13 @@ void game::complete_construction()
     // ...and start the next one, if it exists
     if (u.activity.values.size() > 0) {
         stage_num = u.activity.values[0];
-        u.activity.moves_left = built->stages[stage_num].time * 1000;
-        total_inv.gather_input(built->stages[stage_num], u.activity);
-        move_ppoints_for_construction(built, u.activity.moves_left);
+        if(total_inv.has_all_requirements(built->stages[stage_num])) {
+            u.activity.moves_left = built->stages[stage_num].time * 1000;
+            total_inv.gather_input(built->stages[stage_num], u.activity);
+            move_ppoints_for_construction(built, u.activity.moves_left);
+        } else {
+            u.activity.type = ACT_NULL;
+        }
     } else { // We're finished!
         u.activity.type = ACT_NULL;
     }

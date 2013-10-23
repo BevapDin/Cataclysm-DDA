@@ -16,7 +16,6 @@ class vehicle;
 struct bionic;
 struct recipe;
 class player;
-struct construction_stage;
 /**
  * This inventory represents all the things the player may use
  * when crafting (or in similar activities like building a car).
@@ -660,7 +659,6 @@ public:
      */
     void gather_input(recipe &making, player_activity &activity);
     void gather_input(recipe &making, solution &s, player_activity &activity);
-    void gather_input(const construction_stage &stage, player_activity &activity);
     /**
      * Loads the tools/components that the user selected in gather_input,
      * and consumes them.
@@ -675,12 +673,6 @@ public:
      */
     void consume_gathered(
         recipe &making,
-        player_activity &activity,
-        std::list<item> &used_items,
-        std::list<item> &used_tools
-    );
-    void consume_gathered(
-        const construction_stage &stage,
         player_activity &activity,
         std::list<item> &used_items,
         std::list<item> &used_tools
