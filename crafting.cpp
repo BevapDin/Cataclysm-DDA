@@ -954,6 +954,8 @@ void game::add_known_recipes(std::vector<recipe*> &current, recipe_list source, 
     current.insert(current.begin(),can_craft.begin(),can_craft.end());
 }
 
+void pop_recipe_to_top(recipe *r);
+
 void game::make_craft(recipe *making)
 {
  u.assign_activity(this, ACT_CRAFT, making->time, making->id);
@@ -961,6 +963,7 @@ void game::make_craft(recipe *making)
  craft_inv.gather_input(*making, u.activity);
  u.moves = 0;
  u.lastrecipe = making;
+ pop_recipe_to_top(making);
 }
 
 
@@ -1370,6 +1373,23 @@ recipe* recipe_by_name(std::string name)
         }
     }
     return NULL;
+}
+
+void pop_recipe_to_top(recipe *r) {
+    if(recipes.count(r->cat) == 0) {
+        return;
+    }
+    recipe_list &list = recipes[r->cat];
+    for(recipe_list::iterator b = list.begin(); b != list.end(); b++) {
+        if(*b != r) {
+            continue;
+        }
+        if(b != list.begin()) {
+            list.erase(b);
+            list.insert(list.begin(), r);
+        }
+        return;
+    }
 }
 
 static void check(const std::vector<std::vector<component> > &vec, const std::string &rName) {
