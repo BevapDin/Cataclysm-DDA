@@ -3689,6 +3689,16 @@ graffiti map::graffiti_at(int x, int y)
  return grid[nonant]->graf[x][y];
 }
 
+bool connect_to_wall(ter_t &ter) {
+    static std::string flag1("CONNECT_WALL");
+    static std::string flag2("WALL");
+    return ter.sym == LINE_XOXO ||
+           ter.sym == LINE_OXOX ||
+//           ter.sym == '"' || ter.sym == '+' || ter.sym == '\'' ||
+           ter.has_flag(flag1) ||
+           ter.has_flag(flag2);
+}
+
 long map::determine_wall_corner(const int x, const int y, const long orig_sym)
 {
     long sym = orig_sym;
@@ -3697,11 +3707,47 @@ long map::determine_wall_corner(const int x, const int y, const long orig_sym)
     const long below = terlist[ter(x, y+1)].sym;
     const long left  = terlist[ter(x-1, y)].sym;
     const long right = terlist[ter(x+1, y)].sym;
-
-    const bool above_connects = above == sym || (above == '"' || above == '+' || above == '\'');
-    const bool below_connects = below == sym || (below == '"' || below == '+' || below == '\'');
-    const bool left_connects  = left  == sym || (left  == '"' || left  == '+' || left  == '\'');
-    const bool right_connects = right == sym || (right == '"' || right == '+' || right == '\'');
+    
+    const bool above_connects = above == sym || connect_to_wall(terlist[ter(x, y-1)]);
+    const bool below_connects = below == sym || connect_to_wall(terlist[ter(x, y+1)]);
+    const bool left_connects  = left  == sym || connect_to_wall(terlist[ter(x-1, y)]);
+    const bool right_connects = right == sym || connect_to_wall(terlist[ter(x+1, y)]);
+    
+    int cas = 0;
+    if(above_connects) { cas |= 1; }
+    if(below_connects) { cas |= 2; }
+    if(left_connects ) { cas |= 4; }
+    if(right_connects) { cas |= 8; }
+    switch(cas) {
+        case 0:
+            return orig_sym;
+        case 1:
+        case 2:
+        case 1 | 2:
+            return LINE_XOXO; // | above and below
+        case 4:
+        case 8:
+        case 4 | 8:
+            return LINE_OXOX; // - left and right
+        case 1 | 4:
+            return LINE_XOOX; // ┘ left coming wall
+        case 1 | 8:
+            return LINE_XXOO; // └ right coming wall
+        case 2 | 4:
+            return LINE_OOXX; // ┐ left coming wall
+        case 2 | 8:
+            return LINE_OXXO; // ┌ right coming wall
+        case 1 | 2 | 4:
+            return LINE_XOXX; // ┤ passing by
+        case 1 | 4 | 8:
+            return LINE_XXOX; // ┴ passing by
+        case 2 | 4 | 8:
+            return LINE_OXXX; // ┬ passing by
+        case 1 | 2 | 8:
+            return LINE_XXXO; // ├ passing by
+        case 1 | 2 | 4 | 8:
+            return LINE_XXXX; // ┼ crossway
+    }
 
     // -
     // |      this = - and above = | or a connectable

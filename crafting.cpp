@@ -425,12 +425,11 @@ bool game::check_enough_materials(recipe *r, crafting_inventory_t &crafting_inv)
 
 void game::craft()
 {
+    recipe *rec = select_crafting_recipe();
     if (!crafting_allowed())
     {
         return;
     }
-
-    recipe *rec = select_crafting_recipe();
     if (rec)
     {
         make_craft(rec);

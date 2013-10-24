@@ -1176,6 +1176,8 @@ void advanced_inventory::display(game * gp, player * pp) {
             redraw_pane(src);
         } else if( 'r' == c || 'R' == c) {
             panes[src].filter.clear();
+            panes[src].filtercache.clear();
+            recalc_pane(src);
             redraw_pane(src);
         } else if('p' == c) {
             if(panes[src].size == 0) {

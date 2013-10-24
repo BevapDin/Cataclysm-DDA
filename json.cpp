@@ -19,7 +19,7 @@
  * (1) loading game data from .json files,
  * (2) serializing data to JSON for game saving,
  * (3) loading JSON data from game save files.
- * ~
+3 * ~
  * For (1), files are assumed to be either a single object,
  * or an array of objects. Each object must have a "type" member,
  * indicating the internal data type it is intended to represent.
@@ -376,6 +376,7 @@ JsonArray::JsonArray(JsonIn *j) : positions()
         }
         gotsep = jsin->skip_value();
         lastsep = gotsep;
+        jsin->eat_whitespace();
     }
     end = jsin->tell();
     if ( strict && lastsep ) {
@@ -832,6 +833,8 @@ bool JsonIn::skip_array()
                 throw err.str();                 
             }
             lastsep = false;
+        } else if(ch == ',') {
+            lastsep = true;
         } else if (!is_whitespace(ch)) {
             lastsep = false;
         }
@@ -910,7 +913,7 @@ bool JsonIn::skip_number()
         if (ch != '+' && ch != '-' && (ch < '0' || ch > '9') &&
                 ch != 'e' && ch != 'E' && ch != '.') {
             stream->unget();
-            return (ch==',');
+            break;
         }
     }
     return skip_separator();
@@ -1139,10 +1142,12 @@ bool JsonIn::end_array()
     if (peek() == ']') {
         stream->get();
         return true;
+        /*
     } else if (peek() == ',') {
         // also eat separators, makes iterating easy
         stream->get();
         return false;
+        */
     } else {
         // not the end yet, so just return false?
         return false;

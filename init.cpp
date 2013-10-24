@@ -255,6 +255,7 @@ void load_all_from_json(JsonIn &jsin)
             JsonObject jo = jsin.get_object();
             load_object(jo);
             jo.finish();
+            jsin.skip_separator();
         }
     } else {
         // not an object or an array?

@@ -4788,7 +4788,7 @@
     "charges_per_use": 0,
     "turns_per_charge": 0,
     "ammo": "battery",
-    "functions": [ [ "func:hotplate" , 1 , 5 ] ],
+    "functions": [ [ "func:hotplate" , 1 , 1 ] ],
     "revert_to": "null",
     "use_action": "HOTPLATE"
   },

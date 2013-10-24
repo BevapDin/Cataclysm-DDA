@@ -681,7 +681,7 @@
         "symbol": "'",
         "color": "brown",
         "move_cost": 2,
-        "flags": ["FLAMMABLE_ASH", "TRANSPARENT", "SUPPORTS_ROOF", "FLAT"],
+        "flags": ["FLAMMABLE_ASH", "TRANSPARENT", "SUPPORTS_ROOF", "FLAT", "CONNECT_WALL"],
         "close": "t_door_c"
     },
     {
@@ -733,7 +733,7 @@
         "symbol": ".",
         "color": "brown",
         "move_cost": 2,
-        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT"]
+        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT", "CONNECT_WALL"]
     },
     {
         "type": "terrain",
@@ -853,7 +853,7 @@
         "symbol": "'",
         "color": "cyan",
         "move_cost": 2,
-        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT"],
+        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT", "CONNECT_WALL"],
         "close": "t_door_metal_c"
     },
     {
@@ -885,7 +885,7 @@
         "symbol": "'",
         "color": "cyan",
         "move_cost": 2,
-        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT"],
+        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT", "CONNECT_WALL"],
         "close": "t_door_bar_c"
     },
     {
@@ -922,7 +922,7 @@
         "symbol": "'",
         "color": "ltcyan",
         "move_cost": 2,
-        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT"],
+        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT", "CONNECT_WALL"],
         "close": "t_door_glass_c"
     },
     {

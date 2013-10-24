@@ -98,7 +98,8 @@ void game::init_data()
 
  try {
  if(!json_good())
-  throw (std::string)"Failed to initialize a static variable";
+     throw (std::string) picojson::get_last_error();
+//  throw (std::string)"Failed to initialize a static variable";
  // Gee, it sure is init-y around here!
     init_data_structures(); // initialize cata data structures
     load_json_dir("data/json"); // load it, load it all!

@@ -4600,8 +4600,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "pot", -1 ],
-      [ "rock_pot", -1 ]
+      [ "func:pot", -1 ]
     ]
   ],
   "components": [
@@ -16118,7 +16117,7 @@
   "time": 120000,
   "reversible": false,
   "autolearn": true,
-  "tools": [ [ ["func:hammer", -1],
+  "tools": [ [ ["func:hammer", -1]
      ] ,
      [
       [ "func:screwdriver", -1 ]
