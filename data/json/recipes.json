@@ -8659,7 +8659,7 @@
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "func:welder", 52 ]
+      [ "func:welder", 35 ]
     ]
   ],
   "components": [
@@ -8687,7 +8687,7 @@
       [ "func:hacksaw", -1 ]
     ],
     [
-      [ "func:welder", 52 ]
+      [ "func:welder", 35 ]
     ]
   ],
   "components": [

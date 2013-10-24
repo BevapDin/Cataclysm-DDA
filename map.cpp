@@ -3691,12 +3691,11 @@ graffiti map::graffiti_at(int x, int y)
 
 bool connect_to_wall(ter_t &ter) {
     static std::string flag1("CONNECT_WALL");
-    static std::string flag2("WALL");
+//    static std::string flag2("WALL");
     return ter.sym == LINE_XOXO ||
            ter.sym == LINE_OXOX ||
-//           ter.sym == '"' || ter.sym == '+' || ter.sym == '\'' ||
-           ter.has_flag(flag1) ||
-           ter.has_flag(flag2);
+           ter.sym == '"' || ter.sym == '+' || ter.sym == '\'' ||
+           ter.has_flag(flag1);
 }
 
 long map::determine_wall_corner(const int x, const int y, const long orig_sym)

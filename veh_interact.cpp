@@ -1046,9 +1046,10 @@ item crafting_inventory_t::consume_vpart_item (game *g, const itype_id &itid)
 {
     candvec candidates;
     std::vector<component> components(1, component(itid, 1));
+    components.back().available = 1;
     const int jj = select_items_to_use(components, assume_components, candidates);
     if(jj != 0 || candidates.size() != 1) {
-        debugmsg("part not found");
+        debugmsg("part not found, select_items_to_use returned %d", jj);
         return item();
     }
     requirement req(itid, 1, C_AMOUNT);
@@ -1099,7 +1100,7 @@ void complete_vehicle (game *g)
         {
             debugmsg ("complete_vehicle install part fails dx=%d dy=%d id=%d", dx, dy, part_id.c_str());
         }
-        used_item = crafting_inv.consume_vpart_item(g, part_id);
+        used_item = crafting_inv.consume_vpart_item(g, vehicle_part_types[part_id].item);
         veh->get_part_properties_from_item(g, partnum, used_item); //transfer damage, etc.
         tools.push_back(component("func:welder", welder_charges ));
         crafting_inv.consume_any_tools(tools, true);
@@ -1224,7 +1225,7 @@ void complete_vehicle (game *g)
             if( partnum < 0 ) {
                 debugmsg ("complete_vehicle tire change fails dx=%d dy=%d id=%d", dx, dy, part_id.c_str());
             }
-            used_item = crafting_inv.consume_vpart_item( g, part_id );
+            used_item = crafting_inv.consume_vpart_item( g, vehicle_part_types[part_id].item );
             veh->get_part_properties_from_item( g, partnum, used_item ); //transfer damage, etc.
             // Place the removed wheel on the map last so consume_vpart_item() doesn't pick it.
             if ( !broken ) {

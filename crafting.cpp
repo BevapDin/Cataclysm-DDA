@@ -215,6 +215,7 @@ bool game::making_would_work(recipe *making)
         buffer << _("You can no longer make ") << ::name(making->result) << "\n";
         ::list_missing_ones(buffer, *making);
         popup_top(buffer.str().c_str());
+        draw();
     }
 
     return false;
@@ -830,6 +831,7 @@ recipe* game::select_crafting_recipe()
                         buffer << s2.to_string(crafting_inventory_t::simple_req::ts_selected);
                         popup_top(buffer.str().c_str());
                     }
+                    draw();
                 }
                 break;
             case Confirm:

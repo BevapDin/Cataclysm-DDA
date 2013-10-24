@@ -751,6 +751,8 @@ nc_color item::color(player *u) const
                 (u->skillLevel(tmp->type) >= (int)tmp->req) &&
                 (u->skillLevel(tmp->type) < (int)tmp->level))
             ret = c_ltblue;
+        if(!u->studied_all_recipes(tmp))
+            ret = c_ltblue;
     }
     return ret;
 }
