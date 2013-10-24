@@ -336,12 +336,10 @@ void vehicle::use_controls()
     for (int p = 0; p < parts.size(); p++) {
         if (part_flag(p, "CONE_LIGHT")) {
             has_lights = true;
+            lights.push_back(p);
         }
         if (part_flag(p, "CIRCLE_LIGHT")) {
             has_overhead_lights = true;
-        }
-        if (part_flag(p, "LIGHT")) {
-            has_lights = true;
             lights.push_back(p);
         }
         else if (part_flag(p, "TURRET")) {
