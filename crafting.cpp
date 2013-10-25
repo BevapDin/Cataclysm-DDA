@@ -249,10 +249,8 @@ bool game::can_make(recipe *r, crafting_inventory_t &crafting_inv)
     }
 
     // check all tools and check all components
-    if(!crafting_inv.has_all_requirements(*r)) {
-        RET_VAL = false;
-    }
-    return check_enough_materials(r, crafting_inv) && RET_VAL;
+    return RET_VAL && crafting_inv.has_all_requirements(*r);
+//    return check_enough_materials(r, crafting_inv) && RET_VAL;
 }
 
 bool game::check_enough_materials(recipe *r, crafting_inventory_t &crafting_inv)

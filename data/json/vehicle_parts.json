@@ -1095,6 +1095,7 @@
         "power": 30,
         "item": "reinforced_solar_panel",
         "difficulty": 6,
+        "location": "on_roof",
         "flags": [
             "OVER", "SOLAR_PANEL"
         ]
@@ -1343,6 +1344,7 @@
         "size": 12000,
         "fuel_type": "battery",
         "item": "battery_motorbike",
+        "location": "fuel_source",
         "difficulty": 2,
         "flags": ["FUEL_TANK"]
     },
@@ -1359,6 +1361,7 @@
         "size": 30000,
         "fuel_type": "battery",
         "item": "battery_car",
+        "location": "fuel_source",
         "difficulty": 2,
         "flags": ["FUEL_TANK"]
     },
@@ -1375,6 +1378,7 @@
         "size": 50000,
         "fuel_type": "battery",
         "item": "battery_truck",
+        "location": "fuel_source",
         "difficulty": 2,
         "flags": ["FUEL_TANK"]
     },

@@ -3126,9 +3126,24 @@ void add_item(const itype *type, const char *mat, const char *rep_item, double a
     int item_count = static_cast<int>(amount / rep_it->weight);
     if(type->m1 == mat && item_count >= 1) {
         result.push_back(vpart_info::type_count_pair(rep_item, item_count));
-    } else if(type->m2 == mat && item_count >= 2) {
-        result.push_back(vpart_info::type_count_pair(rep_item, item_count / 2));
+    } else if(type->m2 == mat && item_count >= 3) {
+        result.push_back(vpart_info::type_count_pair(rep_item, item_count / 3));
     }
+}
+
+std::vector<item> vpart_info::get_remaining_scraps() const {
+    std::vector< ::item> result;
+    const int hp = durability / 500;
+    if(hp <= 0) {
+        return result;
+    }
+    type_count_pair_vector ff = get_repair_materials(hp);
+    for(size_t i = 0; i < ff.size(); i++) {
+        for(size_t j = 0; j < ff[i].second; j++) {
+            result.push_back(::item(g->itypes[ff[i].first], (int) g->turn));
+        }
+    }
+    return result;
 }
 
 vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) const {
@@ -3151,7 +3166,12 @@ vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) cons
     // amount (as weight) of damage that must be repaired
     const double amount = rel_damage * type->weight;
     // material     item-type for repair   relative-damage
-    ::add_item(type, "steel", "steel_chunk", amount, result);
+    ::add_item(type, "steel", "steel_lump", amount, result);
+    if(result.empty()) {
+        // Try again, this time use the smaller chunks, this is for
+        // when the damage is to small to require a full lump
+        ::add_item(type, "steel", "steel_chunk", amount, result);
+    }
     if(result.empty()) {
         // Try again, this time use the smaller scraps, this is for
         // when the damage is to small to require a full chunk

@@ -7449,8 +7449,7 @@
       [ "scrap", 3 ],
       [ "knife_butter", 1 ],
       [ "knife_steak", 1 ],
-      [ "bolt_steel", 1 ],
-      [ "scrap", 1 ]
+      [ "bolt_steel", 1 ]
     ],
     [
       [ "can_drink", 1 ],

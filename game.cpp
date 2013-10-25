@@ -6497,9 +6497,7 @@ void game::exam_vehicle(vehicle &veh, int examx, int examy, int cx, int cy)
 //    debugmsg ("exam_vehicle cmd=%c %d", vehint.sel_cmd, (int) vehint.sel_cmd);
     if (vehint.sel_cmd != ' ')
     {                                                        // TODO: different activity times
-        u.activity = player_activity(ACT_VEHICLE,
-                                     vehint.sel_cmd == 'f' || vehint.sel_cmd == 's' ||
-                                     vehint.sel_cmd == 'c' ? 200 : 20000,
+        u.activity = player_activity(ACT_VEHICLE, vehint.move_points,
                                      (int) vehint.sel_cmd, 0, "");
         u.activity.values.push_back (veh.global_x());    // values[0]
         u.activity.values.push_back (veh.global_y());    // values[1]
@@ -10162,7 +10160,7 @@ void game::plmove(int dx, int dy)
       field_list_it != tmpfld.getFieldEnd(); ++field_list_it) {
         cur = field_list_it->second;
         if(cur == NULL) continue;
-        if (cur->is_dangerous() &&
+        if (cur->is_dangerous() && m.field_at(u.posx, u.posy).findField(field_list_it->first) == NULL &&
             !query_yn(_("Really step into that %s?"), cur->name().c_str()))
             return;
     }

@@ -88,8 +88,8 @@ std::string crafting_inventory_t::complex_req::serialize() const {
     return crafting_inventory_t::serialize(selected_simple_req_index, selected_items);
 }
 
-void crafting_inventory_t::complex_req::deserialize(crafting_inventory_t &cinv, const std::string &data) {
-    selected_simple_req_index = cinv.deserialize(data, selected_items);
+void crafting_inventory_t::complex_req::deserialize(crafting_inventory_t &cinv, const picojson::value &pjv) {
+    selected_simple_req_index = cinv.deserialize(pjv, selected_items);
     if(selected_simple_req_index < 0 || selected_simple_req_index >= simple_reqs.size()) {
         if(as_tool) {
             popup(_("a tool you used has vanished while crafting"));
@@ -112,22 +112,37 @@ void crafting_inventory_t::complex_req::consume(crafting_inventory_t &cinv, std:
 }
 
 void crafting_inventory_t::solution::serialize(player_activity &activity) const {
+    std::ostringstream buffer;
+    buffer << "[";
     for(size_t i = 0; i < complex_reqs.size(); i++) {
-        std::string str = complex_reqs[i].serialize();
-        activity.str_values.push_back(str);
+        if(i != 0) { buffer << ","; }
+        buffer << complex_reqs[i].serialize();
     }
+    buffer << "]";
+    activity.str_values.push_back(buffer.str());
 }
 
 void crafting_inventory_t::solution::deserialize(crafting_inventory_t &cinv, player_activity &activity) {
+    if(activity.str_values.empty()) {
+        debugmsg("player_activity::str_values is empty");
+        return;
+    }
+    picojson::value pjv;
+    const std::string &data = activity.str_values.front();
+    const char *s = data.c_str();
+    std::string err = picojson::parse(pjv, s, s + data.length());
+    if(!err.empty()) {
+        debugmsg("failed to deserialize: %s for %s", err.c_str(), data.c_str());
+        return;
+    } else if(!pjv.is<picojson::array>() || !pjv.contains(complex_reqs.size() - 1)) {
+        debugmsg("failed to deserialize: input %s is not an array or too small", data.c_str());
+        return;
+    }
     for(size_t i = 0; i < complex_reqs.size(); i++) {
         complex_req &cr = complex_reqs[i];
-        if(activity.str_values.empty()) {
-            debugmsg("player_activity::str_values is empty");
-            break;
-        }
-        cr.deserialize(cinv, activity.str_values.front());
-        activity.str_values.erase(activity.str_values.begin());
+        cr.deserialize(cinv, pjv.get(i));
     }
+    activity.str_values.erase(activity.str_values.begin());
 }
 
 void crafting_inventory_t::solution::consume(crafting_inventory_t &cinv, std::list<item> &used_items) {
@@ -368,7 +383,7 @@ void crafting_inventory_t::simple_req::find_overlays(simple_req &rc) {
     overlays.push_back(&rc);
 }
 
-bool crafting_inventory_t::solution::is_possible() {
+bool crafting_inventory_t::solution::is_possible() const {
     for(size_t i = 0; i < complex_reqs.size(); i++) {
         if(!complex_reqs[i].is_possible()) {
             return false;
@@ -377,7 +392,7 @@ bool crafting_inventory_t::solution::is_possible() {
     return true;
 }
 
-bool crafting_inventory_t::complex_req::is_possible() {
+bool crafting_inventory_t::complex_req::is_possible() const {
     assert(!simple_reqs.empty());
     for(size_t i = 0; i < simple_reqs.size(); i++) {
         if(simple_reqs[i].is_possible()) {
@@ -387,7 +402,7 @@ bool crafting_inventory_t::complex_req::is_possible() {
     return false;
 }
 
-bool crafting_inventory_t::simple_req::is_possible() {
+bool crafting_inventory_t::simple_req::is_possible() const {
     return available == 1;
 }
 
@@ -408,6 +423,146 @@ void crafting_inventory_t::complex_req::gather(crafting_inventory_t &cinv, bool 
     }
 }
 
+crafting_inventory_t::candidate_t crafting_inventory_t::candidate_t::split(const requirement &req, int count_to_remove) {
+    assert(count_to_remove > 0);
+    assert(valid());
+    if(location != LT_INVENTORY || invcount == 1) {
+        // Non-locations can not be splited, nor can single item stacks (invcount==1)
+        return candidate_t();
+    }
+    if(req.ctype == C_AMOUNT) {
+        if(invcount >= count_to_remove) {
+            // Splitting would result in this.invcount == 0
+            return candidate_t();
+        }
+        invcount -= count_to_remove;
+        return candidate_t(the_player, invlet, count_to_remove, usageType);
+    }
+    const int charges_per_item = req(get_item());
+    const int total_charges = charges_per_item * invcount;
+    const int remaining_charges = total_charges - count_to_remove;
+    const int remaining_items = remaining_charges / charges_per_item;
+    // ^^ note: rounds downwards -> remaining_charges = 99 and
+    // charges_per_item = 100 -> remaining_items == 0
+    if(remaining_items <= 0) {
+        // There would remain less than a full items worth of charges, split
+        // split would use up all the items
+        return candidate_t();
+    }
+    assert(remaining_items < invcount);
+    const int items_to_remove = invcount - remaining_items;
+    invcount -= items_to_remove;
+    return candidate_t(the_player, invlet, items_to_remove, usageType);
+}
+
+void crafting_inventory_t::simple_req::recount_candidate_sources() {
+    cnt_on_map = 0;
+    cnt_on_player = 0;
+    for(candvec::const_iterator a = candidate_items.begin(); a != candidate_items.end(); ++a) {
+        const candidate_t &can = *a;
+        if(can.is_source(S_MAP)) {
+            cnt_on_map += req(can);
+        } else {
+            assert(can.is_source(S_PLAYER));
+            cnt_on_player = req(can);
+        }
+    }
+}
+
+bool sort_by_charges(const crafting_inventory_t::candidate_t &a, const crafting_inventory_t::candidate_t &b) {
+    const item &ia = a.get_item();
+    const item &ib = b.get_item();
+    return ia.charges < ib.charges;
+}
+
+void crafting_inventory_t::simple_req::move_as_required_to(simple_req &other) {
+    int cnt_reqired = other.req.count;
+    // Include those items already in the candidate list
+    other.recount_candidate_sources();
+    cnt_reqired -= other.cnt_on_map + other.cnt_on_player;
+    for(candvec::iterator a = candidate_items.begin(); cnt_reqired > 0 && a != candidate_items.end(); /*empty*/) {
+        candidate_t &can = *a;
+        const candidate_t splitted = can.split(other.req, cnt_reqired);
+        if(!splitted.valid()) {
+            // Move the candidate completely
+            other.candidate_items.push_back(can);
+            cnt_reqired -= other.req(can);
+            a = candidate_items.erase(a);
+        } else {
+            // Move only part of it
+            other.candidate_items.push_back(splitted);
+            break;
+        }
+    }
+    recount_candidate_sources();
+    other.recount_candidate_sources();
+}
+
+void crafting_inventory_t::simple_req::separate(simple_req &other) {
+    if(req.ctype == C_AMOUNT && other.req.ctype == C_AMOUNT) {
+        // We need req.count item and other.req.count items
+        // Note: collect_candidates has created the same list of
+        // candidates for both simple_req objects!
+        /**
+         * How it works:
+         * Go through the list of candidates of this and
+         * _move_ some of them into the list of candidates of the
+         * other simple_req.
+         * cnt_reqired stores the required count that must still be
+         * added to the other simple_req.
+         */
+        other.candidate_items.clear();
+        move_as_required_to(other);
+    } else if(req.ctype == C_CHARGES && other.req.ctype == C_AMOUNT) {
+        other.separate(*this); // same case other direction
+    } else if(req.ctype == C_AMOUNT && other.req.ctype == C_CHARGES) {
+        /**
+         * How it works:
+         * Go through the list the candidates of other and
+         * _move_ some of them into the list of candidates of this.
+         * (Only those that have no charges).
+         * cnt_reqired stores the required count that must still be
+         * added to this simple_req.
+         * Also the candidate list is sorted by charges first
+         * (items with smaller charges first), therfor  if there are items
+         * without charges those get moved to this simple_req and not
+         * those with huge charges.
+         * Note: this.candidate_items might contain some entries that
+         * are not in other.candidate_items because items with no charges
+         * at all would not be included when counting by charges,
+         * but they would be include when counting by amount.
+         * Therfor we remove those items first.
+         */
+        for(candvec::iterator a = candidate_items.begin(); a != candidate_items.end(); /*empty*/) {
+            const candidate_t &can = *a;
+            if(other.req(can) > 0) {
+                // Assume that this candidate is included in the
+                // candidate_items of the other anyway.
+                a = candidate_items.erase(a);
+            } else {
+                ++a;
+            }
+        }
+        std::sort(other.candidate_items.begin(), other.candidate_items.end(), sort_by_charges);
+        other.move_as_required_to(*this);
+    } else if(req.ctype == C_CHARGES && other.req.ctype == C_CHARGES) {
+        /**
+         * No need to separate here, while consuming we consume until
+         * the required charges have been used up and don't care where they
+         * come from.
+         */
+    } else {
+        assert(false);
+    }
+}
+
+void crafting_inventory_t::simple_req::set_unavailable(int av) {
+    candidate_items.clear();
+    cnt_on_player = 0;
+    cnt_on_map = 0;
+    available = av;
+}
+
 void crafting_inventory_t::simple_req::gather(crafting_inventory_t &cinv, bool store) {
     assert(req.type.compare(0, 5, "func:") != 0);
     comp->available = -1;
@@ -419,44 +574,78 @@ void crafting_inventory_t::simple_req::gather(crafting_inventory_t &cinv, bool s
     } else {
         available = cinv.has(req) ? +1 : -1;
     }
-    if(available != 1) {
+    for(size_t j = 0; available == 1 && j < overlays.size(); j++) {
+        check_overlay(cinv, store, *overlays[j]);
+    }
+}
+
+bool crafting_inventory_t::complex_req::has_alternativ(const simple_req &sr) const {
+    assert(!simple_reqs.empty());
+    for(size_t i = 0; i < simple_reqs.size(); i++) {
+        if(&(simple_reqs[i]) == &sr) {
+            continue;
+        }
+        if(simple_reqs[i].is_possible()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void crafting_inventory_t::simple_req::check_overlay(crafting_inventory_t &cinv, bool store, simple_req &other) {
+    assert(req.type == other.req.type);
+    if(other.available != 1) {
+        // Might be possible if other needs more items than this
         return;
     }
-    for(size_t j = 0; j < overlays.size(); j++) {
+    if(req.ctype == other.req.ctype) {
         requirement newReq = req;
-        simple_req &orq = *(overlays[j]);
-        if(orq.available != 1) {
-            // Might be possible of orq needs more items than this
-            continue;
-        }
-        if(orq.req.ctype == C_AMOUNT) {
-            if(newReq.ctype == C_AMOUNT) {
-                newReq.count += orq.req.count;
-            } else {
-                newReq.count++;
-            }
-        } else {
-            if(newReq.ctype == C_AMOUNT) {
-                newReq.count++;
-            } else {
-                newReq.count += orq.req.count;
-            }
-        }
+        newReq.count += other.req.count;
         if(cinv.has(newReq)) {
-            continue;
+            if(store) {
+                separate(other);
+            }
+            return;
         }
-        orq.available = 0;
-        assert(orq.parent != parent);
-        if(orq.parent->is_possible()) {
-            // deselect the other component, still works
-            orq.overlays.push_back(this);
-            continue;
+        // Not enough for both
+    } else {
+        // count by different things.
+        // Make temporary copies and gather components.
+        simple_req _this(req, comp, parent);
+        simple_req _other(other.req, other.comp, other.parent);
+        if(store) {
+            _this.candidate_items = this->candidate_items;
+            _other.candidate_items = other.candidate_items;
+        } else {
+            _this.gather(cinv, true);
+            _other.gather(cinv, true);
         }
-        orq.available = +1;
-        // Nope the other component is needed, deselect this one.
-        available = 0;
+        // Now separte them
+        _this.separate(_other);
+        // Now look if both are still possible.
+        if(_this.req_is_fullfilled() && _other.req_is_fullfilled()) {
+            // Both are possible, store changed candidates
+            if(store) {
+                _this.candidate_items.swap(this->candidate_items);
+                _other.candidate_items.swap(other.candidate_items);
+            }
+            return;
+        }
+        if(!_this.req_is_fullfilled() && !_other.req_is_fullfilled()) {
+            // Neither is possible - is this case even possible?
+            set_unavailable(0);
+            other.set_unavailable(0);
+            return;
+        }
+    }
+    // Only one of both is possible, which one to choose?
+    if(other.parent->has_alternativ(other)) {
+        // we have an alternativ to the other, disable it.
+        other.set_unavailable(0);
         return;
     }
+    // Nope the other component is needed, deselect this one.
+    set_unavailable(0);
 }
 
 const std::string &name(const itype_id &type) {
@@ -690,47 +879,47 @@ crafting_inventory_t::candidate_t::candidate_t(player *p, const itype_id &type):
 location(LT_WEAPON),
 weapon(&(p->weapon)),
 usageType(type)
-{ postInit(); }
+{ }
 
-crafting_inventory_t::candidate_t::candidate_t(items_on_map &ifm, int i, const item &vpitem, const itype_id &type):
+crafting_inventory_t::candidate_t::candidate_t(items_on_map &ifm, int i, const itype_id &type):
 location(LT_MAP),
 mapitems(&ifm),
 mindex(i),
 usageType(type)
-{ postInit(); }
+{ }
 
-crafting_inventory_t::candidate_t::candidate_t(player *p, char ch, const item &vpitem, int count, const itype_id &type):
+crafting_inventory_t::candidate_t::candidate_t(player *p, char ch, int count, const itype_id &type):
 location(LT_INVENTORY),
 the_player(p),
 invlet(ch),
 invcount(count),
 usageType(type)
-{ postInit(); }
+{ }
 
-crafting_inventory_t::candidate_t::candidate_t(items_in_vehicle_cargo &ifv, int i, const item &vpitem, const itype_id &type):
+crafting_inventory_t::candidate_t::candidate_t(items_in_vehicle_cargo &ifv, int i, const itype_id &type):
 location(LT_VEHICLE_CARGO),
 vitems(&ifv),
 iindex(i),
 usageType(type)
-{ postInit(); }
+{ }
 
 crafting_inventory_t::candidate_t::candidate_t(item_from_vpart &ifv, const itype_id &type):
 location(LT_VPART),
 vpartitem(&ifv),
 usageType(type)
-{ postInit(); }
+{ }
 
 crafting_inventory_t::candidate_t::candidate_t(item_from_bionic &ifb, const itype_id &type):
 location(LT_BIONIC),
 bionic(&ifb),
 usageType(type)
-{ postInit(); }
+{ }
 
 crafting_inventory_t::candidate_t::candidate_t(item_from_surrounding &ifs, const itype_id &type):
 location(LT_SURROUNDING),
 surroundings(&ifs),
 usageType(type)
-{ postInit(); }
+{ }
 
 bool crafting_inventory_t::candidate_t::valid() const {
     switch(location) {
@@ -762,9 +951,9 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
     deserialize(cinv, pjv);
 }
 
-void crafting_inventory_t::candidate_t::postInit() {
+float crafting_inventory_t::candidate_t::get_time_modi() const {
     assert(valid());
-    timeModi = get_item().type->getTimeModi(usageType);
+    return get_item().type->getTimeModi(usageType);
 }
 
 void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, const picojson::value &pjv) {
@@ -775,10 +964,7 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
     location = (LocationType) pjv.get("location").get<double>();
     assert(pjv.contains("utype"));
     assert(pjv.get("utype").is<std::string>());
-    assert(pjv.contains("tmodi"));
-    assert(pjv.get("tmodi").is<double>());
     usageType = pjv.get("utype").get<std::string>();
-    timeModi = pjv.get("tmodi").get<double>();
     point tmppnt;
     std::string tmpstr;
     switch(location) {
@@ -870,9 +1056,6 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
             debugmsg("Unknown %d location in candidate_t::deserialize", (int) location);
             break;
     }
-    if(valid()) {
-        postInit();
-    }
 }
 
 const item &crafting_inventory_t::candidate_t::get_item() const {
@@ -916,7 +1099,6 @@ void crafting_inventory_t::candidate_t::serialize(picojson::value &v) const {
     picojson::object pjmap;
     pjmap["location"] = pv((int) location);
     pjmap["utype"] = pv(usageType);
-    pjmap["tmodi"] = pv(timeModi);
     switch(location) {
         case LT_MAP:
             pjmap["x"] = pv(mapitems->position.x);
@@ -987,8 +1169,12 @@ int crafting_inventory_t::deserialize(const std::string &data, candvec &vec) {
         debugmsg("failed to deserialize: %s for %s", err.c_str(), data.c_str());
         return -1;
     }
+    return deserialize(pjv, vec);
+}
+
+int crafting_inventory_t::deserialize(const picojson::value &pjv, candvec &vec) {
     if(!pjv.is<picojson::array>() || !pjv.contains(0)) {
-        debugmsg("failed to deserialize: input %s is not an array or empty", data.c_str());
+        debugmsg("failed to deserialize: input %s is not an array or empty");
         return -1;
     }
     const int index = (int) pjv.get(0).get<double>();
@@ -1059,7 +1245,7 @@ void crafting_inventory_t::merge_time_modi(double modi, double &result) {
 double crafting_inventory_t::calc_time_modi(const candvec &tools) {
     double worst_modi = 0.0;
     for(candvec::const_iterator a = tools.begin(); a != tools.end(); a++) {
-        const double modi = a->timeModi;
+        const double modi = a->get_time_modi();
         if(modi == 1.0 || modi == 0.0) {
             continue;
         }
@@ -1221,8 +1407,6 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
     // to this option.
     std::vector< std::pair<menu_entry_type, size_t> > optionsIndizes;
     
-    int single_req_index = -1;
-    int single_req_cand_index = -1;
     for(size_t i = 0; i < simple_reqs.size(); i++) {
         const simple_req &sr = simple_reqs[i];
         if(sr.available != 1) {
@@ -1234,33 +1418,27 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
         if(sr.cnt_on_map + sr.cnt_on_player < count) {
             continue;
         }
-        for(candvec::const_iterator a = candidate_items.begin(); a != candidate_items.end(); a++) {
+        for(candvec::const_iterator a = candidate_items.begin(); a != candidate_items.end(); ++a) {
             const candidate_t &can = *a;
-            if(req(can.get_item()) < req.count) {
-                // That item aone does not work, need several items
+            if(req(can) < count) {
                 continue;
             }
             if(can.getLocation() == LT_SURROUNDING) {
                 // Prefer surrounding objects (like fire)
-                selected_items.push_back(can);
                 selected_simple_req_index = i;
+                selected_items.push_back(can);
                 toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
                 return;
             }
-            if(as_tool && req.ctype == C_AMOUNT) {
-                selected_items.push_back(can);
+            if(can.getLocation() == LT_VPART) {
+                // Prefer this one as it is linked to the car's battery
                 selected_simple_req_index = i;
+                selected_items.push_back(can);
                 toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
                 return;
-                // Tool requirement, without charges better than any tool with charges
-                if(single_req_index == -1) {
-                    single_req_index = i;
-                    single_req_cand_index = a - candidate_items.begin();
-                } else {
-                    single_req_cand_index = -1;
-                }
             }
         }
+        
         std::ostringstream buffer;
         buffer << "As " << req << ": ";
         if(candidate_items.size() == 1) {
@@ -1294,12 +1472,7 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
             }
         }
     }
-    if(single_req_index != -1 && single_req_cand_index != -1) {
-        selected_items.push_back(simple_reqs[single_req_index].candidate_items[single_req_cand_index]);
-        selected_simple_req_index = single_req_index;
-        toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
-        return;
-    }
+    
     if(options.size() == 0) {
         debugmsg("Attempted to select_items_to_use with no available simple_reqs!");
         return;
@@ -1364,7 +1537,7 @@ void crafting_inventory_t::reduce(requirement req, candvec &candidates) {
             candidates.erase(candidates.begin() + i, candidates.end());
             break;
         }
-        req.count -= req(candidates[i].get_item());
+        req.count -= req(candidates[i]);
     }
     assert(!candidates.empty());
 }
@@ -1440,9 +1613,16 @@ void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_
 
 void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_flags flags, const candvec &candidates, candvec &selected_candidates) {
     assert(candidates.size() > 0);
-    int minCount = req(candidates[0].get_item());
+    int minCount = req.count; // Sensible, dont' care about mincounts greater than this anyway
+    int sum_count = 0;
     for(candvec::const_iterator a = candidates.begin(); a != candidates.end(); ++a) {
-        minCount = std::min(minCount, req(a->get_item()));
+        const int cnt = req(*a);
+        minCount = std::min(minCount, cnt);
+        sum_count += cnt;
+    }
+    if(sum_count == req.count) {
+        selected_candidates = candidates;
+        return;
     }
     // minCount means each item of candidates has at least
     // that much to give. Now if minCount >= req.count
@@ -1491,9 +1671,9 @@ void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_
         } else {
             selected[selection] = !selected[selection];
             if(selected[selection]) {
-                cntFromSelectedOnes += req(candidates[selection].get_item());
+                cntFromSelectedOnes += req(candidates[selection]);
             } else {
-                cntFromSelectedOnes -= req(candidates[selection].get_item());
+                cntFromSelectedOnes -= req(candidates[selection]);
             }
         }
     }
@@ -1502,9 +1682,6 @@ void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_
 #define CMP_IF(_w) \
     do { if(_w != other._w) { return _w < other._w; } } while(false)
 bool crafting_inventory_t::candidate_t::operator<(const candidate_t &other) const {
-    if(timeModi != 0.0 && timeModi != 1.0 && other.timeModi != 1.0 && other.timeModi != 0.0) {
-        CMP_IF(timeModi);
-    }
     CMP_IF(location);
     switch(location) {
         case LT_INVENTORY:
@@ -1545,6 +1722,7 @@ bool crafting_inventory_t::candidate_t::operator<(const candidate_t &other) cons
 std::string crafting_inventory_t::candidate_t::to_string(bool withTime) const {
     std::ostringstream buffer;
     if(withTime) {
+        const float timeModi = get_time_modi();
         if(timeModi != 1.0 && timeModi != 0.0) {
             const int pc = (int) (timeModi * 100);
             if(pc < 100) {
@@ -1555,7 +1733,12 @@ std::string crafting_inventory_t::candidate_t::to_string(bool withTime) const {
             buffer << "   " << "   "; // "XXX % "
         }
     }
-    buffer << const_cast<item&>(get_item()).tname();
+    const item &it = get_item();
+    buffer << const_cast<item&>(it).tname();
+    if(it.charges > 0) {
+        buffer << " (" << it.charges << ")";
+    }
+    
     switch(location) {
         case LT_VEHICLE_CARGO:
         case LT_VPART:
@@ -1610,6 +1793,14 @@ int crafting_inventory_t::requirement::get_charges_or_amount(const item &the_ite
     const float modi = the_item.type->getChargesModi(type);
     assert(modi > 0.0f);
     return result + static_cast<int>(the_item.charges / modi);
+}
+
+int crafting_inventory_t::requirement::operator()(const candidate_t &candidate) const {
+    int cnt = (*this)(candidate.get_item());
+    if(candidate.getLocation() == LT_INVENTORY) {
+        cnt *= candidate.invcount;
+    }
+    return cnt;
 }
 
 bool crafting_inventory_t::requirement::use(item &the_item, std::list<item> &used_items) {
@@ -1773,19 +1964,21 @@ bool crafting_inventory_t::all_equal(const candvec &candidates) {
     for(int i = 0; i + 1 < candidates.size(); i++) {
         const candidate_t &prev = candidates[i];
         const candidate_t &cur = candidates[i + 1];
-        if(prev.get_item().type != cur.get_item().type) {
+        const item &prev_item = prev.get_item();
+        const item &cur_item = cur.get_item();
+        if(prev_item.type != cur_item.type) {
             return false;
         }
-        if(prev.get_item().damage != cur.get_item().damage) {
+        if(prev_item.damage != cur_item.damage) {
             return false;
         }
-        if(prev.get_item().burnt != cur.get_item().burnt) {
+        if(prev_item.burnt != cur_item.burnt) {
             return false;
         }
-        if(prev.get_item().bigness != cur.get_item().bigness) {
+        if(prev_item.bigness != cur_item.bigness) {
             return false;
         }
-        // FIXME: are there properties that need to be compared?
+        // FIXME: are there more properties that need to be compared?
     }
     return true;
 }
@@ -1808,7 +2001,7 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
             std::vector<item> &items = *(a->items);
             for(std::vector<item>::iterator b = items.begin(); b != items.end(); ++b) {
                 if(XMATCH(*b, 1)) {
-                    candidates.push_back(candidate_t(*a, b - items.begin(), *b, req.type));
+                    candidates.push_back(candidate_t(*a, b - items.begin(), req.type));
                 }
             }
         }
@@ -1818,7 +2011,7 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
             std::vector<item> &items = *a->items;
             for(size_t b = 0; b < items.size(); b++) {
                 if(XMATCH(items[b], 1)) {
-                    candidates.push_back(candidate_t(*a, b, items[b], req.type));
+                    candidates.push_back(candidate_t(*a, b, req.type));
                 }
             }
         }
@@ -1835,7 +2028,7 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
             ++iter) {
             const item &it = iter->front();
             if(XMATCH(it, iter->size())) {
-                candidates.push_back(candidate_t(p, it.invlet, it, iter->size(), req.type));
+                candidates.push_back(candidate_t(p, it.invlet, iter->size(), req.type));
             }
         }
     }

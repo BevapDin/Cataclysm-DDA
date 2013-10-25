@@ -25,6 +25,7 @@ public:
     struct vehicle_part *sel_vehicle_part;
     char sel_cmd; //Command currently being run by the player
     int sel_type;
+    int move_points; // move points required to complete the action.
 private:
     int cpart;
     int page_size;
@@ -71,6 +72,8 @@ private:
     void do_tirechange(int reason);
     void do_drain(int reason);
 
+    void calc_display_offsets();
+    
     void display_veh ();
     void display_stats ();
     void display_mode (char mode);

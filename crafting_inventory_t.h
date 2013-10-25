@@ -173,6 +173,8 @@ public:
         C_AMOUNT,
     } count_type;
     
+    struct candidate_t;
+    
     /**
      * Abstract requirement for type.
      * This class hides the diffenrece beewteen counting
@@ -224,6 +226,7 @@ public:
         int operator()(const item &the_item) const {
             return get_charges_or_amount(the_item);
         }
+        int operator()(const candidate_t &candidate) const;
     };
     
     /**
@@ -267,7 +270,6 @@ public:
         // type requested by the recipe or similar, might not be the same
         // as the type of the actuall item.
         itype_id usageType;
-        double timeModi;
         
         LocationType getLocation() const { return location; }
         
@@ -275,10 +277,11 @@ public:
         // and set the location member.
         // The candidate is valid (valid() == true) after
         // beeing constrcuted this way.
+        candidate_t() { make_invalid(); }
         candidate_t(player *p, const itype_id &type);
-        candidate_t(items_on_map &ifm, int i, const item &vpitem, const itype_id &type);
-        candidate_t(player *p, char ch, const item &vpitem, int count, const itype_id &type);
-        candidate_t(items_in_vehicle_cargo &ifv, int i, const item &vpitem, const itype_id &type);
+        candidate_t(items_on_map &ifm, int i, const itype_id &type);
+        candidate_t(player *p, char ch, int count, const itype_id &type);
+        candidate_t(items_in_vehicle_cargo &ifv, int i, const itype_id &type);
         candidate_t(item_from_vpart &ifv, const itype_id &type);
         candidate_t(item_from_bionic &ifb, const itype_id &type);
         candidate_t(item_from_surrounding &ifs, const itype_id &type);
@@ -322,17 +325,30 @@ public:
          * crafting_inventory_t. Don't change this item directly.
          */
         const item &get_item() const;
+
+        float get_time_modi() const;
         
         // Serialize to a json object
         std::string serialize() const;
         // Serialize into v, overriding any existing content.
         void serialize(picojson::value &v) const;
         
+        /**
+         * Split part of this candidate into another one.
+         * Check valid() afterwards for the result.
+         * If count_to_remove is too big or the candidate can not be
+         * splitted, the return might be invlid.
+         * The this objects stays always valid.
+         * The requirement is used to check if count_to_remove
+         * means charges or amounts.
+         */
+        candidate_t split(const requirement &req, int count_to_remove);
+        
         void consume(game *g, player *p, requirement &req, std::list<item> &ret) const;
     private:
-        void postInit();
         void deserialize(crafting_inventory_t &cinv, const std::string &data);
         void deserialize(crafting_inventory_t &cinv, const picojson::value &v);
+        void make_invalid() { location = LT_BIONIC; bionic = NULL; }
     };
     typedef std::vector<candidate_t> candvec;
     
@@ -366,9 +382,18 @@ public:
         int cnt_on_player;
         candvec candidate_items;
         
-        simple_req(const requirement &r, component *c) : req(r), comp(c) { }
+        simple_req(const requirement &r, component *c, complex_req *p = 0) : req(r), comp(c), parent(p) { }
         
-        bool is_possible();
+        bool is_possible() const;
+        
+        /**
+         * Move items from candidate_items of this to the other
+         * to fullfill the requirement of the other simple_req.
+         * call recount_candidate_sources for both at the end.
+         * Note: the candidate_items of the other are
+         * _not_ erased but included in the requirement check.
+         */
+        void move_as_required_to(simple_req &other);
         
         typedef enum {
             ts_normal      = (0 <<  0),
@@ -382,6 +407,19 @@ public:
         friend class solution;
         friend class complex_req;
         
+        /**
+         * Counts cnt_on_map and cnt_on_player from current
+         * content of candidate_items.
+         */
+        void recount_candidate_sources();
+        /**
+         * Checks simply by comparing the sum of cnt_* with
+         * req.count
+         */
+        bool req_is_fullfilled() const {
+            return cnt_on_map + cnt_on_player >= req.count;
+        }
+        
         // Called during solution::gather
         void gather(crafting_inventory_t &cinv, bool store);
         
@@ -394,6 +432,9 @@ public:
          * Otherwise adds the count and return true.
          */
         bool merge(const requirement &otherReq);
+        void set_unavailable(int av = -1);
+        void separate(simple_req &other);
+        void check_overlay(crafting_inventory_t &cinv, bool store, simple_req &other);
     };
 
     class complex_req {
@@ -426,17 +467,23 @@ public:
         
         void select_items_to_use();
         
-        bool is_possible();
+        bool is_possible() const;
         
         bool contains_req_type(const itype_id &type) const;
         simple_req *get_req_type(const itype_id &type);
         
         std::string to_string(int flags = simple_req::ts_normal) const;
+        /**
+         * Is this complex requirement fullfilled even when
+         * ignoring the given simple_req?
+         * sr must be part of simple_reqs!
+         */
+        bool has_alternativ(const simple_req &sr) const;
         
         // Serialize to json string
         std::string serialize() const;
         // Deserialize from json
-        void deserialize(crafting_inventory_t &cinv, const std::string &data);
+        void deserialize(crafting_inventory_t &cinv, const picojson::value &pjv);
     protected:
         friend class solution;
         friend class simple_req;
@@ -463,7 +510,7 @@ public:
         void init(recipe &making);
         void select_items_to_use();
         void gather(crafting_inventory_t &cinv, bool store);
-        bool is_possible();
+        bool is_possible() const;
         std::string to_string(int flags = simple_req::ts_normal) const;
         void save(recipe &making) const;
         void consume(crafting_inventory_t &cinv, std::list<item> &used_items);
@@ -584,6 +631,7 @@ protected:
     
     static std::string serialize(int index, const candvec &vec);
     int deserialize(const std::string &data, candvec &vec);
+    int deserialize(const picojson::value &pjv, candvec &vec);
     
     /**
      * Given a list of tools and their usage (type),

@@ -561,6 +561,26 @@ void inventory::restack(player *p)
     }
 }
 
+static bool vehicle_might_move(const vehicle *veh) {
+    return (veh->cruise_velocity != 0 || veh->velocity != 0);
+}
+
+static bool allow_inventory_from(game *g, const player *p, const vehicle *veh) {
+    if(p->in_vehicle) {
+        // Player is in vehicle, check the speed of that vehicle
+        // if the vehicle is moving (the player is too than),
+        // allow only items from that vehicle.
+        // Otherwise allow items from any non-moving vehicle.
+        vehicle *veh_p = g->m.veh_at(p->posx, p->posy);
+        if(veh_p != NULL && vehicle_might_move(veh_p)) {
+            return veh_p == veh;
+        }
+    }
+    // Player is outside of any vehicle, or on a non-moving vehicle
+    // allow only vehicles that are not moving at all.
+    return !vehicle_might_move(veh);
+}
+
 void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 {
     int junk = 0;
@@ -577,7 +597,6 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
                 on_map.push_back(items);
             }
 
-            // Kludges for now!
             ter_id terrain_id = g->m.ter(x, y);
             if ((g->m.field_at(x, y).findField(fd_fire)) || (terrain_id == t_lava)) {
                 item fire(g->itypes["fire"], 0);
@@ -589,12 +608,15 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
                 water.charges = 50;
                 surround.push_back(item_from_surrounding(p, water));
             }
+            if ((g->m.field_at(x, y).findField(fd_acid))) {
+                item acid(g->itypes["water_acid"], 0);
+                acid.charges = 50;
+                surround.push_back(item_from_surrounding(p, acid));
+            }
 
             int vpart = -1;
             vehicle *veh = g->m.veh_at(x, y, vpart);
-            // include only non-moving cars. This ensures that the car
-            // is still there _after_ the crafting.
-            if (veh && veh->cruise_velocity == 0 && veh->velocity == 0) {
+            if (veh && allow_inventory_from(g, this->p, veh)) {
                 const int kpart = veh->part_with_feature(vpart, "KITCHEN");
                 if (kpart >= 0) {
                     item kitchen(g->itypes["vpart_kitchen_unit"], 0);

@@ -136,6 +136,7 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
                 crafting_inv.has_amount( "wheel_small", 1 );
 
     display_stats ();
+    calc_display_offsets();
     display_veh   ();
     move_cursor (0, 0);
     bool finish = false;
@@ -147,9 +148,7 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
         if (ch == KEY_ESCAPE || ch == 'q' ) {
             finish = true;
         } else {
-            if (dx != -2 && (dx || dy) &&
-                cursor_x + dx >= -6 && cursor_x + dx < 6 &&
-                cursor_y + dy >= -6 && cursor_y + dy < 6)
+            if (dx != -2 && (dx || dy))
             {
                 move_cursor(dx, dy);
             }
@@ -191,6 +190,22 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
     delwin(w_stats);
     delwin(w_list);
     erase();
+    switch(sel_cmd) {
+        case 'f':
+        case 's':
+        case 'c':
+            move_points = 200;
+            break;
+        case 'o':
+            if(sel_vehicle_part->hp <= 0) {
+                move_points = 2000;
+                break;
+            }
+            // Fall through to default time
+        default:
+            move_points = 20000;
+            break;
+    }
 }
 
 /**
@@ -751,6 +766,23 @@ void veh_interact::move_cursor (int dx, int dy)
               special_symbol(cpart >= 0 ? veh->part_sym (cpart) : ' '));
     cursor_x += dx;
     cursor_y += dy;
+    bool must_redraw = false;
+    if(cursor_x >= 6) {
+        cursor_x--; ddy--; must_redraw = true;
+    }
+    if(cursor_x < -6) {
+        cursor_x++; ddy++; must_redraw = true;
+    }
+    if(cursor_y >= 6) {
+        cursor_y--; ddx++; must_redraw = true;
+    }
+    if(cursor_y < -6) {
+        cursor_y++; ddx--; must_redraw = true;
+    }
+    if(must_redraw) {
+        werase(w_disp);
+        display_veh();
+    }
     cpart = part_at (cursor_x, cursor_y);
     int vdx = -ddx - cursor_y;
     int vdy = cursor_x - ddy;
@@ -829,11 +861,7 @@ void veh_interact::move_cursor (int dx, int dy)
     display_mode (' ');
 }
 
-/**
- * Draws the viewport with the vehicle in it on the left side of the window.
- */
-void veh_interact::display_veh ()
-{
+void veh_interact::calc_display_offsets() {
     int x1 = 12, y1 = 12, x2 = -12, y2 = -12;
     for (int p = 0; p < veh->parts.size(); p++)
     {
@@ -880,7 +908,12 @@ void veh_interact::display_veh ()
             ddy = 5 - y2;
         }
     }
-
+}
+/**
+ * Draws the viewport with the vehicle in it on the left side of the window.
+ */
+void veh_interact::display_veh ()
+{
     //Iterate over structural parts so we only hit each square once
     std::vector<int> structural_parts = veh->all_parts_at_location("structure");
     for (int i = 0; i < structural_parts.size(); i++)
@@ -1182,6 +1215,11 @@ void complete_vehicle (game *g)
             if(type!=SEL_JACK) // Changing tires won't make you a car mechanic
             {
                 g->u.practice (g->turn, "mechanics", 2 * 5 + 20);
+            }
+        } else {
+            std::vector<item> scraps = veh->part_info(vehicle_part).get_remaining_scraps();
+            for(size_t a = 0; a < scraps.size(); a++) {
+                g->m.add_item_or_charges(g->u.posx, g->u.posy, scraps[a]);
             }
         }
         if (veh->parts.size() < 2)
