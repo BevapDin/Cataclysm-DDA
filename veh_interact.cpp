@@ -351,6 +351,11 @@ void veh_interact::do_install(int reason)
         char ch = input(); // See keypress.h
         int dx, dy;
         get_direction (dx, dy, ch);
+        if(ch == '>') {
+            dy = 12;
+        } else if(ch == '<') {
+            dy = -12;
+        }
         if ((ch == '\n' || ch == ' ') && has_comps && has_tools && has_skill && has_skill2)
         {
             sel_cmd = 'i';
@@ -366,7 +371,7 @@ void veh_interact::do_install(int reason)
                 break;
             }
         }
-        if (dy == -1 || dy == 1)
+        if (dy != 0 && dy != -2)
         {
             pos += dy;
             if (pos < 0)
