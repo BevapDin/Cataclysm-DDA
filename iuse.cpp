@@ -109,8 +109,10 @@ int iuse::none(game *g, player *p, item *it, bool t)
   return it->type->charges_to_use();
 }
 
-/* To mark an item as "removed from inventory", set its invlet to 0
-   This is useful for traps (placed on ground), inactive bots, etc
+/* iuse methods return the number of charges expended, which is usually it->charges_to_use().
+ * Some items that don't normally use charges return 1 to indicate they're used up.
+ * Regardless, returning 0 indicates the item has not been used up,
+ * though it may have been successfully activated.
  */
 int iuse::sewage(game *g, player *p, item *it, bool t)
 {
@@ -121,7 +123,7 @@ int iuse::sewage(game *g, player *p, item *it, bool t)
   if (one_in(4)) {
     p->mutate(g);
   }
-  return 0;
+  return it->type->charges_to_use();
 }
 
 int iuse::honeycomb(game *g, player *p, item *it, bool t)
@@ -600,9 +602,13 @@ int iuse::antibiotic(game *g, player *p, item *it, bool t) {
 int iuse::fungicide(game *g, player *p, item *it, bool t) {
     g->add_msg_if_player(p,_("You take some fungicide."));
     if (p->has_disease("fungus")) {
-        p->rem_disease("infected");
+        p->rem_disease("fungus");
+        g->add_msg_if_player(p,_("You feel a burning sensation under your skin that quickly fades away."));
     }
     if (p->has_disease("spores")) {
+        if (!p->has_disease("fungus")) {
+            g->add_msg_if_player(p,_("Your skin grows warm for a moment."));
+        }
         int fungus_int = p->disease_intensity("spores", true);
         p->rem_disease("spores");
         int spore_count = rng(fungus_int / 5, fungus_int);
@@ -932,34 +938,41 @@ int iuse::purifier(game *g, player *p, item *it, bool t)
 
 int iuse::marloss(game *g, player *p, item *it, bool t)
 {
- if (p->is_npc()) {
-  return it->type->charges_to_use();
- }
- // If we have the marloss in our veins, we are a "breeder" and will spread
- // alien lifeforms.
- p->add_memorial_log("Ate a marloss berry.");
- if (p->has_trait("MARLOSS")) {
-  g->add_msg_if_player(p,_("As you eat the berry, you have a near-religious experience, feeling at one with your surroundings..."));
-  p->add_morale(MORALE_MARLOSS, 100, 1000);
-  p->hunger = -100;
-  monster goo(GetMType("mon_blob"));
-  goo.friendly = -1;
-  int goo_spawned = 0;
-  for (int x = p->posx - 4; x <= p->posx + 4; x++) {
-   for (int y = p->posy - 4; y <= p->posy + 4; y++) {
-    if (rng(0, 10) > trig_dist(x, y, p->posx, p->posy) &&
-        rng(0, 10) > trig_dist(x, y, p->posx, p->posy)   )
-     g->m.marlossify(x, y);
-    if (one_in(10 + 5 * trig_dist(x, y, p->posx, p->posy)) &&
-        (goo_spawned == 0 || one_in(goo_spawned * 2))) {
-     goo.spawn(x, y);
-     g->add_zombie(goo);
-     goo_spawned++;
+    if (p->is_npc()) {
+        return it->type->charges_to_use();
     }
-   }
-  }
-  return it->type->charges_to_use();
- }
+    // If we have the marloss in our veins, we are a "breeder" and will spread
+    // the fungus.
+    p->add_memorial_log("Ate a marloss berry.");
+
+    if (p->has_trait("MARLOSS")) {
+        g->add_msg_if_player(p,_("As you eat the berry, you have a near-religious experience, feeling at one with your surroundings..."));
+        p->add_morale(MORALE_MARLOSS, 100, 1000);
+        p->hunger = -100;
+        monster spore(GetMType("mon_spore"));
+        spore.friendly = -1;
+        int spore_spawned = 0;
+        for (int x = p->posx - 4; x <= p->posx + 4; x++) {
+            for (int y = p->posy - 4; y <= p->posy + 4; y++) {
+                if (rng(0, 10) > trig_dist(x, y, p->posx, p->posy) &&
+                      rng(0, 10) > trig_dist(x, y, p->posx, p->posy)) {
+                    g->m.marlossify(x, y);
+                }
+                bool moveOK = (g->m.move_cost(x, y) > 0);
+                bool monOK = g->mon_at(x, y) == -1;
+                bool posOK = (g->u.posx != x || g->u.posy != y);
+                if (moveOK && monOK && posOK &&
+                     one_in(10 + 5 * trig_dist(x, y, p->posx, p->posy)) &&
+                     (spore_spawned == 0 || one_in(spore_spawned * 2))) {
+                    spore.spawn(x, y);
+                    g->add_zombie(spore);
+                    spore_spawned++;
+                }
+            }
+        }
+        return it->type->charges_to_use();
+    }
+
 /* If we're not already carriers of Marloss, roll for a random effect:
  * 1 - Mutate
  * 2 - Mutate
@@ -971,34 +984,36 @@ int iuse::marloss(game *g, player *p, item *it, bool t)
  * 8 - Vomit
  * 9 - Give Marloss mutation
  */
- int effect = rng(1, 9);
- if (effect <= 3) {
-  g->add_msg_if_player(p,_("This berry tastes extremely strange!"));
-  p->mutate(g);
- } else if (effect <= 6) { // Radiation cleanse is below
-  g->add_msg_if_player(p,_("This berry makes you feel better all over."));
-  p->pkill += 30;
-  this->purifier(g, p, it, t);
-  if (effect == 6) {
-   p->radiation = 0;
-  }
- } else if (effect == 7) {
-  g->add_msg_if_player(p,_("This berry is delicious, and very filling!"));
-  p->hunger = -100;
- } else if (effect == 8) {
-  g->add_msg_if_player(p,_("You take one bite, and immediately vomit!"));
-  p->vomit(g);
- } else if (!p->has_trait("MARLOSS")) {
-  g->add_msg_if_player(p,_("You feel a strange warmth spreading throughout your body..."));
-  p->toggle_mutation("MARLOSS");
- }
- return it->type->charges_to_use();
+    int effect = rng(1, 9);
+    if (effect <= 3) {
+        g->add_msg_if_player(p,_("This berry tastes extremely strange!"));
+        p->mutate(g);
+    } else if (effect <= 6) { // Radiation cleanse is below
+        g->add_msg_if_player(p,_("This berry makes you feel better all over."));
+        p->pkill += 30;
+        this->purifier(g, p, it, t);
+        if (effect == 6) {
+            p->radiation = 0;
+        }
+    } else if (effect == 7) {
+        g->add_msg_if_player(p,_("This berry is delicious, and very filling!"));
+        p->hunger = -100;
+    } else if (effect == 8) {
+        g->add_msg_if_player(p,_("You take one bite, and immediately vomit!"));
+        p->vomit(g);
+    } else if (!p->has_trait("MARLOSS")) {
+        g->add_msg_if_player(p,_("You feel a strange warmth spreading throughout your body..."));
+        p->toggle_mutation("MARLOSS");
+    }
+    return it->type->charges_to_use();
 }
+
+// TOOLS below this point!
 
 int iuse::dogfood(game *g, player *p, item *it, bool t)
 {
     int dirx, diry;
-    if(!g->choose_adjacent(_("Put the dog food"),dirx,diry)) {
+    if(!g->choose_adjacent(_("Put the dog food where?"),dirx,diry)) {
         return 0;
     }
     p->moves -= 15;
@@ -1014,15 +1029,12 @@ int iuse::dogfood(game *g, player *p, item *it, bool t)
     } else {
         g->add_msg_if_player(p,_("You spill the dogfood all over the ground."));
     }
-    return it->type->charges_to_use();
+    return 1;
 }
-
-
-// TOOLS below this point!
 
 bool prep_firestarter_use(game *g, player *p, item *it, int &posx, int &posy)
 {
-    if (!g->choose_adjacent(_("Light"),posx,posy)) {
+    if (!g->choose_adjacent(_("Light where?"),posx,posy)) {
         return false;
     }
     if (posx == p->posx && posy == p->posy) {
@@ -1030,7 +1042,7 @@ bool prep_firestarter_use(game *g, player *p, item *it, int &posx, int &posy)
         g->add_msg_if_player(p, _("But you're already smokin' hot."));
         return false;
     }
-    if(g->m.field_at(posx, posy).findField(fd_fire)) {
+    if(g->m.get_field(point(posx, posy), fd_fire)) {
         // check if there's already a fire
         g->add_msg_if_player(p, _("There is already a fire."));
         return false;
@@ -1398,20 +1410,13 @@ int iuse::extinguisher(game *g, player *p, item *it, bool t)
  int x, y;
  // If anyone other than the player wants to use one of these,
  // they're going to need to figure out how to aim it.
- if (!g->choose_adjacent("Spray", x, y)) {
+ if (!g->choose_adjacent(_("Spray where?"), x, y)) {
   return 0;
  }
 
  p->moves -= 140;
 
- field &current_field = g->m.field_at(x, y);
- if (current_field.findField(fd_fire)) {
-     current_field.findField(fd_fire)->setFieldDensity(current_field.findField(fd_fire)->getFieldDensity() - rng(2, 3));
-     if (current_field.findField(fd_fire)->getFieldDensity() <= 0) {
-   //g->m.field_at(x, y).density = 1;
-   g->m.remove_field(x, y, fd_fire);
-  }
- }
+ g->m.adjust_field_strength(g, point(x,y), fd_fire, 0 - rng(2, 3) );
  int mondex = g->mon_at(x, y);
  if (mondex != -1) {
   g->zombie(mondex).moves -= 150;
@@ -1429,14 +1434,7 @@ int iuse::extinguisher(game *g, player *p, item *it, bool t)
  if (g->m.move_cost(x, y) != 0) {
   x += (x - p->posx);
   y += (y - p->posy);
-
-  if (current_field.findField(fd_fire)) {
-   current_field.findField(fd_fire)->setFieldDensity(current_field.findField(fd_fire)->getFieldDensity() - rng(0, 1) + rng(0, 1));
-   if (current_field.findField(fd_fire)->getFieldDensity() <= 0) {
-    //g->m.field_at(x, y).density = 1;
-    g->m.remove_field(x, y,fd_fire);
-   }
-  }
+  g->m.adjust_field_strength(g, point(x,y), fd_fire, 0 - rng(0, 1) + rng(0, 1));
  }
  return it->type->charges_to_use();
 }
@@ -1447,7 +1445,7 @@ int iuse::hammer(game *g, player *p, item *it, bool t)
     int x, y;
     // If anyone other than the player wants to use one of these,
     // they're going to need to figure out how to aim it.
-    if (!g->choose_adjacent(_("Pry"), x, y)) {
+    if (!g->choose_adjacent(_("Pry where?"), x, y)) {
         return 0;
     }
 
@@ -2237,7 +2235,7 @@ int iuse::roadmap(game *g, player *p, item *it, bool t)
 int iuse::picklock(game *g, player *p, item *it, bool t)
 {
  int dirx, diry;
- if(!g->choose_adjacent(_("Use your pick lock"), dirx, diry)) {
+ if(!g->choose_adjacent(_("Use your pick lock where?"), dirx, diry)) {
   return 0;
  }
  if (dirx == p->posx && diry == p->posy) {
@@ -2294,10 +2292,8 @@ int iuse::picklock(game *g, player *p, item *it, bool t)
 
   std::string sStatus = rm_prefix(_("<door_status>damage"));
   if (it->damage >= 5) {
-   sStatus = rm_prefix(_("<door_status>destroy"));
-   it->invlet = 0; // no copy to inventory in player.cpp:4472 ->
+      sStatus = rm_prefix(_("<door_status>destroy"));
   }
-
   g->add_msg_if_player(p,"The lock stumps your efforts to pick it, and you %s your tool.", sStatus.c_str());
  } else {
   g->add_msg_if_player(p,_("The lock stumps your efforts to pick it."));
@@ -2309,13 +2305,18 @@ int iuse::picklock(game *g, player *p, item *it, bool t)
    g->add_event(EVENT_WANTED, int(g->turn) + 300, 0, g->levx, g->levy);
   }
  }
+ // Special handling, normally the item isn't used up, but it is if broken.
+ if (it->damage >= 5) {
+     return 1;
+ }
+
  return it->type->charges_to_use();
 }
 
 int iuse::crowbar(game *g, player *p, item *it, bool t)
 {
  int dirx, diry;
- if(!g->choose_adjacent(_("Pry"), dirx,diry)) {
+ if(!g->choose_adjacent(_("Pry where?"), dirx,diry)) {
      return 0;
  }
 
@@ -2464,7 +2465,7 @@ int iuse::siphon(game *g, player *p, item *it, bool t)
 {
     int posx = 0;
     int posy = 0;
-    if(!g->choose_adjacent(_("Siphon from"), posx, posy)) {
+    if(!g->choose_adjacent(_("Siphon from where?"), posx, posy)) {
       return 0;
     }
 
@@ -2892,7 +2893,7 @@ int iuse::zweifire_on(game *g, player *p, item *it, bool t)
 int iuse::jackhammer(game *g, player *p, item *it, bool t)
 {
  int dirx, diry;
- if(!g->choose_adjacent(_("Drill"),dirx,diry)) {
+ if(!g->choose_adjacent(_("Drill where?"),dirx,diry)) {
   return 0;
  }
 
@@ -2970,7 +2971,7 @@ int iuse::pickaxe(game *g, player *p, item *it, bool t)
 int iuse::set_trap(game *g, player *p, item *it, bool t)
 {
  int dirx, diry;
- if(!g->choose_adjacent(_("Place trap"),dirx,diry)) {
+ if(!g->choose_adjacent(_("Place trap where?"),dirx,diry)) {
   return 0;
  }
 
@@ -3147,7 +3148,7 @@ if(it->type->id == "cot"){
    }
   }
  }
- return it->type->charges_to_use();
+ return 1;
 }
 
 int iuse::geiger(game *g, player *p, item *it, bool t)
@@ -3955,7 +3956,6 @@ int iuse::manhack(game *g, player *p, item *it, bool t)
  }
  int index = rng(0, valid.size() - 1);
  p->moves -= 60;
- it->invlet = 0; // Remove the manhack from the player's inv
  monster m_manhack(GetMType("mon_manhack"), valid[index].x, valid[index].y);
  if (rng(0, p->int_cur / 2) + p->skillLevel("electronics") / 2 +
      p->skillLevel("computer") < rng(0, 4)) {
@@ -3964,13 +3964,13 @@ int iuse::manhack(game *g, player *p, item *it, bool t)
   m_manhack.friendly = -1;
  }
  g->add_zombie(m_manhack);
- return it->type->charges_to_use();
+ return 1;
 }
 
 int iuse::turret(game *g, player *p, item *it, bool t)
 {
  int dirx, diry;
- if(!g->choose_adjacent(_("Place the turret"), dirx, diry)) {
+ if(!g->choose_adjacent(_("Place the turret where?"), dirx, diry)) {
   return 0;
  }
  if (!g->is_empty(dirx, diry)) {
@@ -3979,7 +3979,6 @@ int iuse::turret(game *g, player *p, item *it, bool t)
  }
 
  p->moves -= 100;
- it->invlet = 0; // Remove the turret from the player's inv
  monster mturret(GetMType("mon_turret"), dirx, diry);
  if (rng(0, p->int_cur / 2) + p->skillLevel("electronics") / 2 +
      p->skillLevel("computer") < rng(0, 6)) {
@@ -3988,7 +3987,7 @@ int iuse::turret(game *g, player *p, item *it, bool t)
   mturret.friendly = -1;
  }
  g->add_zombie(mturret);
- return it->type->charges_to_use();
+ return 1;
 }
 
 int iuse::UPS_off(game *g, player *p, item *it, bool t)
@@ -4075,7 +4074,7 @@ int iuse::adv_UPS_on(game *g, player *p, item *it, bool t)
 int iuse::tazer(game *g, player *p, item *it, bool t)
 {
  int dirx, diry;
- if(!g->choose_adjacent(_("Shock"),dirx,diry)){
+ if(!g->choose_adjacent(_("Shock where?"),dirx,diry)){
   return 0;
  }
 
@@ -4086,7 +4085,7 @@ int iuse::tazer(game *g, player *p, item *it, bool t)
  int mondex = g->mon_at(dirx, diry);
  int npcdex = g->npc_at(dirx, diry);
  if (mondex == -1 && npcdex == -1) {
-  g->add_msg_if_player(p,_("Your tazer crackles in the air."));
+  g->add_msg_if_player(p,_("Electricity crackles in the air."));
   return it->type->charges_to_use();
  }
 
@@ -4136,6 +4135,169 @@ int iuse::tazer(game *g, player *p, item *it, bool t)
   }
  }
  return it->type->charges_to_use();
+}
+
+int iuse::tazer2(game *g, player *p, item *it, bool t)
+{
+    if (it->charges >= 100) {
+
+        int dirx, diry;
+
+        if(!g->choose_adjacent(_("Shock"), dirx, diry)) {
+            return 0;
+        }
+
+        if (dirx == p->posx && diry == p->posy) {
+            g->add_msg_if_player(p, _("Umm. No."));
+            return 0;
+        }
+
+        int mondex = g->mon_at(dirx, diry);
+        int npcdex = g->npc_at(dirx, diry);
+
+        if (mondex == -1 && npcdex == -1) {
+            g->add_msg_if_player(p, _("Electricity crackles in the air."));
+            return 100;
+        }
+
+        int numdice = 3 + (p->dex_cur / 2.5) + p->skillLevel("melee") * 2;
+        p->moves -= 100;
+
+        if (mondex != -1) {
+            monster *z = &(g->zombie(mondex));
+
+            switch (z->type->size) {
+                case MS_TINY:
+                    numdice -= 2;
+                    break;
+
+                case MS_SMALL:
+                    numdice -= 1;
+                    break;
+
+                case MS_LARGE:
+                    numdice += 2;
+                    break;
+
+                case MS_HUGE:
+                    numdice += 4;
+                    break;
+            }
+
+            int mondice = z->dodge();
+
+            if (dice(numdice, 10) < dice(mondice, 10)) { // A miss!
+                g->add_msg_if_player(p, _("You attempt to shock the %s, but miss."),
+                                     z->name().c_str());
+                return 100;
+            }
+
+            g->add_msg_if_player(p, _("You shock the %s!"), z->name().c_str());
+            int shock = rng(5, 25);
+            z->moves -= shock * 100;
+
+            if (z->hurt(shock)) {
+                g->kill_mon(mondex, (p == &(g->u)));
+            }
+
+            return 100;
+        }
+
+        if (npcdex != -1) {
+            npc *foe = g->active_npc[npcdex];
+
+            if (foe->attitude != NPCATT_FLEE) {
+                foe->attitude = NPCATT_KILL;
+            }
+
+            if (foe->str_max >= 17) {
+                numdice++;    // Minor bonus against huge people
+            } else
+                if (foe->str_max <= 5) {
+                    numdice--;    // Minor penalty against tiny people
+                }
+
+            if (dice(numdice, 10) <= dice(foe->dodge(g), 6)) {
+                g->add_msg_if_player(p, _("You attempt to shock %s, but miss."), foe->name.c_str());
+                return it->charges -= 100;
+            }
+
+            g->add_msg_if_player(p, _("You shock %s!"), foe->name.c_str());
+            int shock = rng(5, 20);
+            foe->moves -= shock * 100;
+            foe->hurtall(shock);
+
+            if (foe->hp_cur[hp_head]  <= 0 || foe->hp_cur[hp_torso] <= 0) {
+                foe->die(g, true);
+                g->active_npc.erase(g->active_npc.begin() + npcdex);
+            }
+        }
+
+        return 100;
+    } else {
+        g->add_msg_if_player(p, _("Insufficient power"));
+    }
+
+    return 0;
+}
+
+int iuse::shocktonfa_off(game *g, player *p, item *it, bool t)
+{
+    int choice = menu(true, _("tactical tonfa"), _("Zap something"),
+                      _("Turn on light"), _("Cancel"), NULL);
+
+    switch (choice) {
+        case 1: {
+            return iuse::tazer2(g, p, it, t);
+        }
+        break;
+
+        case 2: {
+            if (it->charges == 0) {
+                g->add_msg_if_player(p, _("The batteries are dead."));
+                return 0;
+            } else {
+                g->add_msg_if_player(p, _("You turn the light on."));
+                it->make(g->itypes["shocktonfa_on"]);
+                it->active = true;
+                return it->type->charges_to_use();
+            }
+        }
+
+        default
+                :
+            return 0;
+    }
+}
+
+int iuse::shocktonfa_on(game *g, player *p, item *it, bool t)
+{
+    if (t) {  // Effects while simply on
+
+    } else
+        if (it->charges == 0) {
+            g->add_msg_if_player(p, _("Your tactical tonfa is out of power"));
+            it->make(g->itypes["shocktonfa_off"]);
+            it->active = false;
+        } else {
+            int choice = menu(true, _("tactical tonfa"), _("Zap something"),
+                              _("turn off light"), _("cancel"), NULL);
+
+            switch (choice) {
+                case 1: {
+                    return iuse::tazer2(g, p, it, t);
+                }
+                break;
+
+                case 2: {
+                    g->add_msg_if_player(p, _("You turn off the light"));
+                    it->make(g->itypes["shocktonfa_off"]);
+                    it->active = false;
+                }
+            }
+        }
+
+    return it->type->charges_to_use();
 }
 
 int iuse::mp3(game *g, player *p, item *it, bool t)
@@ -4548,7 +4710,7 @@ int iuse::lumber(game *g, player *p, item *it, bool t)
 int iuse::hacksaw(game *g, player *p, item *it, bool t)
 {
     int dirx, diry;
-    if(!g->choose_adjacent(_("Cut up metal"), dirx, diry))
+    if(!g->choose_adjacent(_("Cut up metal where?"), dirx, diry))
         return 0;
 
     if (dirx == p->posx && diry == p->posy) {
@@ -4612,7 +4774,7 @@ int iuse::hacksaw(game *g, player *p, item *it, bool t)
 int iuse::tent(game *g, player *p, item *it, bool t)
 {
  int dirx, diry;
- if(!g->choose_adjacent(_("Pitch the tent"), dirx, diry)) {
+ if(!g->choose_adjacent(_("Pitch the tent where?"), dirx, diry)) {
   return 0;
  }
 
@@ -4642,14 +4804,13 @@ int iuse::tent(game *g, player *p, item *it, bool t)
  }
  g->m.furn_set(posx, posy, f_groundsheet);
  g->m.furn_set(posx - (dirx - p->posx), posy - (diry - p->posy), f_canvas_door);
- it->invlet = 0;
- return it->type->charges_to_use();
+ return 1;
 }
 
 int iuse::shelter(game *g, player *p, item *it, bool t)
 {
  int dirx, diry;
- if(!g->choose_adjacent(_("Put up the shelter"), dirx, diry)) {
+ if(!g->choose_adjacent(_("Put up the shelter where?"), dirx, diry)) {
   return 0;
  }
 
@@ -4679,8 +4840,7 @@ int iuse::shelter(game *g, player *p, item *it, bool t)
  }
  g->m.furn_set(posx, posy, f_skin_groundsheet);
  g->m.furn_set(posx - (dirx - p->posx), posy - (diry - p->posy), f_skin_door);
- it->invlet = 0;
- return it->type->charges_to_use();
+ return 1;
 }
 
 int iuse::torch(game *g, player *p, item *it, bool t)
@@ -5011,6 +5171,12 @@ int iuse::bullet_puller(game *g, player *p, item *it, bool t)
      gunpowder.make(g->itypes["gunpowder"]);
      gunpowder.charges = 3*multiply;
      lead.charges = 2*multiply;
+} else if (pull->type->id == "50") {
+     casing.make(g->itypes["50_casing"]);
+     primer.make(g->itypes["lgrifle_primer"]);
+     gunpowder.make(g->itypes["gunpowder"]);
+     gunpowder.charges = 45*multiply;
+     lead.charges = 21*multiply;
  } else {
      g->add_msg(_("You cannot disassemble that."));
      return 0;
@@ -5082,7 +5248,7 @@ int iuse::bullet_puller(game *g, player *p, item *it, bool t)
 int iuse::boltcutters(game *g, player *p, item *it, bool t)
 {
  int dirx, diry;
- if(!g->choose_adjacent(_("Cut up metal"),dirx,diry)) {
+ if(!g->choose_adjacent(_("Cut up metal where?"),dirx,diry)) {
   return 0;
  }
 
@@ -5110,7 +5276,7 @@ if (dirx == p->posx && diry == p->posy) {
 int iuse::mop(game *g, player *p, item *it, bool t)
 {
  int dirx, diry;
- if(!g->choose_adjacent("Mop",dirx,diry)) {
+ if(!g->choose_adjacent(_("Mop where?"),dirx,diry)) {
   return 0;
  }
 
@@ -5762,12 +5928,11 @@ int iuse::unfold_bicycle(game *g, player *p, item *it, bool t)
         }
         g->add_msg_if_player(p, _("You painstakingly unfold the bicycle and make it ready to ride."));
         p->moves -= 500;
-        it->invlet = 0;
     } else {
         g->add_msg_if_player(p, _("There's no room to unfold the bicycle."));
         return 0;
     }
-    return it->type->charges_to_use();
+    return 1;
 }
 
 int iuse::adrenaline_injector(game *g, player *p, item *it, bool t)

@@ -17,8 +17,6 @@ class crafting_inventory_t;
 class veh_interact
 {
 public:
-    int cursor_x;
-    int cursor_y;
     int ddx;
     int ddy;
     struct vpart_info *sel_vpart_info;
