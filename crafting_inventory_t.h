@@ -16,6 +16,7 @@ class vehicle;
 struct bionic;
 struct recipe;
 class player;
+class map;
 /**
  * This inventory represents all the things the player may use
  * when crafting (or in similar activities like building a car).
@@ -89,9 +90,10 @@ public:
     struct items_on_map {
         /** Point on the map */
         point position;
-        /** Points to the vector returned by map::i_at */
-        std::vector<item> *items;
-        items_on_map(const point &p, std::vector<item> *i) : position(p), items(i) { }
+        map *m;
+        std::vector<item> &items();
+        const std::vector<item> &items() const;
+        items_on_map(const point &p, map *m) : position(p), m(m) { }
     };
     /**
      * Items that are in the cargo slot of a vehicle.
@@ -103,9 +105,9 @@ public:
         vehicle *veh;
         /** The part number of the cargo unit */
         int part_num;
-        /** points to vehicle_part::items of the cargo unit of the car */
-        std::vector<item> *items;
-        items_in_vehicle_cargo(vehicle *v, int p, std::vector<item> *i) : veh(v), part_num(p), items(i) { }
+        std::vector<item> &items();
+        const std::vector<item> &items() const;
+        items_in_vehicle_cargo(vehicle *v, int p) : veh(v), part_num(p) { }
     };
     /**
      * This contains a pseudo-item that represents a special vehicle_part,

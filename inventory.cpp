@@ -573,8 +573,8 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
                 continue;
             }
             const point p(x, y);
-            items_on_map items(p, &(g->m.i_at(x, y)));
-            if(!items.items->empty()) {
+            items_on_map items(p, &(g->m));
+            if(!items.items().empty()) {
                 on_map.push_back(items);
             }
 
@@ -618,8 +618,8 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 
                 const int cpart = veh->part_with_feature(vpart, "CARGO");
                 if (cpart >= 0) {
-                    items_in_vehicle_cargo inveh(veh, cpart, &(veh->parts[cpart].items));
-                    if(!inveh.items->empty()) {
+                    items_in_vehicle_cargo inveh(veh, cpart);
+                    if(!inveh.items().empty()) {
                         in_veh.push_back(inveh);
                     }
                 }

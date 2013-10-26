@@ -269,6 +269,8 @@ ifdef LANGUAGES
   BINDIST_EXTRAS += lang/mo
 endif
 
+PGOBJS = $(subst $(ODIR)/,$(ODIR)/pg-,$(OBJS))
+
 all: version $(TARGET) $(L10N)
 	@
 
@@ -276,9 +278,12 @@ $(TARGET): $(ODIR) $(DDIR) $(OBJS)
 	$(LD) $(W32FLAGS) -o $(TARGET) $(DEFINES) $(CXXFLAGS) \
           $(OBJS) $(LDFLAGS)
 
-$(TARGET).prof: $(ODIR) $(DDIR) $(OBJS)
-	$(LD) $(W32FLAGS) -o $(TARGET).prof -pg $(DEFINES) $(CXXFLAGS) \
-          $(OBJS) $(LDFLAGS)
+$(TARGET).prof: CXXFLAGS += -pg -O2
+$(TARGET).prof: CXXFLAGS := $(filter-out -g, $(CXXFLAGS))
+
+$(TARGET).prof: $(ODIR) $(DDIR) $(PGOBJS)
+	$(LD) $(W32FLAGS) -o $(TARGET).prof $(DEFINES) $(CXXFLAGS) \
+          $(PGOBJS) $(LDFLAGS)
 
 .PHONY: version
 version:
@@ -302,6 +307,9 @@ $(ODIR)/%.o: %.rc
 
 $(ODIR)/SDLMain.o: SDLMain.m
 	$(CC) -c $(OSX_INC) $< -o $@
+
+$(ODIR)/pg-%.o: %.cpp
+	$(CXX) $(DEFINES) $(CXXFLAGS) -c $< -o $@
 
 version.cpp: version
 
@@ -351,6 +359,7 @@ clean-tests:
 
 -include $(SOURCES:%.cpp=$(DEPDIR)/%.P)
 -include ${OBJS:.o=.d}
+-include ${PGOBJS:.o=.d}
 
 
 

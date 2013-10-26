@@ -807,6 +807,22 @@ bool crafting_inventory_t::has(component &x, bool as_tool) const {
     return x.available == 1;
 }
 
+std::vector<item>& crafting_inventory_t::items_on_map::items() {
+    return m->i_at(position.x, position.y);
+}
+
+const std::vector<item>& crafting_inventory_t::items_on_map::items() const {
+    return m->i_at(position.x, position.y);
+}
+
+std::vector<item>& crafting_inventory_t::items_in_vehicle_cargo::items() {
+    return veh->parts[part_num].items;
+}
+
+const std::vector<item>& crafting_inventory_t::items_in_vehicle_cargo::items() const {
+    return veh->parts[part_num].items;
+}
+
 
 #define COUNT_IT_(item_, factor) \
     do { \
@@ -836,7 +852,7 @@ int crafting_inventory_t::count(const requirement &req, int max, int sources) co
     }
     if(sources & LT_MAP) {
         for(std::list<items_on_map>::const_iterator a = on_map.begin(); a != on_map.end(); ++a) {
-            const std::vector<item> &items = *(a->items);
+            const std::vector<item> &items = a->items();
             for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
                 if(b->made_of(LIQUID)) {
                     continue;
@@ -847,7 +863,7 @@ int crafting_inventory_t::count(const requirement &req, int max, int sources) co
     }
     if(sources & LT_VEHICLE_CARGO) {
         for(std::list<items_in_vehicle_cargo>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
-            const std::vector<item> &items = *(a->items);
+            const std::vector<item> &items = a->items();
             for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
                 if(b->made_of(LIQUID)) {
                     continue;
@@ -924,11 +940,11 @@ usageType(type)
 bool crafting_inventory_t::candidate_t::valid() const {
     switch(location) {
         case LT_MAP:
-            return mapitems != NULL && mindex < mapitems->items->size();
+            return mapitems != 0 && mindex >= 0 && mindex < mapitems->items().size();
         case LT_SURROUNDING:
             return surroundings != NULL;
         case LT_VEHICLE_CARGO:
-            return vitems != NULL && iindex < vitems->items->size();
+            return vitems != NULL && iindex >= 0 && iindex < vitems->items().size();
         case LT_VPART:
             return vpartitem != NULL;
         case LT_WEAPON:
@@ -1065,13 +1081,13 @@ const item &crafting_inventory_t::candidate_t::get_item() const {
     }
     switch(location) {
         case LT_MAP:
-            return (*mapitems->items)[mindex];
+            return mapitems->items().at(mindex);
             break;
         case LT_SURROUNDING:
             return surroundings->the_item;
             break;
         case LT_VEHICLE_CARGO:
-            return (*vitems->items)[iindex];
+            return vitems->items().at(iindex);
             break;
         case LT_VPART:
             return vpartitem->the_item;
@@ -1998,7 +2014,7 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
     int count = 0;
     if(sources & LT_MAP) {
         for(std::list<items_on_map>::iterator a = on_map.begin(); a != on_map.end(); ++a) {
-            std::vector<item> &items = *(a->items);
+            std::vector<item> &items = a->items();
             for(std::vector<item>::iterator b = items.begin(); b != items.end(); ++b) {
                 if(XMATCH(*b, 1)) {
                     candidates.push_back(candidate_t(*a, b - items.begin(), req.type));
@@ -2008,7 +2024,7 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
     }
     if(sources & LT_VEHICLE_CARGO) {
         for(std::list<items_in_vehicle_cargo>::iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
-            std::vector<item> &items = *a->items;
+            std::vector<item> &items = a->items();
             for(size_t b = 0; b < items.size(); b++) {
                 if(XMATCH(items[b], 1)) {
                     candidates.push_back(candidate_t(*a, b, req.type));
@@ -2313,7 +2329,7 @@ bool crafting_inventory_t::has_items_with_quality(const std::string &name, int l
         }
     }
     for(std::list<items_on_map>::const_iterator a = on_map.begin(); a != on_map.end(); ++a) {
-        const std::vector<item> &items = *(a->items);
+        const std::vector<item> &items = a->items();
         for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
             if(b->made_of(LIQUID)) {
                 continue;
@@ -2327,7 +2343,7 @@ bool crafting_inventory_t::has_items_with_quality(const std::string &name, int l
         }
     }
     for(std::list<items_in_vehicle_cargo>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
-        const std::vector<item> &items = *(a->items);
+        const std::vector<item> &items = a->items();
         for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
             if(::hasQuality(*b, name, level)) {
                 amount--;
