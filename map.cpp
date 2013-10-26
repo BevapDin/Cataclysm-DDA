@@ -1126,7 +1126,7 @@ bool map::trans(const int x, const int y)
  return false; //failsafe block vision
 }
 
-bool map::has_flag(std::string flag, const int x, const int y)
+bool map::has_flag(const std::string &flag, const int x, const int y)
 {
  if ("BASHABLE" == flag) {
   int vpart;
@@ -1141,22 +1141,22 @@ bool map::has_flag(std::string flag, const int x, const int y)
  return (terlist[ter(x, y)].has_flag(flag) || (furnlist[furn(x, y)].has_flag(flag)));
 }
 
-bool map::has_flag_ter(std::string flag, const int x, const int y)
+bool map::has_flag_ter(const std::string &flag, const int x, const int y)
 {
  return terlist[ter(x, y)].has_flag(flag);
 }
 
-bool map::has_flag_furn(std::string flag, const int x, const int y)
+bool map::has_flag_furn(const std::string &flag, const int x, const int y)
 {
  return furnlist[furn(x, y)].has_flag(flag);
 }
 
-bool map::has_flag_ter_or_furn(std::string flag, const int x, const int y)
+bool map::has_flag_ter_or_furn(const std::string &flag, const int x, const int y)
 {
  return (terlist[ter(x, y)].has_flag(flag) || (furnlist[furn(x, y)].has_flag(flag)));
 }
 
-bool map::has_flag_ter_and_furn(std::string flag, const int x, const int y)
+bool map::has_flag_ter_and_furn(const std::string &flag, const int x, const int y)
 {
  return terlist[ter(x, y)].has_flag(flag) && furnlist[furn(x, y)].has_flag(flag);
 }

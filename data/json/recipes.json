@@ -3299,7 +3299,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset", 1 ],
       [ "press", 2 ]
         ]
   ],
@@ -3339,7 +3338,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset", 1 ],
       [ "press", 2 ]
         ]
   ],
@@ -3376,7 +3374,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset", 1 ],
       [ "press", 2 ]
         ]
   ],
@@ -14462,7 +14459,7 @@
   "time": 240000,
   "reversible": false,
   "autolearn": true,
-  "tools": [ [ ["hammer", -1], ["toolset", -1]  ],
+  "tools": [ [ ["func:hammer", -1]  ],
       [
       ["tongs", -1]
       ],
@@ -14638,12 +14635,10 @@
   "autolearn": true,
   "tools": [
     [
-      [ "toolset", 1 ],
-      [ "soldering_iron", 10 ]
+      [ "func:soldering_iron", 10 ]
     ],
     [
-      ["toolset", -1],
-      ["screwdriver", -1]
+      ["func:screwdriver", -1]
     ]
     ],
   "components": [
@@ -17194,17 +17189,14 @@
   "tools" : [
      [ ["mold_plastic", -1] ],
      [
-      ["hotplate", 10],
-      ["toolset", 1],
+      ["func:hotplate", 10],
       ["fire", -1]
      ],
      [
-      [ "screwdriver", -1 ],
-      [ "toolset", -1 ]
+      [ "func:screwdriver", -1 ]
      ],
      [
-      [ "soldering_iron", 10 ],
-      [ "toolset", 1 ]
+      [ "func:soldering_iron", 10 ]
      ]
   ],
   "components" : [
@@ -17236,8 +17228,7 @@
   "autolearn": false,
   "tools": [
     [
-      [ "screwdriver", -1 ],
-      [ "toolset", -1 ]
+      [ "func:screwdriver", -1 ]
     ]
   ],
   "components": [
@@ -17263,8 +17254,7 @@
   "autolearn": false,
   "tools": [
     [
-      [ "screwdriver", -1 ],
-      [ "toolset", -1 ]
+      [ "func:screwdriver", -1 ]
     ]
   ],
   "components": [

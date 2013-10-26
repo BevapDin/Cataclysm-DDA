@@ -7743,30 +7743,20 @@ void game::pickup(int posx, int posy, int min)
   veh_part = veh->part_with_feature(veh_part, "CARGO", false);
   from_veh = veh && veh_part >= 0 && veh->parts[veh_part].items.size() > 0;
 
-        if(from_veh)
-        {
-            if(!query_yn(_("Get items from %s?"), veh->part_info(veh_part).name.c_str()))
-            {
-                from_veh = false;
-            }
-        }
-
-        if(!from_veh)
+        if(true)
         {
 
             //Either no cargo to grab, or we declined; what about RV kitchen?
-            bool used_feature = false;
+//            bool used_feature = false;
             if (k_part >= 0)
             {
                 int choice = menu(true,
-                _("RV kitchen:"), _("Use the hotplate"), _("Fill a container with water"), _("Have a drink"), _("Examine vehicle"), NULL);
+                _("RV kitchen:"), _("Use the hotplate"), _("Fill a container with water"), _("Have a drink"), _("Examine vehicle"), _("Get items from the kitchen"), _("Do nothing"), NULL);
                 switch (choice)
                 {
-                    if (choice == 3)
-                        break;
+                case UIMENU_INVALID: return;
                 case 1:
                 {
-                    used_feature = true;
                     if (veh->fuel_left("battery") > 0) {
                         //Will be -1 if no battery at all
                         item tmp_hotplate( g->itypes["hotplate"], 0 );
@@ -7775,19 +7765,19 @@ void game::pickup(int posx, int posy, int min)
                         if( tmp_hotplate.is_tool() ) {
                             it_tool * tmptool = static_cast<it_tool*>((&tmp_hotplate)->type);
                             if ( tmp_hotplate.charges >= tmptool->charges_per_use ) {
-                                tmptool->use.call(g, &u, &tmp_hotplate, false);
-                                tmp_hotplate.charges -= tmptool->charges_per_use;
+                                const int used_ = tmptool->use.call(g, &u, &tmp_hotplate, false);
+                                tmp_hotplate.charges -= used_;
                                 veh->refill( "battery", tmp_hotplate.charges );
                             }
                         }
                     } else {
                         add_msg(_("The battery is dead."));
                     }
+                    return;
                 }
                 break;
                 case 2:
                 {
-                    used_feature = true;
                     if (veh->fuel_left("water") > 0)   //Will be -1 if no water at all
                     {
                         int amt = veh->drain("water", veh->fuel_left("water"));
@@ -7807,11 +7797,11 @@ void game::pickup(int posx, int posy, int min)
                     {
                         add_msg(_("The water tank is empty."));
                     }
+                    return;
                 }
                 break;
                 case 3:
                 {
-                    used_feature = true;
                     if (veh->fuel_left("water") > 0)   //Will be -1 if no water at all
                     {
                         veh->drain("water", 1);
@@ -7824,13 +7814,36 @@ void game::pickup(int posx, int posy, int min)
                     {
                         add_msg(_("The water tank is empty."));
                     }
+                    return;
                 }
+                break;
+                case 4:
+                {
+                    exam_vehicle(*veh, posx, posy);
+                    return;
+                }
+                break;
+                case 5:
+                {
+                    // Fall though, grab items
+                }
+                break;
+                case 6:
+                {
+                    return; // do nothing
+                }
+                break;
                 }
             }
 
             if (w_part >= 0) {
-                if (query_yn(_("Use the welding rig?"))) {
-                    used_feature = true;
+                int choice = menu(true,
+                _("welding rig:"), _("Use the welding rig"), _("Examine vehicle"), _("Get items from the welding rig"), _("Do nothing"), NULL);
+                switch (choice)
+                {
+                case UIMENU_INVALID: return;
+                case 1:
+                {
                     if (veh->fuel_left("battery") > 0) {
                         //Will be -1 if no battery at all
                         item tmp_welder( g->itypes["welder"], 0 );
@@ -7847,13 +7860,27 @@ void game::pickup(int posx, int posy, int min)
                     } else {
                         add_msg(_("The battery is dead."));
                     }
+                    return;
+                }
+                break;
+                case 2:
+                {
+                    exam_vehicle(*veh, posx, posy);
+                    return;
+                }
+                break;
+                case 3:
+                {
+                    // Fall though, grab items
+                }
+                break;
+                case 4:
+                {
+                    return; // do nothing
+                }
+                break;
                 }
             }
-    //If we still haven't done anything, we probably want to examine the vehicle
-    if(!used_feature) {
-      exam_vehicle(*veh, posx, posy);
-    }
-
   }
 
  }
@@ -8484,39 +8511,6 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
             }
             return false;
         } // if (choose_adjacent(_("Refill vehicle where?"), vx, vy))
-        return true;
-    }
-    if (liquid.type->id == "water_clean" && vehicle_with_tank_near("water") && query_yn(_("Refill vehicle?"))) {
-        int vx = u.posx, vy = u.posy;
-        refresh_all();
-        if (choose_adjacent(_("Refill vehicle"), vx, vy)) {
-            vehicle *veh = m.veh_at (vx, vy);
-            if (veh) {
-                ammotype ftype = "water";
-                int fuel_cap = veh->fuel_capacity(ftype);
-                int fuel_amnt = veh->fuel_left(ftype);
-                if (fuel_cap < 1) {
-                    add_msg (_("This vehicle doesn't use %s."), ammo_name(ftype).c_str());
-                } else if (fuel_amnt == fuel_cap) {
-                    add_msg (_("Already full."));
-                } else {
-                    veh->refill (ftype, liquid.charges);
-                    if (veh->fuel_left(ftype) < fuel_cap) {
-                        add_msg(_("You refill %s with %s."),
-                                veh->name.c_str(), ammo_name(ftype).c_str());
-                    } else {
-                        add_msg(_("You refill %s with %s to its maximum."),
-                                veh->name.c_str(), ammo_name(ftype).c_str());
-                    }
-
-                    u.moves -= 100;
-                    return true;
-                }
-            } else { // if (veh)
-                add_msg (_("There isn't any vehicle there."));
-            }
-            return false;
-        } // if (choose_adjacent("Refill vehicle", vx, vy))
         return true;
     }
 

@@ -69,8 +69,6 @@ private:
     void do_siphon(int reason);
     void do_tirechange(int reason);
     void do_drain(int reason);
-
-    void calc_display_offsets();
     
     void display_veh ();
     void display_stats ();

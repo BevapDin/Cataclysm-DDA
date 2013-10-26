@@ -65,6 +65,7 @@ vehicle::vehicle(game *ag, std::string type_id, int init_veh_fuel, int init_veh_
     lights_on = false;
     overhead_lights_on = false;
     insides_dirty = true;
+    cached_gen_turn = 0;
 
     //type can be null if the type_id parameter is omitted
     if(type != "null") {
@@ -1353,6 +1354,9 @@ int vehicle::global_y ()
 
 int vehicle::total_mass()
 {
+    if(cached_gen_turn + 10 > (int) g->turn) {
+        return cached_mass;
+    }
     int m = 0;
     for (int i = 0; i < parts.size(); i++)
     {
@@ -1364,6 +1368,8 @@ int vehicle::total_mass()
             m += 81500; // TODO: get real weight
         }
     }
+    cached_mass = m/1000;
+    cached_gen_turn = (int) g->turn;
     return m/1000;
 }
 
@@ -2568,6 +2574,7 @@ void vehicle::gain_moves (int mp)
     // check for smoking parts
     for (int p = 0; p < parts.size(); p++)
     {
+        vehicle_part &vp = parts[p];
         int part_x = global_x() + parts[p].precalc_dx[0];
         int part_y = global_y() + parts[p].precalc_dy[0];
 
@@ -2579,22 +2586,18 @@ void vehicle::gain_moves (int mp)
                 g->weather >= WEATHER_DRIZZLE && g->weather <= WEATHER_ACID_RAIN) {
             parts[p].blood--;
         }
-        int p_eng = part_with_feature (p, "ENGINE", false);
-        if (p_eng < 0 || parts[p_eng].hp > 0 || parts[p_eng].amount < 1 || parts[p_eng].inactive()) {
-            continue;
-        }
-        parts[p_eng].amount--;
-        for (int ix = -1; ix <= 1; ix++) {
-            for (int iy = -1; iy <= 1; iy++) {
-                if (!rng(0, 2)) {
-                    g->m.add_field(g, part_x + ix, part_y + iy, fd_smoke, rng(2, 4));
+        if(vp.hp > 0 && vp.active() && vp.amount >= 1 && part_flag(p, "ENGINE")) {
+            int p_eng = p;
+            parts[p_eng].amount--;
+            for (int ix = -1; ix <= 1; ix++) {
+                for (int iy = -1; iy <= 1; iy++) {
+                    if (!rng(0, 2)) {
+                        g->m.add_field(g, part_x + ix, part_y + iy, fd_smoke, rng(2, 4));
+                    }
                 }
             }
         }
-    }
-
-    if (turret_mode) { // handle turrets
-        for (int p = 0; p < parts.size(); p++) {
+        if (turret_mode) { // handle turrets
             fire_turret (p);
         }
     }

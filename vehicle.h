@@ -493,6 +493,10 @@ public:
     float of_turn_carry;// leftover from prev. turn
     int turret_mode;    // turret firing mode: 0 = off, 1 = burst fire
     int lights_power;   // total power of components with LIGHT flag
+    int cached_mass;
+    int cached_gen_turn;
+    
+    void sort_parts();
 };
 
 #endif

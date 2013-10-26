@@ -134,7 +134,6 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
                 crafting_inv.has_amount( "wheel_small", 1 );
 
     display_stats ();
-    calc_display_offsets();
     display_veh   ();
     move_cursor (0, 0);
     bool finish = false;
