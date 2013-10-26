@@ -515,16 +515,19 @@
 },{
         "type" : "recipe",
   "result": "reinforced_glass_sheet",
-  "id_suffix": "uncraft",
-  "category": "CC_NONCRAFT",
+  "category": "CC_MISC",
   "skill_used": "fabrication",
-  "difficulty": 0,
-  "time": 5000,
+  "difficulty": 4,
+  "time": 20000,
   "reversible": true,
-  "autolearn": false,
+  "autolearn": true,
   "tools": [
     [
       [ "func:hacksaw", -1 ]
+    ],
+    [
+      [ "func:welder", 100 ],
+      [ "func:soldering_iron", 150 ]
     ]
   ],
   "components": [
@@ -3282,6 +3285,121 @@
   ]
 },{
         "type" : "recipe",
+  "result": "50_incendiary",
+  "category": "CC_AMMO",
+  "skill_used": "fabrication",
+  "requires_skills": [ "gun", 7 ],
+  "difficulty": 8,
+  "time": 9000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "press", -1 ]
+    ],
+    [
+      [ "fire", -1 ],
+      [ "toolset", 1 ],
+      [ "press", 2 ]
+        ]
+  ],
+  "components": [
+    [
+      [ "50_casing", 10 ]
+    ],
+    [
+	  [ "incendiary", 300 ]
+    ],
+   [
+      [ "lgrifle_primer", 20 ]
+    ],
+    [
+      [ "gunpowder", 1000 ]
+    ],
+    [
+      [ "lead", 200 ]
+    ],
+    [
+      [ "cu_pipe", 3 ]
+    ]
+  ]
+ },{
+        "type" : "recipe",
+  "result": "50ss",
+  "category": "CC_AMMO",
+  "skill_used": "fabrication",
+  "requires_skills": [ "gun", 7 ],
+  "difficulty": 8,
+  "time": 5000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "press", -1 ]
+    ],
+    [
+      [ "fire", -1 ],
+      [ "toolset", 1 ],
+      [ "press", 2 ]
+        ]
+  ],
+  "components": [
+    [
+      [ "50_casing", 10 ]
+    ],
+    [
+      [ "lgrifle_primer", 20 ]
+    ],
+    [
+      [ "gunpowder", 1000 ]
+    ],
+    [
+      [ "scrap", 3 ]
+    ],
+    [
+      [ "cu_pipe", 3 ]
+    ]
+]
+  },{
+        "type" : "recipe",
+  "result": "50bmg",
+  "category": "CC_AMMO",
+  "skill_used": "fabrication",
+  "requires_skills": [ "gun", 7 ],
+  "difficulty": 8,
+  "time": 5000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "press", -1 ]
+    ],
+    [
+      [ "fire", -1 ],
+      [ "toolset", 1 ],
+      [ "press", 2 ]
+        ]
+  ],
+  "components": [
+    [
+      [ "50_casing", 10 ]
+    ],
+    [
+      [ "lgrifle_primer", 20 ]
+    ],
+    [
+      [ "gunpowder", 1000 ]
+    ],
+    [
+      [ "lead", 380 ]
+    ],
+    [
+      [ "cu_pipe", 3 ]
+    ]
+  ]
+  
+},{
+        "type" : "recipe",
   "result": "3006_incendiary",
   "category": "CC_AMMO",
   "skill_used": "fabrication",
@@ -3659,6 +3777,28 @@
   "components": [
     [
       [ "battery", 125 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "water_acid",
+  "id_suffix": "from electrolysis",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "requires_skills": [ "electronics", 1 ],
+  "difficulty": 2,
+  "time": 10000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "chemistry_set", 5 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "water", 1 ],
+      [ "water_clean", 1 ]
     ]
   ]
 },{
@@ -4386,10 +4526,12 @@
     [
       [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
+      [ "atomic_coffeepot", -1 ],
       [ "fire", -1 ]
     ],
     [
-      [ "func:pot", -1 ]
+      [ "func:pot", -1 ],
+      [ "atomic_coffeepot", -1 ]
     ]
   ],
   "components": [
@@ -4572,10 +4714,12 @@
     [
       [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
+      [ "atomic_coffeepot", -1 ],
       [ "fire", -1 ]
     ],
     [
-      [ "func:pot", -1 ]
+      [ "func:pot", -1 ],
+      [ "atomic_coffeepot", -1 ]
     ]
   ],
   "components": [
@@ -7440,9 +7584,9 @@
   ],
   "components": [
     [
-      [ "lemon", 1 ],
+      [ "lemon", 2 ],
       [ "acid", 1 ],
-      [ "vinegar", 1 ]
+      [ "vinegar", 2 ]
     ],
     [
       [ "steel_chunk", 1 ],
@@ -14311,6 +14455,39 @@
     ]
 },{
         "type" : "recipe",
+  "result": "throwing_knife",
+  "category": "CC_WEAPON",
+  "skill_used": "fabrication",
+  "difficulty": 4,
+  "time": 240000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [ [ ["hammer", -1], ["toolset", -1]  ],
+      [
+      ["tongs", -1]
+      ],
+      [
+      ["chisel", -1]
+      ],
+      [
+      ["anvil", -1]
+      ],
+      [
+      ["swage", -1]
+      ],
+      [
+      ["forge", 200], ["char_forge", 40]
+      ]
+      ],
+  "components":
+    [
+     [
+     [ "steel_chunk", 2 ],
+     [ "scrap", 6 ]
+     ]
+    ]
+},{
+        "type" : "recipe",
   "result": "switchblade",
   "category": "CC_WEAPON",
   "skill_used": "fabrication",
@@ -14447,6 +14624,37 @@
     ],
     [
       [ "scrap", 6 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "shock_staff",
+  "category": "CC_WEAPON",
+  "skill_used": "fabrication",
+  "skills_required" : [ "electronics", 3 ],
+  "difficulty": 3,
+  "time": 15000,
+  "reversible": true,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "toolset", 1 ],
+      [ "soldering_iron", 10 ]
+    ],
+    [
+      ["toolset", -1],
+      ["screwdriver", -1]
+    ]
+    ],
+  "components": [
+    [
+      [ "i_staff", 1 ]
+    ],
+    [
+      [ "tazer", 1 ]
+    ],
+    [
+      [ "cable", 10 ]
     ]
   ]
 },{
@@ -16973,6 +17181,106 @@
     ]
   ],
   "components" : [ [ ["plastic_chunk", 10] ] ]
+},{
+  "type" : "recipe",
+  "result" : "shocktonfa_off",
+  "category" : "CC_WEAPON",
+  "skill_used" : "fabrication",
+  "skills_required" : [ "electronics", 3 ],
+  "difficulty" : 6,
+  "time" : 45000,
+  "reversible" : false,
+  "autolearn" : true,
+  "tools" : [
+     [ ["mold_plastic", -1] ],
+     [
+      ["hotplate", 10],
+      ["toolset", 1],
+      ["fire", -1]
+     ],
+     [
+      [ "screwdriver", -1 ],
+      [ "toolset", -1 ]
+     ],
+     [
+      [ "soldering_iron", 10 ],
+      [ "toolset", 1 ]
+     ]
+  ],
+  "components" : [
+     [
+      ["plastic_chunk", 10]
+     ],
+     [
+     ["amplifier", 2]
+     ],
+     [
+     ["power_supply", 1]
+     ],
+     [
+      [ "scrap", 2 ]
+     ],
+     [
+      [ "cable", 10 ]
+     ]
+    ]
+},{
+        "type" : "recipe",
+  "result": "atomic_light",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "skill_used": "electronics",
+  "difficulty": 3,
+  "time": 2000,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "screwdriver", -1 ],
+      [ "toolset", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "plastic_chunk", 1 ]
+    ],
+    [
+      [ "power_supply", 1 ]
+    ],
+    [
+      [ "plut_cell", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "atomic_coffeepot",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "skill_used": "electronics",
+  "difficulty": 4,
+  "time": 3000,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "screwdriver", -1 ],
+      [ "toolset", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "plastic_chunk", 3 ]
+    ],
+    [
+      [ "power_supply", 1 ]
+    ],
+    [
+      [ "element", 1 ]
+    ],
+    [
+      [ "plut_cell", 1 ]
+    ]
+  ]
 },{
         "type" : "recipe",
   "result": "juice",
