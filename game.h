@@ -464,7 +464,7 @@ void load_artifacts(); // Load artifact data
   void place_construction(constructable *con); // See construction.cpp
   void complete_construction();               // See construction.cpp
   bool vehicle_near ();
-  bool vehicle_with_tank_near();
+  bool vehicle_with_tank_near(const ammotype &fueltype);
   void handbrake ();
   void control_vehicle(); // Use vehicle controls  '^'
   void examine();// Examine nearby terrain  'e'

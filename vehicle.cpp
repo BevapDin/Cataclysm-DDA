@@ -3124,10 +3124,20 @@ void add_item(const itype *type, const char *mat, const char *rep_item, double a
     // item_count = <weight-of-steel-frame> * 0.2 / <weight-of-chunk>
     // = 240 * 0.2 / 6 = 8
     int item_count = static_cast<int>(amount / rep_it->weight);
-    if(type->m1 == mat && item_count >= 1) {
-        result.push_back(vpart_info::type_count_pair(rep_item, item_count));
-    } else if(type->m2 == mat && item_count >= 3) {
-        result.push_back(vpart_info::type_count_pair(rep_item, item_count / 3));
+    if((type->m2 == "" || type->m2 == "null") && type->m1 == mat) {
+        if(item_count >= 1) {
+            result.push_back(vpart_info::type_count_pair(rep_item, item_count));
+        }
+    } else if(type->m1 == mat) { // 66 % m1 and 33% m2
+        item_count = (item_count * 2) / 3;
+        if(item_count >= 1) {
+            result.push_back(vpart_info::type_count_pair(rep_item, item_count));
+        }
+    } else if(type->m2 == mat) {
+        item_count = item_count / 3;
+        if(item_count >= 1) {
+            result.push_back(vpart_info::type_count_pair(rep_item, item_count));
+        }
     }
 }
 

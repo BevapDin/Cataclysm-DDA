@@ -693,6 +693,49 @@ void advanced_inventory::redraw_pane( int i )
 
 }
 
+int advanced_inventory::find_destination(const item &it) {
+    const itype *type = it.type;
+    const itype *cont = it.contents.empty() ? NULL : it.contents.front().type;
+    int result = -1;
+    for(size_t i = 1; i <= 9; i++) {
+        const advanced_inv_area &area = squares[i];
+        advanced_inv_area tmp(area);
+        advanced_inv_update_area(tmp, g);
+        if(!tmp.canputitems) {
+            continue;
+        }
+        std::vector<item>& items = tmp.vstor >= 0 ?
+                        tmp.veh->parts[tmp.vstor].items :
+                        g->m.i_at(tmp.x , tmp.y );
+
+        if(items.empty()) {
+            continue;
+        }
+
+        for(size_t j = 0; j < items.size(); j++) {
+            const item &ex = items[j];
+            if(cont == NULL && ex.contents.empty()) {
+                // Both are empty, check container only
+                if(ex.type != type) {
+                    continue;
+                }
+            } else if(cont != NULL && !ex.contents.empty()) {
+                // Both are non-empty, check content only
+                if(ex.contents.front().type != cont) {
+                    continue;
+                }
+            } else {
+                continue;
+            }
+            if(result != -1) {
+                return -1;
+            }
+            result = i;
+            break;
+        }
+    }
+    return result;
+}
 
 void advanced_inventory::display(game * gp, player * pp) {
     init(gp, pp);
@@ -817,7 +860,7 @@ void advanced_inventory::display(game * gp, player * pp) {
             }
             recalc = true;
         }
-        else if('m' == c || 'M' == c)
+        else if('m' == c || 'M' == c || 'T' == c)
         {
             // If the active screen has no item.
             if( panes[src].size == 0 ) {
@@ -826,6 +869,18 @@ void advanced_inventory::display(game * gp, player * pp) {
                 continue; // category header
             }
             int destarea = panes[dest].area;
+            if('T' == c)
+            {
+                if(panes[src].area != isinventory) {
+                    continue;
+                }
+                item& it = u.inv.slice(item_pos, 1).front()->front();
+                destarea = find_destination(it);
+                if(destarea == -1) {
+                    lastCh = 'j';
+                    continue;
+                }
+            } else
             if ( panes[dest].area == isall || 'M' == c ) {
                 bool valid=false;
                 uimenu m; /* using new uimenu class */
@@ -891,6 +946,7 @@ void advanced_inventory::display(game * gp, player * pp) {
 //                    volume = it->type->volume;
                     askamount = true;
                 }
+                if(c == 'T') { lastCh = 'j'; }
 
                 if ( volume > 0 && volume * amount > free_volume ) {
                     int volmax = int( free_volume / volume );
@@ -909,6 +965,10 @@ void advanced_inventory::display(game * gp, player * pp) {
                 if ( max == 0 ) {
                     popup(_("Destination area has too many items. Remove some first."));
                     continue;
+                }
+                if('T' == c) {
+                    askamount = false;
+                    lastCh = 0;
                 }
                 if ( askamount ) {
                     std::string popupmsg=_("How many do you want to move? (0 to cancel)");

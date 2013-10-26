@@ -119,6 +119,7 @@ class advanced_inventory
         void redraw_pane(int i);
         void init(game *gp, player *pp);
     private:
+        int find_destination(const item &it);
 };
 
 #endif
