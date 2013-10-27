@@ -1003,6 +1003,54 @@ void game::make_all_craft(recipe *making)
  u.lastrecipe = making;
 }
 
+void serialize_item_list(picojson::array &arr, const std::list<item> &x) {
+    for(std::list<item>::const_iterator a = x.begin(); a != x.end(); ++a) {
+        arr.push_back(a->json_save(true));
+    }
+}
+
+std::string to_uncraft_tag(const std::list<item> &comps, const std::list<item> &tools) {
+    std::ostringstream buffer;
+    picojson::array carr;
+    picojson::array tarr;
+    serialize_item_list(carr, comps);
+    serialize_item_list(tarr, tools);
+    picojson::array both;
+    both.push_back(picojson::value(carr));
+    both.push_back(picojson::value(tarr));
+    return std::string("UNCRAFT:") + picojson::value(both).serialize();
+}
+
+bool deserialize_item_list(const picojson::value &arr, std::list<item> &x) {
+    if(!arr.is<picojson::array>()) {
+        return false;
+    }
+    item it;
+    for(int i = 0; arr.contains(i); i++) {
+        if(it.json_load(const_cast<picojson::value&>(arr.get(i)), g)) {
+            x.push_back(it);
+        }
+    }
+    return true;
+}
+
+bool from_uncraft_tag(const std::string &data, std::list<item> &comps, std::list<item> &tools) {
+    if(data.length() < 10 || data.compare(0, 8, "UNCRAFT:") != 0) {
+        return false;
+    }
+    picojson::value pjv;
+    const char *s = data.c_str() + 8;
+    std::string err = picojson::parse(pjv, s, s + data.length());
+    if(!err.empty()) {
+        return false;
+    } else if(!pjv.is<picojson::array>() || !pjv.contains(1)) {
+        return false;
+    }
+    if(!deserialize_item_list(pjv.get(0), comps)) { return false; }
+    if(!deserialize_item_list(pjv.get(1), tools)) { return false; }
+    return true;
+}
+
 void game::complete_craft()
 {
  recipe* making = recipe_by_index(u.activity.index); // Which recipe is it?
@@ -1078,6 +1126,7 @@ void game::complete_craft()
  crafting_inv.consume_gathered(*making, u.activity, used, used_tools);
 
  item newit(item_controller->find_template(making->result), turn);
+ newit.item_tags.insert(to_uncraft_tag(used, used_tools));
  int new_count = 1;
  if(making->count > 0) {
    new_count = making->count;

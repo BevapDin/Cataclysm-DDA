@@ -12,6 +12,9 @@
 #include "options.h"
 #include "uistate.h"
 
+extern bool from_uncraft_tag(const std::string &data, std::list<item> &comps, std::list<item> &tools);
+extern void print_list(std::ostream &buffer, std::list<item> &items);
+
 // mfb(n) converts a flag to its appropriate position in covers's bitfield
 #ifndef mfb
 #define mfb(n) static_cast <unsigned long> (1 << (n))
@@ -689,6 +692,28 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
 
  for(itype::FunctionalityMap::const_iterator a = type->functionalityMap.begin(); a != type->functionalityMap.end(); ++a) {
    dump->push_back(iteminfo("DESCRIPTION", "Functions as " + item_controller->find_template(a->first)->name));
+ }
+ 
+ {
+    std::list<item> comps, tools;
+    for(std::set<std::string>::const_iterator a = item_tags.begin(); a != item_tags.end(); ++a) {
+        comps.clear();
+        tools.clear();
+        if(!::from_uncraft_tag(*a, comps, tools)) {
+            continue;
+        }
+        if(!comps.empty()) {
+            std::ostringstream buffer;
+            buffer << "made from ";
+            print_list(buffer, comps);
+            if(!tools.empty()) {
+                buffer << " with ";
+                print_list(buffer, tools);
+            }
+            dump->push_back(iteminfo("DESCRIPTION", buffer.str()));
+        }
+        break;
+    }
  }
 
  temp1.str("");
@@ -2516,4 +2541,34 @@ float item::get_functionality_time_modi(const itype_id &func) const {
         return tm * dm;
 	}
 	return 0.0;
+}
+
+void print_item_count(std::ostream &buffer, item &it, int count, bool &need_comma) {
+    if(need_comma) { buffer << ", "; } else { need_comma = true; }
+    if(count > 1) {
+        buffer << count << " x ";
+    }
+    buffer << it.tname();
+    if(it.charges > 0) { buffer << " (" << it.charges << ")"; }
+}
+
+void print_list(std::ostream &buffer, std::list<item> &items) {
+    item last_one;
+    int count = 0;
+    bool need_comma = false;
+    for(std::list<item>::iterator b = items.begin(); b != items.end(); b++) {
+        if(last_one.is_null()) {
+            last_one = *b;
+            count = 1;
+        } else if(b->type == last_one.type) {
+            count++;
+        } else {
+            print_item_count(buffer, last_one, count, need_comma);
+            last_one = *b;
+            count = 1;
+        }
+    }
+    if(!last_one.is_null()) {
+        print_item_count(buffer, last_one, count, need_comma);
+    }
 }

@@ -515,7 +515,7 @@ public:
         bool is_possible() const;
         std::string to_string(int flags = simple_req::ts_normal) const;
         void save(recipe &making) const;
-        void consume(crafting_inventory_t &cinv, std::list<item> &used_items);
+        void consume(crafting_inventory_t &cinv, std::list<item> &used_items, std::list<item> &used_tools);
     };
     
 protected:

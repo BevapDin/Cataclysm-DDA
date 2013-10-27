@@ -145,11 +145,11 @@ void crafting_inventory_t::solution::deserialize(crafting_inventory_t &cinv, pla
     activity.str_values.erase(activity.str_values.begin());
 }
 
-void crafting_inventory_t::solution::consume(crafting_inventory_t &cinv, std::list<item> &used_items) {
+void crafting_inventory_t::solution::consume(crafting_inventory_t &cinv, std::list<item> &used_items, std::list<item> &used_tools) {
     for(size_t i = 0; i < complex_reqs.size(); i++) {
         complex_req &cr = complex_reqs[i];
         if(cr.selected_simple_req_index != -1) {
-            cr.consume(cinv, used_items);
+            cr.consume(cinv, cr.as_tool ? used_tools : used_items);
             complex_reqs.erase(complex_reqs.begin() + i);
             i--;
         } else {
@@ -163,7 +163,7 @@ void crafting_inventory_t::solution::consume(crafting_inventory_t &cinv, std::li
     for(size_t i = 0; i < complex_reqs.size(); i++) {
         complex_req &cr = complex_reqs[i];
         cr.select_items_to_use();
-        cr.consume(cinv, used_items);
+        cr.consume(cinv, cr.as_tool ? used_tools : used_items);
     }
     resort_item_vectors();
 }
@@ -203,7 +203,7 @@ void crafting_inventory_t::consume_gathered(
     }
     s.init(making);
     s.deserialize(*this, activity);
-    s.consume(*this, used_items);
+    s.consume(*this, used_items, used_tools);
 }
 
 void crafting_inventory_t::gather_input(recipe &making, solution &s, player_activity &activity) {
@@ -1615,6 +1615,13 @@ int crafting_inventory_t::consume(const std::vector<component> &x, consume_flags
 
 void crafting_inventory_t::consume(requirement req, consume_flags flags, const candvec &selected_items, std::list<item> &used_items) {
     if(req.ctype == C_AMOUNT && flags != assume_components) {
+        for(candvec::const_iterator a = selected_items.begin(); a != selected_items.end(); ++a) {
+            item tmpit(a->get_item());
+            if(req.ctype == C_CHARGES) {
+                tmpit.charges = std::min(tmpit.charges, req.count);
+            }
+            used_items.push_back(tmpit);
+        }
         // Basicly the requirement says: "need tool X, no charges required"
         // and the tool is not used up, so we can skip this here.
         return;
@@ -1825,8 +1832,8 @@ std::string crafting_inventory_t::candidate_t::to_string(bool withTime) const {
     return buffer.str();
 }
 
-static void drainVehicle(vehicle *veh, const std::string &ftype, int &amount, std::list<item> &used_items) {
-    item tmp = item_controller->create(ftype, g->turn);
+static void drainVehicle(vehicle *veh, const item &templ, const std::string &ftype, int &amount, std::list<item> &used_items) {
+    item tmp(templ);
     tmp.charges = veh->drain(ftype, amount);
     amount -= tmp.charges;
     used_items.push_back(tmp);
@@ -1980,15 +1987,15 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                 return;
             }
             if(ix->type->id == "vpart_KITCHEN") {
-                drainVehicle(vpartitem->veh, "battery", req.count, used_items);
+                drainVehicle(vpartitem->veh, *ix, "battery", req.count, used_items);
             } else if(ix->type->id == "water_clean") {
-                drainVehicle(vpartitem->veh, "water", req.count, used_items);
+                drainVehicle(vpartitem->veh, *ix, "water", req.count, used_items);
             } else if(ix->type->id == "vpart_WELDRIG") {
-                drainVehicle(vpartitem->veh, "battery", req.count, used_items);
+                drainVehicle(vpartitem->veh, *ix, "battery", req.count, used_items);
             } else if(ix->type->id == "vpart_CRAFTRIG") {
-                drainVehicle(vpartitem->veh, "battery", req.count, used_items);
+                drainVehicle(vpartitem->veh, *ix, "battery", req.count, used_items);
             } else if(ix->type->id == "vpart_FORGE") {
-                drainVehicle(vpartitem->veh, "battery", req.count, used_items);
+                drainVehicle(vpartitem->veh, *ix, "battery", req.count, used_items);
             } else {
                 debugmsg("Unknown pseudo vehicle part item %s for %s", ix->name.c_str(), req.type.c_str());
             }
@@ -1999,17 +2006,20 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                 debugmsg("attempted to consume a pseudo surrounding item %s for %s", ix->name.c_str(), req.type.c_str());
                 return;
             }
+            used_items.push_back(*ix);
+            used_items.back().charges = req.count;
             // Basicly this is an inifinte amount of things
             // like fire, or a water source, in this case we can ignore it.
             req.count = 0;
-            // FIXME: return and used_up item
-            return;
+             return;
         case LT_BIONIC:
             ix = &(get_item());
             if(req.ctype == C_AMOUNT) {
                 debugmsg("attempted to consume a pseudo bionc item %s for %s", ix->name.c_str(), req.type.c_str());
                 return;
             }
+            used_items.push_back(*ix);
+            used_items.back().charges = std::min(p->power_level, req.count);
             if(req.count >= p->power_level) {
                 req.count -= p->power_level;
                 p->power_level = 0;
@@ -2017,8 +2027,7 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                 p->power_level -= req.count;
                 req.count = 0;
             }
-            // FIXME: return and used_up item
-            return; // can not remove bionic pseudo-item
+            return;
         default:
             debugmsg("dont know what to consume!");
             break;
