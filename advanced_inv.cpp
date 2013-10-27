@@ -693,7 +693,7 @@ void advanced_inventory::redraw_pane( int i )
 
 }
 
-int advanced_inventory::find_destination(const item &it) {
+int advanced_inventory::find_destination(const item &it, int ignore_this_location, int and_this_location) {
     const itype *type = it.type;
     const itype *cont = it.contents.empty() ? NULL : it.contents.front().type;
     int result = -1;
@@ -701,7 +701,7 @@ int advanced_inventory::find_destination(const item &it) {
         const advanced_inv_area &area = squares[i];
         advanced_inv_area tmp(area);
         advanced_inv_update_area(tmp, g);
-        if(!tmp.canputitems) {
+        if(!tmp.canputitems || i == ignore_this_location || i == and_this_location) {
             continue;
         }
         std::vector<item>& items = tmp.vstor >= 0 ?
@@ -871,8 +871,8 @@ void advanced_inventory::display(game * gp, player * pp) {
             int destarea = panes[dest].area;
             if('T' == c)
             {
-                item& it = u.inv.slice(item_pos, 1).front()->front();
-                destarea = find_destination(it);
+                item* it = panes[src].items[list_pos].it;
+                destarea = find_destination(*it, panes[src].area, panes[src].area);
                 if(destarea == -1) {
                     lastCh = 'j';
                     continue;

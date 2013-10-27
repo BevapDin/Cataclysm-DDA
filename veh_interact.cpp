@@ -200,12 +200,17 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
             // Fall through to default time
         default:
             move_points = 20000;
-            if(sel_vpart_info != 0) {
+            int weight_of_item = 0;
+            if(sel_vehicle_part != 0) {
+                weight_of_item = g->itypes[vehicle_part_types[sel_vehicle_part->id].item]->weight;
+            } else if(sel_vpart_info != 0) {
+                weight_of_item = g->itypes[sel_vpart_info->item]->weight;
+            }
+            if(weight_of_item != 0) {
                 // Make small/light items be installed faster
-                const int w = g->itypes[sel_vpart_info->item]->weight;
                 // storage battery: 20000, frame: 13000, motor: 70000
                 const int standard_weight = 20000;
-                move_points = (move_points * w) / standard_weight;
+                move_points = (move_points * weight_of_item) / standard_weight;
                 //                     max              min
                 move_points = std::min(120000, std::max(5000, move_points));
             }

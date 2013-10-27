@@ -437,6 +437,7 @@ void vehicle::use_controls()
             lights_on = !lights_on;
             g->add_msg((lights_on) ? _("Headlights turned on") : _("Headlights turned off"));
         } else {
+            lights_on = false;
             g->add_msg(_("The headlights won't come on!"));
         }
         break;
@@ -446,6 +447,7 @@ void vehicle::use_controls()
             g->add_msg((overhead_lights_on) ? _("Overhead lights turned on") :
                        _("Overhead lights turned off"));
         } else {
+            overhead_lights_on = false;
             g->add_msg(_("The lights won't come on!"));
         }
         break;
@@ -3264,8 +3266,8 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
     // Store name of this vehicle
     parts[0].items[0].mode = name;
     // Global coords of this vehicle
-    const int gx = global_x() + parts[0].precalc_dx[0];
-    const int gy = global_y() + parts[0].precalc_dy[0];
+    const int x = global_x() + parts[0].precalc_dx[0] - other->global_x();
+    const int y = global_y() + parts[0].precalc_dy[0] - other->global_y();
     // Get the local cooridinates of the new parts inside the other vehicle
     const int px = other->parts[other_part].mount_dx;
     const int py = other->parts[other_part].mount_dy;
@@ -3273,9 +3275,9 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
     int nx, ny;
     int ox = px + 1, oy = py;
     other->coord_translate(ox, oy, nx, ny);
-    if(nx != gx || ny != gy) { ox = px; oy = py + 1; other->coord_translate(ox, oy, nx, ny); }
-    if(nx != gx || ny != gy) { ox = px; oy = py - 1; other->coord_translate(ox, oy, nx, ny); }
-    if(nx != gx || ny != gy) { ox = px - 1; oy = py; other->coord_translate(ox, oy, nx, ny); }
+    if(nx != x || ny != y) { ox = px; oy = py + 1; other->coord_translate(ox, oy, nx, ny); }
+    if(nx != x || ny != y) { ox = px; oy = py - 1; other->coord_translate(ox, oy, nx, ny); }
+    if(nx != x || ny != y) { ox = px - 1; oy = py; other->coord_translate(ox, oy, nx, ny); }
     
     // Change local coords
     for(size_t i = 0; i < parts.size(); i++) {
