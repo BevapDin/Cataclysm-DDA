@@ -916,7 +916,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 100], ["char_forge", 20]
+      ["func:forge", 100]
       ]
       ],
   "components":
@@ -1843,13 +1843,13 @@
     "autolearn": true,
     "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       ["crucible", -1]
     ],
     [
-      ["forge", 100], ["char_forge", 20]
+      ["func:forge", 100]
     ]
     ],
     "components": [
@@ -2493,12 +2493,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2528,12 +2528,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2563,12 +2563,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2598,12 +2598,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2633,12 +2633,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2668,12 +2668,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2703,12 +2703,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2738,12 +2738,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2773,12 +2773,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2808,12 +2808,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2843,12 +2843,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2881,12 +2881,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2919,12 +2919,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2957,12 +2957,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -2992,12 +2992,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3027,12 +3027,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3065,12 +3065,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3103,12 +3103,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3142,12 +3142,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3181,12 +3181,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3219,12 +3219,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3257,12 +3257,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3295,11 +3295,11 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
         ]
   ],
   "components": [
@@ -3334,11 +3334,11 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
         ]
   ],
   "components": [
@@ -3370,11 +3370,11 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
         ]
   ],
   "components": [
@@ -3407,12 +3407,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3444,12 +3444,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3482,12 +3482,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3520,12 +3520,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3557,12 +3557,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3592,12 +3592,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3627,12 +3627,12 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3662,7 +3662,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "boltcutters", -1 ]
@@ -3670,7 +3670,7 @@
     [
       [ "fire", -1 ],
       [ "toolset_hotplate", 1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
     ]
   ],
   "components": [
@@ -3961,7 +3961,7 @@
   ],
   "tools": [
     [
-      [ "dehydrator", 50 ]
+      [ "func:dehydrator", 50 ]
     ]
   ],
   "components": [
@@ -4072,7 +4072,7 @@
   ],
   "tools": [
     [
-      [ "dehydrator", 50 ]
+      [ "func:dehydrator", 50 ]
     ]
   ],
   "components": [
@@ -4102,7 +4102,7 @@
   ],
   "tools": [
     [
-      [ "dehydrator", 50 ]
+      [ "func:dehydrator", 50 ]
     ]
   ],
   "components": [
@@ -7050,14 +7050,14 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", 50 ],
+      [ "func:press", 50 ],
       [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]
     ],
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ]
   ],
   "components": [
@@ -7090,14 +7090,14 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", 50 ],
+      [ "func:press", 50 ],
       [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]
     ],
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ]
   ],
   "components": [
@@ -7143,10 +7143,10 @@
       ["anvil", -1]
      ],
      [
-      ["press", -1]
+      ["func:press", -1]
      ],
      [
-      ["forge", 50], ["char_forge", 10]
+      ["func:forge", 50]
      ]
     ],
     "components": [
@@ -7180,10 +7180,10 @@
       ["anvil", -1]
      ],
      [
-      ["press", -1]
+      ["func:press", -1]
      ],
      [
-      ["forge", 50], ["char_forge", 10]
+      ["func:forge", 50]
      ]
     ],
     "components": [
@@ -7217,10 +7217,10 @@
       ["anvil", -1]
      ],
      [
-      ["press", -1]
+      ["func:press", -1]
      ],
      [
-      ["forge", 50], ["char_forge", 10]
+      ["func:forge", 50]
      ]
     ],
     "components": [
@@ -7254,10 +7254,10 @@
       ["anvil", -1]
      ],
      [
-      ["press", -1]
+      ["func:press", -1]
      ],
      [
-      ["forge", 50], ["char_forge", 10]
+      ["func:forge", 50]
      ]
     ],
     "components": [
@@ -7291,10 +7291,10 @@
       ["anvil", -1]
      ],
      [
-      ["press", -1]
+      ["func:press", -1]
      ],
      [
-      ["forge", 50], ["char_forge", 10]
+      ["func:forge", 50]
      ]
     ],
     "components": [
@@ -7319,13 +7319,13 @@
     "autolearn": true,
     "tools": [
      [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
      ],
      [
       ["crucible", -1]
      ],
      [
-      ["forge", 50], ["char_forge", 10]
+      ["func:forge", 50]
      ]
     ],
     "components": [
@@ -10975,7 +10975,8 @@
         "type" : "recipe",
   "result": "weldrig",
   "category": "CC_MISC",
-  "skill_used": "electronics",
+  "skill_used": "fabrication",
+  "skills_required": ["electronics",4],
   "difficulty": 4,
   "time": 60000,
   "reversible": true,
@@ -10999,15 +11000,61 @@
   ],
   "components": [
     [
-      [ "steel_chunk", 16 ],
-      [ "steel_plate", 2 ]
+      [ "frame", 1 ]
     ],
     [
       ["soldering_iron", 1]
     ],
     [
-      [ "welder", 1 ],
-      [ "welder_crude", 3 ]
+      [ "welder", 1 ]
+    ],
+    [
+      ["cable", 5]
+    ]
+  ]
+},{
+  "type" : "recipe",
+  "result": "craftrig",
+  "category": "CC_MISC",
+  "skill_used": "fabrication",
+  "skills_required": ["electronics",3],
+  "difficulty": 4,
+  "time": 60000,
+  "reversible": true,
+  "autolearn": false,
+  "book_learn": [[ "textbook_fabrication", 4 ]],
+  "tools": [
+    [
+      [ "func:wrench", -1 ]
+    ],
+    [
+      [ "func:hammer", -1 ]
+    ],
+    [
+      [ "goggles_welding", -1 ]
+    ],
+    [
+      [ "func:welder", 100 ]
+    ],
+    [
+      [ "func:hacksaw", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "frame", 1 ]
+    ],
+    [
+      ["vac_sealer", 1]
+    ],
+    [
+      [ "dehydrator", 1 ]
+    ],
+    [
+      [ "water_purifier", 1 ]
+    ],
+    [
+      [ "press", 1 ]
     ],
     [
       ["cable", 5]
@@ -11532,8 +11579,7 @@
     ],
     [
       [ "func:welder", 20 ],
-      [ "forge", 10],
-      [ "char_forge", 2]
+      [ "func:forge", 10]
     ]
   ],
   "components": [
@@ -11578,8 +11624,7 @@
     ],
     [
       [ "func:welder", 50 ],
-      [ "forge", 50 ],
-      [ "char_forge", 10]
+      [ "func:forge", 50 ]
     ]
   ],
   "components": [
@@ -11625,8 +11670,7 @@
     ],
     [
       [ "func:welder", 100 ],
-      [ "forge", 100 ],
-      [ "char_forge", 20]
+      [ "func:forge", 100 ]
     ]
   ],
   "components": [
@@ -12410,7 +12454,7 @@
   ],
   "tools": [
     [
-      [ "vac_sealer", 10 ]
+      [ "func:vac_sealer", 10 ]
     ],
     [
       [ "func:pot", -1 ]
@@ -12446,7 +12490,7 @@
   ],
   "tools": [
     [
-      [ "vac_sealer", 10 ]
+      [ "func:vac_sealer", 10 ]
     ],
     [
       [ "func:pot", -1 ]
@@ -12500,7 +12544,7 @@
   ],
   "tools": [
     [
-      [ "vac_sealer", 10 ]
+      [ "func:vac_sealer", 10 ]
     ],
     [
       [ "func:pot", -1 ]
@@ -12559,8 +12603,7 @@
     ],
     [
       [ "func:welder", 20 ],
-      [ "forge", 5],
-      [ "char_forge", 1]
+      [ "func:forge", 5]
     ]
   ],
   "components": [
@@ -12806,8 +12849,7 @@
     ],
     [
       ["fire", -1],
-      ["forge", 7],
-      ["char_forge", 2]
+      ["func:forge", 7]
       ]
   ],
   "components": [
@@ -13002,7 +13044,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "vac_sealer", 10 ]
+      [ "func:vac_sealer", 10 ]
     ],
     [
       [ "func:pot", -1 ]
@@ -13784,8 +13826,7 @@
       ["crucible", -1]
       ],
       [
-      [ "forge", 150],
-      [ "char_forge", 30]
+      [ "func:forge", 150]
       ]
       ],
   "components":
@@ -13803,8 +13844,7 @@
   "autolearn": true,
   "tools": [ [ ["func:hammer", -1] ],
       [
-      [ "forge", 100],
-      [ "char_forge", 20]
+      [ "func:forge", 100]
       ]
       ],
   "components":
@@ -13830,8 +13870,7 @@
       ["anvil", -1]
       ],
       [
-      [ "forge", 150],
-      [ "char_forge", 30]
+      [ "func:forge", 150]
       ]
       ],
   "components":
@@ -13861,8 +13900,7 @@
       ]
       ,
       [
-      [ "forge", 200],
-      [ "char_forge", 40]
+      [ "func:forge", 200]
       ]
       ],
   "components":
@@ -13894,8 +13932,7 @@
       ]
       ,
       [
-      [ "forge", 250],
-      [ "char_forge", 50]
+      [ "func:forge", 250]
       ]
       ],
   "components":
@@ -13929,8 +13966,7 @@
       ["swage", -1]
       ],
       [
-      [ "forge", 250],
-      [ "char_forge", 50]
+      [ "func:forge", 250]
       ]
       ],
   "components":
@@ -13959,7 +13995,7 @@
     [ ["chisel", -1] ],
     [ ["swage", -1]  ],
     [ ["anvil", -1]  ],
-    [ ["forge", 50], [ "char_forge", 10]  ]
+    [ ["func:forge", 50]  ]
            ],
   "components": [
     [
@@ -13990,8 +14026,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 300],
-      [ "char_forge", 60]
+      ["func:forge", 300]
       ]
       ],
   "components":
@@ -14030,8 +14065,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 350],
-      [ "char_forge", 70]
+      ["func:forge", 350]
       ]
       ],
   "components":
@@ -14074,8 +14108,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 400],
-      [ "char_forge", 80]
+      ["func:forge", 400]
       ]
       ],
   "components":
@@ -14118,8 +14151,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 450],
-      [ "char_forge", 90]
+      ["func:forge", 450]
       ]
       ],
   "components":
@@ -14162,8 +14194,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 450],
-      [ "char_forge", 90]
+      ["func:forge", 450]
       ]
       ],
   "components":
@@ -14206,8 +14237,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 450],
-      [ "char_forge", 90]
+      ["func:forge", 450]
       ]
       ],
   "components":
@@ -14250,7 +14280,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 500], ["char_forge", 100]
+      ["func:forge", 500]
       ]
       ],
   "components":
@@ -14289,7 +14319,7 @@
       ["anvil", -1]
       ],
       [
-      ["forge", 200], ["char_forge", 40]
+      ["func:forge", 200]
       ]
       ],
   "components":
@@ -14332,7 +14362,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 300], ["char_forge", 60]
+      ["func:forge", 300]
       ]
       ],
   "components":
@@ -14374,7 +14404,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 200], ["char_forge", 40]
+      ["func:forge", 200]
       ]
       ],
   "components":
@@ -14416,7 +14446,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 200], ["char_forge", 40]
+      ["func:forge", 200]
       ]
       ],
   "components":
@@ -14454,7 +14484,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 300], ["char_forge", 60]
+      ["func:forge", 300]
       ]
       ],
   "components":
@@ -14492,7 +14522,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 300], ["char_forge", 60]
+      ["func:forge", 300]
       ]
       ],
   "components":
@@ -14530,7 +14560,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 200], ["char_forge", 40]
+      ["func:forge", 200]
       ]
       ],
   "components":
@@ -14563,7 +14593,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 400], ["char_forge", 80]
+      ["func:forge", 400]
       ]
       ],
   "components":
@@ -14586,7 +14616,7 @@
   "tools": [ [ ["func:hammer", -1]  ],
       [ ["tongs", -1] ],
       [ ["anvil", -1] ],
-      [ ["forge", 100], ["char_forge", 20] ]
+      [ ["func:forge", 100] ]
       ],
   "components":
     [
@@ -14619,7 +14649,7 @@
       ["swage", -1]
       ],
       [
-      ["forge", 200], ["char_forge", 40]
+      ["func:forge", 200]
       ]
       ],
   "components":
@@ -14669,7 +14699,7 @@
       ["anvil", -1]
     ],
     [
-      ["forge", 150], ["char_forge", 30]
+      ["func:forge", 150]
       ]
     ],
   "components": [
@@ -14732,7 +14762,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 200], ["char_forge", 40]
+      ["func:forge", 200]
      ]
     ],
   "components":
@@ -14766,7 +14796,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 150], ["char_forge", 30]
+      ["func:forge", 150]
      ]
     ],
   "components":
@@ -14800,7 +14830,7 @@
       ["swage", -1]
      ],
      [
-      ["forge", 200], ["char_forge", 40]
+      ["func:forge", 200]
      ]
     ],
   "components":
@@ -14837,7 +14867,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 300], ["char_forge", 60]
+      ["func:forge", 300]
      ]
     ],
   "components":
@@ -14874,7 +14904,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 200], ["char_forge", 40]
+      ["func:forge", 200]
      ]
     ],
   "components":
@@ -14915,7 +14945,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 350], ["char_forge", 70]
+      ["func:forge", 350]
      ]
     ],
   "components":
@@ -14949,7 +14979,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 250], ["char_forge", 50]
+      ["func:forge", 250]
      ]
     ],
   "components":
@@ -14987,7 +15017,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 300], ["char_forge", 60]
+      ["func:forge", 300]
      ]
     ],
   "components":
@@ -15025,7 +15055,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 350], ["char_forge", 70]
+      ["func:forge", 350]
      ]
     ],
   "components":
@@ -15063,7 +15093,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 300], ["char_forge", 60]
+      ["func:forge", 300]
      ]
     ],
   "components":
@@ -15103,7 +15133,7 @@
       ["swage", -1]
      ],
      [
-      ["forge", 450], ["char_forge", 90]
+      ["func:forge", 450]
      ]
     ],
   "components":
@@ -15136,7 +15166,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 20], ["char_forge", 4]
+      ["func:forge", 20]
      ]
     ],
   "components":
@@ -15170,7 +15200,7 @@
       ["swage", -1]
      ],
      [
-      ["forge", 450], ["char_forge", 90]
+      ["func:forge", 450]
      ]
     ],
   "components":
@@ -15207,7 +15237,7 @@
       ["swage", -1]
      ],
      [
-      ["forge", 400], ["char_forge", 80]
+      ["func:forge", 400]
      ]
     ],
   "components":
@@ -15245,7 +15275,7 @@
       ["swage", -1]
      ],
      [
-      ["forge", 300], ["char_forge", 60]
+      ["func:forge", 300]
      ]
     ],
   "components":
@@ -15283,7 +15313,7 @@
       ["swage", -1]
      ],
      [
-      ["forge", 250], ["char_forge", 50]
+      ["func:forge", 250]
      ]
      ],
   "components":
@@ -15322,7 +15352,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 350], ["char_forge", 70]
+      ["func:forge", 350]
      ]
     ],
   "components":
@@ -15360,7 +15390,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 300], ["char_forge", 60]
+      ["func:forge", 300]
      ]
     ],
   "components":
@@ -15398,7 +15428,7 @@
       ["swage", -1]
      ],
      [
-      ["forge", 450], ["char_forge", 90]
+      ["func:forge", 450]
      ]
     ],
   "components":
@@ -15439,7 +15469,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 450], ["char_forge", 90]
+      ["func:forge", 450]
      ]
     ],
   "components":
@@ -15497,7 +15527,7 @@
       ["swage", -1]
      ],
      [
-      ["forge", 350], ["char_forge", 70]
+      ["func:forge", 350]
      ]
     ],
   "components": [
@@ -16802,11 +16832,11 @@
     "autolearn": true,
     "tools": [
       [
-        [ "press", -1 ]
+        [ "func:press", -1 ]
       ],
       [
         [ "fire", -1 ],
-        [ "press", 2 ]
+        [ "func:press", 2 ]
           ]
     ],
     "components": [
@@ -16841,11 +16871,11 @@
     "autolearn": true,
     "tools": [
       [
-        [ "press", -1 ]
+        [ "func:press", -1 ]
       ],
       [
         [ "fire", -1 ],
-        [ "press", 2 ]
+        [ "func:press", 2 ]
       ]
     ],
     "components": [
@@ -16880,11 +16910,11 @@
     "autolearn": true,
     "tools": [
       [
-        [ "press", -1 ]
+        [ "func:press", -1 ]
       ],
       [
         [ "fire", -1 ],
-        [ "press", 2 ]
+        [ "func:press", 2 ]
       ]
     ],
     "components": [
@@ -16917,11 +16947,11 @@
   "autolearn": true,
   "tools": [
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ],
     [
       [ "fire", -1 ],
-      [ "press", 2 ]
+      [ "func:press", 2 ]
         ]
   ],
   "components": [
@@ -17080,11 +17110,11 @@
     "autolearn": true,
     "tools": [
       [
-        [ "press", -1 ]
+        [ "func:press", -1 ]
       ],
       [
         [ "fire", -1 ],
-        [ "press", 2 ]
+        [ "func:press", 2 ]
       ]
     ],
     "components": [

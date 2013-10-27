@@ -1040,8 +1040,11 @@ void game::complete_craft()
  int skill_roll = dice(skill_dice, skill_sides);
  int diff_roll  = dice(diff_dice,  diff_sides);
 
- if (making->skill_used)
-  u.practice(turn, making->skill_used, making->difficulty * 5 + 20);
+ if (making->skill_used) {
+  if(u.skillLevel(making->skill_used) <= 1 || u.skillLevel(making->skill_used) < making->difficulty * 2) {
+   u.practice(turn, making->skill_used, making->difficulty * 5 + 20);
+  }
+ }
 
 
  crafting_inventory_t crafting_inv(this, &u);
@@ -1313,8 +1316,11 @@ void game::complete_disassemble()
    int diff_sides = 24; // 16 + 8 (default intelligence)
 
    // disassembly only nets a bit of practice
-   if (dis->skill_used)
-    u.practice(turn, dis->skill_used, (dis->difficulty) * 2);
+   if (dis->skill_used) {
+    if(u.skillLevel(dis->skill_used) <= 1 || u.skillLevel(dis->skill_used) < dis->difficulty * 2) {
+     u.practice(turn, dis->skill_used, (dis->difficulty) * 2);
+    }
+   }
 
   for (int j = 0; j < dis->components.size(); j++)
   {

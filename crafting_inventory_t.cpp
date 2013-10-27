@@ -496,6 +496,9 @@ void crafting_inventory_t::simple_req::move_as_required_to(simple_req &other) {
     }
     recount_candidate_sources();
     other.recount_candidate_sources();
+    for(candvec::iterator a = other.candidate_items.begin(); a != other.candidate_items.end(); a++) {
+        a->usageType = other.comp->type;
+    }
 }
 
 void crafting_inventory_t::simple_req::separate(simple_req &other) {
@@ -570,6 +573,9 @@ void crafting_inventory_t::simple_req::gather(crafting_inventory_t &cinv, bool s
         candidate_items.clear();
         cnt_on_player = cinv.collect_candidates(req, S_PLAYER, candidate_items);
         cnt_on_map = cinv.collect_candidates(req, S_MAP, candidate_items);
+        for(candvec::iterator a = candidate_items.begin(); a != candidate_items.end(); ++a) {
+            a->usageType = comp->type;
+        }
         available = ((cnt_on_map + cnt_on_player) >= req.count) ? +1 : -1;
     } else {
         available = cinv.has(req) ? +1 : -1;
@@ -1424,6 +1430,7 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
     std::vector< std::pair<menu_entry_type, size_t> > optionsIndizes;
     
     std::pair<int, const candidate_t*> indexOfWater(-1, 0);
+    std::pair<std::pair<int, float>, const candidate_t*> bestTool(std::make_pair(-1, 0.0f), 0);
     for(size_t i = 0; i < simple_reqs.size(); i++) {
         const simple_req &sr = simple_reqs[i];
         if(sr.available != 1) {
@@ -1439,6 +1446,18 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
             const candidate_t &can = *a;
             if(req(can) < count) {
                 continue;
+            }
+            if(as_tool && req.ctype == C_AMOUNT && bestTool.first.first != -2) {
+                const float time_modi = can.get_time_modi();
+                if(bestTool.first.first == -1 || time_modi < bestTool.first.second) {
+                    // can is better
+                    bestTool.first.first = i;
+                    bestTool.first.second = time_modi;
+                    bestTool.second = &can;
+                } else if(time_modi == bestTool.first.second) {
+                    // Equally good, let the used decide
+                    bestTool.first.first = -2;
+                }
             }
             if(can.usageType != "water_clean" && can.usageType != "water") {
                 // We need something else than water,
@@ -1505,6 +1524,12 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
         // except clean water which is to valueable
         selected_simple_req_index = indexOfWater.first;
         selected_items.push_back(*indexOfWater.second);
+        toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
+        return;
+    }
+    if(bestTool.first.first >= 0) {
+        selected_simple_req_index = bestTool.first.first;
+        selected_items.push_back(*bestTool.second);
         toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
         return;
     }
@@ -1954,14 +1979,18 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                 debugmsg("attempted to consume a pseudo vehicle part item %s for %s", ix->name.c_str(), req.type.c_str());
                 return;
             }
-            if(ix->type->id == "vpart_kitchen_unit") {
+            if(ix->type->id == "vpart_KITCHEN") {
                 drainVehicle(vpartitem->veh, "battery", req.count, used_items);
             } else if(ix->type->id == "water_clean") {
                 drainVehicle(vpartitem->veh, "water", req.count, used_items);
-            } else if(ix->type->id == "vpart_welding_rig") {
+            } else if(ix->type->id == "vpart_WELDRIG") {
+                drainVehicle(vpartitem->veh, "battery", req.count, used_items);
+            } else if(ix->type->id == "vpart_CRAFTRIG") {
+                drainVehicle(vpartitem->veh, "battery", req.count, used_items);
+            } else if(ix->type->id == "vpart_FORGE") {
                 drainVehicle(vpartitem->veh, "battery", req.count, used_items);
             } else {
-                debugmsg("unknown pseudo vehicle part item %s for %s", ix->name.c_str(), req.type.c_str());
+                debugmsg("Unknown pseudo vehicle part item %s for %s", ix->name.c_str(), req.type.c_str());
             }
             return;
         case LT_SURROUNDING:
@@ -2422,4 +2451,20 @@ void list_missing_ones(std::ostream &stream, const std::vector< std::vector<comp
 void list_missing_ones(std::ostream &stream, const recipe &r) {
     list_missing_ones(stream, r.tools, true);
     list_missing_ones(stream, r.components, false);
+}
+
+void crafting_inventory_t::add_vpart(vehicle *veh, int part, const std::string &vpart_flag_name, const ammotype &fuel) {
+    static const std::string vpart_name_prefix("vpart_");
+    const itype_id type = vpart_name_prefix + vpart_flag_name;
+    if(!item_controller->has_template(type)) {
+        debugmsg("Missing template for vpart pseudo item %s", type.c_str());
+        return;
+    }
+    item vpart_item(item_controller->find_template(type), (int) g->turn);
+    if(fuel.empty() || fuel == "null" || fuel == "NULL") {
+        vpart_item.charges = 0;
+    } else {
+        vpart_item.charges = veh->fuel_left(fuel, true);
+    }
+    vpart.push_back(item_from_vpart(veh, part, vpart_item));
 }

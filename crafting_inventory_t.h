@@ -539,6 +539,11 @@ protected:
     std::list<item_from_surrounding> surround;
     
     /**
+     * Adds a item_from_vpart object to the vpart list.
+     */
+    void add_vpart(vehicle *veh, int part, const std::string &vpart_flag_name, const ammotype &fuel);
+    
+    /**
      * This is a general counting function.
      * It can count by charges or by amount,
      * it can also count only in specifc sources (see source_flags).

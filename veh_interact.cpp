@@ -845,7 +845,7 @@ void veh_interact::move_cursor (int dx, int dy)
             {
                 ptank = &veh->parts[p];
             }
-            if (veh->part_flag(p, "WHEEL") && veh->parts[p].amount < veh->part_info(p).size)
+            if (veh->part_flag(p, "WHEEL"))
             {
                 wheel = &veh->parts[p];
             }
@@ -1129,6 +1129,10 @@ void complete_vehicle (game *g)
         for(size_t a = 0; a < items_needed.size(); a++) {
             if(items_needed[a].first == veh->part_info(vehicle_part).item) {
                 used_item = crafting_inv.consume_vpart_item(g, items_needed[a].first);
+                veh->parts[vehicle_part].bigness = used_item.bigness;
+                tools.push_back(component("func:wrench", -1));
+                crafting_inv.consume_any_tools(tools, true);
+                tools.clear();
                 dd = 0;
                 veh->insides_dirty = true;
             } else {

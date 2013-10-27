@@ -318,7 +318,7 @@ void inventory::clone_stack (const std::list<item> & rhs) {
        newstack.push_back(*iter);
     }
     items.push_back(newstack);
-//    return *this;    
+//    return *this;
 }
 
 void inventory::push_back(std::list<item> newits)
@@ -392,7 +392,7 @@ char inventory::get_invlet_for_item( std::string item_type ) {
 item& inventory::add_item(item newit, bool keep_invlet)
 {
 //dprint("inv.add_item(%d): [%c] %s", keep_invlet, newit.invlet, newit.typeId().c_str()  );
- 
+
     bool reuse_cached_letter = false;
 
     // Check how many stacks of this type already are in our inventory.
@@ -567,15 +567,16 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
     int junk = 0;
     for (int x = origin.x - range; x <= origin.x + range; x++) {
         for (int y = origin.y - range; y <= origin.y + range; y++) {
-            if (g->m.has_flag("SEALED", x, y) ||
-                ((origin.x != x || origin.y != y) &&
-                !g->m.clear_path( origin.x, origin.y, x, y, range, 1, 100, junk ) ) ) {
+            if(!g->m.clear_path( origin.x, origin.y, x, y, range, 1, 100, junk ) ) {
+                // Can't see this - can't use it
                 continue;
             }
             const point p(x, y);
-            items_on_map items(p, &(g->m));
-            if(!items.items().empty()) {
-                on_map.push_back(items);
+            if(!g->m.has_flag("SEALED", x, y)) {
+                items_on_map items(p, &(g->m));
+                if(!items.items().empty()) {
+                    on_map.push_back(items);
+                }
             }
 
             ter_id terrain_id = g->m.ter(x, y);
@@ -600,9 +601,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
             if (veh && allow_inventory_from(g, this->p, veh)) {
                 const int kpart = veh->part_with_feature(vpart, "KITCHEN");
                 if (kpart >= 0) {
-                    item kitchen(g->itypes["vpart_kitchen_unit"], 0);
-                    kitchen.charges = veh->fuel_left("battery", true);
-                    this->vpart.push_back(item_from_vpart(veh, kpart, kitchen));
+                    add_vpart(veh, kpart, "KITCHEN", "battery");
 
                     item water(g->itypes["water_clean"], 0);
                     water.charges = veh->fuel_left("water");
@@ -611,9 +610,17 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 
                 const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
                 if (weldpart >= 0) {
-                    item welder(g->itypes["vpart_welding_rig"], 0);
-                    welder.charges = veh->fuel_left("battery", true);
-                    this->vpart.push_back(item_from_vpart(veh, weldpart, welder));
+                    add_vpart(veh, weldpart, "WELDRIG", "battery");
+                }
+
+                const int craftpart = veh->part_with_feature(vpart, "CRAFTRIG");
+                if (craftpart >= 0) {
+                    add_vpart(veh, weldpart, "CRAFTRIG", "battery");
+                }
+
+                const int forgepart = veh->part_with_feature(vpart, "FORGE");
+                if (forgepart >= 0) {
+                    add_vpart(veh, forgepart, "FORGE", "battery");
                 }
 
                 const int cpart = veh->part_with_feature(vpart, "CARGO");

@@ -1250,9 +1250,7 @@ bool map::has_adjacent_furniture(const int x, const int y)
     {
         const int adj_x = x + cx[i];
         const int adj_y = y + cy[i];
-        furn_id fid = furn(adj_x, adj_y);
-        if ( fid == f_fridge || fid == f_glass_fridge || fid == f_dresser ||
-            fid == f_rack || fid == f_bookcase || fid == old_f_locker ) {
+        if ( has_furn(adj_x, adj_y) && furn_at(adj_x, adj_y).has_flag("BLOCKSDOOR") ) {
             return true;
         }
     }
@@ -2488,13 +2486,15 @@ std::list<item> map::use_charges(const point origin, const int range, const ityp
       if (veh) { // check if a vehicle part is present to provide water/power
         const int kpart = veh->part_with_feature(vpart, "KITCHEN");
         const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
+        const int craftpart = veh->part_with_feature(vpart, "CRAFTRIG");
+        const int forgepart = veh->part_with_feature(vpart, "FORGE");
 
         if (kpart >= 0) { // we have a kitchen, now to see what to drain
           ammotype ftype = "NULL";
 
           if (type == "water_clean")
             ftype = "water";
-          else if (type == "func:hotplate")
+          else if (type == "func:hotplate" || type == "hotplate")
             ftype = "battery";
 
           item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
@@ -2509,9 +2509,43 @@ std::list<item> map::use_charges(const point origin, const int range, const ityp
         if (weldpart >= 0) { // we have a weldrig, now to see what to drain
           ammotype ftype = "NULL";
 
-          if (type == "func:welder")
+          if (type == "func:welder" || type == "welder")
             ftype = "battery";
-          else if (type == "func:soldering_iron")
+          else if (type == "func:soldering_iron" || type == "soldering_iron")
+            ftype = "battery";
+
+          item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
+          tmp.charges = veh->drain(ftype, quantity);
+          quantity -= tmp.charges;
+          ret.push_back(tmp);
+
+          if (quantity == 0)
+            return ret;
+        }
+        
+        if (craftpart >= 0) { // we have a craftrig, now to see what to drain
+          ammotype ftype = "NULL";
+
+          if (type == "func:press" || type == "press")
+            ftype = "battery";
+          else if (type == "func:vac_sealer" || type == "vac_sealer")
+            ftype = "battery";
+          else if (type == "func:dehydrator" || type == "dehydrator")
+            ftype = "battery";
+
+          item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
+          tmp.charges = veh->drain(ftype, quantity);
+          quantity -= tmp.charges;
+          ret.push_back(tmp);
+
+          if (quantity == 0)
+            return ret;
+        }
+        
+        if (forgepart >= 0) { // we have a veh_forge, now to see what to drain
+          ammotype ftype = "NULL";
+
+          if (type == "func:forge" || type == "forge")
             ftype = "battery";
 
           item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
