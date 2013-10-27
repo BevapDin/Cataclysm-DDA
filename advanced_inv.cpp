@@ -871,9 +871,6 @@ void advanced_inventory::display(game * gp, player * pp) {
             int destarea = panes[dest].area;
             if('T' == c)
             {
-                if(panes[src].area != isinventory) {
-                    continue;
-                }
                 item& it = u.inv.slice(item_pos, 1).front()->front();
                 destarea = find_destination(it);
                 if(destarea == -1) {

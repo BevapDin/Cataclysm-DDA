@@ -2109,7 +2109,7 @@
     "to_hit": 1
   },
   {
-    "type":"GENERIC",
+    "type":"TOOL",
     "id": "char_kiln",
     "symbol": ";",
     "color": "dark_gray",
@@ -2121,7 +2121,14 @@
     "volume": 40,
     "bashing": 10,
     "cutting": 0,
-    "to_hit": -2
+    "to_hit": -2,
+    "max_charges": 0,
+    "initial_charges": 0,
+    "charges_per_use": 0,
+    "turns_per_charge": 0,
+    "ammo": "charcoal",
+    "revert_to": "null",
+    "use_action": "NONE"
   },
   {
     "type":"GENERIC",

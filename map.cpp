@@ -2183,12 +2183,6 @@ void map::spawn_item(const int x, const int y, item new_item, const int birthday
     }
     new_item.damage = damlevel;
 
-    // clothing with variable size flag may sometimes be generated fitted
-    if (new_item.is_armor() && new_item.has_flag("VARSIZE") && one_in(3))
-    {
-        new_item.item_tags.insert("FIT");
-    }
-
     add_item_or_charges(x, y, new_item);
 }
 

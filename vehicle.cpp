@@ -2597,6 +2597,18 @@ void vehicle::gain_moves (int mp)
                 }
             }
         }
+        if(vp.hp > 0 && vp.active() && part_flag(p, "FRIDGE")) {
+            const int fuel_drained = drain("battery", 10);
+            if(fuel_drained == 10 && !one_in(10)) {
+                // Food still gets bad, but slower:
+                // fridge works only 90% of the time
+                for(size_t i = 0; i < parts[p].items.size(); i++) {
+                    item &it = parts[p].items[i];
+                    // this works for all kind of items even non-food
+                    it.bday++;
+                }
+            }
+        }
         if (turret_mode) { // handle turrets
             fire_turret (p);
         }

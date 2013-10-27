@@ -194,12 +194,21 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
             break;
         case 'o':
             if(sel_vehicle_part->hp <= 0) {
-                move_points = 2000;
+                move_points = 5000;
                 break;
             }
             // Fall through to default time
         default:
             move_points = 20000;
+            if(sel_vpart_info != 0) {
+                // Make small/light items be installed faster
+                const int w = g->itypes[sel_vpart_info->item]->weight;
+                // storage battery: 20000, frame: 13000, motor: 70000
+                const int standard_weight = 20000;
+                move_points = (move_points * w) / standard_weight;
+                //                     max              min
+                move_points = std::min(120000, std::max(5000, move_points));
+            }
             break;
     }
 }
@@ -790,6 +799,7 @@ void veh_interact::move_cursor (int dx, int dy)
     wrefresh (w_parts);
 
     can_mount.clear();
+    sel_vpart_info = NULL;
     if (!obstruct)
     {
         for (std::map<std::string, vpart_info>::iterator
@@ -814,6 +824,7 @@ void veh_interact::move_cursor (int dx, int dy)
                 wheel_types.push_back (part_type_iterator->second);
             }
         }
+        sel_vpart_info = NULL;
     }
 
     need_repair.clear();

@@ -3915,7 +3915,7 @@
   
   {
     "id": "plastic_chunk",
-    "type": "TOOL",
+    "type": "GENERIC",
     "symbol": ",",
     "color": "light_blue",
     "name": "plastic chunk",
@@ -4754,7 +4754,7 @@
   },
   {
     "id": "rag_bundle",
-    "type": "TOOL",
+    "type": "GENERIC",
     "symbol": "%",
     "color": "white",
     "name": "bundle of rags",
@@ -4776,7 +4776,7 @@
   
   {
     "id": "leather_bundle",
-    "type": "TOOL",
+    "type": "GENERIC",
     "symbol": "%",
     "color": "white",
     "name": "bundle of leather",
