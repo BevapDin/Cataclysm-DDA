@@ -567,7 +567,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
     int junk = 0;
     for (int x = origin.x - range; x <= origin.x + range; x++) {
         for (int y = origin.y - range; y <= origin.y + range; y++) {
-            if(!g->m.clear_path( origin.x, origin.y, x, y, range, 1, 100, junk ) ) {
+            if((x != origin.x || y != origin.y) && !g->m.clear_path( origin.x, origin.y, x, y, range, 1, 100, junk ) ) {
                 // Can't see this - can't use it
                 continue;
             }

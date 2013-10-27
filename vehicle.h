@@ -450,7 +450,47 @@ public:
 
     // upgrades/refilling/etc. see veh_interact.cpp
     void interact ();
-	bool toogle_active_menu(const std::vector<int> &parts_to_toggle, const std::string &title);
+    bool toogle_active_menu(const std::vector<int> &parts_to_toggle, const std::string &title);
+    /**
+     * @return true if all parts occupy the same single tile at (0, 0).
+     * Note: returns false if no parts exist at all.
+     */
+    bool is_single_tile() const;
+    /**
+     * @return true if this vehicle is moving or if it might
+     * move in the next turns. This checks for cruise_velocity so it
+     * returns true even if the vehicle is currently not moving, but
+     * set to be moving in the next turns.
+     */
+    bool is_or_might_move() const;
+    /**
+     * Check if this vehicle can be towed to another vehicle.
+     * @return true if the vehicle can be towed.
+     * If the function returns true, the parameters other and other_part
+     * point to the other vehicle and a part that this can be towed
+     * to. If the function returns false, other and other_part are invalid.
+     */
+    bool can_tow(game *g, vehicle *&other, int &other_part) const;
+    /**
+     * Tows this vehicle to the other one. If this succeeds, this vehicle
+     * will be delted, so don't use this after calling this function.
+     * @param other Must be set by #can_tow.
+     * @param other_part Must be set by #can_tow.
+     * @return true if the towing succeeds, move points of the player are
+     * automaticly decreased and - Important - this object is deleted.
+     * Returns false if towing was not possible (missing rope) - a dialog
+     * is shown in this case.
+     */
+    bool tow_to(game *g, vehicle *other, int other_part, player *p);
+    /**
+     * Check if the given part can be untowed.
+     */
+    bool can_untow(int part);
+    /**
+     * Untow the given part as a new vehicle from this one.
+     * One must first check with #can_untow before calling this function.
+     */
+    void untow(game *g, int part, player *p);
 
     // return a vector w/ 'direction' & 'magnitude', in its own sense of the words.
     rl_vec2d velo_vec();

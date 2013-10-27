@@ -6672,109 +6672,6 @@ void game::control_vehicle()
     }
 }
 
-bool can_tow(vehicle *veh, vehicle *&other, int &other_part) {
-    if(veh->parts.empty() || veh->velocity != 0) {
-        return false;
-    }
-    for(size_t i = 0; i < veh->parts.size(); i++) {
-        if(veh->parts[i].mount_dx != 0 || veh->parts[i].mount_dy != 0) {
-            return false;
-        }
-    }
-    const int x = veh->global_x() + veh->parts[0].precalc_dx[0];
-    const int y = veh->global_y() + veh->parts[0].precalc_dy[0];
-    if((other = g->m.veh_at(x, y + 1, other_part)) != 0 && other->velocity == 0) { return true; }
-    if((other = g->m.veh_at(x + 1, y, other_part)) != 0 && other->velocity == 0) { return true; }
-    if((other = g->m.veh_at(x - 1, y, other_part)) != 0 && other->velocity == 0) { return true; }
-    if((other = g->m.veh_at(x, y - 1, other_part)) != 0 && other->velocity == 0) { return true; }
-    return false;
-}
-
-void tow_vehicles(vehicle *veh, vehicle *&other, int other_part, player *p) {
-    std::list<item> rope = p->inv.use_amount("rope_30", 1);
-    if(rope.empty()) { return; }
-    veh->parts[0].items.push_back(rope.front());
-    veh->parts[0].items[0].name = veh->name;
-    const int gx = veh->global_x() + veh->parts[0].precalc_dx[0];
-    const int gy = veh->global_y() + veh->parts[0].precalc_dy[0];
-    const int px = other->parts[other_part].mount_dx;
-    const int py = other->parts[other_part].mount_dy;
-    
-    int nx, ny;
-    int ox = px + 1, oy = py;
-    other->coord_translate(ox, oy, nx, ny);
-    if(nx != gx || ny != gy) { ox = px; oy = py + 1; other->coord_translate(ox, oy, nx, ny); }
-    if(nx != gx || ny != gy) { ox = px; oy = py - 1; other->coord_translate(ox, oy, nx, ny); }
-    if(nx != gx || ny != gy) { ox = px - 1; oy = py; other->coord_translate(ox, oy, nx, ny); }
-    
-    for(size_t i = 0; i < veh->parts.size(); i++) {
-        veh->parts[i].mount_dx = ox;
-        veh->parts[i].mount_dy = oy;
-    }
-    other->parts.insert(other->parts.end(), veh->parts.begin(), veh->parts.end());
-    other->precalc_mounts(0, other->face.dir());
-    other->insides_dirty = true;
-    g->m.destroy_vehicle(veh);
-    g->m.update_vehicle_cache(other, false);
-    p->moves -= 300;
-}
-
-bool can_untow(vehicle *veh, int veh_part, int x, int y) {
-    if(veh->parts[veh_part].items.size() != 1) { return false; }
-    if(veh->parts[veh_part].items[0].type != g->itypes["rope_30"]) { return false; }
-    if(veh->parts[veh_part].mount_dx == 0 && veh->parts[veh_part].mount_dy == 0) { return false; }
-    int vp2 = -1;
-    for(int i = 0; i < 9; i++) {
-        int dx = (i % 3) - 1;
-        int dy = (i / 3) - 1;
-        if(dx == 0 && dy == 0) { continue; }
-        int vp3 = veh->global_part_at(x + dx, y + dy);
-        if(vp3 < 0) { continue; }
-        if(vp2 == -1) { vp2 = vp3; continue; }
-//        if(!veh->is_connected(veh->parts[vp2], veh->parts[vp3], veh->parts[veh_part])) {
-//            return false;
-//        }
-    }
-    return true;
-}
-
-void untow_vehicles(vehicle *veh, int veh_part, int x, int y, player *p) {
-    item &rope = veh->parts[veh_part].items[0];
-    const std::string new_veh_name = rope.name;
-    rope.name = rope.type->name;
-    g->m.add_item_or_charges(p->posx, p->posy, rope);
-    veh->parts[veh_part].items.clear();
-    
-    std::vector<vehicle_part> tmp_parts;
-    const int mx = veh->parts[veh_part].mount_dx;
-    const int my = veh->parts[veh_part].mount_dy;
-    for(size_t i = 0; i < veh->parts.size(); i++) {
-        if(veh->parts[i].mount_dx == mx && veh->parts[i].mount_dy == my) {
-            veh->parts[i].mount_dx = 0;
-            veh->parts[i].mount_dy = 0;
-            tmp_parts.push_back(veh->parts[i]);
-            veh->parts.erase(veh->parts.begin() + i);
-            i--;
-        }
-    }
-    veh->precalc_mounts(0, veh->face.dir());
-    veh->insides_dirty = true;
-    g->m.update_vehicle_cache(veh, false);
-    
-    vehicle *new_veh = g->m.add_vehicle (g, "custom", x, y, 270, 0, 0);
-    if(new_veh == 0) {
-        debugmsg ("error constructing vehicle");
-        return;
-    }
-    new_veh->name = new_veh_name;
-    new_veh->parts.swap(tmp_parts);
-    new_veh->precalc_mounts(0, new_veh->face.dir());
-    new_veh->insides_dirty = true;
-    g->m.update_vehicle_cache(new_veh, true);
-    
-    p->moves -= 300;
-}
-
 void game::examine()
 {
  int examx, examy;
@@ -6790,16 +6687,19 @@ void game::examine()
   int vpkitchen = veh->part_with_feature(veh_part, "KITCHEN", true);
   int vpweldrig = veh->part_with_feature(veh_part, "WELDRIG", true);
   int vpcraftrig = veh->part_with_feature(veh_part, "CRAFTRIG", true);
-  if(can_tow(veh, other, other_part) &&
+  if(veh->can_tow(this, other, other_part) &&
       query_yn(_("Tow the vehicles together?"))) {
-      if(!u.inv.has_amount("rope_30", 1)) {
-          popup(_("You need a %s to do this!"), itypes["rope_30"]->name.c_str());
-          return;
+      veh->tow_to(this, other, other_part, &u);
+      // If the player had grabbed the vehicle, release it automaticly
+      if((u.grab_point.x != 0 || u.grab_point.y != 0) && u.grab_type == OBJECT_VEHICLE) {
+          if(examx == u.posx + u.grab_point.x && examy == u.posy + u.grab_point.y) {
+              u.grab_point.x = u.grab_point.y = 0;
+          }
       }
-      tow_vehicles(veh, other, other_part, &u);
-  } else if(can_untow(veh, veh_part, examx, examy) &&
+      return;
+  } else if(veh->can_untow(veh_part) &&
       query_yn(_("Untow the vehicles?"))) {
-      untow_vehicles(veh, veh_part, examx, examy, &u);
+      veh->untow(this, veh_part, &u);
       return;
   } else
   if ((vpcargo >= 0 && veh->parts[vpcargo].items.size() > 0) || vpkitchen >= 0 || vpweldrig >=0 || vpcraftrig >=0)

@@ -3215,3 +3215,178 @@ vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) cons
     ::add_item(type, "bone", "bone", amount, result);
     return result;
 }
+
+bool vehicle::is_single_tile() const {
+    if(parts.empty()) {
+        // It's a 0-tile vehicle
+        return false;
+    }
+    for(size_t i = 0; i < parts.size(); i++) {
+        if(parts[i].mount_dx != 0 || parts[i].mount_dy != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool vehicle::is_or_might_move() const {
+    return velocity != 0 || cruise_velocity != 0;
+}
+
+bool vehicle::can_tow(game *g, vehicle *&other, int &other_part) const {
+    if(!is_single_tile() || is_or_might_move()) {
+        // Can only tow single tile non-moving vehicles
+        return false;
+    }
+    const int gx = const_cast<vehicle*>(this)->global_x() + parts[0].precalc_dx[0];
+    const int gy = const_cast<vehicle*>(this)->global_y() + parts[0].precalc_dy[0];
+    if((other = g->m.veh_at(gx, gy + 1, other_part)) != 0 && !other->is_or_might_move()) { return true; }
+    if((other = g->m.veh_at(gx + 1, gy, other_part)) != 0 && !other->is_or_might_move()) { return true; }
+    if((other = g->m.veh_at(gx - 1, gy, other_part)) != 0 && !other->is_or_might_move()) { return true; }
+    if((other = g->m.veh_at(gx, gy - 1, other_part)) != 0 && !other->is_or_might_move()) { return true; }
+    return false;
+}
+
+bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
+    static const itype_id rope_type("rope_30");
+    assert(g != 0);
+    assert(other != 0);
+    assert(other_part >= 0);
+    assert(p != 0);
+    if(!p->inv.has_amount(rope_type, 1)) {
+        popup(_("You need a %s to do two vehicles together!"), item_controller->find_template(rope_type)->name.c_str());
+        return false;
+    }
+    std::list<item> rope = p->inv.use_amount(rope_type, 1);
+    assert(!rope.empty());
+    // Store the used rope
+    parts[0].items.push_back(rope.front());
+    // Store name of this vehicle
+    parts[0].items[0].mode = name;
+    // Global coords of this vehicle
+    const int gx = global_x() + parts[0].precalc_dx[0];
+    const int gy = global_y() + parts[0].precalc_dy[0];
+    // Get the local cooridinates of the new parts inside the other vehicle
+    const int px = other->parts[other_part].mount_dx;
+    const int py = other->parts[other_part].mount_dy;
+    
+    int nx, ny;
+    int ox = px + 1, oy = py;
+    other->coord_translate(ox, oy, nx, ny);
+    if(nx != gx || ny != gy) { ox = px; oy = py + 1; other->coord_translate(ox, oy, nx, ny); }
+    if(nx != gx || ny != gy) { ox = px; oy = py - 1; other->coord_translate(ox, oy, nx, ny); }
+    if(nx != gx || ny != gy) { ox = px - 1; oy = py; other->coord_translate(ox, oy, nx, ny); }
+    
+    // Change local coords
+    for(size_t i = 0; i < parts.size(); i++) {
+        parts[i].mount_dx = ox;
+        parts[i].mount_dy = oy;
+    }
+    // Move parts
+    other->parts.insert(other->parts.end(), parts.begin(), parts.end());
+    // Destroy me
+    g->m.destroy_vehicle(this);
+    // Update this vehicle, see install_part/remove_part
+    other->precalc_mounts(0, other->face.dir());
+    other->insides_dirty = true;
+    g->m.update_vehicle_cache(other, false);
+    p->moves -= 300;
+    return true;
+}
+
+bool vehicle::can_untow(int part) {
+    static const itype_id rope_type("rope_30");
+    assert(part >= 0 && part < parts.size());
+    if(parts[part].items.size() != 1 || parts[part].items[0].type->id != rope_type) {
+        // Not towed with a rope
+        return false;
+    }
+    const int dx = parts[part].mount_dx;
+    const int dy = parts[part].mount_dy;
+    if(dx == 0 && dy == 0) {
+        // Can not untow the root part
+        return false;
+    }
+    // Check to see if all parts would still be connected
+    //First, find all the squares connected to the one we're removing
+    std::vector<vehicle_part> connected_parts;
+
+    for(int i = 0; i < 4; i++) {
+        int next_x = i < 2 ? (i == 0 ? -1 : 1) : 0;
+        int next_y = i < 2 ? 0 : (i == 2 ? -1 : 1);
+        std::vector<int> parts_over_there = parts_at_relative(dx + next_x, dy + next_y);
+        //Ignore empty squares
+        if(parts_over_there.size() > 0) {
+            //Just need one part from the square to track the x/y
+            connected_parts.push_back(parts[parts_over_there[0]]);
+        }
+    }
+
+    /* If size = 0, it's the last part of the whole vehicle, so we're OK
+        * If size = 1, it's one protruding part (ie, bicycle wheel), so OK
+        * Otherwise, it gets complicated... */
+    if(connected_parts.size() > 1) {
+
+        /* We'll take connected_parts[0] to be the target part.
+            * Every other part must have some path (that doesn't involve
+            * the part about to be removed) to the target part, in order
+            * for the part to be legally removable. */
+        for(int next_part = 1; next_part < connected_parts.size(); next_part++) {
+            if(!is_connected(connected_parts[0], connected_parts[next_part], parts[part])) {
+                //Removing that part would break the vehicle in two
+                return false;
+            }
+        }
+
+    }
+    return true;
+}
+
+void vehicle::untow(game *g, int part, player *p) {
+    assert(g != 0);
+    assert(part >= 0 && part < parts.size());
+    assert(p != 0);
+    assert(!parts[part].items.empty());
+    const int mx = parts[part].mount_dx;
+    const int my = parts[part].mount_dy;
+    const int gx = global_x() + parts[part].precalc_dx[0];
+    const int gy = global_y() + parts[part].precalc_dy[0];
+    // Recover rope and name of the towed vehicle
+    item rope = parts[part].items[0];
+    parts[part].items.erase(parts[part].items.begin());
+    const std::string new_veh_name = rope.mode;
+    rope.mode = "";
+    p->add_or_drop(rope, g);
+    
+    // Remove all the parts of the towed vehicle
+    std::vector<vehicle_part> tmp_parts;
+    for(size_t i = 0; i < parts.size(); i++) {
+        if(parts[i].mount_dx == mx && parts[i].mount_dy == my) {
+            parts[i].mount_dx = 0;
+            parts[i].mount_dy = 0;
+            tmp_parts.push_back(parts[i]);
+            parts.erase(parts.begin() + i);
+            i--;
+        }
+    }
+    // Update this vehicle, see install_part/remove_part
+    precalc_mounts(0, face.dir());
+    insides_dirty = true;
+    g->m.update_vehicle_cache(this, false);
+    
+    // Create the new vehicle
+    vehicle *new_veh = g->m.add_vehicle (g, "custom", gx, gy, 270, 0, 0);
+    if(new_veh == 0) {
+        // FIXME: this will lose the parts in tmp_parts!
+        debugmsg ("error constructing vehicle");
+        return;
+    }
+    // Set name and parts, override any existing parts
+    new_veh->name = new_veh_name;
+    new_veh->parts.swap(tmp_parts);
+    // Update the new (untowed) vehicle, see install_part/remove_part
+    new_veh->precalc_mounts(0, new_veh->face.dir());
+    new_veh->insides_dirty = true;
+    g->m.update_vehicle_cache(new_veh, true);
+    p->moves -= 300;
+}
