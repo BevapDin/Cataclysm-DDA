@@ -2689,6 +2689,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.95 ] ],
+    "category": "weapons",
     "use_action": "KNIFE"
   },
 
@@ -2819,7 +2820,8 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:blade", 0.9 ] ],
+    "functions": [ [ "func:blade", 0.9, 1 ], [ "func:CUT-1", 1, 1] ],
+    "category": "weapons",
     "use_action": "KNIFE"
   },
 
@@ -3278,6 +3280,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.96 ] ],
+    "category": "weapons",
     "use_action": "KNIFE",
     "qualities": [["CUT", 1]]
   },
@@ -3912,12 +3915,13 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "other",
     "use_action": "RAG"
   },
   
   {
     "id": "plastic_chunk",
-    "type": "GENERIC",
+    "type": "TOOL",
     "symbol": ",",
     "color": "light_blue",
     "name": "plastic chunk",
@@ -3935,6 +3939,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "other",
     "use_action": "NONE"
   },
 
@@ -4314,6 +4319,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
   
@@ -4338,6 +4344,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
 
@@ -4361,6 +4368,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
 
@@ -4384,6 +4392,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
 
@@ -4407,6 +4416,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
 
@@ -4430,6 +4440,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
 
@@ -4453,6 +4464,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
 
@@ -4476,6 +4488,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
 
@@ -4547,6 +4560,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
 
@@ -4570,6 +4584,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
 
@@ -4593,6 +4608,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "food",
     "use_action": "DEJAR"
   },
   
@@ -5238,6 +5254,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "vehicle part",
     "use_action": "HORN_BICYCLE"
   },
 
@@ -5261,6 +5278,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "vehicle part",
     "use_action": "NONE"
   },
 
@@ -5284,6 +5302,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "vehicle part",
     "use_action": "NONE"
   },
   

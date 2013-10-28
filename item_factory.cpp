@@ -401,6 +401,28 @@ void Item_factory::load_armor(JsonObject& jo)
     load_basic_info(jo, new_item_template);
 }
 
+void Item_factory::load_armor_container(JsonObject& jo)
+{
+    it_werable_container* armor_container_template = new it_werable_container();
+
+    it_armor* armor_template = armor_container_template;
+    armor_template->encumber = jo.get_int("encumbrance");
+    armor_template->coverage = jo.get_int("coverage");
+    armor_template->thickness = jo.get_int("material_thickness");
+    armor_template->env_resist = jo.get_int("enviromental_protection");
+    armor_template->warmth = jo.get_int("warmth");
+    armor_template->storage = jo.get_int("storage");
+    armor_template->power_armor = jo.get_bool("power_armor", false);
+    armor_template->covers = jo.has_member("covers") ?
+        flags_from_json(jo, "covers", "bodyparts") : 0;
+
+    it_container* container_template = armor_container_template;
+    container_template->contains = jo.get_int("contains");
+
+    itype *new_item_template = armor_container_template;
+    load_basic_info(jo, new_item_template);
+}
+
 void Item_factory::load_tool(JsonObject& jo)
 {
     it_tool* tool_template = new it_tool();
@@ -571,6 +593,26 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
                 debugmsg("item %s's functionality %s does not have func: prefix", new_item_template->name.c_str(), key.c_str());
             }
         }
+    }
+    for(std::map<std::string, int>::iterator a = new_item_template->qualities.begin(); a != new_item_template->qualities.end(); ++a) {
+        std::ostringstream buffer;
+        buffer << "func:" << a->first << ":" << a->second;
+        const std::string id = buffer.str();
+        buffer.str(std::string());
+        if(!has_template(id)) {
+            itype *tt = new itype();
+            m_templates[id] = tt;
+            tt->id = id;
+            buffer << "Tool with " << a->first << "-" << a->second;
+            tt->name = buffer.str();
+        }
+        itype::functionality_t &fu = new_item_template->functionalityMap[id];
+        fu.time_modi = 1;
+        fu.charges_modi = 1;
+    }
+    new_item_template->qualities.clear();
+    if(jo.has_member("category")) {
+        new_item_template->category = jo.get_string("category");
     }
 
     new_item_template->techniques = jo.get_tags("techniques");

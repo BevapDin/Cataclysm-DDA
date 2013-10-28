@@ -503,7 +503,7 @@ void player::apply_persistent_morale()
         unsigned char covered = 0; // body parts covered
         for(int i=0; i<worn.size(); i++) {
             if(worn[i].has_flag(basic_flag) || worn[i].has_flag(bonus_flag) ) {
-                it_armor* item_type = (it_armor*) worn[i].type;
+                it_armor* item_type = dynamic_cast<it_armor*>(worn[i].type);
                 covered |= item_type->covers;
             }
             if(worn[i].has_flag(bonus_flag)) {
@@ -5896,7 +5896,7 @@ bool player::covered_with_flag(const std::string flag, int parts) const {
   int covered = 0;
 
   for (std::vector<item>::const_reverse_iterator armorPiece = worn.rbegin(); armorPiece != worn.rend(); ++armorPiece) {
-    int cover = ((it_armor *)(armorPiece->type))->covers & parts;
+    int cover = (dynamic_cast<it_armor*>(armorPiece->type))->covers & parts;
 
     if (!cover) continue; // For our purposes, this piece covers nothing.
     if (cover & covered) continue; // the body part(s) is already covered.
@@ -5914,7 +5914,7 @@ bool player::covered_with_flag(const std::string flag, int parts) const {
 
 bool player::covered_with_flag_exclusively(const std::string flag, int flags) const {
   for (std::vector<item>::const_iterator armorPiece = worn.begin(); armorPiece != worn.end(); ++armorPiece) {
-    if ((((it_armor *)(armorPiece->type))->covers & flags) && !armorPiece->has_flag(flag))
+    if (((dynamic_cast<it_armor*>(armorPiece->type))->covers & flags) && !armorPiece->has_flag(flag))
       return false;
   }
 
@@ -6650,12 +6650,12 @@ hint_rating player::rate_action_wear(item *it)
  if (armor->is_power_armor() && worn.size()) {
   if (armor->covers & mfb(bp_torso)) {
    return HINT_IFFY;
-  } else if (armor->covers & mfb(bp_head) && !((it_armor *)worn[0].type)->is_power_armor()) {
+  } else if (armor->covers & mfb(bp_head) && !(dynamic_cast<it_armor*>(worn[0].type))->is_power_armor()) {
    return HINT_IFFY;
   }
  }
  // are we trying to wear something over power armor? We can't have that, unless it's a backpack, or similar.
- if (worn.size() && ((it_armor *)worn[0].type)->is_power_armor() && !(armor->covers & mfb(bp_head))) {
+ if (worn.size() && (dynamic_cast<it_armor*>(worn[0].type))->is_power_armor() && !(armor->covers & mfb(bp_head))) {
   if (!(armor->covers & mfb(bp_torso) && armor->color == c_green)) {
    return HINT_IFFY;
   }
@@ -6818,7 +6818,7 @@ bool player::wear_item(game *g, item *to_wear, bool interactive)
 
         for (int i = 0; i < worn.size(); i++)
         {
-            if (((it_armor *)worn[i].type)->is_power_armor() && worn[i].type == armor)
+            if (dynamic_cast<it_armor*>(worn[i].type)->is_power_armor() && worn[i].type == armor)
             {
                 if(interactive)
                 {
@@ -6834,7 +6834,7 @@ bool player::wear_item(game *g, item *to_wear, bool interactive)
         if( armor->covers & ~(mfb(bp_head) | mfb(bp_eyes) | mfb(bp_mouth) ) ) {
             for (int i = 0; i < worn.size(); i++)
             {
-                if( ((it_armor *)worn[i].type)->is_power_armor() )
+                if( dynamic_cast<it_armor*>(worn[i].type)->is_power_armor() )
                 {
                     if(interactive)
                     {
@@ -8374,7 +8374,7 @@ void player::absorb(game *g, body_part bp, int &dam, int &cut)
                 cut_reduction = arm_cut / 3;
 
                 // power armour first  - to depreciate eventually
-                if (((it_armor *)worn[i].type)->is_power_armor())
+                if (dynamic_cast<it_armor*>(worn[i].type)->is_power_armor())
                 {
                     if (cut > arm_cut * 2 || dam > arm_bash * 2)
                     {
@@ -8533,7 +8533,7 @@ bool player::wearing_something_on(body_part bp)
 }
 
 bool player::is_wearing_power_armor(bool *hasHelmet) const {
-  if (worn.size() && ((it_armor *)worn[0].type)->is_power_armor()) {
+  if (worn.size() && dynamic_cast<it_armor*>(worn[0].type)->is_power_armor()) {
     if (hasHelmet) {
       *hasHelmet = false;
 

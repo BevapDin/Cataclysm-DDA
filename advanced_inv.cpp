@@ -249,8 +249,10 @@ struct advanced_inv_sorter {
                     break;
                 }
                 case SORTBY_CATEGORY: {
-                    if ( d1.cat != d2.cat ) {
-                      return d1.cat < d2.cat;
+                    if ( d1.cat.sort_order != d2.cat.sort_order ) {
+                      return d1.cat.sort_order < d2.cat.sort_order;
+                    } else if ( d1.cat.name != d2.cat.name) {
+                      return d1.cat.name < d2.cat.name;
                     } else if ( d1.volume == -8 ) {
                       return true;
                     } else if ( d2.volume == -8 ) {
@@ -360,20 +362,32 @@ void advanced_inv_update_area( advanced_inv_area &area, game *g ) {
     area.weight=0; // must update in main function
 }
 
-int advanced_inv_getinvcat(item *it) {
-    if ( it->is_gun() ) return 0;
-    if ( it->is_ammo() ) return 1;
-    if ( it->is_weap() ) return 2;
-    if ( it->is_tool() ) return 3;
-    if ( it->is_armor() ) return 4;
-    if ( it->is_food_container() ) return 5;
+advanced_inv_category advanced_inv_getinvcat(item *it) {
+    static const std::string invcats[10] = { _("guns"), _("ammo"), _("weapons"), _("tools"), _("clothing"), _("food"), _("drugs"), _("books"), _("mods"), _("other") };
+    if ( it->type->is_container() && !it->contents.empty() ) {
+        return advanced_inv_getinvcat(&(it->contents[0]));
+    }
+    if ( !it->type->category.empty() ) {
+        for(size_t i = 0; i < sizeof(invcats) / sizeof(invcats[0]); i++) {
+            if(it->type->category == invcats[i]) {
+                return advanced_inv_category(i, invcats[i]);
+            }
+        }
+        return advanced_inv_category(sizeof(invcats) / sizeof(invcats[0]), it->type->category);
+    }
+    if ( it->is_gun() ) return advanced_inv_category(0, invcats[0]);
+    if ( it->is_ammo() ) return advanced_inv_category(1, invcats[1]);
+    if ( it->is_weap() ) return advanced_inv_category(2, invcats[2]);
+    if ( it->is_tool() ) return advanced_inv_category(3, invcats[3]);
+    if ( it->is_armor() ) return advanced_inv_category(4, invcats[4]);
+    if ( it->is_food_container() ) return advanced_inv_category(5, invcats[5]);
     if ( it->is_food() ) {
         it_comest* comest = dynamic_cast<it_comest*>(it->type);
-        return ( comest->comesttype != "MED" ? 5 : 6 );
+        return ( comest->comesttype != "MED" ? advanced_inv_category(5, invcats[5]) : advanced_inv_category(6, invcats[6]) );
     }
-    if ( it->is_book() ) return 7;
-    if (it->is_gunmod() || it->is_bionic()) return 8;
-    return 9;
+    if ( it->is_book() ) return advanced_inv_category(8, invcats[7]);
+    if (it->is_gunmod() || it->is_bionic()) return advanced_inv_category(8, invcats[8]);
+    return advanced_inv_category(9, invcats[9]);
 }
 
 std::string center_text(const char *str, int width)
@@ -476,10 +490,9 @@ void advanced_inventory::recalc_pane(int i)
     bool filtering = ( panes[i].filter.size() > 0 );
     player &u = *p;
     map &m = g->m;
-    std::string invcats[10] = { _("guns"), _("ammo"), _("weapons"), _("tools"), _("clothing"), _("food"), _("drugs"), _("books"), _("mods"), _("other") };
     int idest = (i == left ? right : left);
     panes[i].items.clear();
-    bool hascat[10] = {false, false, false, false, false, false, false, false, false, false};
+    std::set<std::string> hascat;
     panes[i].numcats = 0;
     int avolume = 0;
     int aweight = 0;
@@ -506,8 +519,8 @@ void advanced_inventory::recalc_pane(int i)
             it.cat = advanced_inv_getinvcat(&item);
             it.it = &item;
             it.area = panes[i].area;
-            if( !hascat[it.cat] ) {
-                hascat[it.cat] = true;
+            if( hascat.count(it.cat.name) == 0 ) {
+                hascat.insert(it.cat.name);
                 panes[i].numcats++;
                 if(panes[i].sortby == SORTBY_CATEGORY) {
                     advanced_inv_listitem itc;
@@ -516,7 +529,7 @@ void advanced_inventory::recalc_pane(int i)
                     itc.weight = -8;
                     itc.volume = -8;
                     itc.cat = it.cat;
-                    itc.name = invcats[it.cat];
+                    itc.name = it.cat.name;
                     itc.area = panes[i].area;
                     panes[i].items.push_back(itc);
                 }
@@ -558,8 +571,8 @@ void advanced_inventory::recalc_pane(int i)
                     it.cat = advanced_inv_getinvcat(&items[x]);
                     it.it = &items[x];
                     it.area = s;
-                    if( ! hascat[it.cat] ) {
-                        hascat[it.cat] = true;
+                    if( hascat.count(it.cat.name) == 0 ) {
+                        hascat.insert(it.cat.name);
                         panes[i].numcats++;
                         if(panes[i].sortby == SORTBY_CATEGORY) {
                             advanced_inv_listitem itc;
@@ -568,7 +581,7 @@ void advanced_inventory::recalc_pane(int i)
                             itc.weight = -8;
                             itc.volume = -8;
                             itc.cat = it.cat;
-                            itc.name = invcats[it.cat];
+                            itc.name = it.cat.name;
                             itc.area = s;
                             panes[i].items.push_back(itc);
                         }

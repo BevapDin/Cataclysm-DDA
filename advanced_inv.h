@@ -22,6 +22,13 @@ struct advanced_inv_area {
     int max_size, max_volume;
 };
 
+struct advanced_inv_category {
+    int sort_order;
+    std::string name;
+    advanced_inv_category(int s, const std::string &n) : sort_order(s), name(n) { }
+    advanced_inv_category() { }
+};
+
 // for printing items in environment
 struct advanced_inv_listitem {
     int idx;
@@ -32,7 +39,7 @@ struct advanced_inv_listitem {
     int stacks;
     int volume;
     int weight;
-    int cat;
+    advanced_inv_category cat;
 };
 
 class advanced_inventory_pane {

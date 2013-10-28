@@ -1958,6 +1958,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 200,
+        "category": "chems",
         "effects" : ["COOKOFF"]
     },
     {   "type" : "AMMO",
@@ -1980,6 +1981,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category": "chems",
         "count" : 200
     },
     {   "type" : "AMMO",

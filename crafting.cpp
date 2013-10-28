@@ -127,6 +127,14 @@ void load_recipe(JsonObject &jsobj)
         }
         rec->qualities.push_back(quality_requirement(name, level, amount));
     }
+    for(std::vector<quality_requirement>::const_iterator a = rec->qualities.begin(); a != rec->qualities.end(); ++a) {
+        std::ostringstream buffer;
+        buffer << "func:" << a->name << ":" << a->level;
+        std::vector<component> tool_choices;
+        tool_choices.push_back(component(buffer.str(), -1));
+        rec->tools.push_back(tool_choices);
+    }
+    rec->qualities.clear();
 
     jsarr = jsobj.get_array("tools");
     while (jsarr.has_more()) {

@@ -171,6 +171,8 @@ struct itype
      }
      return 1.0f;
  }
+ 
+ std::string category;
 
  virtual bool is_food()          { return false; }
  virtual bool is_ammo()          { return false; }
@@ -509,7 +511,7 @@ struct it_gunmod : public itype
  };
 };
 
-struct it_armor : public itype
+struct it_armor : public virtual itype
 {
  unsigned char covers; // Bitfield of enum body_part
  signed char encumber;
@@ -603,11 +605,20 @@ struct it_book : public itype
  }
 };
 
-struct it_container : public itype
+struct it_container : public virtual itype
 {
  unsigned char contains; // Internal volume
  virtual bool is_container() { return true; }
  it_container() : contains(0) {};
+};
+
+struct it_werable_container : public virtual it_armor, public virtual it_container {
+ it_werable_container() : it_armor(), it_container() {
+ }
+ virtual bool is_armor() { return it_armor::is_armor(); }
+ virtual bool is_power_armor() { return it_armor::is_power_armor(); }
+ virtual bool is_artifact() { return it_armor::is_artifact(); }
+ virtual bool is_container() { return it_container::is_container(); }
 };
 
 struct it_tool : public itype

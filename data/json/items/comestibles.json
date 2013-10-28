@@ -1133,6 +1133,7 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
+        "category": "chems",
         "fun" : -30
     },
     {
@@ -1162,6 +1163,7 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
+        "category": "chems",
         "fun" : -30
     },
     {
@@ -1192,6 +1194,7 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
+        "category": "chems",
         "fun" : -30
     },
     {
@@ -1221,6 +1224,7 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
+        "category": "chems",
         "fun" : -30
     },
     {
@@ -1250,6 +1254,7 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
+        "category": "chems",
         "fun" : -15
     },
     {
@@ -1279,6 +1284,7 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
+        "category": "chems",
         "fun" : -30
     },
     {
@@ -1698,6 +1704,7 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
+        "category": "chems",
         "fun" : 0
     },
     {
@@ -2984,6 +2991,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
+        "category": "food",
         "flags": ["SEED"]
     },
     {
@@ -3035,6 +3043,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
+        "category": "food",
         "flags": ["SEED"]
     },
     {
@@ -3086,6 +3095,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
+        "category": "food",
         "flags": ["SEED"]
     },
     {
@@ -6495,6 +6505,7 @@
         "phase" : "liquid",
         "charges" : 2,
         "bashing" : 0,
+        "category": "chems",
         "fun" : 0
     },
     {

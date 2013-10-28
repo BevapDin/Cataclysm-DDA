@@ -110,7 +110,8 @@ void game::init_itypes ()
 #define VAR_VEH_PART(id, name,price,sym,color,mat1,mat2,volume,wgt,dam,cut,to_hit,\
               flags, bigmin, bigmax, bigaspect, des)\
 itypes[id]=new it_var_veh_part(id,price,name,des,sym,\
-color,mat1,mat2,volume,wgt,dam,cut,to_hit,flags, bigmin, bigmax, bigaspect)
+color,mat1,mat2,volume,wgt,dam,cut,to_hit,flags, bigmin, bigmax, bigaspect); \
+itypes[id]->category = "vehicle part"
 
 //"wheel", "wheel_wide", "wheel_bicycle", "wheel_motorbike", "wheel_small",
 //           NAME     RAR PRC  SYM COLOR        MAT1    MAT2

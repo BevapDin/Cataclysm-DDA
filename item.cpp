@@ -1613,7 +1613,7 @@ int item::is_funnel_container(int bigger_than) const
     if ( ! is_container() ) {
         return 0;
     }
-    it_container *ct = static_cast<it_container *>(type);
+    it_container *ct = dynamic_cast<it_container *>(type);
     // todo; consider linking funnel to item or -making- it an active item
     if ( (int)ct->contains <= bigger_than ) {
         return 0; // skip contents check, performance
@@ -2560,7 +2560,7 @@ void print_list(std::ostream &buffer, std::list<item> &items) {
         if(last_one.is_null()) {
             last_one = *b;
             count = 1;
-        } else if(b->type == last_one.type) {
+        } else if(b->type == last_one.type && b->charges == last_one.charges) {
             count++;
         } else {
             print_item_count(buffer, last_one, count, need_comma);

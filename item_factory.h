@@ -60,6 +60,7 @@ public:
     void load_container (JsonObject &jo);
     void load_gunmod    (JsonObject &jo);
     void load_generic   (JsonObject &jo);
+    void load_armor_container(JsonObject &jo);
 
     // Check that all items referenced in the groups
     // do actually exist (are defined)
