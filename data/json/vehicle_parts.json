@@ -1240,7 +1240,7 @@
         "durability": 1000,
         "item": "steel_plate",
         "difficulty": 3,
-        "location": "center",
+        "location": "armor",
         "flags": ["ARMOR"]
     },
     {
@@ -1254,7 +1254,7 @@
         "durability": 900,
         "item": "alloy_plate",
         "difficulty": 4,
-        "location": "center",
+        "location": "armor",
         "flags": ["ARMOR"]
     },
     {
@@ -1269,7 +1269,7 @@
         "durability": 900,
         "item": "spiked_plate",
         "difficulty": 3,
-        "location": "center",
+        "location": "armor",
         "flags": ["ARMOR", "SHARP"]
     },
     {
@@ -1283,7 +1283,7 @@
         "durability": 2300,
         "item": "hard_plate",
         "difficulty": 4,
-        "location": "center",
+        "location": "armor",
         "flags": ["ARMOR"]
     },
     {
@@ -1392,6 +1392,7 @@
         "fuel_type": "battery",
         "item": "battery_car",
         "difficulty": 2,
+        "location": "fuel_source",
         "flags": ["FUEL_TANK"]
     },
     {
@@ -1408,6 +1409,7 @@
         "fuel_type": "battery",
         "item": "battery_truck",
         "difficulty": 2,
+        "location": "fuel_source",
         "flags": ["FUEL_TANK"]
     },
     {

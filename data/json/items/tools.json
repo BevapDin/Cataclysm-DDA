@@ -4034,7 +4034,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:blade", 1.1 ], [ "func:scissors" ] ],
+    "functions": [ [ "func:blade", 1.03, -1 ], [ "func:scissors" ] ],
     "use_action": "KNIFE",
     "qualities": [["CUT", 1]]
   },

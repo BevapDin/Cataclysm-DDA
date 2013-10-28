@@ -793,7 +793,7 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
             }
         }
         
-        if(rc.cnt_on_map + rc.cnt_on_player > 0 && (flags & simple_req::ts_found_items) != 0) {
+        if(!rc.candidate_items.empty() && (flags & simple_req::ts_found_items) != 0) {
             buffer << "\n     found: ";
             bool needs_comma = false;
             for(candvec::const_iterator a = rc.candidate_items.begin(); a != rc.candidate_items.end(); ++a) {
@@ -2060,25 +2060,41 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
     }
 }
 
+int compare(const item &a, const item &b) {
+    if(a.is_container() && !a.contents.empty()) {
+        // Compare in other direction, so this can check
+        // for contents in b.
+        const int c = compare(b, a.contents[0]);
+        if(c != 0) {
+            return -c;
+        }
+    }
+        
+    if(a.type != b.type) {
+        return a.type < b.type ? -1 : +1;
+    }
+    if(a.damage != b.damage) {
+        return a.damage < b.damage ? -1 : +1;
+    }
+    if(a.burnt != b.burnt) {
+        return a.burnt < b.burnt ? -1 : +1;
+    }
+    if(a.bigness != b.bigness) {
+        return a.bigness < b.bigness ? -1 : +1;
+    }
+    // FIXME: are there more properties that need to be compared?
+    return 0;
+}
+
 bool crafting_inventory_t::all_equal(const candvec &candidates) {
     for(int i = 0; i + 1 < candidates.size(); i++) {
         const candidate_t &prev = candidates[i];
         const candidate_t &cur = candidates[i + 1];
         const item &prev_item = prev.get_item();
         const item &cur_item = cur.get_item();
-        if(prev_item.type != cur_item.type) {
+        if(compare(prev_item, cur_item) != 0) {
             return false;
         }
-        if(prev_item.damage != cur_item.damage) {
-            return false;
-        }
-        if(prev_item.burnt != cur_item.burnt) {
-            return false;
-        }
-        if(prev_item.bigness != cur_item.bigness) {
-            return false;
-        }
-        // FIXME: are there more properties that need to be compared?
     }
     return true;
 }

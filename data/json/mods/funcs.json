@@ -150,6 +150,13 @@
     "name": "any hand press & die set",
     "description": "???"
   },
+  { "id":"func:CUT-1",
+    "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
+    "symbol": " ",
+    "color": "white",
+    "name": "any blade",
+    "description": "???"
+  },
   { "id":"func:saw",
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",

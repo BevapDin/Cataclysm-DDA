@@ -67,6 +67,7 @@
         "recoil" : 0,
         "functions": [ [ "func:thread" ] ],
         "count" : 10,
+        "category": "other",
         "stack_size" : 200
     },
     {   "type" : "AMMO",
