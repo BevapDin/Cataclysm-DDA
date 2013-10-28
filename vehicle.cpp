@@ -2552,6 +2552,15 @@ void vehicle::place_spawn_items()
     }
 }
 
+void increase_bday(std::vector<item> &list) {
+    for(size_t i = 0; i < list.size(); i++) {
+        item &it = list[i];
+        // this works for all kind of items even non-food
+        it.bday++;
+        increase_bday(it.contents);
+    }
+}
+
 void vehicle::gain_moves (int mp)
 {
     if (velocity) {
@@ -2604,11 +2613,7 @@ void vehicle::gain_moves (int mp)
             if(fuel_drained == 10 && !one_in(10)) {
                 // Food still gets bad, but slower:
                 // fridge works only 90% of the time
-                for(size_t i = 0; i < parts[p].items.size(); i++) {
-                    item &it = parts[p].items[i];
-                    // this works for all kind of items even non-food
-                    it.bday++;
-                }
+                increase_bday(parts[p].items);
             }
         }
         if (turret_mode) { // handle turrets

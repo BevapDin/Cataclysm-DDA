@@ -691,7 +691,23 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
  }
 
  for(itype::FunctionalityMap::const_iterator a = type->functionalityMap.begin(); a != type->functionalityMap.end(); ++a) {
-   dump->push_back(iteminfo("DESCRIPTION", "Functions as " + item_controller->find_template(a->first)->name));
+   std::ostringstream buffer;
+   buffer << "Works as " << item_controller->find_template(a->first)->name;
+   std::string std_name = item_controller->find_template(a->first.substr(5))->name;
+   if(a->second.time_modi < 1.0f) {
+       buffer << " (" << static_cast<int>(100.0f / a->second.time_modi) << "% faster than a " << std_name << ")";
+   } else if(a->second.time_modi > 1.0f) {
+       buffer << " (" << static_cast<int>(100.0f * a->second.time_modi) << "% slower than a " << std_name << ")";
+   }
+   if(a->second.charges_modi == 0.0f) {
+   } else if(a->second.charges_modi == -1.0f) {
+       buffer << " (takes no charges at all)";
+   } else if(a->second.charges_modi > 1.0f) {
+       buffer << " (uses " << static_cast<int>(100.0f * a->second.charges_modi) << "% as much charges as a " << std_name << ")";
+   } else if(a->second.charges_modi < 1.0f) {
+       buffer << " (uses " << static_cast<int>(100.0f * a->second.charges_modi) << "% as much charges as a " << std_name << ")";
+   }
+   dump->push_back(iteminfo("DESCRIPTION", buffer.str()));
  }
  
  {

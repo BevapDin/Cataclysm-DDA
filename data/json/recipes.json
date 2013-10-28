@@ -2497,7 +2497,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2532,7 +2531,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2567,7 +2565,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2602,7 +2599,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2637,7 +2633,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2672,7 +2667,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2707,7 +2701,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2742,7 +2735,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2777,7 +2769,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2812,7 +2803,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2847,7 +2837,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2885,7 +2874,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2923,7 +2911,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2961,7 +2948,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -2996,7 +2982,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3031,7 +3016,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3069,7 +3053,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3107,7 +3090,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3146,7 +3128,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3185,7 +3166,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3223,7 +3203,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3261,7 +3240,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3411,7 +3389,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3448,7 +3425,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3486,7 +3462,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3524,7 +3499,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3561,7 +3535,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3596,7 +3569,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3631,7 +3603,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -3669,7 +3640,6 @@
     ],
     [
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ],
       [ "func:press", 2 ]
     ]
   ],
@@ -11415,7 +11385,7 @@
       [ "lighter", 5 ],
       [ "ref_lighter", 5 ],
       [ "fire", -1 ],
-      [ "toolset_hotplate", 1 ]
+      [ "func:hotplate", 10 ]
     ]
   ],
   "components": [

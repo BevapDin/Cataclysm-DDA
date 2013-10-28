@@ -55,6 +55,7 @@ void game::init_itypes ()
             "A fake item. If you are reading this it's a bug! (itypdef.cpp)", \
             '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0)
 
+            (INTEGRATED_TOOLSET("press"))->addFunctionality("func:press", 1, 0.5);
             (INTEGRATED_TOOLSET("knife"))->addFunctionality("func:blade", 1, 1);
             (INTEGRATED_TOOLSET("screwdriver"))->addFunctionality("func:screwdriver", 1, 1);
             (INTEGRATED_TOOLSET("wrench"))->addFunctionality("func:wrench", 1, 1);
@@ -234,6 +235,7 @@ BIO_SINGLE("bio_torsionratchet", 3800, c_yellow, 4);
 // utilities
 #define BIO_SINGLE_TOOLSET(tool,price,color,difficulty) \
     BIO_SINGLE("bio_tools_" tool, price,color,difficulty)
+BIO_SINGLE_TOOLSET("press", 8000, c_ltgray, 2);
 BIO_SINGLE_TOOLSET("knife", 8000, c_ltgray, 2);
 BIO_SINGLE_TOOLSET("screwdriver", 8000, c_ltgray, 2);
 BIO_SINGLE_TOOLSET("wrench", 8000, c_ltgray, 5);

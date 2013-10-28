@@ -162,6 +162,12 @@
 },
 {
     "type"       :    "bionic",
+    "id"         :    "bio_tools_press",
+    "name"       :    "Integrated hand press",
+    "description":    "Implanted in your hands and fingers is a hand press & die set. You can use this in place of a hand press & die set when crafting."
+},
+{
+    "type"       :    "bionic",
     "id"         :    "bio_tools_knife",
     "name"       :    "Integrated knife",
     "description":    "Implanted in your hands and fingers is a knife. You can use this in place of a knife when crafting."

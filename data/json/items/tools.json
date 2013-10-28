@@ -133,7 +133,7 @@
     "turns_per_charge": 0,
     "ammo": "thread",
     "revert_to": "null",
-    "functions": [ [ "func:sewing_kit" ] ],
+    "functions": [ [ "func:sewing_kit", 1, 1 ] ],
     "use_action": "SEW"
   },
 
@@ -181,7 +181,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:hammer" ] ],
+    "functions": [ [ "func:hammer", 1, -1 ] ],
     "use_action": "HAMMER"
   },
 
@@ -2688,7 +2688,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:blade", 0.95 ] ],
+    "functions": [ ["func:blade", 0.85, -1] ],
     "category": "weapons",
     "use_action": "KNIFE"
   },
@@ -2715,7 +2715,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:blade", 0.9 ], [ "func:scissors", 0.9 ] ],
+    "functions": [ [ "func:blade", 0.7, -1 ], [ "func:scissors", 0.7, -1 ] ],
     "use_action": "KNIFE",
     "qualities": [["CUT", 1]]
   },
@@ -2742,7 +2742,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:blade", 0.7 ], [ "func:scissors" ] ],
+    "functions": [ [ "func:blade", 1.05, -1 ], [ "func:scissors", 1.4, -1 ] ],
     "use_action": "KNIFE",
     "qualities": [["CUT", 1]]
   },
@@ -2820,7 +2820,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:blade", 0.9, 1 ], [ "func:CUT-1", 1, 1] ],
+    "functions": [ [ "func:blade", 0.9, -1], [ "func:CUT-1", 1, -1] ],
     "category": "weapons",
     "use_action": "KNIFE"
   },
@@ -2897,7 +2897,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:blade", 1.1 ] ],
+    "functions": [ [ "func:blade", 1.1, -1] ],
     "use_action": "KNIFE"
   },
 

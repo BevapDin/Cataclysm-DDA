@@ -334,17 +334,26 @@ void crafting_inventory_t::complex_req::add(component &c, bool as_tool) {
     assert(!types.empty());
     const int org_count = rs2.req.count;
     for(size_t i = 0; i < types.size(); i++) {
-        rs2.req.type = types[i].first;
+        simple_req rs3(rs2);
+        rs3.req.type = types[i].first;
         if(req.ctype == C_CHARGES) {
-            rs2.req.count = static_cast<int>(std::ceil(org_count * types[i].second));
-            if(rs2.req.count <= 0) {
-                // Need at least a charge, nothing is free
-                rs2.req.count = 1;
+            const float modi = types[i].second;
+            if(modi == -1.0f) {
+                // No charges required for this tool
+                rs3.req.ctype = C_AMOUNT;
+                rs3.req.count = 1;
+            } else if(modi == 0.0f) {
+                // Does not apply for use as charged object
+                continue;
+            } else {
+                rs3.req.count = static_cast<int>(std::ceil(org_count * modi));
+                if(rs3.req.count <= 0) {
+                    // Need at least a charge, nothing is free
+                    rs3.req.count = 1;
+                }
             }
-        } else {
-            rs2.req.count = org_count;
         }
-        add_or_merge(rs2);
+        add_or_merge(rs3);
     }
 }
 
@@ -1619,6 +1628,8 @@ void crafting_inventory_t::consume(requirement req, consume_flags flags, const c
             item tmpit(a->get_item());
             if(req.ctype == C_CHARGES) {
                 tmpit.charges = std::min(tmpit.charges, req.count);
+            } else {
+                tmpit.charges = 0;
             }
             used_items.push_back(tmpit);
         }
@@ -1859,6 +1870,13 @@ int crafting_inventory_t::requirement::get_charges_or_amount(const item &the_ite
         return result + the_item.charges;
     }
     const float modi = the_item.type->getChargesModi(type);
+    if(modi == -1.0f) {
+        // No charges required for this tool
+        return count;
+    } else if(modi == 0.0f) {
+        // Does not apply for use as charged object
+        return 0;
+    }
     assert(modi > 0.0f);
     return result + static_cast<int>(the_item.charges / modi);
 }
@@ -1904,6 +1922,14 @@ bool crafting_inventory_t::requirement::use(item &the_item, std::list<item> &use
     item tmp = the_item;
     if(type.compare(0, 5, "func:") == 0) {
         const float modi = the_item.type->getChargesModi(type);
+        if(modi == -1.0f) {
+            // No charges required for this tool
+            tmp.charges = 0;
+            count = 0;
+        } else if(modi == 0.0f) {
+            // Does not apply for use as charged object
+            return false;
+        }
         const int charges_norm = static_cast<int>(the_item.charges / modi);
         const int used_charges = std::min(count, charges_norm);
         tmp.charges = static_cast<int>(used_charges * modi);
