@@ -16,6 +16,7 @@
 std::vector<craft_cat> craft_cat_list;
 std::vector<std::string> recipe_names;
 recipe_map recipes;
+std::map<std::string,quality> qualities;
 
 void draw_recipe_tabs(WINDOW *w, craft_cat tab,bool filtered=false);
 
@@ -114,22 +115,15 @@ void load_recipe(JsonObject &jsobj)
 
     jsarr = jsobj.get_array("qualities");
     while(jsarr.has_more()){
-        std::vector<quality_requirement> tool_choices;
         JsonObject quality_data = jsarr.next_object();
-        std::string name = quality_data.get_string("name");
-        int level=1;
-        int amount=1;
-        if(quality_data.has_member("level")){
-          level = quality_data.get_int("level");
-        }
-        if(quality_data.has_member("amount")){
-          amount = quality_data.get_int("amount");
-        }
-        rec->qualities.push_back(quality_requirement(name, level, amount));
+        std::string ident = quality_data.get_string("id");
+        int level = quality_data.get_int("level", 1);
+        int amount = quality_data.get_int("amount", 1);
+        rec->qualities.push_back(quality_requirement(ident, level, amount));
     }
     for(std::vector<quality_requirement>::const_iterator a = rec->qualities.begin(); a != rec->qualities.end(); ++a) {
         std::ostringstream buffer;
-        buffer << "func:" << a->name << ":" << a->level;
+        buffer << "func:" << a->id << ":" << a->level;
         std::vector<component> tool_choices;
         tool_choices.push_back(component(buffer.str(), -1));
         rec->tools.push_back(tool_choices);
@@ -164,6 +158,14 @@ void load_recipe(JsonObject &jsobj)
 
     recipes[category].push_back(rec);
     std::sort(recipes[category].begin(), recipes[category].end(), recipe_sorter);
+}
+
+void load_quality(JsonObject &jo)
+{
+    quality qual;
+    qual.id = jo.get_string("id");
+    qual.name = _(jo.get_string("name").c_str());
+    qualities[qual.id] = qual;
 }
 
 bool game::crafting_allowed()
@@ -244,10 +246,10 @@ bool game::can_make(recipe *r, crafting_inventory_t &crafting_inv)
     std::vector<quality_requirement> &qualities = r->qualities;
     std::vector<quality_requirement>::iterator quality_iter = qualities.begin();
     while(quality_iter != qualities.end()){
-        std::string name = quality_iter->name;
+        std::string id = quality_iter->id;
         int amount = quality_iter->count;
         int level = quality_iter->level;
-        if(crafting_inv.has_items_with_quality(name, level, amount)){
+        if(crafting_inv.has_items_with_quality(id, level, amount)){
             quality_iter->available = true;
         } else {
             quality_iter->available = false;
@@ -642,11 +644,10 @@ recipe* game::select_crafting_recipe()
             }
             else
             {
-                ypos = 5;
+                ypos = 6;
                 // Loop to print the required tool qualities
                 for(std::vector<quality_requirement>::const_iterator iter = current[line]->qualities.begin(); 
                         iter != current[line]->qualities.end(); ++iter){
-                    ypos++;
                     xpos = 32;
                     mvwputch(w_data, ypos, 30, col, '>');
                     nc_color toolcol = c_red;
@@ -655,9 +656,10 @@ recipe* game::select_crafting_recipe()
                     }
                     
                     std::stringstream qualinfo;
-                    qualinfo << string_format(_("Requires %d tools with %s of %d or more."), iter->count, iter->name.c_str(), iter->level);
-                    mvwprintz(w_data, ypos, xpos, toolcol, qualinfo.str().c_str());
+                    qualinfo << string_format(_("Requires %d tools with %s of %d or more."), iter->count, qualities[iter->id].name.c_str(), iter->level);
+                    ypos += fold_and_print(w_data, ypos, xpos, getmaxx(w_data)-xpos-1, toolcol, qualinfo.str().c_str());
                 }
+                ypos--;
                 // Loop to print the required tools
                 for (int i = 0; i < current[line]->tools.size() && current[line]->tools[i].size() > 0; i++)
                 {
