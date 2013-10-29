@@ -114,6 +114,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "flags": ["NO_DISASSEMBLE_RETURN"],
         "count" : 200
     },
     {   "type" : "AMMO",

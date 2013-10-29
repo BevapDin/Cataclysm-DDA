@@ -8966,8 +8966,7 @@
   ],
   "tools": [
     [
-      [ "needle_bone", 18 ],
-      [ "sewing_kit", 18 ]
+      [ "func:sewing_kit", 18 ]
     ]
   ],
   "components": [
@@ -8993,8 +8992,7 @@
   ],
   "tools": [
     [
-      [ "needle_bone", 24 ],
-      [ "sewing_kit", 24 ]
+      [ "func:sewing_kit", 24 ]
     ]
   ],
   "components": [
@@ -9017,8 +9015,7 @@
   ],
   "tools": [
     [
-      [ "needle_bone", 18 ],
-      [ "sewing_kit", 18 ]
+      [ "func:sewing_kit", 18 ]
     ]
   ],
   "components": [
@@ -10142,8 +10139,7 @@
   ],
   "tools": [
     [
-      [ "needle_bone", 54 ],
-      [ "sewing_kit", 54 ]
+      [ "func:sewing_kit", 54 ]
     ]
   ],
   "components": [
@@ -10169,8 +10165,7 @@
   ],
   "tools": [
     [
-      [ "needle_bone", 68 ],
-      [ "sewing_kit", 68 ]
+      [ "func:sewing_kit", 68 ]
     ]
   ],
   "components": [
@@ -10193,8 +10188,7 @@
   ],
   "tools": [
     [
-      [ "needle_bone", 68 ],
-      [ "sewing_kit", 68 ]
+      [ "func:sewing_kit", 68 ]
     ]
   ],
   "components": [
@@ -10249,8 +10243,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 22 ],
-      [ "sewing_kit", 22 ]
+      [ "func:sewing_kit", 22 ]
     ]
   ],
   "components": [

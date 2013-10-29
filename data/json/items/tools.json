@@ -3963,6 +3963,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "other",
     "use_action": "NONE"
   },
 

@@ -2559,6 +2559,9 @@ float item::get_functionality_time_modi(const itype_id &func) const {
 	return 0.0;
 }
 
+// see crafting_inventory.cpp
+extern int compare(const item &a, const item &b);
+
 void print_item_count(std::ostream &buffer, item &it, int count, bool &need_comma) {
     if(need_comma) { buffer << ", "; } else { need_comma = true; }
     if(count > 1) {
@@ -2576,7 +2579,7 @@ void print_list(std::ostream &buffer, std::list<item> &items) {
         if(last_one.is_null()) {
             last_one = *b;
             count = 1;
-        } else if(b->type == last_one.type && b->charges == last_one.charges) {
+        } else if(compare(*b, last_one) == 0) {
             count++;
         } else {
             print_item_count(buffer, last_one, count, need_comma);
