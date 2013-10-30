@@ -14,6 +14,7 @@
 
 extern bool from_uncraft_tag(const std::string &data, std::list<item> &comps, std::list<item> &tools);
 extern void print_list(std::ostream &buffer, std::list<item> &items);
+extern const std::string &name(const itype_id &type);
 
 // mfb(n) converts a flag to its appropriate position in covers's bitfield
 #ifndef mfb
@@ -692,20 +693,20 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
 
  for(itype::FunctionalityMap::const_iterator a = type->functionalityMap.begin(); a != type->functionalityMap.end(); ++a) {
    std::ostringstream buffer;
-   buffer << "Works as " << item_controller->find_template(a->first)->name;
-   std::string std_name = item_controller->find_template(a->first.substr(5))->name;
+   buffer << "Works as " << (item_controller->has_template(a->first) ? item_controller->find_template(a->first)->name : a->first);
+   std::string std_name = (item_controller->has_template(a->first.substr(5)) ? item_controller->find_template(a->first.substr(5))->name : a->first.substr(5));
    if(a->second.time_modi < 1.0f) {
-       buffer << " (" << static_cast<int>(100.0f / a->second.time_modi) << "% faster than a " << std_name << ")";
+       buffer << " (" << static_cast<int>(100.0f / a->second.time_modi) << "%% faster than a " << std_name << ")";
    } else if(a->second.time_modi > 1.0f) {
-       buffer << " (" << static_cast<int>(100.0f * a->second.time_modi) << "% slower than a " << std_name << ")";
+       buffer << " (" << static_cast<int>(100.0f * a->second.time_modi) << "%% slower than a " << std_name << ")";
    }
    if(a->second.charges_modi == 0.0f) {
    } else if(a->second.charges_modi == -1.0f) {
        buffer << " (takes no charges at all)";
    } else if(a->second.charges_modi > 1.0f) {
-       buffer << " (uses " << static_cast<int>(100.0f * a->second.charges_modi) << "% as much charges as a " << std_name << ")";
+       buffer << " (uses " << static_cast<int>(100.0f * a->second.charges_modi) << "%% as much charges as a " << std_name << ")";
    } else if(a->second.charges_modi < 1.0f) {
-       buffer << " (uses " << static_cast<int>(100.0f * a->second.charges_modi) << "% as much charges as a " << std_name << ")";
+       buffer << " (uses " << static_cast<int>(100.0f * a->second.charges_modi) << "%% as much charges as a " << std_name << ")";
    }
    dump->push_back(iteminfo("DESCRIPTION", buffer.str()));
  }
@@ -729,6 +730,46 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
             dump->push_back(iteminfo("DESCRIPTION", buffer.str()));
         }
         break;
+    }
+ }
+ 
+ {
+    std::ostringstream buffer;
+    bool header_printed = false;
+    bool has_recipe_to_make = false;
+    for(recipe_map::const_iterator a = recipes.begin(); a != recipes.end(); ++a) {
+        const recipe_list &recipes = a->second;
+        for(recipe_list::const_iterator b = recipes.begin(); b != recipes.end(); ++b) {
+            const recipe &r = **b;
+            if(!(g == 0 ? ::g : g)->u.knows_recipe(const_cast<recipe*>(&r))) {
+                continue;
+            }
+            has_recipe_to_make |= r.result == type->id;
+            if(!contents.empty() && contents[0].type->id == r.result) {
+                has_recipe_to_make = true;
+            }
+            const std::vector< std::vector<component> > &comps = r.components;
+            for(size_t i = 0; i < comps.size(); i++) {
+                for(size_t j = 0; j < comps[i].size(); j++) {
+                    if(!matches_type(comps[i][j].type) && (contents.empty() || !contents[0].matches_type(comps[i][j].type))) {
+                        continue;
+                    }
+                    if(!header_printed) {
+                        buffer << "Used to make ";
+                        header_printed = true;
+                    } else {
+                        buffer << ", ";
+                    }
+                    buffer << ::name(r.result);
+                }
+            }
+        }
+    }
+    if(header_printed) {
+        dump->push_back(iteminfo("DESCRIPTION", buffer.str()));
+    }
+    if(has_recipe_to_make) {
+        dump->push_back(iteminfo("DESCRIPTION", "There is a recipe to make this"));
     }
  }
 
@@ -2515,7 +2556,7 @@ bool item::matches_type(const itype_id &type_) const {
 			// "pot" item, even if that item has an empty functionalityMap.
 			// But note that "pot" does not match any item that has
 			// the functionality "func:pot", you can therefor enforce
-			// a "real" pot be using "pot" (for example as a compontent),
+			// a "real" pot be using "pot" (for example as a component),
 			// but you should use "func:pot" in the tools-section of the
 			// recipes.
 			return true;

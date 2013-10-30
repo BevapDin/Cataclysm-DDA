@@ -495,27 +495,97 @@ public:
         
         // Called during solution::init
         void init(std::vector<component> &components, bool as_tool, solution &s);
+        void init(component &components, bool as_tool, solution &s);
         void add(component &c, bool as_tool);
         void add_or_merge(const simple_req &rs2);
         void init_pointers();
         void consume(crafting_inventory_t &cinv, std::list<item> &used_items);
     };
 
+    /**
+     * Usage:
+     * 1. make an instance
+     * 2. init the instance (use exactly ONE init*-function)
+     * 3. gather possible matching items, this sets up what
+     * existing items can be used and if a component is available.
+     * 4. either check that all components (or alternatives) are
+     * available with is_possible() and be done.
+     * 4. OR select which items should actually be used (this
+     * may prompt the user for some chooses) with select_items_to_use.
+     * 5. (Only do this after select_items_to_use) serialize the
+     * choosen items with #serialize. To deserialize this call
+     * deserialize after init (and skip gather and select_items_to_use).
+     * 6. After either deserialize or select_items_to_use one may
+     * call consume to actually use up the items.
+     */
     class solution {
     public:
         typedef std::vector<complex_req> CompReqVec;
         CompReqVec complex_reqs;
         double toolfactor;
         
+        solution() { }
+        /**
+         * Calls init_single_req and gather
+         */
+        solution(component &comp, bool as_tool, crafting_inventory_t &cinv);
+        /**
+         * Calls init_need_any and gather
+         */
+        solution(std::vector<component> &comp, bool as_tool, crafting_inventory_t &cinv);
+        
         void serialize(player_activity &activity) const;
         void deserialize(crafting_inventory_t &cinv, player_activity &activity);
+        
         void init(recipe &making);
+        /**
+         * Init this as if from a recipe that contains only one
+         * complex requirement stored in comps.
+         * @param as_tool If this requirement means tools or components.
+         */
+        void init_need_any(std::vector<component> &comps, bool as_tool);
+        /**
+         * Init this as if from a recipe that contains only one
+         * complex requirement stored in comp.
+         * @param as_tool If this requirement means a tool or a component.
+         */
+        void init_single_req(component &comp, bool as_tool);
+        
+        /**
+         * Sets up which actuall items to use. This may ask the user for
+         * input.
+         */
         void select_items_to_use();
+        /**
+         * Find out which items of the crafting_inventory_t can be used.
+         * Must only be called after init.
+         * @param store if true, stores all possible items in the
+         * #candidate_items vector in simple_req, other wise only the
+         * count is stored.
+         */
         void gather(crafting_inventory_t &cinv, bool store);
+        /**
+         * Check if all requirements are fullfilled.
+         * Must only be called after gather.
+         */
         bool is_possible() const;
-        std::string to_string(int flags = simple_req::ts_normal) const;
-        void save(recipe &making) const;
+        /**
+         * Use up the selected items (selected_items in complex_req).
+         * Must only be called after select_items_to_use or after deserialize.
+         */
         void consume(crafting_inventory_t &cinv, std::list<item> &used_items, std::list<item> &used_tools);
+        void consume(crafting_inventory_t &cinv, std::list<item> &used);
+        
+        std::string to_string(int flags = simple_req::ts_normal) const;
+        /**
+         * Write the requirements back into a recipe. Only the tools and
+         * the components vaector of the recipe are overriden.
+         */
+        void save(recipe &making) const;
+    protected:
+        void find_overlays();
+        void erase_empty_reqs();
+        void init_pointers();
     };
     
 protected:
@@ -697,7 +767,7 @@ public:
     
     // Interface for recipes: check that the recipe is possible
     /**
-     * This simply calls has_all_components and has_all_tools
+     * Disspatch everything to the solution class.
      */
     bool has_all_requirements(recipe &making);
     bool has_all_requirements(recipe &making, solution &s);
@@ -744,15 +814,13 @@ public:
      * Basicly the interface to crafting (and construction, and vehicle
      * repair/install).
      * This function checks that the components needed are all available.
-     * See the #has_all, #has_any and #has.
+     * See the #has_any and #has.
      * Note: component::available is set according to the available
      * state (-1, 0 or 1).
      */
     
     // Check that at least one component is available.
     bool has_any_components(std::vector<component> &comps) const;
-    // Check that all components are available
-    bool has_all_components(std::vector<component> &comps) const;
     // Check that the single component is available
     bool has_components(component &comps) const;
     // Also provide a singular form (has_component vs has_component_s_)
@@ -770,7 +838,6 @@ public:
      */
     
     bool has_any_tools(std::vector<component> &tools) const;
-    bool has_all_tools(std::vector<component> &tools) const;
     bool has_tools(component &tool) const;
     bool has_tool(component &tool) const { return has_tools(tool); }
     bool has_tools(const itype_id &type, int count) const;
@@ -801,7 +868,6 @@ public:
      * @return the consumed items.
      */
     std::list<item> consume_any_components(const std::vector<component> &comps);
-    std::list<item> consume_all_components(const std::vector<component> &comps);
     std::list<item> consume_components(const component &comps);
     std::list<item> consume_component(const component &comps) { return consume_components(comps); }
     std::list<item> consume_components(const itype_id &type, int count);
@@ -813,7 +879,6 @@ public:
      * is changed.
      */
     std::list<item> consume_any_tools(const std::vector<component> &tools, bool force_available);
-    std::list<item> consume_all_tools(const std::vector<component> &tools, bool force_available);
     std::list<item> consume_tools(const component &tools, bool force_available);
     std::list<item> consume_tool(const component &tool, bool force_available) { return consume_tools(tool, force_available); }
     std::list<item> consume_tools(const itype_id &type, int charges, bool force_available);
@@ -837,7 +902,7 @@ public:
     
     
     // FIXME remove this, change in calling code
-    void consume_items(const std::vector<component> &comps) { consume_all_components(comps); }
+    void consume_items(const std::vector<component> &comps);
     
     /**
      * This is similar to consume_components, but is used in vehilce

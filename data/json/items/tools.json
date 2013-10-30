@@ -2820,7 +2820,8 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:blade", 0.9, -1], [ "func:CUT-1", 1, -1] ],
+    "functions": [ [ "func:blade", 0.9, 0] ],
+    "qualities": [["CUT", 1]],
     "category": "weapons",
     "use_action": "KNIFE"
   },

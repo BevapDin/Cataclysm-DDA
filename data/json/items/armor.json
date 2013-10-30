@@ -2542,6 +2542,7 @@
         "bashing" : -3,
         "flags" : ["VARSIZE"],
         "coverage" : 20,
+        "use_action" : "TOOL_BELT",
         "material_thickness" : 2
     },
     {

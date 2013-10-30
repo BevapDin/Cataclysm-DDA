@@ -412,7 +412,7 @@ bool map::process_fields_in_submap(game *g, int gridn)
                                     smoke++;
                                 }
 
-                            } else if ((it->made_of("cotton") || it->made_of("wool"))) {
+                            } else if ((it->made_of("cotton") || it->made_of("leather") || it->made_of("fur") || it->made_of("wool"))) {
                                 //Cotton and Wool burn slowly but don't feed the fire much.
                                 if (vol <= cur->getFieldDensity() * 5 || cur->getFieldDensity() == 3) {
                                     cur->setFieldAge(cur->getFieldAge() - 1);

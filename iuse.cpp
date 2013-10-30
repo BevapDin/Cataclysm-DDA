@@ -5854,6 +5854,42 @@ int iuse::rad_badge(game *g, player *p, item *it, bool t)
     return it->type->charges_to_use();
 }
 
+int iuse::tool_belt(game *g, player *p, item *it, bool t)
+{
+    bool can_add = (it->contents.size() < 4);
+    std::vector<std::string> menu_entries;
+    if(can_add) {
+        menu_entries.push_back(std::string(_("Put a tool into the ")) + it->tname());
+    }
+    for(size_t i = 0; i < it->contents.size(); i++) {
+        menu_entries.push_back(std::string(_("Take out the ")) + it->contents[i].tname());
+    }
+    uimenu menu(true, it->tname().c_str(), menu_entries);
+    if(menu.ret == 0 && can_add) {
+        char ch = g->inv_type(_("Put what?"), IC_TOOL);
+        item* put = &(p->i_at(ch));
+        if(put->is_null()) {
+            g->add_msg_if_player(p, _("You do not have that item!"));
+            return 0;
+        }
+        if(put->volume() > 3) {
+            g->add_msg_if_player(p, _("That item is too big!"));
+            return 0;
+        }
+        p->moves -= 60;
+        g->add_msg_if_player(p, _("You put the %s in your %s."), put->tname().c_str(), it->tname().c_str());
+        it->put_in(p->i_rem(ch));
+        return 0;
+    }
+    const int index = can_add ? menu.ret - 1 : menu.ret;
+    if(index < 0 || index >= it->contents.size()) { return 0; }
+    p->moves -= 30;
+    item tool = it->contents[index];
+    p->i_add(tool);
+    it->contents.erase(it->contents.begin() + index);
+    return 0;
+}
+
 int iuse::boots(game *g, player *p, item *it, bool t)
 {
  int choice = -1;

@@ -3446,7 +3446,7 @@ int player::throw_range(signed char ch)
  else if (ch == -2)
   return -1;
  else
-  tmp = inv.item_by_letter(ch);
+  tmp = i_at(ch);
 
  if ((tmp.weight() / 113) > int(str_cur * 15))
   return 0;
@@ -6140,6 +6140,11 @@ char player::lookup_item(char let)
 {
  if (weapon.invlet == let)
   return -1;
+ 
+ for (int i = 0; i < worn.size(); i++) {
+  if (worn[i].invlet == let)
+   return let;
+ }
 
  if (inv.item_by_letter(let).is_null())
   return -2; // -2 is for "item not found"
@@ -6186,7 +6191,7 @@ bool player::consume(game *g, signed char ch)
         }
     } else {
         // Consume item from inventory
-        item& it = inv.item_by_letter(ch);
+        item& it = i_at(ch);
         if (it.is_food_container(this)) {
             to_eat = &(it.contents[0]);
             which = 1;
@@ -6293,9 +6298,9 @@ bool player::consume(game *g, signed char ch)
             weapon.contents.erase(weapon.contents.begin());
             g->add_msg_if_player(this,_("You are now wielding an empty %s."), weapon.tname(g).c_str());
         } else if (which == 0) {
-            inv.remove_item_by_letter(ch);
+            i_rem(ch);
         } else if (which >= 0) {
-            item& it = inv.item_by_letter(ch);
+            item& it = i_at(ch);
             it.contents.erase(it.contents.begin());
             if (!is_npc()) {
                 if (OPTIONS["DROP_EMPTY"] == "no") {
@@ -6560,14 +6565,14 @@ bool player::wield(game *g, signed char ch, bool autodrop)
   return false;
  }
 
- item& it = inv.item_by_letter(ch);
+ item& it = i_at(ch);
  if (it.is_two_handed(this) && !has_two_arms()) {
   g->add_msg(_("You cannot wield a %s with only one arm."),
              it.tname(g).c_str());
   return false;
  }
  if (!is_armed()) {
-  weapon = inv.remove_item_by_letter(ch);
+  weapon = i_rem(ch);
   if (weapon.is_artifact() && weapon.is_tool()) {
    it_artifact_tool *art = dynamic_cast<it_artifact_tool*>(weapon.type);
    g->add_artifact_messages(art->effects_wielded);
@@ -6578,7 +6583,7 @@ bool player::wield(game *g, signed char ch, bool autodrop)
  } else if (volume_carried() + weapon.volume() - it.volume() <
             volume_capacity()) {
   item tmpweap = remove_weapon();
-  weapon = inv.remove_item_by_letter(ch);
+  weapon = i_rem(ch);
   inv.add_item_keep_invlet(tmpweap);
   inv.unsort();
   moves -= 45;
@@ -6592,7 +6597,7 @@ bool player::wield(game *g, signed char ch, bool autodrop)
                      weapon.tname(g).c_str())) {
   g->m.add_item_or_charges(posx, posy, remove_weapon());
   weapon = it;
-  inv.remove_item_by_letter(weapon.invlet);
+  i_rem(weapon.invlet);
   inv.unsort();
   moves -= 30;
   if (weapon.is_artifact() && weapon.is_tool()) {
@@ -7628,9 +7633,6 @@ void player::use(game *g, char let)
             g->add_msg(_("Your %s has %d charges but needs %d."), used->tname(g).c_str(),
                        used->charges, tool->charges_per_use);
         }
-    } else if (used->type->use == &iuse::boots) {
-        used->type->use.call(g, this, used, false);
-        return;
     } else if (used->is_gunmod()) {
         if (skillLevel("gun") == 0) {
             g->add_msg(_("You need to be at least level 1 in the firearms skill before you\
@@ -7759,6 +7761,9 @@ press 'U' while wielding the unloaded gun."), gun->tname(g).c_str());
         return;
     } else if (used->is_book()) {
         read(g, let);
+        return;
+    } else if (used->type->use != &iuse::none) {
+        used->type->use.call(g, this, used, false);
         return;
     } else if (used->is_armor()) {
         wear(g, let);

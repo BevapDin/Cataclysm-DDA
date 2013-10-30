@@ -190,6 +190,7 @@ class iuse
   int simple_off       (game *g, player *p, item *it, bool t);
   int simple_on        (game *g, player *p, item *it, bool t);
   int wood_gas         (game *g, player *p, item *it, bool t);
+  int tool_belt        (game *g, player *p, item *it, bool t);
   int wood_gas_amount(const item &it);
 
 

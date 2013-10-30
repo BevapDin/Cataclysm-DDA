@@ -186,11 +186,28 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
     delwin(w_stats);
     delwin(w_list);
     erase();
+    // Make small/light items be installed faster
+    // storage battery: 20000, frame: 13000, motor: 70000
+    const int standard_weight = 20000;
     switch(sel_cmd) {
         case 'f':
         case 's':
         case 'c':
+        case 'd':
             move_points = 200;
+            break;
+        case 'r':
+            move_points = 20000;
+            if(sel_vehicle_part != 0 && sel_vehicle_part->hp > 0) {
+                const int max_hp = vehicle_part_types[sel_vehicle_part->id].durability;
+                move_points = (move_points * (max_hp - sel_vehicle_part->hp)) / max_hp;
+                //                     max              min
+            } else if(sel_vehicle_part != 0) {
+                const int weight_of_item = g->itypes[vehicle_part_types[sel_vehicle_part->id].item]->weight;
+                move_points = (move_points * weight_of_item) / standard_weight;
+            }
+            //                     max              min
+            move_points = std::min(120000, std::max(5000, move_points));
             break;
         case 'o':
             if(sel_vehicle_part->hp <= 0) {
@@ -207,13 +224,10 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
                 weight_of_item = g->itypes[sel_vpart_info->item]->weight;
             }
             if(weight_of_item != 0) {
-                // Make small/light items be installed faster
-                // storage battery: 20000, frame: 13000, motor: 70000
-                const int standard_weight = 20000;
                 move_points = (move_points * weight_of_item) / standard_weight;
-                //                     max              min
-                move_points = std::min(120000, std::max(5000, move_points));
             }
+            //                     max              min
+            move_points = std::min(120000, std::max(5000, move_points));
             break;
     }
 }

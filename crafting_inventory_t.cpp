@@ -168,6 +168,10 @@ void crafting_inventory_t::solution::consume(crafting_inventory_t &cinv, std::li
     resort_item_vectors();
 }
 
+void crafting_inventory_t::solution::consume(crafting_inventory_t &cinv, std::list<item> &used) {
+    consume(cinv, used, used);
+}
+
 void crafting_inventory_t::solution::select_items_to_use() {
     toolfactor = 0.0;
     for(size_t i = 0; i < complex_reqs.size(); i++) {
@@ -223,6 +227,28 @@ void crafting_inventory_t::gather_input(recipe &making, solution &s, player_acti
     }
 }
 
+crafting_inventory_t::solution::solution(std::vector<component> &comps, bool as_tool, crafting_inventory_t &cinv) {
+    init_need_any(comps, as_tool);
+    gather(cinv, false);
+}
+
+crafting_inventory_t::solution::solution(component &comp, bool as_tool, crafting_inventory_t &cinv) {
+    init_single_req(comp, as_tool);
+    gather(cinv, false);
+}
+
+void crafting_inventory_t::solution::init_need_any(std::vector<component> &comps, bool as_tool) {
+    complex_reqs.resize(1);
+    complex_reqs[0].init(comps, as_tool, *this);
+    complex_reqs[0].init_pointers();
+}
+
+void crafting_inventory_t::solution::init_single_req(component &comp, bool as_tool) {
+    complex_reqs.resize(1);
+    complex_reqs[0].init(comp, as_tool, *this);
+    complex_reqs[0].init_pointers();
+}
+
 void crafting_inventory_t::solution::init(recipe &making) {
     complex_reqs.resize(making.tools.size() + making.components.size());
     size_t nr = 0;
@@ -232,6 +258,20 @@ void crafting_inventory_t::solution::init(recipe &making) {
     for(size_t i = 0; i < making.components.size(); i++, nr++) {
         complex_reqs[nr].init(making.components[i], false, *this);
     }
+    erase_empty_reqs();
+    init_pointers();
+    find_overlays();
+}
+
+void crafting_inventory_t::solution::init_pointers() {
+    // Set up the pointers to the parent
+    for(size_t i = 0; i < complex_reqs.size(); i++) {
+        complex_reqs[i].init_pointers();
+    }
+}
+
+void crafting_inventory_t::solution::erase_empty_reqs() {
+    assert(!complex_reqs.empty());
     // Some complex_req might end up empty, because their content
     // been merged into other other complex_req.
     for(size_t i = 0; i < complex_reqs.size(); i++) {
@@ -241,10 +281,9 @@ void crafting_inventory_t::solution::init(recipe &making) {
         }
     }
     assert(!complex_reqs.empty());
-    // Set up the pointers to the parent
-    for(size_t i = 0; i < complex_reqs.size(); i++) {
-        complex_reqs[i].init_pointers();
-    }
+}
+
+void crafting_inventory_t::solution::find_overlays() {
     // set up overlays
     assert(!complex_reqs.empty());
     for(size_t i = 0; i < complex_reqs.size(); i++) {
@@ -375,6 +414,12 @@ void crafting_inventory_t::complex_req::init(std::vector<component> &components,
     }
     assert(!simple_reqs.empty());
     std::sort(simple_reqs.begin(), simple_reqs.end(), cmp_simple_req);
+}
+
+void crafting_inventory_t::complex_req::init(component &components, bool as_tool, solution &s) {
+    this->as_tool = as_tool;
+    add(components, as_tool);
+    assert(!simple_reqs.empty());
 }
 
 void crafting_inventory_t::simple_req::find_overlays(simple_req &rc) {
@@ -864,6 +909,10 @@ int crafting_inventory_t::count(const requirement &req, int max, int sources) co
             assert(!iter->empty());
             COUNT_IT_(iter->front(), iter->size());
         }
+        for(std::vector<item>::const_iterator iter = p->worn.begin(); iter != p->worn.end();
+            ++iter) {
+            COUNT_IT_(*iter, 1);
+        }
     }
     if(sources & LT_MAP) {
         for(std::list<items_on_map>::const_iterator a = on_map.begin(); a != on_map.end(); ++a) {
@@ -965,7 +1014,7 @@ bool crafting_inventory_t::candidate_t::valid() const {
         case LT_WEAPON:
             return weapon != NULL && !weapon->is_null();
         case LT_INVENTORY:
-            return the_player != NULL && invcount > 0 && the_player->inv.stack_by_letter(invlet).size() >= invcount;
+            return the_player != NULL && invcount > 0 && !the_player->i_at(invlet).is_null();
         case LT_BIONIC:
             return bionic != NULL;
         default:
@@ -1110,7 +1159,7 @@ const item &crafting_inventory_t::candidate_t::get_item() const {
         case LT_WEAPON:
             return *weapon;
         case LT_INVENTORY:
-            return the_player->inv.item_by_letter(invlet);
+            return the_player->i_at(invlet);
         case LT_BIONIC:
             return bionic->the_item;
         default:
@@ -1978,8 +2027,8 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
     switch(location) {
         case LT_INVENTORY:
             for(size_t i = 0; req.count > 0 && i < invcount; i++) {
-                if(req.use(p->inv.item_by_letter(invlet), used_items)) {
-                    p->inv.remove_item_by_letter(invlet);
+                if(req.use(p->i_at(invlet), used_items)) {
+                    p->i_rem(invlet);
                 }
             }
             return;
@@ -2068,6 +2117,9 @@ int compare(const item &a, const item &b) {
         if(c != 0) {
             return -c;
         }
+	} else if(b.is_container() && !b.contents.empty()) {
+		// Dispatch inspection of content to this function call
+		return -compare(b, a);
     }
         
     if(a.type != b.type) {
@@ -2147,6 +2199,12 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
                 candidates.push_back(candidate_t(p, it.invlet, iter->size(), req.type));
             }
         }
+        for(std::vector<item>::const_iterator iter = p->worn.begin(); iter != p->worn.end();
+            ++iter) {
+            if(XMATCH(*iter, 1)) {
+                candidates.push_back(candidate_t(p, iter->invlet, 1, req.type));
+            }
+        }
     }
     if(sources & LT_WEAPON && !p->weapon.is_null()) {
         if(XMATCH(p->weapon, 1)) {
@@ -2195,83 +2253,11 @@ crafting_inventory_t::requirement::requirement(const component &comp, bool as_to
         }
     }
 }
-#if 0
-void crafting_inventory_t::form_from_map(game *g, point origin, int range)
-{
-    int junk = 0;
-    for (int x = origin.x - range; x <= origin.x + range; x++) {
-        for (int y = origin.y - range; y <= origin.y + range; y++) {
-            if (g->m.has_flag(sealed, x, y) ||
-                ((origin.x != x || origin.y != y) &&
-                !g->m.clear_path( origin.x, origin.y, x, y, range, 1, 100, junk ) ) ) {
-                continue;
-            }
-            const point p(x, y);
-            items_on_map items(p, &(g->m.i_at(x, y)));
-            if(!items.items->empty()) {
-                on_map.push_back(items);
-            }
-
-            // Kludges for now!
-            ter_id terrain_id = g->m.ter(x, y);
-            if ((g->m.field_at(x, y).findField(fd_fire)) || (terrain_id == t_lava)) {
-                item fire(g->itypes["fire"], 0);
-                fire.charges = 1;
-                surround.push_back(item_from_surrounding(p, fire));
-            }
-            if (terrain_id == t_water_sh || terrain_id == t_water_dp) {
-                item water(g->itypes["water"], 0);
-                water.charges = 50;
-                surround.push_back(item_from_surrounding(p, water));
-            }
-
-            int vpart = -1;
-            vehicle *veh = g->m.veh_at(x, y, vpart);
-            // include only non-moving cars. This ensures that the car
-            // is still there _after_ the crafting.
-            if (veh && veh->cruise_velocity == 0 && veh->velocity == 0) {
-                const int kpart = veh->part_with_function(vpart, vpc_kitchen);
-                if (kpart >= 0) {
-                    item kitchen(g->itypes["installed_kitchen_unit"], 0);
-                    kitchen.charges = veh->fuel_left("battery", true);
-                    this->vpart.push_back(item_from_vpart(veh, kpart, kitchen));
-
-                    item water(g->itypes["water_clean"], 0);
-                    water.charges = veh->fuel_left("water");
-                    this->vpart.push_back(item_from_vpart(veh, kpart, water));
-                }
-
-                const int cpart = veh->part_with_function(vpart, vpc_cargo);
-                if (cpart >= 0) {
-                    items_in_vehicle_cargo inveh(veh, cpart, &(veh->parts[cpart].items));
-                    if(!inveh.items->empty()) {
-                        in_veh.push_back(inveh);
-                    }
-                }
-            }
-        }
-    }
-}
-#endif
-
-bool crafting_inventory_t::has_all_components(std::vector<component> &comps) const {
-    bool isSomethingMissing = false;
-    for(size_t i = 0; i < comps.size(); i++) {
-        if(!has_components(comps[i])) {
-            isSomethingMissing = true;
-        }
-    }
-    return comps.empty() || !isSomethingMissing;
-}
 
 bool crafting_inventory_t::has_any_components(std::vector<component> &comps) const {
-    bool somethingFound = false;
-    for(size_t i = 0; i < comps.size(); i++) {
-        if(has_components(comps[i])) {
-            somethingFound = true;
-        }
-    }
-    return comps.empty() || somethingFound;
+    if(comps.empty()) { return true; }
+    solution s(comps, false, const_cast<crafting_inventory_t&>(*this));
+    return s.is_possible();
 }
 
 bool crafting_inventory_t::has_components(const itype_id &type, int count) const {
@@ -2279,30 +2265,17 @@ bool crafting_inventory_t::has_components(const itype_id &type, int count) const
     return has_components(comp);
 }
 
-bool crafting_inventory_t::has_components(component &comps) const {
-    return has(comps, false);
+bool crafting_inventory_t::has_components(component &comp) const {
+    std::vector<component> tmpcomps(1, comp);
+    return has_any_components(tmpcomps);
 }
 
 
-
-bool crafting_inventory_t::has_all_tools(std::vector<component> &tools) const {
-    bool isSomethingMissing = false;
-    for(size_t i = 0; i < tools.size(); i++) {
-        if(!has_tools(tools[i])) {
-            isSomethingMissing = true;
-        }
-    }
-    return tools.empty() || !isSomethingMissing;
-}
 
 bool crafting_inventory_t::has_any_tools(std::vector<component> &tools) const {
-    bool somethingFound = false;
-    for(size_t i = 0; i < tools.size(); i++) {
-        if(has_tools(tools[i])) {
-            somethingFound = true;
-        }
-    }
-    return tools.empty() || somethingFound;
+    if(tools.empty()) { return true; }
+    solution s(tools, true, const_cast<crafting_inventory_t&>(*this));
+    return s.is_possible();
 }
 
 bool crafting_inventory_t::has_tools(const itype_id &type, int count) const {
@@ -2316,7 +2289,8 @@ bool crafting_inventory_t::has_tools(const itype_id &type) const {
 }
 
 bool crafting_inventory_t::has_tools(component &tools) const {
-    return has(tools, true);
+    std::vector<component> tmptools(1, tools);
+    return has_any_tools(tmptools);
 }
 
 
@@ -2324,34 +2298,23 @@ bool crafting_inventory_t::has_tools(component &tools) const {
 std::list<item> crafting_inventory_t::consume_any_tools(const std::vector<component> &tools, bool force_available)
 {
     std::list<item> result;
-    for(size_t i = 0; i < tools.size(); i++) {
-        const_cast<std::vector<component>&>(tools)[i].available = 1;
+    if(tools.empty()) { return result; }
+    solution s;
+    s.init_need_any(const_cast<std::vector<component>&>(tools), true);
+    s.gather(const_cast<crafting_inventory_t&>(*this), true);
+    if(s.is_possible()) {
+        s.select_items_to_use();
+        s.consume(*this, result);
+    } else {
+        debugmsg("Attempted to consume_any_tools with no possible tools");
     }
-    consume(tools, force_available ? assume_tools_force_available : assume_tools, result);
-    resort_item_vectors();
-    return result;
-}
-
-std::list<item> crafting_inventory_t::consume_all_tools(const std::vector<component> &tools, bool force_available)
-{
-    std::list<item> result;
-    for(size_t i = 0; i < tools.size(); i++) {
-        std::vector<component> tmpcomps(1, tools[i]);
-        tmpcomps.back().available = 1;
-        consume(tmpcomps, force_available ? assume_tools_force_available : assume_tools, result);
-    }
-    resort_item_vectors();
     return result;
 }
 
 std::list<item> crafting_inventory_t::consume_tools(const component &tools, bool force_available)
 {
-    std::vector<component> tmpcomps(1, tools);
-    tmpcomps.back().available = 1;
-    std::list<item> result;
-    consume(tmpcomps, force_available ? assume_tools_force_available : assume_tools, result);
-    resort_item_vectors();
-    return result;
+    std::vector<component> tmptools(1, tools);
+    return consume_any_tools(tmptools, force_available);
 }
 
 std::list<item> crafting_inventory_t::consume_tools(const itype_id &type, int count, bool force_available) {
@@ -2369,22 +2332,15 @@ std::list<item> crafting_inventory_t::consume_tools(const itype_id &type) {
 std::list<item> crafting_inventory_t::consume_any_components(const std::vector<component> &comps)
 {
     std::list<item> result;
-    for(size_t i = 0; i < comps.size(); i++) {
-        const_cast<std::vector<component>&>(comps)[i].available = 1;
-    }
-    consume(comps, assume_components, result);
-    resort_item_vectors();
-    return result;
-}
-
-std::list<item> crafting_inventory_t::consume_all_components(const std::vector<component> &comps)
-{
-    std::list<item> result;
-    for(size_t i = 0; i < comps.size(); i++) {
-        std::vector<component> tmpcomps(1, comps[i]);
-        tmpcomps.back().available = 1;
-        consume(tmpcomps, assume_components, result);
-        resort_item_vectors();
+    if(comps.empty()) { return result; }
+    solution s;
+    s.init_need_any(const_cast<std::vector<component>&>(comps), false);
+    s.gather(const_cast<crafting_inventory_t&>(*this), true);
+    if(s.is_possible()) {
+        s.select_items_to_use();
+        s.consume(*this, result);
+    } else {
+        debugmsg("Attempted to consume_any_components with no possible components");
     }
     return result;
 }
@@ -2392,11 +2348,7 @@ std::list<item> crafting_inventory_t::consume_all_components(const std::vector<c
 std::list<item> crafting_inventory_t::consume_components(const component &comps)
 {
     std::vector<component> tmpcomps(1, comps);
-    tmpcomps.back().available = 1;
-    std::list<item> result;
-    consume(tmpcomps, assume_components, result);
-    resort_item_vectors();
-    return result;
+    return consume_any_components(tmpcomps);
 }
 
 std::list<item> crafting_inventory_t::consume_components(const itype_id &type, int count) {
@@ -2404,6 +2356,20 @@ std::list<item> crafting_inventory_t::consume_components(const itype_id &type, i
     return consume_components(comp);
 }
 
+void crafting_inventory_t::consume_items(const std::vector<component> &comps) {
+    if(comps.empty()) { return; }
+    recipe r;
+    r.components.resize(comps.size());
+    for(size_t i = 0; i < comps.size(); i++) {
+        r.components[i].push_back(comps[i]);
+    }
+    solution s;
+    s.init(r);
+    s.gather(*this, true);
+    s.select_items_to_use();
+    std::list<item> result;
+    s.consume(*this, result);
+}
 
 
 bool hasQuality(const item &the_item, const std::string &name, int level)

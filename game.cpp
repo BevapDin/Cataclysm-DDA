@@ -6395,6 +6395,15 @@ bool game::refill_vehicle_part (vehicle &veh, vehicle_part *part, bool test)
         in_container = true;
       }
       min_charges = p_itm->charges;
+    } else {
+        for(size_t i = 0; i < u.worn.size(); i++) {
+            if(u.worn[i].is_container() && !u.worn[i].contents.empty() && u.worn[i].contents[0].type->id == itid) {
+                it = &(u.worn[i]);
+                p_itm = &(it->contents[0]);
+                in_container = true;
+                break;
+            }
+        }
     }
   }
   if (it->is_null()) {
