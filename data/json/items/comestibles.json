@@ -1315,6 +1315,7 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
+        "category": "chems",
         "fun" : 0
     },
     {

@@ -6154,6 +6154,9 @@ void game::close()
     int closex, closey;
     if (!choose_adjacent(_("Close where?"), closex, closey))
         return;
+    if(closex == 0 && closey == 0) {
+        return;
+    }
 
     bool didit = false;
 
@@ -6723,6 +6726,16 @@ void game::examine()
   int vpkitchen = veh->part_with_feature(veh_part, "KITCHEN", true);
   int vpweldrig = veh->part_with_feature(veh_part, "WELDRIG", true);
   int vpcraftrig = veh->part_with_feature(veh_part, "CRAFTRIG", true);
+  
+    int vpkiln = veh->part_with_feature(veh_part, "KILN");
+    if(vpkiln >= 0 && veh->examine(this, &u, vpkiln)) {
+        return;
+    }
+    int vpfunnel = veh->part_with_feature(veh_part, "FUNNEL");
+    if(vpfunnel >= 0 && veh->examine(this, &u, vpfunnel)) {
+        return;
+    }
+  
   if(veh->can_tow(this, other, other_part) &&
       query_yn(_("Tow the vehicles together?"))) {
       veh->tow_to(this, other, other_part, &u);
@@ -7950,7 +7963,7 @@ void game::pickup(int posx, int posy, int min)
                         //Will be -1 if no battery at all
                         item tmp_purifier( g->itypes["water_purifier"], 0 );
                         // Drain a ton of power
-                        tmp_purifier.charges = veh->drain( "battery", 100 );
+                        tmp_purifier.charges = veh->drain( "battery", 1000 );
                         if( tmp_purifier.is_tool() ) {
                             it_tool * tmptool = static_cast<it_tool*>((&tmp_purifier)->type);
                             if ( tmp_purifier.charges >= tmptool->charges_per_use ) {

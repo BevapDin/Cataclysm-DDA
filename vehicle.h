@@ -537,6 +537,8 @@ public:
     int cached_gen_turn;
     
     void sort_parts();
+    // returns true if examine was done
+    bool examine(game *g, player *p, int part);
 };
 
 #endif

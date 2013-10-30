@@ -809,6 +809,18 @@ public:
         std::list<item> &used_items,
         std::list<item> &used_tools
     );
+    
+    void gather_and_consume(
+        recipe &making,
+        std::list<item> &used_items,
+        std::list<item> &used_tools
+    );
+    void gather_and_consume(
+        recipe &making,
+        solution &s,
+        std::list<item> &used_items,
+        std::list<item> &used_tools
+    );
 
     /**
      * Basicly the interface to crafting (and construction, and vehicle
@@ -919,5 +931,7 @@ private:
     mutable CacheMap counted_by_charges;
     mutable CacheMap counted_by_amount;
 };
+
+extern void list_missing_ones(std::ostream &stream, const recipe &r);
 
 #endif

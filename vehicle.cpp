@@ -2553,12 +2553,12 @@ void vehicle::place_spawn_items()
     }
 }
 
-void increase_bday(std::vector<item> &list) {
+void increase_bday(std::vector<item> &list, int duration) {
     for(size_t i = 0; i < list.size(); i++) {
         item &it = list[i];
         // this works for all kind of items even non-food
-        it.bday++;
-        increase_bday(it.contents);
+        it.bday += duration;
+        increase_bday(it.contents, duration);
     }
 }
 
@@ -2582,6 +2582,20 @@ void vehicle::gain_moves (int mp)
     }
 
     refill ("battery", solar_power());
+    
+    int rain_chance = 0;
+    bool acid_rain = false;
+    if(g->weather == WEATHER_DRIZZLE) {
+        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(4);
+    } else if(g->weather >= WEATHER_RAINY && g->weather <= WEATHER_LIGHTNING) {
+        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(8);
+    } else if(g->weather == WEATHER_ACID_DRIZZLE) {
+        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(4);
+        acid_rain = true;
+    } else if(g->weather == WEATHER_ACID_RAIN) {
+        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(8);
+        acid_rain = true;
+    }
 
     // check for smoking parts
     for (int p = 0; p < parts.size(); p++)
@@ -2609,12 +2623,37 @@ void vehicle::gain_moves (int mp)
                 }
             }
         }
+        if(rain_chance > 0 && vp.hp > 0 && part_flag(p, "FUNNEL") && one_in(rain_chance)) {
+            if(parts[p].items.empty()) {
+                parts[p].items.push_back(item(item_controller->find_template("jerrycan"), 0));
+            }
+            parts[p].items.front().add_rain_to_container(acid_rain, 1);
+        }
         if(vp.hp > 0 && vp.active() && part_flag(p, "FRIDGE")) {
+            // Drain energy under all circumstances
             const int fuel_drained = drain("battery", 10);
-            if(fuel_drained == 10 && !one_in(10)) {
+            if(fuel_drained != 10 || vp.items.empty()) {
+                continue;
+            }
+            if(vp.amount == 0) {
+                // Init to previous turn
+                vp.amount = ((int) g->turn) - 1;
+            }
+            // turn_diff is used incases the vehicle got left the reality-bubble
+            // in that case the turn_diff will be > 1
+            int turn_diff = ((int) g->turn) - vp.amount;
+            vp.amount = (int) g->turn;
+            if(turn_diff < 10 && !one_in(10)) {
+                // Ups did not work in 10% of all turns -> aging still happens
+                continue;
+            }
+            if(turn_diff >= 10) {
+                turn_diff = (turn_diff * 9) / 10; // Age slower but still age
+            }
+            if(!one_in(10)) {
                 // Food still gets bad, but slower:
                 // fridge works only 90% of the time
-                increase_bday(parts[p].items);
+                increase_bday(parts[p].items, turn_diff);
             }
         }
         if (turret_mode) { // handle turrets
@@ -3034,6 +3073,15 @@ void vehicle::close(int part_index)
 
 void vehicle::open_or_close(int part_index, bool opening)
 {
+    if(!opening) {
+        const int x = global_x() + parts[part_index].precalc_dx[0];
+        const int y = global_y() + parts[part_index].precalc_dy[0];
+        if(g->npc_at(x, y) != -1 || g->mon_at(x, y) != -1 || (g->u.posx == x && g->u.posy == y)) {
+            g->add_msg("There is someone in that door");
+            return;
+        }
+    }
+    
   parts[part_index].open = opening ? 1 : 0;
   insides_dirty = true;
 
@@ -3397,4 +3445,93 @@ void vehicle::untow(game *g, int part, player *p) {
     new_veh->insides_dirty = true;
     g->m.update_vehicle_cache(new_veh, true);
     p->moves -= 300;
+}
+
+#include "crafting_inventory_t.h"
+#include "crafting.h"
+extern void print_list(std::ostream &buffer, std::list<item> &items);
+
+bool vehicle::examine(game *g, player *p, int part) {
+    assert(part >= 0);
+    vehicle_part &vp = parts[part];
+    vpart_info &vpi = vehicle_part_types[vp.id];
+    if(vpi.has_flag("KILN")) {
+        crafting_inventory_t cinv(g, p);
+        // recipe is used to check for components
+        // it is automaticly copied from a recipe loaded with json
+        static recipe charcoal_recipe;
+        if(charcoal_recipe.components.empty()) {
+            recipe *r = recipe_by_name("charcoal");
+            if(r == 0) {
+                // If there is no recipe for charcoal, assume this as default
+                charcoal_recipe.components.resize(1);
+                charcoal_recipe.components[0].push_back(component("2x4", 3));
+                charcoal_recipe.time = 60000;
+                charcoal_recipe.count = 1;
+            } else {
+                charcoal_recipe.components = r->components;
+                charcoal_recipe.time = r->time;
+                charcoal_recipe.count = r->count;
+            }
+        }
+        if(vp.items.empty()) {
+            if(!cinv.has_all_requirements(charcoal_recipe)) {
+                std::ostringstream buffer;
+                buffer << _("You need this to make charcoal:\n");
+                ::list_missing_ones(buffer, charcoal_recipe);
+                popup_top(buffer.str().c_str());
+                return false;
+            }
+            if(!query_yn(_("Put items into the kiln?"))) {
+                return false;
+            }
+            std::ostringstream buffer;
+            buffer << _("You put some items into the kiln: ");
+            std::list<item> items;
+            cinv.gather_and_consume(charcoal_recipe, items, items);
+            print_list(buffer, items);
+            for(std::list<item>::iterator a = items.begin(); a != items.end(); ++a) {
+                vp.items.push_back(*a);
+                vp.items.back().bday = (int) g->turn;
+            }
+            g->add_msg_if_player(p, buffer.str().c_str());
+            return true;
+        } else if(vp.items[0].type->id != "charcoal") {
+            const int age = (int) g->turn - vp.items[0].bday;
+            const int time_to_do = charcoal_recipe.time - age * 100;
+            if(time_to_do > 0) {
+                g->add_msg_if_player(p, "The kiln is still working (for at least %i minutes)", time_to_do / (10 * 100));
+                return false;
+            }
+            // Done, make charcoal
+            vp.items.clear();
+            item newit(item_controller->find_template("charcoal"), (int) g->turn);
+            if(charcoal_recipe.count > 0) {
+                newit.charges *= charcoal_recipe.count;
+            }
+            vp.items.push_back(newit);
+        }
+        assert(!vp.items.empty() && vp.items[0].type->id == "charcoal");
+        if(!query_yn(_("The kiln contains %s (%i) - grab it?"), vp.items[0].type->name.c_str(), vp.items[0].charges)) {
+            return false;
+        }
+        p->add_or_drop(vp.items[0], g);
+        vp.items.clear();
+        return true;
+    }
+    if(vpi.has_flag("FUNNEL")) {
+        if(vp.items.empty() || vp.items[0].contents.empty() || vp.items[0].contents[0].charges == 0) {
+            g->add_msg_if_player(p, "The funnel is empty");
+            return false;
+        }
+        if(!query_yn(_("The funnel has collected %s (%i) - fill it into a container?"), vp.items[0].contents[0].type->name.c_str(), vp.items[0].contents[0].charges)) {
+            return false;
+        }
+        if(!g->handle_liquid(vp.items[0].contents[0], false, false)) {
+            return true;
+        }
+        vp.items[0].contents.clear();
+        return true;
+    }
+    return false;
 }

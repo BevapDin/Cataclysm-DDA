@@ -192,7 +192,6 @@ void game::recraft()
 }
 
 // See crafting_inventory_t.cpp
-extern void list_missing_ones(std::ostream &, const recipe &);
 extern const std::string &name(const itype_id &type);
 
 //TODO clean up this function to give better status messages (e.g., "no fire available")

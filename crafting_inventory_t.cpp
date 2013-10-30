@@ -180,6 +180,26 @@ void crafting_inventory_t::solution::select_items_to_use() {
     }
 }
 
+void crafting_inventory_t::gather_and_consume(recipe &making, std::list<item> &used_items, std::list<item> &used_tools) {
+    solution s;
+    gather_and_consume(making, s, used_items, used_tools);
+}
+
+void crafting_inventory_t::gather_and_consume(
+    recipe &making,
+    solution &s,
+    std::list<item> &used_items,
+    std::list<item> &used_tools
+) {
+    if(making.tools.empty() && making.components.empty()) {
+        return;
+    }
+    s.init(making);
+    s.gather(*this, true);
+    s.select_items_to_use();
+    s.consume(*this, used_items, used_tools);
+}
+
 void crafting_inventory_t::gather_input(recipe &making, player_activity &activity) {
     solution s;
     gather_input(making, s, activity);
