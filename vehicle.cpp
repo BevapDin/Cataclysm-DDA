@@ -1381,7 +1381,7 @@ int vehicle::total_mass()
 void vehicle::center_of_mass(int &x, int &y)
 {
     float xf = 0, yf = 0;
-    int m_total = total_mass();
+    int m_total = 0;
     for (int i = 0; i < parts.size(); i++)
     {
         int m_part = 0;
@@ -1394,7 +1394,9 @@ void vehicle::center_of_mass(int &x, int &y)
         }
         xf += parts[i].precalc_dx[0] * m_part / 1000;
         yf += parts[i].precalc_dy[0] * m_part / 1000;
+        m_total += m_part;
     }
+    m_total = m_total / 1000;
     xf /= m_total;
     yf /= m_total;
     x = int(xf + 0.5); //round to nearest
@@ -2826,6 +2828,9 @@ int vehicle::damage (int p, int dmg, int type, bool aimed)
 
 void vehicle::damage_all (int dmg1, int dmg2, int type, const point &impact)
 {
+    if(g->u.controlling_vehicle && g->m.veh_at(g->u.posx, g->u.posy) == this) {
+        g->add_msg("Your %s takes %d-%d damage", name.c_str(), dmg1, dmg2);
+    }
     if (dmg2 < dmg1) { std::swap(dmg1, dmg2); }
     if (dmg1 < 1) { return; }
     for (int p = 0; p < parts.size(); p++) {

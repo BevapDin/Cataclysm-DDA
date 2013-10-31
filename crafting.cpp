@@ -1053,7 +1053,7 @@ void game::complete_craft()
 {
  recipe* making = recipe_by_index(u.activity.index); // Which recipe is it?
 
-
+ craft_count[making->ident]++;
 
  if(making->noise > 0) {
   sound(u.posx, u.posy, making->noise, making->noise_string);

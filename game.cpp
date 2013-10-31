@@ -352,6 +352,7 @@ void game::setup()
 
  // reset kill counts
  kills.clear();
+ craft_count.clear();
 // Set the scent map to 0
  for (int i = 0; i < SEEX * MAPSIZE; i++) {
   for (int j = 0; j < SEEX * MAPSIZE; j++)
@@ -3543,6 +3544,75 @@ void game::disp_kills()
    vert = 42;
   }
   mvwprintz(w, i - vert, hori, types[i]->color, "%c %s", types[i]->sym, types[i]->name.c_str());
+  if (count[i] >= 10)
+   horimove = -1;
+  if (count[i] >= 100)
+   horimove = -2;
+  if (count[i] >= 1000)
+   horimove = -3;
+  mvwprintz(w, i - vert, hori + 22 + horimove, c_white, "%d", count[i]);
+  totalkills += count[i];
+  horimove = 0;
+ }
+ // Display total killcount at top of window
+ mvwprintz(w, 1, 44, c_white, "%d", totalkills);
+
+ wrefresh(w);
+ getch();
+ werase(w);
+ wrefresh(w);
+ delwin(w);
+ refresh_all();
+ disp_craft_count();
+}
+
+void game::disp_craft_count()
+{
+ WINDOW *w = newwin(FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
+                    (TERMY > FULL_SCREEN_HEIGHT) ? (TERMY-FULL_SCREEN_HEIGHT)/2 : 0,
+                    (TERMX > FULL_SCREEN_WIDTH) ? (TERMX-FULL_SCREEN_WIDTH)/2 : 0);
+
+ wborder(w, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
+            LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
+
+ std::vector<recipe *> types;
+ std::vector<int> count;
+ for (std::map<std::string, int>::iterator kill = craft_count.begin(); kill != craft_count.end(); ++kill){
+    recipe *r = recipe_by_name(kill->first);
+    if(r != 0) {
+        types.push_back(r);
+        count.push_back(kill->second);
+    }
+ }
+
+ mvwprintz(w, 1, 32, c_white, _("Crafting count:"));
+
+ if (types.size() == 0) {
+  mvwprintz(w, 2, 2, c_white, _("You haven't crafted anything yet!"));
+  wrefresh(w);
+  getch();
+  werase(w);
+  wrefresh(w);
+  delwin(w);
+  refresh_all();
+  return;
+ }
+ int totalkills = 0;
+ int hori = 1;
+ int horimove = 0;
+ int vert = -2;
+ // display individual kill counts
+ for (int i = 0; i < types.size(); i++) {
+  hori = 1;
+  if (i > 21) {
+   hori = 28;
+   vert = 20;
+  }
+  if( i > 43) {
+   hori = 56;
+   vert = 42;
+  }
+  mvwprintz(w, i - vert, hori, c_white, "%s", item_controller->find_template(types[i]->result)->name.c_str());
   if (count[i] >= 10)
    horimove = -1;
   if (count[i] >= 100)

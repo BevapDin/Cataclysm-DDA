@@ -543,6 +543,7 @@ void load_artifacts(std::string worldname); // Load artifact data
 // On-request draw functions
   void draw_overmap();     // Draws the overmap, allows note-taking etc.
   void disp_kills();       // Display the player's kill counts
+  void disp_craft_count();
   void disp_NPCs();        // Currently UNUSED.  Lists global NPCs.
   void list_missions();    // Listed current, completed and failed missions.
 
@@ -607,6 +608,7 @@ void load_artifacts(std::string worldname); // Load artifact data
   int nulscent;    // Returned for OOB scent checks
   std::vector<event> events;         // Game events to be processed
   std::map<std::string, int> kills;         // Player's kill count
+  std::map<std::string, int> craft_count;         // How often a recipe has been crafted
   std::string last_action;  // The keypresses of last turn
   int moves_since_last_save;
   int item_exchanges_since_save;

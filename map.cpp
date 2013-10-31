@@ -670,7 +670,7 @@ bool map::vehproceed(game* g){
         epicenter2.y /= coll_parts_cnt;
 
 
-        if (dmg2_part > 100) {
+        if (dmg2_part > 1000) {
             // shake veh because of collision
             veh2->damage_all(dmg2_part / 2, dmg2_part, 1, epicenter2);
         }
@@ -1126,17 +1126,46 @@ bool map::trans(const int x, const int y)
  return false; //failsafe block vision
 }
 
+inline bool obstacle_non_open_door(vehicle *veh, int part) {
+    const int dx = veh->parts[part].mount_dx;
+    const int dy = veh->parts[part].mount_dy;
+    bool obstacle = false;
+    bool open_door = false;
+    static const std::string obstacle_flag("OBSTACLE");
+    static const std::string openable_flag("OPENABLE");
+    for (size_t i = 0; i < veh->parts.size(); i++) {
+        if (veh->parts[i].hp <= 0) {
+            continue;
+        }
+        if (veh->parts[i].mount_dx == dx && veh->parts[i].mount_dy == dy) {
+            vpart_info& vi = vehicle_part_types[veh->parts[i].id];
+            if(vi.has_flag(obstacle_flag)) {
+                obstacle = true;
+            }
+            if(vi.has_flag(openable_flag) && veh->parts[i].open) {
+                open_door = true;
+            }
+        }
+    }
+    return obstacle && !open_door;
+}
+
 bool map::has_flag(const std::string &flag, const int x, const int y)
 {
  if ("BASHABLE" == flag) {
   int vpart;
   vehicle *veh = veh_at(x, y, vpart);
+  if(veh && obstacle_non_open_door(veh, vpart)) {
+      return true;
+  }
+#if 0
   if (veh && veh->parts[vpart].hp > 0 && // if there's a vehicle part here...
       veh->part_with_feature (vpart, "OBSTACLE") >= 0) {// & it is obstacle...
    const int p = veh->part_with_feature (vpart, "OPENABLE");
    if (p < 0 || !veh->parts[p].open) // and not open door
     return true;
   }
+#endif
  }
  return (terlist[ter(x, y)].has_flag(flag) || (furnlist[furn(x, y)].has_flag(flag)));
 }

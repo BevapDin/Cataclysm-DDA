@@ -128,6 +128,12 @@ void game::serialize(std::ofstream & fout) {
             killmap[kill->first] = pv(kill->second);
         }
         data["kills"] = pv( killmap );
+        
+        std::map<std::string, picojson::value> craftmap;
+        for (std::map<std::string, int>::iterator kill = craft_count.begin(); kill != craft_count.end(); ++kill){
+            craftmap[kill->first] = pv(kill->second);
+        }
+        data["craft_count"] = pv( craftmap );
 
         data["player"] = pv( u.json_save(true) );
 
@@ -260,6 +266,13 @@ void game::unserialize(std::ifstream & fin) {
             picojson::object * odata = pgetmap(pdata,"kills");
             for( picojson::object::const_iterator it = odata->begin(); it != odata->end(); ++it) {
                 kills[it->first] = (int)it->second.get<double>();
+            }
+            
+            picojson::object * cdata = pgetmap(pdata,"craft_count");
+            if(cdata != 0) {
+                for( picojson::object::const_iterator it = cdata->begin(); it != cdata->end(); ++it) {
+                    craft_count[it->first] = (int)it->second.get<double>();
+                }
             }
 
             u.json_load( pdata["player"], this);
