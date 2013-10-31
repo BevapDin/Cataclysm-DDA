@@ -3648,6 +3648,10 @@ bool map::loadn(game *g, const int worldx, const int worldy, const int worldz,
 
           for(std::vector<item, std::allocator<item> >::iterator it = tmpsub->itm[x][y].begin();
               it != tmpsub->itm[x][y].end();) {
+              if(it->made_of(LIQUID) && it->type->id != "water") {
+                  it = tmpsub->itm[x][y].erase(it);
+                  continue;
+              }
               if ( do_container_check == true ) { // cannot link trap to mapitems
                   int itvol = it->is_funnel_container(maxvolume); // big
                   if ( itvol > maxvolume ) {                      // biggest
@@ -4180,6 +4184,10 @@ void map::check_spoiled(std::vector<item> &items)
     {
         if(it->active) {
             ++it;
+            continue;
+        }
+        if(it->made_of(LIQUID) && it->type->id != "water") {
+            it = items.erase(it);
             continue;
         }
         it_comest *food = dynamic_cast<it_comest *>(it->type);

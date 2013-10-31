@@ -966,13 +966,16 @@ std::vector<int> vehicle::parts_at_relative (int dx, int dy)
 
 int vehicle::part_with_feature (int part, const std::string &flag, bool unbroken)
 {
-    if (part_flag(part, flag)) {
+    if (part_flag(part, flag)/* && (!unbroken || parts[part].hp > 0)*/) {
         return part;
     }
-    std::vector<int> parts_here = parts_at_relative(parts[part].mount_dx, parts[part].mount_dy);
-    for (int i = 0; i < parts_here.size(); i++) {
-        if (part_flag(parts_here[i], flag) && (!unbroken || parts[parts_here[i]].hp > 0)) {
-            return parts_here[i];
+    const int dx = parts[part].mount_dx;
+    const int dy = parts[part].mount_dy;
+    for (int i = 0; i < parts.size(); i++) {
+        if (parts[i].mount_dx == dx && parts[i].mount_dy == dy) {
+            if (part_flag(i, flag) && (!unbroken || parts[i].hp > 0)) {
+                return i;
+            }
         }
     }
     return -1;
@@ -2635,26 +2638,28 @@ void vehicle::gain_moves (int mp)
             if(fuel_drained != 10 || vp.items.empty()) {
                 continue;
             }
+            // turn_diff is used incases the vehicle got left the reality-bubble
+            // in that case the turn_diff will be > 1
+            int turn_diff;
             if(vp.amount == 0) {
                 // Init to previous turn
                 vp.amount = ((int) g->turn) - 1;
+                turn_diff = 1;
+            } else {
+                turn_diff = ((int) g->turn) - vp.amount;
+                vp.amount = (int) g->turn;
+                if(turn_diff < 10) {
+                    if(one_in(10)) {
+                        // Ups did not work in 10% of all turns -> aging still happens
+                        continue;
+                    }
+                } else if(turn_diff >= 10) {
+                    turn_diff = (turn_diff * 9) / 10; // Age slower but still age
+                }
             }
-            // turn_diff is used incases the vehicle got left the reality-bubble
-            // in that case the turn_diff will be > 1
-            int turn_diff = ((int) g->turn) - vp.amount;
-            vp.amount = (int) g->turn;
-            if(turn_diff < 10 && !one_in(10)) {
-                // Ups did not work in 10% of all turns -> aging still happens
-                continue;
-            }
-            if(turn_diff >= 10) {
-                turn_diff = (turn_diff * 9) / 10; // Age slower but still age
-            }
-            if(!one_in(10)) {
-                // Food still gets bad, but slower:
-                // fridge works only 90% of the time
-                increase_bday(parts[p].items, turn_diff);
-            }
+            // Food still gets bad, but slower:
+            // fridge works only 90% of the time
+            increase_bday(parts[p].items, turn_diff);
         }
         if (turret_mode) { // handle turrets
             fire_turret (p);

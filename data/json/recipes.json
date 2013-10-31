@@ -6759,7 +6759,11 @@
   "autolearn": true,
   "tools": [
     [
-      [ "chemistry_set", 50 ]
+      [ "func:hotplate", 50 ]
+    ],
+    [
+      [ "chemistry_set", -1 ],
+      [ "func:pot", -1 ]
     ]
   ],
   "components": [
@@ -6778,7 +6782,11 @@
   "autolearn": true,
   "tools": [
     [
-      [ "chemistry_set", 50 ]
+      [ "func:hotplate", 50 ]
+    ],
+    [
+      [ "chemistry_set", -1 ],
+      [ "func:pot", -1 ]
     ]
   ],
   "components": [
@@ -6831,7 +6839,11 @@
   "autolearn": true,
   "tools": [
     [
-      [ "chemistry_set", 50 ]
+      [ "func:hotplate", 50 ]
+    ],
+    [
+      [ "chemistry_set", -1 ],
+      [ "func:pot", -1 ]
     ]
   ],
   "components": [
