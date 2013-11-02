@@ -1525,7 +1525,7 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
             if(req(can) < count) {
                 continue;
             }
-            if(as_tool && req.ctype == C_AMOUNT && bestTool.first.first != -2) {
+            if(as_tool && req.ctype == C_AMOUNT) {
                 const float time_modi = can.get_time_modi();
                 if(bestTool.first.first == -1 || time_modi < bestTool.first.second) {
                     // can is better
@@ -1533,8 +1533,11 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
                     bestTool.first.second = time_modi;
                     bestTool.second = &can;
                 } else if(time_modi == bestTool.first.second) {
-                    // Equally good, let the used decide
-                    bestTool.first.first = -2;
+                    // Equally good, and different item types, let the used decide
+                    assert(bestTool.second != 0);
+                    if(can.get_item().type != bestTool.second->get_item().type) {
+                        bestTool.first.first = -2;
+                    }
                 }
             }
             if(can.usageType != "water_clean" && can.usageType != "water") {
@@ -1572,7 +1575,7 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
             optionsIndizes.push_back(std::make_pair(single_choise, i));
         } else if(!all_equal(candidate_items)) {
             // several items with differing properties - list by location,
-            options.push_back(buffer.str() + " different items possible");
+            options.push_back(buffer.str() + "different items possible");
             optionsIndizes.push_back(std::make_pair(ask_again, i));
         } else {
             // several items, they are all of the same type and same

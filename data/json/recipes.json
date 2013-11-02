@@ -778,19 +778,13 @@
   "autolearn": true,
   "tools": [
       [
-      [ "rock", -1 ],
-      [ "primitive_hammer", -1 ],
-      [ "hammer", -1 ],
-      [ "hatchet", -1 ],
-      [ "toolset", -1 ]
+      [ "func:hammer", -1 ]
       ],
       [
-      ["hacksaw", -1]
+      [ "func:hacksaw", -1]
       ],
       [
-      [ "welder", 20 ],
-      [ "welder_crude", 20 ],
-      [ "toolset", 2 ]
+      [ "func:welder", 20 ]
       ]
       ],
   "components":
@@ -4068,6 +4062,54 @@
   ]
 },{
         "type" : "recipe",
+  "result": "protein_shake",
+  "category": "CC_DRINK",
+  "skill_used": "cooking",
+  "id_suffix": "from_scrap",
+  "difficulty": 0,
+  "time": 4000,
+  "reversible": false,
+  "autolearn": true,
+  "count": 4,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+    [
+      [ "func:dehydrator", 50 ]
+    ],
+    [
+      [ "func:hotplate", 30 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ],
+    [
+      [ "func:pot", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "meat", 2 ]
+    ],
+    [
+      [ "water", 4 ],
+      [ "water_clean", 4 ]
+    ],
+    [
+      [ "strawberries", 4 ],
+      [ "blueberries", 4 ],
+      [ "orange", 4 ],
+      [ "lemon", 4 ],
+      [ "banana", 4 ],
+      [ "apple", 4 ],
+      [ "rehydrated_fruit", 4 ],
+      [ "dry_fruit", 4 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "dry_veggy",
   "category": "CC_FOOD",
   "skill_used": "cooking",
@@ -6674,8 +6716,7 @@
   "autolearn": true,
   "tools": [
     [
-      ["screwdriver", -1],
-      ["toolset", -1]
+      ["func:screwdriver", -1]
     ]
   ],
   "components": [
@@ -14651,7 +14692,7 @@
   "qualities" : [
     {"id":"CUT","level":1,"amount":1}
   ],
-  "tools": [ [ ["hammer", -1], ["toolset", -1]  ],
+  "tools": [ [ ["func:hammer", -1]  ],
       [
       ["tongs", -1]
       ],
@@ -14662,7 +14703,7 @@
       ["anvil", -1]
       ],
       [
-      ["forge", 150], ["char_forge", 30]
+      ["func:forge", 150]
       ]
       ],
   "components":

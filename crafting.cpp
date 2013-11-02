@@ -124,6 +124,7 @@ void load_recipe(JsonObject &jsobj)
     for(std::vector<quality_requirement>::const_iterator a = rec->qualities.begin(); a != rec->qualities.end(); ++a) {
         std::ostringstream buffer;
         buffer << "func:" << a->id << ":" << a->level;
+        if(buffer.str() == "func:CUT:1") { buffer.str(std::string("func:blade")); }
         std::vector<component> tool_choices;
         tool_choices.push_back(component(buffer.str(), -1));
         rec->tools.push_back(tool_choices);
@@ -1336,7 +1337,7 @@ void game::complete_disassemble()
       ammodrop = item(dis_item->curammo, turn);
       ammodrop.charges = dis_item->charges;
       if (ammodrop.made_of(LIQUID))
-        handle_liquid(ammodrop, false, false);
+        while(!handle_liquid(ammodrop, false, false)) { ; }
       else
         m.add_item_or_charges(u.posx, u.posy, ammodrop);
     }
@@ -1349,7 +1350,7 @@ void game::complete_disassemble()
           ammodrop.charges /= 500;
       }
       if (ammodrop.made_of(LIQUID))
-        handle_liquid(ammodrop, false, false);
+        while(!handle_liquid(ammodrop, false, false)) { ; }
       else
         m.add_item_or_charges(u.posx, u.posy, ammodrop);
     }

@@ -100,7 +100,7 @@ void game::init_data()
  dout() << "Game initialized.";
 
  try {
- if(!json_good())
+ if(!picojson::get_last_error().empty())
      throw (std::string) picojson::get_last_error();
  // Gee, it sure is init-y around here!
     init_data_structures(); // initialize cata data structures
@@ -2764,6 +2764,7 @@ void game::load_artifacts_from_file(std::ifstream *f)
         }
 
         jo.finish();
+        artifact_json.skip_separator();
     }
 }
 
@@ -8811,8 +8812,9 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
             }
         }
     }
+    // reset this, if filling the container succeeds it will be set again
+    last_char = '\0';
     if(ch == '\0') {
-        last_char = '\0';
         std::stringstream text;
         text << _("Container for ") << liquid.tname(this);
         ch = inv_type(text.str().c_str(), IC_CONTAINER);

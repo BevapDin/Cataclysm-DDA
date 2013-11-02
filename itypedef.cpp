@@ -235,13 +235,13 @@ BIO_SINGLE("bio_torsionratchet", 3800, c_yellow, 4);
 // utilities
 #define BIO_SINGLE_TOOLSET(tool,price,color,difficulty) \
     BIO_SINGLE("bio_tools_" tool, price,color,difficulty)
-BIO_SINGLE_TOOLSET("press", 8000, c_ltgray, 2);
+BIO_SINGLE_TOOLSET("press", 8000, c_ltgray, 7);
 BIO_SINGLE_TOOLSET("knife", 8000, c_ltgray, 2);
 BIO_SINGLE_TOOLSET("screwdriver", 8000, c_ltgray, 2);
 BIO_SINGLE_TOOLSET("wrench", 8000, c_ltgray, 5);
 BIO_SINGLE_TOOLSET("hacksaw", 8000, c_ltgray, 6);
 BIO_SINGLE_TOOLSET("hammer", 8000, c_ltgray, 3);
-BIO_SINGLE_TOOLSET("welder", 8000, c_ltgray, 6);
+BIO_SINGLE_TOOLSET("welder", 8000, c_ltgray, 7);
 BIO_SINGLE_TOOLSET("hotplate", 8000, c_ltgray, 5);
 BIO_SINGLE_TOOLSET("soldering_iron", 8000, c_ltgray, 5);
 BIO_SINGLE("bio_storage", 4000, c_ltgray, 7);

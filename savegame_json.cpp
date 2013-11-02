@@ -1214,7 +1214,7 @@ bool item::json_load(picojson::value & parsed, game * g)
         debugmsg("Invalid item type: %s ", parsed.serialize().c_str() );
         idtmp = "null";
     }
-    if(!item_controller->has_template(idtmp)) {
+    if(!item_controller->has_template(idtmp) && g->itypes.count(idtmp) == 0) {
         debugmsg("Unknown item type: %s ", idtmp.c_str() );
     }
 

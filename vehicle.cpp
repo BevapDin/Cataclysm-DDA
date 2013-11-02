@@ -1162,6 +1162,7 @@ nc_color vehicle::part_color (int p)
         }
 
     }
+    return col;
 
     //Invert colors for cargo parts with stuff in them
     int cargo_part = part_with_feature(p, "CARGO");
