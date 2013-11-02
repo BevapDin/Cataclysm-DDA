@@ -5,7 +5,7 @@
 #include "line.h"
 #include "bodypart.h"
 #include "material.h"
-#include "catajson.h"
+#include "json.h"
 #include "monstergenerator.h"
 #include <algorithm>
 
@@ -1526,7 +1526,7 @@ void mattack::upgrade(game *g, monster *z)
            break;
   case  6:
   case  7:
-  case  8: newtype = "mon_zombie_fast";
+  case  8: newtype = "mon_zombie_hunter";
            break;
   case  9: newtype = "mon_zombie_brute";
            break;

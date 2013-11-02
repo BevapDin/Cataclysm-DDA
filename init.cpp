@@ -108,7 +108,6 @@ std::vector<std::string> listfiles(std::string const &dirname)
 
     ret.push_back("data/json/mods/funcs.json");
 
-    ret.push_back("data/json/recipes.json");
     return ret;
 }
 

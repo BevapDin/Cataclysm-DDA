@@ -227,6 +227,13 @@ void monster::move(game *g)
       hp = type->hp;
     }
  }
+ if (has_flag(MF_REGENERATES_10)) {
+    hp += 10;
+    if(hp > type->hp){
+      hp = type->hp;
+    }
+ }
+
  if (sp_timeout == 0 && (friendly == 0 || has_flag(MF_FRIENDLY_SPECIAL))) {
    mattack ma;
    if(!is_hallucination()) {
@@ -614,9 +621,7 @@ void monster::hit_player(game *g, player &p, bool can_grab)
                         g->add_msg(_("%s's offensive defense system shocks it!"),
                                    p.name.c_str());
                     }
-                    if (hurt(rng(10, 40))) {
-                        die(g);
-                    }
+                    hurt(rng(10, 40));
                 }
                 if (p.encumb(bphit) == 0 &&(p.has_trait("SPINES") || p.has_trait("QUILLS")))
                 {
@@ -630,8 +635,7 @@ void monster::hit_player(game *g, player &p, bool can_grab)
                         g->add_msg(_("Your %s puncture it!"),
                                    (g->u.has_trait("QUILLS") ? _("quills") : _("spines")));
                     }
-                    if (hurt(spine))
-                        die(g);
+                    hurt(spine);
                 }
 
                 if (dam + cut <= 0)
