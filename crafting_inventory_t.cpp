@@ -1507,7 +1507,9 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
     // to this option.
     std::vector< std::pair<menu_entry_type, size_t> > optionsIndizes;
     
+    bool needNonWater = false;
     std::pair<int, const candidate_t*> indexOfWater(-1, 0);
+    std::pair<int, const candidate_t*> indexOfCleanWater(-1, 0);
     std::pair<std::pair<int, float>, const candidate_t*> bestTool(std::make_pair(-1, 0.0f), 0);
     for(size_t i = 0; i < simple_reqs.size(); i++) {
         const simple_req &sr = simple_reqs[i];
@@ -1543,7 +1545,7 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
             if(can.usageType != "water_clean" && can.usageType != "water") {
                 // We need something else than water,
                 // disable auto-choosing water
-                indexOfWater.first = -2;
+                needNonWater = true;
             }
             if(can.getLocation() == LT_SURROUNDING) {
                 // Prefer surrounding objects (like fire)
@@ -1552,10 +1554,16 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
                 toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
                 return;
             }
-            if(can.usageType == "water" && indexOfWater.first == -1) {
-                // Found water and auto-choosing of water is still enabled
+            if(!needNonWater && can.usageType == "water" && indexOfWater.first == -1) {
+                // Found water - any source of water is equally good.
                 indexOfWater.first = i;
                 indexOfWater.second = &can;
+            }
+            if(!needNonWater && can.usageType == "water_clean" && (indexOfCleanWater.first == -1 || can.getLocation() == LT_VPART)) {
+                // Found water - any source of water is equally good,
+                // except water from vehicle is "better"?
+                indexOfCleanWater.first = i;
+                indexOfCleanWater.second = &can;
             }
             if(can.getLocation() == LT_VPART && can.usageType != "water_clean" ) {
                 // Prefer this one as it is linked to the car's battery
@@ -1600,11 +1608,17 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
             }
         }
     }
-    if(indexOfWater.first >= 0) {
+    if(!needNonWater && indexOfWater.first >= 0) {
         // Water is plenty and normaly you have no alternative
         // except clean water which is to valueable
         selected_simple_req_index = indexOfWater.first;
         selected_items.push_back(*indexOfWater.second);
+        toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
+        return;
+    }
+    if(!needNonWater && indexOfCleanWater.first >= 0) {
+        selected_simple_req_index = indexOfCleanWater.first;
+        selected_items.push_back(*indexOfCleanWater.second);
         toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
         return;
     }

@@ -747,14 +747,11 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
                 continue;
             }
             has_recipe_to_make |= r.result == type->id;
-            if(!contents.empty() && contents[0].type->id == r.result) {
-                has_recipe_to_make = true;
-            }
             const std::vector< std::vector<component> > &comps = r.components;
             const std::vector< std::vector<component> > &tools = r.tools;
             for(size_t i = 0; i < comps.size(); i++) {
                 for(size_t j = 0; j < comps[i].size(); j++) {
-                    if(!matches_type(comps[i][j].type) && (contents.empty() || !contents[0].matches_type(comps[i][j].type))) {
+                    if(!matches_type(comps[i][j].type)) {
                         continue;
                     }
                     if(!header_printed_1) {
@@ -768,7 +765,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
             }
             for(size_t i = 0; i < tools.size(); i++) {
                 for(size_t j = 0; j < tools[i].size(); j++) {
-                    if(!matches_type(tools[i][j].type) && (contents.empty() || !contents[0].matches_type(tools[i][j].type))) {
+                    if(!matches_type(tools[i][j].type)) {
                         continue;
                     }
                     if(!header_printed_2) {
