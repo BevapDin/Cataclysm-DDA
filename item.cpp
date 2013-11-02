@@ -734,8 +734,10 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
  }
  
  {
-    std::ostringstream buffer;
-    bool header_printed = false;
+    std::ostringstream buffer_1;
+    std::ostringstream buffer_2;
+    bool header_printed_1 = false;
+    bool header_printed_2 = false;
     bool has_recipe_to_make = false;
     for(recipe_map::const_iterator a = recipes.begin(); a != recipes.end(); ++a) {
         const recipe_list &recipes = a->second;
@@ -749,24 +751,42 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
                 has_recipe_to_make = true;
             }
             const std::vector< std::vector<component> > &comps = r.components;
+            const std::vector< std::vector<component> > &tools = r.tools;
             for(size_t i = 0; i < comps.size(); i++) {
                 for(size_t j = 0; j < comps[i].size(); j++) {
                     if(!matches_type(comps[i][j].type) && (contents.empty() || !contents[0].matches_type(comps[i][j].type))) {
                         continue;
                     }
-                    if(!header_printed) {
-                        buffer << "Used to make ";
-                        header_printed = true;
+                    if(!header_printed_1) {
+                        buffer_1 << "Can be made into ";
+                        header_printed_1 = true;
                     } else {
-                        buffer << ", ";
+                        buffer_1 << ", ";
                     }
-                    buffer << ::name(r.result);
+                    buffer_1 << ::name(r.result);
+                }
+            }
+            for(size_t i = 0; i < tools.size(); i++) {
+                for(size_t j = 0; j < tools[i].size(); j++) {
+                    if(!matches_type(tools[i][j].type) && (contents.empty() || !contents[0].matches_type(tools[i][j].type))) {
+                        continue;
+                    }
+                    if(!header_printed_2) {
+                        buffer_2 << "Used to make ";
+                        header_printed_2 = true;
+                    } else {
+                        buffer_2 << ", ";
+                    }
+                    buffer_2 << ::name(r.result);
                 }
             }
         }
     }
-    if(header_printed) {
-        dump->push_back(iteminfo("DESCRIPTION", buffer.str()));
+    if(header_printed_1) {
+        dump->push_back(iteminfo("DESCRIPTION", buffer_1.str()));
+    }
+    if(header_printed_2) {
+        dump->push_back(iteminfo("DESCRIPTION", buffer_2.str()));
     }
     if(has_recipe_to_make) {
         dump->push_back(iteminfo("DESCRIPTION", "There is a recipe to make this"));

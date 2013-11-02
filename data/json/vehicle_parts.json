@@ -1271,6 +1271,21 @@
     },
     {
         "type":"vehicle_part",
+        "id": "big_cargo_box",
+        "name": "a realy big box",
+        "symbol": "O",
+        "color": "green",
+        "broken_symbol": "O",
+        "broken_color": "light_gray",
+        "durability": 500,
+        "item": "steel_plate",
+        "difficulty": 3,
+        "size": 1000,
+        "location": "center",
+        "flags": ["OBSTACLE", "OPAQUE", "CARGO"]
+    },
+    {
+        "type":"vehicle_part",
         "id": "plating_superalloy",
         "name": "superalloy plating",
         "symbol": ")",

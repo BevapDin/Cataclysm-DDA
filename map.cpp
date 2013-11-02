@@ -630,8 +630,9 @@ bool map::vehproceed(game* g){
             0.5 * m2 * final2.norm() * final2.norm();
         float d_E = E - E_a;  //Lost energy at collision -> deformation energy
         float dmg = abs( d_E / 1000 / 2000 );  //adjust to balance damage
-        float dmg_veh1 = dmg * 0.5;
-        float dmg_veh2 = dmg * 0.5;
+        float dmg_veh1 = dmg * m2 / (m1 + m2);
+        float dmg_veh2 = dmg * m1 / (m1 + m2);
+		// ^^ make damage relative to the mass relation of the vehicles
 
         int coll_parts_cnt = 0; //quantity of colliding parts between veh1 and veh2
         for(int i = 0; i < veh_veh_colls.size(); i++) {
@@ -670,7 +671,7 @@ bool map::vehproceed(game* g){
         epicenter2.y /= coll_parts_cnt;
 
 
-        if (dmg2_part > 1000) {
+        if (dmg2_part > 100) {
             // shake veh because of collision
             veh2->damage_all(dmg2_part / 2, dmg2_part, 1, epicenter2);
         }

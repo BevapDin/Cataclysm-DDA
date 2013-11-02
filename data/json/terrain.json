@@ -1233,7 +1233,7 @@
         "id": "t_tree_apple",
         "name": "apple tree",
         "symbol": "7",
-        "color": "ltgreen",
+        "color": "ltred",
         "move_cost": 0,
         "flags": ["FLAMMABLE_ASH", "NOITEM", "SUPPORTS_ROOF", "TREE"],
         "examine_action": "tree_apple"
@@ -1277,8 +1277,8 @@
         "type": "terrain",
         "id": "t_shrub_blueberry",
         "name": "blueberry bush",
-        "symbol": "#",
-        "color": "ltgreen",
+        "symbol": "$",
+        "color": "ltred",
         "move_cost": 8,
         "flags": [
             "TRANSPARENT", "BASHABLE", "CONTAINER", "FLAMMABLE_ASH", "THIN_OBSTACLE", "SHRUB"
@@ -1289,8 +1289,8 @@
         "type": "terrain",
         "id": "t_shrub_strawberry",
         "name": "strawberry bush",
-        "symbol": "#",
-        "color": "ltgreen",
+        "symbol": "$",
+        "color": "ltred",
         "move_cost": 8,
         "flags": [
             "TRANSPARENT", "BASHABLE", "CONTAINER", "FLAMMABLE_ASH", "THIN_OBSTACLE", "SHRUB"

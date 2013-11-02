@@ -997,6 +997,8 @@ void game::make_craft(recipe *making)
 void game::make_all_craft(recipe *making)
 {
  u.assign_activity(this, ACT_LONGCRAFT, making->time, making->id);
+ crafting_inventory_t craft_inv(g, &g->u);
+ craft_inv.gather_input(*making, u.activity);
  u.moves = 0;
  u.lastrecipe = making;
 }
@@ -1170,7 +1172,7 @@ void game::complete_craft()
  //newit = newit.in_its_container(&itypes);
  if (newit.made_of(LIQUID)) {
   newit.charges *= new_count;
-  handle_liquid(newit, false, false);
+  while(!handle_liquid(newit, false, false)) { ; }
  } else {
   if(newit.count_by_charges()) {
     newit.charges *= new_count;

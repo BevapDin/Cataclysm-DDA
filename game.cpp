@@ -3624,7 +3624,7 @@ void game::disp_craft_count()
   horimove = 0;
  }
  // Display total killcount at top of window
- mvwprintz(w, 1, 44, c_white, "%d", totalkills);
+ mvwprintz(w, 1, 47, c_white, "%d", totalkills);
 
  wrefresh(w);
  getch();
@@ -8777,9 +8777,40 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
         return true;
     }
 
-    std::stringstream text;
-    text << _("Container for ") << liquid.tname(this);
-    char ch = inv_type(text.str().c_str(), IC_CONTAINER);
+    char ch = '\0';
+    static std::string last_liquid;
+    static char last_char = '\0';
+    if(last_char != '\0' && last_liquid == liquid.type->id && u.has_item(last_char)) {
+        item &it = u.i_at(last_char);
+        if(it.is_container()) {
+            if(it.contents.empty()) {
+                ch = last_char;
+            } else if(it.contents[0].type->id == liquid.type->id) {
+                ch = last_char;
+                it_container *container = dynamic_cast<it_container *>(it.type);
+                int holding_container_charges;
+
+                if (liquid.type->is_food()) {
+                    it_comest *tmp_comest = dynamic_cast<it_comest *>(liquid.type);
+                    holding_container_charges = container->contains * tmp_comest->charges;
+                } else if (liquid.type->is_ammo()) {
+                    it_ammo *tmp_ammo = dynamic_cast<it_ammo *>(liquid.type);
+                    holding_container_charges = container->contains * tmp_ammo->count;
+                } else {
+                    holding_container_charges = container->contains;
+                }
+                if (it.contents[0].charges < holding_container_charges) {
+                    ch = last_char;
+                }
+            }
+        }
+    }
+    if(ch == '\0') {
+        last_char = '\0';
+        std::stringstream text;
+        text << _("Container for ") << liquid.tname(this);
+        ch = inv_type(text.str().c_str(), IC_CONTAINER);
+    }
     if (!u.has_item(ch)) {
         // No container selected (escaped, ...), ask to pour
         // we asked to pour rotten already
@@ -8918,6 +8949,8 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
                     // Why not try to find another container here?
                     return false;
                 }
+                last_char = ch;
+                last_liquid = liquid.type->id;
                 return true;
             }
         } else { // pouring into an empty container
@@ -8952,6 +8985,8 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
                 return false;
             }
             cont->put_in(liquid);
+            last_char = ch;
+            last_liquid = liquid.type->id;
             return true;
         }
     }

@@ -26,6 +26,7 @@
 #include "crafting.h"
 #include "get_version.h"
 #include "monstergenerator.h"
+#include "item_factory.h"
 
 #include "savegame.h"
 #include "tile_id_data.h" // for monster::json_save
@@ -1213,6 +1214,9 @@ bool item::json_load(picojson::value & parsed, game * g)
     if ( ! picostring(data, "typeid", idtmp) ) {
         debugmsg("Invalid item type: %s ", parsed.serialize().c_str() );
         idtmp = "null";
+    }
+    if(!item_controller->has_template(idtmp)) {
+        debugmsg("Unknown item type: %s ", idtmp.c_str() );
     }
 
     picoint(data, "charges", charges);

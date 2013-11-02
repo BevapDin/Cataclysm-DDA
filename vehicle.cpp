@@ -2629,10 +2629,19 @@ void vehicle::gain_moves (int mp)
             }
         }
         if(rain_chance > 0 && vp.hp > 0 && part_flag(p, "FUNNEL") && one_in(rain_chance)) {
-            if(parts[p].items.empty()) {
-                parts[p].items.push_back(item(item_controller->find_template("jerrycan"), 0));
+            // Create a temporay container for interaction with item::add_rain_to_container
+            item tmpcontainer(item_controller->find_template("jerrycan"), 0);
+            if(!vp.items.empty()) {
+                tmpcontainer.contents.push_back(vp.items[0]);
             }
-            parts[p].items.front().add_rain_to_container(acid_rain, 1);
+            tmpcontainer.add_rain_to_container(acid_rain, 1);
+            if(!tmpcontainer.contents.empty()) {
+                if(vp.items.empty()) {
+                    vp.items.push_back(tmpcontainer.contents[0]);
+                } else {
+                    vp.items[0] = tmpcontainer.contents[0];
+                }
+            }
         }
         if(vp.hp > 0 && vp.active() && part_flag(p, "FRIDGE")) {
             // Drain energy under all circumstances
@@ -3530,17 +3539,17 @@ bool vehicle::examine(game *g, player *p, int part) {
         return true;
     }
     if(vpi.has_flag("FUNNEL")) {
-        if(vp.items.empty() || vp.items[0].contents.empty() || vp.items[0].contents[0].charges == 0) {
+        if(vp.items.empty()) {
             g->add_msg_if_player(p, "The funnel is empty");
             return false;
         }
-        if(!query_yn(_("The funnel has collected %s (%i) - fill it into a container?"), vp.items[0].contents[0].type->name.c_str(), vp.items[0].contents[0].charges)) {
+        if(!query_yn(_("The funnel has collected %s (%i) - fill it into a container?"), vp.items[0].type->name.c_str(), vp.items[0].charges)) {
             return false;
         }
-        if(!g->handle_liquid(vp.items[0].contents[0], false, false)) {
+        if(!g->handle_liquid(vp.items[0], false, false)) {
             return true;
         }
-        vp.items[0].contents.clear();
+        vp.items.clear();
         return true;
     }
     return false;
