@@ -143,6 +143,13 @@ class overmap
   std::vector<city> cities;
   std::vector<city> roads_out;
   std::vector<settlement> towns;
+  
+  /**
+   * Returns the overmap where x and y are contained, also
+   * changes x and y to be within [0...OMAP?).
+   * Might return this, or NULL or something else (see overmap_buffer).
+   */
+  overmap *get_overmap_by_offset(int &x, int &y);
 
  private:
   point loc;

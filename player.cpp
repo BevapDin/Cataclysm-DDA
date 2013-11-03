@@ -7779,6 +7779,31 @@ press 'U' while wielding the unloaded gun."), gun->tname(g).c_str());
     } else if (used->is_armor()) {
         wear(g, let);
         return;
+    } else if (used->is_container() && used->contents.empty()) {
+        char cn = g->inv(_("Put something in the container:"));
+        item &cc = i_at(cn);
+        if(cc.is_null() || cc.is_container() || !cc.is_food()) {
+            return;
+        }
+        it_comest *itc = dynamic_cast<it_comest*>(cc.type);
+        if(itc == 0 || itc->container != used->type->id) {
+            g->add_msg(_("That does not belong in this container"));
+            return;
+        }
+        if(cc.made_of(LIQUID) && !(used->has_flag("WATERTIGHT") && used->has_flag("SEALS"))) {
+            g->add_msg(_("Can't put liquids into this"));
+            return;
+        }
+        if(cc.charges > itc->charges) {
+            used->contents.push_back(cc);
+            used->contents[0].charges = itc->charges;
+            cc.charges -= itc->charges;
+        } else {
+            used->contents.push_back(cc);
+            i_rem(cn);
+        }
+        inv.unsort();
+        inv.restack();
     } else {
         g->add_msg(_("You can't do anything interesting with your %s."),
                    used->tname(g).c_str());

@@ -9606,8 +9606,11 @@ void game::butcher()
 {
  if (u.in_vehicle)
  {
+     vehicle *veh = m.veh_at(u.posx, u.posy);
+     if(veh != 0 && veh->is_or_might_move()) {
      add_msg(_("You can't butcher while driving!"));
      return;
+     }
  }
  std::vector<int> corpses;
  for (int i = 0; i < m.i_at(u.posx, u.posy).size(); i++) {

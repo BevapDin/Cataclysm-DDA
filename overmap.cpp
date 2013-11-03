@@ -798,6 +798,16 @@ bool overmap::is_safe(int x, int y, int z)
 bool overmap::has_note(int const x, int const y, int const z) const
 {
  if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) { return false; }
+ {
+  int _x = x; int _y = y;
+  overmap* ov = const_cast<overmap*>(this)->get_overmap_by_offset(_x, _y);
+  if(ov != this) {
+      return ov->has_note(_x, _y, z);
+  } else if(ov == 0) {
+      return false;
+  }
+  assert(x == _x && y == _y);
+ }
 
  for (int i = 0; i < layer[z + OVERMAP_DEPTH].notes.size(); i++) {
   if (layer[z + OVERMAP_DEPTH].notes[i].x == x && layer[z + OVERMAP_DEPTH].notes[i].y == y)
@@ -809,6 +819,16 @@ bool overmap::has_note(int const x, int const y, int const z) const
 std::string const& overmap::note(int const x, int const y, int const z) const
 {
  if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) { return nullstr; }
+ {
+  int _x = x; int _y = y;
+  overmap* ov = const_cast<overmap*>(this)->get_overmap_by_offset(_x, _y);
+  if(ov != this) {
+      return ov->note(_x, _y, z);
+  } else if(ov == 0) {
+      return nullstr;
+  }
+  assert(x == _x && y == _y);
+ }
 
  for (int i = 0; i < layer[z + OVERMAP_DEPTH].notes.size(); i++) {
   if (layer[z + OVERMAP_DEPTH].notes[i].x == x && layer[z + OVERMAP_DEPTH].notes[i].y == y)
@@ -818,11 +838,48 @@ std::string const& overmap::note(int const x, int const y, int const z) const
  return nullstr;
 }
 
+int modulo_overmap_coord(int &c, const int OMAP_) {
+    if(c < 0) {
+        // eg. c=-200 -> 200/180+1 = 2 = oc  c += 2*180 = 160 < 180
+        // c=-1 -> 1/180+1 = 1 = oc  c += 1*180 = 179 < 180
+        const int oc = -c / OMAP_ + 1;
+        assert(oc > 0);
+        c += oc * OMAP_;
+        return -oc;
+    } else if(c >= OMAP_) {
+        // eg. c=200 -> 200/180 = 1 = oc  c -= 1*180 = 20 < 180
+        const int oc = c / OMAP_;
+        c -= oc * OMAP_;
+        return oc;
+    }
+    return 0;
+}
+
+overmap *overmap::get_overmap_by_offset(int &x, int &y) {
+    const int ox = modulo_overmap_coord(x, OMAPX);
+    const int oy = modulo_overmap_coord(y, OMAPY);
+    if(ox == 0 && oy == 0) {
+        return this;
+    }
+    return &(overmap_buffer.get(g, loc.x + ox, loc.y + oy));
+}
+
 void overmap::add_note(int const x, int const y, int const z, std::string const & message)
 {
  if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) {
   debugmsg("Attempting to add not to overmap for blank layer %d", z);
   return;
+ }
+ {
+  int _x = x; int _y = y;
+  overmap* ov = get_overmap_by_offset(_x, _y);
+  if(ov != this) {
+      ov->add_note(_x, _y, z, message);
+      return;
+  } else if(ov == 0) {
+      return;
+  }
+  assert(x == _x && y == _y);
  }
 
  for (int i = 0; i < layer[z + OVERMAP_DEPTH].notes.size(); i++) {
@@ -844,6 +901,16 @@ point overmap::find_note(int const x, int const y, int const z, std::string cons
  if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) {
   debugmsg("Attempting to find note on overmap for blank layer %d", z);
   return ret;
+ }
+ {
+  int _x = x; int _y = y;
+  overmap* ov = const_cast<overmap*>(this)->get_overmap_by_offset(_x, _y);
+  if(ov != this) {
+      return ov->find_note(_x, _y, z, text);
+  } else if(ov == 0) {
+      return ret;
+  }
+  assert(x == _x && y == _y);
  }
 
  int closest = 9999;
@@ -1703,78 +1770,31 @@ void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
     omy = cursy + j;
     see = false;
     npc_here = false;
-    if (omx >= 0 && omx < OMAPX && omy >= 0 && omy < OMAPY) { // It's in-bounds
-     cur_ter = ter(omx, omy, z);
-     see = seen(omx, omy, z);
-     note_here = has_note(omx, omy, z);
-     if (note_here)
-      note_text = note(omx, omy, z);
-        //Check if there is an npc.
-        npc_here = has_npc(g,omx,omy,z);
-// <Out of bounds placement>
-    } else if (omx < 0) {
-     omx += OMAPX;
-     if (omy < 0 || omy >= OMAPY) {
-      omy += (omy < 0 ? OMAPY : 0 - OMAPY);
-      cur_ter = diag.ter(omx, omy, z);
-      see = diag.seen(omx, omy, z);
-      note_here = diag.has_note(omx, omy, z);
-      if (note_here)
-       note_text = diag.note(omx, omy, z);
-     } else {
-      cur_ter = hori.ter(omx, omy, z);
-      see = hori.seen(omx, omy, z);
-      note_here = hori.has_note(omx, omy, z);
-      if (note_here)
-       note_text = hori.note(omx, omy, z);
-     }
-    } else if (omx >= OMAPX) {
-     omx -= OMAPX;
-     if (omy < 0 || omy >= OMAPY) {
-      omy += (omy < 0 ? OMAPY : 0 - OMAPY);
-      cur_ter = diag.ter(omx, omy, z);
-      see = diag.seen(omx, omy, z);
-      note_here = diag.has_note(omx, omy, z);
-      if (note_here)
-       note_text = diag.note(omx, omy, z);
-     } else {
-      cur_ter = hori.ter(omx, omy, z);
-      see = hori.seen(omx, omy, z);
-      note_here = hori.has_note(omx, omy, z);
-      if (note_here)
-       note_text = hori.note(omx, omy, z);
-     }
-    } else if (omy < 0) {
-     omy += OMAPY;
-     cur_ter = vert.ter(omx, omy, z);
-     see = vert.seen(omx, omy, z);
-     note_here = vert.has_note(omx, omy, z);
-     if (note_here)
-      note_text = vert.note(omx, omy, z);
-    } else if (omy >= OMAPY) {
-     omy -= OMAPY;
-     cur_ter = vert.ter(omx, omy, z);
-     see = vert.seen(omx, omy, z);
-     note_here = vert.has_note(omx, omy, z);
-     if (note_here)
-      note_text = vert.note(omx, omy, z);
-    } else
-     debugmsg("No data loaded! omx: %d omy: %d", omx, omy);
-// </Out of bounds replacement>
-    if (see) {
-     if (note_here && blink) {
-      ter_color = c_yellow;
-      if (note_text[1] == ':')
-       ter_sym = note_text[0];
-      else
-       ter_sym = 'N';
-     } else if (omx == origx && omy == origy && blink) {
+    
+    overmap *ov = get_overmap_by_offset(omx, omy);
+    assert(ov != 0);
+    
+    cur_ter = ov->ter(omx, omy, z);
+    see = ov->seen(omx, omy, z);
+    note_here = ov->has_note(omx, omy, z);
+    if (note_here)
+     note_text = ov->note(omx, omy, z);
+    npc_here = ov->has_npc(g, omx, omy, z);
+
+    if (note_here && blink) {
+     ter_color = c_yellow;
+     if (note_text[1] == ':')
+      ter_sym = note_text[0];
+     else
+      ter_sym = 'N';
+    } else if (see) {
+     if (omx == origx && omy == origy && ov == this && blink) {
       ter_color = g->u.color();
       ter_sym = '@';
      } else if (npc_here && blink) {
       ter_color = c_pink;
       ter_sym = '@';
-     } else if (omx == target.x && omy == target.y && blink) {
+     } else if (omx == target.x && omy == target.y && ov == this && blink) {
       ter_color = c_red;
       ter_sym = '*';
      } else {

@@ -956,15 +956,10 @@
   "autolearn": true,
   "tools": [
       [
-      [ "rock", -1 ],
-      [ "primitive_hammer", -1 ],
-      [ "hammer", -1 ],
-      [ "hatchet", -1 ],
-      [ "toolset", -1 ]
+      [ "func:hammer", -1 ]
       ],
       [
-      [ "boltcutters", -1 ],
-      [ "toolset", -1 ]
+      [ "func:boltcutters", -1 ]
       ]
       ],
   "components":
@@ -3682,7 +3677,7 @@
       [ "func:press", -1 ]
     ],
     [
-      [ "boltcutters", -1 ]
+      [ "func:boltcutters", -1 ]
     ],
     [
       [ "fire", -1 ],
@@ -11403,7 +11398,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "boltcutters", -1 ]
+      [ "func:boltcutters", -1 ]
     ],
     [
       [ "func:hammer", -1 ]

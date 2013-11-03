@@ -761,6 +761,10 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
                         buffer_1 << ", ";
                     }
                     buffer_1 << ::name(r.result);
+                    if(comps[i].size() == 1) {
+                        // Means ther eis no alternative to this component
+                        buffer_1 << "!";
+                    }
                 }
             }
             for(size_t i = 0; i < tools.size(); i++) {
