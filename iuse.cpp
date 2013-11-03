@@ -2483,7 +2483,7 @@ int iuse::siphon(game *g, player *p, item *it, bool t)
     for (int x = p->posx-1; x < p->posx+2; x++) {
       for (int y = p->posy-1; y < p->posy+2; y++) {
         fillv = g->m.veh_at(x, y);
-        if ( fillv != NULL && 
+        if ( fillv != NULL &&
           fillv != veh &&
           foundv.find( point(fillv->posx, fillv->posy) ) == foundv.end() &&
           fillv->fuel_capacity("gasoline") > 0 ) {
@@ -2508,7 +2508,7 @@ int iuse::siphon(game *g, player *p, item *it, bool t)
                 }
             } else {
                 fillv = foundv.begin()->second;
-                
+
             }
         } else if ( fmenu.ret != 1 ) {
             return 0;
@@ -2519,7 +2519,7 @@ int iuse::siphon(game *g, player *p, item *it, bool t)
         int got = veh->drain("gasoline", want);
         int amt=fillv->refill("gasoline",got);
         g->add_msg(_("Siphoned %d units of %s from the %s into the %s%s"), got,
-           "gasoline", veh->name.c_str(), fillv->name.c_str(), 
+           "gasoline", veh->name.c_str(), fillv->name.c_str(),
            (amt > 0 ? "." : ", draining the tank completely.") );
         p->moves -= 200;
     } else {
@@ -5901,7 +5901,7 @@ int iuse::rad_badge(game *g, player *p, item *it, bool t)
 {
     g->add_msg_if_player(p,_("You remove the badge from its wrapper, exposing it to ambient radiation."));
     it->make(g->itypes["rad_badge"]);
-    return it->type->charges_to_use();
+    return 0;
 }
 
 int iuse::tool_belt(game *g, player *p, item *it, bool t)
