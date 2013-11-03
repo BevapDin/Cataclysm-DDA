@@ -24,6 +24,7 @@
         "heal": 0,
         "fun": 0,
         "stim": 0,
+        "functions": [ ["func:water", 1, 1] ],
         "phase": "liquid"
     },
     {
@@ -53,6 +54,7 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
+        "functions": [ ["func:water", 1, 1] ],
         "fun" : 0
     },
     {

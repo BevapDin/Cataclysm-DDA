@@ -614,9 +614,7 @@
       [ "fur", 1 ]
     ],
     [
-      [ "plant_fibre", 20 ],
-      [ "sinew", 20 ],
-      [ "thread", 20 ]
+      [ "func:thread", 20 ]
     ]
   ]
 },{
@@ -694,9 +692,7 @@
       [ "fur", 1 ]
     ],
     [
-      [ "plant_fibre", 20 ],
-      [ "sinew", 20 ],
-      [ "thread", 20 ],
+      [ "func:thread", 20 ],
       [ "duct_tape", 20 ]
     ]
   ]
@@ -729,9 +725,7 @@
       [ "fur", 1 ]
     ],
     [
-      [ "plant_fibre", 20 ],
-      [ "sinew", 20 ],
-      [ "thread", 20 ],
+      [ "func:thread", 20 ],
       [ "duct_tape", 20 ]
     ]
   ]
@@ -817,9 +811,7 @@
     ],
     [
       [ "string_36", 2 ],
-      [ "thread", 200 ],
-      [ "sinew", 200 ],
-      [ "plant_fibre", 200 ]
+      [ "func:thread", 200 ]
     ]
   ]
 },{
@@ -842,9 +834,7 @@
     ],
     [
       [ "string_36", 2 ],
-      [ "thread", 200 ],
-      [ "sinew", 200 ],
-      [ "plant_fibre", 200 ]
+      [ "func:thread", 200 ]
     ]
   ]
 },{
@@ -867,9 +857,7 @@
     ],
     [
       [ "string_36", 2 ],
-      [ "thread", 200 ],
-      [ "sinew", 200 ],
-      [ "plant_fibre", 200 ]
+      [ "func:thread", 200 ]
     ]
   ]
 },{
@@ -895,9 +883,7 @@
     ],
     [
       [ "string_36", 2 ],
-      [ "thread", 200 ],
-      [ "sinew", 200 ],
-      [ "plant_fibre", 200 ]
+      [ "func:thread", 200 ]
     ]
   ]
 },{
@@ -1699,8 +1685,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ],
+      [ "func:water", 1 ],
       [ "salt_water", 1 ]
     ],
     [
@@ -3724,8 +3709,7 @@
   "autolearn": true,
   "components": [
     [
-      [ "water_clean", 1 ],
-      [ "water", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "salt", 1 ]
@@ -3795,8 +3779,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -4018,8 +4001,7 @@
       [ "protein_powder", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -4046,8 +4028,7 @@
       [ "protein_powder", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "strawberries", 1 ],
@@ -4094,8 +4075,7 @@
       [ "meat", 2 ]
     ],
     [
-      [ "water", 4 ],
-      [ "water_clean", 4 ]
+      [ "func:water", 4 ]
     ],
     [
       [ "strawberries", 4 ],
@@ -4315,8 +4295,7 @@
       [ "veggy_wild", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -4402,8 +4381,7 @@
       [ "noodles_fast", 3]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -4457,8 +4435,7 @@
       [ "can_cheese", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -4588,8 +4565,7 @@
       [ "tea_raw", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -4640,8 +4616,7 @@
       [ "sugar", 1 ]
     ],
     [
-      [ "water", 12 ],
-      [ "water_clean", 12 ]
+      [ "func:water", 12 ]
     ]
   ]
 },{
@@ -4777,8 +4752,7 @@
       [ "coffee_syrup", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -4832,8 +4806,7 @@
       [ "honeycomb", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -4855,8 +4828,7 @@
       [ "orange", 2 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -4900,8 +4872,7 @@
       [ "sugar", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -5080,8 +5051,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "broccoli", 1 ],
@@ -5119,8 +5089,7 @@
       [ "bone", 10 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -5330,8 +5299,7 @@
       [ "flour", 3 ]
     ],
     [
-      [ "water", 2 ],
-      [ "water_clean", 2 ]
+      [ "func:water", 2 ]
     ]
   ]
 },{
@@ -5358,8 +5326,7 @@
       [ "cornmeal", 3 ]
     ],
     [
-      [ "water", 2 ],
-      [ "water_clean", 2 ]
+      [ "func:water", 2 ]
     ]
   ]
 },{
@@ -5390,8 +5357,7 @@
       [ "seasoning_salt", 10 ]
     ],
     [
-      [ "water", 2 ],
-      [ "water_clean", 2 ]
+      [ "func:water", 2 ]
     ]
   ]
 },{
@@ -5477,8 +5443,7 @@
       [ "oatmeal", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -5525,8 +5490,7 @@
       [ "pomegranate", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -5554,8 +5518,7 @@
       [ "powder_eggs", 10 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -5599,8 +5562,7 @@
       [ "can_herring", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -5639,8 +5601,7 @@
       [ "cooking_oil", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -5679,8 +5640,7 @@
       [ "cooking_oil", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "jam_strawberries", 1 ],
@@ -5786,8 +5746,7 @@
       [ "honeycomb", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "candy", 3 ],
@@ -5912,8 +5871,7 @@
       [ "sugar", 2 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -5955,8 +5913,7 @@
       [ "seasoning_italian", 5 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -5995,8 +5952,7 @@
       [ "seasoning_italian", 5 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -6027,8 +5983,7 @@
       [ "spaghetti_raw", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "seasoning_italian", 5 ],
@@ -6070,8 +6025,7 @@
       [ "spaghetti_raw", 1 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "seasoning_italian", 5 ],
@@ -6139,8 +6093,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "coke", 12 ]
@@ -6897,8 +6850,7 @@
   ],
   "components": [
     [
-      [ "water_clean", 1 ],
-      [ "water", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "scrap", 1 ]
@@ -6930,8 +6882,7 @@
       [ "bleach", 1 ]
     ],
     [
-      [ "water_clean", 1 ],
-      [ "water", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -6958,8 +6909,7 @@
       [ "bleach", 2 ]
     ],
     [
-      [ "water_clean", 1 ],
-      [ "water", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -7004,8 +6954,7 @@
       [ "lye_powder", 50 ]
     ],
     [
-      [ "water_clean", 1 ],
-      [ "water", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 },{
@@ -7030,8 +6979,7 @@
       [ "charcoal", 10 ]
     ],
     [
-      [ "water_clean", 2 ],
-      [ "water", 2 ]
+      [ "func:water", 2 ]
     ]
   ]
 },{
@@ -10335,8 +10283,7 @@
   ],
   "components": [
     [
-      [ "water", 10 ],
-      [ "water_clean", 10 ]
+      [ "func:water", 10 ]
     ],
     [
       [ "wax", 2 ],
@@ -10623,9 +10570,7 @@
     ],
     [
       [ "string_6", 2 ],
-      [ "sinew", 40 ],
-      [ "thread", 40 ],
-      [ "plant_fibre", 40 ]
+      [ "func:thread", 40 ]
     ]
   ]
 },{
@@ -10684,9 +10629,7 @@
     [
       [ "string_36", 1 ],
       [ "string_6", 6 ],
-      [ "sinew", 20 ],
-      [ "thread", 20 ],
-      [ "plant_fibre", 20 ]
+      [ "func:thread", 20 ]
     ]
   ]
 },{
@@ -10711,9 +10654,7 @@
     [
       [ "string_36", 1 ],
       [ "string_6", 6 ],
-      [ "sinew", 20 ],
-      [ "thread", 20 ],
-      [ "plant_fibre", 20 ]
+      [ "func:thread", 20 ]
     ]
   ]
 },{
@@ -10736,9 +10677,7 @@
       [ "rock", 3 ]
     ],
     [
-      [ "sinew", 80 ],
-      [ "thread", 80 ],
-      [ "plant_fibre", 80 ],
+      [ "func:thread", 80 ],
       [ "string_36", 1 ]
     ]
   ]
@@ -10767,9 +10706,7 @@
     ],
     [
       [ "string_6", 2 ],
-      [ "sinew", 40 ],
-      [ "thread", 40 ],
-      [ "plant_fibre", 40 ]
+      [ "func:thread", 40 ]
     ]
   ]
 },{
@@ -10797,9 +10734,7 @@
     ],
     [
       [ "string_6", 2 ],
-      [ "sinew", 40 ],
-      [ "thread", 40 ],
-      [ "plant_fibre", 40 ]
+      [ "func:thread", 40 ]
     ]
   ]
 },{
@@ -10836,9 +10771,7 @@
   ],
   "components": [
     [
-      [ "sinew", 40 ],
-      [ "thread", 40 ],
-      [ "plant_fibre", 40 ],
+      [ "func:thread", 40 ],
       [ "string_36", 1 ]
     ],
     [
@@ -10918,9 +10851,7 @@
     ],
     [
       [ "string_6", 10 ],
-      [ "sinew", 500 ],
-      [ "thread", 500 ],
-      [ "plant_fibre", 500 ]
+      [ "func:thread", 500 ]
     ]
   ]
 },{
@@ -10948,9 +10879,7 @@
       [ "leather", 4 ]
     ],
     [
-      [ "sinew", 60 ],
-      [ "thread", 60 ],
-      [ "plant_fibre", 60 ],
+      [ "func:thread", 60 ],
       [ "string_6", 1 ]
     ],
     [
@@ -10975,9 +10904,7 @@
       [ "fur", 24 ]
     ],
     [
-      [ "thread", 360 ],
-      [ "sinew", 360 ],
-      [ "plant_fibre", 360 ],
+      [ "func:thread", 360 ],
       [ "string_6", 6 ],
       [ "string_36", 1 ]
     ]
@@ -11281,8 +11208,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "rag_bloody", 1 ]
@@ -11624,8 +11550,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "bleach", 1 ],
@@ -11666,9 +11591,7 @@
       [ "rag", 6 ]
     ],
     [
-      [ "plant_fibre", 50 ],
-      [ "sinew", 50 ],
-      [ "thread", 50 ]
+      [ "func:thread", 50 ]
     ],
     [
       [ "plastic_chunk", 1 ]
@@ -12417,8 +12340,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "jar_glass", 1 ]
@@ -12452,8 +12374,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "jar_glass", 1 ]
@@ -12486,8 +12407,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "jar_glass", 1 ]
@@ -12521,8 +12441,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "jar_glass", 1 ]
@@ -12572,8 +12491,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "bag_plastic", 1 ]
@@ -12608,8 +12526,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "bag_plastic", 1 ]
@@ -12662,8 +12579,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ],
     [
       [ "bag_plastic", 1 ]
@@ -12754,7 +12670,7 @@
   "category": "CC_MISC",
   "skill_used": "fabrication",
   "difficulty": 1,
-  "time": 30000,
+  "time": 7000,
   "reversible": false,
   "autolearn": true,
   "qualities" : [
@@ -12831,7 +12747,7 @@
   "category": "CC_MISC",
   "skill_used": "fabrication",
   "difficulty": 1,
-  "time": 30000,
+  "time": 7000,
   "reversible": false,
   "autolearn": true,
   "qualities" : [
@@ -13193,8 +13109,7 @@
       [ "sugar", 1]
     ],
     [
-      ["water", 12],
-      ["water_clean", 12]
+      ["func:water", 12]
     ]
   ]
 },{
@@ -13634,7 +13549,7 @@
     [ [ "chemistry_set", -1 ], [ "func:pan", -1 ], [ "func:pot", -1 ] ]
   ],
   "components": [
-    [ [ "water", 1 ], [ "water_clean", 1 ] ],
+    [ [ "func:water", 1 ] ],
     [ [ "meal_bone", 2 ] ],
     [ [ "meal_chitin_piece", 1 ] ],
     [ [ "ammonia", 1 ], [ "lye_powder", 100 ] ]
@@ -13661,7 +13576,7 @@
   ],
   "components": [
     [ ["flour", 4] ],
-    [ ["water", 1], ["water_clean", 1] ]
+    [ ["func:water", 1] ]
   ]
 },{
         "type" : "recipe",
@@ -16347,8 +16262,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ],
+      [ "func:water", 1 ],
       [ "salt_water", 1 ]
     ],
     [
@@ -16393,8 +16307,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ],
+      [ "func:water", 1 ],
       [ "salt_water", 1 ]
     ],
     [
@@ -16432,8 +16345,7 @@
   ],
   "components": [
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ],
+      [ "func:water", 1 ],
       [ "salt_water", 1 ]
     ],
     [
@@ -17586,8 +17498,7 @@
        [ "kiwi", 2 ]
     ],
     [
-      [ "water", 1 ],
-      [ "water_clean", 1 ]
+      [ "func:water", 1 ]
     ]
   ]
 }
