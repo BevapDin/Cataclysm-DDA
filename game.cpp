@@ -9855,7 +9855,7 @@ void game::forage()
   {
     add_msg(_("You found some wild veggies!"));
     u.practice(turn, "survival", 10);
-    m.spawn_item(u.activity.placement.x, u.activity.placement.y, "veggy_wild", turn, 0);
+	u.add_or_drop(item(itypes["veggy_wild"], turn), this);
     m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
   }
   else
