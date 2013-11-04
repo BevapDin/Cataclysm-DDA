@@ -628,12 +628,12 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     }
 
     //It also has to be a real part, not the null part
-    vpart_info part = vehicle_part_types[id];
+    const vpart_info part = vehicle_part_types[id];
     if(part.has_flag("NOINSTALL")) {
         return false;
     }
 
-    std::vector<int> parts_in_square = parts_at_relative(dx, dy);
+    const std::vector<int> parts_in_square = parts_at_relative(dx, dy);
 
     //First part in an empty square MUST be a structural part
     if(parts_in_square.empty() && part.location != "structure") {
@@ -641,13 +641,18 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     }
 
     //No part type can stack with itself, or any other part in the same slot
-    for(int index = 0; index < parts_in_square.size(); index++) {
-
-        vpart_info other_part = vehicle_part_types[parts[parts_in_square[index]].id];
+    for( std::vector<int>::const_iterator part_it = parts_in_square.begin();
+         part_it != parts_in_square.end(); ++part_it ) {
+        const vpart_info other_part = vehicle_part_types[parts[*part_it].id];
 
         //Parts with no location can stack with each other (but not themselves)
         if(part.id == other_part.id ||
                 (!part.location.empty() && part.location == other_part.location)) {
+            return false;
+        }
+        // Until we have an interface for handling multiple components with CARGO space,
+        // exclude them from being mounted in the same tile.
+        if( part.has_flag( "CARGO" ) && other_part.has_flag( "CARGO" ) ) {
             return false;
         }
 
@@ -667,9 +672,8 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     //Seatbelts must be installed on a seat
     if(vehicle_part_types[id].has_flag("SEATBELT")) {
         bool anchor_found = false;
-        std::vector<int> parts_here = parts_at_relative(dx, dy);
-        for( std::vector<int>::iterator it = parts_here.begin();
-             it != parts_here.end(); ++it ) {
+        for( std::vector<int>::const_iterator it = parts_in_square.begin();
+             it != parts_in_square.end(); ++it ) {
             if(part_info(*it).has_flag("BELTABLE")) {
                 anchor_found = true;
             }
@@ -966,9 +970,6 @@ std::vector<int> vehicle::parts_at_relative (int dx, int dy)
 
 int vehicle::part_with_feature (int part, const std::string &flag, bool unbroken)
 {
-    if (part_flag(part, flag)/* && (!unbroken || parts[part].hp > 0)*/) {
-        return part;
-    }
     const int dx = parts[part].mount_dx;
     const int dy = parts[part].mount_dy;
     for (int i = 0; i < parts.size(); i++) {

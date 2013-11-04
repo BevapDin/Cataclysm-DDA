@@ -1126,7 +1126,7 @@
         "size" : 40,
         "difficulty": 6,
         "location": "on_roof",
-        "flags": ["TURRET"]
+        "flags": ["TURRET", "CARGO"]
     },{
         "type" : "vehicle_part",
         "id" : "flamethrower",
