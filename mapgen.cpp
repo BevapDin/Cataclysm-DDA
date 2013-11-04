@@ -123,7 +123,7 @@ void break_windows(map &m) {
 		} else {
 			item body;
 			body.make_corpse(g->itypes["corpse"], GetMType("mon_null"), 0);
-			m.add_item(rnx, rny, body);
+			m.add_item_or_charges(rnx, rny, body);
 		}
 	}
 }

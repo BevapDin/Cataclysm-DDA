@@ -372,6 +372,9 @@ void monster::shift(int sx, int sy)
 
 point monster::move_target()
 {
+    if(plans.empty()) {
+        return point(_posx, _posy);
+    }
     return point(plans.back().x, plans.back().y);
 }
 
