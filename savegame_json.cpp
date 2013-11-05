@@ -1251,8 +1251,9 @@ bool item::json_load(picojson::value & parsed, game * g)
         name=type->name;
     }
 
-    picoint(data, "invlet", lettmp);
+    if(picoint(data, "invlet", lettmp))
     invlet = char(lettmp);
+    else invlet = 0;
 
     picoint(data, "damage", damtmp);
     damage = damtmp; // todo: check why this is done after make(), using a tmp variable
@@ -1338,10 +1339,10 @@ picojson::value item::json_save(bool save_contents) const
     }
 
     /////
-    data["invlet"] = pv( int(invlet) );
     data["typeid"] = pv( typeId() );
     data["bday"] = pv( bday );
 
+    if ( invlet != 0 )       data["invlet"]     = pv( int(invlet) );
     if ( charges != -1 )     data["charges"]    = pv( int(charges) );
     if ( damage != 0 )       data["damage"]     = pv( int(damage) );
     if ( burnt != 0 )        data["burnt"]      = pv( burnt );

@@ -1493,6 +1493,31 @@ int crafting_inventory_t::select_items_to_use(const std::vector<component> &comp
     return index_of_component;
 }
 
+bool sort_by_likeness(const item& a, const item& b) {
+    if(!a.is_container() && b.is_container()) {
+        return true; // Prefer stuff outside of containers
+    } else if(a.is_container() && !b.is_container()) {
+        return false; // same
+    }
+    if(a.is_container() && !a.contents.empty() && b.is_container() && !b.contents.empty()) {
+        return sort_by_likeness(a.contents[0], b.contents[0]);
+    }
+    if(a.bday != b.bday) {
+        return a.bday < b.bday; // Prefer the older stuff
+    }
+    if(a.charges != b.charges) {
+        return a.charges < b.charges; // Prefer stuff with less charges
+    }
+    return false;
+}
+
+bool sort_bylikeness(const crafting_inventory_t::candidate_t& a, const crafting_inventory_t::candidate_t& b) {
+    if(a.getLocation() != b.getLocation()) {
+        return a.getLocation() < b.getLocation();
+    }
+    return sort_by_likeness(a.get_item(), b.get_item());
+}
+
 void crafting_inventory_t::complex_req::select_items_to_use() {
     selected_items.clear();
     selected_simple_req_index = -1;
@@ -1516,6 +1541,7 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
         if(sr.available != 1) {
             continue;
         }
+        std::sort(simple_reqs[i].candidate_items.begin(), simple_reqs[i].candidate_items.end(), &sort_bylikeness);
         const requirement &req = sr.req;
         const candvec &candidate_items = sr.candidate_items;
         const int count = req.count;
@@ -2148,15 +2174,15 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
 
 int compare(const item &a, const item &b) {
     if(a.is_container() && !a.contents.empty()) {
-        // Compare in other direction, so this can check
-        // for contents in b.
-        const int c = compare(b, a.contents[0]);
+        const int c = compare(a.contents[0], b);
         if(c != 0) {
-            return -c;
+            return c;
         }
-	} else if(b.is_container() && !b.contents.empty()) {
-		// Dispatch inspection of content to this function call
-		return -compare(b, a);
+    } else if(b.is_container() && !b.contents.empty()) {
+        const int c = compare(a, b.contents[0]);
+        if(c != 0) {
+            return c;
+        }
     }
         
     if(a.type != b.type) {

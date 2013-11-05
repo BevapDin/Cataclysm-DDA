@@ -7219,6 +7219,7 @@ std::vector<map_item_stack> game::find_nearby_items(int iRadius)
     return ret;
 }
 
+static bool exclude_clothing = false;
 std::vector<map_item_stack> game::filter_item_stacks(std::vector<map_item_stack> stack, std::string filter)
 {
     std::vector<map_item_stack> ret;
@@ -7233,6 +7234,9 @@ std::vector<map_item_stack> game::filter_item_stacks(std::vector<map_item_stack>
 
     for (std::vector<map_item_stack>::iterator iter = stack.begin(); iter != stack.end(); ++iter)
     {
+        if(exclude_clothing && dynamic_cast<it_armor*>(iter->example.type) != 0) {
+            continue;
+        }
         std::string name = iter->example.tname(this);
         if (sFilterTemp == "" || ((sFilterPre != "-" && list_items_match(name, sFilterTemp)) ||
                                   (sFilterPre == "-" && !list_items_match(name, sFilterTemp))))
@@ -7485,6 +7489,12 @@ int game::list_items()
                 compare(iActiveX, iActiveY);
                 reset = true;
                 refresh_all();
+            }
+            else if (ch == 'X')
+            {
+                exclude_clothing = !exclude_clothing;
+                reset = true;
+                refilter = true;
             }
             else if (ch == 'f' || ch == 'F')
             {
@@ -11139,10 +11149,12 @@ void game::fling_player_or_monster(player *p, monster *zz, const int& dir, float
             break;
         range--;
         steps++;
+        /*
         timespec ts;   // Timespec for the animation
         ts.tv_sec = 0;
         ts.tv_nsec = BILLION / 20;
         nanosleep (&ts, 0);
+        */
     }
 
     if (!m.has_flag("SWIMMABLE", x, y))
