@@ -372,7 +372,8 @@ void monster::shift(int sx, int sy)
 
 point monster::move_target()
 {
-    if(plans.empty()) {
+    if (plans.empty()) {
+        // if we have no plans, pretend it's intentional
         return point(_posx, _posy);
     }
     return point(plans.back().x, plans.back().y);
