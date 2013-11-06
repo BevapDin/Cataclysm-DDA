@@ -1568,6 +1568,12 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
                     }
                 }
             }
+            if(can.usageType == "burnt_out_bionic") {
+                selected_simple_req_index = i;
+                selected_items.push_back(can);
+                toolfactor = crafting_inventory_t::calc_time_modi(selected_items);
+                return;
+            }
             if(can.usageType != "water_clean" && can.usageType != "water") {
                 // We need something else than water,
                 // disable auto-choosing water

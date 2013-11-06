@@ -13,12 +13,16 @@
 #include "catacharset.h"
 #include <queue>
 #include "crafting_inventory_t.h"
+#include "helper.h"
 
 std::vector<craft_cat> craft_cat_list;
 std::vector<std::string> recipe_names;
 recipe_map recipes;
 std::map<std::string,quality> qualities;
 std::map<std::string, std::queue<std::pair<recipe*, int> > > recipe_booksets;
+
+recipe the_many_recipe;
+void multiply(const recipe &in, recipe &r, int factor);
 
 void draw_recipe_tabs(WINDOW *w, craft_cat tab,bool filtered=false);
 
@@ -175,6 +179,10 @@ void finalize_recipes()
             }
         }
     }
+    the_many_recipe.ident = "the_many_recipe";
+    the_many_recipe.id = recipe_names.size();
+    the_many_recipe.autolearn = false;
+    recipe_names.push_back(the_many_recipe.ident);
 }
 
 void load_quality(JsonObject &jo)
@@ -792,6 +800,7 @@ recipe* game::select_crafting_recipe()
         if(ch=='e'||ch=='E') { ch=(int)'?'; } // get_input is inflexible
         if(ch=='d'||ch=='D') { input = (InputEvent) 'd'; } else
         if(ch == KEY_NPAGE || ch == KEY_PPAGE) { input = (InputEvent) ch; } else
+        if(ch == 'N') { input = (InputEvent) ch; } else
         input = get_input(ch);
         switch (input)
         {
@@ -847,6 +856,7 @@ recipe* game::select_crafting_recipe()
                     draw();
                 }
                 break;
+            case 'N':
             case Confirm:
                 if (!available[line])
                 {
@@ -860,7 +870,6 @@ recipe* game::select_crafting_recipe()
                         {
                             chosen = current[line];
                             done = true;
-                            break;
                         }
                         else
                         {
@@ -871,6 +880,23 @@ recipe* game::select_crafting_recipe()
                     {
                         chosen = current[line];
                         done = true;
+                    }
+                }
+                if(done && input == 'N') {
+                    // fixme / todo make popup take numbers only (m = accept, q = cancel)
+                    int amount = helper::to_int(
+                        string_input_popup("craft how much?", 20, "1")
+                    );
+                    if(amount <= 0) {
+                        done = false;
+                    } else {
+                        multiply(*chosen, the_many_recipe, amount);
+                        if(!can_make(&the_many_recipe, crafting_inv)) {
+                            done = false;
+                        } else {
+                            chosen = &the_many_recipe;
+                            input = Confirm;
+                        }
                     }
                 }
                 break;
@@ -999,10 +1025,14 @@ void game::add_known_recipes(std::vector<recipe*> &current, recipe_list source, 
 }
 
 void pop_recipe_to_top(recipe *r);
+void move_ppoints_for_construction(const std::string &skillName, int difficulty, int &moves_left);
 
 void game::make_craft(recipe *making)
 {
  u.assign_activity(this, ACT_CRAFT, making->time, making->id);
+ if(making->skill_used != 0) {
+  move_ppoints_for_construction(making->skill_used->ident(), making->difficulty, u.activity.moves_left);
+ }
  crafting_inventory_t craft_inv(g, &g->u);
  craft_inv.gather_input(*making, u.activity);
  u.moves = 0;
@@ -1014,6 +1044,9 @@ void game::make_craft(recipe *making)
 void game::make_all_craft(recipe *making)
 {
  u.assign_activity(this, ACT_LONGCRAFT, making->time, making->id);
+ if(making->skill_used != 0) {
+  move_ppoints_for_construction(making->skill_used->ident(), making->difficulty, u.activity.moves_left);
+ }
  crafting_inventory_t craft_inv(g, &g->u);
  craft_inv.gather_input(*making, u.activity);
  u.moves = 0;
@@ -1533,5 +1566,29 @@ void check_recipes() {
                 debugmsg("result %s in recipe %s is not a valid item template", r.result.c_str(), r.ident.c_str());
             }
         }
+    }
+}
+
+static void multiply(std::vector<std::vector<component> > &vec, int factor) {
+    for(std::vector<std::vector<component> >::iterator b = vec.begin(); b != vec.end(); b++) {
+        for(std::vector<component>::iterator c = b->begin(); c != b->end(); c++) {
+            if(c->count > 0) {
+                c->count *= factor;
+            }
+        }
+    }
+}
+
+void multiply(const recipe &in, recipe &r, int factor) {
+    r.tools = in.tools;
+    r.components = in.components;
+    ::multiply(r.tools, factor);
+    ::multiply(r.components, factor);
+    if(r.count > 0) {
+        r.count = in.count * factor;
+        r.count_range = in.count_range * factor;
+    } else {
+        r.count = factor;
+        r.count_range = 0;
     }
 }

@@ -692,22 +692,26 @@ void game::construction_menu()
  refresh_all();
 }
 
-void move_ppoints_for_construction(constructable *con, int &moves_left) {
-    int skill = g->u.skillLevel("carpentry");
-    if(skill > 0 && skill > con->difficulty) {
+void move_ppoints_for_construction(const std::string &skillName, int difficulty, int &moves_left) {
+    int skill = g->u.skillLevel(skillName);
+    if(skill > 0 && skill > difficulty) {
         double skillfactor = 1.0;
         // if skill is big enough, the construction time changes
         // up to half the time (for infinit skill level)
-        if(con->difficulty > 1.0) {
-            skillfactor = static_cast<double>(con->difficulty) / skill;
+        if(difficulty > 1.0) {
+            skillfactor = static_cast<double>(difficulty) / skill;
         } else {
             skillfactor = 1.0 / skill;
         }
         // factor should be in the range (0, 1]
         moves_left /= 2;
         moves_left += static_cast<double>(moves_left) * skillfactor;
-        g->add_msg("constr-factors: skill: %f", skillfactor);
+        g->add_msg("%s-factor: %f", skillName.c_str(), skillfactor);
     }
+}
+
+void move_ppoints_for_construction(constructable *con, int &moves_left) {
+    move_ppoints_for_construction("carpentry", con->difficulty, moves_left);
 }
 
 bool game::player_can_build(player &p, crafting_inventory_t &crafting_inv, constructable* con,
