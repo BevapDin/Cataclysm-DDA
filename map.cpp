@@ -857,6 +857,9 @@ bool map::vehproceed(game* g){
         } else {
             veh->face = mdir;
         }
+        if(veh->skidding && pl_ctrl) {
+            veh->possibly_recover_from_skid();
+        }
         veh->move = mdir;
         if (coll_turn) {
             veh->skidding = true;
@@ -1204,22 +1207,56 @@ inline bool obstacle_non_open_door(vehicle *veh, int part) {
     return obstacle && !open_door;
 }
 
+bool map::is_bashable(const int x, const int y) {
+    if(!INBOUNDS(x, y)) {
+        return false;
+    }
+    const int nonant = int(x / SEEX) + int(y / SEEY) * my_MAPSIZE;
+    const int lx = x % SEEX;
+    const int ly = y % SEEY;
+    
+    static std::vector<bool> furn_bashable;
+    static std::vector<bool> ter_bashable;
+    if(furn_bashable.empty()) {
+        furn_bashable.resize(furnlist.size(), false);
+        for(size_t i = 0; i < furnlist.size(); i++) {
+            if(furnlist[i].has_flag("BASHABLE")) {
+                furn_bashable[i] = true;
+            }
+        }
+        ter_bashable.resize(terlist.size(), false);
+        for(size_t i = 0; i < terlist.size(); i++) {
+            if(terlist[i].has_flag("BASHABLE")) {
+                ter_bashable[i] = true;
+            }
+        }
+    }
+    if(veh_in_active_range && veh_exists_at[x][y]) {
+        std::pair<int,int> point(x,y);
+        std::map< std::pair<int,int>, std::pair<vehicle*,int> >::iterator it;
+        if((it = veh_cached_parts.find(point)) != veh_cached_parts.end()) {
+            int vpart = it->second.second;
+            vehicle *veh = it->second.first;
+            if(veh && obstacle_non_open_door(veh, vpart)) {
+                return true;
+            }
+        } else {
+            debugmsg("vehicle part cache cache indicated vehicle not found: %d %d",x,y);
+        }
+    }
+    if(ter_bashable[grid[nonant]->ter[lx][ly]]) {
+        return true;
+    }
+    if(furn_bashable[grid[nonant]->frn[lx][ly]]) {
+        return true;
+    }
+    return false;
+}
+
 bool map::has_flag(const std::string &flag, const int x, const int y)
 {
  if ("BASHABLE" == flag) {
-  int vpart;
-  vehicle *veh = veh_at(x, y, vpart);
-  if(veh && obstacle_non_open_door(veh, vpart)) {
-      return true;
-  }
-#if 0
-  if (veh && veh->parts[vpart].hp > 0 && // if there's a vehicle part here...
-      veh->part_with_feature (vpart, "OBSTACLE") >= 0) {// & it is obstacle...
-   const int p = veh->part_with_feature (vpart, "OPENABLE");
-   if (p < 0 || !veh->parts[p].open) // and not open door
-    return true;
-  }
-#endif
+  return is_bashable(x, y);
  }
  return (terlist[ter(x, y)].has_flag(flag) || (furnlist[furn(x, y)].has_flag(flag)));
 }
