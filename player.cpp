@@ -3455,6 +3455,9 @@ int player::throw_range(signed char ch)
   return -1;
  else
   tmp = i_at(ch);
+ 
+ if (tmp.count_by_charges() && tmp.charges > 1)
+  tmp.charges = 1;
 
  if ((tmp.weight() / 113) > int(str_cur * 15))
   return 0;
@@ -7644,7 +7647,7 @@ void player::use(game *g, char let)
         }
     } else if (used->is_gunmod()) {
         if (skillLevel("gun") == 0) {
-            g->add_msg(_("You need to be at least level 1 in the firearms skill before you\
+            g->add_msg(_("You need to be at least level 1 in the marksmanship skill before you\
  can modify guns."));
             return;
         }
