@@ -425,6 +425,12 @@ void map::vehmove(game *g)
     }
 }
 
+int degree_diff(int a, int b) {
+    int d = abs(a - b);
+    if(d <= 180) { return d; }
+    return 360 - d;
+}
+
 // find veh with the most amt of turn remaining, and move it a bit.
 // proposal:
 //  move it at most, a tenth of a turn, and at least one square.
@@ -453,7 +459,12 @@ bool map::vehproceed(game* g){
     bool pl_ctrl = veh->player_in_control(&g->u);
 
     // k slowdown first.
-    int slowdown = veh->skidding? 200 : 20; // mph lost per tile when coasting
+    int slowdown = 20; // mph lost per tile when coasting
+    if(veh->skidding) {
+        int dd = degree_diff(veh->move.dir(), veh->face.dir());
+        if(dd > 90) { dd = 180 - dd; }
+        slowdown = 200 * dd / 90;
+    }
     float kslw = (0.1 + veh->k_dynamics()) / ((0.1) + veh->k_mass());
     slowdown = (int) ceil(kslw * slowdown);
     if (abs(slowdown) > abs(veh->velocity)) {
@@ -538,7 +549,7 @@ bool map::vehproceed(game* g){
         veh->skidding = true;
     }
     tileray mdir; // the direction we're moving
-    if (veh->skidding) { // if skidding, it's the move vector
+    if (veh->skidding || !pl_ctrl) { // if skidding, it's the move vector
         mdir = veh->move;
     } else if (veh->turn_dir != veh->face.dir()) {
         mdir.init (veh->turn_dir); // driver turned vehicle, get turn_dir
@@ -550,7 +561,13 @@ bool map::vehproceed(game* g){
     const int dy = mdir.dy();           // where do we go
     bool can_move = true;
     // calculate parts' mount points @ next turn (put them into precalc[1])
-    veh->precalc_mounts(1, veh->skidding ? veh->turn_dir : mdir.dir());
+    if(pl_ctrl && !veh->skidding) {
+        veh->precalc_mounts(1, veh->turn_dir);
+    } else if(pl_ctrl) {
+        veh->precalc_mounts(1, mdir.dir());
+    } else {
+        veh->precalc_mounts(1, veh->face.dir());
+    }
 
     int dmg_1 = 0;
 
@@ -593,7 +610,7 @@ bool map::vehproceed(game* g){
         veh ->center_of_mass(x_cof1, y_cof1);
         veh2->center_of_mass(x_cof2, y_cof2);
         rl_vec2d collision_axis_y;
-
+#if 0
         collision_axis_y.x = ( veh->global_x() + x_cof1 ) -  ( veh2->global_x() + x_cof2 );
         collision_axis_y.y = ( veh->global_y() + y_cof1 ) -  ( veh2->global_y() + y_cof2 );
         collision_axis_y = collision_axis_y.normalized();
@@ -624,7 +641,17 @@ bool map::vehproceed(game* g){
         rl_vec2d final1 = collision_axis_y * vel1_y_a + collision_axis_x * vel1_x_a;
         //add both components; Note: collision_axis is normalized
         rl_vec2d final2 = collision_axis_y * vel2_y_a + collision_axis_x * vel2_x_a;
-
+#endif
+        rl_vec2d u1 = velo_veh1;
+        rl_vec2d u2 = velo_veh2;
+        
+        u1 = u1 - velo_veh2;
+        u2 = u2 - velo_veh2;
+        rl_vec2d final1 = (u1 * (m1 - m2) + (u2 * 2.0f * m2)) / (m1 + m2);
+        rl_vec2d final2 = (u2 * (m2 - m1) + (u1 * 2.0f * m1)) / (m1 + m2);
+        final1 = final1 + velo_veh2;
+        final2 = final2 + velo_veh2;
+        
         //Energy after collision
         float E_a = 0.5 * m1 * final1.norm() * final1.norm() +
             0.5 * m2 * final2.norm() * final2.norm();
@@ -670,6 +697,8 @@ bool map::vehproceed(game* g){
         epicenter2.x /= coll_parts_cnt;
         epicenter2.y /= coll_parts_cnt;
 
+//         g->add_msg("veh2: m: %.2f f: %.2f s: %i", (double) veh2->move.dir(), (double) veh2->face.dir(), (int) veh2->skidding);
+//         g->add_msg("veh : m: %.2f f: %.2f s: %i", (double) veh ->move.dir(), (double) veh ->face.dir(), (int) veh ->skidding);
 
         if (dmg2_part > 100) {
             // shake veh because of collision
@@ -681,12 +710,14 @@ bool map::vehproceed(game* g){
         veh->move.init (final1.x, final1.y);
         veh->velocity = final1.norm();
         // shrug it off if the change is less than 8mph.
-        if(dmg_veh1 > 800) {
+        if(degree_diff(veh->move.dir(), veh->face.dir()) > 30) {
+//        if(dmg_veh1 > 800) {
             veh->skidding = 1;
         }
         veh2->move.init(final2.x, final2.y);
         veh2->velocity = final2.norm();
-        if(dmg_veh2 > 800) {
+        if(degree_diff(veh2->move.dir(), veh2->face.dir()) > 30) {
+//        if(dmg_veh2 > 800) {
             veh2->skidding = 1;
         }
         //give veh2 the initiative to proceed next before veh1
@@ -695,6 +726,9 @@ bool map::vehproceed(game* g){
             avg_of_turn = .1f;
         veh->of_turn = avg_of_turn * .9;
         veh2->of_turn = avg_of_turn * 1.1;
+        
+//         g->add_msg("veh2: m: %.2f f: %.2f s: %i", (double) veh2->move.dir(), (double) veh2->face.dir(), (int) veh2->skidding);
+//         g->add_msg("veh : m: %.2f f: %.2f s: %i", (double) veh ->move.dir(), (double) veh ->face.dir(), (int) veh ->skidding);
     }
 
     int coll_turn = 0;
@@ -800,6 +834,21 @@ bool map::vehproceed(game* g){
 
     if (can_move) {
         // accept new direction
+        int dd = degree_diff(veh->move.dir(), veh->face.dir());
+        if(!pl_ctrl && dd <= 15) {
+            veh->face.init(veh->move.dir());
+            veh->precalc_mounts(1, veh->face.dir());
+        } else if(dd >= 30 || veh->skidding || !pl_ctrl) {
+            int nfd0 = (veh->face.dir() + 15) % 360;
+            int nfd1 = (veh->face.dir() - 15 + 360) % 360;
+            bool bb = degree_diff(veh->move.dir(), nfd0) < degree_diff(veh->move.dir(), nfd1);
+            if((dd > 45 && !bb) || (dd <= 45 && bb)) {
+                veh->face.init(nfd0);
+            } else {
+                veh->face.init(nfd1);
+            }
+            veh->precalc_mounts(1, veh->face.dir());
+        } else
         if (veh->skidding) {
             veh->face.init (veh->turn_dir);
             if(pl_ctrl) {
@@ -3682,10 +3731,6 @@ bool map::loadn(game *g, const int worldx, const int worldy, const int worldz,
 
           for(std::vector<item, std::allocator<item> >::iterator it = tmpsub->itm[x][y].begin();
               it != tmpsub->itm[x][y].end();) {
-              if(it->made_of(LIQUID) && it->type->id != "water") {
-                  it = tmpsub->itm[x][y].erase(it);
-                  continue;
-              }
               if ( do_container_check == true ) { // cannot link trap to mapitems
                   int itvol = it->is_funnel_container(maxvolume); // big
                   if ( itvol > maxvolume ) {                      // biggest
@@ -4220,7 +4265,7 @@ void map::check_spoiled(std::vector<item> &items)
             ++it;
             continue;
         }
-        if(it->made_of(LIQUID) && it->type->id != "water") {
+        if(it->made_of(LIQUID) && it->type->id != "water" && it->type->id != "gasoline") {
             it = items.erase(it);
             continue;
         }

@@ -190,7 +190,7 @@
         "item": "frame",
         "difficulty": 1,
         "location": "structure",
-        "flags": []
+        "flags": ["SPRING"]
     },{
         "type" : "vehicle_part",
         "id" : "frame_handle",
@@ -1185,17 +1185,17 @@
         "item": "steel_plate",
         "difficulty": 3,
         "location": "armor",
-        "flags": ["ARMOR"]
+        "flags": ["ARMOR","SPRING"]
     },{
         "type" : "vehicle_part",
-        "id" : "big_cargo_box",
-        "name": "a realy big box",
+        "id" : "veh_cargo_box",
+        "name": "big cargo box",
         "symbol": "O",
         "color": "green",
         "broken_symbol": "O",
         "broken_color": "light_gray",
         "durability": 500,
-        "item": "steel_plate",
+        "item": "veh_cargo_box",
         "difficulty": 3,
         "size": 1000,
         "location": "center",
@@ -1226,7 +1226,7 @@
         "item": "spiked_plate",
         "difficulty": 3,
         "location": "armor",
-        "flags": ["ARMOR", "SHARP"]
+        "flags": ["ARMOR", "SHARP","SPRING"]
     },{
         "type" : "vehicle_part",
         "id" : "plating_hard",
@@ -1239,7 +1239,7 @@
         "item": "hard_plate",
         "difficulty": 4,
         "location": "armor",
-        "flags": ["ARMOR"]
+        "flags": ["ARMOR","SPRING"]
     },{
         "type" : "vehicle_part",
         "id" : "headlight",
