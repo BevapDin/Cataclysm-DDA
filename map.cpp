@@ -1190,16 +1190,30 @@ inline bool obstacle_non_open_door(vehicle *veh, int part) {
     bool open_door = false;
     static const std::string obstacle_flag("OBSTACLE");
     static const std::string openable_flag("OPENABLE");
+    static std::set<std::string> obstacle_parts;
+    static std::set<std::string> openable_parts;
+    if(obstacle_parts.empty()) {
+        for(std::map<std::string, vpart_info>::iterator a = vehicle_part_types.begin(); a != vehicle_part_types.end(); ++a) {
+            if(a->second.has_flag(obstacle_flag)) {
+                obstacle_parts.insert(a->first);
+            }
+            if(a->second.has_flag(openable_flag)) {
+                openable_parts.insert(a->first);
+            }
+        }
+    }
     for (size_t i = 0; i < veh->parts.size(); i++) {
         if (veh->parts[i].hp <= 0) {
             continue;
         }
         if (veh->parts[i].mount_dx == dx && veh->parts[i].mount_dy == dy) {
-            vpart_info& vi = vehicle_part_types[veh->parts[i].id];
-            if(vi.has_flag(obstacle_flag)) {
+            if(obstacle_parts.count(veh->parts[i].id) > 0) {
                 obstacle = true;
             }
-            if(vi.has_flag(openable_flag) && veh->parts[i].open) {
+            if(openable_parts.count(veh->parts[i].id) > 0) {
+                if(obstacle) {
+                    return false; // true && !true -> see end of function
+                }
                 open_door = true;
             }
         }
