@@ -852,6 +852,12 @@ int iuse::blech(game *g, player *p, item *it, bool t) {
     return it->type->charges_to_use();
 }
 
+int iuse::chew(game *g, player *p, item *it, bool t) {
+    // TODO: Add more effects?
+    g->add_msg_if_player(p,_("You chew your %s."), it->tname().c_str());
+    return it->type->charges_to_use();
+}
+
 int iuse::mutagen(game *g, player *p, item *it, bool t) {
     if(!p->is_npc()) {
       p->add_memorial_log(_("Consumed mutagen."));
@@ -1028,6 +1034,28 @@ int iuse::dogfood(game *g, player *p, item *it, bool t)
         }
     } else {
         g->add_msg_if_player(p,_("You spill the dogfood all over the ground."));
+    }
+    return 1;
+}
+
+int iuse::catfood(game *g, player *p, item *it, bool t)
+{
+    int dirx, diry;
+    if(!g->choose_adjacent(_("Put the cat food where?"),dirx,diry)) {
+        return 0;
+    }
+    p->moves -= 15;
+    int mon_dex = g->mon_at(dirx,diry);
+    if (mon_dex != -1) {
+        if (g->zombie(mon_dex).type->id == "mon_cat") {
+            g->add_msg_if_player(p, _("The cat seems to like you! Or maybe it just tolerates your presence better. It's hard to tell with cats."));
+            g->zombie(mon_dex).friendly = -1;
+        } else {
+            g->add_msg_if_player(p, _("The %s seems quite unimpressed!"),
+                                 g->zombie(mon_dex).type->name.c_str());
+        }
+    } else {
+        g->add_msg_if_player(p,_("You spill the cat food all over the ground."));
     }
     return 1;
 }
@@ -1416,7 +1444,10 @@ int iuse::extinguisher(game *g, player *p, item *it, bool t)
 
  p->moves -= 140;
 
+ // Reduce the strength of fire (if any) in the target tile.
  g->m.adjust_field_strength(g, point(x,y), fd_fire, 0 - rng(2, 3) );
+
+ // Also spray monsters in that tile.
  int mondex = g->mon_at(x, y);
  if (mondex != -1) {
   g->zombie(mondex).moves -= 150;
@@ -1431,11 +1462,15 @@ int iuse::extinguisher(game *g, player *p, item *it, bool t)
     g->zombie(mondex).speed /= 2;
   }
  }
+
+ // Slightly reduce the strength of fire immediately behind the target tile.
  if (g->m.move_cost(x, y) != 0) {
   x += (x - p->posx);
   y += (y - p->posy);
-  g->m.adjust_field_strength(g, point(x,y), fd_fire, 0 - rng(0, 1) + rng(0, 1));
+
+  g->m.adjust_field_strength(g, point(x,y), fd_fire, std::min(0 - rng(0, 1) + rng(0, 1), 0L));
  }
+
  return it->type->charges_to_use();
 }
 
@@ -1655,6 +1690,30 @@ int iuse::glowstick_active(game *g, player *p, item *it, bool t)
             return 0;
         } else {
             g->add_msg_if_player(p,_("The glowstick fades out."));
+            it->active = false;
+        }
+    }
+    return it->type->charges_to_use();
+}
+
+int iuse::handflare(game *g, player *p, item *it, bool t)
+{
+    g->add_msg_if_player(p,_("You strike your flare and light it."));
+    it->make(g->itypes["handflare_lit"]);
+    it->active = true;
+    return it->type->charges_to_use();
+}
+
+int iuse::handflare_lit(game *g, player *p, item *it, bool t)
+{
+    if (t) { // Normal use
+        // Do nothing... player::active_light and the lightmap::generate deal with this
+    } else {
+        if (it->charges > 0) {
+            g->add_msg_if_player(p,_("You can't turn off a flare."));
+            return 0;
+        } else {
+            g->add_msg_if_player(p,_("The flare sputters out."));
             it->active = false;
         }
     }
@@ -2151,6 +2210,21 @@ int iuse::noise_emitter_off(game *g, player *p, item *it, bool t)
         g->add_msg_if_player(p,_("You turn the noise emitter on."));
         it->make(g->itypes["noise_emitter_on"]);
         it->active = true;
+    }
+    return it->type->charges_to_use();
+}
+
+int iuse::airhorn(game *g, player *p, item *it, bool t)
+{
+    if (it->charges == 0)
+    {
+        g->add_msg_if_player(p,_("You depress the button but no sound comes out."));
+    }
+    else
+    {
+        g->add_msg_if_player(p,_("You honk your airhorn."));
+        point pos = g->find_item(it);
+        g->sound(pos.x, pos.y, 50, _("HOOOOONK!"));
     }
     return it->type->charges_to_use();
 }
