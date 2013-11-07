@@ -2561,12 +2561,15 @@ void vehicle::place_spawn_items()
     }
 }
 
-void increase_bday(std::vector<item> &list, int duration) {
+void fridge_function(std::vector<item> &list, int duration) {
     for(size_t i = 0; i < list.size(); i++) {
         item &it = list[i];
         // this works for all kind of items even non-food
         it.bday += duration;
-        increase_bday(it.contents, duration);
+        if(it.item_tags.count("HOT") > 0) {
+            it.item_tags.erase(it.item_tags.find("HOT"));
+        }
+        fridge_function(it.contents, duration);
     }
 }
 
@@ -2673,7 +2676,7 @@ void vehicle::gain_moves (int mp)
             }
             // Food still gets bad, but slower:
             // fridge works only 90% of the time
-            increase_bday(parts[p].items, turn_diff);
+            fridge_function(parts[p].items, turn_diff);
         }
         if (turret_mode) { // handle turrets
             fire_turret (p);

@@ -1497,10 +1497,7 @@ bool item::made_of(const char *mat_ident) const
 
 bool item::made_of(phase_id phase) const
 {
-    if( is_null() )
-        return false;
-
-    return (type->phase == phase);
+    return (type != NULL && type->phase == phase);
 }
 
 bool item::conductive() const
