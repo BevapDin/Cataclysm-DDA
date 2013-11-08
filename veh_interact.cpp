@@ -24,6 +24,9 @@ veh_interact::veh_interact ()
     sel_vehicle_part = NULL;
 }
 
+extern bool invert_cargo_color;
+extern bool set_armor_color;
+
 /**
  * Creates a veh_interact window based on the given parameters.
  * @param v The vehicle the player is interacting with.
@@ -144,6 +147,12 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
         get_direction (dx, dy, ch);
         if (ch == KEY_ESCAPE || ch == 'q' ) {
             finish = true;
+        } else if(ch == 'I') {
+            invert_cargo_color = !invert_cargo_color;
+            display_veh();
+        } else if(ch == 'A') {
+            set_armor_color = !set_armor_color;
+            display_veh();
         } else {
             if (dx != -2 && (dx || dy)) {
                 move_cursor(dx, dy);

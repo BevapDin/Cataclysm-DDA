@@ -1136,6 +1136,9 @@ std::string vehicle::part_id_string(int p, char &part_mod)
     return idinfo;
 }
 
+bool invert_cargo_color = true;
+bool set_armor_color = true;
+
 nc_color vehicle::part_color (int p)
 {
     if (p < 0 || p >= parts.size()) {
@@ -1146,7 +1149,7 @@ nc_color vehicle::part_color (int p)
 
     //If armoring is present, it colors the visible part
     int parm = part_with_feature(p, "ARMOR", false);
-    if (parm >= 0) {
+    if (parm >= 0 && set_armor_color) {
         col = part_info(parm).color;
     } else {
 
@@ -1163,11 +1166,12 @@ nc_color vehicle::part_color (int p)
         }
 
     }
-    return col;
-
+    
     //Invert colors for cargo parts with stuff in them
     int cargo_part = part_with_feature(p, "CARGO");
     if(cargo_part > 0 && !parts[cargo_part].items.empty()) {
+        if(!invert_cargo_color && this == g->m.veh_at(g->u.posx, g->u.posy))
+        return col;
         return invert_color(col);
     } else {
         return col;
