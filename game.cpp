@@ -4040,7 +4040,8 @@ void game::draw_ter(int posx, int posy)
                    && mx >= 0 && my >= 0
                    && mx < TERRAIN_WINDOW_WIDTH && my < TERRAIN_WINDOW_HEIGHT
                    && (u.has_active_bionic("bio_infrared")
-                       || u.has_trait("INFRARED"))
+                       || u.has_trait("INFRARED")
+                       || u.has_trait("LIZ_IR"))
                    && m.pl_sees(u.posx,u.posy,z.posx(),z.posy(),
                                 u.sight_range(DAYLIGHT_LEVEL))) {
             mvwputch(w_terrain, my, mx, c_red, '?');
@@ -7116,6 +7117,7 @@ point game::look_around()
           // This is only done on toggle, so it shouldn't be used heavily.
           if (fast_scroll) {
             // print a light green mark below the top right corner of the w_look window
+            //~ Fast-scroll indicator
             mvwprintz(w_look, 1, lookWidth-1, c_ltgreen, _("F"));
           } else {
             // redraw the border to clear out the marker.

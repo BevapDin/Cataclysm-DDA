@@ -2724,8 +2724,23 @@ void player::disp_status(WINDOW *w, WINDOW *w2, game *g)
 {
     bool sideStyle = use_narrow_sidebar();
 
+    // get the current weapon mode or mods
+    std::string mode = "";
+    if (weapon.mode == "MODE_BURST") {
+        mode = _("Burst");
+    } else {
+        item* gunmod = weapon.active_gunmod();
+        if (gunmod != NULL) {
+            mode = gunmod->type->name;
+        }
+    }
+
     WINDOW *weapwin = sideStyle ? w2 : w;
-    mvwprintz(weapwin, sideStyle ? 1 : 0, 0, c_ltgray, _("Weapon: %s"), weapname().c_str());
+    if (mode == "") {
+        mvwprintz(weapwin, sideStyle ? 1 : 0, 0, c_ltgray, _("Weapon: %s"), weapname().c_str());
+    } else {
+        mvwprintz(weapwin, sideStyle ? 1 : 0, 0, c_ltgray, _("Weapon: %s (%s)"), weapname().c_str(), mode.c_str());
+    }
     if (weapon.is_gun()) {
         int adj_recoil = recoil + driving_recoil;
         if (adj_recoil > 0) {
@@ -2743,30 +2758,15 @@ void player::disp_status(WINDOW *w, WINDOW *w2, game *g)
     }
 
     // Print currently used style
-    const char *style = NULL;
-    if (style_selected == "style_none")
-      style = _("No Style");
-    else
-      style = martialarts[style_selected].name.c_str();
-    if (style) {
-        int x = sideStyle ? (getmaxx(weapwin) - 13) : 0;
-        mvwprintz(weapwin, 1, x, c_blue, style);
+    std::string style = "";
+    if (style_selected == "style_none") {
+        style = _("No Style");
+    } else {
+        style = martialarts[style_selected].name;
     }
-
-    // Print the current weapon mode
-    const char *mode = NULL;
-    if (weapon.mode == "NULL")
-        mode = _("Normal");
-    else if (weapon.mode == "MODE_BURST")
-        mode = _("Burst");
-    else {
-        item* gunmod = weapon.active_gunmod();
-        if (gunmod != NULL)
-            mode = gunmod->type->name.c_str();
-    }
-    if (mode) {
+    if (style != "") {
         int x = sideStyle ? (getmaxx(weapwin) - 13) : 0;
-        mvwprintz(weapwin, 3, x, c_red, mode);
+        mvwprintz(weapwin, 1, x, c_blue, style.c_str());
     }
 
     wmove(w, sideStyle ? 1 : 2, 0);
@@ -6456,12 +6456,12 @@ bool player::eat(game *g, item *eaten, it_comest *comest)
           g->add_msg_if_player(this, _("You feast upon the human flesh."));
           add_morale(MORALE_CANNIBAL, 15, 100);
       } else {
-          g->add_msg_if_player(this, _("You feel horrible for eating a person.."));
+          g->add_msg_if_player(this, _("You feel horrible for eating a person."));
           add_morale(MORALE_CANNIBAL, -60, -400, 600, 300);
       }
     }
     if (has_trait("VEGETARIAN") && (eaten->made_of("flesh") || eaten->made_of("hflesh"))) {
-        g->add_msg_if_player(this,_("Almost instantly you feel a familiar pain in your stomach"));
+        g->add_msg_if_player(this,_("Almost instantly you feel a familiar pain in your stomach."));
         add_morale(MORALE_VEGETARIAN, -75, -400, 300, 240);
     }
     if ((has_trait("HERBIVORE") || has_trait("RUMINANT")) &&
