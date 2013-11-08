@@ -902,7 +902,7 @@ recipe* game::select_crafting_recipe()
                 break;
             case Help:
                 tmp = item(item_controller->find_template(current[line]->result), 0);
-                full_screen_popup(tmp.info(true).c_str());
+                full_screen_popup("%s", tmp.info(true).c_str());
                 redraw = true;
                 keepline = true;
                 break;
@@ -1582,6 +1582,8 @@ static void multiply(std::vector<std::vector<component> > &vec, int factor) {
 void multiply(const recipe &in, recipe &r, int factor) {
     r.tools = in.tools;
     r.components = in.components;
+    r.time = in.time;
+    r.tools = in.tools;
     ::multiply(r.tools, factor);
     ::multiply(r.components, factor);
     if(r.count > 0) {

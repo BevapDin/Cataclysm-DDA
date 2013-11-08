@@ -1142,6 +1142,43 @@ int map::combined_movecost(const int x1, const int y1,
     return (cost1 + cost2 + modifier) * mult / 2;
 }
 
+inline bool transparent_vpart(vehicle *veh, int part) {
+    const int dx = veh->parts[part].mount_dx;
+    const int dy = veh->parts[part].mount_dy;
+    static const std::string opaque_flag("OPAQUE");
+    static const std::string openable_flag("OPENABLE");
+    static std::set<std::string> opaque_parts;
+    static std::set<std::string> openable_parts;
+    if(opaque_parts.empty()) {
+        for(std::map<std::string, vpart_info>::iterator a = vehicle_part_types.begin(); a != vehicle_part_types.end(); ++a) {
+            if(a->second.has_flag(opaque_flag)) {
+                opaque_parts.insert(a->first);
+                // transparent parts are always transparent, even if closed
+                if(a->second.has_flag(openable_flag)) {
+                    openable_parts.insert(a->first);
+                }
+            }
+        }
+    }
+    for (size_t i = 0; i < veh->parts.size(); i++) {
+        if (veh->parts[i].hp <= 0) {
+            continue;
+        }
+        if (veh->parts[i].mount_dx == dx && veh->parts[i].mount_dy == dy) {
+            if(openable_parts.count(veh->parts[i].id) > 0) {
+                if(veh->parts[i].open) {
+                    return true; // transparent because open
+                }
+                // The openable list contains only opaque parts, this one is closed
+                return false;
+            } else if(opaque_parts.count(veh->parts[i].id) > 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 bool map::trans(const int x, const int y)
 {
     // Control statement is a problem. Normally returning false on an out-of-bounds
@@ -1151,15 +1188,25 @@ bool map::trans(const int x, const int y)
     vehicle *veh = veh_at(x, y, vpart);
     bool tertr;
     if (veh) {
-        tertr = veh->part_with_feature(vpart, "OPAQUE") < 0;
-        if (!tertr) {
-            const int dpart = veh->part_with_feature(vpart, "OPENABLE");
-            if (veh->parts[dpart].open) {
-                tertr = true; // open opaque door
+        tertr = transparent_vpart(veh, vpart);
+    } else {
+        static std::vector<bool> furn_transparent;
+        static std::vector<bool> ter_transparent;
+        if(furn_transparent.empty()) {
+            furn_transparent.resize(furnlist.size(), false);
+            for(size_t i = 0; i < furnlist.size(); i++) {
+                if(furnlist[i].transparent) {
+                    furn_transparent[i] = true;
+                }
+            }
+            ter_transparent.resize(terlist.size(), false);
+            for(size_t i = 0; i < terlist.size(); i++) {
+                if(terlist[i].transparent) {
+                    ter_transparent[i] = true;
+                }
             }
         }
-    } else {
-        tertr = ( terlist[ter(x, y)].transparent && furnlist[furn(x, y)].transparent );
+        tertr = ter_transparent[ter(x, y)] && furn_transparent[furn(x, y)];
     }
     if( tertr ) {
         // Fields may obscure the view, too
@@ -1186,8 +1233,6 @@ bool map::trans(const int x, const int y)
 inline bool obstacle_non_open_door(vehicle *veh, int part) {
     const int dx = veh->parts[part].mount_dx;
     const int dy = veh->parts[part].mount_dy;
-    bool obstacle = false;
-    bool open_door = false;
     static const std::string obstacle_flag("OBSTACLE");
     static const std::string openable_flag("OPENABLE");
     static std::set<std::string> obstacle_parts;
@@ -1198,6 +1243,9 @@ inline bool obstacle_non_open_door(vehicle *veh, int part) {
                 obstacle_parts.insert(a->first);
             }
             if(a->second.has_flag(openable_flag)) {
+                if(!a->second.has_flag(obstacle_flag)) {
+                    debugmsg("vpart %s has OPENABLE but not OBSTACLE flag", a->first.c_str());
+                }
                 openable_parts.insert(a->first);
             }
         }
@@ -1207,18 +1255,17 @@ inline bool obstacle_non_open_door(vehicle *veh, int part) {
             continue;
         }
         if (veh->parts[i].mount_dx == dx && veh->parts[i].mount_dy == dy) {
-            if(obstacle_parts.count(veh->parts[i].id) > 0) {
-                obstacle = true;
-            }
             if(openable_parts.count(veh->parts[i].id) > 0) {
-                if(obstacle) {
-                    return false; // true && !true -> see end of function
+                if(veh->parts[i].open) {
+                    return false;
                 }
-                open_door = true;
+                return true;
+            } else if(obstacle_parts.count(veh->parts[i].id) > 0) {
+                return true;
             }
         }
     }
-    return obstacle && !open_door;
+    return false;
 }
 
 bool map::is_bashable(const int x, const int y) {
