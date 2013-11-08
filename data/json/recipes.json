@@ -6870,9 +6870,7 @@
   "autolearn": false,
   "tools": [
     [
-      [ "chemistry_set", 25 ],
-      [ "hotplate", 25 ],
-      [ "toolset", 2 ],
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
@@ -6961,9 +6959,7 @@
   "book_learn": [[ "recipe_alpha", 9 ]],
   "tools": [
     [
-      [ "chemistry_set", 37 ],
-      [ "hotplate", 37 ],
-      [ "toolset", 3 ],
+      [ "func:hotplate", 37 ],
       [ "fire", -1 ]
     ],
     [
@@ -6997,9 +6993,7 @@
   "book_learn": [[ "recipe_chimera", 9]],
   "tools": [
     [
-      [ "chemistry_set", 37 ],
-      [ "hotplate", 37 ],
-      [ "toolset", 3 ],
+      [ "func:hotplate", 37 ],
       [ "fire", -1 ]
     ],
     [
@@ -9833,8 +9827,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 12 ],
-      [ "sewing_kit", 12 ]
+      [ "func:sewing_kit", 12 ]
     ]
   ],
   "components": [
@@ -9867,8 +9860,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 12 ],
-      [ "sewing_kit", 12 ]
+      [ "func:sewing_kit", 12 ]
     ]
   ],
   "components": [
@@ -10510,8 +10502,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 16 ],
-      [ "sewing_kit", 16 ]
+      [ "func:sewing_kit", 16 ]
     ]
   ],
   "components": [
@@ -10530,8 +10521,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 12 ],
-      [ "sewing_kit", 12 ]
+      [ "func:sewing_kit", 12 ]
     ]
   ],
   "components": [
@@ -11772,7 +11762,7 @@
   "time": 30000,
   "reversible": false,
   "autolearn": true,
-  "tools": [ [ ["hammer", -1], ["toolset", -1]  ],
+  "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
      ],
@@ -11786,7 +11776,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 50], ["char_forge", 10]
+      ["func:forge", 50]
      ]
     ],
   "components":
