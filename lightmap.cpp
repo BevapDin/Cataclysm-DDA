@@ -9,6 +9,8 @@
 #define LIGHTMAP_CACHE_X SEEX * MAPSIZE
 #define LIGHTMAP_CACHE_Y SEEY * MAPSIZE
 
+#define light_transparency(a,b) transparency_cache[a][b]
+
 void map::generate_lightmap(game* g)
 {
  memset(lm, 0, sizeof(lm));
@@ -72,7 +74,7 @@ void map::generate_lightmap(game* g)
         if (INBOUNDS(sx, sy) && g->m.is_outside(0, 0))
          lm[sx][sy] = natural_light;
 
-        if (g->m.light_transparency(sx, sy) > LIGHT_TRANSPARENCY_SOLID)
+        if (light_transparency(sx, sy) > LIGHT_TRANSPARENCY_SOLID)
          apply_light_arc(sx, sy, dir_d[i], natural_light);
        }
       }
