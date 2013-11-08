@@ -3450,6 +3450,29 @@ int iuse::grenade_act(game *g, player *p, item *it, bool t)
     return 0;
 }
 
+int iuse::mine_bomb(game *g, player *p, item *it, bool t)
+{
+    g->add_msg_if_player(p,_("You pull the pin on the %s."), it->tname(g).c_str());
+    it->make(g->itypes[it->type->id + "_act"]);
+    it->charges = 30;
+    it->active = true;
+    return it->type->charges_to_use();
+}
+
+int iuse::mine_bomb_act(game *g, player *p, item *it, bool t)
+{
+    point pos = g->find_item(it);
+    if (pos.x == -999 || pos.y == -999) {
+        return 0;
+    }
+    if (t) { // Simple timer effects
+        g->sound(pos.x, pos.y, 0, _("Tick.")); // Vol 0 = only heard if you hold it
+    } else { // When that timer runs down...
+        g->explosion(pos.x, pos.y, 10, 8, false); // Taken from trapfunc for landmine
+    }
+    return 0;
+}
+
 int iuse::granade(game *g, player *p, item *it, bool t)
 {
     g->add_msg_if_player(p,_("You pull the pin on the Granade."));

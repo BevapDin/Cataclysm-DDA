@@ -12494,6 +12494,41 @@
   ]
 },{
         "type" : "recipe",
+  "result": "mine_bomb",
+  "category": "CC_MISC",
+  "skill_used": "traps",
+  "skills_required": [ "mechanics", 7 ],
+  "difficulty": 5,
+  "time": 5000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:soldering_iron", 3 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "superglue", 1 ]
+    ],
+    [
+      [ "landmine", 1 ]
+    ],
+    [
+      [ "scrap", 1 ]
+    ],
+    [
+      [ "nail", 2 ]
+    ],
+    [
+      [ "hose", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "brazier",
   "category": "CC_MISC",
   "skill_used": "fabrication",

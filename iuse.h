@@ -107,6 +107,8 @@ class iuse
   int grenade_act      (game *g, player *p, item *it, bool t);
   int granade          (game *g, player *p, item *it, bool t);
   int granade_act      (game *g, player *p, item *it, bool t);
+  int mine_bomb        (game *g, player *p, item *it, bool t);
+  int mine_bomb_act    (game *g, player *p, item *it, bool t);
   int flashbang        (game *g, player *p, item *it, bool t);
   int flashbang_act    (game *g, player *p, item *it, bool t);
   int c4               (game *g, player *p, item *it, bool t);
