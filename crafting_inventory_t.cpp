@@ -105,7 +105,9 @@ void crafting_inventory_t::complex_req::deserialize(crafting_inventory_t &cinv, 
 }
 
 void crafting_inventory_t::complex_req::consume(crafting_inventory_t &cinv, std::list<item> &used_items) {
-    assert(selected_simple_req_index != -1);
+    if(selected_simple_req_index == -1) {
+        return;
+    }
     assert(selected_simple_req_index >= 0);
     assert(selected_simple_req_index < simple_reqs.size());
     cinv.consume(simple_reqs[selected_simple_req_index].req, as_tool ? assume_tools : assume_components , selected_items, used_items);

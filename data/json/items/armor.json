@@ -4506,6 +4506,7 @@
         "enviromental_protection" : 0,
         "encumbrance" : 0,
         "coverage" : 5,
+        "use_action" : "QUIVER",
         "material_thickness" : 2
     },
     {

@@ -2646,10 +2646,25 @@ void vehicle::gain_moves (int mp)
             }
             tmpcontainer.add_rain_to_container(acid_rain, 1);
             if(!tmpcontainer.contents.empty()) {
-                if(vp.items.empty()) {
-                    vp.items.push_back(tmpcontainer.contents[0]);
-                } else {
-                    vp.items[0] = tmpcontainer.contents[0];
+                if(tmpcontainer.contents[0].type->id == "water" && part_with_feature(p, "CRAFTRIG") >= 0) {
+                    const int drained = drain("battery", tmpcontainer.contents[0].charges);
+                    if(drained > 0) {
+                        assert(drained <= tmpcontainer.contents[0].charges);
+                        const int left_over = refill("water", drained);
+                        if(left_over > 0) {
+                            refill("battery", left_over);
+                            tmpcontainer.contents[0].charges = left_over;
+                        } else {
+                            tmpcontainer.contents.clear();
+                        }
+                    }
+                }
+                if(!tmpcontainer.contents.empty()) {
+                    if(vp.items.empty()) {
+                        vp.items.push_back(tmpcontainer.contents[0]);
+                    } else {
+                        vp.items[0] = tmpcontainer.contents[0];
+                    }
                 }
             }
         }

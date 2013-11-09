@@ -8724,7 +8724,16 @@ void player::cancel_activity()
 
 std::vector<item*> player::has_ammo(ammotype at)
 {
-    return inv.all_ammo(at);
+    std::vector<item*> result = inv.all_ammo(at);
+    for(size_t i = 0; i < worn.size(); i++) {
+        if(worn[i].contents.empty()) { continue; }
+        item *it = &(worn[i].contents[0]);
+        if(it->is_ammo() && dynamic_cast<it_ammo*>(it->type)->type == at)
+        {
+            result.push_back(&(worn[i]));
+        }
+    }
+    return result;
 }
 
 std::string player::weapname(bool charges)

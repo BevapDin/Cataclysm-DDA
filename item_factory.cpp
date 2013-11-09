@@ -211,6 +211,7 @@ void Item_factory::init(){
     iuse_function_list["SIMPLE_OFF"] = &iuse::simple_off;
     iuse_function_list["WOOD_GAS"] = &iuse::wood_gas;
     iuse_function_list["TOOL_BELT"] = &iuse::tool_belt;
+    iuse_function_list["QUIVER"] = &iuse::quiver;
 
 
 

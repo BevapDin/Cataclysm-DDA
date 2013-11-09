@@ -2190,6 +2190,8 @@ char item::pick_reload_ammo(player &u, bool interactive)
    for (int i = 0; i < tmpammo.size(); i++)
     if (charges <= 0 || tmpammo[i]->typeId() == curammo->id)
       am.push_back(tmpammo[i]);
+    else if(charges <= 0 || (!tmpammo[i]->contents.empty() && tmpammo[i]->contents[0].typeId() == curammo->id))
+      am.push_back(tmpammo[i]);
   }
 
   // ammo for gun attachments (shotgun attachments, grenade attachments, etc.)
@@ -2257,7 +2259,7 @@ bool item::reload(player &u, char ammo_invlet)
  bool single_load = false;
  int max_load = 1;
  item *reload_target = NULL;
- item *ammo_container = (ammo_invlet != 0 ? &u.inv.item_by_letter(ammo_invlet) : NULL);
+ item *ammo_container = (ammo_invlet != 0 ? &u.i_at(ammo_invlet) : NULL);
  
  item muscle_ammo;
  if(ammo_container == 0 && ammo_type() == "muscle") {
@@ -2265,7 +2267,7 @@ bool item::reload(player &u, char ammo_invlet)
    muscle_ammo.charges = 10000;
    ammo_container = &muscle_ammo;
    ammo_invlet = 1;
- } else if(ammo_container == 0) {
+ } else if(ammo_container == 0 || ammo_container->is_null()) {
   debugmsg("NULL item to reload");
   return false;
  }
@@ -2274,6 +2276,9 @@ bool item::reload(player &u, char ammo_invlet)
  // Handle ammo in containers, currently only gasoline
  if(ammo_to_use->is_container() && !ammo_to_use->contents.empty())
    ammo_to_use = &ammo_to_use->contents[0];
+ else if(!ammo_to_use->contents.empty()) {
+   ammo_to_use = &ammo_to_use->contents[0];
+ }
 
  if (is_gun()) {
   // Reload using a spare magazine

@@ -6012,7 +6012,7 @@ int iuse::rad_badge(game *g, player *p, item *it, bool t)
 
 int iuse::tool_belt(game *g, player *p, item *it, bool t)
 {
-    bool can_add = (it->contents.size() < 4);
+    const bool can_add = (it->contents.size() < 4);
     std::vector<std::string> menu_entries;
     if(can_add) {
         menu_entries.push_back(std::string(_("Put a tool into the ")) + it->tname());
@@ -6020,12 +6020,17 @@ int iuse::tool_belt(game *g, player *p, item *it, bool t)
     for(size_t i = 0; i < it->contents.size(); i++) {
         menu_entries.push_back(std::string(_("Take out the ")) + it->contents[i].tname());
     }
+    menu_entries.push_back(_("cancel"));
     uimenu menu(true, it->tname().c_str(), menu_entries);
     if(menu.ret == 0 && can_add) {
         char ch = g->inv_type(_("Put what?"), IC_TOOL);
         item* put = &(p->i_at(ch));
         if(put->is_null()) {
             g->add_msg_if_player(p, _("You do not have that item!"));
+            return 0;
+        }
+        if(!put->is_tool()) {
+            g->add_msg_if_player(p, _("That %s is not a tool!"), put->tname(g).c_str());
             return 0;
         }
         if(put->volume() > 3) {
@@ -6043,6 +6048,48 @@ int iuse::tool_belt(game *g, player *p, item *it, bool t)
     item tool = it->contents[index];
     p->i_add(tool);
     it->contents.erase(it->contents.begin() + index);
+    return 0;
+}
+
+int iuse::quiver(game *g, player *p, item *it, bool t)
+{
+    const bool can_add = it->contents.empty();
+    int max_charges = 20;
+    it_armor *arm = dynamic_cast<it_armor*>(it->type);
+    if(arm != 0) {
+        max_charges = arm->storage * 10;
+    }
+    if(can_add) {
+        const std::string quest = string_format(_("Put ammo into the %s"), it->tname().c_str());
+        if(!query_yn("%s", quest.c_str())) { return 0; }
+        char ch = g->inv_type(_("Put what in?"), IC_AMMO);
+        item* put = &(p->i_at(ch));
+        if(put->is_null()) {
+            g->add_msg_if_player(p, _("You do not have that item!"));
+            return 0;
+        }
+        if(!put->is_ammo()) {
+            g->add_msg_if_player(p, _("That %s is not ammo!"), put->tname(g).c_str());
+            return 0;
+        }
+        p->moves -= 60;
+        g->add_msg_if_player(p, _("You put the %s in your %s."), put->tname().c_str(), it->tname().c_str());
+        if(put->charges > max_charges) {
+            it->contents.push_back(*put);
+            it->contents[0].charges = max_charges;
+            put->charges -= max_charges;
+        } else {
+            it->put_in(*put);
+            p->i_rem(ch);
+        }
+    } else {
+        const std::string quest = string_format(_("Take %s out of the %s"), it->contents[0].tname().c_str(), it->tname().c_str());
+        if(!query_yn("%s", quest.c_str())) { return 0; }
+        p->moves -= 20;
+        item ammo = it->contents[0];
+        p->i_add(ammo);
+        it->contents.erase(it->contents.begin());
+    }
     return 0;
 }
 
