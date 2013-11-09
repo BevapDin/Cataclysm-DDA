@@ -7924,7 +7924,6 @@
     ],
     [
       [ "steel_chunk", 1 ],
-      [ "scrap", 3 ],
       [ "knife_butter", 1 ],
       [ "knife_steak", 1 ],
       [ "bolt_steel", 1 ]
@@ -10397,6 +10396,9 @@
   "time": 20000,
   "reversible": true,
   "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
   "tools": [
       [
       [ "func:welder", 56 ],
@@ -13300,7 +13302,6 @@
    "result": "sword_wood",
    "category": "CC_WEAPON",
    "skill_used": "fabrication",
-   "skills_required": [ "melee", 1 ],
    "difficulty": 0,
    "time": 25000,
    "reversible": false,
@@ -13319,7 +13320,6 @@
   "result": "sword_nail",
   "category": "CC_WEAPON",
   "skill_used": "fabrication",
-  "skills_required": ["survival", 1],
   "difficulty": 2,
   "time": 5000,
   "reversible": false,
@@ -13345,7 +13345,6 @@
   "result": "sword_crude",
   "category": "CC_WEAPON",
   "skill_used": "fabrication",
-  "skills_required": ["survival", 2],
   "difficulty": 2,
   "time": 20000,
   "reversible": false,
@@ -15970,7 +15969,7 @@
   "result": "chain",
   "category": "CC_MISC",
   "skill_used": "fabrication",
-  "difficulty": 9,
+  "difficulty": 6,
   "time": 520000,
   "reversible": false,
   "autolearn": true,
@@ -16705,14 +16704,10 @@
   "time": 300000,
   "reversible": false,
   "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
   "tools": [
-    [
-      [ "scissors", -1 ],
-      [ "func:blade", -1 ],
-      [ "scalpel", -1 ],
-      [ "machete", -1 ],
-      [ "broadsword", -1 ]
-    ],
     [
       [ "func:welder", 28 ],
       [ "func:soldering_iron", 28 ]
@@ -16762,15 +16757,10 @@
   "time": 45000,
   "reversible": false,
   "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
   "tools": [
-    [
-      [ "scissors", -1 ],
-      [ "knife_steak", -1 ],
-      [ "func:blade", -1 ],
-      [ "scalpel", -1 ],
-      [ "machete", -1 ],
-      [ "broadsword", -1 ]
-    ],
     [
       [ "func:welder", 42 ],
       [ "func:soldering_iron", 42 ]
@@ -16823,15 +16813,10 @@
   "time": 60000,
   "reversible": false,
   "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
   "tools": [
-    [
-      [ "scissors", -1 ],
-      [ "knife_steak", -1 ],
-      [ "func:blade", -1 ],
-      [ "scalpel", -1 ],
-      [ "machete", -1 ],
-      [ "broadsword", -1 ]
-    ],
     [
       [ "func:welder", 28 ],
       [ "func:soldering_iron", 28 ]
@@ -16875,15 +16860,10 @@
   "time": 120000,
   "reversible": false,
   "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
   "tools": [
-    [
-      [ "scissors", -1 ],
-      [ "knife_steak", -1 ],
-      [ "func:blade", -1 ],
-      [ "scalpel", -1 ],
-      [ "machete", -1 ],
-      [ "broadsword", -1 ]
-    ],
     [
       [ "func:welder", 42 ],
       [ "func:soldering_iron", 42 ]

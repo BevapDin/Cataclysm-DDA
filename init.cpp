@@ -17,6 +17,7 @@
 #include "monstergenerator.h"
 #include "inventory.h"
 #include "tutorial.h"
+#include "artifact.h"
 
 #include <string>
 #include <vector>
@@ -181,6 +182,7 @@ void init_data_structures()
     init_translation();
     init_martial_arts();
     init_inventory_categories();
+    init_artifacts();
 }
 
 void release_data_structures()
