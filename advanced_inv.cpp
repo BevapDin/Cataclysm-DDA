@@ -767,6 +767,15 @@ void advanced_inventory::display(game * gp, player * pp) {
 
     panes[left].window = left_window;
     panes[right].window = right_window;
+    
+    if(u.grab_type == OBJECT_VEHICLE && panes[left].area == isall) {
+        for(size_t i = 0; i < sizeof(squares) / sizeof(squares[0]); i++) {
+            if(squares[i].offx == u.grab_point.x && squares[i].offy == u.grab_point.y) {
+                panes[right].area = squares[i].id;
+                break;
+            }
+        }
+    }
 
     while(!exit)
     {
