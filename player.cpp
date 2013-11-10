@@ -8726,10 +8726,25 @@ std::vector<item*> player::has_ammo(ammotype at)
 {
     std::vector<item*> result = inv.all_ammo(at);
     for(size_t i = 0; i < worn.size(); i++) {
-        if(worn[i].contents.empty()) { continue; }
+        if(worn[i].contents.empty()) {
+            continue; // Empty containe, ignore
+        }
         item *it = &(worn[i].contents[0]);
-        if(it->is_ammo() && dynamic_cast<it_ammo*>(it->type)->type == at)
-        {
+        if(!it->is_ammo()) {
+            continue; // Container with non-ammo, ignore
+        }
+        if(dynamic_cast<it_ammo*>(it->type)->type != at) {
+            continue; // container with wrong ammo, ignore
+        }
+        bool has_this_on = false;
+        for(size_t j = 0; j < result.size(); j++) {
+            if(result[j]->typeId() == it->typeId()) {
+                has_this_on = true;
+                break;
+            }
+        }
+        // Only add ammo from quiver if the same ammo is not in the main inventory
+        if(!has_this_on) {
             result.push_back(&(worn[i]));
         }
     }

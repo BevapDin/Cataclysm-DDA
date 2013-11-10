@@ -2228,10 +2228,21 @@ char item::pick_reload_ammo(player &u, bool interactive)
          "   Damage    Pierce    Range     Accuracy";
      it_ammo* ammo_def;
      for (int i = 0; i < am.size(); i++) {
-         ammo_def = dynamic_cast<it_ammo*>(am[i]->type);
+         item *it = am[i];
+         ammo_def = dynamic_cast<it_ammo*>(it->type);
+         if(ammo_def == 0 && !am[i]->contents.empty()) {
+            it = &it->contents[0];
+            ammo_def = dynamic_cast<it_ammo*>(it->type);
+         }
+         if(ammo_def == 0) {
+            debugmsg("non-ammo %s in ammo-vector from player::has_ammo", am[i]->tname().c_str());
+            am.erase(am.begin() + i);
+            i--;
+            continue;
+         }
          amenu.addentry(i,true,i + 'a',"%s | %-7d | %-7d | %-7d | %-7d",
              std::string(
-                string_format("%s (%d)", am[i]->tname().c_str(), am[i]->charges ) +
+                string_format("%s (%d)", it->tname().c_str(), it->charges ) +
                 std::string(namelen,' ')
              ).substr(0,namelen).c_str(),
              ammo_def->damage, ammo_def->pierce, ammo_def->range,
