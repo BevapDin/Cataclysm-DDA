@@ -180,9 +180,9 @@ void finalize_recipes()
         }
     }
     the_many_recipe.ident = "the_many_recipe";
+    recipe_names.push_back(the_many_recipe.ident);
     the_many_recipe.id = recipe_names.size();
     the_many_recipe.autolearn = false;
-    recipe_names.push_back(the_many_recipe.ident);
 }
 
 void load_quality(JsonObject &jo)
@@ -891,7 +891,11 @@ recipe* game::select_crafting_recipe()
                         done = false;
                     } else {
                         multiply(*chosen, the_many_recipe, amount);
-                        if(!can_make(&the_many_recipe, crafting_inv)) {
+                        if(!crafting_inv.has_all_requirements(the_many_recipe)) {
+                            std::ostringstream buffer;
+                            ::list_missing_ones(buffer, the_many_recipe);
+                            popup_top(buffer.str().c_str());
+                            draw();
                             done = false;
                         } else {
                             chosen = &the_many_recipe;
@@ -1501,6 +1505,9 @@ void game::complete_disassemble()
 
 recipe* game::recipe_by_index(int index)
 {
+    if(index == the_many_recipe.id) {
+        return &the_many_recipe;
+    }
     for (recipe_map::iterator map_iter = recipes.begin(); map_iter != recipes.end(); ++map_iter)
     {
         for (recipe_list::iterator list_iter = map_iter->second.begin(); list_iter != map_iter->second.end(); ++list_iter)
@@ -1580,10 +1587,13 @@ static void multiply(std::vector<std::vector<component> > &vec, int factor) {
 }
 
 void multiply(const recipe &in, recipe &r, int factor) {
-    r.tools = in.tools;
-    r.components = in.components;
-    r.time = in.time;
-    r.tools = in.tools;
+    const int id = r.id;
+    const std::string ident = r.ident;
+    r = in;
+    r.id = id;
+    r.ident = ident;
+    r.autolearn = false;
+    r.time *= factor;
     ::multiply(r.tools, factor);
     ::multiply(r.components, factor);
     if(r.count > 0) {
