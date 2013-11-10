@@ -1170,6 +1170,25 @@ int iuse::sew(game *g, player *p, item *it, bool t)
                 }
             }
         }
+        for (size_t i = 0; ch == ' ' && i < p->worn.size(); i++)
+        {
+            const item& it = p->worn[i];
+            if (it.is_armor())
+            {
+                if (it.made_of("cotton") || it.made_of("wool") || it.made_of("leather") || it.made_of("fur"))
+                {
+                    if(choice == 1 && it.damage > 0) {
+                        ch = it.invlet;
+                    }
+                    if(choice == 2 && it.damage == 0 && it.has_flag("VARSIZE") && !it.has_flag("FIT")) {
+                        ch = it.invlet;
+                    }
+                    if(choice == 3 && it.damage == 0 && (!it.has_flag("VARSIZE") || (it.has_flag("VARSIZE") && it.has_flag("FIT")))) {
+                        ch = it.invlet;
+                    }
+                }
+            }
+        }
         if(ch == ' ') {
             g->add_msg("You have no matching item");
             return 0;
