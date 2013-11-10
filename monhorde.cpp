@@ -373,7 +373,7 @@ void game::spawn_horde_members() {
 			if(horde.pop_normal == 0) {
 				type = MASTER_ZOMBIE_ID;
 			} else {
-                MonsterGroupResult res = MonsterGroupManager::GetResultFromGroup(horde.type, &mtypes, &spawn_count, (int)turn);
+                MonsterGroupResult res = MonsterGroupManager::GetResultFromGroup(horde.type, &spawn_count, (int)turn);
 				// Special check: each horde has one master to begin with, if this one is lost, the group may shrink over time
 				if(res.name == MASTER_ZOMBIE_ID && horde.pop_master == 0) {
 					continue; // try again

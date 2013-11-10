@@ -28,6 +28,7 @@
  // Return false if we weren't able to use the item.
 static bool use_fire(game *g, player *p, item *it)
 {
+    (void)it; //unused
     if (!p->use_charges_if_avail("fire", 1))
     {
         g->add_msg_if_player(p, _("You need a source of flame!"));
@@ -39,6 +40,7 @@ static bool use_fire(game *g, player *p, item *it)
 static bool item_inscription( game *g, player *p, item *cut, std::string verb, std::string gerund,
                               bool carveable)
 {
+    (void)p; //unused
     if (!cut->made_of(SOLID)) {
         std::string lower_verb = verb;
         std::transform(lower_verb.begin(), lower_verb.end(), lower_verb.begin(), ::tolower);
@@ -128,7 +130,7 @@ int iuse::sewage(game *g, player *p, item *it, bool t)
 
 int iuse::honeycomb(game *g, player *p, item *it, bool t)
 {
-  g->m.spawn_item(p->posx, p->posy, "wax",0, 2);
+  g->m.spawn_item(p->posx, p->posy, "wax", 2);
   return it->type->charges_to_use();
 }
 
@@ -630,7 +632,7 @@ int iuse::fungicide(game *g, player *p, item *it, bool t) {
                                 g->add_msg(_("The %s is covered in tiny spores!"),
                                            g->zombie(zid).name().c_str());
                             }
-                            if (!g->zombie(zid).make_fungus(g)) {
+                            if (!g->zombie(zid).make_fungus()) {
                                 g->kill_mon(zid);
                             }
                         } else {
@@ -1562,8 +1564,8 @@ int iuse::hammer(game *g, player *p, item *it, bool t)
         return 0;
     }
     p->moves -= 500;
-    g->m.spawn_item(p->posx, p->posy, "nail", 0, 0, nails);
-    g->m.spawn_item(p->posx, p->posy, "2x4", 0, boards);
+    g->m.spawn_item(p->posx, p->posy, "nail", 0, nails);
+    g->m.spawn_item(p->posx, p->posy, "2x4", boards);
     g->m.ter_set(x, y, newter);
     return it->type->charges_to_use();
 }
@@ -2477,8 +2479,8 @@ int iuse::crowbar(game *g, player *p, item *it, bool t)
     p->practice(g->turn, "carpentry", 1);
    }
    p->moves -= 500;
-   g->m.spawn_item(p->posx, p->posy, "nail", 0, 0, nails);
-   g->m.spawn_item(p->posx, p->posy, "2x4", 0, boards);
+   g->m.spawn_item(p->posx, p->posy, "nail", 0, nails);
+   g->m.spawn_item(p->posx, p->posy, "2x4", boards);
    g->m.ter_set(dirx, diry, newter);
    return it->type->charges_to_use();
   }
@@ -2497,7 +2499,7 @@ int iuse::crowbar(game *g, player *p, item *it, bool t)
     g->sound(dirx, diry, 12, _("crunch!"));
    }
    if ( type == t_manhole_cover ) {
-     g->m.spawn_item(dirx, diry, "manhole_cover", 0);
+     g->m.spawn_item(dirx, diry, "manhole_cover");
    }
    if ( type == t_door_locked_alarm ) {
      g->u.add_memorial_log(_("Set off an alarm."));
@@ -2513,9 +2515,9 @@ int iuse::crowbar(game *g, player *p, item *it, bool t)
      g->add_msg_if_player(p,_("You break the glass."));
      g->sound(dirx, diry, 24, _("glass breaking!"));
      g->m.ter_set(dirx, diry, t_window_frame);
-     g->m.spawn_item(dirx, diry, "sheet", 0, 2);
-     g->m.spawn_item(dirx, diry, "stick", 0);
-     g->m.spawn_item(dirx, diry, "string_36", 0);
+     g->m.spawn_item(dirx, diry, "sheet", 2);
+     g->m.spawn_item(dirx, diry, "stick");
+     g->m.spawn_item(dirx, diry, "string_36");
      return it->type->charges_to_use();
     }
    }
@@ -4880,8 +4882,8 @@ int iuse::hacksaw(game *g, player *p, item *it, bool t)
         p->moves -= 500;
         g->m.furn_set(dirx, diry, f_null);
         g->sound(dirx, diry, 15,_("grnd grnd grnd"));
-        g->m.spawn_item(p->posx, p->posy, "pipe", 0, rng(1, 3));
-        g->m.spawn_item(p->posx, p->posy, "steel_chunk", 0);
+        g->m.spawn_item(p->posx, p->posy, "pipe", rng(1, 3));
+        g->m.spawn_item(p->posx, p->posy, "steel_chunk");
         return it->type->charges_to_use();
     }
 
@@ -4893,15 +4895,15 @@ int iuse::hacksaw(game *g, player *p, item *it, bool t)
         p->moves -= 500;
         g->m.ter_set(dirx, diry, t_dirt);
         g->sound(dirx, diry, 15,_("grnd grnd grnd"));
-        g->m.spawn_item(dirx, diry, "pipe", 0, 6);
-        g->m.spawn_item(dirx, diry, "wire", 0, 20);
+        g->m.spawn_item(dirx, diry, "pipe", 6);
+        g->m.spawn_item(dirx, diry, "wire", 20);
         break;
 
     case old_t_chainfence_posts:
         p->moves -= 500;
         g->m.ter_set(dirx, diry, t_dirt);
         g->sound(dirx, diry, 15,_("grnd grnd grnd"));
-        g->m.spawn_item(dirx, diry, "pipe", 0, 6);
+        g->m.spawn_item(dirx, diry, "pipe", 6);
         break;
 
     case old_t_bars:
@@ -4911,12 +4913,12 @@ int iuse::hacksaw(game *g, player *p, item *it, bool t)
             g->m.ter_set(dirx, diry, t_sewage);
             p->moves -= 1000;
             g->sound(dirx, diry, 15,_("grnd grnd grnd"));
-            g->m.spawn_item(p->posx, p->posy, "pipe", 0, 3);
+            g->m.spawn_item(p->posx, p->posy, "pipe", 3);
         } else if (g->m.ter(p->posx, p->posy)){
             g->m.ter_set(dirx, diry, t_floor);
             p->moves -= 500;
             g->sound(dirx, diry, 15,_("grnd grnd grnd"));
-            g->m.spawn_item(p->posx, p->posy, "pipe", 0, 3);
+            g->m.spawn_item(p->posx, p->posy, "pipe", 3);
         }
         break;
 
@@ -5416,12 +5418,12 @@ if (dirx == p->posx && diry == p->posy) {
   p->moves -= 100;
   g->m.ter_set(dirx, diry, t_chaingate_c);
   g->sound(dirx, diry, 5, _("Gachunk!"));
-  g->m.spawn_item(p->posx, p->posy, "scrap", 0, 3);
+  g->m.spawn_item(p->posx, p->posy, "scrap", 3);
  } else if (g->m.ter(dirx, diry) == t_chainfence_v || g->m.ter(dirx, diry) == t_chainfence_h) {
   p->moves -= 500;
   g->m.ter_set(dirx, diry, t_chainfence_posts);
   g->sound(dirx, diry, 5,_("Snick, snick, gachunk!"));
-  g->m.spawn_item(dirx, diry, "wire", 0, 20);
+  g->m.spawn_item(dirx, diry, "wire", 20);
  } else {
   g->add_msg(_("You can't cut that."));
   return 0;
@@ -5900,7 +5902,7 @@ int iuse::spray_can(game *g, player *p, item *it, bool t)
     }
     else
     {
-        if(g->m.add_graffiti(g, p->posx, p->posy, message))
+        if(g->m.add_graffiti(p->posx, p->posy, message))
         {
             g->add_msg(
                 ismarker?

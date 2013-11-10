@@ -1155,17 +1155,19 @@ void complete_vehicle (game *g)
         g->u.practice (g->turn, "mechanics", vehicle_part_types[part_id].difficulty * 5 + 20);
         break;
     case 'r':
-        items_needed = veh->part_info(vehicle_part).get_repair_materials(veh->parts[vehicle_part].hp);
-        for(size_t a = 0; a < items_needed.size(); a++) {
-            if(items_needed[a].first == veh->part_info(vehicle_part).item) {
-                used_item = crafting_inv.consume_vpart_item(g, items_needed[a].first);
-                veh->parts[vehicle_part].bigness = used_item.bigness;
-                tools.push_back(component("func:wrench", -1));
-                crafting_inv.consume_any_tools(tools, true);
-                tools.clear();
-                dd = 0;
-                veh->insides_dirty = true;
-            } else {
+        if (veh->parts[vehicle_part].hp <= 0)
+        {
+            veh->break_part_into_pieces(vehicle_part, g->u.posx, g->u.posy);
+            used_item = crafting_inv.consume_vpart_item(g, veh->parts[vehicle_part].id);
+            veh->parts[vehicle_part].bigness = used_item.bigness;
+            tools.push_back(component("wrench", -1));
+            crafting_inv.consume_any_tools(tools, true);
+            tools.clear();
+            dd = 0;
+            veh->insides_dirty = true;
+        } else {
+            items_needed = veh->part_info(vehicle_part).get_repair_materials(veh->parts[vehicle_part].hp);
+            for(size_t a = 0; a < items_needed.size(); a++) {
                 crafting_inv.consume_components(items_needed[a].first, items_needed[a].second);
             }
         }
@@ -1200,10 +1202,7 @@ void complete_vehicle (game *g)
                 g->u.practice (g->turn, "mechanics", 2 * 5 + 20);
             }
         } else {
-            std::vector<item> scraps = veh->part_info(vehicle_part).get_remaining_scraps();
-            for(size_t a = 0; a < scraps.size(); a++) {
-                g->m.add_item_or_charges(g->u.posx, g->u.posy, scraps[a]);
-            }
+            veh->break_part_into_pieces(vehicle_part, g->u.posx, g->u.posy);
         }
         if (veh->parts.size() < 2)
         {

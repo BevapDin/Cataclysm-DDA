@@ -258,7 +258,7 @@ void game::unserialize(std::ifstream & fin) {
             clear_zombies();
             monster montmp;
             for( picojson::array::iterator pit = vdata->begin(); pit != vdata->end(); ++pit) {
-                montmp.json_load( *pit, &mtypes );
+                montmp.json_load(*pit);
                 add_zombie(montmp);
             }
 
@@ -621,6 +621,7 @@ void game::unserialize_master(std::ifstream &fin) {
                     mis.deserialize(mis_json);
                     active_missions.push_back(mis);
                 }
+                jsin.skip_separator();
             } else if (name == "factions") {
                 jsin.start_array();
                 while (!jsin.end_array()) {
@@ -629,6 +630,7 @@ void game::unserialize_master(std::ifstream &fin) {
                     fac.deserialize(fac_json);
                     factions.push_back(fac);
                 }
+                jsin.skip_separator();
             } else {
                 // silently ignore anything else
                 jsin.skip_value();
