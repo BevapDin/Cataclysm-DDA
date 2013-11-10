@@ -3621,6 +3621,7 @@ bool vehicle::examine(game *g, player *p, int part) {
                 vp.items.push_back(*a);
                 vp.items.back().bday = (int) g->turn;
             }
+            p->moves -= 150;
             g->add_msg_if_player(p, buffer.str().c_str());
             return true;
         } else if(vp.items[0].type->id != "charcoal") {
@@ -3643,6 +3644,7 @@ bool vehicle::examine(game *g, player *p, int part) {
             return false;
         }
         p->add_or_drop(vp.items[0], g);
+        p->moves -= 150;
         vp.items.clear();
         return true;
     }
@@ -3657,6 +3659,7 @@ bool vehicle::examine(game *g, player *p, int part) {
         if(!g->handle_liquid(vp.items[0], false, false)) {
             return true;
         }
+        p->moves -= 150;
         vp.items.clear();
         return true;
     }
