@@ -3462,6 +3462,7 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
         parts[i].mount_dx = ox;
         parts[i].mount_dy = oy;
     }
+    const std::string this_name = name;
     // Move parts
     other->parts.insert(other->parts.end(), parts.begin(), parts.end());
     // Destroy me
@@ -3471,6 +3472,7 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
     other->insides_dirty = true;
     g->m.update_vehicle_cache(other, false);
     p->moves -= 300;
+    g->add_msg("You tow the %s to the %s", this_name.c_str(), other->name.c_str());
     return true;
 }
 
@@ -3569,6 +3571,7 @@ void vehicle::untow(game *g, int part, player *p) {
     new_veh->insides_dirty = true;
     g->m.update_vehicle_cache(new_veh, true);
     p->moves -= 300;
+    g->add_msg("You untow the %s from the %s", new_veh->name.c_str(), name.c_str());
 }
 
 #include "crafting_inventory_t.h"

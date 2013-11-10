@@ -6813,17 +6813,28 @@ void game::examine()
   
   if(veh->can_tow(this, other, other_part) &&
       query_yn(_("Tow the vehicles together?"))) {
+      const std::string veh_name = veh->name;
       veh->tow_to(this, other, other_part, &u);
       // If the player had grabbed the vehicle, release it automaticly
       if((u.grab_point.x != 0 || u.grab_point.y != 0) && u.grab_type == OBJECT_VEHICLE) {
           if(examx == u.posx + u.grab_point.x && examy == u.posy + u.grab_point.y) {
               u.grab_point.x = u.grab_point.y = 0;
+              add_msg("You release the %s", veh_name.c_str());
           }
       }
       return;
   } else if(veh->can_untow(veh_part) &&
       query_yn(_("Untow the vehicles?"))) {
       veh->untow(this, veh_part, &u);
+      if(u.grab_point.x == 0 && u.grab_point.y == 0) {
+          u.grab_point.x = examx - u.posx;
+          u.grab_point.y = examy - u.posy;
+          u.grab_type = OBJECT_VEHICLE;
+          veh = m.veh_at(examx, examy);
+          if(veh != 0) {
+              add_msg("You grab the %s", veh->name.c_str());
+          }
+      }
       return;
   } else
   if ((vpcargo >= 0 && veh->parts[vpcargo].items.size() > 0) || vpkitchen >= 0 || vpweldrig >=0 || vpcraftrig >=0)
