@@ -40,6 +40,8 @@
 #include <math.h>
 #include <vector>
 
+#define ENABLE_HORDES 1
+
 #ifdef _MSC_VER
 #include "wdirent.h"
 #include <direct.h>

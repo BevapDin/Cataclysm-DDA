@@ -103,11 +103,12 @@ public:
     struct items_in_vehicle_cargo {
         /** The vehicle the items are in. */
         vehicle *veh;
-        /** The part number of the cargo unit */
-        int part_num;
+        /** The relative coords (mount_dx/mount_dy) of the cargo unit */
+        int mount_dx;
+        int mount_dy;
         std::vector<item> &items();
         const std::vector<item> &items() const;
-        items_in_vehicle_cargo(vehicle *v, int p) : veh(v), part_num(p) { }
+        items_in_vehicle_cargo(vehicle *v, int x, int y) : veh(v), mount_dx(x), mount_dy(y) { }
     };
     /**
      * This contains a pseudo-item that represents a special vehicle_part,
@@ -117,11 +118,12 @@ public:
     struct item_from_vpart {
         /** The vehicle with the vehicle_part (like a kitchen). */
         vehicle *veh;
-        /** The part number of the vehicle_part*/
-        int part_num;
+        /** The relative coords (mount_dx/mount_dy) of the vehicle_part*/
+        int mount_dx;
+        int mount_dy;
         /** the pseudo-item of the vehicle_part (like water_clean from kitchen) */
         item the_item;
-        item_from_vpart(vehicle *v, int p, const item &i) : veh(v), part_num(p), the_item(i) { }
+        item_from_vpart(vehicle *v, int x, int y, const item &i) : veh(v), mount_dx(x), mount_dy(y), the_item(i) { }
     };
     /**
      * This contains a pseudo-item that represents a bionic. It is used at

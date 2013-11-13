@@ -898,11 +898,27 @@ const std::vector<item>& crafting_inventory_t::items_on_map::items() const {
 }
 
 std::vector<item>& crafting_inventory_t::items_in_vehicle_cargo::items() {
-    return veh->parts[part_num].items;
+    std::vector<int> parts = veh->parts_at_relative(mount_dx, mount_dy);
+    for(size_t i = 0; i < parts.size(); i++) {
+        if(veh->part_info(parts[i]).has_flag("CARGO")) {
+            return veh->parts[parts[i]].items;
+        }
+    }
+    debugmsg("cargo part not found");
+    static std::vector<item> empty_list;
+    return empty_list;
 }
 
 const std::vector<item>& crafting_inventory_t::items_in_vehicle_cargo::items() const {
-    return veh->parts[part_num].items;
+    std::vector<int> parts = veh->parts_at_relative(mount_dx, mount_dy);
+    for(size_t i = 0; i < parts.size(); i++) {
+        if(veh->part_info(parts[i]).has_flag("CARGO")) {
+            return veh->parts[parts[i]].items;
+        }
+    }
+    debugmsg("cargo part not found");
+    static const std::vector<item> empty_list;
+    return empty_list;
 }
 
 
@@ -1069,6 +1085,7 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
     usageType = pjv.get("utype").get<std::string>();
     point tmppnt;
     std::string tmpstr;
+    int veh_ptr;
     switch(location) {
         case LT_MAP:
             tmppnt.x = (int) pjv.get("x").get<double>();
@@ -1104,12 +1121,14 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
             }
             break;
         case LT_VEHICLE_CARGO:
-            tmppnt.x = (int) pjv.get("vehptr").get<double>();
-            tmppnt.y = (int) pjv.get("part").get<double>();
+            veh_ptr = (int) pjv.get("vehptr").get<double>();
+            tmppnt.x = (int) pjv.get("mount_dx").get<double>();
+            tmppnt.y = (int) pjv.get("mount_dy").get<double>();
             vitems = NULL;
             for(std::list<items_in_vehicle_cargo>::iterator a = cinv.in_veh.begin(); a != cinv.in_veh.end(); ++a) {
-                if(reinterpret_cast<int>(a->veh) == tmppnt.x
-                    && a->part_num == tmppnt.y
+                if(reinterpret_cast<int>(a->veh) == veh_ptr
+                    && a->mount_dx == tmppnt.x
+                    && a->mount_dy == tmppnt.y
                 ) {
                     vitems = &(*a);
                     break;
@@ -1118,13 +1137,15 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
             iindex = (int) pjv.get("index").get<double>();
             break;
         case LT_VPART:
-            tmppnt.x = (int) pjv.get("vehptr").get<double>();
-            tmppnt.y = (int) pjv.get("part").get<double>();
+            veh_ptr = (int) pjv.get("vehptr").get<double>();
+            tmppnt.x = (int) pjv.get("mount_dx").get<double>();
+            tmppnt.y = (int) pjv.get("mount_dy").get<double>();
             vpartitem = NULL;
             tmpstr = pjv.get("type").get<std::string>();
             for(std::list<item_from_vpart>::iterator a = cinv.vpart.begin(); a != cinv.vpart.end(); ++a) {
-                if(reinterpret_cast<int>(a->veh) == tmppnt.x
-                    && a->part_num == tmppnt.y
+                if(reinterpret_cast<int>(a->veh) == veh_ptr
+                    && a->mount_dx == tmppnt.x
+                    && a->mount_dy == tmppnt.y
                     && a->the_item.type->id == tmpstr
                 ) {
                     vpartitem = &(*a);
@@ -1218,13 +1239,15 @@ void crafting_inventory_t::candidate_t::serialize(picojson::value &v) const {
             // BUT: this value is read in and searched for in the crafting_inventory_t,
             // if there is no matching vehicle found, than we reset the_item to NULL.
             pjmap["vehptr"] = pv(reinterpret_cast<int>(vitems->veh));
-            pjmap["part"] = pv(vitems->part_num);
+            pjmap["mount_dx"] = pv(vitems->mount_dx);
+            pjmap["mount_dy"] = pv(vitems->mount_dy);
             pjmap["index"] = pv(iindex);
             break;
         case LT_VPART:
             // Note: see above case LT_VEHICLE_CARGO
             pjmap["vehptr"] = pv(reinterpret_cast<int>(vitems->veh));
-            pjmap["part"] = pv(vitems->part_num);
+            pjmap["mount_dx"] = pv(vitems->mount_dx);
+            pjmap["mount_dy"] = pv(vitems->mount_dy);
             pjmap["type"] = pv(vpartitem->the_item.type->id);
             break;
         case LT_WEAPON:
@@ -1893,12 +1916,14 @@ bool crafting_inventory_t::candidate_t::operator<(const candidate_t &other) cons
             break;
         case LT_VEHICLE_CARGO:
             CMP_IF(vitems->veh);
-            CMP_IF(vitems->part_num);
+            CMP_IF(vitems->mount_dx);
+            CMP_IF(vitems->mount_dy);
             CMP_IF(iindex);
             break;
         case LT_VPART:
             CMP_IF(vpartitem->veh);
-            CMP_IF(vpartitem->part_num);
+            CMP_IF(vitems->mount_dx);
+            CMP_IF(vitems->mount_dy);
             break;
         case LT_WEAPON:
             break;
@@ -2106,7 +2131,7 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
         case LT_VEHICLE_CARGO:
             remove_releated(
                 req,
-                vitems->veh->parts[vitems->part_num].items,
+                vitems->items(),
                 iindex,
                 used_items
             );
@@ -2554,5 +2579,5 @@ void crafting_inventory_t::add_vpart(vehicle *veh, int part, const std::string &
     } else {
         vpart_item.charges = veh->fuel_left(fuel, true);
     }
-    vpart.push_back(item_from_vpart(veh, part, vpart_item));
+    vpart.push_back(item_from_vpart(veh, veh->parts[part].mount_dx, veh->parts[part].mount_dy, vpart_item));
 }

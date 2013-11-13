@@ -891,6 +891,14 @@ int vehicle::install_part (int dx, int dy, std::string id, int hp, bool force)
     find_exhaust ();
     precalc_mounts (0, face.dir());
     insides_dirty = true;
+    sort_parts();
+    std::vector<int> parts_here = parts_at_relative(dx, dy);
+    for(size_t i = 0; i < parts_here.size(); i++) {
+        if(parts[parts_here[i]].id == id) {
+            return parts_here[i];
+        }
+    }
+    debugmsg("Did not found new installed vpart %s at %d,%d", id.c_str(), dx, dy);
     return parts.size() - 1;
 }
 
@@ -993,11 +1001,20 @@ int vehicle::part_with_feature (int part, const std::string &flag, bool unbroken
 {
     const int dx = parts[part].mount_dx;
     const int dy = parts[part].mount_dy;
-    for (int i = 0; i < parts.size(); i++) {
+    while(part > 0) {
+        if(parts[part - 1].mount_dx == dx && parts[part - 1].mount_dy == dy) {
+            part--;
+        } else {
+            break;
+        }
+    }
+    for (int i = part; i < parts.size(); i++) {
         if (parts[i].mount_dx == dx && parts[i].mount_dy == dy) {
             if (part_flag(i, flag) && (!unbroken || parts[i].hp > 0)) {
                 return i;
             }
+        } else {
+            break;
         }
     }
     return -1;
@@ -3681,6 +3698,9 @@ void vehicle::sort_parts() {
             }
             if(parts[p].mount_dx > parts[j].mount_dx) {
                 p = j;
+                continue;
+            }
+            if(parts[p].mount_dx < parts[j].mount_dx) {
                 continue;
             }
             if(parts[p].mount_dy > parts[j].mount_dy) {

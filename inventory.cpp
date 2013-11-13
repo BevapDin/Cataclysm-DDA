@@ -621,7 +621,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 
                     item water(g->itypes["water_clean"], 0);
                     water.charges = veh->fuel_left("water");
-                    this->vpart.push_back(item_from_vpart(veh, kpart, water));
+                    this->vpart.push_back(item_from_vpart(veh, veh->parts[kpart].mount_dx, veh->parts[kpart].mount_dy, water));
                 }
 
                 const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
@@ -641,7 +641,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 
                 const int cpart = veh->part_with_feature(vpart, "CARGO");
                 if (cpart >= 0) {
-                    items_in_vehicle_cargo inveh(veh, cpart);
+                    items_in_vehicle_cargo inveh(veh, veh->parts[cpart].mount_dx, veh->parts[cpart].mount_dy);
                     if(!inveh.items().empty()) {
                         in_veh.push_back(inveh);
                     }
