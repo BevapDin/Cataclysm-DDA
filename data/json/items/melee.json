@@ -28,6 +28,7 @@
     "volume": 1,
     "bashing": -8,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": 0
   },
 
@@ -44,6 +45,7 @@
     "volume": 1,
     "bashing": -2,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -1
   },
 
@@ -109,6 +111,7 @@
     "volume": 2,
     "bashing": 5,
     "cutting": 0,
+    "category": "tools",
     "to_hit": 1
   },
 
@@ -157,6 +160,7 @@
     "volume": 10,
     "bashing": 1,
     "cutting": 0,
+    "category": "tools",
     "to_hit": -10
   },
 
@@ -189,6 +193,7 @@
     "volume": 1,
     "bashing": -5,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -1
   },
 
@@ -205,6 +210,7 @@
     "volume": 4,
     "bashing": 5,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -1
   },
 
@@ -221,6 +227,7 @@
     "volume": 1,
     "bashing": -5,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -1
   },
 
@@ -237,6 +244,7 @@
     "volume": 1,
     "bashing": -5,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -1
   },
 
@@ -253,6 +261,7 @@
     "volume": 1,
     "bashing": -4,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -1
   },
 
@@ -269,6 +278,7 @@
     "volume": 1,
     "bashing": -6,
     "cutting": -2,
+    "category": "spare parts",
     "to_hit": -4
   },
 
@@ -285,6 +295,7 @@
     "volume": 0,
     "bashing": -8,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -3
   },
 
@@ -301,6 +312,7 @@
     "volume": 1,
     "bashing": -4,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -1
   },
 
@@ -317,6 +329,7 @@
     "volume": 1,
     "bashing": -6,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": 2
   },
 
@@ -333,6 +346,7 @@
     "volume": 0,
     "bashing": -6,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": 2
   },
 
@@ -349,6 +363,7 @@
     "volume": 0,
     "bashing": -6,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": 2
   },
 
@@ -365,6 +380,7 @@
     "volume": 2,
     "bashing": 8,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -2
   },
 
@@ -381,6 +397,7 @@
     "volume": 2,
     "bashing": 12,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -4
   },
 
@@ -397,6 +414,7 @@
     "volume": 1,
     "bashing": 1,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -2
   },
 
@@ -413,6 +431,7 @@
     "volume": 50,
     "bashing": 4,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -5
   },
 
@@ -647,6 +666,7 @@
     "volume": 1,
     "bashing": 1,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -2
   },
 
@@ -839,6 +859,7 @@
     "volume": 2,
     "bashing": 0,
     "cutting": 0,
+    "category": "spare parts",
     "to_hit": -2
   },
 
@@ -1679,6 +1700,7 @@
         "volume" : 6,
         "bashing" : 10,
         "cutting" : 0,
+        "category": "spare parts",
         "price" : 80
     },
     {
@@ -1695,6 +1717,7 @@
         "volume" : 4,
         "bashing" : 16,
         "cutting" : 0,
+        "category": "spare parts",
         "price" : 75
     },
     {

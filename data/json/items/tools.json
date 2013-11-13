@@ -4085,6 +4085,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "other",
+    "category": "spare parts",
     "use_action": "NONE"
   },
 
@@ -4108,7 +4109,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "other",
+    "category": "spare parts",
     "use_action": "NONE"
   },
 

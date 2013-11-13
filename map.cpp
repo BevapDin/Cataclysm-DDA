@@ -27,6 +27,39 @@ enum astar_list {
  ASL_CLOSED
 };
 
+struct furn_flag_cache {
+    const std::string flag;
+    std::vector<bool> furns;
+    furn_flag_cache(const std::string &f) : flag(f) { }
+    bool operator[](furn_id id) {
+        if(furns.empty()) {
+            furns.resize(furnlist.size(), false);
+            for(size_t i = 0; i < furnlist.size(); i++) {
+                if(furnlist[i].has_flag(flag)) {
+                    furns[i] = true;
+                }
+            }
+        }
+        return furns[id];
+    }
+};
+struct ter_flag_cache {
+    const std::string flag;
+    std::vector<bool> ters;
+    ter_flag_cache(const std::string &f) : flag(f) { }
+    bool operator[](ter_id id) {
+        if(ters.empty()) {
+            ters.resize(terlist.size(), false);
+            for(size_t i = 0; i < terlist.size(); i++) {
+                if(terlist[i].has_flag(flag)) {
+                    ters[i] = true;
+                }
+            }
+        }
+        return ters[id];
+    }
+};
+
 map::map()
 {
     nulter = t_null;
@@ -463,7 +496,7 @@ bool map::vehproceed(game* g){
     if(veh->skidding) {
         int dd = degree_diff(veh->move.dir(), veh->face.dir());
         if(dd > 90) { dd = 180 - dd; }
-        slowdown = 200 * dd / 90;
+        slowdown = 180 * dd / 90 + 20;
     }
     float kslw = (0.1 + veh->k_dynamics()) / ((0.1) + veh->k_mass());
     slowdown = (int) ceil(kslw * slowdown);
@@ -1276,22 +1309,9 @@ bool map::is_bashable(const int x, const int y) {
     const int lx = x % SEEX;
     const int ly = y % SEEY;
     
-    static std::vector<bool> furn_bashable;
-    static std::vector<bool> ter_bashable;
-    if(furn_bashable.empty()) {
-        furn_bashable.resize(furnlist.size(), false);
-        for(size_t i = 0; i < furnlist.size(); i++) {
-            if(furnlist[i].has_flag("BASHABLE")) {
-                furn_bashable[i] = true;
-            }
-        }
-        ter_bashable.resize(terlist.size(), false);
-        for(size_t i = 0; i < terlist.size(); i++) {
-            if(terlist[i].has_flag("BASHABLE")) {
-                ter_bashable[i] = true;
-            }
-        }
-    }
+    static furn_flag_cache furn_bashable("BASHABLE");
+    static ter_flag_cache ter_bashable("BASHABLE");
+    
     if(veh_in_active_range && veh_exists_at[x][y]) {
         std::pair<int,int> point(x,y);
         std::map< std::pair<int,int>, std::pair<vehicle*,int> >::iterator it;
@@ -4177,12 +4197,15 @@ void map::build_outside_cache(const game *g)
         return;
     }
     memset(outside_cache, true, sizeof(outside_cache));
+    
+    static furn_flag_cache furn_indoors("INDOORS");
+    static ter_flag_cache ter_indoors("INDOORS");
 
     for(int x = 0; x < SEEX * my_MAPSIZE; x++)
     {
         for(int y = 0; y < SEEY * my_MAPSIZE; y++)
         {
-            if( has_flag_ter_or_furn("INDOORS", x, y))
+            if( ter_indoors[ter(x, y)] || furn_indoors[furn(x, y)])
             {
                 for( int dx = -1; dx <= 1; dx++ )
                 {

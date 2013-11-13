@@ -2515,12 +2515,11 @@ void game::update_scent()
  for (int x = u.posx - SCENT_RADIUS; x <= u.posx + SCENT_RADIUS; x++) {
   for (int y = u.posy - SCENT_RADIUS; y <= u.posy + SCENT_RADIUS; y++) {
    const bool is_bashable = m.is_bashable(x, y);
+   const int move_cost = m.move_cost_ter_furn(x, y);
    newscent[x][y] = 0;
    scale[x][y] = 1;
-   if (!is_bashable) { continue; }
+   if (!is_bashable && move_cost == 0) { continue; }
    {
-    const int move_cost = m.move_cost_ter_furn(x, y);
-    if (move_cost == 0) { continue; }
     int squares_used = 0;
     const int this_field = grscent[x][y];
     /*

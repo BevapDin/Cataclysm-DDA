@@ -889,14 +889,15 @@ recipe* game::select_crafting_recipe()
                     );
                     if(amount <= 0) {
                         done = false;
+                        chosen = NULL;
                     } else {
                         multiply(*chosen, the_many_recipe, amount);
                         if(!crafting_inv.has_all_requirements(the_many_recipe)) {
                             std::ostringstream buffer;
                             ::list_missing_ones(buffer, the_many_recipe);
                             popup_top(buffer.str().c_str());
-                            draw();
                             done = false;
+                            chosen = NULL;
                         } else {
                             chosen = &the_many_recipe;
                             input = Confirm;

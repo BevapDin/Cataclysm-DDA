@@ -106,6 +106,7 @@ void vehicle::load (std::ifstream &stin)
             debugmsg("Bad vehicle json\n%s", jsonerr.c_str() );
         } else {
             json_load(pdata, g);
+            sort_parts();
         }
     } else {
         load_legacy(stin);
@@ -3664,4 +3665,32 @@ bool vehicle::examine(game *g, player *p, int part) {
         return true;
     }
     return false;
+}
+
+void vehicle::sort_parts() {
+    std::vector<vehicle_part> ptmp(parts.size());
+    for(size_t i = 0; i < parts.size(); i++) {
+        size_t p = static_cast<size_t>(-1);
+        for(size_t j = 0; j < parts.size(); j++) {
+            if(parts[j].id.empty()) {
+                continue;
+            }
+            if(p == static_cast<size_t>(-1)) {
+                p = j;
+                continue;
+            }
+            if(parts[p].mount_dx > parts[j].mount_dx) {
+                p = j;
+                continue;
+            }
+            if(parts[p].mount_dy > parts[j].mount_dy) {
+                p = j;
+                continue;
+            }
+        }
+        assert(p != static_cast<size_t>(-1));
+        ptmp[i] = parts[p];
+        parts[p].id.clear();
+    }
+    parts.swap(ptmp);
 }
