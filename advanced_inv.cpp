@@ -882,6 +882,18 @@ void advanced_inventory::display(game * gp, player * pp) {
             }
             recalc = true;
         }
+        else if('t' == c) {
+            int destarea = panes[dest].area;
+            if(destarea == isall || destarea == isinventory) { continue; }
+            if(squares[destarea].vstor >= 0) { continue; }
+            int srcarea = panes[src].area;
+            if(srcarea == isall || srcarea == isinventory) { continue; }
+            if(squares[srcarea].vstor >= 0) { continue; }
+            m.i_at(u.posx+panes[src].offx,u.posy+panes[src].offy).swap(
+                m.i_at(u.posx+panes[dest].offx,u.posy+panes[dest].offy));
+            recalc = true;
+            continue;
+        }
         else if('m' == c || 'M' == c || 'T' == c)
         {
             // If the active screen has no item.
@@ -897,6 +909,12 @@ void advanced_inventory::display(game * gp, player * pp) {
                 destarea = find_destination(*it, panes[src].area, panes[src].area);
                 if(destarea == -1) {
                     lastCh = 'j';
+                    continue;
+                }
+            } else if('t' == c) {
+                if(panes[src].area == isinventory || panes[dest].area == isinventory || panes[dest].area == isinventory) {
+                    // can not mass move to inventory or to all (would
+                    // request a input from user for each item).
                     continue;
                 }
             } else
