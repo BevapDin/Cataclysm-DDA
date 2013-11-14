@@ -1263,6 +1263,8 @@ bool map::trans(const int x, const int y)
     return false; //failsafe block vision
 }
 
+extern void vpart_range(vehicle *veh, int &part_begin, int &part_end, int dx, int dy);
+
 inline bool obstacle_non_open_door(vehicle *veh, int part) {
     const int dx = veh->parts[part].mount_dx;
     const int dy = veh->parts[part].mount_dy;
@@ -1283,19 +1285,19 @@ inline bool obstacle_non_open_door(vehicle *veh, int part) {
             }
         }
     }
-    for (size_t i = 0; i < veh->parts.size(); i++) {
-        if (veh->parts[i].hp <= 0) {
+    int end;
+    vpart_range(veh, part, end, dx, dy);
+    for(int i = part; i < end; i++) {
+        if(veh->parts[i].hp <= 0) {
             continue;
         }
-        if (veh->parts[i].mount_dx == dx && veh->parts[i].mount_dy == dy) {
-            if(openable_parts.count(veh->parts[i].id) > 0) {
-                if(veh->parts[i].open) {
-                    return false;
-                }
-                return true;
-            } else if(obstacle_parts.count(veh->parts[i].id) > 0) {
-                return true;
+        if(openable_parts.count(veh->parts[i].id) > 0) {
+            if(veh->parts[i].open) {
+                return false;
             }
+            return true;
+        } else if(obstacle_parts.count(veh->parts[i].id) > 0) {
+            return true;
         }
     }
     return false;
@@ -4231,13 +4233,19 @@ void map::build_transparency_cache()
    // Default to fully transparent.
    transparency_cache[x][y] = LIGHT_TRANSPARENCY_CLEAR;
 
-   if ( !terlist[ter(x, y)].transparent || !furnlist[furn(x, y)].transparent ) {
+   assert(INBOUNDS(x, y));
+   const int nonant = int(x / SEEX) + int(y / SEEY) * my_MAPSIZE;
+   const int lx = x % SEEX;
+   const int ly = y % SEEY;
+   submap &sm = *(grid[nonant]);
+ 
+   if ( !terlist[sm.ter[lx][ly]].transparent || !furnlist[sm.frn[lx][ly]].transparent ) {
     transparency_cache[x][y] = LIGHT_TRANSPARENCY_SOLID;
     continue;
    }
 
    //Quoted to see if this works!
-   field &curfield = field_at(x,y);
+   field &curfield = sm.fld[lx][ly];
    if(curfield.fieldCount() > 0){
     field_entry *cur = NULL;
     for(std::map<field_id, field_entry*>::iterator field_list_it = curfield.getFieldStart(); field_list_it != curfield.getFieldEnd(); ++field_list_it){

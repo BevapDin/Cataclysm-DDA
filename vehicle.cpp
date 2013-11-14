@@ -573,7 +573,10 @@ void vehicle::honk_horn()
 vpart_info& vehicle::part_info (int index)
 {
     if (index >= 0 && index < parts.size()) {
-        return vehicle_part_types[parts[index].id];
+        if(parts[index].vpart == 0) {
+            parts[index].vpart = &(vehicle_part_types[parts[index].id]);
+        }
+        return *parts[index].vpart;
     } else {
         return vehicle_part_types["null"];
     }
@@ -991,10 +994,67 @@ item vehicle::item_from_part( int part )
 std::vector<int> vehicle::parts_at_relative (int dx, int dy)
 {
     std::vector<int> res;
-    for (int i = 0; i < parts.size(); i++)
-        if (parts[i].mount_dx == dx && parts[i].mount_dy == dy)
-            res.push_back (i);
+    if(parts.empty()) {
+        return res;
+    }
+    int l = 0;
+    int u = parts.size();
+    while(u != l) {
+        const int pivo = (u + l) / 2;
+        if(parts[pivo].mount_dx < dx) {
+            l = pivo + 1;
+        } else if(parts[pivo].mount_dx > dx) {
+            u = pivo;
+        } else if(parts[pivo].mount_dy < dy) {
+            l = pivo + 1;
+        } else if(parts[pivo].mount_dy > dy) {
+            u = pivo;
+        } else {
+            // Found matching part, stop here
+            assert(parts[pivo].mount_dx == dx && parts[pivo].mount_dy == dy);
+            u = pivo;
+            break;
+        }
+    }
+    if(u >= parts.size()) {
+        return res;
+    }
+    while(u > 0) {
+        // move back to the first matching part
+        if(parts[u - 1].mount_dx == dx && parts[u - 1].mount_dy == dy) {
+            u--;
+        } else {
+            // part[u-1] does not match
+            break;
+        }
+    }
+    for( ; u < parts.size() && parts[u].mount_dx == dx && parts[u].mount_dy == dy; u++) {
+        res.push_back(u);
+    }
     return res;
+}
+
+void vpart_range(vehicle *veh, int &part_begin, int &part_end, int dx, int dy) {
+    part_end = part_begin + 1;
+    while(part_begin > 0) {
+        const vehicle_part &vp = veh->parts[part_begin - 1];
+        if(vp.mount_dx == dx && vp.mount_dy == dy) {
+            part_begin--;
+        } else {
+            break;
+        }
+    }
+    while(part_end < veh->parts.size()) {
+        const vehicle_part &vp = veh->parts[part_end];
+        if(vp.mount_dx == dx && vp.mount_dy == dy) {
+            part_end++;
+        } else {
+            break;
+        }
+    }
+    assert(part_begin >= 0);
+    assert(part_end <= veh->parts.size());
+    assert(part_begin < part_end);
 }
 
 int vehicle::part_with_feature (int part, const std::string &flag, bool unbroken)

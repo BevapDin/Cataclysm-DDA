@@ -73,6 +73,7 @@ struct vehicle_part
 {
     vehicle_part() : id("null"), mount_dx(0), mount_dy(0), hp(0),
       blood(0), bigness(0), inside(false), flags(0), passenger_id(0), amount(0)
+      , vpart(0)
     {
         precalc_dx[0] = precalc_dx[1] = -1;
         precalc_dy[0] = precalc_dy[1] = -1;
@@ -101,6 +102,8 @@ struct vehicle_part
         int direction;      // direction the part is facing
     };
     std::vector<item> items;// inventory
+    
+    vpart_info *vpart;
 
     bool inactive() const;       // inactive engine (counts as non-existing)
     bool active() const;
