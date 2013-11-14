@@ -106,11 +106,11 @@ void vehicle::load (std::ifstream &stin)
             debugmsg("Bad vehicle json\n%s", jsonerr.c_str() );
         } else {
             json_load(pdata, g);
-            sort_parts();
         }
     } else {
         load_legacy(stin);
     }
+    sort_parts();
 }
 
 /** Checks all parts to see if frames are missing (as they might be when
@@ -3548,6 +3548,7 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
     // Update this vehicle, see install_part/remove_part
     other->precalc_mounts(0, other->face.dir());
     other->insides_dirty = true;
+    other->sort_parts();
     g->m.update_vehicle_cache(other, false);
     p->moves -= 300;
     g->add_msg("You tow the %s to the %s", this_name.c_str(), other->name.c_str());
@@ -3629,6 +3630,7 @@ void vehicle::untow(game *g, int part, player *p) {
             i--;
         }
     }
+    sort_parts();
     // Update this vehicle, see install_part/remove_part
     precalc_mounts(0, face.dir());
     insides_dirty = true;
@@ -3647,6 +3649,7 @@ void vehicle::untow(game *g, int part, player *p) {
     // Update the new (untowed) vehicle, see install_part/remove_part
     new_veh->precalc_mounts(0, new_veh->face.dir());
     new_veh->insides_dirty = true;
+    new_veh->sort_parts();
     g->m.update_vehicle_cache(new_veh, true);
     p->moves -= 300;
     g->add_msg("You untow the %s from the %s", new_veh->name.c_str(), name.c_str());

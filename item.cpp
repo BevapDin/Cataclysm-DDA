@@ -769,7 +769,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, game *g, bool
             }
             for(size_t i = 0; i < tools.size(); i++) {
                 for(size_t j = 0; j < tools[i].size(); j++) {
-                    if(!matches_type(tools[i][j].type)) {
+                    if(type->id != tools[i][j].type) {
                         continue;
                     }
                     if(!header_printed_2) {
