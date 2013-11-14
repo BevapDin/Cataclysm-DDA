@@ -724,6 +724,8 @@ void iexamine::dirtmound(game *g, player *p, map *m, int examx, int examy) {
     }
 
     // Actual planting
+    const bool by_charges = item_controller->find_template(seed_types[seed_index])->count_by_charges();
+    if(by_charges) {
     std::list<item> planted = p->inv.use_charges(seed_types[seed_index], 1);
     if (planted.empty()) { // nothing was removed from inv => weapon is the SEED
         if (g->u.weapon.charges > 1) {
@@ -731,6 +733,12 @@ void iexamine::dirtmound(game *g, player *p, map *m, int examx, int examy) {
         } else {
             g->u.remove_weapon();
         }
+    }
+    } else {
+    std::list<item> planted = p->inv.use_amount(seed_types[seed_index], 1);
+    if (planted.empty()) { // nothing was removed from inv => weapon is the SEED
+        g->u.remove_weapon();
+    }
     }
     m->spawn_item(examx, examy, seed_types[seed_index], 1, 1, g->turn);
     m->set(examx, examy, t_dirt, f_plant_seed);

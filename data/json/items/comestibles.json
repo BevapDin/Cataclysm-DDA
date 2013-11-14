@@ -6338,7 +6338,7 @@
         "volume" : 1,
         "cutting" : 0,
         "phase" : "solid",
-        "charges" : 2,
+        "charges" : 1,
         "stack_size" : 100,
         "bashing" : 0,
         "fun" : 1
