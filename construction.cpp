@@ -651,7 +651,6 @@ void game::construction_menu()
     break;
    case ' ':
    case KEY_ESCAPE:
-   case 'q':
    case 'Q':
     exit = true;
     break;

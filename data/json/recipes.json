@@ -7493,10 +7493,8 @@
   "autolearn": true,
   "tools": [
     [
-      [ "chemistry_set", 50 ],
       [ "press", 50 ],
-      [ "hotplate", 50 ],
-      [ "toolset", 4 ]
+      [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]
@@ -7535,10 +7533,8 @@
   "autolearn": true,
   "tools": [
     [
-      [ "chemistry_set", 50 ],
       [ "press", 50 ],
-      [ "hotplate", 50 ],
-      [ "toolset", 4 ]
+      [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]
@@ -7579,10 +7575,8 @@
   "autolearn": true,
   "tools": [
     [
-      [ "chemistry_set", 50 ],
       [ "press", 50 ],
-      [ "hotplate", 50 ],
-      [ "toolset", 4 ]
+      [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]

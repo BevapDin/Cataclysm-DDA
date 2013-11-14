@@ -10720,6 +10720,9 @@ void game::plmove(int dx, int dy)
                   }
               }
               m.displace_vehicle( this, gx, gy, dxVeh, dyVeh );
+              if(veh1 == grabbed_vehicle) {
+                  veh1 = NULL;
+              }
           } else {
               //We are moving around the veh
               u.grab_point.x = (dx + dxVeh) * (-1);
