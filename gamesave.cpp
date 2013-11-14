@@ -603,6 +603,7 @@ void game::unserialize_master(std::ifstream &fin) {
        }
    }
     try {
+        // single-pass parsing example
         JsonIn jsin(&fin);
         jsin.start_object();
         while (!jsin.end_object()) {
@@ -621,7 +622,6 @@ void game::unserialize_master(std::ifstream &fin) {
                     mis.deserialize(mis_json);
                     active_missions.push_back(mis);
                 }
-                jsin.skip_separator();
             } else if (name == "factions") {
                 jsin.start_array();
                 while (!jsin.end_array()) {
@@ -630,7 +630,6 @@ void game::unserialize_master(std::ifstream &fin) {
                     fac.deserialize(fac_json);
                     factions.push_back(fac);
                 }
-                jsin.skip_separator();
             } else {
                 // silently ignore anything else
                 jsin.skip_value();

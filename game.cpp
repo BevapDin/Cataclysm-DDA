@@ -322,7 +322,7 @@ void game::init_ui(){
             // bottom of the screen.
             stat2H = TERMY - stat2Y;
         }
-    } 
+    }
     liveview.init(this, mouse_view_x, mouseview_y, sidebarWidth, mouseview_h);
 
     w_status2 = newwin(stat2H, stat2W, _y + stat2Y, _x + stat2X);
@@ -1613,7 +1613,7 @@ void game::process_missions()
 void game::handle_key_blocking_activity() {
     // If player is performing a task and a monster is dangerously close, warn them
     // regardless of previous safemode warnings
-    if (is_hostile_very_close() && 
+    if (is_hostile_very_close() &&
         u.activity.type != ACT_NULL &&
         u.activity.moves_left > 0 &&
         !u.activity.warned_of_proximity)
@@ -2818,7 +2818,7 @@ void game::save_artifacts()
 {
     std::ofstream fout;
     std::string artfilename = world_generator->active_world->world_path + "/artifacts.gsav";
-    fout.open(artfilename.c_str());
+    fout.open(artfilename.c_str(), std::ofstream::trunc);
     JsonOut json(&fout);
     json.start_array();
     for ( std::vector<std::string>::iterator it =
@@ -8208,7 +8208,7 @@ void game::pickup(int posx, int posy, int min)
                 break;
                 }
             }
-            
+
             if (craft_part >= 0) {
                 int choice = menu(true,
                 _("water purifier:"), _("Use the water purifier"), _("Examine vehicle"), _("Get items from the water purifier"), _("Do nothing"), NULL);
@@ -11816,7 +11816,7 @@ void game::spawn_mon(int shiftx, int shifty)
     nextspawn += rng(group * 4 + num_zombies() * 4, group * 10 + num_zombies() * 10);
 
    for (int j = 0; j < group; j++) { // For each monster in the group get some spawn details
-     MonsterGroupResult spawn_details = MonsterGroupManager::GetResultFromGroup( cur_om->zg[i].type, 
+     MonsterGroupResult spawn_details = MonsterGroupManager::GetResultFromGroup( cur_om->zg[i].type,
                                                              &group, (int)turn );
      zom = monster(GetMType(spawn_details.name));
      for (int kk = 0; kk < spawn_details.pack_size; kk++){
