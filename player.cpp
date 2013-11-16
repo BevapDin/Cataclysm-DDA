@@ -7627,6 +7627,7 @@ hint_rating player::rate_action_use(item *it)
 void player::use(game *g, char let)
 {
     item* used = &i_at(let);
+    item copy;
 
     if (used->is_null()) {
         g->add_msg(_("You do not have that item."));

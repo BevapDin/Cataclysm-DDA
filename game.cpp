@@ -51,6 +51,7 @@
 #endif
 #include <sys/stat.h>
 #include "debug.h"
+#include "catalua.h"
 
 #if (defined _WIN32 || defined __WIN32__)
 #ifndef NOMINMAX
@@ -101,7 +102,6 @@ game::game() :
 void game::init_data()
 {
  dout() << "Game initialized.";
-
  try {
  if(!picojson::get_last_error().empty())
      throw (std::string) picojson::get_last_error();
@@ -129,8 +129,14 @@ void game::init_data()
     MonsterGenerator::generator().finalize_mtypes();
     finalize_vehicles();
     finalize_recipes();
+
     item_controller->check_items_of_groups_exist();
     check_recipes();
+    
+ #ifdef LUA
+    init_lua();                 // Set up lua                       (SEE catalua.cpp)
+ #endif
+
  } catch(std::string &error_message)
  {
      uquit = QUIT_ERROR;
@@ -3153,7 +3159,10 @@ void game::debug()
                    _("Spawn Clarivoyance Artifact"), //15
                    _("Map editor"), // 16
                    _("Change weather"),         // 17
-                   _("Cancel"),                 // 18
+                   #ifdef LUA
+                       _("Lua Command"), // 18
+                   #endif
+                   _("Cancel"),
                    NULL);
  int veh_num;
  std::vector<std::string> opts;
@@ -3163,7 +3172,7 @@ void game::debug()
    break;
 
   case 2:
-   teleport();
+   teleport(&u, false);
    break;
 
   case 3: {
@@ -3181,6 +3190,8 @@ void game::debug()
                 active_npc[i]->posy %= SEEY;
             }
             active_npc.clear();
+            m.clear_vehicle_cache();
+            m.vehicle_list.clear();
             clear_zombies();
             levx = tmp.x * 2 - int(MAPSIZE / 2);
             levy = tmp.y * 2 - int(MAPSIZE / 2);
@@ -3430,6 +3441,14 @@ Current turn: %d; Next spawn %d.\n\
       }
   }
   break;
+  
+  #ifdef LUA
+      case 18: {
+          std::string luacode = string_input_popup(_("Lua:"), 60, "");
+          call_lua(luacode);
+      }
+      break;
+  #endif
  }
  erase();
  refresh_all();
@@ -6220,16 +6239,24 @@ void game::open()
     int vpart;
     vehicle *veh = m.veh_at(openx, openy, vpart);
     if (veh) {
-        int door = veh->part_with_feature(vpart, "OPENABLE");
-        if(door >= 0) {
-            if (veh->parts[door].open) {
-                add_msg(_("That door is already open."));
+        int openable = veh->part_with_feature(vpart, "OPENABLE");
+        if(openable >= 0) {
+            const char *name = veh->part_info(openable).name.c_str();
+            if (veh->part_info(openable).has_flag("OPENCLOSE_INSIDE")){
+                const vehicle *in_veh = m.veh_at(u.posx, u.posy);
+                if (!in_veh || in_veh != veh){
+                    add_msg(_("That %s can only opened from the inside."), name);
+                    return;
+                } 
+            } 
+            if (veh->parts[openable].open) {
+                add_msg(_("That %s is already open."), name);
                 u.moves += 100;
             } else {
-                veh->open(door);
+                veh->open(openable);
             }
-            return;
         }
+        return;
     }
 
     if (m.is_outside(u.posx, u.posy))
@@ -6274,13 +6301,21 @@ void game::close()
         add_msg(_("There's a %s in the way!"), z.name().c_str());
     }
     else if (veh) {
-        int door = veh->part_with_feature(vpart, "OPENABLE");
-        if(door >= 0) {
-            if(veh->parts[door].open) {
-                veh->close(door);
+        int openable = veh->part_with_feature(vpart, "OPENABLE");
+        if(openable >= 0) {
+            const char *name = veh->part_info(openable).name.c_str();
+            if (veh->part_info(openable).has_flag("OPENCLOSE_INSIDE")){
+                const vehicle *in_veh = m.veh_at(u.posx, u.posy);
+                if (!in_veh || in_veh != veh){
+                    add_msg(_("That %s can only closed from the inside."), name);
+                    return;
+                } 
+            } 
+            if (veh->parts[openable].open) {
+                veh->close(openable);
                 didit = true;
             } else {
-                add_msg(_("That door is already closed."));
+                add_msg(_("That %s is already closed."), name);
             }
         }
     } else if (m.furn(closex, closey) != f_safe_o && m.i_at(closex, closey).size() > 0)
@@ -10580,7 +10615,11 @@ void game::plmove(int dx, int dy)
  bool veh_closed_door = false;
  if (veh1) {
   dpart = veh1->part_with_feature (vpart1, "OPENABLE");
-  veh_closed_door = dpart >= 0 && !veh1->parts[dpart].open;
+  if (veh1->part_info(dpart).has_flag("OPENCLOSE_INSIDE") && (!veh0 || veh0 != veh1)){
+      veh_closed_door = false;
+  } else {
+      veh_closed_door = dpart >= 0 && !veh1->parts[dpart].open;
+  }
  }
 
  if (veh0 && abs(veh0->velocity) > 100) {
@@ -12051,7 +12090,7 @@ void game::msg_buffer()
  refresh_all();
 }
 
-void game::teleport(player *p)
+void game::teleport(player *p, bool add_teleglow)
 {
     if (p == NULL) {
         p = &u;
@@ -12059,7 +12098,9 @@ void game::teleport(player *p)
     int newx, newy, tries = 0;
     bool is_u = (p == &u);
 
-    p->add_disease("teleglow", 300);
+    if(add_teleglow) {
+        p->add_disease("teleglow", 300);
+    }
     do {
         newx = p->posx + rng(0, SEEX * 2) - SEEX;
         newy = p->posy + rng(0, SEEY * 2) - SEEY;
