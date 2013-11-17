@@ -41,6 +41,7 @@ enum vehicle_controls {
  toggle_lights,
  toggle_overhead_lights,
  toggle_turrets,
+ toggle_tracker,
  activate_horn,
  release_control,
  control_cancel,
@@ -59,10 +60,12 @@ vehicle::vehicle(game *ag, std::string type_id, int init_veh_fuel, int init_veh_
     of_turn_carry = 0;
     turret_mode = 0;
     lights_power = 0;
+    tracking_power = 0;
     cruise_velocity = 0;
     skidding = false;
     cruise_on = true;
     lights_on = false;
+    tracking_on = false;
     overhead_lights_on = false;
     insides_dirty = true;
     cached_gen_turn = 0;
@@ -175,6 +178,10 @@ void vehicle::init_state(game* g, int init_veh_fuel, int init_veh_status)
     if (init_veh_fuel > 100)
      veh_fuel_mult = 100;
 
+    // im assuming vehicles only spawn in active maps
+    levx = g->levx;
+    levy = g->levy;
+
     // veh_status is initial vehicle damage
     // -1 = light damage (DEFAULT)
     //  0 = undamgaed
@@ -211,7 +218,7 @@ void vehicle::init_state(game* g, int init_veh_fuel, int init_veh_status)
         if (part_flag(p, "VARIABLE_SIZE")){ // generate its bigness attribute.?
             if(consistent_bignesses.count(parts[p].id) < 1){
                 //generate an item for this type, & cache its bigness
-                item tmp (g->itypes[part_info(p).item], 0);
+                item tmp (itypes[part_info(p).item], 0);
                 consistent_bignesses[parts[p].id] = tmp.bigness;
             }
             parts[p].bigness = consistent_bignesses[parts[p].id];
@@ -323,9 +330,11 @@ void vehicle::use_controls()
     // Always have this option
     int curent = 0;
     int letgoent = 0;
+
     options_choice.push_back(toggle_cruise_control);
     options_message.push_back(uimenu_entry((cruise_on) ? _("Disable cruise control") :
                                            _("Enable cruise control"), 'c'));
+
     curent++;
     
     std::vector<int> engines;
@@ -335,6 +344,7 @@ void vehicle::use_controls()
     bool has_overhead_lights = false;
     bool has_horn = false;
     bool has_turrets = false;
+    bool has_tracker = false;
     for (int p = 0; p < parts.size(); p++) {
         if (part_flag(p, "CONE_LIGHT")) {
             has_lights = true;
@@ -352,6 +362,9 @@ void vehicle::use_controls()
         }
         else if (part_flag(p, "ENGINE")) {
             engines.push_back(p);
+        }
+        else if (part_flag(p, "TRACK")) {
+            has_tracker = true;
         }
     }
     std::sort(lights.begin(), lights.end(), part_type_comparator(this));
@@ -384,6 +397,15 @@ void vehicle::use_controls()
         options_choice.push_back(toggle_turrets);
         options_message.push_back(uimenu_entry((0 == turret_mode) ? _("Switch turrets to burst mode") :
                                                _("Disable turrets"), 't'));
+        curent++;
+    }
+
+    // Tracking on the overmap
+    if (has_tracker) {
+        options_choice.push_back(toggle_tracker);
+        options_message.push_back(uimenu_entry((tracking_on) ? _("Disable tracking device") :
+                                                _("Enable tracking device"), 'g'));
+
         curent++;
     }
 
@@ -477,7 +499,7 @@ void vehicle::use_controls()
         g->add_msg(_("You painstakingly pack the bicycle into a portable configuration."));
         // create a folding bicycle item
         item bicycle;
-        bicycle.make( g->itypes["folding_bicycle"] );
+        bicycle.make( itypes["folding_bicycle"] );
 
         std::ostringstream part_hps;
         // Stash part HP in item
@@ -501,6 +523,21 @@ void vehicle::use_controls()
         g->u.moves -= 500;
         break;
     }
+    case toggle_tracker:
+        if (tracking_on)
+        {
+            g->cur_om->remove_vehicle(om_id);
+            tracking_on = false;
+            g->add_msg(_("tracking device disabled"));
+        } else if (fuel_left("battery"))
+        {
+            om_id = g->cur_om->add_vehicle(this);
+            tracking_on = true;
+            g->add_msg(_("tracking device enabled"));
+        } else {
+            g->add_msg(_("tracking device won't turn on"));
+        }
+        break;
     case control_cancel:
         break;
     }
@@ -902,7 +939,7 @@ int vehicle::install_part (int dx, int dy, std::string id, int hp, bool force)
     new_part.hp = hp < 0 ? vehicle_part_types[id].durability : hp;
     new_part.amount = 0;
     new_part.blood = 0;
-    item tmp(g->itypes[vehicle_part_types[id].item], 0);
+    item tmp(itypes[vehicle_part_types[id].item], 0);
     new_part.bigness = tmp.bigness;
     parts.push_back (new_part);
 
@@ -913,6 +950,10 @@ int vehicle::install_part (int dx, int dy, std::string id, int hp, bool force)
     {
         lights.push_back(parts.size()-1);
         lights_power += part_info(parts.size()-1).power;
+    }
+    if(part_flag(parts.size()-1, "TRACK"))
+    {
+        tracking_power += part_info(parts.size()-1).power;
     }
     if(part_flag(parts.size()-1,"FUEL_TANK"))
         fuel.push_back(parts.size()-1);
@@ -934,7 +975,7 @@ int vehicle::install_part (int dx, int dy, std::string id, int hp, bool force)
 void vehicle::get_part_properties_from_item(game* g, int partnum, item& i){
     //transfer bigness if relevant.
     itype_id  pitmid = part_info(partnum).item;
-    itype* itemtype = g->itypes[pitmid];
+    itype* itemtype = itypes[pitmid];
     if(itemtype->is_var_veh_part())
        parts[partnum].bigness = i.bigness;
 
@@ -948,7 +989,7 @@ void vehicle::get_part_properties_from_item(game* g, int partnum, item& i){
 void vehicle::give_part_properties_to_item(game* g, int partnum, item& i){
     //transfer bigness if relevant.
     itype_id  pitmid = part_info(partnum).item;
-    itype* itemtype = g->itypes[pitmid];
+    itype* itemtype = itypes[pitmid];
     if(itemtype->is_var_veh_part())
        i.bigness = parts[partnum].bigness;
 
@@ -971,6 +1012,23 @@ void vehicle::remove_part (int p)
 {
     if(part_flag(p,"LIGHT")) {
         lights_power -= part_info( parts.size() - 1 ).power;
+    } else if (part_flag(p, "TRACK")) {
+        tracking_power -= part_info( parts.size() - 1 ).power;
+        // disable tracking if there are no other trackers installed.
+        if (tracking_on)
+        {
+            bool has_tracker = false;
+            for (int i = 0; i != parts.size(); i++){
+                if (i != p && part_flag(i, "TRACK")){
+                    has_tracker = true;
+                    break;
+                }
+            }
+            if (!has_tracker){ // disable tracking
+                g->cur_om->remove_vehicle(om_id);
+                tracking_on = false;
+            }
+        }
     }
     
     // if a windshield is removed (usually destroyed) also remove curtains
@@ -1008,7 +1066,7 @@ void vehicle::break_part_into_pieces(int p, int x, int y, bool scatter) {
         for(int num = 0; num < quantity; num++) {
             const int actual_x = scatter ? x + rng(-SCATTER_DISTANCE, SCATTER_DISTANCE) : x;
             const int actual_y = scatter ? y + rng(-SCATTER_DISTANCE, SCATTER_DISTANCE) : y;
-            item piece(g->itypes[break_info[index].item_id], g->turn);
+            item piece(itypes[break_info[index].item_id], g->turn);
             g->m.add_item_or_charges(actual_x, actual_y, piece);
         }
     }
@@ -1018,7 +1076,7 @@ item vehicle::item_from_part( int part )
 {
     itype_id itm = part_info(part).item;
     int bigness = parts[part].bigness;
-    itype* parttype = g->itypes[itm];
+    itype* parttype = itypes[itm];
     item tmp(parttype, g->turn);
 
     //transfer damage, etc.
@@ -1508,6 +1566,26 @@ int vehicle::global_y ()
     return smy * SEEY + posy;
 }
 
+int vehicle::omap_x() {
+    return levx + (global_x() / SEEX);
+}
+
+int vehicle::omap_y() {
+    return levy + (global_y() / SEEY);
+}
+
+void vehicle::update_map_x(int x) {
+    levx = x;
+    if (tracking_on)
+        g->cur_om->vehicles[om_id].x = omap_x()/2;
+}
+
+void vehicle::update_map_y(int y) {
+    levy = y;
+    if (tracking_on)
+        g->cur_om->vehicles[om_id].y = omap_y()/2;
+}
+
 int vehicle::total_mass()
 {
     if(cached_gen_turn + 10 > (int) g->turn) {
@@ -1516,7 +1594,7 @@ int vehicle::total_mass()
     int m = 0;
     for (int i = 0; i < parts.size(); i++)
     {
-        m += g->itypes[part_info(i).item]->weight;
+        m += itypes[part_info(i).item]->weight;
         for (int j = 0; j < parts[i].items.size(); j++) {
             m += parts[i].items[j].type->weight;
         }
@@ -1536,7 +1614,7 @@ void vehicle::center_of_mass(int &x, int &y)
     for (int i = 0; i < parts.size(); i++)
     {
         int m_part = 0;
-        m_part += g->itypes[part_info(i).item]->weight;
+        m_part += itypes[part_info(i).item]->weight;
         for (int j = 0; j < parts[i].items.size(); j++) {
             m_part += parts[i].items[j].type->weight;
         }
@@ -1880,7 +1958,7 @@ bool vehicle::valid_wheel_config ()
     float wo = 0, w2;
     for (int p = 0; p < parts.size(); p++)
     { // lets find vehicle's center of masses
-        w2 = g->itypes[part_info(p).item]->weight;
+        w2 = itypes[part_info(p).item]->weight;
         if (w2 < 1)
             continue;
         xo = xo * wo / (wo + w2) + parts[p].mount_dx * w2 / (wo + w2);
@@ -1934,6 +2012,7 @@ void vehicle::power_parts ()//TODO: more categories of powered part!
 {
     int power=0;
     if(lights_on)power += lights_power;
+    if(tracking_on)power += tracking_power;
     if(power <= 0)return;
     for(int f=0;f<fuel.size() && power > 0;f++)
     {
@@ -1954,6 +2033,7 @@ void vehicle::power_parts ()//TODO: more categories of powered part!
     if(power)
     {
         lights_on = false;
+        tracking_on = false;
         overhead_lights_on = false;
         if(player_in_control(&g->u))
             g->add_msg("The %s's battery dies!",name.c_str());
@@ -2263,8 +2343,8 @@ veh_collision vehicle::part_collision (int part, int x, int y, bool just_detect)
     int degree = rng (70, 100);
 
     //Calculate damage resulting from d_E
-    material_type* vpart_item_mat1 = material_type::find_material(g->itypes[part_info(parm).item]->m1);
-    material_type* vpart_item_mat2 = material_type::find_material(g->itypes[part_info(parm).item]->m2);
+    material_type* vpart_item_mat1 = material_type::find_material(itypes[part_info(parm).item]->m1);
+    material_type* vpart_item_mat2 = material_type::find_material(itypes[part_info(parm).item]->m2);
     int vpart_dens;
     if(vpart_item_mat2->ident() == "null") {
         vpart_dens = vpart_item_mat1->density();
@@ -2683,7 +2763,7 @@ void vehicle::place_spawn_items()
                         }
                     }
                     item new_item = item_controller->create(*next_id, g->turn);
-                    new_item = new_item.in_its_container(&(g->itypes));
+                    new_item = new_item.in_its_container(&(itypes));
                     if ( idmg > 0 ) {
                         new_item.damage = (signed char)idmg;
                     }
@@ -2699,7 +2779,7 @@ void vehicle::place_spawn_items()
                     }
                     Item_tag group_tag = item_controller->id_from(*next_group_id);
                     item new_item = item_controller->create(group_tag, g->turn);
-                    new_item = new_item.in_its_container(&(g->itypes));
+                    new_item = new_item.in_its_container(&(itypes));
                     if ( idmg > 0 ) {
                         new_item.damage = (signed char)idmg;
                     }
@@ -3151,7 +3231,7 @@ void vehicle::fire_turret (int p, bool burst)
 {
     if (!part_flag (p, "TURRET"))
         return;
-    it_gun *gun = dynamic_cast<it_gun*> (g->itypes[part_info(p).item]);
+    it_gun *gun = dynamic_cast<it_gun*> (itypes[part_info(p).item]);
     if (!gun)
         return;
     int charges = burst? gun->burst : 1;
@@ -3165,7 +3245,7 @@ void vehicle::fire_turret (int p, bool burst)
         int fleft = fuel_left (amt);
         if (fleft < 1)
             return;
-        it_ammo *ammo = dynamic_cast<it_ammo*>(g->itypes[amt == "gasoline" ? "gasoline" : "plasma"]);
+        it_ammo *ammo = dynamic_cast<it_ammo*>(itypes[amt == "gasoline" ? "gasoline" : "plasma"]);
         if (!ammo)
             return;
         if (fire_turret_internal (p, *gun, *ammo, charges))
@@ -3262,7 +3342,7 @@ bool vehicle::fire_turret_internal (int p, it_gun &gun, it_ammo &ammo, int charg
     tmp.weapon.curammo = &curam;
     tmp.weapon.charges = charges;
     // Spawn a fake UPS to power any turreted weapons that need electricity.
-    item tmp_ups( g->itypes["UPS_on"], 0 );
+    item tmp_ups( itypes["UPS_on"], 0 );
     // Drain a ton of power
     tmp_ups.charges = drain( "battery", 1000 );
     item &ups_ref = tmp.i_add(tmp_ups);
@@ -3425,7 +3505,7 @@ void add_item(const itype *type, const char *mat, const char *rep_item, double a
     // If the item is made if mat, add rep_item to the list
     // of repair-items.
     // Add more if the m1 is the material, add less if m2 is the material
-    const itype *rep_it = g->itypes[rep_item];
+    const itype *rep_it = itypes[rep_item];
     if(rep_it == 0 || rep_it->name == "null") {
         return;
     }
@@ -3461,7 +3541,7 @@ std::vector<item> vpart_info::get_remaining_scraps() const {
     type_count_pair_vector ff = get_repair_materials(hp);
     for(size_t i = 0; i < ff.size(); i++) {
         for(size_t j = 0; j < ff[i].second; j++) {
-            result.push_back(::item(g->itypes[ff[i].first], (int) g->turn));
+            result.push_back(::item(itypes[ff[i].first], (int) g->turn));
         }
     }
     return result;
@@ -3478,7 +3558,7 @@ vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) cons
         result.push_back(vpart_info::type_count_pair(item, 1));
         return result;
     }
-    const itype *type = g->itypes[item];
+    const itype *type = itypes[item];
     if(type == 0 || type->id == "null") {
         return result;
     }

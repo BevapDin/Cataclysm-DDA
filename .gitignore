@@ -50,3 +50,5 @@ gprof.output
 c
 cur/
 
+# Compiled binary translations
+lang/mo/

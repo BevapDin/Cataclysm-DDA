@@ -477,6 +477,7 @@ int player::dodge(game *g)
     //Mutations
     if (has_trait("TAIL_LONG")) {ret += 2;}
 	if (has_trait("TAIL_LIZARD")) {ret+= 2;}
+	if (has_trait("TAIL_RAPTOR")) {ret+= 3;}
     if (has_trait("TAIL_FLUFFY")) {ret += 4;}
     if (has_trait("WHISKERS")) {ret += 1;}
     if (has_trait("WINGS_BAT")) {ret -= 3;}
@@ -610,6 +611,8 @@ int player::roll_cut_damage(monster *z, bool crit)
  if (unarmed_attack() && !wearing_something_on(bp_hands)) {
   if (has_trait("CLAWS"))
    ret += 6;
+  if (has_bionic("bio_razors"))
+   ret += 4;
   if (has_trait("TALONS"))
    ret += 6 + ((int)skillLevel("unarmed") > 8 ? 8 : (int)skillLevel("unarmed"));
   if (has_trait("SLIME_HANDS") && (z == NULL || !z->has_flag(MF_ACIDPROOF)))
@@ -647,6 +650,8 @@ int player::roll_stab_damage(monster *z, bool crit)
    ret += 6;
   if (has_trait("NAILS") && z_armor == 0)
    ret++;
+  if (has_bionic("bio_razors"))
+   ret += 4;
   if (has_trait("THORNS"))
    ret += 4;
  } else if (weapon.has_flag("SPEAR") || weapon.has_flag("STAB"))
@@ -1338,6 +1343,25 @@ std::vector<special_attack> player::mutation_attacks(monster *z, player *p)
                                      name.c_str(), target.c_str());
         } else {
             tmp.text = string_format(_("%s kicks %s with her hooves!"),
+                                     name.c_str(), target.c_str());
+        }
+        ret.push_back(tmp);
+    }
+	
+    if (has_trait("RAP_TALONS") && one_in(30 - dex_cur - 2 * skillLevel("unarmed"))) {
+        special_attack tmp;
+        tmp.cut = str_cur * 4;
+        if (tmp.cut > 60) {
+            tmp.cut = 60;
+        }
+        if (is_u) {
+            tmp.text = string_format(_("You slash %s with a talon!"),
+                                     target.c_str());
+        } else if (male) {
+            tmp.text = string_format(_("%s slashes %s with a talon!"),
+                                     name.c_str(), target.c_str());
+        } else {
+            tmp.text = string_format(_("%s slashes %s with a talon!"),
                                      name.c_str(), target.c_str());
         }
         ret.push_back(tmp);

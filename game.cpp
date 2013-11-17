@@ -111,12 +111,11 @@ void game::init_data()
     init_npctalk();
     init_artifacts();
     init_weather();
-    init_overmap();
     init_fields();
     init_faction_data();
     init_morale();
     init_itypes();               // Set up item types                (SEE itypedef.cpp)
-    item_controller->init(this); //Item manager
+    item_controller->init_old(); //Item manager
     init_monitems();             // Set up the items monsters carry  (SEE monitemsdef.cpp)
     init_traps();                // Set up the trap types            (SEE trapdef.cpp)
     init_missions();             // Set up mission templates         (SEE missiondef.cpp)
@@ -579,8 +578,6 @@ void game::cleanup_at_end(){
                 } else {
                     delete_world(world_generator->active_world->world_name, true);
                 }
-                MAPBUFFER.reset();
-                MAPBUFFER.make_volatile();
             }
         } else if (ACTIVE_WORLD_OPTIONS["DELETE_WORLD"] != "no") {
             std::stringstream message;
@@ -595,10 +592,8 @@ void game::cleanup_at_end(){
             gamemode = new special_game; // null gamemode or something..
         }
     }
-    if (uquit == QUIT_SAVED && gamemode->id() != SGAME_NULL) {
-        MAPBUFFER.reset();
-        MAPBUFFER.make_volatile();
-    }
+    MAPBUFFER.reset();
+    MAPBUFFER.make_volatile();
     overmap_buffer.clear();
 }
 
@@ -900,6 +895,7 @@ void game::process_activity()
 {
  it_book* reading;
  item* book_item;
+ item* reloadable;
  bool no_recipes;
  if (u.activity.type != ACT_NULL) {
   if (int(turn) % 150 == 0) {
@@ -972,20 +968,25 @@ void game::process_activity()
    switch (u.activity.type) {
 
    case ACT_RELOAD:
-    if (u.weapon.reload(u, u.activity.invlet))
-     if (u.weapon.is_gun() && u.weapon.has_flag("RELOAD_ONE")) {
+    if (u.activity.name[0] == u.weapon.invlet) {
+        reloadable = &u.weapon;
+    } else {
+        reloadable = &u.inv.item_by_letter(u.activity.name[0]);
+    }
+    if (reloadable->reload(u, u.activity.invlet))
+     if (reloadable->is_gun() && reloadable->has_flag("RELOAD_ONE")) {
       add_msg(_("You insert a cartridge into your %s."),
-              u.weapon.tname(this).c_str());
+              reloadable->tname(this).c_str());
       if (u.recoil < 8)
        u.recoil = 8;
       if (u.recoil > 8)
        u.recoil = (8 + u.recoil) / 2;
      } else {
-      add_msg(_("You reload your %s."), u.weapon.tname(this).c_str());
+      add_msg(_("You reload your %s."), reloadable->tname(this).c_str());
       u.recoil = 6;
      }
     else
-     add_msg(_("Can't reload your %s."), u.weapon.tname(this).c_str());
+     add_msg(_("Can't reload your %s."), reloadable->tname(this).c_str());
     break;
 
    case ACT_READ:
@@ -1935,8 +1936,17 @@ bool game::handle_action()
     }
 
     action_id act = ACTION_NULL;
-    if (action == "ANY_INPUT") {
-        char ch = ctxt.get_raw_input().get_first_input();
+    int ch = ctxt.get_raw_input().get_first_input();
+    // Hack until new input system is fully implemented
+    if (ch == KEY_UP) {
+        act = ACTION_MOVE_N;
+    } else if (ch == KEY_RIGHT) {
+        act = ACTION_MOVE_E;
+    } else if (ch == KEY_DOWN) {
+        act = ACTION_MOVE_S;
+    } else if (ch == KEY_LEFT) {
+        act = ACTION_MOVE_W;
+    } else {
         if (keymap.find(ch) == keymap.end()) {
             if (ch != ' ' && ch != '\n') {
                 add_msg(_("Unknown command: '%c'"), ch);
@@ -1945,26 +1955,6 @@ bool game::handle_action()
         }
 
         act = keymap[ch];
-    } else {
-        // Hack to turn new movement actions back into old ones, till this whole context
-        // gets updated to the new style
-        if (action == "UP") {
-            act = ACTION_MOVE_N;
-        } else if (action == "RIGHTUP") {
-            act = ACTION_MOVE_NE;
-        } else if (action == "RIGHT") {
-            act = ACTION_MOVE_E;
-        } else if (action == "RIGHTDOWN") {
-            act = ACTION_MOVE_SE;
-        } else if (action == "DOWN") {
-            act = ACTION_MOVE_S;
-        } else if (action == "LEFTDOWN") {
-            act = ACTION_MOVE_SW;
-        } else if (action == "LEFT") {
-            act = ACTION_MOVE_W;
-        } else {
-            act = ACTION_MOVE_NW;
-        }
     }
 
 // This has no action unless we're in a special game mode.
@@ -2692,7 +2682,11 @@ void game::death_screen()
                 (void)rename( save_dirent->d_name, graveyard_path.c_str() );
             }
         }
-        (void)chdir("..");
+        int ret;
+        ret = chdir("..");
+        if (ret != 0) {
+            debugmsg("game::death_screen: Can\'t chdir(\"..\") from \"save\" directory");
+        }
         (void)closedir(save_dir);
     }
 #endif
@@ -2774,6 +2768,13 @@ void game::load(std::string worldname, std::string name)
  unserialize(fin);
  fin.close();
 
+ // Stair handling.
+ if (!coming_to_stairs.empty()) {
+    monstairx = -1;
+    monstairy = -1;
+    monstairz = 999;
+ }
+
  // weather
  std::string wfile = std::string( worldpath + base64_encode(u.name) + ".weather" );
  fin.open(wfile.c_str());
@@ -2804,7 +2805,7 @@ void game::load(std::string worldname, std::string name)
  load_master(worldname);
  update_map(u.posx, u.posy);
  set_adjacent_overmaps(true);
- MAPBUFFER.set_dirty();
+ MAPBUFFER.save();
  draw();
 }
 
@@ -3192,6 +3193,10 @@ void game::debug()
             active_npc.clear();
             m.clear_vehicle_cache();
             m.vehicle_list.clear();
+            // Save monsters.
+            for (unsigned int i = 0; i < num_zombies(); i++) {
+                force_save_monster(zombie(i));
+            }
             clear_zombies();
             levx = tmp.x * 2 - int(MAPSIZE / 2);
             levy = tmp.y * 2 - int(MAPSIZE / 2);
@@ -3244,7 +3249,7 @@ Current turn: %d; Next spawn %d.\n\
 %d currently active NPC's.\n\
 %d events planned."),
              u.posx, u.posy, levx, levy,
-             oterlist[cur_om->ter(levx / 2, levy / 2, levz)].name.c_str(),
+             otermap[cur_om->ter(levx / 2, levy / 2, levz)].name.c_str(),
              int(turn), int(nextspawn), (!ACTIVE_WORLD_OPTIONS["RANDOM_NPC"] ? _("NPCs are going to spawn.") :
                                          _("NPCs are NOT going to spawn.")),
              num_zombies(), active_npc.size(), events.size());
@@ -3321,7 +3326,7 @@ Current turn: %d; Next spawn %d.\n\
             npc_attitude_name(p->attitude) << std::endl;
     if (p->has_destination()) {
      data << _("Destination: ") << p->goalx << ":" << p->goaly << "(" <<
-             oterlist[ cur_om->ter(p->goalx, p->goaly, p->goalz) ].name << ")" << std::endl;
+             otermap[ cur_om->ter(p->goalx, p->goaly, p->goalz) ].name << ")" << std::endl;
     } else {
      data << _("No destination.") << std::endl;
     }
@@ -3923,7 +3928,7 @@ void game::draw()
 
     point cur_loc = om_location();
     oter_id cur_ter = cur_om->ter(cur_loc.x, cur_loc.y, levz);
-    if (cur_ter == ot_null)
+    if (cur_ter == "")
     {
         if (cur_loc.x >= OMAPX && cur_loc.y >= OMAPY)
             cur_ter = om_diag->ter(cur_loc.x - OMAPX, cur_loc.y - OMAPY, levz);
@@ -3933,9 +3938,9 @@ void game::draw()
             cur_ter = om_vert->ter(cur_loc.x, cur_loc.y - OMAPY, levz);
     }
 
-    std::string tername = oterlist[cur_ter].name;
+    std::string tername = otermap[cur_ter].name;
     werase(w_location);
-    mvwprintz(w_location, 0,  0, oterlist[cur_ter].color, utf8_substr(tername, 0, 14).c_str());
+    mvwprintz(w_location, 0,  0, otermap[cur_ter].color, utf8_substr(tername, 0, 14).c_str());
 
     if (levz < 0) {
         mvwprintz(w_location, 0, 18, c_ltgray, _("Underground"));
@@ -4254,7 +4259,7 @@ void game::draw_minimap()
    int omx = cursx + i;
    int omy = cursy + j;
    bool seen = false;
-   oter_id cur_ter = ot_null;
+   oter_id cur_ter;// = "";
    long note_sym = 0;
    bool note = false;
    if (omx >= 0 && omx < OMAPX && omy >= 0 && omy < OMAPY) {
@@ -4306,8 +4311,8 @@ void game::draw_minimap()
                  << omx << " omy: " << omy;
     debugmsg("No data loaded! omx: %d omy: %d", omx, omy);
    }
-   nc_color ter_color = oterlist[cur_ter].color;
-   long ter_sym = oterlist[cur_ter].sym;
+   nc_color ter_color = otermap[cur_ter].color;
+   long ter_sym = otermap[cur_ter].sym;
    if (note)
    {
        ter_sym = note_sym ? note_sym : 'N';
@@ -6075,8 +6080,8 @@ bool game::is_in_ice_lab(point location)
     oter_id cur_ter = cur_om->ter(location.x, location.y, levz);
     bool is_in_ice_lab = false;
 
-    if (cur_ter == ot_ice_lab      || cur_ter == ot_ice_lab_stairs ||
-        cur_ter == ot_ice_lab_core || cur_ter == ot_ice_lab_finale) {
+    if (cur_ter == "ice_lab"      || cur_ter == "ice_lab_stairs" ||
+        cur_ter == "ice_lab_core" || cur_ter == "ice_lab_finale") {
         is_in_ice_lab = true;
     }
 
@@ -8121,7 +8126,7 @@ void game::pickup(int posx, int posy, int min)
                 {
                     if (veh->fuel_left("battery") > 0) {
                         //Will be -1 if no battery at all
-                        item tmp_hotplate( g->itypes["hotplate"], 0 );
+                        item tmp_hotplate( itypes["hotplate"], 0 );
                         // Drain a ton of power
                         tmp_hotplate.charges = veh->drain( "battery", 100 );
                         if( tmp_hotplate.is_tool() ) {
@@ -8143,7 +8148,7 @@ void game::pickup(int posx, int posy, int min)
                     if (veh->fuel_left("water") > 0)   //Will be -1 if no water at all
                     {
                         int amt = veh->drain("water", veh->fuel_left("water"));
-                        item fill_water(g->itypes[default_ammo("water")], g->turn);
+                        item fill_water(itypes[default_ammo("water")], g->turn);
                         fill_water.charges = amt;
                         int back = g->move_liquid(fill_water);
                         if(back >= 0)
@@ -8208,7 +8213,7 @@ void game::pickup(int posx, int posy, int min)
                 {
                     if (veh->fuel_left("battery") > 0) {
                         //Will be -1 if no battery at all
-                        item tmp_welder( g->itypes["welder"], 0 );
+                        item tmp_welder( itypes["welder"], 0 );
                         // Drain a ton of power
                         tmp_welder.charges = veh->drain( "battery", 1000 );
                         if( tmp_welder.is_tool() ) {
@@ -8254,7 +8259,7 @@ void game::pickup(int posx, int posy, int min)
                 {
                     if (veh->fuel_left("battery") > 0) {
                         //Will be -1 if no battery at all
-                        item tmp_purifier( g->itypes["water_purifier"], 0 );
+                        item tmp_purifier( itypes["water_purifier"], 0 );
                         // Drain a ton of power
                         tmp_purifier.charges = veh->drain( "battery", 1000 );
                         if( tmp_purifier.is_tool() ) {
@@ -8548,6 +8553,10 @@ void game::pickup(int posx, int posy, int min)
    {
        if(itemcount != 0 || pickup_count[idx] == 0)
        {
+           if(itemcount >= here[idx].charges) {
+               // Ignore the count if we pickup the whole stack anyway
+               itemcount = 0;
+           }
            pickup_count[idx] = itemcount;
            itemcount = 0;
 
@@ -8872,7 +8881,7 @@ void game::grab()
 }
 
 // Handle_liquid returns false if we didn't handle all the liquid.
-bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *source)
+bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *source, item *cont)
 {
     if (!liquid.made_of(LIQUID)) {
         dbg(D_ERROR) << "game:handle_liquid: Tried to handle_liquid a non-liquid!";
@@ -8957,24 +8966,29 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
     }
     // reset this, if filling the container succeeds it will be set again
     last_char = '\0';
-    if(ch == '\0') {
+    if (ch != '\0' && u.has_item(ch)) {
+        cont = &(u.i_at(ch));
+    } else
+    if (cont == NULL) {
         std::stringstream text;
         text << _("Container for ") << liquid.tname(this);
-        ch = inv_type(text.str().c_str(), IC_CONTAINER);
-    }
-    if (!u.has_item(ch)) {
-        // No container selected (escaped, ...), ask to pour
-        // we asked to pour rotten already
-        if (!from_ground && !liquid.rotten(this) &&
+
+        char ch = inv_for_liquid(liquid, text.str().c_str(), false);
+        if (!u.has_item(ch)) {
+            // No container selected (escaped, ...), ask to pour
+            // we asked to pour rotten already
+            if (!from_ground && !liquid.rotten(this) &&
                 query_yn(_("Pour %s on the ground?"), liquid.tname(this).c_str())) {
-            if (!m.has_flag("SWIMMABLE", u.posx, u.posy))
-                m.add_item_or_charges(u.posx, u.posy, liquid, 1);
-            return true;
+                    if (!m.has_flag("SWIMMABLE", u.posx, u.posy))
+                        m.add_item_or_charges(u.posx, u.posy, liquid, 1);
+                    return true;
+            }
+            return false;
         }
-        return false;
+
+        cont = &(u.i_at(ch));
     }
 
-    item *cont = &(u.i_at(ch));
     if (cont == NULL || cont->is_null()) {
         // Container is null, ask to pour.
         // we asked to pour rotten already
@@ -9021,7 +9035,7 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
             return false;
         }
 
-        if (cont->charges > 0 && cont->curammo->id != liquid.type->id) {
+        if (cont->charges > 0 && cont->curammo != NULL && cont->curammo->id != liquid.type->id) {
             add_msg(_("You can't mix loads in your %s."), cont->tname(this).c_str());
             return false;
         }
@@ -9043,59 +9057,50 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
         }
         return true;
 
-    } else if (!cont->is_container()) {
-        add_msg(_("That %s won't hold %s."), cont->tname(this).c_str(),
-                liquid.tname(this).c_str());
-        return false;
     } else {      // filling up normal containers
-        // first, check if liquid types are compatible
-        if (!cont->contents.empty()) {
-            if  (cont->contents[0].type->id != liquid.type->id) {
+        LIQUID_FILL_ERROR error;
+        int remaining_capacity = cont->get_remaining_capacity_for_liquid(liquid, error);
+        if (remaining_capacity <= 0) {
+            switch (error)
+            {
+            case L_ERR_NO_MIX:
                 add_msg(_("You can't mix loads in your %s."), cont->tname(this).c_str());
-                return false;
-            }
-        }
-
-        // ok, liquids are compatible.  Now check what the type of liquid is
-        // this will determine how much the holding container can hold
-
-        it_container *container = dynamic_cast<it_container *>(cont->type);
-        int holding_container_charges;
-
-        if (liquid.type->is_food()) {
-            it_comest *tmp_comest = dynamic_cast<it_comest *>(liquid.type);
-            holding_container_charges = container->contains * tmp_comest->charges;
-        } else if (liquid.type->is_ammo()) {
-            it_ammo *tmp_ammo = dynamic_cast<it_ammo *>(liquid.type);
-            holding_container_charges = container->contains * tmp_ammo->count;
-        } else {
-            holding_container_charges = container->contains;
-        }
-
-        // if the holding container is NOT empty
-        if (!cont->contents.empty()) {
-            // case 1: container is completely full
-            if (cont->contents[0].charges == holding_container_charges) {
+                break;
+            case L_ERR_NOT_CONTAINER:
+                add_msg(_("That %s won't hold %s."), cont->tname(this).c_str(), liquid.tname(this).c_str());
+                break;
+            case L_ERR_NOT_WATERTIGHT:
+                add_msg(_("That %s isn't water-tight."), cont->tname(this).c_str());
+                break;
+            case L_ERR_NOT_SEALED:
+                add_msg(_("You can't seal that %s!"), cont->tname(this).c_str());
+                break;
+            case L_ERR_FULL:
                 add_msg(_("Your %s can't hold any more %s."), cont->tname(this).c_str(),
-                        liquid.tname(this).c_str());
-                return false;
+                    liquid.tname(this).c_str());
+                break;
+            default:
+                break;
             }
+            return false;
+        }
 
-            // case 2: container is half full
-
+        if (!cont->contents.empty()) {
+            // Container is partly full
             if (infinite) {
-                cont->contents[0].charges = holding_container_charges;
+                cont->contents[0].charges += remaining_capacity;
                 add_msg(_("You pour %s into your %s."), liquid.tname(this).c_str(),
                         cont->tname(this).c_str());
                 return true;
             } else { // Container is finite, not empty and not full, add liquid to it
                 add_msg(_("You pour %s into your %s."), liquid.tname(this).c_str(),
                         cont->tname(this).c_str());
-                cont->contents[0].charges += liquid.charges;
-                if (cont->contents[0].charges > holding_container_charges) {
-                    int extra = cont->contents[0].charges - holding_container_charges;
-                    cont->contents[0].charges = holding_container_charges;
-                    liquid.charges = extra;
+                if (remaining_capacity > liquid.charges) {
+                    remaining_capacity = liquid.charges;
+                }
+                cont->contents[0].charges += remaining_capacity;
+                liquid.charges -= remaining_capacity;
+                if (liquid.charges > 0) {
                     add_msg(_("There's some left over!"));
                     // Why not try to find another container here?
                     return false;
@@ -9104,41 +9109,29 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
                 last_liquid = liquid.type->id;
                 return true;
             }
-        } else { // pouring into an empty container
-            if (!cont->has_flag("WATERTIGHT")) { // invalid container types
-                add_msg(_("That %s isn't water-tight."), cont->tname(this).c_str());
-                return false;
-            } else if (!(cont->has_flag("SEALS"))) {
-                add_msg(_("You can't seal that %s!"), cont->tname(this).c_str());
-                return false;
-            }
+        } else {
             // pouring into a valid empty container
-            int default_charges = 1;
-
-            if (liquid.is_food()) {
-                it_comest *comest = dynamic_cast<it_comest *>(liquid.type);
-                default_charges = comest->charges;
-            } else if (liquid.is_ammo()) {
-                it_ammo *ammo = dynamic_cast<it_ammo *>(liquid.type);
-                default_charges = ammo->count;
-            }
-
+            item liquid_copy = liquid;
+            bool all_poured = true;
             if (infinite) { // if filling from infinite source, top it to max
-                liquid.charges = container->contains * default_charges;
-            } else if (liquid.charges > container->contains * default_charges) {
+                liquid_copy.charges = remaining_capacity;
+                add_msg(_("You pour %s into your %s."), liquid.tname(this).c_str(),
+                    cont->tname(this).c_str());
+            } else if (liquid.charges > remaining_capacity) {
                 add_msg(_("You fill your %s with some of the %s."), cont->tname(this).c_str(),
                         liquid.tname(this).c_str());
                 u.inv.unsort();
-                int oldcharges = liquid.charges - container->contains * default_charges;
-                liquid.charges = container->contains * default_charges;
-                cont->put_in(liquid);
-                liquid.charges = oldcharges;
-                return false;
+                liquid.charges -= remaining_capacity;
+                liquid_copy.charges = remaining_capacity;
+                all_poured = false;
+            } else {
+                add_msg(_("You pour %s into your %s."), liquid.tname(this).c_str(),
+                    cont->tname(this).c_str());
             }
-            cont->put_in(liquid);
+            cont->put_in(liquid_copy);
             last_char = ch;
-            last_liquid = liquid.type->id;
-            return true;
+            last_liquid = liquid_copy.type->id;
+            return all_poured;
         }
     }
     return false;
@@ -9157,7 +9150,7 @@ int game::move_liquid(item &liquid)
   //liquid is in fact a liquid.
   std::stringstream text;
   text << _("Container for ") << liquid.tname(this);
-  char ch = inv_type(text.str().c_str(), IC_CONTAINER);
+  char ch = inv_for_liquid(liquid, text.str().c_str(), false);
 
   //is container selected?
   if(u.has_item(ch)) {
@@ -10050,92 +10043,106 @@ void game::takeoff(char chInput)
 
 void game::reload(char chInput)
 {
- //Quick and dirty hack
- //Save old weapon in temp variable
- //Wield item that should be unloaded
- //Reload weapon
- //Put unloaded item back into inventory
- //Wield old weapon
- bool bSwitch = false;
- item oTempWeapon;
- item inv_it = u.inv.item_by_letter(chInput);
-
- if (u.weapon.invlet != chInput && !inv_it.is_null()) {
-  oTempWeapon = u.weapon;
-  u.weapon = inv_it;
-  u.inv.remove_item_by_letter(chInput);
-  bSwitch = true;
+ item* it;
+ if (u.weapon.invlet == chInput) {
+      it = &u.weapon;
+ } else {
+      it = &u.inv.item_by_letter(chInput);
  }
 
- if (bSwitch || u.weapon.invlet == chInput) {
-  reload();
-  u.activity.moves_left = 0;
-  monmove();
-  process_activity();
+ // Gun reloading is more complex.
+ if (it->is_gun()) {
+
+     // bows etc do not need to reload.
+     if (it->has_flag("RELOAD_AND_SHOOT")) {
+         add_msg(_("Your %s does not need to be reloaded, it reloads and fires "
+                     "a single motion."), it->tname().c_str());
+         return;
+     }
+
+     // Make sure the item is actually reloadable
+     if (it->ammo_type() == "NULL") {
+         add_msg(_("Your %s does not reload normally."), it->tname().c_str());
+         return;
+     }
+
+     // See if the gun is fully loaded.
+     if (it->charges == it->clip_size()) {
+         
+         // Also see if the spare magazine is loaded
+         bool magazine_isfull = true;
+         item contents;
+
+         for (int i = 0; i < it->contents.size(); i++)
+         {
+             contents = it->contents[i];
+             if ((contents.is_gunmod() && 
+                  (contents.typeId() == "spare_mag" &&
+                   contents.charges < (dynamic_cast<it_gun*>(it->type))->clip)) ||
+                (contents.has_flag("AUX_MODE") &&
+                 contents.charges < contents.clip_size()))
+             {
+                 magazine_isfull = false;
+                 break;
+             }
+         }
+
+         if (magazine_isfull) {
+             add_msg(_("Your %s is fully loaded!"), it->tname().c_str());
+             return;
+         }
+     }
+
+     // pick ammo
+     char am_invlet = it->pick_reload_ammo(u, true);
+     if (am_invlet == 0) {
+         add_msg(_("Out of ammo!"));
+         return;
+     }
+
+     // and finally reload.
+     const char chStr[2]={chInput, '\0'};
+     u.assign_activity(this, ACT_RELOAD, it->reload_time(u), -1, am_invlet, chStr);
+     u.moves = 0;
+
+ } else if (it->is_tool()) { // tools are simpler
+     it_tool* tool = dynamic_cast<it_tool*>(it->type);
+
+     // see if its actually reloadable.
+     if (tool->ammo == "NULL") {
+         add_msg(_("You can't reload a %s!"), it->tname().c_str());
+         return;
+     }
+
+    // pick ammo
+    char am_invlet = it->pick_reload_ammo(u, true);
+
+    if (am_invlet == 0) {
+        // no ammo, fail reload
+        add_msg(_("Out of %s!"), ammo_name(tool->ammo).c_str());
+        return;
+    }
+
+    // do the actual reloading
+     const char chStr[2]={chInput, '\0'};
+    u.assign_activity(this, ACT_RELOAD, it->reload_time(u), -1, am_invlet, chStr);
+    u.moves = 0;
+
+ } else { // what else is there?
+     add_msg(_("You can't reload a %s!"), it->tname().c_str());
  }
 
- if (bSwitch) {
-  u.inv.push_back(u.weapon);
-  u.weapon = oTempWeapon;
- }
+ // all done.
+ refresh_all();
 }
 
 void game::reload()
 {
- if (u.weapon.is_gun()) {
-  if (u.weapon.has_flag("RELOAD_AND_SHOOT")) {
-   add_msg(_("Your %s does not need to be reloaded; it reloads and fires in a \
-single action."), u.weapon.tname().c_str());
-   return;
-  }
-  if (u.weapon.ammo_type() == "NULL") {
-   add_msg(_("Your %s does not reload normally."), u.weapon.tname().c_str());
-   return;
-  }
-  if (u.weapon.charges == u.weapon.clip_size()) {
-      int alternate_magazine = -1;
-      for (int i = 0; i < u.weapon.contents.size(); i++)
-      {
-          if ((u.weapon.contents[i].is_gunmod() &&
-               (u.weapon.contents[i].typeId() == "spare_mag" &&
-                u.weapon.contents[i].charges < (dynamic_cast<it_gun*>(u.weapon.type))->clip)) ||
-              ((u.weapon.contents[i].has_flag("MODE_AUX") &&
-                u.weapon.contents[i].charges < u.weapon.contents[i].clip_size())))
-          {
-              alternate_magazine = i;
-          }
-      }
-      if(alternate_magazine == -1) {
-          add_msg(_("Your %s is fully loaded!"), u.weapon.tname(this).c_str());
-          return;
-      }
-  }
-  char invlet = u.weapon.pick_reload_ammo(u, true);
-  if (invlet == 0) {
-   add_msg(_("Out of ammo!"));
-   return;
-  }
-  u.assign_activity(this, ACT_RELOAD, u.weapon.reload_time(u), -1, invlet);
-  u.moves = 0;
- } else if (u.weapon.is_tool()) {
-  it_tool* tool = dynamic_cast<it_tool*>(u.weapon.type);
-  if (tool->ammo == "NULL") {
-   add_msg(_("You can't reload a %s!"), u.weapon.tname(this).c_str());
-   return;
-  }
-  char invlet = u.weapon.pick_reload_ammo(u, true);
-  if (invlet == 0) {
-// Reload failed
-   add_msg(_("Out of %s!"), ammo_name(tool->ammo).c_str());
-   return;
-  }
-  u.assign_activity(this, ACT_RELOAD, u.weapon.reload_time(u), -1, invlet);
-  u.moves = 0;
- } else if (!u.is_armed())
-  add_msg(_("You're not wielding anything."));
- else
-  add_msg(_("You can't reload a %s!"), u.weapon.tname(this).c_str());
- refresh_all();
+    if (!u.is_armed()) {
+      add_msg(_("You're not wielding anything."));
+    } else {
+      reload(u.weapon.invlet);
+    }
 }
 
 // Unload a containter, gun, or tool
@@ -11316,8 +11323,39 @@ void game::fling_player_or_monster(player *p, monster *zz, const int& dir, float
     }
 }
 
-void game::vertical_move(int movez, bool force)
-{
+void game::vertical_move(int movez, bool force) {
+// Check if there are monsters are using the stairs.
+    bool slippedpast = false;
+    if (!coming_to_stairs.empty()) {
+		// TODO: Allow travel if zombie couldn't reach stairs, but spawn him when we go up.
+            add_msg(_("You try to use the stairs. Suddenly you are blocked by a %s!"), coming_to_stairs[0].name().c_str());
+            // Roll.
+            int dexroll = dice(6, u.dex_cur + u.skillLevel("dodge") * 2);
+            int strroll = dice(3, u.str_cur + u.skillLevel("melee") * 1.5);
+            if (coming_to_stairs.size() > 4) {
+                add_msg(_("The are a lot of them on the %s!"), m.tername(u.posx, u.posy).c_str());
+                dexroll /= 4;
+                strroll /= 2;
+            }
+            else if (coming_to_stairs.size() > 1) {
+                 add_msg(_("There's something else behind it!"));
+                 dexroll /= 2;
+            }
+
+            if (dexroll < 14 || strroll < 12) {
+                update_stair_monsters();
+                u.moves -= 100;
+                return;
+            }
+
+            if (dexroll >= 14)
+                add_msg(_("You manage to slip past!"));
+            else if (strroll >= 12)
+                add_msg(_("You manage to push past!"));
+            slippedpast = true;
+            u.moves -=100;
+    }
+
 // > and < are used for diving underwater.
  if (m.move_cost(u.posx, u.posy) == 0 && m.has_flag("SWIMMABLE", u.posx, u.posy)){
   if (movez == -1) {
@@ -11415,19 +11453,26 @@ void game::vertical_move(int movez, bool force)
   }
  }
 
- bool replace_monsters = false;
-// Replace the stair monsters if we just came back
- if (abs(monstairx - levx) <= 1 && abs(monstairy - levy) <= 1 &&
-     monstairz == levz + movez)
-  replace_monsters = true;
-
  if (!force) {
   monstairx = levx;
   monstairy = levy;
   monstairz = levz;
  }
- // Despawn monsters, only push them onto the stair monster list if we're taking stairs.
- despawn_monsters( abs(movez) == 1 && !force );
+ // Make sure monsters are saved!
+ for (unsigned int i = 0; i < num_zombies(); i++) {
+    monster &z = zombie(i);
+    int turns = z.turns_to_reach(this, u.posx, u.posy);
+        if (turns < 10 && coming_to_stairs.size() < 8 && z.will_reach(this, u.posx, u.posy)
+            && !slippedpast) {
+            z.onstairs = true;
+            z.staircount = 10 + turns;
+            coming_to_stairs.push_back(z);
+            //remove_zombie(i);
+        } else {
+            force_save_monster(z);
+        }
+}
+ despawn_monsters();
  clear_zombies();
 
 // Figure out where we know there are up/down connectors
@@ -11435,8 +11480,8 @@ void game::vertical_move(int movez, bool force)
  for (int x = 0; x < OMAPX; x++) {
   for (int y = 0; y < OMAPY; y++) {
    if (cur_om->seen(x, y, levz) &&
-       ((movez ==  1 && oterlist[ cur_om->ter(x, y, levz) ].known_up) ||
-        (movez == -1 && oterlist[ cur_om->ter(x, y, levz) ].known_down) ))
+       ((movez ==  1 && otermap[ cur_om->ter(x, y, levz) ].known_up) ||
+        (movez == -1 && otermap[ cur_om->ter(x, y, levz) ].known_down) ))
     discover.push_back( point(x, y) );
   }
  }
@@ -11446,10 +11491,10 @@ void game::vertical_move(int movez, bool force)
  for (int i = 0; i < discover.size(); i++) {
   int x = discover[i].x, y = discover[i].y;
   cur_om->seen(x, y, z_coord) = true;
-  if (movez ==  1 && !oterlist[ cur_om->ter(x, y, z_coord) ].known_down &&
+  if (movez ==  1 && !otermap[ cur_om->ter(x, y, z_coord) ].known_down &&
       !cur_om->has_note(x, y, z_coord))
    cur_om->add_note(x, y, z_coord, _("AUTO: goes down"));
-  if (movez == -1 && !oterlist[ cur_om->ter(x, y, z_coord) ].known_up &&
+  if (movez == -1 && !otermap[ cur_om->ter(x, y, z_coord) ].known_up &&
       !cur_om->has_note(x, y, z_coord))
    cur_om->add_note(x, y, z_coord, _("AUTO: goes up"));
  }
@@ -11467,9 +11512,6 @@ void game::vertical_move(int movez, bool force)
   m.spawn_item(stairx + rng(-1, 1), stairy + rng(-1, 1), "manhole_cover");
   m.ter_set(stairx, stairy, t_manhole);
  }
-
- if (replace_monsters)
-  replace_stair_monsters();
 
  m.spawn_monsters(this);
 
@@ -11501,8 +11543,7 @@ void game::vertical_move(int movez, bool force)
 }
 
 
-void game::update_map(int &x, int &y)
-{
+void game::update_map(int &x, int &y) {
  int shiftx = 0, shifty = 0;
  int olevx = 0, olevy = 0;
  while (x < SEEX * int(MAPSIZE / 2)) {
@@ -11546,7 +11587,7 @@ void game::update_map(int &x, int &y)
 
  // Shift monsters if we're actually shifting
  if(shiftx || shifty)
-  despawn_monsters(false, shiftx, shifty);
+    despawn_monsters(shiftx, shifty);
 
  // Shift NPCs
  for (int i = 0; i < active_npc.size(); i++) {
@@ -11630,21 +11671,21 @@ void game::update_overmap_seen()
    for (int i = 0; i < line.size() && sight_points >= 0; i++) {
     int lx = line[i].x, ly = line[i].y;
     if (lx >= 0 && lx < OMAPX && ly >= 0 && ly < OMAPY)
-     cost = oterlist[cur_om->ter(lx, ly, levz)].see_cost;
+     cost = otermap[cur_om->ter(lx, ly, levz)].see_cost;
     else if ((lx < 0 || lx >= OMAPX) && (ly < 0 || ly >= OMAPY)) {
      if (lx < 0) lx += OMAPX;
      else        lx -= OMAPX;
      if (ly < 0) ly += OMAPY;
      else        ly -= OMAPY;
-     cost = oterlist[om_diag->ter(lx, ly, levz)].see_cost;
+     cost = otermap[om_diag->ter(lx, ly, levz)].see_cost;
     } else if (lx < 0 || lx >= OMAPX) {
      if (lx < 0) lx += OMAPX;
      else        lx -= OMAPX;
-     cost = oterlist[om_hori->ter(lx, ly, levz)].see_cost;
+     cost = otermap[om_hori->ter(lx, ly, levz)].see_cost;
     } else if (ly < 0 || ly >= OMAPY) {
      if (ly < 0) ly += OMAPY;
      else        ly -= OMAPY;
-     cost = oterlist[om_vert->ter(lx, ly, levz)].see_cost;
+     cost = otermap[om_vert->ter(lx, ly, levz)].see_cost;
     }
     sight_points -= cost;
    }
@@ -11682,64 +11723,134 @@ point game::om_location()
 
 void game::replace_stair_monsters()
 {
- for (int i = 0; i < coming_to_stairs.size(); i++)
-  add_zombie(coming_to_stairs[i].mon);
+ for (int i = 0; i < coming_to_stairs.size(); i++) {
+    coming_to_stairs[i].onstairs = false;
+    coming_to_stairs[i].staircount = 0;
+    add_zombie(coming_to_stairs[i]);
+ }
  coming_to_stairs.clear();
 }
 
 //TODO: abstract out the location checking code
 //TODO: refactor so zombies can follow up and down stairs instead of this mess
-void game::update_stair_monsters()
-{
- if (abs(levx - monstairx) > 1 || abs(levy - monstairy) > 1)
-  return;
+void game::update_stair_monsters() {
 
- for (int i = 0; i < coming_to_stairs.size(); i++) {
-  coming_to_stairs[i].count--;
-  if (coming_to_stairs[i].count <= 0) {
-   int startx = rng(0, SEEX * MAPSIZE - 1), starty = rng(0, SEEY * MAPSIZE - 1);
-   bool found_stairs = false;
-   for (int x = 0; x < SEEX * MAPSIZE && !found_stairs; x++) {
-    for (int y = 0; y < SEEY * MAPSIZE && !found_stairs; y++) {
-     int sx = (startx + x) % (SEEX * MAPSIZE),
-         sy = (starty + y) % (SEEY * MAPSIZE);
-     if (m.has_flag("GOES_UP", sx, sy) || m.has_flag("GOES_DOWN", sx, sy)) {
-      found_stairs = true;
-      int mposx = sx, mposy = sy;
-      int tries = 0;
-      while (!is_empty(mposx, mposy) && tries < 10) {
-       mposx = sx + rng(-2, 2);
-       mposy = sy + rng(-2, 2);
-       tries++;
-      }
-      if (tries < 10) {
-       coming_to_stairs[i].mon.setpos(mposx, mposy, true);
-       add_zombie( coming_to_stairs[i].mon );
-       if (u_see(sx, sy)) {
-        if (m.has_flag("GOES_UP", sx, sy)) {
-            add_msg(_("A %s comes down the %s!"), coming_to_stairs[i].mon.name().c_str(),
-                m.tername(sx, sy).c_str());
-        } else {
-            add_msg(_("A %s comes up the %s!"), coming_to_stairs[i].mon.name().c_str(),
-                m.tername(sx, sy).c_str());
+    // Search for the stairs closest to the player.
+    std::vector<int> stairx, stairy;
+    std::vector<int> stairdist;
+
+    if (!coming_to_stairs.empty()) {
+        for (int x = 0; x < SEEX * MAPSIZE; x++) {
+            for (int y = 0; y < SEEY * MAPSIZE; y++) {
+                if (m.has_flag("GOES_UP", x, y) || m.has_flag("GOES_DOWN", x, y)) {
+                    stairx.push_back(x);
+                    stairy.push_back(y);
+                    stairdist.push_back(rl_dist(x, y, u.posx, u.posy));
+                }
+            }
         }
-       }
-      }
-     }
+        if (stairdist.empty())
+            return;         // Found no stairs?
+
+        // Find closest stairs.
+        int si = 0;
+        for (int i = 0; i < stairdist.size(); i++) {
+            if (stairdist[i] < stairdist[si])
+                si = i;
+        }
+
+        // Attempt to spawn zombies.
+        for (int i = 0; i < coming_to_stairs.size(); i++) {
+            int mposx = stairx[si], mposy = stairy[si];
+            monster &z = coming_to_stairs[i];
+
+            // We might be not be visible.
+            if (!( z.posx() < 0 - (SEEX * MAPSIZE) / 6 ||
+                    z.posy() < 0 - (SEEY * MAPSIZE) / 6 ||
+                    z.posx() > (SEEX * MAPSIZE * 7) / 6 ||
+                    z.posy() > (SEEY * MAPSIZE * 7) / 6 ) ) {
+
+                coming_to_stairs[i].staircount -= 4;
+                // Let the player know zombies are trying to come.
+                z.setpos(mposx, mposy, true);
+                if (u_see(mposx, mposy)) {
+                    std::stringstream dump;
+                    if (coming_to_stairs[i].staircount > 4)
+                        dump << _("You see a ") << z.name() << _(" on the stairs!");
+                    else
+                        dump << _("The ") << z.name() << _(" is almost at the ")
+                        << (m.has_flag("GOES_UP", mposx, mposy) ? _("bottom") : _("top")) <<  _(" of the ")
+                        << m.tername(mposx, mposy).c_str() << "!";
+                    add_msg(dump.str().c_str());
+                }
+                else {
+                    sound(mposx, mposy, 5, _("a sound nearby from the stairs!"));
+                }
+
+                if (is_empty(mposx, mposy) && coming_to_stairs[i].staircount <= 0) {
+                    z.setpos(mposx, mposy, true);
+                    z.onstairs = false;
+                    z.staircount = 0;
+                    add_zombie(z);
+                    if (u_see(mposx, mposy)) {
+                        if (m.has_flag("GOES_UP", mposx, mposy)) {
+                            add_msg(_("The %s comes down the %s!"), z.name().c_str(),
+                                    m.tername(mposx, mposy).c_str());
+                        } else {
+                            add_msg(_("The %s comes up the %s!"), z.name().c_str(),
+                                    m.tername(mposx, mposy).c_str());
+                        }
+                    }
+                    coming_to_stairs.erase(coming_to_stairs.begin() + i);
+                } else if (u.posx == mposx && u.posy == mposy && z.staircount <= 0) {
+                    // Search for a clear tile.
+                    int pushx = -1, pushy = -1;
+                    int tries = 0;
+                    z.setpos(mposx, mposy, true);
+                    while(tries < 9) {
+                        pushx = rng(-1, 1), pushy = rng(-1, 1);
+                        if (z.can_move_to(this, mposx + pushx, mposy + pushy) && pushx != 0 && pushy != 0) {
+                            add_msg(_("The %s pushed you back!"), z.name().c_str());
+                            u.posx += pushx;
+                            u.posy += pushy;
+                            u.moves -= 100;
+                            // Stumble.
+                            if (u.dodge(this) < 12)
+                                u.add_disease("downed", 2);
+                            return;
+                        }
+                        tries++;
+                    }
+                    add_msg(_("The %s tried to push you back but failed! It attacks you!"), z.name().c_str());
+                    z.hit_player(this, u, false);
+                    u.moves -= 100;
+                    return;
+                }
+            }
+        }
     }
-   }
-   coming_to_stairs.erase(coming_to_stairs.begin() + i);
-   i--;
-  }
- }
- if (coming_to_stairs.empty()) {
-  monstairx = -1;
-  monstairy = -1;
-  monstairz = 999;
- }
+
+    if (coming_to_stairs.empty()) {
+        monstairx = -1;
+        monstairy = -1;
+        monstairz = 999;
+    }
 }
 
-void game::despawn_monsters(const bool stairs, const int shiftx, const int shifty)
+void game::force_save_monster(monster &z) {
+    real_coords rc( m.getabs(z.posx(), z.posy() ) );
+    z.spawnmapx = rc.om_sub.x;
+    z.spawnmapy = rc.om_sub.y;
+    z.spawnposx = rc.sub_pos.x;
+    z.spawnposy = rc.sub_pos.y;
+
+    tinymap tmp(&traps);
+    tmp.load(this, z.spawnmapx, z.spawnmapy, levz, false);
+    tmp.add_spawn(&z);
+    tmp.save(cur_om, turn, z.spawnmapx, z.spawnmapy, levz);
+}
+
+void game::despawn_monsters(const int shiftx, const int shifty)
 {
     for (unsigned int i = 0; i < num_zombies(); i++) {
         monster &z = zombie(i);
@@ -11747,46 +11858,48 @@ void game::despawn_monsters(const bool stairs, const int shiftx, const int shift
         if(shiftx != 0 || shifty != 0) {
             z.shift(shiftx, shifty);
             if( z.posx() >= 0 && z.posx() <= SEEX * MAPSIZE &&
-                z.posy() >= 0 && z.posy() <= SEEY * MAPSIZE ) {
+                    z.posy() >= 0 && z.posy() <= SEEY * MAPSIZE) {
                 // We're inbounds, so don't despawn after all.
                 continue;
-            }
-        }
+            } else {
+                if ( (z.spawnmapx != -1) || z.getkeep() ||
+                          ((shiftx != 0 || shifty != 0) && z.friendly != 0 ) ) {
+                    // translate shifty relative coordinates to submapx, submapy, subtilex, subtiley
+                    real_coords rc( m.getabs(z.posx(), z.posy() ) ); // still madness, bud handles straddling omap and -/+
+                    z.spawnmapx = rc.om_sub.x;
+                    z.spawnmapy = rc.om_sub.y;
+                    z.spawnposx = rc.sub_pos.x;
+                    z.spawnposy = rc.sub_pos.y;
 
-        if (stairs && z.will_reach(this, u.posx, u.posy)) {
-            int turns = z.turns_to_reach(this, u.posx, u.posy);
-            if (turns < 999) {
-                coming_to_stairs.push_back( monster_and_count(z, 1 + turns) );
-            }
-        } else if ( (z.spawnmapx != -1) ||
-                    ((stairs || shiftx != 0 || shifty != 0) && z.friendly != 0 ) ) {
-            // translate shifty relative coordinates to submapx, submapy, subtilex, subtiley
-            real_coords rc( m.getabs(z.posx(), z.posy() ) ); // still madness, bud handles straddling omap and -/+
-            z.spawnmapx = rc.om_sub.x;
-            z.spawnmapy = rc.om_sub.y;
-            z.spawnposx = rc.sub_pos.x;
-            z.spawnposy = rc.sub_pos.y;
+                    // We're saving him, so there's no need to keep anymore.
+                    z.setkeep(false);
 
-            tinymap tmp(&traps);
-            tmp.load(this, z.spawnmapx, z.spawnmapy, levz, false);
-            tmp.add_spawn(&z);
-            tmp.save(cur_om, turn, z.spawnmapx, z.spawnmapy, levz);
-        } else {
-            // No spawn site, so absorb them back into a group.
-            int group = valid_group((z.type->id), levx + shiftx, levy + shifty, levz);
-            if (group != -1) {
-                cur_om->zg[group].population++;
-                if (cur_om->zg[group].population /
-                    (cur_om->zg[group].radius * cur_om->zg[group].radius) > 5 &&
-                    !cur_om->zg[group].diffuse) {
-                    cur_om->zg[group].radius++;
+                    tinymap tmp(&traps);
+                    tmp.load(this, z.spawnmapx, z.spawnmapy, levz, false);
+                    tmp.add_spawn(&z);
+                    tmp.save(cur_om, turn, z.spawnmapx, z.spawnmapy, levz);
+                }
+                else
+                {
+                    // No spawn site, so absorb them back into a group.
+                    int group = valid_group((z.type->id), levx + shiftx, levy + shifty, levz);
+                    if (group != -1)
+                    {
+                        cur_om->zg[group].population++;
+                        if (cur_om->zg[group].population /
+                                (cur_om->zg[group].radius * cur_om->zg[group].radius) > 5 &&
+                                !cur_om->zg[group].diffuse)
+                        {
+                            cur_om->zg[group].radius++;
+                        }
+                    }
+                }
+                // Check if we should keep him.
+                if (!z.getkeep()) {
+                    remove_zombie(i);
+                    i--;
                 }
             }
-        }
-        // Shifting needs some cleanup for despawned monsters since they won't be cleared afterwards.
-        if(shiftx != 0 || shifty != 0) {
-            remove_zombie(i);
-            i--;
         }
     }
 
@@ -12166,7 +12279,7 @@ void game::nuke(int x, int y)
         }
     }
     tmpmap.save(cur_om, turn, mapx, mapy, 0);
-    cur_om->ter(x, y, 0) = ot_crater;
+    cur_om->ter(x, y, 0) = "crater";
     //Kill any npcs on that omap location.
     for(int i = 0; i < cur_om->npcs.size();i++)
         if(cur_om->npcs[i]->mapx/2== x && cur_om->npcs[i]->mapy/2 == y && cur_om->npcs[i]->omz == 0)
@@ -12256,7 +12369,7 @@ bool game::spread_fungus(int x, int y)
                 for (int k = 0; k < g->m.i_at(x, y).size(); k++) {
                     m.i_rem(x, y, k);
                 }
-                item seeds(g->itypes["fungal_seeds"], int(g->turn));
+                item seeds(itypes["fungal_seeds"], int(g->turn));
                 m.add_item_or_charges(x, y, seeds);
             }
         }
@@ -12340,7 +12453,7 @@ bool game::spread_fungus(int x, int y)
                             for (int k = 0; k < g->m.i_at(i, j).size(); k++) {
                                 m.i_rem(i, j, k);
                             }
-                            item seeds(g->itypes["fungal_seeds"], int(g->turn));
+                            item seeds(itypes["fungal_seeds"], int(g->turn));
                             m.add_item_or_charges(x, y, seeds);
                         }
                     }

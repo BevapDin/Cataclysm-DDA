@@ -213,11 +213,11 @@ void monhorde::change_pop_by_terrain(game &g) {
 		if(one_in(10)) {
 			pop_normal--;
 		}
-	} else if(ter >= ot_river_center && ter <= ot_river_nw) {
+	} else if(ter == ot_river_center) {
 		if(one_in(20)) {
 			pop_normal -= rng(0, 4);
 		}
-	} else if(ter >= ot_house_north && ter <= ot_shelter_under) {
+	} else {
 		if(one_in(20)) {
 			pop_normal += rng(0, 10) / 10; // 10% chance of +1
 			if(pop_master > 0) {

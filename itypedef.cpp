@@ -26,6 +26,8 @@ std::vector<std::string> artifact_itype_ids;
 std::vector<std::string> standard_itype_ids;
 std::vector<std::string> pseudo_itype_ids;
 
+std::map<std::string, itype*> itypes;
+
 // GENERAL GUIDELINES
 // When adding a new item, you MUST REMEMBER to insert it in the itype_id enum
 //  at the top of itype.h!
@@ -281,6 +283,7 @@ BIO_SINGLE("bio_water_extractor", 5500, c_green, 5);
 BIO_SINGLE("bio_shock", 5500, c_red, 5);
 BIO_SINGLE("bio_heat_absorb", 5500, c_red, 5);
 BIO_SINGLE("bio_claws", 5500, c_red, 5);
+BIO_SINGLE("bio_razors", 4500, c_red, 4);
 BIO_SINGLE("bio_shockwave", 5500, c_red, 5);
 // armor:
 BIO_SINGLE("bio_carbon", 7500, c_cyan, 9);
@@ -288,6 +291,7 @@ BIO_SINGLE("bio_armor_head", 3500, c_cyan, 5);
 BIO_SINGLE("bio_armor_torso", 3500, c_cyan, 4);
 BIO_SINGLE("bio_armor_arms", 3500, c_cyan, 3);
 BIO_SINGLE("bio_armor_legs", 3500, c_cyan, 3);
+BIO_SINGLE("bio_armor_eyes", 5500, c_cyan, 5);
 // espionage
 BIO_SINGLE("bio_face_mask", 8500, c_magenta, 5);
 BIO_SINGLE("bio_scent_mask", 8500, c_magenta, 5);
@@ -428,9 +432,11 @@ std::string ammo_name(ammotype t)
     if( t == "20x66mm" )    return _("20x66mm caseless shotgun");
     if( t == "5x50" )       return _("5x50mm flechette");
     if( t == "signal_flare")return _("signal flare");
+    if( t == "mininuke_mod")return _("modified mininuke");
     if( t == "charcoal" )   return _("charcoal");
     if( t == "metal_rail" ) return _("ferrous rail projectile");
     if( t == "UPS" )        return _("UPS");
+    if( t == "thrown" )     return _("throwing weapon");
     if( t == "components" ) return _("components");
     return "XXX";
 }
@@ -475,9 +481,11 @@ itype_id default_ammo(ammotype guntype)
     if( guntype == "20x66mm"  )     return "20x66_shot";
     if( guntype == "5x50"  )        return "5x50dart";
     if( guntype == "signal_flare")  return "signal_flare";
+    if( guntype == "mininuke_mod")  return "mininuke_mod";
     if( guntype == "metal_rail"  )  return "rebar_rail";
     if( guntype == "UPS"  )         return "UPS";
     if( guntype == "components"  )  return "components";
+    if( guntype == "thrown"  )      return "thrown";
     if( guntype == "50"  )          return "50bmg";
     return "null";
 }

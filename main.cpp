@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
         if(!g->opening_screen()) {
             quit_game = true;
         }
-        while (!g->do_turn()) ;
+        while (!quit_game && !g->do_turn()) ;
         if (g->game_quit() || g->game_error()) {
             quit_game = true;
         }
@@ -134,17 +134,20 @@ void abort_handler(int s) {
     query_yn(_("recived SIGABRT, waiting for debugger"));
 }
 
-void exit_handler(int s)
-{
+void exit_handler(int s) {
     if (s != 2 || query_yn(_("Really Quit? All unsaved changes will be lost."))) {
         erase(); // Clear screen
         endwin(); // End ncurses
-#if (defined _WIN32 || defined WINDOWS)
-        system("cls"); // Tell the terminal to clear itself
-        system("color 07");
-#else
-        system("clear"); // Tell the terminal to clear itself
-#endif
+        int ret;
+        #if (defined _WIN32 || defined WINDOWS)
+            ret = system("cls"); // Tell the terminal to clear itself
+            ret = system("color 07");
+        #else
+            ret = system("clear"); // Tell the terminal to clear itself
+        #endif
+        if (ret != 0) {
+            DebugLog() << "main.cpp:exit_handler(): system(\"clear\"): error returned\n";
+        }
 
         if(g != NULL) {
             if(g->game_error()) {

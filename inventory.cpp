@@ -279,6 +279,19 @@ inventory inventory::filter_by_category(item_cat cat, const player& u, const std
     return reduced_inv;
 }
 
+inventory inventory::filter_by_capacity_for_liquid(const item &liquid) const
+{
+    inventory reduced_inv;
+    for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter) {
+        const item& it = iter->front();
+        LIQUID_FILL_ERROR error;
+        if (it.get_remaining_capacity_for_liquid(liquid, error) > 0) {
+            reduced_inv.clone_stack(*iter);
+        }
+    }
+    return reduced_inv;
+}
+
 
 void inventory::unsort()
 {
@@ -581,17 +594,17 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 
             ter_id terrain_id = g->m.ter(x, y);
             if ((g->m.field_at(x, y).findField(fd_fire)) || (terrain_id == t_lava)) {
-                item fire(g->itypes["fire"], 0);
+                item fire(itypes["fire"], 0);
                 fire.charges = 1;
                 surround.push_back(item_from_surrounding(p, fire));
             }
             if (terrain_id == t_water_sh || terrain_id == t_water_dp) {
-                item water(g->itypes["water"], 0);
+                item water(itypes["water"], 0);
                 water.charges = 50;
                 surround.push_back(item_from_surrounding(p, water));
             }
             if ((g->m.field_at(x, y).findField(fd_acid))) {
-                item acid(g->itypes["water_acid"], 0);
+                item acid(itypes["water_acid"], 0);
                 acid.charges = 50;
                 surround.push_back(item_from_surrounding(p, acid));
             }
@@ -615,7 +628,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
                 if (kpart >= 0) {
                     add_vpart(veh, kpart, "KITCHEN", "battery");
 
-                    item water(g->itypes["water_clean"], 0);
+                    item water(itypes["water_clean"], 0);
                     water.charges = veh->fuel_left("water");
                     this->vpart.push_back(item_from_vpart(veh, veh->parts[kpart].mount_dx, veh->parts[kpart].mount_dy, water));
                 }

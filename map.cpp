@@ -1431,6 +1431,20 @@ bool map::moppable_items_at(const int x, const int y)
   if (it->made_of(LIQUID))
    return true;
  }
+ field &fld = field_at(x, y);
+ if(fld.findField(fd_blood) != 0 || fld.findField(fd_bile) != 0 || fld.findField(fd_slime) != 0 || fld.findField(fd_sludge) != 0) {
+  return true;
+ }
+ int vpart;
+ vehicle *veh = veh_at(x, y, vpart);
+ if(veh != 0) {
+  std::vector<int> parts_here = veh->parts_at_relative(veh->parts[vpart].mount_dx, veh->parts[vpart].mount_dy);
+  for(size_t i = 0; i < parts_here.size(); i++) {
+   if(veh->parts[parts_here[i]].blood > 0) {
+    return true;
+   }
+  }
+ }
  return false;
 }
 
@@ -1472,6 +1486,19 @@ void map::mop_spills(const int x, const int y) {
   if (it->made_of(LIQUID)) {
     i_rem(x, y, i);
     i--;
+  }
+ }
+ field &fld = field_at(x, y);
+ fld.removeField(fd_blood);
+ fld.removeField(fd_bile);
+ fld.removeField(fd_slime);
+ fld.removeField(fd_sludge);
+ int vpart;
+ vehicle *veh = veh_at(x, y, vpart);
+ if(veh != 0) {
+  std::vector<int> parts_here = veh->parts_at_relative(veh->parts[vpart].mount_dx, veh->parts[vpart].mount_dy);
+  for(size_t i = 0; i < parts_here.size(); i++) {
+   veh->parts[parts_here[i]].blood = 0;
   }
  }
 }
@@ -2374,7 +2401,7 @@ void map::spawn_item(const int x, const int y, item new_item,
         //let's fail silently if we specify charges for an item that doesn't support it
         new_item.charges = charges;
     }
-    new_item = new_item.in_its_container(&(g->itypes));
+    new_item = new_item.in_its_container(&(itypes));
     if ((new_item.made_of(LIQUID) && has_flag("SWIMMABLE", x, y)) ||
         has_flag("DESTROY_ITEM", x, y))
     {
@@ -2651,7 +2678,7 @@ bool map::process_active_item(game* g, item *it, const int nonant, const int i, 
                 if (tmp->revert_to == "null" || it->charges == -1) {
                     return true;
                 } else {
-                    it->type = g->itypes[tmp->revert_to];
+                    it->type = itypes[tmp->revert_to];
                 }
             }
         }
@@ -3741,6 +3768,14 @@ void map::shift(game *g, const int wx, const int wy, const int wz, const int sx,
         for (int gridx = 0; gridx < my_MAPSIZE; gridx++) {
             forget_traps(gridx, gridy);
         }
+    }
+
+    // update vehicles own overmap location
+    std::set<vehicle *>::iterator veh;
+    for (veh = vehicle_list.begin(); veh != vehicle_list.end(); ++veh)
+    {
+        (*veh)->update_map_x(wx);
+        (*veh)->update_map_y(wy);
     }
 
 // Clear vehicle list and rebuild after shift

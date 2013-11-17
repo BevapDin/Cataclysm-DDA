@@ -252,6 +252,16 @@ void mdeath::disappear(game *g, monster *z) {
 
 void mdeath::guilt(game *g, monster *z) {
     const int MAX_GUILT_DISTANCE = 5;
+    int kill_count = g->kill_count(z->type->id);
+    int maxKills = 100; // this is when the player stop caring altogether.
+
+    // different message as we kill more of the same monster
+    std::string msg = "You feel guilty for killing %s."; // default guilt message
+    std::map<int, std::string> guilt_tresholds;
+    guilt_tresholds[75] = "You feel ashamed for killing %s.";
+    guilt_tresholds[50] = "You regret killing %s.";
+    guilt_tresholds[25] = "You feel remorse for killing %s.";
+
     /*  TODO:   Replace default cannibal checks with more elaborate conditions,
                  and add a "PSYCHOPATH" trait for terminally guilt-free folk.
                  Guilty cannibals could make for good drama!
@@ -267,13 +277,29 @@ void mdeath::guilt(game *g, monster *z) {
         // We probably didn't kill it
         return;
     }
+    if (kill_count >= maxKills) {
+        // player no longer cares
+        if (kill_count == maxKills) {
+            g->add_msg(_("After killing so many bloody %ss you no longer care "
+                          "about their deaths anymore."), z->name().c_str());
+        }
+        return;
+    } else {
+        for (std::map<int, std::string>::iterator it = guilt_tresholds.begin();
+                it != guilt_tresholds.end(); it++) {
+            if (kill_count >= it->first) {
+                msg = it->second;
+                break;
+            }
+        }
+    }
 
-    g->add_msg(_("Killing %s fills you with guilt."), z->name().c_str());
+    g->add_msg(_(msg.c_str()), z->name().c_str());
 
-    int moraleMalus = -50;
-    int maxMalus = -250;
-    int duration = 300;
-    int decayDelay = 30;
+    int moraleMalus = -50 * (1.0 - ((float) kill_count / maxKills));
+    int maxMalus = -250 * (1.0 - ((float) kill_count / maxKills));
+    int duration = 300 * (1.0 - ((float) kill_count / maxKills));
+    int decayDelay = 30 * (1.0 - ((float) kill_count / maxKills));
     if (z->type->in_species("ZOMBIE")) {
         moraleMalus /= 10;
     }
@@ -339,7 +365,7 @@ void mdeath::amigara(game *g, monster *z) {
     if (count <= 1) { // We're the last!
         g->u.rem_disease("amigara");
         g->add_msg(_("Your obsession with the fault fades away..."));
-        item art(new_artifact(g->itypes), g->turn);
+        item art(new_artifact(itypes), g->turn);
         g->m.add_item_or_charges(z->posx(), z->posy(), art);
     }
     normal(g, z);
@@ -536,7 +562,7 @@ void make_gibs(game* g, monster* z, int amount) {
 void make_mon_corpse(game* g, monster* z, int damageLvl) {
     const int MAX_DAM = 4;
     item corpse;
-    corpse.make_corpse(g->itypes["corpse"], z->type, g->turn);
+    corpse.make_corpse(itypes["corpse"], z->type, g->turn);
     corpse.damage = damageLvl > MAX_DAM ? MAX_DAM : damageLvl;
     g->m.add_item_or_charges(z->posx(), z->posy(), corpse);
 }

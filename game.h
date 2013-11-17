@@ -88,6 +88,8 @@ enum quit_status {
  QUIT_ERROR
 };
 
+// Refactoring into base monster class.
+
 struct monster_and_count
 {
  monster mon;
@@ -142,7 +144,7 @@ class game
   void decrease_nextinv(); // Decrement the next inventory letter
   void vadd_msg(const char* msg, va_list ap );
   void add_msg_string(const std::string &s);
-  void add_msg(const char* msg, ...);
+    void add_msg(const char* msg, ...);
   void add_msg_if_player(player *p, const char* msg, ...);
   void add_msg_if_npc(player* p, const char* msg, ...);
   void add_msg_player_or_npc(player *p, const char* player_str, const char* npc_str, ...);
@@ -290,6 +292,7 @@ class game
   char inv_type(std::string title, item_cat inv_item_type = IC_NULL);
   char inv_type(std::string title, item_cat inv_item_type, const std::string *liquid);
   char inv_type_container(std::string title, std::string liquid);
+  char inv_for_liquid(const item &liquid, const std::string title, bool auto_choose_single);
   int inventory_item_menu(char chItem, int startx = 0, int width = 50);
   std::vector<item> multidrop();
   faction* list_factions(std::string title = "FACTIONS:");
@@ -303,7 +306,6 @@ class game
   bool has_gametype() const { return gamemode && gamemode->id() != SGAME_NULL; }
   special_game_id gametype() const { return (gamemode) ? gamemode->id() : SGAME_NULL; }
 
-  std::map<std::string, itype*> itypes;
   std::map<std::string, vehicle*> vtypes;
   std::vector <trap*> traps;
   std::vector<constructable*> constructions; // The list of constructions
@@ -322,7 +324,7 @@ class game
   map m;
   int levx, levy, levz; // Placement inside the overmap
   player u;
-  std::vector<monster_and_count> coming_to_stairs;
+  std::vector<monster> coming_to_stairs;
   int monstairx, monstairy, monstairz;
   std::vector<npc *> active_npc;
   std::vector<faction> factions;
@@ -346,7 +348,7 @@ class game
   overmap *om_hori, *om_vert, *om_diag; // Adjacent overmaps
   live_view liveview;
 
- bool handle_liquid(item &liquid, bool from_ground, bool infinite, item *source = NULL);
+  bool handle_liquid(item &liquid, bool from_ground, bool infinite, item *source = NULL, item *cont = NULL);
 
  //Move_liquid returns the amount of liquid left if we didn't move all the liquid,
  //otherwise returns sentinel -1, signifies transaction fail.
@@ -422,7 +424,6 @@ class game
   void init_npctalk();
   void init_fields();
   void init_weather();
-  void init_overmap();
   void init_morale();
   void init_itypes();       // Initializes item types
   void init_skills() throw (std::string);
@@ -522,7 +523,7 @@ class game
   void print_object_info(int lx, int ly, WINDOW* w_look, const int column, int &line, bool mouse_hover);
   void handle_multi_item_info(int lx, int ly, WINDOW* w_look, const int column, int &line, bool mouse_hover);
   void get_lookaround_dimensions(int &lookWidth, int &begin_y, int &begin_x) const;
-  
+
 // Target is an interactive function which allows the player to choose a nearby
 // square.  It display information on any monster/NPC on that square, and also
 // returns a Bresenham line to that square.  It is called by plfire() and
@@ -534,7 +535,8 @@ class game
 // Map updating and monster spawning
   void replace_stair_monsters();
   void update_stair_monsters();
-  void despawn_monsters(const bool stairs = false, const int shiftx = 0, const int shifty = 0);
+  void despawn_monsters(const int shiftx = 0, const int shifty = 0);
+  void force_save_monster(monster &z);
   void spawn_mon(int shift, int shifty); // Called by update_map, sometimes
   int valid_group(std::string type, int x, int y, int z);// Picks a group from cur_om
   void set_adjacent_overmaps(bool from_scratch = false);

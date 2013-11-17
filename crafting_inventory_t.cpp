@@ -61,7 +61,7 @@ const tidvec &get_tidvec(const itype_id &type) {
     static funcmap functionTypes;
     tidvec &types = functionTypes[type];
     if(types.empty()) {
-        for(std::map<std::string, itype*>::iterator a = g->itypes.begin(); a != g->itypes.end(); ++a) {
+        for(std::map<std::string, itype*>::iterator a = itypes.begin(); a != itypes.end(); ++a) {
             itype *t = a->second;
             if(!t->hasFunc(type)) {
                 if(type.compare(5, std::string::npos, t->id) == 0) {
@@ -731,8 +731,8 @@ void crafting_inventory_t::simple_req::check_overlay(crafting_inventory_t &cinv,
 }
 
 const std::string &name(const itype_id &type) {
-    const std::map<itype_id, itype*>::const_iterator a = g->itypes.find(type);
-    if(a == g->itypes.end()) {
+    const std::map<itype_id, itype*>::const_iterator a = itypes.find(type);
+    if(a == itypes.end()) {
         return type;
     }
     return a->second->name;
@@ -1114,7 +1114,7 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
             }
             if(surroundings == NULL) {
 //                debugmsg("surrounding %s is gone - will recreate it", tmpstr.c_str());
-                item it(g->itypes[tmpstr], (int) g->turn);
+                item it(itypes[tmpstr], (int) g->turn);
                 it.charges = 50;
                 cinv.surround.push_back(item_from_surrounding(tmppnt, it));
                 surroundings = &(cinv.surround.back());
