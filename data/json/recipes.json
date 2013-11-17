@@ -11139,11 +11139,8 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "primitive_hammer", -1 ],
-      [ "hammer", -1 ],
-      [ "hatchet", -1 ],
-      [ "toolset", -1 ]
+      [ "func:hammer", -1 ],
+      [ "hatchet", -1 ]
     ]
   ],
   "components": [
@@ -11157,9 +11154,7 @@
     ],
     [
       [ "string_6", 1 ],
-      [ "sinew", 20 ],
-      [ "thread", 20 ],
-      [ "plant_fibre", 20 ]
+      [ "func:thread", 20 ]
     ]
   ]
 },{

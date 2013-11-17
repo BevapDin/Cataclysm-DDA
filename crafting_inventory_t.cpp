@@ -130,7 +130,8 @@ void crafting_inventory_t::solution::deserialize(crafting_inventory_t &cinv, pla
         return;
     }
     picojson::value pjv;
-    const std::string &data = activity.str_values.front();
+    const std::string data = activity.str_values.front();
+    activity.str_values.erase(activity.str_values.begin());
     const char *s = data.c_str();
     std::string err = picojson::parse(pjv, s, s + data.length());
     if(!err.empty()) {
@@ -144,7 +145,6 @@ void crafting_inventory_t::solution::deserialize(crafting_inventory_t &cinv, pla
         complex_req &cr = complex_reqs[i];
         cr.deserialize(cinv, pjv.get(i));
     }
-    activity.str_values.erase(activity.str_values.begin());
 }
 
 void crafting_inventory_t::solution::consume(crafting_inventory_t &cinv, std::list<item> &used_items, std::list<item> &used_tools) {
@@ -2177,12 +2177,29 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                 debugmsg("attempted to consume a pseudo surrounding item %s for %s", ix->name.c_str(), req.type.c_str());
                 return;
             }
+            if(ix->type->id == "water" && furnlist[g->m.furn(mapitems->position.x, mapitems->position.y)].examine == &iexamine::toilet) {
+                // get water charges at location
+                std::vector<item> &toiletitems = g->m.i_at(mapitems->position.x, mapitems->position.y);
+                for(size_t i = 0; req.count > 0 && i < toiletitems.size(); ++i) {
+                    if(toiletitems[i].typeId() == "water") {
+                        remove_releated(
+                            req,
+                            toiletitems,
+                            i,
+                            used_items
+                        );
+                    }
+                }
+                if(req.count <= 0) {
+                    break;
+                }
+            }
             used_items.push_back(*ix);
             used_items.back().charges = req.count;
             // Basicly this is an inifinte amount of things
             // like fire, or a water source, in this case we can ignore it.
             req.count = 0;
-             return;
+            return;
         case LT_BIONIC:
             ix = &(get_item());
             if(req.ctype == C_AMOUNT) {

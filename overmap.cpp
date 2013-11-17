@@ -795,6 +795,21 @@ bool overmap::is_safe(int x, int y, int z)
  return safe;
 }
 
+bool overmap::has_horde(int x, int y, int z) const {
+ if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) { return false; }
+ overmap* ov = const_cast<overmap*>(this)->get_overmap_by_offset(x, y);
+ if(ov != this) {
+  return ov->has_horde(x, y, z);
+ } else if(ov == 0) {
+   return false;
+ }
+ for (int i = 0; i < zh.size(); i++) {
+  if (zh[i].posx / 2 == x && zh[i].posy / 2 == y && zh[i].posz == z)
+   return true;
+ }
+ return false;
+}
+
 bool overmap::has_note(int const x, int const y, int const z) const
 {
  if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) { return false; }
@@ -1762,6 +1777,7 @@ void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
 
 // Now actually draw the map
   bool csee = false;
+  bool horde_here;
   oter_id ccur_ter = ot_null;
   for (int i = -(om_map_width / 2); i < (om_map_width / 2); i++) {
     for (int j = -(om_map_height / 2);
@@ -1780,6 +1796,7 @@ void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
     if (note_here)
      note_text = ov->note(omx, omy, z);
     npc_here = ov->has_npc(g, omx, omy, z);
+    horde_here = ov->has_horde(omx, omy, z);
 
     if (note_here && blink) {
      ter_color = c_yellow;
@@ -1797,6 +1814,9 @@ void overmap::draw(WINDOW *w, game *g, int z, int &cursx, int &cursy,
      } else if (omx == target.x && omy == target.y && ov == this && blink) {
       ter_color = c_red;
       ter_sym = '*';
+     } else if (horde_here) {
+      ter_color = c_magenta;
+      ter_sym = 'Z';
      } else {
       if (cur_ter >= num_ter_types || cur_ter < 0)
        debugmsg("Bad ter %d (%d, %d)", cur_ter, omx, omy);

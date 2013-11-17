@@ -3012,19 +3012,9 @@ void vehicle::damage_all (int dmg1, int dmg2, int type, const point &impact)
     if(g->u.controlling_vehicle && g->m.veh_at(g->u.posx, g->u.posy) == this) {
         g->add_msg("Your %s takes %d-%d damage", name.c_str(), dmg1, dmg2);
     }
-    bool spring = false;
-    for (int p = 0; p < parts.size(); p++) {
+    for (int p = parts.size() - 1; p >= 0; p--) {
         int distance = 1 + square_dist( parts[p].mount_dx, parts[p].mount_dy, impact.x, impact.y );
         if( distance > 1 && one_in( distance ) ) {
-            if (!spring && part_with_feature(p, "SPRING") >= 0) {
-                dmg1 = std::max(0, dmg1 - 100);
-                dmg2 = std::max(0, dmg2 - 100);
-                if(dmg2 == 0) { return; }
-                if(g->u.controlling_vehicle && g->m.veh_at(g->u.posx, g->u.posy) == this) {
-                    g->add_msg("The %s's spring reduces damage to %d-%d", name.c_str(), dmg1, dmg2);
-                }
-                spring = true;
-            }
             damage_direct (p, rng( dmg1, dmg2 ) / (distance * distance), type);
         }
     }
@@ -3821,4 +3811,8 @@ void vehicle::sort_parts() {
         parts[p].id.clear();
     }
     parts.swap(ptmp);
+    find_fuel_tanks();
+    find_exhaust();
+    find_horns();
+    find_lights();
 }

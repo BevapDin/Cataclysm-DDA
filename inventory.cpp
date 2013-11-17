@@ -599,17 +599,13 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
             // crafting
             if (furnlist[g->m.furn(x,y)].examine == &iexamine::toilet) {
                 // get water charges at location
-                std::vector<item> toiletitems = g->m.i_at(x,y);
-                int waterindex = -1;
-                for (int i = 0; i < toiletitems.size(); ++i){
-                    if (toiletitems[i].typeId() == "water"){
-                        waterindex = i;
+                std::vector<item> &toiletitems = g->m.i_at(x,y);
+                for(size_t i = 0; i < toiletitems.size(); ++i) {
+                    if(toiletitems[i].typeId() == "water" && toiletitems[i].charges > 0) {
+                        surround.push_back(item_from_surrounding(p, toiletitems[i]));
                         break;
                     }
                 }
-                if (waterindex >= 0 && toiletitems[waterindex].charges > 0){
-                    surround.push_back(item_from_surrounding(p, toiletitems[waterindex]));
-               }
             }
 
             int vpart = -1;

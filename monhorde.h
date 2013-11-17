@@ -51,6 +51,15 @@ struct monhorde {
   wandf = 0;
   flags = 0;
  }
+ monhorde(std::string ptype, int x, int y, int z) : type(ptype), posx(x), posy(y), posz(z) {
+  pop_normal = 0;
+  pop_master = 0;
+  targetx = 0;
+  targety = 0;
+  last_move = 0;
+  wandf = 0;
+  flags = 0;
+ }
  /**
   * Called when the horde does not move because it
   * has no current target.

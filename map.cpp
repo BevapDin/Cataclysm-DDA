@@ -1279,7 +1279,7 @@ inline bool obstacle_non_open_door(vehicle *veh, int part) {
             }
             if(a->second.has_flag(openable_flag)) {
                 if(!a->second.has_flag(obstacle_flag)) {
-                    debugmsg("vpart %s has OPENABLE but not OBSTACLE flag", a->first.c_str());
+                    continue;
                 }
                 openable_parts.insert(a->first);
             }

@@ -623,6 +623,26 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
     if(jo.has_member("category")) {
         new_item_template->category = jo.get_string("category");
     }
+    for(std::map<std::string, int>::iterator a = new_item_template->qualities.begin(); a != new_item_template->qualities.end(); ++a) {
+        std::ostringstream buffer;
+        buffer << "func:" << a->first << ":" << a->second;
+        const std::string id = buffer.str();
+        buffer.str(std::string());
+        if(!has_template(id)) {
+            itype *tt = new itype();
+            m_templates[id] = tt;
+            tt->id = id;
+            buffer << "Tool with " << a->first << "-" << a->second;
+            tt->name = buffer.str();
+        }
+        itype::functionality_t &fu = new_item_template->functionalityMap[id];
+        fu.time_modi = 1;
+        fu.charges_modi = 1;
+    }
+    new_item_template->qualities.clear();
+    if(jo.has_member("category")) {
+        new_item_template->category = jo.get_string("category");
+    }
 
     new_item_template->techniques = jo.get_tags("techniques");
 
