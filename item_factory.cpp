@@ -209,17 +209,12 @@ void Item_factory::init(){
     iuse_function_list["ADRENALINE_INJECTOR"] = &iuse::adrenaline_injector;
     iuse_function_list["AIRHORN"] = &iuse::airhorn;
     iuse_function_list["HOTPLATE"] = &iuse::hotplate;
-
-
-
     iuse_function_list["SIMPLE_ON"] = &iuse::simple_on;
     iuse_function_list["SIMPLE_OFF"] = &iuse::simple_off;
     iuse_function_list["WOOD_GAS"] = &iuse::wood_gas;
     iuse_function_list["TOOL_BELT"] = &iuse::tool_belt;
     iuse_function_list["QUIVER"] = &iuse::quiver;
-
-
-
+    iuse_function_list["DOLLCHAT"] = &iuse::talking_doll;
     // MACGUFFINS
     iuse_function_list["MCG_NOTE"] = &iuse::mcg_note;
     // ARTIFACTS
