@@ -12,6 +12,13 @@
 #include "crafting_inventory_t.h"
 #include <cassert>
 
+#ifdef _MSC_VER
+#include <math.h>
+#define ISNAN _isnan
+#else
+#define ISNAN std::isnan
+#endif
+
 /**
  * Creates a blank veh_interact window.
  */
@@ -1112,7 +1119,7 @@ void veh_interact::countDurability()
         if(part.hp < part_dur)
         {
             double damageRatio = (double) part.hp / part_dur;
-            if (!std::isnan(damageRatio) && (damageRatio < mostDamaged))
+            if (!ISNAN(damageRatio) && (damageRatio < mostDamaged))
             {
                 mostDamaged = damageRatio;
                 mostDamagedPart = it;
