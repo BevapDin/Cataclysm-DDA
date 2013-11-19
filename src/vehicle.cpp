@@ -2882,12 +2882,12 @@ void vehicle::gain_moves (int mp)
                         }
                     }
                 }
-                if(!tmpcontainer.contents.empty()) {
-                    if(vp.items.empty()) {
-                        vp.items.push_back(tmpcontainer.contents[0]);
-                    } else {
-                        vp.items[0] = tmpcontainer.contents[0];
-                    }
+                if(tmpcontainer.contents.empty()) {
+                    vp.items.clear();
+                } else if(vp.items.empty()) {
+                    vp.items.push_back(tmpcontainer.contents[0]);
+                } else {
+                    vp.items[0] = tmpcontainer.contents[0];
                 }
             }
         }
