@@ -600,28 +600,28 @@ void game::cleanup_at_end(){
 // Returns true if game is over (death, saved, quit, etc)
 bool game::do_turn()
 {
- if (is_game_over()) {
-  cleanup_at_end();
-  return true;
- }
-// Actual stuff
- gamemode->per_turn(this);
- turn.increment();
- process_events();
- process_missions();
- if (turn.hours() == 0 && turn.minutes() == 0 && turn.seconds() == 0) // Midnight!
-  cur_om->process_mongroups();
+    if (is_game_over()) {
+        cleanup_at_end();
+        return true;
+    }
+    // Actual stuff
+    gamemode->per_turn(this);
+    turn.increment();
+    process_events();
+    process_missions();
+    if (turn.hours() == 0 && turn.minutes() == 0 && turn.seconds() == 0) // Midnight!
+        cur_om->process_mongroups();
 
-// Check if we've overdosed... in any deadly way.
- if (u.stim > 250) {
-  add_msg(_("You have a sudden heart attack!"));
-  u.add_memorial_log(_("Died of a drug overdose."));
-  u.hp_cur[hp_torso] = 0;
- } else if (u.stim < -200 || u.pkill > 240) {
-  add_msg(_("Your breathing stops completely."));
-  u.add_memorial_log(_("Died of a drug overdose."));
-  u.hp_cur[hp_torso] = 0;
- }
+    // Check if we've overdosed... in any deadly way.
+    if (u.stim > 250) {
+        add_msg(_("You have a sudden heart attack!"));
+        u.add_memorial_log(_("Died of a drug overdose."));
+        u.hp_cur[hp_torso] = 0;
+    } else if (u.stim < -200 || u.pkill > 240) {
+        add_msg(_("Your breathing stops completely."));
+        u.add_memorial_log(_("Died of a drug overdose."));
+        u.hp_cur[hp_torso] = 0;
+    }
     // Check if we're starving or have starved
     if (u.hunger >= 3000){
         if (u.hunger >= 6000){
@@ -666,195 +666,213 @@ bool game::do_turn()
         }
     }
 
- if (turn % 50 == 0) { // Hunger, thirst, & fatigue up every 5 minutes
-  if ((!u.has_trait("LIGHTEATER") || !one_in(3)) &&
-      (!u.has_bionic("bio_recycler") || turn % 300 == 0))
-   u.hunger++;
-  if ((!u.has_bionic("bio_recycler") || turn % 100 == 0) &&
-      (!u.has_trait("PLANTSKIN") || !one_in(5)))
-   u.thirst++;
-  // Fatigue caps at slightly after the point where characters will fall asleep without player input
-  if(u.fatigue < 1050){
-  u.fatigue++;
-  }
-  if (u.fatigue == 192 && !u.has_disease("lying_down") && !u.has_disease("sleep")) {
-      if (u.activity.type == ACT_NULL){
-     add_msg(_("You're feeling tired.  %s to lie down for sleep."),
-             press_x(ACTION_SLEEP).c_str());
-      } else {
-    cancel_activity_query(_("You're feeling tired."));
-  }
-  }
-  if (u.stim < 0)
-   u.stim++;
-  if (u.stim > 0)
-   u.stim--;
-  if (u.pkill > 0)
-   u.pkill--;
-  if (u.pkill < 0)
-   u.pkill++;
-  if (u.has_bionic("bio_solar") && is_in_sunlight(u.posx, u.posy))
-   u.charge_power(1);
- }
- if (turn % 300 == 0) { // Pain up/down every 30 minutes
-  if (u.pain > 0)
-   u.pain -= 1 + int(u.pain / 10);
-  else if (u.pain < 0)
-   u.pain++;
-// Mutation healing effects
-  if (u.has_trait("FASTHEALER2") && one_in(5))
-   u.healall(1);
-  if (u.has_trait("REGEN") && one_in(2))
-   u.healall(1);
-  if (u.has_trait("ROT2") && one_in(5))
-   u.hurtall(1);
-  if (u.has_trait("ROT3") && one_in(2))
-   u.hurtall(1);
+    #if ENABLE_HORDES
+    spawn_horde_members();
+    #endif
 
-  if (u.radiation > 1 && one_in(3))
-   u.radiation--;
-  u.get_sick(this);
- }
-
-// Auto-save if autosave is enabled
- if (OPTIONS["AUTOSAVE"] &&
-     turn % ((int)OPTIONS["AUTOSAVE_TURNS"] * 10) == 0)
-     autosave();
-
- update_weather();
-
-// The following happens when we stay still; 10/40 minutes overdue for spawn
- if ((!u.has_trait("INCONSPICUOUS") && turn > nextspawn +  100) ||
-     ( u.has_trait("INCONSPICUOUS") && turn > nextspawn +  400)   ) {
-  spawn_mon(-1 + 2 * rng(0, 1), -1 + 2 * rng(0, 1));
-  nextspawn = turn;
- }
- 
-#if ENABLE_HORDES
- spawn_horde_members();
-#endif
-
- if(u.in_vehicle && u.controlling_vehicle) {
-    vehicle *veh = m.veh_at(u.posx, u.posy);
-    if(veh != 0) {
-        rl_vec2d offset;
-        if(veh->skidding)
-            offset = veh->move_vec();
-        else
-            offset = veh->face_vec();
-        offset = offset.normalized();
-        // Have a offset of 0 at velocity = 10km/h,
-        // have a offset of 1 at velocity = 100km/h
-        // 0.0161 = factor for calculation of speed in km/h
-        offset = offset * (((veh->velocity * 0.0161f) - 10.0f) / 90.0f);
-        offset.x = std::min(std::max(offset.x, -1.0f), 1.0f);
-        offset.y = std::min(std::max(offset.y, -1.0f), 1.0f);
-        int offx = getmaxx(w_terrain) / 2 - 5;
-        int offy = getmaxy(w_terrain) / 2 - 5;
-        offx = offx * offset.x;
-        offy = offy * offset.y;
-        if(abs(u.view_offset_x - offx) > 1) {
-            u.view_offset_x = offx;
-        }
-        if(abs(u.view_offset_y - offy) > 1) {
-            u.view_offset_y = offy;
+    if(u.in_vehicle && u.controlling_vehicle) {
+        vehicle *veh = m.veh_at(u.posx, u.posy);
+        if(veh != 0) {
+            rl_vec2d offset;
+            if(veh->skidding)
+                offset = veh->move_vec();
+            else
+                offset = veh->face_vec();
+            offset = offset.normalized();
+            // Have a offset of 0 at velocity = 10km/h,
+            // have a offset of 1 at velocity = 100km/h
+            // 0.0161 = factor for calculation of speed in km/h
+            offset = offset * (((veh->velocity * 0.0161f) - 10.0f) / 90.0f);
+            offset.x = std::min(std::max(offset.x, -1.0f), 1.0f);
+            offset.y = std::min(std::max(offset.y, -1.0f), 1.0f);
+            int offx = getmaxx(w_terrain) / 2 - 5;
+            int offy = getmaxy(w_terrain) / 2 - 5;
+            offx = offx * offset.x;
+            offy = offy * offset.y;
+            if(abs(u.view_offset_x - offx) > 1) {
+                u.view_offset_x = offx;
+            }
+            if(abs(u.view_offset_y - offy) > 1) {
+                u.view_offset_y = offy;
+            }
         }
     }
- }
 
- process_activity();
- if(u.moves > 0) {
-     while (u.moves > 0) {
-          cleanup_dead();
-          if (!u.has_disease("sleep") && u.activity.type == ACT_NULL)
-              draw();
-
-          if(handle_action()) {
-              ++moves_since_last_save;
-              u.action_taken();
-          }
-
-          if (is_game_over()) {
-              cleanup_at_end();
-              return true;
-          }
-     }
- } else {
-     handle_key_blocking_activity();
- }
- update_scent();
- m.vehmove(this);
- m.process_fields(this);
- m.process_active_items(this);
- m.step_in_field(u.posx, u.posy, this);
- 
- for(int i = 0; i < 100; i++) {
-  int x = rng(0, SEEX * MAPSIZE - 1);
-  int y = rng(0, SEEY * MAPSIZE - 1);
-  std::vector<item> &items = m.i_at(x, y);
-  if(!items.empty()) {
-   map::check_spoiled(items);
-   break;
-  }
- }
-
- if(turn % HOURS(1) == 0 && !u.worn.empty() && one_in(10)) {
-    std::vector<item*> items[6];
-    for(std::vector<item>::iterator a = u.worn.begin(); a != u.worn.end(); ++a) {
-        item &it = *a;
-        if(it.damage >= -1 && it.damage < 5) {
-            items[it.damage + 1].push_back(&it);
-        }
-    }
-    std::vector<item*> item_to_wear;
-    for(int i = 0; i < 6; i++) {
-        item_to_wear.insert(item_to_wear.begin(), items[i].begin(), items[i].end());
-        if(item_to_wear.size() >= 3) {
+    for(int i = 0; i < 100; i++) {
+        int x = rng(0, SEEX * MAPSIZE - 1);
+        int y = rng(0, SEEY * MAPSIZE - 1);
+        std::vector<item> &items = m.i_at(x, y);
+        if(!items.empty()) {
+            map::check_spoiled(items);
             break;
         }
     }
-    if(item_to_wear.size() > 0) {
-        int i = rng(0, item_to_wear.size() - 1);
-        item &it = *(item_to_wear[i]);
-        it.damage++;
-        if(it.damage >= 5) {
-            add_msg("Your %s wears completly away", it.tname(this).c_str());
-            assert(!u.worn.empty());
-            const int index = &it - &(u.worn[0]);
-            assert(index >= 0 && index < u.worn.size());
-            u.worn.erase(u.worn.begin() + index);
-        } else {
-            add_msg("Your %s wears further", it.tname(this).c_str());
+
+    if(turn % HOURS(1) == 0 && !u.worn.empty() && one_in(10)) {
+        std::vector<item*> items[6];
+        for(std::vector<item>::iterator a = u.worn.begin(); a != u.worn.end(); ++a) {
+            item &it = *a;
+            if(it.damage >= -1 && it.damage < 5) {
+                items[it.damage + 1].push_back(&it);
+            }
+        }
+        std::vector<item*> item_to_wear;
+        for(int i = 0; i < 6; i++) {
+            item_to_wear.insert(item_to_wear.begin(), items[i].begin(), items[i].end());
+            if(item_to_wear.size() >= 3) {
+                break;
+            }
+        }
+        if(item_to_wear.size() > 0) {
+            int i = rng(0, item_to_wear.size() - 1);
+            item &it = *(item_to_wear[i]);
+            it.damage++;
+            if(it.damage >= 5) {
+                add_msg("Your %s wears completly away", it.tname(this).c_str());
+                assert(!u.worn.empty());
+                const int index = &it - &(u.worn[0]);
+                assert(index >= 0 && index < u.worn.size());
+                u.worn.erase(u.worn.begin() + index);
+            } else {
+                add_msg("Your %s wears further", it.tname(this).c_str());
+            }
         }
     }
- }
 
-#if ENABLE_HORDES
- spawn_horde();
- move_hordes();
-#endif
- monmove();
- update_stair_monsters();
- u.reset(this);
- u.process_active_items(this);
- u.suffer(this);
+    if (turn % 50 == 0) { // Hunger, thirst, & fatigue up every 5 minutes
+        if ((!u.has_trait("LIGHTEATER") || !one_in(3)) &&
+            (!u.has_bionic("bio_recycler") || turn % 300 == 0)) {
+            u.hunger++;
+        }
+        if ((!u.has_bionic("bio_recycler") || turn % 100 == 0) &&
+            (!u.has_trait("PLANTSKIN") || !one_in(5))) {
+            u.thirst++;
+        }
+        // Don't increase fatigue if sleeping or trying to sleep or if we're at the cap.
+        if (u.fatigue < 1050 && !(u.has_disease("sleep") || u.has_disease("lying_down"))) {
+            u.fatigue++;
+        }
+        if (u.fatigue == 192 && !u.has_disease("lying_down") && !u.has_disease("sleep")) {
+            if (u.activity.type == ACT_NULL) {
+                add_msg(_("You're feeling tired.  %s to lie down for sleep."),
+                        press_x(ACTION_SLEEP).c_str());
+            } else {
+                cancel_activity_query(_("You're feeling tired."));
+            }
+        }
+        if (u.stim < 0) {
+            u.stim++;
+        }
+        if (u.stim > 0) {
+            u.stim--;
+        }
+        if (u.pkill > 0) {
+            u.pkill--;
+        }
+        if (u.pkill < 0) {
+            u.pkill++;
+        }
+        if (u.has_bionic("bio_solar") && is_in_sunlight(u.posx, u.posy)) {
+            u.charge_power(1);
+        }
+    }
 
- if (levz >= 0 && !u.is_underwater()) {
-  weather_effect weffect;
-  (weffect.*(weather_data[weather].effect))(this);
- }
+    if (turn % 300 == 0) { // Pain up/down every 30 minutes
+        if (u.pain > 0) {
+            u.pain -= 1 + int(u.pain / 10);
+        } else if (u.pain < 0) {
+            u.pain++;
+        }
+        // Mutation healing effects
+        if (u.has_trait("FASTHEALER2") && one_in(5)) {
+            u.healall(1);
+        }
+        if (u.has_trait("REGEN") && one_in(2)) {
+            u.healall(1);
+        }
+        if (u.has_trait("ROT2") && one_in(5)) {
+            u.hurtall(1);
+        }
+        if (u.has_trait("ROT3") && one_in(2)) {
+            u.hurtall(1);
+        }
 
- if (u.has_disease("sleep") && int(turn) % 300 == 0) {
-  draw();
-  refresh();
- }
+        if (u.radiation > 1 && one_in(3)) {
+            u.radiation--;
+        }
+        u.get_sick( this );
+    }
 
- u.update_bodytemp(this);
+    // Auto-save if autosave is enabled
+    if (OPTIONS["AUTOSAVE"] &&
+        turn % ((int)OPTIONS["AUTOSAVE_TURNS"] * 10) == 0) {
+        autosave();
+    }
 
- rustCheck();
- if (turn % 10 == 0)
-  u.update_morale();
- return false;
+    update_weather();
+
+    // The following happens when we stay still; 10/40 minutes overdue for spawn
+    if ((!u.has_trait("INCONSPICUOUS") && turn > nextspawn +  100) ||
+        ( u.has_trait("INCONSPICUOUS") && turn > nextspawn +  400)   ) {
+        spawn_mon(-1 + 2 * rng(0, 1), -1 + 2 * rng(0, 1));
+        nextspawn = turn;
+    }
+
+    process_activity();
+    if(u.moves > 0) {
+        while (u.moves > 0) {
+            cleanup_dead();
+            if (!u.has_disease("sleep") && u.activity.type == ACT_NULL) {
+                draw();
+            }
+
+            if(handle_action()) {
+                ++moves_since_last_save;
+                u.action_taken();
+            }
+
+            if (is_game_over()) {
+                cleanup_at_end();
+                return true;
+            }
+        }
+    } else {
+        handle_key_blocking_activity();
+    }
+    update_scent();
+    m.vehmove(this);
+    m.process_fields(this);
+    m.process_active_items(this);
+    m.step_in_field(u.posx, u.posy, this);
+
+    #if ENABLE_HORDES
+    spawn_horde();
+    move_hordes();
+    #endif
+
+    monmove();
+    update_stair_monsters();
+    u.reset(this);
+    u.process_active_items(this);
+    u.suffer(this);
+
+    if (levz >= 0 && !u.is_underwater()) {
+        weather_effect weffect;
+        (weffect.*(weather_data[weather].effect))(this);
+    }
+
+    if (u.has_disease("sleep") && int(turn) % 300 == 0) {
+        draw();
+        refresh();
+    }
+
+    u.update_bodytemp(this);
+
+    rustCheck();
+    if (turn % 10 == 0) {
+        u.update_morale();
+    }
+    return false;
 }
 
 void game::rustCheck()
@@ -2757,7 +2775,7 @@ void game::load(std::string worldname, std::string name)
  worldpath += "/";
  std::stringstream playerfile;
  playerfile << worldpath << name << ".sav";
- fin.open(playerfile.str().c_str());
+ fin.open(playerfile.str().c_str(), std::ifstream::in | std::ifstream::binary);
 // First, read in basic game state information.
  if (!fin.is_open()) {
   dbg(D_ERROR) << "game:load: No save game exists!";
@@ -2808,7 +2826,7 @@ void game::load(std::string worldname, std::string name)
  load_master(worldname);
  update_map(u.posx, u.posy);
  set_adjacent_overmaps(true);
- MAPBUFFER.save();
+ MAPBUFFER.set_dirty();
  draw();
 }
 
@@ -2979,8 +2997,23 @@ void game::write_memorial_file() {
         }
     }
 
-    std::string memorial_file_path = string_format("memorial/%s-%s.txt",
-            u.name.c_str(), timestamp.c_str());
+    /* Remove non-ASCII glyphs from character names - unicode symbols are not
+     * valid in filenames. */
+    std::stringstream player_name;
+    for(int index = 0; index < u.name.size(); index++) {
+        if((unsigned char)u.name[index] <= '~') {
+            player_name << u.name[index];
+        }
+    }
+    if(player_name.str().length() > 0) {
+        //Separate name and timestamp
+        player_name << '-';
+    }
+
+    //Omit the name if too many unusable characters stripped
+    std::string memorial_file_path = string_format("memorial/%s%s.txt",
+            player_name.str().length() <= (u.name.length() / 5) ? "" : player_name.str().c_str(),
+            timestamp.c_str());
 
     std::ofstream memorial_file;
     memorial_file.open(memorial_file_path.c_str());
@@ -3449,7 +3482,7 @@ Current turn: %d; Next spawn %d.\n\
       }
   }
   break;
-  
+
   #ifdef LUA
       case 18: {
           std::string luacode = string_input_popup(_("Lua:"), 60, "");
@@ -6255,8 +6288,8 @@ void game::open()
                 if (!in_veh || in_veh != veh){
                     add_msg(_("That %s can only opened from the inside."), name);
                     return;
-                } 
-            } 
+                }
+            }
             if (veh->parts[openable].open) {
                 add_msg(_("That %s is already open."), name);
                 u.moves += 100;
@@ -6317,8 +6350,8 @@ void game::close()
                 if (!in_veh || in_veh != veh){
                     add_msg(_("That %s can only closed from the inside."), name);
                     return;
-                } 
-            } 
+                }
+            }
             if (veh->parts[openable].open) {
                 veh->close(openable);
                 didit = true;
@@ -10071,7 +10104,7 @@ void game::reload(char chInput)
 
      // See if the gun is fully loaded.
      if (it->charges == it->clip_size()) {
-         
+
          // Also see if the spare magazine is loaded
          bool magazine_isfull = true;
          item contents;
@@ -10079,7 +10112,7 @@ void game::reload(char chInput)
          for (int i = 0; i < it->contents.size(); i++)
          {
              contents = it->contents[i];
-             if ((contents.is_gunmod() && 
+             if ((contents.is_gunmod() &&
                   (contents.typeId() == "spare_mag" &&
                    contents.charges < (dynamic_cast<it_gun*>(it->type))->clip)) ||
                 (contents.has_flag("AUX_MODE") &&
@@ -11027,29 +11060,73 @@ void game::plmove(int dx, int dy)
   if (m.has_flag("SWIMMABLE", x, y))
     u.drench(this, 40, mfb(bp_feet) | mfb(bp_legs));
 
-  // List items here
-  if (!m.has_flag("SEALED", x, y)) {
-    if (!u.has_disease("blind") && m.i_at(x, y).size() <= 3 && m.i_at(x, y).size() != 0) {
-      // TODO: Rewrite to be localizable
-      std::string buff = _("You see here ");
-
-      for (int i = 0; i < m.i_at(x, y).size(); i++) {
-        buff += m.i_at(x, y)[i].tname(this);
-
-        if (i + 2 < m.i_at(x, y).size())
-          buff += _(", ");
-        else if (i + 1 < m.i_at(x, y).size())
-          buff += _(", and ");
-
-      }
-
-      buff += _(".");
-
-      add_msg(buff.c_str());
-    } else if (m.i_at(x, y).size() != 0) {
-      add_msg(_("There are many items here."));
+    // List items here
+    if (!m.has_flag("SEALED", x, y)) {
+        if (u.has_disease("blind") && !m.i_at(x, y).empty()) {
+            add_msg(_("There's something here, but you can't see what it is."));
+        } else if (!m.i_at(x, y).empty()) {
+            std::vector<std::string> names;
+            std::vector<size_t> counts;
+            names.push_back(m.i_at(x, y)[0].tname(this));
+            if (m.i_at(x, y)[0].count_by_charges()) {
+                counts.push_back(m.i_at(x, y)[0].charges);
+            } else {
+                counts.push_back(1);
+            }
+            for (int i = 1; i < m.i_at(x, y).size(); i++) {
+                item& tmpitem = m.i_at(x, y)[i];
+                std::string next = tmpitem.tname(this);
+                bool got_it = false;
+                for (int i = 0; i < names.size(); ++i) {
+                    if (next == names[i]) {
+                        if (tmpitem.count_by_charges()) {
+                            counts[i] += tmpitem.charges;
+                        } else {
+                            counts[i] += 1;
+                        }
+                        got_it = true;
+                        break;
+                    }
+                }
+                if (!got_it) {
+                    names.push_back(next);
+                    if (tmpitem.count_by_charges()) {
+                        counts.push_back(tmpitem.charges);
+                    } else {
+                        counts.push_back(1);
+                    }
+                }
+                if (names.size() > 6) {
+                    break;
+                }
+            }
+            for (int i = 0; i < names.size(); ++i) {
+                std::string fmt;
+                if (counts[i] == 1) {
+                    //~ one item (e.g. "a dress")
+                    fmt = _("a %s");
+                    names[i] = string_format(fmt, names[i].c_str());
+                } else {
+                    //~ number of items: "<number> <item>"
+                    fmt = ngettext("%1$d %2$s", "%1$d %2$ss", counts[i]);
+                    names[i] = string_format(fmt, counts[i], names[i].c_str());
+                }
+            }
+            if (names.size() == 1) {
+                add_msg(_("You see here %s."), names[0].c_str());
+            } else if (names.size() == 2) {
+                add_msg(_("You see here %s and %s."),
+                        names[0].c_str(), names[1].c_str());
+            } else if (names.size() == 3) {
+                add_msg(_("You see here %s, %s, and %s."), names[0].c_str(),
+                        names[1].c_str(), names[2].c_str());
+            } else if (names.size() < 7) {
+                add_msg(_("There are %d items here."), names.size());
+            } else {
+                add_msg(_("There are many items here."));
+            }
+        }
     }
-  }
 
   if (veh1 && veh1->part_with_feature(vpart1, "CONTROLS") >= 0
            && u.in_vehicle)

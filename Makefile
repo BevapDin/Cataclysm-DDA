@@ -67,7 +67,7 @@ W32TARGET = cataclysm.exe
 BINDIST_DIR = bindist
 BUILD_DIR = $(CURDIR)
 SRC_DIR = src
-LIB_DIR = src/lib
+LUA_DIR = lua
 LOCALIZE = 1
 
 # tiles object directories are because gcc gets confused
@@ -188,9 +188,9 @@ ifdef LUA
   endif
 
   CXXFLAGS += -DLUA
-  LUA_DEPENDENCIES = $(LIB_DIR)/catalua/catabindings.cpp
-  BINDIST_EXTRAS += $(LIB_DIR)/catalua/catalua.lua
-  BINDIST_EXTRAS += $(LIB_DIR)/catalua/class_definitions.lua
+  LUA_DEPENDENCIES = $(LUA_DIR)/catabindings.cpp
+  BINDIST_EXTRAS  += $(LUA_DIR)/autoexec.lua
+  BINDIST_EXTRAS  += $(LUA_DIR)/class_definitions.lua
 endif
 
 ifdef TILES
@@ -337,8 +337,8 @@ $(ODIR)/pg-%.o: %.cpp
 
 version.cpp: version
 
-$(LIB_DIR)/catalua/catabindings.cpp: $(LIB_DIR)/catalua/class_definitions.lua $(LIB_DIR)/catalua/generate_bindings.lua
-	cd $(LIB_DIR)/catalua && lua generate_bindings.lua
+$(LUA_DIR)/catabindings.cpp: $(LUA_DIR)/class_definitions.lua $(LUA_DIR)/generate_bindings.lua
+	cd $(LUA_DIR) && lua generate_bindings.lua
 
 $(SRC_DIR)/catalua.cpp: $(LUA_DEPENDENCIES)
 
@@ -349,8 +349,7 @@ clean: clean-tests
 	rm -rf $(TARGET) $(TILESTARGET) $(W32TILESTARGET) $(W32TARGET)
 	rm -rf $(ODIR) $(W32ODIR) $(W32ODIRTILES)
 	rm -rf $(BINDIST) $(W32BINDIST) $(BINDIST_DIR)
-	rm -f $(SRC_DIR)/version.h $(LIB_DIR)/catalua/catabindings.cpp
-	rm -f version.h catalua/catabindings.cpp # old files
+	rm -f $(SRC_DIR)/version.h $(LUA_DIR)/catabindings.cpp
 
 distclean:
 	rm -rf $(BINDIST_DIR)
