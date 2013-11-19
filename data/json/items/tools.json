@@ -1653,29 +1653,6 @@
   },
 
   {
-    "id": "mine_bomb",
-    "type": "TOOL",
-    "symbol": "*",
-    "color": "green",
-    "name": "mine bomb",
-    "description": "This is a landmine with a simple timer. Upon activation it takes thirteen turns before it explodes; throwing it would be a good idea.",
-    "price": 2400,
-    "material": "iron",
-    "weight": 13800,
-    "volume": 2,
-    "bashing": 6,
-    "cutting": 0,
-    "to_hit": -1,
-    "max_charges": 0,
-    "initial_charges": 0,
-    "charges_per_use": 0,
-    "turns_per_charge": 0,
-    "ammo": "NULL",
-    "revert_to": "null",
-    "use_action": "MINE_BOMB"
-  },
-
-  {
     "id": "mine_bomb_act",
     "type": "TOOL",
     "symbol": "*",

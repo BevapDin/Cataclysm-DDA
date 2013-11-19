@@ -1634,6 +1634,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1655,6 +1656,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 100
     },
     {   "type" : "AMMO",
@@ -1676,6 +1678,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1697,6 +1700,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1718,6 +1722,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1739,6 +1744,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1760,6 +1766,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1781,6 +1788,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 50
     },
     {   "type" : "AMMO",
@@ -1802,6 +1810,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 50
     },
     {   "type" : "AMMO",
@@ -1823,6 +1832,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1844,6 +1854,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1865,6 +1876,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1886,6 +1898,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1907,6 +1920,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1928,6 +1942,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -1949,6 +1964,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 20
     },
     {   "type" : "AMMO",
@@ -2285,6 +2301,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 200,
+        "category" : "chems",
         "effects" : ["COOKOFF"]
     },
     {   "type" : "AMMO",
@@ -2751,6 +2768,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 200
     },
     {
@@ -2937,6 +2955,30 @@
         "count" : 1,
         "stack_size" : 2,
         "effects" : ["MININUKE_MOD"]
+    },
+    {   "type" : "AMMO",
+        "id" : "landmine_mod",
+        "price" : 1800,
+        "name" : "modified landmine",
+        "symbol" : "*",
+        "color" : "red",
+        "description" : "A heavy modified handheld landmine. Intended to be fired from a sepcialized launcher, its case has been cut down and it has been rigged to explode on impact. While it is now somewhat lighter than before, it can no longer be triggered manually.",
+        "material" : "plastic",
+        "volume" : 3,
+        "weight" : 3816,
+        "bashing" : 8,
+        "cutting" : 0,
+        "to_hit" : 0,
+        "ammo_type" : "mininuke_mod",
+        "casing" : "NULL",
+        "damage" : 14,
+        "pierce" : 0,
+        "range" : 0,
+        "dispersion" : 0,
+        "recoil" : 0,
+        "count" : 1,
+        "stack_size" : 2,
+        "effects" : ["EXPLOSIVE"]
     },
     {   "type" : "AMMO",
         "id" : "20x66_shot",
@@ -3221,6 +3263,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 30
     }
 ]
