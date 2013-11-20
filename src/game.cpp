@@ -11775,6 +11775,11 @@ void game::vertical_move(int movez, bool force) {
 
  set_adjacent_overmaps(true);
  refresh_all();
+// Set the scent map to 0
+ for (int i = 0; i < SEEX * MAPSIZE; i++) {
+  for (int j = 0; j < SEEX * MAPSIZE; j++)
+   grscent[i][j] = 0;
+ }
 }
 
 
