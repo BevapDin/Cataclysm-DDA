@@ -4377,7 +4377,7 @@
     "functions": [ [ "func:shovel" , 2 ] ],
     "use_action": "DIG"
   },
-  
+
   {
     "id": "primitive_knife",
     "type": "TOOL",
@@ -4830,7 +4830,7 @@
     "category": "food",
     "use_action": "DEJAR"
   },
-  
+
    {
     "id": "bag_hflesh_vac",
     "type": "TOOL",
@@ -4947,7 +4947,7 @@
     "revert_to": "null",
     "use_action": "DOLLCHAT"
   },
-  
+
   {
     "id": "creepy_doll",
     "type": "TOOL",
@@ -5676,7 +5676,8 @@
     "description": "This stout combat knife features a steel guard to protect the user's knuckles. The guard can also be used for striking or blocking, and the knife can also be used to butcher corpses.",
     "price": 110,
     "material": ["steel", "wood"],
-    "techniques": ["STAB", "WBLOCK_1"],
+    "flags": "STAB",
+    "techniques": ["WBLOCK_1"],
     "weight": 608,
     "volume": 2,
     "bashing": 6,
