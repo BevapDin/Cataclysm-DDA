@@ -1,5 +1,26 @@
 #! /bin/bash
 
+check_monsters_groups() {
+    sort | \
+    uniq | \
+	while read monster ; do
+		if ! grep -Eqe '"name" *: *"'"$monster"'"' data/json/monstergroups.json ; then
+			echo "Unknown monster group $monster"
+		fi
+	done
+}
+
+check_monsters() {
+    sort | \
+    uniq | \
+	while read monster ; do
+		if ! grep -Eqe '"id" *: *"'"$monster"'"' data/json/monsters.json ; then
+			echo "Unknown monster $monster"
+		fi
+	done
+}
+
+
 grep add_spawn src/*.cpp | \
 	sed -n '
 		s#.*add_spawn *( *\"##
@@ -7,28 +28,50 @@ grep add_spawn src/*.cpp | \
 		s#".*##
 		p
 	' | \
-	sort | \
-	uniq | \
-	while read monster ; do
-		if ! grep -Eqe '"id" *: *"'"$monster"'"' data/json/monsters.json ; then
-			echo "Unknown monster $monster"
-		fi
-	done
+    check_monsters
 
 grep place_spawns src/*.cpp | \
+    sed -n '
+        s#.*place_spawns *([^"]*\"##
+        T
+        s#".*##
+        p
+    ' | \
+    check_monsters_groups
+
+grep GetMType src/*.cpp | \
+    sed -n '
+        s#.*GetMType *( *\"##
+        T
+        s#".*##
+        p
+    ' | \
+    check_monsters
+
+grep \"mon_ src/*.cpp | \
+    sed -n '
+        s#.*\"mon_#mon_#
+        T
+        s#".*##
+        p
+    ' | \
+    check_monsters
+
+grep \"GROUP_ src/*.cpp | \
+    sed '
+        s#.*\"GROUP_#GROUP_#
+        s#".*##
+    ' | \
+    check_monsters_groups
+
+grep mongroup src/*.cpp | \
 	sed -n '
-		s#.*place_spawns *([^"]*\"##
+		s#.*mongroup *([^"]*\"##
 		T
 		s#".*##
 		p
 	' | \
-	sort | \
-	uniq | \
-	while read monster ; do
-		if ! grep -Eqe '"name" *: *"'"$monster"'"' data/json/monstergroups.json ; then
-			echo "Unknown monster group $monster"
-		fi
-	done
+    check_monsters_groups
 
 grep -Ee '"monster" *:' -e '"default" *:' data/json/monstergroups.json | \
 	sed '
@@ -36,12 +79,6 @@ grep -Ee '"monster" *:' -e '"default" *:' data/json/monstergroups.json | \
 		s#^.*"default" *: *"##
 		s#".*##
 	' | \
-	sort | \
-	uniq | \
-	while read monster ; do
-		if ! grep -Eqe '"id" *: *"'"$monster"'"' data/json/monsters.json ; then
-			echo "Unknown monster $monster"
-		fi
-	done
+    check_monsters
 
 
