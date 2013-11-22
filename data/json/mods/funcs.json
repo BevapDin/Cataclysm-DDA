@@ -21,6 +21,20 @@
     "name": "any hammer",
     "description": "???"
   },
+  { "id":"func:hammering",
+    "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
+    "symbol": " ",
+    "color": "white",
+    "name": "something to hammer",
+    "description": "???"
+  },
+  { "id":"func:nailing",
+    "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
+    "symbol": " ",
+    "color": "white",
+    "name": "something to nail",
+    "description": "???"
+  },
   { "id":"func:screwdriver",
     "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
     "symbol": " ",

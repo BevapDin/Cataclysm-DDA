@@ -104,6 +104,9 @@ bool hordeNear(overmap &om, int gx, int gy, int mindist) {
 }
 
 void game::spawn_horde() {
+    if(turn < DAYS(10)) {
+        return;
+    }
 	if(cur_om->zh.size() >= 1 && !one_in(HOURS(36))) {
 		// Spawn a horde if there are  currently no hordes at all present
 		// otherwise only spawn once about ever 12 hours

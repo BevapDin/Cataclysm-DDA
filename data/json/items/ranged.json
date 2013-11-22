@@ -23,6 +23,7 @@
     "durability": 8,
     "burst": 5,
     "clip_size": 100,
+    "functionality" : [ ["func:nailing", 0.3, 1] ],
     "reload": 450
   },
         {

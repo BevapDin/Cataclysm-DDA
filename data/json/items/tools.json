@@ -182,7 +182,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:hammer", 1, -1 ] ],
+    "functions": [ [ "func:hammer", 1, -1 ], ["func:hammering"], ["func:nailing"] ],
     "use_action": "HAMMER"
   },
 
@@ -1067,6 +1067,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "functions": [ ["func:shovel"] ],
     "use_action": "DIG"
   },
 
@@ -1163,7 +1164,7 @@
     "turns_per_charge": 1,
     "ammo": "gasoline",
     "revert_to": "chainsaw_off",
-    "functions": [ [ "func:saw", 0.2 ], [ "func:ax", 0.2 ] ],
+    "functions": [ ["func:saw", 0.2], ["func:ax", 0.2] ],
     "use_action": "CHAINSAW_ON"
   },
 
@@ -3519,6 +3520,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "functions": [ [ "func:saw", 1, 1 ] ],
     "use_action": "LUMBER"
   },
 
@@ -3543,6 +3545,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "functions": [ ["func:ax"] ],
     "use_action": "LUMBER"
   },
 
@@ -4326,7 +4329,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions" : [ [ "func:hammer", 1.7 ] ],
+    "functions" : [ [ "func:hammer", 1.7 ], ["func:hammering", 1.7] , ["func:nailing", 1.7] ],
     "use_action": "HAMMER"
   },
 
@@ -4351,6 +4354,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "functions": [ ["func:ax", 2] ],
     "use_action": "LUMBER"
   },
 
@@ -4374,7 +4378,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "functions": [ [ "func:shovel" , 2 ] ],
+    "functions": [ ["func:shovel", 2] ],
     "use_action": "DIG"
   },
 
@@ -4425,6 +4429,7 @@
     "use_action": "DIG",
     "flags" : ["CHOP"],
     "to_hit": 1,
+    "functions": [ ["func:shovel", 1.05] ],
     "qualities": [["CUT", 1]]
   },
 

@@ -36,6 +36,8 @@ std::vector<std::string> file_finder::get_files_from_path(std::string extension,
     {
         root_path = ".";
     }
+    
+    const bool ext_starts_with_dot = (!extension.empty() && extension[0] == '.');
 
     std::stack<std::string> directories, tempstack;
     directories.push(root_path);
@@ -77,7 +79,10 @@ std::vector<std::string> file_finder::get_files_from_path(std::string extension,
                 }
                 // check to see if it is a file with the appropriate extension
                 std::string tmp = root_file->d_name;
-                if (tmp.find(extension.c_str()) != std::string::npos)
+                if (
+                    (ext_starts_with_dot && tmp.length() > extension.length() && tmp.compare(tmp.length() - extension.length(), extension.length(), extension) == 0)
+                    || (!ext_starts_with_dot && tmp.find(extension.c_str()) != std::string::npos)
+                )
                 {
                     // file with extension found! add to files list with full path
                     std::string fullpath = path + "/" + tmp;

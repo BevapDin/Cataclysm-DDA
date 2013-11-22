@@ -423,11 +423,20 @@ static hp_part use_healing_item(player *p, item *it, int normal_power, int head_
             }
         }
     } else { // Player--present a menu
+      if(p->activity.type != ACT_FIRSTAID) {
         healed = body_window(p, it, item_name, normal_bonus, head_bonus,
                              torso_bonus, bleed, bite, infect, force);
-        if (healed == num_hp_parts) {
-            return healed;
-        }
+      }
+      // Brick healing if using a first aid kit for the first time.
+      // TODO: Base check on something other than the name.
+      if (item_name == "first aid kit" && p->activity.type != ACT_FIRSTAID) {
+          // Cancel and wait for activity completion.
+          return healed;
+      }
+      else if (p->activity.type == ACT_FIRSTAID) {
+        // Completed activity, extract body part from it.
+        healed = (hp_part)p->activity.values[0];
+      }
     }
     p->practice(g->turn, "firstaid", 8);
     int dam = 0;
@@ -486,12 +495,30 @@ static hp_part use_healing_item(player *p, item *it, int normal_power, int head_
 int iuse::bandage(player *p, item *it, bool t)
 {
     if( num_hp_parts != use_healing_item(p, it, 3, 1, 4, it->name, 90, 0, 0, false) ) {
+        if (it->type->id != "quikclot") {
+          // Make bandages and rags take arbitrarily longer than hemostatic powder.
+          p->moves -= 100;
+        }
         return it->type->charges_to_use();
     }
     return 0;
 }
 
 int iuse::firstaid(player *p, item *it, bool t)
+{
+    // Assign first aid long action.
+    int healed = use_healing_item(p, it, 14, 10, 18, it->name, 95, 99, 95, false);
+    if (healed != num_hp_parts) {
+      p->assign_activity(g, ACT_FIRSTAID, 6000 / (p->skillLevel("first aid") + 1), 0, it->invlet, it->name);
+      p->activity.values.push_back(healed);
+      p->moves = 0;
+    }
+
+    return 0;
+}
+
+// Used when finishing the first aid long action.
+int iuse::completefirstaid(player *p, item *it, bool t)
 {
     if( num_hp_parts != use_healing_item(p, it, 14, 10, 18, it->name, 95, 99, 95, false) ) {
         pkill(p, it, t);
@@ -4265,7 +4292,8 @@ int iuse::manhack(player *p, item *it, bool t)
      p->skillLevel("computer") < rng(0, 4)) {
   g->add_msg_if_player(p,_("You misprogram the manhack; it's hostile!"));
  } else {
-  m_manhack.friendly = -1;
+   g->add_msg_if_player(p,_("The manhack flies from your hand and surveys the area!"));
+   m_manhack.friendly = -1;
  }
  g->add_zombie(m_manhack);
  return 1;
@@ -4303,6 +4331,8 @@ int iuse::UPS_off(player *p, item *it, bool t)
   g->add_msg_if_player(p,_("You turn the power supply on."));
   if (p->is_wearing("goggles_nv"))
    g->add_msg_if_player(p,_("Your light amp goggles power on."));
+  if (p->is_wearing("optical_cloak"))
+   g->add_msg_if_player(p,_("Your optical cloak flickers as it becomes transparent."));
   if (p->worn.size() && p->worn[0].type->is_power_armor())
     g->add_msg_if_player(p, _("Your power armor engages."));
   it->make(itypes["UPS_on"]);
@@ -4328,6 +4358,8 @@ int iuse::UPS_on(player *p, item *it, bool t)
   g->add_msg_if_player(p,_("The UPS powers off with a soft hum."));
   if (p->worn.size() && p->worn[0].type->is_power_armor())
     g->add_msg_if_player(p, _("Your power armor disengages."));
+  if (p->is_wearing("optical_cloak"))
+   g->add_msg_if_player(p,_("Your optical cloak flickers for a moment as it becomes opaque."));
   it->make(itypes["UPS_off"]);
   it->active = false;
   return 0;
@@ -4343,6 +4375,9 @@ int iuse::adv_UPS_off(player *p, item *it, bool t)
   g->add_msg_if_player(p,_("You turn the power supply on."));
   if (p->is_wearing("goggles_nv")) {
    g->add_msg_if_player(p,_("Your light amp goggles power on."));
+  }
+  if (p->is_wearing("optical_cloak")) {
+   g->add_msg_if_player(p,_("Your optical cloak becomes transparent."));
   }
   if (p->worn.size() && p->worn[0].type->is_power_armor()) {
     g->add_msg_if_player(p, _("Your power armor engages."));
@@ -4369,6 +4404,8 @@ int iuse::adv_UPS_on(player *p, item *it, bool t)
   g->add_msg_if_player(p,_("The advanced UPS powers off with a soft hum."));
   if (p->worn.size() && p->worn[0].type->is_power_armor())
     g->add_msg_if_player(p, _("Your power armor disengages."));
+  if (p->is_wearing("optical_cloak"))
+   g->add_msg_if_player(p,_("Your optical cloak becomes opaque."));
   it->make(itypes["adv_UPS_off"]);
   it->active = false;
  }

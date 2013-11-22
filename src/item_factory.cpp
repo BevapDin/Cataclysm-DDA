@@ -638,7 +638,7 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
         fu.time_modi = 1;
         fu.charges_modi = 1;
     }
-    new_item_template->qualities.clear();
+//    new_item_template->qualities.clear();
     if(jo.has_member("category")) {
         new_item_template->category = jo.get_string("category");
     }

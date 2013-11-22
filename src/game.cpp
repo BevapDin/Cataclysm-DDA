@@ -31,6 +31,7 @@
 #include "action.h"
 #include "monstergenerator.h"
 #include "worldfactory.h"
+#include "construction.h"
 #include <map>
 #include <set>
 #include <algorithm>
@@ -118,7 +119,6 @@ void game::init_data()
     init_monitems();             // Set up the items monsters carry  (SEE monitemsdef.cpp)
     init_traps();                // Set up the trap types            (SEE trapdef.cpp)
     init_missions();             // Set up mission templates         (SEE missiondef.cpp)
-    init_construction();         // Set up constructables            (SEE construction.cpp)
     init_autosave();             // Set up autosave
     init_diseases();             // Set up disease lookup table
     init_savedata_translation_tables();
@@ -1161,6 +1161,19 @@ void game::process_activity()
 
     break;
 
+   case ACT_FIRSTAID:
+    {
+      item it = u.inv.item_by_letter(u.activity.invlet);
+      iuse tmp;
+      tmp.completefirstaid(&u, &it, false);
+      u.inv.remove_item_by_charges(u.activity.invlet, 1);
+      // Erase activity and values.
+      u.activity.type = ACT_NULL;
+      u.activity.values.clear();
+    }
+
+    break;
+
    case ACT_VEHICLE:
     complete_vehicle (this);
     break;
@@ -1227,7 +1240,8 @@ bool game::cancel_activity_or_ignore_query(const char* reason, ...) {
         _(" Stop crafting?"), _(" Stop disassembly?"),
         _(" Stop butchering?"), _(" Stop foraging?"),
         _(" Stop construction?"), _(" Stop construction?"),
-        _(" Stop pumping gas?"), _(" Stop training?")
+        _(" Stop pumping gas?"), _(" Stop training?"),
+        _(" Stop waiting?"), _(" Stop using first aid?")
     };
 
     std::string stop_message = s + stop_phrase[u.activity.type] +
@@ -1265,7 +1279,8 @@ bool game::cancel_activity_query(const char* message, ...)
         _(" Stop crafting?"), _(" Stop disassembly?"),
         _(" Stop butchering?"), _(" Stop foraging?"),
         _(" Stop construction?"), _(" Stop construction?"),
-        _(" Stop pumping gas?"), _(" Stop training?")
+        _(" Stop pumping gas?"), _(" Stop training?"),
+        _(" Stop waiting?"), _(" Stop using first aid?")
     };
 
     std::string stop_message = s + stop_phrase[u.activity.type];
@@ -1665,7 +1680,8 @@ void game::handle_key_blocking_activity() {
             u.activity.type == ACT_LONGCRAFT ||
             u.activity.type == ACT_REFILL_VEHICLE ||
             u.activity.type == ACT_WAIT ||
-            u.activity.type == ACT_WAIT_WEATHER
+            u.activity.type == ACT_WAIT_WEATHER ||
+            u.activity.type == ACT_FIRSTAID
         )
     ) {
         timeout(1);
@@ -4705,7 +4721,8 @@ bool game::sees_u(int x, int y, int &t)
  }
 
  return (!(u.has_active_bionic("bio_cloak") || u.has_active_bionic("bio_night") ||
-           u.has_artifact_with(AEP_INVISIBLE)) && m.sees(x, y, u.posx, u.posy, range, t));
+           u.has_active_optcloak() || u.has_artifact_with(AEP_INVISIBLE))
+           && m.sees(x, y, u.posx, u.posy, range, t));
 }
 
 bool game::u_see(int x, int y)
@@ -6086,12 +6103,25 @@ void game::emp_blast(int x, int y)
  if (mondex != -1) {
   monster &z = _active_monsters[mondex];
   if (z.has_flag(MF_ELECTRONIC)) {
-   add_msg(_("The EMP blast fries the %s!"), z.name().c_str());
-   int dam = dice(10, 10);
-   if (z.hurt(dam))
-    kill_mon(mondex); // TODO: Player's fault?
-   else if (one_in(6))
-    z.make_friendly();
+   // TODO: Add flag to mob instead.
+   if (z.type->id == "mon_turret" && one_in(3)) {
+     add_msg(_("The %s beeps erratically and deactivates!"), z.name().c_str());
+      remove_zombie(mondex);
+      m.spawn_item(x, y, "bot_turret", 1, 0, turn);
+   }
+   else if (z.type->id == "mon_manhack" && one_in(6)) {
+     add_msg(_("The %s flies erratically and drops from the air!"), z.name().c_str());
+     remove_zombie(mondex);
+     m.spawn_item(x, y, "bot_manhack", 1, 0, turn);
+   }
+   else {
+      add_msg(_("The EMP blast fries the %s!"), z.name().c_str());
+      int dam = dice(10, 10);
+      if (z.hurt(dam))
+        kill_mon(mondex); // TODO: Player's fault?
+      else if (one_in(6))
+        z.make_friendly();
+    }
   } else
    add_msg(_("The %s is unaffected by the EMP blast."), z.name().c_str());
  }
@@ -6667,6 +6697,7 @@ void game::use_item(char chInput)
   return;
  }
  last_action += ch;
+ refresh_all();
  u.use(this, ch);
 }
 
@@ -6677,7 +6708,6 @@ void game::use_wielded_item()
 
 bool game::choose_adjacent(std::string message, int &x, int &y)
 {
-    refresh_all();
     //~ appended to "Close where?" "Pry where?" etc.
     std::string query_text = message + _(" (Direction button)");
     mvwprintw(w_terrain, 0, 0, query_text.c_str());
@@ -11156,6 +11186,41 @@ bool game::plmove(int dx, int dy)
      return false;
     }
    }
+   else if (z.type->id == "mon_manhack") {
+    if (query_yn(_("Reprogram the manhack?"))) {
+      int choice = 0;
+      if (z.has_effect(ME_DOCILE))
+        choice = menu(true, _("Do what?"), _("Engage targets."), _("Deactivate."), NULL);
+      else
+        choice = menu(true, _("Do what?"), _("Follow me."), _("Deactivate."), NULL);
+      switch (choice) {
+      case 1:{
+        if (z.has_effect(ME_DOCILE)) {
+          z.rem_effect(ME_DOCILE);
+          if (one_in(3))
+            add_msg(_("The %s hovers momentarily as it surveys the area."), z.name().c_str());
+        }
+        else {
+          z.add_effect(ME_DOCILE, -1);
+          add_msg(_("The %s ."), z.name().c_str());
+          if (one_in(3))
+            add_msg(_("The %s lets out a whirring noise and starts to follow you."), z.name().c_str());
+        }
+        break;
+      }
+      case 2: {
+        remove_zombie(mondex);
+        m.spawn_item(x, y, "bot_manhack", 1, 0, turn);
+        break;
+      }
+      default: {
+        return false;
+      }
+      }
+      u.moves -= 100;
+    }
+    return false;
+  }
    z.move_to(this, u.posx, u.posy, true); // Force the movement even though the player is there right now.
    add_msg(_("You displace the %s."), z.name().c_str());
   }

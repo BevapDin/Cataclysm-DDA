@@ -18,3 +18,10 @@ If you defined it as "func:sinew" (and changed it to this for "plant_fiber", "th
 Also note that you should define a item in "funcs.json" with the id of your functionality (e.g. "func:thread"). This is needed as the program interprets the functionality as a item type, gets the item type template from the item_factory and uses this template to display the item name. The item_factory has a hack that creates item types starting with "func:" automaticly if there is no definition for it.
 But this looks not so good and in case of ammo (with is counted in charges) this becames ugly as the game looks for 50 x "func:thread" and assumes the "func:thread" objects are counted by item (that means not stacked). This also means that a stack of 50 sinew is recognized as 1 item instead of 50.
 To prevent this, one must define "func:thread" to be an ammo type.
+
+
+func:hammering: hammer, primitive_hammer, hatchet
+
+func:nailing: nailgun, hammer, primitive_hammer, hatchet
+
+func:hammer: hammer, primitive_hammer, hatchet, rock
