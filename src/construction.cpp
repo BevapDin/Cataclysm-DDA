@@ -656,7 +656,7 @@ void load_construction(JsonObject &jo)
         JsonArray ja = temp.next_array();
         while (ja.has_more()) {
             std::string name = ja.next_string();
-            tool_choices.push_back(component(name, 1));
+            tool_choices.push_back(component(name, -1));
         }
         con->tools.push_back(tool_choices);
     }

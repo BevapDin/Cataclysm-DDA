@@ -4,6 +4,9 @@ check_monsters_groups() {
     sort | \
     uniq | \
 	while read monster ; do
+		if [ "$monster" = 'GROUP_NULL' ] ; then
+			continue
+		fi
 		if ! grep -Eqe '"name" *: *"'"$monster"'"' data/json/monstergroups.json ; then
 			echo "Unknown monster group $monster"
 		fi
@@ -14,6 +17,9 @@ check_monsters() {
     sort | \
     uniq | \
 	while read monster ; do
+		if [ "$monster" = 'mon_null' ] ; then
+			continue
+		fi
 		if ! grep -Eqe '"id" *: *"'"$monster"'"' data/json/monsters.json ; then
 			echo "Unknown monster $monster"
 		fi

@@ -1146,8 +1146,6 @@ void vpart_range(vehicle *veh, int &part_begin, int &part_end, int dx, int dy) {
             break;
         }
     }
-    assert(part_begin >= 0);
-    assert(part_end <= veh->parts.size());
     assert(part_begin < part_end);
 }
 
