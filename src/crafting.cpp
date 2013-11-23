@@ -1006,31 +1006,43 @@ void draw_recipe_tabs(WINDOW *w, craft_cat tab,bool filtered)
 void game::pick_recipes(crafting_inventory_t& crafting_inv, std::vector<recipe*> &current,
                         std::vector<bool> &available, craft_cat tab,std::string filter)
 {
-    recipe_list &this_tab_recipes = recipes[tab];
+
+    recipe_list available_recipes;
+
+    if (filter == "") {
+        available_recipes = recipes[tab];
+    } else {
+        for (recipe_map::iterator iter = recipes.begin(); iter != recipes.end(); ++iter)
+        {
+            available_recipes.insert(available_recipes.begin(), iter->second.begin(), iter->second.end());
+        }
+    }
 
     current.clear();
     available.clear();
 
-    for (recipe_list::iterator iter = this_tab_recipes.begin(); iter != this_tab_recipes.end(); ++iter)
+    for (recipe_list::iterator iter = available_recipes.begin(); iter != available_recipes.end(); ++iter)
     {
-        if (u.knows_recipe(*iter))
+        if (!u.knows_recipe(*iter))
+            continue;
+
+        if ((*iter)->difficulty < 0 )
+            continue;
+
+
+        if (filter != "" && item_controller->find_template((*iter)->result)->name.find(filter) == std::string::npos)
+            continue;
+
+
+        if (can_make(*iter, crafting_inv))
         {
-            if ((*iter)->difficulty >= 0 )
-            {
-                if (filter == "" || item_controller->find_template((*iter)->result)->name.find(filter) != std::string::npos)
-                {
-                    if (can_make(*iter, crafting_inv))
-                    {
-                        current.insert(current.begin(), *iter);
-                        available.insert(available.begin(), true);
-                    }
-                    else
-                    {
-                        current.push_back(*iter);
-                        available.push_back(false);
-                    }
-                }
-            }
+            current.insert(current.begin(), *iter);
+            available.insert(available.begin(), true);
+        }
+        else
+        {
+            current.push_back(*iter);
+            available.push_back(false);
         }
     }
 }
