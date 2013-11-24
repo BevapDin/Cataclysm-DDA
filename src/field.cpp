@@ -410,6 +410,9 @@ bool map::process_fields_in_submap(game *g, int gridn)
                                 } else if (it->burnt < cur->getFieldDensity()) {
                                     destroyed = it->burn(1);
                                     smoke++;
+                                } else if (one_in(40)) {
+                                    destroyed = it->burn(1);
+                                    smoke++;
                                 }
 
                             } else if ((it->made_of("cotton") || it->made_of("leather") || it->made_of("fur") || it->made_of("wool"))) {
@@ -422,6 +425,9 @@ bool map::process_fields_in_submap(game *g, int gridn)
                                 } else if (it->burnt < cur->getFieldDensity()) {
                                     destroyed = it->burn(1);
                                     smoke++;
+                                } else if (one_in(40)) {
+                                    destroyed = it->burn(1);
+                                    smoke++;
                                 }
 
                             } else if ((it->made_of("flesh")) || (it->made_of("hflesh"))) {
@@ -432,6 +438,9 @@ bool map::process_fields_in_submap(game *g, int gridn)
                                     smoke += 3;
                                     consumed++;
                                 } else if (it->burnt < cur->getFieldDensity() * 5 || cur->getFieldDensity() >= 2) {
+                                    destroyed = it->burn(1);
+                                    smoke++;
+                                } else if (one_in(40)) {
                                     destroyed = it->burn(1);
                                     smoke++;
                                 }
