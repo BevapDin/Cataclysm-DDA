@@ -3354,7 +3354,8 @@ void player::recalc_sight_limits()
                 !has_trait("MEMBRANE") && !is_wearing("goggles_swim"))) {
         sight_max = 1;
     } else if (has_trait("MYOPIC") && !is_wearing("glasses_eye") &&
-            !is_wearing("glasses_monocle") && !is_wearing("glasses_bifocal")) {
+            !is_wearing("glasses_monocle") && !is_wearing("glasses_bifocal") &&
+            !has_disease("contacts")) {
         sight_max = 4;
     }
 
@@ -3415,7 +3416,8 @@ bool player::sight_impaired()
               && !is_wearing("goggles_swim")) ||
   (has_trait("MYOPIC") && !is_wearing("glasses_eye")
                         && !is_wearing("glasses_monocle")
-                        && !is_wearing("glasses_bifocal"));
+                        && !is_wearing("glasses_bifocal")
+                        && !has_disease("contacts"));
 }
 
 bool player::has_two_arms() const
@@ -7148,6 +7150,7 @@ bool player::takeoff(game *g, char let, bool autodrop)
                                 (worn[j].invlet != let)) {
                             if (autodrop) {
                                 g->m.add_item_or_charges(posx, posy, worn[j]);
+                                g->add_msg(_("You take off your your %s."), worn[j].tname(g).c_str());
                                 worn.erase(worn.begin() + j);
 
                                 // We've invalidated our index into worn[],
@@ -7164,12 +7167,14 @@ bool player::takeoff(game *g, char let, bool autodrop)
                 if (autodrop || volume_capacity() - (reinterpret_cast<it_armor*>(w.type))->storage >
                         volume_carried() + w.type->volume) {
                     inv.add_item_keep_invlet(w);
+                    g->add_msg(_("You take off your your %s."), w.tname(g).c_str());
                     worn.erase(worn.begin() + i);
                     inv.unsort();
                     taken_off = true;
                 } else if (query_yn(_("No room in inventory for your %s.  Drop it?"),
                         w.tname(g).c_str())) {
                     g->m.add_item_or_charges(posx, posy, w);
+                    g->add_msg(_("You take off your your %s."), w.tname(g).c_str());
                     worn.erase(worn.begin() + i);
                     taken_off = true;
                 }
@@ -7325,6 +7330,8 @@ void player::sort_armor(game *g)
             else
                 tmp_str = "";
 
+            if (tmp_worn[leftListIndex]->has_flag("SKINTIGHT"))
+                tmp_str += _("It lies close to the skin.\n");
             if (tmp_worn[leftListIndex]->has_flag("POCKETS"))
                 tmp_str += _("It has pockets.\n");
                 if (tmp_worn[leftListIndex]->has_flag("HOOD"))
@@ -7827,6 +7834,7 @@ press 'U' while wielding the unloaded gun."), gun->tname(g).c_str());
                        (gun->contents[i].type->id == "improve_sights" ||
                         gun->contents[i].type->id == "red_dot_sight" ||
                         gun->contents[i].type->id == "holo_sight" ||
+                        gun->contents[i].type->id == "pistol_scope" ||
                         gun->contents[i].type->id == "rifle_scope")) {
                 //intentionally leaving laser_sight off the list so that it CAN be used with optics
                 g->add_msg(_("Your %s can only use one type of optical aiming device at a time."),
@@ -7925,7 +7933,7 @@ hint_rating player::rate_action_read(item *it, game *g)
  } else if (book->intel > 0 && has_trait("ILLITERATE")) {
   return HINT_IFFY;
  } else if (has_trait("HYPEROPIC") && !is_wearing("glasses_reading")
-            && !is_wearing("glasses_bifocal")) {
+            && !is_wearing("glasses_bifocal") && !has_disease("contacts")) {
   return HINT_IFFY;
  }
 
@@ -7951,7 +7959,7 @@ void player::read(game *g, char ch)
 
     // check for traits
     if (has_trait("HYPEROPIC") && !is_wearing("glasses_reading")
-        && !is_wearing("glasses_bifocal"))
+        && !is_wearing("glasses_bifocal") && !has_disease("contacts"))
     {
         g->add_msg(_("Your eyes won't focus without reading glasses."));
         return;
@@ -8344,6 +8352,9 @@ int player::encumb(body_part bp) {
 int player::encumb(body_part bp, double &layers, int &armorenc)
 {
     int ret = 0;
+
+    int skintight = 0;
+
     it_armor* armor;
     for (int i = 0; i < worn.size(); i++)
     {
@@ -8364,14 +8375,28 @@ int player::encumb(body_part bp, double &layers, int &armorenc)
                 armorenc += armor->encumber;
                 // Fitted clothes will either reduce encumbrance or negate layering.
                 if( worn[i].has_flag( "FIT" ) ) {
-                    if( armor->encumber > 0 ) {
+                    if( armor->encumber > 0 && armorenc > 0 ) {
                         armorenc--;
-                    } else {
+                    } else if (layers > 0) {
                         layers -= .5;
                     }
                 }
+                if( worn[i].has_flag( "SKINTIGHT" ) && layers > 0) {
+                  // Skintight clothes will negate layering.
+                  // But only if we aren't wearing more than two.
+                  if (skintight < 2) {
+                    skintight++;
+                    layers -= .5;
+                  }
+                }
             }
         }
+    }
+    if (armorenc < 0) {
+      armorenc = 0;
+    }
+    if (layers < 0) {
+      layers = 0;
     }
 
     ret += armorenc;
@@ -8397,6 +8422,9 @@ int player::encumb(body_part bp, double &layers, int &armorenc)
         (has_trait("ARM_TENTACLES") || has_trait("ARM_TENTACLES_4") ||
          has_trait("ARM_TENTACLES_8")) ) {
         ret += 3;
+    }
+    if ( ret < 0 ) {
+      ret = 0;
     }
     return ret;
 }
@@ -8543,7 +8571,7 @@ void player::absorb(game *g, body_part bp, int &dam, int &cut)
                     // armour damage occurs only if damage exceeds armour absorption
                     // plus a luck factor, even if damage is below armour absorption (2% chance)
                     if ((diff_bash > arm_bash && !one_in(diff_bash)) ||
-                        (diff_bash == -1 && one_in(50)))
+                        (!worn[i].has_flag ("STURDY") && diff_bash == -1 && one_in(50)))
                     {
                         armor_damaged = true;
                         worn[i].damage++;
@@ -8554,7 +8582,7 @@ void player::absorb(game *g, body_part bp, int &dam, int &cut)
                     if (cut_through)
                     {
                         if ((diff_cut > arm_cut && !one_in(diff_cut)) ||
-                            (diff_cut == -1 && one_in(50)))
+                            (!worn[i].has_flag ("STURDY") && diff_cut == -1 && one_in(50)))
                         {
                             armor_damaged = true;
                             worn[i].damage++;

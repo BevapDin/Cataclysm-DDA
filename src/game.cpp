@@ -621,6 +621,11 @@ bool game::do_turn()
         add_msg(_("Your breathing stops completely."));
         u.add_memorial_log(_("Died of a drug overdose."));
         u.hp_cur[hp_torso] = 0;
+    } else if (u.has_disease("jetinjector") &&
+            u.disease_duration("jetinjector") > 400) {
+        add_msg(_("Your heart spasms painfully and stops."));
+        u.add_memorial_log(_("Died of a healing stimulant overdose."));
+        u.hp_cur[hp_torso] = 0;
     }
     // Check if we're starving or have starved
     if (u.hunger >= 3000){
@@ -2142,7 +2147,7 @@ bool game::handle_action()
  switch (act) {
 
     case ACTION_PAUSE:
-        if (run_mode == 2 && !u.controlling_vehicle) {
+        if (run_mode == 2 && (u.controlling_vehicle && safemodeveh) ) {
             // Monsters around and we don't wanna pause
             add_msg(_("Monster spotted--safe mode is on! (%s to turn it off.)"),
                     press_x(ACTION_TOGGLE_SAFEMODE).c_str());
@@ -5973,7 +5978,7 @@ void game::use_computer(int x, int y)
  }
 
  if (u.has_trait("HYPEROPIC") && !u.is_wearing("glasses_reading")
-     && !u.is_wearing("glasses_bifocal")) {
+     && !u.is_wearing("glasses_bifocal") && !u.has_disease("contacts")) {
   add_msg(_("You'll need to put on reading glasses before you can see the screen."));
   return;
  }
@@ -6110,6 +6115,12 @@ void game::emp_blast(int x, int y)
      add_msg(_("The %s beeps erratically and deactivates!"), z.name().c_str());
       remove_zombie(mondex);
       m.spawn_item(x, y, "bot_turret", 1, 0, turn);
+      m.spawn_item(x, y, "9mm", 1, z.ammo, turn);
+   }
+   else if (z.type->id == "mon_laserturret" && one_in(3)) {
+      add_msg(_("The %s beeps erratically and deactivates!"), z.name().c_str());
+      remove_zombie(mondex);
+      m.spawn_item(x, y, "bot_laserturret", 1, 0, turn);
    }
    else if (z.type->id == "mon_manhack" && one_in(6)) {
      add_msg(_("The %s flies erratically and drops from the air!"), z.name().c_str());
@@ -10651,8 +10662,14 @@ void game::chat()
     u.moves -= 100;
 }
 
-void game::pldrive(int x, int y)
-{
+void game::pldrive(int x, int y) {
+    if (run_mode == 2 && safemodeveh) { // Monsters around and we don't wanna run
+        add_msg(_("Monster spotted--run mode is on! "
+                    "(%s to turn it off or %s to ignore monster.)"),
+                    press_x(ACTION_TOGGLE_SAFEMODE).c_str(),
+                    from_sentence_case(press_x(ACTION_IGNORE_ENEMY)).c_str());
+        return;
+    }
     int part = -1;
     vehicle *veh = m.veh_at (u.posx, u.posy, part);
     if (!veh) {
@@ -11176,12 +11193,23 @@ bool game::plmove(int dx, int dy)
       remove_zombie(mondex);
       u.moves -= 100;
       m.spawn_item(x, y, "bot_turret", 1, 0, turn);
+      m.spawn_item(x, y, "9mm", 1, z.ammo, turn);
+     }
+     return false;
+    }
+    else if (z.type->id == "mon_laserturret") {
+     if (query_yn(_("Deactivate the laser turret?"))) {
+      remove_zombie(mondex);
+      u.moves -= 100;
+      m.spawn_item(x, y, "bot_laserturret", 1, 0, turn);
      }
      return false;
     } else {
      add_msg(_("You can't displace your %s."), z.name().c_str());
      return false;
     }
+   z.move_to(this, u.posx, u.posy, true); // Force the movement even though the player is there right now.
+   add_msg(_("You displace the %s."), z.name().c_str());
    }
    else if (z.type->id == "mon_manhack") {
     if (query_yn(_("Reprogram the manhack?"))) {

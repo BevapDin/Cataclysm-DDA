@@ -426,6 +426,9 @@ static hp_part use_healing_item(player *p, item *it, int normal_power, int head_
       if(p->activity.type != ACT_FIRSTAID) {
         healed = body_window(p, it, item_name, normal_bonus, head_bonus,
                              torso_bonus, bleed, bite, infect, force);
+        if (healed == num_hp_parts) {
+            return num_hp_parts; // canceled
+        }
       }
       // Brick healing if using a first aid kit for the first time.
       // TODO: Base check on something other than the name.
@@ -2816,6 +2819,34 @@ int iuse::chainsaw_on(player *p, item *it, bool t)
  return it->type->charges_to_use();
 }
 
+int iuse::carver_off(player *p, item *it, bool t)
+{
+ p->moves -= 80;
+ if (it->charges > 0) {
+  g->sound(p->posx, p->posy, 20,
+           _("The electric carver's serrated blades start buzzing!"));
+  it->make(itypes["carver_on"]);
+  it->active = true;
+ } else {
+  g->add_msg_if_player(p,_("You pull the trigger but nothing happens."));
+ }
+ return it->type->charges_to_use();
+}
+
+int iuse::carver_on(player *p, item *it, bool t)
+{
+ if (t) { // Effects while simply on
+  if (one_in(10)) {
+   g->sound(p->posx, p->posy, 8, _("Your electric carver buzzes."));
+  }
+ } else { // Toggling
+  g->add_msg_if_player(p,_("Your electric carver dies."));
+  it->make(itypes["carver_off"]);
+  it->active = false;
+ }
+ return it->type->charges_to_use();
+}
+
 int iuse::shishkebab_off(player *p, item *it, bool t)
 {
     int choice = menu(true, _("What's the plan?"), _("Bring the heat!"),
@@ -4318,11 +4349,52 @@ int iuse::turret(player *p, item *it, bool t)
 
  p->moves -= 100;
  monster mturret(GetMType("mon_turret"), dirx, diry);
+ int ammo = std::min(p->inv.charges_of("9mm"), 500);
+ if (ammo > 0) {
+    char invlet = p->inv.item_by_type("9mm").invlet;
+    p->inv.remove_item_by_charges(invlet, ammo);
+    if (ammo == 1) {
+      g->add_msg_if_player(p,_("You load your only 9mm bullet into the turret."));
+    }
+    else {
+      g->add_msg_if_player(p,_("You load %d x 9mm rounds into the turret."), ammo);
+    }
+ }
+ mturret.ammo = ammo;
  if (rng(0, p->int_cur / 2) + p->skillLevel("electronics") / 2 +
      p->skillLevel("computer") < rng(0, 6)) {
-  g->add_msg_if_player(p,_("You misprogram the turret; it's hostile!"));
+  g->add_msg_if_player(p,_("The turret scans you and makes angry beeping noises!"));
  } else {
+  g->add_msg_if_player(p,_("The turret emits an IFF beep as it scans you."));
   mturret.friendly = -1;
+ }
+ g->add_zombie(mturret);
+ return 1;
+}
+
+
+int iuse::turret_laser(player *p, item *it, bool t)
+{
+ int dirx, diry;
+ if(!g->choose_adjacent(_("Place the turret where?"), dirx, diry)) {
+  return 0;
+ }
+ if (!g->is_empty(dirx, diry)) {
+  g->add_msg_if_player(p,_("You cannot place a turret there."));
+  return 0;
+ }
+
+ p->moves -= 100;
+ monster mturret(GetMType("mon_laserturret"), dirx, diry);
+ if (rng(0, p->int_cur / 2) + p->skillLevel("electronics") / 2 +
+     p->skillLevel("computer") < rng(0, 6)) {
+  g->add_msg_if_player(p,_("The laser turret scans you and makes angry beeping noises!"));
+ } else {
+  g->add_msg_if_player(p,_("The laser turret emits an IFF beep as it scans you."));
+  mturret.friendly = -1;
+ }
+ if (!g->is_in_sunlight(mturret.posx(), mturret.posy())) {
+  g->add_msg_if_player(p,_("A flashing LED on the laser turret appears to indicate low light."));
  }
  g->add_zombie(mturret);
  return 1;
@@ -6383,6 +6455,58 @@ int iuse::adrenaline_injector(player *p, item *it, bool t)
     g->add_msg_if_player(p,_("The adrenaline causes your asthma to clear."));
   }
   return it->type->charges_to_use();
+}
+
+int iuse::jet_injector(player *p, item *it, bool t)
+{
+  if(it->charges == 0) {
+    g->add_msg_if_player(p, _("The jet injector is empty."), it->name.c_str());
+    return 0;
+} else {
+    g->add_msg_if_player(p,_("You inject yourself with the jet injector."));
+    p->add_disease("jetinjector", 200);
+    p->pkill += 20;
+    p->stim += 10;
+    p->rem_disease("infected");
+    p->rem_disease("bite");
+    p->rem_disease("bleed");
+    p->radiation += 4;
+    p->healall(20);
+  }
+
+  if(p->has_disease("jetinjector") &&
+            p->disease_duration("jetinjector") > 200) {
+    g->add_msg_if_player(p,_("Your heart is beating alarmingly fast!"));
+  }
+  return it->type->charges_to_use();
+}
+
+int iuse::contacts(player *p, item *it, bool t)
+{
+  int duration = rng(80640, 120960); // Around 7 days.
+  if(p->has_disease("contacts") ) {
+    if ( query_yn(_("Replace your current lenses?")) ) {
+      p->moves -= 200;
+      g->add_msg_if_player(p, _("You replace your current %s."), it->name.c_str());
+      p->rem_disease("contacts");
+      p->add_disease("contacts", duration);
+      return it->type->charges_to_use();
+    }
+    else {
+      g->add_msg_if_player(p, _("You don't do anything with your %s."), it->name.c_str());
+      return 0;
+    }
+  }
+  else if(p->has_trait("HYPEROPIC") || p->has_trait("MYOPIC")) {
+    p->moves -= 200;
+    g->add_msg_if_player(p, _("You put the %s in your eyes."), it->name.c_str());
+    p->add_disease("contacts", duration);
+    return it->type->charges_to_use();
+  }
+  else {
+    g->add_msg_if_player(p, _("Your vision is fine already."));
+    return 0;
+  }
 }
 
 int iuse::talking_doll(player *p, item *it, bool t)
