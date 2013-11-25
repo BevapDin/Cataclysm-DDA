@@ -78,7 +78,7 @@ void veh_interact::exec (game *gm, vehicle *v, int x, int y)
     const int extrah = ((TERMY - FULL_SCREEN_HEIGHT) / 4) * 2;
     const int totalw = FULL_SCREEN_WIDTH + extraw;
     const int totalh = FULL_SCREEN_HEIGHT + extrah;
-    
+
     // position within main display
     const int x1 = 1 + ((TERMX - totalw) / 2);
     const int y1 = 1 + ((TERMY - totalh) / 2);
@@ -1260,6 +1260,8 @@ void complete_vehicle (game *g)
     int dd = 2;
     vpart_info::type_count_pair_vector items_needed;
     crafting_inventory_t crafting_inv(g, &g->u);
+    int batterycharges; // Charges in a battery
+
     switch (cmd) {
     case 'i':
         partnum = veh->install_part (dx, dy, part_id);
@@ -1267,6 +1269,7 @@ void complete_vehicle (game *g)
             debugmsg ("complete_vehicle install part fails dx=%d dy=%d id=%d", dx, dy, part_id.c_str());
         }
         used_item = crafting_inv.consume_vpart_item(g, vehicle_part_types[part_id].item);
+        batterycharges = used_item.charges;
         veh->get_part_properties_from_item(g, partnum, used_item); //transfer damage, etc.
         tools.push_back(component("func:welder", welder_charges ));
         tools.push_back(component("duct_tape", DUCT_TAPE_USED));
@@ -1302,6 +1305,13 @@ void complete_vehicle (game *g)
             }
 
             veh->parts[partnum].direction = dir;
+        }
+
+        // Add charges if battery.
+        if (used_item.typeId() == "storage_battery" || used_item.typeId() == "small_storage_battery" ||
+            used_item.typeId() == "battery_motorbike" || used_item.typeId() == "battery_car" ||
+            used_item.typeId() == "battery_truck") {
+            veh->charge_battery(batterycharges);
         }
 
         g->add_msg (_("You install a %s into the %s."),
@@ -1357,6 +1367,14 @@ void complete_vehicle (game *g)
                 veh->parts[vehicle_part].amount = 0;
 
                 used_item.put_in(liquid);
+            }
+            // Transfer power back to batteries.
+            // TODO: Add new flag.
+            if (used_item.typeId() == "storage_battery" || used_item.typeId() == "small_storage_battery" ||
+                used_item.typeId() == "battery_motorbike" || used_item.typeId() == "battery_car" ||
+                used_item.typeId() == "battery_truck") {
+                used_item.charges = veh->parts[vehicle_part].amount;
+                veh->parts[vehicle_part].amount = 0;
             }
             g->m.add_item_or_charges(g->u.posx, g->u.posy, used_item);
             if(type != SEL_JACK) { // Changing tires won't make you a car mechanic
