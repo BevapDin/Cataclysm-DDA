@@ -622,6 +622,22 @@
 
   {
     "type":"GENERIC",
+    "id": "waffleiron",
+    "symbol": ")",
+    "color": "dark_gray",
+    "name": "waffle iron",
+    "description": "A waffle iron. For making waffles.",
+    "price": 50,
+    "material": "iron",
+    "weight": 2628,
+    "volume": 4,
+    "bashing": 10,
+    "cutting": 0,
+    "to_hit": 2
+  },
+
+  {
+    "type":"GENERIC",
     "id": "teapot",
     "symbol": ")",
     "color": "dark_gray",
@@ -1653,6 +1669,22 @@
     },
     {
         "type":"GENERIC",
+        "id" : "warhammer",
+        "name" : "war hammer",
+        "description" : "A medieval hammer made for battle. Its odd shape and balance make it an excellent weapon, but an ineffective tool.",
+        "weight" : 1231,
+        "to_hit" : 1,
+        "color" : "brown",
+        "symbol" : "/",
+        "material" : ["wood", "steel"],
+        "techniques" : ["BRUTAL"],
+        "volume" : 5,
+        "bashing" : 30,
+        "cutting" : 0,
+        "price" : 160
+    },
+    {
+        "type":"GENERIC",
         "id" : "nailboard",
         "name" : "nail board",
         "description" : "A long piece of wood with several nails through one end; essentially a simple mace. Makes a great melee weapon.",
@@ -1740,14 +1772,14 @@
         "id" : "pipe",
         "name" : "pipe",
         "description" : "A steel pipe, makes a good melee weapon. Useful in a few crafting recipes.",
-        "weight" : 762,
-        "to_hit" : 3,
+        "weight" : 1262,
+        "to_hit" : 1,
         "color" : "dark_gray",
         "symbol" : "/",
         "material" : ["steel", "null"],
         "techniques" : ["WBLOCK_1"],
         "volume" : 4,
-        "bashing" : 16,
+        "bashing" : 12,
         "cutting" : 0,
         "category": "spare parts",
         "price" : 75
@@ -2208,7 +2240,7 @@
     "bashing": 0,
     "cutting": 16,
     "to_hit": 2,
-    "flags" : ["UNARMED_WEAPON"],
+    "flags" : ["UNARMED_WEAPON", "CHOP"],
     "techniques": ["WBLOCK_1"]
   },
   { "type":"GENERIC",

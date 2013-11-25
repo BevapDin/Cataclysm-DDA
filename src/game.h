@@ -308,6 +308,7 @@ class game
 
   std::map<std::string, vehicle*> vtypes;
   std::vector <trap*> traps;
+  void load_trap(JsonObject &jo);
 
   std::map<std::string, std::vector <items_location_and_chance> > monitems;
   std::vector <mission_type> mission_types; // The list of mission templates
@@ -428,7 +429,6 @@ class game
   void init_faction_data();
   void init_mongroups() throw (std::string);    // Initualizes monster groups
   void init_monitems();     // Initializes monster inventory selection
-  void init_traps();        // Initializes trap types
   void release_traps();     // Release trap types memory
   void init_construction(); // Initializes construction "recipes"
   void init_missions();     // Initializes mission templates
