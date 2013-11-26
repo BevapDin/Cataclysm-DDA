@@ -410,17 +410,21 @@ void mapbuffer::unserialize(std::ifstream & fin) {
     getline(fin, databuff); // Clear out the endline
     getline(fin, databuff);
     it_tmp.load_info(databuff, master_game);
+	if(!it_tmp.is_null()) {
     sm->itm[itx][ity].push_back(it_tmp);
     if (it_tmp.active)
      sm->active_item_count++;
+	}
    } else if (string_identifier == "C") {
     getline(fin, databuff); // Clear out the endline
     getline(fin, databuff);
+	if(!sm->itm[itx][ity].empty()) {
     int index = sm->itm[itx][ity].size() - 1;
     it_tmp.load_info(databuff, master_game);
     sm->itm[itx][ity][index].put_in(it_tmp);
     if (it_tmp.active)
      sm->active_item_count++;
+	}
    } else if (string_identifier == "T") {
     fin >> itx >> ity >> t;
     sm->trp[itx][ity] = trap_id(trap_key[t]);
