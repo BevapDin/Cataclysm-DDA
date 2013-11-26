@@ -1246,10 +1246,6 @@ int iuse::sew(player *p, item *it, bool t)
         g->add_msg_if_player(p,_("You do not have that item!"));
         return 0;
     }
-    if (!fix->is_armor()) {
-        g->add_msg_if_player(p,_("That isn't clothing!"));
-        return 0;
-    }
     //some items are made from more than one material. we should try to use both items if one type of repair item is missing
     itype_id repair_item = "none";
     std::vector<std::string> plurals;
@@ -1274,7 +1270,10 @@ int iuse::sew(player *p, item *it, bool t)
         return 0;
     }
 
-    int items_needed = (fix->damage > 2 || fix->damage == 0) ? 1 : 0;
+    int items_needed = ceil( fix->volume() * 0.25);
+    if(fix->damage > 1) {
+        items_needed = ceil( fix->volume() * 0.25 * (fix->damage - 1));
+    }
 
     // this will cause issues if/when NPCs start being able to sew.
     // but, then again, it'll cause issues when they start crafting, too.
@@ -1871,10 +1870,6 @@ int iuse::solder_weld(player *p, item *it, bool t)
                 g->add_msg_if_player(p,_("You do not have that item!"));
                 return 0 ;
             }
-            if (!fix->is_armor()) {
-                g->add_msg_if_player(p,_("That isn't clothing!"));
-                return 0;
-            }
             itype_id repair_item = "none";
             std::vector<std::string> repairitem_names;
             std::vector<itype_id> repair_items;
@@ -1899,6 +1894,9 @@ int iuse::solder_weld(player *p, item *it, bool t)
             //repairing or modifying items requires at least 1 repair item,
             // otherwise number is related to size of item
             int items_needed = ceil( fix->volume() * 0.25);
+            if(fix->damage > 1) {
+                items_needed = ceil( fix->volume() * 0.25 * (fix->damage - 1));
+            }
 
             // this will cause issues if/when NPCs start being able to sew.
             // but, then again, it'll cause issues when they start crafting, too.

@@ -32,6 +32,19 @@
         "density"       :   1
     },{
         "type" : "material",
+        "ident" : "milk",
+        "name"          : "milk",
+        "bash_resist"   :   0,
+        "cut_resist"    :   0,
+        "bash_dmg_verb" : "damaged",
+        "cut_dmg_verb"  : "damaged",
+        "dmg_adj"       : ["lightly damaged", "damaged", "very damaged", "thoroughly damaged"],
+        "acid_resist"   :   0,
+        "elec_resist"   :   0,
+        "fire_resist"   :   0,
+        "density"       :   1
+    },{
+        "type" : "material",
         "ident" : "veggy",
         "name" : "Plant Matter",
         "bash_resist" : 1,

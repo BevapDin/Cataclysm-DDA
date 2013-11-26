@@ -1136,6 +1136,18 @@ void vehicle::deserialize(JsonIn &jsin)
     data.read("name",name);
 
     data.read("parts", parts);
+    bool xfound = false;
+	for(int i = 0; i < parts.size(); i++) {
+        if(parts[i].mount_dx == 0 && parts[i].mount_dy == 0) {
+            xfound = true;
+            break;
+        }
+    }
+    if(!xfound) {
+		parts.push_back(vehicle_part());
+		parts.back().id = "frame_horizontal";
+		parts.back().hp = 1;
+	}
 
     /* After loading, check if the vehicle is from the old rules and is missing
      * frames. */

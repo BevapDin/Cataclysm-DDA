@@ -1359,14 +1359,15 @@ void complete_vehicle (game *g)
         if (!broken) {
             used_item = veh->item_from_part( vehicle_part );
             // Transfer fuel back to tank
-            if (used_item.typeId() == "metal_tank") {
+            if (used_item.is_watertight_container()) {
                 ammotype desired_liquid = veh->part_info(vehicle_part).fuel_type;
                 item liquid( itypes[default_ammo(desired_liquid)], g->turn );
 
                 liquid.charges = veh->parts[vehicle_part].amount;
                 veh->parts[vehicle_part].amount = 0;
-
-                used_item.put_in(liquid);
+                if(liquid.charges > 0) {
+                    used_item.put_in(liquid);
+                }
             }
             // Transfer power back to batteries.
             // TODO: Add new flag.

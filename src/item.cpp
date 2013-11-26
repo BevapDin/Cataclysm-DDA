@@ -989,7 +989,7 @@ std::string item::tname(game *g)
     if (food != NULL && g != NULL && food->has_flag("HOT"))
         ret << _(" (hot)");
     if (food != NULL && g != NULL && food_type->spoils != 0 &&
-        rotten(g))
+        food->rotten(g))
         ret << _(" (rotten)");
     else if (food != NULL && g != NULL && food_type->spoils != 0 &&
     int(g->turn) - (int)(food->bday) + (600*12) > food_type->spoils * 600)
