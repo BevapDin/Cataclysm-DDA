@@ -2743,9 +2743,9 @@ void game::update_scent()
         grscent[x][y] = fslime;
     }
     if (grscent[x][y] > 10000) {
-        dbg(D_ERROR) << "game:update_scent: Wacky scent at " << x << ","
-                     << y << " (" << grscent[x][y] << ")";
-        debugmsg("Wacky scent at %d, %d (%d)", x, y, grscent[x][y]);
+//        dbg(D_ERROR) << "game:update_scent: Wacky scent at " << x << ","
+//                     << y << " (" << grscent[x][y] << ")";
+//        debugmsg("Wacky scent at %d, %d (%d)", x, y, grscent[x][y]);
         grscent[x][y] = 0; // Scent should never be higher
     }
     //Greatly reduce scent for bashable barriers, even more for ductaped barriers
