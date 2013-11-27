@@ -13012,35 +13012,6 @@
   ]
 },{
         "type" : "recipe",
-  "result": "waterskin_hose",
-  "category": "CC_MISC",
-  "skill_used": "tailor",
-  "requires_skills": [ "survival", 3 ],
-  "difficulty": 2,
-  "time": 7000,
-  "reversible": false,
-  "autolearn": true,
-  "tools": [
-    [
-      [ "func:sewing_kit", 20 ]
-    ]
-  ],
-  "components": [
-    [
-      [ "string_36", 1 ]
-    ],
-    [
-      [ "leather", 1 ]
-    ],
-    [
-      [ "waterskin", 1 ]
-    ],
-    [
-      [ "hose", 1 ]
-    ]
-  ]
-},{
-        "type" : "recipe",
   "result": "makeshift_funnel",
   "category": "CC_MISC",
   "skill_used": "fabrication",
