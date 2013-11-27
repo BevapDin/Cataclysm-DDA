@@ -8984,7 +8984,7 @@ void player::learn_recipe(recipe *rec)
 void player::assign_activity(game* g, activity_type type, int moves, int index, char invlet, std::string name)
 {
     if (backlog.type == type && backlog.index == index && backlog.invlet == invlet &&
-        backlog.name == name && query_yn(_("Resume task?"))) {
+        backlog.name == name) {
             activity = backlog;
             backlog = player_activity();
     } else {
