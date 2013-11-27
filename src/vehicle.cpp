@@ -355,22 +355,23 @@ void vehicle::use_controls()
             has_overhead_lights = true;
             lights.push_back(p);
         }
-        else if (part_flag(p, "TURRET")) {
+        if (part_flag(p, "LIGHT")) {
+            has_lights = true;
+        }
+        if (part_flag(p, "TURRET")) {
             has_turrets = true;
         }
-        else if (part_flag(p, "HORN")) {
+        if (part_flag(p, "HORN")) {
             has_horn = true;
         }
-        else if (part_flag(p, "ENGINE")) {
-            engines.push_back(p);
-        }
-        else if (part_flag(p, "TRACK")) {
+        if (part_flag(p, "TRACK")) {
             has_tracker = true;
         }
-        else if (part_flag(p, "ENGINE")) {
+        if (part_flag(p, "ENGINE")) {
             has_engine = true;
+            engines.push_back(p);
         }
-        else if (part_flag(p, "FRIDGE")) {
+        if (part_flag(p, "FRIDGE")) {
             has_fridge = true;
         }
     }
@@ -432,7 +433,7 @@ void vehicle::use_controls()
 
     if (engines.size() > 1) {
         options_choice.push_back(control_engines);
-        options_message.push_back(uimenu_entry(_("Control engines"), 'e'));
+        options_message.push_back(uimenu_entry(_("Control engines"), 'E'));
         current++;
     }
 
@@ -442,8 +443,6 @@ void vehicle::use_controls()
         current++;
     }
 
-    // Exit vehicle, if we are in it.
-    int vpart;
     if (has_engine) {
         options_choice.push_back(toggle_engine);
         options_message.push_back(uimenu_entry((engine_on) ? _("Turn off the engine") :
@@ -453,7 +452,7 @@ void vehicle::use_controls()
 
     // Exit vehicle, if we are in it.
     if (g->u.controlling_vehicle &&
-        g->m.veh_at(g->u.posx, g->u.posy, vpart) == this) {
+        g->m.veh_at(g->u.posx, g->u.posy) == this) {
         options_choice.push_back(release_control);
         options_message.push_back(uimenu_entry(_("Let go of controls"), 'l'));
         letgoent = current;
