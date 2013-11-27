@@ -2118,7 +2118,7 @@ void vehicle::idle() {
 
         for (int p = 0; p < parts.size(); p++)
         {
-          if (part_flag(p, "ENGINE"))
+          if (part_flag(p, "ENGINE") && parts[p].active())
           {
               //Charge the battery if the engine has an alternator
               if(part_flag(p,"ALTERNATOR")) {
