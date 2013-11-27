@@ -410,7 +410,9 @@ void mapbuffer::unserialize(std::ifstream & fin) {
     getline(fin, databuff); // Clear out the endline
     getline(fin, databuff);
     it_tmp.load_info(databuff, master_game);
-	if(!it_tmp.is_null()) {
+	if(it_tmp.is_null()) {
+     debugmsg("found a nul item %s at %d,%d", databuff.c_str(), itx, ity);
+	} else {
     sm->itm[itx][ity].push_back(it_tmp);
     if (it_tmp.active)
      sm->active_item_count++;
