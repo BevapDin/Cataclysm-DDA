@@ -1192,7 +1192,7 @@ int iuse::sew(player *p, item *it, bool t)
         return 0;
     }
     int thread_used = 1;
-    char ch = g->inv_type(_("Repair what?"), IC_ARMOR);
+    char ch = g->inv(_("Repair what?"));
     if(ch == ' ') {
         int choice = menu(true,
     "Choose:", "Repair damaged item", "Fit item", "Reinforce item", "Repair/reinforce worn item", "Cancel", NULL);
@@ -1273,6 +1273,8 @@ int iuse::sew(player *p, item *it, bool t)
     int items_needed = ceil( fix->volume() * 0.25);
     if(fix->damage > 1) {
         items_needed = ceil( fix->volume() * 0.25 * (fix->damage - 1));
+    } else if(fix->damage == 0) {
+        items_needed = 1;
     }
 
     // this will cause issues if/when NPCs start being able to sew.
@@ -1293,7 +1295,7 @@ int iuse::sew(player *p, item *it, bool t)
         }
         return 0;
     }
-    if (fix->damage < 0) {
+    if (fix->damage < 0 || (fix->damage == 0 && !fix->is_armor())) {
         g->add_msg_if_player(p,_("Your %s is already enhanced."), fix->tname().c_str());
         return 0;
     }
@@ -1864,7 +1866,7 @@ int iuse::solder_weld(player *p, item *it, bool t)
                 return 0;
             }
 
-            char ch = g->inv_type(_("Repair what?"), IC_ARMOR);
+            char ch = g->inv(_("Repair what?"));
             item* fix = &(p->i_at(ch));
             if (fix == NULL || fix->is_null()) {
                 g->add_msg_if_player(p,_("You do not have that item!"));
@@ -1916,6 +1918,10 @@ int iuse::solder_weld(player *p, item *it, bool t)
                     g->add_msg_if_player(p,_("You don't have enough %s to do that."),
                                          repairitem_names[i].c_str());
                 }
+                return 0;
+            }
+            if (fix->damage == 0 && !fix->is_armor()) {
+                g->add_msg_if_player(p, _("You can only reinforce clothing"));
                 return 0;
             }
             if (fix->damage < 0) {

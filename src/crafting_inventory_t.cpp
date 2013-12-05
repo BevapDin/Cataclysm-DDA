@@ -646,6 +646,10 @@ void crafting_inventory_t::simple_req::set_unavailable(int av) {
 }
 
 void crafting_inventory_t::simple_req::gather(crafting_inventory_t &cinv, bool store) {
+    if(req.count == 0) {
+        comp->available = +1;
+        return;
+    }
     assert(req.type.compare(0, 5, "func:") != 0);
     comp->available = -1;
     if(store) {
@@ -2091,7 +2095,9 @@ void resort_item_vectors() {
 }
 
 void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement &req, std::list<item> &used_items) const {
-    assert(req.count > 0);
+    if(req.count == 0) {
+        return;
+    }
     assert(valid());
     const item *ix;
     switch(location) {
