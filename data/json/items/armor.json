@@ -3651,7 +3651,7 @@
     {
         "type" : "ARMOR",
         "id" : "scarf_fur",
-        "name" : "scarf",
+        "name" : "fur scarf",
         "weight" : 140,
         "color" : "brown",
         "covers" : ["MOUTH"],
