@@ -530,6 +530,7 @@ overmap::overmap(game *g, int x, int y)
 
 overmap::overmap(overmap const& o)
     : zg(o.zg)
+    , zh(o.zh)
     , radios(o.radios)
     , npcs(o.npcs)
     , vehicles(o.vehicles)
@@ -563,6 +564,7 @@ overmap::~overmap()
 overmap& overmap::operator=(overmap const& o)
 {
     zg = o.zg;
+    zh = o.zh;
     radios = o.radios;
     npcs = o.npcs;
     vehicles = o.vehicles;
