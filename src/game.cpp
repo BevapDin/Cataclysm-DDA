@@ -1026,6 +1026,10 @@ void game::process_activity()
                             u.weapon : u.inv.item_by_letter(u.activity.invlet));
     reading = dynamic_cast<it_book*>(book_item->type);
 
+    if (reading == 0) {
+        u.activity.type = ACT_NULL;
+        return;
+    }
     if (reading->fun != 0) {
         int fun_bonus;
         if(book_item->charges == 0) {
