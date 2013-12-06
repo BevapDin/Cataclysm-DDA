@@ -391,23 +391,7 @@ const std::string input_context::get_desc(const std::string& action_descriptor) 
 const std::string& input_context::handle_input() {
     next_action.type = CATA_INPUT_ERROR;
     while(1) {
-
-#if !defined(NO_MOUSE)
-#if !(defined TILES || defined SDLTILES || defined _WIN32 || defined WINDOWS || defined __CYGWIN__)
-        // Register for ncurses mouse input
-        mousemask(BUTTON1_CLICKED | BUTTON3_CLICKED | REPORT_MOUSE_POSITION, NULL);
-#endif
-#endif
-
         next_action = inp_mngr.get_input_event(NULL);
-
-#if !defined(NO_MOUSE)
-#if !(defined TILES || defined SDLTILES || defined _WIN32 || defined WINDOWS || defined __CYGWIN__)
-        // De-register from ncurses mouse input
-        mousemask(0, NULL);
-#endif
-#endif
-
         if (next_action.type == CATA_INPUT_TIMEOUT) {
             return TIMEOUT;
         }
@@ -417,7 +401,7 @@ const std::string& input_context::handle_input() {
         // Special help action
         if(action == "HELP_KEYBINDINGS") {
             display_help();
-            continue;
+            return ANY_INPUT;
         }
 
         if(next_action.type == CATA_INPUT_MOUSE) {
@@ -509,14 +493,18 @@ void input_context::display_help() {
 
     werase(w_help);
 
+    // Draw win header and borders
+    draw_border(w_help, c_white);
+    mvwprintz(w_help, 0, (FULL_SCREEN_WIDTH - utf8_width(_("Keybindings")))/2 - 1,
+              c_ltred, " %s ", _("Keybindings"));
     mvwprintz(w_help, 1, 51, c_ltred, _("Unbound keys"));
     mvwprintz(w_help, 2, 51, c_ltgreen, _("Keybinding active only"));
     mvwprintz(w_help, 3, 51, c_ltgreen, _("on this screen"));
     mvwprintz(w_help, 4, 51, c_ltgray, _("Keybinding active globally"));
 
-    // Clear the lines
-    for (int i = 0; i < FULL_SCREEN_HEIGHT-2; i++)
-    mvwprintz(w_help, i, 0, c_black, "                                                ");
+    // Clear the lines. Don't touch borders
+    for (int i = 1; i < FULL_SCREEN_HEIGHT-3; i++)
+    mvwprintz(w_help, i, 1, c_black, "                                               ");
 
     for (int i=0; i<registered_actions.size(); i++) {
         const std::string& action_id = registered_actions[i];
@@ -545,6 +533,8 @@ void input_context::display_help() {
     while (ch != 'q' && ch != 'Q' && ch != KEY_ESCAPE) { ch = getch(); };
 
     werase(w_help);
+    wrefresh(w_help);
+    delwin(w_help);
 }
 
 input_event input_context::get_raw_input()
@@ -565,6 +555,7 @@ input_event input_manager::get_input_event(WINDOW* win)
             rval.type = CATA_INPUT_ERROR;
         }
 #if !(defined TILES || defined SDLTILES || defined _WIN32 || defined WINDOWS || defined __CYGWIN__)
+#if !defined(NO_MOUSE)
     // ncurses mouse handling
     } else if (key == KEY_MOUSE) {
         MEVENT event;
@@ -589,15 +580,11 @@ input_event input_manager::get_input_event(WINDOW* win)
             rval.type = CATA_INPUT_ERROR;
         }
 #endif
+#endif
     } else {
         rval.type = CATA_INPUT_KEYBOARD;
         rval.add_input(key);
     }
-
-#if !(defined TILES || defined SDLTILES || defined _WIN32 || defined WINDOWS || defined __CYGWIN__)
-    // De-register ncurses mouse input. Otherwise unmanaged getch() calls will detect mouse input.
-    //mousemask(0, NULL);
-#endif
 
     return rval;
 }
@@ -610,6 +597,9 @@ bool gamepad_available()
 
 bool input_context::get_coordinates(WINDOW* capture_win, int& x, int& y)
 {
+    if (!coordinate_input_received) {
+        return false;
+    }
     int view_columns = getmaxx(capture_win);
     int view_rows = getmaxy(capture_win);
     int win_left = getbegx(capture_win) - VIEW_OFFSET_X;
@@ -624,5 +614,15 @@ bool input_context::get_coordinates(WINDOW* capture_win, int& x, int& y)
     y = g->ter_view_y - ((view_rows/2) - coordinate_y);
     
     return true;
+}
+#endif
+
+#ifndef SDLTILES
+void init_interface()
+{
+#if !(defined TILES || defined _WIN32 || defined WINDOWS || defined __CYGWIN__)
+    // ncurses mouse registration
+    mousemask(BUTTON1_CLICKED | BUTTON3_CLICKED | REPORT_MOUSE_POSITION, NULL);
+#endif
 }
 #endif

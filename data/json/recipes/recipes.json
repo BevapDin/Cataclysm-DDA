@@ -748,7 +748,11 @@
   "components": [
     [
       [ "rag", 1 ],
-      [ "duct_tape", 50 ]
+      [ "duct_tape", 50 ],
+      [ "string_6", 2 ],
+      [ "sinew", 100 ],
+      [ "thread", 100 ],
+      [ "plant_fibre", 100 ]
     ],
     [
       [ "spike", 1 ]
@@ -1008,6 +1012,9 @@
       ],
       [
       [ "func:hacksaw", -1]
+      ],
+      [
+      [ "goggles_welding", -1 ]
       ],
       [
       [ "func:welder", 20 ]
@@ -1802,6 +1809,41 @@
   ]
 },{
         "type" : "recipe",
+  "result": "aux_flamer",
+  "category": "CC_WEAPON",
+  "skill_used": "mechanics",
+  "skills_required": [ "fabrication", 3 ],
+  "difficulty": 6,
+  "time": 18000,
+  "reversible": true,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "func:hacksaw", -1 ]
+    ],
+    [
+      [ "func:screwdriver", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "duct_tape", 50 ]
+    ],
+    [
+      [ "pilot_light", 1 ]
+    ],
+    [
+      [ "pipe", 1 ]
+    ],
+    [
+      [ "hose", 2 ]
+    ],
+    [
+      [ "metal_tank", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "shot_he",
   "category": "CC_AMMO",
   "skill_used": "fabrication",
@@ -1966,6 +2008,9 @@
       [ "func:hammer", -1 ]
     ],
     [
+      [ "goggles_welding", -1 ]
+    ],
+    [
       [ "func:wrench", -1 ]
     ],
     [
@@ -2051,6 +2096,9 @@
     ],
     [
       [ "func:hammer", -1 ]
+    ],
+    [
+      [ "goggles_welding", -1 ]
     ],
     [
       [ "func:wrench", -1 ]
@@ -2793,6 +2841,96 @@
   "components": [
     [
       [ "leather", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "modularvestsuper",
+  "category": "CC_ARMOR",
+  "skill_used": "tailor",
+  "difficulty": 0,
+  "time": 5000,
+  "reversible": false,
+  "autolearn": true,
+  "components": [
+    [
+      [ "modularvest", 1 ],
+      [ "modularvestsuper", 1]
+    ],
+    [
+      [ "alloy_plate", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "modularveststeel",
+  "category": "CC_ARMOR",
+  "skill_used": "tailor",
+  "difficulty": 0,
+  "time": 5000,
+  "reversible": false,
+  "autolearn": true,
+  "components": [
+    [
+      [ "modularvest", 1 ],
+      [ "modularveststeel", 1]
+    ],
+    [
+      [ "steel_plate", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "modularvestceramic",
+  "category": "CC_ARMOR",
+  "skill_used": "tailor",
+  "difficulty": 0,
+  "time": 5000,
+  "reversible": false,
+  "autolearn": true,
+  "components": [
+    [
+      [ "modularvest", 1 ],
+      [ "modularvestceramic", 1]
+    ],
+    [
+      [ "ceramic_armor", 4 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "modularvestkevlar",
+  "category": "CC_ARMOR",
+  "skill_used": "tailor",
+  "difficulty": 0,
+  "time": 5000,
+  "reversible": false,
+  "autolearn": true,
+  "components": [
+    [
+      [ "modularvest", 1 ],
+      [ "modularvestkevlar", 1]
+    ],
+    [
+      [ "kevlar_plate", 8 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "modularvesthard",
+  "category": "CC_ARMOR",
+  "skill_used": "tailor",
+  "difficulty": 0,
+  "time": 5000,
+  "reversible": false,
+  "autolearn": true,
+  "components": [
+    [
+      [ "modularvest", 1 ],
+      [ "modularvesthard", 1]
+    ],
+    [
+      [ "hard_plate", 1 ]
     ]
   ]
 },{
@@ -7018,7 +7156,7 @@
       [ "lemon", 1 ],
       [ "irradiated_banana", 1],
       [ "banana", 1 ],
-      [ "irradiated_apple", 1 ], 
+      [ "irradiated_apple", 1 ],
       [ "apple", 1 ],
       [ "irradiated_pear", 1 ],
       [ "pear", 1 ],
@@ -7918,6 +8056,31 @@
   ]
 },{
         "type" : "recipe",
+  "result": "iv_mutagen",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "mutagen_plant",
   "category": "CC_CHEM",
   "skill_used": "cooking",
@@ -7925,7 +8088,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_creepy", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -7940,11 +8104,37 @@
       [ "mutagen", 1 ]
     ],
     [
-      [ "veggy_tainted", 3 ]
+      [ "veggy_tainted", 3 ],
+	  [ "biollante_bud", 1 ]
     ],
     [
       [ "ammonia", 1 ],
       [ "lye_powder", 100 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "iv_mutagen_plant",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 10,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_plant", 2 ]
     ]
   ]
 },{
@@ -7956,7 +8146,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_maiar", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -7982,6 +8173,31 @@
   ]
 },{
         "type" : "recipe",
+  "result": "iv_mutagen_insect",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 10,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_insect", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "mutagen_spider",
   "category": "CC_CHEM",
   "skill_used": "cooking",
@@ -7989,7 +8205,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_maiar", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8013,6 +8230,31 @@
   ]
 },{
         "type" : "recipe",
+  "result": "iv_mutagen_spider",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 10,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_spider", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "mutagen_slime",
   "category": "CC_CHEM",
   "skill_used": "cooking",
@@ -8020,7 +8262,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_maiar", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8045,6 +8288,31 @@
   ]
 },{
         "type" : "recipe",
+  "result": "iv_mutagen_slime",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_slime", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "mutagen_fish",
   "category": "CC_CHEM",
   "skill_used": "cooking",
@@ -8052,7 +8320,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8079,6 +8348,31 @@
   ]
 },{
         "type" : "recipe",
+  "result": "iv_mutagen_fish",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_fish", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "mutagen_rat",
   "category": "CC_CHEM",
   "skill_used": "cooking",
@@ -8086,7 +8380,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_creepy", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8110,6 +8405,31 @@
   ]
 },{
         "type" : "recipe",
+  "result": "iv_mutagen_rat",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_rat", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "mutagen_beast",
   "category": "CC_CHEM",
   "skill_used": "cooking",
@@ -8117,7 +8437,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8137,6 +8458,31 @@
     [
       [ "ammonia", 1 ],
       [ "lye_powder", 100 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "iv_mutagen_beast",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_beast", 2 ]
     ]
   ]
 },{
@@ -8148,7 +8494,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8172,6 +8519,31 @@
   ]
 },{
         "type" : "recipe",
+  "result": "iv_mutagen_cattle",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_cattle", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "mutagen_cephalopod",
   "category": "CC_CHEM",
   "skill_used": "cooking",
@@ -8179,7 +8551,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_creepy", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8204,6 +8577,31 @@
   ]
 },{
         "type" : "recipe",
+  "result": "iv_mutagen_cephalopod",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_cephalopod", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "mutagen_bird",
   "category": "CC_CHEM",
   "skill_used": "cooking",
@@ -8211,7 +8609,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8231,6 +8630,31 @@
     [
       [ "ammonia", 1 ],
       [ "lye_powder", 100 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "iv_mutagen_bird",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_bird", 2 ]
     ]
   ]
 },{
@@ -8242,7 +8666,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8266,6 +8691,31 @@
   ]
 },{
         "type" : "recipe",
+  "result": "iv_mutagen_lizard",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_lizard", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "mutagen_troglobite",
   "category": "CC_CHEM",
   "skill_used": "cooking",
@@ -8273,7 +8723,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_maiar", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8293,6 +8744,31 @@
     [
       [ "ammonia", 1 ],
       [ "lye_powder", 100 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "iv_mutagen_troglobite",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_troglobite", 2 ]
     ]
   ]
 },{
@@ -8327,6 +8803,31 @@
     ],
     [
       [ "iodine", 10 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "iv_mutagen_medical",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 10,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_medicalmut", 9 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 25 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_medical", 2 ]
     ]
   ]
 },{
@@ -8385,6 +8886,31 @@
     ]
   ]
 },{
+        "type" : "recipe",
+  "result": "iv_purifier",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 10,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 9]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_alpha", 2 ]
+    ]
+  ]
+},{
   "type" : "recipe",
   "result": "mutagen_alpha",
   "category": "CC_CHEM",
@@ -8419,6 +8945,31 @@
     ]
   ]
 },{
+        "type" : "recipe",
+  "result": "iv_mutagen_alpha",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 10,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_alpha", 9 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_alpha", 2 ]
+    ]
+  ]
+},{
   "type" : "recipe",
   "result": "mutagen_elfa",
   "category": "CC_CHEM",
@@ -8447,6 +8998,31 @@
     ],
     [
 	  [ "mutagen_bird", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "iv_mutagen_elfa",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 10,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_elfa", 10 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_elfa", 2 ]
     ]
   ]
 },{
@@ -8484,6 +9060,31 @@
     ]
   ]
 },{
+        "type" : "recipe",
+  "result": "iv_mutagen_chimera",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 10,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_chimera", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_chimera", 2 ]
+    ]
+  ]
+},{
   "type" : "recipe",
   "result": "mutagen_raptor",
   "category": "CC_CHEM",
@@ -8512,6 +9113,31 @@
     ],
     [
       [ "purifier", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "iv_mutagen_raptor",
+  "category": "CC_CHEM",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 10,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_raptor", 10 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_raptor", 2 ]
     ]
   ]
 },{
@@ -9356,7 +9982,7 @@
   "skill_used": "electronics",
   "difficulty": 1,
   "time": 4000,
-  "reversible": false,
+  "reversible": true,
   "autolearn": true,
   "tools": [
     [
@@ -10818,6 +11444,9 @@
       [ "func:hacksaw", -1 ]
     ],
     [
+      [ "goggles_welding", -1 ]
+    ],
+    [
       [ "func:welder", 35 ]
     ]
   ],
@@ -10844,6 +11473,9 @@
   "tools": [
     [
       [ "func:hacksaw", -1 ]
+    ],
+    [
+      [ "goggles_welding", -1 ]
     ],
     [
       [ "func:welder", 35 ]
@@ -11048,6 +11680,29 @@
     [
       [ "leather", 18 ],
       [ "fur", 18 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "boots_western",
+  "category": "CC_ARMOR",
+  "skill_used": "tailor",
+  "difficulty": 5,
+  "time": 35000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+    [
+      [ "needle_bone", 100 ],
+      [ "sewing_kit", 100 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "leather", 9 ]
     ]
   ]
 },{
@@ -12303,6 +12958,29 @@
     ]
   ]
 },{
+        "type" : "recipe",
+  "result": "hat_noise_cancelling",
+  "category": "CC_ARMOR",
+  "skill_used": "tailor",
+  "difficulty": 1,
+  "time": 10000,
+  "reversible": true,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "needle_bone", 8 ],
+      [ "sewing_kit", 8 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "rag", 4 ]
+    ],
+    [
+      [ "string_36", 2 ]
+    ]
+  ]
+},{
   "type" : "recipe",
   "result": "cowboy_hat",
   "category": "CC_ARMOR",
@@ -13301,6 +13979,47 @@
     ]
   ]
 },{
+  "type" : "recipe",
+  "result": "chemlab",
+  "category": "CC_MISC",
+  "skill_used": "fabrication",
+  "skills_required": ["electronics",3],
+  "difficulty": 4,
+  "time": 60000,
+  "reversible": true,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "func:hammer", -1 ]
+    ],
+    [
+      [ "func:wrench", -1 ]
+    ],
+    [
+      [ "func:hacksaw", -1 ]
+    ],
+    [
+      [ "goggles_welding", -1 ]
+    ],
+    [
+      [ "func:welder", 100 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "frame", 1 ]
+    ],
+    [
+      [ "chemistry_set", 1 ]
+    ],
+    [
+      [ "power_supply", 1 ]
+    ],
+    [
+      [ "cable", 5 ]
+    ]
+  ]
+},{
         "type" : "recipe",
   "result": "foot_crank",
   "category": "CC_MISC",
@@ -13792,6 +14511,7 @@
       [ "bleach", 1 ],
       [ "lye_powder", 100 ],
       [ "bone", 20 ],
+	  [ "biollante_bud", 1],
       [ "ant_egg", 1 ],
       [ "slime_scrap", 1 ]
     ]
@@ -14129,6 +14849,7 @@
     ],
     [
       [ "superglue", 1 ]
+	  
     ]
   ]
 },{
@@ -18796,7 +19517,7 @@
       [ "hardtack", 8]
     ],
     [
-      [ "ketchup", 4 ], 
+      [ "ketchup", 4 ],
       [ "mustard", 4]
     ],
     [
@@ -18874,7 +19595,7 @@
       [ "bread", 4 ],
       [ "hardtack", 8]
     ],
-    [ 
+    [
       [ "mustard", 4]
     ]
   ]
@@ -19547,6 +20268,9 @@
     ],
     [
       [ "func:wrench", -1 ]
+    ],
+    [
+      [ "goggles_welding", -1 ]
     ],
     [
       [ "func:welder", 100]
@@ -21172,6 +21896,30 @@
     ],
     [
       [ "scrap", 1 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
+  "result": "mop",
+  "category": "CC_WEAPON",
+  "skill_used": "fabrication",
+  "difficulty": 0,
+  "time": 10000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "components": [
+    [
+      [ "2x4", 1 ],
+      [ "stick", 1 ]
+    ],
+    [
+      [ "rag", 4 ]
+    ],
+    [
+      [ "string_36", 1]
     ]
   ]
 },

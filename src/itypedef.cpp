@@ -114,7 +114,6 @@ void game::init_itypes ()
                      dam, cut, to_hit, bigmin, bigmax, bigaspect, des)\
 itypes[id]=new it_var_veh_part(id, price, name, des, sym, color, mat1, mat2,\
                      volume, wgt, dam, cut, to_hit, bigmin, bigmax, bigaspect); \
-itypes[id]->category = "vehicle part"
 
 //"wheel", "wheel_wide", "wheel_bicycle", "wheel_motorbike", "wheel_small",
 //           NAME     RAR PRC  SYM COLOR        MAT1    MAT2
@@ -300,6 +299,7 @@ BIO_SINGLE("bio_scent_mask", 8500, c_magenta, 5);
 BIO_SINGLE("bio_cloak", 8500, c_magenta, 5);
 BIO_SINGLE("bio_fingerhack", 3500, c_magenta, 2);
 BIO_SINGLE("bio_night", 8500, c_magenta, 5);
+BIO_SINGLE("bio_lockpick", 3500, c_magenta, 2);
 // defensive
 BIO_SINGLE("bio_ads", 9500, c_ltblue, 7);
 BIO_SINGLE("bio_ods", 9500, c_ltblue, 7);
@@ -395,6 +395,7 @@ GUN("bio_lightning", _("Chain Lightning"),  0,c_magenta, "steel", "plastic",
 
 std::string ammo_name(ammotype t)
 {
+    if( t == "700nx")       return _(".700 Nitro Express");
     if( t == "ammo_flint")  return _("flintlock paper pack");
     if( t == "50")          return _(".50 BMG");
     if( t == "nail")        return _("nails");
@@ -443,6 +444,8 @@ std::string ammo_name(ammotype t)
     if( t == "thrown" )     return _("throwing weapon");
     if( t == "ampoule" )    return _("chemical ampoule");
     if( t == "components" ) return _("components");
+    if( t == "RPG-7" )      return _("RPG-7");
+    if( t == "dart" )       return _("dart");
     return "XXX";
 }
 

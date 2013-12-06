@@ -28,7 +28,7 @@
     "volume": 1,
     "bashing": -8,
     "cutting": 0,
-    "category": "spare parts",
+    "category": "spare_parts",
     "to_hit": 0
   },
 
@@ -193,7 +193,7 @@
     "volume": 1,
     "bashing": -5,
     "cutting": 0,
-    "category": "spare parts",
+    "category": "spare_parts",
     "to_hit": -1
   },
 
@@ -363,7 +363,7 @@
     "volume": 0,
     "bashing": -6,
     "cutting": 0,
-    "category": "spare parts",
+    "category" : "spare_parts",
     "to_hit": 2
   },
 
@@ -380,7 +380,7 @@
     "volume": 2,
     "bashing": 8,
     "cutting": 0,
-    "category": "spare parts",
+    "category" : "spare_parts",
     "to_hit": -2
   },
 
@@ -414,7 +414,7 @@
     "volume": 1,
     "bashing": 1,
     "cutting": 0,
-    "category": "spare parts",
+    "category" : "spare_parts",
     "to_hit": -2
   },
 
@@ -547,6 +547,7 @@
     "volume": 12,
     "bashing": 23,
     "cutting": 0,
+    "category" : "weapons",
     "to_hit": 3
   },
 
@@ -564,6 +565,7 @@
     "volume": 12,
     "bashing": 30,
     "cutting": 0,
+    "category" : "weapons",
     "to_hit": 3
   },
 
@@ -583,6 +585,7 @@
     "flags" : ["CHOP"],
     "functions" : [ [ "func:hammer" ] , [ "func:blade", 0.98 ], ["func:hammering"] ],
     "to_hit": 1,
+    "category" : "weapons",
     "qualities": [["CUT", 1]]
   },
 
@@ -600,6 +603,7 @@
     "bashing": 6,
     "cutting": 0,
     "functions": [ [ "func:pot" ] ],
+    "category" : "tools",
     "to_hit": 1
   },
 
@@ -617,6 +621,7 @@
     "bashing": 10,
     "cutting": 0,
     "functions": [ [ "func:pan" ] ],
+    "category" : "tools",
     "to_hit": 2
   },
 
@@ -633,6 +638,7 @@
     "volume": 4,
     "bashing": 10,
     "cutting": 0,
+    "category" : "tools",
     "to_hit": 2
   },
 
@@ -1185,13 +1191,29 @@
 
   {
     "type":"GENERIC",
+    "id": "ceramic_armor",
+    "symbol": ",",
+    "color": "yellow",
+    "name": "ceramic armor plate",
+    "description": "A ceramic armor plate, specifically engineered for use in a bullet resistant vest.",
+    "price": 80,
+    "material": "ceramic",
+    "weight": 362,
+    "volume": 2,
+    "bashing": 4,
+    "cutting": 0,
+    "to_hit": 0
+  },
+
+  {
+    "type":"GENERIC",
     "id": "ceramic_plate",
     "symbol": ",",
     "color": "yellow",
     "name": "ceramic plate",
     "description": "A ceramic dinner plate, you could probably play frisbee with it",
     "price": 10,
-    "material": "glass",
+    "material": "ceramic",
     "weight": 362,
     "volume": 1,
     "bashing": 1,
@@ -1207,7 +1229,7 @@
     "name": "ceramic bowl",
     "description": "A shallow dessert bowl, not a lot of use for it really.",
     "price": 10,
-    "material": "glass",
+    "material": "ceramic",
     "weight": 400,
     "volume": 1,
     "bashing": 1,
@@ -1223,7 +1245,7 @@
     "name": "ceramic cup",
     "description": "A ceramic teacup, pinky out!",
     "price": 10,
-    "material": "glass",
+    "material": "ceramic",
     "weight": 300,
     "volume": 1,
     "bashing": 1,
@@ -1317,7 +1339,7 @@
     "id": "spoon",
     "symbol": ";",
     "color": "light_gray",
-    "name": "fork",
+    "name": "spoon",
     "description": "Do not try to bend the spoon. That is impossible.",
     "price": 15,
     "material": "steel",
@@ -1803,8 +1825,8 @@
     {
         "type":"GENERIC",
         "id" : "bat_metal",
-        "name" : "aluminium bat",
-        "description" : "An aluminium baseball bat, lighter than a wooden bat and a little easier to swing as a result.",
+        "name" : "aluminum bat",
+        "description" : "An aluminum baseball bat, lighter than a wooden bat and a little easier to swing as a result.",
         "weight" : 765,
         "to_hit" : 3,
         "color" : "light_gray",
@@ -2160,7 +2182,7 @@
     "bashing" : -8,
     "cutting" : 0,
     "price" : 250,
-    "flags" : ["WATCH"]
+    "flags" : ["WATCH", "FANCY"]
   },
   {
     "type":"GENERIC",
@@ -2201,7 +2223,7 @@
     "id": "fish_bowl",
     "symbol": "u",
     "color": "light_cyan",
-    "name": "A fish bowl",
+    "name": "a fish bowl",
     "description": "A filled fish bowl, the tag says to Ed and the fish's name Hoss. It appears the fish has tiny antlers",
     "price": 1,
     "material": "glass",
@@ -2414,5 +2436,20 @@
     "bashing" : 5,
     "cutting" : 0,
     "price" : 75
+  },
+  {
+    "type":"GENERIC",
+    "id": "kevlar_harness",
+    "symbol": "[",
+    "color": "blue",
+    "name": "kevlar dog harness",
+    "description": "A blue bulletproof harness, designed to be worn by canines in service of local law enforcement.",
+    "price": 300,
+    "material": ["kevlar", "null"],
+    "weight": 4290,
+    "volume": 18,
+    "bashing": 5,
+    "cutting": 0,
+    "to_hit": -1
   }
 ]

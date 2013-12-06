@@ -22,12 +22,8 @@ struct advanced_inv_area {
     int max_size, max_volume;
 };
 
-struct advanced_inv_category {
-    int sort_order;
-    std::string name;
-    advanced_inv_category(int s, const std::string &n) : sort_order(s), name(n) { }
-    advanced_inv_category() { }
-};
+// see item_factory.h
+class item_category;
 
 // for printing items in environment
 struct advanced_inv_listitem {
@@ -35,11 +31,12 @@ struct advanced_inv_listitem {
     int area;
     item *it;
     std::string name;
+    std::string name_without_prefix;
     bool autopickup;
     int stacks;
     int volume;
     int weight;
-    advanced_inv_category cat;
+    const item_category *cat;
 };
 
 class advanced_inventory_pane {

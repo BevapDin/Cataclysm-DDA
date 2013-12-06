@@ -5,6 +5,7 @@
 #include "keypress.h"
 #include "translations.h"
 #include "file_finder.h"
+#include "cursesdef.h"
 #ifdef SDLTILES
 #include "cata_tiles.h"
 #endif // SDLTILES
@@ -14,7 +15,7 @@
 #include <string>
 #include <locale>
 #include <sstream>
-
+ 
 bool trigdist;
 bool use_tiles;
 
@@ -480,6 +481,11 @@ void initOptions() {
                                              _("A scaling factor that determines density of monster spawns."),
                                              0.0, 50.0, 1.0, 0.1
                                             );
+                                            
+    OPTIONS["ITEM_SPAWNRATE"] =         cOpt("world_default", _("Item spawn scaling factor"),
+                                             _("A scaling factor that determines density of item spawns."),
+                                             0.1, 1.0, 1.0, 0.1
+                                            );
 
     OPTIONS["CITY_SIZE"] =              cOpt("world_default", _("Size of cities"),
                                              _("A number determining how large cities are. Warning, large numbers lead to very slow mapgen."),
@@ -521,7 +527,14 @@ void initOptions() {
                                              _("Switch between the standard or a narrower and taller sidebar. Requires restart."),
                                              "standard,narrow", "standard"
                                             );
-
+    //~ style of vehicle interaction menu; vertical is old one.
+    optionNames["vertical"] = _("Vertical");
+    optionNames["horizontal"] = _("Horizontal");
+    optionNames["hybrid"] = _("Hybrid");
+    OPTIONS["VEH_MENU_STYLE"] =         cOpt("interface", _("Vehicle menu style"),
+                                             _("Switch between two different styles of vehicle interaction menu or combination of them."),
+                                             "vertical,horizontal,hybrid", "vertical"
+                                            );
     OPTIONS["MOVE_VIEW_OFFSET"] =       cOpt("interface", _("Move view offset"),
                                              _("Move view by how many squares per keypress."),
                                              1, 50, 1
@@ -654,12 +667,12 @@ void show_options(bool ingame)
     WINDOW* w_options_header = newwin(1, FULL_SCREEN_WIDTH - 2, 1 + iTooltipHeight + iOffsetY, 1 + iOffsetX);
     WINDOW* w_options = newwin(iContentHeight, FULL_SCREEN_WIDTH - 2, iTooltipHeight + 2 + iOffsetY, 1 + iOffsetX);
 
-    wborder(w_options_border, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX, LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX);
-    mvwputch(w_options_border, iTooltipHeight + 1,  0, c_dkgray, LINE_XXXO); // |-
-    mvwputch(w_options_border, iTooltipHeight + 1, 79, c_dkgray, LINE_XOXX); // -|
+    draw_border(w_options_border);
+    mvwputch(w_options_border, iTooltipHeight + 1,  0, BORDER_COLOR, LINE_XXXO); // |-
+    mvwputch(w_options_border, iTooltipHeight + 1, 79, BORDER_COLOR, LINE_XOXX); // -|
 
     for (std::map<int, bool>::iterator iter = mapLines.begin(); iter != mapLines.end(); ++iter) {
-        mvwputch(w_options_border, FULL_SCREEN_HEIGHT-1, iter->first + 1, c_dkgray, LINE_XXOX); // _|_
+        mvwputch(w_options_border, FULL_SCREEN_HEIGHT-1, iter->first + 1, BORDER_COLOR, LINE_XXOX); // _|_
     }
 
     mvwprintz(w_options_border, 0, 36, c_ltred, _(" OPTIONS "));
@@ -731,7 +744,7 @@ void show_options(bool ingame)
         }
 
         //Draw Scrollbar
-        draw_scrollbar(w_options_border, iCurrentLine, iContentHeight, mPageItems[iCurrentPage].size(), iTooltipHeight+2, 0, c_dkgray);
+        draw_scrollbar(w_options_border, iCurrentLine, iContentHeight, mPageItems[iCurrentPage].size(), iTooltipHeight+2, 0, BORDER_COLOR);
 
         //Draw Tabs
         mvwprintz(w_options_header, 0, 7, c_white, "");
@@ -749,7 +762,34 @@ void show_options(bool ingame)
         }
 
         wrefresh(w_options_header);
-        fold_and_print(w_options_tooltip, 0, 0, 78, c_white, "%s", (OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip() + "  #" + OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getDefaultText()).c_str());
+
+#if (defined TILES || defined SDLTILES || defined _WIN32 || defined WINDOWS)
+		if (mPageItems[iCurrentPage][iCurrentLine] == "VIEWPORT_X")
+		{
+			int new_viewport_x, new_window_width;
+			std::stringstream value_conversion(OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getValueName());
+			
+			value_conversion >> new_viewport_x;
+			new_window_width = projected_window_width(new_viewport_x);
+
+			fold_and_print(w_options_tooltip, 0, 0, 78, c_white, "%s #%s -- The window will be %d pixels wide with the selected value.", OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip().c_str(), OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getDefaultText().c_str(), new_window_width);
+		}
+		else if (mPageItems[iCurrentPage][iCurrentLine] == "VIEWPORT_Y")
+		{
+			int new_viewport_y, new_window_height;
+			std::stringstream value_conversion(OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getValueName());
+
+			value_conversion >> new_viewport_y;
+			new_window_height = projected_window_height(new_viewport_y);
+
+			fold_and_print(w_options_tooltip, 0, 0, 78, c_white, "%s #%s -- The window will be %d pixels tall with the selected value.", OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip().c_str(), OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getDefaultText().c_str(), new_window_height);
+		}
+		else
+#endif
+		{
+			fold_and_print(w_options_tooltip, 0, 0, 78, c_white, "%s #%s", OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip().c_str(), OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getDefaultText().c_str());
+		}
+
         if ( iCurrentPage != iLastPage ) {
             iLastPage = iCurrentPage;
             if ( ingame && iCurrentPage == iWorldOptPage ) {

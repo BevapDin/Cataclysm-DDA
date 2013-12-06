@@ -200,6 +200,10 @@ bool game::crafting_allowed()
         add_msg(_("Your morale is too low to craft..."));
         return false;
     }
+    if (u.fine_detail_vision_mod(g) > 2.5) {
+        g->add_msg(_("You can't see to craft!"));
+        return false;
+    }
 
     return true;
 }
@@ -737,8 +741,8 @@ recipe* game::select_crafting_recipe()
                             xpos = 32;
                             ypos++;
                             }
-                            mvwprintz(w_data, ypos, xpos, c_white, _("OR "));
-                            xpos += 3;
+                            mvwprintz(w_data, ypos, xpos, c_white, _("%s "), _("OR"));
+                            xpos += utf8_width(_("OR"))+1;
                         }
                     }
                 }
@@ -792,8 +796,8 @@ recipe* game::select_crafting_recipe()
                             ypos++;
                             xpos = 32;
                         }
-                        mvwprintz(w_data, ypos, xpos, c_white, _("OR "));
-                        xpos += 3;
+                        mvwprintz(w_data, ypos, xpos, c_white, _("%s "), _("OR"));
+                        xpos += utf8_width(_("OR"))+1;
                     }
                 }
             }
@@ -975,14 +979,23 @@ void draw_recipe_tabs(WINDOW *w, craft_cat tab,bool filtered)
     mvwputch(w, 2, width-1, c_ltgray, LINE_OOXX); // ^|
     if(!filtered)
     {
-        draw_tab(w,  2, _("WEAPONS"), (tab == "CC_WEAPON") ? true : false);
-        draw_tab(w, 13, _("AMMO"),    (tab == "CC_AMMO")   ? true : false);
-        draw_tab(w, 21, _("FOOD"),    (tab == "CC_FOOD")   ? true : false);
-        draw_tab(w, 29, _("DRINKS"),  (tab == "CC_DRINK")  ? true : false);
-        draw_tab(w, 39, _("CHEMS"),   (tab == "CC_CHEM")   ? true : false);
-        draw_tab(w, 48, _("ELECTRONICS"), (tab == "CC_ELECTRONIC") ? true : false);
-        draw_tab(w, 63, _("ARMOR"),   (tab == "CC_ARMOR")  ? true : false);
-        draw_tab(w, 72, _("MISC"),    (tab == "CC_MISC")   ? true : false);
+        int pos_x = 2;//draw the tabs on each other
+        int tab_step = 3;//step between tabs, two for tabs border
+        draw_tab(w,  pos_x, _("WEAPONS"), (tab == "CC_WEAPON") ? true : false);
+        pos_x += utf8_width(_("WEAPONS")) + tab_step;
+        draw_tab(w, pos_x, _("AMMO"),    (tab == "CC_AMMO")   ? true : false);
+        pos_x += utf8_width(_("AMMO")) + tab_step;
+        draw_tab(w, pos_x, _("FOOD"),    (tab == "CC_FOOD")   ? true : false);
+        pos_x += utf8_width(_("FOOD")) + tab_step;
+        draw_tab(w, pos_x, _("DRINKS"),  (tab == "CC_DRINK")  ? true : false);
+        pos_x += utf8_width(_("DRINKS")) + tab_step;
+        draw_tab(w, pos_x, _("CHEMS"),   (tab == "CC_CHEM")   ? true : false);
+        pos_x += utf8_width(_("CHEMS")) + tab_step;
+        draw_tab(w, pos_x, _("ELECTRONICS"), (tab == "CC_ELECTRONIC") ? true : false);
+        pos_x += utf8_width(_("ELECTRONICS")) + tab_step;
+        draw_tab(w, pos_x, _("ARMOR"),   (tab == "CC_ARMOR")  ? true : false);
+        pos_x += utf8_width(_("ARMOR")) + tab_step;
+        draw_tab(w, pos_x, _("MISC"),    (tab == "CC_MISC")   ? true : false);
     }
     else
     {
@@ -1355,7 +1368,7 @@ void game::disassemble(char ch)
                       return;
                     }
                   }
-                  if (OPTIONS["QUERY_DISASSEMBLE"] && !(query_yn(_("Really disassemble your %s?"), dis_item->tname(this).c_str())))
+                  if (OPTIONS["QUERY_DISASSEMBLE"] && !(query_yn(_("Really disassemble your %s?"), dis_item->tname().c_str())))
                   {
                    return;
                   }
@@ -1373,7 +1386,7 @@ void game::disassemble(char ch)
     //if we're trying to disassemble a book or magazine
     if(dis_item->is_book())
     {
-       if (OPTIONS["QUERY_DISASSEMBLE"] && !(query_yn(_("Do you want to tear %s into pages?"), dis_item->tname(this).c_str())))
+       if (OPTIONS["QUERY_DISASSEMBLE"] && !(query_yn(_("Do you want to tear %s into pages?"), dis_item->tname().c_str())))
              return;
         else
         {
@@ -1553,35 +1566,44 @@ void pop_recipe_to_top(recipe *r) {
         return;
     }
     recipe_list &list = recipes[r->cat];
-    for(recipe_list::iterator b = list.begin(); b != list.end(); b++) {
-        if(*b != r) {
+    if(list.empty() || list[list.size() - 1] == r) {
+        return;
+    }
+    for(size_t i = 0; i < list.size(); i++) {
+        if(list[i] != r) {
             continue;
         }
-        if(b != list.begin()) {
-            list.erase(b);
-            list.insert(list.begin(), r);
-        }
+        list.erase(list.begin() + i);
+        list.push_back(r);
         return;
     }
 }
 
-static void check(const std::vector<std::vector<component> > &vec, const std::string &rName) {
-    for(std::vector<std::vector<component> >::const_iterator b = vec.begin(); b != vec.end(); b++) {
-        for(std::vector<component>::const_iterator c = b->begin(); c != b->end(); c++) {
-            if(!item_controller->has_template(c->type)) {
+static void check_component_list(const std::vector<std::vector<component> > &vec, const std::string &rName)
+{
+    for (std::vector<std::vector<component> >::const_iterator b = vec.begin(); b != vec.end(); b++)
+    {
+        for (std::vector<component>::const_iterator c = b->begin(); c != b->end(); c++)
+        {
+            if (!item_controller->has_template(c->type))
+            {
                 debugmsg("%s in recipe %s is not a valid item template", c->type.c_str(), rName.c_str());
             }
         }
     }
 }
 
-void check_recipes() {
-    for(recipe_map::const_iterator a = recipes.begin(); a != recipes.end(); a++) {
-        for(recipe_list::const_iterator b = a->second.begin(); b != a->second.end(); b++) {
-            const recipe &r = **b;
-            ::check(r.tools, r.ident);
-            ::check(r.components, r.ident);
-            if(!item_controller->has_template(r.result)) {
+void check_recipe_definitions()
+{
+    for (recipe_map::iterator map_iter = recipes.begin(); map_iter != recipes.end(); ++map_iter)
+    {
+        for (recipe_list::iterator list_iter = map_iter->second.begin(); list_iter != map_iter->second.end(); ++list_iter)
+        {
+            const recipe &r = **list_iter;
+            ::check_component_list(r.tools, r.ident);
+            ::check_component_list(r.components, r.ident);
+            if (!item_controller->has_template(r.result))
+            {
                 debugmsg("result %s in recipe %s is not a valid item template", r.result.c_str(), r.ident.c_str());
             }
         }

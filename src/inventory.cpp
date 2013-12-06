@@ -648,6 +648,11 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
                     add_vpart(veh, forgepart, "FORGE", "battery");
                 }
 
+                const int chempart = veh->part_with_feature(vpart, "CHEMLAB");
+                if (chempart >= 0) {
+                    add_vpart(veh, chempart, "CHEMLAB", "battery");
+                }
+
                 const int cpart = veh->part_with_feature(vpart, "CARGO");
                 if (cpart >= 0) {
                     items_in_vehicle_cargo inveh(veh, veh->parts[cpart].mount_dx, veh->parts[cpart].mount_dy);

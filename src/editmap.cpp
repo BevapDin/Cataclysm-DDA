@@ -264,7 +264,7 @@ point editmap::edit()
     target.x = g->u.posx + g->u.view_offset_x;
     target.y = g->u.posy + g->u.view_offset_y;
     int ch;
-    InputEvent input;
+    InputEvent input = Undefined;
 
     uberdraw = uistate.editmap_nsa_viewmode;
     infoHeight = 14;
@@ -503,8 +503,7 @@ void editmap::update_view(bool update_info)
 
     if ( update_info ) { // only if requested; this messes up windows layered ontop
         int off = 1;
-        wborder(w_info, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
-                LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
+        draw_border(w_info);
 
         mvwprintz(w_info, 0, 2 , c_ltgray, "< %d,%d >--", target.x, target.y);
         for (int i = 1; i < infoHeight - 2; i++) { // clear window
@@ -579,7 +578,7 @@ void editmap::update_view(bool update_info)
 
         if (!g->m.has_flag("CONTAINER", target.x, target.y) && g->m.i_at(target.x, target.y).size() > 0) {
             mvwprintw(w_info, off, 1, _("There is a %s there."),
-                      g->m.i_at(target.x, target.y)[0].tname(g).c_str());
+                      g->m.i_at(target.x, target.y)[0].tname().c_str());
             off++;
             if (g->m.i_at(target.x, target.y).size() > 1) {
                 mvwprintw(w_info, off, 1, _("There are %d other items there as well."), g->m.i_at(target.x, target.y).size() - 1);
@@ -631,8 +630,7 @@ int editmap::edit_ter()
     int pwh = TERRAIN_WINDOW_HEIGHT - 4;
 
     WINDOW *w_pickter = newwin(pwh, width, VIEW_OFFSET_Y, TERRAIN_WINDOW_WIDTH + VIEW_OFFSET_X);
-    wborder(w_pickter, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
-            LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
+    draw_border(w_pickter);
     wrefresh(w_pickter);
 
     int pickh = pwh - 2;
@@ -709,8 +707,7 @@ int editmap::edit_ter()
         mvwputch(w_pickter, sel_terp.y + 1, sel_terp.x + 1, c_tercurs, LINE_XOOX);
         mvwputch(w_pickter, sel_terp.y - 1, sel_terp.x - 1, c_tercurs, LINE_OXXO);
 
-        wborder(w_pickter, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
-                LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
+        draw_border(w_pickter);
         // calc offset, print terrain selection info
         int tlen = tymax * 2;
         int off = tstart + tlen;
@@ -1079,8 +1076,7 @@ int editmap::edit_trp()
     int pwh = TERRAIN_WINDOW_HEIGHT - infoHeight - 1;
 
     WINDOW *w_picktrap = newwin(pwh, width, VIEW_OFFSET_Y, TERRAIN_WINDOW_WIDTH + VIEW_OFFSET_X);
-    wborder(w_picktrap, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
-            LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
+    draw_border(w_picktrap);
     int tmax = pwh - 4;
     int tshift = 0;
     int subch = 0;
@@ -1172,7 +1168,7 @@ int editmap::edit_itm()
     ilmenu.return_invalid = true;
     std::vector<item>& items = g->m.i_at(target.x , target.y );
     for(int i = 0; i < items.size(); i++) {
-        ilmenu.addentry(i, true, 0, "%s%s", items[i].tname(g).c_str(), items[i].light.luminance > 0 ? " L" : "" );
+        ilmenu.addentry(i, true, 0, "%s%s", items[i].tname().c_str(), items[i].light.luminance > 0 ? " L" : "" );
     }
     // todo; ilmenu.addentry(ilmenu.entries.size(), true, 'a', "Add item");
     ilmenu.addentry(-5, true, 'a', "Add item");
@@ -1260,7 +1256,7 @@ int editmap::edit_itm()
             g->wishitem(NULL,target.x, target.y);
             ilmenu.entries.clear();
             for(int i = 0; i < items.size(); i++) {
-               ilmenu.addentry(i, true, 0, "%s%s", items[i].tname(g).c_str(), items[i].light.luminance > 0 ? " L" : "" );
+               ilmenu.addentry(i, true, 0, "%s%s", items[i].tname().c_str(), items[i].light.luminance > 0 ? " L" : "" );
             }
             ilmenu.addentry(-5, true, 'a', "Add item");
             ilmenu.addentry(-10, true, 'q', "Cancel");

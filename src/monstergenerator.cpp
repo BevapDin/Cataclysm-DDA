@@ -69,7 +69,7 @@ void MonsterGenerator::set_mtype_flags(mtype *mon)
     monster_trigger ntrig;
     for (std::set<monster_trigger>::iterator trig = mon->anger.begin(); trig != mon->anger.end(); ++trig){
         ntrig = monster_trigger(*trig);
-        mon->bitanger[*trig] = true;
+        mon->bitanger[ntrig] = true;
     }
     for (std::set<monster_trigger>::iterator trig = mon->fear.begin(); trig != mon->fear.end(); ++trig){
         ntrig = monster_trigger(*trig);
@@ -359,6 +359,14 @@ mtype *MonsterGenerator::get_mtype(std::string mon)
     debugmsg("Could not find monster with type %s", mon.c_str());
     return default_montype;
 }
+bool MonsterGenerator::has_mtype(const std::string& mon) const
+{
+    return mon_templates.count(mon) > 0;
+}
+bool MonsterGenerator::has_species(const std::string& species) const
+{
+    return mon_species.count(species) > 0;
+}
 mtype *MonsterGenerator::get_mtype(int mon)
 {
     int count = 0;
@@ -451,4 +459,18 @@ T MonsterGenerator::get_from_string(std::string tag, std::map<std::string, T> co
         ret = conversion_map[tag];
     }
     return ret;
+}
+
+void MonsterGenerator::check_monster_definitions() const
+{
+    for(std::map<std::string, mtype *>::const_iterator a = mon_templates.begin();
+        a != mon_templates.end(); ++a) {
+        const mtype *mon = a->second;
+        for(std::set<std::string>::iterator spec = mon->species.begin(); spec != mon->species.end();
+            ++spec) {
+            if(!has_species(*spec)) {
+                debugmsg("monster %s has invalid species %s", mon->id.c_str(), spec->c_str());
+            }
+        }
+    }
 }

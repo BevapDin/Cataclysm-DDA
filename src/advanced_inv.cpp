@@ -10,10 +10,12 @@
 #include <sstream>
 #include <math.h>
 #include <vector>
+#include <iterator>
 #include "catacharset.h"
 #include "translations.h"
 #include "uistate.h"
 #include "helper.h"
+#include "item_factory.h"
 #include "auto_pickup.h"
 #ifdef _MSC_VER
 // MSVC doesn't have c99-compatible "snprintf", so do what picojson does and use _snprintf_s instead
@@ -106,20 +108,27 @@ void advanced_inventory::print_items(advanced_inventory_pane &pane, bool active)
     bool compact=(TERMX<=100);
 
     if(isinventory) {
-        int hrightcol=rightcol; // intentionally -not- shifting rightcol since heavy items are rare, and we're stingy on screenspace
-        if (g->u.convert_weight(g->u.weight_carried()) > 9.9 ) {
-          hrightcol--;
-          if (g->u.convert_weight(g->u.weight_carried()) > 99.9 ) { // not uncommon
-            hrightcol--;
-            if (g->u.convert_weight(g->u.weight_carried()) > 999.9 ) {
-              hrightcol--;
-              if (g->u.convert_weight(g->u.weight_carried()) > 9999.9 ) { // hohum. time to consider tile destruction and sinkholes elsewhere?
-                hrightcol--;
-              }
-            }
-          }
+        int hrightcol = columns//right align
+			- helper::to_string(g->u.convert_weight(g->u.weight_carried())).length() - 3//"xxx.y/"
+			- helper::to_string(g->u.convert_weight(g->u.weight_capacity())).length() - 3//"xxx.y_"
+			- helper::to_string(g->u.volume_carried()).length() - 1//"xxx/"
+			- helper::to_string(g->u.volume_capacity() - 2).length() - 1;//"xxx|"
+        nc_color color = c_ltgreen;//red color if overload
+        if (g->u.weight_carried() > g->u.weight_capacity()) {
+        	color = c_red;
         }
-        mvwprintz( window, 4, hrightcol, c_ltgreen, "%3.1f %3d", g->u.convert_weight(g->u.weight_carried()), g->u.volume_carried() );
+        mvwprintz( window, 4, hrightcol, color, "%.1f", g->u.convert_weight(g->u.weight_carried()) );
+        wprintz(window, c_ltgray, "/%.1f ", g->u.convert_weight(g->u.weight_capacity()) );
+		if (g->u.volume_carried() > g->u.volume_capacity() - 2)
+		{
+			color = c_red;
+		}
+		else
+		{
+			color = c_ltgreen;
+		}
+        wprintz(window, color, "%d", g->u.volume_carried() );
+        wprintz(window, c_ltgray, "/%d ", g->u.volume_capacity() - 2 );
     } else {
         int hrightcol=rightcol; // intentionally -not- shifting rightcol since heavy items are rare, and we're stingy on screenspace
         if (g->u.convert_weight(squares[pane.area].weight) > 9.9 ) {
@@ -174,7 +183,7 @@ void advanced_inventory::print_items(advanced_inventory_pane &pane, bool active)
             }
 
         }
-        mvwprintz(window, 6 + x, ( compact ? 1 : 4 ), thiscolor, "%s", items[i].it->tname(g).c_str() );
+        mvwprintz(window, 6 + x, ( compact ? 1 : 4 ), thiscolor, "%s", items[i].it->tname().c_str() );
 
         if(items[i].it->charges > 0) {
             wprintz(window, thiscolor, " (%d)",items[i].it->charges);
@@ -209,7 +218,7 @@ void advanced_inventory::print_items(advanced_inventory_pane &pane, bool active)
 
         wprintz(window, (items[i].volume > 0 ? thiscolor : thiscolordark), " %3d", items[i].volume );
         if(active && items[i].autopickup==true) {
-          mvwprintz(window,6+x,1, magenta_background(items[i].it->color(&g->u)),"%s",(compact?items[i].it->tname(g).substr(0,1):">").c_str());
+          mvwprintz(window,6+x,1, magenta_background(items[i].it->color(&g->u)),"%s",(compact?items[i].it->tname().substr(0,1):">").c_str());
         }
       }
     }
@@ -249,10 +258,8 @@ struct advanced_inv_sorter {
                     break;
                 }
                 case SORTBY_CATEGORY: {
-                    if ( d1.cat.sort_order != d2.cat.sort_order ) {
-                      return d1.cat.sort_order < d2.cat.sort_order;
-                    } else if ( d1.cat.name != d2.cat.name) {
-                      return d1.cat.name < d2.cat.name;
+                    if ( d1.cat != d2.cat ) {
+                      return *d1.cat < *d2.cat;
                     } else if ( d1.volume == -8 ) {
                       return true;
                     } else if ( d2.volume == -8 ) {
@@ -280,10 +287,17 @@ struct advanced_inv_sorter {
             };
         }
         // secondary sort by name
-        std::string n1=d1.name;
-        std::string n2=d2.name;
+        std::string n1;
+        std::string n2;
+		if (d1.name_without_prefix == d2.name_without_prefix){//if names without prefix equal, compare full name
+			n1 = d1.name;
+			n2 = d2.name;
+		} else {//else compare name without prefix
+			n1 = d1.name_without_prefix;
+			n2 = d2.name_without_prefix;
+		}
         return std::lexicographical_compare( n1.begin(), n1.end(),
-            n2.begin(), n2.end(), advanced_inv_sort_case_insensitive_less() );
+				n2.begin(), n2.end(), advanced_inv_sort_case_insensitive_less() );
     };
 };
 
@@ -360,34 +374,6 @@ void advanced_inv_update_area( advanced_inv_area &area, game *g ) {
     }
     area.volume=0; // must update in main function
     area.weight=0; // must update in main function
-}
-
-advanced_inv_category advanced_inv_getinvcat(item *it) {
-    static const std::string invcats[10] = { _("guns"), _("ammo"), _("weapons"), _("tools"), _("clothing"), _("food"), _("drugs"), _("books"), _("mods"), _("other") };
-    if ( it->type->is_container() && !it->contents.empty() ) {
-        return advanced_inv_getinvcat(&(it->contents[0]));
-    }
-    if ( !it->type->category.empty() ) {
-        for(size_t i = 0; i < sizeof(invcats) / sizeof(invcats[0]); i++) {
-            if(it->type->category == invcats[i]) {
-                return advanced_inv_category(i, invcats[i]);
-            }
-        }
-        return advanced_inv_category(sizeof(invcats) / sizeof(invcats[0]), it->type->category);
-    }
-    if ( it->is_gun() ) return advanced_inv_category(0, invcats[0]);
-    if ( it->is_ammo() ) return advanced_inv_category(1, invcats[1]);
-    if ( it->is_weap() ) return advanced_inv_category(2, invcats[2]);
-    if ( it->is_tool() ) return advanced_inv_category(3, invcats[3]);
-    if ( it->is_armor() ) return advanced_inv_category(4, invcats[4]);
-    if ( it->is_food_container() ) return advanced_inv_category(5, invcats[5]);
-    if ( it->is_food() ) {
-        it_comest* comest = dynamic_cast<it_comest*>(it->type);
-        return ( comest->comesttype != "MED" ? advanced_inv_category(5, invcats[5]) : advanced_inv_category(6, invcats[6]) );
-    }
-    if ( it->is_book() ) return advanced_inv_category(8, invcats[7]);
-    if (it->is_gunmod() || it->is_bionic()) return advanced_inv_category(8, invcats[8]);
-    return advanced_inv_category(9, invcats[9]);
 }
 
 std::string center_text(const char *str, int width)
@@ -492,7 +478,7 @@ void advanced_inventory::recalc_pane(int i)
     map &m = g->m;
     int idest = (i == left ? right : left);
     panes[i].items.clear();
-    std::set<std::string> hascat;
+    std::set<std::string> has_category;
     panes[i].numcats = 0;
     int avolume = 0;
     int aweight = 0;
@@ -502,7 +488,8 @@ void advanced_inventory::recalc_pane(int i)
         for (unsigned x = 0; x < stacks.size(); ++x ) {
             item &item = stacks[x]->front();
             advanced_inv_listitem it;
-            it.name = item.tname(g);
+            it.name = item.tname();
+            it.name_without_prefix = item.tname( false );
             if ( filtering && ! cached_lcmatch(it.name, panes[i].filter, panes[i].filtercache ) ) {
                 continue;
             }
@@ -516,11 +503,11 @@ void advanced_inventory::recalc_pane(int i)
             it.stacks = size;
             it.weight = item.weight() * size;
             it.volume = item.volume() * size;
-            it.cat = advanced_inv_getinvcat(&item);
+            it.cat = &(item.get_category());
             it.it = &item;
             it.area = panes[i].area;
-            if( hascat.count(it.cat.name) == 0 ) {
-                hascat.insert(it.cat.name);
+            if( has_category.count(it.cat->id) == 0 ) {
+                has_category.insert(it.cat->id);
                 panes[i].numcats++;
                 if(panes[i].sortby == SORTBY_CATEGORY) {
                     advanced_inv_listitem itc;
@@ -529,7 +516,7 @@ void advanced_inventory::recalc_pane(int i)
                     itc.weight = -8;
                     itc.volume = -8;
                     itc.cat = it.cat;
-                    itc.name = it.cat.name;
+                    itc.name = it.cat->name;
                     itc.area = panes[i].area;
                     panes[i].items.push_back(itc);
                 }
@@ -558,7 +545,8 @@ void advanced_inventory::recalc_pane(int i)
                 for (unsigned x = 0; x < items.size(); x++) {
                     advanced_inv_listitem it;
                     it.idx = x;
-                    it.name = items[x].tname(g);
+                    it.name = items[x].tname();
+		               			it.name_without_prefix = items[x].tname( false );
                     if ( filtering && ! cached_lcmatch(it.name, panes[i].filter, panes[i].filtercache ) ) {
                         continue;
                     }
@@ -568,11 +556,11 @@ void advanced_inventory::recalc_pane(int i)
                     it.stacks = 1;
                     it.weight = items[x].weight();
                     it.volume = items[x].volume();
-                    it.cat = advanced_inv_getinvcat(&items[x]);
+                    it.cat = &(items[x].get_category());
                     it.it = &items[x];
                     it.area = s;
-                    if( hascat.count(it.cat.name) == 0 ) {
-                        hascat.insert(it.cat.name);
+                    if( has_category.count(it.cat->id) == 0 ) {
+                        has_category.insert(it.cat->id);
                         panes[i].numcats++;
                         if(panes[i].sortby == SORTBY_CATEGORY) {
                             advanced_inv_listitem itc;
@@ -581,7 +569,7 @@ void advanced_inventory::recalc_pane(int i)
                             itc.weight = -8;
                             itc.volume = -8;
                             itc.cat = it.cat;
-                            itc.name = it.cat.name;
+                            itc.name = it.cat->name;
                             itc.area = s;
                             panes[i].items.push_back(itc);
                         }
@@ -801,7 +789,7 @@ void advanced_inventory::display(game * gp, player * pp) {
 
             werase(head);
             {
-                wborder(head,LINE_XOXO,LINE_XOXO,LINE_OXOX,LINE_OXOX,LINE_OXXO,LINE_OOXX,LINE_XXOO,LINE_XOOX);
+                draw_border(head);
                 int line=1;
                 if( checkshowmsg || showmsg ) {
                   for (int i = g->messages.size() - 1; i >= 0 && line < 4; i--) {
@@ -1017,7 +1005,7 @@ void advanced_inventory::display(game * gp, player * pp) {
                         string_input_popup( popupmsg, 20,
                              helper::to_string(
                                  ( amount > max ? max : amount )
-                             )
+                             ), "", "", -1, true//input only digits
                         )
                     );
                 }
@@ -1163,7 +1151,7 @@ void advanced_inventory::display(game * gp, player * pp) {
                                     string_input_popup( popupmsg, 20,
                                          helper::to_string(
                                              ( amount > max ? max : amount )
-                                         )
+                                         ), "", "", -1, true//input only digits
                                     )
                                 );
                                 if ( amount > max ) amount = max;
@@ -1194,7 +1182,7 @@ void advanced_inventory::display(game * gp, player * pp) {
                     recalc=true;
 
                     item new_item = (*it);
-                    
+
                     if ( trycharges > 0 ) {
                         new_item.charges = trycharges;
                     }
@@ -1314,7 +1302,7 @@ void advanced_inventory::display(game * gp, player * pp) {
                 vThisItem.push_back(iteminfo(_("DESCRIPTION"), center_text(_("[up / page up] previous"), rightWidth - 4)));
                 vThisItem.push_back(iteminfo(_("DESCRIPTION"), center_text(_("[down / page down] next"), rightWidth - 4)));
                 ret=compare_split_screen_popup( 1 + colstart + ( src == isinventory ? w_width/2 : 0 ),
-                    rightWidth, 0, it->tname(g), vThisItem, vDummy );
+                    rightWidth, 0, it->tname(), vThisItem, vDummy );
             }
             if ( ret == KEY_NPAGE || ret == KEY_DOWN ) {
                 changey += 1;

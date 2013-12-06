@@ -74,8 +74,7 @@ void live_view::show(const int x, const int y)
     last_height = w_live_view->height;
 #endif
 
-    wborder(w_live_view, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
-        LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
+    draw_border(w_live_view);
 
 #if (defined TILES || defined SDLTILES || defined _WIN32 || defined WINDOWS)
     w_live_view->height = full_height;
@@ -119,7 +118,7 @@ void live_view::print_items(std::vector<item> &items, int &line) const
 {
     std::map<std::string, int> item_names;
     for (int i = 0; i < items.size(); i++) {
-        std::string name = items[i].tname(g);
+        std::string name = items[i].tname();
         if (item_names.find(name) == item_names.end()) {
             item_names[name] = 0;
         }

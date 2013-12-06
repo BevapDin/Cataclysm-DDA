@@ -141,6 +141,4 @@ class inventory
   bool sorted;
 };
 
-void init_inventory_categories(); // inventory_ui.cpp
-
 #endif

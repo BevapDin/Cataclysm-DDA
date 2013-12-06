@@ -131,6 +131,6 @@ extern recipe_map recipes; // The list of valid recipes
 void load_quality(JsonObject &jo);
 extern std::map<std::string,quality> qualities;
 
-void check_recipes();
+void check_recipe_definitions();
 
 #endif

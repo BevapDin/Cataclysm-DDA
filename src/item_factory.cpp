@@ -4,6 +4,7 @@
 #include "json.h"
 #include "addiction.h"
 #include "translations.h"
+#include "bodypart.h"
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
@@ -14,6 +15,17 @@
 #ifndef mfb
 #define mfb(n) static_cast <unsigned long> (1 << (n))
 #endif
+
+static const std::string category_id_guns("guns");
+static const std::string category_id_ammo("ammo");
+static const std::string category_id_weapons("weapons");
+static const std::string category_id_tools("tools");
+static const std::string category_id_clothing("clothing");
+static const std::string category_id_drugs("drugs");
+static const std::string category_id_food("food");
+static const std::string category_id_books("books");
+static const std::string category_id_mods("mods");
+static const std::string category_id_other("other");
 
 Item_factory* item_controller = new Item_factory();
 
@@ -68,6 +80,8 @@ void Item_factory::init(){
     iuse_function_list["CHEW"] = &iuse::chew;
     iuse_function_list["MUTAGEN"] = &iuse::mutagen;
     iuse_function_list["PURIFIER"] = &iuse::purifier;
+    iuse_function_list["MUT_IV"] = &iuse::mut_iv;
+    iuse_function_list["PURIFY_IV"] = &iuse::purify_iv;
     iuse_function_list["MARLOSS"] = &iuse::marloss;
     iuse_function_list["DOGFOOD"] = &iuse::dogfood;
     iuse_function_list["CATFOOD"] = &iuse::catfood;
@@ -222,6 +236,7 @@ void Item_factory::init(){
     iuse_function_list["TOOL_BELT"] = &iuse::tool_belt;
     iuse_function_list["QUIVER"] = &iuse::quiver;
     iuse_function_list["DOLLCHAT"] = &iuse::talking_doll;
+    iuse_function_list["BELL"] = &iuse::bell;
     // MACGUFFINS
     iuse_function_list["MCG_NOTE"] = &iuse::mcg_note;
     // ARTIFACTS
@@ -234,14 +249,33 @@ void Item_factory::init(){
     techniques_list["PRECISE"] = "tec_precise";
     techniques_list["RAPID"] = "tec_rapid";
 
-    bodyparts_list["TORSO"] = mfb(bp_torso);
-    bodyparts_list["HEAD"] = mfb(bp_head);
-    bodyparts_list["EYES"] = mfb(bp_eyes);
-    bodyparts_list["MOUTH"] = mfb(bp_mouth);
-    bodyparts_list["ARMS"] = mfb(bp_arms);
-    bodyparts_list["HANDS"] = mfb(bp_hands);
-    bodyparts_list["LEGS"] = mfb(bp_legs);
-    bodyparts_list["FEET"] = mfb(bp_feet);
+    // Load default categories with their default sort_rank
+    // Negative rank so the default categories come before all
+    // the explicit defined categories from json
+    // (assuming the category definitions in json use positive sort_ranks).
+    // Note that json data might override these settings
+    // (simply define a category in json with the id
+    // taken from category_id_* and that definition will get
+    // used - see load_item_category)
+    add_category(category_id_guns, -20, _("guns"));
+    add_category(category_id_ammo, -19, _("ammo"));
+    add_category(category_id_weapons, -18, _("weapons"));
+    add_category(category_id_tools, -17, _("tools"));
+    add_category(category_id_clothing, -16, _("clothing"));
+    add_category(category_id_food, -15, _("food"));
+    add_category(category_id_drugs, -14, _("drugs"));
+    add_category(category_id_books, -13, _("books"));
+    add_category(category_id_mods, -12, _("mods"));
+    add_category(category_id_other, -11, _("other"));
+}
+
+void Item_factory::add_category(const std::string &id, int sort_rank, const std::string &name) {
+    // unconditionally override any existing definition
+    // as there should be none.
+    item_category &cat = m_categories[id];
+    cat.id = id;
+    cat.sort_rank = sort_rank;
+    cat.name = name;
 }
 
 //Will eventually be deprecated - Loads existing item format into the item factory, and vice versa
@@ -255,6 +289,109 @@ void Item_factory::init_old() {
     //And add them to the various item lists, as needed.
     for(std::map<Item_tag, itype*>::iterator iter = new_templates.begin(); iter != new_templates.end(); ++iter) {
       standard_itype_ids.push_back(iter->first);
+    }
+}
+
+inline int ammo_type_defined(const std::string &ammo) {
+    if(ammo == "NULL" || ammo == "generic_no_ammo") {
+        return 1; // Known ammo type
+    }
+    if(ammo_name(ammo) != "XXX") {
+        return 1; // Known ammo type
+    }
+    if(!item_controller->has_template(ammo)) {
+        return 0; // Unknown ammo type
+    }
+    return 2; // Unknown from ammo_name, but defined as itype
+}
+
+void Item_factory::check_ammo_type(std::ostream& msg, const std::string &ammo) const {
+    if(ammo == "NULL" || ammo == "generic_no_ammo") {
+        return;
+    }
+    if(ammo_name(ammo) == "XXX") {
+        msg << string_format("ammo type %s not listed in ammo_name() function", ammo.c_str()) << "\n";
+    }
+    if(ammo == "UPS") {
+        return;
+    }
+    for(std::map<Item_tag, itype*>::const_iterator it = m_templates.begin(); it != m_templates.end(); ++it) {
+        const it_ammo* ammot = dynamic_cast<const it_ammo*>(it->second);
+        if(ammot == 0) {
+            continue;
+        }
+        if(ammot->type == ammo) {
+            return;
+        }
+    }
+    msg << string_format("there is no actuall ammo of type %s defined", ammo.c_str()) << "\n";
+}
+
+void Item_factory::check_itype_definitions() const {
+    std::ostringstream main_stream;
+    for(std::map<Item_tag, itype*>::const_iterator it = m_templates.begin(); it != m_templates.end(); ++it) {
+        std::ostringstream msg;
+        const itype* type = it->second;
+        if(type->m1 != "null" && !material_type::has_material(type->m1)) {
+            msg << string_format("invalid material %s", type->m1.c_str()) << "\n";
+        }
+        if(type->m2 != "null" && !material_type::has_material(type->m2)) {
+            msg << string_format("invalid material %s", type->m2.c_str()) << "\n";
+        }
+        const it_comest* comest = dynamic_cast<const it_comest*>(type);
+        if(comest != 0) {
+            if(comest->container != "null" && !has_template(comest->container)) {
+                msg << string_format("invalid container property %s", comest->container.c_str()) << "\n";
+            }
+            if(comest->container != "null" && !has_template(comest->tool)) {
+                msg << string_format("invalid tool property %s", comest->tool.c_str()) << "\n";
+            }
+        }
+        const it_ammo* ammo = dynamic_cast<const it_ammo*>(type);
+        if(ammo != 0) {
+            check_ammo_type(msg, ammo->type);
+            if(ammo->casing != "NULL" && !has_template(ammo->casing)) {
+                msg << string_format("invalid casing property %s", ammo->casing.c_str()) << "\n";
+            }
+        }
+        const it_gun* gun = dynamic_cast<const it_gun*>(type);
+        if(gun != 0) {
+            check_ammo_type(msg, gun->ammo);
+            if(gun->skill_used == 0) {
+                msg << string_format("uses no skill") << "\n";
+            }
+        }
+        const it_gunmod* gunmod = dynamic_cast<const it_gunmod*>(type);
+        if(gunmod != 0) {
+            check_ammo_type(msg, gunmod->newtype);
+        }
+        const it_tool* tool = dynamic_cast<const it_tool*>(type);
+        if(tool != 0) {
+            if(tool->max_charges != 0 || tool->def_charges != 0) {
+                check_ammo_type(msg, tool->ammo);
+            }
+            if(tool->revert_to != "null" && !has_template(tool->revert_to)) {
+                msg << string_format("invalid revert_to property %s", tool->revert_to.c_str()) << "\n";
+            }
+        }
+        if(msg.str().empty()) {
+            continue;
+        }
+        main_stream << "warnings for type " << type->id << ":\n" << msg.str() << "\n";
+        const std::string &buffer = main_stream.str();
+        const size_t lines = std::count(buffer.begin(), buffer.end(), '\n');
+        if(lines > 10) {
+            fold_and_print(stdscr, 0, 0, getmaxx(stdscr), c_red, "%s\n  Press any key...", buffer.c_str());
+            getch();
+            werase(stdscr);
+            main_stream.str(std::string());
+        }
+    }
+    const std::string &buffer = main_stream.str();
+    if(!buffer.empty()) {
+        fold_and_print(stdscr, 0, 0, getmaxx(stdscr), c_red, "%s\n  Press any key...", buffer.c_str());
+        getch();
+        werase(stdscr);
     }
 }
 
@@ -317,6 +454,18 @@ const Item_tag Item_factory::id_from(const Item_tag group_tag){
     }
 }
 
+//Returns a random template name from the list of all templates, and if it should come with ammo
+const Item_tag Item_factory::id_from(const Item_tag group_tag, bool & with_ammo ) {
+    std::map<Item_tag, Item_group*>::iterator group_iter = m_template_groups.find(group_tag);
+    //If the tag isn't found, just return a reference to missing item.
+    if(group_iter != m_template_groups.end()){
+        with_ammo = group_iter->second->guns_have_ammo();
+        return group_iter->second->get_id();
+    } else {
+        with_ammo = false;
+        return "MISSING_ITEM";
+    }
+}
 
 item Item_factory::create(Item_tag id, int created_at){
     return item(find_template(id), created_at);
@@ -627,10 +776,6 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
         fu.time_modi = 1;
         fu.charges_modi = 1;
     }
-//    new_item_template->qualities.clear();
-    if(jo.has_member("category")) {
-        new_item_template->category = jo.get_string("category");
-    }
     for(std::map<std::string, int>::iterator a = new_item_template->qualities.begin(); a != new_item_template->qualities.end(); ++a) {
         std::ostringstream buffer;
         buffer << "func:" << a->first << ":" << a->second;
@@ -647,15 +792,33 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
         fu.time_modi = 1;
         fu.charges_modi = 1;
     }
-//    new_item_template->qualities.clear();
-    if(jo.has_member("category")) {
-        new_item_template->category = jo.get_string("category");
-    }
 
     new_item_template->techniques = jo.get_tags("techniques");
 
     new_item_template->use = (!jo.has_member("use_action") ? &iuse::none :
                               use_from_string(jo.get_string("use_action")));
+
+    if(jo.has_member("category")) {
+        new_item_template->category = get_category(jo.get_string("category"));
+    } else {
+        new_item_template->category = get_category(calc_category(new_item_template));
+    }
+}
+
+void Item_factory::load_item_category(JsonObject &jo)
+{
+    const std::string id = jo.get_string("id");
+    // reuse an existing definition,
+    // override the name and the sort_rank if
+    // these are present in the json
+    item_category &cat = m_categories[id];
+    cat.id = id;
+    if(jo.has_member("name")) {
+        cat.name = _(jo.get_string("name").c_str());
+    }
+    if(jo.has_member("sort_rank")) {
+        cat.sort_rank = jo.get_int("sort_rank");
+    }
 }
 
 void Item_factory::set_qualities_from_json(JsonObject& jo, std::string member, itype* new_item_template)
@@ -672,7 +835,7 @@ void Item_factory::set_qualities_from_json(JsonObject& jo, std::string member, i
     }
 }
 
-unsigned Item_factory::flags_from_json(JsonObject& jo, std::string member, std::string flag_type)
+unsigned Item_factory::flags_from_json(JsonObject& jo, const std::string & member, std::string flag_type)
 {
     //If none is found, just use the standard none action
     unsigned flag = 0;
@@ -744,6 +907,8 @@ void Item_factory::load_item_group(JsonObject &jsobj)
     Item_group *current_group = new Item_group(group_id);
     m_template_groups[group_id] = current_group;
 
+    current_group->m_guns_have_ammo = jsobj.get_bool("guns_have_ammo", false );
+
     JsonArray items = jsobj.get_array("items");
     while (items.has_more()) {
         JsonArray pair = items.next_array();
@@ -776,27 +941,18 @@ use_function Item_factory::use_from_string(std::string function_name){
     }
 }
 
-void Item_factory::set_flag_by_string(unsigned& cur_flags, std::string new_flag, std::string flag_type)
+void Item_factory::set_flag_by_string(unsigned& cur_flags, const std::string & new_flag, const std::string & flag_type)
 {
-    std::map<Item_tag, unsigned> flag_map;
-    if(flag_type=="bodyparts"){
-      flag_map = bodyparts_list;
-      set_bitmask_by_string(flag_map, cur_flags, new_flag);
+    if( flag_type == "bodyparts" ) {
+        // global defined in bodypart.h
+        std::map<std::string, body_part>::const_iterator found_flag_iter = body_parts.find(new_flag);
+        if(found_flag_iter != body_parts.end()) {
+            cur_flags = cur_flags | mfb( (unsigned)found_flag_iter->second );
+        } else {
+            debugmsg("Invalid item bodyparts flag: %s", new_flag.c_str());
+        }
     }
 
-}
-
-void Item_factory::set_bitmask_by_string(std::map<Item_tag, unsigned> flag_map, unsigned& cur_bitmask, std::string new_flag)
-{
-    std::map<Item_tag, unsigned>::const_iterator found_flag_iter = flag_map.find(new_flag);
-    if(found_flag_iter != flag_map.end())
-    {
-        cur_bitmask = cur_bitmask | found_flag_iter->second;
-    }
-    else
-    {
-        debugmsg("Invalid item flag (etc.): %s", new_flag.c_str());
-    }
 }
 
 phase_id Item_factory::phase_from_tag(Item_tag name){
@@ -820,4 +976,71 @@ void Item_factory::set_intvar(std::string tag, unsigned int & var, int min, int 
             var=candidate;
         }
     }
+}
+
+bool item_category::operator<(const item_category &rhs) const
+{
+    if(sort_rank != rhs.sort_rank) {
+        return sort_rank < rhs.sort_rank;
+    }
+    if(name != rhs.name) {
+        return name < rhs.name;
+    }
+    return id < rhs.id;
+}
+
+bool item_category::operator==(const item_category &rhs) const
+{
+    return sort_rank == rhs.sort_rank &&
+           name == rhs.name &&
+           id == rhs.id;
+}
+
+bool item_category::operator!=(const item_category &rhs) const
+{
+    return !(*this == rhs);
+}
+
+const item_category *Item_factory::get_category(const std::string &id)
+{
+    const CategoryMap::const_iterator a = m_categories.find(id);
+    if(a != m_categories.end()) {
+        return &a->second;
+    }
+    // Unknown / invalid category id, improvise and make this
+    // a new category with at least a name.
+    item_category &cat = m_categories[id];
+    cat.id = id;
+    cat.name = id;
+    return &cat;
+}
+
+const std::string &Item_factory::calc_category(itype *it)
+{
+    if (it->is_gun() ) {
+        return category_id_guns;
+    }
+    if (it->is_ammo() ) {
+        return category_id_ammo;
+    }
+    if (it->is_tool() ) {
+        return category_id_tools;
+    }
+    if (it->is_armor() ) {
+        return category_id_clothing;
+    }
+    if (it->is_food() ) {
+        it_comest *comest = dynamic_cast<it_comest *>(it);
+        return ( comest->comesttype == "MED" ? category_id_drugs : category_id_food );
+    }
+    if (it->is_book() ) {
+        return category_id_books;
+    }
+    if (it->is_gunmod() || it->is_bionic()) {
+        return category_id_mods;
+    }
+    if (it->melee_dam > 7 || it->melee_cut > 5) {
+        return category_id_weapons;
+    }
+    return category_id_other;
 }

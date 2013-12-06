@@ -60,6 +60,9 @@ void player_activity::deserialize(JsonIn &jsin)
     if ( !data.read( "type", tmptype ) || type >= NUM_ACTIVITIES ) {
         debugmsg( "Bad activity data:\n%s", data.str().c_str() );
     }
+    if ( !data.read( "invlet", tmpinv)) {
+        debugmsg( "Bad activity data:\n%s", data.str().c_str() );
+    }
     type = activity_type(tmptype);
     data.read( "moves_left", moves_left );
     data.read( "index", index );
@@ -391,7 +394,7 @@ void player::deserialize(JsonIn &jsin)
     data.read( "mutations", my_mutations );
 
     set_highest_cat_level();
-    // testme  drench_mut_calc();
+    drench_mut_calc();
 
     parray = data.get_array("temp_cur");
     if ( parray.size() == num_bp ) {
@@ -1073,7 +1076,7 @@ void vehicle_part::deserialize(JsonIn &jsin)
             throw (std::string)"bad vehicle part, id: %s" + pid;
         }
     }
-    id = pid;
+    setid(pid);
     data.read("mount_dx", mount_dx);
     data.read("mount_dy", mount_dy);
     data.read("hp", hp );
@@ -1123,6 +1126,7 @@ void vehicle::deserialize(JsonIn &jsin)
     data.read("cruise_velocity", cruise_velocity);
     data.read("cruise_on", cruise_on);
     data.read("engine_on", engine_on);
+    data.read("has_pedals", has_pedals);
     data.read("tracking_on", tracking_on);
     data.read("lights_on", lights_on);
     data.read("overhead_lights_on", overhead_lights_on);
@@ -1149,12 +1153,18 @@ void vehicle::deserialize(JsonIn &jsin)
 		parts.back().hp = 1;
 	}
 
+/*
+    for(int i=0;i < parts.size();i++ ) {
+       parts[i].setid(parts[i].id);
+    }
+*/
     /* After loading, check if the vehicle is from the old rules and is missing
      * frames. */
     if ( savegame_loading_version < 11 ) {
         add_missing_frames();
     }
     find_horns ();
+    find_parts ();
     find_power ();
     find_fuel_tanks ();
     find_exhaust ();
@@ -1180,6 +1190,7 @@ void vehicle::serialize(JsonOut &json) const
     json.member( "cruise_velocity", cruise_velocity );
     json.member( "cruise_on", cruise_on );
     json.member( "engine_on", engine_on );
+    json.member( "has_pedals", has_pedals );
     json.member( "tracking_on", tracking_on );
     json.member( "lights_on", lights_on );
     json.member( "overhead_lights_on", overhead_lights_on );

@@ -101,19 +101,19 @@ material_type* material_type::find_material(std::string ident)
         return &(found->second);
     } else {
         debugmsg("Tried to get invalid material: %s", ident.c_str());
-        return base_material();
+        static material_type null_material;
+        return &null_material;
     }
 }
 
 bool material_type::has_material(const std::string &ident)
 {
-    material_map::iterator found = _all_materials.find(ident);
-    return (found != _all_materials.end());
+    return _all_materials.count(ident) > 0;
 }
 
 material_type* material_type::base_material()
 {
-    return material_type::find_material("");
+    return material_type::find_material("null");
 }
 
 int material_type::dam_resist(damage_type damtype) const

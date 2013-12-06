@@ -46,7 +46,9 @@ class iuse
   int blech            (player *p, item *it, bool t);
   int chew            (player *p, item *it, bool t);
   int mutagen          (player *p, item *it, bool t);
+  int mut_iv          (player *p, item *it, bool t);
   int purifier         (player *p, item *it, bool t);
+  int purify_iv          (player *p, item *it, bool t);
   int marloss          (player *p, item *it, bool t);
   int dogfood          (player *p, item *it, bool t);
   int catfood          (player *p, item *it, bool t);
@@ -196,6 +198,7 @@ class iuse
   int jet_injector     (player *p, item *it, bool t);
   int contacts (player *p, item *it, bool t);
   int talking_doll     (player *p, item *it, bool t);
+  int bell             (player *p, item *it, bool t);
 // MACGUFFINS
   int mcg_note         (player *p, item *it, bool t);
 // ARTIFACTS

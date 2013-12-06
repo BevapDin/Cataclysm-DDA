@@ -434,10 +434,21 @@ void npc::talk_to_u(game *g)
   }
  }
 
- if (d.topic_stack.back() == TALK_NONE)
+ if (d.topic_stack.back() == TALK_NONE) {
   d.topic_stack.back() = pick_talk_topic(&(g->u));
-
+ }
+ 
  moves -= 100;
+ 
+ if(g->u.has_disease("deaf")) {
+  g->add_msg(_("%s tries to talk to you, but you're deaf!"), name.c_str());
+  if(d.topic_stack.back() == TALK_MUG) {
+   g->add_msg(_("When you don't respond, %s becomes angry!"), name.c_str());
+   make_angry();
+  }
+  return;
+ }
+ 
  decide_needs();
 
  d.win = newwin(FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
@@ -1861,6 +1872,7 @@ void talk_function::set_engagement_all(game *g, npc *p)
  p->combat_rules.engagement = ENGAGE_ALL;
 }
 
+//TODO currently this does not handle martial art styles correctly
 void talk_function::start_training(game *g, npc *p)
 {
  int cost = 0, time = 0;
@@ -2170,18 +2182,18 @@ Tab key to switch lists, letters to pick items, Enter to finalize, Esc to quit\n
                              (cash >= 0 && p->cash  >= cash) ?
                              c_green : c_red),
              (cash >= 0 ? _("Profit $%d") : _("Cost $%d")), abs(cash));
-   if (deal != "")
-    mvwprintz(w_head, 3, 45, (cost < 0 ? c_ltred : c_ltgreen), deal.c_str());
-   if (focus_them)
-    wattron(w_them, c_yellow);
-   else
-    wattron(w_you,  c_yellow);
-   wborder(w_them, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
-                   LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
-   wborder(w_you,  LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
-                   LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
-   wattroff(w_them, c_yellow);
-   wattroff(w_you,  c_yellow);
+
+    if (deal != "") {
+        mvwprintz(w_head, 3, 45, (cost < 0 ? c_ltred : c_ltgreen), deal.c_str());
+    }
+    if (focus_them) {
+        draw_border(w_them, c_yellow);
+        draw_border(w_you);
+    } else {
+        draw_border(w_them);
+        draw_border(w_you, c_yellow);
+    }
+
    mvwprintz(w_them, 0, 1, (cash < 0 || p->cash >= cash ? c_green : c_red),
              _("%s: $%d"), p->name.c_str(), p->cash);
    mvwprintz(w_you,  0, 2, (cash > 0 || g->u.cash>=cash*-1 ? c_green:c_red),
@@ -2248,8 +2260,7 @@ Tab key to switch lists, letters to pick items, Enter to finalize, Esc to quit\n
    update = true;
    w_tmp = newwin(3, 21, 1+(TERMY-FULL_SCREEN_HEIGHT)/2, 30+(TERMX-FULL_SCREEN_WIDTH)/2);
    mvwprintz(w_tmp, 1, 1, c_red, _("Examine which item?"));
-   wborder(w_tmp, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
-                  LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
+   draw_border(w_tmp);
    wrefresh(w_tmp);
    help = getch();
    help -= 'a';

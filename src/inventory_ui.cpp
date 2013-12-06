@@ -3,6 +3,7 @@
 #include "uistate.h"
 #include "keypress.h"
 #include "translations.h"
+#include "item_factory.h"
 #include "options.h"
 #include <string>
 #include <vector>
@@ -10,58 +11,38 @@
 #include <sstream>
 #include <algorithm>
 
-std::vector<std::string> CATEGORIES;
+typedef std::vector<item_category> CategoriesVector;
 
-void init_inventory_categories()
+std::vector<int> find_firsts(invslice &slice, CategoriesVector &CATEGORIES)
 {
-    CATEGORIES.push_back(_("GROUND:"));
-    CATEGORIES.push_back(_("FIREARMS:"));
-    CATEGORIES.push_back(_("AMMUNITION:"));
-    CATEGORIES.push_back(_("CLOTHING:"));
-    CATEGORIES.push_back(_("FOOD/DRINKS:"));
-    CATEGORIES.push_back(_("TOOLS:"));
-    CATEGORIES.push_back(_("BOOKS:"));
-    CATEGORIES.push_back(_("WEAPONS:"));
-    CATEGORIES.push_back(_("MODS/BIONICS:"));
-    CATEGORIES.push_back(_("MEDICINE/DRUGS:"));
-    CATEGORIES.push_back(_("OTHER:"));
-}
+    static const item_category category_on_ground(
+        "GROUND:",
+        _("GROUND:"),
+        -1000 // should be the first category
+    );
 
-//TODO: make this function not have issues with items that are classed as multiple things
-std::vector<int> find_firsts(invslice &slice)
-{
     std::vector<int> firsts;
+    CATEGORIES.clear();
+    CATEGORIES.push_back(category_on_ground);
+    for (int i = 0; i < slice.size(); i++) {
+        item& it = slice[i]->front();
+        const item_category &category = it.get_category();
+        if(std::find(CATEGORIES.begin(), CATEGORIES.end(), category) == CATEGORIES.end()) {
+            CATEGORIES.push_back(category);
+        }
+    }
     for (int i = 0; i < (CATEGORIES.size()-1); i++) {
         firsts.push_back(-1);
     }
 
     for (int i = 0; i < slice.size(); i++) {
         item& it = slice[i]->front();
-        if (firsts[0] == -1 && it.is_gun()) {
-            firsts[0] = i;
-        } else if (firsts[1] == -1 && it.is_ammo()) {
-            firsts[1] = i;
-        } else if (firsts[2] == -1 && it.is_armor()) {
-            firsts[2] = i;
-        } else if (firsts[3] == -1 && it.is_food_container()) {
-            firsts[3] = i;
-        } else if (it.is_food()) {
-            it_comest* comest = dynamic_cast<it_comest*>(it.type);
-            if (firsts[3] == -1 && comest->comesttype != "MED") {
-                firsts[3] = i;
-            } else if (firsts[8] == -1 && comest->comesttype == "MED") {
-                firsts[8] = i;
+        const item_category &category = it.get_category();
+        for(size_t j = 0; j < firsts.size(); j++) {
+            if(firsts[j] == -1 && CATEGORIES[j+1] == category) {
+                firsts[j] = i;
+                break;
             }
-        } else if (firsts[4] == -1 && it.is_tool()) {
-            firsts[4] = i;
-        } else if (firsts[5] == -1 && it.is_book()) {
-            firsts[5] = i;
-        } else if (firsts[6] == -1 && it.is_weap()) {
-            firsts[6] = i;
-        } else if (firsts[7] == -1 && (it.is_gunmod() || it.is_bionic())) {
-            firsts[7] = i;
-        } else if (firsts[9] == -1 && it.is_other()) {
-            firsts[9] = i;
         }
     }
 
@@ -133,12 +114,10 @@ void print_inv_statics(game *g, WINDOW* w_inv, std::string title,
   }
   if (dropping_armor)
    mvwprintz(w_inv, 6 + i, 45, c_white, "%c + %s", g->u.worn[i].invlet,
-             g->u.worn[i].tname(g).c_str());
+             g->u.worn[i].tname().c_str());
   else
    mvwprintz(w_inv, 6 + i, 45, c_ltgray, "%c - %s", g->u.worn[i].invlet,
-             g->u.worn[i].tname(g).c_str());
-  if (g->u.worn[i].is_container() && !g->u.worn[i].contents.empty())
-   wprintz(w_inv, dropping_armor ? c_white : c_ltgray, " (%d)", g->u.worn[i].contents.front().charges);
+             g->u.worn[i].tname().c_str());
  }
 
  // Print items carried
@@ -162,7 +141,8 @@ char game::inv(inventory& inv, std::string title)
 // Gun, ammo, weapon, armor, food, tool, book, other
 
  invslice slice = inv.slice(0, inv.size());
- std::vector<int> firsts = find_firsts(slice);
+ CategoriesVector CATEGORIES;
+ std::vector<int> firsts = find_firsts(slice, CATEGORIES);
 
  int selected =- 1;
  int selected_char = (int)' ';
@@ -191,7 +171,7 @@ char game::inv(inventory& inv, std::string title)
 
    for (int i = 1; i < CATEGORIES.size(); i++) {
     if (cur_it == firsts[i-1]) {
-     mvwprintz(w_inv, cur_line, 0, c_magenta, CATEGORIES[i].c_str());
+     mvwprintz(w_inv, cur_line, 0, c_magenta, CATEGORIES[i].name.c_str());
      cur_line++;
     }
    }
@@ -202,14 +182,10 @@ char game::inv(inventory& inv, std::string title)
     if(cur_it==selected) selected_char=(int)it.invlet;
     mvwputch (w_inv, cur_line, 0, (cur_it == selected ? h_white : c_white), it.invlet);
     mvwprintz(w_inv, cur_line, 1, (cur_it == selected ? h_white : it.color_in_inventory() ), " %s",
-              it.tname(this).c_str());
-    if (slice[cur_it]->size() > 1)
+              it.display_name().c_str());
+    if (slice[cur_it]->size() > 1) {
      wprintw(w_inv, " x %d", slice[cur_it]->size());
-    if (it.charges > 0)
-     wprintw(w_inv, " (%d)", it.charges);
-    else if (it.contents.size() == 1 &&
-             it.contents[0].charges > 0)
-     wprintw(w_inv, " (%d)", it.contents[0].charges);
+    }
     cur_line++;
     max_it=cur_it;
    }
@@ -221,7 +197,10 @@ char game::inv(inventory& inv, std::string title)
    mvwprintw(w_inv, maxitems + 4, 12, _("> More items"));
   wrefresh(w_inv);
 
-  ch = getch();
+  input_context ctxt("INVENTORY");
+  ctxt.register_action("ANY_INPUT");
+  ctxt.handle_input();
+  ch = ctxt.get_raw_input().get_first_input();
 
   if ( ch == KEY_DOWN ) {
     if ( selected < 0 ) {
@@ -328,7 +307,8 @@ std::vector<item> game::multidrop()
  int ch = (int)'.';
  int start = 0, cur_it = 0, max_it;
  invslice stacks = u.inv.slice(0, u.inv.size());
- std::vector<int> firsts = find_firsts(stacks);
+ CategoriesVector CATEGORIES;
+ std::vector<int> firsts = find_firsts(stacks, CATEGORIES);
  int selected=-1;
  int selected_char=(int)' ';
  do {
@@ -367,10 +347,8 @@ std::vector<item> game::multidrop()
           dropping_w = true;
           dropping_a = true;
           mvwprintw(w_inv, drp_line, 90, "%s", drp_line_padding.c_str());
-          mvwprintz(w_inv, drp_line, 90, c_cyan, "%c + %s", u.worn[k].invlet, u.worn[k].tname(this).c_str());
-          if (u.worn[k].is_container() && !u.worn[k].contents.empty())
-            wprintz(w_inv, c_cyan, " (%d)", u.worn[k].contents.front().charges);
-         drp_line++;
+          mvwprintz(w_inv, drp_line, 90, c_cyan, "%c + %s", u.worn[k].invlet, u.worn[k].tname().c_str());
+          drp_line++;
         }
       }
     }
@@ -387,7 +365,7 @@ std::vector<item> game::multidrop()
 // Print category header
    for (int i = 1; i < CATEGORIES.size(); i++) {
     if (cur_it == firsts[i-1]) {
-     mvwprintz(w_inv, cur_line, 0, c_magenta, CATEGORIES[i].c_str());
+     mvwprintz(w_inv, cur_line, 0, c_magenta, CATEGORIES[i].name.c_str());
      cur_line++;
     }
    }
@@ -405,7 +383,7 @@ std::vector<item> game::multidrop()
      icon = '#';
     nc_color col = ( cur_it == selected ? h_white : (dropping[it.invlet] == 0 ? c_ltgray : c_white ) );
     mvwprintz(w_inv, cur_line, 1, col, " %c %s", icon,
-              it.tname(this).c_str());
+              it.tname().c_str());
     if (stacks[cur_it]->size() > 1)
      wprintz(w_inv, col, " x %d", stacks[cur_it]->size());
     if (it.charges > 0)
@@ -414,7 +392,7 @@ std::vector<item> game::multidrop()
              it.contents[0].charges > 0)
      wprintw(w_inv, " (%d)", it.contents[0].charges);
     if (icon=='+'||icon=='#') {
-      mvwprintz(w_inv, drp_line, 90, col, "%c %c %s", it.invlet, icon, it.tname(this).c_str());
+      mvwprintz(w_inv, drp_line, 90, col, "%c %c %s", it.invlet, icon, it.tname().c_str());
       if (icon=='+'){
         if (stacks[cur_it]->size() > 1)
           wprintz(w_inv, col, " x %d", stacks[cur_it]->size());
@@ -510,7 +488,7 @@ std::vector<item> game::multidrop()
          if ( ch == u.weapon.invlet &&
               std::find(unreal_itype_ids.begin(), unreal_itype_ids.end(), u.weapon.type->id) != unreal_itype_ids.end()){
           if (!warned_about_bionic)
-           add_msg(_("You cannot drop your %s."), u.weapon.tname(this).c_str());
+           add_msg(_("You cannot drop your %s."), u.weapon.tname().c_str());
           warned_about_bionic = true;
          } else {
           weapon_and_armor.push_back(ch);
@@ -610,9 +588,9 @@ void game::compare(int iCompareX, int iCompareY)
  //Filter out items with the same name (keep only one of them)
  std::map <std::string, bool> dups;
  for (int i = 0; i < here.size(); i++) {
-  if (!dups[here[i].tname(this).c_str()]) {
+  if (!dups[here[i].tname().c_str()]) {
    grounditems.push_back(here[i]);
-   dups[here[i].tname(this).c_str()] = true;
+   dups[here[i].tname().c_str()] = true;
   }
  }
  //Only the first 10 Items due to numbering 0-9
@@ -632,7 +610,8 @@ void game::compare(int iCompareX, int iCompareY)
  std::vector<char> weapon_and_armor; // Always single, not counted
  print_inv_statics(this, w_inv, "Compare:", weapon_and_armor);
 // Gun, ammo, weapon, armor, food, tool, book, other
- std::vector<int> first = find_firsts(stacks);
+ CategoriesVector CATEGORIES;
+ std::vector<int> first = find_firsts(stacks, CATEGORIES);
  std::vector<int> firsts;
  if (groundsize > 0) {
   firsts.push_back(0);
@@ -666,7 +645,7 @@ void game::compare(int iCompareX, int iCompareY)
 // Print category header
    for (int i = iHeaderOffset; i < CATEGORIES.size(); i++) {
     if (cur_it == firsts[i-iHeaderOffset]) {
-     mvwprintz(w_inv, cur_line, 0, c_magenta, CATEGORIES[i].c_str());
+     mvwprintz(w_inv, cur_line, 0, c_magenta, CATEGORIES[i].name.c_str());
      cur_line++;
     }
    }
@@ -678,13 +657,13 @@ void game::compare(int iCompareX, int iCompareY)
      mvwputch (w_inv, cur_line, 0, c_white, '1'+((cur_it<9) ? cur_it: -1));
      nc_color col = (compare_list[cur_it] == 0 ? c_ltgray : c_white);
      mvwprintz(w_inv, cur_line, 1, col, " %c %s", icon,
-               grounditems[cur_it].tname(this).c_str());
+               grounditems[cur_it].tname().c_str());
     } else {
      item& it = stacks[cur_it-groundsize]->front();
      mvwputch (w_inv, cur_line, 0, c_white, it.invlet);
      nc_color col = (compare_list[cur_it] == 0 ? c_ltgray : c_white);
      mvwprintz(w_inv, cur_line, 1, col, " %c %s", icon,
-               it.tname(this).c_str());
+               it.tname().c_str());
      if (stacks[cur_it-groundsize]->size() > 1)
       wprintz(w_inv, col, " x %d", stacks[cur_it-groundsize]->size());
      if (it.charges > 0)
@@ -788,10 +767,10 @@ void game::compare(int iCompareX, int iCompareY)
     }
 
     grounditems[cLastCh-'1'+iZero].info(true, &vItemLastCh);
-    sItemLastCh = grounditems[cLastCh-'1'+iZero].tname(this);
+    sItemLastCh = grounditems[cLastCh-'1'+iZero].tname();
    } else {
     u.i_at(cLastCh).info(true, &vItemLastCh);
-    sItemLastCh = u.i_at(cLastCh).tname(this);
+    sItemLastCh = u.i_at(cLastCh).tname();
    }
 
    if (ch >= '0' && ch <= '9') {
@@ -801,10 +780,10 @@ void game::compare(int iCompareX, int iCompareY)
     }
 
     grounditems[ch-'1'+iZero].info(true, &vItemCh);
-    sItemCh = grounditems[ch-'1'+iZero].tname(this);
+    sItemCh = grounditems[ch-'1'+iZero].tname();
    } else {
     u.i_at(ch).info(true, &vItemCh);
-    sItemCh = u.i_at(ch).tname(this);
+    sItemCh = u.i_at(ch).tname();
    }
 
    compare_split_screen_popup(0, (TERMX-VIEW_OFFSET_X*2)/2, TERMY-VIEW_OFFSET_Y*2, sItemLastCh, vItemLastCh, vItemCh);

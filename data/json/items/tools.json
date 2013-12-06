@@ -1,4 +1,10 @@
 [
+    {
+        "type" : "ITEM_CATEGORY",
+        "id" : "spare_parts",
+        "name" : "spare parts",
+        "sort_rank" : 8
+    },
   { "id":"lighter",
     "type": "TOOL",
     "symbol": ",",
@@ -3144,6 +3150,7 @@
     "functions": [ [ "func:blade", 0.9, 0] ],
     "category": "weapons",
     "use_action": "KNIFE",
+    "category" : "weapons",
     "qualities": [["CUT", 1]]
   },
 
@@ -3248,6 +3255,7 @@
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.92 ] ],
     "use_action": "KNIFE",
+    "category" : "weapons",
     "qualities": [["CUT", 1]]
   },
 
@@ -3300,6 +3308,7 @@
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.8 ] ],
     "use_action": "KNIFE",
+    "category" : "weapons",
     "qualities": [["CUT", 1]]
   },
 
@@ -3326,6 +3335,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category" : "weapons",
     "use_action": "KNIFE"
   },
 
@@ -3352,6 +3362,7 @@
     "turns_per_charge": 0,
     "ammo": "gasoline",
     "revert_to": "null",
+    "category" : "weapons",
     "use_action": "ZWEIFIRE_OFF"
   },
 
@@ -3378,6 +3389,7 @@
     "turns_per_charge": 30,
     "ammo": "gasoline",
     "revert_to": "zweifire_off",
+    "category" : "weapons",
     "use_action": "ZWEIFIRE_ON"
   },
 
@@ -3403,6 +3415,7 @@
     "turns_per_charge": 0,
     "ammo": "gasoline",
     "revert_to": "null",
+    "category" : "weapons",
     "use_action": "BROADFIRE_OFF"
   },
 
@@ -3428,6 +3441,7 @@
     "turns_per_charge": 30,
     "ammo": "gasoline",
     "revert_to": "broadfire_off",
+    "category" : "weapons",
     "use_action": "BROADFIRE_ON"
   },
 
@@ -3478,6 +3492,7 @@
     "turns_per_charge": 0,
     "ammo": "gasoline",
     "revert_to": "null",
+    "category" : "weapons",
     "use_action": "SHISHKEBAB_OFF"
   },
 
@@ -3502,6 +3517,7 @@
     "turns_per_charge": 20,
     "ammo": "gasoline",
     "revert_to": "shishkebab_off",
+    "category" : "weapons",
     "use_action": "SHISHKEBAB_ON"
   },
 
@@ -3528,6 +3544,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 1.05 ] ],
+    "category" : "weapons",
     "use_action": "KNIFE"
   },
 
@@ -4267,7 +4284,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "other",
+    "category" : "spare_parts",
     "use_action": "RAG"
   },
 
@@ -4291,8 +4308,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "other",
-    "category": "spare parts",
+    "category" : "spare_parts",
     "use_action": "NONE"
   },
 
@@ -4316,7 +4332,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "spare parts",
+    "category" : "spare_parts",
     "use_action": "NONE"
   },
 
@@ -4775,7 +4791,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "food",
+    "category" : "food",
     "use_action": "DEJAR"
   },
 
@@ -4799,7 +4815,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "food",
+    "category" : "food",
     "use_action": "DEJAR"
   },
 
@@ -4823,7 +4839,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "food",
+    "category" : "food",
     "use_action": "DEJAR"
   },
 
@@ -4847,7 +4863,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "food",
+    "category" : "food",
     "use_action": "DEJAR"
   },
 
@@ -4871,7 +4887,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "food",
+    "category" : "food",
     "use_action": "DEJAR"
   },
 
@@ -4895,7 +4911,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "food",
+    "category" : "food",
     "use_action": "DEJAR"
   },
 
@@ -4967,7 +4983,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "food",
+    "category" : "food",
     "use_action": "DEJAR"
   },
 
@@ -4991,6 +5007,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category" : "food",
     "use_action": "DEJAR"
   },
 
@@ -5545,6 +5562,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category" : "weapons",
     "use_action": "KNIFE"
   },
 
@@ -6045,5 +6063,27 @@
     "ammo" : "battery",
     "revert_to" : "null",
     "use_action" : "TAZER"
+  },
+  {
+    "id": "cow_bell",
+    "type": "TOOL",
+    "symbol": ";",
+    "color": "brown",
+    "name": "cow bell",
+    "description": "A brass cow bell. Potentially useful in so many ways.",
+    "price": 70,
+    "material": ["iron", "wood"],
+    "weight": 566,
+    "volume": 4,
+    "bashing": 9,
+    "cutting": 0,
+    "to_hit": 1,
+    "max_charges": 0,
+    "initial_charges": 0,
+    "charges_per_use": 0,
+    "turns_per_charge": 0,
+    "ammo": "NULL",
+    "revert_to": "null",
+    "use_action": "BELL"
   }
 ]
