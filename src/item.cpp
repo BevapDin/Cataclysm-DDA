@@ -1017,7 +1017,7 @@ std::string item::tname( bool with_prefix )
                 ret << _(" (fresh)");
             if(food->rotten(g))
                 ret << _(" (rotten)");
-            else if (int(g->turn) - (int)(food->bday) + (600 * 12) > food_type->spoils * 600)
+            else if ((int)g->turn > ((int)food_type->spoils - 12) * 600 + (int)(food->bday))
                 ret << _(" (nearly rotten)");
         }
         if (food->has_flag("HOT"))
@@ -2363,6 +2363,19 @@ bool item::reload(player &u, char ammo_invlet)
  item *reload_target = NULL;
  item *ammo_container = (ammo_invlet != 0 ? &u.i_at(ammo_invlet) : NULL);
  
+ if (is_gun() && ammo_invlet == -2) {
+  // Reload using a spare magazine
+  int spare_mag = has_gunmod("spare_mag");
+  if (charges <= 0 && spare_mag != -1 &&
+      contents[spare_mag].charges > 0) {
+   charges = contents[spare_mag].charges;
+   curammo = contents[spare_mag].curammo;
+   contents[spare_mag].charges = 0;
+   contents[spare_mag].curammo = NULL;
+   return true;
+  }
+ }
+
  item muscle_ammo;
  if(ammo_container == 0 && ammo_type() == "muscle") {
    muscle_ammo = item_controller->create("muscle", 0);
@@ -2389,17 +2402,7 @@ bool item::reload(player &u, char ammo_invlet)
  }
 
  if (is_gun()) {
-  // Reload using a spare magazine
   int spare_mag = has_gunmod("spare_mag");
-  if (charges <= 0 && spare_mag != -1 &&
-      u.weapon.contents[spare_mag].charges > 0) {
-   charges = u.weapon.contents[spare_mag].charges;
-   curammo = u.weapon.contents[spare_mag].curammo;
-   u.weapon.contents[spare_mag].charges = 0;
-   u.weapon.contents[spare_mag].curammo = NULL;
-   return true;
-  }
-
   // Determine what we're reloading, the gun, a spare magazine, or another gunmod.
   // Prefer the active gunmod if there is one
   item* gunmod = active_gunmod();
