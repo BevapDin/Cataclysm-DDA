@@ -64,6 +64,9 @@ const tidvec &get_tidvec(const itype_id &type) {
     if(types.empty()) {
         for(std::map<std::string, itype*>::iterator a = itypes.begin(); a != itypes.end(); ++a) {
             itype *t = a->second;
+            if(t == 0) {
+                continue;
+            }
             if(!t->hasFunc(type)) {
                 if(type.compare(5, std::string::npos, t->id) == 0) {
                     types.push_back(funcWithModi(a->first, 1.0f));
