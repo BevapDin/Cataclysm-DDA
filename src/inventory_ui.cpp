@@ -253,6 +253,10 @@ char game::inv(inventory& inv, std::string title)
   {
 	  inCategoryMode = !inCategoryMode;
   }
+  else if ( ch == KEY_BACKSPACE ) {
+    ch = ' ';
+    break;
+  }
   else if ( ch == KEY_DOWN ) {
     if ( selected < 0 ) {
       selected = start;

@@ -84,7 +84,7 @@
     "symbol": " ",
     "color": "white",
     "name": "thread of some kind",
-    "ammo_type" : "THREAD",
+    "ammo_type" : "thread",
     "description": "???"
   },
   { "id":"func:soldering_iron",

@@ -2290,17 +2290,14 @@
   "tools" : [
      [ ["mold_plastic", -1] ],
      [
-      ["hotplate", 12],
-      ["toolset", 1],
+      ["func:hotplate", 12],
       ["fire", -1]
      ],
      [
-      [ "screwdriver", -1 ],
-      [ "toolset", -1 ]
+      [ "func:screwdriver", -1 ]
      ],
      [
-      [ "soldering_iron", 12 ],
-      [ "toolset", 1 ]
+      [ "func:soldering_iron", 12 ]
      ]
   ],
   "components" : [
@@ -2336,17 +2333,14 @@
   "tools" : [
      [ ["mold_plastic", -1] ],
      [
-      ["hotplate", 10],
-      ["toolset", 1],
+      ["func:hotplate", 10],
       ["fire", -1]
      ],
      [
-      [ "screwdriver", -1 ],
-      [ "toolset", -1 ]
+      [ "func:screwdriver", -1 ]
      ],
      [
-      [ "soldering_iron", 10 ],
-      [ "toolset", 1 ]
+      [ "func:soldering_iron", 10 ]
      ]
   ],
   "components" : [
@@ -13204,13 +13198,11 @@
   ],
   "tools": [
      [
-      [ "welder", 28 ],
-      [ "soldering_iron", 28 ],
-      [ "toolset", 2 ]
+      [ "func:welder", 28 ],
+      [ "func:soldering_iron", 28 ]
      ],
      [
-      [ "needle_bone", 200 ],
-      [ "sewing_kit", 200 ]
+      [ "func:sewing_kit", 200 ]
     ]
   ],
   "components": [
@@ -13265,15 +13257,10 @@
   "autolearn": true,
   "tools": [
     [
-      [ "rock", -1 ],
-      [ "primitive_hammer", -1 ],
-      [ "hammer", -1 ],
-      [ "hatchet", -1 ],
-      [ "toolset", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
-      [ "needle_bone", 10 ],
-      [ "sewing_kit", 10 ]
+      [ "func:sewing_kit", 10 ]
     ]
   ],
   "components": [
@@ -14809,27 +14796,19 @@
   "autolearn": true,
   "tools": [
     [
-      [ "wrench", -1 ],
-      [ "toolset", -1 ]
+      [ "func:wrench", -1 ]
     ],
     [
-      [ "rock", -1 ],
-      [ "primitive_hammer", -1 ],
-      [ "hammer", -1 ],
-      [ "hatchet", -1 ],
-      [ "toolset", -1 ]
+      [ "func:hammer", -1 ]
     ],
     [
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "welder", 100 ],
-      [ "welder_crude", 150 ],
-      [ "toolset", 5 ]
+      [ "func:welder", 100 ]
     ],
     [
-      [ "hacksaw", -1 ],
-      [ "toolset", -1 ]
+      [ "func:hacksaw", -1 ]
     ]
   ],
   "components": [
@@ -19644,7 +19623,7 @@
   "reversible": false,
   "autolearn": false,
   "book_learn": [[ "textbook_fireman", 8 ]],
-  "tools": [ [ ["hammer", -1], ["toolset", -1]  ],
+  "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
      ],
@@ -19658,7 +19637,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 400], ["char_forge", 80]
+      ["func:forge", 400]
      ]
     ],
   "components":
@@ -19910,7 +19889,7 @@
   "reversible": false,
   "autolearn": false,
   "book_learn": [[ "textbook_fireman", 9 ]],
-  "tools": [ [ ["hammer", -1], ["toolset", -1]  ],
+  "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
      ],
@@ -19924,7 +19903,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 450], ["char_forge", 90]
+      ["func:forge", 450]
      ]
     ],
   "components":
@@ -21189,13 +21168,11 @@
   ],
   "tools": [
      [
-      [ "welder", 28 ],
-      [ "soldering_iron", 28 ],
-      [ "toolset", 2 ]
+      [ "func:welder", 28 ],
+      [ "func:soldering_iron", 28 ]
      ],
      [
-      [ "needle_bone", 200 ],
-      [ "sewing_kit", 200 ]
+      [ "func:sewing_kit", 200 ]
     ]
   ],
   "components": [
@@ -23010,7 +22987,7 @@
   "time": 420000,
   "reversible": false,
   "autolearn": true,
-  "tools": [ [ ["hammer", -1], ["toolset", -1]  ],
+  "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
      ],
@@ -23024,7 +23001,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 400], ["char_forge", 80]
+      ["func:forge", 400]
      ]
     ],
   "components":
@@ -23048,8 +23025,7 @@
   ],
   "tools": [
     [
-      [ "soldering_iron", 40 ],
-      [ "toolset", 4 ]
+      [ "func:soldering_iron", 40 ]
     ]
   ],
   "components": [
