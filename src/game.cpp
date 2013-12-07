@@ -479,7 +479,8 @@ void game::load_npcs()
 
         if (square_dist(levx + int(MAPSIZE / 2), levy + int(MAPSIZE / 2),
               cur_om->npcs[i]->mapx, cur_om->npcs[i]->mapy) <=
-              int(MAPSIZE / 2) + 1 && !cur_om->npcs[i]->is_active(this))
+              int(MAPSIZE / 2) + 1 && !cur_om->npcs[i]->is_active(this) &&
+              cur_om->npcs[i]->omz == levz)
         {
             int dx = cur_om->npcs[i]->mapx - levx, dy = cur_om->npcs[i]->mapy - levy;
             if (debugmon)debugmsg("game::load_npcs: Spawning static NPC, %d:%d (%d:%d)", levx, levy, cur_om->npcs[i]->mapx, cur_om->npcs[i]->mapy);
@@ -1727,8 +1728,20 @@ void game::handle_key_blocking_activity() {
         timeout(-1);
     }
 }
-//// item submenu for 'i' and '/'
-int game::inventory_item_menu(char chItem, int iStartX, int iWidth) {
+/* item submenu for 'i' and '/'
+* It use compare_split_screen_popup to draw item info and action menu
+*
+* @param chItem char of item in inventory
+* @param iStartX Left coord of the item info window
+* @param iWidth width of the item info window (height = height of terminal)
+* @param position It is position of the action menu. Default 0
+* 	-2 - near the right edge of the terminal window
+* 	-1 - left before item info window
+* 	0 - right after item info window
+* 	1 - near the left edge of the terminal window
+* @return getch
+*/
+int game::inventory_item_menu(char chItem, int iStartX, int iWidth, int position) {
     int cMenu = (int)'+';
 
     if (u.has_item(chItem)) {
@@ -1738,31 +1751,54 @@ int game::inventory_item_menu(char chItem, int iStartX, int iWidth) {
         const int iOffsetX = 2;
         const bool bHPR = hasPickupRule(oThisItem.tname());
 
+		int max_text_length = 0; int length = 0;
         vMenu.push_back(iteminfo("MENU", "", "iOffsetX", iOffsetX));
         vMenu.push_back(iteminfo("MENU", "", "iOffsetY", 0));
-        vMenu.push_back(iteminfo("MENU", "a", _("<a>ctivate"), u.rate_action_use(&oThisItem)));
-        vMenu.push_back(iteminfo("MENU", "R", _("<R>ead"), u.rate_action_read(&oThisItem, this)));
-        vMenu.push_back(iteminfo("MENU", "E", _("<E>at"), u.rate_action_eat(&oThisItem)));
-        vMenu.push_back(iteminfo("MENU", "W", _("<W>ear"), u.rate_action_wear(&oThisItem)));
-        vMenu.push_back(iteminfo("MENU", "w", _("<w>ield")));
-        vMenu.push_back(iteminfo("MENU", "t", _("<t>hrow")));
-        vMenu.push_back(iteminfo("MENU", "T", _("<T>ake off"), u.rate_action_takeoff(&oThisItem)));
-        vMenu.push_back(iteminfo("MENU", "d", _("<d>rop")));
-        vMenu.push_back(iteminfo("MENU", "U", _("<U>nload"), u.rate_action_unload(&oThisItem)));
-        vMenu.push_back(iteminfo("MENU", "r", _("<r>eload"), u.rate_action_reload(&oThisItem)));
-        vMenu.push_back(iteminfo("MENU", "D", _("<D>isassemble"), u.rate_action_disassemble(&oThisItem, this)));
-        vMenu.push_back(iteminfo("MENU", "=", _("<=> reassign")));
-        vMenu.push_back(iteminfo("MENU", (bHPR) ? "-":"+", (bHPR) ? _("<-> Autopickup") : _("<+> Autopickup"), (bHPR) ? HINT_IFFY : HINT_GOOD));
+        length = utf8_width(_("<a>ctivate")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "a", _("<a>ctivate"), u.rate_action_use(&oThisItem)));
+		length = utf8_width(_("<R>ead")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "R", _("<R>ead"), u.rate_action_read(&oThisItem, this)));
+		length = utf8_width(_("<E>at")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "E", _("<E>at"), u.rate_action_eat(&oThisItem)));
+		length = utf8_width(_("<W>ear")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "W", _("<W>ear"), u.rate_action_wear(&oThisItem)));
+		length = utf8_width(_("<w>ield")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "w", _("<w>ield")));
+		length = utf8_width(_("<t>hrow")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "t", _("<t>hrow")));
+		length = utf8_width(_("<T>ake off")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "T", _("<T>ake off"), u.rate_action_takeoff(&oThisItem)));
+		length = utf8_width(_("<d>rop")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "d", _("<d>rop")));
+		length = utf8_width(_("<U>nload")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "U", _("<U>nload"), u.rate_action_unload(&oThisItem)));
+		length = utf8_width(_("<r>eload")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "r", _("<r>eload"), u.rate_action_reload(&oThisItem)));
+		length = utf8_width(_("<D>isassemble")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "D", _("<D>isassemble"), u.rate_action_disassemble(&oThisItem, this)));
+		length = utf8_width(_("<=> reassign")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", "=", _("<=> reassign")));
+		length = utf8_width(_("<-> Autopickup")); if (length > max_text_length) max_text_length = length;
+		length = utf8_width(_("<+> Autopickup")); if (length > max_text_length) max_text_length = length;
+		vMenu.push_back(iteminfo("MENU", (bHPR) ? "-":"+", (bHPR) ? _("<-> Autopickup") : _("<+> Autopickup"), (bHPR) ? HINT_IFFY : HINT_GOOD));
 
         oThisItem.info(true, &vThisItem, this);
-        compare_split_screen_popup(iStartX,iWidth, TERMY-VIEW_OFFSET_Y*2, oThisItem.tname(), vThisItem, vDummy);
+        compare_split_screen_popup(iStartX, iWidth, TERMY-VIEW_OFFSET_Y*2, oThisItem.tname(), vThisItem, vDummy, -1, true);
 
         const int iMenuStart = iOffsetX;
         const int iMenuItems = vMenu.size() - 1;
         int iSelected = iOffsetX - 1;
+		int popup_width = max_text_length + 2;
+		int popup_x = 0;
+		switch (position){
+			case -2: popup_x = 0; break; //near the right edge of the terminal window
+			case -1: popup_x = iStartX - popup_width; break; //left before item info window
+			case 0: popup_x = iStartX + iWidth; break; //right after item info window
+			case 1: popup_x = TERMX - popup_width; break; //near the left edge of the terminal window
+		}
 
         do {
-            cMenu = compare_split_screen_popup(iStartX + iWidth, iMenuItems + iOffsetX, vMenu.size()+iOffsetX*2, "", vMenu, vDummy,
+            cMenu = compare_split_screen_popup(popup_x, popup_width, vMenu.size()+iOffsetX*2, "", vMenu, vDummy,
                 iSelected >= iOffsetX && iSelected <= iMenuItems ? iSelected : -1
             );
 
@@ -2718,9 +2754,6 @@ void game::update_scent()
     int  sum_3_scent_y[SEEY * MAPSIZE][SEEX * MAPSIZE]; //intermediate variable
     int squares_used_y[SEEY * MAPSIZE][SEEX * MAPSIZE]; //intermediate variable
 
-    static const std::string hasflag_str_WALL("WALL"); // only need to assemble this once per run
-    static const std::string hasflag_str_REDUCE_SCENT("REDUCE_SCENT");
-
     bool     has_wall_here[SEEX * MAPSIZE][SEEY * MAPSIZE];  // stash instead of
     bool reduce_scent_here[SEEX * MAPSIZE][SEEY * MAPSIZE];  // checking 14884 * (3 redundant)
 
@@ -2742,12 +2775,12 @@ void game::update_scent()
             // cache expensive flag checks, once per tile.
             if ( y == u.posy - SCENT_RADIUS ) {  // Setting y-1 y-0, when we are at the top row...
                 for (int i = y - 1; i <= y; ++i) {
-                    has_wall_here[x][i] = m.has_flag(hasflag_str_WALL, x, i);
-                    reduce_scent_here[x][i] = m.has_flag(hasflag_str_REDUCE_SCENT, x, i);
+                    has_wall_here[x][i] = m.has_flag(TFLAG_WALL, x, i);
+                    reduce_scent_here[x][i] = m.has_flag(TFLAG_REDUCE_SCENT, x, i);
                 }
             }
-            has_wall_here[x][y+1] = m.has_flag(hasflag_str_WALL, x, y+1); // ...so only y+1 here.
-            reduce_scent_here[x][y+1] = m.has_flag(hasflag_str_REDUCE_SCENT, x, y+1);
+            has_wall_here[x][y+1] = m.has_flag(TFLAG_WALL, x, y+1); // ...so only y+1 here.
+            reduce_scent_here[x][y+1] = m.has_flag(TFLAG_REDUCE_SCENT, x, y+1);
 
             // remember the sum of the scent val for the 3 neighboring squares that can defuse into
             sum_3_scent_y[y][x]  = 0;
@@ -4754,20 +4787,21 @@ faction* game::random_evil_faction()
 
 bool game::sees_u(int x, int y, int &t)
 {
-    int range = 0;
- int mondex = mon_at(x,y);
- if (mondex != -1) {
-  monster &critter = _active_monsters[mondex];
-        range = critter.vision_range(u.posx, u.posy);
- }
-
- return (!(u.has_active_bionic("bio_cloak") || u.has_active_bionic("bio_night") ||
-           u.has_active_optcloak() || u.has_artifact_with(AEP_INVISIBLE))
-           && m.sees(x, y, u.posx, u.posy, range, t));
+    const int mondex = mon_at(x,y);
+    if (mondex != -1) {
+        const monster &critter = _active_monsters[mondex];
+        return critter.sees_player(t);
+    }
+    // range = 0 = unlimited, proceeding sans critter
+    return (
+        m.sees(x, y, u.posx, u.posy, 0, t) &&
+        ! u.is_invisible()
+    );
 }
 
 bool game::u_see(int x, int y)
 {
+ static const std::string str_bio_night("bio_night");
  int wanted_range = rl_dist(u.posx, u.posy, x, y);
 
  bool can_see = false;
@@ -4777,7 +4811,7 @@ bool game::u_see(int x, int y)
           (wanted_range <= u.sight_range(DAYLIGHT_LEVEL) &&
             m.light_at(x, y) >= LL_LOW))
      can_see = m.pl_sees(u.posx, u.posy, x, y, wanted_range);
-     if (u.has_active_bionic("bio_night") && wanted_range < 15 && wanted_range > u.sight_range(1))
+     if (u.has_active_bionic(str_bio_night) && wanted_range < 15 && wanted_range > u.sight_range(1))
         return false;
 
  return can_see;
@@ -5537,9 +5571,9 @@ void game::explosion(int x, int y, int power, int shrapnel, bool has_fire)
     dam = 3 * power;
    else
     dam = 3 * power / (rl_dist(x, y, i, j));
-   if (m.has_flag("BASHABLE", i, j))
+   if (m.has_flag(TFLAG_BASHABLE, i, j))
     m.bash(i, j, dam, junk);
-   if (m.has_flag("BASHABLE", i, j)) // Double up for tough doors, etc.
+   if (m.has_flag(TFLAG_BASHABLE, i, j)) // Double up for tough doors, etc.
     m.bash(i, j, dam, junk);
    if (m.is_destructable(i, j) && rng(25, 100) < dam)
     m.destroy(this, i, j, false);
@@ -7910,8 +7944,8 @@ int game::list_items()
 
                 oThisItem.info(true, &vThisItem);
                 compare_split_screen_popup(0, width - 5, TERMY-VIEW_OFFSET_Y*2, oThisItem.tname(), vThisItem, vDummy);
+                // wait until the user presses a key to wipe the screen
 
-                getch(); // wait until the user presses a key to wipe the screen
                 iLastActiveX = -1;
                 iLastActiveY = -1;
                 reset = true;
@@ -12066,6 +12100,9 @@ void game::vertical_move(int movez, bool force) {
  }
 
  set_adjacent_overmaps(true);
+ // Clear currently active npcs and reload them
+ active_npc.clear();
+ load_npcs();
  refresh_all();
 // Set the scent map to 0
  for (int i = 0; i < SEEX * MAPSIZE; i++) {

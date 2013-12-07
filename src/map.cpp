@@ -1143,36 +1143,53 @@ std::string map::features(const int x, const int y)
  return ret;
 }
 
-int map::move_cost(const int x, const int y, const vehicle *ignored_vehicle)
+int map::move_cost(const int x, const int y, const vehicle *ignored_vehicle) const
 {
-    if (terlist[ter(x, y)].movecost == 0 || furnlist[furn(x, y)].movecost < 0) {
+    int cost = move_cost_ter_furn(x, y); // covers !inbounds check too
+    if ( cost == 0 ) {
         return 0;
     }
-    int vpart = -1;
-    vehicle *veh = veh_at(x, y, vpart);
-    if (veh && veh != ignored_vehicle) {  // moving past vehicle cost
-        const int dpart = veh->part_with_feature(vpart, VPFLAG_OBSTACLE);
-        if (dpart >= 0 && (!veh->part_flag(dpart, VPFLAG_OPENABLE) || !veh->parts[dpart].open)) {
-        return 0;
-        } else {
-            const int ipart = veh->part_with_feature(vpart, VPFLAG_AISLE);
-            if (ipart >= 0) {
-                return 2;
+    if (veh_in_active_range && veh_exists_at[x][y]) {
+        std::map< std::pair<int, int>, std::pair<vehicle *, int> >::const_iterator it;
+        if ((it = veh_cached_parts.find( std::make_pair(x, y) )) != veh_cached_parts.end()) {
+            const int vpart = it->second.second;
+            vehicle *veh = it->second.first;
+            if (veh != ignored_vehicle) {  // moving past vehicle cost
+                const int dpart = veh->part_with_feature(vpart, VPFLAG_OBSTACLE);
+                if (dpart >= 0 && (!veh->part_flag(dpart, VPFLAG_OPENABLE) || !veh->parts[dpart].open)) {
+                    return 0;
+                } else {
+                    const int ipart = veh->part_with_feature(vpart, VPFLAG_AISLE);
+                    if (ipart >= 0) {
+                        return 2;
+                    }
+                    return 8;
+                }
             }
-            return 8;
         }
     }
-    int cost = terlist[ter(x, y)].movecost + furnlist[furn(x, y)].movecost;
-    cost+= field_at(x,y).move_cost();
+//    cost+= field_at(x,y).move_cost(); // <-- unimplemented in all cases
     return cost > 0 ? cost : 0;
 }
 
-int map::move_cost_ter_furn(const int x, const int y)
+int map::move_cost_ter_furn(const int x, const int y) const
 {
-    if (terlist[ter(x, y)].movecost == 0 || furnlist[furn(x, y)].movecost < 0) {
+    if (!INBOUNDS(x, y)) {
         return 0;
     }
-    int cost = terlist[ter(x, y)].movecost + furnlist[furn(x, y)].movecost;
+    const int nonant = int(x / SEEX) + int(y / SEEY) * my_MAPSIZE;
+    const int lx = x % SEEX;
+    const int ly = y % SEEY;
+
+    const int tercost = terlist[ grid[nonant]->ter[lx][ly] ].movecost;
+    if ( tercost == 0 ) {
+        return 0;
+    }
+    const int furncost = furnlist[ grid[nonant]->frn[lx][ly] ].movecost;
+    if ( furncost < 0 ) {
+        return 0;
+    }
+    const int cost = tercost + furncost;
     return cost > 0 ? cost : 0;
 }
 
@@ -1275,7 +1292,7 @@ bool map::trans(const int x, const int y)
 
 extern void vpart_range(vehicle *veh, int &part_begin, int &part_end, int dx, int dy);
 
-inline bool obstacle_non_open_door(vehicle *veh, int part) {
+inline bool obstacle_non_open_door(const vehicle *veh, int part) {
     const int dx = veh->parts[part].mount_dx;
     const int dy = veh->parts[part].mount_dy;
     static std::set<std::string> obstacle_parts;
@@ -1294,7 +1311,7 @@ inline bool obstacle_non_open_door(vehicle *veh, int part) {
         }
     }
     int end;
-    vpart_range(veh, part, end, dx, dy);
+    vpart_range(const_cast<vehicle*>(veh), part, end, dx, dy);
     for(int i = part; i < end; i++) {
         if(veh->parts[i].hp <= 0) {
             continue;
@@ -1311,7 +1328,7 @@ inline bool obstacle_non_open_door(vehicle *veh, int part) {
     return false;
 }
 
-bool map::is_bashable(const int x, const int y) {
+bool map::is_bashable(const int x, const int y) const {
     if(!INBOUNDS(x, y)) {
         return false;
     }
@@ -1324,10 +1341,10 @@ bool map::is_bashable(const int x, const int y) {
     
     if(veh_in_active_range && veh_exists_at[x][y]) {
         std::pair<int,int> point(x,y);
-        std::map< std::pair<int,int>, std::pair<vehicle*,int> >::iterator it;
+        std::map< std::pair<int,int>, std::pair<vehicle*,int> >::const_iterator it;
         if((it = veh_cached_parts.find(point)) != veh_cached_parts.end()) {
             int vpart = it->second.second;
-            vehicle *veh = it->second.first;
+            const vehicle *veh = it->second.first;
             if(veh && obstacle_non_open_door(veh, vpart)) {
                 return true;
             }
@@ -1344,7 +1361,7 @@ bool map::is_bashable(const int x, const int y) {
     return false;
 }
 
-bool map::has_flag(const std::string &flag, const int x, const int y)
+bool map::has_flag(const std::string &flag, const int x, const int y) const
 {
  if ("BASHABLE" == flag) {
   return is_bashable(x, y);
@@ -1369,14 +1386,78 @@ bool map::has_flag_furn(const std::string & flag, const int x, const int y) cons
 
 bool map::has_flag_ter_or_furn(const std::string & flag, const int x, const int y) const
 {
- return (terlist[ter(x, y)].has_flag(flag) || (furnlist[furn(x, y)].has_flag(flag)));
+    if (!INBOUNDS(x, y)) {
+        return false;
+    }
+    const int nonant = int(x / SEEX) + int(y / SEEY) * my_MAPSIZE;
+    const int lx = x % SEEX;
+    const int ly = y % SEEY;
+
+    return ( terlist[ grid[nonant]->ter[lx][ly] ].has_flag(flag) || furnlist[ grid[nonant]->frn[lx][ly] ].has_flag(flag) );
 }
 
 bool map::has_flag_ter_and_furn(const std::string & flag, const int x, const int y) const
 {
  return terlist[ter(x, y)].has_flag(flag) && furnlist[furn(x, y)].has_flag(flag);
 }
+/////
+bool map::has_flag(const ter_bitflags flag, const int x, const int y) const
+{
+    if (!INBOUNDS(x, y)) {
+        return false;
+    }
+    // veh_at const no bueno
+    if (veh_in_active_range && veh_exists_at[x][y] && flag == TFLAG_BASHABLE) {
+        std::map< std::pair<int, int>, std::pair<vehicle *, int> >::const_iterator it;
+        if ((it = veh_cached_parts.find( std::make_pair(x, y) )) != veh_cached_parts.end()) {
+            const int vpart = it->second.second;
+            vehicle *veh = it->second.first;
+            if (veh->parts[vpart].hp > 0 && // if there's a vehicle part here...
+                veh->part_with_feature (vpart, VPFLAG_OBSTACLE) >= 0) {// & it is obstacle...
+                const int p = veh->part_with_feature (vpart, VPFLAG_OPENABLE);
+                if (p < 0 || !veh->parts[p].open) { // and not open door
+                    return true;
+                }
+            }
+        }
+    }
+    return has_flag_ter_or_furn(flag, x, y);
+}
 
+bool map::has_flag_ter(const ter_bitflags flag, const int x, const int y) const
+{
+ return terlist[ter(x, y)].has_flag(flag);
+}
+
+bool map::has_flag_furn(const ter_bitflags flag, const int x, const int y) const
+{
+ return furnlist[furn(x, y)].has_flag(flag);
+}
+
+bool map::has_flag_ter_or_furn(const ter_bitflags flag, const int x, const int y) const
+{
+    if (!INBOUNDS(x, y)) {
+        return false;
+    }
+    const int nonant = int(x / SEEX) + int(y / SEEY) * my_MAPSIZE;
+    const int lx = x % SEEX;
+    const int ly = y % SEEY;
+
+    return ( terlist[ grid[nonant]->ter[lx][ly] ].has_flag(flag) || furnlist[ grid[nonant]->frn[lx][ly] ].has_flag(flag) );
+}
+
+bool map::has_flag_ter_and_furn(const ter_bitflags flag, const int x, const int y) const
+{
+    if (!INBOUNDS(x, y)) {
+        return false;
+    }
+    const int nonant = int(x / SEEX) + int(y / SEEY) * my_MAPSIZE;
+    const int lx = x % SEEX;
+    const int ly = y % SEEY;
+ return terlist[ grid[nonant]->ter[lx][ly] ].has_flag(flag) && furnlist[ grid[nonant]->frn[lx][ly] ].has_flag(flag);
+}
+
+/////
 bool map::is_destructable(const int x, const int y)
 {
  return (has_flag("BASHABLE", x, y) ||
@@ -3971,7 +4052,7 @@ bool map::loadn(game *g, const int worldx, const int worldy, const int worldz,
                 traplocs[t].insert(point(fx, fy));
                 if ( do_funnels &&
                      g->traps[t]->funnel_radius_mm > 0 &&             // funnel
-                     has_flag_ter_or_furn("INDOORS", fx, fy) == false // we have no outside_cache
+                     has_flag_ter_or_furn(TFLAG_INDOORS, fx, fy) == false // we have no outside_cache
                    ) {
                     rain_backlog[point(x, y)] = t;
                 }

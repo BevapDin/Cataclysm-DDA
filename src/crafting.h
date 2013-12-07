@@ -12,6 +12,7 @@
 #define MAX_DISPLAYED_RECIPES 18
 
 typedef std::string craft_cat;
+typedef std::string craft_subcat;
 
 struct component
 {
@@ -54,6 +55,7 @@ struct recipe {
   int noise;
   std::string noise_string;
   craft_cat cat;
+  craft_subcat subcat;
   Skill *skill_used;
   std::map<Skill*,int> required_skills;
   int difficulty;
@@ -100,10 +102,10 @@ struct recipe {
     learn_by_disassembly = -1;
   }
 
-recipe(std::string pident, int pid, itype_id pres, craft_cat pcat, std::string &to_use,
+recipe(std::string pident, int pid, itype_id pres, craft_cat pcat, craft_subcat psubcat, std::string &to_use,
        std::map<std::string,int> &to_require, int pdiff, int ptime, bool preversible, bool pautolearn,
        int plearn_dis) :
-  ident (pident), id (pid), result (pres), cat(pcat), difficulty (pdiff), time (ptime),
+  ident (pident), id (pid), result (pres), cat(pcat), subcat(psubcat), difficulty (pdiff), time (ptime),
   reversible (preversible), autolearn (pautolearn), learn_by_disassembly (plearn_dis) {
     count = -1;
     count_range = -1;
@@ -122,6 +124,7 @@ typedef std::vector<recipe*> recipe_list;
 typedef std::map<craft_cat, recipe_list> recipe_map;
 
 void load_recipe_category(JsonObject &jsobj);
+void load_recipe_subcategory(JsonObject &jsobj);
 void load_recipe(JsonObject &jsobj);
 recipe* recipe_by_name(std::string name);
 void finalize_recipes();

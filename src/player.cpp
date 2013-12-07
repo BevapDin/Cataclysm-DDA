@@ -3192,7 +3192,7 @@ bool player::in_climate_control(game *g)
     return regulated_area;
 }
 
-bool player::has_bionic(bionic_id b) const
+bool player::has_bionic(const bionic_id & b) const
 {
  for (int i = 0; i < my_bionics.size(); i++) {
   if (my_bionics[i].id == b)
@@ -3201,16 +3201,20 @@ bool player::has_bionic(bionic_id b) const
  return false;
 }
 
-bool player::has_active_optcloak() {
-  if ((has_active_item("UPS_on") || has_active_item("adv_UPS_on"))
-      && is_wearing("optical_cloak")) {
+bool player::has_active_optcloak() const {
+  static const std::string str_UPS_on("UPS_on");
+  static const std::string str_adv_UPS_on("adv_UPS_on");
+  static const std::string str_optical_cloak("optical_cloak");
+
+  if ((has_active_item(str_UPS_on) || has_active_item(str_adv_UPS_on))
+      && is_wearing(str_optical_cloak)) {
     return true;
   } else {
     return false;
   }
 }
 
-bool player::has_active_bionic(bionic_id b) const
+bool player::has_active_bionic(const bionic_id & b) const
 {
  for (int i = 0; i < my_bionics.size(); i++) {
   if (my_bionics[i].id == b)
@@ -5434,7 +5438,7 @@ item& player::i_add(item it, game *g)
  return inv.add_item(it);
 }
 
-bool player::has_active_item(itype_id id)
+bool player::has_active_item(const itype_id & id) const
 {
     if (weapon.matches_type(id) && weapon.active)
     {
@@ -5994,7 +5998,7 @@ item* player::pick_usb()
  return drives[ select - 1 ];
 }
 
-bool player::is_wearing(itype_id it)
+bool player::is_wearing(const itype_id & it) const
 {
  for (int i = 0; i < worn.size(); i++) {
   if (worn[i].type->id == it)
@@ -6050,7 +6054,7 @@ bool player::is_waterproof(int flags) const {
   return covered_with_flag("WATERPROOF", flags);
 }
 
-bool player::has_artifact_with(art_effect_passive effect)
+bool player::has_artifact_with(const art_effect_passive effect) const
 {
  if (weapon.is_artifact() && weapon.is_tool()) {
   it_artifact_tool *tool = dynamic_cast<it_artifact_tool*>(weapon.type);
@@ -6836,17 +6840,17 @@ hint_rating player::rate_action_wear(item *it)
   return HINT_IFFY;
  }
  if (armor->covers & mfb(bp_head) && !it->made_of("wool") &&
-     !it->made_of("cotton") && !it->made_of("leather") &&
-     (has_trait("HORNS_POINTED") || has_trait("ANTENNAE") ||
-      has_trait("ANTLERS"))) {
+     !it->made_of("cotton") && !it->made_of("leather") 
+     && !it->made_of("nomex") && (has_trait("HORNS_POINTED") || 
+     has_trait("ANTENNAE") || has_trait("ANTLERS"))) {
   return HINT_IFFY;
  }
  // Checks to see if the player is wearing not cotton or not wool, ie leather/plastic shoes
- if (armor->covers & mfb(bp_feet) && wearing_something_on(bp_feet) && !(it->made_of("wool") || it->made_of("cotton"))) {
+ if (armor->covers & mfb(bp_feet) && wearing_something_on(bp_feet) && !(it->made_of("wool") || it->made_of("cotton") || it->made_of("nomex"))) {
   for (int i = 0; i < worn.size(); i++) {
    item *worn_item = &worn[i];
    it_armor *worn_armor = dynamic_cast<it_armor*>(worn_item->type);
-   if( worn_armor->covers & mfb(bp_feet) && !(worn_item->made_of("wool") || worn_item->made_of("cotton"))) {
+   if( worn_armor->covers & mfb(bp_feet) && !(worn_item->made_of("wool") || worn_item->made_of("cotton") || worn_item->made_of("nomex"))) {
     return HINT_IFFY;
    }
   }
@@ -7119,7 +7123,7 @@ bool player::wear_item(game *g, item *to_wear, bool interactive)
             return false;
         }
 
-        if (armor->covers & mfb(bp_head) && !to_wear->made_of("wool") && !to_wear->made_of("cotton") && !to_wear->made_of("leather") && (has_trait("HORNS_POINTED") || has_trait("ANTENNAE") || has_trait("ANTLERS")))
+        if (armor->covers & mfb(bp_head) && !to_wear->made_of("wool") && !to_wear->made_of("cotton") && !to_wear->made_of("nomex") && !to_wear->made_of("leather") && (has_trait("HORNS_POINTED") || has_trait("ANTENNAE") || has_trait("ANTLERS")))
         {
             if(interactive)
             {
@@ -7128,10 +7132,8 @@ bool player::wear_item(game *g, item *to_wear, bool interactive)
             return false;
         }
 
-
-        if (armor->covers & mfb(bp_feet) && wearing_something_on(bp_feet)
-          && ((to_wear->made_of("leather") || to_wear->made_of("plastic") || to_wear->made_of("steel") ||
-                to_wear->made_of("kevlar") || to_wear->made_of("chitin")))){
+        if (armor->covers & mfb(bp_feet) && wearing_something_on(bp_feet) && !(to_wear->made_of("wool") || to_wear->made_of("cotton") || to_wear->made_of("nomex")))
+        {
             if (is_wearing_shoes()){// Checks to see if the player is wearing leather/plastic etc shoes
                 if(interactive){
                     g->add_msg(_("You're already wearing footwear!"));
@@ -8105,7 +8107,7 @@ void player::read(game *g, char ch)
 
     // Check if reading is okay
     // check for light level
-    if (fine_detail_vision_mod(g) > 2.5)
+    if (fine_detail_vision_mod(g) > 4)//minimum LL_LOW or LL_DARK + (ELFA_NV or atomic_light)
     {
         g->add_msg(_("You can't see to read!"));
         return;
@@ -8229,7 +8231,7 @@ void player::read(game *g, char ch)
     }
 
  // Base read_speed() is 1000 move points (1 minute per tmp->time)
-    time = tmp->time * read_speed() * fine_detail_vision_mod(g);
+    time = tmp->time * read_speed() * (fine_detail_vision_mod(g));
     if (tmp->intel > int_cur)
     {
         g->add_msg(_("This book is too complex for you to easily understand. It will take longer to read."));
@@ -8437,15 +8439,16 @@ float player::fine_detail_vision_mod(game *g)
     if (g->m.light_at(posx, posy) == LL_LOW) { vision_ii = 4; }
     else if (g->m.light_at(posx, posy) == LL_DARK) { vision_ii = 5; }
 
-    if (g->u.has_active_item("glowstick_lit"))
-    {
-        vision_ii -= 3.5;
+    if (g->u.has_item_with_flag("LIGHT_2")){
+        vision_ii -= 2;
+    } else if (g->u.has_item_with_flag("LIGHT_1")){
+        vision_ii -= 1;
     }
 
     if (has_trait("NIGHTVISION")) { vision_ii -= .5; }
 	else if (has_trait("ELFA_NV")) { vision_ii -= 1; }
-    else if (has_trait("NIGHTVISION2")) { vision_ii -= 1.5; }
-    else if (has_trait("NIGHTVISION3") || has_trait("ELFA_FNV")) { vision_ii -= 2.5; }
+    else if (has_trait("NIGHTVISION2")) { vision_ii -= 2; }
+    else if (has_trait("NIGHTVISION3") || has_trait("ELFA_FNV")) { vision_ii -= 3; }
 
     if (vision_ii < 1) { vision_ii = 1; }
     return vision_ii;
@@ -8721,13 +8724,13 @@ void player::absorb(game *g, body_part bp, int &dam, int &cut)
                     // determine how much the damage exceeds the armour absorption
                     // bash damage takes into account preceding layers
                     int diff_bash = (dam - arm_bash - bash_absorb < 0) ? -1 : (dam - arm_bash);
-                    int diff_cut  = (cut - arm_cut  < 0) ? -1 : (dam - arm_cut);
+                    int diff_cut  = (cut - arm_cut  < 0) ? -1 : (cut - arm_cut);
                     bool armor_damaged = false;
                     std::string pre_damage_name = worn[i].tname();
 
                     // armour damage occurs only if damage exceeds armour absorption
                     // plus a luck factor, even if damage is below armour absorption (2% chance)
-                    if ((diff_bash > arm_bash && !one_in(diff_bash)) ||
+                    if ((dam > arm_bash && !one_in(diff_bash)) ||
                         (!worn[i].has_flag ("STURDY") && diff_bash == -1 && one_in(50)))
                     {
                         armor_damaged = true;
@@ -8738,7 +8741,7 @@ void player::absorb(game *g, body_part bp, int &dam, int &cut)
                     // cut damage falls through to inner layers only if preceding layer was damaged
                     if (cut_through)
                     {
-                        if ((diff_cut > arm_cut && !one_in(diff_cut)) ||
+                        if ((cut > arm_cut && !one_in(diff_cut)) ||
                             (!worn[i].has_flag ("STURDY") && diff_cut == -1 && one_in(50)))
                         {
                             armor_damaged = true;
@@ -8892,9 +8895,9 @@ bool player::is_wearing_shoes() {
         it_armor *worn_armor = dynamic_cast<it_armor*>(worn_item->type);
 
         if (worn_armor->covers & mfb(bp_feet) &&
-            (worn_item->made_of("leather") || worn_item->made_of("plastic") ||
-             worn_item->made_of("steel") || worn_item->made_of("kevlar") ||
-             worn_item->made_of("chitin"))) {
+            !(worn_item->made_of("wool") ||
+              worn_item->made_of("cotton") ||
+              worn_item->made_of("nomex"))) {
             return true;
         }
     }
@@ -9327,6 +9330,26 @@ void player::environmental_revert_effect()
     radiation = 0;
 
     recalc_sight_limits();
+}
+
+bool player::is_invisible() const {
+    static const std::string str_bio_cloak("bio_cloak"); // This function used in monster::plan_moves
+    static const std::string str_bio_night("bio_night");
+    return (
+        has_active_bionic(str_bio_cloak) ||
+        has_active_bionic(str_bio_night) ||
+        has_active_optcloak() ||
+        has_artifact_with(AEP_INVISIBLE)
+    );
+}
+
+int player::visibility( bool check_color, int stillness ) const { // 0-100 %
+    if ( is_invisible() ) {
+        return 0;
+    }
+    // todo:
+    // if ( dark_clothing() && light check ...
+    return 100;
 }
 
 void player::set_destination(const std::vector<point> &route)

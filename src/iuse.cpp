@@ -511,7 +511,7 @@ int iuse::firstaid(player *p, item *it, bool t)
     // Assign first aid long action.
     int healed = use_healing_item(p, it, 14, 10, 18, it->name, 95, 99, 95, false);
     if (healed != num_hp_parts) {
-      p->assign_activity(g, ACT_FIRSTAID, 6000 / (p->skillLevel("first aid") + 1), 0, it->invlet, it->name);
+      p->assign_activity(g, ACT_FIRSTAID, 6000 / (p->skillLevel("firstaid") + 1), 0, it->invlet, it->name);
       p->activity.values.push_back(healed);
       p->moves = 0;
     }
@@ -887,6 +887,23 @@ int iuse::inhaler(player *p, item *it, bool t) {
         g->add_msg_if_player(p,_("Your heart begins to race."));
         p->fatigue -= 10;
     }
+    return it->type->charges_to_use();
+}
+
+int iuse::oxygen_bottle(player *p, item *it, bool t) {
+    p->moves -= 500;
+    g->add_msg_if_player(p,_("You breathe deeply from the %s"), it->tname().c_str());
+    if (p->has_disease("smoke")) {
+          p->rem_disease("smoke");
+        }
+        else if (p->has_disease("asthma")) {
+          p->rem_disease("asthma");
+        }
+        else if (p->stim < 16) {
+          p->stim += 8;
+          p->pkill += 2;
+        }
+    p->pkill += 2;
     return it->type->charges_to_use();
 }
 
@@ -1608,7 +1625,7 @@ int iuse::primitive_fire(player *p, item *it, bool t)
 
 int iuse::sew(player *p, item *it, bool t)
 {
-    if (p->fine_detail_vision_mod(g) > 2.5) {
+    if (p->fine_detail_vision_mod(g) > 4) {//minimum LL_LOW of LL_DARK + (ELFA_NV or atomic_light)
         g->add_msg(_("You can't see to sew!"));
         return 0;
     }
@@ -1685,8 +1702,12 @@ int iuse::sew(player *p, item *it, bool t)
         repair_items.push_back("fur");
         plurals.push_back(rm_prefix(_("<plural>fur")));
     }
+    if (fix->made_of("nomex")) {
+        repair_items.push_back("nomex");
+        plurals.push_back(rm_prefix(_("<plural>nomex")));
+    }
     if(repair_items.empty()) {
-        g->add_msg_if_player(p,_("Your %s is not made of cotton, wool, leather or fur."),
+        g->add_msg_if_player(p,_("Your %s is not made of fabric, leather or fur."),
                              fix->tname().c_str());
         return 0;
     }
@@ -1848,8 +1869,8 @@ static bool valid_fabric(player *p, item *it, bool t)
         g->add_msg_if_player(p, _("There's no point in cutting a %s."), it->type->name.c_str());
         return false;
     }
-    if (!it->made_of("cotton") && !it->made_of("leather")) {
-        g->add_msg(_("You can only slice items made of cotton or leather."));
+    if (!it->made_of("cotton") && !it->made_of("leather") && !it->made_of("nomex")) {
+        g->add_msg(_("You can only slice items made of fabric or leather."));
         return false;
     }
 
@@ -1882,11 +1903,16 @@ int iuse::cut_up(player *p, item *it, item *cut, bool t)
         sliced_text = ngettext("You slice the %s into a rag.", "You slice the %1$s into %2$d rags.",
                                count);
         type = "rag";
-    } else {
+    } else if (cut->made_of("leather")) {
         scrap_text = _("You clumsily cut the %s into useless scraps.");
         sliced_text = ngettext("You slice the %s into a piece of leather.",
                                "You slice the %1$s into %2$d pieces of leather.", count);
         type = "leather";
+    } else {
+        scrap_text = _("You clumsily cut the %s into useless scraps.");
+        sliced_text = ngettext("You cut the %s into a piece of nomex.",
+                               "You slice the %1$s into %2$d pieces of nomex.", count);
+        type = "nomex";
     }
 
     char ch = cut->invlet;
@@ -3271,6 +3297,38 @@ int iuse::chainsaw_on(player *p, item *it, bool t)
  return it->type->charges_to_use();
 }
 
+int iuse::cs_lajatang_off(player *p, item *it, bool t)
+{
+ p->moves -= 80;
+ if (rng(0, 10) - it->damage > 5 && it->charges > 1) {
+  g->sound(p->posx, p->posy, 40,
+           _("With a roar, the chainsaws leap to life!"));
+  it->make(itypes["cs_lajatang_on"]);
+  it->active = true;
+ } else {
+  g->add_msg_if_player(p,_("You yank the cords, but nothing happens."));
+ }
+ return it->type->charges_to_use();
+}
+
+int iuse::cs_lajatang_on(player *p, item *it, bool t)
+{
+ if (t) { // Effects while simply on
+  if (one_in(15)) {
+   g->sound(p->posx, p->posy, 12, _("Your chainsaws rumble."));
+  }
+  //Deduct an additional charge (since there are two of them)
+  if(it->charges > 0) {
+   it->charges--;
+  }
+ } else { // Toggling
+  g->add_msg_if_player(p,_("Your chainsaws die."));
+  it->make(itypes["cs_lajatang_off"]);
+  it->active = false;
+ }
+ return it->type->charges_to_use();
+}
+
 int iuse::carver_off(player *p, item *it, bool t)
 {
  p->moves -= 80;
@@ -3294,6 +3352,56 @@ int iuse::carver_on(player *p, item *it, bool t)
  } else { // Toggling
   g->add_msg_if_player(p,_("Your electric carver dies."));
   it->make(itypes["carver_off"]);
+  it->active = false;
+ }
+ return it->type->charges_to_use();
+}
+
+int iuse::trimmer_off(player *p, item *it, bool t)
+{
+ p->moves -= 80;
+ if (rng(0, 10) - it->damage > 3 && it->charges > 0) {
+  g->sound(p->posx, p->posy, 15,
+           _("With a roar, the hedge trimmer leaps to life!"));
+  it->make(itypes["trimmer_on"]);
+  it->active = true;
+ } else {
+  g->add_msg_if_player(p,_("You yank the cord, but nothing happens."));
+ }
+ return it->type->charges_to_use();
+}
+
+int iuse::trimmer_on(player *p, item *it, bool t)
+{
+ if (t) { // Effects while simply on
+  if (one_in(15)) {
+   g->sound(p->posx, p->posy, 10, _("Your hedge trimmer rumbles."));
+  }
+ } else { // Toggling
+  g->add_msg_if_player(p,_("Your hedge trimmer dies."));
+  it->make(itypes["trimmer_off"]);
+  it->active = false;
+ }
+ return it->type->charges_to_use();
+}
+
+int iuse::circsaw_off(player *p, item *it, bool t)
+{
+ it->make(itypes["circsaw_on"]);
+ it->active = true;
+ g->add_msg_if_player(p,_("You turn on the circular saw."));
+ return it->type->charges_to_use();
+}
+
+int iuse::circsaw_on(player *p, item *it, bool t)
+{
+ if (t) { // Effects while simply on
+  if (one_in(15)) {
+   g->sound(p->posx, p->posy, 7, _("Your circular saw buzzes."));
+  }
+ } else { // Toggling
+  g->add_msg_if_player(p,_("Your circular saw powers off."));
+  it->make(itypes["circsaw_off"]);
   it->active = false;
  }
  return it->type->charges_to_use();
@@ -4577,7 +4685,7 @@ int iuse::matchbomb_act(player *p, item *it, bool t) {
     point pos = g->find_item(it);
     if (pos.x == -999 || pos.y == -999) { return 0; }
     // Simple timer effects
-    if (t) { 
+    if (t) {
         g->sound(pos.x, pos.y, 0, _("ssss..."));
     } else if(it->charges > 0) {
         g->add_msg(_("You've already lit the %s, try throwing it instead."), it->name.c_str());
@@ -5476,7 +5584,7 @@ int iuse::knife(player *p, item *it, bool t)
     item *result = NULL;
     int count = amount;
 
-    if ((cut->made_of("cotton") || cut->made_of("leather")) ) {
+    if ((cut->made_of("cotton") || cut->made_of("leather") || cut->made_of("nomex")) ) {
         if (valid_fabric(p, cut, t)) {
             cut_up(p, it, cut, t);
         }
@@ -7096,7 +7204,7 @@ int iuse::wood_gas(player *p, item *, bool t)
 int iuse::bell(player *p, item *it, bool t)
 {
     if( it->type->id == "cow_bell" ) {
-        g->sound(p->posx, p->posy, 6, _("Clank! Clank!"));   
+        g->sound(p->posx, p->posy, 6, _("Clank! Clank!"));
     } else {
         g->sound(p->posx, p->posy, 4, _("Ring! Ring!"));
     }
