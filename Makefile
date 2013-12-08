@@ -167,7 +167,7 @@ ifeq ($(TARGETSYSTEM),WINDOWS)
   BINDIST = $(W32BINDIST)
   BINDIST_CMD = $(W32BINDIST_CMD)
   ODIR = $(W32ODIR)
-  LDFLAGS += -static -lgdi32 -lwinmm
+  LDFLAGS += -static -lgdi32 -lwinmm -limagehlp
   ifeq ($(LOCALIZE), 1)
     LDFLAGS += -lintl -liconv
   endif
