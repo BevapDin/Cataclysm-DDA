@@ -2566,8 +2566,13 @@ void list_missing_ones(std::ostream &stream, const recipe &r) {
     list_missing_ones(stream, r.components, false);
 }
 
-void crafting_inventory_t::add_vpart(vehicle *veh, int part, const std::string &vpart_flag_name, const ammotype &fuel) {
+void crafting_inventory_t::add_vpart(vehicle *veh, int mpart, const std::string &vpart_flag_name, const ammotype &fuel) {
     static const std::string vpart_name_prefix("vpart_");
+    const int part = veh->part_with_feature(mpart, vpart_flag_name);
+    if (part < 0) {
+        // No such part here!
+        return;
+    }
     const itype_id type = vpart_name_prefix + vpart_flag_name;
     if(!item_controller->has_template(type)) {
         debugmsg("Missing template for vpart pseudo item %s", type.c_str());
@@ -2575,7 +2580,7 @@ void crafting_inventory_t::add_vpart(vehicle *veh, int part, const std::string &
     }
     item vpart_item(item_controller->find_template(type), (int) g->turn);
     if(fuel.empty() || fuel == "null" || fuel == "NULL") {
-        vpart_item.charges = 0;
+        vpart_item.charges = -1;
     } else {
         vpart_item.charges = veh->fuel_left(fuel, true);
     }

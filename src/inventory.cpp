@@ -633,25 +633,10 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
                     this->vpart.push_back(item_from_vpart(veh, veh->parts[kpart].mount_dx, veh->parts[kpart].mount_dy, water));
                 }
 
-                const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
-                if (weldpart >= 0) {
-                    add_vpart(veh, weldpart, "WELDRIG", "battery");
-                }
-
-                const int craftpart = veh->part_with_feature(vpart, "CRAFTRIG");
-                if (craftpart >= 0) {
-                    add_vpart(veh, weldpart, "CRAFTRIG", "battery");
-                }
-
-                const int forgepart = veh->part_with_feature(vpart, "FORGE");
-                if (forgepart >= 0) {
-                    add_vpart(veh, forgepart, "FORGE", "battery");
-                }
-
-                const int chempart = veh->part_with_feature(vpart, "CHEMLAB");
-                if (chempart >= 0) {
-                    add_vpart(veh, chempart, "CHEMLAB", "battery");
-                }
+                add_vpart(veh, vpart, "WELDRIG", "battery");
+                add_vpart(veh, vpart, "CRAFTRIG", "battery");
+                add_vpart(veh, vpart, "FORGE", "battery");
+                add_vpart(veh, vpart, "CHEMLAB", "battery");
 
                 const int cpart = veh->part_with_feature(vpart, "CARGO");
                 if (cpart >= 0) {
