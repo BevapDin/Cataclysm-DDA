@@ -610,7 +610,7 @@ struct it_book : public itype
 
 struct it_container : public virtual itype
 {
- unsigned char contains; // Internal volume
+ unsigned int contains; // Internal volume
  virtual bool is_container() { return true; }
  it_container() : contains(0) {};
 };

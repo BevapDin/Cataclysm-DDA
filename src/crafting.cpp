@@ -239,7 +239,7 @@ bool game::making_would_work(recipe *making)
     }
 
     crafting_inventory_t crafting_inv(this, &u);
-    if(can_make(making, crafting_inv)) {
+    if(can_make_with_inventory(making, crafting_inv)) {
         if (item_controller->find_template((making->result))->phase == LIQUID) {
             if (u.has_watertight_container() ||
                 u.has_matching_liquid(item_controller->find_template(making->result)->id)) {
@@ -267,7 +267,7 @@ bool game::making_would_work(recipe *making)
     return false;
 }
 
-bool game::can_make(recipe *r, crafting_inventory_t &crafting_inv)
+bool game::can_make_with_inventory(recipe *r, crafting_inventory_t &crafting_inv)
 {
     bool retval = true;
     if (!u.knows_recipe(r)) {
@@ -787,7 +787,7 @@ recipe* game::select_crafting_recipe()
                     subtab = "CSC_AMMO_BULLETS";
                 }
                 else if (tab == "CC_FOOD" && subtab == "CSC_FOOD_OTHER") {
-                    subtab = "CSC_FOOD_DRINK";
+                    subtab = "CSC_FOOD_DRINKS";
                 }
                 else if (tab == "CC_CHEM" && subtab == "CSC_CHEM_OTHER") {
                     subtab = "CSC_CHEM_DRUGS";
@@ -1068,38 +1068,38 @@ void game::pick_recipes(crafting_inventory_t& crafting_inv, std::vector<recipe*>
     if (filter == "") {
         available_recipes = recipes[tab];
     } else {
-        for (recipe_map::iterator iter = recipes.begin(); iter != recipes.end(); ++iter)
-        {
-            available_recipes.insert(available_recipes.begin(), iter->second.begin(), iter->second.end());
+
+        for (recipe_map::iterator iter = recipes.begin(); iter != recipes.end(); ++iter) {
+            available_recipes.insert(available_recipes.begin(),
+                                     iter->second.begin(), iter->second.end());
         }
     }
 
     current.clear();
     available.clear();
 
-    for (recipe_list::iterator iter = available_recipes.begin(); iter != available_recipes.end(); ++iter)
-    {
-        if ((*iter)->subcat == subtab) {
-        if (!u.knows_recipe(*iter))
-            continue;
+    for (recipe_list::iterator iter = available_recipes.begin();
+         iter != available_recipes.end(); ++iter) {
+        if ((*iter)->subcat == subtab || filter != "") {
+            if (!u.knows_recipe(*iter)) {
+                continue;
+            }
 
-        if ((*iter)->difficulty < 0 )
-            continue;
+            if ((*iter)->difficulty < 0 ) {
+                continue;
+            }
 
+            if (filter != "" && item_controller->find_template((*iter)->result)->name.find(filter) == std::string::npos) {
+                continue;
+            }
 
-        if (filter != "" && item_controller->find_template((*iter)->result)->name.find(filter) == std::string::npos)
-            continue;
-
-        if (can_make(*iter, crafting_inv))
-        {
-            current.insert(current.begin(), *iter);
-            available.insert(available.begin(), true);
-        }
-        else
-        {
-            current.push_back(*iter);
-            available.push_back(false);
-        }
+            if (can_make_with_inventory(*iter, crafting_inv)) {
+                current.insert(current.begin(), *iter);
+                available.insert(available.begin(), true);
+            } else {
+                current.push_back(*iter);
+                available.push_back(false);
+            }
         }
     }
 }

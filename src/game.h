@@ -92,9 +92,9 @@ enum quit_status {
 
 struct monster_and_count
 {
- monster mon;
+ monster critter;
  int count;
- monster_and_count(monster M, int C) : mon (M), count (C) {};
+ monster_and_count(monster M, int C) : critter (M), count (C) {};
 };
 
 struct game_message
@@ -250,9 +250,9 @@ class game
   faction* faction_by_id(int it);
   bool sees_u(int x, int y, int &t);
   bool u_see (int x, int y);
-  bool u_see (monster *mon);
+  bool u_see (monster *critter);
   bool u_see (player *p);
-  bool pl_sees(player *p, monster *mon, int &t);
+  bool pl_sees(player *p, monster *critter, int &t);
   bool is_hostile_nearby();
   bool is_hostile_very_close();
   void refresh_all();
@@ -462,7 +462,7 @@ class game
   bool crafting_allowed();             // See crafting.cpp
   recipe* select_crafting_recipe();    // See crafting.cpp
   bool making_would_work(recipe *r);   // See crafting.cpp
-  bool can_make(recipe *r, crafting_inventory_t &crafting_inv);            // See crafting.cpp
+  bool can_make_with_inventory(recipe *r, crafting_inventory_t &crafting_inv);            // See crafting.cpp
   void make_craft(recipe *making);     // See crafting.cpp
   void make_all_craft(recipe *making); // See crafting.cpp
   void complete_craft();               // See crafting.cpp

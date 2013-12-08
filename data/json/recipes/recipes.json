@@ -2163,7 +2163,8 @@
   "difficulty": 8,
   "time": 95000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 8 ]],
   "tools": [
     [
       ["func:screwdriver", -1]
@@ -2492,7 +2493,8 @@
   "difficulty": 8,
   "time": 40000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 5 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -2522,7 +2524,8 @@
   "difficulty": 10,
   "time": 40000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 5 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11210,6 +11213,7 @@
   "reversible": true,
   "decomp_learn": 4,
   "autolearn": true,
+  "book_learn": [[ "recipe_lab_elec", 4 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11243,7 +11247,8 @@
   "time" : 85000,
   "reversible" : true,
   "decomp_learn" : 4,
-  "autolearn" : true,
+  "autolearn" : false,
+  "book_learn": [[ "recipe_lab_elec", 7 ]],
   "tools" : [
     [
       [ "func:screwdriver", -1 ]
@@ -11279,7 +11284,8 @@
   "difficulty": 6,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11314,7 +11320,8 @@
   "difficulty": 12,
   "time": 70000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 8 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11350,7 +11357,8 @@
   "difficulty": 7,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 7 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11384,7 +11392,8 @@
   "difficulty": 7,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 7 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11415,7 +11424,8 @@
   "difficulty": 6,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 7 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11446,7 +11456,8 @@
   "difficulty": 9,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 8 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11482,6 +11493,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 5,
+  "book_learn": [[ "recipe_lab_elec", 7 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11514,6 +11526,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 7,
+  "book_learn": [[ "recipe_lab_elec", 7 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11547,8 +11560,9 @@
   "difficulty": 6,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
   "decomp_learn": 5,
+  "book_learn": [[ "recipe_lab_elec", 5 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11584,6 +11598,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 5,
+  "book_learn": [[ "recipe_lab_elec", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11617,8 +11632,9 @@
   "difficulty": 6,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
   "decomp_learn": 5,
+  "book_learn": [[ "recipe_lab_elec", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11652,8 +11668,9 @@
   "difficulty": 6,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
   "decomp_learn": 5,
+  "book_learn": [[ "recipe_lab_elec", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11687,8 +11704,9 @@
   "difficulty": 6,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
   "decomp_learn": 5,
+  "book_learn": [[ "recipe_lab_elec", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11722,8 +11740,9 @@
   "difficulty": 6,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
   "decomp_learn": 5,
+  "book_learn": [[ "recipe_lab_elec", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -12027,7 +12046,9 @@
   "difficulty": 8,
   "time": 50000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 8 ]],
+  "decomp_learn": 9,
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -16136,7 +16157,8 @@
   "difficulty": 3,
   "time": 10000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 4 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -16160,7 +16182,8 @@
   "difficulty": 6,
   "time": 8000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 6 ] , [ "textbook_robots", 7]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -16229,7 +16252,8 @@
   "difficulty": 7,
   "time": 9000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 7 ] , [ "textbook_robots", 9 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -16270,7 +16294,8 @@
   "difficulty": 8,
   "time": 12000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 8 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -23058,6 +23083,45 @@
     ]
   ]
   },{
+        "type" : "recipe",
+  "result": "bastsandals",
+  "category": "CC_ARMOR",
+  "skill_used": "tailor",
+  "difficulty": 2,
+  "time": 30000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities":[
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "components": [
+    [
+      [ "plant_fibre", 140 ],
+      [ "sinew", 140 ],
+      [ "thread", 140 ]
+    ]
+  ]
+  },{
+        "type" : "recipe",
+  "result": "clogs",
+  "category": "CC_ARMOR",
+  "subcategory": "CSC_ARMOR_FEET",
+  "skill_used": "fabrication",
+  "difficulty": 3,
+  "time": 80000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities":[
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "components": [
+    [
+      [ "2x4", 2 ],
+      [ "stick", 2 ],
+      [ "splinter", 2 ]
+    ]
+  ]
+},{
         "type" : "recipe",
   "result": "brioche",
   "category": "CC_FOOD",
