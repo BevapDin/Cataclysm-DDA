@@ -153,7 +153,6 @@ public:
         LT_SURROUNDING    = (1 <<  1),
         LT_VEHICLE_CARGO  = (1 <<  2),
         LT_VPART          = (1 <<  3),
-        LT_WEAPON         = (1 <<  4),
         LT_INVENTORY      = (1 <<  5),
         LT_BIONIC         = (1 <<  6),
     } LocationType;
@@ -167,7 +166,7 @@ public:
      */
     typedef enum {
         S_MAP = LT_MAP | LT_SURROUNDING | LT_VEHICLE_CARGO | LT_VPART,
-        S_PLAYER = LT_WEAPON | LT_INVENTORY | LT_BIONIC,
+        S_PLAYER = LT_INVENTORY | LT_BIONIC,
         
         S_ALL = S_MAP | S_PLAYER,
     } source_flags;
@@ -246,12 +245,9 @@ public:
                 int mindex;
             };
             struct {
-                item *weapon;
-            };
-            struct {
                 player *the_player;
-                // invlet of item in player's inventory (or worn, weapon has its own location)
-                signed char invlet;
+                // position of item in player's inventory (or worn, weapon has its own location)
+                int invpos;
                 int invcount;
             };
             struct {
@@ -282,9 +278,8 @@ public:
         // The candidate is valid (valid() == true) after
         // beeing constrcuted this way.
         candidate_t() { make_invalid(); }
-        candidate_t(player *p, const itype_id &type);
         candidate_t(items_on_map &ifm, int i, const itype_id &type);
-        candidate_t(player *p, char ch, int count, const itype_id &type);
+        candidate_t(player *p, int pos, int count, const itype_id &type);
         candidate_t(items_in_vehicle_cargo &ifv, int i, const itype_id &type);
         candidate_t(item_from_vpart &ifv, const itype_id &type);
         candidate_t(item_from_bionic &ifb, const itype_id &type);

@@ -1473,17 +1473,14 @@ struct candidate_vpart {
     bool in_inventory;
     int mapx;
     int mapy;
-    union {
-        signed char invlet;
-        int index;
-    };
+    int index;
     item vpart_item;
     candidate_vpart(int x, int y, int i, item vpitem):
         in_inventory(false), mapx(x), mapy(y), index(i) {
         vpart_item = vpitem;
     }
-    candidate_vpart(char ch, item vpitem):
-        in_inventory(true), mapx(-1), mapy(-1), invlet(ch) {
+    candidate_vpart(int position, item vpitem):
+        in_inventory(true), mapx(-1), mapy(-1), index(position) {
         vpart_item = vpitem;
     }
 };

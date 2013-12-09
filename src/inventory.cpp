@@ -17,13 +17,14 @@ invslice inventory::slice() {
     return stacks;
 }
 
-inventory inventory::subset(std::map<char, int> chosen) const
+inventory inventory::subset(std::map<int, int> chosen) const
 {
+    int i = 0;
     inventory ret;
     for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter)
     {
         // don't need to worry about auto-creation of entries, as long as default == 0
-        int count = chosen[iter->front().invlet];
+        int count = chosen[i];
         if (count != 0)
         {
             if (iter->front().count_by_charges())
@@ -48,6 +49,7 @@ inventory inventory::subset(std::map<char, int> chosen) const
                 }
             }
         }
+        ++i;
     }
     return ret;
 }
@@ -66,7 +68,7 @@ std::list<item>& inventory::stack_by_letter(char ch)
 
 const std::list<item>& inventory::const_stack(int i) const
 {
-    if (i < 0 || i > items.size())
+    if (i < 0 || i >= items.size())
     {
         debugmsg("Attempted to access stack %d in an inventory (size %d)",
                  i, items.size());
@@ -224,34 +226,51 @@ inventory inventory::operator+ (const item &rhs)
     return (it.get_remaining_capacity_for_liquid(liquid, error) > 0);
 }
 
-invslice inventory::slice_filter_by_activation(const player& u) {
-    invslice stacks;
+indexed_invslice inventory::slice_filter() {
+    int i = 0;
+    indexed_invslice stacks;
+    for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
+    {
+        stacks.push_back(std::make_pair(&*iter, i));
+        ++i;
+    }
+    return stacks;
+}
+
+indexed_invslice inventory::slice_filter_by_activation(const player& u) {
+    int i = 0;
+    indexed_invslice stacks;
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
     {
         if (has_activation(iter->front(), u)) {
-            stacks.push_back(&*iter);
+            stacks.push_back(std::make_pair(&*iter, i));
         }
+        ++i;
     }
     return stacks;
 }
 
-invslice inventory::slice_filter_by_category(item_cat cat, const player& u) {
-    invslice stacks;
+indexed_invslice inventory::slice_filter_by_category(item_cat cat, const player& u) {
+    int i = 0;
+    indexed_invslice stacks;
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
     {
         if (has_category(iter->front(), cat, u)) {
-            stacks.push_back(&*iter);
+            stacks.push_back(std::make_pair(&*iter, i));
         }
+        ++i;
     }
     return stacks;
 }
 
-invslice inventory::slice_filter_by_capacity_for_liquid(const item &liquid) {
-    invslice stacks;
+indexed_invslice inventory::slice_filter_by_capacity_for_liquid(const item &liquid) {
+    int i = 0;
+    indexed_invslice stacks;
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter) {
         if (has_capacity_for_liquid(iter->front(), liquid)) {
-            stacks.push_back(&*iter);
+            stacks.push_back(std::make_pair(&*iter, i));
         }
+        ++i;
     }
     return stacks;
 }
@@ -308,6 +327,11 @@ void inventory::update_cache_with_item(item& newit) {
     // 1. It adds newit's invlet to the list of favorite letters for newit's item type.
     // 2. It removes newit's invlet from the list of favorite letters for all other item types.
 
+    // no invlet item, just return.
+    // TODO: Should we instead remember that the invlet was cleared?
+    if (newit.invlet == 0) {
+        return;
+    }
     // Iterator over all the keys of the map.
     std::map<std::string, std::vector<char> >::iterator i;
     for(i=invlet_cache.begin(); i!=invlet_cache.end(); i++) {
@@ -804,6 +828,41 @@ void inventory::dump(std::vector<item *>& dest)
     }
 }
 
+item& inventory::find_item(int position) {
+    if (position < 0 || position >= items.size())
+        return nullitem;
+    invstack::iterator iter = items.begin();
+    for (int j = 0; j < position; ++j)
+    {
+        ++iter;
+    }
+    return iter->front();
+}
+
+int inventory::position_by_letter(char ch) {
+    int i = 0;
+    for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter) {
+        if (iter->begin()->invlet == ch) {
+            return i;
+        }
+        ++i;
+    }
+    return INT_MIN;
+}
+
+int inventory::position_by_item(item* it) {
+    int i = 0;
+    for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter) {
+        for (std::list<item>::iterator stack_iter = iter->begin(); stack_iter != iter->end(); ++stack_iter) {
+            if (it == &*stack_iter) {
+                return i;
+            }
+        }
+        ++i;
+    }
+    return INT_MIN;
+}
+
 item& inventory::item_by_letter(char ch)
 {
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
@@ -828,6 +887,19 @@ item& inventory::item_by_type(itype_id type)
     return nullitem;
 }
 
+int inventory::position_by_type(itype_id type)
+{
+    int i = 0;
+    for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
+    {
+        if (iter->front().type->id == type)
+        {
+            return i;
+        }
+        ++i;
+    }
+    return INT_MIN;
+}
 item& inventory::item_or_container(itype_id type)
 {
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
@@ -852,9 +924,10 @@ item& inventory::item_or_container(itype_id type)
     return nullitem;
 }
 
-std::vector<item*> inventory::all_items_by_type(itype_id type)
+std::vector<std::pair<item*, int> > inventory::all_items_by_type(itype_id type)
 {
-    std::vector<item*> ret;
+    std::vector<std::pair<item*, int> > ret;
+    int i = 0;
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter)
     {
         for (std::list<item>::iterator stack_iter = iter->begin();
@@ -863,9 +936,10 @@ std::vector<item*> inventory::all_items_by_type(itype_id type)
         {
             if (stack_iter->matches_type(type))
             {
-                ret.push_back(&*stack_iter);
+                ret.push_back(std::make_pair(&*stack_iter, i));
             }
         }
+        ++i;
     }
     return ret;
 }
@@ -1480,7 +1554,7 @@ std::vector<item*> inventory::active_items()
     return ret;
 }
 
-void inventory::assign_empty_invlet(item &it)
+void inventory::assign_empty_invlet(item &it, bool force)
 {
   player *p = &(g->u);
   for (std::string::const_iterator newinvlet = inv_chars.begin();
@@ -1491,6 +1565,5 @@ void inventory::assign_empty_invlet(item &it)
     return;
    }
   }
-  it.invlet = '`';
-  //debugmsg("Couldn't find empty invlet");
+  it.invlet = force ? '`' : 0;
 }

@@ -1213,6 +1213,19 @@ void game::complete_craft()
   skill_dice -= main_rank_penalty * 4;
  }
 
+ //It's tough to craft with paws.  Fortunately it's just a matter of grip and fine-motor, not inability to see what you're doing
+ if (u.has_trait("PAWS")) {
+  int paws_rank_penalty = 0;
+  if (making->skill_used == Skill::skill("electronics")) {
+   paws_rank_penalty = 1;
+  } else if (making->skill_used == Skill::skill("tailoring")) {
+   paws_rank_penalty = 1;
+  } else if (making->skill_used == Skill::skill("mechanics")) {
+   paws_rank_penalty = 1;
+  }
+  skill_dice -= paws_rank_penalty * 4;
+ }
+ 
 // Sides on dice is 16 plus your current intelligence
  int skill_sides = 16 + u.int_cur;
 
@@ -1259,7 +1272,7 @@ void game::complete_craft()
  std::list<item> used_tools;
  crafting_inv.consume_gathered(*making, u.activity, used, used_tools);
 
- item newit(item_controller->find_template(making->result), turn);
+ item newit(item_controller->find_template(making->result), turn, 0);
  newit.item_tags.insert(to_uncraft_tag(used, used_tools));
  int new_count = 1;
  if(making->count > 0) {
@@ -1269,26 +1282,26 @@ void game::complete_craft()
    }
  }
 
-    if (newit.is_armor() && newit.has_flag("VARSIZE"))
-    {
-        newit.item_tags.insert("FIT");
-    }
-    float used_age_tally = 0;
-    int used_age_count = 0;
-    for (std::list<item>::iterator iter = used.begin(); iter != used.end(); ++iter)
-    {
-        if (iter->goes_bad())
-        {
-            used_age_tally += ((int)turn - iter->bday)/
-                (float)(dynamic_cast<it_comest*>(iter->type)->spoils);
-            ++used_age_count;
-        }
-    }
-    if (used_age_count > 0 && newit.goes_bad())
-    {
-        const int average_used_age = int((used_age_tally / used_age_count) * dynamic_cast<it_comest*>(newit.type)->spoils);
-        newit.bday = newit.bday - average_used_age;
-    }
+ if (newit.is_armor() && newit.has_flag("VARSIZE"))
+ {
+     newit.item_tags.insert("FIT");
+ }
+ float used_age_tally = 0;
+ int used_age_count = 0;
+ for (std::list<item>::iterator iter = used.begin(); iter != used.end(); ++iter)
+ {
+     if (iter->goes_bad())
+     {
+         used_age_tally += ((int)turn - iter->bday)/
+                 (float)(dynamic_cast<it_comest*>(iter->type)->spoils);
+         ++used_age_count;
+     }
+ }
+ if (used_age_count > 0 && newit.goes_bad())
+ {
+     const int average_used_age = int((used_age_tally / used_age_count) * dynamic_cast<it_comest*>(newit.type)->spoils);
+     newit.bday = newit.bday - average_used_age;
+ }
  // for food items
  if (newit.is_food())
   {
@@ -1303,7 +1316,6 @@ void game::complete_craft()
   }
  if (!newit.craft_has_charges())
   newit.charges = 0;
- //newit = newit.in_its_container(&itypes);
  if (newit.made_of(LIQUID)) {
   newit.charges *= new_count;
   while(!handle_liquid(newit, false, false)) { ; }
@@ -1312,29 +1324,24 @@ void game::complete_craft()
     newit.charges *= new_count;
     new_count = 1;
   }
-  u.add_or_drop(newit, this, new_count);
+  u.i_add_or_drop(newit, this, new_count);
   g->add_msg("%s", newit.tname(g).c_str());
  }
 }
 
-void game::disassemble(char ch)
+void game::disassemble(int pos)
 {
-    if (!ch)
+    if (!pos)
     {
-        ch = inv(_("Disassemble item:"));
+        pos = inv(_("Disassemble item:"));
     }
-    if (ch == 27)
+    if (!u.has_item(pos))
     {
-        add_msg(_("Never mind."));
-        return;
-    }
-    if (!u.has_item(ch))
-    {
-        add_msg(_("You don't have item '%c'!"), ch);
+        add_msg(_("You don't have that item!"), pos);
         return;
     }
 
-    item* dis_item = &u.i_at(ch);
+    item* dis_item = &u.i_at(pos);
 	crafting_inventory_t crafting_inv(this, &u);
 
 
@@ -1430,7 +1437,7 @@ void game::disassemble(char ch)
                     u.assign_activity(this, ACT_DISASSEMBLE, cur_recipe->time / 2, cur_recipe->id);
                     u.moves = 0;
                     std::vector<int> dis_items;
-                    dis_items.push_back(ch);
+                    dis_items.push_back(pos);
                     u.activity.values = dis_items;
                 }
                 return; // recipe exists, but no tools, so do not start disassembly

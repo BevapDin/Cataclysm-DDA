@@ -2238,14 +2238,14 @@ ammotype item::ammo_type() const
     return "NULL";
 }
 
-char item::pick_reload_ammo(player &u, bool interactive)
+int item::pick_reload_ammo(player &u, bool interactive)
 {
  if( is_null() )
-  return false;
+  return INT_MIN;
 
  if (!type->is_gun() && !type->is_tool()) {
   debugmsg("RELOADING NON-GUN NON-TOOL");
-  return false;
+  return INT_MIN;
  }
  int has_spare_mag = has_gunmod ("spare_mag");
 
@@ -2254,13 +2254,13 @@ char item::pick_reload_ammo(player &u, bool interactive)
  if (type->is_gun()) {
   if(charges <= 0 && has_spare_mag != -1 && contents[has_spare_mag].charges > 0) {
    // Special return to use magazine for reloading.
-   return -2;
+   return INT_MIN + 1;
   }
   it_gun* tmp = dynamic_cast<it_gun*>(type);
 
   // If there's room to load more ammo into the gun or a spare mag, stash the ammo.
   // If the gun is partially loaded make sure the ammo matches.
-  // If the gun is empty, either the spre mag is empty too and anything goes,
+  // If the gun is empty, either the spare mag is empty too and anything goes,
   // or the spare mag is loaded and we're doing a tactical reload.
   if (charges < clip_size() ||
       (has_spare_mag != -1 && contents[has_spare_mag].charges < tmp->clip)) {
@@ -2296,7 +2296,7 @@ char item::pick_reload_ammo(player &u, bool interactive)
  }
 
 
- char am_invlet = 0;
+ int am_pos = INT_MIN;
 
  if (am.size() > 1 && interactive) {// More than one option; list 'em and pick
      uimenu amenu;
@@ -2341,59 +2341,29 @@ char item::pick_reload_ammo(player &u, bool interactive)
      }
      amenu.query();
      if ( amenu.ret >= 0 ) {
-        am_invlet = am[ amenu.ret ]->invlet;
+        am_pos = g->u.get_item_position(am[ amenu.ret ]);
         uistate.lastreload[ ammo_type() ] = am[ amenu.ret ]->typeId();
      }
  }
  // Either only one valid choice or chosing for a NPC, just return the first.
  else if (am.size() > 0){
-  am_invlet = am[0]->invlet;
+     am_pos = g->u.get_item_position(am[0]);
  }
- return am_invlet;
+ return am_pos;
 }
 
-bool item::reload(player &u, char ammo_invlet)
+bool item::reload(player &u, int pos)
 {
  bool single_load = false;
  int max_load = 1;
  item *reload_target = NULL;
- item *ammo_container = (ammo_invlet != 0 ? &u.i_at(ammo_invlet) : NULL);
- 
- if (is_gun() && ammo_invlet == -2) {
-  // Reload using a spare magazine
-  int spare_mag = has_gunmod("spare_mag");
-  if (charges <= 0 && spare_mag != -1 &&
-      contents[spare_mag].charges > 0) {
-   charges = contents[spare_mag].charges;
-   curammo = contents[spare_mag].curammo;
-   contents[spare_mag].charges = 0;
-   contents[spare_mag].curammo = NULL;
-   return true;
-  }
- }
+ item *ammo_container = 0;
 
- item muscle_ammo;
- if(ammo_container == 0 && ammo_type() == "muscle") {
-   muscle_ammo = item_controller->create("muscle", 0);
-   muscle_ammo.charges = 10000;
-   ammo_container = &muscle_ammo;
-   ammo_invlet = 1;
- } else if(ammo_container == 0 || ammo_container->is_null()) {
-  debugmsg("NULL item to reload");
-  return false;
- }
-
- item *ammo_to_use = ammo_container;
- // also check if wielding ammo
- if (ammo_to_use == NULL || ammo_to_use->is_null()) {
-     if (u.is_armed() && u.weapon.is_ammo() && u.weapon.invlet == ammo_invlet)
-         ammo_to_use = &u.weapon;
- }
+ item *ammo_to_use = &u.i_at(pos);
 
  // Handle ammo in containers, currently only gasoline
- if(ammo_to_use->is_container() && !ammo_to_use->contents.empty())
-   ammo_to_use = &ammo_to_use->contents[0];
- else if(!ammo_to_use->contents.empty()) {
+ if(!ammo_to_use->contents.empty()) {
+   ammo_container = ammo_to_use;
    ammo_to_use = &ammo_to_use->contents[0];
  }
 
@@ -2454,7 +2424,7 @@ bool item::reload(player &u, char ammo_invlet)
   max_load *= 2;
  }
 
- if (ammo_invlet > 0) {
+ if (pos != INT_MIN) {
   // If the gun is currently loaded with a different type of ammo, reloading fails
   if ((reload_target->is_gun() || reload_target->is_gunmod()) &&
       reload_target->charges > 0 &&
@@ -2493,12 +2463,8 @@ bool item::reload(player &u, char ammo_invlet)
       {
           ammo_container->contents.erase(ammo_container->contents.begin());
       }
-      else if (u.weapon.invlet == ammo_to_use->invlet) {
-          u.remove_weapon();
-      }
-      else
-      {
-          u.i_remn(ammo_invlet);
+      else {
+          u.i_rem(pos);
       }
   }
   return true;

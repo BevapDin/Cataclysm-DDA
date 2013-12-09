@@ -450,7 +450,6 @@ void advanced_inventory::init(game *gp, player *pp)
 
     src = left; // the active screen , 0 for left , 1 for right.
     dest = right;
-    max_inv = inv_chars.size() - p->worn.size() - ( p->is_armed() ? 1 : 0 );
     examineScroll = false;
     filter_edit = false;
 }
@@ -659,7 +658,7 @@ void advanced_inventory::redraw_pane( int i )
     }
     wborder(panes[i].window, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX, LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX);
     mvwprintw(panes[i].window, 0, 3, _("< [s]ort: %s >"), sortnames[ ( panes[i].sortby < NUM_SORTBY ? panes[i].sortby : 0 ) ].c_str() );
-    int max = ( panes[i].area == isinventory ? max_inv : MAX_ITEM_IN_SQUARE );
+    int max = MAX_ITEM_IN_SQUARE;
     if ( panes[i].area == isall ) {
         max *= 9;
     }
@@ -754,33 +753,34 @@ void advanced_inventory::display(game * gp, player * pp)
         }
     }
 
-	inCategoryMode = false;
+    inCategoryMode = false;
 
-	std::vector<int> category_index_start;
-	category_index_start.reserve(NUM_SORTBY);
+    std::vector<int> category_index_start;
+    category_index_start.reserve(NUM_SORTBY);
 
-    while(!exit)
-    {
-        dest = (src==left ? right : left);
+    while(!exit) {
+        dest = (src == left ? right : left);
         // recalc and redraw
-        if ( recalc ) redraw=true;
+        if ( recalc ) redraw = true;
         for (int i = 0; i < 2; i++) {
             if ( panes[i].recalc ) panes[i].redraw = true;
         }
 
+        if ( recalc ) redraw = true; // global recalc = global redraw
+
+        // any redraw = redraw everything except opposite
         if(redraw || panes[0].redraw || panes[1].redraw ) {
-            max_inv = inv_chars.size() - u.worn.size() - ( u.is_armed() ? 1 : 0 );
             for (int i = 0; i < 2; i++) {
                 if ( redraw || panes[i].redraw ) {
                     redraw_pane( i );
                     wrefresh(panes[i].window);
                 }
             }
-            recalc=false;
+            recalc = false;
             if (redraw) {
                 werase(head);
                 draw_border(head);
-                int line=1;
+                int line = 1;
                 if( checkshowmsg || showmsg ) {
                     for (int i = g->messages.size() - 1; i >= 0 && line < 4; i--) {
                         std::string mes = g->messages[i].message;
@@ -830,44 +830,38 @@ void advanced_inventory::display(game * gp, player * pp)
         lastCh = 0;
         int changeSquare;
 
-        if(c == 'i')
+        if(c == 'i') {
             c = (char)'0';
+        }
 
         if(c == 'a' ) c = (char)'a';
 
         changeSquare = getsquare((char)c, panes[src].offx, panes[src].offy, panes[src].area_string, squares);
 
-		category_index_start.clear();
+        category_index_start.clear();
 
-		// Finds the index of the first item in each category.
-		for (int current_item_index = 0; current_item_index < panes[src].items.size(); ++current_item_index)
-		{
-			if (panes[src].items[current_item_index].volume == -8) // Found a category header.
-			{
-				category_index_start.push_back(current_item_index + 1);
-			}
-		}
-
-		if (' ' == c)
-		{
-			inCategoryMode = !inCategoryMode;
-			redraw = true; // We redraw to force the color change of the highlighted line and header text.
-		}
-        else if(changeSquare != -1)
-        {
-            if(panes[left].area == changeSquare || panes[right].area == changeSquare) // do nthing
-            {
-                lastCh = (int)popup_getkey(_("same square!"));
-                if(lastCh == 'q' || lastCh == KEY_ESCAPE || lastCh == ' ' ) lastCh=0;
+        // Finds the index of the first item in each category.
+        for (int current_item_index = 0; current_item_index < panes[src].items.size(); ++current_item_index) {
+             // Found a category header.
+            if (panes[src].items[current_item_index].volume == -8) {
+                category_index_start.push_back(current_item_index + 1);
             }
-            else if(squares[changeSquare].canputitems)
-            {
+        }
+
+        if (' ' == c) {
+            inCategoryMode = !inCategoryMode;
+            redraw = true; // We redraw to force the color change of the highlighted line and header text.
+        }
+        else if(changeSquare != -1) {
+             // do nthing
+            if(panes[left].area == changeSquare || panes[right].area == changeSquare) {
+                lastCh = (int)popup_getkey(_("same square!"));
+                if(lastCh == 'q' || lastCh == KEY_ESCAPE || lastCh == ' ' ) lastCh = 0;
+            } else if(squares[changeSquare].canputitems) {
                 panes[src].area = changeSquare;
                 panes[src].page = 0;
                 panes[src].index = 0;
-            }
-            else
-            {
+            } else {
                 popup(_("You can't put items there"));
             }
             recalc = true;
@@ -883,9 +877,7 @@ void advanced_inventory::display(game * gp, player * pp)
                 m.i_at(u.posx+panes[dest].offx,u.posy+panes[dest].offy));
             recalc = true;
             continue;
-        }
-        else if('m' == c || 'M' == c || 'T' == c)
-        {
+        } else if('m' == c || 'M' == c || 'T' == c) {
             // If the active screen has no item.
             if( panes[src].size == 0 ) {
                 continue;
@@ -953,14 +945,12 @@ void advanced_inventory::display(game * gp, player * pp)
             if(panes[src].area == isinventory) {
                 int max = (squares[destarea].max_size - squares[destarea].size);
                 int free_volume = 1000 * ( squares[ destarea ].vstor >= 0 ?
-                    squares[ destarea ].veh->free_volume( squares[ destarea ].vstor ) :
-                    m.free_volume ( squares[ destarea ].x, squares[ destarea ].y )
-                ) * 1000;
+                                           squares[ destarea ].veh->free_volume( squares[ destarea ].vstor ) :
+                                           m.free_volume ( squares[ destarea ].x, squares[ destarea ].y ) );
                 const std::list<item>& stack = u.inv.const_stack(item_pos);
                 const item* it = &stack.front();
 
                 int amount = 1;
-//                int volume = it->volume() * 100; // sigh
                 int volume = it->precise_unit_volume();
                 bool askamount = false;
                 if ( stack.size() > 1) {
@@ -968,7 +958,6 @@ void advanced_inventory::display(game * gp, player * pp)
                     askamount = true;
                 } else if ( it->count_by_charges() ) {
                     amount = it->charges;
-//                    volume = it->type->volume;
                     askamount = true;
                 }
                 if(c == 'T') { lastCh = 'j'; }
@@ -1117,7 +1106,7 @@ void advanced_inventory::display(game * gp, player * pp)
                     int trycharges = -1;
                     if ( destarea == isinventory ) // if destination is inventory
                     {
-                        if(squares[destarea].size >= max_inv) {
+                        if(squares[destarea].size >= MAX_ITEM_IN_SQUARE) {
                             popup(_("Too many items."));
                             continue;
                         }
@@ -1186,7 +1175,7 @@ void advanced_inventory::display(game * gp, player * pp)
                         new_item.charges = trycharges;
                     }
                     if(destarea == isinventory) {
-                        new_item.invlet = u.unused_invlet();
+                        u.inv.assign_empty_invlet(new_item);
                         u.i_add(new_item,g);
                         u.moves -= 100;
                     } else if (squares[destarea].vstor >= 0) {
@@ -1285,11 +1274,8 @@ void advanced_inventory::display(game * gp, player * pp)
             item *it = panes[src].items[list_pos].it;
             int ret=0;
             if(panes[src].area == isinventory ) {
-                char pleaseDeprecateMe=it->invlet;
-                ret=g->inventory_item_menu(pleaseDeprecateMe,
-										colstart + ( src == left ? w_width/2 : 0 ),
-										w_width/2
-                );
+                ret = g->inventory_item_menu( list_pos, colstart + ( src == left ? w_width / 2 : 0 ),
+                                              w_width / 2, (src == right ? 1 : -1) );
                 panes[src].recalc = true;
                 checkshowmsg = true;
             } else {

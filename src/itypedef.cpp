@@ -428,7 +428,6 @@ std::string ammo_name(ammotype t)
     if( t == "battery" )    return _("batteries");
     if( t == "laser_capacitor")return _("charge");
     if( t == "plutonium" )  return _("plutonium");
-    if( t == "muscle" )     return _("muscle");
     if( t == "fusion" )     return _("fusion cell");
     if( t == "12mm" )       return _("12mm slugs");
     if( t == "plasma" )     return _("hydrogen");

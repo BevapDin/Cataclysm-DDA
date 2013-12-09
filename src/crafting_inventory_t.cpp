@@ -518,7 +518,7 @@ crafting_inventory_t::candidate_t crafting_inventory_t::candidate_t::split(const
             return candidate_t();
         }
         invcount -= count_to_remove;
-        return candidate_t(the_player, invlet, count_to_remove, usageType);
+        return candidate_t(the_player, invpos, count_to_remove, usageType);
     }
     const int charges_per_item = req(get_item());
     const int total_charges = charges_per_item * invcount;
@@ -534,7 +534,7 @@ crafting_inventory_t::candidate_t crafting_inventory_t::candidate_t::split(const
     assert(remaining_items < invcount);
     const int items_to_remove = invcount - remaining_items;
     invcount -= items_to_remove;
-    return candidate_t(the_player, invlet, items_to_remove, usageType);
+    return candidate_t(the_player, invpos, items_to_remove, usageType);
 }
 
 void crafting_inventory_t::simple_req::recount_candidate_sources() {
@@ -948,10 +948,10 @@ int crafting_inventory_t::count(const requirement &req, int max, int sources) co
     int &count = xf.first->second;
     max = -1; // force complete counting
     
-    if(sources & LT_WEAPON && !p->weapon.is_null()) {
-        COUNT_IT_(p->weapon, 1);
-    }
     if(sources & LT_INVENTORY) {
+        if(!p->weapon.is_null()) {
+            COUNT_IT_(p->weapon, 1);
+        }
         for(invstack::const_iterator iter = p->inv.getItems().begin(); iter != p->inv.getItems().end();
             ++iter) {
             assert(!iter->empty());
@@ -1003,12 +1003,6 @@ int crafting_inventory_t::count(const requirement &req, int max, int sources) co
 }
 #undef COUNT_IT_
 
-crafting_inventory_t::candidate_t::candidate_t(player *p, const itype_id &type):
-location(LT_WEAPON),
-weapon(&(p->weapon)),
-usageType(type)
-{ }
-
 crafting_inventory_t::candidate_t::candidate_t(items_on_map &ifm, int i, const itype_id &type):
 location(LT_MAP),
 mapitems(&ifm),
@@ -1016,10 +1010,10 @@ mindex(i),
 usageType(type)
 { }
 
-crafting_inventory_t::candidate_t::candidate_t(player *p, char ch, int count, const itype_id &type):
+crafting_inventory_t::candidate_t::candidate_t(player *p, int pos, int count, const itype_id &type):
 location(LT_INVENTORY),
 the_player(p),
-invlet(ch),
+invpos(pos),
 invcount(count),
 usageType(type)
 { }
@@ -1059,10 +1053,8 @@ bool crafting_inventory_t::candidate_t::valid() const {
             return vitems != NULL && iindex >= 0 && iindex < vitems->items().size();
         case LT_VPART:
             return vpartitem != NULL;
-        case LT_WEAPON:
-            return weapon != NULL && !weapon->is_null();
         case LT_INVENTORY:
-            return the_player != NULL && invcount > 0 && !the_player->i_at(invlet).is_null();
+            return the_player != NULL && invcount > 0 && !the_player->i_at(invpos).is_null();
         case LT_BIONIC:
             return bionic != NULL;
         default:
@@ -1150,16 +1142,9 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
                 }
             }
             break;
-        case LT_WEAPON:
-            if(cinv.p->weapon.is_null()) {
-                weapon = NULL;
-            } else {
-                weapon = &(cinv.p->weapon);
-            }
-            break;
         case LT_INVENTORY:
             the_player = cinv.p;
-            invlet = (char) obj.get_int("invlet");
+            invpos = obj.get_int("invpos");
             invcount = obj.get_int("invcount");
             break;
         case LT_BIONIC:
@@ -1196,10 +1181,8 @@ const item &crafting_inventory_t::candidate_t::get_item() const {
         case LT_VPART:
             return vpartitem->the_item;
             break;
-        case LT_WEAPON:
-            return *weapon;
         case LT_INVENTORY:
-            return the_player->i_at(invlet);
+            return the_player->i_at(invpos);
         case LT_BIONIC:
             return bionic->the_item;
         default:
@@ -1240,10 +1223,8 @@ void crafting_inventory_t::candidate_t::serialize(JsonOut &json) const {
             json.member("mount_dy", vitems->mount_dy);
             json.member("type", vpartitem->the_item.type->id);
             break;
-        case LT_WEAPON:
-            break;
         case LT_INVENTORY:
-            json.member("invlet", static_cast<int>(invlet));
+            json.member("invpos", invpos);
             json.member("invcount", invcount);
             break;
         case LT_BIONIC:
@@ -1888,7 +1869,7 @@ bool crafting_inventory_t::candidate_t::operator<(const candidate_t &other) cons
     CMP_IF(location);
     switch(location) {
         case LT_INVENTORY:
-            CMP_IF(invlet);
+            CMP_IF(invpos);
             break;
         case LT_MAP:
             CMP_IF(mapitems->position.x);
@@ -1905,8 +1886,6 @@ bool crafting_inventory_t::candidate_t::operator<(const candidate_t &other) cons
             CMP_IF(vpartitem->veh);
             CMP_IF(vitems->mount_dx);
             CMP_IF(vitems->mount_dy);
-            break;
-        case LT_WEAPON:
             break;
         case LT_BIONIC:
             CMP_IF(bionic->bio_id);
@@ -1952,8 +1931,6 @@ std::string crafting_inventory_t::candidate_t::to_string(bool withTime) const {
         case LT_MAP:
         case LT_SURROUNDING:
             buffer << " (nearby)";
-            break;
-        case LT_WEAPON:
             break;
         case LT_INVENTORY:
             if(invcount > 1) {
@@ -2106,8 +2083,8 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
     switch(location) {
         case LT_INVENTORY:
             for(size_t i = 0; req.count > 0 && i < invcount; i++) {
-                if(req.use(p->i_at(invlet), used_items)) {
-                    p->i_rem(invlet);
+                if(req.use(p->i_at(invpos), used_items)) {
+                    p->i_rem(invpos);
                 }
             }
             return;
@@ -2126,11 +2103,6 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                 mindex,
                 used_items
             );
-            return;
-        case LT_WEAPON:
-            if(req.use(p->weapon, used_items)) {
-                p->remove_weapon();
-            }
             return;
         // Below are pseudo item. They should not be used in recipes
         // as they can not be removed (used up).
@@ -2288,23 +2260,25 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
         }
     }
     if(sources & LT_INVENTORY) {
+        int i = 0;
         for(invstack::const_iterator iter = p->inv.getItems().begin(); iter != p->inv.getItems().end();
-            ++iter) {
+            ++iter, i++) {
             const item &it = iter->front();
             if(XMATCH(it, iter->size())) {
-                candidates.push_back(candidate_t(p, it.invlet, iter->size(), req.type));
+                candidates.push_back(candidate_t(p, i, iter->size(), req.type));
             }
         }
+        int w = 0;
         for(std::vector<item>::const_iterator iter = p->worn.begin(); iter != p->worn.end();
-            ++iter) {
+            ++iter, w++) {
             if(XMATCH(*iter, 1)) {
-                candidates.push_back(candidate_t(p, iter->invlet, 1, req.type));
+                candidates.push_back(candidate_t(p, player::worn_position_to_index(w), 1, req.type));
             }
         }
-    }
-    if(sources & LT_WEAPON && !p->weapon.is_null()) {
-        if(XMATCH(p->weapon, 1)) {
-            candidates.push_back(candidate_t(p, req.type));
+        if(!p->weapon.is_null()) {
+            if(XMATCH(p->weapon, 1)) {
+                candidates.push_back(candidate_t(p, -1, 1, req.type));
+            }
         }
     }
     if(sources & LT_BIONIC) {

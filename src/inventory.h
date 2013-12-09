@@ -4,9 +4,10 @@
 #include "item.h"
 #include "artifact.h"
 
-#include <string>
-#include <vector>
 #include <list>
+#include <string>
+#include <utility>
+#include <vector>
 
 class game;
 class map;
@@ -15,6 +16,7 @@ const extern std::string inv_chars;
 
 typedef std::list< std::list<item> > invstack;
 typedef std::vector< std::list<item>* > invslice;
+typedef std::vector< std::pair<std::list<item>*, int> > indexed_invslice;
 
 class inventory
 {
@@ -22,7 +24,7 @@ class inventory
   invslice slice();
   // returns an inventory instance containing only the chosen items
   // chosen is an invlet-count mapping
-  inventory subset(std::map<char, int> chosen) const;
+  inventory subset(std::map<int, int> chosen) const;
   std::list<item>& stack_by_letter(char ch);
   const std::list<item>& const_stack(int i) const;
   int size() const;
@@ -42,9 +44,10 @@ class inventory
   static bool has_category(const item& it, item_cat cat, const player& u);
   static bool has_capacity_for_liquid(const item& it, const item& liquid);
 
-  invslice slice_filter_by_activation(const player& u);
-  invslice slice_filter_by_category(item_cat cat, const player& u);
-  invslice slice_filter_by_capacity_for_liquid(const item &liquid);
+  indexed_invslice slice_filter();  // unfiltered, but useful for a consistent interface.
+  indexed_invslice slice_filter_by_activation(const player& u);
+  indexed_invslice slice_filter_by_category(item_cat cat, const player& u);
+  indexed_invslice slice_filter_by_capacity_for_liquid(const item &liquid);
 
   void unsort(); // flags the inventory as unsorted
   void sort();
@@ -80,11 +83,16 @@ class inventory
   template<typename Locator> item reduce_charges(const Locator& type, int quantity);
 
   std::vector<item>  remove_mission_items(int mission_id);
+  item& find_item(int position);
   item& item_by_letter(char ch);
   item& item_by_type(itype_id type);
   item& item_or_container(itype_id type); // returns an item, or a container of it
 
-  std::vector<item*> all_items_by_type(itype_id type);
+  int position_by_item(item* it);  // looks up an item (via pointer comparison)
+  int position_by_type(itype_id type);
+  int position_by_letter(char ch);
+
+  std::vector<std::pair<item*, int> > all_items_by_type(itype_id type);
   std::vector<item*> all_ammo(ammotype type);
   std::vector<item*> all_items_with_flag( const std::string flag );
 
@@ -141,6 +149,9 @@ class inventory
   
   const invstack &getItems() const { return items; }
 
+  // Assigns an invlet if any remain.  If none do, will assign ` if force is
+  // true, empty (invlet = 0) otherwise.
+  void assign_empty_invlet(item &it, bool force = false);
  private:
   // For each item ID, store a set of "favorite" inventory letters.
   std::map<std::string, std::vector<char> > invlet_cache;
@@ -152,7 +163,6 @@ class inventory
   template<typename Locator> std::list<item> reduce_stack_internal(const Locator& type, int amount);
   template<typename Locator> item reduce_charges_internal(const Locator& type, int quantity);
 
-  void assign_empty_invlet(item &it);
   invstack items;
   bool sorted;
 };
