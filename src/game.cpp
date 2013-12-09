@@ -1201,7 +1201,6 @@ void game::process_activity()
 
    bool act_veh = (u.activity.type == ACT_VEHICLE);
    bool act_longcraft = (u.activity.type == ACT_LONGCRAFT);
-   bool act_disassemble = (u.activity.type == ACT_DISASSEMBLE);
    u.activity.type = ACT_NULL;
    if (act_veh) {
     if (u.activity.values.size() < 7)
@@ -1226,11 +1225,6 @@ void game::process_activity()
    } else if (act_longcraft) {
     if (making_would_work(u.lastrecipe))
      make_all_craft(u.lastrecipe);
-   } else if(act_disassemble) {
-    item &it = u.i_at(u.activity.values[0]);
-    if(!it.is_null() && query_yn("Continue disassembly of %s?", it.tname(this).c_str())) {
-     disassemble(u.activity.values[0]);
-    }
    }
   }
  }
