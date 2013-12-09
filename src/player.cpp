@@ -5676,7 +5676,7 @@ item player::i_rem(char let)
   }
  }
  if (!inv.item_by_letter(let).is_null())
-  return inv.remove_item_by_letter(let);
+  return inv.remove_item(let);
  return ret_null;
 }
 
@@ -5687,7 +5687,7 @@ item player::i_rem(itype_id type)
     {
         return remove_weapon();
     }
-    return inv.remove_item_by_type(type);
+    return inv.remove_item(type);
 }
 
 item& player::i_at(char let)
@@ -5740,7 +5740,7 @@ std::vector<item *> player::inv_dump()
 
 item player::i_remn(char invlet)
 {
- return inv.remove_item_by_letter(invlet);
+ return inv.remove_item(invlet);
 }
 
 std::list<item> player::use_amount(itype_id it, int quantity, bool use_container)
@@ -6469,14 +6469,14 @@ bool player::consume(game *g, signed char ch)
                     if (it.is_container()) {
                         if (!(it.has_flag("WATERTIGHT") && it.has_flag("SEALS"))) {
                             g->add_msg(_("You drop the empty %s."), it.tname().c_str());
-                            g->m.add_item_or_charges(posx, posy, inv.remove_item_by_letter(it.invlet));
+                            g->m.add_item_or_charges(posx, posy, inv.remove_item(it.invlet));
                         } else {
                             g->add_msg(_("%c - an empty %s"), it.invlet,it.tname().c_str());
                         }
                     }
                 } else if (OPTIONS["DROP_EMPTY"] == "all") {
                     g->add_msg(_("You drop the empty %s."), it.tname().c_str());
-                    g->m.add_item_or_charges(posx, posy, inv.remove_item_by_letter(it.invlet));
+                    g->m.add_item_or_charges(posx, posy, inv.remove_item(it.invlet));
                 }
             }
             if (inv.stack_by_letter(it.invlet).size() > 0) {

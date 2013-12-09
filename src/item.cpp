@@ -2713,11 +2713,6 @@ int item::get_remaining_capacity_for_liquid(const item &liquid, LIQUID_FILL_ERRO
     return remaining_capacity;
 }
 
-
-
-
-
-
 bool item::use_charges(const itype_id &type_to_use, int &amount, std::list<item> &usedup, bool check_contents) {
 	// Check contents first
 	for(size_t m = 0; check_contents && m < contents.size() && amount > 0; m++) {
@@ -2867,4 +2862,14 @@ const item_category &item::get_category() const
     // null-item -> null-category
     static item_category null_category;
     return null_category;
+}
+
+bool item_matches_locator(const item& it, const itype_id& id, int item_pos) {
+    return it.typeId() == id;
+}
+bool item_matches_locator(const item& it, int locator_pos, int item_pos) {
+    return item_pos == locator_pos;
+}
+bool item_matches_locator(const item& it, char invlet, int item_pos) {
+    return it.invlet == invlet;
 }

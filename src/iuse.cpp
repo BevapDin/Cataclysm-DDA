@@ -4942,7 +4942,7 @@ int iuse::turret(player *p, item *it, bool t)
  int ammo = std::min(p->inv.charges_of("9mm"), 500);
  if (ammo > 0) {
     char invlet = p->inv.item_by_type("9mm").invlet;
-    p->inv.remove_item_by_charges(invlet, ammo);
+    p->inv.reduce_charges(invlet, ammo);
     if (ammo == 1) {
       g->add_msg_if_player(p,_("You load your only 9mm bullet into the turret."));
     }
@@ -7089,7 +7089,7 @@ int iuse::wood_gas(player *p, item *, bool t)
         return 0;
     }
     if(useStack) {
-        p->inv.remove_stack_by_letter(ch);
+        p->inv.reduce_stack(ch, stack.size());
     } else {
         p->i_rem(ch);
     }
