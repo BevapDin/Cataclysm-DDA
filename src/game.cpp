@@ -1741,8 +1741,10 @@ void game::handle_key_blocking_activity() {
 * 	1 - near the left edge of the terminal window
 * @return getch
 */
-int game::inventory_item_menu(char chItem, int iStartX, int iWidth, int position) {
+int game::inventory_item_menu(char chItem, int iStartX, int iWidth) {
     int cMenu = (int)'+';
+    
+    int position = 0;
 
     if (u.has_item(chItem)) {
         item oThisItem = u.i_at(chItem);
