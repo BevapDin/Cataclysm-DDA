@@ -1331,7 +1331,7 @@ void game::complete_craft()
 
 void game::disassemble(int pos)
 {
-    if (!pos)
+    if (pos == INT_MIN)
     {
         pos = inv(_("Disassemble item:"));
     }

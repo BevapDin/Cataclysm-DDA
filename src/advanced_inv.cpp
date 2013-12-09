@@ -483,7 +483,7 @@ void advanced_inventory::recalc_pane(int i)
     int aweight = 0;
 
     if(panes[i].area == isinventory) {
-       const invslice & stacks = u.inv.slice();
+        const invslice stacks = u.inv.slice();
         for (unsigned x = 0; x < stacks.size(); ++x ) {
             item &item = stacks[x]->front();
             advanced_inv_listitem it;
@@ -1274,7 +1274,7 @@ void advanced_inventory::display(game * gp, player * pp)
             item *it = panes[src].items[list_pos].it;
             int ret=0;
             if(panes[src].area == isinventory ) {
-                ret = g->inventory_item_menu( list_pos, colstart + ( src == left ? w_width / 2 : 0 ),
+                ret = g->inventory_item_menu( panes[src].items[list_pos].idx, colstart + ( src == left ? w_width / 2 : 0 ),
                                               w_width / 2, (src == right ? 1 : -1) );
                 panes[src].recalc = true;
                 checkshowmsg = true;
