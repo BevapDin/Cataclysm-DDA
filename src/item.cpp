@@ -1152,42 +1152,54 @@ int item::precise_unit_volume() const
  */
 int item::volume(bool unit_value, bool precise_value ) const
 {
- int ret = 0;
- if (corpse != NULL && typeId() == "corpse" ) {
-  switch (corpse->size) {
-   case MS_TINY:   ret =    2;
-   case MS_SMALL:  ret =   40;
-   case MS_MEDIUM: ret =   75;
-   case MS_LARGE:  ret =  160;
-   case MS_HUGE:   ret =  600;
-  }
-  if ( precise_value == true ) {
-      ret *= 1000;
-  }
-  return ret;
- }
+    int ret = 0;
+    if (corpse != NULL && typeId() == "corpse" ) {
+        switch (corpse->size) {
+            case MS_TINY:
+                ret = 2;
+                break;
+            case MS_SMALL:
+                ret = 40;
+                break;
+            case MS_MEDIUM:
+                ret = 75;
+                break;
+            case MS_LARGE:
+                ret = 160;
+                break;
+            case MS_HUGE:
+                ret = 600;
+                break;
+        }
+        if ( precise_value == true ) {
+            ret *= 1000;
+        }
+        return ret;
+    }
 
- if( is_null() )
-  return 0;
+    if( is_null()) {
+        return 0;
+    }
 
- ret = type->volume;
+    ret = type->volume;
 
- if ( precise_value == true ) {
-     ret *= 1000;
- }
+    if ( precise_value == true ) {
+        ret *= 1000;
+    }
 
- if (count_by_charges()) {
-   if ( unit_value == false ) {
-       ret *= charges;
-   }
-   ret /= max_charges();
- }
+    if (count_by_charges()) {
+        if ( unit_value == false ) {
+            ret *= charges;
+        }
+        ret /= max_charges();
+    }
 
- if (is_gun()) {
-  for (int i = 0; i < contents.size(); i++)
-   ret += contents[i].volume( false, precise_value );
- }
-   return ret;
+    if (is_gun()) {
+        for (int i = 0; i < contents.size(); i++) {
+            ret += contents[i].volume( false, precise_value );
+        }
+    }
+    return ret;
 }
 
 int item::volume_contained()
@@ -1564,20 +1576,12 @@ std::string item::get_material(int m) const
 
 }
 
-bool item::made_of(const char *mat_ident) const
+bool item::made_of(phase_id phase) const
 {
     if( is_null() )
         return false;
 
-    if (corpse != NULL && typeId() == "corpse" )
-        return (corpse->mat == mat_ident);
-
-    return (type->m1 == mat_ident || type->m2 == mat_ident);
-}
-
-bool item::made_of(phase_id phase) const
-{
-    return (type != NULL && type->phase == phase);
+    return (type->phase == phase);
 }
 
 bool item::conductive() const
@@ -2357,9 +2361,8 @@ bool item::reload(player &u, int pos)
  bool single_load = false;
  int max_load = 1;
  item *reload_target = NULL;
- item *ammo_container = 0;
-
  item *ammo_to_use = &u.i_at(pos);
+ item *ammo_container = ammo_to_use;
 
  // Handle ammo in containers, currently only gasoline
  if(!ammo_to_use->contents.empty()) {
@@ -2368,7 +2371,17 @@ bool item::reload(player &u, int pos)
  }
 
  if (is_gun()) {
+  // Reload using a spare magazine
   int spare_mag = has_gunmod("spare_mag");
+  if (charges <= 0 && spare_mag != -1 &&
+      u.weapon.contents[spare_mag].charges > 0) {
+   charges = u.weapon.contents[spare_mag].charges;
+   curammo = u.weapon.contents[spare_mag].curammo;
+   u.weapon.contents[spare_mag].charges = 0;
+   u.weapon.contents[spare_mag].curammo = NULL;
+   return true;
+  }
+
   // Determine what we're reloading, the gun, a spare magazine, or another gunmod.
   // Prefer the active gunmod if there is one
   item* gunmod = active_gunmod();
