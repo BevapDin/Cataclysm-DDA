@@ -8181,7 +8181,7 @@ press 'U' while wielding the unloaded gun."), gun->tname().c_str());
         wear(g, pos);
         return;
     } else if (used->is_container() && used->contents.empty()) {
-        char cn = g->inv(_("Put something in the container:"));
+        int cn = g->inv(_("Put something in the container:"));
         item &cc = i_at(cn);
         if(cc.is_null() || cc.is_container() || !cc.is_food()) {
             return;
