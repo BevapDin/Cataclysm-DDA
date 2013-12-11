@@ -2049,6 +2049,9 @@ point overmap::draw_overmap(game *g, int zlevel)
    int tmpx = cursx, tmpy = cursy;
    timeout(-1);
    std::string term = string_input_popup(_("Search term:"));
+   if(term.empty()) {
+    continue;
+   }
    timeout(BLINK_SPEED);
    center_om.draw(w_map, g, zlevel, rc.om_pos.x, rc.om_pos.y, origx, origy, ch, blink, hori, vert, diag, &ictxt);
    point found = center_om.find_note(rc.om_pos.x, rc.om_pos.y, zlevel, term);
@@ -2663,7 +2666,7 @@ void overmap::build_tunnel(int x, int y, int z, int s, int dir)
                     ter(valid[i].x, valid[i].y, z) = "ants_larvae";
                 }
             } else if (one_in(5)) {
-                int dir2;
+                int dir2 = 0;
                 if (valid[i].y == y - 1) { dir2 = 0; }
                 if (valid[i].x == x + 1) { dir2 = 1; }
                 if (valid[i].y == y + 1) { dir2 = 2; }

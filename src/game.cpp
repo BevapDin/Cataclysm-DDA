@@ -742,6 +742,34 @@ bool game::do_turn()
         }
     }
 
+    // Even if we're not Exhausted, we really should be feeling lack/sleep earlier
+    // Penalties start at Dead Tired and go from there
+    if (u.fatigue >= 383 && !u.has_disease("sleep")){
+        if (u.fatigue >= 700) {
+            if (turn % 50 == 0) {
+                add_msg(_("You're too tired to stop yawning."));
+                u.add_disease("lack_sleep", 50);
+                }
+            if (one_in(50 + u.int_cur)) {
+            // Rivet's idea: look out for microsleeps!
+                u.add_disease("sleep", 5);
+                }
+            }
+        else if (u.fatigue >= 575) {
+            if (turn % 50 == 0) {
+                add_msg(_("How much longer until bedtime?"));
+                u.add_disease("lack_sleep", 50);
+                }
+            if (one_in(100 + u.int_cur)) {
+                u.add_disease("sleep", 5);
+                }
+            }
+        else if (u.fatigue >= 383 && turn % 50 == 0) {
+            add_msg(_("*yawn* You should really get some sleep."));
+            u.add_disease("lack_sleep", 50);
+            }
+    }
+    
     if (turn % 50 == 0) { // Hunger, thirst, & fatigue up every 5 minutes
         if ((!u.has_trait("LIGHTEATER") || !one_in(3)) &&
             (!u.has_bionic("bio_recycler") || turn % 300 == 0)) {
@@ -929,6 +957,7 @@ void game::process_activity()
  it_book* reading;
  item* book_item;
  item* reloadable;
+ vehicle *veh;
  bool no_recipes;
  if (u.activity.type != ACT_NULL) {
   if (int(turn) % 50 == 0) {
@@ -959,7 +988,7 @@ void game::process_activity()
     u.pause(this);
 
   } else if (u.activity.type == ACT_REFILL_VEHICLE) {
-   vehicle *veh = m.veh_at( u.activity.placement.x, u.activity.placement.y );
+   veh = m.veh_at( u.activity.placement.x, u.activity.placement.y );
    if (!veh) {  // Vehicle must've moved or something!
     u.activity.moves_left = 0;
     return;
@@ -1195,6 +1224,8 @@ void game::process_activity()
     break;
 
    case ACT_VEHICLE:
+    //Grab this now, in case the vehicle gets shifted
+    veh = m.veh_at(u.activity.values[0], u.activity.values[1]);
     complete_vehicle (this);
     break;
    }
@@ -1211,7 +1242,6 @@ void game::process_activity()
                 u.activity.values.size());
     }
     else {
-     vehicle *veh = m.veh_at(u.activity.values[0], u.activity.values[1]);
      if (veh) {
       exam_vehicle(*veh, u.activity.values[0], u.activity.values[1],
                          u.activity.values[2], u.activity.values[3]);
@@ -11682,7 +11712,7 @@ void game::plswim(int x, int y)
  int movecost = u.swim_speed();
  u.practice(turn, "swimming", u.is_underwater() ? 2 : 1);
  if (movecost >= 500) {
-  if (!u.is_underwater()) {
+  if (!u.is_underwater() || !u.is_wearing("swim_fins")) {
     add_msg(_("You sink like a rock!"));
    u.set_underwater(true);
    u.oxygen = 30 + 2 * u.str_cur;
@@ -11902,7 +11932,7 @@ void game::vertical_move(int movez, bool force) {
    u.oxygen = 30 + 2 * u.str_cur;
    add_msg(_("You dive underwater!"));
   } else {
-   if (u.swim_speed() < 500) {
+   if (u.swim_speed() < 500 || u.is_wearing("swim_fins")) {
     u.set_underwater(false);
     add_msg(_("You surface."));
    } else

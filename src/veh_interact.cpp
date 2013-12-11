@@ -39,7 +39,6 @@ veh_interact::veh_interact ()
 }
 
 extern bool invert_cargo_color;
-extern bool set_armor_color;
 
 /**
  * Creates a veh_interact window based on the given parameters.
@@ -228,9 +227,6 @@ void veh_interact::do_main_loop()
             finish = true;
         } else if(ch == 'I') {
             invert_cargo_color = !invert_cargo_color;
-            display_veh();
-        } else if(ch == 'A') {
-            set_armor_color = !set_armor_color;
             display_veh();
         } else {
             if (dx != -2 && (dx || dy)) {
