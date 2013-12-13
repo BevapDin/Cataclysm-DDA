@@ -12860,7 +12860,7 @@
   ]
 },{
   "type" : "recipe",
-  "result": "jumpsuit_XL",
+  "result": "jumpsuit_xl",
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "tailor",
@@ -12890,7 +12890,7 @@
   ]
 },{
   "type" : "recipe",
-  "result": "jumpsuit_XL",
+  "result": "jumpsuit_xl",
   "id_suffix": "from_jumpsuit",
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_SUIT",
@@ -14221,7 +14221,7 @@
   ]
 },{
   "type" : "recipe",
-  "result": "rebreather_XL",
+  "result": "rebreather_xl",
   "category": "CC_ARMOR",
   "skill_used": "electronics",
   "skills_required": [ "tailor", 3 ],
@@ -14264,8 +14264,7 @@
   ]
 },{
   "type" : "recipe",
-  "result": "rebreather_XL",
-  "id_suffix": "mod_existing",
+  "result": "rebreather_xl",
   "id_suffix": "mod_existing",
   "category": "CC_ARMOR",
   "skill_used": "tailor",
