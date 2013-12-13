@@ -10657,7 +10657,6 @@ void map::place_spawns(game *g, std::string group, const int chance,
     }
 
     float multiplier = ACTIVE_WORLD_OPTIONS["SPAWN_DENSITY"];
-    debugmsg("Spawning %s at %d, %d - %f", group.c_str(), x1, y1, (double) multiplier);
 
     if( multiplier == 0.0 ) {
         return;

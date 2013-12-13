@@ -580,7 +580,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
             }
 
             ter_id terrain_id = g->m.ter(x, y);
-            if ((g->m.field_at(x, y).findField(fd_fire)) || (terrain_id == t_lava)) {
+            if (g->m.has_nearby_fire(x, y, 0)) {
                 item fire(itypes["fire"], 0);
                 fire.charges = 1;
                 surround.push_back(item_from_surrounding(p, fire));
