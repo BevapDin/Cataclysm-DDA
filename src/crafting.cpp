@@ -203,16 +203,16 @@ void load_quality(JsonObject &jo)
 
 bool game::crafting_allowed()
 {
-    if (u.is_underwater()) {
-        g->add_msg(_("You can't do that while underwater."));
-        return false;
-    }
-    if (u.morale_level() < MIN_MORALE_CRAFT)
-    { // See morale.h
+    if (u.morale_level() < MIN_MORALE_CRAFT) { // See morale.h
         add_msg(_("Your morale is too low to craft..."));
         return false;
     }
-    if (u.fine_detail_vision_mod(g) > 4) {//minimum LL_LOW of LL_DARK + (ELFA_NV or atomic_light)
+    return true;
+}
+
+bool game::crafting_can_see()
+{
+    if (u.fine_detail_vision_mod(g) > 2.5) {
         g->add_msg(_("You can't see to craft!"));
         return false;
     }
@@ -222,14 +222,11 @@ bool game::crafting_allowed()
 
 void game::recraft()
 {
- if(u.lastrecipe == NULL)
- {
-  popup(_("Craft something first"));
- }
- else if (making_would_work(u.lastrecipe))
- {
-  make_craft(u.lastrecipe);
- }
+    if(u.lastrecipe == NULL) {
+        popup(_("Craft something first"));
+    } else if (making_would_work(u.lastrecipe)) {
+        make_craft(u.lastrecipe);
+    }
 }
 
 // See crafting_inventory_t.cpp
@@ -243,6 +240,10 @@ bool game::making_would_work(recipe *making)
     }
 
     crafting_inventory_t crafting_inv(this, &u);
+    if(!crafting_can_see()) {
+        return false;
+    }
+
     if(can_make_with_inventory(making, crafting_inv)) {
         if (item_controller->find_template((making->result))->phase == LIQUID) {
             if (u.has_watertight_container() ||
@@ -304,28 +305,29 @@ bool game::can_make_with_inventory(recipe *r, crafting_inventory_t &crafting_inv
 
 void game::craft()
 {
-    recipe *rec = select_crafting_recipe();
-    if (!crafting_allowed())
-    {
+    if (!crafting_allowed()) {
         return;
     }
-    if (rec)
-    {
-        make_craft(rec);
+
+    recipe *rec = select_crafting_recipe();
+    if (rec) {
+        if(crafting_can_see()) {
+            make_craft(rec);
+        }
     }
 }
 
 void game::long_craft()
 {
-    if (!crafting_allowed())
-    {
+    if (!crafting_allowed()) {
         return;
     }
 
     recipe *rec = select_crafting_recipe();
-    if (rec)
-    {
-        make_all_craft(rec);
+    if (rec) {
+        if(crafting_can_see()) {
+            make_all_craft(rec);
+        }
     }
 }
 

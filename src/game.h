@@ -458,6 +458,7 @@ class game
   void recraft();                      // See crafting.cpp
   void long_craft();                   // See crafting.cpp
   bool crafting_allowed();             // See crafting.cpp
+  bool crafting_can_see();             // See crafting.cpp
   recipe* select_crafting_recipe();    // See crafting.cpp
   bool making_would_work(recipe *r);   // See crafting.cpp
   bool can_make_with_inventory(recipe *r, crafting_inventory_t &crafting_inv);            // See crafting.cpp
