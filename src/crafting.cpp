@@ -726,7 +726,7 @@ recipe* game::select_crafting_recipe()
         wrefresh(w_data);
         int ch=(int)getch();
         if(ch == 'N') { input = (InputEvent) ch; } else
-        if(ch=='d'||ch=='D') { input = (InputEvent) 'd'; } else
+        if(ch == 'd') { input = (InputEvent) ch; } else
         if(ch=='e'||ch=='E') { // get_input is inflexible
             ch=(int)'?';
         } else if(ch == KEY_PPAGE) {
