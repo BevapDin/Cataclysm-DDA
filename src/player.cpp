@@ -6687,7 +6687,7 @@ bool player::eat(game *g, item *eaten, it_comest *comest)
     }
     bool overeating = (!has_trait("GOURMAND") && hunger < 0 &&
                        comest->nutr >= 5);
-    bool hiberfood = (has_trait("HIBERNATE") && (hunger > -60 && thirst > -60 ));    
+    bool hiberfood = (has_trait("HIBERNATE") && (hunger > -60));    
     bool spoiled = eaten->rotten(g);
 
     last_item = itype_id(eaten->type->id);
@@ -6696,9 +6696,7 @@ bool player::eat(game *g, item *eaten, it_comest *comest)
         !query_yn(_("You're full.  Force yourself to eat?"))) {
         return false;
     }
-    int temp_nutr = comest->nutr;
-    int temp_quench = comest->quench;
-    if (hiberfood && !is_npc() && (((hunger - temp_nutr) < -60) || ((thirst - temp_quench) < -60))){
+    if (hiberfood && !is_npc() && (((hunger - (comest->nutr)) < -60) || ((thirst - (comest->quench)) < -60))){
        if (!query_yn(_("You're adequately fueled. Prepare for hibernation?"))) {
         return false;
        }
