@@ -1701,8 +1701,7 @@ int iuse::sew(player *p, item *it, bool t)
     }
     int thread_used = 1;
     int pos = g->inv_type(_("Repair what?"), IC_ARMOR);
-    /*
-    if(ch == ' ') {
+    if(pos == INT_MAX) {
         int choice = menu(true,
     "Choose:", "Repair damaged item", "Fit item", "Reinforce item", "Repair/reinforce worn item", "Cancel", NULL);
         if(choice < 1 || choice > 4) {
@@ -1710,7 +1709,7 @@ int iuse::sew(player *p, item *it, bool t)
         }
         std::vector<item*> tmp_inv;
         g->u.inv.dump(tmp_inv);
-        for (std::vector<item*>::const_iterator iter = tmp_inv.begin(); ch == ' ' && iter != tmp_inv.end(); ++iter)
+        for (std::vector<item*>::const_iterator iter = tmp_inv.begin(); pos == INT_MAX && iter != tmp_inv.end(); ++iter)
         {
             const item& it = **iter;
             if (it.is_armor())
@@ -1718,18 +1717,18 @@ int iuse::sew(player *p, item *it, bool t)
                 if (it.made_of("cotton") || it.made_of("wool") || it.made_of("leather") || it.made_of("fur"))
                 {
                     if(choice == 1 && it.damage > 0) {
-                        ch = it.invlet;
+                        pos = iter - tmp_inv.begin();
                     }
                     if(choice == 2 && it.damage == 0 && it.has_flag("VARSIZE") && !it.has_flag("FIT")) {
-                        ch = it.invlet;
+                        pos = iter - tmp_inv.begin();
                     }
                     if(choice == 3 && it.damage == 0 && (!it.has_flag("VARSIZE") || (it.has_flag("VARSIZE") && it.has_flag("FIT")))) {
-                        ch = it.invlet;
+                        pos = iter - tmp_inv.begin();
                     }
                 }
             }
         }
-        for (size_t i = 0; choice == 4 && ch == ' ' && i < p->worn.size(); i++)
+        for (size_t i = 0; choice == 4 && pos == INT_MAX && i < p->worn.size(); i++)
         {
             const item& it = p->worn[i];
             if (it.is_armor())
@@ -1737,20 +1736,19 @@ int iuse::sew(player *p, item *it, bool t)
                 if (it.made_of("cotton") || it.made_of("wool") || it.made_of("leather") || it.made_of("fur"))
                 {
                     if(it.damage > -1) {
-                        ch = it.invlet;
+                        pos = player::worn_position_to_index(i);
                     }
                     if(it.has_flag("VARSIZE") && !it.has_flag("FIT")) {
-                        ch = it.invlet;
+                        pos = player::worn_position_to_index(i);
                     }
                 }
             }
         }
-        if(ch == ' ') {
+        if(pos == INT_MAX) {
             g->add_msg("You have no matching item");
             return 0;
         }
     }
-    */
     item* fix = &(p->i_at(pos));
     if (fix == NULL || fix->is_null()) {
         g->add_msg_if_player(p,_("You do not have that item!"));
@@ -2065,45 +2063,10 @@ int iuse::hammer(player *p, item *it, bool t)
         return 0;
     }
 
-    if (x == p->posx && y == p->posy)
-    {
-        if(query_yn("Hammer some metal item to scraps?")) {
-            char ch = g->inv("Select item to hammer");
-            if(!p->has_item(ch)) {
-                return 0;
-            }
-            item &it = p->i_at(ch);
-            if(it.is_null() || !it.made_of("steel") || !it.contents.empty()) {
-                g->add_msg_if_player(p, "That %s is not made of steel or not empty", it.tname(g).c_str());
-                return 0;
-            }
-            const int w = it.weight();
-            if(w == 0 || it.volume() == 0) {
-                g->add_msg_if_player(p, "That %s is too small", it.tname(g).c_str());
-                return 0;
-            }
-            itype *scrap = itypes["scrap"];
-            int num_scraps = (w / scrap->weight) / 2;
-            if(num_scraps == 0) {
-                num_scraps = 1;
-            }
-            if(num_scraps > 8 && !p->has_amount("hacksaw", 1)) {
-                g->add_msg_if_player(p, "That %s is too big, if only you had a hacksaw", it.tname(g).c_str());
-                return 0;
-            }
-            for (int i = 0; i < num_scraps; i++) {
-                g->m.spawn_item(p->posx, p->posy, "scrap", 0);
-            }
-            g->add_msg_if_player(p, "You hammer the %s into %d scraps", it.tname(g).c_str(), num_scraps);
-            p->moves -= 40 * num_scraps;
-            if(num_scraps > 8) {
-                g->sound(p->posx, p->posy, 20, "hammering");
-            } else {
-                g->sound(p->posx, p->posy, 10, "hammering");
-            }
-            p->i_rem(ch);
-            return 0;
-        }
+    if (x == p->posx && y == p->posy) {
+        g->add_msg_if_player(p, _("You try to hit yourself with the hammer."));
+        g->add_msg_if_player(p, _("But you can't touch this."));
+        return 0;
     }
 
     int nails = 0, boards = 0;
@@ -7000,8 +6963,8 @@ int iuse::tool_belt(player *p, item *it, bool t)
     menu_entries.push_back(_("cancel"));
     uimenu menu(true, it->tname().c_str(), menu_entries);
     if(menu.ret == 0 && can_add) {
-        char ch = g->inv_type(_("Put what?"), IC_TOOL);
-        item* put = &(p->i_at(ch));
+        int pos = g->inv_type(_("Put what?"), IC_TOOL);
+        item* put = &(p->i_at(pos));
         if(put->is_null()) {
             g->add_msg_if_player(p, _("You do not have that item!"));
             return 0;
@@ -7016,7 +6979,7 @@ int iuse::tool_belt(player *p, item *it, bool t)
         }
         p->moves -= 60;
         g->add_msg_if_player(p, _("You put the %s in your %s."), put->tname().c_str(), it->tname().c_str());
-        it->put_in(p->i_rem(ch));
+        it->put_in(p->i_rem(pos));
         return 0;
     }
     const int index = can_add ? menu.ret - 1 : menu.ret;
@@ -7036,36 +6999,63 @@ int iuse::quiver(player *p, item *it, bool t)
     if(arm != 0) {
         max_charges = arm->storage * 10;
     }
+    int max_add_charges = max_charges;
+    std::string ammo_id;
+    bool can_refill = false;
+    std::string ammo_name;
+    if(!can_add) {
+        max_add_charges = std::max<int>(0, max_charges - it->contents[0].charges);
+        ammo_id = it->contents[0].type->id;
+        can_refill = max_add_charges > 0 && !ammo_id.empty() && p->inv.has_charges(ammo_id, 1);
+        ammo_name = it->contents[0].tname();
+    }
+    std::vector<std::string> menu_entries;
     if(can_add) {
-        const std::string quest = string_format(_("Put ammo into the %s"), it->tname().c_str());
-        if(!query_yn("%s", quest.c_str())) { return 0; }
-        char ch = g->inv_type(_("Put what in?"), IC_AMMO);
-        item* put = &(p->i_at(ch));
-        if(put->is_null()) {
-            g->add_msg_if_player(p, _("You do not have that item!"));
+        menu_entries.push_back(string_format(_("Put ammo into the %s"), it->tname().c_str()));
+    } else {
+        menu_entries.push_back(string_format(_("Take %s out of the %s"), ammo_name.c_str(), it->tname().c_str()));
+    }
+    if(can_refill) {
+        menu_entries.push_back(string_format(_("Put more %s into the %s"), ammo_name.c_str(), it->tname().c_str()));
+    }
+    menu_entries.push_back(_("cancel"));
+    uimenu menu(true, it->tname().c_str(), menu_entries);
+    if(menu.ret == 0 && can_add) {
+        int pos = g->inv_type(_("Put what in?"), IC_AMMO);
+        item& put = p->i_at(pos);
+        if(put.is_null()) {
             return 0;
         }
-        if(!put->is_ammo()) {
-            g->add_msg_if_player(p, _("That %s is not ammo!"), put->tname(g).c_str());
+        if(!put.is_ammo()) {
+            g->add_msg_if_player(p, _("That %s is not ammo!"), put.tname(g).c_str());
             return 0;
         }
         p->moves -= 60;
-        g->add_msg_if_player(p, _("You put the %s in your %s."), put->tname().c_str(), it->tname().c_str());
-        if(put->charges > max_charges) {
-            it->contents.push_back(*put);
+        g->add_msg_if_player(p, _("You put the %s in your %s."), put.tname().c_str(), it->tname().c_str());
+        if(put.charges > max_charges) {
+            it->contents.push_back(put);
             it->contents[0].charges = max_charges;
-            put->charges -= max_charges;
+            put.charges -= max_charges;
         } else {
-            it->put_in(*put);
-            p->i_rem(ch);
+            it->put_in(put);
+            p->i_rem(pos);
         }
-    } else {
-        const std::string quest = string_format(_("Take %s out of the %s"), it->contents[0].tname().c_str(), it->tname().c_str());
-        if(!query_yn("%s", quest.c_str())) { return 0; }
+        return 0;
+    } else if(menu.ret == 0 && !can_add) {
         p->moves -= 20;
         item ammo = it->contents[0];
+        g->add_msg_if_player(p, _("You take the %s out of your %s."), ammo.tname().c_str(), it->tname().c_str());
         p->i_add(ammo);
         it->contents.erase(it->contents.begin());
+        return 0;
+    }
+    if(menu.ret == 1 && can_refill) {
+        const int charges = std::min(max_add_charges, p->inv.charges_of(ammo_id));
+        it->contents[0].charges += charges;
+        p->inv.use_charges(ammo_id, charges);
+        p->moves -= 20;
+        g->add_msg_if_player(p, _("You put %d %s in your %s."), charges, ammo_name.c_str(), it->tname().c_str());
+        return 0;
     }
     return 0;
 }

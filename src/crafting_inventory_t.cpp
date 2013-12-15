@@ -2052,6 +2052,9 @@ bool crafting_inventory_t::requirement::use(item &the_item, std::list<item> &use
 
 typedef std::set< std::vector<item>* > item_vector_set_t;
 static item_vector_set_t item_vector_resort_set;
+typedef std::vector< std::pair<int, item> > invpos_vector_t;
+typedef std::map<player*,invpos_vector_t> invpos_map_t;
+static invpos_map_t item_inpos_remove_map;
 
 void remove_releated(crafting_inventory_t::requirement &req, std::vector<item> &v, int index, std::list<item> &used_items) {
     assert(index >= 0 && index < v.size());
@@ -2061,7 +2064,39 @@ void remove_releated(crafting_inventory_t::requirement &req, std::vector<item> &
     }
 }
 
+void remove_releated(crafting_inventory_t::requirement &req, player* p, int invpos, std::list<item> &used_items) {
+    item tmpit = p->i_at(invpos); // note: this is a copy
+    if(req.use(tmpit, used_items)) {
+        item_inpos_remove_map[p].push_back(std::make_pair(invpos, item()));
+    } else {
+        item_inpos_remove_map[p].push_back(std::make_pair(invpos, tmpit));
+    }
+}
+
+bool invpos_item_pair_comparator(const std::pair<int, item>& a, const std::pair<int, item>& b) {
+    if(a.first >= 0 && b.first >= 0) {
+        return a.first > b.first;
+    } else if(a.first < 0 && b.first < 0) {
+        return a.first < b.first;
+    } else {
+        return (a.first >= 0) ? true : false;
+    }
+}
+
 void resort_item_vectors() {
+    for(invpos_map_t::iterator a = item_inpos_remove_map.begin(); a != item_inpos_remove_map.end(); ++a) {
+        player* p = a->first;
+        invpos_vector_t& vec = a->second;
+        std::sort(vec.begin(), vec.end(), invpos_item_pair_comparator);
+        for(invpos_vector_t::iterator b = vec.begin(); b != vec.end(); ++b) {
+            if(b->second.is_null()) {
+                p->i_rem(b->first);
+            } else {
+                p->i_at(b->first) = b->second;
+            }
+        }
+    }
+    item_inpos_remove_map.clear();
     for(item_vector_set_t::iterator a = item_vector_resort_set.begin(); a != item_vector_resort_set.end(); ++a) {
         std::vector<item> &v = **a;
         for(size_t i = 0; i < v.size(); i++) {
@@ -2083,9 +2118,12 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
     switch(location) {
         case LT_INVENTORY:
             for(size_t i = 0; req.count > 0 && i < invcount; i++) {
-                if(req.use(p->i_at(invpos), used_items)) {
-                    p->i_rem(invpos);
-                }
+                remove_releated(
+                    req,
+                    p,
+                    invpos,
+                    used_items
+                );
             }
             return;
         case LT_VEHICLE_CARGO:
