@@ -8445,7 +8445,7 @@ press 'U' while wielding the unloaded gun."), gun->tname().c_str());
             g->add_msg(_("Can't put liquids into this"));
             return;
         }
-        if(cc.charges > itc->charges) {
+        if(cc.count_by_charges() && cc.charges > itc->charges) {
             used->contents.push_back(cc);
             used->contents[0].charges = itc->charges;
             cc.charges -= itc->charges;
