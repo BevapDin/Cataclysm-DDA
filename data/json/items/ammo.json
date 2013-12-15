@@ -65,6 +65,7 @@
         "recoil" : 0,
         "functions": [ [ "func:thread" ] ],
         "count" : 50,
+        "category" : "spare_parts",
         "stack_size" : 200
     },
     {   "type" : "AMMO",
@@ -89,7 +90,7 @@
         "recoil" : 0,
         "functions": [ [ "func:thread" ] ],
         "count" : 10,
-        "category": "other",
+        "category" : "spare_parts",
         "stack_size" : 200
     },
     {   "type" : "AMMO",
@@ -114,6 +115,7 @@
         "recoil" : 0,
         "functions": [ [ "func:thread" ] ],
         "count" : 10,
+        "category" : "spare_parts",
         "stack_size" : 200
     },
     {   "type" : "AMMO",
@@ -137,6 +139,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "flags": ["NO_DISASSEMBLE_RETURN"],
+        "category" : "spare_parts",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -159,6 +162,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "spare_parts",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -204,6 +208,7 @@
         "range" : 3,
         "dispersion" : 34,
         "recoil" : 4,
+        "category" : "spare_parts",
         "count" : 100
     },
     {   "type" : "AMMO",
@@ -2080,6 +2085,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 200,
+        "category" : "chems",
         "effects" : ["COOKOFF"]
     },
     {   "type" : "AMMO",
@@ -2103,6 +2109,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 200,
+        "category" : "chems",
         "effects" : ["COOKOFF"]
     },
     {   "type" : "AMMO",
@@ -2126,6 +2133,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 200,
+        "category" : "chems",
         "effects" : ["COOKOFF"]
     },
     {   "type" : "AMMO",
@@ -2149,6 +2157,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 200,
+        "category" : "chems",
         "effects" : ["COOKOFF"]
     },
     {   "type" : "AMMO",
@@ -2172,6 +2181,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 200,
+        "category" : "chems",
         "effects" : ["COOKOFF"]
     },
     {   "type" : "AMMO",
@@ -2194,6 +2204,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "spare_parts",
         "count" : 200
     },
     {    "type" : "AMMO",
@@ -2215,6 +2226,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "spare_parts",
         "count" : 200
     },
     {    "type" : "AMMO",
@@ -2236,6 +2248,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "spare_parts",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -2257,6 +2270,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "spare_parts",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -2278,6 +2292,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "spare_parts",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -2300,6 +2315,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "spare_parts",
         "count" : 200
     },
     {   "type" : "AMMO",
@@ -2348,6 +2364,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 200,
+        "category" : "chems",
         "effects" : ["FLAME","STREAM"]
     },
     {   "type" : "AMMO",
@@ -2370,6 +2387,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "drugs",
         "count" : 35
     },
     {   "type" : "AMMO",
@@ -3265,6 +3283,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 2,
+        "category" : "drugs",
         "stack_size" : 20
     },
     {   "type" : "AMMO",
@@ -3354,6 +3373,7 @@
         "range" : 0,
         "dispersion" : 0,
         "recoil" : 0,
+        "category" : "casing",
         "count" : 30
     }
 
