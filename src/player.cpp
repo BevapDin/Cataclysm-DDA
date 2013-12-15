@@ -6296,6 +6296,11 @@ int player::amount_of(itype_id it) {
             quantity++;
         }
     }
+    for (size_t i = 0; i < worn.size(); i++) {
+        if (worn[i].matches_type(it)) {
+            quantity++;
+        }
+    }
     quantity += inv.amount_of(it);
     return quantity;
 }
