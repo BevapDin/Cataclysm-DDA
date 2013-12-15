@@ -522,6 +522,29 @@
   ]
 },{
         "type" : "recipe",
+  "result": "alarmclock",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 600,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "scrap", 4 ]
+    ],
+    [
+      [ "clockworks", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "television",
   "category": "CC_NONCRAFT",
   "subcategory": "CSC_NONCRAFT",
@@ -1209,6 +1232,7 @@
   "time": 15000,
   "reversible": true,
   "autolearn": true,
+  "book_learn": [[ "manual_archery", 2 ] , [ "recipe_bows", 1 ] , [ "book_archery", 3]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -1257,6 +1281,7 @@
   "time": 15000,
   "reversible": true,
   "autolearn": true,
+  "book_learn": [[ "recipe_bows", 1 ] , [ "manual_archery", 2 ] , [ "book_archery", 2 ]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -1280,7 +1305,8 @@
   "difficulty": 5,
   "time": 25000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn" : [[ "recipe_bows", 6 ] , [ "manual_archery", 7]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -1570,7 +1596,8 @@
   "difficulty": 3,
   "time": 30000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn" : [[ "recipe_bows", 3 ] , [ "manual_archery", 5] , [ "book_archery", 4]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -1613,7 +1640,8 @@
   "difficulty": 3,
   "time": 15000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn" : [[ "recipe_bows", 2 ] , [ "manual_archery", 4] , [ "book_archery", 3]],
   "tools": [
     [
       [ "func:wrench", -1 ]
@@ -1641,7 +1669,8 @@
   "difficulty": 6,
   "time": 60000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn" : [[ "recipe_bows", 6 ] , [ "textbook_weapwest", 6]],
   "qualities" : [
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -1694,7 +1723,8 @@
   "difficulty": 3,
   "time": 45000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn":false,
+  "book_learn" : [[ "recipe_bows", 4 ] , [ "textbook_weapeast", 6]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -2667,6 +2697,7 @@
   "time" : 5000,
   "reversible" : false,
   "autolearn" : true,
+  "book_learn" : [[ "recipe_arrows", 2 ] , [ "pocket_survival", 2] , [ "manual_archery", 1]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -2690,6 +2721,7 @@
   "time" : 5000,
   "reversible" : false,
   "autolearn" : true,
+  "book_learn" : [[ "recipe_arrows", 1 ]],
   "tools" : [
     [
       [ "func:hacksaw", -1 ]
@@ -2715,6 +2747,7 @@
   "time" : 5000,
   "reversible" : false,
   "autolearn" : true,
+  "book_learn" : [[ "recipe_arrows", 1 ] , [ "manual_archery", 2] , [ "book_archery", 3]],
   "tools" : [
     [
       [ "func:hammer", -1 ]
@@ -2737,6 +2770,7 @@
   "time" : 5000,
   "reversible" : false,
   "autolearn" : true,
+  "book_learn" : [[ "recipe_arrows", 1 ] , [ "manual_archery", 2 ] , [ "book_archery", 3]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -2815,6 +2849,7 @@
   "time" : 2000,
   "reversible" : false,
   "autolearn" : true,
+  "book_learn" : [[ "recipe_arrows", 1 ] , [ "pocket_survival", 1]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -2840,6 +2875,7 @@
   "time" : 3000,
   "reversible" : false,
   "autolearn" : true,
+  "book_learn" : [[ "recipe_arrows", 2 ] , [ "book_archery", 3]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -2862,6 +2898,7 @@
   "time" : 3000,
   "reversible" : false,
   "autolearn" : true,
+  "book_learn" : [[ "recipe_arrows", 1 ] , [ "book_archery", 3]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -2883,7 +2920,8 @@
   "difficulty" : 3,
   "time" : 5000,
   "reversible" : false,
-  "autolearn" : true,
+  "autolearn" : false,
+  "book_learn" : [[ "recipe_arrows", 5 ]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -2921,7 +2959,8 @@
   "difficulty" : 5,
   "time" : 3000,
   "reversible" : false,
-  "autolearn" : true,
+  "autolearn" : false,
+  "book_learn" : [[ "recipe_arrows", 3 ]],
   "qualities":[
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -2947,6 +2986,7 @@
   "time" : 5000,
   "reversible" : false,
   "autolearn" : true,
+  "book_learn" : [[ "recipe_arrows", 3 ]],
   "tools" : [
     [
       [ "func:hacksaw", -1 ]
@@ -2997,7 +3037,8 @@
   "difficulty" : 5,
   "time" : 5000,
   "reversible" : false,
-  "autolearn" : true,
+  "autolearn" : false,
+  "book_learn" : [[ "recipe_arrows", 2 ] , [ "pocket_survival", 2]],
   "qualities" : [
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -3026,6 +3067,7 @@
   "time" : 3000,
   "reversible" : false,
   "autolearn" : true,
+  "book_learn" : [[ "recipe_arrows", 3 ]],
   "qualities" : [
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -3051,6 +3093,7 @@
   "time" : 5000,
   "reversible" : false,
   "autolearn" : true,
+  "book_learn" : [[ "recipe_arrows", 4 ]],
   "qualities" : [
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -3083,7 +3126,8 @@
   "difficulty" : 7,
   "time" : 7000,
   "reversible" : false,
-  "autolearn" : true,
+  "autolearn" : false,
+  "book_learn" : [[ "recipe_arrows", 6 ]],
   "tools" : [
     [
       [ "func:screwdriver", -1 ]
@@ -3160,6 +3204,7 @@
   "time": 10000,
   "reversible": true,
   "autolearn": true,
+  "book_learn" : [[ "recipe_arrows", 1 ]],
   "tools": [
     [
       [ "func:sewing_kit", 2 ]
@@ -3276,6 +3321,7 @@
   "time": 20000,
   "reversible": true,
   "autolearn": true,
+  "book_learn" : [[ "recipe_arrows", 2 ]],
   "tools": [
     [
       [ "func:sewing_kit", 8 ]
@@ -3327,6 +3373,7 @@
   "time": 10000,
   "reversible": false,
   "autolearn": true,
+  "book_learn" : [[ "recipe_arrows", 2 ]],
   "tools": [
     [
         [ "func:hacksaw", -1 ]
@@ -3351,7 +3398,8 @@
   "difficulty": 4,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn" : [[ "recipe_arrows", 7 ]],
   "tools": [
     [
         [ "func:hacksaw", -1 ]
@@ -8985,7 +9033,7 @@
   "time": 10000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_animal", 8 ]],
+  "book_learn": [[ "recipe_animal", 7 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -9149,6 +9197,65 @@
   "components": [
     [
       [ "mutagen_feline", 2 ]
+    ]
+  ]
+},{
+    "type" : "recipe",
+  "result": "mutagen_lupine",
+  "category": "CC_CHEM",
+  "subcategory": "CSC_CHEM_MUTAGEN",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 1 ],
+  "difficulty": 9,
+  "time": 10000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_animal", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 25 ]
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen", 1 ]
+    ],
+    [
+      [ "meat", 3 ]
+    ],
+    [
+      [ "ammonia", 1 ],
+      [ "lye_powder", 100 ]
+    ]
+  ]
+},{
+    "type" : "recipe",
+  "result": "iv_mutagen_lupine",
+  "category": "CC_CHEM",
+  "subcategory": "CSC_CHEM_MUTAGEN",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 3 ],
+  "difficulty": 9,
+  "time": 15000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "recipe_serum", 8 ]],
+  "tools": [
+    [
+      [ "func:hotplate", 37 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mutagen_lupine", 2 ]
     ]
   ]
 },{
@@ -10646,7 +10753,8 @@
   "difficulty": 0,
   "time": 3000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "radio_book", 1 ] , [ "textbook_anarch", 1 ]],
   "tools": [
     [
       [ "func:hacksaw", -1 ]
@@ -10666,7 +10774,8 @@
   "difficulty": 4,
   "time": 5000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "radio_book", 3 ] , [ "textbook_anarch", 5 ]],
   "tools": [
     [
       [ "func:hacksaw", -1 ]
@@ -10698,7 +10807,8 @@
   "difficulty": 1,
   "time": 4000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "radio_book", 3 ] , [ "manual_electronics", 1 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -10727,7 +10837,8 @@
   "difficulty": 1,
   "time": 6500,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "manual_electronics", 1 ] , [ "textbook_electronics", 2 ] , [ "advanced_electronics", 2 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -10753,7 +10864,8 @@
   "difficulty": 2,
   "time": 12000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "manual_electronics", 1 ] , [ "radio_book", 1 ] , [ "textbook_electronics", 2 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -10782,7 +10894,8 @@
   "difficulty": 3,
   "time": 14000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "manual_electronics", 1 ] , [ "textbook_electronics", 2 ] , [ "textbook_anarch", 3 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -10811,7 +10924,8 @@
   "difficulty": 0,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "manual_electronics", 1 ] , [ "mag_electronics", 1 ]],
   "components": [
     [
       [ "amplifier", 1 ]
@@ -10833,7 +10947,8 @@
   "time": 10000,
   "reversible": true,
   "decomp_learn": 0,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "manual_electronics", 0 ] , [ "mag_electronics", 1 ]],
   "components": [
     [
       [ "amplifier", 1 ]
@@ -10860,7 +10975,8 @@
   "time": 15000,
   "reversible": true,
   "decomp_learn": 0,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "manual_electronics", 1 ] , [ "mag_electronics", 2 ]],
   "components": [
     [
       [ "amplifier", 4 ]
@@ -10883,7 +10999,8 @@
   "time": 20000,
   "reversible": true,
   "decomp_learn": 0,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "manual_electronics", 1 ] , [ "advanced_electronics", 2 ] , [ "textbook_anarch", 2 ]],
   "components": [
     [
       [ "antenna", 1 ],
@@ -10911,7 +11028,8 @@
   "difficulty": 2,
   "time": 5000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "manual_electronics", 1 ] , [ "mag_electronics", 1 ] , [ "textbook_anarch", 2 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -10947,7 +11065,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 3,
-  "book_learn": [[ "manual_electronics", 3 ], [ "textbook_electronics", 3 ]],
+  "book_learn": [[ "manual_electronics", 2 ], [ "advanced_electronics", 2 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -10966,6 +11084,37 @@
   ]
 },{
         "type" : "recipe",
+  "result": "rechargeable_battery",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "skill_used": "fabrication",
+  "skills_required": [ "electronics", 3 ],
+  "difficulty": 5,
+  "time": 15000,
+  "reversible": true,
+  "autolearn": false,
+  "book_learn": [[ "manual_electronics", 3 ], [ "textbook_electronics", 3 ]],
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:soldering_iron", 5 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "scrap", 4 ]
+    ],
+    [
+      [ "cable", 5 ]
+    ],
+    [
+      [ "small_storage_battery", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "coilgun",
   "category": "CC_WEAPON",
   "subcategory": "CSC_WEAPON_RANGED",
@@ -10974,7 +11123,8 @@
   "difficulty": 3,
   "time": 25000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "advanced_electronics", 3 ] , [ "textbook_electronics", 3 ] , [ "textbook_anarch", 4 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11010,7 +11160,8 @@
   "difficulty": 1,
   "time": 15000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "radio_book", 1 ] , [ "textbook_anarch", 2 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11037,7 +11188,8 @@
   "difficulty": 2,
   "time": 30000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "textbook_anarch", 2 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11069,7 +11221,8 @@
   "difficulty": 2,
   "time": 25000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "radio_book", 2] , [ "textbook_anarch", 3 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11102,7 +11255,8 @@
   "difficulty": 3,
   "time": 25000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "advanced_electronics", 3 ] , [ "manual_electronics", 2 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11135,7 +11289,8 @@
   "difficulty": 3,
   "time": 30000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "advanced_electronics", 1 ] , [ "mag_electronics", 3 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11170,7 +11325,8 @@
   "difficulty": 3,
   "time": 25000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "advanced_electronics", 2 ] , [ "textbook_electronics", 3 ] , [ "textbook_anarch", 3 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11199,7 +11355,8 @@
   "difficulty": 4,
   "time": 30000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "mag_electronics", 2 ] , [ "textbook_anarch", 4 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11270,7 +11427,8 @@
   "difficulty": 4,
   "time": 35000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "textbook_anarch", 3 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11302,7 +11460,8 @@
   "difficulty": 4,
   "time": 32000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "textbook_anarch", 5 ] , [ "advanced_electronics", 5 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11340,7 +11499,8 @@
   "difficulty": 5,
   "time": 40000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "textbook_electronics", 6 ] , [ "textbook_robots", 5 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11373,7 +11533,8 @@
   "difficulty": 8,
   "time": 60000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [[ "textbook_electronics", 7 ] , [ "textbook_robots", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11448,7 +11609,7 @@
   "reversible": true,
   "decomp_learn": 4,
   "autolearn": true,
-  "book_learn": [[ "recipe_lab_elec", 4 ]],
+  "book_learn": [[ "advanced_electronics", 5] , [ "recipe_lab_elec", 4 ] , [ "textbook_anarch", 6]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11520,7 +11681,7 @@
   "time": 50000,
   "reversible": true,
   "autolearn": false,
-  "book_learn": [[ "recipe_lab_elec", 6 ]],
+  "book_learn": [[ "recipe_augs", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11556,7 +11717,7 @@
   "time": 70000,
   "reversible": true,
   "autolearn": false,
-  "book_learn": [[ "recipe_lab_elec", 8 ]],
+  "book_learn": [[ "recipe_lab_elec", 8 ] , [ "recipe_augs", 7 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11593,7 +11754,7 @@
   "time": 50000,
   "reversible": true,
   "autolearn": false,
-  "book_learn": [[ "recipe_lab_elec", 7 ]],
+  "book_learn": [[ "recipe_lab_elec", 7 ] , [ "recipe_augs", 7 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11628,7 +11789,7 @@
   "time": 50000,
   "reversible": true,
   "autolearn": false,
-  "book_learn": [[ "recipe_lab_elec", 7 ]],
+  "book_learn": [[ "recipe_lab_elec", 7 ] , [ "recipe_augs", 7 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11660,7 +11821,7 @@
   "time": 50000,
   "reversible": true,
   "autolearn": false,
-  "book_learn": [[ "recipe_lab_elec", 7 ]],
+  "book_learn": [[ "recipe_lab_elec", 7 ] , [ "recipe_mil_augs", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11692,7 +11853,7 @@
   "time": 50000,
   "reversible": true,
   "autolearn": false,
-  "book_learn": [[ "recipe_lab_elec", 8 ]],
+  "book_learn": [[ "recipe_lab_elec", 8 ] , [ "recipe_mil_augs", 7 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11728,7 +11889,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 5,
-  "book_learn": [[ "recipe_lab_elec", 7 ]],
+  "book_learn": [[ "recipe_lab_elec", 7 ] , [ "recipe_augs", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11761,7 +11922,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 7,
-  "book_learn": [[ "recipe_lab_elec", 7 ]],
+  "book_learn": [[ "recipe_lab_elec", 7 ] , [ "recipe_mil_augs", 8 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11797,7 +11958,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 5,
-  "book_learn": [[ "recipe_lab_elec", 5 ]],
+  "book_learn": [[ "recipe_lab_elec", 5 ] , [ "recipe_augs", 5 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11833,7 +11994,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 5,
-  "book_learn": [[ "recipe_lab_elec", 6 ]],
+  "book_learn": [[ "recipe_lab_elec", 6 ] , [ "recipe_mil_augs", 5 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11869,7 +12030,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 5,
-  "book_learn": [[ "recipe_lab_elec", 6 ]],
+  "book_learn": [[ "recipe_lab_elec", 6 ] , [ "recipe_mil_augs", 5 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11905,7 +12066,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 5,
-  "book_learn": [[ "recipe_lab_elec", 6 ]],
+  "book_learn": [[ "recipe_lab_elec", 6 ] , [ "recipe_mil_augs", 5 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11941,7 +12102,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 5,
-  "book_learn": [[ "recipe_lab_elec", 6 ]],
+  "book_learn": [[ "recipe_lab_elec", 6 ] , [ "recipe_mil_augs", 5 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11977,7 +12138,7 @@
   "reversible": true,
   "autolearn": false,
   "decomp_learn": 5,
-  "book_learn": [[ "recipe_lab_elec", 6 ]],
+  "book_learn": [[ "recipe_lab_elec", 6 ] , [ "recipe_mil_augs", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -12178,6 +12339,38 @@
   ]
 },{
         "type" : "recipe",
+  "result": "recharge_station",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_PARTS",
+  "skill_used": "electronics",
+  "difficulty": 8,
+  "time": 50000,
+  "reversible": true,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:soldering_iron", 35 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "power_supply", 2 ]
+    ],
+    [
+      [ "processor", 2 ]
+    ],
+    [
+      [ "scrap", 5 ]
+    ],
+    [
+      [ "cable", 8 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "solar_panel",
   "category": "CC_OTHER",
   "subcategory": "CSC_OTHER_PARTS",
@@ -12345,8 +12538,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 6 ],
-      [ "sewing_kit", 6 ]
+      [ "func:sewing_kit", 6 ]
     ]
   ],
   "components": [
@@ -12366,8 +12558,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 36 ],
-      [ "sewing_kit", 36 ]
+      [ "func:sewing_kit", 36 ]
     ]
   ],
   "components": [
@@ -12388,8 +12579,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 6 ],
-      [ "sewing_kit", 6 ]
+      [ "func:sewing_kit", 6 ]
     ]
   ],
   "components": [
@@ -12409,8 +12599,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 48 ],
-      [ "sewing_kit", 48 ]
+      [ "func:sewing_kit", 48 ]
     ]
   ],
   "components": [
@@ -12431,8 +12620,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 8 ],
-      [ "sewing_kit", 8 ]
+      [ "func:sewing_kit", 8 ]
     ]
   ],
   "components": [
@@ -12594,8 +12782,7 @@
   ],
   "tools": [
     [
-      [ "needle_bone", 100 ],
-      [ "sewing_kit", 100 ]
+      [ "func:sewing_kit", 100 ]
     ]
   ],
   "components": [
@@ -12659,8 +12846,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 10 ],
-      [ "sewing_kit", 10 ]
+      [ "func:sewing_kit", 10 ]
     ]
   ],
   "components": [
@@ -12760,8 +12946,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 15 ],
-      [ "sewing_kit", 15 ]
+      [ "func:sewing_kit", 15 ]
     ]
   ],
   "components": [
@@ -12784,8 +12969,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 15 ],
-      [ "sewing_kit", 15 ]
+      [ "func:sewing_kit", 15 ]
     ]
   ],
   "components": [
@@ -12805,8 +12989,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 15 ],
-      [ "sewing_kit", 15 ]
+      [ "func:sewing_kit", 15 ]
     ]
   ],
   "components": [
@@ -12826,8 +13009,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 15 ],
-      [ "sewing_kit", 15 ]
+      [ "func:sewing_kit", 15 ]
     ]
   ],
   "components": [
@@ -12871,8 +13053,7 @@
   "book_learn": [[ "textbook_tailor", 4 ] , [ "manual_tailor", 5 ]],
   "tools": [
     [
-      [ "needle_bone", 20 ],
-      [ "sewing_kit", 20 ]
+      [ "func:sewing_kit", 20 ]
     ]
   ],
   "components": [
@@ -12902,8 +13083,7 @@
   "book_learn": [[ "textbook_tailor", 4 ] , [ "manual_tailor", 5 ]],
   "tools": [
     [
-      [ "needle_bone", 20 ],
-      [ "sewing_kit", 20 ]
+      [ "func:sewing_kit", 20 ]
     ]
   ],
   "components": [
@@ -12967,8 +13147,7 @@
   "book_learn": [[ "textbook_tailor", 2 ] , [ "manual_tailor", 3 ]],
   "tools": [
     [
-      [ "needle_bone", 10 ],
-      [ "sewing_kit", 10 ]
+      [ "func:sewing_kit", 10 ]
     ]
   ],
   "components": [
@@ -12989,8 +13168,7 @@
   "book_learn": [[ "textbook_tailor", 2 ] , [ "manual_tailor", 3 ]],
   "tools": [
     [
-      [ "needle_bone", 10 ],
-      [ "sewing_kit", 10 ]
+      [ "func:sewing_kit", 10 ]
     ]
   ],
   "components": [
@@ -13516,8 +13694,7 @@
   ],
   "tools":[
     [
-      [ "needle_bone", 10 ],
-      [ "sewing_kit", 10 ]
+      [ "func:sewing_kit", 10 ]
     ]
     ],
   "components": [
@@ -13578,8 +13755,7 @@
   "book_learn": [[ "textbook_fireman", 6 ]],
   "tools": [
     [
-      [ "needle_bone", 40 ],
-      [ "sewing_kit", 40 ]
+      [ "func:sewing_kit", 40 ]
     ]
   ],
   "components": [
@@ -13752,8 +13928,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 6 ],
-      [ "sewing_kit", 6 ]
+      [ "func:sewing_kit", 6 ]
     ]
   ],
   "components": [
@@ -13774,8 +13949,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 6 ],
-      [ "sewing_kit", 6 ]
+      [ "func:sewing_kit", 6 ]
     ]
   ],
   "components": [
@@ -14354,8 +14528,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 8 ],
-      [ "sewing_kit", 8 ]
+      [ "func:sewing_kit", 8 ]
     ]
   ],
   "components": [
@@ -20010,6 +20183,40 @@
      ]
     ]
 },{
+        "type" : "recipe",
+  "result": "bagh_nakha",
+  "category": "CC_WEAPON",
+  "subcategory": "CSC_WEAPON_CUTTING",
+  "skill_used": "fabrication",
+  "difficulty": 5,
+  "time": 480000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [ [ ["func:hammer", -1]  ],
+      [
+      ["tongs", -1]
+      ],
+      [
+      ["chisel", -1]
+      ],
+      [
+      ["anvil", -1]
+      ],
+      [
+      ["swage", -1]
+      ],
+      [
+      ["func:forge", 250]
+      ]
+      ],
+  "components":
+    [
+     [
+     [ "steel_chunk", 3 ],
+     [ "scrap", 9 ]
+     ]
+    ]
+},{
   "type" : "recipe",
   "result": "tonfa_wood",
   "category": "CC_WEAPON",
@@ -23872,8 +24079,7 @@
   "autolearn": true,
   "tools": [
     [
-      [ "needle_bone", 5 ],
-      [ "sewing_kit", 5 ]
+      [ "func:sewing_kit", 5 ]
     ]
   ],
   "components": [

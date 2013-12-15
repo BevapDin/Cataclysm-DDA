@@ -912,7 +912,7 @@ public:
      * This is similar to consume_components, but is used in vehilce
      * interaction.
      */
-    item consume_vpart_item(game *g, const itype_id &itid);
+    item consume_vpart_item(const std::string &vpid);
     /**
      * FIXME: legacy, should be changed to "func:" system
      */

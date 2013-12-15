@@ -64,7 +64,7 @@ struct monhorde {
   * Called when the horde does not move because it
   * has no current target.
   */
- void rest_here(game &g);
+ void rest_here();
  /**
   * The population of a horde may change according to the
   * terrain (overmap-terrain) it is currently on.
@@ -73,7 +73,7 @@ struct monhorde {
   * On empty land it may not change at all.
   * In forrest or swamps it may decrese.
   */
- void change_pop_by_terrain(game &g);
+ void change_pop_by_terrain();
  
  /**
   * Called when noise appears.
@@ -87,7 +87,7 @@ struct monhorde {
   * May fail for farious reasons.
   * @return false if the monster has _not_ been added to the horde.
   */
- bool despawn(monster &m, game &g);
+ bool despawn(monster &m);
  
  /**
   * Try to merge another horde into this one. This is called
@@ -102,7 +102,7 @@ struct monhorde {
   * a new, random target or whatever.
   * @return false if the horde did not move at all, otherwise true.
   */
- bool move(game &g);
+ bool move();
 };
 
 #endif

@@ -137,8 +137,8 @@ void crafting_inventory_t::solution::deserialize(crafting_inventory_t &cinv, pla
     std::istringstream buffer(data);
     activity.str_values.erase(activity.str_values.begin());
     try {
-        JsonIn json(&buffer);
-        JsonArray arr(&json);
+        JsonIn json(buffer);
+        JsonArray arr(json);
         if(arr.size() != complex_reqs.size()) {
             debugmsg("failed to deserialize: input %s is too small", data.c_str());
             return;
@@ -435,6 +435,7 @@ bool cmp_simple_req(const crafting_inventory_t::simple_req &a, const crafting_in
 }
 
 void crafting_inventory_t::complex_req::init(std::vector<component> &components, bool as_tool, solution &s) {
+    (void) s;
     assert(!components.empty());
     this->as_tool = as_tool;
     for(size_t j = 0; j < components.size(); j++) {
@@ -445,6 +446,7 @@ void crafting_inventory_t::complex_req::init(std::vector<component> &components,
 }
 
 void crafting_inventory_t::complex_req::init(component &components, bool as_tool, solution &s) {
+    (void) s;
     this->as_tool = as_tool;
     add(components, as_tool);
     assert(!simple_reqs.empty());
@@ -1278,7 +1280,7 @@ int crafting_inventory_t::deserialize(JsonArray &arr, candvec &vec) {
 std::string crafting_inventory_t::serialize(int index, const candvec &vec) {
     assert(!vec.empty());
     std::ostringstream buffer;
-    JsonOut json(&buffer);
+    JsonOut json(buffer);
     json.start_array();
     json.write(index);
     for(size_t i = 0; i < vec.size(); i++) {
@@ -2401,9 +2403,7 @@ bool crafting_inventory_t::has_tools(component &tools) const {
     return has_any_tools(tmptools);
 }
 
-
-
-std::list<item> crafting_inventory_t::consume_any_tools(const std::vector<component> &tools, bool force_available)
+std::list<item> crafting_inventory_t::consume_any_tools(const std::vector<component> &tools, bool)
 {
     std::list<item> result;
     if(tools.empty()) { return result; }

@@ -212,7 +212,7 @@ bool game::crafting_allowed()
 
 bool game::crafting_can_see()
 {
-    if (u.fine_detail_vision_mod(g) > 2.5) {
+    if (u.fine_detail_vision_mod() > 4) {//minimum LL_LOW of LL_DARK + (ELFA_NV or atomic_light) (vs 2.5)
         g->add_msg(_("You can't see to craft!"));
         return false;
     }
@@ -1158,7 +1158,7 @@ void move_ppoints_for_construction(const std::string &skillName, int difficulty,
 
 void game::make_craft(recipe *making)
 {
- u.assign_activity(this, ACT_CRAFT, making->time, making->id);
+ u.assign_activity(ACT_CRAFT, making->time, making->id);
  if(making->skill_used != 0) {
   move_ppoints_for_construction(making->skill_used->ident(), making->difficulty, u.activity.moves_left);
  }
@@ -1172,7 +1172,7 @@ void game::make_craft(recipe *making)
 
 void game::make_all_craft(recipe *making)
 {
- u.assign_activity(this, ACT_LONGCRAFT, making->time, making->id);
+ u.assign_activity(ACT_LONGCRAFT, making->time, making->id);
  if(making->skill_used != 0) {
   move_ppoints_for_construction(making->skill_used->ident(), making->difficulty, u.activity.moves_left);
  }
@@ -1192,7 +1192,7 @@ void serialize_item_list(JsonOut &json, const std::list<item> &x) {
 
 std::string to_uncraft_tag(const std::list<item> &comps, const std::list<item> &tools) {
     std::ostringstream buffer;
-    JsonOut json(&buffer);
+    JsonOut json(buffer);
     json.start_array();
     serialize_item_list(json, comps);
     serialize_item_list(json, tools);
@@ -1220,7 +1220,7 @@ bool from_uncraft_tag(const std::string &data, std::list<item> &comps, std::list
     std::istringstream buffer(data.substr(8));
     try {
         bool result = false;
-        JsonIn json(&buffer);
+        JsonIn json(buffer);
         json.start_array();
         if(deserialize_item_list(json, comps)) {
             if(deserialize_item_list(json, tools)) {
@@ -1341,8 +1341,9 @@ void game::complete_craft()
  {
      if (iter->goes_bad())
      {
-         used_age_tally += ((int)turn - iter->bday)/
-                 (float)(dynamic_cast<it_comest*>(iter->type)->spoils);
+            iter->rotten();
+            used_age_tally += iter->rot/
+                (float)(dynamic_cast<it_comest*>(iter->type)->spoils);
          ++used_age_count;
      }
  }
@@ -1373,7 +1374,7 @@ void game::complete_craft()
     newit.charges *= new_count;
     new_count = 1;
   }
-  u.i_add_or_drop(newit, this, new_count);
+  u.i_add_or_drop(newit, new_count);
   g->add_msg("%s", newit.tname(g).c_str());
  }
 }
@@ -1483,7 +1484,7 @@ void game::disassemble(int pos)
                   {
                    return;
                   }
-                    u.assign_activity(this, ACT_DISASSEMBLE, cur_recipe->time / 2, cur_recipe->id);
+                    u.assign_activity(ACT_DISASSEMBLE, cur_recipe->time / 2, cur_recipe->id);
                     u.moves = 0;
                     std::vector<int> dis_items;
                     dis_items.push_back(pos);
@@ -1622,19 +1623,19 @@ void game::complete_disassemble()
   {
     if (dis->skill_used == NULL || dis->learn_by_disassembly <= u.skillLevel(dis->skill_used))
     {
-      if (rng(0,3) == 0)
+      if (one_in(4))
       {
         u.learn_recipe(dis);
-        add_msg(_("You learned a recipe from this disassembly!"));
+        add_msg(_("You learned a recipe from disassembling it!"));
       }
       else
       {
-        add_msg(_("You think you could learn a recipe from this item. Maybe you'll try again."));
+        add_msg(_("You might be able to learn a recipe if you disassemble another."));
       }
     }
     else
     {
-      add_msg(_("With some more skill, you might learn a recipe from this."));
+      add_msg(_("If you had better skills, you might learn a recipe next time."));
     }
   }
 }

@@ -28,7 +28,7 @@ overmap *game::getOverMap(int &omx, int &omy) {
  }
 }
 
-bool monhorde::despawn(monster &m, game &g) {
+bool monhorde::despawn(monster &m) {
 	if(m.type->id == MASTER_ZOMBIE_ID) {
 		pop_master++;
 	} else {
@@ -71,7 +71,7 @@ bool game::try_despawn_to_horde(monster &m, int shiftx, int shifty) {
 		monhorde &horde = monhordes[i];
 		if(abs(horde.posx - lx) <= 1 && abs(horde.posy - ly) <= 1) {
 			// Near enough
-			if(horde.despawn(m, *this)) {
+			if(horde.despawn(m)) {
 				return true;
 			}
 		}
@@ -80,7 +80,7 @@ bool game::try_despawn_to_horde(monster &m, int shiftx, int shifty) {
 
 	overmap *om = getOverMap(lx, ly);
 	om->zh.push_back(monhorde("GROUP_WANDERING_ZOMBIE", lx, ly, 0, 0, (int) turn));
-	om->zh.back().despawn(m, *this);
+	om->zh.back().despawn(m);
 	
 	return true;
 }
@@ -182,22 +182,22 @@ bool merge(std::vector<monhorde> &monhordes, int p) {
 	return false;
 }
 
-void monhorde::rest_here(game &g) {
+void monhorde::rest_here() {
 	if(pop_normal > 0 && pop_master == 0) {
 		pop_normal--;
 	}
-	change_pop_by_terrain(g);
+	change_pop_by_terrain();
 	if(pop_normal == 0 && pop_master > 0) {
 		pop_master--;
 	}
 }
 
-void monhorde::change_pop_by_terrain(game &g) {
+void monhorde::change_pop_by_terrain() {
 	// Out of bounds?
 	if(posx < 0 || posy < 0 || posx >= OMAPX * 2 || posy >= OMAPY * 2) {
 		return;
 	}
-	oter_id ter = g.cur_om->ter(posx / 2, posy / 2, posz);
+	oter_id ter = g->cur_om->ter(posx / 2, posy / 2, posz);
 	if(ter == ot_crater) {
 		if(one_in(10)) {
 			pop_normal++;
@@ -237,7 +237,7 @@ void game::move_hordes() {
 	MHVec &monhordes = cur_om->zh;
 	for(size_t i = 0; i < monhordes.size(); i++) {
 		monhorde &horde = monhordes[i];
-		if(!horde.move(*this)) {
+		if(!horde.move()) {
 			// Has not moved, has not changed
 			continue;
 		}
@@ -273,8 +273,8 @@ void game::move_hordes() {
 	}
 }
 
-bool monhorde::move(game &g) {
-	int t = (int) g.turn;
+bool monhorde::move() {
+	int t = (int) g->turn;
 	const int move_points = t - last_move;
 	if(move_points < SEEX * 2) {
 		if(move_points < 0) {
@@ -282,7 +282,7 @@ bool monhorde::move(game &g) {
 		}
 		return false;
 	}
-	rest_here(g);
+	rest_here();
 	last_move = t;
 	if(!one_in(10)) { // zombies are slow, the skip this move.
 		return false;
@@ -388,7 +388,7 @@ void game::spawn_horde_members() {
 			for(int iter = 0; iter < 10; iter++) {
 				int monx = rng(0, SEEX - 1) + posx;
 				int mony = rng(0, SEEY - 1) + posy;
-				if(!zom.can_move_to(this, monx, mony) || !is_empty(monx, mony) ||
+				if(!zom.can_move_to(monx, mony) || !is_empty(monx, mony) ||
 					m.sees(u.posx, u.posy, monx, mony, SEEX, t) || !m.is_outside(monx, mony)) {
 					continue;
 				}
@@ -397,7 +397,7 @@ void game::spawn_horde_members() {
 				if(tarx != posx || tary != posy) {
 					int mondex = mon_at(monx, mony);
 					if (mondex != -1) {
-						monster &z = _active_monsters[mondex];
+						monster &z = zombie(mondex);
 						z.wander_to(tarx + rng(0, SEEX - 1), tary + rng(0, SEEY - 1), MAPSIZE * SEEX * MAPSIZE * SEEY);
 					}
 				}
