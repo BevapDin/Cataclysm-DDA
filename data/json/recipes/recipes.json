@@ -9213,7 +9213,7 @@
   "book_learn": [[ "recipe_animal", 8 ]],
   "tools": [
     [
-      [ "func:hotplate", 25 ]
+      [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [

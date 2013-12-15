@@ -6448,6 +6448,11 @@ int player::amount_of(itype_id it) {
         if (worn[i].matches_type(it)) {
             quantity++;
         }
+        for (size_t j = 0; j < worn[i].contents.size(); j++) {
+            if (worn[i].contents[j].matches_type(it)) {
+                quantity++;
+            }
+        }
     }
     quantity += inv.amount_of(it);
     return quantity;
