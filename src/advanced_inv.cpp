@@ -856,7 +856,7 @@ void advanced_inventory::display(player * pp)
              // do nthing
             if(panes[left].area == changeSquare || panes[right].area == changeSquare) {
                 lastCh = (int)popup_getkey(_("same square!"));
-                if(lastCh == 'q' || lastCh == KEY_ESCAPE || lastCh == ' ' ) lastCh = 0;
+                if(lastCh == 'q' || lastCh == KEY_ESCAPE || lastCh == ' ' || lastCh == '\n' ) lastCh = 0;
             } else if(squares[changeSquare].canputitems) {
                 panes[src].area = changeSquare;
                 panes[src].page = 0;
@@ -976,7 +976,6 @@ void advanced_inventory::display(player * pp)
                 if('T' == c) {
                     askamount = false;
                     lastCh = 0;
-                    amount = max;
                     moveall = true;
                 }
                 if ( askamount && ( amount > max || !moveall ) ) {

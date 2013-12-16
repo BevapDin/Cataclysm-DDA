@@ -725,8 +725,6 @@ recipe* game::select_crafting_recipe()
 
         wrefresh(w_data);
         int ch=(int)getch();
-        if(ch == 'N') { input = (InputEvent) ch; } else
-        if(ch == 'd') { input = (InputEvent) ch; } else
         if(ch=='e'||ch=='E') { // get_input is inflexible
             ch=(int)'?';
         } else if(ch == KEY_PPAGE) {
@@ -735,6 +733,8 @@ recipe* game::select_crafting_recipe()
             ch=(int)'>';
         }
         input = get_input(ch);
+        if(ch == 'N') { input = (InputEvent) ch; }
+        if(ch == 'd') { input = (InputEvent) ch; }
         switch (input)
         {
             case KEY_NPAGE:
