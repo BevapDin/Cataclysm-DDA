@@ -11124,6 +11124,7 @@ void map::rotate(int turns)
         for (int v = 0; v < grid[i]->vehicles.size(); v++) {
             if (turns >= 1 && turns <= 3) {
                 grid[i]->vehicles[v]->turn(turns * 90);
+                grid[i]->vehicles[v]->precalc_mounts(0, grid[i]->vehicles[v]->turn_dir);
             }
         }
     }

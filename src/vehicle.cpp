@@ -497,6 +497,7 @@ void vehicle::use_controls()
     }
 
     // Toggle engine on/off, stop driving if we are driving.
+    int vpart;
     if (!pedals() && has_engine) {
         options_choice.push_back(toggle_engine);
         if (g->u.controlling_vehicle) {
@@ -510,7 +511,7 @@ void vehicle::use_controls()
 
     // Let go without turning the engine off.
     if (g->u.controlling_vehicle &&
-        g->m.veh_at(g->u.posx, g->u.posy) == this) {
+        g->m.veh_at(g->u.posx, g->u.posy, vpart) == this) {
         options_choice.push_back(release_control);
         options_message.push_back(uimenu_entry(_("Let go of controls"), 'l'));
         letgoent = current;
@@ -541,7 +542,6 @@ void vehicle::use_controls()
             lights_on = !lights_on;
             g->add_msg((lights_on) ? _("Headlights turned on") : _("Headlights turned off"));
         } else {
-            lights_on = false;
             g->add_msg(_("The headlights won't come on!"));
         }
         break;
@@ -551,7 +551,6 @@ void vehicle::use_controls()
             g->add_msg((overhead_lights_on) ? _("Overhead lights turned on") :
                        _("Overhead lights turned off"));
         } else {
-            overhead_lights_on = false;
             g->add_msg(_("The lights won't come on!"));
         }
         break;
@@ -739,10 +738,8 @@ void vehicle::honk_horn()
 vpart_info& vehicle::part_info (int index)
 {
     if (index >= 0 && index < parts.size()) {
-        if(parts[index].vpart == 0) {
-            parts[index].vpart = &(vehicle_part_types[parts[index].id]);
-        }
-        return *parts[index].vpart;
+        return vehicle_part_int_types[parts[index].iid];
+        // slow autovivication // vehicle_part_types[parts[index].id];
     } else {
         return vehicle_part_int_types[0];//"null"];
     }
@@ -3799,7 +3796,7 @@ void vehicle::open_or_close(int part_index, bool opening)
       //Look for parts 1 square off in any cardinal direction
       int xdiff = parts[next_index].mount_dx - parts[part_index].mount_dx;
       int ydiff = parts[next_index].mount_dy - parts[part_index].mount_dy;
-      if(std::abs(xdiff) <= 1 && std::abs(ydiff) <= 1 &&
+      if((xdiff * xdiff + ydiff * ydiff == 1) && // (x^2 + y^2) == 1
               (part_info(next_index).id == part_info(part_index).id) &&
               (parts[next_index].open == opening ? 0 : 1)) {
         open_or_close(next_index, opening);
