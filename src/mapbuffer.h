@@ -2,6 +2,7 @@
 #include "line.h"
 #include <map>
 #include <list>
+#include <fstream>
 
 class game;
 
@@ -69,6 +70,13 @@ class mapbuffer
   std::map<tripoint, submap*, pointcomp> submaps;
   std::list<submap*> submap_list;
   bool dirty;
+  std::ifstream input_stream;
+  typedef std::map<tripoint, std::streampos, pointcomp> SeekMap;
+  SeekMap seek_map;
+  std::map<int, int> ter_key;
+  std::map<int, int> furn_key;
+  std::map<int, int> trap_key;
+  submap *load_from_offset(std::streampos pos, const tripoint &pnt);
 };
 
 extern mapbuffer MAPBUFFER;
