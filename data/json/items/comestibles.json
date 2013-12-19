@@ -2770,7 +2770,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_feline",
-        "name" : "feine serum",
+        "name" : "feline serum",
         "weight" : 1,
         "color" : "red",
         "addiction_type" : "none",
@@ -5662,7 +5662,7 @@
     },
     {
         "type" : "COMESTIBLE",
-        "id" : "currypowder",
+        "id" : "curry_powder",
         "name" : "curry powder",
         "weight" : 46,
         "color" : "red",
