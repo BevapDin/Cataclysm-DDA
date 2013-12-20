@@ -728,6 +728,9 @@ void inventory::json_save_invcache(JsonOut &json) const
 {
     json.start_array();
     for( std::map<std::string, std::vector<char> >::const_iterator invlet_id =  invlet_cache.begin(); invlet_id != invlet_cache.end(); ++invlet_id ) {
+        if(invlet_id->second.empty()) {
+            continue;
+        }
         json.start_object();
         json.member( invlet_id->first );
         json.start_array();
