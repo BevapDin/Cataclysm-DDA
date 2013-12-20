@@ -1971,7 +1971,7 @@
         "id" : "cargo_space",
         "name" : "cargo space",
         "symbol" : "=",
-        "color" : "light_gray",
+        "color" : "light_green",
         "broken_symbol" : "#",
         "broken_color" : "dark_gray",
         "durability" : 250,
