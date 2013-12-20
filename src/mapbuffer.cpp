@@ -6,6 +6,8 @@
 #include <fstream>
 #include "savegame.h"
 
+#include <unistd.h>
+
 #define dbg(x) dout((DebugLevel)(x),D_MAP) << __FILE__ << ":" << __LINE__ << ": "
 const int savegame_minver_map = 11;
 
@@ -29,6 +31,8 @@ void mapbuffer::reset(){
 
  submaps.clear();
  submap_list.clear();
+ seek_map.clear();
+ input_stream.close();
 }
 
 // set to dirty right before the game starts & the player starts changing stuff.
@@ -60,16 +64,18 @@ bool mapbuffer::add_submap(int x, int y, int z, submap *sm)
 
 submap* mapbuffer::lookup_submap(int x, int y, int z)
 {
- dbg(D_INFO) << "mapbuffer::lookup_submap( x["<< x <<"], y["<< y <<"], z["<< z <<"])";
-
- tripoint p(x, y, z);
-
- if (submaps.count(p) == 0)
-  return NULL;
-
- dbg(D_INFO) << "mapbuffer::lookup_submap success: "<< submaps[p];
-
- return submaps[p];
+    dbg(D_INFO) << "mapbuffer::lookup_submap( x["<< x <<"], y["<< y <<"], z["<< z <<"])";
+    const tripoint p(x, y, z);
+    if (submaps.count(p) == 0) {
+        if (seek_map.count(p) == 0) {
+            return NULL;
+        }
+        const std::streampos spos = seek_map[p];
+        seek_map.erase(p);
+        return load_from_offset(spos, p);
+    }
+    dbg(D_INFO) << "mapbuffer::lookup_submap success: "<< submaps[p];
+    return submaps[p];
 }
 
 void mapbuffer::save_if_dirty()
@@ -84,12 +90,24 @@ void mapbuffer::save()
  std::ofstream fout;
  std::stringstream mapfile;
  mapfile << world_generator->active_world->world_path << "/maps.txt";
+
+ // move the old maps file to a temporary location (.tmp)
+ input_stream.close();
+ std::stringstream mapfile_tmp;
+ mapfile_tmp << mapfile.str() << ".tmp";
+ ::rename(mapfile.str().c_str(), mapfile_tmp.str().c_str());
+ // open the old maps file again
+ input_stream.open(mapfile_tmp.str().c_str());
+ // store the seek_map for later and clear it
+ SeekMap old_seek_map;
+ old_seek_map.swap(seek_map);
+
  fout.open(mapfile.str().c_str());
  fout << "# version " << savegame_version << std::endl;
 
     JsonOut jsout(fout);
     jsout.start_object();
-    jsout.member("listsize", (unsigned int)submap_list.size());
+    jsout.member("listsize", (unsigned int)(submap_list.size()+old_seek_map.size()));
 
     // To keep load speedy, we're saving ints, but since these are ints
     // that will change with revisions and loaded mods, we're also
@@ -123,10 +141,11 @@ void mapbuffer::save()
  int num_total_submaps = submap_list.size();
 
  for (it = submaps.begin(); it != submaps.end(); it++) {
-  if (num_saved_submaps % 100 == 0)
+  if (num_saved_submaps % 1000 == 0)
    popup_nowait(_("Please wait as the map saves [%d/%d]"),
                 num_saved_submaps, num_total_submaps);
 
+  seek_map[it->first] = fout.tellp();
   fout << it->first.x << " " << it->first.y << " " << it->first.z << std::endl;
   submap *sm = it->second;
   fout << sm->turn_last_touched << std::endl;
@@ -232,8 +251,29 @@ void mapbuffer::save()
   fout << "----" << std::endl;
   num_saved_submaps++;
  }
+
+ // Now read the old maps file and copy submaps that are not
+ // yet loaded to the new maps file.
+ for(SeekMap::const_iterator a = old_seek_map.begin(); a != old_seek_map.end(); ++a) {
+  if(seek_map.count(a->first) == 0) {
+   std::string line;
+   seek_map[a->first] = fout.tellp();
+   input_stream.seekg(a->second);
+   while(std::getline(input_stream, line, '\n')) {
+    if(line.compare(0, 4, "----") == 0 || input_stream.eof()) {
+     fout << "----\n";
+     break;
+    }
+    fout << line << "\n";
+   }
+  }
+ }
  // Close the file; that's all we need.
  fout.close();
+
+ input_stream.close();
+ ::unlink(mapfile_tmp.str().c_str());
+ input_stream.open(mapfile.str().c_str());
 }
 
 void mapbuffer::load(std::string worldname)
@@ -247,11 +287,14 @@ void mapbuffer::load(std::string worldname)
   return;
  unserialize(fin);
  fin.close();
+ input_stream.open(worldmap.str().c_str());
 }
 
 void mapbuffer::unserialize(std::ifstream & fin) {
+ seek_map.clear();
+ input_stream.close();
  std::map<tripoint, submap*>::iterator it;
- int itx, ity, t, d, a, num_submaps = 0, num_loaded = 0;
+ int num_submaps = 0, num_loaded = 0;
  item it_tmp;
  std::string databuff;
  std::string st;
@@ -280,9 +323,9 @@ void mapbuffer::unserialize(std::ifstream & fin) {
     jsonbuff.str(databuff);
     JsonIn jsin(jsonbuff);
 
-    std::map<int, int> ter_key;
-    std::map<int, int> furn_key;
-    std::map<int, int> trap_key;
+    ter_key.clear();
+    furn_key.clear();
+    trap_key.clear();
 
     jsin.start_object();
     while (!jsin.end_object()) {
@@ -344,15 +387,39 @@ void mapbuffer::unserialize(std::ifstream & fin) {
     }
 
  while (!fin.eof()) {
-  if (num_loaded % 100 == 0)
+  if (num_loaded % 1000 == 0)
    popup_nowait(_("Please wait as the map loads [%d/%d]"),
                 num_loaded, num_submaps);
-  int locx, locy, locz, turn, temperature;
-  submap* sm = new submap();
-  fin >> locx >> locy >> locz >> turn >> temperature;
+  int locx, locy, locz;
+  const std::streampos spos = fin.tellg();
+  fin >> locx >> locy >> locz;
   if(fin.eof()) {
       break;
   }
+  seek_map[tripoint(locx, locy, locz)] = spos;
+  while(std::getline(fin, databuff)) {
+      if(databuff.compare(0, 4, "----") == 0 || fin.eof()) {
+          break;
+      }
+  }
+  num_loaded++;
+ }
+}
+
+submap *mapbuffer::load_from_offset(std::streampos pos, const tripoint &) {
+  input_stream.seekg(pos);
+  std::ifstream &fin = input_stream;
+  int locx, locy, locz;
+
+ std::map<tripoint, submap*>::iterator it;
+ int itx, ity, t, d, a;
+ item it_tmp;
+ std::string databuff;
+ std::string st;
+ int turn, temperature;
+ 
+  submap* sm = new submap();
+  fin >> locx >> locy >> locz >> turn >> temperature;
   sm->turn_last_touched = turn;
   sm->temperature = temperature;
   int turndif = int(g->turn) - turn;
@@ -439,7 +506,6 @@ void mapbuffer::unserialize(std::ifstream & fin) {
    } else if (string_identifier == "V") {
     vehicle * veh = new vehicle();
     veh->load (fin);
-    g->m.vehicle_list.insert(veh);
     sm->vehicles.push_back(veh);
    } else if (string_identifier == "c") {
     getline(fin, databuff);
@@ -459,8 +525,7 @@ void mapbuffer::unserialize(std::ifstream & fin) {
 
   submap_list.push_back(sm);
   submaps[ tripoint(locx, locy, locz) ] = sm;
-  num_loaded++;
- }
+  return sm;
 }
 
 int mapbuffer::size()
