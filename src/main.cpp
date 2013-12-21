@@ -12,6 +12,7 @@
 #include "mapbuffer.h"
 #include "debug.h"
 #include "item_factory.h"
+#include "profession.h"
 #include "monstergenerator.h"
 #include <sys/stat.h>
 #include <cstdlib>
@@ -107,6 +108,7 @@ int main(int argc, char *argv[])
     MonsterGenerator::generator().check_monster_definitions();
     MonsterGroupManager::check_group_definitions();
     check_recipe_definitions();
+    profession::check_definitions();
     if ( verifyexit ) {
         exit_handler(0);
     }

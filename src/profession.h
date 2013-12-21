@@ -52,6 +52,9 @@ public:
     static int count();
 
     static bool has_initialized();
+    static void check_definitions();
+
+    void check_definition() const;
 
     std::string ident() const;
     std::string name() const;

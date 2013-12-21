@@ -7,6 +7,8 @@
 #include "output.h" //debugmsg
 #include "json.h"
 #include "player.h"
+#include "item_factory.h"
+#include "bionics.h"
 
 profession::profession()
    : _ident(""), _name("null"), _description("null"), _point_cost(0)
@@ -99,6 +101,29 @@ profmap::const_iterator profession::end()
 int profession::count()
 {
     return _all_profs.size();
+}
+
+void profession::check_definitions()
+{
+    for (profmap::const_iterator a = _all_profs.begin(); a != _all_profs.end(); ++a) {
+        a->second.check_definition();
+    }
+}
+
+void profession::check_definition() const
+{
+    for (std::vector<std::string>::const_iterator a = _starting_items.begin(); a != _starting_items.end(); ++a) {
+        if (!item_controller->has_template(*a)) {
+            debugmsg("item %s for profession %s does not exist", a->c_str(), _ident.c_str());
+        }
+    }
+    // TODO: check addictions
+    for (std::vector<std::string>::const_iterator a = _starting_CBMs.begin(); a != _starting_CBMs.end(); ++a) {
+        if (bionics.count(*a) == 0) {
+            debugmsg("bionic %s for profession %s does not exist", a->c_str(), _ident.c_str());
+        }
+    }
+    // TODO: check skills
 }
 
 bool profession::has_initialized()
