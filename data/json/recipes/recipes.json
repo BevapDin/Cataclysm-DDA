@@ -3226,101 +3226,6 @@
   ]
 },{
         "type" : "recipe",
-  "result": "modularvestsuper",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
-  "skill_used": "tailor",
-  "difficulty": 0,
-  "time": 5000,
-  "reversible": false,
-  "autolearn": true,
-  "components": [
-    [
-      [ "modularvest", 1 ],
-      [ "modularvestsuper", 1]
-    ],
-    [
-      [ "alloy_plate", 1 ]
-    ]
-  ]
-},{
-        "type" : "recipe",
-  "result": "modularveststeel",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
-  "skill_used": "tailor",
-  "difficulty": 0,
-  "time": 5000,
-  "reversible": false,
-  "autolearn": true,
-  "components": [
-    [
-      [ "modularvest", 1 ],
-      [ "modularveststeel", 1]
-    ],
-    [
-      [ "steel_plate", 1 ]
-    ]
-  ]
-},{
-        "type" : "recipe",
-  "result": "modularvestceramic",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
-  "skill_used": "tailor",
-  "difficulty": 0,
-  "time": 5000,
-  "reversible": false,
-  "autolearn": true,
-  "components": [
-    [
-      [ "modularvest", 1 ],
-      [ "modularvestceramic", 1]
-    ],
-    [
-      [ "ceramic_armor", 4 ]
-    ]
-  ]
-},{
-        "type" : "recipe",
-  "result": "modularvestkevlar",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
-  "skill_used": "tailor",
-  "difficulty": 0,
-  "time": 5000,
-  "reversible": false,
-  "autolearn": true,
-  "components": [
-    [
-      [ "modularvest", 1 ],
-      [ "modularvestkevlar", 1]
-    ],
-    [
-      [ "kevlar_plate", 8 ]
-    ]
-  ]
-},{
-        "type" : "recipe",
-  "result": "modularvesthard",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
-  "skill_used": "tailor",
-  "difficulty": 0,
-  "time": 5000,
-  "reversible": false,
-  "autolearn": true,
-  "components": [
-    [
-      [ "modularvest", 1 ],
-      [ "modularvesthard", 1]
-    ],
-    [
-      [ "hard_plate", 1 ]
-    ]
-  ]
-},{
-        "type" : "recipe",
   "result": "quiver_large",
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_STORAGE",
@@ -14085,7 +13990,6 @@
      ],
      [
       [ "kevlar", 1 ],
-      [ "modularvest", 1 ],
       [ "swat_armor", 1 ],
       [ "kevlar_plate", 24 ]
      ]
@@ -22676,7 +22580,6 @@
      ],
      [
       [ "kevlar", 1 ],
-      [ "modularvest", 1 ],
       [ "kevlar_plate", 12 ]
      ],
      [
@@ -22724,7 +22627,6 @@
      ],
      [
       [ "kevlar", 1 ],
-      [ "modularvest", 1 ],
       [ "kevlar_plate", 12 ]
      ],
      [
@@ -22925,7 +22827,6 @@
      ],
      [
       [ "kevlar", 1 ],
-      [ "modularvest", 1 ],
       [ "swat_armor", 1 ],
       [ "kevlar_plate", 24 ]
      ]
@@ -22979,7 +22880,6 @@
      ],
      [
       [ "kevlar", 1 ],
-      [ "modularvest", 1 ],
       [ "swat_armor", 1 ],
       [ "kevlar_plate", 24 ]
      ]
@@ -23037,7 +22937,6 @@
      ],
      [
       [ "kevlar", 1 ],
-      [ "modularvest", 1 ],
       [ "swat_armor", 1 ],
       [ "kevlar_plate", 24 ]
      ]
@@ -23094,7 +22993,6 @@
      ],
      [
       [ "kevlar", 1 ],
-      [ "modularvest", 1 ],
       [ "swat_armor", 1 ],
       [ "kevlar_plate", 24 ]
      ]
@@ -23150,7 +23048,6 @@
      ],
      [
       [ "kevlar", 1 ],
-      [ "modularvest", 1 ],
       [ "swat_armor", 1 ],
       [ "kevlar_plate", 24 ]
      ]
@@ -23203,7 +23100,6 @@
      [
       [ "kevlar", 1 ],
       [ "swat_armor", 1 ],
-      [ "modularvest", 1 ],
       [ "kevlar_plate", 24 ]
      ]
   ]
@@ -24675,190 +24571,6 @@
     ],
     [
       [ "rag", 4 ]
-    ]
-  ]
-},{
-        "type" : "recipe",
-  "result": "leather_cat_ears",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_HEAD",
-  "skill_used": "tailor",
-  "difficulty": 3,
-  "time": 20000,
-  "reversible": false,
-  "autolearn": true,
-  "tools": [
-    [
-      [ "func:sewing_kit", 10 ]
-    ],
-    [
-      [ "func:hotplate", 5],
-      ["fire", -1]
-    ]
-  ],
-  "components": [
-    [
-      [ "leather", 2 ]
-    ],
-    [
-      [ "plastic_chunk", 3]
-    ]
-  ]
-},{
-        "type" : "recipe",
-  "result": "fur_cat_ears",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_HEAD",
-  "skill_used": "tailor",
-  "difficulty": 3,
-  "time": 20000,
-  "reversible": false,
-  "autolearn": true,
-  "tools": [
-    [
-      [ "func:sewing_kit", 10 ]
-    ],
-    [
-      [ "func:hotplate", 5],
-      [ "fire", -1]
-    ]
-  ],
-  "components": [
-    [
-      [ "fur", 2 ]
-    ],
-    [
-      [ "plastic_chunk", 3]
-    ]
-  ]
-},{
-        "type" : "recipe",
-  "result": "leather_cat_tail",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_OTHER",
-  "skill_used": "tailor",
-  "difficulty": 3,
-  "time": 30000,
-  "reversible": false,
-  "autolearn": true,
-  "qualities" : [
-    {"id":"CUT","level":1,"amount":1}
-  ],
-  "tools": [
-    [
-      [ "func:sewing_kit", 10 ]
-    ],
-    [
-      [ "func:hotplate", 5],
-      [ "fire", -1]
-    ]
-  ],
-  "components": [
-    [
-      [ "leather", 4 ]
-    ],
-    [
-      [ "string_36", 1]
-    ],
-    [
-      [ "plastic_chunk", 10],
-      [ "bottle_plastic", 5],
-      [ "jug_plastic", 2]
-    ]
-  ]
-},{
-        "type" : "recipe",
-  "result": "fur_cat_tail",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_OTHER",
-  "skill_used": "tailor",
-  "difficulty": 3,
-  "time": 30000,
-  "reversible": false,
-  "autolearn": true,
-  "qualities" : [
-    {"id":"CUT","level":1,"amount":1}
-  ],
-  "tools": [
-    [
-      [ "func:sewing_kit", 10 ]
-    ],
-    [
-      [ "func:hotplate", 5],
-      ["fire", -1]
-    ]
-  ],
-  "components": [
-    [
-      [ "fur", 4 ]
-    ],
-    [
-      [ "string_36", 1]
-    ],
-    [
-      [ "plastic_chunk", 10],
-      [ "bottle_plastic", 5],
-      [ "jug_plastic", 2]
-    ]
-  ]
-},{
-        "type" : "recipe",
-  "result": "fur_collar",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_OTHER",
-  "skill_used": "tailor",
-  "difficulty": 3,
-  "time": 20000,
-  "reversible": false,
-  "autolearn": true,
-  "qualities" : [
-    {"id":"CUT","level":1,"amount":1}
-  ],
-  "tools": [
-    [
-      [ "func:sewing_kit", 5 ]
-    ],
-    [
-      [ "func:soldering_iron", 10],
-      ["fire", -1]
-    ]
-  ],
-  "components": [
-    [
-      [ "fur", 2 ]
-    ],
-    [
-      [ "scrap", 1]
-    ]
-  ]
-},{
-        "type" : "recipe",
-  "result": "leather_collar",
-  "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_OTHER",
-  "skill_used": "tailor",
-  "difficulty": 3,
-  "time": 20000,
-  "reversible": false,
-  "autolearn": true,
-  "qualities" : [
-    {"id":"CUT","level":1,"amount":1}
-  ],
-  "tools": [
-    [
-      [ "func:sewing_kit", 5 ]
-    ],
-    [
-      [ "func:soldering_iron", 10],
-      ["fire", -1]
-    ]
-  ],
-  "components": [
-    [
-      [ "leather", 2 ]
-    ],
-    [
-      [ "scrap", 1]
     ]
   ]
 },{
