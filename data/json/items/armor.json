@@ -3217,7 +3217,7 @@
         "cutting" : 0,
         "warmth" : 10,
         "phase" : "solid",
-        "enviromental_protection" : 0,
+        "enviromental_protection" : 5,
         "encumbrance" : 1,
         "bashing" : -2,
         "flags" : ["VARSIZE", "POCKETS", "STURDY", "WATERPROOF"],
@@ -6218,7 +6218,7 @@
         "type" : "ARMOR",
         "id" : "power_armor_basic",
         "name" : "basic power armor",
-        "description" : "The DoubleTech Power Armor, Mk. I: A heavy suit of basic power armor, offering very good protection against attacks, but hard to move in.",
+        "description" : "The DoubleTech Power Armor, Mk. I: A heavy suit of basic power armor, offering very good protection against attacks, but hard to move in. The UPS power supply compartment can store other things if you don't mind powering the suit yourself.",
         "weight" : 20339,
         "enviromental_protection" : 10,
         "color" : "light_gray",
@@ -6231,7 +6231,7 @@
         "volume" : 100,
         "to_hit" : 1,
         "power_armor" : true,
-        "storage" : 0,
+        "storage" : 10,
         "warmth" : 90,
         "encumbrance" : 5,
         "bashing" : 1,
@@ -7006,7 +7006,7 @@
         "bashing" : 1,
         "flags" : ["VARSIZE", "WATERPROOF", "STURDY"],
         "coverage" : 100,
-        "material_thickness" : 6,
+        "material_thickness" : 7,
         "use_action" : "BOOTS"
     },
     {
@@ -7151,7 +7151,7 @@
         "bashing" : 1,
         "flags" : ["VARSIZE", "WATERPROOF", "STURDY"],
         "coverage" : 100,
-        "material_thickness" : 5,
+        "material_thickness" : 6,
         "use_action" : "BOOTS"
     },
     {
@@ -7296,7 +7296,7 @@
         "bashing" : 1,
         "flags" : ["VARSIZE", "WATER_FRIENDLY", "STURDY"],
         "coverage" : 100,
-        "material_thickness" : 3,
+        "material_thickness" : 4,
         "use_action" : "BOOTS"
     },
     {
@@ -7417,7 +7417,7 @@
         "bashing" : 1,
         "flags" : ["VARSIZE", "WATERPROOF", "STURDY"],
         "coverage" : 100,
-        "material_thickness" : 4,
+        "material_thickness" : 5,
         "use_action" : "BOOTS"
     },
     {
@@ -7442,7 +7442,7 @@
         "bashing" : 1,
         "flags" : ["VARSIZE", "WATERPROOF", "STURDY"],
         "coverage" : 100,
-        "material_thickness" : 5,
+        "material_thickness" : 6,
         "use_action" : "BOOTS"
     },
     {
@@ -7467,7 +7467,7 @@
         "bashing" : 1,
         "flags" : ["VARSIZE", "WATERPROOF", "STURDY"],
         "coverage" : 100,
-        "material_thickness" : 6,
+        "material_thickness" : 7,
         "use_action" : "BOOTS"
     },
     {
