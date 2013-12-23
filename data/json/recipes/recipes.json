@@ -16797,34 +16797,6 @@
   ]
 },{
         "type" : "recipe",
-  "result": "veh_cargo_box",
-  "category": "CC_OTHER",
-  "skill_used": "fabrication",
-   "difficulty": 4,
-  "time": 12000,
-  "reversible": true,
-  "autolearn": true,
-  "tools": [
-    [
-      [ "goggles_welding", -1 ]
-    ],
-    [
-      [ "func:welder", 300 ]
-    ]
-  ],
-  "components": [
-    [
-      [ "steel_plate", 2 ]
-    ],
-    [
-      [ "frame", 1 ]
-    ],
-    [
-      [ "sheet_metal", 4 ]
-    ]
-  ]
-},{
-        "type" : "recipe",
   "result": "makeshift_crowbar",
   "category": "CC_WEAPON",
   "subcategory": "CSC_WEAPON_BASHING",

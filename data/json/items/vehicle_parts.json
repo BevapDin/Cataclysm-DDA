@@ -328,22 +328,6 @@
         "price": 600
     },
     {
-        "type": "GENERIC",
-        "id": "veh_cargo_box",
-        "name": "big cargo box",
-        "description": "A very big cargo box for trucks. It occupies a while tile and blocks movement and vision.",
-        "weight": 59823,
-        "to_hit": -8,
-        "color": "light_gray",
-        "symbol": "]",
-        "material": "steel",
-        "volume": 200,
-        "bashing": 8,
-        "cutting": 0,
-        "category": "veh_parts",
-        "price": 6000
-    },
-    {
         "type":"GENERIC",
         "id" : "solar_cell",
         "name" : "solar cell",
