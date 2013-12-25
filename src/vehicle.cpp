@@ -137,7 +137,6 @@ void vehicle::load (std::ifstream &stin)
         load_legacy(stin);
     }
     sort_parts();
-    refresh(); // part index lists are lost on save??
 }
 
 /** Checks all parts to see if frames are missing (as they might be when
@@ -651,9 +650,11 @@ void vehicle::use_controls()
         break;
     case control_engines:
         while(toogle_active_menu(engines, "activate/deactive engines")) { ; }
+        find_power();
         break;
     case control_lights:
         while(toogle_active_menu(lights, "activate/deactive lights")) { ; }
+        find_power();
         break;
     case control_turrets:
         while(toogle_active_menu(turrets, "activate/deactive turrets")) { ; }
@@ -1194,7 +1195,6 @@ int vehicle::install_part (int dx, int dy, std::string id, int hp, bool force)
     new_part.bigness = tmp.bigness;
     parts.push_back (new_part);
 
-    refresh();
     sort_parts();
     std::vector<int> parts_here = parts_at_relative(dx, dy);
     for(size_t i = 0; i < parts_here.size(); i++) {
@@ -2559,7 +2559,7 @@ void vehicle::idle() {
             }
         }
     }
-    else {
+    else if (engine_on) {
         if (g->u_see(global_x(), global_y()) && engine_on) {
             g->add_msg(_("The %s's engine dies!"), name.c_str());
         }
@@ -3310,18 +3310,6 @@ void vehicle::place_spawn_items()
     }
 }
 
-void fridge_function(std::vector<item> &list, int duration) {
-    for(size_t i = 0; i < list.size(); i++) {
-        item &it = list[i];
-        // this works for all kind of items even non-food
-        it.bday += duration;
-        if(it.item_tags.count("HOT") > 0) {
-            it.item_tags.erase(it.item_tags.find("HOT"));
-        }
-        fridge_function(it.contents, duration);
-    }
-}
-
 void vehicle::gain_moves()
 {
     if (velocity) {
@@ -3388,14 +3376,14 @@ void vehicle::gain_moves()
                 tmpcontainer.contents.push_back(vp.items[0]);
             }
             tmpcontainer.add_rain_to_container(acid_rain, 1);
-            if(!tmpcontainer.contents.empty()) {
+            if(!tmpcontainer.contents.empty() && tmpcontainer.contents[0].charges > 0) {
                 if(tmpcontainer.contents[0].type->id == "water" && part_with_feature(p, "CRAFTRIG") >= 0) {
-                    const int drained = drain("battery", tmpcontainer.contents[0].charges);
+                    const int drained = drain(fuel_type_battery, tmpcontainer.contents[0].charges);
                     if(drained > 0) {
                         assert(drained <= tmpcontainer.contents[0].charges);
-                        const int left_over = refill("water", drained);
+                        const int left_over = refill(fuel_type_water, drained);
                         if(left_over > 0) {
-                            refill("battery", left_over);
+                            refill(fuel_type_battery, left_over);
                             tmpcontainer.contents[0].charges = left_over;
                         } else {
                             tmpcontainer.contents.clear();
@@ -3410,35 +3398,6 @@ void vehicle::gain_moves()
                     vp.items[0] = tmpcontainer.contents[0];
                 }
             }
-        }
-        if(vp.hp > 0 && vp.active() && part_flag(p, "FRIDGE")) {
-            // Drain energy under all circumstances
-            const int fuel_drained = drain("battery", 10);
-            if(fuel_drained != 10 || vp.items.empty()) {
-                continue;
-            }
-            // turn_diff is used incases the vehicle got left the reality-bubble
-            // in that case the turn_diff will be > 1
-            int turn_diff;
-            if(vp.amount == 0) {
-                // Init to previous turn
-                vp.amount = ((int) g->turn) - 1;
-                turn_diff = 1;
-            } else {
-                turn_diff = ((int) g->turn) - vp.amount;
-                vp.amount = (int) g->turn;
-                if(turn_diff < 10) {
-                    if(one_in(10)) {
-                        // Ups did not work in 10% of all turns -> aging still happens
-                        continue;
-                    }
-                } else if(turn_diff >= 10) {
-                    turn_diff = (turn_diff * 9) / 10; // Age slower but still age
-                }
-            }
-            // Food still gets bad, but slower:
-            // fridge works only 90% of the time
-            fridge_function(parts[p].items, turn_diff);
         }
         if (turret_mode) { // handle turrets
             fire_turret (p);
@@ -4572,8 +4531,5 @@ void vehicle::sort_parts() {
         parts[p].id.clear();
     }
     parts.swap(ptmp);
-    find_fuel_tanks();
-    find_exhaust();
-    find_horns();
-    find_power();
+    refresh();
 }
