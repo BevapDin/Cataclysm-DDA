@@ -2594,7 +2594,7 @@ void crafting_inventory_t::add_vpart(vehicle *veh, int mpart, const std::string 
     if(fuel.empty() || fuel == "null" || fuel == "NULL") {
         vpart_item.charges = -1;
     } else {
-        vpart_item.charges = veh->fuel_left(fuel, true);
+        vpart_item.charges = veh->fuel_left(fuel);
     }
     vpart.push_back(item_from_vpart(veh, veh->parts[part].mount_dx, veh->parts[part].mount_dy, vpart_item));
 }
