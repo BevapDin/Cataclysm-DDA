@@ -441,7 +441,7 @@ public:
  typedef std::map<const itype*, int> FoodEnjoyabilitMapy;
  FoodEnjoyabilitMapy food_enjoyability;
  typedef std::vector<const itype*> LeastRecentlyMealsVector;
- std::vector<const itype*> least_recently_meals;
+ LeastRecentlyMealsVector least_recently_meals;
  
  int get_food_enjoyability(const itype &type);
  int add_least_recently_meal(const itype &type);
