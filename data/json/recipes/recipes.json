@@ -24100,6 +24100,46 @@
     ]
   ]
 },{
+    "type" : "recipe",
+  "result": "pickaxe",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_TOOLS",
+  "skill_used": "fabrication",
+  "difficulty": 7,
+  "time": 420000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [[ "textbook_carpentry", 6 ] , [ "textbook_fabrication", 7 ]],
+  "tools": [ [ ["func:hammer", -1]  ],
+     [
+      ["tongs", -1]
+     ],
+     [
+      ["chisel", -1]
+     ],
+     [
+      ["anvil", -1]
+     ],
+     [
+      ["crucible", -1]
+     ],
+     [
+      ["func:forge", 400]
+     ]
+    ],
+  "components":
+   [
+    [
+     [ "steel_lump", 4 ],
+     [ "steel_chunk", 12 ],
+     [ "scrap", 36 ]
+    ],
+    [
+     [ "2x4", 2 ],
+     [ "stick", 4 ]
+    ]
+   ]
+},{
         "type" : "recipe",
   "result": "crackpipe",
   "category": "CC_OTHER",
@@ -26059,7 +26099,13 @@
       [ "candy3", 3 ]
     ],
     [
-      [ "matches", 20 ]
+      [ "coffee_raw", 1 ]
+    ],
+    [
+      [ "matches", 1 ]
+    ],
+    [
+      [ "protein_powder", 1 ]
     ],
     [
       [ "gum", 4 ]
@@ -26095,7 +26141,13 @@
       [ "candy3", 3 ]
     ],
     [
-      [ "matches", 20 ]
+      [ "coffee_raw", 1 ]
+    ],
+    [
+      [ "matches", 1 ]
+    ],
+    [
+      [ "protein_powder", 1 ]
     ],
     [
       [ "gum", 4 ]
@@ -26131,7 +26183,13 @@
       [ "candy3", 3 ]
     ],
     [
-      [ "matches", 20 ]
+      [ "coffee_raw", 1 ]
+    ],
+    [
+      [ "matches", 1 ]
+    ],
+    [
+      [ "protein_powder", 1 ]
     ],
     [
       [ "gum", 4 ]
@@ -26167,7 +26225,13 @@
       [ "candy3", 3 ]
     ],
     [
-      [ "matches", 20 ]
+      [ "coffee_raw", 1 ]
+    ],
+    [
+      [ "matches", 1 ]
+    ],
+    [
+      [ "protein_powder", 1 ]
     ],
     [
       [ "gum", 4 ]
@@ -26203,7 +26267,13 @@
       [ "candy3", 3 ]
     ],
     [
-      [ "matches", 20 ]
+      [ "coffee_raw", 1 ]
+    ],
+    [
+      [ "matches", 1 ]
+    ],
+    [
+      [ "protein_powder", 1 ]
     ],
     [
       [ "gum", 4 ]
