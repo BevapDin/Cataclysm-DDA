@@ -2015,6 +2015,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 200,
+        "category" : "chems",
         "effects" : ["COOKOFF"]
     },
     {   "type" : "AMMO",
