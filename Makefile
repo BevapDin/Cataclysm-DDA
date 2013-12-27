@@ -327,7 +327,7 @@ $(ODIR)/%.o: $(SRC_DIR)/%.rc
 $(ODIR)/SDLMain.o: $(SRC_DIR)/SDLMain.m
 	$(CC) -c $(OSX_INC) $< -o $@
 
-$(ODIR)/pg-%.o: %.cpp
+$(ODIR)/pg-%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(DEFINES) $(CXXFLAGS) -c $< -o $@
 
 version.cpp: version
