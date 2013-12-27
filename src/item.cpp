@@ -542,18 +542,56 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
   } else
    dump->push_back(iteminfo("GUN", _("Burst size: "), "", burst_size()));
 
+  if (!gun->valid_mod_locations.empty()) {
+  temp1.str("\n");
+  dump->push_back(iteminfo("GUN", temp1.str()));
+  temp1.str("");
+  temp1 << "Mod Locations: ";
+  int iternum = 0;
+    for( std::map<std::string,int>::iterator i=gun->valid_mod_locations.begin(); i!=gun->valid_mod_locations.end(); i++) {
+      if (!(iternum % 2) && iternum > 0) {
+        temp1 << "\n  ";
+        dump->push_back(iteminfo("GUN", temp1.str()));
+        temp1.str("");
+      }
+      if (iternum == 0) { temp1 << (*i).first << ": " << (*i).second << " (" << gun->available_mod_locations[(*i).first] << ") "; }
+      else if (!(iternum % 2)) { temp1 << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" << (*i).first << ": " << (*i).second << " (" << gun->available_mod_locations[(*i).first] << ") "; }
+      else { temp1 << (*i).first << ": " << (*i).second << " (" << gun->available_mod_locations[(*i).first] << ") "; }
+     iternum++;
+    }
+  dump->push_back(iteminfo("GUN", temp1.str()));
+  temp1.str("\n");
+  dump->push_back(iteminfo("GUN", temp1.str()));
+  }  
+  
   temp1.str("");
   temp1 << "Mods: ";
   for (int i = 0; i < contents.size(); i++) {
-     if (i == contents.size() - 1) {
-        if (!(i % 2) && i > 0)
-          temp1 << "\n+       ";
-        temp1 << contents[i].tname() + ".";
+    it_gunmod* mod = dynamic_cast<it_gunmod*>(contents[i].type);
+     
+     if (i == 0) {
+        if (!(i % 1) && i > 0) {
+          temp1 << "\n";
+          dump->push_back(iteminfo("GUN", temp1.str()));
+          temp1.str("");
+        }
+        temp1 << "" + contents[i].tname() + " (" + mod->location + ")" + ",";
+     }
+     else if (i == contents.size() - 1) {
+        if (!(i % 1) && i > 0) {
+          temp1 << "\n";
+          dump->push_back(iteminfo("GUN", temp1.str()));
+          temp1.str("");
+        }
+        temp1 << "\t\t\t\t\t\t" << contents[i].tname() << " (" << mod->location << ")" << ".";
      }
      else {
-        if (!(i % 2) && i > 0)
-          temp1 << "\n+       ";
-        temp1 << contents[i].tname() + ", ";
+        if (!(i % 1) && i > 0) {
+          temp1 << "\n";
+          dump->push_back(iteminfo("GUN", temp1.str()));
+          temp1.str("");
+        }
+        temp1 << "\t\t\t\t\t\t" + contents[i].tname() + " (" + mod->location + ")" + ", ";
      }
    }
 
@@ -587,7 +625,12 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
   if (mod->used_on_rifle)
    temp1 << _("Rifles.");
 
+  temp2.str("");
+  temp2 << _("Location: ");
+  temp2 << mod->location;
+   
   dump->push_back(iteminfo("GUNMOD", temp1.str()));
+  dump->push_back(iteminfo("GUNMOD", temp2.str()));
 
  } else if (is_armor()) {
   it_armor* armor = dynamic_cast<it_armor*>(type);
@@ -751,13 +794,31 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
         dump->push_back(iteminfo("DESCRIPTION", "\n\n"));
         dump->push_back(iteminfo("DESCRIPTION", _("This tool has been modified to use a rechargeable power cell and is not compatible with standard batteries.")));
     }
+
     if (is_food() && has_flag("HIDDEN_POISON") && g->u.skillLevel("survival").level() >= 3) {
         dump->push_back(iteminfo("DESCRIPTION", "\n\n"));
         dump->push_back(iteminfo("DESCRIPTION", _("On closer inspection, this appears to be poisonous.")));
     }
+
     if (is_food() && has_flag("HIDDEN_HALLU") && g->u.skillLevel("survival").level() >= 5) {
         dump->push_back(iteminfo("DESCRIPTION", "\n\n"));
         dump->push_back(iteminfo("DESCRIPTION", _("On closer inspection, this appears to be hallucinogenic.")));
+    }
+
+    if ((is_food() && goes_bad()) || (is_food_container() && contents[0].goes_bad())) {
+        dump->push_back(iteminfo("DESCRIPTION", "\n\n"));
+        if(rotten() || (is_food_container() && contents[0].rotten())) {
+            if(g->u.has_bionic("bio_digestion")) {
+                dump->push_back(iteminfo("DESCRIPTION", _("This food has started to rot, but your bionic digestion can tolerate it.")));
+            } else if(g->u.has_trait("SAPROVORE")) {
+                dump->push_back(iteminfo("DESCRIPTION", _("This food has started to rot, but you can tolerate it.")));
+            } else {
+                dump->push_back(iteminfo("DESCRIPTION", _("This food has started to rot. Eating it would be a very bad idea.")));
+            }
+        } else {
+            dump->push_back(iteminfo("DESCRIPTION", _("This food is perishable, and will eventually rot.")));
+        }
+
     }
     std::map<std::string, std::string>::const_iterator item_note = item_vars.find("item_note");
     std::map<std::string, std::string>::const_iterator item_note_type = item_vars.find("item_note_type");

@@ -755,6 +755,7 @@
   "difficulty": 4,
   "time": 20000,
   "reversible": true,
+  "decomp_learn": 3,
   "autolearn": true,
   "tools": [
     [
@@ -2176,7 +2177,9 @@
   "difficulty": 4,
   "time": 20000,
   "reversible": true,
-  "autolearn": true,
+  "decomp_learn": 4,
+  "autolearn": false,
+  "book_learn": [["book_icef", 3] , ["textbook_mechanics", 3] , ["textbook_carpentry", 3]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -2218,7 +2221,9 @@
   "difficulty": 4,
   "time": 20000,
   "reversible": true,
-  "autolearn": true,
+  "decomp_learn": 4,
+  "autolearn": false,
+  "book_learn": [["advanced_electronics", 3] , ["textbook_electronics", 3]],
   "tools" : [
      [ ["mold_plastic", -1] ],
      [
@@ -2262,7 +2267,9 @@
   "difficulty": 5,
   "time": 20000,
   "reversible": true,
-  "autolearn": true,
+  "decomp_learn": 5,
+  "autolearn": false,
+  "book_learn": [["advanced_electronics", 4] , ["textbook_electronics", 4]],
   "tools" : [
      [ ["mold_plastic", -1] ],
      [
@@ -2306,7 +2313,8 @@
   "difficulty": 5,
   "time": 20000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["advanced_electronics", 4] , ["textbook_electronics", 4] , ["textbook_carpentry", 5]],
   "tools" : [
      [ ["mold_plastic", -1] ],
      [
@@ -4758,11 +4766,13 @@
     [
       [ "func:hotplate", 3 ],
       [ "char_smoker", 1 ],
+      [ "coffeemaker", 3],
       [ "fire", -1 ]
     ],
     [
       [ "func:pan", -1 ],
-      [ "func:pot", -1 ]
+      [ "func:pot", -1 ],
+      [ "coffeemaker", -1]
     ]
   ],
   "components": [
@@ -5128,10 +5138,12 @@
     [
       [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
+      [ "coffeemaker", 2],
       [ "fire", -1 ]
     ],
     [
-      [ "func:pot", -1 ]
+      [ "func:pot", -1 ],
+      [ "coffeemaker", -1]
     ]
   ],
   "components": [
@@ -5156,10 +5168,13 @@
     [
       [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
+      [ "coffeemaker", 2],
       [ "fire", -1 ]
     ],
     [
-      [ "func:pot", -1 ]
+      [ "pot", -1 ],
+      [ "coffeemaker", -1],
+      [ "rock_pot", -1 ]
     ]
   ],
   "components": [
@@ -6153,11 +6168,15 @@
       [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "atomic_coffeepot", -1 ],
-      [ "fire", -1 ]
+      [ "fire", -1 ],
+      [ "coffeemaker", 2]
     ],
     [
       [ "func:pot", -1 ],
       [ "teapot", -1 ],
+      [ "pot", -1 ],
+      [ "rock_pot", -1 ],
+      [ "coffeemaker", -1],
       [ "atomic_coffeepot", -1 ]
     ]
   ],
@@ -6359,11 +6378,15 @@
       [ "func:hotplate", 2 ],
       [ "char_smoker", 1 ],
       [ "atomic_coffeepot", -1 ],
+      [ "coffeemaker", 2],
       [ "fire", -1 ]
     ],
     [
       [ "func:pot", -1 ],
       [ "teapot", -1 ],
+      [ "pot", -1 ],
+      [ "rock_pot", -1 ],
+      [ "coffeemaker", -1],
       [ "atomic_coffeepot", -1 ]
     ]
   ],
@@ -9996,7 +10019,8 @@
   "difficulty": 4,
   "time": 24000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_firstaid", 3] , ["manual_first_aid", 3] , ["emergency_book", 4] , ["pocket_firstaid", 2]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -11356,7 +11380,7 @@
   "reversible": true,
   "decomp_learn": 2,
   "autolearn": false,
-  "book_learn": [[ "advanced_electronics", 1 ] , [ "mag_electronics", 3 ]],
+  "book_learn": [[ "advanced_electronics", 1 ] , [ "mag_electronics", 3 ] , [ "manual_electronics", 2 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -11380,6 +11404,46 @@
     ],
     [
       [ "cable", 10 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
+  "result": "coffeemaker",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_TOOLS",
+  "skill_used": "electronics",
+  "difficulty": 3,
+  "time": 30000,
+  "reversible": true,
+  "decomp_learn": 2,
+  "autolearn": false,
+  "book_learn": [[ "advanced_electronics", 1 ] , [ "mag_electronics", 3 ] , [ "manual_electronics", 2 ]],
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:soldering_iron", 10 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "element", 4 ]
+    ],
+    [
+      [ "amplifier", 1 ]
+    ],
+    [
+      [ "scrap", 6 ],
+      [ "pan", 2 ],
+      [ "pot", 2 ],
+      [ "knife_butcher", 6 ],
+      [ "knife_steak", 18 ],
+      [ "knife_butter", 18 ],
+      [ "muffler", 1 ]
+    ],
+    [
+      [ "cable", 15 ]
     ]
   ]
 },{
@@ -11646,7 +11710,9 @@
   "difficulty": 5,
   "time": 35000,
   "reversible": true,
-  "autolearn": true,
+  "decomp_learn": 5,
+  "autolearn": false,
+  "book_learn": [["advanced_electronics", 4] , ["textbook_electronics", 4] , ["atomic_survival", 3]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -12422,7 +12488,8 @@
   "time": 50000,
   "reversible": true,
   "decomp_learn": 6,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_mechanics", 8] , ["textbook_electronics", 7] , ["advanced_electronics", 7] , ["textbook_robots", 6]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -12456,6 +12523,7 @@
   "reversible": true,
   "decomp_learn": 5,
   "autolearn": true,
+  "book_learn": [["manual_electronics", 7] , ["textbook_electronics", 6] , ["advanced_electronics", 6]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -12487,7 +12555,8 @@
   "difficulty": 2,
   "time": 20000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_fabrication", 3] , ["textbook_mechanics", 3] , ["welding_book", 5]],
   "tools": [
     [
       [ "func:hacksaw", -1 ]
@@ -15586,6 +15655,7 @@
   "time": 60000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["mag_survival", 1] , ["atomic_survival", 1] , ["textbook_carpentry", 2]],
   "tools": [
     [
       [ "func:hammer", -1 ]
@@ -15739,6 +15809,7 @@
   "difficulty": 1,
   "time": 20000,
   "reversible": true,
+  "decomp_learn": 0,
   "autolearn": true,
   "qualities" : [
     {"id":"CUT","level":1,"amount":1}
@@ -15763,7 +15834,8 @@
   "difficulty": 0,
   "time": 2000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "note": "believed removed-from-game",
   "qualities" : [
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -15783,7 +15855,8 @@
   "difficulty": 1,
   "time": 5000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "note": "believed removed-from-game",
   "components": [
     [
       [ "snare_trigger", 1 ]
@@ -15802,7 +15875,8 @@
   "difficulty": 3,
   "time": 8000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "note": "believed removed-from-game",
   "components": [
     [
       [ "snare_trigger", 1 ]
@@ -15820,6 +15894,7 @@
   "difficulty": 4,
   "time": 60000,
   "reversible": true,
+  "decomp_learn": 3,
   "autolearn": true,
   "tools": [
     [
@@ -15866,7 +15941,9 @@
   "difficulty": 4,
   "time": 60000,
   "reversible": true,
-  "autolearn": true,
+  "decomp_learn": 4,
+  "autolearn": false,
+  "book_learn": [["textbook_mechanics", 6] , ["textbook_electronics", 8] , ["textbook_fabrication", 8] , ["welding_book", 5]],
   "tools": [
     [
       [ "func:wrench", -1 ]
@@ -15909,8 +15986,9 @@
   "difficulty": 4,
   "time": 60000,
   "reversible": true,
+  "decomp_learn": 3,
   "autolearn": false,
-  "book_learn": [[ "textbook_fabrication", 4 ]],
+  "book_learn": [["textbook_fabrication", 3] , ["manual_fabrication", 3] , ["manual_electronics", 3] , ["manual_mechanics", 3]],
   "tools": [
     [
       [ "func:wrench", -1 ]
@@ -15958,7 +16036,9 @@
   "difficulty": 4,
   "time": 60000,
   "reversible": true,
-  "autolearn": true,
+  "decomp_learn": 3,
+  "autolearn": false,
+  "book_learn": [["textbook_fabrication", 3] , ["manual_fabrication", 3] , ["manual_electronics", 3] , ["manual_mechanics", 3]],
   "tools": [
     [
       [ "func:hammer", -1 ]
@@ -16179,7 +16259,9 @@
   "difficulty": 3,
   "time": 30000,
   "reversible": true,
-  "autolearn": true,
+  "decomp_learn": 3,
+  "autolearn": false,
+  "book_learn": [["textbook_fabrication", 5] , ["textbook_mechanics", 3] , ["manual_mechanics", 3]],
   "tools": [
     [
       [ "func:wrench", -1 ]
@@ -16218,7 +16300,9 @@
   "difficulty": 5,
   "time": 120000,
   "reversible": true,
-  "autolearn": true,
+  "decomp_learn": 4,
+  "autolearn": false,
+  "book_learn": [["textbook_fabrication", 4] , ["manual_mechanics", 4] , ["textbook_mechanics", 4]],
   "tools": [
     [
       [ "func:wrench", -1 ]
@@ -16589,7 +16673,8 @@
   "difficulty": 3,
   "time": 18000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_fabrication", 3] , ["textbook_chemistry", 3] , ["adv_chemistry", 3] , ["textbook_mechanics", 5]],
   "qualities" : [
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -16725,6 +16810,7 @@
   "difficulty": 4,
   "time": 12000,
   "reversible": true,
+  "note": "melting it down doesn't teach anythig useful",
   "autolearn": true,
   "tools": [
     [
@@ -16752,7 +16838,8 @@
    "difficulty": 4,
   "time": 12000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_fabrication", 3] , ["welding_book", 3] , ["textbook_mechanics", 4]],
   "tools": [
     [
       [ "goggles_welding", -1 ]
@@ -16778,10 +16865,12 @@
   "category": "CC_OTHER",
   "subcategory": "CSC_OTHER_MATERIALS",
   "skill_used": "fabrication",
-   "difficulty": 4,
+   "difficulty": 6,
+   "note": "hardened metal tools require high fabrication, so +1 diff here",
   "time": 12000,
   "reversible": true,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_fabrication", 5] , ["adv_chemistry", 6] , ["welding_book", 5]],
   "tools": [
     [
       [ "goggles_welding", -1 ]
@@ -16941,7 +17030,9 @@
   "difficulty": 2,
   "time": 3000,
   "reversible": true,
+  "decomp_learn": 2,
   "autolearn": true,
+  "book_learn": [["mag_traps", 1] , ["manual_mechanics", 2] , ["manual_traps", 1] , ["howto_traps", 1]],
   "tools": [
     [
       [ "func:wrench", -1 ]
@@ -16965,6 +17056,7 @@
   "difficulty": 3,
   "time": 4500,
   "reversible": true,
+  "decomp_learn": 2,
   "autolearn": true,
   "components": [
     [
@@ -16989,6 +17081,7 @@
   "difficulty": 3,
   "time": 5000,
   "reversible": true,
+  "decomp_learn": 2,
   "autolearn": true,
   "components": [
     [
@@ -17012,7 +17105,9 @@
   "difficulty": 4,
   "time": 8000,
   "reversible": true,
-  "autolearn": true,
+  "decomp_learn": 3,
+  "autolearn": false,
+  "book_learn": [["manual_mechanics", 3] , ["manual_traps", 3] , ["howto_traps", 3] , ["book_icef", 4]],
   "tools": [
     [
       [ "func:wrench", -1 ]
@@ -17038,7 +17133,8 @@
   "difficulty": 3,
   "time": 5000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_traps", 2] , ["manual_traps", 3] , ["howto_traps", 3]],
   "components": [
     [
       [ "grenade", 1 ]
@@ -17060,7 +17156,8 @@
   "difficulty": 5,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_traps", 5] , ["manual_traps", 5] , ["howto_traps", 4] , ["recipe_bullets", 6]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -17914,6 +18011,7 @@
    "difficulty": 3,
   "time": 20000,
   "reversible": true,
+  "decomp_learn": 2,
   "autolearn": true,
   "tools": [ ],
   "components": [
@@ -18459,7 +18557,7 @@
   "difficulty": 2,
   "time": 20000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
   "tools": [
     [
       ["func:hotplate", 5 ],
@@ -18567,7 +18665,8 @@
   "difficulty" : 2,
   "time": 50000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 1] , ["textbook_chemistry", 1]],
   "components": [
     [
       ["wire", 5],
@@ -19144,6 +19243,7 @@
   "time": 5000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["atomic_survival", 1] , ["textbook_survival", 1] , ["cookbook", 3]],
   "tools": [ [ ["func:hammer", -1] ] ],
   "components": [ [ ["stick", 2], [ "2x4", 1 ] ], [ ["rock", 6] ] ]
 },{
@@ -19155,7 +19255,9 @@
   "difficulty": 2,
   "time": 12000,
   "reversible": true,
-  "autolearn": true,
+  "decomp_learn": 2,
+  "autolearn": false,
+  "book_learn": [["manual_mechanics", 3] , ["textbook_mechanics", 2] , ["welding_book", 1]],
   "tools": [ [ ["func:hammer", -1] ] ],
   "components": [ [ ["element", 3] ],
     [ ["scrap", 2] ],
@@ -19200,6 +19302,7 @@
   "time": 200000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["textbook_chemistry", 2] , ["adv_chemistry", 2]],
   "qualities" : [
     {"id":"CUT","level":1,"amount":1}
   ],
@@ -19519,7 +19622,9 @@
   "difficulty": 4,
   "time": 180000,
   "reversible": true,
+  "decomp_learn": 4,
   "autolearn": true,
+  "book_learn": [["textbook_fabrication", 4] , ["textbook_weapeast", 5] , ["textbook_weapwest", 5] , ["textbook_armeast", 5] , ["textbook_armwest", 5]],
   "tools": [ [ ["func:hammer", -1] ] ,
       [
       [ "func:screwdriver", -1 ]
@@ -19556,6 +19661,7 @@
   "difficulty": 3,
   "time": 240000,
   "reversible": true,
+  "note": "melting the anvil back down seems unlikely to teach anything useful",
   "autolearn": true,
   "tools": [ [ ["func:hammer", -1] ],
       [
@@ -19629,7 +19735,9 @@
   "difficulty": 4,
   "time": 45000,
   "reversible": true,
+  "note": "melting the chisel back down seems unlikely to teach anything useful",
   "autolearn": true,
+  "book_learn": [["textbook_fabrication", 3] , ["textbook_weapeast", 5] , ["textbook_weapwest", 5] , ["textbook_armeast", 5] , ["textbook_armwest", 5]],
   "tools": [ [ ["func:hammer", -1] ],
       [
       ["tongs", -1]
@@ -19659,7 +19767,8 @@
   "difficulty": 5,
   "time": 120000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_fabrication", 4] , ["textbook_weapeast", 5] , ["textbook_weapwest", 5] , ["textbook_armeast", 5] , ["textbook_armwest", 5]],
   "tools": [ [ ["func:hammer", -1] ],
       [
       ["tongs", -1]
@@ -21013,6 +21122,7 @@
   "time": 300000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["manual_mechanics", 3] , ["manual_fabrication", 3] , ["textbook_fabrication", 4]],
   "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
@@ -21122,6 +21232,7 @@
   "time": 320000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["manual_mechanics", 3] , ["manual_fabrication", 3] , ["textbook_fabrication", 4]],
   "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
@@ -21157,9 +21268,11 @@
   "subcategory": "CSC_OTHER_TOOLS",
   "skill_used": "fabrication",
   "difficulty": 6,
+  "note": "not so much the engineering as hardening the edge",
   "time": 380000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["manual_mechanics", 4] , ["manual_fabrication", 4] , ["textbook_fabrication", 4]],
   "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
@@ -21198,6 +21311,7 @@
   "time": 280000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["manual_fabrication", 2] , ["textbook_fabrication", 3]],
   "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
@@ -21237,6 +21351,7 @@
   "time": 320000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["manual_fabrication", 3] , ["textbook_fabrication", 4]],
   "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
@@ -21275,6 +21390,7 @@
   "time": 320000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["manual_fabrication", 3] , ["textbook_fabrication", 4]],
   "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
@@ -21314,6 +21430,7 @@
   "time": 360000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["textbook_fabrication", 4]],
   "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
@@ -21353,7 +21470,7 @@
   "time": 420000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "textbook_fireman", 8 ]],
+  "book_learn": [[ "textbook_fireman", 8 ] , ["textbook_fabrication", 9]],
   "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
@@ -21393,6 +21510,7 @@
   "time": 420000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["manual_fabrication", 3] , ["textbook_fabrication", 4]],
   "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
@@ -21432,6 +21550,7 @@
   "time": 460000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["manual_fabrication", 3] , ["textbook_fabrication", 4]],
   "tools": [ [ ["func:hammer", -1]  ],
      [
       ["tongs", -1]
@@ -24067,7 +24186,9 @@
   "difficulty": 5,
   "time": 25000,
   "reversible": true,
-  "autolearn": true,
+  "decop_learn": 5,
+  "autolearn": false,
+  "book_learn": [["textbook_mechanics", 5] , ["textbook_carpentry", 5] , ["book_icef", 6]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -24423,7 +24544,8 @@
   "difficulty": 4,
   "time": 1200,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_firstaid", 3] , ["adv_chemistry", 4] , ["emergency_book", 4]],
   "tools": [
     [
       [ "func:hotplate", 18 ],
@@ -24452,9 +24574,10 @@
   "difficulty": 3,
   "time": 120000,
   "reversible": false,
-  "autolearn": true,
-  "tools": [ [ ["func:hammer", -1]
-     ] ,
+  "autolearn": false,
+  "book_learn": [["textbook_fabrication", 4] , ["textbook_weapeast", 5] , ["textbook_weapwest", 5] , ["textbook_armeast", 5] , ["textbook_armwest", 5]],
+  "tools": [ [ ["rock", -1], ["primitive_hammer", -1],
+    ["func:hammer", -1], ["hatchet", -1] ] ,
      [
       [ "func:screwdriver", -1 ]
      ],
@@ -24497,8 +24620,10 @@
   "time": 70000,
   "reversible": true,
   "decomp_learn": 1,
-  "autolearn": true,
-  "tools": [ [ ["func:hammer", -1] ] ,
+  "autolearn": false,
+  "book_learn": [["textbook_fabrication", 2] , ["manual_fabrication", 3] , ["cookbook", 3]],
+  "tools": [ [ ["rock", -1], ["primitive_hammer", -1],
+    ["func:hammer", -1], ["hatchet", -1] ] ,
      [
       [ "func:screwdriver", -1 ]
      ],
@@ -24534,7 +24659,9 @@
   "time": 90000,
   "reversible": false,
   "autolearn": true,
-  "tools": [ [ ["func:hammer", -1] ] ,
+  "book_learn": [["textbook_fabrication", 2] , ["manual_fabrication", 2]],
+  "tools": [ [ ["rock", -1], ["primitive_hammer", -1],
+    ["func:hammer", -1], ["hatchet", -1] ] ,
     [
       [ "func:screwdriver", -1 ]
     ],
@@ -25030,7 +25157,9 @@
   "difficulty": 4,
   "time": 36000,
   "reversible": true,
+  "decomp_learn": 4,
   "autolearn": true,
+  "book_learn": [["textbook_electronics", 3] , ["advanced_electronics", 3] , ["textbook_chemistry", 5]],
   "tools": [
     [
       [ "func:soldering_iron", 20 ]
