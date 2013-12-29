@@ -922,9 +922,11 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
                     }
                     buffer_1 << ::name(r.result);
                     if(comps[i].size() == 1) {
-                        // Means ther eis no alternative to this component
+                        // Means there is no alternative to this component
                         buffer_1 << "!";
                     }
+                    i = comps.size() - 1;
+                    break;
                 }
             }
             for(size_t i = 0; i < tools.size(); i++) {
@@ -939,6 +941,8 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
                         buffer_2 << ", ";
                     }
                     buffer_2 << ::name(r.result);
+                    i = tools.size() - 1;
+                    break;
                 }
             }
         }
