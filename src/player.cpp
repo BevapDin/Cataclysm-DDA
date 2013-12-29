@@ -600,7 +600,7 @@ void player::apply_persistent_morale()
     {
         add_morale(MORALE_PERM_OPTIMIST, 4, 4, 5, 5, true);
     }
-    
+
     // And Bad Temper works just the same way.  But in reverse.  ):
     if (has_trait("BADTEMPER"))
     {
@@ -3519,7 +3519,7 @@ int player::overmap_sight_range(int light_level)
         -1 != weapon.has_gunmod("rifle_scope") ) && has_trait("EAGLEEYED"))  {
         return 30;
     }
-    
+
     return 10;
 }
 
@@ -3724,7 +3724,7 @@ int player::rust_rate(bool real_life)
     if (has_trait("FORGETFUL")) {
         ret *= 1.33;
     }
-    
+
     if (has_trait("GOODMEMORY")) {
         ret *= .66;
     }
@@ -6846,7 +6846,7 @@ bool player::eat(item *eaten, it_comest *comest)
     }
     bool overeating = (!has_trait("GOURMAND") && hunger < 0 &&
                        comest->nutr >= 5);
-    bool hiberfood = (has_trait("HIBERNATE") && (hunger > -60 && thirst > -60 ));    
+    bool hiberfood = (has_trait("HIBERNATE") && (hunger > -60 && thirst > -60 ));
     bool spoiled = eaten->rotten();
 
     last_item = itype_id(eaten->type->id);
@@ -8499,6 +8499,7 @@ activate your weapon."), gun->tname().c_str(), mod->location.c_str());
 
 void player::remove_gunmod(item *weapon, int id) {
     item *gunmod = &weapon->contents[id];
+    it_gun *guntype = dynamic_cast<it_gun*>(weapon->type);
     item newgunmod;
     item ammo;
     if (gunmod != NULL && gunmod->charges > 0) {
@@ -8513,6 +8514,7 @@ void player::remove_gunmod(item *weapon, int id) {
     newgunmod = item(itypes[gunmod->type->id], g->turn);
     i_add_or_drop(newgunmod);
     weapon->contents.erase(weapon->contents.begin()+id);
+    guntype->available_mod_locations[static_cast<it_gunmod*>(gunmod->type)->location] += 1;
     return;
 }
 

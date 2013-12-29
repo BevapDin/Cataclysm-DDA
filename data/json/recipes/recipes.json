@@ -4857,7 +4857,8 @@
   "difficulty": 2,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 1] , ["textbook_chemistry", 1]],
   "tools": [
     [
       [ "chemistry_set", 5 ]
@@ -8467,7 +8468,8 @@
   "difficulty": 5,
   "time": 20000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_chemistry", 5] , ["adv_chemistry", 5] , [ "recipe_labchem", 5]],
   "tools": [
     [
       [ "func:hotplate", 15 ],
@@ -8502,7 +8504,8 @@
   "difficulty": 4,
   "time": 30000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_chemistry", 4] , ["adv_chemistry", 4] , [ "recipe_labchem", 4]],
   "tools": [
     [
       [ "chemistry_set", -1 ],
@@ -8534,7 +8537,8 @@
   "difficulty": 2,
   "time": 5000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_chemistry", 2] , ["adv_chemistry", 2] , ["pocket_survival", 3] , ["atomic_survival", 2] , ["textbook_survival", 3] , ["survival_book", 3]],
   "tools": [
     [
       [ "chemistry_set", -1 ],
@@ -8563,7 +8567,8 @@
   "difficulty": 2,
   "time": 5000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_chemistry", 2] , ["adv_chemistry", 2] , ["pocket_survival", 3] , ["atomic_survival", 2] , ["textbook_survival", 3] , ["survival_book", 3]],
   "tools": [
     [
       [ "chemistry_set", -1 ],
@@ -8592,7 +8597,8 @@
   "difficulty": 2,
   "time": 5000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_chemistry", 2] , ["adv_chemistry", 2] , ["pocket_survival", 3] , ["atomic_survival", 2] , ["textbook_survival", 3] , ["survival_book", 3] , [ "recipe_labchem", 2]],
   "tools": [
     [
       [ "chemistry_set", -1 ],
@@ -8623,7 +8629,8 @@
   "difficulty": 5,
   "time": 5000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_chemistry", 6] , ["adv_chemistry", 6] , ["atomic_survival", 4] , ["survival_book", 5] , [ "recipe_labchem", 5]],
   "tools": [
     [
       [ "chemistry_set", -1 ]
@@ -8648,7 +8655,8 @@
   "difficulty": 6,
   "time": 2000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_chemistry", 7] , ["adv_chemistry", 7] , ["atomic_survival", 6] , [ "recipe_labchem", 6]],
   "tools": [
     [
       [ "func:hotplate", 3 ],
@@ -8679,7 +8687,8 @@
   "difficulty": 8,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_gaswarfare",  8] , ["recipe_creepy", 8] , ["recipe_animal", 8] , ["recipe_maiar", 7] , ["recipe_serum", 7] , [ "recipe_labchem", 7]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8711,14 +8720,14 @@
         "type" : "recipe",
   "result": "iv_mutagen",
   "category": "CC_CHEM",
-  "subcategory": "CSC_CHEM_MUTAGIN",
+  "subcategory": "CSC_CHEM_MUTAGEN",
   "skill_used": "cooking",
   "skills_required": [ "firstaid", 3 ],
   "difficulty": 9,
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_labchem", 9]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -8778,7 +8787,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_creepy", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -8840,7 +8849,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_maiar", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -8899,7 +8908,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_maiar", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -8925,7 +8934,7 @@
   "time": 10000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_maiar", 8 ]],
+  "book_learn": [[ "recipe_maiar", 8 ] , [ "recipe_creepy", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -8959,7 +8968,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_maiar", 8 ] , [ "recipe_creepy", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9021,7 +9030,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9080,7 +9089,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_creepy", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9139,7 +9148,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9198,7 +9207,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9257,7 +9266,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9316,7 +9325,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9375,7 +9384,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] ,  [ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9435,7 +9444,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_creepy", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9494,7 +9503,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9553,7 +9562,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_animal", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9612,7 +9621,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 8 ]],
+  "book_learn": [[ "recipe_serum", 8 ] , [ "recipe_maiar", 8 ]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -9673,7 +9682,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_medicalmut", 9 ]],
+  "book_learn": [[ "recipe_medicalmut", 9 ] , [ "recipe_serum", 9 ]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -9698,6 +9707,7 @@
   "time": 5000,
   "reversible": false,
   "autolearn": true,
+  "note": "'stick the blob globs in a can and seal it' does not seem hugely challenging",
   "tools": [
     [
       ["func:screwdriver", -1]
@@ -9721,7 +9731,8 @@
   "difficulty": 9,
   "time": 10000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["textbook_gaswarfare", 9] , ["atomic_survival", 9] , ["record_patient", 9] , ["recipe_maiar", 8] , [ "recipe_labchem", 7]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -9756,7 +9767,7 @@
   "time": 15000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [[ "recipe_serum", 9]],
+  "book_learn": [[ "recipe_serum", 9] , [ "recipe_labchem", 9]],
   "tools": [
     [
       [ "func:hotplate", 37 ],
@@ -10020,7 +10031,7 @@
   "time": 24000,
   "reversible": false,
   "autolearn": false,
-  "book_learn": [["textbook_firstaid", 3] , ["manual_first_aid", 3] , ["emergency_book", 4] , ["pocket_firstaid", 2]],
+  "book_learn": [["textbook_firstaid", 3] , ["manual_first_aid", 3] , ["emergency_book", 4] , ["pocket_firstaid", 2] , ["recipe_labchem", 4]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -10058,7 +10069,8 @@
   "difficulty": 6,
   "time": 24000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 5] , ["textbook_chemistry", 5] , ["recipe_labchem", 5] , ["atomic_survival", 5]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -10086,7 +10098,8 @@
   "difficulty": 6,
   "time": 24000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 5] , ["textbook_chemistry", 5] , ["recipe_labchem", 4] , ["atomic_survival", 4] , ["textbook_survival", 4]],
   "tools": [
     [
       [ "func:hotplate", 25 ],
@@ -10117,7 +10130,8 @@
   "difficulty": 6,
   "time": 24000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 5] , ["textbook_chemistry", 5] , ["recipe_labchem", 5]],
   "tools": [
     [
       [ "func:hotplate", 50 ]
@@ -10141,7 +10155,8 @@
   "difficulty": 6,
   "time": 36000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 5] , ["textbook_chemistry", 5] , ["recipe_labchem", 5]],
   "tools": [
     [
       [ "func:hotplate", 50 ]
@@ -10172,7 +10187,8 @@
   "difficulty": 8,
   "time": 12000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 5] , ["textbook_chemistry", 5] , ["recipe_labchem", 5]],
   "tools": [
     [
       [ "func:hotplate", 25 ]
@@ -10279,7 +10295,8 @@
   "difficulty": 4,
   "time": 36000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 5] , ["textbook_chemistry", 5] , ["recipe_labchem", 5]],
   "tools": [
     [
       [ "func:hotplate", 25 ]
@@ -10305,7 +10322,8 @@
   "difficulty": 3,
   "time": 6000,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 3] , ["textbook_chemistry", 3] , ["atomic_survival", 4]],
   "tools": [
     [
       [ "func:hotplate", 2 ],
@@ -11202,6 +11220,39 @@
     ]
   ]
 },{
+        "type" : "recipe",
+  "result": "battery_atomic",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "skill_used": "electronics",
+  "skills_required": [ "fabrication", 6 ],
+  "difficulty": 6,
+  "time": 60000,
+  "reversible": true,
+  "decomp_learn": 4,
+  "autolearn": false,
+  "book_learn": [[ "recipe_lab_elec", 6 ]],
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:soldering_iron", 10 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "scrap", 6 ]
+    ],
+    [
+      [ "cable", 4 ]
+    ],
+    [
+      [ "plut_cell", 1 ]
+    ]
+  ]
+},
+{
         "type" : "recipe",
   "result": "coilgun",
   "category": "CC_WEAPON",
@@ -15493,8 +15544,8 @@
 },{
         "type" : "recipe",
   "result": "primitive_knife",
-  "category": "CC_WEAPON",
-  "subcategory": "CSC_WEAPON_PIERCING",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_TOOLS",
   "skill_used": "survival",
   "difficulty": 0,
   "time": 60000,
@@ -15696,7 +15747,7 @@
         "type" : "recipe",
   "result": "waterskin",
   "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "subcategory": "CSC_OTHER_CONTAINERS",
   "skill_used": "tailor",
   "skills_required": [ "survival", 1 ],
   "difficulty": 2,
@@ -17426,7 +17477,8 @@
   "difficulty": 3,
   "time": 1200,
   "reversible": false,
-  "autolearn": true,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 6] , ["textbook_chemistry", 6] , ["recipe_labchem", 3]],
   "tools": [
     [
       [ "func:hotplate", 18 ],
@@ -19150,6 +19202,7 @@
   "time": 20000,
   "reversible": false,
   "autolearn": true,
+  "book_learn": [["adv_chemistry", 2] , ["textbook_chemistry", 2] , ["recipe_labchem", 3] , ["atomic_survival", 2]],
   "tools": [
     [ [ "func:hotplate", 5 ], [ "char_smoker", 1 ], [ "fire", -1 ] ],
     [ [ "chemistry_set", -1 ], [ "func:pan", -1 ], [ "func:pot", -1 ] ]
