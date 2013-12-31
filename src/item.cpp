@@ -791,6 +791,11 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
         dump->push_back(iteminfo("DESCRIPTION", "\n\n"));
         dump->push_back(iteminfo("DESCRIPTION", _("This tool has double the normal maximum charges.")));
     }
+    if (has_flag("LEAK_RAD"))
+    {
+        dump->push_back(iteminfo("DESCRIPTION", "\n\n"));
+        dump->push_back(iteminfo("DESCRIPTION", _("This item can leak radiation if damaged.")));
+    }
     if (is_tool() && has_flag("ATOMIC_AMMO"))
     {
         dump->push_back(iteminfo("DESCRIPTION", "\n\n"));
@@ -1018,19 +1023,17 @@ nc_color item::color(player *u) const
                 (u->skillLevel(tmp->type) >= (int)tmp->req) &&
                 (u->skillLevel(tmp->type) < (int)tmp->level))
             ret = c_ltblue;
-        if(!u->studied_all_recipes(tmp))
-            ret = c_ltblue;
+        else if (!u->studied_all_recipes(tmp) && !u->has_trait("ILLITERATE"))
+          ret = c_yellow;
     }
     return ret;
 }
 
 nc_color item::color_in_inventory()
 {
-    // Items in our inventory get colorized specially
-    if (active && !is_food() && !is_food_container()) {
-        return c_yellow;
-    }
-    return c_white;
+    // This should be relevant only for the player,
+    // npcs don't care about the color
+    return color(&g->u);
 }
 
 /* @param with_prefix determines whether to return for more of its object, such as

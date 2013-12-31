@@ -2523,12 +2523,13 @@ void map::spawn_an_item(const int x, const int y, item new_item,
     if (damlevel < -1)
     {
         new_item.damage = -1;
-    }
-    if (damlevel > 4)
+    } else if (damlevel > 4)
     {
         new_item.damage = 4;
+    } else
+    {
+        new_item.damage = damlevel;
     }
-    new_item.damage = damlevel;
 
     add_item_or_charges(x, y, new_item);
 }

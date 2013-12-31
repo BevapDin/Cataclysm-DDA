@@ -6772,7 +6772,8 @@
       [ "seasoning_italian", 15 ],
       [ "seasoning_salt", 15 ],
       [ "pepper", 20 ],
-      [ "powder_eggs", 5 ]
+      [ "powder_eggs", 5 ],
+      [ "dry_veggy", 1 ]
     ]
   ]
 },{
@@ -7849,7 +7850,8 @@
       [ "irradiated_rhubarb", 2 ],
       [ "irradiated_papaya", 2 ],
       [ "irradiated_apricot", 2 ],
-      [ "irradiated_kiwi", 2 ]
+      [ "irradiated_kiwi", 2 ],
+      [ "dry_fruit", 2 ]
     ],
     [
       [ "sugar", 2 ]
@@ -11231,7 +11233,7 @@
   "reversible": true,
   "decomp_learn": 4,
   "autolearn": false,
-  "book_learn": [[ "recipe_lab_elec", 6 ]],
+  "book_learn": [[ "recipe_atomic_battery", 6 ]],
   "tools": [
     [
       [ "func:screwdriver", -1 ]
@@ -18609,7 +18611,7 @@
   "difficulty": 2,
   "time": 20000,
   "reversible": false,
-  "autolearn": false,
+  "autolearn": true,
   "tools": [
     [
       ["func:hotplate", 5 ],

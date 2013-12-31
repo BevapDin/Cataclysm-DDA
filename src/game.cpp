@@ -107,6 +107,9 @@ void game::init_data()
  try {
  // Gee, it sure is init-y around here!
     init_data_structures(); // initialize cata data structures
+ #ifdef LUA
+    init_lua();                 // Set up lua                       (SEE catalua.cpp)
+ #endif
     load_json_dir("data/json"); // load it, load it all!
     init_names();
     init_npctalk();
@@ -126,10 +129,6 @@ void game::init_data()
     MonsterGenerator::generator().finalize_mtypes();
     finalize_vehicles();
     finalize_recipes();
-
- #ifdef LUA
-    init_lua();                 // Set up lua                       (SEE catalua.cpp)
- #endif
 
  } catch(std::string &error_message)
  {
@@ -5760,12 +5759,12 @@ void game::do_blast( const int x, const int y, const int power, const int radius
                         kill_mon(mon_hit); // TODO: player's fault?
                     }
                 }
+	    }
 
-                int vpart;
-                vehicle *veh = m.veh_at(i, j, vpart);
-                if (veh) {
-                    veh->damage (vpart, dam, false);
-                }
+            int vpart;
+            vehicle *veh = m.veh_at(i, j, vpart);
+            if (veh) {
+                veh->damage (vpart, dam, false);
             }
 
             if (npc_hit != -1) {

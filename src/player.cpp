@@ -315,17 +315,30 @@ void player::normalize()
 {
     Creature::normalize();
 
- ret_null = item(itypes["null"], 0);
- weapon   = item(itypes["null"], 0);
- style_selected = "style_none";
- for (int i = 0; i < num_hp_parts; i++) {
-  hp_max[i] = 60 + str_max * 3;
-  if (has_trait("TOUGH"))
-   hp_max[i] = int(hp_max[i] * 1.2);
-  hp_cur[i] = hp_max[i];
- }
- for (int i = 0 ; i < num_bp; i++)
-  temp_conv[i] = BODYTEMP_NORM;
+    ret_null = item(itypes["null"], 0);
+    weapon   = item(itypes["null"], 0);
+    style_selected = "style_none";
+    for (int i = 0; i < num_hp_parts; i++) {
+        hp_max[i] = 60 + str_max * 3;
+        // Tough and Flimsy are exclusive.
+        // Only the most extreme of each version applies.
+        if (has_trait("TOUGH3")) {
+            hp_max[i] = int(hp_max[i] * 1.2);
+        } else if (has_trait("TOUGH2")) {
+            hp_max[i] = int(hp_max[i] * 1.3);
+        } else if (has_trait("TOUGH")) {
+            hp_max[i] = int(hp_max[i] * 1.4);
+        } else if (has_trait("FLIMSY3")) {
+            hp_max[i] = int(hp_max[i] * .75);
+        } else if (has_trait("FLIMSY2")) {
+            hp_max[i] = int(hp_max[i] * .5);
+        } else if (has_trait("FLIMSY")) {
+            hp_max[i] = int(hp_max[i] * .25);
+        }
+        hp_cur[i] = hp_max[i];
+    }
+    for (int i = 0 ; i < num_bp; i++)
+        temp_conv[i] = BODYTEMP_NORM;
 }
 
 void player::pick_name() {
@@ -4327,13 +4340,19 @@ void player::recalc_hp()
     for (int i = 0; i < num_hp_parts; i++)
     {
         new_max_hp[i] = 60 + str_max * 3;
-        if (has_trait("TOUGH"))
-        {
+        // Only the most extreme applies.
+        if (has_trait("TOUGH3")) {
             new_max_hp[i] *= 1.2;
-        }
-        if (has_trait("FRAIL"))
-        {
-            new_max_hp[i] *= 0.25;
+        } else if (has_trait("TOUGH2")) {
+            new_max_hp[i] *= 1.3;
+        } else if (has_trait("TOUGH")) {
+            new_max_hp[i] *= 1.4;
+        } else if (has_trait("FLIMSY3")) {
+            new_max_hp[i] *= .75;
+        } else if (has_trait("FLIMSY2")) {
+            new_max_hp[i] *= .5;
+        } else if (has_trait("FLIMSY")) {
+            new_max_hp[i] *= .25;
         }
     }
     if (has_trait("GLASSJAW"))
@@ -5115,6 +5134,20 @@ void player::suffer()
   mutate();
  if (has_artifact_with(AEP_FORCE_TELEPORT) && one_in(600))
   g->teleport(this);
+
+// checking for damaged atomic equipment
+ if (damage_leak_level("LEAK_RAD") > 0 && damage_leak_level("LEAK_RAD") < 10) {
+  if (g->m.radiation(posx, posy) < 10 && one_in(50))
+   g->m.radiation(posx, posy)++;
+ }
+ if (damage_leak_level("LEAK_RAD") > 10 && damage_leak_level("LEAK_RAD") < 20) {
+  if (g->m.radiation(posx, posy) < 20 && one_in(25))
+   g->m.radiation(posx, posy)++;
+ }
+ if (damage_leak_level("LEAK_RAD") > 20) {
+  if (g->m.radiation(posx, posy) < 30 && one_in(10))
+   g->m.radiation(posx, posy)++;
+ }
 
  int localRadiation = g->m.radiation(posx, posy);
 
@@ -6504,6 +6537,13 @@ int player::charges_of(itype_id it)
  return quantity;
 }
 
+int  player::damage_leak_level( std::string flag ) const
+{
+    int leak_level = 0;
+    leak_level = inv.damage_leak_level(flag);
+    return leak_level;
+}
+
 bool player::has_watertight_container()
 {
  if (!inv.watertight_container().is_null()) {
@@ -6960,9 +7000,9 @@ bool player::eat(item *eaten, it_comest *comest)
         mealtime /= 2;
     } if (has_trait("GOURMAND")) {
         mealtime -= 100;
-    } 
+    }
         moves -= (mealtime);
-    
+
     // If it's poisonous... poison us.  TODO: More several poison effects
     if (eaten->poison >= rng(2, 4)) {
         add_effect("poison", eaten->poison * 100);
