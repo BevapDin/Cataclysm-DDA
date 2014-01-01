@@ -1115,8 +1115,7 @@ std::list<item> inventory::use_charges(itype_id it, int quantity)
 {
     sort();
     std::list<item> ret;
-    for (invstack::iterator iter = items.begin(); iter != items.end() && quantity > 0; ++iter)
-    {
+    for (invstack::iterator iter = items.begin(); iter != items.end() && quantity > 0; ++iter) {
         for (std::list<item>::iterator stack_iter = iter->begin();
              stack_iter != iter->end() && quantity > 0;
              ++stack_iter)
@@ -1145,12 +1144,12 @@ std::list<item> inventory::use_charges(itype_id it, int quantity)
 
 bool inventory::has_amount(itype_id it, int quantity) const
 {
- return (amount_of(it) >= quantity);
+    return (amount_of(it) >= quantity);
 }
 
 bool inventory::has_charges(itype_id it, int quantity) const
 {
- return (charges_of(it) >= quantity);
+    return (charges_of(it) >= quantity);
 }
 
 bool inventory::has_flag(std::string flag) const
