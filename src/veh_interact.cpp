@@ -1514,6 +1514,10 @@ void complete_vehicle ()
     std::string part_id = g->u.activity.str_values[0];
     std::vector<component> tools;
     int welder_charges = static_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
+    crafting_inventory_t crafting_inv(g, &g->u);
+    const bool has_goggles = crafting_inv.has_amount("goggles_welding", 1) ||
+                   g->u.has_bionic("bio_sunglasses") ||
+                   g->u.is_wearing("goggles_welding");
     int partnum;
     item used_item;
     bool broken;
@@ -1521,7 +1525,6 @@ void complete_vehicle ()
     std::vector<int> parts;
     int dd = 2;
     vpart_info::type_count_pair_vector items_needed;
-    crafting_inventory_t crafting_inv(g, &g->u);
     int batterycharges; // Charges in a battery
 
     switch (cmd) {
@@ -1533,7 +1536,11 @@ void complete_vehicle ()
         used_item = crafting_inv.consume_vpart_item (part_id);
         batterycharges = used_item.charges;
         veh->get_part_properties_from_item(partnum, used_item); //transfer damage, etc.
-        tools.push_back(component("func:welder", welder_charges));
+        if (has_goggles) {
+            // Need welding goggles to use any of these tools,
+            // without the goggles one _must_ use the duct tape
+            tools.push_back(component("func:welder", welder_charges));
+        }
         tools.push_back(component("duct_tape", DUCT_TAPE_USED));
         crafting_inv.consume_any_tools(tools, true);
 
