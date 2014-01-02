@@ -507,7 +507,6 @@ public:
  bool has_item(item *it);  // Has a specific item
  bool has_mission_item(int mission_id); // Has item with mission_id
  std::vector<item*> has_ammo(ammotype at);// Returns a list of the ammo
- char unused_invlet();  // Returns the next available invlet for a player's inventory, or 0 if full.
 
  bool has_weapon();
 

@@ -1087,10 +1087,6 @@ void game::process_activity()
     book_item = &(u.i_at(u.activity.position));
     reading = dynamic_cast<it_book*>(book_item->type);
 
-    if (reading == 0) {
-        u.activity.type = ACT_NULL;
-        return;
-    }
     if (reading->fun != 0) {
         int fun_bonus;
         if(book_item->charges == 0) {
@@ -1802,7 +1798,7 @@ void game::handle_key_blocking_activity() {
 */
 int game::inventory_item_menu(int pos, int iStartX, int iWidth, int position) {
     int cMenu = (int)'+';
-    
+
     if (u.has_item(pos)) {
         item& oThisItem = u.i_at(pos);
         std::vector<iteminfo> vThisItem, vDummy, vMenu;
@@ -10110,15 +10106,6 @@ void game::drop(std::vector<item> &dropped, std::vector<item> &dropped_worn, int
     u.moves -= drop_move_cost;
 }
 
-typedef std::pair<monster *, int> MIndex;
-struct cmp_mindex {
- const point plpos;
- cmp_mindex(const point &p) : plpos(p) { };
- bool operator()(const MIndex &a, const MIndex &b) const {
-  return rl_dist(a.first->pos(), plpos) < rl_dist(b.first->pos(), plpos);
- }
-};
-
 void game::reassign_item(int pos)
 {
  if (pos == INT_MIN) {
@@ -10182,26 +10169,20 @@ void game::plthrow(int pos)
 
  m.draw(w_terrain, point(u.posx, u.posy));
 
- std::vector<MIndex> mindexes;
+ std::vector <monster> mon_targets;
+ std::vector <int> targetindices;
+ int passtarget = -1;
  for (int i = 0; i < num_zombies(); i++) {
    monster &critter = critter_tracker.find(i);
    if (u_see(&critter)) {
      critter.draw(w_terrain, u.posx, u.posy, true);
      if(rl_dist( u.posx, u.posy, critter.posx(), critter.posy() ) <= range) {
-       mindexes.push_back(MIndex(&critter, i));
+       mon_targets.push_back(critter);
+       targetindices.push_back(i);
+       if (i == last_target) {
+         passtarget = mon_targets.size() - 1;
+       }
      }
-   }
- }
- std::sort(mindexes.begin(), mindexes.end(), cmp_mindex(u.pos()));
-
- std::vector <monster> mon_targets;
- std::vector <int> targetindices;
- int passtarget = -1;
- for (int i = 0; i < mindexes.size(); i++) {
-   mon_targets.push_back(*mindexes[i].first);
-   targetindices.push_back(mindexes[i].second);
-   if (mindexes[i].second == last_target) {
-     passtarget = mon_targets.size() - 1;
    }
  }
 
@@ -12353,11 +12334,6 @@ void game::vertical_move(int movez, bool force) {
  active_npc.clear();
  load_npcs();
  refresh_all();
-// Set the scent map to 0
- for (int i = 0; i < SEEX * MAPSIZE; i++) {
-  for (int j = 0; j < SEEX * MAPSIZE; j++)
-   grscent[i][j] = 0;
- }
 }
 
 

@@ -93,8 +93,6 @@ struct vpart_info
     typedef std::pair<std::string, int> type_count_pair;
     typedef std::vector<type_count_pair> type_count_pair_vector;
     type_count_pair_vector get_repair_materials(int hp) const;
-    // Get a items that remain from a broken (hp<=0) vehicle part
-    std::vector< ::item > get_remaining_scraps() const;
     bool has_flag(const vpart_bitflags flag) const {
         return (bitflags & mfb(flag));
     }

@@ -6,8 +6,6 @@
 #include "game.h"
 #include <fstream>
 
-#define NO_MOUSE
-
 /* TODO Replace the hardcoded values with an abstraction layer.
  * Lower redundancy across the methods. */
 
@@ -556,7 +554,6 @@ input_event input_manager::get_input_event(WINDOW* win)
             rval.type = CATA_INPUT_ERROR;
         }
 #if !(defined TILES || defined SDLTILES || defined _WIN32 || defined WINDOWS || defined __CYGWIN__)
-#if !defined(NO_MOUSE)
     // ncurses mouse handling
     } else if (key == KEY_MOUSE) {
         MEVENT event;
@@ -580,7 +577,6 @@ input_event input_manager::get_input_event(WINDOW* win)
         } else {
             rval.type = CATA_INPUT_ERROR;
         }
-#endif
 #endif
     } else {
         rval.type = CATA_INPUT_KEYBOARD;

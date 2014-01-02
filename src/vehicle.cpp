@@ -4205,21 +4205,6 @@ void add_item(const itype *type, const char *mat, const char *rep_item, double a
     }
 }
 
-std::vector<item> vpart_info::get_remaining_scraps() const {
-    std::vector< ::item> result;
-    const int hp = durability / 500;
-    if(hp <= 0) {
-        return result;
-    }
-    type_count_pair_vector ff = get_repair_materials(hp);
-    for(size_t i = 0; i < ff.size(); i++) {
-        for(size_t j = 0; j < ff[i].second; j++) {
-            result.push_back(::item(itypes[ff[i].first], (int) g->turn));
-        }
-    }
-    return result;
-}
-
 vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) const {
     type_count_pair_vector result;
     const int hp_to_repair = durability - hp;

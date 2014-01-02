@@ -424,7 +424,7 @@
     "revert_to": "flashlight",
     "use_action": "LIGHT_ON"
   },
-  
+
   {
     "id": "lightstrip_dead",
     "type": "TOOL",
@@ -680,29 +680,6 @@
     "revert_to": "null",
     "use_action": "HOTPLATE"
   },
-  {
-    "id": "portable_stove",
-    "type": "TOOL",
-    "symbol": ";",
-    "color": "red",
-    "name": "portable stove",
-    "description": "A small portable stove. Can be used to cook things instead of a hotplate.",
-    "price": 900,
-    "material": "steel",
-    "weight": 21,
-    "volume": 17,
-    "bashing": 3,
-    "cutting": 0,
-    "to_hit": -1,
-    "max_charges": 10000,
-    "initial_charges": 0,
-    "charges_per_use": 20,
-    "turns_per_charge": 0,
-    "ammo": "gasoline",
-    "revert_to": "null",
-    "use_action": "NONE"
-  },
-
   {
     "id": "soldering_iron",
     "type": "TOOL",
@@ -1972,29 +1949,6 @@
     "ammo": "NULL",
     "revert_to": "null",
     "use_action": "GRENADE_ACT"
-  },
-
-  {
-    "id": "mine_bomb_act",
-    "type": "TOOL",
-    "symbol": "*",
-    "color": "green",
-    "name": "active mine bomb",
-    "description": "This is an landmine, and will explode any second now.",
-    "price": 0,
-    "material": "iron",
-    "weight": 13800,
-    "volume": 2,
-    "bashing": 6,
-    "cutting": 0,
-    "to_hit": -1,
-    "max_charges": 30,
-    "initial_charges": 30,
-    "charges_per_use": 0,
-    "turns_per_charge": 1,
-    "ammo": "NULL",
-    "revert_to": "null",
-    "use_action": "MINE_BOMB_ACT"
   },
 
   {
@@ -5524,72 +5478,7 @@
     "ammo": "none",
     "revert_to": "null"
   },
-  {
-    "id": "wood_gas_producer",
-    "type": "TOOL",
-    "symbol": ",",
-    "color": "red",
-    "name": "wood gas producer",
-    "description": "Produces gasoline from organic materials.\nThis may take a while, also you should have a\ncontainer ready when using this.",
-    "price": 6000,
-    "material": "steel",
-    "weight": 23,
-    "volume": 56,
-    "bashing": 4,
-    "cutting": 0,
-    "to_hit": -3,
-    "max_charges": 0,
-    "initial_charges": 0,
-    "charges_per_use": 0,
-    "turns_per_charge": 0,
-    "ammo": "none",
-    "revert_to": "null",
-    "use_action": "WOOD_GAS"
-  },
-  {
-    "id": "rag_bundle",
-    "type": "GENERIC",
-    "symbol": "%",
-    "color": "white",
-    "name": "bundle of rags",
-    "description": "bundle of 200 rags",
-    "price": 1,
-    "material": "cotton",
-    "weight": 10,
-    "volume": 10,
-    "bashing": 0,
-    "cutting": 0,
-    "to_hit": 0,
-    "max_charges": 0,
-    "initial_charges": 0,
-    "charges_per_use": 0,
-    "turns_per_charge": 0,
-    "ammo": "none",
-    "revert_to": "null"
-  },
-  
-  {
-    "id": "leather_bundle",
-    "type": "GENERIC",
-    "symbol": "%",
-    "color": "white",
-    "name": "bundle of leather",
-    "description": "bundle of 200 leather chunks",
-    "price": 1,
-    "material": "leather",
-    "weight": 10,
-    "volume": 10,
-    "bashing": 0,
-    "cutting": 0,
-    "to_hit": 0,
-    "max_charges": 0,
-    "initial_charges": 0,
-    "charges_per_use": 0,
-    "turns_per_charge": 0,
-    "ammo": "none",
-    "revert_to": "null"
-  },
-  
+
   {
     "id": "mold_plastic",
     "type": "TOOL",

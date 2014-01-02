@@ -72,7 +72,7 @@ void map::generate_lightmap()
         if (INBOUNDS(sx, sy) && g->m.is_outside(0, 0))
          lm[sx][sy] = natural_light;
 
-        if (transparency_cache[sx][sy] > LIGHT_TRANSPARENCY_SOLID)
+        if (g->m.light_transparency(sx, sy) > LIGHT_TRANSPARENCY_SOLID)
          apply_light_arc(sx, sy, dir_d[i], natural_light);
        }
       }
@@ -332,7 +332,7 @@ void map::castLight( int row, float start, float end, int xx, int xy, int yx, in
 
             if( blocked ) {
                 //previous cell was a blocking one
-                if( transparency_cache[currentX][currentY] == LIGHT_TRANSPARENCY_SOLID ) {
+                if( light_transparency(currentX, currentY) == LIGHT_TRANSPARENCY_SOLID ) {
                     //hit a wall
                     newStart = rightSlope;
                     continue;
@@ -341,7 +341,7 @@ void map::castLight( int row, float start, float end, int xx, int xy, int yx, in
                     start = newStart;
                 }
             } else {
-                if( transparency_cache[currentX][currentY] == LIGHT_TRANSPARENCY_SOLID &&
+                if( light_transparency(currentX, currentY) == LIGHT_TRANSPARENCY_SOLID &&
                     distance < radius ) {
                     //hit a wall within sight line
                     blocked = true;
@@ -536,7 +536,7 @@ void map::apply_light_ray(bool lit[LIGHTMAP_CACHE_X][LIGHTMAP_CACHE_Y],
     }
     lm[x][y] += light * transparency;
   }
-  transparency *= transparency_cache[x][y];
+  transparency *= light_transparency(x, y);
  }
 
    if (transparency <= LIGHT_TRANSPARENCY_SOLID)
@@ -569,7 +569,7 @@ void map::apply_light_ray(bool lit[LIGHTMAP_CACHE_X][LIGHTMAP_CACHE_Y],
     }
     lm[x][y] += light * transparency;
   }
-  transparency *= transparency_cache[x][y];
+  transparency *= light_transparency(x, y);
  }
 
    if (transparency <= LIGHT_TRANSPARENCY_SOLID)

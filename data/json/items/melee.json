@@ -1185,7 +1185,7 @@
     "symbol": ",",
     "color": "light_gray",
     "name": "toaster",
-    "description": "A small two slice toaster, not much use as anything but spare_parts",
+    "description": "A small two slice toaster, not much use as anything but spare parts",
     "price": 10,
     "material": ["iron", "plastic"],
     "weight": 725,

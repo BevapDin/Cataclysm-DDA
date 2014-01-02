@@ -737,8 +737,6 @@ bool map::vehproceed(){
         epicenter2.x /= coll_parts_cnt;
         epicenter2.y /= coll_parts_cnt;
 
-//         g->add_msg("veh2: m: %.2f f: %.2f s: %i", (double) veh2->move.dir(), (double) veh2->face.dir(), (int) veh2->skidding);
-//         g->add_msg("veh : m: %.2f f: %.2f s: %i", (double) veh ->move.dir(), (double) veh ->face.dir(), (int) veh ->skidding);
 
         if (dmg2_part > 100) {
             // shake veh because of collision
@@ -766,9 +764,6 @@ bool map::vehproceed(){
             avg_of_turn = .1f;
         veh->of_turn = avg_of_turn * .9;
         veh2->of_turn = avg_of_turn * 1.1;
-        
-//         g->add_msg("veh2: m: %.2f f: %.2f s: %i", (double) veh2->move.dir(), (double) veh2->face.dir(), (int) veh2->skidding);
-//         g->add_msg("veh : m: %.2f f: %.2f s: %i", (double) veh ->move.dir(), (double) veh ->face.dir(), (int) veh ->skidding);
     }
 
     for(std::vector<veh_collision>::iterator next_collision = veh_misc_colls.begin();

@@ -1729,17 +1729,6 @@ bool item::made_of(std::string mat_ident) const
     return (type->m1 == mat_ident || type->m2 == mat_ident);
 }
 
-bool item::made_of(const char* mat_ident) const
-{
-    if( is_null() )
-        return false;
-
-    if (corpse != NULL && typeId() == "corpse" )
-        return (corpse->mat == mat_ident);
-
-    return (type->m1 == mat_ident || type->m2 == mat_ident);
-}
-
 std::string item::get_material(int m) const
 {
     if (corpse != NULL && typeId() == "corpse" )

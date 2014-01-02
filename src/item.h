@@ -174,7 +174,6 @@ public:
  int acid_resist() const;
  bool is_two_handed(player *u);
  bool made_of(std::string mat_ident) const;
- bool made_of(const char *mat_ident) const;
  std::string get_material(int m) const;
  bool made_of(phase_id phase) const;
  bool conductive() const; // Electricity
