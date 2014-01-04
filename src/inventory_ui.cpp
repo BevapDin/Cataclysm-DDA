@@ -49,7 +49,21 @@ std::vector<int> find_firsts(indexed_invslice &slice, CategoriesVector &CATEGORI
     return firsts;
 }
 
-void print_inv_weight_vol(WINDOW* w_inv, int weight_carried, int vol_carried)
+int calc_volume_capacity(const std::vector<char> &dropped_armor) {
+    if (dropped_armor.empty()) {
+        return g->u.volume_capacity();
+    }
+    // Make copy, remove to be dropped armor from that
+    // copy and let the copy recalculate the volume capacity
+    // (can be affected by various traits).
+    player tmp = g->u;
+    for(size_t i = 0; i < dropped_armor.size(); i++) {
+        tmp.i_rem(dropped_armor[i]);
+    }
+    return tmp.volume_capacity();
+}
+
+void print_inv_weight_vol(WINDOW* w_inv, int weight_carried, int vol_carried, int vol_capacity)
 {
     // Print weight
     mvwprintw(w_inv, 0, 32, _("Weight (%s): "),
@@ -66,7 +80,7 @@ void print_inv_weight_vol(WINDOW* w_inv, int weight_carried, int vol_carried)
 
     // Print volume
     mvwprintw(w_inv, 0, 61, _("Volume: "));
-    if (vol_carried > g->u.volume_capacity() - 2)
+    if (vol_carried > vol_capacity - 2)
     {
         wprintz(w_inv, c_red, "%3d", vol_carried);
     }
@@ -74,7 +88,7 @@ void print_inv_weight_vol(WINDOW* w_inv, int weight_carried, int vol_carried)
     {
         wprintz(w_inv, c_ltgray, "%3d", vol_carried);
     }
-    wprintw(w_inv, "/%-3d", g->u.volume_capacity() - 2);
+    wprintw(w_inv, "/%-3d", vol_capacity - 2);
 }
 
 // dropped_weapon==0 -> weapon is not dropped
@@ -86,7 +100,7 @@ void print_inv_statics(WINDOW* w_inv, std::string title,
 // Print our header
  mvwprintw(w_inv, 0, 0, title.c_str());
 
- print_inv_weight_vol(w_inv, g->u.weight_carried(), g->u.volume_carried());
+ print_inv_weight_vol(w_inv, g->u.weight_carried(), g->u.volume_carried(), calc_volume_capacity(dropped_items));
 
 // Print our weapon
  int n_items = 0;
@@ -186,17 +200,14 @@ int game::display_slice(indexed_invslice& slice, const std::string& title)
 
   // Find the inventory position of the first item in the previous and next category (in relation
   // to the currently selected category).
-  for (int i = 0; i < category_order.size(); ++i)
-  {
-	  if (selected > firsts[category_order[i]] && prev_category_at <= firsts[category_order[i]])
-	  {
-		  prev_category_at = firsts[category_order[i]];
-	  }
+  for (int i = 0; i < category_order.size(); ++i) {
+      if (selected > firsts[category_order[i]] && prev_category_at <= firsts[category_order[i]]) {
+          prev_category_at = firsts[category_order[i]];
+      }
 
-	  if (selected < firsts[category_order[i]] && next_category_at <= selected)
-	  {
-		  next_category_at = firsts[category_order[i]];
-	  }
+      if (selected < firsts[category_order[i]] && next_category_at <= selected) {
+          next_category_at = firsts[category_order[i]];
+      }
   }
 
   for (cur_it = start; cur_it < start + maxitems && cur_line < maxitems+3; cur_it++) {
@@ -229,13 +240,10 @@ int game::display_slice(indexed_invslice& slice, const std::string& title)
    }
   }
 
-  if (inCategoryMode)
-  {
-	  mvwprintz(w_inv, maxitems + 4, 32, c_white_red, _("In category select mode! Press [TAB] to enter item select mode."));
-  }
-  else
-  {
-	  mvwprintz(w_inv, maxitems + 4, 32, h_white, _("In item select mode! Press [TAB] to enter category select mode."));
+  if (inCategoryMode) {
+      mvwprintz(w_inv, maxitems + 4, 32, c_white_red, _("In category select mode! Press [TAB] to enter item select mode."));
+  } else {
+      mvwprintz(w_inv, maxitems + 4, 32, h_white, _("In item select mode! Press [TAB] to enter category select mode."));
   }
 
   if (start > 0)
@@ -251,22 +259,22 @@ int game::display_slice(indexed_invslice& slice, const std::string& title)
 
   if (ch == '\t')
   {
-	  inCategoryMode = !inCategoryMode;
+    inCategoryMode = !inCategoryMode;
   }
   else if ( ch == KEY_DOWN ) {
     if ( selected < 0 ) {
       selected = start;
     } else {
-		if (inCategoryMode)
-		{
-			selected < firsts[category_order[category_order.size() - 1]] ? selected = next_category_at : 0;
-		}
-		else
-		{
-			selected++;
-		}
-		
-		next_category_at = prev_category_at = 0;
+  if (inCategoryMode)
+  {
+    selected < firsts[category_order[category_order.size() - 1]] ? selected = next_category_at : 0;
+  }
+  else
+  {
+    selected++;
+  }
+
+  next_category_at = prev_category_at = 0;
     }
 
     if ( selected > max_it ) {
@@ -277,8 +285,8 @@ int game::display_slice(indexed_invslice& slice, const std::string& title)
       }
     }
   } else if ( ch == KEY_UP ) {
-	inCategoryMode ? selected = prev_category_at : selected--;
-	next_category_at = prev_category_at = 0;
+ inCategoryMode ? selected = prev_category_at : selected--;
+ next_category_at = prev_category_at = 0;
 
     if ( selected < -1 ) {
       selected = -1; // wraparound?
@@ -413,18 +421,19 @@ std::vector<item> game::multidrop(std::vector<item> &dropped_worn, int &freed_vo
         }
 
         inventory drop_subset = u.inv.subset(dropping);
-        if (dropped_weapon == -1) {
-            drop_subset.add_item(u.weapon, false, false);
-        } else if (dropped_weapon > 0) {
-            item &tmp = drop_subset.add_item(u.weapon, false, false);
-            tmp.charges = dropped_weapon;
-        }
         int new_weight = base_weight - drop_subset.weight();
         int new_volume = base_volume - drop_subset.volume();
         for (int i = 0; i < dropped_armor.size(); ++i) {
             new_weight -= u.i_at(dropped_armor[i]).weight();
         }
-        print_inv_weight_vol(w_inv, new_weight, new_volume);
+        if (dropped_weapon == -1) {
+            new_weight -= u.weapon.weight();
+        } else if (dropped_weapon > 0) {
+            item tmp(u.weapon);
+            tmp.charges = dropped_weapon;
+            new_weight -= tmp.weight();
+        }
+        print_inv_weight_vol(w_inv, new_weight, new_volume, calc_volume_capacity(dropped_armor));
         int cur_line = 2;
         max_it = 0;
         int drp_line = 1;

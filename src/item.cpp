@@ -695,7 +695,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
    std::string recipes = "";
    int index = 1;
    for (std::map<recipe*, int>::iterator iter = book->recipes.begin(); iter != book->recipes.end(); ++iter, ++index) {
-     if(g->u.knows_recipe(iter->first)) recipes += "<color_grey>";
+     if(g->u.knows_recipe(iter->first)) recipes += "<color_ltgray>";
      recipes += itypes.at(iter->first->result)->name;
      if(g->u.knows_recipe(iter->first)) recipes += "</color>";
      if(index == book->recipes.size() - 1)
@@ -1057,8 +1057,8 @@ nc_color item::color_in_inventory()
 }
 
 /* @param with_prefix determines whether to return for more of its object, such as
-* 	the extent of damage and burning (was created to sort by name without prefix
-*	in additional inventory)
+* the extent of damage and burning (was created to sort by name without prefix
+* in additional inventory)
 * @return name of item
 */
 std::string item::tname( bool with_prefix )
@@ -1099,17 +1099,20 @@ std::string item::tname( bool with_prefix )
 
     std::string burntext = "";
     if (with_prefix) {
-		if (volume() >= 4 && burnt >= volume() * 2)
-			burntext = rm_prefix(_("<burnt_adj>badly burnt "));
-		else if (burnt > 0)
-			burntext = rm_prefix(_("<burnt_adj>burnt "));
+        if (volume() >= 4 && burnt >= volume() * 2) {
+            burntext = rm_prefix(_("<burnt_adj>badly burnt "));
+        } else if (burnt > 0) {
+            burntext = rm_prefix(_("<burnt_adj>burnt "));
+        }
     }
 
     std::string maintext = "";
     if (corpse != NULL && typeId() == "corpse" ) {
-        if (name != "")
+        if (name != "") {
             maintext = rmp_format(_("<item_name>%s corpse of %s"), corpse->name.c_str(), name.c_str());
-        else maintext = rmp_format(_("<item_name>%s corpse"), corpse->name.c_str());
+        } else {
+            maintext = rmp_format(_("<item_name>%s corpse"), corpse->name.c_str());
+        }
     } else if (typeId() == "blood") {
         if (corpse == NULL || corpse->id == "mon_null")
             maintext = rm_prefix(_("<item_name>human blood"));
