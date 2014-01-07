@@ -195,6 +195,7 @@ player::~player()
 
 player& player::operator= (const player & rhs)
 {
+ Character::operator=(rhs);
  id = rhs.id;
  posx = rhs.posx;
  posy = rhs.posy;
@@ -226,16 +227,6 @@ player& player::operator= (const player & rhs)
 
  my_bionics = rhs.my_bionics;
 
- str_cur = rhs.str_cur;
- dex_cur = rhs.dex_cur;
- int_cur = rhs.int_cur;
- per_cur = rhs.per_cur;
-
- str_max = rhs.str_max;
- dex_max = rhs.dex_max;
- int_max = rhs.int_max;
- per_max = rhs.per_max;
-
  power_level = rhs.power_level;
  max_power_level = rhs.max_power_level;
 
@@ -256,12 +247,10 @@ player& player::operator= (const player & rhs)
  blocks_left = rhs.blocks_left;
 
  stim = rhs.stim;
- pain = rhs.pain;
  pkill = rhs.pkill;
  radiation = rhs.radiation;
 
  cash = rhs.cash;
- moves = rhs.moves;
  movecounter = rhs.movecounter;
 
  for (int i = 0; i < num_hp_parts; i++)
@@ -3158,8 +3147,15 @@ void player::disp_status(WINDOW *w, WINDOW *w2)
     int spdx = sideStyle ?  0 : x + dx * 4;
     int spdy = sideStyle ?  5 : y + dy * 4;
     mvwprintz(w, spdy, spdx, col_spd, _("Spd %2d"), spd_cur);
-    if (this->weight_carried() > this->weight_capacity() || this->volume_carried() > this->volume_capacity() - 2) {
-        col_time = c_red;
+    if (this->weight_carried() > this->weight_capacity()) {
+        col_time = h_black;
+    }
+    if (this->volume_carried() > this->volume_capacity() - 2) {
+        if (this->weight_carried() > this->weight_capacity()) {
+            col_time = c_dkgray_magenta;
+        } else {
+            col_time = c_dkgray_red;
+        }
     }
     wprintz(w, col_time, "  %d", movecounter);
  }
@@ -3275,7 +3271,7 @@ void player::set_cat_level_rec(const std::string &sMut)
         for (int i = 0; i < mutation_data[sMut].prereqs.size(); i++) {
             set_cat_level_rec(mutation_data[sMut].prereqs[i]);
         }
-        
+
         for (int i = 0; i < mutation_data[sMut].prereqs2.size(); i++) {
             set_cat_level_rec(mutation_data[sMut].prereqs2[i]);
         }
@@ -7582,6 +7578,16 @@ bool player::wear_item(item *to_wear, bool interactive)
             return false;
         }
         
+        if ((armor->covers & (mfb(bp_hands) | mfb(bp_arms) | mfb(bp_torso) | mfb(bp_legs) | mfb(bp_feet) | mfb(bp_head))) &&
+        (has_trait("HUGE") || has_trait("HUGE_OK")))
+        {
+            if(interactive)
+            {
+                g->add_msg(_("The %s is much too small to fit your huge body!"), armor->name.c_str());
+            }
+            return false;
+        }
+
         if ((armor->covers & (mfb(bp_hands) | mfb(bp_arms) | mfb(bp_torso) | mfb(bp_legs) | mfb(bp_feet) | mfb(bp_head))) &&
         (has_trait("HUGE") || has_trait("HUGE_OK")))
         {
