@@ -3499,7 +3499,7 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
  const furn_id curr_furn = furn(x,y);
  const trap_id curr_trap = tr_at(x, y);
  field &curr_field = field_at(x, y);
- const std::vector<item> curr_items = i_at(x, y);
+ const std::vector<item> &curr_items = i_at(x, y);
  long sym;
  bool hi = false;
  bool graf = false;
