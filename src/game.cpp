@@ -1860,12 +1860,12 @@ int game::inventory_item_menu(int pos, int iStartX, int iWidth, int position) {
 
         int offset_line = 0;
         int max_line = 0;
-        std::string str;
-        str += oThisItem.info(true, &vThisItem);
+        const std::string str = oThisItem.info(true, &vThisItem);
+        const std::string item_name = oThisItem.tname();
         WINDOW *w = newwin(TERMY-VIEW_OFFSET_Y*2, iWidth, VIEW_OFFSET_Y, iStartX + VIEW_OFFSET_X);
 
         wmove(w, 1, 2);
-        wprintz(w, c_white, "%s", oThisItem.tname().c_str());
+        wprintz(w, c_white, "%s", item_name.c_str());
         max_line = fold_and_print_from(w, 3, 2, iWidth - 4, offset_line, c_white, str.c_str());
         if(max_line > TERMY-VIEW_OFFSET_Y*2 - 5) {
           wmove(w, 1, iWidth - 3);
@@ -1977,7 +1977,7 @@ int game::inventory_item_menu(int pos, int iStartX, int iWidth, int position) {
               }
             }
             wmove(w, 1, 2);
-            wprintz(w, c_white, "%s", oThisItem.tname().c_str());
+            wprintz(w, c_white, "%s", item_name.c_str());
             fold_and_print_from(w, 3, 2, iWidth - 4, offset_line, c_white, str.c_str());
             draw_border(w);
             wrefresh(w);
@@ -4997,9 +4997,9 @@ bool game::sees_u(int x, int y, int &t)
         const monster &critter = critter_tracker.find(mondex);
         return critter.sees_player(t);
     }
-    // range = 0 = unlimited, proceeding sans critter
+    // range = -1 = unlimited, proceeding sans critter
     return (
-        m.sees(x, y, u.posx, u.posy, 0, t) &&
+        m.sees(x, y, u.posx, u.posy, -1, t) &&
         ! u.is_invisible()
     );
 }
@@ -7594,7 +7594,7 @@ void game::examine(int examx, int examy)
         } else if (u.controlling_vehicle) {
             add_msg (_("You can't do that while driving."));
         } else if (abs(veh->velocity) > 0) {
-            add_msg (_("You can't do that on moving vehicle."));
+            add_msg (_("You can't do that on a moving vehicle."));
         } else {
             exam_vehicle (*veh, examx, examy);
         }
@@ -9589,6 +9589,10 @@ void game::grab()
             u.grab_type = OBJECT_VEHICLE;
             add_msg(_("You grab the %s."), veh->name.c_str());
         } else if ( m.has_furn( grabx, graby ) ) { // If not, grab furniture if present
+            if (m.furn_at(grabx, graby).move_str_req < 0) {
+                add_msg(_("You can not grab the %s"), m.furnname( grabx, graby).c_str());
+                return;
+            }
             u.grab_point.x = grabx - u.posx;
             u.grab_point.y = graby - u.posy;
             u.grab_type = OBJECT_FURNITURE;
@@ -10376,6 +10380,16 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
   return;
  }
 
+ if (u.weapon.has_flag("MOUNTED_GUN")) {
+     int vpart = -1;
+     vehicle *veh = m.veh_at (u.posx, u.posy, vpart);
+     if (!m.has_flag_ter_or_furn("MOUNTABLE", u.posx, u.posy) &&
+         (veh == NULL || veh->part_with_feature (vpart, "MOUNTABLE") < 0)) {
+         add_msg(_("You need to be standing near acceptable terrain or furniture to use this weapon. A table, a mound of dirt, a broken window, etc."));
+         return;
+     }
+ }
+ 
  int range = u.weapon.range(&u);
 
  m.draw(w_terrain, point(u.posx, u.posy));

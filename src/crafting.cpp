@@ -642,6 +642,10 @@ recipe* game::select_crafting_recipe()
                         {
                             toolcol = c_green;
                         }
+                        else if ((type == "goggles_welding") && u.has_bionic("bio_sunglasses"))
+                        {
+                            toolcol = c_cyan;
+                        }
 
                         std::stringstream toolinfo;
                         toolinfo << item_controller->find_template(type)->name << " ";
@@ -904,7 +908,7 @@ static void draw_recipe_tabs(WINDOW *w, craft_cat tab,bool filtered)
     mvwputch(w, 2, width-1, c_ltgray, LINE_OOXX); // ^|
      mvwprintz(w, 0, width - utf8_width(_("Lighting:")), c_ltgray, _("Lighting:"));//Lighting info
     int light = g->u.fine_detail_vision_mod();
-    char* str;
+    const char* str;
     nc_color color;
     if (light <= 1) {
         str = _("brightly"); color = c_yellow;
@@ -1224,7 +1228,8 @@ void game::complete_craft()
   skill_dice -= main_rank_penalty * 4;
  }
 
- //It's tough to craft with paws.  Fortunately it's just a matter of grip and fine-motor, not inability to see what you're doing
+ // It's tough to craft with paws.  Fortunately it's just a matter of grip and fine-motor,
+ // not inability to see what you're doing
  if (u.has_trait("PAWS")) {
   int paws_rank_penalty = 0;
   if (making->skill_used == Skill::skill("electronics")) {
