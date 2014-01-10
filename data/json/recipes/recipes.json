@@ -17078,6 +17078,33 @@
   ]
 },{
         "type" : "recipe",
+  "result": "hdframe",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_MATERIALS",
+  "skill_used": "fabrication",
+  "difficulty": 1,
+  "time": 8000,
+  "reversible": true,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "goggles_welding", -1 ]
+    ],
+    [
+      [ "crucible", -1 ]
+    ],
+    [
+      [ "func:welder", 50 ],
+      [ "func:forge", 50 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "steel_lump", 18 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "frame_wood",
   "category": "CC_OTHER",
   "subcategory": "CSC_OTHER_MATERIALS",
@@ -17100,34 +17127,7 @@
     ]
   ]
 },{
-        "type" : "recipe",
-  "result": "hdframe",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_MATERIALS",
-  "skill_used": "fabrication",
-  "difficulty": 1,
-  "time": 14000,
-  "reversible": true,
-  "autolearn": true,
-  "tools": [
-    [
-      [ "goggles_welding", -1 ]
-    ],
-    [
-      [ "crucible", -1 ]
-    ],
-    [
-      [ "func:welder", 75 ],
-      [ "func:forge", 80 ]
-    ]
-  ],
-  "components": [
-    [
-      [ "steel_lump", 5 ]
-    ]
-  ]
-},{
-        "type" : "recipe",
+  "type" : "recipe",
   "result": "sheet_metal",
   "category": "CC_OTHER",
   "subcategory": "CSC_OTHER_MATERIALS",
@@ -17176,7 +17176,7 @@
   "difficulty": 4,
   "time": 12000,
   "reversible": true,
-  "note": "melting it down doesn't teach anything useful",
+  "note": "sawing it down doesn't teach anything useful",
   "autolearn": true,
   "tools": [
     [
@@ -19974,7 +19974,7 @@
   "difficulty": 3,
   "time": 240000,
   "reversible": true,
-  "note": "melting the anvil back down seems unlikely to teach anything useful",
+  "note": "hacking the anvil back down seems unlikely to teach anything useful",
   "autolearn": true,
   "tools": [ [ ["func:hammer", -1] ],
       [

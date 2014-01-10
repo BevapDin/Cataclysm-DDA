@@ -129,6 +129,7 @@ void game::init_data()
     MonsterGenerator::generator().finalize_mtypes();
     finalize_vehicles();
     finalize_recipes();
+    Creature::init_hit_weights();
 
  } catch(std::string &error_message)
  {

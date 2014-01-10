@@ -646,6 +646,8 @@ public:
      return -2 - position;
  }
 
+ m_size get_size();
+
 protected:
     std::set<std::string> my_traits;
     std::set<std::string> my_mutations;
