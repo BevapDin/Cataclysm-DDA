@@ -2154,7 +2154,7 @@
         "bashing" : -8,
         "cutting" : 0,
         "category": "chems",
-        "price" : 400
+        "price" : 0
     },
     {
         "type":"GENERIC",
@@ -2170,7 +2170,7 @@
         "bashing" : -8,
         "cutting" : 0,
         "category": "chems",
-        "price" : 400
+        "price" : 2
     },
     {
         "type":"GENERIC",
