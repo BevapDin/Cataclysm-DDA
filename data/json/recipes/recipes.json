@@ -13443,17 +13443,17 @@
   "subcategory": "CSC_OTHER_OTHER",
   "skill_used": "tailor",
   "difficulty": 0,
-  "time": 5000,
+  "time": 6000,
   "reversible": false,
   "autolearn": true,
   "tools": [
     [
-      [ "func:sewing_kit", 5 ]
+      [ "func:sewing_kit", 7 ]
     ]
   ],
   "components": [
     [
-      [ "rag", 2 ]
+      [ "rag", 5 ]
     ]
   ]
 },{
@@ -15551,17 +15551,17 @@
   "subcategory": "CSC_ARMOR_OTHER",
   "skill_used": "tailor",
   "difficulty": 0,
-  "time": 50000,
+  "time": 80000,
   "reversible": true,
   "autolearn": true,
   "tools": [
     [
-      [ "func:sewing_kit", 10 ]
+      [ "func:sewing_kit", 20 ]
     ]
   ],
   "components": [
     [
-      [ "rag", 20 ]
+      [ "rag", 35 ]
     ]
   ]
 },{
@@ -15572,18 +15572,18 @@
   "skill_used": "tailor",
   "skills_required": [ "survival", 1 ],
   "difficulty": 1,
-  "time": 50000,
+  "time": 80000,
   "reversible": true,
   "decomp_learn": 0,
   "autolearn": true,
   "tools": [
     [
-      [ "func:sewing_kit", 12 ]
+      [ "func:sewing_kit", 24 ]
     ]
   ],
   "components": [
     [
-      [ "rag", 10 ]
+      [ "rag", 30 ]
     ],
     [
       [ "fur", 10 ]

@@ -626,7 +626,10 @@ bool game::do_turn()
         u.hp_cur[hp_torso] = 0;
     } else if (u.has_disease("jetinjector") &&
             u.disease_duration("jetinjector") > 400) {
-        add_msg(_("Your heart spasms painfully and stops."));
+            if (!(u.has_trait("NOPAIN"))) {
+                add_msg(_("Your heart spasms painfully and stops."));
+            }
+        else { add_msg(_("Your heart spasms and stops.")); }
         u.add_memorial_log(_("Died of a healing stimulant overdose."));
         u.hp_cur[hp_torso] = 0;
     }
@@ -809,6 +812,23 @@ bool game::do_turn()
         // Don't increase fatigue if sleeping or trying to sleep or if we're at the cap.
         if (u.fatigue < 1050 && !(u.has_disease("sleep") || u.has_disease("lying_down"))) {
             u.fatigue++;
+            // Wakeful folks don't always gain fatigue!
+            if (u.has_trait("WAKEFUL")) {
+                if (one_in(6)) {
+                    u.fatigue--;
+                }
+            }
+            if (u.has_trait("WAKEFUL2")) {
+                if (one_in(4)) {
+                    u.fatigue--;
+                }
+            }
+            // You're looking at over 24 hours to hit Tired here
+            if (u.has_trait("WAKEFUL3")) {
+                if (one_in(2)) {
+                    u.fatigue--;
+                }
+            }
             // Sleepy folks gain fatigue faster; Very Sleepy is twice as fast as typical
             if (u.has_trait("SLEEPY")) {
                 if (one_in(3)) {
@@ -6834,6 +6854,7 @@ void game::close(int closex, int closey)
     }
 
     bool didit = false;
+    const bool inside = !m.is_outside(u.posx, u.posy);
 
     std::vector<item> &items_in_way = m.i_at(closex, closey);
     int vpart;
@@ -6862,11 +6883,25 @@ void game::close(int closex, int closey)
         }
     } else if (closex == u.posx && closey == u.posy) {
         add_msg(_("There's some buffoon in the way!"));
-    } else if (m.ter(closex, closey) == t_window_domestic &&
-               m.is_outside(u.posx, u.posy)) {
-        add_msg(_("You cannot close the curtains from outside. You must be inside the building."));
     } else if (m.has_furn(closex, closey) && m.furn_at(closex, closey).close.size() == 0 ) {
         add_msg(_("There's a %s in the way!"), m.furnname(closex, closey).c_str());
+    } else if (!m.close_door(closex, closey, inside, true)) {
+        // ^^ That checks if the PC could close something there, it
+        // does not actually do anything.
+        std::string door_name;
+        if (m.has_furn(closex, closey)) {
+            door_name = furnlist[m.furn(closex, closey)].name;
+        } else {
+            door_name = terlist[m.ter(closex, closey)].name;
+        }
+        // Print a message that we either can not close whatever is there
+        // or (if we're outside) that we can only close it from the
+        // inside.
+        if (!inside && m.close_door(closex, closey, true, true)) {
+            add_msg(_("You cannot close the %s from outside. You must be inside the building."), door_name.c_str());
+        } else {
+            add_msg(_("You cannot close the %s."), door_name.c_str());
+        }
     } else {
         // Scoot up to 10 volume of items out of the way, only counting items that are vol >= 1.
         if (m.furn(closex, closey) != f_safe_o && items_in_way.size() > 0) {
@@ -6897,14 +6932,16 @@ void game::close(int closex, int closey)
             u.moves -= items_in_way.size() * 10;
         }
 
-        didit = m.close_door(closex, closey, true, false);
-        // Just plopping items back on their origin square will displace them to adjacent squares
-        // since the door is closed now.
-        for( std::vector<item>::iterator cur_item = items_in_way.begin();
-             cur_item != items_in_way.end(); ++cur_item ) {
-            m.add_item_or_charges( closex, closey, *cur_item );
+        didit = m.close_door(closex, closey, inside, false);
+        if (didit && m.has_flag_ter_or_furn("NOITEM", closex, closey)) {
+            // Just plopping items back on their origin square will displace them to adjacent squares
+            // since the door is closed now.
+            for( std::vector<item>::iterator cur_item = items_in_way.begin();
+                cur_item != items_in_way.end(); ++cur_item ) {
+                m.add_item_or_charges( closex, closey, *cur_item );
+            }
+            items_in_way.erase( items_in_way.begin(), items_in_way.end() );
         }
-        items_in_way.erase( items_in_way.begin(), items_in_way.end() );
     }
 
     if (didit) {
@@ -9295,8 +9332,9 @@ and you can't unwield your %s."),
             if ( idx < here.size()) {
                 if (idx != -1) {
                     if (itemcount != 0 || pickup_count[idx] == 0) {
-                        if (itemcount >= here[idx].charges) {
+                        if (itemcount >= here[idx].charges || !here[idx].count_by_charges()) {
                             // Ignore the count if we pickup the whole stack anyway
+                            // or something that is not counted by charges (tools)
                             itemcount = 0;
                         }
                         pickup_count[idx] = itemcount;
@@ -10744,12 +10782,25 @@ void game::forage()
 
 void game::eat(int pos)
 {
- if (u.has_trait("RUMINANT") && m.ter(u.posx, u.posy) == t_underbrush &&
+ if ((u.has_trait("RUMINANT") || u.has_trait("GRAZER")) && m.ter(u.posx, u.posy) == t_underbrush &&
      query_yn(_("Eat underbrush?"))) {
   u.moves -= 400;
   u.hunger -= 10;
   m.ter_set(u.posx, u.posy, t_grass);
   add_msg(_("You eat the underbrush."));
+  return;
+ }
+  if (u.has_trait("GRAZER") && m.ter(u.posx, u.posy) == t_grass &&
+     query_yn(_("Graze?"))) {
+      u.moves -= 400;
+      if ((u.hunger < 10) || one_in(20 - u.int_cur)) {
+          add_msg(_("You eat some of the taller grass, careful to leave some growing."));
+          u.hunger -= 2;
+      }
+  else{ add_msg(_("You eat the grass."));
+        u.hunger -= 5;
+        m.ter_set(u.posx, u.posy, t_dirt);
+      }
   return;
  }
  if (pos == INT_MIN)
@@ -11602,7 +11653,7 @@ bool game::plmove(int dx, int dy)
                      one_in(std::max(20 - furntype.move_str_req - u.str_cur, 2)) ) {
               add_msg(_("You strain yourself trying to move the heavy %s!"), furntype.name.c_str() );
               u.moves -= 100;
-              u.pain++; // Hurt ourself.
+              u.mod_pain(1); // Hurt ourself.
               return false; // furniture and or obstacle wins.
           } else if ( ! src_item_ok && dst_items > 0 ) {
               add_msg( _("There's stuff in the way.") );
@@ -13538,6 +13589,9 @@ void game::process_artifact(item *it, player *p, bool wielded)
                     it->charges++;
                 }
                 break;
+                // Artifacts can inflict pain even on Deadened folks.
+                // Some weird Lovecraftian thing.  ;P
+                // (So DON'T route them through mod_pain!)
             case ARTC_PAIN:
                 if (turn.seconds() == 0) {
                     add_msg(_("You suddenly feel sharp pain for no reason."));

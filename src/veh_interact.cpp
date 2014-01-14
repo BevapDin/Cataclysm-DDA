@@ -1620,6 +1620,8 @@ void complete_vehicle ()
         g->pl_refill_vehicle(*veh, vehicle_part);
         break;
     case 'o':
+        tools.push_back(component("func:hacksaw", -1));
+        crafting_inv.consume_any_tools(tools, true);
         // Dump contents of part at player's feet, if any.
         for (int i = 0; i < veh->parts[vehicle_part].items.size(); i++) {
             g->m.add_item_or_charges (g->u.posx, g->u.posy, veh->parts[vehicle_part].items[i]);
