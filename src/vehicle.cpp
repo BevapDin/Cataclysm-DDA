@@ -521,7 +521,7 @@ void vehicle::use_controls()
         current++;
     }
 
-    if( !g->u.controlling_vehicle && tags.count("convertible") ) {
+    if( tags.count("convertible") ) {
         options_choice.push_back(convert_vehicle);
         options_message.push_back(uimenu_entry(_("Fold bicycle"), 'f'));
         current++;
@@ -694,14 +694,17 @@ void vehicle::use_controls()
         break;
     case convert_vehicle:
     {
+        if(g->u.controlling_vehicle) {
+            g->add_msg(_("As the pitiless metal bars close on your nether regions, you reconsider trying to fold the bicycle while riding it."));
+            break;
+        }
         g->add_msg(_("You painstakingly pack the bicycle into a portable configuration."));
         // create a folding bicycle item
         item bicycle;
         bicycle.make( itypes["folding_bicycle"] );
 
         // Drop stuff in containers on ground
-        for (int p = 0; p < parts.size(); p++)
-        {
+        for (int p = 0; p < parts.size(); p++) {
             if( part_flag( p, "CARGO" ) ) {
                 for( std::vector<item>::iterator it = parts[p].items.begin();
                      it != parts[p].items.end(); ++it ) {
@@ -797,6 +800,7 @@ bool vehicle::toogle_active_menu(const std::vector<int> &parts_to_toggle, const 
 
 void vehicle::start_engine()
 {
+    bool muscle_powered = false;
     // TODO: Make chance of success based on engine condition.
     for(int p = 0; p < engines.size(); p++) {
         if(parts[engines[p]].hp > 0) {
@@ -805,15 +809,15 @@ void vehicle::start_engine()
                 if(engine_power < 50) {
                     // Small engines can be pull-started
                     engine_on = true;
-                }
-                else {
+                } else {
                     // Starter motor battery draw proportional to engine power
                     if(!discharge_battery(engine_power / 10)) {
                         engine_on = true;
                     }
                 }
-            }
-            else {
+            } else if (part_info(engines[p]).fuel_type == fuel_type_muscle) {
+                muscle_powered = true;
+            } else {
                 // Electric & plasma engines
                 engine_on = true;
             }
@@ -822,8 +826,7 @@ void vehicle::start_engine()
 
     if(engine_on == true) {
         g->add_msg(_("The %s's engine starts up."), name.c_str());
-    }
-    else {
+    } else if (!muscle_powered) {
         g->add_msg (_("The %s's engine fails to start."), name.c_str());
     }
 }

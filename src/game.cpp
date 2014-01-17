@@ -32,6 +32,8 @@
 #include "monstergenerator.h"
 #include "worldfactory.h"
 #include "construction.h"
+#include "file_finder.h"
+#include "mod_manager.h"
 #include <map>
 #include <set>
 #include <algorithm>
@@ -101,48 +103,111 @@ game::game() :
     // do nothing, everything that was in here is moved to init_data() which is called immediately after g = new game; in main.cpp
     // The reason for this move is so that g is not uninitialized when it gets to installing the parts into vehicles.
 }
-void game::init_data()
-{
- dout() << "Game initialized.";
- try {
- // Gee, it sure is init-y around here!
-    init_data_structures(); // initialize cata data structures
- #ifdef LUA
+
+// Load everything that will not depend on any mods
+void game::load_static_data() {
+#ifdef LUA
     init_lua();                 // Set up lua                       (SEE catalua.cpp)
- #endif
-    load_json_dir("data/json"); // load it, load it all!
+#endif
+    // UI stuff, not mod-specific per definition
+    load_keyboard_settings();
+    inp_mngr.init();            // Load input config JSON
+    // Init mappings for loading the json stuff
+    DynamicDataLoader::get_instance();
+    // Only need to load names once, they do not depend on mods
     init_names();
+    narrow_sidebar = OPTIONS["SIDEBAR_STYLE"] == "narrow";
+    fullscreen = false;
+    was_fullscreen = false;
+
+    // These functions do not load stuff from json.
+    // The content they load/initalize is hardcoded into the program.
+    // Therfor they can be loaded here.
+    // If this changes (if they load data from json), they have to
+    // be moved to game::load_mod or game::load_core_data
+    init_body_parts();
+    init_ter_bitflags_map();
+    init_vpart_bitflag_map();
+    init_translation();
+    init_colormap();
+    init_mapgen_builtin_functions();
+    init_fields();
+    init_morale();
+    init_diseases();             // Set up disease lookup table
+    init_savedata_translation_tables();
     init_npctalk();
     init_artifacts();
     init_weather();
-    init_fields();
     init_faction_data();
-    init_morale();
-    init_itypes();               // Set up item types                (SEE itypedef.cpp)
-    item_controller->init_old(); //Item manager
-    init_missions();             // Set up mission templates         (SEE missiondef.cpp)
-    init_autosave();             // Set up autosave
-    init_diseases();             // Set up disease lookup table
-    init_savedata_translation_tables();
-    inp_mngr.init();            // Load input config JSON
 
-    MonsterGenerator::generator().finalize_mtypes();
-    finalize_vehicles();
-    finalize_recipes();
-    Creature::init_hit_weights();
+    // --- move/delete everything below
+    // TODO: move this to player class
+    moveCount = 0;
+}
 
- } catch(std::string &error_message)
- {
-     uquit = QUIT_ERROR;
-     if(!error_message.empty())
-        debugmsg(error_message.c_str());
-     return;
- }
- load_keyboard_settings();
- moveCount = 0;
+void game::check_all_mod_data() {
+    init_ui();
+    popup_nowait("checking all mods");
+    mod_manager *mm = world_generator->get_mod_manager();
+    dependency_tree &dtree = mm->get_tree();
+    if (mm->mod_map.empty()) {
+        // If we don't have any mods, test core data only
+        load_core_data();
+        DynamicDataLoader::get_instance().finalize_loaded_data();
+    }
+    for(mod_manager::t_mod_map::iterator a = mm->mod_map.begin(); a != mm->mod_map.end(); ++a) {
+        MOD_INFORMATION *mod = a->second;
+        if (!dtree.is_available(mod->ident)) {
+            debugmsg("Skipping mod %s (%s)", mod->name.c_str(), dtree.get_node(mod->ident)->s_errors().c_str());
+            continue;
+        }
+        std::vector<std::string> deps = dtree.get_dependents_of_X_as_strings(mod->ident);
+        if (!deps.empty()) {
+            // mod is dependency of another mod(s)
+            // When those mods get checked, they will pull in
+            // this mod, so there is no need to check this mod now.
+            continue;
+        }
+        popup_nowait("checking mod %s", mod->name.c_str());
+        // Reset & load core data, than load dependencies
+        // and the actual mod and finally finalize all.
+        load_core_data();
+        deps = dtree.get_dependencies_of_X_as_strings(mod->ident);
+        for(size_t i = 0; i < deps.size(); i++) {
+            // assert(mm->has_mod(deps[i]));
+            // ^^ dependency tree takes care of that case
+            MOD_INFORMATION *dmod = mm->mod_map[deps[i]];
+            load_data_from_dir(dmod->path);
+        }
+        load_data_from_dir(mod->path);
+        DynamicDataLoader::get_instance().finalize_loaded_data();
+    }
+}
 
- gamemode = new special_game; // Nothing, basically.
- narrow_sidebar = OPTIONS["SIDEBAR_STYLE"] == "narrow";
+void game::load_core_data() {
+    // core data can be loaded only once and must be first
+    // anyway.
+    DynamicDataLoader::get_instance().unload_data();
+    // Special handling for itypes created in itypedef.cpp
+    // First load those items into the global itypes map,
+    init_itypes();
+    // Make itypes and item_controller syncron.
+    item_controller->init_old();
+    // Now item_controller and itypes have the same knowledge
+    // further loading happens through item_controller, which
+    // adds the new item types to both (its internal map and
+    // the global itypes).
+
+#define CORE_JSON_DATA_DIR "data/json"
+    load_data_from_dir(CORE_JSON_DATA_DIR);
+}
+
+void game::load_data_from_dir(const std::string &path) {
+    try {
+        DynamicDataLoader::get_instance().load_data_from_path(path);
+    } catch(std::string &err) {
+        debugmsg("Error loading data from json: %s", err.c_str());
+    }
 }
 
 game::~game()
@@ -160,7 +225,6 @@ game::~game()
  delete world_generator;
 
  release_traps();
- release_data_structures();
 }
 
 // Fixed window sizes
@@ -170,6 +234,7 @@ game::~game()
 void game::init_ui(){
     // clear the screen
     clear();
+
     // set minimum FULL_SCREEN sizes
     FULL_SCREEN_WIDTH = 80;
     FULL_SCREEN_HEIGHT = 24;
@@ -210,6 +275,9 @@ void game::init_ui(){
         // now that TERMX and TERMY are set,
         // check if sidebar style needs to be overridden
         sidebarWidth = use_narrow_sidebar() ? 45 : 55;
+        if(fullscreen) {
+          sidebarWidth = 0;
+        }
 
         TERRAIN_WINDOW_WIDTH = (TERMX - sidebarWidth > 121) ? 121 : TERMX - sidebarWidth;
         TERRAIN_WINDOW_HEIGHT = (TERMY > 121) ? 121 : TERMY;
@@ -330,10 +398,42 @@ void game::init_ui(){
     werase(w_status2);
 }
 
-void game::toggle_sidebar_style(void) {
-  narrow_sidebar = !narrow_sidebar;
-  init_ui();
-  refresh_all();
+void game::toggle_sidebar_style(void)
+{
+    narrow_sidebar = !narrow_sidebar;
+    init_ui();
+    refresh_all();
+}
+
+void game::toggle_fullscreen(void)
+{
+#ifndef TILES
+    if(TERMX > 121 || TERMY > 121) { return; }
+    fullscreen = !fullscreen;
+    init_ui();
+    refresh_all();
+#endif
+}
+
+// temporarily switch out of fullscreen for functions that rely
+// on displaying some part of the sidebar
+void game::temp_exit_fullscreen(void)
+{
+    if(fullscreen) {
+        was_fullscreen = true;
+        toggle_fullscreen();
+    } else {
+        was_fullscreen = false;
+    }
+}
+
+void game::reenter_fullscreen(void)
+{
+    if(was_fullscreen) {
+        if(!fullscreen) {
+            toggle_fullscreen();
+        }
+    }
 }
 
 /*
@@ -342,6 +442,8 @@ void game::toggle_sidebar_style(void) {
 void game::setup()
 {
  m = map(&traps); // Init the root map with our vectors
+
+    load_world_modfiles(world_generator->active_world);
 
 // Even though we may already have 'd', nextinv will be incremented as needed
  nextinv = 'd';
@@ -394,6 +496,10 @@ void game::setup()
 // Set up all default values for a new game
 void game::start_game(std::string worldname)
 {
+    if(gamemode == NULL) {
+        gamemode = new special_game();
+    }
+
  turn = HOURS(ACTIVE_WORLD_OPTIONS["INITIAL_TIME"]);
  if (ACTIVE_WORLD_OPTIONS["INITIAL_SEASON"].getValue() == "spring");
  else if (ACTIVE_WORLD_OPTIONS["INITIAL_SEASON"].getValue() == "summer")
@@ -405,6 +511,8 @@ void game::start_game(std::string worldname)
  nextweather = turn + MINUTES(30);
  run_mode = (OPTIONS["SAFEMODE"] ? 1 : 0);
  mostseen = 0; // ...and mostseen is 0, we haven't seen any monsters yet.
+
+ init_autosave();
 
  clear();
  refresh();
@@ -462,60 +570,65 @@ void game::start_game(std::string worldname)
 
 void game::create_factions()
 {
- int num = dice(4, 3);
- faction tmp(0);
- tmp.make_army();
- factions.push_back(tmp);
- for (int i = 0; i < num; i++) {
-  tmp = faction(assign_faction_id());
-  tmp.randomize();
-  tmp.likes_u = 100;
-  tmp.respects_u = 100;
-  tmp.known_by_u = true;
-  factions.push_back(tmp);
- }
+    int num = dice(4, 3);
+    faction tmp(0);
+    tmp.make_army();
+    factions.push_back(tmp);
+    for (int i = 0; i < num; i++) {
+        tmp = faction(assign_faction_id());
+        tmp.randomize();
+        tmp.likes_u = 100;
+        tmp.respects_u = 100;
+        tmp.known_by_u = true;
+        factions.push_back(tmp);
+    }
 }
 
 //Make any nearby overmap npcs active, and put them in the right location.
 void game::load_npcs()
 {
-    for (int i = 0; i < cur_om->npcs.size(); i++)
-    {
+    for (int i = 0; i < cur_om->npcs.size(); i++) {
+        const int npc_offset = square_dist(levx + int(MAPSIZE / 2), levy + int(MAPSIZE / 2),
+                                           cur_om->npcs[i]->mapx, cur_om->npcs[i]->mapy);
+        if (npc_offset <= int(MAPSIZE / 2) + 1 && !cur_om->npcs[i]->is_active() &&
+            cur_om->npcs[i]->omz == levz) {
 
-        if (square_dist(levx + int(MAPSIZE / 2), levy + int(MAPSIZE / 2),
-              cur_om->npcs[i]->mapx, cur_om->npcs[i]->mapy) <=
-              int(MAPSIZE / 2) + 1 && !cur_om->npcs[i]->is_active() &&
-              cur_om->npcs[i]->omz == levz)
-        {
-            int dx = cur_om->npcs[i]->mapx - levx, dy = cur_om->npcs[i]->mapy - levy;
-            if (debugmon)debugmsg("game::load_npcs: Spawning static NPC, %d:%d (%d:%d)", levx, levy, cur_om->npcs[i]->mapx, cur_om->npcs[i]->mapy);
+            int dx = cur_om->npcs[i]->mapx - levx;
+            int dy = cur_om->npcs[i]->mapy - levy;
+            if (debugmon) {
+                debugmsg("game::load_npcs: Spawning static NPC, %d:%d (%d:%d)",
+                         levx, levy, cur_om->npcs[i]->mapx, cur_om->npcs[i]->mapy);
+            }
 
-            npc * temp = cur_om->npcs[i];
+            npc *temp = cur_om->npcs[i];
 
-            if (temp->posx == -1 || temp->posy == -1)
-            {
+            if (temp->posx == -1 || temp->posy == -1) {
                 dbg(D_ERROR) << "game::load_npcs: Static NPC with no fine location "
                     "data (" << temp->posx << ":" << temp->posy << ").";
-                debugmsg("game::load_npcs Static NPC with no fine location data (%d:%d) New loc data (%d:%d).",
+                debugmsg("game::load_npcs Static NPC with no fine location data "
+                         "(%d:%d) New loc data (%d:%d).",
                          temp->posx, temp->posy, SEEX * 2 * (temp->mapx - levx) + rng(0 - SEEX, SEEX),
                          SEEY * 2 * (temp->mapy - levy) + rng(0 - SEEY, SEEY));
                 temp->posx = SEEX * 2 * (temp->mapx - levx) + rng(0 - SEEX, SEEX);
                 temp->posy = SEEY * 2 * (temp->mapy - levy) + rng(0 - SEEY, SEEY);
             } else {
-                if (debugmon) debugmsg("game::load_npcs Static NPC fine location %d:%d (%d:%d)", temp->posx, temp->posy, temp->posx + dx * SEEX, temp->posy + dy * SEEY);
+                if (debugmon) debugmsg("game::load_npcs Static NPC fine location %d:%d (%d:%d)",
+                                       temp->posx, temp->posy, temp->posx + dx * SEEX,
+                                       temp->posy + dy * SEEY);
                 temp->posx += dx * SEEX;
                 temp->posy += dy * SEEY;
             }
 
-        //check if the loaded position doesn't already contain an object, monster or npc.
-        //If it isn't free, spiralsearch for a free spot.
-        temp->place_near(temp->posx, temp->posy);
+            //check if the loaded position doesn't already contain an object, monster or npc.
+            //If it isn't free, spiralsearch for a free spot.
+            temp->place_near(temp->posx, temp->posy);
 
-        //In the rare case the npc was marked for death while it was on the overmap. Kill it.
-        if (temp->marked_for_death)
-            temp->die(false);
-        else
-            active_npc.push_back(temp);
+            //In the rare case the npc was marked for death while it was on the overmap. Kill it.
+            if (temp->marked_for_death) {
+                temp->die(false);
+            } else {
+                active_npc.push_back(temp);
+            }
         }
     }
 }
@@ -532,10 +645,12 @@ void game::create_starting_npcs()
     tmp->place_near(SEEX * int(MAPSIZE / 2) + SEEX, SEEY * int(MAPSIZE / 2) + 6);
     tmp->form_opinion(&u);
     tmp->attitude = NPCATT_NULL;
-    tmp->mission = NPC_MISSION_SHELTER; //This sets the npc mission. This NPC remains in the shelter.
+    //This sets the npc mission. This NPC remains in the shelter.
+    tmp->mission = NPC_MISSION_SHELTER;
     tmp->chatbin.first_topic = TALK_SHELTER;
+     //one random shelter mission.
     tmp->chatbin.missions.push_back(
-        reserve_random_mission(ORIGIN_OPENER_NPC, om_location(), tmp->getID()) ); //one random shelter mission/
+        reserve_random_mission(ORIGIN_OPENER_NPC, om_location(), tmp->getID()) );
 
     active_npc.push_back(tmp);
 }
@@ -568,13 +683,15 @@ void game::cleanup_at_end(){
         u.memorial_log.clear();
         std::vector<std::string> characters = list_active_characters();
         // remove current player from the active characters list, as they are dead
-        std::vector<std::string>::iterator curchar = std::find(characters.begin(), characters.end(), u.name);
+        std::vector<std::string>::iterator curchar = std::find(characters.begin(),
+                                                               characters.end(), u.name);
         if (curchar != characters.end()){
             characters.erase(curchar);
         }
         if (characters.empty()) {
             if (ACTIVE_WORLD_OPTIONS["DELETE_WORLD"] == "yes" ||
-            (ACTIVE_WORLD_OPTIONS["DELETE_WORLD"] == "query" && query_yn(_("Delete saved world?")))) {
+                (ACTIVE_WORLD_OPTIONS["DELETE_WORLD"] == "query" &&
+                 query_yn(_("Delete saved world?")))) {
                 if (gamemode->id() == SGAME_NULL) {
                     delete_world(world_generator->active_world->world_name, false);
                 } else {
@@ -612,8 +729,9 @@ bool game::do_turn()
     turn.increment();
     process_events();
     process_missions();
-    if (turn.hours() == 0 && turn.minutes() == 0 && turn.seconds() == 0) // Midnight!
+    if (turn.hours() == 0 && turn.minutes() == 0 && turn.seconds() == 0) { // Midnight!
         cur_om->process_mongroups();
+    }
 
     // Check if we've overdosed... in any deadly way.
     if (u.stim > 250) {
@@ -625,11 +743,10 @@ bool game::do_turn()
         u.add_memorial_log(_("Died of a drug overdose."));
         u.hp_cur[hp_torso] = 0;
     } else if (u.has_disease("jetinjector") &&
-            u.disease_duration("jetinjector") > 400) {
-            if (!(u.has_trait("NOPAIN"))) {
-                add_msg(_("Your heart spasms painfully and stops."));
-            }
-        else { add_msg(_("Your heart spasms and stops.")); }
+               u.disease_duration("jetinjector") > 400) {
+        if (!(u.has_trait("NOPAIN"))) {
+            add_msg(_("Your heart spasms painfully and stops."));
+        } else { add_msg(_("Your heart spasms and stops.")); }
         u.add_memorial_log(_("Died of a healing stimulant overdose."));
         u.hp_cur[hp_torso] = 0;
     }
@@ -2106,6 +2223,12 @@ input_context game::get_player_input(std::string &action)
         int iEndX = (TERRAIN_WINDOW_WIDTH > 121) ? TERRAIN_WINDOW_WIDTH-(TERRAIN_WINDOW_WIDTH-121)/2: TERRAIN_WINDOW_WIDTH;
         int iEndY = (TERRAIN_WINDOW_HEIGHT > 121) ? TERRAIN_WINDOW_HEIGHT-(TERRAIN_WINDOW_HEIGHT-121)/2: TERRAIN_WINDOW_HEIGHT;
 
+        if(fullscreen) {
+          iStartX = 0;
+          iStartY = 0;
+          iEndX = TERMX;
+          iEndY = TERMY;
+        }
         //x% of the Viewport, only shown on visible areas
         int dropCount = int(iEndX * iEndY * fFactor);
         //std::vector<std::pair<int, int> > vDrops;
@@ -2513,6 +2636,7 @@ bool game::handle_action()
     int iRetItems = -1;
     int iRetMonsters = -1;
     int startas = uistate.list_item_mon;
+    temp_exit_fullscreen();
     do {
         if ( startas != 2 ) { // last mode 2 = list_monster
             startas = 0;      // but only for the first bit of the loop
@@ -2537,6 +2661,7 @@ bool game::handle_action()
         refresh_all();
         plfire(false);
     }
+    reenter_fullscreen();
   } break;
 
 
@@ -2835,6 +2960,10 @@ bool game::handle_action()
 
   case ACTION_TOGGLE_SIDEBAR_STYLE:
    toggle_sidebar_style();
+   break;
+
+ case ACTION_TOGGLE_FULLSCREEN:
+   toggle_fullscreen();
    break;
 
   case ACTION_DISPLAY_SCENT:
@@ -3199,6 +3328,10 @@ void game::load(std::string worldname, std::string name)
  // recalculated. (This would be cleaner if u.worn were private.)
  u.recalc_sight_limits();
 
+ if(gamemode == NULL) {
+     gamemode = new special_game();
+ }
+
  load_auto_pickup(true); // Load character auto pickup rules
  load_uistate(worldname);
 // Now load up the master game data; factions (and more?)
@@ -3209,6 +3342,33 @@ void game::load(std::string worldname, std::string name)
 
  u.reset();
  draw();
+}
+
+void game::load_world_modfiles(WORLDPTR world)
+{
+    popup_nowait(_("Please wait while the world data loads"));
+    load_core_data();
+    if (world != NULL) {
+        load_artifacts(world->world_path + "/artifacts.gsav", itypes);
+        mod_manager *mm = world_generator->get_mod_manager();
+        // this code does not care about mod dependencies,
+        // it assumes that those dependencies are static and
+        // are resolved during the creation of the world.
+        // That means world->active_mod_order contains a list
+        // of mods in the correct order.
+        for (size_t i = 0; i < world->active_mod_order.size(); i++) {
+            const std::string &mod_ident = world->active_mod_order[i];
+            if (mm->has_mod(mod_ident)) {
+                MOD_INFORMATION *mod = mm->mod_map[mod_ident];
+                load_data_from_dir(mod->path);
+            } else {
+                debugmsg("the world uses an unknown mod %s", mod_ident.c_str());
+            }
+        }
+        // Load additional mods from that world-specific folder
+        load_data_from_dir(world->world_path + "/mods");
+    }
+    DynamicDataLoader::get_instance().finalize_loaded_data();
 }
 
 //Saves all factions and missions and npcs.
@@ -3288,6 +3448,23 @@ void game::delete_world(std::string worldname, bool delete_folder)
     std::string worldpath = world_generator->all_worlds[worldname]->world_path;
     std::string filetmp = "";
     std::string world_opfile = "worldoptions.txt";
+    std::vector<std::string> modfiles;
+    std::set<std::string> mod_dirpathparts;
+
+    if (delete_folder){
+        modfiles = file_finder::get_files_from_path(".json", worldpath, true, true);
+        for (int i = 0; i < modfiles.size(); ++i){
+            // strip to path and remove worldpath from it
+            std::string part = modfiles[i].substr(worldpath.size(), modfiles[i].find_last_of("/\\") - worldpath.size());
+            int last_separator = part.find_last_of("/\\");
+            while (last_separator != std::string::npos && part.size() > 1){
+                mod_dirpathparts.insert(part);
+                part = part.substr(0, last_separator);
+                last_separator = part.find_last_of("/\\");
+            }
+        }
+    }
+
 #if (defined _WIN32 || defined __WIN32__)
       WIN32_FIND_DATA FindFileData;
       HANDLE hFind;
@@ -3305,8 +3482,15 @@ void game::delete_world(std::string worldname, bool delete_folder)
        } while(FindNextFile(hFind, &FindFileData) != 0);
        FindClose(hFind);
       }
+
       SetCurrentDirectory(Buffer);
       if (delete_folder){
+        for (int i = 0; i < modfiles.size(); ++i){
+            DeleteFile(modfiles[i].c_str());
+        }
+        for (std::set<std::string>::reverse_iterator it = mod_dirpathparts.rbegin(); it != mod_dirpathparts.rend(); ++it){
+            RemoveDirectory(std::string(worldpath + *it).c_str());
+        }
         RemoveDirectory(worldpath.c_str());
       }
 #else
@@ -3323,6 +3507,14 @@ void game::delete_world(std::string worldname, bool delete_folder)
       (void)closedir(save_dir);
      }
      if (delete_folder){
+        // delete mod files
+        for (int i = 0; i < modfiles.size(); ++i){
+            (void)unlink(modfiles[i].c_str());
+        }
+        // delete mod directories -- directories are ordered deepest to shallowest
+        for (std::set<std::string>::reverse_iterator it = mod_dirpathparts.rbegin(); it != mod_dirpathparts.rend(); ++it){
+            remove(std::string(worldpath + *it).c_str());
+        }
         remove(worldpath.c_str());
      }
 #endif
@@ -4402,6 +4594,9 @@ void game::draw()
     draw_ter();
     draw_footsteps();
 
+    if(fullscreen) {
+      return;
+    }
     // Draw Status
     draw_HP();
     werase(w_status);
@@ -4640,10 +4835,12 @@ void game::refresh_all()
 {
  m.reset_vehicle_cache();
  draw();
- draw_HP();
- wrefresh(w_messages);
+ if(!fullscreen) {
+   draw_HP();
+   wrefresh(w_messages);
+   draw_minimap();
+ }
  refresh();
- draw_minimap();
 }
 
 void game::draw_HP()
@@ -7889,6 +8086,7 @@ void game::get_lookaround_dimensions(int &lookWidth, int &begin_y, int &begin_x)
 
 point game::look_around()
 {
+ temp_exit_fullscreen();
  draw_ter();
  int lx = u.posx + u.view_offset_x, ly = u.posy + u.view_offset_y;
  std::string action;
@@ -7984,29 +8182,57 @@ point game::look_around()
 
  werase(w_look);
  delwin(w_look);
+ reenter_fullscreen();
  if (action == "CONFIRM")
   return point(lx, ly);
  return point(-1, -1);
 }
 
-bool game::list_items_match(std::string sText, std::string sPattern)
+bool game::list_items_match(item &item, std::string sPattern)
 {
     size_t iPos;
+    bool hasExclude = false;
+
+    if(sPattern.find("-") != std::string::npos) {
+        hasExclude = true;
+    }
 
     do {
         iPos = sPattern.find(",");
+        std::string pat = (iPos == std::string::npos) ? sPattern : sPattern.substr(0, iPos);
+        bool exclude = false;
+        if (pat.substr(0, 1) == "-") {
+            exclude = true;
+            pat = pat.substr(1, pat.size() - 1);
+        } else if (hasExclude) {
+            hasExclude = false; //If there are non exclusive items to filter, we flip this back to false.
+        }
 
-        if (sText.find((iPos == std::string::npos) ? sPattern : sPattern.substr(0, iPos)) != std::string::npos) {
-            return true;
+        if (item.tname().find(pat) != std::string::npos) {
+            return !exclude;
+        }
+
+        if(pat.find("{",0) != std::string::npos) {
+            std::string adv_pat_type = pat.substr(1, pat.find(":")-1);
+            std::string adv_pat_search = pat.substr(pat.find(":")+1, (pat.find("}")-pat.find(":"))-1);
+            if(adv_pat_type == "c" && item.get_category().name.find(adv_pat_search,0) != std::string::npos) {
+                return !exclude;
+            } else if (adv_pat_type == "m" && item.made_of(adv_pat_search)) {
+                return !exclude;
+            } else if (adv_pat_type == "dgt" && item.damage > atoi(adv_pat_search.c_str())) {
+                return !exclude;
+            } else if (adv_pat_type == "dlt" && item.damage < atoi(adv_pat_search.c_str())) {
+                return !exclude;
+            }
         }
 
         if (iPos != std::string::npos) {
-            sPattern = sPattern.substr(iPos+1, sPattern.size());
+            sPattern = sPattern.substr(iPos + 1, sPattern.size());
         }
 
     } while(iPos != std::string::npos);
 
-    return false;
+    return hasExclude;
 }
 
 std::vector<map_item_stack> game::find_nearby_items(int iRadius)
@@ -8064,18 +8290,13 @@ std::vector<map_item_stack> game::filter_item_stacks(std::vector<map_item_stack>
 
     std::string sFilterPre = "";
     std::string sFilterTemp = filter;
-    if (sFilterTemp != "" && filter.substr(0, 1) == "-") {
-        sFilterPre = "-";
-        sFilterTemp = sFilterTemp.substr(1, sFilterTemp.size()-1);
-    }
 
     for (std::vector<map_item_stack>::iterator iter = stack.begin(); iter != stack.end(); ++iter) {
         if(exclude_clothing && dynamic_cast<it_armor*>(iter->example.type) != 0) {
             continue;
         }
         std::string name = iter->example.tname();
-        if (sFilterTemp == "" || ((sFilterPre != "-" && list_items_match(name, sFilterTemp)) ||
-                                  (sFilterPre == "-" && !list_items_match(name, sFilterTemp)))) {
+        if (sFilterTemp == "" || list_items_match(iter->example, sFilterTemp) ) {
             ret.push_back(*iter);
         }
     }
@@ -8089,16 +8310,56 @@ std::string game::ask_item_filter(WINDOW* window, int rows)
                                                      ");
     }
 
-    mvwprintz(window, 2, 2, c_white, "%s", _("Type part of an item's name to see"));
-    mvwprintz(window, 3, 2, c_white, "%s", _("nearby matching items."));
-    mvwprintz(window, 5, 2, c_white, "%s", _("Seperate multiple items with ,"));
-    mvwprintz(window, 6, 2, c_white, "%s", _("Example: back,flash,aid, ,band"));
-    //TODO: fix up the filter code so that "-" applies to each comma-separated bit
-    //or, failing that, make the description sound more like what the current behavior does
-    mvwprintz(window, 8, 2, c_white, "%s", _("To exclude items, place - in front"));
-    mvwprintz(window, 9, 2, c_white, "%s", _("Example: -pipe,chunk,steel"));
+    mvwprintz(window, 0, 2, c_white, "%s", _("Type part of an item's name to see"));
+    mvwprintz(window, 1, 2, c_white, "%s", _("nearby matching items."));
+    mvwprintz(window, 3, 2, c_white, "%s", _("Separate multiple items with ,"));
+    mvwprintz(window, 4, 2, c_white, "%s", _("Example: back,flash,aid, ,band"));
+
+    mvwprintz(window, 6, 2, c_white, "%s", _("To exclude items, place - in front"));
+    mvwprintz(window, 7, 2, c_white, "%s", _("Example: -pipe,chunk,steel"));
+
+    mvwprintz(window, 9, 2, c_white, "%s", _("Search [c]ategory or [m]aterial:"));
+    mvwprintz(window, 10, 2, c_white, "%s", _("Example: {c:food},{m:iron}"));
     wrefresh(window);
     return string_input_popup(_("Filter:"), 55, sFilter, _("UP: history, CTRL-U clear line, ESC: abort, ENTER: save"), "item_filter", 256);
+}
+
+std::string game::ask_item_priority_high(WINDOW* window, int rows)
+{
+    for (int i = 0; i < rows-1; i++) {
+        mvwprintz(window, i, 1, c_black, "%s", "\
+                                                     ");
+    }
+
+    mvwprintz(window, 2, 2, c_white, "%s", _("Type part of an item's name to move"));
+    mvwprintz(window, 3, 2, c_white, "%s", _("nearby items to the top."));
+
+    mvwprintz(window, 5, 2, c_white, "%s", _("Separate multiple items with ,"));
+    mvwprintz(window, 6, 2, c_white, "%s", _("Example: back,flash,aid, ,band"));
+
+    mvwprintz(window, 8, 2, c_white, "%s", _("Search [c]ategory or [m]aterial:"));
+    mvwprintz(window, 9, 2, c_white, "%s", _("Example: {c:food},{m:iron}"));
+    wrefresh(window);
+    return string_input_popup(_("High Priority:"), 55, list_item_upvote, _("UP: history, CTRL-U clear line, ESC: abort, ENTER: save"), "list_item_priority", 256);
+}
+
+std::string game::ask_item_priority_low(WINDOW* window, int rows)
+{
+    for (int i = 0; i < rows-1; i++) {
+        mvwprintz(window, i, 1, c_black, "%s", "\
+                                                     ");
+    }
+
+    mvwprintz(window, 2, 2, c_white, "%s", _("Type part of an item's name to move"));
+    mvwprintz(window, 3, 2, c_white, "%s", _("nearby items to the bottom."));
+
+    mvwprintz(window, 5, 2, c_white, "%s", _("Separate multiple items with ,"));
+    mvwprintz(window, 6, 2, c_white, "%s", _("Example: back,flash,aid, ,band"));
+
+    mvwprintz(window, 8, 2, c_white, "%s", _("Search [c]ategory or [m]aterial:"));
+    mvwprintz(window, 9, 2, c_white, "%s", _("Example: {c:food},{m:iron}"));
+    wrefresh(window);
+    return string_input_popup(_("Low Priority:"), 55, list_item_downvote, _("UP: history, CTRL-U clear line, ESC: abort, ENTER: save"), "list_item_downvote", 256);
 }
 
 
@@ -8182,7 +8443,7 @@ int game::list_filter_high_priority(std::vector<map_item_stack> &stack, std::str
     std::vector<map_item_stack> tempstack; // temp
     for(int i = 0 ; i < stack.size() ; i++) {
         std::string name = stack[i].example.tname();
-        if(prorities == "" || !list_items_match(name,prorities)) {
+        if(prorities == "" || !list_items_match(stack[i].example,prorities)) {
             tempstack.push_back(stack[i]);
             stack.erase(stack.begin()+i);
             i--;
@@ -8201,7 +8462,7 @@ int game::list_filter_low_priority(std::vector<map_item_stack> &stack, int start
     std::vector<map_item_stack> tempstack; // temp
     for(int i = start ; i < stack.size() ; i++) {
         std::string name = stack[i].example.tname();
-        if(prorities != "" && list_items_match(name,prorities)) {
+        if(prorities != "" && list_items_match(stack[i].example,prorities)) {
             tempstack.push_back(stack[i]);
             stack.erase(stack.begin()+i);
             i--;
@@ -8339,12 +8600,12 @@ int game::list_items(const int iLastState)
                 iLastActiveY = -1;
                 reset = true;
             } else if(ch == '+') {
-                std::string temp = string_input_popup(_("High Priority:"), width, list_item_upvote, _("UP: history, CTRL-U clear line, ESC: abort, ENTER: save"), "list_item_priority", 256);
+                std::string temp = ask_item_priority_high(w_item_info, iInfoHeight);
                 list_item_upvote = temp;
                 refilter = true;
                 reset = true;
             } else if(ch == '-') {
-                std::string temp = string_input_popup(_("Low Priority:"), width, list_item_downvote, _("UP: history, CTRL-U clear line, ESC: abort, ENTER: save"), "list_item_downvote", 256);
+                std::string temp = ask_item_priority_low(w_item_info, iInfoHeight);
                 list_item_downvote = temp;
                 refilter = true;
                 reset = true;
@@ -9182,6 +9443,9 @@ and you can't unwield your %s."),
         return;
     }
 
+    if(min != -1) { // don't bother if we're just autopickup-ing
+      temp_exit_fullscreen();
+    }
     bool sideStyle = use_narrow_sidebar();
 
     // Otherwise, we have Autopickup, 2 or more items and should list them, etc.
@@ -9270,6 +9534,7 @@ and you can't unwield your %s."),
             return;
         }
     } else {
+        if(was_fullscreen) { draw_ter(); write_msg(); }
         // Now print the two lists; those on the ground and about to be added to inv
         // Continue until we hit return or space
         do {
@@ -9480,6 +9745,7 @@ and you can't unwield your %s."),
             delwin(w_pickup);
             delwin(w_item_info);
             add_msg(_("Never mind."));
+            reenter_fullscreen();
             refresh_all();
             return;
         }
@@ -9614,6 +9880,7 @@ and you can't unwield your %s."),
     if (volume_is_okay && u.volume_carried() > u.volume_capacity() - 2) {
         add_msg(_("You struggle to carry such a large volume!"));
     }
+    reenter_fullscreen();
     werase(w_pickup);
     wrefresh(w_pickup);
     werase(w_item_info);
@@ -10294,6 +10561,7 @@ void game::plthrow(int pos)
   return;
  }
 
+ temp_exit_fullscreen();
  m.draw(w_terrain, point(u.posx, u.posy));
 
  std::vector <monster> mon_targets;
@@ -10357,6 +10625,7 @@ void game::plthrow(int pos)
  u.practice(turn, "throw", 10);
 
  throw_item(u, x, y, thrown, trajectory);
+ reenter_fullscreen();
 }
 
 void game::plfire(bool burst, int default_target_x, int default_target_y)
@@ -10447,9 +10716,10 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
          return;
      }
  }
- 
+
  int range = u.weapon.range(&u);
 
+ temp_exit_fullscreen();
  m.draw(w_terrain, point(u.posx, u.posy));
 
 // Populate a list of targets with the zombies in range and visible
@@ -10487,6 +10757,7 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
       unload(u.weapon);
       u.moves += u.weapon.reload_time(u) / 2; // unloading time
   }
+  reenter_fullscreen();
   return;
  }
  if (passtarget != -1) { // We picked a real live target
@@ -10512,6 +10783,7 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
      u.practice(turn, "gun", 5);
 
  u.fire_gun(x,y,burst);
+ reenter_fullscreen();
  //fire(u, x, y, trajectory, burst);
 }
 
@@ -11974,7 +12246,9 @@ bool game::plmove(int dx, int dy)
             }
             for (int i = 0; i < names.size(); ++i) {
                 std::string fmt;
-                if (counts[i] == 1) {
+                if (names[i].at(names[i].length() - 1) == 's') {
+                    names[i] = string_format("%d %s", counts[i], names[i].c_str());
+                } else if (counts[i] == 1) {
                     //~ one item (e.g. "a dress")
                     fmt = _("a %s");
                     names[i] = string_format(fmt, names[i].c_str());
@@ -12576,7 +12850,9 @@ void game::update_map(int &x, int &y) {
  m.build_map_cache();
 // Update what parts of the world map we can see
  update_overmap_seen();
- draw_minimap();
+ if(!fullscreen) {
+   draw_minimap();
+ }
 }
 
 void game::set_adjacent_overmaps(bool from_scratch)
@@ -13081,6 +13357,9 @@ bool game::game_error() { return (uquit == QUIT_ERROR); }
 
 void game::write_msg()
 {
+    if(fullscreen) {
+        return;
+    }
     werase(w_messages);
     int maxlength = getmaxx(w_messages);
 

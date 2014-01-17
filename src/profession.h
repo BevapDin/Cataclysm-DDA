@@ -41,11 +41,12 @@ private:
     // Starting skills will boost the players level in those skills by a 
     // given amount.
     void add_skill(const std::string& skill_name, const int level);
+
+    static profmap _all_profs;
 public:
     //these three aren't meant for external use, but had to be made public regardless
     profession();
     profession(std::string ident, std::string name, std::string description, signed int points);
-    static profmap _all_profs;
 
     static void load_profession(JsonObject &jsobj);
 
@@ -61,6 +62,8 @@ public:
     static void check_definitions();
 
     void check_definition() const;
+    // clear profession map, every profession pointer becames invalid!
+    static void reset();
 
     std::string ident() const;
     std::string name() const;

@@ -79,6 +79,7 @@ class advanced_inventory
         const int right;
         const int isinventory;
         const int isall;
+        const int isdrag;
 
     bool checkshowmsg;
     bool showmsg;
@@ -104,7 +105,7 @@ class advanced_inventory
     bool filter_edit;
 
         advanced_inventory_pane panes[2];
-        advanced_inv_area squares[11];
+        advanced_inv_area squares[12];
 
         advanced_inventory() :
             head_height(5),
@@ -114,7 +115,8 @@ class advanced_inventory
             left(0),
             right(1),
             isinventory(0),
-            isall(10) {
+            isall(10),
+            isdrag(11) {
         }
         void display(player *pp);
         void print_items(advanced_inventory_pane &pane, bool active);
@@ -123,6 +125,7 @@ class advanced_inventory
         void init(player *pp);
     private:
         int find_destination(const item &it, int ignore_this_location, int and_this_location);
+        bool isDirectionalDragged(int area1, int area2);
 };
 
 #endif

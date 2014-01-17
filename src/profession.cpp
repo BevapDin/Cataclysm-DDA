@@ -140,6 +140,11 @@ void profession::check_definition() const
     // TODO: check skills
 }
 
+void profession::reset()
+{
+    _all_profs.clear();
+}
+
 bool profession::has_initialized()
 {
     return exists("unemployed");

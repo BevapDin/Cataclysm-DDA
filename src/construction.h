@@ -21,6 +21,7 @@ struct construct // Construction functions.
     void done_trunk_log(point);
     void done_trunk_plank(point);
     void done_vehicle(point);
+    void done_vehicle_hd(point);
     void done_deconstruct(point);
 };
 
@@ -46,6 +47,7 @@ struct construction : public recipe
 extern std::vector<construction*> constructions;
 
 void load_construction(JsonObject &jsobj);
+void reset_constructions();
 void construction_menu();
 bool player_can_build(player &p, crafting_inventory_t& inv, construction *con);
 bool player_can_build(player &p, crafting_inventory_t& pinv, const std::string &desc);

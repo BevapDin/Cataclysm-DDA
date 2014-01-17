@@ -2264,7 +2264,7 @@
      ]
     ]
 },{
-        "type" : "recipe",
+  "type" : "recipe",
   "result": "trimmer_off",
   "category": "CC_OTHER",
   "subcategory": "CSC_OTHER_TOOLS",
@@ -2277,40 +2277,40 @@
   "autolearn": false,
   "book_learn": [["advanced_electronics", 4] , ["textbook_electronics", 4]],
   "tools" : [
-     [ ["mold_plastic", -1] ],
-     [
+    [ ["mold_plastic", -1] ],
+    [
       ["func:hotplate", 12],
       ["fire", -1]
-     ],
-     [
+    ],
+    [
       [ "func:screwdriver", -1 ]
-     ],
-     [
+    ],
+    [
       [ "func:soldering_iron", 12 ]
-     ]
+    ]
   ],
   "components" : [
-     [
+    [
       ["plastic_chunk", 6]
-     ],
-     [
+    ],
+    [
       ["chain", 1]
-     ],
-     [
+    ],
+    [
       ["motor", 1]
-     ],
-     [
+    ],
+    [
       ["power_supply", 1]
-     ],
-     [
+    ],
+    [
       [ "scrap", 1 ]
-     ],
-     [
+    ],
+    [
       [ "cable", 5 ]
-     ]
     ]
+  ]
 },{
-        "type" : "recipe",
+  "type" : "recipe",
   "result": "circsaw_off",
   "category": "CC_OTHER",
   "subcategory": "CSC_OTHER_TOOLS",
@@ -2322,38 +2322,38 @@
   "autolearn": false,
   "book_learn": [["advanced_electronics", 4] , ["textbook_electronics", 4] , ["textbook_carpentry", 5]],
   "tools" : [
-     [ ["mold_plastic", -1] ],
-     [
+    [ ["mold_plastic", -1] ],
+    [
       ["func:hotplate", 10],
       ["fire", -1]
-     ],
-     [
+    ],
+    [
       [ "func:screwdriver", -1 ]
-     ],
-     [
+    ],
+    [
       [ "func:soldering_iron", 10 ]
-     ]
+    ]
   ],
   "components" : [
-     [
+    [
       ["plastic_chunk", 6]
-     ],
-     [
+    ],
+    [
       ["circsaw_blade", 1]
-     ],
-     [
+    ],
+    [
       ["motor", 1]
-     ],
-     [
+    ],
+    [
       ["power_supply", 1]
-     ],
-     [
+    ],
+    [
       [ "scrap", 1 ]
-     ],
-     [
+    ],
+    [
       [ "cable", 5 ]
-     ]
     ]
+  ]
 },{
         "type" : "recipe",
   "result": "combatsaw_off",
@@ -5650,7 +5650,7 @@
     [
       [ "spaghetti_raw", 1 ],
       [ "macaroni_raw", 1],
-      [ "noodles_fast", 3]
+      [ "noodles_fast", 1]
     ],
     [
       [ "func:water", 1 ]
@@ -5724,7 +5724,7 @@
     [
       [ "spaghetti_raw", 1 ],
       [ "macaroni_raw", 1],
-      [ "noodles_fast", 3]
+      [ "noodles_fast", 1]
     ],
     [
       [ "cheese", 1 ],
@@ -5758,7 +5758,7 @@
     [
       [ "spaghetti_raw", 1 ],
       [ "macaroni_raw", 1],
-      [ "noodles_fast", 3]
+      [ "noodles_fast", 1]
     ],
     [
       [ "meat", 1 ],
@@ -5798,7 +5798,7 @@
     [
       [ "spaghetti_raw", 1 ],
       [ "macaroni_raw", 1],
-      [ "noodles_fast", 3]
+      [ "noodles_fast", 1]
     ],
     [
       [ "human_flesh", 1 ],
@@ -6837,7 +6837,7 @@
     [
       [ "spaghetti_raw", 1 ],
       [ "macaroni_raw", 1],
-      [ "noodles_fast", 3],
+      [ "noodles_fast", 1],
       [ "potato_irradiated", 1],
       [ "potato_raw", 1 ],
       [ "powder_eggs", 5 ]
@@ -6880,7 +6880,7 @@
     [
       [ "spaghetti_raw", 1 ],
       [ "macaroni_raw", 1],
-      [ "noodles_fast", 3],
+      [ "noodles_fast", 1],
       [ "potato_irradiated", 1],
       [ "potato_raw", 1 ],
       [ "powder_eggs", 5 ]
@@ -6959,7 +6959,7 @@
     [
       [ "spaghetti_raw", 1 ],
       [ "macaroni_raw", 1],
-      [ "noodles_fast", 3],
+      [ "noodles_fast", 1],
       [ "potato_irradiated", 1 ],
       [ "potato_raw", 1 ]
     ],
