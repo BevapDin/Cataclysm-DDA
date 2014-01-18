@@ -2780,10 +2780,11 @@ bool game::handle_action()
    break;
 
   case ACTION_DISASSEMBLE:
-   if (u.in_vehicle)
-    add_msg(_("You can't disassemble items while in vehicle."));
-   else
-    disassemble();
+      if( u.controlling_vehicle ) {
+          add_msg(_("You can't disassemble items while driving."));
+      } else {
+          disassemble();
+      }
    break;
 
   case ACTION_CONSTRUCT:

@@ -6835,6 +6835,7 @@ bool player::consume(int pos)
         return false;
     }
 
+    int amount_used = 1;
     bool was_consumed = false;
     if (comest != NULL) {
         if (comest->comesttype == "FOOD" || comest->comesttype == "DRINK") {
@@ -6859,8 +6860,8 @@ bool player::consume(int pos)
             }
             if (comest->use != &iuse::none) {
                 //Check special use
-                int was_used = comest->use.call(this, to_eat, false);
-                if( was_used == 0 ) {
+                amount_used = comest->use.call(this, to_eat, false);
+                if( amount_used == 0 ) {
                     return false;
                 }
             }
@@ -6910,7 +6911,7 @@ bool player::consume(int pos)
     }
 
     // Actions after consume
-    to_eat->charges--;
+    to_eat->charges -= amount_used;
     if (to_eat->charges <= 0) {
         if (which == -1) {
             weapon = ret_null;
