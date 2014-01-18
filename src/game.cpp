@@ -437,7 +437,7 @@ void game::reenter_fullscreen(void)
  */
 void game::setup()
 {
- m = map(&traps); // Init the root map with our vectors
+    m = map(); // reset the main map
 
     load_world_modfiles(world_generator->active_world);
 
@@ -12258,7 +12258,7 @@ void game::vertical_move(int movez, bool force) {
      return;
  }
 
- map tmpmap(&traps);
+ map tmpmap;
  tmpmap.load(levx, levy, levz + movez, false);
 // Find the corresponding staircase
  int stairx = -1, stairy = -1;
@@ -12714,7 +12714,7 @@ void game::force_save_monster(monster &critter) {
     critter.spawnposx = rc.sub_pos.x;
     critter.spawnposy = rc.sub_pos.y;
 
-    tinymap tmp(&traps);
+    tinymap tmp;
     tmp.load(critter.spawnmapx, critter.spawnmapy, levz, false);
     tmp.add_spawn(&critter);
     tmp.save(cur_om, turn, critter.spawnmapx, critter.spawnmapy, levz);
@@ -12744,7 +12744,7 @@ void game::despawn_monsters(const int shiftx, const int shifty)
                     // We're saving him, so there's no need to keep anymore.
                     critter.setkeep(false);
 
-                    tinymap tmp(&traps);
+                    tinymap tmp;
                     tmp.load(critter.spawnmapx, critter.spawnmapy, levz, false);
                     tmp.add_spawn(&critter);
                     tmp.save(cur_om, turn, critter.spawnmapx, critter.spawnmapy, levz);
@@ -13163,7 +13163,7 @@ void game::nuke(int x, int y)
     if (x < 0 || y < 0 || x >= OMAPX || y >= OMAPY)
         return;
     int mapx = x * 2, mapy = y * 2;
-    map tmpmap(&traps);
+    map tmpmap;
     tmpmap.load(mapx, mapy, 0, false);
     for (int i = 0; i < SEEX * 2; i++)
     {
