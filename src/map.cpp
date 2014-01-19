@@ -2853,7 +2853,8 @@ std::list<item> use_amount_map_or_vehicle(std::vector<item> &vec, const itype_id
   return ret;
 }
 
-std::list<item> map::use_amount_square(const int x, const int y, const itype_id type, int &quantity, const bool use_container)
+std::list<item> map::use_amount_square(const int x, const int y, const itype_id type,
+                                       int &quantity, const bool use_container)
 {
   std::list<item> ret;
   int vpart = -1;
@@ -2862,7 +2863,8 @@ std::list<item> map::use_amount_square(const int x, const int y, const itype_id 
   if (veh) {
     const int cargo = veh->part_with_feature(vpart, "CARGO");
     if (cargo >= 0) {
-      std::list<item> tmp = use_amount_map_or_vehicle(veh->parts[cargo].items, type, quantity, use_container);
+      std::list<item> tmp = use_amount_map_or_vehicle(veh->parts[cargo].items, type,
+                                                      quantity, use_container);
       ret.splice(ret.end(), tmp);
     }
   }
@@ -2891,7 +2893,7 @@ std::list<item> map::use_amount(const point origin, const int range, const itype
 }
 
 std::list<item> use_charges_from_map_or_vehicle(std::vector<item> &vec, const itype_id type,
-        int &quantity)
+                                                int &quantity)
 {
     std::list<item> ret;
     for (int n = 0; n < vec.size() && quantity > 0; n++) {
@@ -2940,27 +2942,49 @@ std::list<item> map::use_charges(const point origin, const int range,
     for (int radius = 0; radius <= range && quantity > 0; radius++) {
         for (int x = origin.x - radius; x <= origin.x + radius; x++) {
             for (int y = origin.y - radius; y <= origin.y + radius; y++) {
-                int junk;
-                if((x != origin.x || y != origin.y) && !g->m.clear_path( origin.x, origin.y, x, y, range, 1, 100, junk ) ) {
+                if(accessable_items( origin.x, origin.y, x, y, range) ) {
                     continue;
                 }
-                int vpart = -1;
-                vehicle *veh = veh_at(x, y, vpart);
-                if (veh) { // check if a vehicle part is present to provide water/power
-                    const int kpart = veh->part_with_feature(vpart, "KITCHEN");
-                    const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
-                    const int craftpart = veh->part_with_feature(vpart, "CRAFTRIG");
-                    const int forgepart = veh->part_with_feature(vpart, "FORGE");
-                    const int chempart = veh->part_with_feature(vpart, "CHEMLAB");
-                    const int cargo = veh->part_with_feature(vpart, "CARGO");
-                    if (kpart >= 0) { // we have a kitchen, now to see what to drain
-                        ammotype ftype = "NULL";
-                        if (type == "water_clean" || type == "func:water") {
-                            ftype = "water";
-                        } else if (type == "func:hotplate" || type == "hotplate") {
-                            ftype = "battery";
+                if (rl_dist(origin.x, origin.y, x, y) >= radius) {
+                    int vpart = -1;
+                    vehicle *veh = veh_at(x, y, vpart);
+
+                    if (veh) { // check if a vehicle part is present to provide water/power
+                        const int kpart = veh->part_with_feature(vpart, "KITCHEN");
+                        const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
+                        const int craftpart = veh->part_with_feature(vpart, "CRAFTRIG");
+                        const int forgepart = veh->part_with_feature(vpart, "FORGE");
+                        const int chempart = veh->part_with_feature(vpart, "CHEMLAB");
+                        const int cargo = veh->part_with_feature(vpart, "CARGO");
+
+                        if (kpart >= 0) { // we have a kitchen, now to see what to drain
+                            ammotype ftype = "NULL";
+
+                            if (type == "water_clean" || type == "func:water") {
+                                ftype = "water";
+                            } else if (type == "func:hotplate" || type == "hotplate") {
+                                ftype = "battery";
+                            }
+
+                            item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
+                            tmp.charges = veh->drain(ftype, quantity);
+                            quantity -= tmp.charges;
+                            ret.push_back(tmp);
+
+                            if (quantity == 0) {
+                                return ret;
+                            }
                         }
-                        if (ftype != "NULL") {
+
+                        if (weldpart >= 0) { // we have a weldrig, now to see what to drain
+                            ammotype ftype = "NULL";
+
+                            if (type == "func:welder" || type == "welder") {
+                                ftype = "battery";
+                            } else if (type == "func:soldering_iron" || type == "soldering_iron") {
+                                ftype = "battery";
+                            }
+
                             item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
                             tmp.charges = veh->drain(ftype, quantity);
                             quantity -= tmp.charges;
@@ -2969,85 +2993,75 @@ std::list<item> map::use_charges(const point origin, const int range,
                                 return ret;
                             }
                         }
-                    }
-                    if (weldpart >= 0) { // we have a weldrig, now to see what to drain
-                        ammotype ftype = "NULL";
-                        if (type == "func:welder" || type == "welder") {
-                            ftype = "battery";
-                        } else if (type == "func:soldering_iron" || type == "soldering_iron") {
-                            ftype = "battery";
-                        }
-                        if (ftype != "NULL") {
+
+                        if (craftpart >= 0) { // we have a craftrig, now to see what to drain
+                            ammotype ftype = "NULL";
+
+                            if (type == "func:press" || type == "press") {
+                                ftype = "battery";
+                            } else if (type == "func:vac_sealer" || type == "vac_sealer") {
+                                ftype = "battery";
+                            } else if (type == "func:dehydrator" || type == "dehydrator") {
+                                ftype = "battery";
+                            }
+
                             item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
                             tmp.charges = veh->drain(ftype, quantity);
                             quantity -= tmp.charges;
                             ret.push_back(tmp);
+
                             if (quantity == 0) {
                                 return ret;
                             }
                         }
-                    }
-                    if (craftpart >= 0) { // we have a craftrig, now to see what to drain
-                        ammotype ftype = "NULL";
-                        if (type == "func:press" || type == "press") {
-                            ftype = "battery";
-                        } else if (type == "func:vac_sealer" || type == "vac_sealer") {
-                            ftype = "battery";
-                        } else if (type == "func:dehydrator" || type == "dehydrator") {
-                            ftype = "battery";
-                        }
-                        if (ftype != "NULL") {
+
+                        if (forgepart >= 0) { // we have a veh_forge, now to see what to drain
+                            ammotype ftype = "NULL";
+
+                            if (type == "func:forge" || type == "forge") {
+                                ftype = "battery";
+                            }
+
                             item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
                             tmp.charges = veh->drain(ftype, quantity);
                             quantity -= tmp.charges;
                             ret.push_back(tmp);
+
                             if (quantity == 0) {
                                 return ret;
                             }
                         }
-                    }
-                    if (forgepart >= 0) { // we have a veh_forge, now to see what to drain
-                        ammotype ftype = "NULL";
-                        if (type == "func:forge" || type == "forge") {
-                            ftype = "battery";
-                        }
-                        if (ftype != "NULL") {
+
+                        if (chempart >= 0) { // we have a chem_lab, now to see what to drain
+                            ammotype ftype = "NULL";
+
+                            if (type == "func:hotplate" || type == "hotplate") {
+                                ftype = "battery";
+                            } else if (type == "func:chemistry_set" || type == "chemistry_set") {
+                                ftype = "battery";
+                            }
+
                             item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
                             tmp.charges = veh->drain(ftype, quantity);
                             quantity -= tmp.charges;
                             ret.push_back(tmp);
+
                             if (quantity == 0) {
                                 return ret;
                             }
                         }
-                    }
-                    if (chempart >= 0) { // we have a chem_lab, now to see what to drain
-                        ammotype ftype = "NULL";
-                        if (type == "func:hotplate" || type == "hotplate") {
-                            ftype = "battery";
-                        } else if (type == "func:chemistry_set" || type == "chemistry_set") {
-                            ftype = "battery";
-                        }
-                        if (ftype != "NULL") {
-                            item tmp = item_controller->create(type, 0); //TODO add a sane birthday arg
-                            tmp.charges = veh->drain(ftype, quantity);
-                            quantity -= tmp.charges;
-                            ret.push_back(tmp);
-                            if (quantity == 0) {
+
+                        if (cargo >= 0) {
+                            std::list<item> tmp =
+                                use_charges_from_map_or_vehicle(veh->parts[cargo].items, type, quantity);
+                            ret.splice(ret.end(), tmp);
+                            if (quantity <= 0) {
                                 return ret;
                             }
                         }
                     }
-                    if (cargo >= 0) {
-                        std::list<item> tmp = use_charges_from_map_or_vehicle(veh->parts[cargo].items, type, quantity);
-                        ret.splice(ret.end(), tmp);
-                        if (quantity <= 0) {
-                            return ret;
-                        }
-                    }
-                }
-                if (!has_flag_ter_or_furn("SEALED", x, y)) {
-                    std::list<item> tmp = use_charges_from_map_or_vehicle(i_at(x, y), type, quantity);
+
+                    std::list<item> tmp = use_charges_from_map_or_vehicle(i_at(x,y), type, quantity);
                     ret.splice(ret.end(), tmp);
                     if (quantity <= 0) {
                         return ret;
@@ -4338,15 +4352,6 @@ graffiti map::graffiti_at(int x, int y)
  return grid[nonant]->graf[x][y];
 }
 
-bool connect_to_wall(ter_t &ter) {
-    static std::string flag1("CONNECT_WALL");
-//    static std::string flag2("WALL");
-    return ter.sym == LINE_XOXO ||
-           ter.sym == LINE_OXOX ||
-           ter.sym == '"' || ter.sym == '+' || ter.sym == '\'' ||
-           ter.has_flag(flag1);
-}
-
 long map::determine_wall_corner(const int x, const int y, const long orig_sym)
 {
     long sym = orig_sym;
@@ -4355,47 +4360,11 @@ long map::determine_wall_corner(const int x, const int y, const long orig_sym)
     const long below = terlist[ter(x, y+1)].sym;
     const long left  = terlist[ter(x-1, y)].sym;
     const long right = terlist[ter(x+1, y)].sym;
-    
-    const bool above_connects = above == sym || connect_to_wall(terlist[ter(x, y-1)]);
-    const bool below_connects = below == sym || connect_to_wall(terlist[ter(x, y+1)]);
-    const bool left_connects  = left  == sym || connect_to_wall(terlist[ter(x-1, y)]);
-    const bool right_connects = right == sym || connect_to_wall(terlist[ter(x+1, y)]);
-    
-    int cas = 0;
-    if(above_connects) { cas |= 1; }
-    if(below_connects) { cas |= 2; }
-    if(left_connects ) { cas |= 4; }
-    if(right_connects) { cas |= 8; }
-    switch(cas) {
-        case 0:
-            return orig_sym;
-        case 1:
-        case 2:
-        case 1 | 2:
-            return LINE_XOXO; // | above and below
-        case 4:
-        case 8:
-        case 4 | 8:
-            return LINE_OXOX; // - left and right
-        case 1 | 4:
-            return LINE_XOOX; // ┘ left coming wall
-        case 1 | 8:
-            return LINE_XXOO; // └ right coming wall
-        case 2 | 4:
-            return LINE_OOXX; // ┐ left coming wall
-        case 2 | 8:
-            return LINE_OXXO; // ┌ right coming wall
-        case 1 | 2 | 4:
-            return LINE_XOXX; // ┤ passing by
-        case 1 | 4 | 8:
-            return LINE_XXOX; // ┴ passing by
-        case 2 | 4 | 8:
-            return LINE_OXXX; // ┬ passing by
-        case 1 | 2 | 8:
-            return LINE_XXXO; // ├ passing by
-        case 1 | 2 | 4 | 8:
-            return LINE_XXXX; // ┼ crossway
-    }
+
+    const bool above_connects = above == sym || (above == '"' || above == '+' || above == '\'');
+    const bool below_connects = below == sym || (below == '"' || below == '+' || below == '\'');
+    const bool left_connects  = left  == sym || (left  == '"' || left  == '+' || left  == '\'');
+    const bool right_connects = right == sym || (right == '"' || right == '+' || right == '\'');
 
     // -
     // |      this = - and above = | or a connectable
