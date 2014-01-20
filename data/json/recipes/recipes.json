@@ -10520,14 +10520,14 @@
   "book_learn": [[ "recipe_caseless", 5 ] , ["recipe_bullets" , 9 ] , ["manual_shotgun", 10 ]],
   "tools": [
     [
-      [ "press", 50 ],
+      [ "func:press", 50 ],
       [ "func:hotplate", 50 ]
     ],
     [
       [ "chemistry_set", -1 ]
     ],
     [
-      [ "press", -1 ]
+      [ "func:press", -1 ]
     ]
   ],
   "components": [
@@ -10562,7 +10562,7 @@
   "book_learn": [[ "recipe_caseless", 5 ] , ["recipe_bullets" , 9 ] , ["manual_shotgun", 10 ]],
   "tools": [
     [
-      [ "press", 50 ],
+      [ "func:press", 50 ],
       [ "func:hotplate", 50 ]
     ],
     [
@@ -17055,6 +17055,52 @@
   "components": [
     [
       [ "stick", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "basket",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_MATERIALS",
+  "skill_used": "fabrication",
+  "difficulty": 1,
+  "time": 8000,
+  "reversible": true,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "goggles_welding", -1 ]
+    ],
+    [
+      [ "func:welder", 50 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "wire", 6 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "xlframe",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_MATERIALS",
+  "skill_used": "fabrication",
+  "difficulty": 1,
+  "time": 8000,
+  "reversible": true,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "goggles_welding", -1 ]
+    ],
+    [
+      [ "func:welder", 60 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "pipe", 4 ]
     ]
   ]
 },{
@@ -26717,7 +26763,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 150], ["char_forge", 30]
+      ["func:forge", 150]
      ]
     ],
   "components":
@@ -26753,7 +26799,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 75], ["char_forge", 15]
+      ["func:forge", 75]
      ]
     ],
   "components":
@@ -26789,7 +26835,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 50], ["char_forge", 10]
+      ["func:forge", 50]
      ]
     ],
   "components":
@@ -26824,7 +26870,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 25], ["char_forge", 5]
+      ["func:forge", 25]
      ]
     ],
   "components":
@@ -26858,7 +26904,7 @@
       ["crucible", -1]
      ],
      [
-      ["forge", 25], ["char_forge", 5]
+      ["func:forge", 25]
      ]
     ],
   "components":
@@ -26888,7 +26934,7 @@
       [ "sheet_metal", -1 ]
      ],
      [
-      ["forge", 75], ["char_forge", 15]
+      ["func:forge", 75]
      ]
     ],
   "components":

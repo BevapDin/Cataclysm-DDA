@@ -1,32 +1,11 @@
 #include "game.h"
 #include "mongroup.h"
 #include "monhorde.h"
+#include "overmapbuffer.h"
 #include "monstergenerator.h"
 
 #define MASTER_ZOMBIE_ID "mon_zombie_soldier"
 
-
-overmap *game::getOverMap(int &omx, int &omy) {
- if (omx >= 0 && omx < OMAPX * 2 && omy >= 0 && omy < OMAPY * 2) {
-  return cur_om;
- } else if ((omx < 0 || omx >= OMAPX * 2) && (omy < 0 || omy >= OMAPY * 2)) {
-  if (omx < 0) omx += OMAPX * 2;
-  else         omx -= OMAPX * 2;
-  if (omy < 0) omy += OMAPY * 2;
-  else         omy -= OMAPY * 2;
-  return om_diag;
- } else if (omx < 0 || omx >= OMAPX * 2) {
-  if (omx < 0) omx += OMAPX * 2;
-  else         omx -= OMAPX * 2;
-  return om_hori;
- } else if (omy < 0 || omy >= OMAPY * 2) {
-  if (omy < 0) omy += OMAPY * 2;
-  else         omy -= OMAPY * 2;
-  return om_vert;
- } else {
-  return NULL;
- }
-}
 
 bool monhorde::despawn(monster &m) {
 	if(m.type->id == MASTER_ZOMBIE_ID) {
@@ -78,38 +57,21 @@ bool game::try_despawn_to_horde(monster &m, int shiftx, int shifty) {
 	}
 	// TODO: set the target of the monster to the target of the horde
 
-	overmap *om = getOverMap(lx, ly);
-	om->zh.push_back(monhorde("GROUP_WANDERING_ZOMBIE", lx, ly, 0, 0, (int) turn));
-	om->zh.back().despawn(m);
+
+	overmapbuffer::sm_to_omt(lx, ly);
+	overmap &om = overmap_buffer.get_om_global(lx, ly);
+    overmapbuffer::omt_to_sm(lx, ly);
+	om.zh.push_back(monhorde("GROUP_WANDERING_ZOMBIE", lx, ly, 0, 0, (int) turn));
+	om.zh.back().despawn(m);
 	
 	return true;
-}
-
-// Note: gx, gy are global!
-bool hordeNear(overmap &om, int gx, int gy, int mindist) {
-	// Offset to monster horde positions, because
-	// those are relativ to the overmap they are in,
-	// but gx and gy are global.
-	const int ox = om.pos().x;
-	const int oy = om.pos().y;
-	typedef std::vector<monhorde> MHVec;
-	for(MHVec::iterator a = om.zh.begin(); a != om.zh.end(); ++a) {
-		monhorde &horde = *a;
-		// Don't spawn if there is already another horde nearby
-		if(rl_dist(gx, gy, horde.posx + ox, horde.posy + oy) < mindist) {
-			return true;
-		}
-	}
-	return false;
 }
 
 void game::spawn_horde() {
     if(turn < DAYS(10)) {
         return;
     }
-	if(cur_om->zh.size() >= 1 && !one_in(HOURS(36))) {
-		// Spawn a horde if there are  currently no hordes at all present
-		// otherwise only spawn once about ever 12 hours
+	if(!one_in(HOURS(36))) {
 		return;
 	}
 	static const int min_dist_to_player = 10;
@@ -126,33 +88,21 @@ void game::spawn_horde() {
 	if(rl_dist(x, y, 0, 0) > max_dist_to_player) {
 		return;
 	}
-	// Now make their position relative to current overmap
-	x += levx + int(MAPSIZE / 2);
-	y += levy + int(MAPSIZE / 2);
-	
-	// global coordinates of new horde (absolut global!)
-	int gx = x + cur_om->pos().x;
-	int gy = y + cur_om->pos().y;
+	const tripoint gmpos = om_global_location();
+	x += gmpos.x;
+	y += gmpos.y;
 	// Check neighbour overmaps if another horde is nearby, if
 	// so, cancel this new one (don't want to much hordes).
-	if(hordeNear(*cur_om, gx, gy, min_dist_to_other)) {
-		return;
-	}
-	if(hordeNear(*om_diag, gx, gy, min_dist_to_other)) {
-		return;
-	}
-	if(hordeNear(*om_hori, gx, gy, min_dist_to_other)) {
-		return;
-	}
-	if(hordeNear(*om_vert, gx, gy, min_dist_to_other)) {
+	if(overmap_buffer.is_horde_near(x, y, min_dist_to_other)) {
 		return;
 	}
 
-	add_msg("Horde spawned @ %d,%d (rel: %d,%d)", x, y, x - (levx + MAPSIZE / 2), y - (levy + MAPSIZE / 2));
+	add_msg("Horde spawned @ %d,%d (rel: %d,%d)", x, y, x - gmpos.x, y - gmpos.y);
 	
 	// get overmap where to place the horde in
-	overmap *om = getOverMap(x, y);
-	om->zh.push_back(monhorde("GROUP_WANDERING_ZOMBIE", x, y, 0, rng(10, 50), (int) turn));
+	overmap &om = overmap_buffer.get_om_global(x, y);
+    overmapbuffer::omt_to_sm(x, y);
+	om.zh.push_back(monhorde("GROUP_WANDERING_ZOMBIE", x, y, 0, rng(10, 50), (int) turn));
 }
 
 template<typename T> inline T sign(const T &a) { return a < 0 ? -1 : (a > 0 ? +1 : 0); }
@@ -252,21 +202,17 @@ void game::move_hordes() {
 			continue;
 		}
 		// Check if the horde is still on the same overmap, otherwise move it
-		overmap *om = getOverMap(horde.posx, horde.posy);
-		if(om == 0) {
-			// TODO: what now, the horde has been gone into the unknown
-			// we might load an existing overmap, but we may as well just
-			// remove this horde, a new one will be created sooner or later.
-			monhordes.erase(monhordes.begin() + i);
-			i--;
-		} else if(om != cur_om) {
+		point p = overmapbuffer::sm_to_omt_copy(horde.posx, horde.posy);
+		overmap &om = overmap_buffer.get_om_global(p.x, p.y);
+		if(&om != cur_om) {
+            overmapbuffer::omt_to_sm(p.x, p.y);
 			// In this case the coords posx, posy have already been updated.
 			// But the target is still wrong!
 			// Simply reset the target
 			horde.wandf = 0;
-			horde.targetx = horde.posx;
-			horde.targety = horde.posy;
-			om->zh.push_back(horde);
+			horde.targetx = p.x;
+			horde.targety = p.y;
+			om.zh.push_back(horde);
 			monhordes.erase(monhordes.begin() + i);
 			i--;
 		}

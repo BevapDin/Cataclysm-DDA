@@ -28,6 +28,7 @@
 #include "martialarts.h"
 #include "crafting_inventory_t.h"
 #include "output.h"
+#include "overmapbuffer.h"
 
 //Used for e^(x) functions
 #include <stdio.h>
@@ -365,8 +366,6 @@ void player::reset_stats()
     blocks_left = get_num_blocks();
     dodges_left = get_num_dodges();
 
-    suffer();
-
     // Didn't just pick something up
     last_item = itype_id("null");
 
@@ -430,6 +429,8 @@ void player::reset_stats()
         mod_per_bonus(-int(abs(stim - 15) / 12));
         mod_int_bonus(-int(abs(stim - 15) / 14));
     }
+
+    suffer();
 
     // Dodge-related effects
     mod_dodge_bonus(
@@ -1452,17 +1453,8 @@ void player::memorial( std::ofstream &memorial_file )
     }
 
     //Figure out the location
+    const oter_id &cur_ter = overmap_buffer.ter(g->om_global_location());
     point cur_loc = g->om_location();
-    oter_id cur_ter = g->cur_om->ter(cur_loc.x, cur_loc.y, g->levz);
-    if (cur_ter == "") {
-        if (cur_loc.x >= OMAPX && cur_loc.y >= OMAPY) {
-            cur_ter = g->om_diag->ter(cur_loc.x - OMAPX, cur_loc.y - OMAPY, g->levz);
-        } else if (cur_loc.x >= OMAPX) {
-            cur_ter = g->om_hori->ter(cur_loc.x - OMAPX, cur_loc.y, g->levz);
-        } else if (cur_loc.y >= OMAPY) {
-            cur_ter = g->om_vert->ter(cur_loc.x, cur_loc.y - OMAPY, g->levz);
-        }
-    }
     std::string tername = otermap[cur_ter].name;
 
     //Were they in a town, or out in the wilderness?
@@ -1719,7 +1711,7 @@ void player::add_memorial_log(const char* message, ...)
             << _(season_name[g->turn.get_season()].c_str()) << " "
             << (g->turn.days() + 1) << ", " << g->turn.print_time();
 
-  oter_id cur_ter = g->cur_om->ter((g->levx + int(MAPSIZE / 2)) / 2, (g->levy + int(MAPSIZE / 2)) / 2, g->levz);
+  const oter_id &cur_ter = overmap_buffer.ter(g->om_global_location());
   std::string location = otermap[cur_ter].name;
 
   std::stringstream log_message;
@@ -4184,7 +4176,7 @@ void player::hurt(hp_part hurt, int dam)
     if (!is_npc()) {
         g->cancel_activity_query(_("You were hurt!"));
     }
-    
+
     mod_pain( dam / 2 );
 
     hp_cur[hurt] -= dam;
@@ -6046,9 +6038,6 @@ item player::i_rem(char let)
 {
  item tmp;
  if (weapon.invlet == let) {
-  if (std::find(martial_arts_itype_ids.begin(), martial_arts_itype_ids.end(), weapon.type->id) != martial_arts_itype_ids.end()){
-   return ret_null;
-  }
   tmp = weapon;
   weapon = ret_null;
   return tmp;
@@ -6069,10 +6058,6 @@ item player::i_rem(int pos)
 {
  item tmp;
  if (pos == -1) {
-     if (std::find(martial_arts_itype_ids.begin(), martial_arts_itype_ids.end(),
-                   weapon.type->id) != martial_arts_itype_ids.end()){
-         return ret_null;
-     }
      tmp = weapon;
      weapon = ret_null;
      return tmp;
@@ -9682,7 +9667,7 @@ void player::practice (const calendar& turn, Skill *s, int amount)
     if (has_trait("PRED3") && s->is_combat_skill()) {
       amount *= 2;
     }
-    
+
     if (has_trait("PRED4") && s->is_combat_skill()) {
       amount *= 3;
     }

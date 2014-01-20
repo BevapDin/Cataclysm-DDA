@@ -15,6 +15,7 @@
 #include "json.h"
 #include "monhorde.h"
 
+class overmapbuffer;
 class npc;
 
 #define OVERMAP_DEPTH 10
@@ -324,15 +325,9 @@ class overmap
   std::map<int, om_vehicle> vehicles;
   std::vector<city> cities;
   std::vector<city> roads_out;
-  
-  /**
-   * Returns the overmap where x and y are contained, also
-   * changes x and y to be within [0...OMAP?).
-   * Might return this, or NULL or something else (see overmap_buffer).
-   */
-  overmap *get_overmap_by_offset(int &x, int &y);
 
  private:
+  friend class overmapbuffer;
   point loc;
   std::string prefix;
   std::string name;
@@ -399,9 +394,9 @@ class overmap
 
   // Map helper function.
   bool has_npc(int const x, int const y, int const z) const;
-  void print_npcs(WINDOW *w, int const x, int const y, int const z);
+  void print_npcs(WINDOW *w, int const x, int const y, int const z) const;
   bool has_vehicle(int const x, int const y, int const z, bool require_pda = true) const;
-  void print_vehicles(WINDOW *w, int const x, int const y, int const z);
+  void print_vehicles(WINDOW *w, int const x, int const y, int const z) const;
 };
 
 // TODO: readd the stream operators

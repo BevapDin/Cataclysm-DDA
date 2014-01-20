@@ -22,6 +22,8 @@ struct construct // Construction functions.
     void done_trunk_plank(point);
     void done_vehicle(point);
     void done_vehicle_hd(point);
+    void done_vehicle_wood(point);
+    void done_vehicle_light(point);
     void done_deconstruct(point);
 };
 

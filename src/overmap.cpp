@@ -809,12 +809,6 @@ bool overmap::is_safe(int x, int y, int z)
 
 bool overmap::has_horde(int x, int y, int z) const {
  if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) { return false; }
- overmap* ov = const_cast<overmap*>(this)->get_overmap_by_offset(x, y);
- if(ov != this) {
-  return ov->has_horde(x, y, z);
- } else if(ov == 0) {
-   return false;
- }
  for (int i = 0; i < zh.size(); i++) {
   if (zh[i].posx / 2 == x && zh[i].posy / 2 == y && zh[i].posz == z)
    return true;
@@ -825,16 +819,6 @@ bool overmap::has_horde(int x, int y, int z) const {
 bool overmap::has_note(int const x, int const y, int const z) const
 {
  if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) { return false; }
- {
-  int _x = x; int _y = y;
-  overmap* ov = const_cast<overmap*>(this)->get_overmap_by_offset(_x, _y);
-  if(ov != this) {
-      return ov->has_note(_x, _y, z);
-  } else if(ov == 0) {
-      return false;
-  }
-  assert(x == _x && y == _y);
- }
 
  for (int i = 0; i < layer[z + OVERMAP_DEPTH].notes.size(); i++) {
   if (layer[z + OVERMAP_DEPTH].notes[i].x == x && layer[z + OVERMAP_DEPTH].notes[i].y == y)
@@ -846,16 +830,6 @@ bool overmap::has_note(int const x, int const y, int const z) const
 std::string const& overmap::note(int const x, int const y, int const z) const
 {
  if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) { return nullstr; }
- {
-  int _x = x; int _y = y;
-  overmap* ov = const_cast<overmap*>(this)->get_overmap_by_offset(_x, _y);
-  if(ov != this) {
-      return ov->note(_x, _y, z);
-  } else if(ov == 0) {
-      return nullstr;
-  }
-  assert(x == _x && y == _y);
- }
 
  for (int i = 0; i < layer[z + OVERMAP_DEPTH].notes.size(); i++) {
   if (layer[z + OVERMAP_DEPTH].notes[i].x == x && layer[z + OVERMAP_DEPTH].notes[i].y == y)
@@ -865,48 +839,11 @@ std::string const& overmap::note(int const x, int const y, int const z) const
  return nullstr;
 }
 
-int modulo_overmap_coord(int &c, const int OMAP_) {
-    if(c < 0) {
-        // eg. c=-200 -> 200/180+1 = 2 = oc  c += 2*180 = 160 < 180
-        // c=-1 -> 1/180+1 = 1 = oc  c += 1*180 = 179 < 180
-        const int oc = -c / OMAP_ + 1;
-        assert(oc > 0);
-        c += oc * OMAP_;
-        return -oc;
-    } else if(c >= OMAP_) {
-        // eg. c=200 -> 200/180 = 1 = oc  c -= 1*180 = 20 < 180
-        const int oc = c / OMAP_;
-        c -= oc * OMAP_;
-        return oc;
-    }
-    return 0;
-}
-
-overmap *overmap::get_overmap_by_offset(int &x, int &y) {
-    const int ox = modulo_overmap_coord(x, OMAPX);
-    const int oy = modulo_overmap_coord(y, OMAPY);
-    if(ox == 0 && oy == 0) {
-        return this;
-    }
-    return &(overmap_buffer.get(loc.x + ox, loc.y + oy));
-}
-
 void overmap::add_note(int const x, int const y, int const z, std::string const & message)
 {
  if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) {
   debugmsg("Attempting to add not to overmap for blank layer %d", z);
   return;
- }
- {
-  int _x = x; int _y = y;
-  overmap* ov = get_overmap_by_offset(_x, _y);
-  if(ov != this) {
-      ov->add_note(_x, _y, z, message);
-      return;
-  } else if(ov == 0) {
-      return;
-  }
-  assert(x == _x && y == _y);
  }
 
  for (int i = 0; i < layer[z + OVERMAP_DEPTH].notes.size(); i++) {
@@ -928,16 +865,6 @@ point overmap::find_note(int const x, int const y, int const z, std::string cons
  if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) {
   debugmsg("Attempting to find note on overmap for blank layer %d", z);
   return ret;
- }
- {
-  int _x = x; int _y = y;
-  overmap* ov = const_cast<overmap*>(this)->get_overmap_by_offset(_x, _y);
-  if(ov != this) {
-      return ov->find_note(_x, _y, z, text);
-  } else if(ov == 0) {
-      return ret;
-  }
-  assert(x == _x && y == _y);
  }
 
  int closest = 9999;
@@ -1119,7 +1046,7 @@ bool overmap::has_vehicle(int const x, int const y, int const z, bool require_pd
 //     cursy = (g->levy + int(MAPSIZE / 2)) / 2;
 
 //Helper function for the overmap::draw function.
-void overmap::print_npcs(WINDOW *w, int const x, int const y, int const z)
+void overmap::print_npcs(WINDOW *w, int const x, int const y, int const z) const
 {
     int i = 0, maxnamelength = 0;
     //Check the max namelength of the npcs in the target
@@ -1172,7 +1099,7 @@ void overmap::print_npcs(WINDOW *w, int const x, int const y, int const z)
     mvwputch(w, i, maxnamelength, c_white, LINE_XOOX);
 }
 
-void overmap::print_vehicles(WINDOW *w, int const x, int const y, int const z)
+void overmap::print_vehicles(WINDOW *w, int const x, int const y, int const z) const
 {
     if (!z==0) // vehicles only exist on zlevel 0
         return;
@@ -1868,9 +1795,8 @@ int overmap::dist_from_city(point p)
 
 void overmap::draw(WINDOW *w, int z, int &cursx, int &cursy,
                    int &origx, int &origy, signed char &ch, bool blink,
-                   overmap &hori, overmap &vert, overmap &diag, input_context* inp_ctxt)
+                   overmap &, overmap &, overmap &, input_context* inp_ctxt)
 {
- bool note_here = false, npc_here = false, veh_here = false;
  std::string note_text;
  int om_map_width = TERMX-28;
  int om_map_height = TERMY;
@@ -1880,80 +1806,39 @@ void overmap::draw(WINDOW *w, int z, int &cursx, int &cursy,
  if (g->u.active_mission >= 0 &&
      g->u.active_mission < g->u.active_missions.size())
   target = g->find_mission(g->u.active_missions[g->u.active_mission])->target;
-  bool see;
   oter_id cur_ter = ot_null;
   nc_color ter_color;
   long ter_sym;
-  /* First, determine if we're close enough to the edge to need an
-   * adjacent overmap, and record the offsets. */
-  int offx = 0;
-  int offy = 0;
-  if (cursx < om_map_width / 2)
-  {
-      offx = -1;
-  }
-  else if (cursx > OMAPX - 2 - (om_map_width / 2))
-  {
-      offx = 1;
-  }
-  if (cursy < (om_map_height / 2))
-  {
-      offy = -1;
-  }
-  else if (cursy > OMAPY - 2 - (om_map_height / 2))
-  {
-      offy = 1;
-  }
-
-  // If the offsets don't match the previously loaded ones, load the new adjacent overmaps.
-  if( offx && loc.x + offx != hori.loc.x )
-  {
-      hori = overmap_buffer.get( loc.x + offx, loc.y );
-  }
-  if( offy && loc.y + offy != vert.loc.y )
-  {
-      vert = overmap_buffer.get( loc.x, loc.y + offy );
-  }
-  if( offx && offy && (loc.x + offx != diag.loc.x || loc.y + offy != diag.loc.y ) )
-  {
-      diag = overmap_buffer.get( loc.x + offx, loc.y + offy );
-  }
 
 // Now actually draw the map
   bool csee = false;
-  bool horde_here;
   oter_id ccur_ter = "";
   for (int i = -(om_map_width / 2); i < (om_map_width / 2); i++) {
    for (int j = -(om_map_height / 2);
          j <= (om_map_height / 2) + (ch == 'j' ? 1 : 0); j++) {
     omx = cursx + i;
     omy = cursy + j;
-    see = false;
-    npc_here = false;
-    veh_here = false;
-    
-    overmap *ov = get_overmap_by_offset(omx, omy);
-    assert(ov != 0);
-    
-    cur_ter = ov->ter(omx, omy, z);
-    see = ov->seen(omx, omy, z);
-    note_here = ov->has_note(omx, omy, z);
-    if (note_here)
-     note_text = ov->note(omx, omy, z);
-    //Check if there is an npc.
-    npc_here = has_npc(omx,omy,z);
+    const int absx = omx + pos().x * OMAPX;
+    const int absy = omy + pos().y * OMAPY;
+    cur_ter = overmap_buffer.ter(absx, absy, z);
+    const bool see = overmap_buffer.seen(absx, absy, z);
+    const bool note_here = overmap_buffer.has_note(absx, absy, z);
+    const bool horde_here = overmap_buffer.has_horde(absx, absy, z);
+    if (note_here) {
+        note_text = overmap_buffer.note(absx, absy, z);
+    }
+    const bool npc_here = overmap_buffer.has_npc(absx, absy, z);
     // and a vehicle
-    veh_here = ov->has_vehicle(omx,omy,z);
-    horde_here = ov->has_horde(omx, omy, z);
-
-    if (note_here && blink) {
-     ter_color = c_yellow;
-     if (note_text[1] == ':')
-      ter_sym = note_text[0];
-     else
-      ter_sym = 'N';
-    } else if (see) {
-     if (omx == origx && omy == origy && ov == this && blink) {
+    const bool veh_here = overmap_buffer.has_vehicle(absx, absy, z);
+    if (see) {
+     if (note_here && blink) {
+      ter_color = c_yellow;
+      if (note_text[1] == ':') {
+       ter_sym = note_text[0];
+      } else {
+       ter_sym = 'N';
+      }
+     } else if (omx == origx && omy == origy && blink) {
       ter_color = g->u.color();
       ter_sym = '@';
      } else if (npc_here && blink) {
@@ -1962,7 +1847,7 @@ void overmap::draw(WINDOW *w, int z, int &cursx, int &cursy,
      } else if (veh_here && blink) {
          ter_color = c_cyan;
          ter_sym = 'c';
-     } else if (omx == target.x && omy == target.y && ov == this && blink) {
+     } else if (omx == target.x && omy == target.y && blink) {
       ter_color = c_red;
       ter_sym = '*';
      } else if (horde_here) {

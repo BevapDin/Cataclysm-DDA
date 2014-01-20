@@ -1290,6 +1290,7 @@ void advanced_inventory::display(player * pp)
             panes[src].filtercache.clear();
             recalc_pane(src);
             redraw_pane(src);
+            recalc = true;
         } else if('p' == c) {
             if(panes[src].size == 0) {
                 continue;
