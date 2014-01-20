@@ -288,6 +288,15 @@ void mapbuffer::load(std::string worldname)
  unserialize(fin);
  fin.close();
  input_stream.open(worldmap.str().c_str());
+
+    if(savegame_loading_version != savegame_version) {
+        // previous version, load all maps at once, to update ids
+        SeekMap sm;
+        sm.swap(seek_map);
+        for(SeekMap::iterator a = sm.begin(); a != sm.end(); ++a) {
+            load_from_offset(a->second, a->first);
+        }
+    }
 }
 
 void mapbuffer::unserialize(std::ifstream & fin) {
