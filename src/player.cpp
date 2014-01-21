@@ -157,6 +157,7 @@ player::player() : Character(), name("")
  sight_boost = 0;
  sight_boost_cap = 0;
  lastrecipe = NULL;
+ lastconsumed = itype_id("null");
  next_expected_position.x = -1;
  next_expected_position.y = -1;
 
@@ -7952,7 +7953,7 @@ void player::sort_armor()
                     tmp_worn.push_back(&worn[i]);
             }
         }
-        leftListSize = (tmp_worn.size() < cont_h-2) ? tmp_worn.size() : cont_h-2;
+        leftListSize = (tmp_worn.size() < cont_h-2) ? tmp_worn.size() : cont_h - 2;
 
         // Left header
         mvwprintz(w_sort_left, 0, 0, c_ltgray, _("(Innermost)"));
@@ -7964,25 +7965,27 @@ void player::sort_armor()
             each_armor = dynamic_cast<it_armor*>(tmp_worn[itemindex]->type);
 
             if (itemindex == leftListIndex) {
-                mvwprintz(w_sort_left, drawindex + 1, 1, c_yellow, ">>");
+                mvwprintz(w_sort_left, drawindex + 1, 0, c_yellow, ">>");
             }
 
             if (itemindex == selected) {
-                mvwprintz(w_sort_left, drawindex + 1, 4, dam_color[int(tmp_worn[itemindex]->damage + 1)],
-                          each_armor->name.c_str());
-            } else {
                 mvwprintz(w_sort_left, drawindex + 1, 3, dam_color[int(tmp_worn[itemindex]->damage + 1)],
                           each_armor->name.c_str());
+            } else {
+                mvwprintz(w_sort_left, drawindex + 1, 2, dam_color[int(tmp_worn[itemindex]->damage + 1)],
+                          each_armor->name.c_str());
             }
-            mvwprintz(w_sort_left, drawindex + 1, left_w - 2, c_ltgray, "%2d", int(each_armor->storage));
+            mvwprintz(w_sort_left, drawindex + 1, left_w - 3, c_ltgray, "%3d", int(each_armor->storage));
         }
 
         // Left footer
         mvwprintz(w_sort_left, cont_h-1, 0, c_ltgray, _("(Outermost)"));
-        if (leftListSize > tmp_worn.size())
-            mvwprintz(w_sort_left, cont_h-1, left_w - utf8_width(_("<more>")), c_ltblue, _("<more>"));
-        if (leftListSize == 0)
-            mvwprintz(w_sort_left, cont_h-1, left_w - utf8_width(_("<empty>")), c_ltblue, _("<empty>"));
+        if (leftListSize > tmp_worn.size()) {
+            mvwprintz(w_sort_left, cont_h - 1, left_w - utf8_width(_("<more>")), c_ltblue, _("<more>"));
+        }
+        if (leftListSize == 0) {
+            mvwprintz(w_sort_left, cont_h - 1, left_w - utf8_width(_("<empty>")), c_ltblue, _("<empty>"));
+        }
 
         // Items stats
         if (leftListSize){
@@ -8093,10 +8096,10 @@ void player::sort_armor()
                 pos++;
             }
             rightListSize++;
-            for (int i=0; i<worn.size(); i++){
+            for (int i = 0; i < worn.size(); i++){
                 each_armor = dynamic_cast<it_armor*>(worn[i].type);
                 if (each_armor->covers & mfb(cover)){
-                    if (rightListSize >= rightListOffset && pos <= cont_h-2){
+                    if (rightListSize >= rightListOffset && pos <= cont_h - 2){
                         mvwprintz(w_sort_right, pos, 2, dam_color[int(worn[i].damage + 1)],
                                   each_armor->name.c_str());
                         mvwprintz(w_sort_right, pos, right_w - 2, c_ltgray, "%d",
@@ -8502,7 +8505,7 @@ void player::use(int pos)
                 g->add_msg(_("That %s cannot be used on a %s."), used->tname().c_str(),
                        ammo_name(guntype->ammo).c_str());
                 return;
-        } else if (guntype->occupied_mod_locations[mod->location] == guntype->valid_mod_locations[mod->location]) {
+        } else if (gun->get_free_mod_locations(mod->location) <= 0) {
             g->add_msg(_("Your %s doesn't have enough room for another %s mod. To remove the mods, \
 activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
             return;
@@ -8544,7 +8547,6 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
         g->add_msg(_("You attach the %s to your %s."), used->tname().c_str(),
                    gun->tname().c_str());
         gun->contents.push_back(i_rem(pos));
-        guntype->occupied_mod_locations[mod->location] += 1;
         return;
 
     } else if (used->is_bionic()) {
@@ -8645,7 +8647,6 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
 void player::remove_gunmod(item *weapon, int id)
 {
     item *gunmod = &weapon->contents[id];
-    it_gun *guntype = dynamic_cast<it_gun *>(weapon->type);
     item newgunmod;
     item ammo;
     if (gunmod != NULL && gunmod->charges > 0) {
@@ -8665,7 +8666,6 @@ void player::remove_gunmod(item *weapon, int id)
     }
     newgunmod = item(itypes[gunmod->type->id], g->turn);
     i_add_or_drop(newgunmod);
-    guntype->occupied_mod_locations[(static_cast<it_gunmod*>(gunmod->type))->location] -= 1;
     weapon->contents.erase(weapon->contents.begin()+id);
     return;
 }
