@@ -170,6 +170,7 @@
     "symbol": ",",
     "color": "dark_gray",
     "name": "processor board",
+    "category": "spare_parts",
     "description": "A central processor unit, useful in advanced electronics crafting.",
     "price": 120,
     "material": ["plastic", "null"],
@@ -186,6 +187,7 @@
     "symbol": ",",
     "color": "dark_gray",
     "name": "RAM",
+    "category": "spare_parts",
     "description": "A stick of memory. Useful in advanced electronics crafting.",
     "price": 90,
     "material": ["plastic", "null"],
@@ -193,7 +195,6 @@
     "volume": 1,
     "bashing": -5,
     "cutting": 0,
-    "category": "spare_parts",
     "to_hit": -1
   },
 
@@ -203,6 +204,7 @@
     "symbol": ",",
     "color": "light_gray",
     "name": "power converter",
+    "category": "spare_parts",
     "description": "A power supply unit. Useful in lots of electronics recipes.",
     "price": 170,
     "material": ["aluminium", "plastic"],
@@ -210,7 +212,6 @@
     "volume": 4,
     "bashing": 5,
     "cutting": 0,
-    "category": "spare_parts",
     "to_hit": -1
   },
 
@@ -220,6 +221,7 @@
     "symbol": ",",
     "color": "light_gray",
     "name": "amplifier circuit",
+    "category": "spare_parts",
     "description": "A circuit designed to amplify the strength of a signal. Useful in lots of electronics recipes.",
     "price": 200,
     "material": ["plastic", "null"],
@@ -227,7 +229,6 @@
     "volume": 1,
     "bashing": -5,
     "cutting": 0,
-    "category": "spare_parts",
     "to_hit": -1
   },
 
@@ -237,6 +238,7 @@
     "symbol": ",",
     "color": "light_gray",
     "name": "transponder circuit",
+    "category": "spare_parts",
     "description": "A circuit designed to repeat a signal. Useful for crafting communications equipment.",
     "price": 140,
     "material": ["aluminium", "plastic"],
@@ -244,7 +246,6 @@
     "volume": 1,
     "bashing": -5,
     "cutting": 0,
-    "category": "spare_parts",
     "to_hit": -1
   },
 
@@ -254,6 +255,7 @@
     "symbol": ",",
     "color": "light_gray",
     "name": "signal receiver",
+    "category": "spare_parts",
     "description": "A module designed to receive many forms of signals. Useful for crafting communications equipment.",
     "price": 135,
     "material": ["aluminium", "plastic"],
@@ -261,7 +263,6 @@
     "volume": 1,
     "bashing": -4,
     "cutting": 0,
-    "category": "spare_parts",
     "to_hit": -1
   },
 
@@ -271,6 +272,7 @@
     "symbol": ",",
     "color": "dark_gray",
     "name": "small LCD screen",
+    "category": "spare_parts",
     "description": "A small backlit screen, used for displaying images. Useful in some electronics recipes.",
     "price": 240,
     "material": "plastic",
@@ -278,7 +280,6 @@
     "volume": 1,
     "bashing": -6,
     "cutting": -2,
-    "category": "spare_parts",
     "to_hit": -4
   },
 
@@ -288,6 +289,7 @@
     "symbol": ".",
     "color": "light_cyan",
     "name": "high-quality lens",
+    "category": "spare_parts",
     "description": "A high-quality lens, useful for focusing or diffusing light.",
     "price": 1200,
     "material": "glass",
@@ -295,7 +297,6 @@
     "volume": 0,
     "bashing": -8,
     "cutting": 0,
-    "category": "spare_parts",
     "to_hit": -3
   },
 
@@ -305,6 +306,7 @@
     "symbol": ",",
     "color": "dark_gray",
     "name": "burnt out bionic",
+    "category": "spare_parts",
     "description": "Once a valuable bionic implant, it has not held up well under repeated use. This object has been destroyed by excessive electric current and is now useless.",
     "price": 135,
     "material": ["steel", "plastic"],
@@ -312,7 +314,6 @@
     "volume": 1,
     "bashing": -4,
     "cutting": 0,
-    "category": "spare_parts",
     "to_hit": -1
   },
 
@@ -322,6 +323,7 @@
     "symbol": ",",
     "color": "light_gray",
     "name": "antenna",
+    "category": "spare_parts",
     "description": "A simple thin aluminum shaft. Useful in lots of electronics recipes.",
     "price": 80,
     "material": "aluminium",
@@ -329,7 +331,6 @@
     "volume": 1,
     "bashing": -6,
     "cutting": 0,
-    "category": "spare_parts",
     "to_hit": 2
   },
 
@@ -339,6 +340,7 @@
     "symbol": ",",
     "color": "green",
     "name": "circuit board",
+    "category": "spare_parts",
     "description": "A printed card that supports and electrically connects electronic components on a non-conductive substrate.",
     "price": 50,
     "material": "plastic",
@@ -346,7 +348,6 @@
     "volume": 0,
     "bashing": -6,
     "cutting": 0,
-    "category": "spare_parts",
     "to_hit": 2
   },
 
@@ -356,6 +357,7 @@
     "symbol": ",",
     "color": "green",
     "name": "electronic scrap",
+    "category": "spare_parts",
     "description": "A random collection of resistors, capacitors, and diodes which have been stripped from printed circuits.",
     "price": 30,
     "material": "aluminium",
@@ -363,7 +365,6 @@
     "volume": 0,
     "bashing": -6,
     "cutting": 0,
-    "category" : "spare_parts",
     "to_hit": 2
   },
 
@@ -373,6 +374,7 @@
     "symbol": ",",
     "color": "light_gray",
     "name": "chunk of steel",
+    "category": "spare_parts",
     "description": "A misshapen chunk of steel. Makes a decent weapon in a pinch, and is also useful for some crafting recipes.",
     "price": 10,
     "material": "steel",
@@ -380,7 +382,6 @@
     "volume": 2,
     "bashing": 8,
     "cutting": 0,
-    "category" : "spare_parts",
     "to_hit": -2
   },
 
@@ -390,6 +391,7 @@
     "symbol": ",",
     "color": "light_gray",
     "name": "lump of steel",
+    "category": "spare_parts",
     "description": "A misshapen heavy piece of steel. Useful for some crafting recipes.",
     "price": 20,
     "material": "steel",
@@ -397,7 +399,6 @@
     "volume": 2,
     "bashing": 12,
     "cutting": 0,
-    "category": "spare_parts",
     "to_hit": -4
   },
 
@@ -407,6 +408,7 @@
     "symbol": ",",
     "color": "light_gray",
     "name": "scrap metal",
+    "category": "spare_parts",
     "description": "An assortment of small bits of metal and scrap useful in all kinds of crafting",
     "price": 10,
     "material": "steel",
@@ -414,7 +416,6 @@
     "volume": 1,
     "bashing": 1,
     "cutting": 0,
-    "category" : "spare_parts",
     "to_hit": -2
   },
 
@@ -781,6 +782,7 @@
     "symbol": "/",
     "color": "yellow",
     "name": "gold bar",
+    "category": "other",
     "description": "A large bar of gold. Before the apocalypse, this would've been worth a small fortune; now its value is greatly diminished.",
     "price": 3000,
     "material": "gold",
@@ -797,6 +799,7 @@
     "symbol": "/",
     "color": "light_gray",
     "name": "silver bar",
+    "category": "other",
     "description": "A large bar of silver. Before the cataclysm, this would've been worth quite a bit; now its value is greatly diminished.",
     "price": 1000,
     "material": "silver",
@@ -2293,6 +2296,7 @@
     "symbol" : "/",
     "color": "magenta",
     "name": "umbrella",
+    "category": "tools",
     "description": "An umbrella with a pointy end, useful for keeping dry when wielded.",
     "material": ["plastic","aluminium"],
     "price": 24,
@@ -2327,6 +2331,7 @@
     "symbol" : ",",
     "color": "dark_gray",
     "name": "telescoping umbrella",
+    "category": "tools",
     "description": "A telescoping umbrella which collapses down for easy storage, useful for keeping dry when wielded.",
     "material": ["plastic", "aluminium"],
     "price": 120,
@@ -2405,6 +2410,7 @@
     "symbol" : "3",
     "color": "yellow",
     "name": "brass knuckles",
+    "category": "weapons",
     "description": "A metal weapon made of brass, designed to be gripped in the palm and cause punches to do extra damage. A good, quick weapon - but you have to get within punching range to use it.",
     "material": "steel",
     "price": 0,
@@ -2625,6 +2631,7 @@
     "symbol": ")",
     "color": "brown",
     "name": "MRE - Beef",
+    "category": "food",
     "description": "A 'Meal Ready to Eat' with an irradiated beef main course and everything a hungry soldier needs. The contents will begin to rot once they're removed from this sealed bag. Disassemble it to get to its contents.",
     "price": 300,
     "weight": 350,
@@ -2640,6 +2647,7 @@
     "symbol": ")",
     "color": "brown",
     "name": "MRE - Vegetarian",
+    "category": "food",
     "description": "A 'Meal Ready to Eat' with an irradiated vegetarian-friendly course and everything a hungry soldier needs. The contents will begin to rot once they're removed from this sealed bag. Disassemble it to get to its contents.",
     "price": 300,
     "weight": 350,
@@ -2655,6 +2663,7 @@
     "symbol": ")",
     "color": "brown",
     "name": "MRE - Chicken",
+    "category": "food",
     "description": "A 'Meal Ready to Eat' with an irradiated chicken course and everything a hungry soldier needs. The contents will begin to rot once they're removed from this sealed bag. Disassemble it to get to its contents.",
     "price": 300,
     "weight": 350,
@@ -2670,6 +2679,7 @@
     "symbol": ")",
     "color": "brown",
     "name": "MRE - Hotdogs",
+    "category": "food",
     "description": "A 'Meal Rejected by the Enemy' with a hotdog main course and everything a desperate survivor needs. The contents will begin to rot once they're removed from this sealed bag. Disassemble it to get to its contents.",
     "price": 1750,
     "weight": 350,
@@ -2685,6 +2695,7 @@
     "symbol": ")",
     "color": "brown",
     "name": "MRE - Ravioli",
+    "category": "food",
     "description": "A 'Meal Ready to Eat' with a ravioli course and everything a hungry soldier needs. The contents will begin to rot once they're removed from this sealed bag. Disassemble it to get to its contents.",
     "price": 300,
     "weight": 350,

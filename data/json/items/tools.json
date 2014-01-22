@@ -2096,6 +2096,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "weapons",
     "use_action": "EMPBOMB"
   },
 
@@ -2119,6 +2120,7 @@
     "turns_per_charge": 1,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "weapons",
     "use_action": "EMPBOMB_ACT"
   },
 
@@ -2800,6 +2802,7 @@
      "turns_per_charge" : 0,
      "ammo" : "battery",
      "revert_to" : "null",
+     "category": "weapons",
      "use_action" : "TAZER"
   },
 
@@ -3058,6 +3061,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "weapons",
     "use_action": "C4"
   },
 
@@ -3081,6 +3085,7 @@
     "turns_per_charge": 1,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "weapons",
     "use_action": "C4ARMED"
   },
 
@@ -3356,7 +3361,7 @@
     "turns_per_charge": 30,
     "ammo": "gasoline",
     "revert_to": "firemachete_off",
-    "category": "weapon",
+    "category": "weapons",
     "use_action": "FIREMACHETE_ON"
   },
   {
@@ -3514,6 +3519,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 1.1, -1] ],
+    "category": "weapons",
     "use_action": "KNIFE",
     "qualities": [["CUT", 1]]
   },
@@ -3568,6 +3574,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.8 ] ],
+    "category": "weapons",
     "use_action": "KNIFE"
   },
 
@@ -4012,6 +4019,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ ["func:ax", 1.3] ],
+    "category": "weapons",
     "use_action": "LUMBER"
   },
 
@@ -5058,6 +5066,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category": "guns",
     "use_action": "LAW"
   },
 
@@ -5370,7 +5379,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "food",
+    "category" : "food",
     "use_action": "DEJAR"
   },
 
@@ -5394,7 +5403,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "food",
+    "category" : "food",
     "use_action": "DEJAR"
   },
 
@@ -5860,6 +5869,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
+    "category" : "weapons",
     "use_action": "MATCHBOMB"
   },
 
@@ -5883,6 +5893,7 @@
     "turns_per_charge": 1,
     "ammo": "NULL",
     "revert_to": "null",
+    "category" : "weapons",
     "use_action": "MATCHBOMB_ACT"
   },
 
@@ -5999,7 +6010,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "vehicle part",
+    "category": "veh_parts",
     "use_action": "HORN_BICYCLE"
   },
 
@@ -6023,7 +6034,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "vehicle part",
+    "category": "veh_parts",
     "use_action": "NONE"
   },
 
@@ -6047,32 +6058,32 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "category": "vehicle part",
+    "category": "veh_parts",
     "use_action": "NONE"
   },
 
   {
-        "type": "TOOL",
-        "id" : "wrapped_rad_badge",
-        "name" : "wrapped radiation badge",
-        "price" : 1000,
-        "material" : ["plastic", "null"],
-        "volume" : 0,
-        "weight" : 20,
-        "symbol": ",",
-        "color": "light_blue",
-        "description" : "This is a badge that detects radiation dosage sealed in a radiation-blocking bag. Use it to remove it from the bag.",
-        "bashing": 0,
-        "cutting": 0,
-        "to_hit": 0,
-        "max_charges": 0,
-        "initial_charges": 0,
-        "charges_per_use": 0,
-        "turns_per_charge": 0,
-        "ammo": "NULL",
-        "revert_to": "null",
-        "phase" : "solid",
-        "use_action" : "RAD_BADGE"
+    "type": "TOOL",
+    "id" : "wrapped_rad_badge",
+    "name" : "wrapped radiation badge",
+    "price" : 1000,
+    "material" : ["plastic", "null"],
+    "volume" : 0,
+    "weight" : 20,
+    "symbol": ",",
+    "color": "light_blue",
+    "description" : "This is a badge that detects radiation dosage sealed in a radiation-blocking bag. Use it to remove it from the bag.",
+    "bashing": 0,
+    "cutting": 0,
+    "to_hit": 0,
+    "max_charges": 0,
+    "initial_charges": 0,
+    "charges_per_use": 0,
+    "turns_per_charge": 0,
+    "ammo": "NULL",
+    "revert_to": "null",
+    "phase" : "solid",
+    "use_action" : "RAD_BADGE"
   },
 
   {

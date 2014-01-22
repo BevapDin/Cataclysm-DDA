@@ -11527,6 +11527,7 @@
         "type" : "COMESTIBLE",
         "id" : "pur_tablets",
         "name" : "water purification tablets",
+        "category" : "chems",
         "weight" : 1,
         "color" : "white",
         "addiction_type" : "none",
