@@ -211,6 +211,8 @@ public:
     int bell                (player *, item *, bool);
     int oxygen_bottle       (player *, item *, bool);
     int atomic_battery      (player *, item *, bool);
+    int fishing_rod_basic   (player *, item *, bool);
+
     int wood_gas_amount(const item &it);
     int wood_gas(player *p, item *, bool t);
     int quiver(player *p, item *it, bool t);

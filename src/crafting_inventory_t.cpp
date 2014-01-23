@@ -13,10 +13,6 @@ void resort_item_vectors();
    
 std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requirement &req);
 
-bool operator==(const point &a, const point &b) {
-    return a.x == b.x && a.y == b.y;
-}
-
 crafting_inventory_t::crafting_inventory_t(game *g, player *p)
 : p(p)
 {

@@ -1519,14 +1519,15 @@ void game::complete_disassemble()
                 add_msg(_("You fail to recover a component."));
                 continue;
             }
-            if (dis->components[j][0].type == "superglue" || dis->components[j][0].type == "duct_tape") {
-                // skip item addition if component is a consumable like superglue
+
+            item newit(item_controller->find_template(dis->components[j][0].type), turn);
+            if (newit.has_flag("UNRECOVERABLE")) {
                 continue;
             }
-            item newit(item_controller->find_template(dis->components[j][0].type), turn);
             if(newit.type->id.compare(0, 5, "func:") == 0) {
                 newit.make(item_controller->find_template(newit.type->id.substr(5)));
             }
+
             if (newit.count_by_charges()) {
                 newit.charges = compcount;
                 compcount = 1;
