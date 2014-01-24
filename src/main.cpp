@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     sigaction(SIGINT, &sigIntHandler, NULL);
 #endif
 
-    setup_coredump();
+//    setup_coredump();
 
     bool quit_game = false;
     do {

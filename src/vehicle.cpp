@@ -1792,6 +1792,12 @@ int vehicle::print_part_desc(WINDOW *win, int y1, int width, int p, int hl /*= -
             left_sym = "("; right_sym = ")";
         } else if(part_info(pl[i]).location == part_location_structure) {
             left_sym = "["; right_sym = "]";
+        } else if(part_info(pl[i]).has_flag(VPFLAG_CARGO)) {
+            left_sym = "*"; right_sym = "*";
+        } else if(part_info(pl[i]).has_flag(VPFLAG_OBSTACLE)) {
+            left_sym = "#"; right_sym = "#";
+        } else if(part_info(pl[i]).has_flag(VPFLAG_FUEL_TANK)) {
+            left_sym = "{"; right_sym = "}";
         } else {
             left_sym = "-"; right_sym = "-";
         }
