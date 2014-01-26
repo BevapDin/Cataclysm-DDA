@@ -1789,10 +1789,9 @@ bool game::mission_complete(int id, int npc_id)
  mission_type* type = miss->type;
  switch (type->goal) {
   case MGOAL_GO_TO: {
-   point cur_pos(levx + int(MAPSIZE / 2), levy + int(MAPSIZE / 2));
-   if (rl_dist(cur_pos.x, cur_pos.y, miss->target.x, miss->target.y) <= 1)
-    return true;
-   return false;
+   // TODO: target does not contain a z-component, targets are assume to be on z=0
+   const tripoint cur_pos = om_global_location();
+   return (rl_dist(cur_pos.x, cur_pos.y, miss->target.x, miss->target.y) <= 1);
   } break;
 
   case MGOAL_GO_TO_TYPE: {
@@ -1916,13 +1915,16 @@ void game::mission_step_complete(int id, int step)
   case MGOAL_KILL_MONSTER: {
    bool npc_found = false;
    for (int i = 0; i < cur_om->npcs.size(); i++) {
-    if (cur_om->npcs[i]->getID() == miss->npc_id) {
-     miss->target = point(cur_om->npcs[i]->mapx, cur_om->npcs[i]->mapy);
+    npc *p = cur_om->npcs[i];
+    if (p->getID() == miss->npc_id) {
+     // proper global coordinates, map(x/y) are submaps coordinates
+     miss->target.x = p->mapx / 2 + p->omx * OMAPX;
+     miss->target.y = p->mapy / 2 + p->omy * OMAPY;
      npc_found = true;
     }
    }
    if (!npc_found)
-    miss->target = point(-1, -1);
+    miss->target = overmap::invalid_point;
   } break;
  }
 }
@@ -4028,8 +4030,8 @@ Current turn: %d; Next spawn %d.\n\
     data << npc_class_name(p->myclass) << "; " <<
             npc_attitude_name(p->attitude) << std::endl;
     if (p->has_destination()) {
-     data << _("Destination: ") << p->goalx << ":" << p->goaly << "(" <<
-             otermap[ cur_om->ter(p->goalx, p->goaly, p->goalz) ].name << ")" << std::endl;
+     data << _("Destination: ") << p->goal.x << ":" << p->goal.y << "(" <<
+             otermap[ overmap_buffer.ter(p->goal) ].name << ")" << std::endl;
     } else {
      data << _("No destination.") << std::endl;
     }
@@ -4580,9 +4582,12 @@ void game::list_missions()
             if (miss->deadline != 0)
                 mvwprintz(w_missions, 5, 31, c_white, _("Deadline: %d (%d)"),
                           miss->deadline, int(turn));
-            mvwprintz(w_missions, 6, 31, c_white, _("Target: (%d, %d)   You: (%d, %d)"),
-                      miss->target.x, miss->target.y,
-                      (levx + int (MAPSIZE / 2)) / 2, (levy + int (MAPSIZE / 2)) / 2);
+            if (miss->target != overmap::invalid_point) {
+                const tripoint pos = om_global_location();
+                // TODO: target does not contain a z-component, targets are assumed to be on z=0
+                mvwprintz(w_missions, 6, 31, c_white, _("Target: (%d, %d)   You: (%d, %d)"),
+                    miss->target.x, miss->target.y, pos.x, pos.y);
+            }
         } else {
             std::string nope;
             switch (tab) {
@@ -4992,102 +4997,101 @@ nc_color game::limb_color(player *p, body_part bp, int side, bool bleed, bool bi
 
 void game::draw_minimap()
 {
- // Draw the box
- werase(w_minimap);
- mvwputch(w_minimap, 0, 0, c_white, LINE_OXXO);
- mvwputch(w_minimap, 0, 6, c_white, LINE_OOXX);
- mvwputch(w_minimap, 6, 0, c_white, LINE_XXOO);
- mvwputch(w_minimap, 6, 6, c_white, LINE_XOOX);
- for (int i = 1; i < 6; i++) {
-  mvwputch(w_minimap, i, 0, c_white, LINE_XOXO);
-  mvwputch(w_minimap, i, 6, c_white, LINE_XOXO);
-  mvwputch(w_minimap, 0, i, c_white, LINE_OXOX);
-  mvwputch(w_minimap, 6, i, c_white, LINE_OXOX);
- }
+    // Draw the box
+    werase(w_minimap);
+    draw_border(w_minimap);
 
- int cursx = (levx + int(MAPSIZE / 2)) / 2;
- int cursy = (levy + int(MAPSIZE / 2)) / 2;
+    const tripoint curs = om_global_location();
+    const int cursx = curs.x;
+    const int cursy = curs.y;
+    bool drew_mission = false;
+    point targ;
+    if (u.active_mission >= 0 && u.active_mission < u.active_missions.size()) {
+        targ = find_mission(u.active_missions[u.active_mission])->target;
+        if (targ == overmap::invalid_point) {
+            drew_mission = true;
+        }
+    } else {
+        drew_mission = true;
+    }
 
- bool drew_mission = false;
- point targ(-1, -1);
- if (u.active_mission >= 0 && u.active_mission < u.active_missions.size())
-  targ = find_mission(u.active_missions[u.active_mission])->target;
- else
-  drew_mission = true;
-
- if (targ.x == -1)
-  drew_mission = true;
-
- for (int i = -2; i <= 2; i++) {
-  for (int j = -2; j <= 2; j++) {
-   int omx = cursx + i;
-   int omy = cursy + j;
-   long note_sym = 0;
-    const int absx = omx + cur_om->pos().x * OMAPX;
-    const int absy = omy + cur_om->pos().y * OMAPY;
-    const oter_id &cur_ter = overmap_buffer.ter(absx, absy, levz);
-    const bool seen = overmap_buffer.seen(absx, absy, levz);
-    const bool note = overmap_buffer.has_note(absx, absy, levz);
-    if (note) {
-        const std::string &n = overmap_buffer.note(absx, absy, levz);
-        if (n.length() >= 2 && n[1] == ':') {
-            note_sym = n[0];
+    for (int i = -2; i <= 2; i++) {
+        for (int j = -2; j <= 2; j++) {
+            const int omx = cursx + i;
+            const int omy = cursy + j;
+            nc_color ter_color;
+            long ter_sym;
+            const bool seen = overmap_buffer.seen(omx, omy, levz);
+            if (overmap_buffer.has_note(omx, omy, levz)) {
+                const std::string& note = overmap_buffer.note(omx, omy, levz);
+                if (note.length() >= 2 && note[1] == ':') {
+                    ter_sym = note[0];
+                } else {
+                    ter_sym = 'N';
+                }
+                ter_color = c_yellow;
+            } else if (!seen) {
+                ter_sym = ' ';
+                ter_color = c_black;
+            } else {
+                const oter_id &cur_ter = overmap_buffer.ter(omx, omy, levz);
+                ter_sym = otermap[cur_ter].sym;
+                ter_color = otermap[cur_ter].color;
+            }
+            if (!drew_mission && targ.x == omx && targ.y == omy) {
+                // If there is a mission target, and it's not on the same
+                // overmap terrain as the player character, mark it.
+                // TODO: target does not contain a z-component, targets are assume to be on z=0
+                drew_mission = true;
+                if (i != 0 || j != 0) {
+                    ter_color = red_background(ter_color);
+                }
+            }
+            if (i == 0 && j == 0) {
+                mvwputch_hi(w_minimap, 3, 3, ter_color, ter_sym);
+            } else {
+                mvwputch(w_minimap, 3 + j, 3 + i, ter_color, ter_sym);
+            }
         }
     }
-   nc_color ter_color = otermap[cur_ter].color;
-   long ter_sym = otermap[cur_ter].sym;
-   if (note)
-   {
-       ter_sym = note_sym ? note_sym : 'N';
-       ter_color = c_yellow;
-   }
-   if (seen) {
-    if (!drew_mission && targ.x == omx && targ.y == omy) {
-     drew_mission = true;
-     if (i != 0 || j != 0)
-      mvwputch   (w_minimap, 3 + j, 3 + i, red_background(ter_color), ter_sym);
-     else
-      mvwputch_hi(w_minimap, 3,     3,     ter_color, ter_sym);
-    } else if (i == 0 && j == 0)
-     mvwputch_hi(w_minimap, 3,     3,     ter_color, ter_sym);
-    else
-     mvwputch   (w_minimap, 3 + j, 3 + i, ter_color, ter_sym);
-   }
-  }
- }
 
-// Print arrow to mission if we have one!
- if (!drew_mission) {
-  double slope;
-  if (cursx != targ.x)
-   slope = double(targ.y - cursy) / double(targ.x - cursx);
-  if (cursx == targ.x || abs(slope) > 3.5 ) { // Vertical slope
-   if (targ.y > cursy)
-    mvwputch(w_minimap, 6, 3, c_red, '*');
-   else
-    mvwputch(w_minimap, 0, 3, c_red, '*');
-  } else {
-   int arrowx = 3, arrowy = 3;
-   if (abs(slope) >= 1.) { // y diff is bigger!
-    arrowy = (targ.y > cursy ? 6 : 0);
-    arrowx = int(3 + 3 * (targ.y > cursy ? slope : (0 - slope)));
-    if (arrowx < 0)
-     arrowx = 0;
-    if (arrowx > 6)
-     arrowx = 6;
-   } else {
-    arrowx = (targ.x > cursx ? 6 : 0);
-    arrowy = int(3 + 3 * (targ.x > cursx ? slope : (0 - slope)));
-    if (arrowy < 0)
-     arrowy = 0;
-    if (arrowy > 6)
-     arrowy = 6;
-   }
-   mvwputch(w_minimap, arrowy, arrowx, c_red, '*');
-  }
- }
-
- wrefresh(w_minimap);
+    // Print arrow to mission if we have one!
+    if (!drew_mission) {
+        double slope;
+        if (cursx != targ.x) {
+            slope = double(targ.y - cursy) / double(targ.x - cursx);
+        }
+        if (cursx == targ.x || abs(slope) > 3.5 ) { // Vertical slope
+            if (targ.y > cursy) {
+                mvwputch(w_minimap, 6, 3, c_red, '*');
+            } else {
+                mvwputch(w_minimap, 0, 3, c_red, '*');
+            }
+        } else {
+            int arrowx = 3, arrowy = 3;
+            if (abs(slope) >= 1.) { // y diff is bigger!
+                arrowy = (targ.y > cursy ? 6 : 0);
+                arrowx = int(3 + 3 * (targ.y > cursy ? slope : (0 - slope)));
+                if (arrowx < 0) {
+                    arrowx = 0;
+                }
+                if (arrowx > 6) {
+                    arrowx = 6;
+                }
+            } else {
+                arrowx = (targ.x > cursx ? 6 : 0);
+                arrowy = int(3 + 3 * (targ.x > cursx ? slope : (0 - slope)));
+                if (arrowy < 0) {
+                    arrowy = 0;
+                }
+                if (arrowy > 6) {
+                    arrowy = 6;
+                }
+            }
+            mvwputch(w_minimap, arrowy, arrowx, c_red, '*');
+        }
+    }
+    wrefresh(w_minimap);
 }
 
 void game::hallucinate(const int x, const int y)
@@ -6221,7 +6225,8 @@ void game::shockwave(int x, int y, int radius, int force, int stun, int dam_mult
             knockback(x, y, active_npc[i]->posx, active_npc[i]->posy, force, stun, dam_mult);
         }
     }
-    if (rl_dist(u.posx, u.posy, x, y) <= radius && !ignore_player)
+    if (rl_dist(u.posx, u.posy, x, y) <= radius && !ignore_player && ( (!(u.has_trait("LEG_TENT_BRACE"))) ||
+    (u.wearing_something_on(bp_feet))) ) 
     {
         add_msg(_("You're caught in the shockwave!"));
         knockback(x, y, u.posx, u.posy, force, stun, dam_mult);
@@ -6453,8 +6458,13 @@ void game::knockback(std::vector<point>& traj, int force, int stun, int dam_mult
                         add_msg(_("%s collided with someone else and sent her flying!"),
                                 targ->name.c_str());
                     }
-                } else if (u.posx == traj.front().x && u.posy == traj.front().y) {
+                } else if ((u.posx == traj.front().x && u.posy == traj.front().y) &&
+                ( (!(u.has_trait("LEG_TENT_BRACE"))) || (u.wearing_something_on(bp_feet))) ) {
                     add_msg(_("%s collided with you and sent you flying!"), targ->name.c_str());
+                } else if ((u.posx == traj.front().x && u.posy == traj.front().y) &&
+                ((u.has_trait("LEG_TENT_BRACE")) && (!(u.wearing_something_on(bp_feet)))) ) {
+                    add_msg(_("%s collided with you, and barely dislodges your tentacles!"), targ->name.c_str());
+                    force_remaining = 1;
                 }
                 knockback(traj, force_remaining, stun, dam_mult);
                 break;
@@ -12040,6 +12050,16 @@ bool game::plmove(int dx, int dy)
      add_msg(_("You cut your %s on the %s!"), body_part_name(bp, side).c_str(), m.tername(x, y).c_str());
    }
   }
+  if (u.has_trait("LEG_TENT_BRACE") && (!(u.wearing_something_on(bp_feet))) ) {
+      // DX and IN are long suits for Cephalopods,
+      // so this shouldn't cause too much hardship
+      // Presumed that if it's swimmable, they're
+      // swimming and won't stick
+      if ((!(m.has_flag("SWIMMABLE", x, y)) && (one_in(80 + u.dex_cur + u.int_cur)))) {
+          add_msg(_("Your tentacles stick to the ground, but you pull them free."));
+          u.fatigue++;
+      }
+  }
   if (!u.has_artifact_with(AEP_STEALTH) && !u.has_trait("LEG_TENTACLES")) {
    if (u.has_trait("LIGHTSTEP"))
     sound(x, y, 2, ""); // Sound of footsteps may awaken nearby monsters
@@ -12649,12 +12669,34 @@ void game::vertical_move(int movez, bool force) {
     if (tmpmap.move_cost(u.posx, u.posy) == 0) {
      popup(_("Halfway down, the way down becomes blocked off."));
      return;
-    } else if (u.has_amount("rope_30", 1)) {
+    } else if (u.has_trait("VINES2") || ("VINES3")) {
+        if (query_yn(_("There is a sheer drop halfway down.  Use your vines to descend?"))){
+            if (u.has_trait("VINES2")) {
+                if (query_yn(_("Detach a vine?  It'll hurt, but you'll be able to climb back up..."))){
+                    rope_ladder = true;
+                    add_msg(_("You descend on your vines, though leaving a part of you behind stings."));
+                    u.mod_pain(5);
+                    u.hurt(bp_torso, 1, 5);
+                    u.hunger += 5;
+                    u.thirst += 5;
+                }
+                else {
+                    add_msg(_("You gingerly descend using your vines."));
+                }
+            }
+            else {
+                add_msg(_("You effortlessly lower yourself and leave a vine rooted for future use."));
+                rope_ladder = true;
+                u.hunger += 5;
+                u.thirst += 5;
+            }
+        }
+     } else if (u.has_amount("rope_30", 1)) {
      if (query_yn(_("There is a sheer drop halfway down. Climb your rope down?"))){
       rope_ladder = true;
       u.use_amount("rope_30", 1);
-     } else
-      return;
+     }
+     else return;
     } else if (!query_yn(_("There is a sheer drop halfway down.  Jump?")))
      return;
    }
@@ -12987,8 +13029,10 @@ void game::update_stair_monsters() {
                             u.posx += pushx;
                             u.posy += pushy;
                             u.moves -= 100;
-                            // Stumble.
-                            if (u.get_dodge() < 12)
+                            // Stumble.  Unless your tentacles can latch on!
+                            // As with the knockback-pushing, decided not to
+                            // the system any more than necessary.
+                            if ((u.get_dodge() < 12) && (!(u.has_trait("LEG_TENT_BRACE"))))
                                 u.add_effect("downed", 2);
                             return;
                         }

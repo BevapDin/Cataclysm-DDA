@@ -1744,6 +1744,9 @@ void crafting_inventory_t::consume(requirement req, consume_flags flags, const c
         // use up components and change the requirement according
         a->consume(g, p, req, used_items);
     }
+    if(used_items.size() >= 1) {
+        p->lastconsumed = used_items.front().type->id;
+    }
     if(req.count > 0) {
         debugmsg("Their are still %d charges/amounts missing (not used) for %s", req.count, req.type.c_str());
     }

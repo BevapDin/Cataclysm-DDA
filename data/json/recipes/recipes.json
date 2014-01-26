@@ -165,7 +165,7 @@
     ]
   ]
 },{
-        "type" : "recipe",
+  "type" : "recipe",
   "result": "small_relic",
   "id_suffix": "uncraft",
   "category": "CC_NONCRAFT",
@@ -188,7 +188,7 @@
     ]
   ]
 },{
-        "type" : "recipe",
+  "type" : "recipe",
   "result": "badge_deputy",
   "id_suffix": "uncraft",
   "category": "CC_NONCRAFT",
@@ -211,7 +211,7 @@
     ]
   ]
 },{
-        "type" : "recipe",
+  "type" : "recipe",
   "result": "necklace",
   "id_suffix": "uncraft",
   "category": "CC_NONCRAFT",
@@ -234,7 +234,99 @@
     ]
   ]
 },{
-        "type" : "recipe",
+  "type" : "recipe",
+  "result": "locket",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:hammer", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "silver_small", 110 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
+  "result": "gold_bracelet",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 600,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:hammer", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "gold_small", 260 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
+  "result": "silver_bracelet",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 600,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:hammer", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "silver_small", 260 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
+  "result": "copper_bracelet",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 600,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:hammer", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "scrap", 1 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
   "result": "ring",
   "id_suffix": "uncraft",
   "category": "CC_NONCRAFT",
@@ -256,9 +348,103 @@
       [ "gold_small", 50 ]
     ]
   ]
-},
-{
-        "type" : "recipe",
+},{
+  "type" : "recipe",
+  "result": "diamond_ring",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:hammer", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "gold_small", 50 ]
+    ],
+	[
+	  [ "diamond", 1 ]
+	]
+  ]
+},{
+  "type" : "recipe",
+  "result": "gold_ear",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:hammer", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "gold_small", 60 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
+  "result": "silver_ear",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:hammer", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "silver_small", 60 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
+  "result": "copper_ear",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ],
+    [
+      [ "func:hammer", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "scrap", 1 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
   "result": "usb_drive",
   "id_suffix": "uncraft",
   "category": "CC_NONCRAFT",
@@ -278,7 +464,7 @@
     ]
   ]
 },{
-        "type" : "recipe",
+  "type" : "recipe",
   "result": "pda",
   "id_suffix": "uncraft",
   "category": "CC_NONCRAFT",
@@ -310,7 +496,7 @@
     ]
   ]
 },{
-        "type" : "recipe",
+  "type" : "recipe",
   "result": "binoculars",
   "id_suffix": "uncraft",
   "category": "CC_NONCRAFT",
@@ -336,7 +522,7 @@
     ]
   ]
 },{
-        "type" : "recipe",
+  "type" : "recipe",
   "result": "wristwatch",
   "id_suffix": "uncraft",
   "category": "CC_NONCRAFT",
@@ -362,7 +548,7 @@
     ]
   ]
 },{
-        "type" : "recipe",
+  "type" : "recipe",
   "result": "laptop",
   "category": "CC_NONCRAFT",
   "subcategory": "CSC_NONCRAFT",
@@ -6556,6 +6742,42 @@
     ],
     [
       [ "func:water", 1 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
+  "result": "spezi",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_DRINKS",
+  "skill_used": "cooking",
+  "difficulty": 1,
+  "time": 7000,
+  "reversible": false,
+  "autolearn": true,
+  "components": [
+    [
+      [ "orangesoda", 1 ]
+    ],
+    [
+      [ "cola", 1 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
+  "result": "crispycran",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_DRINKS",
+  "skill_used": "cooking",
+  "difficulty": 1,
+  "time": 7000,
+  "reversible": false,
+  "autolearn": true,
+  "components": [
+    [
+      [ "lemonlime", 1 ]
+    ],
+    [
+      [ "cranberry_juice", 1 ]
     ]
   ]
 },{
