@@ -271,9 +271,6 @@ class overmap
 
   void process_mongroups(); // Makes them die out, maybe more
 
-  // TODO: make this 3d
-  std::vector<point> find_all(tripoint origin, const std::string &type,
-                              int &dist, bool must_be_seen);
   std::vector<point> find_terrain(const std::string &term, int zlevel);
   int closest_city(point p);
   point random_house_in_city(int city_id);
@@ -326,7 +323,6 @@ class overmap
      * current z-level, x and y are taken from the players position.
      */
     static point draw_overmap(int z);
-  void remove_npc(int npc_id);
   void remove_vehicle(int id);
   int add_vehicle(vehicle *veh);
 
@@ -421,8 +417,7 @@ class overmap
   std::string player_filename(int const x, int const y) const;
 
   // Map helper function.
-  bool has_npc(int const x, int const y, int const z) const;
-  void print_npcs(WINDOW *w, int const x, int const y, int const z) const;
+  static void print_npcs(WINDOW *w, int const x, int const y, int const z);
   bool has_vehicle(int const x, int const y, int const z, bool require_pda = true) const;
   void print_vehicles(WINDOW *w, int const x, int const y, int const z) const;
 };
