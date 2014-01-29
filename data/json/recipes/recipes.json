@@ -10150,13 +10150,26 @@
       [ "mutagen", 1 ]
     ],
     [
-      [ "blood", 1 ]
+      [ "heroin", 5 ],
+      [ "oxycodone", 10 ],
+      [ "tramadol", 15 ],
+      [ "codeine", 20 ],
+      [ "poppy_pain", 20 ]
     ],
     [
-      [ "vitamins", 10 ]
+      [ "lsd", 5 ],
+      [ "prozac", 10 ],
+      [ "thorazine", 10 ],
+      [ "adderall", 10 ],
+      [ "xanax", 10 ],
+      [ "pills_sleep", 10 ],
+      [ "poppy_sleep", 15 ]
     ],
     [
-      [ "iodine", 10 ]
+      [ "vitamins", 5 ],
+      [ "iodine", 5 ],
+      [ "disinfectant", 5 ],
+      [ "protein_powder", 10 ]
     ]
   ]
 },{
@@ -10579,6 +10592,41 @@
   ]
 },{
         "type" : "recipe",
+  "result": "aspirin",
+  "category": "CC_CHEM",
+  "subcategory": "CSC_CHEM_DRUGS",
+  "skill_used": "cooking",
+  "skills_required": [ "firstaid", 1 ],
+  "difficulty": 4,
+  "time": 24000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 2] , ["textbook_chemistry", 2] , ["recipe_labchem", 2] , ["atomic_survival", 3]],
+  "tools": [
+    [
+      [ "chemistry_set", 25 ],
+      [ "func:hotplate", 25 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "water_clean", 1 ]
+    ],
+    [
+      [ "oxy_powder", 5 ]
+    ],
+    [
+      [ "2x4", 2 ],
+      [ "stick", 2 ],
+      [ "splinter", 4 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "pur_tablets",
   "category": "CC_CHEM",
   "subcategory": "CSC_CHEM_OTHER",
@@ -10724,6 +10772,7 @@
 },{
         "type" : "recipe",
   "result": "sugar",
+  "id_suffix": "from_sweets",
   "category": "CC_FOOD",
   "subcategory": "CSC_FOOD_OTHER",
   "skill_used": "cooking",
@@ -10772,6 +10821,40 @@
     ],
     [
       [ "func:water", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "sugar",
+  "id_suffix": "from_wood",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_OTHER",
+  "note": "high-temperature acid hydrolysis, to extract edible wood sugars",
+  "skill_used": "cooking",
+  "difficulty": 7,
+  "time": 60000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [["adv_chemistry", 7] , ["textbook_chemistry", 8] , ["recipe_labchem", 6]],
+  "tools": [
+    [
+      [ "chemistry_set", 50 ],
+      [ "func:hotplate", 50 ]
+    ],
+    [
+      [ "chemistry_set", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "2x4", 8 ],
+      [ "stick", 8 ],
+      [ "splinter", 16 ]
+    ],
+    [
+      [ "water_acid_weak", 3 ],
+      [ "water_acid", 2 ],
+      [ "acid", 1 ]
     ]
   ]
 },{
@@ -15803,7 +15886,7 @@
         "type" : "recipe",
   "result": "armor_chitin",
   "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
+  "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "tailor",
   "difficulty": 7,
   "time": 100000,
@@ -15823,7 +15906,7 @@
         "type" : "recipe",
   "result": "armor_bone",
   "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
+  "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "tailor",
   "difficulty": 7,
   "time": 30000,
@@ -15851,7 +15934,7 @@
         "type" : "recipe",
   "result": "armor_larmor",
   "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
+  "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "tailor",
   "difficulty": 4,
   "note": "Whilst the trenchcoat needs 6 skill this'll need at least 4.",
@@ -15876,7 +15959,7 @@
         "type" : "recipe",
   "result": "armor_farmor",
   "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
+  "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "tailor",
   "difficulty": 4,
   "time": 28000,
@@ -15899,7 +15982,7 @@
         "type" : "recipe",
   "result": "armor_blarmor",
   "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
+  "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "cooking",
   "difficulty": 3,
   "skills_required": [ "tailor", 3 ],
@@ -15935,7 +16018,7 @@
         "type" : "recipe",
   "result": "armor_plarmor",
   "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
+  "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "fabrication",
   "difficulty": 2,
   "skills_required": [ "tailor", 3 ],
@@ -20212,7 +20295,7 @@
         "type" : "recipe",
   "result": "armor_scrapsuit",
   "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
+  "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "fabrication",
   "difficulty": 7,
   "time": 100000,
@@ -22700,7 +22783,7 @@
         "type" : "recipe",
   "result": "armor_plate",
   "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
+  "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "fabrication",
   "difficulty": 9,
   "time": 600000,
@@ -22934,7 +23017,7 @@
         "type" : "recipe",
   "result": "armor_samurai",
   "category": "CC_ARMOR",
-  "subcategory": "CSC_ARMOR_TORSO",
+  "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "fabrication",
   "difficulty": 9,
   "time": 560000,
