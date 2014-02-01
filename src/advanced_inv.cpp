@@ -905,7 +905,7 @@ void advanced_inventory::display(player * pp)
                 popup(_("You can't put items there"));
             }
             recalc = true;
-        } else if('t' == c) {
+        } else if('T' == c) {
             int destarea = panes[dest].area;
             int srcarea = panes[src].area;
             if(destarea == isall || destarea == isinventory) { continue; }
@@ -921,7 +921,7 @@ void advanced_inventory::display(player * pp)
                 recalc = true;
             }
             continue;
-        } else if('m' == c || 'M' == c || '\n' == c || 'p' == c || 'T' == c ) {
+        } else if('m' == c || 'M' == c || '\n' == c || 't' == c ) {
             // If the active screen has no item.
             if( panes[src].size == 0 ) {
                 continue;
@@ -930,7 +930,7 @@ void advanced_inventory::display(player * pp)
             }
             bool moveall = ('M' == c || '\n' == c );
             int destarea = panes[dest].area;
-            if('T' == c) {
+            if('t' == c) {
                 item* it = panes[src].items[list_pos].it;
                 destarea = find_destination(*it, panes[src].area, panes[src].area);
                 if(destarea == -1) {
@@ -938,7 +938,7 @@ void advanced_inventory::display(player * pp)
                     continue;
                 }
             } else
-            if ( panes[dest].area == isall || 'p' == c ) {
+            if ( panes[dest].area == isall ) {
                 bool valid=false;
                 uimenu m; /* using new uimenu class */
                 m.text=_("Select destination");
@@ -998,7 +998,7 @@ void advanced_inventory::display(player * pp)
                     amount = it->charges;
                     askamount = true;
                 }
-                if(c == 'T') { lastCh = 'j'; }
+                if(c == 't') { lastCh = 'j'; }
 
                 if ( volume > 0 && volume * amount > free_volume ) {
                     int volmax = int( free_volume / volume );
@@ -1018,7 +1018,7 @@ void advanced_inventory::display(player * pp)
                     popup(_("Destination area has too many items. Remove some first."));
                     continue;
                 }
-                if('T' == c) {
+                if('t' == c) {
                     askamount = false;
                     lastCh = 0;
                     moveall = true;

@@ -1021,7 +1021,7 @@
         "heal" : 1,
         "addiction_potential" : 0,
         "nutrition" : 80,
-        "description" : "A mushy grey semi-liquid soup made from mushrooms. It tastes good on it's own but it's also useful in cooking.",
+        "description" : "A mushy grey semi-liquid soup made from mushrooms. It tastes good on its own but it's also useful in cooking.",
         "price" : 45,
         "material" : "veggy",
         "tool" : "null",
@@ -1944,6 +1944,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen",
+        "category" : "drugs",
         "name" : "mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -1975,6 +1976,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_plant",
+        "category" : "drugs",
         "name" : "plant mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2006,6 +2008,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_insect",
+        "category" : "drugs",
         "name" : "insect mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2037,6 +2040,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_spider",
+        "category" : "drugs",
         "name" : "spider mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2068,6 +2072,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_slime",
+        "category" : "drugs",
         "name" : "slime mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2099,6 +2104,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_fish",
+        "category" : "drugs",
         "name" : "fish mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2130,6 +2136,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_rat",
+        "category" : "drugs",
         "name" : "rat mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2161,6 +2168,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_beast",
+        "category" : "drugs",
         "name" : "beast mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2192,6 +2200,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_ursine",
+        "category" : "drugs",
         "name" : "ursine mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2222,6 +2231,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_feline",
+        "category" : "drugs",
         "name" : "feline mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2252,6 +2262,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_lupine",
+        "category" : "drugs",
         "name" : "lupine mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2282,6 +2293,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_cattle",
+        "category" : "drugs",
         "name" : "cattle mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2313,6 +2325,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_cephalopod",
+        "category" : "drugs",
         "name" : "cephalopod mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2344,6 +2357,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_bird",
+        "category" : "drugs",
         "name" : "bird mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2375,6 +2389,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_lizard",
+        "category" : "drugs",
         "name" : "lizard mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2406,6 +2421,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_troglobite",
+        "category" : "drugs",
         "name" : "troglobite mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2437,6 +2453,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_medical",
+        "category" : "drugs",
         "name" : "medical mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2467,6 +2484,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "purifier",
+        "category" : "drugs",
         "name" : "purifier",
         "weight" : 250,
         "color" : "pink",
@@ -2497,6 +2515,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_chimera",
+        "category" : "drugs",
         "name" : "chimera mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2527,6 +2546,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "mutagen_alpha",
+        "category" : "drugs",
         "name" : "alpha mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2557,6 +2577,7 @@
 	{
         "type" : "COMESTIBLE",
         "id" : "mutagen_elfa",
+        "category" : "drugs",
         "name" : "elfa mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2587,6 +2608,7 @@
 	{
         "type" : "COMESTIBLE",
         "id" : "mutagen_raptor",
+        "category" : "drugs",
         "name" : "raptor mutagen",
         "weight" : 250,
         "color" : "light_green",
@@ -2617,6 +2639,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen",
+        "category" : "drugs",
         "name" : "mutagenic serum",
         "weight" : 1,
         "color" : "green",
@@ -2647,6 +2670,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_plant",
+        "category" : "drugs",
         "name" : "plant serum",
         "weight" : 1,
         "color" : "yellow",
@@ -2677,6 +2701,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_insect",
+        "category" : "drugs",
         "name" : "insect serum",
         "weight" : 1,
         "color" : "green",
@@ -2707,6 +2732,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_spider",
+        "category" : "drugs",
         "name" : "spider serum",
         "weight" : 1,
         "color" : "dark_gray",
@@ -2737,6 +2763,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_slime",
+        "category" : "drugs",
         "name" : "slime serum",
         "weight" : 1,
         "color" : "green",
@@ -2767,6 +2794,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_fish",
+        "category" : "drugs",
         "name" : "fish serum",
         "weight" : 1,
         "color" : "cyan",
@@ -2797,6 +2825,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_rat",
+        "category" : "drugs",
         "name" : "rat serum",
         "weight" : 1,
         "color" : "brown",
@@ -2827,6 +2856,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_beast",
+        "category" : "drugs",
         "name" : "beast serum",
         "weight" : 1,
         "color" : "red",
@@ -2857,6 +2887,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_ursine",
+        "category" : "drugs",
         "name" : "ursine serum",
         "weight" : 1,
         "color" : "red",
@@ -2887,6 +2918,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_feline",
+        "category" : "drugs",
         "name" : "feline serum",
         "weight" : 1,
         "color" : "red",
@@ -2917,6 +2949,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_lupine",
+        "category" : "drugs",
         "name" : "lupine serum",
         "weight" : 1,
         "color" : "red",
@@ -2947,6 +2980,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_cattle",
+        "category" : "drugs",
         "name" : "cattle serum",
         "weight" : 1,
         "color" : "green",
@@ -2977,6 +3011,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_cephalopod",
+        "category" : "drugs",
         "name" : "cephalopod serum",
         "weight" : 1,
         "color" : "light_green",
@@ -3007,6 +3042,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_bird",
+        "category" : "drugs",
         "name" : "bird serum",
         "weight" : 1,
         "color" : "cyan",
@@ -3037,6 +3073,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_lizard",
+        "category" : "drugs",
         "name" : "lizard serum",
         "weight" : 1,
         "color" : "light_green",
@@ -3067,7 +3104,9 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_troglobite",
+        "category" : "drugs",
         "name" : "troglobite serum",
+        "category" : "drugs",
         "weight" : 1,
         "color" : "light_gray",
         "addiction_type" : "mutagen",
@@ -3097,7 +3136,9 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_alpha",
+        "category" : "drugs",
         "name" : "alpha serum",
+        "category" : "drugs",
         "weight" : 1,
         "color" : "light_green",
         "addiction_type" : "mutagen",
@@ -3127,7 +3168,9 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_medical",
+        "category" : "drugs",
         "name" : "medical serum",
+        "category" : "drugs",
         "weight" : 1,
         "color" : "light_green",
         "addiction_type" : "mutagen",
@@ -3157,7 +3200,9 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_chimera",
+        "category" : "drugs",
         "name" : "chimera serum",
+        "category" : "drugs",
         "weight" : 1,
         "color" : "red",
         "addiction_type" : "mutagen",
@@ -3187,7 +3232,9 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_elfa",
+        "category" : "drugs",
         "name" : "elf-a serum",
+        "category" : "drugs",
         "weight" : 1,
         "color" : "light_green",
         "addiction_type" : "mutagen",
@@ -3217,7 +3264,9 @@
     {
         "type" : "COMESTIBLE",
         "id" : "iv_mutagen_raptor",
+        "category" : "drugs",
         "name" : "raptor serum",
+        "category" : "drugs",
         "weight" : 1,
         "color" : "green",
         "addiction_type" : "mutagen",
@@ -3248,6 +3297,7 @@
         "type" : "COMESTIBLE",
         "id" : "iv_purifier",
         "name" : "purifier serum",
+        "category" : "drugs",
         "weight" : 1,
         "color" : "magenta",
         "addiction_type" : "mutagen",
@@ -7865,7 +7915,7 @@
         "nutrition" : 10,
         "description" : "A translucent hexagonal chunk of wax, filled with dense, milky jelly. Delicious, and rich with the most beneficial substances the hive can produce, it is useful for curing all sorts of afflictions.",
         "price" : 200,
-        "material" : "veggy",
+        "material" : "null",
         "tool" : "null",
         "volume" : 1,
         "cutting" : 0,
@@ -10759,29 +10809,61 @@
     {
         "type" : "COMESTIBLE",
         "id" : "fungicide",
+        "category" : "chems",
         "name" : "fungicide",
         "weight" : 1,
         "color" : "pink",
         "addiction_type" : "none",
         "spoils_in" : 0,
         "use_action" : "FUNGICIDE",
-        "stim" : 0,
-        "container" : "bottle_plastic",
+        "stim" : -7,
+        "container" : "null",
         "to_hit" : 0,
         "comestible_type" : "MED",
         "symbol" : "!",
         "quench" : 0,
-        "heal" : -2,
+        "heal" : -7,
         "addiction_potential" : 0,
         "nutrition" : 0,
-        "description" : "Antifungal medication designed to destroy fungal infections and force spores from the body.",
-        "price" : 900,
-        "material" : "plastic",
+        "description" : "Agricultural grade chemical anti-fungal powder designed to destroy infections in plants.",
+        "price" : 500,
+        "material" : "powder",
         "tool" : "null",
         "volume" : 1,
         "cutting" : 0,
-        "phase" : "liquid",
-        "charges" : 2,
+        "phase" : "solid",
+        "charges" : 10,
+        "stack_size" : 10,
+        "bashing" : 0,
+        "fun" : -15
+    },
+    {
+        "type" : "COMESTIBLE",
+        "id" : "antifungal",
+        "category" : "drugs",
+        "name" : "antifungal drug",
+        "weight" : 1,
+        "color" : "white",
+        "addiction_type" : "none",
+        "spoils_in" : 0,
+        "use_action" : "ANTIFUNGAL",
+        "stim" : 0,
+        "container" : "null",
+        "to_hit" : 0,
+        "comestible_type" : "MED",
+        "symbol" : "!",
+        "quench" : 0,
+        "heal" : 0,
+        "addiction_potential" : 0,
+        "nutrition" : 0,
+        "description" : "Powerful chemical tablets designed to eliminate fungal infections in living creatures.",
+        "price" : 1000,
+        "material" : "powder",
+        "tool" : "null",
+        "volume" : 1,
+        "cutting" : 0,
+        "phase" : "solid",
+        "charges" : 5,
         "stack_size" : 100,
         "bashing" : 0,
         "fun" : 0
@@ -10929,7 +11011,7 @@
         "spoils_in": 160,
         "addiction_potential": 0,
         "addiction_type" : "none",
-        "charges": 1,
+        "charges": 5,
         "heal": 0,
         "fun": -5,
         "stim": 0,
@@ -10957,7 +11039,7 @@
         "spoils_in": 600,
         "addiction_potential": 0,
         "addiction_type" : "none",
-        "charges": 1,
+        "charges": 5,
         "heal": 0,
         "fun": 0,
         "stim": 0,
@@ -10985,7 +11067,7 @@
         "spoils_in": 0,
         "addiction_potential": 0,
         "addiction_type" : "none",
-        "charges": 1,
+        "charges": 5,
         "heal": 0,
         "fun": 0,
         "stim": 0,
@@ -11013,7 +11095,7 @@
         "spoils_in": 0,
         "addiction_potential": 0,
         "addiction_type" : "none",
-        "charges": 1,
+        "charges": 5,
         "heal": 0,
         "fun": 0,
         "stim": 0,
@@ -11041,7 +11123,7 @@
         "spoils_in": 0,
         "addiction_potential": 0,
         "addiction_type" : "none",
-        "charges": 1,
+        "charges": 5,
         "heal": 0,
         "fun": 0,
         "stim": 0,
@@ -11338,7 +11420,7 @@
         "volume" : 1,
         "cutting" : 0,
         "phase" : "liquid",
-        "charges" : 1,
+        "charges" : 2,
         "bashing" : 0,
         "fun" : 10,
         "flags" : ["USE_EAT_VERB"]
@@ -11368,7 +11450,7 @@
         "volume" : 1,
         "cutting" : 0,
         "phase" : "liquid",
-        "charges" : 1,
+        "charges" : 2,
         "bashing" : 0,
         "fun" : 10,
         "flags" : ["USE_EAT_VERB"]

@@ -4975,8 +4975,8 @@
 },{
         "type" : "recipe",
   "result": "salt_water",
-  "category": "CC_FOOD",
-  "subcategory": "CSC_FOOD_DRINKS",
+  "category": "CC_CHEM",
+  "subcategory": "CSC_CHEM_OTHER",
   "skill_used": "cooking",
   "difficulty": 0,
   "time": 1000,
@@ -7245,7 +7245,7 @@
   ],
   "components": [
     [
-      [ "broth", 2 ]
+      [ "broth", 1 ]
     ],
     [
       [ "spaghetti_raw", 1 ],
@@ -7288,7 +7288,7 @@
   ],
   "components": [
     [
-      [ "broth", 2 ]
+      [ "broth", 1 ]
     ],
     [
       [ "spaghetti_raw", 1 ],
@@ -7325,7 +7325,7 @@
   ],
   "components": [
     [
-      [ "broth", 2 ]
+      [ "broth", 1 ]
     ],
     [
       [ "spaghetti_raw", 1 ],
@@ -7427,7 +7427,7 @@
   ],
   "components": [
     [
-      [ "broth", 2 ]
+      [ "broth", 1 ]
     ],
     [
       [ "spaghetti_raw", 1 ],
@@ -9096,15 +9096,47 @@
       [ "func:hotplate", 2 ]
     ]
   ],
-  "qualities" : [
-    {"id":"CUT","level":1,"amount":1}
+  "components": [
+    [
+      [ "fighter_sting", 1 ],
+      [ "disinfectant", 4 ],
+      [ "oxy_powder", 100 ]
+    ],
+    [
+      [ "bleach", 5 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "antifungal",
+  "category": "CC_CHEM",
+  "subcategory": "CSC_CHEM_CHEMICALS",
+  "skill_used": "cooking",
+  "difficulty": 4,
+  "time": 30000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [["textbook_chemistry", 5] , ["adv_chemistry", 4] , ["pocket_survival", 5] , ["atomic_survival", 5] , ["textbook_survival", 5] , ["survival_book", 5] , [ "recipe_labchem", 4]],
+  "tools": [
+    [
+      [ "chemistry_set", -1 ]
+    ],
+    [
+      [ "fire", -1 ],
+      [ "func:hotplate", 20 ],
+      [ "chemistry_set", 20 ]
+    ]
   ],
   "components": [
     [
-      [ "fighter_sting", 1 ]
+      [ "fungicide", 10 ]
     ],
     [
-      [ "water_clean", 2 ]
+      [ "ammonia", 2 ],
+      [ "lye_powder", 200 ]
+    ],
+    [
+      [ "salt", 1 ]
     ]
   ]
 },{
@@ -15253,7 +15285,7 @@
   "subcategory": "CSC_ARMOR_HEAD",
   "skill_used": "fabrication",
   "skills_required" : ["tailor", 5],
-  "difficulty": 5,
+  "difficulty": 7,
   "time": 20000,
   "reversible": false,
   "autolearn": true,
@@ -15292,7 +15324,7 @@
   "subcategory": "CSC_ARMOR_HEAD",
   "skill_used": "fabrication",
   "skills_required" : ["tailor", 5],
-  "difficulty": 5,
+  "difficulty": 7,
   "time": 20000,
   "reversible": false,
   "autolearn": true,
@@ -15331,7 +15363,7 @@
   "subcategory": "CSC_ARMOR_HEAD",
   "skill_used": "fabrication",
   "skills_required" : ["tailor", 7],
-  "difficulty": 5,
+  "difficulty": 7,
   "time": 20000,
   "reversible": false,
   "autolearn": true,
@@ -15376,7 +15408,7 @@
   "subcategory": "CSC_ARMOR_HEAD",
   "skill_used": "fabrication",
   "skills_required" : ["tailor", 7],
-  "difficulty": 5,
+  "difficulty": 7,
   "time": 20000,
   "reversible": false,
   "autolearn": true,
@@ -15421,7 +15453,7 @@
   "subcategory": "CSC_ARMOR_HEAD",
   "skill_used": "fabrication",
   "skills_required" : ["tailor", 8],
-  "difficulty": 6,
+  "difficulty": 7,
   "time": 20000,
   "reversible": false,
   "autolearn": true,
@@ -15461,7 +15493,7 @@
   "subcategory": "CSC_ARMOR_HEAD",
   "skill_used": "fabrication",
   "skills_required" : ["tailor", 8],
-  "difficulty": 6,
+  "difficulty": 7,
   "time": 20000,
   "reversible": false,
   "autolearn": true,
@@ -15501,7 +15533,7 @@
   "subcategory": "CSC_ARMOR_HEAD",
   "skill_used": "fabrication",
   "skills_required" : ["tailor", 7],
-  "difficulty": 6,
+  "difficulty": 7,
   "time": 20000,
   "reversible": false,
   "autolearn": true,
@@ -15543,7 +15575,7 @@
   "subcategory": "CSC_ARMOR_HEAD",
   "skill_used": "fabrication",
   "skills_required" : ["tailor", 7],
-  "difficulty": 6,
+  "difficulty": 7,
   "time": 20000,
   "reversible": false,
   "autolearn": true,
@@ -23829,8 +23861,8 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_TORSO",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 2],
-  "difficulty": 4,
+  "skills_required" : ["fabrication", 5],
+  "difficulty": 6,
   "time": 70000,
   "reversible": false,
   "autolearn": true,
@@ -23879,8 +23911,8 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_LEGS",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 2],
-  "difficulty": 4,
+  "skills_required" : ["fabrication", 5],
+  "difficulty": 6,
   "time": 70000,
   "reversible": false,
   "autolearn": true,
@@ -23926,8 +23958,8 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_STORAGE",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 1],
-  "difficulty": 3,
+  "skills_required" : ["fabrication", 3],
+  "difficulty": 5,
   "time": 70000,
   "reversible": false,
   "autolearn": true,
@@ -23967,8 +23999,8 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_STORAGE",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 2],
-  "difficulty": 4,
+  "skills_required" : ["fabrication", 3],
+  "difficulty": 5,
   "time": 80000,
   "reversible": false,
   "autolearn": true,
@@ -24014,8 +24046,8 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_STORAGE",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 3],
-  "difficulty": 5,
+  "skills_required" : ["fabrication", 5],
+  "difficulty": 6,
   "time": 90000,
   "reversible": false,
   "autolearn": true,
@@ -24060,7 +24092,7 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 3],
+  "skills_required" : ["fabrication", 6],
   "difficulty": 5,
   "time": 180000,
   "reversible": false,
@@ -24110,7 +24142,7 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 4],
+  "skills_required" : ["fabrication", 6],
   "difficulty": 6,
   "time": 240000,
   "reversible": false,
@@ -24163,7 +24195,7 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 5],
+  "skills_required" : ["fabrication", 7],
   "difficulty": 7,
   "time": 360000,
   "reversible": false,
@@ -24220,8 +24252,8 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 5],
-  "difficulty": 7,
+  "skills_required" : ["fabrication", 6],
+  "difficulty": 6,
   "time": 300000,
   "reversible": false,
   "autolearn": true,
@@ -24276,7 +24308,7 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_SUIT",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 6],
+  "skills_required" : ["fabrication", 7],
   "difficulty": 8,
   "time": 320000,
   "reversible": false,
@@ -24383,7 +24415,7 @@
   "category": "CC_ARMOR",
   "subcategory": "CSC_ARMOR_HEAD",
   "skill_used": "tailor",
-  "skills_required" : ["fabrication", 3],
+  "skills_required" : ["fabrication", 4],
   "difficulty": 5,
   "time": 45000,
   "reversible": false,
