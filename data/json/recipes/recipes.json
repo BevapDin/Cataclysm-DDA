@@ -5375,7 +5375,7 @@
   ],
   "tools": [
     [
-      [ "dehydrator", 50 ]
+      [ "func:dehydrator", 50 ]
     ]
   ],
   "components": [
@@ -5399,7 +5399,7 @@
   ],
   "tools": [
     [
-      [ "dehydrator", 50 ]
+      [ "func:dehydrator", 50 ]
     ]
   ],
   "components": [

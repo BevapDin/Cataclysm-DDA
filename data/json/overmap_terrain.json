@@ -755,7 +755,7 @@
         "id" : "cabin_strange",
         "name" : "forest",
         "sym" : 70,
-        "color" : "green",
+        "color" : "blue",
         "see_cost" : 5,
         "extras" : "field"
     },{

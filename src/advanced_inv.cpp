@@ -907,14 +907,19 @@ void advanced_inventory::display(player * pp)
             recalc = true;
         } else if('t' == c) {
             int destarea = panes[dest].area;
-            if(destarea == isall || destarea == isinventory) { continue; }
-            if(squares[destarea].vstor >= 0) { continue; }
             int srcarea = panes[src].area;
+            if(destarea == isall || destarea == isinventory) { continue; }
             if(srcarea == isall || srcarea == isinventory) { continue; }
-            if(squares[srcarea].vstor >= 0) { continue; }
-            m.i_at(u.posx+panes[src].offx,u.posy+panes[src].offy).swap(
-                m.i_at(u.posx+panes[dest].offx,u.posy+panes[dest].offy));
-            recalc = true;
+
+            if(squares[destarea].vstor < 0 && squares[srcarea].vstor < 0) {
+                m.i_at(u.posx+panes[src].offx,u.posy+panes[src].offy).swap(
+                    m.i_at(u.posx+panes[dest].offx,u.posy+panes[dest].offy));
+                recalc = true;
+            } else if(squares[destarea].vstor >= 0 && squares[srcarea].vstor >= 0) {
+                squares[srcarea].veh->parts[squares[srcarea].vstor].items.swap(
+                    squares[destarea].veh->parts[squares[destarea].vstor].items);
+                recalc = true;
+            }
             continue;
         } else if('m' == c || 'M' == c || '\n' == c || 'p' == c || 'T' == c ) {
             // If the active screen has no item.
