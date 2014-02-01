@@ -1880,7 +1880,7 @@
     "flags":["SEES", "HEARS", "SMELLS", "STUMBLES", "WARM", "BASHES", "POISON", "NO_BREATHE", "VIS40", "BLEED", "SWIMS", "REVIVES"]
     },{
         "type" : "MONSTER",
-        "id" : "mon_zombie_fast",
+        "id" : "mon_zombie_dog",
     "name": "zombie dog",
     "species":"ZOMBIE",
     "symbol":"d",
