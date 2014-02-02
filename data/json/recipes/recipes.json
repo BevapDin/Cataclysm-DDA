@@ -1602,6 +1602,7 @@
       [ "tequila", 14 ],
       [ "gin", 14 ],
       [ "triple_sec", 14 ],
+      [ "lamp_oil", 400 ],
       [ "gasoline", 600 ]
     ]
   ]
@@ -3087,6 +3088,7 @@
       [ "tequila", 5 ],
       [ "gin", 5 ],
       [ "triple_sec", 5 ],
+      [ "lamp_oil", 100 ],
       [ "gasoline", 200 ]
     ]
   ]
@@ -5131,6 +5133,67 @@
   ]
 },{
         "type" : "recipe",
+  "result": "tallow",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_MEAT",
+  "skill_used": "cooking",
+  "difficulty": 2,
+  "time": 10000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+    [
+      [ "func:hotplate", 7 ],
+      [ "char_smoker", 1 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "func:pan", -1 ],
+      [ "func:pot", -1 ]
+        ]
+  ],
+  "components": [
+    [
+      [ "fat", 1 ]
+    ],
+    [
+      [ "water", 1 ],
+      [ "water_clean", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "cooking_oil",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_OTHER",
+  "skill_used": "cooking",
+  "difficulty": 4,
+  "time": 10000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+    [
+      [ "func:hotplate", 10 ],
+      [ "char_smoker", 1 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "func:pot", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "plant_sac", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "rehydrated_meat",
   "category": "CC_FOOD",
   "subcategory": "CSC_FOOD_MEAT",
@@ -5352,7 +5415,8 @@
   ],
   "tools": [
     [
-      [ "func:dehydrator", 50 ]
+      [ "func:dehydrator", 25 ],
+      [ "char_smoker", 5 ]
     ]
   ],
   "components": [
@@ -5375,7 +5439,8 @@
   ],
   "tools": [
     [
-      [ "func:dehydrator", 50 ]
+      [ "func:dehydrator", 25 ],
+      [ "char_smoker", 5 ]
     ]
   ],
   "components": [
@@ -5399,7 +5464,8 @@
   ],
   "tools": [
     [
-      [ "func:dehydrator", 50 ]
+      [ "func:dehydrator", 25 ],
+      [ "char_smoker", 5 ]
     ]
   ],
   "components": [
@@ -5436,7 +5502,8 @@
       [ "skewer", -1 ]
     ],
     [
-      [ "cooking_oil", -1 ]
+      [ "cooking_oil", -1 ],
+      [ "tallow", -1 ]
     ]
   ],
   "components": [
@@ -5554,54 +5621,6 @@
   ]
 },{
         "type" : "recipe",
-  "result": "protein_shake",
-  "category": "CC_FOOD",
-  "subcategory": "CSC_FOOD_DRINKS",
-  "skill_used": "cooking",
-  "id_suffix": "from_scrap",
-  "difficulty": 0,
-  "time": 4000,
-  "reversible": false,
-  "autolearn": true,
-  "count": 4,
-  "qualities" : [
-    {"id":"CUT","level":1,"amount":1}
-  ],
-  "tools": [
-    [
-      [ "func:dehydrator", 50 ]
-    ],
-    [
-      [ "func:hotplate", 30 ],
-      [ "fire", -1 ]
-    ],
-    [
-      [ "chemistry_set", -1 ]
-    ],
-    [
-      [ "func:pot", -1 ]
-    ]
-  ],
-  "components": [
-    [
-      [ "meat", 2 ]
-    ],
-    [
-      [ "func:water", 4 ]
-    ],
-    [
-      [ "strawberries", 4 ],
-      [ "blueberries", 4 ],
-      [ "orange", 4 ],
-      [ "lemon", 4 ],
-      [ "banana", 4 ],
-      [ "apple", 4 ],
-      [ "rehydrated_fruit", 4 ],
-      [ "dry_fruit", 4 ]
-    ]
-  ]
-},{
-        "type" : "recipe",
   "result": "dry_veggy",
   "category": "CC_FOOD",
   "subcategory": "CSC_FOOD_VEGGI",
@@ -5615,7 +5634,8 @@
   ],
   "tools": [
     [
-      [ "func:dehydrator", 50 ]
+      [ "func:dehydrator", 25 ],
+      [ "char_smoker", 5 ]
     ]
   ],
   "components": [
@@ -5646,7 +5666,8 @@
   ],
   "tools": [
     [
-      [ "func:dehydrator", 50 ]
+      [ "func:dehydrator", 25 ],
+      [ "char_smoker", 5 ]
     ]
   ],
   "components": [
@@ -5682,7 +5703,11 @@
   ],
   "components": [
     [
-      [ "meat", 6 ]
+      [ "meat", 3 ]
+    ],
+    [
+      [ "fat", 3 ],
+      [ "tallow", 3 ]
     ],
     [
       [ "salt", 1 ],
@@ -5840,7 +5865,11 @@
   ],
   "components": [
     [
-      [ "human_flesh", 6 ]
+      [ "human_flesh", 3 ]
+    ],
+    [
+      [ "fat", 3 ],
+      [ "tallow", 3 ]
     ],
     [
       [ "salt", 1 ],
@@ -7133,6 +7162,49 @@
   ]
 },{
         "type" : "recipe",
+  "result": "pemmican",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_MEAT",
+  "skill_used": "cooking",
+  "difficulty": 5,
+  "time": 45000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+    [
+      [ "func:hotplate", 20 ],
+      [ "char_smoker", 2 ],
+      [ "fire", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "tallow", 2 ]
+    ],
+    [
+      [ "jerky", 6 ],
+      [ "dry_meat", 4 ],
+      [ "meat_smoked", 2 ],
+      [ "dry_fish", 9 ],
+      [ "salted_fish", 6 ],
+      [ "fish_smoked", 3 ]
+    ],
+    [
+      [ "dry_veggy", 2 ],
+      [ "dry_fruit", 2 ],
+      [ "strawberries", 1 ],
+      [ "blueberries", 1 ],
+      [ "cherries", 1 ],
+      [ "cranberries", 1 ],
+      [ "raspberries", 1 ],
+      [ "blackberries", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "V8",
   "category": "CC_FOOD",
   "subcategory": "CSC_FOOD_DRINKS",
@@ -7288,7 +7360,8 @@
   ],
   "components": [
     [
-      [ "broth", 1 ]
+      [ "broth", 1 ],
+      [ "broth_bone", 1]
     ],
     [
       [ "spaghetti_raw", 1 ],
@@ -7325,7 +7398,8 @@
   ],
   "components": [
     [
-      [ "broth", 1 ]
+      [ "broth", 1 ],
+      [ "broth_bone", 1]
     ],
     [
       [ "spaghetti_raw", 1 ],
@@ -7427,7 +7501,8 @@
   ],
   "components": [
     [
-      [ "broth", 1 ]
+      [ "broth", 1 ],
+      [ "broth_bone", 1]
     ],
     [
       [ "spaghetti_raw", 1 ],
@@ -7596,7 +7671,8 @@
       [ "milk", 1 ],
       [ "con_milk", 1 ],
       [ "can_coconut", 1 ],
-      [ "cooking_oil", 1 ]
+      [ "cooking_oil", 1 ],
+      [ "tallow", 1 ]
     ]
   ]
 },{
@@ -7621,7 +7697,8 @@
   ],
   "components": [
     [
-      [ "cooking_oil", 1 ]
+      [ "cooking_oil", 1 ],
+      [ "tallow", 1 ]
     ],
     [
       [ "cornmeal", 2 ],
@@ -7707,6 +7784,56 @@
     ],
     [
       [ "func:water", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "granola",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_OTHER",
+  "skill_used": "cooking",
+  "difficulty": 3,
+  "time": 45000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "func:hotplate", 20 ],
+      [ "char_smoker", 2 ],
+      [ "fire", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "oatmeal", 4 ]
+    ],
+    [
+      [ "honeycomb", 1 ],
+      [ "con_milk", 1 ],
+      [ "honey_bottled", 4 ],
+      [ "sugar", 4 ],
+      [ "syrup", 4 ]
+    ],
+    [
+      [ "dry_fruit", 1 ],
+      [ "jam_strawberries", 1 ],
+      [ "jam_blueberries", 1 ],
+      [ "jam_fruit", 1 ],
+      [ "strawberries", 1 ],
+      [ "blueberries", 1 ],
+      [ "cherries", 1 ],
+      [ "irradiated_plums", 1],
+      [ "plums", 1 ],
+      [ "grapes", 1 ],
+      [ "cranberries", 1 ],
+      [ "raspberries", 1 ],
+      [ "blackberries", 1 ],
+      [ "irradiated_pomegranate", 1],
+      [ "pomegranate", 1 ],
+      [ "chocolate", 1 ],
+      [ "candy", 2 ],
+      [ "candy2", 2 ],
+      [ "choco_coffee_beans", 1 ]
     ]
   ]
 },{
@@ -7821,7 +7948,8 @@
       [ "syrup", 1 ]
     ],
     [
-      [ "cooking_oil", 1 ]
+      [ "cooking_oil", 1 ],
+      [ "tallow", 1 ]
     ],
     [
       [ "func:water", 1 ]
@@ -7861,7 +7989,8 @@
       [ "syrup", 1 ]
     ],
     [
-      [ "cooking_oil", 1 ]
+      [ "cooking_oil", 1 ],
+      [ "tallow", 1 ]
     ],
     [
       [ "func:water", 1 ]
@@ -7917,7 +8046,8 @@
       [ "syrup", 1 ]
     ],
     [
-      [ "cooking_oil", 1 ]
+      [ "cooking_oil", 1 ],
+      [ "tallow", 1 ]
     ],
     [
       [ "func:water", 1 ]
@@ -7963,7 +8093,8 @@
       [ "sugar", 1 ]
     ],
     [
-      [ "cooking_oil", 1 ]
+      [ "cooking_oil", 1 ],
+      [ "tallow", 1 ]
     ],
     [
       [ "func:water", 1 ]
@@ -8006,7 +8137,8 @@
       [ "sugar", 1 ]
     ],
     [
-      [ "cooking_oil", 1 ]
+      [ "cooking_oil", 1 ],
+      [ "tallow", 1 ]
     ],
     [
       [ "func:water", 1 ]
@@ -8062,7 +8194,8 @@
       [ "syrup", 1 ]
     ],
     [
-      [ "cooking_oil", 1 ]
+      [ "cooking_oil", 1 ],
+      [ "tallow", 1 ]
     ],
     [
       [ "sugar", 1 ]
@@ -8944,6 +9077,40 @@
       [ "veggy_wild", 2 ],
       [ "rehydrated_veggy", 2 ],
       [ "dry_veggy", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "lamp_oil",
+  "category": "CC_CHEM",
+  "subcategory": "CSC_CHEM_OTHER",
+  "skill_used": "cooking",
+  "difficulty": 2,
+  "time": 30000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+    [
+      [ "func:hotplate", 7 ],
+      [ "char_smoker", 1 ],
+      [ "fire", -1 ]
+    ],
+    [
+      [ "func:pan", -1 ],
+      [ "func:pot", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "tallow", 5 ],
+      [ "cooking_oil", 10 ]
+    ],
+    [
+      [ "water", 1 ],
+      [ "water_clean", 1 ]
     ]
   ]
 },{
@@ -12129,6 +12296,39 @@
     ],
     [
       [ "scrap", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "oil_lamp",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_TOOLS",
+  "skill_used": "fabrication",
+  "difficulty": 3,
+  "time": 45000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "func:hammer", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "scrap", 6 ]
+    ],
+    [
+      [ "rag", 1 ]
+    ],
+    [
+      [ "bottle_glass", 1 ],
+      [ "flask_glass", 1],
+      [ "jar_glass", 1 ]
+    ],
+    [
+      [ "can_food", 1 ],
+      [ "can_drink", 1 ],
+      [ "canister_empty", 1 ]
     ]
   ]
 },{
@@ -16037,6 +16237,7 @@
     ],
     [
       [ "wax", 2 ],
+      [ "tallow", 8 ],
       [ "vinegar", 10 ]
     ],
     [
@@ -17392,13 +17593,15 @@
     ],
     [
       [ "gasoline", 200 ],
+      [ "lamp_oil", 100 ],
       [ "vodka", 7 ],
       [ "rum", 7 ],
       [ "whiskey", 7 ],
       [ "single_malt_whiskey", 7 ],
       [ "tequila", 7 ],
       [ "gin", 7 ],
-      [ "triple_sec", 7 ]
+      [ "triple_sec", 7 ],
+      [ "tallow", 2 ]
     ],
     [
       [ "rag", 1 ]
@@ -17422,6 +17625,7 @@
     ],
     [
       [ "gasoline", 200 ],
+      [ "lamp_oil", 100 ],
       [ "vodka", 7 ],
       [ "rum", 7 ],
       [ "whiskey", 7 ],
@@ -17462,18 +17666,21 @@
   "autolearn": true,
   "tools": [
     [
+      [ "func:hotplate", 2 ],
+      [ "char_smoker", 1 ],
       [ "lighter", 5 ],
       [ "ref_lighter", 5 ],
-      [ "fire", -1 ],
-      [ "func:hotplate", 10 ]
+      [ "fire", -1 ]
     ]
   ],
   "components": [
     [
-      [ "can_food", -1 ]
+      [ "can_food", -1 ],
+      [ "canister_empty", -1 ]
     ],
     [
-      [ "wax", 2 ]
+      [ "wax", 2 ],
+      [ "tallow", 4 ]
     ],
     [
       [ "string_6", 1 ]
@@ -26984,7 +27191,8 @@
       [ "sugar", 1 ]
     ],
     [
-      [ "cooking_oil", 1 ]
+      [ "cooking_oil", 1 ],
+      [ "tallow", 1 ]
     ],
     [
       [ "func:water", 1 ]
