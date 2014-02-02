@@ -727,6 +727,20 @@ int iuse::antibiotic(player *p, item *it, bool)
     return it->type->charges_to_use();
 }
 
+int iuse::eyedrops(player *p, item *it, bool) {
+    if (p->is_underwater()) {
+        g->add_msg_if_player(p, _("You can't do that while underwater."));
+        return false;
+    }
+    g->add_msg_if_player(p,_("You use your %s."), it->tname().c_str());
+    p->moves -= 150;
+    if (p->has_disease("boomered")) {
+        p->rem_disease("boomered");
+        g->add_msg_if_player(p,_("You wash the slime from your eyes."));
+    }
+    return it->type->charges_to_use();
+}
+
 int iuse::fungicide(player *p, item *it, bool) {
     if (p->is_underwater()) {
         g->add_msg_if_player(p, _("You can't do that while underwater."));
@@ -795,6 +809,19 @@ int iuse::antifungal(player *p, item *it, bool) {
         if (!p->has_disease("fungus")) {
             g->add_msg_if_player(p,_("Your skin grows warm for a moment."));
         }
+    }
+    return it->type->charges_to_use();
+}
+
+int iuse::antiparasitic(player *p, item *it, bool) {
+    if (p->is_underwater()) {
+        g->add_msg_if_player(p, _("You can't do that while underwater."));
+        return false;
+    }
+    g->add_msg_if_player(p,_("You take some antiparasitic medication."));
+    if (p->has_disease("dermatik")) {
+        p->rem_disease("dermatik");
+        g->add_msg_if_player(p,_("The itching sensation under your skin fades away."));
     }
     return it->type->charges_to_use();
 }
@@ -7601,6 +7628,7 @@ int iuse::jet_injector(player *p, item *it, bool)
     p->rem_disease("bite");
     p->rem_disease("bleed");
     p->rem_disease("fungus");
+    p->rem_disease("dermatik");
     p->radiation += 4;
     p->healall(20);
   }

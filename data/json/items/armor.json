@@ -5933,8 +5933,8 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},
-	{
+    },
+    {
         "type" : "ARMOR",
         "id" : "hairpin",
         "name" : "hairpin",
@@ -5955,9 +5955,9 @@
         "warmth" : 0,
         "enviromental_protection" : 0,
         "phase" : "solid"
-	},
-	{
-    
+    },
+    {
+
         "type" : "ARMOR",
         "id" : "fc_hairpin",
         "name" : "fancy hairpin",
@@ -5979,8 +5979,8 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},
-	{
+    },
+    {
         "type" : "ARMOR",
         "id" : "barrette",
         "name" : "barrette",
@@ -6002,8 +6002,8 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},		
-	{
+    },
+    {
         "type" : "ARMOR",
         "id" : "diamond_ring",
         "name" : "diamond ring",
@@ -6025,9 +6025,9 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},	
-	{
-		"type" : "ARMOR",
+    },
+    {
+        "type" : "ARMOR",
         "id" : "gold_ear",
         "name" : "gold earring",
         "volume" : 0,
@@ -6048,9 +6048,9 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},
-	{
-		"type" : "ARMOR",
+    },
+    {
+        "type" : "ARMOR",
         "id" : "silver_ear",
         "name" : "silver earring",
         "volume" : 0,
@@ -6071,9 +6071,9 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},
-	{
-		"type" : "ARMOR",
+    },
+    {
+        "type" : "ARMOR",
         "id" : "copper_ear",
         "name" : "copper earring",
         "volume" : 0,
@@ -6093,7 +6093,7 @@
         "warmth" : 0,
         "enviromental_protection" : 0,
         "phase" : "solid"
-	},
+    },
     {
         "type" : "ARMOR",
         "id" : "necklace",
@@ -6116,8 +6116,8 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},
-	{
+    },
+    {
         "type" : "ARMOR",
         "id" : "pearl_collar",
         "name" : "pearl collar",
@@ -6139,9 +6139,9 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["SUPER_FANCY"]
-	},
-	{
-		"type" : "ARMOR",
+    },
+    {
+        "type" : "ARMOR",
         "id" : "locket",
         "name" : "locket",
         "volume" : 0,
@@ -6162,9 +6162,9 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},
-	{
-		"type" : "ARMOR",
+    },
+    {
+        "type" : "ARMOR",
         "id" : "gold_bracelet",
         "name" : "gold bracelet",
         "volume" : 0,
@@ -6186,8 +6186,8 @@
         "phase" : "solid",
         "flags" : ["FANCY"]
     },
-	{
-		"type" : "ARMOR",
+    {
+        "type" : "ARMOR",
         "id" : "silver_bracelet",
         "name" : "silver bracelet",
         "volume" : 0,
@@ -6208,9 +6208,9 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},
-	{
-		"type" : "ARMOR",
+    },
+    {
+        "type" : "ARMOR",
         "id" : "copper_bracelet",
         "name" : "copper bracelet",
         "volume" : 0,
@@ -6253,9 +6253,9 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},
-	{
-		"type" : "ARMOR",
+    },
+    {
+        "type" : "ARMOR",
         "id" : "brooch",
         "name" : "jade brooch",
         "volume" : 0,
@@ -7292,7 +7292,7 @@
         "to_hit" : -3,
         "storage" : 50,
         "symbol" : "[",
-        "description" : "A lightweight home built combination armor made from a cut down bulletproof vest and a reinforced jumpsuit made out of fabric. Protects from the elements as well as from harm.",
+        "description" : "A lightweight, home-built combination armor made from a cut-down bulletproof vest and a reinforced jumpsuit made out of fabric. Protects from the elements as well as from harm.",
         "price" : 1100,
         "material" : ["kevlar", "cotton"],
         "volume" : 42,
@@ -7316,7 +7316,7 @@
         "to_hit" : -3,
         "storage" : 46,
         "symbol" : "[",
-        "description" : "A home built combination armor made from a bulletproof vest and a reinforced jumpsuit made out of leather. Protects from the elements as well as from harm.",
+        "description" : "A home-built combination armor made from a bulletproof vest and a reinforced jumpsuit made out of leather. Protects from the elements as well as from harm.",
         "price" : 1500,
         "material" : ["kevlar", "leather"],
         "volume" : 46,
@@ -7389,7 +7389,7 @@
         "to_hit" : -3,
         "storage" : 40,
         "symbol" : "[",
-        "description" : "A heavy home built combination armor made from a reinforced bulletproof vest and a metal armor plated jumpsuit made out of leather. Protects from the elements as well as from harm.",
+        "description" : "A heavy, home-built combination armor made from a reinforced bulletproof vest and a metal-plated jumpsuit made out of leather. Protects from the elements as well as from harm.",
         "price" : 2000,
         "material" : ["kevlar", "steel"],
         "volume" : 48,
@@ -7413,7 +7413,7 @@
         "to_hit" : -3,
         "storage" : 40,
         "symbol" : "[",
-        "description" : "A warm and heavy, home built combination armor made from a reinforced bulletproof vest and an insulated jumpsuit made out of leather. Protects from the elements as well as from harm.",
+        "description" : "A warm and heavy home-built combination armor made from a reinforced bulletproof vest and an insulated jumpsuit made out of leather. Protects from the elements as well as from harm.",
         "price" : 2000,
         "material" : ["kevlar", "fur"],
         "volume" : 56,
@@ -7558,7 +7558,7 @@
         "to_hit" : -3,
         "storage" : 40,
         "symbol" : "[",
-        "description" : "A heavy, home built combination armor made from a cut down bulletproof vest and a reinforced flame-resistant jumpsuit made out of Nomex. Protects from fire and the elements as well as from harm.",
+        "description" : "A heavy, home-built combination armor made from a cut-down bulletproof vest and a reinforced flame-resistant jumpsuit made out of Nomex. Protects from fire and the elements as well as from harm.",
         "price" : 2000,
         "material" : ["kevlar", "nomex"],
         "volume" : 46,
@@ -7703,7 +7703,7 @@
         "to_hit" : -3,
         "storage" : 46,
         "symbol" : "[",
-        "description" : "A lightweight home built combination armor made from a cut down bulletproof vest and a reinforced neoprene wetsuit. Protects from the elements as well as from harm.",
+        "description" : "A lightweight, home-built combination armor made from a cut-down bulletproof vest and a reinforced neoprene wetsuit. Protects from the elements as well as from harm.",
         "price" : 1100,
         "material" : ["kevlar", "plastic"],
         "volume" : 42,
@@ -8521,7 +8521,7 @@
         "coverage" : 50,
         "material_thickness" : 3
     },
-	{
+    {
         "type" : "ARMOR",
         "id" : "striped_shirt",
         "name" : "striped shirt",
@@ -8545,7 +8545,7 @@
         "coverage" : 90,
         "material_thickness" : 1
     },
-	{
+    {
         "type" : "ARMOR",
         "id" : "striped_pants",
         "name" : "striped pants",
@@ -8569,7 +8569,7 @@
         "coverage" : 95,
         "material_thickness" : 2
     },
-	{
+    {
         "type" : "ARMOR",
         "id" : "briefcase",
         "name" : "briefcase",
@@ -8593,7 +8593,7 @@
         "material_thickness" : 2,
         "flags" : ["FANCY"]
     },
-	{
+    {
         "type" : "ARMOR",
         "id" : "tieclip",
         "name" : "tie clip",
@@ -8615,8 +8615,8 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	},
-	{
+    },
+    {
         "type" : "ARMOR",
         "id" : "collarpin",
         "name" : "collar pin",
@@ -8638,5 +8638,5 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-	}
+    }
 ]
