@@ -7195,6 +7195,35 @@
   ]
 },{
         "type" : "recipe",
+  "result": "cracklins",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_MEAT",
+  "skill_used": "cooking",
+  "difficulty": 1,
+  "time": 10000,
+  "reversible": false,
+  "autolearn": true,
+   "qualities" : [
+     {"id":"CUT","level":1,"amount":1}
+   ],
+  "tools": [
+    [
+      [ "func:hotplate", 10 ],
+      [ "char_smoker", 1 ],
+      [ "fire", -1 ]
+    ],
+    [
+      ["func:pot", -1],
+      ["func:pan", -1]
+    ]
+  ],
+  "components": [
+    [
+      [ "fat", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "pemmican",
   "category": "CC_FOOD",
   "subcategory": "CSC_FOOD_MEAT",
@@ -7938,6 +7967,7 @@
       [ "fish_pickled", 1 ],
       [ "fish_vac", 1 ],
       [ "fish_canned", 1 ],
+      [ "cracklins", 4 ],
       [ "can_sardine", 1 ],
       [ "can_tuna", 1 ],
       [ "can_salmon", 1 ],
@@ -16881,6 +16911,58 @@
   ]
 },{
         "type" : "recipe",
+  "result": "waterskin2",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_CONTAINERS",
+  "skill_used": "tailor",
+  "skills_required": [ "survival", 2 ],
+  "difficulty": 2,
+  "time": 30000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "func:sewing_kit", 90 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "func:thread", 40 ],
+      [ "string_36", 1 ]
+    ],
+    [
+      [ "leather", 14 ],
+      [ "fur", 14 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "waterskin3",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_CONTAINERS",
+  "skill_used": "tailor",
+  "skills_required": [ "survival", 2 ],
+  "difficulty": 3,
+  "time": 30000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "func:sewing_kit", 120 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "func:thread", 40 ],
+      [ "string_36", 1 ]
+    ],
+    [
+      [ "leather", 24 ],
+      [ "fur", 24 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "makeshift_funnel",
   "category": "CC_OTHER",
   "subcategory": "CSC_OTHER_TOOLS",
@@ -17309,7 +17391,7 @@
   "result": "v_table",
   "category": "CC_OTHER",
   "subcategory": "CSC_OTHER_PARTS",
-  "skill_used": "construction",
+  "skill_used": "carpentry",
   "difficulty": 1,
   "time": 20000,
   "reversible": true,

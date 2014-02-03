@@ -427,7 +427,6 @@ void place_construction(const std::string &desc)
 
     construction *con = valid[choice];
     g->u.assign_activity(ACT_BUILD, con->time * 1000, con->id);
-    g->u.moves = 0;
     g->u.activity.placement = choice;
     total_inv.gather_input(*con, g->u.activity);
     move_ppoints_for_construction(*con, g->u.activity.moves_left);
