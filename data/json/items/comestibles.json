@@ -4207,6 +4207,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "meat_tainted",
+        "category": "other",
         "name" : "tainted meat",
         "weight" : 238,
         "color" : "red",
@@ -4236,6 +4237,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "slime_scrap",
+        "category": "other",
         "name" : "blob glob",
         "weight" : 238,
         "color" : "dkgray",
@@ -4265,6 +4267,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "veggy_tainted",
+        "category": "other",
         "name" : "tainted veggy",
         "weight" : 238,
         "color" : "green",
@@ -6477,6 +6480,7 @@
     },
     {   "type" : "AMMO",
         "id" : "seed_blueberries",
+        "category": "other",
         "price" : 120,
         "name" : "blueberry seeds",
         "symbol" : ".",
@@ -6529,6 +6533,7 @@
     },
     {   "type" : "AMMO",
         "id" : "seed_strawberries",
+        "category": "other",
         "price" : 120,
         "name" : "strawberry seeds",
         "symbol" : ".",
@@ -6581,6 +6586,7 @@
     },
     {   "type" : "AMMO",
         "id" : "seed_wheat",
+        "category": "other",
         "price" : 120,
         "name" : "wheat seeds",
         "symbol" : ".",
@@ -6662,6 +6668,7 @@
     },
     {   "type" : "AMMO",
         "id" : "seed_tomato",
+        "category": "other",
         "price" : 120,
         "name" : "tomato seeds",
         "symbol" : ".",
@@ -8103,6 +8110,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "fetus",
+        "category": "other",
         "name" : "misshapen fetus",
         "weight" : 760,
         "color" : "pink",
@@ -8132,6 +8140,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "arm",
+        "category": "other",
         "name" : "mutated arm",
         "weight" : 3767,
         "color" : "brown",
@@ -8161,6 +8170,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "leg",
+        "category": "other",
         "name" : "mutated leg",
         "weight" : 11071,
         "color" : "brown",
@@ -10775,6 +10785,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_weed",
+        "category": "other",
         "name" : "hemp seeds",
         "weight" : 1,
         "color" : "green",
@@ -11295,7 +11306,7 @@
         "to_hit": 0,
         "comestible_type": "DRINK",
         "tool": "null",
-        "container": "bottle_plastic",
+        "container": "jar_glass",
         "quench": -2,
         "nutrition": 5,
         "spoils_in": 0,
@@ -11305,7 +11316,8 @@
         "heal": 0,
         "fun": 0,
         "stim": 0,
-        "phase": "liquid"
+        "phase": "liquid",
+		"flags" : ["USE_EAT_VERB"]
     },
     {
         "type" : "COMESTIBLE",
@@ -12318,6 +12330,7 @@
     },
     {   "type" : "AMMO",
         "id" : "fungal_seeds",
+        "category": "other",
         "price" : 1,
         "name" : "fungal seeds",
         "symbol" : ".",
