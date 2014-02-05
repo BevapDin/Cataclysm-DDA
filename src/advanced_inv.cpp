@@ -302,7 +302,7 @@ void advanced_inv_menu_square(advanced_inv_area *squares, uimenu *menu )
     for ( int i = 1; i < 10; i++ ) {
         char key=(char)(i + 48);
         char bracket[3] = "[]";
-        if ( squares[i].vstor >= 0 ) {
+        if ( squares[i].vstor != NULL ) {
             strcpy(bracket,"<>");
         }
         bool canputitems = ( squares[i].canputitems && menu->entries[i-1].enabled ? true : false);
@@ -323,7 +323,7 @@ void advanced_inv_print_header(advanced_inv_area* squares, advanced_inventory_pa
     for ( int i = 0; i < 12; i++ ) {
         char key = ( i == 0 ? 'I' : ( i == 10 ? 'A' : ( i == 11 ? 'D' : (char)(i + 48) ) ) );
         char bracket[3] = "[]";
-        if ( squares[i].vstor >= 0 ) {
+        if ( squares[i].vstor != NULL ) {
             strcpy(bracket, "<>");
         }
         nc_color bcolor = ( squares[i].canputitems ? ( area == i || ( area == 10 && i != 0 ) ? c_cyan : c_ltgray ) : c_red );
@@ -342,20 +342,20 @@ void advanced_inv_update_area( advanced_inv_area &area )
     area.y = g->u.posy + area.offy;
     area.size = 0;
     area.veh = NULL;
-    area.vstor = -1;
+    area.vstor = NULL;
     area.desc = "";
     if( i > 0 && i < 10 ) {
-        int vp = 0;
-        area.veh = g->m.veh_at( u.posx + area.offx, u.posy + area.offy, vp );
+        vparzu *vp;
+        area.veh = g->m.veh_at( u.posx+area.offx,u.posy+area.offy, vp );
         if ( area.veh ) {
-            area.vstor = area.veh->part_with_feature(vp, "CARGO", false);
+            area.vstor = vp->part_with_feature("CARGO", false);
         }
-        if ( area.vstor >= 0 ) {
+        if ( area.vstor != NULL ) {
             area.desc = area.veh->name;
             area.canputitems = true;
-            area.size = area.veh->parts[area.vstor].items.size();
+            area.size = area.vstor->items.size();
             area.max_size = MAX_ITEM_IN_VEHICLE_STORAGE;
-            area.max_volume = area.veh->max_volume(area.vstor);
+            area.max_volume = area.vstor->max_volume();
         } else {
             area.canputitems = g->m.can_put_items(u.posx + area.offx, u.posy + area.offy);
             area.size = g->m.i_at(u.posx + area.offx, u.posy + area.offy).size();
@@ -369,17 +369,17 @@ void advanced_inv_update_area( advanced_inv_area &area )
         area.size = u.inv.size();
         area.canputitems = true;
     } else if (i == 11 ) {
-        int vp = 0;
-        area.veh = g->m.veh_at( u.posx + u.grab_point.x, u.posy + u.grab_point.y, vp);
-        if( area.veh ) {
-            area.vstor = area.veh->part_with_feature(vp, "CARGO", false);
+        vparzu *vp;
+        area.veh = g->m.veh_at( u.posx+u.grab_point.x, u.posy+u.grab_point.y, vp );
+        if ( area.veh ) {
+            area.vstor = vp->part_with_feature("CARGO", false);
         }
-        if( area.vstor >= 0 ) {
+        if ( area.vstor != NULL ) {
             area.desc = area.veh->name;
-            area.canputitems = true;
-            area.size = area.veh->parts[area.vstor].items.size();
+            area.canputitems=true;
+            area.size = area.vstor->items.size();
             area.max_size = MAX_ITEM_IN_VEHICLE_STORAGE;
-            area.max_volume = area.veh->max_volume(area.vstor);
+            area.max_volume = area.vstor->max_volume();
         } else {
             area.canputitems = false;
             area.desc = _("No dragged vehicle");
@@ -407,18 +407,18 @@ void advanced_inventory::init(player *pp)
     this->p = pp;
 
     advanced_inv_area initsquares[12] = {
-        {0, 2, 25, 0, 0, 0, 0, _("Inventory"), "IN", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {1, 3, 30, -1, 1, 0, 0, _("South West"), "SW", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {2, 3, 33, 0, 1, 0, 0, _("South"), "S", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {3, 3, 36, 1, 1, 0, 0, _("South East"), "SE", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {4, 2, 30, -1, 0, 0, 0, _("West"), "W", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {5, 2, 33, 0, 0, 0, 0, _("Directly below you"), "DN", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {6, 2, 36, 1, 0, 0, 0, _("East"), "E", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {7, 1, 30, -1, -1, 0, 0, _("North West"), "NW", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {8, 1, 33, 0, -1, 0, 0, _("North"), "N", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {9, 1, 36, 1, -1, 0, 0, _("North East"), "NE", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {10, 3, 25, 0, 0, 0, 0, _("Surrounding area"), "AL", false, NULL, -1, 0, "", 0, 0, 0, 0 },
-        {11, 1, 25, 0, 0, 0, 0, _("Grabbed Vehicle"), "GR", false, NULL, -1, 0, "", 0, 0, 0, 0 }
+        {0, 2, 25, 0, 0, 0, 0, _("Inventory"), "IN", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {1, 3, 30, -1, 1, 0, 0, _("South West"), "SW", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {2, 3, 33, 0, 1, 0, 0, _("South"), "S", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {3, 3, 36, 1, 1, 0, 0, _("South East"), "SE", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {4, 2, 30, -1, 0, 0, 0, _("West"), "W", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {5, 2, 33, 0, 0, 0, 0, _("Directly below you"), "DN", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {6, 2, 36, 1, 0, 0, 0, _("East"), "E", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {7, 1, 30, -1, -1, 0, 0, _("North West"), "NW", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {8, 1, 33, 0, -1, 0, 0, _("North"), "N", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {9, 1, 36, 1, -1, 0, 0, _("North East"), "NE", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {10, 3, 25, 0, 0, 0, 0, _("Surrounding area"), "AL", false, NULL, NULL, 0, "", 0, 0, 0, 0 },
+        {11, 1, 25, 0, 0, 0, 0, _("Grabbed Vehicle"), "GR", false, NULL, NULL, 0, "", 0, 0, 0, 0 }
     };
     for ( int i = 0; i < 12; i++ ) {
         squares[i] = initsquares[i];
@@ -551,8 +551,8 @@ void advanced_inventory::recalc_pane(int i)
             advanced_inv_update_area(squares[s]);
 
             if ( panes[idest].area != s && squares[s].canputitems && !isDirectionalDragged(s, panes[idest].area)) {
-                std::vector<item>& items = squares[s].vstor >= 0 ?
-                                           squares[s].veh->parts[squares[s].vstor].items :
+                std::vector<item>& items = squares[s].vstor != NULL ?
+                                           squares[s].vstor->items :
                                            m.i_at(squares[s].x , squares[s].y );
                 for (unsigned x = 0; x < items.size(); x++) {
                     advanced_inv_listitem it;
@@ -880,7 +880,7 @@ void advanced_inventory::display(player *pp)
                         (squares[i].canputitems && i != panes[src].area), /* enabled */
                         i + 48, /* hotkey */
                         prefix + " " + squares[i].name + " " +
-                          ( squares[i].vstor >= 0 ? squares[i].veh->name : "" ) /* entry text */
+                          ( squares[i].vstor != NULL ? squares[i].veh->name : "" ) /* entry text */
                     ) );
                 }
 
@@ -906,8 +906,8 @@ void advanced_inventory::display(player *pp)
             // from inventory
             if(panes[src].area == isinventory) {
                 int max = (squares[destarea].max_size - squares[destarea].size);
-                int free_volume = 1000 * ( squares[ destarea ].vstor >= 0 ?
-                                           squares[ destarea ].veh->free_volume( squares[ destarea ].vstor ) :
+                int free_volume = 1000 * ( squares[ destarea ].vstor != NULL ?
+                                           squares[ destarea ].vstor->free_volume() :
                                            m.free_volume ( squares[ destarea ].x, squares[ destarea ].y ) );
                 const std::list<item> &stack = u.inv.const_stack(item_pos);
                 const item *it = &stack.front();
@@ -963,8 +963,8 @@ void advanced_inventory::display(player *pp)
                           if ( chargeback == true ) {
                                 u.i_add(*iter);
                           } else {
-                            if(squares[destarea].vstor >= 0) {
-                                if(squares[destarea].veh->add_item(squares[destarea].vstor, *iter) == false) {
+                            if(squares[destarea].vstor != NULL) {
+                                if(!squares[destarea].vstor->add_item(*iter)) {
                                     // testme
                                     u.i_add(*iter);
                                     popup(_("Destination full. %d / %d moved. Please report a bug if items have vanished."), moved, amount);
@@ -988,8 +988,8 @@ void advanced_inventory::display(player *pp)
                 } else if(it->count_by_charges()) {
                     if(amount != 0 && amount <= it->charges ) {
                         item moving_item = u.inv.reduce_charges(item_pos, amount);
-                        if (squares[destarea].vstor >= 0) {
-                            if(squares[destarea].veh->add_item(squares[destarea].vstor, moving_item) == false) {
+                        if (squares[destarea].vstor != NULL) {
+                            if(!squares[destarea].vstor->add_item(moving_item)) {
                                 // fixme add item back
                                 u.i_add(moving_item);
                                 popup(_("Destination full. Please report a bug if items have vanished."));
@@ -1007,8 +1007,8 @@ void advanced_inventory::display(player *pp)
                     }
                 } else {
                     item moving_item = u.inv.remove_item(item_pos);
-                    if(squares[destarea].vstor >= 0) {
-                        if(squares[destarea].veh->add_item(squares[destarea].vstor, moving_item) == false) {
+                    if(squares[destarea].vstor != NULL) {
+                        if(!squares[destarea].vstor->add_item(moving_item)) {
                            // fixme add item back (test)
                            u.i_add(moving_item);
                            popup(_("Destination full. Please report a bug if items have vanished."));
@@ -1127,8 +1127,8 @@ void advanced_inventory::display(player *pp)
                         u.inv.assign_empty_invlet(new_item);
                         u.i_add(new_item);
                         u.moves -= 100;
-                    } else if (squares[destarea].vstor >= 0) {
-                        if( squares[destarea].veh->add_item( squares[destarea].vstor, new_item ) == false) {
+                    } else if (squares[destarea].vstor != NULL) {
+                        if( squares[destarea].vstor->add_item( new_item ) == false) {
                             popup(_("Destination area is full. Remove some items first"));
                             continue;
                         }
@@ -1141,8 +1141,8 @@ void advanced_inventory::display(player *pp)
                     if ( trycharges > 0 ) {
                         it->charges -= trycharges;
                     } else {
-                        if (panes[src].vstor >= 0) {
-                            panes[src].veh->remove_item (panes[src].vstor, item_pos);
+                        if (panes[src].vstor != NULL) {
+                            panes[src].vstor->remove_item (item_pos);
                         } else {
                             m.i_rem(u.posx + panes[src].offx, u.posy + panes[src].offy, item_pos);
                         }

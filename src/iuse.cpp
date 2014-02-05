@@ -7356,9 +7356,11 @@ int iuse::unfold_bicycle(player *p, item *it, bool)
         bicycle->tags.insert("convertible");
         // Restore HP of parts if we stashed them previously.
         if( it->item_vars.count("folding_bicycle_parts") ) {
+            // TODO [vehicle] make this use the normal json-in-output
             std::istringstream veh_data;
             const std::string &data = it->item_vars["folding_bicycle_parts"];
             veh_data.str(data);
+#if 0
             if (!data.empty() && data[0] >= '0' && data[0] <= '9') {
                 // starts with a digit -> old format
                 for (int p = 0; p < bicycle->parts.size(); p++)
@@ -7388,6 +7390,7 @@ int iuse::unfold_bicycle(player *p, item *it, bool)
                     debugmsg("Error restoring vehicle: %s", e.c_str());
                 }
             }
+#endif
         }
         g->add_msg_if_player(p, _("You painstakingly unfold the bicycle and make it ready to ride."));
         p->moves -= 500;

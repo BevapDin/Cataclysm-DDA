@@ -1723,10 +1723,11 @@ void game::complete_disassemble()
     item *dis_item = &u.i_at(u.activity.values[0]);
     float component_success_chance = std::min((float)pow(0.8f, dis_item->damage), 1.f);
 
-    int veh_part = -1;
-    vehicle *veh = m.veh_at(u.posx, u.posy, veh_part);
-    if(veh != 0) {
-        veh_part = veh->part_with_feature(veh_part, "CARGO");
+    vparzu *veh_parzu = NULL;
+    vehicle_part2 *veh_part = NULL;
+    vehicle *veh = m.veh_at(u.posx, u.posy, veh_parzu);
+    if(veh != NULL) {
+        veh_part = veh_parzu->part_with_feature("CARGO", true);
     }
 
     add_msg(_("You disassemble the %s into its components."), dis_item->name.c_str());
@@ -1737,7 +1738,7 @@ void game::complete_disassemble()
         ammodrop.charges = dis_item->charges;
         if (ammodrop.made_of(LIQUID)) {
             handle_liquid(ammodrop, false, false);
-        } else if (veh != 0 && veh_part > -1 && veh->add_item(veh_part, ammodrop)) {
+        } else if (veh_part != NULL && veh_part->add_item(ammodrop)) {
             // add_item did put the items in the vehicle, nothing further to be done
         } else {
             m.add_item_or_charges(u.posx, u.posy, ammodrop);
@@ -1752,7 +1753,7 @@ void game::complete_disassemble()
         }
         if (ammodrop.made_of(LIQUID)) {
             handle_liquid(ammodrop, false, false);
-        } else if (veh != 0 && veh_part > -1 && veh->add_item(veh_part, ammodrop)) {
+        } else if (veh_part != NULL && veh_part->add_item(ammodrop)) {
             // add_item did put the items in the vehicle, nothing further to be done
         } else {
             m.add_item_or_charges(u.posx, u.posy, ammodrop);
@@ -1825,7 +1826,7 @@ void game::complete_disassemble()
                     continue;
                 }
 
-                if (veh != 0 && veh_part > -1 && veh->add_item(veh_part, newit)) {
+                if (veh_part != NULL && veh_part->add_item(newit)) {
                     // add_item did put the items in the vehicle, nothing further to be done
                 } else {
                     m.add_item_or_charges(u.posx, u.posy, newit);

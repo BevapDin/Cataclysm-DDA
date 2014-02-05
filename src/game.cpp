@@ -1432,8 +1432,9 @@ void game::activity_on_finish_fish()
 void game::activity_on_finish_vehicle()
 {
     //Grab this now, in case the vehicle gets shifted
-    vehicle *veh = m.veh_at(u.activity.values[0], u.activity.values[1]);
-    complete_vehicle ();
+    veh = m.veh_at(u.activity.values[0], u.activity.values[1]);
+    veh_interact vehint;
+    vehint.complete_vehicle();
 
     u.activity.type = ACT_NULL;
     if (u.activity.values.size() < 7) {
@@ -2281,8 +2282,7 @@ bool game::handle_action()
         ctxt = get_player_input(action);
     }
 
-    int veh_part;
-    vehicle *veh = m.veh_at(u.posx, u.posy, veh_part);
+    vehicle *veh = m.veh_at(u.posx, u.posy);
     bool veh_ctrl = veh && veh->player_in_control (&u);
 
     // If performing an action with right mouse button, co-ordinates
@@ -5098,16 +5098,18 @@ point game::find_item(item *it)
     for (std::set<vehicle*>::iterator veh_iterator = m.vehicle_list.begin();
             veh_iterator != m.vehicle_list.end(); veh_iterator++) {
         vehicle *next_vehicle = *veh_iterator;
-        std::vector<int> cargo_parts = next_vehicle->all_parts_with_feature("CARGO", false);
-        for(std::vector<int>::iterator part_index = cargo_parts.begin();
-                part_index != cargo_parts.end(); part_index++) {
-            std::vector<item> *items_in_part = &(next_vehicle->parts[*part_index].items);
-            for (int n = items_in_part->size() - 1; n >= 0; n--) {
-                if (&((*items_in_part)[n]) == it) {
-                    int mapx = next_vehicle->global_x() + next_vehicle->parts[*part_index].precalc_dx[0];
-                    int mapy = next_vehicle->global_y() + next_vehicle->parts[*part_index].precalc_dy[0];
-                    return point(mapx, mapy);
-                }
+        
+        const vparmap &parts = next_vehicle->get_pmap();
+        for (vparmap::const_iterator a = parts.begin(); a != parts.end(); ++a) {
+            const vparzu &vp = a->second;
+            const vehicle_part2 *p = vp.part_with_feature("CARGO", false);
+            if (p == NULL || p->items.empty()) {
+                continue;
+            }
+            if (&(p->items[0]) <= it && it <= &(p->items[p->items.size() - 1])) {
+                const int px = next_vehicle->global_x() + vp.precalc_dx[0];
+                const int py = next_vehicle->global_y() + vp.precalc_dy[0];
+                return point(px, py);
             }
         }
     }
@@ -5835,7 +5837,7 @@ void game::do_blast( const int x, const int y, const int power, const int radius
                 }
             }
 
-            int vpart;
+            vparzu *vpart;
             vehicle *veh = m.veh_at(i, j, vpart);
             if (veh) {
                 veh->damage (vpart, dam, false);
@@ -6763,24 +6765,24 @@ void game::open()
     u.moves -= 100;
     bool didit = false;
 
-    int vpart;
+    vparzu *vpart;
     vehicle *veh = m.veh_at(openx, openy, vpart);
     if (veh) {
-        int openable = veh->part_with_feature(vpart, "OPENABLE");
-        if(openable >= 0) {
-            const char *name = veh->part_info(openable).name.c_str();
-            if (veh->part_info(openable).has_flag("OPENCLOSE_INSIDE")) {
+        vehicle_part2 *openable = vpart->part_with_feature("OPENABLE");
+        if(openable != NULL) {
+            const char *name = openable->part_info().name.c_str();
+            if (openable->has_feature("OPENCLOSE_INSIDE")) {
                 const vehicle *in_veh = m.veh_at(u.posx, u.posy);
                 if (!in_veh || in_veh != veh) {
                     add_msg(_("That %s can only opened from the inside."), name);
                     return;
                 }
             }
-            if (veh->parts[openable].open) {
+            if (openable->open) {
                 add_msg(_("That %s is already open."), name);
                 u.moves += 100;
             } else {
-                veh->open(openable);
+                veh->open(vpart);
             }
         }
         return;
@@ -6822,25 +6824,25 @@ void game::close(int closex, int closey)
     const bool inside = !m.is_outside(u.posx, u.posy);
 
     std::vector<item> &items_in_way = m.i_at(closex, closey);
-    int vpart;
+    vparzu *vpart;
     vehicle *veh = m.veh_at(closex, closey, vpart);
     int zid = mon_at(closex, closey);
     if (zid != -1) {
         monster &critter = critter_tracker.find(zid);
         add_msg(_("There's a %s in the way!"), critter.name().c_str());
     } else if (veh) {
-        int openable = veh->part_with_feature(vpart, "OPENABLE");
-        if(openable >= 0) {
-            const char *name = veh->part_info(openable).name.c_str();
-            if (veh->part_info(openable).has_flag("OPENCLOSE_INSIDE")) {
+        vehicle_part2 *openable = vpart->part_with_feature("OPENABLE");
+        if(openable != NULL) {
+            const char *name = openable->part_info().name.c_str();
+            if (openable->has_feature("OPENCLOSE_INSIDE")) {
                 const vehicle *in_veh = m.veh_at(u.posx, u.posy);
                 if (!in_veh || in_veh != veh) {
                     add_msg(_("That %s can only closed from the inside."), name);
                     return;
                 }
             }
-            if (veh->parts[openable].open) {
-                veh->close(openable);
+            if (openable->open) {
+                veh->close(vpart);
                 didit = true;
             } else {
                 add_msg(_("That %s is already closed."), name);
@@ -7097,9 +7099,9 @@ bool game::vehicle_near ()
  return false;
 }
 
-bool game::refill_vehicle_part (vehicle &veh, vehicle_part *part, bool test)
+bool game::refill_vehicle_part (vehicle &veh, vehicle_part2 *part, bool test)
 {
-  vpart_info part_info = vehicle_part_types[part->id];
+  const vpart_info &part_info = part.part_info();
   if (!part_info.has_flag("FUEL_TANK")) {
     return false;
   }
@@ -7108,7 +7110,7 @@ bool game::refill_vehicle_part (vehicle &veh, vehicle_part *part, bool test)
   int min_charges = -1;
   bool in_container = false;
 
-  std::string ftype = part_info.fuel_type;
+  const std::string &ftype = part_info.fuel_type;
   itype_id itid = default_ammo(ftype);
   if (u.weapon.is_container() && u.weapon.contents.size() > 0 &&
           u.weapon.contents[0].type->id == itid) {
@@ -7189,7 +7191,7 @@ bool game::refill_vehicle_part (vehicle &veh, vehicle_part *part, bool test)
 
 bool game::pl_refill_vehicle (vehicle &veh, int part, bool test)
 {
-  return refill_vehicle_part(veh, &veh.parts[part], test);
+  return refill_vehicle_part(veh, &veh.get_part(part), test);
 }
 
 void game::handbrake ()
@@ -8824,7 +8826,7 @@ void game::pickup(int posx, int posy, int min)
         chempart = veh->part_with_feature(veh_part, "CHEMLAB");
         veh_part = veh->part_with_feature(veh_part, "CARGO", false);
         ctrl_part = veh->part_with_feature(veh_part, "CONTROLS");
-        from_veh = veh && veh_part >= 0 && veh->parts[veh_part].items.size() > 0;
+        from_veh = veh && veh_part >= 0 && veh->get_part(veh_part).items.size() > 0;
 
         menu_items.push_back(_("Examine vehicle"));
         options_message.push_back(uimenu_entry(_("Examine vehicle"), 'e'));
@@ -8995,7 +8997,7 @@ void game::pickup(int posx, int posy, int min)
     }
 
     // which items are we grabbing?
-    std::vector<item> here = from_veh ? veh->parts[veh_part].items : m.i_at(posx, posy);
+    std::vector<item> here = from_veh ? veh->get_part(veh_part).items : m.i_at(posx, posy);
 
     // Not many items, just grab them
     if (here.size() <= min && min != -1) {
@@ -11345,7 +11347,7 @@ bool game::plmove(int dx, int dy)
   if (veh1->part_info(dpart).has_flag("OPENCLOSE_INSIDE") && (!veh0 || veh0 != veh1)){
       veh_closed_door = false;
   } else {
-      veh_closed_door = dpart >= 0 && !veh1->parts[dpart].open;
+      veh_closed_door = dpart >= 0 && !veh1->get_part(dpart).open;
   }
  }
 
@@ -11494,8 +11496,8 @@ bool game::plmove(int dx, int dy)
               for( int i = 0; i < wheel_indices.size(); i++ ) {
                   int p = wheel_indices[i];
                   if( one_in(2) ) {
-                      grabbed_vehicle->handle_trap( gx + grabbed_vehicle->parts[p].precalc_dx[0] + dxVeh,
-                                                    gy + grabbed_vehicle->parts[p].precalc_dy[0] + dyVeh, p );
+                      grabbed_vehicle->handle_trap( gx + grabbed_vehicle->get_part(p).precalc_dx[0] + dxVeh,
+                                                    gy + grabbed_vehicle->get_part(p).precalc_dy[0] + dyVeh, p );
                   }
               }
               m.displace_vehicle( gx, gy, dxVeh, dyVeh );

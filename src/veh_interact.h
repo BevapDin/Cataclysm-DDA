@@ -12,6 +12,9 @@ enum sel_types {
   SEL_NULL, SEL_JACK
 };
 
+struct vparzu;
+struct vehicle_part2;
+
 /** Represents possible return values from the cant_do function. */
 enum task_reason {
     UNKNOWN_TASK = -1, //No such task
@@ -32,11 +35,10 @@ public:
     int ddx;
     int ddy;
     struct vpart_info *sel_vpart_info;
-    struct vehicle_part *sel_vehicle_part;
+    struct vehicle_part2 *sel_vehicle_part;
     char sel_cmd; //Command currently being run by the player
     int sel_type;
 private:
-    int cpart;
     int page_size;
     bool vertical_menu;
     WINDOW *w_grid;
@@ -74,7 +76,7 @@ private:
     bool has_wheel;
     inventory crafting_inv;
 
-    int part_at(int dx, int dy);
+    vparzu *part_at(int dx, int dy);
     void move_cursor(int dx, int dy);
     task_reason cant_do(char mode);
 
@@ -108,10 +110,7 @@ private:
     /** Store the most damaged part's index, or -1 if they're all healthy. */
     int mostDamagedPart;
 
-    /* true if current selected square has part with "FUEL_TANK flag and 
-     * they are not full. Otherwise will be false.
-     */
-    bool has_ptank;
+    vparzu *cpart;
 
     /* Vector of all vpart TYPES that can be mounted in the current square.
      * Can be converted to a vector<vpart_info>.
@@ -122,23 +121,17 @@ private:
      * to be built once. */
     std::vector<vpart_info> wheel_types;
 
-    /* Vector of vparts in the current square that can be repaired. Strictly a
-     * subset of parts_here.
+    /* Vector of indizes in cpart->parts in the current square
+     * that can be repaired. Strictly a subset of cpart->parts.
      * Can probably be removed entirely, otherwise is a vector<vehicle_part>.
-     * Updated whenever parts_here is updated.
      */
     std::vector<int> need_repair;
 
-    /* Vector of all vparts that exist on the vehicle in the current square.
-     * Can be converted to a vector<vehicle_part>.
-     * Updated whenever the cursor moves. */
-    std::vector<int> parts_here;
-
     /* Refers to the fuel tanks (if any) in the currently selected square. */
-    std::vector<vehicle_part*> ptanks;
+    std::vector<vehicle_part2*> ptanks;
 
     /* Refers to the wheel (if any) in the currently selected square. */
-    struct vehicle_part *wheel;
+    struct vehicle_part2 *wheel;
 
     /* called by exec() */
     void cache_tool_availability();
@@ -149,8 +142,7 @@ private:
 public:
     veh_interact ();
     void exec(vehicle *v);
+    void complete_vehicle();
 };
-
-void complete_vehicle ();
 
 #endif

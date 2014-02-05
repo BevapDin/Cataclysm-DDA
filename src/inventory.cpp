@@ -583,23 +583,23 @@ void inventory::form_from_map(point origin, int range, bool assign_invlet)
                 }
             }
 
-            int vpart = -1;
+            vparzu *vpart;
             vehicle *veh = g->m.veh_at(x, y, vpart);
 
-            if (veh) {
-                const int kpart = veh->part_with_feature(vpart, "KITCHEN");
-                const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
-                const int craftpart = veh->part_with_feature(vpart, "CRAFTRIG");
-                const int forgepart = veh->part_with_feature(vpart, "FORGE");
-                const int chempart = veh->part_with_feature(vpart, "CHEMLAB");
-                const int cargo = veh->part_with_feature(vpart, "CARGO");
+            if (veh != NULL) {
+                const vehicle_part2 *kpart = vpart->part_with_feature("KITCHEN");
+                const vehicle_part2 *weldpart = vpart->part_with_feature("WELDRIG");
+                const vehicle_part2 *craftpart = vpart->part_with_feature("CRAFTRIG");
+                const vehicle_part2 *forgepart = vpart->part_with_feature("FORGE");
+                const vehicle_part2 *chempart = vpart->part_with_feature("CHEMLAB");
+                const vehicle_part2 *cargo = vpart->part_with_feature("CARGO");
 
 
-                if (cargo >= 0) {
-                    *this += std::list<item>(veh->parts[cargo].items.begin(), veh->parts[cargo].items.end());
+                if (cargo != NULL) {
+                    *this += std::list<item>(cargo->items.begin(), cargo->items.end());
                 }
                 
-                if (kpart >= 0) {
+                if (kpart != NULL) {
                     item hotplate(itypes["hotplate"], 0);
                     hotplate.charges = veh->fuel_left("battery");
                     add_item(hotplate);
@@ -613,7 +613,7 @@ void inventory::form_from_map(point origin, int range, bool assign_invlet)
                     item pan(itypes["pan"], 0);
                     add_item(pan);
                 }
-                if (weldpart >= 0) {
+                if (weldpart != NULL) {
                     item welder(itypes["welder"], 0);
                     welder.charges = veh->fuel_left("battery");
                     add_item(welder);
@@ -622,7 +622,7 @@ void inventory::form_from_map(point origin, int range, bool assign_invlet)
                     soldering_iron.charges = veh->fuel_left("battery");
                     add_item(soldering_iron);
                 }
-                if (craftpart >= 0) {
+                if (craftpart != NULL) {
                     item vac_sealer(itypes["vac_sealer"], 0);
                     vac_sealer.charges = veh->fuel_left("battery");
                     add_item(vac_sealer);
@@ -635,12 +635,12 @@ void inventory::form_from_map(point origin, int range, bool assign_invlet)
                     press.charges = veh->fuel_left("battery");
                     add_item(press);
                 }
-                if (forgepart >= 0) {
+                if (forgepart != NULL) {
                     item forge(itypes["forge"], 0);
                     forge.charges = veh->fuel_left("battery");
                     add_item(forge);
                 }
-                if (chempart >= 0) {
+                if (chempart != NULL) {
                     item hotplate(itypes["hotplate"], 0);
                     hotplate.charges = veh->fuel_left("battery");
                     add_item(hotplate);

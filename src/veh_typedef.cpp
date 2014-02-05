@@ -251,10 +251,10 @@ void game::finalize_vehicles()
 
             part_id = proto->parts[i].second;
 
-            if(next_vehicle->install_part(part_x, part_y, part_id) < 0) {
-                debugmsg("init_vehicles: '%s' part '%s'(%d) can't be installed to %d,%d",
+            if(!next_vehicle->install_part(part_x, part_y, part_id)) {
+                debugmsg("init_vehicles: '%s' part '%s' can't be installed to %d,%d",
                         next_vehicle->name.c_str(), part_id.c_str(),
-                        next_vehicle->parts.size(), part_x, part_y);
+                        part_x, part_y);
             }
             if ( vehicle_part_types[part_id].has_flag("CARGO") ) {
                 cargo_spots[p] = true;

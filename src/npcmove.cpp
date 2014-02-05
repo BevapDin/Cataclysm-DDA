@@ -314,21 +314,20 @@ void npc::execute_action(npc_action action, int target)
   if (in_vehicle)
    move_pause();
   else {
-   int p1;
-   vehicle *veh = g->m.veh_at(g->u.posx, g->u.posy, p1);
+   vehicle *veh = g->m.veh_at(g->u.posx, g->u.posy);
 
    if (!veh) {
     debugmsg("Following an embarked player with no vehicle at their location?");
     // TODO: change to wait? - for now pause
     move_pause();
    } else {
-    int p2 = veh->free_seat();
-    if (p2 < 0) {
+    const vparzu *p2 = veh->free_seat();
+    if (p2 != NULL) {
      // TODO: be angry at player, switch to wait or leave - for now pause
      move_pause();
     } else {
-     int px = veh->global_x() + veh->parts[p2].precalc_dx[0];
-     int py = veh->global_y() + veh->parts[p2].precalc_dy[0];
+     int px = veh->global_x() + p2->precalc_dx[0];
+     int py = veh->global_y() + p2->precalc_dy[0];
      update_path(px, py);
 
      // TODO: replace extra hop distance with finding the correct door

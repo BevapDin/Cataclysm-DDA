@@ -1711,7 +1711,7 @@ void vehicle::load_legacy(std::ifstream &stin) {
      * frames. */
     add_missing_frames();
     find_exhaust ();
-    insides_dirty = true;
+    refresh_insides();
     precalc_mounts (0, face.dir());
 
     stin >> tag_count;

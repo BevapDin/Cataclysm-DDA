@@ -15,7 +15,7 @@ struct advanced_inv_area {
     std::string shortname;
     bool canputitems;
     vehicle *veh;
-    int vstor;
+    vehicle_part2 *vstor;
     int size;
     std::string desc;
     int volume, weight;
@@ -42,12 +42,13 @@ struct advanced_inv_listitem {
 class advanced_inventory_pane {
   public:
     int pos;
-    int area, offx, offy, size, vstor;  // quick lookup later
+    int area, offx, offy, size;  // quick lookup later
     int index, max_page, max_index, page;
     std::string area_string;
     int sortby;
     int issrc;
     vehicle *veh;
+    vehicle_part2 *vstor;
     WINDOW *window;
     std::vector<advanced_inv_listitem> items;
     int numcats;
@@ -56,7 +57,7 @@ class advanced_inventory_pane {
     bool redraw;
     std::map<std::string, bool> filtercache;
     advanced_inventory_pane() {
-        offx = 0; offy = 0; size = 0; vstor = -1;
+        offx = 0; offy = 0; size = 0; vstor = NULL;
         index = 0; max_page = 0; max_index = 0; page = 0;
         area_string =  _("Initializing...");
         sortby = 1; issrc = 0; veh = NULL; window = NULL;

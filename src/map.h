@@ -193,7 +193,7 @@ class map
   * @param part_num The part number of the part at this tile will be returned in this parameter.
   * @return A pointer to the vehicle in this tile.
   */
- vehicle* veh_at(const int x, const int y, int &part_num);
+ vehicle* veh_at(const int x, const int y, vparzu* &part);
 
  /**
   * Same as `veh_at(const int, const int, int)`, but doesn't return part number.
@@ -416,8 +416,10 @@ void add_corpse(int x, int y);
  float ambient_light_at(int dx, int dy); // Raw values for tilesets
  bool pl_sees(int fx, int fy, int tx, int ty, int max_range);
  std::set<vehicle*> vehicle_list;
- std::map< std::pair<int,int>, std::pair<vehicle*,int> > veh_cached_parts;
+ typedef std::map< point, std::pair<vehicle*, vparzu*> > veh_cache_map;
+ veh_cache_map veh_cached_parts2;
  bool veh_exists_at [SEEX * MAPSIZE][SEEY * MAPSIZE];
+ void remove_vehicle_from_cache(vehicle *veh);
 
  point get_abs_sub() {
    return abs_sub;
@@ -459,7 +461,6 @@ protected:
  std::vector<item> nulitems; // Returned when &i_at() is asked for an OOB value
  ter_id nulter;  // Returned when &ter() is asked for an OOB value
  field nulfield; // Returned when &field_at() is asked for an OOB value
- vehicle nulveh; // Returned when &veh_at() is asked for an OOB value
  int nulrad;     // OOB &radiation()
  int null_temperature;  // Because radiation does it too
 

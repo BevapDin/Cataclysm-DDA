@@ -94,190 +94,182 @@ VehicleList map::get_vehicles(const int sx, const int sy, const int ex, const in
  return vehs;
 }
 
-vehicle* map::veh_at(const int x, const int y, int &part_num)
+vehicle* map::veh_at(const int x, const int y, vparzu* &part)
 {
- // This function is called A LOT. Move as much out of here as possible.
- if (!veh_in_active_range || !inbounds(x, y))
-  return NULL;    // Out-of-bounds - null vehicle
- if(!veh_exists_at[x][y])
-  return NULL;    // cache cache indicates no vehicle. This should optimize a great deal.
- std::pair<int,int> point(x,y);
- std::map< std::pair<int,int>, std::pair<vehicle*,int> >::iterator it;
- if ((it = veh_cached_parts.find(point)) != veh_cached_parts.end())
- {
-  part_num = it->second.second;
-  return it->second.first;
- }
- debugmsg ("vehicle part cache cache indicated vehicle not found: %d %d",x,y);
- return NULL;
+    // This function is called A LOT. Move as much out of here as possible.
+    if (!veh_in_active_range || !inbounds(x, y)) {
+        return NULL;
+    }
+    if (!veh_exists_at[x][y]) {
+        // cache cache indicates no vehicle. This should optimize a great deal.
+        return NULL;
+    }
+    veh_cache_map::iterator it = veh_cached_parts2.find(point(x, y));
+    if (it != veh_cached_parts2.end()) {
+        part = it->second.second;
+        return it->second.first;
+    }
+    debugmsg("vehicle part cache cache indicated vehicle not found: %d %d", x, y);
+    return NULL;
 }
 
 vehicle* map::veh_at(const int x, const int y)
 {
- int part = 0;
- vehicle *veh = veh_at(x, y, part);
- return veh;
+    vparzu *part = NULL;
+    return veh_at(x, y, part);
 }
 
 void map::reset_vehicle_cache()
 {
- clear_vehicle_cache();
- // Cache all vehicles
- veh_in_active_range = false;
- for( std::set<vehicle*>::iterator veh = vehicle_list.begin(),
-   it_end = vehicle_list.end(); veh != it_end; ++veh ) {
-  update_vehicle_cache(*veh, true);
- }
+    clear_vehicle_cache();
+    // Cache all vehicles
+    veh_in_active_range = false;
+    for( std::set<vehicle*>::iterator veh = vehicle_list.begin(),
+        it_end = vehicle_list.end(); veh != it_end; ++veh ) {
+        update_vehicle_cache(*veh, true);
+    }
 }
 
-void map::update_vehicle_cache(vehicle * veh, const bool brand_new)
+void map::remove_vehicle_from_cache(vehicle *veh)
 {
- veh_in_active_range = true;
- if(!brand_new){
- // Existing must be cleared
-  std::map< std::pair<int,int>, std::pair<vehicle*,int> >::iterator it =
-             veh_cached_parts.begin(), end = veh_cached_parts.end(), tmp;
-  while( it != end ) {
-   if( it->second.first == veh ) {
-    int x = it->first.first;
-    int y = it->first.second;
-    if ((x > 0) && (y > 0) &&
-         x < SEEX*MAPSIZE &&
-         y < SEEY*MAPSIZE){
-     veh_exists_at[x][y] = false;
+    veh_cache_map::iterator it = veh_cached_parts2.begin();
+    veh_cache_map::iterator end = veh_cached_parts2.end();
+    while(it != end) {
+        if(it->second.first == veh) {
+            int x = it->first.x;
+            int y = it->first.y;
+            if (inbounds(x, y)) {
+                veh_exists_at[x][y] = false;
+            }
+            veh_cached_parts2.erase(it++);
+        } else {
+            ++it;
+        }
     }
-    tmp = it;
-    ++it;
-    veh_cached_parts.erase( tmp );
-   }else
-    ++it;
-  }
- }
- // Get parts
- std::vector<vehicle_part> & parts = veh->parts;
- const int gx = veh->global_x();
- const int gy = veh->global_y();
- int partid = 0;
- for( std::vector<vehicle_part>::iterator it = parts.begin(),
-   end = parts.end(); it != end; ++it, ++partid ) {
-  const int px = gx + it->precalc_dx[0];
-  const int py = gy + it->precalc_dy[0];
-  veh_cached_parts.insert( std::make_pair( std::make_pair(px,py),
-                                        std::make_pair(veh,partid) ));
-  if ((px > 0) && (py > 0) &&
-       px < SEEX*MAPSIZE &&
-       py < SEEY*MAPSIZE){
-   veh_exists_at[px][py] = true;
-  }
- }
+}
+
+void map::update_vehicle_cache(vehicle *veh, const bool brand_new)
+{
+    veh_in_active_range = true;
+    if (!brand_new) {
+        // Existing must be cleared
+        remove_vehicle_from_cache(veh);
+    }
+    // Get parts
+    const vparmap &parts = veh->get_pmap();
+    const int gx = veh->global_x();
+    const int gy = veh->global_y();
+    for (vparmap::const_iterator a = parts.begin(); a != parts.end(); ++a) {
+        const vparzu &vp = a->second;
+        const int px = gx + vp.precalc_dx[0];
+        const int py = gy + vp.precalc_dy[0];
+        veh_cached_parts2.insert(
+            std::make_pair(
+                point(px, py),
+                std::make_pair(veh, const_cast<vparzu*>(&vp))
+            )
+        );
+        if (inbounds(px, py)) {
+            veh_exists_at[px][py] = true;
+        }
+    }
 }
 
 void map::clear_vehicle_cache()
 {
- std::map< std::pair<int,int>, std::pair<vehicle*,int> >::iterator part;
- while( veh_cached_parts.size() ) {
-  part = veh_cached_parts.begin();
-  int x = part->first.first;
-  int y = part->first.second;
-  if ((x > 0) && (y > 0) &&
-       x < SEEX*MAPSIZE &&
-       y < SEEY*MAPSIZE){
-   veh_exists_at[x][y] = false;
-  }
-  veh_cached_parts.erase(part);
- }
+    veh_cached_parts2.clear();
+    memset(veh_exists_at, false, sizeof(veh_exists_at));
 }
 
 void map::update_vehicle_list(const int to) {
- // Update vehicle data
- for( std::vector<vehicle*>::iterator it = grid[to]->vehicles.begin(),
+    // Update vehicle data
+    for( std::vector<vehicle*>::iterator it = grid[to]->vehicles.begin(),
       end = grid[to]->vehicles.end(); it != end; ++it ) {
-   vehicle_list.insert(*it);
- }
+        vehicle_list.insert(*it);
+    }
 }
 
 void map::board_vehicle(int x, int y, player *p)
 {
- if (!p) {
-  debugmsg ("map::board_vehicle: null player");
-  return;
- }
+    if (p == NULL) {
+        debugmsg ("map::board_vehicle: null player");
+        return;
+    }
+    vparzu *part = NULL;
+    vehicle *veh = veh_at(x, y, part);
+    if (veh == NULL) {
+        debugmsg ("map::board_vehicle: vehicle not found at %d,%d", x, y);
+        return;
+    }
+    vehicle_part2 *seat_part = part->part_with_feature(VPFLAG_BOARDABLE, true);
+    if (seat_part == NULL) {
+        debugmsg ("map::board_vehicle: boarding %s: part at %d,%d is not boardable", veh->name.c_str(), x, y);
+        return;
+    }
+    player *psg = seat_part->get_passenger();
+    if (psg != NULL) {
+        debugmsg ("map::board_vehicle: passenger (%s) is already there",
+            psg->name.c_str());
+        return;
+    }
+    seat_part->set_flag(vehicle_part::passenger_flag);
+    seat_part->passenger_id = p->getID();
 
- int part = 0;
- vehicle *veh = veh_at(x, y, part);
- if (!veh) {
-  debugmsg ("map::board_vehicle: vehicle not found");
-  return;
- }
-
- const int seat_part = veh->part_with_feature (part, VPFLAG_BOARDABLE);
- if (seat_part < 0) {
-  debugmsg ("map::board_vehicle: boarding %s (not boardable)",
-            veh->part_info(part).name.c_str());
-  return;
- }
- if (veh->parts[seat_part].has_flag(vehicle_part::passenger_flag)) {
-  player *psg = veh->get_passenger (seat_part);
-  debugmsg ("map::board_vehicle: passenger (%s) is already there",
-            psg ? psg->name.c_str() : "<null>");
-  return;
- }
- veh->parts[seat_part].set_flag(vehicle_part::passenger_flag);
- veh->parts[seat_part].passenger_id = p->getID();
-
- p->posx = x;
- p->posy = y;
- p->in_vehicle = true;
- if (p == &g->u &&
-     (x < SEEX * int(my_MAPSIZE / 2) || y < SEEY * int(my_MAPSIZE / 2) ||
-      x >= SEEX * (1 + int(my_MAPSIZE / 2)) ||
-      y >= SEEY * (1 + int(my_MAPSIZE / 2))   ))
-  g->update_map(x, y);
+    p->posx = x;
+    p->posy = y;
+    p->in_vehicle = true;
+    if (p == &g->u &&
+        (x < SEEX * int(my_MAPSIZE / 2) || y < SEEY * int(my_MAPSIZE / 2) ||
+         x >= SEEX * (1 + int(my_MAPSIZE / 2)) ||
+         y >= SEEY * (1 + int(my_MAPSIZE / 2)))) {
+        g->update_map(x, y);
+    }
 }
 
 void map::unboard_vehicle(const int x, const int y)
 {
- int part = 0;
- vehicle *veh = veh_at(x, y, part);
- if (!veh) {
-  debugmsg ("map::unboard_vehicle: vehicle not found");
-  return;
- }
- const int seat_part = veh->part_with_feature (part, VPFLAG_BOARDABLE, false);
- if (seat_part < 0) {
-  debugmsg ("map::unboard_vehicle: unboarding %s (not boardable)",
-            veh->part_info(part).name.c_str());
-  return;
- }
- player *psg = veh->get_passenger(seat_part);
- if (!psg) {
-  debugmsg ("map::unboard_vehicle: passenger not found");
-  return;
- }
- psg->in_vehicle = false;
- psg->driving_recoil = 0;
- psg->controlling_vehicle = false;
- veh->parts[seat_part].remove_flag(vehicle_part::passenger_flag);
- veh->skidding = true;
+    vparzu *part = NULL;
+    vehicle *veh = veh_at(x, y, part);
+    if (veh == NULL) {
+        debugmsg ("map::unboard_vehicle: vehicle not found at %d,%d", x, y);
+        return;
+    }
+    vehicle_part2 *seat_part = part->part_with_feature(VPFLAG_BOARDABLE, true);
+    if (seat_part == NULL) {
+        debugmsg ("map::unboard_vehicle: boarding %s: part at %d,%d is not boardable", veh->name.c_str(), x, y);
+        return;
+    }
+    player *psg = seat_part->get_passenger();
+    if (psg == NULL) {
+        debugmsg ("map::unboard_vehicle: passenger not found",
+            psg->name.c_str());
+        return;
+    }
+
+    psg->in_vehicle = false;
+    psg->driving_recoil = 0;
+    psg->controlling_vehicle = false;
+    seat_part->remove_flag(vehicle_part::passenger_flag);
+    veh->skidding = true;
 }
 
 void map::destroy_vehicle (vehicle *veh)
 {
- if (!veh) {
-  debugmsg("map::destroy_vehicle was passed NULL");
-  return;
- }
- const int veh_sm = veh->smx + veh->smy * my_MAPSIZE;
- for (int i = 0; i < grid[veh_sm]->vehicles.size(); i++) {
-  if (grid[veh_sm]->vehicles[i] == veh) {
-   vehicle_list.erase(veh);
-   reset_vehicle_cache();
-   grid[veh_sm]->vehicles.erase (grid[veh_sm]->vehicles.begin() + i);
-   delete veh;
-   return;
-  }
- }
- debugmsg ("destroy_vehicle can't find it! name=%s, sm=%d", veh->name.c_str(), veh_sm);
+    if (veh == NULL) {
+        debugmsg("map::destroy_vehicle was passed NULL");
+        return;
+    }
+    const int veh_sm = veh->smx + veh->smy * my_MAPSIZE;
+    for (int i = 0; i < grid[veh_sm]->vehicles.size(); i++) {
+        if (grid[veh_sm]->vehicles[i] == veh) {
+            vehicle_list.erase(veh);
+            reset_vehicle_cache();
+            grid[veh_sm]->vehicles.erase (grid[veh_sm]->vehicles.begin() + i);
+            delete veh;
+            return;
+        }
+    }
+    debugmsg ("destroy_vehicle can't find it! name=%s, sm=%d", veh->name.c_str(), veh_sm);
 }
 
 bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool test)
@@ -333,44 +325,35 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
   return false;
  }
 
-    // record every passenger inside
- std::vector<int> psg_parts = veh->boarded_parts();
- std::vector<player *> psgs;
- for (int p = 0; p < psg_parts.size(); p++)
-  psgs.push_back (veh->get_passenger (psg_parts[p]));
-
- const int rec = abs(veh->velocity) / 5 / 100;
-
- bool need_update = false;
- int upd_x, upd_y;
- // move passengers
- for (int i = 0; i < psg_parts.size(); i++) {
-  player *psg = psgs[i];
-  const int p = psg_parts[i];
-  if (!psg) {
-   debugmsg ("empty passenger part %d pcoord=%d,%d u=%d,%d?", p,
-             veh->global_x() + veh->parts[p].precalc_dx[0],
-             veh->global_y() + veh->parts[p].precalc_dy[0],
-                      g->u.posx, g->u.posy);
-   continue;
-  }
-  // add recoil
-  psg->driving_recoil = rec;
-  // displace passenger taking in account vehicle movement (dx, dy)
-  // and turning: precalc_dx/dy [0] contains previous frame direction,
-  // and precalc_dx/dy[1] should contain next direction
-  psg->posx += dx + veh->parts[p].precalc_dx[1] - veh->parts[p].precalc_dx[0];
-  psg->posy += dy + veh->parts[p].precalc_dy[1] - veh->parts[p].precalc_dy[0];
-  if (psg == &g->u) { // if passenger is you, we need to update the map
-   need_update = true;
-   upd_x = psg->posx;
-   upd_y = psg->posy;
-  }
- }
- for (int p = 0; p < veh->parts.size(); p++) {
-  veh->parts[p].precalc_dx[0] = veh->parts[p].precalc_dx[1];
-  veh->parts[p].precalc_dy[0] = veh->parts[p].precalc_dy[1];
- }
+    std::vector<vparzu*> psg_parts = veh->boarded_parts();
+    const int rec = abs(veh->velocity) / 5 / 100;
+    bool need_update = false;
+    int upd_x, upd_y;
+    for (int i = 0; i < psg_parts.size(); i++) {
+        vparzu &vp = *psg_parts[i];
+        player *psg = vp.get_passenger();
+        if (psg == NULL) {
+            debugmsg ("empty passenger part %d pcoord=%d,%d u=%d,%d?", i,
+                veh->global_x() + vp.precalc_dx[0],
+                veh->global_y() + vp.precalc_dy[0],
+                g->u.posx, g->u.posy);
+            continue;
+        }
+        // add recoil
+        psg->driving_recoil = rec;
+        // displace passenger taking in account vehicle movement (dx, dy)
+        // and turning: precalc_dx/dy [0] contains previous frame direction,
+        // and precalc_dx/dy[1] should contain next direction
+        psg->posx += dx + vp.precalc_dx[1] - vp.precalc_dx[0];
+        psg->posy += dy + vp.precalc_dy[1] - vp.precalc_dy[0];
+        if (psg == &g->u) {
+            // if passenger is you, we need to update the map
+            need_update = true;
+            upd_x = psg->posx;
+            upd_y = psg->posy;
+        }
+    }
+    veh->move_precalc();
 
  veh->posx = dstx;
  veh->posy = dsty;
@@ -479,12 +462,12 @@ bool map::vehproceed(){
     }
 
     { // sink in water?
-        std::vector<int> wheel_indices = veh->all_parts_with_feature(VPFLAG_WHEEL, false);
+        vehicle::ppvposvec wheel_indices = veh->all_parts_with_feature(VPFLAG_WHEEL, false);
         int num_wheels = wheel_indices.size(), submerged_wheels = 0;
         for (int w = 0; w < num_wheels; w++) {
-            const int p = wheel_indices[w];
-            const int px = x + veh->parts[p].precalc_dx[0];
-            const int py = y + veh->parts[p].precalc_dy[0];
+            const vparzu &wp = *wheel_indices[w].first;
+            const int px = x + wp.precalc_dx[0];
+            const int py = y + wp.precalc_dy[0];
             // deep water
             if(ter_at(px, py).has_flag(TFLAG_DEEP_WATER)) {
                 submerged_wheels++;
@@ -519,9 +502,11 @@ bool map::vehproceed(){
     // if not enough wheels, mess up the ground a bit.
     if (!veh->valid_wheel_config()) {
         veh->velocity += veh->velocity < 0 ? 2000 : -2000;
-        for (int p = 0; p < veh->parts.size(); p++) {
-            const int px = x + veh->parts[p].precalc_dx[0];
-            const int py = y + veh->parts[p].precalc_dy[0];
+        const vparmap &parts = veh->get_pmap();
+        for (vparmap::const_iterator a = parts.begin(); a != parts.end(); ++a) {
+            const vparzu &vp = a->second;
+            const int px = x + vp.precalc_dx[0];
+            const int py = y + vp.precalc_dy[0];
             const ter_id &pter = ter(px, py);
             if (pter == t_dirt || pter == t_grass) {
                 ter_set(px, py, t_dirtmound);
@@ -572,17 +557,17 @@ bool map::vehproceed(){
     point epicenter1(0, 0);
     point epicenter2(0, 0);
 
-    if(veh_veh_colls.size()) { // we have dynamic crap!
+    if(!veh_veh_colls.empty()) { // we have dynamic crap!
         // effects of colliding with another vehicle:
         // transfers of momentum, skidding,
         // parts are damaged/broken on both sides,
         // remaining times are normalized,
         veh_veh_coll_flag = true;
-        veh_collision c = veh_veh_colls[0]; //Note: What´s with collisions with more than 2 vehicles?
-        vehicle* veh2 = (vehicle*) c.target;
+        veh_collision &c = veh_veh_colls[0]; //Note: What´s with collisions with more than 2 vehicles?
+        vehicle* veh2 = reinterpret_cast<vehicle*>(c.target);
         g->add_msg(_("The %1$s's %2$s collides with the %3$s's %4$s."),
-                   veh->name.c_str(),  veh->part_info(c.part).name.c_str(),
-                   veh2->name.c_str(), veh2->part_info(c.target_part).name.c_str());
+                   veh->name.c_str(),  c.part->parts[0].part_info().name.c_str(),
+                   veh2->name.c_str(), c.target_part->parts[0].part_info().name.c_str());
 
         // for reference, a cargo truck weighs ~25300, a bicycle 690,
         //  and 38mph is 3800 'velocity'
@@ -641,8 +626,8 @@ bool map::vehproceed(){
 
         int coll_parts_cnt = 0; //quantity of colliding parts between veh1 and veh2
         for(int i = 0; i < veh_veh_colls.size(); i++) {
-            veh_collision tmp_c = veh_veh_colls[i];
-            if(veh2 == (vehicle*) tmp_c.target) { coll_parts_cnt++; }
+            veh_collision &tmp_c = veh_veh_colls[i];
+            if(veh2 == tmp_c.target) { coll_parts_cnt++; }
         }
 
         float dmg1_part = dmg_veh1 / coll_parts_cnt;
@@ -650,24 +635,24 @@ bool map::vehproceed(){
 
         //damage colliding parts (only veh1 and veh2 parts)
         for(int i = 0; i < veh_veh_colls.size(); i++) {
-            veh_collision tmp_c = veh_veh_colls[i];
+            veh_collision &tmp_c = veh_veh_colls[i];
 
-            if(veh2 == (vehicle*) tmp_c.target) {
-                int parm1 = veh->part_with_feature (tmp_c.part, VPFLAG_ARMOR);
-                if (parm1 < 0) {
-                    parm1 = tmp_c.part;
+            if(veh2 == tmp_c.target) {
+                vehicle_part2 *parm1 = tmp_c.part->part_with_feature(VPFLAG_ARMOR, true);
+                if (parm1 == NULL) {
+                    parm1 = &tmp_c.part->parts[0];
                 }
-                int parm2 = veh2->part_with_feature (tmp_c.target_part, VPFLAG_ARMOR);
-                if (parm2 < 0) {
-                    parm2 = tmp_c.target_part;
+                vehicle_part2 *parm2 = tmp_c.target_part->part_with_feature(VPFLAG_ARMOR, true);
+                if (parm2 == NULL) {
+                    parm2 = &tmp_c.target_part->parts[0];
                 }
-                epicenter1.x += veh->parts[parm1].mount_dx;
-                epicenter1.y += veh->parts[parm1].mount_dy;
-                veh->damage(parm1, dmg1_part, 1);
+                epicenter1.x += tmp_c.part->mount_dx;
+                epicenter1.y += tmp_c.part->mount_dy;
+                veh->damage(tmp_c.part, parm1, dmg1_part, 1);
 
-                epicenter2.x += veh2->parts[parm2].mount_dx;
-                epicenter2.y += veh2->parts[parm2].mount_dy;
-                veh2->damage(parm2, dmg2_part, 1);
+                epicenter2.x += tmp_c.target_part->mount_dx;
+                epicenter2.y += tmp_c.target_part->mount_dy;
+                veh2->damage(tmp_c.target_part, parm2, dmg2_part, 1);
             }
         }
         epicenter1.x /= coll_parts_cnt;
@@ -705,8 +690,7 @@ bool map::vehproceed(){
     for(std::vector<veh_collision>::iterator next_collision = veh_misc_colls.begin();
             next_collision != veh_misc_colls.end(); next_collision++) {
 
-        point collision_point(veh->parts[next_collision->part].mount_dx,
-                                    veh->parts[next_collision->part].mount_dy);
+        point collision_point(next_collision->part->mount_dx, next_collision->part->mount_dy);
         int coll_dmg = next_collision->imp;
         //Shock damage
         veh->damage_all(coll_dmg / 2, coll_dmg, 1, collision_point);
@@ -717,17 +701,18 @@ bool map::vehproceed(){
         int vel1_a = veh->velocity / 100; //velocity of car after collision
         int d_vel = abs(vel1 - vel1_a);
 
-        std::vector<int> ppl = veh->boarded_parts();
+        std::vector<vparzu*> ppl = veh->boarded_parts();
 
         for (int ps = 0; ps < ppl.size(); ps++) {
-            player *psg = veh->get_passenger (ppl[ps]);
-            if (!psg) {
-                debugmsg ("throw passenger: empty passenger at part %d", ppl[ps]);
+            vparzu &vp = *ppl[ps];
+            player *psg = vp.get_passenger();
+            if (psg == NULL) {
+                debugmsg ("throw passenger: empty passenger at %d,%d", vp.mount_dx, vp.mount_dy);
                 continue;
             }
 
-            bool throw_from_seat = 0;
-            if (veh->part_with_feature (ppl[ps], VPFLAG_SEATBELT) == -1) {
+            bool throw_from_seat = false;
+            if (vp.has_part_with_feature(VPFLAG_SEATBELT, true)) {
                 throw_from_seat = d_vel * rng(80, 120) / 100 > (psg->str_cur * 1.5 + 5);
             }
 
@@ -751,12 +736,11 @@ bool map::vehproceed(){
                     g->add_msg(_("%s is hurled from the %s's seat by the power of the impact!"),
                                psg->name.c_str(), veh->name.c_str());
                 }
-                unboard_vehicle(x + veh->parts[ppl[ps]].precalc_dx[0],
-                                     y + veh->parts[ppl[ps]].precalc_dy[0]);
+                unboard_vehicle(x + vp.precalc_dx[0], y + vp.precalc_dy[0]);
                 g->fling_player_or_monster(psg, 0, mdir.dir() + rng(0, 60) - 30,
                                            (vel1 - psg->str_cur < 10 ? 10 :
                                             vel1 - psg->str_cur));
-            } else if (veh->part_with_feature (ppl[ps], "CONTROLS") >= 0) {
+            } else if (vp.has_part_with_feature("CONTROLS", false)) {
                 // FIXME: should actually check if passenger is in control,
                 // not just if there are controls there.
                 const int lose_ctrl_roll = rng (0, dmg_1);
@@ -786,17 +770,17 @@ bool map::vehproceed(){
     // after displacement veh reference would be invdalid.
     // damn references!
     if (can_move) {
-        std::vector<int> wheel_indices = veh->all_parts_with_feature("WHEEL", false);
+        vehicle::ppvposvec wheel_indices = veh->all_parts_with_feature(VPFLAG_WHEEL, false);
         for (int w = 0; w < wheel_indices.size(); w++) {
-            const int p = wheel_indices[w];
+            vparzu &wp = *wheel_indices[w].first;
             if (one_in(2)) {
-                if (displace_water (x + veh->parts[p].precalc_dx[0],
-                                    y + veh->parts[p].precalc_dy[0]) && pl_ctrl) {
+                if (displace_water (x + wp.precalc_dx[0],
+                                    y + wp.precalc_dy[0]) && pl_ctrl) {
                     g->add_msg(_("You hear a splash!"));
                 }
             }
-            veh->handle_trap( x + veh->parts[p].precalc_dx[0],
-                              y + veh->parts[p].precalc_dy[0], p );
+            veh->handle_trap (x + wp.precalc_dx[0],
+                              y + wp.precalc_dy[0]);
         }
     }
 
@@ -1066,21 +1050,10 @@ int map::move_cost(const int x, const int y, const vehicle *ignored_vehicle) con
         return 0;
     }
     if (veh_in_active_range && veh_exists_at[x][y]) {
-        std::map< std::pair<int, int>, std::pair<vehicle *, int> >::const_iterator it;
-        if ((it = veh_cached_parts.find( std::make_pair(x, y) )) != veh_cached_parts.end()) {
-            const int vpart = it->second.second;
-            vehicle *veh = it->second.first;
-            if (veh != ignored_vehicle) {  // moving past vehicle cost
-                const int dpart = veh->part_with_feature(vpart, VPFLAG_OBSTACLE);
-                if (dpart >= 0 && (!veh->part_flag(dpart, VPFLAG_OPENABLE) || !veh->parts[dpart].open)) {
-                    return 0;
-                } else {
-                    const int ipart = veh->part_with_feature(vpart, VPFLAG_AISLE);
-                    if (ipart >= 0) {
-                        return 2;
-                    }
-                    return 8;
-                }
+        veh_cache_map::const_iterator it;
+        if ((it = veh_cached_parts2.find( point(x, y) )) != veh_cached_parts2.end()) {
+            if (it->second.first != ignored_vehicle) {  // moving past vehicle cost
+                return it->second.second->move_cost();
             }
         }
     }
@@ -1125,20 +1098,13 @@ bool map::trans(const int x, const int y)
     // Control statement is a problem. Normally returning false on an out-of-bounds
     // is how we stop rays from going on forever.  Instead we'll have to include
     // this check in the ray loop.
-    int vpart = -1;
+    vparzu *vpart;
     vehicle *veh = veh_at(x, y, vpart);
     bool tertr;
-    if (veh) {
-        tertr = veh->part_with_feature(vpart, VPFLAG_OPAQUE) < 0;
-        if (!tertr) {
-            const int dpart = veh->part_with_feature(vpart, VPFLAG_OPENABLE);
-            if (dpart >= 0 && veh->parts[dpart].open) {
-                tertr = true; // open opaque door
-            }
-        }
-    } else {
-        tertr = has_flag_ter_and_furn(TFLAG_TRANSPARENT, x, y);
+    if (veh != NULL && !vpart->is_transparent()) {
+        return false;
     }
+    tertr = has_flag_ter_and_furn(TFLAG_TRANSPARENT, x, y);
     if( tertr ) {
         // Fields may obscure the view, too
         field &curfield = field_at( x,y );
@@ -1167,20 +1133,9 @@ bool map::has_flag(const std::string &flag, const int x, const int y) const
     if (!INBOUNDS(x, y)) {
         return false;
     }
-    // veh_at const no bueno
-    if (veh_in_active_range && veh_exists_at[x][y] && flag_str_BASHABLE == flag) {
-        std::map< std::pair<int, int>, std::pair<vehicle *, int> >::const_iterator it;
-        if ((it = veh_cached_parts.find( std::make_pair(x, y) )) != veh_cached_parts.end()) {
-            const int vpart = it->second.second;
-            vehicle *veh = it->second.first;
-            if (veh->parts[vpart].hp > 0 && // if there's a vehicle part here...
-                veh->part_with_feature (vpart, VPFLAG_OBSTACLE) >= 0) {// & it is obstacle...
-                const int p = veh->part_with_feature (vpart, VPFLAG_OPENABLE);
-                if (p < 0 || !veh->parts[p].open) { // and not open door
-                    return true;
-                }
-            }
-        }
+    if (flag_str_BASHABLE == flag) {
+        // All the logic regarding bashable vehicle parts is there:
+        return has_flag(TFLAG_BASHABLE, x, y);
     }
     return has_flag_ter_or_furn(flag, x, y);
 }
@@ -1224,16 +1179,10 @@ bool map::has_flag(const ter_bitflags flag, const int x, const int y) const
     }
     // veh_at const no bueno
     if (veh_in_active_range && veh_exists_at[x][y] && flag == TFLAG_BASHABLE) {
-        std::map< std::pair<int, int>, std::pair<vehicle *, int> >::const_iterator it;
-        if ((it = veh_cached_parts.find( std::make_pair(x, y) )) != veh_cached_parts.end()) {
-            const int vpart = it->second.second;
-            vehicle *veh = it->second.first;
-            if (veh->parts[vpart].hp > 0 && // if there's a vehicle part here...
-                veh->part_with_feature (vpart, VPFLAG_OBSTACLE) >= 0) {// & it is obstacle...
-                const int p = veh->part_with_feature (vpart, VPFLAG_OPENABLE);
-                if (p < 0 || !veh->parts[p].open) { // and not open door
-                    return true;
-                }
+        veh_cache_map::const_iterator it;
+        if ((it = veh_cached_parts2.find( point(x, y) )) != veh_cached_parts2.end()) {
+            if (it->second.second->is_obstacle()) {
+                return true;
             }
         }
     }
@@ -1339,17 +1288,16 @@ bool map::moppable_items_at(const int x, const int y)
  if(fld.findField(fd_blood) != 0 || fld.findField(fd_bile) != 0 || fld.findField(fd_slime) != 0 || fld.findField(fd_sludge) != 0) {
   return true;
  }
- int vpart;
- vehicle *veh = veh_at(x, y, vpart);
- if(veh != 0) {
-  std::vector<int> parts_here = veh->parts_at_relative(veh->parts[vpart].mount_dx, veh->parts[vpart].mount_dy);
-  for(size_t i = 0; i < parts_here.size(); i++) {
-   if(veh->parts[parts_here[i]].blood > 0) {
-    return true;
-   }
-  }
- }
- return false;
+    vparzu *vpart;
+    vehicle *veh = veh_at(x, y, vpart);
+    if(veh != NULL) {
+        for(size_t i = 0; i < vpart->parts.size(); i++) {
+            if(vpart->parts[i].blood > 0) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 point map::random_outdoor_tile()
@@ -1413,14 +1361,13 @@ void map::mop_spills(const int x, const int y) {
  fld.removeField(fd_bile);
  fld.removeField(fd_slime);
  fld.removeField(fd_sludge);
- int vpart;
- vehicle *veh = veh_at(x, y, vpart);
- if(veh != 0) {
-  std::vector<int> parts_here = veh->parts_at_relative(veh->parts[vpart].mount_dx, veh->parts[vpart].mount_dy);
-  for(size_t i = 0; i < parts_here.size(); i++) {
-   veh->parts[parts_here[i]].blood = 0;
-  }
- }
+    vparzu *vpart;
+    vehicle *veh = veh_at(x, y, vpart);
+    if(veh != NULL) {
+        for(size_t i = 0; i < vpart->parts.size(); i++) {
+            vpart->parts[i].blood = 0;
+        }
+    }
 }
 
 bool map::bash(const int x, const int y, const int str, std::string &sound, int *res)
@@ -1449,13 +1396,13 @@ bool map::bash(const int x, const int y, const int str, std::string &sound, int 
  }
 
  int result = -1;
- int vpart;
- vehicle *veh = veh_at(x, y, vpart);
- if (veh) {
-  veh->damage (vpart, str, 1);
-  sound += _("crash!");
-  return true;
- }
+    vparzu *vpart;
+    vehicle *veh = veh_at(x, y, vpart);
+    if (veh != NULL) {
+        veh->damage(vpart, str, 1);
+        sound += _("crash!");
+        return true;
+    }
 
 /////
 bool jsfurn = false;
@@ -1781,9 +1728,9 @@ void map::shoot(const int x, const int y, int &dam,
         g->add_event(EVENT_WANTED, int(g->turn) + 300, 0, g->levx, g->levy);
     }
 
-    int vpart;
+    vparzu *vpart;
     vehicle *veh = veh_at(x, y, vpart);
-    if (veh)
+    if (veh != NULL)
     {
         const bool inc = (ammo_effects.count("INCENDIARY") || ammo_effects.count("FLAME"));
         dam = veh->damage (vpart, dam, inc? 2 : 0, hit_items);
@@ -2538,25 +2485,31 @@ void map::process_active_items_in_submap(const int nonant)
 void map::process_active_items_in_vehicles(const int nonant)
 {
     item *it;
-    std::vector<vehicle*> *vehicles = &(grid[nonant]->vehicles);
-    for (int v = vehicles->size() - 1; v >= 0; v--) {
-        vehicle *next_vehicle = (*vehicles)[v];
-        std::vector<int> cargo_parts = next_vehicle->all_parts_with_feature(VPFLAG_CARGO, false);
-        for(std::vector<int>::iterator part_index = cargo_parts.begin();
-                part_index != cargo_parts.end(); part_index++) {
-            std::vector<item> *items_in_part = &(next_vehicle->parts[*part_index].items);
-            int mapx = next_vehicle->posx + next_vehicle->parts[*part_index].precalc_dx[0];
-            int mapy = next_vehicle->posy + next_vehicle->parts[*part_index].precalc_dy[0];
-            for(int n = items_in_part->size() - 1; n >= 0; n--) {
-                it = &((*items_in_part)[n]);
+    std::vector<vehicle*> &vehicles = grid[nonant]->vehicles;
+    for (int v = vehicles.size() - 1; v >= 0; v--) {
+        vehicle *veh = vehicles[v];
+        const vparmap &parts = veh->get_pmap();
+        const int gx = veh->global_x();
+        const int gy = veh->global_y();
+        for (vparmap::const_iterator a = parts.begin(); a != parts.end(); ++a) {
+            const vparzu &vp = a->second;
+            vehicle_part2 *pp = const_cast<vehicle_part2*>(vp.part_with_feature(VPFLAG_CARGO, false));
+            if (pp == NULL) {
+                continue;
+            }
+            const int px = gx + vp.precalc_dx[0];
+            const int py = gy + vp.precalc_dy[0];
+            std::vector<item> &items_in_part = pp->items;
+            for(int n = items_in_part.size() - 1; n >= 0; n--) {
+                it = &(items_in_part[n]);
                 // Check if it's in a fridge and is food.
-                if (it->is_food() && next_vehicle->part_flag(*part_index, VPFLAG_FRIDGE) &&
-                    next_vehicle->fridge_on && it->fridge == 0) {
+                if (it->is_food() && pp->has_feature(VPFLAG_FRIDGE, true) &&
+                    veh->fridge_on && it->fridge == 0) {
                     it->fridge = (int)g->turn;
                     it->item_counter -= 10;
                 }
-                if (it->has_flag("RECHARGE") && next_vehicle->part_with_feature(*part_index, VPFLAG_RECHARGE) >= 0 &&
-                    next_vehicle->recharger_on) {
+                if (it->has_flag("RECHARGE") && vp.part_with_feature(VPFLAG_RECHARGE, true) != NULL &&
+                    veh->recharger_on) {
                     int full_charge = static_cast<it_tool*>(it->type)->max_charges;
                     if (it->has_flag("DOUBLE_AMMO")) {
                         full_charge = full_charge * 2;
@@ -2567,8 +2520,8 @@ void map::process_active_items_in_vehicles(const int nonant)
                         }
                     }
                 }
-                if(process_active_item(it, nonant, mapx, mapy)) {
-                    next_vehicle->remove_item(*part_index, n);
+                if(process_active_item(it, nonant, px, py)) {
+                    pp->remove_item(n);
                 }
             }
         }
@@ -2681,17 +2634,16 @@ std::list<item> map::use_amount_square(const int x, const int y, const itype_id 
                                        int &quantity, const bool use_container)
 {
   std::list<item> ret;
-  int vpart = -1;
-  vehicle *veh = veh_at(x,y, vpart);
-
-  if (veh) {
-    const int cargo = veh->part_with_feature(vpart, "CARGO");
-    if (cargo >= 0) {
-      std::list<item> tmp = use_amount_map_or_vehicle(veh->parts[cargo].items, type,
-                                                      quantity, use_container);
-      ret.splice(ret.end(), tmp);
+    vparzu *vpart;
+    vehicle *veh = veh_at(x,y, vpart);
+    if (veh != NULL) {
+        vehicle_part2 *cargo = vpart->part_with_feature("CARGO", true);
+        if (cargo != NULL) {
+            std::list<item> tmp = use_amount_map_or_vehicle(
+                cargo->items, type, quantity, use_container);
+            ret.splice(ret.end(), tmp);
+        }
     }
-  }
   std::list<item> tmp = use_amount_map_or_vehicle(i_at(x,y), type, quantity, use_container);
   ret.splice(ret.end(), tmp);
   return ret;
@@ -2770,18 +2722,18 @@ std::list<item> map::use_charges(const point origin, const int range,
                     continue;
                 }
                 if (rl_dist(origin.x, origin.y, x, y) >= radius) {
-                    int vpart = -1;
+                    vparzu *vpart;
                     vehicle *veh = veh_at(x, y, vpart);
 
-                    if (veh) { // check if a vehicle part is present to provide water/power
-                        const int kpart = veh->part_with_feature(vpart, "KITCHEN");
-                        const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
-                        const int craftpart = veh->part_with_feature(vpart, "CRAFTRIG");
-                        const int forgepart = veh->part_with_feature(vpart, "FORGE");
-                        const int chempart = veh->part_with_feature(vpart, "CHEMLAB");
-                        const int cargo = veh->part_with_feature(vpart, "CARGO");
+                    if (veh != NULL) { // check if a vehicle part is present to provide water/power
+                        const vehicle_part2 *kpart = vpart->part_with_feature("KITCHEN", true);
+                        const vehicle_part2 *weldpart = vpart->part_with_feature("WELDRIG", true);
+                        const vehicle_part2 *craftpart = vpart->part_with_feature("CRAFTRIG", true);
+                        const vehicle_part2 *forgepart = vpart->part_with_feature("FORGE", true);
+                        const vehicle_part2 *chempart = vpart->part_with_feature("CHEMLAB", true);
+                        vehicle_part2 *cargo = vpart->part_with_feature("CARGO", true);
 
-                        if (kpart >= 0) { // we have a kitchen, now to see what to drain
+                        if (kpart != NULL) { // we have a kitchen, now to see what to drain
                             ammotype ftype = "NULL";
 
                             if (type == "water_clean") {
@@ -2800,7 +2752,7 @@ std::list<item> map::use_charges(const point origin, const int range,
                             }
                         }
 
-                        if (weldpart >= 0) { // we have a weldrig, now to see what to drain
+                        if (weldpart != NULL) { // we have a weldrig, now to see what to drain
                             ammotype ftype = "NULL";
 
                             if (type == "welder") {
@@ -2819,7 +2771,7 @@ std::list<item> map::use_charges(const point origin, const int range,
                             }
                         }
 
-                        if (craftpart >= 0) { // we have a craftrig, now to see what to drain
+                        if (craftpart != NULL) { // we have a craftrig, now to see what to drain
                             ammotype ftype = "NULL";
 
                             if (type == "press") {
@@ -2840,7 +2792,7 @@ std::list<item> map::use_charges(const point origin, const int range,
                             }
                         }
 
-                        if (forgepart >= 0) { // we have a veh_forge, now to see what to drain
+                        if (forgepart != NULL) { // we have a veh_forge, now to see what to drain
                             ammotype ftype = "NULL";
 
                             if (type == "forge") {
@@ -2857,7 +2809,7 @@ std::list<item> map::use_charges(const point origin, const int range,
                             }
                         }
 
-                        if (chempart >= 0) { // we have a chem_lab, now to see what to drain
+                        if (chempart != NULL) { // we have a chem_lab, now to see what to drain
                             ammotype ftype = "NULL";
 
                             if (type == "chemistry_set") {
@@ -2876,9 +2828,9 @@ std::list<item> map::use_charges(const point origin, const int range,
                             }
                         }
 
-                        if (cargo >= 0) {
+                        if (cargo != NULL) {
                             std::list<item> tmp =
-                                use_charges_from_map_or_vehicle(veh->parts[cargo].items, type, quantity);
+                                use_charges_from_map_or_vehicle(cargo->items, type, quantity);
                             ret.splice(ret.end(), tmp);
                             if (quantity <= 0) {
                                 return ret;
@@ -3432,13 +3384,14 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
         }
     }
 
- int veh_part = 0;
- vehicle *veh = veh_at(x, y, veh_part);
- if (veh) {
-  sym = special_symbol (veh->face.dir_symbol(veh->part_sym(veh_part)));
-  if (normal_tercol)
-   tercol = veh->part_color(veh_part);
- }
+    vparzu *veh_part;
+    vehicle *veh = veh_at(x, y, veh_part);
+    if (veh != NULL) {
+        sym = special_symbol (veh->face.dir_symbol(veh_part->part_sym()));
+        if (normal_tercol) {
+            tercol = veh_part->part_color();
+        }
+    }
  // If there's graffiti here, change background color
  if(graffiti_at(x,y).contents)
   graf = true;
@@ -4338,25 +4291,32 @@ void map::build_map_cache()
 
  build_transparency_cache();
 
- // Cache all the vehicle stuff in one loop
- VehicleList vehs = get_vehicles();
- for(int v = 0; v < vehs.size(); ++v) {
-  for (int part = 0; part < vehs[v].v->parts.size(); part++) {
-   int px = vehs[v].x + vehs[v].v->parts[part].precalc_dx[0];
-   int py = vehs[v].y + vehs[v].v->parts[part].precalc_dy[0];
-   if(INBOUNDS(px, py)) {
-    if (vehs[v].v->is_inside(part)) {
-     outside_cache[px][py] = false;
+    // Cache all the vehicle stuff in one loop
+    VehicleList vehs = get_vehicles();
+    for(int v = 0; v < vehs.size(); ++v) {
+        vehicle *veh = vehs[v].v;
+        const vparmap &parts = veh->get_pmap();
+        const int gx = veh->global_x();
+        const int gy = veh->global_y();
+        for (vparmap::const_iterator a = parts.begin(); a != parts.end(); ++a) {
+            const vparzu &vp = a->second;
+            const int px = gx + vp.precalc_dx[0];
+            const int py = gy + vp.precalc_dy[0];
+            if(!INBOUNDS(px, py)) {
+                continue;
+            }
+            if (vp.is_inside()) {
+                outside_cache[px][py] = false;
+            }
+            const vehicle_part2 *p = vp.part_with_feature(VPFLAG_OPAQUE, true);
+            if (p != NULL) {
+                const vehicle_part2 *d = vp.part_with_feature(VPFLAG_OPENABLE, true);
+                if (d == NULL || !d->open) {
+                    transparency_cache[px][py] = LIGHT_TRANSPARENCY_SOLID;
+                }
+            }
+        }
     }
-    if (vehs[v].v->part_flag(part, VPFLAG_OPAQUE) && vehs[v].v->parts[part].hp > 0) {
-     int dpart = vehs[v].v->part_with_feature(part , VPFLAG_OPENABLE);
-     if (dpart < 0 || !vehs[v].v->parts[dpart].open) {
-      transparency_cache[px][py] = LIGHT_TRANSPARENCY_SOLID;
-     }
-    }
-   }
-  }
- }
 
  build_seen_cache();
  generate_lightmap();

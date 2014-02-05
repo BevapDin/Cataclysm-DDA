@@ -942,7 +942,7 @@ bool cata_tiles::draw_field_or_item(int x, int y)
 
 bool cata_tiles::draw_vpart(int x, int y)
 {
-    int veh_part = 0;
+    vparzu *veh_part = 0;
     vehicle *veh = g->m.veh_at(x, y, veh_part);
 
     if (!veh) {
@@ -958,7 +958,7 @@ bool cata_tiles::draw_vpart(int x, int y)
     // Gets the visible part, should work fine once tileset vp_ids are updated to work with the vehicle part json ids
     // get the vpart_id
     char part_mod = 0;
-    std::string vpid = veh->part_id_string(veh_part, part_mod);
+    std::string vpid = veh_part->part_id_string(part_mod);
 
     // prefix with vp_ ident
     vpid = "vp_" + vpid;
@@ -973,8 +973,8 @@ bool cata_tiles::draw_vpart(int x, int y)
                 break;
         }
     }
-    int cargopart = veh->part_with_feature(veh_part, "CARGO");
-    bool draw_highlight = (cargopart > 0) && (!veh->parts[cargopart].items.empty());
+    const vehicle_part2 *pp = vparzu->part_with_feature("CARGO", false);
+    bool draw_highlight = pp != NULL && !pp.items.empty();
     bool ret = draw_from_id_string(vpid, x, y, subtile, veh_dir);
     if (ret && draw_highlight) {
         draw_item_highlight(x, y);

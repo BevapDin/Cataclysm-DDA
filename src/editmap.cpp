@@ -145,9 +145,8 @@ void editmap_hilight::draw( editmap * hm, bool update ) {
         for(std::map<point, char>::iterator it = points.begin(); it != points.end(); ++it ) {
             int x = it->first.x;
             int y = it->first.y;
-            int vpart = 0;
             // but only if there's no vehicles/mobs/npcs on a point
-            if ( ! g->m.veh_at(x, y, vpart) && ( g->mon_at(x, y) == -1 ) && ( g->npc_at(x, y) == -1 ) ) {
+            if ( ! g->m.veh_at(x, y) && ( g->mon_at(x, y) == -1 ) && ( g->npc_at(x, y) == -1 ) ) {
                 char t_sym = terlist[g->m.ter(x, y)].sym;
                 nc_color t_col = terlist[g->m.ter(x, y)].color;
 
@@ -307,8 +306,7 @@ point editmap::edit()
         } else if ( ch == 'm' ) {
             int mon_index = g->mon_at(target.x, target.y);
             int npc_index = g->npc_at(target.x, target.y);
-            int veh_part = -1;
-            vehicle *veh = g->m.veh_at(target.x, target.y, veh_part);
+            vehicle *veh = g->m.veh_at(target.x, target.y);
           if(mon_index >= 0) {
             edit_mon();
           } else if (npc_index >= 0) {
@@ -412,11 +410,11 @@ void editmap::update_view(bool update_info)
 {
     // Debug helper 2, child of debug helper
     // Gather useful data
-    int veh_part = 0;
+    vparzu *veh_part = NULL;
     vehicle *veh = g->m.veh_at(target.x, target.y, veh_part);
     int veh_in = -1;
     if(veh) {
-        veh_in = veh->is_inside(veh_part);
+        veh_in = veh_part->is_inside();
     }
 
     target_ter = g->m.ter(target.x, target.y);
@@ -452,9 +450,8 @@ void editmap::update_view(bool update_info)
         for ( int i = 0; i < target_list.size(); i++ ) {
             int x = target_list[i].x;
             int y = target_list[i].y;
-            int vpart = 0;
             // but only if there's no vehicles/mobs/npcs on a point
-            if ( ! g->m.veh_at(x, y, vpart) && ( g->mon_at(x, y) == -1 ) && ( g->npc_at(x, y) == -1 ) ) {
+            if ( ! g->m.veh_at(x, y) && ( g->mon_at(x, y) == -1 ) && ( g->npc_at(x, y) == -1 ) ) {
                 char t_sym = terlist[g->m.ter(x, y)].sym;
                 nc_color t_col = terlist[g->m.ter(x, y)].color;
 
@@ -1283,8 +1280,7 @@ int editmap::edit_mon()
 int editmap::edit_veh()
 {
     int ret = 0;
-    int veh_part = -1;
-    vehicle *it = g->m.veh_at(target.x, target.y, veh_part);
+    vehicle *it = g->m.veh_at(target.x, target.y);
     edit_json(it);
     return ret;
 }
@@ -1855,6 +1851,6 @@ void editmap::cleartmpmap( tinymap & tmpmap ) {
     }
 
     memset(tmpmap.veh_exists_at, 0, sizeof(tmpmap.veh_exists_at));
-    tmpmap.veh_cached_parts.clear();
+    tmpmap.veh_cached_parts2.clear();
     tmpmap.vehicle_list.clear();
 }

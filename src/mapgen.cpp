@@ -10949,12 +10949,12 @@ vehicle *map::add_vehicle(std::string type, const int x, const int y, const int 
  */
 vehicle *map::add_vehicle_to_map(vehicle *veh, const int x, const int y, const bool merge_wrecks)
 {
-    //We only want to check once per square, so loop over all structural parts
-    std::vector<int> frame_indices = veh->all_parts_at_location("structure");
-    for (std::vector<int>::const_iterator part = frame_indices.begin();
-         part != frame_indices.end(); part++) {
-        const int px = x + veh->parts[*part].precalc_dx[0];
-        const int py = y + veh->parts[*part].precalc_dy[0];
+    const vparmap &parts = veh->get_pmap();
+    bool veh_smashed = false;
+    for (vparmap::const_iterator a = parts.begin(); a != parts.end(); ++a) {
+        const vparzu &p1 = a->second;
+        const int px = x + p1.precalc_dx[0];
+        const int py = y + p1.precalc_dy[0];
 
         //Don't spawn anything in water
         if (ter_at(px, py).has_flag(TFLAG_DEEP_WATER)) {
@@ -10971,7 +10971,6 @@ vehicle *map::add_vehicle_to_map(vehicle *veh, const int x, const int y, const b
         }
 
         //When hitting a wall, only smash the vehicle once (but walls many times)
-        bool veh_smashed = false;
         //For other vehicles, simulate collisions with (non-shopping cart) stuff
         vehicle *other_veh = veh_at(px, py);
         if (other_veh != NULL && other_veh->type != "shopping cart") {
@@ -10997,31 +10996,8 @@ vehicle *map::add_vehicle_to_map(vehicle *veh, const int x, const int y, const b
             //Where are we on the global scale?
             const int global_x = wreckage->smx * SEEX + wreckage->posx;
             const int global_y = wreckage->smy * SEEY + wreckage->posy;
-
-            for (int part_index = 0; part_index < veh->parts.size(); part_index++) {
-
-                const int local_x = (veh->smx * SEEX + veh->posx)
-                                    + veh->parts[part_index].precalc_dx[0]
-                                    - global_x;
-                const int local_y = (veh->smy * SEEY + veh->posy)
-                                    + veh->parts[part_index].precalc_dy[0]
-                                    - global_y;
-
-                wreckage->install_part(local_x, local_y, veh->parts[part_index].id, -1, true);
-
-            }
-            for (int part_index = 0; part_index < other_veh->parts.size(); part_index++) {
-
-                const int local_x = (other_veh->smx * SEEX + other_veh->posx)
-                                    + other_veh->parts[part_index].precalc_dx[0]
-                                    - global_x;
-                const int local_y = (other_veh->smy * SEEY + other_veh->posy)
-                                    + other_veh->parts[part_index].precalc_dy[0]
-                                    - global_y;
-
-                wreckage->install_part(local_x, local_y, other_veh->parts[part_index].id, -1, true);
-
-            }
+            wreckage->merge(veh);
+            wreckage->merge(other_veh);
 
             wreckage->name = _("Wreckage");
             wreckage->smash();

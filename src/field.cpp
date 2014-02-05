@@ -292,7 +292,7 @@ bool map::process_fields_in_submap(int gridn)
                     curtype = fd_null;
                 }
 
-                int part;
+                vparzu *part;
                 vehicle *veh;
                 switch (curtype) {
 
@@ -952,7 +952,7 @@ void map::step_in_field(int x, int y)
     // A copy of the current field for reference. Do not add fields to it, use map::add_field
     field &curfield = field_at(x, y);
     field_entry *cur = NULL; // The current field effect.
-    int veh_part; // vehicle part existing on this tile.
+    vparzu *veh_part; // vehicle part existing on this tile.
     vehicle *veh = NULL; // Vehicle reference if there is one.
     bool inside = false; // Are we inside?
     // For use in determining if we are in a rubble square or not, for the disease effect
@@ -964,7 +964,7 @@ void map::step_in_field(int x, int y)
     // and what part of the vehicle we need to deal with.
     if (g->u.in_vehicle) {
         veh = g->m.veh_at(x, y, veh_part);
-        inside = (veh && veh->is_inside(veh_part));
+        inside = (veh && veh_part->is_inside());
     }
 
     // Iterate through all field effects on this tile.
@@ -1456,17 +1456,17 @@ void map::field_effect(int x, int y) //Applies effect of field immediately
    npc *me = NULL;
    if (fdnpc != -1)
     me = g->active_npc[fdnpc];
-   int veh_part;
+   vparzu *veh_part;
    bool pc_inside = false;
    bool npc_inside = false;
 
    if (g->u.in_vehicle) {
     vehicle *veh = g->m.veh_at(x, y, veh_part);
-    pc_inside = (veh && veh->is_inside(veh_part));
+    pc_inside = (veh && veh_part->is_inside());
    }
    if (me && me->in_vehicle) {
     vehicle *veh = g->m.veh_at(x, y, veh_part);
-    npc_inside = (veh && veh->is_inside(veh_part));
+    npc_inside = (veh && veh_part->is_inside());
    }
    if (g->u.posx == x && g->u.posy == y && !pc_inside) {            //If there's a PC at (x,y) and he's not in a covered vehicle...
     if (g->u.get_dodge() < rng(1, hit_chance) || one_in(g->u.get_dodge())) {
@@ -1521,8 +1521,8 @@ void map::field_effect(int x, int y) //Applies effect of field immediately
     }                                       //Still need to add vehicle damage, but I'm ignoring that for now.
    }
     vehicle *veh = veh_at(x, y, veh_part);
-    if (veh) {
-     veh->damage(veh_part, ceil(veh->parts[veh_part].hp/3.0 * cur->getFieldDensity()), 1, false);
+    if (veh) { // TODO [vehicles]: veh_part->parts is bad
+     veh->damage(veh_part, ceil(veh_part->parts[0].hp/3.0 * cur->getFieldDensity()), 1, false);
     }
  }
  }

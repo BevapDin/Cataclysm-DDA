@@ -775,7 +775,7 @@ void player::update_bodytemp()
         }
 
         // Search the floor for bedding
-        int vpart = -1;
+        vparzu *vpart = NULL;
         vehicle *veh = g->m.veh_at (posx, posy, vpart);
         if      (furn_at_pos == f_bed)
         {
@@ -800,11 +800,11 @@ void player::update_bodytemp()
         {
             floor_bedding_warmth += 0;
         }
-        else if (veh && veh->part_with_feature (vpart, "SEAT") >= 0)
+        else if (veh && vpart->part_with_feature ("SEAT") != NULL)
         {
             floor_bedding_warmth += 200;
         }
-        else if (veh && veh->part_with_feature (vpart, "BED") >= 0)
+        else if (veh && vpart->part_with_feature ("BED") != NULL)
         {
             floor_bedding_warmth += 300;
         }
@@ -3108,7 +3108,7 @@ void player::disp_status(WINDOW *w, WINDOW *w2)
                      (strain <= 0.4? c_ltred : c_red));
 
   bool has_turrets = false;
-  for (int p = 0; p < veh->parts.size(); p++) {
+  for (int p = 0; p < veh->get_part_count(); p++) {
    if (veh->part_flag (p, "TURRET")) {
     has_turrets = true;
     break;
@@ -3383,7 +3383,7 @@ bool player::in_climate_control()
     if(int(g->turn) >= next_climate_control_check)
     {
         next_climate_control_check=int(g->turn)+20;  // save cpu and similate acclimation.
-        int vpart = -1;
+        vparzu *vpart = NULL;
         vehicle *veh = g->m.veh_at(posx, posy, vpart);
         if(veh)
         {
@@ -8908,7 +8908,7 @@ bool player::try_study_recipe(it_book *book)
 
 void player::try_to_sleep()
 {
- int vpart = -1;
+ vparzu *vpart = NULL;
  vehicle *veh = g->m.veh_at (posx, posy, vpart);
  const trap_id trap_at_pos = g->m.tr_at(posx, posy);
  const ter_id ter_at_pos = g->m.ter(posx, posy);
@@ -8917,8 +8917,8 @@ void player::try_to_sleep()
      trap_at_pos == tr_cot || trap_at_pos == tr_rollmat ||
      trap_at_pos == tr_fur_rollmat || furn_at_pos == f_armchair ||
      furn_at_pos == f_sofa || furn_at_pos == f_hay ||
-     (veh && veh->part_with_feature (vpart, "SEAT") >= 0) ||
-      (veh && veh->part_with_feature (vpart, "BED") >= 0))
+     (veh && vpart->part_with_feature ("SEAT") != NULL) ||
+      (veh && vpart->part_with_feature ("BED") != NULL))
   g->add_msg(_("This is a comfortable place to sleep."));
  else if (ter_at_pos != t_floor)
   g->add_msg(
@@ -8939,16 +8939,16 @@ bool player::can_sleep()
  if (has_trait("EASYSLEEPER"))
   sleepy += 8;
 
- int vpart = -1;
+ vparzu *vpart = NULL;
  vehicle *veh = g->m.veh_at (posx, posy, vpart);
  const trap_id trap_at_pos = g->m.tr_at(posx, posy);
  const ter_id ter_at_pos = g->m.ter(posx, posy);
  const furn_id furn_at_pos = g->m.furn(posx, posy);
- if ((veh && veh->part_with_feature (vpart, "BED") >= 0) ||
+ if ((veh && vpart->part_with_feature ("BED") != NULL) ||
      furn_at_pos == f_makeshift_bed || trap_at_pos == tr_cot ||
      furn_at_pos == f_sofa || furn_at_pos == f_hay)
   sleepy += 4;
- else if ((veh && veh->part_with_feature (vpart, "SEAT") >= 0) ||
+ else if ((veh && vpart->part_with_feature ("SEAT") != NULL) ||
       trap_at_pos == tr_rollmat || trap_at_pos == tr_fur_rollmat || furn_at_pos == f_armchair)
   sleepy += 3;
  else if (furn_at_pos == f_bed)
