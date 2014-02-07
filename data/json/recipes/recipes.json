@@ -933,7 +933,10 @@
   ],  "components": [
     [
       [ "amplifier", 1 ]
-    ]
+    ],
+	[
+	  [ "e_scrap", 1 ]
+	]  
   ]
 },{
         "type" : "recipe",
@@ -5667,9 +5670,8 @@
       [ "fire", -1 ]
     ],
     [
-      [ "pot", -1 ],
-      [ "coffeemaker", -1],
-      [ "rock_pot", -1 ]
+      [ "func:pot", -1 ],
+      [ "coffeemaker", -1]
     ]
   ],
   "components": [
@@ -6636,8 +6638,6 @@
     [
       [ "func:pot", -1 ],
       [ "teapot", -1 ],
-      [ "pot", -1 ],
-      [ "rock_pot", -1 ],
       [ "coffeemaker", -1],
       [ "atomic_coffeepot", -1 ]
     ]
@@ -11763,6 +11763,48 @@
         [ "scrap", 21 ]
       ]
     ]
+  },
+  {
+    "type" : "recipe",
+    "result": "press",
+    "category": "CC_OTHER",
+    "subcategory": "CSC_OTHER_TOOLS",
+    "skill_used": "fabrication",
+    "skills_required": [ "gun", 2 ],
+    "difficulty": 5,
+    "time": 45000,
+    "reversible": false,
+    "autolearn": false,
+    "book_learn": [[ "manual_shotgun", 2 ] ,[ "manual_rifle", 2 ] ,[ "manual_smg", 2 ] ,[ "manual_pistol", 3 ] , ["recipe_bullets" , 2]],
+    "tools": [ [ ["func:hammer", -1]  ],
+     [
+      ["tongs", -1]
+     ],
+     [
+      ["swage", -1]
+     ],
+     [
+      ["anvil", -1]
+     ],
+     [
+      ["press", -1]
+     ],
+     [
+      ["func:forge", 50]
+     ]
+    ],
+    "components": [
+      [
+        [ "scrap", 6 ]
+      ],
+      [
+        [ "element", 2 ],
+        [ "hotplate", 1 ]
+      ],
+      [
+        [ "cable", 2 ]
+      ]
+    ]
   },{
   "type" : "recipe",
   "result": "antenna",
@@ -11979,7 +12021,10 @@
     ],
     [
       [ "battery", 15 ]
-    ]
+    ],
+	[
+	  [ "e_scrap", 1 ]
+	]  
   ]
 },{
         "type" : "recipe",
@@ -18550,9 +18595,6 @@
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "crucible", -1 ]
-    ],
-    [
       [ "func:welder", 100 ],
       [ "func:forge", 100 ]
     ]
@@ -18578,7 +18620,8 @@
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 120 ]
+      [ "func:welder", 100 ],
+      [ "func:forge", 100 ]
     ]
   ],
   "components": [
@@ -18609,7 +18652,8 @@
       [ "goggles_welding", -1 ]
     ],
     [
-      [ "func:welder", 300 ]
+      [ "func:welder", 100 ],
+      [ "func:forge", 100 ]
     ]
   ],
   "components": [
