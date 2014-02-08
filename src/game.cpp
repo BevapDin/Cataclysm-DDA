@@ -65,6 +65,8 @@
 #include <tchar.h>
 #endif
 
+namespace std { float abs(float a) { return a < 0 ? -a : a; } }
+
 #ifdef _MSC_VER
 // MSVC doesn't have c99-compatible "snprintf", so do what picojson does and use _snprintf_s instead
 #define snprintf _snprintf_s
@@ -707,6 +709,53 @@ void game::cleanup_at_end(){
     overmap_buffer.clear();
 }
 
+void game::calc_driving_offset(vehicle *veh) {
+    if(veh == NULL || !(OPTIONS["DRIVING_VIEW_OFFSET"] == true)) {
+        set_driving_view_offset(point(0, 0));
+        return;
+    }
+    // velocity at or below this results in no offset at all
+    static const float min_offset_vel = 10*100;
+    // velocity at or above this results in maximal offset
+    static const float max_offset_vel = 70*100;
+    // The maximal offset will leave at least this many tiles
+    // beetween the PC and the edge of the main window.
+    static const int border_range = 2;
+    float velocity = veh->velocity;
+    rl_vec2d offset = veh->move_vec();
+    if (!veh->skidding && std::abs(veh->cruise_velocity - veh->velocity) < 14*100 && veh->player_in_control(&u)) {
+        // Use the cruise controlled velocity, but only if
+        // it is not too different from the actuall velocity.
+        // The actuall velocity changes too often (see above slowdown).
+        // Using it makes would make the offset change far too often.
+        offset = veh->face_vec();
+        velocity = veh->cruise_velocity;
+    }
+    float rel_offset;
+    if(std::abs(velocity) < min_offset_vel) {
+        rel_offset = 0;
+    } else if(std::abs(velocity) > max_offset_vel) {
+        rel_offset = 1;
+    } else {
+        rel_offset = (velocity - min_offset_vel) / (max_offset_vel - min_offset_vel);
+    }
+    // Squeeze into the corners, by making the offset vector longer,
+    // the PC is still in view as long as both offset.x and
+    // offset.y are <= 1
+    if(std::abs(offset.x) > std::abs(offset.y) && std::abs(offset.x) > 0.2) {
+        offset.y /= std::abs(offset.x);
+        offset.x  = offset.x > 0 ? +1 : -1;
+    } else if(std::abs(offset.y) > 0.2) {
+        offset.x /= std::abs(offset.y);
+        offset.y  = offset.y > 0 ? +1 : -1;
+    }
+    offset.x *= rel_offset;
+    offset.y *= rel_offset;
+    offset.x *= (getmaxx(w_terrain) + 1) / 2 - border_range - 1;
+    offset.y *= (getmaxy(w_terrain) + 1) / 2 - border_range - 1;
+    set_driving_view_offset(point(offset.x, offset.y));
+}
+
 // MAIN GAME LOOP
 // Returns true if game is over (death, saved, quit, etc)
 bool game::do_turn()
@@ -794,34 +843,6 @@ bool game::do_turn()
     #if ENABLE_HORDES
     spawn_horde_members();
     #endif
-
-    if(u.in_vehicle && u.controlling_vehicle) {
-        vehicle *veh = m.veh_at(u.posx, u.posy);
-        if(veh != 0) {
-            rl_vec2d offset;
-            if(veh->skidding)
-                offset = veh->move_vec();
-            else
-                offset = veh->face_vec();
-            offset = offset.normalized();
-            // Have a offset of 0 at velocity = 10km/h,
-            // have a offset of 1 at velocity = 100km/h
-            // 0.0161 = factor for calculation of speed in km/h
-            offset = offset * (((veh->velocity * 0.0161f) - 10.0f) / 90.0f);
-            offset.x = std::min(std::max(offset.x, -1.0f), 1.0f);
-            offset.y = std::min(std::max(offset.y, -1.0f), 1.0f);
-            int offx = getmaxx(w_terrain) / 2 - 5;
-            int offy = getmaxy(w_terrain) / 2 - 5;
-            offx = offx * offset.x;
-            offy = offy * offset.y;
-            if(abs(u.view_offset_x - offx) > 1) {
-                u.view_offset_x = offx;
-            }
-            if(abs(u.view_offset_y - offy) > 1) {
-                u.view_offset_y = offy;
-            }
-        }
-    }
 
     for(int i = 0; i < 100; i++) {
         int x = rng(0, SEEX * MAPSIZE - 1);
@@ -1054,6 +1075,19 @@ bool game::do_turn()
             handle_key_blocking_activity();
         }
     }
+    if ((driving_view_offset.x != 0 || driving_view_offset.y != 0))
+    {
+        // Still have a view offset, but might not be driving anymore,
+        // or the option has been deactivated,
+        // might also happen when someone dives from a moving car.
+        // or when using the handbrake.
+        vehicle *veh = m.veh_at(g->u.posx, g->u.posy);
+        if(veh == 0) {
+            calc_driving_offset(0); // reset to (0,0)
+        } else {
+            calc_driving_offset(veh);
+        }
+    }
     update_scent();
     m.vehmove();
     m.process_fields();
@@ -1100,6 +1134,17 @@ bool game::do_turn()
         }
     }
     return false;
+}
+
+void game::set_driving_view_offset(const point &p) {
+    // remove the previous driving offset,
+    // store the new offset and apply the new offset.
+    u.view_offset_x -= driving_view_offset.x;
+    u.view_offset_y -= driving_view_offset.y;
+    driving_view_offset.x = p.x;
+    driving_view_offset.y = p.y;
+    u.view_offset_x += driving_view_offset.x;
+    u.view_offset_y += driving_view_offset.y;
 }
 
 void game::rustCheck()
@@ -2601,8 +2646,8 @@ bool game::handle_action()
    break;
 
   case ACTION_CENTER:
-   u.view_offset_x = 0;
-   u.view_offset_y = 0;
+   u.view_offset_x = driving_view_offset.x;
+   u.view_offset_y = driving_view_offset.y;
    break;
 
   case ACTION_SHIFT_N:
@@ -6803,7 +6848,7 @@ void game::explode_mon(int index)
   kills[critter.type->id]++; // Increment our kill counter
 // Send body parts and blood all over!
   mtype* corpse = critter.type;
-  if (corpse->mat == "flesh" || corpse->mat == "veggy") { // No chunks otherwise
+  if (corpse->mat == "flesh" || corpse->mat == "veggy" || corpse->mat == "iflesh") { // No chunks otherwise
    int num_chunks = 0;
    switch (corpse->size) {
     case MS_TINY:   num_chunks =  1; break;
@@ -6819,8 +6864,10 @@ void game::explode_mon(int index)
     else
      meat = "veggy_tainted";
    } else {
-    if (corpse->mat == "flesh")
+    if (corpse->mat == "flesh" || corpse->mat == "iflesh")
      meat = "meat";
+    else if (corpse->mat == "bone")
+     meat = "bone";
     else
      meat = "veggy";
    }
@@ -6831,17 +6878,13 @@ void game::explode_mon(int index)
     std::vector<point> traj = line_to(posx, posy, tarx, tary, 0);
 
     bool done = false;
+    field_id type_blood = critter.monBloodType();
     for (int j = 0; j < traj.size() && !done; j++) {
      tarx = traj[j].x;
      tary = traj[j].y;
-// Choose a blood type and place it
-     field_id blood_type = fd_blood;
-     if (corpse->dies == &mdeath::boomer)
-      blood_type = fd_bile;
-     else if (corpse->dies == &mdeath::acid)
-      blood_type = fd_acid;
-
-      m.add_field(tarx, tary, blood_type, 1);
+     if (type_blood != fd_null)
+        m.add_field(tarx, tary, type_blood, 1);
+     m.add_field(tarx+rng(-1, 1), tary+rng(-1, 1), critter.monGibType(), rng(1, j+1));
 
      if (m.move_cost(tarx, tary) == 0) {
       std::string tmp = "";
@@ -7163,6 +7206,20 @@ void game::activity_on_turn_pulp()
             continue; // no corpse or already pulped
         }
         int damage = pulp_power / it->volume();
+        //Determine corpse's blood type.
+        //TODO: See if it's possible to use the monBloodType() function rather than this spaghetti code.
+        field_id type_blood;
+        if (it->corpse->flags.count(MF_ACID_BLOOD) != 0)
+            type_blood = fd_acid; //Currently unused, be wary that a corpse with ACID_BLOOD would be very hazardous to smash!
+        else if (it->corpse->flags.count(MF_LARVA) != 0 || it->corpse->flags.count(MF_ARTHROPOD_BLOOD) != 0)
+            type_blood = fd_blood_invertebrate;
+        else if (it->corpse->mat == "veggy")
+            type_blood = fd_blood_veggy;
+        else if (it->corpse->mat == "iflesh")
+            type_blood = fd_blood_insect;
+        else if (it->corpse->flags.count(MF_WARM) != 0)
+            type_blood = fd_blood;
+        else type_blood = fd_null;
         do {
             moves += move_cost;
             // Increase damage as we keep smashing,
@@ -7173,8 +7230,8 @@ void game::activity_on_turn_pulp()
             // Splatter some blood around
             for (int x = smashx - 1; x <= smashx + 1; x++) {
                 for (int y = smashy - 1; y <= smashy + 1; y++) {
-                    if (!one_in(damage+1)) {
-                        m.add_field(x, y, fd_blood, 1);
+                    if (!one_in(damage+1) && type_blood != fd_null) {
+                        m.add_field(x, y, type_blood, 1);
                     }
                 }
             }
@@ -10899,6 +10956,8 @@ void game::complete_butcher(int index)
      meat = "bone";
    } else if(corpse->mat == "veggy") {
     meat = "veggy";
+   } else if(corpse->mat == "iflesh") {
+    meat = "meat"; //In the future, insects could drop insect flesh rather than plain ol' meat.
    } else {
      //Don't generate anything
      return;
