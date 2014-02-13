@@ -1534,7 +1534,7 @@
   "skill_used": "fabrication",
   "skills_required": [ "traps", 2 ],
   "difficulty": 3,
-  "time": 300000,
+  "time": 30000,
   "reversible": false,
   "autolearn": true,
   "tools": [
@@ -2541,6 +2541,39 @@
       [ "cable", 5 ]
     ]
   ]
+},{
+    "type" : "recipe",
+  "result": "puller",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_TOOLS",
+  "skill_used": "fabrication",
+  "skills_required" : [ "gun", 3 ],
+  "difficulty": 4,
+  "time": 20000,
+  "reversible": false,
+  "autolearn": false,
+  "book_learn": [["recipe_bullets", 6] , ["textbook_fabrication", 7]],
+  "tools" : [
+     [ ["mold_plastic", -1] ],
+     [
+      ["func:hotplate", 10],
+      ["fire", -1]
+     ],
+     [
+      [ "swage", -1 ]
+     ],
+     [
+      [ "func:soldering_iron", 10 ]
+     ]
+  ],
+  "components" : [
+     [
+      ["plastic_chunk", 5]
+     ],
+     [
+      [ "scrap", 1 ]
+     ]
+    ]
 },{
         "type" : "recipe",
   "result": "combatsaw_off",
@@ -8175,6 +8208,7 @@
   "tools": [
     [
       [ "func:hotplate", 8 ],
+      [ "char_smoker", 1 ],
       [ "fire", -1 ]
     ],
     [
@@ -8282,7 +8316,8 @@
       [ "fire", -1 ]
     ],
     [
-      [ "func:pan", -1 ]
+      [ "func:pan", -1 ],
+      [ "waffleiron", -1 ]
     ]
   ],
   "components": [
@@ -11785,9 +11820,6 @@
      ],
      [
       ["anvil", -1]
-     ],
-     [
-      ["press", -1]
      ],
      [
       ["func:forge", 50]
@@ -25157,6 +25189,235 @@
       [ "kevlar", 1 ],
       [ "swat_armor", 1 ],
       [ "kevlar_plate", 24 ]
+     ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "xlsurvivor_suit",
+  "category": "CC_ARMOR",
+  "subcategory": "CSC_ARMOR_SUIT",
+  "skill_used": "tailor",
+  "skills_required" : ["fabrication", 6],
+  "difficulty": 6,
+  "time": 320000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+     [
+      [ "func:welder", 56 ],
+      [ "func:soldering_iron", 56 ]
+     ],
+     [
+      [ "func:sewing_kit", 200 ]
+     ]
+  ],
+  "components": [
+     [
+      [ "rag", 30 ]
+     ],
+     [
+      [ "leather", 40 ]
+     ],
+    [
+      ["scrap", 8]
+    ],
+     [
+      [ "coat_rain", 2 ]
+     ],
+     [
+      [ "chestrig", 1 ],
+      [ "legrig", 1 ],
+      [ "vest", 1 ],
+      [ "tool_belt", 1 ],
+      [ "ragpouch", 6 ],
+      [ "leather_pouch", 4 ],
+      [ "dump_pouch", 1 ],
+      [ "purse", 2 ],
+      [ "fanny", 2 ]
+     ],
+     [
+      [ "duct_tape", 400 ]
+     ],
+     [
+      [ "kevlar", 2 ],
+      [ "swat_armor", 2 ],
+      [ "kevlar_plate", 42 ]
+     ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "boots_xlsurvivor",
+  "category": "CC_ARMOR",
+  "subcategory": "CSC_ARMOR_FEET",
+  "skill_used": "tailor",
+  "skills_required" : ["fabrication", 4],
+  "difficulty": 6,
+  "time": 180000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+    [
+      [ "func:welder", 42 ],
+      [ "func:soldering_iron", 42 ]
+    ],
+    [
+      [ "func:sewing_kit", 160 ]
+    ]
+  ],
+  "components": [
+     [
+      [ "leather", 24 ]
+     ],
+     [
+      [ "rag", 6 ]
+     ],
+     [
+      [ "scrap", 4 ]
+     ],
+     [
+      [ "boots_combat", 2 ],
+      [ "kevlar_plate", 10 ]
+     ],
+     [
+      [ "duct_tape", 200 ]
+     ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "gloves_xlsurvivor",
+  "category": "CC_ARMOR",
+  "subcategory": "CSC_ARMOR_HANDS",
+  "skill_used": "tailor",
+  "skills_required" : ["fabrication", 4],
+  "difficulty": 6,
+  "time": 80000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+    [
+      [ "func:welder", 28 ],
+      [ "func:soldering_iron", 28 ]
+    ],
+    [
+      [ "func:sewing_kit", 100 ]
+    ]
+  ],
+  "components": [
+     [
+      [ "leather", 16 ]
+     ],
+     [
+      [ "rag", 6 ]
+     ],
+     [
+      [ "scrap", 2 ]
+     ],
+     [
+      [ "duct_tape", 160 ]
+     ],
+     [
+      [ "gloves_tactical", 2 ],
+      [ "kevlar_plate", 6 ]
+     ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "hood_xlsurvivor",
+  "category": "CC_ARMOR",
+  "subcategory": "CSC_ARMOR_HEAD",
+  "skill_used": "tailor",
+  "skills_required" : ["fabrication", 4],
+  "difficulty": 6,
+  "time": 60000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+    [
+      [ "func:welder", 42 ],
+      [ "func:soldering_iron", 42 ]
+    ],
+    [
+      [ "func:sewing_kit", 80 ]
+    ]
+  ],
+  "components": [
+     [
+      [ "leather", 14 ]
+     ],
+     [
+      [ "rag", 4 ]
+     ],
+     [
+      [ "scrap", 2 ]
+     ],
+     [
+      [ "kevlar_plate", 6 ]
+     ],
+     [
+      [ "hood_rain", 2 ],
+      [ "bag_plastic", 4 ]
+     ],
+     [
+      [ "duct_tape", 200 ]
+     ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "helmet_xlsurvivor",
+  "category": "CC_ARMOR",
+  "subcategory": "CSC_ARMOR_HEAD",
+  "skill_used": "tailor",
+  "skills_required" : ["fabrication", 4],
+  "difficulty": 6,
+  "time": 60000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities" : [
+    {"id":"CUT","level":1,"amount":1}
+  ],
+  "tools": [
+    [
+      [ "func:welder", 84 ],
+      [ "func:soldering_iron", 84 ]
+    ],
+    [
+      [ "func:sewing_kit", 20 ]
+    ]
+  ],
+  "components": [
+     [
+      [ "scrap", 4 ]
+     ],
+     [
+      [ "rag", 6 ]
+     ],
+     [
+      [ "leather", 16 ]
+     ],
+     [
+      [ "plastic_chunk", 20 ]
+     ],
+     [
+      [ "kevlar_plate", 14 ]
+     ],
+     [
+      [ "hood_rain", 2 ],
+      [ "bag_plastic", 4 ]
+     ],
+     [
+      [ "duct_tape", 300 ]
      ]
   ]
 },{

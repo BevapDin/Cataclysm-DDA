@@ -188,12 +188,12 @@ bool computer::hack_attempt(player *p, int Security)
     if (Security == -1) {
         Security = security;    // Set to main system security if no value passed
     }
-    
+
     // Every time you dig for lab notes, (or, in future, do other suspicious stuff?)
     // +2 dice to the system's hack-resistance
     // So practical max files from a given terminal = 5, at 10 Computer
     if (alerts > 0) {
-        Security += (alerts * 2); 
+        Security += (alerts * 2);
     }
 
     p->practice(g->turn, "computer", 5 + Security * 2);
@@ -283,7 +283,7 @@ void computer::activate_function(computer_action action)
         break; // Why would this be called?
 
     case COMPACT_OPEN:
-        g->m.translate(t_door_metal_locked, t_floor);
+        g->m.translate_radius(t_door_metal_locked, t_floor, 25.0, g->u.posx, g->u.posy);
         query_any(_("Doors opened.  Press any key..."));
         break;
 
@@ -355,8 +355,8 @@ void computer::activate_function(computer_action action)
         g->u.add_memorial_log(pgettext("memorial_male", "Released subspace specimens."),
                               pgettext("memorial_female", "Released subspace specimens."));
         g->sound(g->u.posx, g->u.posy, 40, _("An alarm sounds!"));
-        g->m.translate(t_reinforced_glass_h, t_floor);
-        g->m.translate(t_reinforced_glass_v, t_floor);
+        g->m.translate_radius(t_reinforced_glass_h, t_floor, 25.0, g->u.posx, g->u.posy);
+        g->m.translate_radius(t_reinforced_glass_v, t_floor, 25.0, g->u.posx, g->u.posy);
         query_any(_("Containment shields opened.  Press any key..."));
         break;
 
@@ -1077,6 +1077,7 @@ void computer::activate_failure(computer_failure fail)
             for (int y = 0; y < SEEY * MAPSIZE; y++) {
                 if (g->m.has_flag("CONSOLE", x, y)) {
                     g->m.ter_set(x, y, t_console_broken);
+                    g->add_msg(_("The console shuts down."));
                 }
             }
         }

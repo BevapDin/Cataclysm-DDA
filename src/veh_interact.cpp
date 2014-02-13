@@ -538,11 +538,6 @@ void veh_interact::do_install(task_reason reason)
         char ch = input(); // See keypress.h
         int dx, dy;
         get_direction (dx, dy, ch);
-        if(ch == '>') {
-            dy = 12;
-        } else if(ch == '<') {
-            dy = -12;
-        }
         if ((ch == '\n' || ch == ' ') && has_comps && has_tools && has_skill && has_skill2 &&
              !(veh->pedals() && eng) && !(veh->pedals() && install_pedals)) {
             sel_cmd = 'i';
@@ -556,7 +551,21 @@ void veh_interact::do_install(task_reason reason)
                 break;
             }
         }
-        if (dy != 0 && dy != -2) {
+        //get_direction returns -2 on failure
+        if(dx == -2 || dy == -2) {
+            dx = dy = 0;
+        }
+        //input changes pgup and pgdn to these.
+        if(ch == '<') {
+            dx = -1;
+        } else if(ch == '>') {
+            dx = 1;
+        }
+        //if we move left/right scroll by page size
+        if(dx != 0) {
+            dy = dx * page_size;
+        }
+        if (dy != 0) {
             pos += dy;
             if (pos < 0) {
                 pos = can_mount.size() - 1;

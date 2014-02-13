@@ -576,7 +576,7 @@ void overmap::unserialize(std::ifstream & fin, std::string const & plrfilename,
     }
 }
 
-
+// Note: this may throw io errors from std::ofstream
 void overmap::save()
 {
     if (layer == NULL) {
@@ -585,6 +585,7 @@ void overmap::save()
     }
 
     std::ofstream fout;
+    fout.exceptions(std::ios::badbit | std::ios::failbit);
     std::string const plrfilename = player_filename(loc.x, loc.y);
     std::string const terfilename = terrain_filename(loc.x, loc.y);
 

@@ -101,7 +101,8 @@ game::game() :
  run_mode(1),
  mostseen(0),
  gamemode(NULL),
- lookHeight(13)
+ lookHeight(13),
+ tileset_zoom(16)
 {
     world_generator = new worldfactory();
     // do nothing, everything that was in here is moved to init_data() which is called immediately after g = new game; in main.cpp
@@ -648,7 +649,7 @@ void game::create_starting_npcs()
 
 void game::cleanup_at_end(){
     write_msg();
-    if (uquit == QUIT_DIED || uquit == QUIT_SUICIDE || uquit == QUIT_SAVED) {
+    if (uquit == QUIT_DIED || uquit == QUIT_SUICIDE) {
         // Save the factions's, missions and set the NPC's overmap coords
         // Npcs are saved in the overmap.
         save_factions_missions_npcs(); //missions need to be saved as they are global for all saves.
@@ -710,21 +711,42 @@ void game::cleanup_at_end(){
     overmap_buffer.clear();
 }
 
+static int veh_lumi(vehicle *veh) {
+    float veh_luminance = 0.0;
+    float iteration = 1.0;
+    std::vector<int> light_indices = veh->all_parts_with_feature(VPFLAG_CONE_LIGHT);
+    for (std::vector<int>::iterator part = light_indices.begin();
+         part != light_indices.end(); ++part) {
+        veh_luminance += ( veh->part_info(*part).bonus / iteration );
+        iteration = iteration * 1.1;
+    }
+    // Calculation: see lightmap.cpp
+    return LIGHT_RANGE((veh_luminance*3));
+}
+
 void game::calc_driving_offset(vehicle *veh) {
     if(veh == NULL || !(OPTIONS["DRIVING_VIEW_OFFSET"] == true)) {
         set_driving_view_offset(point(0, 0));
         return;
     }
+    const int g_light_level = (int) light_level();
+    const int light_sight_range = u.sight_range(g_light_level);
+    int sight = light_sight_range;
+    if(veh->lights_on) {
+        sight = std::max(veh_lumi(veh), sight);
+    }
+
     // velocity at or below this results in no offset at all
-    static const float min_offset_vel = 10*100;
+    static const float min_offset_vel = 10 * 100;
     // velocity at or above this results in maximal offset
-    static const float max_offset_vel = 70*100;
+    static const float max_offset_vel = 70 * 100;
     // The maximal offset will leave at least this many tiles
     // beetween the PC and the edge of the main window.
     static const int border_range = 2;
     float velocity = veh->velocity;
     rl_vec2d offset = veh->move_vec();
-    if (!veh->skidding && std::abs(veh->cruise_velocity - veh->velocity) < 14*100 && veh->player_in_control(&u)) {
+    if (!veh->skidding && std::abs(veh->cruise_velocity - veh->velocity) < 14 * 100 &&
+        veh->player_in_control(&u)) {
         // Use the cruise controlled velocity, but only if
         // it is not too different from the actuall velocity.
         // The actuall velocity changes too often (see above slowdown).
@@ -745,15 +767,61 @@ void game::calc_driving_offset(vehicle *veh) {
     // offset.y are <= 1
     if(std::abs(offset.x) > std::abs(offset.y) && std::abs(offset.x) > 0.2) {
         offset.y /= std::abs(offset.x);
-        offset.x  = offset.x > 0 ? +1 : -1;
+        offset.x  = (offset.x > 0) ? +1 : -1;
     } else if(std::abs(offset.y) > 0.2) {
         offset.x /= std::abs(offset.y);
         offset.y  = offset.y > 0 ? +1 : -1;
     }
+    point max_offset((getmaxx(w_terrain) + 1) / 2 - border_range - 1,
+                     (getmaxy(w_terrain) + 1) / 2 - border_range - 1);
     offset.x *= rel_offset;
     offset.y *= rel_offset;
-    offset.x *= (getmaxx(w_terrain) + 1) / 2 - border_range - 1;
-    offset.y *= (getmaxy(w_terrain) + 1) / 2 - border_range - 1;
+    offset.x *= max_offset.x;
+    offset.y *= max_offset.y;
+    // [ ----@---- ] sight=6
+    // [ --@------ ] offset=2
+    // [ -@------# ] offset=3
+    // can see sights square in every direction, total visible area is
+    // (2*sight+1)x(2*sight+1), but the window is only
+    // getmaxx(w_terrain) x getmaxy(w_terrain)
+    // The area outside of the window is maxoff (sight-getmax/2).
+    // If that value is <= 0, the whole visible area fits the window.
+    // don't apply the view offset at all.
+    // If the offset is > maxoff, only apply at most maxoff, everything
+    // above leads to invisible area in front of the car.
+    // It will display (getmax/2+offset) squares in one direction and
+    // (getmax/2-offset) in the opposite direction (centered on the PC).
+    const point maxoff((sight * 2 + 1 - getmaxx(w_terrain)) / 2,
+                       (sight * 2 + 1 - getmaxy(w_terrain)) / 2);
+    if(maxoff.x <= 0) {
+        offset.x = 0;
+    } else if(offset.x > 0 && offset.x > maxoff.x) {
+        offset.x = maxoff.x;
+    } else if(offset.x < 0 && -offset.x > maxoff.x) {
+        offset.x = -maxoff.x;
+    }
+    if(maxoff.y <= 0) {
+        offset.y = 0;
+    } else if(offset.y > 0 && offset.y > maxoff.y) {
+        offset.y = maxoff.y;
+    } else if(offset.y < 0 && -offset.y > maxoff.y) {
+        offset.y = -maxoff.y;
+    }
+
+    // Turn the offset into a vector that increments the offset toward the desired position
+    // instead of setting it there instantly, should smooth out jerkiness.
+    const point offset_difference( offset.x - driving_view_offset.x,
+                                   offset.y - driving_view_offset.y );
+
+    const point offset_sign( (offset_difference.x < 0) ? -1 : 1,
+                             (offset_difference.y < 0) ? -1 : 1 );
+    // Shift the current offset in the direction of the calculated offset by one tile
+    // per draw event, but snap to calculated offset if we're close enough to avoid jitter.
+    offset.x = ( std::abs(offset_difference.x) > 1 ) ?
+        (driving_view_offset.x + offset_sign.x) : offset.x;
+    offset.y = ( std::abs(offset_difference.y) > 1 ) ?
+        (driving_view_offset.y + offset_sign.y) : offset.y;
+
     set_driving_view_offset(point(offset.x, offset.y));
 }
 
@@ -2258,6 +2326,10 @@ void game::hide_mouseview()
     }
 }
 
+#ifdef SDLTILES
+    void rescale_tileset(int size);
+#endif
+
 input_context game::get_player_input(std::string &action)
 {
     input_context ctxt("DEFAULTMODE");
@@ -3012,10 +3084,11 @@ bool game::handle_action()
 
   case ACTION_SAVE:
    if (query_yn(_("Save and quit?"))) {
-    save();
-    u.moves = 0;
-    uquit = QUIT_SAVED;
-    MAPBUFFER.make_volatile();
+    if(save()) {
+     u.moves = 0;
+     uquit = QUIT_SAVED;
+     MAPBUFFER.make_volatile();
+    }
    }
    break;
 
@@ -3092,6 +3165,14 @@ bool game::handle_action()
    } else {
     add_msg(_("Debug messages OFF!"));
    }
+   break;
+
+  case ACTION_ZOOM_IN:
+   zoom_in();
+   break;
+  
+  case ACTION_ZOOM_OUT:
+   zoom_out();
    break;
  }
 
@@ -3486,21 +3567,29 @@ void game::load_world_modfiles(WORLDPTR world)
 }
 
 //Saves all factions and missions and npcs.
-void game::save_factions_missions_npcs ()
+bool game::save_factions_missions_npcs ()
 {
-    std::stringstream masterfile;
+    std::string masterfile = world_generator->active_world->world_path + "/master.gsav";
+    try {
     std::ofstream fout;
-    masterfile << world_generator->active_world->world_path <<"/master.gsav";
+    fout.exceptions(std::ios::badbit | std::ios::failbit);
 
-    fout.open(masterfile.str().c_str());
+    fout.open(masterfile.c_str());
     serialize_master(fout);
     fout.close();
+        return true;
+    } catch(std::ios::failure &) {
+        popup(_("Failed to save factions to %s"), masterfile.c_str());
+        return false;
+    }
 }
 
-void game::save_artifacts()
+bool game::save_artifacts()
 {
-    std::ofstream fout;
     std::string artfilename = world_generator->active_world->world_path + "/artifacts.gsav";
+    try {
+    std::ofstream fout;
+    fout.exceptions(std::ios::badbit | std::ios::failbit);
     fout.open(artfilename.c_str(), std::ofstream::trunc);
     JsonOut json(fout);
     json.start_array();
@@ -3517,44 +3606,79 @@ void game::save_artifacts()
     }
     json.end_array();
     fout.close();
+        return true;
+    } catch(std::ios::failure &) {
+        popup(_("Failed to save artifacts to %s"), artfilename.c_str());
+        return false;
+    }
 }
 
-void game::save_maps()
+bool game::save_maps()
 {
+    try {
     m.save(cur_om, turn, levx, levy, levz);
-    overmap_buffer.save();
-    MAPBUFFER.save();
+    overmap_buffer.save(); // can throw std::ios::failure
+    MAPBUFFER.save(); // can throw std::ios::failure
+        return true;
+    } catch(std::ios::failure &) {
+        popup(_("Failed to maps"));
+        return false;
+    }
 }
 
-void game::save_uistate() {
-    std::stringstream savefile;
-    savefile << world_generator->active_world->world_path << "/uistate.json";
+bool game::save_uistate() {
+    std::string savefile = world_generator->active_world->world_path + "/uistate.json";
+    try {
     std::ofstream fout;
-    fout.open(savefile.str().c_str());
+    fout.exceptions(std::ios::badbit | std::ios::failbit);
+    fout.open(savefile.c_str());
     fout << uistate.serialize();
     fout.close();
+        return true;
+    } catch(std::ios::failure &) {
+        popup(_("Failed to save uistate to %s"), savefile.c_str());
+        return false;
+    }
 }
 
-void game::save()
+bool game::save()
 {
- std::stringstream playerfile;
+ std::string playerfile = world_generator->active_world->world_path + "/" + base64_encode(u.name);
+    try {
  std::ofstream fout;
- playerfile << world_generator->active_world->world_path << "/" << base64_encode(u.name);
+ fout.exceptions(std::ios::failbit | std::ios::badbit);
 
- fout.open( std::string(playerfile.str() + ".sav").c_str() );
+ fout.open( std::string(playerfile + ".sav").c_str() );
  serialize(fout);
  fout.close();
  // weather
- fout.open( std::string(playerfile.str() + ".weather").c_str() );
+ fout.open( std::string(playerfile + ".weather").c_str() );
  save_weather(fout);
  fout.close();
  // log
- fout.open( std::string(playerfile.str() + ".log").c_str() );
+ fout.open( std::string(playerfile + ".log").c_str() );
  fout << u.dump_memorial();
  fout.close();
- //factions, missions, and npcs, maps and artifact data is saved in cleanup_at_end()
- save_auto_pickup(true); // Save character auto pickup rules
- save_uistate();
+        if (!save_factions_missions_npcs()) {
+            return false;
+        }
+        if (!save_artifacts()) {
+            return false;
+        }
+        if (!save_maps()) {
+            return false;
+        }
+        if (!save_auto_pickup(true)) { // Save character auto pickup rules
+            return false;
+        }
+        if (!save_uistate()) {
+            return false;
+        }
+        return true;
+    } catch(std::ios::failure &err) {
+        popup(_("Failed to save game data"));
+        return false;
+    }
 }
 
 void game::delete_world(std::string worldname, bool delete_folder)
@@ -4666,7 +4790,7 @@ void game::draw()
 
     WINDOW *time_window = sideStyle ? w_status2 : w_status;
     wmove(time_window, sideStyle ? 0 : 1, sideStyle ? 15 : 41);
-    if ( u.has_item_with_flag("WATCH") ) {
+    if ( (u.has_item_with_flag("WATCH") || u.has_bionic("bio_watch")) ) {
         wprintz(time_window, c_white, turn.print_time().c_str());
     } else {
         std::vector<std::pair<char, nc_color> > vGlyphs;
@@ -5270,6 +5394,9 @@ bool game::u_see(monster *critter)
     return u.sees(critter);
 }
 
+// temporary item and location of it for processing items
+// in vehicle cargo parts. See map::process_active_items_in_vehicle
+std::pair<item, point> tmp_active_item_pos(item(), point(-999, -999));
 /**
  * Attempts to find which map co-ordinates the specified item is located at,
  * looking at the player, the ground, NPCs, and vehicles in that order.
@@ -5278,6 +5405,9 @@ bool game::u_see(monster *critter)
  */
 point game::find_item(item *it)
 {
+    if (&tmp_active_item_pos.first == it) {
+        return tmp_active_item_pos.second;
+    }
     //Does the player have it?
     if (u.has_item(it)) {
         return point(u.posx, u.posy);
@@ -7991,7 +8121,6 @@ void game::print_object_info(int lx, int ly, WINDOW* w_look, const int column, i
             zombie(dex).draw(w_terrain, lx, ly, true);
         }
         line = zombie(dex).print_info(w_look, line, 6, column);
-        handle_multi_item_info(lx, ly, w_look, column, line, mouse_hover);
     }
     else if (npc_at(lx, ly) != -1)
     {
@@ -7999,7 +8128,6 @@ void game::print_object_info(int lx, int ly, WINDOW* w_look, const int column, i
             active_npc[npc_at(lx, ly)]->draw(w_terrain, lx, ly, true);
         }
         line = active_npc[npc_at(lx, ly)]->print_info(w_look, column, line);
-        handle_multi_item_info(lx, ly, w_look, column, line, mouse_hover);
     }
     else if (veh)
     {
@@ -8007,23 +8135,6 @@ void game::print_object_info(int lx, int ly, WINDOW* w_look, const int column, i
         line = veh->print_part_desc(w_look, line, (mouse_hover) ? getmaxx(w_look) : 48, veh_part);
         if (!mouse_hover) {
             m.drawsq(w_terrain, u, lx, ly, true, true, lx, ly);
-        }
-    }
-    else if (!m.has_flag("CONTAINER", lx, ly) && m.i_at(lx, ly).size() > 0)
-    {
-        if (!mouse_hover) {
-            mvwprintw(w_look, line++, column, _("There is a %s there."),
-                m.i_at(lx, ly)[0].tname().c_str());
-            if (m.i_at(lx, ly).size() > 1)
-            {
-                mvwprintw(w_look, line++, column, _("There are other items there as well."));
-            }
-            m.drawsq(w_terrain, u, lx, ly, true, true, lx, ly);
-        }
-    } else if (m.has_flag("CONTAINER", lx, ly)) {
-        mvwprintw(w_look, line++, column, _("You cannot see what is inside of it."));
-        if (!mouse_hover) {
-            m.drawsq(w_terrain, u, lx, ly, true, false, lx, ly);
         }
     }
     // The player is not at <u.posx + u.view_offset_x, u.posy + u.view_offset_y>
@@ -8046,30 +8157,31 @@ void game::print_object_info(int lx, int ly, WINDOW* w_look, const int column, i
                 m.drawsq(w_terrain, u, lx, ly, true, true, lx, ly);
             }
         }
-
     }
     else if (!mouse_hover)
     {
         m.drawsq(w_terrain, u, lx, ly, true, true, lx, ly);
     }
+    handle_multi_item_info(lx, ly, w_look, column, line, mouse_hover);
 }
 
 void game::handle_multi_item_info(int lx, int ly, WINDOW* w_look, const int column, int &line, bool mouse_hover)
 {
-    if (!m.has_flag("CONTAINER", lx, ly))
-    {
-        if (!mouse_hover) {
-            if (m.i_at(lx, ly).size() > 1) {
-                mvwprintw(w_look, line++, column, _("There are several items there."));
-            } else if (m.i_at(lx, ly).size() == 1) {
-                mvwprintw(w_look, line++, column, _("There is an item there."));
-            }
+    if (m.sees_some_items(lx, ly, g->u)) {
+        if (mouse_hover) {
+            // items are displayed from the live view, don't do this here
+            return;
         }
-    } else {
+        std::vector<item> &items = m.i_at(lx, ly);
+        mvwprintw(w_look, line++, column, _("There is a %s there."), items[0].tname().c_str());
+        if (items.size() > 1)
+        {
+            mvwprintw(w_look, line++, column, _("There are other items there as well."));
+        }
+    } else if(m.has_flag("CONTAINER", lx, ly)) {
         mvwprintw(w_look, line++, column, _("You cannot see what is inside of it."));
     }
 }
-
 
 void game::get_lookaround_dimensions(int &lookWidth, int &begin_y, int &begin_x) const
 {
@@ -8240,6 +8352,10 @@ std::vector<map_item_stack> game::find_nearby_items(int iRadius)
     std::vector<map_item_stack> ret;
     std::vector<std::string> vOrder;
 
+    if(g->u.has_effect("blind")) {
+        return ret;
+    }
+
     std::vector<point> points = closest_points_first(iRadius, u.posx, u.posy);
 
     int iLastX = 0;
@@ -8247,9 +8363,7 @@ std::vector<map_item_stack> game::find_nearby_items(int iRadius)
 
     for (std::vector<point>::iterator p_it = points.begin(); p_it != points.end(); ++p_it) {
         if (p_it->y >= u.posy - iRadius && p_it->y <= u.posy + iRadius &&
-            u_see(p_it->x,p_it->y) &&
-            (!m.has_flag("CONTAINER", p_it->x, p_it->y) ||
-            (rl_dist(u.posx, u.posy, p_it->x, p_it->y) == 1 && !m.has_flag("SEALED", p_it->x, p_it->y)))) {
+            u_see(p_it->x,p_it->y) && m.sees_some_items(p_it->x, p_it->y, u)) {
 
             here.clear();
             here = m.i_at(p_it->x, p_it->y);
@@ -8521,6 +8635,29 @@ void centerlistview(int iActiveX, int iActiveY)
 
 }
 
+#define MAXIMUM_ZOOM_LEVEL 4
+void game::zoom_in() {
+   #ifdef SDLTILES
+   if(tileset_zoom > MAXIMUM_ZOOM_LEVEL) {
+       tileset_zoom = tileset_zoom / 2;
+   } else {
+       tileset_zoom = 16;
+   }
+   rescale_tileset(tileset_zoom);
+   #endif
+}
+
+void game::zoom_out() {
+   #ifdef SDLTILES
+   if(tileset_zoom == 16) {
+       tileset_zoom = MAXIMUM_ZOOM_LEVEL;
+   } else {
+       tileset_zoom = tileset_zoom * 2;
+   }
+   rescale_tileset(tileset_zoom);
+   #endif
+}
+
 int game::list_items(const int iLastState)
 {
     int iInfoHeight = 12;
@@ -8667,8 +8804,25 @@ int game::list_items(const int iLastState)
                     delwin(w_item_info_border);
                     return 1;
                     break;
-                default:
-                    break;
+                default: {
+                    action_id act = action_from_key(ch);
+                    switch (act) {
+                        /* The following two don't work for some reason.
+                         * Even though the zoom level will be adjusted,
+                         * the map won't be redrawn until V mode is exited.
+                         
+                        case ACTION_ZOOM_IN:
+                            zoom_in();
+                            break;
+                        case ACTION_ZOOM_OUT:
+                            zoom_out();
+                            break;
+                        default:
+                            break;
+                        */
+                    }
+                }
+                break;
             }
 
             if (ground_items.size() == 0 && iLastState == 1) {
@@ -8926,9 +9080,20 @@ int game::list_monsters(const int iLastState)
                                 delwin(w_monster_info_border);
                                 return 2;
                             }
-                            } break;
+                        } break;
+                        /* The following two don't work for some reason.
+                         * Even though the zoom level will be adjusted,
+                         * the map won't be redrawn until V mode is exited.
+                         
+                        case ACTION_ZOOM_IN:
+                            zoom_in();
+                            break;
+                        case ACTION_ZOOM_OUT:
+                            zoom_out();
+                            break;
                         default:
                             break;
+                        */
                     }
                 }
                 break;
@@ -9070,9 +9235,9 @@ void game::pickup(int posx, int posy, int min)
 
     item_exchanges_since_save += 1; // Keeping this simple.
     write_msg();
-    if (u.weapon.type->id == "bio_claws_weapon") {
+    if ((u.weapon.type->id == "bio_claws_weapon") || (u.weapon.type->id == "bio_blade_weapon")) {
         if (min != -1) {
-            add_msg(_("You cannot pick up items with your claws out!"));
+            add_msg(_("You cannot pick up items with your %s!"), u.weapon.tname().c_str());
         }
         return;
     }
@@ -12022,9 +12187,11 @@ bool game::plmove(int dx, int dy)
    if (u.has_trait("LIGHTSTEP"))
     sound(x, y, 2, ""); // Sound of footsteps may awaken nearby monsters
    else if (u.has_trait("CLUMSY"))
-    sound(x, y, 10, ""); // Sound of footsteps may awaken nearby monsters
+    sound(x, y, 10, "");
+   else if (u.has_bionic("bio_ankles"))
+    sound(x, y, 12, "");
    else
-    sound(x, y, 6, ""); // Sound of footsteps may awaken nearby monsters
+    sound(x, y, 6, "");
   }
   if (one_in(20) && u.has_artifact_with(AEP_MOVEMENT_NOISE))
    sound(x, y, 40, _("You emit a rattling sound."));
@@ -12805,7 +12972,6 @@ void game::update_map(int &x, int &y) {
   olevy = 1;
  }
  if (olevx != 0 || olevy != 0) {
-  cur_om->save();
   cur_om = &overmap_buffer.get(cur_om->pos().x + olevx, cur_om->pos().y + olevy);
  }
 
@@ -13243,7 +13409,7 @@ int game::valid_group(std::string type, int x, int y, int z_coord)
 
 void game::wait()
 {
-    const bool bHasWatch = u.has_item_with_flag("WATCH");
+    const bool bHasWatch = (u.has_item_with_flag("WATCH") || u.has_bionic("bio_watch"));
 
     uimenu as_m;
     as_m.text = _("Wait for how long?");
@@ -13763,10 +13929,6 @@ void game::quicksave(){
 
     //perform save
     save();
-    save_factions_missions_npcs();
-    save_artifacts();
-    save_maps();
-    save_uistate();
     //Now reset counters for autosaving, so we don't immediately autosave after a quicksave or autosave.
     moves_since_last_save = 0;
     item_exchanges_since_save = 0;

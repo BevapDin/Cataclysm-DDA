@@ -71,7 +71,7 @@ static bool item_inscription( player *p, item *cut, std::string verb, std::strin
     bool hasnote = (ent != cut->item_vars.end());
     std::string message = "";
     std::string messageprefix = string_format( hasnote ? _("(To delete, input one '.')\n") : "" ) +
-                                string_format(_("%1$s on this %2$s is a note saying: "),
+                                string_format(_("%1$s on the %2$s is: "),
                                               gerund.c_str(), cut->type->name.c_str() );
     message = string_input_popup(string_format(_("%s what?"), verb.c_str()), 64,
                                  (hasnote ? cut->item_vars["item_note"] : message ),
@@ -4416,7 +4416,7 @@ if(it->type->id == "cot"){
   type = tr_caltrops;
   practice = 2;
  } else if(it->type->id == "telepad"){
-  message << _("You place the telepad."); 
+  message << _("You place the telepad.");
   type = tr_telepad;
   practice = 10;
   } else if(it->type->id == "funnel"){
@@ -6184,13 +6184,23 @@ int iuse::knife(player *p, item *it, bool t)
     }
 
     if (action == "carve") {
-        g->add_msg(ngettext("You carve the %1$s into %2$i %3$s.",
+        if(count > 0) {
+            g->add_msg(ngettext("You carve the %1$s into %2$i %3$s.",
                             "You carve the %1$s into %2$i %3$ss.", count),
                    cut->tname().c_str(), count, result->tname().c_str());
+        } else {
+            g->add_msg("You clumsily carve the %s into useless pieces.",
+                       cut->tname().c_str());
+        }
     } else {
-        g->add_msg(ngettext("You cut the %1$s into %2$i %3$s.",
+        if(count > 0){
+            g->add_msg(ngettext("You cut the %1$s into %2$i %3$s.",
                             "You cut the %1$s into %2$i %3$ss.", count),
                    cut->tname().c_str(), count, result->tname().c_str());
+        } else {
+            g->add_msg("You clumsily cut the %s into useless pieces.",
+                       cut->tname().c_str());
+        }
     }
 
     // otherwise layout the goodies.
@@ -7251,7 +7261,8 @@ int iuse::artifact(player *p, item *it, bool)
 
 int iuse::spray_can(player *p, item *it, bool)
 {
-    if ( it->type->id ==  _("permanent_marker")  )
+    bool ismarker = (it->type->id==_("permanent_marker") );
+    if ( ismarker )
     {
         int ret=menu(true, _("Write on what?"), _("The ground"), _("An item"), _("Cancel"), NULL );
 
@@ -7271,16 +7282,12 @@ int iuse::spray_can(player *p, item *it, bool)
         }
     }
 
-    bool ismarker = (it->type->id=="permanent_marker");
-
     std::string message = string_input_popup(ismarker?_("Write what?"):_("Spray what?"),
                                              0, "", "", "graffiti");
 
     if(message.empty()) {
         return 0;
-    }
-    else
-    {
+    } else {
         if(g->m.add_graffiti(p->posx, p->posy, message))
         {
             g->add_msg(
@@ -7288,9 +7295,8 @@ int iuse::spray_can(player *p, item *it, bool)
                 _("You write a message on the ground.") :
                 _("You spray a message on the ground.")
             );
-        }
-        else
-        {
+            p->moves -= 2 * message.length();
+        } else {
             g->add_msg(
                 ismarker?
                 _("You fail to write a message here.") :
@@ -7778,7 +7784,7 @@ int iuse::wood_gas(player *p, item *, bool )
 int iuse::bell(player *p, item *it, bool)
 {
     if( it->type->id == "cow_bell" ) {
-        g->sound(p->posx, p->posy, 6, _("Clank! Clank!"));
+        g->sound(p->posx, p->posy, 12, _("Clank! Clank!"));
         if ( ! p->has_disease("deaf") ) {
             const int cow_factor = 1 + ( p->mutation_category_level.find("MUTCAT_CATTLE") == p->mutation_category_level.end() ?
                 0 :

@@ -1,5 +1,4 @@
 #include "game.h"
-#include "setvector.h"
 #include "output.h"
 #include "keypress.h"
 #include "player.h"
@@ -18,7 +17,16 @@
 #include "crafting_inventory_t.h"
 
 std::vector<construction*> constructions;
-std::map<std::string,std::vector<construction*> > constructions_by_desc;
+
+std::vector<construction*> constructions_by_desc(const std::string &description) {
+    std::vector<construction*> result;
+    for(std::vector<construction*>::iterator a = constructions.begin(); a != constructions.end(); ++a) {
+        if((*a)->description == description) {
+            result.push_back(*a);
+        }
+    }
+    return result;
+}
 
 bool will_flood_stop(map *m, bool (&fill)[SEEX * MAPSIZE][SEEY * MAPSIZE],
                      int x, int y);
@@ -120,7 +128,7 @@ void construction_menu()
 
    // Print stages and their requirement
    int posx = 33, posy = 1;
-   std::vector<construction*> options = constructions_by_desc[current_desc];
+   std::vector<construction*> options = constructions_by_desc(current_desc);
    for (unsigned i = 0; i < options.size(); ++i) {
     construction *current_con = options[i];
     if (!can_construct(current_con)) {
@@ -319,7 +327,7 @@ void move_ppoints_for_construction(const construction &con, int &moves_left) {
 bool player_can_build(player &p, crafting_inventory_t& pinv, const std::string &desc)
 {
     // check all with the same desc to see if player can build any
-    std::vector<construction*> &cons = constructions_by_desc[desc];
+    std::vector<construction*> cons = constructions_by_desc(desc);
     for (unsigned i = 0; i < cons.size(); ++i) {
         if (player_can_build(p, pinv, cons[i])) {
             return true;
@@ -391,7 +399,7 @@ void place_construction(const std::string &desc)
     g->refresh_all();
     crafting_inventory_t total_inv(g, &g->u);
 
-    std::vector<construction*> &cons = constructions_by_desc[desc];
+    std::vector<construction*> cons = constructions_by_desc(desc);
     std::map<point,construction*> valid;
     for (int x = g->u.posx - 1; x <= g->u.posx + 1; x++) {
         for (int y = g->u.posy - 1; y <= g->u.posy + 1; y++) {
@@ -650,6 +658,12 @@ void construct::done_deconstruct(point p)
         g->m.spawn_item(p.x, p.y, "nail", 0, rng(6,12));
         g->m.ter_set(p.x, p.y, t_door_frame);
       break;
+      case old_t_rdoor_c:
+      case old_t_rdoor_o:
+        g->m.spawn_item(p.x, p.y, "2x4", 24);
+        g->m.spawn_item(p.x, p.y, "nail", 0, rng(36,48));
+        g->m.ter_set(p.x, p.y, t_door_c);
+      break;
       case old_t_curtains:
       case old_t_window_domestic:
         g->m.spawn_item(g->u.posx, g->u.posy, "stick");
@@ -783,7 +797,6 @@ void load_construction(JsonObject &jo)
 
     con->id = constructions.size();
     constructions.push_back(con);
-    constructions_by_desc[con->description].push_back(con);
 }
 
 void reset_constructions() {
@@ -791,5 +804,4 @@ void reset_constructions() {
         delete *a;
     }
     constructions.clear();
-    constructions_by_desc.clear();
 }
