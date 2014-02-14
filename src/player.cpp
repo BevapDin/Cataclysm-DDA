@@ -6989,15 +6989,15 @@ bool player::consume(int pos)
         } else if (which >= 0) {
             item& it = i_at(pos);
             it.contents.erase(it.contents.begin());
-            const bool do_restack = inv.const_stack(pos).size() > 1;
+            const bool do_restack = pos >= 0 && inv.const_stack(pos).size() > 1;
             if (!is_npc()) {
                 bool drop_it = false;
                 if (OPTIONS["DROP_EMPTY"] == "no") {
                     drop_it = false;
                 } else if (OPTIONS["DROP_EMPTY"] == "watertight") {
-                    drop_it = it.is_container() && !(it.has_flag("WATERTIGHT") && it.has_flag("SEALS"));
+                    drop_it = pos >= 0 && it.is_container() && !(it.has_flag("WATERTIGHT") && it.has_flag("SEALS"));
                 } else if (OPTIONS["DROP_EMPTY"] == "all") {
-                    drop_it = true;
+                    drop_it = pos >= 0;
                 }
                 if (drop_it) {
                     g->add_msg(_("You drop the empty %s."), it.tname().c_str());
