@@ -6844,6 +6844,22 @@ int game::npc_by_id(const int id) const
  return -1;
 }
 
+Creature *game::critter_at(int x, int y)
+{
+    const int mindex = mon_at(x, y);
+    if (mindex != -1) {
+        return &zombie(mindex);
+    }
+    if (x == u.posx && y == u.posy) {
+        return &u;
+    }
+    const int nindex = npc_at(x, y);
+    if (nindex != -1) {
+        return active_npc[nindex];
+    }
+    return NULL;
+}
+
 bool game::add_zombie(monster& critter)
 {
     return critter_tracker.add(critter);
@@ -10043,38 +10059,42 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
     if (liquid.type->id == "gasoline" && vehicle_with_tank_near(liquid.type->id) && query_yn(_("Refill vehicle?"))) {
         int vx = u.posx, vy = u.posy;
         refresh_all();
-        if (choose_adjacent(_("Refill vehicle where?"), vx, vy)) {
-            vehicle *veh = m.veh_at (vx, vy);
-            if (veh) {
-                ammotype ftype = "gasoline";
-                int fuel_cap = veh->fuel_capacity(ftype);
-                int fuel_amnt = veh->fuel_left(ftype);
-                if (fuel_cap < 1) {
-                    add_msg (_("This vehicle doesn't use %s."), ammo_name(ftype).c_str());
-                } else if (fuel_amnt == fuel_cap) {
-                    add_msg (_("Already full."));
-                } else if (from_ground && query_yn(_("Pump until full?"))) {
-                    u.assign_activity(ACT_REFILL_VEHICLE, 2 * (fuel_cap - fuel_amnt));
-                    u.activity.placement = point(vx, vy);
-                } else { // Not pump
-                    veh->refill ("gasoline", liquid.charges);
-                    if (veh->fuel_left(ftype) < fuel_cap) {
-                        add_msg(_("You refill %s with %s."),
-                                veh->name.c_str(), ammo_name(ftype).c_str());
-                    } else {
-                        add_msg(_("You refill %s with %s to its maximum."),
-                                veh->name.c_str(), ammo_name(ftype).c_str());
-                    }
-
-                    u.moves -= 100;
-                    return true;
-                }
-            } else { // if (veh)
-                add_msg (_("There isn't any vehicle there."));
-            }
+        if (!choose_adjacent(_("Refill vehicle where?"), vx, vy)) {
             return false;
-        } // if (choose_adjacent(_("Refill vehicle where?"), vx, vy))
-        return true;
+        }
+        vehicle *veh = m.veh_at (vx, vy);
+        if (veh == NULL) {
+            add_msg(_("There isn't any vehicle there."));
+            return false;
+        }
+        const ammotype ftype = "gasoline";
+        int fuel_cap = veh->fuel_capacity(ftype);
+        int fuel_amnt = veh->fuel_left(ftype);
+        if (fuel_cap <= 0) {
+            add_msg(_("The %s doesn't use %s."),
+                    veh->name.c_str(), ammo_name(ftype).c_str());
+            return false;
+        } else if (fuel_amnt >= fuel_cap) {
+            add_msg(_("The %s is already full."),
+                    veh->name.c_str());
+            return false;
+        } else if (from_ground && query_yn(_("Pump until full?"))) {
+            u.assign_activity(ACT_REFILL_VEHICLE, 2 * (fuel_cap - fuel_amnt));
+            u.activity.placement = point(vx, vy);
+            return false; // Liquid is not handled by this function, but by the activity!
+        }
+        const int amt = infinite ? INT_MAX : liquid.charges;
+        u.moves -= 100;
+        liquid.charges = veh->refill(ftype, amt);
+        if (veh->fuel_left(ftype) < fuel_cap) {
+            add_msg(_("You refill the %s with %s."),
+                    veh->name.c_str(), ammo_name(ftype).c_str());
+        } else {
+            add_msg(_("You refill the %s with %s to its maximum."),
+                    veh->name.c_str(), ammo_name(ftype).c_str());
+        }
+        // infinite: always handled all, to prevent loops
+        return infinite || liquid.charges == 0;
     }
 
     // Ask to pour rotten liquid (milk!) from the get-go
@@ -10087,72 +10107,28 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
         return true;
     }
 
-    char ch = '\0';
-    static std::string last_liquid;
-    static char last_char = '\0';
-    if(last_char != '\0' && last_liquid == liquid.type->id && u.has_item(last_char)) {
-        item &it = u.i_at(last_char);
-        if(it.is_container()) {
-            if(it.contents.empty()) {
-                ch = last_char;
-            } else if(it.contents[0].type->id == liquid.type->id) {
-                ch = last_char;
-                it_container *container = dynamic_cast<it_container *>(it.type);
-                int holding_container_charges;
-
-                if (liquid.type->is_food()) {
-                    it_comest *tmp_comest = dynamic_cast<it_comest *>(liquid.type);
-                    holding_container_charges = container->contains * tmp_comest->charges;
-                } else if (liquid.type->is_ammo()) {
-                    it_ammo *tmp_ammo = dynamic_cast<it_ammo *>(liquid.type);
-                    holding_container_charges = container->contains * tmp_ammo->count;
-                } else {
-                    holding_container_charges = container->contains;
-                }
-                if (it.contents[0].charges < holding_container_charges) {
-                    ch = last_char;
-                }
-            }
-        }
-    }
-    // reset this, if filling the container succeeds it will be set again
-    last_char = '\0';
-    if (ch != '\0' && u.has_item(ch)) {
-        cont = &(u.i_at(ch));
-    } else
-    if (cont == NULL) {
+    if (cont == NULL || cont->is_null()) {
         std::stringstream text;
         text << _("Container for ") << liquid.tname();
 
         int pos = inv_for_liquid(liquid, text.str().c_str(), false);
-        if (!u.has_item(pos)) {
+        cont = &(u.i_at(pos));
+        if (cont->is_null()) {
             // No container selected (escaped, ...), ask to pour
             // we asked to pour rotten already
             if (!from_ground && !liquid.rotten() &&
                 query_yn(_("Pour %s on the ground?"), liquid.tname().c_str())) {
-                    if (!m.has_flag("SWIMMABLE", u.posx, u.posy))
+                    if (!m.has_flag("SWIMMABLE", u.posx, u.posy)) {
                         m.add_item_or_charges(u.posx, u.posy, liquid, 1);
+                    }
                     return true;
             }
+            add_msg(_("Never mind."));
             return false;
         }
-
-        cont = &(u.i_at(pos));
     }
 
-    if (cont == NULL || cont->is_null()) {
-        // Container is null, ask to pour.
-        // we asked to pour rotten already
-        if (!from_ground && !liquid.rotten() &&
-                query_yn(_("Pour %s on the ground?"), liquid.tname().c_str())) {
-            if (!m.has_flag("SWIMMABLE", u.posx, u.posy))
-                m.add_item_or_charges(u.posx, u.posy, liquid, 1);
-            return true;
-        }
-        add_msg(_("Never mind."));
-        return false;
-
-    } else if(cont == source) {
+    if (cont == source) {
         //Source and destination are the same; abort
         add_msg(_("That's the same container!"));
         return false;
@@ -10256,8 +10232,6 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
                     // Why not try to find another container here?
                     return false;
                 }
-                last_char = ch;
-                last_liquid = liquid.type->id;
                 return true;
             }
         } else {
@@ -10280,8 +10254,6 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
                     cont->tname().c_str());
             }
             cont->put_in(liquid_copy);
-            last_char = ch;
-            last_liquid = liquid_copy.type->id;
             return all_poured;
         }
     }

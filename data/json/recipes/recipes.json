@@ -115,7 +115,71 @@
       [ "processor", 1 ]
     ],
     [
-      [ "battery", 200 ]
+      [ "battery", 100 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "talking_doll",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "scrap", 1 ]
+    ],
+	[
+      [ "plastic_chunk", 2 ]
+    ],
+    [
+      [ "rag", 2 ]
+    ],
+    [
+      [ "RAM", 1 ]
+    ],
+    [
+      [ "e_scrap", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "creepy_doll",
+  "id_suffix": "uncraft",
+  "category": "CC_NONCRAFT",
+  "subcategory": "CSC_NONCRAFT",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": false,
+  "tools": [
+    [
+      [ "func:screwdriver", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "scrap", 1 ]
+    ],
+	[
+      [ "plastic_chunk", 2 ]
+    ],
+    [
+      [ "rag", 2 ]
+    ],
+    [
+      [ "RAM", 1 ]
+    ],
+    [
+      [ "e_scrap", 2 ]
     ]
   ]
 },    {
@@ -2113,7 +2177,7 @@
   "result": "pipe_launcher40mm",
   "note": "underbarrel_mount",
   "category": "CC_WEAPON",
-  "subcategory": "CSC_WEAPON_RANGED",
+  "subcategory": "CSC_WEAPON_MODS",
   "skill_used": "mechanics",
   "skills_required": [ "launcher", 3 ],
   "difficulty": 6,
