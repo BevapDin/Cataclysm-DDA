@@ -2420,6 +2420,44 @@ input_context game::get_player_input(std::string &action)
     return ctxt;
 }
 
+void dump_my(WINDOW *w_terrain) {
+#if defined(WIN32)
+    std::ofstream fstream("/tmp/terrain.txt");
+    for(int x = 0; x < w_terrain->width; x++) {
+        for(int y = 0; y < w_terrain->height; y++) {
+            curseline &l = w_terrain->line[y];
+            fstream << l.chars << "\n";
+        }
+    }
+#else
+    std::ofstream fstream("/tmp/terrain.txt", std::ios::out);
+    const int mx = getmaxx(w_terrain);
+    const int my = getmaxy(w_terrain);
+    std::vector<cchar_t> buffer(mx + 1);
+    for(int y = 0; y < my; y++) {
+        mvwin_wchnstr(w_terrain, y, 0, &buffer.front(), buffer.size());
+        for(int x = 0; x < mx; x++) {
+            const cchar_t * c = &(buffer[x]);
+            wchar_t wch[CCHARW_MAX+1];
+            attr_t attrs;
+            short color_pair;
+            getcchar(c, wch, &attrs, &color_pair, NULL);
+            for(int i = 0; i < CCHARW_MAX; i++) {
+                fstream << std::hex;
+                fstream.width(sizeof(wchar_t) * 2);
+                fstream.fill('0');
+                fstream << (int) wch[i];
+            }
+            fstream << ' ';
+//            fstream << (char) buffer[x];
+//            fstream << (char) (buffer[x] >> 8);
+        }
+        fstream << "\n";
+    }
+    g->add_msg("Wrote dump");
+#endif
+}
+
 bool game::handle_action()
 {
     std::string action;
@@ -2580,6 +2618,7 @@ bool game::handle_action()
  switch (act) {
 
   case ACTION_PAUSE:
+   dump_my(w_terrain);
    if (run_mode == 2 && ((OPTIONS["SAFEMODEVEH"]) || !(u.controlling_vehicle))) { // Monsters around and we don't wanna pause
      add_msg(_("Monster spotted--safe mode is on! (%s to turn it off.)"),
              press_x(ACTION_TOGGLE_SAFEMODE).c_str());}
