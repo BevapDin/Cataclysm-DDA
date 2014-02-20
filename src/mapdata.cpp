@@ -117,6 +117,7 @@ bool map_bash_info::load(JsonObject &jsobj, std::string member, bool isfurniture
         jsonint(j, "str_min_blocked", str_min_blocked );
         jsonint(j, "str_max_blocked", str_max_blocked );
         jsonint(j, "str_min_roll", str_min_roll );
+        jsonint(j, "explosive", explosive );
         jsonint(j, "chance", chance );
         jsonstring(j, "sound", sound );
         jsonstring(j, "sound_fail", sound_fail );
@@ -149,12 +150,12 @@ bool map_bash_info::load(JsonObject &jsobj, std::string member, bool isfurniture
                        }
                    } else {
                        debugmsg("terrain[\"%s\"].bash.items[%d]: invalid entry",jsobj.get_string("id").c_str(),c);
-                   } 
+                   }
                    c++;
                }
            }
         }
-     
+
 //debugmsg("%d/%d %s %s/%s %d",str_min,str_max, ter_set.c_str(), sound.c_str(), sound_fail.c_str(), items.size() );
     return true;
   } else {
@@ -384,6 +385,7 @@ ter_id t_null,
     // More embellishments than you can shake a stick at.
     t_sandbox, t_slide, t_monkey_bars, t_backboard,
     t_gas_pump, t_gas_pump_smashed,
+    t_atm,
     t_generator_broken,
     t_missile, t_missile_exploded,
     t_radio_tower, t_radio_controls,
@@ -392,6 +394,7 @@ ter_id t_null,
     t_centrifuge,
     t_column,
     t_vat,
+    t_cvdbody, t_cvdmachine,
     // Staircases etc.
     t_stairs_down, t_stairs_up, t_manhole, t_ladder_up, t_ladder_down, t_slope_down,
      t_slope_up, t_rope_up,
@@ -554,6 +557,7 @@ void set_ter_ids() {
     t_backboard=terfind("t_backboard");
     t_gas_pump=terfind("t_gas_pump");
     t_gas_pump_smashed=terfind("t_gas_pump_smashed");
+    t_atm=terfind("t_atm");
     t_generator_broken=terfind("t_generator_broken");
     t_missile=terfind("t_missile");
     t_missile_exploded=terfind("t_missile_exploded");
@@ -570,6 +574,8 @@ void set_ter_ids() {
     t_centrifuge=terfind("t_centrifuge");
     t_column=terfind("t_column");
     t_vat=terfind("t_vat");
+    t_cvdbody=terfind("t_cvdbody");
+    t_cvdmachine=terfind("t_cvdmachine");
     t_stairs_down=terfind("t_stairs_down");
     t_stairs_up=terfind("t_stairs_up");
     t_manhole=terfind("t_manhole");
@@ -598,7 +604,7 @@ void set_ter_ids() {
     t_switch_gb=terfind("t_switch_gb");
     t_switch_rb=terfind("t_switch_rb");
     t_switch_even=terfind("t_switch_even");
-    num_terrain_types = terlist.size(); 
+    num_terrain_types = terlist.size();
 };
 
 furn_id furnfind(const std::string & id) {
@@ -688,7 +694,7 @@ void set_furn_ids() {
     f_plant_seedling=furnfind("f_plant_seedling");
     f_plant_mature=furnfind("f_plant_mature");
     f_plant_harvest=furnfind("f_plant_harvest");
-    num_furniture_types = furnlist.size(); 
+    num_furniture_types = furnlist.size();
 }
 
 /*

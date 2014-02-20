@@ -241,13 +241,14 @@ struct itype
 };
 
 // Includes food drink and drugs
-struct it_comest : public itype
+struct it_comest : public virtual itype
 {
     signed int quench;     // Many things make you thirstier!
     unsigned int nutr;     // Nutrition imparted
     unsigned int spoils;   // How long it takes to spoil (hours / 600 turns)
     unsigned int addict;   // Addictiveness potential
-    unsigned int charges;  // Defaults # of charges (drugs, loaf of bread? etc)
+    long charges;  // Defaults # of charges (drugs, loaf of bread? etc)
+    std::vector<long> rand_charges;
     signed int stim;
     signed int healthy;
     std::string comesttype; //FOOD, DRINK, MED
@@ -279,22 +280,23 @@ struct it_comest : public itype
 
     signed int pquench, unsigned int pnutr, signed int pspoils,
     signed int pstim, signed int phealthy, unsigned int paddict,
-    unsigned int pcharges, signed int pfun, itype_id pcontainer,
+    long pcharges, std::vector<long> prand_charges, signed int pfun, itype_id pcontainer,
     itype_id ptool, int (iuse::*puse)(player *, item *, bool),
     add_type padd, std::string pcomesttype)
     : itype(pid, pprice, pname, pdes, psym, pcolor, pm1, "null", pphase,
     pvolume, pweight, pmelee_dam, pmelee_cut, pm_to_hit), comesttype(pcomesttype), container(pcontainer), tool(ptool)
     {
-        quench     = pquench;
-        nutr       = pnutr;
-        spoils     = pspoils;
-        stim       = pstim;
-        healthy    = phealthy;
-        addict     = paddict;
-        charges    = pcharges;
-        fun        = pfun;
-        use        = puse;
-        add        = padd;
+        quench          = pquench;
+        nutr            = pnutr;
+        spoils          = pspoils;
+        stim            = pstim;
+        healthy         = phealthy;
+        addict          = paddict;
+        charges         = pcharges;
+        rand_charges    = prand_charges;
+        fun             = pfun;
+        use             = puse;
+        add             = padd;
     }
 
     it_comest() : itype()
@@ -312,7 +314,7 @@ struct it_comest : public itype
 };
 
 // v6, v8, wankel, etc.
-struct it_var_veh_part: public itype
+struct it_var_veh_part: public virtual itype
 {
  // TODO? geometric mean: nth root of product
  unsigned int min_bigness; //CC's
@@ -342,7 +344,7 @@ struct it_var_veh_part: public itype
 };
 
 
-struct it_ammo : public itype
+struct it_ammo : public virtual itype
 {
  ammotype type;          // Enum of varieties (e.g. 9mm, shot, etc)
  itype_id casing;        // Casing produced by the ammo, if any
@@ -352,6 +354,8 @@ struct it_ammo : public itype
  signed int dispersion; // Dispersion (low is good)
  unsigned int recoil;   // Recoil; modified by strength
  unsigned int count;    // Default charges
+
+ itype_id container; // The container it comes in
 
  std::set<std::string> ammo_effects;
 
@@ -380,9 +384,9 @@ struct it_ammo : public itype
         ammotype ptype, itype_id pcasing,
         unsigned int pdamage, unsigned int ppierce,
         signed int pdispersion, unsigned int precoil, unsigned int prange,
-        unsigned int pcount)
+        unsigned int pcount, itype_id pcontainer)
 :itype(pid, pprice, pname, pdes, psym, pcolor, pm1, "null", pphase,
-       pvolume, pweight, pmelee_dam, pmelee_cut, pm_to_hit) {
+       pvolume, pweight, pmelee_dam, pmelee_cut, pm_to_hit), container(pcontainer) {
   type = ptype;
   casing = pcasing;
   damage = pdamage;
@@ -395,7 +399,7 @@ struct it_ammo : public itype
  }
 };
 
-struct it_gun : public itype
+struct it_gun : public virtual itype
 {
  ammotype ammo;
  Skill *skill_used;
@@ -458,7 +462,7 @@ struct it_gun : public itype
  };
 };
 
-struct it_gunmod : public itype
+struct it_gunmod : public virtual itype
 {
  signed int dispersion, damage, loudness, clip, recoil, burst;
  ammotype newtype;
@@ -583,7 +587,7 @@ struct it_armor : public virtual itype
 
 struct recipe;
 
-struct it_book : public itype
+struct it_book : public virtual itype
 {
  Skill *type;         // Which skill it upgrades
  unsigned char level; // The value it takes the skill to
@@ -631,11 +635,12 @@ struct it_werable_container : public virtual it_armor, public virtual it_contain
  virtual bool is_container() { return it_container::is_container(); }
 };
 
-struct it_tool : public itype
+struct it_tool : public virtual itype
 {
  ammotype ammo;
- unsigned int max_charges;
- unsigned int def_charges;
+ long max_charges;
+ long def_charges;
+ std::vector<long> rand_charges;
  unsigned char charges_per_use;
  unsigned char turns_per_charge;
  itype_id revert_to;
@@ -661,7 +666,7 @@ struct it_tool : public itype
          unsigned int pvolume, unsigned int pweight,
          signed int pmelee_dam, signed int pmelee_cut, signed int pm_to_hit,
 
-         unsigned int pmax_charges, unsigned int pdef_charges,
+         long pmax_charges, long pdef_charges, std::vector<long> prand_charges,
          unsigned char pcharges_per_use, unsigned char pturns_per_charge,
          ammotype pammo, itype_id prevert_to,
          int (iuse::*puse)(player *, item *, bool))
@@ -669,6 +674,7 @@ struct it_tool : public itype
        pvolume, pweight, pmelee_dam, pmelee_cut, pm_to_hit) {
   max_charges = pmax_charges;
   def_charges = pdef_charges;
+  rand_charges = prand_charges;
   ammo = pammo;
   charges_per_use = pcharges_per_use;
   turns_per_charge = pturns_per_charge;
@@ -677,7 +683,14 @@ struct it_tool : public itype
  }
 };
 
-struct it_bionic : public itype
+struct it_tool_armor : public virtual it_tool, public virtual it_armor {
+    virtual bool is_artifact() { return false; }
+    virtual bool is_armor() { return true; }
+    virtual bool is_power_armor() { return it_armor::is_power_armor(); }
+    virtual int charges_to_use() { return it_tool::charges_to_use(); }
+};
+
+struct it_bionic : public virtual itype
 {
  int difficulty;
 
@@ -696,7 +709,7 @@ struct it_bionic : public itype
  }
 };
 
-struct it_macguffin : public itype
+struct it_macguffin : public virtual itype
 {
  bool readable; // If true, activated with 'R'
 
@@ -718,7 +731,7 @@ struct it_macguffin : public itype
  }
 };
 
-struct it_software : public itype
+struct it_software : public virtual itype
 {
  software_type swtype;
  int power;
@@ -740,7 +753,7 @@ struct it_software : public itype
  }
 };
 
-struct it_stationary : public itype
+struct it_stationary : public virtual itype
 {
  virtual bool is_stationary()         { return true; }
 

@@ -67,8 +67,8 @@ class item : public JsonSerializer, public JsonDeserializer
 {
 public:
  item();
- item(itype* it, unsigned int turn);
- item(itype* it, unsigned int turn, char let);
+ item(itype* it, unsigned int turn, bool rand = true);
+ item(itype* it, unsigned int turn, char let, bool rand = true);
  void make_corpse(itype* it, mtype* mt, unsigned int turn); // Corpse
  item(std::string itemdata);
  item(JsonObject &jo);
@@ -134,7 +134,7 @@ public:
  void add_rain_to_container(bool acid, int charges = 1);
 
  bool matches_type(const itype_id &type) const;
- int get_charges_of(const itype_id &type) const;
+ long get_charges_of(const itype_id &type) const;
  float get_functionality_time_modi(const itype_id &func) const;
  float get_damaged_modi() const;
 
@@ -155,9 +155,9 @@ public:
  item const* inspect_active_gunmod() const;
  bool goes_bad();
  bool count_by_charges() const;
- int max_charges() const;
+ long max_charges() const;
  bool craft_has_charges();
- int num_charges();
+ long num_charges();
  bool rotten();
  bool ready_to_revive(); // used for corpses
 // light emission, determined by type->light_emission (LIGHT_???) tag (circular),
@@ -229,7 +229,7 @@ public:
   * and destroyed_at_zero_charges returned true).
   * Otherwise it returns false.
   */
- bool use_charges(const itype_id &type, int &amount, std::list<item> &usedup, bool check_contents = true);
+ bool use_charges(const itype_id &type, long &amount, std::list<item> &usedup, bool check_contents = true);
 
  itype_id typeId() const;
  itype* type;
@@ -240,7 +240,7 @@ public:
 
  std::string name;
  char invlet;           // Inventory letter
- int charges;
+ long charges;
  bool active;           // If true, it has active effects to be processed
  int fridge;            // The turn we entered a fridge.
  int rot;               // decay; same as turn-bday at 65 degrees, but doubles/halves every 18 degrees. can be negative (start game fridges)
@@ -265,7 +265,7 @@ public:
  std::map<std::string, std::string> item_vars;
  static itype * nullitem();
 
- item clone();
+ item clone(bool rand = true);
 private:
  int sort_rank() const;
  static itype * nullitem_m;

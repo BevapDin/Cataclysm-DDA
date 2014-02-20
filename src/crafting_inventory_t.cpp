@@ -1947,15 +1947,15 @@ std::string crafting_inventory_t::candidate_t::to_string(bool withTime) const {
     return buffer.str();
 }
 
-static void drainVehicle(vehicle *veh, const item &templ, const std::string &ftype, int &amount, std::list<item> &used_items) {
+static void drainVehicle(vehicle *veh, const item &templ, const std::string &ftype, long &amount, std::list<item> &used_items) {
     item tmp(templ);
     tmp.charges = veh->drain(ftype, amount);
     amount -= tmp.charges;
     used_items.push_back(tmp);
 }
 
-int crafting_inventory_t::requirement::get_charges_or_amount(const item &the_item) const {
-    int result = 0;
+long crafting_inventory_t::requirement::get_charges_or_amount(const item &the_item) const {
+    long result = 0;
     for(size_t k = 0; k < the_item.contents.size(); k++) {
         result += get_charges_or_amount(the_item.contents[k]);
     }
@@ -1982,11 +1982,11 @@ int crafting_inventory_t::requirement::get_charges_or_amount(const item &the_ite
         return 0;
     }
     assert(modi > 0.0f);
-    return result + static_cast<int>(the_item.charges / modi);
+    return result + static_cast<long>(the_item.charges / modi);
 }
 
-int crafting_inventory_t::requirement::operator()(const candidate_t &candidate) const {
-    int cnt = (*this)(candidate.get_item());
+long crafting_inventory_t::requirement::operator()(const candidate_t &candidate) const {
+    long cnt = (*this)(candidate.get_item());
     if(candidate.getLocation() == LT_INVENTORY) {
         cnt *= candidate.invcount;
     }
@@ -2034,12 +2034,12 @@ bool crafting_inventory_t::requirement::use(item &the_item, std::list<item> &use
             // Does not apply for use as charged object
             return false;
         }
-        const int charges_norm = static_cast<int>(the_item.charges / modi);
-        const int used_charges = std::min(count, charges_norm);
-        tmp.charges = static_cast<int>(used_charges * modi);
+        const long charges_norm = static_cast<long>(the_item.charges / modi);
+        const long used_charges = std::min(count, charges_norm);
+        tmp.charges = static_cast<long>(used_charges * modi);
         count -= used_charges;
     } else {
-        const int used_charges = std::min(count, the_item.charges);
+        const long used_charges = std::min(count, the_item.charges);
         tmp.charges = used_charges;
         count -= used_charges;
     }
@@ -2201,7 +2201,7 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                 return;
             }
             used_items.push_back(*ix);
-            used_items.back().charges = std::min(p->power_level, req.count);
+            used_items.back().charges = std::min(static_cast<long>(p->power_level), req.count);
             if(req.count >= p->power_level) {
                 req.count -= p->power_level;
                 p->power_level = 0;

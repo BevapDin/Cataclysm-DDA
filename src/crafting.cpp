@@ -645,7 +645,7 @@ recipe *game::select_crafting_recipe()
                         bool has_one = any_marked_available(current[line]->tools[i]);
                         for (unsigned j = 0; j < current[line]->tools[i].size(); j++) {
                             itype_id type = current[line]->tools[i][j].type;
-                            int charges = current[line]->tools[i][j].count;
+                            long charges = current[line]->tools[i][j].count;
                             nc_color toolcol = has_one ? c_dkgray : c_red;
 
                             if (current[line]->tools[i][j].available == 0) {
@@ -1336,7 +1336,7 @@ void game::complete_craft()
     crafting_inv.consume_gathered(*making, u.activity, used, used_tools);
 
     // Set up the new item, and assign an inventory letter if available
-    item newit(item_controller->find_template(making->result), turn, 0);
+    item newit(item_controller->find_template(making->result), turn, 0, false);
     newit.item_tags.insert(to_uncraft_tag(used, used_tools));
     int new_count = 1;
     if(making->count > 0) {

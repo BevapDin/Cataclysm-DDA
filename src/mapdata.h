@@ -39,7 +39,7 @@ struct map_bash_item_drop {
     std::string itemtype; // item id
     int amount;           // number dropped
     int minamount;        // optional: if >= amount drop is random # between minamount and amount
-    int chance;           // 
+    int chance;           //
     map_bash_item_drop(std::string str, int i) : itemtype(str), amount(i), minamount(-1), chance(-1) {};
     map_bash_item_drop(std::string str, int i1, int i2) : itemtype(str), amount(i1), minamount(i2), chance(-1) {};
 };
@@ -48,15 +48,16 @@ struct map_bash_info {
     int str_max;          // max str required: bash succeeds if str >= random # between str_min_roll & str_max
     int str_min_roll;     // lower bound of success check; defaults to str_min ( may set default to 0 )
     int str_min_blocked;  // same as above; alternate values for has_adjacent_furniture(...) == true
-    int str_max_blocked;  
+    int str_max_blocked;
     int num_tests;        // how many tests must succeed
     int chance;
+    int explosive;        // Explosion on destruction
     std::vector<map_bash_item_drop> items; // list of items: map_bash_item_drop
     std::string sound;    // sound made on success ('You hear a "smash!"')
     std::string sound_fail; // sound  made on fail
     std::string ter_set;    // terrain to set (REQUIRED for terrain))
     std::string furn_set;    // furniture to set (only used by furniture, not terrain)
-    map_bash_info() : str_min(-1), str_max(-1), str_min_roll(-1), str_min_blocked(-1), str_max_blocked(-1), num_tests(-1), chance(-1), ter_set(""), furn_set("") {};
+    map_bash_info() : str_min(-1), str_max(-1), str_min_roll(-1), str_min_blocked(-1), str_max_blocked(-1), num_tests(-1), chance(-1), explosive(0), ter_set(""), furn_set("") {};
     bool load(JsonObject &jsobj, std::string member, bool is_furniture);
 };
 
@@ -177,7 +178,7 @@ struct ter_t {
  std::string close;         // close action: transform into terrain with matching id
 
  map_bash_info bash;
- 
+
  bool has_flag(const std::string & flag) const {
      return flags.count(flag) != 0;
  }
@@ -192,7 +193,7 @@ struct ter_t {
          transparent = true;
      }
      if ( ter_bitflags_map.find( flag ) != ter_bitflags_map.end() ) {
-         bitflags |= mfb ( ter_bitflags_map.find( flag )->second ); 
+         bitflags |= mfb ( ter_bitflags_map.find( flag )->second );
      }
  }
  bool transparent;
@@ -225,7 +226,7 @@ struct furn_t {
  std::string close;
 
  map_bash_info bash;
- 
+
  bool has_flag(const std::string & flag) const {
      return flags.count(flag) != 0;
  }
@@ -240,7 +241,7 @@ struct furn_t {
          transparent = true;
      }
      if ( ter_bitflags_map.find( flag ) != ter_bitflags_map.end() ) {
-         bitflags |= mfb ( ter_bitflags_map.find( flag )->second ); 
+         bitflags |= mfb ( ter_bitflags_map.find( flag )->second );
      }
  }
  bool transparent;
@@ -472,6 +473,7 @@ extern ter_id t_null,
     // More embellishments than you can shake a stick at.
     t_sandbox, t_slide, t_monkey_bars, t_backboard,
     t_gas_pump, t_gas_pump_smashed,
+    t_atm,
     t_generator_broken,
     t_missile, t_missile_exploded,
     t_radio_tower, t_radio_controls,
@@ -480,6 +482,7 @@ extern ter_id t_null,
     t_centrifuge,
     t_column,
     t_vat,
+    t_cvdbody, t_cvdmachine,
     // Staircases etc.
     t_stairs_down, t_stairs_up, t_manhole, t_ladder_up, t_ladder_down, t_slope_down,
      t_slope_up, t_rope_up,

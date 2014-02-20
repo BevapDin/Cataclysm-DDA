@@ -202,9 +202,9 @@ public:
         /**
          * How much is needed, must be > 0.
          */
-        int count;
+        long count;
 
-        requirement(const itype_id &t, int c, count_type ct) : ctype(ct), type(t), count(c) { }
+        requirement(const itype_id &t, long c, count_type ct) : ctype(ct), type(t), count(c) { }
         requirement(const component &comp, bool as_tool);
         
         /**
@@ -215,7 +215,7 @@ public:
          * of the item if counted by charges.
          * This is recursive and checks the content of the items too.
          */
-        int get_charges_or_amount(const item &the_item) const;
+        long get_charges_or_amount(const item &the_item) const;
         /**
          * Use up the mathcing items up to #count.
          * This also decreases the #count (not below 0).
@@ -226,10 +226,10 @@ public:
          */
         bool use(item &it, std::list<item> &used_items);
        
-        int operator()(const item &the_item) const {
+        long operator()(const item &the_item) const {
             return get_charges_or_amount(the_item);
         }
-        int operator()(const candidate_t &candidate) const;
+        long operator()(const candidate_t &candidate) const;
     };
     
     /**
@@ -373,8 +373,8 @@ public:
         complex_req *parent;
         std::vector<simple_req*> overlays;
         
-        int cnt_on_map;
-        int cnt_on_player;
+        long cnt_on_map;
+        long cnt_on_player;
         candvec candidate_items;
         
         simple_req(const requirement &r, component *c, complex_req *p = 0) : req(r), comp(c), parent(p) { }

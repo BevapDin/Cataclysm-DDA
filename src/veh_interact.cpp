@@ -339,7 +339,7 @@ void veh_interact::cache_tool_availability()
     crafting_inv.reset(new crafting_inventory_t(g, &g->u));
     crafting_inventory_t &crafting_inv = *this->crafting_inv;
 
-    int charges = static_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
+    long charges = dynamic_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
     has_wrench = crafting_inv.has_amount("func:wrench", 1);
     has_hacksaw = crafting_inv.has_amount("func:hacksaw", 1);
     has_welder = crafting_inv.has_charges("func:welder", charges);
@@ -1098,14 +1098,14 @@ void veh_interact::display_grid()
         }
         for (int i = (name_h + 1 + disp_h + 1); i < (name_h + 1 + stats_h); i++) {
             mvwputch(w_grid, i, parts_w, BORDER_COLOR, LINE_XOXO); // |
-        }     
-        
+        }
+
         // Two horizontal lines: one after name window, and another after parts window
         for (int i = 0; i < grid_w; i++) {
             mvwputch(w_grid, name_h, i, BORDER_COLOR, LINE_OXOX);
             mvwputch(w_grid, name_h + 1 + stats_h, i, BORDER_COLOR, LINE_OXOX);
         }
-        // Horizontal line between vehicle/parts windows 
+        // Horizontal line between vehicle/parts windows
         for (int i = 0; i < disp_w; i++) {
             mvwputch(w_grid, name_h + 1 + disp_h, i, BORDER_COLOR, LINE_OXOX);
         }
@@ -1295,8 +1295,8 @@ void veh_interact::display_stats()
     fold_and_print(w_stats, k_mass_y, k_mass_x, k_mass_w, c_ltgray,
                    _("K mass:       <color_ltblue>%3d</color>%%"),
                    int(veh->k_mass() * 100));
-    
-    // "Fuel usage (safe): " is renamed to "Fuel usage: ". 
+
+    // "Fuel usage (safe): " is renamed to "Fuel usage: ".
     mvwprintz(w_stats, fuel_use_y, fuel_use_x, c_ltgray,  _("Fuel usage:     "));
     fuel_use_x += utf8_width(_("Fuel usage:     "));
     ammotype fuel_types[3] = { "gasoline", "battery", "plasma" };
@@ -1575,7 +1575,7 @@ void complete_vehicle ()
     int type = g->u.activity.values[7];
     std::string part_id = g->u.activity.str_values[0];
     std::vector<component> tools;
-    int welder_charges = static_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
+    long welder_charges = dynamic_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
     crafting_inventory_t crafting_inv(g, &g->u);
     const bool has_goggles = crafting_inv.has_amount("goggles_welding", 1) ||
                    g->u.has_bionic("bio_sunglasses") ||
@@ -1587,7 +1587,7 @@ void complete_vehicle ()
     std::vector<int> parts;
     int dd = 2;
     vpart_info::type_count_pair_vector items_needed;
-    int batterycharges; // Charges in a battery
+    long batterycharges; // Charges in a battery
 
     switch (cmd) {
     case 'i':

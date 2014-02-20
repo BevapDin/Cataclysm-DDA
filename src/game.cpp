@@ -65,7 +65,9 @@
 #include <tchar.h>
 #endif
 
+#ifndef _MSC_VER
 namespace std { float abs(float a) { return a < 0 ? -a : a; } }
+#endif
 
 #ifdef _MSC_VER
 // MSVC doesn't have c99-compatible "snprintf", so do what picojson does and use _snprintf_s instead
@@ -265,6 +267,7 @@ void game::init_ui(){
             VIEW_OFFSET_Y = ((int)(TERMY/tilecontext->tile_ratioy) > 121) ? (TERMY - 121)/2 : 0;
             TERRAIN_WINDOW_WIDTH  = ceil((TERMX - sidebarWidth)/tilecontext->tile_ratiox);
             TERRAIN_WINDOW_HEIGHT = ceil(TERMY/tilecontext->tile_ratioy);
+            TERRAIN_WINDOW_TERM_WIDTH = (TERMX - sidebarWidth > 121) ? 121 : TERMX - sidebarWidth;
         }
         else
         #endif // SDLTILES
@@ -273,6 +276,7 @@ void game::init_ui(){
             VIEW_OFFSET_Y = (TERMY > 121) ? (TERMY - 121)/2 : 0;
             TERRAIN_WINDOW_WIDTH = (TERMX - sidebarWidth > 121) ? 121 : TERMX - sidebarWidth;
             TERRAIN_WINDOW_HEIGHT = (TERMY > 121) ? 121 : TERMY;
+            TERRAIN_WINDOW_TERM_WIDTH = TERRAIN_WINDOW_WIDTH;
         }
 
         POSX = TERRAIN_WINDOW_WIDTH / 2;
@@ -297,6 +301,7 @@ void game::init_ui(){
 
         TERRAIN_WINDOW_WIDTH = (TERMX - sidebarWidth > 121) ? 121 : TERMX - sidebarWidth;
         TERRAIN_WINDOW_HEIGHT = (TERMY > 121) ? 121 : TERMY;
+        TERRAIN_WINDOW_TERM_WIDTH = TERRAIN_WINDOW_WIDTH;
 
         VIEW_OFFSET_X = (TERMX - sidebarWidth > 121) ? (TERMX - sidebarWidth - 121)/2 : 0;
         VIEW_OFFSET_Y = (TERMY > 121) ? (TERMY - 121)/2 : 0;
@@ -2097,6 +2102,7 @@ void game::handle_key_blocking_activity() {
                     break;
                 case ACTION_MESSAGES:
                     msg_buffer();
+                    refresh_all();
                     break;
                 case ACTION_HELP:
                     display_help();
@@ -2130,6 +2136,7 @@ int game::inventory_item_menu(int pos, int iStartX, int iWidth, int position) {
 
         const int iOffsetX = 2;
         const bool bHPR = hasPickupRule(oThisItem.tname());
+        const hint_rating rate_drop_item = u.weapon.has_flag("NO_UNWIELD") ? HINT_CANT : HINT_GOOD;
 
         int max_text_length = 0;
         int length = 0;
@@ -2150,7 +2157,7 @@ int game::inventory_item_menu(int pos, int iStartX, int iWidth, int position) {
         length = utf8_width(_("<T>ake off")); if (length > max_text_length) max_text_length = length;
         vMenu.push_back(iteminfo("MENU", "T", _("<T>ake off"), u.rate_action_takeoff(&oThisItem)));
         length = utf8_width(_("<d>rop")); if (length > max_text_length) max_text_length = length;
-        vMenu.push_back(iteminfo("MENU", "d", _("<d>rop")));
+        vMenu.push_back(iteminfo("MENU", "d", _("<d>rop"), rate_drop_item));
         length = utf8_width(_("<U>nload")); if (length > max_text_length) max_text_length = length;
         vMenu.push_back(iteminfo("MENU", "U", _("<U>nload"), u.rate_action_unload(&oThisItem)));
         length = utf8_width(_("<r>eload")); if (length > max_text_length) max_text_length = length;
@@ -2851,17 +2858,14 @@ bool game::handle_action()
 
   case ACTION_COMPARE:
    compare();
-   refresh_all();
    break;
 
   case ACTION_ORGANIZE:
    reassign_item();
-   refresh_all();
    break;
 
   case ACTION_USE:
    use_item();
-   refresh_all();
    break;
 
   case ACTION_USE_WIELDED:
@@ -2870,32 +2874,26 @@ bool game::handle_action()
 
   case ACTION_WEAR:
    wear();
-   refresh_all();
    break;
 
   case ACTION_TAKE_OFF:
    takeoff();
-   refresh_all();
    break;
 
   case ACTION_EAT:
    eat();
-   refresh_all();
    break;
 
   case ACTION_READ:
    read();
-   refresh_all();
    break;
 
   case ACTION_WIELD:
    wield();
-   refresh_all();
    break;
 
   case ACTION_PICK_STYLE:
    u.pick_style();
-   refresh_all();
    break;
 
   case ACTION_RELOAD:
@@ -2924,12 +2922,10 @@ bool game::handle_action()
 
   case ACTION_DROP:
    drop();
-   refresh_all();
    break;
 
   case ACTION_DIR_DROP:
    drop_in_direction();
-   refresh_all();
    break;
 
   case ACTION_BIONICS:
@@ -3134,6 +3130,7 @@ bool game::handle_action()
 
   case ACTION_MESSAGES:
    msg_buffer();
+   refresh_all();
    break;
 
   case ACTION_HELP:
@@ -3170,7 +3167,7 @@ bool game::handle_action()
   case ACTION_ZOOM_IN:
    zoom_in();
    break;
-  
+
   case ACTION_ZOOM_OUT:
    zoom_out();
    break;
@@ -3681,84 +3678,72 @@ bool game::save()
     }
 }
 
+// Helper predicate to exclude files from deletion when resetting a world directory.
+static bool isForbidden( std::string candidate ) {
+    if( candidate.find("worldoptions.txt") != std::string::npos ||
+        candidate.find("mods.json") != std::string::npos ) {
+        return true;
+    }
+    return false;
+}
+
+// If delete_folder is true, just delete all the files and directories of a world folder.
+// If it's false, just avoid deleting the two config files and the directory itself.
 void game::delete_world(std::string worldname, bool delete_folder)
 {
     std::string worldpath = world_generator->all_worlds[worldname]->world_path;
     std::string filetmp = "";
-    std::set<std::string> files_not_to_delete;
-    if (!delete_folder) {
-        files_not_to_delete.insert("worldoptions.txt");
-        files_not_to_delete.insert("mods.json");
-    }
-    std::vector<std::string> modfiles;
-    std::set<std::string> mod_dirpathparts;
+    std::vector<std::string> file_paths;
+    std::set<std::string> directory_paths;
 
-    if (delete_folder){
-        modfiles = file_finder::get_files_from_path(".json", worldpath, true, true);
-        for (int i = 0; i < modfiles.size(); ++i){
-            // strip to path and remove worldpath from it
-            std::string part = modfiles[i].substr(worldpath.size(), modfiles[i].find_last_of("/\\") - worldpath.size());
-            int last_separator = part.find_last_of("/\\");
-            while (last_separator != std::string::npos && part.size() > 1){
-                mod_dirpathparts.insert(part);
-                part = part.substr(0, last_separator);
-                last_separator = part.find_last_of("/\\");
-            }
+    file_paths = file_finder::get_files_from_path( "", worldpath, true, true );
+    if( !delete_folder ) {
+        std::vector<std::string>::iterator forbidden = find_if( file_paths.begin(), file_paths.end(),
+                                                                isForbidden );
+        while( forbidden != file_paths.end() ) {
+            file_paths.erase( forbidden );
+            forbidden = find_if( file_paths.begin(), file_paths.end(), isForbidden );
+        }
+    }
+    for( std::vector<std::string>::iterator file = file_paths.begin();
+         file != file_paths.end(); ++file ) {
+        // strip to path and remove worldpath from it
+        std::string part = file->substr( worldpath.size(),
+                                         file->find_last_of("/\\") - worldpath.size() );
+        int last_separator = part.find_last_of("/\\");
+        while( last_separator != std::string::npos && part.size() > 1 ) {
+            directory_paths.insert(part);
+            part = part.substr(0, last_separator);
+            last_separator = part.find_last_of("/\\");
         }
     }
 
 #if (defined _WIN32 || defined __WIN32__)
-      WIN32_FIND_DATA FindFileData;
-      HANDLE hFind;
-      TCHAR Buffer[MAX_PATH];
-
-      GetCurrentDirectory(MAX_PATH, Buffer);
-      SetCurrentDirectory(worldpath.c_str());
-      hFind = FindFirstFile("*", &FindFileData);
-      if(INVALID_HANDLE_VALUE != hFind) {
-       do {
-        filetmp = FindFileData.cFileName;
-        if (files_not_to_delete.count(filetmp) == 0) {
-        DeleteFile(FindFileData.cFileName);
-        }
-       } while(FindNextFile(hFind, &FindFileData) != 0);
-       FindClose(hFind);
-      }
-
-      SetCurrentDirectory(Buffer);
-      if (delete_folder){
-        for (int i = 0; i < modfiles.size(); ++i){
-            DeleteFile(modfiles[i].c_str());
-        }
-        for (std::set<std::string>::reverse_iterator it = mod_dirpathparts.rbegin(); it != mod_dirpathparts.rend(); ++it){
-            RemoveDirectory(std::string(worldpath + *it).c_str());
-        }
-        RemoveDirectory(worldpath.c_str());
-      }
+    for( std::vector<std::string>::iterator file = file_paths.begin();
+         file != file_paths.end(); ++file ) {
+        DeleteFile( file->c_str() );
+    }
+    for( std::set<std::string>::reverse_iterator it = directory_paths.rbegin();
+         it != directory_paths.rend(); ++it ) {
+        RemoveDirectory( std::string(worldpath + *it).c_str() );
+    }
+    if( delete_folder ) {
+        RemoveDirectory( worldpath.c_str() );
+    }
 #else
-     DIR *save_dir = opendir(worldpath.c_str());
-     if(save_dir != NULL)
-     {
-      struct dirent *save_dirent = NULL;
-      while ((save_dirent = readdir(save_dir)) != NULL){
-        filetmp = save_dirent->d_name;
-        if (files_not_to_delete.count(filetmp) == 0) {
-          (void)unlink(std::string(worldpath + "/" + filetmp).c_str());
-        }
-      }
-      (void)closedir(save_dir);
-     }
-     if (delete_folder){
-        // delete mod files
-        for (int i = 0; i < modfiles.size(); ++i){
-            (void)unlink(modfiles[i].c_str());
-        }
-        // delete mod directories -- directories are ordered deepest to shallowest
-        for (std::set<std::string>::reverse_iterator it = mod_dirpathparts.rbegin(); it != mod_dirpathparts.rend(); ++it){
-            remove(std::string(worldpath + *it).c_str());
-        }
-        remove(worldpath.c_str());
-     }
+    // Delete files, order doesn't matter.
+    for( std::vector<std::string>::iterator file = file_paths.begin();
+         file != file_paths.end(); ++file ) {
+        (void)unlink( file->c_str() );
+    }
+    // Delete directories -- directories are ordered deepest to shallowest.
+    for( std::set<std::string>::reverse_iterator it = directory_paths.rbegin();
+         it != directory_paths.rend(); ++it ) {
+        remove( std::string(worldpath + *it).c_str() );
+    }
+    if( delete_folder ) {
+        remove( worldpath.c_str() );
+    }
 #endif
 }
 
@@ -7357,7 +7342,9 @@ void game::activity_on_turn_pulp()
         //TODO: See if it's possible to use the monBloodType() function rather than this spaghetti code.
         field_id type_blood;
         if (it->corpse->flags.count(MF_ACID_BLOOD) != 0)
-            type_blood = fd_acid; //Currently unused, be wary that a corpse with ACID_BLOOD would be very hazardous to smash!
+            type_blood = fd_acid; //Be wary that a corpse with ACID_BLOOD would be very hazardous to smash!
+        else if (it->corpse->flags.count(MF_BILE_BLOOD) != 0)
+            type_blood = fd_bile;
         else if (it->corpse->flags.count(MF_LARVA) != 0 || it->corpse->flags.count(MF_ARTHROPOD_BLOOD) != 0)
             type_blood = fd_blood_invertebrate;
         else if (it->corpse->mat == "veggy")
@@ -7477,7 +7464,7 @@ bool game::refill_vehicle_part (vehicle &veh, vehicle_part *part, bool test)
   }
   item* it = NULL;
   item *p_itm = NULL;
-  int min_charges = -1;
+  long min_charges = -1;
   bool in_container = false;
 
   std::string ftype = part_info.fuel_type;
@@ -7532,7 +7519,7 @@ bool game::refill_vehicle_part (vehicle &veh, vehicle_part *part, bool test)
     charge_difference = 1;
   }
   bool rem_itm = min_charges <= charge_difference;
-  int used_charges = rem_itm ? min_charges : charge_difference;
+  long used_charges = rem_itm ? min_charges : charge_difference;
   part->amount += used_charges * fuel_per_charge;
   if (part->amount > max_fuel) {
     part->amount = max_fuel;
@@ -8826,7 +8813,7 @@ int game::list_items(const int iLastState)
                         /* The following two don't work for some reason.
                          * Even though the zoom level will be adjusted,
                          * the map won't be redrawn until V mode is exited.
-                         
+
                         case ACTION_ZOOM_IN:
                             zoom_in();
                             break;
@@ -9100,7 +9087,7 @@ int game::list_monsters(const int iLastState)
                         /* The following two don't work for some reason.
                          * Even though the zoom level will be adjusted,
                          * the map won't be redrawn until V mode is exited.
-                         
+
                         case ACTION_ZOOM_IN:
                             zoom_in();
                             break;
@@ -9348,7 +9335,7 @@ void game::pickup(int posx, int posy, int min)
             // Drain a ton of power
             tmp_hotplate.charges = veh->drain( "battery", 100 );
             if( tmp_hotplate.is_tool() ) {
-                it_tool * tmptool = static_cast<it_tool*>((&tmp_hotplate)->type);
+                it_tool * tmptool = dynamic_cast<it_tool*>((&tmp_hotplate)->type);
                 if ( tmp_hotplate.charges >= tmptool->charges_per_use ) {
                     tmptool->use.call(&u, &tmp_hotplate, false);
                     tmp_hotplate.charges -= tmptool->charges_per_use;
@@ -9388,7 +9375,7 @@ void game::pickup(int posx, int posy, int min)
             // Drain a ton of power
             tmp_welder.charges = veh->drain( "battery", 1000 );
             if( tmp_welder.is_tool() ) {
-                it_tool * tmptool = static_cast<it_tool*>((&tmp_welder)->type);
+                it_tool * tmptool = dynamic_cast<it_tool*>((&tmp_welder)->type);
                 if ( tmp_welder.charges >= tmptool->charges_per_use ) {
                     tmptool->use.call( &u, &tmp_welder, false );
                     tmp_welder.charges -= tmptool->charges_per_use;
@@ -9405,7 +9392,7 @@ void game::pickup(int posx, int posy, int min)
             // Drain a ton of power
             tmp_purifier.charges = veh->drain( "battery", 100 );
             if( tmp_purifier.is_tool() ) {
-                it_tool * tmptool = static_cast<it_tool*>((&tmp_purifier)->type);
+                it_tool * tmptool = dynamic_cast<it_tool*>((&tmp_purifier)->type);
                 if ( tmp_purifier.charges >= tmptool->charges_per_use ) {
                     tmptool->use.call( &u, &tmp_purifier, false );
                     tmp_purifier.charges -= tmptool->charges_per_use;
@@ -10136,7 +10123,7 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
     } else if (liquid.is_ammo() && (cont->is_tool() || cont->is_gun())) {
         // for filling up chainsaws, jackhammers and flamethrowers
         ammotype ammo = "NULL";
-        int max = 0;
+        long max = 0;
 
         if (cont->is_tool()) {
             it_tool *tool = dynamic_cast<it_tool *>(cont->type);
@@ -10175,7 +10162,7 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
         } else {
             cont->charges += liquid.charges;
             if (cont->charges > max) {
-                int extra = cont->charges - max;
+                long extra = cont->charges - max;
                 cont->charges = max;
                 liquid.charges = extra;
                 add_msg(_("There's some left over!"));
@@ -10319,7 +10306,7 @@ int game::move_liquid(item &liquid)
       cont->curammo = dynamic_cast<it_ammo*>(liquid.type);
       cont->charges += liquid.charges;
       if (cont->charges > max) {
-      int extra = cont->charges - max;
+      long extra = cont->charges - max;
       cont->charges = max;
       add_msg(_("There's some left over!"));
       return extra;
@@ -10339,7 +10326,7 @@ int game::move_liquid(item &liquid)
         }
       }
       it_container* container = dynamic_cast<it_container*>(cont->type);
-      int holding_container_charges;
+      long holding_container_charges;
 
       if (liquid.type->is_food())
       {
@@ -10382,7 +10369,7 @@ int game::move_liquid(item &liquid)
             return -1;
           }
           // pouring into a valid empty container
-          int default_charges = 1;
+          long default_charges = 1;
 
           if (liquid.is_food()) {
             it_comest* comest = dynamic_cast<it_comest*>(liquid.type);
@@ -10396,7 +10383,7 @@ int game::move_liquid(item &liquid)
             add_msg(_("You fill your %s with some of the %s."), cont->tname().c_str(),
                                                       liquid.tname().c_str());
             u.inv.unsort();
-            int extra = liquid.charges - container->contains * default_charges;
+            long extra = liquid.charges - container->contains * default_charges;
             liquid.charges = container->contains * default_charges;
             cont->put_in(liquid);
             return extra;
@@ -10431,6 +10418,9 @@ void game::drop(int pos)
             // while taking it off
             return;
         }
+    } else if(pos == -1 && u.weapon.has_flag("NO_UNWIELD")) {
+        add_msg(_("You cannot drop your %s."), u.weapon.tname().c_str());
+        return;
     } else {
         dropped.push_back(u.i_rem(pos));
     }
@@ -10869,7 +10859,7 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
 
 // Train up our skill
  it_gun* firing = dynamic_cast<it_gun*>(u.weapon.type);
- int num_shots = 1;
+ long num_shots = 1;
  if (burst)
   num_shots = u.weapon.burst_size();
  if (num_shots > u.weapon.num_charges() && !u.weapon.has_flag("NO_AMMO"))
@@ -11271,6 +11261,7 @@ void game::reload(int pos)
      int am_pos = it->pick_reload_ammo(u, true);
      if (am_pos == INT_MIN) {
          add_msg(_("Out of ammo!"));
+         refresh_all();
          return;
      }
 
@@ -11284,6 +11275,9 @@ void game::reload(int pos)
 
      // see if its actually reloadable.
      if (tool->ammo == "NULL") {
+         add_msg(_("You can't reload a %s!"), it->tname().c_str());
+         return;
+     } else if (it->has_flag("NO_RELOAD")) {
          add_msg(_("You can't reload a %s!"), it->tname().c_str());
          return;
      }
@@ -11615,6 +11609,7 @@ void game::chat()
         }
     }
     u.moves -= 100;
+    refresh_all();
 }
 
 void game::pldrive(int x, int y) {
@@ -13563,7 +13558,6 @@ void game::msg_buffer()
 
  werase(w);
  delwin(w);
- refresh_all();
 }
 
 void game::teleport(player *p, bool add_teleglow)
@@ -14002,22 +13996,22 @@ void game::process_artifact(item *it, player *p, bool wielded)
     for (int i = 0; i < effects.size(); i++) {
         switch (effects[i]) {
         case AEP_STR_UP:
-            p->str_cur += 4;
+            p->mod_str_bonus(+4);
             break;
         case AEP_DEX_UP:
-            p->dex_cur += 4;
+            p->mod_dex_bonus(+4);
             break;
         case AEP_PER_UP:
-            p->per_cur += 4;
+            p->mod_per_bonus(+4);
             break;
         case AEP_INT_UP:
-            p->int_cur += 4;
+            p->mod_int_bonus(+4);
             break;
         case AEP_ALL_UP:
-            p->str_cur += 2;
-            p->dex_cur += 2;
-            p->per_cur += 2;
-            p->int_cur += 2;
+            p->mod_str_bonus(+2);
+            p->mod_dex_bonus(+2);
+            p->mod_per_bonus(+2);
+            p->mod_int_bonus(+2);
             break;
         case AEP_SPEED_UP: // Handled in player::current_speed()
             break;
@@ -14083,32 +14077,37 @@ void game::process_artifact(item *it, player *p, bool wielded)
             break;
 
         case AEP_STR_DOWN:
-            p->str_cur -= 3;
+            p->mod_str_bonus(-3);
             break;
 
         case AEP_DEX_DOWN:
-            p->dex_cur -= 3;
+            p->mod_dex_bonus(-3);
             break;
 
         case AEP_PER_DOWN:
-            p->per_cur -= 3;
+            p->mod_per_bonus(-3);
             break;
 
         case AEP_INT_DOWN:
-            p->int_cur -= 3;
+            p->mod_int_bonus(-3);
             break;
 
         case AEP_ALL_DOWN:
-            p->str_cur -= 2;
-            p->dex_cur -= 2;
-            p->per_cur -= 2;
-            p->int_cur -= 2;
+            p->mod_str_bonus(-2);
+            p->mod_dex_bonus(-2);
+            p->mod_per_bonus(-2);
+            p->mod_int_bonus(-2);
             break;
 
         case AEP_SPEED_DOWN:
             break; // Handled in player::current_speed()
         }
     }
+    // Recalculate, as it might have changed (by mod_*_bonus above)
+    p->str_cur = p->get_str();
+    p->int_cur = p->get_int();
+    p->dex_cur = p->get_dex();
+    p->per_cur = p->get_per();
 }
 
 void game::add_artifact_messages(std::vector<art_effect_passive> effects)
