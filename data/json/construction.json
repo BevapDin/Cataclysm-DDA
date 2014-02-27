@@ -55,7 +55,7 @@
         "difficulty" : 0,
         "time" : 5,
         "tools" : [
-            [ "shovel", "e_tool", "primitive_shovel" ]
+            [ "func:shovel" ]
         ],
         "pre_terrain" : "t_pit_shallow",
         "post_terrain" : "t_dirt"
@@ -65,7 +65,7 @@
         "difficulty" : 0,
         "time" : 10,
         "tools" : [
-            [ "hoe", "shovel", "e_tool", "primitive_shovel", "digging_stick" ]
+            [ "hoe", "func:shovel", "digging_stick" ]
         ],
         "pre_flags" : "DIGGABLE",
         "post_terrain" : "t_dirtmound"
@@ -115,7 +115,7 @@
         "difficulty" : 1,
         "time" : 10,
         "tools" : [
-            [ "func:nailing" ]
+            [ "func:hammering" ]
         ],
         "components" : [
             [ [ "2x4", 3 ] ],
@@ -129,7 +129,7 @@
         "difficulty" : 1,
         "time" : 10,
         "tools" : [
-            [ "hammer", "primitive_hammer", "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 4 ] ],
@@ -143,7 +143,7 @@
         "difficulty" : 1,
         "time" : 10,
         "tools" : [
-            [ "hammer", "primitive_hammer", "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 8 ] ],
@@ -157,7 +157,7 @@
         "difficulty" : 2,
         "time" : 10,
         "tools" : [
-            [ "hammer", "primitive_hammer", "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 4 ] ],
@@ -171,7 +171,7 @@
         "difficulty" : 2,
         "time" : 10,
         "tools" : [
-            [ "hammer", "primitive_hammer", "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "log", 1 ] ],
@@ -186,8 +186,7 @@
         "difficulty" : 0,
         "time" : 8,
         "tools" : [
-            [ "hammer", "hammer_sledge", "primitive_hammer",
-              "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 4 ] ],
@@ -201,7 +200,7 @@
         "difficulty" : 5,
         "time" : 30,
         "tools" : [
-            [ "hammer", "primitive_hammer", "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 12 ] ],
@@ -215,7 +214,7 @@
         "difficulty" : 2,
         "time" : 15,
         "tools" : [
-            [ "hammer", "primitive_hammer", "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 6 ] ],
@@ -229,7 +228,7 @@
         "difficulty" : 0,
         "time" : 5,
         "tools" : [
-            [ "func:nailing", "hammer_sledge" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 4 ] ],
@@ -243,8 +242,7 @@
         "difficulty" : 0,
         "time" : 5,
         "tools" : [
-            [ "hammer", "hammer_sledge", "primitive_hammer",
-              "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 4 ] ],
@@ -258,8 +256,7 @@
         "difficulty" : 5,
         "time" : 10,
         "tools" : [
-            [ "hammer", "hammer_sledge", "primitive_hammer",
-              "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 8 ] ],
@@ -273,7 +270,7 @@
         "difficulty" : 5,
         "time" : 30,
         "tools" : [
-            [ "hammer", "primitive_hammer", "hatchet", "hammer_sledge" ]
+            [ "func:hammering" ]
         ],
         "components" : [
             [ [ "2x4", 8 ] ],
@@ -287,7 +284,7 @@
         "difficulty" : 7,
         "time" : 30,
         "tools" : [
-            [ "hammer", "primitive_hammer", "hatchet", "hammer_sledge" ]
+            [ "func:hammering" ]
         ],
         "components" : [
             [ [ "spike", 4 ] ],
@@ -301,8 +298,7 @@
         "difficulty" : 7,
         "time" : 10,
         "tools" : [
-            [ "hammer", "hammer_sledge", "primitive_hammer",
-              "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "spike", 4 ] ],
@@ -316,8 +312,7 @@
         "difficulty" : 0,
         "time" : 10,
         "tools" : [
-            [ "hammer", "hammer_sledge", "primitive_hammer",
-              "hatchet", "nailgun" ]
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 4 ] ],
@@ -510,8 +505,8 @@
         "difficulty" : 9,
         "time" : 15,
         "tools" : [
-            [ "hammer", "primitive_hammer", "hatchet", "hammer_sledge" ],
-            [ "hacksaw" ]
+            [ "func:hammering"],
+            [ "func:hacksaw" ]
         ],
         "components" : [
             [ [ "spike", 8 ] ],
@@ -525,9 +520,9 @@
         "difficulty" : 9,
         "time" : 15,
         "tools" : [
-            [ "hammer", "primitive_hammer", "hatchet", "hammer_sledge" ],
-            [ "hacksaw" ],
-            [ "wrench" ]
+            [ "func:hammering" ],
+            [ "func:hacksaw" ],
+            [ "func:wrench" ]
         ],
         "components" : [
             [ [ "steel_lump", 4 ], [ "steel_chunk", 12 ], [ "scrap", 36 ] ],
@@ -541,7 +536,7 @@
         "difficulty" : 0,
         "time" : 5,
         "tools" : [
-            [ "func:hammer", "func:shovel", "func:ax" ]
+            [ "func:hammering", "func:shovel", "func:ax" ]
         ],
         "components" : [
             [ [ "pointy_stick", 2 ], [ "spear_wood", 2 ] ]
@@ -646,8 +641,7 @@
         "difficulty" : 3,
         "time" : 0,
         "tools" : [
-            ["func:hammering"],
-            ["func:shovel"]
+            ["func:hammering"], ["func:shovel"]
         ],
         "components" : [
             [ [ "log", 2 ] ],
@@ -836,8 +830,8 @@
         "difficulty" : 2,
         "time" : 20,
         "tools" : [
-            [ "saw" ],
-            [ "hammer", "primitive_hammer", "hatchet", "nailgun" ]
+            [ "func:saw" ],
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 10 ] ],
@@ -852,8 +846,8 @@
         "difficulty" : 3,
         "time" : 20,
         "tools" : [
-            [ "saw" ],
-            [ "hammer", "primitive_hammer", "hatchet", "nailgun" ]
+            [ "func:saw" ],
+            [ "func:nailing" ]
         ],
         "components" : [
             [ [ "2x4", 10 ] ],
@@ -882,8 +876,7 @@
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
-            [ "hammer", "primitive_hammer",
-              "func:shovel" ]
+            [ "func:hammering", "func:shovel" ]
         ],
         "components" : [
             [ [ "rock", 40 ] ]
@@ -896,7 +889,7 @@
         "difficulty" : 0,
         "time" : 20,
         "tools" : [
-            [ "func:nailing" ],
+            [ "func:hammering" ],
             [ "func:screwdriver" ]
         ],
         "pre_flags" : "DECONSTRUCT",

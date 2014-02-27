@@ -1232,7 +1232,7 @@
         "ident" : "hitchhiker",
         "name" : "Hitchhiker",
         "description" : "Your house has been demolished and your planet destroyed, but at least you still have your towel.",
-        "points" : 0,
+        "points" : -1,
         "items" : {
             "both": [
                 "house_coat",
@@ -1441,7 +1441,7 @@
             "female": "Bride"
         },
         "description": "The cataclysm struck on the big day and you escaped with nothing but your wedding attire. Cold feet? You'd just like to keep your feet attached!",
-        "points": 0,
+        "points": -1,
         "items" : {
             "male": [
                 "tux",

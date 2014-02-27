@@ -1784,6 +1784,7 @@
         "volume" : 10,
         "bashing" : 36,
         "cutting" : 0,
+        "functions": [ [ "func:hammering" ], [ "func:nailing" ] ],
         "price" : 12000
     },
     {
