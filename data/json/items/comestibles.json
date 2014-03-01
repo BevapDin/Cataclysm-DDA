@@ -1970,7 +1970,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2002,7 +2001,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2034,7 +2032,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2066,7 +2063,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2098,7 +2094,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2130,7 +2125,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2162,7 +2156,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2194,7 +2187,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2319,7 +2311,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2351,7 +2342,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2383,7 +2373,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2415,7 +2404,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2447,7 +2435,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -2509,7 +2496,6 @@
         "phase" : "liquid",
         "charges" : 1,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {
@@ -4089,7 +4075,7 @@
         "weight" : 18,
         "color" : "red",
         "addiction_type" : "none",
-        "spoils_in" : 0,
+        "spoils_in" : 560,
         "use_action" : "NONE",
         "stim" : 0,
         "container" : "bag_plastic",
@@ -4962,7 +4948,7 @@
         "heal" : 1,
         "addiction_potential" : 0,
         "nutrition" : 16,
-        "description" : "An irradiated apple, will remain edible nearly forever. Sterilized using radiation, so safe to eat.",
+        "description" : "Mmm, irradiated. Will remain edible nearly forever. Sterilized using radiation, so safe to eat.",
         "price" : 2000,
         "material" : "fruit",
         "tool" : "null",
@@ -6494,7 +6480,6 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
-        "category": "food",
         "flags": ["SEED"]
     },
     {
@@ -6547,7 +6532,6 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
-        "category": "food",
         "flags": ["SEED"]
     },
     {
@@ -6600,7 +6584,6 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
-        "category": "food",
         "flags": ["SEED"]
     },
     {
@@ -10453,10 +10436,10 @@
         "spoils_in" : 0,
         "use_action" : "FLUMED",
         "stim" : 0,
-        "container" : "null",
+        "container" : "bottle_plastic",
         "to_hit" : 0,
         "comestible_type" : "MED",
-        "symbol" : "!",
+        "symbol" : "~",
         "quench" : 0,
         "heal" : 1,
         "addiction_potential" : 0,
@@ -10468,8 +10451,7 @@
         "volume" : 1,
         "cutting" : 0,
         "phase" : "solid",
-        "charges" : 10,
-        "stack_size" : 40,
+        "charges" : 5,
         "bashing" : 0,
         "fun" : 0
     },
@@ -10483,10 +10465,10 @@
         "spoils_in" : 0,
         "use_action" : "FLUSLEEP",
         "stim" : -7,
-        "container" : "null",
+        "container" : "bottle_plastic",
         "to_hit" : 0,
         "comestible_type" : "MED",
-        "symbol" : "!",
+        "symbol" : "~",
         "quench" : 0,
         "heal" : 1,
         "addiction_potential" : 20,
@@ -10498,8 +10480,7 @@
         "volume" : 1,
         "cutting" : 0,
         "phase" : "solid",
-        "charges" : 10,
-        "stack_size" : 40,
+        "charges" : 5,
         "bashing" : 0,
         "fun" : 0
     },
@@ -11169,7 +11150,6 @@
         "phase" : "liquid",
         "charges" : 2,
         "bashing" : 0,
-        "category": "chems",
         "fun" : 0
     },
     {

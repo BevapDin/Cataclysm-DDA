@@ -11394,7 +11394,11 @@
     ],
     [
       [ "lead", 75 ],
-      [ "gold_small", 75 ]
+      [ "gold_small", 75 ],
+      [ "silver_small", 75 ],
+      [ "tin", 75 ],
+      [ "bismuth", 75 ],
+      [ "solder_wire", 75 ]
     ]
   ]
 },{
@@ -11436,7 +11440,11 @@
     ],
     [
       [ "lead", 75 ],
-      [ "gold_small", 75 ]
+      [ "gold_small", 75 ],
+      [ "silver_small", 75 ],
+      [ "tin", 75 ],
+      [ "bismuth", 75 ],
+      [ "solder_wire", 75 ]
     ],
     [
       [ "cu_pipe", 5]
@@ -11481,7 +11489,11 @@
     ],
     [
       [ "lead", 160 ],
-      [ "gold_small", 160 ]
+      [ "gold_small", 160 ],
+      [ "silver_small", 160 ],
+      [ "tin", 160 ],
+      [ "bismuth", 160 ],
+      [ "solder_wire", 160 ]
     ]
   ]
 },{
@@ -11567,7 +11579,11 @@
     ],
     [
       [ "lead", 240 ],
-      [ "gold_small", 240 ]
+      [ "gold_small", 240 ],
+      [ "silver_small", 240 ],
+      [ "tin", 240 ],
+      [ "bismuth", 240 ],
+      [ "solder_wire", 240 ]
     ]
   ]
 },
@@ -20943,7 +20959,7 @@
       [ "stick", 1 ]
     ],
     [
-      ["metal_tank", 1]
+      ["metal_tank_small", 1]
     ],
     [
       ["steel_chunk", 3],

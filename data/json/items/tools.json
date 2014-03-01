@@ -5337,8 +5337,8 @@
     "charges_per_use": 1,
     "turns_per_charge": 0,
     "ammo": "NULL",
-    "revert_to": "null",
     "category": "food",
+    "revert_to": "null",
     "use_action": "DEJAR"
   },
 
@@ -6812,7 +6812,7 @@
     "functions": [ [ "func:hacksaw" ], [ "func:screwdriver" ], [ "func:hammer" ], [ "func:wrench" ], [ "func:soldering_iron", 1, 0.5 ], ["func:welder", 1, 1 ] ],
     "use_action": "GUN_REPAIR"
   },
- {
+  {
     "id": "battery_atomic",
     "type": "TOOL",
     "symbol": ";",

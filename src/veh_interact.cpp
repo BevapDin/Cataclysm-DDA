@@ -501,7 +501,7 @@ void veh_interact::do_install(task_reason reason)
         sel_vpart_info = &(can_mount[pos]);
         display_list (pos, can_mount);
         itype_id itm = sel_vpart_info->item;
-        bool has_comps = crafting_inv.has_amount(itm, 1);
+        bool has_comps = crafting_inv.has_components(itm, 1);
         bool has_skill = g->u.skillLevel("mechanics") >= sel_vpart_info->difficulty;
         bool has_tools = ((has_welder && has_goggles) || has_duct_tape) && has_wrench;
         bool eng = sel_vpart_info->has_flag("ENGINE");
@@ -889,7 +889,7 @@ void veh_interact::do_tirechange(task_reason reason)
         bool is_wheel = sel_vpart_info->has_flag("WHEEL");
         display_list (pos, wheel_types);
         itype_id itm = sel_vpart_info->item;
-        bool has_comps = crafting_inv.has_amount(itm, 1);
+        bool has_comps = crafting_inv.has_components(itm, 1);
         bool has_tools = has_jack && has_wrench;
         werase (w_msg);
         wrefresh (w_msg);
@@ -1440,7 +1440,7 @@ void veh_interact::display_list(int pos, std::vector<vpart_info> list)
     for (int i = page * page_size; i < (page + 1) * page_size && i < list.size(); i++) {
         int y = i - page * page_size;
         itype_id itm = list[i].item;
-        bool has_comps = crafting_inv.has_amount(itm, 1);
+        bool has_comps = crafting_inv.has_components(itm, 1);
         bool has_skill = g->u.skillLevel("mechanics") >= list[i].difficulty;
         bool is_wheel = list[i].has_flag("WHEEL");
         nc_color col = has_comps && (has_skill || is_wheel) ? c_white : c_dkgray;
@@ -1537,20 +1537,16 @@ std::string veh_interact::getDurabilityDescription(const int &dur)
  */
 item crafting_inventory_t::consume_vpart_item (const std::string &vpid)
 {
-    candvec candidates;
     const std::string &itid = vehicle_part_types[vpid].item;
-    std::vector<component> components(1, component(itid, 1));
-    components.back().available = 1;
-    const int jj = select_items_to_use(components, assume_components, candidates);
-    if(jj != 0 || candidates.size() != 1) {
-        debugmsg("part not found, select_items_to_use returned %d", jj);
+    std::list<item> used_items;
+    recipe making;
+    making.components.push_back(std::vector<component>(1, component(itid, 1)));
+    gather_and_consume(making, used_items, used_items);
+    if(used_items.empty()) {
+        debugmsg("part not found");
         return item();
     }
-    requirement req(itid, 1, C_AMOUNT);
-    std::list<item> ret;
-    candidates[0].consume(g, p, req, ret);
-    assert(ret.size() == 1);
-    return *(ret.begin());
+    return *(used_items.begin());
 }
 
 /**

@@ -3947,7 +3947,7 @@ bool player::is_dead_state() {
     return hp_cur[hp_head] <= 0 || hp_cur[hp_torso] <= 0;
 }
 
-void player::on_gethit(Creature *source, body_part bp_hit, damage_instance &) {
+void player::on_gethit(Creature *source, body_part bp_hit, damage_instance&) {
     bool u_see = g->u_see(this);
     if (source != NULL) {
         if (has_active_bionic("bio_ods")) {
@@ -4083,6 +4083,44 @@ dealt_damage_instance player::deal_damage(Creature* source, body_part bp,
         break;
     default:
         debugmsg("Wacky body part hit!");
+    }
+
+    // Skip all this if the damage isn't from a creature. e.g. an explosion.
+    if( source != NULL ) {
+        if (d.total_damage() > 0 && source->has_flag(MF_VENOM)) {
+            g->add_msg_if_player(this, _("You're poisoned!"));
+            add_disease("poison", 30, false, 1, 20, 100);
+            add_effect("poison", 30);
+        }
+        else if (d.total_damage() > 0 && source->has_flag(MF_BADVENOM)) {
+            g->add_msg_if_player(this, _("You feel poison flood your body, wracking you with pain..."));
+            add_disease("badpoison", 40, false, 1, 20, 100);
+            add_effect("badpoison", 40);
+        }
+        else if (d.total_damage() > 0 && source->has_flag(MF_PARALYZE)) {
+            g->add_msg_if_player(this, _("You feel poison enter your body!"));
+            add_disease("paralyzepoison", 100, false, 1, 20, 100);
+            add_effect("paralyzepoison", 100);
+        }
+
+        if (source->has_flag(MF_BLEED) && d.total_damage() > 6 && d.type_damage(DT_CUT) > 0) {
+            g->add_msg_if_player(this, _("You're Bleeding!"));
+            add_disease("bleed", 60, false, 1, 3, 120, 1, bp, -1, true);
+        }
+
+        static bool grab = false;
+
+        if ( !grab && source->has_flag(MF_GRABS)) {
+            g->add_msg(_("%s grabs you!"), source->disp_name().c_str());
+            if (has_grab_break_tec() && get_grab_resist() > 0 && get_dex() > get_str() ? dice(get_dex(), 10) : dice(get_str(), 10) > dice(source->get_dex(), 10)) {
+                g->add_msg_player_or_npc(this, _("You break the grab!"),
+                                                  _("<npcname> breaks the grab!"));
+            } else {
+                grab = true;
+                source->melee_attack(*this, false);
+            }
+        }
+        grab = false;
     }
 
     return dealt_damage_instance(dealt_dams);
@@ -4506,6 +4544,11 @@ void player::recalc_hp()
     for (int i = 0; i < num_hp_parts; i++)
     {
         new_max_hp[i] = 60 + str_max * 3;
+        if (has_trait("HUGE")) {
+            // Bad-Huge doesn't quite have the cardio/skeletal/etc to support the mass,
+            // so no HP bonus from the ST above/beyond that from Large
+            new_max_hp[i] -= 6;
+        }
         // Only the most extreme applies.
         if (has_trait("TOUGH")) {
             new_max_hp[i] *= 1.2;
@@ -7109,7 +7152,7 @@ bool player::eat(item *eaten, it_comest *comest)
         return false;
     }
     if ((!has_trait("SAPIOVORE") && has_trait("CANNIBAL") && !has_trait("PSYCHOPATH")) && eaten->made_of("hflesh")&& !is_npc() &&
-        !query_yn(_("The thought of eating that makes you feel both guilty and excited. Go through with it?"))) {
+        !query_yn(_("The thought of eating that makes you feel both guilty and excited. Really do it?"))) {
         return false;
     }
 
@@ -8747,7 +8790,7 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
         }
         g->add_msg(_("You attach the %s to your %s."), used->tname().c_str(),
                    gun->tname().c_str());
-        gun->contents.push_back(i_rem(pos));
+        gun->contents.push_back(i_rem(used));
         return;
 
     } else if (used->is_bionic()) {
@@ -10579,6 +10622,17 @@ bool player::sees(monster *critter, int &t)
         return false;
     }
     return sees(cx, cy, t);
+}
+
+bool player::can_pickup(bool print_msg) const
+{
+    if (weapon.has_flag("NO_PICKUP")) {
+        if (print_msg && const_cast<player*>(this)->is_player()) {
+            g->add_msg(_("You cannot pick up items with your %s!"), const_cast<player*>(this)->weapon.tname().c_str());
+        }
+        return false;
+    }
+    return true;
 }
 
 // --- End ---
