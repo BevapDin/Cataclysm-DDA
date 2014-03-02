@@ -2818,6 +2818,25 @@
         ]
     },{
         "type" : "vehicle_part",
+        "id" : "tihar",
+        "name" : "mounted pne. ass. rifle",
+        "symbol" : "t",
+        "color" : "cyan",
+        "broken_symbol" : "#",
+        "broken_color" : "cyan",
+        "damage_modifier" : 80,
+        "durability" : 400,
+        "fuel_type" : "pebble",
+        "item" : "tihar",
+        "size" : 40,
+        "difficulty" : 6,
+        "location" : "on_roof",
+        "flags" : ["TURRET", "CARGO"],
+        "breaks_into" : [
+            {"item": "tihar", "min": 0, "max": 1}
+        ]
+    },{
+        "type" : "vehicle_part",
         "id" : "flamethrower",
         "name" : "mounted flamethrower",
         "symbol" : "t",
