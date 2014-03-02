@@ -232,6 +232,15 @@ void veh_interact::do_main_loop()
         } else if(ch == 'S') {
             hide_soloar_panels = !hide_soloar_panels;
             display_veh();
+        } else if(ch == 'M') {
+            const int vp = part_at(0, 0);
+            if (vp > -1) {
+                veh->shift_parts(veh->parts[vp].mount_dx, veh->parts[vp].mount_dy);
+            }
+            ddx = 0;
+            ddy = 0;
+            move_cursor(0, 0);
+            display_veh();
         } else {
             if (dx != -2 && (dx || dy)) {
                 move_cursor(dx, dy);
