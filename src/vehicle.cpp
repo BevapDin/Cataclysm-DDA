@@ -1637,6 +1637,8 @@ int vehicle::index_of_part(vehicle_part *part)
   return -1;
 }
 
+bool hide_soloar_panels = false;
+
 /**
  * Returns which part (as an index into the parts list) is the one that will be
  * displayed for the given square. Returns -1 if there are no parts in that
@@ -1655,6 +1657,9 @@ int vehicle::part_displayed_at(int local_x, int local_y)
 
     int top_part = 0;
     for(int index = 1; index < parts_in_square.size(); index++) {
+        if (hide_soloar_panels && part_info(parts_in_square[index]).epower > 0) {
+            continue;
+        }
         if(part_info(parts_in_square[top_part]).z_order <
                 part_info(parts_in_square[index]).z_order) {
             top_part = index;
