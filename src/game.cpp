@@ -12737,10 +12737,20 @@ void game::vertical_move(int movez, bool force) {
   return;
  }
 
+ vehicle *veh_draged = NULL;
  if( force ) {
      // Let go of a grabbed cart.
      u.grab_point.x = 0;
      u.grab_point.y = 0;
+ } else if( (u.grab_point.x != 0 || u.grab_point.y != 0) && u.grab_type == OBJECT_VEHICLE) {
+        vehicle *veh = m.veh_at(u.posx + u.grab_point.x, u.posy + u.grab_point.y);
+        if (veh != NULL && veh->is_single_tile()) {
+            veh_draged = veh;
+        } else {
+            // TODO: Warp the cart along with you if you're on an elevator
+            add_msg(_("You can't drag things up and down stairs."));
+            return;
+        }
  } else if( u.grab_point.x != 0 || u.grab_point.y != 0 ) {
      // TODO: Warp the cart along with you if you're on an elevator
      add_msg(_("You can't drag things up and down stairs."));
@@ -12820,6 +12830,12 @@ void game::vertical_move(int movez, bool force) {
   }
  }
 
+    if (veh_draged != NULL && tmpmap.move_cost(stairx + u.grab_point.x, stairy + u.grab_point.y) == 0) {
+        veh_draged = NULL;
+        u.grab_point.x = 0;
+        u.grab_point.y = 0;
+    }
+
  if (!force) {
   monstairx = levx;
   monstairy = levy;
@@ -12878,6 +12894,10 @@ void game::vertical_move(int movez, bool force) {
         }
     }
 
+    if (veh_draged != NULL) {
+        m.remove_vehicle(veh_draged);
+    }
+
  levz += movez;
  u.moves -= 100;
  m.clear_vehicle_cache();
@@ -12891,6 +12911,10 @@ void game::vertical_move(int movez, bool force) {
   m.spawn_item(stairx + rng(-1, 1), stairy + rng(-1, 1), "manhole_cover");
   m.ter_set(stairx, stairy, t_manhole);
  }
+
+    if (veh_draged != NULL) {
+        m.insert_vehicle(veh_draged, u.posx + u.grab_point.x, u.posy + u.grab_point.y);
+    }
 
  m.spawn_monsters();
 

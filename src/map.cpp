@@ -312,6 +312,36 @@ void map::destroy_vehicle (vehicle *veh)
  debugmsg ("destroy_vehicle can't find it! name=%s, sm=%d", veh->name.c_str(), veh_sm);
 }
 
+void map::remove_vehicle (vehicle *veh)
+{
+ if (!veh) {
+  debugmsg("map::remove_vehicle was passed NULL");
+  return;
+ }
+ const int veh_sm = veh->smx + veh->smy * my_MAPSIZE;
+ for (int i = 0; i < grid[veh_sm]->vehicles.size(); i++) {
+  if (grid[veh_sm]->vehicles[i] == veh) {
+   vehicle_list.erase(veh);
+   reset_vehicle_cache();
+   grid[veh_sm]->vehicles.erase (grid[veh_sm]->vehicles.begin() + i);
+   return;
+  }
+ }
+ debugmsg ("remove_vehicle can't find it! name=%s, sm=%d", veh->name.c_str(), veh_sm);
+}
+
+void map::insert_vehicle (vehicle *veh, const int x, const int y)
+{
+    veh->smx = x / SEEX;
+    veh->smy = y / SEEY;
+    veh->posx = x % SEEX;
+    veh->posy = y % SEEY;
+    const int nonant = veh->smx + veh->smy * my_MAPSIZE;
+    grid[nonant]->vehicles.push_back(veh);
+    vehicle_list.insert(veh);
+    update_vehicle_cache(veh, true);
+}
+
 bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool test)
 {
  const int x2 = x + dx;
@@ -328,7 +358,7 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
   return false;
  }
 
- const int src_na = int(srcx / SEEX) + int(srcy / SEEY) * my_MAPSIZE;
+ int src_na = int(srcx / SEEX) + int(srcy / SEEY) * my_MAPSIZE;
  srcx %= SEEX;
  srcy %= SEEY;
 
@@ -347,6 +377,18 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
    our_i = i;
    break;
   }
+ }
+ if (our_i < 0) {
+     vehicle *v = veh_at(x, y);
+     for(int a = 0; a < my_MAPSIZE * my_MAPSIZE; a++) {
+        for (int i = 0; i < grid[a]->vehicles.size(); i++) {
+            if (grid[a]->vehicles[i] == v) {
+                our_i = i;
+                src_na = a;
+                break;
+            }
+        }
+     }
  }
  if (our_i < 0) {
   if (g->debugmon)

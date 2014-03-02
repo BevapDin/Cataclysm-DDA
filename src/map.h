@@ -449,6 +449,9 @@ void add_corpse(int x, int y);
                               // Useful for houses, shops, etc
  void add_road_vehicles(bool city, int facing);
 
+ void insert_vehicle(vehicle *veh, const int x, const int y);
+ void remove_vehicle(vehicle *veh);
+
 protected:
  void saven(overmap *om, unsigned const int turn, const int x, const int y, const int z,
             const int gridx, const int gridy);
