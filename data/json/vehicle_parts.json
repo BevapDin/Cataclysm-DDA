@@ -2675,7 +2675,7 @@
         "item" : "kitchen_unit",
         "difficulty" : 4,
         "location" : "center",
-        "flags" : ["CARGO", "OBSTACLE", "KITCHEN"],
+        "flags" : ["CARGO", "OBSTACLE", "KITCHEN", "FAUCET"],
         "breaks_into" : [
             {"item": "steel_lump", "min": 30, "max": 40},
             {"item": "steel_chunk", "min": 30, "max": 40},
