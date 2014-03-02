@@ -4009,8 +4009,9 @@ void game::debug()
                    _("Spawn Clarivoyance Artifact"), //16
                    _("Map editor"), // 17
                    _("Change weather"),         // 18
+                   _("Remove all monsters"),    // 19
                    #ifdef LUA
-                       _("Lua Command"), // 19
+                       _("Lua Command"), // 20
                    #endif
                    _("Cancel"),
                    NULL);
@@ -4389,8 +4390,16 @@ Current turn: %d; Next spawn %d.\n\
   }
   break;
 
+  case 19: {
+        for(size_t i = 0; i < num_zombies(); i++) {
+            zombie(i).dead = true;
+        }
+        cleanup_dead();
+  }
+  break;
+
   #ifdef LUA
-      case 19: {
+      case 20: {
           std::string luacode = string_input_popup(_("Lua:"), 60, "");
           call_lua(luacode);
       }
@@ -8245,6 +8254,8 @@ point game::look_around()
   {
    if (u.has_disease("boomered"))
     mvwputch_inv(w_terrain, POSY + (ly - u.posy), POSX + (lx - u.posx), c_pink, '#');
+   else if (u.has_disease("darkness"))
+    mvwputch_inv(w_terrain, POSY + (ly - u.posy), POSX + (lx - u.posx), c_dkgray, '#');
    else
     mvwputch_inv(w_terrain, POSY + (ly - u.posy), POSX + (lx - u.posx), c_ltgray, '#');
    mvwprintw(w_look, 1, 1, _("Bright light."));

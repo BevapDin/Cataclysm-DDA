@@ -586,15 +586,14 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
             int vpart = -1;
             vehicle *veh = g->m.veh_at(x, y, vpart);
             if (veh && allow_inventory_from(g, this->p, veh)) {
-                const int kpart = veh->part_with_feature(vpart, "KITCHEN");
-                if (kpart >= 0) {
-                    add_vpart(veh, kpart, "KITCHEN", "battery");
-
+                const int faupart = veh->part_with_feature(vpart, "FAUCET");
+                if (faupart >= 0) {
                     item water(itypes["water_clean"], 0);
                     water.charges = veh->fuel_left("water");
-                    this->vpart.push_back(item_from_vpart(veh, veh->parts[kpart].mount_dx, veh->parts[kpart].mount_dy, water));
+                    this->vpart.push_back(item_from_vpart(veh, veh->parts[faupart].mount_dx, veh->parts[faupart].mount_dy, water));
                 }
 
+                add_vpart(veh, vpart, "KITCHEN", "battery");
                 add_vpart(veh, vpart, "WELDRIG", "battery");
                 add_vpart(veh, vpart, "CRAFTRIG", "battery");
                 add_vpart(veh, vpart, "FORGE", "battery");
