@@ -1,7 +1,6 @@
 #include "game.h"
 #include "rng.h"
 #include "input.h"
-#include "keypress.h"
 #include "output.h"
 #include "skill.h"
 #include "line.h"
@@ -4172,6 +4171,8 @@ Current turn: %d; Next spawn %d.\n\
       u.ma_styles.push_back("style_scorpion");
       u.ma_styles.push_back("style_lizard");
       u.ma_styles.push_back("style_toad");
+      u.ma_styles.push_back("style_eskrima");
+      u.ma_styles.push_back("style_fencing");
       add_msg("You now know a lot more than just 10 styles of kung fu.");
    break;
 
@@ -4930,7 +4931,8 @@ void game::draw_ter(int posx, int posy)
                    && mx < TERRAIN_WINDOW_WIDTH && my < TERRAIN_WINDOW_HEIGHT
                    && (u.has_active_bionic("bio_infrared")
                        || u.has_trait("INFRARED")
-                       || u.has_trait("LIZ_IR"))
+                       || u.has_trait("LIZ_IR")
+                       || u.worn_with_flag("IR_EFFECT"))
                    && m.pl_sees(u.posx,u.posy,critter.posx(),critter.posy(),
                                 u.sight_range(DAYLIGHT_LEVEL))) {
             mvwputch(w_terrain, my, mx, c_red, '?');
@@ -6036,7 +6038,7 @@ bool game::sound(int x, int y, int vol, std::string description)
 
     if (u.has_disease("deaf")) {
         // Has to be here as well to work for stacking deafness (loud noises prolong deafness)
-        if (!(u.has_bionic("bio_ears") || u.worn_with_flag("DEAF")) &&
+        if (!(u.has_bionic("bio_ears") || u.worn_with_flag("DEAF") || u.is_wearing("rm13_armor_on")) &&
             rng( (vol - dist) / 2, (vol - dist) ) >= 150) {
             int duration = std::min(40, (vol - dist - 130) / 4);
             u.add_disease("deaf", duration);
@@ -6046,7 +6048,8 @@ bool game::sound(int x, int y, int vol, std::string description)
     }
 
     // Check for deafness
-    if (!u.has_bionic("bio_ears") && rng((vol - dist) / 2, (vol - dist)) >= 150) {
+    if (!u.has_bionic("bio_ears") && !u.is_wearing("rm13_armor_on") &&
+        rng((vol - dist) / 2, (vol - dist)) >= 150) {
         int duration = (vol - dist - 130) / 4;
         u.add_disease("deaf", duration);
     }
@@ -6275,12 +6278,12 @@ void game::flashbang(int x, int y, bool player_immune)
     g->draw_explosion(x, y, 8, c_white);
     int dist = rl_dist(u.posx, u.posy, x, y), t;
     if (dist <= 8 && !player_immune) {
-        if (!u.has_bionic("bio_ears")) {
+        if (!u.has_bionic("bio_ears") && !u.is_wearing("rm13_armor_on")) {
             u.add_disease("deaf", 40 - dist * 4);
         }
         if (m.sees(u.posx, u.posy, x, y, 8, t)) {
             int flash_mod = 0;
-            if (u.has_bionic("bio_sunglasses")) {
+            if (u.has_bionic("bio_sunglasses") || u.is_wearing("rm13_armor_on")) {
                 flash_mod = 6;
             }
             u.add_env_effect("blind", bp_eyes, (12 - flash_mod - dist) / 2, 10 - dist);
@@ -11495,7 +11498,7 @@ void game::unload(item& it)
  } else {
   newam = item(itypes[default_ammo(weapon->ammo_type())], turn);
  }
- if(weapon->typeId() == "adv_UPS_off" || weapon->typeId() == "adv_UPS_on") {
+ if(weapon->typeId() == "adv_UPS_off" || weapon->typeId() == "adv_UPS_on"|| weapon->typeId() == "rm13_armor"|| weapon->typeId() == "rm13_armor_on") {
     int chargesPerPlutonium = 500;
     int chargesRemoved = weapon->charges - (weapon-> charges % chargesPerPlutonium);;
     int plutoniumRemoved = chargesRemoved / chargesPerPlutonium;
@@ -11503,7 +11506,7 @@ void game::unload(item& it)
         add_msg(_("You can't remove partially depleted plutonium!"));
     }
     if(plutoniumRemoved > 0) {
-        add_msg(_("You remove %i plutonium from the advanced UPS"), plutoniumRemoved);
+        add_msg(_("You recover %i unused plutonium."), plutoniumRemoved);
         newam.charges = plutoniumRemoved;
         weapon->charges -= chargesRemoved;
     } else { return; }
@@ -12173,7 +12176,7 @@ bool game::plmove(int dx, int dy)
       }
   }
   if (!u.has_artifact_with(AEP_STEALTH) && !u.has_trait("LEG_TENTACLES")) {
-   if (u.has_trait("LIGHTSTEP"))
+   if (u.has_trait("LIGHTSTEP") || u.is_wearing("rm13_armor_on"))
     sound(x, y, 2, ""); // Sound of footsteps may awaken nearby monsters
    else if (u.has_trait("CLUMSY"))
     sound(x, y, 10, "");
@@ -12816,6 +12819,12 @@ void game::vertical_move(int movez, bool force) {
                 u.thirst += 5;
             }
         } else return;
+     } else if (u.has_amount("grapnel", 1)) {
+     if (query_yn(_("There is a sheer drop halfway down. Climb your grappling hook down?"))){
+      rope_ladder = true;
+      u.use_amount("grapnel", 1);
+     }
+     else return;
      } else if (u.has_amount("rope_30", 1)) {
      if (query_yn(_("There is a sheer drop halfway down. Climb your rope down?"))){
       rope_ladder = true;

@@ -370,6 +370,10 @@ void Item_factory::init(){
     iuse_function_list["ATOMIC_BATTERY"] = &iuse::atomic_battery;
     iuse_function_list["FISHING_BASIC"]  = &iuse::fishing_rod_basic;
     iuse_function_list["GUN_REPAIR"] = &iuse::gun_repair;
+    iuse_function_list["TOOLARMOR_OFF"]  = &iuse::toolarmor_off;
+    iuse_function_list["TOOLARMOR_ON"]  = &iuse::toolarmor_on;
+    iuse_function_list["RM13ARMOR_OFF"]  = &iuse::rm13armor_off;
+    iuse_function_list["RM13ARMOR_ON"]  = &iuse::rm13armor_on;
     // MACGUFFINS
     iuse_function_list["MCG_NOTE"] = &iuse::mcg_note;
     // ARTIFACTS
@@ -403,7 +407,7 @@ void Item_factory::create_inital_categories() {
     add_category(category_id_drugs,    -14, _("drugs"));
     add_category(category_id_books,    -13, _("books"));
     add_category(category_id_mods,     -12, _("mods"));
-    add_category(category_id_mods,     -11, _("bionics"));
+    add_category(category_id_cbm,      -11, _("bionics"));
     add_category(category_id_other,    -10, _("other"));
 }
 
@@ -955,8 +959,13 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
     USE_EAT_VERB - Use the eat verb, even if it's a liquid(soup, jam etc.)
     STURDY - Clothing is made to be armor. Prevents damage to armor unless it is penetrated.
     SWIM_GOGGLES - Allows you to see much further under water.
-    REBREATHER - Works with an active UPS to supply you with oxygen while underwater.
+    REBREATHER - Works to supply you with oxygen while underwater. Requires external limiter like battery power.
     UNRECOVERABLE - Prevents the item from being recovered when deconstructing another item that uses this one.
+    GNV_EFFECT - Green night vision effect. Requires external limiter like battery power.
+    IR_EFFECT - Infrared vision effect. Requires external limiter like battery power.
+    SUN_GLASSES - Protects from sunlight's 'glare' effect.
+    RAD_RESIST - Partially protects from ambient radiation.
+    RAD_PROOF- Fully protects from ambient radiation.
 
     Container-only flags:
     SEALS
@@ -1024,7 +1033,7 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
         fu.charges_modi = 1;
     }
 
-    new_item_template->techniques = jo.get_tags("techniques");
+    new_item_template->techniques = jo.get_tags("techniques");    
 
     new_item_template->use = (!jo.has_member("use_action") ? &iuse::none :
                               use_from_string(jo.get_string("use_action")));
@@ -1303,8 +1312,11 @@ const std::string &Item_factory::calc_category(itype *it)
     if (it->is_book() ) {
         return category_id_books;
     }
-    if (it->is_gunmod() || it->is_bionic()) {
+    if (it->is_gunmod()) {
         return category_id_mods;
+    }
+    if (it->is_bionic()) {
+        return category_id_cbm;
     }
     if (it->melee_dam > 7 || it->melee_cut > 5) {
         return category_id_weapons;
