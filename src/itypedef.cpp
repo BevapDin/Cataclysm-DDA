@@ -77,6 +77,12 @@ void game::init_itypes ()
     ->addFunctionality("func:water_purifier", 1, 1)
     ->addFunctionality("func:press", 1, 1);
 
+    (itypes["vpart_CHEMLAB"] =
+        new itype("vpart_CHEMLAB", 0, "onboard chemistry lab",
+            "An installed onboard chemistry lab - if you are reading this it's a bug! (itypdef.cpp)",
+            '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0))
+    ->addFunctionality("func:chemistry_set", 1, 1);
+
     (itypes["vpart_FORGE"] =
         new itype("vpart_FORGE", 0, "mounted electric forge",
             "An mounted electric forge - if you are reading this it's a bug! (itypdef.cpp)",

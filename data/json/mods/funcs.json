@@ -195,5 +195,12 @@
     "color": "white",
     "name": "any wood saw",
     "description": "???"
+  },
+  { "id":"func:chemistry_set",
+    "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
+    "symbol": " ",
+    "color": "white",
+    "name": "a chemistry set",
+    "description": "???"
   }
 ]

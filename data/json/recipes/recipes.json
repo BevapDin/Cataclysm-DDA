@@ -1736,7 +1736,7 @@
   "book_learn": [[ "textbook_anarch", 5 ] , [ "adv_chemistry", 6 ] , [ "textbook_chemistry", 6 ]],
   "tools": [
     [
-      [ "chemistry_set", 25 ]
+      [ "func:chemistry_set", 25 ]
     ]
   ],
   "components": [
@@ -5146,7 +5146,7 @@
   "book_learn": [["adv_chemistry", 1] , ["textbook_chemistry", 1]],
   "tools": [
     [
-      [ "chemistry_set", 5 ]
+      [ "func:chemistry_set", 5 ]
     ]
   ],
   "components": [
@@ -5671,7 +5671,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9278,7 +9278,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ],
+      [ "func:chemistry_set", -1 ],
       [ "bottle_glass", 2 ],
       [ "hose", -1 ]
     ]
@@ -9310,7 +9310,7 @@
   "book_learn": [["textbook_chemistry", 4] , ["adv_chemistry", 4] , [ "recipe_labchem", 4]],
   "tools": [
     [
-      [ "chemistry_set", -1 ],
+      [ "func:chemistry_set", -1 ],
       [ "func:pot", -1 ]
     ],
     [
@@ -9343,7 +9343,7 @@
   "book_learn": [["textbook_chemistry", 2] , ["adv_chemistry", 2] , ["pocket_survival", 3] , ["atomic_survival", 2] , ["textbook_survival", 2] , ["survival_book", 3]],
   "tools": [
     [
-      [ "chemistry_set", -1 ],
+      [ "func:chemistry_set", -1 ],
       [ "func:pot", -1 ]
     ],
     [
@@ -9373,7 +9373,7 @@
   "book_learn": [["textbook_chemistry", 2] , ["adv_chemistry", 2] , ["pocket_survival", 3] , ["atomic_survival", 2] , ["textbook_survival", 2] , ["survival_book", 3]],
   "tools": [
     [
-      [ "chemistry_set", -1 ],
+      [ "func:chemistry_set", -1 ],
       [ "func:pot", -1 ]
     ],
     [
@@ -9403,7 +9403,7 @@
   "book_learn": [["textbook_chemistry", 2] , ["adv_chemistry", 2] , ["pocket_survival", 2] , ["atomic_survival", 2] , ["textbook_survival", 1] , ["survival_book", 3] , [ "recipe_labchem", 2]],
   "tools": [
     [
-      [ "chemistry_set", -1 ],
+      [ "func:chemistry_set", -1 ],
       [ "func:pot", -1 ]
     ],
     [
@@ -9434,12 +9434,12 @@
   "book_learn": [["textbook_chemistry", 5] , ["adv_chemistry", 4] , ["pocket_survival", 5] , ["atomic_survival", 5] , ["textbook_survival", 5] , ["survival_book", 5] , [ "recipe_labchem", 4]],
   "tools": [
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "func:hotplate", 20 ],
-      [ "chemistry_set", 20 ]
+      [ "func:chemistry_set", 20 ]
     ]
   ],
   "components": [
@@ -9467,12 +9467,12 @@
   "book_learn": [["textbook_chemistry", 7] , ["adv_chemistry", 6] , ["pocket_survival", 8] , ["atomic_survival", 6] , ["textbook_survival", 6] , ["survival_book", 7] , [ "recipe_labchem", 6]],
   "tools": [
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ],
     [
       [ "fire", -1 ],
       [ "func:hotplate", 20 ],
-      [ "chemistry_set", 20 ]
+      [ "func:chemistry_set", 20 ]
     ]
   ],
   "components": [
@@ -9503,7 +9503,7 @@
   "book_learn": [["textbook_chemistry", 6] , ["adv_chemistry", 6] , ["atomic_survival", 4] , ["survival_book", 5] , [ "recipe_labchem", 5]],
   "tools": [
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9533,7 +9533,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ],
+      [ "func:chemistry_set", -1 ],
       [ "func:pan", -1 ],
       [ "func:pot", -1 ]
     ]
@@ -9566,7 +9566,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9605,7 +9605,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9631,7 +9631,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9665,7 +9665,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9691,7 +9691,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9727,7 +9727,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9753,7 +9753,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9786,7 +9786,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9812,7 +9812,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9846,7 +9846,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9872,7 +9872,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9909,7 +9909,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9935,7 +9935,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9968,7 +9968,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -9994,7 +9994,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10027,7 +10027,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10053,7 +10053,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10086,7 +10086,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10112,7 +10112,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10145,7 +10145,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10171,7 +10171,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10204,7 +10204,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10230,7 +10230,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10263,7 +10263,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10289,7 +10289,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10323,7 +10323,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10349,7 +10349,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10382,7 +10382,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10408,7 +10408,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10441,7 +10441,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10467,7 +10467,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10500,7 +10500,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10526,7 +10526,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10574,7 +10574,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10624,7 +10624,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10659,7 +10659,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10685,7 +10685,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10720,7 +10720,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10746,7 +10746,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10778,7 +10778,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10804,7 +10804,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10839,7 +10839,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10865,7 +10865,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10897,7 +10897,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10923,7 +10923,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10962,7 +10962,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -10988,12 +10988,12 @@
   "book_learn": [["adv_chemistry", 2] , ["textbook_chemistry", 2] , ["recipe_labchem", 2] , ["atomic_survival", 3]],
   "tools": [
     [
-      [ "chemistry_set", 25 ],
+      [ "func:chemistry_set", 25 ],
       [ "func:hotplate", 25 ],
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -11026,7 +11026,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -11057,7 +11057,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ],
+      [ "func:chemistry_set", -1 ],
       [ "func:pot", -1 ]
     ]
   ],
@@ -11083,7 +11083,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ],
+      [ "func:chemistry_set", -1 ],
       [ "func:pot", -1 ]
     ]
   ],
@@ -11115,7 +11115,7 @@
       [ "func:hotplate", 25 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -11141,7 +11141,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ],
+      [ "func:chemistry_set", -1 ],
       [ "func:pot", -1 ]
     ]
   ],
@@ -11170,7 +11170,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -11223,11 +11223,11 @@
   "book_learn": [["adv_chemistry", 7] , ["textbook_chemistry", 8] , ["recipe_labchem", 6]],
   "tools": [
     [
-      [ "chemistry_set", 50 ],
+      [ "func:chemistry_set", 50 ],
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -11258,7 +11258,7 @@
       [ "func:hotplate", 25 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -11286,7 +11286,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ],
     [
       [ "func:sewing_kit", 1 ]
@@ -11321,7 +11321,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -11353,7 +11353,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ]
   ],
   "components": [
@@ -11385,7 +11385,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ],
     [
       [ "func:press", -1 ]
@@ -11431,7 +11431,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ],
     [
       [ "func:press", -1 ]
@@ -11480,7 +11480,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ],
     [
       [ "func:press", -1 ]
@@ -11526,7 +11526,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ],
     [
       [ "boltcutters", -1 ]
@@ -11570,7 +11570,7 @@
       [ "func:hotplate", 50 ]
     ],
     [
-      [ "chemistry_set", -1 ]
+      [ "func:chemistry_set", -1 ]
     ],
     [
       [ "press", -1 ]
@@ -21367,7 +21367,7 @@
   "book_learn": [["adv_chemistry", 2] , ["textbook_chemistry", 2] , ["recipe_labchem", 3] , ["atomic_survival", 2]],
   "tools": [
     [ [ "func:hotplate", 5 ], [ "char_smoker", 1 ], [ "fire", -1 ] ],
-    [ [ "chemistry_set", -1 ], [ "func:pan", -1 ], [ "func:pot", -1 ] ]
+    [ [ "func:chemistry_set", -1 ], [ "func:pan", -1 ], [ "func:pot", -1 ] ]
   ],
   "components": [
     [ [ "func:water", 1 ] ],
@@ -26202,7 +26202,7 @@
       [ "fire", -1 ]
     ],
     [
-      [ "chemistry_set", -1 ],
+      [ "func:chemistry_set", -1 ],
       [ "func:pot", -1 ]
     ]
   ],
