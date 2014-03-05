@@ -330,7 +330,8 @@ std::string item::save_info() const
 }
 
 bool itag2ivar( std::string &item_tag, std::map<std::string, std::string> &item_vars ) {
-    if(item_tag.at(0) == ivaresc && item_tag.find('=') != -1 && item_tag.find('=') >= 2 ) {
+    size_t pos = item_tag.find('=');
+    if(item_tag.at(0) == ivaresc && pos != std::string::npos && pos >= 2 ) {
         std::string var_name, val_decoded;
         int svarlen, svarsep;
         svarsep = item_tag.find('=');
@@ -607,7 +608,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
   if (mod->damage != 0)
    dump->push_back(iteminfo("GUNMOD", _("Damage: "), "", mod->damage, true, ((mod->damage > 0) ? "+" : "")));
   if (mod->clip != 0)
-   dump->push_back(iteminfo("GUNMOD", _("Magazine: "), "<num>%%", mod->clip, true, ((mod->clip > 0) ? "+" : "")));
+   dump->push_back(iteminfo("GUNMOD", _("Magazine: "), "<num>%", mod->clip, true, ((mod->clip > 0) ? "+" : "")));
   if (mod->recoil != 0)
    dump->push_back(iteminfo("GUNMOD", _("Recoil: "), "", mod->recoil, true, ((mod->recoil > 0) ? "+" : ""), true, true));
   if (mod->burst != 0)
@@ -670,7 +671,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
    temp1 << _("The feet. ");
 
   dump->push_back(iteminfo("ARMOR", temp1.str()));
-  dump->push_back(iteminfo("ARMOR", _("Coverage: "), "<num>%%  ", armor->coverage, true, "", false));
+  dump->push_back(iteminfo("ARMOR", _("Coverage: "), "<num>%  ", armor->coverage, true, "", false));
   dump->push_back(iteminfo("ARMOR", _("Warmth: "), "", armor->warmth));
     if (has_flag("FIT")) {
         dump->push_back(iteminfo("ARMOR", _("Encumberment: "), _("<num> (fits)"),
@@ -707,7 +708,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
 
   if (!(book->recipes.empty())) {
    std::string recipes = "";
-   int index = 1;
+   size_t index = 1;
    for (std::map<recipe*, int>::iterator iter = book->recipes.begin(); iter != book->recipes.end(); ++iter, ++index) {
      if(g->u.knows_recipe(iter->first)) recipes += "<color_ltgray>";
      recipes += itypes.at(iter->first->result)->name;
@@ -804,7 +805,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
     }
     if (is_armor() && type->id == "rad_badge")
     {
-        int i;
+        size_t i;
         for( i = 1; i < sizeof(rad_dosage_thresholds)/sizeof(rad_dosage_thresholds[0]); i++ )
         {
             if( irridation < rad_dosage_thresholds[i] )
@@ -1426,7 +1427,7 @@ int item::damage_bash()
 int item::damage_cut() const
 {
     if (is_gun()) {
-        for (int i = 0; i < contents.size(); i++) {
+        for (size_t i = 0; i < contents.size(); i++) {
             if (contents[i].typeId() == "bayonet" || "pistol_bayonet"|| "sword_bayonet")
                 return contents[i].type->melee_cut;
         }
@@ -1984,24 +1985,25 @@ bool item::is_watertight_container() const
     return ( is_container() != false && has_flag("WATERTIGHT") && has_flag("SEALS") );
 }
 
-int item::is_funnel_container(int bigger_than) const
+bool item::is_funnel_container(unsigned int &bigger_than) const
 {
-    if ( ! is_container() ) {
-        return 0;
+    if ( ! is_watertight_container() ) {
+        return false;
     }
     it_container *ct = dynamic_cast<it_container *>(type);
     // todo; consider linking funnel to item or -making- it an active item
-    if ( (int)ct->contains <= bigger_than ) {
-        return 0; // skip contents check, performance
+    if ( ct->contains <= bigger_than ) {
+        return false; // skip contents check, performance
     }
     if (
         contents.empty() ||
         contents[0].typeId() == "water" ||
         contents[0].typeId() == "water_acid" ||
         contents[0].typeId() == "water_acid_weak") {
-        return (int)ct->contains;
+        bigger_than = ct->contains;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 bool item::is_tool() const
@@ -2619,7 +2621,7 @@ bool item::reload(player &u, int pos)
    reload_target = &contents[spare_mag];
   // Finally consider other gunmods
   } else {
-   for (size_t i = 0; i < contents.size(); i++) {
+   for (ssize_t i = 0; i < (ssize_t)contents.size(); i++) {
     if (&contents[i] != gunmod && i != spare_mag && contents[i].is_gunmod() &&
         contents[i].has_flag("MODE_AUX") && contents[i].ammo_type() == ammo_to_use->ammo_type() &&
         (contents[i].charges <= (dynamic_cast<it_gunmod*>(contents[i].type))->clip ||

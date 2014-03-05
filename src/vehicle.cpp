@@ -271,7 +271,7 @@ void vehicle::init_state(int init_veh_fuel, int init_veh_status)
 
     // Reactor should always start out activated if present
     std::vector<int> fuel_tanks = all_parts_with_feature(VPFLAG_FUEL_TANK);
-    for(int p = 0; p < fuel_tanks.size(); p++) {
+    for( size_t p = 0; p < fuel_tanks.size(); ++p ) {
         if(part_info(fuel_tanks[p]).fuel_type == fuel_type_plutonium) {
             reactor_on = true;
             break;
@@ -816,7 +816,7 @@ void vehicle::start_engine()
 {
     bool muscle_powered = false;
     // TODO: Make chance of success based on engine condition.
-    for(int p = 0; p < engines.size(); p++) {
+    for( size_t p = 0; p < engines.size(); ++p ) {
         if(parts[engines[p]].hp > 0) {
             if(part_info(engines[p]).fuel_type == fuel_type_gasoline) {
                 int engine_power = part_power(engines[p]);
@@ -847,7 +847,7 @@ void vehicle::start_engine()
 
 void vehicle::honk_horn()
 {
-    for(int h = 0; h < horns.size(); h++) {
+    for( size_t h = 0; h < horns.size(); ++h ) {
         //Get global position of horn
         const int horn_x = global_x() + parts[horns[h]].precalc_dx[0];
         const int horn_y = global_y() + parts[horns[h]].precalc_dy[0];
@@ -1095,7 +1095,7 @@ bool vehicle::can_unmount (int p)
 
         /* To remove a structural part, there can be only structural parts left
          * in that square (might be more than one in the case of wreckage) */
-        for(int part_index = 0; part_index < parts_in_square.size(); part_index++) {
+        for( size_t part_index = 0; part_index < parts_in_square.size(); ++part_index ) {
             if(part_info(parts_in_square[part_index]).location != part_location_structure) {
                 return false;
             }
@@ -1358,7 +1358,7 @@ void vehicle::remove_part (int p)
     //If we remove the (0, 0) frame, we need to shift things around
     if(part_info(p).location == "structure" && parts[p].mount_dx == 0 && parts[p].mount_dy == 0) {
         //Find a frame, any frame, to shift to
-        for(int next_part = 0; next_part < parts.size(); next_part++) {
+        for( size_t next_part = 0; next_part < parts.size(); ++next_part ) {
             if(next_part != p
                     && part_info(next_part).location == "structure"
                     && !part_info(next_part).has_flag("PROTRUSION")) {
@@ -1392,7 +1392,7 @@ void vehicle::remove_part (int p)
  */
 void vehicle::break_part_into_pieces(int p, int x, int y, bool scatter) {
     std::vector<break_entry> break_info = part_info(p).breaks_into;
-    for(int index = 0; index < break_info.size(); index++) {
+    for( size_t index = 0; index < break_info.size(); ++index ) {
         int quantity = rng(break_info[index].min, break_info[index].max);
         for(int num = 0; num < quantity; num++) {
             const int actual_x = scatter ? x + rng(-SCATTER_DISTANCE, SCATTER_DISTANCE) : x;
@@ -1542,7 +1542,7 @@ int vehicle::part_with_feature (int part, const std::string &flag, bool unbroken
 std::vector<int> vehicle::all_parts_with_feature(const std::string& feature, bool unbroken)
 {
     std::vector<int> parts_found;
-    for(int part_index = 0; part_index < parts.size(); part_index++) {
+    for( size_t part_index = 0; part_index < parts.size(); ++part_index ) {
         if(part_info(part_index).has_flag(feature) &&
                 (!unbroken || parts[part_index].hp > 0)) {
             parts_found.push_back(part_index);
@@ -1554,7 +1554,7 @@ std::vector<int> vehicle::all_parts_with_feature(const std::string& feature, boo
 std::vector<int> vehicle::all_parts_with_feature(const vpart_bitflags & feature, bool unbroken)
 {
     std::vector<int> parts_found;
-    for(int part_index = 0; part_index < parts.size(); part_index++) {
+    for( size_t part_index = 0; part_index < parts.size(); ++part_index ) {
         if(part_info(part_index).has_flag(feature) &&
                 (!unbroken || parts[part_index].hp > 0)) {
             parts_found.push_back(part_index);
@@ -1572,7 +1572,7 @@ std::vector<int> vehicle::all_parts_with_feature(const vpart_bitflags & feature,
 std::vector<int> vehicle::all_parts_at_location(const std::string& location)
 {
     std::vector<int> parts_found;
-    for(int part_index = 0; part_index < parts.size(); part_index++) {
+    for( size_t part_index = 0; part_index < parts.size(); ++part_index ) {
         if(part_info(part_index).location == location) {
             parts_found.push_back(part_index);
         }
@@ -1624,7 +1624,7 @@ int vehicle::global_part_at(int x, int y)
 int vehicle::index_of_part(vehicle_part *part)
 {
   if(part != NULL) {
-    for(int index = 0; index < parts.size(); index++) {
+    for( size_t index = 0; index < parts.size(); ++index ) {
       vehicle_part next_part = parts[index];
       if(part->id == next_part.id &&
               part->mount_dx == next_part.mount_dx &&
@@ -2024,7 +2024,7 @@ void vehicle::center_of_mass(int &x, int &y)
 int vehicle::fuel_left (const ammotype & ftype)
 {
     int fl = 0;
-    for(int p = 0; p < fuel.size(); p++) {
+    for( size_t p = 0; p < fuel.size(); ++p ) {
         if(ftype == part_info(fuel[p]).fuel_type) {
             fl += parts[fuel[p]].amount;
         }
@@ -2035,7 +2035,7 @@ int vehicle::fuel_left (const ammotype & ftype)
 int vehicle::fuel_capacity (const ammotype & ftype)
 {
     int cap = 0;
-    for(int p = 0; p < fuel.size(); p++) {
+    for( size_t p = 0; p < fuel.size(); ++p ) {
         if(ftype == part_info(fuel[p]).fuel_type) {
             cap += part_info(fuel[p]).size;
         }
@@ -2091,7 +2091,7 @@ int vehicle::drain (const ammotype & ftype, int amount) {
 int vehicle::basic_consumption (const ammotype & ftype)
 {
     int fcon = 0;
-    for(int p = 0; p < engines.size(); p++) {
+    for(size_t p = 0; p < engines.size(); p++) {
         if(ftype == part_info(engines[p]).fuel_type && parts[engines[p]].hp > 0 && parts[engines[p]].active()) {
             if(part_info(engines[p]).fuel_type == fuel_type_battery) {
                 // electric engine - use epower instead
@@ -2137,7 +2137,7 @@ int vehicle::total_power (bool fueled)
 int vehicle::solar_epower ()
 {
     int epower = 0;
-    for(int p = 0; p < solar_panels.size(); p++) {
+    for( size_t p = 0; p < solar_panels.size(); ++p ) {
         if(parts[solar_panels[p]].hp > 0) {
             int part_x = global_x() + parts[solar_panels[p]].precalc_dx[0];
             int part_y = global_y() + parts[solar_panels[p]].precalc_dy[0];
@@ -2420,7 +2420,7 @@ void vehicle::power_parts ()//TODO: more categories of powered part!
     int gas_epower = 0;
     if(engine_on) {
         // Gas engines require epower to run for ignition system, ECU, etc.
-        for(int p = 0; p < engines.size(); p++) {
+        for( size_t p = 0; p < engines.size(); ++p ) {
             if(parts[engines[p]].hp > 0 &&
                part_info(engines[p]).fuel_type == fuel_type_gasoline) {
                 gas_epower += part_info(engines[p]).epower;
@@ -2441,7 +2441,7 @@ void vehicle::power_parts ()//TODO: more categories of powered part!
     if(engine_on) {
         // Plasma engines generate epower if turned on
         int plasma_epower = 0;
-        for(int p = 0; p < engines.size(); p++) {
+        for( size_t p = 0; p < engines.size(); ++p ) {
             if(parts[engines[p]].hp > 0 &&
                part_info(engines[p]).fuel_type == fuel_type_plasma) {
                 plasma_epower += part_info(engines[p]).epower;
@@ -2456,7 +2456,7 @@ void vehicle::power_parts ()//TODO: more categories of powered part!
         // Produce additional epower from any alternators
         int alternators_epower = 0;
         int alternators_power = 0;
-        for(int p = 0; p < alternators.size(); p++) {
+        for( size_t p = 0; p < alternators.size(); ++p ) {
             if(parts[alternators[p]].hp > 0) {
                 alternators_epower += part_info(alternators[p]).epower;
                 alternators_power += part_power(alternators[p]);
@@ -2481,7 +2481,7 @@ void vehicle::power_parts ()//TODO: more categories of powered part!
         // Produce additional epower from any reactors
         int reactors_epower = 0;
         int reactors_fuel_epower = 0;
-        for(int p = 0; p < reactors.size(); p++) {
+        for( size_t p = 0; p < reactors.size(); ++p ) {
             if(parts[reactors[p]].hp > 0) {
                 reactors_epower += part_info(reactors[p]).epower;
                 reactors_fuel_epower += power_to_epower(parts[reactors[p]].amount);
@@ -3534,7 +3534,7 @@ void vehicle::find_power ()
 void vehicle::find_alternators ()
 {
     alternators.clear();
-    for(int p = 0; p < parts.size(); p++) {
+    for( size_t p = 0; p < parts.size(); ++p ) {
         if(part_flag(p, VPFLAG_ALTERNATOR)) {
             alternators.push_back(p);
         }
@@ -3554,7 +3554,7 @@ void vehicle::find_fuel_tanks ()
 void vehicle::find_engines ()
 {
     engines.clear();
-    for(int p = 0; p < parts.size(); p++) {
+    for( size_t p = 0; p < parts.size(); ++p ) {
         if(part_flag(p, VPFLAG_ENGINE)) {
             engines.push_back(p);
         }
@@ -3564,7 +3564,7 @@ void vehicle::find_engines ()
 void vehicle::find_reactors ()
 {
     reactors.clear();
-    for(int p = 0; p < parts.size(); p++) {
+    for( size_t p = 0; p < parts.size(); ++p ) {
         if(part_flag(p, VPFLAG_FUEL_TANK) &&
            part_info(p).fuel_type == fuel_type_plutonium) {
             reactors.push_back(p);
@@ -3575,7 +3575,7 @@ void vehicle::find_reactors ()
 void vehicle::find_solar_panels ()
 {
     solar_panels.clear();
-    for(int p = 0; p < parts.size(); p++) {
+    for( size_t p = 0; p < parts.size(); ++p ) {
         if(part_flag(p, VPFLAG_SOLAR_PANEL)) {
             solar_panels.push_back(p);
         }
@@ -4125,7 +4125,7 @@ void vehicle::open_or_close(int part_index, bool opening)
     /* Find all other closed parts with the same ID in adjacent squares.
      * This is a tighter restriction than just looking for other Multisquare
      * Openable parts, and stops trunks from opening side doors and the like. */
-    for(int next_index = 0; next_index < parts.size(); next_index++) {
+    for( size_t next_index = 0; next_index < parts.size(); ++next_index ) {
       //Look for parts 1 square off in any cardinal direction
       int xdiff = parts[next_index].mount_dx - parts[part_index].mount_dx;
       int ydiff = parts[next_index].mount_dy - parts[part_index].mount_dy;

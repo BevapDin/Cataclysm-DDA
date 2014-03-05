@@ -246,7 +246,7 @@ void construction_menu()
                 }
                 // Print components
                 posx = 33;
-                for (int i = 0; i < current_con->components.size(); i++) {
+                for (size_t i = 0; i < current_con->components.size(); i++) {
                     total_inv.has_any_components(current_con->components[i]);
                     mvwprintz(w_con, posy, posx - 2, c_white, ">");
                     for (unsigned j = 0; j < current_con->components[i].size(); j++) {

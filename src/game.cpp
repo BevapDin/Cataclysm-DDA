@@ -213,10 +213,10 @@ void game::load_data_from_dir(const std::string &path) {
         // Process the lua mod file before the .json files,
         // so that custom IUSE's will be present when the
         // item definitions are parsed.
-        
+
         lua_loadmod(lua_state, path, "main.lua");
     #endif
-    
+
     try {
         DynamicDataLoader::get_instance().load_data_from_path(path);
     } catch(std::string &err) {
@@ -711,7 +711,7 @@ void game::cleanup_at_end(){
             for (int i = 0; i < characters.size(); ++i) {
                 message << "\n  " << characters[i];
             }
-            popup(message.str().c_str());
+            popup(message.str(), PF_NONE);
         }
         if (gamemode) {
             delete gamemode;
@@ -1688,7 +1688,7 @@ bool game::cancel_activity_or_ignore_query(const char* reason, ...) {
             _(" (Y)es, (N)o, (I)gnore further distractions and finish.");
 
     do {
-        ch = popup_getkey(stop_message.c_str());
+        ch = popup(stop_message, PF_GET_KEY);
     } while (ch != '\n' && ch != ' ' && ch != KEY_ESCAPE &&
              ch != 'Y' && ch != 'N' && ch != 'I' &&
              (force_uc || (ch != 'y' && ch != 'n' && ch != 'i')));
@@ -1717,8 +1717,7 @@ bool game::cancel_activity_query(const char* message, ...)
         }
         return false;
     }
-    std::string stop_message = s + u.activity.get_stop_phrase();
-    if (query_yn(stop_message.c_str())) {
+    if (query_yn("%s%s", s.c_str(), u.activity.get_stop_phrase().c_str())) {
         u.cancel_activity();
         return true;
     }
@@ -2185,7 +2184,7 @@ int game::inventory_item_menu(int pos, int iStartX, int iWidth, int position) {
 
         wmove(w, 1, 2);
         wprintz(w, c_white, "%s", item_name.c_str());
-        max_line = fold_and_print_from(w, 3, 2, iWidth - 4, offset_line, c_white, str.c_str());
+        max_line = fold_and_print_from(w, 3, 2, iWidth - 4, offset_line, c_white, str);
         if(max_line > TERMY-VIEW_OFFSET_Y*2 - 5) {
           wmove(w, 1, iWidth - 3);
           if(offset_line == 0) {
@@ -2297,7 +2296,7 @@ int game::inventory_item_menu(int pos, int iStartX, int iWidth, int position) {
             }
             wmove(w, 1, 2);
             wprintz(w, c_white, "%s", item_name.c_str());
-            fold_and_print_from(w, 3, 2, iWidth - 4, offset_line, c_white, str.c_str());
+            fold_and_print_from(w, 3, 2, iWidth - 4, offset_line, c_white, str);
             draw_border(w);
             wrefresh(w);
         } while (cMenu == KEY_DOWN || cMenu == KEY_UP || cMenu == '>' || cMenu == '<');
@@ -2442,7 +2441,7 @@ input_context game::get_player_input(std::string &action)
         int offset_y = (u.posy + u.view_offset_y) - getmaxy(w_terrain)/2;
 
         do {
-            for(int i=0; i < wPrint.vdrops.size(); i++) {
+            for( size_t i = 0; i < wPrint.vdrops.size(); ++i ) {
                 m.drawsq(w_terrain, u,
                          //vDrops[i].first - getmaxx(w_terrain)/2 + u.posx + u.view_offset_x,
                          wPrint.vdrops[i].first + offset_x,
@@ -3078,7 +3077,7 @@ bool game::handle_action()
   case ACTION_IGNORE_ENEMY:
    if (run_mode == 2) {
     add_msg(_("Ignoring enemy!"));
-    for(int i=0; i < new_seen_mon.size(); i++) {
+    for( size_t i = 0; i < new_seen_mon.size(); ++i ) {
         monster &critter = critter_tracker.find(new_seen_mon[i]);
         critter.ignoring = rl_dist( point(u.posx, u.posy), critter.pos() );
     }
@@ -3626,7 +3625,7 @@ bool game::save_maps()
     MAPBUFFER.save(); // can throw std::ios::failure
         return true;
     } catch(std::ios::failure &) {
-        popup(_("Failed to maps"));
+        popup(_("Failed to save the maps"));
         return false;
     }
 }
@@ -3799,7 +3798,7 @@ void game::write_memorial_file() {
     timestamp = timestamp.substr(0, end);
 
     //Colons are not usable in paths, so get rid of them
-    for(int index = 0; index < timestamp.size(); index++) {
+    for( size_t index = 0; index < timestamp.size(); ++index ) {
         if(timestamp[index] == ':') {
             timestamp[index] = '-';
         }
@@ -3808,7 +3807,7 @@ void game::write_memorial_file() {
     /* Remove non-ASCII glyphs from character names - unicode symbols are not
      * valid in filenames. */
     std::stringstream player_name;
-    for(int index = 0; index < u.name.size(); index++) {
+    for( size_t index = 0; index < u.name.size(); ++index ) {
         if((unsigned char)u.name[index] <= '~') {
             player_name << u.name[index];
         }
@@ -4595,7 +4594,7 @@ faction* game::list_factions(std::string title)
           _("Ranking: %s"), fac_ranking_text(valfac[0].likes_u).c_str());
  mvwprintz(w_info, 1, 0, c_white,
           _("Respect: %s"), fac_respect_text(valfac[0].respects_u).c_str());
- fold_and_print(w_info, 3, 0, maxlength, c_white, valfac[0].describe().c_str());
+ fold_and_print(w_info, 3, 0, maxlength, c_white, valfac[0].describe());
  wrefresh(w_info);
  InputEvent input;
  do {
@@ -4629,7 +4628,7 @@ faction* game::list_factions(std::string title)
             _("Ranking: %s"), fac_ranking_text(valfac[sel].likes_u).c_str());
    mvwprintz(w_info, 1, 0, c_white,
             _("Respect: %s"), fac_respect_text(valfac[sel].respects_u).c_str());
-   fold_and_print(w_info, 3, 0, maxlength, c_white, valfac[sel].describe().c_str());
+   fold_and_print(w_info, 3, 0, maxlength, c_white, valfac[sel].describe());
    wrefresh(w_info);
   }
  } while (input != Cancel && input != Confirm && input != Close);
@@ -8579,7 +8578,7 @@ int game::list_filter_high_priority(std::vector<map_item_stack> &stack, std::str
 {
     //TODO:optimize if necessary
     std::vector<map_item_stack> tempstack; // temp
-    for(int i = 0 ; i < stack.size() ; i++) {
+    for( size_t i = 0; i < stack.size(); ++i ) {
         std::string name = stack[i].example.tname();
         if(prorities == "" || !list_items_match(stack[i].example,prorities)) {
             tempstack.push_back(stack[i]);
@@ -8589,7 +8588,7 @@ int game::list_filter_high_priority(std::vector<map_item_stack> &stack, std::str
     }
 
     int id = stack.size();
-    for(int i = 0 ; i < tempstack.size() ; i++) {
+    for( size_t i = 0; i < tempstack.size(); ++i ) {
         stack.push_back(tempstack[i]);
     }
     return id;
@@ -8608,7 +8607,7 @@ int game::list_filter_low_priority(std::vector<map_item_stack> &stack, int start
     }
 
     int id = stack.size();
-    for(int i = 0 ; i < tempstack.size() ; i++) {
+    for( size_t i = 0; i < tempstack.size(); ++i ) {
         stack.push_back(tempstack[i]);
     }
     return id;
@@ -8928,7 +8927,7 @@ int game::list_items(const int iLastState)
                 wprintz(w_items, c_white, " / %*d ", ((iItemNum - iFilter > 9) ? 2 : 1), iItemNum - iFilter);
 
                 werase(w_item_info);
-                fold_and_print(w_item_info,1,1,width - 5, c_white, "%s", activeItem.info().c_str());
+                fold_and_print(w_item_info,1,1,width - 5, c_white, activeItem.info());
 
                 //Only redraw trail/terrain if x/y position changed
                 if (iActiveX != iLastActiveX || iActiveY != iLastActiveY) {
@@ -9585,8 +9584,8 @@ and you can't unwield your %s."),
     std::vector<bool> getitem;
     getitem.resize(here.size(), false);
 
-    int maxitems=here.size();
-    maxitems=(maxitems < minmaxitems ? minmaxitems : (maxitems > maxmaxitems ? maxmaxitems : maxitems ));
+    int maxitems = here.size();
+    maxitems = (maxitems < minmaxitems ? minmaxitems : (maxitems > maxmaxitems ? maxmaxitems : maxitems ));
 
     int pickupH = maxitems + pickupBorderRows;
     int pickupW = getmaxx(w_messages);
@@ -9604,9 +9603,9 @@ and you can't unwield your %s."),
     int start = 0, cur_it, iter;
     int new_weight = u.weight_carried(), new_volume = u.volume_carried();
     bool update = true;
-    mvwprintw(w_pickup, 0,  0, _("PICK UP (, = all)"));
-    int selected=0;
-    int last_selected=-1;
+    mvwprintw(w_pickup, 0, 0, _("PICK UP"));
+    int selected = 0;
+    int last_selected = -1;
 
     int itemcount = 0;
     std::map<int, unsigned int> pickup_count; // Count of how many we'll pick up from each stack
@@ -9692,10 +9691,10 @@ and you can't unwield your %s."),
             } else if ( ch == KEY_DOWN ) {
                selected++;
                if ( selected >= here.size() ) {
-                   selected=0;
-                   start=0;
+                   selected = 0;
+                   start = 0;
                } else if ( selected >= start + maxitems ) {
-                   start+=maxitems;
+                   start += maxitems;
                }
             } else if ( selected >= 0 && (
                         ( ch == KEY_RIGHT && !getitem[selected]) ||
@@ -9705,10 +9704,10 @@ and you can't unwield your %s."),
             } else if ( ch == '`' ) {
                std::string ext = string_input_popup(_("Enter 2 letters (case sensitive):"), 2);
                if(ext.size() == 2) {
-                    int p1=pickup_chars.find(ext.at(0));
-                    int p2=pickup_chars.find(ext.at(1));
+                    int p1 = pickup_chars.find(ext.at(0));
+                    int p2 = pickup_chars.find(ext.at(1));
                     if ( p1 != -1 && p2 != -1 ) {
-                         idx=pickup_chars.size() + ( p1 * pickup_chars.size() ) + p2;
+                         idx = pickup_chars.size() + ( p1 * pickup_chars.size() ) + p2;
                     }
                }
             } else {
@@ -9841,7 +9840,9 @@ and you can't unwield your %s."),
 
             if (update) { // Update weight & volume information
                 update = false;
-                mvwprintw(w_pickup, 0,  7, "                           ");
+                for (int i = 9; i < pickupW; ++i) {
+                    mvwaddch(w_pickup, 0, i, ' ');
+                }
                 mvwprintz(w_pickup, 0,  9,
                           (new_weight >= u.weight_capacity() ? c_red : c_white),
                           _("Wgt %.1f"), u.convert_weight(new_weight));
@@ -11121,6 +11122,8 @@ void game::complete_butcher(int index)
   if (corpse->has_flag(MF_POISON)) {
     if (corpse->mat == "flesh") {
      meat = "meat_tainted";
+    } else if (corpse->mat == "iflesh") {
+     meat = "meat_tainted"; //In the future, insects could drop insect flesh rather than plain ol' meat.
     } else {
      meat = "veggy_tainted";
     }
@@ -11991,7 +11994,7 @@ bool game::plmove(int dx, int dy)
               int gx = grabbed_vehicle->global_x();
               int gy = grabbed_vehicle->global_y();
               std::vector<int> wheel_indices = grabbed_vehicle->all_parts_with_feature("WHEEL", false);
-              for( int i = 0; i < wheel_indices.size(); i++ ) {
+              for( size_t i = 0; i < wheel_indices.size(); ++i ) {
                   int p = wheel_indices[i];
                   if( one_in(2) ) {
                       grabbed_vehicle->handle_trap( gx + grabbed_vehicle->parts[p].precalc_dx[0] + dxVeh,
@@ -12027,7 +12030,7 @@ bool game::plmove(int dx, int dy)
                mon_at(fdest.x, fdest.y) == -1 &&
                m.has_flag("FLAT", fdest.x, fdest.y) &&
                !m.has_furn(fdest.x, fdest.y) &&
-               m.veh_at(fdest.x, fdest.y)== NULL && 
+               m.veh_at(fdest.x, fdest.y)== NULL &&
                m.tr_at(fdest.x, fdest.y) == tr_null
           );
 
@@ -13697,7 +13700,7 @@ void game::nuke(int x, int y)
     om.ter(x, y, 0) = "crater";
     // Kill any npcs on that omap location.
     std::vector<npc*> npcs = overmap_buffer.get_npcs_near_omt(x, y, 0, 0);
-    for(int a = 0; a < npcs.size(); a++) {
+    for( size_t a = 0; a < npcs.size(); ++a ) {
         npcs[a]->marked_for_death = true;
     }
 }

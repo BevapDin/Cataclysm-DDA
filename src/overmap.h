@@ -43,7 +43,7 @@ struct oter_weight_list {
     }
 
     void setup() { // populate iid's for faster generation and sanity check.
-        for( int i=0; i < items.size(); i++ ) {
+        for( size_t i = 0; i < items.size(); ++i ) {
             if ( items[i].ot_iid == -1 ) {
                 std::map<std::string, oter_t>::const_iterator it = obasetermap.find(items[i].ot_sid);
                 if ( it == obasetermap.end() ) {
@@ -56,10 +56,10 @@ struct oter_weight_list {
         }
     }
 
-    int pick_ent() {
+    size_t pick_ent() {
         int picked = rng(0, total_weight);
         int accumulated_weight = 0;
-        int i;
+        size_t i;
         for(i=0; i<items.size(); i++) {
             accumulated_weight += items[i].weight;
             if(accumulated_weight >= picked) {

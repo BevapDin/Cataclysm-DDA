@@ -294,7 +294,7 @@ bool game::making_would_work(recipe *making)
         std::ostringstream buffer;
         buffer << _("You can no longer make ") << ::name(making->result) << "\n";
         ::list_missing_ones(buffer, *making);
-        popup_top(buffer.str().c_str());
+        popup(buffer.str(), PF_ON_TOP);
         draw();
     }
 
@@ -634,7 +634,7 @@ recipe *game::select_crafting_recipe()
                                                   iter->count, qualities[iter->id].name.c_str(),
                                                   iter->level);
                         ypos += fold_and_print(w_data, ypos, xpos, FULL_SCREEN_WIDTH - xpos - 1,
-                                               toolcol, qualinfo.str().c_str());
+                                               toolcol, qualinfo.str());
                     }
                     ypos--;
                     // Loop to print the required tools
@@ -804,7 +804,7 @@ recipe *game::select_crafting_recipe()
                     msg += current[line]->result;
                     msg += ":\n";
                     msg += s.to_string(crafting_inventory_t::simple_req::ts_overlays | /*crafting_inventory_t::simple_req::ts_compress | */crafting_inventory_t::simple_req::ts_found_items);
-                    popup_top(msg.c_str());
+                    popup(msg, PF_ON_TOP);
                 }
                 draw();
             }
@@ -841,7 +841,7 @@ recipe *game::select_crafting_recipe()
                         if(!crafting_inv.has_all_requirements(the_many_recipe)) {
                             std::ostringstream buffer;
                             ::list_missing_ones(buffer, the_many_recipe);
-                            popup_top(buffer.str().c_str());
+                            popup(buffer.str(), PF_ON_TOP);
                             done = false;
                             chosen = NULL;
                         } else {
@@ -854,7 +854,7 @@ recipe *game::select_crafting_recipe()
             break;
         case Help:
             tmp = item(item_controller->find_template(current[line]->result), g->turn);
-            full_screen_popup(tmp.info(true).c_str());
+            popup(tmp.info(true), PF_FULLSCREEN);
             redraw = true;
             keepline = true;
             break;
@@ -1073,7 +1073,7 @@ void game::pick_recipes(crafting_inventory_t& crafting_inv, std::vector<recipe*>
     {
         search_name = false;
         std::string searchType = filter.substr(0, pos);
-        for(int i = 0 ; i < searchType.size() ; i++)
+        for( size_t i = 0; i < searchType.size(); ++i )
         {
             if(searchType[i] == 'n')
             {

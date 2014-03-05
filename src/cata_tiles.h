@@ -106,7 +106,7 @@ struct tile_drawing_cache {
         if(sprites.size() != other.sprites.size()) {
             return false;
         } else {
-            for(int i=0; i<sprites.size(); i++) {
+            for( size_t i = 0; i < sprites.size(); ++i ) {
                 if(sprites[i] != other.sprites[i] || rotations[i] != other.rotations[i]) {
                     return false;
                 }
@@ -227,7 +227,7 @@ class cata_tiles
 
         /** Variables */
         SDL_Renderer *renderer;
-        SDL_Surface *tile_atlas, *default_size_tile_atlas;
+        SDL_Surface *tile_atlas;
         tile_map *tile_values;
         tile_id_map *tile_ids;
 
