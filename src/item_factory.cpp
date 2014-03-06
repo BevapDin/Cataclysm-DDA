@@ -351,7 +351,7 @@ void Item_factory::init(){
     iuse_function_list["DEJAR"] = &iuse::dejar;
     iuse_function_list["RAD_BADGE"] = &iuse::rad_badge;
     iuse_function_list["BOOTS"] = &iuse::boots;
-    iuse_function_list["ABSORBENT"] = &iuse::towel;
+    iuse_function_list["TOWEL"] = &iuse::towel;
     iuse_function_list["UNFOLD_BICYCLE"] = &iuse::unfold_bicycle;
     iuse_function_list["ADRENALINE_INJECTOR"] = &iuse::adrenaline_injector;
     iuse_function_list["JET_INJECTOR"] = &iuse::jet_injector;
@@ -966,6 +966,7 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
     SUN_GLASSES - Protects from sunlight's 'glare' effect.
     RAD_RESIST - Partially protects from ambient radiation.
     RAD_PROOF- Fully protects from ambient radiation.
+    ELECTRIC_IMMUNE- Fully protects from electricity.
 
     Container-only flags:
     SEALS
@@ -1033,7 +1034,7 @@ void Item_factory::load_basic_info(JsonObject& jo, itype* new_item_template)
         fu.charges_modi = 1;
     }
 
-    new_item_template->techniques = jo.get_tags("techniques");    
+    new_item_template->techniques = jo.get_tags("techniques");
 
     new_item_template->use = (!jo.has_member("use_action") ? &iuse::none :
                               use_from_string(jo.get_string("use_action")));

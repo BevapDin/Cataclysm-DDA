@@ -1058,7 +1058,9 @@ nc_color item::color(player *u) const
 {
     nc_color ret = c_ltgray;
 
-    if (active && !is_food() && !is_food_container()) // Active items show up as yellow
+    if(has_flag("WET"))
+        ret = c_cyan;
+    else if (active && !is_food() && !is_food_container()) // Active items show up as yellow
         ret = c_yellow;
     else if (is_gun()) { // Guns are green if you are carrying ammo for them
         ammotype amtype = ammo_type();
@@ -1212,6 +1214,9 @@ std::string item::tname( bool with_prefix )
 
     if (owned > 0)
         ret << _(" (owned)");
+
+    if(has_flag("WET"))
+       ret << _(" (wet)");
 
     tagtext = ret.str();
 
@@ -2534,31 +2539,43 @@ int item::pick_reload_ammo(player &u, bool interactive)
      amenu.w_y = 0;
      amenu.w_x = 0;
      amenu.w_width = TERMX;
-     int namelen=TERMX-2-40-3;
+     // 40: = 4 * ammo stats colum (10 chars each)
+     // 2: prefix from uimenu: hotkey + space in front of name
+     // 4: borders: 2 char each ("| " and " |")
+     const int namelen = TERMX - 2 - 40 - 4;
      std::string lastreload = "";
 
      if ( uistate.lastreload.find( ammo_type() ) != uistate.lastreload.end() ) {
          lastreload = uistate.lastreload[ ammo_type() ];
      }
 
-     amenu.text=string_format("Choose ammo type:"+std::string(namelen,' ')).substr(0,namelen) +
-         "   Damage    Pierce    Range     Accuracy";
-     it_ammo* ammo_def;
-     for (size_t i = 0; i < am.size(); i++) {
-         item *it = am[i];
-         ammo_def = dynamic_cast<it_ammo*>(it->type);
-         if(ammo_def == 0 && !it->contents.empty()) {
-            it = &it->contents[0];
-            ammo_def = dynamic_cast<it_ammo*>(it->type);
-         }
-         amenu.addentry(i, true, i + 'a', "%s | %-7d | %-7d | %-7d | %-7d",
-             std::string(
-                string_format("%s (%d)", it->tname().c_str(), it->charges ) +
-                std::string(namelen, ' ')
-             ).substr(0,namelen).c_str(),
-             ammo_def->damage, ammo_def->pierce, ammo_def->range,
-             100 - ammo_def->dispersion
-         );
+        amenu.text = std::string(_("Choose ammo type:"));
+        if (amenu.text.length() < namelen) {
+            amenu.text += std::string(namelen - amenu.text.length(), ' ');
+        } else {
+            amenu.text.erase(namelen, amenu.text.length() - namelen);
+        }
+        // To cover the space in the header that is used by the hotkeys created by uimenu
+        amenu.text.insert(0, "  ");
+        //~ header of table that appears when reloading, each colum must contain exactly 10 characters
+        amenu.text += _("| Damage  | Pierce  | Range   | Accuracy");
+        for (size_t i = 0; i < am.size(); i++) {
+            item *it = am[i];
+            it_ammo *ammo_def = dynamic_cast<it_ammo*>(it->type);
+            if(ammo_def == 0 && !it->contents.empty()) {
+                it = &it->contents[0];
+                ammo_def = dynamic_cast<it_ammo*>(it->type);
+            }
+            std::string row = it->display_name();
+            if (row.length() < namelen) {
+                row += std::string(namelen - row.length(), ' ');
+            } else {
+                row.erase(namelen, row.length() - namelen);
+            }
+            row += string_format("| %-7d | %-7d | %-7d | %-7d",
+                    ammo_def->damage, ammo_def->pierce, ammo_def->range,
+                    100 - ammo_def->dispersion);
+            amenu.addentry(i, true, i + 'a', row);
          if ( lastreload == it->typeId() ) {
              amenu.selected = i;
          }
