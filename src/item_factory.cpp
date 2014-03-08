@@ -156,6 +156,11 @@ Item_factory::Item_factory(){
 void Item_factory::init(){
     //Populate the iuse functions
     iuse_function_list["NONE"] = &iuse::none;
+    iuse_function_list["RAW_MEAT"] = &iuse::raw_meat;
+    iuse_function_list["RAW_FAT"] = &iuse::raw_fat;
+    iuse_function_list["RAW_BONE"] = &iuse::raw_bone;
+    iuse_function_list["RAW_FISH"] = &iuse::raw_fish;
+    iuse_function_list["RAW_WILDVEG"] = &iuse::raw_wildveg;
     iuse_function_list["SEWAGE"] = &iuse::sewage;
 
     iuse_function_list["HONEYCOMB"] = &iuse::honeycomb;
@@ -167,6 +172,7 @@ void Item_factory::init(){
     iuse_function_list["ATOMIC_CAFF"] = &iuse::atomic_caff;
     iuse_function_list["ALCOHOL"] = &iuse::alcohol;
     iuse_function_list["ALCOHOL_WEAK"] = &iuse::alcohol_weak;
+    iuse_function_list["ALCOHOL_STRONG"] = &iuse::alcohol_strong;
     iuse_function_list["PKILL"] = &iuse::pkill;
     iuse_function_list["XANAX"] = &iuse::xanax;
     iuse_function_list["CIG"] = &iuse::cig;
@@ -349,6 +355,7 @@ void Item_factory::init(){
     iuse_function_list["LAW"] = &iuse::LAW;
     iuse_function_list["HEATPACK"] = &iuse::heatpack;
     iuse_function_list["DEJAR"] = &iuse::dejar;
+    iuse_function_list["FLASK_YEAST"] = &iuse::flask_yeast;
     iuse_function_list["RAD_BADGE"] = &iuse::rad_badge;
     iuse_function_list["BOOTS"] = &iuse::boots;
     iuse_function_list["TOWEL"] = &iuse::towel;
@@ -812,6 +819,7 @@ void Item_factory::load_comestible(JsonObject& jo)
     comest_template->quench = jo.get_int("quench", 0);
     comest_template->nutr = jo.get_int("nutrition", 0);
     comest_template->spoils = jo.get_int("spoils_in", 0);
+    comest_template->brewtime = jo.get_int("brew_time", 0);
     comest_template->addict = jo.get_int("addiction_potential", 0);
     comest_template->charges = jo.get_long("charges", 0);
     if(jo.has_member("stack_size")) {
@@ -1110,14 +1118,6 @@ void Item_factory::set_material_from_json(JsonObject& jo, std::string member, it
     }
     new_item_template->m1 = material_list[0];
     new_item_template->m2 = material_list[1];
-    if(!material_type::has_material(new_item_template->m1)) {
-        debugmsg("item %s has unknown material %s", new_item_template->name.c_str(), new_item_template->m1.c_str());
-        new_item_template->m1 = "null";
-    }
-    if(!material_type::has_material(new_item_template->m2)) {
-        debugmsg("item %s has unknown material %s", new_item_template->name.c_str(), new_item_template->m2.c_str());
-        new_item_template->m2 = "null";
-    }
 }
 
 bool Item_factory::is_mod_target(JsonObject& jo, std::string member, std::string weapon)

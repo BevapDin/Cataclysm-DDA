@@ -4494,11 +4494,11 @@ bool vehicle::examine(game *g, player *p, int part) {
                 charcoal_recipe.components.resize(1);
                 charcoal_recipe.components[0].push_back(component("2x4", 3));
                 charcoal_recipe.time = 60000;
-                charcoal_recipe.count = 1;
+                charcoal_recipe.result_mult = 1;
             } else {
                 charcoal_recipe.components = r->components;
                 charcoal_recipe.time = r->time;
-                charcoal_recipe.count = r->count;
+                charcoal_recipe.result_mult = r->result_mult;
             }
         }
         if(vp.items.empty()) {
@@ -4534,8 +4534,8 @@ bool vehicle::examine(game *g, player *p, int part) {
             // Done, make charcoal
             vp.items.clear();
             item newit(item_controller->find_template("charcoal"), (int) g->turn);
-            if(charcoal_recipe.count > 0) {
-                newit.charges *= charcoal_recipe.count;
+            if(charcoal_recipe.result_mult > 0) {
+                newit.charges *= charcoal_recipe.result_mult;
             }
             vp.items.push_back(newit);
         }

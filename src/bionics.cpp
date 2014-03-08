@@ -259,6 +259,14 @@ void player::power_bionics()
                                (weapon_id == "bio_claws_weapon" && bio_id == "bio_claws_weapon") ||
                                (weapon_id == "bio_blade_weapon" && bio_id == "bio_blade_weapon")) {
                         int b = tmp - &my_bionics[0];
+
+                        //this will clear the bionics menu for targeting purposes
+                        werase(wBio);
+                        wrefresh(wBio);
+                        delwin(w_title);
+                        delwin(w_description);
+                        delwin(wBio);
+                        g->draw();
                         activate_bionic(b);
                     }
                     // Action done, leave screen
@@ -279,11 +287,14 @@ You can not activate %s!  To read a description of \
             }
         }
     }
-    werase(wBio);
-    wrefresh(wBio);
-    delwin(w_title);
-    delwin(w_description);
-    delwin(wBio);
+    //if we activated a bionic, already killed the windows
+    if(!activating){
+        werase(wBio);
+        wrefresh(wBio);
+        delwin(w_title);
+        delwin(w_description);
+        delwin(wBio);
+    }
 }
 
 void draw_exam_window(WINDOW *win, int border_line, bool examination)
@@ -452,6 +463,18 @@ void player::activate_bionic(int b)
         if (has_disease("adrenaline")) {
             good.push_back(_("Adrenaline Spike"));
         }
+        if (has_disease("tapeworm")) {  // This little guy is immune to the blood filter though, as he lives in your bowels.
+            good.push_back(_("Intestinal Parasite"));
+        }
+        if (has_disease("bloodworms")) {
+            good.push_back(_("Hemolytic Parasites"));
+        }
+        if (has_disease("brainworm")) {  // This little guy is immune to the blood filter too, as he lives in your brain.
+            good.push_back(_("Intracranial Parasite"));
+        }
+        if (has_disease("paincysts")) {  // These little guys are immune to the blood filter too, as they lives in your muscles.
+            good.push_back(_("Intramuscular Parasites"));
+        }
         if (good.empty() && bad.empty()) {
             mvwprintz(w, 1, 1, c_white, _("No effects."));
         } else {
@@ -470,6 +493,7 @@ void player::activate_bionic(int b)
     } else if(bio.id == "bio_blood_filter") {
         rem_disease("fungus");
         rem_disease("dermatik");
+        rem_disease("bloodworms");
         remove_effect("poison");
         rem_disease("pkill1");
         rem_disease("pkill2");
@@ -692,11 +716,7 @@ void player::activate_bionic(int b)
             std::string door_name = rm_prefix(_("<door_name>door"));
             g->add_msg_if_player(this, _("With a satisfying click, the lock on the %s opens."),door_name.c_str());
             g->m.ter_set(dirx, diry, t_door_c);
-        } else if (type == t_door_metal_locked ) {  
-            moves -= 40;
-            std::string door_name = rm_prefix(_("<door_name>door"));
-            g->add_msg_if_player(this, _("With a satisfying click, the lock on the %s opens."),door_name.c_str());
-            g->m.ter_set(dirx, diry, t_door_metal_c);
+        // Locked metal doors are the Lab and Bunker entries.  Those need to stay locked.
         } else if(type == t_door_bar_locked){
             moves -= 40;
             std::string door_name = rm_prefix(_("<door_name>door"));

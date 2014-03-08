@@ -672,6 +672,68 @@ int iuse::atomic_caff(player *p, item *it, bool)
     return it->type->charges_to_use();
 }
 
+int iuse::raw_meat(player *p, item *it, bool)
+{
+    if ((one_in(32)) && !(p->has_disease("tapeworm") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("tapeworm", 1, true);
+    } if ((one_in(64)) && !(p->has_disease("bloodworms") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("bloodworms", 1, true);
+    } if ((one_in(128)) && !(p->has_disease("brainworm") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("brainworm", 1, true);
+    } if ((one_in(64)) && !(p->has_disease("paincysts") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("paincysts", 1, true);
+    }
+    return it->type->charges_to_use();
+}
+
+int iuse::raw_fat(player *p, item *it, bool)
+{
+    if ((one_in(64)) && !(p->has_disease("tapeworm") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("tapeworm", 1, true);
+    } if ((one_in(128)) && !(p->has_disease("bloodworms") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("bloodworms", 1, true);
+    } if ((one_in(128)) && !(p->has_disease("brainworm") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("brainworm", 1, true);
+    }
+    return it->type->charges_to_use();
+}
+
+int iuse::raw_bone(player *p, item *it, bool)
+{
+    if ((one_in(128)) && !(p->has_disease("bloodworms") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("bloodworms", 1, true);
+    }
+    return it->type->charges_to_use();
+}
+
+int iuse::raw_fish(player *p, item *it, bool)
+{
+    if ((one_in(256)) && !(p->has_disease("tapeworm") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("tapeworm", 1, true);
+    } if ((one_in(256)) && !(p->has_disease("bloodworms") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("bloodworms", 1, true);
+    } if ((one_in(256)) && !(p->has_disease("brainworm") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("brainworm", 1, true);
+    } if ((one_in(256)) && !(p->has_disease("paincysts") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("paincysts", 1, true);
+    }
+    return it->type->charges_to_use();
+}
+
+int iuse::raw_wildveg(player *p, item *it, bool)
+{
+    if ((one_in(512)) && !(p->has_disease("tapeworm") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("tapeworm", 1, true);
+    } if ((one_in(256)) && !(p->has_disease("bloodworms") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("bloodworms", 1, true);
+    } if ((one_in(512)) && !(p->has_disease("brainworm") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("brainworm", 1, true);
+    } if ((one_in(128)) && !(p->has_disease("paincysts") || p->has_bionic("bio_digestion") || p->has_trait("PARAIMMUNE"))) {
+        p->add_disease("paincysts", 1, true);
+    }
+    return it->type->charges_to_use();
+}
+
 int iuse::alcohol(player *p, item *it, bool)
 {
     int duration = 680 - (10 * p->str_max); // Weaker characters are cheap drunks
@@ -723,6 +785,36 @@ int iuse::alcohol_weak(player *p, item *it, bool)
     }
     if (!(p->has_trait("ALCMET"))) {
         p->pkill += 4;
+    }
+    p->add_disease("drunk", duration);
+    return it->type->charges_to_use();
+}
+
+int iuse::alcohol_strong(player *p, item *it, bool)
+{
+    int duration = 900 - (12 * p->str_max);
+    it_comest *food = dynamic_cast<it_comest*> (it->type);
+    if (p->has_trait("ALCMET")) {
+        duration = 250 - (10 * p->str_max);
+        // Metabolizing the booze improves the nutritional
+        // value; might not be healthy, and still
+        // causes Thirst problems, though
+        p->hunger -= (abs(food->stim));
+        // Metabolizing it cancels out depressant
+        // effects, but doesn't make it any more
+        // stimulating
+        if ((food->stim) < 0) {
+            p->stim += (abs(food->stim));
+        }
+    }
+    else if (p->has_trait("TOLERANCE")) {
+        duration -= 450;
+    }
+    else if (p->has_trait("LIGHTWEIGHT")) {
+        duration += 450;
+    }
+    if (!(p->has_trait("ALCMET"))) {
+        p->pkill += 12;
     }
     p->add_disease("drunk", duration);
     return it->type->charges_to_use();
@@ -854,7 +946,34 @@ int iuse::antiparasitic(player *p, item *it, bool) {
     if (p->has_disease("dermatik")) {
         p->rem_disease("dermatik");
         g->add_msg_if_player(p,_("The itching sensation under your skin fades away."));
+    } if (p->has_disease("tapeworm")) {
+        p->rem_disease("tapeworm");
+        p->hunger--;  // You just digested the tapeworm.
+        if (p->has_trait("NOPAIN")) {
+        g->add_msg_if_player(p,_("Your bowels clench as something inside them dies."));
+        } else {
+        g->add_msg_if_player(p,_("Your bowels spasm painfully as something inside them dies."));
+        p->mod_pain( rng(8, 24) );
+        }
+    } if (p->has_disease("bloodworms")) {
+        p->rem_disease("bloodworms");
+        g->add_msg_if_player(p,_("Your skin prickles and your veins itch for a few moments."));
+    } if (p->has_disease("brainworm")) {
+        p->rem_disease("brainworm");
+        if (p->has_trait("NOPAIN")) {
+        g->add_msg_if_player(p,_("The pressure inside your head feels better already."));
+        } else {
+        g->add_msg_if_player(p,_("Your head pounds like a sore tooth as something inside of it dies."));
+        p->mod_pain( rng(8, 24) );
+        }
+    } if (p->has_disease("paincysts")) {
+        p->rem_disease("paincysts");
+        if (p->has_trait("NOPAIN")) {
+        g->add_msg_if_player(p,_("The stiffness in your joints goes away."));
+        } else {
+        g->add_msg_if_player(p,_("The pain in your joints goes away."));
     }
+  }
     return it->type->charges_to_use();
 }
 
@@ -7540,6 +7659,25 @@ int iuse::dejar(player *p, item *it, bool)
     it->contents.push_back( item( itypes[ujfood], 0 ) );
     it->contents[0].bday = g->turn + 3600 - (g->turn % 3600);
     return it->type->charges_to_use();
+}
+
+int iuse::flask_yeast(player *p, item *it, bool)
+{
+    int cult_time = it->brewing_time();
+    if (g->turn.get_turn() > (it->bday + cult_time) )
+    {
+        g->add_msg_if_player(p,_("You open the flask and harvest the culture."));
+        itype_id yeast_id = (it->type->id).substr(6);
+        it->make(itypes["flask_glass"]);
+        it->contents.push_back(item(itypes[yeast_id], 0));
+        it->contents[0].charges = 10;
+        return it->type->charges_to_use();
+    }
+    else
+    {
+        g->add_msg_if_player(p,_("The yeast isn't done culturing yet."));
+        return 0;
+    }
 }
 
 int iuse::rad_badge(player *p, item *it, bool)

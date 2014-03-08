@@ -595,6 +595,16 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
                 }
             }
 
+            // keg-kludge
+            if (furnlist[g->m.furn(x, y)].examine == &iexamine::keg) {
+                std::vector<item> &liq_contained = g->m.i_at(x, y);
+                for (size_t i = 0; i < liq_contained.size(); ++i) {
+                    if (liq_contained[i].made_of(LIQUID)) {
+                        surround.push_back(item_from_surrounding(p, liq_contained[i]));
+                    }
+                }
+            }
+
             int vpart = -1;
             vehicle *veh = g->m.veh_at(x, y, vpart);
             if (veh && allow_inventory_from(g, this->p, veh)) {
@@ -906,14 +916,19 @@ std::vector<item *> inventory::all_items_with_flag( const std::string flag )
 {
     std::vector<item *> ret;
 
-    for (invstack::iterator istack = items.begin(); istack != items.end(); ++istack) {
-        for (std::list<item>::iterator iitem = istack->begin(); iitem != istack->end(); ++iitem) {
-            if (iitem->has_flag(flag)) {
-                ret.push_back(&*iitem);
+  for (invstack::iterator istack = items.begin(); istack != items.end(); ++istack) {
+    for (std::list<item>::iterator iitem = istack->begin(); iitem != istack->end(); ++iitem) {
+      if (iitem->has_flag(flag)) {
+        ret.push_back(&*iitem);
+      }
+      else if (!iitem->contents.empty())
+        for (int k = 0; k < iitem->contents.size(); k++) {
+            if (iitem->contents[k].has_flag(flag)) {
+                ret.push_back(&iitem->contents[k]);
             }
         }
     }
-
+  }
     return ret;
 }
 
@@ -939,6 +954,24 @@ std::vector<item *> inventory::all_ammo(ammotype type)
         }
     }
     return ret;
+}
+
+std::vector<item*> inventory::all_drinks() {
+  std::vector<item*> ret;
+
+  for (invstack::iterator istack = items.begin(); istack != items.end(); ++istack) {
+    for (std::list<item>::iterator iitem = istack->begin(); iitem != istack->end(); ++iitem) {
+      if (iitem->is_drink()) {
+        ret.push_back(&*iitem);
+      }
+      else if (!iitem->contents.empty())
+        if (iitem->contents[0].is_drink()) {
+            ret.push_back(&iitem->contents[0]);
+        }
+    }
+  }
+
+  return ret;
 }
 
 int inventory::amount_of(itype_id it) const
@@ -1096,7 +1129,7 @@ bool inventory::has_flag(std::string flag) const
     for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter) {
         for (std::list<item>::const_iterator stack_iter = iter->begin(); stack_iter != iter->end();
              ++stack_iter) {
-            if (stack_iter->has_flag(flag)) {
+            if (stack_iter->has_flag(flag) || stack_iter->contains_with_flag(flag)) {
                 return true;
             }
         }
@@ -1254,6 +1287,19 @@ bool inventory::has_liquid(itype_id type) const
             if (has_capacity_for_liquid(it, liquid)) {
                 return true;
             }
+        }
+    }
+    return false;
+}
+
+bool inventory::has_drink() const
+{
+    for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter)
+    {
+        const item& it = iter->front();
+        if (it.is_container() && !it.contents.empty())
+        {
+            return it.contents[0].is_drink();
         }
     }
     return false;

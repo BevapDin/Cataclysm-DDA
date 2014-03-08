@@ -83,6 +83,7 @@ void load_recipe(JsonObject &jsobj)
     std::string skill_used = jsobj.get_string("skill_used", "");
     std::string id_suffix = jsobj.get_string("id_suffix", "");
     int learn_by_disassembly = jsobj.get_int("decomp_learn", -1);
+    int result_mult = jsobj.get_int("result_mult", 1);
 
     std::map<std::string, int> requires_skills;
     jsarr = jsobj.get_array("skills_required");
@@ -115,15 +116,9 @@ void load_recipe(JsonObject &jsobj)
 
     recipe *rec = new recipe(rec_name, id, result, category, subcategory, skill_used,
                              requires_skills, difficulty, time, reversible,
-                             autolearn, learn_by_disassembly);
+                             autolearn, learn_by_disassembly, result_mult);
 
 
-    if(jsobj.has_member("count")) {
-        rec->count = jsobj.get_int("count");
-    }
-    if(jsobj.has_member("count_range")) {
-        rec->count_range = jsobj.get_int("count_range");
-    }
     if(jsobj.has_member("noise") && jsobj.has_member("noise_string")) {
         rec->noise = jsobj.get_int("noise");
         rec->noise_string = jsobj.get_string("noise_string");
@@ -730,6 +725,7 @@ recipe *game::select_crafting_recipe()
                 if ( lastid != current[line]->id ) {
                     lastid = current[line]->id;
                     tmp = item(item_controller->find_template(current[line]->result), g->turn);
+                    tmp.charges *= current[line]->result_mult;
                     folded = foldstring(tmp.info(true), iInfoWidth);
                 }
                 int maxline = (ssize_t)folded.size() > dataHeight ? dataHeight : (ssize_t)folded.size();
@@ -820,7 +816,6 @@ recipe *game::select_crafting_recipe()
                         u.has_matching_liquid(item_controller->find_template(current[line]->result)->id)) {
                         chosen = current[line];
                         done = true;
-                        break;
                     } else {
                         popup(_("You don't have anything to store that liquid in!"));
                     }
@@ -1341,11 +1336,8 @@ void game::complete_craft()
     item newit(item_controller->find_template(making->result), turn, 0, false);
     newit.item_tags.insert(to_uncraft_tag(used, used_tools));
     int new_count = 1;
-    if(making->count > 0) {
-        new_count = making->count;
-        if(making->count_range > 0) {
-            new_count += rng(0, making->count_range);
-        }
+    if(making->result_mult > 0) {
+        new_count = making->result_mult;
     }
 
     if (newit.is_armor() && newit.has_flag("VARSIZE")) {
@@ -1382,11 +1374,13 @@ void game::complete_craft()
     }
     if (newit.made_of(LIQUID)) {
         newit.charges *= new_count;
+        //while ( u.has_watertight_container() || u.has_matching_liquid(newit.typeId()) ){
+        //while ( u.inv.slice_filter_by_capacity_for_liquid(newit).size() > 0 ){
+        // ^ failed container controls, they don't detect stacks of the same empty container after only one of them is filled
         while(!handle_liquid(newit, false, false)) { ; }
     } else {
         if(newit.count_by_charges() && new_count != 1) {
             newit.charges *= new_count;
-            new_count = 1;
         }
         u.i_add_or_drop(newit, new_count);
         g->add_msg("%s", newit.tname(g).c_str());
@@ -1411,7 +1405,7 @@ void game::disassemble(int pos)
             list_iter != cat_iter->second.end(); ++list_iter) {
             recipe *cur_recipe = *list_iter;
             if (dis_item->type == item_controller->find_template(cur_recipe->result) &&
-                cur_recipe->reversible && cur_recipe->count <= 1 && cur_recipe->count_range <= 0) {
+                cur_recipe->reversible && cur_recipe->result_mult <= 1) {
                 // ok, a valid recipe exists for the item, and it is reversible
                 // assign the activity
                 // check tools are available
@@ -1710,12 +1704,10 @@ void multiply(const recipe &in, recipe &r, int factor) {
     r.time *= factor;
     ::multiply(r.tools, factor);
     ::multiply(r.components, factor);
-    if(r.count > 0) {
-        r.count = in.count * factor;
-        r.count_range = in.count_range * factor;
+    if(r.result_mult > 0) {
+        r.result_mult = in.result_mult * factor;
     } else {
-        r.count = factor;
-        r.count_range = 0;
+        r.result_mult = factor;
     }
 }
 
