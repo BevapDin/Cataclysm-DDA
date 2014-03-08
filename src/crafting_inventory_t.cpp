@@ -2157,6 +2157,8 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                 drainVehicle(vpartitem->veh, *ix, "water", req.count, used_items);
             } else if(ix->type->id == "vpart_WELDRIG") {
                 drainVehicle(vpartitem->veh, *ix, "battery", req.count, used_items);
+            } else if(ix->type->id == "vpart_CHEMLAB") {
+                drainVehicle(vpartitem->veh, *ix, "battery", req.count, used_items);
             } else if(ix->type->id == "vpart_CRAFTRIG") {
                 drainVehicle(vpartitem->veh, *ix, "battery", req.count, used_items);
             } else if(ix->type->id == "vpart_FORGE") {
