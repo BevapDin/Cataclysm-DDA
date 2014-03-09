@@ -9,10 +9,7 @@
 #include <fstream>
 
 // SDL headers end up in different places depending on the OS, sadly
-#if (defined _WIN32 || defined WINDOWS)
-//this is wrong for my windows machine, but if it works for you...
-#include "SDL_image.h" // Make sure to add this to the other OS inclusions
-#elif (defined OSX_SDL_FW)
+#if (defined OSX_SDL_FW)
 #include "SDL_image/SDL_image.h" // Make sure to add this to the other OS inclusions
 #else
 #include "SDL2/SDL_image.h" // Make sure to add this to the other OS inclusions
@@ -256,9 +253,8 @@ void cata_tiles::load_tileset(std::string path)
     tile_atlas = IMG_Load(path.c_str());
 
     if(!tile_atlas) {
-        std::cerr << "Could not locate tileset file at " << path << std::endl;
-        DebugLog() << (std::string)"Could not locate tileset file at " << path.c_str() << "\n";
-        // TODO: run without tileset
+        DebugLog() << "Could not load tileset file " << path << "\nError: " << IMG_GetError() << "\n";
+        throw std::string("failed to open tileset image");
     }
 
     reload_tileset();
@@ -270,17 +266,11 @@ void cata_tiles::load_tilejson(std::string path)
 
     if (!config_file.good()) {
         //throw (std::string)"ERROR: " + path + (std::string)" could not be read.";
-        DebugLog() << (std::string)"ERROR: " + path + (std::string)" could not be read.\n";
-        return;
+        DebugLog() << "ERROR: " << path << " could not be read.\n";
+        throw std::string("failed to open tile info json");
     }
 
-    try {
-        load_tilejson_from_file( config_file );
-    } catch (std::string e) {
-        debugmsg("%s: %s", path.c_str(), e.c_str());
-    }
-
-    config_file.close();
+    load_tilejson_from_file( config_file );
 }
 
 void cata_tiles::load_tilejson_from_file(std::ifstream &f)

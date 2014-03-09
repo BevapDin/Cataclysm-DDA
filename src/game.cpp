@@ -5146,12 +5146,71 @@ void game::draw_minimap()
             const bool vehicle_here = overmap_buffer.has_vehicle(omx, omy, levz);
             if (overmap_buffer.has_note(omx, omy, levz)) {
                 const std::string& note = overmap_buffer.note(omx, omy, levz);
+                ter_color = c_yellow;
                 if (note.length() >= 2 && note[1] == ':') {
                     ter_sym = note[0];
+                } else if (note.length() >= 4 && note[3] == ':') {
+                    ter_sym = note[2];
                 } else {
                     ter_sym = 'N';
                 }
-                ter_color = c_yellow;
+                if (note.length() >= 2 && note[1] == ';'){
+                        if (note[0] == 'r'){
+                                ter_color = c_ltred;
+                        }
+                        if (note[0] == 'R'){
+                                ter_color = c_red;
+                        }
+                        if (note[0] == 'g'){
+                            ter_color = c_ltgreen;
+                        }
+                        if (note[0] == 'G'){
+                                ter_color = c_green;
+                        }
+                        if (note[0] == 'b'){
+                                ter_color = c_ltblue;}
+                        if (note[0] == 'B'){ter_color = c_blue;
+                        }
+                        if (note[0] == 'W'){
+                                ter_color = c_white;
+                        }
+                        if (note[0] == 'C'){
+                                ter_color = c_cyan;
+                        }
+                        if (note[0] == 'P'){
+                                ter_color = c_pink;
+                        }
+                } else if (note.length() >= 4 && note[3] == ';'){
+                        if (note[2] == 'r'){
+                                ter_color = c_ltred;
+                        }
+                        if (note[2] == 'R'){
+                                ter_color = c_red;
+                        }
+                        if (note[2] == 'g'){
+                                ter_color = c_ltgreen;
+                        }
+                        if (note[2] == 'G'){
+                                ter_color = c_green;
+                        }
+                        if (note[2] == 'b'){
+                                ter_color = c_ltblue;
+                        }
+                        if (note[2] == 'B'){
+                                ter_color = c_blue;
+                        }
+                        if (note[2] == 'W'){
+                                ter_color = c_white;
+                        }
+                        if (note[2] == 'C'){
+                                ter_color = c_cyan;
+                        }
+                        if (note[2] == 'P'){
+                                ter_color = c_pink;
+                        }
+                }else{
+                    ter_color = c_yellow;
+                }
             } else if (!seen) {
                 ter_sym = ' ';
                 ter_color = c_black;
@@ -9259,27 +9318,29 @@ void game::pickup(int posx, int posy, int min)
     bool weight_is_okay = (u.weight_carried() <= u.weight_capacity());
     bool volume_is_okay = (u.volume_carried() <= u.volume_capacity() -  2);
     bool from_veh = false;
-    int veh_part = 0;
+    int veh_root_part = 0;
+
     int k_part = 0;
     int wtr_part = 0;
     int w_part = 0;
     int craft_part = 0;
+    int cargo_part = 0;
     int chempart = 0;
     int ctrl_part = 0;
     std::vector<std::string> menu_items;
     std::vector<uimenu_entry> options_message;
 
-    vehicle *veh = m.veh_at (posx, posy, veh_part);
+    vehicle *veh = m.veh_at (posx, posy, veh_root_part);
     std::vector<item> here_ground = m.i_at(posx, posy);
     if (min != -1 && veh) {
-        k_part = veh->part_with_feature(veh_part, "KITCHEN");
-        wtr_part = veh->part_with_feature(veh_part, "FAUCET");
-        w_part = veh->part_with_feature(veh_part, "WELDRIG");
-        craft_part = veh->part_with_feature(veh_part, "CRAFTRIG");
-        chempart = veh->part_with_feature(veh_part, "CHEMLAB");
-        veh_part = veh->part_with_feature(veh_part, "CARGO", false);
-        ctrl_part = veh->part_with_feature(veh_part, "CONTROLS");
-        from_veh = veh && veh_part >= 0 && veh->parts[veh_part].items.size() > 0;
+        k_part = veh->part_with_feature(veh_root_part, "KITCHEN");
+        wtr_part = veh->part_with_feature(veh_root_part, "FAUCET");
+        w_part = veh->part_with_feature(veh_root_part, "WELDRIG");
+        craft_part = veh->part_with_feature(veh_root_part, "CRAFTRIG");
+        chempart = veh->part_with_feature(veh_root_part, "CHEMLAB");
+        cargo_part = veh->part_with_feature(veh_root_part, "CARGO", false);
+        ctrl_part = veh->part_with_feature(veh_root_part, "CONTROLS");
+        from_veh = veh && cargo_part >= 0 && veh->parts[cargo_part].items.size() > 0;
 
         menu_items.push_back(_("Examine vehicle"));
         options_message.push_back(uimenu_entry(_("Examine vehicle"), 'e'));
@@ -9439,7 +9500,7 @@ void game::pickup(int posx, int posy, int min)
         // but water.
         if ((!isEmpty) && m.furn(posx, posy) == f_toilet) {
             isEmpty = true;
-            for (int i = 0; isEmpty && i < m.i_at(posx, posy).size(); i++) {
+            for (size_t i = 0; isEmpty && i < m.i_at(posx, posy).size(); i++) {
                 if (m.i_at(posx, posy)[i].typeId() != "water") {
                     isEmpty = false;
                 }
@@ -9450,11 +9511,10 @@ void game::pickup(int posx, int posy, int min)
     }
 
     // which items are we grabbing?
-    std::vector<item> here = from_veh ? veh->parts[veh_part].items : m.i_at(posx, posy);
+    std::vector<item> here = from_veh ? veh->parts[cargo_part].items : m.i_at(posx, posy);
 
     // Not many items, just grab them
     if (here.size() <= min && min != -1) {
-        int iter = 0;
         item newit = here[0];
         if (newit.made_of(LIQUID)) {
             add_msg(_("You can't pick up a liquid!"));
@@ -9465,6 +9525,7 @@ void game::pickup(int posx, int posy, int min)
             newit.invlet = nextinv;
             advance_nextinv();
         }
+        size_t iter = 0;
         while (iter <= inv_chars.size() && u.has_item(newit.invlet) &&
                !u.i_at(newit.invlet).stacks_with(newit)) {
             newit.invlet = nextinv;
@@ -9483,7 +9544,7 @@ void game::pickup(int posx, int posy, int min)
                                      newit.display_name().c_str())) {
                         if (u.wear_item(&newit)) {
                             if (from_veh) {
-                                veh->remove_item (veh_part, 0);
+                                veh->remove_item (cargo_part, 0);
                             } else {
                                 m.i_clear(posx, posy);
                             }
@@ -9492,7 +9553,7 @@ void game::pickup(int posx, int posy, int min)
                                         u.weapon.display_name().c_str(),
                                         newit.display_name().c_str())) {
                         if (from_veh) {
-                            veh->remove_item (veh_part, 0);
+                            veh->remove_item (cargo_part, 0);
                         } else {
                             m.i_clear(posx, posy);
                         }
@@ -9516,7 +9577,7 @@ and you can't unwield your %s."),
                 u.inv.assign_empty_invlet(newit, true);  // force getting an invlet.
                 u.wield(u.i_add(newit).invlet);
                 if (from_veh) {
-                    veh->remove_item (veh_part, 0);
+                    veh->remove_item (cargo_part, 0);
                 } else {
                     m.i_clear(posx, posy);
                 }
@@ -9529,7 +9590,7 @@ and you can't unwield your %s."),
                     newit.is_weap() || newit.is_gun())) {
             u.weapon = newit;
             if (from_veh) {
-                veh->remove_item (veh_part, 0);
+                veh->remove_item (cargo_part, 0);
             } else {
                 m.i_clear(posx, posy);
             }
@@ -9538,7 +9599,7 @@ and you can't unwield your %s."),
         } else {
             newit = u.i_add(newit);
             if (from_veh) {
-                veh->remove_item (veh_part, 0);
+                veh->remove_item (cargo_part, 0);
             } else {
                 m.i_clear(posx, posy);
             }
@@ -9592,7 +9653,7 @@ and you can't unwield your %s."),
     WINDOW* w_item_info = newwin(itemsH,  itemsW,  itemsY,  itemsX);
 
     int ch = ' ';
-    int start = 0, cur_it, iter;
+    int start = 0, cur_it;
     int new_weight = u.weight_carried(), new_volume = u.volume_carried();
     bool update = true;
     mvwprintw(w_pickup, 0, 0, _("PICK UP"));
@@ -9608,8 +9669,8 @@ and you can't unwield your %s."),
         //Loop through Items lowest Volume first
         bool bPickup = false;
 
-        for(int iVol=0, iNumChecked = 0; iNumChecked < here.size(); iVol++) {
-            for (int i = 0; i < here.size(); i++) {
+        for(size_t iVol=0, iNumChecked = 0; iNumChecked < here.size(); iVol++) {
+            for (size_t i = 0; i < here.size(); i++) {
                 bPickup = false;
                 if (here[i].volume() == iVol) {
                     iNumChecked++;
@@ -9763,7 +9824,7 @@ and you can't unwield your %s."),
 
             if (ch == ',') {
                 int count = 0;
-                for (int i = 0; i < here.size(); i++) {
+                for (size_t i = 0; i < here.size(); i++) {
                     if (getitem[i]) {
                         count++;
                     } else {
@@ -9773,7 +9834,7 @@ and you can't unwield your %s."),
                     getitem[i] = true;
                 }
                 if (count == here.size()) {
-                    for (int i = 0; i < here.size(); i++) {
+                    for (size_t i = 0; i < here.size(); i++) {
                         getitem[i] = false;
                     }
                     new_weight = u.weight_carried();
@@ -9865,11 +9926,12 @@ and you can't unwield your %s."),
     }
 
     // At this point we've selected our items, now we add them to our inventory
+    size_t iter;
     int curmit = 0;
     bool got_water = false; // Did we try to pick up water?
     bool offered_swap = false;
     std::map<std::string, int> mapPickup;
-    for (int i = 0; i < here.size(); i++) {
+    for (size_t i = 0; i < here.size(); i++) {
         // This while loop guarantees the inventory letter won't be a repeat. If it
         // tries all 52 letters, it fails and we don't pick it up.
         if (getitem[i] && here[i].made_of(LIQUID)) {
@@ -9877,6 +9939,7 @@ and you can't unwield your %s."),
         } else if (getitem[i]) {
             bool picked_up = false;
             item temp = here[i].clone();
+
             iter = 0;
             while (iter < inv_chars.size() &&
                    (here[i].invlet == 0 || (u.has_item(here[i].invlet) &&
@@ -9949,7 +10012,7 @@ and you can't unwield your %s."),
 
             if (picked_up) {
                 if (from_veh) {
-                    veh->remove_item (veh_part, curmit);
+                    veh->remove_item (cargo_part, curmit);
                 } else {
                     m.i_rem(posx, posy, curmit);
                 }
@@ -9959,7 +10022,7 @@ and you can't unwield your %s."),
                     bool to_map = !from_veh;
 
                     if (from_veh) {
-                        to_map = !veh->add_item( veh_part, temp );
+                        to_map = !veh->add_item( cargo_part, temp );
                     }
                     if (to_map) {
                         m.add_item_or_charges( posx, posy, temp );
@@ -10515,7 +10578,7 @@ void game::drop(std::vector<item> &dropped, std::vector<item> &dropped_worn, int
 
     itype_id first = itype_id(dropped[0].type->id);
     bool same = true;
-    for (int i = 1; i < dropped.size() && same; i++) {
+    for (size_t i = 1; i < dropped.size() && same; i++) {
         if (dropped[i].type->id != first) {
             same = false;
         }
@@ -10555,7 +10618,7 @@ void game::drop(std::vector<item> &dropped, std::vector<item> &dropped_worn, int
 
     if (to_veh) {
         bool vh_overflow = false;
-        for (int i = 0; i < dropped.size(); i++) {
+        for (size_t i = 0; i < dropped.size(); i++) {
             vh_overflow = vh_overflow || !veh->add_item (veh_part, dropped[i]);
             if (vh_overflow) {
                 m.add_item_or_charges(dirx, diry, dropped[i], 1);
@@ -10565,7 +10628,7 @@ void game::drop(std::vector<item> &dropped, std::vector<item> &dropped_worn, int
             add_msg (_("The trunk is full, so some items fall on the ground."));
         }
     } else {
-        for (int i = 0; i < dropped.size(); i++) {
+        for (size_t i = 0; i < dropped.size(); i++) {
             m.add_item_or_charges(dirx, diry, dropped[i], 2);
         }
     }
@@ -10695,13 +10758,13 @@ std::vector<point> game::pl_target_ui(int &x, int &y, int range, item *relevant,
     } else if(last_target >= 0 && last_target_was_npc && last_target < active_npc.size()) {
         last_target_critter = active_npc[last_target];
     }
-    for (int i = 0; i < num_zombies(); i++) {
+    for (size_t i = 0; i < num_zombies(); i++) {
         monster &critter = critter_tracker.find(i);
         if (u_see(&critter)) {
             mon_targets.push_back(&critter);
         }
     }
-    for (int i = 0; i < active_npc.size(); i++) {
+    for (size_t i = 0; i < active_npc.size(); i++) {
         npc &critter = *active_npc[i];
         if (u_see(critter.xpos(), critter.ypos())) {
             mon_targets.push_back(&critter);
@@ -10709,7 +10772,7 @@ std::vector<point> game::pl_target_ui(int &x, int &y, int range, item *relevant,
     }
     std::sort(mon_targets.begin(), mon_targets.end(), compare_by_dist_to_u);
     int passtarget = -1;
-    for (int i = 0; i < mon_targets.size(); i++) {
+    for (size_t i = 0; i < mon_targets.size(); i++) {
         Creature &critter = *mon_targets[i];
         if(rl_dist( u.posx, u.posy, critter.xpos(), critter.ypos() ) > range) {
             // because the vector is sorted, everything from here on will
@@ -10926,7 +10989,7 @@ void game::butcher()
      uimenu kmenu;
      kmenu.text = _("Choose corpse to butcher");
      kmenu.selected = 0;
-     for (int i = 0; i < corpses.size(); i++) {
+     for (size_t i = 0; i < corpses.size(); i++) {
          mtype *corpse = m.i_at(u.posx, u.posy)[corpses[i]].corpse;
          int hotkey = -1;
          if (i == 0) {
@@ -11097,7 +11160,7 @@ void game::complete_butcher(int index)
  }
 
  // Recover hidden items
- for (int i = 0; i < contents.size(); i++) {
+ for (size_t i = 0; i < contents.size(); i++) {
    if ((skill_shift + 10) * 5 > rng(0,100)) {
      add_msg(_("You discover a %s in the %s!"), contents[i].tname().c_str(), corpse->name.c_str());
      m.add_item_or_charges(u.posx, u.posy, contents[i]);
@@ -11298,8 +11361,7 @@ void game::reload(int pos)
          bool magazine_isfull = true;
          item contents;
 
-         for (int i = 0; i < it->contents.size(); i++)
-         {
+         for (size_t i = 0; i < it->contents.size(); i++) {
              contents = it->contents[i];
              if ((contents.is_gunmod() &&
                   (contents.typeId() == "spare_mag" &&
@@ -11455,18 +11517,15 @@ void game::unload(item& it)
         while (it.contents.size() > 0)
         {
             item content = it.contents[0];
-            int iter = 0;
+            size_t iter = 0;
 // Pick an inventory item for the contents
-            while ((content.invlet == 0 || u.has_item(content.invlet)) && iter < inv_chars.size())
-            {
+            while ((content.invlet == 0 || u.has_item(content.invlet)) && iter < inv_chars.size()) {
                 content.invlet = nextinv;
                 advance_nextinv();
                 iter++;
             }
-            if (content.made_of(LIQUID))
-            {
-                if (!handle_liquid(content, false, false, &it))
-                {
+            if (content.made_of(LIQUID)) {
+                if (!handle_liquid(content, false, false, &it)) {
                     new_contents.push_back(content);// Put it back in (we canceled)
                 }
             } else {
@@ -11556,7 +11615,7 @@ void game::unload(item& it)
   if (!handle_liquid(newam, false, false))
    weapon->charges += newam.charges; // Put it back in
  } else if(newam.charges > 0) {
-  int iter = 0;
+  size_t iter = 0;
   while ((newam.invlet == 0 || u.has_item(newam.invlet)) && iter < inv_chars.size()) {
    newam.invlet = nextinv;
    advance_nextinv();
@@ -11635,37 +11694,31 @@ void game::chat()
 
     std::vector<npc*> available;
 
-    for (int i = 0; i < active_npc.size(); i++)
-    {
+    for (size_t i = 0; i < active_npc.size(); i++) {
         if (u_see(active_npc[i]->posx, active_npc[i]->posy) && rl_dist(u.posx, u.posy, active_npc[i]->posx, active_npc[i]->posy) <= 24)
         {
             available.push_back(active_npc[i]);
         }
     }
 
-    if (available.size() == 0)
-    {
+    if (available.size() == 0) {
         add_msg(_("There's no-one close enough to talk to."));
         return;
     }
-    else if (available.size() == 1)
-    {
+    else if (available.size() == 1) {
         available[0]->talk_to_u();
     }
-    else
-    {
+    else {
         std::vector<std::string> npcs;
 
-        for (int i = 0; i < available.size(); i++)
-        {
+        for (size_t i = 0; i < available.size(); i++) {
             npcs.push_back(available[i]->name);
         }
         npcs.push_back(_("Cancel"));
 
         int npc_choice = menu_vec(true, _("Who do you want to talk to?"), npcs) - 1;
 
-        if(npc_choice >= 0 && npc_choice < available.size())
-        {
+        if(npc_choice >= 0 && npc_choice < available.size()) {
             available[npc_choice]->talk_to_u();
         }
     }
@@ -12387,13 +12440,13 @@ bool game::plmove(int dx, int dy)
                 names.push_back(m.i_at(x, y)[0].display_name());
                 counts.push_back(1);
             }
-            for (int i = 1; i < m.i_at(x, y).size(); i++) {
+            for (size_t i = 1; i < m.i_at(x, y).size(); i++) {
                 item& tmpitem = m.i_at(x, y)[i];
                 std::string next_tname = tmpitem.tname();
                 std::string next_dname = tmpitem.display_name();
                 bool by_charges = tmpitem.count_by_charges();
                 bool got_it = false;
-                for (int i = 0; i < names.size(); ++i) {
+                for (size_t i = 0; i < names.size(); ++i) {
                     if (by_charges && next_tname == names[i]) {
                         counts[i] += tmpitem.charges;
                         got_it = true;
@@ -12417,7 +12470,7 @@ bool game::plmove(int dx, int dy)
                     break;
                 }
             }
-            for (int i = 0; i < names.size(); ++i) {
+            for (size_t i = 0; i < names.size(); ++i) {
                 std::string fmt;
                 if (names[i].at(names[i].length() - 1) == 's') {
                     names[i] = string_format("%d %s", counts[i], names[i].c_str());
@@ -12994,54 +13047,60 @@ void game::vertical_move(int movez, bool force) {
 }
 
 
-void game::update_map(int &x, int &y) {
- int shiftx = 0, shifty = 0;
- int olevx = 0, olevy = 0;
- while (x < SEEX * int(MAPSIZE / 2)) {
-  x += SEEX;
-  shiftx--;
- }
- while (x >= SEEX * (1 + int(MAPSIZE / 2))) {
-  x -= SEEX;
-  shiftx++;
- }
- while (y < SEEY * int(MAPSIZE / 2)) {
-  y += SEEY;
-  shifty--;
- }
- while (y >= SEEY * (1 + int(MAPSIZE / 2))) {
-  y -= SEEY;
-  shifty++;
- }
- m.shift(levx, levy, levz, shiftx, shifty);
- levx += shiftx;
- levy += shifty;
- if (levx < 0) {
-  levx += OMAPX * 2;
-  olevx = -1;
- } else if (levx > OMAPX * 2 - 1) {
-  levx -= OMAPX * 2;
-  olevx = 1;
- }
- if (levy < 0) {
-  levy += OMAPY * 2;
-  olevy = -1;
- } else if (levy > OMAPY * 2 - 1) {
-  levy -= OMAPY * 2;
-  olevy = 1;
- }
- if (olevx != 0 || olevy != 0) {
-  cur_om = &overmap_buffer.get(cur_om->pos().x + olevx, cur_om->pos().y + olevy);
- }
+void game::update_map(int &x, int &y)
+{
+    int shiftx = 0, shifty = 0;
+    int olevx = 0, olevy = 0;
 
- // Shift monsters if we're actually shifting
- if (shiftx || shifty) {
-    despawn_monsters(shiftx, shifty);
-    u.shift_destination(-shiftx * SEEX, -shifty * SEEY);
- }
+    while (x < SEEX * int(MAPSIZE / 2)) {
+        x += SEEX;
+        shiftx--;
+    }
+    while (x >= SEEX * (1 + int(MAPSIZE / 2))) {
+        x -= SEEX;
+        shiftx++;
+    }
+    while (y < SEEY * int(MAPSIZE / 2)) {
+        y += SEEY;
+        shifty--;
+    }
+    while (y >= SEEY * (1 + int(MAPSIZE / 2))) {
+        y -= SEEY;
+        shifty++;
+    }
+
+    m.shift(levx, levy, levz, shiftx, shifty);
+    levx += shiftx;
+    levy += shifty;
+
+    if (levx < 0) {
+        levx += OMAPX * 2;
+        olevx = -1;
+    } else if (levx > OMAPX * 2 - 1) {
+        levx -= OMAPX * 2;
+        olevx = 1;
+    }
+
+    if (levy < 0) {
+        levy += OMAPY * 2;
+        olevy = -1;
+    } else if (levy > OMAPY * 2 - 1) {
+        levy -= OMAPY * 2;
+        olevy = 1;
+    }
+
+    if (olevx != 0 || olevy != 0) {
+        cur_om = &overmap_buffer.get(cur_om->pos().x + olevx, cur_om->pos().y + olevy);
+    }
+
+    // Shift monsters if we're actually shifting
+    if (shiftx || shifty) {
+        despawn_monsters(shiftx, shifty);
+        u.shift_destination(-shiftx * SEEX, -shifty * SEEY);
+    }
 
     // Shift NPCs
-    for (int i = 0; i < active_npc.size(); i++) {
+    for (size_t i = 0; i < active_npc.size(); i++) {
         active_npc[i]->shift(shiftx, shifty);
         if (active_npc[i]->posx < 0 - SEEX * 2 ||
             active_npc[i]->posy < 0 - SEEX * 2 ||
@@ -13057,34 +13116,38 @@ void game::update_map(int &x, int &y) {
     // Put those in the active list.
     load_npcs();
 
- // Spawn monsters if appropriate
- m.spawn_monsters(); // Static monsters
- if (turn >= nextspawn)
-  spawn_mon(shiftx, shifty);
-// Shift scent
- unsigned int newscent[SEEX * MAPSIZE][SEEY * MAPSIZE];
- for (int i = 0; i < SEEX * MAPSIZE; i++) {
-  for (int j = 0; j < SEEY * MAPSIZE; j++)
-   newscent[i][j] = scent(i + (shiftx * SEEX), j + (shifty * SEEY));
- }
- for (int i = 0; i < SEEX * MAPSIZE; i++) {
-  for (int j = 0; j < SEEY * MAPSIZE; j++)
-   scent(i, j) = newscent[i][j];
+     // Spawn monsters if appropriate
+    m.spawn_monsters(); // Static monsters
+    if (turn >= nextspawn) {
+        spawn_mon(shiftx, shifty);
+    }
 
- }
- // Make sure map cache is consistent since it may have shifted.
- m.build_map_cache();
-// Update what parts of the world map we can see
- update_overmap_seen();
- if(!fullscreen) {
-   draw_minimap();
- }
+    // Shift scent
+    unsigned int newscent[SEEX * MAPSIZE][SEEY * MAPSIZE];
+    for (int i = 0; i < SEEX * MAPSIZE; i++) {
+        for (int j = 0; j < SEEY * MAPSIZE; j++)
+            newscent[i][j] = scent(i + (shiftx * SEEX), j + (shifty * SEEY));
+    }
+    for (int i = 0; i < SEEX * MAPSIZE; i++) {
+        for (int j = 0; j < SEEY * MAPSIZE; j++)
+            scent(i, j) = newscent[i][j];
+    }
+
+    // Make sure map cache is consistent since it may have shifted.
+    m.build_map_cache();
+
+    // Update what parts of the world map we can see
+    update_overmap_seen();
+    if(!fullscreen) {
+        draw_minimap();
+    }
 }
 
 tripoint game::om_global_location() const
 {
     const int cursx = (levx + int(MAPSIZE / 2)) / 2 + cur_om->pos().x * OMAPX;
     const int cursy = (levy + int(MAPSIZE / 2)) / 2 + cur_om->pos().y * OMAPY;
+
     return tripoint(cursx, cursy, levz);
 }
 
@@ -13098,7 +13161,7 @@ void game::update_overmap_seen()
         for (int y = ompos.y - dist; y <= ompos.y + dist; y++) {
             const std::vector<point> line = line_to(ompos.x, ompos.y, x, y, 0);
             int sight_points = dist;
-            for (int i = 0; i < line.size() && sight_points >= 0; i++) {
+            for (size_t i = 0; i < line.size() && sight_points >= 0; i++) {
                 const oter_id &ter = overmap_buffer.ter(line[i].x, line[i].y, ompos.z);
                 const int cost = otermap[ter].see_cost;
                 sight_points -= cost;
@@ -13112,20 +13175,22 @@ void game::update_overmap_seen()
 
 point game::om_location() const
 {
- point ret;
- ret.x = int( (levx + int(MAPSIZE / 2)) / 2);
- ret.y = int( (levy + int(MAPSIZE / 2)) / 2);
- return ret;
+    point ret;
+    ret.x = int( (levx + int(MAPSIZE / 2)) / 2);
+    ret.y = int( (levy + int(MAPSIZE / 2)) / 2);
+
+    return ret;
 }
 
 void game::replace_stair_monsters()
 {
- for (int i = 0; i < coming_to_stairs.size(); i++) {
-    coming_to_stairs[i].onstairs = false;
-    coming_to_stairs[i].staircount = 0;
-    add_zombie(coming_to_stairs[i]);
- }
- coming_to_stairs.clear();
+    for (size_t i = 0; i < coming_to_stairs.size(); i++) {
+        coming_to_stairs[i].onstairs = false;
+        coming_to_stairs[i].staircount = 0;
+        add_zombie(coming_to_stairs[i]);
+    }
+
+    coming_to_stairs.clear();
 }
 
 //TODO: abstract out the location checking code
@@ -13150,14 +13215,14 @@ void game::update_stair_monsters() {
             return;         // Found no stairs?
 
         // Find closest stairs.
-        int si = 0;
-        for (int i = 0; i < stairdist.size(); i++) {
+        size_t si = 0;
+        for (size_t i = 0; i < stairdist.size(); i++) {
             if (stairdist[i] < stairdist[si])
                 si = i;
         }
 
         // Attempt to spawn zombies.
-        for (int i = 0; i < coming_to_stairs.size(); i++) {
+        for (size_t i = 0; i < coming_to_stairs.size(); i++) {
             int mposx = stairx[si], mposy = stairy[si];
             monster &critter = coming_to_stairs[i];
 
@@ -13317,50 +13382,51 @@ void game::spawn_mon(int shiftx, int shifty)
  int pop, rad;
  int iter;
  int t;
-    // Create a new NPC?
-    if (ACTIVE_WORLD_OPTIONS["RANDOM_NPC"] && one_in(100 + 15 * cur_om->npcs.size())) {
-        npc* tmp = new npc();
-        tmp->normalize();
-        tmp->randomize();
-        //tmp->stock_missions();
-        // Create the NPC in one of the outermost submaps,
-        // hopefully far away to be invisible to the player,
-        // to prevent NPCs appearing out of thin air.
-        // This can be changed to let the NPC spawn further away,
-        // so it does not became active immediately.
-        int msx = levx;
-        int msy = levy;
-        switch(rng(0, 4)) { // on which side of the map to spawn
-            case 0:
-                msy += rng(0, MAPSIZE - 1);
-                break;
-            case 1:
-                msx += MAPSIZE - 1;
-                msy += rng(0, MAPSIZE - 1);
-                break;
-            case 2:
-                msx += rng(0, MAPSIZE - 1);
-                break;
-            case 3:
-                msy += MAPSIZE - 1;
-                msx += rng(0, MAPSIZE - 1);
-                break;
-        }
-        // adds the npc to the correct overmap.
-        tmp->spawn_at(cur_om, msx, msy, levz);
-        tmp->form_opinion(&u);
-        tmp->mission = NPC_MISSION_NULL;
-        int mission_index = reserve_random_mission(ORIGIN_ANY_NPC, om_location(), tmp->getID());
-        if (mission_index != -1) {
-            tmp->chatbin.missions.push_back(mission_index);
-        }
-        // This will make the new NPC active
-        load_npcs();
+
+ // Create a new NPC?
+ if (ACTIVE_WORLD_OPTIONS["RANDOM_NPC"] && one_in(100 + 15 * cur_om->npcs.size())) {
+    npc* tmp = new npc();
+    tmp->normalize();
+    tmp->randomize();
+    //tmp->stock_missions();
+    // Create the NPC in one of the outermost submaps,
+    // hopefully far away to be invisible to the player,
+    // to prevent NPCs appearing out of thin air.
+    // This can be changed to let the NPC spawn further away,
+    // so it does not became active immediately.
+    int msx = levx;
+    int msy = levy;
+    switch(rng(0, 4)) { // on which side of the map to spawn
+        case 0:
+            msy += rng(0, MAPSIZE - 1);
+            break;
+        case 1:
+            msx += MAPSIZE - 1;
+            msy += rng(0, MAPSIZE - 1);
+            break;
+        case 2:
+            msx += rng(0, MAPSIZE - 1);
+            break;
+        case 3:
+            msy += MAPSIZE - 1;
+            msx += rng(0, MAPSIZE - 1);
+            break;
     }
+    // adds the npc to the correct overmap.
+    tmp->spawn_at(cur_om, msx, msy, levz);
+    tmp->form_opinion(&u);
+    tmp->mission = NPC_MISSION_NULL;
+    int mission_index = reserve_random_mission(ORIGIN_ANY_NPC, om_location(), tmp->getID());
+    if (mission_index != -1) {
+        tmp->chatbin.missions.push_back(mission_index);
+    }
+    // This will make the new NPC active
+    load_npcs();
+ }
 
 // Now, spawn monsters (perhaps)
  monster zom;
- for (int i = 0; i < cur_om->zg.size(); i++) { // For each valid group...
+ for (size_t i = 0; i < cur_om->zg.size(); i++) { // For each valid group...
   if (cur_om->zg[i].posz != levz) { continue; } // skip other levels - hack
   group = 0;
   if(cur_om->zg[i].diffuse)
@@ -13435,35 +13501,38 @@ void game::spawn_mon(int shiftx, int shifty)
 
 int game::valid_group(std::string type, int x, int y, int z_coord)
 {
- std::vector <int> valid_groups;
- std::vector <int> semi_valid; // Groups that're ALMOST big enough
- int dist;
- for (int i = 0; i < cur_om->zg.size(); i++) {
-  if (cur_om->zg[i].posz != z_coord) { continue; }
-  dist = trig_dist(x, y, cur_om->zg[i].posx, cur_om->zg[i].posy);
-  if (dist < cur_om->zg[i].radius) {
-   if(MonsterGroupManager::IsMonsterInGroup(cur_om->zg[i].type, type)) {
-     valid_groups.push_back(i);
-   }
-  } else if (dist < cur_om->zg[i].radius + 3) {
-   if(MonsterGroupManager::IsMonsterInGroup(cur_om->zg[i].type, type)) {
-     semi_valid.push_back(i);
-   }
-  }
- }
- if (valid_groups.size() == 0) {
-  if (semi_valid.size() == 0)
-   return -1;
-  else {
-// If there's a group that's ALMOST big enough, expand that group's radius
-// by one and absorb into that group.
-   int semi = rng(0, semi_valid.size() - 1);
-   if (!cur_om->zg[semi_valid[semi]].diffuse)
-    cur_om->zg[semi_valid[semi]].radius++;
-   return semi_valid[semi];
-  }
- }
- return valid_groups[rng(0, valid_groups.size() - 1)];
+    std::vector <int> valid_groups;
+    std::vector <int> semi_valid; // Groups that're ALMOST big enough
+    int dist;
+    for (size_t i = 0; i < cur_om->zg.size(); i++) {
+        if (cur_om->zg[i].posz != z_coord) {
+            continue;
+        }
+        dist = trig_dist(x, y, cur_om->zg[i].posx, cur_om->zg[i].posy);
+        if (dist < cur_om->zg[i].radius) {
+            if(MonsterGroupManager::IsMonsterInGroup(cur_om->zg[i].type, type)) {
+                valid_groups.push_back(i);
+            }
+        } else if (dist < cur_om->zg[i].radius + 3) {
+            if(MonsterGroupManager::IsMonsterInGroup(cur_om->zg[i].type, type)) {
+                semi_valid.push_back(i);
+            }
+        }
+    }
+    if (valid_groups.size() == 0) {
+        if (semi_valid.size() == 0) {
+            return -1;
+        }
+        else {
+            // If there's a group that's ALMOST big enough,
+            //expand that group's radius by one and absorb into that group.
+            int semi = rng(0, semi_valid.size() - 1);
+            if (!cur_om->zg[semi_valid[semi]].diffuse)
+            cur_om->zg[semi_valid[semi]].radius++;
+            return semi_valid[semi];
+        }
+    }
+    return valid_groups[rng(0, valid_groups.size() - 1)];
 }
 
 void game::wait()
@@ -13625,7 +13694,7 @@ void game::msg_buffer()
     }
 // Split the message into many if we must!
     std::vector<std::string> folded = foldstring(mes, FULL_SCREEN_WIDTH-2);
-    for(int j=0; j<folded.size() && line <= FULL_SCREEN_HEIGHT-2; j++, line++) {
+    for(size_t j=0; j<folded.size() && line <= FULL_SCREEN_HEIGHT-2; j++, line++) {
      mvwprintz(w, line, 1, c_ltgray, "%s", folded[j].c_str());
     }
    } // if (line <= 23)
@@ -13920,7 +13989,7 @@ bool game::spread_fungus(int x, int y)
 std::vector<faction *> game::factions_at(int x, int y)
 {
  std::vector<faction *> ret;
- for (int i = 0; i < factions.size(); i++) {
+ for (size_t i = 0; i < factions.size(); i++) {
   if (factions[i].omx == cur_om->pos().x && factions[i].omy == cur_om->pos().y &&
       trig_dist(x, y, factions[i].mapx, factions[i].mapy) <= factions[i].size)
    ret.push_back(&(factions[i]));
@@ -14206,7 +14275,7 @@ void game::add_artifact_messages(std::vector<art_effect_passive> effects)
 {
     int net_str = 0, net_dex = 0, net_per = 0, net_int = 0, net_speed = 0;
 
-    for (int i = 0; i < effects.size(); i++) {
+    for (size_t i = 0; i < effects.size(); i++) {
         switch (effects[i]) {
         case AEP_STR_UP:   net_str += 4; break;
         case AEP_DEX_UP:   net_dex += 4; break;
@@ -14330,6 +14399,7 @@ void game::add_artifact_messages(std::vector<art_effect_passive> effects)
     if (stat_info.length() > 0) {
         add_msg(stat_info.c_str());
     }
+
 
     if (net_speed != 0) {
         add_msg(_("Speed %s%d! "), (net_speed > 0 ? "+" : ""), net_speed);

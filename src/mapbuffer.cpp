@@ -119,15 +119,19 @@ void mapbuffer::save_if_dirty()
 
 void mapbuffer::save( bool delete_after_save )
 {
+    static bool has_writen_keymap = false;
+
     std::map<tripoint, submap *, pointcomp>::iterator it;
 
     std::stringstream map_directory;
     map_directory << world_generator->active_world->world_path << "/maps";
     assure_dir_exist( map_directory.str().c_str() );
 
+    std::ofstream fout;
+    if (!has_writen_keymap) {
     std::stringstream mapfile;
     mapfile << map_directory.str() << "/map.key";
-    std::ofstream fout(mapfile.str().c_str());
+    fout.open(mapfile.str().c_str());
     if( !fout.is_open() ) {
         debugmsg( "Can't open %s.", mapfile.str().c_str() );
         return;
@@ -168,6 +172,8 @@ void mapbuffer::save( bool delete_after_save )
 
     fout << std::endl;
     fout.close();
+    has_writen_keymap = true;
+    }
 
     int num_saved_submaps = 0;
     int num_total_submaps = submap_list.size();
