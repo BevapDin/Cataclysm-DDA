@@ -264,11 +264,11 @@ void game::init_ui(){
 
         #ifdef SDLTILES
         if(OPTIONS["USE_TILES"]) {
-            VIEW_OFFSET_X = ((int)(TERMX/tilecontext->tile_ratiox) - sidebarWidth > 121) ?
-                                (TERMX - sidebarWidth - 121)/2 * tilecontext->tile_ratiox : 0;
-            VIEW_OFFSET_Y = ((int)(TERMY/tilecontext->tile_ratioy) > 121) ? (TERMY - 121)/2 : 0;
-            TERRAIN_WINDOW_WIDTH  = ceil((TERMX - sidebarWidth)/tilecontext->tile_ratiox);
-            TERRAIN_WINDOW_HEIGHT = ceil(TERMY/tilecontext->tile_ratioy);
+            VIEW_OFFSET_X = ((int)(TERMX/tilecontext->get_tile_ratiox()) - sidebarWidth > 121) ?
+                                (TERMX - sidebarWidth - 121)/2 * tilecontext->get_tile_ratiox() : 0;
+            VIEW_OFFSET_Y = ((int)(TERMY/tilecontext->get_tile_ratioy()) > 121) ? (TERMY - 121)/2 : 0;
+            TERRAIN_WINDOW_WIDTH  = ceil((TERMX - sidebarWidth)/tilecontext->get_tile_ratiox());
+            TERRAIN_WINDOW_HEIGHT = ceil(TERMY/tilecontext->get_tile_ratioy());
             TERRAIN_WINDOW_TERM_WIDTH = (TERMX - sidebarWidth > 121) ? 121 : TERMX - sidebarWidth;
         }
         else
@@ -765,7 +765,7 @@ void game::calc_driving_offset(vehicle *veh) {
     if(std::abs(velocity) < min_offset_vel) {
         rel_offset = 0;
     } else if(std::abs(velocity) > max_offset_vel) {
-        rel_offset = 1;
+        rel_offset = (velocity > 0) ? 1 : -1;
     } else {
         rel_offset = (velocity - min_offset_vel) / (max_offset_vel - min_offset_vel);
     }
@@ -12177,18 +12177,8 @@ bool game::plmove(int dx, int dy)
 
           if ( src_items > 0 ) {  // and the stuff inside.
               if ( dst_item_ok && src_item_ok ) {
-                  std::vector <item>& miat = m.i_at(fpos.x, fpos.y);
-                  const int arbritrary_item_limit = MAX_ITEM_IN_SQUARE - dst_items; // within reason
-                  for (int i=0; i < src_items; i++) { // ...carefully
-                      if ( i < arbritrary_item_limit &&
-                        miat.size() > 0 &&
-                        m.add_item_or_charges(fdest.x, fdest.y, miat[0], 0) ) {
-                          miat.erase(miat.begin());
-                      } else {
-                          add_msg("Stuff spills from the %s!", furntype.name.c_str() );
-                          break;
-                      }
-                  }
+                  // Assume contents of both cells are legal, so we can just swap contents.
+                  m.i_at( fpos.x, fpos.y).swap( m.i_at(fdest.x, fdest.y) );
               } else {
                   add_msg("Stuff spills from the %s!", furntype.name.c_str() );
               }
