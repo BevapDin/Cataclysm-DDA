@@ -1381,6 +1381,7 @@ void game::complete_craft()
     } else {
         if(newit.count_by_charges() && new_count != 1) {
             newit.charges *= new_count;
+            new_count = 1;
         }
         u.i_add_or_drop(newit, new_count);
         g->add_msg("%s", newit.tname(g).c_str());
