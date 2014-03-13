@@ -1822,7 +1822,7 @@ void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_
     
     // sort to make it nicer looking
     // sorts by location first
-    std::sort(const_cast<candvec&>(candidates).begin(), const_cast<candvec&>(candidates).end(), std::less<candidate_t>());
+    std::sort(const_cast<candvec&>(candidates).begin(), const_cast<candvec&>(candidates).end(), sort_bylikeness);
     // stores which items the user has selected
     std::vector<bool> selected(candidates.size(), false);
     // the (summed up) charges (as told by requirement::get_charges_or_amount)
