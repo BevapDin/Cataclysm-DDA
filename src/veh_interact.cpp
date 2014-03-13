@@ -1484,6 +1484,9 @@ void veh_interact::countDurability()
     double mostDamaged = 1; // durability ratio of the most damaged part
 
     for (int it = 0; it < veh->parts.size(); it++) {
+        if (veh->parts[it].removed) {
+            continue;
+        }
         vehicle_part part = veh->parts[it];
         int part_dur = vehicle_part_types[part.id].durability;
 
@@ -1758,6 +1761,7 @@ void complete_vehicle ()
                            veh->name.c_str());
             }
             veh->remove_part (vehicle_part);
+            veh->part_removal_cleanup();
         }
         break;
     case 's':
@@ -1775,6 +1779,7 @@ void complete_vehicle ()
             broken = veh->parts[replaced_wheel].hp <= 0;
             removed_wheel = veh->item_from_part( replaced_wheel );
             veh->remove_part( replaced_wheel );
+            veh->part_removal_cleanup();
             g->add_msg( _("You replace one of the %s's tires with a %s."),
                         veh->name.c_str(), vehicle_part_types[part_id].name.c_str() );
             partnum = veh->install_part( dx, dy, part_id );

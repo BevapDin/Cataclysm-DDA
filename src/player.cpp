@@ -176,6 +176,7 @@ player::player() : Character(), name("")
   temp_conv[i] = BODYTEMP_NORM;
  }
  nv_cached = false;
+ pda_cached = false;
  volume = 0;
 
  memorial_log.clear();
@@ -305,6 +306,7 @@ player& player::operator= (const player & rhs)
  least_recently_meals = rhs.least_recently_meals;
 
  nv_cached = false;
+ pda_cached = false;
 
  return (*this);
 }
@@ -480,6 +482,7 @@ void player::reset_stats()
         update_mental_focus();
     }
     nv_cached = false;
+    pda_cached = false;
 
     recalc_sight_limits();
     recalc_speed_bonus();
@@ -496,6 +499,7 @@ void player::reset_stats()
 void player::action_taken()
 {
     nv_cached = false;
+    pda_cached = false;
 }
 
 void player::update_morale()
@@ -3720,6 +3724,17 @@ bool player::has_nv()
     return nv;
 }
 
+bool player::has_pda()
+{
+    static bool pda = false;
+    if ( !pda_cached ) {
+      pda_cached = true;
+      pda = has_amount("pda", 1);
+    }
+
+    return pda;
+}
+
 void player::pause()
 {
     moves = 0;
@@ -6870,6 +6885,27 @@ bool player::has_item(char let)
  return (has_weapon_or_armor(let) || !inv.item_by_letter(let).is_null());
 }
 
+std::vector<char> player::allocated_invlets() {
+    size_t maxsz = inv_chars.size(), incr = worn.size();
+    std::vector<char> invs = inv.allocated_invlets();
+
+    if (weapon.invlet != 0) {
+        incr++;
+    }
+    if (incr > 0) {
+        invs.resize(maxsz + incr, '\0');
+        if (weapon.invlet != 0) {
+            invs[maxsz] = weapon.invlet;
+            maxsz++;
+        }
+        for (int i = 0; i < worn.size(); i++, maxsz++) {
+            invs[maxsz] = worn[i].invlet;
+        }
+    }
+
+    return invs;
+}
+
 bool player::has_item(int position) {
     return !i_at(position).is_null();
 }
@@ -9058,7 +9094,7 @@ void player::read(int pos)
                            : "Your %s skill won't be improved.  Read anyway?"),
                          tmp->type->name().c_str())) {
         return;
-    } else if (!continuous && !query_yn("Study %s until you learn something? (gain a level)",
+    } else if (!continuous && !query_yn(_("Study %s until you learn something? (gain a level)"),
                                                  tmp->type->name().c_str())) {
         study = false;
     } else {
@@ -9555,7 +9591,7 @@ void get_armor_on(player* p, body_part bp, std::vector<int>& armor_indices) {
     }
 }
 
-// mutates du, returns true iff armor was damaged
+// mutates du, returns true if armor was damaged
 bool player::armor_absorb(damage_unit& du, item& armor) {
     it_armor* armor_type = dynamic_cast<it_armor*>(armor.type);
 
@@ -9995,7 +10031,7 @@ void player::practice (const calendar& turn, Skill *s, int amount)
         int oldLevel = skillLevel(s);
         skillLevel(s).train(amount);
         int newLevel = skillLevel(s);
-        if (newLevel > oldLevel) {
+        if (is_player() && newLevel > oldLevel) {
             g->add_msg(_("Your skill in %s has increased to %d!"), s->name().c_str(), newLevel);
         }
 

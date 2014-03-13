@@ -118,6 +118,7 @@ void construction_menu()
     bool update_info = true;
     int select = 0;
     int chosen = 0;
+    int offset = 0;
     long ch;
     bool exit = false;
 
@@ -131,10 +132,22 @@ void construction_menu()
             }
         }
         // Determine where in the master list to start printing
-        //int offset = select - 11;
-        int offset = 0;
-        if (select >= iMaxY - 2) {
-            offset = select - iMaxY + 3;
+        if( OPTIONS["MENU_SCROLL"] ) {
+            if (available.size() > iMaxY) {
+                offset = select - (iMaxY - 1) / 2;
+
+                if (offset < 0) {
+                    offset = 0;
+                } else if (offset + iMaxY -2   > available.size()) {
+                    offset = available.size() - iMaxY + 2;
+                }
+             }
+        } else {
+            if( select < offset ) {
+                offset = select;
+            } else if( select >= offset + iMaxY -2 ) {
+                offset = 1 + select - iMaxY + 2;
+            }
         }
         // Print the constructions between offset and max (or how many will fit)
         for (int i = 0; i < iMaxY - 2 && (i + offset) < available.size(); i++) {

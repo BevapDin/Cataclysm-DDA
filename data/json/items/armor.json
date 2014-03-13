@@ -3136,7 +3136,7 @@
         "symbol" : "[",
         "description" : "A state-of-the-art, lightweight, flexible, bullet resistant vest. The ceramic disks used in its construction make it impossible to repair, only replace.",
         "price" : 120000,
-        "material" : ["ceramic", "nofixkevlar"],
+        "material" : ["ceramic", "kevlar"],
         "volume" : 24,
         "cutting" : 0,
         "warmth" : 12,
@@ -5973,28 +5973,6 @@
         "enviromental_protection" : 0,
         "phase" : "solid",
         "flags" : ["FANCY"]
-    },
-    {
-        "type" : "ARMOR",
-        "id" : "hairpin",
-        "name" : "hairpin",
-        "volume" : 0,
-        "material_thickness" : 0,
-        "storage" : 0,
-        "description" : "A plain hairpin to keep your hair in place.",
-        "weight" : 2,
-        "to_hit" : 0,
-        "color" : "brown",
-        "encumbrance" : 0,
-        "price" : 500,
-        "material" : ["iron", "null"],
-        "coverage" : 0,
-        "symbol" : "[",
-        "bashing" : 0,
-        "cutting" : 0,
-        "warmth" : 0,
-        "enviromental_protection" : 0,
-        "phase" : "solid"
     },
     {
 

@@ -221,6 +221,8 @@ void game::load_data_from_dir(const std::string &path) {
 
 game::~game()
 {
+ DynamicDataLoader::get_instance().unload_data();
+ MAPBUFFER.reset();
  delete gamemode;
  itypes.clear();
  delwin(w_terrain);
@@ -259,8 +261,8 @@ void game::init_ui(){
     int sidebarWidth = narrow_sidebar ? 45 : 55;
 
     #if (defined TILES || defined _WIN32 || defined __WIN32__)
-        TERMX = OPTIONS["TERMINAL_X"];
-        TERMY = OPTIONS["TERMINAL_Y"];
+        TERMX = get_terminal_width();
+        TERMY = get_terminal_height();
 
         #ifdef SDLTILES
         if(OPTIONS["USE_TILES"]) {
@@ -2947,11 +2949,6 @@ bool game::handle_action()
 
   case ACTION_WAIT:
    wait();
-   if (veh_ctrl) {
-    veh->turret_mode++;
-    if (veh->turret_mode > 1)
-     veh->turret_mode = 0;
-   }
    break;
 
   case ACTION_CRAFT:
@@ -2983,14 +2980,10 @@ bool game::handle_action()
    break;
 
   case ACTION_SLEEP:
-    if (veh_ctrl)
-    {
+    if( veh_ctrl ) {
         add_msg(_("Vehicle control has moved, %s"),
         press_x(ACTION_CONTROL_VEHICLE, _("new binding is "), _("new default binding is '^'.")).c_str());
-
-    }
-    else
-    {
+    } else {
         uimenu as_m;
         as_m.text = _("Are you sure you want to sleep?");
         as_m.entries.push_back(uimenu_entry(0, true, (OPTIONS["FORCE_CAPITAL_YN"]?'Y':'y'), _("Yes.")) );
@@ -4140,8 +4133,8 @@ Current turn: %d; Next spawn %d.\n\
     break;
 
   case 12:
-      add_msg("Martial arts debug.");
-      add_msg("Your eyes blink rapidly as knowledge floods your brain.");
+      add_msg(_("Martial arts debug."));
+      add_msg(_("Your eyes blink rapidly as knowledge floods your brain."));
       u.ma_styles.push_back("style_karate");
       u.ma_styles.push_back("style_judo");
       u.ma_styles.push_back("style_aikido");
@@ -4165,12 +4158,12 @@ Current turn: %d; Next spawn %d.\n\
       u.ma_styles.push_back("style_eskrima");
       u.ma_styles.push_back("style_fencing");
       u.ma_styles.push_back("style_silat");
-      add_msg("You now know a lot more than just 10 styles of kung fu.");
+      add_msg(_("You now know a lot more than just 10 styles of kung fu."));
    break;
 
   case 13: {
-    add_msg("Recipe debug.");
-    add_msg("Your eyes blink rapidly as knowledge floods your brain.");
+    add_msg(_("Recipe debug."));
+    add_msg(_("Your eyes blink rapidly as knowledge floods your brain."));
     for (recipe_map::iterator cat_iter = recipes.begin(); cat_iter != recipes.end(); ++cat_iter)
     {
         for (recipe_list::iterator list_iter = cat_iter->second.begin();
@@ -4182,7 +4175,7 @@ Current turn: %d; Next spawn %d.\n\
         }
       }
     }
-    add_msg("You know how to craft that now.");
+    add_msg(_("You know how to craft that now."));
   }
     break;
 
@@ -7157,30 +7150,44 @@ void game::open()
     }
 
     u.moves -= 100;
-    bool didit = false;
 
     int vpart;
     vehicle *veh = m.veh_at(openx, openy, vpart);
+
     if (veh) {
-        int openable = veh->part_with_feature(vpart, "OPENABLE");
+        int openable = veh->next_part_to_open(vpart);
         if(openable >= 0) {
-            const char *name = veh->part_info(openable).name.c_str();
-            if (veh->part_info(openable).has_flag("OPENCLOSE_INSIDE")) {
-                const vehicle *in_veh = m.veh_at(u.posx, u.posy);
-                if (!in_veh || in_veh != veh) {
+            const vehicle *player_veh = m.veh_at(u.posx, u.posy);
+            bool outside = !player_veh || player_veh != veh;
+            if(!outside) {
+                veh->open(openable);
+            } else {
+                // Outside means we check if there's anything in that tile outside-openable.
+                // If there is, we open everything on tile. This means opening a closed,
+                // curtained door from outside is possible, but it will magically open the
+                // curtains as well.
+                int outside_openable = veh->next_part_to_open(vpart, true);
+                if(outside_openable == -1) {
+                    const char *name = veh->part_info(openable).name.c_str();
                     add_msg(_("That %s can only opened from the inside."), name);
-                    return;
+                    u.moves += 100;
+                } else {
+                    veh->open_all_at(openable);
                 }
             }
-            if (veh->parts[openable].open) {
+        } else {
+            // If there are any OPENABLE parts here, they must be already open
+            int already_open = veh->part_with_feature(vpart, "OPENABLE");
+            if(already_open >= 0) {
+                const char *name = veh->part_info(already_open).name.c_str();
                 add_msg(_("That %s is already open."), name);
-                u.moves += 100;
-            } else {
-                veh->open(openable);
             }
+            u.moves += 100;
         }
         return;
     }
+
+    bool didit = false;
 
     if (m.is_outside(u.posx, u.posy)) {
         didit = m.open_door(openx, openy, false);
@@ -7225,7 +7232,7 @@ void game::close(int closex, int closey)
         monster &critter = critter_tracker.find(zid);
         add_msg(_("There's a %s in the way!"), critter.name().c_str());
     } else if (veh) {
-        int openable = veh->part_with_feature(vpart, "OPENABLE");
+        int openable = veh->next_part_to_close(vpart);
         if(openable >= 0) {
             const char *name = veh->part_info(openable).name.c_str();
             if (veh->part_info(openable).has_flag("OPENCLOSE_INSIDE")) {
@@ -7342,6 +7349,7 @@ void game::smash()
             add_msg(extra.c_str());
         }
         sound(smashx, smashy, 18, bashsound);
+        u.handle_melee_wear();
         // TODO: Move this elsewhere, like maybe into the map on-break code
         if (m.has_flag("ALARMED", smashx, smashy) &&
             !event_queued(EVENT_WANTED))
@@ -7431,6 +7439,7 @@ void game::activity_on_turn_pulp()
             // to insure that we eventually smash the target.
             if (x_in_y(pulp_power, it->volume())) {
                 it->damage++;
+                u.handle_melee_wear();
             }
             // Splatter some blood around
             for (int x = smashx - 1; x <= smashx + 1; x++) {
@@ -11930,13 +11939,10 @@ bool game::plmove(int dx, int dy)
      }
  }
  bool veh_closed_door = false;
+ bool outside_vehicle = (!veh0 || veh0 != veh1);
  if (veh1) {
-  dpart = veh1->part_with_feature (vpart1, "OPENABLE");
-  if (veh1->part_info(dpart).has_flag("OPENCLOSE_INSIDE") && (!veh0 || veh0 != veh1)){
-      veh_closed_door = false;
-  } else {
-      veh_closed_door = dpart >= 0 && !veh1->parts[dpart].open;
-  }
+    dpart = veh1->next_part_to_open(vpart1, outside_vehicle);
+    veh_closed_door = dpart >= 0 && !veh1->parts[dpart].open;
  }
 
  if (veh0 && abs(veh0->velocity) > 100) {
@@ -12539,11 +12545,15 @@ bool game::plmove(int dx, int dy)
       return false;
   }
 
- } else if (veh_closed_door) { // move_cost <= 0
-   veh1->open(dpart);
-  u.moves -= 100;
-  add_msg (_("You open the %s's %s."), veh1->name.c_str(),
+ } else if (veh_closed_door) {
+    if(outside_vehicle) {
+        veh1->open_all_at(dpart);
+   } else {
+        veh1->open(dpart);
+        add_msg (_("You open the %s's %s."), veh1->name.c_str(),
                                     veh1->part_info(dpart).name.c_str());
+   }
+  u.moves -= 100;
  } else { // Invalid move
   if (u.has_effect("blind") || u.has_effect("stunned")) {
 // Only lose movement if we're blind

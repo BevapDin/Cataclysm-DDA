@@ -1207,16 +1207,22 @@ std::string from_sentence_case (const std::string &kingston)
 
 std::string vstring_format(const char *pattern, va_list argptr)
 {
+    // If we have no C++11 support, define a hackish way to do va_copy
+    // See http://stackoverflow.com/questions/558223/va-copy-porting-to-visual-c
+    // and http://stackoverflow.com/questions/5047971/how-do-i-check-for-c11-support
+    #if __cplusplus < 201103L && !defined(va_copy)
+        #define va_copy(dest, source) dest = source
+    #endif
+
     int buffer_size = 1024; // Any number is good
     int returned_length = 0;
     std::vector<char> buffer(buffer_size, '\0');
     // Call of vsnprintf() makes va_list unusable, so we need a copy.
     va_list cur_argptr;
-#ifdef _MSC_VER
+#if (defined(_WIN32) || defined(WINDOWS) || defined(__WIN32__))
     // Microsofts vsnprintf does return -1 on buffer overflow, not
     // the required size of the buffer. So we have to increase the buffer
     // until we succeed.
-    buffer_size = 1024;
     while(true) {
         buffer.resize(buffer_size, '\0');
         va_copy(cur_argptr, argptr);
@@ -1232,7 +1238,6 @@ std::string vstring_format(const char *pattern, va_list argptr)
     const int required = vsnprintf(&buffer[0], buffer_size, pattern, cur_argptr);
     va_end(cur_argptr);
     if (required < 0) {
-        debugmsg("invalid input to string_format function!");
         return std::string("invalid input to string_format function!");
     } else if (required >= buffer_size) {
         // Did not fit the buffer, retry with better buffer size.
@@ -1433,3 +1438,16 @@ void display_table(WINDOW *w, const std::string &title, int columns,
         }
     }
 }
+
+// In non-SDL mode, width/height is just what's specified in the menu
+#if !defined(TILES)
+int get_terminal_width() {
+    int width = OPTIONS["TERMINAL_X"];
+    return width < FULL_SCREEN_WIDTH ? FULL_SCREEN_WIDTH : width;
+}
+
+int get_terminal_height() {
+    return OPTIONS["TERMINAL_Y"];
+}
+
+#endif

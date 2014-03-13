@@ -176,6 +176,9 @@ void map::update_vehicle_cache(vehicle * veh, const bool brand_new)
  int partid = 0;
  for( std::vector<vehicle_part>::iterator it = parts.begin(),
    end = parts.end(); it != end; ++it, ++partid ) {
+  if (it->removed) {
+      continue;
+  }
   const int px = gx + it->precalc_dx[0];
   const int py = gy + it->precalc_dy[0];
   veh_cached_parts.insert( std::make_pair( std::make_pair(px,py),
@@ -495,12 +498,16 @@ void map::vehmove()
         }
     }
 
-    int count = 0;
-    while(vehproceed()) {
-        count++;// lots of movement stuff. maybe 10 is low for collisions.
-        if (count > 10)
+    // 15 equals 3 >50mph vehicles, or up to 15 slow (1 square move) ones
+    for( int count = 0; count < 15; count++ ) {
+        if( !vehproceed() )
             break;
     }
+    // Process item removal on the vehicles that were modified this turn.
+    for (std::set<vehicle*>::iterator it = dirty_vehicle_list.begin(); it != dirty_vehicle_list.end(); ++it) {
+        (*it)->part_removal_cleanup();
+    }
+    dirty_vehicle_list.clear();
 }
 
 int degree_diff(int a, int b) {
@@ -512,13 +519,14 @@ int degree_diff(int a, int b) {
 // find veh with the most amt of turn remaining, and move it a bit.
 // proposal:
 //  move it at most, a tenth of a turn, and at least one square.
-bool map::vehproceed(){
+bool map::vehproceed()
+{
     VehicleList vehs = get_vehicles();
     vehicle* veh = NULL;
     float max_of_turn = 0;
     int x; int y;
     for( size_t v = 0; v < vehs.size(); ++v ) {
-        if(vehs[v].v->of_turn > max_of_turn) {
+        if( vehs[v].v->of_turn > max_of_turn ) {
             veh = vehs[v].v;
             x = vehs[v].x;
             y = vehs[v].y;
