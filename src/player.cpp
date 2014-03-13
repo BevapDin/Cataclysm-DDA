@@ -8861,15 +8861,20 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
             return;
         }
         it_comest *itc = dynamic_cast<it_comest*>(cc.type);
-        if(itc == 0 || itc->container != used->type->id) {
+        if (itc == 0) {
             g->add_msg(_("That does not belong in this container"));
             return;
         }
-        if(cc.made_of(LIQUID) && !(used->has_flag("WATERTIGHT") && used->has_flag("SEALS"))) {
-            g->add_msg(_("Can't put liquids into this"));
+        if (cc.made_of(LIQUID)) {
+            if (!used->is_watertight_container()) {
+                g->add_msg(_("Can't put liquids into this"));
+                return;
+            }
+        } else if(itc->container != used->type->id) {
+            g->add_msg(_("That does not belong in this container"));
             return;
         }
-        if(cc.count_by_charges() && cc.charges > itc->charges) {
+        if(!cc.made_of(LIQUID) && cc.count_by_charges() && cc.charges > itc->charges) {
             used->contents.push_back(cc);
             used->contents[0].charges = itc->charges;
             cc.charges -= itc->charges;
