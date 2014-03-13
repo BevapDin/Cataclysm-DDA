@@ -4819,10 +4819,6 @@ void map::check_spoiled(std::vector<item> &items)
             ++it;
             continue;
         }
-        if(it->made_of(LIQUID) && it->type->id != "water" && it->type->id != "gasoline") {
-            it = items.erase(it);
-            continue;
-        }
         it_comest *food = dynamic_cast<it_comest *>(it->type);
         if(food != 0 && it->goes_bad())
         {
@@ -4850,6 +4846,9 @@ void map::check_spoiled(submap &sm)
     {
         for(int y = 0; y < SEEY; y++)
         {
+            if (sm.frn[x][y] != f_null) {
+                continue;
+            }
             check_spoiled(sm.itm[x][y]);
         }
     }
