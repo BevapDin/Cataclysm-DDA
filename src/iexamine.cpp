@@ -1133,7 +1133,6 @@ void iexamine::aggie_plant(player *p, map *m, int examx, int examy) {
 void iexamine::fvat_empty(player *p, map *m, int examx, int examy) {
     itype_id brew_type;
     bool to_deposit = false;
-    bool vat_full = false;
     bool brew_present = false;
     int charges_on_ground = 0;
     for (int i = 0; i < m->i_at(examx, examy).size(); i++) {
@@ -1195,25 +1194,16 @@ void iexamine::fvat_empty(player *p, map *m, int examx, int examy) {
     if (to_deposit) {
         item brew(itypes[brew_type], 0);
         int charges_held = p->charges_of(brew_type);
-        brew.charges = charges_on_ground;
-        for (int i=0; i<charges_held && !vat_full; i++) {
-            p->use_charges(brew_type, 1);
-            brew.charges++;
-            if ( ((brew.count_by_charges()) ? brew.volume(false, true)/1000 :
-                brew.volume(false, true)/1000*brew.charges ) >= 100)
-                vat_full = true; //vats hold 50 units of brew, or 350 charges for a count_by_charges brew
-        }
+        brew.charges = charges_on_ground + charges_held;
+        p->use_charges(brew_type, charges_held);
         g->add_msg(_("Set %s in the vat."), brew.name.c_str());
         m->i_clear(examx, examy);
         m->i_at(examx, examy).push_back(brew); //This is needed to bypass NOITEM
         p->moves -= 250;
     }
-    if (vat_full || query_yn(_("Start fermenting cycle?"))) {
+    if (query_yn(_("Start fermenting cycle?"))) {
         m->i_at(examx, examy)[0].bday = g->turn;
         m->furn_set(examx, examy, f_fvat_full);
-        if (vat_full)
-            g->add_msg(_("The vat is full, so you close the lid and start the fermenting cycle."));
-        else
             g->add_msg(_("You close the lid and start the fermenting cycle."));
     }
 }
