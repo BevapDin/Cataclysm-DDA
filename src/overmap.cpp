@@ -672,7 +672,6 @@ overmap::overmap(int x, int y)
 
 overmap::overmap(overmap const& o)
     : zg(o.zg)
-    , zh(o.zh)
     , radios(o.radios)
     , npcs(o.npcs)
     , vehicles(o.vehicles)
@@ -707,7 +706,6 @@ overmap::~overmap()
 overmap& overmap::operator=(overmap const& o)
 {
     zg = o.zg;
-    zh = o.zh;
     radios = o.radios;
     npcs = o.npcs;
     vehicles = o.vehicles;
@@ -799,15 +797,6 @@ bool overmap::is_safe(int x, int y, int z)
   safe = mons[n]->is_safe();
 
  return safe;
-}
-
-bool overmap::has_horde(int x, int y, int z) const {
- if (z < -OVERMAP_DEPTH || z > OVERMAP_HEIGHT) { return false; }
- for (int i = 0; i < zh.size(); i++) {
-  if (zh[i].posx / 2 == x && zh[i].posy / 2 == y && zh[i].posz == z)
-   return true;
- }
- return false;
 }
 
 bool overmap::has_note(int const x, int const y, int const z) const
@@ -1660,7 +1649,6 @@ void overmap::draw(WINDOW *w, const tripoint &center,
             const int omx = cursx + i -(om_map_width / 2);
             const int omy = cursy + j -(om_map_height / 2);
             const bool see = overmap_buffer.seen(omx, omy, z);
-            const bool horde_here = overmap_buffer.has_horde(omx, omy, z);
             if (see) {
                 // Only load terrain if we can actually see it
                 cur_ter = overmap_buffer.ter(omx, omy, z);
@@ -1749,9 +1737,6 @@ void overmap::draw(WINDOW *w, const tripoint &center,
                 } else {
                     ter_sym = 'N';
                 }
-            } else if (horde_here) {
-                ter_color = c_magenta;
-                ter_sym = 'Z';
             } else if (!see) {
                 // All cases above ignore the seen-status,
                 ter_color = c_dkgray;

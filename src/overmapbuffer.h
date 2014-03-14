@@ -74,8 +74,6 @@ public:
      */
     bool has_note(int x, int y, int z) const;
     bool has_note(const tripoint& p) const { return has_note(p.x, p.y, p.z); }
-    bool has_horde(int x, int y, int z) const;
-    bool is_horde_near(int gx, int gy, int mindist) const;
     const std::string& note(int x, int y, int z) const;
     const std::string& note(const tripoint& p) const { return note(p.x, p.y, p.z); }
     void add_note(int x, int y, int z, const std::string& message);

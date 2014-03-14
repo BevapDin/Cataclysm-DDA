@@ -13,7 +13,6 @@
 #include "name.h"
 #include "input.h"
 #include "json.h"
-#include "monhorde.h"
 
 class overmapbuffer;
 class npc;
@@ -285,7 +284,6 @@ class overmap
   bool is_road_or_highway(int x, int y, int z);
 
   bool has_note(int const x, int const y, int const z) const;
-  bool has_horde(int x, int y, int z) const;
   std::string const& note(int const x, int const y, int const z) const;
   void add_note(int const x, int const y, int const z, std::string const& message);
   void delete_note(int const x, int const y, int const z) { add_note(x, y, z, ""); }
@@ -338,7 +336,6 @@ class overmap
   }
   // TODO: make private
   std::vector<mongroup> zg;
-  std::vector<monhorde> zh;
   std::vector<radio_tower> radios;
   std::vector<npc *> npcs;
   std::map<int, om_vehicle> vehicles;

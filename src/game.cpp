@@ -43,8 +43,6 @@
 #include <vector>
 #include <cassert>
 
-#define ENABLE_HORDES 1
-
 #ifdef _MSC_VER
 #include "wdirent.h"
 #include <direct.h>
@@ -922,10 +920,6 @@ bool game::do_turn()
         }
     }
 
-    #if ENABLE_HORDES
-    spawn_horde_members();
-    #endif
-
     for(int i = 0; i < 100; i++) {
         int x = rng(0, SEEX * MAPSIZE - 1);
         int y = rng(0, SEEY * MAPSIZE - 1);
@@ -1181,11 +1175,6 @@ bool game::do_turn()
     m.process_fields();
     m.process_active_items();
     m.step_in_field(u.posx, u.posy);
-
-    #if ENABLE_HORDES
-    spawn_horde();
-    move_hordes();
-    #endif
 
     monmove();
     update_stair_monsters();
@@ -6055,14 +6044,6 @@ bool game::sound(int x, int y, int vol, std::string description)
             }
         }
     }
-
-
-
-#if ENABLE_HORDES
-    attract_hordes(x, y, vol);
-#endif
-
-
 
     // --- Player stuff below this point ---
     int dist = rl_dist(x, y, u.posx, u.posy);

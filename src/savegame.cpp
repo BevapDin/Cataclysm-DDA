@@ -423,16 +423,6 @@ void overmap::unserialize(std::ifstream & fin, std::string const & plrfilename,
             zg.back().set_target(tx,ty);
             zg.back().interest=intr;
             nummg++;
-        } else if (datatype == 'H') { // Monster horde
-            fin >> cstr >> cx >> cy >> cz;
-            zh.push_back(monhorde(cstr, cx, cy, cz));
-            fin >> zh.back().pop_normal;
-            fin >> zh.back().pop_master;
-            fin >> zh.back().targetx;
-            fin >> zh.back().targety;
-            fin >> zh.back().last_move;
-            fin >> zh.back().wandf;
-            fin >> zh.back().flags;
         } else if (datatype == 't') { // City
             fin >> cx >> cy >> cs;
             tmp.x = cx; tmp.y = cy; tmp.s = cs;
@@ -667,12 +657,6 @@ void overmap::save()
             zg[i].posz << " " << int(zg[i].radius) << " " << zg[i].population << " " <<
             zg[i].diffuse << " " << zg[i].dying << " " <<
             zg[i].horde << " " << zg[i].tx << " " << zg[i].ty << " " << zg[i].interest << std::endl;
-            
-    for (int i = 0; i < zh.size(); i++)
-        fout << "H " << zh[i].type << " " << zh[i].posx << " " << zh[i].posy << " " <<
-            zh[i].posz << " " << zh[i].pop_normal << " " << zh[i].pop_master << " " <<
-            zh[i].targetx << " " << zh[i].targety << " " <<
-            zh[i].last_move << " " << zh[i].wandf << " " << zh[i].flags << std::endl;
             
     for (int i = 0; i < cities.size(); i++)
         fout << "t " << cities[i].x << " " << cities[i].y << " " << cities[i].s << std::endl;

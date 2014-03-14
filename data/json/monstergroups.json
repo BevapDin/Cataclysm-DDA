@@ -423,19 +423,6 @@
     ]
   },{
     "type":"monstergroup",
-    "name" : "GROUP_WANDERING_ZOMBIE",
-    "default" : "mon_zombie",
-    "monsters" : [
-      { "monster" : "mon_zombie_shrieker", "freq" : 90, "cost_multiplier" : 0 },
-      { "monster" : "mon_zombie_cop", "freq" : 40, "cost_multiplier" : 0 },
-      { "monster" : "mon_zombie_child", "freq" : 60, "cost_multiplier" : 0 },
-      { "monster" : "mon_zombie_scientist", "freq" : 10, "cost_multiplier" : 0 },
-      { "monster" : "mon_zombie_electric", "freq" : 30, "cost_multiplier" : 0 },
-      { "monster" : "mon_zombie_soldier", "freq" : 10, "cost_multiplier" : 0 },
-      { "monster" : "mon_zombie_brute", "freq" : 10, "cost_multiplier" : 0 }
-    ]
-  },{
-    "type":"monstergroup",
     "name" : "GROUP_TRIFFID",
     "default" : "mon_triffid",
     "monsters" : [

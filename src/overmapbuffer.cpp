@@ -135,35 +135,6 @@ bool overmapbuffer::has_note(int x, int y, int z) const
     return (om != NULL) && om->has_note(x, y, z);
 }
 
-bool overmapbuffer::has_horde(int x, int y, int z) const
-{
-    const overmap *om = get_existing_om_global(x, y);
-    return (om != NULL) && om->has_horde(x, y, z);
-}
-
-bool overmapbuffer::is_horde_near(int gx, int gy, int mindist) const
-{
-    for(std::list<overmap>::const_iterator candidate = overmap_list.begin();
-        candidate != overmap_list.end(); ++candidate)
-    {
-        const overmap &om = *candidate;
-        // Offset to monster horde positions, because
-        // those are relativ to the overmap they are in,
-        // but gx and gy are global.
-        const int ox = om.pos().x * OMAPX;
-        const int oy = om.pos().y * OMAPX;
-        typedef std::vector<monhorde> MHVec;
-        for(MHVec::const_iterator a = om.zh.begin(); a != om.zh.end(); ++a) {
-            const monhorde &horde = *a;
-            // Don't spawn if there is already another horde nearby
-            if(rl_dist(gx, gy, horde.posx / 2 + ox, horde.posy / 2 + oy) < mindist) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 const std::string& overmapbuffer::note(int x, int y, int z) const
 {
     const overmap *om = get_existing_om_global(x, y);
