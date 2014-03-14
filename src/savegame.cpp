@@ -364,7 +364,7 @@ void overmap::unserialize(std::ifstream & fin, std::string const & plrfilename,
     // DEBUG VARS
     int nummg = 0;
     char datatype;
-    int cx, cy, cz, cs, cp, cd, cdying;
+    int cx, cy, cz, cs, cp, cd, cdying, horde, tx, ty, intr;
     std::string cstr;
     city tmp;
     std::list<item> npc_inventory;
@@ -415,10 +415,13 @@ void overmap::unserialize(std::ifstream & fin, std::string const & plrfilename,
                 debugmsg("Loaded z level out of range (z: %d)", z);
             }
         } else if (datatype == 'Z') { // Monster group
-            fin >> cstr >> cx >> cy >> cz >> cs >> cp >> cd >> cdying;
+            fin >> cstr >> cx >> cy >> cz >> cs >> cp >> cd >> cdying >> horde >> tx >> ty >>intr;
             zg.push_back(mongroup(cstr, cx, cy, cz, cs, cp));
             zg.back().diffuse = cd;
             zg.back().dying = cdying;
+            zg.back().horde = horde;
+            zg.back().set_target(tx,ty);
+            zg.back().interest=intr;
             nummg++;
         } else if (datatype == 'H') { // Monster horde
             fin >> cstr >> cx >> cy >> cz;
@@ -662,7 +665,8 @@ void overmap::save()
     for (int i = 0; i < zg.size(); i++)
         fout << "Z " << zg[i].type << " " << zg[i].posx << " " << zg[i].posy << " " <<
             zg[i].posz << " " << int(zg[i].radius) << " " << zg[i].population << " " <<
-            zg[i].diffuse << " " << zg[i].dying << std::endl;
+            zg[i].diffuse << " " << zg[i].dying << " " <<
+            zg[i].horde << " " << zg[i].tx << " " << zg[i].ty << " " << zg[i].interest << std::endl;
             
     for (int i = 0; i < zh.size(); i++)
         fout << "H " << zh[i].type << " " << zh[i].posx << " " << zh[i].posy << " " <<

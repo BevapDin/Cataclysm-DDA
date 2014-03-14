@@ -962,7 +962,7 @@
         "time" : 120,
         "tools" : [
             [ "func:hammering" ],
-            [ "wrench" ]
+            [ "func:wrench" ]
         ],
         "components" : [
             [ [ "well_pump", 1 ] ],
