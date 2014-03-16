@@ -10529,13 +10529,10 @@ player::PickupFailReason player::add_item(const item &it) {
     }
     item replacement(it);
     int iter = 0;
-    while(has_item(replacement.invlet)) {
+    while(has_item(replacement.invlet) && iter < inv_chars.size()) {
         replacement.invlet = g->nextinv;
         g->advance_nextinv();
         iter++;
-    }
-    if(iter == inv_chars.size()) {
-        return PFR_COUNT;
     }
     i_add(replacement);
     return PFR_NONE;

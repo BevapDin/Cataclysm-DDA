@@ -468,7 +468,7 @@ public:
  // Why (and if) pickup failed:
  // Reasons are: none (pickup did not fail at all),
  // to much volume / weight / count of items
- typedef enum { PFR_NONE, PFR_VOLUME, PFR_WEIGHT, PFR_COUNT } PickupFailReason;
+ typedef enum { PFR_NONE, PFR_VOLUME, PFR_WEIGHT } PickupFailReason;
  // Try to add an item to the players inventory, might fail
  // because of volume/weight/count restriction.
  // @return PFR_NONE if the the item has been added, otherwise
