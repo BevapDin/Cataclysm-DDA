@@ -659,9 +659,6 @@ int monster::bash_at(int x, int y) {
     if(is_hallucination()) {
       return 0;
     }
-    if(g->m.veh_at(x, y) != NULL) {
-      return 0;
-    }
     bool try_bash = !can_move_to(x, y) || one_in(3);
     bool can_bash = g->m.has_flag("BASHABLE", x, y) && has_flag(MF_BASHES);
     if(try_bash && can_bash) {
