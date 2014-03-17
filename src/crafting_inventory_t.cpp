@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cassert>
+#include <sstream>
 
 void resort_item_vectors();
    

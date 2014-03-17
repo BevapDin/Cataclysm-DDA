@@ -36,6 +36,7 @@
 #include <sys/resource.h>
 #endif
 
+#include <sstream>
 
 void exit_handler(int s);
 void setup_coredump();

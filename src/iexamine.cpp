@@ -133,7 +133,7 @@ void iexamine::atm(player *p, map *m, int examx, int examy) {
         max = dep->charges;
         std::string popupmsg=string_format(_("Deposit how much? Max:%d cents. (0 to cancel) "), max);
         amount = helper::to_int( string_input_popup( popupmsg, 20,
-                   "", "", "", -1, true)
+                   helper::to_string_int(max), "", "", -1, true)
                 );
         if (amount <= 0) {
             return;
@@ -163,7 +163,7 @@ void iexamine::atm(player *p, map *m, int examx, int examy) {
         max = p->cash;
         std::string popupmsg=string_format(_("Withdraw how much? Max:%d cents. (0 to cancel) "), max);
         amount = helper::to_int( string_input_popup( popupmsg, 20,
-                   "", "", "", -1, true)
+                   helper::to_string_int(max), "", "", -1, true)
                 );
         if (amount <= 0) {
             return;
@@ -211,7 +211,7 @@ void iexamine::atm(player *p, map *m, int examx, int examy) {
         max = with->charges;
         std::string popupmsg=string_format(_("Transfer how much? Max:%d cents. (0 to cancel) "), max);
         amount = helper::to_int( string_input_popup( popupmsg, 20,
-                   "", "", "", -1, true)
+                   helper::to_string_int(max), "", "", -1, true)
                 );
         if (amount <= 0) {
             return;
@@ -356,6 +356,9 @@ void iexamine::vending(player *p, map *m, int examx, int examy) {
             card->charges -= vend_items[cur_pos].price();
             p->i_add_or_drop(vend_items[cur_pos]);
             m->i_rem(examx, examy, cur_pos);
+            if (cur_pos == vend_items.size()) {
+                cur_pos--;
+            }
             used_machine = true;
 
             if (num_items == 1) {
