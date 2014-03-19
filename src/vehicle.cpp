@@ -998,7 +998,7 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     }
 
     //All parts after the first must be installed on or next to an existing part
-    if(parts.size() > 0) {
+    if(!parts.empty()) {
         if(!has_structural_part(dx, dy) &&
                 !has_structural_part(dx+1, dy) &&
                 !has_structural_part(dx, dy+1) &&
@@ -1009,7 +1009,7 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     }
 
     // Pedals and engines can't both be installed
-    if( part.has_flag("PEDALS") && engines.size() > 0 ) {
+    if( part.has_flag("PEDALS") && !engines.empty() ) {
         return false;
     }
     if( part.has_flag(VPFLAG_ENGINE) && has_pedals ) {
@@ -1132,7 +1132,7 @@ bool vehicle::can_unmount (int p)
                 int next_y = i < 2 ? 0 : (i == 2 ? -1 : 1);
                 std::vector<int> parts_over_there = parts_at_relative(dx + next_x, dy + next_y, false);
                 //Ignore empty squares
-                if(parts_over_there.size() > 0) {
+                if(!parts_over_there.empty()) {
                     //Just need one part from the square to track the x/y
                     connected_parts.push_back(parts[parts_over_there[0]]);
                 }
@@ -1411,9 +1411,9 @@ void vehicle::part_removal_cleanup() {
         }
     }
     removed_part_count = 0;
-    if (changed || parts.size() == 0) {
+    if (changed || parts.empty()) {
         refresh();
-        if(parts.size() == 0) {
+        if(parts.empty()) {
             g->m.destroy_vehicle(this);
         } else {
             g->m.update_vehicle_cache(this, false);
@@ -2253,6 +2253,85 @@ int vehicle::max_velocity (bool fueled)
     return total_power (fueled) * 80;
 }
 
+bool vehicle::do_environmental_effects()
+{
+    int rain_chance = 0;
+    bool acid_rain = false;
+    if(g->weather == WEATHER_DRIZZLE) {
+        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(4);
+    } else if(g->weather >= WEATHER_RAINY && g->weather <= WEATHER_LIGHTNING) {
+        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(8);
+    } else if(g->weather == WEATHER_ACID_DRIZZLE) {
+        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(4);
+        acid_rain = true;
+    } else if(g->weather == WEATHER_ACID_RAIN) {
+        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(8);
+        acid_rain = true;
+    }
+
+    bool needed = false;
+    // check for smoking parts
+    for( size_t p = 0; p < parts.size(); p++ ) {
+        int part_x = global_x() + parts[p].precalc_dx[0];
+        int part_y = global_y() + parts[p].precalc_dy[0];
+
+        /* Only lower blood level if:
+         * - The part is outside.
+         * - The weather is any effect that would cause the player to be wet. */
+        if( parts[p].blood > 0 && g->m.is_outside(part_x, part_y) && g->levz >= 0 ) {
+            needed = true;
+            if( g->weather >= WEATHER_DRIZZLE && g->weather <= WEATHER_ACID_RAIN ) {
+                parts[p].blood--;
+            }
+        }
+        if( part_flag(p, VPFLAG_ENGINE) && parts[p].hp <= 0 && parts[p].amount > 0 ) {
+            needed = true;
+            parts[p].amount--;
+            for( int ix = -1; ix <= 1; ix++ ) {
+                for( int iy = -1; iy <= 1; iy++ ) {
+                    if( !rng(0, 2) ) {
+                        g->m.add_field( part_x + ix, part_y + iy, fd_smoke, rng(2, 4) );
+                    }
+                }
+            }
+        }
+
+        vehicle_part &vp = parts[p];
+        if(rain_chance > 0 && vp.hp > 0 && part_flag(p, "FUNNEL") && one_in(rain_chance)) {
+            // Create a temporay container for interaction with item::add_rain_to_container
+            item tmpcontainer(item_controller->find_template("jerrycan"), 0);
+            if(!vp.items.empty()) {
+                tmpcontainer.contents.push_back(vp.items[0]);
+            }
+            tmpcontainer.add_rain_to_container(acid_rain, 1);
+            if(!tmpcontainer.contents.empty() && tmpcontainer.contents[0].charges > 0) {
+                if(tmpcontainer.contents[0].type->id == "water" && part_with_feature(p, "CRAFTRIG") >= 0) {
+                    const int drained = drain(fuel_type_battery, tmpcontainer.contents[0].charges);
+                    if(drained > 0) {
+                        assert(drained <= tmpcontainer.contents[0].charges);
+                        const int left_over = refill(fuel_type_water, drained);
+                        if(left_over > 0) {
+                            refill(fuel_type_battery, left_over);
+                            tmpcontainer.contents[0].charges = left_over;
+                        } else {
+                            tmpcontainer.contents.clear();
+                        }
+                    }
+                }
+                if(tmpcontainer.contents.empty()) {
+                    vp.items.clear();
+                } else if(vp.items.empty()) {
+                    vp.items.push_back(tmpcontainer.contents[0]);
+                } else {
+                    vp.items[0] = tmpcontainer.contents[0];
+                }
+                needed = true;
+            }
+        }
+    }
+    return needed;
+}
+
 int vehicle::safe_velocity (bool fueled)
 {
     int pwrs = 0;
@@ -2423,7 +2502,7 @@ bool vehicle::valid_wheel_config ()
     int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
     int count = 0;
     std::vector<int> wheel_indices = all_parts_with_feature(VPFLAG_WHEEL);
-    if(wheel_indices.size() == 0) {
+    if(wheel_indices.empty()) {
         //No wheels!
         return false;
     } else if(wheel_indices.size() == 1) {
@@ -3175,6 +3254,7 @@ veh_collision vehicle::part_collision (int part, int x, int y, bool just_detect)
                 } else if (dam > rng (10, 30)) {
                     parts[part].blood += (10 + dam / 2) * 5;
                 }
+                check_environmental_effects = true;
             }
 
             turns_stunned = rng (0, dam) > 10? rng (1, 2) + (dam > 40? rng (1, 2) : 0) : 0;
@@ -3357,7 +3437,7 @@ void vehicle::handle_trap (int x, int y, int part)
                 t == tr_temple_toggle ) {
         msg.clear();
     }
-    if (msg.size() > 0 && g->u_see(x, y)) {
+    if (!msg.empty() && g->u_see(x, y)) {
         g->add_msg (msg.c_str(), name.c_str(), part_info(part).name.c_str(), g->traps[t]->name.c_str());
     }
     if (noise > 0) {
@@ -3527,80 +3607,12 @@ void vehicle::gain_moves()
     if (player_in_control(&g->u) && cruise_on && cruise_velocity != velocity )
         thrust (cruise_velocity > velocity? 1 : -1);
 
-    int rain_chance = 0;
-    bool acid_rain = false;
-    if(g->weather == WEATHER_DRIZZLE) {
-        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(4);
-    } else if(g->weather >= WEATHER_RAINY && g->weather <= WEATHER_LIGHTNING) {
-        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(8);
-    } else if(g->weather == WEATHER_ACID_DRIZZLE) {
-        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(4);
-        acid_rain = true;
-    } else if(g->weather == WEATHER_ACID_RAIN) {
-        rain_chance = g->traps[tr_funnel]->funnel_turns_per_charge(8);
-        acid_rain = true;
+    if( check_environmental_effects ) {
+        check_environmental_effects = do_environmental_effects();
     }
 
-    // check for smoking parts
-    for (int p = 0; p < parts.size(); p++)
-    {
-        vehicle_part &vp = parts[p];
-        if (parts[p].removed) {
-          continue;
-        }
-        int part_x = global_x() + parts[p].precalc_dx[0];
-        int part_y = global_y() + parts[p].precalc_dy[0];
-
-        /* Only lower blood level if:
-         * - The part is outside.
-         * - The weather is any effect that would cause the player to be wet. */
-        if (parts[p].blood > 0 &&
-                g->m.is_outside(part_x, part_y) && g->levz >= 0 &&
-                g->weather >= WEATHER_DRIZZLE && g->weather <= WEATHER_ACID_RAIN) {
-            parts[p].blood--;
-        }
-        if(vp.hp > 0 && vp.active() && vp.amount >= 1 && part_flag(p, VPFLAG_ENGINE)) {
-            int p_eng = p;
-            parts[p_eng].amount--;
-            for (int ix = -1; ix <= 1; ix++) {
-                for (int iy = -1; iy <= 1; iy++) {
-                    if (!rng(0, 2)) {
-                        g->m.add_field(part_x + ix, part_y + iy, fd_smoke, rng(2, 4));
-                    }
-                }
-            }
-        }
-        if(rain_chance > 0 && vp.hp > 0 && part_flag(p, "FUNNEL") && one_in(rain_chance)) {
-            // Create a temporay container for interaction with item::add_rain_to_container
-            item tmpcontainer(item_controller->find_template("jerrycan"), 0);
-            if(!vp.items.empty()) {
-                tmpcontainer.contents.push_back(vp.items[0]);
-            }
-            tmpcontainer.add_rain_to_container(acid_rain, 1);
-            if(!tmpcontainer.contents.empty() && tmpcontainer.contents[0].charges > 0) {
-                if(tmpcontainer.contents[0].type->id == "water" && part_with_feature(p, "CRAFTRIG") >= 0) {
-                    const int drained = drain(fuel_type_battery, tmpcontainer.contents[0].charges);
-                    if(drained > 0) {
-                        assert(drained <= tmpcontainer.contents[0].charges);
-                        const int left_over = refill(fuel_type_water, drained);
-                        if(left_over > 0) {
-                            refill(fuel_type_battery, left_over);
-                            tmpcontainer.contents[0].charges = left_over;
-                        } else {
-                            tmpcontainer.contents.clear();
-                        }
-                    }
-                }
-                if(tmpcontainer.contents.empty()) {
-                    vp.items.clear();
-                } else if(vp.items.empty()) {
-                    vp.items.push_back(tmpcontainer.contents[0]);
-                } else {
-                    vp.items[0] = tmpcontainer.contents[0];
-                }
-            }
-        }
-        if (turret_mode) { // handle turrets
+    if (turret_mode) { // handle turrets
+        for (int p = 0; p < parts.size(); p++) {
             fire_turret (p);
         }
     }
@@ -3699,6 +3711,7 @@ void vehicle::refresh()
     }
 
     precalc_mounts( 0, face.dir() );
+    check_environmental_effects = true;
     insides_dirty = true;
     find_exhaust();
 }
@@ -4074,7 +4087,7 @@ void vehicle::fire_turret (int p, bool burst)
             }
         }
     } else {
-        if (parts[p].items.size() > 0) {
+        if (!parts[p].items.empty()) {
             it_ammo *ammo = dynamic_cast<it_ammo*> (parts[p].items[0].type);
             if (!ammo || ammo->type != amt || parts[p].items[0].charges < 1) {
                 return;

@@ -87,7 +87,7 @@ void load_recipe(JsonObject &jsobj)
 
     std::map<std::string, int> requires_skills;
     jsarr = jsobj.get_array("skills_required");
-    if (jsarr.size() > 0) {
+    if (!jsarr.empty()) {
         // could be a single requirement, or multiple
         try {
             // try to parse as single requirement
@@ -610,7 +610,7 @@ recipe *game::select_crafting_recipe()
             }
             if(display_mode == 0 || display_mode == 1) {
                 mvwprintz(w_data, ypos++, 30, col, _("Tools required:"));
-                if (current[line]->tools.size() == 0 && current[line]->qualities.size() == 0) {
+                if (current[line]->tools.empty() && current[line]->qualities.empty()) {
                     mvwputch(w_data, ypos, 30, col, '>');
                     mvwprintz(w_data, ypos, 32, c_green, _("NONE"));
                 } else {
@@ -633,7 +633,7 @@ recipe *game::select_crafting_recipe()
                     }
                     ypos--;
                     // Loop to print the required tools
-                    for (size_t i = 0; i < current[line]->tools.size() && current[line]->tools[i].size() > 0; i++) {
+                    for (size_t i = 0; i < current[line]->tools.size() && !current[line]->tools[i].empty(); i++) {
                         ypos++;
                         xpos = 32;
                         mvwputch(w_data, ypos, 30, col, '>');
@@ -682,7 +682,7 @@ recipe *game::select_crafting_recipe()
             // Loop to print the required components
             mvwprintz(w_data, ypos, 30, col, _("Components required:"));
             for (unsigned i = 0; i < current[line]->components.size(); i++) {
-                if (current[line]->components[i].size() > 0) {
+                if (!current[line]->components[i].empty()) {
                     ypos++;
                     mvwputch(w_data, ypos, 30, col, '>');
                 }
@@ -1215,16 +1215,6 @@ void serialize_item_list(JsonOut &json, const std::list<item> &x) {
     json.end_array();
 }
 
-std::string to_uncraft_tag(const std::list<item> &comps, const std::list<item> &tools) {
-    std::ostringstream buffer;
-    JsonOut json(buffer);
-    json.start_array();
-    serialize_item_list(json, comps);
-    serialize_item_list(json, tools);
-    json.end_array();
-    return std::string("UNCRAFT:") + buffer.str();
-}
-
 bool deserialize_item_list(JsonIn &json, std::list<item> &x) {
     JsonArray data = json.get_array();
     item it;
@@ -1336,7 +1326,12 @@ void game::complete_craft()
 
     // Set up the new item, and assign an inventory letter if available
     item newit(item_controller->find_template(making->result), turn, 0, false);
-    newit.item_tags.insert(to_uncraft_tag(used, used_tools));
+    if (!newit.count_by_charges()) {
+        // Setting this for items counted by charges gives only problems:
+        // those items are automatically merged everywhere (map/vehicle/inventory),
+        // which would either loose this information or merge it somehow.
+        newit.components.insert(newit.components.begin(), used.begin(), used.end());
+    }
     int new_count = 1;
     if(making->result_mult > 0) {
         new_count = making->result_mult;
@@ -1408,14 +1403,25 @@ void game::disassemble(int pos)
             list_iter != cat_iter->second.end(); ++list_iter) {
             recipe *cur_recipe = *list_iter;
             if (dis_item->type == item_controller->find_template(cur_recipe->result) &&
-                cur_recipe->reversible && cur_recipe->result_mult <= 1) {
+                cur_recipe->reversible) {
+                if (dis_item->count_by_charges()) {
+                    // Create a new item to get the default charges
+                    item tmp(dis_item->type, 0);
+                    if (cur_recipe->result_mult != 1) {
+                        tmp.charges *= cur_recipe->result_mult;
+                    }
+                    if (dis_item->charges < tmp.charges) {
+                        popup(_("You need at least %d charges of the that item to disassemble it."), tmp.charges);
+                        return;
+                    }
+                }
                 // ok, a valid recipe exists for the item, and it is reversible
                 // assign the activity
                 // check tools are available
                 // loop over the tools and see what's required...again
                 bool have_all_tools = true;
                 for (unsigned j = 0; j < cur_recipe->tools.size(); j++) {
-                    if (cur_recipe->tools[j].size() == 0) { // no tools required, may change this
+                    if (cur_recipe->tools[j].empty()) { // no tools required, may change this
                         continue;
                     }
                     bool have_this_tool = false;
@@ -1507,9 +1513,10 @@ void game::disassemble(int pos)
 void game::complete_disassemble()
 {
     // which recipe was it?
+    const int item_pos = u.activity.values[0];
     recipe *dis = recipe_by_index(u.activity.index); // Which recipe is it?
-    item *dis_item = &u.i_at(u.activity.values[0]);
-    float component_success_chance = std::min((float)pow(0.8f, dis_item->damage), 1.f);
+    item dis_item = u.i_at(item_pos);
+    float component_success_chance = std::min((float)pow(0.8f, dis_item.damage), 1.f);
 
     int veh_part = -1;
     vehicle *veh = m.veh_at(u.posx, u.posy, veh_part);
@@ -1517,17 +1524,25 @@ void game::complete_disassemble()
         veh_part = veh->part_with_feature(veh_part, "CARGO");
     }
 
-    add_msg(_("You disassemble the %s into its components."), dis_item->name.c_str());
+    add_msg(_("You disassemble the %s into its components."), dis_item.name.c_str());
     // remove any batteries or ammo first
-    remove_ammo(dis_item);
+    remove_ammo(&dis_item);
 
-    if (dis_item->count_by_charges()) {
-        dis_item->charges -= dis_item->type->stack_size;
-        if (dis_item->charges == 0) {
-            u.i_rem(u.activity.values[0]);
+    if (dis_item.count_by_charges()) {
+        // Create a new item to get the default charges
+        item tmp(dis_item.type, 0);
+        if (dis->result_mult != 1) {
+            tmp.charges *= dis->result_mult;
+        }
+        dis_item.charges -= tmp.charges;
+        if (dis_item.charges <= 0) {
+            u.i_rem(item_pos);
+        } else {
+            // dis_item is a copy, need to commit the changed charges value
+            u.i_at(item_pos).charges = dis_item.charges;
         }
     } else {
-        u.i_rem(u.activity.values[0]);  // remove the item
+        u.i_rem(item_pos);
     }
 
     crafting_inventory_t crafting_inv(this, &u);
@@ -1554,48 +1569,76 @@ void game::complete_disassemble()
     }
 
     for (unsigned j = 0; j < dis->components.size(); j++) {
-        if (dis->components[j].size() != 0) {
-            int compcount = dis->components[j][0].count;
-            bool comp_success = (dice(skill_dice, skill_sides) > dice(diff_dice,  diff_sides));
-
-            if ((dis->difficulty != 0 && !comp_success)) {
-                add_msg(_("You fail to recover a component."));
-                continue;
-            }
-
-            item newit(item_controller->find_template(dis->components[j][0].type), turn);
-            if (newit.has_flag("UNRECOVERABLE")) {
-                continue;
-            }
-            if(newit.type->id.compare(0, 5, "func:") == 0) {
-                newit.make(item_controller->find_template(newit.type->id.substr(5)));
-            }
-
-            if (newit.count_by_charges()) {
-                newit.charges = compcount;
-                compcount = 1;
-            } else if (newit.is_tool()) {
-                newit.charges = 0;
-            }
-            if (newit.made_of(LIQUID)) {
-                handle_liquid(newit, false, false);
-                continue;
-            }
-            do {
-                compcount--;
-
-                bool dmg_success = component_success_chance > rng_float(0, 1);
-                if(!dmg_success) {
-                    add_msg(_("You fail to recover a component."));
-                    continue;
+        const std::vector<component> &altercomps = dis->components[j];
+        if (altercomps.empty()) {
+            debugmsg("component list %d of recipe %s is empty", j, dis->ident.c_str());
+            continue;
+        }
+        int alter_comp_index = 0;
+        // If there are several (alternative) components, search the
+        // one that was used. If not found, use the first one.
+        // Don't check the first in altercomps, it's the default anyway.
+        for(size_t k = 1; alter_comp_index == 0 && k < altercomps.size(); k++) {
+            for(item::t_item_vector::iterator a = dis_item.components.begin(); a != dis_item.components.end(); ++a) {
+                if (a->type->id == altercomps[k].type) {
+                    alter_comp_index = k;
                 }
+            }
+        }
+        const component &comp = altercomps[alter_comp_index];
+        itype *itt = item_controller->find_template(comp.type);
+        if(itt->id.compare(0, 5, "func:") == 0) {
+            itt = item_controller->find_template(itt->id.substr(5));
+        }
+        if (itt->item_tags.count("UNRECOVERABLE") > 0) {
+            continue;
+        }
 
-                if (veh != 0 && veh_part > -1 && veh->add_item(veh_part, newit)) {
-                    // add_item did put the items in the vehicle, nothing further to be done
-                } else {
-                    m.add_item_or_charges(u.posx, u.posy, newit);
+        int compcount = comp.count;
+        item newit(itt, turn);
+        // Compress liquids and counted-by-charges items into one item,
+        // they are added together on the map anyway and handle_liquid
+        // should only be called once to put it all into a container at once.
+        if (newit.count_by_charges() || newit.made_of(LIQUID)) {
+            newit.charges = compcount;
+            compcount = 1;
+        } else if (!newit.craft_has_charges() && newit.charges > 0) {
+            // tools that can be unloaded should be created unloaded,
+            // tools that can't be unloaded will keep their default charges.
+            newit.charges = 0;
+        }
+
+        for( ; compcount > 0; compcount--) {
+            const bool comp_success = (dice(skill_dice, skill_sides) > dice(diff_dice,  diff_sides));
+            if (dis->difficulty != 0 && !comp_success) {
+                add_msg(_("You fail to recover %s."), newit.tname().c_str());
+                continue;
+            }
+            const bool dmg_success = component_success_chance > rng_float(0, 1);
+            if (!dmg_success) {
+                // Show reason for failure (damaged item, tname contains the damage adjective)
+                add_msg(_("You fail to recover %s from the %s."), newit.tname().c_str(), dis_item.tname().c_str());
+                continue;
+            }
+            // Use item from components list, or (if not contained)
+            // use newit, the default constructed.
+            item act_item = newit;
+            for(item::t_item_vector::iterator a = dis_item.components.begin(); a != dis_item.components.end(); ++a) {
+                if (a->type == newit.type) {
+                    act_item = *a;
+                    dis_item.components.erase(a);
+                    break;
                 }
-            } while (compcount > 0);
+            }
+            if (act_item.made_of(LIQUID)) {
+                while (!handle_liquid(act_item, false, false)) {
+                    // Try again, maybe use another container.
+                }
+            } else if (veh != NULL && veh->add_item(veh_part, act_item)) {
+                // add_item did put the items in the vehicle, nothing further to be done
+            } else {
+                m.add_item_or_charges(u.posx, u.posy, act_item);
+            }
         }
     }
 
@@ -1735,6 +1778,7 @@ void remove_ammo(item *dis_item) {
         } else {
             g->u.i_add_or_drop(ammodrop, 1);
         }
+        dis_item->charges = 0;
     }
     if (dis_item->is_tool() && dis_item->charges > 0 && dis_item->ammo_type() != "NULL") {
         item ammodrop;
@@ -1750,6 +1794,7 @@ void remove_ammo(item *dis_item) {
         } else {
             g->u.i_add_or_drop(ammodrop, 1);
         }
+        dis_item->charges = 0;
     }
 }
 

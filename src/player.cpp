@@ -3261,7 +3261,7 @@ bool player::has_conflicting_trait(const std::string &flag) const
 
 bool player::has_opposite_trait(const std::string &flag) const
 {
-    if (mutation_data[flag].cancels.size() > 0) {
+    if (!mutation_data[flag].cancels.empty()) {
         std::vector<std::string> cancels = mutation_data[flag].cancels;
         for (int i = 0; i < cancels.size(); i++) {
             if (has_trait(cancels[i])) {
@@ -3274,7 +3274,7 @@ bool player::has_opposite_trait(const std::string &flag) const
 
 bool player::has_lower_trait(const std::string &flag) const
 {
-    if (mutation_data[flag].prereqs.size() > 0) {
+    if (!mutation_data[flag].prereqs.empty()) {
         std::vector<std::string> prereqs = mutation_data[flag].prereqs;
         for (int i = 0; i < prereqs.size(); i++) {
             if (has_trait(prereqs[i]) || has_lower_trait(prereqs[i])) {
@@ -3287,7 +3287,7 @@ bool player::has_lower_trait(const std::string &flag) const
 
 bool player::has_higher_trait(const std::string &flag) const
 {
-    if (mutation_data[flag].replacements.size() > 0) {
+    if (!mutation_data[flag].replacements.empty()) {
         std::vector<std::string> replacements = mutation_data[flag].replacements;
         for (int i = 0; i < replacements.size(); i++) {
             if (has_trait(replacements[i]) || has_higher_trait(replacements[i])) {
@@ -3474,7 +3474,7 @@ void player::add_bionic(bionic_id b)
    return; // No duplicates!
  }
  char newinv;
- if (my_bionics.size() == 0)
+ if (my_bionics.empty())
   newinv = 'a';
  else if (my_bionics.size() == 26)
   newinv = 'A';
@@ -6115,7 +6115,7 @@ void player::process_active_items()
 bool player::process_single_active_item(item *it)
 {
     if (it->active ||
-        (it->is_container() && it->contents.size() > 0 && it->contents[0].active))
+        (it->is_container() && !it->contents.empty() && it->contents[0].active))
     {
         if (it->is_food())
         {
@@ -6424,7 +6424,7 @@ std::list<item> player::use_amount(itype_id it, int quantity, bool use_container
  if (use_container && used_weapon_contents)
   remove_weapon();
 
- if (weapon.matches_type(it) && weapon.contents.size() == 0) {
+ if (weapon.matches_type(it) && weapon.contents.empty()) {
   quantity--;
   ret.push_back(remove_weapon());
  }
@@ -6909,25 +6909,17 @@ bool player::has_item(char let)
  return (has_weapon_or_armor(let) || !inv.item_by_letter(let).is_null());
 }
 
-std::vector<char> player::allocated_invlets() {
-    size_t maxsz = inv_chars.size(), incr = worn.size();
-    std::vector<char> invs = inv.allocated_invlets();
+std::set<char> player::allocated_invlets() {
+    std::set<char> invlets = inv.allocated_invlets();
 
     if (weapon.invlet != 0) {
-        incr++;
+        invlets.insert(weapon.invlet);
     }
-    if (incr > 0) {
-        invs.resize(maxsz + incr, '\0');
-        if (weapon.invlet != 0) {
-            invs[maxsz] = weapon.invlet;
-            maxsz++;
-        }
-        for (int i = 0; i < worn.size(); i++, maxsz++) {
-            invs[maxsz] = worn[i].invlet;
-        }
+    for (int i = 0; i < worn.size(); i++) {
+        invlets.insert(worn[i].invlet);
     }
 
-    return invs;
+    return invlets;
 }
 
 bool player::has_item(int position) {
@@ -8699,7 +8691,7 @@ hint_rating player::rate_action_unload(item *it) {
       (has_shotgun2 == -1 || it->contents[has_shotgun2].charges <= 0) &&
       (has_shotgun3 == -1 || it->contents[has_shotgun3].charges <= 0) &&
       (has_auxflamer == -1 || it->contents[has_auxflamer].charges <= 0) )) {
-  if (it->contents.size() == 0) {
+  if (it->contents.empty()) {
    return HINT_IFFY;
   }
  }
@@ -8726,7 +8718,7 @@ hint_rating player::rate_action_disassemble(item *it) {
                 for (int j = 0; j < cur_recipe->tools.size(); j++)
                 {
                     bool have_tool = false;
-                    if (cur_recipe->tools[j].size() == 0) // no tools required, may change this
+                    if (cur_recipe->tools[j].empty()) // no tools required, may change this
                     {
                         have_tool = true;
                     }
@@ -8885,7 +8877,7 @@ void player::use(int pos)
             g->add_msg(_("That %s cannot be attached to a launcher."),
                        used->tname().c_str());
             return;
-        } else if ( mod->acceptible_ammo_types.size() > 0 &&
+        } else if ( !mod->acceptible_ammo_types.empty() &&
                     mod->acceptible_ammo_types.count(guntype->ammo) == 0 ) {
                 g->add_msg(_("That %s cannot be used on a %s."), used->tname().c_str(),
                        ammo_name(guntype->ammo).c_str());
@@ -9340,7 +9332,7 @@ std::string player::is_snuggling()
     int ticker = 0;
 
     // If there are no items on the floor, return nothing
-    if ( floor_item.size() == 0 ) {
+    if ( floor_item.empty() ) {
         return "nothing";
     }
 
@@ -9670,6 +9662,7 @@ bool player::armor_absorb(damage_unit& du, item& armor) {
     bool armor_damaged = false;
 
     std::string pre_damage_name = armor.tname();
+    std::string pre_damage_adj = armor_type->dmg_adj(armor.damage);
 
     if (rng(0,100) < armor_type->coverage) {
         if (armor_type->is_power_armor()) { // TODO: add some check for power armor
@@ -9688,7 +9681,12 @@ bool player::armor_absorb(damage_unit& du, item& armor) {
             std::string damage_verb = du.type == DT_BASH
                 ? armor_type->bash_dmg_verb()
                 : armor_type->cut_dmg_verb();
-            g->add_msg_if_player(this, _("Your %s is %s!"), pre_damage_name.c_str(),
+
+            // add "further" if the damage adjective and verb are the same
+            std::string format_string = pre_damage_adj == damage_verb
+                ? _("Your %s is %s further!")
+                : _("Your %s is %s!");
+            g->add_msg_if_player(this, format_string.c_str(), pre_damage_name.c_str(),
                                     damage_verb.c_str());
         }
     }
@@ -10472,7 +10470,7 @@ void player::clear_destination()
 
 bool player::has_destination() const
 {
-    return auto_move_route.size() > 0;
+    return !auto_move_route.empty();
 }
 
 std::vector<point> &player::get_auto_move_route()
