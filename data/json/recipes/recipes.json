@@ -19399,7 +19399,7 @@
     {"id":"COOK","level":1,"amount":3}
   ], "tools": [
     [
-      [ "vac_sealer", 10 ]
+      [ "func:vac_sealer", 10 ]
     ]
   ],
   "components": [
@@ -19466,7 +19466,7 @@
     {"id":"COOK","level":1,"amount":3}
   ], "tools": [
     [
-      [ "vac_sealer", 10 ]
+      [ "func:vac_sealer", 10 ]
     ]
   ],
   "components": [
