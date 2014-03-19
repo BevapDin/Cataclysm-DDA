@@ -2486,7 +2486,7 @@ bool hasQuality(const item &the_item, const std::string &name, int level)
 {
     const std::map<std::string, int> &qualities = the_item.type->qualities;
     const std::map<std::string, int>::const_iterator quality_iter = qualities.find(name);
-    return (quality_iter != qualities.end() && level >= quality_iter->second);
+    return (quality_iter != qualities.end() && level <= quality_iter->second);
 }
 
 bool crafting_inventory_t::has_items_with_quality(const std::string &name, int level,
