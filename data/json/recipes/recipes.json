@@ -20474,7 +20474,7 @@
       ["goggles_welding", -1]
     ],
     [
-      ["welder", 300], ["welder_crude", 450], ["toolset", 12]
+      ["func:welder", 300]
     ]
   ],
   "components": [
