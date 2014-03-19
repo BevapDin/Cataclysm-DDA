@@ -31,6 +31,22 @@
     "category": "spare_parts",
     "to_hit": 0
   },
+  {
+    "type":"GENERIC",
+    "id": "heap_fur",
+    "symbol": ",",
+    "color": "brown",
+    "name": "heap of fur pelts",
+    "description": "A heap of fur from an animal. Can be made into warm clothing.",
+    "price": 1000,
+    "material": "fur",
+    "weight": 11400,
+    "volume": 1,
+    "bashing": 0,
+    "cutting": 0,
+    "category": "spare_parts",
+    "to_hit": 0
+  },
 
   {
     "type":"GENERIC",
@@ -218,6 +234,22 @@
     "cutting": 0,
     "to_hit": -1
   },
+  {
+    "type":"GENERIC",
+    "id": "heap_RAM",
+    "symbol": ",",
+    "color": "dark_gray",
+    "name": "heap of RAM",
+    "category": "spare_parts",
+    "description": "A heap of memory. Useful in advanced electronics crafting.",
+    "price": 900000,
+    "material": "plastic",
+    "weight": 3000,
+    "volume": 1,
+    "bashing": 0,
+    "cutting": 0,
+    "to_hit": 0
+  },
 
   {
     "type":"GENERIC",
@@ -370,6 +402,22 @@
     "bashing": -6,
     "cutting": 0,
     "to_hit": 2
+  },
+  {
+    "type":"GENERIC",
+    "id": "heap_circuit",
+    "symbol": ",",
+    "color": "green",
+    "name": "heap of circuit boards",
+    "category": "spare_parts",
+    "description": "A heap of printed cards that supports and electrically connects electronic components on a non-conductive substrate.",
+    "price": 500000,
+    "material": "plastic",
+    "weight": 2600,
+    "volume": 1,
+    "bashing": 0,
+    "cutting": 0,
+    "to_hit": 0
   },
 
   {
@@ -800,6 +848,22 @@
     "cutting": 0,
     "category": "spare_parts",
     "to_hit": -2
+  },
+  {
+    "type":"GENERIC",
+    "id": "heap_chitin_piece",
+    "symbol": ",",
+    "color": "light_gray",
+    "name": "heap of chitin",
+    "description": "A heap of pieces of an insect's exoskeleton. It is light and very durable.",
+    "price": 150000,
+    "material": "chitin",
+    "weight": 8900,
+    "volume": 1,
+    "bashing": 0,
+    "cutting": 0,
+    "category": "spare_parts",
+    "to_hit": 0
   },
 
   {

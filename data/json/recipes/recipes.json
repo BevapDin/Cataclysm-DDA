@@ -118,6 +118,50 @@
       [ "battery", 100 ]
     ]
   ]
+  },{
+        "type" : "recipe",
+  "result": "heap_circuit",
+  "id_suffix": "xxx",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_OTHER",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": true,
+  "components": [ [ [ "circuit", 100 ] ], [ [ "ragpouch", 1 ] ] ]
+  },{
+        "type" : "recipe",
+  "result": "heap_chitin_piece",
+  "id_suffix": "xxx",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_OTHER",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": true,
+  "components": [ [ [ "chitin_piece", 100 ] ], [ [ "ragpouch", 1 ] ] ]
+  },{
+        "type" : "recipe",
+  "result": "heap_fur",
+  "id_suffix": "xxx",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_OTHER",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": true,
+  "components": [ [ [ "fur", 100 ] ], [ [ "ragpouch", 1 ] ] ]
+  },{
+        "type" : "recipe",
+  "result": "heap_RAM",
+  "id_suffix": "xxx",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_OTHER",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": true,
+  "components": [ [ [ "RAM", 100 ] ], [ [ "ragpouch", 1 ] ] ]
 },{
         "type" : "recipe",
   "result": "talking_doll",
