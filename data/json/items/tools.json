@@ -6948,26 +6948,90 @@
     "cutting" : 3,
     "to_hit" : 0
   },{
-    "id": "toolset",
     "type": "TOOL",
+    "id": "toolset_press",
     "symbol": ";",
     "color": "brown",
-    "name": "integrated toolset",
-    "description": "Dummy item. If you see this, then something went wrong.",
-    "price": 7000,
-    "material": ["steel", "wood"],
-    "weight": 0,
-    "volume": 0,
-    "bashing": 0,
-    "cutting": 0,
-    "to_hit": 0,
-    "max_charges": 10000,
-    "initial_charges": 0,
-    "charges_per_use": 0,
-    "turns_per_charge": 0,
-    "ammo": "NULL",
-    "revert_to": "null",
-    "use_action": "HAMMER",
-	"qualities": [["HAMMER", 3], ["HAMMER_G", 1], ["CUT", 1], ["SAW_W", 1], ["SAW_M", 1], ["SAW_M_G", 1], ["WRENCH", 1], ["WRENCH_G", 1], ["SCREW", 1], ["SCREW_G", 1]]
+    "name": "integrated hand press & die set",
+    "description": "???",
+    "functions": [ [ "func:press" ] ],
+    "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null"
+  },{
+    "type": "TOOL",
+    "id": "toolset_hammer",
+    "symbol": ";",
+    "color": "brown",
+    "name": "integrated hammer",
+    "description": "???",
+    "functions": [ [ "func:hammer" ] ],
+    "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
+    "qualities": [["HAMMER", 3], ["HAMMER_G", 1]]
+  },{
+    "type": "TOOL",
+    "id": "toolset_wrench",
+    "symbol": ";",
+    "color": "brown",
+    "name": "integrated wrench",
+    "description": "???",
+    "functions": [ [ "func:wrench" ] ],
+    "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
+    "qualities": [["WRENCH", 1], ["WRENCH_G", 1]]
+  },{
+    "type": "TOOL",
+    "id": "toolset_screwdriver",
+    "symbol": ";",
+    "color": "brown",
+    "name": "integrated screwdriver",
+    "description": "???",
+    "functions": [ [ "func:screwdriver" ] ],
+    "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
+    "qualities": [["SCREW", 1], ["SCREW_G", 1]]
+  },{
+    "type": "TOOL",
+    "id": "toolset_hacksaw",
+    "symbol": ";",
+    "color": "brown",
+    "name": "integrated hacksaw",
+    "description": "???",
+    "functions": [ [ "func:hacksaw" ] ],
+    "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
+    "qualities": [["SAW_W", 1], ["SAW_M", 1], ["SAW_M_G", 1]]
+  },{
+    "type": "TOOL",
+    "id": "toolset_knife",
+    "symbol": ";",
+    "color": "brown",
+    "name": "integrated knife",
+    "description": "???",
+    "functions": [ [ "func:blade" ] ],
+    "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
+    "qualities": [["CUT", 1]]
+  },{
+    "type": "TOOL",
+    "id": "toolset_welder",
+    "symbol": ";",
+    "color": "brown",
+    "name": "integrated welder",
+    "description": "???",
+    "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
+    "functions": [ [ "func:welder" , 1 , 0.1 ] ]
+  },{
+    "type": "TOOL",
+    "id": "toolset_hotplate",
+    "symbol": ";",
+    "color": "brown",
+    "name": "integrated hotplate",
+    "description": "???",
+    "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
+    "functions": [ [ "func:hotplate" , 1 , 0.1 ] ]
+  },{
+    "type": "TOOL",
+    "id": "toolset_soldering_iron",
+    "symbol": ";",
+    "color": "brown",
+    "name": "integrated soldering iron",
+    "description": "???",
+    "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
+    "functions": [ [ "func:soldering_iron" , 1 , 0.1 ] ]
   }
 ]

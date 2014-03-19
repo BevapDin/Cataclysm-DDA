@@ -31,27 +31,6 @@ void game::init_itypes ()
   new itype("fire", 0, _("nearby fire"),
             "Some fire - if you are reading this it's a bug! (itypdef:fire)",
             '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0);
-// Integrated toolset - ditto
-#define INTEGRATED_TOOLSET(toolname) \
- itypes["toolset_"toolname]= \
-  new itype("toolset_"toolname, 0, "integrated "toolname, \
-            "A fake item. If you are reading this it's a bug! (itypdef.cpp)", \
-            '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0)
-
-            (INTEGRATED_TOOLSET("press"))->addFunctionality("func:press", 1, 0.5);
-            (INTEGRATED_TOOLSET("knife"))->addFunctionality("func:blade", 1, 1);
-            (INTEGRATED_TOOLSET("screwdriver"))->addFunctionality("func:screwdriver", 1, 1);
-            (INTEGRATED_TOOLSET("wrench"))->addFunctionality("func:wrench", 1, 1);
-            (INTEGRATED_TOOLSET("hacksaw"))->addFunctionality("func:hacksaw", 1, 1);
-            (INTEGRATED_TOOLSET("hammer"))->addFunctionality("func:hammer", 1, 1);
-            (INTEGRATED_TOOLSET("welder"))->addFunctionality("func:welder", 1, 0.1f);
-            (INTEGRATED_TOOLSET("hotplate"))->addFunctionality("func:hotplate", 1, 0.1);
-            (INTEGRATED_TOOLSET("soldering_iron"))->addFunctionality("func:soldering_iron", 1, 0.1f);
-            /**
-             * Note: to add a new integrated toolset type, add it here and
-             * add it in crafting.cpp (game::crafting_inventory)
-             * and add them at the of of this (search for BIO_SINGLE_TOOLSET)
-             * */
 
 // For smoking drugs
  itypes["apparatus"]=
