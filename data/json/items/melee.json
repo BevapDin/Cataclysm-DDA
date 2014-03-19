@@ -727,7 +727,7 @@
     "functions" : [ [ "func:hammer" ] , [ "func:blade", 0.98 ], ["func:hammering"] ],
     "to_hit": 1,
     "category" : "weapons",
-    "qualities": [["CUT", 1]]
+    "qualities": [["CUT", 1], ["HAMMER", 2], ["HAMMER_G", 1]]
   },
 
   {
@@ -745,7 +745,8 @@
     "cutting": 0,
     "functions": [ [ "func:pot" ] ],
     "category" : "tools",
-    "to_hit": 1
+    "to_hit": 1,
+    "qualities": [["COOK", 3], ["BOIL", 2], ["CONTAIN", 1], ["CHEM", 1]]
   },
 
   {
@@ -763,7 +764,8 @@
     "cutting": 0,
     "functions": [ [ "func:pan" ] ],
     "category" : "tools",
-    "to_hit": 2
+    "to_hit": 2,
+    "qualities": [["COOK", 2], ["BOIL", 2], ["CONTAIN", 1]]
   },
 
   {
@@ -813,7 +815,8 @@
     "volume": 2,
     "bashing": 3,
     "cutting": 0,
-    "to_hit": 2
+    "to_hit": 2,
+    "qualities": [["BOIL", 1]]
   },
 
   {
@@ -895,8 +898,9 @@
     "volume": 1,
     "bashing": 2,
     "cutting": 0,
-    "to_hit": -1
-  },
+    "to_hit": -1,
+    "qualities": [["CONTAIN", 1]]
+    },
 
   {
     "type":"GENERIC",
@@ -1188,9 +1192,9 @@
     "volume": 0,
     "bashing": 0,
     "cutting": 0,
-    "to_hit": -10
-  },
-
+    "to_hit": -10,
+    "qualities": [["COOK", 1]]
+    },
   {
     "type":"GENERIC",
     "id": "torch_done",
@@ -1451,8 +1455,9 @@
     "volume": 1,
     "bashing": 1,
     "cutting": 0,
-    "to_hit": 0
-  },
+    "to_hit": 0,
+    "qualities": [["CONTAIN", 1]]
+    },
 
   {
     "type":"GENERIC",
@@ -1467,8 +1472,9 @@
     "volume": 1,
     "bashing": 1,
     "cutting": 0,
-    "to_hit": 0
-  },
+    "to_hit": 0,
+    "qualities": [["CONTAIN", 1]]
+    },
 
   {
     "type":"GENERIC",
@@ -1499,8 +1505,9 @@
     "volume": 1,
     "bashing": 1,
     "cutting": 0,
-    "to_hit": 0
-  },
+    "to_hit": 0,
+    "qualities": [["CONTAIN", 1]]
+    },
 
   {
     "type":"GENERIC",
@@ -1515,8 +1522,9 @@
     "volume": 1,
     "bashing": 1,
     "cutting": 0,
-    "to_hit": 0
-  },
+    "to_hit": 0,
+    "qualities": [["CONTAIN", 1]]
+    },
 
   {
     "type":"GENERIC",
@@ -1664,7 +1672,8 @@
     "bashing": 4,
     "cutting": 0,
     "functions": [ [ "func:pot" ] ],
-    "to_hit": -1
+    "to_hit": -1,
+    "qualities": [["COOK", 3], ["BOIL", 2], ["CONTAIN", 1], ["CHEM", 1]]
   },
 
   {
@@ -1682,9 +1691,7 @@
     "cutting": 0,
     "functions": [ [ "func:hammer", 4 ] ],
     "to_hit": -2,
-    "tool": [
-        ["HAMMER", 1]
-    ]
+    "qualities": [["HAMMER", 1]]
   },
   {
     "type":"GENERIC",
@@ -1714,10 +1721,7 @@
     "volume": 1,
     "bashing": 7,
     "cutting": 0,
-    "to_hit": 2,
-    "tool": [
-        ["HAMMER", 1]
-    ]
+    "to_hit": 2
   },
   {
     "type":"GENERIC",
@@ -1779,8 +1783,9 @@
     "cutting": 10,
     "to_hit": 1,
     "flags": "SPEAR",
-    "techniques": ["WBLOCK_1"]
-  },
+    "techniques": ["WBLOCK_1"],
+    "qualities": [["COOK", 1]]
+    },
    { "type":"GENERIC",
  "id": "sword_wood",
     "symbol" : "!",
@@ -1908,7 +1913,8 @@
         "bashing" : 36,
         "cutting" : 0,
         "functions": [ [ "func:hammering" ], [ "func:nailing" ] ],
-        "price" : 12000
+        "price" : 12000,
+		"qualities": [["HAMMER", 1]]
     },
     {
         "type":"GENERIC",
@@ -1925,7 +1931,8 @@
         "volume" : 5,
         "bashing" : 30,
         "cutting" : 0,
-        "price" : 16000
+        "price" : 16000,
+		"qualities": [["HAMMER", 1]]
     },
     {
         "type":"GENERIC",
@@ -2126,7 +2133,8 @@
         "bashing" : 4,
         "cutting" : 12,
         "flags" : ["SPEAR"],
-        "price" : 4000
+        "price" : 4000,
+        "qualities": [["COOK", 1]]
     },
     {
         "type":"GENERIC",
@@ -2143,7 +2151,8 @@
         "bashing" : 6,
         "cutting" : 18,
         "flags" : ["SPEAR"],
-        "price" : 8000
+        "price" : 8000,
+        "qualities": [["COOK", 1]]
     },
     {
         "type":"GENERIC",
@@ -2244,7 +2253,8 @@
         "volume" : 5,
         "bashing" : 26,
         "cutting" : 0,
-        "price" : 100000
+        "price" : 100000,
+		"qualities": [["HAMMER", 1]]
     },
     {
         "type":"GENERIC",
@@ -2262,7 +2272,8 @@
         "bashing" : 22,
         "cutting" : 4,
         "flags" : ["SPEAR"],
-        "price" : 120000
+        "price" : 120000,
+		"qualities": [["HAMMER", 1]]
     },
     {
         "type":"GENERIC",
@@ -2311,7 +2322,8 @@
         "bashing" : 4,
         "cutting" : 9,
         "flags" : ["SPEAR"],
-        "price" : 4000
+        "price" : 4000,
+        "qualities": [["COOK", 1]]
     },
     {
         "type":"GENERIC",
@@ -2328,7 +2340,8 @@
         "bashing" : 5,
         "cutting" : 15,
         "flags" : ["SPEAR"],
-        "price" : 9000
+        "price" : 9000,
+        "qualities": [["COOK", 1]]
     },
     {
         "type":"GENERIC",
@@ -2810,7 +2823,8 @@
     "volume": 3,
     "bashing": 5,
     "cutting": 0,
-    "to_hit": -2
+    "to_hit": -2,
+    "qualities": [["BOIL", 1]]
   },
   {
     "type":"GENERIC",

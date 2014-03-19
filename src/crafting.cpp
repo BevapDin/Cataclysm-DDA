@@ -1381,7 +1381,7 @@ void game::complete_craft()
             new_count = 1;
         }
         u.i_add_or_drop(newit, new_count);
-        g->add_msg("%s", newit.tname(g).c_str());
+        g->add_msg("%s", newit.tname().c_str());
     }
 }
 

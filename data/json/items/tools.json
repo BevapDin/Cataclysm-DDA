@@ -240,7 +240,8 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:hammer", 1, -1 ], ["func:hammering"], ["func:nailing"] ],
-    "use_action": "HAMMER"
+    "use_action": "HAMMER",
+	"qualities": [["HAMMER", 3], ["HAMMER_G", 1]]
   },
 
   {
@@ -754,7 +755,8 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "use_action": "HOTPLATE"
+    "use_action": "HOTPLATE",
+    "qualities": [["BOIL", 1]]
   },
   {
     "id": "soldering_iron",
@@ -3731,7 +3733,7 @@
     "functions": [ [ "func:blade", 1.1, -1] ],
     "category": "weapons",
     "use_action": "KNIFE",
-    "qualities": [["CUT", 1]]
+    "qualities": [["CUT", 1], ["COOK", 1]]
   },
 
   {
@@ -4154,7 +4156,8 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:saw", 1, 1 ] ],
-    "use_action": "LUMBER"
+    "use_action": "LUMBER",
+	"qualities":[["SAW_W", 1]]
   },
 
   {
@@ -4255,10 +4258,9 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:hacksaw" ] ],
-    "use_action": "HACKSAW"
-  },
-
-  {
+    "use_action": "HACKSAW",
+    "qualities":[["SAW_M", 1], ["SAW_M_G", 1]]
+  },{
     "id": "tent_kit",
     "type": "TOOL",
     "symbol": ";",
@@ -4565,7 +4567,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:screwdriver" ] ],
-    "use_action": "NONE"
+    "qualities": [["SCREW", 1], ["SCREW_G", 1]]
   },
 
   {
@@ -4589,7 +4591,8 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:wrench" ] ],
-    "use_action": "NONE"
+    "use_action": "NONE",
+    "qualities": [["WRENCH", 1], ["WRENCH_G", 1]]
   },
 
   {
@@ -5044,7 +5047,8 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions" : [ [ "func:hammer", 1.7 ], ["func:hammering", 1.7] , ["func:nailing", 1.7] ],
-    "use_action": "HAMMER"
+    "use_action": "HAMMER",
+    "qualities": [["HAMMER", 2], ["HAMMER_G", 1]]
   },
 
   {
@@ -5901,7 +5905,8 @@
     "charges_per_use": 0,
     "turns_per_charge": 0,
     "ammo": "NULL",
-    "revert_to": "null"
+    "revert_to": "null",
+	"qualities":[["BREW", 2]]
   },
 
   {
@@ -5947,9 +5952,9 @@
     "ammo": "battery",
     "functions": [ [ "func:hotplate" , 1 , 1 ] ],
     "revert_to": "null",
-    "use_action": "HOTPLATE"
+    "use_action": "HOTPLATE",
+	"qualities":[["BREW", 1], ["CHEM", 2]]
   },
-
   {
     "id": "crackpipe",
     "type": "TOOL",
@@ -6110,10 +6115,9 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "NONE"
-  },
-
-  {
+    "use_action": "NONE",
+    "qualities": [["COOK", 1]]
+    },{
     "id": "chisel",
     "type": "TOOL",
     "symbol": ";",
@@ -6810,7 +6814,8 @@
     "ammo": "battery",
     "revert_to": "null",
     "functions": [ [ "func:hacksaw" ], [ "func:screwdriver" ], [ "func:hammer" ], [ "func:wrench" ], [ "func:soldering_iron", 1, 1 ], [ "func:welder", 1, 5 ] ],
-    "use_action": "GUN_REPAIR"
+    "use_action": "GUN_REPAIR",
+    "qualities": [["HAMMER_G", 1], ["SAW_M_G", 1], ["WRENCH_G", 1], ["SCREW_G", 1]]
   },
   {
     "id": "large_repairkit",
@@ -6833,7 +6838,8 @@
     "ammo": "battery",
     "revert_to": "null",
     "functions": [ [ "func:hacksaw" ], [ "func:screwdriver" ], [ "func:hammer" ], [ "func:wrench" ], [ "func:soldering_iron", 1, 0.5 ], ["func:welder", 1, 1 ] ],
-    "use_action": "GUN_REPAIR"
+    "use_action": "GUN_REPAIR",
+    "qualities": [["HAMMER_G", 1], ["SAW_M_G", 1], ["WRENCH_G", 1], ["SCREW_G", 1]]
   },
   {
     "id": "misc_repairkit",
@@ -6941,5 +6947,27 @@
     "bashing" : -3,
     "cutting" : 3,
     "to_hit" : 0
+  },{
+    "id": "toolset",
+    "type": "TOOL",
+    "symbol": ";",
+    "color": "brown",
+    "name": "integrated toolset",
+    "description": "Dummy item. If you see this, then something went wrong.",
+    "price": 7000,
+    "material": ["steel", "wood"],
+    "weight": 0,
+    "volume": 0,
+    "bashing": 0,
+    "cutting": 0,
+    "to_hit": 0,
+    "max_charges": 10000,
+    "initial_charges": 0,
+    "charges_per_use": 0,
+    "turns_per_charge": 0,
+    "ammo": "NULL",
+    "revert_to": "null",
+    "use_action": "HAMMER",
+	"qualities": [["HAMMER", 3], ["HAMMER_G", 1], ["CUT", 1], ["SAW_W", 1], ["SAW_M", 1], ["SAW_M_G", 1], ["WRENCH", 1], ["WRENCH_G", 1], ["SCREW", 1], ["SCREW_G", 1]]
   }
 ]
