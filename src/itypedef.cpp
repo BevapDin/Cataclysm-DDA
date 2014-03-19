@@ -52,44 +52,6 @@ void game::init_itypes ()
              * add it in crafting.cpp (game::crafting_inventory)
              * and add them at the of of this (search for BIO_SINGLE_TOOLSET)
              * */
-// kitchen unit - only appears in crafting recipes
-    (itypes["vpart_KITCHEN"] =
-        new itype("vpart_KITCHEN", 0, "kitchen",
-            "An installed kitchen unit - if you are reading this it's a bug! (itypdef.cpp)",
-            '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0))
-    ->addFunctionality("func:pan", 1, 1)
-    ->addFunctionality("func:pot", 1, 1)
-    ->addFunctionality("func:hotplate", 1, 1);
-// welding rig - only appears in crafting recipes
-    (itypes["vpart_WELDRIG"] =
-        new itype("vpart_WELDRIG", 0, "welding rig",
-            "An installed welding rig - if you are reading this it's a bug! (itypdef.cpp)",
-            '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0))
-    ->addFunctionality("func:welder", 1, 1)
-    ->addFunctionality("func:soldering_iron", 1, 1);
-
-    (itypes["vpart_CRAFTRIG"] =
-        new itype("vpart_CRAFTRIG", 0, "FOODCO kitchen buddy",
-            "An installed FOODCO kitchen buddy - if you are reading this it's a bug! (itypdef.cpp)",
-            '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0))
-    ->addFunctionality("func:vac_sealer", 1, 1)
-    ->addFunctionality("func:dehydrator", 1, 1)
-    ->addFunctionality("func:water_purifier", 1, 1)
-    ->addFunctionality("func:press", 1, 1);
-
-    (itypes["vpart_CHEMLAB"] =
-        new itype("vpart_CHEMLAB", 0, "onboard chemistry lab",
-            "An installed onboard chemistry lab - if you are reading this it's a bug! (itypdef.cpp)",
-            '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0))
-    ->addFunctionality("func:chemistry_set", 1, 1);
-
-    (itypes["vpart_FORGE"] =
-        new itype("vpart_FORGE", 0, "mounted electric forge",
-            "An mounted electric forge - if you are reading this it's a bug! (itypdef.cpp)",
-            '$', c_red, "null", "null", PNULL, 0, 0, 0, 0, 0))
-    ->addFunctionality("func:forge", 1, 1);
-
-
 
 // For smoking drugs
  itypes["apparatus"]=

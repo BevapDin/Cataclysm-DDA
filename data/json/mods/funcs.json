@@ -202,5 +202,47 @@
     "color": "white",
     "name": "a chemistry set",
     "description": "???"
+  },
+  { "id":"vpart_KITCHEN",
+    "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
+    "symbol": " ",
+    "color": "white",
+    "name": "kitchen",
+    "functions": [ [ "func:pan" ], [ "func:pot" ], [ "func:hotplate" ] ],
+    "qualities": [["COOK", 3], ["BOIL", 2], ["CONTAIN", 1], ["CHEM", 1]],
+    "description": "???"
+  },
+  { "id":"vpart_WELDRIG",
+    "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
+    "symbol": " ",
+    "color": "white",
+    "name": "welding rig",
+    "functions": [ [ "func:welder" ], [ "func:soldering_iron" ] ],
+    "description": "???"
+  },
+  { "id":"vpart_CRAFTRIG",
+    "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
+    "symbol": " ",
+    "color": "white",
+    "name": "FOODCO kitchen buddy",
+    "functions": [ [ "func:vac_sealer" ], [ "func:dehydrator" ], [ "func:water_purifier" ], [ "func:press" ] ],
+    "description": "???"
+  },
+  { "id":"vpart_CHEMLAB",
+    "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
+    "symbol": " ",
+    "color": "white",
+    "name": "onboard chemistry lab",
+    "functions": [ [ "func:chemistry_set" ] ],
+    "qualities":[["BREW", 1], ["CHEM", 2]],
+    "description": "???"
+  },
+  { "id":"vpart_FORGE",
+    "type": "GENERIC", "price": 0, "volume": 0, "weight": 0, "bashing": 0, "cutting": 0, "to_hit": 0,
+    "symbol": " ",
+    "color": "white",
+    "name": "mounted electric forge",
+    "functions": [ [ "func:forge" ] ],
+    "description": "???"
   }
 ]
