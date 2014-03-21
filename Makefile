@@ -293,10 +293,8 @@ ifdef SDL
   endif
 endif
 
-BINDIST_LOCALE =
 ifdef LANGUAGES
   L10N = localization
-  BINDIST_LOCALE += lang/mo
 endif
 
 PGOBJS = $(subst $(ODIR)/,$(ODIR)/pg-,$(OBJS))
@@ -378,7 +376,9 @@ bindist: $(BINDIST)
 $(BINDIST): distclean version $(TARGET) $(L10N) $(BINDIST_EXTRAS) $(BINDIST_LOCALE)
 	mkdir -p $(BINDIST_DIR)
 	cp -R $(TARGET) $(BINDIST_EXTRAS) $(BINDIST_DIR)
-	cp -R --parents $(BINDIST_LOCALE) $(BINDIST_DIR)
+ifdef LANGUAGES
+	cp -R --parents lang/mo $(BINDIST_DIR)
+endif
 	$(BINDIST_CMD)
 
 export ODIR _OBJS LDFLAGS CXX W32FLAGS DEFINES CXXFLAGS

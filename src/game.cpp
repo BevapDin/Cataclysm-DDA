@@ -14,7 +14,6 @@
 #include "editmap.h"
 #include "bodypart.h"
 #include "map.h"
-#include "output.h"
 #include "uistate.h"
 #include "item_factory.h"
 #include "helper.h"
@@ -1544,7 +1543,7 @@ void game::activity_on_finish_read()
 
         u.skillLevel(reading->type).readBook(min_ex, max_ex, turn, reading->level);
 
-        add_msg(_("You learn a little about %s! (%d%%%%)"), reading->type->name().c_str(),
+        add_msg(_("You learn a little about %s! (%d%%)"), reading->type->name().c_str(),
                 u.skillLevel(reading->type).exercise());
 
         if (u.skillLevel(reading->type) == originalSkillLevel && u.activity.get_value(0) == 1) {
@@ -1591,8 +1590,8 @@ void game::activity_on_finish_train()
         //~ %s is martial art
         u.add_memorial_log(pgettext("memorial_male", "Learned %s."),
                            pgettext("memorial_female", "Learned %s."),
-                           martialarts[u.activity.name].name.c_str()),
-                                       u.ma_styles.push_back(u.activity.name);
+                           martialarts[u.activity.name].name.c_str());
+        u.add_martialart(u.activity.name);
     } else {
         int new_skill_level = u.skillLevel(skill) + 1;
         u.skillLevel(skill).level(new_skill_level);
@@ -4142,30 +4141,30 @@ Current turn: %d; Next spawn %d.\n\
   case 12:
       add_msg(_("Martial arts debug."));
       add_msg(_("Your eyes blink rapidly as knowledge floods your brain."));
-      u.ma_styles.push_back("style_karate");
-      u.ma_styles.push_back("style_judo");
-      u.ma_styles.push_back("style_aikido");
-      u.ma_styles.push_back("style_tai_chi");
-      u.ma_styles.push_back("style_taekwondo");
-      u.ma_styles.push_back("style_krav_maga");
-      u.ma_styles.push_back("style_muay_thai");
-      u.ma_styles.push_back("style_ninjutsu");
-      u.ma_styles.push_back("style_capoeira");
-      u.ma_styles.push_back("style_zui_quan");
-      u.ma_styles.push_back("style_tiger");
-      u.ma_styles.push_back("style_crane");
-      u.ma_styles.push_back("style_leopard");
-      u.ma_styles.push_back("style_snake");
-      u.ma_styles.push_back("style_dragon");
-      u.ma_styles.push_back("style_centipede");
-      u.ma_styles.push_back("style_venom_snake");
-      u.ma_styles.push_back("style_scorpion");
-      u.ma_styles.push_back("style_lizard");
-      u.ma_styles.push_back("style_toad");
-      u.ma_styles.push_back("style_eskrima");
-      u.ma_styles.push_back("style_fencing");
-      u.ma_styles.push_back("style_biojutsu");
-      u.ma_styles.push_back("style_silat");
+      u.add_martialart("style_karate");
+      u.add_martialart("style_judo");
+      u.add_martialart("style_aikido");
+      u.add_martialart("style_tai_chi");
+      u.add_martialart("style_taekwondo");
+      u.add_martialart("style_krav_maga");
+      u.add_martialart("style_muay_thai");
+      u.add_martialart("style_ninjutsu");
+      u.add_martialart("style_capoeira");
+      u.add_martialart("style_zui_quan");
+      u.add_martialart("style_tiger");
+      u.add_martialart("style_crane");
+      u.add_martialart("style_leopard");
+      u.add_martialart("style_snake");
+      u.add_martialart("style_dragon");
+      u.add_martialart("style_centipede");
+      u.add_martialart("style_venom_snake");
+      u.add_martialart("style_scorpion");
+      u.add_martialart("style_lizard");
+      u.add_martialart("style_toad");
+      u.add_martialart("style_eskrima");
+      u.add_martialart("style_fencing");
+      u.add_martialart("style_biojutsu");
+      u.add_martialart("style_silat");
       add_msg(_("You now know a lot more than just 10 styles of kung fu."));
    break;
 
@@ -7076,13 +7075,13 @@ void game::explode_mon(int index)
     std::vector<point> traj = line_to(posx, posy, tarx, tary, 0);
 
     bool done = false;
-    field_id type_blood = critter.monBloodType();
+    field_id type_blood = critter.bloodType();
     for (int j = 0; j < traj.size() && !done; j++) {
      tarx = traj[j].x;
      tary = traj[j].y;
      if (type_blood != fd_null)
         m.add_field(tarx, tary, type_blood, 1);
-     m.add_field(tarx+rng(-1, 1), tary+rng(-1, 1), critter.monGibType(), rng(1, j+1));
+     m.add_field(tarx+rng(-1, 1), tary+rng(-1, 1), critter.gibType(), rng(1, j+1));
 
      if (m.move_cost(tarx, tary) == 0) {
       std::string tmp = "";
@@ -7411,21 +7410,7 @@ void game::activity_on_turn_pulp()
         }
         int damage = pulp_power / it->volume();
         //Determine corpse's blood type.
-        //TODO: See if it's possible to use the monBloodType() function rather than this spaghetti code.
-        field_id type_blood;
-        if (it->corpse->flags.count(MF_ACID_BLOOD) != 0)
-            type_blood = fd_acid; //Be wary that a corpse with ACID_BLOOD would be very hazardous to smash!
-        else if (it->corpse->flags.count(MF_BILE_BLOOD) != 0)
-            type_blood = fd_bile;
-        else if (it->corpse->flags.count(MF_LARVA) != 0 || it->corpse->flags.count(MF_ARTHROPOD_BLOOD) != 0)
-            type_blood = fd_blood_invertebrate;
-        else if (it->corpse->mat == "veggy")
-            type_blood = fd_blood_veggy;
-        else if (it->corpse->mat == "iflesh")
-            type_blood = fd_blood_insect;
-        else if (it->corpse->flags.count(MF_WARM) != 0)
-            type_blood = fd_blood;
-        else type_blood = fd_null;
+        field_id type_blood = it->corpse->bloodType();
         do {
             moves += move_cost;
             // Increase damage as we keep smashing,
@@ -7435,10 +7420,12 @@ void game::activity_on_turn_pulp()
                 u.handle_melee_wear();
             }
             // Splatter some blood around
-            for (int x = smashx - 1; x <= smashx + 1; x++) {
-                for (int y = smashy - 1; y <= smashy + 1; y++) {
-                    if (!one_in(damage+1) && type_blood != fd_null) {
-                        m.add_field(x, y, type_blood, 1);
+            if(type_blood != fd_null) {
+                for (int x = smashx - 1; x <= smashx + 1; x++) {
+                    for (int y = smashy - 1; y <= smashy + 1; y++) {
+                        if (!one_in(damage+1) && type_blood != fd_null) {
+                            m.add_field(x, y, type_blood, 1);
+                        }
                     }
                 }
             }
