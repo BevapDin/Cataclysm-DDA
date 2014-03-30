@@ -6000,8 +6000,7 @@
   ],
   "components": [
     [
-      [ "potato_raw", 1 ],
-      [ "potato_irradiated", 1]
+      [ "cornmeal", 1 ]
     ],
     [
       [ "salt", 2 ]
@@ -7210,8 +7209,11 @@
       [ "spaghetti_raw", 1 ],
       [ "macaroni_raw", 1],
       [ "noodles_fast", 1],
-      [ "potato_irradiated", 1 ],
-      [ "potato_raw", 1 ]
+      [ "potato_irradiated", 1],
+      [ "potato_raw", 1 ],
+      [ "powder_eggs", 5 ],
+      [ "egg_bird", 1 ],
+      [ "egg_reptile", 1 ]
     ],
     [
       [ "human_flesh", 2 ]
@@ -9850,7 +9852,7 @@
       [ "mutagen", 1 ]
     ],
     [
-      [ "egg_bird", 3 ]
+      [ "egg_bird", 1 ]
     ],
     [
       [ "ammonia", 1 ],
@@ -9907,7 +9909,7 @@
       [ "mutagen", 1 ]
     ],
     [
-      [ "egg_reptile", 3 ]
+      [ "egg_reptile", 1 ]
     ],
     [
       [ "ammonia", 1 ],
@@ -11783,7 +11785,7 @@
   "skills_required": [ "fabrication", 6 ],
   "difficulty": 6,
   "time": 60000,
-  "reversible": true,
+  "reversible": false,
   "decomp_learn": 4,
   "autolearn": false,
   "book_learn": [[ "recipe_atomic_battery", 6 ]],
@@ -20648,7 +20650,7 @@
     [ [ "func:hotplate", 5 ], [ "func:chemistry_set", 5 ], [ "char_smoker", 1 ], [ "fire", -1 ] ]
   ],
   "components": [
-    [ [ "func:water", 1 ] ],
+    [ [ "water", 4 ], [ "water_clean", 4 ] ],
     [ [ "meal_bone", 2 ] ],
     [ [ "meal_chitin_piece", 1 ] ],
     [ [ "ammonia", 1 ], [ "lye_powder", 100 ] ]
@@ -21528,8 +21530,7 @@
   "skill_used": "fabrication",
   "difficulty": 3,
   "time": 240000,
-  "reversible": true,
-  "note": "hacking the anvil back down seems unlikely to teach anything useful",
+  "reversible": false,
   "autolearn": true,
   "qualities":[
     {"id":"HAMMER","level":3,"amount":1}

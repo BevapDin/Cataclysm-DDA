@@ -5841,7 +5841,7 @@
         "name" : "bootstrap",
         "weight" : 190,
         "color" : "brown",
-        "covers" : ["LEGS"],
+        "covers" : ["FEET"],
         "to_hit" : -1,
         "storage" : 2,
         "symbol" : "[",

@@ -1757,7 +1757,6 @@ bool map::bash(const int x, const int y, const int str, std::string &sound, int 
             }
         }
         if ( success == true ) {
-            int bday=int(g->turn);
             sound += _(bash->sound.c_str());
             if ( jsfurn == true ) {
                 if ( !bash->furn_set.empty() ) {
@@ -1771,27 +1770,7 @@ bool map::bash(const int x, const int y, const int str, std::string &sound, int 
             } else if ( jster == true ) {
                 debugmsg("data/json/terrain.json does not have %s.bash.ter_set set!",ter_at(x,y).id.c_str());
             }
-            for (int i = 0; i < bash->items.size(); i++) {
-                int chance = bash->items[i].chance;
-                if ( chance == -1 || rng(0, 100) >= chance ) {
-                    int numitems = bash->items[i].amount;
-
-                    if ( bash->items[i].minamount != -1 ) {
-                        numitems = rng( bash->items[i].minamount, bash->items[i].amount );
-                    }
-                    if ( numitems > 0 ) {
-                        // spawn_item(x,y, bash->items[i].itemtype, numitems); // doesn't abstract amount || charges
-                        item new_item = item_controller->create(bash->items[i].itemtype, bday);
-                        if ( new_item.count_by_charges() ) {
-                            new_item.charges = numitems;
-                            numitems = 1;
-                        }
-                        for(int a = 0; a < numitems; a++ ) {
-                            add_item_or_charges(x, y, new_item);
-                        }
-                    }
-                }
-            }
+            spawn_item_list(bash->items, x, y);
             if (bash->explosive > 0) {
                 g->explosion(x, y, bash->explosive, 0, false);
             }
@@ -1857,6 +1836,31 @@ bool map::bash(const int x, const int y, const int str, std::string &sound, int 
         return true;
     }
     return smashed_web;// If we kick empty space, the action is cancelled
+}
+
+void map::spawn_item_list(const std::vector<map_bash_item_drop> &items, int x, int y) {
+    for (size_t i = 0; i < items.size(); i++) {
+        const map_bash_item_drop &drop = items[i];
+        int chance = drop.chance;
+        if ( chance == -1 || rng(0, 100) >= chance ) {
+            int numitems = drop.amount;
+
+            if ( drop.minamount != -1 ) {
+                numitems = rng( drop.minamount, drop.amount );
+            }
+            if ( numitems > 0 ) {
+                // spawn_item(x,y, drop.itemtype, numitems); // doesn't abstract amount || charges
+                item new_item = item_controller->create(drop.itemtype, g->turn);
+                if ( new_item.count_by_charges() ) {
+                    new_item.charges = numitems;
+                    numitems = 1;
+                }
+                for(int a = 0; a < numitems; a++ ) {
+                    add_item_or_charges(x, y, new_item);
+                }
+            }
+        }
+    }
 }
 
 // map::destroy is only called (?) if the terrain is NOT bashable.
@@ -2972,9 +2976,9 @@ bool map::process_active_item(item *it, const int nonant, const int i, const int
             }
         } else if (it->type->id == "corpse" && it->corpse != NULL ) { // some corpses rez over time
             if (it->ready_to_revive()) {
-                if (rng(0,it->volume()) > it->burnt) {
-                    int mapx = (nonant % my_MAPSIZE) * SEEX + i;
-                    int mapy = (nonant / my_MAPSIZE) * SEEY + j;
+                int mapx = (nonant % my_MAPSIZE) * SEEX + i;
+                int mapy = (nonant / my_MAPSIZE) * SEEY + j;
+                if (rng(0,it->volume()) > it->burnt && g->revive_corpse(mapx, mapy, it)) {
                     if (g->u_see(mapx, mapy)) {
                         if(it->corpse->in_species("ROBOT")) {
                             g->add_msg(_("A nearby robot has repaired itself and stands up!"));
@@ -2982,7 +2986,6 @@ bool map::process_active_item(item *it, const int nonant, const int i, const int
                             g->add_msg(_("A nearby corpse rises and moves towards you!"));
                         }
                     }
-                    g->revive_corpse(mapx, mapy, it);
                     return true;
                 } else {
                     it->active = false;
@@ -3737,7 +3740,7 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     long sym;
     bool hi = false;
     bool graf = false;
-    bool normal_tercol = false, drew_field = false;
+    bool draw_item_sym = false;
 
 
     if (has_furn(x, y)) {
@@ -3746,17 +3749,6 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     } else {
         sym = terlist[curr_ter].sym;
         tercol = terlist[curr_ter].color;
-    }
-    if (u.has_disease("boomered")) {
-        tercol = c_magenta;
-    } else if ( u.has_nv() ) {
-        tercol = (bright_light) ? c_white : c_ltgreen;
-    } else if (low_light) {
-        tercol = c_dkgray;
-    } else if (u.has_disease("darkness")) {
-        tercol = c_dkgray;
-    } else {
-        normal_tercol = true;
     }
     if (has_flag(TFLAG_SWIMMABLE, x, y) && has_flag(TFLAG_DEEP_WATER, x, y) && !u.is_underwater()) {
         show_items = false; // Can only see underwater items if WE are underwater
@@ -3778,12 +3770,14 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
             sym = g->traps[curr_trap]->sym;
         }
     }
-    // If there's a field here, draw that instead (unless its symbol is %)
-    if (curr_field.fieldCount() > 0 && curr_field.findField(curr_field.fieldSymbol()) &&
-        fieldlist[curr_field.fieldSymbol()].sym != '&') {
-        tercol = fieldlist[curr_field.fieldSymbol()].color[curr_field.findField(curr_field.fieldSymbol())->getFieldDensity() - 1];
-        drew_field = true;
-        if (fieldlist[curr_field.fieldSymbol()].sym == '*') {
+    if (curr_field.fieldCount() > 0) {
+        const field_id& fid = curr_field.fieldSymbol();
+        const field_entry* fe = curr_field.findField(fid);
+        const field_t& f = fieldlist[fid];
+        if (f.sym == '&' || fe == NULL) {
+            // Do nothing, a '&' indicates invisible fields.
+        } else if (f.sym == '*') {
+            // A random symbol.
             switch (rng(1, 5)) {
             case 1: sym = '*'; break;
             case 2: sym = '0'; break;
@@ -3791,27 +3785,41 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
             case 4: sym = '&'; break;
             case 5: sym = '+'; break;
             }
-        } else if (fieldlist[curr_field.fieldSymbol()].sym != '%' ||
-                   !curr_items.empty()) {
-            sym = fieldlist[curr_field.fieldSymbol()].sym;
-            drew_field = false;
+        } else {
+            // A field symbol '%' indicates the field should not hide
+            // items/terrain. When the symbol is not '%' it will
+            // hide items (the color is still inverted if there are items,
+            // but the tile symbol is not changed).
+            // draw_item_sym indicates that the item symbol should be used
+            // even if sym is not '.'.
+            // As we don't know at this stage if there are any items
+            // (that are visible to the player!), we always set the symbol.
+            // If there are items and the field does not hide them,
+            // the code handling items will override it.
+            draw_item_sym = (sym == '.' && f.sym == '%');
+            if (sym == '.' || f.sym != '%') {
+                // default terrain '.' -> use field symbol
+                // or non-default field symbol -> field symbol overrides terrain
+                sym = f.sym;
+            }
+            tercol = f.color[fe->getFieldDensity() - 1];
         }
     }
-    // If there's items here, draw those instead
-    if (show_items && !drew_field && sees_some_items(x, y, g->u)) {
-        if (sym != '.' && sym != '%') {
+
+    // If there are items here, draw those instead
+    if (show_items && sees_some_items(x, y, g->u)) {
+        // if there's furniture/terrain/trap/fields (sym!='.')
+        // and we should not override it, then only highlight the square
+        if (sym != '.' && sym != '%' && !draw_item_sym) {
             hi = true;
         } else {
-            // if there's furniture, then only change the furniture colour
-            if (has_furn(x, y)) {
-                invert = !invert;
-                sym = furnlist[curr_furn].sym;
-            } else {
+            // otherwise override with the symbol of the last item
+            sym = curr_items[curr_items.size() - 1].symbol();
+            if (!draw_item_sym) {
                 tercol = curr_items[curr_items.size() - 1].color();
-                if (curr_items.size() > 1) {
-                    invert = !invert;
-                }
-                sym = curr_items[curr_items.size() - 1].symbol();
+            }
+            if (curr_items.size() > 1) {
+                invert = !invert;
             }
         }
     }
@@ -3820,8 +3828,7 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     vehicle *veh = veh_at(x, y, veh_part);
     if (veh) {
         sym = special_symbol (veh->face.dir_symbol(veh->part_sym(veh_part)));
-        if (normal_tercol)
-            tercol = veh->part_color(veh_part);
+        tercol = veh->part_color(veh_part);
     }
     // If there's graffiti here, change background color
     if(graffiti_at(x,y).contents) {
@@ -3831,6 +3838,16 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     //suprise, we're not done, if it's a wall adjacent to an other, put the right glyph
     if(sym == LINE_XOXO || sym == LINE_OXOX) { //vertical or horizontal
         sym = determine_wall_corner(x, y, sym);
+    }
+
+    if (u.has_disease("boomered")) {
+        tercol = c_magenta;
+    } else if ( u.has_nv() ) {
+        tercol = (bright_light) ? c_white : c_ltgreen;
+    } else if (low_light) {
+        tercol = c_dkgray;
+    } else if (u.has_disease("darkness")) {
+        tercol = c_dkgray;
     }
 
     if (invert) {

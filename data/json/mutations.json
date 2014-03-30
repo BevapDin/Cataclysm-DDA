@@ -1066,7 +1066,7 @@
         "visibility" : 10,
         "ugliness" : 3,
         "description" : "A set of flexible green scales has grown to cover your body, acting as natural armor. Somewhat reduces wet effects.",
-        "category" : ["MUTCAT_CHIMERA", "MUTCAT_RAPTOR"],
+        "category" : ["MUTCAT_CHIMERA", "MUTCAT_RAPTOR", "MUTCAT_LIZARD"],
         "prereqs" : ["SKIN_ROUGH"],
         "changes_to" : ["THICK_SCALES", "SLEEK_SCALES"],
         "wet_protection" : [
@@ -1086,7 +1086,9 @@
         "ugliness" : 4,
         "description" : "A set of heavy green scales has grown to cover your body, acting as natural armor. While difficult to penetrate, it also limits your flexibility, resulting in a -2 penalty to Dexterity. Greatly reduces wet effects.",
         "prereqs" : ["SCALES"],
-        "cancels" : ["SLEEK_SCALES", "FEATHERS"],
+        "threshreq" : ["THRESH_LIZARD"],
+        "category" : ["MUTCAT_LIZARD"],
+        "cancels" : ["SLEEK_SCALES", "FEATHERS", "CHITIN", "PLANTSKIN", "FUR", "FELINE_FUR", "LUPINE_FUR", "URSINE_FUR"],
         "wet_protection" : [
             { "part" : "HEAD", "ignored" : 5 },
             { "part" : "LEGS", "ignored" : 16 },
@@ -1165,8 +1167,20 @@
         "ugliness" : 3,
         "description" : "Thick black fur has grown to cover your entire body, providing a marginal protection against attacks, and considerable protection from cold.",
         "cancels" : ["SCALES", "FEATHERS", "CHITIN", "PLANTSKIN", "FELINE_FUR", "LUPINE_FUR"],
+        "changes_to" : ["URSINE_FUR"],
         "prereqs" : ["LIGHTFUR"],
         "category" : ["MUTCAT_BEAST", "MUTCAT_CATTLE", "MUTCAT_RAT", "MUTCAT_SPIDER", "MUTCAT_URSINE"]
+    },{
+        "type" : "mutation",
+        "id" : "URSINE_FUR",
+        "name" : "Shaggy Fur",
+        "points" : 4,
+        "visibility" : 10,
+        "ugliness" : 3,
+        "description" : "Your thick fur has grown out, providing noticeable protection from attacks in addition to its considerable insulation.",
+        "cancels" : ["SCALES", "FEATHERS", "CHITIN", "PLANTSKIN", "FELINE_FUR", "LUPINE_FUR"],
+        "prereqs" : ["FUR"],
+        "category" : ["MUTCAT_URSINE"]
     },{
         "type" : "mutation",
         "id" : "LUPINE_FUR",
@@ -1350,7 +1364,7 @@
         "prereqs" : ["NAILS"],
         "changes_to" : ["CLAWS_RETRACT"],
         "cancels" : ["TALONS"],
-        "category" : ["MUTCAT_BEAST", "MUTCAT_RAT", "MUTCAT_RAPTOR"]
+        "category" : ["MUTCAT_BEAST", "MUTCAT_RAT", "MUTCAT_RAPTOR", "MUTCAT_URSINE"]
     },{
         "type" : "mutation",
         "id" : "CLAWS_RETRACT",
@@ -1593,7 +1607,7 @@
         "id" : "STOCKY_TROGLO",
         "name" : "Subterranean Build",
         "points" : 0,
-        "description" : "Your frame has adapted for life in confined spaces.  You seem a little shorter and bulkier, tradiing muscle mass for mobility.  (+2 Strength, -2 Dexterity)",
+        "description" : "Your frame has adapted for life in confined spaces.  You seem a little shorter and bulkier, trading muscle mass for mobility.  (+2 Strength, -2 Dexterity)",
         "threshreq" : ["THRESH_TROGLOBITE"],
         "category" : ["MUTCAT_TROGLOBITE"]
     },{
@@ -1870,6 +1884,7 @@
         "description" : "You've developed the ability to stockpile calories and then sleep for extended periods of time.",
         "valid" : false,
         "prereqs" : ["HEAVYSLEEPER2"],
+        "prereqs2" : ["FAT"],
         "threshreq" : ["THRESH_URSINE"],
         "category" : ["MUTCAT_URSINE"]
     },{
@@ -2157,6 +2172,17 @@
         "ugliness" : 1,
         "description" : "You have a set of prominent rodent-like whiskers around your mouth. These make you more aware of vibrations in the air, and improve your ability to dodge very slightly.",
         "category" : ["MUTCAT_RAT", "MUTCAT_FELINE"]
+    },{
+        "type" : "mutation",
+        "id" : "FAT",
+        "name" : "Fat Deposits",
+        "points" : 1,
+        "visibility" : 1,
+        "ugliness" : 1,
+        "description" : "You've put on some additional weight around your body.  It slows you down a little, but helps your swimming and warmth.",
+        "prereqs" : ["STR_UP", "STR_UP_2", "STR_UP_3", "STR_UP_4"],
+        "leads_to" : ["HIBERNATE"],
+        "category" : ["MUTCAT_URSINE"]
     },{
         "type" : "mutation",
         "id" : "LARGE",

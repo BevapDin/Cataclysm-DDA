@@ -156,7 +156,7 @@ Flags used to describe monsters and define their properties and abilities.
 - ```AMIGARA``` Removes hypnosis if the last one.
 - ```THING``` Turn into a full thing.
 - ```EXPLODE``` Damaging explosion.
-- ```BROKEN``` Spawns a broken robot.
+- ```BROKEN``` Spawns a broken robot item, its id calculated like this: the prefix "mon_" is removed from the monster id, than the prefix "broken_" is added. Example: mon_eyebot -> broken_eyebot
 - ```RATKING``` Cure verminitis.
 - ```KILL_BREATHERS``` All breathers die.
 - ```SMOKEBURST``` Explode like a huge smoke bomb.
@@ -210,7 +210,7 @@ Flags used to describe monsters and define their properties and abilities.
 - ```LEATHER``` May produce leather when butchered.
 - ```FEATHER``` May produce feathers when butchered.
 - ```FAT``` May produce fat when butchered.
-- ```CBM``` May produce a cbm or two when butchered.
+- ```CBM_CIV``` May produce a common cbm or two when butchered.
 - ```BONES``` May produce bones and sinews when butchered.
 - ```IMMOBILE``` Doesn't move (e.g. turrets)
 - ```FRIENDLY_SPECIAL``` Use our special attack, even if friendly.
@@ -233,6 +233,8 @@ Flags used to describe monsters and define their properties and abilities.
 - ```BILE_BLOOD``` Makes monster bleed bile.
 - ```REGEN_MORALE``` Will stop fleeing if at max hp, and regen anger and morale.
 - ```CBM_POWER``` May produce a power CBM when butchered, independent of CBM.
+- ```CBM_SCI``` May produce a cbm or two from bionics_sci when butchered.
+- ```CBM_OP``` May produce a cbm or two from bionics_op when butchered.
 
 ### Special attacks
 Some special attacks are also valid use actions for tools and weapons.
@@ -240,6 +242,7 @@ Some special attacks are also valid use actions for tools and weapons.
 - ```NONE``` No special attack.
 - ```ANTQUEEN``` Hatches/grows: `egg > ant > soldier`.
 - ```SHRIEK``` "a terrible shriek!"
+- ```HOWL``` "an ear-piercing howl!"
 - ```RATTLE``` "a sibilant rattling sound!"
 - ```ACID``` Spit acid.
 - ```SHOCKSTORM``` Shoots bolts of lightning.

@@ -278,7 +278,7 @@
         "type" : "construction",
         "description" : "Reinforce Boarded Up Empty Window",
         "difficulty" : 5,
-        "time" : 30,
+        "time" : 10,
         "tools" : [
             [ "func:hammering" ]
         ],
@@ -306,7 +306,7 @@
         "type" : "construction",
         "description" : "Armor Reinforced Boarded Up Empty Window",
         "difficulty" : 7,
-        "time" : 10,
+        "time" : 30,
         "tools" : [
             [ "func:nailing" ]
         ],
@@ -989,7 +989,7 @@
             [ "func:hammering" ],
             [ "func:screwdriver" ]
         ],
-        "pre_flags" : "DECONSTRUCT",
+        "pre_special" : "check_deconstruct",
         "post_special" : "done_deconstruct"
     },{
         "type" : "construction",
@@ -1009,7 +1009,7 @@
     },
     {
         "type" : "construction",
-        "description" : "Paint horizontal wall red",
+        "description" : "Paint Horizontal Wall Red",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1022,7 +1022,7 @@
         "post_terrain" : "t_wall_h_r"
     },{
         "type" : "construction",
-        "description" : "Paint vertical wall red",
+        "description" : "Paint Vertical Wall Red",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1035,7 +1035,7 @@
         "post_terrain" : "t_wall_v_r"
     },{
         "type" : "construction",
-        "description" : "Paint horizontal wall blue",
+        "description" : "Paint Horizontal Wall Blue",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1048,7 +1048,7 @@
         "post_terrain" : "t_wall_h_b"
     },{
         "type" : "construction",
-        "description" : "Paint vertical wall blue",
+        "description" : "Paint Vertical Wall Blue",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1061,7 +1061,7 @@
         "post_terrain" : "t_wall_v_b"
     },{
         "type" : "construction",
-        "description" : "Paint horizontal wall white",
+        "description" : "Paint Horizontal Wall white",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1074,7 +1074,7 @@
         "post_terrain" : "t_wall_h_w"
     },{
         "type" : "construction",
-        "description" : "Paint vertical wall white",
+        "description" : "Paint Vertical Wall white",
         "difficulty" : 0,
         "time" : 40,
           "tools" : [
@@ -1087,7 +1087,7 @@
         "post_terrain" : "t_wall_v_w"
     },{
         "type" : "construction",
-        "description" : "Paint horizontal wall green",
+        "description" : "Paint Horizontal Wall Green",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1100,7 +1100,7 @@
         "post_terrain" : "t_wall_h_g"
     },{
         "type" : "construction",
-        "description" : "Paint vertical wall green",
+        "description" : "Paint Vertical Wall Green",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1113,7 +1113,7 @@
         "post_terrain" : "t_wall_v_g"
     },{
         "type" : "construction",
-        "description" : "Paint horizontal wall purple",
+        "description" : "Paint Horizontal Wall Purple",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1126,7 +1126,7 @@
         "post_terrain" : "t_wall_h_p"
     },{
         "type" : "construction",
-        "description" : "Paint vertical wall purple",
+        "description" : "Paint Vertical Wall Purple",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1139,7 +1139,7 @@
         "post_terrain" : "t_wall_v_p"
     },{
         "type" : "construction",
-        "description" : "Paint horizontal wall yellow",
+        "description" : "Paint Horizontal Wall Yellow",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1152,7 +1152,7 @@
         "post_terrain" : "t_wall_h_y"
     },{
         "type" : "construction",
-        "description" : "Paint vertical wall yellow",
+        "description" : "Paint Vertical Wall Yellow",
         "difficulty" : 0,
         "time" : 40,
         "tools" : [
@@ -1165,7 +1165,7 @@
         "post_terrain" : "t_wall_v_y"
     },{
         "type" : "construction",
-        "description" : "Take paint off vertical wall",
+        "description" : "Take Paint Off Vertical Wall",
         "difficulty" : 0,
         "time" : 80,
         "tools" : [
@@ -1175,7 +1175,7 @@
         "post_terrain" : "t_wall_v"
     },{
         "type" : "construction",
-        "description" : "Take paint off horizontal wall",
+        "description" : "Take Paint off Horizontal Wall",
         "difficulty" : 0,
         "time" : 80,
         "tools" : [
@@ -1185,7 +1185,7 @@
         "post_terrain" : "t_wall_h"
     },{
         "type" : "construction",
-        "description" : "Rip carpet up",
+        "description" : "Remove Carpet",
         "difficulty" : 0,
         "time" : 30,
         "tools" : [
@@ -1195,7 +1195,7 @@
         "post_terrain" : "t_floor"
     },{
         "type" : "construction",
-        "description" : "carpet floor red",
+        "description" : "Carpet Floor Red",
         "difficulty" : 0,
         "time" : 30,
         "tools" : [
@@ -1209,7 +1209,7 @@
         "post_terrain" : "t_carpet_red"
     },{
         "type" : "construction",
-        "description" : "carpet floor purple",
+        "description" : "Carpet Floor Purple",
         "difficulty" : 0,
         "time" : 30,
         "tools" : [
@@ -1223,7 +1223,7 @@
         "post_terrain" : "t_carpet_purple"
     },{
         "type" : "construction",
-        "description" : "carpet floor yellow",
+        "description" : "Carpet Floor Yellow",
         "difficulty" : 0,
         "time" : 30,
         "tools" : [
@@ -1237,7 +1237,7 @@
         "post_terrain" : "t_carpet_yellow"
     },{
         "type" : "construction",
-        "description" : "carpet floor green",
+        "description" : "Carpet Floor Green",
         "difficulty" : 0,
         "time" : 30,
         "tools" : [
@@ -1249,5 +1249,65 @@
           ],
         "pre_terrain" : "t_floor",
         "post_terrain" : "t_carpet_green"
+    },{
+        "type" : "construction",
+        "description" : "Dig Downstair",
+        "difficulty" : 5,
+        "time" : 420,
+        "tools" : [
+            [ "pickaxe" ],
+            [ "shovel", "e_tool" ],
+            [ "hatchet", "ax", "primitive_axe" ],
+            [ "hatchet", "hammer", "hammer_sledge" ]
+        ],
+        "components" : [
+            [ [ "2x4", 8 ] , [ "log", 8 ] ],
+            [ [ "rope_30", 1 ] ]
+        ],
+        "pre_flags" : "DIGGABLE",
+        "post_special" : "done_dig_stair"
+    },{
+        "type" : "construction",
+        "description" : "Mine Downstair",
+        "difficulty" : 6,
+        "time" : 480,
+        "tools" : [
+            [ "jackhammer", "jacqueshammer" ],
+            [ "shovel", "e_tool" ],
+            [ "crowbar", "halligan"],
+            [ "hatchet", "ax" ],
+            [ "hammer", "hammer_sledge" ]
+        ],
+        "components" : [
+            [ [ "2x4", 12 ] , [ "log", 12 ] ],
+            [ [ "rope_30", 1 ] ],
+            [ [ "gasoline", 30 ]]
+        ],
+        "pre_special" : "check_down_OK",
+        "pre_terrain" : "t_rock_floor",
+        "post_special" : "done_mine_downstair"
+    },{
+        "type" : "construction",
+        "description" : "Mine Upstair",
+        "difficulty" : 6,
+        "time" : 480,
+        "tools" : [
+            [ "jackhammer", "jacqueshammer" ],
+            [ "shovel", "e_tool" ],
+            [ "crowbar", "halligan"],
+            [ "hatchet", "ax" ],
+            [ "hammer", "hammer_sledge" ],
+            [ "miner_hat", "hat_hard", "firehelmet", "helmet_ball",
+            "helmet_army", "helmet_lobster", "helmet_riot"]
+        ],
+        "note" : "Helmets are essential because you're digging up and things may fall on you.",
+        "components" : [
+            [ [ "2x4", 12 ] , [ "log", 12 ] ],
+            [ [ "rope_30", 1 ] ],
+            [ [ "gasoline", 30 ]]
+        ],
+        "pre_special" : "check_up_OK",
+        "pre_terrain" : "t_rock",
+        "post_special" : "done_mine_upstair"
     }
 ]

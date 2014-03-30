@@ -220,8 +220,8 @@ public:
   void kill_mon(int index, bool player_did_it = false);
   void kill_mon(monster& critter, bool player_did_it = false); // new kill_mon that just takes monster reference
   void explode_mon(int index); // Explode a monster; like kill_mon but messier
-  void revive_corpse(int x, int y, int n); // revives a corpse from an item pile
-  void revive_corpse(int x, int y, item *it); // revives a corpse by item pointer, caller handles item deletion
+  bool revive_corpse(int x, int y, int n); // revives a corpse from an item pile
+  bool revive_corpse(int x, int y, item *it); // revives a corpse by item pointer, caller handles item deletion
   void plfire(bool burst, int default_target_x = -1, int default_target_y = -1); // Player fires a gun (target selection)...
 // ... a gun is fired, maybe by an NPC (actual damage, etc.).
   void fire(player &p, int tarx, int tary, std::vector<point> &trajectory,
@@ -546,6 +546,19 @@ public:
   void disassemble(int pos = INT_MAX);       // See crafting.cpp
   void complete_disassemble();         // See crafting.cpp
   recipe* recipe_by_index(int index);  // See crafting.cpp
+  /**
+   * Returns the recipe that is used to disassemble the given item type.
+   * Returns NULL if there is no recipe to disassemble the item type.
+   */
+  recipe* get_disassemble_recipe(const itype_id &ype);
+  /**
+   * Check if the player can disassemble the item dis_item with the recipe
+   * cur_recipe and the inventory crafting_inv.
+   * Checks for example tools (and charges), enough input charges
+   * (if disassembled item is counted by charges).
+   * If print_msg is true show a message about missing tools/charges.
+   */
+  bool can_disassemble(item *dis_item, recipe *cur_recipe, crafting_inventory_t &crafting_inv, bool print_msg);
 
   // Forcefully close a door at (x, y).
   // The function checks for creatures/items/vehicles at that point and

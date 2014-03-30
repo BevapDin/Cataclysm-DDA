@@ -32,6 +32,8 @@
 #include "construction.h"
 #include "file_finder.h"
 #include "mod_manager.h"
+#include "path_info.h"
+#include "crafting_inventory_t.h"
 #include <map>
 #include <set>
 #include <algorithm>
@@ -49,9 +51,11 @@
 #include <unistd.h>
 #include <dirent.h>
 #endif
+
 #include <sys/stat.h>
 #include "debug.h"
 #include "catalua.h"
+#include <cassert>
 
 #if (defined _WIN32 || defined __WIN32__)
 #ifndef NOMINMAX
@@ -193,8 +197,7 @@ void game::load_core_data() {
     // adds the new item types to both (its internal map and
     // the global itypes).
 
-#define CORE_JSON_DATA_DIR "data/json"
-    load_data_from_dir(CORE_JSON_DATA_DIR);
+    load_data_from_dir(FILENAMES["jsondir"]);
 }
 
 void game::load_data_from_dir(const std::string &path) {
@@ -2856,6 +2859,7 @@ bool game::handle_action()
         refresh_all();
         plfire(false);
     }
+    refresh_all();
     reenter_fullscreen();
   } break;
 
@@ -3381,7 +3385,7 @@ void game::death_screen()
     TCHAR Buffer[MAX_PATH];
 
     GetCurrentDirectory(MAX_PATH, Buffer);
-    SetCurrentDirectory("save");
+    SetCurrentDirectory(FILENAMES["savedir"].c_str());
     std::stringstream playerfile;
     playerfile << base64_encode(u.name) << "*";
     hFind = FindFirstFile(playerfile.str().c_str(), &FindFileData);
@@ -3393,9 +3397,9 @@ void game::death_screen()
     }
     SetCurrentDirectory(Buffer);
 #else
-    DIR *save_dir = opendir("save");
+    DIR *save_dir = opendir(FILENAMES["savedir"].c_str());
     struct dirent *save_dirent = NULL;
-    if(save_dir != NULL && 0 == chdir("save"))
+    if(save_dir != NULL && 0 == chdir(FILENAMES["savedir"].c_str()))
     {
         while ((save_dirent = readdir(save_dir)) != NULL)
         {
@@ -4216,11 +4220,27 @@ Current turn: %d; Next spawn %d.\n\
             int(p->personality.altruism) << std::endl << " " << std::endl;
     nmenu.text=data.str();
     nmenu.addentry(0,true,'s',"%s",_("Edit [s]kills"));
-    nmenu.addentry(1,true,'q',"%s",_("[q]uit"));
+    nmenu.addentry(1,true,'i',"%s",_("Grant [i]tems"));
+    nmenu.addentry(2,true,'h',"%s",_("Cause [h]urt (to torso)"));
+    nmenu.addentry(3,true,'p',"%s",_("Cause [p]ain"));
+    nmenu.addentry(4,true,'q',"%s",_("[q]uit"));
     nmenu.selected = 0;
     nmenu.query();
-    if (nmenu.ret == 0 ) {
-      wishskill(p);
+    switch (nmenu.ret) {
+        case 0:
+            wishskill(p);
+            break;
+        case 1:
+            wishitem(p);
+            break;
+        case 2:
+            p->hurt(bp_torso, -1, 20);
+            break;
+        case 3:
+            p->mod_pain(20);
+            break;
+        default:
+            break;
     }
    }
   } break;
@@ -7111,24 +7131,30 @@ void game::explode_mon(int index)
    last_target--;
 }
 
-void game::revive_corpse(int x, int y, int n)
+bool game::revive_corpse(int x, int y, int n)
 {
     if (m.i_at(x, y).size() <= n)
     {
         debugmsg("Tried to revive a non-existent corpse! (%d, %d), #%d of %d", x, y, n, m.i_at(x, y).size());
-        return;
+        return false;
     }
-    item* it = &m.i_at(x, y)[n];
-    revive_corpse(x, y, it);
+    if (!revive_corpse(x, y, &m.i_at(x, y)[n])) {
+        return false;
+    }
     m.i_rem(x, y, n);
+    return true;
 }
 
-void game::revive_corpse(int x, int y, item *it)
+bool game::revive_corpse(int x, int y, item *it)
 {
-    if (it->type->id != "corpse" || it->corpse == NULL)
+    if (it == NULL || it->typeId() != "corpse" || it->corpse == NULL)
     {
         debugmsg("Tried to revive a non-corpse.");
-        return;
+        return false;
+    }
+    if (critter_at(x, y) != NULL) {
+        // Someone is in the way, try again later
+        return false;
     }
     int burnt_penalty = it->burnt;
     monster critter(it->corpse, x, y);
@@ -7141,6 +7167,7 @@ void game::revive_corpse(int x, int y, item *it)
     }
     critter.no_extra_death_drops = true;
     add_zombie(critter);
+    return true;
 }
 
 void game::open()
@@ -8551,14 +8578,25 @@ void game::draw_trail_to_square(int x, int y, bool bDrawX)
     //Reset terrain
     draw_ter();
 
-    //Draw trail
+    std::vector<point> vPoint;
     point center = point(u.posx + u.view_offset_x, u.posy + u.view_offset_y);
-    std::vector<point> vPoint = line_to(u.posx, u.posy, u.posx + x, u.posy + y, 0);
+    if ( x!=0 || y!=0 ) {
+      //Draw trail
+      vPoint = line_to(u.posx, u.posy, u.posx + x, u.posy + y, 0);
+    } else {
+      //Draw point
+      vPoint.push_back( point(u.posx, u.posy) );
+    }
 
     draw_line(u.posx + x, u.posy + y, center, vPoint);
     if (bDrawX) {
-        mvwputch(w_terrain, POSY + (vPoint[vPoint.size()-1].y - (u.posy + u.view_offset_y)),
-                            POSX + (vPoint[vPoint.size()-1].x - (u.posx + u.view_offset_x)), c_white, 'X');
+        if(vPoint.empty()) {
+            mvwputch(w_terrain, POSY, POSX, c_white, 'X');
+        } else {
+            mvwputch(w_terrain, POSY + (vPoint[vPoint.size()-1].y - (u.posy + u.view_offset_y)),
+                                POSX + (vPoint[vPoint.size()-1].x - (u.posx + u.view_offset_x)),
+                                c_white, 'X');
+        }
     }
 
     wrefresh(w_terrain);
@@ -8730,9 +8768,10 @@ void game::zoom_out() {
 
 int game::list_items(const int iLastState)
 {
-    int iInfoHeight = 12;
+    int iInfoHeight = std::min(25,TERMY/2);
     const int width = use_narrow_sidebar() ? 45 : 55;
-    WINDOW* w_items = newwin(TERMY-iInfoHeight-VIEW_OFFSET_Y*2, width, VIEW_OFFSET_Y, TERMX - width);
+    WINDOW* w_items = newwin(TERMY-2-iInfoHeight-VIEW_OFFSET_Y*2, width - 2, VIEW_OFFSET_Y + 1, TERMX - width + 1);
+    WINDOW* w_items_border = newwin(TERMY-iInfoHeight-VIEW_OFFSET_Y*2, width, VIEW_OFFSET_Y, TERMX - width);
     WINDOW* w_item_info = newwin(iInfoHeight-1, width - 2, TERMY-iInfoHeight-VIEW_OFFSET_Y, TERMX - width + 1);
     WINDOW* w_item_info_border = newwin(iInfoHeight, width, TERMY-iInfoHeight-VIEW_OFFSET_Y, TERMX - width);
 
@@ -8828,7 +8867,7 @@ int game::list_items(const int iLastState)
             }
 
             if (reset) {
-                reset_item_list_state(w_items, iInfoHeight);
+                reset_item_list_state(w_items_border, iInfoHeight);
                 reset = false;
             }
 
@@ -8867,9 +8906,11 @@ int game::list_items(const int iLastState)
                     u.view_offset_y = iStoreViewOffsetY;
 
                     werase(w_items);
+                    werase(w_items_border);
                     werase(w_item_info);
                     werase(w_item_info_border);
                     delwin(w_items);
+                    delwin(w_items_border);
                     delwin(w_item_info);
                     delwin(w_item_info_border);
                     return 1;
@@ -8896,18 +8937,12 @@ int game::list_items(const int iLastState)
             }
 
             if (ground_items.empty() && iLastState == 1) {
+                werase(w_items_border);
                 mvwprintz(w_items, 10, 2, c_white, _("You dont see any items around you!"));
             } else {
-                //Draw Scrollbar
-                draw_scrollbar(w_items, iActive, iMaxRows, iItemNum - iFilter, 1);
+                werase(w_items);
 
                 calcStartPos(iStartPos, iActive, iMaxRows, iItemNum - iFilter);
-
-                for (int i = 0; i < iMaxRows; i++) {
-                    wmove(w_items, i + 1, 1);
-                    for (int i = 1; i < width - 1; i++)
-                        wprintz(w_items, c_black, " ");
-                }
 
                 int iNum = 0;
                 iFilter = ground_items.size() - filtered_items.size();
@@ -8954,11 +8989,11 @@ int game::list_items(const int iLastState)
                             sText << " [" << iter->vIG[iThisPage].count << "]";
                         }
 
-                        mvwprintz(w_items, 1 + iNum - iStartPos, 2,
+                        mvwprintz(w_items, iNum - iStartPos, 1,
                                   ((iNum == iActive) ? c_ltgreen : (high ? c_yellow : (low ? c_red : c_white))),
                                   "%s", (sText.str()).c_str());
                         int numw = iItemNum > 9 ? 2 : 1;
-                        mvwprintz(w_items, 1 + iNum - iStartPos, width - (5 + numw),
+                        mvwprintz(w_items, iNum - iStartPos, width - (5 + numw),
                                   ((iNum == iActive) ? c_ltgreen : c_ltgray), "%*d %s",
                                   numw, trig_dist(0, 0, iter->vIG[iThisPage].x, iter->vIG[iThisPage].y),
                                   direction_name_short(direction_from(0, 0, iter->vIG[iThisPage].x, iter->vIG[iThisPage].y)).c_str()
@@ -8967,9 +9002,9 @@ int game::list_items(const int iLastState)
                      iNum++;
                 }
 
-                mvwprintz(w_items, 0, (width - 9) / 2 + ((iItemNum - iFilter > 9) ? 0 : 1),
+                mvwprintz(w_items_border, 0, (width - 9) / 2 + ((iItemNum - iFilter > 9) ? 0 : 1),
                           c_ltgreen, " %*d", ((iItemNum - iFilter > 9) ? 2 : 1), iActive+1);
-                wprintz(w_items, c_white, " / %*d ", ((iItemNum - iFilter > 9) ? 2 : 1), iItemNum - iFilter);
+                wprintz(w_items_border, c_white, " / %*d ", ((iItemNum - iFilter > 9) ? 2 : 1), iItemNum - iFilter);
 
                 werase(w_item_info);
                 fold_and_print(w_item_info,1,1,width - 5, c_white, activeItem.info());
@@ -8981,6 +9016,8 @@ int game::list_items(const int iLastState)
                     centerlistview(iActiveX, iActiveY);
                     draw_trail_to_square(iActiveX, iActiveY, true);
                 }
+                //Draw Scrollbar
+                draw_scrollbar(w_items_border, iActive, iMaxRows, iItemNum - iFilter, 1);
             }
 
             for (int j=0; j < iInfoHeight-1; j++) {
@@ -9016,12 +9053,13 @@ int game::list_items(const int iLastState)
     u.view_offset_y = iStoreViewOffsetY;
 
     werase(w_items);
+    werase(w_items_border);
     werase(w_item_info);
     werase(w_item_info_border);
     delwin(w_items);
+    delwin(w_items_border);
     delwin(w_item_info);
     delwin(w_item_info_border);
-    refresh_all(); // TODO - figure out what precisely needs refreshing, rather than the whole screen
 
     return iReturn;
 }
@@ -9045,7 +9083,8 @@ int game::list_monsters(const int iLastState)
 {
     int iInfoHeight = 12;
     const int width = use_narrow_sidebar() ? 45 : 55;
-    WINDOW* w_monsters = newwin(TERMY-iInfoHeight-VIEW_OFFSET_Y*2, width, VIEW_OFFSET_Y, TERMX - width);
+    WINDOW* w_monsters = newwin(TERMY-2-iInfoHeight-VIEW_OFFSET_Y*2, width - 2, VIEW_OFFSET_Y + 1, TERMX - width + 1);
+    WINDOW* w_monsters_border = newwin(TERMY-iInfoHeight-VIEW_OFFSET_Y*2, width, VIEW_OFFSET_Y, TERMX - width);
     WINDOW* w_monster_info = newwin(iInfoHeight-1, width - 2, TERMY-iInfoHeight-VIEW_OFFSET_Y, TERMX - width + 1);
     WINDOW* w_monster_info_border = newwin(iInfoHeight, width, TERMY-iInfoHeight-VIEW_OFFSET_Y, TERMX - width);
 
@@ -9080,24 +9119,24 @@ int game::list_monsters(const int iLastState)
 
     for (int i = 1; i < TERMX; i++) {
         if (i < width) {
-            mvwputch(w_monsters, 0, i, c_ltgray, LINE_OXOX); // -
-            mvwputch(w_monsters, TERMY-iInfoHeight-1-VIEW_OFFSET_Y*2, i, c_ltgray, LINE_OXOX); // -
+            mvwputch(w_monsters_border, 0, i, c_ltgray, LINE_OXOX); // -
+            mvwputch(w_monsters_border, TERMY-iInfoHeight-1-VIEW_OFFSET_Y*2, i, c_ltgray, LINE_OXOX); // -
         }
 
         if (i < TERMY-iInfoHeight-VIEW_OFFSET_Y*2) {
-            mvwputch(w_monsters, i, 0, c_ltgray, LINE_XOXO); // |
-            mvwputch(w_monsters, i, width - 1, c_ltgray, LINE_XOXO); // |
+            mvwputch(w_monsters_border, i, 0, c_ltgray, LINE_XOXO); // |
+            mvwputch(w_monsters_border, i, width - 1, c_ltgray, LINE_XOXO); // |
         }
     }
 
-    mvwputch(w_monsters, 0, 0,         c_ltgray, LINE_OXXO); // |^
-    mvwputch(w_monsters, 0, width - 1, c_ltgray, LINE_OOXX); // ^|
+    mvwputch(w_monsters_border, 0, 0,         c_ltgray, LINE_OXXO); // |^
+    mvwputch(w_monsters_border, 0, width - 1, c_ltgray, LINE_OOXX); // ^|
 
-    mvwputch(w_monsters, TERMY-iInfoHeight-1-VIEW_OFFSET_Y*2, 0,         c_ltgray, LINE_XXXO); // |-
-    mvwputch(w_monsters, TERMY-iInfoHeight-1-VIEW_OFFSET_Y*2, width - 1, c_ltgray, LINE_XOXX); // -|
+    mvwputch(w_monsters_border, TERMY-iInfoHeight-1-VIEW_OFFSET_Y*2, 0,         c_ltgray, LINE_XXXO); // |-
+    mvwputch(w_monsters_border, TERMY-iInfoHeight-1-VIEW_OFFSET_Y*2, width - 1, c_ltgray, LINE_XOXX); // -|
 
-    mvwprintz(w_monsters, 0, 2, c_ltgreen, "<Tab> ");
-    wprintz(w_monsters, c_white, _("Monsters"));
+    mvwprintz(w_monsters_border, 0, 2, c_ltgreen, "<Tab> ");
+    wprintz(w_monsters_border, c_white, _("Monsters"));
 
     do {
         if (!vMonsters.empty() || iLastState == 1) {
@@ -9122,9 +9161,11 @@ int game::list_monsters(const int iLastState)
                     u.view_offset_y = iStoreViewOffsetY;
 
                     werase(w_monsters);
+                    werase(w_monsters_border);
                     werase(w_monster_info);
                     werase(w_monster_info_border);
                     delwin(w_monsters);
+                    delwin(w_monsters_border);
                     delwin(w_monster_info);
                     delwin(w_monster_info_border);
                     return 1;
@@ -9143,9 +9184,11 @@ int game::list_monsters(const int iLastState)
                                 u.view_offset_x = iStoreViewOffsetX;
                                 u.view_offset_y = iStoreViewOffsetY;
                                 werase(w_monsters);
+                                werase(w_monsters_border);
                                 werase(w_monster_info);
                                 werase(w_monster_info_border);
                                 delwin(w_monsters);
+                                delwin(w_monsters_border);
                                 delwin(w_monster_info);
                                 delwin(w_monster_info_border);
                                 return 2;
@@ -9170,18 +9213,12 @@ int game::list_monsters(const int iLastState)
             }
 
             if (vMonsters.empty() && iLastState == 1) {
+                werase(w_monsters_border);
                 mvwprintz(w_monsters, 10, 2, c_white, _("You dont see any monsters around you!"));
             } else {
-                //Draw Scrollbar
-                draw_scrollbar(w_monsters, iActive, iMaxRows, iMonsterNum, 1);
+                werase(w_monsters);
 
                 calcStartPos(iStartPos, iActive, iMaxRows, iMonsterNum);
-
-                for (int i = 0; i < iMaxRows; i++) {
-                    wmove(w_monsters, i + 1, 1);
-                    for (int i = 1; i < width - 1; i++)
-                        wprintz(w_monsters, c_black, " ");
-                }
 
                 int iNum = 0;
                 iActiveX = 0;
@@ -9201,23 +9238,23 @@ int game::list_monsters(const int iLastState)
 
                         int iDummy;
                         if (sees_u(zombie(vMonsters[i]).posx(), zombie(vMonsters[i]).posy(), iDummy)) {
-                            mvwprintz(w_monsters, 1 + iNum - iStartPos, 1, c_yellow, "!");
+                            mvwprintz(w_monsters, iNum - iStartPos, 0, c_yellow, "!");
                         }
 
-                        mvwprintz(w_monsters, 1 + iNum - iStartPos, 2,
+                        mvwprintz(w_monsters, iNum - iStartPos, 1,
                                   ((iNum == iActive) ? c_ltgreen : c_white),
                                   "%s", zombie(vMonsters[i]).name().c_str());
                         nc_color color = c_white;
                         std::string sText = "";
 
                         zombie(vMonsters[i]).get_HP_Bar(color, sText);
-                        mvwprintz(w_monsters, 1 + iNum - iStartPos, 23, color, "%s", sText.c_str());
+                        mvwprintz(w_monsters, iNum - iStartPos, 22, color, "%s", sText.c_str());
 
                         zombie(vMonsters[i]).get_Attitude(color, sText);
-                        mvwprintz(w_monsters, 1 + iNum - iStartPos, 29, color, "%s", sText.c_str());
+                        mvwprintz(w_monsters, iNum - iStartPos, 28, color, "%s", sText.c_str());
 
                         int numw = iMonsterNum > 9 ? 2 : 1;
-                        mvwprintz(w_monsters, 1 + iNum - iStartPos, width - (5 + numw),
+                        mvwprintz(w_monsters, iNum - iStartPos, width - (6 + numw),
                                   ((iNum == iActive) ? c_ltgreen : c_ltgray), "%*d %s",
                                   numw, trig_dist(0, 0, zombie(vMonsters[i]).posx() - u.posx,
                                                   zombie(vMonsters[i]).posy() - u.posy),
@@ -9228,9 +9265,9 @@ int game::list_monsters(const int iLastState)
                      iNum++;
                 }
 
-                mvwprintz(w_monsters, 0, (width - 9) / 2 + ((iMonsterNum > 9) ? 0 : 1),
+                mvwprintz(w_monsters_border, 0, (width - 9) / 2 + ((iMonsterNum > 9) ? 0 : 1),
                           c_ltgreen, " %*d", ((iMonsterNum > 9) ? 2 : 1), iActive+1);
-                wprintz(w_monsters, c_white, " / %*d ", ((iMonsterNum > 9) ? 2 : 1), iMonsterNum);
+                wprintz(w_monsters_border, c_white, " / %*d ", ((iMonsterNum > 9) ? 2 : 1), iMonsterNum);
 
                 werase(w_monster_info);
 
@@ -9252,6 +9289,8 @@ int game::list_monsters(const int iLastState)
                     centerlistview(iActiveX, iActiveY);
                     draw_trail_to_square(iActiveX, iActiveY, false);
                 }
+                //Draw Scrollbar
+                draw_scrollbar(w_monsters_border, iActive, iMaxRows, iMonsterNum, 1);
             }
 
             for (int j=0; j < iInfoHeight-1; j++) {
@@ -9284,12 +9323,13 @@ int game::list_monsters(const int iLastState)
     u.view_offset_y = iStoreViewOffsetY;
 
     werase(w_monsters);
+    werase(w_monsters_border);
     werase(w_monster_info);
     werase(w_monster_info_border);
     delwin(w_monsters);
+    delwin(w_monsters_border);
     delwin(w_monster_info);
     delwin(w_monster_info_border);
-    refresh_all(); // TODO - figure out what precisely needs refreshing, rather than the whole screen
 
     return iReturn;
 }
@@ -9553,7 +9593,7 @@ void game::pickup(int posx, int posy, int min)
                         }
                         m.add_item_or_charges(posx, posy, u.remove_weapon(), 1);
                         u.inv.assign_empty_invlet(newit, true);  // force getting an invlet.
-                        u.wield(u.i_add(newit).invlet);
+                        u.wield(&(u.i_add(newit)));
                         u.moves -= 100;
                         add_msg(_("Wielding %c - %s"), newit.invlet,
                                 newit.display_name().c_str());
@@ -9569,7 +9609,7 @@ and you can't unwield your %s."),
                 }
             } else {
                 u.inv.assign_empty_invlet(newit, true);  // force getting an invlet.
-                u.wield(u.i_add(newit).invlet);
+                u.wield(&(u.i_add(newit)));
                 if (from_veh) {
                     veh->remove_item (cargo_part, 0);
                 } else {
@@ -9618,7 +9658,7 @@ and you can't unwield your %s."),
     // Otherwise, we have Autopickup, 2 or more items and should list them, etc.
     int maxmaxitems = sideStyle ? TERMY : getmaxy(w_messages) - 3;
 
-    int itemsH = 12;
+    int itemsH = std::min(25,TERMY/2);
     int pickupBorderRows = 3;
 
     // The pickup list may consume the entire terminal, minus space needed for its
@@ -9972,7 +10012,7 @@ and you can't unwield your %s."),
                                 picked_up = true;
                                 m.add_item_or_charges(posx, posy, u.remove_weapon(), 1);
                                 u.inv.assign_empty_invlet(here[i], true);  // force getting an invlet.
-                                u.wield(u.i_add(here[i]).invlet);
+                                u.wield(&(u.i_add(here[i])));
                                 mapPickup[here[i].tname()] += (here[i].count_by_charges()) ? here[i].charges : 1;
                                 add_msg(_("Wielding %c - %s"), u.weapon.invlet,
                                         u.weapon.display_name().c_str());
@@ -9989,7 +10029,7 @@ and you can't unwield your %s."),
                     }
                 } else {
                     u.inv.assign_empty_invlet(here[i], true);  // force getting an invlet.
-                    u.wield(u.i_add(here[i]).invlet);
+                    u.wield(&(u.i_add(here[i])));
                     mapPickup[here[i].tname()] += (here[i].count_by_charges()) ? here[i].charges : 1;
                     picked_up = true;
                 }
@@ -10952,67 +10992,123 @@ void game::butcher()
         return;
     }
 
- std::vector<int> corpses;
- for (int i = 0; i < m.i_at(u.posx, u.posy).size(); i++) {
-  if (m.i_at(u.posx, u.posy)[i].type->id == "corpse")
-   corpses.push_back(i);
- }
- if (corpses.empty()) {
-  add_msg(_("There are no corpses here to butcher."));
-  return;
- }
- int factor = u.butcher_factor();
- if (factor == 999) {
-  add_msg(_("You don't have a sharp item to butcher with."));
-  return;
- }
+    const int factor = u.butcher_factor();
+    bool has_corpse = false;
+    bool has_item = false;
+    // indices of corpses / items that can be disassembled
+    std::vector<int> corpses;
+    std::vector<item>& items = m.i_at(u.posx, u.posy);
+    crafting_inventory_t crafting_inv(this, &u);
+    // get corpses first
+    for (size_t i = 0; i < items.size(); i++) {
+        if (items[i].type->id == "corpse" && items[i].corpse != NULL) {
+            if (factor == 999) {
+                if (!has_corpse) {
+                    add_msg(_("You don't have a sharp item to butcher with."));
+                }
+            } else {
+                corpses.push_back(i);
+            }
+            has_corpse = true;
+        }
+    }
+    // than get items to disassemble
+    for (size_t i = 0; i < items.size(); i++) {
+        if (items[i].type->id != "corpse" || items[i].corpse == NULL) {
+            recipe *cur_recipe = get_disassemble_recipe(items[i].type->id);
+            if (cur_recipe != NULL && can_disassemble(&items[i], cur_recipe, crafting_inv, false)) {
+                corpses.push_back(i);
+                has_item = true;
+            }
+        }
+    }
+    if (corpses.empty()) {
+        add_msg(_("There are no corpses here to butcher."));
+        return;
+    }
 
- if (is_hostile_nearby() &&
-     !query_yn(_("Hostiles are nearby! Start Butchering anyway?")))
- {
-     return;
- }
+    if (is_hostile_nearby() &&
+        !query_yn(_("Hostiles are nearby! Start Butchering anyway?"))) {
+        return;
+    }
 
- int butcher_corpse_index = 0;
- if (corpses.size() > 1) {
-     uimenu kmenu;
-     kmenu.text = _("Choose corpse to butcher");
-     kmenu.selected = 0;
-     for (size_t i = 0; i < corpses.size(); i++) {
-         mtype *corpse = m.i_at(u.posx, u.posy)[corpses[i]].corpse;
-         int hotkey = -1;
-         if (i == 0) {
-             for (std::map<char, action_id>::iterator it = keymap.begin(); it != keymap.end(); it++) {
-                 if (it->second == ACTION_BUTCHER) {
-                     hotkey = (it->first == 'q') ? -1 : it->first;
-                     break;
-                 }
-             }
-         }
-         kmenu.addentry(i, true, hotkey, corpse->name.c_str());
-     }
-     kmenu.addentry(corpses.size(), true, 'q', _("Cancel"));
-     kmenu.query();
-     if (kmenu.ret == corpses.size()) {
-         return;
-     }
-     butcher_corpse_index = kmenu.ret;
- }
+    int butcher_corpse_index = 0;
+    if (corpses.size() > 1) {
+        uimenu kmenu;
+        if (has_item && has_corpse) {
+            kmenu.text = _("Choose corpse to butcher / item to disassemble");
+        } else if (has_corpse) {
+            kmenu.text = _("Choose corpse to butcher");
+        } else {
+            kmenu.text = _("Choose item to disassemble");
+        }
+        kmenu.selected = 0;
+        for( size_t i = 0; i < corpses.size(); i++ ) {
+            item &it = items[corpses[i]];
+            mtype *corpse = it.corpse;
+            int hotkey = -1;
+            // First entry gets a hotkey matching the butcher command.
+            if( i == 0 ) {
+                for (std::map<char, action_id>::iterator it = keymap.begin();
+                     it != keymap.end(); it++) {
+                    if (it->second == ACTION_BUTCHER) {
+                        hotkey = (it->first == 'q') ? -1 : it->first;
+                        break;
+                    }
+                }
+            }
+            if (it.corpse != NULL) {
+                kmenu.addentry(i, true, hotkey, corpse->name.c_str());
+            } else {
+                kmenu.addentry(i, true, hotkey, it.tname().c_str());
+            }
+        }
+        kmenu.addentry(corpses.size(), true, 'q', _("Cancel"));
+        kmenu.query();
+        if (kmenu.ret == corpses.size()) {
+            return;
+        }
+        butcher_corpse_index = kmenu.ret;
+    }
 
- mtype *corpse = m.i_at(u.posx, u.posy)[corpses[butcher_corpse_index]].corpse;
- int time_to_cut = 0;
- switch (corpse->size) { // Time in turns to cut up te corpse
-  case MS_TINY:   time_to_cut =  2; break;
-  case MS_SMALL:  time_to_cut =  5; break;
-  case MS_MEDIUM: time_to_cut = 10; break;
-  case MS_LARGE:  time_to_cut = 18; break;
-  case MS_HUGE:   time_to_cut = 40; break;
- }
- time_to_cut *= 100; // Convert to movement points
- time_to_cut += factor * 5; // Penalty for poor tool
- if (time_to_cut < 250)
-  time_to_cut = 250;
- u.assign_activity(ACT_BUTCHER, time_to_cut, corpses[butcher_corpse_index]);
+    item &dis_item = items[corpses[butcher_corpse_index]];
+    if (dis_item.corpse == NULL) {
+        recipe *cur_recipe = get_disassemble_recipe(dis_item.type->id);
+        assert(cur_recipe != NULL); // tested above
+        if (OPTIONS["QUERY_DISASSEMBLE"] &&
+            !(query_yn(_("Really disassemble the %s?"), dis_item.tname().c_str()))) {
+            return;
+        }
+        u.assign_activity(ACT_DISASSEMBLE, cur_recipe->time, cur_recipe->id);
+        u.activity.values.push_back(corpses[butcher_corpse_index]);
+        u.activity.values.push_back(1);
+        return;
+    }
+    mtype *corpse = dis_item.corpse;
+    int time_to_cut = 0;
+    switch (corpse->size) { // Time in turns to cut up te corpse
+        case MS_TINY:
+            time_to_cut =  2;
+            break;
+        case MS_SMALL:
+            time_to_cut =  5;
+            break;
+        case MS_MEDIUM:
+            time_to_cut = 10;
+            break;
+        case MS_LARGE:
+            time_to_cut = 18;
+            break;
+        case MS_HUGE:
+            time_to_cut = 40;
+            break;
+    }
+    time_to_cut *= 100; // Convert to movement points
+    time_to_cut += factor * 5; // Penalty for poor tool
+    if (time_to_cut < 250) {
+        time_to_cut = 250;
+    }
+    u.assign_activity(ACT_BUTCHER, time_to_cut, corpses[butcher_corpse_index]);
 }
 
 void game::complete_butcher(int index)
@@ -11126,7 +11222,7 @@ void game::complete_butcher(int index)
  }
 
     //Add a chance of CBM recovery. For shocker and cyborg corpses.
-    if( corpse->has_flag(MF_CBM) ) {
+    if( corpse->has_flag(MF_CBM_CIV) ) {
         //As long as the factor is above -4 (the sinew cutoff), you will be able to extract cbms
         if( skill_shift >= 0 ) {
             add_msg(_("You discover a CBM in the %s!"), corpse->name.c_str());
@@ -11140,7 +11236,53 @@ void game::complete_butcher(int index)
         if( skill_shift >= 0 ) {
             //To see if it spawns a random additional CBM
             if( rng(0, 1) == 1 ) { //The CBM works
-                Item_tag bionic_item = item_controller->id_from("bionics");
+                Item_tag bionic_item = item_controller->id_from("bionics_common");
+                m.spawn_item( u.posx, u.posy, bionic_item, 1, 0, age );
+            } else {//There is a burnt out CBM
+                m.spawn_item( u.posx, u.posy, "burnt_out_bionic", 1, 0, age );
+            }
+        }
+    }
+    
+    // Zombie scientist bionics
+    if( corpse->has_flag(MF_CBM_SCI) ) {
+        //As long as the factor is above -4 (the sinew cutoff), you will be able to extract cbms
+        if( skill_shift >= 0 ) {
+            add_msg(_("You discover a CBM in the %s!"), corpse->name.c_str());
+            //To see if it spawns a battery
+            if( rng(0, 1) == 1 ) { //The battery works
+                m.spawn_item( u.posx, u.posy, "bio_power_storage", 1, 0, age );
+            } else { //There is a burnt out CBM
+                m.spawn_item( u.posx, u.posy, "burnt_out_bionic", 1, 0, age );
+            }
+        }
+        if( skill_shift >= 0 ) {
+            //To see if it spawns a random additional CBM
+            if( rng(0, 1) == 1 ) { //The CBM works
+                Item_tag bionic_item = item_controller->id_from("bionics_sci");
+                m.spawn_item( u.posx, u.posy, bionic_item, 1, 0, age );
+            }else{//There is a burnt out CBM
+                m.spawn_item( u.posx, u.posy, "burnt_out_bionic", 1, 0, age );
+            }
+        }
+    }
+    
+    // Payoff for butchering the zombie bio-op
+    if( corpse->has_flag(MF_CBM_OP) ) {
+        //As long as the factor is above -4 (the sinew cutoff), you will be able to extract cbms
+        if( skill_shift >= 0 ) {
+            add_msg(_("You discover a CBM in the %s!"), corpse->name.c_str());
+            //To see if it spawns a battery
+            if( rng(0, 1) == 1 ) { //The battery works
+                m.spawn_item( u.posx, u.posy, "bio_power_storage_mkII", 1, 0, age );
+            } else { //There is a burnt out CBM
+                m.spawn_item( u.posx, u.posy, "burnt_out_bionic", 1, 0, age );
+            }
+        }
+        if( skill_shift >= 0 ) {
+            //To see if it spawns a random additional CBM
+            if( rng(0, 1) == 1 ) { //The CBM works
+                Item_tag bionic_item = item_controller->id_from("bionics_op");
                 m.spawn_item( u.posx, u.posy, bionic_item, 1, 0, age );
             }else{//There is a burnt out CBM
                 m.spawn_item( u.posx, u.posy, "burnt_out_bionic", 1, 0, age );
@@ -11242,9 +11384,11 @@ void game::forage()
 	else {
 	   add_msg(_("You found a nest with some eggs!"));
 	   if (!one_in(4)) {
-          m.spawn_item(u.posx, u.posy, "egg_bird", rng(1, 5), 0, turn);
+          m.spawn_item(u.posx, u.posy, "egg_bird", rng(2, 5), 0, turn);
        } else {
-          m.spawn_item(u.posx, u.posy, "egg_reptile", rng(1, 5), 0, turn);
+          // ~15% & 3.8% chance to find these, assuming you make your veggy roll
+          // So maybe we can give more than 1.
+          m.spawn_item(u.posx, u.posy, "egg_reptile", rng(2, 5), 0, turn);
 	   }
     }
     m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
@@ -11523,20 +11667,18 @@ void game::unload(item& it)
         while (!it.contents.empty())
         {
             item content = it.contents[0];
-            size_t iter = 0;
-// Pick an inventory item for the contents
-            while ((content.invlet == 0 || u.has_item(content.invlet)) && iter < inv_chars.size()) {
-                content.invlet = nextinv;
-                advance_nextinv();
-                iter++;
+            if (content.invlet == 0 || u.has_item(content.invlet)) {
+                u.inv.assign_empty_invlet(content);
+            }
+            if (content.is_gunmod() && content.mode == "MODE_AUX") {
+                it.next_mode();
             }
             if (content.made_of(LIQUID)) {
                 if (!handle_liquid(content, false, false, &it)) {
                     new_contents.push_back(content);// Put it back in (we canceled)
                 }
             } else {
-                if (u.can_pickVolume(content.volume()) && u.can_pickWeight(content.weight(), !OPTIONS["DANGEROUS_PICKUPS"]) &&
-                    iter < inv_chars.size())
+                if (u.can_pickVolume(content.volume()) && u.can_pickWeight(content.weight(), !OPTIONS["DANGEROUS_PICKUPS"]))
                 {
                     add_msg(_("You put the %s in your inventory."), content.tname().c_str());
                     u.i_add(content);
@@ -11664,9 +11806,9 @@ void game::wield(int pos)
 
  bool success = false;
  if (pos == -1)
-  success = u.wield(-3);
+  success = u.wield(NULL);
  else
-  success = u.wield(u.lookup_item(u.position_to_invlet(pos)));
+  success = u.wield(&(u.i_at(pos)));
 
  if (success)
   u.recoil = 5;

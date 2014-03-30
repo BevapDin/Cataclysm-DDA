@@ -1037,8 +1037,8 @@ void player::update_bodytemp()
         {
             temp_conv[i] += (temp_cur[i] > BODYTEMP_NORM ? 250 : 500);
         }
-        // Furry or Lupine Fur
-        if (has_trait("FUR") || has_trait("LUPINE_FUR"))
+        // Furry or Lupine/Ursine Fur
+        if (has_trait("FUR") || has_trait("LUPINE_FUR") || has_trait("URSINE_FUR"))
         {
             temp_conv[i] += (temp_cur[i] > BODYTEMP_NORM ? 750 : 1500);
         }
@@ -1052,6 +1052,11 @@ void player::update_bodytemp()
         if (has_trait("DOWN"))
         {
             temp_conv[i] += (temp_cur[i] > BODYTEMP_NORM ? 300 : 800);
+        }
+        // Fat deposits don't hold in much heat, but don't shift for temp
+        if (has_trait("DOWN"))
+        {
+            temp_conv[i] += (temp_cur[i] > BODYTEMP_NORM ? 200 : 200);
         }
         // Disintegration
         if (has_trait("ROT1")) { temp_conv[i] -= 250;}
@@ -1395,6 +1400,9 @@ int player::run_cost(int base_cost, bool diag)
     if (has_trait("LEG_TENTACLES")) {
         movecost += 20;
     }
+    if (has_trait("FAT")) {
+        movecost *= 1.05f;
+    }
     if (has_trait("PONDEROUS1")) {
         movecost *= 1.1f;
     }
@@ -1427,18 +1435,27 @@ int player::run_cost(int base_cost, bool diag)
 int player::swim_speed()
 {
   int ret = 440 + weight_carried() / 60 - 50 * skillLevel("swimming");
- if (has_trait("PAWS"))
-  ret -= 15 + str_cur * 4;
- if (is_wearing("swim_fins"))
-  ret -= (10 * str_cur) * 1.5;
- if (has_trait("WEBBED"))
-  ret -= 60 + str_cur * 5;
- if (has_trait("TAIL_FIN"))
-  ret -= 100 + str_cur * 10;
- if (has_trait("SLEEK_SCALES"))
-  ret -= 100;
- if (has_trait("LEG_TENTACLES"))
-  ret -= 60;
+  if (has_trait("PAWS")) {
+      ret -= 15 + str_cur * 4;
+  }
+  if (is_wearing("swim_fins")) {
+      ret -= (10 * str_cur) * 1.5;
+  }
+  if (has_trait("WEBBED")) {
+      ret -= 60 + str_cur * 5;
+  }
+  if (has_trait("TAIL_FIN")) {
+      ret -= 100 + str_cur * 10;
+  }
+  if (has_trait("SLEEK_SCALES")) {
+      ret -= 100;
+  }
+  if (has_trait("LEG_TENTACLES")) {
+      ret -= 60;
+  }
+  if (has_trait("FAT")) {
+      ret -= 30;
+  }
  ret += (50 - skillLevel("swimming") * 2) * encumb(bp_legs);
  ret += (80 - skillLevel("swimming") * 3) * encumb(bp_torso);
  if (skillLevel("swimming") < 10) {
@@ -5107,6 +5124,16 @@ void player::process_effects() {
                 mod_str_bonus(-2);
                 mod_per_bonus(-1);
             }
+            // Increased body mass means poison's less effective
+            if (has_trait("FAT")) {
+                psnChance *= 1.5;
+            }
+            if (has_trait("LARGE") || has_trait("LARGE_OK")) {
+                psnChance *= 2;
+            }
+            if (has_trait("HUGE") || has_trait("HUGE_OK")) {
+                psnChance *= 3;
+            }
             if ((one_in(psnChance)) && (!(has_trait("NOPAIN")))) {
                 g->add_msg_if_player(this,_("You're suddenly wracked with pain!"));
                 mod_pain(1);
@@ -5858,6 +5885,11 @@ void player::drench(int saturation, int flags)
             dur /= 5;
             d_start /= 5;
         }
+        // Shaggy fur holds water longer.  :-/
+        if (has_trait("URSINE_FUR")) {
+            dur /= 3;
+            d_start /= 3;
+        }
     } else {
         if (has_trait("SLIMY")) {
             dur *= 1.2;
@@ -6358,14 +6390,13 @@ bool player::process_single_active_item(item *it)
         }
         else if (it->type->id == "corpse")
         {
-            if (it->ready_to_revive())
+            if (it->ready_to_revive() && g->revive_corpse(posx, posy, it))
             {
                 //~ %s is corpse name
                 add_memorial_log(pgettext("memorial_male", "Had a %s revive while carrying it."),
                                  pgettext("memorial_female", "Had a %s revive while carrying it."),
                                  it->name.c_str());
                 g->add_msg_if_player(this, _("Oh dear god, a corpse you're carrying has started moving!"));
-                g->revive_corpse(posx, posy, it);
                 return false;
             }
         }
@@ -7159,7 +7190,7 @@ bool player::consume(int pos)
     int which = -3; // Helps us know how to delete the item which got eaten
 
     if(pos == INT_MIN) {
-        g->add_msg(_("You do not have that item."));
+        g->add_msg_if_player(this, _("You do not have that item."));
         return false;
     } if (is_underwater()) {
         g->add_msg_if_player(this, _("You can't do that while underwater."));
@@ -7488,8 +7519,9 @@ bool player::eat(item *eaten, it_comest *comest)
                 return false;
             }
         } else {
-            if ( ( comest->quench > 0 && temp_thirst < capacity ) && ( (!(has_trait("EATHEALTH"))) ||
-            (!(has_trait("SLIMESPAWNER"))) ) ) {
+            if ( (( comest->nutr > 0 && temp_hunger < capacity ) ||
+              ( comest->quench > 0 && temp_thirst < capacity )) &&
+              ( (!(has_trait("EATHEALTH"))) || (!(has_trait("SLIMESPAWNER"))) ) ) {
                 if (!query_yn(_("You will not be able to finish it all. Consume it?"))) {
                 return false;
                 }
@@ -7764,14 +7796,14 @@ void player::consume_effects(item *eaten, it_comest *comest, bool rotten)
     }
 }
 
-bool player::wield(signed char ch, bool autodrop)
+bool player::wield(item* it, bool autodrop)
 {
  if (weapon.has_flag("NO_UNWIELD")) {
   g->add_msg(_("You cannot unwield your %s!  Withdraw them with 'p'."),
              weapon.tname().c_str());
   return false;
  }
- if (ch == -3) {
+ if (it == NULL || it->is_null()) {
   if(weapon.is_null()) {
    return false;
   }
@@ -7789,22 +7821,21 @@ bool player::wield(signed char ch, bool autodrop)
   } else
    return false;
  }
- if (ch == 0) {
+ if (&weapon == it) {
   g->add_msg(_("You're already wielding that!"));
   return false;
- } else if (ch == -2) {
+ } else if (it == NULL || it->is_null()) {
   g->add_msg(_("You don't have that item."));
   return false;
  }
 
- item& it = i_at(ch);
- if (it.is_two_handed(this) && !has_two_arms()) {
+ if (it->is_two_handed(this) && !has_two_arms()) {
   g->add_msg(_("You cannot wield a %s with only one arm."),
-             it.tname().c_str());
+             it->tname().c_str());
   return false;
  }
  if (!is_armed()) {
-  weapon = i_rem(ch);
+  weapon = inv.remove_item(it);
   if (weapon.is_artifact() && weapon.is_tool()) {
    it_artifact_tool *art = dynamic_cast<it_artifact_tool*>(weapon.type);
    g->add_artifact_messages(art->effects_wielded);
@@ -7812,10 +7843,10 @@ bool player::wield(signed char ch, bool autodrop)
   moves -= 30;
   last_item = itype_id(weapon.type->id);
   return true;
- } else if (volume_carried() + weapon.volume() - it.volume() <
+ } else if (volume_carried() + weapon.volume() - it->volume() <
             volume_capacity()) {
   item tmpweap = remove_weapon();
-  weapon = i_rem(ch);
+  weapon = inv.remove_item(it);
   inv.add_item_keep_invlet(tmpweap);
   inv.unsort();
   moves -= 45;
@@ -7828,8 +7859,8 @@ bool player::wield(signed char ch, bool autodrop)
  } else if (query_yn(_("No space in inventory for your %s.  Drop it?"),
                      weapon.tname().c_str())) {
   g->m.add_item_or_charges(posx, posy, remove_weapon());
-  weapon = it;
-  i_rem(ch);
+  weapon = *it;
+  inv.remove_item(weapon.invlet);
   inv.unsort();
   moves -= 30;
   if (weapon.is_artifact() && weapon.is_tool()) {
@@ -8399,7 +8430,7 @@ bool player::takeoff(int pos, bool autodrop)
 {
     bool taken_off = false;
     if (pos == -1) {
-        taken_off = wield(-3, autodrop);
+        taken_off = wield(NULL, autodrop);
     } else {
         int worn_index = worn_position_to_index(pos);
         if (worn_index >=0 && worn_index < worn.size()) {
@@ -8860,10 +8891,12 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
 
 void player::remove_gunmod(item *weapon, int id)
 {
+    if (id >= weapon->contents.size()) {
+        return;
+    }
     item *gunmod = &weapon->contents[id];
-    item newgunmod;
     item ammo;
-    if (gunmod != NULL && gunmod->charges > 0) {
+    if (gunmod->charges > 0) {
         if (gunmod->curammo != NULL) {
             ammo = item(gunmod->curammo, g->turn);
         } else {
@@ -8877,9 +8910,13 @@ void player::remove_gunmod(item *weapon, int id)
         } else {
             i_add_or_drop(ammo);
         }
+        gunmod->curammo = NULL;
+        gunmod->charges = 0;
     }
-    newgunmod = item(itypes[gunmod->type->id], g->turn);
-    i_add_or_drop(newgunmod);
+    if (gunmod->mode == "MODE_AUX") {
+        weapon->next_mode();
+    }
+    i_add_or_drop(*gunmod);
     weapon->contents.erase(weapon->contents.begin()+id);
     return;
 }
@@ -9419,26 +9456,39 @@ int player::get_armor_bash_base(body_part bp)
   if (armor->covers & mfb(bp))
    ret += worn[i].bash_resist();
  }
- if (has_bionic("bio_carbon"))
-  ret += 2;
- if (bp == bp_head && has_bionic("bio_armor_head"))
-  ret += 3;
- else if (bp == bp_arms && has_bionic("bio_armor_arms"))
-  ret += 3;
- else if (bp == bp_torso && has_bionic("bio_armor_torso"))
-  ret += 3;
- else if (bp == bp_legs && has_bionic("bio_armor_legs"))
-  ret += 3;
-  else if (bp == bp_eyes && has_bionic("bio_armor_eyes"))
-  ret += 3;
- if (has_trait("FUR") || has_trait("LUPINE_FUR"))
-  ret++;
- if (bp == bp_head && has_trait("LYNX_FUR"))
-  ret++;
- if (has_trait("CHITIN"))
-  ret += 2;
- if (has_trait("SHELL") && bp == bp_torso)
-  ret += 6;
+ if (has_bionic("bio_carbon")) {
+    ret += 2;
+ }
+ if (bp == bp_head && has_bionic("bio_armor_head")) {
+    ret += 3;
+ }
+ if (bp == bp_arms && has_bionic("bio_armor_arms")) {
+    ret += 3;
+ }
+ if (bp == bp_torso && has_bionic("bio_armor_torso")) {
+    ret += 3;
+ }
+ if (bp == bp_legs && has_bionic("bio_armor_legs")) {
+    ret += 3;
+ }
+ if (bp == bp_eyes && has_bionic("bio_armor_eyes")) {
+    ret += 3;
+ }
+ if (has_trait("FUR") || has_trait("LUPINE_FUR") || has_trait("URSINE_FUR")) {
+    ret++;
+ }
+ if (bp == bp_head && has_trait("LYNX_FUR")) {
+    ret++;
+ }
+ if (has_trait("FAT")) {
+    ret ++;
+ }
+ if (has_trait("CHITIN")) {
+    ret += 2;
+ }
+ if (has_trait("SHELL") && bp == bp_torso) {
+    ret += 6;
+ }
  ret += rng(0, disease_intensity("armor_boost"));
  return ret;
 }
@@ -9581,12 +9631,6 @@ void player::absorb_hit(body_part bp, int, damage_instance &dam) {
                 worn.erase(worn.begin() + index);
             }
         }
-
-        /* Comment out unused test
-        if (it->type == DT_BASH) { //well, these seem like they aren't needed
-        } else if (it->type == DT_CUT) {
-        }
-        */
     }
 }
 
@@ -9765,11 +9809,14 @@ void player::absorb(body_part bp, int &dam, int &cut)
     if (bp == bp_arms && has_trait("ARM_FEATHERS")) {
         dam--;
     }
-    if (has_trait("FUR") || has_trait("LUPINE_FUR")) {
+    if (has_trait("FUR") || has_trait("LUPINE_FUR") || has_trait("URSINE_FUR")) {
         dam--;
     }
     if (bp == bp_head && has_trait("LYNX_FUR")) {
         dam--;
+    }
+    if (has_trait("FAT")) {
+        cut --;
     }
     if (has_trait("CHITIN")) {
         cut -= 2;
@@ -9899,7 +9946,7 @@ int player::adjust_for_focus(int amount)
     return ret;
 }
 
-void player::practice (const calendar& turn, Skill *s, int amount)
+void player::practice (const calendar& turn, Skill *s, int amount, int cap)
 {
     SkillLevel& level = skillLevel(s);
     // Double amount, but only if level.exercise isn't a small negative number?
@@ -9956,6 +10003,15 @@ void player::practice (const calendar& turn, Skill *s, int amount)
         amount /= 2;
     }
 
+    if (skillLevel(s) > cap) //blunt grinding cap implementation for crafting
+    {
+        amount = 0;
+        int curLevel = skillLevel(s);
+        if(is_player() && one_in(5)) {//remind the player intermittently that no skill gain takes place
+            g->add_msg(_("This task is too simple to train your %s beyond %d."), s->name().c_str(), curLevel);
+        }
+    }
+
     if (amount > 0 && level.isTraining())
     {
         int oldLevel = skillLevel(s);
@@ -9963,6 +10019,9 @@ void player::practice (const calendar& turn, Skill *s, int amount)
         int newLevel = skillLevel(s);
         if (is_player() && newLevel > oldLevel) {
             g->add_msg(_("Your skill in %s has increased to %d!"), s->name().c_str(), newLevel);
+        }
+        if(is_player() && newLevel > cap) { //inform player immediately that the current recipe can't be used to train further
+            g->add_msg(_("You feel that %s tasks of this level are becoming trivial."), s->name().c_str());
         }
 
         int chance_to_drop = focus_pool;
