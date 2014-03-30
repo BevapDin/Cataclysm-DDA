@@ -817,7 +817,7 @@ void vehicle::start_engine()
     bool muscle_powered = false;
     // TODO: Make chance of success based on engine condition.
     for( size_t p = 0; p < engines.size(); ++p ) {
-        if(parts[engines[p]].hp > 0) {
+        if(parts[engines[p]].hp > 0 && parts[engines[p]].active()) {
             if(part_info(engines[p]).fuel_type == fuel_type_gasoline) {
                 int engine_power = part_power(engines[p]);
                 if(engine_power < 50) {
@@ -2284,7 +2284,7 @@ bool vehicle::do_environmental_effects()
                 parts[p].blood--;
             }
         }
-        if( part_flag(p, VPFLAG_ENGINE) && parts[p].hp <= 0 && parts[p].amount > 0 ) {
+        if( part_flag(p, VPFLAG_ENGINE) && parts[p].hp <= 0 && parts[p].amount > 0 && parts[p].active() ) {
             needed = true;
             parts[p].amount--;
             for( int ix = -1; ix <= 1; ix++ ) {
@@ -2406,7 +2406,7 @@ void vehicle::noise_and_smoke( double load, double time )
 
     for( size_t e = 0; e < engines.size(); e++ ) {
         int p = engines[e];
-        if( parts[p].hp > 0 &&
+        if( parts[p].hp > 0 && parts[p].active() &&
                 (fuel_left (part_info(p).fuel_type) ||
                  part_info(p).fuel_type == fuel_type_muscle) ) {
             double pwr = 10.0; // Default noise if nothing else found, shouldn't happen
@@ -2642,7 +2642,7 @@ void vehicle::power_parts ()//TODO: more categories of powered part!
     if(engine_on) {
         // Gas engines require epower to run for ignition system, ECU, etc.
         for( size_t p = 0; p < engines.size(); ++p ) {
-            if(parts[engines[p]].hp > 0 &&
+            if(parts[engines[p]].hp > 0 && parts[engines[p]].active() &&
                part_info(engines[p]).fuel_type == fuel_type_gasoline) {
                 gas_epower += part_info(engines[p]).epower;
             }
@@ -2663,13 +2663,14 @@ void vehicle::power_parts ()//TODO: more categories of powered part!
         // Plasma engines generate epower if turned on
         int plasma_epower = 0;
         for( size_t p = 0; p < engines.size(); ++p ) {
-            if(parts[engines[p]].hp > 0 &&
+            if(parts[engines[p]].hp > 0 && parts[engines[p]].active() &&
                part_info(engines[p]).fuel_type == fuel_type_plasma) {
                 plasma_epower += part_info(engines[p]).epower;
             }
         }
         epower += plasma_epower;
     }
+    alternator_load = 0;
 
     int battery_discharge = power_to_epower(fuel_capacity(fuel_type_battery) - fuel_left(fuel_type_battery));
     if(engine_on && (battery_discharge - epower > 0)) {
