@@ -518,7 +518,10 @@ void veh_interact::do_install(task_reason reason)
         bool has_tools = ((has_welder && has_goggles) || has_duct_tape) && has_wrench;
         bool eng = sel_vpart_info->has_flag("ENGINE");
         bool install_pedals = sel_vpart_info->has_flag("PEDALS");
+        bool install_hand_rims = sel_vpart_info->has_flag("HAND_RIMS");
         bool has_skill2 = !eng || (g->u.skillLevel("mechanics") >= dif_eng);
+        bool has_muscle_engine = veh->has_pedals || veh->has_hand_rims;
+        bool install_muscle_engine = install_pedals || install_hand_rims;
         std::string engine_string = "";
         if (engines && eng) { // already has engine
             engine_string = string_format(
@@ -542,7 +545,7 @@ void veh_interact::do_install(task_reason reason)
         int dx, dy;
         get_direction (dx, dy, ch);
         if ((ch == '\n' || ch == ' ') && has_comps && has_tools && has_skill && has_skill2 &&
-             !(veh->has_pedals && eng) && !(veh->has_pedals && install_pedals)) {
+             !(has_muscle_engine && eng) && !(has_muscle_engine && install_muscle_engine)) {
             sel_cmd = 'i';
             return;
         } else {
@@ -1184,6 +1187,14 @@ void veh_interact::display_stats()
     const int extraw = ((TERMX - FULL_SCREEN_WIDTH) / 4) * 2; // see exec()
     int x[15], y[15], w[15]; // 3 columns * 5 rows = 15 slots max
 
+    std::vector<int> cargo_parts = veh->all_parts_with_feature("CARGO");
+    int total_cargo = 0;
+    int free_cargo = 0;
+    for (size_t i = 0; i < cargo_parts.size(); i++) {
+        const int p = cargo_parts[i];
+        total_cargo += veh->max_volume(p);
+        free_cargo += veh->free_volume(p);
+    }
     if (vertical_menu) {
         // Vertical menu
         const int second_column = 34 + (extraw / 4); // 29
@@ -1222,18 +1233,17 @@ void veh_interact::display_stats()
         weight_factor *= 2.2f;
     }
     fold_and_print(w_stats, y[0], x[0], w[0], c_ltgray,
-                   _("Safe speed:   <color_ltgreen>%3d</color> %s"),
-                   int(veh->safe_velocity(false) * speed_factor), speed_units.c_str());
+                   _("Safe/Top speed: <color_ltgreen>%3d</color>/<color_ltred>%3d</color> %s"),
+                   int(veh->safe_velocity(false) * speed_factor), int(veh->max_velocity(false) * speed_factor), speed_units.c_str());
     fold_and_print(w_stats, y[1], x[1], w[1], c_ltgray,
-                   _("Top speed:    <color_ltred>%3d</color> %s"),
-                   int(veh->max_velocity(false) * speed_factor), speed_units.c_str());
-    fold_and_print(w_stats, y[2], x[2], w[2], c_ltgray,
                    _("Acceleration: <color_ltblue>%3d</color> %s/t"),
                    int(veh->acceleration(false) * speed_factor), speed_units.c_str());
-    fold_and_print(w_stats, y[3], x[3], w[3], c_ltgray,
-                   _("Mass:       <color_ltblue>%5d</color> %s"),
+    fold_and_print(w_stats, y[2], x[2], w[2], c_ltgray,
+                   _("Mass: <color_ltblue>%5d</color> %s"),
                    int(veh->total_mass() * weight_factor), weight_units.c_str());
-
+    fold_and_print(w_stats, y[3], x[3], w[3], c_ltgray,
+                   _("Cargo Volume: <color_ltgray>%d/%d</color>"),
+                   total_cargo - free_cargo, total_cargo);
     // Write the overall damage
     mvwprintz(w_stats, y[4], x[4], c_ltgray, _("Status:  "));
     x[4] += utf8_width(_("Status: ")) + 1;
@@ -1713,7 +1723,7 @@ void complete_vehicle ()
             fmenu.query();
             if ( fmenu.ret == 0 ) {
                 if ( foundv.size() > 1 ) {
-                    if(g->choose_adjacent(_("Fill which vehicle?"), posx, posy)) {
+                    if(choose_adjacent(_("Fill which vehicle?"), posx, posy)) {
                         fillv = g->m.veh_at(posx, posy);
                     } else {
                         break;
@@ -1729,10 +1739,12 @@ void complete_vehicle ()
         if ( fillv != NULL ) {
             int want = fillv->fuel_capacity("gasoline")-fillv->fuel_left("gasoline");
             int got = veh->drain("gasoline", want);
-            int amt=fillv->refill("gasoline",got);
-            g->add_msg(_("Siphoned %d units of %s from the %s into the %s%s"), got,
-               "gasoline", veh->name.c_str(), fillv->name.c_str(),
-               (amt > 0 ? "." : ", draining the tank completely.") );
+            fillv->refill("gasoline", got);
+            g->add_msg(ngettext("Siphoned %d unit of %s from the %s into the %s%s",
+                                "Siphoned %d units of %s from the %s into the %s%s",
+                                got),
+               got, "gasoline", veh->name.c_str(), fillv->name.c_str(),
+               (got < want ? ", draining the tank completely." : ", receiving tank is full.") );
             g->u.moves -= 200;
         } else {
             g->u.siphon( veh, "gasoline" );

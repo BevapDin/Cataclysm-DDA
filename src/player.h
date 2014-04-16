@@ -100,7 +100,7 @@ public:
     /** Returns a random name from NAMES_* */
     void pick_name();
     /** Returns either "you" or the player's name */
-    std::string disp_name();
+    std::string disp_name(bool possessive = false);
     /** Returns the name of the player's outer layer, e.g. "armor plates" */
     std::string skin_name();
 
@@ -156,6 +156,8 @@ public:
  int calc_focus_equilibrium();
  /** Maintains body temperature */
  void update_bodytemp();
+ /** Define color for displaying the body temperature */
+ nc_color bodytemp_color(int bp);
  /** Returns the player's modified base movement cost */
  int  run_cost(int base_cost, bool diag = false);
  /** Returns the player's speed for swimming across water tiles */
@@ -260,6 +262,8 @@ public:
  void recalc_sight_limits();
  /** Returns the player maximum vision range factoring in mutations, diseases, and other effects */
  int  unimpaired_range();
+ /** Returns true if overmap tile is within player line-of-sight */
+ bool overmap_los(int x, int y);
  /** Returns the distance the player can see on the overmap */
  int  overmap_sight_range(int light_level);
  /** Returns the distance the player can see through walls */
@@ -426,8 +430,7 @@ public:
  /** Returns the player's total stab damage roll */
  int roll_stab_damage(bool crit);
  /** Returns the number of moves unsticking a weapon will penalize for */
- int roll_stuck_penalty(bool stabbing);
-
+ int roll_stuck_penalty(bool stabbing, ma_technique &tec);
  std::vector<matec_id> get_all_techniques();
 
  /** Returns true if the player has a weapon or martial arts skill available with the entered technique */
@@ -435,7 +438,6 @@ public:
  /** Returns a random valid technique */
  matec_id pick_technique(Creature &t,
                              bool crit, bool dodge_counter, bool block_counter);
- /** Performs entered technique's effects */
  void perform_technique(ma_technique technique, Creature &t, int &bash_dam, int &cut_dam, int &stab_dam, int& move_cost);
  /** Performs special attacks and their effects (poisonous, stinger, etc.) */
  void perform_special_attacks(Creature &t);
@@ -443,8 +445,7 @@ public:
  /** Returns a vector of valid mutation attacks */
  std::vector<special_attack> mutation_attacks(Creature &t);
  /** Handles combat effects, returns a string of any valid combat effect messages */
- std::string melee_special_effects(Creature &t, damage_instance& d);
-
+ std::string melee_special_effects(Creature &t, damage_instance& d, ma_technique &tec);
  /** Returns Creature::get_dodge_base modified by the player's skill level */
  int get_dodge_base();   // Returns the players's dodge, modded by clothing etc
  /** Returns Creature::get_dodge() modified by any player effects */
@@ -478,7 +479,7 @@ public:
  int intimidation();
 
  /** Converts bphurt to a hp_part (if side == 0, the left), then does/heals dam
-  *  absorb() reduces dam and cut by your armor (and bionics, traits, etc) 
+  *  absorb() reduces dam and cut by your armor (and bionics, traits, etc)
   */
  void absorb(body_part bp, int &dam, int &cut);
  /** Hurts a body_part directly, no armor reduction */
@@ -587,6 +588,10 @@ public:
  bool wear_item(item *to_wear, bool interactive = true);
  /** Takes off an item, returning false on fail */
  bool takeoff(int pos, bool autodrop = false);
+ /** Removes the first item in the container's contents and wields it, taking moves based on skill and volume of item being wielded. */
+ void wield_contents(item *container, bool force_invlet, std::string skill_used, int volume_factor);
+ /** Stores an item inside another item, taking moves based on skill and volume of item being stored. */
+ void store(item *container, item *put, std::string skill_used, int volume_factor);
  /** Draws the UI and handles player input for the armor re-ordering window */
  void sort_armor();
  /** Uses a tool */
@@ -814,6 +819,7 @@ public:
  std::string name;
  bool male;
  profession* prof;
+ std::string start_location;
 
  std::map<std::string, int> mutation_category_level;
 
@@ -925,6 +931,11 @@ protected:
     void setID (int i);
 
 private:
+     /** Check if an area-of-effect technique has valid targets */
+    bool valid_aoe_technique( Creature &t, ma_technique &technique );
+    bool valid_aoe_technique( Creature &t, ma_technique &technique,
+                              std::vector<int> &mon_targets, std::vector<int> &npc_targets );
+
     bool has_fire(const int quantity);
     void use_fire(const int quantity);
 

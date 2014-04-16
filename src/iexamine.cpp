@@ -1,5 +1,6 @@
 #include "item_factory.h"
 #include "iuse.h"
+#include "helper.h"
 #include "game.h"
 #include "mapdata.h"
 #include "output.h"
@@ -131,7 +132,10 @@ void iexamine::atm(player *p, map *m, int examx, int examy) {
         }
 
         max = dep->charges;
-        std::string popupmsg=string_format(_("Deposit how much? Max:%d cents. (0 to cancel) "), max);
+        std::string popupmsg=string_format(ngettext("Deposit how much? Max:%d cent. (0 to cancel) ",
+                                                    "Deposit how much? Max:%d cents. (0 to cancel) ",
+                                                    max),
+                                           max);
         amount = helper::to_int( string_input_popup( popupmsg, 20,
                    helper::to_string_int(max), "", "", -1, true)
                 );
@@ -143,7 +147,8 @@ void iexamine::atm(player *p, map *m, int examx, int examy) {
         }
         p->cash += amount;
         dep->charges -= amount;
-        g->add_msg(_("Your account now holds %d cents."), p->cash);
+        g->add_msg(ngettext("Your account now holds %d cent.","Your account now holds %d cents.",p->cash),
+                   p->cash);
         p->moves -= 100;
         return;
 
@@ -161,7 +166,10 @@ void iexamine::atm(player *p, map *m, int examx, int examy) {
         }
 
         max = p->cash;
-        std::string popupmsg=string_format(_("Withdraw how much? Max:%d cents. (0 to cancel) "), max);
+        std::string popupmsg=string_format(ngettext("Withdraw how much? Max:%d cent. (0 to cancel) ",
+                                                    "Withdraw how much? Max:%d cents. (0 to cancel) ",
+                                                    max),
+                                           max);
         amount = helper::to_int( string_input_popup( popupmsg, 20,
                    helper::to_string_int(max), "", "", -1, true)
                 );
@@ -173,7 +181,10 @@ void iexamine::atm(player *p, map *m, int examx, int examy) {
         }
         p->cash -= amount;
         with->charges += amount;
-        g->add_msg(_("Your account now holds %d cents."), p->cash);
+        g->add_msg(ngettext("Your account now holds %d cent.",
+                            "Your account now holds %d cents.",
+                            p->cash),
+                   p->cash);
         p->moves -= 100;
         return;
 
@@ -209,7 +220,10 @@ void iexamine::atm(player *p, map *m, int examx, int examy) {
         }
 
         max = with->charges;
-        std::string popupmsg=string_format(_("Transfer how much? Max:%d cents. (0 to cancel) "), max);
+        std::string popupmsg=string_format(ngettext("Transfer how much? Max:%d cent. (0 to cancel) ",
+                                                    "Transfer how much? Max:%d cents. (0 to cancel) ", 
+                                                    max),
+                                           max);
         amount = helper::to_int( string_input_popup( popupmsg, 20,
                    helper::to_string_int(max), "", "", -1, true)
                 );
@@ -283,7 +297,12 @@ void iexamine::vending(player *p, map *m, int examx, int examy) {
                        (TERMX > FULL_SCREEN_WIDTH) ? (TERMX - FULL_SCREEN_WIDTH) / 2 + FULL_SCREEN_WIDTH / 2 : FULL_SCREEN_WIDTH / 2);
 
     bool used_machine = false;
-    do {
+    input_context ctxt("VENDING_MACHINE");
+    ctxt.register_updown();
+    ctxt.register_action("CONFIRM");
+    ctxt.register_action("QUIT");
+    ctxt.register_action("HELP_KEYBINDINGS");
+    while(true) {
         werase(w);
         wborder(w, LINE_XOXO, LINE_XOXO, LINE_OXOX, LINE_OXOX,
                          LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
@@ -331,27 +350,21 @@ void iexamine::vending(player *p, map *m, int examx, int examy) {
                              LINE_OXXO, LINE_OOXX, LINE_XXOO, LINE_XOOX );
         mvwprintw(w_item_info, 0, 2, "< %s >", vend_items[cur_pos].display_name().c_str() );
         wrefresh(w_item_info);
-        switch (input()) {
-        case 'j':
-        case '2':
+        const std::string action = ctxt.handle_input();
+        if (action == "DOWN") {
             cur_pos++;
             if (cur_pos >= num_items) {
                 cur_pos = 0;
             }
-            break;
-        case 'k':
-        case '8':
+        } else if (action == "UP") {
             cur_pos--;
             if (cur_pos < 0) {
                 cur_pos = num_items - 1;
             }
-            break;
-        case ' ':
-        case '\n':
-        case '5': {
+        } else if (action == "CONFIRM") {
             if (vend_items[cur_pos].price() > card->charges) {
                 popup(_("That item is too expensive!"));
-                break;
+                continue;
             }
             card->charges -= vend_items[cur_pos].price();
             p->i_add_or_drop(vend_items[cur_pos]);
@@ -363,23 +376,17 @@ void iexamine::vending(player *p, map *m, int examx, int examy) {
 
             if (num_items == 1) {
                 g->add_msg(_("With a beep, the empty vending machine shuts down"));
-                p->moves -= 250;
-                delwin(w_item_info);
-                delwin(w);
-                return;
+                break;
             }
+        } else if (action == "QUIT") {
             break;
         }
-        case 'q':
-        case KEY_ESCAPE:
-            if (used_machine) {
-                p->moves -= 250;
-            }
-            delwin(w_item_info);
-            delwin(w);
-            return;
-        }
-    } while (true);
+    }
+    if (used_machine) {
+        p->moves -= 250;
+    }
+    delwin(w_item_info);
+    delwin(w);
 }
 
 void iexamine::toilet(player *p, map *m, int examx, int examy) {
@@ -1025,6 +1032,59 @@ void iexamine::flower_dahlia(player *p, map *m, int examx, int examy) {
   m->spawn_item(examx, examy, "dahlia_bud");
 }
 
+void iexamine::egg_sackbw(player *p, map *m, int examx, int examy) {
+  if(!query_yn(_("Harvest the %s?"),m->furnname(examx, examy).c_str())) {
+    none(p, m, examx, examy);
+    return;
+  }
+  if (one_in(2)){
+    monster spider_widow_giant_s(GetMType("mon_spider_widow_giant_s"));
+    int f = 0;
+    for (int i = examx -1; i <= examx + 1; i++) {
+        for (int j = examy -1; j <= examy + 1; j++) {
+                if (!(g->u.posx == i && g->u.posy == j) && one_in(3)){
+                    spider_widow_giant_s.spawn(i, j);
+                    g->add_zombie(spider_widow_giant_s);
+                    f++;
+                }
+        }
+    }
+    if (f == 1){
+        g->add_msg(_("A spiderling brusts from the %s!"),m->furnname(examx, examy).c_str());
+    } else if (f >= 1) {
+        g->add_msg(_("Spiderlings brust from the %s!"),m->furnname(examx, examy).c_str());
+    }
+  }
+  m->spawn_item(examx, examy, "spider_egg", rng(1,4));
+  m->furn_set(examx, examy, f_egg_sacke);
+}
+
+void iexamine::egg_sackws(player *p, map *m, int examx, int examy) {
+  if(!query_yn(_("Harvest the %s?"),m->furnname(examx, examy).c_str())) {
+    none(p, m, examx, examy);
+    return;
+  }
+  if (one_in(2)){
+    monster mon_spider_web_s(GetMType("mon_spider_web_s"));
+    int f = 0;
+    for (int i = examx -1; i <= examx + 1; i++) {
+        for (int j = examy -1; j <= examy + 1; j++) {
+                if (!(g->u.posx == i && g->u.posy == j) && one_in(3)){
+                    mon_spider_web_s.spawn(i, j);
+                    g->add_zombie(mon_spider_web_s);
+                    f++;
+                }
+        }
+    }
+    if (f == 1){
+        g->add_msg(_("A spiderling brusts from the %s!"),m->furnname(examx, examy).c_str());
+    } else if (f >= 1) {
+        g->add_msg(_("Spiderlings brust from the %s!"),m->furnname(examx, examy).c_str());
+    }
+  }
+  m->spawn_item(examx, examy, "spider_egg", rng(1,4));
+  m->furn_set(examx, examy, f_egg_sacke);
+}
 void iexamine::fungus(player *p, map *m, int examx, int examy) {
     // TODO: Infect NPCs?
     monster spore(GetMType("mon_spore"));
@@ -1492,7 +1552,10 @@ void iexamine::keg(player *p, map *m, int examx, int examy) {
             int d_vol = (drink->count_by_charges()) ? drink->volume(false, true)/1000
                 : drink->volume(false, true)/1000*drink->charges;
             if (d_vol < 1)
-                g->add_msg(_("It has %d portions of %s left."), drink->charges, drink->name.c_str());
+                g->add_msg(ngettext("It has %d portion of %s left.",
+                                    "It has %d portions of %s left.",
+                                    drink->charges),
+                           drink->charges, drink->name.c_str());
             else
                 g->add_msg(_("%s contained: %d/%d"), drink->name.c_str(), d_vol, keg_cap);
             return;
@@ -1713,10 +1776,10 @@ void iexamine::recycler(player *p, map *m, int examx, int examy) {
 }
 
 void iexamine::trap(player *p, map *m, int examx, int examy) {
- if (g->traps[m->tr_at(examx, examy)]->difficulty < 99 &&
-     p->per_cur-p->encumb(bp_eyes) >= g->traps[m->tr_at(examx, examy)]->visibility &&
+ if (traplist[m->tr_at(examx, examy)]->difficulty < 99 &&
+     p->per_cur-p->encumb(bp_eyes) >= traplist[m->tr_at(examx, examy)]->visibility &&
      query_yn(_("There is a %s there.  Disarm?"),
-              g->traps[m->tr_at(examx, examy)]->name.c_str())) {
+              traplist[m->tr_at(examx, examy)]->name.c_str())) {
      m->disarm_trap(examx, examy);
  }
 }
@@ -1745,6 +1808,103 @@ void iexamine::acid_source(player *p, map *m, const int examx, const int examy)
     {
         p->moves -= 100;
     }
+}
+
+itype *furn_t::crafting_pseudo_item_type() const
+{
+    if (crafting_pseudo_item.empty()) {
+        return NULL;
+    }
+    return item_controller->find_template(crafting_pseudo_item);
+}
+
+itype *furn_t::crafting_ammo_item_type() const
+{
+    const it_tool *toolt = dynamic_cast<const it_tool*>(crafting_pseudo_item_type());
+    if (toolt != NULL && toolt->ammo != "NULL") {
+        const std::string ammoid = default_ammo(toolt->ammo);
+        return item_controller->find_template(ammoid);
+    }
+    return NULL;
+}
+
+size_t find_in_list(const itype *type, const std::vector<item> &items)
+{
+    for (size_t i = 0; i < items.size(); i++) {
+        if (items[i].type == type) {
+            return i;
+        }
+    }
+    return static_cast<size_t>(-1);
+}
+
+long count_charges_in_list(const itype *type, const std::vector<item> &items)
+{
+    const size_t i = find_in_list(type, items);
+    return (i == static_cast<size_t>(-1)) ? 0 : items[i].charges;
+}
+
+long remove_charges_in_list(const itype *type, std::vector<item> &items, long quantity)
+{
+    const size_t i = find_in_list(type, items);
+    if (i != static_cast<size_t>(-1)) {
+        if (items[i].charges > quantity) {
+            items[i].charges -= quantity;
+            return quantity;
+        } else {
+            const long charges = items[i].charges;
+            items[i].charges = 0;
+            if (items[i].destroyed_at_zero_charges()) {
+                items.erase(items.begin() + i);
+            }
+            return charges;
+        }
+    }
+    return 0;
+}
+
+void iexamine::reload_furniture(player *p, map *m, const int examx, const int examy)
+{
+    const furn_t &f = m->furn_at(examx, examy);
+    itype *type = f.crafting_pseudo_item_type();
+    itype *ammo = f.crafting_ammo_item_type();
+    if (type == NULL || ammo == NULL) {
+        g->add_msg("This %s can not be reloaded!", f.name.c_str());
+        return;
+    }
+    const int pos = p->inv.position_by_type(ammo->id);
+    if (pos == INT_MIN) {
+        const int amount = count_charges_in_list(ammo, m->i_at(examx, examy));
+        if (amount > 0) {
+            g->add_msg("The %s contains %d %s.", f.name.c_str(), amount, ammo->name.c_str());
+        }
+        g->add_msg("You need some %s to reload this %s.", ammo->name.c_str(), f.name.c_str());
+        return;
+    }
+    const long max_amount = p->inv.find_item(pos).charges;
+    const std::string popupmsg = string_format(_("Put how many of the %s into the %s?"), ammo->name.c_str(), f.name.c_str());
+    long amount = helper::to_int(
+        string_input_popup(
+            popupmsg, 20, helper::to_string_int(max_amount), "", "", -1, true));
+    if (amount <= 0 || amount > max_amount) {
+        return;
+    }
+    p->inv.reduce_charges(pos, amount);
+    std::vector<item> &items = m->i_at(examx, examy);
+    for (size_t i = 0; i < items.size(); i++) {
+        if (items[i].type == ammo) {
+            items[i].charges += amount;
+            amount = 0;
+            break;
+        }
+    }
+    if (amount != 0) {
+        item it(ammo, 0);
+        it.charges = amount;
+        items.push_back(it);
+    }
+    g->add_msg("You reload the %s.", m->furnname(examx, examy).c_str());
+    p->moves -= 100;
 }
 
 /**
@@ -1848,6 +2008,12 @@ void (iexamine::*iexamine_function_from_string(std::string function_name))(playe
   if ("flower_dahlia" == function_name) {
     return &iexamine::flower_dahlia;
   }
+  if ("egg_sackbw" == function_name) {
+    return &iexamine::egg_sackbw;
+  }
+  if ("egg_sackws" == function_name) {
+    return &iexamine::egg_sackws;
+  }
   if ("dirtmound" == function_name) {
     return &iexamine::dirtmound;
   }
@@ -1890,6 +2056,9 @@ void (iexamine::*iexamine_function_from_string(std::string function_name))(playe
   }
   if ("acid_source" == function_name) {
     return &iexamine::acid_source;
+  }
+  if ("reload_furniture" == function_name) {
+    return &iexamine::reload_furniture;
   }
 
   //No match found

@@ -59,7 +59,7 @@ enum mon_id {
     mon_dermatik_larva, mon_dermatik,
     // SPIDERS
     mon_spider_wolf, mon_spider_web, mon_spider_jumping, mon_spider_trapdoor,
-    mon_spider_widow,
+    mon_spider_widow, mon_spider_widow_giant_s, mon_spider_web_s,
     // Unearthed Horrors
     mon_dark_wyrm, mon_amigara_horror, mon_dog_thing, mon_headless_dog_thing,
     mon_thing,
@@ -97,7 +97,7 @@ enum mon_id {
     mon_dog_skeleton, mon_dog_zombie_cop, mon_dog_zombie_rot,
     // 0.A -> 0.B
     mon_broken_cyborg, mon_zoose, mon_zolf, mon_zougar,
-    mon_zombie_bio_op,
+    mon_zombie_bio_op, mon_zombie_gasbag,
     num_monsters
 };
 
@@ -170,6 +170,7 @@ enum m_flag {
     MF_ACIDTRAIL,           // Leaves a trail of acid
     MF_SLUDGEPROOF,         // Ignores the effect of sludge trails
     MF_SLUDGETRAIL,         // Causes monster to leave a sludge trap trail when moving
+    MF_LEAKSGAS,            // Occasionally leaks gas when moving
     MF_FIREY,               // Burns stuff and is immune to fire
     MF_QUEEN,               // When it dies, local populations start to die off too
     MF_ELECTRONIC,          // e.g. a robot; affected by emp blasts, and other stuff
@@ -239,7 +240,7 @@ struct mtype {
     std::vector<void (mdeath::*)(monster *)> dies; // What happens when this monster dies
     unsigned int def_chance; // How likely a special "defensive" move is to trigger (0-100%, default 0)
     void (mattack::*sp_attack)(monster *); // This monster's special attack
-    void (mdefense::*sp_defense)(monster *); // This monster's special "defensive" move that may trigger when the monster is attacked.
+    void (mdefense::*sp_defense)(monster *, const projectile*); // This monster's special "defensive" move that may trigger when the monster is attacked.
                                              // Note that this can be anything, and is not necessarily beneficial to the monster
     // Default constructor
     mtype ();

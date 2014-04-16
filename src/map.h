@@ -65,11 +65,38 @@ class map
  friend class editmap;
  public:
 // Constructors & Initialization
- map();
+ map(int mapsize = MAPSIZE);
  ~map();
 
 // Visual Output
  void debug();
+
+ /**
+  * Sets a dirty flag on the transparency cache.
+  *
+  * If this isn't set, it's just assumed that
+  * the transparency cache hasn't changed and
+  * doesn't need to be updated.
+  */
+ void set_transparency_cache_dirty() {
+     transparency_cache_dirty = true;
+ }
+
+ /**
+  * Sets a dirty flag on the outside cache.
+  *
+  * If this isn't set, it's just assumed that
+  * the outside cache hasn't changed and
+  * doesn't need to be updated.
+  */
+ void set_outside_cache_dirty() {
+     outside_cache_dirty = true;
+ }
+
+ /**
+  * Callback invoked when a vehicle has moved.
+  */
+ void on_vehicle_moved();
 
  /** Draw a visible part of the map into `w`.
   *
@@ -93,15 +120,12 @@ class map
              const bool low_light = false, const bool bright_level = false);
 
 // File I/O
- virtual void save(overmap *om, unsigned const int turn, const int x, const int y, const int z);
- virtual void load(const int wx, const int wy, const int wz, const bool update_vehicles = true, overmap *om = NULL);
+ void save(overmap *om, unsigned const int turn, const int x, const int y, const int z);
+ void load(const int wx, const int wy, const int wz, const bool update_vehicles = true, overmap *om = NULL);
  void shift(const int wx, const int wy, const int wz, const int x, const int y);
  void spawn_monsters();
  void clear_spawns();
  void clear_traps();
- 
- static void check_spoiled(submap &sm);
- static void check_spoiled(std::vector<item> &sm);
 
 // Movement and LOS
 
@@ -171,6 +195,11 @@ class map
   * 2. That the target location isn't sealed.
   */
  bool accessable_items(const int Fx, const int Fy, const int Tx, const int Ty, const int range) const;
+ /**
+  * Like @ref accessable_items but checks for accessable furniture.
+  * It ignores the furniture flags of the target square (ignores if target is SEALED).
+  */
+ bool accessable_furniture(const int Fx, const int Fy, const int Tx, const int Ty, const int range) const;
 
  /**
   * Calculate a best path using A*
@@ -208,7 +237,7 @@ class map
  void update_vehicle_cache(vehicle *, const bool brand_new = false);
  void reset_vehicle_cache();
  void clear_vehicle_cache();
- void update_vehicle_list(const int to);
+ void update_vehicle_list(submap * const to);
 
  void destroy_vehicle (vehicle *veh);
 // Change vehicle coords and move vehicle's driver along.
@@ -315,7 +344,7 @@ void add_corpse(int x, int y);
  void translate(const ter_id from, const ter_id to); // Change all instances of $from->$to
  void translate_radius(const ter_id from, const ter_id to, const float radi, const int uX, const int uY);
  bool close_door(const int x, const int y, const bool inside, const bool check_only);
- bool open_door(const int x, const int y, const bool inside);
+ bool open_door(const int x, const int y, const bool inside, const bool check_only = false);
  // bash: if res pointer is supplied, res will contain absorbed impact or -1
  bool bash(const int x, const int y, const int str, std::string &sound, int *res = 0);
  // spawn items from the list, see map_bash_item_drop
@@ -384,7 +413,7 @@ void add_corpse(int x, int y);
  bool add_field(const int x, const int y, const field_id t, const unsigned char density);
  void remove_field(const int x, const int y, const field_id field_to_remove);
  bool process_fields(); // See fields.cpp
- bool process_fields_in_submap(const int gridn); // See fields.cpp
+ bool process_fields_in_submap(submap * const current_submap, const int submap_x, const int submap_y); // See fields.cpp
  void step_in_field(const int x, const int y); // See fields.cpp
  void mon_in_field(const int x, const int y, monster *z); // See fields.cpp
  void field_effect(int x, int y); //See fields.cpp
@@ -411,6 +440,8 @@ void add_corpse(int x, int y);
  void place_vending(int x, int y, std::string type);
  int place_items(items_location loc, const int chance, const int x1, const int y1,
                   const int x2, const int y2, bool ongrass, const int turn, bool rand = true);
+ int place_items(items_location loc, const int x1, const int y1,
+                  const int x2, const int y2, bool ongrass, const int turn);
 // put_items_from puts exactly num items, based on chances
  void put_items_from(items_location loc, const int num, const int x, const int y, const int turn = 0,
                     const int quantity = 0, const long charges = 0, const int damlevel = 0, const bool rand = true);
@@ -475,7 +506,6 @@ protected:
                  const int offsetX, const int offsetY, const int offsetDistance );
 
  int my_MAPSIZE;
- virtual bool is_tiny() { return false; };
 
  std::vector<item> nulitems; // Returned when &i_at() is asked for an OOB value
  ter_id nulter;  // Returned when &ter() is asked for an OOB value
@@ -493,7 +523,20 @@ protected:
  void set_abs_sub(const int x, const int y, const int z); // set the above vars on map load/shift/etc
 
 private:
-submap * getsubmap( const int grididx );
+ bool transparency_cache_dirty;
+ bool outside_cache_dirty;
+
+ submap * getsubmap( const int grididx );
+
+ /** Get the submap containing the specified position within the reality bubble. */
+ submap *get_submap_at(int x, int y) const;
+
+ /** Get the submap containing the specified position within the reality bubble.
+  *  Also writes the position within the submap to offset_x, offset_y
+  */
+ submap *get_submap_at(int x, int y, int& offset_x, int& offset_y) const;
+ submap *get_submap_at_grid(int gridx, int gridy) const;
+ 
  long determine_wall_corner(const int x, const int y, const long orig_sym);
  void cache_seen(const int fx, const int fy, const int tx, const int ty, const int max_range);
  // apply a circular light pattern immediately, however it's best to use...
@@ -509,10 +552,10 @@ submap * getsubmap( const int grididx );
  vehicle *add_vehicle_to_map(vehicle *veh, const int x, const int y, const bool merge_wrecks = true);
  void add_item(const int x, const int y, item new_item, int maxitems = 64);
 
- void process_active_items_in_submap(const int nonant);
- void process_active_items_in_vehicles(const int nonant);
- void process_active_items_in_vehicle(vehicle *cur_veh, int nonant);
- bool process_active_item(item *it, const int nonant, const int i, const int j);
+ void process_active_items_in_submap(submap * const current_submap, int gridx, int gridy);
+ void process_active_items_in_vehicles(submap * const current_submap, int gridx, int gridy);
+ void process_active_items_in_vehicle(vehicle *cur_veh, submap * const current_submap, const int gridx, const int gridy);
+ bool process_active_item(item *it, submap * const current_submap, const int gridx, const int gridy, const int i, const int j);
 
  float lm[MAPSIZE*SEEX][MAPSIZE*SEEY];
  float sm[MAPSIZE*SEEX][MAPSIZE*SEEY];
@@ -532,14 +575,7 @@ class tinymap : public map
 {
 friend class editmap;
 public:
- tinymap();
- ~tinymap();
-
-protected:
- virtual bool is_tiny() { return true; };
-
-private:
- submap* grid[4];
+ tinymap(int mapsize = 2);
 };
 
 #endif

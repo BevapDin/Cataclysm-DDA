@@ -11,7 +11,6 @@
 #include "omdata.h"
 #include "mapitems.h"
 #include "crafting.h"
-#include "trap.h"
 #include "npc.h"
 #include "faction.h"
 #include "event.h"
@@ -54,7 +53,6 @@
 #define MAX_ITEM_IN_SQUARE 4096 // really just a sanity check for functions not tested beyond this. in theory 4096 works (`InvletInvlet)
 #define MAX_VOLUME_IN_SQUARE 4000 // 6.25 dead bears is enough for everybody!
 #define MAX_ITEM_IN_VEHICLE_STORAGE MAX_ITEM_IN_SQUARE // no reason to differ
-#define MAX_VOLUME_IN_VEHICLE_STORAGE 2000 // todo: variation. semi trailer square could hold more. the real limit would be weight
 
 extern const int savegame_version;
 extern int save_loading_version;
@@ -106,6 +104,7 @@ struct game_message
  std::string message;
  game_message() { turn = 0; count = 1; message = ""; };
  game_message(calendar T, std::string M) : turn (T), message (M) { count = 1; };
+ game_message &operator= (game_message const &gm) { turn=gm.turn; count=gm.count; message=gm.message; return *this; }
 };
 
 struct mtype;
@@ -232,8 +231,6 @@ public:
   bool cancel_activity_query(const char* message, ...);
   bool cancel_activity_or_ignore_query(const char* reason, ...);
   void moving_vehicle_dismount(int tox, int toy);
-  // Get input from the player to choose an adjacent tile (for examine() etc)
-  bool choose_adjacent(std::string message, int &x, int&y);
 
   int assign_mission_id(); // Just returns the next available one
   void give_mission(mission_id type); // Create the mission and assign it
@@ -341,16 +338,24 @@ public:
   point find_item(item *it);
   void remove_item(item *it);
 
-//  inventory crafting_inventory(player *p);  // inv_from_map, inv, & 'weapon'
-//  std::list<item> consume_items(player *p, std::vector<component> components);
-//  void consume_tools(player *p, std::vector<component> tools, bool force_available);
+  /**
+   * Returns the recipe that is used to disassemble the given item type.
+   * Returns NULL if there is no recipe to disassemble the item type.
+   */
+  recipe* get_disassemble_recipe(const itype_id &ype);
+  /**
+   * Check if the player can disassemble the item dis_item with the recipe
+   * cur_recipe and the inventory crafting_inv.
+   * Checks for example tools (and charges), enough input charges
+   * (if disassembled item is counted by charges).
+   * If print_msg is true show a message about missing tools/charges.
+   */
+  bool can_disassemble(item *dis_item, recipe *cur_recipe, const crafting_inventory_t &crafting_inv, bool print_msg);
 
   bool has_gametype() const { return gamemode && gamemode->id() != SGAME_NULL; }
   special_game_id gametype() const { return (gamemode) ? gamemode->id() : SGAME_NULL; }
 
   std::map<std::string, vehicle*> vtypes;
-  std::vector <trap*> traps;
-  void load_trap(JsonObject &jo);
   void toggle_sidebar_style(void);
   void toggle_fullscreen(void);
   void temp_exit_fullscreen(void);
@@ -504,7 +509,6 @@ public:
   void init_professions();
   void init_faction_data();
   void init_mongroups() throw (std::string);    // Initualizes monster groups
-  void release_traps();     // Release trap types memory
   void init_construction(); // Initializes construction "recipes"
   void init_missions();     // Initializes mission templates
   void init_autosave();     // Initializes autosave parameters
@@ -546,19 +550,6 @@ public:
   void disassemble(int pos = INT_MAX);       // See crafting.cpp
   void complete_disassemble();         // See crafting.cpp
   recipe* recipe_by_index(int index);  // See crafting.cpp
-  /**
-   * Returns the recipe that is used to disassemble the given item type.
-   * Returns NULL if there is no recipe to disassemble the item type.
-   */
-  recipe* get_disassemble_recipe(const itype_id &ype);
-  /**
-   * Check if the player can disassemble the item dis_item with the recipe
-   * cur_recipe and the inventory crafting_inv.
-   * Checks for example tools (and charges), enough input charges
-   * (if disassembled item is counted by charges).
-   * If print_msg is true show a message about missing tools/charges.
-   */
-  bool can_disassemble(item *dis_item, recipe *cur_recipe, crafting_inventory_t &crafting_inv, bool print_msg);
 
   // Forcefully close a door at (x, y).
   // The function checks for creatures/items/vehicles at that point and
@@ -661,6 +652,7 @@ public:
   int  mon_info(WINDOW *); // Prints a list of nearby monsters
   void handle_key_blocking_activity(); // Abort reading etc.
   bool handle_action();
+
   void update_scent();     // Updates the scent map
   bool is_game_over();     // Returns true if the player quit or died
   void place_corpse();     // Place player corpse

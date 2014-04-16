@@ -48,8 +48,8 @@ std::vector<construction *> constructions;
 static bool can_construct( const std::string &desc );
 static bool can_construct( construction *con, int x, int y );
 static bool can_construct( construction *con);
-static bool player_can_build( player &p, crafting_inventory_t& inv, construction *con );
-static bool player_can_build( player &p, crafting_inventory_t& pinv, const std::string &desc );
+static bool player_can_build( player &p, const crafting_inventory_t& inv, construction *con );
+static bool player_can_build( player &p, const crafting_inventory_t& pinv, const std::string &desc );
 static void place_construction(const std::string &desc);
 
 std::vector<construction *> constructions_by_desc(const std::string &description)
@@ -123,8 +123,10 @@ void construction_menu()
 
     bool update_info = true;
     int select = 0;
+    int oldselect = 0;
     int chosen = 0;
     int offset = 0;
+    int oldoffset = 0;
     long ch;
     bool exit = false;
 
@@ -229,7 +231,7 @@ void construction_menu()
                 }
                 // display time needed
                 posy++;
-                mvwprintz(w_con, posy, 31, color_stage, _("Time: %1d minutes"), current_con->time);
+                mvwprintz(w_con, posy, 31, color_stage, ngettext("Time: %1d minute","Time: %1d minutes",current_con->time), current_con->time);
                 // Print tools
                 posy++;
                 posx = 33;
@@ -333,6 +335,20 @@ void construction_menu()
                 select = available.size() - 1;
             }
             break;
+        case KEY_NPAGE:
+            update_info = true;
+            select += 15;
+            if ( select > available.size() - 1 ) {
+                select = available.size() - 1;
+            }
+            break;
+        case KEY_PPAGE:
+            update_info = true;
+            select -= 15;
+            if (select < 0) {
+                select = 0;
+            }
+            break;
         case ' ':
         case KEY_ESCAPE:
         case 'Q':
@@ -341,6 +357,8 @@ void construction_menu()
         case ';':
             update_info = true;
             hide_unconstructable = !hide_unconstructable;
+            std::swap(select, oldselect);
+            std::swap(offset, oldoffset);
             load_available_constructions( available, hide_unconstructable );
             break;
         case '\n':
@@ -398,7 +416,7 @@ void move_ppoints_for_construction(const construction &con, int &moves_left) {
     move_ppoints_for_construction("carpentry", con.difficulty, moves_left);
 }
 
-static bool player_can_build(player &p, crafting_inventory_t& pinv, const std::string &desc)
+static bool player_can_build(player &p, const crafting_inventory_t& pinv, const std::string &desc)
 {
     // check all with the same desc to see if player can build any
     std::vector<construction *> cons = constructions_by_desc(desc);
@@ -410,12 +428,12 @@ static bool player_can_build(player &p, crafting_inventory_t& pinv, const std::s
     return false;
 }
 
-static bool player_can_build(player &p, crafting_inventory_t& pinv, construction *con)
+static bool player_can_build(player &p, const crafting_inventory_t& pinv, construction *con)
 {
     if (p.skillLevel(con->skill) < con->difficulty) {
         return false;
     }
-    return pinv.has_all_requirements(*con);
+    return const_cast<crafting_inventory_t&>(pinv).has_all_requirements(*con);
 }
 
 static bool can_construct( const std::string &desc )
@@ -509,7 +527,7 @@ static void place_construction(const std::string &desc)
     wrefresh(g->w_terrain);
 
     int dirx, diry;
-    if (!g->choose_adjacent(_("Contruct where?"), dirx, diry)) {
+    if (!choose_adjacent(_("Contruct where?"), dirx, diry)) {
         return;
     }
 
@@ -594,23 +612,22 @@ bool construct::check_deconstruct(point p)
 
 bool construct::check_up_OK(point)
 {
-    // You're not going to z+1.
-    return (g->levz < 0);
+    // You're not going above +OVERMAP_HEIGHT.
+    return (g->levz < OVERMAP_HEIGHT);
 }
 
 bool construct::check_down_OK(point)
 {
-    // You're not going to z-11.
-    return (g->levz > -10);
+    // You're not going below -OVERMAP_DEPTH.
+    return (g->levz > -OVERMAP_DEPTH);
 }
 
 void construct::done_tree(point p)
 {
-    mvprintz(0, 0, c_red, _("Press a direction for the tree to fall in:"));
     int x = 0, y = 0;
-    do {
-        get_direction(x, y, input());
-    } while (x == -2 || y == -2);
+    while (!choose_direction(_("Press a direction for the tree to fall in:"), x, y)) {
+        // try again
+    }
     x = p.x + x * 3 + rng(-1, 1);
     y = p.y + y * 3 + rng(-1, 1);
     std::vector<point> tree = line_to(p.x, p.y, x, y, rng(1, 8));

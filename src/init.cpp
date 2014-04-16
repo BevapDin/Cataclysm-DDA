@@ -17,6 +17,7 @@
 #include "help.h"
 #include "mapdata.h"
 #include "color.h"
+#include "trap.h"
 #include "monstergenerator.h"
 #include "inventory.h"
 #include "tutorial.h"
@@ -29,7 +30,8 @@
 #include "ammo.h"
 #include "debug.h"
 #include "path_info.h"
-
+#include "iuse.h"
+#include "start_location.h"
 
 #include <string>
 #include <vector>
@@ -140,7 +142,9 @@ void DynamicDataLoader::initialize()
     type_function_map["MONSTER_WHITELIST"] = new StaticFunctionAccessor(
         &MonsterGroupManager::LoadMonsterWhitelist);
     type_function_map["speech"] = new StaticFunctionAccessor(&load_speech);
-    type_function_map["ammunition_type"] = new StaticFunctionAccessor(&ammunition_type::load_ammunition_type);
+    type_function_map["ammunition_type"] = new StaticFunctionAccessor(
+        &ammunition_type::load_ammunition_type);
+    type_function_map["start_location"] = new StaticFunctionAccessor(&start_location::load_location);
 
     // json/colors.json would be listed here, but it's loaded before the others (see curses_start_color())
     // Non Static Function Access
@@ -151,7 +155,7 @@ void DynamicDataLoader::initialize()
 
     type_function_map["vehicle_part"] = new ClassFunctionAccessor<game>(g, &game::load_vehiclepart);
     type_function_map["vehicle"] = new ClassFunctionAccessor<game>(g, &game::load_vehicle);
-    type_function_map["trap"] = new ClassFunctionAccessor<game>(g, &game::load_trap);
+    type_function_map["trap"] = new StaticFunctionAccessor(&load_trap);
     type_function_map["AMMO"] = new ClassFunctionAccessor<Item_factory>(item_controller,
             &Item_factory::load_ammo);
     type_function_map["GUN"] = new ClassFunctionAccessor<Item_factory>(item_controller,
@@ -215,6 +219,7 @@ void DynamicDataLoader::initialize()
     type_function_map["colordef"] = new StaticFunctionAccessor(&load_ingored_type);
     // mod information, ignored, handled by the mod manager
     type_function_map["MOD_INFO"] = new StaticFunctionAccessor(&load_ingored_type);
+    type_function_map["BULLET_PULLING"] = new StaticFunctionAccessor(&iuse::load_bullet_pulling);
 
     // init maps used for loading json data
     init_martial_arts();
@@ -321,7 +326,15 @@ void DynamicDataLoader::load_all_from_json(JsonIn &jsin)
 // load names depending on current locale
 void init_names()
 {
-    std::locale loc("");
+    std::locale loc;
+
+    try {
+        loc = std::locale("");
+    }
+    catch( std::exception ) {
+        loc = std::locale("C");
+    }
+
     std::string loc_name = loc.name();
     if (loc_name == "C") {
         loc_name = "en";
@@ -380,13 +393,14 @@ void DynamicDataLoader::unload_data()
     reset_recipes();
     reset_recipes_qualities();
     g->reset_monitems();
-    g->release_traps();
+    release_traps();
     reset_constructions();
     reset_overmap_terrain();
     reset_region_settings();
     reset_mapgens();
     reset_effect_types();
     reset_speech();
+    iuse::reset_bullet_pulling();
 
     // artifacts are not loaded from json, but must be unloaded anyway.
     artifact_itype_ids.clear();
@@ -416,4 +430,5 @@ void DynamicDataLoader::check_consistency() {
     MonsterGroupManager::check_group_definitions();
     check_recipe_definitions();
     check_furniture_and_terrain();
+    profession::check_definitions();
 }

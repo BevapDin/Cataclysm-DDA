@@ -61,11 +61,12 @@ public:
     static int count();
 
     static bool has_initialized();
-    static void check_definitions();
-
-    void check_definition() const;
     // clear profession map, every profession pointer becames invalid!
     static void reset();
+    /** calls @ref check_definition for each profession */
+    static void check_definitions();
+    /** Check that item/CBM/addiction/skill definitions are valid. */
+    void check_definition() const;
 
     std::string ident() const;
     std::string name() const;

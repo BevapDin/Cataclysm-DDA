@@ -43,12 +43,18 @@ enum oter_dir {
     oter_dir_north, oter_dir_east, oter_dir_west, oter_dir_south
 };
 
+// Here are the global controls for map-extra spawning.
+// The %%% line is chance that a given map square will have an extra
+// (higher = less likely) and the individual numbers are the
+// relative frequencies of each (higher = more likely).
+// Adding or deleting map_extras will affect the amount
+// of others, so be careful.
 map_extras no_extras(0);
 map_extras road_extras(
 // %%% HEL MIL SCI STA DRG SUP PRT MIN CRT FUM 1WY ART
-    50, 40, 25,60,200, 30, 10,  5, 80, 10,  8,  2,  3);
+    75, 40, 25,60,200, 30, 10,  5, 80, 10,  8,  2,  3);
 map_extras field_extras(
-    60, 40, 8, 20, 80, 10, 10,  3, 50, 10,  8,  1,  3);
+    90, 40, 8, 20, 80, 10, 10,  3, 50, 10,  8,  1,  3);
 map_extras subway_extras(
 // %%% HEL MIL SCI STA DRG SUP PRT MIN CRT FUM 1WY ART
     75,  0,  5, 12,  5,  5,  0,  7,  0,  0, 20,  1,  3);
@@ -1674,12 +1680,28 @@ void overmap::draw(WINDOW *w, const tripoint &center,
             const int omx = cursx + i -(om_map_width / 2);
             const int omy = cursy + j -(om_map_height / 2);
             const bool see = overmap_buffer.seen(omx, omy, z);
+            bool los = false;
             if (see) {
                 // Only load terrain if we can actually see it
                 cur_ter = overmap_buffer.ter(omx, omy, z);
+
+                // Check if location is within player line-of-sight
+                if (g->u.overmap_los(omx, omy)) {
+                    los = true;
+                }
             }
             //Check if there is an npc.
             const bool npc_here = overmap_buffer.has_npc(omx, omy, z);
+            // Check for hordes within player line-of-sight
+            bool horde_here = false;
+            if (los) {
+                std::vector<mongroup*> hordes = overmap_buffer.monsters_at(omx, omy, z);
+                for (int ih = 0; ih < hordes.size(); ih++) {
+                    if (hordes[ih]->horde) {
+                        horde_here = true;
+                    }
+                }
+            }
             // and a vehicle
             const bool veh_here = overmap_buffer.has_vehicle(omx, omy, z);
             if (blink && omx == orig.x && omy == orig.y && z == orig.z) {
@@ -1771,6 +1793,10 @@ void overmap::draw(WINDOW *w, const tripoint &center,
                 // Display NPCs only when player can see the location
                 ter_color = c_pink;
                 ter_sym = '@';
+            } else if (blink && horde_here) {
+                // Display Hordes only when within player line-of-sight
+                ter_color = c_green;
+                ter_sym = 'Z';
             } else if (blink && veh_here) {
                 // Display Vehicles only when player can see the location
                 ter_color = c_cyan;
@@ -2087,12 +2113,12 @@ point overmap::draw_overmap(const tripoint& orig, bool debug_mongroup)
     return ret;
 }
 
-void overmap::first_house(int &x, int &y)
+void overmap::first_house(int &x, int &y, const std::string start_location)
 {
     std::vector<point> valid;
     for (int i = 0; i < OMAPX; i++) {
         for (int j = 0; j < OMAPY; j++) {
-            if (ter(i, j, 0) == "shelter") {
+            if (ter(i, j, 0).t().id_base == start_location) {
                 valid.push_back( point(i, j) );
             }
         }
@@ -2924,9 +2950,7 @@ void overmap::polish(const int z, const std::string &terrain_type)
     for (int x = 0; x < OMAPX; x++) {
         for (int y = 0; y < OMAPY; y++) {
             if (check_all || check_ot_type(terrain_type, x, y, z)) {
-                if (check_ot_type("road", x, y, z)) {
-                    good_road("road", x, y, z);
-                } else if (check_ot_type("bridge", x, y, z) &&
+                if (check_ot_type("bridge", x, y, z) &&
                            check_ot_type("bridge", x - 1, y, z) &&
                            check_ot_type("bridge", x + 1, y, z) &&
                            check_ot_type("bridge", x, y - 1, z) &&
@@ -2955,6 +2979,8 @@ void overmap::polish(const int z, const std::string &terrain_type)
                            (!is_river(ter(x, y - 1, z)) ||
                             !is_river(ter(x, y + 1, z)))) {
                     ter(x, y, z) = "road_ew";
+                } else if (check_ot_type("road", x, y, z)) {
+                    good_road("road", x, y, z);
                 }
             }
         }
@@ -2997,6 +3023,21 @@ bool overmap::check_ot_type(const std::string &otype, int x, int y, int z)
     return is_ot_type(otype, oter);
 }
 
+bool overmap::check_ot_type_road(const std::string &otype, int x, int y, int z)
+{
+    const oter_id oter = ter(x, y, z);
+    if(otype == "road" || otype == "bridge" || otype == "hiway") {
+        if(is_ot_type("road", oter) || is_ot_type ("bridge", oter) || is_ot_type("hiway", oter)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    return is_ot_type(otype, oter);
+}
+
+
+
 bool overmap::is_road(int x, int y, int z)
 {
     if (x < 0 || x >= OMAPX || y < 0 || y >= OMAPY) {
@@ -3020,57 +3061,77 @@ bool overmap::is_road_or_highway(int x, int y, int z)
 
 void overmap::good_road(const std::string &base, int x, int y, int z)
 {
-    if (check_ot_type(base, x, y-1, z)) {
-        if (check_ot_type(base, x+1, y, z)) {
-            if (check_ot_type(base, x, y+1, z)) {
-                if (check_ot_type(base, x-1, y, z)) {
+    if (check_ot_type_road(base, x, y-1, z)) {
+        if (check_ot_type_road(base, x+1, y, z)) {
+            if (check_ot_type_road(base, x, y+1, z)) {
+                if (check_ot_type_road(base, x-1, y, z)) {
                     ter(x, y, z) = base + "_nesw";
                 } else {
                     ter(x, y, z) = base + "_nes";
                 }
             } else {
-                if (check_ot_type(base, x-1, y, z)) {
+                if (check_ot_type_road(base, x-1, y, z)) {
                     ter(x, y, z) = base + "_new";
                 } else {
                     ter(x, y, z) = base + "_ne";
                 }
             }
         } else {
-            if (check_ot_type(base, x, y+1, z)) {
+            if (check_ot_type_road(base, x, y+1, z)) {
                 if (check_ot_type(base, x-1, y, z)) {
                     ter(x, y, z) = base + "_nsw";
                 } else {
                     ter(x, y, z) = base + "_ns";
                 }
             } else {
-                if (check_ot_type(base, x-1, y, z)) {
+                if (check_ot_type_road(base, x-1, y, z)) {
                     ter(x, y, z) = base + "_wn";
                 } else {
-                    ter(x, y, z) = base + "_ns";
+                    if(base == "road") {
+                        ter(x, y, z) = base + "_end_south";
+                    } else {
+                        ter(x, y, z) = base + "_ns";
+                    }
                 }
             }
         }
     } else {
-        if (check_ot_type(base, x+1, y, z)) {
-            if (check_ot_type(base, x, y+1, z)) {
-                if (check_ot_type(base, x-1, y, z)) {
+        if (check_ot_type_road(base, x+1, y, z)) {
+            if (check_ot_type_road(base, x, y+1, z)) {
+                if (check_ot_type_road(base, x-1, y, z)) {
                     ter(x, y, z) = base + "_esw";
                 } else {
                     ter(x, y, z) = base + "_es";
                 }
             } else {
-                ter(x, y, z) = base + "_ew";
+                if( check_ot_type_road(base, x-1, y, z)) {
+                    ter(x, y, z) = base + "_ew";
+                } else {
+                    if(base == "road") {
+                        ter(x, y, z) = base + "_end_west";
+                    } else {
+                        ter(x, y, z) = base + "_ew";
+                    }
+                }
             }
         } else {
-            if (check_ot_type(base, x, y+1, z)) {
-                if (check_ot_type(base, x-1, y, z)) {
+            if (check_ot_type_road(base, x, y+1, z)) {
+                if (check_ot_type_road(base, x-1, y, z)) {
                     ter(x, y, z) = base + "_sw";
                 } else {
-                    ter(x, y, z) = base + "_ns";
+                    if(base == "road") {
+                        ter(x, y, z) = base + "_end_north";
+                    } else {
+                        ter(x, y, z) = base + "_ns";
+                    }
                 }
             } else {
-                if (check_ot_type(base, x-1, y, z)) {
-                    ter(x, y, z) = base + "_ew";
+                if (check_ot_type_road(base, x-1, y, z)) {
+                    if(base == "road") {
+                        ter(x, y, z) = base + "_end_east";
+                    } else {
+                        ter(x, y, z) = base + "_ew";
+                    }
                 } else {
                     // No adjoining roads/etc.
                     // Happens occasionally, esp. with sewers.

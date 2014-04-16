@@ -165,4 +165,18 @@ int get_terminal_width();
  */
 int get_terminal_height();
 
+/**
+ * Check whether we're in tile drawing mode. The most important
+ * effect of this is that we don't need to draw to the ASCII
+ * window.
+ *
+ * Ideally, of course, we'd have a unified tile drawing and ASCII
+ * drawing API and use polymorphy, but for the time being there'll
+ * be a lot of switching around in the map drawing code.
+ */
+bool is_draw_tiles_mode();
+
+void play_music(std::string playlist);
+void play_sound(std::string identifier);
+
 #endif

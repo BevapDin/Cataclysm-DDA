@@ -758,6 +758,7 @@
     <ClInclude Include="..\src\addiction.h" />
     <ClInclude Include="..\src\advanced_inv.h" />
     <ClInclude Include="..\src\ammo.h" />
+    <ClInclude Include="..\src\armor_layers.h" />
     <ClInclude Include="..\src\artifact.h" />
     <ClInclude Include="..\src\auto_pickup.h" />
     <ClInclude Include="..\src\basecamp.h" />
@@ -854,6 +855,7 @@
     <ClInclude Include="..\src\setvector.h" />
     <ClInclude Include="..\src\skill.h" />
     <ClInclude Include="..\src\speech.h" />
+    <ClInclude Include="..\src\start_location.h" />
     <ClInclude Include="..\src\text_snippets.h" />
     <ClInclude Include="..\src\tileray.h" />
     <ClInclude Include="..\src\tile_id_data.h" />
@@ -925,6 +927,7 @@
     <ClCompile Include="..\src\item_group.cpp" />
     <ClCompile Include="..\src\itypedef.cpp" />
     <ClCompile Include="..\src\iuse.cpp" />
+    <ClCompile Include="..\src\iuse_actor.cpp" />
     <ClCompile Include="..\src\iuse_software.cpp" />
     <ClCompile Include="..\src\iuse_software_kitten.cpp" />
     <ClCompile Include="..\src\iuse_software_snake.cpp" />
@@ -987,6 +990,7 @@
     <ClCompile Include="..\src\setvector.cpp" />
     <ClCompile Include="..\src\skill.cpp" />
     <ClCompile Include="..\src\speech.cpp" />
+    <ClCompile Include="..\src\start_location.cpp" />
     <ClCompile Include="..\src\text_snippets.cpp" />
     <ClCompile Include="..\src\tileray.cpp" />
     <ClCompile Include="..\src\translations.cpp" />

@@ -1128,7 +1128,11 @@ void item::serialize(JsonOut &json, bool save_contents) const
         json.member("contents");
         json.start_array();
         for (int k = 0; k < contents.size(); k++) {
-            contents[k].serialize(json, false); // no matryoshka dolls
+            if(!(contents[k].contents.empty()) && contents[k].contents[0].is_gunmod()) {
+                contents[k].serialize(json, true); // save gun mods of holstered pistol
+            } else {
+                contents[k].serialize(json, false); // no matryoshka dolls
+            }
         }
         json.end_array();
     }
@@ -1213,6 +1217,7 @@ void vehicle::deserialize(JsonIn &jsin)
     data.read("cruise_on", cruise_on);
     data.read("engine_on", engine_on);
     data.read("has_pedals", has_pedals);
+    data.read("has_hand_rims", has_hand_rims);
     data.read("tracking_on", tracking_on);
     data.read("lights_on", lights_on);
     data.read("overhead_lights_on", overhead_lights_on);
@@ -1272,6 +1277,7 @@ void vehicle::serialize(JsonOut &json) const
     json.member( "cruise_on", cruise_on );
     json.member( "engine_on", engine_on );
     json.member( "has_pedals", has_pedals );
+    json.member( "has_hand_rims", has_hand_rims );
     json.member( "tracking_on", tracking_on );
     json.member( "lights_on", lights_on );
     json.member( "overhead_lights_on", overhead_lights_on );

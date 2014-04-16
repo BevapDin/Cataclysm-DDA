@@ -22,6 +22,8 @@
 #  make RELEASE=1
 # Tiles (uses SDL rather than ncurses)
 #  make TILES=1
+# Sound (requires SDL, so TILES must be enabled)
+#  make TILES=1 SOUND=1
 # Disable gettext, on some platforms the dependencies are hard to wrangle.
 #  make LOCALIZE=0
 # Compile localization files for specified languages
@@ -79,6 +81,8 @@ BUILD_DIR = $(CURDIR)
 SRC_DIR = src
 LUA_DIR = lua
 LUASRC_DIR = src/lua
+# if you have LUAJIT installed, try make LUA_BINARY=luajit for extra speed
+LUA_BINARY = lua
 LOCALIZE = 1
 
 
@@ -179,6 +183,16 @@ ifeq ($(TARGETSYSTEM),WINDOWS)
   RFLAGS = -J rc -O coff
 endif
 
+ifdef SOUND
+  ifndef TILES
+    $(error "SOUND=1 only works with TILES=1")
+  endif
+  CXXFLAGS += $(shell pkg-config --cflags SDL2_mixer)
+  CXXFLAGS += -DSDL_SOUND
+  LDFLAGS += $(shell pkg-config --libs SDL2_mixer)
+  LDFLAGS += -lvorbisfile -lvorbis -logg
+endif
+
 ifdef LUA
   ifeq ($(TARGETSYSTEM),WINDOWS)
     # Windows expects to have lua unpacked at a specific location
@@ -222,9 +236,9 @@ ifdef SDL
     else # libsdl build
       DEFINES += -DOSX_SDL2_LIBS
       # handle #include "SDL2/SDL.h" and "SDL.h"
-      CXXFLAGS += $(shell sdl-config --cflags) \
-		  -I$(shell dirname $(shell sdl-config --cflags | sed 's/-I\(.[^ ]*\) .*/\1/'))
-      LDFLAGS += $(shell sdl-config --libs) -lSDL2_ttf
+      CXXFLAGS += $(shell sdl2-config --cflags) \
+		  -I$(shell dirname $(shell sdl2-config --cflags | sed 's/-I\(.[^ ]*\) .*/\1/'))
+      LDFLAGS += -framework Cocoa $(shell sdl2-config --libs) -lSDL2_ttf
       ifdef TILES
 	LDFLAGS += -lSDL2_image
       endif
@@ -292,12 +306,6 @@ ifeq ($(TARGETSYSTEM),WINDOWS)
 endif
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
-ifdef SDL
-  ifeq ($(NATIVE),osx)
-    OBJS += $(ODIR)/SDLMain.o
-  endif
-endif
-
 ifdef LANGUAGES
   L10N = localization
 endif
@@ -328,13 +336,15 @@ $(TARGET).prof: $(ODIR) $(DDIR) $(PGOBJS)
 	$(LD) $(W32FLAGS) -o $(TARGET).prof $(DEFINES) $(CXXFLAGS) \
           $(PGOBJS) $(LDFLAGS)
 
-.PHONY: version
+.PHONY: version json-verify
 version:
 	@( VERSION_STRING=$(VERSION) ; \
             [ -e ".git" ] && GITVERSION=$$( git describe --tags --always --dirty --match "[0-9A-Z]*.[0-9A-Z]*" ) && VERSION_STRING=$$GITVERSION ; \
             [ -e "$(SRC_DIR)/version.h" ] && OLDVERSION=$$(grep VERSION $(SRC_DIR)/version.h|cut -d '"' -f2) ; \
             if [ "x$$VERSION_STRING" != "x$$OLDVERSION" ]; then echo "#define VERSION \"$$VERSION_STRING\"" | tee $(SRC_DIR)/version.h ; fi \
          )
+json-verify:
+	$(LUA_BINARY) lua/json_verifier.lua
 
 $(ODIR):
 	mkdir -p $(ODIR)
@@ -357,7 +367,7 @@ $(ODIR)/pg-%.o: $(SRC_DIR)/%.cpp
 version.cpp: version
 
 $(LUASRC_DIR)/catabindings.cpp: $(LUA_DIR)/class_definitions.lua $(LUASRC_DIR)/generate_bindings.lua
-	cd $(LUASRC_DIR) && lua generate_bindings.lua
+	cd $(LUASRC_DIR) && $(LUA_BINARY) generate_bindings.lua
 
 $(SRC_DIR)/catalua.cpp: $(LUA_DEPENDENCIES)
 

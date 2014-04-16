@@ -90,7 +90,6 @@ void game::init_fields()
             {c_white, c_ltgray, c_dkgray}, {true, false, false},{false, true, true},  300,
             {0,0,0}
         },
-
         {
             {_("hazy cloud"),_("toxic gas"),_("thick toxic gas")}, '8', 8,
             {c_white, c_ltgreen, c_green}, {true, false, false},{false, true, true},  900,
@@ -192,6 +191,27 @@ void game::init_fields()
             {_("gooey scraps"), _("icky mess"), _("heap of squishy gore")}, '~', 0,
             {c_ltgray, c_ltgray, c_dkgray}, {true, true, true}, {false, false, false}, 2500,
             {0,0,0}
+        },
+        {
+            {_("swirl of tobacco smoke"), _("tobacco smoke"), _("thick tobacco smoke")}, '%', 8,
+            {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  350,
+            {0,0,0}
+        },
+        {
+            {_("swirl of pot smoke"), _("pot smoke"), _("thick pot smoke")}, '%', 8,
+            {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  325,
+            {0,0,0}
+        },
+
+        {
+            {_("swirl of crack smoke"), _("crack smoke"), _("thick crack smoke")}, '%', 8,
+            {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  225,
+            {0,0,0}
+        },
+        {
+            {_("swirl of meth smoke"), _("meth smoke"), _("thick meth smoke")}, '%', 8,
+            {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  275,
+            {0,0,0}
         }
     };
     for(int i=0; i<num_fields; i++) {
@@ -256,20 +276,30 @@ bool map::process_fields()
  bool found_field = false;
  for (int x = 0; x < my_MAPSIZE; x++) {
   for (int y = 0; y < my_MAPSIZE; y++) {
-   if (grid[x + y * my_MAPSIZE]->field_count > 0)
-    found_field |= process_fields_in_submap(x + y * my_MAPSIZE);
+   submap * const current_submap = get_submap_at_grid(x, y);
+   if (current_submap->field_count > 0)
+    found_field |= process_fields_in_submap(current_submap, x, y);
   }
+ }
+ if (found_field) {
+     // For now, just always dirty the transparency cache
+     // when a field might possibly be changed.
+     // TODO: check if there are any fields(mostly fire)
+     //       that frequently change, if so set the dirty
+     //       flag, otherwise only set the dirty flag if
+     //       something actually changed
+     set_transparency_cache_dirty();
  }
  return found_field;
 }
 
 /*
 Function: process_fields_in_submap
-Iterates over every field on every tile of the given submap indicated by NONANT parameter gridn.
+Iterates over every field on every tile of the given submap given as parameter.
 This is the general update function for field effects. This should only be called once per game turn.
 If you need to insert a new field behavior per unit time add a case statement in the switch below.
 */
-bool map::process_fields_in_submap(int gridn)
+bool map::process_fields_in_submap(submap * const current_submap, const int submap_x, const int submap_y)
 {
     // Realistically this is always true, this function only gets called if fields exist.
     bool found_field = false;
@@ -283,16 +313,16 @@ bool map::process_fields_in_submap(int gridn)
 
     bool skipIterIncr = false; // keep track on when not to increment it[erator]
 
-    //Loop through all tiles in this submap indicated by gridn
+    //Loop through all tiles in this submap indicated by current_submap
     for (int locx = 0; locx < SEEX; locx++) {
         for (int locy = 0; locy < SEEY; locy++) {
             // This is a translation from local coordinates to submap coords.
             // All submaps are in one long 1d array.
-            int x = locx + SEEX * (gridn % my_MAPSIZE);
-            int y = locy + SEEY * int(gridn / my_MAPSIZE);
+            int x = locx + submap_x * SEEX;
+            int y = locy + submap_y * SEEY;
             // get a copy of the field variable from the submap;
             // contains all the pointers to the real field effects.
-            field &curfield = grid[gridn]->fld[locx][locy];
+            field &curfield = current_submap->fld[locx][locy];
             for(std::map<field_id, field_entry *>::iterator it = curfield.getFieldStart();
                 it != curfield.getFieldEnd();) {
                 //Iterating through all field effects in the submap's field.
@@ -374,6 +404,16 @@ bool map::process_fields_in_submap(int gridn)
 
                         // TODO-MATERIALS: use fire resistance
                     case fd_fire: {
+                        std::vector<item> &items_here = i_at(x, y);
+                        for (size_t i = 0; i < items_here.size(); i++) {
+                            if (items_here[i].type->explode_in_fire()) {
+                                // make a copy and let the copy explode
+                                item tmp(items_here[i]);
+                                items_here.erase(items_here.begin() + i);
+                                i--;
+                                tmp.detonate(point(x, y));
+                            }
+                        }
                         // Consume items as fuel to help us grow/last longer.
                         bool destroyed = false; //Is the item destroyed?
                         // Volume, Smoke generation probability, consumed items count
@@ -741,6 +781,55 @@ bool map::process_fields_in_submap(int gridn)
                         spread_gas( this, cur, x, y, curtype, 50, 30 );
                         break;
 
+                    case fd_cigsmoke:
+                        spread_gas( this, cur, x, y, curtype, 250, 65 );
+                        break;
+
+                    case fd_weedsmoke: {
+                        spread_gas( this, cur, x, y, curtype, 200, 60 );
+
+                        if(one_in(20)) {
+                            int npcdex = g->npc_at(x, y);
+                            if (npcdex != -1) {
+                                npc *p = g->active_npc[npcdex];
+                                if(p->is_friend()) {
+                                    p->say(one_in(10) ? _("Whew... smells like skunk!") : _("Man, that smells like some good shit!"));
+                                }
+                            }
+                        }
+
+                    }
+                        break;
+
+                    case fd_methsmoke: {
+                        spread_gas( this, cur, x, y, curtype, 175, 70 );
+
+                        if(one_in(20)) {
+                            int npcdex = g->npc_at(x, y);
+                            if (npcdex != -1) {
+                                npc *p = g->active_npc[npcdex];
+                                if(p->is_friend()) {
+                                    p->say(_("I don't know... should you really be smoking that stuff?"));
+                                }
+                            }
+                        }
+                    }
+                        break;
+
+                    case fd_cracksmoke: {
+                        spread_gas( this, cur, x, y, curtype, 175, 80 );
+
+                        if(one_in(20)) {
+                            int npcdex = g->npc_at(x, y);
+                            if (npcdex != -1) {
+                                npc *p = g->active_npc[npcdex];
+                                if(p->is_friend()) {
+                                    p->say(one_in(2) ? _("Ew, smells like burning rubber!") : _("Ugh, that smells rancid!"));
+                                }
+                            }
+                        }
+                    }
+                        break;
 
                     case fd_nuke_gas:
                         radiation(x, y) += rng(0, cur->getFieldDensity());
@@ -978,8 +1067,8 @@ bool map::process_fields_in_submap(int gridn)
                         cur->setFieldDensity(cur->getFieldDensity() - 1);
                     }
                     if (should_dissipate == true || !cur->isAlive()) { // Totally dissapated.
-                        grid[gridn]->field_count--;
-                        it = grid[gridn]->fld[locx][locy].removeField(cur->getFieldType());
+                        current_submap->field_count--;
+                        it = current_submap->fld[locx][locy].removeField(cur->getFieldType());
                         continue;
                     }
                 }
@@ -1040,6 +1129,10 @@ void map::step_in_field(int x, int y)
         case fd_null:
         case fd_blood: // It doesn't actually do anything //necessary to add other types of blood?
         case fd_bile:  // Ditto
+        case fd_cigsmoke:
+        case fd_weedsmoke:
+        case fd_methsmoke:
+        case fd_cracksmoke:
             //break instead of return in the event of post-processing in the future;
             // also we're in a loop now!
             break;
@@ -1176,14 +1269,19 @@ void map::step_in_field(int x, int y)
         case fd_toxic_gas:
             // Toxic gas at low levels poisons you.
             // Toxic gas at high levels will cause very nasty poison.
-            if (cur->getFieldDensity() == 2 && (!inside || (cur->getFieldDensity() == 3 && inside))) {
-                g->u.add_env_effect("poison", bp_mouth, 5, 30);
-            }
-            else if (cur->getFieldDensity() == 3 && !inside)
             {
-                g->u.infect("badpoison", bp_mouth, 5, 30);
-            } else if (cur->getFieldDensity() == 1 && (!inside)) {
-                g->u.add_env_effect("poison", bp_mouth, 2, 20);
+                bool inhaled = false;
+                if( cur->getFieldDensity() == 2 &&
+                    (!inside || (cur->getFieldDensity() == 3 && inside)) ) {
+                    inhaled = g->u.add_env_effect("poison", bp_mouth, 5, 30);
+                } else if( cur->getFieldDensity() == 3 && !inside ) {
+                    inhaled = g->u.infect("badpoison", bp_mouth, 5, 30);
+                } else if( cur->getFieldDensity() == 1 && (!inside) ) {
+                    inhaled = g->u.add_env_effect("poison", bp_mouth, 2, 20);
+                }
+                if( inhaled ) {
+                    g->add_msg(_("You feel sick from inhaling the %s"), cur->name().c_str());
+                }
             }
             break;
 

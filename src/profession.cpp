@@ -156,6 +156,11 @@ int profession::count()
     return _all_profs.size();
 }
 
+void profession::reset()
+{
+    _all_profs.clear();
+}
+
 void profession::check_definitions()
 {
     for (profmap::const_iterator a = _all_profs.begin(); a != _all_profs.end(); ++a) {
@@ -170,18 +175,25 @@ void profession::check_definition() const
             debugmsg("item %s for profession %s does not exist", a->c_str(), _ident.c_str());
         }
     }
-    // TODO: check addictions
+    for (std::vector<std::string>::const_iterator a = _starting_items_female.begin(); a != _starting_items_female.end(); ++a) {
+        if (!item_controller->has_template(*a)) {
+            debugmsg("item %s for profession %s does not exist", a->c_str(), _ident.c_str());
+        }
+    }
+    for (std::vector<std::string>::const_iterator a = _starting_items_male.begin(); a != _starting_items_male.end(); ++a) {
+        if (!item_controller->has_template(*a)) {
+            debugmsg("item %s for profession %s does not exist", a->c_str(), _ident.c_str());
+        }
+    }
     for (std::vector<std::string>::const_iterator a = _starting_CBMs.begin(); a != _starting_CBMs.end(); ++a) {
         if (bionics.count(*a) == 0) {
             debugmsg("bionic %s for profession %s does not exist", a->c_str(), _ident.c_str());
         }
     }
-    // TODO: check skills
-}
-
-void profession::reset()
-{
-    _all_profs.clear();
+    for (StartingSkillList::const_iterator a = _starting_skills.begin(); a != _starting_skills.end(); ++a) {
+        // Skill::skill shows a debug message if the skill is unknown
+        Skill::skill(a->first);
+    }
 }
 
 bool profession::has_initialized()

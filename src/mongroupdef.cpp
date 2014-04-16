@@ -364,6 +364,7 @@ void init_translation() {
     monStr2monId["mon_halfworm"] = mon_halfworm;
     monStr2monId["mon_boomer"] = mon_boomer;
     monStr2monId["mon_boomer_fungus"] = mon_boomer_fungus;
+    monStr2monId["mon_zombie_gasbag"] = mon_zombie_gasbag;
     monStr2monId["mon_skeleton"] = mon_skeleton;
     monStr2monId["mon_triffid"] = mon_triffid;
     monStr2monId["mon_triffid_young"] = mon_triffid_young;
@@ -446,6 +447,7 @@ void init_translation() {
     monStr2monId["mon_spider_wolf"] = mon_spider_wolf;
     monStr2monId["mon_spider_wolf_giant"] = mon_spider_wolf_giant;
     monStr2monId["mon_spider_web"] = mon_spider_web;
+    monStr2monId["mon_spider_web_s"] = mon_spider_web_s;
     monStr2monId["mon_spider_web_giant"] = mon_spider_web_giant;
     monStr2monId["mon_spider_jumping"] = mon_spider_jumping;
     monStr2monId["mon_spider_jumping_giant"] = mon_spider_jumping_giant;
@@ -453,6 +455,7 @@ void init_translation() {
     monStr2monId["mon_spider_trapdoor_giant"] = mon_spider_trapdoor_giant;
     monStr2monId["mon_spider_widow"] = mon_spider_widow;
     monStr2monId["mon_spider_widow_giant"] = mon_spider_widow_giant;
+    monStr2monId["mon_spider_widow_giant_s"] = mon_spider_widow_giant_s;
     monStr2monId["mon_zombie"] = mon_zombie;
     monStr2monId["mon_zombie_cop"] = mon_zombie_cop;
     monStr2monId["mon_zombie_shrieker"] = mon_zombie_shrieker;

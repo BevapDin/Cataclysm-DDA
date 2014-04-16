@@ -24,6 +24,28 @@
   },
 
   {
+    "id": "generic_folded_vehicle",
+    "type": "TOOL",
+    "symbol": "/",
+    "color": "light_gray",
+    "name": "seeing this is a bug",
+    "description": "seeing this is a bug",
+    "price": 0,
+    "weight": 0,
+    "volume": 0,
+    "bashing": 0,
+    "cutting": 0,
+    "to_hit": 0,
+    "max_charges": 0,
+    "initial_charges": 0,
+    "charges_per_use": 0,
+    "turns_per_charge": 0,
+    "use_action": "UNFOLD_GENERIC",
+    "ammo": "NULL",
+    "revert_to": "null"
+  },
+
+  {
     "type" : "ITEM_CATEGORY",
     "id" : "spare_parts",
     "name" : "spare parts",
@@ -138,8 +160,8 @@
     "bashing": 0,
     "cutting": 0,
     "to_hit": 0,
-    "max_charges": 20,
-    "initial_charges": 20,
+    "max_charges": 32,
+    "initial_charges": 32,
     "charges_per_use": 1,
     "turns_per_charge": 0,
     "ammo": "NULL",
@@ -241,7 +263,7 @@
     "revert_to": "null",
     "functions": [ [ "func:hammer", 1, -1 ], ["func:hammering"], ["func:nailing"] ],
     "use_action": "HAMMER",
-	"qualities": [["HAMMER", 3], ["HAMMER_G", 1]]
+	"qualities": [["HAMMER", 3], ["HAMMER_FINE", 1]]
   },
 
   {
@@ -377,11 +399,20 @@
     "to_hit": 2,
     "max_charges": 500,
     "initial_charges": 500,
-    "charges_per_use": 0,
+    "charges_per_use": 1,
     "turns_per_charge": 0,
     "ammo": "gasoline",
     "revert_to": "null",
-    "use_action": "GASOLINE_LANTERN_OFF"
+    "use_action": {
+        "type": "transform",
+        "target": "gasoline_lantern_on",
+        "active": true,
+        "msg": "You turn the lamp on.",
+        "need_fire": 1,
+        "need_fire_msg": "You need a lighter!",
+        "need_charges": 1,
+        "need_charges_msg": "The lamp is empty."
+    }
   },
 
   {
@@ -405,7 +436,12 @@
     "turns_per_charge": 20,
     "ammo": "gasoline",
     "revert_to": "gasoline_lantern",
-    "use_action": "GASOLINE_LANTERN_ON"
+    "use_action": {
+        "type": "auto_transform",
+        "target": "gasoline_lantern",
+        "when_underwater": "The lantern is extinguished.",
+        "msg": "The lantern is extinguished."
+    }
   },
 
   {
@@ -424,11 +460,20 @@
     "to_hit": 2,
     "max_charges": 800,
     "initial_charges": 800,
-    "charges_per_use": 0,
+    "charges_per_use": 1,
     "turns_per_charge": 0,
     "ammo": "lamp_oil",
     "revert_to": "null",
-    "use_action": "OIL_LAMP_OFF"
+    "use_action": {
+        "type": "transform",
+        "target": "oil_lamp_on",
+        "active": true,
+        "msg": "You turn the lamp on.",
+        "need_fire": 1,
+        "need_fire_msg": "You need a lighter!",
+        "need_charges": 1,
+        "need_charges_msg": "The lamp is empty."
+    }
   },
 
   {
@@ -452,7 +497,12 @@
     "turns_per_charge": 20,
     "ammo": "lamp_oil",
     "revert_to": "oil_lamp",
-    "use_action": "OIL_LAMP_ON"
+    "use_action": {
+        "type": "auto_transform",
+        "target": "oil_lamp",
+        "when_underwater": "The lantern is extinguished.",
+        "msg": "The lantern is extinguished."
+    }
   },
 
   {
@@ -471,11 +521,18 @@
     "to_hit": 2,
     "max_charges": 100,
     "initial_charges": 100,
-    "charges_per_use": 0,
+    "charges_per_use": 1,
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "use_action": "LIGHT_OFF"
+    "use_action": {
+        "type": "transform",
+        "msg": "You turn the flashlight on.",
+        "target": "flashlight_on",
+        "active": true,
+        "need_charges": 1,
+        "need_charges_msg": "The flashlights batteries are dead."
+    }
   },
 
   {
@@ -499,7 +556,11 @@
     "turns_per_charge": 15,
     "ammo": "battery",
     "revert_to": "flashlight",
-    "use_action": "LIGHT_ON"
+    "use_action": {
+        "type": "auto_transform",
+        "msg": "You turn the flashlight off.",
+        "target": "flashlight"
+    }
   },
 
   {
@@ -545,7 +606,12 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "LIGHTSTRIP"
+    "use_action": {
+        "type": "transform",
+        "target": "lightstrip",
+        "active": true,
+        "msg": "You irreversibly activate the lightstrip."
+    }
   },
 
   {
@@ -569,7 +635,12 @@
     "turns_per_charge": 120,
     "ammo": "NULL",
     "revert_to": "lightstrip_dead",
-    "use_action": "LIGHTSTRIP_ACTIVE"
+    "use_action": {
+        "type": "auto_transform",
+        "target": "lightstrip_dead",
+        "non_interactive_msg": "You can not deactivate the lightstrip.",
+        "msg": "The lightstrip dies."
+    }
   },
 
   {
@@ -592,7 +663,12 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "GLOWSTICK"
+    "use_action": {
+        "type": "transform",
+        "target": "glowstick_lit",
+        "active": true,
+        "msg": "You activate the glowstick."
+    }
   },
 
   {
@@ -616,7 +692,12 @@
     "turns_per_charge": 2,
     "ammo": "NULL",
     "revert_to": "glowstick_dead",
-    "use_action": "GLOWSTICK_ACTIVE"
+    "use_action": {
+        "type": "auto_transform",
+        "target": "glowstick_dead",
+        "non_interactive_msg": "You can't turn off a glowstick.",
+        "msg": "The glowstick fades out."
+    }
   },
 
   {
@@ -662,7 +743,12 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "HANDFLARE"
+    "use_action": {
+        "type": "transform",
+        "target": "handflare_lit",
+        "active": true,
+        "msg": "You strike your flare and light it."
+    }
   },
 
   {
@@ -686,7 +772,12 @@
     "turns_per_charge": 2,
     "ammo": "NULL",
     "revert_to": "handflare_dead",
-    "use_action": "HANDFLARE_LIT"
+    "use_action": {
+        "type": "auto_transform",
+        "target": "handflare_dead",
+        "non_interactive_msg": "You can't turn off a flare.",
+        "msg": "The flare sputters out."
+    }
   },
 
   {
@@ -1346,7 +1437,8 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "use_action": "CARVER_OFF"
+    "use_action": "CARVER_OFF",
+    "flags": ["SHEATH_SWORD"]
   },{
     "id": "carver_on",
     "type": "TOOL",
@@ -1430,11 +1522,16 @@
     "to_hit": -3,
     "max_charges": 100,
     "initial_charges": 50,
-    "charges_per_use": 0,
+    "charges_per_use": 1,
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "use_action": "CIRCSAW_OFF"
+    "use_action": {
+        "type": "transform",
+        "target": "circsaw_on",
+        "active": true,
+        "msg": "You turn on the circular saw."
+    }
   },{
     "id": "circsaw_on",
     "type": "TOOL",
@@ -1514,7 +1611,7 @@
     "description": "A long wooden pole with chainsaws impractically attached to both ends. The product of either genius or insanity, but not both; the weight ensures that only someone both strong and very skilled could possibly hope to use it.",
     "price": 80000,
     "material": ["plastic", "steel"],
-    "techniques" : ["WBLOCK_1", "WIDE"],
+    "techniques" : ["WBLOCK_1", "SPIN"],
     "weight": 14254,
     "volume": 30,
     "bashing": 20,
@@ -1536,7 +1633,7 @@
     "description": "A long wooden pole with chainsaws impractically attached to both ends. They are currently on and draining gasoline; use this item to turn them off.",
     "price": 80000,
     "material": ["plastic", "steel"],
-    "techniques" : ["WBLOCK_1", "WIDE", "SWEEP"],
+    "techniques" : ["WBLOCK_1", "SPIN", "SWEEP"],
     "weight": 14254,
     "volume": 30,
     "bashing": 4,
@@ -2012,7 +2109,15 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "PIPEBOMB"
+    "use_action": {
+        "type": "transform",
+        "msg": "You light the fuse on the pipe bomb.",
+        "active": true,
+        "need_fire": 1,
+        "need_fire_msg": "You need a lighter!",
+        "target": "pipebomb_act",
+        "target_charges": 3
+    }
   },
 
   {
@@ -2060,7 +2165,13 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "GRENADE"
+    "use_action": {
+        "type": "transform",
+        "target": "grenade_act",
+        "target_charges": 5,
+        "active": true,
+        "msg": "You pull the pin on the grenade."
+    }
   },
 
   {
@@ -2084,7 +2195,14 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "GRENADE_ACT"
+    "use_action": {
+        "type": "explosion",
+        "sound_volume": 0,
+        "sound_msg": "Tick.",
+        "no_deactivate_msg": "You've already pulled the %s's pin, try throwing it instead.",
+        "explosion_power": 12,
+        "explosion_shrapnel": 28
+    }
   },
 
   {
@@ -2156,7 +2274,13 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "FLASHBANG"
+    "use_action": {
+        "type": "transform",
+        "target": "flashbang_act",
+        "target_charges": 5,
+        "active": true,
+        "msg": "You pull the pin on the flashbang."
+    }
   },
 
   {
@@ -2180,7 +2304,13 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "FLASHBANG_ACT"
+    "use_action": {
+        "type": "explosion",
+        "sound_volume": 0,
+        "sound_msg": "Tick.",
+        "no_deactivate_msg": "You've already pulled the %s's pin, try throwing it instead.",
+        "do_flashbang": true
+    }
   },
 
   {
@@ -2204,7 +2334,13 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "EMPBOMB"
+    "use_action": {
+        "type": "transform",
+        "target": "EMPbomb_act",
+        "target_charges": 3,
+        "active": true,
+        "msg": "You pull the pin on the EMP grenade."
+    }
   },
 
   {
@@ -2228,7 +2364,15 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "EMPBOMB_ACT"
+    "use_action": {
+        "type": "explosion",
+        "sound_volume": 0,
+        "sound_msg": "Tick.",
+        "no_deactivate_msg": "You've already pulled the %s's pin, try throwing it instead.",
+        "draw_explosion_radius": 4,
+        "draw_explosion_color": "ltblue",
+        "emp_blast_radius": 4
+    }
   },
 
   {
@@ -2252,7 +2396,13 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "SCRAMBLER"
+    "use_action": {
+        "type": "transform",
+        "target": "scrambler_act",
+        "target_charges": 3,
+        "active": true,
+        "msg": "You pull the pin on the scrambler grenade."
+    }
   },
 
   {
@@ -2276,7 +2426,15 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "SCRAMBLER_ACT"
+    "use_action": {
+        "type": "explosion",
+        "sound_volume": 0,
+        "sound_msg": "Tick.",
+        "no_deactivate_msg": "You've already pulled the %s's pin, try throwing it instead.",
+        "draw_explosion_radius": 4,
+        "draw_explosion_color": "cyan",
+        "scrambler_blast_radius": 4
+    }
   },
 
   {
@@ -2300,7 +2458,13 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "GASBOMB"
+    "use_action": {
+        "type": "transform",
+        "target": "gasbomb_act",
+        "target_charges": 20,
+        "active": true,
+        "msg": "You pull the pin on the teargas canister."
+    }
   },
 
   {
@@ -2324,7 +2488,16 @@
     "ammo": "NULL",
     "revert_to": "canister_empty",
     "category": "weapons",
-    "use_action": "GASBOMB_ACT"
+    "use_action": {
+        "type": "explosion",
+        "sound_volume": 0,
+        "sound_msg": "Tick.",
+        "no_deactivate_msg": "You've already pulled the %s's pin, try throwing it instead.",
+        "fields_radius": 3,
+        "fields_type": "fd_tear_gas",
+        "fields_min_density": 3,
+        "fields_max_density": 3
+    }
   },
 
   {
@@ -2348,7 +2521,13 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "SMOKEBOMB"
+    "use_action": {
+        "type": "transform",
+        "target": "smokebomb_act",
+        "target_charges": 20,
+        "active": true,
+        "msg": "You pull the pin on the smoke bomb."
+    }
   },
 
   {
@@ -2372,7 +2551,16 @@
     "ammo": "NULL",
     "revert_to": "canister_empty",
     "category": "weapons",
-    "use_action": "SMOKEBOMB_ACT"
+    "use_action": {
+        "type": "explosion",
+        "sound_volume": 0,
+        "sound_msg": "Tick.",
+        "no_deactivate_msg": "You've already pulled the %s's pin, try throwing it instead.",
+        "fields_radius": 2,
+        "fields_type": "fd_smoke",
+        "fields_min_density": 1,
+        "fields_max_density": 3
+    }
   },
 
   {   "id" : "flamable_arrow",
@@ -2468,7 +2656,14 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "ACIDBOMB"
+    "use_action": {
+        "type": "transform",
+        "target": "acidbomb_act",
+        "target_charges": 1,
+        "msg": "You remove the divider, and the chemicals mix.",
+        "active": true,
+        "moves": 150
+    }
   },
 
   {
@@ -2516,7 +2711,19 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "DYNAMITE"
+    "explode_in_fire" : {
+        "power": 60,
+        "shrapnel": 0
+    },
+    "use_action": {
+        "type": "transform",
+        "target": "dynamite_act",
+        "target_charges": 20,
+        "need_fire": 1,
+        "need_fire_msg": "You need a lighter!",
+        "active": true,
+        "msg": "You light the dynamite."
+    }
   },
 
   {
@@ -2540,7 +2747,18 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "DYNAMITE_ACT"
+    "explode_in_fire" : {
+        "power": 60,
+        "shrapnel": 0
+    },
+    "use_action": {
+        "type": "explosion",
+        "sound_volume": 0,
+        "sound_msg": "ssss...",
+        "no_deactivate_msg": "You've already lit the %s, try throwing it instead.",
+        "explosion_power": 60,
+        "explosion_shrapnel": 0
+    }
   },
 
   {
@@ -2682,7 +2900,18 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "MININUKE_ACT"
+    "use_action": {
+        "type": "explosion",
+        "sound_volume": 2,
+        "sound_msg": "Tick.",
+        "no_deactivate_msg": "You've already set the %s's timer, you might want to get away from it.",
+        "explosion_power": 200,
+        "explosion_shrapnel": 0,
+        "fields_type": "fd_nuke_gas",
+        "fields_radius": 4,
+        "fields_min_density": 3,
+        "fields_max_density": 3
+    }
   },
 
   {
@@ -2910,7 +3139,8 @@
      "ammo" : "battery",
      "revert_to" : "null",
      "category": "weapons",
-     "use_action" : "TAZER"
+     "use_action" : "TAZER",
+     "flags": ["SHEATH_KNIFE"]
   },
 
   {
@@ -2948,9 +3178,8 @@
     "description" : "This is a reinforced plastic tonfa; the core is hollowed out and is filled with capacitors and a high-yield rechargeable storage battery.  When a switch on the handle is pressed, a high-voltage current is transmitted to the two electrodes mounted in the end of the weapon, and by extension to anyone unfortunate enough to be in contact with them. The integral flashlight is turned on, continually draining power and lighting the surrounding area.",
     "price" : 170000,
     "material" : ["plastic", "steel"],
-    "flags": [ "LIGHT_100", "CHARGEDIM" ],
+    "flags": [ "LIGHT_100", "CHARGEDIM", "DURABLE_MELEE" ],
     "techniques" : ["WBLOCK_2", "RAPID"],
-    "flags" : ["DURABLE_MELEE"],
     "weight" : 726,
     "volume" : 9,
     "bashing" : 14,
@@ -3032,7 +3261,8 @@
      "turns_per_charge": 0,
      "ammo": "battery",
      "revert_to": "null",
-     "use_action": "PORTABLE_GAME"
+     "use_action": "PORTABLE_GAME",
+     "flags": ["SHEATH_KNIFE"]
   },
 
   {
@@ -3195,7 +3425,14 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "C4ARMED"
+    "use_action": {
+        "type": "explosion",
+        "sound_volume": 0,
+        "sound_msg": "Tick.",
+        "no_deactivate_msg": "You've already set the %s's timer, you might want to get away from it.",
+        "explosion_power": 40,
+        "explosion_shrapnel": 3
+    }
   },
 
   {
@@ -3407,7 +3644,7 @@
     "volume": 4,
     "bashing": 6,
     "cutting": 20,
-    "flags" : ["CHOP", "DURABLE_MELEE"],
+    "flags" : ["CHOP", "DURABLE_MELEE", "SHEATH_SWORD", "IAIJUTSU"],
     "to_hit": 2,
     "max_charges": 0,
     "initial_charges": 0,
@@ -3435,7 +3672,7 @@
     "volume": 6,
     "bashing": 6,
     "cutting": 20,
-    "flags" : ["FIRE", "CHOP", "DURABLE_MELEE"],
+    "flags" : ["FIRE", "CHOP", "DURABLE_MELEE", "SHEATH_SWORD", "IAIJUTSU"],
     "to_hit": 1,
     "max_charges": 50,
     "initial_charges": 0,
@@ -3486,7 +3723,7 @@
     "volume": 3,
     "bashing": 0,
     "cutting": 22,
-    "flags" : ["STAB", "DURABLE_MELEE"],
+    "flags" : ["STAB", "DURABLE_MELEE", "SHEATH_KNIFE"],
     "to_hit": 2,
     "max_charges": 0,
     "initial_charges": 0,
@@ -3512,7 +3749,7 @@
     "volume": 4,
     "bashing": 4,
     "cutting": 28,
-    "flags" : ["CHOP", "NON_STUCK", "DURABLE_MELEE"],
+    "flags" : ["CHOP", "NON_STUCK", "DURABLE_MELEE", "SHEATH_SWORD"],
     "to_hit": 2,
     "max_charges": 0,
     "initial_charges": 0,
@@ -3534,7 +3771,7 @@
     "price": 1500,
     "material": ["steel", "diamond"],
     "techniques": ["RAPID", "PRECISE", "WBLOCK_2"],
-    "flags" : ["DURABLE_MELEE", "SLICE"],
+    "flags" : ["DURABLE_MELEE", "SLICE", "SHEATH_SWORD", "IAIJUTSU"],
     "weight": 1100,
     "volume": 8,
     "bashing": 4,
@@ -3564,7 +3801,7 @@
     "volume": 3,
     "bashing": 1,
     "cutting": 16,
-    "flags" : ["STAB", "DURABLE_MELEE"],
+    "flags" : ["STAB", "DURABLE_MELEE", "SHEATH_KNIFE", "IAIJUTSU"],
     "to_hit": 2,
     "max_charges": 0,
     "initial_charges": 0,
@@ -3590,7 +3827,7 @@
     "volume": 3,
     "bashing": 1,
     "cutting": 14,
-    "flags" : ["STAB", "DURABLE_MELEE"],
+    "flags" : ["STAB", "DURABLE_MELEE", "SHEATH_KNIFE"],
     "to_hit": 1,
     "max_charges": 0,
     "initial_charges": 0,
@@ -3612,7 +3849,7 @@
     "price": 78000,
     "material": "steel",
     "techniques": ["RAPID", "WBLOCK_1"],
-    "flags" : ["SLICE", "DURABLE_MELEE"],
+    "flags" : ["SLICE", "DURABLE_MELEE", "SHEATH_SWORD", "IAIJUTSU"],
     "weight": 835,
     "volume": 6,
     "bashing": 3,
@@ -3638,7 +3875,7 @@
     "price": 98000,
     "material": "steel",
     "techniques": ["RAPID", "WBLOCK_2"],
-    "flags" : ["SLICE", "DURABLE_MELEE"],
+    "flags" : ["SLICE", "DURABLE_MELEE", "SHEATH_SWORD", "IAIJUTSU"],
     "weight": 1133,
     "volume": 8,
     "bashing": 4,
@@ -3665,7 +3902,7 @@
     "description": "This is a katana with a nozzle just behind the the cutting edge of the blade. People love fire, and people love katanas, so why not put them together? The gas burners attached to this blade can really turn up the heat on your foes. Use to ignite.",
     "price": 98000,
     "material": "steel",
-    "flags": ["FIRE", "SLICE", "DURABLE_MELEE"],
+    "flags": ["FIRE", "SLICE", "DURABLE_MELEE", "SHEATH_SWORD", "IAIJUTSU"],
     "techniques": ["RAPID", "WBLOCK_2"],
     "weight": 2041,
     "volume": 10,
@@ -3746,7 +3983,7 @@
     "price": 98000,
     "material": "steel",
     "techniques": ["RAPID", "WBLOCK_2", "PRECISE"],
-    "flags" : ["STAB", "DURABLE_MELEE"],
+    "flags" : ["STAB", "DURABLE_MELEE", "SHEATH_SWORD"],
     "weight": 1000,
     "volume": 6,
     "bashing": 2,
@@ -3773,6 +4010,7 @@
     "description": "This is a medieval weapon consisting of a wood shaft tipped with an iron spike. Though large and heavy compared to other spears, its accuracy and damage are unparalleled.",
     "price": 200000,
     "material": ["iron", "wood"],
+	"techniques" : ["IMPALE"],
     "flags" : ["DURABLE_MELEE", "SPEAR"],
     "weight": 8000,
     "volume": 14,
@@ -3799,7 +4037,7 @@
     "description": "This is an early modern sword seeing use in the 16th, 17th, and 18th centuries. Called 'broad' to contrast with the slimmer rapiers.",
     "price": 120000,
     "material": "steel",
-    "flags" : ["CHOP", "DURABLE_MELEE"],
+    "flags" : ["CHOP", "DURABLE_MELEE", "SHEATH_SWORD", "IAIJUTSU"],
     "techniques": "WBLOCK_1",
     "weight": 1133,
     "volume": 7,
@@ -3828,7 +4066,7 @@
     "rarity": 30,
     "price": 120000,
     "material": "steel",
-    "flags" : ["CHOP", "DURABLE_MELEE"],
+    "flags" : ["CHOP", "DURABLE_MELEE", "SHEATH_SWORD"],
     "techniques": ["WBLOCK_1", "WIDE", "BRUTAL"],
     "weight": 3176,
     "volume": 13,
@@ -3856,7 +4094,7 @@
     "price": 120000,
     "material": "steel",
     "flags": ["CHOP", "DURABLE_MELEE"],
-    "techniques": ["WBLOCK_1", "WIDE", "BRUTAL"],
+    "techniques": ["WBLOCK_1", "WIDE", "BRUTAL", "SHEATH_SWORD"],
     "weight": 3400,
     "volume": 15,
     "bashing": 15,
@@ -3908,7 +4146,7 @@
     "description": "This is a combination of two Dark Age conflict-resolution classics, the broadsword and the torch. Use to light it up and show those heathen zombies who's Lord around here.",
     "price": 120000,
     "material": "steel",
-    "flags": ["CHOP", "DURABLE_MELEE"],
+    "flags": ["CHOP", "DURABLE_MELEE", "SHEATH_SWORD", "IAIJUTSU"],
     "techniques": "WBLOCK_1",
     "weight": 1474,
     "volume": 9,
@@ -3960,7 +4198,7 @@
     "description": "This is a large blade that has had a portion of the handle wrapped in duct tape, making it easier to wield as a rough machete.",
     "price": 10000,
     "material": "steel",
-    "flags": "CHOP",
+    "flags": ["CHOP", "SHEATH_SWORD", "IAIJUTSU"],
     "weight": 538,
     "volume": 8,
     "bashing": 4,
@@ -3987,7 +4225,7 @@
     "description": "This is a large blade with a fuel pipe on the side, and a small tank and igniter built into the insulated hilt.  When filled with gasoline, the blade can be made scorching hot to singe enemies and light your way. Use to ignite.",
     "price": 10000,
     "material": ["steel", "plastic"],
-    "flags": ["FIRE", "CHOP"],
+    "flags": ["FIRE", "CHOP", "SHEATH_SWORD"],
     "weight": 1701,
     "volume": 10,
     "bashing": 4,
@@ -4065,7 +4303,6 @@
     "description": "This is a sharp knife, designed for cutting meat. It makes a poor melee weapon, but is decent at butchering corpses.",
     "price": 2500,
     "material": "steel",
-    "flags": "STAB",
     "weight": 453,
     "volume": 1,
     "bashing": 2,
@@ -4079,7 +4316,8 @@
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.99 ] ],
     "use_action": "KNIFE",
-    "qualities": [["CUT", 1]]
+    "qualities": [["CUT", 1]],
+    "flags": ["STAB", "SHEATH_KNIFE"]
   },
 
   {
@@ -4095,7 +4333,6 @@
     "volume": 2,
     "bashing": 2,
     "cutting": 10,
-    "flags" : ["CHOP"],
     "to_hit": -3,
     "max_charges": 0,
     "initial_charges": 0,
@@ -4105,7 +4342,8 @@
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.99 ] ],
     "use_action": "KNIFE",
-    "qualities": [["CUT", 1]]
+    "qualities": [["CUT", 1]],
+    "flags": ["CHOP", "SHEATH_KNIFE"]
   },
 
   {
@@ -4117,7 +4355,7 @@
     "description": "This is a military combat knife designed for close quarters conflict. It is light and extremely sharp, and could be deadly in the right hands. It could be used to butcher corpses.",
     "price": 10000,
     "material": ["steel", "plastic"],
-    "flags": ["STAB", "DURABLE_MELEE"],
+    "flags": ["STAB", "DURABLE_MELEE", "SHEATH_KNIFE"],
     "weight": 558,
     "volume": 2,
     "bashing": 2,
@@ -4259,7 +4497,7 @@
     "revert_to": "null",
     "functions": [ [ "func:hacksaw" ] ],
     "use_action": "HACKSAW",
-    "qualities":[["SAW_M", 1], ["SAW_M_G", 1]]
+	"qualities":[["SAW_M", 1], ["SAW_M_FINE", 1]]
   },{
     "id": "tent_kit",
     "type": "TOOL",
@@ -4299,11 +4537,18 @@
     "to_hit": 1,
     "max_charges": 25,
     "initial_charges": 25,
-    "charges_per_use": 0,
+    "charges_per_use": 1,
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "TORCH"
+    "use_action": {
+        "type": "transform",
+        "target": "torch_lit",
+        "need_fire": 1,
+        "need_fire_msg": "You need a lighter or fire to light this.",
+        "active": true,
+        "msg": "You light the torch."
+    }
   },
 
   {
@@ -4348,12 +4593,19 @@
     "price" : 16000,
     "max_charges": 25,
     "initial_charges": 25,
-    "charges_per_use": 0,
+    "charges_per_use": 1,
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "BATTLETORCH"
+    "use_action": {
+        "type": "transform",
+        "target": "battletorch_lit",
+        "need_fire": 1,
+        "need_fire_msg": "You need a lighter or fire to light this.",
+        "active": true,
+        "msg": "You light the Louisville Slaughterer."
+    }
   },
 
   {
@@ -4398,11 +4650,18 @@
     "to_hit": -2,
     "max_charges": 100,
     "initial_charges": 100,
-    "charges_per_use": 0,
+    "charges_per_use": 1,
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "can_food",
-    "use_action": "CANDLE"
+    "use_action": {
+        "type": "transform",
+        "target": "candle_lit",
+        "active": true,
+        "msg": "You light the candle.",
+        "need_fire": 1,
+        "need_fire_msg": "You need a lighter to light this."
+    }
   },
 
   {
@@ -4426,7 +4685,12 @@
     "turns_per_charge": 50,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "CANDLE_LIT"
+    "use_action": {
+        "type": "auto_transform",
+        "target": "candle",
+        "when_underwater": "The candle is extinguished.",
+        "msg": "The candle winks out."
+    }
   },
 
   {
@@ -4567,7 +4831,8 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:screwdriver" ] ],
-    "qualities": [["SCREW", 1], ["SCREW_G", 1]]
+    "use_action": "NONE",
+	"qualities": [["SCREW", 1], ["SCREW_FINE", 1]]
   },
 
   {
@@ -4592,7 +4857,7 @@
     "revert_to": "null",
     "functions": [ [ "func:wrench" ] ],
     "use_action": "NONE",
-    "qualities": [["WRENCH", 1], ["WRENCH_G", 1]]
+	"qualities": [["WRENCH", 1], ["WRENCH_FINE", 1]]
   },
 
   {
@@ -4899,7 +5164,14 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "use_action": "PDA"
+    "use_action": {
+        "type": "transform",
+        "need_charges": 1,
+        "need_charges_msg": "The PDA's batteries are dead.",
+        "msg": "You activate the flashlight app.",
+        "target": "pda_flashlight",
+        "active": true
+    }
   },
 
   {
@@ -4923,7 +5195,11 @@
     "turns_per_charge": 30,
     "ammo": "battery",
     "revert_to": "pda",
-    "use_action": "PDA_FLASHLIGHT"
+    "use_action": {
+        "type": "auto_transform",
+        "msg": "The PDA screen goes blank.",
+        "target": "pda"
+    }
   },
 
   {
@@ -4961,7 +5237,6 @@
     "description" : "A knife consisting of a long somewhat sharpened spike and a tightly wrapped a rag as a handle. It makes a good melee weapon.",
     "price": 1000,
     "material": ["steel", "null"],
-    "flags": "STAB",
     "weight": 550,
     "volume": 2,
     "bashing": 2,
@@ -4974,7 +5249,8 @@
     "ammo": "NULL",
     "revert_to": "null",
     "use_action": "KNIFE",
-    "qualities": [["CUT", 1]]
+    "qualities": [["CUT", 1]],
+    "flags": ["STAB", "SHEATH_KNIFE"]
    },
 
    {
@@ -5048,7 +5324,7 @@
     "revert_to": "null",
     "functions" : [ [ "func:hammer", 1.7 ], ["func:hammering", 1.7] , ["func:nailing", 1.7] ],
     "use_action": "HAMMER",
-    "qualities": [["HAMMER", 2], ["HAMMER_G", 1]]
+	"qualities": [["HAMMER", 2], ["HAMMER_FINE", 1]]
   },
 
   {
@@ -5109,7 +5385,6 @@
     "description": "This is a sharpened stone set into a hollowed handle. Not nearly as usable as a proper knife, but it's better than nothing.",
     "price": 200,
     "material": ["wood", "stone"],
-    "flags": "STAB",
     "weight": 453,
     "volume": 1,
     "bashing": 2,
@@ -5122,7 +5397,8 @@
     "ammo": "NULL",
     "revert_to": "null",
     "use_action": "KNIFE",
-    "qualities": [["CUT", 1]]
+    "qualities": [["CUT", 1]],
+	"flags": ["STAB", "SHEATH_KNIFE"]
   },
 
   {
@@ -5311,7 +5587,12 @@
     "ammo": "NULL",
     "category": "food",
     "revert_to": "null",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the jar, exposing it to the atmosphere.",
+        "target": "meat_canned",
+        "container": "jar_glass"
+    }
   },
 
   {
@@ -5335,7 +5616,12 @@
     "ammo": "NULL",
     "category": "food",
     "revert_to": "null",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the jar, exposing it to the atmosphere.",
+        "target": "fish_canned",
+        "container": "jar_glass"
+    }
   },
 
   {
@@ -5360,7 +5646,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the jar, exposing it to the atmosphere.",
+        "target": "kompot",
+        "container": "jar_3l_glass"
+    }
   },
 
   {
@@ -5384,7 +5675,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the jar, exposing it to the atmosphere.",
+        "target": "human_canned",
+        "container": "jar_glass"
+    }
   },
 
   {
@@ -5408,7 +5704,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the jar, exposing it to the atmosphere.",
+        "target": "veggy_canned",
+        "container": "jar_glass"
+    }
   },
 
   {
@@ -5432,7 +5733,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the jar, exposing it to the atmosphere.",
+        "target": "apple_canned",
+        "container": "jar_glass"
+    }
   },
 
   {
@@ -5456,7 +5762,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the jar, exposing it to the atmosphere.",
+        "target": "veggy_pickled",
+        "container": "jar_glass"
+    }
   },
 
   {
@@ -5480,7 +5791,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the jar, exposing it to the atmosphere.",
+        "target": "meat_pickled",
+        "container": "jar_glass"
+    }
   },
 
   {
@@ -5504,7 +5820,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the jar, exposing it to the atmosphere.",
+        "target": "fish_pickled",
+        "container": "jar_glass"
+    }
   },
 
   {
@@ -5528,7 +5849,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the jar, exposing it to the atmosphere.",
+        "target": "human_pickled",
+        "container": "jar_glass"
+    }
   },
 
   {
@@ -5624,7 +5950,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the vacuum pack, exposing it to the atmosphere.",
+        "target": "meat_vac",
+        "container": "bag_plastic"
+    }
   },
 
   {
@@ -5648,7 +5979,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the vacuum pack, exposing it to the atmosphere.",
+        "target": "fish_vac",
+        "container": "bag_plastic"
+    }
   },
 
    {
@@ -5672,7 +6008,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the vacuum pack, exposing it to the atmosphere.",
+        "target": "hflesh_vac",
+        "container": "bag_plastic"
+    }
   },
 
   {
@@ -5696,7 +6037,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the vacuum pack, exposing it to the atmosphere.",
+        "target": "veggy_vac",
+        "container": "bag_plastic"
+    }
   },
 
   {
@@ -5720,7 +6066,12 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "food",
-    "use_action": "DEJAR"
+    "use_action": {
+        "type": "transform",
+        "msg": "You open the vacuum pack, exposing it to the atmosphere.",
+        "target": "apple_vac",
+        "container": "bag_plastic"
+    }
   },
 
   {
@@ -5859,7 +6210,12 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "UNFOLD_BICYCLE"
+    "use_action": {
+        "type": "unfold_vehicle",
+        "vehicle_name": "bicycle",
+        "unfold_msg": "You painstakingly unfold the bicycle and make it ready to ride.",
+        "moves": 500
+    }
   },
 
   {
@@ -6175,7 +6531,7 @@
     "rarity": 30,
     "price": 150000,
     "material": "steel",
-    "flags": ["SLICE", "DURABLE_MELEE"],
+    "flags": ["SLICE", "DURABLE_MELEE", "SHEATH_SWORD"],
     "techniques": ["RAPID", "WIDE", "BRUTAL"],
     "weight": 2822,
     "volume": 17,
@@ -6213,7 +6569,15 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "MATCHBOMB"
+    "use_action": {
+        "type": "transform",
+        "target": "matchbomb_act",
+        "target_charges": 20,
+        "need_fire": 1,
+        "need_fire_msg": "You need a lighter!",
+        "active": true,
+        "msg": "You light the match head bomb."
+    }
   },
 
   {
@@ -6237,7 +6601,14 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "MATCHBOMB_ACT"
+    "use_action": {
+        "type": "explosion",
+        "sound_volume": 0,
+        "sound_msg": "ssss...",
+        "no_deactivate_msg": "You've already lit the %s, try throwing it instead.",
+        "explosion_power": 24,
+        "explosion_shrapnel": 0
+    }
   },
 
   {
@@ -6426,7 +6797,11 @@
     "ammo": "NULL",
     "revert_to": "null",
     "phase" : "solid",
-    "use_action" : "RAD_BADGE"
+    "use_action": {
+        "type": "transform",
+        "target": "rad_badge",
+        "msg":"You remove the badge from its wrapper, exposing it to ambient radiation."
+    }
   },
 
   {
@@ -6462,7 +6837,7 @@
     "description": "This stout combat knife features a steel guard to protect the user's knuckles. The guard can also be used for striking or blocking, and the knife can also be used to butcher corpses.",
     "price": 11000,
     "material": ["steel", "wood"],
-    "flags" : ["DURABLE_MELEE", "STAB"],
+    "flags" : ["DURABLE_MELEE", "STAB", "SHEATH_KNIFE"],
     "techniques": ["WBLOCK_1"],
     "weight": 608,
     "volume": 2,
@@ -6708,7 +7083,6 @@
     "description": "This is a short, sturdy knife with a serrated edge for cutting lines and straps, and a blunt tip for prying. Used primarily by divers, it is very light and takes up virtually no space in one's pockets.",
     "price": 14000,
     "material": ["steel", "plastic"],
-    "flags": "CHOP",
     "weight": 226,
     "volume": 0,
     "bashing": 0,
@@ -6721,7 +7095,8 @@
     "ammo": "NULL",
     "revert_to": "null",
     "use_action": "KNIFE",
-    "qualities": [["CUT", 1]]
+    "qualities": [["CUT", 1]],
+    "flags": ["CHOP", "SHEATH_KNIFE"]
   },
 
   {
@@ -6815,7 +7190,7 @@
     "revert_to": "null",
     "functions": [ [ "func:hacksaw" ], [ "func:screwdriver" ], [ "func:hammer" ], [ "func:wrench" ], [ "func:soldering_iron", 1, 1 ], [ "func:welder", 1, 5 ] ],
     "use_action": "GUN_REPAIR",
-    "qualities": [["HAMMER_G", 1], ["SAW_M_G", 1], ["WRENCH_G", 1], ["SCREW_G", 1]]
+	"qualities": [["HAMMER_FINE", 1], ["SAW_M_FINE", 1], ["WRENCH_FINE", 1], ["SCREW_FINE", 1]]
   },
   {
     "id": "large_repairkit",
@@ -6839,7 +7214,7 @@
     "revert_to": "null",
     "functions": [ [ "func:hacksaw" ], [ "func:screwdriver" ], [ "func:hammer" ], [ "func:wrench" ], [ "func:soldering_iron", 1, 0.5 ], ["func:welder", 1, 1 ] ],
     "use_action": "GUN_REPAIR",
-    "qualities": [["HAMMER_G", 1], ["SAW_M_G", 1], ["WRENCH_G", 1], ["SCREW_G", 1]]
+	"qualities": [["HAMMER_FINE", 1], ["SAW_M_FINE", 1], ["WRENCH_FINE", 1], ["SCREW_FINE", 1]]
   },
   {
     "id": "misc_repairkit",
@@ -6891,7 +7266,7 @@
     "id": "g_shovel",
     "symbol": "/",
     "color": "dark_gray",
-    "name": "gardening shovel",
+    "name": "trowel",
     "description": "A small, sharp gardening shovel, perfect for digging up grubs and worms.",
     "price": 20,
     "material": "steel",
@@ -6965,7 +7340,7 @@
     "description": "???",
     "functions": [ [ "func:hammer" ] ],
     "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
-    "qualities": [["HAMMER", 3], ["HAMMER_G", 1]]
+    "qualities": [["HAMMER", 3], ["HAMMER_FINE", 1]]
   },{
     "type": "TOOL",
     "id": "toolset_wrench",
@@ -6975,7 +7350,7 @@
     "description": "???",
     "functions": [ [ "func:wrench" ] ],
     "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
-    "qualities": [["WRENCH", 1], ["WRENCH_G", 1]]
+    "qualities": [["WRENCH", 1], ["WRENCH_FINE", 1]]
   },{
     "type": "TOOL",
     "id": "toolset_screwdriver",
@@ -6985,7 +7360,7 @@
     "description": "???",
     "functions": [ [ "func:screwdriver" ] ],
     "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
-    "qualities": [["SCREW", 1], ["SCREW_G", 1]]
+    "qualities": [["SCREW", 1], ["SCREW_FINE", 1]]
   },{
     "type": "TOOL",
     "id": "toolset_hacksaw",
@@ -6995,7 +7370,7 @@
     "description": "???",
     "functions": [ [ "func:hacksaw" ] ],
     "price": 0, "weight": 0, "volume": 0, "bashing": 0, "cutting": 0, "to_hit": 0, "max_charges": 10000, "initial_charges": 0, "charges_per_use": 0, "turns_per_charge": 0, "ammo": "NULL", "revert_to": "null",
-    "qualities": [["SAW_W", 1], ["SAW_M", 1], ["SAW_M_G", 1]]
+    "qualities": [["SAW_M", 1], ["SAW_M_FINE", 1]]
   },{
     "type": "TOOL",
     "id": "toolset_knife",

@@ -72,7 +72,8 @@
                 "hat_chef",
                 "jacket_chef",
                 "pants_checkered",
-                "dress_shoes"
+                "dress_shoes",
+                "sheath"
             ],
             "male": [
                 "briefs"
@@ -192,6 +193,7 @@
                 "pants_cargo",
                 "sneakers",
                 "weed",
+                "tobacco",
                 "lighter",
                 "rolling_paper",
                 "switchblade",
@@ -269,7 +271,8 @@
                 "m4a1",
                 "223",
                 "knife_combat",
-                "binoculars"
+                "binoculars",
+                "sheath"
             ],
             "male": [
                 "boxer_shorts"
@@ -454,7 +457,8 @@
                 "switchblade",
                 "lighter",
                 "mag_porn",
-                "sunglasses"
+                "sunglasses",
+                "holster"
             ],
             "male": [
                 "boxer_shorts"
@@ -539,7 +543,8 @@
                 "knife_combat",
                 "lighter",
                 "rope_30",
-                "canteen"
+                "canteen",
+                "sheath"
             ],
             "male": [
                 "boxer_shorts"
@@ -1250,7 +1255,15 @@
         "description": "You always had to have the latest and best gadgets and gizmos, so is it any wonder that you upgraded your flesh along with your smart phone? Only time will tell if your status as a marvel of bionic technology will be enough to ensure your survival after the apocalypse.",
         "points": 5,
         "CBMs":[
-            "bio_tools",
+            "bio_tools_press",
+            "bio_tools_knife",
+            "bio_tools_screwdriver",
+            "bio_tools_wrench",
+            "bio_tools_hacksaw",
+            "bio_tools_hammer",
+            "bio_tools_welder",
+            "bio_tools_hotplate",
+            "bio_tools_soldering_iron",
             "bio_flashlight",
             "bio_storage",
             "bio_watch",
@@ -1316,7 +1329,8 @@
                 "jacket_flannel",
                 "beartrap",
                 "pockknife",
-                "cig",
+                "tobacco",
+                "rolling_paper",
                 "matches"
             ],
             "male": [
@@ -1366,6 +1380,9 @@
         "points": 0,
         "items": {
             "both": [
+                "tobacco",
+                "pipe_tobacco",
+                "ref_lighter",
                 "dress_shoes",
                 "cane"
             ],
@@ -1519,6 +1536,7 @@
                 "gloves_fingerless",
                 "boots_combat",
                 "weed",
+                "tobacco",
                 "rolling_paper",
                 "mp3",
                 "ref_lighter"
@@ -1594,7 +1612,7 @@
                 "socks",
                 "dress_shoes",
                 "rolling_paper",
-                "cig",
+                "tobacco",
                 "mp3",
                 "ref_lighter"
             ],
@@ -1758,7 +1776,8 @@
                 "shorts",
                 "lowtops",
                 "aspirin",
-                "cig",
+                "tobacco",
+                "rolling_paper",
                 "lighter"
             ],
             "male": [

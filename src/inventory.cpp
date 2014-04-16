@@ -197,6 +197,11 @@ inventory inventory::operator+ (const item &rhs)
             }
         }
         break;
+    case IC_GUN:
+        if(it.is_gun()) {
+            return true;
+        }
+        break;
     }
     return false;
 }
@@ -543,16 +548,29 @@ static bool allow_inventory_from(game *g, const player *p, const vehicle *veh) {
     return !vehicle_might_move(veh);
 }
 
+extern long count_charges_in_list(const itype *type, const std::vector<item> &items);
+
 void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 {
-    int junk = 0;
     for (int x = origin.x - range; x <= origin.x + range; x++) {
         for (int y = origin.y - range; y <= origin.y + range; y++) {
-            if((x != origin.x || y != origin.y) && !g->m.clear_path( origin.x, origin.y, x, y, range, 1, 100, junk ) ) {
-                // Can't see this - can't use it
+            const point p(x, y);
+            if (g->m.has_furn(x, y) && g->m.accessable_furniture(origin.x, origin.y, x, y, range)) {
+                const furn_t &f = g->m.furn_at(x, y);
+                itype *type = f.crafting_pseudo_item_type();
+                if (type != NULL) {
+                    item furn_item(type, 0);
+                    const itype *ammo = f.crafting_ammo_item_type();
+                    if (ammo != NULL) {
+                        furn_item.charges = count_charges_in_list(ammo, g->m.i_at(x, y));
+                    }
+                    furn_item.item_tags.insert("PSEUDO");
+                    surround.push_back(item_from_surrounding(p, furn_item));
+                }
+            }
+            if(g->m.accessable_items(origin.x, origin.y, x, y, range)) {
                 continue;
             }
-            const point p(x, y);
             if(!g->m.has_flag("SEALED", x, y)) {
                 items_on_map items(p, &(g->m));
                 if(!items.items().empty()) {

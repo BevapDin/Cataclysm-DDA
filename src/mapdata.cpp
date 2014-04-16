@@ -186,6 +186,7 @@ furn_t null_furniture_t() {
   new_furniture.loadid = 0;
   new_furniture.open = "";
   new_furniture.close = "";
+  new_furniture.max_volume = MAX_VOLUME_IN_SQUARE;
   return new_furniture;
 };
 
@@ -204,6 +205,7 @@ ter_t null_terrain_t() {
   new_terrain.loadid = 0;
   new_terrain.open = "";
   new_terrain.close = "";
+  new_terrain.max_volume = MAX_VOLUME_IN_SQUARE;
   return new_terrain;
 };
 
@@ -237,6 +239,9 @@ void load_furniture(JsonObject &jsobj)
 
   new_furniture.movecost = jsobj.get_int("move_cost_mod");
   new_furniture.move_str_req = jsobj.get_int("required_str");
+  new_furniture.max_volume = jsobj.get_int("max_volume", MAX_VOLUME_IN_SQUARE);
+
+  new_furniture.crafting_pseudo_item = jsobj.get_string("crafting_pseudo_item", "");
 
   new_furniture.transparent = false;
   new_furniture.bitflags = 0;
@@ -302,6 +307,7 @@ void load_terrain(JsonObject &jsobj)
       new_terrain.trap_id_str = jsobj.get_string("trap");
   }
   new_terrain.trap = tr_null;
+  new_terrain.max_volume = jsobj.get_int("max_volume", MAX_VOLUME_IN_SQUARE);
 
   new_terrain.transparent = false;
   new_terrain.bitflags = 0;
@@ -354,6 +360,7 @@ ter_id t_null,
     t_floor, t_floor_waxed,
     t_dirtfloor,//Dirt floor(Has roof)
     t_carpet_red,t_carpet_yellow,t_carpet_purple,t_carpet_green,
+    t_linoleum_white, t_linoleum_gray,
     t_grate,
     t_slime,
     t_bridge,
@@ -454,6 +461,8 @@ void set_ter_ids() {
     t_carpet_yellow=terfind("t_carpet_yellow");
     t_carpet_purple=terfind("t_carpet_purple");
     t_carpet_green=terfind("t_carpet_green");
+    t_linoleum_white=terfind("t_linoleum_white");
+    t_linoleum_gray=terfind("t_linoleum_gray");
     t_grate=terfind("t_grate");
     t_slime=terfind("t_slime");
     t_bridge=terfind("t_bridge");
@@ -671,7 +680,7 @@ furn_id f_null,
     f_plant_seed, f_plant_seedling, f_plant_mature, f_plant_harvest,
     f_fvat_empty, f_fvat_full,
     f_wood_keg,
-    f_statue,
+    f_statue, f_egg_sackbw, f_egg_sackws, f_egg_sacke,
     f_floor_canvas,
     num_furniture_types;
 
@@ -742,6 +751,9 @@ void set_furn_ids() {
     f_fvat_full=furnfind("f_fvat_full");
     f_wood_keg=furnfind("f_wood_keg");
     f_statue=furnfind("f_statue");
+    f_egg_sackbw=furnfind("f_egg_sackbw");
+    f_egg_sackws=furnfind("f_egg_sackws");
+    f_egg_sacke=furnfind("f_egg_sacke");
     f_floor_canvas=furnfind("f_floor_canvas");
     num_furniture_types = furnlist.size();
 }

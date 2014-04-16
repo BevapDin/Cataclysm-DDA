@@ -387,6 +387,7 @@ void input_manager::init_keycode_mapping()
         add_keycode_pair(c, name);
     }
 
+    add_keycode_pair('\t',          "TAB");
     add_keycode_pair(KEY_UP,        "UP");
     add_keycode_pair(KEY_DOWN,      "DOWN");
     add_keycode_pair(KEY_LEFT,      "LEFT");
@@ -708,7 +709,7 @@ void input_context::register_cardinal()
     register_leftright();
 }
 
-void input_context::get_direction(int &dx, int &dy, const std::string &action)
+bool input_context::get_direction(int &dx, int &dy, const std::string &action)
 {
     if(action == "UP") {
         dx = 0;
@@ -737,7 +738,9 @@ void input_context::get_direction(int &dx, int &dy, const std::string &action)
     } else {
         dx = -2;
         dy = -2;
+        return false;
     }
+    return true;
 }
 
 void input_context::display_help()

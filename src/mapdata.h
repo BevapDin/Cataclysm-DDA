@@ -190,6 +190,8 @@ struct ter_t {
 
  map_bash_info bash;
  map_deconstruct_info deconstruct;
+ // Maximal volume of items that can be stored in/on this furniture
+ int max_volume;
 
  bool has_flag(const std::string & flag) const {
      return flags.count(flag) != 0;
@@ -236,9 +238,17 @@ struct furn_t {
  iexamine_function examine;
  std::string open;
  std::string close;
+ // Maximal volume of items that can be stored in/on this furniture
+ int max_volume;
 
  map_bash_info bash;
  map_deconstruct_info deconstruct;
+
+ std::string crafting_pseudo_item;
+ // May return NULL
+ itype *crafting_pseudo_item_type() const;
+ // May return NULL
+ itype *crafting_ammo_item_type() const;
 
  bool has_flag(const std::string & flag) const {
      return flags.count(flag) != 0;
@@ -353,9 +363,27 @@ struct spawn_point {
 };
 
 struct submap {
+    inline trap_id get_trap(int x, int y) const {
+        return trp[x][y];
+    }
+
+    inline void set_trap(int x, int y, trap_id trap) {
+        trp[x][y] = trap;
+    }
+
+    inline furn_id get_furn(int x, int y) const {
+        return frn[x][y];
+    }
+
+    inline void set_furn(int x, int y, furn_id furn) {
+        frn[x][y] = furn;
+    }
+
     ter_id             ter[SEEX][SEEY];  // Terrain on each square
     std::vector<item>  itm[SEEX][SEEY];  // Items on each square
     furn_id            frn[SEEX][SEEY];  // Furniture on each square
+
+    // TODO: make trp private once the horrible hack known as editmap is resolved
     trap_id            trp[SEEX][SEEY];  // Trap on each square
     field              fld[SEEX][SEEY];  // Field on each square
     int                rad[SEEX][SEEY];  // Irradiation of each square
@@ -370,9 +398,8 @@ struct submap {
     computer comp;
     basecamp camp;  // only allowing one basecamp per submap
 
-    submap() : active_item_count(0), field_count(0)
-    {
-
+    submap() : ter(), frn(), trp(), rad(),
+        active_item_count(0), field_count(0), turn_last_touched(0), temperature(0) {
     }
 };
 
@@ -540,7 +567,7 @@ extern furn_id f_null,
     f_safe_c, f_safe_l, f_safe_o,
     f_plant_seed, f_plant_seedling, f_plant_mature, f_plant_harvest,
     f_fvat_empty, f_fvat_full,
-    f_wood_keg,
+    f_wood_keg, f_egg_sackbw, f_egg_sackws, f_egg_sacke,
     num_furniture_types;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

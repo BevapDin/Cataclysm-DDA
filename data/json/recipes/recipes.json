@@ -51,6 +51,8 @@
     "recipe_subcategories" : [
       "CSC_ALL",
       "CSC_ELECTRONIC_CBMS",
+      "CSC_ELECTRONIC_TOOLS",
+      "CSC_ELECTRONIC_PARTS",
       "CSC_ELECTRONIC_LIGHTING",
       "CSC_ELECTRONIC_COMPONENTS",
       "CSC_ELECTRONIC_OTHER"
@@ -1557,6 +1559,24 @@
   ]
 },{
   "type" : "recipe",
+  "result": "bwirebat",
+  "category": "CC_WEAPON",
+  "subcategory": "CSC_WEAPON_BASHING",
+  "skill_used": "fabrication",
+  "difficulty": 0,
+  "time": 5000,
+  "reversible": true,
+  "autolearn": true,
+  "components": [
+    [
+      [ "bat", 1 ]
+    ],
+    [
+      [ "wire_barbed", 1 ]
+    ]
+  ]
+},{
+  "type" : "recipe",
   "result": "bowling_axe",
   "category": "CC_WEAPON",
   "subcategory": "CSC_WEAPON_PIERCING",
@@ -1680,7 +1700,7 @@
   "reversible": false,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "shotgun_d", 1 ],
@@ -1701,7 +1721,7 @@
   "autolearn": true,
   "book_learn": [[ "manual_shotgun", 2 ] , [ "manual_pistol", 2 ]],
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1}
   ], "tools": [
     [
       [ "goggles_welding", -1 ]
@@ -1726,7 +1746,7 @@
   "reversible": false,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "saiga_12", 1 ]
@@ -1805,8 +1825,8 @@
   "reversible": true,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "pipe", 1 ]
@@ -1827,11 +1847,33 @@
   "reversible": true,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "pipe", 1 ]
+    ],
+    [
+      [ "2x4", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "pipe_double_shotgun",
+  "category": "CC_WEAPON",
+  "subcategory": "CSC_WEAPON_RANGED",
+  "skill_used": "mechanics",
+  "skills_required": [ "gun", 1 ],
+  "difficulty": 3,
+  "time": 18000,
+  "reversible": true,
+  "autolearn": true,
+  "qualities":[
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1}
+  ], "components": [
+    [
+      [ "pipe", 2 ]
     ],
     [
       [ "2x4", 1 ]
@@ -1848,7 +1890,7 @@
   "reversible": false,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "pipe_shotgun", 1 ]
@@ -1866,8 +1908,8 @@
   "reversible": true,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "pipe", 1 ]
@@ -1889,9 +1931,9 @@
   "autolearn": false,
   "book_learn": [[ "manual_smg", 4 ] , [ "mag_smg", 5 ]],
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1},
-    {"id":"HAMMER_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1},
+	{"id":"HAMMER_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "pipe", 1 ]
@@ -1916,9 +1958,9 @@
   "autolearn": false,
   "book_learn": [[ "manual_smg", 4 ] , [ "mag_smg", 5 ]],
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1},
-    {"id":"HAMMER_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1},
+	{"id":"HAMMER_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "pipe", 1 ]
@@ -1942,8 +1984,8 @@
   "reversible": true,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "pilot_light", 2 ]
@@ -1972,7 +2014,7 @@
   "reversible": true,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "pipe", 1 ]
@@ -2012,6 +2054,25 @@
     ]
   ]
 },{
+  "type": "recipe",
+  "result": "m320",
+  "category": "CC_WEAPON",
+  "subcategory": "CSC_WEAPON_RANGED",
+  "skill_used": "launcher",
+  "difficulty": 0,
+  "time": 5000,
+  "reversible": true,
+  "autolearn": true,
+  "decomp_learn": 0,
+  "components": [
+    [
+      [ "m320_mod", 1 ]
+    ],
+    [
+      [ "ugl_buttstock", 1 ]
+    ]
+  ]
+},{
         "type" : "recipe",
   "result": "u_shotgun",
   "category": "CC_WEAPON",
@@ -2024,7 +2085,7 @@
   "autolearn": false,
   "book_learn": [[ "manual_shotgun", 4 ] , [ "mag_shotgun", 5 ]],
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "pipe", 2 ]
@@ -2254,8 +2315,8 @@
 },{
         "type" : "recipe",
   "result": "carver_off",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "fabrication",
   "skills_required" : [ "electronics", 3 ],
   "difficulty": 4,
@@ -2299,8 +2360,8 @@
 },{
   "type" : "recipe",
   "result": "trimmer_off",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "fabrication",
   "skills_required" : [ "electronics", 3 ],
   "difficulty": 5,
@@ -2344,8 +2405,8 @@
 },{
   "type" : "recipe",
   "result": "circsaw_off",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "fabrication",
   "skills_required" : [ "electronics", 3 ],
   "difficulty": 5,
@@ -2538,7 +2599,7 @@
   "autolearn": false,
   "book_learn": [[ "recipe_lab_elec", 5 ]],
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1}
   ], "tools": [
     [
       [ "func:soldering_iron", 6 ]
@@ -5230,6 +5291,28 @@
   "components": [
     [
       [ "human_flesh", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "dry_mushroom",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_MEAT",
+  "skill_used": "cooking",
+  "difficulty": 2,
+  "skills_required": [ "survival", 5 ],
+  "time": 9000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      [ "dehydrator", 20 ],
+      [ "char_smoker", 4 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "mushroom", 4 ]
     ]
   ]
 },{
@@ -9276,7 +9359,8 @@
       [ "mutagen", 1 ]
     ],
     [
-      [ "chitin_piece", 3 ]
+      [ "spider_egg", 1 ],
+      [ "chitin_piece", 4 ]
     ],
     [
       [ "ammonia", 1 ],
@@ -11633,8 +11717,8 @@
 },{
         "type" : "recipe",
   "result": "floodlight",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_LIGHTING",
   "skill_used": "mechanics",
   "skills_required": [ "electronics", 1 ],
   "difficulty": 2,
@@ -11658,8 +11742,8 @@
 },{
         "type" : "recipe",
   "result": "soldering_iron",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 1,
   "time": 20000,
@@ -11748,7 +11832,7 @@
         "type" : "recipe",
   "result": "rechargeable_battery",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "fabrication",
   "skills_required": [ "electronics", 3 ],
   "difficulty": 5,
@@ -11780,7 +11864,7 @@
         "type" : "recipe",
   "result": "battery_atomic",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "electronics",
   "skills_required": [ "fabrication", 6 ],
   "difficulty": 6,
@@ -11821,7 +11905,7 @@
   "autolearn": false,
   "book_learn": [[ "advanced_electronics", 3 ] , [ "textbook_electronics", 3 ] , [ "textbook_anarch", 4 ]],
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1}
   ], "tools": [
     [
       [ "func:soldering_iron", 10 ]
@@ -11849,7 +11933,7 @@
   "result": "noise_emitter",
   "id_suffix": "radio-mod",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 1,
   "time": 15000,
@@ -11876,7 +11960,7 @@
   "result": "noise_emitter",
   "id_suffix": "from-scratch",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 2,
   "time": 30000,
@@ -11908,7 +11992,7 @@
         "type" : "recipe",
   "result": "radio",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 2,
   "time": 25000,
@@ -11939,8 +12023,8 @@
 },{
         "type" : "recipe",
   "result": "water_purifier",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "mechanics",
   "skills_required": [ "electronics", 1 ],
   "difficulty": 3,
@@ -11972,8 +12056,8 @@
 },{
         "type" : "recipe",
   "result": "hotplate",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 3,
   "time": 30000,
@@ -12006,8 +12090,8 @@
 },{
   "type" : "recipe",
   "result": "coffeemaker",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 3,
   "time": 30000,
@@ -12046,7 +12130,7 @@
         "type" : "recipe",
   "result": "tazer",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 3,
   "time": 25000,
@@ -12105,8 +12189,8 @@
 },{
         "type" : "recipe",
   "result": "veh_tracker",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "electronics",
   "difficulty": 4,
   "time": 30000,
@@ -12139,7 +12223,7 @@
         "type" : "recipe",
   "result": "two_way_radio",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 4,
   "time": 30000,
@@ -12176,7 +12260,7 @@
         "type" : "recipe",
   "result": "electrohack",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "skills_required": [ "computer", 1 ],
   "difficulty": 4,
@@ -12247,7 +12331,7 @@
         "type" : "recipe",
   "result": "mp3",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "skills_required": [ "computer", 1 ],
   "difficulty": 5,
@@ -12281,7 +12365,7 @@
         "type" : "recipe",
   "result": "portable_game",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "skills_required": ["computer",  5],
   "difficulty": 8,
@@ -12323,8 +12407,8 @@
 },{
         "type" : "recipe",
   "result": "geiger_off",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 5,
   "time": 35000,
@@ -12356,8 +12440,8 @@
 },{
         "type" : "recipe",
   "result": "rad_monitor",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 7,
   "time": 35000,
@@ -13093,8 +13177,8 @@
 },{
         "type" : "recipe",
   "result": "recharge_station",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "electronics",
   "difficulty": 8,
   "time": 50000,
@@ -13126,8 +13210,8 @@
 },{
         "type" : "recipe",
   "result": "solar_panel",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "electronics",
   "difficulty": 8,
   "time": 50000,
@@ -13159,8 +13243,8 @@
 },{
         "type" : "recipe",
   "result": "solar_panel_v2",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "electronics",
   "difficulty": 10,
   "time": 50000,
@@ -13326,7 +13410,7 @@
         "type" : "recipe",
   "result": "teleporter",
   "category": "CC_ELECTRONIC",
-  "subcategory": "CSC_ELECTRONIC_OTHER",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 8,
   "time": 50000,
@@ -17017,8 +17101,8 @@
 },{
         "type" : "recipe",
   "result": "water_faucet",
-  "subcategory": "CSC_OTHER_PARTS",
   "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_PARTS",
   "skill_used": "fabrication",
   "skills_required": [ "mechanics", 1 ],
   "difficulty": 2,
@@ -17086,8 +17170,8 @@
 },{
         "type" : "recipe",
   "result": "forgerig",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "fabrication",
   "skills_required": ["electronics",4],
   "difficulty": 4,
@@ -17117,8 +17201,8 @@
 },{
         "type" : "recipe",
   "result": "weldrig",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "fabrication",
   "skills_required": ["electronics",4],
   "difficulty": 4,
@@ -17157,8 +17241,8 @@
 },{
   "type" : "recipe",
   "result": "craftrig",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "fabrication",
   "skills_required": ["electronics",3],
   "difficulty": 4,
@@ -17202,8 +17286,8 @@
 },{
   "type" : "recipe",
   "result": "chemlab",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "fabrication",
   "skills_required": ["electronics",3],
   "difficulty": 4,
@@ -17297,8 +17381,8 @@
 },{
   "type" : "recipe",
   "result": "small_storage_battery",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "electronics",
   "skills_required": [ "fabrication", 1 ],
   "difficulty": 3,
@@ -17347,8 +17431,8 @@
 },{
   "type" : "recipe",
   "result": "battery_motorbike",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "electronics",
   "skills_required": [ "fabrication", 1 ],
   "difficulty": 3,
@@ -17397,8 +17481,8 @@
 },{
   "type" : "recipe",
   "result": "battery_car",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "electronics",
   "skills_required": [ "fabrication", 1 ],
   "difficulty": 3,
@@ -17447,8 +17531,8 @@
 },{
   "type" : "recipe",
   "result": "battery_truck",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "electronics",
   "skills_required": [ "fabrication", 1 ],
   "difficulty": 3,
@@ -18166,6 +18250,60 @@
   ]
 },{
         "type" : "recipe",
+  "result": "wheel_wheelchair",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_MATERIALS",
+  "skill_used": "fabrication",
+  "difficulty": 2,
+  "time": 5000,
+  "reversible": true,
+  "autolearn": true,
+  "qualities":[
+    {"id":"HAMMER","level":2,"amount":1},
+    {"id":"SAW_M","level":1,"amount":1}
+  ], "tools": [
+    [
+      [ "goggles_welding", -1 ]
+    ],
+    [
+      [ "func:welder", 40 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "pipe", 2 ]
+    ], [
+      [ "wheel_bicycle", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "hand_rims",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_MATERIALS",
+  "skill_used": "fabrication",
+  "difficulty": 1,
+  "time": 4000,
+  "reversible": true,
+  "autolearn": true,
+  "qualities":[
+    {"id":"HAMMER","level":2,"amount":1},
+    {"id":"SAW_M","level":1,"amount":1}
+  ], "tools": [
+    [
+      [ "goggles_welding", -1 ]
+    ],
+    [
+      [ "func:welder", 20 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "pipe", 2 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "frame",
   "category": "CC_OTHER",
   "subcategory": "CSC_OTHER_MATERIALS",
@@ -18865,7 +19003,7 @@
   "reversible": false,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1}
   ], "components": [
     [
       [ "muffler", 1 ],
@@ -19088,8 +19226,8 @@
 },{
         "type" : "recipe",
   "result": "bot_turret",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "mechanics",
   "skills_required": [[ "electronics", 5 ], [ "computer", 5 ], [ "gun", 3 ]],
   "difficulty": 7,
@@ -19130,8 +19268,8 @@
 },{
         "type" : "recipe",
   "result": "bot_laserturret",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_PARTS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_PARTS",
   "skill_used": "mechanics",
   "skills_required": [[ "electronics", 8 ], [ "computer", 5 ], [ "gun", 3 ]],
   "difficulty": 8,
@@ -19752,7 +19890,7 @@
   "time": 5000,
   "reversible": false,
   "autolearn": true,
-  "qualities":[
+  "qualities" : [
     {"id":"HAMMER","level":1,"amount":1}
   ], "components": [
     [
@@ -20240,8 +20378,8 @@
   "reversible": true,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1}
   ], "components": [
     [
       ["pipe", 1]
@@ -20302,9 +20440,9 @@
   "reversible": false,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1},
-	{"id":"WRENCH_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1},
+	{"id":"WRENCH_FINE","level":1,"amount":1}
   ], "tools": [
     [
       ["goggles_welding", -1]
@@ -20345,9 +20483,9 @@
   "reversible": false,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1},
-	{"id":"WRENCH_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1},
+	{"id":"WRENCH_FINE","level":1,"amount":1}
   ], "tools": [
     [
       ["goggles_welding", -1]
@@ -20389,9 +20527,9 @@
   "autolearn": false,
   "book_learn": [["recipe_mininuke_launch", 5]],
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1},
-	{"id":"WRENCH_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1},
+	{"id":"WRENCH_FINE","level":1,"amount":1}
   ], "tools": [
     [
       ["goggles_welding", -1]
@@ -20433,9 +20571,9 @@
   "autolearn": true,
   "book_learn": [["textbook_fabrication", 2]],
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1},
-	{"id":"WRENCH_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1},
+	{"id":"WRENCH_FINE","level":1,"amount":1}
   ], "tools": [
     [
       ["goggles_welding", -1]
@@ -20468,9 +20606,9 @@
   "reversible": false,
   "autolearn": true,
   "qualities":[
-    {"id":"SAW_M_G","level":1,"amount":1},
-    {"id":"SCREW_G","level":1,"amount":1},
-	{"id":"WRENCH_G","level":1,"amount":1}
+    {"id":"SAW_M_FINE","level":1,"amount":1},
+    {"id":"SCREW_FINE","level":1,"amount":1},
+	{"id":"WRENCH_FINE","level":1,"amount":1}
   ], "tools": [
     [
       ["goggles_welding", -1]
@@ -21281,9 +21419,6 @@
   "time": 5000,
   "reversible": true,
   "autolearn": true,
-"qualities":[
-    {"id":"CUT","level":1,"amount":1}
-    ],
   "qualities":[
     {"id":"HAMMER","level":1,"amount":1}
   ], "components": [
@@ -26111,7 +26246,7 @@
   "autolearn": false,
   "book_learn": [[ "recipe_lab_elec", 5]],
   "qualities":[
-    {"id":"SCREW_G","level":1,"amount":1}
+    {"id":"SCREW_FINE","level":1,"amount":1}
   ], "tools": [
     [
       [ "func:soldering_iron", 20 ]
@@ -26392,8 +26527,8 @@
 },{
   "type" : "recipe",
   "result": "dehydrator",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 4,
   "time": 36000,
@@ -26695,8 +26830,8 @@
 },{
         "type" : "recipe",
   "result": "atomic_coffeepot",
-  "category": "CC_OTHER",
-  "subcategory": "CSC_OTHER_TOOLS",
+  "category": "CC_ELECTRONIC",
+  "subcategory": "CSC_ELECTRONIC_TOOLS",
   "skill_used": "electronics",
   "difficulty": 4,
   "time": 3000,
@@ -27190,9 +27325,6 @@
   "reversible": false,
   "autolearn": true,
   "qualities":[
-    {"id":"CUT","level":1,"amount":1}
-  ],
-  "qualities":[
     {"id":"SAW_M","level":1,"amount":1},
     {"id":"SCREW","level":1,"amount":1}
   ], "components": [
@@ -27218,9 +27350,6 @@
   "reversible": false,
   "autolearn": true,
   "qualities":[
-    {"id":"CUT","level":1,"amount":1}
-  ],
-  "qualities":[
     {"id":"SAW_M","level":1,"amount":1},
     {"id":"SCREW","level":1,"amount":1}
   ], "components": [
@@ -27245,9 +27374,6 @@
   "time": 45000,
   "reversible": false,
   "autolearn": true,
-  "qualities":[
-    {"id":"CUT","level":1,"amount":1}
-  ],
   "qualities":[
     {"id":"SAW_M","level":1,"amount":1},
     {"id":"SCREW","level":1,"amount":1}
@@ -27720,9 +27846,6 @@
   "autolearn": false,
   "book_learn": [["mag_survival", 4] , ["atomic_survival", 3] , ["textbook_survival", 2]],
   "qualities":[
-    {"id":"CUT","level":1,"amount":1}
-  ],
-  "qualities":[
     {"id":"HAMMER","level":1,"amount":1}
   ], "components": [
     [
@@ -28019,5 +28142,98 @@
         [ "nail", 1 ]
       ]
     ]
+  },
+  {
+    "type" : "recipe",
+    "result": "scabbard",
+    "category": "CC_ARMOR",
+    "subcategory": "CSC_ARMOR_STORAGE",
+    "skill_used": "fabrication",
+    "difficulty": 5,
+    "time": 40000,
+    "reversible": false,
+    "autolearn": false,
+	"book_learn": [ ["textbook_weapwest", 5], ["textbook_weapeast", 5], ["textbook_armwest", 5], ["textbook_armeast", 5] ],
+	"qualities":[
+      {"id":"HAMMER","level":1,"amount":1},
+	  {"id":"CUT","level":1,"amount":1}
+	],
+    "components": [
+      [
+        [ "leather", 10 ]
+      ],
+      [
+        ["superglue", 1]
+      ],
+      [
+        ["2x4", 2]
+      ],
+      [
+        ["nail", 5]
+      ]
+    ]
+  },
+  {
+    "type" : "recipe",
+    "result": "holster",
+    "category": "CC_ARMOR",
+    "subcategory": "CSC_ARMOR_STORAGE",
+    "skill_used": "tailor",
+    "skills_required": [ "pistol", 3 ],
+    "difficulty": 3,
+    "time": 15000,
+    "reversible": false,
+    "autolearn": true,
+    "tools": [
+      [
+        [ "needle_bone", 20 ],
+        [ "needle_wood", 20 ],
+        [ "sewing_kit", 20 ]
+      ]
+    ],
+     "components": [
+      [
+        [ "leather", 6 ]
+      ],
+      [
+        [ "string_36", 1 ],
+        [ "string_6", 6 ],
+        [ "sinew", 20 ],
+        [ "thread", 20 ],
+        [ "plant_fibre", 20 ]
+      ]
+    ]
+  },
+  {
+    "type" : "recipe",
+    "result": "sheath",
+    "category": "CC_ARMOR",
+    "subcategory": "CSC_ARMOR_STORAGE",
+    "skill_used": "tailor",
+    "skills_required": [ "cutting", 3 ],
+    "difficulty": 3,
+    "time": 15000,
+    "reversible": false,
+    "autolearn": true,
+    "tools": [
+      [
+        [ "needle_bone", 20 ],
+        [ "needle_wood", 20 ],
+        [ "sewing_kit", 20 ]
+      ]
+    ],
+     "components": [
+      [
+        [ "leather", 6 ]
+      ],
+      [
+        [ "string_36", 1 ],
+        [ "string_6", 6 ],
+        [ "sinew", 20 ],
+        [ "thread", 20 ],
+        [ "plant_fibre", 20 ]
+      ]
+    ]
   }
 ]
+
