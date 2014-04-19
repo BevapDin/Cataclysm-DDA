@@ -7418,7 +7418,7 @@ int iuse::tool_belt(player *p, item *it, bool )
             return 0;
         }
         if(!put->is_tool()) {
-            g->add_msg_if_player(p, _("That %s is not a tool!"), put->tname(g).c_str());
+            g->add_msg_if_player(p, _("That %s is not a tool!"), put->tname().c_str());
             return 0;
         }
         if(put->volume() > 3) {
@@ -7723,7 +7723,7 @@ int iuse::wood_gas(player *p, item *, bool )
         vol_fac += wood_gas_amount(it);
     }
     if(vol_fac == 0) {
-        g->add_msg_if_player(p, "Your %s is is too small or not organic at all.", it.tname(g).c_str());
+        g->add_msg_if_player(p, "Your %s is is too small or not organic at all.", it.tname().c_str());
         return 0;
     }
     if(useStack) {

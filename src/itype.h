@@ -112,7 +112,10 @@ struct itype
                  // Used for save files; aligns to itype_id above.
     unsigned int  price; // Its value
 
-    std::string name;        // Proper name
+    // name and name_plural are not translated automatically
+    // nname() is used for display purposes
+    std::string name;        // Proper name, singular form, in American English.
+    std::string name_plural; // name, plural form, in American English.
     std::string description; // Flavor text
 
     char sym;       // Symbol on the map
@@ -190,6 +193,10 @@ struct itype
 
  virtual std::string get_item_type_string() { return "misc"; }
 
+ // Returns the name of the item type in the correct language and with respect to its grammatical number,
+ // based on quantity (example: item type “anvil”, nname(4) would return “anvils” (as in “4 anvils”).
+ virtual std::string nname(unsigned int quantity) { return ngettext(name.c_str(), name_plural.c_str(), quantity); }
+
  virtual bool is_food()          { return false; }
  virtual bool is_ammo()          { return false; }
  virtual bool is_gun()           { return false; }
@@ -218,6 +225,7 @@ struct itype
         : id("null")
         , price(0)
         , name("none")
+        , name_plural("none")
         , description()
         , sym('#')
         , color(c_white)
@@ -242,13 +250,14 @@ struct itype
     }
 
     itype(std::string pid, unsigned int pprice,
-       std::string pname, std::string pdes,
+       std::string pname, std::string pname_plural, std::string pdes,
        char psym, nc_color pcolor, std::string pm1, std::string pm2, phase_id pphase,
        unsigned int pvolume, unsigned int pweight,
        signed int pmelee_dam, signed int pmelee_cut, signed int pm_to_hit)
         : id(pid)
         , price(pprice)
         , name(pname)
+        , name_plural(pname_plural)
         , description(pdes)
         , sym(psym)
         , color(pcolor)
@@ -609,7 +618,7 @@ struct it_macguffin : public virtual itype
 
  virtual bool is_macguffin() { return true; }
  it_macguffin(std::string pid, unsigned int pprice,
-              std::string pname, std::string pdes,
+              std::string pname, std::string pname_plural, std::string pdes,
               char psym, nc_color pcolor, std::string pm1, std::string pm2,
               unsigned int pvolume, unsigned int pweight,
               signed int pmelee_dam, signed int pmelee_cut,
@@ -617,7 +626,7 @@ struct it_macguffin : public virtual itype
 
               bool preadable,
               int (iuse::*puse)(player *, item *, bool))
-:itype(pid, pprice, pname, pdes, psym, pcolor, pm1, pm2, SOLID,
+:itype(pid, pprice, pname, pname_plural, pdes, psym, pcolor, pm1, pm2, SOLID,
        pvolume, pweight, pmelee_dam, pmelee_cut, pm_to_hit) {
   readable = preadable;
   use = puse;
@@ -632,14 +641,14 @@ struct it_software : public virtual itype
  virtual bool is_software()      { return true; }
 
  it_software(std::string pid, unsigned int pprice,
-             std::string pname, std::string pdes,
+             std::string pname, std::string pname_plural, std::string pdes,
              char psym, nc_color pcolor, std::string pm1, std::string pm2,
              unsigned int pvolume, unsigned int pweight,
              signed int pmelee_dam, signed int pmelee_cut,
              signed int pm_to_hit,
 
              software_type pswtype, int ppower)
-:itype(pid, pprice, pname, pdes, psym, pcolor, pm1, pm2, SOLID,
+:itype(pid, pprice, pname, pname_plural, pdes, psym, pcolor, pm1, pm2, SOLID,
        pvolume, pweight, pmelee_dam, pmelee_cut, pm_to_hit) {
   swtype = pswtype;
   power = ppower;
@@ -653,14 +662,14 @@ struct it_stationary : public virtual itype
  std::string category;
 
  it_stationary(std::string pid, unsigned int pprice,
-          std::string pname, std::string pdes,
+          std::string pname, std::string pname_plural, std::string pdes,
           char psym, nc_color pcolor, std::string pm1, std::string pm2,
           unsigned char pvolume, unsigned char pweight,
           signed int pmelee_dam, signed int pmelee_cut,
           signed int pm_to_hit,
           std::string pcategory)
 
-:itype(pid, pprice, pname, pdes, psym, pcolor, pm1, pm2, SOLID,
+:itype(pid, pprice, pname, pname_plural, pdes, psym, pcolor, pm1, pm2, SOLID,
        pvolume, pweight, pmelee_dam, pmelee_cut, pm_to_hit)
  {
      category = pcategory;
