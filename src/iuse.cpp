@@ -7064,20 +7064,7 @@ int iuse::quiver(player *p, item *it, bool)
             return 0;
         }
 
-        int maxArrows = 0;
-        // find QUIVER_n tag and grab n
-        for(std::set<std::string>::iterator iter = it->type->item_tags.begin();
-            iter != it->type->item_tags.end(); iter++) {
-            std::string flag = *iter;
-            if(flag.substr(0, 6) == "QUIVER") {
-                std::stringstream ss(flag.substr(7, flag.size()));
-                if(!(ss >> maxArrows)) {
-                    debugmsg("Error parsing QUIVER_n tag (iuse::quiver)");
-                    return 0;
-                }
-                break;
-            }
-        }
+        int maxArrows = it->max_charges_from_flag("QUIVER");
         if(maxArrows == 0) {
             debugmsg("Tried storing arrows in quiver without a QUIVER_n tag (iuse::quiver)");
             return 0;
@@ -7807,7 +7794,7 @@ int iuse::misc_repair(player *p, item *it, bool)
                 g->add_msg_if_player(p,_("You do not have that item!"));
                 return 0 ;
             }
-            if (!(fix->made_of("wood") || fix->made_of("plastic") || fix->made_of("bone"))) {
+            if (!(fix->made_of("wood") || fix->made_of("plastic") || fix->made_of("bone") || fix->made_of("chitin"))) {
                 g->add_msg_if_player(p,_("That isn't made of wood, bone, or chitin!"));
                 return 0;
             }

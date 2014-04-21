@@ -34,6 +34,7 @@
 #include "mod_manager.h"
 #include "path_info.h"
 #include "crafting_inventory_t.h"
+#include "mapsharing.h"
 #include <map>
 #include <set>
 #include <algorithm>
@@ -111,7 +112,6 @@ void game::load_static_data() {
     init_lua();                 // Set up lua                       (SEE catalua.cpp)
 #endif
     // UI stuff, not mod-specific per definition
-    load_keyboard_settings();
     inp_mngr.init();            // Load input config JSON
     // Init mappings for loading the json stuff
     DynamicDataLoader::get_instance();
@@ -129,7 +129,6 @@ void game::load_static_data() {
     init_body_parts();
     init_ter_bitflags_map();
     init_vpart_bitflag_map();
-    init_translation();
     init_colormap();
     init_mapgen_builtin_functions();
     init_fields();
@@ -2374,15 +2373,103 @@ void game::hide_mouseview()
     void rescale_tileset(int size);
 #endif
 
-input_context game::get_player_input(std::string &action)
-{
+input_context get_default_mode_input_context() {
     input_context ctxt("DEFAULTMODE");
-    ctxt.register_directions();
+    // Because those keys move the character, they don't pan, as their original name says
+    ctxt.register_action("UP", _("Move North"));
+    ctxt.register_action("RIGHTUP", _("Move Northeast"));
+    ctxt.register_action("RIGHT", _("Move East"));
+    ctxt.register_action("RIGHTDOWN", _("Move Southeast"));
+    ctxt.register_action("DOWN", _("Move South"));
+    ctxt.register_action("LEFTDOWN", _("Move Southwest"));
+    ctxt.register_action("LEFT", _("Move West"));
+    ctxt.register_action("LEFTUP", _("Move Northwest"));
+    ctxt.register_action("pause");
+    ctxt.register_action("LEVEL_DOWN", _("Descend Stairs"));
+    ctxt.register_action("LEVEL_UP", _("Ascend Stairs"));
+    ctxt.register_action("center");
+    ctxt.register_action("shift_n");
+    ctxt.register_action("shift_ne");
+    ctxt.register_action("shift_e");
+    ctxt.register_action("shift_se");
+    ctxt.register_action("shift_s");
+    ctxt.register_action("shift_sw");
+    ctxt.register_action("shift_w");
+    ctxt.register_action("shift_nw");
+    ctxt.register_action("open");
+    ctxt.register_action("close");
+    ctxt.register_action("smash");
+    ctxt.register_action("examine");
+    ctxt.register_action("advinv");
+    ctxt.register_action("pickup");
+    ctxt.register_action("grab");
+    ctxt.register_action("butcher");
+    ctxt.register_action("chat");
+    ctxt.register_action("look");
+    ctxt.register_action("peek");
+    ctxt.register_action("listitems");
+    ctxt.register_action("inventory");
+    ctxt.register_action("compare");
+    ctxt.register_action("organize");
+    ctxt.register_action("apply");
+    ctxt.register_action("apply_wielded");
+    ctxt.register_action("wear");
+    ctxt.register_action("take_off");
+    ctxt.register_action("eat");
+    ctxt.register_action("read");
+    ctxt.register_action("wield");
+    ctxt.register_action("pick_style");
+    ctxt.register_action("reload");
+    ctxt.register_action("unload");
+    ctxt.register_action("throw");
+    ctxt.register_action("fire");
+    ctxt.register_action("fire_burst");
+    ctxt.register_action("select_fire_mode");
+    ctxt.register_action("drop");
+    ctxt.register_action("drop_adj");
+    ctxt.register_action("bionics");
+    ctxt.register_action("sort_armor");
+    ctxt.register_action("wait");
+    ctxt.register_action("craft");
+    ctxt.register_action("recraft");
+    ctxt.register_action("long_craft");
+    ctxt.register_action("construct");
+    ctxt.register_action("disassemble");
+    ctxt.register_action("sleep");
+    ctxt.register_action("control_vehicle");
+    ctxt.register_action("safemode");
+    ctxt.register_action("autosafe");
+    ctxt.register_action("ignore_enemy");
+    ctxt.register_action("save");
+    ctxt.register_action("quicksave");
+    ctxt.register_action("quit");
+    ctxt.register_action("player_data");
+    ctxt.register_action("map");
+    ctxt.register_action("missions");
+    ctxt.register_action("factions");
+    ctxt.register_action("kills");
+    ctxt.register_action("morale");
+    ctxt.register_action("messages");
+    ctxt.register_action("help");
+    ctxt.register_action("debug");
+    ctxt.register_action("debug_scent");
+    ctxt.register_action("debug_mode");
+    ctxt.register_action("zoom_out");
+    ctxt.register_action("zoom_in");
+    ctxt.register_action("toggle_sidebar_style");
+    ctxt.register_action("toggle_fullscreen");
+    ctxt.register_action("action_menu");
     ctxt.register_action("ANY_INPUT");
     ctxt.register_action("COORDINATE");
     ctxt.register_action("MOUSE_MOVE");
     ctxt.register_action("SELECT");
     ctxt.register_action("SEC_SELECT");
+    return ctxt;
+}
+
+input_context game::get_player_input(std::string &action)
+{
+    input_context ctxt = get_default_mode_input_context();
 
     char cGlyph = ',';
     nc_color colGlyph = c_ltblue;
@@ -2575,7 +2662,7 @@ bool game::handle_action()
                     destination_preview = m.route(u.posx, u.posy, mx, my, false);
                     return false;
                 }
-            } else {
+            } else if (action == "SEC_SELECT") {
                 // Right mouse button
 
                 bool had_destination_to_clear = !destination_preview.empty();
@@ -2632,29 +2719,9 @@ bool game::handle_action()
         u.clear_destination();
         destination_preview.clear();
 
-        int ch = ctxt.get_raw_input().get_first_input();
-        // Hack until new input system is fully implemented
-        if (ch == KEY_UP) {
-            act = ACTION_MOVE_N;
-        } else if (ch == KEY_RIGHT) {
-            act = ACTION_MOVE_E;
-        } else if (ch == KEY_DOWN) {
-            act = ACTION_MOVE_S;
-        } else if (ch == KEY_LEFT) {
-            act = ACTION_MOVE_W;
-        } else if (ch == KEY_NPAGE) {
-            act = ACTION_MOVE_DOWN;
-        } else if (ch == KEY_PPAGE) {
-            act = ACTION_MOVE_UP;
-        } else {
-            if (keymap.find(ch) == keymap.end()) {
-                if (ch != ' ' && ch != '\n') {
-                    add_msg(_("Unknown command: '%c'"), ch);
-                }
-                return false;
-            }
-
-            act = keymap[ch];
+        act = look_up_action(action);
+        if (act == ACTION_NULL) {
+            add_msg(_("Unknown command: '%c'"), (int) ctxt.get_raw_input().get_first_input());
         }
     }
 
@@ -3176,6 +3243,8 @@ bool game::handle_action()
    break;
 
   case ACTION_DEBUG:
+   if(MAP_SHARING::isCompetitive() && !MAP_SHARING::isDebugger())
+       break; //don't do anything when sharing and not debugger
    debug();
    refresh_all();
    break;
@@ -3189,10 +3258,14 @@ bool game::handle_action()
    break;
 
   case ACTION_DISPLAY_SCENT:
+   if(MAP_SHARING::isCompetitive() && !MAP_SHARING::isDebugger())
+       break; //don't do anything when sharing and not debugger
    display_scent();
    break;
 
   case ACTION_TOGGLE_DEBUGMON:
+   if(MAP_SHARING::isCompetitive() && !MAP_SHARING::isDebugger())
+       break; //don't do anything when sharing and not debugger
    debugmon = !debugmon;
    if (debugmon) {
     add_msg(_("Debug messages ON!"));
@@ -3608,9 +3681,13 @@ bool game::save_factions_missions_npcs ()
     std::ofstream fout;
     fout.exceptions(std::ios::badbit | std::ios::failbit);
 
-    fout.open(masterfile.c_str());
+    fopen_exclusive(fout, masterfile.c_str());
+    if(!fout.is_open()) {
+        return true; //trick code into thinking that everything went okay
+    }
+
     serialize_master(fout);
-    fout.close();
+    fclose_exclusive(fout, masterfile.c_str());
         return true;
     } catch(std::ios::failure &) {
         popup(_("Failed to save factions to %s"), masterfile.c_str());
@@ -3624,7 +3701,12 @@ bool game::save_artifacts()
     try {
     std::ofstream fout;
     fout.exceptions(std::ios::badbit | std::ios::failbit);
-    fout.open(artfilename.c_str(), std::ofstream::trunc);
+
+    fopen_exclusive(fout, artfilename.c_str(), std::ofstream::trunc);
+    if(!fout.is_open()) {
+        return true; // trick game into thinking it was saved
+    }
+
     JsonOut json(fout);
     json.start_array();
     for ( std::vector<std::string>::iterator it =
@@ -3639,7 +3721,8 @@ bool game::save_artifacts()
     }
     }
     json.end_array();
-    fout.close();
+    fclose_exclusive(fout, artfilename.c_str());
+
         return true;
     } catch(std::ios::failure &) {
         popup(_("Failed to save artifacts to %s"), artfilename.c_str());
@@ -3665,9 +3748,14 @@ bool game::save_uistate() {
     try {
     std::ofstream fout;
     fout.exceptions(std::ios::badbit | std::ios::failbit);
-    fout.open(savefile.c_str());
+
+    fopen_exclusive(fout, savefile.c_str());
+    if(!fout.is_open()) {
+        return true; //trick game into thinking it was saved
+    }
+
     fout << uistate.serialize();
-    fout.close();
+    fclose_exclusive(fout, savefile.c_str());
         return true;
     } catch(std::ios::failure &) {
         popup(_("Failed to save uistate to %s"), savefile.c_str());
@@ -9576,6 +9664,9 @@ void game::pickup(int posx, int posy, int min)
     // Not many items, just grab them
     if (here.size() <= min && min != -1) {
         item newit = here[0];
+        int moves_taken = 100;
+        bool picked_up = false;
+
         if (newit.made_of(LIQUID)) {
             add_msg(_("You can't pick up a liquid!"));
             return;
@@ -9596,31 +9687,25 @@ void game::pickup(int posx, int posy, int min)
             add_msg(_("The %s is too heavy!"), newit.display_name().c_str());
             decrease_nextinv();
         } else if (!u.can_pickVolume(newit.volume())) {
-            if (u.is_armed()) {
+            if (newit.is_ammo() && (newit.ammo_type() == "arrow" || newit.ammo_type() == "bolt")) {
+                handle_quiver_insertion(newit, false, moves_taken, picked_up);
+            } else if (u.is_armed()) {
                 if (!u.weapon.has_flag("NO_UNWIELD")) {
                     // Armor can be instantly worn
                     if (newit.is_armor() &&
                             query_yn(_("Put on the %s?"),
                                      newit.display_name().c_str())) {
                         if (u.wear_item(&newit)) {
-                            if (from_veh) {
-                                veh->remove_item (cargo_part, 0);
-                            } else {
-                                m.i_clear(posx, posy);
-                            }
+                            picked_up = true;
                         }
                     } else if (query_yn(_("Drop your %s and pick up %s?"),
                                         u.weapon.display_name().c_str(),
                                         newit.display_name().c_str())) {
-                        if (from_veh) {
-                            veh->remove_item (cargo_part, 0);
-                        } else {
-                            m.i_clear(posx, posy);
-                        }
+                        picked_up = true;
                         m.add_item_or_charges(posx, posy, u.remove_weapon(), 1);
                         u.inv.assign_empty_invlet(newit, true);  // force getting an invlet.
                         u.wield(&(u.i_add(newit)));
-                        u.moves -= 100;
+
                         add_msg(_("Wielding %c - %s"), newit.invlet,
                                 newit.display_name().c_str());
                     } else {
@@ -9636,35 +9721,26 @@ and you can't unwield your %s."),
             } else {
                 u.inv.assign_empty_invlet(newit, true);  // force getting an invlet.
                 u.wield(&(u.i_add(newit)));
-                if (from_veh) {
-                    veh->remove_item (cargo_part, 0);
-                } else {
-                    m.i_clear(posx, posy);
-                }
-                u.moves -= 100;
-                add_msg(_("Wielding %c - %s"), newit.invlet,
-                        newit.display_name().c_str());
+                picked_up = true;
+                add_msg(_("Wielding %c - %s"), newit.invlet, newit.display_name().c_str());
             }
+        } else if (newit.is_ammo() && (newit.ammo_type() == "arrow" || newit.ammo_type() == "bolt")) {
+            //add ammo to quiver
+            handle_quiver_insertion(newit, true, moves_taken, picked_up);
         } else if (!u.is_armed() &&
                    (u.volume_carried() + newit.volume() > u.volume_capacity() - 2 ||
                     newit.is_weap() || newit.is_gun())) {
             u.weapon = newit;
-            if (from_veh) {
-                veh->remove_item (cargo_part, 0);
-            } else {
-                m.i_clear(posx, posy);
-            }
-            u.moves -= 100;
+            picked_up = true;
             add_msg(_("Wielding %c - %s"), newit.invlet, newit.display_name().c_str());
         } else {
             newit = u.i_add(newit);
-            if (from_veh) {
-                veh->remove_item (cargo_part, 0);
-            } else {
-                m.i_clear(posx, posy);
-            }
-            u.moves -= 100;
+            picked_up = true;
             add_msg("%c - %s", newit.invlet == 0 ? ' ' : newit.invlet, newit.display_name().c_str());
+        }
+
+        if(picked_up) {
+            remove_from_map_or_vehicle(posx, posy, from_veh, veh, cargo_part, moves_taken, 0);
         }
 
         if (weight_is_okay && u.weight_carried() >= u.weight_capacity()) {
@@ -9753,6 +9829,11 @@ and you can't unwield your %s."),
                         if ( mapAutoPickupItems[here[i].tname()] == "true" ) {
                             bPickup = true;
                         }
+                    }
+
+                    //auto pickup arrow/bolt ammo
+                    if (here[i].is_ammo() && (here[i].ammo_type() == "arrow" || here[i].ammo_type() == "bolt")) {
+                        bPickup = true;
                     }
                 }
 
@@ -9999,6 +10080,7 @@ and you can't unwield your %s."),
         } else if (getitem[i]) {
             bool picked_up = false;
             item temp = here[i].clone();
+            int moves_taken = 100;
 
             iter = 0;
             while (iter < inv_chars.size() &&
@@ -10021,8 +10103,16 @@ and you can't unwield your %s."),
             if (!u.can_pickWeight(here[i].weight(), false)) {
                 add_msg(_("The %s is too heavy!"), here[i].display_name().c_str());
                 decrease_nextinv();
-            } else if (!u.can_pickVolume(here[i].volume())) {
-                if (u.is_armed()) {
+            } else if (!u.can_pickVolume(here[i].volume())) { //check if player is at max volume
+                //try to store arrows/bolts in a worn quiver
+                if (here[i].is_ammo() && (here[i].ammo_type() == "arrow" || here[i].ammo_type() == "bolt")) {
+                    int quivered = handle_quiver_insertion(here[i], false, moves_taken, picked_up);
+                    if(quivered > 0 && here[i].charges > 0) {
+                        //update the charges for the item that gets re-added to the game map
+                        pickup_count[i] = quivered;
+                        temp.charges = here[i].charges;
+                    }
+                } else if (u.is_armed()) {
                     if (!u.weapon.has_flag("NO_UNWIELD")) {
                         // Armor can be instantly worn
                         if (here[i].is_armor() &&
@@ -10059,6 +10149,9 @@ and you can't unwield your %s."),
                     mapPickup[here[i].tname()] += (here[i].count_by_charges()) ? here[i].charges : 1;
                     picked_up = true;
                 }
+            } else if (here[i].is_ammo() && (here[i].ammo_type() == "arrow" || here[i].ammo_type() == "bolt")) {
+                //add ammo to quiver
+                handle_quiver_insertion(here[i], true, moves_taken, picked_up);
             } else if (!u.is_armed() &&
                        (u.volume_carried() + here[i].volume() > u.volume_capacity() - 2 ||
                         here[i].is_weap() || here[i].is_gun())) {
@@ -10071,13 +10164,8 @@ and you can't unwield your %s."),
             }
 
             if (picked_up) {
-                if (from_veh) {
-                    veh->remove_item (cargo_part, curmit);
-                } else {
-                    m.i_rem(posx, posy, curmit);
-                }
+                remove_from_map_or_vehicle(posx, posy, from_veh, veh, cargo_part, moves_taken, curmit);
                 curmit--;
-                u.moves -= 100;
                 if( pickup_count[i] != 0 ) {
                     bool to_map = !from_veh;
 
@@ -10096,15 +10184,7 @@ and you can't unwield your %s."),
     // Auto pickup item message
     // FIXME: i18n
     if (min == -1 && !mapPickup.empty()) {
-        std::stringstream sTemp;
-        for (std::map<std::string, int>::iterator iter = mapPickup.begin();
-                iter != mapPickup.end(); ++iter) {
-            if (sTemp.str() != "") {
-                sTemp << ", ";
-            }
-            sTemp << iter->second << " " << iter->first;
-        }
-        add_msg((_("You pick up: ") + sTemp.str()).c_str());
+        show_pickup_message(mapPickup);
     }
 
     if (got_water) {
@@ -10123,6 +10203,50 @@ and you can't unwield your %s."),
     wrefresh(w_item_info);
     delwin(w_pickup);
     delwin(w_item_info);
+}
+
+//helper function for game::pickup
+//return value is amount of ammo added to quiver
+int game::handle_quiver_insertion(item &here, bool inv_on_fail, int &moves_to_decrement, bool &picked_up)
+{
+    //add ammo to quiver
+    int quivered = here.add_ammo_to_quiver(&u, true);
+    if(quivered > 0) {
+        moves_to_decrement = 0; //moves already decremented in item::add_ammo_to_quiver()
+        picked_up = true;
+        return quivered;
+    } else if (inv_on_fail){
+        //add to inventory instead
+        u.i_add(here);
+        picked_up = true;
+
+        //display output message
+        std::map<std::string, int> map_pickup;
+        int charges = (here.count_by_charges()) ? here.charges : 1;
+        map_pickup.insert(std::pair<std::string, int>(here.tname(), charges));
+        show_pickup_message(map_pickup);
+    }
+    return 0;
+}
+
+//helper function for game::pickup (singular item)
+void game::remove_from_map_or_vehicle(int posx, int posy, bool from_veh, vehicle *veh, int cargo_part, int &moves_taken, int curmit)
+{
+    if (from_veh) {
+        veh->remove_item (cargo_part, curmit);
+    } else {
+        m.i_rem(posx, posy, curmit);
+    }
+    u.moves -= moves_taken;
+}
+
+//helper function for game::pickup
+void game::show_pickup_message(std::map<std::string, int> mapPickup) {
+    for (std::map<std::string, int>::iterator iter = mapPickup.begin();
+            iter != mapPickup.end(); ++iter) {
+        add_msg(ngettext("You pick up: %d %s", "You pick up: %d %ss", iter->second),
+                         iter->second, iter->first.c_str());
+    }
 }
 
 // Establish or release a grab on a vehicle
@@ -10654,22 +10778,24 @@ void game::drop(std::vector<item> &dropped, std::vector<item> &dropped_worn, int
     }
 
     if (dropped.size() == 1 || same) {
+        int dropcount = (dropped[0].count_by_charges()) ? dropped[0].charges: 1;
+
         if (to_veh) {
             add_msg(ngettext("You put your %1$s in the %2$s's %3$s.",
-                             "You put your %1$s in the %2$s's %3$s.",
-                             dropped.size()),
-                    dropped[0].tname(dropped.size()).c_str(),
+                             "You put your %1$ss in the %2$s's %3$s.",
+                             dropcount),
+                    dropped[0].tname(dropcount).c_str(),
                     veh->name.c_str(),
                     veh->part_info(veh_part).name.c_str());
         } else if (can_move_there) {
             add_msg(ngettext("You drop your %s on the %s.",
-                             "You drop your %s on the %s.", dropped.size()),
-                    dropped[0].tname(dropped.size()).c_str(),
+                             "You drop your %ss on the %s.", dropcount),
+                    dropped[0].tname(dropcount).c_str(),
                     m.name(dirx, diry).c_str());
         } else {
             add_msg(ngettext("You put your %s in the %s.",
-                             "You put your %s in the %s.", dropped.size()),
-                    dropped[0].tname(dropped.size()).c_str(),
+                             "You put your %ss in the %s.", dropcount),
+                    dropped[0].tname(dropcount).c_str(),
                     m.name(dirx, diry).c_str());
         }
     } else {
@@ -10920,7 +11046,7 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
             choice = (uimenu(false, _("Draw what?"), choices)) - 1;
         }
 
-        if(choice != -1) {
+        if(choice > -1) {
             u.wield_contents(holsters[choice], true, _("pistol"), 13);
             add_msg_if_player(&u, _("You pull your %s from its %s and ready it to fire."), u.weapon.name.c_str(), holsters[choice]->name.c_str());
             if(u.weapon.charges <= 0) {
@@ -11004,7 +11130,7 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
         }
 
         // draw arrow from quiver
-        if(choice != -1) {
+        if(choice > -1) {
             item* worn = quivers[choice];
             item& arrows = worn->contents[0];
             // chance to fail pulling an arrow at lower levels
@@ -11166,12 +11292,9 @@ void game::butcher()
             int hotkey = -1;
             // First entry gets a hotkey matching the butcher command.
             if( i == 0 ) {
-                for (std::map<char, action_id>::iterator it = keymap.begin();
-                     it != keymap.end(); it++) {
-                    if (it->second == ACTION_BUTCHER) {
-                        hotkey = (it->first == 'q') ? -1 : it->first;
-                        break;
-                    }
+                const long butcher_key = inp_mngr.get_previously_pressed_key();
+                if (butcher_key != 0) {
+                    hotkey = butcher_key;
                 }
             }
             if (it.corpse != NULL) {
