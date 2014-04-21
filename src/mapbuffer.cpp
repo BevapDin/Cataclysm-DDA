@@ -73,6 +73,10 @@ void mapbuffer::remove_submap( tripoint addr )
     std::list<submap *>::iterator l_target = find( submap_list.begin(), submap_list.end(),
                                                    m_target->second );
     // We're probably leaking vehicle objects here.
+    for(size_t i = 0; i < m_target->second->vehicles.size(); i++) {
+        delete m_target->second->vehicles[i];
+    }
+    m_target->second->vehicles.clear();
     delete m_target->second;
     submap_list.erase( l_target );
     submaps.erase( m_target );

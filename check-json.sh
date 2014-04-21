@@ -22,6 +22,7 @@ check_monsters() {
 		fi
 		if ! grep -Eqe '"id" *: *"'"$monster"'"' data/json/monsters.json ; then
 			echo "Unknown monster $monster"
+			grep -F '"'"$monster"'"' src/*.cpp
 		fi
 	done
 }

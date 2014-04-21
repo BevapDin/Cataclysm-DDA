@@ -1048,18 +1048,6 @@ void item::deserialize(JsonObject &data)
 
     data.read("contents", contents);
     data.read("components", components);
-    for(std::set<std::string>::const_iterator a = item_tags.begin(); a != item_tags.end(); ++a) {
-        if (a->length() > 1000) {
-            continue;
-        }
-        std::list<item> comps, tools;
-        if(!::from_uncraft_tag(*a, comps, tools) || comps.empty() || comps.size() > 30) {
-            continue;
-        }
-        components.insert(components.end(), comps.begin(), comps.end());
-        item_tags.erase(a);
-        break;
-    }
 }
 
 void item::serialize(JsonOut &json, bool save_contents) const
