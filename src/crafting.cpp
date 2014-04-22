@@ -153,11 +153,6 @@ void load_recipe(JsonObject &jsobj)
                              autolearn, learn_by_disassembly, result_mult);
 
 
-    if(jsobj.has_member("noise") && jsobj.has_member("noise_string")) {
-        rec->noise = jsobj.get_int("noise");
-        rec->noise_string = jsobj.get_string("noise_string");
-    }
-
 
     jsarr = jsobj.get_array("components");
     load_obj_list(jsarr, rec->components);
@@ -1277,9 +1272,6 @@ void game::complete_craft()
 {
     recipe *making = recipe_by_index(u.activity.index); // Which recipe is it?
     craft_count[making->ident]++;
-    if(making->noise > 0) {
-        sound(u.posx, u.posy, making->noise, making->noise_string);
-    }
     // # of dice is 75% primary skill, 25% secondary (unless secondary is null)
     int skill_dice = u.skillLevel(making->skill_used) * 4;
 

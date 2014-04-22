@@ -51,8 +51,6 @@ struct recipe {
   std::string ident;
   int id;
   itype_id result;
-  int noise;
-  std::string noise_string;
   craft_cat cat;
   craft_subcat subcat;
   Skill *skill_used;
@@ -78,8 +76,6 @@ struct recipe {
   recipe() {
     id = 0;
     result = "null";
-    noise = -1;
-    noise_string = "";
     skill_used = NULL;
     difficulty = 0;
     time = 0;
@@ -95,8 +91,6 @@ recipe(std::string pident, int pid, itype_id pres, craft_cat pcat, craft_subcat 
   ident (pident), id (pid), result (pres), cat(pcat), subcat(psubcat), difficulty (pdiff), time (ptime),
   reversible (preversible), autolearn (pautolearn), learn_by_disassembly (plearn_dis), result_mult(pmult) {
     skill_used = to_use.size()?Skill::skill(to_use):NULL;
-    noise = -1;
-    noise_string = "";
     if(!to_require.empty()){
         for(std::map<std::string,int>::iterator iter=to_require.begin(); iter!=to_require.end(); ++iter){
             required_skills[Skill::skill(iter->first)] = iter->second;
