@@ -153,6 +153,7 @@ class uimenu: public ui_container {
     void setup();
     void show();
     bool scrollby(int scrollby=0, const int key=0 );
+    bool scrollby(int scrollby, const std::string &action );
     void query(bool loop=true);
     void filterlist();
     void apply_scrollbar();

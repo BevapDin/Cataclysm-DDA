@@ -656,6 +656,66 @@ bool uimenu::scrollby(int scrollby, const int key) {
     return true;
 }
 
+bool uimenu::scrollby(int scrollby, const std::string &action) {
+    if (action == "UP") {
+        scrollby = -1;
+    } else if (action == "SCROLL_UP") {
+        scrollby = -3;
+    } else if (action == "PREV_TAB") {
+        scrollby = (-vmax + 1);
+    } else if (action == "DOWN") {
+        scrollby = 1;
+    } else if (action == "SCROLL_DOWN") {
+        scrollby = 3;
+    } else if (action == "NEXT_TAB") {
+        scrollby = vmax - 1;
+    } else if ( scrollby == 0 ) {
+        return false;
+    }
+
+    bool looparound = ( scrollby == -1 || scrollby == 1 );
+    bool backwards = ( scrollby < 0 );
+
+    fselected += scrollby;
+    if ( ! looparound ) {
+        if ( backwards && fselected < 0 ) {
+            fselected = 0;
+        } else if ( fselected >= fentries.size() ) {
+            fselected = fentries.size()-1;
+        }
+    }
+
+    int iter = ( hilight_disabled ? 1 : fentries.size() );
+
+    if ( backwards ) {
+            while ( iter > 0 ) {
+                iter--;
+            if( fselected < 0 ) {
+                fselected = fentries.size() - 1;
+                }
+            if ( entries[ fentries [ fselected ] ].enabled == false ) {
+                fselected--;
+                } else {
+                    iter = 0;
+                }
+            }
+            } else {
+            while ( iter > 0 ) {
+                iter--;
+            if( fselected >= fentries.size() ) {
+                fselected = 0;
+                }
+            if ( entries[ fentries [ fselected ] ].enabled == false ) {
+                fselected++;
+                } else {
+                    iter = 0;
+                }
+            }
+    }
+    selected = fentries [ fselected ];
+    return true;
+}
+
 /*
  * Handle input and update display
  */
@@ -667,16 +727,27 @@ void uimenu::query(bool loop) {
     int startret = UIMENU_INVALID;
     ret = UIMENU_INVALID;
     bool keycallback = (callback != NULL );
+    input_context ctxt("UIMENU");
+    ctxt.register_updown();
+    ctxt.register_action("NEXT_TAB");
+    ctxt.register_action("PREV_TAB");
+    ctxt.register_action("FILTER");
+    ctxt.register_action("SCROLL_UP");
+    ctxt.register_action("SCROLL_DOWN");
+    ctxt.register_action("ANY_INPUT");
+    // without this the input_context would not query the mouse
+    ctxt.register_action("COORDINATE");
 
     show();
     do {
         bool skiprefresh = false;
         bool skipkey = false;
-        keypress = getch();
+        const std::string action = ctxt.handle_input();
+        keypress = ctxt.get_raw_input().get_first_input();
 
-        if ( scrollby(0, keypress) == true ) {
+        if ( scrollby(0, action) ) {
             /* nothing */
-        } else if ( filtering && ( keypress == '/' || keypress == '.' ) ) {
+        } else if ( filtering && action == "FILTER" ) {
             inputfilter();
         } else if ( !fentries.empty() && ( keypress == '\n' || keypress == KEY_ENTER ||
                                            keymap.find(keypress) != keymap.end() ) ) {
