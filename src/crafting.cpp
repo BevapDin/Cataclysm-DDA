@@ -1523,9 +1523,7 @@ void game::complete_craft()
     u.inv.assign_empty_invlet(newit);
     //newit = newit.in_its_container(&itypes);
     if (newit.made_of(LIQUID)) {
-        //while ( u.inv.slice_filter_by_capacity_for_liquid(newit).size() > 0 ){
-        // ^ failed container controls, they don't detect stacks of the same empty container after only one of them is filled
-        while(!handle_liquid(newit, false, false)) { ; }
+        handle_all_liquid(newit);
     } else {
         // We might not have space for the item
         if (!u.can_pickVolume(newit.volume())) { //Accounts for result_mult
@@ -2006,9 +2004,7 @@ void game::complete_disassemble()
                 }
             }
             if (act_item.made_of(LIQUID)) {
-                while (!handle_liquid(act_item, false, false)) {
-                    // Try again, maybe use another container.
-                }
+                handle_all_liquid(act_item);
             } else if (veh != NULL && veh->add_item(veh_part, act_item)) {
                 // add_item did put the items in the vehicle, nothing further to be done
             } else {
@@ -2111,9 +2107,7 @@ void remove_ammo(item *dis_item) {
         ammodrop = item(dis_item->curammo, calendar::turn);
         ammodrop.charges = dis_item->charges;
         if (ammodrop.made_of(LIQUID)) {
-            while(!g->handle_liquid(ammodrop, false, false)) {
-                // Allow selecting several containers
-            }
+            g->handle_all_liquid(ammodrop);
         } else {
             g->u.i_add_or_drop(ammodrop, 1);
         }
@@ -2127,9 +2121,7 @@ void remove_ammo(item *dis_item) {
             ammodrop.charges /= 500;
         }
         if (ammodrop.made_of(LIQUID)) {
-            while(!g->handle_liquid(ammodrop, false, false)) {
-                // Allow selecting several containers
-            }
+            g->handle_all_liquid(ammodrop);
         } else {
             g->u.i_add_or_drop(ammodrop, 1);
         }

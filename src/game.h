@@ -396,7 +396,29 @@ public:
   // the function set the driving offset to (0,0)
   void calc_driving_offset(vehicle *veh = NULL);
 
-  bool handle_liquid(item &liquid, bool from_ground, bool infinite, item *source = NULL, item *cont = NULL);
+  /**
+   * @param liquid
+   * @param cont
+   * @param source
+   * @param infinite Whether the source is infinite. If so, the charges of
+   * the liquid item are ignored and the target container is filled completely.
+   * It also implies from_ground.
+   * @param from_ground Whether the liquid is from ground (water in
+   * a watery square, acid from acid puddle, ...).
+   * This suppresses the question "pour onto ground?".
+   * @returns false if we didn't handle all the liquid, otherwise true.
+   * If the source is infinite, it will always return true.
+   */
+  bool handle_liquid(item &liquid, bool from_ground, bool infinite, item *source = NULL);
+  /**
+   * Handle all the liquid, if one call to @ref handle_liquid does not handle
+   * all the liquid, try again.
+   * The user can still cancel out of the loop by selecting to pour
+   * the liquid onto the ground. This counts as being handled.
+   * For parameters see @ref handle_liquid. @ref handle_liquid is called
+   * with from_ground and infinite set to false.
+   */
+  void handle_all_liquid(item &liquid, item *source = NULL);
 
  //Move_liquid returns the amount of liquid left if we didn't move all the liquid,
  //otherwise returns sentinel -1, signifies transaction fail.

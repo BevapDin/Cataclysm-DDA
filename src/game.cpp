@@ -9262,8 +9262,14 @@ void game::grab()
     }
 }
 
-// Handle_liquid returns false if we didn't handle all the liquid.
-bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *source, item *cont)
+void game::handle_all_liquid(item &liquid, item *source)
+{
+    while(!handle_liquid(liquid, false, false, source)) {
+        // not handled all the liquid, try again.
+    }
+}
+
+bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *source)
 {
     if (!liquid.made_of(LIQUID)) {
         dbg(D_ERROR) << "game:handle_liquid: Tried to handle_liquid a non-liquid!";
@@ -9327,11 +9333,10 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
         return true;
     }
 
-    if (cont == NULL || cont->is_null()) {
         const std::string text = string_format(_("Container for %s"), liquid.tname().c_str());
 
         int pos = inv_for_liquid(liquid, text, false);
-        cont = &(u.i_at(pos));
+        item *cont = &(u.i_at(pos));
         if (cont->is_null()) {
             // No container selected (escaped, ...), ask to pour
             // we asked to pour rotten already
@@ -9348,7 +9353,6 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
             add_msg(_("Never mind."));
             return false;
         }
-    }
 
     if (cont == source) {
         //Source and destination are the same; abort

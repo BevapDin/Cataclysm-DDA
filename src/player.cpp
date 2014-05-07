@@ -8973,9 +8973,7 @@ void player::remove_gunmod(item *weapon, int id)
         }
         ammo.charges = gunmod->charges;
         if (ammo.made_of(LIQUID)) {
-            while(!g->handle_liquid(ammo, false, false)) {
-                // handled only part of it, retry
-            }
+            g->handle_all_liquid(ammo, weapon);
         } else {
             i_add_or_drop(ammo);
         }
