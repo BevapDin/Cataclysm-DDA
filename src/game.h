@@ -409,7 +409,7 @@ public:
    * @returns false if we didn't handle all the liquid, otherwise true.
    * If the source is infinite, it will always return true.
    */
-  bool handle_liquid(item &liquid, bool from_ground, bool infinite, item *source = NULL);
+  bool handle_liquid(item &liquid, bool from_ground, bool infinite, item *source = NULL, vehicle *vsource = NULL);
   /**
    * Handle all the liquid, if one call to @ref handle_liquid does not handle
    * all the liquid, try again.
@@ -419,10 +419,6 @@ public:
    * with from_ground and infinite set to false.
    */
   void handle_all_liquid(item &liquid, item *source = NULL);
-
- //Move_liquid returns the amount of liquid left if we didn't move all the liquid,
- //otherwise returns sentinel -1, signifies transaction fail.
- int move_liquid(item &liquid);
 
  void open_gate( const int examx, const int examy, const ter_id handle_type );
 

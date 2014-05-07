@@ -123,11 +123,8 @@ void Pickup::pick_up(int posx, int posy, int min)
             int amt = veh->drain("water", veh->fuel_left("water"));
             item fill_water(itypes[default_ammo("water")], calendar::turn);
             fill_water.charges = amt;
-            int back = g->move_liquid(fill_water);
-            if (back >= 0) {
-                veh->refill("water", back);
-            } else {
-                veh->refill("water", amt);
+            if (!g->handle_liquid(fill_water, false, false, NULL, veh)) {
+                veh->refill("water", fill_water.charges);
             }
             return;
         }

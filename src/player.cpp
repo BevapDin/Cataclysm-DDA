@@ -5160,24 +5160,19 @@ bool player::siphon(vehicle *veh, ammotype desired_liquid)
     int liquid_amount = veh->drain( desired_liquid, veh->fuel_capacity(desired_liquid) );
     item used_item( itypes[default_ammo(desired_liquid)], calendar::turn );
     used_item.charges = liquid_amount;
-    int extra = g->move_liquid( used_item );
-    if( extra == -1 ) {
-        // Failed somehow, put the liquid back and bail out.
+    if (!g->handle_liquid(used_item, false, false, NULL, veh)) {
         veh->refill( desired_liquid, used_item.charges );
-        return false;
     }
-    int siphoned = liquid_amount - extra;
-    veh->refill( desired_liquid, extra );
-    if( siphoned > 0 ) {
-        add_msg(ngettext("Siphoned %d unit of %s from the %s.",
-                            "Siphoned %d units of %s from the %s.",
-                            siphoned),
-                   siphoned, used_item.name.c_str(), veh->name.c_str());
+    const int siphoned = liquid_amount - used_item.charges;
+    if (siphoned <= 0) {
         //Don't consume turns if we decided not to siphon
-        return true;
-    } else {
         return false;
     }
+    add_msg(ngettext("Siphoned %d unit of %s from the %s.",
+                     "Siphoned %d units of %s from the %s.",
+                     siphoned),
+            siphoned, used_item.name.c_str(), veh->name.c_str());
+    return true;
 }
 
 static void manage_fire_exposure(player &p, int fireStrength) {
