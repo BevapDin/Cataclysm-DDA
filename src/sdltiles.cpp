@@ -221,7 +221,7 @@ bool WinCreate()
     std::string version = string_format("Cataclysm: Dark Days Ahead - %s", getVersionString());
 
     // Common flags used for fulscreen and for windowed
-    int window_flags = 0;
+    int window_flags = SDL_WINDOW_RESIZABLE;
     WindowWidth = TERMINAL_WIDTH * fontwidth;
     WindowHeight = TERMINAL_HEIGHT * fontheight;
 
@@ -763,6 +763,18 @@ void CheckMessages()
                 case SDL_WINDOWEVENT_EXPOSED:
                 case SDL_WINDOWEVENT_RESTORED:
                     needupdate = true;
+                    break;
+                case SDL_WINDOWEVENT_RESIZED:
+                    {
+                        const int w = ev.window.data1 / fontwidth;
+                        const int h = ev.window.data2 / fontheight;
+                        if (g != NULL && (w != TERMINAL_WIDTH || h != TERMINAL_HEIGHT)) {
+                            TERMINAL_WIDTH = w;
+                            TERMINAL_HEIGHT = h;
+                            g->init_ui();
+                            g->refresh_all();
+                        }
+                    }
                     break;
                 default:
                     break;
