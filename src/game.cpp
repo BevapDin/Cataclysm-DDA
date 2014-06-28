@@ -12250,49 +12250,8 @@ bool game::plmove( int dx, int dy )
     }
 
     // Otherwise, actual movement, zomg
-    if( u.has_disease( "amigara" ) ) {
-        int curdist = 999, newdist = 999;
-        for( int cx = 0; cx < SEEX * MAPSIZE; cx++ ) {
-            for( int cy = 0; cy < SEEY * MAPSIZE; cy++ ) {
-                if( m.ter( cx, cy ) == t_fault ) {
-                    int dist = rl_dist( cx, cy, u.posx, u.posy );
-                    if( dist < curdist ) {
-                        curdist = dist;
-                    }
-                    dist = rl_dist( cx, cy, x, y );
-                    if( dist < newdist ) {
-                        newdist = dist;
-                    }
-                }
-            }
-        }
-        if( newdist > curdist ) {
-            add_msg( m_info, _( "You cannot pull yourself away from the faultline..." ) );
-            return false;
-        }
-    }
-
-    if( u.has_disease( "in_pit" ) ) {
-        if( rng( 0, 40 ) > u.str_cur + int( u.dex_cur / 2 ) ) {
-            add_msg( m_bad, _( "You try to escape the pit, but slip back in." ) );
-            u.moves -= 100;
-            return false;
-        } else {
-            add_msg( m_good, _( "You escape the pit!" ) );
-            u.rem_disease( "in_pit" );
-        }
-    }
-    if( u.has_effect( "downed" ) ) {
-        if( rng( 0, 40 ) > u.dex_cur + int( u.str_cur / 2 ) ) {
-            add_msg( _( "You struggle to stand." ) );
-            u.moves -= 100;
-            return false;
-        } else {
-            add_msg( _( "You stand up." ) );
-            u.remove_effect( "downed" );
-            u.moves -= 100;
-            return false;
-        }
+    if( !movement_allowed( x, y )) {
+        return false;
     }
 
     // GRAB: pre-action checking.
@@ -12831,6 +12790,54 @@ bool game::plmove( int dx, int dy )
         return false;
     }
 
+    return true;
+}
+
+bool game::movement_allowed(int x, int y)
+{
+    if( u.has_disease( "amigara" ) ) {
+        int curdist = 999, newdist = 999;
+        for( int cx = 0; cx < SEEX * MAPSIZE; cx++ ) {
+            for( int cy = 0; cy < SEEY * MAPSIZE; cy++ ) {
+                if( m.ter( cx, cy ) == t_fault ) {
+                    int dist = rl_dist( cx, cy, u.posx, u.posy );
+                    if( dist < curdist ) {
+                        curdist = dist;
+                    }
+                    dist = rl_dist( cx, cy, x, y );
+                    if( dist < newdist ) {
+                        newdist = dist;
+                    }
+                }
+            }
+        }
+        if( newdist > curdist ) {
+            add_msg( m_info, _( "You cannot pull yourself away from the faultline..." ) );
+            return false;
+        }
+    }
+    if( u.has_disease( "in_pit" ) ) {
+        if( rng( 0, 40 ) > u.str_cur + int( u.dex_cur / 2 ) ) {
+            add_msg( m_bad, _( "You try to escape the pit, but slip back in." ) );
+            u.moves -= 100;
+            return false;
+        } else {
+            add_msg( m_good, _( "You escape the pit!" ) );
+            u.rem_disease( "in_pit" );
+        }
+    }
+    if( u.has_effect( "downed" ) ) {
+        if( rng( 0, 40 ) > u.dex_cur + int( u.str_cur / 2 ) ) {
+            add_msg( _( "You struggle to stand." ) );
+            u.moves -= 100;
+            return false;
+        } else {
+            add_msg( _( "You stand up." ) );
+            u.remove_effect( "downed" );
+            u.moves -= 100;
+            return false;
+        }
+    }
     return true;
 }
 
