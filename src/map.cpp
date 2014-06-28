@@ -5381,3 +5381,8 @@ void map::load_zones()
 
     fin.close();
 }
+
+bool map::must_swim(int x, int y) const
+{
+    return has_flag( "SWIMMABLE", x, y ) && has_flag( TFLAG_DEEP_WATER, x, y );
+}

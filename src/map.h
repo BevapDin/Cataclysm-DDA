@@ -335,7 +335,11 @@ class map
   * does not check that there are actually any items.
   */
  bool could_see_items(int x, int y, const player &u);
-
+ /**
+  * If there is water (SWIMMABLE) and it's deep (DEEP_WATER), than
+  * the player *has* to swim. (Shallow water can be walked in.)
+  */
+ bool must_swim(int x, int y) const;
 
  std::string features(const int x, const int y); // Words relevant to terrain (sharp, etc)
  bool has_flag(const std::string & flag, const int x, const int y) const;  // checks terrain, furniture and vehicles
