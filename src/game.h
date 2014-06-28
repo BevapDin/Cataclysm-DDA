@@ -257,7 +257,14 @@ class game
 
         void peek( int peekx = 0, int peeky = 0);
         point look_debug();
-
+        /**
+         * Displace monster with index mondex to (x,y).
+         * Does not work for immobile monsters, attempts to deactivate certain
+         * robotic monsters instead.
+         * @return true if displacement was successful. false if displacement
+         * has been canceled or is not allowed/not possible.
+         */
+        bool displace_monster(int mondex, int x, int y);
         /** Add a message with a shortened list of items at(x,y) */
         void print_item_overview(int x, int y) /*const*/;
         bool checkZone(const std::string p_sType, const int p_iX, const int p_iY);
