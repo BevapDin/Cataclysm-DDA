@@ -12165,6 +12165,180 @@ void game::pldrive(int x, int y)
     }
 }
 
+void game::pre_player_movement(int x, int y)
+{
+    // Adjust recoil down
+    if( u.recoil > 0 ) {
+        if( int( u.str_cur / 2 ) + u.skillLevel( "gun" ) >= u.recoil ) {
+            u.recoil = 0;
+        } else {
+            u.recoil -= int( u.str_cur / 2 ) + u.skillLevel( "gun" );
+            u.recoil = int( u.recoil / 2 );
+        }
+    }
+    int vpart1 = -1;
+    vehicle *veh1 = m.veh_at( x, y, vpart1 );
+    if( ( !u.has_trait( "PARKOUR" ) && m.move_cost( x, y ) > 2 ) ||
+        ( u.has_trait( "PARKOUR" ) && m.move_cost( x, y ) > 4 ) ) {
+        if( veh1 && m.move_cost( x, y ) != 2 ) {
+            add_msg( m_warning, _( "Moving past this %s is slow!" ), veh1->part_info( vpart1 ).name.c_str() );
+        } else {
+            add_msg( m_warning, _( "Moving past this %s is slow!" ), m.name( x, y ).c_str() );
+        }
+    }
+    std::string signage = m.get_signage( x, y );
+    if( signage.size() ) {
+        add_msg( m_info, _( "The sign says: %s" ), signage.c_str() );
+    }
+    if( m.has_flag( "ROUGH", x, y ) && ( !u.in_vehicle ) ) {
+        if( one_in( 5 ) && u.get_armor_bash( bp_feet ) < rng( 2, 5 ) ) {
+            add_msg( m_bad, _( "You hurt your feet on the %s!" ), m.tername( x, y ).c_str() );
+            u.hit( NULL, bp_feet, 0, 0, 1 );
+            u.hit( NULL, bp_feet, 1, 0, 1 );
+        }
+    }
+    if( m.has_flag( "SHARP", x, y ) && !one_in( 3 ) && !one_in( 40 - int( u.dex_cur / 2 ) )
+        && ( !u.in_vehicle ) ) {
+        if( !u.has_trait( "PARKOUR" ) || one_in( 4 ) ) {
+            body_part bp = random_body_part();
+            int side = random_side( bp );
+            if( u.hit( NULL, bp, side, 0, rng( 1, 4 ) ) > 0 ) {
+                add_msg( m_bad, _( "You cut your %s on the %s!" ), body_part_name( bp, side ).c_str(), m.tername( x,
+                            y ).c_str() );
+            }
+            if( ( u.has_trait( "INFRESIST" ) ) && ( one_in( 1024 ) ) ) {
+                u.add_disease( "tetanus", 1, true );
+            } else if( ( !u.has_trait( "INFIMMUNE" ) || !u.has_trait( "INFRESIST" ) ) && ( one_in( 256 ) ) ) {
+                u.add_disease( "tetanus", 1, true );
+            }
+        }
+    }
+    if( u.has_trait( "LEG_TENT_BRACE" ) && ( !( u.wearing_something_on( bp_feet ) ) ) ) {
+        // DX and IN are long suits for Cephalopods,
+        // so this shouldn't cause too much hardship
+        // Presumed that if it's swimmable, they're
+        // swimming and won't stick
+        if( ( !( m.has_flag( "SWIMMABLE", x, y ) ) && ( one_in( 80 + u.dex_cur + u.int_cur ) ) ) ) {
+            add_msg( _( "Your tentacles stick to the ground, but you pull them free." ) );
+            u.fatigue++;
+        }
+    }
+    if( !u.has_artifact_with( AEP_STEALTH ) && !u.has_trait( "LEG_TENTACLES" ) ) {
+        if( u.has_trait( "LIGHTSTEP" ) || u.is_wearing( "rm13_armor_on" ) ) {
+            sound( x, y, 2, "" );  // Sound of footsteps may awaken nearby monsters
+        } else if( u.has_trait( "CLUMSY" ) ) {
+            sound( x, y, 10, "" );
+        } else if( u.has_bionic( "bio_ankles" ) ) {
+            sound( x, y, 12, "" );
+        } else {
+            sound( x, y, 6, "" );
+        }
+    }
+    if( one_in( 20 ) && u.has_artifact_with( AEP_MOVEMENT_NOISE ) ) {
+        sound( x, y, 40, _( "You emit a rattling sound." ) );
+    }
+    // If we moved out of the nonant, we need update our map data
+    if( m.has_flag( "SWIMMABLE", x, y ) && u.has_effect( "onfire" ) ) {
+        add_msg( _( "The water puts out the flames!" ) );
+        u.remove_effect( "onfire" );
+    }
+
+    // If the player is in a vehicle, unboard them from the current part
+    if( u.in_vehicle ) {
+        m.unboard_vehicle( u.posx, u.posy );
+    }
+
+    if( x != u.posx || y != u.posy ) {
+        u.lifetime_stats()->squares_walked++;
+    }
+}
+
+void game::post_player_movement(int x, int y)
+{
+    // If we moved out of the nonant, we need update our map data
+    if( x < SEEX * int( MAPSIZE / 2 ) || y < SEEY * int( MAPSIZE / 2 ) ||
+        x >= SEEX * ( 1 + int( MAPSIZE / 2 ) ) || y >= SEEY * ( 1 + int( MAPSIZE / 2 ) ) ) {
+        update_map( x, y );
+    }
+
+    //Autopickup
+    if( OPTIONS["AUTO_PICKUP"] && ( !OPTIONS["AUTO_PICKUP_SAFEMODE"] || mostseen == 0 ) &&
+        ( ( m.i_at( u.posx, u.posy ) ).size() || OPTIONS["AUTO_PICKUP_ADJACENT"] ) ) {
+        Pickup::pick_up( u.posx, u.posy, -1 );
+    }
+
+    int vpart1 = -1;
+    vehicle *veh1 = m.veh_at( u.posx, u.posy, vpart1 );
+    // If the new tile is a boardable part, board it
+    if( veh1 && veh1->part_with_feature( vpart1, "BOARDABLE" ) >= 0 ) {
+        m.board_vehicle( u.posx, u.posy, &u );
+    }
+
+    // Traps!
+    // Try to detect.
+    u.search_surroundings();
+    // We stepped on a trap!
+    if( m.tr_at( u.posx, u.posy ) != tr_null ) {
+        trap *tr = traplist[m.tr_at( u.posx, u.posy )];
+        if( !u.avoid_trap( tr, u.posx, u.posy ) ) {
+            tr->trigger( &g->u, u.posx, u.posy );
+        }
+    }
+
+    // apply martial art move bonuses
+    u.ma_onmove_effects();
+
+    // leave the old martial arts stuff in for now
+    // Some martial art styles have special effects that trigger when we move
+    if( u.weapon.type->id == "style_capoeira" ) {
+        if( u.disease_duration( "attack_boost" ) < 2 ) {
+            u.add_disease( "attack_boost", 2, false, 2, 2 );
+        }
+        if( u.disease_duration( "dodge_boost" ) < 2 ) {
+            u.add_disease( "dodge_boost", 2, false, 2, 2 );
+        }
+    } else if( u.weapon.type->id == "style_ninjutsu" ) {
+        u.add_disease( "attack_boost", 2, false, 1, 3 );
+    } else if( u.weapon.type->id == "style_crane" ) {
+        if( !u.has_disease( "dodge_boost" ) ) {
+            u.add_disease( "dodge_boost", 1, false, 3, 3 );
+        }
+    } else if( u.weapon.type->id == "style_leopard" ) {
+        u.add_disease( "attack_boost", 2, false, 1, 4 );
+    } else if( u.weapon.type->id == "style_dragon" ) {
+        if( !u.has_disease( "damage_boost" ) ) {
+            u.add_disease( "damage_boost", 2, false, 3, 3 );
+        }
+    } else if( u.weapon.type->id == "style_lizard" ) {
+        bool wall = false;
+        for( int wallx = u.posx - 1; wallx <= u.posx + 1 && !wall; wallx++ ) {
+            for( int wally = u.posy - 1; wally <= u.posy + 1 && !wall; wally++ ) {
+                if( m.has_flag( "SUPPORTS_ROOF", wallx, wally ) ) {
+                    wall = true;
+                }
+            }
+        }
+        if( wall ) {
+            u.add_disease( "attack_boost", 2, false, 2, 8 );
+        } else {
+            u.rem_disease( "attack_boost" );
+        }
+    }
+
+    // Drench the player if swimmable
+    if( m.has_flag( "SWIMMABLE", u.posx, u.posy ) ) {
+        u.drench( 40, mfb( bp_feet ) | mfb( bp_legs ) );
+    }
+    print_item_overview( u.posx, u.posy );
+
+    if( veh1 && veh1->part_with_feature( vpart1, "CONTROLS" ) >= 0
+        && u.in_vehicle ) {
+        add_msg( _( "There are vehicle controls here." ) );
+        add_msg( m_info, _( "%s to drive." ),
+                    press_x( ACTION_CONTROL_VEHICLE ).c_str() );
+    }
+}
+
 bool game::plmove( int dx, int dy )
 {
     if( run_mode == 2 ) {
@@ -12558,171 +12732,11 @@ bool game::plmove( int dx, int dy )
         u.moves -= int( u.run_cost( m.combined_movecost( u.posx, u.posy, x, y, grabbed_vehicle,
                                     movecost_modifier ), diag ) * drag_multiplier );
 
-        // Adjust recoil down
-        if( u.recoil > 0 ) {
-            if( int( u.str_cur / 2 ) + u.skillLevel( "gun" ) >= u.recoil ) {
-                u.recoil = 0;
-            } else {
-                u.recoil -= int( u.str_cur / 2 ) + u.skillLevel( "gun" );
-                u.recoil = int( u.recoil / 2 );
-            }
-        }
-        if( ( !u.has_trait( "PARKOUR" ) && m.move_cost( x, y ) > 2 ) ||
-            ( u.has_trait( "PARKOUR" ) && m.move_cost( x, y ) > 4 ) ) {
-            if( veh1 && m.move_cost( x, y ) != 2 ) {
-                add_msg( m_warning, _( "Moving past this %s is slow!" ), veh1->part_info( vpart1 ).name.c_str() );
-            } else {
-                add_msg( m_warning, _( "Moving past this %s is slow!" ), m.name( x, y ).c_str() );
-            }
-        }
-        std::string signage = m.get_signage( x, y );
-        if( signage.size() ) {
-            add_msg( m_info, _( "The sign says: %s" ), signage.c_str() );
-        }
-        if( m.has_flag( "ROUGH", x, y ) && ( !u.in_vehicle ) ) {
-            if( one_in( 5 ) && u.get_armor_bash( bp_feet ) < rng( 2, 5 ) ) {
-                add_msg( m_bad, _( "You hurt your feet on the %s!" ), m.tername( x, y ).c_str() );
-                u.hit( NULL, bp_feet, 0, 0, 1 );
-                u.hit( NULL, bp_feet, 1, 0, 1 );
-            }
-        }
-        if( m.has_flag( "SHARP", x, y ) && !one_in( 3 ) && !one_in( 40 - int( u.dex_cur / 2 ) )
-            && ( !u.in_vehicle ) ) {
-            if( !u.has_trait( "PARKOUR" ) || one_in( 4 ) ) {
-                body_part bp = random_body_part();
-                int side = random_side( bp );
-                if( u.hit( NULL, bp, side, 0, rng( 1, 4 ) ) > 0 ) {
-                    add_msg( m_bad, _( "You cut your %s on the %s!" ), body_part_name( bp, side ).c_str(), m.tername( x,
-                             y ).c_str() );
-                }
-                if( ( u.has_trait( "INFRESIST" ) ) && ( one_in( 1024 ) ) ) {
-                    u.add_disease( "tetanus", 1, true );
-                } else if( ( !u.has_trait( "INFIMMUNE" ) || !u.has_trait( "INFRESIST" ) ) && ( one_in( 256 ) ) ) {
-                    u.add_disease( "tetanus", 1, true );
-                }
-            }
-        }
-        if( u.has_trait( "LEG_TENT_BRACE" ) && ( !( u.wearing_something_on( bp_feet ) ) ) ) {
-            // DX and IN are long suits for Cephalopods,
-            // so this shouldn't cause too much hardship
-            // Presumed that if it's swimmable, they're
-            // swimming and won't stick
-            if( ( !( m.has_flag( "SWIMMABLE", x, y ) ) && ( one_in( 80 + u.dex_cur + u.int_cur ) ) ) ) {
-                add_msg( _( "Your tentacles stick to the ground, but you pull them free." ) );
-                u.fatigue++;
-            }
-        }
-        if( !u.has_artifact_with( AEP_STEALTH ) && !u.has_trait( "LEG_TENTACLES" ) ) {
-            if( u.has_trait( "LIGHTSTEP" ) || u.is_wearing( "rm13_armor_on" ) ) {
-                sound( x, y, 2, "" );  // Sound of footsteps may awaken nearby monsters
-            } else if( u.has_trait( "CLUMSY" ) ) {
-                sound( x, y, 10, "" );
-            } else if( u.has_bionic( "bio_ankles" ) ) {
-                sound( x, y, 12, "" );
-            } else {
-                sound( x, y, 6, "" );
-            }
-        }
-        if( one_in( 20 ) && u.has_artifact_with( AEP_MOVEMENT_NOISE ) ) {
-            sound( x, y, 40, _( "You emit a rattling sound." ) );
-        }
-        // If we moved out of the nonant, we need update our map data
-        if( m.has_flag( "SWIMMABLE", x, y ) && u.has_effect( "onfire" ) ) {
-            add_msg( _( "The water puts out the flames!" ) );
-            u.remove_effect( "onfire" );
-        }
-
-        if( x < SEEX * int( MAPSIZE / 2 ) || y < SEEY * int( MAPSIZE / 2 ) ||
-            x >= SEEX * ( 1 + int( MAPSIZE / 2 ) ) || y >= SEEY * ( 1 + int( MAPSIZE / 2 ) ) ) {
-            update_map( x, y );
-        }
-
-        // If the player is in a vehicle, unboard them from the current part
-        if( u.in_vehicle ) {
-            m.unboard_vehicle( u.posx, u.posy );
-        }
-
+        pre_player_movement( x, y );
         // Move the player
         u.posx = x;
         u.posy = y;
-        if( dx != 0 || dy != 0 ) {
-            u.lifetime_stats()->squares_walked++;
-        }
-
-        //Autopickup
-        if( OPTIONS["AUTO_PICKUP"] && ( !OPTIONS["AUTO_PICKUP_SAFEMODE"] || mostseen == 0 ) &&
-            ( ( m.i_at( u.posx, u.posy ) ).size() || OPTIONS["AUTO_PICKUP_ADJACENT"] ) ) {
-            Pickup::pick_up( u.posx, u.posy, -1 );
-        }
-
-        // If the new tile is a boardable part, board it
-        if( veh1 && veh1->part_with_feature( vpart1, "BOARDABLE" ) >= 0 ) {
-            m.board_vehicle( u.posx, u.posy, &u );
-        }
-
-        // Traps!
-        // Try to detect.
-        u.search_surroundings();
-        // We stepped on a trap!
-        if( m.tr_at( x, y ) != tr_null ) {
-            trap *tr = traplist[m.tr_at( x, y )];
-            if( !u.avoid_trap( tr, x, y ) ) {
-                tr->trigger( &g->u, x, y );
-            }
-        }
-
-        // apply martial art move bonuses
-        u.ma_onmove_effects();
-
-        // leave the old martial arts stuff in for now
-        // Some martial art styles have special effects that trigger when we move
-        if( u.weapon.type->id == "style_capoeira" ) {
-            if( u.disease_duration( "attack_boost" ) < 2 ) {
-                u.add_disease( "attack_boost", 2, false, 2, 2 );
-            }
-            if( u.disease_duration( "dodge_boost" ) < 2 ) {
-                u.add_disease( "dodge_boost", 2, false, 2, 2 );
-            }
-        } else if( u.weapon.type->id == "style_ninjutsu" ) {
-            u.add_disease( "attack_boost", 2, false, 1, 3 );
-        } else if( u.weapon.type->id == "style_crane" ) {
-            if( !u.has_disease( "dodge_boost" ) ) {
-                u.add_disease( "dodge_boost", 1, false, 3, 3 );
-            }
-        } else if( u.weapon.type->id == "style_leopard" ) {
-            u.add_disease( "attack_boost", 2, false, 1, 4 );
-        } else if( u.weapon.type->id == "style_dragon" ) {
-            if( !u.has_disease( "damage_boost" ) ) {
-                u.add_disease( "damage_boost", 2, false, 3, 3 );
-            }
-        } else if( u.weapon.type->id == "style_lizard" ) {
-            bool wall = false;
-            for( int wallx = x - 1; wallx <= x + 1 && !wall; wallx++ ) {
-                for( int wally = y - 1; wally <= y + 1 && !wall; wally++ ) {
-                    if( m.has_flag( "SUPPORTS_ROOF", wallx, wally ) ) {
-                        wall = true;
-                    }
-                }
-            }
-            if( wall ) {
-                u.add_disease( "attack_boost", 2, false, 2, 8 );
-            } else {
-                u.rem_disease( "attack_boost" );
-            }
-        }
-
-        // Drench the player if swimmable
-        if( m.has_flag( "SWIMMABLE", x, y ) ) {
-            u.drench( 40, mfb( bp_feet ) | mfb( bp_legs ) );
-        }
-        print_item_overview( u.posx, u.posy );
-
-        if( veh1 && veh1->part_with_feature( vpart1, "CONTROLS" ) >= 0
-            && u.in_vehicle ) {
-            add_msg( _( "There are vehicle controls here." ) );
-            add_msg( m_info, _( "%s to drive." ),
-                     press_x( ACTION_CONTROL_VEHICLE ).c_str() );
-        }
+        post_player_movement( x, y );
 
     } else if( u.has_active_bionic( "bio_probability_travel" ) && u.power_level >= 10 ) {
         if( !pltunnel( x, y ) ) {

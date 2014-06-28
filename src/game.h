@@ -282,6 +282,16 @@ class game
          * @return false the movement was canceled.
          */
         bool warn_to_cancel_move(int x, int y);
+        /**
+         * Called right before the movement of the player.
+         * Used for certain status/effects/martial arts stuff
+         */
+        void pre_player_movement(int x, int y);
+        /**
+         * Called right after the movement of the player.
+         * Used for (among others) boarding the vehicle.
+         */
+        void post_player_movement(int x, int y);
         /** Add a message with a shortened list of items at(x,y) */
         void print_item_overview(int x, int y) /*const*/;
         bool checkZone(const std::string p_sType, const int p_iX, const int p_iY);
