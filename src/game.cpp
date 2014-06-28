@@ -12868,76 +12868,7 @@ bool game::plmove( int dx, int dy )
         if( m.has_flag( "SWIMMABLE", x, y ) ) {
             u.drench( 40, mfb( bp_feet ) | mfb( bp_legs ) );
         }
-
-        // List items here
-        if( !m.has_flag( "SEALED", x, y ) ) {
-            if( u.has_effect( "blind" ) && !m.i_at( x, y ).empty() ) {
-                add_msg( _( "There's something here, but you can't see what it is." ) );
-            } else if( !m.i_at( x, y ).empty() ) {
-                std::vector<std::string> names;
-                std::vector<size_t> counts;
-                std::vector<item> items;
-                for( std::vector<item>::iterator it = m.i_at( x, y ).begin();
-                     it != m.i_at( x, y ).end(); ++it ) {
-                    item &tmpitem = *it;
-                    std::string next_tname = tmpitem.tname();
-                    std::string next_dname = tmpitem.display_name();
-                    bool by_charges = tmpitem.count_by_charges();
-                    bool got_it = false;
-                    for( size_t i = 0; i < names.size(); ++i ) {
-                        if( by_charges && next_tname == names[i] ) {
-                            counts[i] += tmpitem.charges;
-                            got_it = true;
-                            break;
-                        } else if( next_dname == names[i] ) {
-                            counts[i] += 1;
-                            got_it = true;
-                            break;
-                        }
-                    }
-                    if( !got_it ) {
-                        if( by_charges ) {
-                            names.push_back( tmpitem.tname( tmpitem.charges ) );
-                            counts.push_back( tmpitem.charges );
-                        } else {
-                            names.push_back( tmpitem.display_name( 1 ) );
-                            counts.push_back( 1 );
-                        }
-                        items.push_back( tmpitem );
-                    }
-                    if( names.size() > 6 ) {
-                        break;
-                    }
-                }
-                for( size_t i = 0; i < names.size(); ++i ) {
-                    if( !items[i].count_by_charges() ) {
-                        names[i] = items[i].display_name( counts[i] );
-                    } else {
-                        names[i] = items[i].tname( counts[i] );
-                    }
-                }
-                for( size_t i = 0; i < names.size(); ++i ) {
-                    std::string fmt;
-                    //~ number of items: "<number> <item>"
-                    fmt = ngettext( "%1$d %2$s", "%1$d %2$s", counts[i] );
-                    names[i] = string_format( fmt, counts[i], names[i].c_str() );
-                }
-                if( names.size() == 1 ) {
-                    add_msg( _( "You see here %s." ), names[0].c_str() );
-                } else if( names.size() == 2 ) {
-                    add_msg( _( "You see here %s and %s." ),
-                             names[0].c_str(), names[1].c_str() );
-                } else if( names.size() == 3 ) {
-                    add_msg( _( "You see here %s, %s, and %s." ), names[0].c_str(),
-                             names[1].c_str(), names[2].c_str() );
-                } else if( m.i_at( x, y ).size() < 7 ) {
-                    add_msg( ngettext( "There is %d item here.", "There are %d items here.", m.i_at( x, y ).size() ),
-                             m.i_at( x, y ).size() );
-                } else {
-                    add_msg( _( "There are many items here." ) );
-                }
-            }
-        }
+        print_item_overview( u.posx, u.posy );
 
         if( veh1 && veh1->part_with_feature( vpart1, "CONTROLS" ) >= 0
             && u.in_vehicle ) {
@@ -13017,6 +12948,83 @@ bool game::plmove( int dx, int dy )
     }
 
     return true;
+}
+
+void game::print_item_overview(int x, int y) /*const*/
+{
+    // List items here
+    if( m.has_flag( "SEALED", x, y ) ) {
+        return;
+    }
+    if( u.has_effect( "blind" ) && !m.i_at( x, y ).empty() ) {
+        add_msg( _( "There's something here, but you can't see what it is." ) );
+        return;
+    }
+    if( m.i_at( x, y ).empty() ) {
+        return;
+    }
+    std::vector<std::string> names;
+    std::vector<size_t> counts;
+    std::vector<item> items;
+    for( std::vector<item>::iterator it = m.i_at( x, y ).begin();
+            it != m.i_at( x, y ).end(); ++it ) {
+        item &tmpitem = *it;
+        std::string next_tname = tmpitem.tname();
+        std::string next_dname = tmpitem.display_name();
+        bool by_charges = tmpitem.count_by_charges();
+        bool got_it = false;
+        for( size_t i = 0; i < names.size(); ++i ) {
+            if( by_charges && next_tname == names[i] ) {
+                counts[i] += tmpitem.charges;
+                got_it = true;
+                break;
+            } else if( next_dname == names[i] ) {
+                counts[i] += 1;
+                got_it = true;
+                break;
+            }
+        }
+        if( !got_it ) {
+            if( by_charges ) {
+                names.push_back( tmpitem.tname( tmpitem.charges ) );
+                counts.push_back( tmpitem.charges );
+            } else {
+                names.push_back( tmpitem.display_name( 1 ) );
+                counts.push_back( 1 );
+            }
+            items.push_back( tmpitem );
+        }
+        if( names.size() > 6 ) {
+            break;
+        }
+    }
+    for( size_t i = 0; i < names.size(); ++i ) {
+        if( !items[i].count_by_charges() ) {
+            names[i] = items[i].display_name( counts[i] );
+        } else {
+            names[i] = items[i].tname( counts[i] );
+        }
+    }
+    for( size_t i = 0; i < names.size(); ++i ) {
+        std::string fmt;
+        //~ number of items: "<number> <item>"
+        fmt = ngettext( "%1$d %2$s", "%1$d %2$s", counts[i] );
+        names[i] = string_format( fmt, counts[i], names[i].c_str() );
+    }
+    if( names.size() == 1 ) {
+        add_msg( _( "You see here %s." ), names[0].c_str() );
+    } else if( names.size() == 2 ) {
+        add_msg( _( "You see here %s and %s." ),
+                    names[0].c_str(), names[1].c_str() );
+    } else if( names.size() == 3 ) {
+        add_msg( _( "You see here %s, %s, and %s." ), names[0].c_str(),
+                    names[1].c_str(), names[2].c_str() );
+    } else if( m.i_at( x, y ).size() < 7 ) {
+        add_msg( ngettext( "There is %d item here.", "There are %d items here.", m.i_at( x, y ).size() ),
+                    m.i_at( x, y ).size() );
+    } else {
+        add_msg( _( "There are many items here." ) );
+    }
 }
 
 void game::plswim(int x, int y)
