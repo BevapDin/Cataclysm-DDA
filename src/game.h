@@ -276,6 +276,12 @@ class game
          * Check if movement of player to (x,y) is allowed/possible.
          */
         bool movement_allowed(int x, int y);
+        /**
+         * Warn about any (visible/known) dangers on the target square (x,y).
+         * This allows the user to cancel the movement.
+         * @return false the movement was canceled.
+         */
+        bool warn_to_cancel_move(int x, int y);
         /** Add a message with a shortened list of items at(x,y) */
         void print_item_overview(int x, int y) /*const*/;
         bool checkZone(const std::string p_sType, const int p_iX, const int p_iY);

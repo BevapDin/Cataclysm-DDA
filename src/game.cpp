@@ -12329,43 +12329,8 @@ bool game::plmove( int dx, int dy )
         // move_cost() of 0 = impassible (e.g. a wall)
         u.set_underwater( false );
 
-        //Ask for EACH bad field, maybe not? Maybe say "theres X bad shit in there don't do it."
-        field_entry *cur = NULL;
-        field &tmpfld = m.field_at( x, y );
-        std::map<field_id, field_entry *>::iterator field_it;
-        for( field_it = tmpfld.getFieldStart(); field_it != tmpfld.getFieldEnd(); ++field_it ) {
-            cur = field_it->second;
-            if( cur == NULL ) {
-                continue;
-            }
-            field_id curType = cur->getFieldType();
-            bool dangerous = false;
-
-            switch( curType ) {
-                case fd_smoke:
-                    dangerous = !( u.get_env_resist( bp_mouth ) >= 7 );
-                    break;
-                case fd_tear_gas:
-                case fd_toxic_gas:
-                case fd_gas_vent:
-                    dangerous = !( u.get_env_resist( bp_mouth ) >= 15 );
-                    break;
-                default:
-                    dangerous = cur->is_dangerous();
-                    break;
-            }
-            if( ( dangerous ) && !query_yn( _( "Really step into that %s?" ), cur->name().c_str() ) ) {
-                return false;
-            }
-        }
-
-        const trap_id tid = m.tr_at( x, y );
-        if( tid != tr_null ) {
-            const struct trap &t = *traplist[tid];
-            if( ( t.can_see( u, x, y ) ) && !t.is_benign() &&
-                !query_yn( _( "Really step onto that %s?" ), t.name.c_str() ) ) {
-                return false;
-            }
+        if( warn_to_cancel_move(x, y) ) {
+            return false;
         }
 
         float drag_multiplier = 1.0;
@@ -12790,6 +12755,50 @@ bool game::plmove( int dx, int dy )
         return false;
     }
 
+    return true;
+}
+
+bool game::warn_to_cancel_move(int x, int y)
+{
+    // TODO: check about vehicles that are at (x,y)
+    // and see if they cancel/prevent the bad thing and therefor
+    // don't require that warning.
+
+    //Ask for EACH bad field, maybe not? Maybe say "theres X bad shit in there don't do it."
+    field &tmpfld = m.field_at( x, y );
+    for( auto field_it = tmpfld.getFieldStart(); field_it != tmpfld.getFieldEnd(); ++field_it ) {
+        const field_entry *cur = field_it->second;
+        if( cur == NULL ) {
+            continue;
+        }
+        field_id curType = cur->getFieldType();
+        bool dangerous = false;
+        switch( curType ) {
+            case fd_smoke:
+                dangerous = !( u.get_env_resist( bp_mouth ) >= 7 );
+                break;
+            case fd_tear_gas:
+            case fd_toxic_gas:
+            case fd_gas_vent:
+                dangerous = !( u.get_env_resist( bp_mouth ) >= 15 );
+                break;
+            default:
+                dangerous = cur->is_dangerous();
+                break;
+        }
+        if( ( dangerous ) && !query_yn( _( "Really step into that %s?" ), cur->name().c_str() ) ) {
+            return false;
+        }
+    }
+
+    const trap_id tid = m.tr_at( x, y );
+    if( tid != tr_null ) {
+        const struct trap &t = *traplist[tid];
+        if( ( t.can_see( u, x, y ) ) && !t.is_benign() &&
+            !query_yn( _( "Really step onto that %s?" ), t.name.c_str() ) ) {
+            return false;
+        }
+    }
     return true;
 }
 
