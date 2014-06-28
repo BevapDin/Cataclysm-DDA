@@ -12165,67 +12165,68 @@ void game::pldrive(int x, int y)
     }
 }
 
-bool game::plmove(int dx, int dy)
+bool game::plmove( int dx, int dy )
 {
-    if (run_mode == 2) {
+    if( run_mode == 2 ) {
         // Monsters around and we don't wanna run
-        add_msg(m_warning, _("Monster spotted--safe mode is on! \
-							 							 							 							 							 							 							 							 							 							 							 							 							 							 							 							 							 							 							 							 							 							 (%s to turn it off or %s to ignore monster.)"),
-                press_x(ACTION_TOGGLE_SAFEMODE).c_str(),
-                from_sentence_case(press_x(ACTION_IGNORE_ENEMY)).c_str());
+        add_msg( m_warning, _( "Monster spotted--safe mode is on! \
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         (%s to turn it off or %s to ignore monster.)" ),
+                 press_x( ACTION_TOGGLE_SAFEMODE ).c_str(),
+                 from_sentence_case( press_x( ACTION_IGNORE_ENEMY ) ).c_str() );
         return false;
     }
     int x = 0;
     int y = 0;
-    if (u.has_effect("stunned")) {
-        x = rng(u.posx - 1, u.posx + 1);
-        y = rng(u.posy - 1, u.posy + 1);
+    if( u.has_effect( "stunned" ) ) {
+        x = rng( u.posx - 1, u.posx + 1 );
+        y = rng( u.posy - 1, u.posy + 1 );
     } else {
         x = u.posx + dx;
         y = u.posy + dy;
 
-        if (moveCount % 60 == 0) {
-            if (u.has_bionic("bio_torsionratchet")) {
-                u.charge_power(1);
+        if( moveCount % 60 == 0 ) {
+            if( u.has_bionic( "bio_torsionratchet" ) ) {
+                u.charge_power( 1 );
             }
         }
     }
 
-    dbg(D_PEDANTIC_INFO) << "game:plmove: From (" << u.posx << "," << u.posy << ") to (" << x << "," <<
-                         y << ")";
+    dbg( D_PEDANTIC_INFO ) << "game:plmove: From (" << u.posx << "," << u.posy << ") to (" << x << ","
+                           <<
+                           y << ")";
 
     // Check if our movement is actually an attack on a monster
-    int mondex = mon_at(x, y);
+    int mondex = mon_at( x, y );
     // Are we displacing a monster?  If it's vermin, always.
     bool displace = false;
-    if (mondex != -1) {
-        monster &critter = zombie(mondex);
-        if (critter.friendly == 0 && !(critter.type->has_flag(MF_VERMIN))) {
-            if (u.has_destination()) {
-                add_msg(m_warning, _("Monster in the way. Auto-move canceled."));
-                add_msg(m_info, _("Click directly on monster to attack."));
+    if( mondex != -1 ) {
+        monster &critter = zombie( mondex );
+        if( critter.friendly == 0 && !( critter.type->has_flag( MF_VERMIN ) ) ) {
+            if( u.has_destination() ) {
+                add_msg( m_warning, _( "Monster in the way. Auto-move canceled." ) );
+                add_msg( m_info, _( "Click directly on monster to attack." ) );
                 u.clear_destination();
                 return false;
             }
-            u.melee_attack(critter, true);
-            if (critter.is_hallucination()) {
-                kill_mon(mondex, true);
+            u.melee_attack( critter, true );
+            if( critter.is_hallucination() ) {
+                kill_mon( mondex, true );
             }
-            draw_hit_mon(x, y, critter, critter.dead);
+            draw_hit_mon( x, y, critter, critter.dead );
             return false;
         } else {
             displace = true;
         }
     }
     // If not a monster, maybe there's an NPC there
-    int npcdex = npc_at(x, y);
-    if (npcdex != -1) {
+    int npcdex = npc_at( x, y );
+    if( npcdex != -1 ) {
         bool force_attack = false;
-        if (!active_npc[npcdex]->is_enemy()) {
-            if (!query_yn(_("Really attack %s?"), active_npc[npcdex]->name.c_str())) {
-                if (active_npc[npcdex]->is_friend()) {
-                    add_msg(_("%s moves out of the way."), active_npc[npcdex]->name.c_str());
-                    active_npc[npcdex]->move_away_from(u.posx, u.posy);
+        if( !active_npc[npcdex]->is_enemy() ) {
+            if( !query_yn( _( "Really attack %s?" ), active_npc[npcdex]->name.c_str() ) ) {
+                if( active_npc[npcdex]->is_friend() ) {
+                    add_msg( _( "%s moves out of the way." ), active_npc[npcdex]->name.c_str() );
+                    active_npc[npcdex]->move_away_from( u.posx, u.posy );
                 }
 
                 return false; // Cancel the attack
@@ -12236,59 +12237,59 @@ bool game::plmove(int dx, int dy)
             }
         }
 
-        if (u.has_destination() && !force_attack) {
-            add_msg(_("NPC in the way, Auto-move canceled."));
-            add_msg(m_info, _("Click directly on NPC to attack."));
+        if( u.has_destination() && !force_attack ) {
+            add_msg( _( "NPC in the way, Auto-move canceled." ) );
+            add_msg( m_info, _( "Click directly on NPC to attack." ) );
             u.clear_destination();
             return false;
         }
 
-        u.melee_attack(*active_npc[npcdex], true);
+        u.melee_attack( *active_npc[npcdex], true );
         active_npc[npcdex]->make_angry();
         return false;
     }
 
     // Otherwise, actual movement, zomg
-    if (u.has_disease("amigara")) {
+    if( u.has_disease( "amigara" ) ) {
         int curdist = 999, newdist = 999;
-        for (int cx = 0; cx < SEEX * MAPSIZE; cx++) {
-            for (int cy = 0; cy < SEEY * MAPSIZE; cy++) {
-                if (m.ter(cx, cy) == t_fault) {
-                    int dist = rl_dist(cx, cy, u.posx, u.posy);
-                    if (dist < curdist) {
+        for( int cx = 0; cx < SEEX * MAPSIZE; cx++ ) {
+            for( int cy = 0; cy < SEEY * MAPSIZE; cy++ ) {
+                if( m.ter( cx, cy ) == t_fault ) {
+                    int dist = rl_dist( cx, cy, u.posx, u.posy );
+                    if( dist < curdist ) {
                         curdist = dist;
                     }
-                    dist = rl_dist(cx, cy, x, y);
-                    if (dist < newdist) {
+                    dist = rl_dist( cx, cy, x, y );
+                    if( dist < newdist ) {
                         newdist = dist;
                     }
                 }
             }
         }
-        if (newdist > curdist) {
-            add_msg(m_info, _("You cannot pull yourself away from the faultline..."));
+        if( newdist > curdist ) {
+            add_msg( m_info, _( "You cannot pull yourself away from the faultline..." ) );
             return false;
         }
     }
 
-    if (u.has_disease("in_pit")) {
-        if (rng(0, 40) > u.str_cur + int(u.dex_cur / 2)) {
-            add_msg(m_bad, _("You try to escape the pit, but slip back in."));
+    if( u.has_disease( "in_pit" ) ) {
+        if( rng( 0, 40 ) > u.str_cur + int( u.dex_cur / 2 ) ) {
+            add_msg( m_bad, _( "You try to escape the pit, but slip back in." ) );
             u.moves -= 100;
             return false;
         } else {
-            add_msg(m_good, _("You escape the pit!"));
-            u.rem_disease("in_pit");
+            add_msg( m_good, _( "You escape the pit!" ) );
+            u.rem_disease( "in_pit" );
         }
     }
-    if (u.has_effect("downed")) {
-        if (rng(0, 40) > u.dex_cur + int(u.str_cur / 2)) {
-            add_msg(_("You struggle to stand."));
+    if( u.has_effect( "downed" ) ) {
+        if( rng( 0, 40 ) > u.dex_cur + int( u.str_cur / 2 ) ) {
+            add_msg( _( "You struggle to stand." ) );
             u.moves -= 100;
             return false;
         } else {
-            add_msg(_("You stand up."));
-            u.remove_effect("downed");
+            add_msg( _( "You stand up." ) );
+            u.remove_effect( "downed" );
             u.moves -= 100;
             return false;
         }
@@ -12296,164 +12297,164 @@ bool game::plmove(int dx, int dy)
 
     // GRAB: pre-action checking.
     int vpart0 = -1, vpart1 = -1, dpart = -1;
-    vehicle *veh0 = m.veh_at(u.posx, u.posy, vpart0);
-    vehicle *veh1 = m.veh_at(x, y, vpart1);
+    vehicle *veh0 = m.veh_at( u.posx, u.posy, vpart0 );
+    vehicle *veh1 = m.veh_at( x, y, vpart1 );
     bool pushing_furniture = false;  // moving -into- furniture tile; skip check for move_cost > 0
     bool pulling_furniture = false;  // moving -away- from furniture tile; check for move_cost > 0
     bool shifting_furniture = false; // moving furniture and staying still; skip check for move_cost > 0
     int movecost_modifier =
         0;       // pulling moves furniture into our origin square, so this changes to subtract it.
 
-    if (u.grab_point.x != 0 || u.grab_point.y) {
-        if (u.grab_type == OBJECT_VEHICLE) { // default; assume OBJECT_VEHICLE
-            vehicle *grabbed_vehicle = m.veh_at(u.posx + u.grab_point.x, u.posy + u.grab_point.y);
+    if( u.grab_point.x != 0 || u.grab_point.y ) {
+        if( u.grab_type == OBJECT_VEHICLE ) { // default; assume OBJECT_VEHICLE
+            vehicle *grabbed_vehicle = m.veh_at( u.posx + u.grab_point.x, u.posy + u.grab_point.y );
             // If we're pushing a vehicle, the vehicle tile we'd be "stepping onto" is
             // actually the current tile.
             // If there's a vehicle there, it will actually result in failed movement.
-            if (grabbed_vehicle == veh1) {
+            if( grabbed_vehicle == veh1 ) {
                 veh1 = veh0;
                 vpart1 = vpart0;
             }
-        } else if (u.grab_type ==
-                   OBJECT_FURNITURE) { // Determine if furniture grab is valid, and what we're wanting to do with it based on
-            point fpos(u.posx + u.grab_point.x, u.posy + u.grab_point.y); // where it is
-            if (m.has_furn(fpos.x, fpos.y)) {
-                pushing_furniture = (dx == u.grab_point.x && dy == u.grab_point.y); // and where we're going
-                if (!pushing_furniture) {
-                    point fdest(fpos.x + dx, fpos.y + dy);
-                    pulling_furniture = (fdest.x == u.posx && fdest.y == u.posy);
+        } else if( u.grab_type ==
+                   OBJECT_FURNITURE ) { // Determine if furniture grab is valid, and what we're wanting to do with it based on
+            point fpos( u.posx + u.grab_point.x, u.posy + u.grab_point.y ); // where it is
+            if( m.has_furn( fpos.x, fpos.y ) ) {
+                pushing_furniture = ( dx == u.grab_point.x && dy == u.grab_point.y ); // and where we're going
+                if( !pushing_furniture ) {
+                    point fdest( fpos.x + dx, fpos.y + dy );
+                    pulling_furniture = ( fdest.x == u.posx && fdest.y == u.posy );
                 }
-                shifting_furniture = (pushing_furniture == false && pulling_furniture == false);
+                shifting_furniture = ( pushing_furniture == false && pulling_furniture == false );
             }
         }
     }
     bool veh_closed_door = false;
-    bool outside_vehicle = (!veh0 || veh0 != veh1);
-    if (veh1) {
-        dpart = veh1->next_part_to_open(vpart1, outside_vehicle);
+    bool outside_vehicle = ( !veh0 || veh0 != veh1 );
+    if( veh1 ) {
+        dpart = veh1->next_part_to_open( vpart1, outside_vehicle );
         veh_closed_door = dpart >= 0 && !veh1->parts[dpart].open;
     }
 
-    if (veh0 && abs(veh0->velocity) > 100) {
-        if (!veh1) {
-            if (query_yn(_("Dive from moving vehicle?"))) {
-                moving_vehicle_dismount(x, y);
+    if( veh0 && abs( veh0->velocity ) > 100 ) {
+        if( !veh1 ) {
+            if( query_yn( _( "Dive from moving vehicle?" ) ) ) {
+                moving_vehicle_dismount( x, y );
             }
             return false;
-        } else if (veh1 != veh0) {
-            add_msg(m_info, _("There is another vehicle in the way."));
+        } else if( veh1 != veh0 ) {
+            add_msg( m_info, _( "There is another vehicle in the way." ) );
             return false;
-        } else if (veh1->part_with_feature(vpart1, "BOARDABLE") < 0) {
-            add_msg(m_info, _("That part of the vehicle is currently unsafe."));
+        } else if( veh1->part_with_feature( vpart1, "BOARDABLE" ) < 0 ) {
+            add_msg( m_info, _( "That part of the vehicle is currently unsafe." ) );
             return false;
         }
     }
 
-    if (m.has_flag("SWIMMABLE", x, y) && m.has_flag(TFLAG_DEEP_WATER, x, y)) { // Dive into water!
+    if( m.has_flag( "SWIMMABLE", x, y ) && m.has_flag( TFLAG_DEEP_WATER, x, y ) ) { // Dive into water!
         // Requires confirmation if we were on dry land previously
-        if ((m.has_flag("SWIMMABLE", u.posx, u.posy) &&
-             m.has_flag(TFLAG_DEEP_WATER, u.posx, u.posy)) || query_yn(_("Dive into the water?"))) {
-            if (!m.has_flag(TFLAG_DEEP_WATER, u.posx, u.posy) && u.swim_speed() < 500) {
-                add_msg(_("You start swimming."));
-                add_msg(m_info, "%s to dive underwater.",
-                        press_x(ACTION_MOVE_DOWN).c_str());
+        if( ( m.has_flag( "SWIMMABLE", u.posx, u.posy ) &&
+              m.has_flag( TFLAG_DEEP_WATER, u.posx, u.posy ) ) || query_yn( _( "Dive into the water?" ) ) ) {
+            if( !m.has_flag( TFLAG_DEEP_WATER, u.posx, u.posy ) && u.swim_speed() < 500 ) {
+                add_msg( _( "You start swimming." ) );
+                add_msg( m_info, "%s to dive underwater.",
+                         press_x( ACTION_MOVE_DOWN ).c_str() );
             }
-            plswim(x, y);
+            plswim( x, y );
         }
-    } else if (m.move_cost(x, y) > 0 || pushing_furniture || shifting_furniture) {
+    } else if( m.move_cost( x, y ) > 0 || pushing_furniture || shifting_furniture ) {
         // move_cost() of 0 = impassible (e.g. a wall)
-        u.set_underwater(false);
+        u.set_underwater( false );
 
         //Ask for EACH bad field, maybe not? Maybe say "theres X bad shit in there don't do it."
         field_entry *cur = NULL;
-        field &tmpfld = m.field_at(x, y);
+        field &tmpfld = m.field_at( x, y );
         std::map<field_id, field_entry *>::iterator field_it;
-        for (field_it = tmpfld.getFieldStart(); field_it != tmpfld.getFieldEnd(); ++field_it) {
+        for( field_it = tmpfld.getFieldStart(); field_it != tmpfld.getFieldEnd(); ++field_it ) {
             cur = field_it->second;
-            if (cur == NULL) {
+            if( cur == NULL ) {
                 continue;
             }
             field_id curType = cur->getFieldType();
             bool dangerous = false;
 
-            switch (curType) {
-            case fd_smoke:
-                dangerous = !(u.get_env_resist(bp_mouth) >= 7);
-                break;
-            case fd_tear_gas:
-            case fd_toxic_gas:
-            case fd_gas_vent:
-                dangerous = !(u.get_env_resist(bp_mouth) >= 15);
-                break;
-            default:
-                dangerous = cur->is_dangerous();
-                break;
+            switch( curType ) {
+                case fd_smoke:
+                    dangerous = !( u.get_env_resist( bp_mouth ) >= 7 );
+                    break;
+                case fd_tear_gas:
+                case fd_toxic_gas:
+                case fd_gas_vent:
+                    dangerous = !( u.get_env_resist( bp_mouth ) >= 15 );
+                    break;
+                default:
+                    dangerous = cur->is_dangerous();
+                    break;
             }
-            if ((dangerous) && !query_yn(_("Really step into that %s?"), cur->name().c_str())) {
+            if( ( dangerous ) && !query_yn( _( "Really step into that %s?" ), cur->name().c_str() ) ) {
                 return false;
             }
         }
 
-        const trap_id tid = m.tr_at(x, y);
-        if (tid != tr_null) {
+        const trap_id tid = m.tr_at( x, y );
+        if( tid != tr_null ) {
             const struct trap &t = *traplist[tid];
-            if ((t.can_see(u, x, y)) && !t.is_benign() &&
-                !query_yn(_("Really step onto that %s?"), t.name.c_str())) {
+            if( ( t.can_see( u, x, y ) ) && !t.is_benign() &&
+                !query_yn( _( "Really step onto that %s?" ), t.name.c_str() ) ) {
                 return false;
             }
         }
 
         float drag_multiplier = 1.0;
         vehicle *grabbed_vehicle = NULL;
-        if (u.grab_point.x != 0 || u.grab_point.y != 0) {
+        if( u.grab_point.x != 0 || u.grab_point.y != 0 ) {
             // vehicle: pulling, pushing, or moving around the grabbed object.
-            if (u.grab_type == OBJECT_VEHICLE) {
-                grabbed_vehicle = m.veh_at(u.posx + u.grab_point.x, u.posy + u.grab_point.y);
-                if (NULL != grabbed_vehicle) {
-                    if (grabbed_vehicle == veh0) {
-                        add_msg(m_info, _("You can't move %s while standing on it!"), grabbed_vehicle->name.c_str());
+            if( u.grab_type == OBJECT_VEHICLE ) {
+                grabbed_vehicle = m.veh_at( u.posx + u.grab_point.x, u.posy + u.grab_point.y );
+                if( NULL != grabbed_vehicle ) {
+                    if( grabbed_vehicle == veh0 ) {
+                        add_msg( m_info, _( "You can't move %s while standing on it!" ), grabbed_vehicle->name.c_str() );
                         return false;
                     }
-                    drag_multiplier += (float)(grabbed_vehicle->total_mass() * 1000) /
-                                       (float)(u.weight_capacity() * 5);
-                    if (drag_multiplier > 2.0) {
-                        add_msg(m_info, _("The %s is too heavy for you to budge!"), grabbed_vehicle->name.c_str());
+                    drag_multiplier += ( float )( grabbed_vehicle->total_mass() * 1000 ) /
+                                       ( float )( u.weight_capacity() * 5 );
+                    if( drag_multiplier > 2.0 ) {
+                        add_msg( m_info, _( "The %s is too heavy for you to budge!" ), grabbed_vehicle->name.c_str() );
                         return false;
                     }
                     tileray mdir;
 
-                    int dxVeh = u.grab_point.x * (-1);
-                    int dyVeh = u.grab_point.y * (-1);
+                    int dxVeh = u.grab_point.x * ( -1 );
+                    int dyVeh = u.grab_point.y * ( -1 );
                     int prev_grab_x = u.grab_point.x;
                     int prev_grab_y = u.grab_point.y;
 
-                    if( abs(dx + dxVeh) == 2 || abs(dy + dyVeh) == 2 ||
-                        ((dxVeh + dx) == 0 && (dyVeh + dy) == 0) ) {
+                    if( abs( dx + dxVeh ) == 2 || abs( dy + dyVeh ) == 2 ||
+                        ( ( dxVeh + dx ) == 0 && ( dyVeh + dy ) == 0 ) ) {
                         //We are not moving around the veh
-                        if ((dxVeh + dx) == 0 && (dyVeh + dy) == 0) {
+                        if( ( dxVeh + dx ) == 0 && ( dyVeh + dy ) == 0 ) {
                             //we are pushing in the direction of veh
                             dxVeh = dx;
                             dyVeh = dy;
                         } else {
-                            u.grab_point.x = dx * (-1);
-                            u.grab_point.y = dy * (-1);
+                            u.grab_point.x = dx * ( -1 );
+                            u.grab_point.y = dy * ( -1 );
                         }
 
-                        if( (abs(dx + dxVeh) == 0 || abs(dy + dyVeh) == 0) &&
+                        if( ( abs( dx + dxVeh ) == 0 || abs( dy + dyVeh ) == 0 ) &&
                             u.grab_point.x != 0 && u.grab_point.y != 0 ) {
                             //We are moving diagonal while veh is diagonal too and one direction is 0
-                            dxVeh = ((dx + dxVeh) == 0) ? 0 : dxVeh;
-                            dyVeh = ((dy + dyVeh) == 0) ? 0 : dyVeh;
+                            dxVeh = ( ( dx + dxVeh ) == 0 ) ? 0 : dxVeh;
+                            dyVeh = ( ( dy + dyVeh ) == 0 ) ? 0 : dyVeh;
 
-                            u.grab_point.x = dxVeh * (-1);
-                            u.grab_point.y = dyVeh * (-1);
+                            u.grab_point.x = dxVeh * ( -1 );
+                            u.grab_point.y = dyVeh * ( -1 );
                         }
 
-                        mdir.init(dxVeh, dyVeh);
-                        mdir.advance(1);
-                        grabbed_vehicle->turn(mdir.dir() - grabbed_vehicle->face.dir());
+                        mdir.init( dxVeh, dyVeh );
+                        mdir.advance( 1 );
+                        grabbed_vehicle->turn( mdir.dir() - grabbed_vehicle->face.dir() );
                         grabbed_vehicle->face = grabbed_vehicle->turn_dir;
-                        grabbed_vehicle->precalc_mounts(1, mdir.dir());
+                        grabbed_vehicle->precalc_mounts( 1, mdir.dir() );
                         int imp = 0;
                         std::vector<veh_collision> veh_veh_colls;
                         std::vector<veh_collision> veh_misc_colls;
@@ -12463,10 +12464,10 @@ bool game::plmove(int dx, int dy)
                         int player_prev_y = u.posy;
                         u.posx = 0;
                         u.posy = 0;
-                        if (grabbed_vehicle->collision(veh_veh_colls, veh_misc_colls, dxVeh, dyVeh,
-                                                       can_move, imp, true)) {
+                        if( grabbed_vehicle->collision( veh_veh_colls, veh_misc_colls, dxVeh, dyVeh,
+                                                        can_move, imp, true ) ) {
                             // TODO: figure out what we collided with.
-                            add_msg(_("The %s collides with something."), grabbed_vehicle->name.c_str());
+                            add_msg( _( "The %s collides with something." ), grabbed_vehicle->name.c_str() );
                             u.moves -= 10;
                             u.posx = player_prev_x;
                             u.posy = player_prev_y;
@@ -12481,82 +12482,82 @@ bool game::plmove(int dx, int dy)
                         int gy = grabbed_vehicle->global_y();
                         std::vector<int> wheel_indices =
                             grabbed_vehicle->all_parts_with_feature( "WHEEL", false );
-                        for( auto it = wheel_indices.begin(); it != wheel_indices.end(); ++it) {
+                        for( auto it = wheel_indices.begin(); it != wheel_indices.end(); ++it ) {
                             int p = *it;
-                            if( one_in(2) ) {
+                            if( one_in( 2 ) ) {
                                 grabbed_vehicle->handle_trap(
                                     gx + grabbed_vehicle->parts[p].precalc_dx[0] + dxVeh,
                                     gy + grabbed_vehicle->parts[p].precalc_dy[0] + dyVeh, p );
                             }
                         }
-                        m.displace_vehicle(gx, gy, dxVeh, dyVeh);
+                        m.displace_vehicle( gx, gy, dxVeh, dyVeh );
                     } else {
                         //We are moving around the veh
-                        u.grab_point.x = (dx + dxVeh) * (-1);
-                        u.grab_point.y = (dy + dyVeh) * (-1);
+                        u.grab_point.x = ( dx + dxVeh ) * ( -1 );
+                        u.grab_point.y = ( dy + dyVeh ) * ( -1 );
                     }
                 } else {
-                    add_msg(m_info, _("No vehicle at grabbed point."));
+                    add_msg( m_info, _( "No vehicle at grabbed point." ) );
                     u.grab_point.x = 0;
                     u.grab_point.y = 0;
                     u.grab_type = OBJECT_NONE;
                 }
                 // Furniture: pull, push, or standing still and nudging object around.
                 // Can push furniture out of reach.
-            } else if ( u.grab_type == OBJECT_FURNITURE ) {
+            } else if( u.grab_type == OBJECT_FURNITURE ) {
                 point fpos( u.posx + u.grab_point.x, u.posy + u.grab_point.y );
                 // supposed position of grabbed furniture
-                if ( ! m.has_furn( fpos.x, fpos.y ) ) {
+                if( ! m.has_furn( fpos.x, fpos.y ) ) {
                     // where'd it go? We're grabbing thin air so reset.
-                    add_msg(m_info, _("No furniture at grabbed point.") );
-                    u.grab_point = point(0, 0);
+                    add_msg( m_info, _( "No furniture at grabbed point." ) );
+                    u.grab_point = point( 0, 0 );
                     u.grab_type = OBJECT_NONE;
                 } else {
                     point fdest( fpos.x + dx, fpos.y + dy ); // intended destination of furniture.
                     // Unfortunately, game::is_empty fails for tiles we're standing on,
                     // which will forbid pulling, so:
                     bool canmove = (
-                                       ( m.move_cost(fdest.x, fdest.y) > 0) &&
-                                       npc_at(fdest.x, fdest.y) == -1 &&
-                                       mon_at(fdest.x, fdest.y) == -1 &&
-                                       m.has_flag("FLAT", fdest.x, fdest.y) &&
-                                       !m.has_furn(fdest.x, fdest.y) &&
-                                       m.veh_at(fdest.x, fdest.y) == NULL &&
-                                       m.tr_at(fdest.x, fdest.y) == tr_null
+                                       ( m.move_cost( fdest.x, fdest.y ) > 0 ) &&
+                                       npc_at( fdest.x, fdest.y ) == -1 &&
+                                       mon_at( fdest.x, fdest.y ) == -1 &&
+                                       m.has_flag( "FLAT", fdest.x, fdest.y ) &&
+                                       !m.has_furn( fdest.x, fdest.y ) &&
+                                       m.veh_at( fdest.x, fdest.y ) == NULL &&
+                                       m.tr_at( fdest.x, fdest.y ) == tr_null
                                    );
 
-                    const furn_t furntype = m.furn_at(fpos.x, fpos.y);
+                    const furn_t furntype = m.furn_at( fpos.x, fpos.y );
                     int furncost = furntype.movecost;
-                    const int src_items = m.i_at(fpos.x, fpos.y).size();
-                    const int dst_items = m.i_at(fdest.x, fdest.y).size();
-                    bool dst_item_ok = ( ! m.has_flag("NOITEM", fdest.x, fdest.y) &&
-                                         ! m.has_flag("SWIMMABLE", fdest.x, fdest.y) &&
-                                         ! m.has_flag("DESTROY_ITEM", fdest.x, fdest.y) );
-                    bool src_item_ok = ( m.furn_at(fpos.x, fpos.y).has_flag("CONTAINER") ||
-                                         m.furn_at(fpos.x, fpos.y).has_flag("SEALED") );
+                    const int src_items = m.i_at( fpos.x, fpos.y ).size();
+                    const int dst_items = m.i_at( fdest.x, fdest.y ).size();
+                    bool dst_item_ok = ( ! m.has_flag( "NOITEM", fdest.x, fdest.y ) &&
+                                         ! m.has_flag( "SWIMMABLE", fdest.x, fdest.y ) &&
+                                         ! m.has_flag( "DESTROY_ITEM", fdest.x, fdest.y ) );
+                    bool src_item_ok = ( m.furn_at( fpos.x, fpos.y ).has_flag( "CONTAINER" ) ||
+                                         m.furn_at( fpos.x, fpos.y ).has_flag( "SEALED" ) );
 
-                    if ( ! canmove ) {
-                        add_msg( _("The %s collides with something."), furntype.name.c_str() );
+                    if( ! canmove ) {
+                        add_msg( _( "The %s collides with something." ), furntype.name.c_str() );
                         u.moves -= 50; // "oh was that your foot? Sorry :-O"
                         return false;
-                    } else if ( !m.can_move_furniture( fpos.x, fpos.y, &u ) &&
-                                one_in(std::max(20 - furntype.move_str_req - u.str_cur, 2)) ) {
-                        add_msg(m_bad, _("You strain yourself trying to move the heavy %s!"),
-                                furntype.name.c_str() );
+                    } else if( !m.can_move_furniture( fpos.x, fpos.y, &u ) &&
+                               one_in( std::max( 20 - furntype.move_str_req - u.str_cur, 2 ) ) ) {
+                        add_msg( m_bad, _( "You strain yourself trying to move the heavy %s!" ),
+                                 furntype.name.c_str() );
                         u.moves -= 100;
-                        u.mod_pain(1); // Hurt ourself.
+                        u.mod_pain( 1 ); // Hurt ourself.
                         return false; // furniture and or obstacle wins.
-                    } else if ( ! src_item_ok && dst_items > 0 ) {
-                        add_msg( _("There's stuff in the way.") );
+                    } else if( ! src_item_ok && dst_items > 0 ) {
+                        add_msg( _( "There's stuff in the way." ) );
                         u.moves -= 50; // "oh was that your stuffed parrot? Sorry :-O"
                         return false;
                     }
 
-                    if ( pulling_furniture ) {
+                    if( pulling_furniture ) {
                         // normalize movecost for pulling: furniture moves into our current square -then- we move away
-                        if ( furncost < 0 ) {
+                        if( furncost < 0 ) {
                             // this will make our exit-tile move cost 0
-                            movecost_modifier += m.ter_at(fpos.x, fpos.y).movecost;
+                            movecost_modifier += m.ter_at( fpos.x, fpos.y ).movecost;
                             // so add the base cost of our exit-tile's terrain.
                         } else {
                             // or it will think we're walking over the furniture we're pulling
@@ -12568,54 +12569,55 @@ bool game::plmove(int dx, int dy)
                     int str_req = furntype.move_str_req;
                     u.moves -= str_req * 10;
                     // Additional penalty if we can't comfortably move it.
-                    if (!m.can_move_furniture(fpos.x, fpos.y, &u)) {
-                        int move_penalty = std::min(std::pow(str_req, 2.0) + 100.0, 1000.0);
+                    if( !m.can_move_furniture( fpos.x, fpos.y, &u ) ) {
+                        int move_penalty = std::min( std::pow( str_req, 2.0 ) + 100.0, 1000.0 );
                         u.moves -= move_penalty;
-                        if (move_penalty > 500) {
-                            if (one_in(3)) { // Nag only occasionally.
-                                add_msg( _("Moving the heavy %s is taking a lot of time!"), furntype.name.c_str() );
+                        if( move_penalty > 500 ) {
+                            if( one_in( 3 ) ) { // Nag only occasionally.
+                                add_msg( _( "Moving the heavy %s is taking a lot of time!" ), furntype.name.c_str() );
                             }
-                        } else if (move_penalty > 200) {
-                            if (one_in(3)) { // Nag only occasionally.
-                                add_msg( _("It takes some time to move the heavy %s."), furntype.name.c_str() );
+                        } else if( move_penalty > 200 ) {
+                            if( one_in( 3 ) ) { // Nag only occasionally.
+                                add_msg( _( "It takes some time to move the heavy %s." ), furntype.name.c_str() );
                             }
                         }
                     }
-                    sound(x, y, furntype.move_str_req * 2, _("a scraping noise."));
+                    sound( x, y, furntype.move_str_req * 2, _( "a scraping noise." ) );
 
-                    m.furn_set(fdest.x, fdest.y, m.furn(fpos.x, fpos.y));    // finally move it.
-                    m.furn_set(fpos.x, fpos.y, f_null);
+                    m.furn_set( fdest.x, fdest.y, m.furn( fpos.x, fpos.y ) ); // finally move it.
+                    m.furn_set( fpos.x, fpos.y, f_null );
 
-                    if ( src_items > 0 ) {  // and the stuff inside.
-                        if ( dst_item_ok && src_item_ok ) {
+                    if( src_items > 0 ) {   // and the stuff inside.
+                        if( dst_item_ok && src_item_ok ) {
                             // Assume contents of both cells are legal, so we can just swap contents.
-                            m.i_at( fpos.x, fpos.y).swap( m.i_at(fdest.x, fdest.y) );
+                            m.i_at( fpos.x, fpos.y ).swap( m.i_at( fdest.x, fdest.y ) );
                         } else {
-                            add_msg("Stuff spills from the %s!", furntype.name.c_str() );
+                            add_msg( "Stuff spills from the %s!", furntype.name.c_str() );
                         }
                     }
 
-                    if ( shifting_furniture ) { // we didn't move
-                        if ( abs( u.grab_point.x + dx ) < 2 && abs( u.grab_point.y + dy ) < 2 ) {
-                            u.grab_point = point ( u.grab_point.x + dx ,
-                                                   u.grab_point.y + dy ); // furniture moved relative to us
+                    if( shifting_furniture ) {  // we didn't move
+                        if( abs( u.grab_point.x + dx ) < 2 && abs( u.grab_point.y + dy ) < 2 ) {
+                            u.grab_point = point( u.grab_point.x + dx ,
+                                                  u.grab_point.y + dy ); // furniture moved relative to us
                         } else { // we pushed furniture out of reach
-                            add_msg( _("You let go of the %s"), furntype.name.c_str() );
-                            u.grab_point = point (0, 0);
+                            add_msg( _( "You let go of the %s" ), furntype.name.c_str() );
+                            u.grab_point = point( 0, 0 );
                             u.grab_type = OBJECT_NONE;
                         }
                         return false; // We moved furniture but stayed still.
-                    } else if ( pushing_furniture &&
-                                m.move_cost(x, y) <= 0 ) { // Not sure how that chair got into a wall, but don't let player follow.
-                        add_msg( _("You let go of the %s as it slides past %s"), furntype.name.c_str(), m.ter_at(x,
-                                 y).name.c_str() );
-                        u.grab_point = point (0, 0);
+                    } else if( pushing_furniture &&
+                               m.move_cost( x, y ) <=
+                               0 ) { // Not sure how that chair got into a wall, but don't let player follow.
+                        add_msg( _( "You let go of the %s as it slides past %s" ), furntype.name.c_str(), m.ter_at( x,
+                                 y ).name.c_str() );
+                        u.grab_point = point( 0, 0 );
                         u.grab_type = OBJECT_NONE;
                     }
                 }
                 // Unsupported!
             } else {
-                add_msg(m_info, _("Nothing at grabbed point %d,%d."), u.grab_point.x, u.grab_point.y );
+                add_msg( m_info, _( "Nothing at grabbed point %d,%d." ), u.grab_point.x, u.grab_point.y );
                 u.grab_point.x = 0;
                 u.grab_point.y = 0;
                 u.grab_type = OBJECT_NONE;
@@ -12624,201 +12626,201 @@ bool game::plmove(int dx, int dy)
 
         // Calculate cost of moving
         bool diag = trigdist && u.posx != x && u.posy != y;
-        u.moves -= int(u.run_cost(m.combined_movecost(u.posx, u.posy, x, y, grabbed_vehicle,
-                                  movecost_modifier), diag) * drag_multiplier);
+        u.moves -= int( u.run_cost( m.combined_movecost( u.posx, u.posy, x, y, grabbed_vehicle,
+                                    movecost_modifier ), diag ) * drag_multiplier );
 
         // Adjust recoil down
-        if (u.recoil > 0) {
-            if (int(u.str_cur / 2) + u.skillLevel("gun") >= u.recoil) {
+        if( u.recoil > 0 ) {
+            if( int( u.str_cur / 2 ) + u.skillLevel( "gun" ) >= u.recoil ) {
                 u.recoil = 0;
             } else {
-                u.recoil -= int(u.str_cur / 2) + u.skillLevel("gun");
-                u.recoil = int(u.recoil / 2);
+                u.recoil -= int( u.str_cur / 2 ) + u.skillLevel( "gun" );
+                u.recoil = int( u.recoil / 2 );
             }
         }
-        if ((!u.has_trait("PARKOUR") && m.move_cost(x, y) > 2) ||
-            ( u.has_trait("PARKOUR") && m.move_cost(x, y) > 4    )) {
-            if (veh1 && m.move_cost(x, y) != 2) {
-                add_msg(m_warning, _("Moving past this %s is slow!"), veh1->part_info(vpart1).name.c_str());
+        if( ( !u.has_trait( "PARKOUR" ) && m.move_cost( x, y ) > 2 ) ||
+            ( u.has_trait( "PARKOUR" ) && m.move_cost( x, y ) > 4 ) ) {
+            if( veh1 && m.move_cost( x, y ) != 2 ) {
+                add_msg( m_warning, _( "Moving past this %s is slow!" ), veh1->part_info( vpart1 ).name.c_str() );
             } else {
-                add_msg(m_warning, _("Moving past this %s is slow!"), m.name(x, y).c_str());
+                add_msg( m_warning, _( "Moving past this %s is slow!" ), m.name( x, y ).c_str() );
             }
         }
-        std::string signage = m.get_signage(x, y);
-        if (signage.size()) {
-            add_msg(m_info, _("The sign says: %s"), signage.c_str());
+        std::string signage = m.get_signage( x, y );
+        if( signage.size() ) {
+            add_msg( m_info, _( "The sign says: %s" ), signage.c_str() );
         }
-        if (m.has_flag("ROUGH", x, y) && (!u.in_vehicle)) {
-            if (one_in(5) && u.get_armor_bash(bp_feet) < rng(2, 5)) {
-                add_msg(m_bad, _("You hurt your feet on the %s!"), m.tername(x, y).c_str());
-                u.hit(NULL, bp_feet, 0, 0, 1);
-                u.hit(NULL, bp_feet, 1, 0, 1);
+        if( m.has_flag( "ROUGH", x, y ) && ( !u.in_vehicle ) ) {
+            if( one_in( 5 ) && u.get_armor_bash( bp_feet ) < rng( 2, 5 ) ) {
+                add_msg( m_bad, _( "You hurt your feet on the %s!" ), m.tername( x, y ).c_str() );
+                u.hit( NULL, bp_feet, 0, 0, 1 );
+                u.hit( NULL, bp_feet, 1, 0, 1 );
             }
         }
-        if (m.has_flag("SHARP", x, y) && !one_in(3) && !one_in(40 - int(u.dex_cur / 2))
-            && (!u.in_vehicle)) {
-            if (!u.has_trait("PARKOUR") || one_in(4)) {
+        if( m.has_flag( "SHARP", x, y ) && !one_in( 3 ) && !one_in( 40 - int( u.dex_cur / 2 ) )
+            && ( !u.in_vehicle ) ) {
+            if( !u.has_trait( "PARKOUR" ) || one_in( 4 ) ) {
                 body_part bp = random_body_part();
-                int side = random_side(bp);
-                if(u.hit(NULL, bp, side, 0, rng(1, 4)) > 0) {
-                    add_msg(m_bad, _("You cut your %s on the %s!"), body_part_name(bp, side).c_str(), m.tername(x,
-                            y).c_str());
+                int side = random_side( bp );
+                if( u.hit( NULL, bp, side, 0, rng( 1, 4 ) ) > 0 ) {
+                    add_msg( m_bad, _( "You cut your %s on the %s!" ), body_part_name( bp, side ).c_str(), m.tername( x,
+                             y ).c_str() );
                 }
-                if ((u.has_trait("INFRESIST")) && (one_in(1024))) {
-                    u.add_disease("tetanus", 1, true);
-                } else if ((!u.has_trait("INFIMMUNE") || !u.has_trait("INFRESIST")) && (one_in(256))) {
-                    u.add_disease("tetanus", 1, true);
+                if( ( u.has_trait( "INFRESIST" ) ) && ( one_in( 1024 ) ) ) {
+                    u.add_disease( "tetanus", 1, true );
+                } else if( ( !u.has_trait( "INFIMMUNE" ) || !u.has_trait( "INFRESIST" ) ) && ( one_in( 256 ) ) ) {
+                    u.add_disease( "tetanus", 1, true );
                 }
             }
         }
-        if (u.has_trait("LEG_TENT_BRACE") && (!(u.wearing_something_on(bp_feet))) ) {
+        if( u.has_trait( "LEG_TENT_BRACE" ) && ( !( u.wearing_something_on( bp_feet ) ) ) ) {
             // DX and IN are long suits for Cephalopods,
             // so this shouldn't cause too much hardship
             // Presumed that if it's swimmable, they're
             // swimming and won't stick
-            if ((!(m.has_flag("SWIMMABLE", x, y)) && (one_in(80 + u.dex_cur + u.int_cur)))) {
-                add_msg(_("Your tentacles stick to the ground, but you pull them free."));
+            if( ( !( m.has_flag( "SWIMMABLE", x, y ) ) && ( one_in( 80 + u.dex_cur + u.int_cur ) ) ) ) {
+                add_msg( _( "Your tentacles stick to the ground, but you pull them free." ) );
                 u.fatigue++;
             }
         }
-        if (!u.has_artifact_with(AEP_STEALTH) && !u.has_trait("LEG_TENTACLES")) {
-            if (u.has_trait("LIGHTSTEP") || u.is_wearing("rm13_armor_on")) {
-                sound(x, y, 2, "");    // Sound of footsteps may awaken nearby monsters
-            } else if (u.has_trait("CLUMSY")) {
-                sound(x, y, 10, "");
-            } else if (u.has_bionic("bio_ankles")) {
-                sound(x, y, 12, "");
+        if( !u.has_artifact_with( AEP_STEALTH ) && !u.has_trait( "LEG_TENTACLES" ) ) {
+            if( u.has_trait( "LIGHTSTEP" ) || u.is_wearing( "rm13_armor_on" ) ) {
+                sound( x, y, 2, "" );  // Sound of footsteps may awaken nearby monsters
+            } else if( u.has_trait( "CLUMSY" ) ) {
+                sound( x, y, 10, "" );
+            } else if( u.has_bionic( "bio_ankles" ) ) {
+                sound( x, y, 12, "" );
             } else {
-                sound(x, y, 6, "");
+                sound( x, y, 6, "" );
             }
         }
-        if (one_in(20) && u.has_artifact_with(AEP_MOVEMENT_NOISE)) {
-            sound(x, y, 40, _("You emit a rattling sound."));
+        if( one_in( 20 ) && u.has_artifact_with( AEP_MOVEMENT_NOISE ) ) {
+            sound( x, y, 40, _( "You emit a rattling sound." ) );
         }
         // If we moved out of the nonant, we need update our map data
-        if (m.has_flag("SWIMMABLE", x, y) && u.has_effect("onfire")) {
-            add_msg(_("The water puts out the flames!"));
-            u.remove_effect("onfire");
+        if( m.has_flag( "SWIMMABLE", x, y ) && u.has_effect( "onfire" ) ) {
+            add_msg( _( "The water puts out the flames!" ) );
+            u.remove_effect( "onfire" );
         }
         // displace is set at the top of this function.
-        if (displace) { // We displaced a friendly monster!
+        if( displace ) { // We displaced a friendly monster!
             // Immobile monsters can't be displaced.
-            monster &critter = zombie(mondex);
-            if (critter.has_flag(MF_IMMOBILE)) {
+            monster &critter = zombie( mondex );
+            if( critter.has_flag( MF_IMMOBILE ) ) {
                 // ...except that turrets can be picked up.
                 // TODO: Make there a flag, instead of hard-coded to mon_turret
-                if (critter.type->id == "mon_turret") {
-                    if (query_yn(_("Deactivate the turret?"))) {
+                if( critter.type->id == "mon_turret" ) {
+                    if( query_yn( _( "Deactivate the turret?" ) ) ) {
                         u.moves -= 100;
-                        m.spawn_item(x, y, "bot_turret", 1, 0, calendar::turn);
-                        if (critter.ammo > 0) {
-                            m.spawn_item(x, y, "9mm", 1, critter.ammo, calendar::turn);
+                        m.spawn_item( x, y, "bot_turret", 1, 0, calendar::turn );
+                        if( critter.ammo > 0 ) {
+                            m.spawn_item( x, y, "9mm", 1, critter.ammo, calendar::turn );
                         }
-                        remove_zombie(mondex);
+                        remove_zombie( mondex );
                     }
                     return false;
-                } else if (critter.type->id == "mon_laserturret") {
-                    if (query_yn(_("Deactivate the laser turret?"))) {
-                        remove_zombie(mondex);
+                } else if( critter.type->id == "mon_laserturret" ) {
+                    if( query_yn( _( "Deactivate the laser turret?" ) ) ) {
+                        remove_zombie( mondex );
                         u.moves -= 100;
-                        m.spawn_item(x, y, "bot_laserturret", 1, 0, calendar::turn);
+                        m.spawn_item( x, y, "bot_laserturret", 1, 0, calendar::turn );
                     }
                     return false;
-                } else if (critter.type->id == "mon_turret_rifle") {
-                    if (query_yn(_("Deactivate the rifle turret?"))) {
-                        remove_zombie(mondex);
+                } else if( critter.type->id == "mon_turret_rifle" ) {
+                    if( query_yn( _( "Deactivate the rifle turret?" ) ) ) {
+                        remove_zombie( mondex );
                         u.moves -= 100;
-                        m.spawn_item(x, y, "bot_rifleturret", 1, 0, calendar::turn);
+                        m.spawn_item( x, y, "bot_rifleturret", 1, 0, calendar::turn );
                     }
                     return false;
                 } else {
-                    add_msg(m_info, _("You can't displace your %s."), critter.name().c_str());
+                    add_msg( m_info, _( "You can't displace your %s." ), critter.name().c_str() );
                     return false;
                 }
                 // Force the movement even though the player is there right now.
-                critter.move_to(u.posx, u.posy, true);
-                add_msg(_("You displace the %s."), critter.name().c_str());
-            } else if (critter.type->id == "mon_manhack") {
-                if (query_yn(_("Reprogram the manhack?"))) {
+                critter.move_to( u.posx, u.posy, true );
+                add_msg( _( "You displace the %s." ), critter.name().c_str() );
+            } else if( critter.type->id == "mon_manhack" ) {
+                if( query_yn( _( "Reprogram the manhack?" ) ) ) {
                     int choice = 0;
-                    if (critter.has_effect("docile")) {
-                        choice = menu(true, _("Do what?"), _("Engage targets."), _("Deactivate."), NULL);
+                    if( critter.has_effect( "docile" ) ) {
+                        choice = menu( true, _( "Do what?" ), _( "Engage targets." ), _( "Deactivate." ), NULL );
                     } else {
-                        choice = menu(true, _("Do what?"), _("Follow me."), _("Deactivate."), NULL);
+                        choice = menu( true, _( "Do what?" ), _( "Follow me." ), _( "Deactivate." ), NULL );
                     }
-                    switch (choice) {
-                    case 1: {
-                        if (critter.has_effect("docile")) {
-                            critter.remove_effect("docile");
-                            if (one_in(3)) {
-                                add_msg(_("The %s hovers momentarily as it surveys the area."),
-                                        critter.name().c_str());
+                    switch( choice ) {
+                        case 1: {
+                            if( critter.has_effect( "docile" ) ) {
+                                critter.remove_effect( "docile" );
+                                if( one_in( 3 ) ) {
+                                    add_msg( _( "The %s hovers momentarily as it surveys the area." ),
+                                             critter.name().c_str() );
+                                }
+                            } else {
+                                critter.add_effect( "docile", 1, 1, true );
+                                add_msg( _( "The %s ." ), critter.name().c_str() );
+                                if( one_in( 3 ) ) {
+                                    add_msg( _( "The %s lets out a whirring noise and starts to follow you." ),
+                                             critter.name().c_str() );
+                                }
                             }
-                        } else {
-                            critter.add_effect("docile", 1, 1, true);
-                            add_msg(_("The %s ."), critter.name().c_str());
-                            if (one_in(3)) {
-                                add_msg(_("The %s lets out a whirring noise and starts to follow you."),
-                                        critter.name().c_str());
-                            }
+                            break;
                         }
-                        break;
-                    }
-                    case 2: {
-                        remove_zombie(mondex);
-                        m.spawn_item(x, y, "bot_manhack", 1, 0, calendar::turn);
-                        break;
-                    }
-                    default: {
-                        return false;
-                    }
+                        case 2: {
+                            remove_zombie( mondex );
+                            m.spawn_item( x, y, "bot_manhack", 1, 0, calendar::turn );
+                            break;
+                        }
+                        default: {
+                            return false;
+                        }
                     }
                     u.moves -= 100;
                 }
                 return false;
             } // critter is immobile or special
-            critter.move_to(u.posx, u.posy,
-                            true); // Force the movement even though the player is there right now.
-            add_msg(_("You displace the %s."), critter.name().c_str());
+            critter.move_to( u.posx, u.posy,
+                             true ); // Force the movement even though the player is there right now.
+            add_msg( _( "You displace the %s." ), critter.name().c_str() );
         } // displace == true
 
 
-        if (x < SEEX * int(MAPSIZE / 2) || y < SEEY * int(MAPSIZE / 2) ||
-            x >= SEEX * (1 + int(MAPSIZE / 2)) || y >= SEEY * (1 + int(MAPSIZE / 2))) {
-            update_map(x, y);
+        if( x < SEEX * int( MAPSIZE / 2 ) || y < SEEY * int( MAPSIZE / 2 ) ||
+            x >= SEEX * ( 1 + int( MAPSIZE / 2 ) ) || y >= SEEY * ( 1 + int( MAPSIZE / 2 ) ) ) {
+            update_map( x, y );
         }
 
         // If the player is in a vehicle, unboard them from the current part
-        if (u.in_vehicle) {
-            m.unboard_vehicle(u.posx, u.posy);
+        if( u.in_vehicle ) {
+            m.unboard_vehicle( u.posx, u.posy );
         }
 
         // Move the player
         u.posx = x;
         u.posy = y;
-        if (dx != 0 || dy != 0) {
+        if( dx != 0 || dy != 0 ) {
             u.lifetime_stats()->squares_walked++;
         }
 
         //Autopickup
-        if (OPTIONS["AUTO_PICKUP"] && (!OPTIONS["AUTO_PICKUP_SAFEMODE"] || mostseen == 0) &&
-            ((m.i_at(u.posx, u.posy)).size() || OPTIONS["AUTO_PICKUP_ADJACENT"])) {
-            Pickup::pick_up(u.posx, u.posy, -1);
+        if( OPTIONS["AUTO_PICKUP"] && ( !OPTIONS["AUTO_PICKUP_SAFEMODE"] || mostseen == 0 ) &&
+            ( ( m.i_at( u.posx, u.posy ) ).size() || OPTIONS["AUTO_PICKUP_ADJACENT"] ) ) {
+            Pickup::pick_up( u.posx, u.posy, -1 );
         }
 
         // If the new tile is a boardable part, board it
-        if (veh1 && veh1->part_with_feature(vpart1, "BOARDABLE") >= 0) {
-            m.board_vehicle(u.posx, u.posy, &u);
+        if( veh1 && veh1->part_with_feature( vpart1, "BOARDABLE" ) >= 0 ) {
+            m.board_vehicle( u.posx, u.posy, &u );
         }
 
         // Traps!
         // Try to detect.
         u.search_surroundings();
         // We stepped on a trap!
-        if (m.tr_at(x, y) != tr_null) {
-            trap *tr = traplist[m.tr_at(x, y)];
-            if (!u.avoid_trap(tr, x, y)) {
-                tr->trigger(&g->u, x, y);
+        if( m.tr_at( x, y ) != tr_null ) {
+            trap *tr = traplist[m.tr_at( x, y )];
+            if( !u.avoid_trap( tr, x, y ) ) {
+                tr->trigger( &g->u, x, y );
             }
         }
 
@@ -12827,189 +12829,189 @@ bool game::plmove(int dx, int dy)
 
         // leave the old martial arts stuff in for now
         // Some martial art styles have special effects that trigger when we move
-        if (u.weapon.type->id == "style_capoeira") {
-            if (u.disease_duration("attack_boost") < 2) {
-                u.add_disease("attack_boost", 2, false, 2, 2);
+        if( u.weapon.type->id == "style_capoeira" ) {
+            if( u.disease_duration( "attack_boost" ) < 2 ) {
+                u.add_disease( "attack_boost", 2, false, 2, 2 );
             }
-            if (u.disease_duration("dodge_boost") < 2) {
-                u.add_disease("dodge_boost", 2, false, 2, 2);
+            if( u.disease_duration( "dodge_boost" ) < 2 ) {
+                u.add_disease( "dodge_boost", 2, false, 2, 2 );
             }
-        } else if (u.weapon.type->id == "style_ninjutsu") {
-            u.add_disease("attack_boost", 2, false, 1, 3);
-        } else if (u.weapon.type->id == "style_crane") {
-            if (!u.has_disease("dodge_boost")) {
-                u.add_disease("dodge_boost", 1, false, 3, 3);
+        } else if( u.weapon.type->id == "style_ninjutsu" ) {
+            u.add_disease( "attack_boost", 2, false, 1, 3 );
+        } else if( u.weapon.type->id == "style_crane" ) {
+            if( !u.has_disease( "dodge_boost" ) ) {
+                u.add_disease( "dodge_boost", 1, false, 3, 3 );
             }
-        } else if (u.weapon.type->id == "style_leopard") {
-            u.add_disease("attack_boost", 2, false, 1, 4);
-        } else if (u.weapon.type->id == "style_dragon") {
-            if (!u.has_disease("damage_boost")) {
-                u.add_disease("damage_boost", 2, false, 3, 3);
+        } else if( u.weapon.type->id == "style_leopard" ) {
+            u.add_disease( "attack_boost", 2, false, 1, 4 );
+        } else if( u.weapon.type->id == "style_dragon" ) {
+            if( !u.has_disease( "damage_boost" ) ) {
+                u.add_disease( "damage_boost", 2, false, 3, 3 );
             }
-        } else if (u.weapon.type->id == "style_lizard") {
+        } else if( u.weapon.type->id == "style_lizard" ) {
             bool wall = false;
-            for (int wallx = x - 1; wallx <= x + 1 && !wall; wallx++) {
-                for (int wally = y - 1; wally <= y + 1 && !wall; wally++) {
-                    if (m.has_flag("SUPPORTS_ROOF", wallx, wally)) {
+            for( int wallx = x - 1; wallx <= x + 1 && !wall; wallx++ ) {
+                for( int wally = y - 1; wally <= y + 1 && !wall; wally++ ) {
+                    if( m.has_flag( "SUPPORTS_ROOF", wallx, wally ) ) {
                         wall = true;
                     }
                 }
             }
-            if (wall) {
-                u.add_disease("attack_boost", 2, false, 2, 8);
+            if( wall ) {
+                u.add_disease( "attack_boost", 2, false, 2, 8 );
             } else {
-                u.rem_disease("attack_boost");
+                u.rem_disease( "attack_boost" );
             }
         }
 
         // Drench the player if swimmable
-        if (m.has_flag("SWIMMABLE", x, y)) {
-            u.drench(40, mfb(bp_feet) | mfb(bp_legs));
+        if( m.has_flag( "SWIMMABLE", x, y ) ) {
+            u.drench( 40, mfb( bp_feet ) | mfb( bp_legs ) );
         }
 
         // List items here
-        if (!m.has_flag("SEALED", x, y)) {
-            if (u.has_effect("blind") && !m.i_at(x, y).empty()) {
-                add_msg(_("There's something here, but you can't see what it is."));
-            } else if (!m.i_at(x, y).empty()) {
+        if( !m.has_flag( "SEALED", x, y ) ) {
+            if( u.has_effect( "blind" ) && !m.i_at( x, y ).empty() ) {
+                add_msg( _( "There's something here, but you can't see what it is." ) );
+            } else if( !m.i_at( x, y ).empty() ) {
                 std::vector<std::string> names;
                 std::vector<size_t> counts;
                 std::vector<item> items;
-                for (std::vector<item>::iterator it = m.i_at(x, y).begin();
-                     it != m.i_at(x, y).end(); ++it) {
+                for( std::vector<item>::iterator it = m.i_at( x, y ).begin();
+                     it != m.i_at( x, y ).end(); ++it ) {
                     item &tmpitem = *it;
                     std::string next_tname = tmpitem.tname();
                     std::string next_dname = tmpitem.display_name();
                     bool by_charges = tmpitem.count_by_charges();
                     bool got_it = false;
-                    for (size_t i = 0; i < names.size(); ++i) {
-                        if (by_charges && next_tname == names[i]) {
+                    for( size_t i = 0; i < names.size(); ++i ) {
+                        if( by_charges && next_tname == names[i] ) {
                             counts[i] += tmpitem.charges;
                             got_it = true;
                             break;
-                        } else if (next_dname == names[i]) {
+                        } else if( next_dname == names[i] ) {
                             counts[i] += 1;
                             got_it = true;
                             break;
                         }
                     }
-                    if (!got_it) {
-                        if (by_charges) {
-                            names.push_back(tmpitem.tname(tmpitem.charges));
-                            counts.push_back(tmpitem.charges);
+                    if( !got_it ) {
+                        if( by_charges ) {
+                            names.push_back( tmpitem.tname( tmpitem.charges ) );
+                            counts.push_back( tmpitem.charges );
                         } else {
-                            names.push_back(tmpitem.display_name(1));
-                            counts.push_back(1);
+                            names.push_back( tmpitem.display_name( 1 ) );
+                            counts.push_back( 1 );
                         }
-                        items.push_back(tmpitem);
+                        items.push_back( tmpitem );
                     }
-                    if (names.size() > 6) {
+                    if( names.size() > 6 ) {
                         break;
                     }
                 }
                 for( size_t i = 0; i < names.size(); ++i ) {
-                    if (!items[i].count_by_charges()) {
-                        names[i] = items[i].display_name(counts[i]);
+                    if( !items[i].count_by_charges() ) {
+                        names[i] = items[i].display_name( counts[i] );
                     } else {
-                        names[i] = items[i].tname(counts[i]);
+                        names[i] = items[i].tname( counts[i] );
                     }
                 }
-                for (size_t i = 0; i < names.size(); ++i) {
+                for( size_t i = 0; i < names.size(); ++i ) {
                     std::string fmt;
                     //~ number of items: "<number> <item>"
-                    fmt = ngettext("%1$d %2$s", "%1$d %2$s", counts[i]);
-                    names[i] = string_format(fmt, counts[i], names[i].c_str());
+                    fmt = ngettext( "%1$d %2$s", "%1$d %2$s", counts[i] );
+                    names[i] = string_format( fmt, counts[i], names[i].c_str() );
                 }
-                if (names.size() == 1) {
-                    add_msg(_("You see here %s."), names[0].c_str());
-                } else if (names.size() == 2) {
-                    add_msg(_("You see here %s and %s."),
-                            names[0].c_str(), names[1].c_str());
-                } else if (names.size() == 3) {
-                    add_msg(_("You see here %s, %s, and %s."), names[0].c_str(),
-                            names[1].c_str(), names[2].c_str());
-                } else if (m.i_at(x, y).size() < 7) {
-                    add_msg(ngettext("There is %d item here.", "There are %d items here.", m.i_at(x, y).size()),
-                            m.i_at(x, y).size());
+                if( names.size() == 1 ) {
+                    add_msg( _( "You see here %s." ), names[0].c_str() );
+                } else if( names.size() == 2 ) {
+                    add_msg( _( "You see here %s and %s." ),
+                             names[0].c_str(), names[1].c_str() );
+                } else if( names.size() == 3 ) {
+                    add_msg( _( "You see here %s, %s, and %s." ), names[0].c_str(),
+                             names[1].c_str(), names[2].c_str() );
+                } else if( m.i_at( x, y ).size() < 7 ) {
+                    add_msg( ngettext( "There is %d item here.", "There are %d items here.", m.i_at( x, y ).size() ),
+                             m.i_at( x, y ).size() );
                 } else {
-                    add_msg(_("There are many items here."));
+                    add_msg( _( "There are many items here." ) );
                 }
             }
         }
 
-        if (veh1 && veh1->part_with_feature(vpart1, "CONTROLS") >= 0
-            && u.in_vehicle) {
-            add_msg(_("There are vehicle controls here."));
-            add_msg(m_info, _("%s to drive."),
-                    press_x(ACTION_CONTROL_VEHICLE).c_str());
+        if( veh1 && veh1->part_with_feature( vpart1, "CONTROLS" ) >= 0
+            && u.in_vehicle ) {
+            add_msg( _( "There are vehicle controls here." ) );
+            add_msg( m_info, _( "%s to drive." ),
+                     press_x( ACTION_CONTROL_VEHICLE ).c_str() );
         }
 
-    } else if (u.has_active_bionic("bio_probability_travel") && u.power_level >= 10) {
+    } else if( u.has_active_bionic( "bio_probability_travel" ) && u.power_level >= 10 ) {
         //probability travel through walls but not water
         int tunneldist = 0;
         // tile is impassable
-        while ((m.move_cost(x + tunneldist * (x - u.posx), y + tunneldist * (y - u.posy)) == 0) ||
+        while( ( m.move_cost( x + tunneldist * ( x - u.posx ), y + tunneldist * ( y - u.posy ) ) == 0 ) ||
                // a monster is there
-               ((mon_at(x + tunneldist * (x - u.posx), y + tunneldist * (y - u.posy)) != -1 ||
-                 // so keep tunneling
-                 npc_at(x + tunneldist * (x - u.posx), y + tunneldist * (y - u.posy)) != -1) &&
-                // assuming we've already started
-                tunneldist > 0)) {
+               ( ( mon_at( x + tunneldist * ( x - u.posx ), y + tunneldist * ( y - u.posy ) ) != -1 ||
+                   // so keep tunneling
+                   npc_at( x + tunneldist * ( x - u.posx ), y + tunneldist * ( y - u.posy ) ) != -1 ) &&
+                 // assuming we've already started
+                 tunneldist > 0 ) ) {
             tunneldist += 1; //add 1 to tunnel distance for each impassable tile in the line
-            if (tunneldist * 10 >
-                u.power_level) { //oops, not enough energy! Tunneling costs 10 bionic power per impassable tile
-                add_msg(_("You try to quantum tunnel through the barrier but are reflected! Try again with more energy!"));
+            if( tunneldist * 10 >
+                u.power_level ) { //oops, not enough energy! Tunneling costs 10 bionic power per impassable tile
+                add_msg( _( "You try to quantum tunnel through the barrier but are reflected! Try again with more energy!" ) );
                 tunneldist = 0; //we didn't tunnel anywhere
                 break;
             }
-            if (tunneldist > 24) {
-                add_msg(m_info, _("It's too dangerous to tunnel that far!"));
+            if( tunneldist > 24 ) {
+                add_msg( m_info, _( "It's too dangerous to tunnel that far!" ) );
                 tunneldist = 0;
                 break;    //limit maximum tunneling distance
             }
         }
-        if (tunneldist) { //you tunneled
-            if (u.in_vehicle) {
-                m.unboard_vehicle(u.posx, u.posy);
+        if( tunneldist ) { //you tunneled
+            if( u.in_vehicle ) {
+                m.unboard_vehicle( u.posx, u.posy );
             }
-            u.power_level -= (tunneldist * 10); //tunneling costs 10 bionic power per impassable tile
+            u.power_level -= ( tunneldist * 10 ); //tunneling costs 10 bionic power per impassable tile
             u.moves -= 100; //tunneling costs 100 moves
-            u.posx += (tunneldist + 1) * (x -
-                                          u.posx); //move us the number of tiles we tunneled in the x direction, plus 1 for the last tile
-            u.posy += (tunneldist + 1) * (y - u.posy); //ditto for y
-            add_msg(_("You quantum tunnel through the %d-tile wide barrier!"), tunneldist);
-            if (m.veh_at(u.posx, u.posy, vpart1) &&
-                m.veh_at(u.posx, u.posy, vpart1)->part_with_feature(vpart1, "BOARDABLE") >= 0) {
-                m.board_vehicle(u.posx, u.posy, &u);
+            u.posx += ( tunneldist + 1 ) * ( x -
+                                             u.posx ); //move us the number of tiles we tunneled in the x direction, plus 1 for the last tile
+            u.posy += ( tunneldist + 1 ) * ( y - u.posy ); //ditto for y
+            add_msg( _( "You quantum tunnel through the %d-tile wide barrier!" ), tunneldist );
+            if( m.veh_at( u.posx, u.posy, vpart1 ) &&
+                m.veh_at( u.posx, u.posy, vpart1 )->part_with_feature( vpart1, "BOARDABLE" ) >= 0 ) {
+                m.board_vehicle( u.posx, u.posy, &u );
             }
         } else { //or you couldn't tunnel due to lack of energy
             u.power_level -= 10; //failure is expensive!
             return false;
         }
 
-    } else if (veh_closed_door) {
-        if (outside_vehicle) {
-            veh1->open_all_at(dpart);
+    } else if( veh_closed_door ) {
+        if( outside_vehicle ) {
+            veh1->open_all_at( dpart );
         } else {
-            veh1->open(dpart);
-            add_msg(_("You open the %s's %s."), veh1->name.c_str(),
-                    veh1->part_info(dpart).name.c_str());
+            veh1->open( dpart );
+            add_msg( _( "You open the %s's %s." ), veh1->name.c_str(),
+                     veh1->part_info( dpart ).name.c_str() );
         }
         u.moves -= 100;
     } else { // Invalid move
-        if (u.has_effect("blind") || u.has_effect("stunned")) {
+        if( u.has_effect( "blind" ) || u.has_effect( "stunned" ) ) {
             // Only lose movement if we're blind
-            add_msg(_("You bump into a %s!"), m.name(x, y).c_str());
+            add_msg( _( "You bump into a %s!" ), m.name( x, y ).c_str() );
             u.moves -= 100;
-        } else if (m.furn(x, y) != f_safe_c && m.open_door(x, y, !m.is_outside(u.posx, u.posy))) {
+        } else if( m.furn( x, y ) != f_safe_c && m.open_door( x, y, !m.is_outside( u.posx, u.posy ) ) ) {
             u.moves -= 100;
-        } else if (m.ter(x, y) == t_door_locked || m.ter(x, y) == t_door_locked_alarm ||
-                   m.ter(x, y) == t_door_locked_interior) {
+        } else if( m.ter( x, y ) == t_door_locked || m.ter( x, y ) == t_door_locked_alarm ||
+                   m.ter( x, y ) == t_door_locked_interior ) {
             u.moves -= 100;
-            add_msg(_("That door is locked!"));
-        } else if (m.ter(x, y) == t_door_bar_locked) {
+            add_msg( _( "That door is locked!" ) );
+        } else if( m.ter( x, y ) == t_door_bar_locked ) {
             u.moves -= 80;
-            add_msg(_("You rattle the bars but the door is locked!"));
+            add_msg( _( "You rattle the bars but the door is locked!" ) );
         }
         return false;
     }
