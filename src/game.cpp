@@ -12801,48 +12801,9 @@ bool game::plmove( int dx, int dy )
         }
 
     } else if( u.has_active_bionic( "bio_probability_travel" ) && u.power_level >= 10 ) {
-        //probability travel through walls but not water
-        int tunneldist = 0;
-        // tile is impassable
-        while( ( m.move_cost( x + tunneldist * ( x - u.posx ), y + tunneldist * ( y - u.posy ) ) == 0 ) ||
-               // a monster is there
-               ( ( mon_at( x + tunneldist * ( x - u.posx ), y + tunneldist * ( y - u.posy ) ) != -1 ||
-                   // so keep tunneling
-                   npc_at( x + tunneldist * ( x - u.posx ), y + tunneldist * ( y - u.posy ) ) != -1 ) &&
-                 // assuming we've already started
-                 tunneldist > 0 ) ) {
-            tunneldist += 1; //add 1 to tunnel distance for each impassable tile in the line
-            if( tunneldist * 10 >
-                u.power_level ) { //oops, not enough energy! Tunneling costs 10 bionic power per impassable tile
-                add_msg( _( "You try to quantum tunnel through the barrier but are reflected! Try again with more energy!" ) );
-                tunneldist = 0; //we didn't tunnel anywhere
-                break;
-            }
-            if( tunneldist > 24 ) {
-                add_msg( m_info, _( "It's too dangerous to tunnel that far!" ) );
-                tunneldist = 0;
-                break;    //limit maximum tunneling distance
-            }
-        }
-        if( tunneldist ) { //you tunneled
-            if( u.in_vehicle ) {
-                m.unboard_vehicle( u.posx, u.posy );
-            }
-            u.power_level -= ( tunneldist * 10 ); //tunneling costs 10 bionic power per impassable tile
-            u.moves -= 100; //tunneling costs 100 moves
-            u.posx += ( tunneldist + 1 ) * ( x -
-                                             u.posx ); //move us the number of tiles we tunneled in the x direction, plus 1 for the last tile
-            u.posy += ( tunneldist + 1 ) * ( y - u.posy ); //ditto for y
-            add_msg( _( "You quantum tunnel through the %d-tile wide barrier!" ), tunneldist );
-            if( m.veh_at( u.posx, u.posy, vpart1 ) &&
-                m.veh_at( u.posx, u.posy, vpart1 )->part_with_feature( vpart1, "BOARDABLE" ) >= 0 ) {
-                m.board_vehicle( u.posx, u.posy, &u );
-            }
-        } else { //or you couldn't tunnel due to lack of energy
-            u.power_level -= 10; //failure is expensive!
+        if( !pltunnel( x, y ) ) {
             return false;
         }
-
     } else if( veh_closed_door ) {
         if( outside_vehicle ) {
             veh1->open_all_at( dpart );
@@ -12870,6 +12831,54 @@ bool game::plmove( int dx, int dy )
         return false;
     }
 
+    return true;
+}
+
+bool game::pltunnel(int x, int y)
+{
+    int tunneldist = 0;
+    const int dx = x - u.posx;
+    const int dy = y - u.posy;
+    // tunnel through fsquare if: tile is impassable
+    // or a critter is there and we've already started
+    while( m.move_cost( x, y ) == 0 ||
+           ( critter_at( x, y ) != NULL && tunneldist > 0 ) ) {
+        tunneldist += 1; //add 1 to tunnel distance for each impassable tile in the line
+        x += dx;
+        y += dy;
+        if( tunneldist * 10 > u.power_level ) {
+            //oops, not enough energy! Tunneling costs 10 bionic power per impassable tile
+            add_msg( _( "You try to quantum tunnel through the barrier but are reflected! Try again with more energy!" ) );
+            tunneldist = 0; //we didn't tunnel anywhere
+            break;
+        }
+        if( tunneldist > 24 ) {
+            add_msg( m_info, _( "It's too dangerous to tunnel that far!" ) );
+            tunneldist = 0;
+            break;    //limit maximum tunneling distance
+        }
+    }
+    if( tunneldist == 0 ) {
+        u.power_level -= 10; //failure is expensive!
+        return false;
+    }
+    if( u.in_vehicle ) {
+        m.unboard_vehicle( u.posx, u.posy );
+    }
+    u.power_level -= tunneldist * 10; //tunneling costs 10 bionic power per impassable tile
+    u.moves -= 100; //tunneling costs 100 moves
+    u.posx = x;
+    u.posy = y;
+    if( x < SEEX * int( MAPSIZE / 2 ) || y < SEEY * int( MAPSIZE / 2 ) ||
+        x >= SEEX * ( 1 + int( MAPSIZE / 2 ) ) || y >= SEEY * ( 1 + int( MAPSIZE / 2 ) ) ) {
+        update_map( x, y );
+    }
+    add_msg( _( "You quantum tunnel through the %d-tile wide barrier!" ), tunneldist );
+    int vpart1 = -1;
+    if( m.veh_at( u.posx, u.posy, vpart1 ) &&
+        m.veh_at( u.posx, u.posy, vpart1 )->part_with_feature( vpart1, "BOARDABLE" ) >= 0 ) {
+        m.board_vehicle( u.posx, u.posy, &u );
+    }
     return true;
 }
 

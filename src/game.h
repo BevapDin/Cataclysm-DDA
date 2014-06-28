@@ -265,6 +265,13 @@ class game
          * has been canceled or is not allowed/not possible.
          */
         bool displace_monster(int mondex, int x, int y);
+        /**
+         * Attempt to quantum tunnel in to (x,y), or further if (x,y) is impassable.
+         * Therfor the tunnel direction (u.posx,u.posy) -> (x,y)
+         * @return false if the action failed, true if it succeeded.
+         * A message has been printed in both cases.
+         */
+        bool pltunnel(int x, int y);
         /** Add a message with a shortened list of items at(x,y) */
         void print_item_overview(int x, int y) /*const*/;
         bool checkZone(const std::string p_sType, const int p_iX, const int p_iY);
