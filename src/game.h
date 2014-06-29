@@ -292,6 +292,13 @@ class game
          * Used for (among others) boarding the vehicle.
          */
         void post_player_movement(int x, int y);
+        /**
+         * Move the grabbed objected around as part of the movement to (x,y)
+         * @return true if the movement should continue, false if the movement
+         * should be canceled. If no object is grabbed, returns true to indicate
+         * normal movement.
+         */
+        bool move_grabbed_object(int x, int y, int &movecost_modifier, float &drag_multiplier, vehicle* &grabbed_vehicle);
         /** Add a message with a shortened list of items at(x,y) */
         void print_item_overview(int x, int y) /*const*/;
         bool checkZone(const std::string p_sType, const int p_iX, const int p_iY);
