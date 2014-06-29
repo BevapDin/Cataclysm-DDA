@@ -1328,7 +1328,7 @@ void mattack::vortex(monster *z)
                         g->u.posy = traj[traj.size() - 1].y;
                     }
                     g->u.hit(z, bp_torso, -1, damage, 0);
-                    g->update_map(g->u.posx, g->u.posy);
+                    g->update_map();
                 } // Done with checking for player
             }
         }

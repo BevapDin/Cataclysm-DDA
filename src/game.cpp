@@ -3940,7 +3940,7 @@ void game::load(std::string worldname, std::string name)
     load_uistate(worldname);
     // Now load up the master game data; factions (and more?)
     load_master(worldname);
-    update_map(u.posx, u.posy);
+    update_map();
 
     const int tmp_moves = u.moves;
     u.reset();
@@ -12253,13 +12253,10 @@ void game::pre_player_movement(int x, int y)
     }
 }
 
-void game::post_player_movement(int x, int y)
+void game::post_player_movement()
 {
     // If we moved out of the nonant, we need update our map data
-    if( x < SEEX * int( MAPSIZE / 2 ) || y < SEEY * int( MAPSIZE / 2 ) ||
-        x >= SEEX * ( 1 + int( MAPSIZE / 2 ) ) || y >= SEEY * ( 1 + int( MAPSIZE / 2 ) ) ) {
-        update_map( x, y );
-    }
+    update_map();
 
     //Autopickup
     if( OPTIONS["AUTO_PICKUP"] && ( !OPTIONS["AUTO_PICKUP_SAFEMODE"] || mostseen == 0 ) &&
@@ -12718,7 +12715,7 @@ bool game::plmove( int dx, int dy )
         // Move the player
         u.posx = x;
         u.posy = y;
-        post_player_movement( x, y );
+        post_player_movement();
 
     } else if( u.has_active_bionic( "bio_probability_travel" ) && u.power_level >= 10 ) {
         if( !pltunnel( x, y ) ) {
@@ -12881,10 +12878,7 @@ bool game::pltunnel(int x, int y)
     u.moves -= 100; //tunneling costs 100 moves
     u.posx = x;
     u.posy = y;
-    if( x < SEEX * int( MAPSIZE / 2 ) || y < SEEY * int( MAPSIZE / 2 ) ||
-        x >= SEEX * ( 1 + int( MAPSIZE / 2 ) ) || y >= SEEY * ( 1 + int( MAPSIZE / 2 ) ) ) {
-        update_map( x, y );
-    }
+    update_map();
     add_msg( _( "You quantum tunnel through the %d-tile wide barrier!" ), tunneldist );
     int vpart1 = -1;
     if( m.veh_at( u.posx, u.posy, vpart1 ) &&
@@ -13053,12 +13047,9 @@ void game::print_item_overview(int x, int y) /*const*/
 
 void game::plswim(int x, int y)
 {
-    if (x < SEEX * int(MAPSIZE / 2) || y < SEEY * int(MAPSIZE / 2) ||
-        x >= SEEX * (1 + int(MAPSIZE / 2)) || y >= SEEY * (1 + int(MAPSIZE / 2))) {
-        update_map(x, y);
-    }
     u.posx = x;
     u.posy = y;
+    update_map();
     if (!m.has_flag("SWIMMABLE", x, y)) {
         dbg(D_ERROR) << "game:plswim: Tried to swim in "
                      << m.tername(x, y).c_str() << "!";
@@ -13518,8 +13509,10 @@ void game::vertical_move(int movez, bool force)
 }
 
 
-void game::update_map(int &x, int &y)
+void game::update_map()
 {
+    int &x = u.posx;
+    int &y = u.posy;
     int shiftx = 0, shifty = 0;
     int olevx = 0, olevy = 0;
 
@@ -13538,6 +13531,9 @@ void game::update_map(int &x, int &y)
     while (y >= SEEY * (1 + int(MAPSIZE / 2))) {
         y -= SEEY;
         shifty++;
+    }
+    if( shiftx == 0 && shifty == 0 ) {
+        return;
     }
 
     m.shift(shiftx, shifty);
@@ -14281,7 +14277,7 @@ void game::teleport(player *p, bool add_teleglow)
         }
     }
     if (is_u) {
-        update_map(u.posx, u.posy);
+        update_map();
     }
 }
 

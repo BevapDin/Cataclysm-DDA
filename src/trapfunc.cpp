@@ -173,7 +173,7 @@ void trapfunc::tripwire(Creature *c, int x, int y)
                 n->hurtall(rng(1, 4));
             }
             if (c == &g->u) {
-                g->update_map(g->u.posx, g->u.posy);
+                g->update_map();
             }
         }
     }
@@ -777,7 +777,7 @@ void trapfunc::sinkhole(Creature *c, int /*x*/, int /*y*/)
                     g->m.ter_set(g->u.posx, g->u.posy, t_hole);
                     g->u.posx = safe[index].x;
                     g->u.posy = safe[index].y;
-                    g->update_map(g->u.posx, g->u.posy);
+                    g->update_map();
                 }
             } else {
                 add_msg(m_bad, _("You're not strong enough to pull yourself out..."));
@@ -836,7 +836,7 @@ void trapfunc::sinkhole(Creature *c, int /*x*/, int /*y*/)
                         g->m.ter_set(g->u.posx, g->u.posy, t_hole);
                         g->u.posx = safe[index].x;
                         g->u.posy = safe[index].y;
-                        g->update_map(g->u.posx, g->u.posy);
+                        g->update_map();
                     }
                 }
             }
@@ -869,7 +869,7 @@ void trapfunc::sinkhole(Creature *c, int /*x*/, int /*y*/)
                     g->m.ter_set(g->u.posx, g->u.posy, t_hole);
                     g->u.posx = safe[index].x;
                     g->u.posy = safe[index].y;
-                    g->update_map(g->u.posx, g->u.posy);
+                    g->update_map();
                 }
             } else {
                 add_msg(m_bad, _("You're not strong enough to pull yourself out..."));

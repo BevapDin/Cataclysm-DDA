@@ -240,7 +240,7 @@ class game
         bool is_hostile_nearby();
         bool is_hostile_very_close();
         void refresh_all();
-        void update_map(int &x, int &y);  // Called by plmove when the map updates
+        void update_map();  // Called by plmove when the map updates
         void update_overmap_seen(); // Update which overmap tiles we can see
         // Position of the player in overmap terrain coordinates, relative
         // to the current overmap (@ref cur_om).
@@ -291,7 +291,7 @@ class game
          * Called right after the movement of the player.
          * Used for (among others) boarding the vehicle.
          */
-        void post_player_movement(int x, int y);
+        void post_player_movement();
         /**
          * Move the grabbed objected around as part of the movement to (x,y)
          * @return true if the movement should continue, false if the movement

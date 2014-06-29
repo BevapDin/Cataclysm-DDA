@@ -580,14 +580,11 @@ void iexamine::chainfence( player *p, map *m, int examx, int examy )
     if( p->in_vehicle ) {
         m->unboard_vehicle( p->posx, p->posy );
     }
-    if( examx < SEEX * int( MAPSIZE / 2 ) || examy < SEEY * int( MAPSIZE / 2 ) ||
-        examx >= SEEX * ( 1 + int( MAPSIZE / 2 ) ) || examy >= SEEY * ( 1 + int( MAPSIZE / 2 ) ) ) {
-        if( &g->u == p ) {
-            g->update_map( examx, examy );
-        }
-    }
     p->posx = examx;
     p->posy = examy;
+    if( &g->u == p ) {
+        g->update_map();
+    }
 }
 
 void iexamine::bars(player *p, map *m, int examx, int examy) {

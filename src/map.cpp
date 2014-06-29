@@ -222,11 +222,8 @@ void map::board_vehicle(int x, int y, player *p)
     p->posx = x;
     p->posy = y;
     p->in_vehicle = true;
-    if (p == &g->u &&
-        (x < SEEX * int(my_MAPSIZE / 2) || y < SEEY * int(my_MAPSIZE / 2) ||
-         x >= SEEX * (1 + int(my_MAPSIZE / 2)) ||
-         y >= SEEY * (1 + int(my_MAPSIZE / 2))   )) {
-        g->update_map(x, y);
+    if( p == &g->u ) {
+        g->update_map();
     }
 }
 
@@ -421,7 +418,7 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
    y += SEEY;
   else if (upd_y >= SEEY * (1+int(my_MAPSIZE / 2)))
    y -= SEEY;
-  g->update_map(upd_x, upd_y);
+  g->update_map();
   was_update = true;
  }
 
@@ -4224,12 +4221,6 @@ void map::shift(const int sx, const int sy)
     const int absy = get_abs_sub().y;
     const int wz = get_abs_sub().z;
     set_abs_sub( absx + sx, absy + sy, wz );
-
-// if player is in vehicle, (s)he must be shifted with vehicle too
-    if( g->u.in_vehicle ) {
-        g->u.posx -= sx * SEEX;
-        g->u.posy -= sy * SEEY;
-    }
 
     // Forget about traps in submaps that are being unloaded.
     if (sx != 0) {

@@ -57,7 +57,7 @@ bool tutorial_game::init()
  g->u.posy = 4;
 
  // This shifts the view to center the players pos
- g->update_map(g->u.posx, g->u.posy);
+ g->update_map();
  return true;
 }
 
