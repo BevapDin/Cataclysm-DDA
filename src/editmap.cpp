@@ -206,8 +206,8 @@ bool editmap::eget_direction(int &x, int &y, const std::string &action) const
     x = 0;
     y = 0;
     if ( action == "CENTER" ) {
-        x = ( g->u.posx - ( target.x ) );
-        y = ( g->u.posy - ( target.y ) );
+        x = ( g->u.xpos() - ( target.x ) );
+        y = ( g->u.ypos() - ( target.y ) );
     } else if ( action == "LEFT_WIDE" ) {
         x = 0 - (tmaxx / 2);
     } else if ( action == "DOWN_WIDE" ) {
@@ -257,8 +257,8 @@ void editmap::uphelp (std::string txt1, std::string txt2, std::string title)
 
 point editmap::edit()
 {
-    target.x = g->u.posx + g->u.view_offset_x;
-    target.y = g->u.posy + g->u.view_offset_y;
+    target.x = g->u.xpos() + g->u.view_offset_x;
+    target.y = g->u.ypos() + g->u.view_offset_y;
     input_context ctxt("EDITMAP");
     ctxt.register_directions();
     ctxt.register_action("LEFT_WIDE");
@@ -527,7 +527,7 @@ void editmap::update_view(bool update_info)
                      );
             off++; // 3
         }
-        mvwprintw(w_info, off, 2, _("dist: %d u_see: %d light: %d v_in: %d scent: %d"), rl_dist(g->u.posx, g->u.posy, target.x, target.y), g->u_see(target.x, target.y), g->m.light_at(target.x, target.y), veh_in, g->scent(target.x, target.y) );
+        mvwprintw(w_info, off, 2, _("dist: %d u_see: %d light: %d v_in: %d scent: %d"), rl_dist(g->u.xpos(), g->u.ypos(), target.x, target.y), g->u_see(target.x, target.y), g->m.light_at(target.x, target.y), veh_in, g->scent(target.x, target.y) );
         off++; // 3-4
 
         std::string extras = "";
@@ -1671,7 +1671,7 @@ int editmap::mapgen_preview( real_coords &tc, uimenu &gmenu )
 
                             int spawns_todo = 0;
                             for (int i = 0; i < srcsm->spawns.size(); i++) { // copy spawns
-                                int mx = srcsm->spawns[i].posx, my = srcsm->spawns[i].posy;
+                                int mx = srcsm->spawns[i].posy, my = srcsm->spawns[i].posy;
                                 s += string_format("  copying monster %d/%d pos %d,%d\n", i,srcsm->spawns.size(), mx, my );
                                 destsm->spawns.push_back( srcsm->spawns[i] );
                                 spawns_todo++;

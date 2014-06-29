@@ -979,7 +979,7 @@ void player::perform_technique(ma_technique technique, Creature &t, int &bash_da
 
     /* TODO: put all this in when disease/effects merging is done
     if (technique.disarms) {
-        g->m.add_item_or_charges(p->posx, p->posy, p->remove_weapon());
+        g->m.add_item_or_charges(p->xpos(), p->ypos(), p->remove_weapon());
         if (you) {
             g->add_msg_if_npc(this, _("<npcname> disarms you!"));
         } else {
@@ -1957,7 +1957,7 @@ void player_hit_message(player* attacker, std::string message,
 
         SCT.add(t.xpos(),
                 t.ypos(),
-                direction_from(0, 0, t.xpos() - attacker->posx, t.ypos() - attacker->posy),
+                direction_from(0, 0, t.xpos() - attacker->xpos(), t.ypos() - attacker->ypos()),
                 health_bar, m_good,
                 sSCTmod, gmtSCTcolor);
 
@@ -1966,7 +1966,7 @@ void player_hit_message(player* attacker, std::string message,
 
             SCT.add(t.xpos(),
                     t.ypos(),
-                    direction_from(0, 0, t.xpos() - attacker->posx, t.ypos() - attacker->posy),
+                    direction_from(0, 0, t.xpos() - attacker->xpos(), t.ypos() - attacker->ypos()),
                     health_bar, m_good,
                     "hp", m_neutral,
                     "hp");

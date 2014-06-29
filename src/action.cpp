@@ -477,10 +477,10 @@ bool can_interact_at(action_id action, int x, int y)
 {
     switch(action) {
     case ACTION_OPEN:
-        return g->m.open_door(x, y, !g->m.is_outside(g->u.posx, g->u.posy), true);
+        return g->m.open_door(x, y, !g->m.is_outside(g->u.xpos(), g->u.ypos()), true);
         break;
     case ACTION_CLOSE:
-        return g->m.close_door(x, y, !g->m.is_outside(g->u.posx, g->u.posy), true);
+        return g->m.close_door(x, y, !g->m.is_outside(g->u.xpos(), g->u.ypos()), true);
         break;
     case ACTION_BUTCHER:
         return can_butcher_at(x, y);
@@ -521,7 +521,7 @@ action_id handle_action_menu()
         int veh_part = 0;
         vehicle *veh = NULL;
 
-        veh = g->m.veh_at(g->u.posx, g->u.posy, veh_part);
+        veh = g->m.veh_at(g->u.xpos(), g->u.ypos(), veh_part);
         if (veh) {
             // Make it 300 to prioritize it before examining the vehicle.
             action_weightings[ACTION_CONTROL_VEHICLE] = 300;
@@ -769,8 +769,8 @@ bool choose_adjacent(std::string message, int &x, int &y)
     if (!choose_direction(message, x, y)) {
         return false;
     }
-    x += g->u.posx;
-    y += g->u.posy;
+    x += g->u.xpos();
+    y += g->u.ypos();
     return true;
 }
 

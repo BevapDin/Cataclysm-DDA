@@ -280,8 +280,8 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
  // the creature base class uses xpos/ypos to prevent conflict with
  // player.xpos and player.ypos which are public ints that are literally used
  // in every single file.
- int xpos() { return _posx; }
- int ypos() { return _posy; }
+ int xpos() const { return _posx; }
+ int ypos() const { return _posy; }
 
  short ignoring;
 

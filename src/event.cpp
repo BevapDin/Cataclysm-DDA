@@ -26,8 +26,7 @@ void event::actualize()
     } else
      tmp.randomize();
     tmp.attitude = NPCATT_DEFEND;
-    tmp.posx = g->u.posx - SEEX * 2 + rng(-5, 5);
-    tmp.posy = g->u.posy - SEEY * 2 + rng(-5, 5);
+    tmp.setpos( g->u.xpos() - SEEX * 2 + rng( -5, 5 ), g->u.ypos() - SEEY * 2 + rng( -5, 5 ) );
     g->active_npc.push_back(&tmp);
    }
   } break;
@@ -63,7 +62,7 @@ void event::actualize()
      mony = rng(0, SEEY * MAPSIZE);
      tries++;
     } while (tries < 10 && !g->is_empty(monx, mony) &&
-             rl_dist(g->u.posx, g->u.posx, monx, mony) <= 2);
+             rl_dist(g->u.xpos(), g->u.xpos(), monx, mony) <= 2);
     if (tries < 10) {
      wyrm.spawn(monx, mony);
      g->add_zombie(wyrm);
@@ -187,8 +186,8 @@ void event::actualize()
    if (!flooded)
     return; // We finished flooding the entire chamber!
 // Check if we should print a message
-   if (flood_buf[g->u.posx][g->u.posy] != g->m.ter(g->u.posx, g->u.posy)) {
-    if (flood_buf[g->u.posx][g->u.posy] == t_water_sh) {
+   if (flood_buf[g->u.xpos()][g->u.ypos()] != g->m.ter(g->u.xpos(), g->u.ypos())) {
+    if (flood_buf[g->u.xpos()][g->u.ypos()] == t_water_sh) {
      add_msg(m_warning, _("Water quickly floods up to your knees."));
      g->u.add_memorial_log(pgettext("memorial_male", "Water level reached knees."),
                            pgettext("memorial_female", "Water level reached knees."));
@@ -196,7 +195,7 @@ void event::actualize()
      add_msg(m_warning, _("Water fills nearly to the ceiling!"));
      g->u.add_memorial_log(pgettext("memorial_male", "Water level reached the ceiling."),
                            pgettext("memorial_female", "Water level reached the ceiling."));
-     g->plswim(g->u.posx, g->u.posy);
+     g->plswim(g->u.xpos(), g->u.ypos());
     }
    }
 // flood_buf is filled with correct tiles; now copy them back to g->m
@@ -218,11 +217,11 @@ void event::actualize()
    monster spawned( GetMType(montype) );
    int tries = 0, x, y;
    do {
-    x = rng(g->u.posx - 5, g->u.posx + 5);
-    y = rng(g->u.posy - 5, g->u.posy + 5);
+    x = rng(g->u.xpos() - 5, g->u.xpos() + 5);
+    y = rng(g->u.ypos() - 5, g->u.ypos() + 5);
     tries++;
    } while (tries < 20 && !g->is_empty(x, y) &&
-            rl_dist(x, y, g->u.posx, g->u.posy) <= 2);
+            rl_dist(x, y, g->u.xpos(), g->u.ypos()) <= 2);
    if (tries < 20) {
     spawned.spawn(x, y);
     g->add_zombie(spawned);

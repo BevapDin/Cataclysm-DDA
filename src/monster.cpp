@@ -388,10 +388,10 @@ bool monster::sees_player(int & tc, player * p) const {
     if ( p == NULL ) {
         p = &g->u;
     }
-    const int range = vision_range(p->posx, p->posy);
+    const int range = vision_range(p->xpos(), p->ypos());
     // * p->visibility() / 100;
     return (
-        g->m.sees( _posx, _posy, p->posx, p->posy, range, tc ) &&
+        g->m.sees( _posx, _posy, p->xpos(), p->ypos(), range, tc ) &&
         p->is_invisible() == false
     );
 }
@@ -443,7 +443,7 @@ void monster::debug(player &u)
  debugmsg("monster::debug %s Moves %d Speed %d HP %d",name().c_str(), moves, speed, hp);
  for (int i = 0; i < plans.size(); i++) {
         const int digit = '0' + (i % 10);
-        mvaddch(plans[i].y - SEEY + u.posy, plans[i].x - SEEX + u.posx, digit);
+        mvaddch(plans[i].y - SEEY + u.ypos(), plans[i].x - SEEX + u.xpos(), digit);
  }
  getch();
 }
@@ -473,7 +473,7 @@ bool monster::is_fleeing(player &u)
   return true;
  monster_attitude att = attitude(&u);
  return (att == MATT_FLEE ||
-         (att == MATT_FOLLOW && rl_dist(_posx, _posy, u.posx, u.posy) <= 4));
+         (att == MATT_FOLLOW && rl_dist(_posx, _posy, u.xpos(), u.ypos()) <= 4));
 }
 
 monster_attitude monster::attitude(player *u)
@@ -577,10 +577,10 @@ int monster::trigger_sum(std::set<monster_trigger> *triggers)
        break;
 
       case MTRIG_PLAYER_CLOSE:
-       if (rl_dist(_posx, _posy, g->u.posx, g->u.posy) <= 5)
+       if (rl_dist(_posx, _posy, g->u.xpos(), g->u.ypos()) <= 5)
         ret += 5;
        for (int i = 0; i < g->active_npc.size(); i++) {
-        if (rl_dist(_posx, _posy, g->active_npc[i]->posx, g->active_npc[i]->posy) <= 5)
+        if (rl_dist(_posx, _posy, g->active_npc[i]->xpos(), g->active_npc[i]->ypos()) <= 5)
          ret += 5;
        }
        break;
@@ -1159,7 +1159,7 @@ void monster::die()
   int light = g->light_level();
   for (int i = 0; i < g->num_zombies(); i++) {
    int t = 0;
-   if (g->m.sees(g->zombie(i).posx(), g->zombie(i).posy(), _posx, _posy, light, t)) {
+   if (g->m.sees(g->zombie(i).xpos(), g->zombie(i).ypos(), _posx, _posy, light, t)) {
     g->zombie(i).morale += morale_adjust;
     g->zombie(i).anger += anger_adjust;
    }

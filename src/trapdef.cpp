@@ -77,7 +77,7 @@ bool trap::detect_trap(const player &p, int x, int y) const
             // ...malus if we are tired...
             (p.has_disease("lack_sleep") ? rng(1, 5) : 0) -
             // ...malus farther we are from trap...
-            rl_dist(p.posx, p.posy, x, y) > 
+            rl_dist(p.xpos(), p.ypos(), x, y) > 
             // ...must all be greater than the trap visibility.
             visibility;
 }

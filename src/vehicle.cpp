@@ -96,7 +96,7 @@ vehicle::~vehicle()
 bool vehicle::player_in_control (player *p)
 {
     int veh_part;
-    vehicle *veh = g->m.veh_at (p->posx, p->posy, veh_part);
+    vehicle *veh = g->m.veh_at (p->xpos(), p->ypos(), veh_part);
     if (veh == NULL || veh != this)
         return false;
     return part_with_feature(veh_part, VPFLAG_CONTROLS, false) >= 0 && p->controlling_vehicle;
@@ -427,7 +427,7 @@ void vehicle::use_controls()
 
     // Let go without turning the engine off.
     if (g->u.controlling_vehicle &&
-        g->m.veh_at(g->u.posx, g->u.posy, vpart) == this) {
+        g->m.veh_at(g->u.xpos(), g->u.ypos(), vpart) == this) {
         options_choice.push_back(release_control);
         options_message.push_back(uimenu_entry(_("Let go of controls"), 'l'));
     }
@@ -740,7 +740,7 @@ void vehicle::use_controls()
             if( part_flag( p, "CARGO" ) ) {
                 for( std::vector<item>::iterator it = parts[p].items.begin();
                      it != parts[p].items.end(); ++it ) {
-                    g->m.add_item_or_charges( g->u.posx, g->u.posy, *it );
+                    g->m.add_item_or_charges( g->u.xpos(), g->u.ypos(), *it );
                 }
                 parts[p].items.clear();
             }
@@ -776,7 +776,7 @@ void vehicle::use_controls()
             bicycle.item_vars["description"] = string_format(_("A folded %s."), name.c_str());
         }
 
-        g->m.add_item_or_charges(g->u.posx, g->u.posy, bicycle);
+        g->m.add_item_or_charges(g->u.xpos(), g->u.ypos(), bicycle);
         g->m.destroy_vehicle(this);
 
         g->u.moves -= 500;
@@ -874,7 +874,7 @@ void vehicle::play_music()
 
         }
         g->sound(radio_x,radio_y,15,sound);
-        if ((g->u.posx < radio_x + 15 && g->u.posy < radio_y + 15) && (g->u.posx > radio_x - 15 && g->u.posy > radio_y - 15)) {
+        if ((g->u.xpos() < radio_x + 15 && g->u.ypos() < radio_y + 15) && (g->u.xpos() > radio_x - 15 && g->u.ypos() > radio_y - 15)) {
             g->u.add_morale(MORALE_MUSIC,5,20,30,1);
         }
     }
@@ -2149,7 +2149,7 @@ int vehicle::total_power (bool fueled)
     int pwr = 0;
     int cnt = 0;
     int part_under_player;
-    g->m.veh_at(g->u.posx, g->u.posy, part_under_player);
+    g->m.veh_at(g->u.xpos(), g->u.ypos(), part_under_player);
     bool player_controlling = player_in_control(&(g->u));
     for (int p = 0; p < parts.size(); p++) {
         if (part_flag(p, VPFLAG_ENGINE) &&
@@ -3000,7 +3000,7 @@ veh_collision vehicle::part_collision (int part, int x, int y, bool just_detect)
     bool pl_ctrl = player_in_control (&g->u);
     int mondex = g->mon_at(x, y);
     int npcind = g->npc_at(x, y);
-    bool u_here = x == g->u.posx && y == g->u.posy && !g->u.in_vehicle;
+    bool u_here = x == g->u.xpos() && y == g->u.ypos() && !g->u.in_vehicle;
     monster *z = mondex >= 0? &g->zombie(mondex) : NULL;
     player *ph = (npcind >= 0? g->active_npc[npcind] : (u_here? &g->u : 0));
 
@@ -4102,8 +4102,7 @@ bool vehicle::fire_turret_internal (int p, it_gun &gun, it_ammo &ammo, long char
     tmp.skillLevel(gun.skill_used).level(8);
     tmp.skillLevel("gun").level(4);
     tmp.recoil = abs(velocity) / 100 / 4;
-    tmp.posx = x;
-    tmp.posy = y;
+    tmp.setpos( x, y );
     tmp.str_cur = 16;
     tmp.dex_cur = 8;
     tmp.per_cur = 12;

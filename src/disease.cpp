@@ -942,7 +942,7 @@ void dis_effect(player &p, disease &dis)
                                 dis.duration += 100;
                             }
                         } else {
-                            if(!g->sound(p.posx, p.posy, 12, _("beep-beep-beep!"))) {
+                            if(!g->sound(p.xpos(), p.ypos(), 12, _("beep-beep-beep!"))) {
                                 // 10 minute automatic snooze
                                 dis.duration += 100;
                             } else {
@@ -1060,7 +1060,7 @@ void dis_effect(player &p, disease &dis)
                 p.hurt(dis.bp, dis.side == -1 ? 0 : dis.side, 1);
                 p.mod_per_bonus(-1);
                 p.mod_str_bonus(-1);
-                g->m.add_field(p.posx, p.posy, p.playerBloodType(), 1);
+                g->m.add_field(p.xpos(), p.ypos(), p.playerBloodType(), 1);
             }
             break;
 
@@ -1231,7 +1231,7 @@ void dis_effect(player &p, disease &dis)
                      add_msg(m_warning, _("You start scratching your %s!"),
                                               body_part_name(dis.bp, dis.side).c_str());
                      g->cancel_activity();
-                } else if (g->u_see(p.posx, p.posy)) {
+                } else if (g->u_see(p.xpos(), p.ypos())) {
                     add_msg(_("%s starts scratching their %s!"), p.name.c_str(),
                                        body_part_name(dis.bp, dis.side).c_str());
                 }
@@ -1387,13 +1387,13 @@ void dis_effect(player &p, disease &dis)
                     int x, y;
                     int tries = 0;
                     do {
-                        x = p.posx + rng(-4, 4);
-                        y = p.posy + rng(-4, 4);
+                        x = p.xpos() + rng(-4, 4);
+                        y = p.ypos() + rng(-4, 4);
                         tries++;
                         if (tries >= 10) {
                             break;
                         }
-                    } while (((x == p.posx && y == p.posy) || g->mon_at(x, y) != -1));
+                    } while (((x == p.xpos() && y == p.ypos()) || g->mon_at(x, y) != -1));
                     if (tries < 10) {
                         if (g->m.move_cost(x, y) == 0) {
                             g->m.ter_set(x, y, t_rubble);
@@ -1454,10 +1454,10 @@ void dis_effect(player &p, disease &dis)
                 int x, y;
                 int tries = 0;
                 do {
-                    x = p.posx + rng(-4, 4);
-                    y = p.posy + rng(-4, 4);
+                    x = p.xpos() + rng(-4, 4);
+                    y = p.ypos() + rng(-4, 4);
                     tries++;
-                } while (((x == p.posx && y == p.posy) || g->mon_at(x, y) != -1) && tries < 10);
+                } while (((x == p.xpos() && y == p.ypos()) || g->mon_at(x, y) != -1) && tries < 10);
                 if (tries < 10) {
                     if (g->m.move_cost(x, y) == 0) {
                         g->m.ter_set(x, y, t_rubble);
@@ -2572,8 +2572,8 @@ void manage_fungal_infection(player& p, disease& dis)
                 if (i == 0 && j == 0) {
                     continue;
                 }
-                sporex = p.posx + i;
-                sporey = p.posy + j;
+                sporex = p.xpos() + i;
+                sporey = p.ypos() + j;
                 if (g->m.move_cost(sporex, sporey) > 0) {
                     const int zid = g->mon_at(sporex, sporey);
                     if (zid >= 0) {  // Spores hit a monster
@@ -2728,7 +2728,7 @@ void manage_sleep(player& p, disease& dis)
     }
     
     if (int(calendar::turn) % 100 == 0 && p.has_trait("CHLOROMORPH") &&
-    g->is_in_sunlight(g->u.posx, g->u.posy) ) {
+    g->is_in_sunlight(g->u.xpos(), g->u.ypos()) ) {
         // Hunger and thirst fall before your Chloromorphic physiology!
         if (p.hunger >= -30) {
             p.hunger -= 5;
@@ -3029,9 +3029,9 @@ static void handle_cough(player &p, int, int loudness, bool harmful)
 {
     if (!p.is_npc()) {
         add_msg(m_bad, _("You cough heavily."));
-        g->sound(p.posx, p.posy, loudness, "");
+        g->sound(p.xpos(), p.ypos(), loudness, "");
     } else {
-        g->sound(p.posx, p.posy, loudness, _("a hacking cough."));
+        g->sound(p.xpos(), p.ypos(), loudness, _("a hacking cough."));
     }
     p.moves -= 80;
     if (harmful && !one_in(4)) {
@@ -3098,7 +3098,7 @@ static void handle_deliriant(player& p, disease& dis)
             int loudness = 20 + p.str_cur - p.int_cur;
             loudness = (loudness > 5 ? loudness : 5);
             loudness = (loudness < 30 ? loudness : 30);
-            g->sound(p.posx, p.posy, loudness, _(npcText.c_str()));
+            g->sound(p.xpos(), p.ypos(), loudness, _(npcText.c_str()));
         }
     } else if (dis.duration == peakTime) {
         // Visuals start
@@ -3196,8 +3196,8 @@ static void handle_insect_parasites(player& p, disease& dis)
         p.add_msg_player_or_npc( m_bad, _("Your flesh crawls; insects tear through the flesh and begin to emerge!"),
             _("Insects begin to emerge from <npcname>'s skin!") );
         monster grub(GetMType("mon_dermatik_larva"));
-        for (int i = p.posx - 1; i <= p.posx + 1; i++) {
-            for (int j = p.posy - 1; j <= p.posy + 1; j++) {
+        for (int i = p.xpos() - 1; i <= p.xpos() + 1; i++) {
+            for (int j = p.ypos() - 1; j <= p.ypos() + 1; j++) {
                 if (num_insects == 0) {
                     break;
                 } else if (i == 0 && j == 0) {

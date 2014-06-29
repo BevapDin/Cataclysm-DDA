@@ -145,12 +145,12 @@ double Creature::projectile_attack(const projectile &proj, int sourcex, int sour
         for (unsigned long int i = 0; i < g->num_zombies(); i++) {
             monster &z = g->zombie(i);
             // search for monsters in radius 4 around impact site
-            if( rl_dist( z.posx(), z.posy(), tx, ty ) <= 4 &&
-                g->m.sees( z.posx(), z.posy(), tx, ty, -1, tart ) ) {
+            if( rl_dist( z.xpos(), z.ypos(), tx, ty ) <= 4 &&
+                g->m.sees( z.xpos(), z.ypos(), tx, ty, -1, tart ) ) {
                 // don't hit targets that have already been hit
                 if (!z.has_effect("bounced") && !z.dead) {
                     add_msg(_("The attack bounced to %s!"), z.name().c_str());
-                    projectile_attack(proj, tx, ty, z.posx(), z.posy(), shot_dispersion);
+                    projectile_attack(proj, tx, ty, z.xpos(), z.ypos(), shot_dispersion);
                     break;
                 }
             }
@@ -399,7 +399,7 @@ void player::fire_gun(int tarx, int tary, bool burst)
                 monster &z = g->zombie(i);
                 int dummy;
                 // search for monsters in radius
-                if( rl_dist(z.posx(), z.posy(), tarx, tary) <=
+                if( rl_dist(z.xpos(), z.ypos(), tarx, tary) <=
                     std::min(2 + skillLevel("gun"), weaponrange) &&
                     rl_dist(xpos(), ypos(), z.xpos(), z.ypos()) <= weaponrange && sees(&z, dummy) ) {
                     if (!z.is_dead_state()) {
@@ -560,7 +560,7 @@ void game::throw_item(player &p, int tarx, int tary, item &thrown,
                       std::vector<point> &trajectory)
 {
     int deviation = 0;
-    int trange = 1.5 * rl_dist(p.posx, p.posy, tarx, tary);
+    int trange = 1.5 * rl_dist(p.xpos(), p.ypos(), tarx, tary);
     std::set<std::string> no_effects;
 
     // Throwing attempts below "Basic Competency" level are extra-bad
@@ -607,10 +607,10 @@ void game::throw_item(player &p, int tarx, int tary, item &thrown,
 
         tarx += rng(0 - int(sqrt(double(missed_by))), int(sqrt(double(missed_by))));
         tary += rng(0 - int(sqrt(double(missed_by))), int(sqrt(double(missed_by))));
-        if (m.sees(p.posx, p.posy, tarx, tary, -1, tart)) {
-            trajectory = line_to(p.posx, p.posy, tarx, tary, tart);
+        if (m.sees(p.xpos(), p.ypos(), tarx, tary, -1, tart)) {
+            trajectory = line_to(p.xpos(), p.ypos(), tarx, tary, tart);
         } else {
-            trajectory = line_to(p.posx, p.posy, tarx, tary, 0);
+            trajectory = line_to(p.xpos(), p.ypos(), tarx, tary, 0);
         }
         missed = true;
         p.add_msg_if_player(_("You miss!"));
@@ -703,7 +703,7 @@ void game::throw_item(player &p, int tarx, int tary, item &thrown,
 
                 SCT.add(z.xpos(),
                         z.ypos(),
-                        direction_from(0, 0, z.xpos() - p.posx, z.ypos() - p.posy),
+                        direction_from(0, 0, z.xpos() - p.xpos(), z.ypos() - p.ypos()),
                         health_bar.c_str(), m_good,
                         message, gmtSCTcolor);
 
@@ -724,8 +724,8 @@ void game::throw_item(player &p, int tarx, int tary, item &thrown,
                 tx = trajectory[i - 1].x;
                 ty = trajectory[i - 1].y;
             } else {
-                tx = u.posx;
-                ty = u.posy;
+                tx = u.xpos();
+                ty = u.ypos();
             }
             i = trajectory.size();
         }
@@ -768,7 +768,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
 {
     std::vector<point> ret;
     int tarx, tary, junk, tart;
-    int range = (hix - u.posx);
+    int range = (hix - u.xpos());
     // First, decide on a target among the monsters, if there are any in range
     if (!t.empty()) {
         // Check for previous target
@@ -778,7 +778,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
             double closest = -1;
             double dist;
             for (int i = 0; i < t.size(); i++) {
-                dist = rl_dist(t[i]->xpos(), t[i]->ypos(), u.posx, u.posy);
+                dist = rl_dist(t[i]->xpos(), t[i]->ypos(), u.xpos(), u.ypos());
                 if( (closest < 0 || dist < closest) && u.sees( t[i] ) ) {
                     closest = dist;
                     target = i;
@@ -852,18 +852,18 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
     }
 
     do {
-        if (m.sees(u.posx, u.posy, x, y, -1, tart)) {
-            ret = line_to(u.posx, u.posy, x, y, tart);
+        if (m.sees(u.xpos(), u.ypos(), x, y, -1, tart)) {
+            ret = line_to(u.xpos(), u.ypos(), x, y, tart);
         } else {
-            ret = line_to(u.posx, u.posy, x, y, 0);
+            ret = line_to(u.xpos(), u.ypos(), x, y, 0);
         }
 
-        if(trigdist && trig_dist(u.posx, u.posy, x, y) > range) {
+        if(trigdist && trig_dist(u.xpos(), u.ypos(), x, y) > range) {
             bool cont = true;
             int cx = x;
             int cy = y;
             for (int i = 0; i < ret.size() && cont; i++) {
-                if(trig_dist(u.posx, u.posy, ret[i].x, ret[i].y) > range) {
+                if(trig_dist(u.xpos(), u.ypos(), ret[i].x, ret[i].y) > range) {
                     ret.resize(i);
                     cont = false;
                 } else {
@@ -878,7 +878,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
         if (snap_to_target) {
             center = point(x, y);
         } else {
-            center = point(u.posx + u.view_offset_x, u.posy + u.view_offset_y);
+            center = point(u.xpos() + u.view_offset_x, u.ypos() + u.view_offset_y);
         }
         // Clear the target window.
         for (int i = 1; i < getmaxy(w_target) - 5; i++) {
@@ -897,14 +897,14 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
         }
         // Draw the NPCs
         for (int i = 0; i < active_npc.size(); i++) {
-            if (u_see(active_npc[i]->posx, active_npc[i]->posy)) {
+            if (u_see(active_npc[i]->xpos(), active_npc[i]->ypos())) {
                 active_npc[i]->draw(w_terrain, center.x, center.y, false);
             }
         }
-        if (x != u.posx || y != u.posy) {
+        if (x != u.xpos() || y != u.ypos()) {
 
             // Draw the player
-            int atx = POSX + u.posx - center.x, aty = POSY + u.posy - center.y;
+            int atx = POSX + u.xpos() - center.x, aty = POSY + u.ypos() - center.y;
             if (is_valid_in_w_terrain(atx, aty)) {
                 mvwputch(w_terrain, aty, atx, u.color(), '@');
             }
@@ -938,7 +938,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
             } else if (relevent == &u.weapon && relevent->is_gun()) {
                 // firing a gun
                 mvwprintw(w_target, 1, 1, _("Range: %d/%d, %s"),
-                          rl_dist(u.posx, u.posy, x, y), range, enemiesmsg.c_str());
+                          rl_dist(u.xpos(), u.ypos(), x, y), range, enemiesmsg.c_str());
                 // get the current weapon mode or mods
                 std::string mode = "";
                 if (u.weapon.mode == "MODE_BURST") {
@@ -956,7 +956,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
             } else {
                 // throwing something
                 mvwprintw(w_target, 1, 1, _("Range: %d/%d, %s"),
-                          rl_dist(u.posx, u.posy, x, y), range, enemiesmsg.c_str());
+                          rl_dist(u.xpos(), u.ypos(), x, y), range, enemiesmsg.c_str());
             }
 
             const int zid = mon_at(x, y);
@@ -1004,8 +1004,8 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
         if (action == "SELECT" && ctxt.get_coordinates(g->w_terrain, tarx, tary)) {
             if (!OPTIONS["USE_TILES"] && snap_to_target) {
                 // Snap to target doesn't currently work with tiles.
-                tarx += x - u.posx;
-                tary += y - u.posy;
+                tarx += x - u.xpos();
+                tary += y - u.ypos();
             }
             tarx -= x;
             tary -= y;
@@ -1026,7 +1026,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
                 zombie(mondex).draw(w_terrain, center.x, center.y, false);
             } else if (npcdex != -1) {
                 active_npc[npcdex]->draw(w_terrain, center.x, center.y, false);
-            } else if (m.sees(u.posx, u.posy, x, y, -1, junk)) {
+            } else if (m.sees(u.xpos(), u.ypos(), x, y, -1, junk)) {
                 m.drawsq(w_terrain, u, x, y, false, true, center.x, center.y);
             } else {
                 mvwputch(w_terrain, POSY, POSX, c_black, 'X');
@@ -1063,13 +1063,13 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
                     target = i;
                 }
             }
-            if (u.posx == x && u.posy == y) {
+            if (u.xpos() == x && u.ypos() == y) {
                 ret.clear();
             }
             break;
         } else if (action == "CENTER") {
-            x = u.posx;
-            y = u.posy;
+            x = u.xpos();
+            y = u.ypos();
             ret.clear();
         } else if (action == "TOGGLE_SNAP_TO_TARGET") {
             snap_to_target = !snap_to_target;
@@ -1148,7 +1148,7 @@ void make_gun_sound_effect(player &p, bool burst, item *weapon)
     // noise() doesn't suport gunmods, but it does return the right value
     int noise = p.weapon.noise();
     if(weapon->is_gunmod()) { //TODO make this produce the correct sound
-        g->sound(p.posx, p.posy, noise, "Boom!");
+        g->sound(p.xpos(), p.ypos(), noise, "Boom!");
         return;
     }
 
@@ -1205,18 +1205,18 @@ void make_gun_sound_effect(player &p, bool burst, item *weapon)
     }
 
     if (weapon->curammo->type == "40mm") {
-        g->sound(p.posx, p.posy, 8, _("Thunk!"));
+        g->sound(p.xpos(), p.ypos(), 8, _("Thunk!"));
     } else if (weapon->type->id == "hk_g80") {
-        g->sound(p.posx, p.posy, 24, _("tz-CRACKck!"));
+        g->sound(p.xpos(), p.ypos(), 24, _("tz-CRACKck!"));
     } else if (weapon->curammo->type == "gasoline" || weapon->curammo->type == "66mm" ||
                weapon->curammo->type == "84x246mm" || weapon->curammo->type == "m235") {
-        g->sound(p.posx, p.posy, 4, _("Fwoosh!"));
+        g->sound(p.xpos(), p.ypos(), 4, _("Fwoosh!"));
     } else if (weapon->curammo->type != "bolt" &&
                weapon->curammo->type != "arrow" &&
                weapon->curammo->type != "pebble" &&
                weapon->curammo->type != "fishspear" &&
                weapon->curammo->type != "dart") {
-        g->sound(p.posx, p.posy, noise, gunsound);
+        g->sound(p.xpos(), p.ypos(), noise, gunsound);
     }
 }
 

@@ -77,7 +77,7 @@ void mdeath::boomer(monster *z) {
             }
         }
     }
-    if (rl_dist(z->posx(), z->posy(), g->u.posx, g->u.posy) == 1) {
+    if (rl_dist(z->posx(), z->posy(), g->u.xpos(), g->u.ypos()) == 1) {
         g->u.infect("boomered", bp_eyes, 2, 24, false, 1, 1);
     }
 }
@@ -87,7 +87,7 @@ void mdeath::kill_vines(monster *z) {
     std::vector<int> hubs;
     for (int i = 0; i < g->num_zombies(); i++) {
         bool isHub = g->zombie(i).type->id == "mon_creeper_hub";
-        if (isHub && (g->zombie(i).posx() != z->posx() || g->zombie(i).posy() != z->posy())) {
+        if (isHub && (g->zombie(i).xpos() != z->posx() || g->zombie(i).ypos() != z->posy())) {
             hubs.push_back(i);
         }
         if (g->zombie(i).type->id == "mon_creeper_vine") {
@@ -101,8 +101,8 @@ void mdeath::kill_vines(monster *z) {
         int dist = rl_dist(vine->posx(), vine->posy(), z->posx(), z->posy());
         bool closer = false;
         for (int j = 0; j < hubs.size() && !closer; j++) {
-            curX = g->zombie(hubs[j]).posx();
-            curY = g->zombie(hubs[j]).posy();
+            curX = g->zombie(hubs[j]).xpos();
+            curY = g->zombie(hubs[j]).ypos();
             if (rl_dist(vine->posx(), vine->posy(), curX, curY) < dist) {
                 closer = true;
             }
@@ -178,7 +178,7 @@ void mdeath::fungus(monster *z) {
                     if (!g->zombie(mondex).make_fungus()) {
                         g->kill_mon(mondex, (z->friendly != 0));
                     }
-                } else if (g->u.posx == sporex && g->u.posy == sporey) {
+                } else if (g->u.xpos() == sporex && g->u.ypos() == sporey) {
                     // Spores hit the player
                         if (g->u.has_trait("TAIL_CATTLE") && one_in(20 - g->u.dex_cur - g->u.skillLevel("melee"))) {
                         add_msg(_("The spores land on you, but you quickly swat them off with your tail!"));
@@ -242,7 +242,7 @@ void mdeath::worm(monster *z) {
             wormx = z->posx() + i;
             wormy = z->posy() + j;
             if (g->m.has_flag("DIGGABLE", wormx, wormy) &&
-                    !(g->u.posx == wormx && g->u.posy == wormy)) {
+                    !(g->u.xpos() == wormx && g->u.ypos() == wormy)) {
                 wormspots.push_back(point(wormx, wormy));
             }
         }
@@ -282,7 +282,7 @@ void mdeath::guilt(monster *z) {
     if (g->u.has_trait("PSYCHOPATH") || g->u.has_trait("PRED3") || g->u.has_trait("PRED4") ) {
         return;
     }
-    if (rl_dist(z->posx(), z->posy(), g->u.posx, g->u.posy) > MAX_GUILT_DISTANCE) {
+    if (rl_dist(z->posx(), z->posy(), g->u.xpos(), g->u.ypos()) > MAX_GUILT_DISTANCE) {
         // Too far away, we can deal with it.
         return;
     }
@@ -362,7 +362,7 @@ void mdeath::blobsplit(monster *z) {
         for (int j = -1; j <= 1; j++) {
             bool moveOK = (g->m.move_cost(z->posx()+i, z->posy()+j) > 0);
             bool monOK = g->mon_at(z->posx()+i, z->posy()+j) == -1;
-            bool posOK = (g->u.posx != z->posx()+i || g->u.posy != z->posy() + j);
+            bool posOK = (g->u.xpos() != z->posx()+i || g->u.ypos() != z->posy() + j);
             if (moveOK && monOK && posOK) {
                 valid.push_back(point(z->posx()+i, z->posy()+j));
             }
@@ -447,7 +447,7 @@ void mdeath::ratking(monster *z) {
             ratx = z->posx() + i;
             raty = z->posy() + i;
             if (g->m.move_cost(ratx, raty) > 0 && g->mon_at(ratx, raty) == -1 &&
-                  !(g->u.posx == ratx && g->u.posy == raty)) {
+                  !(g->u.xpos() == ratx && g->u.ypos() == raty)) {
                 ratspots.push_back(point(ratx, raty));
             }
         }

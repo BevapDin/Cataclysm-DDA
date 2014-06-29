@@ -1004,7 +1004,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
                                 if (!valid.empty()) {
                                     point newp = valid[rng(0, valid.size() - 1)];
                                     add_item_or_charges(newp.x, newp.y, tmp);
-                                    if (g->u.posx == newp.x && g->u.posy == newp.y) {
+                                    if (g->u.xpos() == newp.x && g->u.ypos() == newp.y) {
                                         add_msg(m_bad, _("A %s hits you!"), tmp.tname().c_str());
                                         body_part hit = random_body_part();
                                         int side = random_side(hit);
@@ -1735,13 +1735,13 @@ void map::mon_in_field(int x, int y, monster *z)
                 int tries = 0;
                 int newposx, newposy;
                 do {
-                    newposx = rng(z->posx() - SEEX, z->posx() + SEEX);
-                    newposy = rng(z->posy() - SEEY, z->posy() + SEEY);
+                    newposx = rng(z->xpos() - SEEX, z->xpos() + SEEX);
+                    newposy = rng(z->ypos() - SEEY, z->ypos() + SEEY);
                     tries++;
                 } while (move_cost(newposx, newposy) == 0 && tries != 10);
 
                 if (tries == 10) {
-                    g->explode_mon(g->mon_at(z->posx(), z->posy()));
+                    g->explode_mon(g->mon_at(z->xpos(), z->ypos()));
                 } else {
                     int mon_hit = g->mon_at(newposx, newposy);
                     if (mon_hit != -1) {
@@ -1839,7 +1839,7 @@ void map::field_effect(int x, int y) //Applies effect of field immediately
     vehicle *veh = veh_at(x, y, veh_part);
     npc_inside = (veh && veh->is_inside(veh_part));
    }
-   if (g->u.posx == x && g->u.posy == y && !pc_inside) {            //If there's a PC at (x,y) and he's not in a covered vehicle...
+   if (g->u.xpos() == x && g->u.ypos() == y && !pc_inside) {            //If there's a PC at (x,y) and he's not in a covered vehicle...
     if (g->u.get_dodge() < rng(1, hit_chance) || one_in(g->u.get_dodge())) {
      int how_many_limbs_hit = rng(0, num_hp_parts);
      for ( int i = 0 ; i < how_many_limbs_hit ; i++ ) {

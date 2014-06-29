@@ -240,7 +240,8 @@ class game
         bool is_hostile_nearby();
         bool is_hostile_very_close();
         void refresh_all();
-        void update_map();  // Called by plmove when the map updates
+        // Called from player::setpos to shift the map.
+        void update_map(int &x, int &y);
         void update_overmap_seen(); // Update which overmap tiles we can see
         // Position of the player in overmap terrain coordinates, relative
         // to the current overmap (@ref cur_om).

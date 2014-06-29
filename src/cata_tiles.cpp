@@ -586,8 +586,8 @@ void cata_tiles::draw(int destx, int desty, int centerx, int centery, int width,
         }
     }
     // check to see if player is located at ter
-    else if (g->u.posx + g->u.view_offset_x != g->ter_view_x ||
-             g->u.posy + g->u.view_offset_y != g->ter_view_y) {
+    else if (g->u.xpos() + g->u.view_offset_x != g->ter_view_x ||
+             g->u.ypos() + g->u.view_offset_y != g->ter_view_y) {
         draw_from_id_string("cursor", C_NONE, empty_string, g->ter_view_x, g->ter_view_y, 0, 0);
     }
 
@@ -1093,7 +1093,7 @@ bool cata_tiles::draw_entity(int x, int y)
         }
     }
     // check for PC (least common, only ever 1)
-    if (!entity_here && g->u.posx == x && g->u.posy == y) {
+    if (!entity_here && g->u.xpos() == x && g->u.ypos() == y) {
         ent_name = g->u.male ? "player_male" : "player_female";
         entity_here = true;
     }
@@ -1383,12 +1383,12 @@ void cata_tiles::init_light()
 LIGHTING cata_tiles::light_at(int x, int y)
 {
     /** Logic */
-    const int dist = rl_dist(g->u.posx, g->u.posy, x, y);
+    const int dist = rl_dist(g->u.xpos(), g->u.ypos(), x, y);
 
     int real_max_sight_range = sightrange_light > sightrange_max ? sightrange_light : sightrange_max;
     int distance_to_look = DAYLIGHT_LEVEL;
 
-    bool can_see = g->m.pl_sees(g->u.posx, g->u.posy, x, y, distance_to_look);
+    bool can_see = g->m.pl_sees(g->u.xpos(), g->u.ypos(), x, y, distance_to_look);
     lit_level lit = g->m.light_at(x, y);
 
     if (lit != LL_BRIGHT && dist > real_max_sight_range) {

@@ -11,7 +11,7 @@
 void mdefense::zapback(monster *m, const projectile* proj)
 {
     int j;
-    if (rl_dist(m->posx(), m->posy(), g->u.posx, g->u.posy) > 1 ||
+    if (rl_dist(m->posx(), m->posy(), g->u.xpos(), g->u.ypos()) > 1 ||
         !g->sees_u(m->posx(), m->posy(), j))
         {
         return; // Out of range

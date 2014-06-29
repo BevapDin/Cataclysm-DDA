@@ -379,15 +379,15 @@ void advanced_inv_update_area( advanced_inv_area &area )
 {
     int i = area.id;
     const player &u = g->u;
-    area.x = g->u.posx + area.offx;
-    area.y = g->u.posy + area.offy;
+    area.x = g->u.xpos() + area.offx;
+    area.y = g->u.ypos() + area.offy;
     area.size = 0;
     area.veh = NULL;
     area.vstor = -1;
     area.desc = "";
     if( i > 0 && i < 10 ) {
         int vp = 0;
-        area.veh = g->m.veh_at( u.posx + area.offx, u.posy + area.offy, vp );
+        area.veh = g->m.veh_at( u.xpos() + area.offx, u.ypos() + area.offy, vp );
         if ( area.veh ) {
             area.vstor = area.veh->part_with_feature(vp, "CARGO", false);
         }
@@ -398,12 +398,12 @@ void advanced_inv_update_area( advanced_inv_area &area )
             area.max_size = MAX_ITEM_IN_VEHICLE_STORAGE;
             area.max_volume = area.veh->max_volume(area.vstor);
         } else {
-            area.canputitems = g->m.can_put_items(u.posx + area.offx, u.posy + area.offy);
-            area.size = g->m.i_at(u.posx + area.offx, u.posy + area.offy).size();
+            area.canputitems = g->m.can_put_items(u.xpos() + area.offx, u.ypos() + area.offy);
+            area.size = g->m.i_at(u.xpos() + area.offx, u.ypos() + area.offy).size();
             area.max_size = MAX_ITEM_IN_SQUARE;
-            area.max_volume = g->m.max_volume(u.posx + area.offx, u.posy + area.offy);
-            if (g->m.graffiti_at(u.posx + area.offx, u.posy + area.offy).contents) {
-                area.desc = g->m.graffiti_at(u.posx + area.offx, u.posy + area.offy).contents->c_str();
+            area.max_volume = g->m.max_volume(u.xpos() + area.offx, u.ypos() + area.offy);
+            if (g->m.graffiti_at(u.xpos() + area.offx, u.ypos() + area.offy).contents) {
+                area.desc = g->m.graffiti_at(u.xpos() + area.offx, u.ypos() + area.offy).contents->c_str();
             }
         }
     } else if ( i == 0 ) {
@@ -411,7 +411,7 @@ void advanced_inv_update_area( advanced_inv_area &area )
         area.canputitems = true;
     } else if (i == 11 ) {
         int vp = 0;
-        area.veh = g->m.veh_at( u.posx + u.grab_point.x, u.posy + u.grab_point.y, vp);
+        area.veh = g->m.veh_at( u.xpos() + u.grab_point.x, u.ypos() + u.grab_point.y, vp);
         if( area.veh ) {
             area.vstor = area.veh->part_with_feature(vp, "CARGO", false);
         }
@@ -475,8 +475,8 @@ void advanced_inventory::init(player *pp)
     panes[right].sortby = uistate.adv_inv_rightsort;
     panes[left].area = uistate.adv_inv_leftarea;
     panes[right].area = uistate.adv_inv_rightarea;
-    bool moved = ( uistate.adv_inv_last_coords.x != p->posx ||
-                   uistate.adv_inv_last_coords.y != p->posy );
+    bool moved = ( uistate.adv_inv_last_coords.x != p->xpos() ||
+                   uistate.adv_inv_last_coords.y != p->ypos() );
     if ( !moved || panes[left].area == isinventory ) {
         panes[left].index = uistate.adv_inv_leftindex;
         panes[left].page = uistate.adv_inv_leftpage;
@@ -815,8 +815,8 @@ bool advanced_inventory::move_all_items()
 
             int part = panes[dest].vstor;
             vehicle *veh = panes[dest].veh;
-            int d_x = u.posx + panes[dest].offx;
-            int d_y = u.posy + panes[dest].offy;
+            int d_x = u.xpos() + panes[dest].offx;
+            int d_y = u.ypos() + panes[dest].offy;
             // Ok, we're go to (try) and move everything from the player inventory.
             // First, we'll want to iterate backwards
             for (int ip = u.inv.size() - 1; ip >= 0; /* noop */ ) {
@@ -966,8 +966,8 @@ bool advanced_inventory::move_all_items()
     // Otherwise, we have a normal square to work with
     } else {
 
-        int p_x = u.posx + panes[src].offx;
-        int p_y = u.posy + panes[src].offy;
+        int p_x = u.xpos() + panes[src].offx;
+        int p_y = u.ypos() + panes[src].offy;
         int part = panes[src].vstor;
         vehicle *veh = panes[src].veh;
         // by default, we want to iterate the items at a location
@@ -1570,7 +1570,7 @@ void advanced_inventory::display(player *pp)
                         if (panes[src].vstor >= 0) {
                             panes[src].veh->remove_item (panes[src].vstor, it);
                         } else {
-                            m.i_rem(u.posx + panes[src].offx, u.posy + panes[src].offy, it);
+                            m.i_rem(u.xpos() + panes[src].offx, u.ypos() + panes[src].offy, it);
                         }
                     }
                 }
@@ -1812,8 +1812,8 @@ void advanced_inventory::display(player *pp)
         }
     }
 
-    uistate.adv_inv_last_coords.x = u.posx;
-    uistate.adv_inv_last_coords.y = u.posy;
+    uistate.adv_inv_last_coords.x = u.xpos();
+    uistate.adv_inv_last_coords.y = u.ypos();
     uistate.adv_inv_leftarea = panes[left].area;
     uistate.adv_inv_rightarea = panes[right].area;
     uistate.adv_inv_leftindex = panes[left].index;

@@ -1265,7 +1265,7 @@ static void draw_recipe_subtabs(WINDOW *w, craft_cat tab, craft_subcat subtab, b
 inventory game::crafting_inventory(player *p)
 {
     inventory crafting_inv;
-    crafting_inv.form_from_map(point(p->posx, p->posy), PICKUP_RANGE, false);
+    crafting_inv.form_from_map(point(p->xpos(), p->ypos()), PICKUP_RANGE, false);
     crafting_inv += p->inv;
     crafting_inv += p->weapon;
     for (std::vector<item>::const_iterator a = p->worn.begin(); a != p->worn.end(); a++) {
@@ -1572,11 +1572,11 @@ void game::complete_craft()
         if (!u.can_pickVolume(newit.volume())) { //Accounts for result_mult
             add_msg(_("There's no room in your inventory for the %s, so you drop it."),
                     newit.tname().c_str());
-            m.add_item_or_charges(u.posx, u.posy, newit);
+            m.add_item_or_charges(u.xpos(), u.ypos(), newit);
         } else if (!u.can_pickWeight(newit.weight(), !OPTIONS["DANGEROUS_PICKUPS"])) {
             add_msg(_("The %s is too heavy to carry, so you drop it."),
                     newit.tname().c_str());
-            m.add_item_or_charges(u.posx, u.posy, newit);
+            m.add_item_or_charges(u.xpos(), u.ypos(), newit);
         } else {
             newit = u.i_add(newit);
             add_msg(m_info, "%c - %s", newit.invlet == 0 ? ' ' : newit.invlet, newit.tname().c_str());
@@ -1600,7 +1600,7 @@ std::list<item> game::consume_items(player *p, std::vector<component> components
     } use_from;
     component selected_comp("", 0);
     inventory map_inv;
-    map_inv.form_from_map(point(p->posx, p->posy), PICKUP_RANGE);
+    map_inv.form_from_map(point(p->xpos(), p->ypos()), PICKUP_RANGE);
 
     for (std::vector<component>::iterator it = components.begin();
          it != components.end(); ++it) {
@@ -1695,7 +1695,7 @@ std::list<item> game::consume_items(player *p, std::vector<component> components
         }
     }
 
-    const point loc(p->posx, p->posy);
+    const point loc(p->xpos(), p->ypos());
     itype *itt = item_controller->find_template(selected_comp.type);
     const bool by_charges = (itt->count_by_charges() && selected_comp.count > 0);
     // Count given to use_amount/use_charges, changed by those functions!
@@ -1740,7 +1740,7 @@ void game::consume_tools(player *p, std::vector<component> tools, bool force_ava
 {
     bool found_nocharge = false;
     inventory map_inv;
-    map_inv.form_from_map(point(p->posx, p->posy), PICKUP_RANGE);
+    map_inv.form_from_map(point(p->xpos(), p->ypos()), PICKUP_RANGE);
     std::vector<component> player_has;
     std::vector<component> map_has;
     // Use charges of any tools that require charges used
@@ -1791,7 +1791,7 @@ void game::consume_tools(player *p, std::vector<component> tools, bool force_ava
         // Get selection via a popup menu
         size_t selection = menu_vec(false, _("Use which tool?"), options) - 1;
         if (selection < map_has.size())
-            m.use_charges(point(p->posx, p->posy), PICKUP_RANGE,
+            m.use_charges(point(p->xpos(), p->ypos()), PICKUP_RANGE,
                           map_has[selection].type, map_has[selection].count);
         else {
             selection -= map_has.size();
@@ -1932,7 +1932,7 @@ void game::disassemble(int pos)
         } else {
             //twice the volume then multiplied by 10 (a book with volume 3 will give 60 pages)
             int num_pages = (dis_item->volume() * 2) * 10;
-            m.spawn_item(u.posx, u.posy, "paper", 0, num_pages);
+            m.spawn_item(u.xpos(), u.ypos(), "paper", 0, num_pages);
             u.i_rem(pos);
         }
         return;
@@ -1948,7 +1948,7 @@ void game::complete_disassemble()
     const bool from_ground = u.activity.values.size() > 1 && u.activity.values[1] == 1;
     recipe *dis = recipe_by_index(u.activity.index); // Which recipe is it?
     item *org_item;
-    std::vector<item> &items_on_ground = m.i_at(u.posx, u.posy);
+    std::vector<item> &items_on_ground = m.i_at(u.xpos(), u.ypos());
     if (from_ground) {
         if (static_cast<size_t>(item_pos) >= items_on_ground.size()) {
             add_msg(_("The item has vanished."));
@@ -1969,7 +1969,7 @@ void game::complete_disassemble()
     float component_success_chance = std::min(std::pow(0.8f, dis_item.damage), 1.0);
 
     int veh_part = -1;
-    vehicle *veh = m.veh_at(u.posx, u.posy, veh_part);
+    vehicle *veh = m.veh_at(u.xpos(), u.ypos(), veh_part);
     if(veh != 0) {
         veh_part = veh->part_with_feature(veh_part, "CARGO");
     }
@@ -2082,7 +2082,7 @@ void game::complete_disassemble()
             } else if (veh != NULL && veh->add_item(veh_part, act_item)) {
                 // add_item did put the items in the vehicle, nothing further to be done
             } else {
-                m.add_item_or_charges(u.posx, u.posy, act_item);
+                m.add_item_or_charges(u.xpos(), u.ypos(), act_item);
             }
         }
     }

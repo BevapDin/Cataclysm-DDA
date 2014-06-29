@@ -12,7 +12,7 @@
  * @{
  */
 
-#define PLAYER_OUTSIDE (g->m.is_outside(g->u.posx, g->u.posy) && g->levz >= 0)
+#define PLAYER_OUTSIDE (g->m.is_outside(g->u.xpos(), g->u.ypos()) && g->levz >= 0)
 #define THUNDER_CHANCE 50
 #define LIGHTNING_CHANCE 600
 
@@ -27,7 +27,7 @@ std::map<weather_type, clWeatherAnim> mapWeatherAnim;
  */
 void weather_effect::glare()
 {
- if (PLAYER_OUTSIDE && g->is_in_sunlight(g->u.posx, g->u.posy) && !g->u.worn_with_flag("SUN_GLASSES") && !g->u.has_bionic("bio_sunglasses")) {
+ if (PLAYER_OUTSIDE && g->is_in_sunlight(g->u.xpos(), g->u.ypos()) && !g->u.worn_with_flag("SUN_GLASSES") && !g->u.has_bionic("bio_sunglasses")) {
         if(!g->u.has_effect("glare")) {
             g->u.add_env_effect("glare", bp_eyes, 2, 2);
         } else {
@@ -283,8 +283,8 @@ void fill_water_collectors(int mmPerHour, bool acid)
  */
 void decay_fire_and_scent(int fire_amount)
 {
-    for (int x = g->u.posx - SEEX * 2; x <= g->u.posx + SEEX * 2; x++) {
-        for (int y = g->u.posy - SEEY * 2; y <= g->u.posy + SEEY * 2; y++) {
+    for (int x = g->u.xpos() - SEEX * 2; x <= g->u.xpos() + SEEX * 2; x++) {
+        for (int y = g->u.ypos() - SEEY * 2; y <= g->u.ypos() + SEEY * 2; y++) {
             if (g->m.is_outside(x, y)) {
                 g->m.adjust_field_age(point(x, y), fd_fire, fire_amount);
                 if (g->scent(x, y) > 0)

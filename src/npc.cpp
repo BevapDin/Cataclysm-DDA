@@ -110,8 +110,8 @@ npc& npc::operator= (const npc & rhs)
 
  flags = rhs.flags;
 
- posx = rhs.posx;
- posy = rhs.posy;
+ posx = rhs.xpos();
+ posy = rhs.ypos();
 
  weapon = rhs.weapon;
  ret_null = rhs.ret_null;
@@ -1664,7 +1664,7 @@ int npc::danger_assessment()
  int ret = 0;
  int sightdist = g->light_level(), junk;
  for (int i = 0; i < g->num_zombies(); i++) {
-  if (g->m.sees(posx, posy, g->zombie(i).posx(), g->zombie(i).posy(), sightdist, junk))
+  if (g->m.sees(posx, posy, g->zombie(i).xpos(), g->zombie(i).ypos(), sightdist, junk))
    ret += g->zombie(i).type->difficulty;
  }
  ret /= 10;
@@ -1673,18 +1673,18 @@ int npc::danger_assessment()
 
 // Mod for the player
  if (is_enemy()) {
-  if (rl_dist(posx, posy, g->u.posx, g->u.posy) < 10) {
+  if (rl_dist(posx, posy, g->u.xpos(), g->u.ypos()) < 10) {
    if (g->u.weapon.is_gun())
     ret += 10;
    else
-    ret += 10 - rl_dist(posx, posy, g->u.posx, g->u.posy);
+    ret += 10 - rl_dist(posx, posy, g->u.xpos(), g->u.ypos());
   }
  } else if (is_friend()) {
-  if (rl_dist(posx, posy, g->u.posx, g->u.posy) < 8) {
+  if (rl_dist(posx, posy, g->u.xpos(), g->u.ypos()) < 8) {
    if (g->u.weapon.is_gun())
     ret -= 8;
    else
-    ret -= 8 - rl_dist(posx, posy, g->u.posx, g->u.posy);
+    ret -= 8 - rl_dist(posx, posy, g->u.xpos(), g->u.ypos());
   }
  }
 

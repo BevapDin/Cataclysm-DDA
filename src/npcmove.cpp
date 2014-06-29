@@ -135,7 +135,7 @@ void npc::move()
     if (danger > 0 && (
             (action == npc_follow_embarked && in_vehicle) ||
             (action == npc_follow_player &&
-             rl_dist(posx, posy, g->u.posx, g->u.posy) <= follow_distance())
+             rl_dist(posx, posy, g->u.xpos(), g->u.ypos()) <= follow_distance())
         )) {
         action = method_of_attack(target, danger);
     }
@@ -153,11 +153,11 @@ void npc::execute_action(npc_action action, int target)
     int tarx = posx, tary = posy;
     int linet, light = g->light_level();
     if (target == -2) {
-        tarx = g->u.posx;
-        tary = g->u.posy;
+        tarx = g->u.xpos();
+        tary = g->u.ypos();
     } else if (target >= 0) {
-        tarx = g->zombie(target).posx();
-        tary = g->zombie(target).posy();
+        tarx = g->zombie(target).xpos();
+        tary = g->zombie(target).ypos();
     }
     /*
       debugmsg("%s ran execute_action() with target = %d! Action %s",
@@ -312,7 +312,7 @@ void npc::execute_action(npc_action action, int target)
         break;
 
     case npc_heal_player:
-        update_path(g->u.posx, g->u.posy);
+        update_path(g->u.xpos(), g->u.ypos());
         if (path.size() == 1) { // We're adjacent to u, and thus can heal u
             heal_player(g->u);
         } else if (!path.empty()) {
@@ -323,7 +323,7 @@ void npc::execute_action(npc_action action, int target)
         break;
 
     case npc_follow_player:
-        update_path(g->u.posx, g->u.posy);
+        update_path(g->u.xpos(), g->u.ypos());
         if (path.size() <= follow_distance()) { // We're close enough to u.
             move_pause();
         } else if (!path.empty()) {
@@ -338,7 +338,7 @@ void npc::execute_action(npc_action action, int target)
             move_pause();
         } else {
             int p1;
-            vehicle *veh = g->m.veh_at(g->u.posx, g->u.posy, p1);
+            vehicle *veh = g->m.veh_at(g->u.xpos(), g->u.ypos(), p1);
 
             if (!veh) {
                 debugmsg("Following an embarked player with no vehicle at their location?");
@@ -373,7 +373,7 @@ void npc::execute_action(npc_action action, int target)
         break;
 
     case npc_mug_player:
-        update_path(g->u.posx, g->u.posy);
+        update_path(g->u.xpos(), g->u.ypos());
         if (path.size() == 1) { // We're adjacent to u, and thus can mug u
             mug_player(g->u);
         } else if (!path.empty()) {
@@ -418,7 +418,7 @@ void npc::choose_monster_target(int &enemy, int &danger,
     for (int i = 0; i < g->num_zombies(); i++) {
         monster *mon = &(g->zombie(i));
         if (this->sees(mon, linet)) {
-            int distance = (100 * rl_dist(posx, posy, mon->posx(), mon->posy())) /
+            int distance = (100 * rl_dist(posx, posy, mon->xpos(), mon->ypos())) /
                            mon->speed;
             double hp_percent = (mon->type->hp - mon->hp) / mon->type->hp;
             int priority = mon->type->difficulty * (1 + hp_percent) - distance;
@@ -465,7 +465,7 @@ void npc::choose_monster_target(int &enemy, int &danger,
                 enemy = i;
             } else if (okay_by_rules && defend_u) {
                 priority = mon->type->difficulty * (1 + hp_percent);
-                distance = (100 * rl_dist(g->u.posx, g->u.posy, mon->posx(), mon->posy())) /
+                distance = (100 * rl_dist(g->u.xpos(), g->u.ypos(), mon->xpos(), mon->ypos())) /
                            mon->speed;
                 priority -= distance;
                 if (mon->speed < get_speed()) {
@@ -486,8 +486,8 @@ npc_action npc::method_of_fleeing(int enemy)
 {
     int speed = (enemy == TARGET_PLAYER ? g->u.get_speed() :
                  g->zombie(enemy).speed);
-    point enemy_loc = (enemy == TARGET_PLAYER ? point(g->u.posx, g->u.posy) :
-                       point(g->zombie(enemy).posx(), g->zombie(enemy).posy()));
+    point enemy_loc = (enemy == TARGET_PLAYER ? point(g->u.xpos(), g->u.ypos()) :
+                       point(g->zombie(enemy).xpos(), g->zombie(enemy).ypos()));
     int distance = rl_dist(posx, posy, enemy_loc.x, enemy_loc.y);
 
     if (choose_escape_item() != INT_MIN) { // We have an escape item!
@@ -508,11 +508,11 @@ npc_action npc::method_of_attack(int target, int danger)
     bool use_silent = (is_following() && combat_rules.use_silent);
 
     if (target == TARGET_PLAYER) {
-        tarx = g->u.posx;
-        tary = g->u.posy;
+        tarx = g->u.xpos();
+        tary = g->u.ypos();
     } else if (target >= 0) {
-        tarx = g->zombie(target).posx();
-        tary = g->zombie(target).posy();
+        tarx = g->zombie(target).xpos();
+        tary = g->zombie(target).ypos();
     } else { // This function shouldn't be called...
         debugmsg("Ran npc::method_of_attack without a target!");
         return npc_pause;
@@ -649,7 +649,7 @@ npc_action npc::address_player()
             // Leave sleeping characters alone.
             return npc_undecided;
         }
-        if (rl_dist(posx, posy, g->u.posx, g->u.posy) <= 6) {
+        if (rl_dist(posx, posy, g->u.xpos(), g->u.ypos()) <= 6) {
             return npc_talk_to_player;    // Close enough to talk to you
         } else {
             if (one_in(10)) {
@@ -681,7 +681,7 @@ npc_action npc::address_player()
     }
 
     if (attitude == NPCATT_LEAD) {
-        if (rl_dist(posx, posy, g->u.posx, g->u.posy) >= 12 ||
+        if (rl_dist(posx, posy, g->u.xpos(), g->u.ypos()) >= 12 ||
             !g->sees_u(posx, posy, linet)) {
             int intense = disease_intensity("catch_up");
             if (intense < 10) {
@@ -895,13 +895,13 @@ bool npc::wont_hit_friend(int tarx, int tary, char invlet)
         for (int x = traj[i].x - deviation; x <= traj[i].x + deviation; x++) {
             for (int y = traj[i].y - deviation; y <= traj[i].y + deviation; y++) {
                 // Hit the player?
-                if (is_friend() && g->u.posx == x && g->u.posy == y) {
+                if (is_friend() && g->u.xpos() == x && g->u.ypos() == y) {
                     return false;
                 }
                 // Hit a friendly monster?
                 /*
                     for (int n = 0; n < g->num_zombies(); n++) {
-                     if (g->zombie(n).friendly != 0 && g->zombie(n).posx == x && g->zombie(n).posy == y)
+                     if (g->zombie(n).friendly != 0 && g->zombie(n).xpos() == x && g->zombie(n).ypos() == y)
                       return false;
                     }
                 */
@@ -910,7 +910,7 @@ bool npc::wont_hit_friend(int tarx, int tary, char invlet)
                     for (int n = 0; n < g->active_npc.size(); n++) {
                      npc* guy = &(g->active_npc[n]);
                      if (guy != this && (is_friend() == guy->is_friend()) &&
-                         guy->posx == x && guy->posy == y)
+                         guy->xpos() == x && guy->ypos() == y)
                       return false;
                     }
                 */
@@ -949,10 +949,10 @@ bool npc::enough_time_to_reload(int target, item &gun)
         if (g->sees_u(posx, posy, linet) && g->u.weapon.is_gun() && rltime > 200) {
             return false;    // Don't take longer than 2 turns if player has a gun
         }
-        dist = rl_dist(posx, posy, g->u.posx, g->u.posy);
+        dist = rl_dist(posx, posy, g->u.xpos(), g->u.ypos());
         speed = speed_estimate(g->u.get_speed());
     } else if (target >= 0) {
-        dist = rl_dist(posx, posy, g->zombie(target).posx(), g->zombie(target).posy());
+        dist = rl_dist(posx, posy, g->zombie(target).xpos(), g->zombie(target).ypos());
         speed = speed_estimate(g->zombie(target).speed);
     } else {
         return true;    // No target, plenty of time to reload
@@ -1030,7 +1030,7 @@ void npc::move_to(int x, int y)
         //monster *m = &(g->zombie(g->mon_at(x, y)));
         //debugmsg("Bumped into a monster, %d, a %s",g->mon_at(x, y),m->name().c_str());
         melee_monster(g->mon_at(x, y));
-    } else if (g->u.posx == x && g->u.posy == y) {
+    } else if (g->u.xpos() == x && g->u.ypos() == y) {
         say("<let_me_pass>");
         moves -= 100;
     } else if (g->npc_at(x, y) != -1) {
@@ -1095,11 +1095,11 @@ void npc::avoid_friendly_fire(int target)
 {
     int tarx, tary;
     if (target == TARGET_PLAYER) {
-        tarx = g->u.posx;
-        tary = g->u.posy;
+        tarx = g->u.xpos();
+        tary = g->u.ypos();
     } else if (target >= 0) {
-        tarx = g->zombie(target).posx();
-        tary = g->zombie(target).posy();
+        tarx = g->zombie(target).xpos();
+        tary = g->zombie(target).ypos();
         if (!one_in(3)) {
             say(_("<move> so I can shoot that %s!"), g->zombie(target).name().c_str());
         }
@@ -1562,11 +1562,11 @@ void npc::alt_attack(int target)
     itype_id which = "null";
     int tarx, tary;
     if (target == TARGET_PLAYER) {
-        tarx = g->u.posx;
-        tary = g->u.posy;
+        tarx = g->u.xpos();
+        tary = g->u.ypos();
     } else if (target >= 0) {
-        tarx = g->zombie(target).posx();
-        tary = g->zombie(target).posy();
+        tarx = g->zombie(target).xpos();
+        tary = g->zombie(target).ypos();
     } else {
         debugmsg("npc::alt_attack() called with target = %d", target);
         move_pause();
@@ -1748,10 +1748,10 @@ bool thrown_item(item *used)
 
 void npc::heal_player(player &patient)
 {
-    int dist = rl_dist(posx, posy, patient.posx, patient.posy);
+    int dist = rl_dist(posx, posy, patient.xpos(), patient.ypos());
 
     if (dist > 1) { // We need to move to the player
-        update_path(patient.posx, patient.posy);
+        update_path(patient.xpos(), patient.ypos());
         move_to_next();
     } else { // Close enough to heal!
         int lowest_HP = 400;
@@ -1772,7 +1772,7 @@ void npc::heal_player(player &patient)
         }
 
         bool u_see_me      = g->u_see(posx, posy),
-             u_see_patient = g->u_see(patient.posx, patient.posy);
+             u_see_patient = g->u_see(patient.xpos(), patient.ypos());
         if (patient.is_npc()) {
             if (u_see_me) {
                 if (u_see_patient) {
@@ -1952,12 +1952,12 @@ void npc::pick_and_eat()
 
 void npc::mug_player(player &mark)
 {
-    if (rl_dist(posx, posy, mark.posx, mark.posy) > 1) { // We have to travel
-        update_path(mark.posx, mark.posy);
+    if (rl_dist(posx, posy, mark.xpos(), mark.ypos()) > 1) { // We have to travel
+        update_path(mark.xpos(), mark.ypos());
         move_to_next();
     } else {
         bool u_see_me   = g->u_see(posx, posy),
-             u_see_mark = g->u_see(mark.posx, mark.posy);
+             u_see_mark = g->u_see(mark.xpos(), mark.ypos());
         if (mark.cash > 0) {
             cash += mark.cash;
             mark.cash = 0;
@@ -2012,7 +2012,7 @@ void npc::mug_player(player &mark)
                 moves -= 100;
             } else {
                 bool u_see_me   = g->u_see(posx, posy),
-                     u_see_mark = g->u_see(mark.posx, mark.posy);
+                     u_see_mark = g->u_see(mark.xpos(), mark.ypos());
                 item stolen = mark.i_remn(invlet);
                 if (mark.is_npc()) {
                     if (u_see_me) {
@@ -2049,7 +2049,7 @@ void npc::mug_player(player &mark)
 void npc::look_for_player(player &sought)
 {
     int linet, range = sight_range(g->light_level());
-    if (g->m.sees(posx, posy, sought.posx, sought.posy, range, linet)) {
+    if (g->m.sees(posx, posy, sought.xpos(), sought.ypos(), range, linet)) {
         if (sought.is_npc())
             debugmsg("npc::look_for_player() called, but we can see %s!",
                      sought.name.c_str());

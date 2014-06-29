@@ -799,7 +799,7 @@ void mutation_effect(player &p, std::string mut)
                     }
 
                     int pos = player::worn_position_to_index(i);
-                    g->m.add_item_or_charges(p.posx, p.posy, p.worn[i]);
+                    g->m.add_item_or_charges( p.xpos(), p.ypos(), p.worn[i] );
                     p.i_rem(pos);
                 }
                 // Reset to the start of the vector

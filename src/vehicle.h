@@ -600,6 +600,10 @@ public:
 
     // save values
     int posx, posy;
+    // These three functions are for "compatibility" with creatures
+    int xpos() const { return posx; }
+    int ypos() const { return posy; }
+    point pos() const { return point(posx, posy); }
     int levx,levy;       // vehicle map coordinates.
     tileray face;       // frame direction
     tileray move;       // direction we are moving

@@ -175,7 +175,7 @@ long unfold_vehicle_iuse::use(player *p, item *it, bool /*t*/) const
         p->add_msg_if_player(m_info, _("You can't do that while underwater."));
         return 0;
     }
-    vehicle *veh = g->m.add_vehicle(vehicle_name, p->posx, p->posy, 0, 0, 0, false);
+    vehicle *veh = g->m.add_vehicle(vehicle_name, p->xpos(), p->ypos(), 0, 0, 0, false);
     if (veh == NULL) {
         p->add_msg_if_player(m_info, _("There's no room to unfold the %s."), it->tname().c_str());
         return 0;
@@ -271,7 +271,7 @@ long consume_drug_iuse::use(player *p, item *it, bool) const
     }
     for( auto field = fields_produced.cbegin(); field != fields_produced.cend(); ++field ) {
         for(int i = 0; i < 3; i++) {
-            g->m.add_field(p->posx + int(rng(-2, 2)), p->posy + int(rng(-2, 2)), fd_cracksmoke, 2);
+            g->m.add_field(p->xpos() + int(rng(-2, 2)), p->ypos() + int(rng(-2, 2)), fd_cracksmoke, 2);
         }
     }
     // Output message.

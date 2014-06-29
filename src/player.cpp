@@ -37,11 +37,8 @@
 
 #include <fstream>
 
-static void manage_fire_exposure(player& p, int fireStrength = 1);
-static void handle_cough(player& p, int intensity = 1, int volume = 4);
-
 std::map<std::string, trait> traits;
-std::map<std::string, martialart> ma_styles;
+extern std::map<std::string, martialart> ma_styles;
 std::vector<std::string> vStartingTraits[2];
 
 std::string morale_data[NUM_MORALE_TYPES];
@@ -5287,42 +5284,44 @@ bool player::siphon(vehicle *veh, ammotype desired_liquid)
     }
 }
 
-static void manage_fire_exposure(player &p, int fireStrength) {
+void player::manage_fire_exposure(int fireStrength) {
     // TODO: this should be determined by material properties
-    p.hurtall(3*fireStrength);
-    for (int i = 0; i < p.worn.size(); i++) {
-        item tmp = p.worn[i];
+    hurtall(3*fireStrength);
+    for (int i = 0; i < worn.size(); i++) {
+        item tmp = worn[i];
         bool burnVeggy = (tmp.made_of("veggy") || tmp.made_of("paper"));
         bool burnFabric = ((tmp.made_of("cotton") || tmp.made_of("wool")) && one_in(10*fireStrength));
         bool burnPlastic = ((tmp.made_of("plastic")) && one_in(50*fireStrength));
         if (burnVeggy || burnFabric || burnPlastic) {
-            p.worn.erase(p.worn.begin() + i);
+            worn.erase(worn.begin() + i);
             i--;
         }
     }
 }
-static void handle_cough(player &p, int intensity, int loudness) {
-    if (p.is_player()) {
+
+void player::handle_cough(int intensity, int loudness) {
+    if (is_player()) {
         add_msg(m_bad, _("You cough heavily."));
-        g->sound(p.posx, p.posy, loudness, "");
+        g->sound(posx, posy, loudness, "");
     } else {
-        g->sound(p.posx, p.posy, loudness, _("a hacking cough."));
+        g->sound(posx, posy, loudness, _("a hacking cough."));
     }
-    p.mod_moves(-80);
+    mod_moves(-80);
     if (rng(1,6) < intensity) {
-        p.apply_damage(NULL, bp_torso, -1, 1);
+        apply_damage(NULL, bp_torso, -1, 1);
     }
-    if (p.has_disease("sleep") && intensity >= 2) {
-        p.wake_up(_("You wake up coughing."));
+    if (has_disease("sleep") && intensity >= 2) {
+        wake_up(_("You wake up coughing."));
     }
 }
+
 void player::process_effects() {
     int psnChance;
     for (std::vector<effect>::iterator it = effects.begin();
             it != effects.end(); ++it) {
         std::string id = it->get_id();
         if (id == "onfire") {
-            manage_fire_exposure(*this, 1);
+            manage_fire_exposure(1);
         } else if (id == "poison") {
             psnChance = 150;
             if (has_trait("POISRESIST")) {
@@ -5362,14 +5361,14 @@ void player::process_effects() {
             mod_dex_bonus(-1);
             it->set_intensity((it->get_duration()+190)/200);
             if (it->get_intensity() >= 10 && one_in(6)) {
-                handle_cough(*this, it->get_intensity());
+                handle_cough(it->get_intensity());
             }
         } else if (id == "teargas") {
             mod_str_bonus(-2);
             mod_dex_bonus(-2);
             mod_per_bonus(-5);
             if (one_in(3)) {
-                handle_cough(*this, 4);
+                handle_cough(4);
             }
         } else if ( id == "stung" ) {
             mod_pain(1);
@@ -11297,4 +11296,23 @@ void player::add_known_trap(int x, int y, const std::string &t)
 bool player::is_deaf() const
 {
     return has_disease("deaf") || worn_with_flag("DEAF");
+}
+
+void player::setpos(int x, int y)
+{
+    posx = x;
+    posy = y;
+    // Note: some code sets position to (-1,-1) to move the player
+    // (temporally) out of the way (e.g. checking for collision of
+    // grabbed vehicle after pushing/pulling.
+    // Or see newcharacter.cpp, there the player needs an invalid position
+    // to prevent accessing the not yet loaded map.
+    if( g != nullptr && this == &g->u && x >= 0 ) {
+        g->update_map( posx, posy );
+    }
+}
+
+void player::setpos(const point &p)
+{
+    setpos( p.x, p.y );
 }

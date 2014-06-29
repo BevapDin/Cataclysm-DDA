@@ -542,9 +542,9 @@ static bool can_construct(construction *con, int x, int y)
 
 static bool can_construct(construction *con)
 {
-    for (int x = g->u.posx - 1; x <= g->u.posx + 1; x++) {
-        for (int y = g->u.posy - 1; y <= g->u.posy + 1; y++) {
-            if (x == g->u.posx && y == g->u.posy) {
+    for (int x = g->u.xpos() - 1; x <= g->u.xpos() + 1; x++) {
+        for (int y = g->u.ypos() - 1; y <= g->u.ypos() + 1; y++) {
+            if (x == g->u.xpos() && y == g->u.ypos()) {
                 y++;
             }
             if (can_construct(con, x, y)) {
@@ -562,9 +562,9 @@ static void place_construction(const std::string &desc)
 
     std::vector<construction *> cons = constructions_by_desc(desc);
     std::map<point, construction *> valid;
-    for (int x = g->u.posx - 1; x <= g->u.posx + 1; x++) {
-        for (int y = g->u.posy - 1; y <= g->u.posy + 1; y++) {
-            if (x == g->u.posx && y == g->u.posy) {
+    for (int x = g->u.xpos() - 1; x <= g->u.xpos() + 1; x++) {
+        for (int y = g->u.ypos() - 1; y <= g->u.ypos() + 1; y++) {
+            if (x == g->u.xpos() && y == g->u.ypos()) {
                 y++;
             }
             for (std::vector<construction *>::iterator it = cons.begin();
@@ -817,10 +817,10 @@ void construct::done_dig_stair(point p)
               // refund components!
               if (!(g->u.has_trait("WEB_ROPE"))) {
                   item rope("rope_30", 0);
-                  g->m.add_item_or_charges(g->u.posx, g->u.posy, rope);
+                  g->m.add_item_or_charges(g->u.xpos(), g->u.ypos(), rope);
               }
               // presuming 2x4 to conserve lumber.
-              g->m.spawn_item(g->u.posx, g->u.posy,"2x4", 8);
+              g->m.spawn_item(g->u.xpos(), g->u.ypos(),"2x4", 8);
               return;
           }
       }
@@ -829,10 +829,10 @@ void construct::done_dig_stair(point p)
               // refund components!
               if (!(g->u.has_trait("WEB_ROPE"))) {
                   item rope("rope_30", 0);
-                  g->m.add_item_or_charges(g->u.posx, g->u.posy, rope);
+                  g->m.add_item_or_charges(g->u.xpos(), g->u.ypos(), rope);
               }
               // presuming 2x4 to conserve lumber.
-              g->m.spawn_item(g->u.posx, g->u.posy,"2x4", 8);
+              g->m.spawn_item(g->u.xpos(), g->u.ypos(),"2x4", 8);
               return;
           }
       }
@@ -910,27 +910,25 @@ void construct::done_dig_stair(point p)
                   if (safe.empty()) {
                       add_msg(m_bad, _("There's nowhere to pull yourself to, and you fall!"));
                       g->u.use_amount("grapnel", 1);
-                      g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "grapnel");
+                      g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "grapnel");
                       g->vertical_move(-1, true);
                   } else {
                       add_msg(_("You pull yourself to safety!"));
                       int index = rng(0, safe.size() - 1);
-                      g->u.posx = safe[index].x;
-                      g->u.posy = safe[index].y;
-                      g->update_map();
+                      g->u.setpos( safe[index] );
                   }
               } else {
                     add_msg(m_bad, _("You're not strong enough to pull yourself out..."));
                     g->u.moves -= 100;
                     g->u.use_amount("grapnel", 1);
-                    g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "grapnel");
+                    g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "grapnel");
                     g->vertical_move(-1, true);
                 }
               } else {
                   add_msg(m_bad, _("Your throw misses completely, and you fall into the lava!"));
                   if (one_in((g->u.str_cur + g->u.dex_cur) / 3)) {
                       g->u.use_amount("grapnel", 1);
-                      g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "grapnel");
+                      g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "grapnel");
                   }
                 g->vertical_move(-1, true);
               }
@@ -962,9 +960,7 @@ void construct::done_dig_stair(point p)
                           } else {
                               add_msg(_("You pull yourself to safety!"));
                               int index = rng(0, safe.size() - 1);
-                              g->u.posx = safe[index].x;
-                              g->u.posy = safe[index].y;
-                              g->update_map();
+                              g->u.setpos( safe[index] );
                           }
                       } else {
                             add_msg(m_bad, _("You're not strong enough to pull yourself out..."));
@@ -997,26 +993,24 @@ void construct::done_dig_stair(point p)
                   }
                   if (safe.empty()) {
                       add_msg(m_bad, _("There's nowhere to pull yourself to, and you fall!"));
-                      g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "rope_30");
+                      g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "rope_30");
                       g->vertical_move(-1, true);
                   } else {
                       add_msg(_("You pull yourself to safety!"));
                       add_msg(_("The rope gives way and plummets, just as you escape."));
                       int index = rng(0, safe.size() - 1);
-                      g->u.posx = safe[index].x;
-                      g->u.posy = safe[index].y;
-                      g->update_map();
+                      g->u.setpos( safe[index] );
                   }
               } else {
                     add_msg(m_bad, _("You're not strong enough to pull yourself out..."));
                     g->u.moves -= 100;
-                    g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "rope_30");
+                    g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "rope_30");
                     g->vertical_move(-1, true);
                 }
               } else {
                   add_msg(m_bad, _("Your throw misses completely, and you fall into the lava!"));
                   if (one_in((g->u.str_cur + g->u.dex_cur) / 3)) {
-                      g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "rope_30");
+                      g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "rope_30");
                   }
                 g->vertical_move(-1, true);
               }
@@ -1087,10 +1081,10 @@ void construct::done_mine_downstair(point p)
               // refund components!
               if (!(g->u.has_trait("WEB_ROPE"))) {
                   item rope("rope_30", 0);
-                  g->m.add_item_or_charges(g->u.posx, g->u.posy, rope);
+                  g->m.add_item_or_charges(g->u.xpos(), g->u.ypos(), rope);
               }
               // presuming 2x4 to conserve lumber.
-              g->m.spawn_item(g->u.posx, g->u.posy,"2x4", 12);
+              g->m.spawn_item(g->u.xpos(), g->u.ypos(),"2x4", 12);
               return;
           }
       }
@@ -1099,10 +1093,10 @@ void construct::done_mine_downstair(point p)
               // refund components!
               if (!(g->u.has_trait("WEB_ROPE"))) {
                   item rope("rope_30", 0);
-                  g->m.add_item_or_charges(g->u.posx, g->u.posy, rope);
+                  g->m.add_item_or_charges(g->u.xpos(), g->u.ypos(), rope);
               }
               // presuming 2x4 to conserve lumber.
-              g->m.spawn_item(g->u.posx, g->u.posy,"2x4", 12);
+              g->m.spawn_item(g->u.xpos(), g->u.ypos(),"2x4", 12);
               return;
           }
       }
@@ -1180,27 +1174,25 @@ void construct::done_mine_downstair(point p)
                   if (safe.empty()) {
                       add_msg(m_bad, _("There's nowhere to pull yourself to, and you fall!"));
                       g->u.use_amount("grapnel", 1);
-                      g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "grapnel");
+                      g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "grapnel");
                       g->vertical_move(-1, true);
                   } else {
                       add_msg(_("You pull yourself to safety!"));
                       int index = rng(0, safe.size() - 1);
-                      g->u.posx = safe[index].x;
-                      g->u.posy = safe[index].y;
-                      g->update_map();
+                      g->u.setpos( safe[index] );
                   }
               } else {
                     add_msg(m_bad, _("You're not strong enough to pull yourself out..."));
                     g->u.moves -= 100;
                     g->u.use_amount("grapnel", 1);
-                    g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "grapnel");
+                    g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "grapnel");
                     g->vertical_move(-1, true);
                 }
               } else {
                   add_msg(m_bad, _("Your throw misses completely, and you fall into the lava!"));
                   if (one_in((g->u.str_cur + g->u.dex_cur) / 3)) {
                       g->u.use_amount("grapnel", 1);
-                      g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "grapnel");
+                      g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "grapnel");
                   }
                 g->vertical_move(-1, true);
               }
@@ -1232,9 +1224,7 @@ void construct::done_mine_downstair(point p)
                           } else {
                               add_msg(_("You pull yourself to safety!"));
                               int index = rng(0, safe.size() - 1);
-                              g->u.posx = safe[index].x;
-                              g->u.posy = safe[index].y;
-                              g->update_map();
+                              g->u.setpos( safe[index] );
                           }
                       } else {
                             add_msg(m_bad, _("You're not strong enough to pull yourself out..."));
@@ -1267,26 +1257,24 @@ void construct::done_mine_downstair(point p)
                   }
                   if (safe.empty()) {
                       add_msg(m_bad, _("There's nowhere to pull yourself to, and you fall!"));
-                      g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "rope_30");
+                      g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "rope_30");
                       g->vertical_move(-1, true);
                   } else {
                       add_msg(_("You pull yourself to safety!"));
                       add_msg(_("The rope gives way and plummets, just as you escape."));
                       int index = rng(0, safe.size() - 1);
-                      g->u.posx = safe[index].x;
-                      g->u.posy = safe[index].y;
-                      g->update_map();
+                      g->u.setpos( safe[index] );
                   }
               } else {
                     add_msg(m_bad, _("You're not strong enough to pull yourself out..."));
                     g->u.moves -= 100;
-                    g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "rope_30");
+                    g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "rope_30");
                     g->vertical_move(-1, true);
                 }
               } else {
                   add_msg(m_bad, _("Your throw misses completely, and you fall into the lava!"));
                   if (one_in((g->u.str_cur + g->u.dex_cur) / 3)) {
-                      g->m.spawn_item(g->u.posx + rng(-1, 1), g->u.posy + rng(-1, 1), "rope_30");
+                      g->m.spawn_item(g->u.xpos() + rng(-1, 1), g->u.ypos() + rng(-1, 1), "rope_30");
                   }
                 g->vertical_move(-1, true);
               }
@@ -1364,10 +1352,10 @@ void construct::done_mine_upstair(point p)
           // refund components!
           if (!(g->u.has_trait("WEB_ROPE"))) {
               item rope("rope_30", 0);
-              g->m.add_item_or_charges(g->u.posx, g->u.posy, rope);
+              g->m.add_item_or_charges(g->u.xpos(), g->u.ypos(), rope);
           }
           // presuming 2x4 to conserve lumber.
-          g->m.spawn_item(g->u.posx, g->u.posy,"2x4", 12);
+          g->m.spawn_item(g->u.xpos(), g->u.ypos(),"2x4", 12);
           return;
       }
       if (danger_open) {
@@ -1375,10 +1363,10 @@ void construct::done_mine_upstair(point p)
               // refund components!
               if (!(g->u.has_trait("WEB_ROPE"))) {
                   item rope("rope_30", 0);
-                  g->m.add_item_or_charges(g->u.posx, g->u.posy, rope);
+                  g->m.add_item_or_charges(g->u.xpos(), g->u.ypos(), rope);
               }
               // presuming 2x4 to conserve lumber.
-              g->m.spawn_item(g->u.posx, g->u.posy,"2x4", 12);
+              g->m.spawn_item(g->u.xpos(), g->u.ypos(),"2x4", 12);
               return;
           }
       }
@@ -1387,10 +1375,10 @@ void construct::done_mine_upstair(point p)
           // refund components!
           if (!(g->u.has_trait("WEB_ROPE"))) {
               item rope("rope_30", 0);
-              g->m.add_item_or_charges(g->u.posx, g->u.posy, rope);
+              g->m.add_item_or_charges(g->u.xpos(), g->u.ypos(), rope);
           }
           // presuming 2x4 to conserve lumber.
-          g->m.spawn_item(g->u.posx, g->u.posy,"2x4", 12);
+          g->m.spawn_item(g->u.xpos(), g->u.ypos(),"2x4", 12);
           return;
       }
   }

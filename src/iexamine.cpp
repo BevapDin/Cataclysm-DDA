@@ -35,7 +35,7 @@ void iexamine::gaspump(player *p, map *m, int examx, int examy) {
     item spill(liq->type->id, calendar::turn);
     spill.charges = rng(dynamic_cast<it_ammo*>(liq->type)->count,
                         dynamic_cast<it_ammo*>(liq->type)->count * (float)(8 / p->dex_cur));
-    m->add_item_or_charges(p->posx, p->posy, spill, 1);
+    m->add_item_or_charges(p->xpos(), p->ypos(), spill, 1);
     liq->charges -= spill.charges;
     if (liq->charges < 1) {
      m->i_at(examx, examy).erase(m->i_at(examx, examy).begin() + i);
@@ -541,8 +541,8 @@ void iexamine::rubble(player *p, map *m, int examx, int examy) {
         // "Replace"
         if(m->ter(examx,examy) == t_rubble) {
             item rock("rock", calendar::turn);
-            m->add_item_or_charges(p->posx, p->posy, rock);
-            m->add_item_or_charges(p->posx, p->posy, rock);
+            m->add_item_or_charges(p->xpos(), p->ypos(), rock);
+            m->add_item_or_charges(p->xpos(), p->ypos(), rock);
         }
 
         // "Refloor"
@@ -578,13 +578,9 @@ void iexamine::chainfence( player *p, map *m, int examx, int examy )
         p->moves += p->dex_cur * 10;
     }
     if( p->in_vehicle ) {
-        m->unboard_vehicle( p->posx, p->posy );
+        m->unboard_vehicle( p->xpos(), p->ypos() );
     }
-    p->posx = examx;
-    p->posy = examy;
-    if( &g->u == p ) {
-        g->update_map();
-    }
+    p->setpos( examx, examy );
 }
 
 void iexamine::bars(player *p, map *m, int examx, int examy) {
@@ -603,8 +599,7 @@ void iexamine::bars(player *p, map *m, int examx, int examy) {
  }
   p->moves -= 200;
   add_msg(_("You slide right between the bars."));
-  p->posx = examx;
-  p->posy = examy;
+  p->setpos( examx, examy );
 }
 
 void iexamine::tent(player *p, map *m, int examx, int examy) {
@@ -660,7 +655,7 @@ void iexamine::wreckage(player *p, map *m, int examx, int examy) {
 void iexamine::pit(player *p, map *m, int examx, int examy)
 {
     inventory map_inv;
-    map_inv.form_from_map(point(p->posx, p->posy), 1);
+    map_inv.form_from_map(point(p->xpos(), p->ypos()), 1);
 
     bool player_has = p->has_amount("2x4", 1);
     bool map_has = map_inv.has_amount("2x4", 1);
@@ -679,7 +674,7 @@ void iexamine::pit(player *p, map *m, int examx, int examy)
         {
             if (query_yn(_("Use the plank at your feet?")))
             {
-                m->use_amount(point(p->posx, p->posy), 1, "2x4", 1, false);
+                m->use_amount(point(p->xpos(), p->ypos()), 1, "2x4", 1, false);
             }
             else
             {
@@ -692,7 +687,7 @@ void iexamine::pit(player *p, map *m, int examx, int examy)
         }
         else if (!player_has && map_has)    // only map has plank
         {
-            m->use_amount(point(p->posx, p->posy), 1, "2x4", 1, false);
+            m->use_amount(point(p->xpos(), p->ypos()), 1, "2x4", 1, false);
         }
 
         if( m->ter(examx, examy) == t_pit )
@@ -717,7 +712,7 @@ void iexamine::pit_covered(player *p, map *m, int examx, int examy)
 
     item plank("2x4", calendar::turn);
     add_msg(_("You remove the plank."));
-    m->add_item_or_charges(p->posx, p->posy, plank);
+    m->add_item_or_charges(p->xpos(), p->ypos(), plank);
 
     if( m->ter(examx, examy) == t_pit_covered )
     {
@@ -773,8 +768,8 @@ void iexamine::remove_fence_rope(player *p, map *m, int examx, int examy) {
   return;
  }
  item rope("rope_6", calendar::turn);
- m->add_item_or_charges(p->posx, p->posy, rope);
- m->add_item_or_charges(p->posx, p->posy, rope);
+ m->add_item_or_charges(p->xpos(), p->ypos(), rope);
+ m->add_item_or_charges(p->xpos(), p->ypos(), rope);
  m->ter_set(examx, examy, t_fence_post);
  p->moves -= 200;
 
@@ -787,8 +782,8 @@ void iexamine::remove_fence_wire(player *p, map *m, int examx, int examy) {
  }
 
  item rope("wire", calendar::turn);
- m->add_item_or_charges(p->posx, p->posy, rope);
- m->add_item_or_charges(p->posx, p->posy, rope);
+ m->add_item_or_charges(p->xpos(), p->ypos(), rope);
+ m->add_item_or_charges(p->xpos(), p->ypos(), rope);
  m->ter_set(examx, examy, t_fence_post);
  p->moves -= 200;
 }
@@ -800,8 +795,8 @@ void iexamine::remove_fence_barbed(player *p, map *m, int examx, int examy) {
  }
 
  item rope("wire_barbed", calendar::turn);
- m->add_item_or_charges(p->posx, p->posy, rope);
- m->add_item_or_charges(p->posx, p->posy, rope);
+ m->add_item_or_charges(p->xpos(), p->ypos(), rope);
+ m->add_item_or_charges(p->xpos(), p->ypos(), rope);
  m->ter_set(examx, examy, t_fence_post);
  p->moves -= 200;
 }
@@ -1110,7 +1105,7 @@ void iexamine::fungus(player *p, map *m, int examx, int examy) {
                     if (!g->zombie(mondex).make_fungus()) {
                         g->kill_mon(mondex, false);
                     }
-                } else if (g->u.posx == i && g->u.posy == j) {
+                } else if (g->u.xpos() == i && g->u.ypos() == j) {
                     // Spores hit the player
                     bool hit = false;
                     if (one_in(4) && g->u.infect("spores", bp_head, 3, 90, false, 1, 3, 120, 1, true)) {
@@ -1763,22 +1758,22 @@ void iexamine::recycler(player *p, map *m, int examx, int examy) {
 
     for (int i = 0; i < num_lumps; i++)
     {
-        m->spawn_item(p->posx, p->posy, "steel_lump");
+        m->spawn_item(p->xpos(), p->ypos(), "steel_lump");
     }
 
     for (int i = 0; i < num_sheets; i++)
     {
-        m->spawn_item(p->posx, p->posy, "sheet_metal");
+        m->spawn_item(p->xpos(), p->ypos(), "sheet_metal");
     }
 
     for (int i = 0; i < num_chunks; i++)
     {
-        m->spawn_item(p->posx, p->posy, "steel_chunk");
+        m->spawn_item(p->xpos(), p->ypos(), "steel_chunk");
     }
 
     for (int i = 0; i < num_scraps; i++)
     {
-        m->spawn_item(p->posx, p->posy, "scrap");
+        m->spawn_item(p->xpos(), p->ypos(), "scrap");
     }
 }
 
@@ -1946,7 +1941,7 @@ void iexamine::reload_furniture(player *p, map *m, const int examx, const int ex
 }
 
 void iexamine::curtains(player *p, map *m, const int examx, const int examy) {
-    if (m->is_outside(p->posx, p->posy)) {
+    if (m->is_outside(p->xpos(), p->ypos())) {
         p->add_msg_if_player( _("You cannot get to the curtains from the outside."));
         return;
     }

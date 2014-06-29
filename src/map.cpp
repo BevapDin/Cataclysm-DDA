@@ -71,8 +71,8 @@ VehicleList map::get_vehicles(const int sx, const int sy, const int ex, const in
    for( size_t i = 0; i < current_submap->vehicles.size(); ++i ) {
     wrapped_vehicle w;
     w.v = current_submap->vehicles[i];
-    w.x = w.v->posx + cx * SEEX;
-    w.y = w.v->posy + cy * SEEY;
+    w.x = w.v->xpos() + cx * SEEX;
+    w.y = w.v->ypos() + cy * SEEY;
     w.i = cx;
     w.j = cy;
     vehs.push_back(w);
@@ -219,12 +219,8 @@ void map::board_vehicle(int x, int y, player *p)
     veh->parts[seat_part].set_flag(vehicle_part::passenger_flag);
     veh->parts[seat_part].passenger_id = p->getID();
 
-    p->posx = x;
-    p->posy = y;
+    p->setpos( x, y );
     p->in_vehicle = true;
-    if( p == &g->u ) {
-        g->update_map();
-    }
 }
 
 void map::unboard_vehicle(const int x, const int y)
@@ -314,8 +310,8 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
  // first, let's find our position in current vehicles vector
  int our_i = -1;
  for (int i = 0; i < src_submap->vehicles.size(); i++) {
-  if (src_submap->vehicles[i]->posx == src_offset_x &&
-      src_submap->vehicles[i]->posy == src_offset_y) {
+  if (src_submap->vehicles[i]->xpos() == src_offset_x &&
+      src_submap->vehicles[i]->ypos() == src_offset_y) {
    our_i = i;
    break;
   }
@@ -367,7 +363,7 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
    debugmsg ("empty passenger part %d pcoord=%d,%d u=%d,%d?", p,
              veh->global_x() + veh->parts[p].precalc_dx[0],
              veh->global_y() + veh->parts[p].precalc_dy[0],
-                      g->u.posx, g->u.posy);
+                      g->u.xpos(), g->u.ypos());
    veh->parts[p].remove_flag(vehicle_part::passenger_flag);
    continue;
   }
@@ -380,8 +376,8 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
   psg->posy += dy + veh->parts[p].precalc_dy[1] - veh->parts[p].precalc_dy[0];
   if (psg == &g->u) { // if passenger is you, we need to update the map
    need_update = true;
-   upd_x = psg->posx;
-   upd_y = psg->posy;
+   upd_x = psg->xpos();
+   upd_y = psg->ypos();
   }
  }
  for (int p = 0; p < veh->parts.size(); p++) {
@@ -405,22 +401,12 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
  update_vehicle_cache(veh);
 
  bool was_update = false;
- if (need_update &&
-     (upd_x < SEEX * int(my_MAPSIZE / 2) || upd_y < SEEY *int(my_MAPSIZE / 2) ||
-      upd_x >= SEEX * (1+int(my_MAPSIZE / 2)) ||
-      upd_y >= SEEY * (1+int(my_MAPSIZE / 2))   )) {
-// map will shift, so adjust vehicle coords we've been passed
-  if (upd_x < SEEX * int(my_MAPSIZE / 2))
-   x += SEEX;
-  else if (upd_x >= SEEX * (1+int(my_MAPSIZE / 2)))
-   x -= SEEX;
-  if (upd_y < SEEY * int(my_MAPSIZE / 2))
-   y += SEEY;
-  else if (upd_y >= SEEY * (1+int(my_MAPSIZE / 2)))
-   y -= SEEY;
-  g->update_map();
-  was_update = true;
- }
+    if( need_update ) {
+        g->update_map( g->u.posx, g->u.posy );
+        x += g->u.posx - upd_x;
+        y += g->u.posy - upd_y;
+        was_update = true;
+    }
 
  return (src_submap != dst_submap) || was_update;
 }
@@ -859,7 +845,7 @@ bool map::vehproceed()
     }
     // If the PC is in the currently moved vehicle, adjust the
     // view offset.
-    if (g->u.controlling_vehicle && veh_at(g->u.posx, g->u.posy) == veh) {
+    if (g->u.controlling_vehicle && veh_at(g->u.xpos(), g->u.ypos()) == veh) {
         g->calc_driving_offset(veh);
     }
     // redraw scene
@@ -2457,7 +2443,7 @@ bool map::could_see_items(int x, int y, const player &u)
     if (container) {
         // can see inside of containers if adjacent or
         // on top of the container
-        return (abs(x - u.posx) <= 1 && abs(y - u.posy) <= 1);
+        return (abs(x - u.xpos()) <= 1 && abs(y - u.ypos()) <= 1);
     }
     return true;
 }
@@ -2841,8 +2827,8 @@ void map::process_active_items_in_vehicle(vehicle *cur_veh, submap * const curre
         // the vehicle part in case cur_veh->parts got changed
         const point mnt(vp.precalc_dx[0], vp.precalc_dy[0]);
         const int vp_type = vp.iid;
-        const int mapx = cur_veh->posx + vp.precalc_dx[0];
-        const int mapy = cur_veh->posy + vp.precalc_dy[0];
+        const int mapx = cur_veh->xpos() + vp.precalc_dx[0];
+        const int mapy = cur_veh->ypos() + vp.precalc_dy[0];
         // This is used in game::find_item. Because otherwise the
         // temporary item would nowhere to be found.
         tmp_active_item_pos.second = point(cur_veh->global_x() + vp.precalc_dx[0], cur_veh->global_y() + vp.precalc_dy[0]);
@@ -3528,7 +3514,7 @@ bool map::add_field(const point p, const field_id t, int density, const int age)
         current_submap->field_count++; //Only adding it to the count if it doesn't exist.
     }
     current_submap->fld[lx][ly].addField(t, density, age); //This will insert and/or update the field.
-    if(g != NULL && this == &g->m && p.x == g->u.posx && p.y == g->u.posy) {
+    if(g != NULL && this == &g->m && p.x == g->u.xpos() && p.y == g->u.ypos()) {
         step_in_field(p.x, p.y); //Hit the player with the field if it spawned on top of them.
     }
     return true;
@@ -3655,7 +3641,7 @@ void map::draw(WINDOW* w, const point center)
 
  for  (int realx = center.x - getmaxx(w)/2; realx <= center.x + getmaxx(w)/2; realx++) {
   for (int realy = center.y - getmaxy(w)/2; realy <= center.y + getmaxy(w)/2; realy++) {
-   const int dist = rl_dist(g->u.posx, g->u.posy, realx, realy);
+   const int dist = rl_dist(g->u.xpos(), g->u.ypos(), realx, realy);
    int sight_range = light_sight_range;
    int low_sight_range = lowlight_sight_range;
    bool bRainOutside = false;
@@ -3674,7 +3660,7 @@ void map::draw(WINDOW* w, const point center)
    int real_max_sight_range = light_sight_range > max_sight_range ? light_sight_range : max_sight_range;
    int distance_to_look = DAYLIGHT_LEVEL;
 
-   bool can_see = pl_sees(g->u.posx, g->u.posy, realx, realy, distance_to_look);
+   bool can_see = pl_sees(g->u.xpos(), g->u.ypos(), realx, realy, distance_to_look);
    lit_level lit = light_at(realx, realy);
 
    // now we're gonna adjust real_max_sight, to cover some nearby "highlights",
@@ -3723,7 +3709,7 @@ void map::draw(WINDOW* w, const point center)
    }
   }
  }
- int atx = getmaxx(w)/2 + g->u.posx - center.x, aty = getmaxy(w)/2 + g->u.posy - center.y;
+ int atx = getmaxx(w)/2 + g->u.xpos() - center.x, aty = getmaxy(w)/2 + g->u.ypos() - center.y;
  if (is_valid_in_w_terrain(atx, aty)) {
   mvwputch(w, aty, atx, g->u.color(), '@');
   g->mapRain[aty][atx] = false;
@@ -3746,9 +3732,9 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     if (!INBOUNDS(x, y))
         return; // Out of bounds
     if (cx == -1)
-        cx = u.posx;
+        cx = u.xpos();
     if (cy == -1)
-        cy = u.posy;
+        cy = u.ypos();
     const int k = x + getmaxx(w)/2 - cx;
     const int j = y + getmaxy(w)/2 - cy;
     nc_color tercol;

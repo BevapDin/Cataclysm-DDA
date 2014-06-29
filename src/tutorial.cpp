@@ -53,11 +53,7 @@ bool tutorial_game::init()
  }
  g->m.load(g->levx, g->levy, 0, true, g->cur_om);
  g->levz = 0;
- g->u.posx = 2;
- g->u.posy = 4;
-
- // This shifts the view to center the players pos
- g->update_map();
+ g->u.setpos( 2, 4 );
  return true;
 }
 
@@ -83,17 +79,17 @@ void tutorial_game::per_turn()
   add_message(LESSON_RECOIL);
 
  if (!tutorials_seen[LESSON_BUTCHER]) {
-  for (size_t i = 0; i < g->m.i_at(g->u.posx, g->u.posy).size(); i++) {
-   if (g->m.i_at(g->u.posx, g->u.posy)[i].type->id == "corpse") {
+  for (size_t i = 0; i < g->m.i_at(g->u.xpos(), g->u.ypos()).size(); i++) {
+   if (g->m.i_at(g->u.xpos(), g->u.ypos())[i].type->id == "corpse") {
     add_message(LESSON_BUTCHER);
-    i = g->m.i_at(g->u.posx, g->u.posy).size();
+    i = g->m.i_at(g->u.xpos(), g->u.ypos()).size();
    }
   }
  }
 
  bool showed_message = false;
- for (int x = g->u.posx - 1; x <= g->u.posx + 1 && !showed_message; x++) {
-  for (int y = g->u.posy - 1; y <= g->u.posy + 1 && !showed_message; y++) {
+ for (int x = g->u.xpos() - 1; x <= g->u.xpos() + 1 && !showed_message; x++) {
+  for (int y = g->u.ypos() - 1; y <= g->u.ypos() + 1 && !showed_message; y++) {
    if (g->m.ter(x, y) == t_door_o) {
     add_message(LESSON_OPEN);
     showed_message = true;
@@ -116,7 +112,7 @@ void tutorial_game::per_turn()
   }
  }
 
- if (!g->m.i_at(g->u.posx, g->u.posy).empty())
+ if (!g->m.i_at(g->u.xpos(), g->u.ypos()).empty())
   add_message(LESSON_PICKUP);
 }
 
@@ -129,11 +125,11 @@ void tutorial_game::post_action(action_id act)
  switch (act) {
  case ACTION_RELOAD:
   if (g->u.weapon.is_gun() && !tutorials_seen[LESSON_GUN_FIRE]) {
-   monster tmp(GetMType("mon_zombie"), g->u.posx, g->u.posy - 6);
+   monster tmp(GetMType("mon_zombie"), g->u.xpos(), g->u.ypos() - 6);
    g->add_zombie(tmp);
-   tmp.spawn(g->u.posx + 2, g->u.posy - 5);
+   tmp.spawn(g->u.xpos() + 2, g->u.ypos() - 5);
    g->add_zombie(tmp);
-   tmp.spawn(g->u.posx - 2, g->u.posy - 5);
+   tmp.spawn(g->u.xpos() - 2, g->u.ypos() - 5);
    g->add_zombie(tmp);
    add_message(LESSON_GUN_FIRE);
   }
@@ -150,8 +146,8 @@ void tutorial_game::post_action(action_id act)
  case ACTION_USE:
   if (g->u.has_amount("grenade_act", 1))
    add_message(LESSON_ACT_GRENADE);
-  for (int x = g->u.posx - 1; x <= g->u.posx + 1; x++) {
-   for (int y = g->u.posy - 1; y <= g->u.posy + 1; y++) {
+  for (int x = g->u.xpos() - 1; x <= g->u.xpos() + 1; x++) {
+   for (int y = g->u.ypos() - 1; y <= g->u.ypos() + 1; y++) {
     if (g->m.tr_at(x, y) == tr_bubblewrap)
      add_message(LESSON_ACT_BUBBLEWRAP);
    }

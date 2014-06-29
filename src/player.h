@@ -773,9 +773,15 @@ public:
  void calculate_portions(int &x, int &y, int &z, int maximum);
 
 // ---------------VALUES-----------------
+protected:
  int posx, posy;
- inline int xpos() { return posx; }
- inline int ypos() { return posy; }
+public:
+ inline int xpos() const { return posx; }
+ inline int ypos() const { return posy; }
+ // Set posx and posy, calls game::update_map if this is the player character
+ void setpos(int x, int y);
+ // calls setpos(p.x, p.y)
+ void setpos(const point &p);
  int view_offset_x, view_offset_y;
  bool in_vehicle;       // Means player sit inside vehicle on the tile he is now
  bool controlling_vehicle;  // Is currently in control of a vehicle
@@ -938,6 +944,9 @@ private:
     int id; // A unique ID number, assigned by the game class private so it cannot be overwritten and cause save game corruptions.
     //NPCs also use this ID value. Values should never be reused.
 
+    void manage_fire_exposure(int fireStrength = 1);
+    void handle_cough(int intensity = 1, int volume = 4);
+    friend class map;
 };
 
 #endif
