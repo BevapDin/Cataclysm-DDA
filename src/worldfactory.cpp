@@ -60,6 +60,7 @@ WORLD::WORLD()
 
     world_saves.clear();
     active_mod_order = world_generator->get_mod_manager()->get_default_mods();
+    main_seed = rng( INT_MIN, INT_MAX );
 }
 
 worldfactory::worldfactory()

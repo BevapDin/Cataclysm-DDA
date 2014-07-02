@@ -218,6 +218,9 @@ public:
      */
     overmap *get_existing(int x, int y);
 
+    // in overmap terrain coordinates
+    int get_omt_seed(int x, int y);
+
     typedef std::pair<point, std::string> t_point_with_note;
     typedef std::vector<t_point_with_note> t_notes_vector;
     t_notes_vector get_all_notes(int z) {

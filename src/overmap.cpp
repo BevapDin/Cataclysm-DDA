@@ -611,6 +611,7 @@ overmap::overmap(int x, int y)
     , nullret("")
     , nullbool(false)
     , nullstr("")
+    , main_seed( rng( INT_MIN, INT_MAX ) )
 {
     // STUB: need region map:
     // settings = regionmap->calculate_settings( loc );
@@ -834,6 +835,8 @@ void overmap::generate(const overmap *north, const overmap *east,
     std::vector<city> road_points; // cities and roads_out together
     std::vector<point> river_start;// West/North endpoints of rivers
     std::vector<point> river_end; // East/South endpoints of rivers
+    // Use overmap seed to allow regenerating an identical map
+    std::srand( main_seed );
 
     // Determine points where rivers & roads should connect w/ adjacent maps
     const oter_id river_center("river_center"); // optimized comparison.

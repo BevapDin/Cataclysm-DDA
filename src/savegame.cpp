@@ -400,6 +400,8 @@ void overmap::unserialize(std::ifstream & fin, std::string const & plrfilename,
             fin >> cx >> cy >> cs;
             tmp.x = cx; tmp.y = cy; tmp.s = cs;
             cities.push_back(tmp);
+        } else if( datatype == 'S' ) {
+            fin >> main_seed;
         } else if (datatype == 'R') { // Road leading out
             fin >> cx >> cy;
             tmp.x = cx; tmp.y = cy; tmp.s = 0;
@@ -623,6 +625,7 @@ void overmap::save() const
     }
     fout << std::endl;
 
+    fout << "S " << main_seed << "\n";
     for( auto &mgv : zg ) {
         auto &mg = mgv.second;
         fout << "Z " << mg.type << " " << mg.posx << " " << mg.posy << " " <<

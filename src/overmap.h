@@ -454,6 +454,8 @@ public:
     void add_mon_group(const mongroup &group);
     // not available because *every* overmap needs location, so use the other constructor.
     overmap() = delete;
+
+    int main_seed;
 };
 
 // TODO: readd the stream operators

@@ -24,6 +24,7 @@ struct WORLD {
      * should be loaded for this world.
      */
     std::vector<std::string> active_mod_order;
+    int main_seed;
 
     WORLD();
 };

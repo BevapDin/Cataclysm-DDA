@@ -602,6 +602,12 @@ overmapbuffer::t_notes_vector overmapbuffer::get_notes(int z, const std::string*
     return result;
 }
 
+int overmapbuffer::get_omt_seed( int x, int y )
+{
+    overmap &om = get_om_global( x, y );
+    return om.main_seed + x * OMAPY + y;
+}
+
 bool overmapbuffer::is_safe(int x, int y, int z)
 {
     overmap &om = get_om_global(x, y);

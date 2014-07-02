@@ -87,6 +87,7 @@ void map::generate(const int x, const int y, const int z, const int turn)
     }
     density = density / 100;
 
+    std::srand( overmap_buffer.get_omt_seed( overx, overy ) );
     draw_map(terrain_type, t_north, t_east, t_south, t_west, t_neast, t_seast, t_nwest, t_swest,
              t_above, turn, density, z, rsettings);
 
