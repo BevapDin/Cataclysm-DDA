@@ -1,4 +1,5 @@
 #include "crafting_inventory_t.h"
+#include "messages.h"
 #include "game.h"
 #include "bionics.h"
 #include "player.h"
@@ -35,7 +36,7 @@ void crafting_inventory_t::init(game *g, int range)
     // iterator of all bionics of the player and grab the toolsets automaticly
     // This allows easy addition of more toolsets
     for(std::vector<bionic>::const_iterator a = p->getMyBionics().begin(); a != p->getMyBionics().end(); ++a) {
-        add_bio_toolset(*a, g->turn);
+        add_bio_toolset(*a, calendar::turn);
     }
 }
 
@@ -247,7 +248,7 @@ void crafting_inventory_t::gather_input(recipe &making, solution &s, player_acti
     if(toolfactor > 0.0 && toolfactor != 1.0) {
         int move_points = activity.moves_left;
         move_points = static_cast<int>(move_points * toolfactor);
-        g->add_msg("craft-factors: tool: %f", toolfactor);
+        add_msg("craft-factors: tool: %f", toolfactor);
         activity.moves_left = move_points;
     }
 }
@@ -1102,7 +1103,7 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
             }
             if(surroundings == NULL) {
 //                debugmsg("surrounding %s is gone - will recreate it", tmpstr.c_str());
-                item it(itypes[tmpstr], (int) g->turn);
+                item it(itypes[tmpstr], calendar::turn);
                 it.charges = 50;
                 cinv.surround.push_back(item_from_surrounding(tmppnt, it));
                 surroundings = &(cinv.surround.back());
@@ -1337,7 +1338,7 @@ double crafting_inventory_t::calc_time_modi(const candvec &tools) {
         }
         assert(modi > 0);
         if(worst_modi == 0.0 || worst_modi < modi) {
-            g->add_msg("Tool %s has time modi %f", a->get_item().name.c_str(), modi);
+            add_msg("Tool %s has time modi %f", a->get_item().name.c_str(), modi);
             worst_modi = modi;
         }
     }
@@ -2592,7 +2593,7 @@ void crafting_inventory_t::add_vpart(vehicle *veh, int mpart, const std::string 
         debugmsg("Missing template for vpart pseudo item %s", type.c_str());
         return;
     }
-    item vpart_item(item_controller->find_template(type), (int) g->turn);
+    item vpart_item(item_controller->find_template(type), calendar::turn);
     if(fuel.empty() || fuel == "null" || fuel == "NULL") {
         vpart_item.charges = -1;
     } else {

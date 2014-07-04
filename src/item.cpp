@@ -10,6 +10,7 @@
 #include "options.h"
 #include "uistate.h"
 #include "helper.h" //to_string_int
+#include "messages.h"
 
 #include <cmath> // floor
 #include <sstream>
@@ -440,7 +441,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
         if ( debug == true ) {
             if( g != NULL ) {
                 dump->push_back(iteminfo("BASE", _("age: "), "",
-                                         (int(g->turn) - bday) / (10 * 60), true, "", true, true));
+                                         (int(calendar::turn) - bday) / (10 * 60), true, "", true, true));
                 int maxrot = 0;
                 item * food = NULL;
                 if( goes_bad() ) {
@@ -454,7 +455,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
                 }
                 if ( food != NULL && maxrot != 0 ) {
                     dump->push_back(iteminfo("BASE", _("bday rot: "), "",
-                                             (int(g->turn) - food->bday), true, "", true, true));
+                                             (int(calendar::turn) - food->bday), true, "", true, true));
                     dump->push_back(iteminfo("BASE", _("temp rot: "), "",
                                              (int)food->rot, true, "", true, true));
                     dump->push_back(iteminfo("BASE", _(" max rot: "), "",
@@ -1340,7 +1341,7 @@ std::string item::tname( unsigned int quantity, bool with_prefix )
                 ret << _(" (rotten)");
             } else if ( rot < 100 ) {
                 ret << _(" (fresh)");
-            } else if ((int)g->turn > ((int)food_type->spoils - 12) * 600 + (int)(food->bday)) {
+            } else if ((int)calendar::turn > ((int)food_type->spoils - 12) * 600 + (int)(food->bday)) {
                 ret << _(" (nearly rotten)");
             }
         }
@@ -1547,7 +1548,20 @@ int item::volume(bool unit_value, bool precise_value ) const
         ret *= 1000;
     }
 
-    if (count_by_charges()) {
+    static const std::string RIGID_FLAG("RIGID");
+    if (is_container() && !has_flag(RIGID_FLAG)) {
+        // non-rigid container add the volume of the content
+        int tmpvol = 0;
+        for (size_t i = 0; i < contents.size(); i++) {
+            tmpvol += contents[i].volume(false, true);
+        }
+        if (!precise_value) {
+            tmpvol /= 1000;
+        }
+        ret += tmpvol;
+    }
+
+    if (count_by_charges() || made_of(LIQUID)) {
         if ( unit_value == false ) {
             ret *= charges;
         }
@@ -1614,7 +1628,7 @@ int item::damage_cut() const
         }
 }
 
-bool item::has_flag(std::string f) const
+bool item::has_flag(const std::string &f) const
 {
     bool ret = false;
 
@@ -1705,7 +1719,7 @@ bool item::rotten()
 
 void item::calc_rot()
 {
-    const int now = g->turn;
+    const int now = calendar::turn;
     if ( last_rot_check + 10 < now ) {
         const int since = ( last_rot_check == 0 ? bday : last_rot_check );
         const int until = ( fridge > 0 ? fridge : now );
@@ -1714,7 +1728,7 @@ void item::calc_rot()
             int old = rot;
             rot += get_rot_since( since, until );
             if (g->debugmon) {
-                g->add_msg("r: %s %d,%d %d->%d", type->id.c_str(), since, until, old, rot );
+                add_msg("r: %s %d,%d %d->%d", type->id.c_str(), since, until, old, rot );
             }
         }
         last_rot_check = now;
@@ -1750,7 +1764,7 @@ bool item::ready_to_revive()
     if(can_revive() == false) {
         return false;
     }
-    int age_in_hours = (int(g->turn) - bday) / (10 * 60);
+    int age_in_hours = (int(calendar::turn) - bday) / (10 * 60);
     age_in_hours -= int((float)burnt / volume() * 24);
     if (damage > 0)
     {
@@ -3194,43 +3208,6 @@ int item::get_remaining_capacity_for_liquid(const item &liquid, LIQUID_FILL_ERRO
     return remaining_capacity;
 }
 
-bool item::use_charges(const itype_id &type_to_use, long &amount, std::list<item> &usedup, bool check_contents) {
-	// Check contents first
-	for(size_t m = 0; check_contents && m < contents.size() && amount > 0; m++) {
-		if(contents[m].use_charges(type_to_use, amount, usedup)) {
-			contents.erase(contents.begin() + m);
-			m--;
-		}
-	}
-	if(amount <= 0 || charges <= 0 || type == NULL) {
-		return false;
-	}
-	if(!matches_type(type_to_use)) {
-		return false;
-	}
-    const float modi = type->getChargesModi(type_to_use);
-	// Now check the actual item
-	// 1. store used charges in resulting list,
-	// 2. decrease charges
-	// 3. decide if item must be destroyed
-    // Normalized count of charges e.g. for a crude welder wwith
-    // 150 charges this becames 100.
-    const long charges_norm = static_cast<long>(charges / modi);
-    // Number of charges that get used up
-    const long used_charges = std::min(amount, charges_norm);
-    item tmp = *this;
-    // item.charges is behind the modifier, so if 50 charges
-    // get used up, but the item is a crude welder the
-    // actually used up charges for this item are 75.
-    tmp.charges = static_cast<long>(used_charges * modi);
-    assert(tmp.charges <= charges); // Don't consume more than we have
-    charges -= tmp.charges;
-    amount -= used_charges;
-    assert(charges >= 0);
-    usedup.push_back(tmp);
-    return (charges == 0 && destroyed_at_zero_charges());
-}
-
 bool item::matches_type(const itype_id &type_) const {
 	if(type != 0) {
 		if(type->id == type_) {
@@ -3342,6 +3319,88 @@ int item::amount_of(const itype_id &it, bool used_as_tool) const
         count += contents[k].amount_of(it, used_as_tool);
     }
     return count;
+}
+
+bool item::use_amount(const itype_id &it, int &quantity, bool use_container, std::list<item> &used)
+{
+    // First, check contents
+    bool used_item_contents = false;
+    for (std::vector<item>::iterator a = contents.begin(); a != contents.end() && quantity > 0; ) {
+        if (a->use_amount(it, quantity, use_container, used)) {
+            a = contents.erase(a);
+            used_item_contents = true;
+        } else {
+            ++a;
+        }
+    }
+    // Now check the item itself
+    if (use_container && used_item_contents) {
+        return true;
+    } else if (matches_type(it) && quantity > 0 && contents.empty()) {
+        used.push_back(*this);
+        quantity--;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+long item::charges_of(const itype_id &it) const
+{
+    long count = 0;
+    if (matches_type(it) && contents.empty()) {
+        // If we're specifically looking for a container, only say we have it if it's empty.
+        if (charges < 0) {
+            count++;
+        } else {
+            count += charges;
+        }
+    } else {
+        for (std::vector<item>::const_iterator a = contents.begin(); a != contents.end(); ++a) {
+            count += a->charges_of(it);
+        }
+    }
+    return count;
+}
+
+bool item::use_charges(const itype_id &it, long &quantity, std::list<item> &used)
+{
+    // First, check contents
+    for (std::vector<item>::iterator a = contents.begin(); a != contents.end() && quantity > 0; ) {
+        if (a->use_charges(it, quantity, used)) {
+            a = contents.erase(a);
+        } else {
+            ++a;
+        }
+    }
+    // Now check the item itself
+    if (!matches_type(it) || quantity <= 0 || !contents.empty()) {
+        return false;
+    }
+    const float modi = type->getChargesModi(it);
+    // Normalized quantity e.g. for a crude welder:
+    // quantity 100 becames 150.
+    const long quantity_norm = static_cast<long>(charges * modi);
+    // Maximal amount that can be used, not more than we have
+    // e.g. this has only 100 charges, but 150 were requested -> to_be_used=100
+    const long to_be_used = std::min(quantity_norm, charges);
+    if (charges <= quantity_norm) {
+        // Convert remaining back: 100 for crude welder -> 100/1.5=66
+        const long used_quantity = static_cast<long>(to_be_used / modi);
+        used.push_back(*this);
+        if (charges < 0) {
+            quantity--;
+        } else {
+            quantity -= used_quantity;
+        }
+        charges = 0;
+        return destroyed_at_zero_charges();
+    }
+    used.push_back(*this);
+    used.back().charges = quantity_norm;
+    charges -= quantity_norm;
+    quantity = 0;
+    return false;
 }
 
 const item_category &item::get_category() const
@@ -3461,7 +3520,7 @@ int item::add_ammo_to_quiver(player *u, bool isAutoPickup)
                 if(!(worn->contents.empty()) && worn->contents[0].charges > 0) {
                     if(worn->contents[0].type->id != type->id) {
                         if(!isAutoPickup) {
-                            g->add_msg_if_player(u, _("Those aren't the same arrows!"));
+                            u->add_msg_if_player(_("Those aren't the same arrows!"));
                         }
 
                         //only return false if this is last quiver in the loop
@@ -3473,7 +3532,7 @@ int item::add_ammo_to_quiver(player *u, bool isAutoPickup)
                     }
                     if(worn->contents[0].charges >= maxArrows) {
                         if(!isAutoPickup) {
-                            g->add_msg_if_player(u, _("That %s is already full!"), worn->name.c_str());
+                            u->add_msg_if_player(_("That %s is already full!"), worn->name.c_str());
                         }
 
                         //only return false if this is last quiver in the loop
@@ -3507,7 +3566,7 @@ int item::add_ammo_to_quiver(player *u, bool isAutoPickup)
                 }
 
                 arrowsStored = worn->contents[0].charges - arrowsStored;
-                g->add_msg_if_player(u, ngettext("You store %d %s in your %s.", "You store %d %ss in your %s.", arrowsStored),
+                u->add_msg_if_player(ngettext("You store %d %s in your %s.", "You store %d %ss in your %s.", arrowsStored),
                                      arrowsStored, worn->contents[0].name.c_str(), worn->name.c_str());
                 u->moves -= std::min(100, movesPerArrow * arrowsStored);
                 arrowsQuivered += arrowsStored;
@@ -3521,7 +3580,7 @@ int item::add_ammo_to_quiver(player *u, bool isAutoPickup)
             clone.charges = charges;
             u->i_add(clone);
 
-            g->add_msg_if_player(u, ngettext("You pick up: %d %s", "You pick up: %d %ss", charges),
+            u->add_msg_if_player(ngettext("You pick up: %d %s", "You pick up: %d %ss", charges),
                              charges, clone.name.c_str());
             u->moves -= 100;
 
@@ -3557,4 +3616,21 @@ int item::max_charges_from_flag(std::string flagName)
     }
 
     return maxCharges;
+}
+
+int item::butcher_factor() const
+{
+    int butcher_factor = INT_MAX;
+    if (has_quality("CUT") && !has_flag("SPEAR")) {
+        int butcher_factor = volume() * 5 - weight() / 75 - damage_cut();
+        if (damage_cut() <= 20) {
+            butcher_factor *= 2;
+        }
+        return butcher_factor;
+    } else {
+        for(std::vector<item>::const_iterator a = contents.begin(); a != contents.end(); ++a) {
+            butcher_factor = std::min(butcher_factor, a->butcher_factor());
+        }
+    }
+    return butcher_factor;
 }

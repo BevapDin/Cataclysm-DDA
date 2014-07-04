@@ -13,6 +13,7 @@ import os
 # there may be some non-json files in data/raw
 not_json = {
     "sokoban.txt",
+    "main.lua"
 }
 
 # these objects have no translatable strings
@@ -65,6 +66,7 @@ automatically_convertible = {
     "skill",
     "snippet",
     "speech",
+    "start_location",
     "terrain",
     "tool_quality",
     "TOOL",

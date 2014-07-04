@@ -235,6 +235,9 @@ int main(int argc, char *argv[])
     // ncurses stuff
     initOptions();
     load_options(); // For getting size options
+#ifdef LOCALIZE
+    setlocale(LC_ALL, OPTIONS["USE_LANG"].getValue().c_str());
+#endif // LOCALIZE
     if (initscr() == NULL) { // Initialize ncurses
         DebugLog() << "initscr failed!\n";
         return 1;

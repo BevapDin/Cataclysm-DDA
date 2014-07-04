@@ -11,6 +11,7 @@
 #include "inventory.h"
 #include "item_factory.h"
 #include "catacharset.h"
+#include "messages.h"
 #include <queue>
 #include "crafting_inventory_t.h"
 #include "helper.h"
@@ -241,7 +242,7 @@ bool game::crafting_allowed()
 bool game::crafting_can_see()
 {
     if (u.fine_detail_vision_mod() > 4) {//minimum LL_LOW of LL_DARK + (ELFA_NV or atomic_light) (vs 2.5)
-        g->add_msg(_("You can't see to craft!"));
+        add_msg(_("You can't see to craft!"));
         return false;
 
     }
@@ -1074,8 +1075,9 @@ static void draw_recipe_subtabs(WINDOW *w, craft_cat tab, craft_subcat subtab, b
     wrefresh(w);
 }
 
-void game::pick_recipes(crafting_inventory_t& crafting_inv, std::vector<recipe*> &current,
-                         std::vector<bool> &available, craft_cat tab, craft_subcat subtab, std::string filter)
+void game::pick_recipes(crafting_inventory_t &crafting_inv, std::vector<recipe *> &current,
+                        std::vector<bool> &available, craft_cat tab,
+                        craft_subcat subtab, std::string filter)
 {
     bool search_name = true;
     bool search_tool = false;
@@ -1223,7 +1225,7 @@ void game::make_all_craft(recipe *making)
 
 item recipe::create_result() const
 {
-    item newit(item_controller->find_template(result), g->turn, 0, false);
+    item newit(item_controller->find_template(result), calendar::turn, 0, false);
     if (result_mult != 1) {
         newit.charges *= result_mult;
     }
@@ -1255,14 +1257,17 @@ void game::complete_craft()
 
     // It's tough to craft with paws.  Fortunately it's just a matter of grip and fine-motor,
     // not inability to see what you're doing
-    if (u.has_trait("PAWS")) {
+    if (u.has_trait("PAWS") || u.has_trait("PAWS_LARGE")) {
         int paws_rank_penalty = 0;
+        if (u.has_trait("PAWS_LARGE")) {
+            paws_rank_penalty += 1;
+        }
         if (making->skill_used == Skill::skill("electronics")) {
-            paws_rank_penalty = 1;
+            paws_rank_penalty += 1;
         } else if (making->skill_used == Skill::skill("tailor")) {
-            paws_rank_penalty = 1;
+            paws_rank_penalty += 1;
         } else if (making->skill_used == Skill::skill("mechanics")) {
-            paws_rank_penalty = 1;
+            paws_rank_penalty += 1;
         }
         skill_dice -= paws_rank_penalty * 4;
     }
@@ -1277,7 +1282,7 @@ void game::complete_craft()
     int diff_roll  = dice(diff_dice,  diff_sides);
 
     if (making->skill_used) {
-        u.practice(turn, making->skill_used, making->difficulty * 5 + 20, (int)making->difficulty * 1.25);
+        u.practice(calendar::turn, making->skill_used, making->difficulty * 5 + 20, (int)making->difficulty * 1.25);
     }
 
     crafting_inventory_t crafting_inv(this, &u);
@@ -1361,7 +1366,7 @@ void game::complete_craft()
             new_count = 1;
         }
         u.i_add_or_drop(newit, new_count);
-        g->add_msg("%s", newit.tname().c_str());
+        add_msg("%s", newit.tname().c_str());
     }
 }
 
@@ -1560,7 +1565,7 @@ void game::complete_disassemble()
 
     // disassembly only nets a bit of practice
     if (dis->skill_used) {
-        u.practice(turn, dis->skill_used, (dis->difficulty) * 2, dis->difficulty);
+        u.practice(calendar::turn, dis->skill_used, (dis->difficulty) * 2, dis->difficulty);
     }
 
     for (unsigned j = 0; j < dis->components.size(); j++) {
@@ -1587,7 +1592,7 @@ void game::complete_disassemble()
         }
 
         int compcount = comp.count;
-        item newit(itt, turn);
+        item newit(itt, calendar::turn);
         // Compress liquids and counted-by-charges items into one item,
         // they are added together on the map anyway and handle_liquid
         // should only be called once to put it all into a container at once.
@@ -1695,13 +1700,13 @@ void pop_recipe_to_top(recipe *r) {
     }
 }
 
-static void check_component_list(const std::vector<std::vector<component> > &vec,
-                                 const std::string &rName)
+void check_component_list(const std::vector<std::vector<component> > &vec,
+                                 const std::string &display_name)
 {
     for (std::vector<std::vector<component> >::const_iterator b = vec.begin(); b != vec.end(); b++) {
         for (std::vector<component>::const_iterator c = b->begin(); c != b->end(); c++) {
             if (!item_controller->has_template(c->type)) {
-                debugmsg("%s in recipe %s is not a valid item template", c->type.c_str(), rName.c_str());
+                debugmsg("%s in %s is not a valid item template", c->type.c_str(), display_name.c_str());
             }
         }
     }
@@ -1723,8 +1728,9 @@ void check_recipe_definitions()
         for (recipe_list::iterator list_iter = map_iter->second.begin();
              list_iter != map_iter->second.end(); ++list_iter) {
             const recipe &r = **list_iter;
-            ::check_component_list(r.tools, r.ident);
-            ::check_component_list(r.components, r.ident);
+            const std::string display_name = std::string("recipe ") + r.ident;
+            ::check_component_list(r.tools, display_name);
+            ::check_component_list(r.components, display_name);
             ::check_qualities(r.qualities, r.ident);
             if (!item_controller->has_template(r.result)) {
                 debugmsg("result %s in recipe %s is not a valid item template", r.result.c_str(), r.ident.c_str());
@@ -1772,7 +1778,7 @@ void remove_ammo(item *dis_item) {
     }
     if (dis_item->is_gun() && dis_item->curammo != NULL && dis_item->ammo_type() != "NULL") {
         item ammodrop;
-        ammodrop = item(dis_item->curammo, g->turn);
+        ammodrop = item(dis_item->curammo, calendar::turn);
         ammodrop.charges = dis_item->charges;
         if (ammodrop.made_of(LIQUID)) {
             while(!g->handle_liquid(ammodrop, false, false)) {
@@ -1785,7 +1791,7 @@ void remove_ammo(item *dis_item) {
     }
     if (dis_item->is_tool() && dis_item->charges > 0 && dis_item->ammo_type() != "NULL") {
         item ammodrop;
-        ammodrop = item(item_controller->find_template(default_ammo(dis_item->ammo_type())), g->turn);
+        ammodrop = item(item_controller->find_template(default_ammo(dis_item->ammo_type())), calendar::turn);
         ammodrop.charges = dis_item->charges;
         if (dis_item->typeId() == "adv_UPS_off" || dis_item->typeId() == "adv_UPS_on") {
             ammodrop.charges /= 500;

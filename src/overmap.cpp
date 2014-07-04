@@ -2969,15 +2969,16 @@ void overmap::polish(const int z, const std::string &terrain_type)
                 // Sometimes a bridge will start at the edge of a river,
                 // and this looks ugly.
                 // So, fix it by making that square normal road;
-                // bit of a kludge but it works.
+                // also taking other road pieces that may be next
+		// to it into account. A bit of a kludge but it works.
                 } else if (ter(x, y, z) == "bridge_ns" &&
                            (!is_river(ter(x - 1, y, z)) ||
                             !is_river(ter(x + 1, y, z)))) {
-                    ter(x, y, z) = "road_ns";
+                    good_road("road", x, y, z);
                 } else if (ter(x, y, z) == "bridge_ew" &&
                            (!is_river(ter(x, y - 1, z)) ||
                             !is_river(ter(x, y + 1, z)))) {
-                    ter(x, y, z) = "road_ew";
+                    good_road("road", x, y, z);
                 } else if (check_ot_type("road", x, y, z)) {
                     good_road("road", x, y, z);
                 }
@@ -3610,15 +3611,15 @@ void overmap::place_mongroups()
 {
     // Cities are full of zombies
     for( size_t i = 0; i < cities.size(); i++ ) {
-        if( !one_in(16) || cities[i].s > 5 ) {
-            if( ACTIVE_WORLD_OPTIONS["WANDER_SPAWNS"] ) {
-                zg.push_back (mongroup("GROUP_ZOMBIE", (cities[i].x * 2), (cities[i].y * 2), 0,
-                                       int(cities[i].s * 2.5), cities[i].s * 80));
+        if( ACTIVE_WORLD_OPTIONS["WANDER_SPAWNS"] ) {
+            if( !one_in(16) || cities[i].s > 5 ) {
+                zg.push_back( mongroup("GROUP_ZOMBIE", (cities[i].x * 2), (cities[i].y * 2), 0,
+                                       int(cities[i].s * 2.5), cities[i].s * 80) );
+                zg.back().set_target( zg.back().posx, zg.back().posy );
+                zg.back().horde = true;
+                zg.back().wander();
             }
         }
-        zg.back().set_target( zg.back().posx, zg.back().posy );
-        zg.back().horde = true;
-        zg.back().wander();
         if( !ACTIVE_WORLD_OPTIONS["STATIC_SPAWN"] ) {
             zg.push_back( mongroup("GROUP_ZOMBIE", (cities[i].x * 2), (cities[i].y * 2), 0,
                                    int(cities[i].s * 2.5), cities[i].s * 80) );
