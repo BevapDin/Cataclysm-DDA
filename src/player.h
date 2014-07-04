@@ -699,20 +699,6 @@ public:
 
 
 
-
-
-
- typedef std::map<const itype*, int> FoodEnjoyabilitMapy;
- FoodEnjoyabilitMapy food_enjoyability;
- typedef std::vector<const itype*> LeastRecentlyMealsVector;
- LeastRecentlyMealsVector least_recently_meals;
- 
- int get_food_enjoyability(const itype &type);
- int add_least_recently_meal(const itype &type);
- int get_combined_food_enjoyability(const itype &type);
-
-
-
  item& i_add(item it);
  // Sets invlet and adds to inventory if possible, drops otherwise, returns true if either succeeded.
  // An optional qty can be provided (and will perform better than separate calls).

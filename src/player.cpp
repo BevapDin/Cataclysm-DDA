@@ -309,8 +309,6 @@ player& player::operator= (const player & rhs)
 
  illness = rhs.illness;
  addictions = rhs.addictions;
- food_enjoyability = rhs.food_enjoyability;
- least_recently_meals = rhs.least_recently_meals;
  memorial_log = rhs.memorial_log;
 
  nv_cached = false;
@@ -7019,7 +7017,7 @@ bool player::covered_with_flag(const std::string flag, int parts) const {
   int covered = 0;
 
   for (std::vector<item>::const_reverse_iterator armorPiece = worn.rbegin(); armorPiece != worn.rend(); ++armorPiece) {
-    int cover = dynamic_cast<it_armor*>(armorPiece->type)->covers & parts;
+    int cover = dynamic_cast<it_armor *>(armorPiece->type)->covers & parts;
 
     if (!cover) continue; // For our purposes, this piece covers nothing.
     if (cover & covered) continue; // the body part(s) is already covered.
@@ -7829,16 +7827,11 @@ void player::consume_effects(item *eaten, it_comest *comest, bool rotten)
     if (eaten->has_flag("HOT") && eaten->has_flag("EATEN_HOT")) {
         add_morale(MORALE_FOOD_HOT, 5, 10);
     }
-    int fun = comest->fun;
-    if(comest->nutr != 0 || comest->quench != 0) {
-        int meal_enjoy = get_combined_food_enjoyability(*eaten->type);
-        fun += meal_enjoy;
-    }
     if (has_trait("GOURMAND")) {
-        if (fun < -2) {
-            add_morale(MORALE_FOOD_BAD, fun * 0.5, fun, 60, 30, false, comest);
-        } else if (fun > 0) {
-            add_morale(MORALE_FOOD_GOOD, fun * 3, fun * 6, 60, 30, false, comest);
+        if (comest->fun < -2) {
+            add_morale(MORALE_FOOD_BAD, comest->fun * 0.5, comest->fun, 60, 30, false, comest);
+        } else if (comest->fun > 0) {
+            add_morale(MORALE_FOOD_GOOD, comest->fun * 3, comest->fun * 6, 60, 30, false, comest);
         }
         if (has_trait("GOURMAND") && !(has_trait("HIBERNATE"))) {
         if ((comest->nutr > 0 && hunger < -60) || (comest->quench > 0 && thirst < -60)) {
@@ -7884,10 +7877,10 @@ void player::consume_effects(item *eaten, it_comest *comest, bool rotten)
             thirst = -620;
         }
     } else {
-        if (fun < 0) {
-            add_morale(MORALE_FOOD_BAD, fun * 2, fun * 6, 60, 30, false, comest);
-        } else if (fun > 0) {
-            add_morale(MORALE_FOOD_GOOD, fun * 2, fun * 4, 60, 30, false, comest);
+        if (comest->fun < 0) {
+            add_morale(MORALE_FOOD_BAD, comest->fun * 2, comest->fun * 6, 60, 30, false, comest);
+        } else if (comest->fun > 0) {
+            add_morale(MORALE_FOOD_GOOD, comest->fun * 2, comest->fun * 4, 60, 30, false, comest);
         }
         if ((comest->nutr > 0 && hunger < -20) || (comest->quench > 0 && thirst < -20)) {
             add_msg_if_player(_("You can't finish it all!"));
@@ -8292,16 +8285,6 @@ bool player::wear_item(item *to_wear, bool interactive)
             if(interactive) {
                 add_msg(m_info, wearing_something_on(bp_head) ?
                                 _("You can't wear another helmet!") : _("You can't wear a helmet!"));
-            }
-            return false;
-        }
-        
-        if ((armor->covers & (mfb(bp_hands) | mfb(bp_arms) | mfb(bp_torso) | mfb(bp_legs) | mfb(bp_feet) | mfb(bp_head))) &&
-        (has_trait("HUGE") || has_trait("HUGE_OK")))
-        {
-            if(interactive)
-            {
-                add_msg(_("The %s is much too small to fit your huge body!"), armor->name.c_str());
             }
             return false;
         }
@@ -10627,61 +10610,6 @@ void player::shift_destination(int shiftx, int shifty)
         it->x += shiftx;
         it->y += shifty;
     }
-}
-
-int player::get_food_enjoyability(const itype &type) {
-    if(type.id == "water" || type.id == "water_clean") {
-        return 0;
-    }
-    FoodEnjoyabilitMapy::const_iterator a = food_enjoyability.find(&type);
-    if(a != food_enjoyability.end()) {
-        return a->second;
-    }
-    int f = rng(-5, +5);
-    food_enjoyability[&type] = f;
-    if(f > 3) {
-        add_msg_if_player("You think you might like this %s.", type.name.c_str());
-    } else if(f < -3) {
-        add_msg_if_player("You think you might hate this %s", type.name.c_str());
-    }
-    return f;
-}
-
-int player::add_least_recently_meal(const itype &type) {
-    if(type.id == "water" || type.id == "water_clean") {
-        return 0;
-    }
-    int r = 0;
-    for(int a = 0; a < least_recently_meals.size(); a++) {
-        if(&type == least_recently_meals[a]) {
-            r += a + 1;
-        }
-    }
-    if(least_recently_meals.size() > 0) {
-        r = r / least_recently_meals.size();
-    }
-    least_recently_meals.push_back(&type);
-    while(least_recently_meals.size() > 100) {
-        least_recently_meals.erase(least_recently_meals.begin());
-    }
-    return (r / 10) - 4;
-}
-
-int player::get_combined_food_enjoyability(const itype &type) {
-    if(type.id == "water" || type.id == "water_clean") {
-        return 0;
-    }
-    int fe = get_food_enjoyability(type);
-    int lrf = add_least_recently_meal(type);
-    if(lrf > 16) {
-        add_msg_if_player("You really don't like this %s anymore", type.name.c_str());
-    } else if(lrf > 8) {
-        add_msg_if_player("You'r tired of eating the same %s", type.name.c_str());
-    } else if(lrf > 3) {
-        add_msg_if_player("You think about eating other stuff, too.");
-    }
-    add_msg_if_player("fe: %d, lrf: %d", fe, lrf);
-    return fe - lrf;
 }
 
 player::PickupFailReason player::add_item(const item &it) {

@@ -336,21 +336,6 @@ void player::serialize(JsonOut &json, bool save_contents) const
     }
     json.end_array();
 
-    json.member( "food_enjoyability" );
-    json.start_array();
-    for (FoodEnjoyabilitMapy::const_iterator iter = food_enjoyability.begin(); iter != food_enjoyability.end(); ++iter) {
-        json.write( iter->first->id );
-        json.write( iter->second );
-    }
-    json.end_array();
-
-    json.member( "least_recently_meals" );
-    json.start_array();
-    for (LeastRecentlyMealsVector::const_iterator iter = least_recently_meals.begin(); iter != least_recently_meals.end(); ++iter) {
-        json.write( (*iter)->id );
-    }
-    json.end_array();
-
     // :(
     json.member( "morale", morale );
 
@@ -466,33 +451,6 @@ void player::deserialize(JsonIn &jsin)
         while ( parray.has_more() ) {
             if ( parray.read_next(pstr) ) {
                 learned_recipes[ pstr ] = recipe_by_name( pstr );
-            }
-        }
-    }
-
-    if (data.has_array("food_enjoyability")) {
-        parray = data.get_array("food_enjoyability");
-        if ( !parray.empty() ) {
-            food_enjoyability.clear();
-            std::string pstr;
-            int pint;
-            while ( parray.has_more() ) {
-                if ( parray.read_next(pstr) && parray.read_next(pint) && itypes.count(pstr) > 0 ) {
-                    food_enjoyability[itypes[pstr]] = pint;
-                }
-            }
-        }
-    }
-
-    if (data.has_array("least_recently_meals")) {
-        parray = data.get_array("least_recently_meals");
-        if ( !parray.empty() ) {
-            least_recently_meals.clear();
-            std::string pstr;
-            while ( parray.has_more() ) {
-                if ( parray.read_next(pstr) && itypes.count(pstr) > 0 ) {
-                    least_recently_meals.push_back(itypes[pstr]);
-                }
             }
         }
     }
