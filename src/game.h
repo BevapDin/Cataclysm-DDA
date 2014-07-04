@@ -439,8 +439,6 @@ public:
  // ignore_player determines if player is affected, useful for bionic, etc.
  void shockwave(int x, int y, int radius, int force, int stun, int dam_mult, bool ignore_player);
 
- bool player_can_see_on_overmap(int x, int y);
-
 
 // Animation related functions
   void draw_explosion(int x, int y, int radius, nc_color col);
@@ -567,7 +565,6 @@ public:
   bool forced_gate_closing(int x, int y, ter_id door_type, int bash_dmg);
 
   bool vehicle_near ();
-  bool vehicle_with_tank_near(const ammotype &fueltype);
   void handbrake ();
   void control_vehicle(); // Use vehicle controls  '^'
   void examine(int examx = -1, int examy = -1);// Examine nearby terrain  'e'
@@ -679,34 +676,6 @@ public:
   void display_scent();   // Displays the scent map
   void mondebug();        // Debug monster behavior directly
   void groupdebug();      // Get into on monster groups
-  
-  overmap *getOverMap(int &omx, int &omy);
-  /**
-   * Try to spawn a new horde. This may fail because of different reasons.
-   * Simply call this method every n turns (or each turn witha one-in-n change).
-   */
-  void spawn_horde();
-  /**
-   * Goes through all the hordes and moves them.
-   */
-  void move_hordes();
-  /**
-   * Attract the nearby hordes to the sound.
-   * called from sound(), x and y are local coordinates!
-   */
-  void attract_hordes(int x, int y, int vol);
-  /**
-   * If hordes are in the current map area, spawn some of the member
-   * of that horde.
-   */
-  void spawn_horde_members();
-  /**
-   * If the monster is a horde-monster (part of the matching monster group),
-   * put it back into a horde.
-   * @returns true if this monster has been despawned. Otherwise false.
-   * The monster is not despawned if it is not a horde monster (not a zombie).
-   */
-  bool try_despawn_to_horde(monster &m, int shiftx = 0, int shifty = 0);
 
 // ########################## DATA ################################
 

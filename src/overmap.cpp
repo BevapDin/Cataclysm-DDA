@@ -20,7 +20,6 @@
 #include "input.h"
 #include "json.h"
 #include <queue>
-#include <cassert>
 #include "mapdata.h"
 #include "mapgen.h"
 #define dbg(x) dout((DebugLevel)(x),D_MAP_GEN) << __FILE__ << ":" << __LINE__ << ": "

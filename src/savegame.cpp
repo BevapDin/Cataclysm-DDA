@@ -667,7 +667,6 @@ void overmap::save()
             zg[i].posz << " " << int(zg[i].radius) << " " << zg[i].population << " " <<
             zg[i].diffuse << " " << zg[i].dying << " " <<
             zg[i].horde << " " << zg[i].tx << " " << zg[i].ty << " " << zg[i].interest << std::endl;
-            
     for (int i = 0; i < cities.size(); i++)
         fout << "t " << cities[i].x << " " << cities[i].y << " " << cities[i].s << std::endl;
     for (int i = 0; i < roads_out.size(); i++)

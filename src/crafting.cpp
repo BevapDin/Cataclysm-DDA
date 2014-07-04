@@ -152,8 +152,6 @@ void load_recipe(JsonObject &jsobj)
                              requires_skills, difficulty, time, reversible,
                              autolearn, learn_by_disassembly, result_mult);
 
-
-
     jsarr = jsobj.get_array("components");
     load_obj_list(jsarr, rec->components);
 
@@ -1211,6 +1209,7 @@ void game::make_craft(recipe *making)
     u.lastrecipe = making;
 }
 
+
 void game::make_all_craft(recipe *making)
 {
     u.assign_activity(ACT_LONGCRAFT, making->time, making->id);
@@ -1220,40 +1219,6 @@ void game::make_all_craft(recipe *making)
     crafting_inventory_t craft_inv(g, &g->u);
     craft_inv.gather_input(*making, u.activity);
     u.lastrecipe = making;
-}
-
-bool deserialize_item_list(JsonIn &json, std::list<item> &x) {
-    JsonArray data = json.get_array();
-    item it;
-    for(size_t i = 0; i < data.size(); i++) {
-        JsonObject obj(data.get_object(i));
-        it.deserialize(obj);
-        if(!it.is_null()) {
-            x.push_back(it);
-        }
-    }
-    return true;
-}
-
-bool from_uncraft_tag(const std::string &data, std::list<item> &comps, std::list<item> &tools) {
-    if(data.length() < 10 || data.compare(0, 8, "UNCRAFT:") != 0) {
-        return false;
-    }
-    std::istringstream buffer(data.substr(8));
-    try {
-        bool result = false;
-        JsonIn json(buffer);
-        json.start_array();
-        if(deserialize_item_list(json, comps)) {
-            if(deserialize_item_list(json, tools)) {
-                result = true;
-            }
-        }
-        json.end_array();
-        return result;
-    } catch(...) {
-        return false;
-    }
 }
 
 item recipe::create_result() const
@@ -1386,6 +1351,8 @@ void game::complete_craft()
         newit.charges = 0;
     }
     if (newit.made_of(LIQUID)) {
+        //while ( u.inv.slice_filter_by_capacity_for_liquid(newit).size() > 0 ){
+        // ^ failed container controls, they don't detect stacks of the same empty container after only one of them is filled
         newit.charges *= new_count;
         while(!handle_liquid(newit, false, false)) { ; }
     } else {
@@ -1492,7 +1459,6 @@ void game::disassemble(int pos)
     }
 
     item *dis_item = &u.i_at(pos);
-
     recipe *cur_recipe = get_disassemble_recipe(dis_item->type->id);
     if (cur_recipe != NULL) {
         crafting_inventory_t crafting_inv(this, &u);

@@ -2967,8 +2967,10 @@ int iuse::solder_weld(player *p, item *it, bool)
             }
 
             std::vector<component> comps;
-            comps.push_back(component(repair_item, items_needed));
-            comps.back().available = true;
+            if (items_needed > 0) {
+                comps.push_back(component(repair_item, items_needed));
+                comps.back().available = true;
+            }
 
             if (fix->damage == 0) {
                 p->moves -= 500 * p->fine_detail_vision_mod();

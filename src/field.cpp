@@ -494,12 +494,9 @@ bool map::process_fields_in_submap(submap * const current_submap, const int subm
                                 } else if (it->burnt < cur->getFieldDensity()) {
                                     destroyed = it->burn(1);
                                     smoke++;
-                                } else if (one_in(40)) {
-                                    destroyed = it->burn(1);
-                                    smoke++;
                                 }
 
-                            } else if ((it->made_of("cotton") || it->made_of("leather") || it->made_of("fur") || it->made_of("wool"))) {
+                            } else if ((it->made_of("cotton") || it->made_of("wool"))) {
                                 //Cotton and Wool burn slowly but don't feed the fire much.
                                 if (vol <= cur->getFieldDensity() * 5 || cur->getFieldDensity() == 3) {
                                     cur->setFieldAge(cur->getFieldAge() - 1);
@@ -507,9 +504,6 @@ bool map::process_fields_in_submap(submap * const current_submap, const int subm
                                     smoke++;
                                     consumed++;
                                 } else if (it->burnt < cur->getFieldDensity()) {
-                                    destroyed = it->burn(1);
-                                    smoke++;
-                                } else if (one_in(40)) {
                                     destroyed = it->burn(1);
                                     smoke++;
                                 }
@@ -522,9 +516,6 @@ bool map::process_fields_in_submap(submap * const current_submap, const int subm
                                     smoke += 3;
                                     consumed++;
                                 } else if (it->burnt < cur->getFieldDensity() * 5 || cur->getFieldDensity() >= 2) {
-                                    destroyed = it->burn(1);
-                                    smoke++;
-                                } else if (one_in(40)) {
                                     destroyed = it->burn(1);
                                     smoke++;
                                 }

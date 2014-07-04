@@ -34,8 +34,6 @@
 #include "debug.h"
 #define dbg(x) dout((DebugLevel)(x),D_GAME) << __FILE__ << ":" << __LINE__ << ": "
 
-extern bool from_uncraft_tag(const std::string &data, std::list<item> &comps, std::list<item> &tools);
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///// player.h
 
@@ -771,9 +769,6 @@ void inventory::json_save_invcache(JsonOut &json) const
 {
     json.start_array();
     for( std::map<std::string, std::vector<char> >::const_iterator invlet_id =  invlet_cache.begin(); invlet_id != invlet_cache.end(); ++invlet_id ) {
-        if(invlet_id->second.empty()) {
-            continue;
-        }
         json.start_object();
         json.member( invlet_id->first );
         json.start_array();
@@ -1220,19 +1215,6 @@ void vehicle::deserialize(JsonIn &jsin)
     data.read("name",name);
 
     data.read("parts", parts);
-    bool xfound = false;
-	for(int i = 0; i < parts.size(); i++) {
-        if(parts[i].mount_dx == 0 && parts[i].mount_dy == 0) {
-            xfound = true;
-            break;
-        }
-    }
-    if(!xfound) {
-		parts.push_back(vehicle_part());
-		parts.back().id = "frame_horizontal";
-		parts.back().hp = 1;
-	}
-
 /*
     for(int i=0;i < parts.size();i++ ) {
        parts[i].setid(parts[i].id);

@@ -7639,24 +7639,6 @@ bool game::vehicle_near ()
  return false;
 }
 
-bool game::vehicle_with_tank_near (const ammotype &fueltype)
-{
-    for(int dx = -1; dx <= 1; dx++) {
-        for (int dy = -1; dy <= 1; dy++) {
-            vehicle *veh = m.veh_at(u.posx + dx, u.posy + dy);
-            if(veh == NULL) {
-                continue;
-            }
-            const int left = veh->fuel_left(fueltype);
-            const int capacity = veh->fuel_capacity(fueltype);
-            if(left < capacity) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 bool game::refill_vehicle_part (vehicle &veh, vehicle_part *part, bool test)
 {
   vpart_info part_info = vehicle_part_types[part->id];
@@ -10302,7 +10284,7 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
         return false;
     }
 
-    if (liquid.type->id == "gasoline" && vehicle_with_tank_near(liquid.type->id) && query_yn(_("Refill vehicle?"))) {
+    if (liquid.type->id == "gasoline" && vehicle_near() && query_yn(_("Refill vehicle?"))) {
         int vx = u.posx, vy = u.posy;
         refresh_all();
         if (!choose_adjacent(_("Refill vehicle where?"), vx, vy)) {

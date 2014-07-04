@@ -30,39 +30,6 @@ enum astar_list {
  ASL_CLOSED
 };
 
-struct furn_flag_cache {
-    const std::string flag;
-    std::vector<bool> furns;
-    furn_flag_cache(const std::string &f) : flag(f) { }
-    bool operator[](furn_id id) {
-        if(furns.empty()) {
-            furns.resize(furnlist.size(), false);
-            for(size_t i = 0; i < furnlist.size(); i++) {
-                if(furnlist[i].has_flag(flag)) {
-                    furns[i] = true;
-                }
-            }
-        }
-        return furns[id];
-    }
-};
-struct ter_flag_cache {
-    const std::string flag;
-    std::vector<bool> ters;
-    ter_flag_cache(const std::string &f) : flag(f) { }
-    bool operator[](ter_id id) {
-        if(ters.empty()) {
-            ters.resize(terlist.size(), false);
-            for(size_t i = 0; i < terlist.size(); i++) {
-                if(terlist[i].has_flag(flag)) {
-                    ters[i] = true;
-                }
-            }
-        }
-        return ters[id];
-    }
-};
-
 map::map(int mapsize)
 {
     nulter = t_null;
@@ -1272,41 +1239,6 @@ int map::combined_movecost(const int x1, const int y1,
     return (cost1 + cost2 + modifier) * mult / 2;
 }
 
-inline bool transparent_vpart(vehicle *veh, int part) {
-    const int dx = veh->parts[part].mount_dx;
-    const int dy = veh->parts[part].mount_dy;
-    static std::set<std::string> opaque_parts;
-    static std::set<std::string> openable_parts;
-    if(opaque_parts.empty()) {
-        for(std::map<std::string, vpart_info>::iterator a = vehicle_part_types.begin(); a != vehicle_part_types.end(); ++a) {
-            if(a->second.has_flag(VPFLAG_OPAQUE)) {
-                opaque_parts.insert(a->first);
-                // transparent parts are always transparent, even if closed
-                if(a->second.has_flag(VPFLAG_OPENABLE)) {
-                    openable_parts.insert(a->first);
-                }
-            }
-        }
-    }
-    for (size_t i = 0; i < veh->parts.size(); i++) {
-        if (veh->parts[i].hp <= 0) {
-            continue;
-        }
-        if (veh->parts[i].mount_dx == dx && veh->parts[i].mount_dy == dy) {
-            if(openable_parts.count(veh->parts[i].id) > 0) {
-                if(veh->parts[i].open) {
-                    return true; // transparent because open
-                }
-                // The openable list contains only opaque parts, this one is closed
-                return false;
-            } else if(opaque_parts.count(veh->parts[i].id) > 0) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 bool map::trans(const int x, const int y)
 {
     // Control statement is a problem. Normally returning false on an out-of-bounds
@@ -1316,25 +1248,15 @@ bool map::trans(const int x, const int y)
     vehicle *veh = veh_at(x, y, vpart);
     bool tertr;
     if (veh) {
-        tertr = transparent_vpart(veh, vpart);
-    } else {
-        static std::vector<bool> furn_transparent;
-        static std::vector<bool> ter_transparent;
-        if(furn_transparent.empty()) {
-            furn_transparent.resize(furnlist.size(), false);
-            for(size_t i = 0; i < furnlist.size(); i++) {
-                if(furnlist[i].transparent) {
-                    furn_transparent[i] = true;
-                }
-            }
-            ter_transparent.resize(terlist.size(), false);
-            for(size_t i = 0; i < terlist.size(); i++) {
-                if(terlist[i].transparent) {
-                    ter_transparent[i] = true;
-                }
+        tertr = veh->part_with_feature(vpart, VPFLAG_OPAQUE) < 0;
+        if (!tertr) {
+            const int dpart = veh->part_with_feature(vpart, VPFLAG_OPENABLE);
+            if (dpart >= 0 && veh->parts[dpart].open) {
+                tertr = true; // open opaque door
             }
         }
-        tertr = ter_transparent[ter(x, y)] && furn_transparent[furn(x, y)];
+    } else {
+        tertr = has_flag_ter_and_furn(TFLAG_TRANSPARENT, x, y);
     }
     if( tertr ) {
         // Fields may obscure the view, too
@@ -1358,83 +1280,28 @@ bool map::trans(const int x, const int y)
     return false; //failsafe block vision
 }
 
-extern void vpart_range(vehicle *veh, int &part_begin, int &part_end, int dx, int dy);
-
-inline bool obstacle_non_open_door(const vehicle *veh, int part) {
-    const int dx = veh->parts[part].mount_dx;
-    const int dy = veh->parts[part].mount_dy;
-    static std::set<std::string> obstacle_parts;
-    static std::set<std::string> openable_parts;
-    if(obstacle_parts.empty()) {
-        for(std::map<std::string, vpart_info>::iterator a = vehicle_part_types.begin(); a != vehicle_part_types.end(); ++a) {
-            if(a->second.has_flag(VPFLAG_OBSTACLE)) {
-                obstacle_parts.insert(a->first);
-            }
-            if(a->second.has_flag(VPFLAG_OPENABLE)) {
-                if(!a->second.has_flag(VPFLAG_OBSTACLE)) {
-                    continue;
-                }
-                openable_parts.insert(a->first);
-            }
-        }
-    }
-    int end;
-    vpart_range(const_cast<vehicle*>(veh), part, end, dx, dy);
-    for(int i = part; i < end; i++) {
-        if(veh->parts[i].hp <= 0) {
-            continue;
-        }
-        if(openable_parts.count(veh->parts[i].id) > 0) {
-            if(veh->parts[i].open) {
-                return false;
-            }
-            return true;
-        } else if(obstacle_parts.count(veh->parts[i].id) > 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool map::is_bashable(const int x, const int y) const {
-    if(!INBOUNDS(x, y)) {
-        return false;
-    }
-    const int nonant = int(x / SEEX) + int(y / SEEY) * my_MAPSIZE;
-    const int lx = x % SEEX;
-    const int ly = y % SEEY;
-    
-    static furn_flag_cache furn_bashable("BASHABLE");
-    static ter_flag_cache ter_bashable("BASHABLE");
-    
-    if(veh_in_active_range && veh_exists_at[x][y]) {
-        std::pair<int,int> point(x,y);
-        std::map< std::pair<int,int>, std::pair<vehicle*,int> >::const_iterator it;
-        if((it = veh_cached_parts.find(point)) != veh_cached_parts.end()) {
-            int vpart = it->second.second;
-            const vehicle *veh = it->second.first;
-            if(veh && obstacle_non_open_door(veh, vpart)) {
-                return true;
-            }
-        } else {
-            debugmsg("vehicle part cache cache indicated vehicle not found: %d %d",x,y);
-        }
-    }
-    if(ter_bashable[grid[nonant]->ter[lx][ly]]) {
-        return true;
-    }
-    if(furn_bashable[grid[nonant]->frn[lx][ly]]) {
-        return true;
-    }
-    return false;
-}
-
 bool map::has_flag(const std::string &flag, const int x, const int y) const
 {
- if ("BASHABLE" == flag) {
-  return is_bashable(x, y);
- }
- return (terlist[ter(x, y)].has_flag(flag) || (furnlist[furn(x, y)].has_flag(flag)));
+    static const std::string flag_str_BASHABLE("BASHABLE"); // construct once per runtime, slash delay 90%
+    if (!INBOUNDS(x, y)) {
+        return false;
+    }
+    // veh_at const no bueno
+    if (veh_in_active_range && veh_exists_at[x][y] && flag_str_BASHABLE == flag) {
+        std::map< std::pair<int, int>, std::pair<vehicle *, int> >::const_iterator it;
+        if ((it = veh_cached_parts.find( std::make_pair(x, y) )) != veh_cached_parts.end()) {
+            const int vpart = it->second.second;
+            vehicle *veh = it->second.first;
+            if (veh->parts[vpart].hp > 0 && // if there's a vehicle part here...
+                veh->part_with_feature (vpart, VPFLAG_OBSTACLE) >= 0) {// & it is obstacle...
+                const int p = veh->part_with_feature (vpart, VPFLAG_OPENABLE);
+                if (p < 0 || !veh->parts[p].open) { // and not open door
+                    return true;
+                }
+            }
+        }
+    }
+    return has_flag_ter_or_furn(flag, x, y);
 }
 
 bool map::can_put_items(const int x, const int y)
@@ -3290,6 +3157,7 @@ std::list<item> map::use_charges(const point origin, const int range,
                             tmp.charges = veh->drain(ftype, quantity);
                             quantity -= tmp.charges;
                             ret.push_back(tmp);
+
                             if (quantity == 0) {
                                 return ret;
                             }
@@ -4789,15 +4657,12 @@ void map::build_outside_cache()
         return;
     }
     memset(outside_cache, true, sizeof(outside_cache));
-    
-    static furn_flag_cache furn_indoors("INDOORS");
-    static ter_flag_cache ter_indoors("INDOORS");
 
     for(int x = 0; x < SEEX * my_MAPSIZE; x++)
     {
         for(int y = 0; y < SEEY * my_MAPSIZE; y++)
         {
-            if( ter_indoors[ter(x, y)] || furn_indoors[furn(x, y)])
+            if( has_flag_ter_or_furn(TFLAG_INDOORS, x, y))
             {
                 for( int dx = -1; dx <= 1; dx++ )
                 {
@@ -4828,19 +4693,13 @@ void map::build_transparency_cache()
    // Default to fully transparent.
    transparency_cache[x][y] = LIGHT_TRANSPARENCY_CLEAR;
 
-   assert(INBOUNDS(x, y));
-   const int nonant = int(x / SEEX) + int(y / SEEY) * my_MAPSIZE;
-   const int lx = x % SEEX;
-   const int ly = y % SEEY;
-   submap &sm = *(grid[nonant]);
- 
-   if ( !terlist[sm.ter[lx][ly]].transparent || !furnlist[sm.frn[lx][ly]].transparent ) {
+   if ( !terlist[ter(x, y)].transparent || !furnlist[furn(x, y)].transparent ) {
     transparency_cache[x][y] = LIGHT_TRANSPARENCY_SOLID;
     continue;
    }
 
    //Quoted to see if this works!
-   field &curfield = sm.fld[lx][ly];
+   field &curfield = field_at(x,y);
    if(curfield.fieldCount() > 0){
     field_entry *cur = NULL;
     for(std::map<field_id, field_entry*>::iterator field_list_it = curfield.getFieldStart(); field_list_it != curfield.getFieldEnd(); ++field_list_it){

@@ -24,9 +24,6 @@
 #include <dirent.h>
 #endif
 
-// If defined: showing the credits triggers a segfault
-#define DEBUG_BACKTRACE
-
 #define dbg(x) dout((DebugLevel)(x),D_GAME) << __FILE__ << ":" << __LINE__ << ": "
 extern worldfactory *world_generator;
 
@@ -254,11 +251,6 @@ bool game::opening_screen()
 
         if (layer == 1) {
             if (sel1 == 0) { // Print the MOTD.
-#if defined DEBUG_BACKTRACE
-                char *szTemp = (char*) 0x1;
-                *szTemp = '9';
-                printf("%s", szTemp);
-#endif
                 for (int i = 0; i < motd.size() && i < 16; i++) {
                     mvwprintz(w_open, i + 6, 8 + extra_w / 2, c_ltred, motd[i].c_str());
                 }
