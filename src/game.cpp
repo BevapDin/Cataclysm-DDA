@@ -980,37 +980,6 @@ bool game::do_turn()
         }
     }
 
-    if(calendar::turn % HOURS(1) == 0 && !u.worn.empty() && one_in(10)) {
-        std::vector<item*> items[6];
-        for(std::vector<item>::iterator a = u.worn.begin(); a != u.worn.end(); ++a) {
-            item &it = *a;
-            if(it.damage >= -1 && it.damage < 5) {
-                items[it.damage + 1].push_back(&it);
-            }
-        }
-        std::vector<item*> item_to_wear;
-        for(int i = 0; i < 6; i++) {
-            item_to_wear.insert(item_to_wear.begin(), items[i].begin(), items[i].end());
-            if(item_to_wear.size() >= 3) {
-                break;
-            }
-        }
-        if(item_to_wear.size() > 0) {
-            int i = rng(0, item_to_wear.size() - 1);
-            item &it = *(item_to_wear[i]);
-            if(it.damage >= 4) {
-                add_msg("Your %s wears completly away", it.tname().c_str());
-                assert(!u.worn.empty());
-                const int index = &it - &(u.worn[0]);
-                assert(index >= 0 && index < u.worn.size());
-                u.worn.erase(u.worn.begin() + index);
-            } else {
-                add_msg("Your %s wears further", it.tname().c_str());
-                it.damage++;
-            }
-        }
-    }
-
     // Even if we're not Exhausted, we really should be feeling lack/sleep earlier
     // Penalties start at Dead Tired and go from there
     if (u.fatigue >= 383 && !u.has_disease("sleep")){
