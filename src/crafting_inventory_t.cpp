@@ -2351,9 +2351,18 @@ crafting_inventory_t::requirement::requirement(const component &comp, bool as_to
     if(as_tool) {
         if(req > 0) {
             this->count = req;
-            this->ctype = C_CHARGES;
+            itype *it = item_controller->find_template(type);
+            if(type.compare(0, 5, "func:") == 0) {
+                it = item_controller->find_template(type.substr(5));
+            }
+            it_tool *itt = dynamic_cast<it_tool*>(it);
+            if(itt != nullptr && itt->max_charges > 0) {
+                this->ctype = C_CHARGES;
+            } else {
+                this->ctype = C_AMOUNT;
+            }
         } else {
-            this->count = 1;
+            this->count = std::max(1, abs(req));
             this->ctype = C_AMOUNT;
         }
     } else {
