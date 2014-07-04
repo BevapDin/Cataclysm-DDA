@@ -623,7 +623,7 @@
         "post_terrain" : "t_chainfence_posts"
     },{
         "type" : "construction",
-        "description" : "Build wire Fence",
+        "description" : "Build Wire Fence",
         "difficulty" : 3,
         "time" : 20,
         "components" : [
@@ -675,7 +675,7 @@
         "type" : "construction",
         "description" : "Build Log & Sod Roof",
         "difficulty" : 3,
-        "time" : 0,
+        "time" : 40,
         "tools" : [
             ["func:hammering"], ["func:shovel"]
         ],

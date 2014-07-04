@@ -218,7 +218,7 @@ void monster::move()
 
     //Hallucinations have a chance of disappearing each turn
     if (is_hallucination() && one_in(25)) {
-        die();
+        dead = true;
         return;
     }
 
@@ -230,7 +230,7 @@ void monster::move()
     if (has_flag(MF_REGENERATES_50)) {
         if (hp < type->hp) {
             if (one_in(2)) {
-                add_msg(_("The %s is visibly regenerating!"), name().c_str());
+                add_msg(m_warning, _("The %s is visibly regenerating!"), name().c_str());
             }
             hp += 50;
             if(hp > type->hp) {
@@ -241,7 +241,7 @@ void monster::move()
     if (has_flag(MF_REGENERATES_10)) {
         if (hp < type->hp) {
             if (one_in(2)) {
-                add_msg(_("The %s seems a little healthier."), name().c_str());
+                add_msg(m_warning, _("The %s seems a little healthier."), name().c_str());
             }
             hp += 10;
             if(hp > type->hp) {
@@ -723,7 +723,7 @@ int monster::attack_at(int x, int y) {
 
         // Special case: Target is hallucination
         if(mon.is_hallucination()) {
-            g->kill_mon(mondex);
+            mon.dead = true;
 
             // We haven't actually attacked anything, i.e. we can still do things.
             // Hallucinations(obviously) shouldn't affect the way real monsters act.
@@ -781,11 +781,11 @@ int monster::move_to(int x, int y, bool force)
 
     if(was_water && !will_be_water && g->u_see(x, y)) {
         //Use more dramatic messages for swimming monsters
-        add_msg(_("A %s %s from the %s!"), name().c_str(),
+        add_msg(m_warning, _("A %s %s from the %s!"), name().c_str(),
                    has_flag(MF_SWIMS) || has_flag(MF_AQUATIC) ? _("leaps") : _("emerges"),
                    g->m.tername(posx(), posy()).c_str());
     } else if(!was_water && will_be_water && g->u_see(x, y)) {
-        add_msg(_("A %s %s into the %s!"), name().c_str(),
+        add_msg(m_warning, _("A %s %s into the %s!"), name().c_str(),
                    has_flag(MF_SWIMS) || has_flag(MF_AQUATIC) ? _("dives") : _("sinks"),
                    g->m.tername(x, y).c_str());
     }
@@ -805,9 +805,8 @@ int monster::move_to(int x, int y, bool force)
     if (!digging() && !has_flag(MF_FLIES) &&
           g->m.tr_at(posx(), posy()) != tr_null) { // Monster stepped on a trap!
         trap* tr = traplist[g->m.tr_at(posx(), posy())];
-        if (dice(3, type->sk_dodge + 1) < dice(3, tr->avoidance)) {
-            trapfuncm f;
-            (f.*(tr->actm))(this, posx(), posy());
+        if (dice(3, type->sk_dodge + 1) < dice(3, tr->get_avoidance())) {
+            tr->trigger(this, posx(), posy());
         }
     }
     // Diggers turn the dirt into dirtmound

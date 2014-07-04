@@ -2,11 +2,10 @@
 #include "inventory.h"
 #include "game.h"
 #include "mapdata.h"
-#include "item_factory.h"
 #include "crafting_inventory_t.h"
 
 const std::string inv_chars =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#&()*+./:;=?@[\\]^_{|}";
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#&()*+./:;=@[\\]^_{|}";
 
 invslice inventory::slice()
 {
@@ -15,36 +14,6 @@ invslice inventory::slice()
         stacks.push_back(&*iter);
     }
     return stacks;
-}
-
-inventory inventory::subset(std::map<int, int> chosen) const
-{
-    int i = 0;
-    inventory ret;
-    for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter) {
-        // don't need to worry about auto-creation of entries, as long as default == 0
-        int count = chosen[i];
-        if (count != 0) {
-            if (iter->front().count_by_charges()) {
-                item tmp = iter->front();
-                if (count <= tmp.charges && count >= 0) { // -1 is used to mean "all" sometimes
-                    tmp.charges = count;
-                }
-                ret.add_item(tmp);
-            } else {
-                for (std::list<item>::const_iterator stack_iter = iter->begin(); stack_iter != iter->end();
-                     ++stack_iter) {
-                    ret.add_item(*stack_iter);
-                    --count;
-                    if (count <= 0) {
-                        break;
-                    }
-                }
-            }
-        }
-        ++i;
-    }
-    return ret;
 }
 
 std::list<item> &inventory::stack_by_letter(char ch)
@@ -464,7 +433,7 @@ void inventory::add_item_by_type(itype_id type, int count, long charges, bool ra
 {
     // TODO add proper birthday
     while (count > 0) {
-        item tmp = item_controller->create(type, 0, rand);
+        item tmp(type, 0, rand);
         if (charges != -1) {
             tmp.charges = charges;
         }
@@ -567,7 +536,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
                 const furn_t &f = g->m.furn_at(x, y);
                 itype *type = f.crafting_pseudo_item_type();
                 if (type != NULL) {
-                    item furn_item(type, 0);
+                    item furn_item(type->id, 0);
                     const itype *ammo = f.crafting_ammo_item_type();
                     if (ammo != NULL) {
                         furn_item.charges = count_charges_in_list(ammo, g->m.i_at(x, y));
@@ -588,28 +557,28 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 
             ter_id terrain_id = g->m.ter(x, y);
             if (g->m.has_nearby_fire(x, y, 0)) {
-                item fire(itypes["fire"], 0);
+                item fire("fire", 0);
                 fire.charges = 1;
                 surround.push_back(item_from_surrounding(p, fire));
             }
             if (terrain_id == t_water_sh || terrain_id == t_water_dp) {
-                item water(itypes["water"], 0);
+                item water("water", 0);
                 water.charges = 50;
                 surround.push_back(item_from_surrounding(p, water));
             }
             if ((g->m.field_at(x, y).findField(fd_acid))) {
-                item acid(itypes["water_acid"], 0);
+                item acid("water_acid", 0);
                 acid.charges = 50;
                 surround.push_back(item_from_surrounding(p, acid));
             }
             if (terrain_id == t_swater_sh || terrain_id == t_swater_dp) {
-                item swater(itypes["water_salt"], 0);
+                item swater("water_salt", 0);
                 swater.charges = 50;
                 surround.push_back(item_from_surrounding(p, swater));
             }
             // add cvd forge from terrain
             if (terrain_id == t_cvdmachine) {
-                item cvd_machine(itypes["cvd_machine"], 0);
+                item cvd_machine("cvd_machine", 0);
                 cvd_machine.charges = 1;
                 surround.push_back(item_from_surrounding(p, cvd_machine));
             }
@@ -641,7 +610,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
             if (veh && allow_inventory_from(g, this->p, veh)) {
                 const int faupart = veh->part_with_feature(vpart, "FAUCET");
                 if (faupart >= 0) {
-                    item water(itypes["water_clean"], 0);
+                    item water("water_clean", 0);
                     water.charges = veh->fuel_left("water");
                     this->vpart.push_back(item_from_vpart(veh, veh->parts[faupart].mount_dx, veh->parts[faupart].mount_dy, water));
                 }
@@ -1244,7 +1213,7 @@ bool inventory::has_artifact_with(art_effect_passive effect) const
 bool inventory::has_liquid(itype_id type) const
 {
     // has_capacity_for_liquid needs an item, not an item type
-    const item liquid(itypes[type], calendar::turn);
+    const item liquid(type, calendar::turn);
     for (invstack::const_iterator iter = items.begin(); iter != items.end(); ++iter) {
         const item &it = iter->front();
         if (it.is_container() && !it.contents.empty()) {

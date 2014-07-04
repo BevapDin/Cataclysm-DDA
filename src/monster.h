@@ -31,6 +31,7 @@ NUM_MONSTER_EFFECTS
 enum monster_attitude {
 MATT_NULL = 0,
 MATT_FRIEND,
+MATT_FPASSIVE,
 MATT_FLEE,
 MATT_IGNORE,
 MATT_FOLLOW,
@@ -66,7 +67,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
  std::string get_material() { return type->mat; };
 
  // Access
- std::string name(); // Returns the monster's formal name
+ std::string name(unsigned int quantity = 1); // Returns the monster's formal name
  std::string name_with_armor(); // Name, with whatever our armor is called
  // the creature-class versions of the above
  std::string disp_name(bool possessive = false);
@@ -239,6 +240,11 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
 
     field_id bloodType();
     field_id gibType();
+
+    void add_msg_if_npc(const char *msg, ...);
+    void add_msg_if_npc(game_message_type type, const char *msg, ...);
+    void add_msg_player_or_npc(const char *, const char* npc_str, ...);
+    void add_msg_player_or_npc(game_message_type type, const char *, const char* npc_str, ...);
 
 // TEMP VALUES
  int wandx, wandy; // Wander destination - Just try to move in that direction

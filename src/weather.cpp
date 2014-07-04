@@ -138,7 +138,7 @@ void item::add_rain_to_container(bool acid, int charges)
     long added = charges;
     if (contents.empty()) {
         // This is easy. Just add 1 charge of the rain liquid to the container.
-        item ret(item_controller->find_template(typeId), 0);
+        item ret(typeId, 0);
         if (!acid) {
             // Funnels aren't always clean enough for water. // todo; disinfectant squeegie->funnel
             ret.poison = one_in(10) ? 1 : 0;
@@ -171,7 +171,7 @@ void item::add_rain_to_container(bool acid, int charges)
             const bool transmute = x_in_y(2*added, liq.charges);
 
             if (transmute) {
-                item transmuted(item_controller->find_template("water_acid_weak"), 0);
+                item transmuted("water_acid_weak", 0);
                 transmuted.charges = liq.charges;
                 contents[0] = transmuted;
             } else if (liq.typeId() == "water") {
@@ -199,7 +199,7 @@ double trap::funnel_turns_per_charge( double rain_depth_mm_per_hour ) const {
     if ( rain_depth_mm_per_hour == 0 ) {
         return 0;
     }
-    const item water(item_controller->find_template("water"), 0);
+    const item water("water", 0);
     const double charge_ml = (double) (water.weight()) / water.charges; // 250ml
     const double PI = 3.14159265358979f;
 
@@ -355,7 +355,7 @@ void weather_effect::light_acid()
                 if (g->u.is_wearing_power_armor(&has_helmet) && (has_helmet || !one_in(4))) {
                     add_msg(_("Your power armor protects you from the acidic drizzle."));
                 } else {
-                    add_msg(_("The acid rain stings, but is mostly harmless for now..."));
+                    add_msg(m_warning, _("The acid rain stings, but is mostly harmless for now..."));
                     if (one_in(10) && (g->u.pain < 10)) {
                         g->u.mod_pain(1);
                     }
@@ -378,7 +378,7 @@ void weather_effect::acid()
                 if (g->u.is_wearing_power_armor(&has_helmet) && (has_helmet || !one_in(2))) {
                     add_msg(_("Your power armor protects you from the acid rain."));
                 } else {
-                    add_msg(_("The acid rain burns!"));
+                    add_msg(m_bad, _("The acid rain burns!"));
                     if (one_in(2) && (g->u.pain < 100)) {
                         g->u.mod_pain( rng(1, 5) );
                     }

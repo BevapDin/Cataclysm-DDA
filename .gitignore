@@ -3,6 +3,7 @@ cataclysm-tiles
 chkjson
 !src/chkjson
 data/*.template
+templates/
 save/
 save.*/
 graveyard/
@@ -65,3 +66,7 @@ cur/
 
 # Compiled binary translations
 lang/mo/
+
+# Netbeans IDE folders
+nbproject/
+

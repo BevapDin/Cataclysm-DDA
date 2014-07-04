@@ -40,7 +40,9 @@ public:
     int fungicide           (player*, item*, bool);
     int antifungal          (player*, item*, bool);
     int antiparasitic       (player*, item*, bool);
+    int anticonvulsant      (player*, item*, bool);
     int weed                (player*, item*, bool);
+    int weed_brownie        (player*, item*, bool);
     int coke                (player*, item*, bool);
     int crack               (player*, item*, bool);
     int grack               (player*, item*, bool);
@@ -155,6 +157,7 @@ public:
     int mp3                 (player *, item *, bool);
     int mp3_on              (player *, item *, bool);
     int portable_game       (player *, item *, bool);
+    int vibe                (player *, item *, bool);
     int vortex              (player *, item *, bool);
     int dog_whistle         (player *, item *, bool);
     int vacutainer          (player *, item *, bool);
@@ -192,6 +195,7 @@ public:
     int seed                (player *, item *, bool);
     int oxygen_bottle       (player *, item *, bool);
     int atomic_battery      (player *, item *, bool);
+    int ups_battery         (player *, item *, bool);
     int fishing_rod_basic   (player *, item *, bool);
 
     int wood_gas_amount(const item &it);
@@ -205,6 +209,7 @@ public:
     int unpack_item         (player *, item *, bool);
     int pack_item           (player *, item *, bool);
     int radglove            (player *, item *, bool);
+    int robotcontrol        (player *, item *, bool);
 // MACGUFFINS
     int mcg_note            (player *, item *, bool);
 

@@ -207,7 +207,7 @@ enum m_flag {
 };
 
 struct mtype {
-    std::string id, name, description;
+    std::string id, name, name_plural, description;
     std::set<std::string> species, categories;
     long sym;
     nc_color color;
@@ -239,11 +239,14 @@ struct mtype {
     std::vector<void (mdeath::*)(monster *)> dies; // What happens when this monster dies
     unsigned int def_chance; // How likely a special "defensive" move is to trigger (0-100%, default 0)
     void (mattack::*sp_attack)(monster *); // This monster's special attack
-    void (mdefense::*sp_defense)(monster *, const projectile*); // This monster's special "defensive" move that may trigger when the monster is attacked.
-                                             // Note that this can be anything, and is not necessarily beneficial to the monster
+    // This monster's special "defensive" move that may trigger when the monster is attacked.
+    // Note that this can be anything, and is not necessarily beneficial to the monster
+    void (mdefense::*sp_defense)(monster *, const projectile*);
     // Default constructor
     mtype ();
 
+    // Used to fetch the properly pluralized monster type name
+    std::string nname(unsigned int quantity = 1) const;
     bool has_flag(m_flag flag) const;
     bool has_flag(std::string flag) const;
     void set_flag(std::string flag, bool state);

@@ -48,7 +48,7 @@ void crafting_inventory_t::add_bio_toolset(const bionic &bio, const calendar &tu
     }
     // FIXME: bionics _share_ the power!
     const std::string tool_name = prefixOut + bio.id.substr(prefixIn.length());
-    item tools(item_controller->find_template(tool_name), turn);
+    item tools(tool_name, turn);
     tools.charges = p->power_level;
     by_bionic.push_back(item_from_bionic(bio.id, tools));
 }
@@ -1103,7 +1103,7 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
             }
             if(surroundings == NULL) {
 //                debugmsg("surrounding %s is gone - will recreate it", tmpstr.c_str());
-                item it(itypes[tmpstr], calendar::turn);
+                item it(tmpstr, calendar::turn);
                 it.charges = 50;
                 cinv.surround.push_back(item_from_surrounding(tmppnt, it));
                 surroundings = &(cinv.surround.back());
@@ -2593,7 +2593,7 @@ void crafting_inventory_t::add_vpart(vehicle *veh, int mpart, const std::string 
         debugmsg("Missing template for vpart pseudo item %s", type.c_str());
         return;
     }
-    item vpart_item(item_controller->find_template(type), calendar::turn);
+    item vpart_item(type, calendar::turn);
     if(fuel.empty() || fuel == "null" || fuel == "NULL") {
         vpart_item.charges = -1;
     } else {
