@@ -2190,6 +2190,10 @@ int iuse::sew(player *p, item *it, bool)
                              fix->tname().c_str());
         return 0;
     }
+    if( std::find( repair_items.begin(), repair_items.end(), fix->typeId() ) != repair_items.end() ) {
+        p->add_msg_if_player( m_info, _( "This can be used to repair other items, not itself." ) );
+        return 0;
+    }
 
     int items_needed = ceil( fix->volume() * 0.25);
     if(fix->damage > 1) {
@@ -2579,6 +2583,12 @@ int iuse::fishing_rod_basic (player *p, item *it, bool) {
         p->add_msg_if_player(m_info, _("That water does not contain any fish, try a river instead."));
         return 0;
     }
+    
+    if ( (p->has_trait("ROOTS2") || (p->has_trait("ROOTS3"))) &&
+      g->m.has_flag("DIGGABLE", p->posx, p->posy) &&
+            (!(p->wearing_something_on(bp_feet))) ) {
+                add_msg(m_info, _("You sink your roots into the soil."));   
+            }
 
     p->add_msg_if_player( _("You cast your line and wait to hook something..."));
 
@@ -2985,6 +2995,10 @@ int iuse::solder_weld(player *p, item *it, bool)
             if(repair_items.empty()) {
                 p->add_msg_if_player(m_info, _("Your %s is not made of plastic, metal, or kevlar."),
                                      fix->tname().c_str());
+                return 0;
+            }
+            if( std::find( repair_items.begin(), repair_items.end(), fix->typeId() ) != repair_items.end() ) {
+                p->add_msg_if_player( m_info, _( "This can be used to repair other items, not itself." ) );
                 return 0;
             }
 
@@ -5855,7 +5869,7 @@ int iuse::mp3(player *p, item *it, bool)
 int iuse::mp3_on(player *p, item *it, bool t)
 {
     if (t) { // Normal use
-        if (!p->has_item(it) || p->has_disease("deaf") ) {
+        if (!p->has_item(it) || p->is_deaf() ) {
             return it->type->charges_to_use(); // We're not carrying it, or we're deaf.
         }
         p->add_morale(MORALE_MUSIC, 1, 50, 5, 2);
@@ -5914,12 +5928,27 @@ int iuse::portable_game(player *p, item *it, bool)
         switch (as_m.ret) {
             case 1:
                 loaded_software = "robot_finds_kitten";
+                if ( (p->has_trait("ROOTS2") || (p->has_trait("ROOTS3"))) &&
+                  g->m.has_flag("DIGGABLE", p->posx, p->posy) &&
+                  (!(p->wearing_something_on(bp_feet))) ) {
+                    p->add_msg_if_player(m_info, _("You sink your roots into the soil."));   
+                }
                 break;
             case 2:
                 loaded_software = "snake_game";
+                if ( (p->has_trait("ROOTS2") || (p->has_trait("ROOTS3"))) &&
+                  g->m.has_flag("DIGGABLE", p->posx, p->posy) &&
+                  (!(p->wearing_something_on(bp_feet))) ) {
+                    p->add_msg_if_player(m_info, _("You sink your roots into the soil."));   
+                }
                 break;
             case 3:
                 loaded_software = "sokoban_game";
+                if ( (p->has_trait("ROOTS2") || (p->has_trait("ROOTS3"))) &&
+                  g->m.has_flag("DIGGABLE", p->posx, p->posy) &&
+                  (!(p->wearing_something_on(bp_feet))) ) {
+                    p->add_msg_if_player(m_info, _("You sink your roots into the soil."));   
+                }
                 break;
             case 4: //Cancel
                 return 0;
@@ -7895,7 +7924,7 @@ int iuse::bell(player *p, item *it, bool)
 {
     if( it->type->id == "cow_bell" ) {
         g->sound(p->posx, p->posy, 12, _("Clank! Clank!"));
-        if ( ! p->has_disease("deaf") ) {
+        if ( ! p->is_deaf() ) {
             const int cow_factor = 1 + ( p->mutation_category_level.find("MUTCAT_CATTLE") == p->mutation_category_level.end() ?
                 0 :
                 (p->mutation_category_level.find("MUTCAT_CATTLE")->second)/8

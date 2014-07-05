@@ -1648,6 +1648,12 @@ bool map::bash(const int x, const int y, const int str, bool silent, int *res)
                     } else {
                         furn_set( x, y, f_null );
                     }
+                    // Hack alert.
+                    // Signs have cosmetics associated with them on the submap since 
+                    // furniture can't store dynamic data to disk. To prevent writing
+                    // mysteriously appearing for a sign later built here, remove the
+                    // writing from the submap.
+                    g->m.delete_signage(x, y);
                 }
                 if ( !bash->ter_set.empty() ) {
                     ter_set( x, y, bash->ter_set );
@@ -2361,6 +2367,40 @@ bool map::close_door(const int x, const int y, const bool inside, const bool che
  return false;
 }
 
+const std::string map::get_signage(const int x, const int y) const
+{
+    if (!INBOUNDS(x, y)) {
+        return "";
+    }
+
+    int lx, ly;
+    submap * const current_submap = get_submap_at(x, y, lx, ly);
+
+    return current_submap->get_signage(lx, ly);
+}
+void map::set_signage(const int x, const int y, std::string message) const
+{
+    if (!INBOUNDS(x, y)) {
+        return;
+    }
+
+    int lx, ly;
+    submap * const current_submap = get_submap_at(x, y, lx, ly);
+
+    current_submap->set_signage(lx, ly, message);
+}
+void map::delete_signage(const int x, const int y) const
+{
+    if (!INBOUNDS(x, y)) {
+        return;
+    }
+
+    int lx, ly;
+    submap * const current_submap = get_submap_at(x, y, lx, ly);
+
+    current_submap->delete_signage(lx, ly);
+}
+
 int map::get_radiation(const int x, const int y) const
 {
     if (!INBOUNDS(x, y)) {
@@ -2486,10 +2526,12 @@ itemslice map::i_stacked(std::vector<item>& items)
 
 bool map::sees_some_items(int x, int y, const player &u)
 {
-    if(i_at(x, y).empty()) {
-        // can not see non-existing items.
-        return false;
-    }
+    // can only see items if there are any items.
+    return !i_at( x, y ).empty() && could_see_items( x, y, u );
+}
+
+bool map::could_see_items(int x, int y, const player &u)
+{
     const bool container = has_flag_ter_or_furn("CONTAINER", x, y);
     const bool sealed = has_flag_ter_or_furn("SEALED", x, y);
     if (sealed && container) {

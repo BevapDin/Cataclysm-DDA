@@ -6906,6 +6906,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
+        "stack_size" : 100,
         "flags": ["SEED"]
     },
     {
@@ -6959,6 +6960,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
+        "stack_size" : 100,
         "flags": ["SEED"]
     },
     {
@@ -7001,7 +7003,7 @@
         "description" : "Some wheat seeds.",
         "material" : "wheat",
         "volume" : 1,
-        "weight" : 67,
+        "weight" : 5,
         "bashing" : 0,
         "cutting" : 0,
         "to_hit" : 0,
@@ -7012,6 +7014,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
+        "stack_size" : 40,
         "flags": ["SEED"]
     },
     {
@@ -7065,6 +7068,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 2,
+        "stack_size" : 8,
         "flags": ["SEED"]
     },
     {
@@ -7106,7 +7110,7 @@
         "description" : "Some barley seeds.",
         "material" : "veggy",
         "volume" : 1,
-        "weight" : 67,
+        "weight" : 5,
         "bashing" : 0,
         "cutting" : 0,
         "to_hit" : 0,
@@ -7117,6 +7121,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 2,
+        "stack_size" : 40,
         "flags": ["SEED"]
     },
     {
@@ -7169,6 +7174,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
+        "stack_size" : 40,
         "flags": ["SEED"]
     },
     {
@@ -7239,7 +7245,7 @@
         "description" : "Some tomato seeds.",
         "material" : "veggy",
         "volume" : 1,
-        "weight" : 67,
+        "weight" : 1,
         "bashing" : 0,
         "cutting" : 0,
         "to_hit" : 0,
@@ -7250,6 +7256,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 4,
+        "stack_size" : 100,
         "flags": ["SEED"]
     },
     {   "type" : "AMMO",
@@ -7263,7 +7270,7 @@
         "description" : "Some cotton seeds. Can be processed to produce an edible oil.",
         "material" : "veggy",
         "volume" : 1,
-        "weight" : 120,
+        "weight" : 5,
         "bashing" : 0,
         "cutting" : 0,
         "to_hit" : 0,
@@ -7274,6 +7281,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 8,
+        "stack_size" : 40,
         "flags": ["SEED"]
     },
     {
@@ -13590,6 +13598,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 1,
+        "stack_size" : 8,
         "flags": ["SEED"]
     },
     {

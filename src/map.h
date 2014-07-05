@@ -295,6 +295,12 @@ class map
   * the player is at (x,y) or at an adjacent square).
   */
  bool sees_some_items(int x, int y, const player &u);
+ /**
+  * Check if the player could see items at (x,y) if there were
+  * any items. This is similar to @ref sees_some_items, but it
+  * does not check that there are actually any items.
+  */
+ bool could_see_items(int x, int y, const player &u);
 
 
  std::string features(const int x, const int y); // Words relevant to terrain (sharp, etc)
@@ -362,7 +368,12 @@ void add_corpse(int x, int y);
  bool has_adjacent_furniture(const int x, const int y);
  void mop_spills(const int x, const int y);
 
-// Radiation
+ // Signs
+ const std::string get_signage(const int x, const int y) const;
+ void set_signage(const int x, const int y, std::string message) const;
+ void delete_signage(const int x, const int y) const;
+ 
+ // Radiation
  int get_radiation(const int x, const int y) const; // Amount of radiation at (x, y);
  void set_radiation(const int x, const int y, const int value);
 
