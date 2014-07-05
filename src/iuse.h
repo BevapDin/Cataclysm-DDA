@@ -213,6 +213,11 @@ public:
 // MACGUFFINS
     int mcg_note            (player *, item *, bool);
 
+	int radiocar(player *, item *, bool);
+	int radiocaron(player *, item *, bool);
+	int radiocontrol(player *, item *, bool);
+
+
 // ARTIFACTS
     /* This function is used when an artifact is activated.
        It examines the item's artifact-specific properties.
