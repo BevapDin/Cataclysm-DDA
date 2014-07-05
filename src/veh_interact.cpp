@@ -1551,6 +1551,7 @@ void complete_vehicle ()
             tools.push_back(component("func:welder", welder_charges));
         }
         tools.push_back(component("duct_tape", DUCT_TAPE_USED));
+        tools.push_back(component("toolbox", DUCT_TAPE_USED));
         crafting_inv.consume_any_tools(tools, true);
 
         used_item = crafting_inv.consume_vpart_item (part_id);
@@ -1602,6 +1603,7 @@ void complete_vehicle ()
             used_item = crafting_inv.consume_vpart_item (veh->parts[vehicle_part].id);
             veh->parts[vehicle_part].bigness = used_item.bigness;
             tools.push_back(component("func:wrench", -1));
+            tools.push_back(component("toolbox", -1));
             crafting_inv.consume_any_tools(tools, true);
             tools.clear();
             dd = 0;
@@ -1614,6 +1616,7 @@ void complete_vehicle ()
         }
         tools.push_back(component("func:welder", welder_charges ));
         tools.push_back(component("duct_tape", DUCT_TAPE_USED));
+        tools.push_back(component("toolbox", int(DUCT_TAPE_USED*dmg)));
         crafting_inv.consume_any_tools(tools, true);
         veh->parts[vehicle_part].hp = veh->part_info(vehicle_part).durability;
         add_msg (m_good, _("You repair the %s's %s."),
@@ -1628,6 +1631,8 @@ void complete_vehicle ()
         break;
     case 'o':
         tools.push_back(component("func:hacksaw", -1));
+        tools.push_back(component("toolbox", -1));
+        tools.push_back(component("circsaw_off", 20));
         crafting_inv.consume_any_tools(tools, true);
         // Dump contents of part at player's feet, if any.
         for (size_t i = 0; i < veh->parts[vehicle_part].items.size(); i++) {

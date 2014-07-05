@@ -1277,6 +1277,14 @@ item recipe::create_result() const
 void game::complete_craft()
 {
     recipe *making = recipe_by_index(u.activity.index); // Which recipe is it?
+    if( making == nullptr ) {
+        debugmsg( "no recipe with id %d found", u.activity.index );
+        u.activity.type = ACT_NULL;
+        return;
+    }
+    if( u.lastrecipe == nullptr ) {
+        u.lastrecipe = making; // has been lost due to save & load
+    }
     craft_count[making->ident]++;
 
     // # of dice is 75% primary skill, 25% secondary (unless secondary is null)
@@ -1577,6 +1585,11 @@ void game::complete_disassemble()
     const int item_pos = u.activity.values[0];
     const bool from_ground = u.activity.values.size() > 1 && u.activity.values[1] == 1;
     recipe *dis = recipe_by_index(u.activity.index); // Which recipe is it?
+    if( dis == nullptr ) {
+        debugmsg( "no recipe with id %d found", u.activity.index );
+        u.activity.type = ACT_NULL;
+        return;
+    }
     item *org_item;
     std::vector<item> &items_on_ground = m.i_at(u.posx, u.posy);
     if (from_ground) {
@@ -1623,8 +1636,9 @@ void game::complete_disassemble()
 
     crafting_inventory_t crafting_inv(this, &u);
     // consume tool charges
-    for (unsigned j = 0; j < dis->tools.size(); j++) {
-        crafting_inv.consume_any_tools(dis->tools[j], false);
+    for (std::vector<std::vector<component> >::iterator it = dis->tools.begin();
+         it != dis->tools.end(); ++it) {
+        crafting_inv.consume_any_tools(*it, false);
     }
 
     // add the components to the map

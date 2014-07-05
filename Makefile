@@ -104,10 +104,10 @@ RC  = $(CROSS)windres
 # enable optimizations. slow to build
 ifdef RELEASE
   ifeq ($(NATIVE), osx)
-    OTHERS += -O3
+    CXXFLAGS += -O3
   else
-    OTHERS += -Os
-    OTHERS += -s
+    CXXFLAGS += -Os
+    LDFLAGS += -s
   endif
   # OTHERS += -mmmx -m3dnow -msse -msse2 -msse3 -mfpmath=sse -mtune=native
   # Strip symbols, generates smaller executable.
@@ -365,7 +365,7 @@ all: version $(TARGET) $(L10N)
 	@
 
 $(TARGET): $(ODIR) $(DDIR) $(OBJS)
-	$(LD) $(W32FLAGS) -o $(TARGET) $(DEFINES) $(CXXFLAGS) \
+	$(LD) $(W32FLAGS) -o $(TARGET) $(DEFINES) \
           $(OBJS) $(LDFLAGS)
 
 $(TARGET).prof: CXXFLAGS += -pg -O2
