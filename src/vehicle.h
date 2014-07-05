@@ -509,6 +509,7 @@ public:
 
 // remove item from part's cargo
     void remove_item (int part, int itemdex);
+    void remove_item (int part, item *it);
 
 // Generates starting items in the car, should only be called when placed on the map
     void place_spawn_items();
@@ -639,6 +640,7 @@ public:
     int init_veh_fuel;
     int init_veh_status;
     float alternator_load;
+    int last_repair_turn; // Turn it was last repaired, used to make consecutive repairs faster.
 
     // save values
     int posx, posy;

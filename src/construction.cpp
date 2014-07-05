@@ -179,11 +179,9 @@ void construction_menu()
             // limit(28) = 30(column len) - 2(letter + ' ').
             // If we run out of hotkeys, just stop assigning them.
             std::string cur_name = available[current].c_str();
-            int edge_pos = cursorx_to_position(cur_name.c_str(), 27, NULL, -1);
-            cur_name.resize(edge_pos);
             mvwprintz(w_con, 1 + i, 1, col, "%c %s",
                       (current < hotkeys.size()) ? hotkeys[current] : ' ',
-                      cur_name.c_str());
+                      utf8_truncate(cur_name, 27).c_str());
         }
 
         if (update_info) {
@@ -559,7 +557,8 @@ void complete_construction()
     std::list<item> used_items;
     std::list<item> used_tools;
     total_inv.consume_gathered(*built, g->u.activity, used_items, used_tools);
-    g->u.practice(calendar::turn, built->skill, std::max(built->difficulty, 1) * 10);
+    g->u.practice( built->skill, std::max(built->difficulty, 1) * 10,
+                   (int)(built->difficulty * 1.25) );
 
     // Make the terrain change
     int terx = g->u.activity.placement.x, tery = g->u.activity.placement.y;

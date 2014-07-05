@@ -356,15 +356,15 @@ void veh_interact::cache_tool_availability()
     crafting_inventory_t &crafting_inv = *this->crafting_inv;
 
     long charges = dynamic_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
-    has_wrench = crafting_inv.has_amount("func:wrench", 1);
-    has_hacksaw = crafting_inv.has_amount("func:hacksaw", 1);
+    has_wrench = crafting_inv.has_tools("func:wrench", 1);
+    has_hacksaw = crafting_inv.has_tools("func:hacksaw", 1);
     has_welder = crafting_inv.has_charges("func:welder", charges);
-    has_goggles = (crafting_inv.has_amount("goggles_welding", 1) ||
+    has_goggles = (crafting_inv.has_tools("goggles_welding", 1) ||
                    g->u.has_bionic("bio_sunglasses") ||
                    g->u.is_wearing("goggles_welding") || g->u.is_wearing("rm13_armor_on"));
     has_duct_tape = (crafting_inv.has_charges("duct_tape", DUCT_TAPE_USED));
-    has_jack = crafting_inv.has_amount("func:jack", 1);
-    has_siphon = crafting_inv.has_amount("func:hose", 1);
+    has_jack = crafting_inv.has_tools("func:jack", 1);
+    has_siphon = crafting_inv.has_tools("func:hose", 1);
 
     has_wheel = crafting_inv.has_amount( "wheel", 1 ) ||
                 crafting_inv.has_amount( "wheel_wide", 1 ) ||
@@ -539,7 +539,7 @@ void veh_interact::do_install()
         fold_and_print(w_msg, 0, 1, msg_width - 2, c_ltgray,
                        _("Needs <color_%1$s>%2$s</color>, a <color_%3$s>wrench</color>, either a <color_%4$s>powered welder</color> or <color_%5$s>duct tape</color>, and level <color_%6$s>%7$d</color> skill in mechanics.%8$s"),
                        has_comps ? "ltgreen" : "red",
-                       itypes[itm]->name.c_str(),
+                       itypes[itm]->nname(1).c_str(),
                        has_wrench ? "ltgreen" : "red",
                        (has_welder && has_goggles) ? "ltgreen" : "red",
                        has_duct_tape ? "ltgreen" : "red",
@@ -630,12 +630,13 @@ void veh_interact::do_repair()
     int pos = 0;
     while (true) {
         sel_vehicle_part = &veh->parts[parts_here[need_repair[pos]]];
+        sel_vpart_info = &(vehicle_part_types[sel_vehicle_part->id]);
         werase (w_parts);
         veh->print_part_desc(w_parts, 0, parts_w, cpart, need_repair[pos]);
         wrefresh (w_parts);
         werase (w_msg);
         bool has_comps = true;
-        int dif = vehicle_part_types[sel_vehicle_part->id].difficulty + ((sel_vehicle_part->hp <= 0) ? 0 : 2);
+        int dif = sel_vpart_info->difficulty + ((sel_vehicle_part->hp <= 0) ? 0 : 2);
         bool has_skill = g->u.skillLevel("mechanics") >= dif;
         fold_and_print(w_msg, 0, 1, msg_width - 2, c_ltgray,
                        _("You need level <color_%1$s>%2$d</color> skill in mechanics."),
@@ -655,16 +656,16 @@ void veh_interact::do_repair()
                 const itype_id &itm = items_needed[a].first;
                 int count = items_needed[a].second;
                 const itype *type = itypes[itm];
-                bool has = crafting_inv->has_amount(itm, count);
+                bool has = crafting_inv->has_components(itm, count);
                 if(cc > 0) {
                     buffer << ", ";
                 }
                 cc++;
                 buffer << "<color_" << (has ? "ltgreen" : "red") << ">";
                 if(count > 1) {
-                    buffer << count << " " << type->name << "s";
+                    buffer << count << " " << type->nname(count) << "s";
                 } else {
-                    buffer << "a " << type->name;
+                    buffer << "a " << type->nname(1);
                 }
                 buffer << "</color>";
                 has_comps &= has;
@@ -1533,6 +1534,7 @@ void complete_vehicle ()
     int replaced_wheel;
     std::vector<int> parts;
     int dd = 2;
+    double dmg = 1.0;
 
     // For siphoning from adjacent vehicles
     int posx = 0;
@@ -1540,6 +1542,7 @@ void complete_vehicle ()
     std::map<point, vehicle*> foundv;
     vehicle * fillv = NULL;
 
+    // cmd = Install Repair reFill remOve Siphon Drainwater Changetire reName
     switch (cmd) {
     case 'i':
         if (has_goggles) {
@@ -1590,9 +1593,10 @@ void complete_vehicle ()
 
         add_msg (m_good, _("You install a %s into the %s."),
                     vehicle_part_types[part_id].name.c_str(), veh->name.c_str());
-        g->u.practice (calendar::turn, "mechanics", vehicle_part_types[part_id].difficulty * 5 + 20);
+        g->u.practice( "mechanics", vehicle_part_types[part_id].difficulty * 5 + 20 );
         break;
     case 'r':
+        veh->last_repair_turn = calendar::turn;
         if (veh->parts[vehicle_part].hp <= 0) {
             veh->break_part_into_pieces(vehicle_part, g->u.posx, g->u.posy);
             used_item = crafting_inv.consume_vpart_item (veh->parts[vehicle_part].id);
@@ -1614,7 +1618,7 @@ void complete_vehicle ()
         veh->parts[vehicle_part].hp = veh->part_info(vehicle_part).durability;
         add_msg (m_good, _("You repair the %s's %s."),
                     veh->name.c_str(), veh->part_info(vehicle_part).name.c_str());
-        g->u.practice (calendar::turn, "mechanics", (veh->part_info(vehicle_part).difficulty + dd) * 5 + 20);
+        g->u.practice( "mechanics", int(((veh->part_info(vehicle_part).difficulty+dd)*5+20)*dmg) );
         break;
     case 'f':
         if (!g->pl_refill_vehicle(*veh, vehicle_part, true)) {
@@ -1636,7 +1640,7 @@ void complete_vehicle ()
             used_item = veh->parts[vehicle_part].properties_to_item();
             g->m.add_item_or_charges(g->u.posx, g->u.posy, used_item);
             if(type != SEL_JACK) { // Changing tires won't make you a car mechanic
-                g->u.practice (calendar::turn, "mechanics", 2 * 5 + 20);
+                g->u.practice ( "mechanics", 2 * 5 + 20 );
             }
         } else {
             veh->break_part_into_pieces(vehicle_part, g->u.posx, g->u.posy);

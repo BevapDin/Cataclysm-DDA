@@ -740,16 +740,16 @@ void crafting_inventory_t::simple_req::check_overlay(crafting_inventory_t &cinv,
     set_unavailable(0);
 }
 
-const std::string &name(const itype_id &type) {
+std::string name(const itype_id &type) {
     const std::map<itype_id, itype*>::const_iterator a = itypes.find(type);
     if(a == itypes.end()) {
         return type;
     }
-    return a->second->name;
+    return a->second->nname(1);
 }
 
 std::string pname(const itype_id &type) {
-    const std::string &n = name(type);
+    const std::string n = name(type);
     assert(!n.empty());
     switch(n[n.length() - 1]) {
         case 's': return n;
@@ -763,7 +763,7 @@ std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requi
     if(req.ctype == crafting_inventory_t::C_CHARGES) {
         buffer << name(req.type) << " (" << req.count << ")";
     } else if(req.count == 1) {
-        const std::string &n = name(req.type);
+        const std::string n = name(req.type);
         assert(!n.empty());
         if(n[n.length() - 1] == 's') {
             buffer << n;
@@ -1338,7 +1338,7 @@ double crafting_inventory_t::calc_time_modi(const candvec &tools) {
         }
         assert(modi > 0);
         if(worst_modi == 0.0 || worst_modi < modi) {
-            add_msg("Tool %s has time modi %f", a->get_item().name.c_str(), modi);
+            add_msg("Tool %s has time modi %f", a->get_item().tname().c_str(), modi);
             worst_modi = modi;
         }
     }
@@ -1396,16 +1396,16 @@ int crafting_inventory_t::select_items_to_use(const std::vector<component> &comp
         } else if(has_different_types(candids)) {
             // several items to choose, and they are of different types, 
             // make another menu later if the user chooses this
-            options.push_back(item_controller->find_template(req.type)->name + " (different items)");
+            options.push_back(item_controller->find_template(req.type)->nname(1) + " (different items)");
             optionsIndizes.push_back(std::make_pair(ask_again, i));
         } else if(!all_equal(candids)) {
             // several items, but they are all of the same type,
             // but with differing properties - list by location,
-            options.push_back(item_controller->find_template(req.type)->name + " (different items)");
+            options.push_back(item_controller->find_template(req.type)->nname(1) + " (different items)");
             optionsIndizes.push_back(std::make_pair(ask_again, i));
         } else {
             // several items, but they are all of the same type, list by location,
-            const std::string &name = item_controller->find_template(req.type)->name;
+            const std::string name = item_controller->find_template(req.type)->nname(1);
             // Rules here are: show entry for "on person",
             // for "nearby" (if any of them apply).
             // Also show the mixed entry, but only if none of the other two
@@ -1896,11 +1896,11 @@ bool crafting_inventory_t::candidate_t::operator<(const candidate_t &other) cons
         case LT_SURROUNDING:
             CMP_IF(mapitems->position.x);
             CMP_IF(mapitems->position.y);
-            CMP_IF(surroundings->the_item.type->name);
+            CMP_IF(surroundings->the_item.type->nname(1));
             break;
     }
     if(get_item().type != other.get_item().type) {
-        return get_item().type->name < other.get_item().type->name;
+        return get_item().type->nname(1) < other.get_item().type->nname(1);
     }
     return ::memcmp(this, &other, sizeof(*this));
 }
@@ -2150,7 +2150,7 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
         case LT_VPART:
             ix = &(get_item());
             if(req.ctype == C_AMOUNT) {
-                debugmsg("attempted to consume a pseudo vehicle part item %s for %s", ix->name.c_str(), req.type.c_str());
+                debugmsg("attempted to consume a pseudo vehicle part item %s for %s", ix->tname().c_str(), req.type.c_str());
                 return;
             }
             if(ix->type->id == "vpart_KITCHEN") {
@@ -2166,13 +2166,13 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
             } else if(ix->type->id == "vpart_FORGE") {
                 drainVehicle(vpartitem->veh, *ix, "battery", req.count, used_items);
             } else {
-                debugmsg("Unknown pseudo vehicle part item %s for %s", ix->name.c_str(), req.type.c_str());
+                debugmsg("Unknown pseudo vehicle part item %s for %s", ix->tname().c_str(), req.type.c_str());
             }
             return;
         case LT_SURROUNDING:
             ix = &(get_item());
             if(req.ctype == C_AMOUNT) {
-                debugmsg("attempted to consume a pseudo surrounding item %s for %s", ix->name.c_str(), req.type.c_str());
+                debugmsg("attempted to consume a pseudo surrounding item %s for %s", ix->tname().c_str(), req.type.c_str());
                 return;
             }
             if(ix->type->id == "water" && furnlist[g->m.furn(mapitems->position.x, mapitems->position.y)].examine == &iexamine::toilet) {
@@ -2201,7 +2201,7 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
         case LT_BIONIC:
             ix = &(get_item());
             if(req.ctype == C_AMOUNT) {
-                debugmsg("attempted to consume a pseudo bionc item %s for %s", ix->name.c_str(), req.type.c_str());
+                debugmsg("attempted to consume a pseudo bionc item %s for %s", ix->tname().c_str(), req.type.c_str());
                 return;
             }
             used_items.push_back(*ix);

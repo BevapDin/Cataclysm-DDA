@@ -270,6 +270,16 @@
         ]
     },{
         "type" : "terrain",
+        "id" : "t_utility_light",
+        "name": "Utility Light",
+        "symbol": ".",
+        "color": "white",
+        "move_cost": 2,
+        "flags": [
+            "TRANSPARENT", "FLAMMABLE_HARD", "SUPPORTS_ROOF", "COLLAPSES", "INDOORS", "FLAT"
+        ]
+    },{
+        "type" : "terrain",
         "id" : "t_wall_log_half",
         "name": "half-built wall",
         "symbol": "#",
@@ -1173,7 +1183,7 @@
         "color": "yellow",
         "move_cost": 8,
         "flags": [
-            "TRANSPARENT", "FLAMMABLE", "SUPPORTS_ROOF", "MOUNTABLE"
+            "TRANSPARENT", "NOITEM", "FLAMMABLE", "SUPPORTS_ROOF", "MOUNTABLE"
         ]
     },{
         "type" : "terrain",
@@ -1182,6 +1192,15 @@
         "symbol": "0",
         "color": "ltcyan",
         "move_cost": 8,
+        "bash": {
+            "str_min": 1, "str_max": 1,
+            "sound": "glass crunching!",
+            "sound_fail": "whack!",
+            "ter_set": "t_window_empty",
+            "items": [
+                { "item": "glass_shard", "amount": 1 }
+            ]
+        },
         "flags": [
             "TRANSPARENT", "SHARP", "FLAMMABLE", "NOITEM", "SUPPORTS_ROOF", "MOUNTABLE"
         ]

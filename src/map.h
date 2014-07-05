@@ -8,11 +8,14 @@
 #include <string>
 #include <set>
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "mapdata.h"
 #include "mapitems.h"
 #include "overmap.h"
 #include "item.h"
+#include "json.h"
 #include "monster.h"
 #include "npc.h"
 #include "vehicle.h"
@@ -38,6 +41,7 @@ struct wrapped_vehicle{
 };
 
 typedef std::vector<wrapped_vehicle> VehicleList;
+typedef std::vector< std::list<item*> > itemslice;
 
 /**
  * Manage and cache data about a part of the map.
@@ -346,7 +350,7 @@ void add_corpse(int x, int y);
  bool close_door(const int x, const int y, const bool inside, const bool check_only);
  bool open_door(const int x, const int y, const bool inside, const bool check_only = false);
  // bash: if res pointer is supplied, res will contain absorbed impact or -1
- bool bash(const int x, const int y, const int str, std::string &sound, int *res = 0);
+ bool bash(const int x, const int y, const int str, bool silent = false, int *res = 0);
  // spawn items from the list, see map_bash_item_drop
  void spawn_item_list(const std::vector<map_bash_item_drop> &items, int x, int y);
  void destroy(const int x, const int y, const bool makesound);
@@ -373,11 +377,13 @@ void add_corpse(int x, int y);
 
 // Items
  std::vector<item>& i_at(int x, int y);
+ itemslice i_stacked(std::vector<item>& items);
  item water_from(const int x, const int y);
  item swater_from(const int x, const int y);
  item acid_from(const int x, const int y);
  void i_clear(const int x, const int y);
  void i_rem(const int x, const int y, const int index);
+ void i_rem(const int x, const int y, item* it);
  point find_item(const item *it);
  void spawn_artifact( const int x, const int y );
  void spawn_natural_artifact( const int x, const int y, const artifact_natural_property prop );
@@ -417,8 +423,8 @@ void add_corpse(int x, int y);
  int set_field_age(const point p, const field_id t, const int age, bool isoffset = false);
  int set_field_strength(const point p, const field_id t, const int str, bool isoffset = false);
  field_entry * get_field( const point p, const field_id t );
- bool add_field(const point p, const field_id t, unsigned int density, const int age);
- bool add_field(const int x, const int y, const field_id t, const unsigned char density);
+ bool add_field(const point p, const field_id t, const int density, const int age);
+ bool add_field(const int x, const int y, const field_id t, const int density);
  void remove_field(const int x, const int y, const field_id field_to_remove);
  bool process_fields(); // See fields.cpp
  bool process_fields_in_submap(submap * const current_submap, const int submap_x, const int submap_y); // See fields.cpp
@@ -479,6 +485,7 @@ void add_corpse(int x, int y);
    return abs_sub;
  };
  point getabs(const int x=0, const int y=0 );
+ point getabs( const point p ) { return getabs(p.x, p.y); }
  point getlocal(const int x, const int y );
  point getlocal( const point p ) { return getlocal(p.x, p.y); }
  bool inboundsabs(const int x, const int y);
@@ -493,6 +500,99 @@ void add_corpse(int x, int y);
 
  void insert_vehicle(vehicle *veh, const int x, const int y);
  void remove_vehicle(vehicle *veh);
+
+    class clZones : public JsonSerializer, public JsonDeserializer
+    {
+        private:
+            std::unordered_map<std::string, std::unordered_set<int> > mZones;
+            std::vector<std::pair<std::string, std::string> > vZoneTypes;
+
+        public:
+            clZones();
+            ~clZones() {};
+
+            class clZoneData
+            {
+                private:
+                    std::string sName;
+                    std::string sZoneType;
+                    bool bInvert;
+                    bool bEnabled;
+                    point pointStartXY;
+                    point pointEndXY;
+
+                public:
+                    clZoneData() {
+                        this->sName = "";
+                        this->sZoneType = "";
+                        this->bInvert = false;
+                        this->bEnabled = false;
+                        this->pointStartXY = point(-1, -1);
+                        this->pointEndXY = point(-1, -1);
+                    }
+
+                    clZoneData(const std::string p_sName, const std::string p_sZoneType,
+                               const bool p_bInvert, const bool p_bEnabled,
+                               const point &p_pointStartXY, const point &p_pointEndXY) {
+                        this->sName = p_sName;
+                        this->sZoneType = p_sZoneType;
+                        this->bInvert = p_bInvert;
+                        this->bEnabled = p_bEnabled;
+                        this->pointStartXY = p_pointStartXY;
+                        this->pointEndXY = p_pointEndXY;
+                    }
+
+                    ~clZoneData() {};
+
+                    void setName();
+                    void setZoneType(std::vector<std::pair<std::string, std::string> > vZoneTypes);
+                    void setEnabled(const bool p_bEnabled);
+
+                    std::string getName() const { return sName; }
+                    std::string getZoneType() const { return sZoneType; }
+                    bool getInvert() const { return bInvert; }
+                    bool getEnabled() const { return bEnabled; }
+                    point getStartPoint() const { return pointStartXY; }
+                    point getEndPoint() const { return pointEndXY; }
+                    point getCenterPoint();
+            };
+
+            std::vector<clZoneData> vZones;
+
+            void add(const std::string p_sName, const std::string p_sZoneType,
+                     const bool p_bInvert, const bool p_bEnabled,
+                     const point &p_pointStartXY, const point &p_pointEndXY) {
+                vZones.push_back(clZoneData(p_sName, p_sZoneType,
+                                            p_bInvert, p_bEnabled,
+                                            p_pointStartXY, p_pointEndXY
+                                           )
+                                );
+            }
+
+            bool remove(const int iIndex) {
+                if (iIndex < vZones.size() && iIndex >= 0) {
+                    vZones.erase(vZones.begin()+iIndex);
+                    return true;
+                }
+
+                return false;
+            }
+
+            unsigned int size() { return vZones.size(); }
+            std::vector<std::pair<std::string, std::string> > getZoneTypes() { return vZoneTypes; }
+            std::string getNameFromType(const std::string p_sType);
+            bool hasType(const std::string p_sType);
+            void cacheZoneData();
+            bool hasZone(const std::string p_sType, const point p_pointInput);
+            using JsonSerializer::serialize;
+            void serialize(JsonOut &json) const;
+            void deserialize(JsonIn &jsin);
+    };
+
+    clZones Zones;
+
+    bool save_zones();
+    void load_zones();
 
 protected:
  void saven(overmap *om, unsigned const int turn, const int x, const int y, const int z,
