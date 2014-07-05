@@ -1517,6 +1517,7 @@ void check_constructions()
 {
     for( std::vector<construction *>::const_iterator a = constructions.begin();
          a != constructions.end(); ++a ) {
+        (*a)->auto_functions();
         const construction *c = *a;
         const std::string display_name = std::string("construction ") + c->description;
         // Note: print the description as the id is just a generated number,

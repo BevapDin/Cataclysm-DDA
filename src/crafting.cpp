@@ -208,11 +208,39 @@ void finalize_recipes()
                 book_def->recipes[r] = skill_level;
             }
             r->booksets.clear();
+            r->auto_functions();
         }
         the_many_recipe.id += it->second.size();
     }
     the_many_recipe.ident = "the_many_recipe";
     the_many_recipe.autolearn = false;
+}
+
+void recipe::auto_functions()
+{
+    for(auto &tools : this->tools) {
+        std::string ff;
+        for(auto &tool : tools) {
+            const std::string f = std::string("func:") + tool.type;
+            if(item_controller->has_template(f)) {
+                ff = tool.type = f;
+                break;
+            }
+        }
+        if(ff.empty()) {
+            continue;
+        }
+        for(size_t a = 0; a < tools.size(); a++) {
+            if(tools[a].type == ff) {
+                continue;
+            }
+            itype *it = item_controller->find_template(tools[a].type);
+            if(it->hasFunc(ff) || (tools[a].type == "toolset" && tools.size() > 1)) {
+                tools.erase(tools.begin() + a);
+                a--;
+            }
+        }
+    }
 }
 
 void reset_recipes_qualities()

@@ -116,6 +116,7 @@ struct recipe {
     // Create an item instance as if the recipe was just finished,
     // Contain charges multiplier
     item create_result() const;
+    void auto_functions();
 };
 
 typedef std::vector<recipe *> recipe_list;
