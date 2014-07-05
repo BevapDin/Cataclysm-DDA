@@ -7419,6 +7419,27 @@ hint_rating player::rate_action_eat(item *it)
  return HINT_CANT;
 }
 
+//Returns the amount of charges that were consumed byt he player
+int player::drink_from_hands(item& water) {
+    int charges_consumed = 0;
+    if (query_yn(_("Drink from your hands?")))
+        {
+            // Create a dose of water no greater than the amount of water remaining.
+            item water_temp(water);
+            inv.push_back(water_temp);
+            // If player is slaked water might not get consumed.
+            if (consume(inv.position_by_type(water_temp.typeId())))
+            {
+                moves -= 350;
+
+                charges_consumed = 1;// for some reason water_temp doesn't seem to have charges consumed, jsut set this to 1
+            }
+            inv.remove_item(inv.position_by_type(water_temp.typeId()));
+        }
+    return charges_consumed;
+}
+
+
 bool player::consume(int pos)
 {
     item *to_eat = NULL;
@@ -7818,14 +7839,16 @@ bool player::eat(item *eaten, it_comest *comest)
         moves -= (mealtime);
 
     // If it's poisonous... poison us.  TODO: More several poison effects
-    if ((eaten->poison >= rng(2, 4)) && !has_trait("EATPOISON") &&
-    !has_trait("EATDEAD")) {
-        add_effect("poison", eaten->poison * 100);
+    if (eaten->poison > 0) {
+        debugmsg("Ate some posioned stuff");
+        if (!has_trait("EATPOISON") && !has_trait("EATDEAD")) {
+            if (eaten->poison >= rng(2, 4)) {
+                add_effect("poison", eaten->poison * 100);
+            }
+            add_disease("foodpoison", eaten->poison * 300);
+        }
     }
-    if ((eaten->poison > 0) && !has_trait("EATPOISON") &&
-    !has_trait("EATDEAD")) {
-        add_disease("foodpoison", eaten->poison * 300);
-    }
+
 
     if (has_trait("AMORPHOUS")) {
         add_msg_player_or_npc(_("You assimilate your %s."), _("<npcname> assimilates a %s."),
@@ -8651,9 +8674,8 @@ bool player::wear_item(item *to_wear, bool interactive)
         }
     }
 
-    // Armor needs invlets to access, give one if not already assigned.
     if (to_wear->invlet == 0) {
-        inv.assign_empty_invlet(*to_wear, true);
+        inv.assign_empty_invlet( *to_wear, false );
     }
 
     const bool was_deaf = is_deaf();
@@ -8705,7 +8727,7 @@ hint_rating player::rate_action_takeoff(item *it) {
  return HINT_IFFY;
 }
 
-bool player::takeoff(int pos, bool autodrop)
+bool player::takeoff(int pos, bool autodrop, std::vector<item> *items)
 {
     bool taken_off = false;
     if (pos == -1) {
@@ -8722,8 +8744,12 @@ bool player::takeoff(int pos, bool autodrop)
                 for (int j = worn.size() - 1; j >= 0; j--) {
                     if (worn[j].type->is_power_armor() &&
                             j != worn_index) {
-                        if (autodrop) {
-                            g->m.add_item_or_charges(posx, posy, worn[j]);
+                        if( autodrop || items != nullptr ) {
+                            if( items != nullptr ) {
+                                items->push_back( worn[j] );
+                            } else {
+                                g->m.add_item_or_charges( posx, posy, worn[j] );
+                            }
                             add_msg(_("You take off your your %s."), worn[j].tname().c_str());
                             worn.erase(worn.begin() + j);
                             // If we are before worn_index, erasing this element shifted its position by 1.
@@ -8740,18 +8766,22 @@ bool player::takeoff(int pos, bool autodrop)
                 }
             }
 
-            if (autodrop || volume_capacity() - dynamic_cast<it_armor*>(w.type)->storage > volume_carried() + w.type->volume) {
+            if( items != nullptr ) {
+                items->push_back( w );
+                taken_off = true;
+            } else if (autodrop || volume_capacity() - dynamic_cast<it_armor*>(w.type)->storage > volume_carried() + w.type->volume) {
                 inv.add_item_keep_invlet(w);
-                add_msg(_("You take off your your %s."), w.tname().c_str());
-                worn.erase(worn.begin() + worn_index);
-                inv.unsort();
                 taken_off = true;
             } else if (query_yn(_("No room in inventory for your %s.  Drop it?"),
                     w.tname().c_str())) {
                 g->m.add_item_or_charges(posx, posy, w);
+                taken_off = true;
+            } else {
+                taken_off = false;
+            }
+            if( taken_off ) {
                 add_msg(_("You take off your your %s."), w.tname().c_str());
                 worn.erase(worn.begin() + worn_index);
-                taken_off = true;
             }
         } else {
             add_msg(m_info, _("You are not wearing that item."));

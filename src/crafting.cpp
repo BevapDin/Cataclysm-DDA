@@ -1466,12 +1466,11 @@ bool game::can_disassemble(item *dis_item, recipe *cur_recipe, const crafting_in
     // check tools are available
     // loop over the tools and see what's required...again
     bool have_all_tools = true;
-    for (std::vector<std::vector<component> >::iterator it =
-             cur_recipe->tools.begin();
-         it != cur_recipe->tools.end(); ++it) {
+    for( std::vector<std::vector<component> >::const_iterator it = cur_recipe->tools.cbegin();
+         it != cur_recipe->tools.cend(); ++it ) {
         bool have_this_tool = false;
-        for (std::vector<component>::iterator tool = it->begin();
-             tool != it->end(); ++it) {
+        for( std::vector<component>::const_iterator tool = it->cbegin();
+             tool != it->cend(); ++tool ) {
             itype_id type = tool->type;
             int req = tool->count; // -1 => 1
 
@@ -1484,13 +1483,17 @@ bool game::can_disassemble(item *dis_item, recipe *cur_recipe, const crafting_in
                 (req <= 0 && type == "mold_plastic") ||
                 (req >  0 && crafting_inv.has_charges(type, req))) {
                 have_this_tool = true;
-                tool = it->end();
             }
+
             // If crafting recipe required a welder,
             // disassembly requires a hacksaw or super toolkit.
             if (type == "welder") {
                 have_this_tool = (crafting_inv.has_tools("hacksaw", 1) ||
                                   crafting_inv.has_tools("toolset", 1));
+            }
+
+            if( have_this_tool ) {
+                break;
             }
         }
         if (!have_this_tool) {
@@ -1645,7 +1648,7 @@ void game::complete_disassemble()
              dis->components.begin();
          altercomps != dis->components.end(); ++altercomps) {
         // If there are several (alternative) components, search the
-        // one that was used. If not found, use the first one.
+        // one that was used.
         // Don't check the first in altercomps, it's the default anyway.
         std::vector<component>::iterator it;
         for(it = altercomps->begin()+1; it != altercomps->end(); ++it) {
@@ -1656,8 +1659,8 @@ void game::complete_disassemble()
                 }
             }
         }
-
-        const component &comp = *it;
+        // If not found, use the first one.
+        const component &comp = (it == altercomps->end()) ? altercomps->front() : *it;
 
         itype *itt = item_controller->find_template(comp.type);
         if(itt->id.compare(0, 5, "func:") == 0) {

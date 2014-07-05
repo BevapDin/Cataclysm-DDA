@@ -57,21 +57,7 @@ void map::generate(const int x, const int y, const int z, const int turn)
     //  function, we save the upper-left 4 submaps, and delete the rest.
     for (int i = 0; i < my_MAPSIZE * my_MAPSIZE; i++) {
         grid[i] = new submap;
-        grid[i]->active_item_count = 0;
-        grid[i]->field_count = 0;
-        grid[i]->turn_last_touched = turn;
-        grid[i]->temperature = 0;
-        grid[i]->comp = computer();
-        grid[i]->camp = basecamp();
-        for (int x = 0; x < SEEX; x++) {
-            for (int y = 0; y < SEEY; y++) {
-                grid[i]->ter[x][y] = t_null;
-                grid[i]->set_furn(x, y, f_null);
-                grid[i]->set_trap(x, y, tr_null);
-                grid[i]->set_radiation(x, y, 0);
-                grid[i]->set_graffiti(x, y, graffiti());
-            }
-        }
+        // TODO: memory leak if the code below throws before the submaps get stored/deleted!
     }
 
     unsigned zones = 0;
@@ -119,7 +105,7 @@ void map::generate(const int x, const int y, const int z, const int turn)
             dbg(D_INFO) << grid[i + j];
 
             if (i <= 1 && j <= 1) {
-                saven(turn, x, y, z, i, j);
+                saven(x, y, z, i, j);
             } else {
                 delete grid[i + j * my_MAPSIZE];
             }
@@ -159,13 +145,10 @@ void calculate_mapgen_weights() { // todo; rename as it runs jsonfunction setup 
                 funcnum++;
                 continue; // rejected!
             }
-            if ( (*fit)->function_type() == MAPGENFUNC_JSON ) {
-                mapgen_function_json * mf = dynamic_cast<mapgen_function_json*>(*fit);
-                if ( ! mf->setup() ) {
-                    dbg(D_INFO) << "wcalc " << oit->first << "(" << funcnum << "): (rej(2), " << weight << ") = " << wtotal;
-                    funcnum++;
-                    continue; // disqualify! doesn't get to play in the pool
-                }
+            if ( ! (*fit)->setup() ) {
+                dbg(D_INFO) << "wcalc " << oit->first << "(" << funcnum << "): (rej(2), " << weight << ") = " << wtotal;
+                funcnum++;
+                continue; // disqualify! doesn't get to play in the pool
             }
             //
             wtotal += weight;
@@ -184,7 +167,6 @@ void calculate_mapgen_weights() { // todo; rename as it runs jsonfunction setup 
  */
 mapgen_function_builtin::mapgen_function_builtin(std::string sptr, int w)
 {
-    ftype = MAPGENFUNC_C;
     weight = w;
     std::map<std::string, building_gen_pointer>::iterator gptr = mapgen_cfunction_map.find(sptr);
     if ( gptr !=  mapgen_cfunction_map.end() ) {
@@ -952,7 +934,7 @@ void mapgen_lua(map * m, oter_id id, mapgendata md, int t, float d, const std::s
 /*
  * Apply mapgen as per a derived-from-json recipe; in theory fast, but not very versatile
  */
-void mapgen_function_json::apply( map *m, oter_id terrain_type, mapgendata md, int t, float d ) {
+void mapgen_function_json::generate( map *m, oter_id terrain_type, mapgendata md, int t, float d ) {
     if ( fill_ter != -1 ) {
         m->draw_fill_background( fill_ter );
     }
@@ -984,7 +966,6 @@ void mapgen_function_json::apply( map *m, oter_id terrain_type, mapgendata md, i
     }
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////
 ///// lua mapgen functions
 // wip: need moar bindings. Basic stuff works
@@ -1015,6 +996,12 @@ void mapgen_lua(map * m,oter_id id,mapgendata md ,int t,float d, const std::stri
 
 #endif
 }
+
+#ifdef LUA
+void mapgen_function_lua::generate( map *m, oter_id terrain_type, mapgendata dat, int t, float d ) {
+    mapgen_lua(m, terrain_type, dat, t, d, scr );
+}
+#endif
 
 /////////////
 // TODO: clean up variable shadowing in this function
@@ -1078,18 +1065,7 @@ void map::draw_map(const oter_id terrain_type, const oter_id t_north, const oter
         const int fidx = weightit->second.lower_bound( roll )->second;
         //add_msg("draw_map: %s (%s): %d/%d roll %d/%d den %.4f", terrain_type.c_str(), function_key.c_str(), fidx+1, fmapit->second.size(), roll, rlast, density );
 
-        if ( fmapit->second[fidx]->function_type() == MAPGENFUNC_C ) {
-           void(*gfunction)(map*,oter_id,mapgendata,int,float) = dynamic_cast<mapgen_function_builtin*>( fmapit->second[fidx] )->fptr;
-           gfunction(this, terrain_type, dat, turn, density);
-        } else if ( fmapit->second[fidx]->function_type() == MAPGENFUNC_JSON ) {
-           mapgen_function_json * mf = dynamic_cast<mapgen_function_json*>(fmapit->second[fidx]);
-           mf->apply( this, terrain_type, dat, turn, density );
-        } else if ( fmapit->second[fidx]->function_type() == MAPGENFUNC_LUA ) {
-           mapgen_function_lua * mf = dynamic_cast<mapgen_function_lua*>(fmapit->second[fidx]);
-           mapgen_lua(this, terrain_type, dat, turn, density, mf->scr );
-        } else {
-           debugmsg("mapgen %s (%s): Invalid mapgen function type.",terrain_type.c_str(), function_key.c_str() );
-        }
+        fmapit->second[fidx]->generate(this, terrain_type, dat, turn, density);
     // todo; make these mappable functions
     } else if (terrain_type == "apartments_con_tower_1_entrance") {
 
@@ -3029,7 +3005,7 @@ C..C..C...|hhh|#########\n\
         if (is_ot_type("sewer", t_west) && connects_to(t_west, 1)) {
             lw = SEEX * 2;
         }
-        if (t_above == "open_air") { // We're on ground level
+        if (zlevel == 0) { // We're on ground level
             for (int i = 0; i < SEEX * 2; i++) {
                 for (int j = 0; j < SEEY * 2; j++) {
                     if (i <= 1 || i >= SEEX * 2 - 2 ||
@@ -4016,7 +3992,7 @@ ff.......|....|WWWWWWWW|\n\
 
     } else if (terrain_type == "bunker") {
 
-        if (t_above == "open_air") { // We're on ground level
+        if (zlevel == 0) { // We're on ground level
             dat.fill_groundcover();
             //chainlink fence that surrounds bunker
             line(this, t_chainfence_v, 1, 1, 1, SEEY * 2 - 1);
@@ -4362,7 +4338,7 @@ ff.......|....|WWWWWWWW|\n\
 
     } else if (terrain_type == "silo") {
 
-        if (t_above == "") { // We're on ground level
+        if (zlevel == 0) { // We're on ground level
             for (int i = 0; i < SEEX * 2; i++) {
                 for (int j = 0; j < SEEY * 2; j++) {
                     if (trig_dist(i, j, SEEX, SEEY) <= 6) {
@@ -4454,7 +4430,7 @@ ff.......|....|WWWWWWWW|\n\
     } else if (terrain_type == "temple" ||
                terrain_type == "temple_stairs") {
 
-        if (t_above == "") { // Ground floor
+        if (zlevel == 0) { // Ground floor
             // TODO: More varieties?
             fill_background(this, t_dirt);
             square(this, t_grate, SEEX - 1, SEEY - 1, SEEX, SEEX);
@@ -10459,7 +10435,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
                     ter_set(i, j, (!one_in(10) ? t_slime : t_rock_floor));
                 } else if (rng(0, SEEX) > abs(i - SEEX) && rng(0, SEEY) > abs(j - SEEY)) {
                     ter_set(i, j, t_slime);
-                } else if (t_above == "") {
+                } else if (zlevel == 0) {
                     ter_set(i, j, t_dirt);
                 } else {
                     ter_set(i, j, t_rock_floor);
@@ -11035,6 +11011,9 @@ vehicle *map::add_vehicle(std::string type, const int x, const int y, const int 
     veh->smx = smx;
     veh->smy = smy;
     veh->place_spawn_items();
+    veh->face.init( dir );
+    veh->turn_dir = dir;
+    veh->precalc_mounts( 0, dir );
     // veh->init_veh_fuel = 50;
     // veh->init_veh_status = 0;
 

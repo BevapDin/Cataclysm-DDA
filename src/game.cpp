@@ -600,11 +600,11 @@ void game::start_game(std::string worldname)
 
     // Find a random house on the map, and set us there.
     cur_om->first_house(levx, levy, u.start_location);
-    point player_location = overmapbuffer::omt_to_sm_copy(levx, levy);
+    point player_location = overmapbuffer::omt_to_sm_copy( levx, levy );
     tinymap player_start;
-    player_start.load(player_location.x, player_location.y, levz, false);
-    player_start.translate(t_window_domestic, t_curtains);
-    player_start.save(cur_om, int(calendar::turn), player_location.x, player_location.y, levz);
+    player_start.load( player_location.x, player_location.y, levz, false, cur_om );
+    player_start.translate( t_window_domestic, t_curtains );
+    player_start.save();
 
     levx -= int(int(MAPSIZE / 2) / 2);
     levy -= int(int(MAPSIZE / 2) / 2);
@@ -615,7 +615,7 @@ void game::start_game(std::string worldname)
     levx = levx * 2 - 1;
     levy = levy * 2 - 1;
     // Init the starting map at this location.
-    m.load(levx, levy, levz);
+    m.load( levx, levy, levz, true, cur_om );
 
     // Start us off somewhere in the shelter.
     u.posx = SEEX * int(MAPSIZE / 2) + 5;
@@ -624,7 +624,7 @@ void game::start_game(std::string worldname)
     m.build_map_cache();
     // Make sure we spawn on an inside and valid location.
     int tries = 0;
-    while ((m.is_outside(u.posx, u.posy) || m.move_cost(u.posx, u.posy) == 0) && tries < 1000) {
+    while( (m.is_outside(u.posx, u.posy) || m.move_cost(u.posx, u.posy) == 0) && tries < 1000 ) {
         tries++;
         u.posx = (SEEX * int(MAPSIZE / 2)) + rng(0, SEEX * 2);
         u.posy = (SEEY * int(MAPSIZE / 2)) + rng(0, SEEY * 2);
@@ -2829,7 +2829,6 @@ bool game::isActivatedRadioCarPresent()
     for (pos.x = 0; pos.x < SEEX * MYMAPSIZE; pos.x++)
         for (pos.y = 0; pos.y < SEEY * MYMAPSIZE; pos.y++)
             for (int i = 0; i < g->m.i_at(pos.x, pos.y).size(); i++) {
-
                 item &ii = g->m.i_at(pos.x, pos.y)[i];
                 if (ii.type->id == "radio_car_on" && ii.active) {
                     return true;
@@ -2854,8 +2853,8 @@ void game::rcdrive(int dx, int dy)
                 item &ii = g->m.i_at(pos.x, pos.y)[i];
                 if( ii.type->id == "radio_car_on" && ii.active ) {
                     if( m.move_cost(pos.x + dx, pos.y + dy) == 0 ||
-                        !m.can_put_items(pos.x + dx, pos.y + dy) ) {
-                        sound(pos.x + dx, pos.y + dy, 7, "sound of a collision with an obstacle.");
+                      !m.can_put_items(pos.x + dx, pos.y + dy) || m.has_furn(pos.x + dx, pos.y + dy)) {
+                        sound(pos.x + dx, pos.y + dy, 7, "a collision.");
                         return;
                     } else if( m.add_item_or_charges(pos.x + dx, pos.y + dy, ii) ) {
                         sound(pos.x, pos.y, 6, "zzz...");
@@ -4042,7 +4041,7 @@ bool game::save_artifacts()
 bool game::save_maps()
 {
     try {
-        m.save(cur_om, calendar::turn, levx, levy, levz);
+        m.save();
         overmap_buffer.save(); // can throw std::ios::failure
         MAPBUFFER.save(); // can throw std::ios::failure
         return true;
@@ -4355,7 +4354,7 @@ void game::debug()
             levx = tmp.x * 2 - int(MAPSIZE / 2);
             levy = tmp.y * 2 - int(MAPSIZE / 2);
             levz = tmp.z;
-            m.load(levx, levy, levz);
+            m.load(levx, levy, levz, true, cur_om);
             load_npcs();
             m.spawn_monsters(); // Static monsters
             update_overmap_seen();
@@ -10873,43 +10872,41 @@ void game::drop(std::vector<item> &dropped, std::vector<item> &dropped_worn,
     u.moves -= drop_move_cost;
 }
 
-void game::reassign_item(int pos)
+void game::reassign_item( int pos )
 {
-    if (pos == INT_MIN) {
-        pos = inv(_("Reassign item:"));
+    if( pos == INT_MIN ) {
+        pos = inv( _( "Reassign item:" ) );
     }
-    if (pos == INT_MIN) {
-        add_msg(_("Never mind."));
+    if( pos == INT_MIN ) {
+        add_msg( _( "Never mind." ) );
         return;
     }
 
-    item *change_from = &u.i_at(pos);
-    char newch = popup_getkey(_("%s; enter new letter."),
-                              change_from->tname().c_str());
-    if (newch == ' ') {
-        if (pos >= 0) {
-            change_from->invlet = 0;
-        } else {
-            add_msg(m_info, _("Cannot clear inventory letter of worn or wielded items."));
-            return;
-        }
-    } else if (inv_chars.find(newch) == std::string::npos) {
-        add_msg(m_info, _("%c is not a valid inventory letter."), newch);
+    item &change_from = u.i_at( pos );
+    if( change_from.is_null() ) {
         return;
     }
-    if (u.has_item(newch)) {
-        if (change_from->invlet == 0 && u.has_weapon_or_armor(newch)) {
-            // TODO: Chain assignment dialogues until in a valid state.
-            add_msg(m_info, _("Cannot unassign inventory letter of worn or wielded items."));
-            return;
-        }
-        item *change_to = &(u.i_at(newch));
-        change_to->invlet = change_from->invlet;
-        add_msg(m_info, "%c - %s", change_to->invlet == 0 ? ' ' : change_to->invlet,
-                change_to->tname().c_str());
+    char newch = popup_getkey( _( "%s; enter new letter (press SPACE for none, ESCAPE to cancel)." ),
+                               change_from.tname().c_str() );
+    if( newch == ' ' ) {
+        newch = 0;
     }
-    change_from->invlet = newch;
-    add_msg(m_info, "%c - %s", newch == 0 ? ' ' : newch, change_from->tname().c_str());
+    if( newch == KEY_ESCAPE || change_from.invlet == newch ) {
+        add_msg( m_neutral, _( "Never mind." ) );
+        return;
+    }
+    if( newch != 0 && inv_chars.find( newch ) == std::string::npos ) {
+        add_msg( m_info, _( "%c is not a valid inventory letter." ), newch );
+        return;
+    }
+    if( newch != 0 && u.has_item( newch ) ) {
+        item &change_to = u.i_at( newch );
+        change_to.invlet = change_from.invlet;
+        add_msg( m_info, "%c - %s", change_to.invlet == 0 ? ' ' : change_to.invlet,
+                 change_to.tname().c_str() );
+    }
+    change_from.invlet = newch;
+    add_msg( m_info, "%c - %s", newch == 0 ? ' ' : newch, change_from.tname().c_str() );
 }
 
 void game::plthrow(int pos)
@@ -12976,14 +12973,6 @@ bool game::plmove(int dx, int dy)
                 std::vector<std::string> names;
                 std::vector<size_t> counts;
                 std::vector<item> items;
-                if (m.i_at(x, y)[0].count_by_charges()) {
-                    names.push_back(m.i_at(x, y)[0].tname(m.i_at(x, y)[0].charges));
-                    counts.push_back(m.i_at(x, y)[0].charges);
-                } else {
-                    names.push_back(m.i_at(x, y)[0].display_name(1));
-                    counts.push_back(1);
-                }
-                items.push_back(m.i_at(x, y)[0]);
                 for (std::vector<item>::iterator it = m.i_at(x, y).begin();
                      it != m.i_at(x, y).end(); ++it) {
                     item &tmpitem = *it;
@@ -13003,7 +12992,7 @@ bool game::plmove(int dx, int dy)
                         }
                     }
                     if (!got_it) {
-                        if (tmpitem.count_by_charges()) {
+                        if (by_charges) {
                             names.push_back(tmpitem.tname(tmpitem.charges));
                             counts.push_back(tmpitem.charges);
                         } else {
@@ -13399,13 +13388,13 @@ void game::vertical_move(int movez, bool force)
     }
 
     map tmpmap;
-    tmpmap.load(levx, levy, levz + movez, false);
+    tmpmap.load(levx, levy, levz + movez, false, cur_om);
     // Find the corresponding staircase
     int stairx = -1, stairy = -1;
     bool rope_ladder = false;
 
-    const int omtilesz = SEEX * 2;
-    real_coords rc(m.getabs(u.posx, u.posy));
+    const int omtilesz=SEEX * 2;
+    real_coords rc( m.getabs(u.posx, u.posy) );
 
     point omtile_align_start(
         m.getlocal(rc.begin_om_pos())
@@ -13571,7 +13560,7 @@ void game::vertical_move(int movez, bool force)
     u.moves -= 100;
     m.clear_vehicle_cache();
     m.vehicle_list.clear();
-    m.load(levx, levy, levz);
+    m.load( levx, levy, levz, true, cur_om );
     u.posx = stairx;
     u.posy = stairy;
     if (rope_ladder) {
@@ -13639,7 +13628,7 @@ void game::update_map(int &x, int &y)
         shifty++;
     }
 
-    m.shift(levx, levy, levz, shiftx, shifty);
+    m.shift(shiftx, shifty);
     levx += shiftx;
     levy += shifty;
 
@@ -13983,9 +13972,9 @@ void game::force_save_monster(monster &critter)
     critter.spawnposy = rc.sub_pos.y;
 
     tinymap tmp;
-    tmp.load(critter.spawnmapx, critter.spawnmapy, levz, false);
+    tmp.load(critter.spawnmapx, critter.spawnmapy, levz, false, cur_om);
     tmp.add_spawn(&critter);
-    tmp.save(cur_om, calendar::turn, critter.spawnmapx, critter.spawnmapy, levz);
+    tmp.save();
 }
 
 void game::despawn_monsters(const int shiftx, const int shifty)
@@ -14014,9 +14003,9 @@ void game::despawn_monsters(const int shiftx, const int shifty)
                     critter.setkeep(false);
 
                     tinymap tmp;
-                    tmp.load(critter.spawnmapx, critter.spawnmapy, levz, false);
+                    tmp.load(critter.spawnmapx, critter.spawnmapy, levz, false, cur_om);
                     tmp.add_spawn(&critter);
-                    tmp.save(cur_om, calendar::turn, critter.spawnmapx, critter.spawnmapy, levz);
+                    tmp.save();
                 } else {
                     // No spawn site, so absorb them back into a group.
                     int group = valid_group((critter.type->id), levx + shiftx, levy + shifty, levz);
@@ -14115,7 +14104,8 @@ void game::spawn_mon(int shiftx, int shifty)
             // chance of adding one monster; cap at the population OR 16
             while ((cur_om->zg[i].diffuse ? long(pop) :
                     long((1.0 - double(dist / rad)) * pop)) > rng(0, (rad * rad)) &&
-                   rng(horde ? MAPSIZE * 2 : 0, MAPSIZE * 4) > group && group < pop && group < MAPSIZE * 3) {
+                   rng(horde ? MAPSIZE * 2 : 0, MAPSIZE * 4) > group &&
+                   group < pop && group < MAPSIZE * 3) {
                 group++;
             }
             cur_om->zg[i].population -= group;
@@ -14386,12 +14376,8 @@ void game::teleport(player *p, bool add_teleglow)
 void game::nuke(int x, int y)
 {
     // TODO: nukes hit above surface, not critter = 0
-    overmap &om = overmap_buffer.get_om_global(x, y);
-    // ^^ crops x,y to point inside om now., but map::load
-    // and map::save needs submap coordinates.
-    const point smc = overmapbuffer::omt_to_sm_copy(x, y);
-    map tmpmap;
-    tmpmap.load(smc.x, smc.y, 0, false, &om);
+    tinymap tmpmap;
+    tmpmap.load_abs(x * 2, y * 2, 0, false);
     for (int i = 0; i < SEEX * 2; i++) {
         for (int j = 0; j < SEEY * 2; j++) {
             if (!one_in(10)) {
@@ -14403,8 +14389,8 @@ void game::nuke(int x, int y)
             tmpmap.adjust_radiation(i, j, rng(20, 80));
         }
     }
-    tmpmap.save(&om, calendar::turn, smc.x, smc.y, 0);
-    om.ter(x, y, 0) = "crater";
+    tmpmap.save();
+    overmap_buffer.ter(x, y, 0) = "crater";
     // Kill any npcs on that omap location.
     std::vector<npc *> npcs = overmap_buffer.get_npcs_near_omt(x, y, 0, 0);
     for (size_t a = 0; a < npcs.size(); ++a) {
