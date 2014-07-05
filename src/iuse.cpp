@@ -772,13 +772,13 @@ int iuse::smoking_pipe(player *p, item *it, bool)
         p->add_msg_if_player(m_info, _("You need to find something to smoke."));
         return 0;
     }
-    int choice = uimenu(true, _("What would you like to smoke?"), smokable_choices) - 1;
-    if (choice < 0 || choice >= smokable_choices.size()) {
+    const size_t choice = uimenu(true, _("What would you like to smoke?"), smokable_choices) - 1;
+    if (choice >= smokable_choices.size()) {
         // Chose not to smoke.
         return 0;
     }
     // Finally we can smoke.
-    std::string id_to_smoke = smokable_choices[(size_t) choice];
+    std::string id_to_smoke = smokable_choices[choice];
     // We trust from this point on that we've checked for the existence of
     // consumables and as such will now consume.
     p->use_charges("fire", 1);
@@ -2142,6 +2142,49 @@ int iuse::primitive_fire(player *p, item *it, bool)
     return 0;
 }
 
+int iuse::ref_lit(player *p, item *it, bool t)
+{
+    if (p->is_underwater()) {
+        p->add_msg_if_player(_("The lighter is extinguished."));
+        it->make("ref_lighter");
+        it->active = false;
+        return 0;
+    }
+    if (t) {
+        if (it->charges < it->type->charges_to_use()) {
+            p->add_msg_if_player(_("The lighter burns out."));
+            it->make("ref_lighter");
+            it->active = false;
+        }
+    } else if(it->charges <= 0) {
+        p->add_msg_if_player( _("The %s winks out."), it->tname().c_str());
+    } else { // Turning it off
+        int choice = menu(true, _("refillable lighter (lit)"), _("extinguish"),
+                          _("light something"), _("cancel"), NULL);
+        switch (choice) {
+        case 1:
+        {
+            p->add_msg_if_player(_("You extinguish the lighter."));
+            it->make("ref_lighter");
+            it->active = false;
+            return 0;
+        }
+        break;
+        case 2:
+        {
+		int dirx, diry;
+		if (prep_firestarter_use(p, it, dirx, diry)) {
+			p->moves -= 15;
+			resolve_firestarter_use(p, it, dirx, diry);
+			return it->type->charges_to_use();
+		}
+	
+        }
+        }
+    }
+    return it->type->charges_to_use();
+}
+
 int iuse::sew(player *p, item *it, bool)
 {
     if (it->charges == 0) {
@@ -2583,12 +2626,8 @@ int iuse::fishing_rod_basic (player *p, item *it, bool) {
         p->add_msg_if_player(m_info, _("That water does not contain any fish, try a river instead."));
         return 0;
     }
-    
-    if ( (p->has_trait("ROOTS2") || (p->has_trait("ROOTS3"))) &&
-      g->m.has_flag("DIGGABLE", p->posx, p->posy) &&
-            (!(p->wearing_something_on(bp_feet))) ) {
-                add_msg(m_info, _("You sink your roots into the soil."));   
-            }
+
+    p->rooted_message();
 
     p->add_msg_if_player( _("You cast your line and wait to hook something..."));
 
@@ -4610,7 +4649,7 @@ int iuse::set_trap(player *p, item *it, bool)
         return 0;
  }
  int dirx, diry;
- if(!choose_adjacent(_("Place trap where?"),dirx,diry)) {
+ if( !choose_adjacent( string_format(_("Place %s where?"), it->tname().c_str()), dirx, diry) ) {
   return 0;
  }
 
@@ -4813,11 +4852,15 @@ if(it->type->id == "cot"){
 int iuse::geiger(player *p, item *it, bool t)
 {
     if (t) { // Every-turn use when it's on
-        int rads = g->m.get_radiation(p->posx, p->posy);
+        const point pos = g->find_item(it);
+        const int rads = g->m.get_radiation(pos.x, pos.y);
         if (rads == 0) {
             return it->type->charges_to_use();
         }
-        g->sound(p->posx, p->posy, 6, "");
+        if( !g->sound( pos.x, pos.y, 6, "" ) ) {
+            // can not hear it, but may have alarmed other creatures
+            return it->type->charges_to_use();
+        }
         if (rads > 50) {
             add_msg(m_warning, _("The geiger counter buzzes intensely."));
         } else if (rads > 35) {
@@ -4827,13 +4870,13 @@ int iuse::geiger(player *p, item *it, bool t)
         } else if (rads > 15) {
             add_msg(m_warning, _("The geiger counter clicks steadily."));
         } else if (rads > 8) {
-            add_msg(m_warning, ("The geiger counter clicks slowly."));
+            add_msg(m_warning, _("The geiger counter clicks slowly."));
         } else if (rads > 4) {
             add_msg(_("The geiger counter clicks intermittently."));
         } else {
             add_msg(_("The geiger counter clicks once."));
         }
-        return it->type->charges_to_use();;
+        return it->type->charges_to_use();
     }
     // Otherwise, we're activating the geiger counter
     it_tool *type = dynamic_cast<it_tool*>(it->type);
@@ -5134,6 +5177,37 @@ int iuse::acidbomb_act(player *p, item *it, bool)
     g->m.add_field(x, y, fd_acid, 3);
   }
  }
+ return 0;
+}
+
+int iuse::grenade_inc_act(player *p, item *it, bool t)
+{
+    point pos = g->find_item(it);
+        if (pos.x == -999 || pos.y == -999) {
+            return 0;
+        }
+
+    if (t) { // Simple timer effects
+        g->sound(pos.x, pos.y, 0, _("Tick!")); // Vol 0 = only heard if you hold it
+    } else if (it->charges > 0) {
+        p->add_msg_if_player(m_info, _("You've already released the handle, try throwing it instead."));
+        return 0;
+    } else {  // blow up
+        int num_flames= rng(3,5);
+        for (int current_flame = 0; current_flame < num_flames; current_flame++){
+            std::vector<point> flames = line_to(pos.x, pos.y, pos.x + rng(-5,5), pos.y + rng(-5,5), 0);
+            for (size_t i = 0; i <flames.size(); i++) {
+                g->m.add_field(flames[i].x, flames[i].y, fd_fire, rng(0,2));
+            }
+        }
+        g->explosion(pos.x, pos.y, 8, 0, true);
+        for (int i = -2; i <= 2; i++) {
+            for (int j = -2; j <= 2; j++) {
+                g->m.add_field( pos.x + i, pos.y + j, fd_incendiary, 3);
+            }
+        }
+
+    }
  return 0;
 }
 
@@ -5928,27 +6002,15 @@ int iuse::portable_game(player *p, item *it, bool)
         switch (as_m.ret) {
             case 1:
                 loaded_software = "robot_finds_kitten";
-                if ( (p->has_trait("ROOTS2") || (p->has_trait("ROOTS3"))) &&
-                  g->m.has_flag("DIGGABLE", p->posx, p->posy) &&
-                  (!(p->wearing_something_on(bp_feet))) ) {
-                    p->add_msg_if_player(m_info, _("You sink your roots into the soil."));   
-                }
+                p->rooted_message();
                 break;
             case 2:
                 loaded_software = "snake_game";
-                if ( (p->has_trait("ROOTS2") || (p->has_trait("ROOTS3"))) &&
-                  g->m.has_flag("DIGGABLE", p->posx, p->posy) &&
-                  (!(p->wearing_something_on(bp_feet))) ) {
-                    p->add_msg_if_player(m_info, _("You sink your roots into the soil."));   
-                }
+                p->rooted_message();
                 break;
             case 3:
                 loaded_software = "sokoban_game";
-                if ( (p->has_trait("ROOTS2") || (p->has_trait("ROOTS3"))) &&
-                  g->m.has_flag("DIGGABLE", p->posx, p->posy) &&
-                  (!(p->wearing_something_on(bp_feet))) ) {
-                    p->add_msg_if_player(m_info, _("You sink your roots into the soil."));   
-                }
+                p->rooted_message();
                 break;
             case 4: //Cancel
                 return 0;
@@ -6364,7 +6426,7 @@ int iuse::hacksaw(player *p, item *it, bool)
 int iuse::tent(player *p, item *, bool)
 {
  int dirx, diry;
- if(!choose_adjacent(_("Pitch the tent where?"), dirx, diry)) {
+ if(!choose_adjacent(_("Pitch the tent towards where (3x3 clear area)?"), dirx, diry)) {
   return 0;
  }
 
@@ -6382,7 +6444,7 @@ int iuse::tent(player *p, item *, bool)
      for (int j = -1; j <= 1; j++) {
          if (!g->m.has_flag("FLAT", posx + i, posy + j) ||
              g->m.has_furn(posx + i, posy + j)) {
-             add_msg(m_info, _("You need a 3x3 flat space to place a tent"));
+             add_msg(m_info, _("You need a 3x3 flat space to place a tent."));
              return 0;
          }
      }
@@ -6394,6 +6456,7 @@ int iuse::tent(player *p, item *, bool)
  }
  g->m.furn_set(posx, posy, f_groundsheet);
  g->m.furn_set(posx - (dirx - p->posx), posy - (diry - p->posy), f_canvas_door);
+ add_msg(m_info, _("You set up the tent on the ground."));
  return 1;
 }
 
@@ -6418,7 +6481,7 @@ int iuse::shelter(player *p, item *, bool)
      for (int j = -1; j <= 1; j++) {
          if (!g->m.has_flag("FLAT", posx + i, posy + j) ||
              g->m.has_furn(posx + i, posy + j)) {
-             add_msg(m_info, _("You need a 3x3 flat space to place a shelter"));
+             add_msg(m_info, _("You need a 3x3 flat space to place a shelter."));
              return 0;
          }
      }
@@ -7969,7 +8032,7 @@ int iuse::robotcontrol(player *p, item *it, bool)
         uimenu pick_robot;
         pick_robot.text = _("Choose an endpoint to hack.");
         // Build a list of all unfriendly robots in range.
-        for( int i = 0; i < g->num_zombies(); ++i ) {
+        for( size_t i = 0; i < g->num_zombies(); ++i ) {
             monster &candidate = g->zombie( i );
             if( candidate.type->in_species( "ROBOT" ) && candidate.friendly == 0 &&
                 rl_dist( p->xpos(), p->ypos(), candidate.xpos(), candidate.ypos() <= 10 ) ) {
@@ -8022,7 +8085,7 @@ int iuse::robotcontrol(player *p, item *it, bool)
     case 2:{ //make all friendly robots stop their purposeless extermination of (un)life.
         p->moves -= 100;
         int f = 0; //flag to check if you have robotic allies
-        for (int i = 0; i < g->num_zombies(); i++) {
+        for (size_t i = 0; i < g->num_zombies(); i++) {
             if (g->zombie(i).friendly != 0 && g->zombie(i).type->in_species("ROBOT")) {
                 p->add_msg_if_player( _("A following %s goes into passive mode."),
                                       g->zombie(i).name().c_str());
@@ -8040,7 +8103,7 @@ int iuse::robotcontrol(player *p, item *it, bool)
     case 3:{ //make all friendly robots terminate (un)life with extreme prejudice
         p->moves -= 100;
         int f = 0; //flag to check if you have robotic allies
-        for (int i = 0; i < g->num_zombies(); i++) {
+        for (size_t i = 0; i < g->num_zombies(); i++) {
             if (g->zombie(i).friendly != 0 && g->zombie(i).has_flag(MF_ELECTRONIC)) {
                 p->add_msg_if_player( _("A following %s goes into combat mode."),
                                       g->zombie(i).name().c_str());

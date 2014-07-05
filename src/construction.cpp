@@ -69,18 +69,19 @@ static void load_available_constructions( std::vector<std::string> &available,
                                           bool hide_unconstructable )
 {
     available.clear();
-    for( unsigned i = 0; i < constructions.size(); ++i ) {
-        construction *c = constructions[i];
-        if( !hide_unconstructable || can_construct(c) ) {
+    for(std::vector<construction *>::iterator it = constructions.begin();
+        it != constructions.end(); ++it ) {
+        if( !hide_unconstructable || can_construct(*it) ) {
             bool already_have_it = false;
-            for( unsigned j = 0; j < available.size(); ++j ) {
-                if (available[j] == c->description) {
+            for(std::vector<std::string>::iterator avail_it = available.begin();
+                avail_it != available.end(); ++avail_it ) {
+                if (*avail_it == (*it)->description) {
                     already_have_it = true;
                     break;
                 }
             }
             if (!already_have_it) {
-                available.push_back(c->description);
+                available.push_back((*it)->description);
             }
         }
     }
@@ -203,8 +204,9 @@ void construction_menu()
             // Print stages and their requirement
             int posx = 33, posy = 1;
             std::vector<construction *> options = constructions_by_desc(current_desc);
-            for( unsigned i = 0; i < options.size(); ++i) {
-                construction *current_con = options[i];
+            for(std::vector<construction *>::iterator it = options.begin();
+                it != options.end(); ++it) {
+                construction *current_con = *it;
                 if( hide_unconstructable && !can_construct(current_con) ) {
                     continue;
                 }
@@ -250,10 +252,12 @@ void construction_menu()
                 for (int i = 0; i < current_con->tools.size(); i++) {
                     mvwprintz(w_con, posy, posx - 2, c_white, ">");
                     total_inv.has_any_tools(current_con->tools[i]);
-                    for (unsigned j = 0; j < current_con->tools[i].size(); j++) {
-                        itype_id tool = current_con->tools[i][j].type;
+                    for (std::vector<component>::iterator curr_tool =
+                             current_con->tools[i].begin();
+                         curr_tool != current_con->tools[i].end(); ++curr_tool){
+                        itype_id tool = curr_tool->type;
                         nc_color col = c_red;
-                        if(current_con->tools[i][j].available == 1) {
+                        if(curr_tool->available == 1) {
                             col = c_green;
                         }
                         int length = utf8_width(item_controller->find_template(tool)->nname(1).c_str());
@@ -264,7 +268,7 @@ void construction_menu()
                         mvwprintz(w_con, posy, posx, col,
                                   item_controller->find_template(tool)->nname(1).c_str());
                         posx += length + 1; // + 1 for an empty space
-                        if (j < current_con->tools[i].size() - 1) { // "OR" if there's more
+                        if (curr_tool != current_con->tools[i].end() - 1) { // "OR" if there's more
                             if (posx > FULL_SCREEN_WIDTH - 3) {
                                 posy++;
                                 posx = 33;
@@ -281,36 +285,40 @@ void construction_menu()
                 for (size_t i = 0; i < current_con->components.size(); i++) {
                     total_inv.has_any_components(current_con->components[i]);
                     mvwprintz(w_con, posy, posx - 2, c_white, ">");
-                    for (unsigned j = 0; j < current_con->components[i].size(); j++) {
+                    for(std::vector<component>::iterator comp =
+                            current_con->components[i].begin();
+                        comp != current_con->components[i].end(); ++comp) {
                         nc_color col = c_red;
-                        component &comp = current_con->components[i][j];
-                        if(comp.available == 1) {
+                        if( ( item_controller->find_template(comp->type)->is_ammo() &&
+                              total_inv.has_charges(comp->type, comp->count)) ||
+                            (!item_controller->find_template(comp->type)->is_ammo() &&
+                             total_inv.has_components(comp->type, comp->count)) ) {
                             col = c_green;
                         }
-                        if ( ((item_controller->find_template(comp.type)->id == "rope_30") ||
-                          (item_controller->find_template(comp.type)->id == "rope_6")) &&
+                        if ( ((item_controller->find_template(comp->type)->id == "rope_30") ||
+                          (item_controller->find_template(comp->type)->id == "rope_6")) &&
                           ((g->u.has_trait("WEB_ROPE")) && (g->u.hunger <= 300)) ) {
-                            comp.available = 1;
+                            comp->available = 1;
                             col = c_ltgreen; // Show that WEB_ROPE is on the job!
                         }
-                        int length = utf8_width(item_controller->find_template(comp.type)->nname(comp.count).c_str());
+                        int length = utf8_width(item_controller->find_template(comp->type)->nname(comp->count).c_str());
                         if (posx + length > FULL_SCREEN_WIDTH - 1) {
                             posy++;
                             posx = 33;
                         }
                         mvwprintz(w_con, posy, posx, col, "%d %s",
-                                  comp.count, item_controller->find_template(comp.type)->nname(comp.count).c_str());
+                                  comp->count, item_controller->find_template(comp->type)->nname(comp->count).c_str());
                         posx += length + 2; 
                         // Add more space for the length of the count
-                        if (comp.count < 10) {
+                        if (comp->count < 10) {
                             posx++;
-                        } else if (comp.count < 100) {
+                        } else if (comp->count < 100) {
                             posx += 2;
                         } else {
                             posx += 3;
                         }
 
-                        if (j < current_con->components[i].size() - 1) { // "OR" if there's more
+                        if (comp != current_con->components[i].end() - 1) { // "OR" if there's more
                             if (posx > FULL_SCREEN_WIDTH - 3) {
                                 posy++;
                                 posx = 33;
@@ -425,8 +433,9 @@ static bool player_can_build(player &p, const crafting_inventory_t& pinv, const 
 {
     // check all with the same desc to see if player can build any
     std::vector<construction *> cons = constructions_by_desc(desc);
-    for (unsigned i = 0; i < cons.size(); ++i) {
-        if (player_can_build(p, pinv, cons[i])) {
+    for (std::vector<construction *>::iterator it = cons.begin();
+         it != cons.end(); ++it) {
+        if (player_can_build(p, pinv, *it)) {
             return true;
         }
     }
@@ -445,8 +454,9 @@ static bool can_construct( const std::string &desc )
 {
     // check all with the same desc to see if player can build any
     std::vector<construction *> cons = constructions_by_desc(desc);
-    for( unsigned i = 0; i < cons.size(); ++i ) {
-        if( can_construct(cons[i]) ) {
+    for(std::vector<construction *>::iterator it = cons.begin();
+        it != cons.end(); ++it) {
+        if(can_construct(*it)) {
             return true;
         }
     }
@@ -515,10 +525,11 @@ static void place_construction(const std::string &desc)
             if (x == g->u.posx && y == g->u.posy) {
                 y++;
             }
-            for (unsigned i = 0; i < cons.size(); ++i) {
-                if (can_construct(cons[i], x, y)
-                    && player_can_build(g->u, total_inv, cons[i])) {
-                    valid[point(x, y)] = cons[i];
+            for (std::vector<construction *>::iterator it = cons.begin();
+                 it != cons.end(); ++it) {
+                if (can_construct(*it, x, y)
+                    && player_can_build(g->u, total_inv, *it)) {
+                    valid[point(x, y)] = *it;
                 }
             }
         }
@@ -638,9 +649,10 @@ void construct::done_tree(point p)
     x = p.x + x * 3 + rng(-1, 1);
     y = p.y + y * 3 + rng(-1, 1);
     std::vector<point> tree = line_to(p.x, p.y, x, y, rng(1, 8));
-    for (unsigned i = 0; i < tree.size(); i++) {
-        g->m.destroy(tree[i].x, tree[i].y, true);
-        g->m.ter_set(tree[i].x, tree[i].y, t_trunk);
+    for (std::vector<point>::iterator it = tree.begin();
+         it != tree.end(); ++it) {
+        g->m.destroy(it->x, it->y, true);
+        g->m.ter_set(it->x, it->y, t_trunk);
     }
 }
 

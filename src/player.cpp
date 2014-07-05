@@ -476,11 +476,7 @@ void player::reset_stats()
     suffer();
 
     // Dodge-related effects
-    mod_dodge_bonus(
-            mabuff_dodge_bonus()
-            - encumb(bp_legs)/2
-            - encumb(bp_torso)
-        );
+    mod_dodge_bonus( mabuff_dodge_bonus() - encumb(bp_legs)/2 - encumb(bp_torso) );
     if (has_trait("TAIL_LONG")) {
         mod_dodge_bonus(2);
     }
@@ -513,11 +509,7 @@ void player::reset_stats()
     else if (str_max <= 5) {mod_dodge_bonus(1);} // Bonus if we're small
 
     // Hit-related effects
-    mod_hit_bonus(
-            mabuff_tohit_bonus()
-            + weapon.type->m_to_hit
-            - encumb(bp_torso)
-        );
+    mod_hit_bonus( mabuff_tohit_bonus() + weapon.type->m_to_hit - encumb(bp_torso) );
 
     // Set our scent towards the norm
     int norm_scent = 500;
@@ -686,16 +678,16 @@ void player::apply_persistent_morale()
             add_morale(MORALE_PERM_FANCY, bonus, bonus, 5, 5, true);
         }
     }
-    
+
     // Floral folks really don't like having their flowers covered.
-    if ((has_trait("FLOWERS")) && (wearing_something_on(bp_head)) ) {
+    if( has_trait("FLOWERS") && wearing_something_on(bp_head) ) {
         add_morale(MORALE_PERM_CONSTRAINED, -10, -10, 5, 5, true);
     }
-    
+
     // The same applies to rooters and their feet; however, they don't take
     // too many problems from no-footgear.
-    if (((has_trait("ROOTS")) || (has_trait("ROOTS2")) || (has_trait("ROOTS3")) ) &&
-      (wearing_something_on(bp_feet)) ) {
+    if( (has_trait("ROOTS") || has_trait("ROOTS2") || has_trait("ROOTS3") ) &&
+        wearing_something_on(bp_feet) ) {
         add_morale(MORALE_PERM_CONSTRAINED, -10, -10, 5, 5, true);
     }
 
@@ -1412,6 +1404,20 @@ int player::run_cost(int base_cost, bool diag)
     if (diag)
         movecost *= 0.7071f; // because everything here assumes 100 is base
     bool flatground = movecost < 105;
+    const ter_id ter_at_pos = g->m.ter(posx, posy);
+    // If your floor is hard, flat, and otherwise skateable, list it here
+    bool offroading = ( flatground && (!((ter_at_pos == t_rock_floor) ||
+      (ter_at_pos == t_pit_covered) || (ter_at_pos == t_metal_floor) ||
+      (ter_at_pos == t_pit_spiked_covered) || (ter_at_pos == t_pavement) ||
+      (ter_at_pos == t_pavement_y) || (ter_at_pos == t_sidewalk) ||
+      (ter_at_pos == t_concrete) || (ter_at_pos == t_floor) ||
+      (ter_at_pos == t_skylight) || (ter_at_pos == t_door_glass_o) ||
+      (ter_at_pos == t_emergency_light_flicker) ||
+      (ter_at_pos == t_emergency_light) || (ter_at_pos == t_utility_light) ||
+      (ter_at_pos == t_door_o) || (ter_at_pos == t_rdoor_o) ||
+      (ter_at_pos == t_door_frame) || (ter_at_pos == t_mdoor_frame) ||
+      (ter_at_pos == t_fencegate_o) || (ter_at_pos == t_chaingate_o) ||
+      (ter_at_pos == t_door_metal_o) || (ter_at_pos == t_door_bar_o) )) );
 
     if (has_trait("PARKOUR") && movecost > 100 ) {
         movecost *= .5f;
@@ -1482,6 +1488,15 @@ int player::run_cost(int base_cost, bool diag)
     if (is_wearing("swim_fins")) {
         movecost *= 1.5f;
     }
+    if (is_wearing("roller_blades")) {
+        if (offroading) {
+            movecost *= 1.5f;
+        } else if (flatground) {
+            movecost *= 0.5f;
+        } else {
+            movecost *= 1.5f;
+        }
+    }
 
     movecost += encumb(bp_mouth) * 5 + encumb(bp_feet) * 5 + encumb(bp_legs) * 3;
 
@@ -1492,14 +1507,15 @@ int player::run_cost(int base_cost, bool diag)
         !has_trait("TOUGH_FEET") && !has_trait("ROOTS2") ) {
         movecost += 15;
     }
-    
-    if ( (!(wearing_something_on(bp_feet))) && has_trait("ROOTS3") &&
-      g->m.has_flag("DIGGABLE", posx, posy) ) {
-        movecost += 10;
-      }
 
-    if (diag)
+    if( !wearing_something_on(bp_feet) && has_trait("ROOTS3") &&
+        g->m.has_flag("DIGGABLE", posx, posy) ) {
+        movecost += 10;
+    }
+
+    if (diag) {
         movecost *= 1.4142;
+    }
 
     return int(movecost);
 }
@@ -1593,7 +1609,8 @@ nc_color player::color()
  if (underwater)
   return c_blue;
  if (has_active_bionic("bio_cloak") || has_artifact_with(AEP_INVISIBLE) ||
-    (is_wearing("optical_cloak") && (has_active_item("UPS_on") || has_active_item("adv_UPS_on"))))
+    (is_wearing("optical_cloak") && (has_active_item("UPS_on") ||
+    has_active_item("adv_UPS_on"))) || has_trait("DEBUG_CLOAK"))
   return c_dkgray;
  return c_white;
 }
@@ -3834,7 +3851,11 @@ void player::recalc_sight_limits()
     // Set sight_boost and sight_boost_cap, based on night vision.
     // (A player will never have more than one night vision trait.)
     sight_boost_cap = 12;
-    if (has_nv() || has_trait("NIGHTVISION3") || has_trait("ELFA_FNV") || is_wearing("rm13_armor_on")) {
+    // Debug-only NV, by vache's request
+    if (has_trait("DEBUG_NIGHTVISION")) {
+        sight_boost = 59;
+        sight_boost_cap = 59;
+    } else if (has_nv() || has_trait("NIGHTVISION3") || has_trait("ELFA_FNV") || is_wearing("rm13_armor_on")) {
         // Yes, I'm breaking the cap. I doubt the reality bubble shrinks at night.
         // BIRD_EYE represents excellent fine-detail vision so I think it works.
         if (has_trait("BIRD_EYE")) {
@@ -4065,21 +4086,31 @@ void player::search_surroundings()
     if (controlling_vehicle) {
         return;
     }
-    for(size_t i = 0; i < 9; i++) {
-        const int x = posx + i / 3 - 1;
-        const int y = posy + i % 3 - 1;
+    // Search for traps in a larger area than before because this is the only
+    // way we can "find" traps that aren't marked as visible.
+    // Detection formula takes care of likelihood of seeing within this range.
+    for (size_t i = 0; i < 121; i++) {
+        const int x = posx + i / 11 - 5;
+        const int y = posy + i % 11 - 5;
         const trap_id trid = g->m.tr_at(x, y);
         if (trid == tr_null || (x == posx && y == posy)) {
             continue;
         }
         const trap *tr = traplist[trid];
         if (tr->name.empty() || tr->can_see(*this, x, y)) {
-            // Already seen, or has no name -> can never bee seen
+            // Already seen, or has no name -> can never be seen
             continue;
         }
-        const std::string direction = direction_name(direction_from(posx, posy, x, y));
-        add_msg_if_player(_("You've spotted a %s to the %s!"), tr->name.c_str(), direction.c_str());
-        add_known_trap(x, y, tr->id);
+        // Chance to detect traps we haven't yet seen.
+        if (tr->detect_trap(*this, x, y)) {
+            if( tr->get_visibility() > 0 ) {
+                // Only bug player about traps that aren't trivial to spot.
+                const std::string direction = direction_name(direction_from(posx, posy, x, y));
+                add_msg_if_player(_("You've spotted a %s to the %s!"),
+                                  tr->name.c_str(), direction.c_str());
+            }
+            add_known_trap(x, y, tr->id);
+        }
     }
 }
 
@@ -5372,26 +5403,26 @@ void player::suffer()
             }
         }
     }
-    
-    if ( (has_trait("ROOTS3")) && g->m.has_flag("DIGGABLE", posx, posy) &&
-            (!(wearing_something_on(bp_feet))) ) {
-                if (one_in(25)) {
-                    add_msg(m_good, _("This soil is delicious!"));
-                    hunger -= 2;
-                    thirst -= 2;
-                    if (health <= 10) {
-                        health++;
-                    }
-                    // Mmm, dat soil...
-                    focus_pool--;
-              } else if (one_in(20)){
-                    hunger--;
-                    thirst--;
-                    if (health <= 5) {
-                        health++;
-                    }
-                }
+
+    if( has_trait("ROOTS3") && g->m.has_flag("DIGGABLE", posx, posy) &&
+        (!(wearing_something_on(bp_feet))) ) {
+        if (one_in(25)) {
+            add_msg(m_good, _("This soil is delicious!"));
+            hunger -= 2;
+            thirst -= 2;
+            if (health <= 10) {
+                health++;
             }
+            // Mmm, dat soil...
+            focus_pool--;
+        } else if (one_in(20)){
+            hunger--;
+            thirst--;
+            if (health <= 5) {
+                health++;
+            }
+        }
+    }
 
     for (int i = 0; i < illness.size(); i++) {
         dis_effect(*this, illness[i]);
@@ -8014,22 +8045,31 @@ void player::consume_effects(item *eaten, it_comest *comest, bool rotten)
     }
 }
 
+void player::rooted_message() const
+{
+    if( (has_trait("ROOTS2") || has_trait("ROOTS3") ) &&
+        g->m.has_flag("DIGGABLE", posx, posy) &&
+        !wearing_something_on(bp_feet) ) {
+        add_msg(m_info, _("You sink your roots into the soil."));
+    }
+}
+
 void player::rooted()
 // Should average a point every two minutes or so; ground isn't uniformly fertile
 // If being able to "overfill" is a serious balance issue, will revisit
 // Otherwise, nutrient intake via roots can fill past the "Full" point, WAI
 {
-  if ( (has_trait("ROOTS2") || (has_trait("ROOTS3"))) &&
-            g->m.has_flag("DIGGABLE", posx, posy) &&
-            (!(wearing_something_on(bp_feet))) ) {
-                if (one_in(20)) {
-                  hunger--;
-                  thirst--;
-                if (health <= 5) {
-                  health++;
-                }
+    if( (has_trait("ROOTS2") || has_trait("ROOTS3")) &&
+        g->m.has_flag("DIGGABLE", posx, posy) &&
+        !wearing_something_on(bp_feet) ) {
+        if( one_in(20) ) {
+            hunger--;
+            thirst--;
+            if (health <= 5) {
+                health++;
             }
         }
+    }
 }
 
 bool player::wield(item* it, bool autodrop)
@@ -9317,11 +9357,11 @@ void player::read(int pos)
         //If we just started studying, tell the player how to stop
         if(!continuous) {
             add_msg(m_info, _("Now studying %s, %s to stop early."),
-                            it->tname().c_str(), press_x(ACTION_PAUSE).c_str());
+                    it->tname().c_str(), press_x(ACTION_PAUSE).c_str());
             if ( (has_trait("ROOTS2") || (has_trait("ROOTS3"))) &&
-              g->m.has_flag("DIGGABLE", posx, posy) &&
-              (!(wearing_something_on(bp_feet))) ) {
-                add_msg(m_info, _("You sink your roots into the soil."));   
+                 g->m.has_flag("DIGGABLE", posx, posy) &&
+                 (!(wearing_something_on(bp_feet))) ) {
+                add_msg(m_info, _("You sink your roots into the soil."));
             }
         }
         study = true;
@@ -9491,17 +9531,14 @@ void player::do_read( item *book )
             read(activity.position);
             // Rooters root (based on time spent reading)
             int root_factor = (reading->time / 20);
-            if ( (has_trait("ROOTS2") || (has_trait("ROOTS3"))) &&
-            g->m.has_flag("DIGGABLE", posx, posy) &&
-            (!(wearing_something_on(bp_feet))) ) {
-                if (one_in(root_factor)){
-                  hunger--;
-                  thirst--;
-                if (health <= 5) {
-                  health++;
-                }
+            if( (has_trait("ROOTS2") || has_trait("ROOTS3")) &&
+                g->m.has_flag("DIGGABLE", posx, posy) &&
+                !wearing_something_on(bp_feet) ) {
+                hunger -= root_factor;
+                thirst -= root_factor;
+                health += root_factor;
+                health = std::min( 5, health );
             }
-        }
             if (activity.type != ACT_NULL) {
                 return;
             }
@@ -9590,47 +9627,42 @@ bool player::try_study_recipe(it_book *book)
 
 void player::try_to_sleep()
 {
- int vpart = -1;
- vehicle *veh = g->m.veh_at (posx, posy, vpart);
- const trap_id trap_at_pos = g->m.tr_at(posx, posy);
- const ter_id ter_at_pos = g->m.ter(posx, posy);
- const furn_id furn_at_pos = g->m.furn(posx, posy);
- bool plantsleep = false;
- if (has_trait("CHLOROMORPH")) {
-    plantsleep = true;
-    if ( (ter_at_pos == t_dirt || ter_at_pos == t_pit ||
-        ter_at_pos == t_dirtmound || ter_at_pos == t_pit_shallow ||
-        ter_at_pos == t_ash || ter_at_pos == t_grass) && (!(veh)) &&
-        (furn_at_pos == f_null) ) {
-        add_msg(m_good, _("You relax as your roots embrace the soil."));
+    int vpart = -1;
+    vehicle *veh = g->m.veh_at (posx, posy, vpart);
+    const trap_id trap_at_pos = g->m.tr_at(posx, posy);
+    const ter_id ter_at_pos = g->m.ter(posx, posy);
+    const furn_id furn_at_pos = g->m.furn(posx, posy);
+    bool plantsleep = false;
+    if (has_trait("CHLOROMORPH")) {
+        plantsleep = true;
+        if( (ter_at_pos == t_dirt || ter_at_pos == t_pit ||
+             ter_at_pos == t_dirtmound || ter_at_pos == t_pit_shallow ||
+             ter_at_pos == t_ash || ter_at_pos == t_grass) && (!(veh)) &&
+            (furn_at_pos == f_null) ) {
+            add_msg(m_good, _("You relax as your roots embrace the soil."));
+        } else if (veh) {
+            add_msg(m_bad, _("It's impossible to sleep in this wheeled pot!"));
+        } else if (furn_at_pos != f_null) {
+            add_msg(m_bad, _("The humans' furniture blocks your roots. You can't get comfortable."));
+        } else { // Floor problems
+            add_msg(m_bad, _("Your roots scrabble ineffectively at the unyielding surface."));
+        }
     }
-    else if (veh) {
-        add_msg(m_bad, _("It's impossible to sleep in this wheeled pot!"));
+    if( (furn_at_pos == f_bed || furn_at_pos == f_makeshift_bed ||
+         trap_at_pos == tr_cot || trap_at_pos == tr_rollmat ||
+         trap_at_pos == tr_fur_rollmat || furn_at_pos == f_armchair ||
+         furn_at_pos == f_sofa || furn_at_pos == f_hay ||
+         (veh && veh->part_with_feature (vpart, "SEAT") >= 0) ||
+         (veh && veh->part_with_feature (vpart, "BED") >= 0)) &&
+        (!(plantsleep)) ) {
+        add_msg(m_good, _("This is a comfortable place to sleep."));
+    } else if ((ter_at_pos != t_floor) && (!(plantsleep))) {
+        add_msg( terlist[ter_at_pos].movecost <= 2 ?
+                 _("It's a little hard to get to sleep on this %s.") :
+                 _("It's hard to get to sleep on this %s."),
+                 terlist[ter_at_pos].name.c_str() );
     }
-    else if (furn_at_pos != f_null) {
-        add_msg(m_bad, _("The humans' furniture blocks your roots. You can't get comfortable."));
-    }
-    else { // Floor problems
-        add_msg(m_bad, _("Your roots scrabble ineffectively at the unyielding surface."));
-    }
-  }
- if ( (furn_at_pos == f_bed || furn_at_pos == f_makeshift_bed ||
-     trap_at_pos == tr_cot || trap_at_pos == tr_rollmat ||
-     trap_at_pos == tr_fur_rollmat || furn_at_pos == f_armchair ||
-     furn_at_pos == f_sofa || furn_at_pos == f_hay ||
-     (veh && veh->part_with_feature (vpart, "SEAT") >= 0) ||
-     (veh && veh->part_with_feature (vpart, "BED") >= 0)) &&
-     (!(plantsleep)) ) {
-      add_msg(m_good, _("This is a comfortable place to sleep."));
-  }
- else if ((ter_at_pos != t_floor) && (!(plantsleep))) {
-    add_msg(
-             terlist[ter_at_pos].movecost <= 2 ?
-             _("It's a little hard to get to sleep on this %s.") :
-             _("It's hard to get to sleep on this %s."),
-             terlist[ter_at_pos].name.c_str());
-  }
- add_disease("lying_down", 300);
+    add_disease("lying_down", 300);
 }
 
 bool player::can_sleep()
@@ -10432,19 +10464,20 @@ int player::get_env_resist(body_part bp)
     return ret;
 }
 
-bool player::wearing_something_on(body_part bp)
+bool player::wearing_something_on(body_part bp) const
 {
- for (int i = 0; i < worn.size(); i++) {
-  if ((dynamic_cast<it_armor*>(worn[i].type))->covers & mfb(bp))
-    return true;
- }
- return false;
+    for (int i = 0; i < worn.size(); i++) {
+        if ((dynamic_cast<it_armor*>(worn[i].type))->covers & mfb(bp))
+            return true;
+    }
+    return false;
 }
 
-bool player::is_wearing_shoes() {
+bool player::is_wearing_shoes() const
+{
     for (int i = 0; i < worn.size(); i++) {
-        item *worn_item = &worn[i];
-        it_armor *worn_armor = dynamic_cast<it_armor*>(worn_item->type);
+        const item *worn_item = &worn[i];
+        const it_armor *worn_armor = dynamic_cast<it_armor*>(worn_item->type);
 
         if (worn_armor->covers & mfb(bp_feet) &&
             (!worn_item->has_flag("BELTED")) &&
@@ -10958,6 +10991,7 @@ bool player::is_invisible() const {
         has_active_bionic(str_bio_cloak) ||
         has_active_bionic(str_bio_night) ||
         has_active_optcloak() ||
+        has_trait("DEBUG_CLOAK") ||
         has_artifact_with(AEP_INVISIBLE)
     );
 }
@@ -11197,6 +11231,8 @@ bool player::sees(int x, int y, int &t)
         if (is_player()) {
             // uses the seen cache in map
             can_see = g->m.pl_sees(posx, posy, x, y, wanted_range);
+        } else if (g->m.light_at(x, y) >= LL_LOW) {
+            can_see = g->m.sees(posx, posy, x, y, wanted_range, t);
         } else {
             can_see = g->m.sees(posx, posy, x, y, s_range, t);
         }

@@ -581,7 +581,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
                 surround.push_back(item_from_surrounding(p, acid));
             }
             if (terrain_id == t_swater_sh || terrain_id == t_swater_dp) {
-                item swater("water_salt", 0);
+                item swater("salt_water", 0);
                 swater.charges = 50;
                 surround.push_back(item_from_surrounding(p, swater));
             }

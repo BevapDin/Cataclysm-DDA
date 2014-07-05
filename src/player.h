@@ -581,6 +581,7 @@ public:
  /** Handles the effects of consuming an item */
  void consume_effects(item *eaten, it_comest *comest, bool rotten = false);
  /** Handles rooting effects */
+ void rooted_message() const;
  void rooted();
  /** Wields an item, returns false on failed wield */
  virtual bool wield(item* it, bool autodrop = false);
@@ -652,9 +653,9 @@ public:
  /** Returns overall env_resist on a body_part */
  int get_env_resist(body_part bp);
  /** Returns true if the player is wearing something on the entered body_part */
- bool wearing_something_on(body_part bp);
+ bool wearing_something_on(body_part bp) const;
  /** Returns true if the player is wearing something on their feet that is not SKINTIGHT */
- bool is_wearing_shoes();
+ bool is_wearing_shoes() const;
  /** Returns true if the player is wearing power armor */
  bool is_wearing_power_armor(bool *hasHelmet = NULL) const;
 
@@ -925,6 +926,9 @@ public:
     typedef std::map<tripoint, std::string> trap_map;
     bool knows_trap(int x, int y) const;
     void add_known_trap(int x, int y, const std::string &t);
+    /** Search surrounding squares for traps (and maybe other things in the future). */
+    void search_surroundings();
+    
 protected:
     std::unordered_set<std::string> my_traits;
     std::unordered_set<std::string> my_mutations;
@@ -938,7 +942,7 @@ protected:
     int sight_boost_cap;
 
     void setID (int i);
-
+    
 private:
     // Items the player has identified.
     std::unordered_set<std::string> items_identified;
@@ -952,9 +956,6 @@ private:
 
     bool can_study_recipe(it_book *book);
     bool try_study_recipe(it_book *book);
-
-    /** Search surroundings squares for traps while pausing a turn. */
-    void search_surroundings();
 
     std::vector<point> auto_move_route;
     // Used to make sure auto move is canceled if we stumble off course

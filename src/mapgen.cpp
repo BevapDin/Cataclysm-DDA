@@ -42,10 +42,14 @@ room_type pick_mansion_room(int x1, int y1, int x2, int y2);
 void build_mansion_room(map *m, room_type type, int x1, int y1, int x2, int y2, mapgendata & dat);
 void mansion_room(map *m, int x1, int y1, int x2, int y2, mapgendata & dat); // pick & build
 
-void map::generate(overmap *om, const int x, const int y, const int z, const int turn)
+// (x,y,z) are absolute coordinates of a submap
+// x%2 and y%2 must be 0!
+void map::generate(const int x, const int y, const int z, const int turn)
 {
-    dbg(D_INFO) << "map::generate( g[" << g << "], om[" << (void *)om << "], x[" << x << "], "
+    dbg(D_INFO) << "map::generate( g[" << g << "], x[" << x << "], "
                 << "y[" << y << "], turn[" << turn << "] )";
+
+    set_abs_sub( x, y, z );
 
     // First we have to create new submaps and initialize them to 0 all over
     // We create all the submaps, even if we're not a tinymap, so that map
@@ -71,10 +75,9 @@ void map::generate(overmap *om, const int x, const int y, const int z, const int
     }
 
     unsigned zones = 0;
-    // x, and y are submap coordinates, local to om -> make them global,
-    // than convert to overmap terrain coordinates
-    int overx = x + om->pos().x * OMAPX * 2;
-    int overy = y + om->pos().y * OMAPY * 2;
+    // x, and y are submap coordinates, convert to overmap terrain coordinates
+    int overx = x;
+    int overy = y;
     overmapbuffer::sm_to_omt(overx, overy);
     const regional_settings *rsettings = &overmap_buffer.get_settings(overx, overy, z);
     oter_id t_above = overmap_buffer.ter(overx, overy, z + 1);
@@ -116,7 +119,7 @@ void map::generate(overmap *om, const int x, const int y, const int z, const int
             dbg(D_INFO) << grid[i + j];
 
             if (i <= 1 && j <= 1) {
-                saven(om, turn, x, y, z, i, j);
+                saven(turn, x, y, z, i, j);
             } else {
                 delete grid[i + j * my_MAPSIZE];
             }
@@ -3026,7 +3029,7 @@ C..C..C...|hhh|#########\n\
         if (is_ot_type("sewer", t_west) && connects_to(t_west, 1)) {
             lw = SEEX * 2;
         }
-        if (t_above == "") { // We're on ground level
+        if (t_above == "open_air") { // We're on ground level
             for (int i = 0; i < SEEX * 2; i++) {
                 for (int j = 0; j < SEEY * 2; j++) {
                     if (i <= 1 || i >= SEEX * 2 - 2 ||
@@ -4013,7 +4016,7 @@ ff.......|....|WWWWWWWW|\n\
 
     } else if (terrain_type == "bunker") {
 
-        if (t_above == "") { // We're on ground level
+        if (t_above == "open_air") { // We're on ground level
             dat.fill_groundcover();
             //chainlink fence that surrounds bunker
             line(this, t_chainfence_v, 1, 1, 1, SEEY * 2 - 1);
@@ -10841,10 +10844,9 @@ void map::place_spawns(std::string group, const int chance,
         return;
     }
 
-    if ( MonsterGroupManager::isValidMonsterGroup( group ) == false ) {
-        real_coords rc( this->getabs() );
-        overmap * thisom = &overmap_buffer.get(rc.abs_om.x, rc.abs_om.y );
-        oter_id oid = thisom->ter( rc.om_pos.x, rc.om_pos.y, world_z );
+    if (MonsterGroupManager::isValidMonsterGroup( group ) == false ) {
+        const point omt = overmapbuffer::sm_to_omt_copy( get_abs_sub().x, get_abs_sub().y );
+        const oter_id &oid = overmap_buffer.ter( omt.x, omt.y, get_abs_sub().z );
         debugmsg("place_spawns: invalid mongroup '%s', om_terrain = '%s' (%s)", group.c_str(), oid.t().id.c_str(), oid.t().id_mapgen.c_str() );
         return;
     }
@@ -10917,9 +10919,8 @@ int map::place_items(items_location loc, int chance, int x1, int y1,
         return 0;
     }
     if (!item_controller->has_group(loc)) {
-        real_coords rc( this->getabs() );
-        overmap * thisom = &overmap_buffer.get(rc.abs_om.x, rc.abs_om.y );
-        oter_id oid = thisom->ter( rc.om_pos.x, rc.om_pos.y, world_z );
+        const point omt = overmapbuffer::sm_to_omt_copy( get_abs_sub().x, get_abs_sub().y );
+        const oter_id &oid = overmap_buffer.ter( omt.x, omt.y, get_abs_sub().z );
         debugmsg("place_items: invalid item group '%s', om_terrain = '%s' (%s)",
                  loc.c_str(), oid.t().id.c_str(), oid.t().id_mapgen.c_str() );
         return 0;
@@ -12729,80 +12730,83 @@ void map::add_extra(map_extra type)
     break;
 
     case mx_stash: {
-        int x = rng(0, SEEX * 2 - 1), y = rng(0, SEEY * 2 - 1);
-        if (move_cost(x, y) != 0) {
-            ter_set(x, y, t_dirt);
-        }
-
-        int size = 0;
-        items_location stash;
-        switch (rng(1, 6)) { // What kind of stash?
-        case 1:
-            stash = "stash_food";
-            size = 90;
-            break;
-        case 2:
-            stash = "stash_ammo";
-            size = 80;
-            break;
-        case 3:
-            stash = "rare";
-            size = 70;
-            break;
-        case 4:
-            stash = "stash_wood";
-            size = 90;
-            break;
-        case 5:
-            stash = "stash_drugs";
-            size = 85;
-            break;
-        case 6:
-            stash = "trash";
-            size = 92;
-            break;
-        }
-
-        if (move_cost(x, y) == 0) {
-            ter_set(x, y, t_dirt);
-        }
-        place_items(stash, size, x, y, x, y, true, 0);
-
-        // Now add traps around that stash
-        for (int i = x - 4; i <= x + 4; i++) {
-            for (int j = y - 4; j <= y + 4; j++) {
-                if (i >= 0 && j >= 0 && i < SEEX * 2 && j < SEEY * 2 && one_in(4)) {
-                    trap_id placed = tr_null;
-                    switch (rng(1, 7)) {
-                    case 1:
-                    case 2:
-                    case 3:
-                        placed = tr_beartrap;
-                        break;
-                    case 4:
-                        placed = tr_caltrops;
-                        break;
-                    case 5:
-                        placed = tr_nailboard;
-                        break;
-                    case 6:
-                        placed = tr_crossbow;
-                        break;
-                    case 7:
-                        placed = tr_shotgun_2;
-                        break;
-                    }
-                    if (placed == tr_beartrap && has_flag("DIGGABLE", i, j)) {
-                        if (one_in(8)) {
-                            placed = tr_landmine_buried;
-                        } else {
-                            placed = tr_beartrap_buried;
-                        }
-                    }
-                    add_trap(i, j,  placed);
-                }
-            }
-        }
+        // 2014 June 21
+        // Disabled stashes here. Allows previous weights to be kept and
+        // stashes, if "created" will be ignored.
+//        int x = rng(0, SEEX * 2 - 1), y = rng(0, SEEY * 2 - 1);
+//        if (move_cost(x, y) != 0) {
+//            ter_set(x, y, t_dirt);
+//        }
+//
+//        int size = 0;
+//        items_location stash;
+//        switch (rng(1, 6)) { // What kind of stash?
+//        case 1:
+//            stash = "stash_food";
+//            size = 90;
+//            break;
+//        case 2:
+//            stash = "stash_ammo";
+//            size = 80;
+//            break;
+//        case 3:
+//            stash = "rare";
+//            size = 70;
+//            break;
+//        case 4:
+//            stash = "stash_wood";
+//            size = 90;
+//            break;
+//        case 5:
+//            stash = "stash_drugs";
+//            size = 85;
+//            break;
+//        case 6:
+//            stash = "trash";
+//            size = 92;
+//            break;
+//        }
+//
+//        if (move_cost(x, y) == 0) {
+//            ter_set(x, y, t_dirt);
+//        }
+//        place_items(stash, size, x, y, x, y, true, 0);
+//
+//        // Now add traps around that stash
+//        for (int i = x - 4; i <= x + 4; i++) {
+//            for (int j = y - 4; j <= y + 4; j++) {
+//                if (i >= 0 && j >= 0 && i < SEEX * 2 && j < SEEY * 2 && one_in(4)) {
+//                    trap_id placed = tr_null;
+//                    switch (rng(1, 7)) {
+//                    case 1:
+//                    case 2:
+//                    case 3:
+//                        placed = tr_beartrap;
+//                        break;
+//                    case 4:
+//                        placed = tr_caltrops;
+//                        break;
+//                    case 5:
+//                        placed = tr_nailboard;
+//                        break;
+//                    case 6:
+//                        placed = tr_crossbow;
+//                        break;
+//                    case 7:
+//                        placed = tr_shotgun_2;
+//                        break;
+//                    }
+//                    if (placed == tr_beartrap && has_flag("DIGGABLE", i, j)) {
+//                        if (one_in(8)) {
+//                            placed = tr_landmine_buried;
+//                        } else {
+//                            placed = tr_beartrap_buried;
+//                        }
+//                    }
+//                    add_trap(i, j,  placed);
+//                }
+//            }
+//        }
     }
     break;
 
