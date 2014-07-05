@@ -262,7 +262,7 @@
         "color": "yellow",
         "name": "Monomolecular Blade CBM",
         "description": "A deadly foot-long blade made of advanced material now resides inside your forearm, capable of being extended through the back of your wrist at the cost of a small amount of power.  Though exceptionally sharp, it will prevent you from holding anything else while extended.",
-        "price": 800000,
+        "price": 8000,
         "material": ["steel", "plastic"],
         "weight": 2041,
         "volume": 10,

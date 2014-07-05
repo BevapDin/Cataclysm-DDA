@@ -123,10 +123,14 @@
       			["sunglasses", 25],
       			["cowboy_hat", 25],
       			["mp3", 40],
+      			["wolfsuit", 5],
+      			["dinosuit", 5],
       			["gum", 10],
       			["talking_doll", 50],
       			["creepy_doll", 1],
-      			["jedi_cloak", 5]
+      			["jedi_cloak", 5],
+      			["clown_suit", 5],
+      			["clownshoes", 5]
         	]
    	},{
     		"type" : "item_group",

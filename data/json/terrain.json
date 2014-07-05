@@ -653,7 +653,7 @@
         "move_cost": 2,
         "flags": [
             "FLAMMABLE_ASH", "TRANSPARENT", "SUPPORTS_ROOF",
-            "FLAT", "BARRICADABLE_DOOR", "CONNECT_WALL"
+            "FLAT", "BARRICADABLE_DOOR"
         ],
         "deconstruct": {
             "ter_set": "t_door_frame",
@@ -791,7 +791,7 @@
         "symbol": ".",
         "color": "brown",
         "move_cost": 2,
-        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT", "CONNECT_WALL"]
+        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT"]
     },{
         "type" : "terrain",
         "id" : "t_mdoor_frame",
@@ -940,7 +940,7 @@
         "symbol": "'",
         "color": "cyan",
         "move_cost": 2,
-        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT", "CONNECT_WALL"],
+        "flags": ["TRANSPARENT", "SUPPORTS_ROOF", "FLAT"],
         "close": "t_door_bar_c"
     },{
         "type" : "terrain",

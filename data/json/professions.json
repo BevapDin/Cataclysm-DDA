@@ -1437,6 +1437,44 @@
     },
     {
         "type": "profession",
+        "ident": "clown",
+        "name": "Clown",
+        "description": "All you ever wanted was to make people laugh. Dropping out of school and performing at kids' parties was a dream come true until the world ended. There's precious few balloon animals in your future now.",
+        "points": -1,
+        "items": {
+            "both": [
+                "clown_suit",
+                "clownshoes",
+                "airhorn"
+            ],
+            "male": [
+                "briefs"
+            ],
+            "female": [
+                "bra",
+                "panties"
+            ]
+        }
+    },
+    {
+        "type": "profession",
+        "ident": "lost_sub",
+        "name": "Lost Submissive",
+        "description": "Early in the rush to safety, you were separated from your master by cruel fate. Now you are on your own with nothing to your name but a suit of really kinky black leather. Unfortunately, there's no safewords in the apocalypse.",
+        "points": -1,
+        "items": {
+            "both" : [
+                "bondage_suit",
+                "bondage_mask",
+                "boots",
+                "leather_belt",
+                "candle",
+                "matches"
+            ]
+        }
+    },
+    {
+        "type": "profession",
         "ident": "senior",
         "name": "Senior Citizen",
         "description": "You haven't seen this much blood since the war. The whole world's gone crazy! They ate your grandkids! But dagnabbit, you'll make them all pay for what they've done.",
@@ -1460,6 +1498,33 @@
                 "bra",
                 "dress",
                 "gold_watch"
+            ]
+        }
+    },
+    {
+        "type": "profession",
+        "ident": "cosplay",
+        "name": "Otaku",
+        "description": "Late nights with friends watching anime and eating snacks has prepared you for the premier anime convention in the Northeast.  It just had to be the day of the apocalypse.  At least you were ready in case your costume tore.",
+        "points": 1,
+        "items": {
+            "both": [
+                "shorts",
+                "sneakers",
+                "tank_top",
+                "sewing_kit",
+                "mbag",
+                "fur_cat_ears",
+                "fur_cat_tail",
+                "fur_collar",
+                "cheeseburger"
+            ],
+            "male": [
+                "briefs"
+            ],
+            "female": [
+                "bra",
+                "panties"
             ]
         }
     },
