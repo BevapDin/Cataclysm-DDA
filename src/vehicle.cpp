@@ -4827,8 +4827,12 @@ bool vehicle::examine(game *g, player *p, int part) {
                 // If there is no recipe for charcoal, assume this as default
                 charcoal_recipe.components.resize(1);
                 charcoal_recipe.components[0].push_back(component("2x4", 3));
-                charcoal_recipe.time = 60000;
-                charcoal_recipe.result_mult = 1;
+                charcoal_recipe.components[0].push_back(component("splinter", 20));
+                charcoal_recipe.components[0].push_back(component("stick", 5));
+                charcoal_recipe.components[0].push_back(component("bone", 40));
+                charcoal_recipe.components[0].push_back(component("log", 1));
+                charcoal_recipe.time = 120000;
+                charcoal_recipe.result_mult = 2;
             } else {
                 charcoal_recipe.components = r->components;
                 charcoal_recipe.time = r->time;
