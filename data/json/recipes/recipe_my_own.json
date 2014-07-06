@@ -1,0 +1,133 @@
+[
+{
+        "type" : "recipe",
+  "result": "heap_circuit",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_OTHER",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": true,
+  "components": [ [ [ "circuit", 100 ] ], [ [ "ragpouch", 1 ] ] ]
+  },{
+        "type" : "recipe",
+  "result": "heap_chitin_piece",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_OTHER",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": true,
+  "components": [ [ [ "chitin_piece", 100 ] ], [ [ "ragpouch", 1 ] ] ]
+  },{
+        "type" : "recipe",
+  "result": "heap_fur",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_OTHER",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": true,
+  "components": [ [ [ "fur", 100 ] ], [ [ "ragpouch", 1 ] ] ]
+  },{
+        "type" : "recipe",
+  "result": "heap_RAM",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_OTHER",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": true,
+  "components": [ [ [ "RAM", 100 ] ], [ [ "ragpouch", 1 ] ] ]
+ },{
+         "type" : "recipe",
+  "result": "landmine_mod",
+  "category": "CC_OTHER",
+  "skill_used": "traps",
+  "skills_required": [ "mechanics", 7 ],
+  "difficulty": 5,
+  "time": 5000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+      ["func:screwdriver", -1]
+    ],
+    [
+      [ "func:wrench", -1 ]
+    ],
+    [
+      [ "func:hacksaw", -1 ]
+    ],
+    [
+      [ "func:soldering_iron", 3 ]
+    ],
+    [
+      [ "func:boltcutters", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      ["landmine", 1]
+    ],
+    [
+      [ "cable", 2 ]
+    ],
+    [
+      [ "circuit", 1 ]
+    ],
+    [
+      [ "transponder", 1 ]
+    ],
+    [
+      [ "superglue", 1 ]
+    ],
+    [
+      [ "scrap", 1 ]
+    ]
+  ]
+ },{
+         "type" : "recipe",
+  "result": "veh_char_kiln",
+  "category": "CC_OTHER",
+  "skill_used": "fabrication",
+  "difficulty": 6,
+  "time": 70000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+        [ [ "func:hammer", -1 ] ] ,
+        [ [ "func:screwdriver", -1 ] ],
+        [ [ "func:wrench", -1 ] ],
+        [ [ "func:hacksaw", -1 ] ],
+        [ [ "func:welder", 150 ] ]
+      ],
+  "components": [
+        [ [ "char_kiln", 1 ] ],
+        [ [ "cable", 3 ] ],
+        [ [ "element", 6 ] ],
+        [ [ "scrap", 2 ] ],
+        [ [ "plastic_chunk", 2 ] ]
+      ]
+},{
+        "type" : "recipe",
+  "result": "veh_funnel",
+  "category": "CC_OTHER",
+  "skill_used": "fabrication",
+  "difficulty": 6,
+  "time": 70000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+        [ [ "func:hammer", -1 ] ] ,
+        [ [ "func:screwdriver", -1 ] ],
+        [ [ "func:soldering_iron", 150 ] ]
+      ],
+  "components": [
+        [ [ "funnel", 1 ] ],
+        [ [ "jerrycan", 1 ] ],
+        [ [ "hose", 1 ] ],
+        [ [ "plastic_chunk", 5 ] ]
+      ]
+}
+]
