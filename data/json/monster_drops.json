@@ -6,11 +6,6 @@
         "id": "default_zombie_clothes",
         "entries":
         [
-            { "group": "pants", "damage-min": 1, "damage-max": 4 },
-            { "group": "shirts", "damage-min": 1, "damage-max": 4 },
-            { "group": "shoes", "damage-min": 1, "damage-max": 4 },
-            { "group": "jackets", "damage-min": 1, "damage-max": 4, "prob": 20 },
-            { "group": "bags", "damage-min": 1, "damage-max": 4, "prob": 6 }
         ]
     },
     {
