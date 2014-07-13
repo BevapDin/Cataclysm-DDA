@@ -240,6 +240,13 @@ class map
  bool accessable_furniture(const int Fx, const int Fy, const int Tx, const int Ty, const int range) const;
 
  /**
+  * Calculate next search points surrounding the current position.
+  * Points closer to the target come first.
+  * This method leads to straighter lines and prevents weird looking movements away from the target.
+  */
+ std::vector<point> getDirCircle(const int Fx, const int Fy, const int Tx, const int Ty);
+
+ /**
   * Calculate a best path using A*
   *
   * @param Fx, Fy The source location from which to path.
@@ -296,7 +303,6 @@ class map
  bool has_furn(const int x, const int y);
 
  furn_id furn(const int x, const int y) const; // Furniture at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
- int oldfurn(const int x, const int y) const; // Furniture at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
  std::string get_furn(const int x, const int y) const;
  furn_t & furn_at(const int x, const int y) const;
 
@@ -307,7 +313,6 @@ class map
  bool can_move_furniture( const int x, const int y, player * p = NULL);
 // Terrain
  ter_id ter(const int x, const int y) const; // Terrain integer id at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
- int oldter(const int x, const int y) const; // Temporary; the game is riddled with case statements requiring enum
  std::string get_ter(const int x, const int y) const; // Terrain string id at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
  ter_t & ter_at(const int x, const int y) const; // Terrain at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
 
@@ -432,9 +437,9 @@ void add_corpse(int x, int y);
  point find_item(const item *it);
  void spawn_artifact( const int x, const int y );
  void spawn_natural_artifact( const int x, const int y, const artifact_natural_property prop );
-    void spawn_item(const int x, const int y, const std::string &itype_id,
-                    const unsigned quantity=1, const long charges=0,
-                    const unsigned birthday=0, const int damlevel=0, const bool rand = true);
+ void spawn_item(const int x, const int y, const std::string &itype_id,
+                 const unsigned quantity=1, const long charges=0,
+                 const unsigned birthday=0, const int damlevel=0, const bool rand = true);
  int max_volume(const int x, const int y);
  int free_volume(const int x, const int y);
  int stored_volume(const int x, const int y);
@@ -442,10 +447,14 @@ void add_corpse(int x, int y);
  bool add_item_or_charges(const int x, const int y, item new_item, int overflow_radius = 2);
  void process_active_items();
 
- std::list<item> use_amount_square(const int x, const int y, const itype_id type, int &quantity, const bool use_container);
- std::list<item> use_amount(const point origin, const int range, const itype_id type, const int amount,
-                              const bool use_container = false);
- std::list<item> use_charges(const point origin, const int range, const itype_id type, const long amount);
+ std::list<item> use_amount_square( const int x, const int y, const itype_id type,
+                                    int &quantity, const bool use_container );
+ std::list<item> use_amount( const point origin, const int range, const itype_id type,
+                             const int amount, const bool use_container = false );
+ std::list<item> use_charges( const point origin, const int range, const itype_id type,
+                              const long amount );
+
+ std::list<std::pair<tripoint, item *> > get_rc_items( int x = -1, int y = -1, int z = -1 );
 
 // Traps
  std::string trap_get(const int x, const int y) const;
@@ -497,7 +506,7 @@ void add_corpse(int x, int y);
  void place_gas_pump(const int x, const int y, const int charges);
  void place_toilet(const int x, const int y, const int charges = 6 * 4); // 6 liters at 250 ml per charge
  void place_vending(int x, int y, std::string type);
- void place_npc(int x, int y, std::string type);
+ int place_npc(int x, int y, std::string type);
  int place_items(items_location loc, const int chance, const int x1, const int y1,
                   const int x2, const int y2, bool ongrass, const int turn, bool rand = true);
 // put_items_from puts exactly num items, based on chances

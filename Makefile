@@ -49,8 +49,8 @@ RELEASE_FLAGS = -Werror -Wno-switch -Wno-sign-compare
 WARNINGS = -Werror -Wall -Wextra -Wno-switch -Wno-sign-compare -Wno-missing-braces -Wno-narrowing
 # Uncomment below to disable warnings
 #WARNINGS = -w
-#DEBUG = -g -fopenmp
-DEBUG = -g
+DEBUG = -g -D_GLIBCXX_DEBUG
+DEBUG += -fopenmp
 #PROFILE = -pg
 #OTHERS = -O3
 #DEFINES = -DNDEBUG
