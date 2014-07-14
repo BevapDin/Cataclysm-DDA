@@ -1030,6 +1030,7 @@ private:
 
 std::vector<point> closest_points_first(int radius, point p);
 std::vector<point> closest_points_first(int radius,int x,int y);
+std::vector<tripoint> closest_points_first(int radius, const tripoint &p);
 
 class tinymap : public map
 {
