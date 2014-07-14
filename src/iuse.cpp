@@ -2263,17 +2263,18 @@ int iuse::marloss(player *p, item *it, bool t, const tripoint &pos)
         int spore_spawned = 0;
         for (int x = p->posx - 4; x <= p->posx + 4; x++) {
             for (int y = p->posy - 4; y <= p->posy + 4; y++) {
-                if (rng(0, 10) > trig_dist(x, y, p->posx, p->posy) &&
-                    rng(0, 10) > trig_dist(x, y, p->posx, p->posy)) {
-                    g->m.marlossify(x, y);
+                const tripoint tp(x, y, p->zpos());
+                if (rng(0, 10) > trig_dist(tp, p->pos()) &&
+                    rng(0, 10) > trig_dist(tp, p->pos())) {
+                    g->m.marlossify(tp);
                 }
-                bool moveOK = (g->m.move_cost(x, y) > 0);
-                bool monOK = g->mon_at(x, y) == -1;
-                bool posOK = (p->posx != x || p->posy != y);
+                bool moveOK = (g->m.move_cost(tp) > 0);
+                bool monOK = g->mon_at(tp) == -1;
+                bool posOK = (g->u.pos() != tp);
                 if (moveOK && monOK && posOK &&
-                    one_in(10 + 5 * trig_dist(x, y, p->posx, p->posy)) &&
+                    one_in(10 + 5 * trig_dist(tp, p->pos())) &&
                     (spore_spawned == 0 || one_in(spore_spawned * 2))) {
-                    spore.spawn(x, y);
+                    spore.spawn(tp);
                     g->add_zombie(spore);
                     spore_spawned++;
                 }
@@ -2388,9 +2389,10 @@ int iuse::marloss_seed(player *p, item *it, bool t, const tripoint &pos)
         int spore_spawned = 0;
         for (int x = p->posx - 4; x <= p->posx + 4; x++) {
             for (int y = p->posy - 4; y <= p->posy + 4; y++) {
-                if (rng(0, 10) > trig_dist(x, y, p->posx, p->posy) &&
-                    rng(0, 10) > trig_dist(x, y, p->posx, p->posy)) {
-                    g->m.marlossify(x, y);
+                const tripoint tp(x, y, p->zpos());
+                if (rng(0, 10) > trig_dist(tp, p->pos()) &&
+                    rng(0, 10) > trig_dist(tp, p->pos())) {
+                    g->m.marlossify(tp);
                 }
                 bool moveOK = (g->m.move_cost(x, y) > 0);
                 bool monOK = g->mon_at(x, y) == -1;
@@ -2509,9 +2511,10 @@ int iuse::marloss_gel(player *p, item *it, bool t, const tripoint &pos)
         int spore_spawned = 0;
         for (int x = p->posx - 4; x <= p->posx + 4; x++) {
             for (int y = p->posy - 4; y <= p->posy + 4; y++) {
-                if (rng(0, 10) > trig_dist(x, y, p->posx, p->posy) &&
-                    rng(0, 10) > trig_dist(x, y, p->posx, p->posy)) {
-                    g->m.marlossify(x, y);
+                const tripoint tp(x, y, p->zpos());
+                if (rng(0, 10) > trig_dist(tp, p->pos()) &&
+                    rng(0, 10) > trig_dist(tp, p->pos())) {
+                    g->m.marlossify(tp);
                 }
                 bool moveOK = (g->m.move_cost(x, y) > 0);
                 bool monOK = g->mon_at(x, y) == -1;
@@ -2630,7 +2633,8 @@ int iuse::mycus(player *p, item *it, bool t, const tripoint &pos)
         p->add_msg_if_player(m_good, _("As, in time, shall we adapt to better welcome those who have not received us."));
         for (int x = p->posx - 3; x <= p->posx + 3; x++) {
             for (int y = p->posy - 3; y <= p->posy + 3; y++) {
-                g->m.marlossify(x, y);
+                const tripoint tp(x, y, p->zpos());
+                g->m.marlossify(tp);
             }
         }
         p->rem_addiction(ADD_MARLOSS_R);

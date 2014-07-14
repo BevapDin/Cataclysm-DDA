@@ -13,7 +13,7 @@
  * @{
  */
 
-#define PLAYER_OUTSIDE (g->m.is_outside(g->u.posx, g->u.posy) && g->levz >= 0)
+#define PLAYER_OUTSIDE (g->m.is_outside(g->u.pos()) && g->levz >= 0)
 #define THUNDER_CHANCE 50
 #define LIGHTNING_CHANCE 600
 

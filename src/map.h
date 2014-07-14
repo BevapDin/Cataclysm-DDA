@@ -303,6 +303,8 @@ class map
                           const bool bash = true) const;
 
  int coord_to_angle (const int x, const int y, const int tgtx, const int tgty);
+ // Not: only the horizontal angel is calculated!
+ int coord_to_angle (const tripoint &a, const tripoint &p);
 // vehicles
  VehicleList get_vehicles();
  VehicleList get_vehicles(const int sx, const int sy, const int ex, const int ey);
@@ -536,7 +538,7 @@ void add_corpse(int x, int y);
             const std::set<std::string>& ammo_effects);
  bool hit_with_acid(const int x, const int y);
  bool hit_with_fire(const int x, const int y);
- bool marlossify(const int x, const int y);
+ bool marlossify(const tripoint &p);
  bool has_adjacent_furniture(const int x, const int y);
  bool has_adjacent_furniture(const tripoint &p);
  void mop_spills(const int x, const int y);

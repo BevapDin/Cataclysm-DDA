@@ -13309,7 +13309,7 @@ void map::add_extra(map_extra type)
         for (int i = x - 5; i <= x + 5; i++) {
             for (int j = y - 5; j <= y + 5; j++) {
                 if (rng(1, 9) >= trig_dist(x, y, i, j)) {
-                    marlossify(i, j);
+                    marlossify(tripoint(i, j, 0));
                     if (one_in(15)) {
                         add_spawn( monids[rng( 0, 4 )], 1, i, j );
                     }
