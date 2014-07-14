@@ -192,14 +192,78 @@ std::vector <tripoint> line_to(const tripoint &p1, const tripoint &p2, int t)
     return ret;
 }
     }
-    const std::vector<point> tmp = line_to(p1.x, p1.y, p2.x, p2.y, t);
-    const std::vector<point> tmp2 = line_to(0, p1.z, tmp.size() - 1, p2.z, 0);
-    int j = 0;
-    for(int i = 0; i < tmp.size(); i++) {
-        do {
-            ret.push_back(tripoint(tmp[i].x, tmp[i].y, tmp2[j].y));
-            j++;
-        } while(j < tmp2.size() && tmp2[j].x <= i);
+   const int dx = p2.x - p1.x;
+   const int dy = p2.y - p1.y;
+   const int dz = p2.z - p1.z;
+   const int x_inc = SGN(dx);
+   const int y_inc = SGN(dy);
+   const int z_inc = SGN(dz);
+   const int Adx = std::abs(dx);
+   const int Ady = std::abs(dy);
+   const int Adz = std::abs(dz);
+   const int dx2 = Adx * 2;
+   const int dy2 = Ady * 2;
+   const int dz2 = Adz * 2;
+
+   int xxx = p1.x;
+   int yyy = p1.y;
+   int zzz = p1.z;
+
+   if ((Adx >= Ady) && (Adx >= Adz)) {
+        int err_1 = dy2 - Adx;
+        int err_2 = dz2 - Adx;
+        for(int Cont = 0; Cont < Adx; Cont++) {
+            if (err_1 > 0) {
+                yyy += y_inc;
+                err_1 -= dx2;
+            }
+            if (err_2 > 0) {
+                zzz += z_inc;
+                err_2 -= dx2;
+            }
+            err_1 += dy2;
+            err_2 += dz2;
+            xxx+= x_inc;
+            ret.push_back(tripoint(xxx, yyy, zzz));
+        }
+   }
+
+    if ((Ady > Adx) & (Ady >= Adz)) {
+        int err_1 = dx2 - Ady;
+        int err_2 = dz2 - Ady;
+        for(int Cont = 0; Cont < Ady; Cont++) {
+            if (err_1 > 0) {
+                xxx += x_inc;
+                err_1 -= dy2;
+            }
+            if (err_2 > 0) {
+                zzz += z_inc;
+                err_2 -= dy2;
+            }
+            err_1 += dx2;
+            err_2 += dz2;
+            yyy += y_inc;
+            ret.push_back(tripoint(xxx, yyy, zzz));
+        }
+    }
+
+    if ((Adz > Adx) && (Adz > Ady)) {
+        int err_1 = dy2 - Adz;
+        int err_2 = dx2 - Adz;
+        for(int Cont = 0; Cont < Adz; Cont++) {
+            if (err_1 > 0) {
+                yyy += y_inc;
+                err_1 -= dz2;
+            }
+            if (err_2 > 0) {
+                xxx += x_inc;
+                err_2 -= dz2;
+            }
+            err_1 += dy2;
+            err_2 += dx2;
+            zzz += z_inc;
+            ret.push_back(tripoint(xxx, yyy, zzz));
+        }
     }
     return ret;
 }
