@@ -472,7 +472,7 @@ bool can_examine_at(int x, int y)
     }
 
     const trap_id t = g->m.tr_at( x, y );
-    if( t != tr_null && traplist[t]->can_see( g->u, x, y ) ) {
+    if( t != tr_null && traplist[t]->can_see( g->u, tripoint( x, y, 0 ) ) ) {
         return true;
     }
 

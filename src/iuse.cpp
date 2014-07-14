@@ -5103,12 +5103,12 @@ int iuse::set_trap(player *p, item *it, bool, const tripoint &)
     const trap_id existing_trap = g->m.tr_at(posx, posy);
     if (existing_trap != tr_null) {
         const struct trap &t = *traplist[existing_trap];
-        if (t.can_see(*p, posx, posy)) {
+        if (t.can_see(*p, tripoint(posx, posy, 0))) {
             p->add_msg_if_player(m_info, _("You can't place a %s there. It contains a trap already."),
                                  it->tname().c_str());
         } else {
             p->add_msg_if_player(m_bad, _("You trigger a %s!"), t.name.c_str());
-            t.trigger(p, posx, posy);
+            t.trigger(p, tripoint(posx, posy, 0));
         }
         return 0;
     }
@@ -5274,8 +5274,8 @@ int iuse::set_trap(player *p, item *it, bool, const tripoint &)
     p->practice("traps", practice);
     trap *tr = traplist[type];
     g->m.add_trap(posx, posy, type);
-    if (!tr->can_see(*p, posx, posy)) {
-        p->add_known_trap(posx, posy, tr->id);
+    if (!tr->can_see(*p, tripoint(posx, posy, 0))) {
+        p->add_known_trap(tripoint(posx, posy, 0), tr->id);
     }
     p->moves -= 100 + practice * 25;
     if (type == tr_engine) {

@@ -4416,11 +4416,11 @@ bool player::has_two_arms() const
  return true;
 }
 
-bool player::avoid_trap(trap* tr, int x, int y)
+bool player::avoid_trap(trap* tr, const tripoint &p)
 {
   int myroll = dice(3, int(dex_cur + skillLevel("dodge") * 1.5));
  int traproll;
-    if (tr->can_see(*this, x, y)) {
+    if (tr->can_see(*this, p)) {
         traproll = dice(3, tr->get_avoidance());
     } else {
         traproll = dice(6, tr->get_avoidance());
@@ -4504,27 +4504,28 @@ void player::search_surroundings()
     for (size_t i = 0; i < 121; i++) {
         const int x = posx + i / 11 - 5;
         const int y = posy + i % 11 - 5;
-        const trap_id trid = g->m.tr_at(x, y);
-        if (trid == tr_null || (x == posx && y == posy)) {
+        const tripoint sp(x, y, zpos());
+        const trap_id trid = g->m.tr_at(sp);
+        if (trid == tr_null || sp == pos()) {
             continue;
         }
         if( !g->m.pl_sees( posx, posy, x, y, -1 ) ) {
             continue;
         }
         const trap *tr = traplist[trid];
-        if (tr->name.empty() || tr->can_see(*this, x, y)) {
+        if (tr->name.empty() || tr->can_see(*this, sp)) {
             // Already seen, or has no name -> can never be seen
             continue;
         }
         // Chance to detect traps we haven't yet seen.
-        if (tr->detect_trap(*this, x, y)) {
+        if (tr->detect_trap(*this, sp)) {
             if( tr->get_visibility() > 0 ) {
                 // Only bug player about traps that aren't trivial to spot.
-                const std::string direction = direction_name(direction_from(posx, posy, x, y));
+                const std::string direction = direction_name(direction_from(pos(), sp));
                 add_msg_if_player(_("You've spotted a %s to the %s!"),
                                   tr->name.c_str(), direction.c_str());
             }
-            add_known_trap(x, y, tr->id);
+            add_known_trap(sp, tr->id);
         }
     }
 }
@@ -13622,17 +13623,17 @@ void player::add_msg_player_or_npc(game_message_type type, const char* player_st
     va_end(ap);
 };
 
-bool player::knows_trap(int x, int y) const
+bool player::knows_trap(const tripoint &lp) const
 {
-    const point a = g->m.getabs( x, y );
-    const tripoint p( a.x, a.y, g->get_abs_levz() );
+    const point a = g->m.getabs( lp.x, lp.y );
+    const tripoint p( a.x, a.y, lp.z + g->levz );
     return known_traps.count(p) > 0;
 }
 
-void player::add_known_trap(int x, int y, const std::string &t)
+void player::add_known_trap(const tripoint &lp, const std::string &t)
 {
-    const point a = g->m.getabs( x, y );
-    const tripoint p( a.x, a.y, g->get_abs_levz() );
+    const point a = g->m.getabs( lp.x, lp.y );
+    const tripoint p( a.x, a.y, lp.z + g->levz );
     if (t == "tr_null") {
         known_traps.erase(p);
     } else {

@@ -865,7 +865,7 @@ int monster::move_to(const tripoint &p, bool force)
           g->m.tr_at(pos()) != tr_null) { // Monster stepped on a trap!
         trap* tr = traplist[g->m.tr_at(pos())];
         if (dice(3, type->sk_dodge + 1) < dice(3, tr->get_avoidance())) {
-            tr->trigger(this, pos().x, pos().y);
+            tr->trigger(this, pos());
         }
     }
     // Diggers turn the dirt into dirtmound

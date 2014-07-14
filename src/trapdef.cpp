@@ -57,7 +57,7 @@ trap_id trapfind(const std::string id)
     return traplist[trapmap[id]]->loadid;
 };
 
-bool trap::detect_trap(const player &p, int x, int y) const
+bool trap::detect_trap(const player &p, const tripoint &pnt) const
 {
     // Some decisions are based around:
     // * Starting, and thus average perception, is 8.
@@ -76,7 +76,7 @@ bool trap::detect_trap(const player &p, int x, int y) const
            // ...malus if we are tired...
            (p.has_effect("lack_sleep") ? rng(1, 5) : 0) -
            // ...malus farther we are from trap...
-           rl_dist(p.posx, p.posy, x, y) +
+           rl_dist(p.pos(), pnt) +
            // Police are trained to notice Something Wrong.
            (p.has_trait("PROF_POLICE") ? 1 : 0) +
            (p.has_trait("PROF_PD_DET") ? 2 : 0) >
@@ -85,16 +85,16 @@ bool trap::detect_trap(const player &p, int x, int y) const
 }
 
 // Whether or not, in the current state, the player can see the trap.
-bool trap::can_see(const player &p, int x, int y) const
+bool trap::can_see(const player &p, const tripoint &pnt) const
 {
-    return visibility < 0 || p.knows_trap(x, y);
+    return visibility < 0 || p.knows_trap(pnt);
 }
 
-void trap::trigger(Creature *creature, int x, int y) const
+void trap::trigger(Creature *creature, const tripoint &pnt) const
 {
     if (act != NULL) {
         trapfunc f;
-        (f.*act)(creature, x, y);
+        (f.*act)(creature, pnt);
     }
 }
 
