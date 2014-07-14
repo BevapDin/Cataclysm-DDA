@@ -4535,10 +4535,18 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     const int k = x + getmaxx(w)/2 - cx;
     const int j = y + getmaxy(w)/2 - cy;
     nc_color tercol;
-    // TODO: Z
-    const int zv = z_level_down_xx(tripoint(x, y, center.z));
+    // TODO: Z Stupid it is, to make this static!
+    static const ter_id t_open_air = terfind("t_open_air");
+    int zv = 0;
+    if (ter(tripoint(x, y, center.z)) == t_open_air) {
+        zv = z_level_down_xx(tripoint(x, y, center.z));
+    }
     const tripoint tpx(x, y, center.z + zv);
-    const bool from_above = tpx.z != 0;
+    const bool from_above = zv != 0;
+    if(!pl_sees(u.pos(), tpx, -1)) {
+        mvwputch(w, j, k, c_white, ' ');
+        return;
+    }
     const ter_id curr_ter = ter(tpx);
     const furn_id curr_furn = furn(tpx);
     const trap_id curr_trap = tr_at(tpx);
