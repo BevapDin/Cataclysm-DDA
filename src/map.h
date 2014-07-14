@@ -25,6 +25,7 @@
 
 //TODO: include comments about how these variables work. Where are they used. Are they constant etc.
 #define MAPSIZE 11
+#define MAPHEIGHT 0
 #define CAMPSIZE 1
 #define CAMPCHECK 3
 
@@ -96,7 +97,7 @@ class map
  friend class editmap;
  public:
 // Constructors & Initialization
- map(int mapsize = MAPSIZE, int z_min = 0, int z_max = 0);
+ map(int mapsize = MAPSIZE, int z_min = -MAPHEIGHT, int z_max = +MAPHEIGHT);
  ~map();
 
 // Visual Output
