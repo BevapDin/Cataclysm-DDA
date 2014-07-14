@@ -3809,7 +3809,7 @@
         "symbol": ">",
         "color": "yellow",
         "move_cost": 2,
-        "flags": ["TRANSPARENT", "GOES_DOWN", "PLACE_ITEM"]
+        "flags": ["TRANSPARENT", "GOES_DOWN", "PLACE_ITEM", "TRANSPARENT_FLOOR", "PERMEABLE_FLOOR"]
     },{
         "type": "terrain",
         "id": "t_stairs_up",
@@ -3841,7 +3841,7 @@
         "symbol": ">",
         "color": "dkgray",
         "move_cost": 2,
-        "flags": ["TRANSPARENT", "GOES_DOWN", "PLACE_ITEM"]
+        "flags": ["TRANSPARENT", "GOES_DOWN", "PLACE_ITEM", "TRANSPARENT_FLOOR", "PERMEABLE_FLOOR"]
     },{
         "type" : "terrain",
         "id" : "t_slope_down",
@@ -3849,7 +3849,7 @@
         "symbol": ">",
         "color": "brown",
         "move_cost": 2,
-        "flags": ["TRANSPARENT", "GOES_DOWN", "PLACE_ITEM"]
+        "flags": ["TRANSPARENT", "GOES_DOWN", "PLACE_ITEM", "TRANSPARENT_FLOOR", "PERMEABLE_FLOOR"]
     },{
         "type" : "terrain",
         "id" : "t_slope_up",
@@ -4613,7 +4613,23 @@
         "symbol": " ",
         "color": "i_cyan",
         "move_cost": 2,
-        "flags": ["TRANSPARENT", "NOFLOOR"]
+        "flags": ["TRANSPARENT", "NOFLOOR", "TRANSPARENT_FLOOR", "PERMEABLE_FLOOR"]
+    },{
+        "type": "terrain",
+        "id": "t_glass_floor",
+        "name": "glass floor",
+        "symbol": ".",
+        "color": "white",
+        "move_cost": 2,
+        "flags": ["TRANSPARENT", "TRANSPARENT_FLOOR"]
+    },{
+        "type": "terrain",
+        "id": "t_grating_floor",
+        "name": "floor grating",
+        "symbol": ".",
+        "color": "yellow",
+        "move_cost": 2,
+        "flags": ["TRANSPARENT", "TRANSPARENT_FLOOR", "PERMEABLE_FLOOR"]
     },{
         "type" : "terrain",
         "id" : "t_flat_roof",
