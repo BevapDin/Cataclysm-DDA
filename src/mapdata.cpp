@@ -155,6 +155,7 @@ furn_t null_furniture_t() {
   new_furniture.id = "f_null";
   new_furniture.name = _("nothing");
   new_furniture.sym = ' ';
+  new_furniture.sym_down = ' ';
   new_furniture.color = c_white;
   new_furniture.movecost = 0;
   new_furniture.move_str_req = -1;
@@ -174,6 +175,7 @@ ter_t null_terrain_t() {
   new_terrain.id = "t_null";
   new_terrain.name = _("nothing");
   new_terrain.sym = ' ';
+  new_terrain.sym_down = ' ';
   new_terrain.color = c_white;
   new_terrain.movecost = 2;
   new_terrain.trap = tr_null;
@@ -207,6 +209,11 @@ void load_furniture(JsonObject &jsobj)
   }
   new_furniture.name = _(jsobj.get_string("name").c_str());
   new_furniture.sym = jsobj.get_string("symbol").c_str()[0];
+    if (jsobj.has_string("symbol_down")) {
+        new_furniture.sym_down = jsobj.get_string("symbol_down").c_str()[0];
+    } else {
+        new_furniture.sym_down = ' ';
+    }
 
   bool has_color = jsobj.has_member("color");
   bool has_bgcolor = jsobj.has_member("bgcolor");
@@ -281,6 +288,18 @@ void load_terrain(JsonObject &jsobj)
   } else {
     new_terrain.sym = symbol.c_str()[0];
   }
+    if (jsobj.has_string("symbol_down")) {
+        symbol = jsobj.get_string("symbol_down");
+        if("LINE_XOXO" == symbol) {
+            new_terrain.sym_down = LINE_XOXO;
+        } else if("LINE_OXOX" == symbol) {
+            new_terrain.sym_down = LINE_OXOX;
+        } else {
+            new_terrain.sym_down = symbol.c_str()[0];
+        }
+    } else {
+        new_terrain.sym_down = '.';
+    }
 
   new_terrain.color = color_from_string(jsobj.get_string("color"));
   new_terrain.movecost = jsobj.get_int("move_cost");

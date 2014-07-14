@@ -4505,12 +4505,18 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     bool draw_item_sym = false;
 
 
+    ter_t &t = terlist[curr_ter];
+    sym = from_above ? t.sym_down : t.sym;
+    tercol = t.color;
     if (curr_furn != f_null) {
-        sym = furnlist[curr_furn].sym;
-        tercol = furnlist[curr_furn].color;
-    } else {
-        sym = terlist[curr_ter].sym;
-        tercol = terlist[curr_ter].color;
+        const furn_t &f = furnlist[curr_furn];
+        if (!from_above) {
+            sym = f.sym;
+            tercol = f.color;
+        } else if (f.sym_down != ' ') {
+            sym = f.sym_down;
+            tercol = f.color;
+        }
     }
     if (has_flag(TFLAG_SWIMMABLE, tpx) && has_flag(TFLAG_DEEP_WATER, tpx) && !u.is_underwater()) {
         show_items = false; // Can only see underwater items if WE are underwater
