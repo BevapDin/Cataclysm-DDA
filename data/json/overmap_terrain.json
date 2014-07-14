@@ -28,6 +28,7 @@
         "known_up" : false,
         "mondensity" : 0,
         "sidewalk" : false,
+        "transparent_floor" : true,
         "allow_road" : false
     },{
         "type" : "overmap_terrain",

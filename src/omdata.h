@@ -47,6 +47,9 @@ struct oter_t {
     bool rotates; // lazy for; directional_peers.size() == 4
     bool line_drawing; // lazy for; directional_peers.size() == 8
     std::string id_mapgen;  // *only* for mapgen and almost always == id_base. Unless line_drawing / road.
+    std::set<std::string> flags;
+    // Can see down through the floor of this terrain
+    bool transparent_floor;
 
     // Spawns are added to the submaps *once* upon mapgen of the submaps
     overmap_spawns static_spawns;
