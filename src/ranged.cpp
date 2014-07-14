@@ -957,8 +957,9 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
                                 item *relevant, target_mode mode)
 {
     std::vector<point> ret;
+    std::vector<tripoint> ret2;
     int tarx, tary, junk, tart;
-    int range = ( hix - u.posx );
+    int range = (hix - u.posx);
     // First, decide on a target among the monsters, if there are any in range
     if (!t.empty()) {
         if( static_cast<size_t>( target ) >= t.size() ) {
@@ -1004,6 +1005,8 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
     ctxt.register_action("TOGGLE_SNAP_TO_TARGET");
     ctxt.register_action("HELP_KEYBINDINGS");
     ctxt.register_action("QUIT");
+    ctxt.register_action("LEVEL_UP");
+    ctxt.register_action("LEVEL_DOWN");
 
     int num_instruction_lines = draw_targeting_window( w_target, relevant, u, mode, ctxt );
 
@@ -1018,10 +1021,13 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
     }
 
     do {
-        if (m.sees(u.posx, u.posy, x, y, -1, tart)) {
+        const tripoint pnt(x, y, z);
+        if (m.sees(u.pos(), pnt, -1, tart)) {
             ret = line_to(u.posx, u.posy, x, y, tart);
+            ret2 = line_to(u.pos(), pnt, tart);
         } else {
             ret = line_to(u.posx, u.posy, x, y, 0);
+            ret2 = line_to(u.pos(), pnt, 0);
         }
 
         // This chunk of code handles shifting the aim point around
@@ -1044,13 +1050,11 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
         }
         tripoint center;
         if (snap_to_target) {
-            center.x = x;
-            center.y = y;
-            center.z = 0;
+            center = pnt;
         } else {
             center.x = u.posx + u.view_offset_x;
             center.y = u.posy + u.view_offset_y;
-            center.z = u.view_offset_z;
+            center.z = z;
         }
         // Clear the target window.
         for (int i = 1; i <= getmaxy(w_target) - num_instruction_lines - 2; i++) {
@@ -1078,7 +1082,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
             // Only draw a highlighted trajectory if we can see the endpoint.
             // Provides feedback to the player, and avoids leaking information
             // about tiles they can't see.
-            draw_line(x, y, point(center.x, center.y), ret);
+            draw_line( pnt, center, ret2 );
 
             // Print to target window
             if (!relevant) {
@@ -1250,6 +1254,13 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
         } else if (action == "CENTER") {
             x = u.posx;
             y = u.posy;
+            z = 0;
+            ret.clear();
+        } else if (action == "LEVEL_UP") {
+            z++;
+            ret.clear();
+        } else if (action == "LEVEL_DOWN") {
+            z--;
             ret.clear();
         } else if (action == "TOGGLE_SNAP_TO_TARGET") {
             snap_to_target = !snap_to_target;

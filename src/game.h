@@ -452,6 +452,7 @@ class game
         void draw_hit_mon(int x, int y, monster critter, bool dead = false);
         void draw_hit_player(player *p, const int iDam, bool dead = false);
         void draw_line(const int x, const int y, const point center_point, std::vector<point> ret);
+        void draw_line(const tripoint &p, const tripoint &center_point, const std::vector<tripoint> &ret);
         void draw_line(const int x, const int y, std::vector<point> ret);
         void draw_weather(weather_printable wPrint);
         void draw_sct();

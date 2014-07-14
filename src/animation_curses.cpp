@@ -117,6 +117,36 @@ void game::draw_line(const int x, const int y, std::vector<point> vPoint)
     mvwputch(w_terrain, cry, crx, c_white, 'X');
 }
 
+void game::draw_line(const tripoint &p, const tripoint &center_point, const std::vector<tripoint> &ret)
+{
+    if (u_see(p))
+    {
+        for (unsigned i = 0; i < ret.size(); i++)
+        {
+            int mondex = mon_at(ret[i]),
+            npcdex = npc_at(ret[i]);
+
+            // NPCs and monsters get drawn with inverted colors
+            if (mondex != -1 && u_see(&(critter_tracker.find(mondex))))
+            {
+                critter_tracker.find(mondex).draw(w_terrain, center_point.x, center_point.y, true);
+            }
+            else if (npcdex != -1)
+            {
+                active_npc[npcdex]->draw(w_terrain, center_point.x, center_point.y, true);
+            }
+            else if (ret[i].z != center_point.z)
+            {
+                // Don't draw anything on a differet z-level
+            }
+            else
+            {
+                m.drawsq(w_terrain, u, ret[i].x, ret[i].y, true,true, center_point, false, false);
+            }
+        }
+    }
+}
+
 void game::draw_weather(weather_printable wPrint)
 {
     for (std::vector<std::pair<int, int> >::iterator weather_iterator = wPrint.vdrops.begin();
