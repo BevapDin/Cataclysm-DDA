@@ -3435,24 +3435,26 @@ void map::process_items( bool active, T processor )
 {
     for( int gx = 0; gx < my_MAPSIZE; gx++ ) {
         for( int gy = 0; gy < my_MAPSIZE; gy++ ) {
-            submap *const current_submap = get_submap_at_grid( point( gx, gy ) );
+            for (int gz = my_ZMIN; gz <= my_ZMAX; gz++) {
+            submap *const current_submap = get_submap_at_grid( tripoint( gx, gy, gz ) );
             // Vehicles first in case they get blown up and drop active items on the map.
             if( !current_submap->vehicles.empty() ) {
                 process_items_in_vehicles(current_submap, processor);
             }
             if( !active || current_submap->active_item_count > 0) {
-                process_items_in_submap(current_submap, gx, gy, processor);
+                process_items_in_submap(current_submap, gx, gy, gz, processor);
+            }
             }
         }
     }
 }
 
 template<typename T>
-void map::process_items_in_submap( submap *const current_submap, int gridx, int gridy, T processor )
+void map::process_items_in_submap( submap *const current_submap, int gridx, int gridy, int gridz, T processor )
 {
     for (int i = 0; i < SEEX; i++) {
         for (int j = 0; j < SEEY; j++) {
-            tripoint location( gridx * SEEX + i, gridy * SEEY + j, 0 );
+            tripoint location( gridx * SEEX + i, gridy * SEEY + j, gridz );
             std::vector<item> &items = current_submap->itm[i][j];
             //Do a count-down loop, as some items may be removed
             for (size_t n = 0; n < items.size(); n++) {
@@ -3499,6 +3501,7 @@ void map::process_items_in_vehicles( submap *const current_submap, T processor )
 template<typename T>
 void map::process_items_in_vehicle(vehicle *cur_veh, submap *const current_submap, T processor)
 {
+    item tmp_item;
     std::vector<int> cargo_parts = cur_veh->all_parts_with_feature(VPFLAG_CARGO, false);
     for(size_t part_index = 0; part_index < cargo_parts.size(); part_index++) {
         const int part = cargo_parts[part_index];
@@ -3507,6 +3510,7 @@ void map::process_items_in_vehicle(vehicle *cur_veh, submap *const current_subma
         // the vehicle part in case cur_veh->parts got changed
         const point mnt(vp.precalc_dx[0], vp.precalc_dy[0]);
         const int vp_type = vp.iid;
+        // TODO: Z
         const tripoint item_location( cur_veh->global_x() + vp.precalc_dx[0],
                                    cur_veh->global_y() + vp.precalc_dy[0], 0 );
         std::vector<item> *items_in_part = &vp.items;
@@ -3842,8 +3846,6 @@ std::list<std::pair<tripoint, item *> > map::get_rc_items( int x, int y, int z )
 {
     std::list<std::pair<tripoint, item *> > rc_pairs;
     tripoint pos;
-    (void)z;
-    pos.z = abs_sub.z;
     for( pos.x = 0; pos.x < SEEX * MAPSIZE; pos.x++ ) {
         if( x != -1 && x != pos.x ) {
             continue;
@@ -3852,11 +3854,16 @@ std::list<std::pair<tripoint, item *> > map::get_rc_items( int x, int y, int z )
             if( y != -1 && y != pos.y ) {
                 continue;
             }
-            auto &item_stack = i_at_mutable( pos.x, pos.y );
+            for( pos.z = my_ZMIN; pos.z <= my_ZMAX; pos.z++ ) {
+            if( z != -1 && z != pos.z ) {
+                continue;
+            }
+            auto &item_stack = i_at_mutable( pos );
             for( auto &elem : item_stack ) {
                 if( elem.has_flag( "RADIO_ACTIVATION" ) || elem.has_flag( "RADIO_CONTAINER" ) ) {
                     rc_pairs.push_back( std::make_pair( pos, &( elem ) ) );
                 }
+            }
             }
         }
     }

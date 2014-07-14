@@ -2181,7 +2181,7 @@ bool item::can_revive()
     return false;
 }
 
-bool item::ready_to_revive( point pos )
+bool item::ready_to_revive( tripoint pos )
 {
     if(can_revive() == false) {
         return false;
@@ -2196,7 +2196,7 @@ bool item::ready_to_revive( point pos )
         // If we're a special revival zombie, wait to get up until the player is nearby.
         const bool isReviveSpecial = has_flag("REVIVE_SPECIAL");
         if( isReviveSpecial ) {
-            const int distance = rl_dist(pos.x, pos.y, g->u.posx, g->u.posy);
+            const int distance = rl_dist(pos, g->u.pos());
             if (distance > 3) {
                 return false;
             }
@@ -4242,7 +4242,7 @@ bool item::process_corpse( player *carrier, tripoint pos )
     if( corpse == nullptr ) {
         return false;
     }
-    if( !ready_to_revive( point( pos.x, pos.y ) ) ) {
+    if( !ready_to_revive( pos ) ) {
         return false;
     }
     if( rng( 0, volume() ) > burnt && g->revive_corpse( pos.x, pos.y, this ) ) {
@@ -4444,7 +4444,7 @@ bool item::process_tool( player *carrier, tripoint pos )
     if( charges_used == 0 ) {
         // TODO: iuse functions should expect a nullptr as player, but many of them
         // don't and therefore will fail.
-        tmp->invoke( carrier != nullptr ? carrier : &g->u, this, true, point( pos.x, pos.y ) );
+        tmp->invoke( carrier != nullptr ? carrier : &g->u, this, true, pos );
         if( charges == -1 ) {
             // Signal that the item has destroyed itself.
             return true;
@@ -4455,7 +4455,7 @@ bool item::process_tool( player *carrier, tripoint pos )
         }
         // TODO: iuse functions should expect a nullptr as player, but many of them
         // don't and therefor will fail.
-        tmp->invoke( carrier != nullptr ? carrier : &g->u, this, false, point( pos.x, pos.y ) );
+        tmp->invoke( carrier != nullptr ? carrier : &g->u, this, false, pos );
         if( tmp->revert_to == "null" ) {
             return true; // reverts to nothing -> destroy the item
         }
@@ -4531,7 +4531,7 @@ bool item::process( player *carrier, tripoint pos, bool activate )
     }
     if( activate ) {
         it_tool *tmp = dynamic_cast<it_tool *>( type );
-        return tmp->invoke( carrier != nullptr ? carrier : &g->u, this, false, point( pos.x, pos.y ) );
+        return tmp->invoke( carrier != nullptr ? carrier : &g->u, this, false, pos );
     }
     // How this works: it checks what kind of processing has to be done
     // (e.g. for food, for drying towels, lit cigars), and if that matches,

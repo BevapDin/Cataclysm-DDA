@@ -2058,7 +2058,7 @@ void game::activity_on_finish_firstaid()
 {
     item &it = u.i_at(u.activity.position);
     iuse tmp;
-    tmp.completefirstaid(&u, &it, false, point( u.xpos(), u.ypos() ));
+    tmp.completefirstaid(&u, &it, false, u.pos() );
     u.reduce_charges(u.activity.position, 1);
     // Erase activity and values.
     u.activity.type = ACT_NULL;
@@ -2069,7 +2069,7 @@ void game::activity_on_finish_start_fire()
 {
     item &it = u.i_at(u.activity.position);
     iuse tmp;
-    tmp.resolve_firestarter_use(&u, &it, u.activity.placement);
+    tmp.resolve_firestarter_use(&u, &it, tripoint( u.activity.placement.x, u.activity.placement.y, 0 ) );
     u.activity.type = ACT_NULL;
 }
 
@@ -3172,15 +3172,17 @@ void game::rcdrive(int dx, int dy)
     }
     item *rc_car = rc_pair->second;
 
-    if( m.move_cost(cx + dx, cy + dy) == 0 || !m.can_put_items(cx + dx, cy + dy) ||
-        m.has_furn(cx + dx, cy + dy) ) {
-        sound(cx + dx, cy + dy, 7, _("sound of a collision with an obstacle."));
+    const tripoint dp(cx + dx, cy + dy, cz);
+    const tripoint d(cx, cy, cz);
+    if( m.move_cost(dp) == 0 || !m.can_put_items(dp) ||
+        m.has_furn(dp) ) {
+        sound(dp, 7, _("sound of a collision with an obstacle."));
         return;
-    } else if( m.add_item_or_charges(cx + dx, cy + dy, *rc_car ) ) {
+    } else if( m.add_item_or_charges(dp, *rc_car ) ) {
         //~ Sound of moving a remote controlled car
-        sound(cx, cy, 6, _("zzz..."));
+        sound(d, 6, _("zzz..."));
         u.moves -= 50;
-        m.i_rem( cx, cy, rc_car );
+        m.i_rem( d, rc_car );
         car_location_string.clear();
         car_location_string << cx + dx << ' ' << cy + dy << ' ' << cz;
         u.set_value( "remote_controlling", car_location_string.str() );
@@ -7995,7 +7997,7 @@ void game::smash()
 
     if( m.get_field( point( smashx, smashy ), fd_web ) != nullptr ) {
         m.remove_field( smashx, smashy, fd_web );
-        sound( smashx, smashy, 2, "" );
+        sound( tripoint(smashx, smashy, 0), 2, "" );
         add_msg( m_info, _( "You brush aside some webs." ) );
         u.moves -= 100;
         return;
@@ -8831,7 +8833,7 @@ bool pet_menu(monster *z)
 
             item ball("pheromone", 0);
             iuse pheromone;
-            pheromone.pheromone(&(g->u), &ball, true, point( g->u.xpos(), g->u.ypos() ));
+            pheromone.pheromone(&(g->u), &ball, true, g->u.pos() );
         }
 
     }
@@ -12499,7 +12501,7 @@ void game::unload(item &it)
         // Tools need to be turned off, especially when thy consume charges only every few turns,
         // otherwise they stay active until they would consume the next charge.
         if( weapon->active && weapon->is_tool() && weapon->type->has_use() ) {
-            weapon->type->invoke( &u, weapon, false, point( u.xpos(), u.ypos() ) );
+            weapon->type->invoke( &u, weapon, false, u.pos() );
         }
     }
 }

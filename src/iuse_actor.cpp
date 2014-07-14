@@ -31,7 +31,7 @@ void iuse_transform::load( JsonObject &obj )
     obj.read( "moves", moves );
 }
 
-long iuse_transform::use(player *p, item *it, bool t, point /*pos*/) const
+long iuse_transform::use(player* p, item* it, bool t, const tripoint &/*pos*/) const
 {
     if( t ) {
         // Invoked from active item processing, do nothing.
@@ -105,7 +105,7 @@ void auto_iuse_transform::load( JsonObject &obj )
     obj.read( "non_interactive_msg", non_interactive_msg );
 }
 
-long auto_iuse_transform::use(player *p, item *it, bool t, point pos) const
+long auto_iuse_transform::use(player *p, item *it, bool t, const tripoint &pos) const
 {
     if (t) {
         if (!when_underwater.empty() && p != NULL && p->is_underwater()) {
@@ -140,7 +140,7 @@ iuse_actor *explosion_iuse::clone() const
 }
 
 // defined in iuse.cpp
-extern std::vector<point> points_for_gas_cloud(const point &center, int radius);
+extern std::vector<tripoint> points_for_gas_cloud(const tripoint &center, int radius);
 
 void explosion_iuse::load( JsonObject &obj )
 {
@@ -167,7 +167,7 @@ void explosion_iuse::load( JsonObject &obj )
     obj.read( "no_deactivate_msg", no_deactivate_msg );
 }
 
-long explosion_iuse::use(player *p, item *it, bool t, point pos) const
+long explosion_iuse::use(player *p, item *it, bool t, const tripoint &pos) const
 {
     if (t) {
         if (sound_volume >= 0) {
@@ -194,11 +194,10 @@ long explosion_iuse::use(player *p, item *it, bool t, point pos) const
         g->flashbang(pos.x, pos.y, flashbang_player_immune);
     }
     if (fields_radius >= 0 && fields_type != fd_null) {
-        std::vector<point> gas_sources = points_for_gas_cloud(pos, fields_radius);
-        for( auto &gas_source : gas_sources ) {
-            const point &p = gas_source;
+        std::vector<tripoint> gas_sources = points_for_gas_cloud(pos, fields_radius);
+        for( auto &p : gas_sources ) {
             const int dens = rng(fields_min_density, fields_max_density);
-            g->m.add_field(p.x, p.y, fields_type, dens);
+            g->m.add_field(p, fields_type, dens);
         }
     }
     if (scrambler_blast_radius >= 0) {
@@ -237,7 +236,7 @@ void unfold_vehicle_iuse::load( JsonObject &obj )
     obj.read( "tools_needed", tools_needed );
 }
 
-long unfold_vehicle_iuse::use(player *p, item *it, bool /*t*/, point /*pos*/) const
+long unfold_vehicle_iuse::use(player *p, item *it, bool /*t*/, const tripoint &/*pos*/) const
 {
     if (p->is_underwater()) {
         p->add_msg_if_player(m_info, _("You can't do that while underwater."));
@@ -332,7 +331,7 @@ void consume_drug_iuse::load( JsonObject &obj )
     obj.read( "fields_produced", fields_produced );
 }
 
-long consume_drug_iuse::use(player *p, item *it, bool, point) const
+long consume_drug_iuse::use(player *p, item *it, bool, const tripoint &) const
 {
     // Check prerequisites first.
     for( auto tool = tools_needed.cbegin(); tool != tools_needed.cend(); ++tool ) {
@@ -409,7 +408,7 @@ int delayed_transform_iuse::time_to_do( const item &it ) const
     return it.bday + transform_age - calendar::turn.get_turn();
 }
 
-long delayed_transform_iuse::use( player *p, item *it, bool t, point pos ) const
+long delayed_transform_iuse::use( player *p, item *it, bool t, const tripoint &pos ) const
 {
     if( time_to_do( *it ) > 0 ) {
         p->add_msg_if_player( m_info, _( not_ready_msg.c_str() ) );
@@ -437,7 +436,7 @@ void place_monster_iuse::load( JsonObject &obj )
     obj.read( "skill2", skill2 );
 }
 
-long place_monster_iuse::use( player *p, item *it, bool, point ) const
+long place_monster_iuse::use( player *p, item *it, bool, const tripoint& ) const
 {
     monster newmon( GetMType( mtype_id ) );
     point target;
@@ -542,7 +541,7 @@ bool has_powersource(const item &i, const player &p) {
     return p.has_charges( "UPS", 1 );
 }
 
-long ups_based_armor_actor::use( player *p, item *it, bool t, point ) const
+long ups_based_armor_actor::use( player *p, item *it, bool t, const tripoint & ) const
 {
     if( p == nullptr ) {
         return 0;
@@ -592,7 +591,7 @@ void pick_lock_actor::load( JsonObject &obj )
     pick_quality = obj.get_int( "pick_quality" );
 }
 
-long pick_lock_actor::use( player *p, item *it, bool, point ) const
+long pick_lock_actor::use( player *p, item *it, bool, const tripoint & ) const
 {
     if( p == nullptr || p->is_npc() ) {
         return 0;
@@ -699,7 +698,7 @@ void reveal_map_actor::reveal_targets( const std::string &target, int reveal_dis
     }
 }
 
-long reveal_map_actor::use( player *p, item *it, bool, point ) const
+long reveal_map_actor::use( player *p, item *it, bool, const tripoint & ) const
 {
     if( it->already_used_by_player( *p ) ) {
         p->add_msg_if_player( _( "There isn't anything new on the %s." ), it->tname().c_str() );

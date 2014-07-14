@@ -1272,7 +1272,7 @@ void vehicle::play_music()
         std::string sound = "";
         const int radio_x = global_x() + parts[p].precalc_dx[0];
         const int radio_y = global_y() + parts[p].precalc_dy[0];
-        iuse::play_music( &(g->u), point(radio_x, radio_y), 15 );
+        iuse::play_music( &(g->u), tripoint(radio_x, radio_y, 0), 15 );
     }
 }
 vpart_info& vehicle::part_info (int index, bool include_removed) const

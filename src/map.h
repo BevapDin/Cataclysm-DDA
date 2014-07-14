@@ -959,7 +959,7 @@ private:
  template<typename T>
  void process_items( bool active, T processor );
  template<typename T>
- void process_items_in_submap( submap *const current_submap, int gridx, int gridy, T processor );
+ void process_items_in_submap( submap *const current_submap, int gridx, int gridy, int gridz, T processor );
  template<typename T>
  void process_items_in_vehicles( submap *const current_submap, T processor);
  template<typename T>

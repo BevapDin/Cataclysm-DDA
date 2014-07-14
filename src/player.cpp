@@ -9378,7 +9378,7 @@ bool player::consume(int target_position)
             }
             if (comest->has_use()) {
                 //Check special use
-                amount_used = comest->invoke(this, to_eat, false, point( xpos(), ypos() ));
+                amount_used = comest->invoke(this, to_eat, false, pos() );
                 if( amount_used <= 0 ) {
                     return false;
                 }
@@ -9666,7 +9666,7 @@ bool player::eat(item *eaten, it_comest *comest)
     }
 
     if (comest->has_use()) {
-        to_eat = comest->invoke(this, eaten, false, point( xpos(), ypos() ));
+        to_eat = comest->invoke(this, eaten, false, pos() );
         if( to_eat <= 0 ) {
             return false;
         }
@@ -11001,7 +11001,7 @@ void player::use(int inventory_position)
         if (!has_enough_charges(*used, true)) {
             return;
         }
-        const long charges_used = tool->invoke( this, used, false, point( xpos(), ypos() ) );
+        const long charges_used = tool->invoke( this, used, false, pos() );
         if (charges_used <= 0) {
             // Canceled or not used up or whatever
             return;
@@ -11187,7 +11187,7 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
         moves -= int(used->reload_time(*this) / 2);
         return;
     } else if ( used->type->has_use() ) {
-        used->type->invoke(this, used, false, point( xpos(), ypos() ));
+        used->type->invoke(this, used, false, pos() );
         return;
     } else {
         add_msg(m_info, _("You can't do anything interesting with your %s."),
@@ -11591,7 +11591,7 @@ void player::do_read( item *book )
     }
 
     for( auto &m : reading->use_methods ) {
-        m.call( this, book, false, point( xpos(), ypos() ) );
+        m.call( this, book, false, pos() );
     }
 
     activity.type = ACT_NULL;
