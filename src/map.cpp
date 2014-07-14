@@ -1820,7 +1820,12 @@ bool map::is_outside(const tripoint &p) const
 
 bool map::flammable_items_at(const int x, const int y)
 {
-    for( const auto &i : i_at(x, y) ) {
+    return flammable_items_at(tripoint(x, y, 0));
+}
+
+bool map::flammable_items_at(const tripoint &p)
+{
+    for( const auto &i : i_at(p) ) {
         if( i.flammable() ) {
             // Total fire resistance == 0
             return true;

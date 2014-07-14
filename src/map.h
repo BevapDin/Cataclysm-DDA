@@ -503,6 +503,7 @@ class map
  bool is_outside(const int x, const int y) const;
  bool is_outside(const tripoint &p) const;
  bool flammable_items_at(const int x, const int y);
+ bool flammable_items_at(const tripoint &p);
  bool moppable_items_at(const int x, const int y);
  point random_outdoor_tile();
 // mapgen
