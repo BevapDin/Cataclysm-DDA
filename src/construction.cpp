@@ -674,7 +674,7 @@ void construct::done_deconstruct(point p)
             g->m.furn_set(p.x, p.y, f.deconstruct.furn_set);
         }
         add_msg(_("You disassemble the %s."), f.name.c_str());
-        g->m.spawn_item_list(f.deconstruct.items, p.x, p.y);
+        g->m.spawn_item_list(f.deconstruct.items, tripoint(p.x, p.y, 0));
         // Hack alert.
         // Signs have cosmetics associated with them on the submap since
         // furniture can't store dynamic data to disk. To prevent writing
@@ -699,7 +699,7 @@ void construct::done_deconstruct(point p)
         }
         g->m.ter_set(p.x, p.y, t.deconstruct.ter_set);
         add_msg(_("You disassemble the %s."), t.name.c_str());
-        g->m.spawn_item_list(t.deconstruct.items, p.x, p.y);
+        g->m.spawn_item_list(t.deconstruct.items, tripoint(p.x, p.y, 0));
     }
 }
 
