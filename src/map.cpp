@@ -4338,17 +4338,19 @@ void map::draw(WINDOW* w, const tripoint &center)
  const bool u_sight_impaired = g->u.sight_impaired();
  const bool bio_night_active = g->u.has_active_bionic("bio_night");
 
- for  (int realx = center.x - getmaxx(w)/2; realx <= center.x + getmaxx(w)/2; realx++) {
-  for (int realy = center.y - getmaxy(w)/2; realy <= center.y + getmaxy(w)/2; realy++) {
-   const int dist = rl_dist(g->u.posx, g->u.posy, realx, realy);
+ tripoint real(0, 0, center.z);
+ const tripoint upos = g->u.pos();
+ for  (real.x = center.x - getmaxx(w)/2; real.x <= center.x + getmaxx(w)/2; real.x++) {
+  for (real.y = center.y - getmaxy(w)/2; real.y <= center.y + getmaxy(w)/2; real.y++) {
+   const int dist = rl_dist(upos, real);
    int sight_range = light_sight_range;
    int low_sight_range = lowlight_sight_range;
    // While viewing indoor areas use lightmap model
-   if (!is_outside(realx, realy)) {
+   if (!is_outside(real)) {
     sight_range = natural_sight_range;
    // Don't display area as shadowy if it's outside and illuminated by natural light
    //and illuminated by source of light
-   } else if (this->light_at(realx, realy) > LL_LOW || dist <= light_sight_range) {
+   } else if (light_at(real) > LL_LOW || dist <= light_sight_range) {
     low_sight_range = std::max(g_light_level, natural_sight_range);
    }
 
@@ -4356,9 +4358,9 @@ void map::draw(WINDOW* w, const tripoint &center)
    // this must stay here...
    int real_max_sight_range = light_sight_range > max_sight_range ? light_sight_range : max_sight_range;
    int distance_to_look = DAYLIGHT_LEVEL;
-
-   bool can_see = pl_sees(g->u.posx, g->u.posy, realx, realy, distance_to_look);
-   lit_level lit = light_at(realx, realy);
+ // TODO: Z
+   bool can_see = pl_sees(upos, real, distance_to_look);
+   lit_level lit = light_at(real);
 
    // now we're gonna adjust real_max_sight, to cover some nearby "highlights",
    // but at the same time changing light-level depending on distance,
@@ -4386,21 +4388,21 @@ void map::draw(WINDOW* w, const tripoint &center)
          (u_sight_impaired && lit != LL_BRIGHT) ||
           !can_see))) {
     if (u_is_boomered)
-     mvwputch(w, realy+getmaxy(w)/2 - center.y, realx+getmaxx(w)/2 - center.x, c_magenta, '#');
+     mvwputch(w, real.y+getmaxy(w)/2 - center.y, real.x+getmaxx(w)/2 - center.x, c_magenta, '#');
     else
-         mvwputch(w, realy+getmaxy(w)/2 - center.y, realx+getmaxx(w)/2 - center.x, c_dkgray, '#');
+         mvwputch(w, real.y+getmaxy(w)/2 - center.y, real.x+getmaxx(w)/2 - center.x, c_dkgray, '#');
    } else if (dist > light_sight_range && u_sight_impaired && lit == LL_BRIGHT) {
     if (u_is_boomered)
-     mvwputch(w, realy+getmaxy(w)/2 - center.y, realx+getmaxx(w)/2 - center.x, c_pink, '#');
+     mvwputch(w, real.y+getmaxy(w)/2 - center.y, real.x+getmaxx(w)/2 - center.x, c_pink, '#');
     else
-     mvwputch(w, realy+getmaxy(w)/2 - center.y, realx+getmaxx(w)/2 - center.x, c_ltgray, '#');
+     mvwputch(w, real.y+getmaxy(w)/2 - center.y, real.x+getmaxx(w)/2 - center.x, c_ltgray, '#');
    } else if (dist <= u_clairvoyance || can_see) {
-    drawsq(w, g->u, realx, realy, false, true, center,
+    drawsq(w, g->u, real.x, real.y, false, true, center,
            (dist > low_sight_range && LL_LIT > lit) ||
            (dist > sight_range && LL_LOW == lit),
            LL_BRIGHT == lit);
    } else {
-    mvwputch(w, realy+getmaxy(w)/2 - center.y, realx+getmaxx(w)/2 - center.x, c_black,' ');
+    mvwputch(w, real.y+getmaxy(w)/2 - center.y, real.x+getmaxx(w)/2 - center.x, c_black,' ');
    }
   }
  }
