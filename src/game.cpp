@@ -8961,25 +8961,25 @@ point game::look_debug()
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void game::print_all_tile_info(int lx, int ly, WINDOW *w_look, int column, int &line,
+void game::print_all_tile_info(const tripoint &p, WINDOW *w_look, int column, int &line,
                                bool mouse_hover)
 {
-    print_terrain_info(lx, ly, w_look, column, line);
-    print_fields_info(lx, ly, w_look, column, line);
-    print_trap_info(lx, ly, w_look, column, line);
-    print_object_info(lx, ly, w_look, column, line, mouse_hover);
+    print_terrain_info(p, w_look, column, line);
+    print_fields_info(p, w_look, column, line);
+    print_trap_info(p, w_look, column, line);
+    print_object_info(p, w_look, column, line, mouse_hover);
 }
 
-void game::print_terrain_info(int lx, int ly, WINDOW *w_look, int column, int &line)
+void game::print_terrain_info(const tripoint &p, WINDOW *w_look, int column, int &line)
 {
     int ending_line = line + 3;
-    std::string tile = m.tername(lx, ly);
-    if (m.has_furn(lx, ly)) {
-        furn_t furn = m.furn_at(lx, ly);
+    std::string tile = m.tername(p);
+    if (m.has_furn(p)) {
+        furn_t furn = m.furn_at(p);
         tile += "; " + furn.name;
         if (furn.has_flag("PLANT")) {
             // Plant types are defined by seeds.
-            item plantType = m.i_at(lx, ly)[0];
+            item plantType = m.i_at(p)[0];
             if (plantType.typeId() != "fungal_seeds") {
                 // We rely on the seeds we care about to be
                 // id'd as seed_*.
@@ -8988,14 +8988,14 @@ void game::print_terrain_info(int lx, int ly, WINDOW *w_look, int column, int &l
         }
     }
 
-    if (m.move_cost(lx, ly) == 0) {
+    if (m.move_cost(p) == 0) {
         mvwprintw(w_look, line, column, _("%s; Impassable"), tile.c_str());
     } else {
         mvwprintw(w_look, line, column, _("%s; Movement cost %d"), tile.c_str(),
-                  m.move_cost(lx, ly) * 50);
+                  m.move_cost(p) * 50);
     }
 
-    std::string signage = m.get_signage(lx, ly);
+    std::string signage = m.get_signage(p);
     if (signage.size() > 0 && signage.size() < 36) {
         mvwprintw(w_look, ++line, column, _("Sign: %s"), signage.c_str());
     } else if (signage.size() > 0) {
@@ -9003,15 +9003,15 @@ void game::print_terrain_info(int lx, int ly, WINDOW *w_look, int column, int &l
         mvwprintw(w_look, ++line, column, _("Sign: %s..."), signage.substr(0, 32).c_str());
     }
 
-    mvwprintw(w_look, ++line, column, "%s", m.features(lx, ly).c_str());
+    mvwprintw(w_look, ++line, column, "%s", m.features(p).c_str());
     if (line < ending_line) {
         line = ending_line;
     }
 }
 
-void game::print_fields_info(int lx, int ly, WINDOW *w_look, int column, int &line)
+void game::print_fields_info(const tripoint &p, WINDOW *w_look, int column, int &line)
 {
-    const field &tmpfield = m.field_at(lx, ly);
+    const field &tmpfield = m.field_at(p);
     for( auto &fld : tmpfield ) {
         const field_entry *cur = &fld.second;
         mvwprintz(w_look, line++, column, fieldlist[cur->getFieldType()].color[cur->getFieldDensity() - 1],
@@ -9020,54 +9020,54 @@ void game::print_fields_info(int lx, int ly, WINDOW *w_look, int column, int &li
     }
 }
 
-void game::print_trap_info(int lx, int ly, WINDOW *w_look, const int column, int &line)
+void game::print_trap_info(const tripoint &p, WINDOW *w_look, const int column, int &line)
 {
-    trap_id trapid = m.tr_at(lx, ly);
+    trap_id trapid = m.tr_at(p);
     if (trapid == tr_null) {
         return;
     }
-    if (traplist[trapid]->can_see(u, lx, ly)) {
+    if (traplist[trapid]->can_see(u, p.x, p.y)) {
         mvwprintz(w_look, line++, column, traplist[trapid]->color, "%s", traplist[trapid]->name.c_str());
     }
 }
 
-void game::print_object_info(int lx, int ly, WINDOW *w_look, const int column, int &line,
+void game::print_object_info(const tripoint &p, WINDOW *w_look, const int column, int &line,
                              bool mouse_hover)
 {
     int veh_part = 0;
-    vehicle *veh = m.veh_at(lx, ly, veh_part);
-    const Creature *critter = critter_at( lx, ly );
+    vehicle *veh = m.veh_at(p, veh_part);
+    const Creature *critter = critter_at( p );
     if( critter != nullptr && ( u.sees( critter ) || critter == &u ) ) {
         if( !mouse_hover ) {
-            critter->draw( w_terrain, lx, ly, true );
+            critter->draw( w_terrain, p.x, p.y, true );
         }
         line = critter->print_info( w_look, line, 6, column );
     } else if (veh) {
         mvwprintw(w_look, line++, column, _("There is a %s there. Parts:"), veh->name.c_str());
         line = veh->print_part_desc(w_look, line, (mouse_hover) ? getmaxx(w_look) : 48, veh_part);
         if (!mouse_hover) {
-            m.drawsq(w_terrain, u, lx, ly, true, true, tripoint(lx, ly, 0), false, false);
+            m.drawsq(w_terrain, u, p.x, p.y, true, true, p, false, false);
         }
     } else if (!mouse_hover) {
-        m.drawsq(w_terrain, u, lx, ly, true, true, tripoint(lx, ly, 0), false, false);
+        m.drawsq(w_terrain, u, p.x, p.y, true, true, p, false, false);
     }
-    handle_multi_item_info(lx, ly, w_look, column, line, mouse_hover);
+    handle_multi_item_info(p, w_look, column, line, mouse_hover);
 }
 
-void game::handle_multi_item_info(int lx, int ly, WINDOW *w_look, const int column, int &line,
+void game::handle_multi_item_info(const tripoint &p, WINDOW *w_look, const int column, int &line,
                                   bool mouse_hover)
 {
-    if (m.sees_some_items(lx, ly, u)) {
+    if (m.sees_some_items(p, u)) {
         if (mouse_hover) {
             // items are displayed from the live view, don't do this here
             return;
         }
-        auto &items = m.i_at(lx, ly);
+        auto &items = m.i_at(p);
         mvwprintw(w_look, line++, column, _("There is a %s there."), items[0].tname().c_str());
         if (items.size() > 1) {
             mvwprintw(w_look, line++, column, _("There are other items there as well."));
         }
-    } else if (m.has_flag("CONTAINER", lx, ly) && !m.could_see_items(lx, ly, u)) {
+    } else if (m.has_flag("CONTAINER", p) && !m.could_see_items(p, u)) {
         mvwprintw(w_look, line++, column, _("You cannot see what is inside of it."));
     }
 }
@@ -9627,7 +9627,7 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
         } else {
             //Look around
             if (u_see(lp)) {
-                print_all_tile_info(lx, ly, w_info, 1, off, false);
+                print_all_tile_info(lp, w_info, 1, off, false);
 
             } else if (u.sight_impaired() &&
                        m.light_at(lp) == LL_BRIGHT &&
