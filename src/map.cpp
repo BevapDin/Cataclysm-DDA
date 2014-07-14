@@ -1898,15 +1898,15 @@ bool map::has_adjacent_furniture(const tripoint &p)
  return false;
 }
 
-bool map::has_nearby_fire(int x, int y, int radius)
+bool map::has_nearby_fire(const tripoint &pnt, int radius)
 {
     for(int dx = -radius; dx <= radius; dx++) {
         for(int dy = -radius; dy <= radius; dy++) {
-            const point p(x + dx, y + dy);
+            const tripoint p(pnt.x + dx, pnt.y + dy, pnt.z);
             if( get_field( p, fd_fire ) != nullptr ) {
                 return true;
             }
-            if (ter(p.x, p.y) == t_lava) {
+            if (ter(p) == t_lava) {
                 return true;
             }
         }

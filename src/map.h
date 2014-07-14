@@ -424,7 +424,7 @@ class map
  // Check for terrain/furniture/field that provide a
  // "fire" item to be used for example when crafting or when
  // a iuse function needs fire.
- bool has_nearby_fire(int x, int y, int radius = 1);
+ bool has_nearby_fire(const tripoint &p, int radius = 1);
  /**
   * Check if player can see some items at (x,y). Includes:
   * - check for items at this location (!i_at().empty())
