@@ -1745,7 +1745,12 @@ bool map::is_outside(const tripoint &p) const
 // MATERIALS-TODO: Use fire resistance
 bool map::flammable_items_at(const int x, const int y)
 {
-    for (auto &i : i_at(x, y)) {
+    return flammable_items_at(tripoint(x, y, 0));
+}
+
+bool map::flammable_items_at(const tripoint &p)
+{
+    for (auto &i : i_at(p)) {
         int vol = i.volume();
         if (i.made_of("paper") || i.made_of("powder") ||
               i.type->id == "whiskey" || i.type->id == "vodka" ||
