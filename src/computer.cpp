@@ -413,19 +413,20 @@ void computer::activate_function(computer_action action)
         }
         g->u.add_memorial_log(pgettext("memorial_male", "Caused a resonance cascade."),
                               pgettext("memorial_female", "Caused a resonance cascade."));
-        std::vector<point> cascade_points;
+        std::vector<tripoint> cascade_points;
         for (int i = g->u.posx() - 10; i <= g->u.posx() + 10; i++) {
             for (int j = g->u.posy() - 10; j <= g->u.posy() + 10; j++) {
-                if (g->m.ter(i, j) == t_radio_tower) {
-                    cascade_points.push_back(point(i, j));
+                const tripoint tp(i, j, 0);
+                if (g->m.ter(tp) == t_radio_tower) {
+                    cascade_points.push_back(tp);
                 }
             }
         }
         if (cascade_points.empty()) {
-            g->resonance_cascade(g->u.posx(), g->u.posy());
+            g->resonance_cascade(g->u.pos());
         } else {
-            point p = cascade_points[rng(0, cascade_points.size() - 1)];
-            g->resonance_cascade(p.x, p.y);
+            const tripoint p = cascade_points[rng(0, cascade_points.size() - 1)];
+            g->resonance_cascade(p);
         }
     }
     break;

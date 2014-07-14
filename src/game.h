@@ -163,8 +163,10 @@ class game
         bool event_queued(event_type type);
         /** Create explosion at (x, y) of intensity (power) with (shrapnel) chunks of shrapnel. */
         void explosion(int x, int y, int power, int shrapnel, bool fire, bool blast = true);
+        void explosion(const tripoint &p, int power, int shrapnel, bool fire, bool blast = true);
         /** Triggers a flashbang explosion at (x, y). */
         void flashbang(int x, int y, bool player_immune = false);
+        void flashbang(const tripoint &p, bool player_immune = false);
         /** Moves the player vertically. If force == true then they are falling. */
         void vertical_move(int z, bool force);
         /** Checks to see if a player can use a computer (not illiterate, etc.) and uses if able. */
@@ -175,10 +177,13 @@ class game
         bool pl_refill_vehicle (vehicle &veh, int part, bool test = false);
         /** Triggers a resonance cascade at (x, y). */
         void resonance_cascade(int x, int y);
+        void resonance_cascade(const tripoint &p);
         /** Triggers a scrambler blast at (x, y). */
         void scrambler_blast(int x, int y);
+        void scrambler_blast(const tripoint &p);
         /** Triggers an emp blast at (x, y). */
         void emp_blast(int x, int y);
+        void emp_blast(const tripoint &p);
         /** Returns the NPC index of the npc at (x, y). Returns -1 if no NPC is present. */
         int  npc_at(const int x, const int y) const;
         int  npc_at(const tripoint &p) const; // Index of the npc at p; -1 for none
@@ -219,8 +224,10 @@ class game
         bool is_sheltered(int x, int y);
         /** Revives the corpse with position n in the items at (x, y). Returns true if successful. */
         bool revive_corpse(int x, int y, int n);
+        bool revive_corpse(const tripoint &p, int n);
         /** Revives the corpse at (x, y) by item pointer. Caller handles item deletion. */
         bool revive_corpse(int x, int y, item *it);
+        bool revive_corpse(const tripoint &p, item *it);
         /** Handles player input parts of gun firing (target selection, etc.). Actual firing is done 
          *  in player::fire_gun(). This is interactive and should not be used by NPC's. */
         void plfire(bool burst, int default_target_x = -1, int default_target_y = -1);
@@ -448,7 +455,7 @@ class game
         bionic_id random_good_bionic() const; // returns a non-faulty, valid bionic
 
         // Helper because explosion was getting too big.
-        void do_blast( const int x, const int y, const int power, const int radius, const bool fire );
+        void do_blast( const tripoint &p, const int power, const int radius, const bool fire );
 
         // Knockback functions: knock target at (tx,ty) along a line, either calculated
         // from source position (sx,sy) using force parameter or passed as an argument;
@@ -463,9 +470,11 @@ class game
         // parameters force, stun, and dam_mult are passed to knockback()
         // ignore_player determines if player is affected, useful for bionic, etc.
         void shockwave(int x, int y, int radius, int force, int stun, int dam_mult, bool ignore_player);
+        void shockwave(const tripoint &p, int radius, int force, int stun, int dam_mult, bool ignore_player);
 
         // Animation related functions
         void draw_explosion(int x, int y, int radius, nc_color col);
+        void draw_explosion(const tripoint &p, int radius, nc_color col);
         void draw_bullet(Creature &p, int tx, int ty, int i, std::vector<point> trajectory, char bullet,
                          timespec &ts);
         void draw_hit_mon(int x, int y, monster critter, bool dead = false);

@@ -5,8 +5,11 @@ bool is_valid_in_w_terrain(int x, int y);
 
 #include "game.h"
 /* Explosion Animation */
-void game::draw_explosion(int x, int y, int radius, nc_color col)
+void game::draw_explosion(const tripoint &p, int radius, nc_color col)
 {
+    const int x = p.x;
+    const int y = p.y;
+    // TODO: Z
     timespec ts;    // Timespec for the animation of the explosion
     ts.tv_sec = 0;
     ts.tv_nsec = OPTIONS["ANIMATION_DELAY"] * EXPLOSION_MULTIPLIER * 1000000;
