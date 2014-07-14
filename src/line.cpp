@@ -204,27 +204,23 @@ std::vector <tripoint> line_to(const tripoint &p1, const tripoint &p2, int t)
    const int dx2 = Adx * 2;
    const int dy2 = Ady * 2;
    const int dz2 = Adz * 2;
-
-   int xxx = p1.x;
-   int yyy = p1.y;
-   int zzz = p1.z;
-
+    tripoint pnt = p1;
    if ((Adx >= Ady) && (Adx >= Adz)) {
         int err_1 = dy2 - Adx;
         int err_2 = dz2 - Adx;
         for(int Cont = 0; Cont < Adx; Cont++) {
             if (err_1 > 0) {
-                yyy += y_inc;
+                pnt.y += y_inc;
                 err_1 -= dx2;
             }
             if (err_2 > 0) {
-                zzz += z_inc;
+                pnt.z += z_inc;
                 err_2 -= dx2;
             }
             err_1 += dy2;
             err_2 += dz2;
-            xxx+= x_inc;
-            ret.push_back(tripoint(xxx, yyy, zzz));
+            pnt.x+= x_inc;
+            ret.push_back(pnt);
         }
    }
 
@@ -233,17 +229,17 @@ std::vector <tripoint> line_to(const tripoint &p1, const tripoint &p2, int t)
         int err_2 = dz2 - Ady;
         for(int Cont = 0; Cont < Ady; Cont++) {
             if (err_1 > 0) {
-                xxx += x_inc;
+                pnt.x += x_inc;
                 err_1 -= dy2;
             }
             if (err_2 > 0) {
-                zzz += z_inc;
+                pnt.z += z_inc;
                 err_2 -= dy2;
             }
             err_1 += dx2;
             err_2 += dz2;
-            yyy += y_inc;
-            ret.push_back(tripoint(xxx, yyy, zzz));
+            pnt.y += y_inc;
+            ret.push_back(pnt);
         }
     }
 
@@ -252,17 +248,17 @@ std::vector <tripoint> line_to(const tripoint &p1, const tripoint &p2, int t)
         int err_2 = dx2 - Adz;
         for(int Cont = 0; Cont < Adz; Cont++) {
             if (err_1 > 0) {
-                yyy += y_inc;
+                pnt.y += y_inc;
                 err_1 -= dz2;
             }
             if (err_2 > 0) {
-                xxx += x_inc;
+                pnt.x += x_inc;
                 err_2 -= dz2;
             }
             err_1 += dy2;
             err_2 += dx2;
-            zzz += z_inc;
-            ret.push_back(tripoint(xxx, yyy, zzz));
+            pnt.z += z_inc;
+            ret.push_back(pnt);
         }
     }
     return ret;
