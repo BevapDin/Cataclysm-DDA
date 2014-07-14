@@ -326,6 +326,8 @@ void load_overmap_terrain(JsonObject &jo)
     oter.is_road = isroad(id_base);
     oter.is_river = (id_base.compare(0, 5, "river", 5) == 0 ||
                      id_base.compare(0, 6, "bridge", 6) == 0);
+    oter.flags = jo.get_tags("flags");
+    oter.transparent_floor = jo.get_bool("transparent_floor", false);
 
     oter.id_mapgen = id_base; // What, another identifier? Whyyy...
     if ( ! oter.line_drawing ) { // ...oh

@@ -14072,18 +14072,38 @@ void game::update_overmap_seen()
     const int dist = u.overmap_sight_range(light_level());
     // We can always see where we're standing
     overmap_buffer.set_seen(ompos.x, ompos.y, ompos.z, true);
+    // TODO: Z this should use the optimized shadow casting!
     for (int x = ompos.x - dist; x <= ompos.x + dist; x++) {
         for (int y = ompos.y - dist; y <= ompos.y + dist; y++) {
-            const std::vector<point> line = line_to(ompos.x, ompos.y, x, y, 0);
+            for (int z = ompos.z - dist; z <= ompos.z + dist; z++) {
+                tripoint prevp = ompos;
+                const std::vector<tripoint> line = line_to(ompos, tripoint(x, y, z), 0);
             int sight_points = dist;
-            for (std::vector<point>::const_iterator it = line.begin();
-                 it != line.end() && sight_points >= 0; ++it) {
-                const oter_id &ter = overmap_buffer.ter(it->x, it->y, ompos.z);
+                for( const auto &p : line ) {
+                    const oter_id &ter = overmap_buffer.ter(p.x, p.y, p.z);
+                    if (ter == "") {
+                        sight_points = -1;
+                        break;
+                    }
+                    if (prevp.z < p.z) { // Looking up
+                        if (!ter.t().transparent_floor) {
+                            sight_points = -1;
+                            break;
+                        }
+                    }
+                    if (prevp.z > p.z) { // Looking down
+                        if (!overmap_buffer.ter(prevp.x, prevp.y, prevp.z).t().transparent_floor) {
+                            sight_points = -1;
+                            break;
+                        }
+                    }
                 const int cost = otermap[ter].see_cost;
                 sight_points -= cost;
+                    prevp = p;
             }
             if (sight_points >= 0) {
-                overmap_buffer.set_seen(x, y, ompos.z, true);
+                    overmap_buffer.set_seen(x, y, z, true);
+                }
             }
         }
     }
