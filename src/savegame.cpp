@@ -92,8 +92,8 @@ void game::serialize(std::ofstream & fout) {
         int rle_lastval = -1;
         int rle_count = 0;
         for( auto &elem : grscent ) {
-            for( auto val : elem ) {
-
+            for( auto &valz : elem ) {
+                for( auto val : valz ) {
                if (val == rle_lastval) {
                    rle_count++;
                } else {
@@ -104,6 +104,7 @@ void game::serialize(std::ofstream & fout) {
                    rle_lastval = val;
                    rle_count = 1;
                }
+                }
             }
         }
         rle_out << rle_count;
@@ -226,11 +227,13 @@ void game::unserialize(std::ifstream & fin)
             int count = 0;
             for( auto &elem : grscent ) {
                 for( auto &elem_j : elem ) {
+                    for( auto &elem_z : elem_j ) {
                     if (count == 0) {
                         linein >> stmp >> count;
                     }
                     count--;
-                    elem_j = stmp;
+                    elem_z = stmp;
+                    }
                 }
             }
         }
