@@ -79,6 +79,7 @@ void mapgen_generic_house(map *m, oter_id terrain_type, mapgendata dat, int turn
 void mapgen_generic_house_boxy(map *m, oter_id terrain_type, mapgendata dat, int turn, float density);
 void mapgen_generic_house_big_livingroom(map *m, oter_id terrain_type, mapgendata dat, int turn, float density);
 void mapgen_generic_house_center_hallway(map *m, oter_id terrain_type, mapgendata dat, int turn, float density);
+void mapgen_generic_house_above(map *m, oter_id, mapgendata dat, int, float);
 
 void mapgen_church_new_england(map *m, oter_id terrain_type, mapgendata dat, int turn, float density);
 void mapgen_church_gothic(map *m, oter_id terrain_type, mapgendata dat, int turn, float density);

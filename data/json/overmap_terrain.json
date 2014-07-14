@@ -4504,5 +4504,27 @@
         "see_cost" : 5,
         "mondensity" : 2,
         "sidewalk" : true
+    },{
+        "type" : "overmap_terrain",
+        "id" : "house_second_floor",
+        "name" : "house (second floor)",
+        "sym" : 94,
+        "color" : "light_green",
+        "see_cost" : 6,
+        "mondensity" : 2,
+        "mapgen": [
+            { "method": "builtin", "name": "house_generic_above" }
+        ]
+    },{
+        "type" : "overmap_terrain",
+        "id" : "house_third_floor",
+        "name" : "house (third floor)",
+        "sym" : 94,
+        "color" : "light_green",
+        "see_cost" : 6,
+        "mondensity" : 2,
+        "mapgen": [
+            { "method": "builtin", "name": "house_generic_above" }
+        ]
     }
 ]
