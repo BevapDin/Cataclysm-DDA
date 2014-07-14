@@ -17,12 +17,12 @@ int recoil_add(player &p, const item &gun);
 void make_gun_sound_effect(player &p, bool burst, item *weapon);
 extern bool is_valid_in_w_terrain(int, int);
 
-void splatter(std::vector<point> trajectory, int dam, Creature *target = NULL);
+void splatter(std::vector<tripoint> trajectory, int dam, Creature *target = NULL);
 
-double Creature::projectile_attack(const projectile &proj, int targetx, int targety,
+double Creature::projectile_attack(const projectile &proj, const tripoint &target,
                                    double shot_dispersion)
 {
-    return projectile_attack(proj, posx(), posy(), targetx, targety, shot_dispersion);
+    return projectile_attack(proj, pos(), target, shot_dispersion);
 }
 
 /* Adjust dispersion cutoff thresholds per skill type.
@@ -61,10 +61,11 @@ int ranged_skill_offset( std::string skill )
     return 0;
 }
 
-double Creature::projectile_attack(const projectile &proj, int sourcex, int sourcey,
-                                   int targetx, int targety, double shot_dispersion)
+double Creature::projectile_attack(const projectile &proj, const tripoint &source,
+                                   const tripoint &target_, double shot_dispersion)
 {
-    double range = rl_dist(sourcex, sourcey, targetx, targety);
+    tripoint target = target_;
+    double range = rl_dist(source, target);
     // .013 * trange is a computationally cheap version of finding the tangent in degrees.
     // 0.0002166... is used because the unit of dispersion is MOA (1/60 degree).
     // It's also generous; missed_by will be rather short.
@@ -74,16 +75,22 @@ double Creature::projectile_attack(const projectile &proj, int sourcex, int sour
     if (missed_by >= 1.) {
         // We missed D:
         // Shoot a random nearby space?
-        targetx += rng(0 - int(sqrt(double(missed_by))), int(sqrt(double(missed_by))));
-        targety += rng(0 - int(sqrt(double(missed_by))), int(sqrt(double(missed_by))));
+        target.x += rng(0 - int(sqrt(double(missed_by))), int(sqrt(double(missed_by))));
+        target.y += rng(0 - int(sqrt(double(missed_by))), int(sqrt(double(missed_by))));
     }
 
-    std::vector<point> trajectory;
+    std::vector<tripoint> trajectory;
     int tart = 0;
-    if (g->m.sees(sourcex, sourcey, targetx, targety, -1, tart)) {
-        trajectory = line_to(sourcex, sourcey, targetx, targety, tart);
+    if (g->m.sees(source, target, -1, tart)) {
+        trajectory = line_to(source, target, tart);
     } else {
-        trajectory = line_to(sourcex, sourcey, targetx, targety, 0);
+        trajectory = line_to(source, target, 0);
+    }
+
+    // TODO: Z
+    std::vector<point> traj2;
+    for(size_t a = 0; a < trajectory.size(); a++) {
+        traj2.push_back(point(trajectory[a].x, trajectory[a].y));
     }
 
     // Set up a timespec for use in the nanosleep function below
@@ -95,28 +102,25 @@ double Creature::projectile_attack(const projectile &proj, int sourcex, int sour
     itype *curammo = proj.ammo;
 
     // Trace the trajectory, doing damage in order
-    int tx = sourcex;
-    int ty = sourcey;
-    int px = sourcex;
-    int py = sourcey;
+    tripoint t = trajectory[0];
+    tripoint p = trajectory[0];
 
     // if this is a vehicle mounted turret, which vehicle is it mounted on?
-    const vehicle *in_veh = is_fake() ? g->m.veh_at(posx(), posy()) : NULL;
+    const vehicle *in_veh = is_fake() ? g->m.veh_at(pos()) : NULL;
 
     //Start this now in case we hit something early
-    std::vector<point> blood_traj = std::vector<point>();
+    std::vector<tripoint> blood_traj = std::vector<tripoint>();
     bool stream = proj.proj_effects.count("FLAME") > 0 || proj.proj_effects.count("JET") > 0;
     for( size_t i = 0; i < trajectory.size() && ( dam > 0 || stream ); i++ ) {
         blood_traj.push_back(trajectory[i]);
-        px = tx;
-        py = ty;
-        (void) px;
-        (void) py;
-        tx = trajectory[i].x;
-        ty = trajectory[i].y;
+        p = t;
+        (void) p;
+        t = trajectory[i];
         // Drawing the bullet uses player u, and not player p, because it's drawn
         // relative to YOUR position, which may not be the gunman's position.
-        g->draw_bullet(g->u, tx, ty, (int)i, trajectory, stream ? '#' : '*', ts);
+        if (t.z == g->u.view_offset.z) {
+        g->draw_bullet(g->u, t.x, t.y, (int)i, traj2, stream ? '#' : '*', ts);
+        }
 
         if( in_veh != nullptr ) {
             int part;
@@ -131,11 +135,11 @@ double Creature::projectile_attack(const projectile &proj, int sourcex, int sour
         }
         */
 
-        Creature *critter = g->critter_at(tx, ty);
+        Creature *critter = g->critter_at(t);
         monster *mon = dynamic_cast<monster *>(critter);
         // ignore non-point-blank digging targets (since they are underground)
         if (mon != NULL && mon->digging() &&
-            rl_dist(posx(), posy(), tx, ty) > 1) {
+            rl_dist(pos(), t) > 1) {
             critter = mon = NULL;
         }
         // If we shot us a monster...
@@ -162,16 +166,16 @@ double Creature::projectile_attack(const projectile &proj, int sourcex, int sour
             if (!passed_through) {
                 dam = 0;
             }
-        } else if(in_veh != NULL && g->m.veh_at(tx, ty) == in_veh) {
+        } else if(in_veh != NULL && g->m.veh_at(t) == in_veh) {
             // Don't do anything, especially don't call map::shoot as this would damage the vehicle
         } else {
-            g->m.shoot(tx, ty, dam, i == trajectory.size() - 1, proj.proj_effects);
+            // TODO: Z
+            g->m.shoot(t.x, t.y, dam, i == trajectory.size() - 1, proj.proj_effects);
         }
     } // Done with the trajectory!
 
-    if (g->m.move_cost(tx, ty) == 0) {
-        tx = px;
-        ty = py;
+    if (g->m.move_cost(t) == 0) {
+        t = p;
     }
     // we can only drop something if curammo exists
     if (curammo != NULL && proj.drops &&
@@ -187,10 +191,11 @@ double Creature::projectile_attack(const projectile &proj, int sourcex, int sour
        ) {
         item ammotmp = item(curammo->id, 0);
         ammotmp.charges = 1;
-        g->m.add_item_or_charges(tx, ty, ammotmp);
+        g->m.add_item_or_charges(t, ammotmp);
     }
 
-    ammo_effects(tx, ty, proj.proj_effects);
+    // TODO: Z
+    ammo_effects(t.x, t.y, proj.proj_effects);
 
     if (proj.proj_effects.count("BOUNCE")) {
         for (unsigned long int i = 0; i < g->num_zombies(); i++) {
@@ -199,13 +204,13 @@ double Creature::projectile_attack(const projectile &proj, int sourcex, int sour
                 continue;
             }
             // search for monsters in radius 4 around impact site
-            if( rl_dist( z.posx(), z.posy(), tx, ty ) <= 4 &&
-                g->m.sees( z.posx(), z.posy(), tx, ty, -1, tart ) ) {
+            if( rl_dist( z.pos(), t ) <= 4 &&
+                g->m.sees( z.pos(), t, -1, tart ) ) {
                 // don't hit targets that have already been hit
                 if (!z.has_effect("bounced")) {
                     add_msg(_("The attack bounced to %s!"), z.name().c_str());
                     z.add_effect("bounced", 1);
-                    projectile_attack(proj, tx, ty, z.posx(), z.posy(), shot_dispersion);
+                    projectile_attack(proj, t, z.pos(), shot_dispersion);
                     break;
                 }
             }
@@ -523,15 +528,14 @@ void player::fire_gun(const tripoint &target_, bool burst)
             recoil += recoil_add(*this, *used_weapon);
         }
 
-        int mtarx = target.x;
-        int mtary = target.y;
+        tripoint mtar = target;
 
         int adjusted_damage = used_weapon->gun_damage();
         int armor_penetration = used_weapon->gun_pierce();
 
         proj.impact = damage_instance::physical(0, adjusted_damage, 0, armor_penetration);
 
-        double missed_by = projectile_attack(proj, mtarx, mtary, total_dispersion);
+        double missed_by = projectile_attack(proj, mtar, total_dispersion);
         if (missed_by <= .1) { // TODO: check head existence for headshot
             lifetime_stats()->headshots++;
         }
@@ -1464,7 +1468,7 @@ int recoil_add(player &p, const item &gun)
     return 0;
 }
 
-void splatter( std::vector<point> trajectory, int dam, Creature *target )
+void splatter( std::vector<tripoint> trajectory, int dam, Creature *target )
 {
     if( dam <= 0) {
         return;
@@ -1494,13 +1498,11 @@ void splatter( std::vector<point> trajectory, int dam, Creature *target )
         distance = 2;
     }
 
-    std::vector<point> spurt = continue_line( trajectory, distance );
+    std::vector<tripoint> spurt = continue_line( trajectory, distance );
 
     for( auto &elem : spurt ) {
-        int tarx = elem.x;
-        int tary = elem.y;
-        g->m.adjust_field_strength( point(tarx, tary), blood, 1 );
-        if( g->m.move_cost(tarx, tary) == 0 ) {
+        g->m.adjust_field_strength( elem, blood, 1 );
+        if( g->m.move_cost(elem) == 0 ) {
             // Blood splatters stop at walls.
             break;
         }
