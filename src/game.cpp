@@ -47,6 +47,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <cassert>
 #include <vector>
 #include <locale>
 
@@ -13930,10 +13931,15 @@ void game::update_map(int &x, int &y, int z)
         cur_om = &overmap_buffer.get( rc.abs_om.x, rc.abs_om.y );
     }
 
+    const tripoint rel_shift(shiftx, shifty, shiftz);
     // Shift monsters if we're actually shifting
     if (shiftx || shifty || shiftz) {
-        shift_monsters( tripoint( shiftx, shifty, shiftz ) );
-        shift_npcs( tripoint( shiftx, shifty, shiftz ) );
+        shift_monsters( rel_shift );
+        shift_npcs( rel_shift );
+    }
+
+    if (shiftx != 0 || shifty != 0) {
+        // Player does not need a z-level shift, player is alread at z=0
         u.shift_destination(-shiftx * SEEX, -shifty * SEEY);
     }
 
