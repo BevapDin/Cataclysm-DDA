@@ -1423,12 +1423,13 @@ void Creature::draw(WINDOW *w, int player_x, int player_y, bool inverted) const
 {
     int draw_x = getmaxx(w) / 2 + posx() - player_x;
     int draw_y = getmaxy(w) / 2 + posy() - player_y;
+    const bool diffzlev = (posz() != g->u.view_offset.z);
     if(inverted) {
-        mvwputch_inv(w, draw_y, draw_x, basic_symbol_color(), symbol());
+        mvwputch_inv(w, draw_y, draw_x, diffzlev ? c_ltgray : basic_symbol_color(), symbol());
     } else if(is_symbol_highlighted()) {
-        mvwputch_hi(w, draw_y, draw_x, basic_symbol_color(), symbol());
+        mvwputch_hi(w, draw_y, draw_x, diffzlev ? c_ltgray : basic_symbol_color(), symbol());
     } else {
-        mvwputch(w, draw_y, draw_x, symbol_color(), symbol() );
+        mvwputch(w, draw_y, draw_x, diffzlev ? c_ltgray : symbol_color(), symbol() );
     }
 }
 
