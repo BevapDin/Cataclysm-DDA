@@ -6541,22 +6541,23 @@ void game::monmove()
 
     for (size_t i = 0; i < num_zombies(); i++) {
         monster *critter = &critter_tracker.find(i);
-        while (!critter->is_dead() && !critter->can_move_to(critter->posx(), critter->posy())) {
+        while (!critter->is_dead() && !critter->can_move_to(critter->pos())) {
             // If we can't move to our current position, assign us to a new one
                 dbg(D_ERROR) << "game:monmove: " << critter->name().c_str()
                              << " can't move to its location! (" << critter->posx()
-                             << ":" << critter->posy() << "), "
-                             << m.tername(critter->posx(), critter->posy()).c_str();
-                add_msg( m_debug, "%s can't move to its location! (%d:%d), %s", critter->name().c_str(),
-                         critter->posx(), critter->posy(), m.tername(critter->posx(), critter->posy()).c_str());
+                             << ":" << critter->posy() << ":" << critter->zpos() << "), "
+                             << m.tername(critter->pos()).c_str();
+                add_msg( m_debug, "%s can't move to its location! (%d:%d:%d), %s", critter->name().c_str(),
+                         critter->posx(), critter->posy(), critter->posz(), m.tername(critter->pos()).c_str());
             bool okay = false;
             int xdir = rng(1, 2) * 2 - 3, ydir = rng(1, 2) * 2 - 3; // -1 or 1
             int startx = critter->posx() - 3 * xdir, endx = critter->posx() + 3 * xdir;
             int starty = critter->posy() - 3 * ydir, endy = critter->posy() + 3 * ydir;
             for (int x = startx; x != endx && !okay; x += xdir) {
                 for (int y = starty; y != endy && !okay; y += ydir) {
-                    if (critter->can_move_to(x, y) && is_empty(x, y)) {
-                        critter->setpos(x, y);
+                    const tripoint p(x, y, critter->posz());
+                    if (critter->can_move_to(p) && is_empty(p)) {
+                        critter->setpos(p);
                         okay = true;
                     }
                 }
@@ -6587,7 +6588,7 @@ void game::monmove()
 
         if (!critter->is_dead()) {
             if (u.has_active_bionic("bio_alarm") && u.power_level >= 25 &&
-                rl_dist(u.posx, u.posy, critter->posx(), critter->posy()) <= 5) {
+                rl_dist(u.pos(), critter->pos()) <= 5) {
                 u.power_level -= 25;
                 add_msg(m_warning, _("Your motion alarm goes off!"));
                 cancel_activity_query(_("Your motion alarm goes off!"));
@@ -6596,10 +6597,7 @@ void game::monmove()
                 }
             }
             // We might have stumbled out of range of the player; if so, kill us
-            if (critter->posx() < 0 - (SEEX * MAPSIZE) / 6 ||
-                critter->posy() < 0 - (SEEY * MAPSIZE) / 6 ||
-                critter->posx() > (SEEX * MAPSIZE * 7) / 6 ||
-                critter->posy() > (SEEY * MAPSIZE * 7) / 6) {
+            if (!m.inbounds(critter->pos())) {
                 // Remove the zombie, but don't let it "die", it still exists, just
                 // not in the reality bubble.
                 despawn_monster( i );
