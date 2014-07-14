@@ -316,7 +316,38 @@ bool map::pl_sees(const tripoint &f, const tripoint &t, int max_range) const
     return seen_cache(t.x, t.y, t.z);
 }
 
+// This function defines when one can look vertically done
+bool can_see_down(ter_id tid, furn_id fid) {
+    const ter_t &ter = terlist[tid];
+    if (!ter.has_flag("TRANSPARENT_FLOOR")) {
+        // No transparent floor -> no view
+        return false;
+    }
+    if (fid != f_null) {
+        const furn_t &furn = furnlist[fid];
+        if (!furn.has_flag("TRANSPARENT_FLOOR")) {
+            // transparent terrain floor is obstructed by furniture
+            return false;
+        }
+    }
+    // TODO: check fields
+    // Both furniture and terrain have a transparent floor
+    return true;
+}
 
+void map::per_submap_cache::build_see_up_down_cache(const submap &sm, const submap *sm_above) {
+    for(int x = 0; x < SEEX; x++) {
+        for(int y = 0; y < SEEX; y++) {
+            see_down[x][y] = can_see_down(sm.ter[x][y], sm.frn[x][y]);
+            // seeing up is the same as seeing down from above.
+            if (sm_above == NULL) {
+                see_up[x][y] = true;
+            } else {
+                see_up[x][y] = can_see_down(sm_above->ter[x][y], sm_above->frn[x][y]);
+            }
+        }
+    }
+}
 
 /**
  * Calculates the Field Of View for the provided map from the given x, y
@@ -336,8 +367,18 @@ void map::build_seen_cache()
     for(int x = 0; x < my_MAPSIZE; x++) {
         for(int y = 0; y < my_MAPSIZE; y++) {
             for(int z = my_ZMIN; z <= my_ZMAX; z++) {
-                per_submap_cache &cache = psm_cache[get_nonant(x, y, z)];
+                const int nonant = get_nonant(x, y, z);
+                per_submap_cache &cache = psm_cache[nonant];
                 memset(cache.seen_by_u, false, sizeof(cache.seen_by_u));
+                if ((cache.vflags & per_submap_cache::VF_MAP_DATA) == 0) {
+                    const submap *sm = grid[nonant];
+                    const submap *sm_above = NULL;
+                    if (z < my_ZMAX) {
+                        sm_above = grid[get_nonant(x, y, z + 1)];
+                    }
+                    cache.build_see_up_down_cache(*sm, sm_above);
+                    cache.vflags |= per_submap_cache::VF_MAP_DATA;
+                }
             }
         }
     }
