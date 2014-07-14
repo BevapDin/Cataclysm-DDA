@@ -76,6 +76,8 @@ class map
             VF_SEEN_BY_U       = 1 <<  0,
             // see_down, see_up
             VF_MAP_DATA        = 1 <<  1,
+            // transparency
+            VF_TRANSPARENCY    = 1 <<  2,
         } valid_flags;
         /**
          * Contains combination of valid_flags.
@@ -84,6 +86,7 @@ class map
         bool seen_by_u[SEEX][SEEY];
         bool see_down[SEEX][SEEY];
         bool see_up[SEEX][SEEY];
+        float transparency[SEEX][SEEY];
         per_submap_cache() : vflags(0) { }
         void build_see_up_down_cache(const submap &sm, const submap *sm_above = NULL);
     };
@@ -786,6 +789,7 @@ void add_corpse(int x, int y);
                       const bool merge_wrecks = true);
  computer* add_computer(const int x, const int y, std::string name, const int security);
  float light_transparency(const int x, const int y) const;
+ float light_transparency(const tripoint &p) const;
  void build_map_cache();
  lit_level light_at(int dx, int dy) const; // Assumes 0,0 is light map center
  lit_level light_at(const tripoint &p) const; // Assumes 0,0 is light map center
@@ -1004,8 +1008,6 @@ private:
  // only valid for the duration of generate_lightmap
  float light_source_buffer[MAPSIZE*SEEX][MAPSIZE*SEEY];
  bool outside_cache[MAPSIZE*SEEX][MAPSIZE*SEEY];
- float transparency_cache[MAPSIZE*SEEX][MAPSIZE*SEEY];
-        bool seen_cache[MAPSIZE*SEEX][MAPSIZE*SEEY][MAPHEIGHT * 2 + 1];
         /**
          * The list of currently loaded submaps.
          */
