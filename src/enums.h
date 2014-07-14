@@ -190,4 +190,50 @@ inline bool operator<(const tripoint &a, const tripoint &b)
     return false;
 }
 
+/**
+ * Useage:
+ * for(point_iterator it(my_center, my_radius); it; ++it) {
+ *   m.ter_set(*it, "t_...");
+ * }
+ */
+class point_iterator {
+    tripoint cur;
+    tripoint center;
+    int radius;
+    bool valid;
+public:
+    point_iterator(const tripoint &c, int r)
+    : cur(c.x - r, c.y - r, c.z)
+    , center(c)
+    , radius(r)
+    , valid(r >= 0)
+    { }
+    const tripoint &operator*() const {
+        return cur;
+    }
+    const tripoint *operator->() const {
+        return &cur;
+    }
+    bool is_center() const {
+        return cur == center;
+    }
+    point_iterator &operator++() {
+        if(cur.x < center.x + radius) {
+            cur.x++;
+        } else if(cur.y < center.y + radius) {
+            cur.x = center.x - radius;
+            cur.y++;
+        } else {
+            valid = false;
+        }
+        return *this;
+    }
+    operator bool() const {
+        return valid;
+    }
+    bool operator!() const {
+        return !valid;
+    }
+};
+
 #endif
