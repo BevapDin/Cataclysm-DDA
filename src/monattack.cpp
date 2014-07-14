@@ -155,7 +155,7 @@ void mattack::acid(monster *z, int index)
                         0 ); // TODO: maybe spit onto another z-level?
     std::vector<tripoint> line = line_to(z->pos(), hit, junk);
     for (auto &i : line) {
-        if (g->m.hit_with_acid(i.x, i.y)) {
+        if (g->m.hit_with_acid( i )) {
             if (g->u_see(i)) {
                 add_msg(_("A glob of acid hits the %s!"),
                         g->m.tername(i).c_str());
