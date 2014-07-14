@@ -233,12 +233,6 @@ class map
                        const vehicle *ignored_vehicle = NULL, const int modifier = 0) const;
 
  /**
-  * Returns whether the tile at `(x, y)` is transparent(you can look past it).
-  */
- bool trans(const int x, const int y) const; // Transparent?
- bool trans(const tripoint &p) const; // Transparent?
-
- /**
   * Returns whether `(Fx, Fy)` sees `(Tx, Ty)` with a view range of `range`.
   *
   * @param tc Indicates the Bresenham line used to connect the two points, and may
@@ -801,6 +795,13 @@ void add_corpse(int x, int y);
                       const int init_veh_fuel = -1, const int init_veh_status = -1,
                       const bool merge_wrecks = true);
  computer* add_computer(const int x, const int y, std::string name, const int security);
+ /**
+  * Returns whether the tile at `(x, y)` is transparent
+  * (you can look past it).
+  * @return LIGHT_TRANSPARENCY_CLEAR completely transparent (air).
+  * LIGHT_TRANSPARENCY_SOLID in case it's not transparent at all.
+  * Or anything in between.
+  */
  float light_transparency(const int x, const int y) const;
  float light_transparency(const tripoint &p) const;
  void build_map_cache();

@@ -1343,16 +1343,6 @@ int map::combined_movecost(const tripoint &p1,
     return (cost1 + cost2 + modifier) * mult / 2;
 }
 
-bool map::trans(const int x, const int y) const
-{
-    return trans(tripoint(x, y, 0));
-}
-
-bool map::trans(const tripoint &p) const
-{
-    return light_transparency(p.x, p.y) > LIGHT_TRANSPARENCY_SOLID;
-}
-
 bool map::has_flag(const std::string &flag, const int x, const int y) const
 {
     return has_flag(flag, tripoint(x, y, 0));
@@ -2564,7 +2554,7 @@ void map::shoot(const int x, const int y, int &dam,
             dam = 0;
         }
     } else {
-        if (move_cost(x, y) == 0 && !trans(x, y)) {
+        if (move_cost(x, y) == 0 && light_transparency(x, x) == LIGHT_TRANSPARENCY_SOLID) {
             dam = 0; // TODO: Bullets can go through some walls?
         } else {
             dam -= (rng(0, 1) * rng(0, 1) * rng(0, 1));
@@ -4734,7 +4724,7 @@ bool map::sees(const tripoint &F, const tripoint &T,
                     tc *= st;
                     return true;
                 }
-            } while ((trans(pnt)) && (inbounds(pnt)));
+            } while ((light_transparency(pnt) != LIGHT_TRANSPARENCY_SOLID) && (inbounds(pnt)));
         }
         return false;
     } else { // Same as above, for mostly-vertical lines
@@ -4769,7 +4759,7 @@ bool map::sees(const tripoint &F, const tripoint &T,
                     tc *= st;
                     return true;
                 }
-            } while ((trans(pnt)) && (inbounds(pnt)));
+            } while ((light_transparency(pnt) != LIGHT_TRANSPARENCY_SOLID) && (inbounds(pnt)));
         }
         return false;
     }
