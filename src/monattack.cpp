@@ -81,7 +81,7 @@ void mattack::antqueen(monster *z, int index)
         z->moves -= 100; // It takes a while
         int mondex = ants[ rng(0, ants.size() - 1) ];
         monster *ant = &(g->zombie(mondex));
-        if (g->u_see(z->posx(), z->posy()) && g->u_see(ant->posx(), ant->posy()))
+        if (g->u_see(z->pos()) && g->u_see(ant->pos()))
             add_msg(m_warning, _("The %s feeds an %s and it grows!"), z->name().c_str(),
                     ant->name().c_str());
         if (ant->type->id == "mon_ant_larva") {
@@ -90,13 +90,13 @@ void mattack::antqueen(monster *z, int index)
             ant->poly(GetMType("mon_ant_soldier"));
         }
     } else if (egg_points.empty()) { // There's no eggs nearby--lay one.
-        if (g->u_see(z->posx(), z->posy())) {
+        if (g->u_see(z->pos())) {
             add_msg(_("The %s lays an egg!"), z->name().c_str());
         }
-        g->m.spawn_item(z->posx(), z->posy(), "ant_egg", 1, 0, calendar::turn);
+        g->m.spawn_item(z->pos(), "ant_egg", 1, 0, calendar::turn);
     } else { // There are eggs nearby.  Let's hatch some.
         z->moves -= 20 * egg_points.size(); // It takes a while
-        if (g->u_see(z->posx(), z->posy())) {
+        if (g->u_see(z->pos())) {
             add_msg(m_warning, _("The %s tends nearby eggs, and they hatch!"), z->name().c_str());
         }
         for (auto &i : egg_points) {
