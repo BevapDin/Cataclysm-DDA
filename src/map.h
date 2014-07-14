@@ -560,7 +560,7 @@ void add_corpse(int x, int y);
  void crush(const tripoint &p);
  void shoot(const tripoint &p, int &dam, const bool hit_items,
             const std::set<std::string>& ammo_effects);
- bool hit_with_acid(const int x, const int y);
+ bool hit_with_acid(const tripoint &p);
  bool hit_with_fire(const int x, const int y);
  bool marlossify(const tripoint &p);
  bool has_adjacent_furniture(const int x, const int y);

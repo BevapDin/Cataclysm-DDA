@@ -2708,36 +2708,36 @@ void map::shoot(const tripoint &p, int &dam,
     }
 }
 
-bool map::hit_with_acid( const int x, const int y )
+bool map::hit_with_acid( const tripoint &p )
 {
-    if( move_cost( x, y ) != 0 ) {
+    if( move_cost( p ) != 0 ) {
         return false;    // Didn't hit the tile!
     }
-    const ter_id t = ter( x, y );
+    const ter_id t = ter( p );
     if( t == t_wall_glass_v || t == t_wall_glass_h || t == t_wall_glass_v_alarm || t == t_wall_glass_h_alarm ||
         t == t_vat ) {
-        ter_set( x, y, t_floor );
+        ter_set( p, t_floor );
     } else if( t == t_door_c || t == t_door_locked || t == t_door_locked_peep || t == t_door_locked_alarm ) {
         if( one_in( 3 ) ) {
-            ter_set( x, y, t_door_b );
+            ter_set( p, t_door_b );
         }
     } else if( t == t_door_bar_c || t == t_door_bar_o || t == t_door_bar_locked || t == t_bars ) {
-        ter_set( x, y, t_floor );
+        ter_set( p, t_floor );
         add_msg( m_warning, _( "The metal bars melt!" ) );
     } else if( t == t_door_b ) {
         if( one_in( 4 ) ) {
-            ter_set( x, y, t_door_frame );
+            ter_set( p, t_door_frame );
         } else {
             return false;
         }
     } else if( t == t_window || t == t_window_alarm ) {
-        ter_set( x, y, t_window_empty );
+        ter_set( p, t_window_empty );
     } else if( t == t_wax ) {
-        ter_set( x, y, t_floor_wax );
+        ter_set( p, t_floor_wax );
     } else if( t == t_gas_pump || t == t_gas_pump_smashed ) {
         return false;
     } else if( t == t_card_science || t == t_card_military ) {
-        ter_set( x, y, t_card_reader_broken );
+        ter_set( p, t_card_reader_broken );
     }
     return true;
 }
