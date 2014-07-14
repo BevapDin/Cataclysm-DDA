@@ -132,10 +132,12 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         void set_dest(const tripoint &p, int &t);
 
         /**
-         * Set (x, y) as wander destination.
+         * Set p as wander destination.
          *
          * This will cause the monster to slowly move towards the destination,
          * unless there is an overriding smell or plan.
+         *
+         * Old comment: Try to get to p, we don't know the route.  Give up after f steps.
          *
          * @param f The priority of the destination, as well as how long we should
          *          wander towards there.
@@ -154,7 +156,6 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
 
         tripoint scent_move();
         tripoint wander_next();
-        int calc_movecost(int x1, int y1, int x2, int y2) const;
         int calc_movecost(const tripoint &p1, const tripoint &p2) const;
 
         /**
@@ -180,11 +181,10 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
          *
          * @return 1 if something was attacked, 0 otherwise
          */
-        int attack_at(int x, int y);
         int attack_at(const tripoint &p);
 
         /**
-         * Try to smash/bash/destroy your way through the terrain at (x, y).
+         * Try to smash/bash/destroy your way through the terrain at p.
          *
          * @return 1 if we destroyed something, 0 otherwise.
          */

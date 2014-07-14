@@ -25,14 +25,7 @@ bool monster::wander()
 }
 
 bool monster::can_move_to(int x, int y) const { return can_move_to(tripoint(x, y, posz())); }
-bool monster::will_reach(int x, int y) { return will_reach(tripoint(x, y, posz())); } // Do we have plans to get to (x, y)?
-int  monster::turns_to_reach(int x, int y) { return turns_to_reach(tripoint(x, y, posz())); } // How long will it take?
-void monster::set_dest(int x, int y, int &t) { set_dest(tripoint(x, y, posz()), t); } // Go in a straight line to (x, y)
-void monster::wander_to(int x, int y, int f) { wander_to(tripoint(x, y, posz()), f); } // Try to get to (x, y), we don't know
-int monster::calc_movecost(int x1, int y1, int x2, int y2) const { return calc_movecost(tripoint(x1, y1, posz()), tripoint(x2, y2, posz())); }
 int monster::move_to(int x, int y, bool force) { return move_to(tripoint(x, y, posz()), force); }
-int monster::attack_at(int x, int y) { return attack_at(tripoint(x, y, posz())); }
-int monster::bash_at(int x, int y) { return bash_at(tripoint(x, y, posz())); }
 
 bool monster::can_move_to(const tripoint &p) const
 {
@@ -360,11 +353,11 @@ void monster::move()
     // Set attitude to attitude to our current target
     monster_attitude current_attitude = attitude( nullptr );
     if( !plans.empty() ) {
-        if (plans.back().x == g->u.posx() && plans.back().y == g->u.posy()) {
+        if (plans.back() == g->u.pos()) {
             current_attitude = attitude( &(g->u) );
         } else {
             for( auto &i : g->active_npc ) {
-                if( plans.back().x == i->posx() && plans.back().y == i->posy() ) {
+                if( plans.back() == i->pos() ) {
                     current_attitude = attitude( i );
                 }
             }
@@ -378,15 +371,15 @@ void monster::move()
         return;
     }
 
-    int mondex = !plans.empty() ? g->mon_at( plans[0].x, plans[0].y ) : -1;
+    int mondex = !plans.empty() ? g->mon_at( plans[0] ) : -1;
     auto mon_att = mondex != -1 ? attitude_to( g->zombie( mondex ) ) : A_HOSTILE;
 
     if( !plans.empty() &&
         ( mon_att == A_HOSTILE || has_flag(MF_ATTACKMON) ) &&
-        ( can_move_to( plans[0].x, plans[0].y ) ||
-          ( plans[0].x == g->u.posx() && plans[0].y == g->u.posy() ) ||
+        ( can_move_to( plans[0] ) ||
+          ( plans[0] == g->u.pos() ) ||
           ( ( has_flag( MF_BASHES ) || has_flag( MF_BORES ) ) &&
-          g->m.bash_rating( bash_estimate(), plans[0].x, plans[0].y) >= 0 ) ) ) {
+          g->m.bash_rating( bash_estimate(), plans[0] ) >= 0 ) ) ) {
         // CONCRETE PLANS - Most likely based on sight
         next = plans[0];
         moved = true;
