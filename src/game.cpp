@@ -568,7 +568,9 @@ void game::setup()
     // Set the scent map to 0
     for( auto &elem : grscent ) {
         for( auto &elem_j : elem ) {
-            elem_j = 0;
+            for( auto &elem_z : elem_j ) {
+                elem_z = 0;
+            }
         }
     }
 
@@ -4063,18 +4065,18 @@ bool game::handle_action()
 
 int& game::scent(const tripoint &p)
 {
-    // TODO: Z  z-component is ignored
-    return scent(p.x, p.y);
+    if (p.x < (SEEX * MAPSIZE / 2) - SCENT_RADIUS || p.x >= (SEEX * MAPSIZE / 2) + SCENT_RADIUS ||
+        p.z < -MAPHEIGHT || p.z > MAPHEIGHT ||
+      p.y < (SEEY * MAPSIZE / 2) - SCENT_RADIUS || p.y >= (SEEY * MAPSIZE / 2) + SCENT_RADIUS) {
+        nulscent = 0;
+        return nulscent; // Out-of-bounds - null scent
+    }
+    return grscent[p.x][p.y][p.z + MAPHEIGHT];
 }
 
 int &game::scent(int x, int y)
 {
-    if (x < (SEEX * MAPSIZE / 2) - SCENT_RADIUS || x >= (SEEX * MAPSIZE / 2) + SCENT_RADIUS ||
-        y < (SEEY * MAPSIZE / 2) - SCENT_RADIUS || y >= (SEEY * MAPSIZE / 2) + SCENT_RADIUS) {
-        nulscent = 0;
-        return nulscent; // Out-of-bounds - null scent
-    }
-    return grscent[x][y];
+    return scent(tripoint(x, y, 0));
 }
 
 void game::update_scent()
@@ -4115,9 +4117,10 @@ void game::update_scent()
     // stability. This is essentially a decimal number * 1000.
 
     if (!u.has_active_bionic("bio_scent_mask")) {
-        grscent[u.posx][u.posy] = u.scent;
+        grscent[u.posx][u.posy][MAPHEIGHT] = u.scent;
     }
 
+    const int z = rng(-MAPHEIGHT, +MAPHEIGHT);
     // Sum neighbors in the y direction.  This way, each square gets called 3 times instead of 9
     // times. This cost us an extra loop here, but it also eliminated a loop at the end, so there
     // is a net performance improvement over the old code. Could probably still be better.
@@ -4129,12 +4132,12 @@ void game::update_scent()
             // cache expensive flag checks, once per tile.
             if (y == scentmap_miny) {  // Setting y-1 y-0, when we are at the top row...
                 for (int i = y - 1; i <= y; ++i) {
-                    blocks_scent[x][i] = m.has_flag(TFLAG_WALL, x, i);
-                    reduces_scent[x][i] = m.has_flag(TFLAG_REDUCE_SCENT, x, i);
+                    blocks_scent[x][i] = m.has_flag(TFLAG_WALL, tripoint(x, i, z));
+                    reduces_scent[x][i] = m.has_flag(TFLAG_REDUCE_SCENT, tripoint(x, i, z));
                 }
             }
-            blocks_scent[x][y + 1] = m.has_flag(TFLAG_WALL, x, y + 1); // ...so only y+1 here.
-            reduces_scent[x][y + 1] = m.has_flag(TFLAG_REDUCE_SCENT, x, y + 1);
+            blocks_scent[x][y + 1] = m.has_flag(TFLAG_WALL, tripoint(x, y + 1, z)); // ...so only y+1 here.
+            reduces_scent[x][y + 1] = m.has_flag(TFLAG_REDUCE_SCENT, tripoint(x, y + 1, z));
 
             // remember the sum of the scent val for the 3 neighboring squares that can defuse into
             sum_3_scent_y[y][x] = 0;
@@ -4143,10 +4146,10 @@ void game::update_scent()
                 if (not blocks_scent[x][i]) {
                     if (reduces_scent[x][i]) {
                         // only 20% of scent can diffuse on REDUCE_SCENT squares
-                        sum_3_scent_y[y][x] += 2 * grscent[x][i];
+                        sum_3_scent_y[y][x] += 2 * grscent[x][i][z+MAPHEIGHT];
                         squares_used_y[y][x] += 2;
                     } else {
-                        sum_3_scent_y[y][x] += 10 * grscent[x][i];
+                        sum_3_scent_y[y][x] += 10 * grscent[x][i][z+MAPHEIGHT];
                         squares_used_y[y][x] += 10;
                     }
                 }
@@ -4170,13 +4173,13 @@ void game::update_scent()
                 }
                 int temp_scent;
                 // take the old scent and subtract what diffuses out
-                temp_scent = grscent[x][y] * (10 * 1000 - squares_used * this_diffusivity);
+                temp_scent = grscent[x][y][z+MAPHEIGHT] * (10 * 1000 - squares_used * this_diffusivity);
                 // neighboring walls and reduce_scent squares absorb some scent
-                temp_scent -= grscent[x][y] * this_diffusivity * (90 - squares_used) / 5;
+                temp_scent -= grscent[x][y][z+MAPHEIGHT] * this_diffusivity * (90 - squares_used) / 5;
                 // we've already summed neighboring scent values in the y direction in the previous
                 // loop. Now we do it for the x direction, multiply by diffusion, and this is what
                 // diffuses into our current square.
-                grscent[x][y] =
+                grscent[x][y][z+MAPHEIGHT] =
                     (temp_scent
                      + this_diffusivity * (sum_3_scent_y[y][x - 1]
                                            + sum_3_scent_y[y][x]
@@ -4184,18 +4187,18 @@ void game::update_scent()
                     ) / (1000 * 10);
 
 
-                const int fslime = m.get_field_strength(point(x, y), fd_slime) * 10;
-                if (fslime > 0 && grscent[x][y] < fslime) {
-                    grscent[x][y] = fslime;
+                const int fslime = m.get_field_strength(tripoint(x, y, z), fd_slime) * 10;
+                if (fslime > 0 && grscent[x][y][z+MAPHEIGHT] < fslime) {
+                    grscent[x][y][z+MAPHEIGHT] = fslime;
                 }
-                if (grscent[x][y] > 10000) {
+                if (grscent[x][y][z+MAPHEIGHT] > 10000) {
                     dbg(D_ERROR) << "game:update_scent: Wacky scent at " << x << ","
-                                 << y << " (" << grscent[x][y] << ")";
-                    debugmsg("Wacky scent at %d, %d (%d)", x, y, grscent[x][y]);
-                    grscent[x][y] = 0; // Scent should never be higher
+                                 << y << " (" << grscent[x][y][z+MAPHEIGHT] << ")";
+                    debugmsg("Wacky scent at %d, %d (%d)", x, y, grscent[x][y][z+MAPHEIGHT]);
+                    grscent[x][y][z+MAPHEIGHT] = 0; // Scent should never be higher
                 }
             } else { // this cell blocks scent
-                grscent[x][y] = 0;
+                grscent[x][y][z+MAPHEIGHT] = 0;
             }
         }
     }
@@ -14034,22 +14037,15 @@ void game::update_map(int &x, int &y, int z)
     }
 
     // Shift scent
-    if (shiftz == 0) {
-    unsigned int newscent[SEEX * MAPSIZE][SEEY * MAPSIZE];
+    unsigned int newscent[SEEX * MAPSIZE][SEEY * MAPSIZE][MAPHEIGHT * 2 + 1];
     for (int i = 0; i < SEEX * MAPSIZE; i++) {
         for (int j = 0; j < SEEY * MAPSIZE; j++) {
-            newscent[i][j] = scent(i + (shiftx * SEEX), j + (shifty * SEEY));
+            for (int k = 0; k < MAPHEIGHT * 2 + 1; k++) {
+                newscent[i][j][k] = scent(tripoint(i + (shiftx * SEEX), j + (shifty * SEEY), k + shiftz));
         }
     }
-    for (int i = 0; i < SEEX * MAPSIZE; i++) {
-        for (int j = 0; j < SEEY * MAPSIZE; j++) {
-            scent(i, j) = newscent[i][j];
-        }
     }
-    } else {
-        // Z-level change, only reset the scent
-        memset(grscent, 0x00, sizeof(grscent));
-    }
+    memcpy(grscent, newscent, sizeof(grscent));
 
     // Make sure map cache is consistent since it may have shifted.
     m.build_map_cache();

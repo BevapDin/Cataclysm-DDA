@@ -733,7 +733,7 @@ class game
         calendar nextspawn; // The turn on which monsters will spawn next.
         calendar nextweather; // The turn on which weather will shift next.
         int next_npc_id, next_faction_id, next_mission_id; // Keep track of UIDs
-        int grscent[SEEX *MAPSIZE][SEEY *MAPSIZE];   // The scent map
+        int grscent[SEEX * MAPSIZE][SEEY * MAPSIZE][MAPHEIGHT * 2 + 1]; // The scent map
         //int monmap[SEEX * MAPSIZE][SEEY * MAPSIZE]; // Temp monster map, for mon_at()
         int nulscent;    // Returned for OOB scent checks
         std::list<event> events;         // Game events to be processed
