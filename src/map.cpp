@@ -1776,14 +1776,14 @@ bool map::flammable_items_at(const tripoint &p)
     return false;
 }
 
-bool map::moppable_items_at(const int x, const int y)
+bool map::moppable_items_at(const tripoint &p)
 {
-    for (auto &i : i_at(x, y)) {
+    for (auto &i : i_at(p)) {
         if (i.made_of(LIQUID)) {
             return true;
         }
     }
-    const field &fld = field_at(x, y);
+    const field &fld = field_at(p);
     if(fld.findField(fd_blood) != 0 || fld.findField(fd_blood_veggy) != 0 ||
           fld.findField(fd_blood_insect) != 0 || fld.findField(fd_blood_invertebrate) != 0
           || fld.findField(fd_gibs_flesh) != 0 || fld.findField(fd_gibs_veggy) != 0 ||
@@ -1793,7 +1793,7 @@ bool map::moppable_items_at(const int x, const int y)
         return true;
     }
     int vpart;
-    vehicle *veh = veh_at(x, y, vpart);
+    vehicle *veh = veh_at(p, vpart);
     if(veh != 0) {
         std::vector<int> parts_here = veh->parts_at_relative(veh->parts[vpart].mount_dx, veh->parts[vpart].mount_dy);
         for(auto &i : parts_here) {
@@ -1855,27 +1855,27 @@ bool map::has_nearby_fire(int x, int y, int radius)
     return false;
 }
 
-void map::mop_spills(const int x, const int y) {
-    for( auto it = i_at(x, y).begin(); it != i_at(x, y).end(); ) {
+void map::mop_spills(const tripoint &p) {
+    for( auto it = i_at(p).begin(); it != i_at(p).end(); ) {
         if( it->made_of(LIQUID) ) {
-            it = i_rem( x, y, it );
+            it = i_rem( p, it );
         } else {
             it++;
         }
     }
-    remove_field( x, y, fd_blood );
-    remove_field( x, y, fd_blood_veggy );
-    remove_field( x, y, fd_blood_insect );
-    remove_field( x, y, fd_blood_invertebrate );
-    remove_field( x, y, fd_gibs_flesh );
-    remove_field( x, y, fd_gibs_veggy );
-    remove_field( x, y, fd_gibs_insect );
-    remove_field( x, y, fd_gibs_invertebrate );
-    remove_field( x, y, fd_bile );
-    remove_field( x, y, fd_slime );
-    remove_field( x, y, fd_sludge );
+    remove_field( p, fd_blood );
+    remove_field( p, fd_blood_veggy );
+    remove_field( p, fd_blood_insect );
+    remove_field( p, fd_blood_invertebrate );
+    remove_field( p, fd_gibs_flesh );
+    remove_field( p, fd_gibs_veggy );
+    remove_field( p, fd_gibs_insect );
+    remove_field( p, fd_gibs_invertebrate );
+    remove_field( p, fd_bile );
+    remove_field( p, fd_slime );
+    remove_field( p, fd_sludge );
     int vpart;
-    vehicle *veh = veh_at(x, y, vpart);
+    vehicle *veh = veh_at(p, vpart);
     if(veh != 0) {
         std::vector<int> parts_here = veh->parts_at_relative( veh->parts[vpart].mount_dx,
                                                               veh->parts[vpart].mount_dy );

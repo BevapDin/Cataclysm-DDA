@@ -476,7 +476,7 @@ class map
  bool is_outside(const tripoint &p) const;
  bool flammable_items_at(const int x, const int y);
  bool flammable_items_at(const tripoint &p);
- bool moppable_items_at(const int x, const int y);
+ bool moppable_items_at(const tripoint &p);
  point random_outdoor_tile();
 // mapgen
 
@@ -538,7 +538,7 @@ void add_corpse(int x, int y);
  bool marlossify(const tripoint &p);
  bool has_adjacent_furniture(const int x, const int y);
  bool has_adjacent_furniture(const tripoint &p);
- void mop_spills(const int x, const int y);
+ void mop_spills(const tripoint &p);
 
  // Signs
  const std::string get_signage(const int x, const int y) const;
