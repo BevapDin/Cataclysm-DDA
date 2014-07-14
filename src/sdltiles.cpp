@@ -643,8 +643,7 @@ void curses_drawwindow(WINDOW *win)
         tilecontext->draw(
             win->x * fontwidth,
             win->y * fontheight,
-            g->ter_view_x,
-            g->ter_view_y,
+            tripoint(g->ter_view_x, g->ter_view_y, g->ter_view_z),
             TERRAIN_WINDOW_TERM_WIDTH * font->fontwidth,
             TERRAIN_WINDOW_TERM_HEIGHT * font->fontheight);
 

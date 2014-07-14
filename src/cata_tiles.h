@@ -198,7 +198,7 @@ class cata_tiles
         void add_ascii_subtile(tile_type *curr_tile, const std::string &t_id, int fg, const std::string &s_id);
     public:
         /** Draw to screen */
-        void draw(int destx, int desty, int centerx, int centery, int width, int height);
+        void draw(int destx, int desty, const tripoint &center, int width, int height);
     protected:
         /** How many rows and columns of tiles fit into given dimensions **/
         void get_window_tile_counts(const int width, const int height, int &columns, int &rows) const;
@@ -218,20 +218,20 @@ class cata_tiles
 
         /* Tile Picking */
         void get_tile_values(const int t, const int *tn, int &subtile, int &rotation);
-        void get_wall_values(const int x, const int y, const long vertical_wall_symbol,
+        void get_wall_values(const tripoint &p, const long vertical_wall_symbol,
                              const long horizontal_wall_symbol, int &subtile, int &rotation);
-        void get_terrain_orientation(int x, int y, int &rota, int &subtype);
+        void get_terrain_orientation(const tripoint &p, int &rota, int &subtype);
         void get_rotation_and_subtile(const char val, const int num_connects, int &rota, int &subtype);
 
         /** Drawing Layers */
         bool draw_lighting(int x, int y, LIGHTING l);
-        bool draw_terrain(int x, int y);
-        bool draw_furniture(int x, int y);
-        bool draw_trap(int x, int y);
-        bool draw_field_or_item(int x, int y);
-        bool draw_vpart(int x, int y);
-        bool draw_entity( const Creature &critter, int x, int y );
-        void draw_entity_with_overlays( const player &p, int x, int y );
+        bool draw_terrain( tripoint p );
+        bool draw_furniture( tripoint p );
+        bool draw_trap( tripoint p );
+        bool draw_field_or_item( tripoint p );
+        bool draw_vpart( tripoint p );
+        bool draw_entity( const Creature &critter, tripoint p );
+        void draw_entity_with_overlays( const player &p, tripoint p );
 
         bool draw_item_highlight(int x, int y);
 
@@ -286,7 +286,7 @@ class cata_tiles
         void get_tile_information(std::string dir_path, std::string &json_path, std::string &tileset_path);
         /** Lighting */
         void init_light();
-        LIGHTING light_at(int x, int y);
+        LIGHTING light_at(const tripoint &p);
 
         /** Variables */
         SDL_Renderer *renderer;
