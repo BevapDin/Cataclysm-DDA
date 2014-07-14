@@ -33,7 +33,7 @@ void iuse_transform::load( JsonObject &obj )
     obj.read( "moves", moves );
 }
 
-long iuse_transform::use(player *p, item *it, bool t, point /*pos*/) const
+long iuse_transform::use(player* p, item* it, bool t, tripoint/*pos*/) const
 {
     if( t ) {
         // Invoked from active item processing, do nothing.
@@ -107,7 +107,7 @@ void auto_iuse_transform::load( JsonObject &obj )
     obj.read( "non_interactive_msg", non_interactive_msg );
 }
 
-long auto_iuse_transform::use(player *p, item *it, bool t, point pos) const
+long auto_iuse_transform::use(player *p, item *it, bool t, tripoint pos) const
 {
     if (t) {
         if (!when_underwater.empty() && p != NULL && p->is_underwater()) {
@@ -142,7 +142,7 @@ iuse_actor *explosion_iuse::clone() const
 }
 
 // defined in iuse.cpp
-extern std::vector<point> points_for_gas_cloud(const point &center, int radius);
+extern std::vector<tripoint> points_for_gas_cloud(tripoint center, int radius);
 
 void explosion_iuse::load( JsonObject &obj )
 {
@@ -169,7 +169,7 @@ void explosion_iuse::load( JsonObject &obj )
     obj.read( "no_deactivate_msg", no_deactivate_msg );
 }
 
-long explosion_iuse::use(player *p, item *it, bool t, point pos) const
+long explosion_iuse::use(player *p, item *it, bool t, tripoint pos) const
 {
     if (t) {
         if (sound_volume >= 0) {
@@ -196,11 +196,10 @@ long explosion_iuse::use(player *p, item *it, bool t, point pos) const
         g->flashbang(pos.x, pos.y, flashbang_player_immune);
     }
     if (fields_radius >= 0 && fields_type != fd_null) {
-        std::vector<point> gas_sources = points_for_gas_cloud(pos, fields_radius);
-        for( auto &gas_source : gas_sources ) {
-            const point &p = gas_source;
+        std::vector<tripoint> gas_sources = points_for_gas_cloud(pos, fields_radius);
+        for( auto &p : gas_sources ) {
             const int dens = rng(fields_min_density, fields_max_density);
-            g->m.add_field(p.x, p.y, fields_type, dens);
+            g->m.add_field(p, fields_type, dens);
         }
     }
     if (scrambler_blast_radius >= 0) {
@@ -239,7 +238,7 @@ void unfold_vehicle_iuse::load( JsonObject &obj )
     obj.read( "tools_needed", tools_needed );
 }
 
-long unfold_vehicle_iuse::use(player *p, item *it, bool /*t*/, point /*pos*/) const
+long unfold_vehicle_iuse::use(player *p, item *it, bool /*t*/, tripoint/*pos*/) const
 {
     if (p->is_underwater()) {
         p->add_msg_if_player(m_info, _("You can't do that while underwater."));
@@ -334,7 +333,7 @@ void consume_drug_iuse::load( JsonObject &obj )
     obj.read( "fields_produced", fields_produced );
 }
 
-long consume_drug_iuse::use(player *p, item *it, bool, point) const
+long consume_drug_iuse::use(player *p, item *it, bool, tripoint) const
 {
     // Check prerequisites first.
     for( auto tool = tools_needed.cbegin(); tool != tools_needed.cend(); ++tool ) {
@@ -411,7 +410,7 @@ int delayed_transform_iuse::time_to_do( const item &it ) const
     return it.bday + transform_age - calendar::turn.get_turn();
 }
 
-long delayed_transform_iuse::use( player *p, item *it, bool t, point pos ) const
+long delayed_transform_iuse::use( player *p, item *it, bool t, tripoint pos ) const
 {
     if( time_to_do( *it ) > 0 ) {
         p->add_msg_if_player( m_info, _( not_ready_msg.c_str() ) );
@@ -439,7 +438,7 @@ void place_monster_iuse::load( JsonObject &obj )
     obj.read( "skill2", skill2 );
 }
 
-long place_monster_iuse::use( player *p, item *it, bool, point ) const
+long place_monster_iuse::use( player *p, item *it, bool, tripoint) const
 {
     monster newmon( GetMType( mtype_id ) );
     point target;
@@ -542,7 +541,7 @@ bool has_powersource(const item &i, const player &p) {
     return p.has_charges( "UPS", 1 );
 }
 
-long ups_based_armor_actor::use( player *p, item *it, bool t, point ) const
+long ups_based_armor_actor::use( player *p, item *it, bool t, tripoint ) const
 {
     if( p == nullptr ) {
         return 0;
@@ -592,7 +591,7 @@ void pick_lock_actor::load( JsonObject &obj )
     pick_quality = obj.get_int( "pick_quality" );
 }
 
-long pick_lock_actor::use( player *p, item *it, bool, point ) const
+long pick_lock_actor::use( player *p, item *it, bool, tripoint ) const
 {
     if( p == nullptr || p->is_npc() ) {
         return 0;
@@ -699,7 +698,7 @@ void reveal_map_actor::reveal_targets( const std::string &target, int reveal_dis
     }
 }
 
-long reveal_map_actor::use( player *p, item *it, bool, point ) const
+long reveal_map_actor::use( player *p, item *it, bool, tripoint ) const
 {
     if( it->already_used_by_player( *p ) ) {
         p->add_msg_if_player( _( "There isn't anything new on the %s." ), it->tname().c_str() );
@@ -731,7 +730,7 @@ iuse_actor *firestarter_actor::clone() const
     return new firestarter_actor( *this );
 }
 
-bool firestarter_actor::prep_firestarter_use( const player *p, const item *it, point &pos )
+bool firestarter_actor::prep_firestarter_use( const player *p, const item *it, tripoint &pos )
 {
     if( (it->charges == 0) && (!it->has_flag("LENS"))){ // lenses do not need charges
         return false;
@@ -763,7 +762,7 @@ bool firestarter_actor::prep_firestarter_use( const player *p, const item *it, p
     }
 }
 
-void firestarter_actor::resolve_firestarter_use( const player *p, const item *, const point &pos )
+void firestarter_actor::resolve_firestarter_use( const player *p, const item *, const tripoint &pos )
 {
     if( g->m.add_field( pos, fd_fire, 1, 100 ) ) {
         p->add_msg_if_player(_("You successfully light a fire."));
@@ -771,7 +770,7 @@ void firestarter_actor::resolve_firestarter_use( const player *p, const item *, 
 }
 
 // TODO: Move prep_firestarter_use here
-long firestarter_actor::use( player *p, item *it, bool t, point pos ) const
+long firestarter_actor::use( player *p, item *it, bool t, tripoint pos ) const
 {
     if (it->has_flag("REFILLABLE_LIGHTER")) {
         if( p->is_underwater() ) {
@@ -818,7 +817,7 @@ long firestarter_actor::use( player *p, item *it, bool t, point pos ) const
     return 0;
 }
 
-bool firestarter_actor::can_use( const player* p, const item*, bool, const point& ) const
+bool firestarter_actor::can_use( const player* p, const item*, bool, const tripoint& ) const
 {
     if( p->is_underwater() ) {
         return false;
@@ -854,7 +853,7 @@ int extended_firestarter_actor::calculate_time_for_lens_fire( const player *p, f
     return int(moves_base * moves_modifier);
 }
 
-long extended_firestarter_actor::use( player *p, item *it, bool, point pos ) const
+long extended_firestarter_actor::use( player *p, item *it, bool, tripoint pos ) const
 {
     if( need_sunlight ) {
         // Needs the correct weather, light and to be outside.
@@ -870,7 +869,7 @@ long extended_firestarter_actor::use( player *p, item *it, bool, point pos ) con
                 p->assign_activity( ACT_START_FIRE, turns, -1, p->get_item_position(it), it->tname() );
                 // Keep natural_light_level for comparing throughout the activity.
                 p->activity.values.push_back( g->natural_light_level() );
-                p->activity.placement = pos;
+                p->activity.placement = point(pos.x, pos.y); // TODO: Z
                 p->practice("survival", 5);
             }
         } else {
@@ -895,7 +894,7 @@ long extended_firestarter_actor::use( player *p, item *it, bool, point pos ) con
             const int turns = int( moves_base * moves_modifier );
             p->add_msg_if_player(m_info, _("At your skill level, it will take around %d minutes to light a fire."), turns / 1000);
             p->assign_activity(ACT_START_FIRE, turns, -1, p->get_item_position(it), it->tname());
-            p->activity.placement = pos;
+            p->activity.placement = point(pos.x, pos.y); // TODO: Z
             p->practice("survival", 10);
             it->charges -= it->type->charges_to_use() * round(moves_modifier);
             return 0;
@@ -904,7 +903,7 @@ long extended_firestarter_actor::use( player *p, item *it, bool, point pos ) con
     return 0;
 }
 
-bool extended_firestarter_actor::can_use( const player* p, const item* it, bool t, const point& pos ) const
+bool extended_firestarter_actor::can_use( const player* p, const item* it, bool t, const tripoint& pos ) const
 {
     if( !firestarter_actor::can_use( p, it, t, pos ) ) {
         return false;

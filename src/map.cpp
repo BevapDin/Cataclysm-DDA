@@ -3446,20 +3446,22 @@ void map::process_items( bool active, T processor, std::string signal )
 {
     for( int gx = 0; gx < my_MAPSIZE; gx++ ) {
         for( int gy = 0; gy < my_MAPSIZE; gy++ ) {
-            submap *const current_submap = get_submap_at_grid( point( gx, gy ) );
+            for (int gz = my_ZMIN; gz <= my_ZMAX; gz++) {
+            submap *const current_submap = get_submap_at_grid( tripoint( gx, gy, gz ) );
             // Vehicles first in case they get blown up and drop active items on the map.
             if( !current_submap->vehicles.empty() ) {
                 process_items_in_vehicles(current_submap, processor, signal);
             }
             if( !active || !current_submap->active_items.empty() ) {
-                process_items_in_submap(current_submap, gx, gy, processor, signal);
+                process_items_in_submap(current_submap, gx, gy, gz, processor, signal);
+            }
             }
         }
     }
 }
 
 template<typename T>
-void map::process_items_in_submap( submap *const current_submap, int gridx, int gridy, T processor,
+void map::process_items_in_submap( submap *const current_submap, int gridx, int gridy, int gridz, T processor,
                                    std::string signal )
 {
     // Get a COPY of the active item list for this submap.
@@ -3468,7 +3470,7 @@ void map::process_items_in_submap( submap *const current_submap, int gridx, int 
     std::list<item_reference> active_items = current_submap->active_items.get();
     for( auto &active_item : active_items ) {
         tripoint map_location( gridx * SEEX + active_item.location.x,
-                            gridy * SEEY + active_item.location.y, 0 );
+                            gridy * SEEY + active_item.location.y, gridz );
         auto items = i_at( map_location );
         if( !current_submap->active_items.has( active_item ) ) {
             continue;
@@ -3520,10 +3522,7 @@ void map::process_items_in_vehicle( vehicle *cur_veh, submap *const current_subm
             vehicle_part &vp = cur_veh->parts[part_index_candidate];
             if( active_item.location == vp.mount ) {
                 part_index = part_index_candidate;
-                auto tmp = cur_veh->global_pos();
-                tmp.x += vp.precalc[0].x;
-                tmp.y += vp.precalc[0].y;
-                item_location = tmp;
+                item_location = cur_veh->global_pos() + vp.precalc[0];
                 items = cur_veh->get_items( part_index );
                 break;
             }
@@ -3816,8 +3815,6 @@ std::list<std::pair<tripoint, item *> > map::get_rc_items( int x, int y, int z )
 {
     std::list<std::pair<tripoint, item *> > rc_pairs;
     tripoint pos;
-    (void)z;
-    pos.z = abs_sub.z;
     for( pos.x = 0; pos.x < SEEX * MAPSIZE; pos.x++ ) {
         if( x != -1 && x != pos.x ) {
             continue;
@@ -3826,13 +3823,18 @@ std::list<std::pair<tripoint, item *> > map::get_rc_items( int x, int y, int z )
             if( y != -1 && y != pos.y ) {
                 continue;
             }
-            auto items = i_at( pos.x, pos.y );
+            for( pos.z = my_ZMIN; pos.z <= my_ZMAX; pos.z++ ) {
+            if( z != -1 && z != pos.z ) {
+                continue;
+            }
+            auto items = i_at( pos );
             for( auto &elem : items ) {
                 if( elem.has_flag( "RADIO_ACTIVATION" ) || elem.has_flag( "RADIO_CONTAINER" ) ) {
                     rc_pairs.push_back( std::make_pair( pos, &( elem ) ) );
                 }
             }
         }
+    }
     }
 
     return rc_pairs;
@@ -5758,7 +5760,7 @@ float map::light_transparency(const int x, const int y) const
 
 float map::light_transparency(const tripoint &p) const
 {
-    return transparency_cache[x][y];
+    return transparency_cache[p.x][p.y];
 }
 
 void map::build_outside_cache()

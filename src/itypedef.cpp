@@ -41,7 +41,7 @@ const use_function *itype::get_use( const std::string &iuse_name ) const
     return nullptr;
 }
 
-int itype::invoke( player *p, item *it, bool active, point pos )
+int itype::invoke( player *p, item *it, bool active, const tripoint &pos )
 {
     int charges_to_use = 0;
     for( auto method = use_methods.begin();

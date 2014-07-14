@@ -721,7 +721,7 @@ bool player::activate_bionic(int b, bool eff_only)
         moves -= 100;
     } else if(bio.id == "bio_lockpick") {
         item tmp_item( "pseuso_bio_picklock", 0 );
-        if( tmp_item.type->invoke( this, &tmp_item, false, point( posx(), posy() ) ) == 0 ) {
+        if( tmp_item.type->invoke( this, &tmp_item, false, pos() ) == 0 ) {
             power_level += bionics["bio_lockpick"]->power_activate;
             return false;
         }

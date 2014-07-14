@@ -998,7 +998,7 @@ private:
  template<typename T>
      void process_items( bool active, T processor, std::string signal );
  template<typename T>
-     void process_items_in_submap( submap *const current_submap, int gridx, int gridy,
+     void process_items_in_submap( submap *const current_submap, int gridx, int gridy, int gridz,
                                    T processor, std::string signal );
  template<typename T>
      void process_items_in_vehicles( submap *const current_submap, T processor, std::string signal);

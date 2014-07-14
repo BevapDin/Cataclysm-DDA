@@ -610,7 +610,7 @@ public:
     bool has_use() const;
     bool can_use( const std::string &iuse_name ) const;
     const use_function *get_use( const std::string &iuse_name ) const;
-    int invoke( player *p, item *it, bool active, point pos );
+    int invoke( player *p, item *it, bool active, const tripoint &pos );
 
     std::vector<use_function> use_methods;// Special effects of use
 
