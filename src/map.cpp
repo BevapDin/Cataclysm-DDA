@@ -4458,6 +4458,9 @@ bool map::blocks_vertical_air_down(const tripoint &p) const {
     if (ter.movecost == 0) {
         return true;
     }
+    if (ter.has_flag("FLAT")) {
+        return true;
+    }
     // TODO: Z
 #if 0
     if (!ter.has_flag("C")) { // no no floor -> floor
@@ -4470,6 +4473,9 @@ bool map::blocks_vertical_air_down(const tripoint &p) const {
     }
     const furn_t &furn = furnlist[fid];
     if (furn.movecost == 0) {
+        return true;
+    }
+    if (furn.has_flag("FLAT")) {
         return true;
     }
     // TODO: Z

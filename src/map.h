@@ -806,6 +806,10 @@ void add_corpse(int x, int y);
  void rotate(const int turns);// Rotates the current map 90*turns degress clockwise
                               // Useful for houses, shops, etc
  void add_road_vehicles(bool city, int facing);
+ bool blocks_vertical_view_down(const tripoint &p) const;
+ bool blocks_vertical_view_up(const tripoint &p) const;
+ bool blocks_vertical_air_down(const tripoint &p) const;
+ bool blocks_vertical_air_up(const tripoint &p) const;
 
 protected:
         void saven( tripoint gp );
@@ -978,10 +982,6 @@ private:
          */
         std::vector<submap*> grid;
  std::map<trap_id, std::set<point> > traplocs;
- bool blocks_vertical_view_down(const tripoint &p) const;
- bool blocks_vertical_view_up(const tripoint &p) const;
- bool blocks_vertical_air_down(const tripoint &p) const;
- bool blocks_vertical_air_up(const tripoint &p) const;
  int z_level_down_xx(const tripoint &p) const;
  int z_level_up_xx(const tripoint &p) const;
  void spread_gas(field_entry *cur, const tripoint &here, field_id curtype, int percent_spread, int outdoor_age_speedup);
