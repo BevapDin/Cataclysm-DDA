@@ -198,13 +198,11 @@ void npc::move()
 void npc::execute_action(npc_action action, int target)
 {
     int oldmoves = moves;
-    int tarx = posx(), tary = posy();
+    tripoint targ = pos();
     if (target == -2) {
-        tarx = g->u.posx();
-        tary = g->u.posy();
+        targ = g->u.pos();
     } else if (target >= 0) {
-        tarx = g->zombie(target).posx();
-        tary = g->zombie(target).posy();
+        targ = g->zombie(target).pos();
     }
     /*
       debugmsg("%s ran execute_action() with target = %d! Action %s",
@@ -308,11 +306,11 @@ void npc::execute_action(npc_action action, int target)
 
     case npc_flee:
         // TODO: More intelligent fleeing
-        move_away_from(tarx, tary);
+        move_away_from(targ.x, targ.y);
         break;
 
     case npc_melee:
-        update_path(tarx, tary);
+        update_path(targ.x, targ.y);
         if (path.size() > 1) {
             move_to_next();
         } else if (path.size() == 1) {
@@ -327,11 +325,11 @@ void npc::execute_action(npc_action action, int target)
         break;
 
     case npc_shoot:
-        fire_gun( tarx, tary, false);
+        fire_gun( targ, false);
         break;
 
     case npc_shoot_burst:
-        fire_gun( tarx, tary, true);
+        fire_gun( targ, true);
         break;
 
     case npc_alt_attack:
@@ -1599,19 +1597,17 @@ void npc::wield_best_melee()
 void npc::alt_attack(int target)
 {
     itype_id which = "null";
-    int tarx, tary;
+    tripoint targ;
     if (target == TARGET_PLAYER) {
-        tarx = g->u.posx();
-        tary = g->u.posy();
+        targ = g->u.pos();
     } else if (target >= 0) {
-        tarx = g->zombie(target).posx();
-        tary = g->zombie(target).posy();
+        targ = g->zombie(target).pos();
     } else {
         debugmsg("npc::alt_attack() called with target = %d", target);
         move_pause();
         return;
     }
-    int dist = rl_dist(posx(), posy(), tarx, tary);
+    int dist = rl_dist(pos(), targ);
     /* ALT_ATTACK_ITEMS is an array which stores the itype_id of all alternate
      * items, from least to most important.
      * See npc.h for definition of ALT_ATTACK_ITEMS
@@ -1634,7 +1630,7 @@ void npc::alt_attack(int target)
                 melee_monster(target);
             }
         } else {
-            move_to(tarx, tary);
+            move_to(targ.x, targ.y);
         }
     }
 
@@ -1658,15 +1654,15 @@ void npc::alt_attack(int target)
         activate_item(weapon_index);
     } else { // We are throwing it!
 
-        std::vector<point> trajectory;
+        std::vector<tripoint> trajectory;
         int linet, light = g->light_level();
 
-        if (dist <= confident_range(weapon_index) && wont_hit_friend(tarx, tary, weapon_index)) {
+        if (dist <= confident_range(weapon_index) && wont_hit_friend(targ.x, targ.y, weapon_index)) {
 
-            if (g->m.sees(posx(), posy(), tarx, tary, light, linet)) {
-                trajectory = line_to(posx(), posy(), tarx, tary, linet);
+            if (g->m.sees(pos(), targ, light, linet)) {
+                trajectory = line_to(pos(), targ, linet);
             } else {
-                trajectory = line_to(posx(), posy(), tarx, tary, 0);
+                trajectory = line_to(pos(), targ, 0);
             }
             moves -= 125;
             if (g->u.sees( *this )) {
@@ -1679,14 +1675,14 @@ void npc::alt_attack(int target)
                 stack_size = used->charges;
                 used->charges = 1;
             }
-            g->throw_item(*this, tarx, tary, *used, trajectory);
+            g->throw_item(*this, targ, *used, trajectory);
             // Throw a single charge of a stacking object.
             if( stack_size == -1 || stack_size == 1 ) {
                 i_rem(weapon_index);
             } else {
                 used->charges = stack_size - 1;
             }
-        } else if (!wont_hit_friend(tarx, tary, weapon_index)) {// Danger of friendly fire
+        } else if (!wont_hit_friend(targ.x, targ.y, weapon_index)) {// Danger of friendly fire
 
             if (!used->active || used->charges > 2) { // Safe to hold on to, for now
                 avoid_friendly_fire(target);    // Maneuver around player
@@ -1718,8 +1714,8 @@ void npc::alt_attack(int target)
                             int new_dist = rl_dist(posx(), posy(), x, y);
                             if (new_dist > best_dist && wont_hit_friend(x, y, weapon_index)) {
                                 best_dist = new_dist;
-                                tarx = x;
-                                tary = y;
+                                targ.x = x;
+                                targ.y = y;
                             }
                         }
                     }
@@ -1728,10 +1724,10 @@ void npc::alt_attack(int target)
                  * should be equal to the original location of our target, and risking friendly
                  * fire is better than holding on to a live grenade / whatever.
                  */
-                if (g->m.sees(posx(), posy(), tarx, tary, light, linet)) {
-                    trajectory = line_to(posx(), posy(), tarx, tary, linet);
+                if (g->m.sees(pos(), targ, light, linet)) {
+                    trajectory = line_to(pos(), targ, linet);
                 } else {
-                    trajectory = line_to(posx(), posy(), tarx, tary, 0);
+                    trajectory = line_to(pos(), targ, 0);
                 }
                 moves -= 125;
                 if (g->u.sees( *this )) {
@@ -1744,7 +1740,7 @@ void npc::alt_attack(int target)
                     stack_size = used->charges;
                     used->charges = 1;
                 }
-                g->throw_item(*this, tarx, tary, *used, trajectory);
+                g->throw_item(*this, targ, *used, trajectory);
 
                 // Throw a single charge of a stacking object.
                 if( stack_size == -1 || stack_size == 1 ) {
@@ -1757,7 +1753,7 @@ void npc::alt_attack(int target)
             }
 
         } else { // Within this block, our chosen target is outside of our range
-            update_path(tarx, tary);
+            update_path(targ.x, targ.y);
             move_to_next(); // Move towards the target
         }
     } // Done with throwing-item block

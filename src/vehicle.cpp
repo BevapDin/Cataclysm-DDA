@@ -5004,10 +5004,14 @@ void vehicle::aim_turrets()
     auto mons = g->u.get_visible_creatures( range );
     target_mode tmode = TARGET_MODE_TURRET; // We can't aim here yet
     item weap( part_info( turret_index ).item, 0 );
-    std::vector<point> trajectory = 
-                        g->target( x, y, x - range, y - range,
+    // TODO: Z
+    tripoint targ( x, y, 0 );
+    std::vector<tripoint> trajectory =
+                        g->target( targ, x - range, y - range,
                                    x + range, y + range, mons,
-                                   t, &weap, tmode, turret_pos );
+                                   t, &weap, tmode, global_pos() + parts[turret_index].precalc[0] );
+    x = targ.x;
+    y = targ.y;
 
     if( trajectory.empty() ) {
         target.first = turret_pos;
@@ -5277,8 +5281,7 @@ bool vehicle::fire_turret_internal (int p, const itype &gun, const itype &ammo, 
         area += area == 1 ? 1 : 2; // Pad a bit for less friendly fire
     }
 
-    int xtarg;
-    int ytarg;
+    tripoint targ = global_pos();
     std::pair< point, point > &target = parts[p].target;
     if( target.first == target.second ) {
         // Manual target not set, find one automatically
@@ -5294,14 +5297,14 @@ bool vehicle::fire_turret_internal (int p, const itype &gun, const itype &ammo, 
             }
             return false;
         }
-        xtarg = auto_target->posx();
-        ytarg = auto_target->posy();
+        targ = auto_target->pos();
     } else {
         // Target set manually
         // Second value of 'target' is last position
         // If vehicle moved, move the "sights" with it
-        xtarg = target.first.x + (x - target.second.x);
-        ytarg = target.first.y + (y - target.second.y);
+        // TODO: Z
+        targ.x = target.first.x + (x - target.second.x);
+        targ.y = target.first.y + (y - target.second.y);
         // Remove the target
         target.first.x = x;
         target.first.y = y;
@@ -5320,7 +5323,7 @@ bool vehicle::fire_turret_internal (int p, const itype &gun, const itype &ammo, 
     // Drain a ton of power
     tmp_ups.charges = drain( fuel_type_battery, 1000 );
     item &ups_ref = tmp.i_add(tmp_ups);
-    tmp.fire_gun( xtarg, ytarg, burst );
+    tmp.fire_gun( targ, burst );
     // Return whatever is left.
     refill( fuel_type_battery, ups_ref.charges );
     charges = tmp.weapon.charges; // Return real ammo, in case of burst ending early
