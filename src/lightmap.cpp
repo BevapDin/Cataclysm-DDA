@@ -410,17 +410,17 @@ void map::build_seen_cache()
     const int offsetX = g->u.posx();
     const int offsetY = g->u.posy();
 
-    castLight( 1, 1.0f, 0.0f, 0, 1, 1, 0, offsetX, offsetY, 0 );
-    castLight( 1, 1.0f, 0.0f, 1, 0, 0, 1, offsetX, offsetY, 0 );
+    castLight<0, 1, 1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<1, 0, 0, 1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
 
-    castLight( 1, 1.0f, 0.0f, 0, -1, 1, 0, offsetX, offsetY, 0 );
-    castLight( 1, 1.0f, 0.0f, -1, 0, 0, 1, offsetX, offsetY, 0 );
+    castLight<0, -1, 1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<-1, 0, 0, 1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
 
-    castLight( 1, 1.0f, 0.0f, 0, 1, -1, 0, offsetX, offsetY, 0 );
-    castLight( 1, 1.0f, 0.0f, 1, 0, 0, -1, offsetX, offsetY, 0 );
+    castLight<0, 1, -1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<1, 0, 0, -1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
 
-    castLight( 1, 1.0f, 0.0f, 0, -1, -1, 0, offsetX, offsetY, 0 );
-    castLight( 1, 1.0f, 0.0f, -1, 0, 0, -1, offsetX, offsetY, 0 );
+    castLight<0, -1, -1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<-1, 0, 0, -1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
 
     int part;
     if ( vehicle *veh = veh_at( offsetX, offsetY, part ) ) {
@@ -471,17 +471,17 @@ void map::build_seen_cache()
             //
             // The naive solution of making the mirrors act like a second player
             // at an offset appears to give reasonable results though.
-            castLight( 1, 1.0f, 0.0f, 0, 1, 1, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, 1, 0, 0, 1, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<0, 1, 1, 0>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<1, 0, 0, 1>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
 
-            castLight( 1, 1.0f, 0.0f, 0, -1, 1, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, -1, 0, 0, 1, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<0, -1, 1, 0>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<-1, 0, 0, 1>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
 
-            castLight( 1, 1.0f, 0.0f, 0, 1, -1, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, 1, 0, 0, -1, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<0, 1, -1, 0>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<1, 0, 0, -1>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
 
-            castLight( 1, 1.0f, 0.0f, 0, -1, -1, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, -1, 0, 0, -1, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<0, -1, -1, 0>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<-1, 0, 0, -1>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
         }
     }
 
@@ -495,8 +495,8 @@ void map::build_seen_cache()
     }
 }
 
-void map::castLight( int row, float start, float end, int xx, int xy, int yx, int yy,
-                     const int offsetX, const int offsetY, const int offsetDistance )
+template<int xx, int xy, int yx, int yy>
+void map::castLight( int row, float start, float end, const int offsetX, const int offsetY, const int offsetDistance)
 {
     float newStart = 0.0f;
     float radius = 60.0f - offsetDistance;
@@ -557,7 +557,7 @@ void map::castLight( int row, float start, float end, int xx, int xy, int yx, in
                     distance < radius ) {
                     //hit a wall within sight line
                     blocked = true;
-                    castLight(distance + 1, start, leftSlope, xx, xy, yx, yy,
+                    castLight<xx, xy, yx, yy>(distance + 1, start, leftSlope,
                               offsetX, offsetY, offsetDistance);
                     newStart = rightSlope;
                 }
