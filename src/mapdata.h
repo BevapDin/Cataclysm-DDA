@@ -184,6 +184,8 @@ struct ter_t {
  possible object/field/entity in a single square gets drawn and that some symbols are "reserved" such as * and % to do programmatic behavior.
  */
  long sym;
+ /* The symbol drawn when looked down from above, Use ' ' for no symbol at all. */
+ long sym_down;
 
  nc_color color; //The color the sym will draw in on the GUI.
  unsigned char movecost; //The amount of movement points required to pass this terrain by default.
@@ -240,6 +242,7 @@ struct furn_t {
  int loadid;
  std::string name;
  long sym;
+ long sym_down;
  nc_color color;
  int movecost; // Penalty to terrain
  int move_str_req; //The amount of strength required to move through this terrain easily.
