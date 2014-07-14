@@ -3284,6 +3284,9 @@ bool map::add_item_or_charges(const tripoint &p, item new_item, int overflow_rad
         // Silently fail on mundane things that prevent item spawn.
         return false;
     }
+    if (has_flag_ter(TFLAG_NOFLOOR, p) && p.z > my_ZMIN) {
+        return add_item_or_charges(tripoint(p.x, p.y, p.z - 1), new_item, overflow_radius);
+    }
 
 
     bool tryaddcharges = (new_item.charges  != -1 && new_item.count_by_charges());
