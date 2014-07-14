@@ -508,7 +508,7 @@ void inventory::form_from_map(point origin, int range, bool assign_invlet)
             }
             // Kludges for now!
             ter_id terrain_id = g->m.ter(x, y);
-            if (g->m.has_nearby_fire(x, y, 0)) {
+            if (g->m.has_nearby_fire(tripoint(x, y, 0), 0)) {
                 item fire("fire", 0);
                 fire.charges = 1;
                 add_item(fire);
