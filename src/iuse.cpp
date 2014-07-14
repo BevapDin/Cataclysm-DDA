@@ -6988,8 +6988,8 @@ int iuse::mop(player *p, item *it, bool, tripoint)
         p->add_msg_if_player(_("The universe implodes and reforms around you."));
         return 0;
     }
-    if (g->m.moppable_items_at(dirx, diry)) {
-        g->m.mop_spills(dirx, diry);
+    if (g->m.moppable_items_at(tripoint(dirx, diry, 0))) {
+        g->m.mop_spills(tripoint(dirx, diry, 0));
         add_msg(_("You mop up the spill."));
         p->moves -= 15;
     } else {
