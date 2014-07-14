@@ -299,6 +299,8 @@ float map::ambient_light_at(int dx, int dy)
 
 bool map::pl_sees(int fx, int fy, int tx, int ty, int max_range) const
 {
+    // Using 0 as default for fz is actually correct, because f is supposed to
+    // be the location of the player and the player is always at z=0
     return pl_sees(tripoint(fx, fy, 0), tripoint(tx, ty, 0), max_range);
 }
 
@@ -387,17 +389,17 @@ void map::build_seen_cache()
     const int offsetX = g->u.posx;
     const int offsetY = g->u.posy;
 
-    castLight( 1, 1.0f, 0.0f, 0, 1, 1, 0, offsetX, offsetY, 0 );
-    castLight( 1, 1.0f, 0.0f, 1, 0, 0, 1, offsetX, offsetY, 0 );
+    castLight<0, 1, 1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<1, 0, 0, 1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
 
-    castLight( 1, 1.0f, 0.0f, 0, -1, 1, 0, offsetX, offsetY, 0 );
-    castLight( 1, 1.0f, 0.0f, -1, 0, 0, 1, offsetX, offsetY, 0 );
+    castLight<0, -1, 1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<-1, 0, 0, 1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
 
-    castLight( 1, 1.0f, 0.0f, 0, 1, -1, 0, offsetX, offsetY, 0 );
-    castLight( 1, 1.0f, 0.0f, 1, 0, 0, -1, offsetX, offsetY, 0 );
+    castLight<0, 1, -1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<1, 0, 0, -1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
 
-    castLight( 1, 1.0f, 0.0f, 0, -1, -1, 0, offsetX, offsetY, 0 );
-    castLight( 1, 1.0f, 0.0f, -1, 0, 0, -1, offsetX, offsetY, 0 );
+    castLight<0, -1, -1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<-1, 0, 0, -1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
 
     if (vehicle *veh = veh_at(offsetX, offsetY)) {
         // We're inside a vehicle. Do mirror calcs.
@@ -430,17 +432,17 @@ void map::build_seen_cache()
             // The naive solution of making the mirrors act like a second player
             // at an offset appears to give reasonable results though.
 
-            castLight( 1, 1.0f, 0.0f, 0, 1, 1, 0, mirrorX, mirrorY, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, 1, 0, 0, 1, mirrorX, mirrorY, offsetDistance );
+            castLight<0, 1, 1, 0>( 1, 1.0f, 0.0f, mirrorX, mirrorY, offsetDistance );
+            castLight<1, 0, 0, 1>( 1, 1.0f, 0.0f, mirrorX, mirrorY, offsetDistance );
 
-            castLight( 1, 1.0f, 0.0f, 0, -1, 1, 0, mirrorX, mirrorY, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, -1, 0, 0, 1, mirrorX, mirrorY, offsetDistance );
+            castLight<0, -1, 1, 0>( 1, 1.0f, 0.0f, mirrorX, mirrorY, offsetDistance );
+            castLight<-1, 0, 0, 1>( 1, 1.0f, 0.0f, mirrorX, mirrorY, offsetDistance );
 
-            castLight( 1, 1.0f, 0.0f, 0, 1, -1, 0, mirrorX, mirrorY, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, 1, 0, 0, -1, mirrorX, mirrorY, offsetDistance );
+            castLight<0, 1, -1, 0>( 1, 1.0f, 0.0f, mirrorX, mirrorY, offsetDistance );
+            castLight<1, 0, 0, -1>( 1, 1.0f, 0.0f, mirrorX, mirrorY, offsetDistance );
 
-            castLight( 1, 1.0f, 0.0f, 0, -1, -1, 0, mirrorX, mirrorY, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, -1, 0, 0, -1, mirrorX, mirrorY, offsetDistance );
+            castLight<0, -1, -1, 0>( 1, 1.0f, 0.0f, mirrorX, mirrorY, offsetDistance );
+            castLight<-1, 0, 0, -1>( 1, 1.0f, 0.0f, mirrorX, mirrorY, offsetDistance );
         }
     }
 
@@ -454,8 +456,8 @@ void map::build_seen_cache()
     }
 }
 
-void map::castLight( int row, float start, float end, int xx, int xy, int yx, int yy,
-                     const int offsetX, const int offsetY, const int offsetDistance )
+template<int xx, int xy, int yx, int yy>
+void map::castLight( int row, float start, float end, const int offsetX, const int offsetY, const int offsetDistance)
 {
     float newStart = 0.0f;
     float radius = 60.0f - offsetDistance;
@@ -516,7 +518,7 @@ void map::castLight( int row, float start, float end, int xx, int xy, int yx, in
                     distance < radius ) {
                     //hit a wall within sight line
                     blocked = true;
-                    castLight(distance + 1, start, leftSlope, xx, xy, yx, yy,
+                    castLight<xx, xy, yx, yy>(distance + 1, start, leftSlope,
                               offsetX, offsetY, offsetDistance);
                     newStart = rightSlope;
                 }
