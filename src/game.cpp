@@ -12898,6 +12898,17 @@ bool game::plmove(int dx, int dy)
         }
     }
 
+    if (m.has_flag_ter("NOFLOOR", x, y)) {
+        if (!query_yn(_("Step across the ridge?"))) {
+            return false;
+        }
+        // First move into midair, than fall down
+        u.posx = x;
+        u.posy = y;
+        vertical_move(-1, true);
+        return false;
+    }
+
     bool toSwimmable = m.has_flag("SWIMMABLE", x, y);
     bool toDeepWater = m.has_flag(TFLAG_DEEP_WATER, x, y);
     bool fromSwimmable = m.has_flag("SWIMMABLE", u.posx, u.posy);
@@ -13794,7 +13805,22 @@ void game::vertical_move(int movez, bool force)
     tripoint stair(u.posx, u.posy, movez);
     bool rope_ladder = false;
 
-    if (!force) { // We need to find the stairs.
+    if (force) {
+        if (movez < 0) {
+            // Search for the ground. might not find some, if there
+            // is a really deep shaft.
+            while(m.has_flag("NOFLOOR", stair)) {
+                stair.z--;
+                if (!m.inbounds(stair)) {
+                    // Bottom of loaded map space, go back to a valid
+                    // coordinate and leave the loop.
+                    stair.z++;
+                    break;
+                }
+                movez--;
+            }
+        }
+    } else {// We need to find the stairs.
         if(!find_vertical_movement_destination(stair, movez)) { // No stairs found!
             if (movez < 0) {
                 if (m.move_cost(tripoint(u.posx, u.posy, movez)) == 0) {
@@ -13915,6 +13941,8 @@ void game::vertical_move(int movez, bool force)
         if ((u.has_trait("WINGS_BIRD")) || ((one_in(2)) && (u.has_trait("WINGS_BUTTERFLY")))) {
             add_msg(_("You flap your wings and flutter down gracefully."));
         } else {
+            // TODO: respect the amount of z-levels that one did fall!
+            // (multiply by -movez?)
             int dam = int((u.str_max / 4) + rng(5, 10)) * rng(1, 3);//The bigger they are
             dam -= rng(u.get_dodge(), u.get_dodge() * 3);
             if (dam <= 0) {
@@ -13924,6 +13952,13 @@ void game::vertical_move(int movez, bool force)
                 u.hurtall(dam);
             }
         }
+    }
+
+    if (m.has_flag("NOFLOOR", u.pos())) {
+        // Still not at the bottom, but the map has shifted and
+        // the bottom might be loaded now.
+        vertical_move(-1, true);
+        return;
     }
 
     if (m.tr_at(u.posx, u.posy) != tr_null) { // We stepped on a trap!
