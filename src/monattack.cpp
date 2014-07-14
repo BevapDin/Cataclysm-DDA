@@ -1565,7 +1565,7 @@ void mattack::fungus_fortify(monster *z, int index)
 void mattack::leap(monster *z, int index)
 {
     int linet = 0;
-    std::vector<point> options;
+    std::vector<tripoint> options;
     tripoint target = z->move_target();
     int best = rl_dist( z->pos(), target );
 
@@ -1574,13 +1574,14 @@ void mattack::leap(monster *z, int index)
             if (x == z->posx() && y == z->posy()) {
                 continue;
             }
-            if( !z->sees( x, y, linet ) ) {
+            const tripoint pnt(x, y, z->posz());
+            if( !z->sees( pnt, linet ) ) {
                 continue;
             }
-            if (!g->is_empty(x, y)) {
+            if (!g->is_empty(pnt)) {
                 continue;
             }
-            if (rl_dist(target.x, target.y, x, y) > best) {
+            if (rl_dist(target, pnt) > best) {
                 continue;
             }
             bool blocked_path = false;
@@ -1593,8 +1594,8 @@ void mattack::leap(monster *z, int index)
                 }
             }
             if (!blocked_path) {
-                options.push_back( point(x, y) );
-                best = rl_dist(target.x, target.y, x, y);
+                options.push_back(pnt);
+                best = rl_dist(target, pnt);
             }
 
         }
@@ -1614,7 +1615,7 @@ void mattack::leap(monster *z, int index)
 
     z->moves -= 150;
     z->reset_special(index); // Reset timer
-    point chosen = options[rng(0, options.size() - 1)];
+    tripoint chosen = options[rng(0, options.size() - 1)];
     bool seen = g->u.sees(*z); // We can see them jump...
     z->setpos(chosen);
     seen |= g->u.sees(*z); // ... or we can see them land
@@ -2115,10 +2116,10 @@ void mattack::vortex(monster *z, int index)
                             g->zombie( monhit ).apply_damage( z, bp_torso, damage );
                             g->zombie( monhit ).check_dead_state();
                             hit_wall = true;
-                            thrown->setpos(traj[i - 1]);
+                            thrown->setpos(tripoint(traj[i - 1].x, traj[i - 1].y, 0));
                         } else if (g->m.move_cost(traj[i].x, traj[i].y) == 0) {
                             hit_wall = true;
-                            thrown->setpos(traj[i - 1]);
+                            thrown->setpos(tripoint(traj[i - 1].x, traj[i - 1].y, 0));
                         }
                         int damage_copy = damage;
                         g->m.shoot(traj[i].x, traj[i].y, damage_copy, false, no_effects);
@@ -2129,7 +2130,7 @@ void mattack::vortex(monster *z, int index)
                     if (hit_wall) {
                         damage *= 2;
                     } else {
-                        thrown->setpos(traj[traj.size() - 1]);
+                        thrown->setpos(tripoint(traj[traj.size() - 1].x, traj[traj.size() - 1].y, 0));
                     }
                     thrown->apply_damage( z, bp_torso, damage );
                     thrown->check_dead_state();

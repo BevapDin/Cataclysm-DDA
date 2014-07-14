@@ -2015,17 +2015,17 @@ void map::monster_in_field( monster &z )
             if (rng(0, 2) < cur->getFieldDensity()) {
                 dam += cur->getFieldDensity();
                 int tries = 0;
-                int newposx, newposy;
+                tripoint newpos(0, 0, z.posz());
                 do {
-                    newposx = rng(z.posx() - SEEX, z.posx() + SEEX);
-                    newposy = rng(z.posy() - SEEY, z.posy() + SEEY);
+                    newpos.x = rng(z.posx() - SEEX, z.posx() + SEEX);
+                    newpos.y = rng(z.posy() - SEEY, z.posy() + SEEY);
                     tries++;
-                } while (move_cost(newposx, newposy) == 0 && tries != 10);
+                } while (move_cost(newpos) == 0 && tries != 10);
 
                 if (tries == 10) {
                     z.die_in_explosion( nullptr );
                 } else {
-                    int mon_hit = g->mon_at(newposx, newposy);
+                    int mon_hit = g->mon_at(newpos);
                     if (mon_hit != -1) {
                         if (g->u.sees(z)) {
                             add_msg(_("The %s teleports into a %s, killing them both!"),
@@ -2033,7 +2033,7 @@ void map::monster_in_field( monster &z )
                         }
                         g->zombie( mon_hit ).die_in_explosion( &z );
                     } else {
-                        z.setpos(newposx, newposy);
+                        z.setpos(newpos);
                     }
                 }
             }

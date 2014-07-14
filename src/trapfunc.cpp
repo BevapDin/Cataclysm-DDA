@@ -523,17 +523,17 @@ void trapfunc::telepad(Creature *c, int x, int y)
             }
 
             int tries = 0;
-            int newposx, newposy;
+            tripoint newpos(0, 0, z->posz());
             do {
-                newposx = rng(z->posx() - SEEX, z->posx() + SEEX);
-                newposy = rng(z->posy() - SEEY, z->posy() + SEEY);
+                newpos.x = rng(z->posx() - SEEX, z->posx() + SEEX);
+                newpos.y = rng(z->posy() - SEEY, z->posy() + SEEY);
                 tries++;
-            } while (g->m.move_cost(newposx, newposy) == 0 && tries != 10);
+            } while (g->m.move_cost(newpos) == 0 && tries != 10);
 
             if (tries == 10) {
                 z->die_in_explosion( nullptr );
             } else {
-                int mon_hit = g->mon_at(newposx, newposy);
+                int mon_hit = g->mon_at(newpos);
                 if (mon_hit != -1) {
                     if (g->u.sees(*z)) {
                         add_msg(m_good, _("The %s teleports into a %s, killing them both!"),
@@ -541,7 +541,7 @@ void trapfunc::telepad(Creature *c, int x, int y)
                     }
                     g->zombie( mon_hit ).die_in_explosion( z );
                 } else {
-                    z->setpos(newposx, newposy);
+                    z->setpos(newpos);
                 }
             }
         }

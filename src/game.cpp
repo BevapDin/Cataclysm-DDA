@@ -6269,7 +6269,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
         }
         for (size_t i = 1; i < traj.size(); i++) {
             if (m.move_cost(traj[i].x, traj[i].y) == 0) {
-                targ->setpos(traj[i - 1]);
+                targ->setpos(tripoint(traj[i - 1].x, traj[i - 1].y, 0))
                 force_remaining = traj.size() - i;
                 if (stun != 0) {
                     if (targ->has_effect("stunned")) {
@@ -6293,7 +6293,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                 break;
             } else if (mon_at(traj[i].x, traj[i].y) != -1 || npc_at(traj[i].x, traj[i].y) != -1 ||
                        (u.posx() == traj[i].x && u.posy() == traj[i].y)) {
-                targ->setpos(traj[i - 1]);
+                targ->setpos(tripoint(traj[i - 1].x, traj[i - 1].y, 0));
                 force_remaining = traj.size() - i;
                 if (stun != 0) {
                     if (targ->has_effect("stunned")) {
@@ -6328,8 +6328,8 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                 knockback(traj, force_remaining, stun, dam_mult);
                 break;
             }
-            targ->setpos(traj[i]);
-            if (m.has_flag("LIQUID", targ->posx(), targ->posy()) && !targ->can_drown() && !targ->is_dead()) {
+            targ->setpos(tripoint(traj[i].x, traj[i].y, 0));
+            if (m.has_flag("LIQUID", targ->pos()) && !targ->can_drown() && !targ->is_dead()) {
                 targ->die( nullptr );
                 if (u.sees(*targ)) {
                     add_msg(_("The %s drowns!"), targ->name().c_str());
@@ -12264,7 +12264,7 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
                 p->setx( x );
                 p->sety( y );
             } else {
-                zz->setpos(x, y);
+                zz->setpos(tripoint(x, y, zz->posz()));
             }
         } else {
             break;

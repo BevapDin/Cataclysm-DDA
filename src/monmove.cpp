@@ -29,6 +29,16 @@ int monster::move_to(int x, int y, bool force) { return move_to(tripoint(x, y, p
 
 bool monster::can_move_to(const tripoint &p) const
 {
+    if (p.z > posz()) { // moving upwards
+        if (!g->m.has_flag_ter("GOES_UP", tripoint(p.x, p.y, posz()))) {
+            return false;
+        }
+    } else if (p.z < posz()) { // moving downwards
+        // TODO: Z allow jumping down
+        if (!g->m.has_flag_ter("GOES_DOWN", tripoint(p.x, p.y, posz()))) {
+            return false;
+        }
+    }
     if (g->m.move_cost(p) == 0) {
         return false;
     }
@@ -983,6 +993,7 @@ void monster::stumble(bool moved)
  }
 }
 
+// TODO: Z (parameters)
 void monster::knock_back_from(int x, int y)
 {
  if (x == posx() && y == posy())
@@ -991,7 +1002,7 @@ void monster::knock_back_from(int x, int y)
         die( nullptr );
         return;
     }
- point to(posx(), posy());
+ tripoint to = pos();
  if (x < posx())
   to.x++;
  if (x > posx())
@@ -1004,7 +1015,7 @@ void monster::knock_back_from(int x, int y)
  bool u_see = g->u.sees( to );
 
 // First, see if we hit another monster
- int mondex = g->mon_at(to.x, to.y);
+ int mondex = g->mon_at(to);
     if( mondex != -1 && g->zombie( mondex ).is_hallucination() ) {
         // hallucinations should not affect real monsters. If they interfer, just remove them.
         g->zombie( mondex ).die( this );
@@ -1014,6 +1025,7 @@ void monster::knock_back_from(int x, int y)
   monster *z = &(g->zombie(mondex));
   apply_damage( z, bp_torso, z->type->size );
   add_effect("stunned", 1);
+  // TODO: Z
   if (type->size > 1 + z->type->size) {
    z->knock_back_from(posx(), posy()); // Chain reaction!
    z->apply_damage( this, bp_torso, type->size );
@@ -1030,7 +1042,7 @@ void monster::knock_back_from(int x, int y)
   return;
  }
 
- int npcdex = g->npc_at(to.x, to.y);
+ int npcdex = g->npc_at(to);
  if (npcdex != -1) {
   npc *p = g->active_npc[npcdex];
   apply_damage( p, bp_torso, 3 );
@@ -1044,8 +1056,8 @@ void monster::knock_back_from(int x, int y)
  }
 
 // If we're still in the function at this point, we're actually moving a tile!
- if (g->m.ter_at(to.x, to.y).has_flag(TFLAG_DEEP_WATER)) {
-  if (g->m.has_flag("LIQUID", to.x, to.y) && can_drown()) {
+ if (g->m.ter_at(to).has_flag(TFLAG_DEEP_WATER)) {
+  if (g->m.has_flag("LIQUID", to) && can_drown()) {
    die( nullptr );
    if (u_see) {
     add_msg(_("The %s drowns!"), name().c_str());
@@ -1059,14 +1071,14 @@ void monster::knock_back_from(int x, int y)
   }
  }
 
- if (g->m.move_cost(to.x, to.y) == 0) {
+ if (g->m.move_cost(to) == 0) {
 
    // It's some kind of wall.
    apply_damage( nullptr, bp_torso, type->size );
    add_effect("stunned", 2);
    if (u_see) {
     add_msg(_("The %s bounces off a %s."), name().c_str(),
-               g->m.tername(to.x, to.y).c_str());
+               g->m.tername(to).c_str());
    }
 
  } else { // It's no wall
