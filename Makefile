@@ -103,6 +103,8 @@ RC  = $(CROSS)windres
 
 # enable optimizations. slow to build
 ifdef RELEASE
+  ODIR=obj.rel
+  TARGET=cataclysm.rel
   ifeq ($(NATIVE), osx)
     CXXFLAGS += -O3
   else
