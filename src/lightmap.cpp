@@ -351,6 +351,13 @@ void map::per_submap_cache::build_see_up_down_cache(const submap &sm, const subm
     }
 }
 
+#define can_see_down(x, y, z) \
+    (psm_cache[get_nonant( tripoint( (x) / SEEX, (y) / SEEY, (z)))].see_down[(x) % SEEX][(y) % SEEY])
+#define can_see_up(x, y, z) \
+    (psm_cache[get_nonant( tripoint( (x) / SEEX, (y) / SEEY, (z)))].see_up[(x) % SEEX][(y) % SEEY])
+#define light_transparency(x, y, z) \
+    (psm_cache[get_nonant( tripoint( (x) / SEEX, (y) / SEEY, (z)))].transparency[(x) % SEEX][(y) % SEEY])
+
 /**
  * Calculates the Field Of View for the provided map from the given x, y
  * coordinates. Returns a lightmap for a result where the values represent a
@@ -454,6 +461,26 @@ void map::build_seen_cache()
             }
         }
     }
+    const bool can_look_down = can_see_down(g->u.posx, g->u.posy, 0);
+    const bool can_look_up = can_see_up(g->u.posx, g->u.posy, 0);
+    for(int i = -1; i <= +1; i++) {
+        for(int j = -1; j <= +1; j++) {
+            const int a = i + g->u.posx;
+            const int b = j + g->u.posy;
+            if (can_look_down) {
+                seen_cache(a, b, -1) = true;
+            }
+            if (can_look_up) {
+                seen_cache(a, b, +1) = true;
+            }
+            for (int z = -1; z >= my_ZMIN && can_see_up(a, b, z); z--) {
+                seen_cache(a, b, z) = true;
+            }
+            for (int z = +1; z <= my_ZMAX && can_see_down(a, b, z); z--) {
+                seen_cache(a, b, z) = true;
+            }
+        }
+    }
 }
 
 template<int xx, int xy, int yx, int yy>
@@ -479,12 +506,6 @@ void map::castLight( int row, int z, float start, float end, int zmin, int zmax,
             } else if( end > leftSlope ) {
                 break;
             }
-#define can_see_down(x, y, z) \
-    (psm_cache[get_nonant( tripoint( (x) / SEEX, (y) / SEEY, (z)))].see_down[(x) % SEEX][(y) % SEEY])
-#define can_see_up(x, y, z) \
-    (psm_cache[get_nonant( tripoint( (x) / SEEX, (y) / SEEY, (z)))].see_up[(x) % SEEX][(y) % SEEY])
-#define light_transparency(x, y, z) \
-    (psm_cache[get_nonant( tripoint( (x) / SEEX, (y) / SEEY, (z)))].transparency[(x) % SEEX][(y) % SEEY])
 
             //check if it's within the visible area and mark visible if so
             if( rl_dist(0, 0, deltaX, deltaY) <= radius ) {
@@ -492,34 +513,15 @@ void map::castLight( int row, int z, float start, float end, int zmin, int zmax,
                 float bright = (float) (1 - (rStrat.radius(deltaX, deltaY) / radius));
                 lightMap[currentX][currentY] = bright;
                 */
-                const float delta = (rightSlope - leftSlope) / 10.0f;
                 seen_cache(currentX, currentY, z) = true;
                 if (z >= 0 && z < zmax && !seen_cache(currentX, currentY, z + 1) && can_see_up(currentX, currentY, z)) {
-                    seen_cache(currentX, currentY, z + 1) = true;
-                    castLight<xx, xy, yx, yy>(distance + 1, z + 1, leftSlope + delta, rightSlope - delta, z + 1, zmax,
+                    castLight<xx, xy, yx, yy>(distance + 1, z + 1, leftSlope , rightSlope , z + 1, zmax,
                               offsetX, offsetY, offsetDistance);
                 }
                 if (z <= 0 && z > zmin && !seen_cache(currentX, currentY, z - 1) && can_see_down(currentX, currentY, z)) {
-                    seen_cache(currentX, currentY, z - 1) = true;
-                    castLight<xx, xy, yx, yy>(distance + 1, z - 1, leftSlope + delta, rightSlope - delta, zmin, z - 1,
+                    castLight<xx, xy, yx, yy>(distance + 1, z - 1, leftSlope , rightSlope , zmin, z - 1,
                               offsetX, offsetY, offsetDistance);
                 }
-#if 0
-                tripoint p(currentX, currentY, 0);
-                for(p.z = 0; p.z >= my_ZMIN; ) {
-                    if (!can_see_down(p.x, p.y, p.z)) {
-                        break;
-                    }
-                    p.z--;
-                    seen_cache(currentX, currentY, p.z) = true;
-                }
-                for(p.z = +1; p.z <= my_ZMAX; p.z++) {
-                    if (!can_see_up(p.x, p.y, p.z)) {
-                        break;
-                    }
-                    seen_cache(currentX, currentY, p.z) = true;
-                }
-#endif
             }
 
             if( blocked ) {
