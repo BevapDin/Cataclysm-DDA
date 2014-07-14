@@ -51,7 +51,7 @@ void live_view::show(const int x, const int y)
     wprintz(w_live_view, c_white, " >");
     int line = START_LINE;
 
-    g->print_all_tile_info(x, y, w_live_view, START_COLUMN, line, true);
+    g->print_all_tile_info(tripoint(x, y, g->u.view_offset.z), w_live_view, START_COLUMN, line, true);
 
     if (m.can_put_items(x, y) && m.sees_some_items(x, y, g->u)) {
         if(g->u.has_effect("blind")) {

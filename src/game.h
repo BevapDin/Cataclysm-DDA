@@ -341,7 +341,7 @@ class game
         int list_items(const int iLastState); //List all items around the player
         int list_monsters(const int iLastState); //List all monsters around the player
         // Shared method to print "look around" info
-        void print_all_tile_info(int lx, int ly, WINDOW *w_look, int column, int &line, bool mouse_hover);
+        void print_all_tile_info(const tripoint &p, WINDOW* w_look, int column, int &line, bool mouse_hover);
 
         bool list_items_match(item &item, std::string sPattern);
         int list_filter_high_priority(std::vector<map_item_stack> &stack, std::string prorities);
@@ -633,12 +633,12 @@ class game
         void plthrow(int pos = INT_MIN); // Throw an item  't'
 
         // Internal methods to show "look around" info
-        void print_fields_info(int lx, int ly, WINDOW *w_look, int column, int &line);
-        void print_terrain_info(int lx, int ly, WINDOW *w_look, int column, int &line);
-        void print_trap_info(int lx, int ly, WINDOW *w_look, const int column, int &line);
-        void print_object_info(int lx, int ly, WINDOW *w_look, const int column, int &line,
+        void print_fields_info(const tripoint &lp, WINDOW *w_look, int column, int &line);
+        void print_terrain_info(const tripoint &lp, WINDOW *w_look, int column, int &line);
+        void print_trap_info(const tripoint &lp, WINDOW *w_look, const int column, int &line);
+        void print_object_info(const tripoint &lp, WINDOW *w_look, const int column, int &line,
                                bool mouse_hover);
-        void handle_multi_item_info(int lx, int ly, WINDOW *w_look, const int column, int &line,
+        void handle_multi_item_info(const tripoint &lp, WINDOW *w_look, const int column, int &line,
                                     bool mouse_hover);
         void get_lookaround_dimensions(int &lookWidth, int &begin_y, int &begin_x) const;
 
