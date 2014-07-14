@@ -211,7 +211,10 @@ public:
     std::map<field_id, field_entry>::iterator removeField(const field_id field_to_remove);
 
     //Returns the number of fields existing on the current tile.
-    unsigned int fieldCount() const;
+    inline unsigned int fieldCount() const {
+        return field_list.size();
+    }
+
 
     /**
      * Returns the id of the field that should be drawn.

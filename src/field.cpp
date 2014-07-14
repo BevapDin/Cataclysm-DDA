@@ -2258,14 +2258,6 @@ std::map<field_id, field_entry>::iterator field::removeField(const field_id fiel
     return it;
 }
 
-/*
-Function: fieldCount
-Returns the number of fields existing on the current tile.
-*/
-unsigned int field::fieldCount() const
-{
-    return field_list.size();
-}
 
 std::map<field_id, field_entry>::iterator field::begin()
 {

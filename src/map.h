@@ -676,7 +676,18 @@ void add_corpse(int x, int y);
          * @param x,y The local map coordinates, if out of bounds, returns an empty field.
          */
         const field& field_at( const int x, const int y ) const;
-        const field& field_at( const tripoint &p ) const;
+        const field& field_at( const tripoint &p ) const
+        {
+            if( !inbounds( p ) ) {
+                nulfield = field();
+                return nulfield;
+            }
+
+            int lx, ly;
+            submap *const current_submap = get_submap_at( p, lx, ly );
+
+            return current_submap->fld[lx][ly];
+        }
         /**
          * Get the age of a field entry (@ref field_entry::age), if there is no
          * field of that type, returns -1.

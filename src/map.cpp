@@ -4081,19 +4081,6 @@ const field &map::field_at( const int x, const int y ) const
     return field_at(tripoint(x, y, 0));
 }
 
-const field& map::field_at( const tripoint &p ) const
-{
-    if( !inbounds( p ) ) {
-        nulfield = field();
-        return nulfield;
-    }
-
-    int lx, ly;
-    submap *const current_submap = get_submap_at( p, lx, ly );
-
-    return current_submap->fld[lx][ly];
-}
-
 field &map::get_field( const int x, const int y )
 {
     return get_field(tripoint(x, y, 0));
