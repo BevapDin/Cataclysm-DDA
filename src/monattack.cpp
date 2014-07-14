@@ -212,34 +212,35 @@ void mattack::shockstorm(monster *z, int index)
 void mattack::smokecloud(monster *z, int index)
 {
     z->reset_special(index); // Reset timer
-    const int monx = z->posx();
-    const int mony = z->posy();
+    const tripoint monpos = z->pos();
     int junk = 0;
-    for (int i = -3; i <= 3; i++) {
-        for (int j = -3; j <= 3; j++) {
-            if( g->m.move_cost( monx + i, mony + j ) != 0 &&
-                g->m.clear_path(monx, mony, monx + i, mony + j, 3, 1, 100, junk) ) {
-                g->m.add_field(monx + i, mony + j, fd_smoke, 2);
-            }
+    for(point_iterator it(monpos, 3); it; ++it) {
+        if( g->m.move_cost( *it ) != 0 &&
+            g->m.clear_path(monpos, *it, 3, 1, 100, junk) ) {
+            g->m.add_field(*it, fd_smoke, 2);
         }
     }
     //Round it out a bit
     for (int i = -2; i <= 2; i++) {
-        if( g->m.move_cost( monx + i, mony + 4 ) != 0 &&
-            g->m.clear_path(monx, mony, monx + i, mony + 4, 3, 1, 100, junk) ) {
-            g->m.add_field(monx + i, mony + 4, fd_smoke, 2);
+        const tripoint p1(monpos.x + i, monpos.y + 4, monpos.z);
+        const tripoint p2(monpos.x + i, monpos.y - 4, monpos.z);
+        const tripoint p3(monpos.x + 4, monpos.y + i, monpos.z);
+        const tripoint p4(monpos.x - 4, monpos.y + i, monpos.z);
+        if( g->m.move_cost(p1) != 0 &&
+            g->m.clear_path(monpos, p1, 3, 1, 100, junk) ) {
+            g->m.add_field(p1, fd_smoke, 2);
         }
-        if( g->m.move_cost( monx + i, mony - 4 ) != 0 &&
-            g->m.clear_path(monx, mony, monx + i, mony - 4, 3, 1, 100, junk) ) {
-            g->m.add_field(monx + i, mony - 4, fd_smoke, 2);
+        if( g->m.move_cost(p2) != 0 &&
+            g->m.clear_path(monpos, p2, 3, 1, 100, junk) ) {
+            g->m.add_field(p2, fd_smoke, 2);
         }
-        if( g->m.move_cost( monx + 4, mony + i ) != 0 &&
-            g->m.clear_path(monx, mony, monx + 4, mony + i, 3, 1, 100, junk) ) {
-            g->m.add_field(monx + 4, mony + i, fd_smoke, 2);
+        if( g->m.move_cost(p3) != 0 &&
+            g->m.clear_path(monpos, p3, 3, 1, 100, junk) ) {
+            g->m.add_field(p3, fd_smoke, 2);
         }
-        if( g->m.move_cost( monx - 4, mony + i ) != 0 &&
-            g->m.clear_path(monx, mony, monx - 4, mony + i, 3, 1, 100, junk) ) {
-            g->m.add_field(monx - 4, mony + i, fd_smoke, 2);
+        if( g->m.move_cost(p4) != 0 &&
+            g->m.clear_path(monpos, p4, 3, 1, 100, junk) ) {
+            g->m.add_field(p4, fd_smoke, 2);
         }
     }
 }
