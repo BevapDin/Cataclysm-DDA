@@ -24,8 +24,36 @@ bool monster::wander()
 bool monster::can_move_to(int x, int y) const { return can_move_to(tripoint(x, y, _posz)); }
 int monster::move_to(int x, int y, bool force) { return move_to(tripoint(x, y, _posz), force); }
 
+bool monster::can_attack_across_z(const tripoint &p) const
+{
+    if (p.z == _posz) {
+        return true;
+    }
+    if (std::abs(p.z - _posz) > 1) {
+        return false;
+    }
+    if (p.z > _posz) { // attacking upwards
+        if (!has_flag(MF_ATTACKS_UPWARDS)) {
+            return false;
+        }
+        if (g->m.blocks_vertical_air_up(pos()) && g->m.blocks_vertical_air_down(p)) {
+            return false;
+        }
+        return true;
+    }
+    // attacking down
+    if (g->m.blocks_vertical_air_down(pos()) && g->m.blocks_vertical_air_up(p)) {
+        return false;
+    }
+    return true;
+}
+
 bool monster::can_move_to(const tripoint &p) const
 {
+    if (std::abs(p.z - _posz) > 1) {
+        // TODO: Z jumping down multiple z-level
+        return false;
+    }
     if (p.z > _posz) { // moving upwards
         if (!g->m.has_flag_ter("GOES_UP", tripoint(p.x, p.y, _posz))) {
             return false;
@@ -371,34 +399,18 @@ bool monster::can_follow_plan() {
         // and this monster does not have the ATTACKMON flag.
         return false;
     }
-    if (can_move_to(next)) {
-        return true;
-    }
-    bool check_z = false;
-    // Attack player on the very same z-level
-    if (next == g->u.pos()) {
+    if (next == g->u.pos() && can_attack_across_z(next)) {
         if (next.z == _posz) {
             return true;
         }
         // nope, player is above / below us, check if we can attack it
-        check_z = true;
     }
     if( ( has_flag(MF_BASHES) || has_flag(MF_BORES) ) && g->m.bash_rating(bash_estimate(), next) > 0) {
         if (next.z == _posz) {
             return true;
         }
-        check_z = true;
     }
-    if (check_z) {
-        if (next.z < _posz) {
-            if (g->m.blocks_vertical_air_up(next) && g->m.blocks_vertical_air_down(pos())) {
-                return false;
-            }
-        } else {
-            if (g->m.blocks_vertical_air_down(next) && g->m.blocks_vertical_air_up(pos())) {
-                return false;
-            }
-        }
+    if (can_move_to(next)) {
         return true;
     }
     if (next.z != _posz) {

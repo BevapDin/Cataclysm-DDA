@@ -2992,18 +2992,9 @@ void mattack::bite(monster *z, int index)
     if (rl_dist(z->pos(), g->u.pos()) > 1) {
         return;
     }
-    {
-        const int zz = z->zpos();
-        if (zz < 0) {
-            if (g->m.blocks_vertical_air_up(z->pos()) && g->m.blocks_vertical_air_down(g->u.pos())) {
+    if (!z->can_attack_across_z(g->u.pos())) {
                 return;
             }
-        } else if(zz > 0) {
-            if (g->m.blocks_vertical_air_down(z->pos()) && g->m.blocks_vertical_air_up(g->u.pos())) {
-                return;
-            }
-        }
-    }
 
     z->reset_special(index); // Reset timer
     add_msg(_("The %s lunges forward!"), z->name().c_str());

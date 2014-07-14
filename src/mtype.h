@@ -119,6 +119,7 @@ enum m_flag {
     MF_BILE_BLOOD,          // Makes monster bleed bile.
     MF_ABSORBS,             // Consumes objects it moves over.
     MF_REGENMORALE,         // Will stop fleeing if at max hp, and regen anger and morale to positive values.
+    MF_ATTACKS_UPWARDS,     // Can attack things on the z-level above itself
     MF_CBM_POWER,           // May produce a power CBM when butchered, independent of MF_CBM_wev.
     MF_CBM_SCI,             // May produce a bionic from bionics_sci when butchered.
     MF_CBM_OP,              // May produce a bionic from bionics_op when butchered, and the power storage is mk 2.

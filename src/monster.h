@@ -310,6 +310,9 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         {
             return _posz;
         }
+        /** Check if a melee attack at p is possible, only checks the
+         * z-level related stuff. */
+        bool can_attack_across_z(const tripoint &p) const;
 
         short ignoring;
 
