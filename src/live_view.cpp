@@ -30,7 +30,7 @@ void live_view::init(int start_x, int start_y, int width, int height)
     hide();
 }
 
-void live_view::show(const int x, const int y)
+void live_view::show(const tripoint &p)
 {
     if (!enabled || w_live_view == NULL) {
         return;
@@ -38,7 +38,7 @@ void live_view::show(const int x, const int y)
 
     bool did_hide = hide(false); // Clear window if it's visible
 
-    if (!g->u.sees(x, y)) {
+    if (!g->u.sees(p)) {
         if (did_hide) {
             wrefresh(w_live_view);
         }
@@ -51,14 +51,14 @@ void live_view::show(const int x, const int y)
     wprintz(w_live_view, c_white, " >");
     int line = START_LINE;
 
-    g->print_all_tile_info(tripoint(x, y, g->u.view_offset.z), w_live_view, START_COLUMN, line, true);
+    g->print_all_tile_info(p, w_live_view, START_COLUMN, line, true);
 
-    if (m.can_put_items(x, y) && m.sees_some_items(x, y, g->u)) {
+    if (m.can_put_items(p) && m.sees_some_items(p, g->u)) {
         if(g->u.has_effect("blind")) {
             mvwprintz(w_live_view, line++, START_COLUMN, c_yellow,
                       _("There's something here, but you can't see what it is."));
         } else {
-            print_items(m.i_at(x, y), line);
+            print_items(m.i_at(p), line);
         }
     }
 

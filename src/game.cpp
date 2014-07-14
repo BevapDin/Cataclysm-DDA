@@ -2262,7 +2262,7 @@ bool game::handle_mouseview(input_context &ctxt, std::string &action)
             if (!ctxt.get_coordinates(w_terrain, mx, my)) {
                 hide_mouseview();
             } else {
-                liveview.show(mx, my);
+                liveview.show(tripoint(mx, my, u.view_offset.z));
             }
         }
     } while (action == "MOUSE_MOVE"); // Freeze animation when moving the mouse
