@@ -226,13 +226,13 @@ class cata_tiles
 
         /** Drawing Layers */
         bool draw_lighting(int x, int y, LIGHTING l);
-        bool draw_terrain(const tripoint &p);
-        bool draw_furniture(const tripoint &p);
-        bool draw_trap(const tripoint &p);
-        bool draw_field_or_item(const tripoint &p);
-        bool draw_vpart(const tripoint &p);
-        bool draw_entity(const tripoint &p);
-        void draw_entity_with_overlays(const tripoint &p);
+        bool draw_terrain(const tripoint &p, bool from_above);
+        bool draw_furniture(const tripoint &p, bool from_above);
+        bool draw_trap(const tripoint &p, bool from_above);
+        bool draw_field_or_item(const tripoint &p, bool from_above);
+        bool draw_vpart(const tripoint &p, bool from_above);
+        bool draw_entity(const tripoint &p, bool from_above);
+        void draw_entity_with_overlays(const tripoint &p, bool from_above);
 
         bool draw_item_highlight(int x, int y);
 
@@ -256,6 +256,7 @@ class cata_tiles
 
         // pseudo-animated layer, not really though.
         void init_draw_line(int x, int y, std::vector<point> trajectory, std::string line_end_name, bool target_line);
+        void init_draw_line(const tripoint &p, const std::vector<tripoint> &trajectory, const std::string &line_end_name, bool target_line);
         void draw_line();
         void void_line();
 

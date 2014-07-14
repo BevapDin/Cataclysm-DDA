@@ -14,6 +14,17 @@
             "rotates":false
         },
         {
+            "comment":"this must be foreground so it overrides whatever was there before",
+            "id":"t_air",
+            "fg":0,
+            "rotates":false
+        },
+        {
+            "id":"t_roof",
+            "bg":52,
+            "rotates":false
+        },
+        {
             "id":"unknown",
             "fg":54,
             "rotates":true

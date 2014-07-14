@@ -170,6 +170,34 @@ void game::draw_line(const int x, const int y, std::vector<point> vPoint)
     tilecontext->init_draw_line(x, y, vPoint, "line_trail", false);
 }
 
+void game::draw_line(const tripoint &p, const tripoint &center_point, const std::vector<tripoint> &ret)
+{
+    if (u_see(p))
+    {
+        for (int i = 0; i < ret.size(); i++)
+        {
+            int mondex = mon_at(ret[i]),
+            npcdex = npc_at(ret[i]);
+
+            // NPCs and monsters get drawn with inverted colors
+            if (mondex != -1 && u_see(&(critter_tracker.find(mondex))))
+            {
+                critter_tracker.find(mondex).draw(w_terrain, center_point.x, center_point.y, true);
+            }
+            else if (npcdex != -1)
+            {
+                active_npc[npcdex]->draw(w_terrain, center_point.x, center_point.y, true);
+            }
+            else
+            {
+                m.drawsq(w_terrain, u, ret[i].x, ret[i].y, true, true, tripoint(center_point.x, center_point.y, 0), false, false);
+            }
+        }
+    }
+    tilecontext->init_draw_line(p, ret, "line_target", true);
+}
+//*/
+
 void game::draw_weather(weather_printable wPrint)
 {
     if (use_tiles) {
