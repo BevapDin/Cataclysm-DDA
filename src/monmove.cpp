@@ -521,16 +521,14 @@ tripoint monster::scent_move()
     return pos();
 }
 
+bool monster::can_move_to_or_bash_or_is_u(const tripoint &p) const {
+    const int bashskill = bash_estimate();
+    return can_move_to(p) || p == g->u.pos() || ((has_flag(MF_BASHES) || has_flag(MF_BORES)) && g->m.bash_rating(bashskill, p) > 0);
+}
+
 tripoint monster::wander_next()
 {
-    tripoint next;
-    next.z = _posz;
-    bool xbest = true;
-    if (abs(wandy - posy()) > abs(wandx - posx())) {// which is more important
-        xbest = false;
-    }
-    next.x = posx();
-    next.y = posy();
+    bool xbest = abs(wandy - posy()) > abs(wandx - posx());
     int x = posx(), x2 = posx() - 1, x3 = posx() + 1;
     int y = posy(), y2 = posy() - 1, y3 = posy() + 1;
     if (wandx < posx()) {
@@ -546,62 +544,37 @@ tripoint monster::wander_next()
         y++; y2++; y3 -= 2;
     }
 
+    const tripoint n1(x, y, _posz);
+    const tripoint n2(x, y2, _posz);
+    const tripoint n3(x2, y, _posz);
+    const tripoint n4(x, y3, _posz);
+    const tripoint n5(x3, y, _posz);
+    if (can_move_to_or_bash_or_is_u(n1)) {
+        return n1;
+    }
+    // Note: different order of checks depending on xbest
     if (xbest) {
-        if (can_move_to(x, y) || (x == g->u.posx && y == g->u.posy) ||
-            ((has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-             g->m.bash_rating(bash_estimate(), x, y) >= 0)) {
-            next.x = x;
-            next.y = y;
-        } else if (can_move_to(x, y2) || (x == g->u.posx && y == g->u.posy) ||
-                   ((has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-                    g->m.bash_rating(bash_estimate(), x, y2) >= 0)) {
-            next.x = x;
-            next.y = y2;
-        } else if (can_move_to(x2, y) || (x == g->u.posx && y == g->u.posy) ||
-                   ((has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-                    g->m.bash_rating(bash_estimate(), x2, y) >= 0)) {
-            next.x = x2;
-            next.y = y;
-        } else if (can_move_to(x, y3) || (x == g->u.posx && y == g->u.posy) ||
-                   ((has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-                    g->m.bash_rating(bash_estimate(), x, y3) >= 0)) {
-            next.x = x;
-            next.y = y3;
-        } else if (can_move_to(x3, y) || (x == g->u.posx && y == g->u.posy) ||
-                   ((has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-                    g->m.bash_rating(bash_estimate(), x3, y) >= 0)) {
-            next.x = x3;
-            next.y = y;
+        if (can_move_to_or_bash_or_is_u(n2)) {
+            return n2;
+        } else if (can_move_to_or_bash_or_is_u(n3)) {
+            return n3;
+        } else if (can_move_to_or_bash_or_is_u(n4)) {
+            return n4;
+        } else if (can_move_to_or_bash_or_is_u(n5)) {
+            return n5;
         }
     } else {
-        if (can_move_to(x, y) || (x == g->u.posx && y == g->u.posy) ||
-            ((has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-             g->m.bash_rating(bash_estimate(), x, y) >= 0)) {
-            next.x = x;
-            next.y = y;
-        } else if (can_move_to(x2, y) || (x == g->u.posx && y == g->u.posy) ||
-                   ((has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-                    g->m.bash_rating(bash_estimate(), x2, y) >= 0)) {
-            next.x = x2;
-            next.y = y;
-        } else if (can_move_to(x, y2) || (x == g->u.posx && y == g->u.posy) ||
-                   ((has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-                    g->m.bash_rating(bash_estimate(), x, y2) >= 0)) {
-            next.x = x;
-            next.y = y2;
-        } else if (can_move_to(x3, y) || (x == g->u.posx && y == g->u.posy) ||
-                   ((has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-                    g->m.bash_rating(bash_estimate(), x3, y) >= 0)) {
-            next.x = x3;
-            next.y = y;
-        } else if (can_move_to(x, y3) || (x == g->u.posx && y == g->u.posy) ||
-                   ((has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-                    g->m.bash_rating(bash_estimate(), x, y3) >= 0)) {
-            next.x = x;
-            next.y = y3;
+        if (can_move_to_or_bash_or_is_u(n3)) {
+            return n3;
+        } else if (can_move_to_or_bash_or_is_u(n2)) {
+            return n2;
+        } else if (can_move_to_or_bash_or_is_u(n5)) {
+            return n5;
+        } else if (can_move_to_or_bash_or_is_u(n4)) {
+            return n4;
         }
     }
-    return next;
+    return pos();
 }
 
 int monster::calc_movecost(const tripoint &p1, const tripoint &p2) const
@@ -693,7 +666,7 @@ int monster::bash_at(const tripoint &p) {
     return 0;
 }
 
-int monster::bash_estimate()
+int monster::bash_estimate() const
 {
     int estimate = bash_skill();
     if( has_flag(MF_GROUP_BASH) ) {
@@ -704,7 +677,7 @@ int monster::bash_estimate()
     return estimate;
 }
 
-int monster::bash_skill()
+int monster::bash_skill() const
 {
     int ret = type->melee_dice * type->melee_sides; // IOW, the critter's max bashing damage
     if (has_flag(MF_BORES)) {

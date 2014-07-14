@@ -175,8 +175,8 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         int bash_at(const tripoint &p);
 
         /** Returns innate monster bash skill, without calculating additional from helpers */
-        int bash_skill();
-        int bash_estimate();
+        int bash_skill() const;
+        int bash_estimate() const;
         /** Returns ability of monster and any cooperative helpers to
          * bash the designated target.  **/
         int group_bash_skill( const tripoint &target );
@@ -338,6 +338,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         void load(JsonObject &jsin);
         /** Can the zombie make the next movement according to its current plan? */
         bool can_follow_plan();
+        bool can_move_to_or_bash_or_is_u(const tripoint &p) const;
 };
 
 #endif
