@@ -3011,7 +3011,7 @@ itemslice map::i_stacked(std::vector<item>& items)
 }
 
 
-bool map::sees_some_items(int x, int y, const player &u)
+bool map::sees_some_items(const int x, const int y, const player &u)
 {
     return sees_some_items( tripoint( x, y, 0 ), u );
 }
@@ -3020,11 +3020,6 @@ bool map::sees_some_items(const tripoint &p, const player &u)
 {
     // can only see items if there are any items.
     return !i_at( p ).empty() && could_see_items( p, u );
-}
-
-bool map::could_see_items(int x, int y, const player &u)
-{
-    return could_see_items( tripoint( x, y, 0 ), u );
 }
 
 bool map::could_see_items(const tripoint &p, const player &u)
@@ -3038,7 +3033,7 @@ bool map::could_see_items(const tripoint &p, const player &u)
     if (container) {
         // can see inside of containers if adjacent or
         // on top of the container
-        return (abs(p.x - u.posx) <= 1 && abs(p.y - u.posy) <= 1);
+        return (abs(p.x - u.posx) <= 1 && abs(p.y - u.posy) <= 1 && abs(p.z - u.zpos()) <= 1);
     }
     return true;
 }

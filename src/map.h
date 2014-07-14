@@ -389,7 +389,6 @@ class map
   * any items. This is similar to @ref sees_some_items, but it
   * does not check that there are actually any items.
   */
- bool could_see_items(int x, int y, const player &u);
  bool could_see_items(const tripoint &p, const player &u);
 
 
