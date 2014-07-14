@@ -72,6 +72,9 @@ List of known flags, used in both terrain.json and furniture.json
 - ```MOUNTABLE``` Suitable for guns with the "MOUNTED_GUN" flag.
 - ```UNSTABLE``` Walking here cause the bouldering effect on the character.
 - ```HARVESTED``` Marks the harvested version of a terrain type (e.g. harvesting an apple tree turns it into a harvested tree, which later becomes an apple tree again).
+- ```NOFLOOR``` The tile has no floor to stand on. Items / creatures will fall through.
+- ```TRANSPARENT_FLOOR``` The tile has a transparent floor, one can see through it.
+- ```PERMEABLE_FLOOR``` The floor of the tile allows air to pass through (like scent) and liquids, too.
 
 ### Examine actions
 

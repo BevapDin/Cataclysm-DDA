@@ -4416,7 +4416,7 @@ bool map::blocks_vertical_view_down( const tripoint &p ) const
     if( !ter.transparent ) {
         return true;
     }
-    if( !ter.has_flag( TFLAG_NOFLOOR ) ) { // no no floor -> floor
+    if(!ter.has_flag("TRANSPARENT_FLOOR")) { // no no floor -> floor
         return true;
     }
     const furn_id fid = furn( p );
@@ -4427,10 +4427,15 @@ bool map::blocks_vertical_view_down( const tripoint &p ) const
     if( !furn.transparent ) {
         return true;
     }
-    if( !furn.has_flag( TFLAG_NOFLOOR ) ) { // no no floor -> floor
+    if (!furn.has_flag("TRANSPARENT_FLOOR")) { // no no floor -> floor
         return true;
     }
     return false;
+}
+
+bool map::allows_vertical_view_down( const tripoint &p ) const
+{
+    return !blocks_vertical_view_down( p );
 }
 
 bool map::blocks_vertical_view_up( const tripoint &p ) const
@@ -4438,39 +4443,30 @@ bool map::blocks_vertical_view_up( const tripoint &p ) const
     return blocks_vertical_view_down( tripoint( p.x, p.y, p.z + 1 ) );
 }
 
+bool map::allows_vertical_air_down( const tripoint &p ) const
+{
+    return !blocks_vertical_air_down( p );
+}
+
 bool map::blocks_vertical_air_down(const tripoint &p) const {
     const ter_id tid = ter(p);
     const ter_t &ter = terlist[tid];
-    if (ter.movecost == 0) {
+    if (!ter.has_flag("PERMEABLE_FLOOR")) { // not permeable at all.
         return true;
     }
-    if (ter.has_flag("FLAT")) {
-        return true;
-    }
-    // TODO: Z
-#if 0
-    if (!ter.has_flag("C")) { // no no floor -> floor
-        return true;
-    }
-#endif
     const furn_id fid = furn(p);
-    if (fid == f_null) {
+    if (fid == f_null) { // OK, terrain is permeable, no blocking furniture
         return false;
     }
     const furn_t &furn = furnlist[fid];
-    if (furn.movecost == 0) {
+    if (!furn.has_flag("PERMEABLE_FLOOR")) { // not permeable, blocks the terrain
         return true;
     }
-    if (furn.has_flag("FLAT")) {
-        return true;
-    }
-    // TODO: Z
-#if 0
-    if (!furn.has_flag(TFLAG_NOFLOOR)) { // no no floor -> floor
-        return true;
-    }
-#endif
     return false;
+}
+
+bool map::allows_vertical_air_up(const tripoint &p) const {
+    return !blocks_vertical_air_up(p);
 }
 
 bool map::blocks_vertical_air_up(const tripoint &p) const {

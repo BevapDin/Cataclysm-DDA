@@ -843,9 +843,17 @@ void add_corpse(int x, int y);
  void rotate(const int turns);// Rotates the current map 90*turns degress clockwise
                               // Useful for houses, shops, etc
  void add_road_vehicles(bool city, int facing);
+ // Is there an opaque floor?
+ bool allows_vertical_view_down(const tripoint &p) const;
  bool blocks_vertical_view_down(const tripoint &p) const;
+ // Is there an opaque roof?
+ bool allows_vertical_view_up(const tripoint &p) const;
  bool blocks_vertical_view_up(const tripoint &p) const;
+ // Can air go down to the z-level below?
+ bool allows_vertical_air_down(const tripoint &p) const;
  bool blocks_vertical_air_down(const tripoint &p) const;
+ // Can air go up to the z-level above?
+ bool allows_vertical_air_up(const tripoint &p) const;
  bool blocks_vertical_air_up(const tripoint &p) const;
 
 protected:
