@@ -41,7 +41,7 @@ class editmap
         point pos2screen( const int x, const int y );
         point screen2pos( const int i, const int j );
         bool eget_direction ( int &x, int &y, const std::string &action ) const;
-        point edit();
+        tripoint edit();
         void uber_draw_ter( WINDOW *w, map *m );
         void update_view(bool update_info = false);
         int edit_ter();
@@ -73,7 +73,7 @@ class editmap
         int sel_frn;
         int target_frn;
 
-        point recalc_target(shapetype shape);
+        tripoint recalc_target(shapetype shape);
         bool move_target( const std::string &action, int moveorigin = -1 );
         field *cur_field;
 
@@ -90,8 +90,8 @@ class editmap
         int trsel;
         int trset;
 
-        point target;
-        point origin;
+        tripoint target;
+        tripoint origin;
         bool moveall;
         bool refresh_mplans;
         shapetype editshape;
@@ -100,7 +100,7 @@ class editmap
 
         std::string fids[num_fields];
 
-        std::vector<point> target_list;
+        std::vector<tripoint> target_list;
         std::map<std::string, editmap_hilight> hilights;
         bool blink;
         bool altblink;

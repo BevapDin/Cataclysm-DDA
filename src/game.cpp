@@ -8993,10 +8993,10 @@ void game::peek(int peekx, int peeky)
     draw_ter();
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
-point game::look_debug()
+tripoint game::look_debug()
 {
     editmap *edit = new editmap();
-    point ret = edit->edit();
+    tripoint ret = edit->edit();
     delete edit;
     edit = 0;
     return ret;
