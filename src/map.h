@@ -322,7 +322,7 @@ class map
  void vehmove();          // Vehicle movement
  bool vehproceed();
 // move water under wheels. true if moved
- bool displace_water (const int x, const int y);
+ bool displace_water (const tripoint &p);
 
 // Furniture
  void set(const int x, const int y, const ter_id new_terrain, const furn_id new_furniture);
