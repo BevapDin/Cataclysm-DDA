@@ -324,6 +324,9 @@ bool map::pl_sees( const int tx, const int ty, const int max_range ) const
     return pl_sees( tripoint( tx, ty, 0 ), max_range );
 }
 
+#define seen_cache(x, y, z) \
+    (psm_cache[get_nonant(tripoint((x) / SEEX, (y) / SEEY, (z)))].seen_by_u[(x) % SEEX][(y) % SEEY])
+
 bool map::pl_sees( const tripoint t, int max_range ) const
 {
     if( !inbounds( t ) ) {
@@ -333,8 +336,7 @@ bool map::pl_sees( const tripoint t, int max_range ) const
     if( max_range >= 0 && square_dist( t, g->u.pos() ) > max_range ) {
         return false;    // Out of range!
     }
-
-    return seen_cache[t.x][t.y][t.z - my_ZMIN];
+    return seen_cache(t.x, t.y, t.z);
 }
 
 /**
@@ -352,8 +354,15 @@ bool map::pl_sees( const tripoint t, int max_range ) const
  */
 void map::build_seen_cache()
 {
-    memset(seen_cache, false, sizeof(seen_cache));
-    seen_cache[g->u.posx()][g->u.posy()][-my_ZMIN] = true;
+    for(int x = 0; x < my_MAPSIZE; x++) {
+        for(int y = 0; y < my_MAPSIZE; y++) {
+            for(int z = my_ZMIN; z <= my_ZMAX; z++) {
+                per_submap_cache &cache = psm_cache[get_nonant(x, y, z)];
+                memset(cache.seen_by_u, false, sizeof(cache.seen_by_u));
+            }
+        }
+    }
+    seen_cache(g->u.posx(), g->u.posy(), -my_ZMIN) = true;
 
     const int offsetX = g->u.posx();
     const int offsetY = g->u.posy();
@@ -411,7 +420,7 @@ void map::build_seen_cache()
             } else {
                 offsetDistance = 60 - veh->part_info( mirror ).bonus *  
                                       veh->parts[mirror].hp / veh->part_info( mirror ).durability;
-                seen_cache[mirror_pos.x][mirror_pos.y] = true;
+                seen_cache(mirror_pos.x, mirror_pos.y, 0) = true;
             }
 
             // @todo: Factor in the mirror facing and only cast in the
@@ -430,6 +439,15 @@ void map::build_seen_cache()
 
             castLight( 1, 1.0f, 0.0f, 0, -1, -1, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
             castLight( 1, 1.0f, 0.0f, -1, 0, 0, -1, mirror_pos.x, mirror_pos.y, offsetDistance );
+        }
+    }
+
+    for(int x = 0; x < my_MAPSIZE; x++) {
+        for(int y = 0; y < my_MAPSIZE; y++) {
+            for(int z = my_ZMIN; z <= my_ZMAX; z++) {
+                per_submap_cache &cache = psm_cache[get_nonant(x, y, z)];
+                cache.vflags |= per_submap_cache::VF_SEEN_BY_U;
+            }
         }
     }
 }
@@ -464,20 +482,20 @@ void map::castLight( int row, float start, float end, int xx, int xy, int yx, in
                 float bright = (float) (1 - (rStrat.radius(deltaX, deltaY) / radius));
                 lightMap[currentX][currentY] = bright;
                 */
-                seen_cache[currentX][currentY][-my_ZMIN] = true;
+                seen_cache(currentX, currentY, 0) = true;
                 tripoint p(currentX, currentY, 0);
                 for(p.z = 0; p.z >= my_ZMIN; ) {
                     if (blocks_vertical_view_down(p)) {
                         break;
                     }
                     p.z--;
-                    seen_cache[currentX][currentY][p.z - my_ZMIN] = true;
+                    seen_cache(currentX, currentY, p.z) = true;
                 }
                 for(p.z = +1; p.z <= my_ZMAX; p.z++) {
                     if (blocks_vertical_view_down(p)) {
                         break;
                     }
-                    seen_cache[currentX][currentY][p.z - my_ZMIN] = true;
+                    seen_cache(currentX, currentY, p.z) = true;
                 }
             }
 

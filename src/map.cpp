@@ -120,6 +120,7 @@ map::map(int mapsize, int z_min, int z_max)
     assert(z_min <= 0 && z_max >= 0);
     assert(z_min <= z_max);
     grid.resize( my_MAPSIZE * my_MAPSIZE * ( 1 + my_ZMAX - my_ZMIN ), nullptr );
+    psm_cache.resize( grid.size() );
     dbg( D_INFO ) << "map::map(" << mapsize << ", " << z_min << ", " << z_max << ")";
     veh_in_active_range = true;
     transparency_cache_dirty = true;
@@ -1146,8 +1147,13 @@ void map::furn_set(const tripoint &p, const furn_id new_furniture)
     }
  int lx, ly;
     submap *sm = get_submap_at( p, lx, ly );
+    sm->frn[lx][ly] = new_furniture;
+    const int nonant = get_nonant( tripoint( p.x / SEEX, p.y / SEEY, p.z ) );
  // set the dirty flags
  // TODO: consider checking if the transparency value actually changes
+    // TODO: Z make this a bit more specific,
+    // TODO: Z avoid it alltogether in some cases
+    psm_cache[nonant].vflags = 0;
  set_transparency_cache_dirty();
     sm->frn[lx][ly] = new_furniture;
 }
@@ -1290,6 +1296,10 @@ void map::ter_set(const tripoint &p, const ter_id new_terrain) {
     int lx, ly;
     submap *sm = get_submap_at( p, lx, ly );
     sm->ter[lx][ly] = new_terrain;
+    const int nonant = get_nonant( tripoint( p.x / SEEX, p.y / SEEY, p.z ) );
+    // TODO: Z make this a bit more specific,
+    // TODO: Z avoid it alltogether in some cases
+    psm_cache[nonant].vflags = 0;
 }
 
 std::string map::tername(const int x, const int y) const
@@ -5203,6 +5213,8 @@ void map::shift( const tripoint &s )
     // Move grid to oldgrid an reinitialize grid to all NULL
     std::vector<submap*> oldgrid( grid.size(), NULL );
     oldgrid.swap( grid );
+    t_per_submap_cache_vector oldpsm_cache( psm_cache.size() );
+    oldpsm_cache.swap(psm_cache);
     // Step through each grid and get its grid point before the shift.
     // If that point is valid, we can simply move the submap pointer,
     // else we have to load a new submap.
@@ -5217,6 +5229,7 @@ void map::shift( const tripoint &s )
                     grid[get_nonant( gp )] = oldgrid[get_nonant( oldgp )];
                     update_vehicle_list( gp );
                     update_traps( gp );
+                    psm_cache[get_nonant( gp )] = oldpsm_cache[get_nonant( oldgp )];
                     } else {
                     loadn( gp, true );
                 }
@@ -5282,6 +5295,7 @@ void map::loadn( const tripoint gp, const bool update_vehicles )
     set_transparency_cache_dirty();
     set_outside_cache_dirty();
     setsubmap( gridn, tmpsub );
+    psm_cache[gridn].vflags = 0;
 
   // Update vehicle data
   for( std::vector<vehicle*>::iterator it = tmpsub->vehicles.begin(),
