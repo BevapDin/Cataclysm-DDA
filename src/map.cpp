@@ -52,20 +52,28 @@ map::~map()
 }
 
 VehicleList map::get_vehicles(){
-   return get_vehicles(0,0,SEEX*my_MAPSIZE, SEEY*my_MAPSIZE);
+   return get_vehicles(0,0,my_ZMIN,SEEX*my_MAPSIZE, SEEY*my_MAPSIZE,my_ZMAX);
 }
 
 VehicleList map::get_vehicles(const int sx, const int sy, const int ex, const int ey)
+{
+    return get_vehicles(sx, sy, 0, ex, ey, 0);
+}
+
+VehicleList map::get_vehicles(const int sx, const int sy, const int sz, const int ex, const int ey, const int ez)
 {
  const int chunk_sx = std::max( 0, (sx / SEEX) - 1 );
  const int chunk_ex = std::min( my_MAPSIZE - 1, (ex / SEEX) + 1 );
  const int chunk_sy = std::max( 0, (sy / SEEY) - 1 );
  const int chunk_ey = std::min( my_MAPSIZE - 1, (ey / SEEY) + 1 );
+    const int chunk_sz = std::max(sz, my_ZMIN);
+    const int chunk_ez = std::min(ez, my_ZMAX);
  VehicleList vehs;
 
  for(int cx = chunk_sx; cx <= chunk_ex; ++cx) {
   for(int cy = chunk_sy; cy <= chunk_ey; ++cy) {
-   submap *current_submap = get_submap_at_grid( point( cx, cy ) );
+   for(int cz = chunk_sz; cz <= chunk_ez; ++cz) {
+   submap *current_submap = get_submap_at_grid( tripoint( cx, cy, cz ) );
    for( auto &elem : current_submap->vehicles ) {
     wrapped_vehicle w;
     w.v = elem;
@@ -73,9 +81,11 @@ VehicleList map::get_vehicles(const int sx, const int sy, const int ex, const in
     w.y = w.v->posy + cy * SEEY;
     w.i = cx;
     w.j = cy;
+    w.z = cz;
     vehs.push_back(w);
    }
   }
+ }
  }
 
  return vehs;
@@ -5801,15 +5811,29 @@ void map::build_map_cache()
         for (size_t part = 0; part < v.v->parts.size(); part++) {
             int px = v.x + v.v->parts[part].precalc_dx[0];
             int py = v.y + v.v->parts[part].precalc_dy[0];
-            if(inbounds(px, py)) {
+            const int z = v.z;
+            if(inbounds(tripoint(px, py, z))) {
+                per_submap_cache &psm = psm_cache[get_nonant( tripoint( px / SEEX, py / SEEY, z) )];
+                per_submap_cache *psma = (z == my_ZMAX) ? NULL : &(psm_cache[get_nonant( tripoint( px / SEEX, py / SEEY, z + 1 ) )]);
+                const int lx = px % SEEX;
+                const int ly = py % SEEY;
                 if (v.v->is_inside(part)) {
                     outside_cache[px][py] = false;
+                    psm.see_up[lx][ly] = false;
+                    if (psma != NULL) {
+                        psma->see_down[lx][ly] = false;
+                    }
+                }
+                if (v.v->part_flag(part, "ROOF")) {
+                    psm.see_up[lx][ly] = false;
+                    if (psma != NULL) {
+                        psma->see_down[lx][ly] = false;
+                    }
                 }
                 if (v.v->part_flag(part, VPFLAG_OPAQUE) && v.v->parts[part].hp > 0) {
                     int dpart = v.v->part_with_feature(part , VPFLAG_OPENABLE);
                     if (dpart < 0 || !v.v->parts[dpart].open) {
-                        // TODO: Z
-                        transparency_cache(px, py, 0) = LIGHT_TRANSPARENCY_SOLID;
+                        psm.transparency[lx][ly] = LIGHT_TRANSPARENCY_SOLID;
                     }
                 }
             }

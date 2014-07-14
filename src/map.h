@@ -36,6 +36,7 @@ struct wrapped_vehicle{
  int y;
  int i; // submap col
  int j; // submap row
+ int z;
  vehicle* v;
 };
 
@@ -302,6 +303,7 @@ class map
 // vehicles
  VehicleList get_vehicles();
  VehicleList get_vehicles(const int sx, const int sy, const int ex, const int ey);
+ VehicleList get_vehicles(const int sx, const int sy, const int sz, const int ex, const int ey, const int ez);
 
  /**
   * Checks if tile is occupied by vehicle and by which part.
