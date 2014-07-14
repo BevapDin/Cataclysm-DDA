@@ -74,6 +74,7 @@ void init_mapgen_builtin_functions() {
     mapgen_cfunction_map["house_generic_boxy"]      = &mapgen_generic_house_boxy;
     mapgen_cfunction_map["house_generic_big_livingroom"]      = &mapgen_generic_house_big_livingroom;
     mapgen_cfunction_map["house_generic_center_hallway"]      = &mapgen_generic_house_center_hallway;
+    mapgen_cfunction_map["house_generic_above"] = mapgen_generic_house_above;
     mapgen_cfunction_map["church_new_england"]             = &mapgen_church_new_england;
     mapgen_cfunction_map["church_gothic"]             = &mapgen_church_gothic;
     mapgen_cfunction_map["s_pharm"]             = &mapgen_pharm;
@@ -6396,6 +6397,56 @@ void mapgen_open_air(map *m, oter_id, mapgendata dat, int, float)
     }
 }
 
+void mapgen_generic_house_above(map *m, oter_id o, mapgendata dat, int a, float b)
+{
+    const int x = m->get_abs_sub().x;
+    const int y = m->get_abs_sub().y;
+    // the map m is only a tinymap, it has no further z-levels
+    tinymap tm;
+    tm.load_abs(x, y, dat.zlevel - 1, false);
+    std::vector<point> pnts = find_empty_square(tm);
+    if (!pnts.empty()) {
+        const int index = rng(0, pnts.size() - 1);
+        tm.ter_set(pnts[index].x, pnts[index].y, "t_stairs_up");
+    }
+
+    mapgen_generic_house_boxy(m, o, dat, a, b);
+    for (int x = 0; x < SEEX * 2; x++) {
+        for (int y = 0; y < SEEY * 2; y++) {
+            const ter_id t = m->ter(x, y);
+            // skip terrain that is valid on a second floor
+            // TODO: should be better a check
+            if (t == t_floor || t == t_wall_h || t == t_wall_v || t == t_door_c ||
+                t == t_door_locked || m->has_flag(TFLAG_WALL, x, y) ||
+                m->has_flag(TFLAG_INDOORS, x, y) || t == t_window_domestic) {
+                continue;
+            }
+            // check what's below and change the terrain to a more appropriate
+            // type (either roof or air), in any case remove the items and furn
+            if(tm.has_flag(TFLAG_WALL, x, y)) {
+                m->ter_set(x, y, "t_flat_roof");
+            } else if(tm.has_flag(TFLAG_INDOORS, x+1, y)) {
+                m->ter_set(x, y, "t_flat_roof");
+            } else if(tm.has_flag(TFLAG_INDOORS, x-1, y)) {
+                m->ter_set(x, y, "t_flat_roof");
+            } else if(tm.has_flag(TFLAG_INDOORS, x, y+1)) {
+                m->ter_set(x, y, "t_flat_roof");
+            } else if(tm.has_flag(TFLAG_INDOORS, x, y-1)) {
+                m->ter_set(x, y, "t_flat_roof");
+            } else {
+                m->ter_set(x, y, "t_open_air");
+            }
+            m->i_clear(x, y);
+            m->furn_set(x, y, f_null);
+            // TODO: remove doors that lead to the outside.
+        }
+    }
+    pnts = find_empty_square(*m);
+    if (!pnts.empty()) {
+        const int index = rng(0, pnts.size() - 1);
+        m->ter_set(pnts[index].x, pnts[index].y, "t_stairs_down");
+    }
+}
 
 void mapgen_rift(map *m, oter_id, mapgendata dat, int, float)
 {

@@ -1113,6 +1113,12 @@ bool overmap::generate_sub(int const z)
 
             if (is_ot_type("house_base", oter_above)) {
                 ter(i, j, z) = "basement";
+                if(!one_in(6)) {
+                    ter(i, j, z + 2) = "house_second_floor";
+                    if(!one_in(4)) {
+                        ter(i, j, z + 3) = "house_third_floor";
+                    }
+                }
             } else if (is_ot_type("sub_station", oter_above)) {
                 ter(i, j, z) = "subway_nesw";
                 subway_points.push_back(city(i, j, 0));
