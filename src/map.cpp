@@ -80,12 +80,12 @@ VehicleList map::get_vehicles(const int sx, const int sy, const int ex, const in
  return vehs;
 }
 
-vehicle* map::veh_at(const int x, const int y, int &part_num)
+vehicle* map::veh_at(const int x, const int y, int &part_num) const
 {
     return veh_at(tripoint(x, y, 0), part_num);
 }
 
-vehicle* map::veh_at(const tripoint &p, int &part_num)
+vehicle* map::veh_at(const tripoint &p, int &part_num) const
 {
     const int x = p.x;
     const int y = p.y;
@@ -118,13 +118,13 @@ point map::veh_part_coordinates(const int x, const int y)
     return point(part.mount_dx, part.mount_dy);
 }
 
-vehicle* map::veh_at(const tripoint &p)
+vehicle* map::veh_at(const tripoint &p) const
 {
     int part = 0;
     return veh_at(p, part);
 }
 
-vehicle* map::veh_at(const int x, const int y)
+vehicle* map::veh_at(const int x, const int y) const
 {
  int part = 0;
     return veh_at(tripoint(x, y, 0), part);
@@ -976,22 +976,22 @@ void map::set(const tripoint &p, const std::string new_terrain, const std::strin
     ter_set(p, new_terrain);
 }
 
-std::string map::name(const int x, const int y)
+std::string map::name(const int x, const int y) const
 {
     return name(tripoint(x, y, 0));
 }
 
-std::string map::name(const tripoint &p)
+std::string map::name(const tripoint &p) const
 {
     return has_furn(p) ? furn_at(p).name : ter_at(p).name;
 }
 
-bool map::has_furn(const int x, const int y)
+bool map::has_furn(const int x, const int y) const
 {
     return has_furn(tripoint(x, y, 0));
 }
 
-bool map::has_furn(const tripoint &p)
+bool map::has_furn(const tripoint &p) const
 {
   return furn(p) != f_null;
 }
@@ -1060,11 +1060,11 @@ void map::furn_set(const tripoint &p, const std::string new_furniture) {
     furn_set(p, (furn_id) furnmap[ new_furniture ].loadid );
 }
 
-bool map::can_move_furniture( const int x, const int y, player * p ) {
+bool map::can_move_furniture( const int x, const int y, player * p ) const {
     return can_move_furniture(tripoint(x, y, 0), p);
 }
 
-bool map::can_move_furniture( const tripoint &pnt, player * p ) {
+bool map::can_move_furniture( const tripoint &pnt, player * p ) const {
     const furn_t &furniture_type = furn_at(pnt);
     int required_str = furniture_type.move_str_req;
 
@@ -1076,11 +1076,11 @@ bool map::can_move_furniture( const tripoint &pnt, player * p ) {
     return true;
 }
 
-std::string map::furnname(const int x, const int y) {
+std::string map::furnname(const int x, const int y) const {
     return furnname(tripoint(x, y, 0));
 }
 
-std::string map::furnname(const tripoint &p) {
+std::string map::furnname(const tripoint &p) const {
     return furn_at(p).name;
 }
 /*
@@ -1199,12 +1199,12 @@ std::string map::tername(const tripoint &p) const
     return ter_at(p).name;
 }
 
-std::string map::features(const int x, const int y)
+std::string map::features(const int x, const int y) const
 {
     return features( tripoint( x, y, 0 ) );
 }
 
-std::string map::features(const tripoint &p)
+std::string map::features(const tripoint &p) const
 {
     // This is used in an info window that is 46 characters wide, and is expected
     // to take up one line.  So, make sure it does that.
@@ -1294,7 +1294,7 @@ int map::move_cost_ter_furn(const tripoint &p) const
 
 int map::combined_movecost(const int x1, const int y1,
                            const int x2, const int y2,
-                           const vehicle *ignored_vehicle, const int modifier)
+                           const vehicle *ignored_vehicle, const int modifier) const
 {
     return combined_movecost(
         tripoint(x1, y1, 0), tripoint(x2, y2, 0), ignored_vehicle, modifier);
@@ -1302,7 +1302,7 @@ int map::combined_movecost(const int x1, const int y1,
 
 int map::combined_movecost(const tripoint &p1,
                            const tripoint &p2,
-                           const vehicle *ignored_vehicle, const int modifier)
+                           const vehicle *ignored_vehicle, const int modifier) const
 {
     int cost1 = move_cost(p1, ignored_vehicle);
     int cost2 = move_cost(p2, ignored_vehicle);
@@ -1311,12 +1311,12 @@ int map::combined_movecost(const tripoint &p1,
     return (cost1 + cost2 + modifier) * mult / 2;
 }
 
-bool map::trans(const int x, const int y)
+bool map::trans(const int x, const int y) const
 {
     return light_transparency(x, y) > LIGHT_TRANSPARENCY_SOLID;
 }
 
-bool map::trans(const tripoint &p)
+bool map::trans(const tripoint &p) const
 {
     return trans(p.x, p.y);
 }
@@ -1350,12 +1350,12 @@ bool map::has_flag(const std::string &flag, const tripoint &p) const
     return has_flag(flag, p.x, p.y);
 }
 
-bool map::can_put_items(const int x, const int y)
+bool map::can_put_items(const int x, const int y) const
 {
     return can_put_items(tripoint(x, y, 0));
 }
 
-bool map::can_put_items(const tripoint &p)
+bool map::can_put_items(const tripoint &p) const
 {
     return !has_flag("NOITEM", p) && !has_flag("SEALED", p);
 }
@@ -1472,12 +1472,12 @@ bool map::has_flag_ter_and_furn(const ter_bitflags flag, const tripoint &p) cons
 }
 
 /////
-bool map::is_bashable(const tripoint &p)
+bool map::is_bashable(const tripoint &p) const
 {
     return is_bashable(p.x, p.y);
 }
 
-bool map::is_bashable(const int x, const int y)
+bool map::is_bashable(const int x, const int y) const
 {
     if (!inbounds(x, y)) {
         DebugLog( D_WARNING, D_MAP ) << "Looking for out-of-bounds is_bashable at "
@@ -1507,7 +1507,7 @@ bool map::is_bashable(const int x, const int y)
     return false;
 }
 
-bool map::is_bashable_ter(const int x, const int y)
+bool map::is_bashable_ter(const int x, const int y) const
 {
     return is_bashable_ter( tripoint( x, y, 0 ) );
 }
@@ -1520,12 +1520,12 @@ bool map::is_bashable_ter(const tripoint &p)
     return false;
 }
 
-bool map::is_bashable_furn(const int x, const int y)
+bool map::is_bashable_furn(const int x, const int y) const
 {
     return is_bashable_furn(tripoint(x, y, 0));
 }
 
-bool map::is_bashable_furn(const tripoint &p)
+bool map::is_bashable_furn(const tripoint &p) const
 {
     if ( has_furn(p) && furn_at(p).bash.str_max != -1 ) {
         return true;
@@ -1533,22 +1533,22 @@ bool map::is_bashable_furn(const tripoint &p)
     return false;
 }
 
-bool map::is_bashable_ter_furn(const int x, const int y)
+bool map::is_bashable_ter_furn(const int x, const int y) const
 {
     return is_bashable_ter_furn(tripoint(x, y, 0));
 }
 
-bool map::is_bashable_ter_furn(const tripoint &p)
+bool map::is_bashable_ter_furn(const tripoint &p) const
 {
     return is_bashable_furn(p) || is_bashable_ter(p);
 }
 
-int map::bash_strength(const int x, const int y)
+int map::bash_strength(const int x, const int y) const
 {
     return bash_strength(tripoint(x, y, 0));
 }
 
-int map::bash_strength(const tripoint &p)
+int map::bash_strength(const tripoint &p) const
 {
     if ( has_furn(p) && furn_at(p).bash.str_max != -1 ) {
         return furn_at(p).bash.str_max;
@@ -1558,12 +1558,12 @@ int map::bash_strength(const tripoint &p)
     return -1;
 }
 
-int map::bash_resistance(const int x, const int y)
+int map::bash_resistance(const int x, const int y) const
 {
     return bash_resistance(tripoint(x, y, 0));
 }
 
-int map::bash_resistance(const tripoint &p)
+int map::bash_resistance(const tripoint &p) const
 {
     if ( has_furn(p) && furn_at(p).bash.str_min != -1 ) {
         return furn_at(p).bash.str_min;
@@ -1573,12 +1573,12 @@ int map::bash_resistance(const tripoint &p)
     return -1;
 }
 
-int map::bash_rating(const int str, const int x, const int y)
+int map::bash_rating(const int str, const int x, const int y) const
 {
     return bash_rating(str, tripoint(x, y, 0));
 }
 
-int map::bash_rating(const int str, const tripoint &p)
+int map::bash_rating(const int str, const tripoint &p) const
 {
     if (!is_bashable(p)) {
         return -1;
@@ -1681,22 +1681,22 @@ void map::make_rubble(const tripoint &p, furn_id rubble_type, bool items, ter_id
  * @param y The y coordinate to look at.
  * @return true if the terrain can be dived into; false if not.
  */
-bool map::is_divable(const int x, const int y)
+bool map::is_divable(const int x, const int y) const
 {
     return is_divable(tripoint(x, y, 0));
 }
 
-bool map::is_divable(const tripoint &p)
+bool map::is_divable(const tripoint &p) const
 {
     return has_flag("SWIMMABLE", p) && has_flag(TFLAG_DEEP_WATER, p);
 }
 
-bool map::is_outside(const int x, const int y)
+bool map::is_outside(const int x, const int y) const
 {
     return is_outside(tripoint(x, y, 0));
 }
 
-bool map::is_outside(const tripoint &p)
+bool map::is_outside(const tripoint &p) const
 {
     if(p.z > 0) {
         // For now, TODO: Z
@@ -3196,12 +3196,12 @@ void map::spawn_item(const tripoint &p, const std::string &type_id,
     spawn_an_item(p, new_item, charges, damlevel);
 }
 
-int map::max_volume(const int x, const int y)
+int map::max_volume(const int x, const int y) const
 {
     return max_volume(tripoint(x, y, 0));
 }
 
-int map::max_volume(const tripoint &p)
+int map::max_volume(const tripoint &p) const
 {
     const ter_t &ter = ter_at(p);
     if (has_furn(p)) {
@@ -4542,7 +4542,7 @@ map::sees based off code by Steve Register [arns@arns.freeservers.com]
 http://roguebasin.roguelikedevelopment.org/index.php?title=Simple_Line_of_Sight
 */
 bool map::sees(const int Fx, const int Fy, const int Tx, const int Ty,
-               const int range, int &tc)
+               const int range, int &tc) const
 {
     const int dx = Tx - Fx;
     const int dy = Ty - Fy;
@@ -4606,7 +4606,7 @@ bool map::sees(const int Fx, const int Fy, const int Tx, const int Ty,
 }
 
 bool map::sees(const tripoint &F, const tripoint &T,
-               const int range, int &tc)
+               const int range, int &tc) const
 {
     return sees(F.x, F.y, T.x, T.y, range, tc);
 }
@@ -4708,7 +4708,7 @@ bool map::accessable_furniture(const tripoint &F, const tripoint &T, const int r
     return accessable_furniture(F.x, F.y, T.x, T.y, range);
 }
 
-std::vector<point> map::getDirCircle(const int Fx, const int Fy, const int Tx, const int Ty)
+std::vector<point> map::getDirCircle(const int Fx, const int Fy, const int Tx, const int Ty) const
 {
     std::vector<point> vCircle;
     vCircle.resize(8);
@@ -4742,7 +4742,7 @@ std::vector<point> map::getDirCircle(const int Fx, const int Fy, const int Tx, c
 }
 
 // Bash defaults to true.
-std::vector<point> map::route(const int Fx, const int Fy, const int Tx, const int Ty, const bool can_bash)
+std::vector<point> map::route(const int Fx, const int Fy, const int Tx, const int Ty, const bool can_bash) const
 {
     /* TODO: If the origin or destination is out of bound, figure out the closest
      * in-bounds point and go to that, then to the real origin/destination.

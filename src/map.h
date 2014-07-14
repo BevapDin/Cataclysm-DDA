@@ -203,15 +203,15 @@ class map
   * @return The cost in turns to move out of `(x1, y1)` and into `(x2, y2)`
   */
  int combined_movecost(const int x1, const int y1, const int x2, const int y2,
-                       const vehicle *ignored_vehicle = NULL, const int modifier = 0);
+                       const vehicle *ignored_vehicle = NULL, const int modifier = 0) const;
  int combined_movecost(const tripoint &p1, const tripoint &p2,
-                       const vehicle *ignored_vehicle = NULL, const int modifier = 0);
+                       const vehicle *ignored_vehicle = NULL, const int modifier = 0) const;
 
  /**
   * Returns whether the tile at `(x, y)` is transparent(you can look past it).
   */
- bool trans(const int x, const int y); // Transparent?
- bool trans(const tripoint &p); // Transparent?
+ bool trans(const int x, const int y) const; // Transparent?
+ bool trans(const tripoint &p) const; // Transparent?
 
  /**
   * Returns whether `(Fx, Fy)` sees `(Tx, Ty)` with a view range of `range`.
@@ -220,9 +220,9 @@ class map
   *           subsequently be used to form a path between them
   */
  bool sees(const int Fx, const int Fy, const int Tx, const int Ty,
-           const int range, int &tc);
+           const int range, int &tc) const;
  bool sees(const tripoint &F, const tripoint &T,
-           const int range, int &tc);
+           const int range, int &tc) const;
 
  /**
   * Check whether there's a direct line of sight between `(Fx, Fy)` and
@@ -261,7 +261,7 @@ class map
   * Points closer to the target come first.
   * This method leads to straighter lines and prevents weird looking movements away from the target.
   */
- std::vector<point> getDirCircle(const int Fx, const int Fy, const int Tx, const int Ty);
+ std::vector<point> getDirCircle(const int Fx, const int Fy, const int Tx, const int Ty) const;
 
  /**
   * Calculate a best path using A*
@@ -273,7 +273,7 @@ class map
   *             be destroyed(closed windows, doors, etc.)
   */
  std::vector<point> route(const int Fx, const int Fy, const int Tx, const int Ty,
-                          const bool bash = true);
+                          const bool bash = true) const;
 
  int coord_to_angle (const int x, const int y, const int tgtx, const int tgty);
 // vehicles
@@ -286,14 +286,14 @@ class map
   * @param part_num The part number of the part at this tile will be returned in this parameter.
   * @return A pointer to the vehicle in this tile.
   */
- vehicle* veh_at(const int x, const int y, int &part_num);
- vehicle* veh_at(const tripoint &p, int &part_num);
+ vehicle* veh_at(const int x, const int y, int &part_num) const;
+ vehicle* veh_at(const tripoint &p, int &part_num) const;
 
  /**
   * Same as `veh_at(const int, const int, int)`, but doesn't return part number.
   */
- vehicle* veh_at(const int x, const int y);// checks, if tile is occupied by vehicle
- vehicle* veh_at(const tripoint &p);// checks, if tile is occupied by vehicle
+ vehicle* veh_at(const int x, const int y) const;// checks, if tile is occupied by vehicle
+ vehicle* veh_at(const tripoint &p) const;// checks, if tile is occupied by vehicle
 
  /**
   * Vehicle-relative coordinates from reality bubble coordinates, if a vehicle
@@ -327,10 +327,10 @@ class map
  void set(const int x, const int y, const std::string new_terrain, const std::string new_furniture);
  void set(const tripoint &p, const std::string new_terrain, const std::string new_furniture);
 
- std::string name(const int x, const int y);
- std::string name(const tripoint &p);
- bool has_furn(const int x, const int y);
- bool has_furn(const tripoint &p);
+ std::string name(const int x, const int y) const;
+ std::string name(const tripoint &p) const;
+ bool has_furn(const int x, const int y) const;
+ bool has_furn(const tripoint &p) const;
 
  furn_id furn(const int x, const int y) const; // Furniture at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
  furn_id furn(const tripoint &p) const; // Furniture at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
@@ -344,10 +344,10 @@ class map
  void furn_set(const int x, const int y, const std::string new_furniture);
  void furn_set(const tripoint &p, const std::string new_furniture);
 
- std::string furnname(const int x, const int y);
- std::string furnname(const tripoint &p);
- bool can_move_furniture( const int x, const int y, player * p = NULL);
- bool can_move_furniture( const tripoint &pnt, player * p = NULL);
+ std::string furnname(const int x, const int y) const;
+ std::string furnname(const tripoint &p) const;
+ bool can_move_furniture( const int x, const int y, player * p = NULL) const;
+ bool can_move_furniture( const tripoint &pnt, player * p = NULL) const;
 // Terrain
  ter_id ter(const int x, const int y) const; // Terrain integer id at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
  ter_id ter(const tripoint &p) const; // Terrain integer id at coord (x, y); {x|y}=(0, SEE{X|Y}*3]
@@ -390,12 +390,12 @@ class map
  bool could_see_items(const tripoint &p, const player &u);
 
 
- std::string features(const int x, const int y); // Words relevant to terrain (sharp, etc)
- std::string features(const tripoint &p); // Words relevant to terrain (sharp, etc)
+ std::string features(const int x, const int y) const; // Words relevant to terrain (sharp, etc)
+ std::string features(const tripoint &p) const; // Words relevant to terrain (sharp, etc)
  bool has_flag(const std::string & flag, const int x, const int y) const;  // checks terrain, furniture and vehicles
  bool has_flag(const std::string & flag, const tripoint &p) const;  // checks terrain, furniture and vehicles
- bool can_put_items(const int x, const int y); // True if items can be placed in this tile
- bool can_put_items(const tripoint &p); // True if items can be placed in this tile
+ bool can_put_items(const int x, const int y) const; // True if items can be placed in this tile
+ bool can_put_items(const tripoint &p) const; // True if items can be placed in this tile
  bool has_flag_ter(const std::string & flag, const int x, const int y) const;  // checks terrain
  bool has_flag_ter(const std::string & flag, const tripoint &p) const;  // checks terrain
  bool has_flag_furn(const std::string & flag, const int x, const int y) const;  // checks furniture
@@ -417,27 +417,27 @@ class map
  bool has_flag_ter_and_furn(const ter_bitflags flag, const tripoint &p) const; // checks terrain and furniture
 
  /** Returns true if there is a bashable vehicle part or the furn/terrain is bashable at x,y */
- bool is_bashable(const int x, const int y);
- bool is_bashable(const tripoint &p);
+ bool is_bashable(const int x, const int y) const;
+ bool is_bashable(const tripoint &p) const;
  /** Returns true if the terrain at x,y is bashable */
- bool is_bashable_ter(const int x, const int y);
- bool is_bashable_ter(const tripoint &p);
+ bool is_bashable_ter(const int x, const int y) const;
+ bool is_bashable_ter(const tripoint &p) const;
  /** Returns true if the furniture at x,y is bashable */
- bool is_bashable_furn(const int x, const int y);
- bool is_bashable_furn(const tripoint &p);
+ bool is_bashable_furn(const int x, const int y) const;
+ bool is_bashable_furn(const tripoint &p) const;
  /** Returns true if the furniture or terrain at x,y is bashable */
- bool is_bashable_ter_furn(const int x, const int y);
- bool is_bashable_ter_furn(const tripoint &p);
+ bool is_bashable_ter_furn(const int x, const int y) const;
+ bool is_bashable_ter_furn(const tripoint &p) const;
  /** Returns max_str of the furniture or terrain at x,y */
- int bash_strength(const int x, const int y);
- int bash_strength(const tripoint &p);
+ int bash_strength(const int x, const int y) const;
+ int bash_strength(const tripoint &p) const;
  /** Returns min_str of the furniture or terrain at x,y */
- int bash_resistance(const int x, const int y);
- int bash_resistance(const tripoint &p);
+ int bash_resistance(const int x, const int y) const;
+ int bash_resistance(const tripoint &p) const;
  /** Returns a success rating from -1 to 10 for a given tile based on a set strength, used for AI movement planning 
   *  Values roughly correspond to 10% increment chances of success on a given bash, rounded down. -1 means the square is not bashable */
- int bash_rating(const int str, const int x, const int y);
- int bash_rating(const int str, const tripoint &p);
+ int bash_rating(const int str, const int x, const int y) const;
+ int bash_rating(const int str, const tripoint &p) const;
  
  /** Generates rubble at the given location, if overwrite is true it just writes on top of what currently exists 
   *  floor_type is only used if there is a non-bashable wall at the location or with overwrite = true */
@@ -446,10 +446,10 @@ class map
  void make_rubble(const tripoint &p, furn_id rubble_type = f_rubble, bool items = false,
                     ter_id floor_type = t_dirt, bool overwrite = false);
 
- bool is_divable(const int x, const int y);
- bool is_divable(const tripoint &p);
- bool is_outside(const int x, const int y);
- bool is_outside(const tripoint &p);
+ bool is_divable(const int x, const int y) const;
+ bool is_divable(const tripoint &p) const;
+ bool is_outside(const int x, const int y) const;
+ bool is_outside(const tripoint &p) const;
  bool flammable_items_at(const int x, const int y);
  bool moppable_items_at(const int x, const int y);
  point random_outdoor_tile();
@@ -579,8 +579,8 @@ void add_corpse(int x, int y);
  void spawn_item(const tripoint &p, const std::string &itype_id,
                  const unsigned quantity=1, const long charges=0,
                  const unsigned birthday=0, const int damlevel=0, const bool rand = true);
- int max_volume(const int x, const int y);
- int max_volume(const tripoint &p);
+ int max_volume(const int x, const int y) const;
+ int max_volume(const tripoint &p) const;
  int free_volume(const int x, const int y);
  int free_volume(const tripoint &p);
  int stored_volume(const int x, const int y);
