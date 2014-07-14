@@ -68,6 +68,22 @@ class map
 {
  friend class editmap;
  public:
+    /**
+     * Cached data for each submap.
+     */
+    struct per_submap_cache {
+        typedef enum {
+            VF_SEEN_BY_U       = 1 <<  0,
+        } valid_flags;
+        /**
+         * Contains combination of valid_flags.
+         */
+        int vflags;
+        bool seen_by_u[SEEX][SEEY];
+        per_submap_cache() : vflags(0) { }
+    };
+    typedef std::vector<per_submap_cache> t_per_submap_cache_vector;
+    t_per_submap_cache_vector psm_cache;
 // Constructors & Initialization
  map(int mapsize = MAPSIZE, int z_min = -MAPHEIGHT, int z_max = +MAPHEIGHT);
  ~map();
