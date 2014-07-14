@@ -301,9 +301,6 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
 
         short ignoring;
 
-        // Stair data.
-        int staircount;
-
         // Ammunition if we use a gun.
         std::map<std::string, int> ammo;
 

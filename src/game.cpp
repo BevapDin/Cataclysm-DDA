@@ -536,10 +536,6 @@ void game::setup()
     next_npc_id = 1;
     next_faction_id = 1;
     next_mission_id = 1;
-    // Clear monstair values
-    monstairx = -1;
-    monstairy = -1;
-    monstairz = -1;
     last_target = -1;  // We haven't targeted any monsters yet
     last_target_was_npc = false;
     new_game = true;
@@ -557,7 +553,6 @@ void game::setup()
     footsteps.clear();
     footsteps_source.clear();
     clear_zombies();
-    coming_to_stairs.clear();
     active_npc.clear();
     factions.clear();
     active_missions.clear();
@@ -1477,7 +1472,6 @@ bool game::do_turn()
     m.creature_in_field( u );
 
     monmove();
-    update_stair_monsters();
     u.reset_bonuses();
     u.process_turn();
     u.process_active_items();
@@ -4326,13 +4320,6 @@ void game::load(std::string worldname, std::string name)
     u.weapon = item("null", 0);
     unserialize(fin);
     fin.close();
-
-    // Stair handling.
-    if (!coming_to_stairs.empty()) {
-        monstairx = -1;
-        monstairy = -1;
-        monstairz = 999;
-    }
 
     // weather
     std::string wfile = std::string(worldpath + base64_encode(u.name) + ".weather");
@@ -13586,39 +13573,6 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
 
 void game::vertical_move(int movez, bool force)
 {
-    // Check if there are monsters are using the stairs.
-    bool slippedpast = false;
-    if (!coming_to_stairs.empty()) {
-        // TODO: Allow travel if zombie couldn't reach stairs, but spawn him when we go up.
-        add_msg(m_warning, _("You try to use the stairs. Suddenly you are blocked by a %s!"),
-                coming_to_stairs[0].name().c_str());
-        // Roll.
-        int dexroll = dice(6, u.dex_cur + u.skillLevel("dodge") * 2);
-        int strroll = dice(3, u.str_cur + u.skillLevel("melee") * 1.5);
-        if (coming_to_stairs.size() > 4) {
-            add_msg(_("The are a lot of them on the %s!"), m.tername(u.posx, u.posy).c_str());
-            dexroll /= 4;
-            strroll /= 2;
-        } else if (coming_to_stairs.size() > 1) {
-            add_msg(m_warning, _("There's something else behind it!"));
-            dexroll /= 2;
-        }
-
-        if (dexroll < 14 || strroll < 12) {
-            update_stair_monsters();
-            u.moves -= 100;
-            return;
-        }
-
-        if (dexroll >= 14) {
-            add_msg(_("You manage to slip past!"));
-        } else if (strroll >= 12) {
-            add_msg(_("You manage to push past!"));
-        }
-        slippedpast = true;
-        u.moves -= 100;
-    }
-
     // > and < are used for diving underwater.
     if (m.has_flag("SWIMMABLE", u.posx, u.posy) && m.has_flag(TFLAG_DEEP_WATER, u.posx, u.posy)) {
         if (movez == -1) {
@@ -13766,26 +13720,6 @@ void game::vertical_move(int movez, bool force)
         }
     }
 
-    if (!force) {
-        monstairx = levx;
-        monstairy = levy;
-        monstairz = levz;
-    }
-    // Save all monsters that can reach the stairs, remove them from the tracker,
-    // then despawn the remaining monsters. Because it's a vertical shift, all
-    // monsters are out of the bounds of the map and will despawn.
-    for( unsigned int i = 0; i < num_zombies(); ) {
-        monster &critter = zombie(i);
-        int turns = critter.turns_to_reach(u.posx, u.posy);
-        if (turns < 10 && coming_to_stairs.size() < 8 && critter.will_reach(u.posx, u.posy)
-            && !slippedpast) {
-            critter.staircount = 10 + turns;
-            coming_to_stairs.push_back(critter);
-            remove_zombie( i );
-        } else {
-            i++;
-        }
-    }
     shift_monsters( 0, 0, movez );
 
     // Clear current scents.
@@ -13993,224 +13927,6 @@ point game::om_location() const
     ret.y = int((levy + int(MAPSIZE / 2)) / 2);
 
     return ret;
-}
-
-void game::replace_stair_monsters()
-{
-    for( auto &elem : coming_to_stairs ) {
-        elem.staircount = 0;
-        add_zombie( elem );
-    }
-
-    coming_to_stairs.clear();
-}
-
-//TODO: abstract out the location checking code
-//TODO: refactor so zombies can follow up and down stairs instead of this mess
-void game::update_stair_monsters()
-{
-
-    // Search for the stairs closest to the player.
-    std::vector<int> stairx, stairy;
-    std::vector<int> stairdist;
-
-    const bool from_below = monstairz < levz;
-
-    if (!coming_to_stairs.empty()) {
-        for (int x = 0; x < SEEX * MAPSIZE; x++) {
-            for (int y = 0; y < SEEY * MAPSIZE; y++) {
-                if( ( from_below && m.has_flag( "GOES_DOWN", x, y ) ) ||
-                    ( !from_below && m.has_flag( "GOES_UP", x, y ) ) ) {
-                    stairx.push_back(x);
-                    stairy.push_back(y);
-                    stairdist.push_back(rl_dist(x, y, u.posx, u.posy));
-                }
-            }
-        }
-        if (stairdist.empty()) {
-            return;         // Found no stairs?
-        }
-
-        // Find closest stairs.
-        size_t si = 0;
-        for (size_t i = 0; i < stairdist.size(); i++) {
-            if (stairdist[i] < stairdist[si]) {
-                si = i;
-            }
-        }
-
-        // Find up to 4 stairs for distance stairdist[si] +1
-        int nearest[4] = { 0 };
-        int found = 0;
-        nearest[found++] = si;
-        for (size_t i = 0; i < stairdist.size(); i++) {
-            if ((i != si) && (stairdist[i] <= stairdist[si] + 1)) {
-                nearest[found++] = i;
-                if (found == 4) {
-                    break;
-                }
-            }
-        }
-        // Randomize the stair choice
-        si = nearest[rng( 0, found - 1 )];
-
-        // Attempt to spawn zombies.
-        for (size_t i = 0; i < coming_to_stairs.size(); i++) {
-            int mposx = stairx[si];
-            int mposy = stairy[si];
-            monster &critter = coming_to_stairs[i];
-
-            // We might be not be visible.
-            if (!(critter.posx() < 0 - (SEEX * MAPSIZE) / 6 ||
-                  critter.posy() < 0 - (SEEY * MAPSIZE) / 6 ||
-                  critter.posx() > (SEEX * MAPSIZE * 7) / 6 ||
-                  critter.posy() > (SEEY * MAPSIZE * 7) / 6)) {
-
-                coming_to_stairs[i].staircount -= 4;
-                // Let the player know zombies are trying to come.
-                if (u_see(mposx, mposy)) {
-                    std::stringstream dump;
-                    if (coming_to_stairs[i].staircount > 4) {
-                        dump << string_format(_("You see a %s on the stairs"), critter.name().c_str());
-                    } else {
-                        //~ The <monster> is almost at the <bottom/top> of the <terrain type>!
-                        if (coming_to_stairs[i].staircount > 0) {
-                            dump << (from_below ?
-                                     string_format(_("The %s is almost at the top of the %s!"),
-                                                   critter.name().c_str(),
-                                                   m.tername(mposx, mposy).c_str()) :
-                                     string_format(_("The %s is almost at the bottom of the %s!"),
-                                                   critter.name().c_str(),
-                                                   m.tername(mposx, mposy).c_str()));
-                        }
-                        add_msg(m_warning, dump.str().c_str());
-                    }
-                } else {
-                    sound(mposx, mposy, 5, _("a sound nearby from the stairs!"));
-                }
-
-                if (is_empty(mposx, mposy) && coming_to_stairs[i].staircount <= 0) {
-                    critter.setpos(mposx, mposy, true);
-                    critter.staircount = 0;
-                    add_zombie(critter);
-                    if (u_see(mposx, mposy)) {
-                        if (!from_below) {
-                            add_msg(m_warning, _("The %s comes down the %s!"),
-                                    critter.name().c_str(),
-                                    m.tername(mposx, mposy).c_str());
-                        } else {
-                            add_msg(m_warning, _("The %s comes up the %s!"),
-                                    critter.name().c_str(),
-                                    m.tername(mposx, mposy).c_str());
-                        }
-                    }
-                    coming_to_stairs.erase(coming_to_stairs.begin() + i);
-                } else if (u.posx == mposx && u.posy == mposy && critter.staircount <= 0) {
-                    // Monster attempts to push player of stairs
-                    int pushx = -1;
-                    int pushy = -1;
-                    int tries = 0;
-
-                    // the critter is now right on top of you and will attack unless
-                    // it can find a square to push you into with one of his tries.
-                    const int creature_push_attempts = 9;
-                    const int player_throw_resist_chance = 3;
-
-                    critter.setpos(mposx, mposy, true);
-                    while (tries < creature_push_attempts) {
-                        tries++;
-                        pushx = rng(-1, 1), pushy = rng(-1, 1);
-                        int iposx = mposx + pushx;
-                        int iposy = mposy + pushy;
-                        if ((pushx != 0 || pushy != 0) && (mon_at(iposx, iposy) == -1) &&
-                            critter.can_move_to(iposx, iposy)) {
-                            bool resiststhrow = (u.is_throw_immune()) ||
-                                                (u.has_trait("LEG_TENT_BRACE"));
-                            if (resiststhrow && one_in(player_throw_resist_chance)) {
-                                u.moves -= 25; // small charge for avoiding the push altogether
-                                add_msg(_("The %s fails to push you back!"),
-                                        critter.name().c_str());
-                                return; //judo or leg brace prevent you from getting pushed at all
-                            }
-                            // not accounting for tentacles latching on, so..
-                            // something is about to happen, lets charge a move
-                            u.moves -= 100;
-                            if (resiststhrow && (u.is_throw_immune())) {
-                                //we have a judoka who isn't getting pushed but counterattacking now.
-                                mattack defend;
-                                defend.thrown_by_judo(&critter, -1);
-                                return;
-                            }
-                            std::string msg = "";
-                            if (!(resiststhrow) && (u.get_dodge() + rng(0, 3) < 12)) {
-                                // dodge 12 - never get downed
-                                // 11.. avoid 75%; 10.. avoid 50%; 9.. avoid 25%
-                                u.add_effect("downed", 2);
-                                msg = _("The %s pushed you back hard!");
-                            } else {
-                                msg = _("The %s pushed you back!");
-                            }
-                            add_msg(m_warning, msg.c_str(), critter.name().c_str());
-                            u.posx += pushx;
-                            u.posy += pushy;
-                            return;
-                        }
-                    }
-                    add_msg(m_warning,
-                            _("The %s tried to push you back but failed! It attacks you!"),
-                            critter.name().c_str());
-                    critter.melee_attack(u, false);
-                    u.moves -= 100;
-                    return;
-                } else if ((critter.staircount <= 0) && (mon_at(mposx, mposy) != -1)) {
-                    // Monster attempts to displace a monster from the stairs
-                    monster &other = critter_tracker.find(mon_at(mposx, mposy));
-                    critter.setpos(mposx, mposy, true);
-
-                    // the critter is now right on top of another and will push it
-                    // if it can find a square to push it into inside of his tries.
-                    const int creature_push_attempts = 9;
-                    const int creature_throw_resist = 4;
-
-                    int tries = 0;
-                    int pushx = 0;
-                    int pushy = 0;
-                    while (tries < creature_push_attempts) {
-                        tries++;
-                        pushx = rng(-1, 1);
-                        pushy = rng(-1, 1);
-                        int iposx = mposx + pushx;
-                        int iposy = mposy + pushy;
-                        if ((pushx == 0 && pushy == 0) || ((iposx == u.posx) && (iposy == u.posy))) {
-                            continue;
-                        }
-                        if ((mon_at(iposx, iposy) == -1) && other.can_move_to(iposx, iposy)) {
-                            other.setpos(iposx, iposy, false);
-                            other.moves -= 100;
-                            std::string msg = "";
-                            if (one_in(creature_throw_resist)) {
-                                other.add_effect("downed", 2);
-                                msg = _("The %s pushed the %s hard.");
-                            } else {
-                                msg = _("The %s pushed the %s.");
-                            };
-                            add_msg(msg.c_str(), critter.name().c_str(), other.name().c_str());
-                            return;
-                        }
-                    }
-                    return;
-                } else {
-                    critter.setpos(mposx, mposy, true);
-                }
-            }
-        }
-    }
-
-    if (coming_to_stairs.empty()) {
-        monstairx = -1;
-        monstairy = -1;
-        monstairz = 999;
-    }
 }
 
 void game::despawn_monster(int mondex)
