@@ -878,7 +878,7 @@ int iuse::smoking_pipe(player *p, item *it, bool, point)
         }
         if (p->get_effect_dur("cig") > (100 * (p->addiction_level(ADD_CIG)))) {
             p->add_msg_if_player(m_bad, _("Ugh, too much smoke... you cough heavily."));
-            sounds::sound(p->posx(), p->posy(), 10, "");
+            sounds::sound(p->pos(), 10, "");
         }
         p->moves -= 250;
     } else if ("weed" == id_to_smoke) {
@@ -1777,12 +1777,12 @@ int iuse::mut_iv(player *p, item *it, bool, point)
         mutation_category = "";
         if (p->has_trait("MUT_JUNKIE")) {
             p->add_msg_if_player(m_good, _("Oh, yeah! That's the stuff!"));
-            sounds::sound(p->posx(), p->posy(), 15 + 3 * p->str_cur, _("YES! YES! YESSS!!!"));
+            sounds::sound(p->pos(), 15 + 3 * p->str_cur, _("YES! YES! YESSS!!!"));
         } else if (p->has_trait("NOPAIN")) {
             p->add_msg_if_player(_("You inject yourself."));
         } else {
             p->add_msg_if_player(m_bad, _("You inject yoursel-arRGH!"));
-            sounds::sound(p->posx(), p->posy(), 15 + 3 * p->str_cur, _("You scream in agony!!"));
+            sounds::sound(p->pos(), 15 + 3 * p->str_cur, _("You scream in agony!!"));
         }
         p->mutate();
         p->mod_pain(1 * rng(1, 4));
@@ -1888,7 +1888,7 @@ int iuse::mut_iv(player *p, item *it, bool, point)
         p->mutate_category("MUTCAT_CHIMERA");
         if (!(p->has_trait("NOPAIN"))) {
             p->mod_pain(20);
-            sounds::sound(p->posx(), p->posy(), 25 + 3 * p->str_cur, _("You roar in agony!!"));
+            sounds::sound(p->pos(), 25 + 3 * p->str_cur, _("You roar in agony!!"));
             p->add_morale(MORALE_MUTAGEN_CHIMERA, -40, -200);
         }
         p->hunger += 20;
@@ -1945,7 +1945,7 @@ int iuse::mut_iv(player *p, item *it, bool, point)
         } else if (it->has_flag("MUTAGEN_RAT")) {
             p->add_msg_if_player(_("You squeak as the shot hits you."));
             //~Sound of ratlike squeaking
-            sounds::sound(p->posx(), p->posy(), 10, _("Eep!"));
+            sounds::sound(p->pos(), 10, _("Eep!"));
             mutation_category = "MUTCAT_RAT";
         } else if (it->has_flag("MUTAGEN_BEAST")) {
             p->add_msg_if_player(_("Your heart races wildly as the injection takes hold."));
@@ -4087,7 +4087,7 @@ int iuse::crowbar(player *p, item *it, bool, point)
         if (type == t_door_locked_alarm) {
             p->add_memorial_log(pgettext("memorial_male", "Set off an alarm."),
                                   pgettext("memorial_female", "Set off an alarm."));
-            sounds::sound(p->posx(), p->posy(), 40, _("An alarm sounds!"));
+            sounds::sound(p->pos(), 40, _("An alarm sounds!"));
             if (!g->event_queued(EVENT_WANTED)) {
                 g->add_event(EVENT_WANTED, int(calendar::turn) + 300, 0, g->get_abs_levx(), g->get_abs_levy());
             }
@@ -4204,7 +4204,7 @@ int iuse::combatsaw_off(player *p, item *it, bool, point)
 {
     p->moves -= 60;
     if (it->charges > 0 && !p->is_underwater()) {
-        sounds::sound(p->posx(), p->posy(), 30,
+        sounds::sound(p->pos(), 30,
                       _("With a snarl, the combat chainsaw screams to life!"));
         it->make("combatsaw_on");
         it->active = true;
@@ -4222,7 +4222,7 @@ int iuse::combatsaw_on(player *p, item *it, bool t, point)
             it->make("combatsaw_off");
             it->active = false;
         } else if (one_in(12)) {
-            sounds::ambient_sound(p->posx(), p->posy(), 18, _("Your combat chainsaw growls."));
+            sounds::ambient_sound(p->pos(), 18, _("Your combat chainsaw growls."));
         }
     } else { // Toggling
         p->add_msg_if_player(_("Your combat chainsaw goes quiet."));
@@ -4236,7 +4236,7 @@ int iuse::chainsaw_off(player *p, item *it, bool, point)
 {
     p->moves -= 80;
     if (rng(0, 10) - it->damage > 5 && it->charges > 0 && !p->is_underwater()) {
-        sounds::sound(p->posx(), p->posy(), 20,
+        sounds::sound(p->pos(), 20,
                       _("With a roar, the chainsaw leaps to life!"));
         it->make("chainsaw_on");
         it->active = true;
@@ -4254,7 +4254,7 @@ int iuse::chainsaw_on(player *p, item *it, bool t, point)
         it->active = false;
     } else if (t) { // Effects while simply on
         if (one_in(15)) {
-            sounds::ambient_sound(p->posx(), p->posy(), 12, _("Your chainsaw rumbles."));
+            sounds::ambient_sound(p->pos(), 12, _("Your chainsaw rumbles."));
         }
     } else { // Toggling
         p->add_msg_if_player(_("Your chainsaw dies."));
@@ -4268,7 +4268,7 @@ int iuse::elec_chainsaw_off(player *p, item *it, bool, point)
 {
     p->moves -= 80;
     if (rng(0, 10) - it->damage > 5 && it->charges > 0 && !p->is_underwater()) {
-        sounds::sound(p->posx(), p->posy(), 20,
+        sounds::sound(p->pos(), 20,
                       _("With a roar, the electric chainsaw leaps to life!"));
         it->make("elec_chainsaw_on");
         it->active = true;
@@ -4299,7 +4299,7 @@ int iuse::cs_lajatang_off(player *p, item *it, bool, point)
 {
     p->moves -= 80;
     if (rng(0, 10) - it->damage > 5 && it->charges > 1) {
-        sounds::sound(p->posx(), p->posy(), 40,
+        sounds::sound(p->pos(), 40,
                       _("With a roar, the chainsaws leap to life!"));
         it->make("cs_lajatang_on");
         it->active = true;
@@ -4313,7 +4313,7 @@ int iuse::cs_lajatang_on(player *p, item *it, bool t, point)
 {
     if (t) { // Effects while simply on
         if (one_in(15)) {
-            sounds::ambient_sound(p->posx(), p->posy(), 12, _("Your chainsaws rumble."));
+            sounds::ambient_sound(p->pos(), 12, _("Your chainsaws rumble."));
         }
         //Deduct an additional charge (since there are two of them)
         if (it->charges > 0) {
@@ -4331,7 +4331,7 @@ int iuse::carver_off(player *p, item *it, bool, point)
 {
     p->moves -= 80;
     if (it->charges > 0) {
-        sounds::sound(p->posx(), p->posy(), 20,
+        sounds::sound(p->pos(), 20,
                       _("The electric carver's serrated blades start buzzing!"));
         it->make("carver_on");
         it->active = true;
@@ -4345,7 +4345,7 @@ int iuse::carver_on(player *p, item *it, bool t, point)
 {
     if (t) { // Effects while simply on
         if (one_in(10)) {
-            sounds::ambient_sound(p->posx(), p->posy(), 8, _("Your electric carver buzzes."));
+            sounds::ambient_sound(p->pos(), 8, _("Your electric carver buzzes."));
         }
     } else { // Toggling
         p->add_msg_if_player(_("Your electric carver dies."));
@@ -4359,7 +4359,7 @@ int iuse::trimmer_off(player *p, item *it, bool, point)
 {
     p->moves -= 80;
     if (rng(0, 10) - it->damage > 3 && it->charges > 0) {
-        sounds::sound(p->posx(), p->posy(), 15,
+        sounds::sound(p->pos(), 15,
                       _("With a roar, the hedge trimmer leaps to life!"));
         it->make("trimmer_on");
         it->active = true;
@@ -4373,7 +4373,7 @@ int iuse::trimmer_on(player *p, item *it, bool t, point)
 {
     if (t) { // Effects while simply on
         if (one_in(15)) {
-            sounds::ambient_sound(p->posx(), p->posy(), 10, _("Your hedge trimmer rumbles."));
+            sounds::ambient_sound(p->pos(), 10, _("Your hedge trimmer rumbles."));
         }
     } else { // Toggling
         p->add_msg_if_player(_("Your hedge trimmer dies."));
@@ -4387,7 +4387,7 @@ int iuse::circsaw_on(player *p, item *it, bool t, point)
 {
     if (t) { // Effects while simply on
         if (one_in(15)) {
-            sounds::ambient_sound(p->posx(), p->posy(), 7, _("Your circular saw buzzes."));
+            sounds::ambient_sound(p->pos(), 7, _("Your circular saw buzzes."));
         }
     } else { // Toggling
         p->add_msg_if_player(_("Your circular saw powers off."));
@@ -4407,7 +4407,7 @@ int iuse::shishkebab_off(player *p, item *it, bool, point pos)
             if (it->charges <= 0) {
                 p->add_msg_if_player(m_info, _("This thing needs some fuel!"));
             } else if (rng(0, 10) - it->damage > 5 && !p->is_underwater()) {
-                sounds::sound(p->posx(), p->posy(), 10, _("Let's dance, Zeds!"));
+                sounds::sound(p->pos(), 10, _("Let's dance, Zeds!"));
                 it->make("shishkebab_on");
                 it->active = true;
             } else {
@@ -4433,7 +4433,7 @@ int iuse::shishkebab_on(player *p, item *it, bool t, point pos)
     } else if (t) {
         // Effects while simply on
         if (one_in(25)) {
-            sounds::ambient_sound(p->posx(), p->posy(), 10, _("Your shishkebab crackles!"));
+            sounds::ambient_sound(p->pos(), 10, _("Your shishkebab crackles!"));
         }
 
         if (one_in(75)) {
@@ -4476,7 +4476,7 @@ int iuse::firemachete_off(player *p, item *it, bool, point pos)
         case 1: {
             p->moves -= 10;
             if (rng(0, 10) - it->damage > 2 && it->charges > 0 && !p->is_underwater()) {
-                sounds::sound(p->posx(), p->posy(), 10, _("Your No. 9 glows!"));
+                sounds::sound(p->pos(), 10, _("Your No. 9 glows!"));
                 it->make("firemachete_on");
                 it->active = true;
             } else {
@@ -4501,7 +4501,7 @@ int iuse::firemachete_on(player *p, item *it, bool t, point pos)
             it->make("firemachete_off");
             it->active = false;
         } else if (one_in(25)) {
-            sounds::ambient_sound(p->posx(), p->posy(), 5, _("Your No. 9 hisses."));
+            sounds::ambient_sound(p->pos(), 5, _("Your No. 9 hisses."));
         }
         if (one_in(100)) {
             p->add_msg_if_player(m_bad, _("Your No. 9 cuts out!"));
@@ -4542,7 +4542,7 @@ int iuse::broadfire_off(player *p, item *it, bool t, point pos)
         case 1: {
             p->moves -= 10;
             if (it->charges > 0 && !p->is_underwater()) {
-                sounds::sound(p->posx(), p->posy(), 10, _("Charge!!"));
+                sounds::sound(p->pos(), 10, _("Charge!!"));
                 it->make("broadfire_on");
                 it->active = true;
             } else {
@@ -4600,7 +4600,7 @@ int iuse::firekatana_off(player *p, item *it, bool t, point pos)
         case 1: {
             p->moves -= 10;
             if (it->charges > 0 && !p->is_underwater()) {
-                sounds::sound(p->posx(), p->posy(), 10, _("The Sun rises."));
+                sounds::sound(p->pos(), 10, _("The Sun rises."));
                 it->make("firekatana_on");
                 it->active = true;
             } else {
@@ -4659,7 +4659,7 @@ int iuse::zweifire_off(player *p, item *it, bool t, point pos)
         case 1: {
             p->moves -= 10;
             if (it->charges > 0 && !p->is_underwater()) {
-                sounds::sound(p->posx(), p->posy(), 10,
+                sounds::sound(p->pos(), 10,
                               _("Die Klinge deines Schwertes brennt!"));
                 it->make("zweifire_on");
                 it->active = true;
@@ -7059,7 +7059,7 @@ int iuse::artifact(player *p, item *it, bool, point)
 
         switch (used) {
             case AEA_STORM: {
-                sounds::sound(p->posx(), p->posy(), 10, _("Ka-BOOM!"));
+                sounds::sound(p->pos(), 10, _("Ka-BOOM!"));
                 int num_bolts = rng(2, 4);
                 for (int j = 0; j < num_bolts; j++) {
                     int xdir = 0, ydir = 0;
@@ -7152,7 +7152,7 @@ int iuse::artifact(player *p, item *it, bool, point)
             break;
 
             case AEA_PULSE:
-                sounds::sound(p->posx(), p->posy(), 30, _("The earth shakes!"));
+                sounds::sound(p->pos(), 30, _("The earth shakes!"));
                 for (int x = p->posx() - 2; x <= p->posx() + 2; x++) {
                     for (int y = p->posy() - 2; y <= p->posy() + 2; y++) {
                         g->m.bash(x, y, 40);
@@ -7305,12 +7305,12 @@ int iuse::artifact(player *p, item *it, bool, point)
 
             case AEA_NOISE:
                 p->add_msg_if_player(m_bad, _("Your %s emits a deafening boom!"), it->tname().c_str());
-                sounds::sound(p->posx(), p->posy(), 100, "");
+                sounds::sound(p->pos(), 100, "");
                 break;
 
             case AEA_SCREAM:
                 p->add_msg_if_player(m_warning, _("Your %s screams disturbingly."), it->tname().c_str());
-                sounds::sound(p->posx(), p->posy(), 40, "");
+                sounds::sound(p->pos(), 40, "");
                 p->add_morale(MORALE_SCREAM, -10, 0, 300, 5);
                 break;
 
@@ -8118,7 +8118,7 @@ int iuse::talking_doll(player *p, item *it, bool, point)
 
     const SpeechBubble speech = get_speech(label);
 
-    sounds::ambient_sound(p->posx(), p->posy(), speech.volume, speech.text);
+    sounds::ambient_sound(p->pos(), speech.volume, speech.text);
 
     return it->type->charges_to_use();
 }
@@ -8158,20 +8158,20 @@ int iuse::gun_repair(player *p, item *it, bool, point)
     }
     if ((fix->damage == 0) && p->skillLevel("mechanics") >= 8) {
         p->add_msg_if_player(m_good, _("You accurize your %s."), fix->tname().c_str());
-        sounds::sound(p->posx(), p->posy(), 6, "");
+        sounds::sound(p->pos(), 6, "");
         p->moves -= 2000 * p->fine_detail_vision_mod();
         p->practice("mechanics", 10);
         fix->damage--;
     } else if (fix->damage >= 2) {
         p->add_msg_if_player(m_good, _("You repair your %s!"), fix->tname().c_str());
-        sounds::sound(p->posx(), p->posy(), 8, "");
+        sounds::sound(p->pos(), 8, "");
         p->moves -= 1000 * p->fine_detail_vision_mod();
         p->practice("mechanics", 10);
         fix->damage--;
     } else {
         p->add_msg_if_player(m_good, _("You repair your %s completely!"),
                              fix->tname().c_str());
-        sounds::sound(p->posx(), p->posy(), 8, "");
+        sounds::sound(p->pos(), 8, "");
         p->moves -= 500 * p->fine_detail_vision_mod();
         p->practice("mechanics", 10);
         fix->damage = 0;
@@ -8237,7 +8237,7 @@ int iuse::misc_repair(player *p, item *it, bool, point)
 int iuse::bell(player *p, item *it, bool, point)
 {
     if (it->type->id == "cow_bell") {
-        sounds::sound(p->posx(), p->posy(), 12, _("Clank! Clank!"));
+        sounds::sound(p->pos(), 12, _("Clank! Clank!"));
         if (!p->is_deaf()) {
             const int cow_factor = 1 + (p->mutation_category_level.find("MUTCAT_CATTLE") ==
                                         p->mutation_category_level.end() ?
@@ -8249,7 +8249,7 @@ int iuse::bell(player *p, item *it, bool, point)
             }
         }
     } else {
-        sounds::sound(p->posx(), p->posy(), 4, _("Ring! Ring!"));
+        sounds::sound(p->pos(), 4, _("Ring! Ring!"));
     }
     return it->type->charges_to_use();
 }
@@ -9004,7 +9004,7 @@ int iuse::camera(player *p, item *it, bool, point)
         trajectory.push_back(aim_point);
 
         p->moves -= 50;
-        sounds::sound(p->posx(), p->posy(), 8, _("Click."));
+        sounds::sound(p->pos(), 8, _("Click."));
 
         for (auto &i : trajectory) {
             int tx = i.x;
@@ -9424,7 +9424,7 @@ void sendRadioSignal(player *p, std::string signal)
         item &it = p->inv.find_item(i);
 
         if (it.has_flag("RADIO_ACTIVATION") && it.has_flag(signal)) {
-            sounds::sound(p->posx(), p->posy(), 6, "beep.");
+            sounds::sound(p->pos(), 6, "beep.");
 
             it_tool *tmp = dynamic_cast<it_tool *>(it.type);
             tmp->invoke(p, &it, false, point( p->posx(), p->posy() ));

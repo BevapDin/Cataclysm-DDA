@@ -29,7 +29,18 @@ static std::unordered_map<point, sound_event> sound_markers;
 
 void sounds::ambient_sound(int x, int y, int vol, std::string description)
 {
-    sound( x, y, vol, description, true );
+    ambient_sound( tripoint( x, y, 0 ), vol, description );
+}
+
+void sounds::ambient_sound(tripoint p, int vol, std::string description)
+{
+    sound( p, vol, description, true );
+}
+
+void sounds::sound(const tripoint p, int vol, std::string description, bool ambient)
+{
+    // TODO: Z
+    sound( p.x, p.y, vol, description, ambient );
 }
 
 void sounds::sound(int x, int y, int vol, std::string description, bool ambient)
@@ -42,6 +53,12 @@ void sounds::sound(int x, int y, int vol, std::string description, bool ambient)
     recent_sounds.emplace_back( std::make_pair( point(x, y), vol ) );
     sounds_since_last_turn.emplace(
         std::make_pair( point(x, y), sound_event{vol, description, ambient, false} ) );
+}
+
+void sounds::add_footstep(const tripoint p, int volume, int distance, monster *source)
+{
+    // TODO: Z
+    add_footstep( p.x, p.y, volume, distance, source );
 }
 
 void sounds::add_footstep(int x, int y, int volume, int, monster *)
@@ -151,7 +168,8 @@ void sounds::process_sounds()
                     int target_y = source.y + rng(-max_error, max_error);
 
                     int wander_turns = volume * (goodhearing ? 6 : 1);
-                    critter.wander_to(target_x, target_y, wander_turns);
+                    // TODO: Z
+                    critter.wander_to(tripoint( target_x, target_y, 0 ), wander_turns);
                     critter.process_trigger(MTRIG_SOUND, volume);
                 }
             }

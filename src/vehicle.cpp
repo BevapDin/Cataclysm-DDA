@@ -1362,11 +1362,11 @@ void vehicle::honk_horn()
         const auto horn_pos = global_pos() + parts[p].precalc[0];
         //Determine sound
         if( horn_type.bonus >= 40 ) {
-            sounds::sound( horn_pos.x, horn_pos.y, horn_type.bonus, _("HOOOOORNK!") );
+            sounds::sound( horn_pos, horn_type.bonus, _("HOOOOORNK!") );
         } else if( horn_type.bonus >= 20 ) {
-            sounds::sound( horn_pos.x, horn_pos.y, horn_type.bonus, _("BEEEP!") );
+            sounds::sound( horn_pos, horn_type.bonus, _("BEEEP!") );
         } else {
-            sounds::sound( horn_pos.x, horn_pos.y, horn_type.bonus, _("honk.") );
+            sounds::sound( horn_pos, horn_type.bonus, _("honk.") );
         }
     }
 
@@ -2993,7 +2993,7 @@ void vehicle::noise_and_smoke( double load, double time )
            lvl++;
        }
     }
-    sounds::ambient_sound( global_x(), global_y(), noise, sound_msgs[lvl] );
+    sounds::ambient_sound( global_pos(), noise, sound_msgs[lvl] );
 }
 
 float vehicle::wheels_area (int *cnt)

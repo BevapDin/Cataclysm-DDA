@@ -457,7 +457,7 @@ void monster::footsteps(const tripoint &p)
   default: break;
  }
  int dist = rl_dist(p, g->u.pos());
- sounds::add_footstep(p.x, p.y, volume, dist, this);
+ sounds::add_footstep(p, volume, dist, this);
  return;
 }
 
