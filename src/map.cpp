@@ -963,7 +963,7 @@ bool map::vehproceed()
             const int wheel_x = x + veh->parts[w].precalc[0].x;
             const int wheel_y = y + veh->parts[w].precalc[0].y;
             if (one_in(2)) {
-                if( displace_water( wheel_x, wheel_y) && pl_ctrl ) {
+                if( displace_water( tripoint(wheel_x, wheel_y, 0)) && pl_ctrl ) {
                     add_msg(m_warning, _("You hear a splash!"));
                 }
             }
@@ -1020,9 +1020,9 @@ bool map::vehproceed()
     return true;
 }
 
-bool map::displace_water (const int x, const int y)
+bool map::displace_water (const tripoint &p)
 {
-    if (has_flag("SWIMMABLE", x, y) && !has_flag(TFLAG_DEEP_WATER, x, y)) // shallow water
+    if (has_flag("SWIMMABLE", p) && !has_flag(TFLAG_DEEP_WATER, p)) // shallow water
     { // displace it
         int dis_places = 0, sel_place = 0;
         for (int pass = 0; pass < 2; pass++)
@@ -1037,18 +1037,19 @@ bool map::displace_water (const int x, const int y)
             for (int tx = -1; tx <= 1; tx++)
                 for (int ty = -1; ty <= 1; ty++)
                 {
+                    const tripoint t(p.x + tx, p.y + ty, p.z);
                     if ((!tx && !ty)
-                            || move_cost_ter_furn(x + tx, y + ty) == 0
-                            || has_flag(TFLAG_DEEP_WATER, x + tx, y + ty))
+                            || move_cost_ter_furn(t) == 0
+                            || has_flag(TFLAG_DEEP_WATER, t))
                         continue;
-                    ter_id ter0 = ter (x + tx, y + ty);
+                    ter_id ter0 = ter (t);
                     if (ter0 == t_water_sh ||
                         ter0 == t_water_dp)
                         continue;
                     if (pass && dis_places == sel_place)
                     {
-                       ter_set(x + tx, y + ty, t_water_sh);
-                       ter_set(x, y, t_dirt);
+                       ter_set(t, t_water_sh);
+                       ter_set(p, t_dirt);
                         return true;
                     }
                     dis_places++;
