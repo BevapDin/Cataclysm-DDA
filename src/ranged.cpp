@@ -155,8 +155,7 @@ double Creature::projectile_attack(const projectile &proj, const tripoint &sourc
         } else if(in_veh != NULL && g->m.veh_at(t) == in_veh) {
             // Don't do anything, especially don't call map::shoot as this would damage the vehicle
         } else {
-            // TODO: Z
-            g->m.shoot(t.x, t.y, dam, i == trajectory.size() - 1, proj.proj_effects);
+            g->m.shoot(t, dam, i == trajectory.size() - 1, proj.proj_effects);
         }
     } // Done with the trajectory!
 
@@ -797,7 +796,7 @@ void game::throw_item(player &p, const tripoint &target_, item &thrown,
             break; // trajectory stops at this square
             // end if (hit_something)
         } else { // No monster hit, but the terrain might be. (e.g. window)
-            m.shoot(t.x, t.y, dam, false, no_effects);
+            m.shoot(t, dam, false, no_effects);
         }
 
         // Collide with impassable terrain

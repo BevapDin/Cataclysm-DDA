@@ -6965,8 +6965,7 @@ void game::explosion(const tripoint &pos, int power, int shrapnel, bool fire, bo
                 u.deal_damage( nullptr, hit, damage_instance( DT_CUT, dam ) );
             } else {
                 std::set<std::string> shrapnel_effects;
-                // TODO: Z
-                m.shoot(tp.x, tp.y, dam, j == traj.size() - 1, shrapnel_effects);
+                m.shoot(tp, dam, j == traj.size() - 1, shrapnel_effects);
             }
         }
     }

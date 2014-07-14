@@ -2387,7 +2387,7 @@ void map::crush(const tripoint &p)
     }
 }
 
-void map::shoot(const int x, const int y, int &dam,
+void map::shoot(const tripoint &p, int &dam,
                 const bool hit_items, const std::set<std::string>& ammo_effects)
 {
     if (dam < 0)
@@ -2395,29 +2395,29 @@ void map::shoot(const int x, const int y, int &dam,
         return;
     }
 
-    if (has_flag("ALARMED", x, y) && !g->event_queued(EVENT_WANTED))
+    if (has_flag("ALARMED", p) && !g->event_queued(EVENT_WANTED))
     {
-        g->sound(x, y, 30, _("An alarm sounds!"));
+        g->sound(p, 30, _("An alarm sounds!"));
         g->add_event(EVENT_WANTED, int(calendar::turn) + 300, 0, g->get_abs_levx(), g->get_abs_levy());
     }
 
     int vpart;
-    vehicle *veh = veh_at(x, y, vpart);
+    vehicle *veh = veh_at(p, vpart);
     if (veh)
     {
         const bool inc = (ammo_effects.count("INCENDIARY") || ammo_effects.count("FLAME"));
         dam = veh->damage (vpart, dam, inc? 2 : 0, hit_items);
     }
 
-    ter_t terrain = ter_at(x, y);
+    ter_t terrain = ter_at(p);
     if( 0 == terrain.id.compare("t_wall_wood_broken") ||
         0 == terrain.id.compare("t_wall_log_broken") ||
         0 == terrain.id.compare("t_door_b") ) {
         if (hit_items || one_in(8)) { // 1 in 8 chance of hitting the door
             dam -= rng(20, 40);
             if (dam > 0) {
-                g->sound(x, y, 10, _("crash!"));
-                ter_set(x, y, t_dirt);
+                g->sound(p, 10, _("crash!"));
+                ter_set(p, t_dirt);
             }
         }
         else {
@@ -2429,8 +2429,8 @@ void map::shoot(const int x, const int y, int &dam,
                0 == terrain.id.compare("t_door_locked_alarm") ) {
         dam -= rng(15, 30);
         if (dam > 0) {
-            g->sound(x, y, 10, _("smash!"));
-            ter_set(x, y, t_door_b);
+            g->sound(p, 10, _("smash!"));
+            ter_set(p, t_door_b);
         }
     } else if( 0 == terrain.id.compare("t_door_boarded") ||
                0 == terrain.id.compare("t_door_boarded_damaged") ||
@@ -2438,8 +2438,8 @@ void map::shoot(const int x, const int y, int &dam,
                0 == terrain.id.compare("t_rdoor_boarded_damaged") ) {
         dam -= rng(15, 35);
         if (dam > 0) {
-            g->sound(x, y, 10, _("crash!"));
-            ter_set(x, y, t_door_b);
+            g->sound(p, 10, _("crash!"));
+            ter_set(p, t_door_b);
         }
     } else if( 0 == terrain.id.compare("t_window_domestic_taped") ||
                0 == terrain.id.compare("t_curtains") ) {
@@ -2451,11 +2451,11 @@ void map::shoot(const int x, const int y, int &dam,
         } else {
             dam -= rng(1,3);
             if (dam > 0) {
-                g->sound(x, y, 16, _("glass breaking!"));
-                ter_set(x, y, t_window_frame);
-                spawn_item(x, y, "sheet", 1);
-                spawn_item(x, y, "stick");
-                spawn_item(x, y, "string_36");
+                g->sound(p, 16, _("glass breaking!"));
+                ter_set(p, t_window_frame);
+                spawn_item(p, "sheet", 1);
+                spawn_item(p, "stick");
+                spawn_item(p, "string_36");
             }
         }
     } else if( 0 == terrain.id.compare("t_window_domestic") ) {
@@ -2464,11 +2464,11 @@ void map::shoot(const int x, const int y, int &dam,
         } else {
             dam -= rng(1,3);
             if (dam > 0) {
-                g->sound(x, y, 16, _("glass breaking!"));
-                ter_set(x, y, t_window_frame);
-                spawn_item(x, y, "sheet", 1);
-                spawn_item(x, y, "stick");
-                spawn_item(x, y, "string_36");
+                g->sound(p, 16, _("glass breaking!"));
+                ter_set(p, t_window_frame);
+                spawn_item(p, "sheet", 1);
+                spawn_item(p, "stick");
+                spawn_item(p, "string_36");
             }
         }
     } else if( 0 == terrain.id.compare("t_window_taped") ||
@@ -2481,8 +2481,8 @@ void map::shoot(const int x, const int y, int &dam,
         } else {
             dam -= rng(1,3);
             if (dam > 0) {
-                g->sound(x, y, 16, _("glass breaking!"));
-                ter_set(x, y, t_window_frame);
+                g->sound(p, 16, _("glass breaking!"));
+                ter_set(p, t_window_frame);
             }
         }
     } else if( 0 == terrain.id.compare("t_window") ||
@@ -2492,15 +2492,15 @@ void map::shoot(const int x, const int y, int &dam,
         } else {
             dam -= rng(1,3);
             if (dam > 0) {
-                g->sound(x, y, 16, _("glass breaking!"));
-                ter_set(x, y, t_window_frame);
+                g->sound(p, 16, _("glass breaking!"));
+                ter_set(p, t_window_frame);
             }
         }
     } else if( 0 == terrain.id.compare("t_window_boarded") ) {
         dam -= rng(10, 30);
         if (dam > 0) {
-            g->sound(x, y, 16, _("glass breaking!"));
-            ter_set(x, y, t_window_frame);
+            g->sound(p, 16, _("glass breaking!"));
+            ter_set(p, t_window_frame);
         }
     } else if( 0 == terrain.id.compare("t_wall_glass_h") ||
                0 == terrain.id.compare("t_wall_glass_v") ||
@@ -2511,8 +2511,8 @@ void map::shoot(const int x, const int y, int &dam,
         } else {
             dam -= rng(1,8);
             if (dam > 0) {
-                g->sound(x, y, 20, _("glass breaking!"));
-                ter_set(x, y, t_floor);
+                g->sound(p, 20, _("glass breaking!"));
+                ter_set(p, t_floor);
             }
         }
     } else if( 0 == terrain.id.compare("t_reinforced_glass_v") ||
@@ -2529,47 +2529,48 @@ void map::shoot(const int x, const int y, int &dam,
             } else if (dam >= 40) {
                 //high powered bullets penetrate the glass, but only extremely strong
                 // ones (80 before reduction) actually destroy the glass itself.
-                g->sound(x, y, 20, _("glass breaking!"));
-                ter_set(x, y, t_floor);
+                g->sound(p, 20, _("glass breaking!"));
+                ter_set(p, t_floor);
             }
         }
     } else if( 0 == terrain.id.compare("t_paper") ) {
         dam -= rng(4, 16);
         if (dam > 0) {
-            g->sound(x, y, 8, _("rrrrip!"));
-            ter_set(x, y, t_dirt);
+            g->sound(p, 8, _("rrrrip!"));
+            ter_set(p, t_dirt);
         }
         if (ammo_effects.count("INCENDIARY")) {
-            add_field(x, y, fd_fire, 1);
+            add_field(p, fd_fire, 1);
         }
     } else if( 0 == terrain.id.compare("t_gas_pump") ) {
         if (hit_items || one_in(3)) {
             if (dam > 15) {
                 if (ammo_effects.count("INCENDIARY") || ammo_effects.count("FLAME")) {
-                    g->explosion(tripoint(x, y, 0), 40, 0, true);
+                    g->explosion(p, 40, 0, true);
                 } else {
-                    for (int i = x - 2; i <= x + 2; i++) {
-                        for (int j = y - 2; j <= y + 2; j++) {
-                            if (move_cost(i, j) > 0 && one_in(3)) {
-                                    spawn_item(i, j, "gasoline");
+                    for (int i = p.x - 2; i <= p.x + 2; i++) {
+                        for (int j = p.y - 2; j <= p.y + 2; j++) {
+                            const tripoint np(i, j, p.z);
+                            if (move_cost(np) > 0 && one_in(3)) {
+                                    spawn_item(np, "gasoline");
                             }
                         }
                     }
-                    g->sound(x, y, 10, _("smash!"));
+                    g->sound(p, 10, _("smash!"));
                 }
-                ter_set(x, y, t_gas_pump_smashed);
+                ter_set(p, t_gas_pump_smashed);
             }
             dam -= 60;
         }
     } else if( 0 == terrain.id.compare("t_vat") ) {
         if (dam >= 10) {
-            g->sound(x, y, 20, _("ke-rash!"));
-            ter_set(x, y, t_floor);
+            g->sound(p, 20, _("ke-rash!"));
+            ter_set(p, t_floor);
         } else {
             dam = 0;
         }
     } else {
-        if (move_cost(x, y) == 0 && light_transparency(x, x) == LIGHT_TRANSPARENCY_SOLID) {
+        if (move_cost(p) == 0 && light_transparency(p) == LIGHT_TRANSPARENCY_SOLID) {
             dam = 0; // TODO: Bullets can go through some walls?
         } else {
             dam -= (rng(0, 1) * rng(0, 1) * rng(0, 1));
@@ -2577,27 +2578,27 @@ void map::shoot(const int x, const int y, int &dam,
     }
 
     if (ammo_effects.count("TRAIL") && !one_in(4)) {
-        add_field(x, y, fd_smoke, rng(1, 2));
+        add_field(p, fd_smoke, rng(1, 2));
     }
 
     if (ammo_effects.count("STREAM") && !one_in(3)) {
-        add_field(x, y, fd_fire, rng(1, 2));
+        add_field(p, fd_fire, rng(1, 2));
     }
 
     if (ammo_effects.count("STREAM_BIG") && !one_in(4)) {
-        add_field(x, y, fd_fire, 2);
+        add_field(p, fd_fire, 2);
     }
 
     if (ammo_effects.count("LIGHTNING")) {
-        add_field(x, y, fd_electricity, rng(2, 3));
+        add_field(p, fd_electricity, rng(2, 3));
     }
 
     if (ammo_effects.count("PLASMA") && one_in(2)) {
-        add_field(x, y, fd_plasma, rng(1, 2));
+        add_field(p, fd_plasma, rng(1, 2));
     }
 
     if (ammo_effects.count("LASER")) {
-        add_field(x, y, fd_laser, 2);
+        add_field(p, fd_laser, 2);
     }
 
     // Set damage to 0 if it's less
@@ -2606,37 +2607,37 @@ void map::shoot(const int x, const int y, int &dam,
     }
 
     // Check fields?
-    const field_entry *fieldhit = get_field( point( x, y ), fd_web );
+    const field_entry *fieldhit = get_field( p, fd_web );
     if( fieldhit != nullptr ) {
         if (ammo_effects.count("INCENDIARY") || ammo_effects.count("FLAME")) {
-            add_field(x, y, fd_fire, fieldhit->getFieldDensity() - 1);
+            add_field(p, fd_fire, fieldhit->getFieldDensity() - 1);
         } else if (dam > 5 + fieldhit->getFieldDensity() * 5 &&
                    one_in(5 - fieldhit->getFieldDensity())) {
             dam -= rng(1, 2 + fieldhit->getFieldDensity() * 2);
-            remove_field(tripoint(x, y, 0),fd_web);
+            remove_field(p,fd_web);
         }
     }
 
     // Now, destroy items on that tile.
-    if ((move_cost(x, y) == 2 && !hit_items) || !inbounds(x, y)) {
+    if ((move_cost(p) == 2 && !hit_items) || !inbounds(p)) {
         return; // Items on floor-type spaces won't be shot up.
     }
 
-    for( auto target_item = i_at(x, y).begin(); target_item != i_at(x, y).end(); ) {
+    for( auto target_item = i_at(p).begin(); target_item != i_at(p).end(); ) {
         bool destroyed = false;
         int chance = ( target_item->volume() > 0 ? target_item->volume() : 1);
         // volume dependent chance
 
         if( dam > target_item->bash_resist() && one_in(chance) ) {
-            get_item(x, y, target_item)->damage++;
+            get_item(p, target_item)->damage++;
         }
         if( target_item->damage >= 5 ) {
             destroyed = true;
         }
 
         if (destroyed) {
-            spawn_items( x, y, target_item->contents );
-            target_item = i_rem( x, y, target_item );
+            spawn_items( p.x, p.y, target_item->contents );
+            target_item = i_rem( p, target_item );
         } else {
             ++target_item;
         }

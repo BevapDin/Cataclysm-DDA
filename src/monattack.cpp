@@ -716,7 +716,7 @@ void mattack::spit_sap(monster *z, int index)
         std::vector<tripoint> line = line_to(z->pos(), tripoint(hitx, hity, z->posz()), 0);
         int dam = 5;
         for (auto &i : line) {
-            g->m.shoot(i.x, i.y, dam, false, no_effects);
+            g->m.shoot(i, dam, false, no_effects);
             if (dam == 0 && g->u_see(i)) {
                 add_msg(_("A glob of sap hits the %s!"),
                         g->m.tername(i).c_str());
@@ -738,7 +738,7 @@ void mattack::spit_sap(monster *z, int index)
     std::vector<tripoint> line = line_to(z->pos(), g->u.pos(), t);
     int dam = 5;
     for (auto &i : line) {
-        g->m.shoot(i.x, i.y, dam, false, no_effects);
+        g->m.shoot(i, dam, false, no_effects);
         if (dam == 0 && g->u_see(i)) {
             add_msg(_("A glob of sap hits the %s!"),
                     g->m.tername(i).c_str());
@@ -1609,7 +1609,7 @@ void mattack::tentacle(monster *z, int index)
     std::set<std::string> no_effects;
     for (auto &i : line) {
         int tmpdam = 20;
-        g->m.shoot(i.x, i.y, tmpdam, true, no_effects);
+        g->m.shoot(i, tmpdam, true, no_effects);
     }
 
     if (g->u.uncanny_dodge()) {
@@ -1668,7 +1668,7 @@ void mattack::vortex(monster *z, int index)
                     int dam = (thrown.weight() / 113) / double(3 + double(thrown.volume() / 6));
                     std::vector<tripoint> traj = continue_line(from_monster, distance);
                     for (size_t i = 0; i < traj.size() && dam > 0; i++) {
-                        g->m.shoot(traj[i].x, traj[i].y, dam, false, no_effects);
+                        g->m.shoot(traj[i], dam, false, no_effects);
                         int mondex = g->mon_at(traj[i]);
                         if (mondex != -1) {
                             g->zombie( mondex ).apply_damage( z, random_body_part(), dam );
@@ -1753,7 +1753,7 @@ void mattack::vortex(monster *z, int index)
                             thrown->setpos(traj[i - 1]);
                         }
                         int damage_copy = damage;
-                        g->m.shoot(traj[i].x, traj[i].y, damage_copy, false, no_effects);
+                        g->m.shoot(traj[i], damage_copy, false, no_effects);
                         if (damage_copy < damage) {
                             thrown->apply_damage( nullptr, bp_torso, damage - damage_copy );
                         }
@@ -1803,7 +1803,7 @@ void mattack::vortex(monster *z, int index)
                             // g->u.posz = traj[i - 1].z; TODO
                         }
                         int damage_copy = damage;
-                        g->m.shoot(traj[i].x, traj[i].y, damage_copy, false, no_effects);
+                        g->m.shoot(traj[i], damage_copy, false, no_effects);
                         if (damage_copy < damage) {
                             g->u.deal_damage( z, bp_torso, damage_instance( DT_BASH, damage - damage_copy ) );
                         }
