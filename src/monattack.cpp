@@ -1448,7 +1448,7 @@ void mattack::callblobs(monster *z, int index)
     // if we want to deal with NPCS and friendly monsters as well.
     // The strategy is to send about 1/3 of the available blobs after the player,
     // and keep the rest near the brain blob for protection.
-    point enemy( g->u.xpos(), g->u.ypos() );
+    tripoint enemy( g->u.pos() );
     std::list<monster *> allies;
     std::vector<point> nearby_points = closest_points_first( 3, point(z->pos().x, z->pos().y) );
     // Iterate using horrible creature_tracker API.
@@ -1465,14 +1465,15 @@ void mattack::callblobs(monster *z, int index)
     int guards = 0;
     for( std::list<monster *>::iterator ally = allies.begin();
          ally != allies.end(); ++ally, ++guards ) {
-        point post = enemy;
+        tripoint post = enemy;
         if( guards < num_guards ) {
             // Each guard is assigned a spot in the nearby_points vector based on their order.
             int assigned_spot = (nearby_points.size() * guards) / num_guards;
-            post = nearby_points[ assigned_spot ];
+            post.x = nearby_points[ assigned_spot ].x;
+            post.y = nearby_points[ assigned_spot ].y;
         }
         int trash = 0;
-        (*ally)->set_dest( post.x, post.y, trash );
+        (*ally)->set_dest( post, trash );
         if (!(*ally)->has_effect("controlled")) {
             (*ally)->add_effect("controlled", 1, num_bp, true);
         }
@@ -1485,7 +1486,7 @@ void mattack::jackson(monster *z, int index)
 {
     // Jackson draws nearby zombies into the dance.
     std::list<monster *> allies;
-    std::vector<point> nearby_points = closest_points_first( 3, point( z->xpos(), z->ypos() ) );
+    std::vector<tripoint> nearby_points = closest_points_first( 3, z->pos() );
     // Iterate using horrible creature_tracker API.
     for( size_t i = 0; i < g->num_zombies(); i++ ) {
         monster *candidate = &g->zombie( i );
@@ -1499,7 +1500,7 @@ void mattack::jackson(monster *z, int index)
     int dancers = 0;
     bool converted = false;
     for( auto ally = allies.begin(); ally != allies.end(); ++ally, ++dancers ) {
-        point post = point( z->xpos(), z->ypos() );
+        tripoint post = z->pos();
         if( dancers < num_dancers ) {
             // Each dancer is assigned a spot in the nearby_points vector based on their order.
             int assigned_spot = (nearby_points.size() * dancers) / num_dancers;
@@ -1510,7 +1511,7 @@ void mattack::jackson(monster *z, int index)
             converted = true;
         }
         int trash = 0;
-        (*ally)->set_dest( post.x, post.y, trash );
+        (*ally)->set_dest( post, trash );
         if (!(*ally)->has_effect("controlled")) {
             (*ally)->add_effect("controlled", 1, num_bp, true);
         }

@@ -22,14 +22,7 @@ bool monster::wander()
 }
 
 bool monster::can_move_to(int x, int y) const { return can_move_to(tripoint(x, y, _posz)); }
-bool monster::will_reach(int x, int y) { return will_reach(tripoint(x, y, _posz)); } // Do we have plans to get to (x, y)?
-int  monster::turns_to_reach(int x, int y) { return turns_to_reach(tripoint(x, y, _posz)); } // How long will it take?
-void monster::set_dest(int x, int y, int &t) { set_dest(tripoint(x, y, _posz), t); } // Go in a straight line to (x, y)
-void monster::wander_to(int x, int y, int f) { wander_to(tripoint(x, y, _posz), f); } // Try to get to (x, y), we don't know
-int monster::calc_movecost(int x1, int y1, int x2, int y2) const { return calc_movecost(tripoint(x1, y1, _posz), tripoint(x2, y2, _posz)); }
 int monster::move_to(int x, int y, bool force) { return move_to(tripoint(x, y, _posz), force); }
-int monster::attack_at(int x, int y) { return attack_at(tripoint(x, y, _posz)); }
-int monster::bash_at(int x, int y) { return bash_at(tripoint(x, y, _posz)); }
 
 bool monster::can_move_to(const tripoint &p) const
 {
@@ -122,13 +115,13 @@ void monster::plan(const std::vector<int> &friendlies)
         }
 
         if (closest >= 0) {
-            set_dest(g->zombie(closest).posx(), g->zombie(closest).posy(), stc);
+            set_dest(g->zombie(closest).pos(), stc);
         } else if (friendly > 0 && one_in(3)) {
             // Grow restless with no targets
             friendly--;
         } else if (friendly < 0 &&  sees_player( tc ) ) {
             if (rl_dist(pos(), g->u.pos()) > 2) {
-                set_dest(g->u.posx, g->u.posy, tc);
+                set_dest(g->u.pos(), tc);
             } else {
                 plans.clear();
             }
@@ -284,7 +277,7 @@ void monster::move()
 
     bool moved = false;
     tripoint next;
-    int mondex = (!plans.empty() ? g->mon_at(plans[0].x, plans[0].y) : -1);
+    int mondex = (!plans.empty() ? g->mon_at(plans[0]) : -1);
 
     monster_attitude current_attitude = attitude();
     if (friendly == 0) {
@@ -292,11 +285,11 @@ void monster::move()
     }
     // If our plans end in a player, set our attitude to consider that player
     if (!plans.empty()) {
-        if (plans.back().x == g->u.posx && plans.back().y == g->u.posy) {
+        if (plans.back() == g->u.pos()) {
             current_attitude = attitude(&(g->u));
         } else {
             for (auto &i : g->active_npc) {
-                if (plans.back().x == i->posx && plans.back().y == i->posy) {
+                if (plans.back() == i->pos()) {
                     current_attitude = attitude(i);
                 }
             }
@@ -312,10 +305,10 @@ void monster::move()
 
     if( !plans.empty() &&
         (mondex == -1 || g->zombie(mondex).friendly != 0 || has_flag(MF_ATTACKMON)) &&
-        (can_move_to(plans[0].x, plans[0].y) ||
-         (plans[0].x == g->u.posx && plans[0].y == g->u.posy) ||
+        (can_move_to(plans[0]) ||
+         (plans[0] == g->u.pos()) ||
          ( (has_flag(MF_BASHES) || has_flag(MF_BORES)) &&
-          g->m.bash_rating(bash_estimate(), plans[0].x, plans[0].y) >= 0) ) ) {
+          g->m.bash_rating(bash_estimate(), plans[0]) >= 0) ) ) {
         // CONCRETE PLANS - Most likely based on sight
         next = plans[0];
         moved = true;
