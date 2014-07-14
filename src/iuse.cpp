@@ -4873,22 +4873,23 @@ int iuse::jackhammer(player *p, item *it, bool, const tripoint &)
         return 0;
     }
 
-    if (dirx == p->posx && diry == p->posy) {
+    const tripoint dir(dirx, diry, p->zpos());
+    if (dir == p->pos()) {
         p->add_msg_if_player(_("My god! Let's talk it over OK?"));
         p->add_msg_if_player(_("Don't do anything rash.."));
         return 0;
     }
-    if (g->m.is_bashable(dirx, diry) && g->m.has_flag("SUPPORTS_ROOF", dirx, diry) &&
-        g->m.ter(dirx, diry) != t_tree) {
-        g->m.destroy(dirx, diry, true);
+    if (g->m.is_bashable(dir) && g->m.has_flag("SUPPORTS_ROOF", dir) &&
+        g->m.ter(dir) != t_tree) {
+        g->m.destroy(dir, true);
         p->moves -= 500;
         //~ the sound of a jackhammer
-        g->sound(dirx, diry, 45, _("TATATATATATATAT!"));
-    } else if (g->m.move_cost(dirx, diry) == 2 && g->levz != -1 &&
-               g->m.ter(dirx, diry) != t_dirt && g->m.ter(dirx, diry) != t_grass) {
-        g->m.destroy(dirx, diry, true);
+        g->sound(dir, 45, _("TATATATATATATAT!"));
+    } else if (g->m.move_cost(dir) == 2 && g->levz != -1 &&
+               g->m.ter(dir) != t_dirt && g->m.ter(dir) != t_grass) {
+        g->m.destroy(dir, true);
         p->moves -= 500;
-        g->sound(dirx, diry, 45, _("TATATATATATATAT!"));
+        g->sound(dir, 45, _("TATATATATATATAT!"));
     } else {
         p->add_msg_if_player(m_info, _("You can't drill there."));
         return 0;
@@ -4923,18 +4924,19 @@ int iuse::jacqueshammer(player *p, item *it, bool, const tripoint &)
     }
     dirx += p->posx;
     diry += p->posy;
-    if (g->m.is_bashable(dirx, diry) && g->m.has_flag("SUPPORTS_ROOF", dirx, diry) &&
-        g->m.ter(dirx, diry) != t_tree) {
-        g->m.destroy(dirx, diry, true);
+    const tripoint dir(dirx, diry, p->zpos());
+    if (g->m.is_bashable(dir) && g->m.has_flag("SUPPORTS_ROOF", dir) &&
+        g->m.ter(dir) != t_tree) {
+        g->m.destroy(dir, true);
         // This looked like 50 minutes, but seems more like 50 seconds.  Needs checked.
         p->moves -= 500;
         //~ the sound of a "jacqueshammer"
-        g->sound(dirx, diry, 45, _("OHOHOHOHOHOHOHOHO!"));
-    } else if (g->m.move_cost(dirx, diry) == 2 && g->levz != -1 &&
-               g->m.ter(dirx, diry) != t_dirt && g->m.ter(dirx, diry) != t_grass) {
-        g->m.destroy(dirx, diry, true);
+        g->sound(dir, 45, _("OHOHOHOHOHOHOHOHO!"));
+    } else if (g->m.move_cost(dir) == 2 && g->levz != -1 &&
+               g->m.ter(dir) != t_dirt && g->m.ter(dir) != t_grass) {
+        g->m.destroy(dir, true);
         p->moves -= 500;
-        g->sound(dirx, diry, 45, _("OHOHOHOHOHOHOHOHO!"));
+        g->sound(dir, 45, _("OHOHOHOHOHOHOHOHO!"));
     } else {
         //~ (jacqueshammer) "You can't drill there."
         p->add_msg_if_player(m_info, _("Vous ne pouvez pas percer la-bas.."));
@@ -4949,33 +4951,33 @@ int iuse::pickaxe(player *p, item *it, bool, const tripoint &)
         p->add_msg_if_player(m_info, _("You can't do that while underwater."));
         return 0;
     }
-    int dirx, diry;
-    if (!choose_adjacent(_("Mine where?"), dirx, diry)) {
+    tripoint dir = p->pos();
+    if (!choose_adjacent(_("Mine where?"), dir.x, dir.y)) {
         return 0;
     }
 
-    if (dirx == p->posx && diry == p->posy) {
+    if (dir == p->pos()) {
         p->add_msg_if_player(_("Mining the depths of your experience,"));
         p->add_msg_if_player(_("you realize that it's best not to dig"));
         p->add_msg_if_player(_("yourself into a hole. You stop digging."));
         return 0;
     }
     int turns;
-    if (g->m.is_bashable(dirx, diry) && g->m.has_flag("SUPPORTS_ROOF", dirx, diry) &&
-        g->m.ter(dirx, diry) != t_tree) {
+    if (g->m.is_bashable(dir) && g->m.has_flag("SUPPORTS_ROOF", dir) &&
+        g->m.ter(dir) != t_tree) {
         // Takes about 100 minutes (not quite two hours) base time.  Construction skill can speed this: 3 min off per level.
         turns = (100000 - 3000 * p->skillLevel("carpentry"));
-    } else if (g->m.move_cost(dirx, diry) == 2 && g->levz == 0 &&
-               g->m.ter(dirx, diry) != t_dirt && g->m.ter(dirx, diry) != t_grass) {
+    } else if (g->m.move_cost(dir) == 2 && g->levz == 0 &&
+               g->m.ter(dir) != t_dirt && g->m.ter(dir) != t_grass) {
         turns = 20000;
     } else {
         p->add_msg_if_player(m_info, _("You can't mine there."));
         return 0;
     }
     p->assign_activity(ACT_PICKAXE, turns, -1, p->get_item_position(it));
-    p->activity.placement = point(dirx, diry);
+    p->activity.placement = point( dir.x, dir.y );
     p->add_msg_if_player(_("You attack the %s with your %s."),
-                         g->m.tername(dirx, diry).c_str(), it->tname().c_str());
+                         g->m.tername(dir).c_str(), it->tname().c_str());
     return 0; // handled when the activity finishes
 }
 
@@ -5005,9 +5007,10 @@ void on_finish_activity_pickaxe(player *p)
 {
     const int dirx = p->activity.placement.x;
     const int diry = p->activity.placement.y;
+    const tripoint dir(dirx, diry, p->zpos());
     item *it = &p->i_at(p->activity.position);
-    if (g->m.is_bashable(dirx, diry) && g->m.has_flag("SUPPORTS_ROOF", dirx, diry) &&
-        g->m.ter(dirx, diry) != t_tree) {
+    if (g->m.is_bashable(dir) && g->m.has_flag("SUPPORTS_ROOF", dir) &&
+        g->m.ter(dir) != t_tree) {
         // Tunneling through solid rock is hungry, sweaty, tiring, backbreaking work
         // Betcha wish you'd opted for the J-Hammer ;P
         p->hunger += 15;
@@ -5020,14 +5023,14 @@ void on_finish_activity_pickaxe(player *p)
         p->mod_pain(2 * rng(1, 3));
         // Mining is construction work!
         p->practice("carpentry", 5);
-    } else if (g->m.move_cost(dirx, diry) == 2 && g->levz == 0 &&
-               g->m.ter(dirx, diry) != t_dirt && g->m.ter(dirx, diry) != t_grass) {
+    } else if (g->m.move_cost(dir) == 2 && g->levz == 0 &&
+               g->m.ter(dir) != t_dirt && g->m.ter(dir) != t_grass) {
         //Breaking up concrete on the surface? not nearly as bad
         p->hunger += 5;
         p->fatigue += 10;
         p->thirst += 5;
     }
-    g->m.destroy(dirx, diry, true);
+    g->m.destroy(dir, true);
     it->charges = std::max(long(0), it->charges - it->type->charges_to_use());
     if (it->charges == 0 && it->destroyed_at_zero_charges()) {
         p->i_rem(p->activity.position);

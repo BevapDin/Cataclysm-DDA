@@ -3927,7 +3927,7 @@ veh_collision vehicle::part_collision (int part, int x, int y, bool just_detect)
             // something bashable -- use map::bash to determine outcome
             smashed = g->m.bash(tripoint(x, y, 0), obj_dmg, false, false, this).second;
             if (smashed) {
-                if (g->m.is_bashable_ter_furn(x, y)) {
+                if (g->m.is_bashable_ter_furn(tripoint(x, y, 0))) {
                     // There's new terrain there to smash
                     smashed = false;
                     e = 0.30;

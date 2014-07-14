@@ -605,8 +605,8 @@ void construct::done_tree(point p)
     y = p.y + y * 3 + rng(-1, 1);
     std::vector<point> tree = line_to(p.x, p.y, x, y, rng(1, 8));
     for( auto &elem : tree ) {
-        g->m.destroy( elem.x, elem.y );
-        g->m.ter_set( elem.x, elem.y, t_trunk );
+        g->m.destroy( tripoint( elem.x, elem.y, 0 ) );
+        g->m.ter_set( tripoint( elem.x, elem.y, 0 ), t_trunk );
     }
 }
 
