@@ -2181,7 +2181,7 @@ void complete_vehicle ()
             g->u.view_offset.y = veh->global_y() + gy - g->u.posy();
             g->u.view_offset.z = 0;
             popup(_("Choose a facing direction for the new headlight."));
-            point headlight_target = g->look_around();
+            tripoint headlight_target = g->look_around();
             // Restore previous view offsets.
             g->u.view_offset = old_view_offset;
 

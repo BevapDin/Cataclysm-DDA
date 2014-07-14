@@ -4367,8 +4367,8 @@ void game::debug()
     break;
 
     case 14: {
-        point pos = look_around();
-        int npcdex = npc_at(pos.x, pos.y);
+        tripoint pos = look_around();
+        int npcdex = npc_at(pos);
         if (npcdex == -1) {
             popup(_("No NPC there."));
         } else {
@@ -4431,7 +4431,7 @@ void game::debug()
     break;
 
     case 15: {
-        point center = look_around();
+        tripoint center = look_around();
         artifact_natural_property prop =
             artifact_natural_property(rng(ARTPROP_NULL + 1, ARTPROP_MAX - 1));
         m.create_anomaly(center.x, center.y, prop);
@@ -8371,14 +8371,17 @@ void game::zones_manager()
             mvwprintz(w_zones_info, 3, 2, c_white, _("Select first point."));
             wrefresh(w_zones_info);
 
-            point pFirst = look_around(w_zones_info, point(-999, -999));
+            const tripoint pFirst_ = look_around(w_zones_info, point(-999, -999));
+            point pFirst(pFirst_.x, pFirst_.y);
             point pSecond = point(-1, -1);
 
             if (pFirst.x != -1 && pFirst.y != -1) {
                 mvwprintz(w_zones_info, 3, 2, c_white, _("Select second point."));
                 wrefresh(w_zones_info);
 
-                pSecond = look_around(w_zones_info, pFirst);
+                const tripoint pSecond_ = look_around(w_zones_info, pFirst);
+                pSecond.x = pSecond_.x;
+                pSecond.y = pSecond_.y;
             }
 
             if (pSecond.x != -1 && pSecond.y != -1) {
@@ -8675,7 +8678,7 @@ void game::zones_manager()
     refresh_all();
 }
 
-point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
+tripoint game::look_around(WINDOW *w_info, const point pairCoordsFirst)
 {
     temp_exit_fullscreen();
 
@@ -8898,12 +8901,12 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
 
     if (action == "CONFIRM") {
         if (bSelectZone) {
-            return point(lx, ly);
+            return tripoint(lx, ly, lz);
         }
-        return point(lx, ly);
+        return tripoint(lx, ly, lz);
     }
 
-    return point(-1, -1);
+    return tripoint(-1, -1, -1);
 }
 
 bool lcmatch(const std::string &str, const std::string &findstr); // ui.cpp
@@ -9646,13 +9649,13 @@ int game::list_monsters(const int iLastState)
                 u.view_offset = old_view_offset;
                 return 1;
             } else if (action == "look") {
-                point recentered = look_around();
+                tripoint recentered = look_around();
                 iLastActiveX = recentered.x;
                 iLastActiveY = recentered.y;
             } else if (action == "fire") {
                 if( cCurMon != nullptr &&
                     rl_dist( u.pos(), cCurMon->pos() ) <= iWeaponRange) {
-                    last_target = mon_at( cCurMon->posx(), cCurMon->posy() );
+                    last_target = mon_at( cCurMon->pos() );
                     u.view_offset = old_view_offset;
                     return 2;
                 }

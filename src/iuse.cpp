@@ -7097,9 +7097,9 @@ int iuse::artifact(player *p, item *it, bool, tripoint)
             break;
 
             case AEA_FIREBALL: {
-                point fireball = g->look_around();
-                if (fireball.x != -1 && fireball.y != -1) {
-                    g->explosion(fireball.x, fireball.y, 8, 0, true);
+                tripoint fireball = g->look_around();
+                if (fireball != tripoint(-1, -1, -1)) {
+                    g->explosion(fireball, 8, 0, true);
                 }
             }
             break;
@@ -7144,11 +7144,11 @@ int iuse::artifact(player *p, item *it, bool, tripoint)
             break;
 
             case AEA_ACIDBALL: {
-                point acidball = g->look_around();
+                tripoint acidball = g->look_around();
                 if (acidball.x != -1 && acidball.y != -1) {
                     for (int x = acidball.x - 1; x <= acidball.x + 1; x++) {
                         for (int y = acidball.y - 1; y <= acidball.y + 1; y++) {
-                            g->m.add_field(x, y, fd_acid, rng(2, 3));
+                            g->m.add_field(tripoint(x, y, acidball.z), fd_acid, rng(2, 3));
                         }
                     }
                 }
@@ -8984,20 +8984,20 @@ int iuse::camera(player *p, item *it, bool, tripoint)
 
     if (c_shot == choice) {
 
-        point aim_point = g->look_around();
+        tripoint aim_point = g->look_around();
 
         if (aim_point.x == -1 || aim_point.y == -1) {
             p->add_msg_if_player(_("Never mind."));
             return 0;
         }
 
-        if (aim_point.x == p->posx() && aim_point.y == p->posy()) {
+        if (aim_point == p->pos()) {
             p->add_msg_if_player(_("You decide not to flash yourself."));
             return 0;
         }
 
-        const int sel_zid = g->mon_at(aim_point.x, aim_point.y);
-        const int sel_npcID = g->npc_at(aim_point.x, aim_point.y);
+        const int sel_zid = g->mon_at(aim_point);
+        const int sel_npcID = g->npc_at(aim_point);
 
         if (sel_zid == -1 && sel_npcID == -1) {
             p->add_msg_if_player(_("There's nothing particularly interesting there."));
@@ -9011,11 +9011,8 @@ int iuse::camera(player *p, item *it, bool, tripoint)
         sounds::sound(p->pos(), 8, _("Click."));
 
         for (auto &i : trajectory) {
-            int tx = i.x;
-            int ty = i.y;
-
-            int zid = g->mon_at(tx, ty);
-            int npcID = g->npc_at(tx, ty);
+            int zid = g->mon_at(i);
+            int npcID = g->npc_at(i);
 
             if (zid != -1 || npcID != -1) {
                 int dist = rl_dist( p->pos(), i );

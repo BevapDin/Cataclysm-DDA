@@ -376,11 +376,11 @@ void game::wishmonster(int x, int y)
             if (cb->hallucination) {
                 mon.hallucination = true;
             }
-            point spawn = ( x == -1 && y == -1 ? look_around() : point ( x, y ) );
+            tripoint spawn = ( x == -1 && y == -1 ? look_around() : tripoint ( x, y, g->u.view_offset.z ) );
             if (spawn.x != -1) {
-                std::vector<point> spawn_points = closest_points_first( cb->group, spawn );
+                std::vector<tripoint> spawn_points = closest_points_first( cb->group, spawn );
                 for( auto spawn_point : spawn_points ) {
-                    mon.spawn(spawn_point.x, spawn_point.y);
+                    mon.spawn(spawn_point);
                     add_zombie(mon);
                 }
                 cb->msg = _("Monster spawned, choose another or 'q' to quit.");
