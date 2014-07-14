@@ -4216,6 +4216,25 @@ bool map::add_field(const tripoint &p, const field_id t, int density, const int 
     if (!inbounds(p) || density <= 0) {
         return false;
     }
+    switch(t) {
+        case fd_acid:
+        case fd_blood:
+        case fd_slime:
+        case fd_bile:
+        case fd_blood_insect:
+        case fd_blood_invertebrate:
+        case fd_rubble:
+        case fd_sludge:
+        case fd_web:
+        case fd_blood_veggy:
+            // let those fields fall through to the ground, they can not hoover
+            if( allows_vertical_air_down( p ) ) {
+                return add_field( tripoint( p.x, p.y, p.z - 1 ), t, density, age );
+            }
+        default:
+            // other fields can hoover in the air.
+            break;
+    }
 
     if (density > 3) {
         density = 3;

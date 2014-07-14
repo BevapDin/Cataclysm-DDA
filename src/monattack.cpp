@@ -196,9 +196,15 @@ void mattack::acid(monster *z, int index)
     sounds::sound(z->pos(), 4, _("a spitting noise."));
     const tripoint hit( target->posx() + rng(-2, 2),
                         target->posy() + rng(-2, 2),
-                        0 ); // TODO: maybe spit onto another z-level?
+                        target->posz() + rng(-1, 1) );
     std::vector<tripoint> line = line_to(z->pos(), hit, junk);
-    for (auto &i : line) {
+    for( size_t a = 0; a < line.size(); ++a ) {
+        if( a > 0 && line[a - 1].z != line[a].z ) {
+            if( g->m.blocks_vertical_air_up( line[a - 1] ) && g->m.blocks_vertical_air_down( line[a] ) ) {
+                return;
+            }
+        }
+        const auto &i = line[a];
         if (g->m.hit_with_acid( i )) {
             if (g->u.sees( i )) {
                 add_msg(_("A glob of acid hits the %s!"),
