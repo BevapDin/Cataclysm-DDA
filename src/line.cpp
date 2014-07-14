@@ -181,11 +181,25 @@ std::vector <tripoint> line_to(const tripoint loc1, const tripoint loc2, int t, 
 
 std::vector <tripoint> line_to(const tripoint &p1, const tripoint &p2, int t)
 {
-    const std::vector<point> tmp = line_to(p1.x, p1.y, p2.x, p2.y, t);
     std::vector<tripoint> ret;
-    // TODO: Z make this correct
+    if (p1.z == p2.z) {
+        // Use the 2-D algorithm, it should be faster and better anyway
+        const std::vector<point> tmp = line_to(p1.x, p1.y, p2.x, p2.y, t);
+        if(p2.z == p1.z) {
     for(std::vector<point>::const_iterator a = tmp.begin(); a != tmp.end(); ++a) {
         ret.push_back(tripoint(a->x, a->y, p1.z));
+    }
+    return ret;
+}
+    }
+    const std::vector<point> tmp = line_to(p1.x, p1.y, p2.x, p2.y, t);
+    const std::vector<point> tmp2 = line_to(0, p1.z, tmp.size() - 1, p2.z, 0);
+    int j = 0;
+    for(int i = 0; i < tmp.size(); i++) {
+        do {
+            ret.push_back(tripoint(tmp[i].x, tmp[i].y, tmp2[j].y));
+            j++;
+        } while(j < tmp2.size() && tmp2[j].x <= i);
     }
     return ret;
 }
