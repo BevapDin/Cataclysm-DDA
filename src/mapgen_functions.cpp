@@ -3709,8 +3709,8 @@ void mapgen_shelter(map *m, oter_id, mapgendata dat, int, float) {
 | b b b    c   |\n\
 : b b b        :\n\
 |              |\n\
-+      >>      +\n\
-+      >>      +\n\
++      <>      +\n\
++      <>      +\n\
 |              |\n\
 : b b b        :\n\
 | b b b    c   |\n\
@@ -3718,8 +3718,8 @@ void mapgen_shelter(map *m, oter_id, mapgendata dat, int, float) {
 | b b b    c   |\n\
 |          c  x|\n\
 |----:-++-:----|\n",
-                                   mapf::basic_bind("- | + : 6 x >", t_wall_h, t_wall_v, t_door_c, t_window_domestic,  t_console,
-                                           t_console_broken, t_stairs_down),
+                                   mapf::basic_bind("- | + : 6 x > <", t_wall_h, t_wall_v, t_door_c, t_window_domestic,  t_console,
+                                           t_console_broken, t_stairs_down, t_stairs_up),
                                    mapf::basic_bind("b c l", f_bench, f_counter, f_locker));
         computer * tmpcomp = m->add_computer(SEEX + 6, 5, _("Evac shelter computer"), 0);
         tmpcomp->add_option(_("Emergency Message"), COMPACT_EMERG_MESS, 0);
@@ -6337,8 +6337,63 @@ void mapgen_rock(map *m, oter_id, mapgendata dat, int, float)
 }
 
 
-void mapgen_open_air(map *m, oter_id, mapgendata, int, float){
-    fill_background(m, t_open_air);
+std::vector<point> find_empty_square(map &m)
+{
+    std::vector<point> result;
+    for (int x = 0; x < SEEX * 2; x++) {
+        for (int y = 0; y < SEEY * 2; y++) {
+            if (!m.i_at(x, y).empty()) {
+                continue;
+            }
+            if (!m.has_flag_ter_or_furn("FLAT", x, y)) {
+                continue;
+            }
+            if (m.ter(x, y) == t_dirt || m.ter(x, y) == t_grass) {
+                continue;
+            }
+            result.push_back(point(x, y));
+        }
+    }
+    return result;
+}
+
+#define set_if_air(a,b,c) if(m->ter(a,b) == t_open_air) { m->ter_set(a,b,c); }
+
+void mapgen_open_air(map *m, oter_id, mapgendata dat, int, float)
+{
+    const int x = m->get_abs_sub().x;
+    const int y = m->get_abs_sub().y;
+    // the map m is only a tinymap, it has no further z-levels
+    tinymap tm;
+    tm.load_abs(x, y, dat.zlevel - 1, false);
+    const ter_id t_open_air = terfind("t_open_air");
+    const ter_id t_flat_roof = terfind("t_flat_roof");
+    // First some special terrain
+    for (int x = 0; x < SEEX * 2; x++) {
+        for (int y = 0; y < SEEY * 2; y++) {
+            if(tm.ter(x, y) == t_stairs_up) {
+                m->ter_set(x, y, t_stairs_down);
+            } else if(tm.has_flag(TFLAG_WALL, x, y)) {
+                m->ter_set(x, y, t_flat_roof);
+            } else {
+                m->ter_set(x, y, t_open_air);
+            }
+        }
+    }
+    // Now create the roof
+    for (int x = 0; x < SEEX * 2; x++) {
+        for (int y = 0; y < SEEY * 2; y++) {
+            if(tm.ter(x, y) == t_open_air) {
+                continue;
+            } else if(tm.has_flag(TFLAG_INDOORS, x, y)) {
+                set_if_air(x, y, t_flat_roof);
+                set_if_air(x+1, y, t_flat_roof);
+                set_if_air(x-1, y, t_flat_roof);
+                set_if_air(x, y+1, t_flat_roof);
+                set_if_air(x, y-1, t_flat_roof);
+            }
+        }
+    }
 }
 
 
