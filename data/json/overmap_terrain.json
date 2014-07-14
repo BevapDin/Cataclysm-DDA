@@ -1304,6 +1304,14 @@
         "known_up" : true
     },{
         "type" : "overmap_terrain",
+        "id" : "shelter_above",
+        "name" : "evac shelter",
+        "sym" : 43,
+        "color" : "white",
+        "see_cost" : 2,
+        "known_up" : true
+    },{
+        "type" : "overmap_terrain",
         "id" : "lmoe",
         "name" : "LMOE shelter",
         "sym" : 43,
