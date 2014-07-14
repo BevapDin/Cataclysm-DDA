@@ -280,8 +280,6 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         std::string unique_name; // If we're unique
         bool hallucination;
 
-        bool setpos(const int x, const int y);
-        bool setpos(const point &p);
         bool setpos(const tripoint &p);
         tripoint pos() const;
         // posx and posy are kept to retain backwards compatibility

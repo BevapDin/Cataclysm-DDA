@@ -107,16 +107,6 @@ monster::~monster()
 {
 }
 
-bool monster::setpos(const int x, const int y)
-{
-    return setpos(tripoint(x, y, _posz));
-}
-
-bool monster::setpos(const point &p)
-{
-    return setpos(tripoint(p.x, p.y, _posz));
-}
-
 bool monster::setpos(const tripoint &p)
 {
     if (p == pos()) {

@@ -293,17 +293,18 @@ void defense_game::init_map()
     g->update_map(g->u.posx, g->u.posy, 0);
     monster generator(GetMType("mon_generator"), tripoint(g->u.posx + 1, g->u.posy + 1, 0));
     // Find a valid spot to spawn the generator
-    std::vector<point> valid;
+    std::vector<tripoint> valid;
     for (int x = g->u.posx - 1; x <= g->u.posx + 1; x++) {
         for (int y = g->u.posy - 1; y <= g->u.posy + 1; y++) {
-            if (generator.can_move_to(x, y) && g->is_empty(x, y)) {
-                valid.push_back( point(x, y) );
+            const tripoint pnt(x, y, 0);
+            if (generator.can_move_to(pnt) && g->is_empty(pnt)) {
+                valid.push_back(pnt);
             }
         }
     }
     if (!valid.empty()) {
-        point p = valid[rng(0, valid.size() - 1)];
-        generator.spawn(p.x, p.y);
+        tripoint p = valid[rng(0, valid.size() - 1)];
+        generator.spawn(p);
     }
     generator.friendly = -1;
     g->add_zombie(generator);
