@@ -6844,27 +6844,28 @@ void game::add_footstep(const tripoint &p, int volume, int distance, monster* so
     footsteps_source.push_back(source);
 }
 
-void game::do_blast(const int x, const int y, const int power, const int radius, const bool fire)
+void game::do_blast(const tripoint &p, const int power, const int radius, const bool fire)
 {
     int dam;
-    for (int i = x - radius; i <= x + radius; i++) {
-        for (int j = y - radius; j <= y + radius; j++) {
-            if (i == x && j == y) {
+    for (int i = -radius; i <= +radius; i++) {
+        for (int j = -radius; j <= +radius; j++) {
+            const tripoint pn(p.x + i, p.y + j, p.z);
+            if (pn == p) {
                 dam = 3 * power;
             } else {
-                dam = 3 * power / (rl_dist(x, y, i, j));
+                dam = 3 * power / (rl_dist(p, pn));
             }
-            m.bash(i, j, dam);
-            m.bash(i, j, dam); // Double up for tough doors, etc.
+            m.bash(pn, dam);
+            m.bash(pn, dam); // Double up for tough doors, etc.
 
-            int mon_hit = mon_at(i, j), npc_hit = npc_at(i, j);
+            int mon_hit = mon_at(pn), npc_hit = npc_at(pn);
             if (mon_hit != -1) {
                 monster &critter = critter_tracker.find(mon_hit);
                 critter.apply_damage( nullptr, bp_torso, rng( dam / 2, long( dam * 1.5 ) ) ); // TODO: player's fault?
             }
 
             int vpart;
-            vehicle *veh = m.veh_at(i, j, vpart);
+            vehicle *veh = m.veh_at(pn, vpart);
             if (veh) {
                 veh->damage(vpart, dam, fire ? 2 : 1, false);
             }
@@ -6872,7 +6873,7 @@ void game::do_blast(const int x, const int y, const int power, const int radius,
             player *n = nullptr;
             if (npc_hit != -1) {
                 n = active_npc[npc_hit];
-            } else if( u.posx == i && u.posy == j ) {
+            } else if( u.pos() == pn ) {
                 add_msg(m_bad, _("You're caught in the explosion!"));
                 n = &u;
             }
@@ -6885,7 +6886,7 @@ void game::do_blast(const int x, const int y, const int power, const int radius,
                 n->deal_damage( nullptr, bp_arm_r, damage_instance( DT_BASH, rng( dam / 3, dam ) ) );
             }
             if (fire) {
-                m.add_field(i, j, fd_fire, dam / 10);
+                m.add_field(pn, fd_fire, dam / 10);
             }
         }
     }
@@ -6893,52 +6894,58 @@ void game::do_blast(const int x, const int y, const int power, const int radius,
 
 void game::explosion(int x, int y, int power, int shrapnel, bool fire, bool blast)
 {
+    explosion(tripoint(x, y, 0), power, shrapnel, fire, blast);
+}
+
+void game::explosion(const tripoint &pos, int power, int shrapnel, bool fire, bool blast)
+{
     int radius = int(sqrt(double(power / 4)));
     int dam;
     int noise = power * (fire ? 2 : 10);
 
     if (power >= 30) {
-        sound(x, y, noise, _("a huge explosion!"));
+        sound(pos, noise, _("a huge explosion!"));
     } else if (power >= 4) {
-        sound(x, y, noise, _("an explosion!"));
+        sound(pos, noise, _("an explosion!"));
     } else {
-        sound(x, y, 3, _("a loud pop!"));
+        sound(pos, 3, _("a loud pop!"));
     }
     if (blast) {
-        do_blast(x, y, power, radius, fire);
+        do_blast(pos, power, radius, fire);
         // Draw the explosion
-        draw_explosion(x, y, radius, c_red);
+        draw_explosion(pos, radius, c_red);
     }
 
     // The rest of the function is shrapnel
     if (shrapnel <= 0 || power < 4) {
         return;
     }
-    int sx, sy, t, tx, ty;
-    std::vector<point> traj;
+    int t;
+    std::vector<tripoint> traj;
     timespec ts;
     ts.tv_sec = 0;
     ts.tv_nsec = 1000000 * OPTIONS["ANIMATION_DELAY"];
     for (int i = 0; i < shrapnel; i++) {
-        sx = rng(x - 2 * radius, x + 2 * radius);
-        sy = rng(y - 2 * radius, y + 2 * radius);
-        if (m.sees(x, y, sx, sy, 50, t)) {
-            traj = line_to(x, y, sx, sy, t);
+        const int sx = rng(pos.x - 2 * radius, pos.x + 2 * radius);
+        const int sy = rng(pos.y - 2 * radius, pos.y + 2 * radius);
+        const tripoint s(sx, sy, pos.z);
+        if (m.sees(pos, s, 50, t)) {
+            traj = line_to(pos, s, t);
         } else {
-            traj = line_to(x, y, sx, sy, 0);
+            traj = line_to(pos, s, 0);
         }
         // If the randomly chosen spot is the origin, it already points there.
         // Otherwise line_to excludes the origin, so add it.
-        if( sx !=x || sy != y ) {
-            traj.insert( traj.begin(), point(x, y) );
+        if( sx != pos.x || sy != pos.y ) {
+            traj.insert( traj.begin(), pos );
         }
         for (size_t j = 0; j < traj.size(); j++) {
             dam = rng(power / 2, power * 2);
-            draw_bullet(u, traj[j].x, traj[j].y, (int)j, traj, '`', ts);
-            tx = traj[j].x;
-            ty = traj[j].y;
-            const int zid = mon_at(tx, ty);
-            const int npcdex = npc_at(tx, ty);
+            const tripoint tp = traj[j];
+            // TODO: Z
+            draw_bullet(u, tp.x, tp.y, (int)j, line_to(pos.x, pos.y, s.x, s.y, t), '`', ts);
+            const int zid = mon_at(tp);
+            const int npcdex = npc_at(tp);
             if (zid != -1) {
                 monster &critter = critter_tracker.find(zid);
                 dam -= critter.get_armor_cut(bp_torso);
@@ -6951,14 +6958,15 @@ void game::explosion(int x, int y, int power, int shrapnel, bool fire, bool blas
                     dam = rng(long(1.5 * dam), 3 * dam);
                 }
                 active_npc[npcdex]->deal_damage( nullptr, hit, damage_instance( DT_CUT, dam ) );
-            } else if (tx == u.posx && ty == u.posy) {
+            } else if (tp == u.pos()) {
                 body_part hit = random_body_part();
                 //~ %s is bodypart name in accusative.
                 add_msg(m_bad, _("Shrapnel hits your %s!"), body_part_name_accusative(hit).c_str());
                 u.deal_damage( nullptr, hit, damage_instance( DT_CUT, dam ) );
             } else {
                 std::set<std::string> shrapnel_effects;
-                m.shoot(tx, ty, dam, j == traj.size() - 1, shrapnel_effects);
+                // TODO: Z
+                m.shoot(tp.x, tp.y, dam, j == traj.size() - 1, shrapnel_effects);
             }
         }
     }
@@ -6966,13 +6974,18 @@ void game::explosion(int x, int y, int power, int shrapnel, bool fire, bool blas
 
 void game::flashbang(int x, int y, bool player_immune)
 {
-    draw_explosion(x, y, 8, c_white);
-    int dist = rl_dist(u.posx, u.posy, x, y), t;
+    flashbang(tripoint(x, y, 0), player_immune);
+}
+
+void game::flashbang(const tripoint &p, bool player_immune)
+{
+    draw_explosion(p, 8, c_white);
+    int dist = rl_dist(u.pos(), p), t;
     if (dist <= 8 && !player_immune) {
         if (!u.has_bionic("bio_ears") && !u.is_wearing("rm13_armor_on")) {
             u.add_effect("deaf", 40 - dist * 4);
         }
-        if (m.sees(u.posx, u.posy, x, y, 8, t)) {
+        if (m.sees(u.pos(), p, 8, t)) {
             int flash_mod = 0;
             if (u.has_trait("PER_SLIME")) {
                 if (one_in(2)) {
@@ -6988,12 +7001,12 @@ void game::flashbang(int x, int y, bool player_immune)
     }
     for (size_t i = 0; i < num_zombies(); i++) {
         monster &critter = critter_tracker.find(i);
-        dist = rl_dist(critter.posx(), critter.posy(), x, y);
+        dist = rl_dist(critter.pos(), p);
         if (dist <= 4) {
             critter.add_effect("stunned", 10 - dist);
         }
         if (dist <= 8) {
-            if (critter.has_flag(MF_SEES) && m.sees(critter.posx(), critter.posy(), x, y, 8, t)) {
+            if (critter.has_flag(MF_SEES) && m.sees(critter.pos(), p, 8, t)) {
                 critter.add_effect("blind", 18 - dist);
             }
             if (critter.has_flag(MF_HEARS)) {
@@ -7001,34 +7014,41 @@ void game::flashbang(int x, int y, bool player_immune)
             }
         }
     }
-    sound(x, y, 12, _("a huge boom!"));
+    sound(p, 12, _("a huge boom!"));
     // TODO: Blind/deafen NPC
 }
 
 void game::shockwave(int x, int y, int radius, int force, int stun, int dam_mult,
                      bool ignore_player)
 {
-    draw_explosion(x, y, radius, c_blue);
+    shockwave(tripoint(x, y, 0), radius, force, stun, dam_mult, ignore_player);
+}
 
-    sound(x, y, force * force * dam_mult / 2, _("Crack!"));
+void game::shockwave(const tripoint &pos, int radius, int force, int stun, int dam_mult, bool ignore_player)
+{
+    draw_explosion(pos, radius, c_blue);
+
+    sound(pos, force * force * dam_mult / 2, _("Crack!"));
     for (size_t i = 0; i < num_zombies(); i++) {
         monster &critter = critter_tracker.find(i);
-        if (rl_dist(critter.posx(), critter.posy(), x, y) <= radius) {
+        if (rl_dist(critter.pos(), pos) <= radius) {
             add_msg(_("%s is caught in the shockwave!"), critter.name().c_str());
-            knockback(x, y, critter.posx(), critter.posy(), force, stun, dam_mult);
+            // TODO: Z
+            knockback(pos.x, pos.y, critter.posx(), critter.posy(), force, stun, dam_mult);
         }
     }
     for( auto &elem : active_npc ) {
-        if( rl_dist( ( elem )->posx, ( elem )->posy, x, y ) <= radius ) {
+        if( rl_dist( ( elem )->pos(), pos ) <= radius ) {
             add_msg( _( "%s is caught in the shockwave!" ), ( elem )->name.c_str() );
-            knockback( x, y, ( elem )->posx, ( elem )->posy, force, stun, dam_mult );
+            knockback( pos.x, pos.y, ( elem )->posx, ( elem )->posy, force, stun, dam_mult );
         }
     }
-    if (rl_dist(u.posx, u.posy, x, y) <= radius && !ignore_player &&
+    if (rl_dist(u.pos(), pos) <= radius && !ignore_player &&
           (!u.has_trait("LEG_TENT_BRACE") || u.footwear_factor() == 1 ||
           (u.footwear_factor() == .5 && one_in(2)))) {
         add_msg(m_bad, _("You're caught in the shockwave!"));
-        knockback(x, y, u.posx, u.posy, force, stun, dam_mult);
+        // TODO: Z
+        knockback(pos.x, pos.y, u.posx, u.posy, force, stun, dam_mult);
     }
     return;
 }
@@ -7078,7 +7098,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
         }
         for (size_t i = 1; i < traj.size(); i++) {
             if (m.move_cost(traj[i].x, traj[i].y) == 0) {
-                targ->setpos(tripoint(traj[i - 1].x, traj[i - 1].y, 0))
+                targ->setpos(tripoint(traj[i - 1].x, traj[i - 1].y, 0));
                 force_remaining = traj.size() - i;
                 if (stun != 0) {
                     if (targ->has_effect("stunned")) {
@@ -7375,10 +7395,10 @@ void game::use_computer(int x, int y)
     refresh_all();
 }
 
-void game::resonance_cascade(int x, int y)
+void game::resonance_cascade(const tripoint &pos)
 {
-    int maxglow = 100 - 5 * trig_dist(x, y, u.posx, u.posy);
-    int minglow = 60 - 5 * trig_dist(x, y, u.posx, u.posy);
+    int maxglow = 100 - 5 * trig_dist(pos, u.pos());
+    int minglow = 60 - 5 * trig_dist(pos, u.pos());
     MonsterGroupResult spawn_details;
     monster invader;
     if (minglow < 0) {
@@ -7387,14 +7407,15 @@ void game::resonance_cascade(int x, int y)
     if (maxglow > 0) {
         u.add_effect("teleglow", rng(minglow, maxglow) * 100);
     }
-    int startx = (x < 8 ? 0 : x - 8), endx = (x + 8 >= SEEX * 3 ? SEEX * 3 - 1 : x + 8);
-    int starty = (y < 8 ? 0 : y - 8), endy = (y + 8 >= SEEY * 3 ? SEEY * 3 - 1 : y + 8);
+    int startx = (pos.x < 8 ? 0 : pos.x - 8), endx = (pos.x + 8 >= SEEX * 3 ? SEEX * 3 - 1 : pos.x + 8);
+    int starty = (pos.y < 8 ? 0 : pos.y - 8), endy = (pos.y + 8 >= SEEY * 3 ? SEEY * 3 - 1 : pos.y + 8);
     for (int i = startx; i <= endx; i++) {
         for (int j = starty; j <= endy; j++) {
+            const tripoint tp(i, j, pos.z);
             switch (rng(1, 80)) {
             case 1:
             case 2:
-                emp_blast(i, j);
+                emp_blast(tp);
                 break;
             case 3:
             case 4:
@@ -7422,7 +7443,7 @@ void game::resonance_cascade(int x, int y)
                             break;
                         }
                         if (!one_in(3)) {
-                            m.add_field(k, l, type, 3);
+                            m.add_field(tripoint(k, l, tp.z), type, 3);
                         }
                     }
                 }
@@ -7432,26 +7453,26 @@ void game::resonance_cascade(int x, int y)
             case  8:
             case  9:
             case 10:
-                m.add_trap(i, j, tr_portal);
+                m.add_trap(tp, tr_portal);
                 break;
             case 11:
             case 12:
-                m.add_trap(i, j, tr_goo);
+                m.add_trap(tp, tr_goo);
                 break;
             case 13:
             case 14:
             case 15:
                 spawn_details = MonsterGroupManager::GetResultFromGroup("GROUP_NETHER");
-                invader = monster(GetMType(spawn_details.name), tripoint(i, j, 0));
+                invader = monster(GetMType(spawn_details.name), tp);
                 add_zombie(invader);
                 break;
             case 16:
             case 17:
             case 18:
-                m.destroy(i, j);
+                m.destroy(tp);
                 break;
             case 19:
-                explosion(i, j, rng(1, 10), rng(0, 1) * rng(0, 6), one_in(4));
+                explosion(tp, rng(1, 10), rng(0, 1) * rng(0, 6), one_in(4));
                 break;
             }
         }
@@ -7460,7 +7481,12 @@ void game::resonance_cascade(int x, int y)
 
 void game::scrambler_blast(int x, int y)
 {
-    int mondex = mon_at(x, y);
+    scrambler_blast(tripoint(x, y, 0));
+}
+
+void game::scrambler_blast(const tripoint &p)
+{
+    int mondex = mon_at(p);
     if (mondex != -1) {
         monster &critter = critter_tracker.find(mondex);
         if (critter.has_flag(MF_ELECTRONIC)) {
@@ -7468,6 +7494,11 @@ void game::scrambler_blast(int x, int y)
         }
         add_msg(m_warning, _("The %s sparks and begins searching for a target!"), critter.name().c_str());
     }
+}
+
+void game::emp_blast(const tripoint &p)
+{
+    emp_blast(p.x, p.y);
 }
 
 void game::emp_blast(int x, int y)
@@ -7731,30 +7762,40 @@ bool game::is_sheltered(int x, int y)
 
 bool game::revive_corpse(int x, int y, int n)
 {
-    if ((int)m.i_at(x, y).size() <= n) {
-        debugmsg("Tried to revive a non-existent corpse! (%d, %d), #%d of %d", x, y, n, m.i_at(x,
-                 y).size());
+    return revive_corpse(tripoint(x, y, 0), n);
+}
+
+bool game::revive_corpse(const tripoint &p, int n)
+{
+    if ((int)m.i_at(p).size() <= n) {
+        debugmsg("Tried to revive a non-existent corpse! (%d, %d, %d), #%d of %d", p.x, p.y, p.z, n,
+                 m.i_at(p).size());
         return false;
     }
-    if( !revive_corpse( x, y, m.get_item(x, y, n) ) ) {
+    if( !revive_corpse( p, m.get_item(p, n) ) ) {
         return false;
     }
-    m.i_rem(x, y, n);
+    m.i_rem(p, n);
     return true;
 }
 
 bool game::revive_corpse(int x, int y, item *it)
 {
+    return revive_corpse(tripoint(x, y, 0), it);
+}
+
+bool game::revive_corpse(const tripoint &p, item *it)
+{
     if (it == NULL || it->typeId() != "corpse" || it->corpse == NULL) {
         debugmsg("Tried to revive a non-corpse.");
         return false;
     }
-    if (critter_at(x, y) != NULL) {
+    if (critter_at(p) != NULL) {
         // Someone is in the way, try again later
         return false;
     }
     int burnt_penalty = it->burnt;
-    monster critter(it->corpse, tripoint(x, y, 0));
+    monster critter(it->corpse, p);
     critter.set_speed_base( int(critter.get_speed_base() * 0.8) - (burnt_penalty / 2) );
     critter.hp = int(critter.hp * 0.7) - burnt_penalty;
     if (it->damage > 0) {
@@ -15022,4 +15063,9 @@ int game::get_abs_levy() const
 int game::get_abs_levz() const
 {
     return levz;
+}
+
+void game::draw_explosion(int x, int y, int radius, nc_color col)
+{
+    draw_explosion(tripoint(x, y, 0), radius, col);
 }

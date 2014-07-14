@@ -177,19 +177,23 @@ class game
         void draw_footsteps();
         // Explosion at (x, y) of intensity (power), with (shrapnel) chunks of shrapnel
         void explosion(int x, int y, int power, int shrapnel, bool fire, bool blast = true);
+        void explosion(const tripoint &p, int power, int shrapnel, bool fire, bool blast = true);
         // Draws an explosion with set radius and color at the given location
         /* Defined later in this file */
         //void draw_explosion(int x, int y, int radius, nc_color col);
         // Flashback at (x, y)
         void flashbang(int x, int y, bool player_immune = false);
+        void flashbang(const tripoint &p, bool player_immune = false);
         // Move the player vertically, if (force) then they fell
         void vertical_move(int z, bool force);
         void use_computer(int x, int y);
         bool refill_vehicle_part (vehicle &veh, vehicle_part *part, bool test = false);
         bool pl_refill_vehicle (vehicle &veh, int part, bool test = false);
-        void resonance_cascade(int x, int y);
+        void resonance_cascade(const tripoint &p);
         void scrambler_blast(int x, int y);
+        void scrambler_blast(const tripoint &p);
         void emp_blast(int x, int y);
+        void emp_blast(const tripoint &p);
         int  npc_at(const int x, const int y) const; // Index of the npc at (x, y); -1 for none
         int  npc_at(const tripoint &p) const; // Index of the npc at p; -1 for none
         int  npc_by_id(const int id) const; // Index of the npc at (x, y); -1 for none
@@ -216,8 +220,10 @@ class game
         bool is_in_sunlight(const tripoint &p);
         bool is_sheltered(int x, int y); // Checks if indoors, underground or in a car.
         bool revive_corpse(int x, int y, int n); // revives a corpse from an item pile
+        bool revive_corpse(const tripoint &p, int n);
         bool revive_corpse(int x, int y,
                            item *it); // revives a corpse by item pointer, caller handles item deletion
+        bool revive_corpse(const tripoint &p, item *it);
         // Player wants to fire a gun (target selection) etc. actual firing is done in player::fire_gun
         // This is interactive and therefor not for npcs.
         void plfire(bool burst, int default_target_x = -1, int default_target_y = -1);
@@ -421,7 +427,7 @@ class game
         bionic_id random_good_bionic() const; // returns a non-faulty, valid bionic
 
         // Helper because explosion was getting too big.
-        void do_blast( const int x, const int y, const int power, const int radius, const bool fire );
+        void do_blast( const tripoint &p, const int power, const int radius, const bool fire );
 
         // Knockback functions: knock target at (tx,ty) along a line, either calculated
         // from source position (sx,sy) using force parameter or passed as an argument;
@@ -436,9 +442,11 @@ class game
         // parameters force, stun, and dam_mult are passed to knockback()
         // ignore_player determines if player is affected, useful for bionic, etc.
         void shockwave(int x, int y, int radius, int force, int stun, int dam_mult, bool ignore_player);
+        void shockwave(const tripoint &p, int radius, int force, int stun, int dam_mult, bool ignore_player);
 
         // Animation related functions
         void draw_explosion(int x, int y, int radius, nc_color col);
+        void draw_explosion(const tripoint &p, int radius, nc_color col);
         void draw_bullet(Creature &p, int tx, int ty, int i, std::vector<point> trajectory, char bullet,
                          timespec &ts);
         void draw_hit_mon(int x, int y, monster critter, bool dead = false);

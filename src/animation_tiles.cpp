@@ -8,8 +8,11 @@ extern cata_tiles *tilecontext; // obtained from sdltiles.cpp
 extern void try_update();
 
 /* Tiles version of Explosion Animation */
-void game::draw_explosion(int x, int y, int radius, nc_color col)
+void game::draw_explosion(const tripoint &p, int radius, nc_color col)
 {
+    const int x = p.x;
+    const int y = p.y;
+    // TODO: Z
     timespec ts;    // Timespec for the animation of the explosion
     ts.tv_sec = 0;
     ts.tv_nsec = OPTIONS["ANIMATION_DELAY"] * EXPLOSION_MULTIPLIER;
