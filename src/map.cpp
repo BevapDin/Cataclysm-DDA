@@ -4445,6 +4445,39 @@ bool map::blocks_vertical_view_up( const tripoint &p ) const
     return blocks_vertical_view_down( tripoint( p.x, p.y, p.z + 1 ) );
 }
 
+bool map::blocks_vertical_air_down(const tripoint &p) const {
+    const ter_id tid = ter(p);
+    const ter_t &ter = terlist[tid];
+    if (ter.movecost == 0) {
+        return true;
+    }
+    // TODO: Z
+#if 0
+    if (!ter.has_flag("C")) { // no no floor -> floor
+        return true;
+    }
+#endif
+    const furn_id fid = furn(p);
+    if (fid == f_null) {
+        return false;
+    }
+    const furn_t &furn = furnlist[fid];
+    if (furn.movecost == 0) {
+        return true;
+    }
+    // TODO: Z
+#if 0
+    if (!furn.has_flag(TFLAG_NOFLOOR)) { // no no floor -> floor
+        return true;
+    }
+#endif
+    return false;
+}
+
+bool map::blocks_vertical_air_up(const tripoint &p) const {
+    return blocks_vertical_air_down(tripoint(p.x, p.y, p.z + 1));
+}
+
 // Returns the negative length (z-levels) of a vertical shaft
 // starting at p, and going down until an opaque floor stops it
 int map::z_level_down_xx( const tripoint &p ) const

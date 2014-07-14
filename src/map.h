@@ -697,7 +697,6 @@ void add_corpse(int x, int y);
         void remove_field( const int x, const int y, const field_id field_to_remove );
         void remove_field( const tripoint &p, const field_id field_to_remove );
  bool process_fields(); // See fields.cpp
- bool process_fields_in_submap(submap * const current_submap, const int submap_x, const int submap_y); // See fields.cpp
         /**
          * Apply field effects to the creature when it's on a square with fields.
          */
@@ -981,8 +980,13 @@ private:
  std::map<trap_id, std::set<point> > traplocs;
  bool blocks_vertical_view_down(const tripoint &p) const;
  bool blocks_vertical_view_up(const tripoint &p) const;
+ bool blocks_vertical_air_down(const tripoint &p) const;
+ bool blocks_vertical_air_up(const tripoint &p) const;
  int z_level_down_xx(const tripoint &p) const;
  int z_level_up_xx(const tripoint &p) const;
+ void spread_gas(field_entry *cur, const tripoint &here, field_id curtype, int percent_spread, int outdoor_age_speedup);
+ void create_hot_air(const tripoint &here, int density);
+ bool process_fields_in_submap(submap * const current_submap, const int submap_x, const int submap_y, const int submap_z); // See fields.cpp
 };
 
 std::vector<point> closest_points_first(int radius, point p);
