@@ -2319,7 +2319,7 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
     return std::pair<bool, bool> (smashed_something, success);
 }
 
-void map::spawn_item_list(const std::vector<map_bash_item_drop> &items, int x, int y) {
+void map::spawn_item_list(const std::vector<map_bash_item_drop> &items, const tripoint &p) {
     for( auto &items_i : items ) {
         const map_bash_item_drop &drop = items_i;
         int chance = drop.chance;
@@ -2344,7 +2344,7 @@ void map::spawn_item_list(const std::vector<map_bash_item_drop> &items, int x, i
                         // might have been added previously
                         new_item.item_tags.erase( "FIT" );
                     }
-                    add_item_or_charges(x, y, new_item);
+                    add_item_or_charges(p, new_item);
                 }
             }
         }
