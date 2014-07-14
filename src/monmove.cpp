@@ -386,7 +386,7 @@ void monster::footsteps(const tripoint &p)
   default: break;
  }
  int dist = rl_dist(p, g->u.pos());
- g->add_footstep(p.x, p.y, volume, dist, this);
+ g->add_footstep(p, volume, dist, this);
  return;
 }
 

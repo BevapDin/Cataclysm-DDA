@@ -7592,7 +7592,7 @@ void player::suffer()
                     break;
                 case 9:
                     add_msg(m_bad, _("You have the sudden urge to SCREAM!"));
-                    g->sound(posx, posy, 10 + 2 * str_cur, "AHHHHHHH!");
+                    g->sound(pos(), 10 + 2 * str_cur, "AHHHHHHH!");
                     break;
                 case 10:
                     add_msg(std::string(name + name + name + name + name + name + name +
@@ -7625,13 +7625,13 @@ void player::suffer()
             vomit();
         }
         if (has_trait("SHOUT1") && one_in(3600)) {
-            g->sound(posx, posy, 10 + 2 * str_cur, _("You shout loudly!"));
+            g->sound(pos(), 10 + 2 * str_cur, _("You shout loudly!"));
         }
         if (has_trait("SHOUT2") && one_in(2400)) {
-            g->sound(posx, posy, 15 + 3 * str_cur, _("You scream loudly!"));
+            g->sound(pos(), 15 + 3 * str_cur, _("You scream loudly!"));
         }
         if (has_trait("SHOUT3") && one_in(1800)) {
-            g->sound(posx, posy, 20 + 4 * str_cur, _("You let out a piercing howl!"));
+            g->sound(pos(), 20 + 4 * str_cur, _("You let out a piercing howl!"));
         }
         if (has_trait("M_SPORES") && one_in(2400)) {
             spores();
@@ -7919,7 +7919,7 @@ void player::suffer()
             add_msg(m_bad, _("A bionic emits a crackle of noise!"));
         else
             add_msg(m_bad, _("A bionic shudders, but you hear nothing."));
-        g->sound(posx, posy, 60, "");
+        g->sound(pos(), 60, "");
     }
     if (has_bionic("bio_power_weakness") && max_power_level > 0 &&
         power_level >= max_power_level * .75) {

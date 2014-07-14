@@ -161,10 +161,13 @@ class game
          * @returns true if the player could hear the sound.
          */
         bool sound(int x, int y, int vol, std::string description, bool ambient = false);
+        bool sound(const tripoint &p, int vol, std::string description, bool ambient = false);
         // same as sound(..., true)
         bool ambient_sound(int x, int y, int vol, std::string description);
+        bool ambient_sound(const tripoint &p, int vol, std::string description);
         // creates a list of coordinates to draw footsteps
         void add_footstep(int x, int y, int volume, int distance, monster *source);
+        void add_footstep(const tripoint &p, int volume, int distance, monster* source);
         std::vector<std::vector<point> > footsteps;
         std::vector<monster *> footsteps_source;
         // Calculate where footstep marker should appear and put those points into the result.

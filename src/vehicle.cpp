@@ -1241,15 +1241,16 @@ void vehicle::honk_horn()
             honked = true;
         }
         //Get global position of horn
-        const int horn_x = global_x() + parts[p].precalc_dx[0];
-        const int horn_y = global_y() + parts[p].precalc_dy[0];
+        const tripoint horn( global_x() + parts[p].precalc_dx[0],
+                             global_y() + parts[p].precalc_dy[0],
+                             0 ); // TODO: Z
         //Determine sound
         if( horn_type.bonus >= 40 ) {
-            g->sound( horn_x, horn_y, horn_type.bonus, _("HOOOOORNK!") );
+            g->sound( horn, horn_type.bonus, _("HOOOOORNK!") );
         } else if( horn_type.bonus >= 20 ) {
-            g->sound( horn_x, horn_y, horn_type.bonus, _("BEEEP!") );
+            g->sound( horn, horn_type.bonus, _("BEEEP!") );
         } else {
-            g->sound( horn_x, horn_y, horn_type.bonus, _("honk.") );
+            g->sound( horn, horn_type.bonus, _("honk.") );
         }
     }
 
@@ -2927,7 +2928,8 @@ void vehicle::noise_and_smoke( double load, double time )
            lvl++;
        }
     }
-    g->ambient_sound( global_x(), global_y(), noise, sound_msgs[lvl] );
+    // TODO: Z
+    g->ambient_sound( tripoint( global_x(), global_y(), 0 ), noise, sound_msgs[lvl] );
 }
 
 float vehicle::wheels_area (int *cnt)

@@ -6639,10 +6639,20 @@ void game::monmove()
 
 bool game::ambient_sound(int x, int y, int vol, std::string description)
 {
-    return sound( x, y, vol, description, true );
+    return ambient_sound( tripoint(x, y, 0), vol, description );
+}
+
+bool game::ambient_sound(const tripoint &p, int vol, std::string description)
+{
+    return sound( p, vol, description, true );
 }
 
 bool game::sound(int x, int y, int vol, std::string description, bool ambient)
+{
+    return sound(tripoint(x, y, 0), vol, description, ambient);
+}
+
+bool game::sound(const tripoint &p, int vol, std::string description, bool ambient)
 {
     // --- Monster sound handling here ---
     // Alert all hordes
@@ -6654,7 +6664,7 @@ bool game::sound(int x, int y, int vol, std::string description, bool ambient)
     for (int i = 0, numz = num_zombies(); i < numz; i++) {
         monster &critter = critter_tracker.find(i);
         // rl_dist() is faster than critter.has_flag() or critter.can_hear(), so we'll check it first.
-        int dist = rl_dist(x, y, critter.posx(), critter.posy());
+        int dist = rl_dist(p, critter.pos());
         int vol_goodhearing = vol * 2 - dist;
         if (vol_goodhearing > 0 && critter.can_hear()) {
             const bool goodhearing = critter.has_flag(MF_GOODHEARING);
@@ -6672,18 +6682,20 @@ bool game::sound(int x, int y, int vol, std::string description, bool ambient)
                     max_error = 1;
                 }
 
-                int target_x = x + rng(-max_error, max_error);
-                int target_y = y + rng(-max_error, max_error);
+                const tripoint target(
+                    p.x + rng(-max_error, max_error),
+                    p.y + rng(-max_error, max_error),
+                    p.z);
 
                 int wander_turns = volume * (goodhearing ? 6 : 1);
-                critter.wander_to(target_x, target_y, wander_turns);
+                critter.wander_to(target, wander_turns);
                 critter.process_trigger(MTRIG_SOUND, volume);
             }
         }
     }
 
     // --- Player stuff below this point ---
-    int dist = rl_dist(x, y, u.posx, u.posy);
+    int dist = rl_dist(p, u.pos());
 
     // Mutation/Bionic volume modifiers
     if (u.has_bionic("bio_ears")) {
@@ -6752,7 +6764,7 @@ bool game::sound(int x, int y, int vol, std::string description, bool ambient)
         }
     }
 
-    if (!ambient && (x != u.posx || y != u.posy) && !m.pl_sees(u.posx, u.posy, x, y, dist)) {
+    if (!ambient && p != u.pos() && !m.pl_sees(u.pos(), p, dist)) {
         if (u.activity.ignore_trivial != true) {
             std::string query;
             if (description != "") {
@@ -6773,12 +6785,12 @@ bool game::sound(int x, int y, int vol, std::string description, bool ambient)
     // Only print a description if it exists
     if (description != "") {
         // If it came from us, don't print a direction
-        if (x == u.posx && y == u.posy) {
+        if (p == u.pos()) {
             capitalize_letter(description, 0);
             add_msg("%s", description.c_str());
         } else {
             // Else print a direction as well
-            std::string direction = direction_name(direction_from(u.posx, u.posy, x, y));
+            std::string direction = direction_name(direction_from(u.posx, u.posy, p.x, p.y));
             add_msg(m_warning, _("From the %s you hear %s"), direction.c_str(), description.c_str());
         }
     }
@@ -6790,13 +6802,20 @@ bool game::sound(int x, int y, int vol, std::string description, bool ambient)
 // characters hearing and how close they are
 void game::add_footstep(int x, int y, int volume, int distance, monster *source)
 {
+    add_footstep(tripoint(x, y, 0), volume, distance, source);
+}
+
+void game::add_footstep(const tripoint &p, int volume, int distance, monster* source)
+{
     if (u.is_deaf()) {
         return;
-    } else if (x == u.posx && y == u.posy) {
+    } else if (p == u.pos()) {
         return;
-    } else if (u_see(x, y)) {
+    } else if (u_see(p)) {
         return;
     }
+    int x = p.x;
+    int y = p.y;
     int err_offset;
     if (volume / distance < 2) {
         err_offset = 3;
