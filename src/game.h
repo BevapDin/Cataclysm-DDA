@@ -162,7 +162,6 @@ class game
                        int x = INT_MIN, int y = INT_MIN);
         bool event_queued(event_type type);
         /** Create explosion at (x, y) of intensity (power) with (shrapnel) chunks of shrapnel. */
-        void explosion(int x, int y, int power, int shrapnel, bool fire, bool blast = true);
         void explosion(const tripoint &p, int power, int shrapnel, bool fire, bool blast = true);
         /** Triggers a flashbang explosion at (x, y). */
         void flashbang(int x, int y, bool player_immune = false);
@@ -476,7 +475,6 @@ class game
         void shockwave(const tripoint &p, int radius, int force, int stun, int dam_mult, bool ignore_player);
 
         // Animation related functions
-        void draw_explosion(int x, int y, int radius, nc_color col);
         void draw_explosion(const tripoint &p, int radius, nc_color col);
         void draw_bullet(Creature &p, int tx, int ty, int i, std::vector<point> trajectory, char bullet,
                          timespec &ts);

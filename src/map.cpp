@@ -2608,7 +2608,7 @@ void map::shoot(const int x, const int y, int &dam,
         if (hit_items || one_in(3)) {
             if (dam > 15) {
                 if (ammo_effects.count("INCENDIARY") || ammo_effects.count("FLAME")) {
-                    g->explosion(x, y, 40, 0, true);
+                    g->explosion(tripoint(x, y, 0), 40, 0, true);
                 } else {
                     for (int i = x - 2; i <= x + 2; i++) {
                         for (int j = y - 2; j <= y + 2; j++) {

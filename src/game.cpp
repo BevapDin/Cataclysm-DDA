@@ -6084,11 +6084,6 @@ void game::do_blast(const tripoint &p, const int power, const int radius, const 
     }
 }
 
-void game::explosion(int x, int y, int power, int shrapnel, bool fire, bool blast)
-{
-    explosion(tripoint(x, y, 0), power, shrapnel, fire, blast);
-}
-
 void game::explosion(const tripoint &pos, int power, int shrapnel, bool fire, bool blast)
 {
     int radius = int(sqrt(double(power / 4)));
@@ -13794,9 +13789,4 @@ int game::get_abs_levy() const
 int game::get_abs_levz() const
 {
     return levz;
-}
-
-void game::draw_explosion(int x, int y, int radius, nc_color col)
-{
-    draw_explosion(tripoint(x, y, 0), radius, col);
 }
