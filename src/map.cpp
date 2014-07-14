@@ -3298,22 +3298,22 @@ bool map::add_item_or_charges(const tripoint &p, item new_item, int overflow_rad
 
 
     bool tryaddcharges = (new_item.charges  != -1 && new_item.count_by_charges());
-    std::vector<point> ps = closest_points_first(overflow_radius, point(p.x, p.y));
-    for( std::vector<point>::iterator p_it = ps.begin(); p_it != ps.end(); p_it++ ) {
-        if( !inbounds(p_it->x, p_it->y) || new_item.volume() > this->free_volume(p_it->x, p_it->y) ||
-            has_flag("DESTROY_ITEM", p_it->x, p_it->y) || has_flag("NOITEM", p_it->x, p_it->y) ) {
+    std::vector<tripoint> ps = closest_points_first(overflow_radius, p);
+    for( auto p_it = ps.begin(); p_it != ps.end(); p_it++ ) {
+        if( !inbounds(*p_it) || new_item.volume() > this->free_volume(*p_it) ||
+            has_flag("DESTROY_ITEM", *p_it) || has_flag("NOITEM", *p_it) ) {
             continue;
         }
 
         if( tryaddcharges ) {
-            for( auto &i : i_at_mutable( p_it->x, p_it->y ) ) {
+            for( auto &i : i_at_mutable( *p_it ) ) {
                 if( i.merge_charges( new_item ) ) {
                     return true;
                 }
             }
         }
-        if( i_at( p_it->x, p_it->y ).size() < MAX_ITEM_IN_SQUARE ) {
-            add_item( p_it->x, p_it->y, new_item, MAX_ITEM_IN_SQUARE );
+        if( i_at( *p_it ).size() < MAX_ITEM_IN_SQUARE ) {
+            add_item( *p_it, new_item, MAX_ITEM_IN_SQUARE );
             return true;
         }
     }
@@ -5801,6 +5801,17 @@ std::vector<point> closest_points_first(int radius, int center_x, int center_y)
         y += dy;
     }
     return points;
+}
+
+std::vector<tripoint> closest_points_first(int radius, const tripoint &p)
+{
+    // TODO: Z
+    std::vector<point> tmp = closest_points_first(radius, p.x, p.y);
+    std::vector<tripoint> res;
+    for(std::vector<point>::const_iterator a = tmp.begin(); a != tmp.end(); ++a) {
+        res.push_back(tripoint(a->x, a->y, p.z));
+    }
+    return res;
 }
 
 std::vector<tripoint> map::route(const tripoint &F, const tripoint &T, const bool can_bash) const
