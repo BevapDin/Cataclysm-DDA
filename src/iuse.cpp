@@ -5583,7 +5583,7 @@ int iuse::granade_act(player *, item *it, bool t, const tripoint &pos)
                 break;
             case 5:
                 g->sound(pos, 100, _("BEES!!"));
-                g->draw_explosion(pos.x, pos.y, explosion_radius, c_yellow);
+                g->draw_explosion(pos, explosion_radius, c_yellow);
                 for (int i = -explosion_radius; i <= explosion_radius; i++) {
                     for (int j = -explosion_radius; j <= explosion_radius; j++) {
                         if (one_in(5) && -1 == g->mon_at(pos.x + i, pos.y + j) &&

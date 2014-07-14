@@ -176,7 +176,6 @@ class game
         // visual cue to monsters moving out of the players sight
         void draw_footsteps();
         // Explosion at (x, y) of intensity (power), with (shrapnel) chunks of shrapnel
-        void explosion(int x, int y, int power, int shrapnel, bool fire, bool blast = true);
         void explosion(const tripoint &p, int power, int shrapnel, bool fire, bool blast = true);
         // Draws an explosion with set radius and color at the given location
         /* Defined later in this file */
@@ -445,7 +444,6 @@ class game
         void shockwave(const tripoint &p, int radius, int force, int stun, int dam_mult, bool ignore_player);
 
         // Animation related functions
-        void draw_explosion(int x, int y, int radius, nc_color col);
         void draw_explosion(const tripoint &p, int radius, nc_color col);
         void draw_bullet(Creature &p, int tx, int ty, int i, std::vector<point> trajectory, char bullet,
                          timespec &ts);

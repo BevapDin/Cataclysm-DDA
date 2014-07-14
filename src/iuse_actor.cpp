@@ -185,10 +185,10 @@ long explosion_iuse::use(player *p, item *it, bool t, const tripoint &pos) const
         return 0;
     }
     if (explosion_power >= 0) {
-        g->explosion(pos.x, pos.y, explosion_power, explosion_shrapnel, explosion_fire, explosion_blast);
+        g->explosion(pos, explosion_power, explosion_shrapnel, explosion_fire, explosion_blast);
     }
     if (draw_explosion_radius >= 0) {
-        g->draw_explosion(pos.x, pos.y, draw_explosion_radius, draw_explosion_color);
+        g->draw_explosion(pos, draw_explosion_radius, draw_explosion_color);
     }
     if (do_flashbang) {
         g->flashbang(pos.x, pos.y, flashbang_player_immune);

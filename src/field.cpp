@@ -580,7 +580,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
                                 // make a copy and let the copy explode
                                 item tmp = items_here[i];
                                 i_rem( here, i );
-                                tmp.detonate(point(here.x, here.y));
+                                tmp.detonate( here );
                             }
                         }
                         std::vector<item> new_content;
@@ -643,7 +643,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
                                         // large intrinsic effect blows up with half
                                         // the ammos damage in force, for each bullet,
                                         // just creating shrapnel.
-                                        g->explosion( here.x, here.y, ammo_type->damage / 2,
+                                        g->explosion( here, ammo_type->damage / 2,
                                                       true, false, false );
                                     } else if( special ) {
                                         // If it has a special effect just trigger it.

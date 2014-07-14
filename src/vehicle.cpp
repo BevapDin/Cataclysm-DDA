@@ -4146,7 +4146,7 @@ void vehicle::handle_trap (int x, int y, int part)
         damage_direct( pwh, part_damage );
     }
     if (expl > 0) {
-        g->explosion(x, y, expl, shrap, false);
+        g->explosion(tripoint(x, y, 0), expl, shrap, false);
     }
 }
 
@@ -4727,7 +4727,7 @@ int vehicle::damage_direct (int p, int dmg, int type)
                     g->u.add_memorial_log(pgettext("memorial_male","The fuel tank of the %s exploded!"),
                         pgettext("memorial_female", "The fuel tank of the %s exploded!"),
                         name.c_str());
-                    g->explosion (global_x() + parts[p].precalc_dx[0], global_y() + parts[p].precalc_dy[0],
+                    g->explosion (tripoint(global_x() + parts[p].precalc_dx[0], global_y() + parts[p].precalc_dy[0], 0),
                                 pow, 0, (ft == fuel_type_gasoline || ft == fuel_type_diesel));
                     parts[p].hp = 0;
                 }
