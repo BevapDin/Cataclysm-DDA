@@ -283,7 +283,13 @@ void map::add_light_source(int x, int y, float luminance )
     light_source_buffer[x][y] = std::max(luminance, light_source_buffer[x][y]);
 }
 
-lit_level map::light_at(int dx, int dy)
+lit_level map::light_at(const tripoint &p) const
+{
+    // TODO: Z
+    return light_at(p.x, p.y);
+}
+
+lit_level map::light_at(int dx, int dy) const
 {
     if (!inbounds(dx, dy)) {
         return LL_DARK;    // Out of bounds
@@ -313,17 +319,22 @@ float map::ambient_light_at(int dx, int dy)
     return lm[dx][dy];
 }
 
-bool map::pl_sees( const int tx, const int ty, const int max_range )
+bool map::pl_sees( const int tx, const int ty, const int max_range ) const
 {
-    if (!inbounds(tx, ty)) {
+    return pl_sees( tripoint( tx, ty, 0 ), max_range );
+}
+
+bool map::pl_sees( const tripoint t, int max_range ) const
+{
+    if( !inbounds( t ) ) {
         return false;
     }
 
-    if( max_range >= 0 && square_dist( tx, ty, g->u.posx(), g->u.posy() ) > max_range ) {
+    if( max_range >= 0 && square_dist( t, g->u.pos() ) > max_range ) {
         return false;    // Out of range!
     }
 
-    return seen_cache[tx][ty];
+    return seen_cache[t.x][t.y][t.z - my_ZMIN];
 }
 
 /**
@@ -342,7 +353,7 @@ bool map::pl_sees( const int tx, const int ty, const int max_range )
 void map::build_seen_cache()
 {
     memset(seen_cache, false, sizeof(seen_cache));
-    seen_cache[g->u.posx()][g->u.posy()] = true;
+    seen_cache[g->u.posx()][g->u.posy()][-my_ZMIN] = true;
 
     const int offsetX = g->u.posx();
     const int offsetY = g->u.posy();
@@ -453,7 +464,7 @@ void map::castLight( int row, float start, float end, int xx, int xy, int yx, in
                 float bright = (float) (1 - (rStrat.radius(deltaX, deltaY) / radius));
                 lightMap[currentX][currentY] = bright;
                 */
-                seen_cache[currentX][currentY] = true;
+                seen_cache[currentX][currentY][-my_ZMIN] = true;
             }
 
             if( blocked ) {

@@ -796,8 +796,8 @@ void add_corpse(int x, int y);
   */
  float light_transparency(const int x, const int y) const;
  void build_map_cache();
- lit_level light_at(int dx, int dy); // Assumes 0,0 is light map center
- lit_level light_at(const tripoint &p); // Assumes 0,0 is light map center
+ lit_level light_at(int dx, int dy) const; // Assumes 0,0 is light map center
+ lit_level light_at(const tripoint &p) const; // Assumes 0,0 is light map center
  float ambient_light_at(int dx, int dy); // Raw values for tilesets
         /**
          * Whether the player character (g->u) can see the given square (local map coordinates).
@@ -806,7 +806,8 @@ void add_corpse(int x, int y);
          * @param max_range All squares that are further away than this are invisible.
          * Ignored if smaller than 0.
          */
-        bool pl_sees( int tx, int ty, int max_range );
+        bool pl_sees( int tx, int ty, int max_range ) const;
+        bool pl_sees( tripoint t, int max_range ) const;
  std::set<vehicle*> vehicle_list;
  std::set<vehicle*> dirty_vehicle_list;
 
@@ -969,6 +970,7 @@ private:
     void spawn_monsters( int gx, int gy, mongroup &group, bool ignore_sight );
 
  long determine_wall_corner(const int x, const int y, const long orig_sym);
+ long determine_wall_corner(const tripoint &p, const long orig_sym);
  void cache_seen(const int fx, const int fy, const int tx, const int ty, const int max_range);
  // apply a circular light pattern immediately, however it's best to use...
  void apply_light_source(int x, int y, float luminance, bool trig_brightcalc);
@@ -1003,7 +1005,7 @@ private:
  float light_source_buffer[MAPSIZE*SEEX][MAPSIZE*SEEY];
  bool outside_cache[MAPSIZE*SEEX][MAPSIZE*SEEY];
  float transparency_cache[MAPSIZE*SEEX][MAPSIZE*SEEY];
- bool seen_cache[MAPSIZE*SEEX][MAPSIZE*SEEY];
+        bool seen_cache[MAPSIZE*SEEX][MAPSIZE*SEEY][MAPHEIGHT * 2 + 1];
         /**
          * The list of currently loaded submaps. The size of this should not be changed.
          * After calling @ref load or @ref generate, it should only contain non-null pointers.
