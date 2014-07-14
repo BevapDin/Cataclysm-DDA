@@ -6357,7 +6357,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                     add_msg(_("The %s drowns!"), targ->name().c_str());
                 }
             }
-            if (!m.has_flag("LIQUID", targ->posx(), targ->posy()) && targ->has_flag(MF_AQUATIC) &&
+            if (!m.has_flag("LIQUID", targ->pos()) && targ->has_flag(MF_AQUATIC) &&
                 !targ->is_dead()) {
                 targ->die( nullptr );
                 if (u.sees(*targ)) {
@@ -6884,10 +6884,10 @@ bool game::spawn_hallucination()
 {
     monster phantasm(MonsterGenerator::generator().get_valid_hallucination());
     phantasm.hallucination = true;
-    phantasm.spawn(u.posx() + rng(-10, 10), u.posy() + rng(-10, 10));
+    phantasm.spawn(tripoint(u.posx() + rng(-10, 10), u.posy() + rng(-10, 10), 0));
 
     //Don't attempt to place phantasms inside of other monsters
-    if (mon_at(phantasm.posx(), phantasm.posy()) == -1) {
+    if (mon_at(phantasm.pos()) == -1) {
         return critter_tracker.add(phantasm);
     } else {
         return false;
@@ -13040,91 +13040,91 @@ void game::nuke(int x, int y)
     }
 }
 
-bool game::spread_fungus(int x, int y)
+bool game::spread_fungus(const tripoint &p)
 {
     int growth = 1;
-    for (int i = x - 1; i <= x + 1; i++) {
-        for (int j = y - 1; j <= y + 1; j++) {
-            if (i == x && j == y) {
+    for (int i = p.x - 1; i <= p.x + 1; i++) {
+        for (int j = p.y - 1; j <= p.y + 1; j++) {
+            if (i == p.x && j == p.y) {
                 continue;
             }
-            if (m.has_flag("FUNGUS", i, j)) {
+            if (m.has_flag("FUNGUS", tripoint( i, j, p.z ))) {
                 growth += 1;
             }
         }
     }
 
     bool converted = false;
-    if (!m.has_flag_ter("FUNGUS", x, y)) {
+    if (!m.has_flag_ter("FUNGUS", p)) {
         // Terrain conversion
-        if (m.has_flag_ter("DIGGABLE", x, y)) {
+        if (m.has_flag_ter("DIGGABLE", p)) {
             if (x_in_y(growth * 10, 100)) {
-                m.ter_set(x, y, t_fungus);
+                m.ter_set(p, t_fungus);
                 converted = true;
             }
-        } else if (m.has_flag("FLAT", x, y)) {
-            if (m.has_flag("INDOORS", x, y)) {
+        } else if (m.has_flag("FLAT", p)) {
+            if (m.has_flag("INDOORS", p)) {
                 if (x_in_y(growth * 10, 500)) {
-                    m.ter_set(x, y, t_fungus_floor_in);
+                    m.ter_set(p, t_fungus_floor_in);
                     converted = true;
                 }
-            } else if (m.has_flag("SUPPORTS_ROOF", x, y)) {
+            } else if (m.has_flag("SUPPORTS_ROOF", p)) {
                 if (x_in_y(growth * 10, 1000)) {
-                    m.ter_set(x, y, t_fungus_floor_sup);
+                    m.ter_set(p, t_fungus_floor_sup);
                     converted = true;
                 }
             } else {
                 if (x_in_y(growth * 10, 2500)) {
-                    m.ter_set(x, y, t_fungus_floor_out);
+                    m.ter_set(p, t_fungus_floor_out);
                     converted = true;
                 }
             }
-        } else if (m.has_flag("SHRUB", x, y)) {
+        } else if (m.has_flag("SHRUB", p)) {
             if (x_in_y(growth * 10, 200)) {
-                m.ter_set(x, y, t_shrub_fungal);
+                m.ter_set(p, t_shrub_fungal);
                 converted = true;
             } else if (x_in_y(growth, 1000)) {
-                m.ter_set(x, y, t_marloss);
+                m.ter_set(p, t_marloss);
                 converted = true;
             }
-        } else if (m.has_flag("THIN_OBSTACLE", x, y)) {
+        } else if (m.has_flag("THIN_OBSTACLE", p)) {
             if (x_in_y(growth * 10, 150)) {
-                m.ter_set(x, y, t_fungus_mound);
+                m.ter_set(p, t_fungus_mound);
                 converted = true;
             }
-        } else if (m.has_flag("YOUNG", x, y)) {
+        } else if (m.has_flag("YOUNG", p)) {
             if (x_in_y(growth * 10, 500)) {
-                m.ter_set(x, y, t_tree_fungal_young);
+                m.ter_set(p, t_tree_fungal_young);
                 converted = true;
             }
-        } else if (m.has_flag("WALL", x, y)) {
+        } else if (m.has_flag("WALL", p)) {
             if (x_in_y(growth * 10, 5000)) {
                 converted = true;
-                if (m.ter_at(x, y).sym == LINE_OXOX) {
-                    m.ter_set(x, y, t_fungus_wall_h);
-                } else if (m.ter_at(x, y).sym == LINE_XOXO) {
-                    m.ter_set(x, y, t_fungus_wall_v);
+                if (m.ter_at(p).sym == LINE_OXOX) {
+                    m.ter_set(p, t_fungus_wall_h);
+                } else if (m.ter_at(p).sym == LINE_XOXO) {
+                    m.ter_set(p, t_fungus_wall_v);
                 } else {
-                    m.ter_set(x, y, t_fungus_wall);
+                    m.ter_set(p, t_fungus_wall);
                 }
             }
         }
         // Furniture conversion
         if (converted) {
-            if (m.has_flag("FLOWER", x, y)) {
-                m.furn_set(x, y, f_flower_fungal);
-            } else if (m.has_flag("ORGANIC", x, y)) {
-                if (m.furn_at(x, y).movecost == -10) {
-                    m.furn_set(x, y, f_fungal_mass);
+            if (m.has_flag("FLOWER", p)) {
+                m.furn_set(p, f_flower_fungal);
+            } else if (m.has_flag("ORGANIC", p)) {
+                if (m.furn_at(p).movecost == -10) {
+                    m.furn_set(p, f_fungal_mass);
                 } else {
-                    m.furn_set(x, y, f_fungal_clump);
+                    m.furn_set(p, f_fungal_clump);
                 }
-            } else if (m.has_flag("PLANT", x, y)) {
-                for (size_t k = 0; k < m.i_at(x, y).size(); k++) {
-                    m.i_rem(x, y, k);
+            } else if (m.has_flag("PLANT", p)) {
+                for (size_t k = 0; k < m.i_at(p).size(); k++) {
+                    m.i_rem(p, k);
                 }
                 item seeds("fungal_seeds", int(calendar::turn));
-                m.add_item_or_charges(x, y, seeds);
+                m.add_item_or_charges(p, seeds);
             }
         }
         return true;
@@ -13133,106 +13133,107 @@ bool game::spread_fungus(int x, int y)
         if (growth == 9) {
             return false;
         }
-        for (int i = x - 1; i <= x + 1; i++) {
-            for (int j = y - 1; j <= y + 1; j++) {
+        for (int i = p.x - 1; i <= p.x + 1; i++) {
+            for (int j = p.y - 1; j <= p.y + 1; j++) {
+                const tripoint p2(i, j, p.z);
                 // One spread on average
-                if (!m.has_flag("FUNGUS", i, j) && one_in(9 - growth)) {
+                if (!m.has_flag("FUNGUS", p2) && one_in(9 - growth)) {
                     //growth chance is 100 in X simplified
-                    if (m.has_flag("DIGGABLE", i, j)) {
-                        m.ter_set(i, j, t_fungus);
+                    if (m.has_flag("DIGGABLE", p2)) {
+                        m.ter_set(p2, t_fungus);
                         converted = true;
-                    } else if (m.has_flag("FLAT", i, j)) {
-                        if (m.has_flag("INDOORS", i, j)) {
+                    } else if (m.has_flag("FLAT", p2)) {
+                        if (m.has_flag("INDOORS", p2)) {
                             if (one_in(5)) {
-                                m.ter_set(i, j, t_fungus_floor_in);
+                                m.ter_set(p2, t_fungus_floor_in);
                                 converted = true;
                             }
-                        } else if (m.has_flag("SUPPORTS_ROOF", i, j)) {
+                        } else if (m.has_flag("SUPPORTS_ROOF", p2)) {
                             if (one_in(10)) {
-                                m.ter_set(i, j, t_fungus_floor_sup);
+                                m.ter_set(p2, t_fungus_floor_sup);
                                 converted = true;
                             }
                         } else {
                             if (one_in(25)) {
-                                m.ter_set(i, j, t_fungus_floor_out);
+                                m.ter_set(p2, t_fungus_floor_out);
                                 converted = true;
                             }
                         }
-                    } else if (m.has_flag("SHRUB", i, j)) {
+                    } else if (m.has_flag("SHRUB", p2)) {
                         if (one_in(2)) {
-                            m.ter_set(i, j, t_shrub_fungal);
+                            m.ter_set(p2, t_shrub_fungal);
                             converted = true;
                         } else if (one_in(25)) {
-                            m.ter_set(i, j, t_marloss);
+                            m.ter_set(p2, t_marloss);
                             converted = true;
                         }
-                    } else if (m.has_flag("THIN_OBSTACLE", i, j)) {
+                    } else if (m.has_flag("THIN_OBSTACLE", p2)) {
                         if (x_in_y(10, 15)) {
-                            m.ter_set(i, j, t_fungus_mound);
+                            m.ter_set(p2, t_fungus_mound);
                             converted = true;
                         }
-                    } else if (m.has_flag("YOUNG", i, j)) {
+                    } else if (m.has_flag("YOUNG", p2)) {
                         if (one_in(5)) {
-                            if (m.get_field_strength(point (x, y), fd_fungal_haze) != 0) {
+                            if (m.get_field_strength(p, fd_fungal_haze) != 0) {
                                 if (one_in(3)) { // young trees are Vulnerable
-                                    m.ter_set(i, j, t_fungus);
-                                    m.add_spawn("mon_fungal_blossom", 1, x, y);
-                                    if (u.sees(x, y)) {
+                                    m.ter_set(p2, t_fungus);
+                                    m.add_spawn("mon_fungal_blossom", 1, p.x, p.y);
+                                    if (u.sees(p)) {
                                     add_msg(m_warning, _("The young tree blooms forth into a fungal blossom!"));
                                     }
                                 } else if (one_in(2)) {
-                                    m.ter_set(i, j, t_marloss_tree);
+                                    m.ter_set(p2, t_marloss_tree);
                                 }
                             } else {
-                                m.ter_set(i, j, t_tree_fungal_young);
+                                m.ter_set(p2, t_tree_fungal_young);
                             }
                             converted = true;
                         }
-                    } else if (m.has_flag("TREE", i, j)) {
+                    } else if (m.has_flag("TREE", p2)) {
                         if (one_in(10)) {
-                            if (m.get_field_strength(point (x, y), fd_fungal_haze) != 0) {
+                            if (m.get_field_strength(p, fd_fungal_haze) != 0) {
                                 if (one_in(4)) {
-                                    m.ter_set(i, j, t_fungus);
-                                    m.add_spawn("mon_fungal_blossom", 1, x, y);
-                                    if (u.sees(x, y)) {
+                                    m.ter_set(p2, t_fungus);
+                                    m.add_spawn("mon_fungal_blossom", 1, p.x, p.y);
+                                    if (u.sees(p)) {
                                     add_msg(m_warning, _("The tree blooms forth into a fungal blossom!"));
                                     }
                                 } else if (one_in(3)) {
-                                    m.ter_set(i, j, t_marloss_tree);
+                                    m.ter_set(p2, t_marloss_tree);
                                 }
                             } else {
-                                m.ter_set(i, j, t_tree_fungal);
+                                m.ter_set(p2, t_tree_fungal);
                             }
                             converted = true;
                         }
-                    } else if (m.has_flag("WALL", i, j)) {
+                    } else if (m.has_flag("WALL", p2)) {
                         if (one_in(50)) {
                             converted = true;
-                            if (m.ter_at(i, j).sym == LINE_OXOX) {
-                                m.ter_set(i, j, t_fungus_wall_h);
-                            } else if (m.ter_at(i, j).sym == LINE_XOXO) {
-                                m.ter_set(i, j, t_fungus_wall_v);
+                            if (m.ter_at(p2).sym == LINE_OXOX) {
+                                m.ter_set(p2, t_fungus_wall_h);
+                            } else if (m.ter_at(p2).sym == LINE_XOXO) {
+                                m.ter_set(p2, t_fungus_wall_v);
                             } else {
-                                m.ter_set(i, j, t_fungus_wall);
+                                m.ter_set(p2, t_fungus_wall);
                             }
                         }
                     }
 
                     if (converted) {
-                        if (m.has_flag("FLOWER", i, j)) {
-                            m.furn_set(i, j, f_flower_fungal);
-                        } else if (m.has_flag("ORGANIC", i, j)) {
-                            if (m.furn_at(i, j).movecost == -10) {
-                                m.furn_set(i, j, f_fungal_mass);
+                        if (m.has_flag("FLOWER", p2)) {
+                            m.furn_set(p2, f_flower_fungal);
+                        } else if (m.has_flag("ORGANIC", p2)) {
+                            if (m.furn_at(p2).movecost == -10) {
+                                m.furn_set(p2, f_fungal_mass);
                             } else {
-                                m.furn_set(i, j, f_fungal_clump);
+                                m.furn_set(p2, f_fungal_clump);
                             }
-                        } else if (m.has_flag("PLANT", i, j)) {
-                            for (size_t k = 0; k < m.i_at(i, j).size(); k++) {
-                                m.i_rem(i, j, k);
+                        } else if (m.has_flag("PLANT", p2)) {
+                            for (size_t k = 0; k < m.i_at(p2).size(); k++) {
+                                m.i_rem(p2, k);
                             }
                             item seeds("fungal_seeds", int(calendar::turn));
-                            m.add_item_or_charges(x, y, seeds);
+                            m.add_item_or_charges(p, seeds);
                         }
                     }
                 }

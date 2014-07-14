@@ -2739,15 +2739,15 @@ bool map::hit_with_fire(const int x, const int y)
     return true;
 }
 
-bool map::marlossify(const int x, const int y)
+bool map::marlossify(const tripoint &p)
 {
-    if (one_in(25) && (ter_at(x, y).movecost != 0 && !has_furn(x, y))
-            && !ter_at(x, y).has_flag(TFLAG_DEEP_WATER)) {
-        ter_set(x, y, t_marloss);
+    if (one_in(25) && (ter_at(p).movecost != 0 && !has_furn(p))
+            && !ter_at(p).has_flag(TFLAG_DEEP_WATER)) {
+        ter_set(p, t_marloss);
         return true;
     }
     for (int i = 0; i < 25; i++) {
-        if(!g->spread_fungus(x, y)) {
+        if(!g->spread_fungus(p)) {
             return true;
         }
     }
@@ -5099,6 +5099,11 @@ std::vector<point> map::route(const int Fx, const int Fy, const int Tx, const in
         }
     }
     return ret;
+}
+
+int map::coord_to_angle ( const tripoint &a, const tripoint &p )
+{
+    return coord_to_angle( a.x, a.y, p.x, p.y );
 }
 
 int map::coord_to_angle ( const int x, const int y, const int tgtx, const int tgty ) {

@@ -308,7 +308,7 @@ class game
 
         /** Nuke the area at (x, y) - global overmap terrain coordinates! */
         void nuke(int x, int y);
-        bool spread_fungus(int x, int y);
+        bool spread_fungus(const tripoint &p);
         std::vector<faction *> factions_at(int x, int y);
         int &scent(int x, int y);
         int &scent(const tripoint &p);
