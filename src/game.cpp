@@ -5932,22 +5932,22 @@ void game::monmove()
 
     for (size_t i = 0; i < num_zombies(); i++) {
         monster &critter = critter_tracker.find(i);
-        while (!critter.is_dead() && !critter.can_move_to(critter.posx(), critter.posy())) {
+        while (!critter.is_dead() && !critter.can_move_to(critter.pos())) {
             // If we can't move to our current position, assign us to a new one
                 dbg(D_ERROR) << "game:monmove: " << critter.name().c_str()
-                             << " can't move to its location! (" << critter.posx()
-                             << ":" << critter.posy() << "), "
-                             << m.tername(critter.posx(), critter.posy()).c_str();
-                add_msg( m_debug, "%s can't move to its location! (%d:%d), %s", critter.name().c_str(),
-                         critter.posx(), critter.posy(), m.tername(critter.posx(), critter.posy()).c_str());
+                             << " can't move to its location! (" << critter.pos() << "), "
+                             << m.tername(critter.pos()).c_str();
+                add_msg( m_debug, "%s can't move to its location! (%d:%d:%d), %s", critter.name().c_str(),
+                         critter.posx(), critter.posy(), critter.posz(), m.tername(critter.pos()).c_str());
             bool okay = false;
             int xdir = rng(1, 2) * 2 - 3, ydir = rng(1, 2) * 2 - 3; // -1 or 1
             int startx = critter.posx() - 3 * xdir, endx = critter.posx() + 3 * xdir;
             int starty = critter.posy() - 3 * ydir, endy = critter.posy() + 3 * ydir;
             for (int x = startx; x != endx && !okay; x += xdir) {
                 for (int y = starty; y != endy && !okay; y += ydir) {
-                    if (critter.can_move_to(x, y) && is_empty(x, y)) {
-                        critter.setpos(x, y);
+                    const tripoint p(x, y, critter.posz());
+                    if (critter.can_move_to(p) && is_empty(p)) {
+                        critter.setpos(p);
                         okay = true;
                     }
                 }
@@ -5996,10 +5996,7 @@ void game::monmove()
     // monster::die function is not called.
     for( size_t i = 0; i < num_zombies(); ) {
         monster &critter = critter_tracker.find( i );
-        if( critter.posx() < 0 - ( SEEX * MAPSIZE ) / 6 ||
-            critter.posy() < 0 - ( SEEY * MAPSIZE ) / 6 ||
-            critter.posx() > ( SEEX * MAPSIZE * 7 ) / 6 ||
-            critter.posy() > ( SEEY * MAPSIZE * 7 ) / 6 ) {
+        if( !m.inbounds( critter.pos() ) ) {
             despawn_monster( i );
         } else {
             i++;
