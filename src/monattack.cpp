@@ -100,7 +100,7 @@ void mattack::antqueen(monster *z, int index)
         if (g->u.sees( *z )) {
             add_msg(_("The %s lays an egg!"), z->name().c_str());
         }
-        g->m.spawn_item(z->posx(), z->posy(), "ant_egg", 1, 0, calendar::turn);
+        g->m.spawn_item(z->pos(), "ant_egg", 1, 0, calendar::turn);
     } else { // There are eggs nearby.  Let's hatch some.
         z->moves -= 20 * egg_points.size(); // It takes a while
         if (g->u.sees( *z )) {
