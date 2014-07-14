@@ -892,6 +892,10 @@ void add_corpse(int x, int y);
  // Can air go up to the z-level above?
  bool allows_vertical_air_up(const tripoint &p) const;
  bool blocks_vertical_air_up(const tripoint &p) const;
+ // Returns the negative length (z-levels) of a vertical shaft
+ // starting at p, and going down until an opaque floor stops it
+ int z_level_down_xx(const tripoint &p) const;
+ int z_level_up_xx(const tripoint &p) const;
 
 protected:
         void saven( tripoint gp );
@@ -1069,8 +1073,6 @@ private:
          */
         std::vector<submap*> grid;
  std::map<trap_id, std::set<point> > traplocs;
- int z_level_down_xx(const tripoint &p) const;
- int z_level_up_xx(const tripoint &p) const;
  void spread_gas(field_entry *cur, const tripoint &here, field_id curtype, int percent_spread, int outdoor_age_speedup);
  void create_hot_air(const tripoint &here, int density);
  bool process_fields_in_submap(submap * const current_submap, const int submap_x, const int submap_y, const int submap_z); // See fields.cpp

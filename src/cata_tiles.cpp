@@ -537,7 +537,7 @@ void cata_tiles::draw(int destx, int desty, const tripoint &center, int width, i
         for (int mx = 0; mx < sx; ++mx) {
             x = mx + o_x;
             y = my + o_y;
-            const tripoint p(x, y, center.z);
+            tripoint p(x, y, center.z);
             l = light_at(p);
             const auto critter = g->critter_at( p );
             if (l != CLEAR) {
@@ -548,17 +548,30 @@ void cata_tiles::draw(int destx, int desty, const tripoint &center, int width, i
                 }
                 continue;
             }
-            // light is no longer being considered, for now.
-            // Draw Terrain if possible. If not possible then we need to continue on to the next part of loop
-            if (!draw_terrain(p)) {
+            // TODO: Z Stupid it is, to make this static!
+            static const ter_id t_open_air = terfind("t_open_air");
+            int zv = 0;
+            if (g->m.ter(p) == t_open_air) {
+                zv = g->m.z_level_down_xx(p);
+            }
+            const tripoint tpx(x, y, center.z + zv);
+            if(zv + center.z != 0 && !g->m.pl_sees(g->u.pos(), tpx, -1)) {
+                draw_from_id_string("t_open_air", p.x, p.y, 0, 0);
                 continue;
             }
-            draw_furniture(p);
-            draw_trap(p);
-            draw_field_or_item(p);
-            draw_vpart(p);
+            p = tpx;
+            const bool from_above = zv != 0;
+            // light is no longer being considered, for now.
+            // Draw Terrain if possible. If not possible then we need to continue on to the next part of loop
+            if (!draw_terrain(p, from_above)) {
+                continue;
+            }
+            draw_furniture(p, from_above);
+            draw_trap(p, from_above);
+            draw_field_or_item(p, from_above);
+            draw_vpart(p, from_above);
             if( critter != nullptr ) {
-                draw_entity( *critter, p );
+                draw_entity( *critter, p, from_above );
             }
         }
     }
@@ -633,9 +646,6 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
     // [0->width|height / tile_width|height]
     if( x - o_x < 0 || x - o_x >= screentile_width ||
         y - o_y < 0 || y - o_y >= screentile_height ) {
-        return false;
-    }
-    if (id == "t_air") {
         return false;
     }
 
@@ -900,8 +910,9 @@ bool cata_tiles::draw_lighting(int x, int y, LIGHTING l)
     return false;
 }
 
-bool cata_tiles::draw_terrain( const tripoint p )
+bool cata_tiles::draw_terrain( const tripoint p, const bool from_above )
 {
+    (void) from_above; // TODO: Z ignored for now
     ter_id t = g->m.ter(p); // get the ter_id value at this point
     // check for null, if null return false
     if (t == t_null) {
@@ -931,8 +942,9 @@ bool cata_tiles::draw_terrain( const tripoint p )
     return draw_from_id_string(tname, C_TERRAIN, empty_string, p.x, p.y, subtile, rotation);
 }
 
-bool cata_tiles::draw_furniture( const tripoint p )
+bool cata_tiles::draw_furniture( const tripoint p, const bool from_above )
 {
+    (void) from_above; // TODO: Z ignored for now
     // get furniture ID at x,y
     bool has_furn = g->m.has_furn(p);
     if (!has_furn) {
@@ -961,8 +973,12 @@ bool cata_tiles::draw_furniture( const tripoint p )
     return ret;
 }
 
-bool cata_tiles::draw_trap( const tripoint p )
+bool cata_tiles::draw_trap( const tripoint p, const bool from_above )
 {
+    if (from_above) {
+        // TODO: Z Traps are never draw from above, compare map::drawsq
+        return false;
+    }
     trap_id tr_id = g->m.tr_at(p);
     if (tr_id == tr_null) {
         return false;
@@ -986,8 +1002,9 @@ bool cata_tiles::draw_trap( const tripoint p )
     return draw_from_id_string(tr_name, C_TRAP, empty_string, p.x, p.y, subtile, rotation);
 }
 
-bool cata_tiles::draw_field_or_item( const tripoint p )
+bool cata_tiles::draw_field_or_item( const tripoint p, const bool from_above )
 {
+    (void) from_above; // TODO: Z use me!
     // check for field
     const field &f = g->m.field_at(p);
     field_id f_id = f.fieldSymbol();
@@ -1067,8 +1084,9 @@ bool cata_tiles::draw_field_or_item( const tripoint p )
     return ret_draw_field && ret_draw_item;
 }
 
-bool cata_tiles::draw_vpart( const tripoint p )
+bool cata_tiles::draw_vpart( const tripoint p, const bool from_above )
 {
+    (void) from_above; // TODO: Z use me!
     int veh_part = 0;
     vehicle *veh = g->m.veh_at(p, veh_part);
 
@@ -1111,8 +1129,9 @@ bool cata_tiles::draw_vpart( const tripoint p )
     return ret;
 }
 
-bool cata_tiles::draw_entity( const Creature &critter, const tripoint p )
+bool cata_tiles::draw_entity( const Creature &critter, const tripoint p, const bool from_above )
 {
+    (void) from_above; // TODO: Z use me!
     if( !g->u.sees( critter ) ) {
         if( g->u.sees_with_infrared( critter ) ) {
             return draw_from_id_string( "infrared_creature", C_NONE, empty_string, p.x, p.y, 0, 0 );
@@ -1132,14 +1151,15 @@ bool cata_tiles::draw_entity( const Creature &critter, const tripoint p )
     }
     const player *pl = dynamic_cast<const player*>( &critter );
     if( pl != nullptr ) {
-        draw_entity_with_overlays( *pl, p );
+        draw_entity_with_overlays( *pl, p, from_above );
         return true;
     }
     return false;
 }
 
-void cata_tiles::draw_entity_with_overlays( const player &p, const tripoint l )
+void cata_tiles::draw_entity_with_overlays( const player &p, const tripoint l, const bool from_above )
 {
+    (void) from_above; // TODO: Z use me!
     std::string ent_name;
 
     if( p.is_npc() ) {
@@ -1253,6 +1273,19 @@ void cata_tiles::init_draw_line(int x, int y, std::vector<point> trajectory, std
     line_pos_y = y;
     line_endpoint_id = name;
     line_trajectory = trajectory;
+}
+void cata_tiles::init_draw_line(const tripoint &p, const std::vector<tripoint> &trajectory, const std::string &name, bool target_line)
+{
+    do_draw_line = true;
+    is_target_line = target_line;
+    line_pos_x = p.x;
+    line_pos_y = p.y;
+    line_endpoint_id = name;
+    // TODO: Z
+    line_trajectory.clear();
+    for(size_t i = 0; i < trajectory.size(); i++) {
+        line_trajectory.push_back(point(trajectory[i].x, trajectory[i].y));
+    }
 }
 void cata_tiles::init_draw_weather(weather_printable weather, std::string name)
 {

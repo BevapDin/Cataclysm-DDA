@@ -4456,8 +4456,6 @@ bool map::blocks_vertical_air_up(const tripoint &p) const {
     return blocks_vertical_air_down(tripoint(p.x, p.y, p.z + 1));
 }
 
-// Returns the negative length (z-levels) of a vertical shaft
-// starting at p, and going down until an opaque floor stops it
 int map::z_level_down_xx( const tripoint &p ) const
 {
     int z = 0;
