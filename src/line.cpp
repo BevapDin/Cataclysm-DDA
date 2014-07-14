@@ -71,7 +71,79 @@ std::vector<point> line_to( const point &p1, const point &p2, const int t )
 
 std::vector <tripoint> line_to( const tripoint &p1, const tripoint &p2, const int t )
 {
-    return line_to( loc1, loc2, t, 0 );
+    (void) t; // TODO: use me
+    std::vector<tripoint> ret;
+    const int dx = p2.x - p1.x;
+    const int dy = p2.y - p1.y;
+    const int dz = p2.z - p1.z;
+    const int x_inc = SGN( dx );
+    const int y_inc = SGN( dy );
+    const int z_inc = SGN( dz );
+    const int Adx = std::abs( dx );
+    const int Ady = std::abs( dy );
+    const int Adz = std::abs( dz );
+    const int dx2 = Adx * 2;
+    const int dy2 = Ady * 2;
+    const int dz2 = Adz * 2;
+
+    tripoint pnt = p1;
+    if( ( Adx >= Ady ) && ( Adx >= Adz ) ) {
+        int err_1 = dy2 - Adx;
+        int err_2 = dz2 - Adx;
+        for( int Cont = 0; Cont < Adx; Cont++ ) {
+            if( err_1 > 0 ) {
+                pnt.y += y_inc;
+                err_1 -= dx2;
+            }
+            if( err_2 > 0 ) {
+                pnt.z += z_inc;
+                err_2 -= dx2;
+            }
+            err_1 += dy2;
+            err_2 += dz2;
+            pnt.x += x_inc;
+            ret.push_back( pnt );
+        }
+    }
+
+    if( ( Ady > Adx ) & ( Ady >= Adz ) ) {
+        int err_1 = dx2 - Ady;
+        int err_2 = dz2 - Ady;
+        for( int Cont = 0; Cont < Ady; Cont++ ) {
+            if( err_1 > 0 ) {
+                pnt.x += x_inc;
+                err_1 -= dy2;
+            }
+            if( err_2 > 0 ) {
+                pnt.z += z_inc;
+                err_2 -= dy2;
+            }
+            err_1 += dx2;
+            err_2 += dz2;
+            pnt.y += y_inc;
+            ret.push_back( pnt );
+        }
+    }
+
+    if( ( Adz > Adx ) && ( Adz > Ady ) ) {
+        int err_1 = dy2 - Adz;
+        int err_2 = dx2 - Adz;
+        for( int Cont = 0; Cont < Adz; Cont++ ) {
+            if( err_1 > 0 ) {
+                pnt.y += y_inc;
+                err_1 -= dz2;
+            }
+            if( err_2 > 0 ) {
+                pnt.x += x_inc;
+                err_2 -= dz2;
+            }
+            err_1 += dy2;
+            err_2 += dx2;
+            pnt.z += z_inc;
+            ret.push_back( pnt );
+        }
+    }
+    return ret;
 }
 
 std::vector <tripoint> line_to(const tripoint &loc1, const tripoint &loc2, int t, int t2)
