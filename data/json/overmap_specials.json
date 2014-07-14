@@ -736,6 +736,7 @@
         "id" : "Evac Shelter",
         "overmaps" :
         [
+            { "point":[0,0,1], "overmap": "shelter_above", "connect":"road"},
             { "point":[0,0,0], "overmap": "shelter", "connect":"road"},
             { "point":[0,0,-1], "overmap": "shelter_under"}
         ],
