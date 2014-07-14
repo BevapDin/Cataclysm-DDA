@@ -4514,7 +4514,7 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
 
     //suprise, we're not done, if it's a wall adjacent to an other, put the right glyph
     if(sym == LINE_XOXO || sym == LINE_OXOX) { //vertical or horizontal
-        sym = determine_wall_corner(x, y, sym);
+        sym = determine_wall_corner(tripoint(x, y, 0), sym);
     }
 
     if (u.has_effect("boomered")) {
@@ -5502,14 +5502,14 @@ bool map::has_graffiti_at( const tripoint &p ) const
     return current_submap->has_graffiti( lx, ly );
 }
 
-long map::determine_wall_corner(const int x, const int y, const long orig_sym)
+long map::determine_wall_corner(const tripoint &p, const long orig_sym)
 {
     long sym = orig_sym;
     //LINE_NESW
-    const long above = ter_at(x, y-1).sym;
-    const long below = ter_at(x, y+1).sym;
-    const long left  = ter_at(x-1, y).sym;
-    const long right = ter_at(x+1, y).sym;
+    const long above = ter_at(tripoint(p.x, p.y-1, p.z)).sym;
+    const long below = ter_at(tripoint(p.x, p.y+1, p.z)).sym;
+    const long left  = ter_at(tripoint(p.x-1, p.y, p.z)).sym;
+    const long right = ter_at(tripoint(p.x+1, p.y, p.z)).sym;
 
     const bool above_connects = above == sym || (above == '"' || above == '+' || above == '\'');
     const bool below_connects = below == sym || (below == '"' || below == '+' || below == '\'');
