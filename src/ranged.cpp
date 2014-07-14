@@ -804,7 +804,7 @@ void game::throw_item(player &p, const tripoint &target_, item &thrown,
         if (trid != tr_null) {
             const struct trap *tr = traplist[trid];
             if (thrown.weight() >= tr->trigger_weight) {
-                tr->trigger(NULL, t.x, t.y);
+                tr->trigger(NULL, t);
             }
         }
     }

@@ -1090,9 +1090,9 @@ void npc::move_to(int x, int y)
             bool diag = trigdist && posx() != x && posy() != y;
             moves -= run_cost(g->m.combined_movecost(posx(), posy(), x, y), diag);
             if (g->m.tr_at(x, y) != tr_null) { // NPC stepped on a trap!
-                trap *tr = traplist[g->m.tr_at(x, y)];
-                if (!this->avoid_trap(tr, x, y)) {
-                    tr->trigger(this, x, y);
+                trap* tr = traplist[g->m.tr_at(pos())];
+                if (!this->avoid_trap(tr, pos())) {
+                    tr->trigger(this, pos());
                 }
             }
             int part;

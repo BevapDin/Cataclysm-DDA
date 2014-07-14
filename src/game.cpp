@@ -8198,7 +8198,7 @@ void game::print_trap_info(const tripoint &p, WINDOW *w_look, const int column, 
     if (trapid == tr_null) {
         return;
     }
-    if (traplist[trapid]->can_see(u, p.x, p.y)) {
+    if (traplist[trapid]->can_see(u, p)) {
         mvwprintz(w_look, line++, column, traplist[trapid]->color, "%s", traplist[trapid]->name.c_str());
     }
 }
@@ -11589,10 +11589,11 @@ bool game::plmove(int dx, int dy)
             }
         }
 
-        const trap_id tid = m.tr_at(x, y);
+        const tripoint tp(x, y, 0);
+        const trap_id tid = m.tr_at(tp);
         if (tid != tr_null) {
             const struct trap &t = *traplist[tid];
-            if ((t.can_see(u, x, y)) && !t.is_benign() &&
+            if ((t.can_see(u, tp)) && !t.is_benign() &&
                 !query_yn(_("Really step onto that %s?"), t.name.c_str())) {
                 return false;
             }
@@ -11981,10 +11982,11 @@ bool game::plmove(int dx, int dy)
         // Try to detect.
         u.search_surroundings();
         // We stepped on a trap!
-        if (m.tr_at(x, y) != tr_null) {
-            trap *tr = traplist[m.tr_at(x, y)];
-            if (!u.avoid_trap(tr, x, y)) {
-                tr->trigger(&u, x, y);
+        const tripoint tp2(x, y, 0);
+        if (m.tr_at(tp2) != tr_null) {
+            trap *tr = traplist[m.tr_at(tp2)];
+            if (!u.avoid_trap(tr, tp2)) {
+                tr->trigger(&u, tp2);
             }
         }
 
@@ -12625,10 +12627,10 @@ void game::vertical_move(int movez, bool force)
         return;
     }
 
-    if (m.tr_at(u.posx(), u.posy()) != tr_null) { // We stepped on a trap!
-        trap *tr = traplist[m.tr_at(u.posx(), u.posy())];
-        if (force || !u.avoid_trap(tr, u.posx(), u.posy())) {
-            tr->trigger(&u, u.posx(), u.posy());
+    if (m.tr_at(u.pos()) != tr_null) { // We stepped on a trap!
+        trap *tr = traplist[m.tr_at(u.pos())];
+        if (force || !u.avoid_trap(tr, u.pos())) {
+            tr->trigger(&u, u.pos());
         }
     }
 

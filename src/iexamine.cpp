@@ -2254,20 +2254,20 @@ void iexamine::trap(player *p, map *m, int examx, int examy)
     }
     const struct trap &t = *traplist[tid];
     const int possible = t.get_difficulty();
-    if ( (t.can_see(*p, examx, examy)) && (possible == 99) ) {
+    if ( (t.can_see(*p, tripoint(examx, examy, 0))) && (possible == 99) ) {
         add_msg(m_info, _("That %s looks too dangerous to mess with. Best leave it alone."),
             t.name.c_str());
         return;
     }
     // Some traps are not actual traps. Those should get a different query.
-    if (t.can_see(*p, examx, examy) && possible == 0 &&
+    if (t.can_see(*p, tripoint(examx, examy, 0)) && possible == 0 &&
         t.get_avoidance() == 0) { // Separated so saying no doesn't trigger the other query.
         if (query_yn(_("There is a %s there. Take down?"), t.name.c_str())) {
-            m->disarm_trap(examx, examy);
+            m->disarm_trap(tripoint(examx, examy, 0));
         }
-    } else if (t.can_see(*p, examx, examy) &&
+    } else if (t.can_see(*p, tripoint(examx, examy, 0)) &&
                query_yn(_("There is a %s there.  Disarm?"), t.name.c_str())) {
-        m->disarm_trap(examx, examy);
+        m->disarm_trap(tripoint(examx, examy, 0));
     }
 }
 

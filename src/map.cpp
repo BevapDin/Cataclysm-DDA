@@ -4043,7 +4043,7 @@ void map::disarm_trap(const tripoint &p)
         }
     } else {
         add_msg(m_bad, _("You fail to disarm the trap, and you set it off!"));
-        tr->trigger(&g->u, p.x, p.y);
+        tr->trigger(&g->u, p);
         if(diff - roll <= 6) {
             // Give xp for failing, but not if we failed terribly (in which
             // case the trap may not be disarmable).
@@ -4067,7 +4067,7 @@ void map::remove_trap(const tripoint &p)
     trap_id t = current_submap->get_trap(lx, ly);
     if (t != tr_null) {
         if (g != NULL && this == &g->m) {
-            g->u.add_known_trap(p.x, p.y, "tr_null");
+            g->u.add_known_trap(p, "tr_null");
         }
         current_submap->set_trap(lx, ly, tr_null);
         traplocs[t].erase(point(p.x, p.y));
@@ -4548,7 +4548,7 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
         show_items = false; // Can only see underwater items if WE are underwater
     }
     // If there's a trap here, and we have sufficient perception, draw that instead
-    if (curr_trap != tr_null && traplist[curr_trap]->can_see(g->u, x, y)) {
+    if (curr_trap != tr_null && traplist[curr_trap]->can_see(g->u, tpx)) {
         tercol = traplist[curr_trap]->color;
         if (traplist[curr_trap]->sym == '%') {
             switch(rng(1, 5)) {

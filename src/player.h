@@ -306,7 +306,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** True if unarmed or wielding a weapon with the UNARMED_WEAPON flag */
         bool unarmed_attack() const;
         /** Called when a player triggers a trap, returns true if they don't set it off */
-        bool avoid_trap(trap *tr, int x, int y);
+ bool avoid_trap(trap *tr, const tripoint &p);
 
         /** Returns true if the player has a pda */
         bool has_pda();
@@ -1002,8 +1002,8 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
                                            const char *npc_str, ...) const;
 
         typedef std::map<tripoint, std::string> trap_map;
-        bool knows_trap(int x, int y) const;
-        void add_known_trap(int x, int y, const std::string &t);
+    bool knows_trap(const tripoint &p) const;
+    void add_known_trap(const tripoint &p, const std::string &t);
         /** Search surrounding squares for traps (and maybe other things in the future). */
         void search_surroundings();
 
