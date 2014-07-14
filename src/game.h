@@ -227,8 +227,8 @@ class game
         // Player wants to fire a gun (target selection) etc. actual firing is done in player::fire_gun
         // This is interactive and therefor not for npcs.
         void plfire(bool burst, int default_target_x = -1, int default_target_y = -1);
-        void throw_item(player &p, int tarx, int tary, item &thrown,
-                        std::vector<point> &trajectory);
+        void throw_item(player &p, const tripoint &target, item &thrown,
+                        std::vector<tripoint> &trajectory);
         void cancel_activity();
         bool cancel_activity_query(const char *message, ...);
         bool cancel_activity_or_ignore_query(const char *reason, ...);
@@ -632,12 +632,12 @@ class game
         // square.  It display information on any monster/NPC on that square, and also
         // returns a Bresenham line to that square.  It is called by plfire() and
         // throw().
-        std::vector<point> target(int &x, int &y, int lowx, int lowy, int hix,
+        std::vector<tripoint> target(tripoint &targ, int lowx, int lowy, int hix,
                                   int hiy, std::vector <Creature *> t, int &target,
                                   item *relevent, target_mode mode);
         // interface to target(), collects a list of targets & selects default target
         // finally calls target() and returns its result.
-        std::vector<point> pl_target_ui(int &x, int &y, int range, item *relevent, target_mode mode,
+        std::vector<tripoint> pl_target_ui(tripoint &targ, int range, item *relevent, target_mode mode,
                                         int default_target_x = -1, int default_target_y = -1);
 
         // Map updating and monster spawning

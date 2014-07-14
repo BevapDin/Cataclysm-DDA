@@ -2089,7 +2089,7 @@ void mattack::smg(monster *z, int index)
     tmp.weapon.curammo = dynamic_cast<it_ammo *>( item::find_type( ammo_type ) );
     tmp.weapon.charges = std::max(z->ammo[ammo_type], 10);
     z->ammo[ammo_type] -= tmp.weapon.charges;
-    tmp.fire_gun(target->xpos(), target->ypos(), true);
+    tmp.fire_gun(target->pos(), true);
     z->ammo[ammo_type] += tmp.weapon.charges;
     if (target == &g->u) {
         z->add_effect("targeted", 3);
@@ -2156,7 +2156,7 @@ void mattack::laser(monster *z, int index)
     tmp.weapon = item("cerberus_laser", 0);
     tmp.weapon.curammo = dynamic_cast<it_ammo *>( item::find_type( "laser_capacitor" ) );
     tmp.weapon.charges = 100;
-    tmp.fire_gun(target->xpos(), target->ypos(), true);
+    tmp.fire_gun(target->pos(), true);
     if (target == &g->u) {
         z->add_effect("targeted", 3);
     }
@@ -2228,7 +2228,7 @@ void mattack::rifle_tur(monster *z, int index)
     tmp.weapon.curammo = dynamic_cast<it_ammo *>( item::find_type( ammo_type ) );
     tmp.weapon.charges = std::max(z->ammo[ammo_type], 30);
     z->ammo[ammo_type] -= tmp.weapon.charges;
-    tmp.fire_gun(target->xpos(), target->ypos(), true);
+    tmp.fire_gun(target->pos(), true);
     z->ammo[ammo_type] += tmp.weapon.charges;
     if (target == &g->u) {
         z->add_effect("targeted", 3);
@@ -2306,7 +2306,7 @@ void mattack::frag_tur(monster *z, int index) // This is for the bots, not a sta
     tmp.weapon.curammo = dynamic_cast<it_ammo *>( item::find_type( ammo_type ) );
     tmp.weapon.charges = std::max(z->ammo[ammo_type], 30);
     z->ammo[ammo_type] -= tmp.weapon.charges;
-    tmp.fire_gun(target->xpos(), target->ypos(), true);
+    tmp.fire_gun(target->pos(), true);
     z->ammo[ammo_type] += tmp.weapon.charges;
     if (target == &g->u) {
         z->add_effect("targeted", 3);
@@ -2383,7 +2383,7 @@ void mattack::bmg_tur(monster *z, int index)
     tmp.weapon.curammo = dynamic_cast<it_ammo *>( item::find_type( ammo_type ) );
     tmp.weapon.charges = std::max(z->ammo[ammo_type], 30);
     z->ammo[ammo_type] -= tmp.weapon.charges;
-    tmp.fire_gun(target->xpos(), target->ypos(), false);
+    tmp.fire_gun(target->pos(), false);
     z->ammo[ammo_type] += tmp.weapon.charges;
     if (target == &g->u) {
         z->add_effect("targeted", 3);
@@ -2473,7 +2473,7 @@ void mattack::tank_tur(monster *z, int index)
     tmp.weapon.curammo = dynamic_cast<it_ammo *>( item::find_type( ammo_type ) );
     tmp.weapon.charges = std::max(z->ammo[ammo_type], 5);
     z->ammo[ammo_type] -= tmp.weapon.charges;
-    tmp.fire_gun( aim_point.x, aim_point.y, false );
+    tmp.fire_gun( aim_point, false );
     z->ammo[ammo_type] += tmp.weapon.charges;
 }
 

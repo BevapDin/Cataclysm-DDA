@@ -13653,7 +13653,7 @@ int player::print_info(WINDOW* w, int vStart, int, int column) const
 
 bool player::is_visible_in_range( const Creature &critter, const int range ) const
 {
-    return sees( &critter ) && rl_dist( posx, posy, critter.xpos(), critter.ypos() ) <= range;
+    return sees( &critter ) && rl_dist( pos(), critter.pos() ) <= range;
 }
 
 std::vector<Creature *> player::get_visible_creatures( const int range ) const

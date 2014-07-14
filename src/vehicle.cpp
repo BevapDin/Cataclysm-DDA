@@ -4990,7 +4990,7 @@ bool vehicle::fire_turret_internal (int p, it_gun &gun, it_ammo &ammo, long &cha
     // Drain a ton of power
     tmp_ups.charges = drain( fuel_type_battery, 1000 );
     item &ups_ref = tmp.i_add(tmp_ups);
-    tmp.fire_gun( target->xpos(), target->ypos(), parts[p].mode > 1 );
+    tmp.fire_gun( target->pos(), parts[p].mode > 1 );
     // Return whatever is left.
     refill( fuel_type_battery, ups_ref.charges );
     charges = tmp.weapon.charges; // Return real ammo, in case of burst ending early

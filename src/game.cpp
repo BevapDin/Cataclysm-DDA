@@ -11221,11 +11221,10 @@ void game::plthrow(int pos)
     temp_exit_fullscreen();
     m.draw(w_terrain, u.pos());
 
-    int x = u.posx;
-    int y = u.posy;
+    tripoint targ = u.pos();
 
     // pl_target_ui() sets x and y, or returns empty vector if we canceled (by pressing Esc)
-    std::vector <point> trajectory = pl_target_ui(x, y, range, &thrown, TARGET_MODE_THROW);
+    std::vector <tripoint> trajectory = pl_target_ui(targ, range, &thrown, TARGET_MODE_THROW);
     if (trajectory.empty()) {
         return;
     }
@@ -11262,7 +11261,7 @@ void game::plthrow(int pos)
     u.moves -= move_cost;
     u.practice("throw", 10);
 
-    throw_item(u, x, y, thrown, trajectory);
+    throw_item(u, targ, thrown, trajectory);
     reenter_fullscreen();
 }
 
@@ -11282,11 +11281,11 @@ bool compare_by_dist_attitude::operator()(Creature *a, Creature *b) const
     if( aa != ab ) {
         return aa < ab;
     }
-    return rl_dist( a->xpos(), a->ypos(), u.xpos(), u.ypos() ) <
-           rl_dist( b->xpos(), b->ypos(), u.xpos(), u.ypos() );
+    return rl_dist( a->pos(), u.pos() ) <
+           rl_dist( b->pos(), u.pos() );
 }
 
-std::vector<point> game::pl_target_ui(int &x, int &y, int range, item *relevant, target_mode mode,
+std::vector<tripoint> game::pl_target_ui(tripoint &targ, int range, item *relevant, target_mode mode,
                                       int default_target_x, int default_target_y)
 {
     // Populate a list of targets with the zombies in range and visible
@@ -11307,25 +11306,26 @@ std::vector<point> game::pl_target_ui(int &x, int &y, int range, item *relevant,
             passtarget = i;
             break;
         }
+        // TODO: Z , lots of it
         if (default_target_x == critter.xpos() && default_target_y == critter.ypos()) {
             passtarget = i;
             break;
         }
     }
     // target() sets x and y, and returns an empty vector if we canceled (Esc)
-    std::vector <point> trajectory = target(x, y, u.posx - range, u.posy - range,
+    std::vector <tripoint> trajectory = target(targ, u.posx - range, u.posy - range,
                                             u.posx + range, u.posy + range,
                                             mon_targets, passtarget, relevant, mode);
 
     if (passtarget != -1) { // We picked a real live target
         // Make it our default for next time
-        int id = npc_at(x, y);
+        int id = npc_at(targ);
         if (id >= 0) {
             last_target = id;
             last_target_was_npc = true;
             if(!active_npc[id]->is_enemy()){
                 if (!query_yn(_("Really attack %s?"), active_npc[id]->name.c_str())) {
-                    std::vector <point> trajectory_blank;
+                    std::vector <tripoint> trajectory_blank;
                     return trajectory_blank; // Cancel the attack
                 } else {
                     //The NPC knows we started the fight, used for morale penalty.
@@ -11334,7 +11334,7 @@ std::vector<point> game::pl_target_ui(int &x, int &y, int range, item *relevant,
             }
             active_npc[id]->make_angry();
         } else {
-            id = mon_at(x, y);
+            id = mon_at(targ);
             if (id >= 0) {
                 last_target = id;
                 last_target_was_npc = false;
@@ -11408,7 +11408,7 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
         return;
     }
 
-    vehicle *veh = m.veh_at(u.posx, u.posy);
+    vehicle *veh = m.veh_at(u.pos());
     if (veh && veh->player_in_control(&u) && u.weapon.is_two_handed(&u)) {
         add_msg(m_info, _("You need a free arm to drive!"));
         return;
@@ -11548,10 +11548,9 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
     temp_exit_fullscreen();
     m.draw(w_terrain, u.pos());
 
-    int x = u.posx;
-    int y = u.posy;
+    tripoint targ = u.pos();
 
-    std::vector<point> trajectory = pl_target_ui(x, y, range, &u.weapon, TARGET_MODE_FIRE,
+    std::vector<tripoint> trajectory = pl_target_ui(targ, range, &u.weapon, TARGET_MODE_FIRE,
                                                  default_target_x, default_target_y);
 
     if (trajectory.empty()) {
@@ -11569,7 +11568,7 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
         burst = true;
     }
 
-    u.fire_gun(x, y, burst);
+    u.fire_gun(targ, burst);
     reenter_fullscreen();
     //fire(u, x, y, trajectory, burst);
 }
