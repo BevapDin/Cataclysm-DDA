@@ -27,8 +27,36 @@ bool monster::wander()
 bool monster::can_move_to(int x, int y) const { return can_move_to(tripoint(x, y, posz())); }
 int monster::move_to(int x, int y, bool force) { return move_to(tripoint(x, y, posz()), force); }
 
+bool monster::can_attack_across_z(const tripoint &p) const
+{
+    if (p.z == posz()) {
+        return true;
+    }
+    if (std::abs(p.z - posz()) > 1) {
+        return false;
+    }
+    if (p.z > posz()) { // attacking upwards
+        if (!has_flag(MF_ATTACKS_UPWARDS)) {
+            return false;
+        }
+        if (g->m.blocks_vertical_air_up(pos()) && g->m.blocks_vertical_air_down(p)) {
+            return false;
+        }
+        return true;
+    }
+    // attacking down
+    if (g->m.blocks_vertical_air_down(pos()) && g->m.blocks_vertical_air_up(p)) {
+        return false;
+    }
+    return true;
+}
+
 bool monster::can_move_to(const tripoint &p) const
 {
+    if (std::abs(p.z - posz()) > 1) {
+        // TODO: Z jumping down multiple z-level
+        return false;
+    }
     if (p.z > posz()) { // moving upwards
         if (!g->m.has_flag_ter("GOES_UP", tripoint(p.x, p.y, posz()))) {
             return false;
@@ -445,24 +473,13 @@ bool monster::can_follow_plan() {
             return true;
         }
         // nope, player is above / below us, check if we can attack it
-        check_z = true;
     }
     if( ( has_flag(MF_BASHES) || has_flag(MF_BORES) ) && g->m.bash_rating(bash_estimate(), next) > 0) {
         if (next.z == posz()) {
             return true;
         }
-        check_z = true;
-    }
-    if (check_z) {
-        if (next.z < posz()) {
-            if (g->m.blocks_vertical_air_up(next) && g->m.blocks_vertical_air_down(pos())) {
-                return false;
-            }
-        } else {
-            if (g->m.blocks_vertical_air_down(next) && g->m.blocks_vertical_air_up(pos())) {
-                return false;
-            }
         }
+    if (can_move_to(next)) {
         return true;
     }
     if (next.z != posz()) {
