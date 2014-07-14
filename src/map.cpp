@@ -4419,38 +4419,24 @@ void map::draw(WINDOW* w, const tripoint &center)
     g->draw_critter( g->u, center );
 }
 
-bool map::blocks_vertical_view_down( const tripoint &p ) const
-{
-    const ter_id tid = ter( p );
-    const ter_t &ter = terlist[tid];
-    if( !ter.transparent ) {
-        return true;
-    }
-    if(!ter.has_flag("TRANSPARENT_FLOOR")) { // no no floor -> floor
-        return true;
-    }
-    const furn_id fid = furn( p );
-    if( fid == f_null ) {
-        return false;
-    }
-    const furn_t &furn = furnlist[fid];
-    if( !furn.transparent ) {
-        return true;
-    }
-    if (!furn.has_flag("TRANSPARENT_FLOOR")) { // no no floor -> floor
-        return true;
-    }
-    return false;
-}
-
 bool map::allows_vertical_view_down( const tripoint &p ) const
 {
-    return !blocks_vertical_view_down( p );
+    return psm_cache[get_nonant( p.x / SEEX, p.y / SEEY, p.z )].see_down[p.x % SEEX][p.y % SEEY];
+}
+
+bool map::blocks_vertical_view_down( const tripoint &p ) const
+{
+    return !psm_cache[get_nonant( p.x / SEEX, p.y / SEEY, p.z )].see_down[p.x % SEEX][p.y % SEEY];
+}
+
+bool map::allows_vertical_view_up( const tripoint &p ) const
+{
+    return psm_cache[get_nonant( p.x / SEEX, p.y / SEEY, p.z )].see_up[p.x % SEEX][p.y % SEEY];
 }
 
 bool map::blocks_vertical_view_up( const tripoint &p ) const
 {
-    return blocks_vertical_view_down( tripoint( p.x, p.y, p.z + 1 ) );
+    return !psm_cache[get_nonant( p.x / SEEX, p.y / SEEY, p.z )].see_up[p.x % SEEX][p.y % SEEY];
 }
 
 bool map::allows_vertical_air_down( const tripoint &p ) const

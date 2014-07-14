@@ -102,13 +102,18 @@ class map
     struct per_submap_cache {
         typedef enum {
             VF_SEEN_BY_U       = 1 <<  0,
+            // see_down, see_up
+            VF_MAP_DATA        = 1 <<  1,
         } valid_flags;
         /**
          * Contains combination of valid_flags.
          */
         int vflags;
         bool seen_by_u[SEEX][SEEY];
+        bool see_down[SEEX][SEEY];
+        bool see_up[SEEX][SEEY];
         per_submap_cache() : vflags(0) { }
+        void build_see_up_down_cache(const submap &sm, const submap *sm_above = NULL);
     };
     typedef std::vector<per_submap_cache> t_per_submap_cache_vector;
     t_per_submap_cache_vector psm_cache;
