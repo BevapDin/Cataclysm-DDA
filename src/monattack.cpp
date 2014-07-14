@@ -3143,13 +3143,13 @@ void mattack::flame( monster *z, Creature *target )
 
       for (auto &i : traj) {
           // break out of attack if flame hits a wall
-          if (g->m.hit_with_fire(i.x, i.y)) {
+          if (g->m.hit_with_fire( i )) {
               if (g->u.sees( i ))
                   add_msg(_("The tongue of flame hits the %s!"),
-                          g->m.tername(i.x, i.y).c_str());
+                          g->m.tername(i).c_str());
               return;
           }
-          g->m.add_field(i.x, i.y, fd_fire, 1);
+          g->m.add_field(i, fd_fire, 1);
       }
       target->add_effect("onfire", 8);
 
@@ -3165,7 +3165,7 @@ void mattack::flame( monster *z, Creature *target )
 
     for (auto &i : traj) {
         // break out of attack if flame hits a wall
-        if (g->m.hit_with_fire(i.x, i.y)) {
+        if (g->m.hit_with_fire( i )) {
             if (g->u.sees( i ))
                 add_msg(_("The tongue of flame hits the %s!"),
                         g->m.tername(i).c_str());

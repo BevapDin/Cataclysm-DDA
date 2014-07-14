@@ -2743,15 +2743,15 @@ bool map::hit_with_acid( const tripoint &p )
 }
 
 // returns true if terrain stops fire
-bool map::hit_with_fire(const int x, const int y)
+bool map::hit_with_fire(const tripoint &p)
 {
-    if (move_cost(x, y) != 0)
+    if (move_cost(p) != 0)
         return false; // Didn't hit the tile!
 
     // non passable but flammable terrain, set it on fire
-    if (has_flag("FLAMMABLE", x, y) || has_flag("FLAMMABLE_ASH", x, y))
+    if (has_flag("FLAMMABLE", p) || has_flag("FLAMMABLE_ASH", p))
     {
-        add_field(x, y, fd_fire, 3);
+        add_field(p, fd_fire, 3);
     }
     return true;
 }
