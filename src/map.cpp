@@ -5755,16 +5755,6 @@ long map::determine_wall_corner(const tripoint &p, const long orig_sym)
     return sym;
 }
 
-float map::light_transparency(const int x, const int y) const
-{
-  return transparency_cache[x][y];
-}
-
-float map::light_transparency(const tripoint &p) const
-{
-    return transparency_cache[p.x][p.y];
-}
-
 void map::build_outside_cache()
 {
     if (!outside_cache_dirty) {
@@ -5801,6 +5791,23 @@ void map::build_outside_cache()
     outside_cache_dirty = false;
 }
 
+// TODO: Z Just for now, make something better later
+#define transparency_cache(x, y, z) \
+    (psm_cache[get_nonant(tripoint((x) / SEEX, (y) / SEEY, (z)))].transparency[(x) % SEEX][(y) % SEEY])
+
+float map::light_transparency(const int x, const int y) const
+{
+    return light_transparency(tripoint(x, y, 0));
+}
+
+float map::light_transparency(const tripoint &p) const
+{
+    if (!inbounds(p)) {
+        return LIGHT_TRANSPARENCY_SOLID;
+    }
+    return transparency_cache(p.x, p.y, p.z);
+ }
+
 // TODO Consider making this just clear the cache and dynamically fill it in as trans() is called
 void map::build_transparency_cache()
 {
@@ -5809,15 +5816,19 @@ void map::build_transparency_cache()
     }
     for( int x = 0; x < my_MAPSIZE * SEEX; x++ ) {
         for( int y = 0; y < my_MAPSIZE * SEEY; y++ ) {
+            for( int z = my_ZMIN; z <= my_ZMAX; z++ ) {
+                // TODO: Z use cache validity flag
+                const tripoint p(x, y, z);
+                float &transp = transparency_cache(x, y, z);
             // Default to fully transparent.
-            transparency_cache[x][y] = LIGHT_TRANSPARENCY_CLEAR;
+            transp = LIGHT_TRANSPARENCY_CLEAR;
 
-            if( !ter_at(x, y).transparent || !furn_at(x, y).transparent ) {
-                transparency_cache[x][y] = LIGHT_TRANSPARENCY_SOLID;
+            if( !ter_at(p).transparent || !furn_at(p).transparent ) {
+                transp = LIGHT_TRANSPARENCY_SOLID;
                 continue;
             }
 
-            const field &curfield = field_at(x,y);
+            const field &curfield = field_at(p);
             for( auto &fld : curfield ) {
                 const field_entry * cur = &fld.second;
                     if( !fieldlist[cur->getFieldType()].transparent[cur->getFieldDensity() - 1] ) {
@@ -5828,30 +5839,31 @@ void map::build_transparency_cache()
                         case fd_cracksmoke:
                         case fd_methsmoke:
                         case fd_relax_gas:
-                            transparency_cache[x][y] *= 0.7;
+                            transp *= 0.7;
                             break;
                         case fd_smoke:
                         case fd_incendiary:
                         case fd_toxic_gas:
                         case fd_tear_gas:
                             if(cur->getFieldDensity() == 3) {
-                                transparency_cache[x][y] = LIGHT_TRANSPARENCY_SOLID;
+                                transp = LIGHT_TRANSPARENCY_SOLID;
                             }
                             if(cur->getFieldDensity() == 2) {
-                                transparency_cache[x][y] *= 0.5;
+                                transp *= 0.5;
                             }
                             break;
                         case fd_nuke_gas:
-                            transparency_cache[x][y] *= 0.5;
+                            transp *= 0.5;
                             break;
                         default:
-                            transparency_cache[x][y] = LIGHT_TRANSPARENCY_SOLID;
+                            transp = LIGHT_TRANSPARENCY_SOLID;
                             break;
                         }
                     }
                     // TODO: [lightmap] Have glass reduce light as well
             }
         }
+    }
     }
     transparency_cache_dirty = false;
 }
@@ -5875,7 +5887,8 @@ void map::build_map_cache()
                 if (v.v->part_flag(part, VPFLAG_OPAQUE) && v.v->parts[part].hp > 0) {
                     int dpart = v.v->part_with_feature(part , VPFLAG_OPENABLE);
                     if (dpart < 0 || !v.v->parts[dpart].open) {
-                        transparency_cache[px][py] = LIGHT_TRANSPARENCY_SOLID;
+                        // TODO: Z
+                        transparency_cache(px, py, 0) = LIGHT_TRANSPARENCY_SOLID;
                     }
                 }
             }
@@ -5885,6 +5898,7 @@ void map::build_map_cache()
     build_seen_cache();
     generate_lightmap();
 }
+#undef transparency_cache
 
 std::vector<point> closest_points_first(int radius, point p)
 {
