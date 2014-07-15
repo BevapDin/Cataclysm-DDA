@@ -12,6 +12,8 @@
 #include <vector>
 #include <bitset>
 
+#include "enums.h"
+
 // JSON parsing and serialization tools for Cataclysm-DDA.
 // For documentation, see the included header, json.h.
 
@@ -1388,6 +1390,35 @@ bool JsonIn::read(std::bitset<N> &b)
     return true;
 }
 
+bool JsonIn::read(point &p)
+{
+    if (!test_array()) {
+        return false;
+    }
+    JsonArray ja = get_array();
+    if (ja.size() < 2) {
+        return false;
+    }
+    p.x = ja.get_int(0);
+    p.y = ja.get_int(1);
+    return true;
+}
+
+bool JsonIn::read(tripoint &p)
+{
+    if (!test_array()) {
+        return false;
+    }
+    JsonArray ja = get_array();
+    if (ja.size() < 3) {
+        return false;
+    }
+    p.x = ja.get_int(0);
+    p.y = ja.get_int(1);
+    p.z = ja.get_int(2);
+    return true;
+}
+
 bool JsonIn::read(JsonDeserializer &j)
 {
     // can't know what type of json object it will deserialize from,
@@ -1778,6 +1809,23 @@ void JsonOut::write(const std::bitset<N> &b)
     }
     stream->put('"');
     need_separator = true;
+}
+
+void JsonOut::write(const point &p)
+{
+    start_array();
+    write(p.x);
+    write(p.y);
+    end_array();
+}
+
+void JsonOut::write(const tripoint &p)
+{
+    start_array();
+    write(p.x);
+    write(p.y);
+    write(p.z);
+    end_array();
 }
 
 void JsonOut::write(const JsonSerializer &thing)

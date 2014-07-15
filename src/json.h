@@ -31,6 +31,8 @@ class JsonObject;
 class JsonArray;
 class JsonSerializer;
 class JsonDeserializer;
+struct tripoint;
+struct point;
 
 /* JsonIn
  * ======
@@ -202,6 +204,8 @@ class JsonIn
         bool read(std::string &s);
         template<size_t N>
         bool read(std::bitset<N> &b);
+        bool read(point &p);
+        bool read(tripoint &p);
         bool read(JsonDeserializer &j);
         // array ~> vector
         template <typename T> bool read(std::vector<T> &v)
@@ -431,6 +435,8 @@ class JsonOut
         {
             write(std::string(cstr));
         }
+        void write(const point &p);
+        void write(const tripoint &p);
         void write(const JsonSerializer &thing);
         // vector ~> array
         template <typename T> void write(const std::vector<T> &v)
