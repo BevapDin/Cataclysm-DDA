@@ -9691,7 +9691,7 @@ int iuse::radiocontrol(player *p, item *it, bool t, point)
             p->remove_value( "remote_controlling" );
         } else {
             std::list<std::pair<tripoint, item *>> rc_pairs = g->m.get_rc_items();
-            tripoint rc_item_location = {999, 999, 999};
+            tripoint rc_item_location( 999, 999, 999 );
             // TODO: grab the closest car or similar?
             for( auto &rc_pairs_rc_pair : rc_pairs ) {
                 if( rc_pairs_rc_pair.second->type->id == "radio_car_on" &&

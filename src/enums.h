@@ -1,7 +1,7 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
-#include "json.h" // (de)serialization for points
+#include <functional>
 
 #ifndef sgn
 #define sgn(x) (((x) < 0) ? -1 : 1)
@@ -116,30 +116,10 @@ enum object_type {
     NUM_OBJECTS,
 };
 
-struct point : public JsonSerializer, public JsonDeserializer {
+struct point {
     int x;
     int y;
     point(int X = 0, int Y = 0) : x (X), y (Y) {}
-    point(point &&) = default;
-    point(const point &) = default;
-    point &operator=(point &&) = default;
-    point &operator=(const point &) = default;
-    ~point() {}
-    using JsonSerializer::serialize;
-    void serialize(JsonOut &jsout) const
-    {
-        jsout.start_array();
-        jsout.write(x);
-        jsout.write(y);
-        jsout.end_array();
-    }
-    using JsonDeserializer::deserialize;
-    void deserialize(JsonIn &jsin)
-    {
-        JsonArray ja = jsin.get_array();
-        x = ja.get_int(0);
-        y = ja.get_int(1);
-    }
 };
 
 // Make point hashable so it can be used as an unordered_set or unordered_map key,
@@ -171,7 +151,7 @@ struct tripoint {
     int x;
     int y;
     int z;
-    tripoint(int X = 0, int Y = 0, int Z = 0) : x (X), y (Y), z (Z) {}
+    explicit tripoint(int X = 0, int Y = 0, int Z = 0) : x(X), y(Y), z(Z) {}
 };
 
 // Make tripoint hashable so it can be used as an unordered_set or unordered_map key,
