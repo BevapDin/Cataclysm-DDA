@@ -644,7 +644,7 @@ void add_corpse(int x, int y);
  void disarm_trap( const tripoint &p);
  void remove_trap(const int x, const int y);
  void remove_trap(const tripoint &p);
- const std::set<point> &trap_locations(trap_id t) const;
+ const std::set<tripoint> &trap_locations(trap_id t) const;
 
 // Fields
         /**
@@ -1034,7 +1034,7 @@ private:
          * The list of currently loaded submaps.
          */
         std::vector<submap*> grid;
- std::map<trap_id, std::set<point> > traplocs;
+        std::map< trap_id, std::set< tripoint > > traplocs;
  void spread_gas(field_entry *cur, const tripoint &here, field_id curtype, int percent_spread, int outdoor_age_speedup);
  void create_hot_air(const tripoint &here, int density);
  bool process_fields_in_submap(submap * const current_submap, const int submap_x, const int submap_y, const int submap_z); // See fields.cpp

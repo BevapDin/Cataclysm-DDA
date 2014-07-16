@@ -3993,7 +3993,7 @@ void map::add_trap(const tripoint &p, const trap_id t)
 
     current_submap->set_trap(lx, ly, t);
     if (t != tr_null) {
-        traplocs[t].insert(point(p.x, p.y));
+        traplocs[t].insert(p);
     }
 }
 
@@ -4090,7 +4090,7 @@ void map::remove_trap(const tripoint &p)
             g->u.add_known_trap(p, "tr_null");
         }
         current_submap->set_trap(lx, ly, tr_null);
-        traplocs[t].erase(point(p.x, p.y));
+        traplocs[t].erase(p);
     }
 }
 /*
@@ -5170,7 +5170,7 @@ void map::update_traps( const tripoint &gp )
         for( int y = 0; y < SEEX; y++ ) {
             auto t = to->get_trap( x, y );
             if( t != tr_null ) {
-                traplocs[t].insert( point( gp.x * SEEX + x, gp.y * SEEY + y ) );
+                traplocs[t].insert( tripoint( gp.x * SEEX + x, gp.y * SEEY + y, gp.z ) );
             }
         }
     }
@@ -5431,7 +5431,7 @@ void map::actualize( const tripoint &gp )
 
             const auto trap_here = tmpsub->get_trap( x, y );
             if( trap_here != tr_null ) {
-                traplocs[trap_here].insert( point( pnt.x, pnt.y ) );
+                traplocs[trap_here].insert( pnt );
             }
 
             if( do_funnels ) {
@@ -5591,25 +5591,23 @@ void map::clear_traps()
     for( auto & smap : grid ) {
         for (int x = 0; x < SEEX; x++) {
             for (int y = 0; y < SEEY; y++) {
+                for (int gz = my_ZMIN; gz <= my_ZMAX; gz++) {
                 smap->set_trap(x, y, tr_null);
             }
         }
     }
 
     // Forget about all trap locations.
-    std::map<trap_id, std::set<point> >::iterator i;
-    for(i = traplocs.begin(); i != traplocs.end(); ++i) {
-        i->second.clear();
-    }
+    traplocs.clear();
 }
 
-const std::set<point> &map::trap_locations(trap_id t) const
+const std::set<tripoint> &map::trap_locations(trap_id t) const
 {
     const auto it = traplocs.find(t);
     if(it != traplocs.end()) {
         return it->second;
     }
-    static std::set<point> empty_set;
+    static std::set<tripoint> empty_set;
     return empty_set;
 }
 
