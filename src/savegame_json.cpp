@@ -134,7 +134,6 @@ void player::json_load_common_variables(JsonObject & data)
     data.read("pain",pain);            data.read("pkill",pkill);
     data.read("radiation",radiation);
     data.read("scent",scent);
-    data.read("in_vehicle", in_vehicle);
     data.read("moves",moves);
     data.read("dodges_left",num_dodges);
     data.read("underwater",underwater);
@@ -142,6 +141,7 @@ void player::json_load_common_variables(JsonObject & data)
     data.read("male",male);
     data.read("cash",cash);
     data.read("recoil",recoil);
+    data.read("in_vehicle",in_vehicle);
 
     parray = data.get_array("hp_cur");
     if ( parray.size() == num_hp_parts ) {
@@ -232,7 +232,6 @@ void player::json_save_common_variables(JsonOut &json) const
     // misc levels
     json.member( "radiation", radiation );
     json.member( "scent", int(scent) );
-    json.member( "in_vehicle", in_vehicle );
 
     // initiative type stuff
     json.member( "moves", moves );
@@ -247,6 +246,7 @@ void player::json_save_common_variables(JsonOut &json) const
 
     json.member( "cash", cash );
     json.member( "recoil", int(recoil) );
+    json.member( "in_vehicle", in_vehicle );
 
     // potential incompatibility with future expansion
     // todo: consider ["parts"]["head"]["hp_cur"] instead of ["hp_cur"][head_enum_value]
