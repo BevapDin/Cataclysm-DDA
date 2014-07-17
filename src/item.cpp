@@ -3308,7 +3308,7 @@ bool item::use_charges(const itype_id &it, long &quantity, std::list<item> &used
     const float modi = type->getChargesModi(it);
     // Normalized quantity e.g. for a crude welder:
     // quantity 100 becames 150.
-    const long quantity_norm = static_cast<long>(charges * modi);
+    const long quantity_norm = static_cast<long>(quantity * modi);
     // Maximal amount that can be used, not more than we have
     // e.g. this has only 100 charges, but 150 were requested -> to_be_used=100
     const long to_be_used = std::min(quantity_norm, charges);
