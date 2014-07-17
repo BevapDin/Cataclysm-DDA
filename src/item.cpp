@@ -45,6 +45,7 @@ item::item(const std::string new_type, unsigned int turn, bool rand)
         charges = ammo->count;
     } else if (type->is_food()) {
         it_comest* comest = dynamic_cast<it_comest*>(type);
+        active = true;
         if (comest->charges == 1 && !made_of(LIQUID)) {
             charges = -1;
         } else {
@@ -142,6 +143,7 @@ void item::init() {
     light = nolight;
     fridge = 0;
     rot = 0;
+    is_rotten = false;
     last_rot_check = 0;
 }
 
@@ -1679,20 +1681,15 @@ int item::has_gunmod(itype_id mod_type)
 
 bool item::rotten()
 {
-    if (!is_food() || g == NULL)
-        return false;
-    it_comest* food = dynamic_cast<it_comest*>(type);
-    if (food->spoils != 0) {
-      calc_rot();
-
-      return (rot > (signed int)food->spoils * 600);
-    } else {
-      return false;
-    }
+    return is_rotten;
 }
 
-void item::calc_rot()
+void item::calc_rot(const point &location)
 {
+    if (!is_food() || g == NULL){
+        is_rotten = false;
+        return;
+    }
     const int now = calendar::turn;
     if ( last_rot_check + 10 < now ) {
         const int since = ( last_rot_check == 0 ? bday : last_rot_check );
@@ -1700,7 +1697,7 @@ void item::calc_rot()
         if ( since < until ) {
             // rot (outside of fridge) from bday/last_rot_check until fridge/now
             int old = rot;
-            rot += get_rot_since( since, until );
+            rot += get_rot_since( since, until, location );
             if (g->debugmon) {
                 add_msg(m_info, "r: %s %d,%d %d->%d", type->id.c_str(), since, until, old, rot );
             }
@@ -1713,6 +1710,13 @@ void item::calc_rot()
             fridge = 0;
         }
     }
+    it_comest* food = dynamic_cast<it_comest*>(type);
+    if (food->spoils != 0 && (rot > (signed int)food->spoils * 600)) {
+      is_rotten = true;
+    } else {
+      is_rotten = false;
+    }
+    if(is_rotten) {active = false;}
 }
 
 int item::brewing_time()

@@ -373,9 +373,6 @@ void player::die(Creature* nkiller)
 void player::reset_stats()
 {
 
-    // Didn't just pick something up
-    last_item = itype_id("null");
-
     // Bionic buffs
     if (has_active_bionic("bio_hydraulics"))
         mod_str_bonus(20);
@@ -387,11 +384,6 @@ void player::reset_stats()
         mod_int_bonus(2);
     if (has_bionic("bio_dex_enhancer"))
         mod_dex_bonus(2);
-    if (has_active_bionic("bio_metabolics") && power_level < max_power_level &&
-            hunger < 100 && (int(calendar::turn) % 5 == 0)) {
-        hunger += 2;
-        power_level++;
-    }
 
     // Trait / mutation buffs
     if (has_trait("THICK_SCALES")) {
@@ -475,8 +467,6 @@ void player::reset_stats()
         mod_int_bonus(-int(abs(stim - 15) / 14));
     }
 
-    suffer();
-
     // Dodge-related effects
     mod_dodge_bonus( mabuff_dodge_bonus() - encumb(bp_legs)/2 - encumb(bp_torso) );
     if (has_trait("TAIL_LONG")) {
@@ -513,6 +503,37 @@ void player::reset_stats()
     // Hit-related effects
     mod_hit_bonus( mabuff_tohit_bonus() + weapon.type->m_to_hit - encumb(bp_torso) );
 
+    // Apply static martial arts buffs
+    ma_static_effects();
+
+    if (int(calendar::turn) % 10 == 0) {
+        update_mental_focus();
+    }
+    nv_cached = false;
+    pda_cached = false;
+
+    recalc_sight_limits();
+    recalc_speed_bonus();
+
+    Creature::reset_stats();
+
+}
+
+void player::process_turn()
+{
+    Creature::process_turn();
+
+    // Didn't just pick something up
+    last_item = itype_id("null");
+
+    if (has_active_bionic("bio_metabolics") && power_level < max_power_level &&
+            hunger < 100 && (int(calendar::turn) % 5 == 0)) {
+        hunger += 2;
+        power_level++;
+    }
+
+    suffer();
+
     // Set our scent towards the norm
     int norm_scent = 500;
     if (has_trait("WEAKSCENT")) {
@@ -547,25 +568,12 @@ void player::reset_stats()
     if (scent > norm_scent)
         scent--;
 
-    // Apply static martial arts buffs
-    ma_static_effects();
-
-    if (int(calendar::turn) % 10 == 0) {
-        update_mental_focus();
-    }
-    nv_cached = false;
-    pda_cached = false;
-
-    recalc_sight_limits();
-    recalc_speed_bonus();
-
-    Creature::reset_stats();
-
     // We can dodge again! Assuming we can actually move...
     if (moves > 0) {
         blocks_left = get_num_blocks();
         dodges_left = get_num_dodges();
     }
+
 }
 
 void player::action_taken()
@@ -4537,7 +4545,7 @@ dealt_damage_instance player::deal_damage(Creature* source, body_part bp,
     Where damage to player is actually applied to hit body parts
     Might be where to put bleed stuff rather than in player::deal_damage()
  */
-void player::apply_damage(Creature* source, body_part bp, int side, int dam) {
+void player::apply_damage(Creature *, body_part bp, int side, int dam) {
     if (is_dead_state()) {
         // don't do any more damage if we're already dead
         return;
@@ -4599,9 +4607,6 @@ void player::apply_damage(Creature* source, body_part bp, int side, int dam) {
     }
     lifetime_stats()->damage_taken+=dam;
 
-    if (is_dead_state()) {
-        die(source);
-    }
 }
 
 void player::mod_pain(int npain) {
@@ -5779,9 +5784,9 @@ void player::suffer()
     // Blind/Deaf for brief periods about once an hour,
     // and visuals about once every 30 min.
     if (has_trait("PER_SLIME")) {
-        if (one_in(600) && !has_disease("deaf")) {
+        if (one_in(600) && !has_effect("deaf")) {
             add_msg(m_bad, _("Suddenly, you can't hear anything!"));
-            add_disease("deaf", 20 * rng (2, 6)) ;
+            add_effect("deaf", 20 * rng (2, 6)) ;
         }
         if (one_in(600) && !(has_effect("blind"))) {
             add_msg(m_bad, _("Suddenly, your eyes stop working!"));
@@ -6598,25 +6603,25 @@ bool player::process_single_active_item(item *it)
     {
         if (it->is_food())
         {
+            it->calc_rot(this->pos());
             if (it->has_flag("HOT"))
             {
                 it->item_counter--;
                 if (it->item_counter == 0)
                 {
                     it->item_tags.erase("HOT");
-                    it->active = false;
                 }
             }
         }
         else if (it->is_food_container())
         {
+            it->contents[0].calc_rot(this->pos());
             if (it->contents[0].has_flag("HOT"))
             {
                 it->contents[0].item_counter--;
                 if (it->contents[0].item_counter == 0)
                 {
                     it->contents[0].item_tags.erase("HOT");
-                    it->contents[0].active = false;
                 }
             }
         }
@@ -7668,6 +7673,7 @@ bool player::eat(item *eaten, it_comest *comest)
     bool overeating = (!has_trait("GOURMAND") && hunger < 0 &&
                        comest->nutr >= 5);
     bool hiberfood = (has_trait("HIBERNATE") && (hunger > -60 && thirst > -60 ));
+    eaten->calc_rot(pos()); // check if it's rotten before eating!
     bool spoiled = eaten->rotten();
 
     last_item = itype_id(eaten->type->id);
@@ -9167,6 +9173,11 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
           add_msg(m_info, _("Your %s isn't big enough to use that mod.'"), gun->tname().c_str(),
           used->tname().c_str());
           return;
+        }
+        if (mod->id == "brass_catcher" && gun->has_flag("RELOAD_EJECT")) {
+            add_msg(m_info, _("You cannot attach a brass catcher to your %s."),
+                       gun->tname().c_str());
+            return;
         }
         for (int i = 0; i < gun->contents.size(); i++) {
             if (gun->contents[i].type->id == used->type->id) {
@@ -11482,7 +11493,7 @@ void player::add_known_trap(int x, int y, const std::string &t)
 
 bool player::is_deaf() const
 {
-    return has_disease("deaf") || worn_with_flag("DEAF");
+    return has_effect("deaf") || worn_with_flag("DEAF");
 }
 
 bool player::is_suitable_weapon( const item &it ) const

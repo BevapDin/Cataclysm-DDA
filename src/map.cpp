@@ -2969,20 +2969,20 @@ bool map::process_active_item(item *it, submap *const current_submap,
                               const int gridx, const int gridy, const int i, const int j) {
     if (it->active || (it->is_container() && !it->contents.empty() && it->contents[0].active)) {
         if (it->is_food()) { // food items
+            it->calc_rot(point(gridx * SEEX + i, gridy * SEEY + j));
             if (it->has_flag("HOT")) {
                 it->item_counter--;
                 if (it->item_counter == 0) {
                     it->item_tags.erase("HOT");
-                    it->active = false;
                     current_submap->active_item_count--;
                 }
             }
         } else if (it->is_food_container()) { // food in containers
+            it->contents[0].calc_rot(point(gridx * SEEX + i, gridy * SEEY + j));
             if (it->contents[0].has_flag("HOT")) {
                 it->contents[0].item_counter--;
                 if (it->contents[0].item_counter == 0) {
                     it->contents[0].item_tags.erase("HOT");
-                    it->contents[0].active = false;
                     current_submap->active_item_count--;
                 }
             }
@@ -4097,9 +4097,9 @@ std::vector<point> map::getDirCircle(const int Fx, const int Fy, const int Tx, c
 
     const std::vector<point> vLine = line_to(Fx, Fy, Tx, Ty, 0);
     const std::vector<point> vSpiral = closest_points_first(1, Fx, Fy);
-    const std::vector<int> vPos {1,3,5,7,8,6,4,2};
+    const std::vector<int> vPos {1,2,4,6,8,7,5,3};
 
-    //  All possible constelations (closest_points_first goes counterclokcwise)
+    //  All possible constelations (closest_points_first goes clockwise)
     //  753  531  312  124  246  468  687  875
     //  8 1  7 2  5 4  3 6  1 8  2 7  4 5  6 3
     //  642  864  786  578  357  135  213  421
@@ -4213,14 +4213,14 @@ std::vector<point> map::route(const int Fx, const int Fy, const int Tx, const in
       list[x][y] = ASL_OPEN;
       open.push_back(point(x, y));
       parent[x][y] = open[index];
-      gscore[x][y] = gscore[open[index].x][open[index].y] + move_cost(x, y);
+      gscore[x][y] = gscore[open[index].x][open[index].y] + move_cost(x, y) + ((open[index].x - x != 0 && open[index].y - y != 0) ? 1 : 0);
       if (ter(x, y) == t_door_c)
        gscore[x][y] += 4; // A turn to open it and a turn to move there
       else if (move_cost(x, y) == 0 && (can_bash && has_flag("BASHABLE", x, y)))
        gscore[x][y] += 18; // Worst case scenario with damage penalty
       score[x][y] = gscore[x][y] + 2 * rl_dist(x, y, Tx, Ty);
      } else if (list[x][y] == ASL_OPEN) { // It's open, but make it our child
-      int newg = gscore[open[index].x][open[index].y] + move_cost(x, y);
+      int newg = gscore[open[index].x][open[index].y] + move_cost(x, y) + ((open[index].x - x != 0 && open[index].y - y != 0) ? 1 : 0);
       if (ter(x, y) == t_door_c)
        newg += 4; // A turn to open it and a turn to move there
       else if (move_cost(x, y) == 0 && (can_bash && has_flag("BASHABLE", x, y)))
@@ -4481,7 +4481,7 @@ bool map::loadn(const int worldx, const int worldy, const int worldz,
 
     // check traps
     std::map<point, trap_id> rain_backlog;
-    bool do_funnels = ( worldz >= 0 && !g->weather_log.empty() ); // empty if just loaded a save here
+    bool do_funnels = ( worldz >= 0 ); // empty if just loaded a save here
     for (int x = 0; x < SEEX; x++) {
         for (int y = 0; y < SEEY; y++) {
             const trap_id t = tmpsub->get_trap(x, y);
@@ -4520,7 +4520,7 @@ bool map::loadn(const int worldx, const int worldy, const int worldz,
                   }
               }
               if (it->is_corpse()) {
-                  it->calc_rot();
+                  it->calc_rot(point(x,y));
 
                   //remove corpse after 10 days = 144000 turns (dependent on temperature)
                   if(it->rot > 144000 && it->can_revive() == false) {
@@ -4531,7 +4531,7 @@ bool map::loadn(const int worldx, const int worldy, const int worldz,
               }
               if(it->goes_bad() && biggest_container_idx != intidx) { // you never know...
                   it_comest *food = dynamic_cast<it_comest*>(it->type);
-                  it->rotten();
+                  it->calc_rot(point(x,y));
                   if(it->rot >= (food->spoils * 600)*2) {
                       it = tmpsub->itm[x][y].erase(it);
                   } else { ++it; intidx++; }
@@ -4541,7 +4541,7 @@ bool map::loadn(const int worldx, const int worldy, const int worldz,
           if ( do_container_check == true && biggest_container_idx != -1 ) { // funnel: check. bucket: check
               item * it = &tmpsub->itm[x][y][biggest_container_idx];
               trap_id fun_trap_id = rain_backlog[point(x,y)];
-              retroactively_fill_from_funnel(it, fun_trap_id, int(calendar::turn) ); // bucket: what inside??
+              retroactively_fill_from_funnel( it, fun_trap_id, calendar(calendar::turn), point(x,y) ); // bucket: what inside??
           }
 
       }
@@ -4611,6 +4611,20 @@ void map::copy_grid(const int to, const int from)
   (*it)->smx = to % my_MAPSIZE;
   (*it)->smy = to / my_MAPSIZE;
  }
+
+    const int oldx = (from % my_MAPSIZE) * SEEX;
+    const int oldy = (from / my_MAPSIZE) * SEEY;
+    const int newx = (to % my_MAPSIZE) * SEEX;
+    const int newy = (to / my_MAPSIZE) * SEEY;
+    for (int x = 0; x < SEEX; x++) {
+        for (int y = 0; y < SEEY; y++) {
+            trap_id t = grid[to]->get_trap(x, y);
+            if (t != tr_null) {
+                traplocs[t].erase(point(oldx + x, oldy + y));
+                traplocs[t].insert(point(newx + x, newy + y));
+            }
+        }
+    }
 }
 
 void map::spawn_monsters()
@@ -4682,9 +4696,14 @@ void map::clear_traps()
     }
 }
 
-std::set<point> map::trap_locations(trap_id t)
+const std::set<point> &map::trap_locations(trap_id t) const
 {
-    return traplocs[t];
+    const auto it = traplocs.find(t);
+    if(it != traplocs.end()) {
+        return it->second;
+    }
+    static std::set<point> empty_set;
+    return empty_set;
 }
 
 bool map::inbounds(const int x, const int y)

@@ -24,6 +24,7 @@
 #include "worldfactory.h"
 #include "creature_tracker.h"
 #include "game_constants.h"
+#include "weather_gen.h"
 #include <vector>
 #include <map>
 #include <queue>
@@ -301,6 +302,7 @@ class game
         int inv_activatable(std::string title);
         int inv_type(std::string title, item_cat inv_item_type = IC_NULL);
         int inv_for_liquid(const item &liquid, const std::string title, bool auto_choose_single);
+        item *inv_map_for_liquid(const item &liquid, const std::string title, bool &on_ground);
         int inv_for_flag(const std::string flag, const std::string title, bool auto_choose_single);
         int display_slice(indexed_invslice &, const std::string &, const int &position = INT_MIN);
         int inventory_item_menu(int pos, int startx = 0, int width = 50, int position = 0);
@@ -353,6 +355,9 @@ class game
 
         std::vector <mission_type> mission_types; // The list of mission templates
 
+        weather_generator weatherGen; //A weather engine.
+        bool has_generator = false;
+        unsigned int weatherSeed = 0;
         signed char temperature;              // The air temperature
         int get_temperature();    // Returns outdoor or indoor temperature of current location
         weather_type weather;   // Weather pattern--SEE weather.h
