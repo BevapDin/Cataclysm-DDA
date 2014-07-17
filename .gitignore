@@ -9,6 +9,8 @@ save.*/
 graveyard/
 memorial/
 obj/
+obj.rel/
+src/*.patch
 debug.log
 logg.txt
 bindist/
