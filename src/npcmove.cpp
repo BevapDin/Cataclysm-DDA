@@ -158,6 +158,66 @@ void npc::move()
     execute_action(action, target);
 }
 
+struct pcomp_dist_to_u {
+    vehicle *veh;
+    point pu;
+    bool operator()(int a, int b) const {
+        return dist(a) < dist(b);
+    }
+    int dist(int a) const {
+        const point p(veh->global_x() + veh->parts[a].precalc_dx[0],
+                      veh->global_y() + veh->parts[a].precalc_dy[0]);
+        return square_dist(pu.x, pu.y, p.x, p.y);
+    }
+    int random(std::vector<int> &positions) const {
+        // Sort nearest to player first
+        std::stable_sort(positions.begin(), positions.end(), *this);
+        for(size_t i = 0; i < positions.size(); i++) {
+            // get the nearest to player seat that is at least 2 squares away
+            if(dist(positions[i]) >= 2 ) {
+                return positions[i];
+            }
+        }
+        return positions[rng(0, positions.size() - 1)];
+    }
+};
+
+int find_nice_seat(vehicle *veh) {
+    pcomp_dist_to_u comp{ veh, point(g->u.posx, g->u.posy) };
+
+    std::vector<int> boardable;
+    std::vector<int> belted;
+    std::vector<int> seats;
+    for(size_t p = 0; p < veh->parts.size(); p++) {
+        if( !veh->part_flag (p, VPFLAG_BOARDABLE) || veh->parts[p].has_flag(vehicle_part::passenger_flag) ) {
+            continue;
+        }
+        boardable.push_back(p);
+        if( veh->part_with_feature (p, "SEATBELT") >= 0 ) {
+            belted.push_back(p);
+        }
+        if( veh->part_with_feature (p, "SEAT") >= 0 ) {
+            seats.push_back(p);
+        }
+    }
+    if(boardable.empty()) {
+        return -1;
+    }
+    // Prefer with seat belts
+    if(!belted.empty()) {
+        return comp.random(belted);
+    }
+    // Or at least with seats
+    if(!seats.empty()) {
+        return comp.random(seats);
+    }
+    // Or anything
+    if(!boardable.empty()) {
+        return comp.random(boardable);
+    }
+    return -1;
+}
+
 void npc::execute_action(npc_action action, int target)
 {
     int oldmoves = moves;
@@ -345,9 +405,7 @@ void npc::execute_action(npc_action action, int target)
         break;
 
     case npc_follow_embarked:
-        if (in_vehicle) {
-            move_pause();
-        } else {
+        {
             int p1;
             vehicle *veh = g->m.veh_at(g->u.posx, g->u.posy, p1);
 
@@ -356,23 +414,34 @@ void npc::execute_action(npc_action action, int target)
                 // TODO: change to wait? - for now pause
                 move_pause();
             } else {
-                int p2 = veh->free_seat();
+                if( in_vehicle && g->m.veh_at(posx, posy) == veh && square_dist(posx, posy, g->u.posx, g->u.posy) <= 3 ) {
+                    move_pause();
+                } else {
+                int p2 = find_nice_seat(veh);
                 if (p2 < 0) {
                     // TODO: be angry at player, switch to wait or leave - for now pause
                     move_pause();
                 } else {
                     int px = veh->global_x() + veh->parts[p2].precalc_dx[0];
                     int py = veh->global_y() + veh->parts[p2].precalc_dy[0];
+                    if(px == posx && py == posy) {
+                        move_pause();
+                    } else {
                     update_path(px, py);
 
                     // TODO: replace extra hop distance with finding the correct door
                     //       Hop in the last few squares is mostly to avoid player clash
                     if (path.size() <= 2) {
+                        if(in_vehicle) {
+                            g->m.unboard_vehicle(posx, posy);
+                        }
                         g->m.board_vehicle(px, py, this);
                         move_pause();
                     } else {
                         move_to_next();
                     }
+                    }
+                }
                 }
             }
         }
@@ -1065,6 +1134,11 @@ void npc::move_to(int x, int y)
             posy = y;
             bool diag = trigdist && posx != x && posy != y;
             moves -= run_cost(g->m.combined_movecost(posx, posy, x, y), diag);
+            int part;
+            vehicle *veh = g->m.veh_at(x, y, part);
+            if(veh != NULL && veh->part_with_feature (part, VPFLAG_BOARDABLE) >= 0) {
+                g->m.board_vehicle(posx, posy, this);
+            }
         } else if (g->m.open_door(x, y, (g->m.ter(posx, posy) == t_floor))) {
             moves -= 100;
         } else if (g->m.has_flag("BASHABLE", x, y)) {

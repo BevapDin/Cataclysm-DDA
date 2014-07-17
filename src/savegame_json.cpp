@@ -134,6 +134,7 @@ void player::json_load_common_variables(JsonObject & data)
     data.read("pain",pain);            data.read("pkill",pkill);
     data.read("radiation",radiation);
     data.read("scent",scent);
+    data.read("in_vehicle", in_vehicle);
     data.read("moves",moves);
     data.read("dodges_left",num_dodges);
     data.read("underwater",underwater);
@@ -231,6 +232,7 @@ void player::json_save_common_variables(JsonOut &json) const
     // misc levels
     json.member( "radiation", radiation );
     json.member( "scent", int(scent) );
+    json.member( "in_vehicle", in_vehicle );
 
     // initiative type stuff
     json.member( "moves", moves );
@@ -318,7 +320,6 @@ void player::serialize(JsonOut &json, bool save_contents) const
 
     // someday, npcs may drive
     json.member( "driving_recoil", int(driving_recoil) );
-    json.member( "in_vehicle", in_vehicle );
     json.member( "controlling_vehicle", controlling_vehicle );
 
     // shopping carts, furniture etc
@@ -412,7 +413,6 @@ void player::deserialize(JsonIn &jsin)
     data.read("backlog",backlog);
 
     data.read("driving_recoil",driving_recoil);
-    data.read("in_vehicle",in_vehicle);
     data.read("controlling_vehicle",controlling_vehicle);
 
     data.read("grab_point", grab_point);
