@@ -10300,6 +10300,7 @@ void game::grab()
 bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *source,
                          item *cont)
 {
+    static int last_item_pos = INT_MIN;
     if (!liquid.made_of(LIQUID)) {
         dbg(D_ERROR) << "game:handle_liquid: Tried to handle_liquid a non-liquid!";
         debugmsg("Tried to handle_liquid a non-liquid!");
@@ -10364,6 +10365,14 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
 
     bool on_ground;
 
+    if( cont == NULL && last_item_pos != INT_MIN ) {
+        cont = &u.i_at( last_item_pos );
+        LIQUID_FILL_ERROR error;
+        if( cont->get_remaining_capacity_for_liquid( liquid, error ) <= 0 ) {
+            last_item_pos = INT_MIN;
+            cont = NULL;
+        }
+    }
     if (cont == NULL || cont->is_null()) {
         const std::string text = string_format(_("Container for %s"), liquid.tname().c_str());
 
@@ -10384,6 +10393,7 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
             add_msg(_("Never mind."));
             return false;
         }
+        last_item_pos = u.get_item_position( cont );
     }
 
     if (cont == source) {
