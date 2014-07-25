@@ -6503,22 +6503,19 @@ void player::rem_morale(morale_type type, itype* item_type)
  }
 }
 
-item& player::i_add(item it)
+item &player::i_add(const item &it)
 {
- itype_id item_type_id = "null";
- if( it.type ) item_type_id = it.type->id;
-
- last_item = item_type_id;
-
- if (it.is_food() || it.is_ammo() || it.is_gun()  || it.is_armor() ||
-     it.is_book() || it.is_tool() || it.is_weap() || it.is_food_container())
-  inv.unsort();
-
- if (g != NULL && it.is_artifact() && it.is_tool()) {
-  it_artifact_tool *art = dynamic_cast<it_artifact_tool*>(it.type);
-  g->add_artifact_messages(art->effects_carried);
- }
- return inv.add_item(it);
+    if( it.is_null() ) {
+        DebugLog( D_ERROR, D_GAME ) << "null-item given to player::i_add";
+        return ret_null;
+    }
+    last_item = it.typeId();
+    inv.unsort();
+    if( g != NULL && it.is_artifact() && it.is_tool() ) {
+        const it_artifact_tool *art = dynamic_cast<const it_artifact_tool *>( it.type );
+        g->add_artifact_messages( art->effects_carried );
+    }
+    return inv.add_item( it );
 }
 
 bool player::has_active_item(const itype_id & id) const
@@ -7552,22 +7549,37 @@ bool player::has_mission_item(int mission_id)
     return false;
 }
 
-bool player::i_add_or_drop(item& it, int qty) {
-    bool retval = true;
+void player::i_add_or_drop(const item &it, const size_t qty)
+{
     bool drop = false;
-    inv.assign_empty_invlet(it);
-    for (int i = 0; i < qty; ++i) {
-        if (!drop && (!can_pickWeight(it.weight(), !OPTIONS["DANGEROUS_PICKUPS"])
-                      || !can_pickVolume(it.volume()))) {
-            drop = true;
-        }
-        if (drop) {
-            retval &= g->m.add_item_or_charges(posx, posy, it);
-        } else {
-            i_add(it);
+    int vpart;
+    vehicle *veh = g->m.veh_at( posx, posy, vpart );
+    if( veh != nullptr ) {
+        vpart = veh->part_with_feature( vpart, "CARGO", false );
+        if( vpart == -1 ) {
+            veh = nullptr;
         }
     }
-    return retval;
+    for( size_t i = 0; i < qty; ++i ) {
+        if( !drop ) {
+            if( !can_pickWeight( it.weight(), !OPTIONS["DANGEROUS_PICKUPS"] ) ||
+                !can_pickVolume( it.volume() ) ) {
+                drop = true;
+            }
+        }
+        if( drop ) {
+            if( veh != nullptr ) {
+                if( !veh->add_item( vpart, it ) ) {
+                    veh = nullptr; // part is full
+                }
+            }
+            if( veh == nullptr ) {
+                g->m.add_item_or_charges( posx, posy, it );
+            }
+        } else {
+            i_add( it );
+        }
+    }
 }
 
 hint_rating player::rate_action_eat(item *it)

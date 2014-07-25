@@ -728,10 +728,21 @@ public:
 
  std::string weapname(bool charges = true);
 
- item& i_add(item it);
- // Sets invlet and adds to inventory if possible, drops otherwise, returns true if either succeeded.
- // An optional qty can be provided (and will perform better than separate calls).
- bool i_add_or_drop(item& it, int qty = 1);
+ /**
+  * Add an item to the inventory of this player. This might trigger a message
+  * (in case of artifacts) or other things. It also sets @ref last_item.
+  * The item automatically gets an invlet assigned by the inventory class.
+  * See also @ref i_add_or_drop.
+  * @return a reference to the added item.
+  */
+ item& i_add(const item &it);
+ /**
+  * Check whether the player can carry the item (no can_pickup check is performed!),
+  * based on the volume and the weight and the respective capacity of this player.
+  * If the player does not have enough capacity for the item, it is dropped on the
+  * map (or in the vehicle the player is on).
+  */
+ void i_add_or_drop(const item &it, const size_t qty = 1);
  bool has_active_item(const itype_id &id) const;
  long active_item_charges(itype_id id);
  void process_active_items();
