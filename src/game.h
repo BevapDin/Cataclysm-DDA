@@ -188,7 +188,6 @@ class game
         bool refill_vehicle_part (vehicle &veh, vehicle_part *part, bool test = false);
         bool pl_refill_vehicle (vehicle &veh, int part, bool test = false);
         void resonance_cascade(const tripoint &p);
-        void scrambler_blast(int x, int y);
         void scrambler_blast(const tripoint &p);
         void emp_blast(const tripoint &p);
         int  npc_at(const int x, const int y) const; // Index of the npc at (x, y); -1 for none
