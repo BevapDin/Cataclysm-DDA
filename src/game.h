@@ -181,7 +181,6 @@ class game
         /* Defined later in this file */
         //void draw_explosion(int x, int y, int radius, nc_color col);
         // Flashback at (x, y)
-        void flashbang(int x, int y, bool player_immune = false);
         void flashbang(const tripoint &p, bool player_immune = false);
         // Move the player vertically, if (force) then they fell
         void vertical_move(int z, bool force);
@@ -440,7 +439,6 @@ class game
         // shockwave applies knockback to all targets within radius of (x,y)
         // parameters force, stun, and dam_mult are passed to knockback()
         // ignore_player determines if player is affected, useful for bionic, etc.
-        void shockwave(int x, int y, int radius, int force, int stun, int dam_mult, bool ignore_player);
         void shockwave(const tripoint &p, int radius, int force, int stun, int dam_mult, bool ignore_player);
 
         // Animation related functions
