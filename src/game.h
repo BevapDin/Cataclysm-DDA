@@ -164,7 +164,6 @@ class game
         /** Create explosion at (x, y) of intensity (power) with (shrapnel) chunks of shrapnel. */
         void explosion(const tripoint &p, int power, int shrapnel, bool fire, bool blast = true);
         /** Triggers a flashbang explosion at (x, y). */
-        void flashbang(int x, int y, bool player_immune = false);
         void flashbang(const tripoint &p, bool player_immune = false);
         /** Moves the player vertically. If force == true then they are falling. */
         void vertical_move(int z, bool force);
@@ -471,7 +470,6 @@ class game
         // shockwave applies knockback to all targets within radius of (x,y)
         // parameters force, stun, and dam_mult are passed to knockback()
         // ignore_player determines if player is affected, useful for bionic, etc.
-        void shockwave(int x, int y, int radius, int force, int stun, int dam_mult, bool ignore_player);
         void shockwave(const tripoint &p, int radius, int force, int stun, int dam_mult, bool ignore_player);
 
         // Animation related functions

@@ -7332,7 +7332,7 @@ int iuse::artifact(player *p, item *it, bool, tripoint)
 
             case AEA_FLASH:
                 p->add_msg_if_player(_("The %s flashes brightly!"), it->tname().c_str());
-                g->flashbang(p->posx(), p->posy());
+                g->flashbang(p->pos());
                 break;
 
             case AEA_VOMIT:

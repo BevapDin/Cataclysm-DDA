@@ -6162,11 +6162,6 @@ void game::explosion(const tripoint &pos, int power, int shrapnel, bool fire, bo
     }
 }
 
-void game::flashbang(int x, int y, bool player_immune)
-{
-    flashbang(tripoint(x, y, 0), player_immune);
-}
-
 void game::flashbang(const tripoint &p, bool player_immune)
 {
     draw_explosion(p, 8, c_white);
@@ -6206,12 +6201,6 @@ void game::flashbang(const tripoint &p, bool player_immune)
     }
     sounds::sound(p, 12, _("a huge boom!"));
     // TODO: Blind/deafen NPC
-}
-
-void game::shockwave(int x, int y, int radius, int force, int stun, int dam_mult,
-                     bool ignore_player)
-{
-    shockwave(tripoint(x, y, 0), radius, force, stun, dam_mult, ignore_player);
 }
 
 void game::shockwave(const tripoint &pos, int radius, int force, int stun, int dam_mult, bool ignore_player)

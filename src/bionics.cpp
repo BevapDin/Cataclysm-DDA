@@ -730,9 +730,9 @@ bool player::activate_bionic(int b, bool eff_only)
             // TODO: damage the player / their bionics
         }
     } else if(bio.id == "bio_flashbang") {
-        g->flashbang(posx(), posy(), true);
+        g->flashbang(pos(), true);
     } else if(bio.id == "bio_shockwave") {
-        g->shockwave(posx(), posy(), 3, 4, 2, 8, true);
+        g->shockwave(pos(), 3, 4, 2, 8, true);
         add_msg_if_player(m_neutral, _("You unleash a powerful shockwave!"));
     } else if(bio.id == "bio_meteorologist") {
         // Calculate local wind power

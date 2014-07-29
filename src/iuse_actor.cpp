@@ -193,7 +193,7 @@ long explosion_iuse::use(player *p, item *it, bool t, tripoint pos) const
         g->draw_explosion(pos, draw_explosion_radius, draw_explosion_color);
     }
     if (do_flashbang) {
-        g->flashbang(pos.x, pos.y, flashbang_player_immune);
+        g->flashbang(pos, flashbang_player_immune);
     }
     if (fields_radius >= 0 && fields_type != fd_null) {
         std::vector<tripoint> gas_sources = points_for_gas_cloud(pos, fields_radius);
