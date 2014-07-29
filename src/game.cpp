@@ -6661,11 +6661,6 @@ void game::resonance_cascade(const tripoint &pos)
     }
 }
 
-void game::scrambler_blast(int x, int y)
-{
-    scrambler_blast(tripoint(x, y, 0));
-}
-
 void game::scrambler_blast(const tripoint &p)
 {
     int mondex = mon_at(p);

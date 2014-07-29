@@ -177,7 +177,6 @@ class game
         void resonance_cascade(int x, int y);
         void resonance_cascade(const tripoint &p);
         /** Triggers a scrambler blast at (x, y). */
-        void scrambler_blast(int x, int y);
         void scrambler_blast(const tripoint &p);
         /** Triggers an emp blast at (x, y). */
         void emp_blast(const tripoint &p);
