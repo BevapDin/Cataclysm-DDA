@@ -6680,30 +6680,26 @@ void game::scrambler_blast(const tripoint &p)
 
 void game::emp_blast(const tripoint &p)
 {
-    emp_blast(p.x, p.y);
-}
-
-void game::emp_blast(int x, int y)
-{
     int rn;
-    if (m.has_flag("CONSOLE", x, y)) {
-        add_msg(_("The %s is rendered non-functional!"), m.tername(x, y).c_str());
-        m.ter_set(x, y, t_console_broken);
+    if (m.has_flag("CONSOLE", p)) {
+        add_msg(_("The %s is rendered non-functional!"), m.tername(p).c_str());
+        m.ter_set(p, t_console_broken);
         return;
     }
     // TODO: More terrain effects.
-    if (m.ter(x, y) == t_card_science || m.ter(x, y) == t_card_military) {
+    if (m.ter(p) == t_card_science || m.ter(p) == t_card_military) {
         rn = rng(1, 100);
         if (rn > 92 || rn < 40) {
             add_msg(_("The card reader is rendered non-functional."));
-            m.ter_set(x, y, t_card_reader_broken);
+            m.ter_set(p, t_card_reader_broken);
         }
         if (rn > 80) {
             add_msg(_("The nearby doors slide open!"));
             for (int i = -3; i <= 3; i++) {
                 for (int j = -3; j <= 3; j++) {
-                    if (m.ter(x + i, y + j) == t_door_metal_locked) {
-                        m.ter_set(x + i, y + j, t_floor);
+                    const tripoint p2( p.x + i, p.y + j, p.z );
+                    if (m.ter(p2) == t_door_metal_locked) {
+                        m.ter_set(p2, t_floor);
                     }
                 }
             }
@@ -6712,7 +6708,7 @@ void game::emp_blast(int x, int y)
             add_msg(_("Nothing happens."));
         }
     }
-    int mondex = mon_at(x, y);
+    int mondex = mon_at(p);
     if (mondex != -1) {
         monster &critter = critter_tracker.find(mondex);
         if (critter.has_flag(MF_ELECTRONIC)) {
@@ -6732,10 +6728,10 @@ void game::emp_blast(int x, int y)
             }
             if( !mon_item_id.empty() && deact_chance != 0 && one_in( deact_chance ) ) {
                 add_msg(_("The %s beeps erratically and deactivates!"), critter.name().c_str());
-                m.add_item_or_charges( x, y, critter.to_item() );
+                m.add_item_or_charges( p, critter.to_item() );
                 for( auto & ammodef : critter.ammo ) {
                     if( ammodef.second > 0 ) {
-                        m.spawn_item( x, y, ammodef.first, 1, ammodef.second, calendar::turn );
+                        m.spawn_item( p, ammodef.first, 1, ammodef.second, calendar::turn );
                     }
                 }
                 remove_zombie(mondex);
@@ -6752,7 +6748,7 @@ void game::emp_blast(int x, int y)
             add_msg(_("The %s is unaffected by the EMP blast."), critter.name().c_str());
         }
     }
-    if (u.posx() == x && u.posy() == y) {
+    if (u.pos() == p) {
         if (u.power_level > 0) {
             add_msg(m_bad, _("The EMP blast drains your power."));
             int max_drain = (u.power_level > 1000 ? 1000 : u.power_level);
@@ -6768,7 +6764,7 @@ void game::emp_blast(int x, int y)
         }
     }
     // Drain any items of their battery charge
-    for( auto it = m.i_at( x, y ).begin(); it != m.i_at( x, y ).end(); ++it ) {
+    for( auto it = m.i_at( p ).begin(); it != m.i_at( p ).end(); ++it ) {
         if( it->is_tool() && ( dynamic_cast<it_tool *>( it->type ) )->ammo == "battery" ) {
             it->charges = 0;
         }

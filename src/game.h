@@ -180,7 +180,6 @@ class game
         void scrambler_blast(int x, int y);
         void scrambler_blast(const tripoint &p);
         /** Triggers an emp blast at (x, y). */
-        void emp_blast(int x, int y);
         void emp_blast(const tripoint &p);
         /** Returns the NPC index of the npc at (x, y). Returns -1 if no NPC is present. */
         int  npc_at(const int x, const int y) const;
