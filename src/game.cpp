@@ -8082,30 +8082,33 @@ void game::examine(int examx, int examy)
     }
 }
 
-//Shift player by one tile, look_around(), then restore previous position.
-//represents carefully peeking around a corner, hence the large move cost.
-void game::peek(int peekx, int peeky)
+void game::peek()
 {
-    int prevx, prevy;
-
-    if (peekx == 0 && peeky == 0) {
-        if (!choose_adjacent(_("Peek where?"), peekx, peeky)) {
+    tripoint pos = u.pos();
+    // TODO: Z
+    if (!choose_adjacent(_("Peek where?"), pos.x, pos.y)) {
             return;
         }
 
-        if (m.move_cost(peekx, peeky) == 0) {
+    if (m.move_cost(pos) == 0) {
             return;
         }
+    peek( pos );
     }
 
+//Shift player by one tile, look_around(), then restore previous position.
+//represents carefully peeking around a corner, hence the large move cost.
+void game::peek(tripoint pos)
+{
     u.moves -= 200;
-    prevx = u.posx();
-    prevy = u.posy();
-    u.setx( peekx );
-    u.sety( peeky );
+    const auto prev_pos = u.pos();
+    u.setx( pos.x );
+    u.sety( pos.y );
+    u.setz( pos.z );
     look_around();
-    u.setx( prevx );
-    u.sety( prevy );
+    u.setx( prev_pos.x );
+    u.sety( prev_pos.y );
+    u.setz( prev_pos.z );
     draw_ter();
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
