@@ -1277,8 +1277,7 @@ int editmap::edit_itm()
             wrefresh(w_info);
         } else if ( ilmenu.ret == -5 ) {
             ilmenu.ret = UIMENU_INVALID;
-            // TODO: Z
-            g->wishitem(NULL,target.x, target.y);
+            g->wishitem(NULL, target);
             ilmenu.entries.clear();
             for( size_t i = 0; i < items.size(); ++i ) {
                ilmenu.addentry(i, true, 0, "%s%s", items[i].tname().c_str(), items[i].light.luminance > 0 ? " L" : "" );

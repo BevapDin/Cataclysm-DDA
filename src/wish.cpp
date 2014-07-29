@@ -342,7 +342,7 @@ class wish_monster_callback: public uimenu_callback
         }
 };
 
-void game::wishmonster(int x, int y)
+void game::wishmonster(const tripoint &pos)
 {
     const std::map<std::string, mtype *> montypes = MonsterGenerator::generator().get_all_mtypes();
 
@@ -375,7 +375,7 @@ void game::wishmonster(int x, int y)
             if (cb->hallucination) {
                 mon.hallucination = true;
             }
-            tripoint spawn = ( x == -1 && y == -1 ? look_around() : tripoint ( x, y, g->u.view_offset_z ) );
+            tripoint spawn = ( pos == tripoint( -1, -1, -1 ) ? look_around() : pos );
             if (spawn.x != -1) {
                 std::vector<tripoint> spawn_points = closest_points_first( cb->group, spawn );
                 for( auto spawn_point : spawn_points ) {
@@ -435,9 +435,9 @@ class wish_item_callback: public uimenu_callback
         }
 };
 
-void game::wishitem( player *p, int x, int y)
+void game::wishitem( player *p, const tripoint &pos)
 {
-    if ( p == NULL && x <= 0 ) {
+    if ( p == NULL && pos.x <= 0 ) {
         debugmsg("game::wishitem(): invalid parameters");
         return;
     }
@@ -476,8 +476,8 @@ void game::wishitem( player *p, int x, int y)
                     p->i_add(granted);
                 }
                 p->invalidate_crafting_inventory();
-            } else if ( x >= 0 && y >= 0 ) {
-                m.add_item_or_charges(x, y, granted);
+            } else if ( m.inbounds( pos ) ) {
+                m.add_item_or_charges(pos, granted);
                 wmenu.keypress = 'q';
             }
             dynamic_cast<wish_item_callback *>(wmenu.callback)->msg =
