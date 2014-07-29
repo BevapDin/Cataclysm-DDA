@@ -4456,7 +4456,7 @@ bool item::process_corpse( player *carrier, tripoint pos )
     if( !ready_to_revive( pos ) ) {
         return false;
     }
-    if( rng( 0, volume() ) > burnt && g->revive_corpse( pos.x, pos.y, this ) ) {
+    if( rng( 0, volume() ) > burnt && g->revive_corpse( pos, this ) ) {
         if( carrier == nullptr ) {
             if( g->u.sees( pos ) ) {
                 if( corpse->in_species( "ROBOT" ) ) {

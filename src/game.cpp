@@ -6943,11 +6943,6 @@ bool game::is_sheltered(int x, int y)
         return false;
 }
 
-bool game::revive_corpse(int x, int y, int n)
-{
-    return revive_corpse(tripoint(x, y, 0), n);
-}
-
 bool game::revive_corpse(const tripoint &p, int n)
 {
     if ((int)m.i_at(p).size() <= n) {
@@ -6960,11 +6955,6 @@ bool game::revive_corpse(const tripoint &p, int n)
     }
     m.i_rem(p, n);
     return true;
-}
-
-bool game::revive_corpse(int x, int y, item *it)
-{
-    return revive_corpse(tripoint(x, y, 0), it);
 }
 
 bool game::revive_corpse(const tripoint &p, item *it)
