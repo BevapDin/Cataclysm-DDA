@@ -208,9 +208,12 @@ long explosion_iuse::use(player *p, item *it, bool t, const tripoint &pos) const
         }
     }
     if (emp_blast_radius >= 0) {
-        for (int x = pos.x - emp_blast_radius; x <= pos.x + emp_blast_radius; x++) {
-            for (int y = pos.y - emp_blast_radius; y <= pos.y + emp_blast_radius; y++) {
-                g->emp_blast(x, y);
+        tripoint p;
+        for (p.x = pos.x - emp_blast_radius; p.x <= pos.x + emp_blast_radius; p.x++) {
+            for (p.y = pos.y - emp_blast_radius; p.y <= pos.y + emp_blast_radius; p.y++) {
+                for (p.z = pos.z - emp_blast_radius; p.z <= pos.z + emp_blast_radius; p.z++) {
+                    g->emp_blast(p);
+                }
             }
         }
     }

@@ -635,7 +635,8 @@ bool player::activate_bionic(int b, bool eff_only)
         weapon = tmp_item;
     } else if (bio.id == "bio_emp") {
         if(choose_adjacent(_("Create an EMP where?"), dirx, diry)) {
-            g->emp_blast(dirx, diry);
+            // TODO: Z
+            g->emp_blast( tripoint( dirx, diry, zpos() ) );
         } else {
             power_level += bionics["bio_emp"]->power_activate;
         }

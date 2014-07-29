@@ -190,7 +190,6 @@ class game
         void resonance_cascade(const tripoint &p);
         void scrambler_blast(int x, int y);
         void scrambler_blast(const tripoint &p);
-        void emp_blast(int x, int y);
         void emp_blast(const tripoint &p);
         int  npc_at(const int x, const int y) const; // Index of the npc at (x, y); -1 for none
         int  npc_at(const tripoint &p) const; // Index of the npc at p; -1 for none
