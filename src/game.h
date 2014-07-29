@@ -575,8 +575,8 @@ class game
         void create_starting_npcs(); // Creates NPCs that start near you
 
         // Player actions
-        void wishitem( player *p = NULL, int x = -1, int y = -1 );
-        void wishmonster( int x = -1, int y = -1 );
+        void wishitem( player *p = NULL, const tripoint &pos = tripoint( -1, -1, -1 ) );
+        void wishmonster( const tripoint &pos = tripoint( -1, -1, -1 ) );
         void wishmutate( player *p );
         void wishskill( player *p );
         void mutation_wish(); // Mutate
