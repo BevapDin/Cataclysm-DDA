@@ -28,7 +28,7 @@ std::map<weather_type, clWeatherAnim> mapWeatherAnim;
  */
 void weather_effect::glare()
 {
-    if (PLAYER_OUTSIDE && g->is_in_sunlight(g->u.posx, g->u.posy) &&
+    if (PLAYER_OUTSIDE && g->is_in_sunlight(g->u.pos()) &&
         !g->u.worn_with_flag("SUN_GLASSES") && !g->u.has_bionic("bio_sunglasses")) {
         if(!g->u.has_effect("glare")) {
             if (g->u.has_trait("CEPH_VISION")) {

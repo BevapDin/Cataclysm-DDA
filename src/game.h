@@ -214,8 +214,7 @@ class game
         bool is_empty(const int x, const int y); // True if no PC, no monster, move cost > 0
         bool is_empty(const tripoint &p);
         bool isBetween(int test, int down, int up);
-        bool is_in_sunlight(int x, int y); // Checks outdoors + sunny
-        bool is_in_sunlight(const tripoint &p);
+        bool is_in_sunlight(const tripoint &p); // Checks outdoors + sunny
         bool is_sheltered(int x, int y); // Checks if indoors, underground or in a car.
         bool revive_corpse(const tripoint &p, int n);
         bool revive_corpse(const tripoint &p, item *it);
