@@ -216,7 +216,6 @@ class game
         /** Returns true if the value of test is between down and up. */
         bool isBetween(int test, int down, int up);
         /** Returns true if (x, y) is outdoors and it is sunny. */
-        bool is_in_sunlight(int x, int y);
         bool is_in_sunlight(const tripoint &p);
         /** Returns true if (x, y) is indoors, underground, or in a car. */
         bool is_sheltered(int x, int y);

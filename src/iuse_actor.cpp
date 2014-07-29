@@ -508,7 +508,7 @@ long place_monster_iuse::use( player *p, item *it, bool, tripoint) const
         newmon.friendly = -1;
     }
     // TODO: add a flag instead of monster id or something?
-    if( newmon.type->id == "mon_laserturret" && !g->is_in_sunlight( newmon.posx(), newmon.posy() ) ) {
+    if( newmon.type->id == "mon_laserturret" && !g->is_in_sunlight( newmon.pos() ) ) {
         p->add_msg_if_player( _( "A flashing LED on the laser turret appears to indicate low light." ) );
     }
     g->add_zombie( newmon );

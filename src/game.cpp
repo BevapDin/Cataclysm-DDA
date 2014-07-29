@@ -1319,7 +1319,7 @@ bool game::do_turn()
         if (u.pkill < 0) {
             u.pkill++;
         }
-        if (u.has_bionic("bio_solar") && is_in_sunlight(u.posx(), u.posy())) {
+        if (u.has_bionic("bio_solar") && is_in_sunlight(u.pos())) {
             u.charge_power(25);
         }
         // Huge folks take penalties for cramming themselves in vehicles
@@ -6909,11 +6909,6 @@ bool game::is_empty( const tripoint &p )
 {
     return ((m.move_cost(p) > 0 || m.has_flag("LIQUID", p)) &&
             critter_at( p ) == nullptr);
-}
-
-bool game::is_in_sunlight(int x, int y)
-{
-    return is_in_sunlight(tripoint(x, y, 0));
 }
 
 bool game::is_in_sunlight(const tripoint &p)
@@ -13415,7 +13410,7 @@ void game::process_artifact(item *it, player *p)
                 break;
             case ARTC_SOLAR:
                 if (calendar::turn.seconds() == 0 && calendar::turn.minutes() % 10 == 0 &&
-                    is_in_sunlight(p->posx(), p->posy())) {
+                    is_in_sunlight(p->pos())) {
                     it->charges++;
                 }
                 break;
