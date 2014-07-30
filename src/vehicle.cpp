@@ -2403,20 +2403,6 @@ int vehicle::max_velocity (bool fueled)
 
 bool vehicle::do_environmental_effects()
 {
-    int rain_chance = 0;
-    bool acid_rain = false;
-    if(g->weather == WEATHER_DRIZZLE) {
-        rain_chance = traplist[tr_funnel]->funnel_turns_per_charge(4);
-    } else if(g->weather >= WEATHER_RAINY && g->weather <= WEATHER_LIGHTNING) {
-        rain_chance = traplist[tr_funnel]->funnel_turns_per_charge(8);
-    } else if(g->weather == WEATHER_ACID_DRIZZLE) {
-        rain_chance = traplist[tr_funnel]->funnel_turns_per_charge(4);
-        acid_rain = true;
-    } else if(g->weather == WEATHER_ACID_RAIN) {
-        rain_chance = traplist[tr_funnel]->funnel_turns_per_charge(8);
-        acid_rain = true;
-    }
-
     bool needed = false;
     // check for smoking parts
     for( size_t p = 0; p < parts.size(); p++ ) {
@@ -2441,39 +2427,6 @@ bool vehicle::do_environmental_effects()
                         g->m.add_field( part_x + ix, part_y + iy, fd_smoke, rng(2, 4) );
                     }
                 }
-            }
-        }
-
-        vehicle_part &vp = parts[p];
-        if(rain_chance > 0 && vp.hp > 0 && part_flag(p, "FUNNEL") && one_in(rain_chance)) {
-            // Create a temporay container for interaction with item::add_rain_to_container
-            item tmpcontainer("jerrycan", 0);
-            if(!vp.items.empty()) {
-                tmpcontainer.contents.push_back(vp.items[0]);
-            }
-            tmpcontainer.add_rain_to_container(acid_rain, 1);
-            if(!tmpcontainer.contents.empty() && tmpcontainer.contents[0].charges > 0) {
-                if(tmpcontainer.contents[0].type->id == "water" && part_with_feature(p, "CRAFTRIG") >= 0) {
-                    const int drained = drain(fuel_type_battery, tmpcontainer.contents[0].charges);
-                    if(drained > 0) {
-                        assert(drained <= tmpcontainer.contents[0].charges);
-                        const int left_over = refill(fuel_type_water, drained);
-                        if(left_over > 0) {
-                            refill(fuel_type_battery, left_over);
-                            tmpcontainer.contents[0].charges = left_over;
-                        } else {
-                            tmpcontainer.contents.clear();
-                        }
-                    }
-                }
-                if(tmpcontainer.contents.empty()) {
-                    vp.items.clear();
-                } else if(vp.items.empty()) {
-                    vp.items.push_back(tmpcontainer.contents[0]);
-                } else {
-                    vp.items[0] = tmpcontainer.contents[0];
-                }
-                needed = true;
             }
         }
     }
@@ -4907,21 +4860,6 @@ bool vehicle::examine(game *g, player *p, int part) {
             return false;
         }
         p->add_or_drop(vp.items[0], g);
-        p->moves -= 150;
-        vp.items.clear();
-        return true;
-    }
-    if(vpi.has_flag("FUNNEL")) {
-        if(vp.items.empty()) {
-            p->add_msg_if_player("The funnel is empty");
-            return false;
-        }
-        if(!query_yn(_("The funnel has collected %s (%i) - fill it into a container?"), vp.items[0].type->nname(1).c_str(), vp.items[0].charges)) {
-            return false;
-        }
-        if(!g->handle_liquid(vp.items[0], false, false)) {
-            return true;
-        }
         p->moves -= 150;
         vp.items.clear();
         return true;

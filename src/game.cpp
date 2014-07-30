@@ -8381,10 +8381,6 @@ void game::examine(int examx, int examy)
         if(vpkiln >= 0 && veh->examine(this, &u, vpkiln)) {
             return;
         }
-        int vpfunnel = veh->part_with_feature(veh_part, "FUNNEL");
-        if(vpfunnel >= 0 && veh->examine(this, &u, vpfunnel)) {
-            return;
-        }
         if(veh->can_tow(this, other, other_part) &&
             query_yn(_("Tow the vehicles together?"))) {
             const std::string veh_name = veh->name;

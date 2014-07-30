@@ -2882,19 +2882,6 @@
         "flags": ["OBSTACLE", "KILN"]
     },{
         "type" : "vehicle_part",
-        "id" : "veh_funnel",
-        "name": "mounted funnel",
-        "symbol": "&",
-        "color": "yellow",
-        "broken_symbol": "x",
-        "broken_color": "light_gray",
-        "durability": 200,
-        "item": "veh_funnel",
-        "difficulty": 2,
-        "location": "on_roof",
-        "flags": ["FUNNEL"]
-    },{
-        "type" : "vehicle_part",
         "id" : "m249",
         "name" : "mounted M249",
         "symbol" : "t",
