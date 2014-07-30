@@ -15,23 +15,23 @@ void resort_item_vectors();
    
 std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requirement &req);
 
-crafting_inventory_t::crafting_inventory_t(game *g, player *p)
+crafting_inventory_t::crafting_inventory_t(player *p)
 : p(p)
 {
-    init(g, PICKUP_RANGE);
+    init(PICKUP_RANGE);
 }
 
-crafting_inventory_t::crafting_inventory_t(game *g, player *p, int range)
+crafting_inventory_t::crafting_inventory_t(player *p, int range)
 : p(p)
 {
-    init(g, range);
+    init(range);
 }
 
-void crafting_inventory_t::init(game *g, int range)
+void crafting_inventory_t::init(int range)
 {
     if(range != -1) {
         assert(range >= 0);
-        form_from_map(g, point(p->posx, p->posy), range);
+        form_from_map(point(p->posx, p->posy), range);
     }
     // iterator of all bionics of the player and grab the toolsets automaticly
     // This allows easy addition of more toolsets
@@ -77,7 +77,7 @@ const tidvec &get_tidvec(const itype_id &type) {
     return types;
 }
 
-bool crafting_inventory_t::has_all_requirements(recipe &making) {
+bool crafting_inventory_t::has_all_requirements(const requirements &making) {
     solution s;
     return has_all_requirements(making, s);
 }
@@ -186,13 +186,13 @@ void crafting_inventory_t::solution::select_items_to_use() {
     }
 }
 
-void crafting_inventory_t::gather_and_consume(recipe &making, std::list<item> &used_items, std::list<item> &used_tools) {
+void crafting_inventory_t::gather_and_consume(const requirements &making, std::list<item> &used_items, std::list<item> &used_tools) {
     solution s;
     gather_and_consume(making, s, used_items, used_tools);
 }
 
 void crafting_inventory_t::gather_and_consume(
-    recipe &making,
+    const requirements &making,
     solution &s,
     std::list<item> &used_items,
     std::list<item> &used_tools
@@ -206,13 +206,13 @@ void crafting_inventory_t::gather_and_consume(
     s.consume(*this, used_items, used_tools);
 }
 
-void crafting_inventory_t::gather_input(recipe &making, player_activity &activity) {
+void crafting_inventory_t::gather_input(const requirements &making, player_activity &activity) {
     solution s;
     gather_input(making, s, activity);
 }
 
 void crafting_inventory_t::consume_gathered(
-    recipe &making,
+    const requirements &making,
     player_activity &activity,
     std::list<item> &used_items,
     std::list<item> &used_tools
@@ -222,7 +222,7 @@ void crafting_inventory_t::consume_gathered(
 }
 
 void crafting_inventory_t::consume_gathered(
-    recipe &making,
+    const requirements &making,
     solution &s,
     player_activity &activity,
     std::list<item> &used_items,
@@ -236,7 +236,7 @@ void crafting_inventory_t::consume_gathered(
     s.consume(*this, used_items, used_tools);
 }
 
-void crafting_inventory_t::gather_input(recipe &making, solution &s, player_activity &activity) {
+void crafting_inventory_t::gather_input(const requirements &making, solution &s, player_activity &activity) {
     if(making.tools.empty() && making.components.empty()) {
         return;
     }
@@ -253,36 +253,40 @@ void crafting_inventory_t::gather_input(recipe &making, solution &s, player_acti
     }
 }
 
-crafting_inventory_t::solution::solution(std::vector<component> &comps, bool as_tool, crafting_inventory_t &cinv) {
-    init_need_any(comps, as_tool);
+template<typename T>
+crafting_inventory_t::solution::solution(const std::vector<T> &comps, crafting_inventory_t &cinv) {
+    init_need_any(comps);
     gather(cinv, false);
 }
 
-crafting_inventory_t::solution::solution(component &comp, bool as_tool, crafting_inventory_t &cinv) {
-    init_single_req(comp, as_tool);
+template<typename T>
+crafting_inventory_t::solution::solution(const T &comp, crafting_inventory_t &cinv) {
+    init_single_req(comp);
     gather(cinv, false);
 }
 
-void crafting_inventory_t::solution::init_need_any(std::vector<component> &comps, bool as_tool) {
+template<typename T>
+void crafting_inventory_t::solution::init_need_any(const std::vector<T> &comps) {
     complex_reqs.resize(1);
-    complex_reqs[0].init(comps, as_tool, *this);
+    complex_reqs[0].init(comps, *this);
     complex_reqs[0].init_pointers();
 }
 
-void crafting_inventory_t::solution::init_single_req(component &comp, bool as_tool) {
+template<typename T>
+void crafting_inventory_t::solution::init_single_req(const T &comp) {
     complex_reqs.resize(1);
-    complex_reqs[0].init(comp, as_tool, *this);
+    complex_reqs[0].init(comp, *this);
     complex_reqs[0].init_pointers();
 }
 
-void crafting_inventory_t::solution::init(recipe &making) {
+void crafting_inventory_t::solution::init(const requirements &making) {
     complex_reqs.resize(making.tools.size() + making.components.size());
     size_t nr = 0;
     for(size_t i = 0; i < making.tools.size(); i++, nr++) {
-        complex_reqs[nr].init(making.tools[i], true, *this);
+        complex_reqs[nr].init(making.tools[i], *this);
     }
     for(size_t i = 0; i < making.components.size(); i++, nr++) {
-        complex_reqs[nr].init(making.components[i], false, *this);
+        complex_reqs[nr].init(making.components[i], *this);
     }
     erase_empty_reqs();
     init_pointers();
@@ -387,7 +391,7 @@ void crafting_inventory_t::complex_req::add_or_merge(const simple_req &rs2) {
     simple_reqs.push_back(rs2);
 }
 
-void crafting_inventory_t::complex_req::add(component &c, bool as_tool) {
+void crafting_inventory_t::complex_req::add(const component &c) {
     c.available = -1;
     requirement req(c, as_tool);
     simple_req rs2(req, &c);
@@ -432,21 +436,23 @@ bool cmp_simple_req(const crafting_inventory_t::simple_req &a, const crafting_in
     return a.req.type < b.req.type;
 }
 
-void crafting_inventory_t::complex_req::init(std::vector<component> &components, bool as_tool, solution &s) {
+template<typename T>
+void crafting_inventory_t::complex_req::init(const std::vector<T> &components, solution &s) {
     (void) s;
     assert(!components.empty());
-    this->as_tool = as_tool;
+    as_tool = std::is_same<const tool_comp,const T>::value;
     for(size_t j = 0; j < components.size(); j++) {
-        add(components[j], as_tool);
+        add(components[j]);
     }
     assert(!simple_reqs.empty());
     std::sort(simple_reqs.begin(), simple_reqs.end(), cmp_simple_req);
 }
 
-void crafting_inventory_t::complex_req::init(component &components, bool as_tool, solution &s) {
+template<typename T>
+void crafting_inventory_t::complex_req::init(const T &components, solution &s) {
     (void) s;
-    this->as_tool = as_tool;
-    add(components, as_tool);
+    as_tool = std::is_same<const tool_comp,const T>::value;
+    add(components);
     assert(!simple_reqs.empty());
 }
 
@@ -781,24 +787,34 @@ std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requi
     return buffer;
 }
 
-void crafting_inventory_t::solution::save(recipe &making) const {
+void crafting_inventory_t::solution::save(requirements &making) const {
     making.components.clear();
     making.tools.clear();
     for(size_t i = 0; i < complex_reqs.size(); i++) {
         const complex_req &rc = complex_reqs[i];
-        std::vector<std::vector<component> > &vv = (rc.as_tool ? making.tools : making.components);
-        vv.resize(vv.size() + 1);
-        for(size_t j = 0; j < rc.simple_reqs.size(); j++) {
-            int count = rc.simple_reqs[j].req.count;
-            if(rc.as_tool && rc.simple_reqs[j].req.ctype == C_AMOUNT) {
-                count = -1;
+        if(rc.as_tool) {
+            making.tools.resize(making.tools.size() + 1);
+            for(size_t j = 0; j < rc.simple_reqs.size(); j++) {
+                int count = rc.simple_reqs[j].req.count;
+                if(rc.as_tool && rc.simple_reqs[j].req.ctype == C_AMOUNT) {
+                    count = -1;
+                }
+                making.tools.back().push_back(tool_comp(rc.simple_reqs[j].req.type, count));
             }
-            vv.back().push_back(component(rc.simple_reqs[j].req.type, count));
+        } else {
+            making.components.resize(making.components.size() + 1);
+            for(size_t j = 0; j < rc.simple_reqs.size(); j++) {
+                int count = rc.simple_reqs[j].req.count;
+                if(rc.as_tool && rc.simple_reqs[j].req.ctype == C_AMOUNT) {
+                    count = -1;
+                }
+                making.components.back().push_back(item_comp(rc.simple_reqs[j].req.type, count));
+            }
         }
     }
 }
 
-bool crafting_inventory_t::has_all_requirements(recipe &making, solution &s) {
+bool crafting_inventory_t::has_all_requirements(const requirements &making, solution &s) {
     if(making.tools.empty() && making.components.empty()) {
         return true;
     }
@@ -1744,7 +1760,7 @@ void crafting_inventory_t::consume(requirement req, consume_flags flags, const c
     }
     for(candvec::const_iterator a = selected_items.begin(); req.count > 0 && a != selected_items.end(); ++a) {
         // use up components and change the requirement according
-        a->consume(g, p, req, used_items);
+        a->consume(p, req, used_items);
     }
     if(used_items.size() >= 1) {
         p->lastconsumed = used_items.front().type->id;
@@ -2112,7 +2128,7 @@ void resort_item_vectors() {
     item_vector_resort_set.clear();
 }
 
-void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement &req, std::list<item> &used_items) const {
+void crafting_inventory_t::candidate_t::consume(player *p, requirement &req, std::list<item> &used_items) const {
     if(req.count == 0) {
         return;
     }
@@ -2145,7 +2161,7 @@ void crafting_inventory_t::candidate_t::consume(game *g, player *p, requirement 
                 used_items
             );
             return;
-        // Below are pseudo item. They should not be used in recipes
+        // Below are pseudo item. They should not be used in requirementss
         // as they can not be removed (used up).
         case LT_VPART:
             ix = &(get_item());
@@ -2376,51 +2392,51 @@ crafting_inventory_t::requirement::requirement(const component &comp, bool as_to
     }
 }
 
-bool crafting_inventory_t::has_any_components(std::vector<component> &comps) const {
+bool crafting_inventory_t::has_any_components(const std::vector<item_comp> &comps) const {
     if(comps.empty()) { return true; }
-    solution s(comps, false, const_cast<crafting_inventory_t&>(*this));
+    solution s(comps, const_cast<crafting_inventory_t&>(*this));
     return s.is_possible();
 }
 
 bool crafting_inventory_t::has_components(const itype_id &type, int count) const {
-    component comp(type, count);
+    item_comp comp(type, count);
     return has_components(comp);
 }
 
-bool crafting_inventory_t::has_components(component &comp) const {
-    std::vector<component> tmpcomps(1, comp);
+bool crafting_inventory_t::has_components(const item_comp &comp) const {
+    std::vector<item_comp> tmpcomps(1, comp);
     return has_any_components(tmpcomps);
 }
 
 
 
-bool crafting_inventory_t::has_any_tools(std::vector<component> &tools) const {
+bool crafting_inventory_t::has_any_tools(const std::vector<tool_comp> &tools) const {
     if(tools.empty()) { return true; }
-    solution s(tools, true, const_cast<crafting_inventory_t&>(*this));
+    solution s(tools, const_cast<crafting_inventory_t&>(*this));
     return s.is_possible();
 }
 
 bool crafting_inventory_t::has_tools(const itype_id &type, int count) const {
-    component comp(type, count);
+    tool_comp comp(type, count);
     return has_tools(comp);
 }
 
 bool crafting_inventory_t::has_tools(const itype_id &type) const {
-    component comp(type, -1);
+    tool_comp comp(type, -1);
     return has_tools(comp);
 }
 
-bool crafting_inventory_t::has_tools(component &tools) const {
-    std::vector<component> tmptools(1, tools);
+bool crafting_inventory_t::has_tools(const tool_comp &tools) const {
+    std::vector<tool_comp> tmptools(1, tools);
     return has_any_tools(tmptools);
 }
 
-std::list<item> crafting_inventory_t::consume_any_tools(const std::vector<component> &tools, bool)
+std::list<item> crafting_inventory_t::consume_any_tools(const std::vector<tool_comp> &tools)
 {
     std::list<item> result;
     if(tools.empty()) { return result; }
     solution s;
-    s.init_need_any(const_cast<std::vector<component>&>(tools), true);
+    s.init_need_any(tools);
     s.gather(const_cast<crafting_inventory_t&>(*this), true);
     if(s.is_possible()) {
         s.select_items_to_use();
@@ -2431,30 +2447,30 @@ std::list<item> crafting_inventory_t::consume_any_tools(const std::vector<compon
     return result;
 }
 
-std::list<item> crafting_inventory_t::consume_tools(const component &tools, bool force_available)
+std::list<item> crafting_inventory_t::consume_tools(const tool_comp &tools)
 {
-    std::vector<component> tmptools(1, tools);
-    return consume_any_tools(tmptools, force_available);
+    std::vector<tool_comp> tmptools(1, tools);
+    return consume_any_tools(tmptools);
 }
 
-std::list<item> crafting_inventory_t::consume_tools(const itype_id &type, int count, bool force_available) {
-    component comp(type, count);
-    return consume_tools(comp, force_available);
+std::list<item> crafting_inventory_t::consume_tools(const itype_id &type, int count) {
+    tool_comp comp(type, count);
+    return consume_tools(comp);
 }
 
 std::list<item> crafting_inventory_t::consume_tools(const itype_id &type) {
-    component comp(type, -1);
-    return consume_tools(comp, true);
+    tool_comp comp(type, -1);
+    return consume_tools(comp);
 }
 
 
 
-std::list<item> crafting_inventory_t::consume_any_components(const std::vector<component> &comps)
+std::list<item> crafting_inventory_t::consume_any_components(const std::vector<item_comp> &comps)
 {
     std::list<item> result;
     if(comps.empty()) { return result; }
     solution s;
-    s.init_need_any(const_cast<std::vector<component>&>(comps), false);
+    s.init_need_any(comps);
     s.gather(const_cast<crafting_inventory_t&>(*this), true);
     if(s.is_possible()) {
         s.select_items_to_use();
@@ -2465,24 +2481,26 @@ std::list<item> crafting_inventory_t::consume_any_components(const std::vector<c
     return result;
 }
 
-std::list<item> crafting_inventory_t::consume_components(const component &comps)
+std::list<item> crafting_inventory_t::consume_components(const item_comp &comps)
 {
-    std::vector<component> tmpcomps(1, comps);
+    std::vector<item_comp> tmpcomps(1, comps);
     return consume_any_components(tmpcomps);
 }
 
 std::list<item> crafting_inventory_t::consume_components(const itype_id &type, int count) {
-    component comp(type, count);
+    item_comp comp(type, count);
     return consume_components(comp);
 }
 
-void crafting_inventory_t::consume_items(const std::vector<component> &comps) {
+void crafting_inventory_t::consume_items(const std::vector<item_comp> &comps) {
     if(comps.empty()) { return; }
-    recipe r;
+    requirements r;
     r.components.resize(comps.size());
     for(size_t i = 0; i < comps.size(); i++) {
+        if(comps[i].count == 0) { continue; }
         r.components[i].push_back(comps[i]);
     }
+    if(r.components.empty()) { return; }
     solution s;
     s.init(r);
     s.gather(*this, true);
@@ -2557,37 +2575,6 @@ bool crafting_inventory_t::has_items_with_quality(const std::string &name, int l
         }
     }
     return amount <= 0;
-}
-
-bool has_any(const std::vector<component> &v) {
-    if(v.empty()) { return true; }
-    for(size_t i = 0; i < v.size(); i++) {
-        if(v[i].available == 1) { return true; }
-    }
-    return false;
-}
-
-void list_missing_ones(std::ostream &stream, const std::vector< std::vector<component> > &vv, bool as_tool) {
-    bool had_printed_header = false;
-    for(size_t i = 0; i < vv.size(); i++) {
-        if(::has_any(vv[i])) {
-            continue;
-        }
-        if(!had_printed_header) {
-            had_printed_header = true;
-            stream << (as_tool ? _("Missing tools") : _("Missing components")) << ":\n";
-        }
-        for(size_t j = 0; j < vv[i].size(); j++) {
-            if(j != 0) { stream << " or "; }
-            stream << crafting_inventory_t::requirement(vv[i][j], as_tool);
-        }
-        stream << "\n";
-    }
-}
-
-void list_missing_ones(std::ostream &stream, const recipe &r) {
-    list_missing_ones(stream, r.tools, true);
-    list_missing_ones(stream, r.components, false);
 }
 
 void crafting_inventory_t::add_vpart(vehicle *veh, int mpart, const std::string &vpart_flag_name, const ammotype &fuel) {

@@ -352,7 +352,7 @@ void veh_interact::deallocate_windows()
 
 void veh_interact::cache_tool_availability()
 {
-    crafting_inv.reset(new crafting_inventory_t(g, &g->u));
+    crafting_inv.reset(new crafting_inventory_t(&g->u));
     crafting_inventory_t &crafting_inv = *this->crafting_inv;
 
     long charges = dynamic_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
@@ -1541,7 +1541,7 @@ item crafting_inventory_t::consume_vpart_item (const std::string &vpid)
     const std::string &itid = vehicle_part_types[vpid].item;
     std::list<item> used_items;
     recipe making;
-    making.components.push_back(std::vector<component>(1, component(itid, 1)));
+    making.components.push_back(std::vector<item_comp>(1, item_comp(itid, 1)));
     gather_and_consume(making, used_items, used_items);
     if(used_items.empty()) {
         debugmsg("part not found");
@@ -1571,10 +1571,10 @@ void complete_vehicle ()
     int vehicle_part = g->u.activity.values[6];
     int type = g->u.activity.values[7];
     std::string part_id = g->u.activity.str_values[0];
-    std::vector<component> tools;
-    long welder_charges = dynamic_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
-    crafting_inventory_t crafting_inv(g, &g->u);
-    const bool has_goggles = crafting_inv.has_amount("goggles_welding", 1) ||
+    std::vector<tool_comp> tools;
+    int welder_charges = dynamic_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
+    crafting_inventory_t crafting_inv(&g->u);
+    const bool has_goggles = crafting_inv.has_tools("goggles_welding", 1) ||
                    g->u.has_bionic("bio_sunglasses") ||
                    g->u.is_wearing("goggles_welding") || g->u.is_wearing("rm13_armor_on");
     int partnum;
@@ -1597,11 +1597,11 @@ void complete_vehicle ()
         if (has_goggles) {
             // Need welding goggles to use any of these tools,
             // without the goggles one _must_ use the duct tape
-            tools.push_back(component("func:welder", welder_charges));
+            tools.push_back(tool_comp("func:welder", welder_charges));
         }
-        tools.push_back(component("duct_tape", DUCT_TAPE_USED));
-        tools.push_back(component("toolbox", DUCT_TAPE_USED));
-        crafting_inv.consume_any_tools(tools, true);
+        tools.push_back(tool_comp("duct_tape", DUCT_TAPE_USED));
+        tools.push_back(tool_comp("toolbox", DUCT_TAPE_USED));
+        crafting_inv.consume_any_tools(tools);
 
         used_item = crafting_inv.consume_vpart_item (part_id);
         partnum = veh->install_part (dx, dy, part_id, used_item);
@@ -1651,9 +1651,9 @@ void complete_vehicle ()
             veh->break_part_into_pieces(vehicle_part, g->u.posx, g->u.posy);
             used_item = crafting_inv.consume_vpart_item (veh->parts[vehicle_part].id);
             veh->parts[vehicle_part].bigness = used_item.bigness;
-            tools.push_back(component("func:wrench", -1));
-            tools.push_back(component("toolbox", -1));
-            crafting_inv.consume_any_tools(tools, true);
+            tools.push_back(tool_comp("func:wrench", -1));
+            tools.push_back(tool_comp("toolbox", -1));
+            crafting_inv.consume_any_tools(tools);
             tools.clear();
             dd = 0;
             veh->insides_dirty = true;
@@ -1663,10 +1663,10 @@ void complete_vehicle ()
                 crafting_inv.consume_components(items_needed[a].first, items_needed[a].second);
             }
         }
-        tools.push_back(component("func:welder", welder_charges ));
-        tools.push_back(component("duct_tape", DUCT_TAPE_USED));
-        tools.push_back(component("toolbox", int(DUCT_TAPE_USED*dmg)));
-        crafting_inv.consume_any_tools(tools, true);
+        tools.push_back(tool_comp("func:welder", int(welder_charges*dmg)));
+        tools.push_back(tool_comp("duct_tape", int(DUCT_TAPE_USED*dmg)));
+        tools.push_back(tool_comp("toolbox", int(DUCT_TAPE_USED*dmg)));
+        crafting_inv.consume_any_tools(tools);
         veh->parts[vehicle_part].hp = veh->part_info(vehicle_part).durability;
         add_msg (m_good, _("You repair the %s's %s."),
                     veh->name.c_str(), veh->part_info(vehicle_part).name.c_str());
@@ -1679,10 +1679,10 @@ void complete_vehicle ()
         g->pl_refill_vehicle(*veh, vehicle_part);
         break;
     case 'o':
-        tools.push_back(component("func:hacksaw", -1));
-        tools.push_back(component("toolbox", -1));
-        tools.push_back(component("circsaw_off", 20));
-        crafting_inv.consume_any_tools(tools, true);
+        tools.push_back(tool_comp("func:hacksaw", -1));
+        tools.push_back(tool_comp("toolbox", -1));
+        tools.push_back(tool_comp("circsaw_off", 20));
+        crafting_inv.consume_any_tools(tools);
         // Dump contents of part at player's feet, if any.
         for (size_t i = 0; i < veh->parts[vehicle_part].items.size(); i++) {
             g->m.add_item_or_charges (g->u.posx, g->u.posy, veh->parts[vehicle_part].items[i]);

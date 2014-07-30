@@ -128,7 +128,7 @@ void construction_menu()
     int oldoffset = 0;
     bool exit = false;
 
-    crafting_inventory_t total_inv(g, &g->u);
+    crafting_inventory_t total_inv(&g->u);
 
     input_context ctxt("CONSTRUCTION");
     ctxt.register_action("UP", _("Move cursor up"));
@@ -202,7 +202,7 @@ void construction_menu()
             mvwprintz(w_con, 1, 31, c_white, "%s", current_desc.c_str());
 
             // Print stages and their requirement
-            int posx = 33, posy = 1;
+            int posy = 1;
             std::vector<construction *> options = constructions_by_desc(current_desc);
             for(std::vector<construction *>::iterator it = options.begin();
                 it != options.end(); ++it) {
@@ -245,91 +245,9 @@ void construction_menu()
                 }
                 // display time needed
                 posy++;
-                mvwprintz(w_con, posy, 31, color_stage, ngettext("Time: %1d minute","Time: %1d minutes",current_con->time), current_con->time);
-                // Print tools
-                posy++;
-                posx = 33;
-                for (int i = 0; i < current_con->tools.size(); i++) {
-                    mvwprintz(w_con, posy, posx - 2, c_white, ">");
-                    total_inv.has_any_tools(current_con->tools[i]);
-                    for (std::vector<component>::iterator curr_tool =
-                             current_con->tools[i].begin();
-                         curr_tool != current_con->tools[i].end(); ++curr_tool){
-                        itype_id tool = curr_tool->type;
-                        nc_color col = c_red;
-                        if(curr_tool->available == 1) {
-                            col = c_green;
-                        }
-                        int length = utf8_width(item_controller->find_template(tool)->nname(1).c_str());
-                        if( posx + length > FULL_SCREEN_WIDTH - 1 ) {
-                            posy++;
-                            posx = 33;
-                        }
-                        mvwprintz(w_con, posy, posx, col,
-                                  item_controller->find_template(tool)->nname(1).c_str());
-                        posx += length + 1; // + 1 for an empty space
-                        if (curr_tool != current_con->tools[i].end() - 1) { // "OR" if there's more
-                            if (posx > FULL_SCREEN_WIDTH - 3) {
-                                posy++;
-                                posx = 33;
-                            }
-                            mvwprintz(w_con, posy, posx, c_white, _("OR"));
-                            posx += utf8_width(_("OR")) + 1;
-                        }
-                    }
-                    posy ++;
-                    posx = 33;
-                }
-                // Print components
-                posx = 33;
-                for (size_t i = 0; i < current_con->components.size(); i++) {
-                    total_inv.has_any_components(current_con->components[i]);
-                    mvwprintz(w_con, posy, posx - 2, c_white, ">");
-                    for(std::vector<component>::iterator comp =
-                            current_con->components[i].begin();
-                        comp != current_con->components[i].end(); ++comp) {
-                        nc_color col = c_red;
-                        if( ( item_controller->find_template(comp->type)->is_ammo() &&
-                              total_inv.has_charges(comp->type, comp->count)) ||
-                            (!item_controller->find_template(comp->type)->is_ammo() &&
-                             total_inv.has_components(comp->type, comp->count)) ) {
-                            col = c_green;
-                        }
-                        if ( ((item_controller->find_template(comp->type)->id == "rope_30") ||
-                          (item_controller->find_template(comp->type)->id == "rope_6")) &&
-                          ((g->u.has_trait("WEB_ROPE")) && (g->u.hunger <= 300)) ) {
-                            comp->available = 1;
-                            col = c_ltgreen; // Show that WEB_ROPE is on the job!
-                        }
-                        int length = utf8_width(item_controller->find_template(comp->type)->nname(comp->count).c_str());
-                        if (posx + length > FULL_SCREEN_WIDTH - 1) {
-                            posy++;
-                            posx = 33;
-                        }
-                        mvwprintz(w_con, posy, posx, col, "%d %s",
-                                  comp->count, item_controller->find_template(comp->type)->nname(comp->count).c_str());
-                        posx += length + 2; 
-                        // Add more space for the length of the count
-                        if (comp->count < 10) {
-                            posx++;
-                        } else if (comp->count < 100) {
-                            posx += 2;
-                        } else {
-                            posx += 3;
-                        }
-
-                        if (comp != current_con->components[i].end() - 1) { // "OR" if there's more
-                            if (posx > FULL_SCREEN_WIDTH - 3) {
-                                posy++;
-                                posx = 33;
-                            }
-                            mvwprintz(w_con, posy, posx, c_white, _("OR"));
-                            posx += utf8_width(_("OR")) + 1;
-                        }
-                    }
-                    posy ++;
-                    posx = 33;
-                }
+                posy += current_con->print_time(w_con, posy, 31, FULL_SCREEN_WIDTH - 31 - 1, color_stage);
+                posy += current_con->print_tools(w_con, posy, 31, FULL_SCREEN_WIDTH - 31 - 1, color_stage, total_inv);
+                posy += current_con->print_components(w_con, posy, 31, FULL_SCREEN_WIDTH - 31 - 1, color_stage, total_inv);
             }
         } // Finished updating
 
@@ -447,7 +365,7 @@ static bool player_can_build(player &p, const crafting_inventory_t& pinv, constr
     if (p.skillLevel(con->skill) < con->difficulty) {
         return false;
     }
-    return const_cast<crafting_inventory_t&>(pinv).has_all_requirements(*con);
+    return con->can_make_with_inventory( pinv );
 }
 
 static bool can_construct( const std::string &desc )
@@ -516,7 +434,7 @@ static bool can_construct(construction *con)
 static void place_construction(const std::string &desc)
 {
     g->refresh_all();
-    crafting_inventory_t total_inv(g, &g->u);
+    crafting_inventory_t total_inv(&g->u);
 
     std::vector<construction *> cons = constructions_by_desc(desc);
     std::map<point, construction *> valid;
@@ -554,7 +472,7 @@ static void place_construction(const std::string &desc)
     }
 
     construction *con = valid[choice];
-    g->u.assign_activity(ACT_BUILD, con->time * 1000, con->id);
+    g->u.assign_activity(ACT_BUILD, con->time, con->id);
     g->u.activity.placement = choice;
     total_inv.gather_input(*con, g->u.activity);
     move_ppoints_for_construction(*con, g->u.activity.moves_left);
@@ -564,7 +482,7 @@ void complete_construction()
 {
     construction *built = constructions[g->u.activity.index];
 
-    crafting_inventory_t total_inv(g, &g->u);
+    crafting_inventory_t total_inv(&g->u);
     std::list<item> used_items;
     std::list<item> used_tools;
     total_inv.consume_gathered(*built, g->u.activity, used_items, used_tools);
@@ -1401,36 +1319,14 @@ void construct::done_mine_upstair(point p)
 void load_construction(JsonObject &jo)
 {
     construction *con = new construction;
-    JsonArray temp;
 
     con->description = _(jo.get_string("description").c_str());
     con->skill = jo.get_string("skill", "carpentry");
     con->difficulty = jo.get_int("difficulty");
-    con->time = jo.get_int("time");
-
-    temp = jo.get_array("tools");
-    while (temp.has_more()) {
-        std::vector<component> tool_choices;
-        JsonArray ja = temp.next_array();
-        while (ja.has_more()) {
-            std::string name = ja.next_string();
-            tool_choices.push_back(component(name, -1));
-        }
-        con->tools.push_back(tool_choices);
-    }
-
-    temp = jo.get_array("components");
-    while (temp.has_more()) {
-        std::vector<component> comp_choices;
-        JsonArray ja = temp.next_array();
-        while (ja.has_more()) {
-            JsonArray comp = ja.next_array();
-            std::string name = comp.get_string(0);
-            int quant = comp.get_int(1);
-            comp_choices.push_back(component(name, quant));
-        }
-        con->components.push_back(comp_choices);
-    }
+    con->load(jo);
+    // constructions use different time units in json, this makes it compatible
+    // with recipes/requirements, TODO: should be changed in json
+    con->time *= 1000;
 
     con->pre_terrain = jo.get_string("pre_terrain", "");
     if (con->pre_terrain.size() > 1
@@ -1519,8 +1415,7 @@ void check_constructions()
         if (!c->skill.empty() && Skill::skill(c->skill) == NULL) {
             debugmsg("Unknown skill %s in %s", c->skill.c_str(), display_name.c_str());
         }
-        check_component_list(c->tools, display_name);
-        check_component_list(c->components, display_name);
+        c->check_consistency(display_name);
         if (!c->pre_terrain.empty() && !c->pre_is_furniture && termap.count(c->pre_terrain) == 0) {
             debugmsg("Unknown pre_terrain (terrain) %s in %s", c->pre_terrain.c_str(), display_name.c_str());
         }

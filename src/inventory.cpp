@@ -518,7 +518,7 @@ static bool vehicle_might_move(const vehicle *veh) {
     return (veh->cruise_velocity != 0 || veh->velocity != 0);
 }
 
-static bool allow_inventory_from(game *g, const player *p, const vehicle *veh) {
+static bool allow_inventory_from(const player *p, const vehicle *veh) {
     if(p->in_vehicle) {
         // Player is in vehicle, check the speed of that vehicle
         // if the vehicle is moving (the player is too than),
@@ -536,7 +536,7 @@ static bool allow_inventory_from(game *g, const player *p, const vehicle *veh) {
 
 extern long count_charges_in_list(const itype *type, const std::vector<item> &items);
 
-void crafting_inventory_t::form_from_map(game *g, point origin, int range)
+void crafting_inventory_t::form_from_map(point origin, int range)
 {
     for (int x = origin.x - range; x <= origin.x + range; x++) {
         for (int y = origin.y - range; y <= origin.y + range; y++) {
@@ -616,7 +616,7 @@ void crafting_inventory_t::form_from_map(game *g, point origin, int range)
 
             int vpart = -1;
             vehicle *veh = g->m.veh_at(x, y, vpart);
-            if (veh && allow_inventory_from(g, this->p, veh)) {
+            if (veh && allow_inventory_from(this->p, veh)) {
                 const int faupart = veh->part_with_feature(vpart, "FAUCET");
                 if (faupart >= 0) {
                     item water("water_clean", 0);

@@ -801,7 +801,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
         for(std::map<std::string, int>::const_iterator quality = type->qualities.begin();
             quality != type->qualities.end(); ++quality){
             dump->push_back(iteminfo("QUALITIES", "", string_format(_("Has level %1$d %2$s quality."),
-                            quality->second, qualities[quality->first].name.c_str())));
+                            quality->second, quality::get_name(quality->first).c_str())));
         }
     }
 
@@ -1039,8 +1039,8 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
                     continue;
                 }
                 has_recipe_to_make |= r.result == type->id;
-                const std::vector< std::vector<component> > &comps = r.components;
-                const std::vector< std::vector<component> > &tools = r.tools;
+                const auto &comps = r.components;
+                const auto &tools = r.tools;
                 for(size_t i = 0; i < comps.size(); i++) {
                     for(size_t j = 0; j < comps[i].size(); j++) {
                         if(!matches_type(comps[i][j].type)) {

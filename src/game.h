@@ -534,8 +534,7 @@ class game
         bool crafting_can_see();             // See crafting.cpp
         recipe *select_crafting_recipe();    // See crafting.cpp
         bool making_would_work(recipe *r);   // See crafting.cpp
-        bool can_make_with_inventory(recipe *r,
-                                     crafting_inventory_t &crafting_inv);            // See crafting.cpp
+        bool can_make(recipe *r);            // See crafting.cpp
         void make_craft(recipe *making);     // See crafting.cpp
         void make_all_craft(recipe *making); // See crafting.cpp
         void complete_craft();               // See crafting.cpp

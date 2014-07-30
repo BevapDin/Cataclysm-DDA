@@ -11265,7 +11265,7 @@ void game::butcher()
     // indices of corpses / items that can be disassembled
     std::vector<int> corpses;
     std::vector<item> &items = m.i_at(u.posx, u.posy);
-    crafting_inventory_t crafting_inv(this, &u);
+    crafting_inventory_t crafting_inv(&u);
 
     // check if we have a butchering tool
     if (factor == INT_MAX) {

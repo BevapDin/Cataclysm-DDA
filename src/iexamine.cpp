@@ -650,7 +650,7 @@ void iexamine::wreckage(player *p, map *m, int examx, int examy) {
 
 void iexamine::pit(player *p, map *m, int examx, int examy)
 {
-    crafting_inventory_t map_inv(g, p, 1);
+    crafting_inventory_t map_inv(p, 1);
 
     bool has = map_inv.has_amount("2x4", 1);
 

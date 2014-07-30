@@ -8949,7 +8949,7 @@ hint_rating player::rate_action_disassemble(item *it) {
             {
                 // check tools are available
                 // loop over the tools and see what's required...again
-                crafting_inventory_t crafting_inv(g, this);
+                crafting_inventory_t crafting_inv(this);
                 for (int j = 0; j < cur_recipe->tools.size(); j++)
                 {
                     bool have_tool = false;
@@ -10765,10 +10765,10 @@ bool player::knows_recipe(const recipe *rec) const
     return false;
 }
 
-int player::has_recipe( const recipe *r, const inventory &crafting_inv ) const
+int player::has_recipe( const recipe *r, const crafting_inventory_t & ) const
 {
     // Iterate over the nearby items and see if there's a book that has the recipe.
-    const_invslice slice = crafting_inv.const_slice();
+    const_invslice slice = inv.const_slice();
     int difficulty = -1;
     for( auto stack = slice.cbegin(); stack != slice.cend(); ++stack ) {
         // We are only checking qualities, so we only care about the first item in the stack.

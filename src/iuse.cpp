@@ -2299,7 +2299,7 @@ int iuse::sew(player *p, item *it, bool)
 
     // this will cause issues if/when NPCs start being able to sew.
     // but, then again, it'll cause issues when they start crafting, too.
-    crafting_inventory_t crafting_inv(g, p);
+    crafting_inventory_t crafting_inv(p);
     bool bFound = false;
     //go through all discovered repair items and see if we have any of them available
     for (unsigned int i = 0; i < repair_items.size(); i++) {
@@ -2316,8 +2316,8 @@ int iuse::sew(player *p, item *it, bool)
         return 0;
     }
 
-    std::vector<component> comps;
-    comps.push_back(component(repair_item, items_needed));
+    std::vector<item_comp> comps;
+    comps.push_back(item_comp(repair_item, items_needed));
     comps.back().available = true;
 
     if (fix->damage > 0) {
@@ -3108,7 +3108,7 @@ int iuse::solder_weld(player *p, item *it, bool)
 
             // this will cause issues if/when NPCs start being able to sew.
             // but, then again, it'll cause issues when they start crafting, too.
-            crafting_inventory_t crafting_inv(g, p);
+            crafting_inventory_t crafting_inv(p);
 
             bool bFound = false;
             //go through all discovered repair items and see if we have any of them available
@@ -3127,11 +3127,9 @@ int iuse::solder_weld(player *p, item *it, bool)
                 return 0;
             }
 
-            std::vector<component> comps;
-            if (items_needed > 0) {
-                comps.push_back(component(repair_item, items_needed));
-                comps.back().available = true;
-            }
+            std::vector<item_comp> comps;
+            comps.push_back(item_comp(repair_item, items_needed));
+            comps.back().available = true;
 
             if (fix->damage > 0) {
                 p->moves -= 500 * p->fine_detail_vision_mod();

@@ -410,7 +410,7 @@ bool can_butcher_at(int x, int y)
     const int factor = g->u.butcher_factor();
     std::vector<item> &items = g->m.i_at(x, y);
     bool has_corpse, has_item = false;
-    crafting_inventory_t crafting_inv(g, &g->u);
+    crafting_inventory_t crafting_inv(&g->u);
     for (std::vector<item>::iterator it = items.begin();
          it != items.end(); ++it) {
         if (it->type->id == "corpse" && it->corpse != NULL) {

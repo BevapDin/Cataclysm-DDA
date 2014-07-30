@@ -4795,7 +4795,7 @@ bool vehicle::examine(game *g, player *p, int part) {
     vehicle_part &vp = parts[part];
     vpart_info &vpi = vehicle_part_types[vp.id];
     if(vpi.has_flag("KILN")) {
-        crafting_inventory_t cinv(g, p);
+        crafting_inventory_t cinv(p);
         // recipe is used to check for components
         // it is automaticly copied from a recipe loaded with json
         static recipe charcoal_recipe;
@@ -4804,11 +4804,11 @@ bool vehicle::examine(game *g, player *p, int part) {
             if(r == 0) {
                 // If there is no recipe for charcoal, assume this as default
                 charcoal_recipe.components.resize(1);
-                charcoal_recipe.components[0].push_back(component("2x4", 3));
-                charcoal_recipe.components[0].push_back(component("splinter", 20));
-                charcoal_recipe.components[0].push_back(component("stick", 5));
-                charcoal_recipe.components[0].push_back(component("bone", 40));
-                charcoal_recipe.components[0].push_back(component("log", 1));
+                charcoal_recipe.components[0].push_back(item_comp("2x4", 3));
+                charcoal_recipe.components[0].push_back(item_comp("splinter", 20));
+                charcoal_recipe.components[0].push_back(item_comp("stick", 5));
+                charcoal_recipe.components[0].push_back(item_comp("bone", 40));
+                charcoal_recipe.components[0].push_back(item_comp("log", 1));
                 charcoal_recipe.time = 120000;
                 charcoal_recipe.result_mult = 2;
             } else {
@@ -4821,7 +4821,7 @@ bool vehicle::examine(game *g, player *p, int part) {
             if(!cinv.has_all_requirements(charcoal_recipe)) {
                 std::ostringstream buffer;
                 buffer << _("You need this to make charcoal:\n");
-                ::list_missing_ones(buffer, charcoal_recipe);
+                buffer << charcoal_recipe.list_missing();
                 popup_top(buffer.str().c_str());
                 return false;
             }

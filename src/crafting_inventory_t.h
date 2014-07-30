@@ -14,7 +14,7 @@ namespace picojson {
 struct player_activity;
 class vehicle;
 struct bionic;
-struct recipe;
+struct requirements;
 class player;
 class map;
 /**
@@ -38,7 +38,7 @@ class map;
  * The several functions to examin if something exists (has_*) iterate
  * over these stored references.
  * 
- * Usage (outside of recipes):
+ * Usage (outside of requirementss):
  * 1. crreate a crafting_inventory_t object,
  * 2. check requirements: use has_*_tools and has_*_components
  * 3. consume items: consume_*_tools and consume_*_items
@@ -267,7 +267,7 @@ public:
             };
         };
     public:
-        // type requested by the recipe or similar, might not be the same
+        // type requested by the requirements or similar, might not be the same
         // as the type of the actuall item.
         itype_id usageType;
         
@@ -340,7 +340,7 @@ public:
          */
         candidate_t split(const requirement &req, int count_to_remove);
         
-        void consume(game *g, player *p, requirement &req, std::list<item> &ret) const;
+        void consume(player *p, requirement &req, std::list<item> &ret) const;
     private:
         void deserialize(crafting_inventory_t &cinv, JsonObject &obj);
         void make_invalid() { location = LT_BIONIC; bionic = NULL; }
@@ -363,9 +363,9 @@ public:
         requirement req;
         /**
          * Points to the component object that is stored
-         * in a recipe.
+         * in a requirements.
          */
-        component *comp;
+        const component *comp;
         /**
          * Indicates if this requirement is fullfilled.
          */
@@ -377,7 +377,7 @@ public:
         long cnt_on_player;
         candvec candidate_items;
         
-        simple_req(const requirement &r, component *c, complex_req *p = 0) : req(r), comp(c), parent(p) { }
+        simple_req(const requirement &r, const component *c, complex_req *p = 0) : req(r), comp(c), parent(p) { }
         
         bool is_possible() const;
         
@@ -487,9 +487,11 @@ public:
         void gather(crafting_inventory_t &cinv, bool store);
         
         // Called during solution::init
-        void init(std::vector<component> &components, bool as_tool, solution &s);
-        void init(component &components, bool as_tool, solution &s);
-        void add(component &c, bool as_tool);
+        template<typename T>
+        void init(const std::vector<T> &components, solution &s);
+        template<typename T>
+        void init(const T &components, solution &s);
+        void add(const component &c);
         void add_or_merge(const simple_req &rs2);
         void init_pointers();
         void consume(crafting_inventory_t &cinv, std::list<item> &used_items);
@@ -521,28 +523,32 @@ public:
         /**
          * Calls init_single_req and gather
          */
-        solution(component &comp, bool as_tool, crafting_inventory_t &cinv);
+        template<typename T>
+        solution(const T &comp, crafting_inventory_t &cinv);
         /**
          * Calls init_need_any and gather
          */
-        solution(std::vector<component> &comp, bool as_tool, crafting_inventory_t &cinv);
+        template<typename T>
+        solution(const std::vector<T> &comp, crafting_inventory_t &cinv);
         
         void serialize(player_activity &activity) const;
         void deserialize(crafting_inventory_t &cinv, player_activity &activity);
         
-        void init(recipe &making);
+        void init(const requirements &making);
         /**
-         * Init this as if from a recipe that contains only one
+         * Init this as if from a requirements that contains only one
          * complex requirement stored in comps.
          * @param as_tool If this requirement means tools or components.
          */
-        void init_need_any(std::vector<component> &comps, bool as_tool);
+        template<typename T>
+        void init_need_any(const std::vector<T> &comps);
         /**
-         * Init this as if from a recipe that contains only one
+         * Init this as if from a requirements that contains only one
          * complex requirement stored in comp.
          * @param as_tool If this requirement means a tool or a component.
          */
-        void init_single_req(component &comp, bool as_tool);
+        template<typename T>
+        void init_single_req(const T &comp);
         
         /**
          * Sets up which actuall items to use. This may ask the user for
@@ -571,10 +577,10 @@ public:
         
         std::string to_string(int flags = simple_req::ts_normal) const;
         /**
-         * Write the requirements back into a recipe. Only the tools and
-         * the components vaector of the recipe are overriden.
+         * Write the requirements back into a requirements. Only the tools and
+         * the components vaector of the requirements are overriden.
          */
-        void save(recipe &making) const;
+        void save(requirements &making) const;
     protected:
         void find_overlays();
         void erase_empty_reqs();
@@ -634,9 +640,9 @@ protected:
      * vpart with pseudo items as wrapper for vehicle vparts.
      * surround with pseudo items from the surrounding.
      */
-    void form_from_map(game *g, point position, int distance);
+    void form_from_map(point position, int distance);
     
-    typedef enum { assume_components, assume_tools, assume_tools_force_available } consume_flags;
+    typedef enum { assume_components, assume_tools } consume_flags;
     int consume(const std::vector<component> &x, consume_flags flags, std::list<item> &used_items);
     
     /**
@@ -708,7 +714,7 @@ protected:
      * modi.
      * @param tools The tools that will be used. All of them will be
      * used. The list may be empty.
-     * @param type The type of tool that was requested (e.g. by a recipe).
+     * @param type The type of tool that was requested (e.g. by a requirements).
      * This might not be the same type as each tools. And each tool might
      * have different time modififactions based on what it is used for.
      * E.g. a hammer is fast for hammering, but not so fast for prying.
@@ -737,15 +743,15 @@ protected:
     bool has(component &x, bool as_tool) const;
 
     /**
-     * See #crafting_inventory_t(game*, player*, int)
+     * See #crafting_inventory_t(player*, int)
      * This is the wrapper that does what is descripted there.
      */
-    void init(game *g, int range);
+    void init(int range);
 public:
     /**
      * Same as <code>crafting_inventory_t(g, p, PICKUP_RANGE)</code>
      */
-    crafting_inventory_t(game *g, player *p);
+    crafting_inventory_t(player *p);
     /**
      * Create an inventory wrapper for the given player.
      * The position of the player is used to add items from the map,
@@ -755,16 +761,16 @@ public:
      * If range is -1, no items from the map or from vehicles are added
      * at all.
      */
-    crafting_inventory_t(game *g, player *p, int range);
+    crafting_inventory_t(player *p, int range);
     
-    // Interface for recipes: check that the recipe is possible
+    // Interface for requirementss: check that the requirements is possible
     /**
      * Disspatch everything to the solution class.
      */
-    bool has_all_requirements(recipe &making);
-    bool has_all_requirements(recipe &making, solution &s);
+    bool has_all_requirements(const requirements &making);
+    bool has_all_requirements(const requirements &making, solution &s);
     
-    // Interface for recipes: gather what tools and components to use
+    // Interface for requirementss: gather what tools and components to use
     /**
      * Lets the user select which components/tools to use and
      * stores the selected ones in the activity.
@@ -774,12 +780,12 @@ public:
      * here (in str_values), also the turns left for this activity
      * might be changed.
      */
-    void gather_input(recipe &making, player_activity &activity);
-    void gather_input(recipe &making, solution &s, player_activity &activity);
+    void gather_input(const requirements &making, player_activity &activity);
+    void gather_input(const requirements &making, solution &s, player_activity &activity);
     /**
      * Loads the tools/components that the user selected in gather_input,
      * and consumes them.
-     * This function uses the recipe to ask the user again if any of
+     * This function uses the requirements to ask the user again if any of
      * the input items has vanished (e.g. a fire went out).
      * @param used_items The list of all the used_up items
      * or the used up charges. These are actuall items.
@@ -789,13 +795,13 @@ public:
      * dissabmling the item.
      */
     void consume_gathered(
-        recipe &making,
+        const requirements &making,
         player_activity &activity,
         std::list<item> &used_items,
         std::list<item> &used_tools
     );
     void consume_gathered(
-        recipe &making,
+        const requirements &making,
         solution &s,
         player_activity &activity,
         std::list<item> &used_items,
@@ -803,12 +809,12 @@ public:
     );
     
     void gather_and_consume(
-        recipe &making,
+        const requirements &making,
         std::list<item> &used_items,
         std::list<item> &used_tools
     );
     void gather_and_consume(
-        recipe &making,
+        const requirements &making,
         solution &s,
         std::list<item> &used_items,
         std::list<item> &used_tools
@@ -824,11 +830,11 @@ public:
      */
     
     // Check that at least one component is available.
-    bool has_any_components(std::vector<component> &comps) const;
+    bool has_any_components(const std::vector<item_comp> &comps) const;
     // Check that the single component is available
-    bool has_components(component &comps) const;
+    bool has_components(const item_comp &comps) const;
     // Also provide a singular form (has_component vs has_component_s_)
-    bool has_component(component &comps) const { return has_components(comps); }
+    bool has_component(const item_comp &comps) const { return has_components(comps); }
     // Check that the single component is available
     bool has_components(const itype_id &type, int count) const;
     // Also provide a singular form (has_component vs has_component_s_)
@@ -841,9 +847,9 @@ public:
      * tool itself must be available.
      */
     
-    bool has_any_tools(std::vector<component> &tools) const;
-    bool has_tools(component &tool) const;
-    bool has_tool(component &tool) const { return has_tools(tool); }
+    bool has_any_tools(const std::vector<tool_comp> &tools) const;
+    bool has_tools(const tool_comp &tool) const;
+    bool has_tool(const tool_comp &tool) const { return has_tools(tool); }
     bool has_tools(const itype_id &type, int count) const;
     bool has_tool(const itype_id &type, int count) const { return has_tools(type, count); }
     bool has_tools(const itype_id &type) const;
@@ -871,9 +877,9 @@ public:
      * Consume components.
      * @return the consumed items.
      */
-    std::list<item> consume_any_components(const std::vector<component> &comps);
-    std::list<item> consume_components(const component &comps);
-    std::list<item> consume_component(const component &comps) { return consume_components(comps); }
+    std::list<item> consume_any_components(const std::vector<item_comp> &comps);
+    std::list<item> consume_components(const item_comp &comps);
+    std::list<item> consume_component(const item_comp &comps) { return consume_components(comps); }
     std::list<item> consume_components(const itype_id &type, int count);
     std::list<item> consume_component(const itype_id &type, int count) { return consume_components(type, count); }
     
@@ -882,11 +888,11 @@ public:
      * Consume tool charges, if no charges have been required, nothing
      * is changed.
      */
-    std::list<item> consume_any_tools(const std::vector<component> &tools, bool force_available);
-    std::list<item> consume_tools(const component &tools, bool force_available);
-    std::list<item> consume_tool(const component &tool, bool force_available) { return consume_tools(tool, force_available); }
-    std::list<item> consume_tools(const itype_id &type, int charges, bool force_available);
-    std::list<item> consume_tool(const itype_id &type, int charges, bool force_available) { return consume_tools(type, charges, force_available); }
+    std::list<item> consume_any_tools(const std::vector<tool_comp> &tools);
+    std::list<item> consume_tools(const tool_comp &tools);
+    std::list<item> consume_tool(const tool_comp &tool) { return consume_tools(tool); }
+    std::list<item> consume_tools(const itype_id &type, int charges);
+    std::list<item> consume_tool(const itype_id &type, int charges) { return consume_tools(type, charges); }
     std::list<item> consume_tools(const itype_id &type);
     std::list<item> consume_tool(const itype_id &type) { return consume_tools(type); }
     
@@ -907,6 +913,7 @@ public:
     
     // FIXME remove this, change in calling code
     void consume_items(const std::vector<component> &comps);
+    void consume_items(const std::vector<item_comp> &comps);
     
     /**
      * This is similar to consume_components, but is used in vehilce
@@ -923,7 +930,5 @@ private:
     mutable CacheMap counted_by_charges;
     mutable CacheMap counted_by_amount;
 };
-
-extern void list_missing_ones(std::ostream &stream, const recipe &r);
 
 #endif

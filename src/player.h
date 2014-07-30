@@ -16,6 +16,7 @@
 
 #include <unordered_set>
 
+class crafting_inventory_t;
 class monster;
 class game;
 struct trap;
@@ -784,7 +785,7 @@ public:
 
  // Checks crafting inventory for books providing the requested recipe.
  // Returns -1 to indicate recipe not found, otherwise difficulty to learn.
- int has_recipe( const recipe *r, const inventory &crafting_inv ) const;
+ int has_recipe( const recipe *r, const crafting_inventory_t &crafting_inv ) const;
  bool knows_recipe( const recipe *rec ) const;
  void learn_recipe( recipe *rec );
 
