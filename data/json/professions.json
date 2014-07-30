@@ -68,6 +68,8 @@
             "both": [
                 "jeans",
                 "tshirt",
+                "socks",
+                "jacket_light",
                 "sneakers",
                 "pockknife",
                 "water_clean",
@@ -99,6 +101,7 @@
                 "polo_shirt",
                 "blazer",
                 "pants",
+                "socks",
                 "dress_shoes",
                 "sewing_kit",
                 "thread",
@@ -131,6 +134,7 @@
                 "hat_chef",
                 "jacket_chef",
                 "pants_checkered",
+                "socks",
                 "dress_shoes",
                 "sheath"
             ],
@@ -172,6 +176,7 @@
             "both": [
                 "dress_shirt",
                 "pants",
+                "socks",
                 "boots",
                 "coat_lab",
                 "gloves_rubber",
@@ -203,6 +208,7 @@
             "both": [
                 "tank_top",
                 "jeans",
+                "socks",
                 "boots_steel",
                 "tool_belt",
                 "wrench",
@@ -250,6 +256,7 @@
                 "tank_top",
                 "hoodie",
                 "pants_cargo",
+                "socks",
                 "sneakers",
                 "weed",
                 "tobacco",
@@ -288,6 +295,7 @@
                 "folding_bicycle",
                 "under_armor_shorts",
                 "under_armor",
+                "socks",
                 "sneakers",
                 "sports_drink",
                 "fanny",
@@ -326,6 +334,7 @@
             "both": [
                 "pants_army",
                 "army_top",
+                "socks",
                 "boots_combat",
                 "m4a1",
                 "223",
@@ -384,6 +393,7 @@
                 "jacket_army",
                 "beret",
                 "gloves_tactical",
+                "socks",
                 "boots_combat",
                 "rm2000_smg",
                 "suppressor",
@@ -425,7 +435,8 @@
         "items": {
             "both" : [
                 "pocketwatch",
-                "knife_butter"
+                "knife_butter",
+                "socks"
             ],
             "male": [
                 "tux",
@@ -457,6 +468,7 @@
             "both": [
                 "pants",
                 "dress_shirt",
+                "socks",
                 "dress_shoes",
                 "coat_lab",
                 "water_clean",
@@ -512,6 +524,7 @@
                 "bowhat",
                 "glock_19",
                 "9mm",
+                "socks",
                 "dress_shoes",
                 "cig",
                 "switchblade",
@@ -538,6 +551,7 @@
         "items": {
             "both": [
                 "pants",
+                "socks",
                 "boots_combat",
                 "flashlight",
                 "longshirt",
@@ -625,6 +639,7 @@
             "both": [
                 "pants",
                 "dress_shirt",
+                "socks",
                 "dress_shoes",
                 "cig",
                 "lighter"
@@ -783,6 +798,7 @@
         "items": {
             "both": [
                 "suit",
+                "socks",
                 "dress_shoes"
             ],
             "male": [
@@ -809,6 +825,7 @@
         "items": {
             "both": [
                 "army_top",
+                "socks",
                 "boots_steel",
                 "pants_cargo",
                 "compbow",
@@ -841,6 +858,7 @@
         "items": {
             "both": [
                 "tank_top",
+                "socks",
                 "boots_steel",
                 "jeans",
                 "hammer",
@@ -866,6 +884,7 @@
         "items": {
             "both": [
                 "jeans",
+                "socks",
                 "boots",
                 "hat_hunting",
                 "jacket_flannel",
@@ -948,6 +967,7 @@
         "items": {
             "both": [
                 "jumpsuit",
+                "socks",
                 "boots",
                 "tool_belt",
                 "flashlight"
@@ -977,6 +997,7 @@
             "both": [
                 "pants",
                 "tshirt",
+                "socks",
                 "sneakers",
                 "portable_game",
                 "mbag",
@@ -1000,6 +1021,7 @@
             "both": [
                 "pants",
                 "tshirt",
+                "socks",
                 "sneakers",
                 "ZSG",
                 "backpack",
@@ -1052,6 +1074,7 @@
                 "jeans",
                 "tank_top",
                 "chaps_leather",
+                "socks",
                 "boots",
                 "bandana",
                 "jacket_leather",
@@ -1080,6 +1103,7 @@
         ],
         "items": {
             "both": [
+                "socks",
                 "dress_shoes"
             ],
             "male": [
@@ -1110,6 +1134,7 @@
                 "waistcoat",
                 "pants",
                 "dress_shirt",
+                "socks",
                 "dress_shoes",
                 "gold_watch",
                 "briefcase_smg",
@@ -1141,6 +1166,7 @@
             "both": [
                 "jeans",
                 "tshirt",
+                "socks",
                 "sneakers"
             ],
             "male": [
@@ -1221,6 +1247,7 @@
         "items": {
             "both": [
                 "dress_shoes",
+                "socks",
                 "suit"
             ],
             "male": [
@@ -1295,6 +1322,7 @@
         ],
         "items": {
             "both": [
+                "socks",
                 "sneakers",
                 "jeans",
                 "tshirt",
@@ -1385,6 +1413,7 @@
         "items": {
             "both": [
                 "jeans",
+                "socks",
                 "boots",
                 "hat_hunting",
                 "jacket_flannel",
@@ -1418,6 +1447,7 @@
         "items": {
             "both": [
                 "jeans",
+                "socks",
                 "boots",
                 "tank_top",
                 "apron_leather",
@@ -1442,6 +1472,7 @@
         "items": {
             "both": [
                 "clown_suit",
+                "socks",
                 "clownshoes",
                 "airhorn"
             ],
@@ -1482,6 +1513,7 @@
                 "tobacco",
                 "pipe_tobacco",
                 "ref_lighter",
+                "socks",
                 "dress_shoes",
                 "cane"
             ],
@@ -1508,6 +1540,7 @@
         "items": {
             "both": [
                 "shorts",
+                "socks",
                 "sneakers",
                 "tank_top",
                 "sewing_kit",
@@ -1538,6 +1571,7 @@
                 "hockey_stick",
                 "jersey",
                 "pants",
+                "socks",
                 "sneakers",
                 "mouthpiece",
                 "puck"
@@ -1563,6 +1597,7 @@
                 "helmet_ball",
                 "dress_shirt",
                 "pants",
+                "socks",
                 "cleats",
                 "mouthpiece",
                 "baseball"
@@ -1588,6 +1623,7 @@
                 "tank_top",
                 "helmet_football",
                 "pants",
+                "socks",
                 "cleats",
                 "mouthpiece",
                 "football"
@@ -1612,6 +1648,7 @@
                 "hat_ball",
                 "dress_shirt",
                 "pants",
+                "socks",
                 "sneakers",
                 "golf_club"
             ],
@@ -1636,11 +1673,13 @@
         "items" : {
             "male": [
                 "tux",
+                "socks",
                 "dress_shoes",
                 "briefs"
             ],
             "female": [
                 "dress_wedding",
+                "stockings",
                 "dress_shoes",
                 "bra",
                 "panties"
@@ -1660,6 +1699,7 @@
             "both": [
                 "trenchcoat",
                 "gloves_fingerless",
+                "socks",
                 "boots_combat",
                 "weed",
                 "tobacco",
@@ -1704,6 +1744,7 @@
                 "bunker_pants",
                 "fireman_belt",
                 "bunker_coat",
+                "nomex_socks",
                 "boots_bunker",
                 "fire_gauntlets",
                 "glasses_safety",
@@ -1981,6 +2022,7 @@
                 "suit",
                 "skinny_tie",
                 "tieclip",
+                "socks",
                 "dress_shoes",
                 "wristwatch",
                 "cell_phone",
@@ -2009,6 +2051,7 @@
                 "karate_gi",
                 "judo_belt_white",
                 "mouthpiece",
+                "socks",
                 "sneakers"
             ],
             "male": [
@@ -2045,6 +2088,7 @@
                 "karate_gi",
                 "judo_belt_orange",
                 "mouthpiece",
+                "socks",
                 "sneakers"
             ],
             "male": [
@@ -2157,18 +2201,19 @@
         ],
         "items": {
             "both": [
-				"undershirt",
+                "undershirt",
                 "leather_belt",
-				"boots",
-				"pants",
-				"jacket_leather",
-				"holster",
-				"sw_619",
-				"38_special",
-				"bullwhip",
-				"mbag",
-				"fedora",
-				"spiral_stone"
+                "socks",
+                "boots",
+                "pants",
+                "jacket_leather",
+                "holster",
+                "sw_619",
+                "38_special",
+                "bullwhip",
+                "mbag",
+                "fedora",
+                "spiral_stone"
             ],
             "male": [
                 "briefs"
@@ -2193,6 +2238,7 @@
                 "backpack",
                 "pockknife",
                 "hoe",
+                "socks",
                 "boots",
                 "seed_blueberries",
                 "seed_strawberries",

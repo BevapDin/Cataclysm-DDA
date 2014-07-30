@@ -118,12 +118,34 @@ void load_recipe(JsonObject &jsobj)
         }
     }
 
+    std::vector<byproduct> bps;
+    // could be a single byproduct - either id or byproduct, or array of ids and byproducts
+    if (jsobj.has_string("byproducts")) {
+        bps.push_back(byproduct(jsobj.get_string("byproducts")));
+    }
+    else if (jsobj.has_object("byproducts")) {
+        JsonObject jsbp = jsobj.get_object("byproducts");
+        bps.push_back(byproduct(jsbp.get_string("id"), jsbp.get_int("charges_mult", 1), jsbp.get_int("amount", 1)));
+    }
+    else if (jsobj.has_array("byproducts")) {
+        jsarr = jsobj.get_array("byproducts");
+        while (jsarr.has_more()) {
+            if (jsarr.has_string(0)) {
+                bps.push_back(byproduct(jsarr.next_string()));
+            }
+            else if (jsarr.has_object(0)) {
+                JsonObject jsbp = jsarr.next_object();
+                bps.push_back(byproduct(jsbp.get_string("id"), jsbp.get_int("charges_mult", 1), jsbp.get_int("amount", 1)));
+            }
+        }
+    }
+
     std::string rec_name = result + id_suffix;
     int id = check_recipe_ident(rec_name, jsobj);
 
     recipe *rec = new recipe(rec_name, id, result, category, subcategory, skill_used,
                              requires_skills, difficulty, reversible,
-                             autolearn, learn_by_disassembly, result_mult);
+                             autolearn, learn_by_disassembly, result_mult, bps);
     rec->load(jsobj);
 
     jsarr = jsobj.get_array("book_learn");
@@ -242,18 +264,90 @@ bool game::making_would_work(recipe *making)
     crafting_inventory_t crafting_inv(&u);
     if(!making->can_make_with_inventory(crafting_inv)) {
         std::ostringstream buffer;
-        buffer << _("You can no longer make that craft!");
+        buffer << _("You can no longer make that craft!") << "\n";
         buffer << making->list_missing();
         popup(buffer.str(), PF_NONE);
         return false;
     }
 
-    if (!u.has_container_for(making->create_result())) {
-        popup(_("You don't have anything to store that liquid in!"));
-        return false;
+    return check_eligible_containers_for_crafting(making);
+}
+
+bool game::check_eligible_containers_for_crafting(recipe *making)
+{
+    std::vector<item> conts = get_eligible_containers_for_crafting();
+    std::vector<item> bps = making->create_byproducts();
+    bps.push_back(making->create_result());
+
+    for(item& prod : bps) {
+        if (prod.made_of(LIQUID)) {
+            long charges_to_store = prod.charges;
+            // we go trough half-filled containers first
+            for(item& cont : conts) {
+                if (!cont.is_container_empty()) {
+                    if (cont.contents[0].type->id ==  prod.type->id) {
+                        charges_to_store -= cont.get_remaining_capacity();
+                        if (charges_to_store <= 0) break;
+                    }
+                }
+            }
+            // we go trough empty containers if we need
+            if (charges_to_store > 0) {
+                std::vector<item>::iterator iter;
+                for(iter = conts.begin(); iter != conts.end(); ++iter) {
+                    if (iter->is_container_empty()) {
+                        LIQUID_FILL_ERROR tmperr;
+                        charges_to_store -= iter->get_remaining_capacity_for_liquid(prod, tmperr);
+                        iter = conts.erase(iter);
+                        if (charges_to_store <= 0) break;
+                    }
+                }
+            }
+            if (charges_to_store > 0) {
+                popup(_("You don't have anything to store %s in!"), prod.tname().c_str());
+                return false;
+            }
+        }
     }
 
     return true;
+}
+
+std::vector<item> game::get_eligible_containers_for_crafting()
+{
+    std::vector<item> conts;
+
+    if (is_container_eligible_for_crafting(u.weapon)) {
+        conts.push_back(u.weapon);
+    }
+    for (item& i : u.worn) {
+        if (is_container_eligible_for_crafting(i)) {
+            conts.push_back(i);
+        }
+    }
+    for (int i = 0; i < u.inv.size(); i++) {
+        for (item it : u.inv.const_stack(i)) {
+            if (is_container_eligible_for_crafting(it)) {
+                conts.push_back(it);
+            }
+        }
+    }
+    for (item& i : m.i_at(u.posx, u.posy)) {
+        if (is_container_eligible_for_crafting(i)) {
+            conts.push_back(i);
+        }
+    }
+
+    return conts;
+}
+
+bool game::is_container_eligible_for_crafting(item &cont)
+{
+    if (cont.is_watertight_container()) {
+        return !cont.is_container_full();
+    }
+
+    return false;
 }
 
 bool game::can_make(recipe *r)
@@ -544,6 +638,7 @@ recipe *game::select_crafting_recipe()
                               (int)u.skillLevel(current[line]->skill_used));
                 }
                 ypos += current[line]->print_time(w_data, ypos, 30, FULL_SCREEN_WIDTH - 30 - 1, col);
+                ypos += current[line]->print_items(w_data, ypos, 30, col);
             }
             if(display_mode == 0 || display_mode == 1) {
                 ypos += current[line]->print_tools(w_data, ypos, 30, FULL_SCREEN_WIDTH - 30 - 1, col, crafting_inv);
@@ -613,8 +708,8 @@ recipe *game::select_crafting_recipe()
         } else if (action == "CONFIRM") {
             if (available.empty() || !available[line]) {
                 popup(_("You can't do that!"));
-            } else if (!u.has_container_for(current[line]->create_result())) {
-                popup(_("You don't have anything to store that liquid in!"));
+            } else if (!check_eligible_containers_for_crafting(current[line])) {
+                ; // popup is already inside check
             } else {
                 chosen = current[line];
                 done = true;
@@ -833,6 +928,53 @@ static void draw_recipe_subtabs(WINDOW *w, craft_cat tab, craft_subcat subtab, b
     wrefresh(w);
 }
 
+int recipe::print_items(WINDOW *w, int ypos, int xpos, nc_color col)
+{
+    if(!has_byproducts()) {
+        return 0;
+    }
+
+    const int oldy = ypos;
+
+    mvwprintz(w, ypos++, xpos, col, _( "Byproducts:" ));
+    for (auto& bp : byproducts) {
+        print_item(w, ypos++, xpos, col, bp);
+    }
+
+    return ypos - oldy;
+}
+
+void recipe::print_item(WINDOW *w, int ypos, int xpos, nc_color col, const byproduct &bp)
+{
+    item it(bp.result, calendar::turn, false);
+    std::string str = string_format(_("> %d %s"), bp.amount, it.tname().c_str());
+    if (it.charges > 0) {
+        str = string_format(_("%s (%d)"), str.c_str(), it.charges * bp.charges_mult);
+    }
+    mvwprintz(w, ypos, xpos, col, str.c_str());
+}
+
+std::string item_name(const itype_id &type)
+{
+    return item_controller->find_template(type)->nname(1);
+}
+
+// ui.cpp
+extern bool lcmatch(const std::string &str, const std::string &findstr);
+
+template<typename T>
+bool lcmatch_any(const std::vector< std::vector<T> > &list_of_list, const std::string &filter)
+{
+    for( auto &list : list_of_list ) {
+        for( auto &comp : list ) {
+            if( lcmatch( item_name( comp.type ), filter ) ) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void game::pick_recipes(crafting_inventory_t &crafting_inv, std::vector<recipe *> &current,
                         std::vector<bool> &available, craft_cat tab,
                         craft_subcat subtab, std::string filter)
@@ -860,6 +1002,8 @@ void game::pick_recipes(crafting_inventory_t &crafting_inv, std::vector<recipe *
     if (filter == "") {
         available_recipes = recipes[tab];
     } else {
+        // lcmatch needs an all lowercase string to match case-insensitive
+        std::transform( filter.begin(), filter.end(), filter.begin(), tolower );
 
         for (recipe_map::iterator iter = recipes.begin(); iter != recipes.end(); ++iter) {
             available_recipes.insert(available_recipes.begin(),
@@ -872,65 +1016,39 @@ void game::pick_recipes(crafting_inventory_t &crafting_inv, std::vector<recipe *
 
     for (recipe_list::iterator iter = available_recipes.begin();
          iter != available_recipes.end(); ++iter) {
-        if( subtab == "CSC_ALL" || (*iter)->subcat == subtab ||
-            ((*iter)->subcat == "" && last_craft_subcat( tab ) == subtab) ||
+        recipe *rec = *iter;
+        if( subtab == "CSC_ALL" || rec->subcat == subtab ||
+            (rec->subcat == "" && last_craft_subcat( tab ) == subtab) ||
             filter != "") {
-            if( !u.knows_recipe( *iter ) && -1 == u.has_recipe(*iter, crafting_inv) ) {
+            if( !u.knows_recipe( rec ) && -1 == u.has_recipe(rec, crafting_inv) ) {
                 continue;
             }
 
-            if ((*iter)->difficulty < 0 ) {
+            if (rec->difficulty < 0 ) {
                 continue;
             }
             if(filter != "") {
                 if(search_name) {
-                    if(item_controller->find_template((*iter)->result)->nname(1).find(filter) ==
-                       std::string::npos) {
+                    if( !lcmatch( item_name( rec->result ), filter ) ) {
                         continue;
                     }
                 }
                 if(search_tool) {
-                    bool found = false;
-                    for( auto it = (*iter)->tools.begin(); it != (*iter)->tools.end(); ++it) {
-                        for( auto it2 = (*it).begin(); it2 != (*it).end() ; ++it2 ) {
-                            if(item_controller->find_template((*it2).type)->nname(1).find(filter) !=
-                               std::string::npos) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if(found) {
-                            break;
-                        }
-                    }
-                    if(!found) {
+                    if( !lcmatch_any( rec->tools, filter ) ) {
                         continue;
                     }
                 }
                 if(search_component) {
-                    bool found = false;
-                    for( auto it = (*iter)->components.begin(); it != (*iter)->components.end(); ++it ) {
-                        for( auto it2 = (*it).begin() ; it2 != (*it).end() ; ++it2) {
-                            if( item_controller->find_template((*it2).type)->nname(1).find(filter) !=
-                                std::string::npos ) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if(found) {
-                            break;
-                        }
-                    }
-                    if(!found) {
+                    if( !lcmatch_any( rec->components, filter ) ) {
                         continue;
                     }
                 }
             }
-            if ((*iter)->can_make_with_inventory(crafting_inv)) {
-                current.insert(current.begin(), *iter);
+            if (rec->can_make_with_inventory(crafting_inv)) {
+                current.insert(current.begin(), rec);
                 available.insert(available.begin(), true);
             } else {
-                current.push_back(*iter);
+                current.push_back(rec);
                 available.push_back(false);
             }
         }
@@ -976,6 +1094,29 @@ item recipe::create_result() const
     return newit;
 }
 
+std::vector<item> recipe::create_byproducts() const
+{
+    std::vector<item> bps;
+    for(auto& val : byproducts) {
+        for (int i = 0; i < val.amount; i++) {
+            item newit(val.result, calendar::turn, false);
+            if (val.charges_mult != 1) {
+                newit.charges *= val.charges_mult;
+            }
+            if (!newit.craft_has_charges()) {
+                newit.charges = 0;
+            }
+            bps.push_back(newit);
+        }
+    }
+    return bps;
+}
+
+bool recipe::has_byproducts() const
+{
+    return byproducts.size() != 0;
+}
+
 void game::complete_craft()
 {
     recipe *making = recipe_by_index(u.activity.index); // Which recipe is it?
@@ -995,7 +1136,7 @@ void game::complete_craft()
     // farsightedness can impose a penalty on electronics and tailoring success
     // it's equivalent to a 2-rank electronics penalty, 1-rank tailoring
     if (u.has_trait("HYPEROPIC") && !u.is_wearing("glasses_reading")
-            && !u.is_wearing("glasses_bifocal") && !u.has_disease("contacts")) {
+            && !u.is_wearing("glasses_bifocal") && !u.has_effect("contacts")) {
         int main_rank_penalty = 0;
         if (making->skill_used == Skill::skill("electronics")) {
             main_rank_penalty = 2;
@@ -1070,10 +1211,6 @@ void game::complete_craft()
         // which would either loose this information or merge it somehow.
         newit.components.insert(newit.components.begin(), used.begin(), used.end());
     }
-    int new_count = 1;
-    if(making->result_mult > 1 && !newit.count_by_charges()) {
-        new_count = making->result_mult;
-    }
 
     if( u.knows_recipe( making ) ) {
         add_msg(_("You craft %s from memory."), newit.type->nname(1).c_str());
@@ -1109,34 +1246,73 @@ void game::complete_craft()
         }
     }
     if (used_age_count > 0 && newit.goes_bad()) {
-        const int average_used_age = int((used_age_tally / used_age_count) * dynamic_cast<it_comest *>
-                                         (newit.type)->spoils);
-        newit.bday = newit.bday - average_used_age;
+        set_item_spoilage(newit, used_age_tally, used_age_count);
     }
     // for food items
     if (newit.is_food()) {
-        int bday_tmp = newit.bday % 3600; // fuzzy birthday for stacking reasons
-        newit.bday = int(newit.bday) + 3600 - bday_tmp;
-        newit.active = true;
+        set_item_food(newit);
+    }
 
-        if (newit.has_flag("EATEN_HOT")) { // hot foods generated
-            newit.item_tags.insert("HOT");
-            newit.item_counter = 600;
+    set_item_inventory(this, newit);
+
+    if (making->has_byproducts()) {
+        std::vector<item> bps = making->create_byproducts();
+        for(auto& bp : bps) {
+            if (bp.is_armor() && bp.has_flag("VARSIZE")) {
+                bp.item_tags.insert("FIT");
+            }
+            if (used_age_count > 0 && bp.goes_bad()) {
+                set_item_spoilage(bp, used_age_tally, used_age_count);
+            }
+            if (bp.is_food()) {
+                set_item_food(bp);
+            }
+            set_item_inventory(this, bp);
         }
     }
-    if (!newit.craft_has_charges()) {
-        newit.charges = 0;
+
+    u.inv.restack(&u);
+}
+
+void set_item_spoilage(item &newit, float used_age_tally, int used_age_count)
+{
+    const int average_used_age = int((used_age_tally / used_age_count) * dynamic_cast<it_comest *>
+                                     (newit.type)->spoils);
+    newit.bday = newit.bday - average_used_age;
+}
+
+void set_item_food(item &newit)
+{
+    int bday_tmp = newit.bday % 3600; // fuzzy birthday for stacking reasons
+    newit.bday = int(newit.bday) + 3600 - bday_tmp;
+    newit.active = true;
+
+    if (newit.has_flag("EATEN_HOT")) { // hot foods generated
+        newit.item_tags.insert("HOT");
+        newit.item_counter = 600;
     }
+}
+
+void set_item_inventory(game *g, item &newit)
+{
     if (newit.made_of(LIQUID)) {
-        newit.charges *= new_count;
-        while(!handle_liquid(newit, false, false)) { ; }
-    } else {
-        if(newit.count_by_charges() && new_count > 1) {
-            newit.charges *= new_count;
-            new_count = 1;
+        while(!g->handle_liquid(newit, false, false)) {
+            ;
         }
-        u.i_add_or_drop(newit, new_count);
-        add_msg("%s", newit.tname().c_str());
+    } else {
+        // We might not have space for the item
+        if (!g->u.can_pickVolume(newit.volume())) { //Accounts for result_mult
+            add_msg(_("There's no room in your inventory for the %s, so you drop it."),
+                    newit.tname().c_str());
+            g->m.add_item_or_charges(g->u.posx, g->u.posy, newit);
+        } else if (!g->u.can_pickWeight(newit.weight(), !OPTIONS["DANGEROUS_PICKUPS"])) {
+            add_msg(_("The %s is too heavy to carry, so you drop it."),
+                    newit.tname().c_str());
+            g->m.add_item_or_charges(g->u.posx, g->u.posy, newit);
+        } else {
+            newit = g->u.i_add(newit);
+            add_msg(m_info, "%c - %s", newit.invlet == 0 ? ' ' : newit.invlet, newit.tname().c_str());
+        }
     }
 }
 
@@ -1579,7 +1755,7 @@ std::string recipe::required_skills_string()
             }
         }
     } else {
-        skills_as_stream << "N/A";
+        skills_as_stream << _("N/A");
     }
     return skills_as_stream.str();
 }

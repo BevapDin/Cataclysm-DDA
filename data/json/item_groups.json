@@ -277,6 +277,7 @@
       ["cereal3", 45],
       ["toaster", 20],
       ["microwave", 20],
+      ["multi_cooker", 1],
       ["clock", 10],
       ["hat_chef", 2],
       ["jacket_chef", 2],
@@ -4230,6 +4231,7 @@
       ["advanced_ecig", 5],
       ["television", 10],
       ["microwave", 5],
+      ["multi_cooker", 1],
       ["knuckle_brass", 15],
       ["gold", 10],
       ["silver", 20],
@@ -4920,7 +4922,8 @@
       ["canister_goo", 8],
       ["recipe_labchem", 2],
       ["recipe_creepy", 2],
-      ["recipe_chimera", 2]
+      ["recipe_animal", 1],
+      ["recipe_chimera", 1]
     ]
   },{
     "type" : "item_group",
@@ -5100,7 +5103,7 @@
       ["tailor_portfolio", 1],
       ["recipe_alpha", 1],
       ["recipe_serum", 4],
-      ["recipe_animal", 2],
+      ["recipe_animal", 4],
       ["recipe_raptor", 1],
       ["recipe_labchem", 1],
       ["textbook_anarch", 1],

@@ -109,6 +109,7 @@ void SkillLevel::deserialize(JsonIn & jsin)
 void player::json_load_common_variables(JsonObject & data)
 {
     JsonArray parray;
+    int tmpid = 0;
 
 // todo/maybe:
 // std::map<std::string, int*> strmap_common_variables;
@@ -142,6 +143,9 @@ void player::json_load_common_variables(JsonObject & data)
     data.read("cash",cash);
     data.read("recoil",recoil);
     data.read("in_vehicle",in_vehicle);
+    if( data.read( "id", tmpid ) ) {
+        setID( tmpid );
+    }
 
     parray = data.get_array("hp_cur");
     if ( parray.size() == num_hp_parts ) {
@@ -247,6 +251,7 @@ void player::json_save_common_variables(JsonOut &json) const
     json.member( "cash", cash );
     json.member( "recoil", int(recoil) );
     json.member( "in_vehicle", in_vehicle );
+    json.member( "id", getID() );
 
     // potential incompatibility with future expansion
     // todo: consider ["parts"]["head"]["hp_cur"] instead of ["hp_cur"][head_enum_value]
@@ -649,9 +654,9 @@ void npc::deserialize(JsonIn &jsin)
 
     json_load_common_variables(data);
 
-    int misstmp, classtmp, flagstmp, atttmp, tmpid;
+    int misstmp, classtmp, flagstmp, atttmp;
+    std::string facID;
 
-    data.read("id",tmpid);  setID(tmpid);
     data.read("name",name);
     data.read("marked_for_death", marked_for_death);
     data.read("dead", dead);
@@ -664,12 +669,19 @@ void npc::deserialize(JsonIn &jsin)
     data.read("wandx",wandx);
     data.read("wandy",wandy);
     data.read("wandf",wandf);
-    data.read("omx",omx);
-    data.read("omy",omy);
-    data.read("omz",omz);
 
     data.read("mapx",mapx);
     data.read("mapy",mapy);
+    if(!data.read("mapz",mapz)) {
+        data.read("omz",mapz); // was renamed to match mapx,mapy
+    }
+    int o;
+    if(data.read("omx",o)) {
+        mapx += o * OMAPX * 2;
+    }
+    if(data.read("omy",o)) {
+        mapy += o * OMAPY * 2;
+    }
 
     data.read("plx",plx);
     data.read("ply",ply);
@@ -685,6 +697,11 @@ void npc::deserialize(JsonIn &jsin)
     if ( data.read( "flags", flagstmp) ) {
         flags = flagstmp;
     }
+
+    if ( data.read( "my_fac", facID) ) {
+        fac_id = facID;
+    }
+
     if ( data.read( "attitude", atttmp) ) {
         attitude = npc_attitude(atttmp);
     }
@@ -716,7 +733,6 @@ void npc::serialize(JsonOut &json, bool save_contents) const
     json_save_common_variables( json );
 
     json.member( "name", name );
-    json.member( "id", getID() );
     json.member( "marked_for_death", marked_for_death );
     json.member( "dead", dead );
     json.member( "patience", patience );
@@ -726,12 +742,10 @@ void npc::serialize(JsonOut &json, bool save_contents) const
     json.member( "wandx", wandx );
     json.member( "wandy", wandy );
     json.member( "wandf", wandf );
-    json.member( "omx", omx );
-    json.member( "omy", omy );
-    json.member( "omz", omz );
 
     json.member( "mapx", mapx );
     json.member( "mapy", mapy );
+    json.member( "mapz", mapz );
     json.member( "plx", plx );
     json.member( "ply", ply );
     json.member( "goalx", goal.x );
@@ -740,8 +754,8 @@ void npc::serialize(JsonOut &json, bool save_contents) const
 
     json.member( "mission", mission ); // todo: stringid
     json.member( "flags", flags );
-    if ( my_fac != NULL ) { // set in constructor
-        json.member( "my_fac", my_fac->id );
+    if ( fac_id != "" ) { // set in constructor
+        json.member( "my_fac", my_fac->id.c_str() );
     }
     json.member( "attitude", (int)attitude );
     json.member("op_of_u", op_of_u);
@@ -933,7 +947,7 @@ void monster::serialize(JsonOut &json, bool save_contents) const
     if ( save_contents ) {
         json.member("inv");
         json.start_array();
-        for(int i=0;i<inv.size();i++) {
+        for(size_t i=0; i < inv.size(); i++) {
             inv[i].serialize(json, true);
         }
         json.end_array();
@@ -1106,7 +1120,7 @@ void item::serialize(JsonOut &json, bool save_contents) const
     if ( save_contents && !contents.empty() ) {
         json.member("contents");
         json.start_array();
-        for (int k = 0; k < contents.size(); k++) {
+        for (size_t k = 0; k < contents.size(); k++) {
             if(!(contents[k].contents.empty()) && contents[k].contents[0].is_gunmod()) {
                 contents[k].serialize(json, true); // save gun mods of holstered pistol
             } else {
@@ -1185,8 +1199,6 @@ void vehicle::deserialize(JsonIn &jsin)
     data.read("type", type);
     data.read("posx", posx);
     data.read("posy", posy);
-    data.read("levx", levx);
-    data.read("levy", levy);
     data.read("om_id", om_id);
     data.read("faceDir", fdir);
     data.read("moveDir", mdir);
@@ -1250,8 +1262,6 @@ void vehicle::serialize(JsonOut &json) const
     json.member( "type", type );
     json.member( "posx", posx );
     json.member( "posy", posy );
-    json.member( "levx", levx );
-    json.member( "levy", levy );
     json.member( "om_id", om_id );
     json.member( "faceDir", face.dir() );
     json.member( "moveDir", move.dir() );
@@ -1344,6 +1354,9 @@ void faction::deserialize(JsonIn &jsin)
 
     jo.read("id", id);
     jo.read("name", name);
+    if ( !jo.read( "description", desc )){
+        desc = "";
+    }
     goal = faction_goal(jo.get_int("goal", goal));
     values = jo.get_int("values", values);
     job1 = faction_job(jo.get_int("job1", job1));
@@ -1356,10 +1369,16 @@ void faction::deserialize(JsonIn &jsin)
     jo.read("crime", crime);
     jo.read("cult", cult);
     jo.read("good", good);
-    jo.read("omx", omx);
-    jo.read("omy", omy);
     jo.read("mapx", mapx);
     jo.read("mapy", mapy);
+    // omx,omy are obsolete, use them (if present) to make mapx,mapy global coordinates
+    int o;
+    if(jo.read("omx", o)) {
+        mapx += o * OMAPX * 2;
+    }
+    if(jo.read("omy", o)) {
+        mapy += o * OMAPY * 2;
+    }
     jo.read("size", size);
     jo.read("power", power);
     if (jo.has_array("opinion_of")) {
@@ -1373,6 +1392,7 @@ void faction::serialize(JsonOut &json) const
 
     json.member("id", id);
     json.member("name", name);
+    json.member("desc", desc);
     json.member("values", values);
     json.member("goal", goal);
     json.member("job1", job1);
@@ -1385,8 +1405,6 @@ void faction::serialize(JsonOut &json) const
     json.member("crime", crime);
     json.member("cult", cult);
     json.member("good", good);
-    json.member("omx", omx);
-    json.member("omy", omy);
     json.member("mapx", mapx);
     json.member("mapy", mapy);
     json.member("size", size);

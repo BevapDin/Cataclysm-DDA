@@ -310,7 +310,7 @@ void inventory_selector::print_column(const itemstack_vector &items, size_t y, s
                 item_name = string_format("%d %s", count, it.display_name(count).c_str());
             }
         }
-        nc_color name_color = const_cast<item&>(it).color_in_inventory();
+        nc_color name_color = it.color_in_inventory();
         nc_color invlet_color = c_white;
         if (a + current_page_offset == selected) {
             name_color = selected_line_color;
@@ -363,7 +363,7 @@ void inventory_selector::print_right_column() const
         const item &it = stack.front();
         const char invlet = invlet_or_space(it);
         const int count = a->second;
-        const nc_color col = const_cast<item&>(it).color_in_inventory();
+        const nc_color col = it.color_in_inventory();
         std::string item_name = it.display_name(count);
         if (stack.size() > 1) {
             item_name = string_format("%d %s", stack.size(), item_name.c_str());
@@ -630,8 +630,10 @@ void inventory_selector::set_selected_to_drop(int count)
     if (cur_entry.it != NULL && cur_entry.slice != NULL) {
         set_drop_count(cur_entry.item_pos, count, *cur_entry.slice);
     } else if (cur_entry.it != NULL) {
-        const std::list<item> stack(1, *cur_entry.it);
-        set_drop_count(cur_entry.item_pos, count, stack);
+        if (count > 0 && (!cur_entry.it->count_by_charges() || count >= cur_entry.it->charges)) {
+            count = -1;
+        }
+        set_drop_count(cur_entry.item_pos, count, *cur_entry.it);
     }
 }
 
@@ -645,8 +647,9 @@ void inventory_selector::set_to_drop(int it_pos, int count)
         if (count > 0 && (!u.weapon.count_by_charges() || count >= u.weapon.charges)) {
             count = -1; // drop whole item, because it can not be separated, or the requested count means all
         }
-        const std::list<item> stack(1, u.weapon);
-        set_drop_count(it_pos, count, stack);
+        // Must bypass the set_drop_count() that takes a stack,
+        // because it must get a direct reference to weapon.
+        set_drop_count(it_pos, count, u.weapon);
     } else if (it_pos < -1) { // worn
         const size_t wpos = player::worn_position_to_index(it_pos);
         if (wpos >= u.worn.size()) {
@@ -806,7 +809,7 @@ int game::inv_for_liquid(const item &liquid, const std::string title, bool auto_
     return display_slice(reduced_inv, title);
 }
 
-item *game::inv_map_for_liquid(const item &liquid, const std::string title, bool &on_ground)
+item *game::inv_map_for_liquid(const item &liquid, const std::string title)
 {
     std::vector <item> &here = m.i_at(g->u.posx, g->u.posy);
     typedef std::vector< std::list<item> > pseudo_inventory;
@@ -814,26 +817,25 @@ item *game::inv_map_for_liquid(const item &liquid, const std::string title, bool
     indexed_invslice grounditems_slice;
     std::vector<item *> ground_containers;
 
-    on_ground = false;
-
     LIQUID_FILL_ERROR error;
 
     std::set<std::string> dups;
-    for (size_t i = 0; i < here.size();
-         i++) if (here[i].get_remaining_capacity_for_liquid(liquid, error) > 0) {
-            if (dups.count(here[i].tname()) == 0) {
-                grounditems.push_back(std::list<item>(1, here[i]));
+    for( auto item_iter = here.begin(); item_iter != here.end(); ++item_iter ) {
+        if( item_iter->get_remaining_capacity_for_liquid(liquid, error) > 0 ) {
+            if( dups.count( item_iter->tname()) == 0 ) {
+                grounditems.push_back( std::list<item>(1, *item_iter) );
 
-                if (grounditems.size() <= 10) {
+                if( grounditems.size() <= 10 ) {
                     grounditems.back().front().invlet = '0' + grounditems.size() - 1;
                 } else {
                     grounditems.back().front().invlet = ' ';
                 }
-                dups.insert(here[i].tname());
+                dups.insert( item_iter->tname() );
 
-                ground_containers.push_back(&here[i]);
+                ground_containers.push_back( &*item_iter );
             }
         }
+    }
 
     for (size_t a = 0; a < grounditems.size(); a++) {
         // avoid INT_MIN, as it can be confused with "no item at all"
@@ -854,8 +856,6 @@ item *game::inv_map_for_liquid(const item &liquid, const std::string title, bool
     inv_s.make_item_list(stacks);
     inv_s.prepare_paging();
 
-    //return display_slice(reduced_inv, title);
-
     inventory_selector::drop_map prev_droppings;
     while (true) {
         inv_s.display();
@@ -866,6 +866,9 @@ item *game::inv_map_for_liquid(const item &liquid, const std::string title, bool
         if (item_pos != INT_MIN) {
             inv_s.set_to_drop(item_pos, 0);
             return inv_s.first_item;
+        } else if (ch >= '0' && ch <= '9' && (size_t)(ch - '0') < grounditems_slice.size()) {
+            const int ip = ch - '0';
+            return ground_containers[ip];
         } else if (inv_s.handle_movement(action)) {
             // continue with comparison below
         } else if (action == "QUIT") {
@@ -874,19 +877,13 @@ item *game::inv_map_for_liquid(const item &liquid, const std::string title, bool
 
             inv_s.set_selected_to_drop(0);
 
-            for (int i = 0; i < grounditems_slice.size(); i++) {
-                if (&grounditems_slice[i].first->front() == inv_s.first_item) {
-                    on_ground = true;
+            for( size_t i = 0; i < grounditems_slice.size(); i++) {
+                if( &grounditems_slice[i].first->front() == inv_s.first_item ) {
                     return ground_containers[i];
                 }
             }
 
             return inv_s.first_item;
-
-        } else if (ch >= '0' && ch <= '9' && (size_t)(ch - '0') < grounditems_slice.size()) {
-            on_ground = true;
-            const int ip = ch - '0';
-            return ground_containers[ip];
         }
     }
 }
@@ -1034,15 +1031,15 @@ void game::compare(int iCompareX, int iCompareY)
         const int item_pos = g->u.invlet_to_position(static_cast<char>(ch));
         if (item_pos != INT_MIN) {
             inv_s.set_to_drop(item_pos, 0);
+        } else if (ch >= '0' && ch <= '9' && (size_t) (ch - '0') < grounditems_slice.size()) {
+            const int ip = ch - '0';
+            inv_s.set_drop_count(INT_MIN + 1 + ip, 0, grounditems_slice[ip].first->front());
         } else if (inv_s.handle_movement(action)) {
             // continue with comparison below
         } else if (action == "QUIT") {
             break;
         } else if (action == "RIGHT") {
             inv_s.set_selected_to_drop(0);
-        } else if (ch >= '0' && ch <= '9' && (size_t) (ch - '0') < grounditems_slice.size()) {
-            const int ip = ch - '0';
-            inv_s.set_drop_count(INT_MIN + 1 + ip, 0, grounditems_slice[ip].first->front());
         }
         if (inv_s.second_item != NULL) {
             std::vector<iteminfo> vItemLastCh, vItemCh;

@@ -1,6 +1,7 @@
 #include <string>
 #include "veh_interact.h"
 #include "vehicle.h"
+#include "overmapbuffer.h"
 #include "game.h"
 #include "output.h"
 #include "catacharset.h"
@@ -357,7 +358,9 @@ void veh_interact::cache_tool_availability()
 
     long charges = dynamic_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
     has_wrench = crafting_inv.has_tools("func:wrench", 1);
-    has_hacksaw = crafting_inv.has_tools("func:hacksaw", 1);
+    has_hacksaw = crafting_inv.has_tools("func:hacksaw", 1) ||
+                  (crafting_inv.has_tools("circsaw_off", 1) &&
+                  crafting_inv.has_charges("circsaw_off", CIRC_SAW_USED));
     has_welder = crafting_inv.has_charges("func:welder", charges);
     has_goggles = (crafting_inv.has_tools("goggles_welding", 1) ||
                    g->u.has_bionic("bio_sunglasses") ||
@@ -556,10 +559,16 @@ void veh_interact::do_install()
                        engine_string.c_str());
         wrefresh (w_msg);
         const std::string action = main_context.handle_input();
-        if ((action == "INSTALL" || action == "CONFIRM")  && has_comps && has_tools && has_skill && has_skill2 &&
-             !(has_muscle_engine && eng) && !(has_muscle_engine && install_muscle_engine)) {
-            sel_cmd = 'i';
-            return;
+        if ((action == "INSTALL" || action == "CONFIRM")  && has_comps && has_tools && has_skill && has_skill2) {
+            if (!(has_muscle_engine && eng) && !((engines > 0) && install_muscle_engine)) {
+                sel_cmd = 'i';
+                return;
+            } else {
+                werase (w_msg);
+                fold_and_print(w_msg, 0, 1, msg_width - 2, c_ltred, _("That install would conflict with the existing drive system."));
+                wrefresh (w_msg);
+                return;
+            }
         } else if (action == "QUIT") {
             werase (w_list);
             wrefresh (w_list);
@@ -750,7 +759,7 @@ void veh_interact::do_refill()
                                  ammo_name(vehicle_part_types[ptanks[entry_num]->id].fuel_type).c_str(),
                                  vehicle_part_types[ptanks[entry_num]->id].name.c_str());
         }
-        fuel_choose.addentry(entry_num, true, 'q', "Cancel");
+        fuel_choose.addentry(entry_num, true, 'q', _("Cancel"));
         fuel_choose.query();
         pt_choise = fuel_choose.ret;
         if(pt_choise == entry_num) { // Select canceled
@@ -988,7 +997,9 @@ void veh_interact::do_rename()
     if(name.length() > 0) {
         (veh->name = name);
         if (veh->tracking_on) {
-            g->cur_om->vehicles[veh->om_id].name = name;
+            overmap_buffer.remove_vehicle( veh );
+            // Add the vehicle again, this time with the new name
+            overmap_buffer.add_vehicle( veh );
         }
     }
     display_grid();
@@ -1734,9 +1745,9 @@ void complete_vehicle ()
         if ( ! foundv.empty() ) {
             uimenu fmenu;
             fmenu.text = _("Fill what?");
-            fmenu.addentry("Nearby vehicle (%d)",foundv.size());
-            fmenu.addentry("Container");
-            fmenu.addentry("Never mind");
+            fmenu.addentry(_("Nearby vehicle (%d)"),foundv.size());
+            fmenu.addentry(_("Container"));
+            fmenu.addentry(_("Never mind"));
             fmenu.query();
             if ( fmenu.ret == 0 ) {
                 if ( foundv.size() > 1 ) {

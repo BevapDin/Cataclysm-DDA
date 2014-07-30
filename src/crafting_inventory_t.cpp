@@ -101,8 +101,8 @@ void crafting_inventory_t::complex_req::deserialize(crafting_inventory_t &cinv, 
         selected_simple_req_index = -1;
         selected_items.clear();
     } else {
-        simple_reqs[selected_simple_req_index].available = 1;
-        simple_reqs[selected_simple_req_index].comp->available = 1;
+        simple_reqs[selected_simple_req_index].available = a_true;
+        simple_reqs[selected_simple_req_index].comp->available = a_true;
     }
 }
 
@@ -392,7 +392,7 @@ void crafting_inventory_t::complex_req::add_or_merge(const simple_req &rs2) {
 }
 
 void crafting_inventory_t::complex_req::add(const component &c) {
-    c.available = -1;
+    c.available = a_false;
     requirement req(c, as_tool);
     simple_req rs2(req, &c);
     if(rs2.req.type.compare(0, 5, "func:") != 0) {
@@ -491,7 +491,7 @@ bool crafting_inventory_t::complex_req::is_possible() const {
 }
 
 bool crafting_inventory_t::simple_req::is_possible() const {
-    return available == 1;
+    return available == a_true;
 }
 
 void crafting_inventory_t::solution::gather(crafting_inventory_t &cinv, bool store) {
@@ -507,7 +507,7 @@ void crafting_inventory_t::complex_req::gather(crafting_inventory_t &cinv, bool 
     }
     for(size_t i = 0; i < simple_reqs.size(); i++) {
         simple_req &sr = simple_reqs[i];
-        sr.comp->available = std::max(sr.available, sr.comp->available);
+        sr.comp->available = (available_status) std::max<int>(sr.available, sr.comp->available);
     }
 }
 
@@ -647,7 +647,7 @@ void crafting_inventory_t::simple_req::separate(simple_req &other) {
     }
 }
 
-void crafting_inventory_t::simple_req::set_unavailable(int av) {
+void crafting_inventory_t::simple_req::set_unavailable(available_status av) {
     candidate_items.clear();
     cnt_on_player = 0;
     cnt_on_map = 0;
@@ -656,11 +656,11 @@ void crafting_inventory_t::simple_req::set_unavailable(int av) {
 
 void crafting_inventory_t::simple_req::gather(crafting_inventory_t &cinv, bool store) {
     if(req.count == 0) {
-        comp->available = +1;
+        comp->available = a_true;
         return;
     }
     assert(req.type.compare(0, 5, "func:") != 0);
-    comp->available = -1;
+    comp->available = a_false;
     if(store) {
         candidate_items.clear();
         cnt_on_player = cinv.collect_candidates(req, S_PLAYER, candidate_items);
@@ -668,11 +668,11 @@ void crafting_inventory_t::simple_req::gather(crafting_inventory_t &cinv, bool s
         for(candvec::iterator a = candidate_items.begin(); a != candidate_items.end(); ++a) {
             a->usageType = comp->type;
         }
-        available = ((cnt_on_map + cnt_on_player) >= req.count) ? +1 : -1;
+        available = ((cnt_on_map + cnt_on_player) >= req.count) ? a_true : a_false;
     } else {
-        available = cinv.has(req) ? +1 : -1;
+        available = cinv.has(req) ? a_true : a_false;
     }
-    for(size_t j = 0; available == 1 && j < overlays.size(); j++) {
+    for(size_t j = 0; available == a_true && j < overlays.size(); j++) {
         check_overlay(cinv, store, *overlays[j]);
     }
 }
@@ -692,7 +692,7 @@ bool crafting_inventory_t::complex_req::has_alternativ(const simple_req &sr) con
 
 void crafting_inventory_t::simple_req::check_overlay(crafting_inventory_t &cinv, bool store, simple_req &other) {
     assert(req.type == other.req.type);
-    if(other.available != 1) {
+    if(other.available != a_true) {
         // Might be possible if other needs more items than this
         return;
     }
@@ -731,19 +731,19 @@ void crafting_inventory_t::simple_req::check_overlay(crafting_inventory_t &cinv,
         }
         if(!_this.req_is_fullfilled() && !_other.req_is_fullfilled()) {
             // Neither is possible - is this case even possible?
-            set_unavailable(0);
-            other.set_unavailable(0);
+            set_unavailable(a_insufficent);
+            other.set_unavailable(a_insufficent);
             return;
         }
     }
     // Only one of both is possible, which one to choose?
     if(other.parent->has_alternativ(other)) {
         // we have an alternativ to the other, disable it.
-        other.set_unavailable(0);
+        other.set_unavailable(a_insufficent);
         return;
     }
     // Nope the other component is needed, deselect this one.
-    set_unavailable(0);
+    set_unavailable(a_insufficent);
 }
 
 std::string name(const itype_id &type) {
@@ -823,13 +823,13 @@ bool crafting_inventory_t::has_all_requirements(const requirements &making, solu
     return s.is_possible();
 }
 
-std::string avail_to_string(int a) {
+std::string avail_to_string(available_status a) {
     switch(a) {
-        case -1: return "-";
-        case +1: return "+";
-        case  0: return "#";
-        default: return "?";
+        case a_false: return "-";
+        case a_true: return "+";
+        case a_insufficent: return "#";
     }
+    return "?";
 }
 
 std::string crafting_inventory_t::solution::to_string(int flags) const {
@@ -857,10 +857,10 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
             } else {
                 if(j != 0) { buffer << " OR\n  "; }
                 last_comp = rc.comp;
-                int avail = rc.available;
+                available_status avail = rc.available;
                 for(size_t k = j + 1; avail != 1 && k < simple_reqs.size(); k++) {
                     if(simple_reqs[k].comp == last_comp) {
-                        avail = std::max(avail, simple_reqs[k].available);
+                        avail = (available_status)std::max<int>(avail, simple_reqs[k].available);
                     }
                 }
                 buffer << " " << avail_to_string(avail) << " ";
@@ -908,11 +908,11 @@ int crafting_inventory_t::count(const requirement &req, source_flags sources) co
 
 bool crafting_inventory_t::has(component &x, bool as_tool) const {
     if(has(requirement(x, as_tool))) {
-        x.available = 1;
+        x.available = a_true;
     } else {
-        x.available = -1;
+        x.available = a_false;
     }
-    return x.available == 1;
+    return x.available == a_true;
 }
 
 std::vector<item>& crafting_inventory_t::items_on_map::items() {
@@ -1541,7 +1541,7 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
     std::pair<std::pair<int, float>, const candidate_t*> bestTool(std::make_pair(-1, 0.0f), 0);
     for(size_t i = 0; i < simple_reqs.size(); i++) {
         const simple_req &sr = simple_reqs[i];
-        if(sr.available != 1) {
+        if(sr.available != a_true) {
             continue;
         }
         std::sort(simple_reqs[i].candidate_items.begin(), simple_reqs[i].candidate_items.end(), &sort_bylikeness);
@@ -2596,4 +2596,8 @@ void crafting_inventory_t::add_vpart(vehicle *veh, int mpart, const std::string 
         vpart_item.charges = veh->fuel_left(fuel);
     }
     vpart.push_back(item_from_vpart(veh, veh->parts[part].mount_dx, veh->parts[part].mount_dy, vpart_item));
+}
+
+void crafting_inventory_t::add_surround(const point &p, const item &it) {
+    surround.push_back(item_from_surrounding(p, it));
 }

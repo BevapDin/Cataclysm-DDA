@@ -369,7 +369,7 @@ public:
         /**
          * Indicates if this requirement is fullfilled.
          */
-        int available;
+        available_status available;
         complex_req *parent;
         std::vector<simple_req*> overlays;
         
@@ -427,7 +427,7 @@ public:
          * Otherwise adds the count and return true.
          */
         bool merge(const requirement &otherReq);
-        void set_unavailable(int av = -1);
+        void set_unavailable(available_status av = a_false);
         void separate(simple_req &other);
         void check_overlay(crafting_inventory_t &cinv, bool store, simple_req &other);
     };
@@ -925,6 +925,7 @@ public:
      */
     bool has_items_with_quality(const std::string &name, int level, int amount) const;
     
+    void add_surround(const point &p, const item &it);
 private:
     typedef std::map<itype_id, int> CacheMap;
     mutable CacheMap counted_by_charges;

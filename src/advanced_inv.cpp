@@ -25,11 +25,11 @@
 
 // should probably move to an adv_inv_pane class
 enum advanced_inv_sortby {
-    SORTBY_NONE = 1, SORTBY_NAME, SORTBY_WEIGHT, SORTBY_VOLUME, SORTBY_CHARGES, SORTBY_CATEGORY, SORTBY_DAMAGE, SORTBY_TYPE, NUM_SORTBY
+    SORTBY_NONE = 1, SORTBY_NAME, SORTBY_WEIGHT, SORTBY_VOLUME, SORTBY_CHARGES, SORTBY_CATEGORY, SORTBY_DAMAGE, NUM_SORTBY
 };
 
-std::string sortnames[10] = { "-none-", _("none"), _("name"), _("weight"), _("volume"),
-                                 _("charges"), _("category"), _("damage"), _("type"), "-" };
+const std::string sortnames[NUM_SORTBY] = { "-none-", _( "none" ), _( "name" ), _( "weight" ), _( "volume" ),
+                                            _( "charges" ), _( "category" ), _( "damage" ) };
 
 bool advanced_inventory::isDirectionalDragged(int area1, int area2)
 {
@@ -317,17 +317,9 @@ struct advanced_inv_sorter {
                 break;
             }
             case SORTBY_DAMAGE: {
-                if (d1.it != 0 && d2.it != 0) {
-                    if(d1.it->damage != d2.it->damage) {
+                if( d1.it != nullptr && d2.it != nullptr ) {
+                    if( d1.it->damage != d2.it->damage ) {
                         return d1.it->damage < d2.it->damage;
-                    }
-                }
-                break;
-            }
-            case SORTBY_TYPE: {
-                if (d1.it != 0 && d2.it != 0 && d1.it->type != 0 && d2.it->type != 0) {
-                    if(d1.it->type->nname(1) != d2.it->type->nname(1)) {
-                        return d1.it->type->nname(1) < d2.it->type->nname(1);
                     }
                 }
                 break;
@@ -565,7 +557,7 @@ void advanced_inventory::recalc_pane(int i)
             item &an_item = stacks[x]->front();
             advanced_inv_listitem it;
             it.name = an_item.tname();
-            it.name_without_prefix = an_item.tname( false );
+            it.name_without_prefix = an_item.tname( 1, false );
             if ( filtering && ! cached_lcmatch(it.name, panes[i].filter, panes[i].filtercache ) ) {
                 continue;
             }
@@ -627,7 +619,7 @@ void advanced_inventory::recalc_pane(int i)
 
                     it.idx = x;
                     it.name = an_item->tname();
-                    it.name_without_prefix = an_item->tname( false );
+                    it.name_without_prefix = an_item->tname( 1, false );
                     if ( filtering && ! cached_lcmatch(it.name, panes[i].filter, panes[i].filtercache ) ) {
                         continue;
                     }
@@ -769,7 +761,7 @@ void advanced_inventory::redraw_pane( int i )
     }
     draw_border(panes[i].window);
     mvwprintw(panes[i].window, 0, 3, _("< [s]ort: %s >"),
-              sortnames[ ( panes[i].sortby < NUM_SORTBY ? panes[i].sortby : 0 ) ].c_str() );
+              sortnames[ panes[i].sortby < NUM_SORTBY ? panes[i].sortby : 0 ].c_str() );
     int max = MAX_ITEM_IN_SQUARE;
     if ( panes[i].area == isall ) {
         max *= 9;
@@ -1692,7 +1684,6 @@ void advanced_inventory::display(player *pp)
             sm.entries.push_back(uimenu_entry(SORTBY_CHARGES, true, 'x', sortnames[SORTBY_CHARGES]));
             sm.entries.push_back(uimenu_entry(SORTBY_CATEGORY, true, 'c', sortnames[SORTBY_CATEGORY]));
             sm.entries.push_back(uimenu_entry(SORTBY_DAMAGE, true, 'd', sortnames[SORTBY_DAMAGE]));
-            sm.entries.push_back(uimenu_entry(SORTBY_TYPE, true, 't', sortnames[SORTBY_TYPE]));
             sm.selected = panes[src].sortby - 1; /* pre-select current sort. uimenu.selected is entries[index] (starting at 0), not return value */
             sm.query(); /* calculate key and window variables, generate window, and loop until we get a valid answer */
             if (sm.ret < 1) {
@@ -1757,7 +1748,7 @@ void advanced_inventory::display(player *pp)
             if(panes[src].area == isinventory ) {
                 ret = g->inventory_item_menu( item_pos, colstart + ( src == left ? w_width / 2 : 0 ),
                                               w_width / 2, (src == right ? 0 : -1) );
-                // if player has started an activaity, leave the screen and process it
+                // if player has started an activity, leave the screen and process it
                 if (!g->u.has_activity(ACT_NULL)) {
                     exit = true;
                 }

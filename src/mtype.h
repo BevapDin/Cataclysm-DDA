@@ -16,6 +16,8 @@
 #include "color.h"
 #include "field.h"
 
+typedef std::string itype_id;
+
 /*
   On altering any entries in this enum please add or remove the appropriate entry to the monster_names array in tile_id_data.h
 */
@@ -75,7 +77,7 @@ enum mon_id {
     mon_eyebot, mon_manhack, mon_skitterbot, mon_secubot, mon_hazmatbot, mon_copbot, mon_molebot,
     mon_tripod, mon_chickenbot, mon_tankbot, mon_turret, mon_exploder,
     // Hallucinations
-    mon_hallu_mom,
+    mon_hallu_mom, mon_hallu_multicooker,
     // Special monsters
     mon_generator, mon_player_blob,
     // 0.8 -> 0.9
@@ -135,7 +137,7 @@ enum monster_trigger {
 #define mfb(n) static_cast <unsigned long> (1 << (n))
 #endif
 enum m_flag {
-    MF_NULL = 0,            // Helps with setvector
+    MF_NULL = 0,            //
     MF_SEES,                // It can see you (and will run/follow)
     MF_VIS50,               // Vision -10
     MF_VIS40,               // Vision -20
@@ -268,6 +270,9 @@ public:
     //Used for corpses.
     field_id bloodType ();
     field_id gibType ();
+    // The item id of the meat items that are produced by this monster (or "null")
+    // if there is no matching item type. e.g. "veggy" for plant monsters.
+    itype_id get_meat_itype() const;
 };
 
 #endif

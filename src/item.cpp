@@ -245,19 +245,6 @@ void item::put_in(item payload)
 }
 const char ivaresc=001;
 
-
-/*
- * Old 1 line string output retained for mapbuffer
- */
-std::string item::save_info() const
-{
-    // doing this manually so as not to recurse
-    std::stringstream s;
-    JsonOut jsout(s);
-    serialize(jsout, false);
-    return s.str();
-}
-
 bool itag2ivar( std::string &item_tag, std::map<std::string, std::string> &item_vars ) {
     size_t pos = item_tag.find('=');
     if(item_tag.at(0) == ivaresc && pos != std::string::npos && pos >= 2 ) {
@@ -1186,7 +1173,7 @@ nc_color item::color(player *u) const
     return ret;
 }
 
-nc_color item::color_in_inventory()
+nc_color item::color_in_inventory() const
 {
     // This should be relevant only for the player,
     // npcs don't care about the color
@@ -2233,6 +2220,19 @@ bool item::is_watertight_container() const
     return ( is_container() != false && has_flag("WATERTIGHT") && has_flag("SEALS") );
 }
 
+bool item::is_container_empty() const
+{
+    return contents.empty();
+}
+
+bool item::is_container_full() const
+{
+    if (is_container_empty())
+        return false;
+
+    return get_remaining_capacity() == 0;
+}
+
 bool item::is_funnel_container(unsigned int &bigger_than) const
 {
     if ( ! is_watertight_container() ) {
@@ -3074,7 +3074,7 @@ int item::getlight_emit(bool calculate_dimming) const {
     if ( lumint == 0 ) {
         return 0;
     }
-    if ( calculate_dimming && has_flag("CHARGEDIM") && is_tool()) {
+    if ( calculate_dimming && has_flag("CHARGEDIM") && is_tool() && !has_flag("USE_UPS")) {
         it_tool * tool = dynamic_cast<it_tool *>(type);
         int maxcharge = tool->max_charges;
         if ( maxcharge > 0 ) {
@@ -3266,6 +3266,28 @@ void print_list(std::ostream &buffer, std::list<item> &items) {
     }
 }
 
+// Remaining capacity for currently stored liquid in container - do not call for empty container
+int item::get_remaining_capacity() const
+{
+    it_container *container = dynamic_cast<it_container *>(type);
+    int total_capacity = container->contains;
+
+    if (contents[0].is_food()) {
+        it_comest *tmp_comest = dynamic_cast<it_comest *>(contents[0].type);
+        total_capacity = container->contains * tmp_comest->charges;
+    } else if (contents[0].is_ammo()) {
+        it_ammo *tmp_ammo = dynamic_cast<it_ammo *>(contents[0].type);
+        total_capacity = container->contains * tmp_ammo->count;
+    }
+
+    int remaining_capacity = total_capacity;
+    if (!contents.empty()) {
+        remaining_capacity -= contents[0].charges;
+    }
+
+    return remaining_capacity;
+}
+
 int item::amount_of(const itype_id &it, bool used_as_tool) const
 {
     int count = 0;
@@ -3388,9 +3410,6 @@ bool item_matches_locator(const item &it, const itype_id &id, int) {
 }
 bool item_matches_locator(const item &, int locator_pos, int item_pos) {
     return item_pos == locator_pos;
-}
-bool item_matches_locator(const item &it, char invlet, int) {
-    return it.invlet == invlet;
 }
 
 iteminfo::iteminfo(std::string Type, std::string Name, std::string Fmt, double Value, bool _is_int, std::string Plus, bool NewLine, bool LowerIsBetter, bool DrawName) {
@@ -3595,4 +3614,29 @@ int item::butcher_factor() const
         }
     }
     return butcher_factor;
+}
+
+static const std::string USED_BY_IDS( "USED_BY_IDS" );
+bool item::already_used_by_player(const player &p) const
+{
+    const auto it = item_vars.find( USED_BY_IDS );
+    if( it == item_vars.end() ) {
+        return false;
+    }
+    // USED_BY_IDS always starts *and* ends with a ';', the search string
+    // ';<id>;' matches at most one part of USED_BY_IDS, and only when exactly that
+    // id has been added.
+    const std::string needle = string_format( ";%d;", p.getID() );
+    return it->second.find( needle ) != std::string::npos;
+}
+
+void item::mark_as_used_by_player(const player &p)
+{
+    std::string &used_by_ids = item_vars[ USED_BY_IDS ];
+    if( used_by_ids.empty() ) {
+        // *always* start with a ';'
+        used_by_ids = ";";
+    }
+    // and always end with a ';'
+    used_by_ids += string_format( "%d;", p.getID() );
 }
