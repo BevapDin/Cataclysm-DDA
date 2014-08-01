@@ -186,7 +186,7 @@
         "type": "CONTAINER",
         "symbol": ")",
         "color": "green",
-        "name": "plastic jerrycan",
+        "name": "jerrycan",
         "category": "other",
         "description": "A bulky plastic jerrycan, meant to carry fuel, but can carry other liquids in a pinch.  It has a capacity of 10 liters.",
         "price": 15000,
