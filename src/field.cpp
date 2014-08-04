@@ -15,210 +15,247 @@ void game::init_fields()
     field_t tmp_fields[num_fields] =
     {
         {
+            "fd_null",
             {"", "", ""}, '%', 0,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0}
         },
         {
+            "fd_blood",
             {_("blood splatter"), _("blood stain"), _("puddle of blood")}, '%', 0,
             {c_red, c_red, c_red}, {true, true, true}, {false, false, false}, 2500,
             {0,0,0}
         },
         {
+            "fd_bile",
             {_("bile splatter"), _("bile stain"), _("puddle of bile")}, '%', 0,
             {c_pink, c_pink, c_pink}, {true, true, true}, {false, false, false}, 2500,
             {0,0,0}
         },
 
         {
+            "fd_gibs_flesh",
             {_("scraps of flesh"), _("bloody meat chunks"), _("heap of gore")}, '~', 0,
             {c_brown, c_ltred, c_red}, {true, true, true}, {false, false, false}, 2500,
             {0,0,0}
         },
 
         {
+            "fd_gibs_veggy",
             {_("shredded leaves and twigs"), _("shattered branches and leaves"), _("broken vegetation tangle")}, '~', 0,
             {c_ltgreen, c_ltgreen, c_green}, {true, true, true}, {false, false, false}, 2500,
             {0,0,0}
         },
 
         {
+            "fd_web",
             {_("cobwebs"),_("webs"), _("thick webs")}, '}', 2,
             {c_white, c_white, c_white}, {true, true, false},{false, false, false}, 0,
             {0,0,0}
         },
 
         {
+            "fd_slime",
             {_("slime trail"), _("slime stain"), _("puddle of slime")}, '%', 0,
             {c_ltgreen, c_ltgreen, c_green},{true, true, true},{false, false, false}, 2500,
             {0,0,0}
         },
 
         {
+            "fd_acid",
             {_("acid splatter"), _("acid streak"), _("pool of acid")}, '5', 2,
             {c_ltgreen, c_green, c_green}, {true, true, true}, {true, true, true}, 10,
             {0,0,0}
         },
 
         {
+            "fd_sap",
             {_("sap splatter"), _("glob of sap"), _("pool of sap")}, '5', 2,
             {c_yellow, c_brown, c_brown}, {true, true, true}, {true, true, true}, 20,
             {0,0,0}
         },
 
         {
+            "fd_sludge",
             {_("thin sludge trail"), _("sludge trail"), _("thick sludge trail")}, '5', 2,
             {c_ltgray, c_dkgray, c_black}, {true, true, true}, {false, false, false}, 900,
             {0,0,0}
         },
 
         {
+            "fd_fire",
             {_("small fire"), _("fire"), _("raging fire")}, '4', 4,
             {c_yellow, c_ltred, c_red}, {true, true, true}, {true, true, true}, 800,
             {0,0,0}
         },
 
         {
+            "fd_rubble",
             {_("rubble heap"), _("rubble pile"), _("mountain of rubble")}, '#', 2,
             {c_dkgray, c_dkgray, c_dkgray}, {true, true, false},{false, false, false},  0,
             {0,0,0}
         },
 
         {
+            "fd_smoke",
             {_("thin smoke"), _("smoke"), _("thick smoke")}, '8', 8,
             {c_white, c_ltgray, c_dkgray}, {true, false, false},{false, true, true},  300,
             {0,0,0}
         },
         {
+            "fd_toxic_gas",
             {_("hazy cloud"),_("toxic gas"),_("thick toxic gas")}, '8', 8,
             {c_white, c_ltgreen, c_green}, {true, false, false},{false, true, true},  900,
             {0,0,0}
         },
 
         {
+            "fd_tear_gas",
             {_("hazy cloud"),_("tear gas"),_("thick tear gas")}, '8', 8,
             {c_white, c_yellow, c_brown}, {true, false, false},{true, true, true},   600,
             {0,0,0}
         },
 
         {
+            "fd_nuke_gas",
             {_("hazy cloud"),_("radioactive gas"), _("thick radioactive gas")}, '8', 8,
             {c_white, c_ltgreen, c_green}, {true, true, false}, {true, true, true},  1000,
             {0,0,0}
         },
 
         {
+            "fd_gas_vent",
             {_("gas vent"), _("gas vent"), _("gas vent")}, '%', 0,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0}
         },
 
         { // Fire Vents
+            "fd_fire_vent",
             {"", "", ""}, '&', 0,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0}
         },
 
         {
+            "fd_flame_burst",
             {_("fire"), _("fire"), _("fire")}, '5', 4,
             {c_red, c_red, c_red}, {true, true, true}, {true, true, true}, 0,
             {0,0,0}
         },
 
         {
+            "fd_electricity",
             {_("sparks"), _("electric crackle"), _("electric cloud")}, '9', 4,
             {c_white, c_cyan, c_blue}, {true, true, true}, {true, true, true}, 2,
             {0,0,0}
         },
 
         {
+            "fd_fatigue",
             {_("odd ripple"), _("swirling air"), _("tear in reality")}, '*', 8,
             {c_ltgray, c_dkgray, c_magenta},{true, true, false},{false, false, false},  0,
             {0,0,0}
         },
 
         { //Push Items
+            "fd_push_items",
             {"", "", ""}, '&', 0,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0}
         },
 
         { // shock vents
+            "fd_shock_vent",
             {"", "", ""}, '&', 0,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0}
         },
 
         { // acid vents
+            "fd_acid_vent",
             {"", "", ""}, '&', 0,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0}
         },
 
         { // plasma glow (for plasma weapons)
+            "fd_plasma",
             {_("faint plasma"), _("glowing plasma"), _("glaring plasma")}, '9', 4,
             {c_magenta, c_pink, c_white}, {true, true, true}, {false, false, false}, 2,
             {0,0,0}
         },
 
         { // laser beam (for laser weapons)
+            "fd_laser",
             {_("faint glimmer"), _("beam of light"), _("intense beam of light")}, '#', 4,
             {c_blue, c_ltblue, c_white}, {true, true, true}, {false, false, false}, 1,
             {0,0,0}
         },
         {
+            "fd_blood_veggy",
             {_("plant sap splatter"), _("plant sap stain"), _("puddle of resin")}, '%', 0,
             {c_ltgreen, c_ltgreen, c_ltgreen}, {true, true, true}, {false, false, false}, 2500,
             {0,0,0}
         },
         {
+            "fd_blood_insect",
             {_("bug blood splatter"), _("bug blood stain"), _("puddle of bug blood")}, '%', 0,
             {c_green, c_green, c_green}, {true, true, true}, {false, false, false}, 2500,
             {0,0,0}
         },
         {
+            "fd_blood_invertebrate",
             {_("hemolymph splatter"), _("hemolymph stain"), _("puddle of hemolymph")}, '%', 0,
             {c_ltgray, c_ltgray, c_ltgray}, {true, true, true}, {false, false, false}, 2500,
             {0,0,0}
         },
         {
+            "fd_gibs_insect",
             {_("shards of chitin"), _("shattered bug leg"), _("torn insect organs")}, '~', 0,
             {c_ltgreen, c_green, c_yellow}, {true, true, true}, {false, false, false}, 2500,
             {0,0,0}
         },
         {
+            "fd_gibs_invertebrate",
             {_("gooey scraps"), _("icky mess"), _("heap of squishy gore")}, '~', 0,
             {c_ltgray, c_ltgray, c_dkgray}, {true, true, true}, {false, false, false}, 2500,
             {0,0,0}
         },
         {
+            "fd_cigsmoke",
             {_("swirl of tobacco smoke"), _("tobacco smoke"), _("thick tobacco smoke")}, '%', 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  350,
             {0,0,0}
         },
         {
+            "fd_weedsmoke",
             {_("swirl of pot smoke"), _("pot smoke"), _("thick pot smoke")}, '%', 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  325,
             {0,0,0}
         },
 
         {
+            "fd_cracksmoke",
             {_("swirl of crack smoke"), _("crack smoke"), _("thick crack smoke")}, '%', 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  225,
             {0,0,0}
         },
         {
+            "fd_methsmoke",
             {_("swirl of meth smoke"), _("meth smoke"), _("thick meth smoke")}, '%', 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  275,
             {0,0,0}
         },
         {
+            "fd_bees",
             {_("some bees"), _("swarm of bees"), _("angry swarm of bees")}, '8', 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, true},{true, true, true},  1000,
             {0,0,0}
         },
 
         {
+            "fd_incendiary",
             {_("smoke"),_("airborne incendiary"), _("airborne incendiary")}, '8', 8,
             {c_white, c_ltred, c_ltred_red}, {true, true, false}, {true, true, true},  500,
             {0,0,0}
@@ -230,6 +267,16 @@ void game::init_fields()
     }
 }
 
+field_id field_from_ident(const std::string &field_ident)
+{
+    for( size_t i = 0; i < num_fields; i++) {
+        if( fieldlist[i].id == field_ident ) {
+            return static_cast<field_id>( i );
+        }
+    }
+    debugmsg( "unknown field ident %s", field_ident.c_str() );
+    return fd_null;
+}
 
 /*
 Function: spread_gas
@@ -1001,8 +1048,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
                                     if (g->u.posx == newp.x && g->u.posy == newp.y) {
                                         add_msg(m_bad, _("A %s hits you!"), tmp.tname().c_str());
                                         body_part hit = random_body_part();
-                                        int side = random_side(hit);
-                                        g->u.hit(NULL, hit, side, 6, 0);
+                                        g->u.hit(NULL, hit, 6, 0);
                                     }
                                     int npcdex = g->npc_at(newp.x, newp.y),
                                         mondex = g->mon_at(newp.x, newp.y);
@@ -1010,8 +1056,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
                                     if (npcdex != -1) {
                                         npc *p = g->active_npc[npcdex];
                                         body_part hit = random_body_part();
-                                        int side = random_side(hit);
-                                        p->hit(NULL, hit, side, 6, 0);
+                                        p->hit(NULL, hit, 6, 0);
                                         if (g->u_see(newp.x, newp.y)) {
                                             add_msg(_("A %s hits %s!"), tmp.tname().c_str(), p->name.c_str());
                                         }
@@ -1019,7 +1064,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
 
                                     if (mondex != -1) {
                                         monster *mon = &(g->zombie(mondex));
-                                        mon->hurt(6 - mon->get_armor_bash(bp_torso));
+                                        mon->apply_damage( nullptr, bp_torso, 6 - mon->get_armor_bash( bp_torso ) );
                                         if (g->u_see(newp.x, newp.y))
                                             add_msg(_("A %s hits the %s!"), tmp.tname().c_str(),
                                                        mon->name().c_str());
@@ -1274,20 +1319,22 @@ void map::step_in_field(int x, int y)
             //TODO: Add resistance to this with rubber shoes or something?
             if (cur->getFieldDensity() == 3 && !inside) {
                 add_msg(m_bad, _("The acid burns your legs and feet!"));
-                g->u.hit(NULL, bp_feet, 0, 0, rng(4, 10));
-                g->u.hit(NULL, bp_feet, 1, 0, rng(4, 10));
-                g->u.hit(NULL, bp_legs, 0, 0, rng(2,  8));
-                g->u.hit(NULL, bp_legs, 1, 0, rng(2,  8));
+                g->u.hit(NULL, bp_foot_l, 0, rng(4, 10));
+                g->u.hit(NULL, bp_foot_r, 0, rng(4, 10));
+                g->u.hit(NULL, bp_leg_l, 0, rng(2,  8));
+                g->u.hit(NULL, bp_leg_r, 0, rng(2,  8));
             } else if (cur->getFieldDensity() == 2 && !inside) {
-                g->u.hit(NULL, bp_feet, 0, 0, rng(2, 5));
-                g->u.hit(NULL, bp_feet, 1, 0, rng(2, 5));
-                g->u.hit(NULL, bp_legs, 0, 0, rng(1,  4));
-                g->u.hit(NULL, bp_legs, 1, 0, rng(1,  4));
+                add_msg(m_bad, _("The acid burns your legs and feet!"));
+                g->u.hit(NULL, bp_foot_l, 0, rng(2, 5));
+                g->u.hit(NULL, bp_foot_r, 0, rng(2, 5));
+                g->u.hit(NULL, bp_leg_l, 0, rng(1,  4));
+                g->u.hit(NULL, bp_leg_r, 0, rng(1,  4));
             } else if (!inside) {
-                g->u.hit(NULL, bp_feet, 0, 0, rng(1, 3));
-                g->u.hit(NULL, bp_feet, 1, 0, rng(1, 3));
-                g->u.hit(NULL, bp_legs, 0, 0, rng(0,  2));
-                g->u.hit(NULL, bp_legs, 1, 0, rng(0,  2));
+                add_msg(m_bad, _("The acid burns your legs and feet!"));
+                g->u.hit(NULL, bp_foot_l, 0, rng(1, 3));
+                g->u.hit(NULL, bp_foot_r, 0, rng(1, 3));
+                g->u.hit(NULL, bp_leg_l, 0, rng(0,  2));
+                g->u.hit(NULL, bp_leg_r, 0, rng(0,  2));
             }
             break;
 
@@ -1323,20 +1370,20 @@ void map::step_in_field(int x, int y)
             if (!g->u.has_active_bionic("bio_heatsink") && !g->u.is_wearing("rm13_armor_on")) { //heatsink or suit prevents ALL fire damage.
                 if (adjusted_intensity == 1) {
                     add_msg(m_bad, _("You burn your legs and feet!"));
-                    g->u.hit(NULL, bp_feet, 0, 0, rng(2, 6));
-                    g->u.hit(NULL, bp_feet, 1, 0, rng(2, 6));
-                    g->u.hit(NULL, bp_legs, 0, 0, rng(1, 4));
-                    g->u.hit(NULL, bp_legs, 1, 0, rng(1, 4));
+                    g->u.hit(NULL, bp_foot_l, 0, rng(2, 6));
+                    g->u.hit(NULL, bp_foot_r, 0, rng(2, 6));
+                    g->u.hit(NULL, bp_leg_l, 0, rng(1, 4));
+                    g->u.hit(NULL, bp_leg_r, 0, rng(1, 4));
                 } else if (adjusted_intensity == 2) {
                     add_msg(m_bad, _("You're burning up!"));
-                    g->u.hit(NULL, bp_legs, 0, 0,  rng(2, 6));
-                    g->u.hit(NULL, bp_legs, 1, 0,  rng(2, 6));
-                    g->u.hit(NULL, bp_torso, -1, 4, rng(4, 9));
+                    g->u.hit(NULL, bp_leg_l, 0,  rng(2, 6));
+                    g->u.hit(NULL, bp_leg_r, 0,  rng(2, 6));
+                    g->u.hit(NULL, bp_torso, 4, rng(4, 9));
                 } else if (adjusted_intensity == 3) {
                     add_msg(m_bad, _("You're set ablaze!"));
-                    g->u.hit(NULL, bp_legs, 0, 0, rng(2, 6));
-                    g->u.hit(NULL, bp_legs, 1, 0, rng(2, 6));
-                    g->u.hit(NULL, bp_torso, -1, 4, rng(4, 9));
+                    g->u.hit(NULL, bp_leg_l, 0, rng(2, 6));
+                    g->u.hit(NULL, bp_leg_r, 0, rng(2, 6));
+                    g->u.hit(NULL, bp_torso, 4, rng(4, 9));
                     g->u.add_effect("onfire", 5); //lasting fire damage only from the strongest fires.
                 }
             }
@@ -1416,9 +1463,9 @@ void map::step_in_field(int x, int y)
             if (inside) break; //fireballs can't touch you inside a car.
             if (!g->u.has_active_bionic("bio_heatsink") || !g->u.is_wearing("rm13_armor_on")) { //heatsink or suit stops fire.
                 add_msg(m_bad, _("You're torched by flames!"));
-                g->u.hit(NULL, bp_legs, 0, 0,  rng(2, 6));
-                g->u.hit(NULL, bp_legs, 1, 0,  rng(2, 6));
-                g->u.hit(NULL, bp_torso, -1, 4, rng(4, 9));
+                g->u.hit(NULL, bp_leg_l, 0,  rng(2, 6));
+                g->u.hit(NULL, bp_leg_r, 0,  rng(2, 6));
+                g->u.hit(NULL, bp_torso, 4, rng(4, 9));
             } else
                 add_msg(_("These flames do not burn you."));
             break;
@@ -1735,7 +1782,7 @@ void map::mon_in_field(int x, int y, monster *z)
                 } while (move_cost(newposx, newposy) == 0 && tries != 10);
 
                 if (tries == 10) {
-                    z->hurt( 9999 ); // trigger exploding
+                    z->die_in_explosion( nullptr );
                 } else {
                     int mon_hit = g->mon_at(newposx, newposy);
                     if (mon_hit != -1) {
@@ -1743,7 +1790,7 @@ void map::mon_in_field(int x, int y, monster *z)
                             add_msg(_("The %s teleports into a %s, killing them both!"),
                                        z->name().c_str(), g->zombie(mon_hit).name().c_str());
                         }
-                        g->zombie( mon_hit ).hurt( 9999 ); // trigger exploding
+                        g->zombie( mon_hit ).die_in_explosion( z );
                     } else {
                         z->setpos(newposx, newposy);
                     }
@@ -1789,7 +1836,7 @@ void map::mon_in_field(int x, int y, monster *z)
         ++field_list_it;
     }
     if (dam > 0) {
-        z->hurt(dam);
+        z->apply_damage( nullptr, bp_torso, dam );
     }
 }
 
@@ -1829,14 +1876,16 @@ void map::field_effect(int x, int y) //Applies effect of field immediately
       g->u.hp_cur[rng(0, num_hp_parts)] -= rng(0, 10);
       add_msg(m_bad, _("You are hit by the falling debris!"));
      }
-     if ((one_in(g->u.dex_cur)) && (((!(g->u.has_trait("LEG_TENT_BRACE")))) || (g->u.wearing_something_on(bp_feet))) ) {
+     if (one_in(g->u.dex_cur) && (!g->u.has_trait("LEG_TENT_BRACE") || g->u.footwear_factor() == 1 ||
+          (g->u.footwear_factor() == .5 && one_in(2))) ) {
       g->u.add_effect("downed", 2);
      }
      if (one_in(g->u.str_cur)) {
       g->u.add_effect("stunned", 2);
      }
     }
-    else if ((one_in(g->u.str_cur)) && ((!(g->u.has_trait("LEG_TENT_BRACE"))) || (g->u.wearing_something_on(bp_feet))) ) {
+    else if (one_in(g->u.str_cur) && (!g->u.has_trait("LEG_TENT_BRACE") || g->u.footwear_factor() == 1 ||
+              (g->u.footwear_factor() == .5 && one_in(2))) ) {
      add_msg(m_bad, _("You trip as you evade the falling debris!"));
      g->u.add_effect("downed", 1);
     }
@@ -1847,7 +1896,7 @@ void map::field_effect(int x, int y) //Applies effect of field immediately
    if (fdmon != -1 && fdmon < g->num_zombies()) {  //If there's a monster at (x,y)...
     monster* monhit = &(g->zombie(fdmon));
     int dam = 10;                             //This is a simplistic damage implementation. It can be improved, for instance to account for armor
-    monhit->hurt( dam );                      //Ideally an external disease-like system would handle this to make it easier to modify later
+    monhit->apply_damage( nullptr, bp_torso, dam ); //Ideally an external disease-like system would handle this to make it easier to modify later
    }
    if (fdnpc != -1) {
     if (fdnpc < g->active_npc.size() && !npc_inside) { //If there's an NPC at (x,y) and he's not in a covered vehicle...
@@ -1857,14 +1906,16 @@ void map::field_effect(int x, int y) //Applies effect of field immediately
        me->hp_cur[rng(0, num_hp_parts)] -= rng(0, 10);
       }
       // Not sure how to track what NPCs are wearing, and they're under revision anyway so leaving it checking player. :-/
-      if ((one_in(me->dex_cur)) && ( ((!(g->u.has_trait("LEG_TENT_BRACE")))) || (g->u.wearing_something_on(bp_feet)) ) ) {
+      if (one_in(me->dex_cur) && (!g->u.has_trait("LEG_TENT_BRACE") || g->u.footwear_factor() == 1 ||
+          (g->u.footwear_factor() == .5 && one_in(2))) ) {
        me->add_effect("downed", 2);
       }
       if (one_in(me->str_cur)) {
        me->add_effect("stunned", 2);
       }
      }
-     else if (me && (one_in(me->str_cur)) && ( ((!(g->u.has_trait("LEG_TENT_BRACE")))) || (g->u.wearing_something_on(bp_feet)) ) ) {
+     else if (me && one_in(me->str_cur) && (!g->u.has_trait("LEG_TENT_BRACE") || g->u.footwear_factor() == 1 ||
+               (g->u.footwear_factor() == .5 && one_in(2))) ) {
       me->add_effect("downed", 1);
      }
     }

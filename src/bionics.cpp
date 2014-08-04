@@ -196,7 +196,7 @@ void player::power_bionics()
                     }
                     mvwputch(wBio, list_start_y + i, second_column, type, active[i]->invlet);
                     mvwprintz(wBio, list_start_y + i, second_column + 2, type,
-                              (active[i]->powered ? _("%s - ON") : _("%s - %d PU / %d trns")),
+                              (active[i]->powered ? _("%s - ON") : _("%s - %d PU / %d turns")),
                               bionics[active[i]->id]->name.c_str(),
                               bionics[active[i]->id]->power_cost,
                               bionics[active[i]->id]->charge_time);
@@ -293,8 +293,7 @@ void player::power_bionics()
                                (weapon_id == "bio_claws_weapon" && bio_id == "bio_claws_weapon") ||
                                (weapon_id == "bio_blade_weapon" && bio_id == "bio_blade_weapon")) {
 
-
-                        //this will clear the bionics menu for targeting purposes
+                        // this will clear the bionics menu for targeting purposes
                         werase(wBio);
                         wrefresh(wBio);
                         delwin(w_title);
@@ -429,11 +428,11 @@ void player::activate_bionic(int b)
         add_msg(m_good, _("Your speed suddenly increases!"));
         if (one_in(3)) {
             add_msg(m_bad, _("Your muscles tear with the strain."));
-            hurt(bp_arms, 0, rng(5, 10));
-            hurt(bp_arms, 1, rng(5, 10));
-            hurt(bp_legs, 0, rng(7, 12));
-            hurt(bp_legs, 1, rng(7, 12));
-            hurt(bp_torso, -1, rng(5, 15));
+            apply_damage( nullptr, bp_arm_l, rng( 5, 10 ) );
+            apply_damage( nullptr, bp_arm_r, rng( 5, 10 ) );
+            apply_damage( nullptr, bp_leg_l, rng( 7, 12 ) );
+            apply_damage( nullptr, bp_leg_r, rng( 7, 12 ) );
+            apply_damage( nullptr, bp_torso, rng( 5, 15 ) );
         }
         if (one_in(5)) {
             add_disease("teleglow", rng(50, 400));
@@ -583,11 +582,8 @@ void player::activate_bionic(int b)
     }
     if(bio.id == "bio_leukocyte") {
         add_msg(m_neutral, _("You activate your leukocyte breeder system."));
-        if (health < 0) {
-            health = 0;
-        } else {
-            health += 5;
-        }
+        g->u.set_healthy(std::min(100, g->u.get_healthy() + 2));
+        g->u.mod_healthy_mod(20);
     }
     if(bio.id == "bio_geiger") {
         add_msg(m_info, _("Your radiation level: %d"), radiation);
@@ -699,7 +695,7 @@ void player::activate_bionic(int b)
                     item water = item("water_clean", 0);
                     if (g->handle_liquid(water, true, true)) {
                         moves -= 100;
-                    } else if (query_yn(_("Drink directly from the condensor?"))) {
+                    } else if (query_yn(_("Drink directly from the condenser?"))) {
                         inv.push_back(water);
                         consume(inv.position_by_type(water.typeId()));
                         moves -= 350;
@@ -734,7 +730,7 @@ void player::activate_bionic(int b)
                         for (it = traj.begin(); it != traj.end(); ++it) {
                             int index = g->mon_at(it->x, it->y);
                             if (index != -1) {
-                                g->zombie(index).hurt(tmp_item.weight() / 225, 0, this);
+                                g->zombie(index).apply_damage( this, bp_torso, tmp_item.weight() / 225 );
                                 g->m.add_item_or_charges(it->x, it->y, tmp_item);
                                 break;
                             } else if (it != traj.begin() && g->m.move_cost(it->x, it->y) == 0) {

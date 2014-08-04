@@ -203,73 +203,75 @@ int player::hit_roll()
  return dice(numdice, sides);
 }
 
-// Likelyhood to pick a reason
-struct reason_weight {
-    const char *reason;
-    unsigned int weight;
-};
-
-// Local class for picking a message from a weighted list.
-struct reason_weight_list {
-        reason_weight_list() : total_weight(0) { };
-
-        void add_item(const char *reason, unsigned int weight)
-        {
-            // ignore items with zero weight
-            if (weight != 0) {
-                reason_weight new_weight = { reason, weight };
-                items.push_back(new_weight);
-                total_weight += weight;
-            }
-        }
-
-        unsigned int pick_ent()
-        {
-            unsigned int picked = rng(0, total_weight);
-            unsigned int accumulated_weight = 0;
-            unsigned int i;
-            for(i = 0; i < items.size(); i++) {
-                accumulated_weight += items[i].weight;
-                if(accumulated_weight >= picked) {
-                    break;
-                }
-            }
-            return i;
-        }
-
-        const char *pick()
-        {
-            if (total_weight != 0) {
-                return items[ pick_ent() ].reason;
-            } else {
-                // if no items have been added, or only zero-weight items have
-                // been added, don't pick anything
-                return NULL;
-            }
-        }
-
-    private:
-        unsigned int total_weight;
-        std::vector<reason_weight> items;
-};
-
-const char *player::get_reason_for_miss()
+void reason_weight_list::add_item(const char *reason, unsigned int weight)
 {
-    // should include everything that lowers accuracy in player::hit_roll()
-    struct reason_weight_list list = reason_weight_list();
+    // ignore items with zero weight
+    if (weight != 0) {
+        reason_weight new_weight = { reason, weight };
+        items.push_back(new_weight);
+        total_weight += weight;
+    }
+}
 
-    list.add_item(_("Your torso encumbrance throws you off-balance."),
-                  encumb(bp_torso));
+unsigned int reason_weight_list::pick_ent()
+{
+    unsigned int picked = rng(0, total_weight);
+    unsigned int accumulated_weight = 0;
+    unsigned int i;
+    for(i = 0; i < items.size(); i++) {
+        accumulated_weight += items[i].weight;
+        if(accumulated_weight >= picked) {
+            break;
+        }
+    }
+    return i;
+}
 
+const char *reason_weight_list::pick()
+{
+    if (total_weight != 0) {
+        return items[ pick_ent() ].reason;
+    } else {
+        // if no items have been added, or only zero-weight items have
+        // been added, don't pick anything
+        return NULL;
+    }
+}
+
+void reason_weight_list::clear()
+{
+    total_weight = 0;
+    items.clear();
+}
+
+
+void player::add_miss_reason(const char *reason, unsigned int weight)
+{
+    melee_miss_reasons.add_item(reason, weight);
+
+}
+
+void player::clear_miss_reasons()
+{
+    melee_miss_reasons.clear();
+}
+
+const char *player::get_miss_reason()
+{
+    // everything that lowers accuracy in player::hit_roll()
+    // adding it in hit_roll() might not be safe if it's called multiple times
+    // in one turn
+    add_miss_reason(
+        _("Your torso encumbrance throws you off-balance."),
+        encumb(bp_torso));
     int farsightedness = 2 * (has_trait("HYPEROPIC")
                               && !is_wearing("glasses_reading")
                               && !is_wearing("glasses_bifocal"));
-    list.add_item(_("You can't hit reliably without your glasses."),
-                  farsightedness);
+    add_miss_reason(
+        _("You can't hit reliably without your glasses."),
+        farsightedness);
 
-    // TODO: include effects that indirectly lower accuracy, like those that
-    // decrease dexterity
-    return list.pick();
+    return melee_miss_reasons.pick();
 }
 
 // Melee calculation is in parts. This sets up the attack, then in deal_melee_attack,
@@ -301,7 +303,7 @@ void player::melee_attack(Creature &t, bool allow_special, matec_id force_techni
         if (is_player()) { // Only display messages if this is the player
 
             if (one_in(2)) {
-                const char* reason_for_miss = get_reason_for_miss();
+                const char* reason_for_miss = get_miss_reason();
                 if (reason_for_miss != NULL)
                     add_msg(reason_for_miss);
 	    }
@@ -474,7 +476,7 @@ bool player::scored_crit(int target_dodge)
   num_crits++;
 
 // Dexterity to-hit roll
-// ... except sometimes we don't use dexteiry!
+// ... except sometimes we don't use dexterity!
  int stat = dex_cur;
 
  chance = 25;
@@ -544,7 +546,8 @@ int player::get_dodge()
 
 int player::dodge_roll()
 {
-    if ( (is_wearing("roller_blades")) && one_in((get_dex() + skillLevel("dodge")) / 3 ) ) {
+    if ( (shoe_type_count("roller_blades") == 2 && one_in((get_dex() + skillLevel("dodge")) / 3 )) ||
+          (shoe_type_count("roller_blades") == 1 && one_in((get_dex() + skillLevel("dodge")) / 8 ))) {
         if (!has_disease("downed")) {
             add_msg_if_player(_("Fighting on wheels is hard!"));
         }
@@ -675,16 +678,29 @@ int player::roll_cut_damage(bool crit)
         unarmed_skill = 5;
     }
 
-    if (unarmed_attack() && !wearing_something_on(bp_hands)) {
-        if (has_trait("CLAWS") || has_trait("CLAWS_RETRACT"))
-            ret += 6;
-        if (has_bionic("bio_razors"))
-            ret += 4;
-        if (has_trait("TALONS"))
-            ret += 6 + (unarmed_skill > 8 ? 8 : unarmed_skill);
-        //TODO: add acidproof check back to slime hands (probably move it elsewhere)
-        if (has_trait("SLIME_HANDS"))
-            ret += rng(4, 6);
+    if (unarmed_attack()) {
+        if (wearing_something_on(bp_hand_l)) {
+            if (has_trait("CLAWS") || has_trait("CLAWS_RETRACT"))
+                ret += 3;
+            if (has_bionic("bio_razors"))
+                ret += 2;
+            if (has_trait("TALONS"))
+                ret += 3 + (unarmed_skill > 8 ? 4 : unarmed_skill / 2);
+            //TODO: add acidproof check back to slime hands (probably move it elsewhere)
+            if (has_trait("SLIME_HANDS"))
+                ret += rng(2, 3);
+        }
+        if (wearing_something_on(bp_hand_r)) {
+            if (has_trait("CLAWS") || has_trait("CLAWS_RETRACT"))
+                ret += 3;
+            if (has_bionic("bio_razors"))
+                ret += 2;
+            if (has_trait("TALONS"))
+                ret += 3 + (unarmed_skill > 8 ? 4 : unarmed_skill / 2);
+            //TODO: add acidproof check back to slime hands (probably move it elsewhere)
+            if (has_trait("SLIME_HANDS"))
+                ret += rng(2, 3);
+        }
     }
 
     if (ret <= 0)
@@ -708,16 +724,28 @@ int player::roll_stab_damage(bool crit)
     double ret = 0;
     //TODO: armor formula is z->get_armor_cut() - 3 * skillLevel("stabbing")
 
-    if (unarmed_attack() && !wearing_something_on(bp_hands)) {
+    if (unarmed_attack()) {
         ret = 0;
-        if (has_trait("CLAWS") || has_trait("CLAWS_RETRACT"))
-            ret += 6;
-        if (has_trait("NAILS"))
-            ret++;
-        if (has_bionic("bio_razors"))
-            ret += 4;
-        if (has_trait("THORNS"))
-            ret += 4;
+        if (!wearing_something_on(bp_hand_l)) {
+            if (has_trait("CLAWS") || has_trait("CLAWS_RETRACT"))
+                ret += 3;
+            if (has_trait("NAILS"))
+                ret += .5;
+            if (has_bionic("bio_razors"))
+                ret += 2;
+            if (has_trait("THORNS"))
+                ret += 2;
+        }
+        if (!wearing_something_on(bp_hand_r)) {
+            if (has_trait("CLAWS") || has_trait("CLAWS_RETRACT"))
+                ret += 3;
+            if (has_trait("NAILS"))
+                ret += .5;
+            if (has_bionic("bio_razors"))
+                ret += 2;
+            if (has_trait("THORNS"))
+                ret += 2;
+        }
     } else if (weapon.has_flag("SPEAR") || weapon.has_flag("STAB"))
         ret = weapon.damage_cut();
     else
@@ -1165,12 +1193,15 @@ bool player::can_weapon_block()
 }
 
 void player::dodge_hit(Creature *source, int) {
-    if (dodges_left < 1)
+    if( dodges_left < 1 ) {
         return;
+    }
 
     ma_ondodge_effects(); // fire martial arts block-triggered effects
 
     dodges_left--;
+
+    practice( "dodge", source->get_melee() * 2, source->get_melee() );
 
     // check if we have any dodge counters
     matec_id tec = pick_technique(*source, false, true, false);
@@ -1180,8 +1211,7 @@ void player::dodge_hit(Creature *source, int) {
     }
 }
 
-bool player::block_hit(Creature *source, body_part &bp_hit, int &side,
-                       damage_instance &dam) {
+bool player::block_hit(Creature *source, body_part &bp_hit, damage_instance &dam) {
 
     //Shouldn't block if player is asleep; this only seems to be used by player.
     //g->u.has_disease("sleep") would work as well from looking at other block functions.
@@ -1269,29 +1299,33 @@ bool player::block_hit(Creature *source, body_part &bp_hit, int &side,
 
     ma_onblock_effects(); // fire martial arts block-triggered effects
 
-    //weapon blocks are prefered to arm blocks
+    // weapon blocks are preferred to arm blocks
     std::string thing_blocked_with;
     if (can_weapon_block()) {
         thing_blocked_with = weapon.tname();
         handle_melee_wear();
     } else if (can_limb_block()) {
-        //Choose which body part to block with
+        //Choose which body part to block with, assume left side first
         if (can_leg_block() && can_arm_block()) {
-            bp_hit = one_in(2) ? bp_legs : bp_arms;
+            bp_hit = one_in(2) ? bp_leg_l : bp_arm_l;
         } else if (can_leg_block()) {
-            bp_hit = bp_legs;
+            bp_hit = bp_leg_l;
         } else {
-            bp_hit = bp_arms;
+            bp_hit = bp_arm_l;
         }
 
-        // Choose what side to block with.
-        if (bp_hit == bp_legs) {
-            side = hp_cur[hp_leg_r] > hp_cur[hp_leg_l];
+        // Check if we should actually use the right side to block
+        if (bp_hit == bp_leg_l) {
+            if (hp_cur[hp_leg_r] > hp_cur[hp_leg_l]) {
+                bp_hit = bp_leg_r;
+            }
         } else {
-            side = hp_cur[hp_arm_r] > hp_cur[hp_arm_l];
+            if (hp_cur[hp_arm_r] > hp_cur[hp_arm_l]) {
+                bp_hit = bp_arm_r;
+            }
         }
 
-        thing_blocked_with = body_part_name(bp_hit, side);
+        thing_blocked_with = body_part_name(bp_hit);
     }
 
     std::string damage_blocked_description;
@@ -1299,25 +1333,25 @@ bool player::block_hit(Creature *source, body_part &bp_hit, int &side,
     // none, hardly any, a little, some, most, all
     float blocked_ratio = (total_damage - damage_blocked) / total_damage;
     if( blocked_ratio < std::numeric_limits<float>::epsilon() ) {
-        //~ Ajective in "You block <adjective> of the damage with your <weapon>.
+        //~ Adjective in "You block <adjective> of the damage with your <weapon>.
         damage_blocked_description = _("all");
     } else if( blocked_ratio < 0.2 ) {
-        //~ Ajective in "You block <adjective> of the damage with your <weapon>.
+        //~ Adjective in "You block <adjective> of the damage with your <weapon>.
         damage_blocked_description = _("nearly all");
     } else if( blocked_ratio < 0.4 ) {
-        //~ Ajective in "You block <adjective> of the damage with your <weapon>.
+        //~ Adjective in "You block <adjective> of the damage with your <weapon>.
         damage_blocked_description = _("most");
     } else if( blocked_ratio < 0.6 ) {
-        //~ Ajective in "You block <adjective> of the damage with your <weapon>.
+        //~ Adjective in "You block <adjective> of the damage with your <weapon>.
         damage_blocked_description = _("a lot");
     } else if( blocked_ratio < 0.8 ) {
-        //~ Ajective in "You block <adjective> of the damage with your <weapon>.
+        //~ Adjective in "You block <adjective> of the damage with your <weapon>.
         damage_blocked_description = _("some");
     } else if( blocked_ratio > std::numeric_limits<float>::epsilon() ){
-        //~ Ajective in "You block <adjective> of the damage with your <weapon>.
+        //~ Adjective in "You block <adjective> of the damage with your <weapon>.
         damage_blocked_description = _("a little");
     } else {
-        //~ Ajective in "You block <adjective> of the damage with your <weapon>.
+        //~ Adjective in "You block <adjective> of the damage with your <weapon>.
         damage_blocked_description = _("none");
     }
     add_msg_player_or_npc( _("You block %s of the damage with your %s!"),
@@ -1441,9 +1475,9 @@ std::string player::melee_special_effects(Creature &t, damage_instance &d, ma_te
     //Hurting the wielder from poorly-chosen weapons
     if(weapon.has_flag("HURT_WHEN_WIELDED") && x_in_y(2, 3)) {
         add_msg_if_player(m_bad, _("The %s cuts your hand!"), weapon.tname().c_str());
-        deal_damage(NULL, bp_hands, 0, damage_instance::physical(0, weapon.damage_cut(), 0));
+        deal_damage(NULL, bp_hand_r, damage_instance::physical(0, weapon.damage_cut(), 0));
         if (weapon.is_two_handed(this)) { // Hurt left hand too, if it was big
-            deal_damage(NULL, bp_hands, 1, damage_instance::physical(0, weapon.damage_cut(), 0));
+            deal_damage(NULL, bp_hand_l, damage_instance::physical(0, weapon.damage_cut(), 0));
         }
     }
 
@@ -1464,10 +1498,10 @@ std::string player::melee_special_effects(Creature &t, damage_instance &d, ma_te
             g->m.add_item_or_charges(posx, posy, weapon.contents[i]);
         }
         // Take damage
-        deal_damage(this, bp_arms, 1, damage_instance::physical(0, rng(0, weapon.volume() * 2), 0));
+        deal_damage(this, bp_arm_r, damage_instance::physical(0, rng(0, weapon.volume() * 2), 0));
         if (weapon.is_two_handed(this)) {// Hurt left arm too, if it was big
             //redeclare shatter_dam because deal_damage mutates it
-            deal_damage(this, bp_arms, 0, damage_instance::physical(0, rng(0, weapon.volume() * 2), 0));
+            deal_damage(this, bp_arm_l, damage_instance::physical(0, rng(0, weapon.volume() * 2), 0));
         }
         d.add_damage(DT_CUT, rng(0, 5 + int(weapon.volume() * 1.5)));// Hurt the monster extra
         remove_weapon();
@@ -1520,8 +1554,11 @@ std::string player::melee_special_effects(Creature &t, damage_instance &d, ma_te
             //Sharp objects that injure wielder when pulled from hands (so cutting damage only)
             dump << std::endl << string_format(_("You are hurt by the %s being pulled from your hands!"),
                                                weapon.tname().c_str());
-            deal_damage( this, bp_hands, random_side(bp_hands),
-                         damage_instance::physical( 0, weapon.damage_cut() / 2, 0) );
+            if (one_in(2)) {
+                deal_damage( this, bp_hand_l, damage_instance::physical( 0, weapon.damage_cut() / 2, 0) );
+            } else {
+                deal_damage( this, bp_hand_r, damage_instance::physical( 0, weapon.damage_cut() / 2, 0) );
+            }
         }
     } else {
         if (d.total_damage() > 20) { // TODO: change this back to "if it would kill the monster"
@@ -1570,7 +1607,8 @@ std::vector<special_attack> player::mutation_attacks(Creature &t)
         ret.push_back(tmp);
     }
 
-    //Having lupine or croc jaws makes it much easier to sink your fangs into people; Ursine/Feline, not so much
+    // Having lupine or croc jaws makes it much easier to sink your fangs into people;
+    // Ursine/Feline, not so much
     if (has_trait("FANGS") && (!wearing_something_on(bp_mouth)) &&
         ((!has_trait("MUZZLE") && !has_trait("MUZZLE_LONG") &&
           one_in(20 - dex_cur - skillLevel("unarmed"))) ||

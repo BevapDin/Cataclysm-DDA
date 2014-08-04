@@ -869,7 +869,7 @@ bool map::vehproceed()
                 }
                 unboard_vehicle(x + veh->parts[ppl[ps]].precalc_dx[0],
                                      y + veh->parts[ppl[ps]].precalc_dy[0]);
-                g->fling_player_or_monster(psg, 0, mdir.dir() + rng(0, 60) - 30,
+                g->fling_creature(psg, mdir.dir() + rng(0, 60) - 30,
                                            (vel1 - psg->str_cur < 10 ? 10 :
                                             vel1 - psg->str_cur));
             } else if (veh->part_with_feature (ppl[ps], "CONTROLS") >= 0) {
@@ -1685,7 +1685,7 @@ bool map::bash(const int x, const int y, const int str, bool silent, int *res)
             furn_id furnid = furn(x, y);
             if ( furnid == f_skin_wall || furnid == f_skin_door || furnid == f_skin_door_o ||
                  furnid == f_skin_groundsheet || furnid == f_canvas_wall || furnid == f_canvas_door ||
-                 furnid == f_canvas_door_o || furnid == f_groundsheet ) {
+                 furnid == f_canvas_door_o || furnid == f_groundsheet) {
                 result = rng(0, 6);
                 if (res) {
                     *res = result;
@@ -1698,7 +1698,7 @@ bool map::bash(const int x, const int y, const int str, bool silent, int *res)
                         for (int j = -1; j <= 1; j++) {
                             if (furn(x + i, y + j) == f_groundsheet ||
                                 furn(x + i, y + j) == f_fema_groundsheet ||
-                                furn(x + i, y + j) == f_skin_groundsheet)  {
+                                furn(x + i, y + j) == f_skin_groundsheet){
                                 tentx = x + i;
                                 tenty = y + j;
                                 break;
@@ -1722,6 +1722,49 @@ bool map::bash(const int x, const int y, const int str, bool silent, int *res)
                         }
                     }
 
+                    sound_volume = 8;
+                    sound = _("rrrrip!");
+                    smashed_something = true;
+                } else {
+                    sound_volume = 8;
+                    sound = _("slap!");
+                    smashed_something = true;
+                }
+            }
+            // Made furniture seperate from the other tent to facilitate destruction
+            else if (furnid == f_center_groundsheet || furnid == f_large_groundsheet ||
+                     furnid == f_large_canvas_door || furnid == f_large_canvas_wall ||
+                     furnid == f_large_canvas_door_o) {
+                result = rng(0, 6);
+                if (res) {
+                    *res = result;
+                }
+                if (str >= result) {
+                    // Special code to collapse the tent if destroyed
+                    int tentx = -1, tenty = -1;
+                    // Find the center of the tent
+                    for (int i = -2; i <= 2; i++) {
+                        for (int j = -2; j <= 2; j++) {
+                            if (furn(x + i, y + j) == f_center_groundsheet){
+                                tentx = x + i;
+                                tenty = y + j;
+                                break;
+                            }
+                        }
+                    }
+                    // Never found tent center, bail out
+                    if (tentx == -1 && tenty == -1) {
+                        smashed_something = true;
+                    }
+                    // Take the tent down
+                    for (int i = -2; i <= 2; i++) {
+                        for (int j = -2; j <= 2; j++) {
+                             if (furn(tentx + i, tenty + j) == f_center_groundsheet) {
+                             spawn_item(tentx + i, tenty + j, "largebroketent");
+                            }
+                            furn_set(tentx + i, tenty + j, f_null);
+                        }
+                    }
                     sound_volume = 8;
                     sound = _("rrrrip!");
                     smashed_something = true;
@@ -2622,6 +2665,40 @@ void map::spawn_items(const int x, const int y, const std::vector<item> &new_ite
         if (new_item.is_armor() && new_item.has_flag("VARSIZE") && one_in(3))
         {
             new_item.item_tags.insert("FIT");
+        }
+        if (new_item.is_armor() && new_item.has_flag("PAIRED") && x_in_y(4, 5)) {
+            //Clear old side info
+            it_armor* armor = dynamic_cast<it_armor*>(new_item.type);
+            new_item.covers = armor->covers;
+            if (new_item.has_flag("RIGHT")) {
+                new_item.item_tags.erase("RIGHT");
+            }
+            if (new_item.has_flag("LEFT")) {
+                new_item.item_tags.erase("LEFT");
+            }
+            //Clone unsided item
+            item new_item2 = new_item;
+            
+            //Add new sides to both items
+            new_item.item_tags.insert("LEFT");
+            new_item2.item_tags.insert("RIGHT");
+            if (new_item.type->is_sided(bp_arm_l)) {
+                new_item.covers.set(bp_arm_l);
+                new_item2.covers.set(bp_arm_r);
+            }
+            if (new_item.type->is_sided(bp_hand_l)) {
+                new_item.covers.set(bp_hand_l);
+                new_item2.covers.set(bp_hand_r);
+            }
+            if (new_item.type->is_sided(bp_leg_l)) {
+                new_item.covers.set(bp_leg_l);
+                new_item2.covers.set(bp_leg_r);
+            }
+            if (new_item.type->is_sided(bp_foot_l)) {
+                new_item.covers.set(bp_foot_l);
+                new_item2.covers.set(bp_foot_r);
+            }
+            add_item_or_charges(x, y, new_item2);
         }
         add_item_or_charges(x, y, new_item);
     }
@@ -5134,7 +5211,17 @@ void map::draw_rough_circle(std::string type, int x, int y, int rad) {
 
 void map::add_corpse(int x, int y) {
     item body;
-    body.make_corpse("corpse", GetMType("mon_null"), 0);
+
+    const bool isReviveSpecial = one_in(10);
+
+    if (!isReviveSpecial){
+        body.make_corpse("corpse", GetMType("mon_null"), 0);
+    } else {
+        body.make_corpse("corpse", GetMType("mon_zombie"), 0);
+        body.item_tags.insert("REVIVE_SPECIAL");
+        body.active = true;
+    }
+
     add_item_or_charges(x, y, body);
     put_items_from("shoes",  1, x, y, 0, 0, 0);
     put_items_from("pants",  1, x, y, 0, 0, 0);

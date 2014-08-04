@@ -237,7 +237,7 @@ void monster::get_Attitude(nc_color &color, std::string &text) const
             break;
         case MATT_ZLAVE:
             color = c_green;
-            text = _("Zlave ");
+            text = _("Zombie slave ");
             break;
         default:
             color = h_red;
@@ -654,74 +654,17 @@ bool monster::is_dead_state() const {
 void monster::dodge_hit(Creature *, int) {
 }
 
-bool monster::block_hit(Creature *, body_part &, int &, damage_instance &) {
+bool monster::block_hit(Creature *, body_part &, damage_instance &) {
     return false;
 }
 
-void monster::absorb_hit(body_part, int, damage_instance &dam) {
+void monster::absorb_hit(body_part, damage_instance &dam) {
     for (std::vector<damage_unit>::iterator it = dam.damage_units.begin();
             it != dam.damage_units.end(); ++it) {
         it->amount -= std::min(resistances(*this).get_effective_resist(*it),
                 it->amount);
     }
 }
-
-int monster::hit(Creature &p, body_part &bp_hit) {
- int ret = 0;
- int highest_hit = 0;
-
-    //If the player is knocked down or the monster can fly, any body part is a valid target
-    if(p.is_on_ground() || has_flag(MF_FLIES)){
-        highest_hit = 20;
-    } else {
-        switch (type->size) {
-        case MS_TINY:
-            highest_hit = 3;
-            break;
-        case MS_SMALL:
-            highest_hit = 12;
-            break;
-        case MS_MEDIUM:
-            highest_hit = 20;
-            break;
-        case MS_LARGE:
-            highest_hit = 28;
-            break;
-        case MS_HUGE:
-            highest_hit = 35;
-            break;
-        }
-        if (digging()){
-            highest_hit -= 8;
-        }
-        if (highest_hit <= 1){
-            highest_hit = 2;
-        }
-    }
-
-    if (highest_hit > 20){
-        highest_hit = 20;
-    }
-
-
-    int bp_rand = rng(0, highest_hit - 1);
-    if (bp_rand <=  2){
-        bp_hit = bp_legs;
-    } else if (bp_rand <= 10){
-        bp_hit = bp_torso;
-    } else if (bp_rand <= 14){
-        bp_hit = bp_arms;
-    } else if (bp_rand <= 16){
-        bp_hit = bp_mouth;
-    } else if (bp_rand == 17){
-        bp_hit = bp_eyes;
-    } else{
-        bp_hit = bp_head;
-    }
-    ret += dice(type->melee_dice, type->melee_sides);
-    return ret;
-}
-
 
 void monster::melee_attack(Creature &target, bool, matec_id) {
     mod_moves(-100);
@@ -752,57 +695,6 @@ void monster::melee_attack(Creature &target, bool, matec_id) {
         }
     }
 
-    /* TODO: height-related bodypart selection
-    //If the player is knocked down or the monster can fly, any body part is a valid target
-    if(target.is_on_ground() || has_flag(MF_FLIES)){
-        highest_hit = 20;
-    }
-    else {
-        switch (type->size) {
-        case MS_TINY:
-            highest_hit = 3;
-        break;
-        case MS_SMALL:
-            highest_hit = 12;
-        break;
-        case MS_MEDIUM:
-            highest_hit = 20;
-        break;
-        case MS_LARGE:
-            highest_hit = 28;
-        break;
-        case MS_HUGE:
-            highest_hit = 35;
-        break;
-        }
-        if (digging()){
-            highest_hit -= 8;
-        }
-        if (highest_hit <= 1){
-            highest_hit = 2;
-        }
-    }
-
-    if (highest_hit > 20){
-        highest_hit = 20;
-    }
-
-    int bp_rand = rng(0, highest_hit - 1);
-    if (bp_rand <=  2){
-        bp_hit = bp_legs;
-    } else if (bp_rand <= 10){
-        bp_hit = bp_torso;
-    } else if (bp_rand <= 14){
-        bp_hit = bp_arms;
-    } else if (bp_rand <= 16){
-        bp_hit = bp_mouth;
-    } else if (bp_rand == 18){
-        bp_hit = bp_eyes;
-    } else{
-        bp_hit = bp_head;
-    }
-    */
-
     dealt_damage_instance dealt_dam;
     int hitspread = target.deal_melee_attack(this, hitroll);
     if (hitspread >= 0) {
@@ -828,34 +720,32 @@ void monster::melee_attack(Creature &target, bool, matec_id) {
     } else if (is_hallucination() || dealt_dam.total_damage() > 0) {
         if (target.is_player()) {
             if (u_see_me) {
-                //~ 1$s is attaker name, 2$s is bodypart name in accusative.
+                //~ 1$s is attacker name, 2$s is bodypart name in accusative.
                 add_msg(m_bad, _("The %1$s hits your %2$s."), name().c_str(),
-                        body_part_name_accusative(bp_hit, random_side(bp_hit)).c_str());
+                        body_part_name_accusative(bp_hit).c_str());
             } else {
-                //~ %s is is bodypart name in accusative.
+                //~ %s is bodypart name in accusative.
                 add_msg(m_bad, _("Something hits your %s."),
-                        body_part_name_accusative(bp_hit, random_side(bp_hit)).c_str());
+                        body_part_name_accusative(bp_hit).c_str());
             }
         } else {
             if (u_see_me) {
-                //~ 1$s is attaker name, 2$s is target name, 3$s is bodypart name in accusative.
+                //~ 1$s is attacker name, 2$s is target name, 3$s is bodypart name in accusative.
                 add_msg(_("The %1$s hits %2$s %3$s."), name().c_str(),
-                        target.disp_name(true).c_str(),
-                        body_part_name_accusative(bp_hit, random_side(bp_hit)).c_str());
+                            target.disp_name(true).c_str(),
+                            body_part_name_accusative(bp_hit).c_str());
             }
         }
     } else {
         if (target.is_player()) {
             if (u_see_me) {
-                //~ 1$s is attaker name, 2$s is bodypart name in accusative, 3$s is armor name
-                add_msg(_("The %1$s hits your %2$s, but your %3$s protects you."),name().c_str(),
-                        body_part_name_accusative(bp_hit, random_side(bp_hit)).c_str(),
-                        target.skin_name().c_str());
+                //~ 1$s is attacker name, 2$s is bodypart name in accusative, 3$s is armor name
+                add_msg(_("The %1$s hits your %2$s, but your %3$s protects you."), name().c_str(),
+                        body_part_name_accusative(bp_hit).c_str(), target.skin_name().c_str());
             } else {
                 //~ 1$s is bodypart name in accusative, 2$s is armor name.
                 add_msg(_("Something hits your %1$s, but your %2$s protects you."),
-                        body_part_name_accusative(bp_hit, random_side(bp_hit)).c_str(),
-                        target.skin_name().c_str());
+                        body_part_name_accusative(bp_hit).c_str(), target.skin_name().c_str());
             }
         } else {
             if (u_see_me) {
@@ -863,7 +753,7 @@ void monster::melee_attack(Creature &target, bool, matec_id) {
                 //~ $3s is target bodypart name in accusative, 4$s is target armor name.
                 add_msg(_("The %1$s hits %2$s %3$s but is stopped by %2$s %4$s."), name().c_str(),
                             target.disp_name(true).c_str(),
-                            body_part_name_accusative(bp_hit, random_side(bp_hit)).c_str(),
+                            body_part_name_accusative(bp_hit).c_str(),
                             target.skin_name().c_str());
             }
         }
@@ -898,9 +788,9 @@ void monster::melee_attack(Creature &target, bool, matec_id) {
     }
 }
 
-void monster::hit_monster(int i)
+void monster::hit_monster(monster &other)
 {
- monster* target = &(g->zombie(i));
+ monster* target = &other;
  moves -= 100;
 
  if (this == target) {
@@ -925,28 +815,27 @@ void monster::hit_monster(int i)
  if (g->u_see(this))
   add_msg(_("The %s hits the %s!"), name().c_str(), target->name().c_str());
  int damage = dice(type->melee_dice, type->melee_sides);
- target->hurt(damage);
+ target->apply_damage( this, bp_torso, damage );
 }
 
 int monster::deal_melee_attack(Creature *source, int hitroll)
 {
     mdefense mdf;
-    if(!is_hallucination() && source != NULL)
-        {
+    if(!is_hallucination() && source != NULL) {
         (mdf.*type->sp_defense)(this, NULL);
-        }
+    }
     return Creature::deal_melee_attack(source, hitroll);
 }
 
 int monster::deal_projectile_attack(Creature *source, double missed_by,
                                     const projectile& proj, dealt_damage_instance &dealt_dam) {
     bool u_see_mon = g->u_see(this);
-    if (has_flag(MF_HARDTOSHOOT) && !one_in(10 - 10 * (.8 - missed_by)) && // Maxes out at 50% chance with perfect hit
-            !proj.wide) {
-        if (u_see_mon)
-            add_msg(_("The shot passes through %s without hitting."),
-            disp_name().c_str());
-        return 0;
+    // Maxes out at 50% chance with perfect hit
+    if (has_flag(MF_HARDTOSHOOT) && !one_in(10 - 10 * (.8 - missed_by)) && !proj.wide) {
+        if (u_see_mon) {
+            add_msg(_("The shot passes through %s without hitting."), disp_name().c_str());
+        }
+        return 1;
     }
     // Not HARDTOSHOOT
     // if it's a headshot with no head, make it not a headshot
@@ -954,14 +843,13 @@ int monster::deal_projectile_attack(Creature *source, double missed_by,
         missed_by = 0.2;
     }
     mdefense mdf;
-     if(!is_hallucination() && source != NULL)
-        {
+    if(!is_hallucination() && source != NULL) {
         (mdf.*type->sp_defense)(this, &proj);
-        }
+    }
 
     // whip has a chance to scare wildlife
     if(proj.proj_effects.count("WHIP") && type->in_category("WILDLIFE") && one_in(3)) {
-            add_effect("run", rng(3, 5));
+        add_effect("run", rng(3, 5));
     }
 
     return Creature::deal_projectile_attack(source, missed_by, proj, dealt_dam);
@@ -1006,30 +894,11 @@ void monster::deal_damage_handle_type(const damage_unit& du, body_part bp, int& 
     Creature::deal_damage_handle_type(du, bp, damage, pain);
 }
 
-void monster::apply_damage(Creature* source, body_part bp, int side, int amount) {
-    // monsters don't have bodyparts
-    (void) bp;
-    (void) side;
-    hurt(amount, 0, source);
-}
-
-void monster::hurt(body_part, int, int dam) {
-    hurt(dam, 0, nullptr);
-}
-
-void monster::hurt(int dam) {
-    hurt(dam, 0, nullptr);
-}
-
-void monster::hurt( int dam, int real_dam, Creature *source )
-{
+void monster::apply_damage(Creature* source, body_part /*bp*/, int dam) {
     if( dead ) {
         return;
     }
     hp -= dam;
-    if( real_dam > 0 ) {
-        hp = std::max( hp, -real_dam );
-    }
     if( hp < 1 ) {
         die( source );
     } else if( dam > 0 ) {
@@ -1037,17 +906,23 @@ void monster::hurt( int dam, int real_dam, Creature *source )
     }
 }
 
+void monster::die_in_explosion(Creature* source)
+{
+    hp = -9999; // huge to trigger explosion and prevent corpse item
+    die( source );
+}
+
 int monster::get_armor_cut(body_part bp)
 {
     (void) bp;
-// TODO: Add support for worn armor?
- return int(type->armor_cut) + armor_bash_bonus;
+    // TODO: Add support for worn armor?
+    return int(type->armor_cut) + armor_bash_bonus;
 }
 
 int monster::get_armor_bash(body_part bp)
 {
     (void) bp;
- return int(type->armor_bash) + armor_cut_bonus;
+    return int(type->armor_bash) + armor_cut_bonus;
 }
 
 int monster::hit_roll() {
@@ -1064,6 +939,11 @@ int monster::get_dodge()
  if (moves <= 0 - 100 - type->speed)
   ret = rng(0, ret);
  return ret + get_dodge_bonus();
+}
+
+int monster::get_melee() const
+{
+    return type->melee_skill;
 }
 
 int monster::dodge_roll()
@@ -1280,20 +1160,20 @@ void monster::process_effects()
         std::string id = effect_it->second.get_id();
         if (id == "nasty_poisoned") {
             speed -= rng(3, 5);
-            hurt(rng(3, 6));
+            apply_damage( nullptr, bp_torso, rng( 3, 6 ) );
         } if (id == "poisoned") {
             speed -= rng(0, 3);
-            hurt(rng(1, 3));
+            apply_damage( nullptr, bp_torso, rng( 1, 3 ) );
 
         // MATERIALS-TODO: use fire resistance
         } else if (id == "onfire") {
             if (made_of("flesh") || made_of("iflesh"))
-                hurt(rng(3, 8));
+                apply_damage( nullptr, bp_torso, rng( 3, 8 ) );
             if (made_of("veggy"))
-                hurt(rng(10, 20));
+                apply_damage( nullptr, bp_torso, rng( 10, 20 ) );
             if (made_of("paper") || made_of("powder") || made_of("wood") || made_of("cotton") ||
                 made_of("wool"))
-                hurt(rng(15, 40));
+                apply_damage( nullptr, bp_torso, rng( 15, 40 ) );
         }
     }
 

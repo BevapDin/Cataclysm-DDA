@@ -28,6 +28,7 @@
 #include "savegame.h"
 #include "tile_id_data.h" // for monster::json_save
 #include <ctime>
+#include <bitset>
 
 #include "json.h"
 
@@ -130,6 +131,7 @@ void player::json_load_common_variables(JsonObject & data)
     data.read("dex_cur",dex_cur);      data.read("dex_max",dex_max);
     data.read("int_cur",int_cur);      data.read("int_max",int_max);
     data.read("per_cur",per_cur);      data.read("per_max",per_max);
+    data.read("healthy",healthy);      data.read("healthy_mod",healthy_mod);
     data.read("hunger",hunger);        data.read("thirst",thirst);
     data.read("fatigue",fatigue);      data.read("stim",stim);
     data.read("pain",pain);            data.read("pkill",pkill);
@@ -226,6 +228,9 @@ void player::json_save_common_variables(JsonOut &json) const
     json.member( "dex_cur", dex_cur );      json.member( "dex_max", dex_max );
     json.member( "int_cur", int_cur );      json.member( "int_max", int_max );
     json.member( "per_cur", per_cur );      json.member( "per_max", per_max );
+    
+    // Healthy values
+    json.member( "healthy", healthy );      json.member( "healthy_mod", healthy_mod );
 
     // om-noms or lack thereof
     json.member( "hunger", hunger );        json.member( "thirst", thirst );
@@ -336,9 +341,6 @@ void player::serialize(JsonOut &json, bool save_contents) const
     json.member( "focus_pool", focus_pool );
     json.member( "style_selected", style_selected );
 
-    // possibly related to illness[] ?
-    json.member( "health", health );
-
     // crafting etc
     json.member( "activity", activity );
     json.member( "backlog", activity );
@@ -435,38 +437,34 @@ void player::deserialize(JsonIn &jsin)
     data.read( "focus_pool", focus_pool);
     data.read( "style_selected", style_selected );
 
-    data.read( "health", health );
-
     data.read( "mutations", my_mutations );
 
     set_highest_cat_level();
     drench_mut_calc();
 
     parray = data.get_array("temp_cur");
-    if ( parray.size() == num_bp ) {
-        for(int i=0; i < num_bp; i++) {
-            temp_cur[i]=parray.get_int(i);
-        }
-    } else {
-        debugmsg("Error, incompatible temp_cur in save file %s",parray.str().c_str());
+    for(int i = 0; i < num_bp; i++) {
+        temp_cur[i] = 5000;
+    }
+    for(int i = 0; i < parray.size(); i++) {
+        temp_cur[i]=parray.get_int(i);
     }
 
+
     parray = data.get_array("temp_conv");
-    if ( parray.size() == num_bp ) {
-        for(int i=0; i < num_bp; i++) {
-            temp_conv[i]=parray.get_int(i);
-        }
-    } else {
-        debugmsg("Error, incompatible temp_conv in save file %s",parray.str().c_str());
+    for(int i = 0; i < num_bp; i++) {
+        temp_conv[i] = 5000;
+    }
+    for(int i = 0; i < parray.size(); i++) {
+        temp_conv[i]=parray.get_int(i);
     }
 
     parray = data.get_array("frostbite_timer");
-    if ( parray.size() == num_bp ) {
-        for(int i=0; i < num_bp; i++) {
-            frostbite_timer[i]=parray.get_int(i);
-        }
-    } else {
-        debugmsg("Error, incompatible frostbite_timer in save file %s",parray.str().c_str());
+    for(int i = 0; i < num_bp; i++) {
+        frostbite_timer[i] = 0;
+    }
+    for(int i = 0; i < parray.size(); i++) {
+        frostbite_timer[i]=parray.get_int(i);
     }
 
     parray = data.get_array("learned_recipes");
@@ -969,6 +967,7 @@ void item::deserialize(JsonObject &data)
     int lettmp = 0;
     std::string corptmp = "null";
     int damtmp = 0;
+    std::bitset<13> tmp_covers;
 
     if ( ! data.read( "typeid", idtmp) ) {
         debugmsg("Invalid item type: %s ", data.str().c_str() );
@@ -977,6 +976,7 @@ void item::deserialize(JsonObject &data)
 
     data.read( "charges", charges );
     data.read( "burnt", burnt );
+    
     data.read( "poison", poison );
     data.read( "owned", owned );
 
@@ -1033,6 +1033,45 @@ void item::deserialize(JsonObject &data)
     } else {
         curammo = NULL;
     }
+    
+    data.read( "covers", tmp_covers );
+    if (is_armor() && tmp_covers.none()) {
+        it_armor* armor = dynamic_cast<it_armor*>(itypes[idtmp]);
+        covers = armor->covers;
+        if (armor->sided.any()) {
+            bool left = one_in(2);
+            if (armor->sided.test(bp_arm_l)) {
+                if (left == true) {
+                    covers.set(bp_arm_l);
+                } else {
+                    covers.set(bp_arm_r);
+                }
+            }
+            if (armor->sided.test(bp_hand_l)) {
+                if (left == true) {
+                    covers.set(bp_hand_l);
+                } else {
+                    covers.set(bp_hand_r);
+                }
+            }
+            if (armor->sided.test(bp_leg_l)) {
+                if (left == true) {
+                    covers.set(bp_leg_l);
+                } else {
+                    covers.set(bp_leg_r);
+                }
+            }
+            if (armor->sided.test(bp_foot_l)) {
+                if (left == true) {
+                    covers.set(bp_foot_l);
+                } else {
+                    covers.set(bp_foot_r);
+                }
+            }
+        }
+    } else {
+        covers = tmp_covers;
+    }
 
     data.read("item_tags", item_tags);
 
@@ -1081,6 +1120,7 @@ void item::serialize(JsonOut &json, bool save_contents) const
     if ( charges != -1 )     json.member( "charges", long(charges) );
     if ( damage != 0 )       json.member( "damage", int(damage) );
     if ( burnt != 0 )        json.member( "burnt", burnt );
+    if ( covers != 0 )       json.member( "covers", covers );    
     if ( poison != 0 )       json.member( "poison", poison );
     if ( ammotmp != "null" ) json.member( "curammo", ammotmp );
     if ( mode != "NULL" )    json.member( "mode", mode );
@@ -1188,6 +1228,26 @@ void vehicle_part::serialize(JsonOut &json) const
 }
 
 /*
+ * label
+ */
+void label::deserialize(JsonIn &jsin)
+{
+    JsonObject data = jsin.get_object();
+    data.read("x", x);
+    data.read("y", y);
+    data.read("text", text);
+}
+
+void label::serialize(JsonOut &json) const
+{
+    json.start_object();
+    json.member("x", x);
+    json.member("y", y);
+    json.member("text", text);
+    json.end_object();
+}
+
+/*
  * Load vehicle from a json blob that might just exceed player in size.
  */
 void vehicle::deserialize(JsonIn &jsin)
@@ -1239,6 +1299,7 @@ void vehicle::deserialize(JsonIn &jsin)
     refresh();
 
     data.read("tags",tags);
+    data.read("labels", labels);
 
     // Note that it's possible for a vehicle to be loaded midway
     // through a turn if the player is driving REALLY fast and their
@@ -1286,6 +1347,7 @@ void vehicle::serialize(JsonOut &json) const
     json.member( "name", name );
     json.member( "parts", parts );
     json.member( "tags", tags );
+    json.member( "labels", labels );
     json.end_object();
 }
 

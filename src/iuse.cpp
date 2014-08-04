@@ -23,11 +23,6 @@
 
 #define RADIO_PER_TURN 25 // how many characters per turn of radio
 
-// mfb(n) converts a flag to its appropriate position in covers's bitfield
-#ifndef mfb
-#define mfb(n) static_cast <unsigned long> (1 << (n))
-#endif
-
 #include "iuse_software.h"
 
 void remove_double_ammo_mod( item &it, player &p )
@@ -160,8 +155,8 @@ static bool inscribe_item(player *p, std::string verb, std::string gerund, bool 
     return item_inscription(p, cut, verb, gerund, carveable);
 }
 
-// For an exxplosion (which releases some kind of gas), this functions
-// calculates the points around that explosin where to create those
+// For an explosion (which releases some kind of gas), this function
+// calculates the points around that explosion where to create those
 // gas fields.
 // Those points must have a clear line of sight and a clear path to
 // the center of the explosion.
@@ -278,7 +273,7 @@ static hp_part body_window(player *p, item *, std::string item_name,
         (p->has_disease("bite", bp_head)) ||
         // By rights "bleed" ought to enable itself via HP loss, but...
         (p->has_disease("bleed", bp_head)) || force) {
-        color = g->limb_color(p, bp_head, -1, bleed, bite, infect);
+        color = g->limb_color(p, bp_head, bleed, bite, infect);
         if (color != c_ltgray || head_bonus != 0) {
             mvwprintz(hp_window, 2, 1, color, _("1: Head"));
             allowed_result[hp_head] = true;
@@ -288,47 +283,47 @@ static hp_part body_window(player *p, item *, std::string item_name,
         (p->has_disease("infected", bp_torso)) ||
         (p->has_disease("bite", bp_torso)) ||
         (p->has_disease("bleed", bp_torso)) || force) {
-        color = g->limb_color(p, bp_torso, -1, bleed, bite, infect);
+        color = g->limb_color(p, bp_torso, bleed, bite, infect);
         if (color != c_ltgray || torso_bonus != 0) {
             mvwprintz(hp_window, 3, 1, color, _("2: Torso"));
             allowed_result[hp_torso] = true;
         }
     }
     if (p->hp_cur[hp_arm_l] < p->hp_max[hp_arm_l] ||
-        (p->has_disease("infected", bp_arms, 0)) ||
-        (p->has_disease("bite", bp_arms, 0)) ||
-        (p->has_disease("bleed", bp_arms, 0)) || force) {
-        color = g->limb_color(p, bp_arms, 0, bleed, bite, infect);
+        (p->has_disease("infected", bp_arm_l)) ||
+        (p->has_disease("bite", bp_arm_l)) ||
+        (p->has_disease("bleed", bp_arm_l)) || force) {
+        color = g->limb_color(p, bp_arm_l, bleed, bite, infect);
         if (color != c_ltgray || normal_bonus != 0) {
             mvwprintz(hp_window, 4, 1, color, _("3: Left Arm"));
             allowed_result[hp_arm_l] = true;
         }
     }
     if (p->hp_cur[hp_arm_r] < p->hp_max[hp_arm_r] ||
-        (p->has_disease("infected", bp_arms, 1)) ||
-        (p->has_disease("bite", bp_arms, 1)) ||
-        (p->has_disease("bleed", bp_arms, 1)) || force) {
-        color = g->limb_color(p, bp_arms, 1, bleed, bite, infect);
+        (p->has_disease("infected", bp_arm_r)) ||
+        (p->has_disease("bite", bp_arm_r)) ||
+        (p->has_disease("bleed", bp_arm_r)) || force) {
+        color = g->limb_color(p, bp_arm_r, bleed, bite, infect);
         if (color != c_ltgray || normal_bonus != 0) {
             mvwprintz(hp_window, 5, 1, color, _("4: Right Arm"));
             allowed_result[hp_arm_r] = true;
         }
     }
     if (p->hp_cur[hp_leg_l] < p->hp_max[hp_leg_l] ||
-        (p->has_disease("infected", bp_legs, 0)) ||
-        (p->has_disease("bite", bp_legs, 0)) ||
-        (p->has_disease("bleed", bp_legs, 0)) || force) {
-        color = g->limb_color(p, bp_legs, 0, bleed, bite, infect);
+        (p->has_disease("infected", bp_leg_l)) ||
+        (p->has_disease("bite", bp_leg_l)) ||
+        (p->has_disease("bleed", bp_leg_l)) || force) {
+        color = g->limb_color(p, bp_leg_l, bleed, bite, infect);
         if (color != c_ltgray || normal_bonus != 0) {
             mvwprintz(hp_window, 6, 1, color, _("5: Left Leg"));
             allowed_result[hp_leg_l] = true;
         }
     }
     if (p->hp_cur[hp_leg_r] < p->hp_max[hp_leg_r] ||
-        (p->has_disease("infected", bp_legs, 1)) ||
-        (p->has_disease("bite", bp_legs, 1)) ||
-        (p->has_disease("bleed", bp_legs, 1)) || force) {
-        color = g->limb_color(p, bp_legs, 1, bleed, bite, infect);
+        (p->has_disease("infected", bp_leg_r)) ||
+        (p->has_disease("bite", bp_leg_r)) ||
+        (p->has_disease("bleed", bp_leg_r)) || force) {
+        color = g->limb_color(p, bp_leg_r, bleed, bite, infect);
         if (color != c_ltgray || normal_bonus != 0) {
             mvwprintz(hp_window, 7, 1, color, _("6: Right Leg"));
             allowed_result[hp_leg_r] = true;
@@ -392,9 +387,9 @@ static hp_part body_window(player *p, item *, std::string item_name,
             healed_part = hp_torso;
         } else if (ch == '3') {
             if ((p->hp_cur[hp_arm_l] == 0) &&
-                (!((p->has_disease("infected", bp_arms, 0)) ||
-                   (p->has_disease("bite", bp_arms, 0)) ||
-                   (p->has_disease("bleed", bp_arms, 0))))) {
+                (!((p->has_disease("infected", bp_arm_l)) ||
+                   (p->has_disease("bite", bp_arm_l)) ||
+                   (p->has_disease("bleed", bp_arm_l))))) {
                 p->add_msg_if_player(m_info, _("That arm is broken.  It needs surgical attention."));
                 healed_part = num_hp_parts;
             } else {
@@ -402,9 +397,9 @@ static hp_part body_window(player *p, item *, std::string item_name,
             }
         } else if (ch == '4') {
             if ((p->hp_cur[hp_arm_r] == 0) &&
-                (!((p->has_disease("infected", bp_arms, 1)) ||
-                   (p->has_disease("bite", bp_arms, 1)) ||
-                   (p->has_disease("bleed", bp_arms, 1))))) {
+                (!((p->has_disease("infected", bp_arm_r)) ||
+                   (p->has_disease("bite", bp_arm_r)) ||
+                   (p->has_disease("bleed", bp_arm_r))))) {
                 p->add_msg_if_player(m_info, _("That arm is broken.  It needs surgical attention."));
                 healed_part = num_hp_parts;
             } else {
@@ -412,9 +407,9 @@ static hp_part body_window(player *p, item *, std::string item_name,
             }
         } else if (ch == '5') {
             if ((p->hp_cur[hp_leg_l] == 0) &&
-                (!((p->has_disease("infected", bp_legs, 0)) ||
-                   (p->has_disease("bite", bp_legs, 0)) ||
-                   (p->has_disease("bleed", bp_legs, 0))))) {
+                (!((p->has_disease("infected", bp_leg_l)) ||
+                   (p->has_disease("bite", bp_leg_l)) ||
+                   (p->has_disease("bleed", bp_leg_l))))) {
                 p->add_msg_if_player(m_info, _("That leg is broken.  It needs surgical attention."));
                 healed_part = num_hp_parts;
             } else {
@@ -422,9 +417,9 @@ static hp_part body_window(player *p, item *, std::string item_name,
             }
         } else if (ch == '6') {
             if ((p->hp_cur[hp_leg_r] == 0) &&
-                (!((p->has_disease("infected", bp_legs, 1)) ||
-                   (p->has_disease("bite", bp_legs, 1)) ||
-                   (p->has_disease("bleed", bp_legs, 1))))) {
+                (!((p->has_disease("infected", bp_leg_r)) ||
+                   (p->has_disease("bite", bp_leg_r)) ||
+                   (p->has_disease("bleed", bp_leg_r))))) {
                 p->add_msg_if_player(m_info, _("That leg is broken.  It needs surgical attention."));
                 healed_part = num_hp_parts;
             } else {
@@ -520,35 +515,36 @@ static hp_part use_healing_item(player *p, item *it, int normal_power, int head_
     if ((p->hp_cur[healed] >= 1) && (dam > 0)) { // Prevent first-aid from mending limbs
         p->heal(healed, dam);
     } else if ((p->hp_cur[healed] >= 1) && (dam < 0)) {
-        p->hurt(healed, -dam); //hurt takes + damage
+        body_part bp;
+        p->hp_convert( healed, bp );
+        p->apply_damage( nullptr, bp, -dam ); //hurt takes + damage
     }
 
     body_part bp_healed = bp_torso;
-    int side = -1;
-    p->hp_convert(healed, bp_healed, side);
+    p->hp_convert(healed, bp_healed);
 
-    if (p->has_disease("bleed", bp_healed, side)) {
+    if (p->has_disease("bleed", bp_healed)) {
         if (x_in_y(bleed, 100)) {
-            p->rem_disease("bleed", bp_healed, side);
+            p->rem_disease("bleed", bp_healed);
             p->add_msg_if_player(m_good, _("You stop the bleeding."));
         } else {
             p->add_msg_if_player(_("You fail to stop the bleeding."));
         }
     }
-    if (p->has_disease("bite", bp_healed, side)) {
+    if (p->has_disease("bite", bp_healed)) {
         if (x_in_y(bite, 100)) {
-            int bite_dur = p->disease_duration("bite", false, bp_healed, side);
-            p->rem_disease("bite", bp_healed, side);
+            int bite_dur = p->disease_duration("bite", false, bp_healed);
+            p->rem_disease("bite", bp_healed);
             p->add_disease("recover", 2 * (3601 - bite_dur) - 4800);
             p->add_msg_if_player(m_good, _("You clean the wound."));
         } else {
             p->add_msg_if_player(m_warning, _("Your wound still aches."));
         }
     }
-    if (p->has_disease("infected", bp_healed, side)) {
+    if (p->has_disease("infected", bp_healed)) {
         if (x_in_y(infect, 100)) {
-            int infected_dur = p->disease_duration("infected", false, bp_healed, side);
-            p->rem_disease("infected", bp_healed, side);
+            int infected_dur = p->disease_duration("infected", false, bp_healed);
+            p->rem_disease("infected", bp_healed);
             if (infected_dur > 8401) {
                 p->add_disease("recover", 3 * (14401 - infected_dur + 3600) - 4800);
             } else {
@@ -569,8 +565,8 @@ int iuse::bandage(player *p, item *it, bool)
         return false;
     }
     if (num_hp_parts != use_healing_item(p, it, 3, 1, 4, 90, 0, 0, false)) {
-        if (it->type->id != "quikclot") {
-            // Make bandages and rags take arbitrarily longer than hemostatic powder.
+        if (it->type->id != "quikclot" || "bfipowder") {
+            // Make bandages and rags take arbitrarily longer than hemostatic/antiseptic powders.
             p->moves -= 100;
         }
         return it->type->charges_to_use();
@@ -746,13 +742,11 @@ int iuse::alcohol(player *p, item *it, bool)
     it_comest *food = dynamic_cast<it_comest *> (it->type);
     if (p->has_trait("ALCMET")) {
         duration = 180 - (10 * p->str_max);
-        // Metabolizing the booze improves the nutritional
-        // value; might not be healthy, and still
-        // causes Thirst problems, though
+        // Metabolizing the booze improves the nutritional value; 
+        // might not be healthy, and still causes Thirst problems, though
         p->hunger -= (abs(food->stim));
         // Metabolizing it cancels out depressant
-        // effects, but doesn't make it any more
-        // stimulating
+        // effects, but doesn't make it any more stimulating
         if ((food->stim) < 0) {
             p->stim += (abs(food->stim));
         }
@@ -774,9 +768,8 @@ int iuse::alcohol_weak(player *p, item *it, bool)
     it_comest *food = dynamic_cast<it_comest *> (it->type);
     if (p->has_trait("ALCMET")) {
         duration = 90 - (6 * p->str_max);
-        // Metabolizing the booze improves the nutritional
-        // value; might not be healthy, and still
-        // cuses Thirst problems, though
+        // Metabolizing the booze improves the nutritional value; 
+        // might not be healthy, and still causes Thirst problems, though
         p->hunger -= (abs(food->stim));
         // Metabolizing it cancels out the depressant
         p->stim += (abs(food->stim));
@@ -916,7 +909,6 @@ int iuse::smoking_pipe(player *p, item *it, bool)
             weed_msg(p);
         }
     }
-
     return 0;
 }
 
@@ -1299,13 +1291,7 @@ int iuse::meth(player *p, item *it, bool)
 int iuse::vitamins(player *p, item *it, bool)
 {
     p->add_msg_if_player(_("You take some vitamins."));
-    if (p->health >= 10) {
-        return it->type->charges_to_use();
-    } else if (p->health >= 0) {
-        p->health = 10;
-    } else {
-        p->health += 10;
-    }
+    p->mod_healthy_mod(50);
     return it->type->charges_to_use();
 }
 
@@ -1313,13 +1299,7 @@ int iuse::vaccine(player *p, item *it, bool)
 {
     p->add_msg_if_player(_("You inject the vaccine."));
     p->add_msg_if_player(m_good, _("You feel tough."));
-    if (p->health >= 100) {
-        return it->type->charges_to_use();
-    } else if (p->health >= 0) {
-        p->health = 100;
-    } else {
-        p->health += 100;
-    }
+    p->mod_healthy_mod(200);
     p->mod_pain(3);
     return it->type->charges_to_use();
 }
@@ -1671,7 +1651,7 @@ int iuse::mut_iv(player *p, item *it, bool)
         p->add_msg_if_player(_("You took that shot like a champ!"));
         p->mutate_category("MUTCAT_ALPHA");
         p->mod_pain(3 * rng(1, 5));
-        //Alpha doesn't make a lot of massive morphologial changes, so less nutrients needed.
+        // Alpha doesn't make a lot of massive morphological changes, so less nutrients needed.
         p->hunger += 3;
         p->fatigue += 5;
         p->thirst += 3;
@@ -2783,7 +2763,7 @@ int iuse::extinguisher(player *p, item *it, bool)
                 p->add_msg_if_player(_("The %s is frozen!"), g->zombie(mondex).name().c_str());
             }
             monster &critter = g->zombie( mondex );
-            critter.hurt( rng( 20, 60 ), 0, p );
+            critter.apply_damage( p, bp_torso, rng( 20, 60 ) );
             critter.speed /= 2;
         }
     }
@@ -2948,10 +2928,9 @@ static bool cauterize_effect(player *p, item *it, bool force = true)
             p->add_msg_if_player(m_neutral, _("It itches a little."));
         }
         body_part bp = num_bp;
-        int side = -1;
-        p->hp_convert(hpart, bp, side);
-        if (p->has_disease("bite", bp, side)) {
-            g->u.add_disease("bite", 2600, false, 1, 1, 0, -1, bp, side, true);
+        p->hp_convert(hpart, bp);
+        if (p->has_disease("bite", bp)) {
+            g->u.add_disease("bite", 2600, false, 1, 1, 0, -1, bp, true);
         }
         return true;
     }
@@ -5029,7 +5008,7 @@ int iuse::granade_act(player *, item *it, bool t)
                         if (zid != -1 &&
                             (g->zombie(zid).type->in_species("INSECT") ||
                              g->zombie(zid).is_hallucination())) {
-                            g->zombie( zid ).hurt( 9999 ); // trigger exploding
+                            g->zombie( zid ).die_in_explosion( nullptr );
                         }
                     }
                 }
@@ -5739,7 +5718,7 @@ int iuse::tazer(player *p, item *it, bool)
         p->add_msg_if_player(m_good, _("You shock the %s!"), z->name().c_str());
         int shock = rng(5, 25);
         z->moves -= shock * 100;
-        z->hurt( shock, 0, p );
+        z->apply_damage( p, bp_torso, shock );
         return it->type->charges_to_use();
     }
 
@@ -5833,7 +5812,7 @@ int iuse::tazer2(player *p, item *it, bool)
             p->add_msg_if_player(m_good, _("You shock the %s!"), z->name().c_str());
             int shock = rng(5, 25);
             z->moves -= shock * 100;
-            z->hurt( shock, 0, p );
+            z->apply_damage( p, bp_torso, shock );
 
             return 100;
         }
@@ -6208,10 +6187,10 @@ void make_zlave(player *p)
         tolerance_level = 7;
     }
 
-    const bool tolerance = p->skillLevel("survival") > tolerance_level;
-
-    if (!tolerance && p->morale_level() <= -150) {
-        add_msg(m_neutral, _("It's too awful."));
+    // Survival skill increases your willingness to get things done,
+    // but it doesn't make you feel any less bad about it.
+    if( p->morale_level() <= (15 * (tolerance_level - p->skillLevel("survival") )) - 150 ) {
+        add_msg(m_neutral, _("The prospect of cutting up the copse and letting it rise again as a slave is too much for you to deal with right now."));
         return;
     }
 
@@ -6231,15 +6210,11 @@ void make_zlave(player *p)
         return;
     }
 
-    if (tolerance) {
-
-        if (p->has_trait("PSYCHOPATH")) {
-            add_msg(m_neutral, _("Meh. Saves you having to carry stuff."));
-        } else {
-            add_msg(m_neutral, _("Well, it's more constructive than just chopping 'em into gooey meat..."));
-        }
+    if( tolerance_level == 0 ) {
+        // You just don't care, no message.
+    } else if( tolerance_level <= 5 ) {
+        add_msg(m_neutral, _("Well, it's more constructive than just chopping 'em into gooey meat..."));
     } else {
-
         add_msg(m_bad, _("You feel horrible for mutilating and enslaving someone's corpse."));
 
         int moraleMalus = -50 * (5.0 / (float) p->skillLevel("survival"));
@@ -6264,19 +6239,22 @@ void make_zlave(player *p)
     item *body = corpses[selected_corpse];
     mtype *mt = body->corpse;
 
-    int hard = body->damage * 10 + mt->hp / 2 + mt->speed / 2 + (1 + mt->melee_skill) *
-               (1 + mt->melee_cut) * (1 + mt->melee_sides);
-    int skills = p->skillLevel("survival") * p->int_cur + p->skillLevel("firstaid") * p->int_cur *
-                 p->dex_cur / 3;
+    // HP range for zombies is roughly 36 to 120, with the really big ones having 180 and 480 hp.
+    // Speed range is 20 - 120 (for humanoids, dogs get way faster)
+    // This gives us a difficulty ranging rougly from 10 - 40, with up to +25 for corpse damage.
+    // An average zombie with an undamaged corpse is 0 + 8 + 14 = 22.
+    int difficulty = (body->damage * 5) + (mt->hp / 10) + (mt->speed / 5);
+    // 0 - 30
+    int skills = p->skillLevel("survival") + p->skillLevel("firstaid") + (p->dex_cur / 2);
+    skills *= 2;
 
-    int success = skills - hard - rng(1, 100);
+    int success = rng(0, skills) - rng(0, difficulty);
 
-    const int moves = hard * 1200 / p->skillLevel("firstaid");
+    const int moves = difficulty * 1200 / p->skillLevel("firstaid");
 
     p->assign_activity(ACT_MAKE_ZLAVE, moves);
     p->activity.values.push_back(success);
     p->activity.str_values.push_back(corpses[selected_corpse]->display_name());
-    p->moves = 0;
 }
 
 int iuse::knife(player *p, item *it, bool t)
@@ -6306,7 +6284,7 @@ int iuse::knife(player *p, item *it, bool t)
         }
     }
 
-    if( p->skillLevel("survival") > 4 && p->skillLevel("firstaid") > 3 ) {
+    if( p->skillLevel("survival") > 1 && p->skillLevel("firstaid") > 1 ) {
         kmenu.addentry(make_slave, true, 'z', _("Make zlave"));
     }
 
@@ -6577,6 +6555,51 @@ int iuse::tent(player *p, item *, bool)
     }
     g->m.furn_set(posx, posy, f_groundsheet);
     g->m.furn_set(posx - (dirx - p->posx), posy - (diry - p->posy), f_canvas_door);
+    add_msg(m_info, _("You set up the tent on the ground."));
+    return 1;
+}
+
+int iuse::large_tent(player *p, item *, bool)
+{
+    int dirx, diry;
+    if(!choose_adjacent(_("Pitch the tent towards where (5x5 clear area)?"), dirx, diry)) {
+        return 0;
+    }
+
+    //must place the center of the tent three spaces away from player
+    //dirx and diry will be integratined with the player's position
+    int posx = dirx - p->posx;
+    int posy = diry - p->posy;
+    if(posx == 0 && posy == 0) {
+        p->add_msg_if_player(m_info, _("Invalid Direction"));
+        return 0;
+    }
+    posx = posx * 3 + p->posx;
+    posy = posy * 3 + p->posy;
+    for (int i = -2; i <= 2; i++) {
+        for (int j = -2; j <= 2; j++) {
+            if (!g->m.has_flag("FLAT", posx + i, posy + j) ||
+                g->m.has_furn(posx + i, posy + j)) {
+                add_msg(m_info, _("You need a 5x5 flat space to place this tent."));
+                return 0;
+            }
+        }
+    }
+    for (int i = -2; i <= 2; i++) {
+        for (int j = -2; j <= 2; j++) {
+            g->m.furn_set(posx + i, posy + j, f_large_canvas_wall);
+        }
+    }
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            g->m.furn_set(posx + i, posy + j, f_large_groundsheet);
+        }
+    }
+    // f_center_groundsheet instead of f_large_groundsheet so the
+    // iexamine function for the tent works properly
+    g->m.furn_set(posx, posy, f_center_groundsheet);
+    g->m.furn_set(posx - ((dirx - p->posx) * 2), posy - ((diry - p->posy) * 2), f_large_canvas_door);
+//    g->m.furn_set((posx - (dirx - p->posx) * 2), (posy - (diry - p->posy) * 2), f_large_canvas_door);
     add_msg(m_info, _("You set up the tent on the ground."));
     return 1;
 }
@@ -6860,7 +6883,7 @@ int iuse::artifact(player *p, item *it, bool)
         return 0;
     }
     if (!p->is_npc()) {
-        //~ %s is atrifact name
+        //~ %s is artifact name
         p->add_memorial_log(pgettext("memorial_male", "Activated the %s."),
                             pgettext("memorial_female", "Activated the %s."),
                             it->tname().c_str());
@@ -7071,12 +7094,12 @@ int iuse::artifact(player *p, item *it, bool)
 
             case AEA_HURTALL:
                 for (size_t j = 0; j < g->num_zombies(); j++) {
-                    g->zombie(j).hurt(rng(0, 5));
+                    g->zombie(j).apply_damage( nullptr, bp_torso, rng( 0, 5 ) );
                 }
                 break;
 
             case AEA_RADIATION:
-                add_msg(m_warning, _("Horrible gasses are emitted!"));
+                add_msg(m_warning, _("Horrible gases are emitted!"));
                 for (int x = p->posx - 1; x <= p->posx + 1; x++) {
                     for (int y = p->posy - 1; y <= p->posy + 1; y++) {
                         g->m.add_field(x, y, fd_nuke_gas, rng(2, 3));
@@ -8201,7 +8224,7 @@ int iuse::robotcontrol(player *p, item *it, bool)
                 return it->type->charges_to_use();
             }
             monster *z = &(g->zombie(pick_robot.ret));
-            p->add_msg_if_player(_("You start reprograming the %s into an ally."), z->name().c_str());
+            p->add_msg_if_player(_("You start reprogramming the %s into an ally."), z->name().c_str());
             p->moves -= 1000 - p->int_cur * 10 - p->skillLevel("computer") * 10;
             float success = p->skillLevel("computer") - 1.5 * (z->type->difficulty) /
                             ((rng(2, p->int_cur) / 2) + (p->skillLevel("computer") / 2));
@@ -8212,10 +8235,10 @@ int iuse::robotcontrol(player *p, item *it, bool)
             } else if (success >= -2) { //A near success
                 p->add_msg_if_player(_("The %s short circuits as you attempt to reprogram it!"),
                                      z->name().c_str());
-                z->hurt( rng( 1, 10 ), 0, p ); //damage it a little
+                z->apply_damage( p, bp_torso, rng( 1, 10 ) ); //damage it a little
                 if( z->is_dead() ) {
                     p->practice("computer", 10);
-                    return it->type->charges_to_use(); //dont do the other effects if the robot died
+                    return it->type->charges_to_use(); // Do not do the other effects if the robot died
                 }
                 if (one_in(3)) {
                     p->add_msg_if_player(_("...and turns friendly!"));

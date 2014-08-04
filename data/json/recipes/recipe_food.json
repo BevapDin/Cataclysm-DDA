@@ -592,7 +592,8 @@
       [ "irradiated_apple", 1 ],
       [ "apple", 1 ],
       [ "rehydrated_fruit", 1 ],
-      [ "dry_fruit", 1 ]
+      [ "dry_fruit", 1 ],
+      [ "juice_pulp", 2 ]
     ]
   ]
 },{
@@ -624,7 +625,8 @@
       [ "carrot", 2 ],
       [ "veggy", 2 ],
       [ "veggy_wild", 2 ],
-      [ "plant_sac", 6 ]
+      [ "plant_sac", 6 ],
+      [ "wild_herbs", 40 ]
     ]
   ]
 },{
@@ -689,6 +691,7 @@
     [
       [ "salt", 1 ],
       [ "seasoning_italian", 10 ],
+      [ "wild_herbs", 10 ],
       [ "seasoning_salt", 10 ],
       [ "pepper", 10 ]
     ]
@@ -721,6 +724,7 @@
     [
       [ "salt", 1 ],
       [ "seasoning_italian", 10 ],
+      [ "wild_herbs", 10 ],
       [ "seasoning_salt", 10 ]
     ]
   ]
@@ -753,6 +757,7 @@
     [
       [ "salt", 1 ],
       [ "seasoning_italian", 10 ],
+      [ "wild_herbs", 10 ],
       [ "seasoning_salt", 10 ]
     ]
   ]
@@ -842,6 +847,7 @@
     [
       [ "salt", 1 ],
       [ "seasoning_italian", 10 ],
+      [ "wild_herbs", 10 ],
       [ "seasoning_salt", 10 ],
       [ "pepper", 10 ]
     ]
@@ -1521,6 +1527,37 @@
   ]
 },{
         "type" : "recipe",
+  "result": "herbal_tea",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_DRINKS",
+  "skill_used": "cooking",
+  "difficulty": 1,
+  "time": 6000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities":[
+    {"id":"BOIL","level":1,"amount":1}
+  ], "tools": [
+    [
+      [ "hotplate", 2 ],
+      [ "char_smoker", 1 ],
+      [ "toolset", 1 ],
+      [ "atomic_coffeepot", -1 ],
+      [ "fire", -1 ],
+      [ "coffeemaker", 2]
+    ]
+  ],
+  "components": [
+    [
+      [ "wild_herbs", 1 ]
+    ],
+    [
+      [ "water", 1 ],
+      [ "water_clean", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
   "result": "kompot",
   "category": "CC_FOOD",
   "subcategory": "CSC_FOOD_DRINKS",
@@ -1805,6 +1842,7 @@
 },{
         "type" : "recipe",
   "result": "oj",
+  "byproducts": "juice_pulp",
   "category": "CC_FOOD",
   "subcategory": "CSC_FOOD_DRINKS",
   "skill_used": "cooking",
@@ -1827,6 +1865,7 @@
 },{
         "type" : "recipe",
   "result": "apple_cider",
+  "byproducts": "juice_pulp",
   "category": "CC_FOOD",
   "subcategory": "CSC_FOOD_DRINKS",
   "skill_used": "cooking",
@@ -2199,6 +2238,7 @@
     [
       [ "dry_veggy", 2 ],
       [ "dry_fruit", 2 ],
+      [ "juice_pulp", 4 ],
       [ "strawberries", 1 ],
       [ "blueberries", 1 ],
       [ "cherries", 1 ],
@@ -2266,6 +2306,7 @@
       [ "veggy", 1 ],
       [ "veggy_wild", 1 ],
       [ "seasoning_italian", 15 ],
+      [ "wild_herbs", 15 ],
       [ "seasoning_salt", 15 ],
       [ "pepper", 20 ],
       [ "powder_eggs", 5 ],
@@ -3235,7 +3276,8 @@
       [ "blackberries", 1 ],
       [ "irradiated_pomegranate", 1],
       [ "pomegranate", 1 ],
-      [ "dry_fruit", 1 ]
+      [ "dry_fruit", 1 ],
+      [ "juice_pulp", 2 ]
     ],
     [
       [ "water", 1 ],
@@ -3274,6 +3316,7 @@
     ],
     [
       [ "dry_fruit", 1 ],
+      [ "juice_pulp", 2 ],
       [ "jam_strawberries", 1 ],
       [ "jam_blueberries", 1 ],
       [ "jam_fruit", 1 ],
@@ -3319,6 +3362,36 @@
       [ "powder_eggs", 10 ],
       [ "egg_bird", 2 ],
       [ "egg_reptile", 2 ]
+    ],
+    [
+      [ "water", 1 ],
+      [ "water_clean", 1 ]
+    ]
+  ]
+},{
+        "type" : "recipe",
+  "result": "boiled_egg",
+  "category": "CC_FOOD",
+  "subcategory": "CSC_FOOD_OTHER",
+  "skill_used": "cooking",
+  "difficulty": 1,
+  "time": 1000,
+  "reversible": false,
+  "autolearn": true,
+  "qualities":[
+    {"id":"BOIL","level":1,"amount":1}
+  ], "tools": [
+    [
+      [ "hotplate", 2 ],
+      [ "char_smoker", 1 ],
+      [ "toolset", 1 ],
+      [ "fire", -1 ]
+    ]
+  ],
+  "components": [
+    [
+      [ "egg_bird", 1 ],
+      [ "egg_reptile", 1 ]
     ],
     [
       [ "water", 1 ],
@@ -3482,7 +3555,8 @@
       [ "raspberries", 1 ],
       [ "blackberries", 1 ],
       [ "rehydrated_fruit", 1 ],
-      [ "dry_fruit", 1 ]
+      [ "dry_fruit", 1 ],
+      [ "juice_pulp", 2 ]
     ]
   ]
 },{
@@ -3646,7 +3720,8 @@
       [ "raspberries", 1 ],
       [ "blackberries", 1 ],
       [ "rehydrated_fruit", 1 ],
-      [ "dry_fruit", 1 ]
+      [ "dry_fruit", 1 ],
+      [ "juice_pulp", 2 ]
     ]
   ]
 },{
@@ -3855,7 +3930,8 @@
       [ "irradiated_apricot", 1],
       [ "apricot", 1 ],
       [ "rehydrated_fruit", 1 ],
-      [ "dry_fruit", 1 ]
+      [ "dry_fruit", 1 ],
+      [ "juice_pulp", 2 ]
     ]
   ]
 },{
@@ -3887,10 +3963,12 @@
       [ "honeycomb", 1 ],
       [ "honey_bottled", 1],
       [ "rehydrated_fruit", 1 ],
-      [ "dry_fruit", 1 ]
+      [ "dry_fruit", 1 ],
+      [ "juice_pulp", 2 ]
     ],
     [
       [ "seasoning_italian", 20 ],
+      [ "wild_herbs", 20 ],
       [ "pepper", 20 ],
       [ "rehydrated_veggy", 1 ],
       [ "dry_veggy", 1 ]
@@ -3965,7 +4043,8 @@
       [ "irradiated_papaya", 2 ],
       [ "irradiated_apricot", 2 ],
       [ "irradiated_kiwi", 2 ],
-      [ "dry_fruit", 2 ]
+      [ "dry_fruit", 2 ],
+      [ "juice_pulp", 4 ]
     ],
     [
       [ "sugar", 2 ]
@@ -4250,7 +4329,8 @@
     [
       [ "sauce_pesto", 1 ],
       [ "sauce_red", 1 ],
-      [ "seasoning_italian", 5 ]
+      [ "seasoning_italian", 5 ],
+      [ "wild_herbs", 10 ]
     ],
     [
       [ "water", 1 ],
@@ -4331,7 +4411,8 @@
     ],
     [
       [ "sauce_red", 1 ],
-      [ "seasoning_italian", 5 ]
+      [ "seasoning_italian", 5 ],
+      [ "wild_herbs", 10 ]
     ],
     [
       [ "water", 1 ],
@@ -4373,7 +4454,8 @@
     ],
     [
       [ "sauce_red", 1 ],
-      [ "seasoning_italian", 5 ]
+      [ "seasoning_italian", 5 ],
+      [ "wild_herbs", 10 ]
     ],
     [
       [ "water", 1 ],
@@ -4413,7 +4495,8 @@
     [
       [ "seasoning_italian", 5 ],
       [ "sauce_red", 1 ],
-      [ "tomato", 2 ]
+      [ "tomato", 2 ],
+      [ "wild_herbs", 10 ]
     ],
     [
       [ "meat", 2 ],
@@ -4455,7 +4538,8 @@
     [
       [ "seasoning_italian", 5 ],
       [ "sauce_red", 1 ],
-      [ "tomato", 2 ]
+      [ "tomato", 2 ],
+      [ "wild_herbs", 10 ]
     ],
     [
       [ "meat", 2 ],
@@ -4497,7 +4581,8 @@
     [
       [ "seasoning_italian", 5 ],
       [ "sauce_red", 1 ],
-      [ "tomato", 2 ]
+      [ "tomato", 2 ],
+      [ "wild_herbs", 10 ]
     ],
     [
       [ "human_flesh", 2 ],
@@ -4539,7 +4624,8 @@
     [
       [ "seasoning_italian", 5 ],
       [ "sauce_red", 1 ],
-      [ "tomato", 2 ]
+      [ "tomato", 2 ],
+      [ "wild_herbs", 10 ]
     ],
     [
       [ "human_flesh", 2 ],
@@ -4580,7 +4666,8 @@
     ],
     [
       [ "seasoning_italian", 5 ],
-      [ "sauce_pesto", 1 ]
+      [ "sauce_pesto", 1 ],
+      [ "wild_herbs", 10 ]
     ],
     [
       [ "veggy", 2 ],
@@ -6765,6 +6852,7 @@
 },{
         "type" : "recipe",
   "result": "juice",
+  "byproducts": "juice_pulp",
   "category": "CC_FOOD",
   "subcategory": "CSC_FOOD_DRINKS",
   "skill_used": "cooking",

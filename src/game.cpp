@@ -632,6 +632,7 @@ void game::start_game(std::string worldname)
         u.posx = (SEEX * int(MAPSIZE / 2)) + rng(0, SEEX * 2);
         u.posy = (SEEY * int(MAPSIZE / 2)) + rng(0, SEEY * 2);
     }
+    u.moves = 0;
     u.reset();
     u.process_turn(); // process_turn adds the initial move points
     nextspawn = int(calendar::turn);
@@ -1336,6 +1337,11 @@ bool game::do_turn()
         }
     }
 
+    if (calendar::turn % 3600 == 0)
+    {
+        u.update_health();
+    }
+    
     // Auto-save if autosave is enabled
     if (OPTIONS["AUTOSAVE"] &&
         calendar::turn % ((int)OPTIONS["AUTOSAVE_TURNS"] * 10) == 0) {
@@ -1394,8 +1400,8 @@ bool game::do_turn()
 
     monmove();
     update_stair_monsters();
-    u.process_turn();
     u.reset();
+    u.process_turn();
     u.process_active_items();
 
     if (levz >= 0 && !u.is_underwater()) {
@@ -1665,7 +1671,7 @@ void game::activity_on_finish_make_zlave()
     }
 
     if (body == NULL) {
-        add_msg(m_info, _("There's no corpse to make into a zlave!"));
+        add_msg(m_info, _("There's no corpse to make into a zombie slave!"));
         return;
     }
 
@@ -1677,7 +1683,7 @@ void game::activity_on_finish_make_zlave()
         u.practice("survival", rng(2, 5));
 
         u.add_msg_if_player(m_good,
-                            _("You're confident you've removed the zombie's ability to pose a threat. When it reanimates, you'll be able to use it as a zlave."));
+                            _("You slice muscles and tendons, and remove body parts until you're confident the zombie won't be able to attack you when it reainmates."));
 
         body->item_vars["zlave"] = "zlave";
         //take into account the chance that the body yet can regenerate not as we need.
@@ -1693,7 +1699,7 @@ void game::activity_on_finish_make_zlave()
             u.practice("survival", rng(3, 6));
 
             u.add_msg_if_player(m_warning,
-                                _("You've cut a lot of tissue. Now to wait and see..."));
+                                _("You hack into the corpse and chop off some body parts.  You think the zombie won't be able to attack when it reanimates."));
 
             success += rng(1, 20);
 
@@ -1716,11 +1722,9 @@ void game::activity_on_finish_make_zlave()
                 body->damage = full_pulp_threshold;
                 body->active = false;
 
-                u.add_msg_if_player(m_warning,
-                                    _("The corpse is thoroughly pulped."));
+                u.add_msg_if_player(m_warning, _("You cut up the corpse too much, it is thoroughly pulped."));
             } else {
-                u.add_msg_if_player(m_warning,
-                                    _("The corpse is damaged."));
+                u.add_msg_if_player(m_warning, _("You cut into the corpse trying to make it unable to attack, but you don't think you have it right."));
             }
         }
     }
@@ -4587,7 +4591,7 @@ void game::debug()
                 wishitem(p);
                 break;
             case 2:
-                p->hurt(bp_torso, -1, 20);
+                p->apply_damage( nullptr, bp_torso, 20 );
                 break;
             case 3:
                 p->mod_pain(20);
@@ -5424,20 +5428,19 @@ void game::draw_HP()
     static const char *body_parts[] = { _("HEAD"), _("TORSO"), _("L ARM"),
                                         _("R ARM"), _("L LEG"), _("R LEG"), _("POWER")
                                       };
-    static body_part part[] = { bp_head, bp_torso, bp_arms,
-                                bp_arms, bp_legs, bp_legs, num_bp
+    static body_part part[] = { bp_head, bp_torso, bp_arm_l,
+                                bp_arm_r, bp_leg_l, bp_leg_r, num_bp
                               };
-    static int side[] = { -1, -1, 0, 1, 0, 1, -1 };
     int num_parts = sizeof(body_parts) / sizeof(body_parts[0]);
     for (int i = 0; i < num_parts; i++) {
         const char *str = body_parts[i];
         wmove(w_HP, i * dy, 0);
         if (wide) {
-            wprintz(w_HP, limb_color(&u, part[i], side[i]), " ");
+            wprintz(w_HP, limb_color(&u, part[i]), " ");
         }
-        wprintz(w_HP, limb_color(&u, part[i], side[i]), str);
+        wprintz(w_HP, limb_color(&u, part[i]), str);
         if (!wide) {
-            wprintz(w_HP, limb_color(&u, part[i], side[i]), ":");
+            wprintz(w_HP, limb_color(&u, part[i]), ":");
         }
     }
 
@@ -5467,7 +5470,7 @@ void game::draw_HP()
     wrefresh(w_HP);
 }
 
-nc_color game::limb_color(player *p, body_part bp, int side, bool bleed, bool bite, bool infect)
+nc_color game::limb_color(player *p, body_part bp, bool bleed, bool bite, bool infect)
 {
     if (bp == num_bp) {
         return c_ltgray;
@@ -5475,13 +5478,13 @@ nc_color game::limb_color(player *p, body_part bp, int side, bool bleed, bool bi
 
     int color_bit = 0;
     nc_color i_color = c_ltgray;
-    if (bleed && p->has_disease("bleed", bp, side)) {
+    if (bleed && p->has_disease("bleed", bp)) {
         color_bit += 1;
     }
-    if (bite && p->has_disease("bite", bp, side)) {
+    if (bite && p->has_disease("bite", bp)) {
         color_bit += 10;
     }
-    if (infect && p->has_disease("infected", bp, side)) {
+    if (infect && p->has_disease("infected", bp)) {
         color_bit += 100;
     }
     switch (color_bit) {
@@ -6271,8 +6274,8 @@ void game::monmove()
         }
 
         if (!critter->is_dead()) {
-            critter->process_turn();
             critter->reset();
+            critter->process_turn();
         }
 
         m.mon_in_field(critter->posx(), critter->posy(), critter);
@@ -6331,8 +6334,8 @@ void game::monmove()
         if((*it)->hp_cur[hp_head] <= 0 || (*it)->hp_cur[hp_torso] <= 0) {
             (*it)->die( nullptr );
         } else {
-            (*it)->process_turn();
             (*it)->reset();
+            (*it)->process_turn();
             while (!(*it)->is_dead() && (*it)->moves > 0 && turns < 10) {
                 int moves = (*it)->moves;
                 (*it)->move();
@@ -6557,7 +6560,7 @@ void game::do_blast(const int x, const int y, const int power, const int radius,
             int mon_hit = mon_at(i, j), npc_hit = npc_at(i, j);
             if (mon_hit != -1) {
                 monster &critter = critter_tracker.find(mon_hit);
-                critter.hurt( rng( dam / 2, long( dam * 1.5 ) ) ); // TODO: player's fault?
+                critter.apply_damage( nullptr, bp_torso, rng( dam / 2, long( dam * 1.5 ) ) ); // TODO: player's fault?
             }
 
             int vpart;
@@ -6567,12 +6570,12 @@ void game::do_blast(const int x, const int y, const int power, const int radius,
             }
 
             if (npc_hit != -1) {
-                active_npc[npc_hit]->hit(NULL, bp_torso, -1, rng(dam / 2, long(dam * 1.5)), 0);
-                active_npc[npc_hit]->hit(NULL, bp_head, -1, rng(dam / 3, dam), 0);
-                active_npc[npc_hit]->hit(NULL, bp_legs, 0, rng(dam / 3, dam), 0);
-                active_npc[npc_hit]->hit(NULL, bp_legs, 1, rng(dam / 3, dam), 0);
-                active_npc[npc_hit]->hit(NULL, bp_arms, 0, rng(dam / 3, dam), 0);
-                active_npc[npc_hit]->hit(NULL, bp_arms, 1, rng(dam / 3, dam), 0);
+                active_npc[npc_hit]->hit(NULL, bp_torso, rng(dam / 2, long(dam * 1.5)), 0);
+                active_npc[npc_hit]->hit(NULL, bp_head, rng(dam / 3, dam), 0);
+                active_npc[npc_hit]->hit(NULL, bp_leg_l, rng(dam / 3, dam), 0);
+                active_npc[npc_hit]->hit(NULL, bp_leg_r, rng(dam / 3, dam), 0);
+                active_npc[npc_hit]->hit(NULL, bp_arm_l, rng(dam / 3, dam), 0);
+                active_npc[npc_hit]->hit(NULL, bp_arm_r, rng(dam / 3, dam), 0);
                 if (active_npc[npc_hit]->hp_cur[hp_head] <= 0 ||
                     active_npc[npc_hit]->hp_cur[hp_torso] <= 0) {
                     active_npc[npc_hit]->die( nullptr ); // TODO: player's fault?
@@ -6580,12 +6583,12 @@ void game::do_blast(const int x, const int y, const int power, const int radius,
             }
             if (u.posx == i && u.posy == j) {
                 add_msg(m_bad, _("You're caught in the explosion!"));
-                u.hit(NULL, bp_torso, -1, rng(dam / 2, dam * 1.5), 0);
-                u.hit(NULL, bp_head, -1, rng(dam / 3, dam), 0);
-                u.hit(NULL, bp_legs, 0, rng(dam / 3, dam), 0);
-                u.hit(NULL, bp_legs, 1, rng(dam / 3, dam), 0);
-                u.hit(NULL, bp_arms, 0, rng(dam / 3, dam), 0);
-                u.hit(NULL, bp_arms, 1, rng(dam / 3, dam), 0);
+                u.hit(NULL, bp_torso, rng(dam / 2, dam * 1.5), 0);
+                u.hit(NULL, bp_head, rng(dam / 3, dam), 0);
+                u.hit(NULL, bp_leg_l, rng(dam / 3, dam), 0);
+                u.hit(NULL, bp_leg_r, rng(dam / 3, dam), 0);
+                u.hit(NULL, bp_arm_l, rng(dam / 3, dam), 0);
+                u.hit(NULL, bp_arm_r, rng(dam / 3, dam), 0);
             }
             if (fire) {
                 m.add_field(i, j, fd_fire, dam / 10);
@@ -6637,7 +6640,7 @@ void game::explosion(int x, int y, int power, int shrapnel, bool fire, bool blas
             if (zid != -1) {
                 monster &critter = critter_tracker.find(zid);
                 dam -= critter.get_armor_cut(bp_torso);
-                critter.hurt( dam );
+                critter.apply_damage( nullptr, bp_torso, dam );
             } else if (npc_at(tx, ty) != -1) {
                 body_part hit = random_body_part();
                 if (hit == bp_eyes || hit == bp_mouth || hit == bp_head) {
@@ -6646,17 +6649,16 @@ void game::explosion(int x, int y, int power, int shrapnel, bool fire, bool blas
                     dam = rng(long(1.5 * dam), 3 * dam);
                 }
                 int npcdex = npc_at(tx, ty);
-                active_npc[npcdex]->hit(NULL, hit, rng(0, 1), 0, dam);
+                active_npc[npcdex]->hit(NULL, hit, 0, dam);
                 if (active_npc[npcdex]->hp_cur[hp_head] <= 0 ||
                     active_npc[npcdex]->hp_cur[hp_torso] <= 0) {
                     active_npc[npcdex]->die( nullptr );
                 }
             } else if (tx == u.posx && ty == u.posy) {
                 body_part hit = random_body_part();
-                int side = random_side(hit);
                 //~ %s is bodypart name in accusative.
-                add_msg(m_bad, _("Shrapnel hits your %s!"), body_part_name_accusative(hit, side).c_str());
-                u.hit(NULL, hit, random_side(hit), 0, dam);
+                add_msg(m_bad, _("Shrapnel hits your %s!"), body_part_name_accusative(hit).c_str());
+                u.hit(NULL, hit, 0, dam);
             } else {
                 std::set<std::string> shrapnel_effects;
                 m.shoot(tx, ty, dam, j == traj.size() - 1, shrapnel_effects);
@@ -6726,8 +6728,8 @@ void game::shockwave(int x, int y, int radius, int force, int stun, int dam_mult
         }
     }
     if (rl_dist(u.posx, u.posy, x, y) <= radius && !ignore_player &&
-        ((!(u.has_trait("LEG_TENT_BRACE"))) ||
-         (u.wearing_something_on(bp_feet)))) {
+          (!g->u.has_trait("LEG_TENT_BRACE") || g->u.footwear_factor() == 1 ||
+          (g->u.footwear_factor() == .5 && one_in(2)))) {
         add_msg(m_bad, _("You're caught in the shockwave!"));
         knockback(x, y, u.posx, u.posy, force, stun, dam_mult);
     }
@@ -6797,7 +6799,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                                 targ->name().c_str(), force_remaining);
                     }
                     add_msg(_("%s slammed into an obstacle!"), targ->name().c_str());
-                    targ->hurt(dam_mult * force_remaining);
+                    targ->apply_damage( nullptr, bp_torso, dam_mult * force_remaining );
                 }
                 m.bash(traj[i].x, traj[i].y, 2 * dam_mult * force_remaining);
                 break;
@@ -6884,25 +6886,28 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                     }
                     add_msg(_("%s took %d damage! (before armor)"), targ->name.c_str(), dam_mult * force_remaining);
                     if (one_in(2)) {
-                        targ->hit(NULL, bp_arms, 0, force_remaining * dam_mult, 0);
+                        targ->hit(NULL, bp_arm_l, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        targ->hit(NULL, bp_arms, 1, force_remaining * dam_mult, 0);
+                        targ->hit(NULL, bp_arm_r, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        targ->hit(NULL, bp_legs, 0, force_remaining * dam_mult, 0);
+                        targ->hit(NULL, bp_leg_l, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        targ->hit(NULL, bp_legs, 1, force_remaining * dam_mult, 0);
+                        targ->hit(NULL, bp_leg_r, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        targ->hit(NULL, bp_torso, -1, force_remaining * dam_mult, 0);
+                        targ->hit(NULL, bp_torso, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        targ->hit(NULL, bp_head, -1, force_remaining * dam_mult, 0);
+                        targ->hit(NULL, bp_head, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        targ->hit(NULL, bp_hands, 0, force_remaining * dam_mult, 0);
+                        targ->hit(NULL, bp_hand_l, force_remaining * dam_mult, 0);
+                    }
+                    if (one_in(2)) {
+                        targ->hit(NULL, bp_hand_r, force_remaining * dam_mult, 0);
                     }
                 }
                 m.bash(traj[i].x, traj[i].y, 2 * dam_mult * force_remaining);
@@ -6938,13 +6943,13 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                         add_msg(_("%s collided with someone else and sent her flying!"),
                                 targ->name.c_str());
                     }
-                } else if ((u.posx == traj.front().x && u.posy == traj.front().y) &&
-                           ((!(u.has_trait("LEG_TENT_BRACE"))) || (u.wearing_something_on(bp_feet)))) {
-                    add_msg(m_bad, _("%s collided with you and sent you flying!"), targ->name.c_str());
-                } else if ((u.posx == traj.front().x && u.posy == traj.front().y) &&
-                           ((u.has_trait("LEG_TENT_BRACE")) && (!(u.wearing_something_on(bp_feet))))) {
+                } else if (u.posx == traj.front().x && u.posy == traj.front().y &&
+                           (g->u.has_trait("LEG_TENT_BRACE") && (!g->u.footwear_factor() ||
+                            (g->u.footwear_factor() == .5 && one_in(2))))) {
                     add_msg(_("%s collided with you, and barely dislodges your tentacles!"), targ->name.c_str());
                     force_remaining = 1;
+                } else if (u.posx == traj.front().x && u.posy == traj.front().y) {
+                    add_msg(m_bad, _("%s collided with you and sent you flying!"), targ->name.c_str());
                 }
                 knockback(traj, force_remaining, stun, dam_mult);
                 break;
@@ -6979,25 +6984,28 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                     }
                     u.add_effect("stunned", force_remaining);
                     if (one_in(2)) {
-                        u.hit(NULL, bp_arms, 0, force_remaining * dam_mult, 0);
+                        u.hit(NULL, bp_arm_l, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        u.hit(NULL, bp_arms, 1, force_remaining * dam_mult, 0);
+                        u.hit(NULL, bp_arm_r, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        u.hit(NULL, bp_legs, 0, force_remaining * dam_mult, 0);
+                        u.hit(NULL, bp_leg_l, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        u.hit(NULL, bp_legs, 1, force_remaining * dam_mult, 0);
+                        u.hit(NULL, bp_leg_r, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        u.hit(NULL, bp_torso, -1, force_remaining * dam_mult, 0);
+                        u.hit(NULL, bp_torso, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        u.hit(NULL, bp_head, -1, force_remaining * dam_mult, 0);
+                        u.hit(NULL, bp_head, force_remaining * dam_mult, 0);
                     }
                     if (one_in(2)) {
-                        u.hit(NULL, bp_hands, 0, force_remaining * dam_mult, 0);
+                        u.hit(NULL, bp_hand_l, force_remaining * dam_mult, 0);
+                    }
+                    if (one_in(2)) {
+                        u.hit(NULL, bp_hand_r, force_remaining * dam_mult, 0);
                     }
                 }
                 m.bash(traj[i].x, traj[i].y, 2 * dam_mult * force_remaining);
@@ -7222,7 +7230,7 @@ void game::emp_blast(int x, int y)
             } else {
                 add_msg(_("The EMP blast fries the %s!"), critter.name().c_str());
                 int dam = dice(10, 10);
-                critter.hurt( dam );
+                critter.apply_damage( nullptr, bp_torso, dam );
                 if( !critter.is_dead() && one_in( 6 ) ) {
                     critter.make_friendly();
                 }
@@ -7639,10 +7647,10 @@ void game::smash()
                 m.add_item_or_charges(u.posx, u.posy, *it);
             }
             sound(u.posx, u.posy, 24, "");
-            u.hit(NULL, bp_hands, 1, 0, rng(0, u.weapon.volume()));
+            u.hit(NULL, bp_hand_r, 0, rng(0, u.weapon.volume()));
             if (u.weapon.volume() > 20) {
                 // Hurt left arm too, if it was big
-                u.hit(NULL, bp_hands, 0, 0, rng(0, long(u.weapon.volume() * .5)));
+                u.hit(NULL, bp_hand_l, 0, rng(0, long(u.weapon.volume() * .5)));
             }
             u.remove_weapon();
         }
@@ -7982,9 +7990,9 @@ bool game::forced_gate_closing(int x, int y, ter_id door_type, int bash_dmg)
         }
         monster &critter = zombie( cindex );
         if (critter.type->size <= MS_SMALL || critter.has_flag(MF_VERMIN)) {
-            critter.hurt( 9999 ); // big damage to make it explode
+            critter.die_in_explosion( nullptr );
         } else {
-            critter.hurt( bash_dmg );
+            critter.apply_damage( nullptr, bp_torso, bash_dmg );
         }
         if( !critter.is_dead() && critter.type->size >= MS_HUGE ) {
             // big critters simply prevent the gate from closing
@@ -8195,13 +8203,13 @@ void game::moving_vehicle_dismount(int tox, int toy)
     m.unboard_vehicle(u.posx, u.posy);
     u.moves -= 200;
     // Dive three tiles in the direction of tox and toy
-    fling_player_or_monster(&u, 0, d, 30, true);
+    fling_creature( &u, d, 30, true );
     // Hit the ground according to vehicle speed
     if (!m.has_flag("SWIMMABLE", u.posx, u.posy)) {
         if (veh->velocity > 0) {
-            fling_player_or_monster(&u, 0, veh->face.dir(), veh->velocity / (float)100);
+            fling_creature(&u, veh->face.dir(), veh->velocity / (float)100);
         } else {
-            fling_player_or_monster(&u, 0, veh->face.dir() + 180, -(veh->velocity) / (float)100);
+            fling_creature(&u, veh->face.dir() + 180, -(veh->velocity) / (float)100);
         }
     }
     return;
@@ -8255,11 +8263,11 @@ bool zlave_menu(monster *z)
     uimenu amenu;
 
     amenu.selected = 0;
-    amenu.text = _("What to do with zlave?");
+    amenu.text = _("What to do with zombie slave?");
     amenu.addentry(cancel, true, 'q', _("Cancel"));
 
     amenu.addentry(swap_pos, true, 's', _("Swap positions"));
-    amenu.addentry(push_zlave, true, 'p', _("Push zlave"));
+    amenu.addentry(push_zlave, true, 'p', _("Push zombie slave"));
 
     if (z->has_effect("has_bag")) {
         amenu.addentry(give_items, true, 'g', _("Place items into bag"));
@@ -8306,11 +8314,11 @@ bool zlave_menu(monster *z)
                 z->add_effect("tied", 1, 1, true);
             }
 
-            add_msg(_("You displaced your zlave."));
+            add_msg(_("You swap positions with your zombie slave."));
 
             return true;
         } else {
-            add_msg(_("You failed to displace the zlave!"));
+            add_msg(_("You fail to budge the zombie slave!"));
 
             return true;
         }
@@ -8321,9 +8329,9 @@ bool zlave_menu(monster *z)
         g->u.moves -= 30;
 
         if (!one_in(g->u.str_cur)) {
-            add_msg(_("You pushed the zlave."));
+            add_msg(_("You pushed the zombie slave."));
         } else {
-            add_msg(_("You pushed the zlave, but he resisted."));
+            add_msg(_("You pushed the zombie slave, but it resisted."));
             return true;
         }
 
@@ -8356,7 +8364,7 @@ bool zlave_menu(monster *z)
 
         z->add_item(*it);
 
-        add_msg(_("You mount the %s on your zlave, ready to store gear."), it->display_name().c_str());
+        add_msg(_("You mount the %s on your zombie slave, ready to store gear."), it->display_name().c_str());
 
         g->u.i_rem(pos);
 
@@ -8377,7 +8385,7 @@ bool zlave_menu(monster *z)
 
         z->remove_effect("has_bag");
 
-        add_msg(_("You remove the stuff you had your zlave carry."));
+        add_msg(_("You dump the contents of the zombie slave's bag on the ground."));
 
         g->u.moves -= 200;
         return true;
@@ -8388,14 +8396,14 @@ bool zlave_menu(monster *z)
         int max_cap = 0;
 
         if (z->inv.empty()) {
-            add_msg(_("Your zlave has nothing to carry that in!"));
+            add_msg(_("Your zombie slave has nothing to carry that in!"));
             return true;
         }
 
         item *it = &z->inv[0];
 
         if (!it->is_armor()) {
-            add_msg(_("Your zlave has nothing to carry that in!"));
+            add_msg(_("Your zombie slave has nothing to carry that in!"));
             return true;
         }
 
@@ -8410,7 +8418,7 @@ bool zlave_menu(monster *z)
         }
 
         if (max_cap <= 0) {
-            add_msg(_("Your zlave's doesn't have space for that, it's too bulky!"));
+            add_msg(_("Your zombie slave's doesn't have space for that, it's too bulky!"));
             return true;
         }
 
@@ -8422,7 +8430,7 @@ bool zlave_menu(monster *z)
         if (result.size() == 0) {
             add_msg(_("Never mind."));
         } else {
-            add_msg(_("You stash some gear on your zlave."));
+            add_msg(_("You stash some gear on your zombie slave."));
 
             for (int i = 0; i < result.size(); i++) {
 
@@ -8442,15 +8450,15 @@ bool zlave_menu(monster *z)
         return true;
     }
 
-    if (pheromone == choice && query_yn(_("Really kill the zlave?"))) {
+    if (pheromone == choice && query_yn(_("Really kill the zombie slave?"))) {
 
-        z->hurt(100, 0, &g->u); // damage the monster (and its corpse)
+        z->apply_damage( &g->u, bp_torso, 100 ); // damage the monster (and its corpse)
         z->die(&g->u); // and make sure it's really dead
 
         g->u.moves -= 150;
 
         if (!one_in(3)) {
-            g->u.add_msg_if_player(_("You tear out the pheromone ball from the zlave."));
+            g->u.add_msg_if_player(_("You tear out the pheromone ball from the zombie slave."));
 
             item ball("pheromone", 0);
             iuse pheromone;
@@ -11757,8 +11765,9 @@ void game::forage()
         m.put_items_from("trash_forest", 1, u.posx, u.posy, calendar::turn, 0, 0, 0);
         found_something = true;
     }
-    if (veggy_chance < ((u.skillLevel("survival") * 2) + (u.per_cur - 8) + 5)) {
-        if (!one_in(6)) {
+    if (veggy_chance < ((u.skillLevel("survival") / 2) + ((u.per_cur - 8) + 5))) {
+        found_something = true;
+        if (!one_in(6) && (calendar::turn.get_season() == SUMMER || calendar::turn.get_season() == AUTUMN)) {
             if (!one_in(3)) {
                 add_msg(m_good, _("You found some wild veggies!"));
                 m.spawn_item(u.posx, u.posy, "veggy_wild", 1, 0, calendar::turn);
@@ -11769,7 +11778,7 @@ void game::forage()
                                  calendar::turn, 0, 0, 0);
                 m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
             }
-        } else {
+        } else if ( (calendar::turn.get_season() != WINTER) && (!one_in(3)) ) {
             add_msg(m_good, _("You found a nest with some eggs!"));
             if (!one_in(4)) {
                 m.spawn_item(u.posx, u.posy, "egg_bird", rng(2, 5), 0, calendar::turn);
@@ -11778,9 +11787,13 @@ void game::forage()
                 // So maybe we can give more than 1.
                 m.spawn_item(u.posx, u.posy, "egg_reptile", rng(2, 5), 0, calendar::turn);
             }
+        } else if (calendar::turn.get_season() != WINTER) {
+            add_msg(m_good, _("You found some wild herbs!"));
+            m.spawn_item(u.posx, u.posy, "wild_herbs", 1, 0, calendar::turn);
+        } else {
+            found_something = false;
         }
         m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
-        found_something = true;
     } else {
         if (one_in(2)) {
             m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
@@ -12793,27 +12806,37 @@ bool game::plmove(int dx, int dy)
                 add_msg(m_warning, _("Moving past this %s is slow!"), m.name(x, y).c_str());
             }
         }
+        if (veh1) {
+            vehicle_part *part = &(veh1->parts[vpart1]);
+            std::string label = veh1->get_label(part->mount_dx, part->mount_dy);
+            if (label != "") {
+            	add_msg(m_info, _("Label here: %s"), label.c_str());
+            }
+    	}
+
         std::string signage = m.get_signage(x, y);
         if (signage.size()) {
             add_msg(m_info, _("The sign says: %s"), signage.c_str());
         }
         if (m.has_flag("ROUGH", x, y) && (!u.in_vehicle)) {
-            if (one_in(5) && u.get_armor_bash(bp_feet) < rng(2, 5)) {
-                add_msg(m_bad, _("You hurt your feet on the %s!"), m.tername(x, y).c_str());
-                u.hit(NULL, bp_feet, 0, 0, 1);
-                u.hit(NULL, bp_feet, 1, 0, 1);
+            if (one_in(5) && u.get_armor_bash(bp_foot_l) < rng(2, 5)) {
+                add_msg(m_bad, _("You hurt your left foot on the %s!"), m.tername(x, y).c_str());
+                u.hit(NULL, bp_foot_l, 0, 1);
+            }
+            if (one_in(5) && u.get_armor_bash(bp_foot_r) < rng(2, 5)) {
+                add_msg(m_bad, _("You hurt your right foot on the %s!"), m.tername(x, y).c_str());
+                u.hit(NULL, bp_foot_l, 0, 1);
             }
         }
         if (m.has_flag("SHARP", x, y) && !one_in(3) && !one_in(40 - int(u.dex_cur / 2))
             && (!u.in_vehicle)) {
             if (!u.has_trait("PARKOUR") || one_in(4)) {
                 body_part bp = random_body_part();
-                int side = random_side(bp);
-                if(u.hit(NULL, bp, side, 0, rng(1, 4)) > 0) {
+                if(u.hit(NULL, bp, 0, rng(1, 4)) > 0) {
                     //~ 1$s - bodypart name in accusative, 2$s is terrain name.
                     add_msg(m_bad, _("You cut your %1$s on the %2$s!"),
-                            body_part_name_accusative(bp, side).c_str(),
-                            m.tername(x,y).c_str());
+                                body_part_name_accusative(bp).c_str(),
+                                m.tername(x, y).c_str());
                 }
                 if ((u.has_trait("INFRESIST")) && (one_in(1024))) {
                     u.add_disease("tetanus", 1, true);
@@ -12822,7 +12845,8 @@ bool game::plmove(int dx, int dy)
                 }
             }
         }
-        if (u.has_trait("LEG_TENT_BRACE") && (!(u.wearing_something_on(bp_feet))) ) {
+        if (g->u.has_trait("LEG_TENT_BRACE") && (!g->u.footwear_factor() ||
+              (g->u.footwear_factor() == .5 && one_in(2)))) {
             // DX and IN are long suits for Cephalopods,
             // so this shouldn't cause too much hardship
             // Presumed that if it's swimmable, they're
@@ -13015,7 +13039,7 @@ bool game::plmove(int dx, int dy)
 
         // Drench the player if swimmable
         if (m.has_flag("SWIMMABLE", x, y)) {
-            u.drench(40, mfb(bp_feet) | mfb(bp_legs));
+            u.drench(40, mfb(bp_foot_l) | mfb(bp_foot_r) | mfb(bp_leg_l) | mfb(bp_leg_r));
         }
 
         // List items here
@@ -13189,7 +13213,8 @@ void game::plswim(int x, int y)
     int movecost = u.swim_speed();
     u.practice("swimming", u.is_underwater() ? 2 : 1);
     if (movecost >= 500) {
-        if (!u.is_underwater() || !u.is_wearing("swim_fins")) {
+        if (!u.is_underwater() && !(g->u.shoe_type_count("swim_fins") == 2 || 
+            (g->u.shoe_type_count("swim_fins") == 1 && one_in(2)))) {
             add_msg(m_bad, _("You sink like a rock!"));
             u.set_underwater(true);
             u.oxygen = 30 + 2 * u.str_cur;
@@ -13207,57 +13232,36 @@ void game::plswim(int x, int y)
     u.moves -= (movecost > 200 ? 200 : movecost)  * (trigdist && diagonal ? 1.41 : 1);
     u.inv.rust_iron_items();
 
-    int drenchFlags = mfb(bp_legs) | mfb(bp_torso) | mfb(bp_arms) | mfb(bp_feet);
+    int drenchFlags = mfb(bp_leg_l) | mfb(bp_leg_r) | mfb(bp_torso) | mfb(bp_arm_l) |
+                        mfb(bp_arm_r) | mfb(bp_foot_l) | mfb(bp_foot_r);
 
     if (get_temperature() <= 50) {
-        drenchFlags |= mfb(bp_hands);
+        drenchFlags |= mfb(bp_hand_l) | mfb(bp_hand_r);
     }
 
     if (u.is_underwater()) {
-        drenchFlags |= mfb(bp_head) | mfb(bp_eyes) | mfb(bp_mouth) | mfb(bp_hands);
+        drenchFlags |= mfb(bp_head) | mfb(bp_eyes) | mfb(bp_mouth) | mfb(bp_hand_l) | mfb(bp_hand_r);
     }
     u.drench(100, drenchFlags);
 }
 
-void game::fling_player_or_monster(player *p, monster *zz, const int &dir, float flvel,
-                                   bool controlled)
+void game::fling_creature(Creature *c, const int &dir, float flvel, bool controlled)
 {
     int steps = 0;
-    bool is_u = p && (p == &u);
+    const bool is_u = (c == &u);
     int dam1, dam2;
 
-    bool is_player;
-    if (p) {
-        is_player = true;
-    } else {
-        if (zz) {
-            is_player = false;
-        } else {
-            dbg(D_ERROR) << "game:fling_player_or_monster: "
-                         "neither player nor monster";
-            debugmsg("game::fling neither player nor monster");
-            return;
-        }
-    }
+    player *p = dynamic_cast<player*>(c);
+    monster *zz = dynamic_cast<monster*>(c);
 
     tileray tdir(dir);
-    std::string sname;
-    if (is_player) {
-        if (is_u) {
-            sname = std::string(_("You are"));
-        } else {
-            sname = p->name + _(" is");
-        }
-    } else {
-        sname = zz->name() + _(" is");
-    }
     int range = flvel / 10;
-    int x = (is_player ? p->posx : zz->posx());
-    int y = (is_player ? p->posy : zz->posy());
+    int x = c->xpos();
+    int y = c->ypos();
     while (range > 0) {
         tdir.advance();
-        x = (is_player ? p->posx : zz->posx()) + tdir.dx();
-        y = (is_player ? p->posy : zz->posy()) + tdir.dy();
+        x = c->xpos() + tdir.dx();
+        y = c->ypos() + tdir.dy();
         std::string dname;
         bool thru = true;
         bool slam = false;
@@ -13271,14 +13275,14 @@ void game::fling_player_or_monster(player *p, monster *zz, const int &dir, float
             slam = true;
             dname = critter.name();
             dam2 = flvel / 3 + rng(0, flvel * 1 / 3);
-            critter.hurt( dam2 );
+            critter.apply_damage( c, bp_torso, dam2 );
             if( !critter.is_dead() ) {
                 thru = false;
             }
-            if (is_player) {
+            if( p != nullptr ) {
                 p->hitall(dam1, 40);
             } else {
-                zz->hurt(dam1);
+                zz->apply_damage( &critter, bp_torso, dam1 );
             }
         } else if (m.move_cost(x, y) == 0) {
             slam = true;
@@ -13290,18 +13294,23 @@ void game::fling_player_or_monster(player *p, monster *zz, const int &dir, float
             } else {
                 thru = false;
             }
-            if (is_player) {
+            if( p != nullptr ) {
                 p->hitall(dam1, 40);
             } else {
-                zz->hurt(dam1);
+                zz->apply_damage( nullptr, bp_torso, dam1 );
             }
             flvel = flvel / 2;
         }
         if (slam && dam1) {
-            add_msg(_("%s slammed against the %s!"), sname.c_str(), dname.c_str());
+            if( is_u ) {
+                add_msg(_("You are slammed against the %s!"), dname.c_str());
+            } else {
+                //~ first %s is the monster name ("the zombie") or a npc name.
+                add_msg(_("%s is slammed against the %s!"), c->disp_name().c_str(), dname.c_str());
+            }
         }
         if (thru) {
-            if (is_player) {
+            if( p != nullptr ) {
                 p->posx = x;
                 p->posy = y;
             } else {
@@ -13320,7 +13329,7 @@ void game::fling_player_or_monster(player *p, monster *zz, const int &dir, float
         if (controlled) {
             dam1 = std::max(dam1 / 2 - 5, 0);
         }
-        if (is_player) {
+        if( p != nullptr ) {
             int dex_reduce = p->dex_cur < 4 ? 4 : p->dex_cur;
             dam1 = dam1 * 8 / dex_reduce;
             if (p->has_trait("PARKOUR")) {
@@ -13330,7 +13339,7 @@ void game::fling_player_or_monster(player *p, monster *zz, const int &dir, float
                 p->hitall(dam1, 40);
             }
         } else {
-            zz->hurt(dam1);
+            zz->apply_damage( nullptr, bp_torso, dam1 );
         }
         if (is_u) {
             if (dam1 > 0) {
@@ -13398,13 +13407,15 @@ void game::vertical_move(int movez, bool force)
             u.oxygen = 30 + 2 * u.str_cur;
             add_msg(_("You dive underwater!"));
         } else {
-            if (u.swim_speed() < 500 || u.is_wearing("swim_fins")) {
+            if (u.swim_speed() < 500 || g->u.shoe_type_count("swim_fins") == 2 || 
+                  (g->u.shoe_type_count("swim_fins") == 1 && one_in(2))) {
                 u.set_underwater(false);
                 add_msg(_("You surface."));
             } else {
-                add_msg(m_info, _("You can't surface!"));
+                add_msg(m_info, _("You try to surface but can't!"));
             }
         }
+        u.moves -= 100;
         return;
     }
     // Force means we're going down, even if there's no staircase, etc.
@@ -13494,7 +13505,7 @@ void game::vertical_move(int movez, bool force)
                                 rope_ladder = true;
                                 add_msg(m_bad, _("You descend on your vines, though leaving a part of you behind stings."));
                                 u.mod_pain(5);
-                                u.hurt(bp_torso, 1, 5);
+                                u.apply_damage( nullptr, bp_torso, 5 );
                                 u.hunger += 5;
                                 u.thirst += 5;
                             } else {
@@ -14380,7 +14391,7 @@ void game::teleport(player *p, bool add_teleglow)
                         p->name.c_str(), m.name(newx, newy).c_str());
             }
         }
-        p->hurt(bp_torso, 0, 500);
+        p->apply_damage( nullptr, bp_torso, 500 );
     } else if (can_see) {
         const int i = mon_at(newx, newy);
         if (i != -1) {
@@ -14395,7 +14406,7 @@ void game::teleport(player *p, bool add_teleglow)
                 add_msg(_("%s teleports into the middle of a %s!"),
                         p->name.c_str(), critter.name().c_str());
             }
-            critter.hurt( 9999 ); // trigger exploding
+            critter.die_in_explosion( p );
         }
     }
     if (is_u) {
@@ -15047,6 +15058,10 @@ void game::add_artifact_messages(std::vector<art_effect_passive> effects)
 
         case AEP_BAD_WEATHER:
             add_msg(m_warning, _("You feel storms coming."));
+            break;
+
+        case AEP_SICK:
+            add_msg(m_bad, _("You feel unwell."));
             break;
         }
     }

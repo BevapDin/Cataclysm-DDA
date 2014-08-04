@@ -19,11 +19,7 @@
 #include <sstream>
 #include <memory>
 #include <stdio.h>
-
-// mfb(n) converts a flag to its appropriate position in covers's bitfield
-#ifndef mfb
-#define mfb(n) static_cast <unsigned long> (1 << (n))
-#endif
+#include <bitset>
 
 static const std::string category_id_guns("guns");
 static const std::string category_id_ammo("ammo");
@@ -309,6 +305,7 @@ void Item_factory::init()
     iuse_function_list["LUMBER"] = &iuse::lumber;
     iuse_function_list["HACKSAW"] = &iuse::hacksaw;
     iuse_function_list["TENT"] = &iuse::tent;
+    iuse_function_list["LARGE_TENT"] = &iuse::large_tent;
     iuse_function_list["SHELTER"] = &iuse::shelter;
     iuse_function_list["TORCH_LIT"] = &iuse::torch_lit;
     iuse_function_list["BATTLETORCH_LIT"] = &iuse::battletorch_lit;
@@ -362,7 +359,7 @@ void Item_factory::init()
     iuse_function_list["RADIOCARON"] = &iuse::radiocaron;
     iuse_function_list["RADIOCONTROL"] = &iuse::radiocontrol;
 
-    iuse_function_list["MULTICOOKER"] = &iuse::multicooker;	
+    iuse_function_list["MULTICOOKER"] = &iuse::multicooker;
 
     create_inital_categories();
 }
@@ -727,6 +724,8 @@ void Item_factory::load_armor(JsonObject &jo)
     armor_template->power_armor = jo.get_bool("power_armor", false);
     armor_template->covers = jo.has_member("covers") ?
                              flags_from_json(jo, "covers", "bodyparts") : 0;
+    armor_template->sided = jo.has_member("covers") ?
+                             flags_from_json(jo, "covers", "sided") : 0;
 
     itype *new_item_template = armor_template;
     load_basic_info(jo, new_item_template);
@@ -773,6 +772,7 @@ void Item_factory::load_tool(JsonObject &jo)
     tool_template->charges_per_use = jo.get_int("charges_per_use");
     tool_template->turns_per_charge = jo.get_int("turns_per_charge");
     tool_template->revert_to = jo.get_string("revert_to");
+    tool_template->subtype = jo.get_string("sub", "");
 
     itype *new_item_template = tool_template;
     load_basic_info(jo, new_item_template);
@@ -808,6 +808,8 @@ void Item_factory::load_tool_armor(JsonObject &jo)
     armor_template->power_armor = jo.get_bool("power_armor", false);
     armor_template->covers = jo.has_member("covers") ?
                              flags_from_json(jo, "covers", "bodyparts") : 0;
+    armor_template->sided = jo.has_member("covers") ?
+                             flags_from_json(jo, "covers", "sided") : 0;
 
     load_basic_info(jo, tool_armor_template);
 }
@@ -1101,11 +1103,11 @@ void Item_factory::set_qualities_from_json(JsonObject &jo, std::string member,
     }
 }
 
-unsigned Item_factory::flags_from_json(JsonObject &jo, const std::string &member,
+std::bitset<13> Item_factory::flags_from_json(JsonObject &jo, const std::string &member,
                                        std::string flag_type)
 {
     //If none is found, just use the standard none action
-    unsigned flag = 0;
+    std::bitset<13> flag = 0;
     //Otherwise, grab the right label to look for
     if (jo.has_array(member)) {
         JsonArray jarr = jo.get_array(member);
@@ -1438,17 +1440,8 @@ use_function Item_factory::use_from_object(JsonObject obj)
         obj.read("do_flashbang", actor->do_flashbang);
         obj.read("flashbang_player_immune", actor->flashbang_player_immune);
         obj.read("fields_radius", actor->fields_radius);
-        if (obj.has_member("fields_type")) {
-            const std::string ft = obj.get_string("fields_type");
-            for (int i = 0; i < num_fields; i++) {
-                if (field_names[i] == ft) {
-                    actor->fields_type = static_cast<field_id>(i);
-                    break;
-                }
-            }
-            if (actor->fields_type == fd_null) {
-                debugmsg("Unknown field type %s", ft.c_str());
-            }
+        if( obj.has_member( "fields_type" ) || actor->fields_radius > 0 ) {
+            actor->fields_type = field_from_ident( obj.get_string( "fields_type" ) );
         }
         obj.read("fields_min_density", actor->fields_min_density);
         obj.read("fields_max_density", actor->fields_max_density);
@@ -1496,16 +1489,69 @@ use_function Item_factory::use_from_string(std::string function_name)
     }
 }
 
-void Item_factory::set_flag_by_string(unsigned &cur_flags, const std::string &new_flag,
+void Item_factory::set_flag_by_string(std::bitset<13> &cur_flags, const std::string &new_flag,
                                       const std::string &flag_type)
 {
     if (flag_type == "bodyparts") {
         // global defined in bodypart.h
-        std::map<std::string, body_part>::const_iterator found_flag_iter = body_parts.find(new_flag);
-        if (found_flag_iter != body_parts.end()) {
-            cur_flags = cur_flags | mfb((unsigned)found_flag_iter->second);
+        if (new_flag == "ARM" || new_flag == "HAND" || new_flag == "LEG" || new_flag == "FOOT") {
+            return;
+        } else if (new_flag == "ARMS" || new_flag == "HANDS" || new_flag == "LEGS" || new_flag == "FEET") {
+            std::vector<std::string> parts;
+            if (new_flag == "ARMS") {
+                parts.push_back("ARM_L");
+                parts.push_back("ARM_R");
+            } else if (new_flag == "HANDS") {
+                parts.push_back("HAND_L");
+                parts.push_back("HAND_R");
+            } else if (new_flag == "LEGS") {
+                parts.push_back("LEG_L");
+                parts.push_back("LEG_R");
+            } else if (new_flag == "FEET") {
+                parts.push_back("FOOT_L");
+                parts.push_back("FOOT_R");
+            }
+            for (auto it = parts.begin(); it != parts.end(); ++it) {
+                std::map<std::string, body_part>::const_iterator found_flag_iter = body_parts.find(*it);
+                if (found_flag_iter != body_parts.end()) {
+                    cur_flags.set(found_flag_iter->second);
+                } else {
+                    debugmsg("Invalid item bodyparts flag: %s", new_flag.c_str());
+                }
+            }
         } else {
-            debugmsg("Invalid item bodyparts flag: %s", new_flag.c_str());
+            std::map<std::string, body_part>::const_iterator found_flag_iter = body_parts.find(new_flag);
+            if (found_flag_iter != body_parts.end()) {
+                cur_flags.set(found_flag_iter->second);
+            } else {
+                debugmsg("Invalid item bodyparts flag: %s", new_flag.c_str());
+            }
+        }
+    } else if (flag_type == "sided") {
+        // global defined in bodypart.h
+        if (new_flag == "ARM" || new_flag == "HAND" || new_flag == "LEG" || new_flag == "FOOT") {
+            std::vector<std::string> parts;
+            if (new_flag == "ARM") {
+                parts.push_back("ARM_L");
+                parts.push_back("ARM_R");
+            } else if (new_flag == "HAND") {
+                parts.push_back("HAND_L");
+                parts.push_back("HAND_R");
+            } else if (new_flag == "LEG") {
+                parts.push_back("LEG_L");
+                parts.push_back("LEG_R");
+            } else if (new_flag == "FOOT") {
+                parts.push_back("FOOT_L");
+                parts.push_back("FOOT_R");
+            }
+            for (auto it = parts.begin(); it != parts.end(); ++it) {
+                std::map<std::string, body_part>::const_iterator found_flag_iter = body_parts.find(*it);
+                if (found_flag_iter != body_parts.end()) {
+                    cur_flags.set(found_flag_iter->second);
+                } else {
+                    debugmsg("Invalid item bodyparts flag: %s", new_flag.c_str());
+                }
+            }
         }
     }
 

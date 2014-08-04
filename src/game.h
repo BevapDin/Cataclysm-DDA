@@ -229,7 +229,7 @@ class game
         void teleport(player *p = NULL, bool add_teleglow = true);
         void plswim(int x, int y); // Called by plmove.  Handles swimming
         // when player is thrown (by impact or something)
-        void fling_player_or_monster(player *p, monster *zz, const int &dir, float flvel,
+        void fling_creature(Creature *c, const int &dir, float flvel,
                                      bool controlled = false);
 
         /**
@@ -459,7 +459,7 @@ class game
 
         std::queue<vehicle_prototype *> vehprototypes;
 
-        nc_color limb_color(player *p, body_part bp, int side, bool bleed = true,
+        nc_color limb_color(player *p, body_part bp, bool bleed = true,
                             bool bite = true, bool infect = true);
 
         bool opening_screen();// Warn about screen size, then present the main menu
@@ -508,7 +508,7 @@ class game
         void init_skills() throw (std::string);
         void init_professions();
         void init_faction_data();
-        void init_mongroups() throw (std::string);    // Initualizes monster groups
+        void init_mongroups() throw (std::string);    // Initializes monster groups
         void init_construction(); // Initializes construction "recipes"
         void init_missions();     // Initializes mission templates
         void init_autosave();     // Initializes autosave parameters
@@ -562,7 +562,7 @@ class game
         // the function returns false.
         // If the door gets closed the terrain at (x, y) is set to door_type and
         // true is returned.
-        // bash_dmg controlls how much damage the door does to the
+        // bash_dmg controls how much damage the door does to the
         // creatures/items/vehicle.
         // If bash_dmg is 0 or smaller, creatures and vehicles are not damaged
         // at all and they will prevent the door from closing.
@@ -588,8 +588,8 @@ class game
         void drop_in_direction(); // Drop w/ direction  'D'
         // put items from the item-vector on the map/a vehicle
         // at (dirx, diry), items are dropped into a vehicle part
-        // with the cargo flag (if ther eis one), otherwise they are
-        // droppend onto the ground.
+        // with the cargo flag (if there is one), otherwise they are
+        // dropped onto the ground.
         void drop(std::vector<item> &dropped, std::vector<item> &dropped_worn, int freed_volume_capacity,
                   int dirx, int diry);
         // calculate the time (in player::moves) it takes to drop the

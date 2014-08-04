@@ -40,8 +40,8 @@ void addict_effect(addiction &add)
     case ADD_ALCOHOL:
         g->u.mod_per_bonus(-1);
         g->u.mod_int_bonus(-1);
-        if (rng(40, 1200) <= in * 10 && g->u.health > -100) {
-            g->u.health--;
+        if (rng(40, 1200) <= in * 10) {
+            g->u.mod_healthy_mod(-1);
         }
         if (one_in(20) && rng(0, 20) < in) {
             add_msg(m_warning, _("You could use a drink."));
@@ -76,8 +76,8 @@ void addict_effect(addiction &add)
             if (g->u.pain < in * 3) {
                 g->u.mod_pain(1);
             }
-            if ((in >= 40 || one_in(1200 - 30 * in)) && g->u.health > -100) {
-                g->u.health--;
+            if (in >= 40 || one_in(1200 - 30 * in)) {
+                g->u.mod_healthy_mod(-1);
             }
             if (one_in(20) && dice(2, 20) < in) {
                 add_msg(m_bad, _("Your hands start shaking... you need some painkillers."));
@@ -105,8 +105,8 @@ void addict_effect(addiction &add)
         if (g->u.stim > -100 && (in >= 20 || int(calendar::turn) % (100 - in * 5) == 0)) {
             g->u.stim--;
         }
-        if (rng(0, 150) <= in && g->u.health > -100) {
-            g->u.health--;
+        if (rng(0, 150) <= in) {
+            g->u.mod_healthy_mod(-1);
         }
         if (dice(2, 100) < in) {
             add_msg(m_warning, _("You feel depressed.  Speed would help."));
@@ -161,12 +161,12 @@ void addict_effect(addiction &add)
         if (g->u.has_trait("MUT_JUNKIE")) {
             if (one_in(600 - 50 * in)) {
                 add_msg(m_warning, rng(0, 6) < in ? _("You so miss the exquisite rainbow of post-humanity.") :
-                           _("Your body is SOO booorrrring. Just a little sip to liven things up?"));
+                           _("Your body is SOO booorrrring.  Just a little sip to liven things up?"));
                 g->u.add_morale(MORALE_CRAVING_MUTAGEN, -20, -200);
             }
             if (g->u.focus_pool > 40 && one_in(800 - 20 * in)) {
                 g->u.focus_pool -= (in);
-                add_msg(m_warning, _("You daydream what it'd be like if you were *different*. Different is good."));
+                add_msg(m_warning, _("You daydream what it'd be like if you were *different*.  Different is good."));
             }
         } else if (in > 5 || one_in((500 - 15 * in))) {
             add_msg(m_warning, rng(0, 6) < in ? _("You haven't had any mutagen lately.") :
@@ -178,8 +178,8 @@ void addict_effect(addiction &add)
     case ADD_DIAZEPAM:
         g->u.mod_per_bonus(-1);
         g->u.mod_int_bonus(-1);
-        if (rng(40, 1200) <= in * 10 && g->u.health > -100) {
-            g->u.health--;
+        if (rng(40, 1200) <= in * 10) {
+            g->u.mod_healthy_mod(-1);
         }
         if (one_in(20) && rng(0, 20) < in) {
             add_msg(m_warning, _("You could use some diazepam."));
@@ -314,7 +314,7 @@ add_type addiction_type(std::string name)
         return ADD_DIAZEPAM;
     } else {
         if (name != "none") {
-            debugmsg("unknown addiction type: %s. For no addictive potential, use \"none\"", name.c_str());
+            debugmsg("unknown addiction type: %s.  For no addictive potential, use \"none\"", name.c_str());
         }
         return ADD_NULL;
     }
@@ -361,7 +361,7 @@ Movement rate reduction.  Depression.  Weak immune system.  Frequent cravings.")
         return _("Perception - 2;   Intelligence - 2;  Frequent cravings.");
         
     case ADD_MUTAGEN:
-        return _("You've gotten a taste for mutating and the chemicals that cause it. But you can stop, yeah, any time you want.");
+        return _("You've gotten a taste for mutating and the chemicals that cause it.  But you can stop, yeah, any time you want.");
         
     case ADD_DIAZEPAM:
         return _("Perception - 1;   Intelligence - 1;\n\

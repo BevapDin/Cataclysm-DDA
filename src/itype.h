@@ -15,11 +15,7 @@
 #include <string>
 #include <vector>
 #include <set>
-
-// mfb(n) converts a flag to its appropriate position in covers's bitfield
-#ifndef mfb
-#define mfb(n) static_cast <unsigned long> (1 << (n))
-#endif
+#include <bitset>
 
 // for use in category specific inventory lists
 enum item_cat {
@@ -261,6 +257,10 @@ public:
 
     bool has_use();
     bool can_use( std::string iuse_name );
+    /** Returns true if is_armor() and covers bp */
+    bool is_covering(body_part bp);
+    /** Returns true if is_armor() and is sided on bp */
+    bool is_sided(body_part bp);
     int invoke( player *p, item *it, bool active );
 
     std::string dmg_adj(int dam)
@@ -461,7 +461,8 @@ struct it_gunmod : public virtual itype {
 };
 
 struct it_armor : public virtual itype {
-    unsigned char covers; // Bitfield of enum body_part
+    std::bitset<13> covers; // Bitfield of enum body_part
+    std::bitset<13> sided;  // Bitfield of enum body_part
     signed char encumber;
     unsigned char coverage;
     unsigned char thickness;
@@ -471,7 +472,7 @@ struct it_armor : public virtual itype {
 
     bool power_armor;
 
-    it_armor() : itype(), covers(0), encumber(0), coverage(0), thickness(0), env_resist(0), warmth(0),
+    it_armor() : itype(), covers(0), sided(0), encumber(0), coverage(0), thickness(0), env_resist(0), warmth(0),
         storage(), power_armor(false)
     {
     }
@@ -566,6 +567,7 @@ struct it_tool : public virtual itype {
     unsigned char charges_per_use;
     unsigned char turns_per_charge;
     itype_id revert_to;
+    itype_id subtype;
 
     virtual bool is_tool()
     {
@@ -585,7 +587,7 @@ struct it_tool : public virtual itype {
     }
 
     it_tool() : itype(), ammo(), max_charges(0), def_charges(0), rand_charges(), charges_per_use(0),
-        turns_per_charge(0), revert_to()
+        turns_per_charge(0), revert_to(), subtype()
     {
     }
 };

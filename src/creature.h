@@ -66,26 +66,21 @@ class Creature
                 std::set<std::string>& proj_effects);
                 */
 
-        virtual int hit(Creature *source, body_part bphurt, int side,
-                        int dam, int cut);
+        virtual int hit(Creature *source, body_part bphurt, int dam, int cut);
 
         // handles dodges and misses, allowing triggering of martial arts counter
         virtual void dodge_hit(Creature *source, int hit_spread) = 0;
 
         // handles blocking of damage instance. mutates &dam
-        virtual bool block_hit(Creature *source, body_part &bp_hit, int &side,
+        virtual bool block_hit(Creature *source, body_part &bp_hit,
                                damage_instance &dam) = 0;
 
         // handles armor absorption (including clothing damage etc)
         // of damage instance. mutates &dam
-        virtual void absorb_hit(body_part bp, int side,
-                                damage_instance &dam) = 0;
+        virtual void absorb_hit(body_part bp, damage_instance &dam) = 0;
 
         // TODO: this is just a shim so knockbacks work
         virtual void knock_back_from(int posx, int posy) = 0;
-
-        // TODO: remove this function in favor of deal/apply_damage
-        virtual void hurt(body_part bp, int side, int dam) = 0;
 
         // begins a melee attack against the creature
         // returns hit - dodge (>=0 = hit, <0 = miss)
@@ -106,7 +101,7 @@ class Creature
         // Most sources of external damage should use deal_damage
         // Mutates the damage_instance& object passed in to reflect the
         // post-mitigation object
-        virtual dealt_damage_instance deal_damage(Creature *source, body_part bp, int side,
+        virtual dealt_damage_instance deal_damage(Creature *source, body_part bp,
                                                   const damage_instance &d);
         // for each damage type, how much gets through and how much pain do we
         // accrue? mutates damage and pain
@@ -114,8 +109,7 @@ class Creature
                                              body_part bp, int &damage, int &pain);
         // directly decrements the damage. ONLY handles damage, doesn't
         // increase pain, apply effects, etc
-        virtual void apply_damage(Creature *source,
-                                  body_part bp, int side, int amount) = 0;
+        virtual void apply_damage(Creature *source, body_part bp, int amount) = 0;
 
         virtual bool digging() const;      // MF_DIGS or MF_CAN_DIG and diggable terrain
         virtual bool is_on_ground() const = 0;
@@ -148,6 +142,9 @@ class Creature
         std::string get_value( const std::string key ) const;
 
         virtual void process_effects(); // runs all the effects on the Creature
+        
+        /** Handles health fluctuations over time */
+        virtual void update_health(int base_threshold = 0);
 
         // not-quite-stats, maybe group these with stats later
         virtual void mod_pain(int npain);
@@ -177,6 +174,9 @@ class Creature
         virtual int get_dex_bonus() const;
         virtual int get_per_bonus() const;
         virtual int get_int_bonus() const;
+        
+        virtual int get_healthy() const;
+        virtual int get_healthy_mod() const;
 
         virtual int get_num_blocks() const;
         virtual int get_num_dodges() const;
@@ -194,6 +194,7 @@ class Creature
 
         virtual int get_speed() const;
         virtual int get_dodge();
+        virtual int get_melee() const;
         virtual int get_hit();
         virtual m_size get_size() const = 0;
         virtual int get_hp( hp_part bp = num_hp_parts ) const = 0;
@@ -233,6 +234,11 @@ class Creature
         virtual void mod_per_bonus(int nper);
         virtual void mod_int_bonus(int nint);
         virtual void mod_stat( std::string stat, int modifier );
+        
+        virtual void set_healthy(int nhealthy);
+        virtual void set_healthy_mod(int nhealthy_mod);
+        virtual void mod_healthy(int nhealthy);
+        virtual void mod_healthy_mod(int nhealthy_mod);
 
         virtual void set_num_blocks_bonus(int nblocks);
         virtual void set_num_dodges_bonus(int ndodges);
@@ -318,6 +324,9 @@ class Creature
         int dex_bonus;
         int per_bonus;
         int int_bonus;
+        
+        int healthy; //How healthy the creature is, currently only used by players
+        int healthy_mod;
 
         int num_blocks; // base number of blocks/dodges per turn
         int num_dodges;

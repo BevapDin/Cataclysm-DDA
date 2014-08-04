@@ -1561,6 +1561,7 @@ void vehicle::part_removal_cleanup() {
         refresh();
         if(parts.empty()) {
             g->m.destroy_vehicle(this);
+            return;
         } else {
             g->m.update_vehicle_cache(this, false);
         }
@@ -1631,6 +1632,26 @@ const std::vector<int> vehicle::parts_at_relative (const int dx, const int dy, b
         res.push_back(u);
     }
     return res;
+}
+
+/**
+ * Returns the label at the coordinates given (mount coordinates)
+ */
+const std::string vehicle::get_label(int x, int y) {
+	std::set<label>::const_iterator it = labels.find(label(x, y));
+    if (it != labels.end()) {
+    	return it->text;
+    }
+    return "";
+}
+
+/**
+ * Sets the label at the coordinates given (mount coordinates)
+ */
+void vehicle::set_label(int x, int y, std::string text) {
+    labels.erase(label(x, y));
+    if (text != "")
+    	labels.insert(label(x, y, text));
 }
 
 int vehicle::next_part_to_close(int p, bool outside)
@@ -2068,8 +2089,13 @@ int vehicle::print_part_desc(WINDOW *win, int y1, int width, int p, int hl /*= -
             //~ indicates that a vehicle part is outside
             mvwprintz(win, y, width-2-utf8_width(_("Out")), c_ltgray, _("Out"));
         }
-        y++;
+    	y++;
     }
+
+    // print the label for this location
+    const std::string label = get_label(parts[p].mount_dx, parts[p].mount_dy);
+    if (label != "")
+    	mvwprintz(win, y + 1, 1, c_ltred, _("Label: %s"), label.c_str());
 
     return y;
 }
@@ -3445,16 +3471,14 @@ veh_collision vehicle::part_collision (int part, int x, int y, bool just_detect)
 
             int angle = (100 - degree) * 2 * (one_in(2)? 1 : -1);
             if (z) {
-                z->hurt(dam);
+                z->apply_damage( nullptr, bp_torso, dam); // TODO: get the driver and make them responsible.
 
-                if (vel2_a > rng (10, 20)) {
-                    g->fling_player_or_monster (0, z, move.dir() + angle, vel2_a);
-                }
             } else {
                 ph->hitall (dam, 40);
-                if (vel2_a > rng (10, 20)) {
-                    g->fling_player_or_monster (ph, 0, move.dir() + angle, vel2_a);
-                }
+            }
+            if (vel2_a > rng (10, 20)) {
+                g->fling_creature( z != nullptr ? static_cast<Creature*>( z)  : ph,
+                                   move.dir() + angle, vel2_a );
             }
         }
 
