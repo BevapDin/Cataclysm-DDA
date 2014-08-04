@@ -51,10 +51,10 @@ class inventory
   void add_item_keep_invlet(const item &newit);
 
 /* Check all items for proper stacking, rearranging as needed
- * game pointer is not necessary, but if supplied, will ensure no overlap with
+ * If this is the player's inventory, ensure the invlets do not overlap with
  * the player's worn items / weapon
  */
-  void restack(player *p = NULL);
+  void restack();
 
   void form_from_map(point origin, int distance);
 
@@ -140,10 +140,6 @@ class inventory
 
   void json_save_invcache(JsonOut &jsout) const;
   void json_save_items(JsonOut &jsout) const;
-
-  // Assigns an invlet if any remain.  If none do, will assign ` if force is
-  // true, empty (invlet = 0) otherwise.
-  void assign_empty_invlet(item &it, bool force = false);
 
   std::set<char> allocated_invlets() const;
  private:

@@ -12091,7 +12091,7 @@ void game::wield(int pos)
     // Weapons need invlets to access, give one if not already assigned.
     item &it = u.i_at(pos);
     if (!it.is_null() && it.invlet == 0) {
-        u.inv.assign_empty_invlet(it, true);
+        u.force_assign_invlet( it );
     }
 
     bool success = false;

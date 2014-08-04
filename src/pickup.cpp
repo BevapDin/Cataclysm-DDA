@@ -287,7 +287,7 @@ void Pickup::pick_up(int posx, int posy, int min)
                                         newit.display_name().c_str())) {
                         picked_up = true;
                         g->m.add_item_or_charges(posx, posy, g->u.remove_weapon(), 1);
-                        g->u.inv.assign_empty_invlet(newit, true);  // force getting an invlet.
+                        g->u.force_assign_invlet(newit);
                         g->u.wield(&(g->u.i_add(newit)));
                         add_msg(m_info, _("Wielding %c - %s"), newit.invlet,
                                 newit.display_name().c_str());
@@ -299,7 +299,7 @@ void Pickup::pick_up(int posx, int posy, int min)
                             g->u.weapon.display_name().c_str());
                 }
             } else {
-                g->u.inv.assign_empty_invlet(newit, true);  // force getting an invlet.
+                g->u.force_assign_invlet(newit);
                 g->u.wield(&(g->u.i_add(newit)));
                 picked_up = true;
                 add_msg(m_info, _("Wielding %c - %s"), newit.invlet, newit.display_name().c_str());
@@ -310,7 +310,7 @@ void Pickup::pick_up(int posx, int posy, int min)
         } else if (!g->u.is_armed() &&
                    (g->u.volume_carried() + newit.volume() > g->u.volume_capacity() - 2 ||
                     g->u.is_suitable_weapon(newit))) {
-            g->u.inv.assign_empty_invlet(newit, true);  // force getting an invlet.
+            g->u.force_assign_invlet(newit);
             g->u.weapon = newit;
             picked_up = true;
             add_msg(m_info, _("Wielding %c - %s"), newit.invlet, newit.display_name().c_str());
@@ -721,7 +721,7 @@ void Pickup::pick_up(int posx, int posy, int min)
                                          here[i].display_name().c_str())) {
                                 picked_up = true;
                                 g->m.add_item_or_charges(posx, posy, g->u.remove_weapon(), 1);
-                                g->u.inv.assign_empty_invlet(here[i], true);  // force getting an invlet.
+                                g->u.force_assign_invlet(here[i]);
                                 g->u.wield(&(g->u.i_add(here[i])));
                                 mapPickup[here[i].tname()] += (here[i].count_by_charges()) ?
                                     here[i].charges : 1;
@@ -737,7 +737,7 @@ void Pickup::pick_up(int posx, int posy, int min)
                                 g->u.weapon.display_name().c_str());
                     }
                 } else {
-                    g->u.inv.assign_empty_invlet(here[i], true);  // force getting an invlet.
+                    g->u.force_assign_invlet(here[i]);
                     g->u.wield(&(g->u.i_add(here[i])));
                     add_msg(m_info, _("Wielding %c - %s"), g->u.weapon.invlet, g->u.weapon.display_name().c_str());
                     mapPickup[here[i].tname()] += (here[i].count_by_charges()) ? here[i].charges : 1;
@@ -750,7 +750,7 @@ void Pickup::pick_up(int posx, int posy, int min)
             } else if (!g->u.is_armed() &&
                        (g->u.volume_carried() + here[i].volume() > g->u.volume_capacity() - 2 ||
                         g->u.is_suitable_weapon(here[i]))) {
-                g->u.inv.assign_empty_invlet(here[i], true);  // force getting an invlet.
+                g->u.force_assign_invlet(here[i]);
                 g->u.weapon = here[i];
                 add_msg(m_info, _("Wielding %c - %s"), g->u.weapon.invlet, g->u.weapon.display_name().c_str());
                 picked_up = true;

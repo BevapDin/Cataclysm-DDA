@@ -1244,7 +1244,7 @@ void game::complete_craft()
         }
     }
 
-    u.inv.restack(&u);
+    u.inv.restack();
 }
 
 void set_item_spoilage(item &newit, float used_age_tally, int used_age_count)
@@ -1268,7 +1268,6 @@ void set_item_food(item &newit)
 
 void set_item_inventory(game *g, item &newit)
 {
-    g->u.inv.assign_empty_invlet(newit);
     if (newit.made_of(LIQUID)) {
         while(!g->handle_liquid(newit, false, false)) {
             ;

@@ -1944,7 +1944,7 @@ void player::memorial( std::ofstream &memorial_file, std::string epitaph )
 
     //Inventory
     memorial_file << _("Inventory:") << "\n";
-    inv.restack(this);
+    inv.restack();
     inv.sort();
     invslice slice = inv.slice();
     for( size_t i = 0; i < slice.size(); ++i ) {
@@ -7780,7 +7780,7 @@ bool player::consume(int pos)
                 }
             }
             if (do_restack) {
-                inv.restack(this);
+                inv.restack();
             }
             inv.unsort();
         }
@@ -8608,7 +8608,7 @@ bool player::wear(int pos, bool interactive)
         // in case it's a stack, reset the invlet to avoid duplicates
         to_wear->invlet = 0;
         inv.remove_item(to_wear);
-        inv.restack(this);
+        inv.restack();
     }
 
     return true;
@@ -8917,10 +8917,6 @@ bool player::wear_item(item *to_wear, bool interactive)
             }
             return false;
         }
-    }
-
-    if (to_wear->invlet == 0) {
-        inv.assign_empty_invlet( *to_wear, false );
     }
 
     const bool was_deaf = is_deaf();
@@ -11078,7 +11074,7 @@ void player::wield_contents(item *container, bool force_invlet,
 {
     if(!(container->contents.empty())) {
         item& weap = container->contents[0];
-        inv.assign_empty_invlet(weap, force_invlet);
+        force_assign_invlet( weap );
         wield(&(i_add(weap)));
         container->contents.erase(container->contents.begin());
     } else {
@@ -11702,4 +11698,53 @@ void player::place_corpse()
         }
     }
     g->m.add_item_or_charges( posx, posy, body );
+}
+
+void player::force_assign_invlet( item &it )
+{
+    if( !is_player() ) {
+        // npcs don't need invlets
+        return;
+    }
+    assign_unused_invlet( it );
+    if( it.invlet != 0 ) {
+        return;
+    }
+    // No free hotkey exist, re-use some of the existing ones
+    for( size_t i = 0; i < inv.size(); i++ ) {
+        item &o = inv.find_item( i );
+        if( o.invlet != 0 ) {
+            it.invlet = o.invlet;
+            o.invlet = 0;
+            return;
+        }
+    }
+    for( size_t i = 0; i < worn.size(); i++ ) {
+        item &o = worn[i];
+        if( o.invlet != 0 ) {
+            it.invlet = o.invlet;
+            o.invlet = 0;
+            return;
+        }
+    }
+    DebugLog( D_WARNING, D_GAME ) << "could not find a hotkey for " << it.tname();
+}
+
+void player::assign_unused_invlet(item &it) const
+{
+    if( !is_player() ) {
+        // npcs don't need invlets
+        return;
+    }
+    const std::set<char> cur_inv = allocated_invlets();
+    if( cur_inv.size() < inv_chars.size() ) {
+        for( std::string::const_iterator newinvlet = inv_chars.begin(); newinvlet != inv_chars.end();
+             newinvlet++ ) {
+            if( cur_inv.find( *newinvlet ) == cur_inv.end() ) {
+                it.invlet = *newinvlet;
+                return;
+            }
+        }
+    }
+    it.invlet = 0;
 }

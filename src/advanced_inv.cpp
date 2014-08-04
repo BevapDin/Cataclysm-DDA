@@ -1075,7 +1075,6 @@ bool advanced_inventory::move_all_items()
                 // if it's an inventory, we'll have to let time pass, and move the item
                 // we also know that we can pick it up, we've calculated that above!
                 if(destarea == isinventory) {
-                    u.inv.assign_empty_invlet(new_item);
                     u.i_add(new_item);
                     u.moves -= 100;
 
@@ -1129,7 +1128,7 @@ void advanced_inventory::display(player *pp)
     map &m = g->m;
 
     u.inv.sort();
-    u.inv.restack((&g->u));
+    u.inv.restack();
 
 
     WINDOW *head = newwin(head_height, w_width, headstart, colstart);
@@ -1555,7 +1554,6 @@ void advanced_inventory::display(player *pp)
                         new_item.charges = trycharges;
                     }
                     if(destarea == isinventory) {
-                        u.inv.assign_empty_invlet(new_item);
                         u.i_add(new_item);
                         u.moves -= 100;
                     } else if (squares[destarea].vstor >= 0) {
@@ -1670,7 +1668,7 @@ void advanced_inventory::display(player *pp)
                     exit = true;
                 }
                 // Might have changed at stack (activated an item)
-                g->u.inv.restack(&g->u);
+                g->u.inv.restack();
                 recalc = true;
                 checkshowmsg = true;
             } else {

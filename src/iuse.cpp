@@ -976,7 +976,7 @@ int iuse::smoking(player *p, item *it, bool)
     // If we're here, we better have a cig to light.
     p->use_charges_if_avail("fire", 1);
     cig.active = true;
-    p->inv.add_item(cig, false, true);
+    p->i_add(cig);
     p->add_msg_if_player(m_info, _("You light a %s."), cig.tname().c_str());
 
     // Parting messages
@@ -7342,7 +7342,6 @@ int iuse::quiver(player *p, item *it, bool)
             p->add_msg_if_player(ngettext("You remove the %s from the %s.", "You remove the %s from the %s.",
                                           arrowsRemoved),
                                  arrows.type->nname(arrowsRemoved).c_str(), it->tname().c_str());
-            p->inv.assign_empty_invlet(arrows, false);
             p->i_add(arrows);
             it->contents.erase(it->contents.begin());
             return it->type->charges_to_use();
@@ -7704,7 +7703,7 @@ int iuse::boots(player *p, item *it, bool)
         p->moves -= 15;
         item &knife = it->contents[choice - 1];
         if (!p->is_armed() || p->wield(NULL)) {
-            p->inv.assign_empty_invlet(knife, true);  // force getting an invlet.
+            p->force_assign_invlet( knife );
             p->wield(&(p->i_add(knife)));
             it->contents.erase(it->contents.begin() + choice - 1);
         }
@@ -8253,7 +8252,6 @@ int iuse::radiocar(player *p, item *it, bool)
             p->moves -= 150;
             item &bomb = it->contents[0];
 
-            p->inv.assign_empty_invlet(bomb, true); // force getting an invlet.
             p->i_add(bomb);
             it->contents.erase(it->contents.begin());
 

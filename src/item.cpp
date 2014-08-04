@@ -2961,7 +2961,7 @@ bool item::reload(player &u, int pos)
                 // We just emptied a container, which might be part of stack,
                 // but empty and non-empty containers should not stack, force
                 // a re-stacking.
-                u.inv.restack(&u);
+                u.inv.restack();
             } else {
                 u.i_rem(pos);
             }

@@ -967,6 +967,17 @@ public:
 
     bool save_zones();
     void load_zones();
+
+    // Assigns an invlet. If no invlet is available, it takes one from the
+    // main inventory/worn items and swaps it.
+    // Should only be called if the item *really* needs an invlet (e.g. for wielded
+    // items). Should *only* by called for the actual player. npcs ignore this,
+    // they don't need invlets.
+    void force_assign_invlet(item &it);
+    // Returns an invlet that is not used in the inventory/worn/wielded items of
+    // this player. Returns 0 if there is no free invlet available. npcs ignore this,
+    // they don't need invlets.
+    void assign_unused_invlet(item &it) const;
     
 protected:
     std::unordered_set<std::string> my_traits;

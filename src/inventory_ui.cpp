@@ -773,7 +773,7 @@ int game::display_slice(indexed_invslice &slice, const std::string &title, const
 // Display current inventory.
 int game::inv(const std::string &title, const int &position)
 {
-    u.inv.restack(&u);
+    u.inv.restack();
     u.inv.sort();
     indexed_invslice slice = u.inv.slice_filter();
     return display_slice(slice, title, position);
@@ -781,7 +781,7 @@ int game::inv(const std::string &title, const int &position)
 
 int game::inv_activatable(std::string title)
 {
-    u.inv.restack(&u);
+    u.inv.restack();
     u.inv.sort();
     indexed_invslice activatables = u.inv.slice_filter_by_activation(u);
     return display_slice(activatables, title);
@@ -789,7 +789,7 @@ int game::inv_activatable(std::string title)
 
 int game::inv_type(std::string title, item_cat inv_item_type)
 {
-    u.inv.restack(&u);
+    u.inv.restack();
     u.inv.sort();
     indexed_invslice reduced_inv = u.inv.slice_filter_by_category(inv_item_type, u);
     return display_slice(reduced_inv, title);
@@ -797,7 +797,7 @@ int game::inv_type(std::string title, item_cat inv_item_type)
 
 int game::inv_for_liquid(const item &liquid, const std::string title, bool auto_choose_single)
 {
-    u.inv.restack(&u);
+    u.inv.restack();
     u.inv.sort();
     indexed_invslice reduced_inv = u.inv.slice_filter_by_capacity_for_liquid(liquid);
     if (auto_choose_single && reduced_inv.size() == 1) {
@@ -847,7 +847,7 @@ item *game::inv_map_for_liquid(const item &liquid, const std::string title)
         -1000
     );
 
-    u.inv.restack(&u);
+    u.inv.restack();
     u.inv.sort();
     const indexed_invslice stacks = u.inv.slice_filter_by_capacity_for_liquid(liquid);
 
@@ -890,7 +890,7 @@ item *game::inv_map_for_liquid(const item &liquid, const std::string title)
 
 int game::inv_for_flag(const std::string flag, const std::string title, bool auto_choose_single)
 {
-    u.inv.restack(&u);
+    u.inv.restack();
     u.inv.sort();
     indexed_invslice reduced_inv = u.inv.slice_filter_by_flag(flag);
     if (auto_choose_single && reduced_inv.size() == 1) {
@@ -915,7 +915,7 @@ std::vector<item> game::multidrop(std::vector<item> &dropped_worn, int &freed_vo
 {
     freed_volume_capacity = 0;
 
-    u.inv.restack(&u);
+    u.inv.restack();
     u.inv.sort();
     const indexed_invslice stacks = u.inv.slice_filter();
     inventory_selector inv_s(true, false, _("Multidrop:"));
@@ -1014,7 +1014,7 @@ void game::compare(int iCompareX, int iCompareY)
         -1000
     );
 
-    u.inv.restack(&u);
+    u.inv.restack();
     u.inv.sort();
     const indexed_invslice stacks = u.inv.slice_filter();
 

@@ -315,9 +315,11 @@ char inventory::get_invlet_for_item( std::string item_type )
 item &inventory::add_item(item newit, bool keep_invlet, bool assign_invlet)
 {
     bool reuse_cached_letter = false;
+    // Only do invlets stuff for the player's inventory, npcs don't need invlets.
+    const bool is_player = this == &g->u.inv;
 
     // Check how many stacks of this type already are in our inventory.
-    if(!keep_invlet && assign_invlet) {
+    if(!keep_invlet && assign_invlet && is_player) {
         // Do we have this item in our inventory favourites cache?
         char temp_invlet = get_invlet_for_item( newit.typeId() );
         if( temp_invlet != 0 ) {
@@ -327,12 +329,12 @@ item &inventory::add_item(item newit, bool keep_invlet, bool assign_invlet)
 
         // If it's not in our cache and not a lowercase letter, try to give it a low letter.
         if(!reuse_cached_letter && (newit.invlet < 'a' || newit.invlet > 'z')) {
-            assign_empty_invlet(newit);
+            g->u.assign_unused_invlet(newit);
         }
 
         // Make sure the assigned invlet doesn't exist already.
-        if(this == &g->u.inv && g->u.invlet_to_position(newit.invlet) != INT_MIN) {
-            assign_empty_invlet(newit);
+        if(g->u.invlet_to_position(newit.invlet) != INT_MIN) {
+            g->u.assign_unused_invlet(newit);
         }
     }
 
@@ -353,13 +355,13 @@ item &inventory::add_item(item newit, bool keep_invlet, bool assign_invlet)
                 newit.invlet = it_ref->invlet;
                 iter->push_back(newit);
                 return iter->back();
-            } else if (keep_invlet && assign_invlet && it_ref->invlet == newit.invlet) {
-                assign_empty_invlet(*it_ref);
+            } else if (keep_invlet && assign_invlet && it_ref->invlet == newit.invlet && is_player) {
+                g->u.assign_unused_invlet(*it_ref);
             }
         }
         // If keep_invlet is true, we'll be forcing other items out of their current invlet.
-        else if (keep_invlet && assign_invlet && it_ref->invlet == newit.invlet) {
-            assign_empty_invlet(*it_ref);
+        else if (keep_invlet && assign_invlet && it_ref->invlet == newit.invlet && is_player) {
+            g->u.assign_unused_invlet(*it_ref);
         }
     }
 
@@ -379,26 +381,29 @@ void inventory::add_item_keep_invlet(const item &newit)
     add_item(newit, true);
 }
 
-void inventory::restack(player *p)
+void inventory::restack()
 {
+    // Only do invlets stuff for the player's inventory, npcs don't need invlets.
+    const bool is_player = this == &g->u.inv;
     // tasks that the old restack seemed to do:
     // 1. reassign inventory letters
     // 2. remove items from non-matching stacks
     // 3. combine matching stacks
 
-    if (!p) {
-        return;
-    }
-
     std::list<item> to_restack;
     int idx = 0;
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter, ++idx) {
-        const int ipos = p->invlet_to_position(iter->front().invlet);
-        if (!iter->front().invlet_is_okay() || ( ipos != INT_MIN && ipos != idx ) ) {
-            assign_empty_invlet(iter->front());
-            for( std::list<item>::iterator stack_iter = iter->begin();
-                 stack_iter != iter->end(); ++stack_iter ) {
-                stack_iter->invlet = iter->front().invlet;
+        if( is_player ) {
+            // If this is the player's inventory, try to assign invlets to each stack.
+            // Also remove (and reassign) invlets that are used multiple times (or
+            // are used in the worn items).
+            item &first = iter->front();
+            const int ipos = g->u.invlet_to_position( first.invlet );
+            if( !first.invlet_is_okay() || ( ipos != INT_MIN && ipos != idx ) ) {
+                g->u.assign_unused_invlet( first );
+                for( auto &itm : *iter ) {
+                    itm.invlet = first.invlet;
+                }
             }
         }
 
@@ -1351,35 +1356,6 @@ std::vector<item *> inventory::active_items()
         }
     }
     return ret;
-}
-
-void inventory::assign_empty_invlet(item &it, bool force)
-{
-    player *p = &(g->u);
-    std::set<char> cur_inv = p->allocated_invlets();
-    if (cur_inv.size() < inv_chars.size()) {
-        for (std::string::const_iterator newinvlet = inv_chars.begin();
-            newinvlet != inv_chars.end(); newinvlet++) {
-            if (cur_inv.find(*newinvlet) == cur_inv.end()) {
-                it.invlet = *newinvlet;
-                return;
-            }
-        }
-    }
-    if (!force) {
-        it.invlet = 0;
-        return;
-    }
-    // No free hotkey exist, re-use some of the existing ones
-    for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter) {
-        item &o = iter->front();
-        if (o.invlet != 0) {
-            it.invlet = o.invlet;
-            o.invlet = 0;
-            return;
-        }
-    }
-    debugmsg("could not find a hotkey for %s", it.tname().c_str());
 }
 
 std::set<char> inventory::allocated_invlets() const {
