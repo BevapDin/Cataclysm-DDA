@@ -1351,7 +1351,7 @@ void advanced_inventory::display(player *pp)
             if('t' == c) {
                 item* it = panes[src].items[list_pos].it;
                 destarea = find_destination(*it, panes[src].area, panes[src].area);
-                if(destarea == -1) {
+                if(destarea == -1 || destarea == panes[src].area) {
                     lastCh = 'j';
                     continue;
                 }
