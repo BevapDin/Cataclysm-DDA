@@ -2469,6 +2469,7 @@ std::list<item> crafting_inventory_t::consume_any_components(const std::vector<i
 {
     std::list<item> result;
     if(comps.empty()) { return result; }
+    if(comps[0].count == 0) { return result; }
     solution s;
     s.init_need_any(comps);
     s.gather(const_cast<crafting_inventory_t&>(*this), true);
@@ -2493,12 +2494,11 @@ std::list<item> crafting_inventory_t::consume_components(const itype_id &type, i
 }
 
 void crafting_inventory_t::consume_items(const std::vector<item_comp> &comps) {
-    if(comps.empty()) { return; }
     requirements r;
-    r.components.resize(comps.size());
     for(size_t i = 0; i < comps.size(); i++) {
         if(comps[i].count == 0) { continue; }
-        r.components[i].push_back(comps[i]);
+        r.components.resize(r.components.size() + 1);
+        r.components.back().push_back(comps[i]);
     }
     if(r.components.empty()) { return; }
     solution s;
