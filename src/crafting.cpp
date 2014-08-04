@@ -913,7 +913,7 @@ void recipe::print_item(WINDOW *w, int ypos, int xpos, nc_color col, const bypro
 inventory game::crafting_inventory(player *p)
 {
     inventory crafting_inv;
-    crafting_inv.form_from_map(point(p->posx, p->posy), PICKUP_RANGE, false);
+    crafting_inv.form_from_map(point(p->posx, p->posy), PICKUP_RANGE);
     crafting_inv += p->inv;
     crafting_inv += p->weapon;
     crafting_inv += p->worn;

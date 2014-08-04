@@ -23,9 +23,9 @@ class inventory
  public:
   invslice slice();
   const_invslice const_slice() const;
-  const std::list<item>& const_stack(int i) const;
-  int size() const;
-  int num_items() const;
+  const std::list<item>& const_stack(size_t i) const;
+  size_t size() const;
+  size_t num_items() const;
   bool is_sorted() const;
 
   inventory& operator=  (const inventory &rhs);
@@ -46,9 +46,9 @@ class inventory
   void unsort(); // flags the inventory as unsorted
   void sort();
   void clear();
-  void add_stack(std::list<item> newits);
+  void add_stack(const std::list<item> newits);
   item& add_item (item newit, bool keep_invlet = false, bool assign_invlet = true); //returns a ref to the added item
-  void add_item_keep_invlet(item newit);
+  void add_item_keep_invlet(const item &newit);
 
 /* Check all items for proper stacking, rearranging as needed
  * game pointer is not necessary, but if supplied, will ensure no overlap with
@@ -56,7 +56,7 @@ class inventory
  */
   void restack(player *p = NULL);
 
-  void form_from_map(point origin, int distance, bool assign_invlet = true);
+  void form_from_map(point origin, int distance);
 
   item remove_item(item *it);
   item remove_item(int position);
@@ -141,9 +141,6 @@ class inventory
   void json_save_invcache(JsonOut &jsout) const;
   void json_save_items(JsonOut &jsout) const;
 
-  item nullitem;
-  std::list<item> nullstack;
-
   // Assigns an invlet if any remain.  If none do, will assign ` if force is
   // true, empty (invlet = 0) otherwise.
   void assign_empty_invlet(item &it, bool force = false);
@@ -153,6 +150,9 @@ class inventory
   // For each item ID, store a set of "favorite" inventory letters.
   std::map<std::string, std::vector<char> > invlet_cache;
   void update_cache_with_item(item& newit);
+
+  mutable item nullitem;
+  mutable std::list<item> nullstack;
 
   // Often items can be located using typeid, position, or invlet.  To reduce code duplication,
   // we back those functions with a single internal function templated on the type of Locator.
