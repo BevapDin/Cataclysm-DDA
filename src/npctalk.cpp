@@ -3634,7 +3634,7 @@ TAB key to switch lists, letters to pick items, Enter to finalize, Esc to quit,\
   std::vector<item*> removing;
   for (size_t i = 0; i < yours.size(); i++) {
    if (getting_yours[i]) {
-    newinv.push_back(*yours[i]);
+    newinv.add_item(*yours[i]);
     practice++;
     removing.push_back(yours[i]);
    }
@@ -3647,9 +3647,9 @@ TAB key to switch lists, letters to pick items, Enter to finalize, Esc to quit,\
    item tmp = *theirs[i];
    if (getting_theirs[i]) {
     practice += 2;
-    g->u.inv.push_back(tmp);
+    g->u.i_add_or_drop(tmp);
    } else
-    newinv.push_back(tmp);
+    newinv.add_item(tmp);
   }
   g->u.practice( "barter", practice / 2 );
   p->inv = newinv;

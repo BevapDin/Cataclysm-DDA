@@ -8667,10 +8667,10 @@ int iuse::multicooker(player *p, item *it, bool t)
 
             inventory crafting_inv = g->crafting_inventory(&g->u);
             //add some tools and qualities. we can't add this qualities to json, because multicook must be used only by activating, not as component other crafts.
-            crafting_inv.push_back(item("hotplate", 0)); //hotplate inside
-            crafting_inv.push_back(item("tongs", 0)); //some recipes requires tongs
-            crafting_inv.push_back(item("toolset", 0)); //toolset with CUT and other qualities inside
-            crafting_inv.push_back(item("pot", 0)); //good COOK, BOIL, CONTAIN qualities inside
+            crafting_inv.add_item(item("hotplate", 0)); //hotplate inside
+            crafting_inv.add_item(item("tongs", 0)); //some recipes requires tongs
+            crafting_inv.add_item(item("toolset", 0)); //toolset with CUT and other qualities inside
+            crafting_inv.add_item(item("pot", 0)); //good COOK, BOIL, CONTAIN qualities inside
 
             int counter = 1;
 

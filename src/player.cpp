@@ -7598,7 +7598,7 @@ int player::drink_from_hands(item& water) {
         {
             // Create a dose of water no greater than the amount of water remaining.
             item water_temp(water);
-            inv.push_back(water_temp);
+            inv.add_item(water_temp);
             // If player is slaked water might not get consumed.
             if (consume(inv.position_by_type(water_temp.typeId())))
             {

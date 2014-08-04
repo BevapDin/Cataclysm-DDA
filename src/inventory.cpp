@@ -57,19 +57,6 @@ bool inventory::is_sorted() const
     return sorted;
 }
 
-inventory &inventory::operator= (inventory &rhs)
-{
-    if (this == &rhs) {
-        return *this; // No self-assignment
-    }
-
-    clear();
-    for (int i = 0; i < rhs.size(); i++) {
-        items.push_back(rhs.const_stack(i));
-    }
-    return *this;
-}
-
 inventory &inventory::operator= (const inventory &rhs)
 {
     if (this == &rhs) {
@@ -91,14 +78,6 @@ inventory &inventory::operator+= (const inventory &rhs)
     return *this;
 }
 
-inventory &inventory::operator+= (const std::list<item> &rhs)
-{
-    for (std::list<item>::const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter) {
-        add_item(*iter, false, false);
-    }
-    return *this;
-}
-
 inventory &inventory::operator+= (const std::vector<item> &rhs)
 {
     for (std::vector<item>::const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter) {
@@ -111,21 +90,6 @@ inventory &inventory::operator+= (const item &rhs)
 {
     add_item(rhs);
     return *this;
-}
-
-inventory inventory::operator+ (const inventory &rhs)
-{
-    return inventory(*this) += rhs;
-}
-
-inventory inventory::operator+ (const std::list<item> &rhs)
-{
-    return inventory(*this) += rhs;
-}
-
-inventory inventory::operator+ (const item &rhs)
-{
-    return inventory(*this) += rhs;
 }
 
 /*static*/ bool inventory::has_activation(const item &it, const player &u)
@@ -278,23 +242,6 @@ void inventory::add_stack(const std::list<item> newits)
     }
 }
 
-/*
- *  Bypass troublesome add_item for situations where we want an -exact- copy.
- */
-void inventory::clone_stack (const std::list<item> &rhs)
-{
-    std::list<item> newstack;
-    for (std::list<item>::const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter) {
-        newstack.push_back(*iter);
-    }
-    items.push_back(newstack);
-}
-
-void inventory::push_back(std::list<item> newits)
-{
-    add_stack(newits);
-}
-
 // This function keeps the invlet cache updated when a new item is added.
 void inventory::update_cache_with_item(item &newit)
 {
@@ -430,12 +377,6 @@ void inventory::add_item_keep_invlet(item newit)
 {
     add_item(newit, true);
 }
-
-void inventory::push_back(item newit)
-{
-    add_item(newit);
-}
-
 
 void inventory::restack(player *p)
 {

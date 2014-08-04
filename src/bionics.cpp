@@ -565,11 +565,7 @@ void player::activate_bionic(int b)
         item water = item("water_clean", 0);
         if (g->handle_liquid(water, true, true)) {
             moves -= 100;
-        } else if (query_yn(_("Drink from your hands?"))) {
-            inv.push_back(water);
-            consume(inv.position_by_type(water.typeId()));
-            moves -= 350;
-        } else {
+        } else if( drink_from_hands( water ) == 0 ) {
             power_level += bionics["bio_evap"]->power_cost;
         }
     } else if(bio.id == "bio_lighter") {
@@ -696,8 +692,9 @@ void player::activate_bionic(int b)
                     if (g->handle_liquid(water, true, true)) {
                         moves -= 100;
                     } else if (query_yn(_("Drink directly from the condenser?"))) {
-                        inv.push_back(water);
-                        consume(inv.position_by_type(water.typeId()));
+                        item &w = inv.add_item( water );
+                        // TODO: check for cancelation
+                        consume( inv.position_by_item( &w ) );
                         moves -= 350;
                     }
                     extracted = true;

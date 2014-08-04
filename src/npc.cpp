@@ -1154,7 +1154,7 @@ bool npc::wear_if_wanted(item it)
  for (int i = 0; i < removal.size(); i++) {
   if (true) {
 //  if (worn[removal[i]].value_to(this) < it.value_to(this)) {
-   inv.push_back(worn[removal[i]]);
+   inv.add_item(worn[removal[i]]);
    worn.push_back(it);
    return true;
   }

@@ -28,15 +28,10 @@ class inventory
   int num_items() const;
   bool is_sorted() const;
 
-  inventory& operator=  (inventory &rhs);
   inventory& operator=  (const inventory &rhs);
   inventory& operator+= (const inventory &rhs);
   inventory& operator+= (const item &rhs);
-  inventory& operator+= (const std::list<item> &rhs);
   inventory& operator+= (const std::vector<item> &rhs);
-  inventory  operator+  (const inventory &rhs);
-  inventory  operator+  (const item &rhs);
-  inventory  operator+  (const std::list<item> &rhs);
 
   static bool has_activation(const item& it, const player& u);
   static bool has_category(const item& it, item_cat cat, const player& u);
@@ -52,11 +47,8 @@ class inventory
   void sort();
   void clear();
   void add_stack(std::list<item> newits);
-  void clone_stack(const std::list<item> &rhs);
-  void push_back(std::list<item> newits);
   item& add_item (item newit, bool keep_invlet = false, bool assign_invlet = true); //returns a ref to the added item
   void add_item_keep_invlet(item newit);
-  void push_back(item newit);
 
 /* Check all items for proper stacking, rearranging as needed
  * game pointer is not necessary, but if supplied, will ensure no overlap with

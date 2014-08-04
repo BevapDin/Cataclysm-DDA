@@ -467,9 +467,9 @@ bool player::create(character_type type, std::string tempname)
         } else if(tmp.has_flag("WET")) {
             tmp.active = true;
             tmp.item_counter = 450;
-            inv.push_back(tmp);
+            inv.add_item(tmp);
         } else {
-            inv.push_back(tmp);
+            inv.add_item(tmp);
         }
     }
 
@@ -507,13 +507,13 @@ bool player::create(character_type type, std::string tempname)
     // Likewise, the asthmatic start with their medication.
     if (has_trait("ASTHMA")) {
         tmp = item("inhaler", 0, false);
-        inv.push_back(tmp);
+        inv.add_item(tmp);
     }
 
     // And cannibals start with a special cookbook.
     if (has_trait("CANNIBAL")) {
         tmp = item("cookbook_human", 0);
-        inv.push_back(tmp);
+        inv.add_item(tmp);
     }
 
     // Albinoes have their umbrella handy.
@@ -521,7 +521,7 @@ bool player::create(character_type type, std::string tempname)
     // too badly to issue one.
     if (has_trait("ALBINO")) {
         tmp = item("teleumbrella", 0);
-        inv.push_back(tmp);
+        inv.add_item(tmp);
     }
 
     // make sure we have no mutations
