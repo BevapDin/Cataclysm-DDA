@@ -713,7 +713,7 @@ class game
         int grscent[SEEX *MAPSIZE][SEEY *MAPSIZE];   // The scent map
         //int monmap[SEEX * MAPSIZE][SEEY * MAPSIZE]; // Temp monster map, for mon_at()
         int nulscent;    // Returned for OOB scent checks
-        std::vector<event> events;         // Game events to be processed
+        std::list<event> events;         // Game events to be processed
         std::map<std::string, int> kills;         // Player's kill count
         std::map<std::string, int> craft_count;         // How often a recipe has been crafted
         int moves_since_last_save;

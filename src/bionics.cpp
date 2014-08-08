@@ -494,6 +494,9 @@ void player::activate_bionic(int b)
         if (has_disease("iodine")) {
             good.push_back(_("Iodine"));
         }
+        if (has_disease("datura")) {
+            good.push_back(_("Anticholinergic Tropane Alkaloids"));
+        }
         if (has_disease("took_xanax")) {
             good.push_back(_("Xanax"));
         }
@@ -554,6 +557,7 @@ void player::activate_bionic(int b)
         rem_disease("hallu");
         rem_disease("visuals");
         rem_disease("iodine");
+        rem_disease("datura");
         rem_disease("took_xanax");
         rem_disease("took_prozac");
         rem_disease("took_flumed");
@@ -785,8 +789,6 @@ void player::activate_bionic(int b)
     } else if(bio.id == "bio_shockwave") {
         g->shockwave(posx, posy, 3, 4, 2, 8, true);
         add_msg_if_player(m_neutral, _("You unleash a powerful shockwave!"));
-    } else if(bio.id == "bio_ups"){
-        add_msg_if_player(m_neutral, _("Your internal UPS powers on."));
     }
 }
 

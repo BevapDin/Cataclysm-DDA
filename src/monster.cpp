@@ -324,7 +324,7 @@ nc_color monster::color_with_effects() const
     if (has_effect("beartrap") || has_effect("stunned") || has_effect("downed") || has_effect("tied")) {
         ret = hilite(ret);
     }
-    if (has_effect("zlave")) {
+    if (has_effect("pacified")) {
         ret = invert_color(ret);
     }
     if (has_effect("onfire")) {
@@ -477,7 +477,7 @@ monster_attitude monster::attitude(player *u) const
     if (has_effect("run")) {
         return MATT_FLEE;
     }
-    if (has_effect("zlave")) {
+    if (has_effect("pacified")) {
         return MATT_ZLAVE;
     }
 
@@ -955,6 +955,7 @@ int monster::dodge_roll()
   case MS_SMALL: numdice += 3; break;
   case MS_LARGE: numdice -= 2; break;
   case MS_HUGE:  numdice -= 4; break;
+  case MS_MEDIUM: break; // keep default
  }
 
  numdice += int(speed / 80);

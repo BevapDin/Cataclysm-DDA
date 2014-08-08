@@ -53,6 +53,7 @@ public:
     int prozac              (player*, item*, bool);
     int sleep               (player*, item*, bool);
     int iodine              (player*, item*, bool);
+    int datura              (player*, item*, bool);
     int flumed              (player*, item*, bool);
     int flusleep            (player*, item*, bool);
     int inhaler             (player*, item*, bool);
@@ -203,6 +204,7 @@ public:
     int wood_gas(player *p, item *, bool t);
     int tool_belt(player *p, item *it, bool t);
 
+    int fish_trap           (player *, item *, bool);
     int gun_repair          (player *, item *, bool);
     int misc_repair         (player *, item *, bool);
     int rm13armor_off       (player *, item *, bool);

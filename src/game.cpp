@@ -633,7 +633,7 @@ void game::start_game(std::string worldname)
         u.posy = (SEEY * int(MAPSIZE / 2)) + rng(0, SEEY * 2);
     }
     u.moves = 0;
-    u.reset();
+    u.reset_bonuses();
     u.process_turn(); // process_turn adds the initial move points
     nextspawn = int(calendar::turn);
     temperature = 65; // Springtime-appropriate?
@@ -1125,6 +1125,17 @@ bool game::do_turn()
         u.add_memorial_log(pgettext("memorial_male", "Died of a healing stimulant overdose."),
                            pgettext("memorial_female", "Died of a healing stimulant overdose."));
         u.hp_cur[hp_torso] = 0;
+    } else if (u.has_disease("datura") &&
+               u.disease_duration("datura") > 14000 &&
+			   one_in(512)) {
+        if (!(u.has_trait("NOPAIN"))) {
+            add_msg(m_bad, _("Your heart spasms painfully and stops, dragging you back to reality as you die."));
+        } else {
+            add_msg(_("You dissolve into beautiful paroxysms of energy.  Life fades from your nebulae and you are no more."));
+        }
+        u.add_memorial_log(pgettext("memorial_male", "Died of datura overdose."),
+                           pgettext("memorial_female", "Died of datura overdose."));
+        u.hp_cur[hp_torso] = 0;
     }
     // Check if we're starving or have starved
     if (u.hunger >= 3000) {
@@ -1341,7 +1352,7 @@ bool game::do_turn()
     {
         u.update_health();
     }
-    
+
     // Auto-save if autosave is enabled
     if (OPTIONS["AUTOSAVE"] &&
         calendar::turn % ((int)OPTIONS["AUTOSAVE_TURNS"] * 10) == 0) {
@@ -1400,7 +1411,7 @@ bool game::do_turn()
 
     monmove();
     update_stair_monsters();
-    u.reset();
+    u.reset_bonuses();
     u.process_turn();
     u.process_active_items();
 
@@ -1481,8 +1492,7 @@ void game::rustCheck()
 
 void game::process_events()
 {
-    for (std::vector<event>::iterator it = events.begin();
-         it != events.end();) {
+    for( auto it = events.begin(); it != events.end(); ) {
         it->per_turn();
         if (it->turn <= int(calendar::turn)) {
             it->actualize();
@@ -2904,10 +2914,11 @@ void game::rcdrive(int dx, int dy)
 
     if( m.move_cost(cx + dx, cy + dy) == 0 || !m.can_put_items(cx + dx, cy + dy) ||
         m.has_furn(cx + dx, cy + dy) ) {
-        sound(cx + dx, cy + dy, 7, "sound of a collision with an obstacle.");
+        sound(cx + dx, cy + dy, 7, _("sound of a collision with an obstacle."));
         return;
     } else if( m.add_item_or_charges(cx + dx, cy + dy, *rc_car ) ) {
-        sound(cx, cy, 6, "zzz...");
+        //~ Sound of moving a remote controlled car
+        sound(cx, cy, 6, _("zzz..."));
         u.moves -= 50;
         m.i_rem( cx, cy, rc_car );
         car_location_string.clear();
@@ -3064,6 +3075,11 @@ bool game::handle_action()
     bool continue_auto_move = false;
 
     switch (act) {
+    case ACTION_NULL:
+    case NUM_ACTIONS:
+        break; // dummy entries
+    case ACTION_ACTIONMENU:
+        break; // handled above
 
     case ACTION_PAUSE:
         if (run_mode == 2 && ((OPTIONS["SAFEMODEVEH"]) ||
@@ -4316,8 +4332,8 @@ struct terrain {
 
 bool game::event_queued(event_type type)
 {
-    for( std::vector<event>::iterator it = events.begin(); it != events.end(); ++it ) {
-        if( it->type == type ) {
+    for( auto &e : events ) {
+        if( e.type == type ) {
             return true;
         }
     }
@@ -5715,12 +5731,11 @@ unsigned char game::light_level()
         ret = calendar::turn.sunlight();
         ret -= weather_data[weather].sight_penalty;
     }
-    for (std::vector<event>::iterator it = events.begin();
-         it != events.end(); ++it) {
+    for( auto &e : events ) {
         // The EVENT_DIM event slowly dims the sky, then relights it
         // EVENT_DIM has an occurrence date of turn + 50, so the first 25 dim it
-        if (it->type == EVENT_DIM) {
-            int turns_left = it->turn - int(calendar::turn);
+        if( e.type == EVENT_DIM ) {
+            int turns_left = e.turn - int(calendar::turn);
             if (turns_left > 25) {
                 ret = (ret * (turns_left - 25)) / 25;
             } else {
@@ -6274,7 +6289,7 @@ void game::monmove()
         }
 
         if (!critter->is_dead()) {
-            critter->reset();
+            critter->reset_bonuses();
             critter->process_turn();
         }
 
@@ -6334,7 +6349,7 @@ void game::monmove()
         if((*it)->hp_cur[hp_head] <= 0 || (*it)->hp_cur[hp_torso] <= 0) {
             (*it)->die( nullptr );
         } else {
-            (*it)->reset();
+            (*it)->reset_bonuses();
             (*it)->process_turn();
             while (!(*it)->is_dead() && (*it)->moves > 0 && turns < 10) {
                 int moves = (*it)->moves;
@@ -7425,7 +7440,8 @@ bool game::revive_corpse(int x, int y, item *it)
     critter.no_extra_death_drops = true;
 
     if (it->item_vars["zlave"] == "zlave"){
-        critter.add_effect("zlave", 1, 1, true);
+        critter.add_effect("pacified", 1, 1, true);
+        critter.add_effect("pet", 1, 1, true);
     }
 
     add_zombie(critter);
@@ -8247,7 +8263,7 @@ void game::control_vehicle()
     }
 }
 
-bool zlave_menu(monster *z)
+bool pet_menu(monster *z)
 {
     enum choices {
         cancel,
@@ -8262,12 +8278,17 @@ bool zlave_menu(monster *z)
 
     uimenu amenu;
 
+    std::string pet_name = "dog";
+    if( z->type->in_species("ZOMBIE") ) {
+        pet_name = "zombie slave";
+    }
+
     amenu.selected = 0;
-    amenu.text = _("What to do with zombie slave?");
+    amenu.text = string_format(_("What to do with your %s?"), pet_name.c_str());
     amenu.addentry(cancel, true, 'q', _("Cancel"));
 
     amenu.addentry(swap_pos, true, 's', _("Swap positions"));
-    amenu.addentry(push_zlave, true, 'p', _("Push zombie slave"));
+    amenu.addentry(push_zlave, true, 'p', _("Push %s"), pet_name.c_str());
 
     if (z->has_effect("has_bag")) {
         amenu.addentry(give_items, true, 'g', _("Place items into bag"));
@@ -8286,7 +8307,9 @@ bool zlave_menu(monster *z)
         }
     }
 
-    amenu.addentry(pheromone, true, 't', _("Tear out pheromone ball"));
+    if( z->type->in_species("ZOMBIE") ) {
+        amenu.addentry(pheromone, true, 't', _("Tear out pheromone ball"));
+    }
 
     amenu.query();
     int choice = amenu.ret;
@@ -8314,11 +8337,11 @@ bool zlave_menu(monster *z)
                 z->add_effect("tied", 1, 1, true);
             }
 
-            add_msg(_("You swap positions with your zombie slave."));
+            add_msg(_("You swap positions with your %s."), pet_name.c_str());
 
             return true;
         } else {
-            add_msg(_("You fail to budge the zombie slave!"));
+            add_msg(_("You fail to budge your %s!"), pet_name.c_str());
 
             return true;
         }
@@ -8329,9 +8352,9 @@ bool zlave_menu(monster *z)
         g->u.moves -= 30;
 
         if (!one_in(g->u.str_cur)) {
-            add_msg(_("You pushed the zombie slave."));
+            add_msg(_("You pushed the %s."), pet_name.c_str());
         } else {
-            add_msg(_("You pushed the zombie slave, but it resisted."));
+            add_msg(_("You pushed the %s, but it resisted."), pet_name.c_str());
             return true;
         }
 
@@ -8364,7 +8387,8 @@ bool zlave_menu(monster *z)
 
         z->add_item(*it);
 
-        add_msg(_("You mount the %s on your zombie slave, ready to store gear."), it->display_name().c_str());
+        add_msg(_("You mount the %s on your %s, ready to store gear."),
+                it->display_name().c_str(),  pet_name.c_str());
 
         g->u.i_rem(pos);
 
@@ -8385,7 +8409,7 @@ bool zlave_menu(monster *z)
 
         z->remove_effect("has_bag");
 
-        add_msg(_("You dump the contents of the zombie slave's bag on the ground."));
+        add_msg(_("You dump the contents of the %s's bag on the ground."), pet_name.c_str());
 
         g->u.moves -= 200;
         return true;
@@ -8393,32 +8417,33 @@ bool zlave_menu(monster *z)
 
     if (give_items == choice) {
 
-        int max_cap = 0;
-
         if (z->inv.empty()) {
-            add_msg(_("Your zombie slave has nothing to carry that in!"));
+            add_msg(_("There is no container on your %s to put things in!"), pet_name.c_str());
             return true;
         }
 
         item *it = &z->inv[0];
 
         if (!it->is_armor()) {
-            add_msg(_("Your zombie slave has nothing to carry that in!"));
+            add_msg(_("There is no container on your %s to put things in!"), pet_name.c_str());
             return true;
         }
 
         it_armor *armor = dynamic_cast<it_armor *>(it->type);
 
-        max_cap = armor->storage;
+        int max_cap = armor->storage;
+        int max_weight = z->weight_capacity() - armor->weight;
 
         if (z->inv.size() > 1) {
             for (int i = 1; i < z->inv.size(); i++) {
                 max_cap -= z->inv[i].volume();
+                max_weight -= z->inv[i].weight();
             }
         }
 
         if (max_cap <= 0) {
-            add_msg(_("Your zombie slave's doesn't have space for that, it's too bulky!"));
+            add_msg(_("There's no room in your %s's %s for that, it's too bulky!"),
+                    pet_name.c_str(), it->tname(1).c_str() );
             return true;
         }
 
@@ -8430,19 +8455,28 @@ bool zlave_menu(monster *z)
         if (result.size() == 0) {
             add_msg(_("Never mind."));
         } else {
-            add_msg(_("You stash some gear on your zombie slave."));
-
+            add_msg(_("You stash some gear in your %s's %s."),
+                    pet_name.c_str(), it->tname(1).c_str() );
             for (int i = 0; i < result.size(); i++) {
 
                 int vol = result[i].volume();
+                int weight = result[i].weight();
+                bool too_heavy = max_weight - weight < 0;
+                bool too_big = max_cap - vol < 0;
 
-                if (max_cap - vol >= 0) {
+                if( !too_heavy && !too_big ) {
                     z->inv.push_back(result[i]);
                     max_cap -= vol;
+                    max_weight -= weight;
                 } else {
                     g->m.add_item_or_charges(z->xpos(), z->ypos(), result[i], 1);
-                    g->u.add_msg_if_player(m_bad, _("%s did not fit and fell to the ground!"),
-                                           result[i].display_name().c_str());
+                    if( too_big ) {
+                        g->u.add_msg_if_player(m_bad, _("%s did not fit and fell to the ground!"),
+                                               result[i].display_name().c_str());
+                    } else {
+                        g->u.add_msg_if_player(m_bad, _("%s is too heavy and fell to the ground!"),
+                                               result[i].display_name().c_str());
+                    }
                 }
             }
         }
@@ -8581,13 +8615,12 @@ void game::examine(int examx, int examy)
         none = false;
     }
 
-    if (critter_at(examx, examy) != NULL)
-    {
+    if (critter_at(examx, examy) != NULL) {
         Creature *c = critter_at(examx, examy);
         monster *mon = dynamic_cast<monster *>(c);
 
-        if (mon != NULL && mon->has_effect("zlave")) {
-            if (zlave_menu(mon)) {
+        if (mon != NULL && mon->has_effect("pet")) {
+            if (pet_menu(mon)) {
                 return;
             }
         }
@@ -8613,7 +8646,7 @@ void game::examine(int examx, int examy)
         if(m.tr_at(examx, examy) == tr_null) {
             Pickup::pick_up(examx, examy, 0);    // After disarming a trap, pick it up.
         }
-    };
+    }
 }
 
 void game::advanced_inv()
@@ -11765,35 +11798,29 @@ void game::forage()
         m.put_items_from("trash_forest", 1, u.posx, u.posy, calendar::turn, 0, 0, 0);
         found_something = true;
     }
-    if (veggy_chance < ((u.skillLevel("survival") / 2) + ((u.per_cur - 8) + 5))) {
-        found_something = true;
-        if (!one_in(6) && (calendar::turn.get_season() == SUMMER || calendar::turn.get_season() == AUTUMN)) {
-            if (!one_in(3)) {
-                add_msg(m_good, _("You found some wild veggies!"));
-                m.spawn_item(u.posx, u.posy, "veggy_wild", 1, 0, calendar::turn);
-                m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
-            } else {
-                add_msg(m_good, _("You found some wild mushrooms!"));
-                m.put_items_from("mushroom_forest", rng(1, 3), u.posx, u.posy,
-                                 calendar::turn, 0, 0, 0);
-                m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
-            }
-        } else if ( (calendar::turn.get_season() != WINTER) && (!one_in(3)) ) {
-            add_msg(m_good, _("You found a nest with some eggs!"));
-            if (!one_in(4)) {
-                m.spawn_item(u.posx, u.posy, "egg_bird", rng(2, 5), 0, calendar::turn);
-            } else {
-                // ~15% & 3.8% chance to find these, assuming you make your veggy roll
-                // So maybe we can give more than 1.
-                m.spawn_item(u.posx, u.posy, "egg_reptile", rng(2, 5), 0, calendar::turn);
-            }
-        } else if (calendar::turn.get_season() != WINTER) {
-            add_msg(m_good, _("You found some wild herbs!"));
-            m.spawn_item(u.posx, u.posy, "wild_herbs", 1, 0, calendar::turn);
-        } else {
-            found_something = false;
+    // Compromise: Survival gives a bigger boost, and Peception is leveled a bit.
+    if (veggy_chance < ((u.skillLevel("survival") * 1.5) + ((u.per_cur / 2 - 4) + 3))) {
+        items_location loc;
+        switch (calendar::turn.get_season()) {
+        case SPRING:
+            loc = "forage_spring";
+            break;
+        case SUMMER:
+            loc = "forage_summer";
+            break;
+        case AUTUMN:
+            loc = "forage_autumn";
+            break;
+        case WINTER:
+            loc = "forage_winter";
+            break;
         }
-        m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
+        int cnt = m.put_items_from_loc(loc, u.posx, u.posy, calendar::turn); // returns zero if location has no defined items
+        if (cnt > 0) {
+            add_msg(m_good, _("You found something!"));
+            m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
+            found_something = true;
+        }
     } else {
         if (one_in(2)) {
             m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
@@ -13213,7 +13240,7 @@ void game::plswim(int x, int y)
     int movecost = u.swim_speed();
     u.practice("swimming", u.is_underwater() ? 2 : 1);
     if (movecost >= 500) {
-        if (!u.is_underwater() && !(g->u.shoe_type_count("swim_fins") == 2 || 
+        if (!u.is_underwater() && !(g->u.shoe_type_count("swim_fins") == 2 ||
             (g->u.shoe_type_count("swim_fins") == 1 && one_in(2)))) {
             add_msg(m_bad, _("You sink like a rock!"));
             u.set_underwater(true);
@@ -13407,7 +13434,7 @@ void game::vertical_move(int movez, bool force)
             u.oxygen = 30 + 2 * u.str_cur;
             add_msg(_("You dive underwater!"));
         } else {
-            if (u.swim_speed() < 500 || g->u.shoe_type_count("swim_fins") == 2 || 
+            if (u.swim_speed() < 500 || g->u.shoe_type_count("swim_fins") == 2 ||
                   (g->u.shoe_type_count("swim_fins") == 1 && one_in(2))) {
                 u.set_underwater(false);
                 add_msg(_("You surface."));
@@ -14781,6 +14808,9 @@ void game::process_artifact(item *it, player *p, bool wielded)
         // Recharge it if necessary
         if (it->charges < tool->max_charges) {
             switch (tool->charge_type) {
+            case ARTC_NULL:
+            case NUM_ARTCS:
+                break; // dummy entries
             case ARTC_TIME:
                 // Once per hour
                 if (calendar::turn.seconds() == 0 && calendar::turn.minutes() == 0) {

@@ -170,6 +170,9 @@ ifeq ($(NATIVE), osx)
   WARNINGS = -Werror -Wall -Wextra -Wno-switch -Wno-sign-compare -Wno-missing-braces
   ifeq ($(LOCALIZE), 1)
     LDFLAGS += -lintl
+    ifeq ($(MACPORTS), 1)
+      LDFLAGS += -L$(shell ncursesw5-config --libdir)
+    endif
   endif
   TARGETSYSTEM=LINUX
   ifneq ($(OS), Linux)
@@ -248,7 +251,7 @@ ifdef LUA
   BINDIST_EXTRAS  += $(LUA_DIR)
 endif
 
-ifdef SDL 
+ifdef SDL
   TILES = 1
 endif
 

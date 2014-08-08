@@ -178,6 +178,8 @@ inventory inventory::operator+ (const item &rhs)
             return true;
         }
         break;
+    case IC_NULL:
+        break;
     }
     return false;
 }
