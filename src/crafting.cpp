@@ -723,7 +723,7 @@ recipe *game::select_crafting_recipe()
             keepline = true;
         } else if (action == "FILTER") {
             filterstring = string_input_popup(_("Search:"), 85, filterstring,
-                                              _("Search tools or component using prefix t and c. \n(i.e. \"t:hammer\" or \"c:two by four\".)"));
+                                              _("Search tools or component using prefix t. \nSearch skills using prefix s, or S for skill used only. \n (i.e. \"t:hammer\" or \"c:two by four\" or \"s:cooking\".)"));
             redraw = true;
         } else if (action == "QUIT") {
             done = true;
@@ -983,6 +983,8 @@ void game::pick_recipes(crafting_inventory_t &crafting_inv, std::vector<recipe *
     bool search_name = true;
     bool search_tool = false;
     bool search_component = false;
+    bool search_skill = false;
+    bool search_skill_primary_only = false;
     size_t pos = filter.find(":");
     if(pos != std::string::npos) {
         search_name = false;
@@ -994,6 +996,10 @@ void game::pick_recipes(crafting_inventory_t &crafting_inv, std::vector<recipe *
                 search_tool = true;
             } else if(*it == 'c') {
                 search_component = true;
+            } else if(*it == 's') {
+                search_skill = true;
+            } else if(*it == 'S') {
+                search_skill_primary_only = true;
             }
         }
         filter = filter.substr(pos + 1);
@@ -1014,6 +1020,8 @@ void game::pick_recipes(crafting_inventory_t &crafting_inv, std::vector<recipe *
 
     current.clear();
     available.clear();
+    std::vector<recipe *> filtered_list;
+    int max_difficulty = 0;
 
     for (recipe_list::iterator iter = available_recipes.begin();
          iter != available_recipes.end(); ++iter) {
@@ -1044,16 +1052,52 @@ void game::pick_recipes(crafting_inventory_t &crafting_inv, std::vector<recipe *
                         continue;
                     }
                 }
+                if(search_skill) {
+                    if( !rec->skill_used) {
+                        continue;
+                    }
+                    else if( !lcmatch( rec->skill_used->name(), filter ) &&
+                             !lcmatch( rec->required_skills_string(), filter )) {
+                        continue;
+                    }
+                }
+                if(search_skill_primary_only) {
+                    if( !rec->skill_used ) {
+                        continue;
+                    }
+                    else if( !lcmatch( rec->skill_used->name(), filter )) {
+                        continue;
+                    }
+                }
             }
-            if (rec->can_make_with_inventory(crafting_inv)) {
-                current.insert(current.begin(), rec);
-                available.insert(available.begin(), true);
-            } else {
-                current.push_back(rec);
-                available.push_back(false);
+
+            filtered_list.push_back(rec);
+
+        }
+        max_difficulty = std::max(max_difficulty, rec->difficulty);
+    }
+
+    int truecount = 0;
+    for (int i = max_difficulty; i != -1; --i)
+    {
+        for (std::vector<recipe*>::iterator iter = filtered_list.begin(); iter != filtered_list.end(); ++iter)
+        {
+            recipe *rec = *iter;
+            if (rec->difficulty == i)
+            {
+                if (rec->can_make_with_inventory(crafting_inv)) {
+                    current.insert(current.begin(), rec);
+                    available.insert(available.begin(), true);
+                    truecount++;
+                } else {
+                    current.push_back(rec);
+                    available.push_back(false);
+                }
             }
         }
     }
+    // This is so the list of available recipes is also is order of difficulty.
+    std::reverse(current.begin(), current.begin() + truecount);
 }
 
 void pop_recipe_to_top(recipe *r);
