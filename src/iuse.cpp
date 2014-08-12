@@ -7817,16 +7817,17 @@ int iuse::holster_ankle(player *p, item *it, bool b)
 int iuse::tool_belt(player *p, item *it, bool )
 {
     const bool can_add = (it->contents.size() < 4);
-    std::vector<std::string> menu_entries;
-    if(can_add) {
-        menu_entries.push_back(std::string(_("Put a tool into the ")) + it->tname());
-    }
+    uimenu menu;
+    menu.text = _("What do you want to do?");
+    menu.return_invalid = true;
+    menu.addentry( -10, can_add, 'p', string_format( _("Put a tool into the %s"), it->tname().c_str() ) );
     for(size_t i = 0; i < it->contents.size(); i++) {
-        menu_entries.push_back(std::string(_("Take out the ")) + it->contents[i].tname());
+        const item &c = it->contents[i];
+        menu.addentry( i, true, '0' + i, string_format( _("Take out the %s"), c.tname().c_str() ) );
+        menu.addentry( i + it->contents.size(), c.type->has_use(), -1, string_format( _("Use the %s"), c.tname().c_str() ) );
     }
-    menu_entries.push_back(_("cancel"));
-    uimenu menu(true, it->tname().c_str(), menu_entries);
-    if(menu.ret == 0 && can_add) {
+    menu.query();
+    if( menu.ret == -10 ) {
         int pos = g->inv_type(_("Put what?"), IC_TOOL);
         item* put = &(p->i_at(pos));
         if(put->is_null()) {
@@ -7846,12 +7847,32 @@ int iuse::tool_belt(player *p, item *it, bool )
         it->put_in(p->i_rem(pos));
         return 0;
     }
-    const int index = can_add ? menu.ret - 1 : menu.ret;
-    if(index < 0 || index >= it->contents.size()) { return 0; }
-    p->moves -= 30;
-    item tool = it->contents[index];
-    p->i_add(tool);
-    it->contents.erase(it->contents.begin() + index);
+    size_t index = menu.ret;
+    if( index < it->contents.size() ) {
+        p->moves -= 30;
+        item tool = it->contents[index];
+        p->i_add(tool);
+        it->contents.erase(it->contents.begin() + index);
+        return 0;
+    }
+    index -= it->contents.size();
+    if( index < it->contents.size() ) {
+        item &tool = p->inv.add_item( it->contents[index], false, false );
+        it->contents.erase( it->contents.begin() + index );
+        // The hack, it's evil. The mission id acts as an item id, once the item
+        // has been used, it is removed based on that item id, if the removal did
+        // not return any items, the item has *already* been used up and deleted
+        // by its iuse function. Otherwise it must be put back into the toolbelt.
+        const int oldmid = tool.mission_id;
+        tool.mission_id = -100;
+        const int pos = p->inv.position_by_item( &tool );
+        p->use( pos );
+        std::vector<item> backs = p->inv.remove_mission_items( -100 );
+        if( !backs.empty() ) {
+            backs.front().mission_id = oldmid;
+            it->contents.insert( it->contents.begin() + index, backs.front() );
+        }
+    }
     return 0;
 }
 

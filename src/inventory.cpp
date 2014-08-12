@@ -760,18 +760,15 @@ std::vector<item> inventory::remove_mission_items(int mission_id)
              stack_iter != iter->end(); ++stack_iter) {
             if (stack_iter->mission_id == mission_id) {
                 ret.push_back(remove_item(&*stack_iter));
-                stack_iter = iter->begin();
+                return ret;
             } else {
                 for (int k = 0; k < stack_iter->contents.size() && stack_iter != iter->end(); ++k) {
                     if (stack_iter->contents[k].mission_id == mission_id) {
                         ret.push_back(remove_item(&*stack_iter));
-                        stack_iter = iter->begin();
+                        return ret;
                     }
                 }
             }
-        }
-        if (ret.size()) {
-            return ret;
         }
     }
     return ret;
