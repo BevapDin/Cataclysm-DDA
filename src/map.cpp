@@ -2990,6 +2990,14 @@ void map::process_active_items_in_vehicle(vehicle *cur_veh, submap * const curre
             if(!it->active) {
                 continue;
             }
+            // Avoid the item copy, it's slowwwwww...
+            if(it->is_food() || it->is_food_container()) {
+                if(process_active_item(&tmp_active_item_pos.first, current_submap, gridx, gridy, mapx, mapy)) {
+                    items_in_part->erase(items_in_part->begin() + n);
+                    n--;
+                }
+                continue;
+            }
             // make a temporary copy, remove the item (in advance)
             // and use that copy to process it
             tmp_active_item_pos.first = *it;
