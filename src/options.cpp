@@ -310,7 +310,7 @@ void cOpt::setNext()
 {
     if (sType == "string") {
         int iNext = getItemPos(sSet) + 1;
-        if (iNext >= vItems.size()) {
+        if (iNext >= (int)vItems.size()) {
             iNext = 0;
         }
 
@@ -559,19 +559,19 @@ void initOptions()
     // TODO: scan for languages like we do for tilesets.
     optionNames[""] = _("System language");
     // Note: language names are in their own language and are *not* translated at all.
-    optionNames["cs"] = "čeština";
+    optionNames["cs"] = "Čeština";
     optionNames["en"] = "English";
-    optionNames["fr_FR"] =  "français (France)";
+    optionNames["fr_FR"] =  "Français (France)";
     optionNames["de_DE"] = "Deutsch (Deutschland)";
-    optionNames["it"] = "italiano";
-    optionNames["es_ES"] = "español (España)";
+    optionNames["it"] = "Italiano";
+    optionNames["es_ES"] = "Español (España)";
     optionNames["ja"] = "日本語";
     optionNames["ko"] = "한국어";
     optionNames["pl"] = "polski";
     optionNames["pt_BR"] = "Português (Brasil)";
-    optionNames["pt_PT"] = "português (Portugal)";
+    optionNames["pt_PT"] = "Português (Portugal)";
     optionNames["ru"] = "Русский";
-    optionNames["sr"] = "srpski";
+    optionNames["sr"] = "Srpski";
     optionNames["vi"] = "Tiếng Việt";
     optionNames["zh_CN"] = "中文(中华人民共和国)";
     optionNames["zh_TW"] = "中文(台灣)";
@@ -1050,8 +1050,8 @@ void show_options(bool ingame)
 
         //Draw options
         size_t iBlankOffset = 0; // Offset when blank line is printed.
-        for (int i = iStartPos; i < iStartPos + ((iContentHeight > mPageItems[iCurrentPage].size()) ?
-                mPageItems[iCurrentPage].size() : iContentHeight); i++) {
+        for (int i = iStartPos; i < iStartPos + ((iContentHeight > (int)mPageItems[iCurrentPage].size()) ?
+                (int)mPageItems[iCurrentPage].size() : iContentHeight); i++) {
 
             int line_pos; // Current line position in window.
             nc_color cLineColor = c_ltgreen;
@@ -1157,7 +1157,7 @@ void show_options(bool ingame)
         if (action == "DOWN") {
             do {
                 iCurrentLine++;
-                if (iCurrentLine >= mPageItems[iCurrentPage].size()) {
+                if (iCurrentLine >= (int)mPageItems[iCurrentPage].size()) {
                     iCurrentLine = 0;
                 }
             } while( (cOPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getMenuText() == ""));
@@ -1179,7 +1179,7 @@ void show_options(bool ingame)
             iCurrentLine = 0;
             iStartPos = 0;
             iCurrentPage++;
-            if (iCurrentPage >= vPages.size()) {
+            if (iCurrentPage >= (int)vPages.size()) {
                 iCurrentPage = 0;
             }
         } else if (action == "PREV_TAB") {
@@ -1348,7 +1348,7 @@ void save_options(bool ingame)
     fout << options_header() << std::endl;
 
     for( size_t j = 0; j < vPages.size(); ++j ) {
-        bool update_wopt = (ingame && j == iWorldOptPage );
+        bool update_wopt = (ingame && (int)j == iWorldOptPage );
         for( size_t i = 0; i < mPageItems[j].size(); ++i ) {
             if (OPTIONS[mPageItems[j][i]].getDefaultText() != "") {
                 fout << "#" << OPTIONS[mPageItems[j][i]].getTooltip() << std::endl;

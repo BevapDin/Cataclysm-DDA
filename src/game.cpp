@@ -2190,7 +2190,7 @@ bool game::mission_complete(int id, int npc_id)
         if (miss->npc_id != -1 && miss->npc_id != npc_id) {
             return false;
         }
-        for (int i = 0; i < num_zombies(); i++) {
+        for (size_t i = 0; i < num_zombies(); i++) {
             if (zombie(i).mission_id == miss->uid) {
                 return true;
             }
@@ -2274,6 +2274,9 @@ void game::wrap_up_mission(int id)
     case MGOAL_FIND_ANY_ITEM:
         u.remove_mission_items(miss->uid);
         break;
+    default:
+        //Suppress warnings
+        break;
     }
     mission_end endfunc;
     (endfunc.*miss->type->end)(miss);
@@ -2321,6 +2324,9 @@ void game::mission_step_complete(int id, int step)
         }
         break;
     }
+    default:
+        //Suppress warnings
+        break;
     }
 }
 
@@ -2857,7 +2863,7 @@ input_context game::get_player_input(std::string &action)
                 for (auto iter = SCT.vSCT.rbegin(); iter != SCT.vSCT.rend(); ++iter) {
                     const direction oCurDir = iter->getDirecton();
 
-                    for (int i = 0; i < iter->getText().length(); ++i) {
+                    for (int i = 0; i < (int)iter->getText().length(); ++i) {
                         const int dex = mon_at(iter->getPosX() + i, iter->getPosY());
 
                         if (dex != -1 && u_see(&zombie(dex))) {
@@ -4199,7 +4205,7 @@ void game::delete_world(std::string worldname, bool delete_folder)
         std::string part = file->substr(worldpath.size(),
                                         file->find_last_of("/\\") - worldpath.size());
         int last_separator = part.find_last_of("/\\");
-        while (last_separator != std::string::npos && part.size() > 1) {
+        while (last_separator != (int)std::string::npos && part.size() > 1) {
             directory_paths.insert(part);
             part = part.substr(0, last_separator);
             last_separator = part.find_last_of("/\\");
@@ -4506,7 +4512,7 @@ void game::debug()
             opts.push_back(std::string(_("Cancel")));
             veh_num = menu_vec(false, _("Choose vehicle to spawn"), opts) + 1;
             veh_num -= 2;
-            if (veh_num < opts.size() - 1) {
+            if (veh_num < (int)opts.size() - 1) {
                 //Didn't pick Cancel
                 std::string selected_opt = veh_strings[veh_num];
                 vehicle *veh = m.add_vehicle(selected_opt, u.posx, u.posy, -90, 100, 0);
@@ -4788,7 +4794,7 @@ void game::debug()
 void game::mondebug()
 {
     int tc = 0;
-    for (int i = 0; i < num_zombies(); i++) {
+    for (size_t i = 0; i < num_zombies(); i++) {
         monster &critter = critter_tracker.find(i);
         critter.debug(u);
         if (critter.has_flag(MF_SEES) &&
@@ -4903,7 +4909,7 @@ void game::disp_NPCs()
     mvwprintz(w, 0, 0, c_white, _("Your position: %d:%d"), ppos.x, ppos.y);
     std::vector<npc *> npcs = overmap_buffer.get_npcs_near_player(100);
     std::sort(npcs.begin(), npcs.end(), npc_dist_to_player);
-    for (int i = 0; i < 20 && i < npcs.size(); i++) {
+    for (size_t i = 0; i < 20 && i < npcs.size(); i++) {
         const tripoint apos = npcs[i]->global_omt_location();
         mvwprintz(w, i + 2, 0, c_white, "%s: %d:%d", npcs[i]->name.c_str(),
                   apos.x, apos.y);
@@ -5342,7 +5348,7 @@ void game::draw_ter(int posx, int posy)
     m.draw( w_terrain, center );
 
     // Draw monsters
-    for (int i = 0; i < num_zombies(); i++) {
+    for (size_t i = 0; i < num_zombies(); i++) {
         draw_critter( critter_tracker.find( i ), center );
     }
 
@@ -5442,7 +5448,7 @@ void game::draw_HP()
 
             //Add the trailing symbols for a not-quite-full health bar
             int bar_remainder = 5;
-            while (bar_remainder > health_bar.size()) {
+            while (bar_remainder > (int)health_bar.size()) {
                 --bar_remainder;
                 wprintz(w_HP, c_white, ".");
             }
@@ -5542,7 +5548,7 @@ void game::draw_minimap()
     const int cursy = curs.y;
     bool drew_mission = false;
     point targ;
-    if (u.active_mission >= 0 && u.active_mission < u.active_missions.size()) {
+    if (u.active_mission >= 0 && u.active_mission < (int)u.active_missions.size()) {
         targ = find_mission(u.active_missions[u.active_mission])->target;
         if (targ == overmap::invalid_point) {
             drew_mission = true;
@@ -5901,7 +5907,7 @@ void game::remove_item(item *it)
     }
     ret = m.find_item(it);
     if (ret.x != -1 && ret.y != -1) {
-        for (int i = 0; i < m.i_at(ret.x, ret.y).size(); i++) {
+        for (size_t i = 0; i < m.i_at(ret.x, ret.y).size(); i++) {
             if (it == &m.i_at(ret.x, ret.y)[i]) {
                 m.i_rem(ret.x, ret.y, i);
                 return;
@@ -5940,7 +5946,7 @@ bool game::is_hostile_very_close()
 
 bool game::is_hostile_within(int distance)
 {
-    for (int i = 0; i < num_zombies(); i++) {
+    for (size_t i = 0; i < num_zombies(); i++) {
         monster &critter = critter_tracker.find(i);
 
         if ((critter.attitude(&u) != MATT_ATTACK) || (!u_see(&critter))) {
@@ -6002,7 +6008,7 @@ int game::mon_info(WINDOW *w)
     int viewy = u.posy + u.view_offset_y;
     new_seen_mon.clear();
 
-    for (int i = 0; i < num_zombies(); i++) {
+    for (size_t i = 0; i < num_zombies(); i++) {
         monster &critter = critter_tracker.find(i);
         if (u_see(&critter) && !critter.type->has_flag(MF_VERMIN)) {
             dir_to_mon = direction_from(viewx, viewy, critter.posx(), critter.posy());
@@ -6047,7 +6053,7 @@ int game::mon_info(WINDOW *w)
         }
     }
 
-    for (int i = 0; i < active_npc.size(); i++) {
+    for (size_t i = 0; i < active_npc.size(); i++) {
         point npcp(active_npc[i]->posx, active_npc[i]->posy);
         if (u_see(npcp.x, npcp.y)) { // TODO: NPC invis
             if (active_npc[i]->attitude == NPCATT_KILL)
@@ -6225,7 +6231,7 @@ int game::mon_info(WINDOW *w)
 
 void game::cleanup_dead()
 {
-    for( int i = 0; i < num_zombies(); ) {
+    for( size_t i = 0; i < num_zombies(); ) {
         monster &critter = critter_tracker.find(i);
         if( critter.is_dead() ) {
             dbg(D_INFO) << string_format("cleanup_dead: critter[%d] %d,%d dead:%c hp:%d %s",
@@ -6266,7 +6272,7 @@ void game::monmove()
         }
     }
 
-    for (int i = 0; i < num_zombies(); i++) {
+    for (size_t i = 0; i < num_zombies(); i++) {
         monster *critter = &critter_tracker.find(i);
         while (!critter->is_dead() && !critter->can_move_to(critter->posx(), critter->posy())) {
             // If we can't move to our current position, assign us to a new one
@@ -6639,8 +6645,8 @@ void game::explosion(int x, int y, int power, int shrapnel, bool fire, bool blas
             traj = line_to(x, y, sx, sy, 0);
         }
         dam = rng(20, 60);
-        for (int j = 0; j < traj.size(); j++) {
-            draw_bullet(u, traj[j].x, traj[j].y, j, traj, '`', ts);
+        for (size_t j = 0; j < traj.size(); j++) {
+            draw_bullet(u, traj[j].x, traj[j].y, (int)j, traj, '`', ts);
             tx = traj[j].x;
             ty = traj[j].y;
             const int zid = mon_at(tx, ty);
@@ -6692,7 +6698,7 @@ void game::flashbang(int x, int y, bool player_immune)
             u.add_env_effect("blind", bp_eyes, (12 - flash_mod - dist) / 2, 10 - dist);
         }
     }
-    for (int i = 0; i < num_zombies(); i++) {
+    for (size_t i = 0; i < num_zombies(); i++) {
         monster &critter = critter_tracker.find(i);
         dist = rl_dist(critter.posx(), critter.posy(), x, y);
         if (dist <= 4) {
@@ -6717,7 +6723,7 @@ void game::shockwave(int x, int y, int radius, int force, int stun, int dam_mult
     draw_explosion(x, y, radius, c_blue);
 
     sound(x, y, force * force * dam_mult / 2, _("Crack!"));
-    for (int i = 0; i < num_zombies(); i++) {
+    for (size_t i = 0; i < num_zombies(); i++) {
         monster &critter = critter_tracker.find(i);
         if (rl_dist(critter.posx(), critter.posy(), x, y) <= radius) {
             add_msg(_("%s is caught in the shockwave!"), critter.name().c_str());
@@ -6783,7 +6789,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                              "%s was stunned for %d turns!", stun),
                     targ->name().c_str(), stun);
         }
-        for (int i = 1; i < traj.size(); i++) {
+        for (size_t i = 1; i < traj.size(); i++) {
             if (m.move_cost(traj[i].x, traj[i].y) == 0) {
                 targ->setpos(traj[i - 1]);
                 force_remaining = traj.size() - i;
@@ -6866,7 +6872,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                              "%s was stunned for %d turns!", stun),
                     targ->name.c_str(), stun);
         }
-        for (int i = 1; i < traj.size(); i++) {
+        for (size_t i = 1; i < traj.size(); i++) {
             if (m.move_cost(traj[i].x, traj[i].y) == 0) { // oops, we hit a wall!
                 targ->posx = traj[i - 1].x;
                 targ->posy = traj[i - 1].y;
@@ -6968,7 +6974,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                                     stun),
                     stun);
         }
-        for (int i = 1; i < traj.size(); i++) {
+        for (size_t i = 1; i < traj.size(); i++) {
             if (m.move_cost(traj[i].x, traj[i].y) == 0) { // oops, we hit a wall!
                 u.posx = traj[i - 1].x;
                 u.posy = traj[i - 1].y;
@@ -7263,9 +7269,9 @@ void game::emp_blast(int x, int y)
 
 int game::npc_at(const int x, const int y) const
 {
-    for (int i = 0; i < active_npc.size(); i++) {
+    for (size_t i = 0; i < active_npc.size(); i++) {
         if (active_npc[i]->posx == x && active_npc[i]->posy == y && !active_npc[i]->is_dead()) {
-            return i;
+            return (int)i;
         }
     }
     return -1;
@@ -7273,9 +7279,9 @@ int game::npc_at(const int x, const int y) const
 
 int game::npc_by_id(const int id) const
 {
-    for (int i = 0; i < active_npc.size(); i++) {
+    for (size_t i = 0; i < active_npc.size(); i++) {
         if (active_npc[i]->getID() == id) {
-            return i;
+            return (int)i;
         }
     }
     return -1;
@@ -7398,7 +7404,7 @@ bool game::is_in_ice_lab(point location)
 
 bool game::revive_corpse(int x, int y, int n)
 {
-    if (m.i_at(x, y).size() <= n) {
+    if ((int)m.i_at(x, y).size() <= n) {
         debugmsg("Tried to revive a non-existent corpse! (%d, %d), #%d of %d", x, y, n, m.i_at(x,
                  y).size());
         return false;
@@ -8426,9 +8432,9 @@ bool pet_menu(monster *z)
         int max_weight = z->weight_capacity() - armor->weight;
 
         if (z->inv.size() > 1) {
-            for (int i = 1; i < z->inv.size(); i++) {
-                max_cap -= z->inv[i].volume();
-                max_weight -= z->inv[i].weight();
+            for (auto &i : z->inv) {
+                max_cap -= i.volume();
+                max_weight -= i.weight();
             }
         }
 
@@ -8448,25 +8454,25 @@ bool pet_menu(monster *z)
         } else {
             add_msg(_("You stash some gear in your %s's %s."),
                     pet_name.c_str(), it->tname(1).c_str() );
-            for (int i = 0; i < result.size(); i++) {
+            for (auto &i : result) {
 
-                int vol = result[i].volume();
-                int weight = result[i].weight();
+                int vol = i.volume();
+                int weight = i.weight();
                 bool too_heavy = max_weight - weight < 0;
                 bool too_big = max_cap - vol < 0;
 
                 if( !too_heavy && !too_big ) {
-                    z->inv.push_back(result[i]);
+                    z->inv.push_back(i);
                     max_cap -= vol;
                     max_weight -= weight;
                 } else {
-                    g->m.add_item_or_charges(z->xpos(), z->ypos(), result[i], 1);
+                    g->m.add_item_or_charges(z->xpos(), z->ypos(), i, 1);
                     if( too_big ) {
                         g->u.add_msg_if_player(m_bad, _("%s did not fit and fell to the ground!"),
-                                               result[i].display_name().c_str());
+                                               i.display_name().c_str());
                     } else {
                         g->u.add_msg_if_player(m_bad, _("%s is too heavy and fell to the ground!"),
-                                               result[i].display_name().c_str());
+                                               i.display_name().c_str());
                     }
                 }
             }
@@ -8986,7 +8992,7 @@ void game::zones_manager()
                 bRedrawInfo = true;
 
             } else if (action == "REMOVE_ZONE") {
-                if (iActive < u.Zones.size()) {
+                if (iActive < (int)u.Zones.size()) {
                     u.Zones.remove(iActive);
                     iActive--;
 
@@ -9043,7 +9049,7 @@ void game::zones_manager()
                 zones_manager_shortcuts(w_zones_info);
 
             } else if (action == "MOVE_ZONE_UP" && u.Zones.size() > 1) {
-                if (iActive < u.Zones.size() - 1) {
+                if (iActive < (int)u.Zones.size() - 1) {
                     std::swap(u.Zones.vZones[iActive],
                               u.Zones.vZones[iActive + 1]);
                     iActive++;
@@ -9112,13 +9118,13 @@ void game::zones_manager()
             point pointPlayer = m.getabs(u.posx, u.posy);
 
             //Display saved zones
-            for (size_t i = 0; i < iZonesNum; ++i) {
+            for (auto &i : u.Zones.vZones) {
                 if (iNum >= iStartPos && iNum < iStartPos + ((iMaxRows > iZonesNum) ? iZonesNum : iMaxRows)) {
-                    nc_color colorLine = (u.Zones.vZones[i].getEnabled()) ? c_white : c_ltgray;
+                    nc_color colorLine = (i.getEnabled()) ? c_white : c_ltgray;
 
                     if (iNum == iActive) {
                         mvwprintz(w_zones, iNum - iStartPos, 0, c_yellow, "%s", ">>");
-                        colorLine = (u.Zones.vZones[i].getEnabled()) ? c_ltgreen : c_green;
+                        colorLine = (i.getEnabled()) ? c_ltgreen : c_green;
                     }
 
                     //Draw Zone name
@@ -9129,7 +9135,7 @@ void game::zones_manager()
                     mvwprintz(w_zones, iNum - iStartPos, 20, colorLine, "%s",
                               u.Zones.getNameFromType(u.Zones.vZones[iNum].getZoneType()).c_str());
 
-                    point pCenter = u.Zones.vZones[i].getCenterPoint();
+                    point pCenter = i.getCenterPoint();
 
                     //Draw direction + distance
                     mvwprintz(w_zones, iNum - iStartPos, 35, colorLine, "%*d %s",
@@ -9980,7 +9986,7 @@ int game::list_items(const int iLastState)
                 }
             } else if (action == "RIGHT") {
                 iPage++;
-                if (!filtered_items.empty() && iPage >= filtered_items[iActive].vIG.size()) {
+                if (!filtered_items.empty() && iPage >= (int)filtered_items[iActive].vIG.size()) {
                     iPage = filtered_items[iActive].vIG.size() - 1;
                 }
             } else if (action == "LEFT") {
@@ -10256,7 +10262,7 @@ int game::list_monsters(const int iLastState)
                 iLastActiveX = recentered.x;
                 iLastActiveY = recentered.y;
             } else if (action == "fire") {
-                if (iMonDex >= 0 && iMonDex < num_zombies() &&
+                if (iMonDex >= 0 && size_t(iMonDex) < num_zombies() &&
                     rl_dist(point(u.posx, u.posy), zombie(iMonDex).pos()) <= iWeaponRange) {
                     last_target = iMonDex;
                     u.view_offset_x = iStoreViewOffsetX;
@@ -11093,9 +11099,9 @@ std::vector<point> game::pl_target_ui(int &x, int &y, int range, item *relevant,
     // Populate a list of targets with the zombies in range and visible
     std::vector <Creature *> mon_targets;
     const Creature *last_target_critter = NULL;
-    if (last_target >= 0 && !last_target_was_npc && last_target < num_zombies()) {
+    if (last_target >= 0 && !last_target_was_npc && size_t(last_target) < num_zombies()) {
         last_target_critter = &zombie(last_target);
-    } else if (last_target >= 0 && last_target_was_npc && last_target < active_npc.size()) {
+    } else if (last_target >= 0 && last_target_was_npc && size_t(last_target) < active_npc.size()) {
         last_target_critter = active_npc[last_target];
     }
     for (size_t i = 0; i < num_zombies(); i++) {
@@ -11464,7 +11470,7 @@ void game::butcher()
         }
         kmenu.addentry(corpses.size(), true, 'q', _("Cancel"));
         kmenu.query();
-        if (kmenu.ret == corpses.size()) {
+        if (kmenu.ret == (int)corpses.size()) {
             return;
         }
         butcher_corpse_index = kmenu.ret;
@@ -11513,7 +11519,7 @@ void game::butcher()
 void game::complete_butcher(int index)
 {
     // corpses can disappear (rezzing!), so check for that
-    if (m.i_at(u.posx, u.posy).size() <= index || m.i_at(u.posx, u.posy)[index].corpse == NULL ||
+    if ((int)m.i_at(u.posx, u.posy).size() <= index || m.i_at(u.posx, u.posy)[index].corpse == NULL ||
         m.i_at(u.posx, u.posy)[index].typeId() != "corpse") {
         add_msg(m_info, _("There's no corpse to butcher!"));
         return;
@@ -12283,7 +12289,7 @@ void game::chat()
 
         int npc_choice = menu_vec(true, _("Who do you want to talk to?"), npcs) - 1;
 
-        if (npc_choice >= 0 && npc_choice < available.size()) {
+        if (npc_choice >= 0 && size_t(npc_choice) < available.size()) {
             available[npc_choice]->talk_to_u();
         }
     }
@@ -12809,7 +12815,7 @@ bool game::plmove(int dx, int dy)
 
         // Adjust recoil down
         if (u.recoil > 0) {
-            if (int(u.str_cur / 2) + u.skillLevel("gun") >= u.recoil) {
+            if (int(u.str_cur / 2) + u.skillLevel("gun") >= (int)u.recoil) {
                 u.recoil = 0;
             } else {
                 u.recoil -= int(u.str_cur / 2) + u.skillLevel("gun");
@@ -14383,7 +14389,7 @@ bool game::spread_fungus(int x, int y)
                     m.furn_set(x, y, f_fungal_clump);
                 }
             } else if (m.has_flag("PLANT", x, y)) {
-                for (int k = 0; k < g->m.i_at(x, y).size(); k++) {
+                for (size_t k = 0; k < g->m.i_at(x, y).size(); k++) {
                     m.i_rem(x, y, k);
                 }
                 item seeds("fungal_seeds", int(calendar::turn));
@@ -14467,7 +14473,7 @@ bool game::spread_fungus(int x, int y)
                                 m.furn_set(i, j, f_fungal_clump);
                             }
                         } else if (m.has_flag("PLANT", i, j)) {
-                            for (int k = 0; k < g->m.i_at(i, j).size(); k++) {
+                            for (size_t k = 0; k < g->m.i_at(i, j).size(); k++) {
                                 m.i_rem(i, j, k);
                             }
                             item seeds("fungal_seeds", int(calendar::turn));
@@ -14638,8 +14644,8 @@ void game::process_artifact(item *it, player *p, bool wielded)
         it_artifact_tool *tool = dynamic_cast<it_artifact_tool *>(it->type);
         effects = tool->effects_carried;
         if (wielded) {
-            for (int i = 0; i < tool->effects_wielded.size(); i++) {
-                effects.push_back(tool->effects_wielded[i]);
+            for (auto &i : tool->effects_wielded) {
+                effects.push_back(i);
             }
         }
         // Recharge it if necessary
@@ -14681,8 +14687,8 @@ void game::process_artifact(item *it, player *p, bool wielded)
         }
     }
 
-    for (int i = 0; i < effects.size(); i++) {
-        switch (effects[i]) {
+    for (auto &i : effects) {
+        switch (i) {
         case AEP_STR_UP:
             p->mod_str_bonus(+4);
             break;
@@ -14789,6 +14795,10 @@ void game::process_artifact(item *it, player *p, bool wielded)
 
         case AEP_SPEED_DOWN:
             break; // Handled in player::current_speed()
+        
+        default:
+            //Suppress warnings
+            break;
         }
     }
     // Recalculate, as it might have changed (by mod_*_bonus above)
@@ -14802,8 +14812,8 @@ void game::add_artifact_messages(std::vector<art_effect_passive> effects)
 {
     int net_str = 0, net_dex = 0, net_per = 0, net_int = 0, net_speed = 0;
 
-    for (size_t i = 0; i < effects.size(); i++) {
-        switch (effects[i]) {
+    for (auto &i : effects) {
+        switch (i) {
         case AEP_STR_UP:
             net_str += 4;
             break;
@@ -14929,6 +14939,9 @@ void game::add_artifact_messages(std::vector<art_effect_passive> effects)
 
         case AEP_SICK:
             add_msg(m_bad, _("You feel unwell."));
+            break;
+        default:
+            //Suppress warnings
             break;
         }
     }
