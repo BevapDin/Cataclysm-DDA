@@ -45,8 +45,8 @@
 # we don't check in code with new warnings, but we also have to disable some classes of warnings
 # for now as we get rid of them.  In non-release builds we want to show all the warnings,
 # even the ones we're allowing in release builds so they're visible to developers.
-RELEASE_FLAGS = -Werror -Wno-switch -Wno-sign-compare
-WARNINGS = -Werror -Wall -Wextra -Wno-switch -Wno-sign-compare -Wno-missing-braces -Wno-narrowing
+RELEASE_FLAGS = -Werror
+WARNINGS = -Wall -Wextra
 # Uncomment below to disable warnings
 #WARNINGS = -w
 ifeq ($(shell sh -c 'uname -o 2>/dev/null || echo not'),Cygwin)

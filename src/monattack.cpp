@@ -442,7 +442,7 @@ void mattack::growplants(monster *z)
                                 if (one_in(2)) {
                                     hit = bp_foot_l;
                                 } else {
-                                    hit = bp_foot_l;
+                                    hit = bp_foot_r;
                                 }
                             }
                             //~ %s is bodypart name in accusative.
@@ -2550,6 +2550,179 @@ bool mattack::thrown_by_judo(monster *z)
     } else {
         return false;
     }
+}
+
+void mattack::riotbot(monster *z)
+{
+    z->sp_timeout = z->type->sp_freq; // Reset timer
+
+    const int monx = z->posx();
+    const int mony = z->posy();
+
+    if (calendar::turn % 10 == 0) {
+
+        int junk = 0;
+        for (int i = -4; i <= 4; i++) {
+            for (int j = -4; j <= 4; j++) {
+                if( g->m.move_cost( monx + i, mony + j ) != 0 &&
+                    g->m.clear_path(monx, mony, monx + i, mony + j, 3, 1, 100, junk) ) {
+                    g->m.add_field(monx + i, mony + j, fd_relax_gas, rng(1, 3));
+                }
+            }
+        }
+    }
+
+    //already arrested?
+    //and yes, if the player has no hands, we are not going to arrest him.
+    if (g->u.weapon.type->id == "e_handcuffs" || !g->u.has_two_arms()) {
+        z->anger = 0;
+
+        if (calendar::turn % 25 == 0) {
+            g->sound(monx, mony, 10, _("Halt and submit to arrest, citizen! The police will be here any moment."));
+        }
+
+        return;
+    }
+
+    if (z->anger < z->type->agro) {
+        z->anger += z->type->agro / 20;
+        return;
+    }
+
+    const int dist = rl_dist(z->pos(), g->u.pos());
+
+    //we need empty hands to arrest
+    if (!g->u.is_armed()) {
+
+        g->sound(monx, mony, 15, _("Please stay in place, citizen, do not make any movements!"));
+
+        //we need to come closer and arrest
+        if (dist > 1) {
+            return;
+        }
+
+        //Strain the atmosphere, forcing the player to wait. Let him feel the power of law!
+        if (!one_in(10)) {
+            if (g->u.sees(monx, mony)) {
+                add_msg(_("The robot carefully scans you."));
+            }
+            return;
+        }
+
+        enum {ur_arrest, ur_resist, ur_trick};
+
+        //arrest!
+        uimenu amenu;
+        amenu.selected = 0;
+        amenu.text = _("The riotbot orders you to present your hands and be cuffed.");
+
+        amenu.addentry(ur_arrest, true, 'a', _("Allow yourself to be arrested."));
+        amenu.addentry(ur_resist, true, 'r', _("Resist arrest!"));
+        if (g->u.int_cur > 12 || (g->u.int_cur > 10 && !one_in(g->u.int_cur - 8))) {
+            amenu.addentry(ur_trick, true, 't', _("Feign death."));
+        }
+
+        amenu.query();
+        const int choice = amenu.ret;
+
+        if (choice == ur_arrest) {
+            item handcuffs("e_handcuffs", 0);
+            handcuffs.item_tags.insert("NO_UNWIELD");
+            handcuffs.charges = handcuffs.type->maximum_charges();
+            handcuffs.active = true;
+            handcuffs.item_vars["HANDCUFFS_X"] = string_format("%d", g->u.posx);
+            handcuffs.item_vars["HANDCUFFS_Y"] = string_format("%d", g->u.posy);
+
+            g->u.wield(&(g->u.i_add(handcuffs)));
+
+            add_msg(_("The robot puts handcuffs on you."));
+            g->sound(z->posx(), z->posy(), 5,
+                     _("You are under arrest, citizen.  You have the right to remain silent.  If you do not remain silent, anything you say may be used against you in a court of law."));
+            g->sound(z->posx(), z->posy(), 5,
+                     _("You have the right to an attorney.  If you cannot afford an attorney, one will be provided at no cost to you.  You may have your attorney present during any questioning."));
+            g->sound(z->posx(), z->posy(), 5,
+                     _("If you do not understand these rights, an officer will explain them in greater detail when taking you into custody."));
+            g->sound(z->posx(), z->posy(), 5,
+                     _("Do not attempt to flee or to remove the handcuffs, citizen.  That can be dangerous to your health."));
+
+            g->u.moves -= 300;
+            z->moves -= 300;
+
+            return;
+        }
+
+        bool bad_trick = false;
+
+        if (choice == ur_trick) {
+
+            if (!one_in(g->u.int_cur - 10)) {
+
+                add_msg(m_good,
+                        _("You fall to the ground and feign a sudden convulsive attack.  Though you're obviously still alive, the riotbot cannot tell the difference between your 'attack' and a potentially fatal medical condition.  It backs off, signaling for medical help."));
+
+                z->moves -= 300;
+                z->anger = -rng(0, 50);
+                return;
+            } else {
+                add_msg(m_bad, _("Your awkward movements do not fool the riotbot."));
+                g->u.moves -= 100;
+                bad_trick = true;
+            }
+        }
+
+        if ((choice == ur_resist) || bad_trick) {
+
+            add_msg(m_bad, _("The robot sprays tear gas!"));
+            z->moves -= 200;
+
+            int junk = 0;
+            for (int i = -2; i <= 2; i++) {
+                for (int j = -2; j <= 2; j++) {
+                    if( g->m.move_cost( monx + i, mony + j ) != 0 &&
+                        g->m.clear_path(monx, mony, monx + i, mony + j, 3, 1, 100, junk) ) {
+                        g->m.add_field(monx + i, mony + j, fd_tear_gas, rng(1, 3));
+                    }
+                }
+            }
+
+            return;
+        }
+
+        return;
+    }
+
+    if (calendar::turn % 5 == 0) {
+        g->sound(monx, mony, 25, _("Empty your hands and hold your position, citizen!"));
+    }
+
+    if (dist > 5 && dist < 18 && one_in(10)) {
+
+        z->moves -= 50;
+
+        int delta = dist / 4 + 1;  //precautionary shot
+        if (z->hp < z->type->hp) {
+            delta = 1;    //precision shot
+        }
+
+        int x = g->u.posx + rng(0, delta) - rng(0, delta);
+        int y = g->u.posy + rng(0, delta) - rng(0, delta);
+
+        //~ Sound of a riotbot using its blinding flash
+        g->sound(x, y, 3, _("fzzzzzt"));
+
+        g->m.add_field(x, y, fd_dazzling, 1);
+
+        std::vector <point> traj = line_to(monx, mony, x, y, 0);
+        traj.erase(traj.begin());
+
+        for (auto it = traj.begin(); it != traj.end(); ++it) {
+            g->m.add_field(it->x, it->y, fd_dazzling, 1);
+        }
+        return;
+
+    }
+
+    return;
 }
 
 void mattack::bio_op_takedown(monster *z)

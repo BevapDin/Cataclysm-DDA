@@ -215,6 +215,7 @@ void MonsterGenerator::init_attack()
     attack_map["SLIMESPRING"] = &mattack::slimespring;
     attack_map["BIO_OP_TAKEDOWN"] = &mattack::bio_op_takedown;
     attack_map["SUICIDE"] = &mattack::suicide;
+    attack_map["RIOTBOT"] = &mattack::riotbot;
 
 }
 
@@ -383,7 +384,7 @@ void MonsterGenerator::load_monster(JsonObject &jo)
         newmon->sp_attack = get_attack_function(jo, "special_attack");
         newmon->sp_defense = get_defense_function(jo, "special_when_hit");
 
-        std::set<std::string> flags, anger_trig, placate_trig, fear_trig, cats;
+        std::set<std::string> flags, anger_trig, placate_trig, fear_trig;
         flags = jo.get_tags("flags");
         anger_trig = jo.get_tags("anger_triggers");
         placate_trig = jo.get_tags("placate_triggers");

@@ -572,7 +572,7 @@ void player::process_turn()
     suffer();
 
     // Set our scent towards the norm
-    unsigned norm_scent = 500;
+    int norm_scent = 500;
     if (has_trait("WEAKSCENT")) {
         norm_scent = 300;
     }
@@ -5464,6 +5464,11 @@ void player::process_effects() {
             if (one_in(3)) {
                 handle_cough(*this, 4);
             }
+        } else if (id == "relax_gas") {
+            mod_str_bonus(-3);
+            mod_dex_bonus(-3);
+            mod_int_bonus(-2);
+            mod_per_bonus(-4);
         } else if ( id == "stung" ) {
             mod_pain(1);
         } else if ( id == "boomered" ) {
@@ -10081,7 +10086,7 @@ std::string player::is_snuggling()
         return "nothing";
     }
     else if ( ticker == 1 ) {
-        return floor_armor->nname(1).c_str();
+        return floor_armor->nname(1);
     }
     else if ( ticker > 1 ) {
         return "many";

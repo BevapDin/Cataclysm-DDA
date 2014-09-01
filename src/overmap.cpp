@@ -505,7 +505,6 @@ void load_region_settings( JsonObject &jo )
         }
         tmpval = 0.0f;
         if ( pjo.has_object("other") ) {
-            std::string tmpstr = "";
             JsonObject opjo = pjo.get_object("other");
             std::set<std::string> keys = opjo.get_member_names();
             for(std::set<std::string>::iterator it = keys.begin(); it != keys.end(); ++it) {
@@ -528,7 +527,6 @@ void load_region_settings( JsonObject &jo )
             }
             new_region.field_coverage.boosted_other_mpercent = (int)(tmpval * 10000.0);
             if ( pjo.has_object("boosted_other") ) {
-                std::string tmpstr = "";
                 JsonObject opjo = pjo.get_object("boosted_other");
                 std::set<std::string> keys = opjo.get_member_names();
                 for(std::set<std::string>::iterator it = keys.begin(); it != keys.end(); ++it) {
@@ -1736,7 +1734,9 @@ void overmap::draw(WINDOW *w, const tripoint &center,
                   _(" - Delete a note")).c_str());
         mvwprintz(w, 20, om_map_width + 1, c_magenta, (inp_ctxt->get_desc("LIST_NOTES") +
                   _(" - List notes")).c_str());
-        fold_and_print(w, 21, om_map_width + 1, 27, c_magenta, ("m, " + inp_ctxt->get_desc("QUIT") +
+        mvwprintz(w, 21, om_map_width + 1, c_magenta, (inp_ctxt->get_desc("HELP_KEYBINDINGS") +
+                  _(" - Change keys")).c_str());
+        fold_and_print(w, 22, om_map_width + 1, 27, c_magenta, ("m, " + inp_ctxt->get_desc("QUIT") +
                        _(" - Return to game")).c_str());
     }
     point omt(cursx, cursy);

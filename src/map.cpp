@@ -4608,10 +4608,11 @@ void map::loadn(const int worldx, const int worldy, const int worldz,
   for (int x = 0; x < SEEX; x++) {
       for (int y = 0; y < SEEY; y++) {
           int biggest_container_idx = -1;
-          unsigned int maxvolume = 0;
+          int maxvolume = 0;
           bool do_container_check = false;
 
-          if ( do_funnels && ! rain_backlog.empty() && rain_backlog.find(point(x,y)) != rain_backlog.end() ) {
+          if ( do_funnels && ! rain_backlog.empty() &&
+               rain_backlog.find(point(x,y)) != rain_backlog.end() ) {
               do_container_check = true;
           }
           int intidx = 0;
@@ -4985,6 +4986,7 @@ void map::build_transparency_cache()
       case fd_weedsmoke:
       case fd_cracksmoke:
       case fd_methsmoke:
+      case fd_relax_gas:
           transparency_cache[x][y] *= 0.7;
           break;
       case fd_smoke:
