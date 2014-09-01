@@ -230,7 +230,7 @@ class game
         void plswim(int x, int y); // Called by plmove.  Handles swimming
         // when player is thrown (by impact or something)
         void fling_creature(Creature *c, const int &dir, float flvel,
-                                     bool controlled = false);
+                            bool controlled = false);
 
         /**
          * Nuke the area at (x,y) - global overmap terrain coordinates!
@@ -320,6 +320,10 @@ class game
         point find_item(item *it);
         void remove_item(item *it);
 
+        recipe_map list_recipes()
+        {
+            return recipes;
+        };
         /**
          * Returns the recipe that is used to disassemble the given item type.
          * Returns NULL if there is no recipe to disassemble the item type.

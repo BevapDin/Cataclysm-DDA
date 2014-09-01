@@ -16,8 +16,7 @@
 typedef std::string craft_cat;
 typedef std::string craft_subcat;
 
-struct byproduct
-{
+struct byproduct {
     itype_id result;
     int charges_mult;
     int amount;
@@ -30,7 +29,7 @@ struct byproduct
     }
 
     byproduct(itype_id res, int mult = 1, int amnt = 1)
-    : result(res), charges_mult(mult), amount(amnt)
+        : result(res), charges_mult(mult), amount(amnt)
     {
     }
 };
@@ -88,7 +87,7 @@ struct recipe : public requirements {
             }
         }
         if(!bps.empty()) {
-            for(auto& val : bps) {
+            for(auto &val : bps) {
                 byproducts.push_back(val);
             }
         }
