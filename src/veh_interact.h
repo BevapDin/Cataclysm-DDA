@@ -40,7 +40,6 @@ class veh_interact
         struct vehicle_part *sel_vehicle_part;
         char sel_cmd; //Command currently being run by the player
         int sel_type;
-        int move_points; // move points required to complete the action.
     private:
         int cpart;
         int page_size;
