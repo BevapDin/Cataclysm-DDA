@@ -1950,6 +1950,189 @@
             "rotates":false
         },
         {
+            "id": "unknown_vehicle_part",
+            "fg": 244,
+            "//": "same as 'unknown' tile, TODO: replace with something better",
+            "rotates": false
+        },
+        {
+            "id": "unknown_terrain",
+            "fg": 244,
+            "//": "same as 'unknown' tile, TODO: replace with something better",
+            "rotates": false
+        },
+        {
+            "id": "unknown_item",
+            "fg": 244,
+            "//": "same as 'unknown' tile, TODO: replace with something better",
+            "rotates": false
+        },
+        {
+            "id": "unknown_furniture",
+            "fg": 244,
+            "//": "same as 'unknown' tile, TODO: replace with something better",
+            "rotates": false
+        },
+        {
+            "id": "unknown_field",
+            "fg": 244,
+            "//": "same as 'unknown' tile, TODO: replace with something better",
+            "rotates": false
+        },
+        {
+            "id": "unknown_trap",
+            "//": "same as 'tr_beartrap' tile, TODO: replace with something better",
+            "fg": 453,
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster",
+            "//": "actually this is the tile of a mon_zombie, if you find something better, apply it",
+            "fg": 527,
+            "bg": 526,
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_ZOMBIE",
+            "//": "actually this is the tile of a mon_zombie, if you find something better, apply it",
+            "fg": 527,
+            "bg": 526,
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_SPIDER",
+            "//": "actually this is the tile of a mon_spider_wolf, if you find something better, apply it",
+            "fg": 586,
+            "bg": 585,
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_UNKNOWN",
+            "fg": 638,
+            "bg": 617,
+            "//": "actually this is the tile of a mon_generator, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_MAMMAL",
+            "fg": 503,
+            "bg": 500,
+            "//": "actually this is the tile of a mon_deer, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_ROBOT",
+            "fg": 621,
+            "bg": 617,
+            "//": "actually this is the tile of a mon_secubot, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_PLANT",
+            "fg": 551,
+            "bg": 550,
+            "//": "actually this is the tile of a mon_triffid, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_WORM",
+            "fg": 523,
+            "bg": 512,
+            "//": "actually this is the tile of a mon_worm, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_FUNGUS",
+            "fg": 560,
+            "bg": 559,
+            "//": "actually this is the tile of a mon_fungaloid, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_HALLUCINATION",
+            "fg": 637,
+            "bg": 636,
+            "//": "actually this is the tile of your mom, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_BIRD",
+            "fg": 509,
+            "bg": 518,
+            "//": "actually this is the tile of a mon_crow, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_BLOB",
+            "fg": 567,
+            "bg": 566,
+            "//": "actually this is the tile of a mon_blob, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_NETHER",
+            "fg": 567,
+            "bg": 566,
+            "//": "actually this is the tile of a mon_blob, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_REPTILE",
+            "fg": 574,
+            "bg": 500,
+            "//": "actually this is the tile of a mon_sewer_snake, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_MUTANT",
+            "fg": 569,
+            "bg": 548,
+            "//": "actually this is the tile of a mon_chud, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_MOLLUSK",
+            "fg": 582,
+            "bg": 580,
+            "//": "actually this is the tile of a mon_slug, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_INSECT",
+            "fg": 583,
+            "bg": 580,
+            "//": "actually this is the tile of a mon_dermatik_larva, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_HORROR",
+            "fg": 592,
+            "bg": 548,
+            "//": "actually this is the tile of a mon_amigara_horror, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_FISH",
+            "fg": 573,
+            "bg": 572,
+            "//": "actually this is the tile of a mon_sewer_fish, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_AMPHIBIAN",
+            "fg": 581,
+            "bg": 580,
+            "//": "actually this is the tile of a mon_frog, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_ABERRATION",
+            "//": "actually this is the tile of a mon_human_snail, if you find something better, apply it",
+            "fg": 596,
+            "bg": 548,
+            "rotates": false
+        },
+        {
             "id":"t_rubble",
             "fg":245,
             "bg":6,
