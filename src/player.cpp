@@ -881,6 +881,12 @@ Warmth  Temperature (Comfortable)    Temperature (Very cold)    Notes
 
 void player::update_bodytemp()
 {
+    if (has_trait("DEBUG_NOTEMP")){
+        for (int i = 0 ; i < num_bp ; i++) {
+            temp_cur[i] = BODYTEMP_NORM;
+        }
+        return;
+    }
     // NOTE : visit weather.h for some details on the numbers used
     // Converts temperature to Celsius/10(Wito plans on using degrees Kelvin later)
     int Ctemperature = 100*(g->get_temperature() - 32) * 5/9;
@@ -6183,7 +6189,8 @@ void player::vomit()
 void player::drench(int saturation, int flags)
 {
     // OK, water gets in your AEP suit or whatever.  It wasn't built to keep you dry.
-    if ( (is_waterproof(flags)) && (!(g->m.has_flag(TFLAG_DEEP_WATER, posx, posy))) ) {
+    if ( (has_trait("DEBUG_NOTEMP")) || ((is_waterproof(flags)) &&
+        (!(g->m.has_flag(TFLAG_DEEP_WATER, posx, posy)))) ) {
         return;
     }
 
@@ -6503,7 +6510,6 @@ void player::add_morale(morale_type type, int bonus, int max_bonus,
                 // The existing bonus is above the new cap.  Reduce it.
                 i.bonus = max_bonus;
             }
-            
             //Found a match, so no need to check further
             break;
         }
@@ -6716,6 +6722,14 @@ bool player::process_single_active_item(item *it)
                     it->item_tags.erase("HOT");
                 }
             }
+            if (it->has_flag("COLD"))
+            {
+                it->item_counter--;
+                if (it->item_counter == 0)
+                {
+                    it->item_tags.erase("COLD");
+                }
+            }
         }
         else if (it->is_food_container())
         {
@@ -6726,6 +6740,14 @@ bool player::process_single_active_item(item *it)
                 if (it->contents[0].item_counter == 0)
                 {
                     it->contents[0].item_tags.erase("HOT");
+                }
+            }
+            if (it->contents[0].has_flag("COLD"))
+            {
+                it->contents[0].item_counter--;
+                if (it->contents[0].item_counter == 0)
+                {
+                    it->contents[0].item_tags.erase("COLD");
                 }
             }
         }
@@ -8095,7 +8117,10 @@ bool player::eat(item *eaten, it_comest *comest)
     if( has_bionic("bio_ethanol") && comest->can_use( "ALCOHOL_STRONG" ) ) {
         charge_power(rng(75, 300));
     }
-
+    //eating plant fertilizer stops here
+    if (has_trait("THRESH_PLANT") && comest->can_use( "PLANTBLECH" )){
+        return true;
+    }
     if (eaten->made_of("hflesh") && !has_trait("SAPIOVORE")) {
     // Sapiovores don't recognize humans as the same species.
     // It's not cannibalism if you're not eating your own kind.
@@ -8169,6 +8194,9 @@ bool player::eat(item *eaten, it_comest *comest)
 
 void player::consume_effects(item *eaten, it_comest *comest, bool rotten)
 {
+    if (has_trait("THRESH_PLANT") && eaten->type->id == "fertilizer_liquid") {
+    return;
+    }
     if ( !(has_trait("GIZZARD")) && (rotten) && !(has_trait("SAPROPHAGE")) ) {
         hunger -= rng(0, comest->nutr);
         thirst -= comest->quench;
@@ -8224,6 +8252,12 @@ void player::consume_effects(item *eaten, it_comest *comest, bool rotten)
     }
     if (eaten->has_flag("HOT") && eaten->has_flag("EATEN_HOT")) {
         add_morale(MORALE_FOOD_HOT, 5, 10);
+    }
+    if (eaten->has_flag("COLD") && eaten->has_flag("EATEN_COLD") && comest->fun > 0) {
+            add_morale(MORALE_FOOD_GOOD, comest->fun * 3, comest->fun * 3, 60, 30, false, comest);
+    }
+    if (eaten->has_flag("COLD") && eaten->has_flag("EATEN_COLD") && comest->fun <= 0) {
+            comest->fun = 1;
     }
     if (has_trait("GOURMAND")) {
         if (comest->fun < -2) {
