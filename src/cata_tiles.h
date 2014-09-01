@@ -351,6 +351,7 @@ class cata_tiles
             bionight_bionic_active;
         int last_pos_x, last_pos_y;
 
+        std::string check_tile_exists(const std::string &tile_id) const;
 };
 
 #endif // CATA_TILES_H

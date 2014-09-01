@@ -481,6 +481,15 @@ std::vector<std::string> MonsterGenerator::get_all_mtype_ids() const
     return hold;
 }
 
+std::vector<std::string> MonsterGenerator::get_all_scpecies_ids() const
+{
+    std::vector<std::string> hold;
+    for( auto &sp : mon_species ) {
+        hold.push_back( sp.first );
+    }
+    return hold;
+}
+
 mtype *MonsterGenerator::get_valid_hallucination()
 {
     std::vector<mtype *> potentials;

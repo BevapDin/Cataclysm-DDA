@@ -8,6 +8,7 @@
 #include "item_factory.h"
 #include "veh_type.h"
 #include <fstream>
+#include <sstream>
 
 #include "SDL2/SDL_image.h"
 
@@ -19,6 +20,25 @@ extern game *g;
 //extern SDL_Surface *screen;
 extern int WindowHeight, WindowWidth;
 extern int fontwidth, fontheight;
+
+// ids of various specific tiles. Other tiles use information from the object
+// to generate the id (e.g. the id of a monster tile is the ident of the monster,
+// same for items etc.)
+static const std::string footstep_tile_id = "footstep";
+static const std::string cursor_tile_id = "cursor";
+static const std::string explosion_tile_id = "explosion";
+static const std::string animation_hit_tile_id = "animation_hit";
+static const std::string animation_line_tile_id = "animation_line";
+static const std::string npc_male_tile_id = "npc_male";
+static const std::string npc_female_tile_id = "npc_female";
+static const std::string player_male_tile_id = "player_male";
+static const std::string player_female_tile_id = "player_female";
+
+static const std::string HIDDEN_tile_id = "lighting_hidden";
+static const std::string LIGHT_NORMAL_tile_id = "lighting_lowlight_light";
+static const std::string LIGHT_DARK_tile_id = "lighting_lowlight_dark";
+static const std::string BOOMER_NORMAL_tile_id = "lighting_boomered_light";
+static const std::string BOOMER_DARK_tile_id = "lighting_boomered_dark";
 
 static const std::string empty_string;
 static const std::string TILE_CATEGORY_IDS[] = {
@@ -231,6 +251,14 @@ void cata_tiles::set_draw_scale(int scale) {
     tile_ratioy = ((float)tile_height/(float)fontheight);
 }
 
+std::string cata_tiles::check_tile_exists( const std::string &tile_id ) const
+{
+    if( tile_ids.count( tile_id ) > 0 ) {
+        return "";
+    }
+    return tile_id + " ";
+}
+
 void cata_tiles::load_tilejson(std::string path, const std::string &image_path)
 {
     dbg( D_INFO ) << "Attempting to Load JSON file " << path;
@@ -241,9 +269,43 @@ void cata_tiles::load_tilejson(std::string path, const std::string &image_path)
     }
 
         load_tilejson_from_file( config_file, image_path );
-        if (tile_ids.count("unknown") == 0) {
-            debugmsg("The tileset you're using has no 'unknown' tile defined!");
+
+    std::ostringstream buffer;
+    // Generic last ditch tile
+    buffer << check_tile_exists( "unknown" );
+    // Generic tiles based on their category, see TILE_CATEGORY_IDS
+    buffer << check_tile_exists( "unknown_" + TILE_CATEGORY_IDS[C_VEHICLE_PART] );
+    buffer << check_tile_exists( "unknown_" + TILE_CATEGORY_IDS[C_TERRAIN] );
+    buffer << check_tile_exists( "unknown_" + TILE_CATEGORY_IDS[C_ITEM] );
+    buffer << check_tile_exists( "unknown_" + TILE_CATEGORY_IDS[C_FURNITURE] );
+    buffer << check_tile_exists( "unknown_" + TILE_CATEGORY_IDS[C_TRAP] );
+    buffer << check_tile_exists( "unknown_" + TILE_CATEGORY_IDS[C_FIELD] );
+    buffer << check_tile_exists( "unknown_" + TILE_CATEGORY_IDS[C_MONSTER] );
+    // Generic monster tiles specific for the species of the monster
+    const auto species = MonsterGenerator::generator().get_all_scpecies_ids();
+    for( auto &specie : species ) {
+        if( specie == "spec_null" ) {
+            continue; // null-species should not be used in any monster type
         }
+        buffer << check_tile_exists( "unknown_" + TILE_CATEGORY_IDS[C_MONSTER] + "_" + specie );
+    }
+    buffer << check_tile_exists( HIDDEN_tile_id );
+    buffer << check_tile_exists( LIGHT_NORMAL_tile_id );
+    buffer << check_tile_exists( LIGHT_DARK_tile_id );
+    buffer << check_tile_exists( BOOMER_NORMAL_tile_id );
+    buffer << check_tile_exists( BOOMER_DARK_tile_id );
+    buffer << check_tile_exists( npc_male_tile_id );
+    buffer << check_tile_exists( npc_female_tile_id );
+    buffer << check_tile_exists( player_male_tile_id );
+    buffer << check_tile_exists( player_female_tile_id );
+    buffer << check_tile_exists( explosion_tile_id );
+    buffer << check_tile_exists( animation_hit_tile_id );
+    buffer << check_tile_exists( animation_line_tile_id );
+    buffer << check_tile_exists( footstep_tile_id );
+    buffer << check_tile_exists( cursor_tile_id );
+    if( !buffer.str().empty() ) {
+        add_msg( m_bad, _( "The tileset misses the following tiles:\n%s" ), buffer.str().c_str() );
+    }
 }
 
 void cata_tiles::load_tilejson_from_file(std::ifstream &f, const std::string &image_path)
@@ -488,11 +550,14 @@ tile_type *cata_tiles::load_tile(JsonObject &entry, const std::string &id, int o
     } else {
         bg += offset;
     }
-    tile_type *curr_subtile = new tile_type();
+    std::unique_ptr<tile_type> curr_subtile( new tile_type() );
     curr_subtile->fg = fg;
     curr_subtile->bg = bg;
-    tile_ids[id] = curr_subtile;
-    return curr_subtile;
+    if( tile_ids.count( id ) > 0 ) {
+        throw std::string("Duplicated tile id: ") + id;
+    }
+    tile_ids[id] = curr_subtile.get();
+    return curr_subtile.release();
 }
 
 void cata_tiles::draw(int destx, int desty, int centerx, int centery, int width, int height)
@@ -588,7 +653,7 @@ void cata_tiles::draw(int destx, int desty, int centerx, int centery, int width,
     // check to see if player is located at ter
     else if (g->u.posx + g->u.view_offset_x != g->ter_view_x ||
              g->u.posy + g->u.view_offset_y != g->ter_view_y) {
-        draw_from_id_string("cursor", C_NONE, empty_string, g->ter_view_x, g->ter_view_y, 0, 0);
+        draw_from_id_string(cursor_tile_id, C_NONE, empty_string, g->ter_view_x, g->ter_view_y, 0, 0);
     }
 
     SDL_RenderSetClipRect(renderer, NULL);
@@ -838,19 +903,19 @@ bool cata_tiles::draw_lighting(int x, int y, LIGHTING l)
     std::string light_name;
     switch(l) {
         case HIDDEN:
-            light_name = "lighting_hidden";
+            light_name = HIDDEN_tile_id;
             break;
         case LIGHT_NORMAL:
-            light_name = "lighting_lowlight_light";
+            light_name = LIGHT_NORMAL_tile_id;
             break;
         case LIGHT_DARK:
-            light_name = "lighting_lowlight_dark";
+            light_name = LIGHT_DARK_tile_id;
             break;
         case BOOMER_NORMAL:
-            light_name = "lighting_boomered_light";
+            light_name = BOOMER_NORMAL_tile_id;
             break;
         case BOOMER_DARK:
-            light_name = "lighting_boomered_dark";
+            light_name = BOOMER_DARK_tile_id;
             break;
         case CLEAR: // Actually handled by the caller.
             return false;
@@ -1092,13 +1157,13 @@ bool cata_tiles::draw_entity(int x, int y)
     if (!entity_here && g->npc_at(x, y) >= 0) {
         npc &m = *g->active_npc[g->npc_at(x, y)];
         if( !m.is_dead() ) {
-            ent_name = m.male ? "npc_male" : "npc_female";
+            ent_name = m.male ? npc_male_tile_id : npc_female_tile_id;
             entity_here = true;
         }
     }
     // check for PC (least common, only ever 1)
     if (!entity_here && g->u.posx == x && g->u.posy == y) {
-        ent_name = g->u.male ? "player_male" : "player_female";
+        ent_name = g->u.male ? player_male_tile_id : player_female_tile_id;
         entity_here = true;
     }
     if (entity_here) {
@@ -1257,7 +1322,6 @@ void cata_tiles::void_zones()
 /* -- Animation Renders */
 void cata_tiles::draw_explosion_frame()
 {
-    std::string exp_name = "explosion";
     int subtile, rotation;
     const int mx = exp_pos_x, my = exp_pos_y;
 
@@ -1265,20 +1329,20 @@ void cata_tiles::draw_explosion_frame()
         subtile = corner;
         rotation = 0;
 
-        draw_from_id_string(exp_name, mx - i, my - i, subtile, rotation++);
-        draw_from_id_string(exp_name, mx - i, my + i, subtile, rotation++);
-        draw_from_id_string(exp_name, mx + i, my + i, subtile, rotation++);
-        draw_from_id_string(exp_name, mx + i, my - i, subtile, rotation++);
+        draw_from_id_string(explosion_tile_id, mx - i, my - i, subtile, rotation++);
+        draw_from_id_string(explosion_tile_id, mx - i, my + i, subtile, rotation++);
+        draw_from_id_string(explosion_tile_id, mx + i, my + i, subtile, rotation++);
+        draw_from_id_string(explosion_tile_id, mx + i, my - i, subtile, rotation++);
 
         subtile = edge;
         for (int j = 1 - i; j < 0 + i; j++) {
             rotation = 0;
-            draw_from_id_string(exp_name, mx + j, my - i, subtile, rotation);
-            draw_from_id_string(exp_name, mx + j, my + i, subtile, rotation);
+            draw_from_id_string(explosion_tile_id, mx + j, my - i, subtile, rotation);
+            draw_from_id_string(explosion_tile_id, mx + j, my + i, subtile, rotation);
 
             rotation = 1;
-            draw_from_id_string(exp_name, mx - i, my + j, subtile, rotation);
-            draw_from_id_string(exp_name, mx + i, my + j, subtile, rotation);
+            draw_from_id_string(explosion_tile_id, mx - i, my + j, subtile, rotation);
+            draw_from_id_string(explosion_tile_id, mx + i, my + j, subtile, rotation);
         }
     }
 }
@@ -1291,21 +1355,19 @@ void cata_tiles::draw_bullet_frame()
 void cata_tiles::draw_hit_frame()
 {
     const int mx = hit_pos_x, my = hit_pos_y;
-    std::string hit_overlay = "animation_hit";
 
     draw_from_id_string(hit_entity_id, C_HIT_ENTITY, empty_string, mx, my, 0, 0);
-    draw_from_id_string(hit_overlay, mx, my, 0, 0);
+    draw_from_id_string(animation_hit_tile_id, mx, my, 0, 0);
 }
 void cata_tiles::draw_line()
 {
     int mx = line_pos_x, my = line_pos_y;
-    std::string line_overlay = "animation_line";
     if (!is_target_line || g->u_see(mx, my)) {
         for( auto it = line_trajectory.begin(); it != line_trajectory.end() - 1; ++it ) {
             mx = it->x;
             my = it->y;
 
-            draw_from_id_string(line_overlay, mx, my, 0, 0);
+            draw_from_id_string(animation_line_tile_id, mx, my, 0, 0);
         }
     }
     mx = line_trajectory[line_trajectory.size() - 1].x;
@@ -1369,11 +1431,10 @@ void cata_tiles::draw_zones_frame()
 }
 void cata_tiles::draw_footsteps_frame()
 {
-    static const std::string footstep_tilestring = "footstep";
     std::vector<point> markers;
     g->calculate_footstep_markers(markers);
     for (std::vector<point>::const_iterator a = markers.begin(); a != markers.end(); ++a) {
-        draw_from_id_string(footstep_tilestring, a->x, a->y, 0, 0);
+        draw_from_id_string(footstep_tile_id, a->x, a->y, 0, 0);
     }
 }
 /* END OF ANIMATION FUNCTIONS */
