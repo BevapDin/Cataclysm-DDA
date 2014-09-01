@@ -19,6 +19,173 @@
             "rotates":true
         },
         {
+            "id": "unknown_vehicle_part",
+            "fg": 54,
+            "//": "same as 'unknown' tile, TODO: replace with something better",
+            "rotates": true
+        },
+        {
+            "id": "unknown_terrain",
+            "fg": 54,
+            "//": "same as 'unknown' tile, TODO: replace with something better",
+            "rotates": true
+        },
+        {
+            "id": "unknown_item",
+            "fg": 54,
+            "//": "same as 'unknown' tile, TODO: replace with something better",
+            "rotates": true
+        },
+        {
+            "id": "unknown_furniture",
+            "fg": 54,
+            "//": "same as 'unknown' tile, TODO: replace with something better",
+            "rotates":true
+        },
+        {
+            "id": "unknown_trap",
+            "//": "same as 'tr_beartrap' tile, TODO: replace with something better",
+            "fg": 144,
+            "rotates": false
+        },
+        {
+            "id": "unknown_field",
+            "fg": 54,
+            "//": "same as 'unknown' tile, TODO: replace with something better",
+            "rotates":true
+        },
+        {
+            "id": "footstep",
+            "fg": 1680,
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster",
+            "fg": 218,
+            "//": "actually this is the tile of a mon_zombie, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_ZOMBIE",
+            "fg": 218,
+            "//": "actually this is the tile of a mon_zombie, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_SPIDER",
+            "fg": 191,
+            "//": "actually this is the tile of a mon_spider_wolf, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_UNKNOWN",
+            "fg": 240,
+            "//": "actually this is the tile of a mon_generator, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_MAMMAL",
+            "fg": 197,
+            "//": "actually this is the tile of a mon_deer, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_ROBOT",
+            "fg": 179,
+            "//": "actually this is the tile of a mon_secubot, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_PLANT",
+            "fg": 243,
+            "//": "actually this is the tile of a mon_triffid, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_WORM",
+            "fg": 215,
+            "//": "actually this is the tile of a mon_worm, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_FUNGUS",
+            "fg": 251,
+            "//": "actually this is the tile of a mon_fungaloid, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_HALLUCINATION",
+            "fg": 241,
+            "//": "actually this is the tile of your mom, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_BIRD",
+            "fg": 203,
+            "//": "actually this is the tile of a mon_crow, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_BLOB",
+            "fg": 270,
+            "//": "actually this is the tile of a mon_blob, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_NETHER",
+            "fg": 270,
+            "//": "actually this is the tile of a mon_blob, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_REPTILE",
+            "fg": 265,
+            "//": "actually this is the tile of a mon_sewer_snake, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_MUTANT",
+            "fg": 266,
+            "//": "actually this is the tile of a mon_chud, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_MOLLUSK",
+            "fg": 258,
+            "//": "actually this is the tile of a mon_slug, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_INSECT",
+            "fg": 257,
+            "//": "actually this is the tile of a mon_dermatik_larva, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_HORROR",
+            "fg": 186,
+            "//": "actually this is the tile of a mon_amigara_horror, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_FISH",
+            "fg": 269,
+            "//": "actually this is the tile of a mon_sewer_fish, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_AMPHIBIAN",
+            "fg": 259,
+            "//": "actually this is the tile of a mon_frog, if you find something better, apply it",
+            "rotates": false
+        },
+        {
+            "id": "unknown_monster_ABERRATION",
+            "fg": 186,
+            "//": "actually this is the tile of a mon_human_snail, if you find something better, apply it",
+            "rotates": false
+        },
+        {
             "id":"weather_acid_drop",
             "bg":14
         },
