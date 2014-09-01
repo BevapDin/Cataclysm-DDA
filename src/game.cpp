@@ -11270,14 +11270,13 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
     }
 
     if (u.weapon.has_flag("RELOAD_AND_SHOOT") && u.weapon.charges == 0) {
-        // draw an arrow from a worn quiver
-        if (u.weapon.ammo_type() == "arrow") {
             // find worn quivers
             std::vector<item *> quivers;
             for (std::vector<item>::iterator it = u.worn.begin(); it != u.worn.end(); it++) {
                 item &worn = *it;
-                if (worn.type->can_use("QUIVER") &&
-                    !worn.contents.empty() && worn.contents[0].is_ammo() && worn.contents[0].charges > 0) {
+                if (worn.type->can_use("QUIVER") && !worn.contents.empty()
+                    && worn.contents[0].is_ammo() && worn.contents[0].charges > 0
+                    && worn.contents[0].ammo_type() == u.weapon.ammo_type() ) {
                     quivers.push_back(&worn);
                 }
             }
@@ -11318,7 +11317,6 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
                     reload_pos = u.get_item_position(worn);
                 }
             }
-        }
         if (reload_pos == INT_MIN) {
             reload_pos = u.weapon.pick_reload_ammo(u, true);
         }
@@ -11423,7 +11421,7 @@ void game::butcher()
     crafting_inventory_t crafting_inv(&u);
 
     // check if we have a butchering tool
-    if (factor == INT_MAX) {
+    if( factor == INT_MIN ) {
         add_msg(m_info, _("You don't have a sharp item to butcher with."));
         return;
     }
@@ -11522,7 +11520,7 @@ void game::butcher()
         break;
     }
     time_to_cut *= 100; // Convert to movement points
-    time_to_cut += factor * 5; // Penalty for poor tool
+    time_to_cut -= factor * 5; // Penalty for poor tool or benefit for good tool
     if (time_to_cut < 250) {
         time_to_cut = 250;
     }
@@ -11595,8 +11593,8 @@ void game::complete_butcher(int index)
     if (u.str_cur < 4) {
         skill_shift -= rng(0, 5 * (4 - u.str_cur)) / 4;
     }
-    if (factor > 0) {
-        skill_shift -= rng(0, factor / 5);
+    if( factor < 0 ) {
+        skill_shift -= rng( 0, -factor / 5 );
     }
 
     int practice = 4 + pieces;
