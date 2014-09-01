@@ -999,6 +999,8 @@ void iexamine::flower_poppy(player *p, map *m, int examx, int examy)
 {
     if (calendar::turn.get_season() == WINTER) {
         add_msg(m_info, _("This flower is dead. You can't get it."));
+        none(p, m, examx, examy);
+        return;
     }
     if ( ((p->has_trait("PROBOSCIS")) || (p->has_trait("BEAK_HUM"))) && ((p->hunger) > 0) &&
          (!(p->wearing_something_on(bp_mouth))) ) {
@@ -1048,6 +1050,8 @@ void iexamine::flower_blubell(player *p, map *m, int examx, int examy)
 {
     if (calendar::turn.get_season() == WINTER) {
         add_msg(m_info, _("This flower is dead. You can't get it."));
+        none(p, m, examx, examy);
+        return;
     }
     if ( ((p->has_trait("PROBOSCIS")) || (p->has_trait("BEAK_HUM"))) &&
          ((p->hunger) > 0) && (!(p->wearing_something_on(bp_mouth))) ) {
@@ -1068,6 +1072,8 @@ void iexamine::flower_dahlia(player *p, map *m, int examx, int examy)
 {
     if (calendar::turn.get_season() == WINTER) {
         add_msg(m_info, _("This flower is dead. You can't get it."));
+        none(p, m, examx, examy);
+        return;
     }
     if ( ((p->has_trait("PROBOSCIS")) || (p->has_trait("BEAK_HUM"))) &&
          ((p->hunger) > 0) && (!(p->wearing_something_on(bp_mouth))) ) {
@@ -1088,6 +1094,8 @@ void iexamine::flower_datura(player *p, map *m, int examx, int examy)
 {
     if (calendar::turn.get_season() == WINTER) {
         add_msg(m_info, _("This plant is dead. You can't get it."));
+        none(p, m, examx, examy);
+        return;
     }
     if ( ((p->has_trait("PROBOSCIS")) || (p->has_trait("BEAK_HUM"))) &&
          ((p->hunger) > 0) && (!(p->wearing_something_on(bp_mouth))) ) {
@@ -1100,7 +1108,7 @@ void iexamine::flower_datura(player *p, map *m, int examx, int examy)
         return;
     }
     m->furn_set(examx, examy, f_null);
-    m->spawn_item(examx, examy, "datura_seed");
+    m->spawn_item(examx, examy, "datura_seed", 2, 6 );
 }
 
 void iexamine::egg_sack_generic( player *p, map *m, int examx, int examy,
@@ -1676,6 +1684,10 @@ void iexamine::pick_plant(player *p, map *m, int examx, int examy,
 
 void iexamine::tree_apple(player *p, map *m, int examx, int examy)
 {
+    if (calendar::turn.get_season() == WINTER) {
+        add_msg( m_info, _("The tree is dormant and uninteresting."));
+        return;
+    }
     if ( ((p->has_trait("PROBOSCIS")) || (p->has_trait("BEAK_HUM"))) &&
          ((p->hunger) > 0) && (!(p->wearing_something_on(bp_mouth))) &&
          (calendar::turn.get_season() == SUMMER || calendar::turn.get_season() == SPRING) ) {

@@ -72,6 +72,13 @@ cur/
 # Compiled binary translations
 lang/mo/
 
+# Directory for translatable strings
+lang/json/*
+!lang/json/README
+
 # Netbeans IDE folders
 nbproject/
+
+# Python runtime files
+*.pyc
 
