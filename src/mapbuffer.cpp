@@ -468,6 +468,7 @@ submap *mapbuffer::unserialize_submaps( const tripoint &p )
                     while( !jsin.end_array() ) {
                         item tmp;
                         jsin.read( tmp );
+                        if(tmp.is_null()) { continue; }
                         sm->itm[i][j].push_back( tmp );
                     }
                 }
