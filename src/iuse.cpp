@@ -3811,7 +3811,8 @@ int iuse::picklock(player *p, item *it, bool)
     return it->type->charges_to_use();
 }
 
-bool pry_nails(player *p, ter_id &type, int dirx, int diry) {
+bool pry_nails(player *p, ter_id &type, int dirx, int diry)
+{
     int nails = 0, boards = 0;
     ter_id newter;
     if (type == t_fence_h || type == t_fence_v) {
@@ -3853,7 +3854,6 @@ bool pry_nails(player *p, ter_id &type, int dirx, int diry) {
     g->m.ter_set(dirx, diry, newter);
     return true;
 }
-
 
 int iuse::hammer(player *p, item *it, bool)
 {
