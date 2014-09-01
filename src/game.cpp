@@ -599,7 +599,7 @@ void game::start_game(std::string worldname)
     player_start.load( player_location.x, player_location.y, levz, false, cur_om );
     player_start.translate( t_window_domestic, t_curtains );
     player_start.save();
-    if (g->scen->has_flag("INFECTED")){u.add_disease("infected",100,false,1,1,0, -1, random_body_part(), true);}
+    if (g->scen->has_flag("INFECTED")){u.add_disease("infected", 14401, false, 1, 1, 0, 0, random_body_part(), true);}
     levx -= int(int(MAPSIZE / 2) / 2);
     levy -= int(int(MAPSIZE / 2) / 2);
     levz = 0;
@@ -6612,8 +6612,10 @@ void game::explosion(int x, int y, int power, int shrapnel, bool fire, bool blas
 
     if (power >= 30) {
         sound(x, y, noise, _("a huge explosion!"));
-    } else {
+    } else if (power >= 4) {
         sound(x, y, noise, _("an explosion!"));
+    } else {
+        sound(x, y, 3, _("a loud pop!"));
     }
     if (blast) {
         do_blast(x, y, power, radius, fire);
@@ -6622,7 +6624,7 @@ void game::explosion(int x, int y, int power, int shrapnel, bool fire, bool blas
     }
 
     // The rest of the function is shrapnel
-    if (shrapnel <= 0) {
+    if (shrapnel <= 0 || power < 4) {
         return;
     }
     int sx, sy, t, tx, ty;
@@ -11721,6 +11723,28 @@ void game::complete_butcher(int index)
             //To see if it spawns a random additional CBM
             if (rng(0, 1) == 1) { //The CBM works
                 Item_tag bionic_item = item_controller->id_from("bionics_sci");
+                m.spawn_item(u.posx, u.posy, bionic_item, 1, 0, age);
+            } else { //There is a burnt out CBM
+                m.spawn_item(u.posx, u.posy, "burnt_out_bionic", 1, 0, age);
+            }
+        }
+    }
+
+    // Zombie technician bionics
+    if (corpse->has_flag(MF_CBM_TECH)) {
+        if (skill_shift >= 0) {
+            add_msg(m_good, _("You discover a CBM in the %s!"), corpse->nname().c_str());
+            //To see if it spawns a battery
+            if (rng(0, 1) == 1) { //The battery works
+                m.spawn_item(u.posx, u.posy, "bio_power_storage", 1, 0, age);
+            } else { //There is a burnt out CBM
+                m.spawn_item(u.posx, u.posy, "burnt_out_bionic", 1, 0, age);
+            }
+        }
+        if (skill_shift >= 0) {
+            //To see if it spawns a random additional CBM
+            if (rng(0, 1) == 1) { //The CBM works
+                Item_tag bionic_item = item_controller->id_from("bionics_tech");
                 m.spawn_item(u.posx, u.posy, bionic_item, 1, 0, age);
             } else { //There is a burnt out CBM
                 m.spawn_item(u.posx, u.posy, "burnt_out_bionic", 1, 0, age);
