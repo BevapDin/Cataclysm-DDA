@@ -1152,6 +1152,8 @@ bool advanced_inventory::move_all_items()
                         add_msg(m_info, _("Unable to move item, the destination is too full."));
                         ++it;
                         continue;
+                    } else {
+                        u.moves -= 100;
                     }
 
                     // if it's a normal square, try to move it there. If not, just continue
@@ -1160,6 +1162,8 @@ bool advanced_inventory::move_all_items()
                         add_msg(m_info, _("Unable to move item, the destination is too full."));
                         ++it;
                         continue;
+                    } else {
+                        u.moves -= 100;
                     }
                 }
 
@@ -1672,11 +1676,15 @@ void advanced_inventory::display(player *pp)
                         if( squares[destarea].veh->add_item( squares[destarea].vstor, new_item ) == false) {
                             popup(_("Destination area is full.  Remove some items first"));
                             continue;
+                        } else {
+                            u.moves -= 100;
                         }
                     } else {
                         if ( m.add_item_or_charges(squares[destarea].x, squares[destarea].y, new_item, 0 ) == false ) {
                             popup(_("Destination area is full.  Remove some items first"));
                             continue;
+                        } else {
+                            u.moves -= 100;
                         }
                     }
                     if ( trycharges > 0 ) {

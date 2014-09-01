@@ -767,6 +767,10 @@
         "bindings":[
             {
                 "input_method":"keyboard",
+                "key":"TAB"
+            },
+            {
+                "input_method":"keyboard",
                 "key":"NPAGE"
             },
             {
@@ -831,7 +835,7 @@
         "bindings":[
             {
                 "input_method":"keyboard",
-                "key":"TAB"
+                "key":"@"
             }
         ]
     },
