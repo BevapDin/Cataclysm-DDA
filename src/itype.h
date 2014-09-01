@@ -556,11 +556,11 @@ struct it_container : public virtual itype {
 struct it_werable_container : public virtual it_armor, public virtual it_container {
     it_werable_container() : it_armor(), it_container() {
     }
-    virtual bool is_armor() { return it_armor::is_armor(); }
-    virtual bool is_power_armor() { return it_armor::is_power_armor(); }
-    virtual bool is_artifact() { return it_armor::is_artifact(); }
-    virtual bool is_container() { return it_container::is_container(); }
-    virtual std::string get_item_type_string() { return "ARMOR"; }
+    virtual bool is_armor() const override { return it_armor::is_armor(); }
+    virtual bool is_power_armor() const override { return it_armor::is_power_armor(); }
+    virtual bool is_artifact() const override { return it_armor::is_artifact(); }
+    virtual bool is_container() const override { return it_container::is_container(); }
+    virtual std::string get_item_type_string() const override { return "ARMOR"; }
 };
 
 struct it_tool : public virtual itype {

@@ -591,7 +591,8 @@ void player::process_turn()
     }
     // You *are* a plant.  Unless someone hunts triffids by scent,
     // you don't smell like prey.
-    if (has_trait("CHLOROMORPH")) {
+    // Or maybe you're debugging and would rather not be smelled.
+    if (has_trait("CHLOROMORPH") || has_trait("DEBUG_NOSCENT")) {
         norm_scent = 0;
     }
 
@@ -1583,6 +1584,16 @@ int player::run_cost(int base_cost, bool diag)
             movecost *= 1.0f - (0.25f * shoe_type_count("roller_blades"));
         } else {
             movecost *= 1.5f;
+        }
+    }
+	// Quad skates might be more stable than inlines, but that also translates into a slower speed when on good surfaces.
+    if ( (is_wearing("rollerskates")) && !(is_on_ground())) {
+        if (offroading) {
+            movecost *= 1.0f + (0.15f * shoe_type_count("rollerskates"));
+        } else if (flatground) {
+            movecost *= 1.0f - (0.15f * shoe_type_count("rollerskates"));
+        } else {
+            movecost *= 1.3f;
         }
     }
 

@@ -74,61 +74,39 @@ int getsquare(int c, int &off_x, int &off_y, std::string &areastring, advanced_i
     return ret;
 }
 
-int getsquare(char c , int &off_x, int &off_y, std::string &areastring, advanced_inv_area *squares)
+int getsquare(const std::string action, int &off_x, int &off_y, std::string &areastring, advanced_inv_area *squares)
 {
     int ret = - 1;
-    switch(c) {
-    case '0':
-    case 'I':
+    if(action == "ITEMS_INVENTORY") {
         ret = 0;
-        break;
-    case '1':
-    case 'B':
+    } else if(action == "ITEMS_NW") {
         ret = 1;
-        break;
-    case '2':
-    case 'J':
+    } else if(action == "ITEMS_N") {
         ret = 2;
-        break;
-    case '3':
-    case 'N':
+    } else if(action == "ITEMS_NE") {
         ret = 3;
-        break;
-    case '4':
-    case 'H':
+    } else if(action == "ITEMS_W") {
         ret = 4;
-        break;
-    case '5':
-    case 'G':
+    } else if(action == "ITEMS_CE") {
         ret = 5;
-        break;
-    case '6':
-    case 'L':
+    } else if(action == "ITEMS_E") {
         ret = 6;
-        break;
-    case '7':
-    case 'Y':
+    } else if(action == "ITEMS_SW") {
         ret = 7;
-        break;
-    case '8':
-    case 'K':
+    } else if(action == "ITEMS_S") {
         ret = 8;
-        break;
-    case '9':
-    case 'U':
+    } else if(action == "ITEMS_SE") {
         ret = 9;
-        break;
-    case 'a':
+    } else if(action == "ITEMS_AROUND") {
         ret = 10;
-        break;
-    case 'D':
+    } else if(action == "ITEMS_CONTAINER") {
         ret = 11;
-        break;
-    default :
+    } else {
         return -1;
     }
     return getsquare(ret, off_x, off_y, areastring, squares);
 }
+
 
 void advanced_inventory::print_items(advanced_inventory_pane &pane, bool active)
 {
@@ -516,9 +494,6 @@ void advanced_inventory::init(player *pp)
     panes[left].filter = uistate.adv_inv_leftfilter;
     panes[right].filter = uistate.adv_inv_rightfilter;
 
-
-    checkshowmsg = false;
-    showmsg = false;
 
     itemsPerPage = 10;
     w_height = (TERMY < min_w_height + head_height) ? min_w_height : TERMY - head_height;
@@ -1227,6 +1202,40 @@ void advanced_inventory::display(player *pp)
     std::vector<int> category_index_start;
     category_index_start.reserve(NUM_SORTBY);
 
+    input_context ctxt("ADVANCED_INVENTORY");
+    ctxt.register_action("HELP_KEYBINDINGS");
+    ctxt.register_action("QUIT");
+    ctxt.register_action("UP");
+    ctxt.register_action("DOWN");
+    ctxt.register_action("LEFT");
+    ctxt.register_action("RIGHT");
+    ctxt.register_action("PAGE_DOWN");
+    ctxt.register_action("PAGE_UP");
+    ctxt.register_action("TOGGLE_TAB");
+    ctxt.register_action("FILTER");
+    ctxt.register_action("RESET_FILTER");
+    ctxt.register_action("EXAMINE");
+    ctxt.register_action("SORT");
+    ctxt.register_action("TOGGLE_AUTO_PICKUP");
+    ctxt.register_action("MOVE_SINGLE_ITEM");
+    ctxt.register_action("MOVE_ITEM_STACK");
+    ctxt.register_action("MOVE_ALL_ITEMS");
+    ctxt.register_action("CATEGORY_SELECTION");
+    ctxt.register_action("ITEMS_NW");
+    ctxt.register_action("ITEMS_N");
+    ctxt.register_action("ITEMS_NE");
+    ctxt.register_action("ITEMS_W");
+    ctxt.register_action("ITEMS_CE");
+    ctxt.register_action("ITEMS_E");
+    ctxt.register_action("ITEMS_SW");
+    ctxt.register_action("ITEMS_S");
+    ctxt.register_action("ITEMS_SE");
+    ctxt.register_action("ITEMS_INVENTORY");
+    ctxt.register_action("ITEMS_AROUND");
+    ctxt.register_action("ITEMS_CONTAINER");
+    ctxt.register_action("SWAP");
+    ctxt.register_action("AUTO_MOVE");
+
     while(!exit) {
         dest = (src == left ? right : left);
         // recalc and redraw
@@ -1255,32 +1264,10 @@ void advanced_inventory::display(player *pp)
             if (redraw) {
                 werase(head);
                 draw_border(head);
-                if (checkshowmsg && Messages::has_undisplayed_messages()) {
-                    showmsg = true;
-                }
 
-                if( showmsg ) {
-                    Messages::display_messages(head, 2, 1, w_width - 1, 4);
-                }
-                if ( ! showmsg ) {
-                    mvwprintz(head, 0, w_width - utf8_width(_("< [?] show log >")) - 1,
-                              c_white, _("< [?] show log >"));
-                    mvwprintz(head, 1, 2, c_white,
-                              _("hjkl or arrow keys to move cursor, [m]ove item between panes ([M]: all)"));
-                    mvwprintz(head, 2, 2, c_white,
-                              _("1-9 to select square for active tab, 0 for inventory, D for dragged item,")); // 1-9 or GHJKLYUBNID
-                    mvwprintz(head, 3, 2, c_white,
-                              _("[e]xamine, [s]ort, toggle auto[p]ickup, [,] to move all items, [q]uit."));
-                    if (panes[src].sortby == SORTBY_CATEGORY) {
-                        nc_color highlight_color = inCategoryMode ? c_white_red : h_ltgray;
-                        mvwprintz(head, 3, 3 + utf8_width(
-                                      _("[e]xamine, [s]ort, toggle auto[p]ickup, [,] to move all items, [q]uit.")),
-                                  highlight_color, _("[space] toggles selection modes."));
-                    }
-                } else {
-                    mvwprintz(head, 0, w_width - utf8_width(_("< [?] show help >")) - 1,
-                              c_white, _("< [?] show help >"));
-                }
+                Messages::display_messages(head, 2, 1, w_width - 1, 4);
+                mvwprintz(head, 0, w_width - utf8_width(_("< [?] show help >")) - 1,
+                          c_white, _("< [?] show help >"));
                 wrefresh(head);
             }
             redraw = false;
@@ -1293,23 +1280,11 @@ void advanced_inventory::display(player *pp)
         int changey = 0;
         bool donothing = false;
 
-        int c = lastCh ? lastCh : getch();
-        lastCh = 0;
+        const std::string action = ctxt.handle_input();
+
         int changeSquare;
 
-        if(c == 'i') {
-            c = (char)'0';
-        }
-
-        if(c == 'A') {
-            c = (char)'a';
-        }
-
-        if(c == 'd') {
-            c = (char)'D';
-        }
-
-        changeSquare = getsquare((char)c, panes[src].offx, panes[src].offy,
+        changeSquare = getsquare(action, panes[src].offx, panes[src].offy,
                                  panes[src].area_string, squares);
 
         category_index_start.clear();
@@ -1323,7 +1298,7 @@ void advanced_inventory::display(player *pp)
             }
         }
 
-        if (' ' == c) {
+        if (action == "CATEGORY_SELECTION") {
             inCategoryMode = !inCategoryMode;
             redraw = true; // We redraw to force the color change of the highlighted line and header text.
         } else if(changeSquare != -1) {
@@ -1352,7 +1327,7 @@ void advanced_inventory::display(player *pp)
                 popup(_("You can't put items there"));
             }
             recalc = true;
-        } else if('T' == c) {
+        } else if(action == "SWAP") {
             int destarea = panes[dest].area;
             int srcarea = panes[src].area;
             if(destarea == isall || destarea == isinventory) { continue; }
@@ -1368,21 +1343,21 @@ void advanced_inventory::display(player *pp)
                 recalc = true;
             }
             continue;
-        } else if('m' == c || 'M' == c || '\n' == c || 't' == c ) {
+        } else if(action == "MOVE_SINGLE_ITEM" || action == "MOVE_ITEM_STACK" || action == "AUTO_MOVE") {
             // If the active screen has no item.
             if( panes[src].size == 0 ) {
                 continue;
             } else if ( item_pos == -8 ) {
                 continue; // category header
             }
-            bool moveall = ('M' == c || '\n' == c );
+            bool moveall = (action == "MOVE_ITEM_STACK");
             int destarea = panes[dest].area;
-            if('t' == c) {
+            if(action == "AUTO_MOVE") {
                 item* it = panes[src].items[list_pos].it;
                 destarea = find_destination(*it, panes[src].area, panes[src].area);
                 if(destarea == -1 || destarea == panes[src].area) {
-                    lastCh = 'j';
-                    continue;
+                    changey = 1;
+                    goto xxx_not_do_nothing;
                 }
             } else
             if ( panes[dest].area == isall ) {
@@ -1452,7 +1427,10 @@ void advanced_inventory::display(player *pp)
                     amount = it->charges;
                     askamount = true;
                 }
-                if(c == 't') { lastCh = 'j'; }
+                if(action == "AUTO_MOVE") {
+                    changey = 1;
+                    goto xxx_not_do_nothing;
+                }
 
                 if ( volume > 0 && volume * amount > free_volume ) {
                     int volmax = int( free_volume / volume );
@@ -1472,9 +1450,8 @@ void advanced_inventory::display(player *pp)
                     popup(_("Destination area has too many items.  Remove some first."));
                     continue;
                 }
-                if('t' == c) {
+                if(action == "AUTO_MOVE") {
                     askamount = false;
-                    lastCh = 0;
                     moveall = true;
                 }
                 if ( askamount && ( amount > max || !moveall ) ) {
@@ -1590,9 +1567,7 @@ void advanced_inventory::display(player *pp)
                     long trycharges = -1;
                     if ( destarea == isinventory ) { // if destination is inventory
                         if (!u.can_pickup(true)) {
-                            if (!showmsg) {
-                                redraw = showmsg = true;
-                            }
+                            redraw = true;
                             continue;
                         }
                         if(squares[destarea].size >= MAX_ITEM_IN_SQUARE) {
@@ -1698,17 +1673,13 @@ void advanced_inventory::display(player *pp)
                     }
                 }
             }
-        } else if (',' == c) {
+        } else if (action == "MOVE_ALL_ITEMS") {
             if (move_all_items() && OPTIONS["CLOSE_ADV_INV"] == true) {
                 exit = true;
             }
             recalc = true;
             redraw = true;
-        } else if ('?' == c) {
-            showmsg = (!showmsg);
-            checkshowmsg = false;
-            redraw = true;
-        } else if ('s' == c) {
+        } else if (action == "SORT") {
             redraw = true;
             uimenu sm; /* using new uimenu class */
             sm.text = _("Sort by... ");
@@ -1736,7 +1707,7 @@ void advanced_inventory::display(player *pp)
                 uistate.adv_inv_rightsort = sm.ret;
             }
             recalc = true;
-        } else if( 'f' == c || 'F' == c || '.' == c || '/' == c) {
+        } else if(action == "FILTER") {
             long key = 0;
             int spos = -1;
             std::string filter = panes[src].filter;
@@ -1757,12 +1728,12 @@ void advanced_inventory::display(player *pp)
             } while(key != '\n' && key != KEY_ESCAPE);
             filter_edit = false;
             redraw = true;
-        } else if('r' == c) {
+        } else if(action == "RESET_FILTER") {
             panes[src].filter = "";
             recalc_pane(src);
             redraw_pane(src);
             redraw = true;
-        } else if('p' == c) {
+        } else if(action == "TOGGLE_AUTO_PICKUP") {
             if(panes[src].size == 0) {
                 continue;
             } else if ( item_pos == -8 ) {
@@ -1776,7 +1747,7 @@ void advanced_inventory::display(player *pp)
                 panes[src].items[list_pos].autopickup = true;
             }
             redraw = true;
-        } else if('e' == c) {
+        } else if(action == "EXAMINE") {
             if(panes[src].size == 0) {
                 continue;
             } else if ( item_pos == -8 ) {
@@ -1794,7 +1765,6 @@ void advanced_inventory::display(player *pp)
                 // Might have changed at stack (activated an item)
                 g->u.inv.restack(&g->u);
                 recalc = true;
-                checkshowmsg = true;
             } else {
                 std::vector<iteminfo> vThisItem, vDummy;
                 it->info(true, &vThisItem);
@@ -1811,17 +1781,14 @@ void advanced_inventory::display(player *pp)
             }
             if ( ret == KEY_NPAGE || ret == KEY_DOWN ) {
                 changey += 1;
-                lastCh = 'e';
             } else if ( ret == KEY_PPAGE || ret == KEY_UP ) {
                 changey += -1;
-                lastCh = 'e';
             } else {
-                lastCh = 0;
                 redraw = true;
             };
-        } else if( 'q' == c || KEY_ESCAPE == c) {
+        } else if(action == "QUIT") {
             exit = true;
-        } else if('>' == c || KEY_NPAGE == c) {
+        } else if(action == "PAGE_DOWN") {
             if ( inCategoryMode ) {
                 changey = 1;
             } else {
@@ -1831,7 +1798,7 @@ void advanced_inventory::display(player *pp)
                 }
                 redraw = true;
             }
-        } else if('<' == c || KEY_PPAGE == c) {
+        } else if(action == "PAGE_UP") {
             if ( inCategoryMode ) {
                 changey = -1;
             } else {
@@ -1841,33 +1808,21 @@ void advanced_inventory::display(player *pp)
                 }
                 redraw = true;
             }
+        } else if(action == "DOWN") {
+            changey = 1;
+        } else if(action == "UP") {
+            changey = -1;
+        } else if(action == "LEFT") {
+            changex = 0;
+        } else if(action == "RIGHT") {
+            changex = 1;
+        } else if(action == "TOGGLE_TAB") {
+            changex = dest;
         } else {
-            switch(c) {
-            case 'j':
-            case KEY_DOWN:
-                changey = 1;
-                break;
-            case 'k':
-            case KEY_UP:
-                changey = -1;
-                break;
-            case 'h':
-            case KEY_LEFT:
-                changex = 0;
-                break;
-            case 'l':
-            case KEY_RIGHT:
-                changex = 1;
-                break;
-            case '\t':
-                changex = dest;
-                break;
-            default :
-                donothing = true;
-                break;
-            }
+            donothing = true;
         }
         if(!donothing) {
+xxx_not_do_nothing:
             if ( changey != 0 ) {
                 for ( int l = 2; l > 0; l-- ) {
                     int new_index = panes[src].index;
