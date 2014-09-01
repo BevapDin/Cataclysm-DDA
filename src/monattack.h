@@ -30,6 +30,8 @@ class mattack
         void disappear          (monster *z);
         void formblob           (monster *z);
         void callblobs          (monster *z);
+        void jackson            (monster *z);
+        void dance              (monster *z);
         void dogthing           (monster *z);
         void tentacle           (monster *z);
         void vortex             (monster *z);
@@ -43,6 +45,7 @@ class mattack
         void smg                (monster *z); // Automated MP5
         void laser              (monster *z);
         void rifle_tur          (monster *z); // Automated M4
+        void searchlight        (monster *z);
         void flamethrower       (monster *z);
         void copbot             (monster *z);
         void multi_robot        (monster *z); // Pick from tazer, smg, flame

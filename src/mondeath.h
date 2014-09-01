@@ -20,11 +20,14 @@ class mdeath
         void worm           (monster *z); // Spawns 2 half-worms
         void disappear      (monster *z); // Hallucination disappears
         void guilt          (monster *z); // Morale penalty
+        void brainblob      (monster *z); // Frees blobs, redirects to blobsplit
         void blobsplit      (monster *z); // Creates more blobs
+        void jackson        (monster *z); // Reverts dancers
         void melt           (monster *z); // Normal death, but melts
         void amigara        (monster *z); // Removes hypnosis if last one
         void thing          (monster *z); // Turn into a full thing
         void explode        (monster *z); // Damaging explosion
+        void focused_beam   (monster *z); // blinding ray
         void broken         (monster *z);  // Broken robot drop
         void ratking        (monster *z); // Cure verminitis
         void darkman        (monster *z); // sight returns to normal

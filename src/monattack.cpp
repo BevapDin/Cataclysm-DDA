@@ -1115,9 +1115,96 @@ void mattack::callblobs( monster *z )
         }
         int trash = 0;
         (*ally)->set_dest( post.x, post.y, trash );
+        if (!(*ally)->has_effect("controlled")) {
+            (*ally)->add_effect("controlled", 1, 1, true);
+        }
     }
     // This is telepathy, doesn't take any moves.
     z->sp_timeout = z->type->sp_freq;
+}
+
+void mattack::jackson( monster *z )
+{
+    // Jackson draws nearby zombies into the dance.
+    std::list<monster *> allies;
+    std::vector<point> nearby_points = closest_points_first( 3, z->pos() );
+    // Iterate using horrible creature_tracker API.
+    for( size_t i = 0; i < g->num_zombies(); i++ ) {
+        monster *candidate = &g->zombie( i );
+        if(candidate->type->in_species("ZOMBIE") && candidate->type->id != "mon_zombie_jackson") {
+            // Just give the allies consistent assignments.
+            // Don't worry about trying to make the orders optimal.
+            allies.push_back( candidate );
+        }
+    }
+    const int num_dancers = std::min( allies.size(), nearby_points.size() );
+    int dancers = 0;
+    bool converted = false;
+    for( auto ally = allies.begin(); ally != allies.end(); ++ally, ++dancers ) {
+        point post = z->pos();
+        if( dancers < num_dancers ) {
+            // Each dancer is assigned a spot in the nearby_points vector based on their order.
+            int assigned_spot = (nearby_points.size() * dancers) / num_dancers;
+            post = nearby_points[ assigned_spot ];
+        }
+        if ((*ally)->type->id != "mon_zombie_dancer") {
+            (*ally)->poly(GetMType("mon_zombie_dancer"));
+            converted = true;
+        }
+        int trash = 0;
+        (*ally)->set_dest( post.x, post.y, trash );
+        if (!(*ally)->has_effect("controlled")) {
+            (*ally)->add_effect("controlled", 1, 1, true);
+        }
+    }
+    // Did we convert anybody?
+    if (converted) {
+        if (g->u_see(z->posx(), z->posy())) {
+            add_msg(m_warning, _("The %s lets out a high-pitched cry!"), z->name().c_str());
+        }
+    }
+    // This is telepathy, doesn't take any moves.
+    z->sp_timeout = z->type->sp_freq;
+}
+
+
+void mattack::dance(monster *z)
+{
+    if (g->u_see(z->posx(), z->posy())) {
+        switch (rng(1,10)) {
+            case 1:
+                add_msg(m_neutral, _("The %s swings its arms from side to side!"), z->name().c_str());
+                break;
+            case 2:
+                add_msg(m_neutral, _("The %s does some fancy footwork!"), z->name().c_str());
+                break;
+            case 3:
+                add_msg(m_neutral, _("The %s shrugs its shoulders!"), z->name().c_str());
+                break;
+            case 4:
+                add_msg(m_neutral, _("The %s spins in place!"), z->name().c_str());
+                break;
+            case 5:
+                add_msg(m_neutral, _("The %s crouches on the ground!"), z->name().c_str());
+                break;
+            case 6:
+                add_msg(m_neutral, _("The %s looks left and right!"), z->name().c_str());
+                break;
+            case 7:
+                add_msg(m_neutral, _("The %s jumps back and forth!"), z->name().c_str());
+                break;
+            case 8:
+                add_msg(m_neutral, _("The %s raises its arms in the air!"), z->name().c_str());
+                break;
+            case 9:
+                add_msg(m_neutral, _("The %s swings its hips!"), z->name().c_str());
+                break;
+            case 10:
+                add_msg(m_neutral, _("The %s claps!"), z->name().c_str());
+                break;
+        }
+    }
+    z->sp_timeout = z->type->sp_freq; // Reset timer
 }
 
 void mattack::dogthing(monster *z)
@@ -1705,6 +1792,192 @@ void mattack::rifle_tur(monster *z)
     z->ammo += tmp.weapon.charges;
     if (target == &g->u) {
         z->add_effect("targeted", 3);
+    }
+}
+
+void mattack::searchlight(monster *z)
+{
+
+    z->sp_timeout = z->type->sp_freq; // Reset timer
+
+    int max_lamp_count = 3;
+    if (z->hp < z->type->hp) {
+        max_lamp_count--;
+    }
+    if (z->hp < z->type->hp / 3) {
+        max_lamp_count--;
+    }
+
+    const int zposx = z->posx();
+    const int zposy = z->posy();
+
+    //this searchlight is not initialized
+    if (z->inv.size() == 0) {
+
+        for (int i = 0; i < max_lamp_count; i++) {
+
+            item settings("processor", 0);
+
+            settings.item_vars["SL_PREFER_UP"] = "TRUE";
+            settings.item_vars["SL_PREFER_DOWN"] = "TRUE";
+            settings.item_vars["SL_PREFER_RIGHT"] = "TRUE";
+            settings.item_vars["SL_PREFER_LEFT"] = "TRUE";
+
+            for (int x = zposx - 24; x < zposx + 24; x++)
+                for (int y = zposy - 24; y < zposy + 24; y++) {
+                    if (g->mon_at(x, y) != -1 && g->zombie(g->mon_at(x, y)).type->id == "mon_turret_searchlight") {
+                        if (x < zposx) {
+                            settings.item_vars["SL_PREFER_LEFT"] = "FALSE";
+                        }
+                        if (x > zposx) {
+                            settings.item_vars["SL_PREFER_RIGHT"] = "FALSE";
+                        }
+                        if (y < zposy) {
+                            settings.item_vars["SL_PREFER_UP"] = "FALSE";
+                        }
+                        if (y > zposy) {
+                            settings.item_vars["SL_PREFER_DOWN"] = "FALSE";
+                        }
+                    }
+
+                }
+
+            settings.item_vars["SL_SPOT_X"] = string_format("%d", 0);
+            settings.item_vars["SL_SPOT_Y"] = string_format("%d", 0);
+
+            z->add_item(settings);
+        }
+    }
+
+    //battery charge from the generator is enough for some time of work
+    if (calendar::turn % 100 == 0) {
+
+        bool generator_ok = false;
+
+        for (int x = zposx - 24; x < zposx + 24; x++)
+            for (int y = zposy - 24; y < zposy + 24; y++) if (g->m.ter_at(x, y).id == "t_plut_generator") {
+                    generator_ok = true;
+                }
+
+        if (!generator_ok) {
+            item &settings = z->inv[0];
+            settings.item_vars["SL_POWER"] = "OFF";
+
+            return;
+        }
+    }
+
+    for (int i = 0; i < max_lamp_count; i++) {
+
+        item &settings = z->inv[i];
+
+        if (settings.item_vars["SL_POWER"] == "OFF") {
+            return;
+        }
+
+        const int rng_dir = rng(0, 7);
+
+        if (one_in(5)) {
+
+            if (!one_in(5)) {
+                settings.item_vars["SL_DIR"] = string_format("%d", rng_dir);
+            } else {
+                const int rng_pref = rng(0, 3) * 2;
+                if (rng_pref == 0 && settings.item_vars["SL_PREFER_UP"] == "TRUE") {
+                    settings.item_vars["SL_DIR"] = string_format("%d", rng_pref);
+                } else            if (rng_pref == 2 && settings.item_vars["SL_PREFER_RIGHT"] == "TRUE") {
+                    settings.item_vars["SL_DIR"] = string_format("%d", rng_pref);
+                } else            if (rng_pref == 4 && settings.item_vars["SL_PREFER_DOWN"] == "TRUE") {
+                    settings.item_vars["SL_DIR"] = string_format("%d", rng_pref);
+                } else            if (rng_pref == 6 && settings.item_vars["SL_PREFER_LEFT"] == "TRUE") {
+                    settings.item_vars["SL_DIR"] = string_format("%d", rng_pref);
+                }
+            }
+        }
+
+
+        int x = zposx + atoi(settings.item_vars["SL_SPOT_X"].c_str());
+        int y = zposy + atoi(settings.item_vars["SL_SPOT_Y"].c_str());
+        int shift = 0;
+
+        for (int i = 0; i < rng(1, 2); i++) {
+
+            int tc;
+            if (!z->sees_player(tc)) {
+                if (settings.item_vars["SL_DIR"] != "") {
+                    shift = atoi(settings.item_vars["SL_DIR"].c_str());
+                }
+
+                switch (shift) {
+                    case 0:
+                        y--;
+                        break;
+                    case 1:
+                        y--;
+                        x++;
+                        break;
+                    case 2:
+                        x++;
+                        break;
+                    case 3:
+                        x++;
+                        y++;
+                        break;
+                    case 4:
+                        y++;
+                        break;
+                    case 5:
+                        y++;
+                        x--;
+                        break;
+                    case 6:
+                        x--;
+                        break;
+                    case 7:
+                        x--;
+                        y--;
+                        break;
+
+                    default:
+                        break;
+                }
+
+            } else {
+                if (x < g->u.posx) {
+                    x++;
+                }
+                if (x > g->u.posx) {
+                    x--;
+                }
+                if (y < g->u.posy) {
+                    y++;
+                }
+                if (y > g->u.posy) {
+                    y--;
+                }
+            }
+
+            if (rl_dist(x, y, zposx, zposy) > 50) {
+                if (x > zposx) {
+                    x--;
+                }
+                if (x < zposx) {
+                    x++;
+                }
+                if (y > zposy) {
+                    y--;
+                }
+                if (y < zposy) {
+                    y++;
+                }
+            }
+        }
+
+        settings.item_vars["SL_SPOT_X"] = string_format("%d", x - zposx);
+        settings.item_vars["SL_SPOT_Y"] = string_format("%d", y - zposy);
+
+        g->m.add_field(x, y, fd_spotlight, 1);
+
     }
 }
 

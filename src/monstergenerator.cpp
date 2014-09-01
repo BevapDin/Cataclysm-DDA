@@ -132,11 +132,14 @@ void MonsterGenerator::init_death()
     death_map["WORM"] = &mdeath::worm;// Spawns 2 half-worms
     death_map["DISAPPEAR"] = &mdeath::disappear;// Hallucination disappears
     death_map["GUILT"] = &mdeath::guilt;// Morale penalty
+    death_map["BRAINBLOB"] = &mdeath::brainblob;// Frees blobs, redirects to brainblob()
     death_map["BLOBSPLIT"] = &mdeath::blobsplit;// Creates more blobs
+    death_map["JACKSON"] = &mdeath::jackson;// Reverts dancers
     death_map["MELT"] = &mdeath::melt;// Normal death, but melts
     death_map["AMIGARA"] = &mdeath::amigara;// Removes hypnosis if last one
     death_map["THING"] = &mdeath::thing;// Turn into a full thing
     death_map["EXPLODE"] = &mdeath::explode;// Damaging explosion
+    death_map["FOCUSEDBEAM"] = &mdeath::focused_beam;// Blinding ray
     death_map["BROKEN"] = &mdeath::broken;// Spawns a broken robot.
     death_map["RATKING"] = &mdeath::ratking;// Cure verminitis
     death_map["DARKMAN"] = &mdeath::darkman;// sight returns to normal
@@ -179,6 +182,8 @@ void MonsterGenerator::init_attack()
     attack_map["DISAPPEAR"] = &mattack::disappear;
     attack_map["FORMBLOB"] = &mattack::formblob;
     attack_map["CALLBLOBS"] = &mattack::callblobs;
+    attack_map["JACKSON"] = &mattack::jackson;
+    attack_map["DANCE"] = &mattack::dance;
     attack_map["DOGTHING"] = &mattack::dogthing;
     attack_map["TENTACLE"] = &mattack::tentacle;
     attack_map["VORTEX"] = &mattack::vortex;
@@ -192,6 +197,7 @@ void MonsterGenerator::init_attack()
     attack_map["SMG"] = &mattack::smg;
     attack_map["LASER"] = &mattack::laser;
     attack_map["RIFLE_TUR"] = &mattack::rifle_tur;
+    attack_map["SEARCHLIGHT"] = &mattack::searchlight;
     attack_map["FLAMETHROWER"] = &mattack::flamethrower;
     attack_map["COPBOT"] = &mattack::copbot;
     attack_map["MULTI_ROBOT"] = &mattack::multi_robot;

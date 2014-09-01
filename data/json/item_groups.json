@@ -164,6 +164,7 @@
       ["flip_flops", 35],
       ["lowtops", 45],
       ["dress_shoes", 50],
+      ["dance_shoes", 5],
       ["heels", 50],
       ["coat_rain", 50],
       ["hood_rain", 20],
@@ -2636,6 +2637,7 @@
       ["flip_flops", 35],
       ["lowtops", 45],
       ["dress_shoes", 50],
+      ["dance_shoes", 5],
       ["heels", 50],
       ["boots_combat", 10],
       ["boots_hiking", 20],
@@ -4192,6 +4194,7 @@
       ["candlestick", 20],
       ["heels", 50],
       ["coat_fur_sf", 1],
+      ["tricorne", 3],
       ["ring", 12],
       ["pearl_collar", 1],
       ["diamond_ring", 1],
@@ -4334,6 +4337,7 @@
       ["knee_high_boots", 30],
       ["mocassins", 5],
       ["dress_shoes", 50],
+      ["dance_shoes", 10],
       ["heels", 50],
       ["boots_western", 10],
       ["pants", 75],
@@ -6654,6 +6658,12 @@
     "id" : "turret_rifle",
     "items":[
       ["556", 8]
+    ]
+  },{
+    "type" : "item_group",
+    "id" : "turret_searchlight",
+    "items":[
+      ["lens", 15]
     ]
   },{
     "type" : "item_group",
