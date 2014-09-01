@@ -11,6 +11,7 @@ memorial/
 obj/
 obj.rel/
 src/*.patch
+data/json/*/*.patch
 debug.log
 logg.txt
 bindist/
