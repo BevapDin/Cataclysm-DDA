@@ -7251,6 +7251,13 @@ void game::emp_blast(int x, int y)
             u.charge_power(0 - rng(1 + max_drain / 3, max_drain));
         }
         // TODO: More effects?
+        //e-handcuffs effects
+        if (u.weapon.type->id == "e_handcuffs" && u.weapon.charges > 0){
+            u.weapon.item_tags.erase("NO_UNWIELD");
+            u.weapon.charges = 0;
+            u.weapon.active = false;
+            add_msg(m_good, _("The %s on your wrists spark briefly, then release your hands!"), u.weapon.tname().c_str());
+        }
     }
     // Drain any items of their battery charge
     for (std::vector<item>::iterator it = m.i_at(x, y).begin();
@@ -12370,12 +12377,6 @@ bool game::plmove(int dx, int dy)
     } else {
         x = u.posx + dx;
         y = u.posy + dy;
-
-        if (moveCount % 2 == 0) {
-            if (u.has_bionic("bio_torsionratchet")) {
-                u.charge_power(1);
-            }
-        }
     }
 
     dbg(D_PEDANTIC_INFO) << "game:plmove: From (" << u.posx << "," << u.posy << ") to (" << x << "," <<
@@ -13175,9 +13176,9 @@ bool game::plmove(int dx, int dy)
                  npc_at(x + tunneldist * (x - u.posx), y + tunneldist * (y - u.posy)) != -1) &&
                 // assuming we've already started
                 tunneldist > 0)) {
-            tunneldist += 1; //add 1 to tunnel distance for each impassable tile in the line
-            if (tunneldist * 250 >
-                u.power_level) { //oops, not enough energy! Tunneling costs 10 bionic power per impassable tile
+            //add 1 to tunnel distance for each impassable tile in the line
+            tunneldist += 1;
+            if (tunneldist * 250 > u.power_level) { //oops, not enough energy! Tunneling costs 10 bionic power per impassable tile
                 add_msg(_("You try to quantum tunnel through the barrier but are reflected! Try again with more energy!"));
                 tunneldist = 0; //we didn't tunnel anywhere
                 break;
@@ -13234,7 +13235,18 @@ bool game::plmove(int dx, int dy)
         return false;
     }
 
+    //Only now can we be sure we actually moved
+    on_move_effects();
     return true;
+}
+
+void game::on_move_effects()
+{
+    if (moveCount % 2 == 0) {
+        if (u.has_bionic("bio_torsionratchet")) {
+            u.charge_power(1);
+        }
+    }
 }
 
 void game::plswim(int x, int y)
