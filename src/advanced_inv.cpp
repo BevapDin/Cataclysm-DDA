@@ -1423,10 +1423,6 @@ void advanced_inventory::display(player *pp)
                     amount = it->charges;
                     askamount = true;
                 }
-                if(action == "AUTO_MOVE") {
-                    changey = 1;
-                    goto xxx_not_do_nothing;
-                }
 
                 if ( volume > 0 && volume * amount > free_volume ) {
                     int volmax = int( free_volume / volume );
