@@ -4392,8 +4392,9 @@ void game::debug()
                       _("Remove all monsters"),    // 19
                       _("Display hordes"), // 20
                       _("Test Item Group"), // 21
+                      _("Configure debugging"), // 22
 #ifdef LUA
-                      _("Lua Command"), // 22
+                      _("Lua Command"), // 23
 #endif
                       _("Cancel"),
                       NULL);
@@ -4790,9 +4791,40 @@ void game::debug()
         item_controller->debug_spawn();
     }
     break;
-
-#ifdef LUA
     case 22: {
+        const char *level_names[] = { "D_INFO", "D_WARNING", "D_ERROR", "D_PEDANTIC_INFO", "DL_ALL" };
+        DebugLevel levels[] = { D_INFO, D_WARNING, D_ERROR, D_PEDANTIC_INFO, DL_ALL };
+        const char *class_names[] = { "D_MAIN", "D_MAP", "D_GAME", "D_NPC", "D_SDL", "DC_ALL" };
+        DebugClass classes[] = { D_MAIN, D_MAP, D_GAME, D_NPC, D_SDL, DC_ALL };
+
+        int selected = 0;
+        while( true ) {
+            uimenu menu;
+            menu.text = _("Select an entry to toggle it");
+            menu.return_invalid = true;
+            menu.selected = selected;
+            for( size_t i = 0; i < sizeof(level_names) / sizeof(level_names[0]); ++i ) {
+                menu.addentry( "%s (%s)", level_names[i], isDebugLevelEnabled(levels[i]) ? "active" : "inactive" );
+            }
+            for( size_t i = 0; i < sizeof(class_names) / sizeof(class_names[0]); ++i ) {
+                menu.addentry( "%s (%s)", class_names[i], isDebugClassEnabled(classes[i]) ? "active" : "inactive" );
+            }
+            menu.addentry( _("exit") );
+            menu.query();
+            selected = menu.selected;
+            size_t r = menu.ret;
+            size_t s = r - sizeof(level_names) / sizeof(level_names[0]);
+            if( r < sizeof(level_names) / sizeof(level_names[0])) {
+                toggleDebugLevel(levels[r]);
+            } else if( s < sizeof(class_names) / sizeof(class_names[0])) {
+                toggleDebugClass(classes[s]);
+            } else {
+                break;
+            }
+        }
+    }
+#ifdef LUA
+    case 23: {
         std::string luacode = string_input_popup(_("Lua:"), 60, "");
         call_lua(luacode);
     }

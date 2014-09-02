@@ -63,6 +63,7 @@ void realDebugmsg( const char *name, const char *line, const char *mes, ... );
 /**
  * If you add an entry, add an entry in that function:
  * std::ostream &operator<<(std::ostream &out, DebugLevel lev)
+ * And to game::debug to allow activating/deactivating it.
  */
 enum DebugLevel {
     D_INFO          = 1,
@@ -77,6 +78,7 @@ enum DebugLevel {
  * Debugging areas can be enabled for each of those areas separately.
  * If you add an entry, add an entry in that function:
  * std::ostream &operator<<(std::ostream &out, DebugClass cl)
+ * And to game::debug to allow activating/deactivating it.
  */
 enum DebugClass {
     /** Messages from realDebugmsg */
@@ -109,11 +111,21 @@ void deinitDebug();
  */
 void limitDebugLevel( int );
 /**
+ * Toggle the given debug level, other levels are not changed.
+ */
+void toggleDebugLevel( DebugLevel dl );
+bool isDebugLevelEnabled( DebugLevel dl );
+/**
  * Set the debug classes should be logged. bitmask is a OR-combined
  * set of DebugClass values. Use 0 to disable all.
  * Note that D_UNSPECIFIC is always logged.
  */
 void limitDebugClass( int );
+/**
+ * Toggle the given debug class, other classes are not changed.
+ */
+void toggleDebugClass( DebugClass dc );
+bool isDebugClassEnabled( DebugClass dc );
 
 // Debug Only                                                       {{{1
 // ---------------------------------------------------------------------

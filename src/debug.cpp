@@ -63,6 +63,34 @@ void limitDebugClass( int class_bitmask )
     debugClass = class_bitmask;
 }
 
+void toggleDebugLevel( DebugLevel dl )
+{
+    if( ( debugLevel | dl ) == 0 ) {
+        limitDebugLevel( debugLevel | dl );
+    } else {
+        limitDebugLevel( debugLevel & ~dl );
+    }
+}
+
+void toggleDebugClass( DebugClass dc )
+{
+    if( ( debugClass | dc ) == 0 ) {
+        limitDebugClass( debugClass | dc );
+    } else {
+        limitDebugClass( debugClass & ~dc );
+    }
+}
+
+bool isDebugLevelEnabled( DebugLevel dl )
+{
+    return ( debugLevel | dl ) == dl;
+}
+
+bool isDebugClassEnabled( DebugClass dc )
+{
+    return ( debugClass | dc ) == dc;
+}
+
 // Debug only                                                       {{{1
 // ---------------------------------------------------------------------
 
