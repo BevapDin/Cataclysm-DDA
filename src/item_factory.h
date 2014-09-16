@@ -6,6 +6,7 @@
 #include "iuse.h"
 #include "enums.h"
 #include <string>
+#include <memory>
 #include <vector>
 #include <map>
 #include <bitset>
@@ -174,6 +175,13 @@ class Item_factory
         CategoryMap m_categories;
 
         void create_inital_categories();
+
+        /**
+         * Load the data of the slot struct.
+         * TODO: document better
+         */
+        template<typename SlotType>
+        void load_slot( std::unique_ptr<SlotType> &slotptr, JsonObject &jo );
 
         // used to add the default categories
         void add_category(const std::string &id, int sort_rank, const std::string &name);

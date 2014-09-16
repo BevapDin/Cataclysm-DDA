@@ -16,6 +16,7 @@
 #include <vector>
 #include <set>
 #include <bitset>
+#include <memory>
 
 // for use in category specific inventory lists
 enum item_cat {
@@ -74,11 +75,36 @@ struct explosion_data {
     explosion_data() : power(-1), fire(false), blast(true) { }
 };
 
+struct islot_container {
+    /**
+     * Volume, scaled by the default-stack size of the item that
+     * is contained in this container.
+     */
+    int contains;
+    /**
+     * Can be sealed so it's usable to transport liquids (and not just hold them)
+     */
+    bool seals;
+    /**
+     * Is watertight - can be used to store liquids.
+     */
+    bool watertight;
+
+    islot_container()
+    : contains( 0 )
+    , seals( false )
+    , watertight( false )
+    {
+    }
+};
+
 struct itype {
     itype_id id; // unique string identifier for this item,
     // can be used as lookup key in master itype map
     // Used for save files; aligns to itype_id above.
     unsigned int  price; // Its value
+
+    std::unique_ptr<islot_container> container_slot;
 
 protected:
     friend class Item_factory;
@@ -169,10 +195,6 @@ public:
         return false;
     }
     virtual bool is_tool() const
-    {
-        return false;
-    }
-    virtual bool is_container() const
     {
         return false;
     }
@@ -492,21 +514,6 @@ struct it_book : public virtual itype {
     }
 
     it_book() : itype(), type(NULL), level(0), req(0), fun(0), intel(0), time(0), chapters(), recipes()
-    {
-    }
-};
-
-struct it_container : public virtual itype {
-    int contains; // Internal volume
-    virtual bool is_container() const
-    {
-        return true;
-    }
-    virtual std::string get_item_type_string() const
-    {
-        return "CONTAINER";
-    }
-    it_container() : itype(), contains(0)
     {
     }
 };

@@ -338,6 +338,7 @@ public:
  bool is_book() const;
  bool is_container() const;
  bool is_watertight_container() const;
+ bool is_watertight() const;
  bool is_container_empty() const;
  bool is_container_full() const;
  bool is_funnel_container(int &bigger_than) const;

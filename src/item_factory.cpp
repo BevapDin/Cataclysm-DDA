@@ -847,14 +847,24 @@ void Item_factory::load_comestible(JsonObject &jo)
     load_basic_info(jo, new_item_template);
 }
 
+template<>
+void Item_factory::load_slot( std::unique_ptr<islot_container> &slotptr, JsonObject &jo )
+{
+    // TODO: more generic. those two lines are identical for all slot types
+    slotptr.reset( new islot_container() );
+    auto &slot = *slotptr;
+    const auto flags = jo.get_tags( "flags" );
+    slot.contains = jo.get_int( "contains" );
+    slot.watertight = flags.count( "WATERTIGHT" ) > 0;
+    slot.seals = flags.count( "SEALS" ) > 0;
+}
+
 void Item_factory::load_container(JsonObject &jo)
 {
-    it_container *container_template = new it_container();
-
-    container_template->contains = jo.get_int("contains");
-
-    itype *new_item_template = container_template;
-    load_basic_info(jo, new_item_template);
+    std::unique_ptr<itype> new_item_template( new itype() );
+    load_slot( new_item_template->container_slot, jo );
+    load_basic_info( jo, new_item_template.get() );
+    new_item_template.release();
 }
 
 void Item_factory::load_gunmod(JsonObject &jo)

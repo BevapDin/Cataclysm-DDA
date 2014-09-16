@@ -7624,7 +7624,7 @@ bool player::consume(int pos)
                 if (OPTIONS["DROP_EMPTY"] == "no") {
                     drop_it = false;
                 } else if (OPTIONS["DROP_EMPTY"] == "watertight") {
-                    drop_it = it.is_container() && !(it.has_flag("WATERTIGHT") && it.has_flag("SEALS"));
+                    drop_it = it.is_container() && !it.is_watertight();
                 } else if (OPTIONS["DROP_EMPTY"] == "all") {
                     drop_it = true;
                 }

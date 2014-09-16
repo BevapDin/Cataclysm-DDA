@@ -1242,10 +1242,8 @@ item &inventory::watertight_container()
 {
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter) {
         item &it = iter->front();
-        if (it.is_container() && it.contents.empty()) {
-            if (it.has_flag("WATERTIGHT") && it.has_flag("SEALS")) {
-                return it;
-            }
+        if (it.is_watertight_container() && it.contents.empty()) {
+            return it;
         }
     }
     return nullitem;
