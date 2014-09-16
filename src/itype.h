@@ -116,6 +116,23 @@ struct islot_variable_bigness {
     }
 };
 
+struct islot_bionic {
+    /**
+     * Arbitrary difficulty scale, see bionics.cpp for its usage.
+     */
+    int difficulty;
+    /**
+     * Id of the bionic, see @ref bionics (global std:map).
+     */
+    std::string bionic_id;
+
+    islot_bionic()
+    : difficulty( 0 )
+    , bionic_id()
+    {
+    }
+};
+
 struct itype {
     itype_id id; // unique string identifier for this item,
     // can be used as lookup key in master itype map
@@ -124,6 +141,7 @@ struct itype {
 
     std::unique_ptr<islot_container> container_slot;
     std::unique_ptr<islot_variable_bigness> variable_bigness_slot;
+    std::unique_ptr<islot_bionic> bionic_slot;
 
 protected:
     friend class Item_factory;
@@ -172,6 +190,8 @@ public:
     {
         if( variable_bigness_slot.get() != nullptr ) {
             return "VEHICLE_PART";
+        } else if( bionic_slot.get() != nullptr ) {
+            return "BIONIC";
         }
         return "misc";
     }
@@ -196,10 +216,6 @@ public:
         return false;
     }
     virtual bool is_gunmod() const
-    {
-        return false;
-    }
-    virtual bool is_bionic() const
     {
         return false;
     }
@@ -553,23 +569,6 @@ struct it_tool_armor : public virtual it_tool, public virtual it_armor {
     virtual std::string get_item_type_string() const
     {
         return "ARMOR";
-    }
-};
-
-struct it_bionic : public virtual itype {
-    int difficulty;
-
-    it_bionic() : itype(), difficulty(0)
-    {
-    }
-
-    virtual bool is_bionic() const
-    {
-        return true;
-    }
-    virtual std::string get_item_type_string() const
-    {
-        return "BIONIC";
     }
 };
 

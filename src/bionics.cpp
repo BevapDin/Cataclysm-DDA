@@ -19,7 +19,7 @@ std::vector<bionic_id> faulty_bionics;
 std::vector<bionic_id> power_source_bionics;
 std::vector<bionic_id> unpowered_bionics;
 
-void bionics_install_failure(player *u, it_bionic *type, int success);
+void bionics_install_failure(player *u, int difficulty, int success);
 
 bionic_data::bionic_data(std::string new_name, bool new_power_source, bool new_activated,
                          int new_power_cost, int new_charge_time, std::string new_description,
@@ -879,9 +879,11 @@ bool player::uninstall_bionic(bionic_id b_id)
 {
     // malfunctioning bionics don't have associated items and get a difficulty of 12
     int difficulty = 12;
-    if( item_controller->has_template(b_id) > 0) {
-        const it_bionic *type = dynamic_cast<it_bionic *> (item_controller->find_template(b_id));
-        difficulty = type->difficulty;
+    if( item_controller->has_template( b_id ) ) {
+        auto type = item_controller->find_template( b_id );
+        if( type->bionic_slot ) {
+            difficulty = type->bionic_slot->difficulty;
+        }
     }
 
     if (!has_bionic(b_id)) {
@@ -937,27 +939,29 @@ bool player::uninstall_bionic(bionic_id b_id)
     return true;
 }
 
-bool player::install_bionics(it_bionic *type)
+bool player::install_bionics(const itype *type)
 {
-    if (type == NULL) {
+    if( type == nullptr || type->bionic_slot.get() == nullptr ) {
         debugmsg("Tried to install NULL bionic");
         return false;
     }
-    if (bionics.count(type->id) == 0) {
-        popup("invalid / unknown bionic id %s", type->id.c_str());
+    const std::string bioid = type->bionic_slot->bionic_id;
+    if( bionics.count( bioid ) == 0 ) {
+        popup("invalid / unknown bionic id %s", bioid.c_str());
         return false;
     }
-    if (has_bionic(type->id)) {
-        if (!(type->id == "bio_power_storage" || type->id == "bio_power_storage_mkII")) {
+    if( has_bionic( bioid ) ) {
+        if( !( bioid == "bio_power_storage" || bioid == "bio_power_storage_mkII" ) ) {
             popup(_("You have already installed this bionic."));
             return false;
         }
     }
+    const int difficult = type->bionic_slot->difficulty;
     int chance_of_success = bionic_manip_cos(int_cur,
                             skillLevel("electronics"),
                             skillLevel("firstaid"),
                             skillLevel("mechanics"),
-                            type->difficulty);
+                            difficult);
 
     if (!query_yn(
             _("WARNING: %i percent chance of genetic damage, blood loss, or damage to existing bionics! Install anyway?"),
@@ -965,11 +969,10 @@ bool player::install_bionics(it_bionic *type)
         return false;
     }
     int pow_up = 0;
-    if (type->id == "bio_power_storage" || type->id == "bio_power_storage_mkII") {
+    if( bioid == "bio_power_storage" ) {
         pow_up = BATTERY_AMOUNT;
-        if (type->id == "bio_power_storage_mkII") {
-            pow_up = 250;
-        }
+    } else if( bioid == "bio_power_storage_mkII" ) {
+        pow_up = 250;
     }
 
     practice( "electronics", int((100 - chance_of_success) * 1.5) );
@@ -979,25 +982,25 @@ bool player::install_bionics(it_bionic *type)
     if (success > 0) {
         add_memorial_log(pgettext("memorial_male", "Installed bionic: %s."),
                          pgettext("memorial_female", "Installed bionic: %s."),
-                         bionics[type->id]->name.c_str());
+                         bionics[bioid]->name.c_str());
         if (pow_up) {
             max_power_level += pow_up;
             add_msg_if_player(m_good, _("Increased storage capacity by %i"), pow_up);
         } else {
-            add_msg(m_good, _("Successfully installed %s."), bionics[type->id]->name.c_str());
-            add_bionic(type->id);
+            add_msg(m_good, _("Successfully installed %s."), bionics[bioid]->name.c_str());
+            add_bionic(bioid);
         }
     } else {
         add_memorial_log(pgettext("memorial_male", "Installed bionic: %s."),
                          pgettext("memorial_female", "Installed bionic: %s."),
-                         bionics[type->id]->name.c_str());
-        bionics_install_failure(this, type, success);
+                         bionics[bioid]->name.c_str());
+        bionics_install_failure(this, difficult, success);
     }
     g->refresh_all();
     return true;
 }
 
-void bionics_install_failure(player *u, it_bionic *type, int success)
+void bionics_install_failure(player *u, int difficulty, int success)
 {
     // "success" should be passed in as a negative integer representing how far off we
     // were for a successful install.  We use this to determine consequences for failing.
@@ -1018,7 +1021,7 @@ void bionics_install_failure(player *u, it_bionic *type, int success)
     // this is scaled up or down by the ratio of difficulty/skill.  At high skill levels (or low
     // difficulties), only minor consequences occur.  At low skill levels, severe consequences
     // are more likely.
-    int failure_level = int(sqrt(success * 4.0 * type->difficulty / float (adjusted_skill)));
+    int failure_level = int(sqrt(success * 4.0 * difficulty / float (adjusted_skill)));
     int fail_type = (failure_level > 5 ? 5 : failure_level);
 
     if (fail_type <= 0) {

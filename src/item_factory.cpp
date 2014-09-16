@@ -512,10 +512,9 @@ void Item_factory::check_itype_definitions() const
                 msg << string_format("invalid revert_to property %s", tool->revert_to.c_str()) << "\n";
             }
         }
-        const it_bionic *bionic = dynamic_cast<const it_bionic *>(type);
-        if (bionic != 0) {
-            if (bionics.count(bionic->id) == 0) {
-                msg << string_format("there is no bionic with id %s", bionic->id.c_str()) << "\n";
+        if( type->bionic_slot ) {
+            if( bionics.count( type->bionic_slot->bionic_id ) == 0 ) {
+                msg << string_format("there is no bionic with id %s", type->bionic_slot->bionic_id.c_str()) << "\n";
             }
         }
         if (msg.str().empty()) {
@@ -892,11 +891,23 @@ void Item_factory::load_gunmod(JsonObject &jo)
     load_basic_info(jo, new_item_template);
 }
 
-void Item_factory::load_bionic(JsonObject &jo)
+template<>
+void Item_factory::load_slot( std::unique_ptr<islot_bionic> &slotptr, JsonObject &jo )
 {
-    it_bionic *bionic_template = new it_bionic();
-    bionic_template->difficulty = jo.get_int("difficulty");
-    load_basic_info(jo, bionic_template);
+    // TODO: more generic. those two lines are identical for all slot types
+    slotptr.reset( new islot_bionic() );
+    auto &slot = *slotptr;
+    slot.difficulty = jo.get_int( "difficulty" );
+    // TODO: must be the same as the item type id, for compatibility
+    slot.bionic_id = jo.get_string( "id" );
+}
+
+void Item_factory::load_bionic( JsonObject &jo )
+{
+    std::unique_ptr<itype> new_item_template( new itype() );
+    load_slot( new_item_template->bionic_slot, jo );
+    load_basic_info( jo, new_item_template.get() );
+    new_item_template.release();
 }
 
 template<>
@@ -1622,7 +1633,7 @@ const std::string &Item_factory::calc_category(itype *it)
     if (it->is_gunmod()) {
         return category_id_mods;
     }
-    if (it->is_bionic()) {
+    if( it->bionic_slot ) {
         return category_id_cbm;
     }
     if (it->melee_dam > 7 || it->melee_cut > 5) {
