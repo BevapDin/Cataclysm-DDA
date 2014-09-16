@@ -10308,7 +10308,7 @@ bool player::armor_absorb(damage_unit& du, item& armor) {
     std::string pre_damage_name = armor.tname();
     std::string pre_damage_adj = armor_type->dmg_adj(armor.damage);
 
-    if (rng(0,100) <= armor_type->coverage) {
+    if (rng(0,100) <= armor.get_coverage()) {
         if (armor_type->is_power_armor()) { // TODO: add some check for power armor
         }
 
@@ -10430,7 +10430,7 @@ void player::absorb(body_part bp, int &dam, int &cut)
         if (worn[i].covers.test(bp)) {
             // first determine if damage is at a covered part of the body
             // probability given by coverage
-            if (rng(0, 100) <= tmp->coverage) {
+            if (rng(0, 100) <= worn[i].get_coverage()) {
                 // hit a covered part of the body, so now determine if armour is damaged
                 arm_bash = worn[i].bash_resist();
                 arm_cut  = worn[i].cut_resist();

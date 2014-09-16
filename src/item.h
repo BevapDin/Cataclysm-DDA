@@ -172,6 +172,10 @@ public:
      * Returns the encumberment value that this item has when worn.
      */
     int get_encumber() const;
+    /**
+     * Returns the coverage value that this item has when worn.
+     */
+    int get_coverage() const;
  /**
   * Count the amount of items of type 'it' including this item,
   * and any of its contents (recursively).
