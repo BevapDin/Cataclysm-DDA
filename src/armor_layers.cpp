@@ -139,7 +139,6 @@ void player::sort_armor()
         // Left list
         for (int drawindex = 0; drawindex < leftListSize; drawindex++) {
             int itemindex = leftListOffset + drawindex;
-            each_armor = dynamic_cast<it_armor *>(tmp_worn[itemindex]->type);
 
             if (itemindex == leftListIndex) {
                 mvwprintz(w_sort_left, drawindex + 1, 0, c_yellow, ">>");
@@ -147,12 +146,12 @@ void player::sort_armor()
 
             if (itemindex == selected) {
                 mvwprintz(w_sort_left, drawindex + 1, 3, dam_color[int(tmp_worn[itemindex]->damage + 1)],
-                          each_armor->nname(1).c_str());
+                          tmp_worn[itemindex]->type->nname(1).c_str());
             } else {
                 mvwprintz(w_sort_left, drawindex + 1, 2, dam_color[int(tmp_worn[itemindex]->damage + 1)],
-                          each_armor->nname(1).c_str());
+                          tmp_worn[itemindex]->type->nname(1).c_str());
             }
-            mvwprintz(w_sort_left, drawindex + 1, left_w - 3, c_ltgray, "%3d", int(each_armor->storage));
+            mvwprintz(w_sort_left, drawindex + 1, left_w - 3, c_ltgray, "%3d", tmp_worn[itemindex]->get_storage());
         }
 
         // Left footer
@@ -372,8 +371,7 @@ The sum of these values is the effective encumbrance value your character has fo
 
 void draw_mid_pane(WINDOW *w_sort_middle, item *worn_item)
 {
-    it_armor *each_armor = dynamic_cast<it_armor *>(worn_item->type);
-    mvwprintz(w_sort_middle, 0, 1, c_white, each_armor->nname(1).c_str());
+    mvwprintz(w_sort_middle, 0, 1, c_white, worn_item->type->nname(1).c_str());
     int middle_w = getmaxx(w_sort_middle);
     std::vector<std::string> props = clothing_properties(worn_item, middle_w - 3);
     size_t i;
@@ -425,7 +423,7 @@ std::vector<std::string> clothing_properties(item *worn_item, int width)
     props.push_back(name_and_value(_("Warmth:"),
                                    string_format("%3d", int(each_armor->warmth)), width));
     props.push_back(name_and_value(_("Storage:"),
-                                   string_format("%3d", int(each_armor->storage)), width));
+                                   string_format("%3d", worn_item->get_storage()), width));
 
     return props;
 }

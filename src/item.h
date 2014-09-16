@@ -164,6 +164,10 @@ public:
      * rotten. In turns. Compare to the @ref rot
      */
     int get_spoils_time() const;
+    /**
+     * Returns the storage amount that this item provides when worn.
+     */
+    int get_storage() const;
  /**
   * Count the amount of items of type 'it' including this item,
   * and any of its contents (recursively).

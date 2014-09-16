@@ -6352,10 +6352,8 @@ int player::weight_capacity() const
 int player::volume_capacity() const
 {
     int ret = 2; // A small bonus (the overflow)
-    const it_armor *armor = NULL;
     for (auto &i : worn) {
-        armor = dynamic_cast<const it_armor*>(i.type);
-        ret += armor->storage;
+        ret += i.get_storage();
     }
     if (has_bionic("bio_storage")) {
         ret += 8;
@@ -8932,7 +8930,7 @@ bool player::takeoff(int pos, bool autodrop, std::vector<item> *items)
             if( items != nullptr ) {
                 items->push_back( w );
                 taken_off = true;
-            } else if (autodrop || volume_capacity() - dynamic_cast<it_armor*>(w.type)->storage > volume_carried() + int(w.type->volume)) {
+            } else if (autodrop || volume_capacity() - w.get_storage() > volume_carried() + int(w.type->volume)) {
                 inv.add_item_keep_invlet(w);
                 taken_off = true;
             } else if (query_yn(_("No room in inventory for your %s.  Drop it?"),
