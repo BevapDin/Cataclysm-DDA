@@ -176,6 +176,10 @@ public:
      * Returns the coverage value that this item has when worn.
      */
     int get_coverage() const;
+    /**
+     * Returns the warmth value that this item has when worn.
+     */
+    int get_warmth() const;
  /**
   * Count the amount of items of type 'it' including this item,
   * and any of its contents (recursively).

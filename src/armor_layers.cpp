@@ -7,8 +7,6 @@
 
 void player::sort_armor()
 {
-    it_armor *each_armor = 0;
-
     /* Define required height of the right pane:
     * + 3 - horizontal lines;
     * + 1 - caption line;
@@ -207,11 +205,10 @@ void player::sort_armor()
             rightListSize++;
             for (std::vector<item>::iterator it = worn.begin();
                  it != worn.end(); ++it) {
-                each_armor = dynamic_cast<it_armor *>(it->type);
                 if (it->covers.test(cover)) {
                     if (rightListSize >= rightListOffset && pos <= cont_h - 2) {
                         mvwprintz(w_sort_right, pos, 2, dam_color[int(it->damage + 1)],
-                                  each_armor->nname(1).c_str());
+                                  it->type->nname(1).c_str());
                         mvwprintz(w_sort_right, pos, right_w - 2, c_ltgray, "%d",
                                   (it->has_flag("FIT")) ? std::max(0, it->get_encumber() - 1)
                                   : it->get_encumber());
@@ -409,7 +406,6 @@ std::string clothing_layer(item *worn_item)
 
 std::vector<std::string> clothing_properties(item *worn_item, int width)
 {
-    it_armor *each_armor = dynamic_cast<it_armor *>(worn_item->type);
     std::vector<std::string> props;
     props.push_back(name_and_value(_("Coverage:"),
                                    string_format("%3d", worn_item->get_coverage()), width));
@@ -421,7 +417,7 @@ std::vector<std::string> clothing_properties(item *worn_item, int width)
     props.push_back(name_and_value(_("Cut Protection:"),
                                    string_format("%3d", int(worn_item->cut_resist())), width));
     props.push_back(name_and_value(_("Warmth:"),
-                                   string_format("%3d", int(each_armor->warmth)), width));
+                                   string_format("%3d", worn_item->get_warmth()), width));
     props.push_back(name_and_value(_("Storage:"),
                                    string_format("%3d", worn_item->get_storage()), width));
 

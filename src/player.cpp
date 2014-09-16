@@ -792,7 +792,6 @@ void player::update_bodytemp()
     if ( has_disease("sleep") || has_disease("lying_down")) {
         // Search the floor for items
         std::vector<item>& floor_item = g->m.i_at(posx, posy);
-        it_armor* floor_armor = NULL;
 
         for ( std::vector<item>::iterator afloor_item = floor_item.begin() ;
         afloor_item != floor_item.end() ;
@@ -800,12 +799,11 @@ void player::update_bodytemp()
             if ( !afloor_item->is_armor() ) {
                 continue;
             }
-            floor_armor = dynamic_cast<it_armor*>(afloor_item->type);
             // Items that are big enough and covers the torso are used to keep warm.
             // Smaller items don't do as good a job
-            if (floor_armor->volume > 1 && (afloor_item->covers.test(bp_torso) ||
+            if (afloor_item->volume() > 1 && (afloor_item->covers.test(bp_torso) ||
                   afloor_item->covers.test(bp_leg_l) || afloor_item->covers.test(bp_leg_r))) {
-                floor_item_warmth += 60 * floor_armor->warmth * floor_armor->volume / 10;
+                floor_item_warmth += 60 * afloor_item->get_warmth() * afloor_item->volume() / 10;
             }
         }
 
@@ -10003,7 +10001,6 @@ float player::fine_detail_vision_mod()
 int player::warmth(body_part bp) const
 {
     int ret = 0, warmth = 0;
-    const it_armor* armor = NULL;
 
     // If the player is not wielding anything, check if hands can be put in pockets
     if((bp == bp_hand_l || bp == bp_hand_r) && !is_armed() && (temp_conv[bp] <=  BODYTEMP_COLD) &&
@@ -10020,11 +10017,9 @@ int player::warmth(body_part bp) const
 
     for (auto &i : worn)
     {
-        armor = dynamic_cast<const it_armor*>(i.type);
-
         if (i.covers.test(bp))
         {
-            warmth = armor->warmth;
+            warmth = i.get_warmth();
             // Wool items do not lose their warmth due to being wet.
             // Warmth is reduced by 0 - 66% based on wetness.
             if (!i.made_of("wool"))
