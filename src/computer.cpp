@@ -319,31 +319,23 @@ void computer::activate_function(computer_action action)
                         for (int y1 = y - 1; y1 <= y + 1; y1++ ) {
                             if (g->m.furn(x1, y1) == f_counter) {
                                 bool found_item = false;
+                                item sewage( "sewage", calendar::turn );
+                                LIQUID_FILL_ERROR lferr;
                                 for (std::vector<item>::iterator it = g->m.i_at(x1, y1).begin();
                                      it != g->m.i_at(x1, y1).end(); ++it) {
-                                    if (it->is_container()) {
-                                        item sewage = item("sewage", calendar::turn);
-                                        it_container *container = dynamic_cast<it_container *>(it->type);
-                                        it_comest    *comest    = dynamic_cast<it_comest *>(sewage.type);
-                                        long maxCharges = container->contains * comest->charges;
-
-                                        if (it->contents.empty()) {
-                                            it->put_in(sewage);
-                                            found_item = true;
-                                            break;
-                                        } else {
-                                            if (it->contents[0].type->id == sewage.type->id) {
-                                                if (it->contents[0].charges < maxCharges) {
-                                                    it->contents[0].charges += comest->charges;
-                                                    found_item = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
+                                    long capa = it->get_remaining_capacity_for_liquid( sewage, lferr );
+                                    if( capa <= 0 ) {
+                                        continue;
                                     }
+                                    capa = std::min( sewage.charges, capa );
+                                    if( it->contents.empty() ) {
+                                        it->put_in( sewage );
+                                    }
+                                    it->contents[0].charges = capa;
+                                    found_item = true;
+                                    break;
                                 }
                                 if (!found_item) {
-                                    item sewage("sewage", calendar::turn);
                                     g->m.add_item_or_charges(x1, y1, sewage);
                                 }
                             }

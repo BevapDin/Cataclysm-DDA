@@ -10644,80 +10644,43 @@ int game::move_liquid(item &liquid)
             } else {
                 return 0;
             }
-        } else if (!cont->is_container()) {
-            add_msg(m_info, _("That %s won't hold %s."), cont->tname().c_str(),
-                    liquid.tname().c_str());
-            return -1;
         } else {
-            if (!cont->contents.empty()) {
-                if (cont->contents[0].type->id != liquid.type->id) {
-                    add_msg(m_info, _("You can't mix loads in your %s."), cont->tname().c_str());
-                    return -1;
-                }
+            LIQUID_FILL_ERROR error;
+            int remaining_capacity = cont->get_remaining_capacity_for_liquid(liquid, error);
+            switch( error ) {
+            case L_ERR_NO_MIX:
+                add_msg(m_info, _("You can't mix loads in your %s."), cont->tname().c_str());
+                return -1;
+            case L_ERR_NOT_CONTAINER:
+                add_msg(m_info, _("That %s won't hold %s."), cont->tname().c_str(), liquid.tname().c_str());
+                return -1;
+            case L_ERR_NOT_WATERTIGHT:
+                add_msg(m_info, _("That %s isn't water-tight."), cont->tname().c_str());
+                return -1;
+            case L_ERR_NOT_SEALED:
+                add_msg(m_info, _("You can't seal that %s!"), cont->tname().c_str());
+                return -1;
+            case L_ERR_FULL:
+                add_msg(m_info, _("Your %s can't hold any more %s."), cont->tname().c_str(), liquid.tname().c_str());
+                return -1;
+            case L_ERR_NONE:
+                assert( remaining_capacity > 0 );
+                break;
             }
-            it_container *container = dynamic_cast<it_container *>(cont->type);
-            long holding_container_charges;
-
-            if (liquid.type->is_food()) {
-                it_comest *tmp_comest = dynamic_cast<it_comest *>(liquid.type);
-                holding_container_charges = container->contains * tmp_comest->charges;
-            } else if (liquid.type->is_ammo()) {
-                it_ammo *tmp_ammo = dynamic_cast<it_ammo *>(liquid.type);
-                holding_container_charges = container->contains * tmp_ammo->count;
-            } else {
-                holding_container_charges = container->contains;
+            if( cont->contents.empty() ) {
+                cont->put_in( liquid );
+                cont->contents[0].charges = 0; // filled again later
             }
-            if (!cont->contents.empty()) {
-
-                // case 1: container is completely full
-                if (cont->contents[0].charges == holding_container_charges) {
-                    add_msg(m_info, _("Your %s can't hold any more %s."), cont->tname().c_str(),
-                            liquid.tname().c_str());
-                    return -1;
-                } else {
-                    add_msg(_("You pour %s into your %s."), liquid.tname().c_str(),
-                            cont->tname().c_str());
-                    cont->contents[0].charges += liquid.charges;
-                    if (cont->contents[0].charges > holding_container_charges) {
-                        int extra = cont->contents[0].charges - holding_container_charges;
-                        cont->contents[0].charges = holding_container_charges;
-                        add_msg(_("There's some left over!"));
-                        return extra;
-                    } else {
-                        return 0;
-                    }
-                }
-            } else {
-                if (!cont->has_flag("WATERTIGHT")) {
-                    add_msg(m_info, _("That %s isn't water-tight."), cont->tname().c_str());
-                    return -1;
-                } else if (!(cont->has_flag("SEALS"))) {
-                    add_msg(m_info, _("You can't seal that %s!"), cont->tname().c_str());
-                    return -1;
-                }
-                // pouring into a valid empty container
-                long default_charges = 1;
-
-                if (liquid.is_food()) {
-                    it_comest *comest = dynamic_cast<it_comest *>(liquid.type);
-                    default_charges = comest->charges;
-                } else if (liquid.is_ammo()) {
-                    it_ammo *ammo = dynamic_cast<it_ammo *>(liquid.type);
-                    default_charges = ammo->count;
-                }
-                if (liquid.charges > container->contains * default_charges) {
-                    add_msg(_("You fill your %s with some of the %s."), cont->tname().c_str(),
-                            liquid.tname().c_str());
-                    u.inv.unsort();
-                    long extra = liquid.charges - container->contains * default_charges;
-                    liquid.charges = container->contains * default_charges;
-                    cont->put_in(liquid);
-                    return extra;
-                } else {
-                    cont->put_in(liquid);
-                    return 0;
-                }
+            u.inv.unsort();
+            if( liquid.charges <= remaining_capacity ) {
+                add_msg(_("You pour %s into your %s."), liquid.tname().c_str(), cont->tname().c_str());
+                cont->contents[0].charges += liquid.charges;
+                return 0;
             }
+            add_msg(_("You fill your %s with some of the %s."), cont->tname().c_str(), liquid.tname().c_str());
+            cont->contents[0].charges += remaining_capacity;
+            add_msg(_("There's some left over!"));
+            return liquid.charges - remaining_capacity;
         }
         return -1;
     }

@@ -234,8 +234,8 @@ item item::in_its_container()
         item ret(food->container, bday);
 
         if (made_of(LIQUID)) {
-            it_container* container = dynamic_cast<it_container*>(ret.type);
-            charges = container->contains * food->charges;
+            LIQUID_FILL_ERROR lferr;
+            charges = ret.get_remaining_capacity_for_liquid( *this, lferr );
         }
         ret.contents.push_back(*this);
         ret.invlet = invlet;
@@ -245,8 +245,8 @@ item item::in_its_container()
         item ret(ammo->container, bday);
 
         if (made_of(LIQUID)) {
-            it_container* container = dynamic_cast<it_container*>(ret.type);
-            charges = container->contains * ammo->count;
+            LIQUID_FILL_ERROR lferr;
+            charges = ret.get_remaining_capacity_for_liquid( *this, lferr );
         }
         ret.contents.push_back(*this);
         ret.invlet = invlet;
