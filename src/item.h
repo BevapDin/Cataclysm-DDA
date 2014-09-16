@@ -168,6 +168,10 @@ public:
      * Returns the storage amount that this item provides when worn.
      */
     int get_storage() const;
+    /**
+     * Returns the encumberment value that this item has when worn.
+     */
+    int get_encumber() const;
  /**
   * Count the amount of items of type 'it' including this item,
   * and any of its contents (recursively).

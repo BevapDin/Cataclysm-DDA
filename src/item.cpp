@@ -1731,6 +1731,16 @@ int item::get_storage() const
     return static_cast<int>( static_cast<unsigned int>( t->storage ) );
 }
 
+int item::get_encumber() const
+{
+    auto t = dynamic_cast<const it_armor*>( type );
+    if( t == nullptr ) {
+        return 0;
+    }
+    // it_armor::storage is signed char
+    return static_cast<int>( t->encumber );
+}
+
 int item::brewing_time()
 {
     float season_mult = ( (float)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"] ) / 14;

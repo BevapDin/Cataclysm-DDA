@@ -213,8 +213,8 @@ void player::sort_armor()
                         mvwprintz(w_sort_right, pos, 2, dam_color[int(it->damage + 1)],
                                   each_armor->nname(1).c_str());
                         mvwprintz(w_sort_right, pos, right_w - 2, c_ltgray, "%d",
-                                  (it->has_flag("FIT")) ? std::max(0, int(each_armor->encumber) - 1)
-                                  : int(each_armor->encumber));
+                                  (it->has_flag("FIT")) ? std::max(0, it->get_encumber() - 1)
+                                  : it->get_encumber());
                         pos++;
                     }
                     rightListSize++;
@@ -414,8 +414,8 @@ std::vector<std::string> clothing_properties(item *worn_item, int width)
     props.push_back(name_and_value(_("Coverage:"),
                                    string_format("%3d", int(each_armor->coverage)), width));
     props.push_back(name_and_value(_("Encumbrance:"), string_format("%3d",
-                                   (worn_item->has_flag("FIT")) ? std::max(0, int(each_armor->encumber) - 1) :
-                                   int(each_armor->encumber)), width));
+                                   (worn_item->has_flag("FIT")) ? std::max(0, worn_item->get_encumber() - 1) :
+                                   worn_item->get_encumber()), width));
     props.push_back(name_and_value(_("Bash Protection:"),
                                    string_format("%3d", int(worn_item->bash_resist())), width));
     props.push_back(name_and_value(_("Cut Protection:"),
