@@ -1305,7 +1305,7 @@ int vehicle::install_part( int dx, int dy, const vehicle_part &new_part )
 void vehicle_part::properties_from_item( const item &used_item )
 {
     const vpart_info &vpinfo = vehicle_part_int_types[iid];
-    if( used_item.type->is_var_veh_part() ) {
+    if( used_item.has_variable_bigness() ) {
         bigness = used_item.bigness;
     }
     // item damage is 0,1,2,3, or 4. part hp is 1..durability.
@@ -1330,7 +1330,7 @@ item vehicle_part::properties_to_item() const
 {
     const vpart_info &vpinfo = vehicle_part_int_types[iid];
     item tmp( vpinfo.item, calendar::turn );
-    if( tmp.type->is_var_veh_part() ) {
+    if( tmp.has_variable_bigness() ) {
         tmp.bigness = bigness;
     }
     // tools go unloaded to prevent user from exploiting this to

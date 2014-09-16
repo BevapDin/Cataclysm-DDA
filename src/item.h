@@ -347,7 +347,7 @@ public:
  bool is_software() const;
  bool is_macguffin() const;
  bool is_stationary() const;
- bool is_var_veh_part() const;
+ bool has_variable_bigness() const;
  bool is_artifact() const;
 
  int get_remaining_capacity_for_liquid(const item &liquid, LIQUID_FILL_ERROR &error) const;

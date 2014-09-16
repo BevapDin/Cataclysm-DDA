@@ -118,9 +118,8 @@ item::item(const std::string new_type, unsigned int turn, bool rand, int handed)
             }
         }
     }
-    if(type->is_var_veh_part()) {
-        it_var_veh_part* varcarpart = dynamic_cast<it_var_veh_part*>(type);
-        bigness= rng( varcarpart->min_bigness, varcarpart->max_bigness);
+    if( type->variable_bigness_slot ) {
+        bigness = rng( type->variable_bigness_slot->min_bigness, type->variable_bigness_slot->max_bigness );
     }
     // Should be a flag, but we're out at the moment
     if( type->is_stationary() ) {
@@ -283,9 +282,11 @@ bool item::stacks_with(item rhs)
     if (contents.size() != rhs.contents.size())
         return false;
 
-    if(is_var_veh_part())
-        if(bigness != rhs.bigness)
+    if( has_variable_bigness() ) {
+        if( bigness != rhs.bigness ) {
             return false;
+        }
+    }
 
     for (size_t i = 0; i < contents.size() && stacks; i++) {
         stacks &= contents[i].stacks_with(rhs.contents[i]);
@@ -1181,15 +1182,19 @@ std::string item::tname( unsigned int quantity, bool with_prefix ) const
     }
 
     std::string vehtext = "";
-    if (is_var_veh_part()) {
-        if(type->bigness_aspect == BIGNESS_ENGINE_DISPLACEMENT) {
-            float liters = (((float) bigness)/100.0f);
-            //~ liters, e.g. 3.21-Liter V8 engine
-            vehtext = rmp_format(_("<veh_adj>%4.2f-Liter "), liters);
-        }
-        else if(type->bigness_aspect == BIGNESS_WHEEL_DIAMETER) {
-            //~ inches, e.g. 20" wheel
-            vehtext = rmp_format(_("<veh_adj>%d\" "), bigness);
+    if( has_variable_bigness() ) {
+        switch( type->variable_bigness_slot->bigness_aspect) {
+            case BIGNESS_ENGINE_DISPLACEMENT:
+                {
+                    float liters = (((float) bigness)/100.0f);
+                    //~ liters, e.g. 3.21-Liter V8 engine
+                    vehtext = rmp_format(_("<veh_adj>%4.2f-Liter "), liters);
+                }
+                break;
+            case BIGNESS_WHEEL_DIAMETER:
+                //~ inches, e.g. 20" wheel
+                vehtext = rmp_format(_("<veh_adj>%d\" "), bigness);
+                break;
         }
     }
 
@@ -2079,12 +2084,9 @@ bool item::destroyed_at_zero_charges()
     return (is_ammo() || is_food());
 }
 
-bool item::is_var_veh_part() const
+bool item::has_variable_bigness() const
 {
-    if( is_null() )
-        return false;
-
-    return type->is_var_veh_part();
+    return type != nullptr && type->variable_bigness_slot.get() != nullptr;
 }
 
 bool item::is_gun() const
