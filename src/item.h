@@ -346,7 +346,6 @@ public:
  bool is_tool() const;
  bool is_software() const;
  bool is_macguffin() const;
- bool is_stationary() const;
  bool has_variable_bigness() const;
  bool is_artifact() const;
 

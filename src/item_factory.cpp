@@ -936,11 +936,21 @@ void Item_factory::load_veh_part(JsonObject &jo)
     new_item_template.release();
 }
 
+template<>
+void Item_factory::load_slot( std::unique_ptr<islot_stationary> &slotptr, JsonObject &jo )
+{
+    // TODO: more generic. those two lines are identical for all slot types
+    slotptr.reset( new islot_stationary() );
+    auto &slot = *slotptr;
+    slot.snippet_category = jo.get_string( "snippet_category" );
+}
+
 void Item_factory::load_stationary(JsonObject &jo)
 {
-    it_stationary *stationary_template = new it_stationary();
-    stationary_template->category = jo.get_string("snippet_category");
-    load_basic_info(jo, stationary_template);
+    std::unique_ptr<itype> new_item_template( new itype() );
+    load_slot( new_item_template->stationary_slot, jo );
+    load_basic_info( jo, new_item_template.get() );
+    new_item_template.release();
 }
 
 void Item_factory::load_generic(JsonObject &jo)

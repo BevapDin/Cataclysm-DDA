@@ -133,6 +133,19 @@ struct islot_bionic {
     }
 };
 
+struct islot_stationary {
+    /**
+     * Category - arbitrary identifier, used to select random descriptions
+     * from a list of descriptions. see @ref snippet_library
+     */
+    std::string snippet_category;
+
+    islot_stationary()
+    : snippet_category()
+    {
+    }
+};
+
 struct itype {
     itype_id id; // unique string identifier for this item,
     // can be used as lookup key in master itype map
@@ -142,6 +155,7 @@ struct itype {
     std::unique_ptr<islot_container> container_slot;
     std::unique_ptr<islot_variable_bigness> variable_bigness_slot;
     std::unique_ptr<islot_bionic> bionic_slot;
+    std::unique_ptr<islot_stationary> stationary_slot;
 
 protected:
     friend class Item_factory;
@@ -240,10 +254,6 @@ public:
         return false;
     }
     virtual bool is_macguffin() const
-    {
-        return false;
-    }
-    virtual bool is_stationary() const
     {
         return false;
     }
@@ -610,19 +620,6 @@ struct it_software : public virtual itype {
     {
         swtype = pswtype;
         power = ppower;
-    }
-};
-
-struct it_stationary : public virtual itype {
-    virtual bool is_stationary() const
-    {
-        return true;
-    }
-
-    std::string category;
-
-    it_stationary() : itype(), category()
-    {
     }
 };
 

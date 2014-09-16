@@ -122,8 +122,8 @@ item::item(const std::string new_type, unsigned int turn, bool rand, int handed)
         bigness = rng( type->variable_bigness_slot->min_bigness, type->variable_bigness_slot->max_bigness );
     }
     // Should be a flag, but we're out at the moment
-    if( type->is_stationary() ) {
-        note = SNIPPET.assign( (dynamic_cast<it_stationary*>(type))->category );
+    if( type->stationary_slot ) {
+        note = SNIPPET.assign( type->stationary_slot->snippet_category );
     }
 }
 
@@ -851,7 +851,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
     if ( showtext && !is_null() ) {
         const std::map<std::string, std::string>::const_iterator idescription = item_vars.find("description");
         dump->push_back(iteminfo("DESCRIPTION", "--"));
-        if (is_stationary()) {
+        if( type->stationary_slot ) {
             // Just use the dynamic description
             dump->push_back( iteminfo("DESCRIPTION", SNIPPET.get(note)) );
         } else if (idescription != item_vars.end()) {
@@ -2312,14 +2312,6 @@ bool item::is_macguffin() const
         return false;
 
     return type->is_macguffin();
-}
-
-bool item::is_stationary() const
-{
-    if( is_null() )
-        return false;
-
-    return type->is_stationary();
 }
 
 bool item::is_artifact() const
