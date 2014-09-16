@@ -413,11 +413,11 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
                 item * food = NULL;
                 if( goes_bad() ) {
                     food = this;
-                    maxrot = dynamic_cast<it_comest*>(type)->spoils * 600;
+                    maxrot = get_spoils_time();
                 } else if(is_food_container()) {
                     food = &contents[0];
                     if ( food->goes_bad() ) {
-                        maxrot =dynamic_cast<it_comest*>(food->type)->spoils * 600;
+                        maxrot = get_spoils_time();
                     }
                 }
                 if ( food != NULL && maxrot != 0 ) {
@@ -1251,7 +1251,6 @@ std::string item::tname( unsigned int quantity, bool with_prefix ) const
     }
 
     const item* food = NULL;
-    const it_comest* food_type = NULL;
     std::string tagtext = "";
     std::string toolmodtext = "";
     std::string sidedtext = "";
@@ -1259,9 +1258,8 @@ std::string item::tname( unsigned int quantity, bool with_prefix ) const
     if (is_food())
     {
         food = this;
-        food_type = dynamic_cast<it_comest*>(type);
 
-        if (food_type->spoils != 0)
+        if( get_spoils_time() != 0 )
         {
             if(const_cast<item*>(food)->rotten()) {
                 ret << _(" (rotten)");
@@ -1704,13 +1702,23 @@ void item::calc_rot(const point &location)
             fridge = 0;
         }
     }
-    it_comest* food = dynamic_cast<it_comest*>(type);
-    if (food->spoils != 0 && (rot > (signed int)food->spoils * 600)) {
+    if( get_spoils_time() != 0 && rot > get_spoils_time()) {
       is_rotten = true;
     } else {
       is_rotten = false;
     }
     if(is_rotten) {active = false;}
+}
+
+int item::get_spoils_time() const
+{
+    auto t = dynamic_cast<const it_comest*>( type );
+    if( t == nullptr ) {
+        return 0;
+    }
+    // it_comest::spoils is in hours, this function returns a turn count
+    // also: it_comest::spoils is unsigned
+    return static_cast<int>( t->spoils ) * 600;
 }
 
 int item::brewing_time()
@@ -1768,10 +1776,7 @@ bool item::ready_to_revive()
 
 bool item::goes_bad()
 {
-    if (!is_food())
-        return false;
-    it_comest* food = dynamic_cast<it_comest*>(type);
-    return (food->spoils != 0);
+    return get_spoils_time() != 0;
 }
 
 bool item::count_by_charges() const

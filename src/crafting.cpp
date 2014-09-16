@@ -1355,8 +1355,7 @@ void game::complete_craft()
             for (std::list<item>::iterator iter = used.begin(); iter != used.end(); ++iter) {
                 if (iter->goes_bad()) {
                     iter->calc_rot(u.pos());
-                    used_age_tally += iter->rot /
-                                      (float)(dynamic_cast<it_comest *>(iter->type)->spoils);
+                    used_age_tally += iter->rot / static_cast<float>( iter->get_spoils_time() );
                     ++used_age_count;
                 }
             }
@@ -1404,8 +1403,7 @@ void game::complete_craft()
 
 void set_item_spoilage(item &newit, float used_age_tally, int used_age_count)
 {
-    const int average_used_age = int((used_age_tally / used_age_count) * dynamic_cast<it_comest *>
-                                     (newit.type)->spoils);
+    const int average_used_age = int((used_age_tally / used_age_count) * newit.get_spoils_time());
     newit.bday = newit.bday - average_used_age;
 }
 

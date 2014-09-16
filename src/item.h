@@ -159,6 +159,11 @@ public:
  int damage_bash();
  int damage_cut() const;
 
+    /**
+     * Returns the time it takes for items of this type to become
+     * rotten. In turns. Compare to the @ref rot
+     */
+    int get_spoils_time() const;
  /**
   * Count the amount of items of type 'it' including this item,
   * and any of its contents (recursively).
