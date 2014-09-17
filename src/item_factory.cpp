@@ -505,11 +505,10 @@ void Item_factory::check_itype_definitions() const
         if (gunmod != 0) {
             check_ammo_type(msg, gunmod->newtype);
         }
-        const it_tool *tool = dynamic_cast<const it_tool *>(type);
-        if (tool != 0) {
-            check_ammo_type(msg, tool->ammo);
-            if (tool->revert_to != "null" && !has_template(tool->revert_to)) {
-                msg << string_format("invalid revert_to property %s", tool->revert_to.c_str()) << "\n";
+        if( type->tool_slot ) {
+            check_ammo_type(msg, type->tool_slot->ammo);
+            if (type->tool_slot->revert_to != "null" && !has_template(type->tool_slot->revert_to)) {
+                msg << string_format("invalid revert_to property %s", type->tool_slot->revert_to.c_str()) << "\n";
             }
         }
         if( type->bionic_slot ) {
@@ -730,46 +729,46 @@ void Item_factory::load_armor( JsonObject &jo )
     new_item_template.release();
 }
 
-void Item_factory::load_tool(JsonObject &jo)
+template<>
+void Item_factory::load_slot( std::unique_ptr<islot_tool> &slotptr, JsonObject &jo )
 {
-    it_tool *tool_template = new it_tool();
-    tool_template->ammo = jo.get_string("ammo");
-    tool_template->max_charges = jo.get_long("max_charges");
-    tool_template->def_charges = jo.get_long("initial_charges");
+    // TODO: more generic. those two lines are identical for all slot types
+    slotptr.reset( new islot_tool() );
+    auto &slot = *slotptr;
 
-    if (jo.has_array("rand_charges")) {
-        JsonArray jarr = jo.get_array("rand_charges");
-        while (jarr.has_more()) {
-            tool_template->rand_charges.push_back(jarr.next_long());
+    slot.ammo = jo.get_string( "ammo" );
+    slot.max_charges = jo.get_long( "max_charges" );
+    slot.def_charges = jo.get_long( "initial_charges" );
+
+    if( jo.has_array( "rand_charges" ) ) {
+        JsonArray jarr = jo.get_array( "rand_charges" );
+        while( jarr.has_more() ) {
+            slot.rand_charges.push_back( jarr.next_long() );
         }
     } else {
-        tool_template->rand_charges.push_back(tool_template->def_charges);
+        slot.rand_charges.push_back( slot.def_charges );
     }
+    slot.charges_per_use = jo.get_int( "charges_per_use" );
+    slot.turns_per_charge = jo.get_int( "turns_per_charge" );
+    slot.revert_to = jo.get_string( "revert_to" );
+    slot.subtype = jo.get_string( "sub", "" );
+}
 
-    tool_template->charges_per_use = jo.get_int("charges_per_use");
-    tool_template->turns_per_charge = jo.get_int("turns_per_charge");
-    tool_template->revert_to = jo.get_string("revert_to");
-    tool_template->subtype = jo.get_string("sub", "");
-
-    itype *new_item_template = tool_template;
-    load_basic_info(jo, new_item_template);
+void Item_factory::load_tool(JsonObject &jo)
+{
+    std::unique_ptr<itype> new_item_template( new itype() );
+    load_slot( new_item_template->tool_slot, jo );
+    load_basic_info( jo, new_item_template.get() );
+    new_item_template.release();
 }
 
 void Item_factory::load_tool_armor(JsonObject &jo)
 {
-    it_tool_armor *tool_armor_template = new it_tool_armor();
-
-    it_tool *tool_template = tool_armor_template;
-    tool_template->ammo = jo.get_string("ammo");
-    tool_template->max_charges = jo.get_int("max_charges");
-    tool_template->def_charges = jo.get_int("initial_charges");
-    tool_template->charges_per_use = jo.get_int("charges_per_use");
-    tool_template->turns_per_charge = jo.get_int("turns_per_charge");
-    tool_template->revert_to = jo.get_string("revert_to");
-
-    load_slot( tool_armor_template->armor_slot, jo );
-
-    load_basic_info(jo, tool_armor_template);
+    std::unique_ptr<itype> new_item_template( new itype() );
+    load_slot( new_item_template->tool_slot, jo );
+    load_slot( new_item_template->armor_slot, jo );
+    load_basic_info( jo, new_item_template.get() );
+    new_item_template.release();
 }
 
 void Item_factory::load_book(JsonObject &jo)
@@ -1613,11 +1612,11 @@ const std::string &Item_factory::calc_category(itype *it)
     if (it->is_ammo()) {
         return category_id_ammo;
     }
-    if (it->is_tool()) {
-        return category_id_tools;
-    }
     if( it->armor_slot ) {
         return category_id_clothing;
+    }
+    if( it->tool_slot ) {
+        return category_id_tools;
     }
     if (it->is_food()) {
         it_comest *comest = dynamic_cast<it_comest *>(it);

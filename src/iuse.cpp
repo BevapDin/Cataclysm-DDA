@@ -2639,8 +2639,7 @@ int iuse::extra_battery(player *p, item *, bool)
         return 0;
     }
 
-    it_tool *tool = dynamic_cast<it_tool *>(modded->type);
-    if (tool->ammo != "battery") {
+    if (modded->type->tool_slot->ammo != "battery") {
         p->add_msg_if_player(m_info, _("That item does not use batteries!"));
         return 0;
     }
@@ -2673,8 +2672,7 @@ int iuse::rechargeable_battery(player *p, item *it, bool)
         return 0;
     }
 
-    it_tool *tool = dynamic_cast<it_tool *>(modded->type);
-    if (tool->ammo != "battery") {
+    if (modded->type->tool_slot->ammo != "battery") {
         p->add_msg_if_player(m_info, _("That item does not use batteries!"));
         return 0;
     }
@@ -2710,8 +2708,7 @@ int iuse::atomic_battery(player *p, item *it, bool)
         return 0;
     }
 
-    it_tool *tool = dynamic_cast<it_tool *>(modded->type);
-    if (tool->ammo != "battery") {
+    if (modded->type->tool_slot->ammo != "battery") {
         p->add_msg_if_player(m_info, _("That item does not use batteries!"));
         return 0;
     }
@@ -2749,8 +2746,7 @@ int iuse::ups_battery(player *p, item *, bool)
         return 0;
     }
 
-    it_tool *tool = dynamic_cast<it_tool *>(modded->type);
-    if (tool->ammo != "battery") {
+    if (modded->type->tool_slot->ammo != "battery") {
         p->add_msg_if_player(_("That item does not use batteries!"));
         return 0;
     }
@@ -3207,7 +3203,7 @@ int iuse::solder_weld(player *p, item *it, bool)
         return 0;
     }
     int choice = 2;
-    int charges_used = (dynamic_cast<it_tool *>(it->type))->charges_to_use();
+    int charges_used = it->type->tool_slot->charges_to_use();
 
     // Option for cauterization only if player has the incentive to do so
     // One does not check for open wounds with a soldering iron.
@@ -5118,8 +5114,7 @@ int iuse::geiger(player *p, item *it, bool t)
         return it->type->charges_to_use();
     }
     // Otherwise, we're activating the geiger counter
-    it_tool *type = dynamic_cast<it_tool *>(it->type);
-    bool is_on = (type->id == "geiger_on");
+    bool is_on = (it->typeId() == "geiger_on");
     if (is_on) {
         add_msg(_("The geiger counter's SCANNING LED flicks off."));
         it->make("geiger_off");
@@ -9622,8 +9617,7 @@ void sendRadioSignal(player *p, std::string signal)
         if (it.has_flag("RADIO_ACTIVATION") && it.has_flag(signal)) {
             g->sound(p->posx, p->posy, 6, "beep.");
 
-            it_tool *tmp = dynamic_cast<it_tool *>(it.type);
-            tmp->invoke(p, &it, it.active);
+            it.type->invoke(p, &it, it.active);
         }
     }
 
@@ -9637,8 +9631,7 @@ void sendRadioSignal(player *p, std::string signal)
             if (rc_item->has_flag("BOMB")) {
                 rc_item->charges = 0;
             }
-            it_tool *tmp = dynamic_cast<it_tool *>(rc_item->type);
-            tmp->invoke( p, rc_item, rc_item->active );
+            rc_item->type->invoke( p, rc_item, rc_item->active );
         }
 
         if( rc_item->has_flag("RADIO_CONTAINER") ) {
@@ -9648,8 +9641,7 @@ void sendRadioSignal(player *p, std::string signal)
                 rc_item->make(bomb_type);
                 rc_item->charges = 0;
                 rc_item->active = true;
-                it_tool *tmp = dynamic_cast<it_tool *>(rc_item->type);
-                tmp->invoke( p, rc_item, true );
+                rc_item->type->invoke( p, rc_item, true );
             }
         }
     }
@@ -9992,8 +9984,7 @@ int iuse::multicooker(player *p, item *it, bool t)
                     mealtime = meal->time * 2 ;
                 }
 
-                it_tool *tmp = dynamic_cast<it_tool *>(it->type);
-                const int all_charges = 50 + mealtime / (tmp->turns_per_charge * 100);
+                const int all_charges = 50 + mealtime / (it->type->tool_slot->turns_per_charge * 100);
 
                 if (it->charges < all_charges) {
 

@@ -203,7 +203,7 @@ void tutorial_game::post_action(action_id act)
    add_message(LESSON_GOT_GUN);
   else if (it->is_ammo())
    add_message(LESSON_GOT_AMMO);
-  else if (it->is_tool())
+  else if( it->tool_slot )
    add_message(LESSON_GOT_TOOL);
   else if (it->is_food())
    add_message(LESSON_GOT_FOOD);

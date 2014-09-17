@@ -125,7 +125,7 @@ enum artifact_natural_property {
 
 /* CLASSES */
 
-class it_artifact_tool : public it_tool, public JsonSerializer, public JsonDeserializer
+class it_artifact_tool : public itype, public JsonSerializer, public JsonDeserializer
 {
     public:
         art_charge charge_type;
@@ -150,7 +150,7 @@ class it_artifact_tool : public it_tool, public JsonSerializer, public JsonDeser
 
         it_artifact_tool();
 
-        it_artifact_tool(JsonObject &jo) : it_tool()
+        it_artifact_tool(JsonObject &jo) : itype()
         {
             use_methods.push_back( &iuse::artifact );
             deserialize(jo);

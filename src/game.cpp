@@ -7258,8 +7258,7 @@ void game::emp_blast(int x, int y)
     // Drain any items of their battery charge
     for (std::vector<item>::iterator it = m.i_at(x, y).begin();
          it != m.i_at(x, y).end(); ++it) {
-        if (it->is_tool() &&
-            (dynamic_cast<it_tool *>(it->type))->ammo == "battery") {
+        if( it->type->tool_slot && it->type->tool_slot->ammo == "battery" ) {
             it->charges = 0;
         }
     }
@@ -10464,9 +10463,8 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
         long max = 0;
 
         if (cont->is_tool()) {
-            it_tool *tool = dynamic_cast<it_tool *>(cont->type);
-            ammo = tool->ammo;
-            max = tool->max_charges;
+            ammo = cont->type->tool_slot->ammo;
+            max = cont->type->tool_slot->max_charges;
         } else {
             it_gun *gun = dynamic_cast<it_gun *>(cont->type);
             ammo = gun->ammo;
@@ -10604,9 +10602,8 @@ int game::move_liquid(item &liquid)
             int max = 0;
 
             if (cont->is_tool()) {
-                it_tool *tool = dynamic_cast<it_tool *>(cont->type);
-                ammo = tool->ammo;
-                max = tool->max_charges;
+                ammo = cont->type->tool_slot->ammo;
+                max = cont->type->tool_slot->max_charges;
             } else {
                 it_gun *gun = dynamic_cast<it_gun *>(cont->type);
                 ammo = gun->ammo;
@@ -11909,10 +11906,8 @@ void game::reload(int pos)
         u.assign_activity(ACT_RELOAD, it->reload_time(u), -1, am_pos, ss.str());
 
     } else if (it->is_tool()) { // tools are simpler
-        it_tool *tool = dynamic_cast<it_tool *>(it->type);
-
         // see if its actually reloadable.
-        if (tool->ammo == "NULL") {
+        if (it->type->tool_slot->ammo == "NULL") {
             add_msg(m_info, _("You can't reload a %s!"), it->tname().c_str());
             return;
         } else if (it->has_flag("NO_RELOAD")) {
@@ -11925,7 +11920,7 @@ void game::reload(int pos)
 
         if (am_pos == INT_MIN) {
             // no ammo, fail reload
-            add_msg(m_info, _("Out of %s!"), ammo_name(tool->ammo).c_str());
+            add_msg(m_info, _("Out of %s!"), ammo_name(it->type->tool_slot->ammo).c_str());
             return;
         }
 
@@ -14594,7 +14589,7 @@ void game::process_artifact(item *it, player *p, bool wielded)
             }
         }
         // Recharge it if necessary
-        if (it->charges < tool->max_charges) {
+        if (it->charges < tool->tool_slot->max_charges) {
             switch (tool->charge_type) {
             case ARTC_NULL:
             case NUM_ARTCS:

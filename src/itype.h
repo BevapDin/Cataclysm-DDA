@@ -203,6 +203,64 @@ struct islot_armor {
     }
 };
 
+struct islot_tool {
+    /**
+     * The ammo that is used to load this tools. Might be "null" in case
+     * this tool does not use ammo.
+     */
+    ammotype ammo;
+    /**
+     * Maximal amount of charges that this tool can have.
+     */
+    long max_charges;
+    /**
+     * TODO: merge with @ref rand_charges
+     */
+    long def_charges;
+    /**
+     * A set of default charges of this tool when it's created. Ignores max_charges.
+     */
+    std::vector<long> rand_charges;
+    /**
+     * How many charges this tool consumes during a turn when it's active.
+     */
+    unsigned char charges_per_use;
+    /**
+     * How many charges this tool consumes when it is activated (it's iuse function
+     * is invoked).
+     */
+    unsigned char turns_per_charge;
+    /**
+     * When the tool runs out of charges, it will revert to this item type.
+     * Can be "null", in that case the item is destroyed.
+     */
+    itype_id revert_to;
+    /**
+     * TODO: document me
+     */
+    itype_id subtype;
+
+    int charges_to_use() const
+    {
+        return charges_per_use;
+    }
+    int maximum_charges() const
+    {
+        return max_charges;
+    }
+    islot_tool()
+    : ammo( "null" )
+    , max_charges( 0 )
+    , def_charges( 0 )
+    , rand_charges()
+    , charges_per_use( 0 )
+    , turns_per_charge( 0 )
+    , revert_to( "null" )
+    , subtype()
+    {
+    }
+};
+
 struct itype {
     itype_id id; // unique string identifier for this item,
     // can be used as lookup key in master itype map
@@ -214,6 +272,7 @@ struct itype {
     std::unique_ptr<islot_bionic> bionic_slot;
     std::unique_ptr<islot_stationary> stationary_slot;
     std::unique_ptr<islot_armor> armor_slot;
+    std::unique_ptr<islot_tool> tool_slot;
 
 protected:
     friend class Item_factory;
@@ -266,6 +325,8 @@ public:
             return "BIONIC";
         } else if( armor_slot.get() != nullptr ) {
             return "ARMOR";
+        } else if( tool_slot.get() != nullptr ) {
+            return "TOOL";
         }
         return "misc";
     }
@@ -307,10 +368,6 @@ public:
         return false;
     }
     virtual bool is_book() const
-    {
-        return false;
-    }
-    virtual bool is_tool() const
     {
         return false;
     }
@@ -540,61 +597,6 @@ struct it_book : public virtual itype {
 
     it_book() : itype(), type(NULL), level(0), req(0), fun(0), intel(0), time(0), chapters(), recipes()
     {
-    }
-};
-
-struct it_tool : public virtual itype {
-    ammotype ammo;
-    long max_charges;
-    long def_charges;
-    std::vector<long> rand_charges;
-    unsigned char charges_per_use;
-    unsigned char turns_per_charge;
-    itype_id revert_to;
-    itype_id subtype;
-
-    virtual bool is_tool() const
-    {
-        return true;
-    }
-    virtual bool is_artifact() const
-    {
-        return false;
-    }
-    virtual std::string get_item_type_string() const
-    {
-        return "TOOL";
-    }
-    int charges_to_use() const
-    {
-        return charges_per_use;
-    }
-    int maximum_charges() const
-    {
-	return max_charges;
-    }
-    it_tool() : itype(), ammo(), max_charges(0), def_charges(0), rand_charges(), charges_per_use(0),
-        turns_per_charge(0), revert_to(), subtype()
-    {
-    }
-};
-
-struct it_tool_armor : public virtual it_tool {
-    virtual bool is_artifact() const
-    {
-        return false;
-    }
-    virtual int charges_to_use() const
-    {
-        return it_tool::charges_to_use();
-    }
-    virtual int maximum_charges() const
-    {
-	return it_tool::maximum_charges();
-    }
-    virtual std::string get_item_type_string() const
-    {
-        return "ARMOR";
     }
 };
 

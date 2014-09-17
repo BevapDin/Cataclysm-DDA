@@ -50,19 +50,19 @@ item::item(const std::string new_type, unsigned int turn, bool rand, int handed)
                 charges = comest->charges;
             }
         }
-    } else if (type->is_tool()) {
-        it_tool* tool = dynamic_cast<it_tool*>(type);
-        if (tool->max_charges == 0) {
+    }
+    if( type->tool_slot ) {
+        if (type->tool_slot->max_charges == 0) {
             charges = -1;
         } else {
-            if (rand && tool->rand_charges.size() > 1) {
-                int charge_roll = rng(1, tool->rand_charges.size() - 1);
-                charges = rng(tool->rand_charges[charge_roll - 1], tool->rand_charges[charge_roll]);
+            if (rand && type->tool_slot->rand_charges.size() > 1) {
+                int charge_roll = rng(1, type->tool_slot->rand_charges.size() - 1);
+                charges = rng(type->tool_slot->rand_charges[charge_roll - 1], type->tool_slot->rand_charges[charge_roll]);
             } else {
-                charges = tool->def_charges;
+                charges = type->tool_slot->def_charges;
             }
-            if (tool->ammo != "NULL") {
-                curammo = dynamic_cast<it_ammo*>(item_controller->find_template(default_ammo(tool->ammo)));
+            if (type->tool_slot->ammo != "NULL") {
+                curammo = dynamic_cast<it_ammo*>(item_controller->find_template(default_ammo(type->tool_slot->ammo)));
             }
         }
     } else if (type->is_book()) {
@@ -788,37 +788,35 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
 
     }
     if (is_tool()) {
-        it_tool* tool = dynamic_cast<it_tool*>(type);
-
-        if ((tool->max_charges)!=0) {
+        if ((type->tool_slot->max_charges)!=0) {
             std::string charges_line = _("Charges"); //;
             dump->push_back(iteminfo("TOOL",charges_line+ ": " + helper::to_string_int(charges)));
 
             if (has_flag("DOUBLE_AMMO")) {
-                dump->push_back(iteminfo("TOOL", "", ((tool->ammo == "NULL") ?
-                    ngettext("Maximum <num> charge (doubled).", "Maximum <num> charges (doubled)", tool->max_charges * 2) :
-                    string_format(ngettext("Maximum <num> charge (doubled) of %s.", "Maximum <num> charges (doubled) of %s.", tool->max_charges * 2),
-                                  ammo_name(tool->ammo).c_str())), tool->max_charges * 2));
+                dump->push_back(iteminfo("TOOL", "", ((type->tool_slot->ammo == "NULL") ?
+                    ngettext("Maximum <num> charge (doubled).", "Maximum <num> charges (doubled)", type->tool_slot->max_charges * 2) :
+                    string_format(ngettext("Maximum <num> charge (doubled) of %s.", "Maximum <num> charges (doubled) of %s.", type->tool_slot->max_charges * 2),
+                                  ammo_name(type->tool_slot->ammo).c_str())), type->tool_slot->max_charges * 2));
             } else if (has_flag("RECHARGE")) {
-                dump->push_back(iteminfo("TOOL", "", ((tool->ammo == "NULL") ?
-                    ngettext("Maximum <num> charge (rechargeable).", "Maximum <num> charges (rechargeable).", tool->max_charges) :
-                    string_format(ngettext("Maximum <num> charge (rechargeable) of %s", "Maximum <num> charges (rechargeable) of %s.", tool->max_charges),
-                    ammo_name(tool->ammo).c_str())), tool->max_charges));
+                dump->push_back(iteminfo("TOOL", "", ((type->tool_slot->ammo == "NULL") ?
+                    ngettext("Maximum <num> charge (rechargeable).", "Maximum <num> charges (rechargeable).", type->tool_slot->max_charges) :
+                    string_format(ngettext("Maximum <num> charge (rechargeable) of %s", "Maximum <num> charges (rechargeable) of %s.", type->tool_slot->max_charges),
+                    ammo_name(type->tool_slot->ammo).c_str())), type->tool_slot->max_charges));
             } else if (has_flag("DOUBLE_AMMO") && has_flag("RECHARGE")) {
-                dump->push_back(iteminfo("TOOL", "", ((tool->ammo == "NULL") ?
-                    ngettext("Maximum <num> charge (rechargeable) (doubled).", "Maximum <num> charges (rechargeable) (doubled).", tool->max_charges * 2) :
-                    string_format(ngettext("Maximum <num> charge (rechargeable) (doubled) of %s.", "Maximum <num> charges (rechargeable) (doubled) of %s.", tool->max_charges * 2),
-                                  ammo_name(tool->ammo).c_str())), tool->max_charges * 2));
+                dump->push_back(iteminfo("TOOL", "", ((type->tool_slot->ammo == "NULL") ?
+                    ngettext("Maximum <num> charge (rechargeable) (doubled).", "Maximum <num> charges (rechargeable) (doubled).", type->tool_slot->max_charges * 2) :
+                    string_format(ngettext("Maximum <num> charge (rechargeable) (doubled) of %s.", "Maximum <num> charges (rechargeable) (doubled) of %s.", type->tool_slot->max_charges * 2),
+                                  ammo_name(type->tool_slot->ammo).c_str())), type->tool_slot->max_charges * 2));
             } else if (has_flag("ATOMIC_AMMO")) {
                 dump->push_back(iteminfo("TOOL", "",
-                                         ((tool->ammo == "NULL") ? ngettext("Maximum <num> charge.", "Maximum <num> charges.", tool->max_charges * 100) :
-                                          string_format(ngettext("Maximum <num> charge of %s.", "Maximum <num> charges of %s.", tool->max_charges * 100),
-                                          ammo_name("plutonium").c_str())), tool->max_charges * 100));
+                                         ((type->tool_slot->ammo == "NULL") ? ngettext("Maximum <num> charge.", "Maximum <num> charges.", type->tool_slot->max_charges * 100) :
+                                          string_format(ngettext("Maximum <num> charge of %s.", "Maximum <num> charges of %s.", type->tool_slot->max_charges * 100),
+                                          ammo_name("plutonium").c_str())), type->tool_slot->max_charges * 100));
             } else {
                 dump->push_back(iteminfo("TOOL", "",
-                    ((tool->ammo == "NULL") ? ngettext("Maximum <num> charge.", "Maximum <num> charges.", tool->max_charges) :
-                     string_format(ngettext("Maximum <num> charge of %s.", "Maximum <num> charges of %s.", tool->max_charges),
-                                   ammo_name(tool->ammo).c_str())), tool->max_charges));
+                    ((type->tool_slot->ammo == "NULL") ? ngettext("Maximum <num> charge.", "Maximum <num> charges.", type->tool_slot->max_charges) :
+                     string_format(ngettext("Maximum <num> charge of %s.", "Maximum <num> charges of %s.", type->tool_slot->max_charges),
+                                   ammo_name(type->tool_slot->ammo).c_str())), type->tool_slot->max_charges));
             }
         }
     }
@@ -1378,10 +1376,9 @@ int item::price() const
     }
     if( is_tool() && curammo == nullptr ) {
         // If the tool uses specific ammo (like gasoline) it is handled above.
-        const it_tool *itt = dynamic_cast<const it_tool*>( type );
-        if( itt->def_charges > 0 ) {
+        if( type->tool_slot->def_charges > 0 ) {
             // Full value when charges == default charges, otherwise scalled down
-            ret = ret * std::max<long>( 0, charges ) / static_cast<double>( itt->def_charges );
+            ret = ret * std::max<long>( 0, charges ) / static_cast<double>( type->tool_slot->def_charges );
         }
     }
     for (size_t i = 0; i < contents.size(); i++) {
@@ -1429,7 +1426,7 @@ int item::weight() const
         ret *= charges;
     } else if (type->is_gun() && charges >= 1) {
         ret += curammo->weight * charges;
-    } else if (type->is_tool() && charges >= 1 && ammo_type() != "NULL") {
+    } else if (type->tool_slot && charges >= 1 && ammo_type() != "NULL") {
         if (typeId() == "adv_UPS_off" || typeId() == "adv_UPS_on" || has_flag("ATOMIC_AMMO") ||
             typeId() == "rm13_armor" || typeId() == "rm13_armor_on") {
             ret += item_controller->find_template(default_ammo(this->ammo_type()))->weight * charges / 500;
@@ -2288,10 +2285,7 @@ bool item::is_funnel_container(int &bigger_than) const
 
 bool item::is_tool() const
 {
-    if( is_null() )
-        return false;
-
-    return type->is_tool();
+    return type != nullptr && type->tool_slot.get() != nullptr;
 }
 
 bool item::is_software() const
@@ -2645,11 +2639,10 @@ ammotype item::ammo_type() const
         }
         return ret;
     } else if (is_tool()) {
-        it_tool* tool = dynamic_cast<it_tool*>(type);
         if (has_flag("ATOMIC_AMMO")) {
             return "plutonium";
         }
-        return tool->ammo;
+        return type->tool_slot->ammo;
     } else if (is_ammo()) {
         it_ammo* amm = dynamic_cast<it_ammo*>(type);
         return amm->type;
@@ -2704,7 +2697,7 @@ int item::pick_reload_ammo(player &u, bool interactive)
         return INT_MIN;
     }
 
-    if (!type->is_gun() && !type->is_tool()) {
+    if (!is_gun() && !is_tool()) {
         debugmsg("RELOADING NON-GUN NON-TOOL");
         return INT_MIN;
     }
@@ -2927,10 +2920,9 @@ bool item::reload(player &u, int pos)
             }
         }
     } else if (is_tool()) {
-        it_tool* tool = dynamic_cast<it_tool*>(type);
         reload_target = this;
         single_load = false;
-        max_load = tool->max_charges;
+        max_load = type->tool_slot->max_charges;
     } else {
         return false;
     }
@@ -3090,8 +3082,7 @@ int item::getlight_emit(bool calculate_dimming) const {
         return 0;
     }
     if ( calculate_dimming && has_flag("CHARGEDIM") && is_tool() && !has_flag("USE_UPS")) {
-        it_tool * tool = dynamic_cast<it_tool *>(type);
-        int maxcharge = tool->max_charges;
+        int maxcharge = type->tool_slot->max_charges;
         if ( maxcharge > 0 ) {
             lumint = ( type->light_emission * chargedrop * charges ) / maxcharge;
         }
@@ -3113,9 +3104,8 @@ int item::get_remaining_capacity_for_liquid(const item &liquid, LIQUID_FILL_ERRO
         int max = 0;
 
         if (is_tool()) {
-            it_tool *tool = dynamic_cast<it_tool *>(type);
-            ammo = tool->ammo;
-            max = tool->max_charges;
+            ammo = type->tool_slot->ammo;
+            max = type->tool_slot->max_charges;
         } else {
             it_gun *gun = dynamic_cast<it_gun *>(type);
             ammo = gun->ammo;
@@ -3250,7 +3240,7 @@ long item::charges_of(const itype_id &it) const
 {
     long count = 0;
 
-    if (((type->id == it) || (is_tool() && (dynamic_cast<it_tool *>(type))->subtype == it)) && contents.empty()) {
+    if (((type->id == it) || (is_tool() && type->tool_slot->subtype == it)) && contents.empty()) {
         // If we're specifically looking for a container, only say we have it if it's empty.
         if (charges < 0) {
             count++;
@@ -3276,7 +3266,7 @@ bool item::use_charges(const itype_id &it, long &quantity, std::list<item> &used
         }
     }
     // Now check the item itself
-    if (!((type->id == it) || (is_tool() && (dynamic_cast<it_tool *>(type))->subtype == it)) || quantity <= 0 || !contents.empty()) {
+    if (!((type->id == it) || (is_tool() && type->tool_slot->subtype == it)) || quantity <= 0 || !contents.empty()) {
         return false;
     }
     if (charges <= quantity) {
@@ -3726,9 +3716,8 @@ bool item::process_wet( player * /*carrier*/, point /*pos*/ )
 {
     item_counter--;
     if( item_counter == 0 ) {
-        const it_tool *tool = dynamic_cast<const it_tool *>( type );
-        if( tool != nullptr && tool->revert_to != "null" ) {
-            make( tool->revert_to );
+        if( type->tool_slot && type->tool_slot->revert_to != "null" ) {
+            make( type->tool_slot->revert_to );
         }
         item_tags.erase( "WET" );
         if( !has_flag( "ABSORBENT" ) ) {
@@ -3742,9 +3731,8 @@ bool item::process_wet( player * /*carrier*/, point /*pos*/ )
 
 bool item::process_tool( player *carrier, point /*pos*/ )
 {
-    it_tool *tmp = dynamic_cast<it_tool *>( type );
     long charges_used = 0;
-    if( tmp->turns_per_charge > 0 && int( calendar::turn ) % tmp->turns_per_charge == 0 ) {
+    if( type->tool_slot->turns_per_charge > 0 && int( calendar::turn ) % type->tool_slot->turns_per_charge == 0 ) {
         charges_used = 1;
     }
     if( charges_used > 0 ) {
@@ -3769,18 +3757,18 @@ bool item::process_tool( player *carrier, point /*pos*/ )
     if( charges_used == 0 ) {
         // TODO: iuse functions should expect a nullptr as player, but many of them
         // don't and therefor will fail.
-        tmp->invoke( carrier != nullptr ? carrier : &g->u, this, true );
+        type->invoke( carrier != nullptr ? carrier : &g->u, this, true );
     } else {
         if( carrier != nullptr && has_flag( "USE_UPS" ) && charges < charges_used ) {
             carrier->add_msg_if_player( m_info, _( "You need an active UPS to run %s!" ), tname().c_str() );
         }
         // TODO: iuse functions should expect a nullptr as player, but many of them
         // don't and therefor will fail.
-        tmp->invoke( carrier != nullptr ? carrier : &g->u, this, false );
-        if( tmp->revert_to == "null" ) {
+        type->invoke( carrier != nullptr ? carrier : &g->u, this, false );
+        if( type->tool_slot->revert_to == "null" ) {
             return true; // reverts to nothing -> destroy the item
         }
-        make( tmp->revert_to );
+        make( type->tool_slot->revert_to );
         active = false;
     }
     // Keep the item

@@ -243,8 +243,7 @@ void iexamine::atm(player *p, map *m, int examx, int examy)
     } else if (choice == purchase_cash_card) {
         if(query_yn(_("This will automatically deduct $1.00 from your bank account. Continue?"))) {
             item card("cash_card", calendar::turn);
-            it_tool *tool = dynamic_cast<it_tool *>(card.type);
-            card.charges = tool->def_charges;
+            card.charges = 0;
             p->i_add(card);
             p->cash -= 100;
             p->moves -= 100;
@@ -2000,9 +1999,9 @@ itype *furn_t::crafting_pseudo_item_type() const
 
 itype *furn_t::crafting_ammo_item_type() const
 {
-    const it_tool *toolt = dynamic_cast<const it_tool *>(crafting_pseudo_item_type());
-    if (toolt != NULL && toolt->ammo != "NULL") {
-        const std::string ammoid = default_ammo(toolt->ammo);
+    const itype *t = crafting_pseudo_item_type();
+    if( t != nullptr && t->tool_slot && t->tool_slot->ammo != "NULL") {
+        const std::string ammoid = default_ammo(t->tool_slot->ammo);
         return item_controller->find_template(ammoid);
     }
     return NULL;

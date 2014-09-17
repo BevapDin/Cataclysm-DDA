@@ -1335,7 +1335,7 @@ item vehicle_part::properties_to_item() const
     }
     // tools go unloaded to prevent user from exploiting this to
     // refill their (otherwise not refillable) tools
-    if( tmp.type->is_tool() ) {
+    if( tmp.type->tool_slot ) {
         tmp.charges = 0;
     }
     // translate part damage to item damage.

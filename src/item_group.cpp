@@ -160,13 +160,12 @@ void Item_modifier::modify(item &new_item) const
     }
     long ch = (charges.first == charges.second) ? charges.first : rng(charges.first, charges.second);
     if(ch != -1) {
-        it_tool *t = dynamic_cast<it_tool *>(new_item.type);
         it_gun *g = dynamic_cast<it_gun *>(new_item.type);
         if(new_item.count_by_charges()) {
             // food, ammo
             new_item.charges = ch;
-        } else if(t != NULL) {
-            new_item.charges = std::min(ch, t->max_charges);
+        } else if( new_item.type->tool_slot ) {
+            new_item.charges = std::min(ch, new_item.type->tool_slot->max_charges);
         } else if(g != NULL && ammo.get() != NULL) {
             item am = ammo->create_single(new_item.bday);
             it_ammo *a = dynamic_cast<it_ammo *>(am.type);

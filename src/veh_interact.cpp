@@ -290,9 +290,9 @@ void veh_interact::cache_tool_availability()
 {
     crafting_inv = g->crafting_inventory(&g->u);
 
-    int charges = dynamic_cast<it_tool *>(itypes["welder"])->charges_per_use;
-    int charges_oxy = dynamic_cast<it_tool *>(itypes["oxy_torch"])->charges_per_use;
-    int charges_crude = dynamic_cast<it_tool *>(itypes["welder_crude"])->charges_per_use;
+    int charges = itypes["welder"]->tool_slot->charges_per_use;
+    int charges_oxy = itypes["oxy_torch"]->tool_slot->charges_per_use;
+    int charges_crude = itypes["welder_crude"]->tool_slot->charges_per_use;
     has_wrench = crafting_inv.has_tools("wrench", 1) ||
                  crafting_inv.has_tools("toolset", 1) ||
                  crafting_inv.has_tools("survivor_belt", 1) ||
@@ -1589,9 +1589,9 @@ void complete_vehicle ()
     int type = g->u.activity.values[7];
     std::string part_id = g->u.activity.str_values[0];
     std::vector<tool_comp> tools;
-    int welder_charges = dynamic_cast<it_tool *>(itypes["welder"])->charges_per_use;
-    int welder_oxy_charges = dynamic_cast<it_tool *>(itypes["oxy_torch"])->charges_per_use;
-    int welder_crude_charges = dynamic_cast<it_tool *>(itypes["welder_crude"])->charges_per_use;
+    int welder_charges = itypes["welder"]->tool_slot->charges_per_use;
+    int welder_oxy_charges = itypes["oxy_torch"]->tool_slot->charges_per_use;
+    int welder_crude_charges = itypes["welder_crude"]->tool_slot->charges_per_use;
     inventory crafting_inv = g->crafting_inventory(&g->u);
     const bool has_goggles = crafting_inv.has_tools("goggles_welding", 1) ||
                              g->u.has_bionic("bio_sunglasses") ||

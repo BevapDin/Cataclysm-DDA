@@ -94,10 +94,9 @@ int Pickup::interact_with_vehicle( vehicle *veh, int posx, int posy, int veh_roo
             // Drain a ton of power
             tmp_hotplate.charges = veh->drain( "battery", 100 );
             if( tmp_hotplate.is_tool() ) {
-                it_tool *tmptool = dynamic_cast<it_tool *>((&tmp_hotplate)->type);
-                if ( tmp_hotplate.charges >= tmptool->charges_per_use ) {
-                    tmptool->invoke(&g->u, &tmp_hotplate, false);
-                    tmp_hotplate.charges -= tmptool->charges_per_use;
+                if ( tmp_hotplate.charges >= tmp_hotplate.type->tool_slot->charges_per_use ) {
+                    tmp_hotplate.type->invoke(&g->u, &tmp_hotplate, false);
+                    tmp_hotplate.charges -= tmp_hotplate.type->tool_slot->charges_per_use;
                     veh->refill( "battery", tmp_hotplate.charges );
                 }
             }
@@ -131,10 +130,9 @@ int Pickup::interact_with_vehicle( vehicle *veh, int posx, int posy, int veh_roo
             // Drain a ton of power
             tmp_welder.charges = veh->drain( "battery", 1000 );
             if( tmp_welder.is_tool() ) {
-                it_tool *tmptool = dynamic_cast<it_tool *>((&tmp_welder)->type);
-                if ( tmp_welder.charges >= tmptool->charges_per_use ) {
-                    tmptool->invoke( &g->u, &tmp_welder, false );
-                    tmp_welder.charges -= tmptool->charges_per_use;
+                if ( tmp_welder.charges >= tmp_welder.type->tool_slot->charges_per_use ) {
+                    tmp_welder.type->invoke( &g->u, &tmp_welder, false );
+                    tmp_welder.charges -= tmp_welder.type->tool_slot->charges_per_use;
                     veh->refill( "battery", tmp_welder.charges );
                 }
             }
@@ -147,10 +145,9 @@ int Pickup::interact_with_vehicle( vehicle *veh, int posx, int posy, int veh_roo
             // Drain a ton of power
             tmp_purifier.charges = veh->drain( "battery", 100 );
             if( tmp_purifier.is_tool() ) {
-                it_tool *tmptool = dynamic_cast<it_tool *>((&tmp_purifier)->type);
-                if ( tmp_purifier.charges >= tmptool->charges_per_use ) {
-                    tmptool->invoke( &g->u, &tmp_purifier, false );
-                    tmp_purifier.charges -= tmptool->charges_per_use;
+                if ( tmp_purifier.charges >= tmp_purifier.type->tool_slot->charges_per_use ) {
+                    tmp_purifier.type->invoke( &g->u, &tmp_purifier, false );
+                    tmp_purifier.charges -= tmp_purifier.type->tool_slot->charges_per_use;
                     veh->refill( "battery", tmp_purifier.charges );
                 }
             }

@@ -3131,12 +3131,12 @@ void map::process_active_items_in_vehicle(vehicle *cur_veh, submap * const curre
                 apply_in_fridge(*it);
             }
             if (it->has_flag("RECHARGE") && cur_veh->part_with_feature(part, VPFLAG_RECHARGE) >= 0 &&
-                cur_veh->recharger_on) {
-                int full_charge = dynamic_cast<it_tool*>(it->type)->max_charges;
+                cur_veh->recharger_on && it->type->tool_slot) {
+                int full_charge = it->type->tool_slot->max_charges;
                 if (it->has_flag("DOUBLE_AMMO")) {
                     full_charge = full_charge * 2;
                 }
-                if (it->is_tool() && full_charge > it->charges ) {
+                if (full_charge > it->charges ) {
                     if (one_in(10)) {
                         it->charges++;
                     }

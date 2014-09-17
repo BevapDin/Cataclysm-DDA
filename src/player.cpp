@@ -7914,7 +7914,7 @@ bool player::eat(item *eaten, it_comest *comest)
         else healall(excess_food /= 5);
     }
 
-    if (itypes[comest->tool]->is_tool()) {
+    if( item_controller->find_template( comest->tool )->tool_slot ) {
         use_charges(comest->tool, 1); // Tools like lighters get used
     }
 
@@ -8970,8 +8970,7 @@ hint_rating player::rate_action_reload(item *it) {
         }
         return HINT_GOOD;
     } else if (it->is_tool()) {
-        it_tool* tool = dynamic_cast<it_tool*>(it->type);
-        if (tool->ammo == "NULL") {
+        if (it->type->tool_slot->ammo == "NULL") {
             return HINT_CANT;
         }
         return HINT_GOOD;
@@ -9073,8 +9072,7 @@ hint_rating player::rate_action_disassemble(item *it) {
 hint_rating player::rate_action_use(const item *it) const
 {
     if (it->is_tool()) {
-        it_tool *tool = dynamic_cast<it_tool*>(it->type);
-        if (tool->charges_per_use != 0 && it->charges < tool->charges_per_use) {
+        if (it->type->tool_slot->charges_per_use != 0 && it->charges < it->type->tool_slot->charges_per_use) {
             return HINT_IFFY;
         } else {
             return HINT_GOOD;
@@ -9104,30 +9102,29 @@ hint_rating player::rate_action_use(const item *it) const
 
 bool player::has_enough_charges( const item &it, bool show_msg ) const
 {
-    const it_tool *tool = dynamic_cast<const it_tool *>( it.type );
-    if( tool == NULL || tool->charges_per_use <= 0 ) {
+    if( it.type == nullptr || !it.type->tool_slot || it.type->tool_slot->charges_per_use <= 0 ) {
         // If the item is not a tool, it can always be invoked as it does not consume charges.
         return true;
     }
     if( it.has_flag( "USE_UPS" ) ) {
-        if( has_charges( "UPS", tool->charges_per_use ) ) {
+        if( has_charges( "UPS", it.type->tool_slot->charges_per_use ) ) {
             return true;
         }
         if( show_msg ) {
             add_msg_if_player( m_info,
                     ngettext( "Your %s needs %d charge from some UPS.",
                               "Your %s needs %d charges from some UPS.",
-                              tool->charges_per_use ),
-                    it.tname().c_str(), tool->charges_per_use );
+                              it.type->tool_slot->charges_per_use ),
+                    it.tname().c_str(), it.type->tool_slot->charges_per_use );
         }
         return false;
-    } else if( it.charges < tool->charges_per_use ) {
+    } else if( it.charges < it.type->tool_slot->charges_per_use ) {
         if( show_msg ) {
             add_msg_if_player( m_info,
                     ngettext( "Your %s has %d charge but needs %d.",
                               "Your %s has %d charges but needs %d.",
                               it.charges ),
-                    it.tname().c_str(), it.charges, tool->charges_per_use );
+                    it.tname().c_str(), it.charges, it.type->tool_slot->charges_per_use );
         }
         return false;
     }
@@ -9152,16 +9149,15 @@ void player::use(int pos)
     last_item = itype_id(used->type->id);
 
     if (used->is_tool()) {
-        it_tool *tool = dynamic_cast<it_tool*>(used->type);
         if (!has_enough_charges(*used, true)) {
             return;
         }
-        const long charges_used = tool->invoke( this, used, false );
+        const long charges_used = used->type->invoke( this, used, false );
         if (charges_used <= 0) {
             // Canceled or not used up or whatever
             return;
         }
-        if( tool->charges_per_use <= 0 ) {
+        if( used->type->tool_slot->charges_per_use <= 0 ) {
             // An item that doesn't normally expend charges is destroyed instead.
             /* We can't be certain the item is still in the same position,
              * as other items may have been consumed as well, so remove
@@ -10924,7 +10920,7 @@ std::vector<item*> player::has_ammo(ammotype at)
 
 std::string player::weapname(bool charges)
 {
-    if (!(weapon.is_tool() && dynamic_cast<it_tool*>(weapon.type)->max_charges <= 0) &&
+    if (!(weapon.is_tool() && weapon.type->tool_slot->max_charges <= 0) &&
           weapon.charges >= 0 && charges) {
         std::stringstream dump;
         int spare_mag = weapon.has_gunmod("spare_mag");
