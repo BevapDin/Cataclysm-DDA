@@ -296,6 +296,10 @@ public:
     void operator=(iuse_actor *f);
     void operator=(const use_function &other);
 
+    bool is_none() const {
+        return function_type == USE_FUNCTION_NONE;
+    }
+
     bool operator==(use_function f) const {
         return function_type == USE_FUNCTION_CPP && f.function_type == USE_FUNCTION_CPP &&
         f.cpp_function == cpp_function;

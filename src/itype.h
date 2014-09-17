@@ -299,6 +299,17 @@ struct islot_book {
      * Key is the recipe, value is TODO
      */
     std::map<recipe *, int> recipes;
+    /**
+     * Iuse function that is invoked when the book has been read.
+     */
+    use_function use_method;
+
+    int invoke( player *p, item *it, bool active ) const {
+        if( !use_method.is_none() ) {
+            use_method.call( p, it, active );
+        }
+        return 0;
+    }
 
     islot_book()
     : type( nullptr )
@@ -309,6 +320,7 @@ struct islot_book {
     , time( 0 )
     , chapters( 0 )
     , recipes()
+    , use_method()
     {
     }
 };

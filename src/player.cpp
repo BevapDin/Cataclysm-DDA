@@ -9712,9 +9712,7 @@ void player::do_read( item *book )
         }
     }
 
-    if( book->type->has_use() ) {
-        book->type->invoke( &g->u, book, false );
-    }
+    book->type->book_slot->invoke( &g->u, book, false );
 
     activity.type = ACT_NULL;
 }
