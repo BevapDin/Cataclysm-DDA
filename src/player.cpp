@@ -8401,19 +8401,17 @@ hint_rating player::rate_action_wear(item *it)
         return HINT_CANT;
     }
 
-    it_armor* armor = dynamic_cast<it_armor*>(it->type);
-
     // are we trying to put on power armor? If so, make sure we don't have any other gear on.
-    if (armor->is_power_armor() && worn.size()) {
+    if (it->is_power_armor() && worn.size()) {
         if (it->covers.test(bp_torso)) {
             return HINT_IFFY;
-        } else if (it->covers.test(bp_head) && !worn[0].type->is_power_armor()) {
+        } else if (it->covers.test(bp_head) && !worn[0].is_power_armor()) {
             return HINT_IFFY;
         }
     }
     // are we trying to wear something over power armor? We can't have that, unless it's a backpack, or similar.
-    if (worn.size() && worn[0].type->is_power_armor() && !(it->covers.test(bp_head))) {
-        if (!(it->covers.test(bp_torso) && armor->color == c_green)) {
+    if (worn.size() && it->is_power_armor() && !(it->covers.test(bp_head))) {
+        if (!(it->covers.test(bp_torso) && it->type->color == c_green)) {
             return HINT_IFFY;
         }
     }
@@ -8526,20 +8524,13 @@ bool player::wear(int pos, bool interactive)
 
 bool player::wear_item(item *to_wear, bool interactive)
 {
-    it_armor* armor = NULL;
-
-    if (to_wear->is_armor())
-    {
-        armor = dynamic_cast<it_armor*>(to_wear->type);
-    }
-    else
-    {
+    if( !to_wear->is_armor() ) {
         add_msg(m_info, _("Putting on a %s would be tricky."), to_wear->tname().c_str());
         return false;
     }
 
     // are we trying to put on power armor? If so, make sure we don't have any other gear on.
-    if (armor->is_power_armor())
+    if (to_wear->is_power_armor())
     {
         for (std::vector<item>::iterator it = worn.begin(); it != worn.end(); ++it)
         {
@@ -8561,7 +8552,7 @@ bool player::wear_item(item *to_wear, bool interactive)
             {
                 for (std::vector<item>::iterator it = worn.begin(); it != worn.end(); ++it)
                 {
-                    if (it->type->is_power_armor())
+                    if (it->is_power_armor())
                     {
                         power_armor = true;
                         break;
@@ -8581,7 +8572,7 @@ bool player::wear_item(item *to_wear, bool interactive)
 
         for (auto &i : worn)
         {
-            if (i.type->is_power_armor() && i.type == armor)
+            if (i.is_power_armor() && i.type == to_wear->type)
             {
                 if(interactive)
                 {
@@ -8598,7 +8589,7 @@ bool player::wear_item(item *to_wear, bool interactive)
              !to_wear->covers.test(bp_head)) {
             for (auto &i : worn)
             {
-                if( i.type->is_power_armor() )
+                if( i.is_power_armor() )
                 {
                     if(interactive)
                     {
@@ -8651,7 +8642,7 @@ bool player::wear_item(item *to_wear, bool interactive)
             (has_trait("HUGE") || has_trait("HUGE_OK"))) {
             if(interactive) {
                 add_msg(m_info, _("The %s is much too small to fit your huge body!"),
-                        armor->nname(1).c_str());
+                        to_wear->tname().c_str());
             }
             return false;
         }
@@ -8660,7 +8651,7 @@ bool player::wear_item(item *to_wear, bool interactive)
         {
             if(interactive)
             {
-                add_msg(m_info, _("You cannot put %s over your webbed hands."), armor->nname(1).c_str());
+                add_msg(m_info, _("You cannot put %s over your webbed hands."), to_wear->type->nname(1).c_str());
             }
             return false;
         }
@@ -8671,7 +8662,7 @@ bool player::wear_item(item *to_wear, bool interactive)
         {
             if(interactive)
             {
-                add_msg(m_info, _("You cannot put %s over your tentacles."), armor->nname(1).c_str());
+                add_msg(m_info, _("You cannot put %s over your tentacles."), to_wear->type->nname(1).c_str());
             }
             return false;
         }
@@ -8680,7 +8671,7 @@ bool player::wear_item(item *to_wear, bool interactive)
         {
             if(interactive)
             {
-                add_msg(m_info, _("You cannot put %s over your talons."), armor->nname(1).c_str());
+                add_msg(m_info, _("You cannot put %s over your talons."), to_wear->type->nname(1).c_str());
             }
             return false;
         }
@@ -8689,7 +8680,7 @@ bool player::wear_item(item *to_wear, bool interactive)
         {
             if(interactive)
             {
-                add_msg(m_info, _("You cannot get %s to stay on your paws."), armor->nname(1).c_str());
+                add_msg(m_info, _("You cannot get %s to stay on your paws."), to_wear->type->nname(1).c_str());
             }
             return false;
         }
@@ -8699,7 +8690,7 @@ bool player::wear_item(item *to_wear, bool interactive)
         {
             if(interactive)
             {
-                add_msg(m_info, _("You cannot put a %s over your beak."), armor->nname(1).c_str());
+                add_msg(m_info, _("You cannot put a %s over your beak."), to_wear->type->nname(1).c_str());
             }
             return false;
         }
@@ -8709,7 +8700,7 @@ bool player::wear_item(item *to_wear, bool interactive)
         {
             if(interactive)
             {
-                add_msg(m_info, _("You cannot fit the %s over your muzzle."), armor->nname(1).c_str());
+                add_msg(m_info, _("You cannot fit the %s over your muzzle."), to_wear->type->nname(1).c_str());
             }
             return false;
         }
@@ -8718,7 +8709,7 @@ bool player::wear_item(item *to_wear, bool interactive)
         {
             if(interactive)
             {
-                add_msg(m_info, _("You cannot fit the %s over your snout."), armor->nname(1).c_str());
+                add_msg(m_info, _("You cannot fit the %s over your snout."), to_wear->type->nname(1).c_str());
             }
             return false;
         }
@@ -8727,7 +8718,7 @@ bool player::wear_item(item *to_wear, bool interactive)
         {
             if(interactive)
             {
-                add_msg(m_info, _("Your saber teeth are simply too large for %s to fit."), armor->nname(1).c_str());
+                add_msg(m_info, _("Your saber teeth are simply too large for %s to fit."), to_wear->type->nname(1).c_str());
             }
             return false;
         }
@@ -8736,7 +8727,7 @@ bool player::wear_item(item *to_wear, bool interactive)
         {
             if(interactive)
             {
-                add_msg(_("Your mandibles are simply too large for %s to fit."), armor->nname(1).c_str());
+                add_msg(_("Your mandibles are simply too large for %s to fit."), to_wear->type->nname(1).c_str());
             }
             return false;
         }
@@ -8745,7 +8736,7 @@ bool player::wear_item(item *to_wear, bool interactive)
         {
             if(interactive)
             {
-                add_msg(m_info, _("Your proboscis is simply too large for %s to fit."), armor->nname(1).c_str());
+                add_msg(m_info, _("Your proboscis is simply too large for %s to fit."), to_wear->type->nname(1).c_str());
             }
             return false;
         }
@@ -8898,10 +8889,10 @@ bool player::takeoff(int pos, bool autodrop, std::vector<item> *items)
             item &w = worn[worn_index];
 
             // Handle power armor.
-            if (w.type->is_power_armor() && w.covers.test(bp_torso)) {
+            if (w.is_power_armor() && w.covers.test(bp_torso)) {
                 // We're trying to take off power armor, but cannot do that if we have a power armor component on!
                 for (int j = worn.size() - 1; j >= 0; j--) {
-                    if (worn[j].type->is_power_armor() &&
+                    if (worn[j].is_power_armor() &&
                             j != worn_index) {
                         if( autodrop || items != nullptr ) {
                             if( items != nullptr ) {
@@ -9919,7 +9910,7 @@ std::string player::is_snuggling()
         }
     }
     std::vector<item>& floor_item = *items_to_snuggle;
-    it_armor* floor_armor = NULL;
+    const itype* floor_armor = nullptr;
     int ticker = 0;
 
     // If there are no items on the floor, return nothing
@@ -9934,7 +9925,7 @@ std::string player::is_snuggling()
         else if ( afloor_item->volume() > 1 &&
               (afloor_item->covers.test(bp_torso) || afloor_item->covers.test(bp_leg_l) ||
               afloor_item->covers.test(bp_leg_r)) ){
-            floor_armor = dynamic_cast<it_armor*>(afloor_item->type);
+            floor_armor = afloor_item->type;
             ticker++;
         }
     }
@@ -10062,13 +10053,11 @@ int player::encumb(body_part bp, double &layers, int &armorenc) const
     double layer[MAX_CLOTHING_LAYER] = { };
     int level = 0;
 
-    const it_armor* armor = NULL;
     for (size_t i = 0; i < worn.size(); ++i) {
         if( !worn[i].is_armor() ) {
             debugmsg("%s::encumb hit a non-armor item at worn[%d] (%s)", name.c_str(),
                      i, worn[i].tname().c_str());
         }
-        armor = dynamic_cast<const it_armor*>(worn[i].type);
 
         if( worn[i].covers.test(bp) ) {
             if( worn[i].has_flag( "SKINTIGHT" ) ) {
@@ -10082,7 +10071,7 @@ int player::encumb(body_part bp, double &layers, int &armorenc) const
             }
 
             layer[level]++;
-            if( armor->is_power_armor() &&
+            if( worn[i].is_power_armor() &&
                 (has_active_UPS() ||
                  has_active_bionic("bio_power_armor_interface") ||
                  has_active_bionic("bio_power_armor_interface_mkII")) ) {
@@ -10293,17 +10282,15 @@ void get_armor_on(player* p, body_part bp, std::vector<int>& armor_indices) {
 
 // mutates du, returns true if armor was damaged
 bool player::armor_absorb(damage_unit& du, item& armor) {
-    it_armor* armor_type = dynamic_cast<it_armor*>(armor.type);
-
     float mitigation = 0; // total amount of damage mitigated
     float effective_resist = resistances(armor).get_effective_resist(du);
     bool armor_damaged = false;
 
     std::string pre_damage_name = armor.tname();
-    std::string pre_damage_adj = armor_type->dmg_adj(armor.damage);
+    std::string pre_damage_adj = armor.type->dmg_adj(armor.damage);
 
     if (rng(0,100) <= armor.get_coverage()) {
-        if (armor_type->is_power_armor()) { // TODO: add some check for power armor
+        if( armor.is_power_armor() ) { // TODO: add some check for power armor
         }
 
         mitigation = std::min(effective_resist, du.amount);
@@ -10313,12 +10300,12 @@ bool player::armor_absorb(damage_unit& du, item& armor) {
         if ((du.amount > effective_resist && !one_in(du.amount) && one_in(2)) ||
                 // or if it isn't, but 1/50 chance
                 (du.amount <= effective_resist && !armor.has_flag("STURDY")
-                && !armor_type->is_power_armor() && one_in(200))) {
+                && !armor.is_power_armor() && one_in(200))) {
             armor_damaged = true;
             armor.damage++;
             std::string damage_verb = du.type == DT_BASH
-                ? armor_type->bash_dmg_verb()
-                : armor_type->cut_dmg_verb();
+                ? armor.type->bash_dmg_verb()
+                : armor.type->cut_dmg_verb();
 
             // add "further" if the damage adjective and verb are the same
             std::string format_string = pre_damage_adj == damage_verb
@@ -10390,7 +10377,6 @@ void player::absorb_hit(body_part bp, damage_instance &dam) {
 // get rid of this.
 void player::absorb(body_part bp, int &dam, int &cut)
 {
-    it_armor* tmp;
     int arm_bash = 0, arm_cut = 0;
     bool cut_through = true;      // to determine if cutting damage penetrates multiple layers of armour
     int bash_absorb = 0;      // to determine if lower layers of armour get damaged
@@ -10420,7 +10406,6 @@ void player::absorb(body_part bp, int &dam, int &cut)
 
     // See, we do it backwards, iterating inwards
     for (int i = worn.size() - 1; i >= 0; i--) {
-        tmp = dynamic_cast<it_armor*>(worn[i].type);
         if (worn[i].covers.test(bp)) {
             // first determine if damage is at a covered part of the body
             // probability given by coverage
@@ -10434,7 +10419,7 @@ void player::absorb(body_part bp, int &dam, int &cut)
                 cut_reduction = arm_cut / 3;
 
                 // power armour first  - to depreciate eventually
-                if (worn[i].type->is_power_armor()) {
+                if (worn[i].is_power_armor()) {
                     if (cut > arm_cut * 2 || dam > arm_bash * 2) {
                         add_msg_if_player(m_bad, _("Your %s is damaged!"), worn[i].tname().c_str());
                         worn[i].damage++;
@@ -10480,8 +10465,8 @@ void player::absorb(body_part bp, int &dam, int &cut)
                                                      worn[i].tname().c_str() );
                         worn.erase(worn.begin() + i);
                     } else if (armor_damaged) {
-                        std::string damage_verb = diff_bash > diff_cut ? tmp->bash_dmg_verb() :
-                                                                         tmp->cut_dmg_verb();
+                        std::string damage_verb = diff_bash > diff_cut ? worn[i].type->bash_dmg_verb() :
+                                                                         worn[i].type->cut_dmg_verb();
                         add_msg_if_player( m_bad, _("Your %s is %s!"), pre_damage_name.c_str(),
                                                   damage_verb.c_str());
                     }
@@ -10594,7 +10579,7 @@ int player::get_env_resist(body_part bp) const
     for (auto &i : worn) {
         // Head protection works on eyes too (e.g. baseball cap)
         if (i.covers.test(bp) || (bp == bp_eyes && i.covers.test(bp_head))) {
-            ret += (dynamic_cast<it_armor*>(i.type))->env_resist;
+            ret += i.type->armor_slot->env_resist;
         }
     }
 
@@ -10681,8 +10666,7 @@ int player::shoe_type_count(const itype_id & it) const
 bool player::is_wearing_power_armor(bool *hasHelmet) const {
     bool result = false;
     for (size_t i = 0; i < worn.size(); i++) {
-        it_armor *armor = dynamic_cast<it_armor*>(worn[i].type);
-        if (armor == NULL || !armor->is_power_armor()) {
+        if( !worn[i].is_armor() || !worn[i].is_power_armor()) {
             continue;
         }
         if (hasHelmet == NULL) {

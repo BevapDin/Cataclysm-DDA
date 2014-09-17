@@ -697,32 +697,37 @@ void Item_factory::load_gun(JsonObject &jo)
     load_basic_info(jo, new_item_template);
 }
 
-void Item_factory::load_armor(JsonObject &jo)
+template<>
+void Item_factory::load_slot( std::unique_ptr<islot_armor> &slotptr, JsonObject &jo )
 {
-    it_armor *armor_template = new it_armor();
-
-    armor_template->encumber = jo.get_int("encumbrance");
-    armor_template->coverage = jo.get_int("coverage");
-    armor_template->thickness = jo.get_int("material_thickness");
+    // TODO: more generic. those two lines are identical for all slot types
+    slotptr.reset( new islot_armor() );
+    auto &slot = *slotptr;
+    slot.encumber = jo.get_int( "encumbrance" );
+    slot.coverage = jo.get_int( "coverage" );
+    slot.thickness = jo.get_int( "material_thickness" );
     // TODO (as of may 2014): sometimes in the future: remove this if clause and accept
     // only "environmental_protection" and not "enviromental_protection".
-    if (jo.has_member("enviromental_protection")) {
-        debugmsg("the item property \"enviromental_protection\" has been renamed to \"environmental_protection\"\n"
-                 "please change the json data for item %d", armor_template->id.c_str());
-        armor_template->env_resist = jo.get_int("enviromental_protection");
+    if( jo.has_member( "enviromental_protection" ) ) {
+        debugmsg( "the item property \"enviromental_protection\" has been renamed to \"environmental_protection\"\n"
+                  "please change the json data for item %d", jo.get_string( "id", "" ).c_str() );
+        slot.env_resist = jo.get_int( "enviromental_protection" );
     } else {
-        armor_template->env_resist = jo.get_int("environmental_protection");
+        slot.env_resist = jo.get_int( "environmental_protection" );
     }
-    armor_template->warmth = jo.get_int("warmth");
-    armor_template->storage = jo.get_int("storage");
-    armor_template->power_armor = jo.get_bool("power_armor", false);
-    armor_template->covers = jo.has_member("covers") ?
-                             flags_from_json(jo, "covers", "bodyparts") : 0;
-    armor_template->sided = jo.has_member("covers") ?
-                            flags_from_json(jo, "covers", "sided") : 0;
+    slot.warmth = jo.get_int( "warmth" );
+    slot.storage = jo.get_int( "storage" );
+    slot.power_armor = jo.get_bool( "power_armor", false );
+    slot.covers = jo.has_member( "covers" ) ? flags_from_json( jo, "covers", "bodyparts" ) : 0;
+    slot.sided = jo.has_member( "covers" ) ? flags_from_json( jo, "covers", "sided" ) : 0;
+}
 
-    itype *new_item_template = armor_template;
-    load_basic_info(jo, new_item_template);
+void Item_factory::load_armor( JsonObject &jo )
+{
+    std::unique_ptr<itype> new_item_template( new itype() );
+    load_slot( new_item_template->armor_slot, jo );
+    load_basic_info( jo, new_item_template.get() );
+    new_item_template.release();
 }
 
 void Item_factory::load_tool(JsonObject &jo)
@@ -762,26 +767,7 @@ void Item_factory::load_tool_armor(JsonObject &jo)
     tool_template->turns_per_charge = jo.get_int("turns_per_charge");
     tool_template->revert_to = jo.get_string("revert_to");
 
-    it_armor *armor_template = tool_armor_template;
-    armor_template->encumber = jo.get_int("encumbrance");
-    armor_template->coverage = jo.get_int("coverage");
-    armor_template->thickness = jo.get_int("material_thickness");
-    // TODO (as of may 2014): sometimes in the future: remove this if clause and accept
-    // only "environmental_protection" and not "enviromental_protection".
-    if (jo.has_member("enviromental_protection")) {
-        debugmsg("the item property \"enviromental_protection\" has been renamed to \"environmental_protection\"\n"
-                 "please change the json data for item %d", armor_template->id.c_str());
-        armor_template->env_resist = jo.get_int("enviromental_protection");
-    } else {
-        armor_template->env_resist = jo.get_int("environmental_protection");
-    }
-    armor_template->warmth = jo.get_int("warmth");
-    armor_template->storage = jo.get_int("storage");
-    armor_template->power_armor = jo.get_bool("power_armor", false);
-    armor_template->covers = jo.has_member("covers") ?
-                             flags_from_json(jo, "covers", "bodyparts") : 0;
-    armor_template->sided = jo.has_member("covers") ?
-                            flags_from_json(jo, "covers", "sided") : 0;
+    load_slot( tool_armor_template->armor_slot, jo );
 
     load_basic_info(jo, tool_armor_template);
 }
@@ -1630,7 +1616,7 @@ const std::string &Item_factory::calc_category(itype *it)
     if (it->is_tool()) {
         return category_id_tools;
     }
-    if (it->is_armor()) {
+    if( it->armor_slot ) {
         return category_id_clothing;
     }
     if (it->is_food()) {

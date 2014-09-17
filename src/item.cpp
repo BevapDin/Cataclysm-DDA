@@ -73,10 +73,9 @@ item::item(const std::string new_type, unsigned int turn, bool rand, int handed)
     } else {
         charges = -1;
     }
-    if (type->is_armor()) {
-        it_armor* armor = dynamic_cast<it_armor*>(type);
-        covers = armor->covers;
-        if (armor->sided.any()) {
+    if( type->armor_slot ) {
+        covers = type->armor_slot->covers;
+        if (type->armor_slot->sided.any()) {
             bool right = one_in(2);
             if (handed == RIGHT) {
                 right = true;
@@ -197,11 +196,10 @@ void item::make( const std::string new_type )
     if( was_armor != is_armor() ) {
         // If changed from armor to non-armor (or reverse), have to recalculate
         // the coverage.
-        const it_armor* armor = dynamic_cast<const it_armor*>( type );
-        if( armor == nullptr ) {
-            covers = 0;
+        if( type->armor_slot ) {
+            covers = type->armor_slot->covers;
         } else {
-            covers = armor->covers;
+            covers = 0;
         }
     }
 }
@@ -608,7 +606,8 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
             dump->push_back(iteminfo("DESCRIPTION", temp1.str()));
         }
 
-    } else if (is_gunmod()) {
+    }
+    if (is_gunmod()) {
         it_gunmod* mod = dynamic_cast<it_gunmod*>(type);
 
         if (mod->dispersion != 0) {
@@ -663,9 +662,8 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
         dump->push_back(iteminfo("GUNMOD", temp1.str()));
         dump->push_back(iteminfo("GUNMOD", temp2.str()));
 
-    } else if (is_armor()) {
-        it_armor* armor = dynamic_cast<it_armor*>(type);
-
+    }
+    if( type->armor_slot ) {
         temp1.str("");
         temp1 << _("Covers: ");
         if (covers.test(bp_head)) {
@@ -706,22 +704,23 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
         }
 
         dump->push_back(iteminfo("ARMOR", temp1.str()));
-        dump->push_back(iteminfo("ARMOR", _("Coverage: "), "<num>%  ", armor->coverage, true, "", false));
-        dump->push_back(iteminfo("ARMOR", _("Warmth: "), "", armor->warmth));
+        dump->push_back(iteminfo("ARMOR", _("Coverage: "), "<num>%  ", type->armor_slot->coverage, true, "", false));
+        dump->push_back(iteminfo("ARMOR", _("Warmth: "), "", type->armor_slot->warmth));
         if (has_flag("FIT")) {
             dump->push_back(iteminfo("ARMOR", _("Encumberment: "), _("<num> (fits)"),
-                                     std::max(0, armor->encumber - 1), true, "", true, true));
+                                     std::max(0, type->armor_slot->encumber - 1), true, "", true, true));
         } else {
             dump->push_back(iteminfo("ARMOR", _("Encumberment: "), "",
-                                     armor->encumber, true, "", true, true));
+                                     type->armor_slot->encumber, true, "", true, true));
         }
         dump->push_back(iteminfo("ARMOR", _("Protection: Bash: "), "", bash_resist(), true, "", false));
         dump->push_back(iteminfo("ARMOR", space + _("Cut: "), "", cut_resist(), true, "", true));
         dump->push_back(iteminfo("ARMOR", _("Environmental protection: "), "",
-                                 armor->env_resist, true, "", false));
-        dump->push_back(iteminfo("ARMOR", space + _("Storage: "), "", armor->storage));
+                                 type->armor_slot->env_resist, true, "", false));
+        dump->push_back(iteminfo("ARMOR", space + _("Storage: "), "", type->armor_slot->storage));
 
-    } else if (is_book()) {
+    }
+    if (is_book()) {
 
         dump->push_back(iteminfo("DESCRIPTION", "--"));
         it_book* book = dynamic_cast<it_book*>(type);
@@ -787,7 +786,8 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
             dump->push_back(iteminfo("BOOK", _("You need to read this book to see its contents.")));
         }
 
-    } else if (is_tool()) {
+    }
+    if (is_tool()) {
         it_tool* tool = dynamic_cast<it_tool*>(type);
 
         if ((tool->max_charges)!=0) {
@@ -1730,42 +1730,38 @@ int item::get_spoils_time() const
 
 int item::get_storage() const
 {
-    auto t = dynamic_cast<const it_armor*>( type );
-    if( t == nullptr ) {
+    if( !type->armor_slot ) {
         return 0;
     }
     // it_armor::storage is unsigned char
-    return static_cast<int>( static_cast<unsigned int>( t->storage ) );
+    return static_cast<int>( static_cast<unsigned int>( type->armor_slot->storage ) );
 }
 
 int item::get_encumber() const
 {
-    auto t = dynamic_cast<const it_armor*>( type );
-    if( t == nullptr ) {
+    if( !type->armor_slot ) {
         return 0;
     }
     // it_armor::storage is signed char
-    return static_cast<int>( t->encumber );
+    return static_cast<int>( type->armor_slot->encumber );
 }
 
 int item::get_coverage() const
 {
-    auto t = dynamic_cast<const it_armor*>( type );
-    if( t == nullptr ) {
+    if( !type->armor_slot ) {
         return 0;
     }
     // it_armor::storage is unsigned char
-    return static_cast<int>( static_cast<unsigned int>( t->coverage ) );
+    return static_cast<int>( static_cast<unsigned int>( type->armor_slot->coverage ) );
 }
 
 int item::get_warmth() const
 {
-    auto t = dynamic_cast<const it_armor*>( type );
-    if( t == nullptr ) {
+    if( !type->armor_slot ) {
         return 0;
     }
     // it_armor::storage is signed char
-    return static_cast<int>( t->warmth );
+    return static_cast<int>( type->armor_slot->warmth );
 }
 
 int item::brewing_time()
@@ -1930,8 +1926,7 @@ int item::bash_resist() const
     if (is_armor())
     {
         // base resistance
-        it_armor* tmp = dynamic_cast<it_armor*>(type);
-        int eff_thickness = ((tmp->thickness - damage <= 0) ? 1 : (tmp->thickness - damage));
+        int eff_thickness = ((type->armor_slot->thickness - damage <= 0) ? 1 : (type->armor_slot->thickness - damage));
 
         // assumes weighted sum of materials for items with 2 materials, 66% material 1 and 33% material 2
         if (cur_mat2->is_null())
@@ -1969,8 +1964,7 @@ int item::cut_resist() const
     const material_type* cur_mat2 = get_material(2);
     if (is_armor())
         {
-        it_armor* tmp = dynamic_cast<it_armor*>(type);
-        int eff_thickness = ((tmp->thickness - damage <= 0) ? 1 : (tmp->thickness - damage));
+        int eff_thickness = ((type->armor_slot->thickness - damage <= 0) ? 1 : (type->armor_slot->thickness - damage));
 
         // assumes weighted sum of materials for items with 2 materials, 66% material 1 and 33% material 2
         if (cur_mat2->is_null())
@@ -2227,10 +2221,12 @@ bool item::is_cutting_weapon() const
 
 bool item::is_armor() const
 {
-    if( is_null() )
-        return false;
+    return type != nullptr && type->armor_slot.get() != nullptr;
+}
 
-    return type->is_armor();
+bool item::is_power_armor() const
+{
+    return is_armor() && type->armor_slot->power_armor;
 }
 
 bool item::is_book() const

@@ -2815,8 +2815,7 @@ void map::spawn_items(const int x, const int y, const std::vector<item> &new_ite
         }
         if (new_item.is_armor() && new_item.has_flag("PAIRED") && x_in_y(4, 5)) {
             //Clear old side info
-            it_armor* armor = dynamic_cast<it_armor*>(new_item.type);
-            new_item.covers = armor->covers;
+            new_item.covers = new_item.type->armor_slot->covers;
             if (new_item.has_flag("RIGHT")) {
                 new_item.item_tags.erase("RIGHT");
             }

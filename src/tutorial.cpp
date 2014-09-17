@@ -177,13 +177,12 @@ void tutorial_game::post_action(action_id act)
 
  case ACTION_WEAR: {
   itype *it = itypes[ g->u.last_item];
-  if (it->is_armor()) {
-   it_armor *armor = dynamic_cast<it_armor*>(it);
-   if (armor->coverage >= 2 || armor->thickness >= 2)
+  if (it->armor_slot) {
+   if (it->armor_slot->coverage >= 2 || it->armor_slot->thickness >= 2)
     add_message(LESSON_WORE_ARMOR);
-   if (armor->storage >= 20)
+   if (it->armor_slot->storage >= 20)
     add_message(LESSON_WORE_STORAGE);
-   if (armor->env_resist >= 2)
+   if (it->armor_slot->env_resist >= 2)
     add_message(LESSON_WORE_MASK);
   }
  } break;
@@ -198,7 +197,7 @@ void tutorial_game::post_action(action_id act)
 // Fall through to...
  case ACTION_PICKUP: {
   itype *it = itypes[ g->u.last_item ];
-  if (it->is_armor())
+  if( it->armor_slot )
    add_message(LESSON_GOT_ARMOR);
   else if (it->is_gun())
    add_message(LESSON_GOT_GUN);
