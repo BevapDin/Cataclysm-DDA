@@ -639,9 +639,9 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Used for eating object at pos, returns true if object is successfully eaten */
         bool consume(int pos);
         /** Used for eating entered comestible, returns true if comestible is successfully eaten */
-        bool eat(item *eat, it_comest *comest);
+        bool eat(item *eat, const islot_comest *comest);
         /** Handles the effects of consuming an item */
-        void consume_effects(item *eaten, it_comest *comest, bool rotten = false);
+        void consume_effects(item *eaten, const islot_comest *comest, bool rotten = false);
         /** Handles rooting effects */
         void rooted_message() const;
         void rooted();

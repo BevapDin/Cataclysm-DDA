@@ -754,9 +754,9 @@ int npc::choose_escape_item()
     for (size_t i = 0; i < slice.size(); i++) {
         item &it = slice[i]->front();
         for (int j = 0; j < NUM_ESCAPE_ITEMS; j++) {
-            it_comest *food = NULL;
+            const islot_comest *food = nullptr;
             if (it.is_food()) {
-                food = dynamic_cast<it_comest *>(it.type);
+                food = it.type->comest_slot.get();
             }
             if (it.type->id == ESCAPE_ITEMS[j] &&
                 (food == NULL || stim < food->stim ||            // Avoid guzzling down
@@ -1910,16 +1910,16 @@ void npc::pick_and_eat()
     invslice slice = inv.slice();
     for (size_t i = 0; i < slice.size(); i++) {
         int eaten_hunger = -1, eaten_thirst = -1;
-        it_comest *food = NULL;
+        const itype *food = nullptr;
         item &it = slice[i]->front();
         if (it.is_food()) {
-            food = dynamic_cast<it_comest *>(it.type);
+            food = it.type;
         } else if (it.is_food_container()) {
-            food = dynamic_cast<it_comest *>(it.contents[0].type);
+            food = it.contents[0].type;
         }
         if (food != NULL) {
-            eaten_hunger = hunger - food->nutr;
-            eaten_thirst = thirst - food->quench;
+            eaten_hunger = hunger - food->comest_slot->nutr;
+            eaten_thirst = thirst - food->comest_slot->quench;
         }
         if (eaten_hunger > 0) { // <0 means we have a chance of puking
             if ((thirst_more_important && eaten_thirst < best_thirst) ||

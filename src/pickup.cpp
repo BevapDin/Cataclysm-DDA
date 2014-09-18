@@ -119,7 +119,7 @@ int Pickup::interact_with_vehicle( vehicle *veh, int posx, int posy, int veh_roo
         if(menu_items[choice] == _("Have a drink")) {
             veh->drain("water", 1);
             item water( "water_clean", 0 );
-            g->u.eat(&water, dynamic_cast<it_comest *>(water.type));
+            g->u.eat(&water, water.type->comest_slot.get());
             g->u.moves -= 250;
             return -2;
         }

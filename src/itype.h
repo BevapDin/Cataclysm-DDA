@@ -408,6 +408,105 @@ struct islot_gun {
     }
 };
 
+// TODO: separate this into med/drugs and food/drink - should be separate instead of
+// using the comesttype information.
+struct islot_comest {
+    /**
+     * Many things make you thirstier!
+     */
+    signed int quench;
+    /**
+     * Nutrition imparted
+     */
+    unsigned int nutr;
+    /**
+     * How long it takes to spoil (hours / 600 turns)
+     */
+    unsigned int spoils;
+    /**
+     * Addictiveness potential
+     */
+    unsigned int addict;
+    /**
+     * Defaults # of charges (drugs, loaf of bread? etc)
+     */
+    long charges;
+    /**
+     * TODO: document me
+     */
+    std::vector<long> rand_charges;
+    /**
+     * TODO: document me
+     */
+    signed int stim;
+    /**
+     * TODO: document me
+     */
+    signed int healthy;
+    /**
+     * How long it takes for a brew to ferment.
+     */
+    unsigned int brewtime;
+    /**
+     * FOOD, DRINK, MED
+     */
+    std::string comesttype;
+    /**
+     * How fun its use is
+     */
+    signed int fun;
+    /**
+     * The container it comes in.
+     */
+    itype_id container;
+    /**
+     * Tool needed to consume (e.g. lighter for cigarettes)
+     */
+    itype_id tool;
+    /**
+     * Effects of addiction
+     */
+    add_type add;
+    /**
+     * Iuse function that is invoked when the item has been consumed.
+     */
+    use_function use_method;
+    /**
+     * TODO: document me
+     */
+    int stack_size;
+
+    int invoke( player *p, item *it, bool active ) const {
+        if( !use_method.is_none() ) {
+            return use_method.call( p, it, active );
+        }
+        return 0;
+    }
+    bool has_use() const
+    {
+        return !use_method.is_none();
+    }
+    bool can_use( const std::string &iuse_name ) const;
+
+    islot_comest()
+    : quench( 0 )
+    , nutr( 0 )
+    , charges( 0 )
+    , rand_charges()
+    , stim( 0 )
+    , healthy( 0 )
+    , brewtime( 0 )
+    , comesttype()
+    , fun( 0 )
+    , container()
+    , tool()
+    , add()
+    , use_method()
+    , stack_size( 0 )
+    {
+    }
+};
+
 struct itype {
     itype_id id; // unique string identifier for this item,
     // can be used as lookup key in master itype map
@@ -422,6 +521,7 @@ struct itype {
     std::unique_ptr<islot_tool> tool_slot;
     std::unique_ptr<islot_book> book_slot;
     std::unique_ptr<islot_gun> gun_slot;
+    std::unique_ptr<islot_comest> comest_slot;
     // Explosion that happens when the item is set on fire
     std::unique_ptr<explosion_data> explode_in_fire_slot;
 
@@ -444,7 +544,6 @@ public:
     phase_id phase; //e.g. solid, liquid, gas
 
     unsigned int volume; // Space taken up by this item
-    int stack_size;      // How many things make up the above-defined volume (eg. 100 aspirin = 1 volume)
     unsigned int weight; // Weight in grams. Assumes positive weight. No helium, guys!
     std::map<std::string, int> qualities; //Tool quality indicators
 
@@ -475,6 +574,8 @@ public:
             return "BOOK";
         } else if( gun_slot.get() != nullptr ) {
             return "GUN";
+        } else if( comest_slot.get() != nullptr ) {
+            return "FOOD";
         }
         return "misc";
     }
@@ -499,10 +600,6 @@ public:
         return ngettext(name.c_str(), name_plural.c_str(), quantity);
     }
 
-    virtual bool is_food() const
-    {
-        return false;
-    }
     virtual bool is_ammo() const
     {
         return false;
@@ -525,6 +622,13 @@ public:
     }
     virtual bool count_by_charges() const
     {
+        if( comest_slot ) {
+            if (phase == LIQUID) {
+                return true;
+            } else {
+                return comest_slot->charges > 1 ;
+            }
+        }
         return false;
     }
     virtual int charges_to_use() const
@@ -558,7 +662,7 @@ public:
     std::vector<use_function> use_methods;// Special effects of use
 
     itype() : id("null"), price(0), name("none"), name_plural("none"), description(), sym('#'),
-        color(c_white), m1("null"), m2("null"), phase(SOLID), volume(0), stack_size(0),
+        color(c_white), m1("null"), m2("null"), phase(SOLID), volume(0),
         weight(0), qualities(), corpse(NULL),
         melee_dam(0), melee_cut(0), m_to_hit(0), item_tags(), techniques(), light_emission(),
         category(NULL) { }
@@ -568,56 +672,12 @@ public:
           phase_id pphase, unsigned int pvolume, unsigned int pweight, signed int pmelee_dam,
           signed int pmelee_cut, signed int pm_to_hit) : id(pid), price(pprice), name(pname),
         name_plural(pname_plural), description(pdes), sym(psym), color(pcolor), m1(pm1), m2(pm2),
-        phase(pphase), volume(pvolume), stack_size(0), weight(pweight),
+        phase(pphase), volume(pvolume), weight(pweight),
         qualities(), corpse(NULL), melee_dam(pmelee_dam),
         melee_cut(pmelee_cut), m_to_hit(pm_to_hit), item_tags(), techniques(), light_emission(),
         category(NULL) { }
 
     virtual ~itype() {}
-};
-
-// Includes food drink and drugs
-struct it_comest : public virtual itype {
-    signed int quench;     // Many things make you thirstier!
-    unsigned int nutr;     // Nutrition imparted
-    unsigned int spoils;   // How long it takes to spoil (hours / 600 turns)
-    unsigned int addict;   // Addictiveness potential
-    long charges;  // Defaults # of charges (drugs, loaf of bread? etc)
-    std::vector<long> rand_charges;
-    signed int stim;
-    signed int healthy;
-    unsigned int brewtime; // How long it takes for a brew to ferment.
-    std::string comesttype; //FOOD, DRINK, MED
-
-    signed int fun;    // How fun its use is
-
-    itype_id container; // The container it comes in
-    itype_id tool;      // Tool needed to consume (e.g. lighter for cigarettes)
-
-    virtual bool is_food() const
-    {
-        return true;
-    }
-    virtual std::string get_item_type_string() const
-    {
-        return "FOOD";
-    }
-
-    virtual bool count_by_charges() const
-    {
-        if (phase == LIQUID) {
-            return true;
-        } else {
-            return charges > 1 ;
-        }
-    }
-
-    add_type add; // Effects of addiction
-
-    it_comest(): itype(), quench(0), nutr(0), charges(0), rand_charges(), stim(0), healthy(0),
-        brewtime(0), comesttype(), fun(0), container(), tool()
-    {
-    }
 };
 
 struct it_ammo : public virtual itype {
@@ -629,6 +689,7 @@ struct it_ammo : public virtual itype {
     signed int dispersion; // Dispersion (low is good)
     unsigned int recoil;   // Recoil; modified by strength
     unsigned int count;    // Default charges
+    int stack_size;
 
     itype_id container; // The container it comes in
 
@@ -637,6 +698,7 @@ struct it_ammo : public virtual itype {
     it_ammo(): itype(), type(), casing(), damage(0), pierce(0), range(0), dispersion(0), recoil(0),
         count(0), container(), ammo_effects()
     {
+        stack_size = 0;
     }
 
     virtual bool is_ammo() const

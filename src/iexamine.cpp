@@ -1617,7 +1617,7 @@ void iexamine::keg(player *p, map *m, int examx, int examy)
         }
 
         if(menu_items[choice] == _("Have a drink")) {
-            if (!p->eat(drink, dynamic_cast<it_comest *>(drink->type))) {
+            if (!p->eat(drink, drink->type->comest_slot.get())) {
                 return; // They didn't actually drink
             }
 

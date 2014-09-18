@@ -39,17 +39,16 @@ item::item(const std::string new_type, unsigned int turn, bool rand, int handed)
         it_ammo* ammo = dynamic_cast<it_ammo*>(type);
         charges = ammo->count;
     }
-    if (type->is_food()) {
-        it_comest* comest = dynamic_cast<it_comest*>(type);
+    if( type->comest_slot ) {
         active = true;
-        if (comest->charges == 1 && !made_of(LIQUID)) {
+        if( type->comest_slot->charges == 1 && !made_of(LIQUID)) {
             charges = -1;
         } else {
-            if (rand && comest->rand_charges.size() > 1) {
-                int charge_roll = rng(1, comest->rand_charges.size() - 1);
-                charges = rng(comest->rand_charges[charge_roll - 1], comest->rand_charges[charge_roll]);
+            if (rand && type->comest_slot->rand_charges.size() > 1) {
+                int charge_roll = rng(1, type->comest_slot->rand_charges.size() - 1);
+                charges = rng(type->comest_slot->rand_charges[charge_roll - 1], type->comest_slot->rand_charges[charge_roll]);
             } else {
-                charges = comest->charges;
+                charges = type->comest_slot->charges;
             }
         }
     }
@@ -229,9 +228,8 @@ item item::in_its_container()
         ret.invlet = invlet;
         return ret;
     }
-    if (is_food() && (dynamic_cast<it_comest*>(type))->container != "null") {
-        it_comest *food = dynamic_cast<it_comest*>(type);
-        item ret(food->container, bday);
+    if( is_food() && type->comest_slot->container != "null" ) {
+        item ret( type->comest_slot->container, bday );
 
         if (made_of(LIQUID)) {
             LIQUID_FILL_ERROR lferr;
@@ -439,27 +437,24 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
         }
     }
 
-    if (is_food()) {
-        it_comest* food = dynamic_cast<it_comest*>(type);
+    const item* food_item = nullptr;
+    if( type->comest_slot ) {
+        food_item = this;
+    } else if( is_food_container() ) {
+        food_item = &contents[0];
+    }
+    if( food_item != nullptr ) {
+        const islot_comest *food = food_item->type->comest_slot.get();
 
         dump->push_back(iteminfo("FOOD", _("Nutrition: "), "", food->nutr, true, "", false, true));
         dump->push_back(iteminfo("FOOD", space + _("Quench: "), "", food->quench));
         dump->push_back(iteminfo("FOOD", _("Enjoyability: "), "", food->fun));
         dump->push_back(iteminfo("FOOD", _("Portions: "), "", abs(int(charges))));
-        if (corpse != NULL && ( debug == true || ( g != NULL &&
+        if (food_item->corpse != NULL && ( debug == true || ( g != NULL &&
              ( g->u.has_bionic("bio_scent_vision") || g->u.has_trait("CARNIVORE") ||
                g->u.has_artifact_with(AEP_SUPER_CLAIRVOYANCE) ) ) ) ) {
-            dump->push_back(iteminfo("FOOD", _("Smells like: ") + corpse->nname()));
+            dump->push_back(iteminfo("FOOD", _("Smells like: ") + food_item->corpse->nname()));
         }
-    } else if (is_food_container()) {
-        // added charge display for debugging
-        it_comest* food = dynamic_cast<it_comest*>(contents[0].type);
-
-        dump->push_back(iteminfo("FOOD", _("Nutrition: "), "", food->nutr, true, "", false, true));
-        dump->push_back(iteminfo("FOOD", space + _("Quench: "), "", food->quench));
-        dump->push_back(iteminfo("FOOD", _("Enjoyability: "), "", food->fun));
-        dump->push_back(iteminfo("FOOD", _("Portions: "), "", abs(int(contents[0].charges))));
-
     }
     const it_ammo* ammo = nullptr;
     if( is_ammo() ) {
@@ -1717,13 +1712,12 @@ void item::calc_rot(const point &location)
 
 int item::get_spoils_time() const
 {
-    auto t = dynamic_cast<const it_comest*>( type );
-    if( t == nullptr ) {
+    if( !type->comest_slot ) {
         return 0;
     }
     // it_comest::spoils is in hours, this function returns a turn count
     // also: it_comest::spoils is unsigned
-    return static_cast<int>( t->spoils ) * 600;
+    return static_cast<int>( type->comest_slot->spoils ) * 600;
 }
 
 int item::get_storage() const
@@ -1764,10 +1758,13 @@ int item::get_warmth() const
 
 int item::brewing_time()
 {
+    if( !type->comest_slot ) {
+        return 0;
+    }
     float season_mult = ( (float)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"] ) / 14;
     if (typeId() == "flask_yeast")
         return 7200 * season_mult;
-    unsigned int b_time = dynamic_cast<it_comest*>(type)->brewtime;
+    unsigned int b_time = type->comest_slot->brewtime;
     int ret = b_time * season_mult;
     return ret;
 }
@@ -1825,8 +1822,7 @@ bool item::count_by_charges() const
     if (is_ammo())
         return true;
     if (is_food()) {
-        it_comest* food = dynamic_cast<it_comest*>(type);
-        return (food->charges > 1);
+        return (type->comest_slot->charges > 1);
     }
     return false;
 }
@@ -1834,7 +1830,12 @@ bool item::count_by_charges() const
 long item::max_charges() const
 {
     if(count_by_charges()) {
-        return type->stack_size;
+        if( type->comest_slot ) {
+            return type->comest_slot->stack_size;
+        } else {
+            const it_ammo *a = dynamic_cast<const it_ammo*>( type );
+            return a == nullptr ? 1 : a->stack_size;
+        }
     } else {
         return 1;
     }
@@ -2131,8 +2132,9 @@ bool item::is_food(player const*u) const
     if( is_null() )
         return false;
 
-    if (type->is_food())
+    if( type->comest_slot ) {
         return true;
+    }
 
     if (u->has_active_bionic("bio_batteries") && is_ammo() &&
             (dynamic_cast<it_ammo*>(type))->type == "battery")
@@ -2149,12 +2151,7 @@ bool item::is_food_container(player const*u) const
 
 bool item::is_food() const
 {
-    if( is_null() )
-        return false;
-
-    if (type->is_food())
-        return true;
-    return false;
+    return type != nullptr && type->comest_slot.get() != nullptr;
 }
 
 bool item::is_food_container() const
@@ -2184,7 +2181,7 @@ bool item::is_drink() const
     if( is_null() )
         return false;
 
-    return type->is_food() && type->phase == LIQUID;
+    return type->comest_slot && type->phase == LIQUID;
 }
 
 bool item::is_weap() const
@@ -3139,8 +3136,7 @@ int item::get_remaining_capacity_for_liquid(const item &liquid, LIQUID_FILL_ERRO
     int total_capacity = type->container_slot->contains;
 
     if (liquid.is_food()) {
-        it_comest *tmp_comest = dynamic_cast<it_comest *>(liquid.type);
-        total_capacity = type->container_slot->contains * tmp_comest->charges;
+        total_capacity = type->container_slot->contains * liquid.type->comest_slot->charges;
     } else if (liquid.is_ammo()) {
         it_ammo *tmp_ammo = dynamic_cast<it_ammo *>(liquid.type);
         total_capacity = type->container_slot->contains * tmp_ammo->count;
@@ -3165,8 +3161,7 @@ int item::get_remaining_capacity() const
     int total_capacity = type->container_slot->contains;
 
     if (contents[0].is_food()) {
-        it_comest *tmp_comest = dynamic_cast<it_comest *>(contents[0].type);
-        total_capacity = type->container_slot->contains * tmp_comest->charges;
+        total_capacity = type->container_slot->contains * contents[0].type->comest_slot->charges;
     } else if (contents[0].is_ammo()) {
         it_ammo *tmp_ammo = dynamic_cast<it_ammo *>(contents[0].type);
         total_capacity = type->container_slot->contains * tmp_ammo->count;

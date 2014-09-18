@@ -478,13 +478,12 @@ void Item_factory::check_itype_definitions() const
                 msg << string_format("item %s has unknown quality %s", type->id.c_str(), a->first.c_str()) << "\n";
             }
         }
-        const it_comest *comest = dynamic_cast<const it_comest *>(type);
-        if (comest != 0) {
-            if (comest->container != "null" && !has_template(comest->container)) {
-                msg << string_format("invalid container property %s", comest->container.c_str()) << "\n";
+        if( type->comest_slot ) {
+            if (type->comest_slot->container != "null" && !has_template(type->comest_slot->container)) {
+                msg << string_format("invalid container property %s", type->comest_slot->container.c_str()) << "\n";
             }
-            if (comest->container != "null" && !has_template(comest->tool)) {
-                msg << string_format("invalid tool property %s", comest->tool.c_str()) << "\n";
+            if (type->comest_slot->container != "null" && !has_template(type->comest_slot->tool)) {
+                msg << string_format("invalid tool property %s", type->comest_slot->tool.c_str()) << "\n";
             }
         }
         const it_ammo *ammo = dynamic_cast<const it_ammo *>(type);
@@ -803,47 +802,56 @@ void Item_factory::load_book( JsonObject &jo )
     new_item_template.release();
 }
 
-void Item_factory::load_comestible(JsonObject &jo)
+template<>
+void Item_factory::load_slot( std::unique_ptr<islot_comest> &slotptr, JsonObject &jo )
 {
-    it_comest *comest_template = new it_comest();
-    comest_template->comesttype = jo.get_string("comestible_type");
-    comest_template->tool = jo.get_string("tool", "null");
-    comest_template->container = jo.get_string("container", "null");
-    comest_template->quench = jo.get_int("quench", 0);
-    comest_template->nutr = jo.get_int("nutrition", 0);
-    comest_template->spoils = jo.get_int("spoils_in", 0);
-    comest_template->brewtime = jo.get_int("brew_time", 0);
-    comest_template->addict = jo.get_int("addiction_potential", 0);
-    comest_template->charges = jo.get_long("charges", 0);
-    if (jo.has_member("stack_size")) {
-        comest_template->stack_size = jo.get_long("stack_size");
+    // TODO: more generic. those two lines are identical for all slot types
+    slotptr.reset( new islot_comest() );
+    auto &slot = *slotptr;
+
+    slot.comesttype = jo.get_string( "comestible_type" );
+    slot.tool = jo.get_string( "tool", "null" );
+    slot.container = jo.get_string( "container", "null" );
+    slot.quench = jo.get_int( "quench", 0 );
+    slot.nutr = jo.get_int( "nutrition", 0 );
+    slot.spoils = jo.get_int( "spoils_in", 0 );
+    slot.brewtime = jo.get_int( "brew_time", 0 );
+    slot.addict = jo.get_int( "addiction_potential", 0 );
+    slot.charges = jo.get_long( "charges", 0 );
+    if( jo.has_member( "stack_size" ) ) {
+        slot.stack_size = jo.get_long( "stack_size" );
     } else {
-        comest_template->stack_size = comest_template->charges;
+        slot.stack_size = slot.charges;
     }
-    comest_template->stim = jo.get_int("stim", 0);
+    slot.stim = jo.get_int( "stim", 0 );
     // TODO: sometimes in the future: remove this if clause and accept
     // only "healthy" and not "heal".
-    if (jo.has_member("heal")) {
-        debugmsg("the item property \"heal\" has been renamed to \"healthy\"\n"
-                 "please change the json data for item %d", comest_template->id.c_str());
-        comest_template->healthy = jo.get_int("heal");
+    if( jo.has_member( "heal" ) ) {
+        debugmsg( "the item property \"heal\" has been renamed to \"healthy\"\n"
+                  "please change the json data for item %d", jo.get_string( "id", "" ).c_str() );
+        slot.healthy = jo.get_int( "heal" );
     } else {
-        comest_template->healthy = jo.get_int("healthy", 0);
+        slot.healthy = jo.get_int( "healthy", 0 );
     }
-    comest_template->fun = jo.get_int("fun", 0);
-    comest_template->add = addiction_type(jo.get_string("addiction_type"));
+    slot.fun = jo.get_int( "fun", 0 );
+    slot.add = addiction_type( jo.get_string( "addiction_type" ) );
 
-    if (jo.has_array("rand_charges")) {
-        JsonArray jarr = jo.get_array("rand_charges");
-        while (jarr.has_more()) {
-            comest_template->rand_charges.push_back(jarr.next_long());
+    if( jo.has_array( "rand_charges" ) ) {
+        JsonArray jarr = jo.get_array( "rand_charges" );
+        while( jarr.has_more() ) {
+            slot.rand_charges.push_back( jarr.next_long() );
         }
     } else {
-        comest_template->rand_charges.push_back(comest_template->charges);
+        slot.rand_charges.push_back( slot.charges );
     }
+}
 
-    itype *new_item_template = comest_template;
-    load_basic_info(jo, new_item_template);
+void Item_factory::load_comestible( JsonObject &jo )
+{
+    std::unique_ptr<itype> new_item_template( new itype() );
+    load_slot( new_item_template->comest_slot, jo );
+    load_basic_info( jo, new_item_template.get() );
+    new_item_template.release();
 }
 
 template<>
@@ -989,6 +997,7 @@ void Item_factory::load_generic( JsonObject &jo )
     load_slot_if_available( new_item_template->tool_slot, jo, "tool" );
     load_slot_if_available( new_item_template->book_slot, jo, "book" );
     load_slot_if_available( new_item_template->gun_slot, jo, "gun" );
+    load_slot_if_available( new_item_template->comest_slot, jo, "comest" );
     load_slot_if_available( new_item_template->explode_in_fire_slot, jo, "explode_in_fire" );
     load_basic_info( jo, new_item_template.get() );
     new_item_template.release();
@@ -1662,9 +1671,8 @@ const std::string &Item_factory::calc_category(itype *it)
     if( it->tool_slot ) {
         return category_id_tools;
     }
-    if (it->is_food()) {
-        it_comest *comest = dynamic_cast<it_comest *>(it);
-        return (comest->comesttype == "MED" ? category_id_drugs : category_id_food);
+    if( it->comest_slot ) {
+        return (it->comest_slot->comesttype == "MED" ? category_id_drugs : category_id_food);
     }
     if( it->book_slot ) {
         return category_id_books;

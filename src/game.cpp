@@ -4759,7 +4759,7 @@ void game::debug()
             std::string spstr = "";
             for (int i = 0; i < ne; i++) {
                 itype *ity = item_controller->find_template(examples[i]);
-                exsp[i] = dynamic_cast<it_comest *>(ity)->spoils * 600;
+                exsp[i] = ity->comest_slot->spoils * 600;
                 esz[i] = examples[i].size();
                 spstr = string_format("%s | %s", spstr.c_str(), examples[i].c_str());
             }

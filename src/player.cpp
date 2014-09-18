@@ -7470,7 +7470,7 @@ int player::drink_from_hands(item& water) {
 bool player::consume(int pos)
 {
     item *to_eat = NULL;
-    it_comest *comest = NULL;
+    const itype *comest = NULL;
     int which = -3; // Helps us know how to delete the item which got eaten
 
     if(pos == INT_MIN) {
@@ -7488,12 +7488,12 @@ bool player::consume(int pos)
             to_eat = &weapon.contents[0];
             which = -2;
             if (weapon.contents[0].is_food()) {
-                comest = dynamic_cast<it_comest*>(weapon.contents[0].type);
+                comest = weapon.contents[0].type;
             }
         } else if (weapon.is_food(this)) {
             to_eat = &weapon;
             which = -1;
-            comest = dynamic_cast<it_comest*>(weapon.type);
+            comest = weapon.type;
         } else {
             add_msg_if_player(m_info, _("You can't eat your %s."), weapon.tname().c_str());
             if(is_npc()) {
@@ -7508,12 +7508,12 @@ bool player::consume(int pos)
             to_eat = &(it.contents[0]);
             which = 1;
             if (it.contents[0].is_food()) {
-                comest = dynamic_cast<it_comest*>(it.contents[0].type);
+                comest = it.contents[0].type;
             }
         } else if (it.is_food(this)) {
             to_eat = &it;
             which = 0;
-            comest = dynamic_cast<it_comest*>(it.type);
+            comest = it.type;
         } else {
             add_msg_if_player(m_info, _("You can't eat your %s."), it.tname().c_str());
             if(is_npc()) {
@@ -7531,34 +7531,35 @@ bool player::consume(int pos)
     int amount_used = 1;
     bool was_consumed = false;
     if (comest != NULL) {
-        if (comest->comesttype == "FOOD" || comest->comesttype == "DRINK") {
-            was_consumed = eat(to_eat, comest);
+        const islot_comest *f = comest->comest_slot.get();
+        if (f->comesttype == "FOOD" || f->comesttype == "DRINK") {
+            was_consumed = eat(to_eat, f);
             if (!was_consumed) {
                 return was_consumed;
             }
-        } else if (comest->comesttype == "MED") {
-            if (comest->tool != "null") {
+        } else if (f->comesttype == "MED") {
+            if (f->tool != "null") {
                 // Check tools
-                bool has = has_amount(comest->tool, 1);
+                bool has = has_amount(f->tool, 1);
                 // Tools with charges need to have charges, not just be present.
-                if (itypes[comest->tool]->count_by_charges()) {
-                    has = has_charges(comest->tool, 1);
+                if (itypes[f->tool]->count_by_charges()) {
+                    has = has_charges(f->tool, 1);
                 }
                 if (!has) {
                     add_msg_if_player(m_info, _("You need a %s to consume that!"),
-                                         itypes[comest->tool]->nname(1).c_str());
+                                         itypes[f->tool]->nname(1).c_str());
                     return false;
                 }
-                use_charges(comest->tool, 1); // Tools like lighters get used
+                use_charges(f->tool, 1); // Tools like lighters get used
             }
-            if (comest->has_use()) {
+            if(f->has_use()) {
                 //Check special use
-                amount_used = comest->invoke(this, to_eat, false);
+                amount_used = f->invoke(this, to_eat, false);
                 if( amount_used <= 0 ) {
                     return false;
                 }
             }
-            consume_effects(to_eat, comest);
+            consume_effects(to_eat, f);
             moves -= 250;
             was_consumed = true;
         } else {
@@ -7577,7 +7578,7 @@ bool player::consume(int pos)
             charge_power(to_eat->charges / factor);
             to_eat->charges -= max_change * factor; //negative charges seem to be okay
             to_eat->charges++; //there's a flat subtraction later
-        } else if (!to_eat->type->is_food() && !to_eat->is_food_container(this)) {
+        } else if (!to_eat->is_food() && !to_eat->is_food_container(this)) {
             if (to_eat->is_book()) {
                 if (to_eat->type->book_slot->type != NULL && !query_yn(_("Really eat %s?"), to_eat->tname().c_str())) {
                     return false;
@@ -7642,7 +7643,7 @@ bool player::consume(int pos)
     return true;
 }
 
-bool player::eat(item *eaten, it_comest *comest)
+bool player::eat(item *eaten, const islot_comest *comest)
 {
     int to_eat = 1;
     if (comest == NULL) {
@@ -8008,7 +8009,7 @@ bool player::eat(item *eaten, it_comest *comest)
     return true;
 }
 
-void player::consume_effects(item *eaten, it_comest *comest, bool rotten)
+void player::consume_effects(item *eaten, const islot_comest *comest, bool rotten)
 {
     if (has_trait("THRESH_PLANT") && comest->can_use( "PLANTBLECH" )) {
     return;
@@ -8088,16 +8089,17 @@ void player::consume_effects(item *eaten, it_comest *comest, bool rotten)
         add_morale(MORALE_FOOD_HOT, 5, 10);
     }
     if (eaten->has_flag("COLD") && eaten->has_flag("EATEN_COLD") && comest->fun > 0) {
-            add_morale(MORALE_FOOD_GOOD, comest->fun * 3, comest->fun * 3, 60, 30, false, comest);
+            add_morale(MORALE_FOOD_GOOD, comest->fun * 3, comest->fun * 3, 60, 30, false, eaten->type);
     }
+    auto fun = comest->fun;
     if (eaten->has_flag("COLD") && eaten->has_flag("EATEN_COLD") && comest->fun <= 0) {
-            comest->fun = 1;
+        fun = 1;
     }
     if (has_trait("GOURMAND")) {
-        if (comest->fun < -2) {
-            add_morale(MORALE_FOOD_BAD, comest->fun * 0.5, comest->fun, 60, 30, false, comest);
-        } else if (comest->fun > 0) {
-            add_morale(MORALE_FOOD_GOOD, comest->fun * 3, comest->fun * 6, 60, 30, false, comest);
+        if (fun < -2) {
+            add_morale(MORALE_FOOD_BAD, fun * 0.5, fun, 60, 30, false, eaten->type);
+        } else if (fun > 0) {
+            add_morale(MORALE_FOOD_GOOD, fun * 3, fun * 6, 60, 30, false, eaten->type);
         }
         if (has_trait("GOURMAND") && !(has_active_mutation("HIBERNATE"))) {
         if ((comest->nutr > 0 && hunger < -60) || (comest->quench > 0 && thirst < -60)) {
@@ -8143,10 +8145,10 @@ void player::consume_effects(item *eaten, it_comest *comest, bool rotten)
             thirst = -620;
         }
     } else {
-        if (comest->fun < 0) {
-            add_morale(MORALE_FOOD_BAD, comest->fun, comest->fun * 6, 60, 30, false, comest);
-        } else if (comest->fun > 0) {
-            add_morale(MORALE_FOOD_GOOD, comest->fun, comest->fun * 4, 60, 30, false, comest);
+        if (fun < 0) {
+            add_morale(MORALE_FOOD_BAD, fun, fun * 6, 60, 30, false, eaten->type);
+        } else if (fun > 0) {
+            add_morale(MORALE_FOOD_GOOD, fun, fun * 4, 60, 30, false, eaten->type);
         }
         if ((comest->nutr > 0 && hunger < -20) || (comest->quench > 0 && thirst < -20)) {
             add_msg_if_player(_("You can't finish it all!"));

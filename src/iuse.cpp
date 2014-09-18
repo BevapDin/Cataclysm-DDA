@@ -627,16 +627,14 @@ int iuse::xanax(player *p, item *it, bool)
 
 int iuse::caff(player *p, item *it, bool)
 {
-    it_comest *food = dynamic_cast<it_comest *> (it->type);
-    p->fatigue -= food->stim * 3;
+    p->fatigue -= it->type->comest_slot->stim * 3;
     return it->type->charges_to_use();
 }
 
 int iuse::atomic_caff(player *p, item *it, bool)
 {
     p->add_msg_if_player(m_good, _("Wow! This %s has a kick."), it->tname().c_str());
-    it_comest *food = dynamic_cast<it_comest *> (it->type);
-    p->fatigue -= food->stim * 12;
+    p->fatigue -= it->type->comest_slot->stim * 12;
     p->radiation += 8;
     return it->type->charges_to_use();
 }
@@ -738,16 +736,16 @@ int iuse::raw_wildveg(player *p, item *it, bool)
 int iuse::alcohol(player *p, item *it, bool)
 {
     int duration = 680 - (10 * p->str_max); // Weaker characters are cheap drunks
-    it_comest *food = dynamic_cast<it_comest *> (it->type);
+    const auto stim = it->type->comest_slot->stim;
     if (p->has_trait("ALCMET")) {
         duration = 180 - (10 * p->str_max);
         // Metabolizing the booze improves the nutritional value;
         // might not be healthy, and still causes Thirst problems, though
-        p->hunger -= (abs(food->stim));
+        p->hunger -= (abs(stim));
         // Metabolizing it cancels out depressant
         // effects, but doesn't make it any more stimulating
-        if ((food->stim) < 0) {
-            p->stim += (abs(food->stim));
+        if ((stim) < 0) {
+            p->stim += (abs(stim));
         }
     } else if (p->has_trait("TOLERANCE")) {
         duration -= 300;
@@ -764,14 +762,14 @@ int iuse::alcohol(player *p, item *it, bool)
 int iuse::alcohol_weak(player *p, item *it, bool)
 {
     int duration = 340 - (6 * p->str_max);
-    it_comest *food = dynamic_cast<it_comest *> (it->type);
+    const auto stim = it->type->comest_slot->stim;
     if (p->has_trait("ALCMET")) {
         duration = 90 - (6 * p->str_max);
         // Metabolizing the booze improves the nutritional value;
         // might not be healthy, and still causes Thirst problems, though
-        p->hunger -= (abs(food->stim));
+        p->hunger -= (abs(stim));
         // Metabolizing it cancels out the depressant
-        p->stim += (abs(food->stim));
+        p->stim += (abs(stim));
     } else if (p->has_trait("TOLERANCE")) {
         duration -= 120;
     } else if (p->has_trait("LIGHTWEIGHT")) {
@@ -787,18 +785,18 @@ int iuse::alcohol_weak(player *p, item *it, bool)
 int iuse::alcohol_strong(player *p, item *it, bool)
 {
     int duration = 900 - (12 * p->str_max);
-    it_comest *food = dynamic_cast<it_comest *> (it->type);
+    const auto stim = it->type->comest_slot->stim;
     if (p->has_trait("ALCMET")) {
         duration = 250 - (10 * p->str_max);
         // Metabolizing the booze improves the nutritional
         // value; might not be healthy, and still
         // causes Thirst problems, though
-        p->hunger -= (abs(food->stim));
+        p->hunger -= (abs(stim));
         // Metabolizing it cancels out depressant
         // effects, but doesn't make it any more
         // stimulating
-        if ((food->stim) < 0) {
-            p->stim += (abs(food->stim));
+        if ((stim) < 0) {
+            p->stim += (abs(stim));
         }
     } else if (p->has_trait("TOLERANCE")) {
         duration -= 450;
@@ -1322,10 +1320,8 @@ int iuse::poison(player *p, item *it, bool)
  */
 int iuse::fun_hallu(player *p, item *it, bool)
 {
-    it_comest *comest = dynamic_cast<it_comest *>(it->type);
-
     //Fake a normal food morale effect
-    p->add_morale(MORALE_FOOD_GOOD, 18, 36, 60, 30, false, comest);
+    p->add_morale(MORALE_FOOD_GOOD, 18, 36, 60, 30, false, it->type);
     if (!p->has_disease("hallu")) {
         p->add_disease("hallu", 3600);
     }
@@ -1456,12 +1452,11 @@ int iuse::plantblech(player *p, item *it, bool)
         } else{
             p->add_msg_if_player(m_good, _("Oddly enough, this doesn't taste so bad."));
         }
-    it_comest *food = dynamic_cast<it_comest*>(it->type);
     //reverses the harmful values of drinking fertilizer
-    p->hunger += food->nutr * multiplier;
-    p->thirst -= food->quench * multiplier;
-    p->mod_healthy_mod(food->healthy * multiplier);
-    p->add_morale(MORALE_FOOD_GOOD, -10 * multiplier, 60, 60, 30, false, food);
+    p->hunger += it->type->comest_slot->nutr * multiplier;
+    p->thirst -= it->type->comest_slot->quench * multiplier;
+    p->mod_healthy_mod(it->type->comest_slot->healthy * multiplier);
+    p->add_morale(MORALE_FOOD_GOOD, -10 * multiplier, 60, 60, 30, false, it->type);
     return it->type->charges_to_use();
     }
     else {
@@ -7639,7 +7634,7 @@ static bool heat_item(player *p)
         return false;
     }
     item *target = heat->is_food_container() ? &(heat->contents[0]) : heat;
-    if ((target->type->is_food()) && (target->has_flag("EATEN_HOT"))) {
+    if ((target->is_food()) && (target->has_flag("EATEN_HOT"))) {
         p->moves -= 300;
         add_msg(_("You heat up the food."));
         target->item_tags.insert("HOT");

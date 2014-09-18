@@ -205,7 +205,7 @@ void tutorial_game::post_action(action_id act)
    add_message(LESSON_GOT_AMMO);
   else if( it->tool_slot )
    add_message(LESSON_GOT_TOOL);
-  else if (it->is_food())
+  else if( it->comest_slot )
    add_message(LESSON_GOT_FOOD);
   else if (it->melee_dam > 7 || it->melee_cut > 5)
    add_message(LESSON_GOT_WEAPON);
