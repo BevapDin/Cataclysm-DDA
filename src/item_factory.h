@@ -182,6 +182,13 @@ class Item_factory
          */
         template<typename SlotType>
         void load_slot( std::unique_ptr<SlotType> &slotptr, JsonObject &jo );
+        /**
+         * If the json object has a member (which has to be any object, too),
+         * than load its data into the given item slot. The pointer is reset,
+         * the current value is lost.
+         */
+        template<typename SlotType>
+        void load_slot_if_available( std::unique_ptr<SlotType> &slotptr, JsonObject &jo, const std::string &name );
 
         // used to add the default categories
         void add_category(const std::string &id, int sort_rank, const std::string &name);

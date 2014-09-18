@@ -945,10 +945,31 @@ void Item_factory::load_stationary(JsonObject &jo)
     new_item_template.release();
 }
 
-void Item_factory::load_generic(JsonObject &jo)
+template<typename SlotType>
+void Item_factory::load_slot_if_available( std::unique_ptr<SlotType> &slotptr, JsonObject &jo, const std::string &name )
 {
-    itype *new_item_template = new itype();
-    load_basic_info(jo, new_item_template);
+    if( !jo.has_object( name ) ) {
+        return;
+    }
+    JsonObject m = jo.get_object( name );
+    load_slot( slotptr, m );
+}
+
+void Item_factory::load_generic( JsonObject &jo )
+{
+    std::unique_ptr<itype> new_item_template( new itype() );
+    // TODO: move all those load_slot_if_available calls into load_basic_info,
+    // but this would currently interfere with the other items types, e.g.
+    // book_slot would be loaded twice from different places.
+    load_slot_if_available( new_item_template->container_slot, jo, "container" );
+    load_slot_if_available( new_item_template->variable_bigness_slot, jo, "variable_bigness" );
+    load_slot_if_available( new_item_template->bionic_slot, jo, "bionic" );
+    load_slot_if_available( new_item_template->stationary_slot, jo, "stationary" );
+    load_slot_if_available( new_item_template->armor_slot, jo, "armor" );
+    load_slot_if_available( new_item_template->tool_slot, jo, "tool" );
+    load_slot_if_available( new_item_template->book_slot, jo, "book" );
+    load_basic_info( jo, new_item_template.get() );
+    new_item_template.release();
 }
 
 void Item_factory::load_basic_info(JsonObject &jo, itype *new_item_template)
