@@ -16,6 +16,7 @@
 #include <cmath> // floor
 #include <sstream>
 #include <algorithm>
+#include <cassert>
 
 light_emission nolight = {0, 0, 0};
 
@@ -217,8 +218,9 @@ void item::clear()
 
 bool item::is_null() const
 {
+	assert( this != nullptr );
     static const std::string s_null("null"); // used alot, no need to repeat
-    return (this == NULL || type == NULL || type->id == s_null);
+    return (type == NULL || type->id == s_null);
 }
 
 item item::in_its_container()
@@ -2155,11 +2157,6 @@ bool item::is_food(player const*u) const
 bool item::is_food_container(player const*u) const
 {
     return (contents.size() >= 1 && contents[0].is_food(u));
-}
-
-bool is_edible(item i, player const*u)
-{
-    return (i.is_food(u) || i.is_food_container(u));
 }
 
 bool item::is_food() const
