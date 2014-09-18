@@ -7794,9 +7794,8 @@ int iuse::holster_pistol(player *p, item *it, bool)
         }
 
         // make sure we're holstering a pistol
-        if (put->type->is_gun()) {
-            it_gun *gun = dynamic_cast<it_gun *>(put->type);
-            if (!(gun->skill_used == Skill::skill("pistol"))) {
+        if (put->is_gun()) {
+            if( put->type->gun_slot->skill_used != Skill::skill( "pistol" ) ) {
                 p->add_msg_if_player(m_info, _("The %s isn't a pistol!"), put->tname().c_str());
                 return 0;
             }

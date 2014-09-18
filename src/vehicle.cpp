@@ -4045,8 +4045,8 @@ bool vehicle::fire_turret (int p, bool burst)
 {
     if (!part_flag (p, "TURRET"))
         return false;
-    it_gun *gun = dynamic_cast<it_gun*> (itypes[part_info(p).item]);
-    if (!gun) {
+    const itype *gun = item_controller->find_template( part_info(p).item );
+    if( !gun->gun_slot ) {
         return false;
     }
     // Check for available power for turrets that use it.
@@ -4058,7 +4058,7 @@ bool vehicle::fire_turret (int p, bool burst)
     } else if( gun->item_tags.count( "USE_UPS_40" ) && power < 40 ) {
         return false;
     }
-    long charges = burst? gun->burst : 1;
+    long charges = burst? gun->gun_slot->burst : 1;
     std::string whoosh = "";
     if (!charges)
         charges = 1;
@@ -4125,7 +4125,7 @@ bool vehicle::fire_turret (int p, bool burst)
     return true;
 }
 
-bool vehicle::fire_turret_internal (int p, it_gun &gun, it_ammo &ammo, long charges, const std::string &extra_sound)
+bool vehicle::fire_turret_internal (int p, const itype &gun, it_ammo &ammo, long charges, const std::string &extra_sound)
 {
     int x = global_x() + parts[p].precalc_dx[0];
     int y = global_y() + parts[p].precalc_dy[0];
@@ -4135,7 +4135,7 @@ bool vehicle::fire_turret_internal (int p, it_gun &gun, it_ammo &ammo, long char
     npc tmp;
     tmp.set_fake( true );
     tmp.name = rmp_format(_("<veh_player>The %s"), part_info(p).name.c_str());
-    tmp.skillLevel(gun.skill_used).level(8);
+    tmp.skillLevel(gun.gun_slot->skill_used).level(8);
     tmp.skillLevel("gun").level(4);
     tmp.recoil = abs(velocity) / 100 / 4;
     tmp.posx = x;

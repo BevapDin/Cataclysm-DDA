@@ -10466,9 +10466,8 @@ bool game::handle_liquid(item &liquid, bool from_ground, bool infinite, item *so
             ammo = cont->type->tool_slot->ammo;
             max = cont->type->tool_slot->max_charges;
         } else {
-            it_gun *gun = dynamic_cast<it_gun *>(cont->type);
-            ammo = gun->ammo;
-            max = gun->clip;
+            ammo = cont->type->gun_slot->ammo;
+            max = cont->type->gun_slot->clip;
         }
 
         ammotype liquid_type = liquid.ammo_type();
@@ -10605,9 +10604,8 @@ int game::move_liquid(item &liquid)
                 ammo = cont->type->tool_slot->ammo;
                 max = cont->type->tool_slot->max_charges;
             } else {
-                it_gun *gun = dynamic_cast<it_gun *>(cont->type);
-                ammo = gun->ammo;
-                max = gun->clip;
+                ammo = cont->type->gun_slot->ammo;
+                max = cont->type->gun_slot->clip;
             }
 
             ammotype liquid_type = liquid.ammo_type();
@@ -11878,7 +11876,7 @@ void game::reload(int pos)
                 contents = *cont;
                 if ((contents.is_gunmod() &&
                      (contents.typeId() == "spare_mag" &&
-                      contents.charges < (dynamic_cast<it_gun *>(it->type))->clip)) ||
+                      contents.charges < it->type->gun_slot->clip)) ||
                     (contents.has_flag("MODE_AUX") &&
                      contents.charges < contents.clip_size())) {
                     magazine_isfull = false;

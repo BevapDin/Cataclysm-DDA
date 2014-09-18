@@ -331,6 +331,83 @@ struct islot_book {
     }
 };
 
+// TODO: this shares a lot with the ammo item type, merge into a separate slot type?
+struct islot_gun {
+    /**
+     * What type of ammo this gun uses.
+     */
+    ammotype ammo;
+    /**
+     * What skill this gun uses.
+     * TODO: This is also indicates the type of gun (handgun/rifle/etc.) - that
+     * should probably be made explicit.
+     * TODO: this should be a pointer to a const Skill
+     */
+    Skill *skill_used;
+    /**
+     * Damage bonus from gun.
+     */
+    int dmg_bonus;
+    /**
+     * Armor-pierce bonus from gun.
+     */
+    int pierce;
+    /**
+     * Range bonus from gun.
+     */
+    int range;
+    /**
+     * Dispersion "bonus" from gun.
+     */
+    int dispersion;
+    /**
+     * Recoil "bonus" from gun.
+     */
+    int recoil;
+    /**
+     * Gun durability, affects gun being damaged during shooting.
+     */
+    int durability;
+    /**
+     * Burst size.
+     */
+    int burst;
+    /**
+     * Clip size.
+     */
+    int clip;
+    /**
+     * Reload time.
+     */
+    int reload_time;
+    /**
+     * Effects that are applied to the ammo when fired.
+     */
+    std::set<std::string> ammo_effects;
+    /**
+     * Location for gun mods.
+     * Key is the location (untranslated!), value is the number of mods
+     * that the location can have. The value should be > 0.
+     */
+    std::map<std::string, int> valid_mod_locations;
+
+    islot_gun()
+    : skill_used( nullptr )
+    , dmg_bonus( 0 )
+    , pierce( 0 )
+    , range( 0 )
+    , dispersion( 0 )
+    , recoil( 0 )
+    , durability( 0 )
+    , burst( 0 )
+    , clip( 0 )
+    , reload_time( 0 )
+    , ammo_effects()
+    , valid_mod_locations()
+    {
+    }
+};
+
 struct itype {
     itype_id id; // unique string identifier for this item,
     // can be used as lookup key in master itype map
@@ -344,6 +421,7 @@ struct itype {
     std::unique_ptr<islot_armor> armor_slot;
     std::unique_ptr<islot_tool> tool_slot;
     std::unique_ptr<islot_book> book_slot;
+    std::unique_ptr<islot_gun> gun_slot;
     // Explosion that happens when the item is set on fire
     std::unique_ptr<explosion_data> explode_in_fire_slot;
 
@@ -395,6 +473,8 @@ public:
             return "TOOL";
         } else if( book_slot.get() != nullptr ) {
             return "BOOK";
+        } else if( gun_slot.get() != nullptr ) {
+            return "GUN";
         }
         return "misc";
     }
@@ -424,10 +504,6 @@ public:
         return false;
     }
     virtual bool is_ammo() const
-    {
-        return false;
-    }
-    virtual bool is_gun() const
     {
         return false;
     }
@@ -575,38 +651,6 @@ struct it_ammo : public virtual itype {
     virtual std::string get_item_type_string() const
     {
         return "AMMO";
-    }
-};
-
-struct it_gun : public virtual itype {
-    ammotype ammo;
-    Skill *skill_used;
-    int dmg_bonus;
-    int pierce;
-    int range;
-    int dispersion;
-    int recoil;
-    int durability;
-    int burst;
-    int clip;
-    int reload_time;
-
-    std::set<std::string> ammo_effects;
-    std::map<std::string, int> valid_mod_locations;
-
-    virtual bool is_gun() const
-    {
-        return true;
-    }
-    virtual std::string get_item_type_string() const
-    {
-        return "GUN";
-    }
-
-    it_gun() : itype(), skill_used(NULL), dmg_bonus(0), pierce(0), range(0), dispersion(0),
-        recoil(0), durability(0), burst(0), clip(0), reload_time(0), ammo_effects(),
-        valid_mod_locations()
-    {
     }
 };
 

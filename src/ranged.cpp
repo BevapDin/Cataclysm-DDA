@@ -11,7 +11,7 @@
 #include "input.h"
 #include "messages.h"
 
-int time_to_fire(player &p, it_gun *firing);
+int time_to_fire(player &p, const itype *firing);
 int recoil_add(player &p);
 void make_gun_sound_effect(player &p, bool burst, item *weapon);
 int skill_dispersion( player *p, item *weapon, bool random );
@@ -165,9 +165,9 @@ double Creature::projectile_attack(const projectile &proj, int sourcex, int sour
     return missed_by;
 }
 
-bool player::handle_gun_damage( it_gun *firing, std::set<std::string> *curammo_effects )
+bool player::handle_gun_damage( const itype *firingt, std::set<std::string> *curammo_effects )
 {
-
+    const islot_gun *firing = firingt->gun_slot.get();
     // Here we check if we're underwater and whether we should misfire.
     // As a result this causes no damage to the firearm, note that some guns are waterproof
     // and so are immune to this effect, note also that WATERPROOF_GUN status does not
@@ -295,8 +295,8 @@ void player::fire_gun(int tarx, int tary, bool burst)
 
     std::set<std::string> *curammo_effects = &curammo->ammo_effects;
     if( gunmod == NULL ) {
-        std::set<std::string> *gun_effects = &dynamic_cast<it_gun *>(used_weapon->type)->ammo_effects;
-        proj.proj_effects.insert(gun_effects->begin(), gun_effects->end());
+        std::set<std::string> &gun_effects = used_weapon->type->gun_slot->ammo_effects;
+        proj.proj_effects.insert(gun_effects.begin(), gun_effects.end());
     }
     proj.proj_effects.insert(curammo_effects->begin(), curammo_effects->end());
 
@@ -311,7 +311,7 @@ void player::fire_gun(int tarx, int tary, bool burst)
 
     //int x = xpos(), y = ypos();
     // Have to use the gun, gunmods don't have a type
-    it_gun *firing = dynamic_cast<it_gun *>(weapon.type);
+    const itype *firing = weapon.type;
     if (has_trait("TRIGGERHAPPY") && one_in(30)) {
         burst = true;
     }
@@ -319,7 +319,7 @@ void player::fire_gun(int tarx, int tary, bool burst)
         burst = false; // Can't burst fire a semi-auto
     }
     if (skill_used == NULL) {
-        skill_used = firing->skill_used;
+        skill_used = firing->gun_slot->skill_used;
     }
 
     // Use different amounts of time depending on the type of gun and our skill
@@ -504,12 +504,12 @@ void player::fire_gun(int tarx, int tary, bool burst)
         //debugmsg("%f",total_dispersion);
         int range = rl_dist(xpos(), ypos(), tarx, tary);
         // penalties for point-blank
-        if (range < int(firing->volume / 3) && firing->ammo != "shot") {
+        if (range < int(firing->volume / 3) && firing->gun_slot->ammo != "shot") {
             total_dispersion *= double(firing->volume / 3) / double(range);
         }
 
         // rifle has less range penalty past LONG_RANGE
-        if (firing->skill_used == Skill::skill("rifle") && range > LONG_RANGE) {
+        if (firing->gun_slot->skill_used == Skill::skill("rifle") && range > LONG_RANGE) {
             total_dispersion *= 1 - 0.4 * double(range - LONG_RANGE) / double(range);
         }
 
@@ -1140,8 +1140,9 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
     return ret;
 }
 
-int time_to_fire(player &p, it_gun *firing)
+int time_to_fire(player &p, const itype *firingt)
 {
+    const islot_gun *firing = firingt->gun_slot.get();
     int time = 0;
     if (firing->skill_used == Skill::skill("pistol")) {
         if (p.skillLevel("pistol") > 6) {
@@ -1192,7 +1193,7 @@ int time_to_fire(player &p, it_gun *firing)
             time = (200 - (20 * p.skillLevel("melee")));
         }
     } else {
-        debugmsg("Why is shooting %s using %s skill?", firing->nname(1).c_str(),
+        debugmsg("Why is shooting %s using %s skill?", firingt->nname(1).c_str(),
                  firing->skill_used->name().c_str());
         time =  0;
     }
@@ -1210,7 +1211,7 @@ void make_gun_sound_effect(player &p, bool burst, item *weapon)
         return;
     }
 
-    it_gun *weapontype = dynamic_cast<it_gun *>(weapon->type);
+    islot_gun *weapontype = weapon->type->gun_slot.get();
     if (weapontype->ammo_effects.count("LASER") || weapontype->ammo_effects.count("PLASMA")) {
         if (noise < 20) {
             gunsound = _("Fzzt!");
@@ -1323,9 +1324,8 @@ int skill_dispersion( player *p, item *weapon, bool random )
         skill_used = firing->skill_used->ident();
         weapon_skill_level = p->skillLevel(firing->skill_used);
     } else {
-        it_gun *firing = dynamic_cast<it_gun *>(weapon->type);
-        skill_used = firing->skill_used->ident();
-        weapon_skill_level = p->skillLevel(firing->skill_used);
+        skill_used = weapon->type->gun_slot->skill_used->ident();
+        weapon_skill_level = p->skillLevel(weapon->type->gun_slot->skill_used);
     }
     int dispersion = 0; // Measured in quarter-degrees.
     // Up to 0.75 degrees for each skill point < 10.
@@ -1391,12 +1391,10 @@ double player::get_weapon_dispersion(item *weapon)
 
 int recoil_add(player &p)
 {
-    // Gunmods don't have atype,so use guns.
-    it_gun *firing = dynamic_cast<it_gun *>(p.weapon.type);
     // item::recoil() doesn't suport gunmods, so call it on player gun.
     int ret = p.weapon.recoil();
     ret -= rng(p.str_cur / 2, p.str_cur);
-    ret -= rng(0, p.skillLevel(firing->skill_used) / 2);
+    ret -= rng(0, p.skillLevel(p.weapon.type->gun_slot->skill_used) / 2);
     if (ret > 0) {
         return ret;
     }

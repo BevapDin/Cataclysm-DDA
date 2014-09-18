@@ -199,7 +199,7 @@ void tutorial_game::post_action(action_id act)
   itype *it = itypes[ g->u.last_item ];
   if( it->armor_slot )
    add_message(LESSON_GOT_ARMOR);
-  else if (it->is_gun())
+  else if( it->gun_slot )
    add_message(LESSON_GOT_GUN);
   else if (it->is_ammo())
    add_message(LESSON_GOT_AMMO);

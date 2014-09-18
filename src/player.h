@@ -447,7 +447,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Returns a weapon's modified dispersion value */
         double get_weapon_dispersion(item *weapon);
         /** Returns true if a gun misfires, jams, or has other problems, else returns false */
-        bool handle_gun_damage( it_gun *firing, std::set<std::string> *curammo_effects );
+        bool handle_gun_damage( const itype *firing, std::set<std::string> *curammo_effects );
         /** Handles gun firing effects and functions */
         void fire_gun(int targetx, int targety, bool burst);
 

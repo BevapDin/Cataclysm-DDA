@@ -160,13 +160,12 @@ void Item_modifier::modify(item &new_item) const
     }
     long ch = (charges.first == charges.second) ? charges.first : rng(charges.first, charges.second);
     if(ch != -1) {
-        it_gun *g = dynamic_cast<it_gun *>(new_item.type);
         if(new_item.count_by_charges()) {
             // food, ammo
             new_item.charges = ch;
         } else if( new_item.type->tool_slot ) {
             new_item.charges = std::min(ch, new_item.type->tool_slot->max_charges);
-        } else if(g != NULL && ammo.get() != NULL) {
+        } else if( new_item.type->gun_slot && ammo.get() != NULL) {
             item am = ammo->create_single(new_item.bday);
             it_ammo *a = dynamic_cast<it_ammo *>(am.type);
             if(!am.is_null() && a != NULL) {
@@ -294,9 +293,9 @@ Item_spawn_data::ItemList Item_group::create(int birthday, RecursionList &rec) c
         }
     }
     if (with_ammo && !result.empty()) {
-        it_gun *maybe_gun = dynamic_cast<it_gun *>(result.front().type);
-        if (maybe_gun != NULL) {
-            const std::string ammoid = default_ammo( maybe_gun->ammo );
+        const itype *t = result.front().type;
+        if( t->gun_slot ) {
+            const std::string ammoid = default_ammo( t->gun_slot->ammo );
             if ( !ammoid.empty() ) {
                 item ammo( ammoid, birthday );
                 // TODO: change the spawn lists to contain proper references to containers
