@@ -70,7 +70,13 @@ struct explosion_data {
     int shrapnel;
     bool fire;
     bool blast;
-    explosion_data() : power(-1), fire(false), blast(true) { }
+    explosion_data()
+    : power( -1 )
+    , shrapnel( 0 )
+    , fire( false )
+    , blast( true )
+    {
+    }
 };
 
 struct islot_container {
@@ -338,6 +344,8 @@ struct itype {
     std::unique_ptr<islot_armor> armor_slot;
     std::unique_ptr<islot_tool> tool_slot;
     std::unique_ptr<islot_book> book_slot;
+    // Explosion that happens when the item is set on fire
+    std::unique_ptr<explosion_data> explode_in_fire_slot;
 
 protected:
     friend class Item_factory;
@@ -361,13 +369,6 @@ public:
     int stack_size;      // How many things make up the above-defined volume (eg. 100 aspirin = 1 volume)
     unsigned int weight; // Weight in grams. Assumes positive weight. No helium, guys!
     std::map<std::string, int> qualities; //Tool quality indicators
-
-    // Explosion that happens when the item is set on fire
-    explosion_data explosion_on_fire_data;
-    bool explode_in_fire() const
-    {
-        return explosion_on_fire_data.power >= 0;
-    }
 
     mtype   *corpse;
 

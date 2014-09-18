@@ -3335,14 +3335,14 @@ iteminfo::iteminfo(std::string Type, std::string Name, std::string Fmt, double V
     bDrawName = DrawName;
 }
 
-void item::detonate(point p) const
+void item::detonate( point p ) const
 {
-    if (type == NULL || type->explosion_on_fire_data.power < 0) {
+    if( type == nullptr || !type->explode_in_fire_slot ) {
         return;
     }
-    g->explosion(p.x, p.y, type->explosion_on_fire_data.power, type->explosion_on_fire_data.shrapnel, type->explosion_on_fire_data.fire, type->explosion_on_fire_data.blast);
+    auto &e = *type->explode_in_fire_slot;
+    g->explosion( p.x, p.y, e.ower, e.shrapnel, e.fire, e.blast );
 }
-
 
 //sort quivers by contents, such that empty quivers go last
 struct sort_by_charges {

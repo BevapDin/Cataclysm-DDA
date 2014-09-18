@@ -515,7 +515,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
                                 // invalid, continue until the index is valid again.
                                 continue;
                             }
-                            if( items_here[i].type->explode_in_fire() ) {
+                            if( items_here[i].type->explode_in_fire_slot ) {
                                 // make a copy and let the copy explode
                                 item tmp( items_here[i] );
                                 items_here.erase( items_here.begin() + i );
