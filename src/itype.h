@@ -30,6 +30,8 @@ enum item_cat {
     IC_CONTAINER
 };
 
+struct recipe;
+
 typedef std::string itype_id;
 extern std::vector<std::string> artifact_itype_ids;
 extern std::vector<std::string> standard_itype_ids;
@@ -261,6 +263,56 @@ struct islot_tool {
     }
 };
 
+struct islot_book {
+    /**
+     * Which skill it upgrades, if any. Can be NULL.
+     * TODO: this should be a pointer to const
+     */
+    Skill *type;
+    /**
+     * The value it takes the skill to.
+     */
+    unsigned char level;
+    /**
+     * The skill level required to understand it.
+     */
+    unsigned char req;
+    /**
+     * How fun reading this is, can be negative.
+     */
+    signed char fun;
+    /**
+     * Intelligence required to read, at all.
+     */
+    unsigned char intel;
+    /**
+     * How long, in 10-turns (aka minutes), it takes to read.
+     * "To read" means getting 1 skill point, not all of them.
+     */
+    unsigned int time;
+    /**
+     * Fun books have chapters; after all are read, the book is less fun.
+     */
+    int chapters;
+    /**
+     * What recipes can be learned from this book.
+     * Key is the recipe, value is TODO
+     */
+    std::map<recipe *, int> recipes;
+
+    islot_book()
+    : type( nullptr )
+    , level( 0 )
+    , req( 0 )
+    , fun( 0 )
+    , intel( 0 )
+    , time( 0 )
+    , chapters( 0 )
+    , recipes()
+    {
+    }
+};
+
 struct itype {
     itype_id id; // unique string identifier for this item,
     // can be used as lookup key in master itype map
@@ -273,6 +325,7 @@ struct itype {
     std::unique_ptr<islot_stationary> stationary_slot;
     std::unique_ptr<islot_armor> armor_slot;
     std::unique_ptr<islot_tool> tool_slot;
+    std::unique_ptr<islot_book> book_slot;
 
 protected:
     friend class Item_factory;
@@ -327,6 +380,8 @@ public:
             return "ARMOR";
         } else if( tool_slot.get() != nullptr ) {
             return "TOOL";
+        } else if( book_slot.get() != nullptr ) {
+            return "BOOK";
         }
         return "misc";
     }
@@ -364,10 +419,6 @@ public:
         return false;
     }
     virtual bool is_gunmod() const
-    {
-        return false;
-    }
-    virtual bool is_book() const
     {
         return false;
     }
@@ -569,33 +620,6 @@ struct it_gunmod : public virtual itype {
         newtype(), acceptible_ammo_types(), used_on_pistol(false), used_on_shotgun(false),
         used_on_smg(false), used_on_rifle(false), used_on_bow(false), used_on_crossbow(false),
         used_on_launcher(false), skill_used(NULL), location()
-    {
-    }
-};
-
-
-struct recipe;
-
-struct it_book : public virtual itype {
-    Skill *type;         // Which skill it upgrades
-    unsigned char level; // The value it takes the skill to
-    unsigned char req;   // The skill level required to understand it
-    signed char fun;     // How fun reading this is
-    unsigned char intel; // Intelligence required to read, at all
-    unsigned int time;  // How long, in 10-turns (aka minutes), it takes to read
-    // "To read" means getting 1 skill point, not all of em
-    int chapters; //Fun books have chapters; after all are read, the book is less fun
-    std::map<recipe *, int> recipes; //what recipes can be learned from this book
-    virtual bool is_book() const
-    {
-        return true;
-    }
-    virtual std::string get_item_type_string() const
-    {
-        return "BOOK";
-    }
-
-    it_book() : itype(), type(NULL), level(0), req(0), fun(0), intel(0), time(0), chapters(), recipes()
     {
     }
 };

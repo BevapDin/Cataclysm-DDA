@@ -828,9 +828,9 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         // Returns -1 to indicate recipe not found, otherwise difficulty to learn.
         int has_recipe( const recipe *r, const inventory &crafting_inv ) const;
         bool knows_recipe( const recipe *rec ) const;
-        void learn_recipe( recipe *rec );
+        void learn_recipe( const recipe *rec );
 
-        bool studied_all_recipes(it_book *book);
+        bool studied_all_recipes(const itype *book) const;
 
         // Auto move methods
         void set_destination(const std::vector<point> &route);
@@ -1029,8 +1029,8 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         bool has_enough_charges(const item &it, bool show_msg) const;
         bool has_active_UPS() const;
 
-        bool can_study_recipe(it_book *book);
-        bool try_study_recipe(it_book *book);
+        bool can_study_recipe(const itype *book);
+        bool try_study_recipe(const itype *book);
 
         std::vector<point> auto_move_route;
         // Used to make sure auto move is canceled if we stumble off course

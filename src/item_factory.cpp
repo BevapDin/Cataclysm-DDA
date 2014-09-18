@@ -771,21 +771,28 @@ void Item_factory::load_tool_armor(JsonObject &jo)
     new_item_template.release();
 }
 
-void Item_factory::load_book(JsonObject &jo)
+template<>
+void Item_factory::load_slot( std::unique_ptr<islot_book> &slotptr, JsonObject &jo )
 {
-    it_book *book_template = new it_book();
+    // TODO: more generic. those two lines are identical for all slot types
+    slotptr.reset( new islot_book() );
+    auto &slot = *slotptr;
 
-    book_template->level = jo.get_int("max_level");
-    book_template->req = jo.get_int("required_level");
-    book_template->fun = jo.get_int("fun");
-    book_template->intel = jo.get_int("intelligence");
-    book_template->time = jo.get_int("time");
-    book_template->type = Skill::skill(jo.get_string("skill"));
+    slot.level = jo.get_int( "max_level" );
+    slot.req = jo.get_int( "required_level" );
+    slot.fun = jo.get_int( "fun" );
+    slot.intel = jo.get_int( "intelligence" );
+    slot.time = jo.get_int( "time" );
+    slot.type = Skill::skill( jo.get_string( "skill" ) );
+    slot.chapters = jo.get_int( "chapters", -1 );
+}
 
-    book_template->chapters = jo.get_int("chapters", -1);
-
-    itype *new_item_template = book_template;
-    load_basic_info(jo, new_item_template);
+void Item_factory::load_book( JsonObject &jo )
+{
+    std::unique_ptr<itype> new_item_template( new itype() );
+    load_slot( new_item_template->book_slot, jo );
+    load_basic_info( jo, new_item_template.get() );
+    new_item_template.release();
 }
 
 void Item_factory::load_comestible(JsonObject &jo)
@@ -1622,7 +1629,7 @@ const std::string &Item_factory::calc_category(itype *it)
         it_comest *comest = dynamic_cast<it_comest *>(it);
         return (comest->comesttype == "MED" ? category_id_drugs : category_id_food);
     }
-    if (it->is_book()) {
+    if( it->book_slot ) {
         return category_id_books;
     }
     if (it->is_gunmod()) {

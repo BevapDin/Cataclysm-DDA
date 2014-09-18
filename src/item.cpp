@@ -65,9 +65,9 @@ item::item(const std::string new_type, unsigned int turn, bool rand, int handed)
                 curammo = dynamic_cast<it_ammo*>(item_controller->find_template(default_ammo(type->tool_slot->ammo)));
             }
         }
-    } else if (type->is_book()) {
-        it_book* book = dynamic_cast<it_book*>(type);
-        charges = book->chapters;
+    }
+    if( type->book_slot ) {
+        charges = type->book_slot->chapters;
     } else if ((type->is_gunmod() && type->id == "spare_mag") || type->item_tags.count("MODE_AUX")) {
         charges = 0;
     } else {
@@ -723,7 +723,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
     if (is_book()) {
 
         dump->push_back(iteminfo("DESCRIPTION", "--"));
-        it_book* book = dynamic_cast<it_book*>(type);
+        auto book = type->book_slot.get();
         // Some things about a book you CAN tell by it's cover.
         if( !book->type ) {
             dump->push_back(iteminfo("BOOK", _("Just for fun.")));
@@ -1127,12 +1127,12 @@ nc_color item::color(player *u) const
         }
     } else if (is_book()) {
     	if(u->has_identified( type->id )) {
-	    it_book* tmp = dynamic_cast<it_book*>(type);
+	    auto tmp = type->book_slot.get();
 	    if (tmp->type && tmp->intel <= u->int_cur + u->skillLevel(tmp->type) &&
 		 (u->skillLevel(tmp->type) >= (int)tmp->req) &&
 		 (u->skillLevel(tmp->type) < (int)tmp->level)) {
 	        ret = c_ltblue;
-	    } else if (!u->studied_all_recipes(tmp)) {
+	    } else if (!u->studied_all_recipes(type)) {
 	        ret = c_yellow;
 	    }
 	} else {
@@ -2228,10 +2228,7 @@ bool item::is_power_armor() const
 
 bool item::is_book() const
 {
-    if( is_null() )
-        return false;
-
-    return type->is_book();
+    return type != nullptr && type->book_slot.get() != nullptr;
 }
 
 bool item::is_container() const
