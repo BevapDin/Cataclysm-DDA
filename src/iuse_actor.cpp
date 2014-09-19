@@ -7,11 +7,6 @@ iuse_transform::~iuse_transform()
 {
 }
 
-iuse_actor *iuse_transform::clone() const
-{
-    return new iuse_transform(*this);
-}
-
 long iuse_transform::use(player *p, item *it, bool /*t*/) const
 {
     if (need_fire > 0 && p != NULL && p->is_underwater()) {
@@ -60,11 +55,6 @@ auto_iuse_transform::~auto_iuse_transform()
 {
 }
 
-iuse_actor *auto_iuse_transform::clone() const
-{
-    return new auto_iuse_transform(*this);
-}
-
 long auto_iuse_transform::use(player *p, item *it, bool t) const
 {
     if (t) {
@@ -92,11 +82,6 @@ long auto_iuse_transform::use(player *p, item *it, bool t) const
 
 explosion_iuse::~explosion_iuse()
 {
-}
-
-iuse_actor *explosion_iuse::clone() const
-{
-    return new explosion_iuse(*this);
 }
 
 // defined in iuse.cpp
@@ -163,11 +148,6 @@ long explosion_iuse::use(player *p, item *it, bool t) const
 
 unfold_vehicle_iuse::~unfold_vehicle_iuse()
 {
-}
-
-iuse_actor *unfold_vehicle_iuse::clone() const
-{
-    return new unfold_vehicle_iuse(*this);
 }
 
 long unfold_vehicle_iuse::use(player *p, item *it, bool /*t*/) const
@@ -238,11 +218,6 @@ long unfold_vehicle_iuse::use(player *p, item *it, bool /*t*/) const
 }
 
 consume_drug_iuse::~consume_drug_iuse() {};
-
-iuse_actor *consume_drug_iuse::clone() const
-{
-    return new consume_drug_iuse(*this);
-}
 
 long consume_drug_iuse::use(player *p, item *it, bool) const
 {

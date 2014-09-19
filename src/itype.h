@@ -847,7 +847,7 @@ struct it_macguffin : public virtual itype {
                 pweight, pmelee_dam, pmelee_cut, pm_to_hit)
     {
         readable = preadable;
-        use_methods.push_back( puse );
+        use_methods.push_back( use_function( puse ) );
     }
 };
 

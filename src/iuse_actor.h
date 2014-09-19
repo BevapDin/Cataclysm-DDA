@@ -53,7 +53,6 @@ class iuse_transform : public iuse_actor
         }
         virtual ~iuse_transform();
         virtual long use(player *, item *, bool) const;
-        virtual iuse_actor *clone() const;
 };
 
 /**
@@ -84,7 +83,6 @@ class auto_iuse_transform : public iuse_transform
         }
         virtual ~auto_iuse_transform();
         virtual long use(player *, item *, bool) const;
-        virtual iuse_actor *clone() const;
 };
 
 /**
@@ -145,7 +143,6 @@ class explosion_iuse : public iuse_actor
         }
         virtual ~explosion_iuse();
         virtual long use(player *, item *, bool) const;
-        virtual iuse_actor *clone() const;
 };
 
 /**
@@ -168,7 +165,6 @@ class unfold_vehicle_iuse : public iuse_actor
         }
         virtual ~unfold_vehicle_iuse();
         virtual long use(player *, item *, bool) const;
-        virtual iuse_actor *clone() const;
 };
 
 /**
@@ -193,5 +189,4 @@ class consume_drug_iuse : public iuse_actor
         consume_drug_iuse() : iuse_actor() { }
         virtual ~consume_drug_iuse();
         virtual long use(player *, item *, bool) const;
-        virtual iuse_actor *clone() const;
 };

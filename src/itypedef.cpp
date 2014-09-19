@@ -20,31 +20,31 @@ bool itype::has_use() const
 
 bool itype::can_use( std::string iuse_name ) const
 {
-    const use_function *func;
+    use_function func;
 
     try {
-        func = item_controller->get_iuse( iuse_name );
-    } catch (const std::out_of_range &e) {
+        func = item_controller->use_from_string( iuse_name );
+    } catch (const std::string &) {
         debugmsg("itype::can_use attempted to test for invalid iuse function %s", iuse_name.c_str());
         return false;
     }
 
     return std::find( use_methods.cbegin(), use_methods.cend(),
-                      *func ) != use_methods.cend();
+                      func ) != use_methods.cend();
 }
 
 bool islot_comest::can_use( const std::string &iuse_name ) const
 {
-    const use_function *func;
+    use_function func;
 
     try {
-        func = item_controller->get_iuse( iuse_name );
-    } catch (const std::out_of_range &e) {
+        func = item_controller->use_from_string( iuse_name );
+    } catch (const std::string &e) {
         debugmsg("itype::can_use attempted to test for invalid iuse function %s", iuse_name.c_str());
         return false;
     }
 
-    return use_method == *func;
+    return use_method == func;
 }
 
 int itype::invoke( player *p, item *it, bool active )

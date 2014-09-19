@@ -143,7 +143,13 @@ class Item_factory
         // stays valid.
         const item_category *get_category(const std::string &id);
 
-        const use_function *get_iuse( const std::string &id );
+        /**
+         * Returns the iuse function associated with the given id,
+         * throws an std::string if there is no matching iuse function known.
+         * This is to be compatible with the json system which also throws
+         * std::string.
+         */
+        use_function use_from_string(std::string id);
 
         // The below functions are meant to be accessed at startup by lua to
         // do mod-related modifications of groups.
@@ -197,8 +203,7 @@ class Item_factory
         void add_category(const std::string &id, int sort_rank, const std::string &name);
 
         //json data handlers
-        void set_use_methods_from_json( JsonObject &jo, std::string member, itype *new_item_template );
-        use_function use_from_string(std::string name);
+        void set_use_methods_from_json( JsonObject &jo, std::string member, std::vector<use_function> &use_vector );
         use_function use_from_object(JsonObject obj);
         phase_id phase_from_tag(Item_tag name);
 

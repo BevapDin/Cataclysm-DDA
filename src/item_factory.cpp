@@ -1123,7 +1123,7 @@ void Item_factory::load_basic_info(JsonObject &jo, itype *new_item_template)
     new_item_template->techniques = jo.get_tags("techniques");
 
     if (jo.has_member("use_action")) {
-        set_use_methods_from_json(jo, "use_action", new_item_template);
+        set_use_methods_from_json(jo, "use_action", new_item_template->use_methods);
     }
 
     if (jo.has_member("category")) {
@@ -1412,7 +1412,7 @@ void Item_factory::load_item_group(JsonObject &jsobj, const std::string &group_i
 }
 
 void Item_factory::set_use_methods_from_json(JsonObject &jo, std::string member,
-        itype *new_item_template)
+        std::vector<use_function> &use_vector)
 {
     if (jo.has_array(member)) {
         JsonArray jarr = jo.get_array(member);
@@ -1423,10 +1423,9 @@ void Item_factory::set_use_methods_from_json(JsonObject &jo, std::string member,
             } else if (jarr.test_object()) {
                 new_function = use_from_object(jarr.next_object());
             } else {
-                debugmsg("use_action array element for item %s is neither string nor object.",
-                         new_item_template->id.c_str());
+                jarr.throw_error("use_action array element is neither string nor object.");
             }
-            new_item_template->use_methods.push_back(new_function);
+            use_vector.push_back(new_function);
         }
     } else {
         use_function new_function;
@@ -1435,10 +1434,9 @@ void Item_factory::set_use_methods_from_json(JsonObject &jo, std::string member,
         } else if (jo.has_object("use_action")) {
             new_function = use_from_object(jo.get_object("use_action"));
         } else {
-            debugmsg("use_action member for item %s is neither string nor object.",
-                     new_item_template->id.c_str());
+            jo.throw_error("use_action member is neither string nor object.");
         }
-        new_item_template->use_methods.push_back(new_function);
+        use_vector.push_back(new_function);
     }
 }
 
@@ -1462,8 +1460,7 @@ use_function Item_factory::use_from_object(JsonObject obj)
         obj.read("need_charges_msg", actor->need_charges_msg);
         actor->need_charges_msg = _(actor->need_charges_msg.c_str());
         obj.read("moves", actor->moves);
-        // from hereon memory is handled by the use_function class
-        return use_function(actor.release());
+        return use_function( actor );
     } else if (type == "auto_transform") {
         std::unique_ptr<auto_iuse_transform> actor(new auto_iuse_transform);
         // Mandatory:
@@ -1486,8 +1483,7 @@ use_function Item_factory::use_from_object(JsonObject obj)
             actor->non_interactive_msg = _(actor->non_interactive_msg.c_str());
         }
         obj.read("moves", actor->moves);
-        // from hereon memory is handled by the use_function class
-        return use_function(actor.release());
+        return use_function( actor );
     } else if (type == "explosion") {
         std::unique_ptr<explosion_iuse> actor(new explosion_iuse);
         obj.read("explosion_power", actor->explosion_power);
@@ -1511,7 +1507,7 @@ use_function Item_factory::use_from_object(JsonObject obj)
         obj.read("sound_volume", actor->sound_volume);
         obj.read("sound_msg", actor->sound_msg);
         obj.read("no_deactivate_msg", actor->no_deactivate_msg);
-        return use_function(actor.release());
+        return use_function( actor );
     } else if (type == "unfold_vehicle") {
         std::unique_ptr<unfold_vehicle_iuse> actor(new unfold_vehicle_iuse);
         obj.read("vehicle_name", actor->vehicle_name);
@@ -1519,7 +1515,7 @@ use_function Item_factory::use_from_object(JsonObject obj)
         actor->unfold_msg = _(actor->unfold_msg.c_str());
         obj.read("moves", actor->moves);
         obj.read("tools_needed", actor->tools_needed);
-        return use_function(actor.release());
+        return use_function( actor );
     } else if (type == "consume_drug") {
         std::unique_ptr<consume_drug_iuse> actor(new consume_drug_iuse);
         // Are these optional? The need to be.
@@ -1529,9 +1525,10 @@ use_function Item_factory::use_from_object(JsonObject obj)
         obj.read("diseases", actor->diseases);
         obj.read("stat_adjustments", actor->stat_adjustments);
         obj.read("fields_produced", actor->fields_produced);
-        return use_function(actor.release());
+        return use_function( actor );
     } else {
-        debugmsg("unknown use_action type %s", type.c_str());
+        obj.throw_error("unknown use_action type", "type");
+        // ^^ throws, this return statement is only to pacify the compiler
         return use_function();
     }
 }
@@ -1543,11 +1540,8 @@ use_function Item_factory::use_from_string(std::string function_name)
     //Before returning, make sure sure the function actually exists
     if (found_function != iuse_function_list.end()) {
         return found_function->second;
-    } else {
-        //Otherwise, return a hardcoded function we know exists (hopefully)
-        debugmsg("Received unrecognized iuse function %s, using iuse::none instead", function_name.c_str());
-        return use_function();
     }
+    throw std::string("unknown iuse function: ") + function_name;
 }
 
 void Item_factory::set_flag_by_string(std::bitset<13> &cur_flags, const std::string &new_flag,
@@ -1668,11 +1662,6 @@ const item_category *Item_factory::get_category(const std::string &id)
     cat.id = id;
     cat.name = id;
     return &cat;
-}
-
-const use_function *Item_factory::get_iuse(const std::string &id)
-{
-    return &iuse_function_list.at(id);
 }
 
 const std::string &Item_factory::calc_category(itype *it)

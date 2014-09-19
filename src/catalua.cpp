@@ -509,57 +509,52 @@ void game::init_lua()
 }
 #endif // #ifdef LUA
 
-use_function::~use_function()
-{
-    if (function_type == USE_FUNCTION_ACTOR_PTR) {
-        delete actor_ptr;
+class pointer_wrapper_actor : public iuse_actor {
+public:
+    typedef use_function::use_function_pointer pointer;
+    pointer _function;
+    pointer_wrapper_actor(pointer f) : iuse_actor(), _function(f)
+    {
     }
-}
-
-use_function::use_function(const use_function &other)
-    : function_type(other.function_type)
-{
-    if (function_type == USE_FUNCTION_CPP) {
-        cpp_function = other.cpp_function;
-    } else if (function_type == USE_FUNCTION_ACTOR_PTR) {
-        actor_ptr = other.actor_ptr->clone();
-    } else {
-        lua_function = other.lua_function;
+    virtual ~pointer_wrapper_actor()
+    {
     }
+    virtual long use(player *p, item *it, bool t) const
+    {
+        iuse tmp;
+        return (tmp.*_function)(p, it, t);
+    }
+};
+
+class lua_wrapper_actor : public iuse_actor {
+public:
+    int lua_function;
+    lua_wrapper_actor(int f) : iuse_actor(), lua_function(f)
+    {
+    }
+    virtual ~lua_wrapper_actor()
+    {
+    }
+    virtual long use(player *p, item *it, bool t) const;
+};
+
+use_function::use_function( use_function_pointer ptr )
+: _actor( new pointer_wrapper_actor( ptr ) )
+{
 }
 
-void use_function::operator=(use_function_pointer f)
+long use_function::call( player *p, item *it, bool t) const
 {
-    this->~use_function();
-    new (this) use_function(f);
-}
-
-void use_function::operator=(iuse_actor *f)
-{
-    this->~use_function();
-    new (this) use_function(f);
-}
-
-void use_function::operator=(const use_function &other)
-{
-    this->~use_function();
-    new (this) use_function(other);
+    if( !_actor ) {
+        p->add_msg_if_player(_("You can't do anything interesting with your %s."), it->tname().c_str());
+        return 0;
+    }
+    return _actor->use( p, it, t );
 }
 
 // If we're not using lua, need to define Use_function in a way to always call the C++ function
-int use_function::call(player *player_instance, item *item_instance, bool active) const
+long lua_wrapper_actor::use(player *player_instance, item *item_instance, bool active) const
 {
-    if (function_type == USE_FUNCTION_NONE) {
-        if (player_instance != NULL && player_instance->is_player()) {
-            add_msg(_("You can't do anything interesting with your %s."), item_instance->tname().c_str());
-        }
-    } else if (function_type == USE_FUNCTION_CPP) {
-        // If it's a C++ function, simply call it with the given arguments.
-        iuse tmp;
-        return (tmp.*cpp_function)(player_instance, item_instance, active);
-    } else if (function_type == USE_FUNCTION_ACTOR_PTR) {
-        return actor_ptr->use(player_instance, item_instance, active);
-    } else {
 #ifdef LUA
 
         // We'll be using lua_state a lot!
@@ -611,13 +606,13 @@ int use_function::call(player *player_instance, item *item_instance, bool active
         return lua_tointeger(L, -1);
 
 #else
-
+        // Avoid warnings when lua is not enabled.
+        (void) player_instance;
+        (void) item_instance;
+        (void) active;
         // If LUA isn't defined and for some reason we registered a lua function,
         // simply do nothing.
         return 0;
 
 #endif
-
-    }
-    return 0;
 }

@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
 
 class item;
 class player;
@@ -240,79 +241,54 @@ protected:
     static bullet_pulling_t bullet_pulling_recipes;
 };
 
-
-typedef int (iuse::*use_function_pointer)(player*,item*,bool);
-
 class iuse_actor {
 protected:
     iuse_actor() { }
+    iuse_actor(const iuse_actor &) = delete;
+    iuse_actor &operator=(const iuse_actor &) = delete;
 public:
     virtual ~iuse_actor() { }
     virtual long use(player*, item*, bool) const = 0;
-    virtual iuse_actor *clone() const = 0;
 };
 
-struct use_function {
-protected:
-    enum use_function_t {
-        USE_FUNCTION_NONE,
-        USE_FUNCTION_CPP,
-        USE_FUNCTION_ACTOR_PTR,
-        USE_FUNCTION_LUA
-    };
+/**
+ * This is merely a wrapper for @ref iuse_actor into a std::shared_ptr.
+ */
+class use_function
+{
+    protected:
+        std::shared_ptr<iuse_actor> _actor;
 
-    use_function_t function_type;
+    public:
+        use_function() : _actor()
+        {
+        }
+        // T must be compatible with iuse_actor!
+        template<typename T>
+        use_function( std::unique_ptr<T> &ptr ) : _actor( std::move( ptr ) )
+        {
+        }
+        use_function( iuse_actor *ptr ) : _actor( ptr )
+        {
+        }
+        typedef int (iuse::*use_function_pointer)(player*,item*,bool);
+        use_function( use_function_pointer ptr);
+        use_function( const use_function & ) = default;
+        use_function &operator=( const use_function & ) = default;
+        bool operator==( const use_function &rhs ) const
+        {
+            return _actor.get() == rhs._actor.get();
+        }
+        bool operator!=( const use_function &rhs ) const
+        {
+            return !operator==(rhs);
+        }
 
-    union {
-        use_function_pointer cpp_function;
-        int lua_function;
-        iuse_actor *actor_ptr;
-    };
+        long call( player *, item *, bool ) const;
 
-public:
-    use_function()
-        : function_type(USE_FUNCTION_NONE)
-    { }
-
-    use_function(use_function_pointer f)
-        : function_type(USE_FUNCTION_CPP), cpp_function(f)
-    { }
-
-    use_function(int f)
-        : function_type(USE_FUNCTION_LUA), lua_function(f)
-    { }
-
-    use_function(iuse_actor *f)
-        : function_type(USE_FUNCTION_ACTOR_PTR), actor_ptr(f)
-    { }
-
-    use_function(const use_function &other);
-
-    ~use_function();
-
-    int call(player*,item*,bool) const;
-
-    void operator=(use_function_pointer f);
-    void operator=(iuse_actor *f);
-    void operator=(const use_function &other);
-
-    bool is_none() const {
-        return function_type == USE_FUNCTION_NONE;
-    }
-
-    bool operator==(use_function f) const {
-        return function_type == USE_FUNCTION_CPP && f.function_type == USE_FUNCTION_CPP &&
-        f.cpp_function == cpp_function;
-    }
-
-    bool operator==(use_function_pointer f) const {
-        return (function_type == USE_FUNCTION_CPP) && (f == cpp_function);
-    }
-
-    bool operator!=(use_function_pointer f) const {
-        return !(this->operator==(f));
-    }
+        bool is_none() const {
+            return !_actor;
+        }
 };
-
 
 #endif
