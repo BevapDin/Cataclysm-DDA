@@ -248,14 +248,6 @@ struct islot_tool {
      */
     itype_id subtype;
 
-    int charges_to_use() const
-    {
-        return charges_per_use;
-    }
-    int maximum_charges() const
-    {
-        return max_charges;
-    }
     islot_tool()
     : ammo( "null" )
     , max_charges( 0 )
@@ -653,13 +645,19 @@ public:
         }
         return false;
     }
-    virtual int charges_to_use() const
+    int charges_to_use() const
     {
+        if( tool_slot ) {
+            return tool_slot->charges_per_use;
+        }
         return 1;
     }
-    virtual int maximum_charges() const
+    int maximum_charges() const
     {
-	return 1;
+        if( tool_slot ) {
+            return tool_slot->max_charges;
+        }
+        return 1;
     }
 
     bool has_use() const;
