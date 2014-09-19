@@ -3198,7 +3198,7 @@ int iuse::solder_weld(player *p, item *it, bool)
         return 0;
     }
     int choice = 2;
-    int charges_used = it->type->tool_slot->charges_to_use();
+    int charges_used = it->type->charges_to_use();
 
     // Option for cauterization only if player has the incentive to do so
     // One does not check for open wounds with a soldering iron.
