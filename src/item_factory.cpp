@@ -1003,6 +1003,21 @@ void Item_factory::load_generic( JsonObject &jo )
     new_item_template.release();
 }
 
+template<>
+void Item_factory::load_slot( std::unique_ptr<islot_light_emission> &slotptr, JsonObject &jo )
+{
+    // TODO: more generic. those two lines are identical for all slot types
+    slotptr.reset( new islot_light_emission() );
+    auto &slot = *slotptr;
+    slot.strength = jo.get_int( "strength" );
+    slot.chargedim = jo.get_int( "chargedim", false );
+}
+
+void Item_factory::load_dep_slots( depending_slots &deps, JsonObject &jo )
+{
+    load_slot_if_available( deps.light_emission_slot, jo, "light_emission" );
+}
+
 void Item_factory::load_basic_info(JsonObject &jo, itype *new_item_template)
 {
     std::string new_id = jo.get_string("id");
@@ -1048,8 +1063,6 @@ void Item_factory::load_basic_info(JsonObject &jo, itype *new_item_template)
 
     load_slot_if_available( new_item_template->explode_in_fire_slot, jo, "explode_in_fire" );
 
-    new_item_template->light_emission = 0;
-
     /*
     List of current flags
     FIT - Reduces encumbrance by one
@@ -1081,11 +1094,18 @@ void Item_factory::load_basic_info(JsonObject &jo, itype *new_item_template)
     WATERTIGHT
     */
     new_item_template->item_tags = jo.get_tags("flags");
-    if (!new_item_template->item_tags.empty()) {
-        for (std::set<std::string>::const_iterator it = new_item_template->item_tags.begin();
-             it != new_item_template->item_tags.end(); ++it) {
-            set_intvar(std::string(*it), new_item_template->light_emission, 1, 10000);
-        }
+
+    // Load the same values for both active and inactive items
+    for( int i = 0; i < 1; i++ ) {
+        load_dep_slots( new_item_template->deps[i], jo );
+    }
+    if( jo.has_object( "active" ) ) {
+        auto je = jo.get_object( "active" );
+        load_dep_slots( new_item_template->deps[0], je );
+    }
+    if( jo.has_object( "inactive" ) ) {
+        auto je = jo.get_object( "inactive" );
+        load_dep_slots( new_item_template->deps[1], je );
     }
 
     if (jo.has_member("qualities")) {
@@ -1604,16 +1624,6 @@ phase_id Item_factory::phase_from_tag(Item_tag name)
         return PNULL;
     }
 };
-
-void Item_factory::set_intvar(std::string tag, unsigned int &var, int min, int max)
-{
-    if (tag.size() > 6 && tag.substr(0, 6) == "LIGHT_") {
-        int candidate = atoi(tag.substr(6).c_str());
-        if (candidate >= min && candidate <= max) {
-            var = candidate;
-        }
-    }
-}
 
 bool item_category::operator<(const item_category &rhs) const
 {

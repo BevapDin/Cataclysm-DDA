@@ -3056,18 +3056,24 @@ bool item::getlight(float & luminance, int & width, int & direction, bool calcul
  * Returns just the integer
  */
 int item::getlight_emit(bool calculate_dimming) const {
-    const int mult = 10; // woo intmath
-    const int chargedrop = 5 * mult; // start dimming at 1/5th charge.
-
-    int lumint = type->light_emission * mult;
-
-    if ( lumint == 0 ) {
+    if( is_null()) {
         return 0;
     }
-    if ( calculate_dimming && has_flag("CHARGEDIM") && is_tool() && !has_flag("USE_UPS")) {
+    auto &slot = type->deps[active ? 1 : 0].light_emission_slot;
+    if( !slot ) {
+        return 0;
+    }
+
+    static const int mult = 10; // woo intmath
+    static const int chargedrop = 5 * mult; // start dimming at 1/5th charge.
+
+    int lumint = slot->strength * mult;
+    const bool chargedim = slot->chargedim;
+
+    if ( calculate_dimming && chargedim && is_tool() && !has_flag("USE_UPS")) {
         int maxcharge = type->tool_slot->max_charges;
         if ( maxcharge > 0 ) {
-            lumint = ( type->light_emission * chargedrop * charges ) / maxcharge;
+            lumint = ( slot->strength * chargedrop * charges ) / maxcharge;
         }
     }
     if ( lumint > 4 && lumint < 10 ) {
@@ -3324,7 +3330,7 @@ void item::detonate( point p ) const
         return;
     }
     auto &e = *type->explode_in_fire_slot;
-    g->explosion( p.x, p.y, e.ower, e.shrapnel, e.fire, e.blast );
+    g->explosion( p.x, p.y, e.power, e.shrapnel, e.fire, e.blast );
 }
 
 //sort quivers by contents, such that empty quivers go last

@@ -22,6 +22,7 @@ class Item_spawn_data;
 class Item_group;
 class item;
 struct itype;
+struct depending_slots;
 
 class item_category
 {
@@ -190,6 +191,8 @@ class Item_factory
         template<typename SlotType>
         void load_slot_if_available( std::unique_ptr<SlotType> &slotptr, JsonObject &jo, const std::string &name );
 
+        void load_dep_slots( depending_slots &deps, JsonObject &jo );
+
         // used to add the default categories
         void add_category(const std::string &id, int sort_rank, const std::string &name);
 
@@ -211,8 +214,6 @@ class Item_factory
 
         void set_material_from_json(JsonObject &jo, std::string member, itype *new_item);
         bool is_mod_target(JsonObject &jo, std::string member, std::string weapon);
-
-        void set_intvar(std::string tag, unsigned int &var, int min, int max);
 
         //Currently only used to body_part stuff, bitset size might need to be increased in the future
         void set_flag_by_string(std::bitset<13> &cur_flags, const std::string &new_flag,

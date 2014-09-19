@@ -507,6 +507,27 @@ struct islot_comest {
     }
 };
 
+struct islot_light_emission {
+    /**
+     * Exactly the same as item_tags LIGHT_*, this is for lightmap.
+     */
+    unsigned int strength;
+    bool chargedim;
+
+    islot_light_emission()
+    : strength( 0 )
+    , chargedim( false )
+    {
+    }
+};
+
+/**
+ * Slots whose content depends on the active/inactive state.
+ */
+struct depending_slots {
+    std::unique_ptr<islot_light_emission> light_emission_slot;
+};
+
 struct itype {
     itype_id id; // unique string identifier for this item,
     // can be used as lookup key in master itype map
@@ -524,6 +545,9 @@ struct itype {
     std::unique_ptr<islot_comest> comest_slot;
     // Explosion that happens when the item is set on fire
     std::unique_ptr<explosion_data> explode_in_fire_slot;
+    // Depending slots: first entry is for inactive items,
+    // second entry is for active items.
+    depending_slots deps[2];
 
 protected:
     friend class Item_factory;
@@ -555,8 +579,6 @@ public:
 
     std::set<std::string> item_tags;
     std::set<std::string> techniques;
-
-    unsigned int light_emission;   // Exactly the same as item_tags LIGHT_*, this is for lightmap.
 
     const item_category *category; // category pointer or NULL for automatic selection
 
@@ -664,7 +686,7 @@ public:
     itype() : id("null"), price(0), name("none"), name_plural("none"), description(), sym('#'),
         color(c_white), m1("null"), m2("null"), phase(SOLID), volume(0),
         weight(0), qualities(), corpse(NULL),
-        melee_dam(0), melee_cut(0), m_to_hit(0), item_tags(), techniques(), light_emission(),
+        melee_dam(0), melee_cut(0), m_to_hit(0), item_tags(), techniques(),
         category(NULL) { }
 
     itype(std::string pid, unsigned int pprice, std::string pname, std::string pname_plural,
@@ -674,7 +696,7 @@ public:
         name_plural(pname_plural), description(pdes), sym(psym), color(pcolor), m1(pm1), m2(pm2),
         phase(pphase), volume(pvolume), weight(pweight),
         qualities(), corpse(NULL), melee_dam(pmelee_dam),
-        melee_cut(pmelee_cut), m_to_hit(pm_to_hit), item_tags(), techniques(), light_emission(),
+        melee_cut(pmelee_cut), m_to_hit(pm_to_hit), item_tags(), techniques(),
         category(NULL) { }
 
     virtual ~itype() {}
