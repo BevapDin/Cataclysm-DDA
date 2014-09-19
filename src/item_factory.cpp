@@ -499,9 +499,8 @@ void Item_factory::check_itype_definitions() const
                 msg << string_format("uses no skill") << "\n";
             }
         }
-        const it_gunmod *gunmod = dynamic_cast<const it_gunmod *>(type);
-        if (gunmod != 0) {
-            check_ammo_type(msg, gunmod->newtype);
+        if( type->gunmod_slot ) {
+            check_ammo_type( msg, type->gunmod_slot->newtype );
         }
         if( type->tool_slot ) {
             check_ammo_type(msg, type->tool_slot->ammo);
@@ -874,29 +873,37 @@ void Item_factory::load_container(JsonObject &jo)
     new_item_template.release();
 }
 
+template<>
+void Item_factory::load_slot( std::unique_ptr<islot_gunmod> &slotptr, JsonObject &jo )
+{
+    // TODO: more generic. those two lines are identical for all slot types
+    slotptr.reset( new islot_gunmod() );
+    auto &slot = *slotptr;
+    slot.damage = jo.get_int( "damage_modifier", 0 );
+    slot.loudness = jo.get_int( "loudness_modifier", 0 );
+    slot.newtype = jo.get_string( "ammo_modifier" );
+    slot.location = jo.get_string( "location" );
+    slot.used_on_pistol = is_mod_target( jo, "mod_targets", "pistol" );
+    slot.used_on_shotgun = is_mod_target( jo, "mod_targets", "shotgun" );
+    slot.used_on_smg = is_mod_target( jo, "mod_targets", "smg" );
+    slot.used_on_rifle = is_mod_target( jo, "mod_targets", "rifle" );
+    slot.used_on_bow = is_mod_target( jo, "mod_targets", "bow" );
+    slot.used_on_crossbow = is_mod_target( jo, "mod_targets", "crossbow" );
+    slot.used_on_launcher = is_mod_target( jo, "mod_targets", "launcher" );
+    slot.dispersion = jo.get_int( "dispersion_modifier", 0 );
+    slot.recoil = jo.get_int( "recoil_modifier", 0 );
+    slot.burst = jo.get_int( "burst_modifier", 0 );
+    slot.clip = jo.get_int( "clip_size_modifier", 0 );
+    slot.acceptible_ammo_types = jo.get_tags( "acceptable_ammo" );
+    slot.skill_used = Skill::skill( jo.get_string( "skill", "gun" ) );
+}
+
 void Item_factory::load_gunmod(JsonObject &jo)
 {
-    it_gunmod *gunmod_template = new it_gunmod();
-    gunmod_template->damage = jo.get_int("damage_modifier", 0);
-    gunmod_template->loudness = jo.get_int("loudness_modifier", 0);
-    gunmod_template->newtype = jo.get_string("ammo_modifier");
-    gunmod_template->location = jo.get_string("location");
-    gunmod_template->used_on_pistol = is_mod_target(jo, "mod_targets", "pistol");
-    gunmod_template->used_on_shotgun = is_mod_target(jo, "mod_targets", "shotgun");
-    gunmod_template->used_on_smg = is_mod_target(jo, "mod_targets", "smg");
-    gunmod_template->used_on_rifle = is_mod_target(jo, "mod_targets", "rifle");
-    gunmod_template->used_on_bow = is_mod_target(jo, "mod_targets", "bow");
-    gunmod_template->used_on_crossbow = is_mod_target(jo, "mod_targets", "crossbow");
-    gunmod_template->used_on_launcher = is_mod_target(jo, "mod_targets", "launcher");
-    gunmod_template->dispersion = jo.get_int("dispersion_modifier", 0);
-    gunmod_template->recoil = jo.get_int("recoil_modifier", 0);
-    gunmod_template->burst = jo.get_int("burst_modifier", 0);
-    gunmod_template->clip = jo.get_int("clip_size_modifier", 0);
-    gunmod_template->acceptible_ammo_types = jo.get_tags("acceptable_ammo");
-    gunmod_template->skill_used = Skill::skill(jo.get_string("skill", "gun"));
-
-    itype *new_item_template = gunmod_template;
-    load_basic_info(jo, new_item_template);
+    std::unique_ptr<itype> new_item_template( new itype() );
+    load_slot( new_item_template->gunmod_slot, jo );
+    load_basic_info( jo, new_item_template.get() );
+    new_item_template.release();
 }
 
 template<>
@@ -999,6 +1006,7 @@ void Item_factory::load_generic( JsonObject &jo )
     load_slot_if_available( new_item_template->gun_slot, jo, "gun" );
     load_slot_if_available( new_item_template->comest_slot, jo, "comest" );
     load_slot_if_available( new_item_template->explode_in_fire_slot, jo, "explode_in_fire" );
+    load_slot_if_available( new_item_template->gunmod_slot, jo, "gunmod" );
     load_basic_info( jo, new_item_template.get() );
     new_item_template.release();
 }
@@ -1687,7 +1695,7 @@ const std::string &Item_factory::calc_category(itype *it)
     if( it->book_slot ) {
         return category_id_books;
     }
-    if (it->is_gunmod()) {
+    if( it->gunmod_slot ) {
         return category_id_mods;
     }
     if( it->bionic_slot ) {

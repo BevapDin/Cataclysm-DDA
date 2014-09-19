@@ -400,6 +400,99 @@ struct islot_gun {
     }
 };
 
+struct islot_gunmod {
+    /**
+     * TODO: document me
+     */
+    int dispersion;
+    /**
+     * TODO: document me
+     */
+    int damage;
+    /**
+     * TODO: document me
+     */
+    int loudness;
+    /**
+     * TODO: document me
+     */
+    int clip;
+    /**
+     * TODO: document me
+     */
+    int recoil;
+    /**
+     * TODO: document me
+     */
+    int burst;
+    /**
+     * TODO: document me
+     */
+    ammotype newtype;
+    /**
+     * TODO: document me
+     */
+    std::set<std::string> acceptible_ammo_types;
+    /**
+     * TODO: document me
+     */
+    bool used_on_pistol;
+    /**
+     * TODO: document me
+     */
+    bool used_on_shotgun;
+    /**
+     * TODO: document me
+     */
+    bool used_on_smg;
+    /**
+     * TODO: document me
+     */
+    bool used_on_rifle;
+    /**
+     * TODO: document me
+     */
+    bool used_on_bow;
+    /**
+     * TODO: document me
+     */
+    bool used_on_crossbow;
+    /**
+     * TODO: document me
+     */
+    bool used_on_launcher;
+    /**
+     * TODO: document me
+     * TODO: this should be a pointer to const Skill.
+     */
+    Skill *skill_used;
+    /**
+     * TODO: document me
+     */
+    std::string location;
+
+    islot_gunmod()
+    : dispersion( 0 )
+    , damage( 0 )
+    , loudness( 0 )
+    , clip( 0 )
+    , recoil( 0 )
+    , burst( 0 )
+    , newtype()
+    , acceptible_ammo_types()
+    , used_on_pistol( false )
+    , used_on_shotgun( false )
+    , used_on_smg( false )
+    , used_on_rifle( false )
+    , used_on_bow( false )
+    , used_on_crossbow( false )
+    , used_on_launcher( false )
+    , skill_used( nullptr )
+    , location()
+    {
+    }
+};
+
 // TODO: separate this into med/drugs and food/drink - should be separate instead of
 // using the comesttype information.
 struct islot_comest {
@@ -535,6 +628,7 @@ struct itype {
     std::unique_ptr<islot_book> book_slot;
     std::unique_ptr<islot_gun> gun_slot;
     std::unique_ptr<islot_comest> comest_slot;
+    std::unique_ptr<islot_gunmod> gunmod_slot;
     // Explosion that happens when the item is set on fire
     std::unique_ptr<explosion_data> explode_in_fire_slot;
     // Depending slots: first entry is for inactive items,
@@ -736,32 +830,6 @@ struct it_ammo : public virtual itype {
     }
 };
 
-struct it_gunmod : public virtual itype {
-    signed int dispersion, damage, loudness, clip, recoil, burst;
-    ammotype newtype;
-    std::set<std::string> acceptible_ammo_types;
-    bool used_on_pistol;
-    bool used_on_shotgun;
-    bool used_on_smg;
-    bool used_on_rifle;
-    bool used_on_bow;
-    bool used_on_crossbow;
-    bool used_on_launcher;
-    Skill *skill_used;
-    std::string location;
-
-    virtual bool is_gunmod() const
-    {
-        return true;
-    }
-
-    it_gunmod() : itype(), dispersion(0), damage(0), loudness(0), clip(0), recoil(0), burst(0),
-        newtype(), acceptible_ammo_types(), used_on_pistol(false), used_on_shotgun(false),
-        used_on_smg(false), used_on_rifle(false), used_on_bow(false), used_on_crossbow(false),
-        used_on_launcher(false), skill_used(NULL), location()
-    {
-    }
-};
 
 struct it_macguffin : public virtual itype {
     bool readable; // If true, activated with 'R'

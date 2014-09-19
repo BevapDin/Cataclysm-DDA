@@ -270,9 +270,8 @@ void player::fire_gun(int tarx, int tary, bool burst)
     } else if (gunmod != NULL) {
         used_weapon = gunmod;
         curammo = used_weapon->curammo;
-        const it_gunmod *mod = dynamic_cast<const it_gunmod *>(gunmod->type);
-        if (mod != NULL) {
-            skill_used = mod->skill_used;
+        if( gunmod->type->gunmod_slot ) {
+            skill_used = gunmod->type->gunmod_slot->skill_used;
         }
     } else {// Just a normal gun. If we're here, we know curammo is valid.
         curammo = weapon.curammo;
@@ -1320,9 +1319,8 @@ int skill_dispersion( player *p, item *weapon, bool random )
     int weapon_skill_level = 0;
     std::string skill_used;
     if(weapon->is_gunmod()) {
-        it_gunmod *firing = dynamic_cast<it_gunmod *>(weapon->type);
-        skill_used = firing->skill_used->ident();
-        weapon_skill_level = p->skillLevel(firing->skill_used);
+        skill_used = weapon->type->gunmod_slot->skill_used->ident();
+        weapon_skill_level = p->skillLevel(weapon->type->gunmod_slot->skill_used);
     } else {
         skill_used = weapon->type->gun_slot->skill_used->ident();
         weapon_skill_level = p->skillLevel(weapon->type->gun_slot->skill_used);
