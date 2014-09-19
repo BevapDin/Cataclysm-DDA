@@ -152,7 +152,6 @@ class it_artifact_tool : public itype, public JsonSerializer, public JsonDeseria
 
         it_artifact_tool(JsonObject &jo) : itype()
         {
-            use_methods.push_back( &iuse::artifact );
             deserialize(jo);
         };
         void create_name(const std::string &type);

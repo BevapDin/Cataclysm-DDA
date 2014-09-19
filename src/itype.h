@@ -247,6 +247,17 @@ struct islot_tool {
      * TODO: document me
      */
     itype_id subtype;
+    /**
+     * TODO: document me
+     */
+    use_function use_method;
+
+    long invoke( player *p, item *it, bool active ) const {
+        if( !use_method.is_none() ) {
+            return use_method.call( p, it, active );
+        }
+        return 0;
+    }
 
     islot_tool()
     : ammo( "null" )
@@ -257,6 +268,34 @@ struct islot_tool {
     , turns_per_charge( 0 )
     , revert_to( "null" )
     , subtype()
+    , use_method()
+    {
+    }
+};
+
+/**
+ * This slot controls continuous usage of the item.
+ * If present, its use_method is called on each turn.
+ */
+struct islot_continious {
+    /**
+     * Number of turns that a single charge from the item allows to be used.
+     */
+    unsigned char turns_per_charge;
+    /**
+     * When the item runs out of charges, it will revert to this item type.
+     * Can be "null", in that case the item is destroyed.
+     */
+    itype_id revert_to;
+    /**
+     * The function that should be called on each turn.
+     */
+    use_function use_method;
+
+    islot_continious()
+    : turns_per_charge( 1 )
+    , revert_to( "null" )
+    , use_method()
     {
     }
 };
@@ -611,6 +650,7 @@ struct islot_light_emission {
  */
 struct depending_slots {
     std::unique_ptr<islot_light_emission> light_emission_slot;
+    std::unique_ptr<islot_continious> continious_slot;
 };
 
 struct itype {
@@ -633,6 +673,7 @@ struct itype {
     std::unique_ptr<explosion_data> explode_in_fire_slot;
     // Depending slots: first entry is for inactive items,
     // second entry is for active items.
+    depending_slots deps[2];
     depending_slots deps[2];
 
 protected:
@@ -754,8 +795,6 @@ public:
         return 1;
     }
 
-    bool has_use() const;
-    bool can_use( std::string iuse_name ) const;
     /** Returns true if this covers bp */
     bool is_covering(body_part bp) const
     {
@@ -766,14 +805,13 @@ public:
     {
         return armor_slot && armor_slot->sided.test( bp );
     }
-    int invoke( player *p, item *it, bool active );
 
     std::string dmg_adj(int dam)
     {
         return material_type::find_material(m1)->dmg_adj(dam);
     }
 
-    std::vector<use_function> use_methods;// Special effects of use
+//    std::vector<use_function> use_methods;// Special effects of use
 
     itype() : id("null"), price(0), name("none"), name_plural("none"), description(), sym('#'),
         color(c_white), m1("null"), m2("null"), phase(SOLID), volume(0),
@@ -841,13 +879,11 @@ struct it_macguffin : public virtual itype {
     it_macguffin(std::string pid, unsigned int pprice, std::string pname, std::string pname_plural,
                  std::string pdes, char psym, nc_color pcolor, std::string pm1, std::string pm2,
                  unsigned int pvolume, unsigned int pweight, signed int pmelee_dam,
-                 signed int pmelee_cut, signed int pm_to_hit, bool preadable,
-                 int (iuse::*puse)(player *, item *, bool))
+                 signed int pmelee_cut, signed int pm_to_hit, bool preadable)
         : itype(pid, pprice, pname, pname_plural, pdes, psym, pcolor, pm1, pm2, SOLID, pvolume,
                 pweight, pmelee_dam, pmelee_cut, pm_to_hit)
     {
         readable = preadable;
-        use_methods.push_back( use_function( puse ) );
     }
 };
 

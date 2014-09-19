@@ -103,8 +103,7 @@ void game::init_itypes ()
 #define MACGUFFIN(id, name, name_plural, price, sym, color, mat1, mat2, volume, wgt, dam, cut,\
                   to_hit, readable, function, description) \
 itypes[id]=new it_macguffin(id, price, name, name_plural, description,\
-                            sym, color, mat1, mat2, volume, wgt, dam, cut, to_hit, readable,\
-                            function)
+                            sym, color, mat1, mat2, volume, wgt, dam, cut, to_hit, readable)
 
     SOFTWARE("software_useless", "misc software", "none", 300, SW_USELESS, 0, _("\
 A miscellaneous piece of hobby software. Probably useless."));

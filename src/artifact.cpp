@@ -242,6 +242,7 @@ std::string artifact_name(std::string type);
 it_artifact_tool::it_artifact_tool() : itype()
 {
     tool_slot.reset( new islot_tool() );
+    tool_slot->use_method = use_function( &iuse::artifact );
     id = mk_artifact_id();
     tool_slot->ammo = "NULL";
     price = 0;
@@ -251,7 +252,6 @@ it_artifact_tool::it_artifact_tool() : itype()
     charge_type = ARTC_NULL;
     tool_slot->turns_per_charge = 0;
     tool_slot->revert_to = "null";
-    use_methods.push_back( &iuse::artifact );
 };
 
 it_artifact_armor::it_artifact_armor() : itype()
@@ -1133,6 +1133,7 @@ void it_artifact_tool::deserialize(JsonObject &jo)
     item_tags = jo.get_tags("item_flags");
 
     tool_slot.reset( new islot_tool() );
+    tool_slot->use_method = use_function( &iuse::artifact );
     tool_slot->max_charges = jo.get_long("max_charges");
     tool_slot->def_charges = jo.get_long("def_charges");
 

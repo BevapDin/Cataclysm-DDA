@@ -1021,9 +1021,25 @@ void Item_factory::load_slot( std::unique_ptr<islot_light_emission> &slotptr, Js
     slot.chargedim = jo.get_int( "chargedim", false );
 }
 
+template<>
+void Item_factory::load_slot( std::unique_ptr<islot_continious> &slotptr, JsonObject &jo )
+{
+    // TODO: more generic. those two lines are identical for all slot types
+    slotptr.reset( new islot_continious() );
+    auto &slot = *slotptr;
+    std::vector<use_function> tmp;
+    set_use_methods_from_json( jo, "use_action", tmp );
+    if( !tmp.empty() ) {
+        slot.use_method = tmp.front();
+    }
+    slot.turns_per_charge = jo.get_int( "turns_per_charge" );
+    slot.revert_to = jo.get_string( "revert_to" );
+}
+
 void Item_factory::load_dep_slots( depending_slots &deps, JsonObject &jo )
 {
     load_slot_if_available( deps.light_emission_slot, jo, "light_emission" );
+    load_slot_if_available( deps.continious_slot, jo, "continious" );
 }
 
 void Item_factory::load_basic_info(JsonObject &jo, itype *new_item_template)
