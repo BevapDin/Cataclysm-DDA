@@ -336,6 +336,7 @@ bool WinCreate()
     } else {
         joystick = NULL;
     }
+    SDL_StartTextInput();
 
     // Set up audio mixer.
 #ifdef SDL_SOUND
@@ -354,6 +355,7 @@ bool WinCreate()
 
 void WinDestroy()
 {
+    SDL_StopTextInput();
 #ifdef SDL_SOUND
     Mix_CloseAudio();
 #endif
