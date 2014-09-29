@@ -91,6 +91,8 @@ enum DebugClass {
     D_NPC     = 1 << 5,
     /** SDL & tiles & anything graphical */
     D_SDL     = 1 << 6,
+    /** Related to windows specific parts, mostely the wincurse stuff */
+    D_WINDOWS = 1 << 7,
 
     DC_ALL    = ( 1 << 30 ) - 1
 };

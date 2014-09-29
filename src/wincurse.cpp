@@ -16,6 +16,8 @@
 #include "file_wrapper.h"
 #include "debug.h"
 
+#define dbg(x) DebugLog( x, D_WINDOWS ) << __FILE__ << ":" << __LINE__ << ": "
+
 //***********************************
 //Globals                           *
 //***********************************
@@ -28,8 +30,6 @@ int WindowWidth;        //Width of the actual window, not the curses window
 int WindowHeight;       //Height of the actual window, not the curses window
 int lastchar;          //the last character that was pressed, resets in getch
 int inputdelay;         //How long getch will wait for a character to be typed
-//WINDOW *_windows;  //Probably need to change this to dynamic at some point
-//int WindowCount;        //The number of curses windows currently in use
 HDC backbuffer;         //an off-screen DC to prevent flickering, lower cpu
 HBITMAP backbit;        //the bitmap that is used in conjunction wth the above
 int fontwidth;          //the width of the font, background is always this size
@@ -76,8 +76,10 @@ bool WinCreate()
     WindowClassType.hIconSm       = LoadIcon(WindowINST, MAKEINTRESOURCE(0));
     WindowClassType.hCursor       = LoadCursor(NULL, IDC_ARROW);
     WindowClassType.lpszClassName = szWindowClass;
-    if (!RegisterClassExW(&WindowClassType))
+    if( RegisterClassExW( &WindowClassType ) == 0 ) {
+        dbg( D_ERROR ) << "RegisterClassEx failed: " << GetLastError();
         return false;
+    }
 
     // Adjust window size
     uint32_t WndStyle = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_VISIBLE; // Basic window, show on creation
@@ -99,8 +101,10 @@ bool WinCreate()
                                    WndRect.right - WndRect.left,
                                    WndRect.bottom - WndRect.top,
                                    0, 0, WindowINST, NULL);
-    if (WindowHandle == 0)
+    if( WindowHandle == 0 ) {
+        dbg( D_ERROR ) << "CreateWindowEx failed: " << GetLastError();
         return false;
+    }
 
     return true;
 };
@@ -444,7 +448,6 @@ int projected_window_height(int)
 //Basic Init, create the font, backbuffer, etc
 WINDOW *curses_init(void)
 {
-   // _windows = new WINDOW[20];         //initialize all of our variables
     lastchar=-1;
     inputdelay=-1;
 
@@ -484,7 +487,7 @@ WINDOW *curses_init(void)
             assure_dir_exist(FILENAMES["config_dir"]);
             std::ofstream OutStream(FILENAMES["fontdata"].c_str(), std::ofstream::binary);
             if(!OutStream.good()) {
-                DebugLog( D_ERROR, DC_ALL ) << "Can't save user fontdata file.\n"
+                dbg( D_ERROR ) << "Can't save user fontdata file.\n"
                 << "Check permissions for: " << FILENAMES["fontdata"].c_str();
                 return NULL;
             }
@@ -503,7 +506,7 @@ WINDOW *curses_init(void)
             OutStream << "\n";
             OutStream.close();
         } else {
-            DebugLog( D_ERROR, DC_ALL ) << "Can't load fontdata files.\n"
+            dbg( D_ERROR ) << "Can't load fontdata files.\n"
             << "Check permissions for:\n" << FILENAMES["legacy_fontdata"].c_str() << "\n"
             << FILENAMES["fontdata"].c_str() << "\n";
             return NULL;
@@ -515,13 +518,22 @@ WINDOW *curses_init(void)
     WindowWidth= OPTIONS["TERMINAL_X"] * fontwidth;
     WindowHeight = OPTIONS["TERMINAL_Y"] * fontheight;
 
-    WinCreate();    //Create the actual window, register it, etc
+    if( !WinCreate() ) {
+        return NULL;
+    }
     timeBeginPeriod(1); // Set Sleep resolution to 1ms
     CheckMessages();    //Let the message queue handle setting up the window
 
     WindowDC   = GetDC(WindowHandle);
+    if( WindowDC == NULL ) {
+        dbg( D_ERROR ) << "GetDC returned NULL";
+        return NULL;
+    }
     backbuffer = CreateCompatibleDC(WindowDC);
-
+    if( backbuffer == NULL ) {
+        dbg( D_ERROR ) << "CreateCompatibleDC returned NULL";
+        return NULL;
+    }
     BITMAPINFO bmi = BITMAPINFO();
     bmi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth        = WindowWidth;
@@ -533,7 +545,16 @@ WINDOW *curses_init(void)
     bmi.bmiHeader.biClrUsed      = 16; // Colors in the palette
     bmi.bmiHeader.biClrImportant = 16; // Colors in the palette
     backbit = CreateDIBSection(0, &bmi, DIB_RGB_COLORS, (void**)&dcbits, NULL, 0);
-    DeleteObject(SelectObject(backbuffer, backbit));//load the buffer into DC
+    if( backbit == NULL ) {
+        dbg( D_ERROR ) << "CreateDIBSection returned NULL";
+        return NULL;
+    }
+    auto oldobj = SelectObject( backbuffer, backbit ); // load the buffer into DC
+    if( oldobj == NULL ) {
+        dbg( D_ERROR ) << "SelectObject(backbuffer,backbit) returned NULL";
+        return NULL;
+    }
+    DeleteObject( oldobj );
 
     // Load private fonts
     if (SetCurrentDirectoryW(L"data\\font")){
@@ -541,7 +562,10 @@ WINDOW *curses_init(void)
         for (HANDLE findFont = FindFirstFileW(L".\\*", &findData); findFont != INVALID_HANDLE_VALUE; )
         {
             if (!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)){ // Skip folders
-                AddFontResourceExW(findData.cFileName, FR_PRIVATE,NULL);
+                if( AddFontResourceExW( findData.cFileName, FR_PRIVATE, NULL ) == 0 ) {
+                    // stupid wide character string findData.cFileName, does not work with std::ostream, needs to be narrowed
+                    dbg( D_ERROR ) << "AddFontResourceEx failed";
+                }
             }
             if (!FindNextFile(findFont, &findData)){
                 FindClose(findFont);
@@ -549,16 +573,29 @@ WINDOW *curses_init(void)
             }
         }
         SetCurrentDirectoryW(L"..\\..");
+    } else {
+        dbg( D_ERROR ) << "SetCurrentDirectory(data\\font) failed";
     }
 
     // Use desired font, if possible
     font = CreateFontW(fontheight, fontwidth, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
                       DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,
                       PROOF_QUALITY, FF_MODERN, widen(typeface).c_str());
+    if( font == NULL ) {
+        dbg( D_ERROR ) << "CreateFont returned NULL";
+    }
 
-    SetBkMode(backbuffer, TRANSPARENT);//Transparent font backgrounds
-    SelectObject(backbuffer, font);//Load our font into the DC
-//    WindowCount=0;
+    if( SetBkMode( backbuffer, TRANSPARENT ) == 0 ) { // Transparent font backgrounds
+        dbg( D_ERROR ) << "SetBkMode failed";
+    }
+    if( font != NULL ) {
+        auto oldobj = SelectObject( backbuffer, font ); // Load our font into the DC
+        if( oldobj == NULL ) {
+            dbg( D_ERROR ) << "SelectObject(backbit,font) returned NULL";
+        } else {
+            DeleteObject( oldobj );
+        }
+    }
 
     init_colors();
 
@@ -616,8 +653,11 @@ int curses_getch(WINDOW* win)
 //Ends the terminal, destroy everything
 int curses_destroy(void)
 {
-    DeleteObject(font);
+    if( font != NULL ) {
+        DeleteObject( font );
+    }
     WinDestroy();
+    // TODO: should remove all fonts in the data/font directy, just as all of them have been loaded, see above
     RemoveFontResourceExA("data\\termfont",FR_PRIVATE,NULL);//Unload it
     return 1;
 }
