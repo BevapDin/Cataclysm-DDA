@@ -662,14 +662,16 @@ int curses_destroy(void)
     return 1;
 }
 
-inline RGBQUAD BGR(int b, int g, int r)
+// translate color entry in consolecolors to RGBQUAD
+inline RGBQUAD ccolor( const std::string &color )
 {
-    RGBQUAD result;
-    result.rgbBlue=b;    //Blue
-    result.rgbGreen=g;    //Green
-    result.rgbRed=r;    //Red
-    result.rgbReserved=0;//The Alpha, isnt used, so just set it to 0
-    return result;
+    const auto it = consolecolors.find( color );
+    if( it == consolecolors.end() ) {
+        dbg( D_ERROR ) << "requested non-existing color " << color << "\n";
+        return RGBQUAD { 0, 0, 0, 0 };
+    }
+    // rgbBlue, rgbGreen, rgbRed, rgbReserved
+    return RGBQUAD { BYTE( it->second[0] ), BYTE( it->second[1] ), BYTE( it->second[2] ), 0 };
 }
 
 void load_colors(JsonObject &jsobj)
@@ -688,67 +690,35 @@ void load_colors(JsonObject &jsobj)
     }
 }
 
-#define ccolor(s) consolecolors[s][0],consolecolors[s][1],consolecolors[s][2]
+// This function mimics the ncurses interface. It must not throw.
+// Instead it should return ERR or OK, see man curs_color
 int curses_start_color(void)
 {
     colorpairs = new pairs[100];
     windowsPalette = new RGBQUAD[16];
-
-    //Load the console colors from colors.json
-    std::ifstream colorfile(FILENAMES["colors"].c_str(), std::ifstream::in | std::ifstream::binary);
-    try{
-        JsonIn jsin(colorfile);
-        char ch;
+    const std::string path = FILENAMES["colors"];
+    std::ifstream colorfile( path.c_str(), std::ifstream::in | std::ifstream::binary );
+    try {
+        JsonIn jsin( colorfile );
         // Manually load the colordef object because the json handler isn't loaded yet.
-        jsin.eat_whitespace();
-        ch = jsin.peek();
-        if( ch == '[' ) {
-            jsin.start_array();
-            // find type and dispatch each object until array close
-            while (!jsin.end_array()) {
-                jsin.eat_whitespace();
-                char ch = jsin.peek();
-                if (ch != '{') {
-                    std::stringstream err;
-                    err << jsin.line_number() << ": ";
-                    err << "expected array of objects but found '";
-                    err << ch << "', not '{'";
-                    throw err.str();
-                }
-                JsonObject jo = jsin.get_object();
-                load_colors(jo);
-                jo.finish();
-            }
-        } else {
-            // not an array?
-            std::stringstream err;
-            err << jsin.line_number() << ": ";
-            err << "expected object or array, but found '" << ch << "'";
-            throw err.str();
+        jsin.start_array();
+        while( !jsin.end_array() ) {
+            JsonObject jo = jsin.get_object();
+            load_colors( jo );
+            jo.finish();
         }
+    } catch( std::string e ) {
+        dbg( D_ERROR ) << "Failed to load color definitions from " << path << ": " << e;
+        return ERR;
     }
-    catch(std::string e){
-        throw FILENAMES["colors"] + ": " + e;
+    for( size_t c = 0; c < main_color_names.size(); c++ ) {
+        windowsPalette[c] = ccolor( main_color_names[c] );
     }
-
-    if(consolecolors.empty())return SetDIBColorTable(backbuffer, 0, 16, windowsPalette);
-    windowsPalette[0]  = BGR(ccolor("BLACK"));
-    windowsPalette[1]  = BGR(ccolor("RED"));
-    windowsPalette[2]  = BGR(ccolor("GREEN"));
-    windowsPalette[3]  = BGR(ccolor("BROWN"));
-    windowsPalette[4]  = BGR(ccolor("BLUE"));
-    windowsPalette[5]  = BGR(ccolor("MAGENTA"));
-    windowsPalette[6]  = BGR(ccolor("CYAN"));
-    windowsPalette[7]  = BGR(ccolor("GRAY"));
-    windowsPalette[8]  = BGR(ccolor("DGRAY"));
-    windowsPalette[9]  = BGR(ccolor("LRED"));
-    windowsPalette[10] = BGR(ccolor("LGREEN"));
-    windowsPalette[11] = BGR(ccolor("YELLOW"));
-    windowsPalette[12] = BGR(ccolor("LBLUE"));
-    windowsPalette[13] = BGR(ccolor("LMAGENTA"));
-    windowsPalette[14] = BGR(ccolor("LCYAN"));
-    windowsPalette[15] = BGR(ccolor("WHITE"));
-    return SetDIBColorTable(backbuffer, 0, 16, windowsPalette);
+    if( SetDIBColorTable( backbuffer, 0, 16, windowsPalette ) == 0 ) {
+        dbg( D_ERROR ) << "SetDIBColorTable failed";
+        return ERR;
+    }
+    return OK;
 }
 
 void curses_timeout(int t)
