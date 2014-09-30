@@ -172,13 +172,15 @@ int echo(void);
 int noecho(void);
 //non-curses functions, Do not call these in the main game code
 extern WINDOW *mainwin;
-extern pairs *colorpairs;
-// key is a color name from main_color_names,
-// value is a color in *BGR*. each vector has exactly 3 values.
-// see load_colors(Json...)
-extern std::map< std::string, std::vector<int> > consolecolors;
-// color names as read from the json file
+
+// -----
+// Color related stuff, see cursesport.cpp for implementation and explanation.
+extern std::array<pairs, 100> colorpairs;
+extern std::map< std::string, std::array<int, 3> > consolecolors;
 extern std::array<std::string, 16> main_color_names;
+bool load_colors_from_json();
+// -----
+
 WINDOW *curses_init();
 int curses_destroy();
 void curses_drawwindow(WINDOW *win);

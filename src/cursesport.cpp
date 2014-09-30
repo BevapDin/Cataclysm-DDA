@@ -2,9 +2,13 @@
 #include "catacurse.h"
 #include "output.h"
 #include "color.h"
+#include "debug.h"
 #include "catacharset.h"
+#include "json.h"
+#include "path_info.h"
 
 #include <cstring> // strlen
+#include <fstream>
 
 /**
  * Whoever cares, btw. not my base design, buit this is how it works:
@@ -30,7 +34,6 @@
 
 WINDOW *mainwin;
 WINDOW *stdscr;
-pairs *colorpairs;   //storage for pair'ed colored, should be dynamic, meh
 int echoOn;     //1 = getnstr shows input, 0 = doesn't show. needed for echo()-ncurses compatibility.
 
 //***********************************
@@ -522,6 +525,9 @@ int erase(void)
 //pairs up a foreground and background color and puts it into the array of pairs
 int init_pair(short pair, short f, short b)
 {
+    if( static_cast<size_t>( pair ) < colorpairs.size() ) {
+        return 0;
+    }
     colorpairs[pair].FG = f;
     colorpairs[pair].BG = b;
     return 1;
@@ -749,4 +755,70 @@ int noecho()
     echoOn = 0;
     return 0;
 }
+
+// Common data/functions for wincurse and sdltiles:
+/**
+ * wincurse and sdltiles both implement a ncurses interface function
+ * @ref curses_start_color (the actual ncurse interface function is
+ * @ref start_color above, it just calls curses_start_color).
+ * This function calls @ref load_colors_from_json to load the color definition into
+ * @ref consolecolors.
+ * Those definitions are than copied into the system specific format
+ * (SDL_Color / RGBQUAD) and into a system specific storage
+ * (called @ref windowsPalette in both cases).
+ *
+ * At this pint consolecolors is no longer used.
+ *
+ * The json data contains a simple array of RGB values, the load functions
+ * stores them with their name in consolecolors, the names matches the index
+ * in that json array based on main_color_names (main_color_names[0] is the
+ * name of the first color in the array).
+ */
+
+// colors as loaded from the colors.json file,
+// key is a color name from main_color_names,
+// value is a color in *BGR*
+std::map< std::string,std::array<int, 3> > consolecolors;
+
+// color names in the order they appear in the json data.
+std::array<std::string, 16> main_color_names{ { "BLACK","RED","GREEN","BROWN","BLUE","MAGENTA",
+"CYAN","GRAY","DGRAY","LRED","LGREEN","YELLOW","LBLUE","LMAGENTA","LCYAN","WHITE" } };
+
+// color pairs (foreground and background), see ncurses for documentation,
+// this just mimics it, it stores the color pairs (loaded in init_colors)
+std::array<pairs, 100> colorpairs;
+
+void load_colors( JsonObject &jsobj )
+{
+    for( auto & cname : main_color_names ) {
+        auto &bgr = consolecolors[cname];
+        JsonArray jsarr = jsobj.get_array( cname );
+        // Strange ordering, isn't it? Entries in consolecolors are BGR,
+        // the json contains them as RGB.
+        bgr[0] = jsarr.get_int( 2 );
+        bgr[1] = jsarr.get_int( 1 );
+        bgr[2] = jsarr.get_int( 0 );
+    }
+}
+
+bool load_colors_from_json()
+{
+    const std::string path = FILENAMES["colors"];
+    std::ifstream colorfile( path.c_str(), std::ifstream::in | std::ifstream::binary );
+    try {
+        JsonIn jsin( colorfile );
+        // Manually load the colordef object because the json handler isn't loaded yet.
+        jsin.start_array();
+        while( !jsin.end_array() ) {
+            JsonObject jo = jsin.get_object();
+            load_colors( jo );
+            jo.finish();
+        }
+    } catch( std::string e ) {
+        DebugLog( D_ERROR, DC_ALL ) << "Failed to load color definitions from " << path << ": " << e;
+        return false;
+    }
+    return true;
+}
+
 #endif

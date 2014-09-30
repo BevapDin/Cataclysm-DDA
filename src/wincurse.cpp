@@ -37,10 +37,10 @@ int fontheight;         //the height of the font, background is always this size
 int halfwidth;          //half of the font width, used for centering lines
 int halfheight;          //half of the font height, used for centering lines
 HFONT font;             //Handle to the font created by CreateFont
-RGBQUAD *windowsPalette;  //The coor palette, 16 colors emulates a terminal
+// The color palette, 16 colors emulates a terminal
+std::array<RGBQUAD, 16> windowsPalette;
 unsigned char *dcbits;  //the bits of the screen image, for direct access
 bool CursorVisible = true; // Showcursor is a somewhat weird function
-std::map< std::string, std::vector<int> > consolecolors;
 
 //***********************************
 //Non-curses, Window functions      *
@@ -674,47 +674,17 @@ inline RGBQUAD ccolor( const std::string &color )
     return RGBQUAD { BYTE( it->second[0] ), BYTE( it->second[1] ), BYTE( it->second[2] ), 0 };
 }
 
-void load_colors(JsonObject &jsobj)
-{
-    std::string colors[16]={"BLACK","RED","GREEN","BROWN","BLUE","MAGENTA","CYAN","GRAY",
-    "DGRAY","LRED","LGREEN","YELLOW","LBLUE","LMAGENTA","LCYAN","WHITE"};
-    JsonArray jsarr;
-    for(int c=0;c<16;c++)
-    {
-        jsarr = jsobj.get_array(colors[c]);
-        if(jsarr.size()<3)continue;
-        consolecolors[colors[c]].clear();
-        consolecolors[colors[c]].push_back(jsarr.get_int(2));
-        consolecolors[colors[c]].push_back(jsarr.get_int(1));
-        consolecolors[colors[c]].push_back(jsarr.get_int(0));
-    }
-}
-
 // This function mimics the ncurses interface. It must not throw.
 // Instead it should return ERR or OK, see man curs_color
 int curses_start_color(void)
 {
-    colorpairs = new pairs[100];
-    windowsPalette = new RGBQUAD[16];
-    const std::string path = FILENAMES["colors"];
-    std::ifstream colorfile( path.c_str(), std::ifstream::in | std::ifstream::binary );
-    try {
-        JsonIn jsin( colorfile );
-        // Manually load the colordef object because the json handler isn't loaded yet.
-        jsin.start_array();
-        while( !jsin.end_array() ) {
-            JsonObject jo = jsin.get_object();
-            load_colors( jo );
-            jo.finish();
-        }
-    } catch( std::string e ) {
-        dbg( D_ERROR ) << "Failed to load color definitions from " << path << ": " << e;
+    if( !load_colors_from_json() ) {
         return ERR;
     }
     for( size_t c = 0; c < main_color_names.size(); c++ ) {
         windowsPalette[c] = ccolor( main_color_names[c] );
     }
-    if( SetDIBColorTable( backbuffer, 0, 16, windowsPalette ) == 0 ) {
+    if( SetDIBColorTable( backbuffer, 0, windowsPalette.size(), windowsPalette.data() ) == 0 ) {
         dbg( D_ERROR ) << "SetDIBColorTable failed";
         return ERR;
     }

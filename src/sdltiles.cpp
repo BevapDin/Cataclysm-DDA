@@ -133,8 +133,6 @@ protected:
 static Font *font = NULL;
 static Font *map_font = NULL;
 
-std::array<std::string, 16> main_color_names{ { "BLACK","RED","GREEN","BROWN","BLUE","MAGENTA",
-"CYAN","GRAY","DGRAY","LRED","LGREEN","YELLOW","LBLUE","LMAGENTA","LCYAN","WHITE" } };
 static SDL_Color windowsPalette[256];
 static SDL_Window *window = NULL;
 static SDL_Renderer* renderer = NULL;
@@ -159,7 +157,6 @@ int fontwidth;          //the width of the font, background is always this size
 int fontheight;         //the height of the font, background is always this size
 static int TERMINAL_WIDTH;
 static int TERMINAL_HEIGHT;
-std::map< std::string,std::vector<int> > consolecolors;
 
 static SDL_Joystick *joystick; // Only one joystick for now.
 
@@ -1389,22 +1386,6 @@ inline SDL_Color BGR(int b, int g, int r)
     return result;
 }
 
-void load_colors( JsonObject &jsobj )
-{
-    JsonArray jsarr;
-    for( size_t c = 0; c < main_color_names.size(); c++ ) {
-        const std::string &color = main_color_names[c];
-        auto &bgr = consolecolors[color];
-        jsarr = jsobj.get_array( color );
-        bgr.resize( 3 );
-        // Strange ordering, isn't it? Entries in consolecolors are BGR,
-        // the json contains them as RGB.
-        bgr[0] = jsarr.get_int( 2 );
-        bgr[1] = jsarr.get_int( 1 );
-        bgr[2] = jsarr.get_int( 0 );
-    }
-}
-
 // translate color entry in consolecolors to SDL_Color
 inline SDL_Color ccolor( const std::string &color )
 {
@@ -1413,27 +1394,14 @@ inline SDL_Color ccolor( const std::string &color )
         dbg( D_ERROR ) << "requested non-existing color " << color << "\n";
         return SDL_Color { 0, 0, 0, 0 };
     }
-    return BGR( it->second[0], it->second[1], it->second[2] );
+    return SDL_Color { Uint8( it->second[0] ), Uint8( it->second[1] ), Uint8( it->second[2] ), 0 };
 }
 
 // This function mimics the ncurses interface. It must not throw.
 // Instead it should return ERR or OK, see man curs_color
 int curses_start_color( void )
 {
-    const std::string path = FILENAMES["colors"];
-    colorpairs = new pairs[100];
-    std::ifstream colorfile( path.c_str(), std::ifstream::in | std::ifstream::binary );
-    try {
-        JsonIn jsin( colorfile );
-        // Manually load the colordef object because the json handler isn't loaded yet.
-        jsin.start_array();
-        while( !jsin.end_array() ) {
-            JsonObject jo = jsin.get_object();
-            load_colors( jo );
-            jo.finish();
-        }
-    } catch( std::string e ) {
-        dbg( D_ERROR ) << "Failed to load color definitions from " << path << ": " << e;
+    if( !load_colors_from_json() ) {
         return ERR;
     }
     for( size_t c = 0; c < main_color_names.size(); c++ ) {
