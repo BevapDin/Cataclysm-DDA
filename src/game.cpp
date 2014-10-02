@@ -1527,10 +1527,12 @@ void game::process_activity()
     if (int(calendar::turn) % 50 == 0) {
         draw();
     }
-    activity_on_turn();
-    if (u.activity.moves_left <= 0) { // We finished our activity!
-        activity_on_finish();
-    }
+    do {
+        activity_on_turn();
+        if (u.activity.moves_left <= 0) { // We finished our activity!
+            activity_on_finish();
+        }
+    } while( u.moves > 0 && u.activity.type != ACT_NULL );
 }
 
 void on_turn_activity_pickaxe(player *p);
@@ -7471,10 +7473,10 @@ bool game::revive_corpse(int x, int y, item *it)
     }
     int burnt_penalty = it->burnt;
     monster critter(it->corpse, x, y);
-    critter.speed = int(critter.speed * .8) - burnt_penalty / 2;
-    critter.hp = int(critter.hp    * .7) - burnt_penalty;
+    critter.set_speed_base( int(critter.get_speed_base() * 0.8) - (burnt_penalty / 2) );
+    critter.hp = int(critter.hp * 0.7) - burnt_penalty;
     if (it->damage > 0) {
-        critter.speed /= it->damage + 1;
+        critter.set_speed_base( critter.get_speed_base() / (it->damage + 1) );
         critter.hp /= it->damage + 1;
     }
     critter.no_extra_death_drops = true;

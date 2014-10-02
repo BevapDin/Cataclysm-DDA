@@ -316,11 +316,14 @@ void veh_interact::cache_tool_availability()
     crafting_inventory_t &crafting_inv = *this->crafting_inv;
 
     long charges = dynamic_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
+    int charges_oxy = dynamic_cast<it_tool *>(itypes["oxy_torch"])->charges_per_use;
     has_wrench = crafting_inv.has_tools("func:wrench", 1);
     has_hacksaw = crafting_inv.has_tools("func:hacksaw", 1) ||
                   (crafting_inv.has_tools("circsaw_off", 1) &&
                   crafting_inv.has_charges("circsaw_off", CIRC_SAW_USED));
-    has_welder = crafting_inv.has_charges("func:welder", charges);
+    has_welder = crafting_inv.has_charges("func:welder", charges) ||
+                 (crafting_inv.has_tools("oxy_torch", 1) &&
+                  crafting_inv.has_charges("oxy_torch", charges_oxy));
     has_goggles = (crafting_inv.has_tools("goggles_welding", 1) ||
                    g->u.has_bionic("bio_sunglasses") ||
                    g->u.is_wearing("goggles_welding") || g->u.is_wearing("rm13_armor_on"));
@@ -772,7 +775,7 @@ void veh_interact::do_remove()
         return;
     case LACK_TOOLS:
         fold_and_print(w_msg, 0, 1, msg_width - 2, c_ltgray,
-                       _("You need a <color_%1$s>wrench</color> and a <color_%2$s>hacksaw</color> to remove parts."),
+                       _("You need a <color_%1$s>wrench</color> and a <color_%2$s>hacksaw, cutting torch and goggles, or circular saw (off)</color> to remove parts."),
                        has_wrench ? "ltgreen" : "red",
                        has_hacksaw ? "ltgreen" : "red");
         if(wheel) {
@@ -819,7 +822,7 @@ void veh_interact::do_remove()
                     return;
                 } else {
                     fold_and_print(w_msg, 0, 1, msg_width - 2, c_ltgray,
-                                   _("You need a <color_%1$s>wrench</color> and a <color_%2$s>hacksaw or circular saw (off)</color> and <color_%3$s>level 2</color> mechanics skill to remove parts."),
+                                   _("You need a <color_%1$s>wrench</color> and a <color_%2$s>hacksaw, cutting torch and goggles, or circular saw (off)</color> and <color_%3$s>level 2</color> mechanics skill to remove parts."),
                                    has_wrench ? "ltgreen" : "red",
                                    has_hacksaw ? "ltgreen" : "red",
                                    has_skill ? "ltgreen" : "red");
@@ -1581,6 +1584,7 @@ void complete_vehicle ()
     std::string part_id = g->u.activity.str_values[0];
     std::vector<tool_comp> tools;
     int welder_charges = dynamic_cast<it_tool *>(itypes["func:welder"])->charges_per_use;
+    int welder_oxy_charges = dynamic_cast<it_tool *>(itypes["oxy_torch"])->charges_per_use;
     crafting_inventory_t crafting_inv(&g->u);
     const bool has_goggles = crafting_inv.has_tools("goggles_welding", 1) ||
                              g->u.has_bionic("bio_sunglasses") ||
@@ -1606,6 +1610,7 @@ void complete_vehicle ()
             // Need welding goggles to use any of these tools,
             // without the goggles one _must_ use the duct tape
             tools.push_back(tool_comp("func:welder", welder_charges));
+            tools.push_back(tool_comp("oxy_torch", welder_oxy_charges));
         }
         tools.push_back(tool_comp("duct_tape", DUCT_TAPE_USED));
         tools.push_back(tool_comp("toolbox", DUCT_TAPE_USED));
@@ -1672,6 +1677,7 @@ void complete_vehicle ()
             }
         }
         tools.push_back(tool_comp("func:welder", int(welder_charges * dmg)));
+        tools.push_back(tool_comp("oxy_torch", int(welder_oxy_charges * dmg)));
         tools.push_back(tool_comp("duct_tape", int(DUCT_TAPE_USED * dmg)));
         tools.push_back(tool_comp("toolbox", int(DUCT_TAPE_USED * dmg)));
         crafting_inv.consume_any_tools(tools);
@@ -1691,6 +1697,7 @@ void complete_vehicle ()
         tools.push_back(tool_comp("toolbox", -1));
         tools.push_back(tool_comp("survivor_belt", -1));
         tools.push_back(tool_comp("circsaw_off", 20));
+        tools.push_back(tool_comp("oxy_torch", 10));
         crafting_inv.consume_any_tools(tools);
         // Dump contents of part at player's feet, if any.
         for (size_t i = 0; i < veh->parts[vehicle_part].items.size(); i++) {
