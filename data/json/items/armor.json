@@ -2805,7 +2805,7 @@
     {
         "type" : "ARMOR",
         "id" : "tshirt",
-        "name" : "t shirt",
+        "name" : "t-shirt",
         "weight" : 110,
         "color" : "white",
         "covers" : ["TORSO"],
@@ -5992,6 +5992,7 @@
         "type" : "ARMOR",
         "id" : "helmet_bike",
         "name" : "bike helmet",
+        "category" : "armor",
         "weight" : 270,
         "color" : "dark_gray",
         "covers" : ["HEAD"],
