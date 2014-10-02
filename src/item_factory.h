@@ -119,7 +119,6 @@ class Item_factory
         void load_armor_container(JsonObject &jo);
         void load_bionic    (JsonObject &jo);
         void load_veh_part  (JsonObject &jo);
-        void load_stationary(JsonObject &jo);
 
         void load_item_blacklist(JsonObject &jo);
         void load_item_whitelist(JsonObject &jo);

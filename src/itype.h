@@ -166,6 +166,8 @@ public:
 
     const item_category *category; // category pointer or NULL for automatic selection
 
+    std::string snippet_category;
+
     virtual std::string get_item_type_string() const
     {
         return "misc";
@@ -223,10 +225,6 @@ public:
         return false;
     }
     virtual bool is_macguffin() const
-    {
-        return false;
-    }
-    virtual bool is_stationary() const
     {
         return false;
     }
@@ -681,19 +679,6 @@ struct it_software : public virtual itype {
     {
         swtype = pswtype;
         power = ppower;
-    }
-};
-
-struct it_stationary : public virtual itype {
-    virtual bool is_stationary() const
-    {
-        return true;
-    }
-
-    std::string category;
-
-    it_stationary() : itype(), category()
-    {
     }
 };
 

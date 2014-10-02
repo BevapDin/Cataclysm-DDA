@@ -1129,7 +1129,7 @@
         "items": {
             "both": [
                 "pants",
-                "tshirt",
+                ["tshirt_text", "allyourbase"],
                 "socks",
                 "sneakers",
                 "portable_game",
