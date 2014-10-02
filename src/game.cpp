@@ -2054,7 +2054,8 @@ void game::update_weather()
         g->lightning_active = false;
         nextweather += 50; // Check weather each 50 turns.
         if (weather != old_weather && weather_data[weather].dangerous &&
-            levz >= 0 && m.is_outside(u.posx, u.posy)) {
+            levz >= 0 && m.is_outside(u.posx, u.posy)
+            && !u.has_activity(ACT_WAIT_WEATHER)) {
             cancel_activity_query(_("The weather changed to %s!"), weather_data[weather].name.c_str());
         }
 
@@ -11361,6 +11362,10 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
     }
     if (u.weapon.has_flag("FIRE_50") && u.weapon.num_charges() < 50) {
         add_msg(m_info, _("Your %s needs 50 charges to fire!"), u.weapon.tname().c_str());
+        return;
+    }
+    if (u.weapon.has_flag("FIRE_20") && u.weapon.num_charges() < 20) {
+        add_msg(m_info, _("Your %s needs 20 charges to fire!"), u.weapon.tname().c_str());
         return;
     }
     if (u.weapon.has_flag("USE_UPS") && !u.has_charges("UPS_off", 5) &&

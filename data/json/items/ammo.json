@@ -2131,6 +2131,7 @@
         "symbol" : "=",
         "color" : "dark_gray",
         "description" : "Firearm quality gunpowder.",
+        "container" : "bottle_plastic_small",
         "material" : "powder",
         "volume" : 1,
         "weight" : 1,
@@ -2156,6 +2157,7 @@
         "symbol" : "=",
         "color" : "white",
         "description" : "Volatile powdered chemical oxidizer.",
+        "container" : "bottle_plastic_small",
         "material" : "powder",
         "volume" : 1,
         "weight" : 1,
@@ -2181,6 +2183,7 @@
         "symbol" : "=",
         "color" : "white",
         "description" : "Powdered caustic soda.",
+        "container" : "bottle_plastic_small",
         "material" : "powder",
         "volume" : 1,
         "weight" : 1,
@@ -2505,7 +2508,7 @@
         "dispersion" : 0,
         "recoil" : 0,
         "count" : 200,
-        "effects" : ["FLAME", "STREAM", "NEVER_MISFIRES"]
+        "effects" : ["FLAME", "STREAM", "INCENDIARY", "NEVER_MISFIRES"]
     },
     {   "type" : "AMMO",
         "id" : "lamp_oil",

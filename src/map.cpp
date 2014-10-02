@@ -1422,6 +1422,12 @@ bool map::has_flag_ter_and_furn(const ter_bitflags flag, const int x, const int 
 /////
 bool map::is_bashable(const int x, const int y)
 {
+    if (!inbounds(x, y)) {
+        DebugLog( D_WARNING, D_MAP ) << "Looking for out-of-bounds is_bashable at "
+                                     << x << ", " << y;
+        return false;
+    }
+
     if (veh_in_active_range && veh_exists_at[x][y]) {
         std::map< std::pair<int, int>, std::pair<vehicle *, int> >::const_iterator it;
         if ((it = veh_cached_parts.find( std::make_pair(x, y) )) != veh_cached_parts.end()) {
@@ -2372,6 +2378,10 @@ void map::shoot(const int x, const int y, int &dam,
 
     if (ammo_effects.count("TRAIL") && !one_in(4)) {
         add_field(x, y, fd_smoke, rng(1, 2));
+    }
+
+    if (ammo_effects.count("STREAM") && !one_in(3)) {
+        add_field(x, y, fd_fire, rng(1, 2));
     }
 
     if (ammo_effects.count("LIGHTNING")) {

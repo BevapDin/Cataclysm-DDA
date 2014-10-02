@@ -911,12 +911,44 @@ void player::update_bodytemp()
             }
         }
         // TILES
-        // Being on fire affects temp_cur (not temp_conv): this is super dangerous for the player
+        int tile_strength = 0;
+        // Being on fire increases very intensly the convergeant temperature.
         if (has_effect("onfire")) {
-            temp_cur[i] += 250;
+            temp_conv[i] += 15000;
         }
-        if ( g->m.get_field_strength( point(posx, posy), fd_fire ) > 2 || trap_at_pos == tr_lava) {
-            temp_cur[i] += 250;
+        // Same with standing on fire.
+        tile_strength = g->m.get_field_strength(point(posx, posy), fd_fire);
+        if (tile_strength > 2 || trap_at_pos == tr_lava) {
+            temp_conv[i] += 15000;
+        }
+        // Standing in the hot air of a fire is nice.
+        tile_strength = g->m.get_field_strength(point(posx, posy), fd_hot_air1);
+        switch (tile_strength) {
+            case 3: temp_conv[i] +=  500; break;
+            case 2: temp_conv[i] +=  300; break;
+            case 1: temp_conv[i] +=  100; break;
+            default: break;
+        }
+        tile_strength = g->m.get_field_strength(point(posx, posy), fd_hot_air2);
+        switch (tile_strength) {
+            case 3: temp_conv[i] += 1000; break;
+            case 2: temp_conv[i] +=  800; break;
+            case 1: temp_conv[i] +=  300; break;
+            default: break;
+        }
+        tile_strength = g->m.get_field_strength(point(posx, posy), fd_hot_air3);
+        switch (tile_strength) {
+            case 3: temp_conv[i] += 3500; break;
+            case 2: temp_conv[i] += 2000; break;
+            case 1: temp_conv[i] +=  800; break;
+            default: break;
+        }
+        tile_strength = g->m.get_field_strength(point(posx, posy), fd_hot_air4);
+        switch (tile_strength) {
+            case 3: temp_conv[i] += 8000; break;
+            case 2: temp_conv[i] += 5000; break;
+            case 1: temp_conv[i] += 3500; break;
+            default: break;
         }
         // WEATHER
         if (g->weather == WEATHER_SUNNY && g->is_in_sunlight(posx, posy))
@@ -7994,16 +8026,15 @@ bool player::eat(item *eaten, it_comest *comest)
             add_msg_if_player(m_good, _("You feast upon the sweet honey."));
         add_morale(MORALE_HONEY, honey_fun, 100);
     }
-    if ((has_trait("HERBIVORE") || has_trait("RUMINANT")) &&
-            (eaten->made_of("flesh") || eaten->made_of("egg"))) {
-        if (!one_in(3)) {
+    if( (has_trait("HERBIVORE") || has_trait("RUMINANT")) &&
+        (eaten->made_of("flesh") || eaten->made_of("egg")) ) {
+        add_msg_if_player(m_bad, _("Your stomach immediately revolts, you can't keep this disgusting stuff down."));
+        if( !one_in(3) && (stomach_food || stomach_water) ) {
             vomit();
-        }
-        if (comest->quench >= 2) {
-            thirst += int(comest->quench / 2);
-        }
-        if (comest->nutr >= 2) {
-            hunger += int(comest->nutr * .75);
+        } else {
+            add_memorial_log(pgettext("memorial_male", "Threw up."),
+                             pgettext("memorial_female", "Threw up."));
+            add_msg( m_bad, _("You throw up everything you just ate!") );
         }
     }
     return true;
@@ -8012,7 +8043,12 @@ bool player::eat(item *eaten, it_comest *comest)
 void player::consume_effects(item *eaten, it_comest *comest, bool rotten)
 {
     if (has_trait("THRESH_PLANT") && comest->can_use( "PLANTBLECH" )) {
-    return;
+        return;
+    }
+    if( (has_trait("HERBIVORE") || has_trait("RUMINANT")) &&
+        (eaten->made_of("flesh") || eaten->made_of("egg")) ) {
+        // No good can come of this.
+        return;
     }
     if ( !(has_trait("GIZZARD")) && (rotten) && !(has_trait("SAPROPHAGE")) ) {
         hunger -= rng(0, comest->nutr);
