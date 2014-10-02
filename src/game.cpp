@@ -1369,7 +1369,7 @@ bool game::do_turn()
 
     // Auto-save if autosave is enabled
     if (OPTIONS["AUTOSAVE"] &&
-        calendar::turn % ((int)OPTIONS["AUTOSAVE_TURNS"] * 10) == 0) {
+        calendar::turn % ((int)OPTIONS["AUTOSAVE_TURNS"]) == 0) {
         autosave();
     }
 
@@ -1839,16 +1839,21 @@ void game::activity_on_finish()
         activity_on_finish_make_zlave();
         u.activity.type = ACT_NULL;
         break;
+    case ACT_PICKUP:
+    case ACT_MOVE_ITEMS:
+        // Do nothing, the only way this happens is if we set this activity after
+        // entering the advanced inventory menu as an activity, and we want it to play out.
+        break;
     default:
         u.activity.type = ACT_NULL;
     }
     if (u.activity.type == ACT_NULL) {
         // Make sure data of previous activity is cleared
         u.activity = player_activity();
-    }
-    if( !u.backlog.empty() && u.backlog.front().auto_resume ) {
-        u.activity = u.backlog.front();
-        u.backlog.pop_front();
+        if( !u.backlog.empty() && u.backlog.front().auto_resume ) {
+            u.activity = u.backlog.front();
+            u.backlog.pop_front();
+        }
     }
 }
 
@@ -8811,8 +8816,7 @@ void game::print_fields_info(int lx, int ly, WINDOW *w_look, int column, int &li
     }
 
     field_entry *cur = NULL;
-    typedef std::map<field_id, field_entry *>::iterator field_iterator;
-    for (field_iterator it = tmpfield.getFieldStart(); it != tmpfield.getFieldEnd(); ++it) {
+    for( auto it = tmpfield.getFieldStart(); it != tmpfield.getFieldEnd(); ++it ) {
         cur = it->second;
         if (cur == NULL) {
             continue;
@@ -12689,8 +12693,7 @@ bool game::plmove(int dx, int dy)
         //Ask for EACH bad field, maybe not? Maybe say "theres X bad shit in there don't do it."
         field_entry *cur = NULL;
         field &tmpfld = m.field_at(x, y);
-        std::map<field_id, field_entry *>::iterator field_it;
-        for (field_it = tmpfld.getFieldStart(); field_it != tmpfld.getFieldEnd(); ++field_it) {
+        for( auto field_it = tmpfld.getFieldStart(); field_it != tmpfld.getFieldEnd(); ++field_it ) {
             cur = field_it->second;
             if (cur == NULL) {
                 continue;
