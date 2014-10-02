@@ -423,7 +423,7 @@ inline char advanced_inventory::get_location_key( aim_location area )
     return ' ';
 }
 
-void advanced_inventory::print_header( advanced_inventory_pane &pane, aim_location sel )
+int advanced_inventory::print_header( advanced_inventory_pane &pane, aim_location sel )
 {
     WINDOW *window = pane.window;
     int area = pane.area;
@@ -440,6 +440,7 @@ void advanced_inventory::print_header( advanced_inventory_pane &pane, aim_locati
         wprintz( window, kcolor, "%c", key );
         wprintz( window, bcolor, "%c", bracket[1] );
     }
+    return squares[AIM_INVENTORY].hscreeny + ofs;
 }
 
 int advanced_inv_area::get_item_count() const
@@ -799,15 +800,22 @@ void advanced_inventory::redraw_pane( side p )
     print_items( pane, active );
 
     auto itm = pane.get_cur_item_ptr();
+    int width;
     if( itm == nullptr ) {
-        // print header with an invalid aim_location, no location is highlighted than
-        print_header( pane, static_cast<aim_location>( -1 ) );
+        width = print_header( pane, pane.area );
     } else {
-        print_header( pane, itm->area );
+        width = print_header( pane, itm->area );
     }
-
-    mvwprintz( w, 1, 2, active ? c_cyan : c_ltgray, "%s", square.name.c_str() );
-    mvwprintz( w, 2, 2, active ? c_green : c_dkgray , "%s", square.desc.c_str() );
+    width -= 2 + 1; // starts at offset 2, plus space between the header and the text
+    mvwprintz( w, 1, 2, active ? c_cyan : c_ltgray, "%s", utf8_truncate( square.name, width ).c_str() );
+    mvwprintz( w, 2, 2, active ? c_green : c_dkgray , "%s", utf8_truncate( square.desc, width ).c_str() );
+    if( square.veh != nullptr ) {
+        const auto &part = square.veh->parts[square.vstor];
+        const auto label = square.veh->get_label( part.mount_dx, part.mount_dy );
+        if( !label.empty() ) {
+            mvwprintz( w, 3, 2, active ? c_green : c_dkgray , "%s", utf8_truncate( label, width ).c_str() );
+        }
+    }
 
     const int max_page = ( pane.items.size() + itemsPerPage - 1 ) / itemsPerPage;
     if( active && max_page > 1 ) {
@@ -918,8 +926,16 @@ bool advanced_inventory::move_all_items()
     auto &darea = squares[dpane.area];
 
     if( OPTIONS["CLOSE_ADV_INV"] != true ) {
-        // TODO: why is this here? It's overwritten on the next line with
-        // ACT_DROP anyway. It seems to be completely useless!
+        // Why is this here? It's because the activity backlog can act
+        // like a stack instead of a single deferred activity in order to
+        // accomplish some UI shenanigans. The inventory menu activity is
+        // added, then an activity to drop is pushed on the stack, then
+        // the drop activity is repeatedly popped and pushed on the stack
+        // until all its items are processed. When the drop activity runs out,
+        // the inventory menu activity is there waiting and seamlessly returns
+        // the player to the menu. If the activity is interrupted instead of
+        // completing, both activities are cancelled.
+        // Thanks to kevingranade for the explanation.
         g->u.assign_activity( ACT_ADV_INVENTORY, 0 );
         g->u.activity.auto_resume = true;
     }
@@ -1481,9 +1497,9 @@ bool advanced_inventory::query_charges( aim_location destarea, const advanced_in
     const int unitvolume = it.precise_unit_volume();
     const int free_volume = 1000 * p.free_volume();
     // default to move all
-    const long max = by_charges ? it.charges : sitem.stacks;
-    assert( max > 0 ); // there has to be something to begin with
-    amount = max;
+    const long input_amount = by_charges ? it.charges : sitem.stacks;
+    assert( input_amount > 0 ); // there has to be something to begin with
+    amount = input_amount;
 
     // Picking up stuff might not be possible at all
     if( destarea == AIM_INVENTORY && !g->u.can_pickup( true ) ) {
@@ -1500,7 +1516,7 @@ bool advanced_inventory::query_charges( aim_location destarea, const advanced_in
         const long volmax = free_volume / unitvolume;
         if( volmax == 0 ) {
             popup( _( "Destination area is full.  Remove some items first." ) );
-            redraw  = true;
+            redraw = true;
             return false;
         }
         amount = std::min( volmax, amount );
@@ -1511,7 +1527,7 @@ bool advanced_inventory::query_charges( aim_location destarea, const advanced_in
         if( cntmax == 0 ) {
             // TODO: items by charges might still be able to be add to an existing stack!
             popup( _( "Destination area has too many items.  Remove some first." ) );
-            redraw  = true;
+            redraw = true;
             return false;
         }
         amount = std::min( cntmax, amount );
@@ -1524,7 +1540,7 @@ bool advanced_inventory::query_charges( aim_location destarea, const advanced_in
             const long weightmax = max_weight / unitweight;
             if( weightmax == 0 ) {
                 popup( _( "This is too heavy!." ) );
-                redraw  = true;
+                redraw = true;
                 return false;
             }
             amount = std::min( weightmax, amount );
@@ -1533,7 +1549,7 @@ bool advanced_inventory::query_charges( aim_location destarea, const advanced_in
 
     // Now we have the final amount. Query if needed (either requested, or when
     // the destination can not hold all items).
-    if( askamount || amount > max ) {
+    if( askamount || amount < input_amount ) {
         // moving several items (not charges!) from ground it currently not implemented.
         // TODO: implement this properly, see the code where this is called from.
         if( !by_charges && sitem.area != AIM_INVENTORY ) {
@@ -1541,17 +1557,19 @@ bool advanced_inventory::query_charges( aim_location destarea, const advanced_in
             return true;
         }
         std::string popupmsg = _( "How many do you want to move? (0 to cancel)" );
-        if( amount > max ) {
-            popupmsg = string_format( _( "Destination can only hold %d! Move how many? (0 to cancel) " ), max );
+        // At this point amount contains the maximal amount that the destination can hold.
+        if( amount < input_amount ) {
+            popupmsg = string_format( _( "Destination can only hold %d! Move how many? (0 to cancel) " ), amount );
         }
+        const long possible_max = std::min( input_amount, amount );
         amount = helper::to_int( string_input_popup( popupmsg, 20,
-                                 helper::to_string_int( std::max( amount , max ) ),
+                                 helper::to_string_int( possible_max ),
                                  "", "", -1, true ) );
         if( amount <= 0 ) {
             return false;
         }
-        if( amount > max ) {
-            amount = max;
+        if( amount > possible_max ) {
+            amount = possible_max;
         }
     }
     return true;
@@ -1565,7 +1583,7 @@ bool advanced_inv_area::is_same( const advanced_inv_area &other ) const
     // Inventory is compared by id only, the coordinates are not of concern there.
     // All other locations are compared by the coordinates, e.g. dragged vehicle
     // (to the south) and AIM_SOUTH are the same.
-    if( id != AIM_INVENTORY || other.id == AIM_INVENTORY ) {
+    if( id != AIM_INVENTORY && other.id != AIM_INVENTORY ) {
         if( x == other.x && y == other.y && veh == other.veh ) {
             return true;
         }
