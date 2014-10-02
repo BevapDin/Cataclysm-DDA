@@ -290,7 +290,7 @@ class advanced_inventory
         // displayed right right of it, everything left of it is till free.
         int print_header(advanced_inventory_pane &pane, aim_location sel);
         void init();
-        aim_location find_destination(const item &it, aim_location ignore_this_location, aim_location and_this_location);
+        aim_location find_destination(const advanced_inv_listitem &it);
         /**
          * Translate an action ident from the input context to an aim_location.
          * @param ret If the action ident referred to a location, its id is stored

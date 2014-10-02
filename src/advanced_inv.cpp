@@ -860,15 +860,16 @@ void advanced_inventory::redraw_pane( side p )
     wrefresh( w );
 }
 
-aim_location advanced_inventory::find_destination(const item &it, aim_location ignore_this_location, aim_location and_this_location) {
-    const itype *type = it.type;
-    const itype *cont = it.contents.empty() ? NULL : it.contents.front().type;
+aim_location advanced_inventory::find_destination(const advanced_inv_listitem &it)
+{
+    const itype *type = it.it->type;
+    const itype *cont = it.it->contents.empty() ? NULL : it.it->contents.front().type;
     aim_location result = AIM_ALL;
     for( auto &s : squares ) {
         if( s.id == AIM_INVENTORY || s.id == AIM_DRAGED || s.id == AIM_ALL ) {
             continue;
         }
-        if( !s.canputitems || s.id == ignore_this_location || s.id == and_this_location ) {
+        if( !s.canputitems || s.id == it.area ) {
             continue;
         }
         std::vector<item>& items = s.veh != nullptr ?
@@ -927,6 +928,41 @@ bool advanced_inventory::move_all_items()
     }
     auto &sarea = squares[spane.area];
     auto &darea = squares[dpane.area];
+
+    if( spane.area != AIM_INVENTORY && dpane.area != AIM_INVENTORY && !sarea.is_same( darea ) ) {
+        auto &i = spane.items;
+        while( !i.empty() ) {
+            if( i.front().it == nullptr ) {
+                i.erase( i.begin() );
+                continue;
+            }
+            advanced_inv_listitem *sitem = &i.front();
+            const bool by_charges = sitem->it->count_by_charges();
+            long amount_to_move = 0;
+            if( !query_charges( dpane.area, *sitem, false, amount_to_move ) ) {
+                break;
+            }
+            assert( amount_to_move > 0 );
+            // from map/vehicle: add the item to the destination, if that worked,
+            // remove it from the source, else continue.
+            // TODO: move partial stack with items that are not counted by charges
+            item new_item( *sitem->it );
+            if( by_charges ) {
+                new_item.charges = amount_to_move;
+            }
+            if( !add_item( dpane.area, new_item ) ) {
+                break;
+            }
+            if( by_charges && amount_to_move < sitem->it->charges ) {
+                sitem->it->charges -= amount_to_move;
+                break;
+            } else {
+                remove_item( *sitem );
+            }
+            recalc_pane( src );
+        }
+        return false;
+    }
 
     if( OPTIONS["CLOSE_ADV_INV"] != true ) {
         // Why is this here? It's because the activity backlog can act
@@ -1132,7 +1168,7 @@ void advanced_inventory::display()
             aim_location destarea = dpane.area;
             aim_location srcarea = sitem->area;
             if( action == "AUTO_MOVE" ) {
-                destarea = find_destination( *sitem->it, spane.area, dpane.area );
+                destarea = find_destination( *sitem );
                 if( destarea == AIM_ALL || destarea == spane.area) {
                     spane.scroll_by( +1 );
                     continue;
