@@ -3247,7 +3247,7 @@ void map::process_active_items_in_vehicle(vehicle *cur_veh, submap * const curre
             }
             // Avoid the item copy, it's slowwwwww...
             if(it->is_food() || it->is_food_container()) {
-                if(process_active_item(&tmp_active_item_pos.first, current_submap, gridx, gridy, mapx, mapy)) {
+                if(tmp_active_item_pos.first.process( nullptr, tmp_active_item_pos.second )) {
                     items_in_part->erase(items_in_part->begin() + n);
                     n--;
                 }
