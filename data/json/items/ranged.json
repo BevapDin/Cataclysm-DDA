@@ -2480,7 +2480,7 @@
     "recoil": 0,
     "durability": 6,
     "burst": 0,
-    "clip_size": 800,
+    "clip_size": 1600,
     "reload": 800
   },
   {
@@ -2506,7 +2506,7 @@
     "recoil": 0,
     "durability": 8,
     "burst": 4,
-    "clip_size": 1600,
+    "clip_size": 3000,
     "reload": 900,
     "valid_mod_locations": [[ "accessories", 1 ],[ "grip", 1 ]]
   },
