@@ -91,7 +91,7 @@ public:
  // Returns the category of this item.
  const item_category &get_category() const;
 
-// Firearm specifics
+ // Firearm specifics
  int reload_time(player &u);
  int clip_size();
  int dispersion();
@@ -118,7 +118,6 @@ public:
         deserialize(jo);
     }
 
- //
  void load_legacy(std::stringstream & dump);
  void load_info(std::string data);
  //std::string info(bool showtext = false); // Formatted for human viewing
