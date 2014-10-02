@@ -791,7 +791,7 @@ int advanced_inventory::find_destination(const item &it, int ignore_this_locatio
         const advanced_inv_area &area = squares[i];
         advanced_inv_area tmp(area);
         advanced_inv_update_area(tmp);
-        if(!tmp.canputitems || i == ignore_this_location || i == and_this_location) {
+        if(!tmp.canputitems || (int) i == ignore_this_location || (int) i == and_this_location) {
             continue;
         }
         std::vector<item>& items = tmp.vstor >= 0 ?

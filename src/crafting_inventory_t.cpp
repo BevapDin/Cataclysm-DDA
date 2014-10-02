@@ -85,14 +85,13 @@ bool crafting_inventory_t::has_all_requirements(const requirements &making) {
 std::string crafting_inventory_t::complex_req::serialize() const {
     assert(!simple_reqs.empty());
     assert(!selected_items.empty());
-    assert(selected_simple_req_index >= 0);
-    assert(selected_simple_req_index < simple_reqs.size());
+    assert((size_t) selected_simple_req_index < simple_reqs.size());
     return crafting_inventory_t::serialize(selected_simple_req_index, selected_items);
 }
 
 void crafting_inventory_t::complex_req::deserialize(crafting_inventory_t &cinv, JsonArray &arr) {
     selected_simple_req_index = cinv.deserialize(arr, selected_items);
-    if(selected_simple_req_index < 0 || selected_simple_req_index >= simple_reqs.size()) {
+    if((size_t) selected_simple_req_index >= simple_reqs.size()) {
         if(as_tool) {
             popup(_("a tool you used has vanished while crafting"));
         } else {
@@ -110,8 +109,7 @@ void crafting_inventory_t::complex_req::consume(crafting_inventory_t &cinv, std:
     if(selected_simple_req_index == -1) {
         return;
     }
-    assert(selected_simple_req_index >= 0);
-    assert(selected_simple_req_index < simple_reqs.size());
+    assert((size_t) selected_simple_req_index < simple_reqs.size());
     cinv.consume(simple_reqs[selected_simple_req_index].req, as_tool ? assume_tools : assume_components , selected_items, used_items);
 }
 
@@ -137,7 +135,7 @@ void crafting_inventory_t::solution::deserialize(crafting_inventory_t &cinv, pla
     try {
         JsonIn json(buffer);
         JsonArray arr(json);
-        if(arr.size() != complex_reqs.size()) {
+        if((size_t) arr.size() != complex_reqs.size()) {
             debugmsg("failed to deserialize: input %s is too small", data.c_str());
             return;
         }
@@ -848,7 +846,7 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
     for(size_t j = 0; j < simple_reqs.size(); j++) {
         const simple_req &rc = simple_reqs[j];
         
-        if((flags & simple_req::ts_selected) != 0 && j != selected_simple_req_index) {
+        if((flags & simple_req::ts_selected) != 0 && j != (size_t) selected_simple_req_index) {
             continue;
         }
         
@@ -1062,11 +1060,11 @@ usageType(type)
 bool crafting_inventory_t::candidate_t::valid() const {
     switch(location) {
         case LT_MAP:
-            return mapitems != 0 && mindex >= 0 && mindex < mapitems->items().size();
+            return mapitems != 0 && (size_t) mindex < mapitems->items().size();
         case LT_SURROUNDING:
             return surroundings != NULL;
         case LT_VEHICLE_CARGO:
-            return vitems != NULL && iindex >= 0 && iindex < vitems->items().size();
+            return vitems != NULL && (size_t) iindex < vitems->items().size();
         case LT_VPART:
             return vpartitem != NULL;
         case LT_INVENTORY:
@@ -1279,7 +1277,7 @@ int crafting_inventory_t::deserialize(JsonArray &arr, candvec &vec) {
     }
     const int index = arr.get_int(0);
     vec.clear();
-    for(size_t i = 1; i < arr.size(); i++) {
+    for(int i = 1; i < arr.size(); i++) {
         JsonObject o(arr.get_object(i));
         candidate_t ci(*this, o);
         if(!ci.valid()) {
@@ -1306,7 +1304,7 @@ std::string crafting_inventory_t::serialize(int index, const candvec &vec) {
 
 void crafting_inventory_t::gather_inputs(const std::vector< std::vector<component> > &components, consume_flags flags, std::vector<std::string> &strVec, double *timeModi)
 {
-    for (int i = 0; i < components.size(); i++) {
+    for (size_t i = 0; i < components.size(); i++) {
         gather_inputs(components[i], flags, strVec, timeModi);
     }
 }
@@ -1323,7 +1321,7 @@ void crafting_inventory_t::gather_inputs(const std::vector<component> &cv, consu
         strVec.push_back(std::string(""));
         return;
     }
-    assert(index_of_component < cv.size());
+    assert((size_t) index_of_component < cv.size());
     strVec.push_back(serialize(index_of_component, selected_items));
     if(timeModi == NULL) {
         return;
@@ -1390,7 +1388,7 @@ int crafting_inventory_t::select_items_to_use(const std::vector<component> &comp
     // to this option.
     std::vector< std::pair<menu_entry_type, int> > optionsIndizes;
     
-    for (int i = 0; i < components.size(); i++) {
+    for (size_t i = 0; i < components.size(); i++) {
         // stores the candidates that can be used as components[i]
         candvec &candids = available_items[i];
         // Requirement for components[i]
@@ -1450,7 +1448,7 @@ int crafting_inventory_t::select_items_to_use(const std::vector<component> &comp
         // no user-interaction needed if only one choise
         selection = menu_vec(false, "Use which component?", options) - 1;
     }
-    assert(selection >= 0 && selection < options.size());
+    assert((size_t) selection < options.size());
     assert(options.size() == optionsIndizes.size());
     const int index_of_component = optionsIndizes[selection].second;
     // The user has choosen this selection of items:
@@ -1804,7 +1802,7 @@ crafting_inventory_t::candidate_t crafting_inventory_t::ask_for_single_item(cons
         buffer << "Select the item to use as " << req;
         selection = menu_vec(false, buffer.str().c_str(), options) - 1;
     }
-    assert(selection >= 0 && selection < indizes.size());
+    assert((size_t) selection < indizes.size());
     return candidates[indizes[selection]];
 }
 
@@ -1860,7 +1858,7 @@ void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_
         if(cntFromSelectedOnes >= req.count) {
             options.push_back("OK");
         }
-        const int selection = menu_vec(false, buffer.str().c_str(), options) - 1;
+        const size_t selection = menu_vec(false, buffer.str().c_str(), options) - 1;
         if(selection >= candidates.size()) {
             for(size_t i = 0; i < candidates.size(); i++) {
                 if(selected[i]) {
@@ -2076,7 +2074,7 @@ typedef std::map<player*,invpos_vector_t> invpos_map_t;
 static invpos_map_t item_inpos_remove_map;
 
 void remove_releated(crafting_inventory_t::requirement &req, std::vector<item> &v, int index, std::list<item> &used_items) {
-    assert(index >= 0 && index < v.size());
+    assert((size_t) index < v.size());
     if(req.use(v[index], used_items)) {
         item_vector_resort_set.insert(&v);
         v[index] = item();
@@ -2136,7 +2134,7 @@ void crafting_inventory_t::candidate_t::consume(player *p, requirement &req, std
     const item *ix;
     switch(location) {
         case LT_INVENTORY:
-            for(size_t i = 0; req.count > 0 && i < invcount; i++) {
+            for(int i = 0; req.count > 0 && i < invcount; i++) {
                 remove_releated(
                     req,
                     p,
@@ -2266,7 +2264,7 @@ int compare(const item &a, const item &b) {
 }
 
 bool crafting_inventory_t::all_equal(const candvec &candidates) {
-    for(int i = 0; i + 1 < candidates.size(); i++) {
+    for(size_t i = 0; i + 1 < candidates.size(); i++) {
         const candidate_t &prev = candidates[i];
         const candidate_t &cur = candidates[i + 1];
         const item &prev_item = prev.get_item();

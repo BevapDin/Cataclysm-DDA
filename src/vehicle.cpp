@@ -869,7 +869,7 @@ void vehicle::use_controls()
 bool vehicle::toogle_active_menu(const std::vector<int> &parts_to_toggle, const std::string &title) {
     uimenu selectmenu;
     selectmenu.text = title;
-    for(int i = 0; i < parts_to_toggle.size(); i++) {
+    for(size_t i = 0; i < parts_to_toggle.size(); i++) {
         const int p = parts_to_toggle[i];
         const vehicle_part &part = parts[p];
         std::ostringstream buffer;
@@ -881,8 +881,8 @@ bool vehicle::toogle_active_menu(const std::vector<int> &parts_to_toggle, const 
     selectmenu.entries.push_back(uimenu_entry("deactivate all", 'D'));
     selectmenu.entries.push_back(uimenu_entry("Do nothing", ' '));
     selectmenu.query();
-    int select = selectmenu.ret;
-    if(select >= 0 && select < parts_to_toggle.size()) {
+    size_t select = selectmenu.ret;
+    if(select < parts_to_toggle.size()) {
         const int p = parts_to_toggle[select];
         vehicle_part &part = parts[p];
         if(part.active()) {
@@ -892,13 +892,13 @@ bool vehicle::toogle_active_menu(const std::vector<int> &parts_to_toggle, const 
         }
         return true;
     } else if(select == parts_to_toggle.size()) {
-        for(int i = 0; i < parts_to_toggle.size(); i++) {
+        for(size_t i = 0; i < parts_to_toggle.size(); i++) {
             const int p = parts_to_toggle[i];
             parts[p].flags &= ~mfb(INACTIVE);
         }
         return true;
     } else if(select == parts_to_toggle.size() + 1) {
-        for(int i = 0; i < parts_to_toggle.size(); i++) {
+        for(size_t i = 0; i < parts_to_toggle.size(); i++) {
             const int p = parts_to_toggle[i];
             parts[p].flags |= mfb(INACTIVE);
         }
@@ -1621,7 +1621,7 @@ const std::vector<int> vehicle::parts_at_relative (const int dx, const int dy, b
             break;
         }
     }
-    if(u >= parts.size()) {
+    if((size_t)u >= parts.size()) {
         return res;
     }
     while(u > 0) {
@@ -1633,7 +1633,7 @@ const std::vector<int> vehicle::parts_at_relative (const int dx, const int dy, b
             break;
         }
     }
-    for( ; u < parts.size() && parts[u].mount_dx == dx && parts[u].mount_dy == dy; u++) {
+    for( ; (size_t)u < parts.size() && parts[u].mount_dx == dx && parts[u].mount_dy == dy; u++) {
         res.push_back(u);
     }
     return res;
@@ -1710,7 +1710,7 @@ int vehicle::part_with_feature (int part, const vpart_bitflags &flag, bool unbro
             break;
         }
     }
-    for (int i = part; i < parts.size(); i++) {
+    for (size_t i = part; i < parts.size(); i++) {
         if (parts[i].mount_dx == dx && parts[i].mount_dy == dy) {
             if (part_flag(i, flag) && (!unbroken || parts[i].hp > 0)) {
                 return i;
@@ -1732,7 +1732,7 @@ void vpart_range(vehicle *veh, int &part_begin, int &part_end, int dx, int dy) {
             break;
         }
     }
-    while(part_end < veh->parts.size()) {
+    while((size_t)part_end < veh->parts.size()) {
         const vehicle_part &vp = veh->parts[part_end];
         if(vp.mount_dx == dx && vp.mount_dy == dy) {
             part_end++;
@@ -1754,7 +1754,7 @@ int vehicle::part_with_feature (int part, const std::string &flag, bool unbroken
             break;
         }
     }
-    for (int i = part; i < parts.size(); i++) {
+    for (size_t i = part; i < parts.size(); i++) {
         if (parts[i].mount_dx == dx && parts[i].mount_dy == dy) {
             if (part_flag(i, flag) && (!unbroken || parts[i].hp > 0)) {
                 return i;
@@ -2387,7 +2387,7 @@ int vehicle::total_power (bool fueled)
         if (part_flag(p, VPFLAG_ENGINE) && parts[p].active() &&
             (fuel_left (part_info(p).fuel_type) || !fueled ||
              ((part_info(p).fuel_type == fuel_type_muscle) && player_controlling &&
-             part_with_feature(part_under_player, VPFLAG_ENGINE) == p)) &&
+             part_with_feature(part_under_player, VPFLAG_ENGINE) == (int)p)) &&
             parts[p].hp > 0)
         {
             pwr += part_power(p);
@@ -3690,7 +3690,7 @@ int vehicle::free_volume(int part) {
 // (addvolume >= 0):                  size+1 > max || volume + addvolume > max
 // (addvolume >= 0, addnumber >= 0):  size + addnumber > max || volume + addvolume > max
 bool vehicle::is_full(const int part, const int addvolume, const int addnumber) {
-   const int maxitems = MAX_ITEM_IN_VEHICLE_STORAGE;
+   const size_t maxitems = MAX_ITEM_IN_VEHICLE_STORAGE;
    const int maxvolume = this->max_volume(part);
 
    if ( addvolume == -1 ) {
@@ -3717,7 +3717,7 @@ bool vehicle::add_item (int part, item itm)
         return false;
     }
 
-    if (parts[part].items.size() >= max_storage)
+    if (parts[part].items.size() >= (size_t) max_storage)
         return false;
     it_ammo *ammo = dynamic_cast<it_ammo*> (itm.type);
     if (part_flag(part, "TURRET")) {
@@ -4720,7 +4720,7 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
 
 bool vehicle::can_untow(int part) {
     static const itype_id rope_type("rope_30");
-    assert(part >= 0 && part < parts.size());
+    assert((size_t)part < parts.size());
     if(parts[part].items.size() != 1 || parts[part].items[0].type->id != rope_type) {
         // Not towed with a rope
         return false;
@@ -4755,7 +4755,7 @@ bool vehicle::can_untow(int part) {
             * Every other part must have some path (that doesn't involve
             * the part about to be removed) to the target part, in order
             * for the part to be legally removable. */
-        for(int next_part = 1; next_part < connected_parts.size(); next_part++) {
+        for(size_t next_part = 1; next_part < connected_parts.size(); next_part++) {
             if(!is_connected(connected_parts[0], connected_parts[next_part], parts[part])) {
                 //Removing that part would break the vehicle in two
                 return false;
@@ -4768,7 +4768,7 @@ bool vehicle::can_untow(int part) {
 
 void vehicle::untow(game *g, int part, player *p) {
     assert(g != 0);
-    assert(part >= 0 && part < parts.size());
+    assert((size_t) part < parts.size());
     assert(p != 0);
     assert(!parts[part].items.empty());
     const int mx = parts[part].mount_dx;

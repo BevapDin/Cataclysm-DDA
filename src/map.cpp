@@ -298,7 +298,7 @@ void map::remove_vehicle (vehicle *veh)
   return;
  }
  const int veh_sm = veh->smx + veh->smy * my_MAPSIZE;
- for (int i = 0; i < grid[veh_sm]->vehicles.size(); i++) {
+ for (size_t i = 0; i < grid[veh_sm]->vehicles.size(); i++) {
   if (grid[veh_sm]->vehicles[i] == veh) {
    vehicle_list.erase(veh);
    reset_vehicle_cache();
@@ -2782,7 +2782,7 @@ int map::free_volume(const int x, const int y) {
 // (addvolume >= 0):                  size+1 > max || volume + addvolume > max
 // (addvolume >= 0, addnumber >= 0):  size + addnumber > max || volume + addvolume > max
 bool map::is_full(const int x, const int y, const int addvolume, const int addnumber ) {
-   const int maxitems = MAX_ITEM_IN_SQUARE; // (game.h) 1024
+   const size_t maxitems = MAX_ITEM_IN_SQUARE; // (game.h) 1024
    const int maxvolume = this->max_volume(x, y);
 
    if( ! (INBOUNDS(x, y) && move_cost(x, y) > 0 && !has_flag("NOITEM", x, y) ) ) {
