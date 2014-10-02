@@ -6933,6 +6933,11 @@ item player::reduce_charges(int position, long quantity) {
     }
 }
 
+item player::reduce_charges( item *it, long quantity )
+{
+    return reduce_charges( get_item_position( it ), quantity );
+}
+
 item player::i_rem(int pos)
 {
  item tmp;
@@ -9084,6 +9089,11 @@ hint_rating player::rate_action_takeoff(item *it) {
     return HINT_IFFY;
 }
 
+bool player::takeoff( item *target, bool autodrop, std::vector<item> *items)
+{
+    return takeoff( get_item_position( target ), autodrop, items );
+}
+
 bool player::takeoff(int pos, bool autodrop, std::vector<item> *items)
 {
     bool taken_off = false;
@@ -11146,12 +11156,15 @@ void player::learn_recipe(recipe *rec)
 
 void player::assign_activity(activity_type type, int moves, int index, int pos, std::string name)
 {
-    if (backlog.type == type && backlog.index == index && backlog.position == pos &&
-        backlog.name == name) {
+    if( !backlog.empty() && backlog.front().type == type && backlog.front().index == index &&
+        backlog.front().position == pos && backlog.front().name == name ) {
         add_msg_if_player( _("You resume your task."));
-        activity = backlog;
-        backlog = player_activity();
+        activity = backlog.front();
+        backlog.pop_front();
     } else {
+        if( activity.type != ACT_NULL ) {
+            backlog.push_front( activity );
+        }
         activity = player_activity(type, moves, index, pos, name);
     }
     if (this->moves <= activity.moves_left) {
@@ -11172,10 +11185,18 @@ bool player::has_activity(const activity_type type) const
 
 void player::cancel_activity()
 {
-    if (activity.is_suspendable()) {
-        backlog = activity;
+    // Clear any backlog items that can't resume.
+    for( auto backlog_item = backlog.begin(); backlog_item != backlog.end(); ) {
+        if( backlog_item->is_suspendable() ) {
+            backlog_item++;
+        } else {
+            backlog_item = backlog.erase( backlog_item );
+        }
     }
-    activity.type = ACT_NULL;
+    if( activity.is_suspendable() ) {
+        backlog.push_front( activity );
+    }
+    activity = player_activity();
 }
 
 std::vector<item*> player::has_ammo(ammotype at)
