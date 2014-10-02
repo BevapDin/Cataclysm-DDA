@@ -506,6 +506,9 @@ submap *mapbuffer::unserialize_submaps( const tripoint &p )
                         jsin.read( tmp );
                         if(tmp.is_null()) { continue; }
                         sm->itm[i][j].push_back( tmp );
+                        if( tmp.needs_processing() ) {
+                            sm->active_item_count++;
+                        }
                     }
                 }
             } else if( submap_member_name == "traps" ) {
