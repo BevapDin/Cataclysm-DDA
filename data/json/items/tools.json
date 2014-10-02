@@ -853,7 +853,7 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "qualities": [["COOK", 2], ["BOIL", 2], ["CONTAIN", 1]],	
+    "qualities": [["COOK", 2], ["BOIL", 2], ["CONTAIN", 1]],
     "use_action": "HOTPLATE"
   },
   {
@@ -877,7 +877,7 @@
     "turns_per_charge": 0,
     "ammo": "battery",
     "revert_to": "null",
-    "qualities": [["COOK", 2], ["BOIL", 2], ["CONTAIN", 1]],	
+    "qualities": [["COOK", 2], ["BOIL", 2], ["CONTAIN", 1]],
     "use_action": "HOTPLATE"
   },
   {
@@ -4626,7 +4626,7 @@
     "revert_to": "null",
     "functions": [ [ "func:saw", 1, 1 ] ],
     "use_action": "LUMBER",
-	"qualities":[["SAW_W", 2]]
+    "qualities":[["SAW_W", 2]]
   },
 
   {
@@ -4731,7 +4731,7 @@
     "revert_to": "null",
     "functions": [ [ "func:hacksaw" ] ],
     "use_action": "HACKSAW",
-	"qualities":[["SAW_M", 1], ["SAW_M_FINE", 1]]
+    "qualities":[["SAW_M", 1], ["SAW_M_FINE", 1]]
   },{
     "id": "tent_kit",
     "type": "TOOL",
@@ -5089,8 +5089,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:screwdriver" ] ],
-    "use_action": "NONE",
-	"qualities": [["SCREW", 1], ["SCREW_FINE", 1]]
+    "qualities": [["SCREW", 1], ["SCREW_FINE", 1]]
   },
 
   {
@@ -5115,7 +5114,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:wrench" ] ],
-	"qualities": [["WRENCH", 1], ["WRENCH_FINE", 1]]
+    "qualities": [["WRENCH", 1], ["WRENCH_FINE", 1]]
   },
 
   {
@@ -6914,7 +6913,7 @@
   },
   
 {
-	"id": "ref_lighter_on",
+    "id": "ref_lighter_on",
     "type": "TOOL",
     "symbol": ",",
     "color": "light_gray",
@@ -6923,7 +6922,7 @@
     "description": "This is a lighter featuring a flip top cover and refuelable tank.  It is lit.",
     "price": 35000,
     "material": "aluminum",
-	"flags": ["FIRE", "LIGHT_4", "FLAMING"],
+    "flags": ["FIRE", "LIGHT_4", "FLAMING"],
     "weight": 20,
     "volume": 0,
     "bashing": 0,
@@ -7044,7 +7043,7 @@
     "color": "brown",
     "name": "lit charcoal kiln",
     "description": "A kiln full of wood that has been lit; better drop it!",
-	"flags": ["LIGHT_4"],
+    "flags": ["LIGHT_4"],
     "price": 100,
     "material": ["steel", "wood"],
     "weight": 15142,
@@ -8212,7 +8211,7 @@
     "category": "weapons",
     "use_action": {
         "type": "explosion",
-	"no_deactivate_msg": "You can't disarm your %s'.  Place it, get away, and use the remote control to detonate.",
+    "no_deactivate_msg": "You can't disarm your %s'.  Place it, get away, and use the remote control to detonate.",
         "explosion_power": 12,
         "explosion_shrapnel": 4
     }
@@ -8270,7 +8269,7 @@
     "category": "weapons",
     "use_action": {
         "type": "explosion",
-	"no_deactivate_msg": "You can't disarm your %s'.  Place it, get away and use the remote control to detonate.",
+    "no_deactivate_msg": "You can't disarm your %s'.  Place it, get away and use the remote control to detonate.",
         "explosion_power": 60,
         "explosion_shrapnel": 0
     }
