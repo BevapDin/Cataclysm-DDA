@@ -538,7 +538,8 @@ void crafting_inventory_t::form_from_map(point origin, int range)
                 fire.charges = 1;
                 add_surround(p, fire);
             }
-            if (terrain_id == t_water_sh || terrain_id == t_water_dp || terrain_id == t_water_pool) {
+            if (terrain_id == t_water_sh || terrain_id == t_water_dp ||
+                terrain_id == t_water_pool || terrain_id == t_water_pump) {
                 item water("water", 0);
                 water.charges = 50;
                 add_surround(p, water);
