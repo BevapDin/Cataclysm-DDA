@@ -706,6 +706,7 @@ void Item_factory::load_gun(JsonObject &jo)
     gun_template->reload_time = jo.get_int("reload");
     gun_template->pierce = jo.get_int("pierce", 0);
     gun_template->ammo_effects = jo.get_tags("ammo_effects");
+    gun_template->ups_charges = jo.get_int( "ups_charges", 0 );
 
     if (jo.has_array("valid_mod_locations")) {
         JsonArray jarr = jo.get_array("valid_mod_locations");
@@ -857,6 +858,8 @@ void Item_factory::load_comestible(JsonObject &jo)
     comest_template->quench = jo.get_int("quench", 0);
     comest_template->nutr = jo.get_int("nutrition", 0);
     comest_template->spoils = jo.get_int("spoils_in", 0);
+    // In json it's in hours, here it shall be in turns, as item::rot is also in turns.
+    comest_template->spoils *= 600;
     comest_template->brewtime = jo.get_int("brew_time", 0);
     comest_template->addict = jo.get_int("addiction_potential", 0);
     comest_template->charges = jo.get_long("charges", 0);

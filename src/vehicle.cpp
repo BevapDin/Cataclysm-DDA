@@ -3613,7 +3613,7 @@ void vehicle::handle_trap (int x, int y, int part)
         noise = 10;
         snd = _("BRZZZAP!");
         part_damage = 500;
-    } else if ( t == tr_sinkhole || t == tr_pit || t == tr_spike_pit || t == tr_ledge ) {
+    } else if ( t == tr_sinkhole || t == tr_pit || t == tr_spike_pit || t == tr_ledge || t == tr_glass_pit ) {
         part_damage = 500;
     }
     if( g->u_see(x, y) ) {
@@ -4245,11 +4245,7 @@ bool vehicle::fire_turret (int p, bool burst)
     }
     // Check for available power for turrets that use it.
     const int power = fuel_left(fuel_type_battery);
-    if( gun->item_tags.count( "USE_UPS" ) && power < 5 ) {
-        return false;
-    } else if( gun->item_tags.count( "USE_UPS_20" ) && power < 20 ) {
-        return false;
-    } else if( gun->item_tags.count( "USE_UPS_40" ) && power < 40 ) {
+    if( gun->ups_charges > 0 && gun->ups_charges < power ) {
         return false;
     }
     long charges = burst? gun->burst : 1;

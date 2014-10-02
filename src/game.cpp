@@ -4803,7 +4803,7 @@ void game::debug()
             std::string spstr = "";
             for (int i = 0; i < ne; i++) {
                 itype *ity = item_controller->find_template(examples[i]);
-                exsp[i] = dynamic_cast<it_comest *>(ity)->spoils * 600;
+                exsp[i] = dynamic_cast<it_comest *>(ity)->spoils;
                 esz[i] = examples[i].size();
                 spstr = string_format("%s | %s", spstr.c_str(), examples[i].c_str());
             }
@@ -11429,24 +11429,21 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
         add_msg(m_info, _("Your %s needs 20 charges to fire!"), u.weapon.tname().c_str());
         return;
     }
-    if (u.weapon.has_flag("USE_UPS") && !u.has_charges("UPS_off", 5) &&
-        !u.has_charges("UPS_on", 5) && !u.has_charges("adv_UPS_off", 3) &&
-        !u.has_charges("adv_UPS_on", 3) && !(u.has_bionic("bio_ups") && u.power_level >= 5)) {
-        add_msg(m_info,
-                _("You need a UPS with at least 5 charges or an advanced UPS with at least 3 charges to fire that!"));
-        return;
-    } else if (u.weapon.has_flag("USE_UPS_20") && !u.has_charges("UPS_off", 20) &&
-               !u.has_charges("UPS_on", 20) && !u.has_charges("adv_UPS_off", 12) &&
-               !u.has_charges("adv_UPS_on", 12) && !(u.has_bionic("bio_ups") && u.power_level >= 20)) {
-        add_msg(m_info,
-                _("You need a UPS with at least 20 charges or an advanced UPS with at least 12 charges to fire that!"));
-        return;
-    } else if (u.weapon.has_flag("USE_UPS_40") && !u.has_charges("UPS_off", 40) &&
-               !u.has_charges("UPS_on", 40) && !u.has_charges("adv_UPS_off", 24) &&
-               !u.has_charges("adv_UPS_on", 24) && !(u.has_bionic("bio_ups") && u.power_level >= 40)) {
-        add_msg(m_info,
-                _("You need a UPS with at least 40 charges or an advanced UPS with at least 24 charges to fire that!"));
-        return;
+    const it_gun *gun = dynamic_cast<const it_gun*>( u.weapon.type );
+    if( gun != nullptr && gun->ups_charges > 0 ) {
+        const int ups_drain = gun->ups_charges;
+        const int adv_ups_drain = std::min( 1, gun->ups_charges * 3 / 5 );
+        const int bio_power_drain = std::min( 1, gun->ups_charges / 5 );
+        if( !( u.has_charges( "UPS_off", ups_drain ) ||
+               u.has_charges( "UPS_on", ups_drain ) ||
+               u.has_charges( "adv_UPS_off", adv_ups_drain ) ||
+               u.has_charges( "adv_UPS_on", adv_ups_drain ) ||
+               (u.has_bionic( "bio_ups" ) && u.power_level >= bio_power_drain ) ) ) {
+            add_msg( m_info,
+                     _("You need a UPS with at least %d charges or an advanced UPS with at least %d charges to fire that!"),
+                     ups_drain, adv_ups_drain );
+            return;
+        }
     }
 
     if (u.weapon.has_flag("MOUNTED_GUN")) {
@@ -13008,7 +13005,7 @@ bool game::plmove(int dx, int dy)
         if (signage.size()) {
             add_msg(m_info, _("The sign says: %s"), signage.c_str());
         }
-        std::string *graffiti = m.graffiti_at(u.posx, u.posy).contents;
+        std::string *graffiti = m.graffiti_at(x, y).contents;
         if (graffiti) {
             add_msg(_("Written here: %s"), utf8_truncate(*graffiti, 40).c_str());
         }

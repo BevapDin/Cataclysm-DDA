@@ -295,7 +295,12 @@ public:
 struct it_comest : public virtual itype {
     signed int quench;     // Many things make you thirstier!
     unsigned int nutr;     // Nutrition imparted
-    unsigned int spoils;   // How long it takes to spoil (hours / 600 turns)
+    /**
+     * How long it takes to spoil (turns), rotten food is handled differently
+     * (chance of bad thinks happen when eating etc).
+     * If 0, the food never spoils.
+     */
+    int spoils;
     unsigned int addict;   // Addictiveness potential
     long charges;  // Defaults # of charges (drugs, loaf of bread? etc)
     std::vector<long> rand_charges;
@@ -418,6 +423,10 @@ struct it_gun : public virtual itype {
 
     std::set<std::string> ammo_effects;
     std::map<std::string, int> valid_mod_locations;
+    /**
+     * If this uses UPS charges, how many (per shoot), 0 for no UPS charges at all.
+     */
+    int ups_charges;
 
     virtual bool is_gun() const
     {
@@ -430,7 +439,7 @@ struct it_gun : public virtual itype {
 
     it_gun() : itype(), skill_used(NULL), dmg_bonus(0), pierce(0), range(0), dispersion(0),
         recoil(0), durability(0), burst(0), clip(0), reload_time(0), ammo_effects(),
-        valid_mod_locations()
+        valid_mod_locations(), ups_charges(0)
     {
     }
 };
