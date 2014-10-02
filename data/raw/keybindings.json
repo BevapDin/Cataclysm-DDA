@@ -1754,7 +1754,7 @@
         "bindings":[
             {
                 "input_method":"keyboard",
-                "key":"1"
+                "key":"7"
             }
         ]
     },
@@ -1766,7 +1766,7 @@
         "bindings":[
             {
                 "input_method":"keyboard",
-                "key":"2"
+                "key":"8"
             }
         ]
     },
@@ -1778,7 +1778,7 @@
         "bindings":[
             {
                 "input_method":"keyboard",
-                "key":"3"
+                "key":"9"
             }
         ]
     },
@@ -1826,7 +1826,7 @@
         "bindings":[
             {
                 "input_method":"keyboard",
-                "key":"7"
+                "key":"1"
             }
         ]
     },
@@ -1838,7 +1838,7 @@
         "bindings":[
             {
                 "input_method":"keyboard",
-                "key":"8"
+                "key":"2"
             }
         ]
     },
@@ -1850,7 +1850,7 @@
         "bindings":[
             {
                 "input_method":"keyboard",
-                "key":"9"
+                "key":"3"
             }
         ]
     },
