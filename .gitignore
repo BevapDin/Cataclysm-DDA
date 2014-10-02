@@ -82,3 +82,9 @@ nbproject/
 # Python runtime files
 *.pyc
 
+# vim files
+*.vim
+*.session
+
+# taskwarrior files
+*.task*

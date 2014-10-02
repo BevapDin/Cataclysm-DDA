@@ -646,7 +646,7 @@ void game::start_game(std::string worldname)
     //Load NPCs. Set nearby npcs to active.
     load_npcs();
     //spawn the monsters
-    m.spawn_monsters(); // Static monsters
+    m.spawn_monsters( true ); // Static monsters
 
     //Create mutation_category_level
     u.set_highest_cat_level();
@@ -1108,6 +1108,9 @@ bool game::do_turn()
 
     if (calendar::turn % 50 == 0) { //move hordes every 5 min
         cur_om->move_hordes();
+        // Hordes that reached the reality bubble need to spawn,
+        // make them spawn in invisible areas only.
+        m.spawn_monsters( false );
     }
 
     // Check if we've overdosed... in any deadly way.
@@ -1131,9 +1134,7 @@ bool game::do_turn()
         u.add_memorial_log(pgettext("memorial_male", "Died of a healing stimulant overdose."),
                            pgettext("memorial_female", "Died of a healing stimulant overdose."));
         u.hp_cur[hp_torso] = 0;
-    } else if (u.has_disease("datura") &&
-               u.disease_duration("datura") > 14000 &&
-			   one_in(512)) {
+    } else if (u.has_disease("datura") && u.disease_duration("datura") > 14000 && one_in(512)) {
         if (!(u.has_trait("NOPAIN"))) {
             add_msg(m_bad, _("Your heart spasms painfully and stops, dragging you back to reality as you die."));
         } else {
@@ -4486,7 +4487,7 @@ void game::debug()
             levz = tmp.z;
             m.load(levx, levy, levz, true, cur_om);
             load_npcs();
-            m.spawn_monsters(); // Static monsters
+            m.spawn_monsters( true ); // Static monsters
             update_overmap_seen();
             draw_minimap();
         }
@@ -13869,7 +13870,7 @@ void game::vertical_move(int movez, bool force)
         m.ter_set(stairx, stairy, t_manhole);
     }
 
-    m.spawn_monsters();
+    m.spawn_monsters( true );
 
     if (veh_draged != NULL) {
         m.insert_vehicle(veh_draged, u.posx + u.grab_point.x, u.posy + u.grab_point.y);
@@ -13962,7 +13963,7 @@ void game::update_map(int &x, int &y)
     load_npcs();
 
     // Spawn monsters if appropriate
-    m.spawn_monsters(); // Static monsters
+    m.spawn_monsters( false ); // Static monsters
     if (calendar::turn >= nextspawn) {
         spawn_mon(shiftx, shifty);
     }
@@ -15020,24 +15021,30 @@ void game::process_artifact(item *it, player *p, bool wielded)
 }
 void game::determine_starting_season()
 {
-	if (g->scen->has_flag("SPR_START") || g->scen->has_flag("SUM_START") || g->scen->has_flag("AUT_START") || g->scen->has_flag("WIN_START"))
-	{
-		if (g->scen->has_flag("SPR_START"));
-		else if (g->scen->has_flag("SUM_START")){calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"]);}
-		else if (g->scen->has_flag("AUT_START")){calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"] * 2);}
-		else if (g->scen->has_flag("WIN_START")){calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"] * 3);}
-		else {debugmsg("The Unicorn");}
-	}
-    	else{
-	    if (ACTIVE_WORLD_OPTIONS["INITIAL_SEASON"].getValue() == "spring");
-	    else if (ACTIVE_WORLD_OPTIONS["INITIAL_SEASON"].getValue() == "summer") {
-		calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"]);
-	    } else if (ACTIVE_WORLD_OPTIONS["INITIAL_SEASON"].getValue() == "autumn") {
-		calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"] * 2);
-	    } else {
-		calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"] * 3);
-	    }
-	}
+    if( g->scen->has_flag("SPR_START") || g->scen->has_flag("SUM_START") ||
+        g->scen->has_flag("AUT_START") || g->scen->has_flag("WIN_START") ) {
+        if( g->scen->has_flag("SPR_START") ) {
+            ; // Do nothing;
+        } else if( g->scen->has_flag("SUM_START") ) {
+            calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"]);
+        } else if( g->scen->has_flag("AUT_START") ) {
+            calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"] * 2);
+        } else if( g->scen->has_flag("WIN_START") ) {
+            calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"] * 3);
+        } else {
+            debugmsg("The Unicorn");
+        }
+    } else {
+        if( ACTIVE_WORLD_OPTIONS["INITIAL_SEASON"].getValue() == "spring" ) {
+            ; // Do nothing.
+        } else if( ACTIVE_WORLD_OPTIONS["INITIAL_SEASON"].getValue() == "summer") {
+            calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"]);
+        } else if( ACTIVE_WORLD_OPTIONS["INITIAL_SEASON"].getValue() == "autumn" ) {
+            calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"] * 2);
+        } else {
+            calendar::turn += DAYS((int)ACTIVE_WORLD_OPTIONS["SEASON_LENGTH"] * 3);
+        }
+    }
 }
 void game::add_artifact_messages(std::vector<art_effect_passive> effects)
 {

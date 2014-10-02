@@ -434,7 +434,8 @@
         "volume": 2,
         "bashing": 12,
         "cutting": 0,
-        "to_hit": -4
+        "to_hit": -4,
+        "qualities": [["HAMMER", 1]]
     },
     {
         "type":"GENERIC",
@@ -4093,7 +4094,7 @@
     "type" : "AMMO",
     "id" : "material_sand",
     "category" : "spare_parts",
-    "price" : 20,
+    "price" : 0,
     "name" : "sand",
     "name_plural" : "sand",
     "symbol" : "=",
