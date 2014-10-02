@@ -942,7 +942,7 @@ void player::update_bodytemp()
         {
             floor_bedding_warmth += 500;
         }
-        else if (trap_at_pos == tr_cot)
+        else if (trap_at_pos == tr_cot || ter_at_pos == t_improvised_shelter)
         {
             floor_bedding_warmth -= 500;
         }
@@ -1550,7 +1550,7 @@ int player::run_cost(int base_cost, bool diag)
         movecost *= 1.15f;
     }
     if (has_trait("PADDED_FEET") && !footwear_factor()) {
-        movecost *= (1 - footwear_factor());
+        movecost *= .9f;
     }
     if (has_trait("LIGHT_BONES")) {
         movecost *= .9f;
@@ -6697,11 +6697,14 @@ void player::process_active_items()
         ch_UPS_used++;
         weapon.charges++;
     }
-    for( auto worn_item : worn ) {
+
+    for( size_t i = 0; i < worn.size() && ch_UPS_used < ch_UPS; ++i ) {
+        item& worn_item = worn[i];
+
         if( !worn_item.has_flag( "USE_UPS" ) ) {
             continue;
         }
-        if( worn_item.charges < worn_item.type->charges_to_use() ) {
+        if( worn_item.charges < worn_item.type->maximum_charges() ) {
             ch_UPS_used++;
             worn_item.charges++;
         }
@@ -10056,7 +10059,7 @@ void player::try_to_sleep()
     if( (furn_at_pos == f_bed || furn_at_pos == f_makeshift_bed ||
          trap_at_pos == tr_cot || trap_at_pos == tr_rollmat ||
          trap_at_pos == tr_fur_rollmat || furn_at_pos == f_armchair ||
-         furn_at_pos == f_sofa || furn_at_pos == f_hay ||
+         furn_at_pos == f_sofa || furn_at_pos == f_hay || ter_at_pos == t_improvised_shelter ||
          (veh && veh->part_with_feature (vpart, "SEAT") >= 0) ||
          (veh && veh->part_with_feature (vpart, "BED") >= 0)) &&
         (!(plantsleep)) ) {
@@ -10096,7 +10099,7 @@ bool player::can_sleep()
  }
  else if ( ((veh && veh->part_with_feature (vpart, "SEAT") >= 0) ||
       trap_at_pos == tr_rollmat || trap_at_pos == tr_fur_rollmat ||
-      furn_at_pos == f_armchair) && (!(plantsleep)) ) {
+      furn_at_pos == f_armchair || ter_at_pos == t_improvised_shelter) && (!(plantsleep)) ) {
     sleepy += 3;
  }
  else if ( (furn_at_pos == f_bed) && (!(plantsleep)) ) {
@@ -11166,9 +11169,9 @@ bool player::has_activity(const activity_type type) const
 
 void player::cancel_activity()
 {
-    // Clear any backlog items that can't resume.
+    // Clear any backlog items that aren't auto-resume.
     for( auto backlog_item = backlog.begin(); backlog_item != backlog.end(); ) {
-        if( backlog_item->is_suspendable() ) {
+        if( backlog_item->auto_resume ) {
             backlog_item++;
         } else {
             backlog_item = backlog.erase( backlog_item );

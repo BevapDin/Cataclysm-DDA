@@ -1867,6 +1867,7 @@
   {
     "type":"GENERIC",
     "id": "rock_pot",
+    "category" : "tools",
     "symbol": ";",
     "color": "dark_gray",
     "name": "stone pot",
