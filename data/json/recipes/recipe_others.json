@@ -1197,7 +1197,8 @@
       [ "frame", 4 ]
     ],
     [
-      ["rope_30", 4]
+      ["rope_30", 4],
+      ["vine_30", 4]
     ],
     [
       [ "steel_chunk", 4 ],
@@ -4727,6 +4728,7 @@
   ], "components": [
     [
       [ "rope_30", 1 ],
+      [ "vine_30", 1 ],
       [ "rope_6", 5 ]
     ],
     [
@@ -4922,5 +4924,58 @@
 	  [ "string_6", 6 ]
     ]
   ]
-}
+  },
+  {
+  "type" : "recipe",
+  "result": "material_quicklime",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_MATERIALS",
+  "skill_used": "fabrication",
+  "skills_required": [ "cooking", 2 ],
+  "difficulty": 3,
+  "time": 90000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+    ["crucible", -1]
+    ],
+    [
+    ["forge", 250], ["char_forge", 50], [ "oxy_torch", 50]
+    ]
+    ],
+  "components": [
+    [
+    [ "material_limestone", 50 ]
+    ]
+  ]
+ },
+  {
+  "type" : "recipe",
+  "result": "material_cement",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_MATERIALS",
+  "skill_used": "fabrication",
+  "skills_required": [ "cooking", 3 ],
+  "difficulty": 4,
+  "time": 90000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+    [
+    ["crucible", -1]
+    ],
+    [
+    ["forge", 250], ["char_forge", 50], [ "oxy_torch", 50]
+    ]
+    ],
+  "components": [
+    [
+    [ "material_quicklime", 50 ]
+    ],
+    [
+    [ "material_sand", 50 ]
+    ]
+  ]
+ }
 ]
