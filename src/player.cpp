@@ -1506,9 +1506,7 @@ int player::run_cost(int base_cost, bool diag)
       (ter_at_pos == t_pit_spiked_covered) || (ter_at_pos == t_pavement) ||
       (ter_at_pos == t_pavement_y) || (ter_at_pos == t_sidewalk) ||
       (ter_at_pos == t_concrete) || (ter_at_pos == t_floor) ||
-      (ter_at_pos == t_skylight) || (ter_at_pos == t_door_glass_o) ||
-      (ter_at_pos == t_emergency_light_flicker) ||
-      (ter_at_pos == t_emergency_light) || (ter_at_pos == t_utility_light) ||
+      (ter_at_pos == t_door_glass_o) || (ter_at_pos == t_utility_light) ||
       (ter_at_pos == t_door_o) || (ter_at_pos == t_rdoor_o) ||
       (ter_at_pos == t_door_frame) || (ter_at_pos == t_mdoor_frame) ||
       (ter_at_pos == t_fencegate_o) || (ter_at_pos == t_chaingate_o) ||
@@ -6261,8 +6259,7 @@ void player::drench(int saturation, int flags)
     }
 
     // Make the body wet
-    for (int i = 0; i < num_bp; ++i)
-    {
+    for (int i = 0; i < num_bp; ++i) {
         // Different body parts have different size, they can only store so much water
         int bp_wetness_max = 0;
         if (mfb(i) & flags){
@@ -6397,7 +6394,8 @@ void player::update_body_wetness()
     * Mutations and weather can affect the duration of the player being wet.
     */
     int delay = 10;
-    if (has_trait("LIGHTFUR") || has_trait("FUR") || has_trait("FELINE_FUR") || has_trait("LUPINE_FUR")) {
+    if( has_trait("LIGHTFUR") || has_trait("FUR") || has_trait("FELINE_FUR") ||
+        has_trait("LUPINE_FUR") ) {
         delay += 2;
     }
     if (has_trait("URSINE_FUR")) {
@@ -6414,14 +6412,13 @@ void player::update_body_wetness()
         return;
     }
 
-    for (int i = 0; i < num_bp; ++i)
-    {
+    for (int i = 0; i < num_bp; ++i) {
         if (body_wetness[i] == 0) {
             continue;
         }
         body_wetness[i] -= 1;
         if (body_wetness[i] < 0) {
-            body_wetness[i] -= 0;
+            body_wetness[i] = 0;
         }
     }
 }
@@ -10169,7 +10166,7 @@ void player::try_to_sleep()
         plantsleep = true;
         if( (ter_at_pos == t_dirt || ter_at_pos == t_pit ||
              ter_at_pos == t_dirtmound || ter_at_pos == t_pit_shallow ||
-             ter_at_pos == t_ash || ter_at_pos == t_grass) && (!(veh)) &&
+             ter_at_pos == t_grass) && (!(veh)) &&
             (furn_at_pos == f_null) ) {
             add_msg(m_good, _("You relax as your roots embrace the soil."));
         } else if (veh) {
@@ -10238,7 +10235,7 @@ bool player::can_sleep()
         furn_at_pos == f_null) {
         sleepy += 10; // It's very easy for Chloromorphs to get to sleep on soil!
     }
-    else if ((ter_at_pos == t_grass || ter_at_pos == t_ash) &&
+    else if ((ter_at_pos == t_grass) &&
         furn_at_pos == f_null) {
         sleepy += 5; // Not as much if you have to dig through stuff first
     }
