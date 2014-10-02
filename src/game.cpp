@@ -88,6 +88,7 @@ bool is_valid_in_w_terrain(int x, int y)
 
 // This is the main game set-up process.
 game::game() :
+    new_game(false),
     uquit(QUIT_NO),
     w_terrain(NULL),
     w_minimap(NULL),
@@ -527,6 +528,7 @@ void game::setup()
     monstairz = -1;
     last_target = -1;  // We haven't targeted any monsters yet
     last_target_was_npc = false;
+    new_game = true;
     uquit = QUIT_NO;   // We haven't quit the game
 
     weather = WEATHER_CLEAR; // Start with some nice weather...
@@ -572,6 +574,7 @@ void game::start_game(std::string worldname)
         gamemode = new special_game();
     }
 
+    new_game = true;
     calendar::turn = HOURS(ACTIVE_WORLD_OPTIONS["INITIAL_TIME"]);
     determine_starting_season();
     nextweather = calendar::turn;
@@ -1084,8 +1087,12 @@ bool game::do_turn()
         return true;
     }
     // Actual stuff
-    gamemode->per_turn();
-    calendar::turn.increment();
+    if (new_game) {
+        new_game = false;
+    } else {
+        gamemode->per_turn();
+        calendar::turn.increment();
+    }
     process_events();
     process_missions();
     if (calendar::turn.hours() == 0 && calendar::turn.minutes() == 0 &&
@@ -1434,6 +1441,7 @@ bool game::do_turn()
     }
 
     u.update_bodytemp();
+    u.update_body_wetness();
 
     rustCheck();
     if (calendar::turn % 10 == 0) {
