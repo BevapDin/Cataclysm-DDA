@@ -67,13 +67,9 @@ void remove_atomic_mod( item &it, player &p )
     }
     p.add_msg_if_player( _( "You remove the plutonium cells of your %s!" ), it.tname().c_str() );
     item mod( "battery_atomic", calendar::turn );
+    mod.charges = it.charges;
+    it.charges = 0;
     p.i_add_or_drop( mod, 1 );
-    if( it.charges >= 2500 ) {
-        item plutonium( "plut_cell", calendar::turn );
-        plutonium.charges = it.charges / 2500;
-        p.i_add_or_drop( plutonium, 1 );
-        it.charges %= 2500;
-    }
     it.item_tags.erase( "ATOMIC_AMMO" );
     it.item_tags.erase( "NO_UNLOAD" );
     it.item_tags.erase( "RADIOACTIVE" );
@@ -7608,7 +7604,7 @@ int iuse::artifact(player *p, item *it, bool)
 
 int iuse::spray_can(player *p, item *it, bool)
 {
-    bool ismarker = (it->type->id == _("permanent_marker"));
+    bool ismarker = (it->type->id == "permanent_marker" || it->type->id == "survival_marker");
     if (ismarker) {
         int ret = menu(true, _("Write on what?"), _("The ground"), _("An item"), _("Cancel"), NULL);
 
