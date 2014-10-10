@@ -1215,6 +1215,9 @@ item recipe::create_result(int handed) const
     if (!newit.craft_has_charges()) {
         newit.charges = 0;
     }
+    if( newit.has_flag( "VARSIZE" ) ) {
+        newit.item_tags.insert( "FIT" );
+    }
     return newit;
 }
 
@@ -1248,6 +1251,9 @@ std::vector<item> recipe::create_byproducts(int batch) const
                 if (!newit.craft_has_charges()) {
                     newit.charges = 0;
                 }
+                if( newit.has_flag( "VARSIZE" ) ) {
+                    newit.item_tags.insert( "FIT" );
+                }
                 bps.push_back(newit);
             }
         } else {
@@ -1257,6 +1263,9 @@ std::vector<item> recipe::create_byproducts(int batch) const
                     newit.charges *= val.charges_mult;
                 }
                 newit.charges *= batch;
+                if( newit.has_flag( "VARSIZE" ) ) {
+                    newit.item_tags.insert( "FIT" );
+                }
                 bps.push_back(newit);
             }
         }
@@ -1437,9 +1446,6 @@ void set_item_food(item &newit)
 
 void finalize_crafted_item( item &newit, float used_age_tally, int used_age_count )
 {
-    if( newit.is_armor() && newit.has_flag( "VARSIZE" ) ) {
-        newit.item_tags.insert( "FIT" );
-    }
     if( newit.is_food() ) {
         set_item_food( newit );
     }
