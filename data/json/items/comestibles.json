@@ -4571,7 +4571,6 @@
         "phase" : "solid",
         "charges" : 4,
         "bashing" : 0,
-        "flags" : ["EATEN_HOT"],
         "fun" : 14
     },
     {
@@ -6788,7 +6787,6 @@
         "phase" : "solid",
         "charges" : 1,
         "bashing" : 0,
-        "flags" : ["EATEN_HOT"],
         "fun" : 5
     },
     {
@@ -6818,7 +6816,6 @@
         "phase" : "solid",
         "charges" : 1,
         "bashing" : 0,
-        "flags" : ["EATEN_HOT"],
         "fun" : 5
     },
     {
