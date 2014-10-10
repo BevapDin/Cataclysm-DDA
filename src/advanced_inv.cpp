@@ -1169,7 +1169,7 @@ void advanced_inventory::display()
             aim_location srcarea = sitem->area;
             if( action == "AUTO_MOVE" ) {
                 destarea = find_destination( *sitem );
-                if( destarea == AIM_ALL || destarea == sitem->area ) {
+                if( destarea == AIM_ALL || squares[srcarea].is_same( squares[destarea] ) ) {
                     spane.scroll_by( +1 );
                     continue;
                 }
@@ -1194,7 +1194,7 @@ void advanced_inventory::display()
                 // onto the map/vehicle, if it fails, put them back into the inventory.
                 // If no item has actually been moved, continue.
                 if( by_charges ) {
-                    item moving_item = g->u.inv.reduce_charges( sitem->idx, amount_to_move );
+                    item moving_item = g->u.reduce_charges( sitem->idx, amount_to_move );
                     assert( !moving_item.is_null() );
                     if( !add_item( destarea, moving_item ) ) {
                         g->u.i_add( moving_item );

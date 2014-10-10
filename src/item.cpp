@@ -1223,7 +1223,7 @@ nc_color item::color(player *u) const
         if (u->weapon.is_gun() && u->weapon.ammo_type() == amtype) {
             ret = c_green;
         } else {
-            if (u->inv.has_gun_for_ammo(amtype)) {
+            if (u->has_gun_for_ammo(amtype)) {
                 ret = c_green;
             }
         }
@@ -1370,8 +1370,6 @@ std::string item::tname( unsigned int quantity, bool with_prefix ) const
                 ret << _(" (old)");
             } else if ( rot < 100 ) {
                 ret << _(" (fresh)");
-            } else if ((int)calendar::turn > ((int)food_type->spoils - 12) * 600 + (int)(food->bday)) {
-                ret << _(" (nearly rotten)");
             }
         }
         if (has_flag("HOT")) {
@@ -4122,5 +4120,21 @@ bool item::process( player *carrier, point pos )
     if( has_flag( "CHARGE" ) && process_charger_gun( carrier, pos ) ) {
         return true;
     }
+    return false;
+}
+
+bool item::reduce_charges( long quantity )
+{
+    if( !count_by_charges() ) {
+        debugmsg( "Tried to remove %s by charges, but item is not counted by charges", tname().c_str() );
+        return false;
+    }
+    if( quantity > charges ) {
+        debugmsg( "Charges: Tried to remove charges that do not exist, removing maximum available charges instead" );
+    }
+    if( charges <= quantity ) {
+        return true;
+    }
+    charges -= quantity;
     return false;
 }
