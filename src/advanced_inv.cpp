@@ -1169,7 +1169,7 @@ void advanced_inventory::display()
             aim_location srcarea = sitem->area;
             if( action == "AUTO_MOVE" ) {
                 destarea = find_destination( *sitem );
-                if( destarea == AIM_ALL || destarea == spane.area) {
+                if( destarea == AIM_ALL || destarea == sitem->area ) {
                     spane.scroll_by( +1 );
                     continue;
                 }
@@ -1237,7 +1237,6 @@ void advanced_inventory::display()
                 }
             }
             // This is only reached when at least one item has been moved.
-            g->u.moves -= 100;
             // Just in case the items have moved from/to the inventory
             g->u.inv.sort();
             g->u.inv.restack( &g->u );
@@ -1500,7 +1499,6 @@ bool advanced_inventory::add_item( aim_location destarea, const item &new_item )
     assert( destarea != AIM_ALL ); // should be a specific location instead
     if( destarea == AIM_INVENTORY ) {
         g->u.i_add( new_item );
-        g->u.moves -= 100;
         return true;
     }
     advanced_inv_area &p = squares[destarea];
