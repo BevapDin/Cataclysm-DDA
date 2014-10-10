@@ -66,6 +66,7 @@ void iexamine::atm(player *p, map *m, int examx, int examy)
     const int withdraw_money = 2;
     const int transfer_money = 3;
     const int cancel = 4;
+    const int revoke = 5;
     long amount = 0;
     long max = 0;
     std::string popupmsg;
@@ -109,6 +110,13 @@ void iexamine::atm(player *p, map *m, int examx, int examy)
     } else {
         amenu.addentry( transfer_money, false, -1,
                         _("One of your cash cards must be charged before you can move money!") );
+    }
+
+    if (p->has_amount("cash_card", 1)) {
+        amenu.addentry( revoke, true, 'r', _("Revoke cash card (50 cents back)") );
+    } else {
+        amenu.addentry( revoke, false, -1,
+                        _("You need a cash card before you can revoke a cash card!") );
     }
 
     amenu.addentry( cancel, true, 'q', _("Cancel") );
@@ -250,6 +258,28 @@ void iexamine::atm(player *p, map *m, int examx, int examy)
             p->cash -= 100;
             p->moves -= 100;
         }
+    } else if (choice == revoke) {
+        pos = g->inv(_("Insert card to be revoked."));
+        with = &(p->i_at(pos));
+
+        if (with->is_null()) {
+            popup(_("You do not have that item!"));
+            return;
+        }
+        if (with->type->id != "cash_card") {
+            popup(_("Please insert cash cards only!"));
+            return;
+        }
+
+        p->cash += with->charges + 50;
+        p->i_rem(pos);
+        add_msg(m_info, ngettext("Your account now holds %d cent.",
+                                 "Your account now holds %d cents.",
+                                 p->cash),
+                p->cash);
+        p->moves -= 100;
+        return;
+
     } else {
         return;
     }
