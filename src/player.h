@@ -115,7 +115,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         player &operator=(player &&) = default;
 
         // newcharacter.cpp
-        bool create(character_type type, std::string tempname = "");
+        int create(character_type type, std::string tempname = "");
         /** Returns the set "my_traits" */
         std::vector<std::string> get_traits() const;
         /** Empties the trait list */
@@ -1032,6 +1032,9 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
          * Only required for rendering.
          */
         std::vector<std::string> get_overlay_ids() const;
+
+        void spores();
+        void blossoms();
 
     protected:
         std::vector<std::string> my_traits;

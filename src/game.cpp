@@ -98,7 +98,7 @@ game::game() :
     w_status(NULL),
     w_status2(NULL),
     dangerous_proximity(5),
-    run_mode(1),
+    safe_mode(SAFE_MODE_ON),
     mostseen(0),
     gamemode(NULL),
     lookHeight(13),
@@ -579,7 +579,7 @@ void game::start_game(std::string worldname)
     determine_starting_season();
     nextweather = calendar::turn;
     weatherSeed = rand();
-    run_mode = (OPTIONS["SAFEMODE"] ? 1 : 0);
+    safe_mode = (OPTIONS["SAFEMODE"] ? SAFE_MODE_ON : SAFE_MODE_OFF);
     mostseen = 0; // ...and mostseen is 0, we haven't seen any monsters yet.
 
     init_autosave();
@@ -927,7 +927,9 @@ void game::cleanup_at_end()
                                pgettext("memorial_female", "%s was killed."),
                                u.name.c_str());
         }
-        u.add_memorial_log( _("Last words: %s"), sLastWords.c_str() );
+        if (!sLastWords.empty()) {
+            u.add_memorial_log( _("Last words: %s"), sLastWords.c_str(), _("Last words: %s"), sLastWords.c_str() );
+        }
         save_player_data();
         move_save_to_graveyard();
         write_memorial_file(sLastWords);
@@ -3170,13 +3172,7 @@ bool game::handle_action()
         break; // handled above
 
     case ACTION_PAUSE:
-        if (run_mode == 2 && ((OPTIONS["SAFEMODEVEH"]) ||
-                              !(u.controlling_vehicle))) { // Monsters around and we don't wanna pause
-            monster &critter = critter_tracker.find(new_seen_mon.back());
-            add_msg(m_warning, _("Spotted %s--safe mode is on! (%s to turn it off.)"),
-                    critter.name().c_str(),
-                    press_x(ACTION_TOGGLE_SAFEMODE).c_str());
-        } else {
+        if( check_save_mode_allowed() ) {
             u.pause();
         }
         break;
@@ -3614,13 +3610,13 @@ bool game::handle_action()
         break;
 
     case ACTION_TOGGLE_SAFEMODE:
-        if (run_mode == 0 ) {
-            run_mode = 1;
+        if (safe_mode == SAFE_MODE_OFF ) {
+            safe_mode = SAFE_MODE_ON;
             mostseen = 0;
             add_msg(m_info, _("Safe mode ON!"));
         } else {
             turnssincelastmon = 0;
-            run_mode = 0;
+            safe_mode = SAFE_MODE_OFF;
             if (autosafemode) {
                 add_msg(m_info, _("Safe mode OFF! (Auto safe mode still enabled!)"));
             } else {
@@ -3640,14 +3636,14 @@ bool game::handle_action()
         break;
 
     case ACTION_IGNORE_ENEMY:
-        if (run_mode == 2) {
+        if (safe_mode == SAFE_MODE_STOP) {
             add_msg(m_info, _("Ignoring enemy!"));
             for(std::vector<int>::iterator it = new_seen_mon.begin();
                 it != new_seen_mon.end(); ++it) {
                 monster &critter = critter_tracker.find(*it);
                 critter.ignoring = rl_dist(point(u.posx, u.posy), critter.pos());
             }
-            run_mode = 1;
+            safe_mode = SAFE_MODE_ON;
         }
         break;
 
@@ -5356,12 +5352,12 @@ void game::draw_sidebar()
     WINDOW *day_window = sideStyle ? w_status2 : w_status;
     mvwprintz(day_window, 0, sideStyle ? 0 : 41, c_white, _("%s, day %d"),
               season_name_uc[calendar::turn.get_season()].c_str(), calendar::turn.days() + 1);
-    if (run_mode != 0 || autosafemode != 0) {
+    if (safe_mode != SAFE_MODE_OFF || autosafemode != 0) {
         int iPercent = int((turnssincelastmon * 100) / OPTIONS["AUTOSAFEMODETURNS"]);
         wmove(w_status, sideStyle ? 4 : 1, getmaxx(w_status) - 4);
         const char *letters[] = { "S", "A", "F", "E" };
         for (int i = 0; i < 4; i++) {
-            nc_color c = (run_mode == 0 && iPercent < (i + 1) * 25) ? c_red : c_green;
+            nc_color c = (safe_mode == SAFE_MODE_OFF && iPercent < (i + 1) * 25) ? c_red : c_green;
             wprintz(w_status, c, letters[i]);
         }
     }
@@ -5724,7 +5720,11 @@ void game::draw_minimap()
             } else {
                 const oter_id &cur_ter = overmap_buffer.ter(omx, omy, levz);
                 ter_sym = otermap[cur_ter].sym;
-                ter_color = otermap[cur_ter].color;
+                if (overmap_buffer.is_explored(omx, omy, levz)) {
+                    ter_color = c_dkgray;
+                } else {
+                    ter_color = otermap[cur_ter].color;
+                }
             }
             if (!drew_mission && targ.x == omx && targ.y == omy) {
                 // If there is a mission target, and it's not on the same
@@ -6130,9 +6130,8 @@ int game::mon_info(WINDOW *w)
                 int mondist = rl_dist(u.posx, u.posy, critter.posx(), critter.posy());
                 if (mondist <= iProxyDist) {
                     bool passmon = false;
-
                     if (critter.ignoring > 0) {
-                        if (run_mode != 1) {
+                        if (safe_mode != SAFE_MODE_ON) {
                             critter.ignoring = 0;
                         } else if (mondist > critter.ignoring / 2 || mondist < 6) {
                             passmon = true;
@@ -6179,6 +6178,19 @@ int game::mon_info(WINDOW *w)
             if (!new_seen_mon.empty()) {
                 monster &critter = critter_tracker.find(new_seen_mon.back());
                 cancel_activity_query(_("%s spotted!"), critter.name().c_str());
+                if (u.has_trait("M_DEFENDER")) {
+                    if (critter.type->in_species("PLANT")) {
+                        add_msg(m_warning, _("We have detected a %s."), critter.name().c_str());
+                        if (!u.has_disease("adrenaline")){
+                            u.add_disease("adrenaline", 300); // Message handled in disease.cpp
+                        } else if (u.has_disease("adrenaline") && (u.disease_duration("adrenaline") < 150) ) {
+                            // Triffids present.  We ain't got TIME to adrenaline comedown!
+                            u.add_disease("adrenaline", 150);
+                            u.mod_pain(3); // Does take it out of you, though
+                            add_msg(m_info, _("Our fibers strain with renewed wrath!"));
+                        }
+                    }
+                }
             } else {
                 //Hostile NPC
                 cancel_activity_query(_("Hostile survivor spotted!"));
@@ -6187,18 +6199,18 @@ int game::mon_info(WINDOW *w)
             cancel_activity_query(_("Monsters spotted!"));
         }
         turnssincelastmon = 0;
-        if (run_mode == 1) {
-            run_mode = 2; // Stop movement!
+        if (safe_mode == SAFE_MODE_ON) {
+            safe_mode = SAFE_MODE_STOP; // Stop movement!
         }
     } else if (autosafemode && newseen == 0) { // Auto-safemode
         turnssincelastmon++;
-        if (turnssincelastmon >= OPTIONS["AUTOSAFEMODETURNS"] && run_mode == 0) {
-            run_mode = 1;
+        if (turnssincelastmon >= OPTIONS["AUTOSAFEMODETURNS"] && safe_mode == SAFE_MODE_OFF) {
+            safe_mode = SAFE_MODE_ON;
         }
     }
 
-    if (newseen == 0 && run_mode == 2) {
-        run_mode = 1;
+    if (newseen == 0 && safe_mode == SAFE_MODE_STOP) {
+        safe_mode = SAFE_MODE_ON;
     }
 
     mostseen = newseen;
@@ -12449,11 +12461,7 @@ void game::chat()
 
 void game::pldrive(int x, int y)
 {
-    if (run_mode == 2 && (OPTIONS["SAFEMODEVEH"])) { // Monsters around and we don't wanna run
-        add_msg(m_warning, _("Monster spotted--run mode is on! "
-                             "(%s to turn it off or %s to ignore monster.)"),
-                press_x(ACTION_TOGGLE_SAFEMODE).c_str(),
-                from_sentence_case(press_x(ACTION_IGNORE_ENEMY)).c_str());
+    if( !check_save_mode_allowed() ) {
         return;
     }
     int part = -1;
@@ -12496,15 +12504,33 @@ void game::pldrive(int x, int y)
     }
 }
 
+bool game::check_save_mode_allowed()
+{
+    if( safe_mode != SAFE_MODE_STOP ) {
+        return true;
+    }
+    // Currently driving around, ignore the monster, they have no chance against a proper car anyway (-:
+    if( u.controlling_vehicle && !OPTIONS["SAFEMODEVEH"] ) {
+        return true;
+    }
+    // Monsters around and we don't wanna run
+    std::string spotted_creature_name;
+    if( new_seen_mon.empty() ) {
+        // naming consistent with code in game::mon_info
+        spotted_creature_name = _( "a hostile survivor" );
+    } else {
+        spotted_creature_name = zombie( new_seen_mon.back() ).name();
+    }
+    add_msg( m_warning,
+             _( "Spotted %s--safe mode is on! (%s to turn it off or %s to ignore monster.)" ),
+             spotted_creature_name.c_str(), press_x( ACTION_TOGGLE_SAFEMODE ).c_str(),
+             from_sentence_case( press_x( ACTION_IGNORE_ENEMY ) ).c_str() );
+    return false;
+}
+
 bool game::plmove(int dx, int dy)
 {
-    if (run_mode == 2) {
-        // Monsters around and we don't wanna run
-        monster &critter = critter_tracker.find(new_seen_mon.back());
-        add_msg(m_warning, _("Spotted %s--safe mode is on! (%s to turn it off or %s to ignore monster.)"),
-                critter.name().c_str(),
-                press_x(ACTION_TOGGLE_SAFEMODE).c_str(),
-                from_sentence_case(press_x(ACTION_IGNORE_ENEMY)).c_str());
+    if( !check_save_mode_allowed() ) {
         return false;
     }
     int x = 0;
@@ -12731,8 +12757,9 @@ bool game::plmove(int dx, int dy)
                 dangerous = !(u.get_env_resist(bp_mouth) >= 15);
                 break;
             case fd_fungal_haze:
-                dangerous = !((u.get_env_resist(bp_mouth) >= 15) &&
-                              (u.get_env_resist(bp_eyes) >= 15) );
+                dangerous = (!((u.get_env_resist(bp_mouth) >= 15) &&
+                              (u.get_env_resist(bp_eyes) >= 15) ) &&
+                              !u.has_trait("M_IMMUNE"));
                 break;
             default:
                 dangerous = cur->is_dangerous();
@@ -13380,7 +13407,7 @@ bool game::plmove(int dx, int dy)
             u.moves -= 100;
         } else if (m.furn(x, y) != f_safe_c && m.open_door(x, y, !m.is_outside(u.posx, u.posy))) {
             u.moves -= 100;
-        } else if (m.ter(x, y) == t_door_locked || m.ter(x, y) == t_door_locked_alarm ||
+        } else if (m.ter(x, y) == t_door_locked || m.ter(x, y) == t_door_locked_peep || m.ter(x, y) == t_door_locked_alarm ||
                    m.ter(x, y) == t_door_locked_interior) {
             u.moves -= 100;
             add_msg(_("That door is locked!"));
@@ -14638,8 +14665,10 @@ bool game::spread_fungus(int x, int y)
                                     if (u_see(x, y)) {
                                     add_msg(m_warning, _("The young tree blooms forth into a fungal blossom!"));
                                     }
+                                } else if (one_in(2)) {
+                                    m.ter_set(i, j, t_marloss_tree);
                                 }
-                            } else { 
+                            } else {
                                 m.ter_set(i, j, t_tree_fungal_young);
                             }
                             converted = true;
@@ -14653,6 +14682,8 @@ bool game::spread_fungus(int x, int y)
                                     if (u_see(x, y)) {
                                     add_msg(m_warning, _("The tree blooms forth into a fungal blossom!"));
                                     }
+                                } else if (one_in(3)) {
+                                    m.ter_set(i, j, t_marloss_tree);
                                 }
                             } else {
                                 m.ter_set(i, j, t_tree_fungal);

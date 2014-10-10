@@ -5,6 +5,7 @@
 #include "game.h"
 #include "line.h"
 #include "options.h"
+#include "item_factory.h"
 #include "mapbuffer.h"
 #include "translations.h"
 #include "monstergenerator.h"
@@ -1512,12 +1513,12 @@ int map::bash_rating(const int str, const int x, const int y)
     } else if ( ter_at(x, y).bash.str_max != -1 ) {
         ter_smash = true;
     }
-    
+
     if (!furn_smash && !ter_smash) {
     //There must be a vehicle there!
         return 10;
     }
-    
+
     int bash_min = 0;
     int bash_max = 0;
     if (furn_smash) {
@@ -1532,7 +1533,7 @@ int map::bash_rating(const int str, const int x, const int y)
     } else if (str >= bash_max) {
         return 10;
     }
-    
+
     return (10 * (str - bash_min)) / (bash_max - bash_min);
 }
 
@@ -1554,7 +1555,7 @@ void map::make_rubble(const int x, const int y, furn_id rubble_type, bool items,
         if (move_cost(x, y) <= 0) {
             ter_set(x, y, floor_type);
         }
-        
+
         furn_set(x, y, rubble_type);
     }
     if (items) {
@@ -2236,6 +2237,7 @@ void map::shoot(const int x, const int y, int &dam,
         }
     } else if( 0 == terrain.id.compare("t_door_c") ||
                0 == terrain.id.compare("t_door_locked") ||
+               0 == terrain.id.compare("t_door_locked_peep") ||
                0 == terrain.id.compare("t_door_locked_alarm") ) {
         dam -= rng(15, 30);
         if (dam > 0) {
@@ -2459,7 +2461,7 @@ bool map::hit_with_acid( const int x, const int y )
     if( t == t_wall_glass_v || t == t_wall_glass_h || t == t_wall_glass_v_alarm || t == t_wall_glass_h_alarm ||
         t == t_vat ) {
         ter_set( x, y, t_floor );
-    } else if( t == t_door_c || t == t_door_locked || t == t_door_locked_alarm ) {
+    } else if( t == t_door_c || t == t_door_locked || t == t_door_locked_peep || t == t_door_locked_alarm ) {
         if( one_in( 3 ) ) {
             ter_set( x, y, t_door_b );
         }
@@ -2890,7 +2892,6 @@ void map::spawn_an_item(const int x, const int y, item new_item,
     {
         new_item.damage = damlevel;
     }
-
     add_item_or_charges(x, y, new_item);
 }
 
@@ -2904,11 +2905,6 @@ void map::spawn_items(const int x, const int y, const std::vector<item> &new_ite
         item new_item = *a;
         if (new_item.made_of(LIQUID) && swimmable) {
             continue;
-        }
-        // clothing with variable size flag may sometimes be generated fitted
-        if (new_item.is_armor() && new_item.has_flag("VARSIZE") && one_in(3))
-        {
-            new_item.item_tags.insert("FIT");
         }
         if (new_item.is_armor() && new_item.has_flag("PAIRED") && x_in_y(4, 5)) {
             //Clear old side info
@@ -2964,6 +2960,9 @@ void map::spawn_item(const int x, const int y, const std::string &type_id,
                      const unsigned birthday, const int damlevel, const bool rand)
 {
     if(type_id == "null") {
+        return;
+    }
+    if(item_is_blacklisted(type_id)) {
         return;
     }
     // recurse to spawn (quantity - 1) items

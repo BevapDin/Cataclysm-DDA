@@ -67,7 +67,8 @@ public:
     int purify_iv           (player*, item*, bool);
     int marloss             (player*, item*, bool);
     int marloss_seed        (player*, item*, bool);
-    int marloss_gel        (player*, item*, bool);
+    int marloss_gel         (player*, item*, bool);
+    int mycus               (player*, item*, bool);
     int dogfood             (player*, item*, bool);
     int catfood             (player*, item*, bool);
 
@@ -171,6 +172,7 @@ public:
     int lumber              (player *, item *, bool);
     int oxytorch            (player *, item *, bool);
     int hacksaw             (player *, item *, bool);
+    int portable_structure  (player *, item *, bool);
     int tent                (player *, item *, bool);
     int large_tent          (player *, item *, bool);
     int shelter             (player *, item *, bool);

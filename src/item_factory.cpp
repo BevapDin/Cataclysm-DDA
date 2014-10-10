@@ -110,8 +110,6 @@ void Item_factory::finialize_item_blacklist()
             remove_item(itm, furnlist[i].bash.items);
         }
     }
-    item_blacklist.clear();
-    item_whitelist.clear();
 }
 
 void add_to_set(t_string_set &s, JsonObject &json, const std::string &name)
@@ -210,6 +208,7 @@ void Item_factory::init()
     iuse_function_list["MARLOSS"] = &iuse::marloss;
     iuse_function_list["MARLOSS_SEED"] = &iuse::marloss_seed;
     iuse_function_list["MARLOSS_GEL"] = &iuse::marloss_gel;
+    iuse_function_list["MYCUS"] = &iuse::mycus;
     iuse_function_list["DOGFOOD"] = &iuse::dogfood;
     iuse_function_list["CATFOOD"] = &iuse::catfood;
 
@@ -311,9 +310,7 @@ void Item_factory::init()
     iuse_function_list["LUMBER"] = &iuse::lumber;
     iuse_function_list["OXYTORCH"] = &iuse::oxytorch;
     iuse_function_list["HACKSAW"] = &iuse::hacksaw;
-    iuse_function_list["TENT"] = &iuse::tent;
-    iuse_function_list["LARGE_TENT"] = &iuse::large_tent;
-    iuse_function_list["SHELTER"] = &iuse::shelter;
+    iuse_function_list["PORTABLE_STRUCTURE"] = &iuse::portable_structure;
     iuse_function_list["TORCH_LIT"] = &iuse::torch_lit;
     iuse_function_list["BATTLETORCH_LIT"] = &iuse::battletorch_lit;
     iuse_function_list["BULLET_PULLER"] = &iuse::bullet_puller;
