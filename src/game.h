@@ -202,6 +202,7 @@ class game
         bool is_empty(const int x, const int y); // True if no PC, no monster, move cost > 0
         bool isBetween(int test, int down, int up);
         bool is_in_sunlight(int x, int y); // Checks outdoors + sunny
+        bool is_sheltered(int x, int y); // Checks if indoors, underground or in a car.
         bool is_in_ice_lab(point location);
         bool revive_corpse(int x, int y, int n); // revives a corpse from an item pile
         bool revive_corpse(int x, int y,
@@ -381,6 +382,7 @@ class game
         std::map<int, weather_segment> weather_log;
         overmap *cur_om;
         map m;
+
         int levx, levy, levz; // Placement inside the overmap
         /** Absolute values of lev[xyz] (includes the offset of cur_om) */
         int get_abs_levx() const;
@@ -402,12 +404,15 @@ class game
 
         int ter_view_x, ter_view_y;
         WINDOW *w_terrain;
+        WINDOW *w_overmap;
+        WINDOW *w_omlegend;
         WINDOW *w_minimap;
         WINDOW *w_HP;
         WINDOW *w_messages;
         WINDOW *w_location;
         WINDOW *w_status;
         WINDOW *w_status2;
+        WINDOW *w_blackspace;
         live_view liveview;
 
         // View offset based on the driving speed (if any)

@@ -218,6 +218,7 @@ public:
     int einktabletpc        (player *, item *, bool);
     int camera              (player *, item *, bool);
     int ehandcuffs          (player *, item *, bool);
+    int cable_attach        (player *, item *, bool);
 
     int wood_gas_amount(const item &it);
     int wood_gas(player *p, item *, bool t);
