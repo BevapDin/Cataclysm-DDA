@@ -4996,8 +4996,8 @@ bool vehicle::examine(game *g, player *p, int part) {
         // it is automaticly copied from a recipe loaded with json
         static recipe charcoal_recipe;
         if(charcoal_recipe.components.empty()) {
-            recipe *r = recipe_by_name("charcoal");
-            if(r == 0) {
+            const recipe *r = recipe_by_name("charcoal");
+            if(r == nullptr) {
                 // If there is no recipe for charcoal, assume this as default
                 charcoal_recipe.components.resize(1);
                 charcoal_recipe.components[0].push_back(item_comp("2x4", 3));

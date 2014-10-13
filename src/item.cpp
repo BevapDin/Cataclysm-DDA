@@ -760,8 +760,8 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
             if (!(book->recipes.empty())) {
                 std::string recipes = "";
                 size_t index = 1;
-                for (std::map<recipe*, int>::iterator iter = book->recipes.begin();
-                     iter != book->recipes.end(); ++iter, ++index) {
+                for( auto iter = book->recipes.begin();
+                     iter != book->recipes.end(); ++iter, ++index ) {
                     if(g->u.knows_recipe(iter->first)) {
                         recipes += "<color_ltgray>";
                     }
@@ -825,7 +825,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
     if (!components.empty()) {
         dump->push_back( iteminfo( "DESCRIPTION", string_format( _("Made from: %s"), components_to_string().c_str() ) ) );
     } else {
-        recipe *dis_recipe = g->get_disassemble_recipe( type->id );
+        const recipe *dis_recipe = g->get_disassemble_recipe( type->id );
         if( dis_recipe != nullptr ) {
             std::ostringstream buffer;
             for( auto it = dis_recipe->components.begin(); it != dis_recipe->components.end(); ++it ) {
@@ -1464,22 +1464,29 @@ int item::price() const
         // maximal damage is 4, maximal reduction is 1/10 of the value.
         ret -= ret * static_cast<double>( damage ) / 40;
     }
-    if( curammo != nullptr && charges > 0 ) {
-        item tmp( curammo->id, 0 );
-        tmp.charges = charges;
-        ret += tmp.price();
-    }
     // The price from the json data is for the default-sized stack, like the volume
     // calculation.
     if( count_by_charges() || made_of( LIQUID ) ) {
         ret = ret * charges / static_cast<double>( max_charges() );
     }
-    if( is_tool() && curammo == nullptr ) {
-        // If the tool uses specific ammo (like gasoline) it is handled above.
-        const it_tool *itt = dynamic_cast<const it_tool*>( type );
-        if( itt->def_charges > 0 ) {
-            // Full value when charges == default charges, otherwise scalled down
-            ret = ret * std::max<long>( 0, charges ) / static_cast<double>( itt->def_charges );
+    const it_tool* ttype = dynamic_cast<const it_tool*>( type );
+    if( curammo != nullptr && charges > 0 ) {
+        item tmp( curammo->id, 0 );
+        tmp.charges = charges;
+        ret += tmp.price();
+    } else if( ttype != nullptr && curammo == nullptr ) {
+        if( charges > 0 && ttype->ammo != "NULL" ) {
+            // Tools sometimes don't have a curammo, when they should, e.g. flashlight
+            // that has been reloaded, apparently item::reload does not set curammo for tools.
+            item tmp( default_ammo( ttype->ammo ), 0 );
+            tmp.charges = charges;
+            ret += tmp.price();
+        } else if( ttype->def_charges > 0 && ttype->ammo == "NULL" ) {
+            // If the tool uses specific ammo (like gasoline) it is handled above.
+            // This case is for tools that have no ammo, but charges (e.g. spray can)
+            // Full value when charges == default charges, otherwise scaled down
+            // (e.g. half price for half full spray).
+            ret = ret * charges / static_cast<double>( ttype->def_charges );
         }
     }
     for (size_t i = 0; i < contents.size(); i++) {
@@ -2702,12 +2709,16 @@ int item::range(player *p)
         return 0;
     // Just use the raw ammo range for now.
     // we do NOT want to use the parent gun's range.
-    if(mode == "MODE_AUX") {
-        item* gunmod = active_gunmod();
-        if(gunmod && gunmod->curammo)
-            return gunmod->curammo->range;
-        else
-            return 0;
+    if( mode == "MODE_AUX" ) {
+        item *gunmod = active_gunmod();
+        int mod_range = 0;
+        if( gunmod ) {
+            mod_range += dynamic_cast<it_gunmod *>(gunmod->type)->range;
+            if( gunmod->curammo) {
+                mod_range += gunmod->curammo->range;
+            }
+        }
+        return mod_range;
     }
 
     // Ammoless weapons use weapon's range only
