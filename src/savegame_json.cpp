@@ -1200,7 +1200,9 @@ void item::serialize(JsonOut &json, bool save_contents) const
         json.end_array();
     }
 
-    json.member( "components", components );
+	if( !components.empty() ) {
+	    json.member( "components", components );
+	}
 
     json.end_object();
 }
