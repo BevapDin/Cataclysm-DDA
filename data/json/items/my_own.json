@@ -1,5 +1,32 @@
 [
     {
+        "id": "bot_hazmatbot",
+        "type": "TOOL",
+        "symbol": ";",
+        "color": "light_green",
+        "name": "inactive cleaner bot",
+        "description": "This is an inactive cleaner bot.",
+        "price": 400000,
+        "material": ["steel", "plastic"],
+        "weight": 81500,
+        "volume": 250,
+        "bashing": 8,
+        "cutting": 0,
+        "to_hit": -3,
+        "max_charges": 0,
+        "initial_charges": 0,
+        "charges_per_use": 0,
+        "turns_per_charge": 0,
+        "ammo": "NULL",
+        "revert_to": "null",
+        "use_action": {
+            "type": "place_monster",
+            "monster_id": "mon_hazmatbot",
+            "difficulty": 8,
+            "moves": 160
+        }
+    },
+    {
         "type":"GENERIC",
         "id": "heap_fur",
         "symbol": ",",
