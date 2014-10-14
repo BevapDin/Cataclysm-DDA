@@ -768,6 +768,7 @@ public:
      * Disspatch everything to the solution class.
      */
     bool has_all_requirements(const requirements &making);
+    bool has_all_requirements(const requirements &making, int batch_size);
     bool has_all_requirements(const requirements &making, solution &s);
     
     // Interface for requirementss: gather what tools and components to use
@@ -781,6 +782,7 @@ public:
      * might be changed.
      */
     void gather_input(const requirements &making, player_activity &activity);
+    void gather_input(const requirements &making, player_activity &activity, int batch_size);
     void gather_input(const requirements &making, solution &s, player_activity &activity);
     /**
      * Loads the tools/components that the user selected in gather_input,
@@ -797,6 +799,13 @@ public:
     void consume_gathered(
         const requirements &making,
         player_activity &activity,
+        std::list<item> &used_items,
+        std::list<item> &used_tools
+    );
+    void consume_gathered(
+        const requirements &making,
+        player_activity &activity,
+        int batch_size,
         std::list<item> &used_items,
         std::list<item> &used_tools
     );

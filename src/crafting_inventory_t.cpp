@@ -13,6 +13,19 @@
 
 void resort_item_vectors();
    
+void multiply(requirements &r, int n) {
+    for(auto &a : r.tools) {
+        for(auto &b : a) {
+            b.count *= n;
+        }
+    }
+    for(auto &a : r.components) {
+        for(auto &b : a) {
+            b.count *= n;
+        }
+    }
+}
+
 std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requirement &req);
 
 crafting_inventory_t::crafting_inventory_t(player *p)
@@ -75,6 +88,12 @@ const tidvec &get_tidvec(const itype_id &type) {
         }
     }
     return types;
+}
+
+bool crafting_inventory_t::has_all_requirements(const requirements &making, int batch_size) {
+    requirements tmp = making;
+    multiply(tmp, batch_size);
+    return has_all_requirements(tmp);
 }
 
 bool crafting_inventory_t::has_all_requirements(const requirements &making) {
@@ -207,6 +226,24 @@ void crafting_inventory_t::gather_and_consume(
 void crafting_inventory_t::gather_input(const requirements &making, player_activity &activity) {
     solution s;
     gather_input(making, s, activity);
+}
+
+void crafting_inventory_t::gather_input(const requirements &making, player_activity &activity, int batch_size) {
+    requirements tmp = making;
+    multiply(tmp, batch_size);
+    gather_input(tmp, activity);
+}
+
+void crafting_inventory_t::consume_gathered(
+    const requirements &making,
+    player_activity &activity,
+    int batch_size,
+    std::list<item> &used_items,
+    std::list<item> &used_tools
+) {
+    requirements tmp = making;
+    multiply(tmp, batch_size);
+    consume_gathered(tmp, activity, used_items, used_tools);
 }
 
 void crafting_inventory_t::consume_gathered(

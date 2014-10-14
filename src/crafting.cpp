@@ -278,8 +278,7 @@ bool game::making_would_work(std::string id_to_make, int batch_size)
         return false;
     }
 
-    crafting_inventory_t crafting_inv(&u);
-    if(!making->can_make_with_inventory(crafting_inv, batch_size)) {
+    if( !can_make( making, batch_size ) ) {
         std::ostringstream buffer;
         buffer << _("You can no longer make that craft!") << "\n";
         buffer << making->list_missing();
@@ -1201,7 +1200,7 @@ void game::make_craft(std::string id_to_make, int batch_size)
     }
     u.activity.values.push_back( batch_size );
     crafting_inventory_t craft_inv(&g->u);
-    craft_inv.gather_input(*recipe_to_make, u.activity);
+    craft_inv.gather_input(*recipe_to_make, u.activity, batch_size);
     pop_recipe_to_top(recipe_to_make);
     u.last_batch = batch_size;
     u.lastrecipe = id_to_make;
@@ -1220,7 +1219,7 @@ void game::make_all_craft(std::string id_to_make, int batch_size)
         move_ppoints_for_construction(recipe_to_make->skill_used->ident(), recipe_to_make->difficulty, u.activity.moves_left);
     }
     crafting_inventory_t craft_inv(&g->u);
-    craft_inv.gather_input(*recipe_to_make, u.activity);
+    craft_inv.gather_input(*recipe_to_make, u.activity, batch_size);
     u.last_batch = batch_size;
     u.lastrecipe = id_to_make;
 }
@@ -1368,7 +1367,7 @@ void game::complete_craft()
                 item_controller->find_template(making->result)->nname(1).c_str());
         std::list<item> used;
         std::list<item> used_tools;
-        crafting_inv.consume_gathered(*making, u.activity, used, used_tools);
+        crafting_inv.consume_gathered(*making, u.activity, batch_size, used, used_tools);
         u.activity.type = ACT_NULL;
         return;
         // Messed up slightly; no components wasted.
@@ -1385,7 +1384,7 @@ void game::complete_craft()
     // Use up the components and tools
     std::list<item> used;
     std::list<item> used_tools;
-    crafting_inv.consume_gathered(*making, u.activity, used, used_tools);
+    crafting_inv.consume_gathered(*making, u.activity, batch_size, used, used_tools);
 
     // Set up the new item, and assign an inventory letter if available
     std::vector<item> newits = making->create_results(batch_size, handed);
