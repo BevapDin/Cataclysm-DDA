@@ -769,6 +769,9 @@ void inventory::json_save_invcache(JsonOut &json) const
     json.start_array();
     for( std::map<std::string, std::vector<char> >::const_iterator invlet_id =  invlet_cache.begin();
          invlet_id != invlet_cache.end(); ++invlet_id ) {
+        if(invlet_id->second.empty()) {
+            continue;
+        }
         json.start_object();
         json.member( invlet_id->first );
         json.start_array();
@@ -797,7 +800,11 @@ void inventory::json_load_invcache(JsonIn &jsin)
                 std::vector<char> vect;
                 JsonArray pvect = jo.get_array(*it);
                 while ( pvect.has_more() ) {
-                    vect.push_back( pvect.next_int() );
+                    const int ic = pvect.next_int();
+                    if( std::find( vect.begin(), vect.end(), ic ) != vect.end() ) {
+                        continue;
+                    }
+                    vect.push_back( ic );
                 }
                 invlet_cache[*it] = vect;
             }
