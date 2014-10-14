@@ -225,6 +225,7 @@ void MonsterGenerator::init_attack()
     attack_map["BIO_OP_TAKEDOWN"] = &mattack::bio_op_takedown;
     attack_map["SUICIDE"] = &mattack::suicide;
     attack_map["RIOTBOT"] = &mattack::riotbot;
+    attack_map["CLEANUP"] = &mattack::cleanup;
 
 }
 

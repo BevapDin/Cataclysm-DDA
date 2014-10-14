@@ -75,6 +75,7 @@ class mattack
         void suicide            (monster *z, int index);
         bool thrown_by_judo     (monster *z, int index); //handles zombie getting thrown when u.is_throw_immune()
         void riotbot            (monster *z, int index);
+        void cleanup            (monster *z, int index);
 };
 
 #endif

@@ -5021,11 +5021,11 @@
     "armor_cut":12,
     "luminance":0,
     "hp":120,
-    "special_freq":[3],
+    "special_freq":[300],
     "death_function":"EXPLODE",
-    "special_attack":["NONE"],
+    "special_attack":["CLEANUP"],
     "description":"The Ford Sanitron, a utility robot designed for cleaning up waste material in hazardous conditions.",
-    "flags":["SEES", "HEARS", "BASHES", "ELECTRONIC", "NO_BREATHE", "VIS50"]
+    "flags":["SEES", "HEARS", "BASHES", "ELECTRONIC", "NO_BREATHE", "VIS50", "FRIENDLY_SPECIAL"]
     },{
         "type" : "MONSTER",
         "id" : "mon_copbot",

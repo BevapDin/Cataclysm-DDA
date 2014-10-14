@@ -3442,3 +3442,55 @@ void mattack::suicide(monster *z, int index)
     }
     z->die(z);
 }
+
+bool remove_field(point p, field_id f, monster *z) {
+    auto fl = g->m.get_field( p, f );
+    if( fl == nullptr ) {
+        return false;
+    }
+    if( g->u.sees( z ) ) {
+        add_msg( "The %s cleans up the %s.", z->name().c_str(), fl->name().c_str() );
+    }
+    z->moves -= fl->getFieldDensity() * 100;
+    g->m.remove_field( p.x, p.y, f );
+    return true;
+}
+
+void mattack::cleanup(monster *z, int)
+{
+    // The surroundings that the robot can reach
+    static const point areas[9] = { { -1, -1 }, { 0, -1 }, { +1, -1 }, { -1, 0 }, { 0, 0 }, { +1, 0 }, { -1, +1 }, { 0, +1 }, { +1, +1 } };
+    // Offset into areas, so we don't start with the same point each time.
+    const int off = rng( 0, 8 );
+    for( int i = 0; i < 9; i++ ) {
+        const int idx = ( i + off ) % 9;
+        const point p( areas[idx].x + z->xpos(), areas[idx].y + z->ypos() );
+        if( remove_field( p, fd_acid, z ) ||
+            remove_field( p, fd_blood, z ) ||
+            remove_field( p, fd_bile, z ) ||
+            remove_field( p, fd_gibs_flesh, z ) ||
+            remove_field( p, fd_gibs_veggy, z ) ||
+            remove_field( p, fd_web, z ) ||
+            remove_field( p, fd_slime, z ) ||
+            remove_field( p, fd_sap, z ) ||
+            remove_field( p, fd_sludge, z ) ||
+            remove_field( p, fd_rubble, z ) ||
+            remove_field( p, fd_blood_veggy, z ) ||
+            remove_field( p, fd_blood_insect, z ) ||
+            remove_field( p, fd_blood_invertebrate, z ) ||
+            remove_field( p, fd_gibs_insect, z ) ||
+            remove_field( p, fd_gibs_invertebrate, z ) ) {
+            return;
+        }
+        auto &f = g->m.furn_at( p.x, p.y );
+        if( f.examine != &iexamine::rubble ) {
+            continue;
+        }
+        if( g->u.sees( z ) ) {
+            add_msg( "The %s cleans up the %s.", z->name().c_str(), f.name.c_str() );
+        }
+        z->moves -= 200;
+        g->m.furn_set( p.x, p.y, f_null );
+        return;
+    }
+}
