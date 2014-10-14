@@ -313,6 +313,13 @@ void mapbuffer::save_quad( const std::string &filename, const tripoint &om_addr,
         jsout.start_array();
         for (int j = 0; j < SEEY; j++) {
             for (int i = 0; i < SEEX; i++) {
+                for(auto it = sm->cosmetics[i][j].begin(); it != sm->cosmetics[i][j].end(); ) {
+                    if(it->second.empty()) {
+                        sm->cosmetics[i][j].erase(it++);
+                    } else {
+                        ++it;
+                    }
+                }
                 if (sm->cosmetics[i][j].size() > 0) {
                     jsout.start_array();
                     jsout.write(i);
