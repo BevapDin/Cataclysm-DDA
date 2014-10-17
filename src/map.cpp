@@ -2237,8 +2237,12 @@ void map::shoot(const int x, const int y, int &dam,
     vehicle *veh = veh_at(x, y, vpart);
     if (veh)
     {
+        if (ammo_effects.count("LASER") && light_transparency(x, y) > LIGHT_TRANSPARENCY_SOLID) {
+            dam -= rng(0, 5);
+        } else {
         const bool inc = (ammo_effects.count("INCENDIARY") || ammo_effects.count("FLAME"));
         dam = veh->damage (vpart, dam, inc? 2 : 0, hit_items);
+        }
     }
 
     ter_t terrain = ter_at(x, y);
