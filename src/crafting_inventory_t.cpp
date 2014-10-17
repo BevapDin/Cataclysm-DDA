@@ -16,12 +16,16 @@ void resort_item_vectors();
 void multiply(requirements &r, int n) {
     for(auto &a : r.tools) {
         for(auto &b : a) {
-            b.count *= n;
+			if(b.count > 0) {
+				b.count *= n;
+			}
         }
     }
     for(auto &a : r.components) {
         for(auto &b : a) {
-            b.count *= n;
+			if(b.count > 0) {
+				b.count *= n;
+			}
         }
     }
 }
