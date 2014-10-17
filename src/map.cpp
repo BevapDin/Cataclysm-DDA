@@ -931,6 +931,7 @@ bool map::vehproceed()
             for( auto it = item_vec.begin(); it != item_vec.end(); ) {
                 it->damage += rng( 0, 3 );
                 if( it->damage > 4 ) {
+                    add_msg( m_bad, "The car destroyed a %s!", it->tname().c_str() );
                     it = item_vec.erase(it);
                 } else {
                     ++it;
