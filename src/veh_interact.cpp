@@ -1298,10 +1298,12 @@ void veh_interact::display_stats()
     x[4] += utf8_width(_("Status: ")) + 1;
     fold_and_print(w_stats, y[4], x[4], w[4], totalDurabilityColor, totalDurabilityText);
 
+	int wheel_count = veh->all_parts_with_feature(VPFLAG_WHEEL).size();
+
     if( !isBoat ) {
         if( conf ) {
             fold_and_print(w_stats, y[5], x[5], w[5], c_ltgray,
-                           _("Wheels:    <color_ltgreen>enough</color>"));
+                           _("Wheels:    <color_ltgreen>enough</color> (%d)"), wheel_count);
         }   else {
             fold_and_print(w_stats, y[5], x[5], w[5], c_ltgray,
                            _("Wheels:      <color_ltred>lack</color>"));
