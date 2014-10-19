@@ -2095,6 +2095,8 @@ int vehicle::print_part_desc(WINDOW *win, int y1, int width, int p, int hl /*= -
             left_sym = "#"; right_sym = "#";
         } else if(part_info(pl[i]).has_flag(VPFLAG_FUEL_TANK)) {
             left_sym = "{"; right_sym = "}";
+        } else if(part_info(pl[i]).has_flag(VPFLAG_WHEEL)) {
+            left_sym = "!"; right_sym = "!";
         } else {
             left_sym = "-"; right_sym = "-";
         }
