@@ -20,10 +20,20 @@ check_monsters() {
 		if [ "$monster" = 'mon_null' ] ; then
 			continue
 		fi
-		if ! grep -Eqe '"id" *: *"'"$monster"'"' data/json/monsters.json ; then
-			echo "Unknown monster $monster"
-			grep -F '"'"$monster"'"' src/*.cpp
-		fi
+		case "$monster" in
+			# Legacy support
+			mon_zombie_fast)
+				;;
+			# Legacy support
+			mon_fungaloid_dormant)
+				;;
+			*)
+				if ! grep -Eqe '"id" *: *"'"$monster"'"' data/json/{monsters,fish}.json ; then
+					echo "Unknown monster $monster"
+					grep -F '"'"$monster"'"' src/*.cpp
+				fi
+			;;
+		esac
 	done
 }
 
