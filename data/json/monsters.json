@@ -4739,6 +4739,7 @@
     },
     "luminance":0,
     "hp":80,
+    "revert_to_itype": "bot_secubot",
     "death_function":"EXPLODE",
     "special_attacks":[["SMG", 2]],
     "starting_ammo" : {"9mm":100},

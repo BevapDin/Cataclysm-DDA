@@ -1,5 +1,32 @@
 [
     {
+        "id": "bot_secubot",
+        "type": "TOOL",
+        "symbol": ";",
+        "color": "light_green",
+        "name": "inactive security bot",
+        "description": "This is an inactive security bot.",
+        "price": 400000,
+        "material": ["steel", "plastic"],
+        "weight": 40750,
+        "volume": 120,
+        "bashing": 8,
+        "cutting": 0,
+        "to_hit": -3,
+        "max_charges": 0,
+        "initial_charges": 0,
+        "charges_per_use": 0,
+        "turns_per_charge": 0,
+        "ammo": "NULL",
+        "revert_to": "null",
+        "use_action": {
+            "type": "place_monster",
+            "monster_id": "mon_secubot",
+            "difficulty": 12,
+            "moves": 160
+        }
+    },
+    {
         "id": "bot_hazmatbot",
         "type": "TOOL",
         "symbol": ";",
