@@ -107,7 +107,6 @@ void load_recipe(JsonObject &jsobj)
     std::string category = jsobj.get_string("category");
     std::string subcategory = jsobj.get_string("subcategory", "");
 
-    int difficulty = jsobj.get_int("difficulty");
     bool autolearn = jsobj.get_bool("autolearn");
     // optional
     bool reversible = jsobj.get_bool("reversible", false);
@@ -156,7 +155,7 @@ void load_recipe(JsonObject &jsobj)
     int id = check_recipe_ident(rec_name, jsobj);
 
     recipe *rec = new recipe(rec_name, id, result, category, subcategory, skill_used,
-                             requires_skills, difficulty, reversible, autolearn,
+                             requires_skills, reversible, autolearn,
                              learn_by_disassembly, result_mult, paired, bps);
     rec->load(jsobj);
 
@@ -513,7 +512,7 @@ const recipe *game::select_crafting_recipe( int &batch_size )
     WINDOW *w_data = newwin(dataHeight, width, headHeight + subHeadHeight, wStart);
 
     const int iInfoWidth = width - FULL_SCREEN_WIDTH - 3;
-    std::vector<std::string> folded;
+    std::string item_info_text;
     craft_cat tab = first_craft_cat();
     craft_subcat subtab = first_craft_subcat( tab );
     std::vector<const recipe *> current;
@@ -702,17 +701,12 @@ const recipe *game::select_crafting_recipe( int &batch_size )
                 if ( lastid != current[line]->id ) {
                     lastid = current[line]->id;
                     tmp = current[line]->create_result();
-                    folded = foldstring(tmp.info(true), iInfoWidth);
+                    item_info_text = tmp.info( true );
                 }
-                int maxline = (int)folded.size() > dataHeight ? dataHeight : (int)folded.size();
-
                 mvwprintz(w_data, 0, FULL_SCREEN_WIDTH + 1, col, "%s",
                           utf8_truncate(tmp.type->nname(1), iInfoWidth).c_str());
 
-                for(int i = 1; i < maxline; i++) {
-                    mvwprintz(w_data, i, FULL_SCREEN_WIDTH + 1, col, "%s", folded[i].c_str() );
-                }
-
+                fold_and_print( w_data, 1, FULL_SCREEN_WIDTH + 1, iInfoWidth, col, item_info_text );
             }
 
         }
@@ -1197,11 +1191,11 @@ void game::make_craft(std::string id_to_make, int batch_size)
     if( recipe_to_make == nullptr ) {
         return;
     }
-    u.assign_activity(ACT_CRAFT, recipe_to_make->time * batch_size, recipe_to_make->id);
+    u.assign_activity(ACT_CRAFT, recipe_to_make->batch_time(batch_size), recipe_to_make->id);
+    u.activity.values.push_back( batch_size );
     if(recipe_to_make->skill_used != 0) {
         move_ppoints_for_construction(recipe_to_make->skill_used->ident(), recipe_to_make->difficulty, u.activity.moves_left);
     }
-    u.activity.values.push_back( batch_size );
     crafting_inventory_t craft_inv(&g->u);
     craft_inv.gather_input(*recipe_to_make, u.activity, batch_size);
     pop_recipe_to_top(recipe_to_make);
@@ -1216,7 +1210,7 @@ void game::make_all_craft(std::string id_to_make, int batch_size)
     if( recipe_to_make == nullptr ) {
         return;
     }
-    u.assign_activity(ACT_LONGCRAFT, recipe_to_make->time, recipe_to_make->id);
+    u.assign_activity(ACT_LONGCRAFT, recipe_to_make->batch_time(batch_size), recipe_to_make->id);
     u.activity.values.push_back( batch_size );
     if(recipe_to_make->skill_used != 0) {
         move_ppoints_for_construction(recipe_to_make->skill_used->ident(), recipe_to_make->difficulty, u.activity.moves_left);

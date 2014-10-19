@@ -525,15 +525,14 @@ void Pickup::pick_up(int posx, int posy, int min)
         WINDOW *w_item_info = newwin(itemsH,  itemsW,  itemsY,  itemsX);
         WINDOW_PTR w_pickupptr( w_pickup );
         WINDOW_PTR w_item_infoptr( w_item_info );
-        mvwprintw(w_pickup, 0, 0, _("PICK UP"));
-
-        bool update = true;
-        int last_selected = -1;
 
         int ch = ' ';
         int start = 0, cur_it;
         int new_weight = g->u.weight_carried(), new_volume = g->u.volume_carried();
+        bool update = true;
+        mvwprintw(w_pickup, 0, 0, _("PICK UP"));
         int selected = 0;
+        int last_selected = -1;
 
         if(g->was_fullscreen) {
             g->draw_ter();
