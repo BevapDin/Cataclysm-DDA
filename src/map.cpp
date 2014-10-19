@@ -3189,6 +3189,14 @@ void map::process_active_items_in_submap(submap * const current_submap, int grid
                 if( !items[n].needs_processing() ) {
                     continue;
                 }
+                // Avoid the item copy, it's slowwwwww...
+                if( items[n].is_food() || items[n].is_food_container() ) {
+                    if( items[n].process( nullptr, tmp_active_item_pos.second ) ) {
+                        items.erase( items.begin() + n );
+                        n--;
+                    }
+                    continue;
+                }
                 // make a temporary copy, remove the item (in advance)
                 // and use that copy to process it
                 tmp_active_item_pos.first = items[n];
@@ -3273,9 +3281,9 @@ void map::process_active_items_in_vehicle(vehicle *cur_veh, submap * const curre
                 continue;
             }
             // Avoid the item copy, it's slowwwwww...
-            if(it->is_food() || it->is_food_container()) {
-                if(tmp_active_item_pos.first.process( nullptr, tmp_active_item_pos.second )) {
-                    items_in_part->erase(items_in_part->begin() + n);
+            if( it->is_food() || it->is_food_container() ) {
+                if( it->process( nullptr, tmp_active_item_pos.second ) ) {
+                    items_in_part->erase( items_in_part->begin() + n );
                     n--;
                 }
                 continue;
