@@ -88,3 +88,6 @@ nbproject/
 
 # taskwarrior files
 *.task*
+
+# GitEye files
+*.project
