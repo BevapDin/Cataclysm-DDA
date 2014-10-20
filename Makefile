@@ -56,7 +56,7 @@ ifeq ($(shell sh -c 'uname -o 2>/dev/null || echo not'),Cygwin)
 else
   DEBUG = -g -D_GLIBCXX_DEBUG
 endif
-DEBUG += -fopenmp
+RELEASE_FLAGS += -fopenmp
 #PROFILE = -pg
 #OTHERS = -O3
 #DEFINES = -DNDEBUG

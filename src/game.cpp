@@ -3974,6 +3974,7 @@ void game::update_scent()
             }
         }
     }
+#pragma omp parallel for
     for (int x = u.posx - SCENT_RADIUS; x <= u.posx + SCENT_RADIUS; x++) {
         for (int y = u.posy - SCENT_RADIUS; y <= u.posy + SCENT_RADIUS; y++) {
             if (has_wall_here[x][y] == false) {
