@@ -1123,9 +1123,6 @@ void monster::die(Creature* nkiller) {
     if( hp < -( type->size < MS_MEDIUM ? 1.5 : 3 ) * type->hp ) {
         explode(); // Explode them if it was big overkill
     }
-    if (!no_extra_death_drops) {
-        drop_items_on_death();
-    }
     // TODO: should actually be class Character
     player *ch = dynamic_cast<player*>( get_killer() );
     if( !is_hallucination() && ch != nullptr ) {
@@ -1144,10 +1141,6 @@ void monster::die(Creature* nkiller) {
                                   name().c_str() );
         }
     }
-    for( const auto &it : inv ) {
-        g->m.add_item_or_charges( posx(), posy(), it );
-    }
-
     // If we're a queen, make nearby groups of our type start to die out
     if( has_flag( MF_QUEEN ) ) {
         // The submap coordinates of this monster, monster groups coordinates are
@@ -1191,6 +1184,12 @@ void monster::die(Creature* nkiller) {
             func = deathfunctions.at(i);
             (md.*func)(this);
         }
+    }
+    if (!no_extra_death_drops) {
+        drop_items_on_death();
+    }
+    for( const auto &it : inv ) {
+        g->m.add_item_or_charges( posx(), posy(), it );
     }
     // If our species fears seeing one of our own die, process that
     int anger_adjust = 0, morale_adjust = 0;
