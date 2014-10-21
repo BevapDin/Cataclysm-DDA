@@ -55,9 +55,9 @@ int get_rot_since( const int since, const int endturn, const point &location )
         return 0;
     }
     int ret = 0;
-    for (calendar i(since); i.get_turn() < endturn; i += 600) {
-        w_point w = g->weatherGen.get_weather(location, i);
-        ret += std::min(600, endturn - i.get_turn()) * get_hourly_rotpoints_at_temp(w.temperature) / 600;
+    for( int i = since; i < endturn; i += HOURS(1) ) {
+        w_point w = g->weatherGen.get_weather(location, calendar(i));
+        ret += std::min( HOURS(1), endturn - i) * get_hourly_rotpoints_at_temp(w.temperature) /  HOURS(1);
     }
     return ret;
 }

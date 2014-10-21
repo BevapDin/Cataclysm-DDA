@@ -59,7 +59,7 @@ class calendar
         calendar(int turn);
         int get_turn() const;
         operator int() const; // Returns get_turn() for backwards compatibility
-        calendar &operator = (const calendar &rhs);
+        calendar &operator = (const calendar &rhs) = default;
         calendar &operator = (int rhs);
         calendar &operator -=(const calendar &rhs);
         calendar &operator -=(int rhs);

@@ -47,23 +47,9 @@ calendar::operator int() const
     return turn_number;
 }
 
-calendar &calendar::operator =(const calendar &rhs)
-{
-    if (this == &rhs) {
-        return *this;
-    }
-
-    turn_number = rhs.turn_number;
-    sync();
-
-    return *this;
-}
-
 calendar &calendar::operator =(int rhs)
 {
-    turn_number = rhs;
-    sync();
-    return *this;
+    return operator=( calendar( rhs ) );
 }
 
 calendar &calendar::operator -=(const calendar &rhs)
@@ -410,9 +396,10 @@ int calendar::season_length()
 
 void calendar::sync()
 {
-    year = turn_number / year_turns();
-    season = season_type(turn_number / DAYS(season_length()) % 4);
-    day = turn_number / DAYS(1) % season_length();
+    const int sl = season_length();
+    year = turn_number / DAYS(sl * 4);
+    season = season_type(turn_number / DAYS(sl) % 4);
+    day = turn_number / DAYS(1) % sl;
     hour = turn_number / HOURS(1) % 24;
     minute = turn_number / MINUTES(1) % 60;
     second = (turn_number * 6) % 60;
