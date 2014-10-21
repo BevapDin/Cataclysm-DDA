@@ -1829,7 +1829,6 @@ void game::activity_on_finish()
         break;
     case ACT_BUTCHER:
         complete_butcher(u.activity.index);
-        u.activity.type = ACT_NULL;
         break;
     case ACT_VEHICLE:
         activity_on_finish_vehicle();
@@ -11593,6 +11592,7 @@ void game::butcher()
     const int factor = u.butcher_factor();
     bool has_corpse = false;
     bool has_item = false;
+    bool has_several_corpses = false;
     // indices of corpses / items that can be disassembled
     std::vector<int> corpses;
     std::vector<item> &items = m.i_at(u.posx, u.posy);
@@ -11607,6 +11607,7 @@ void game::butcher()
     for (size_t i = 0; i < items.size(); i++) {
         if (items[i].type->id == "corpse" && items[i].corpse != NULL) {
             corpses.push_back(i);
+            has_several_corpses = has_corpse;
             has_corpse = true;
         }
     }
@@ -11644,12 +11645,20 @@ void game::butcher()
             kmenu.text = _("Choose item to disassemble");
         }
         kmenu.selected = 0;
+        if( has_several_corpses ) {
+            const long butcher_key = inp_mngr.get_previously_pressed_key();
+            int hotkey = -1;
+            if (butcher_key != 0) {
+                hotkey = butcher_key;
+            }
+            kmenu.addentry( INT_MAX, true, hotkey, "Butcher all corpses" );
+        }
         for (size_t i = 0; i < corpses.size(); i++) {
             item &it = items[corpses[i]];
             mtype *corpse = it.corpse;
             int hotkey = -1;
             // First entry gets a hotkey matching the butcher command.
-            if (i == 0) {
+            if (i == 0 && !has_several_corpses) {
                 const long butcher_key = inp_mngr.get_previously_pressed_key();
                 if (butcher_key != 0) {
                     hotkey = butcher_key;
@@ -11663,6 +11672,13 @@ void game::butcher()
         }
         kmenu.addentry(corpses.size(), true, 'q', _("Cancel"));
         kmenu.query();
+        if( has_several_corpses ) {
+            if( kmenu.ret == INT_MAX ) {
+                kmenu.ret = 0;
+            } else {
+                has_several_corpses = false;
+            }
+        }
         if (kmenu.ret == (int)corpses.size()) {
             return;
         }
@@ -11706,10 +11722,12 @@ void game::butcher()
         time_to_cut = 250;
     }
     u.assign_activity(ACT_BUTCHER, time_to_cut, corpses[butcher_corpse_index]);
+    u.activity.values.push_back( has_several_corpses ? 1 : 0 );
 }
 
 void game::complete_butcher(int index)
 {
+    u.activity.type = ACT_NULL;
     // corpses can disappear (rezzing!), so check for that
     if ((int)m.i_at(u.posx, u.posy).size() <= index || m.i_at(u.posx, u.posy)[index].corpse == NULL ||
         m.i_at(u.posx, u.posy)[index].typeId() != "corpse") {
@@ -12026,6 +12044,46 @@ void game::complete_butcher(int index)
         while ( pieces > 0 ) {
             pieces--;
             m.add_item_or_charges(u.posx, u.posy, tmpitem);
+        }
+    }
+    if( u.activity.values.size() > 0 && u.activity.values[0] == 1 ) {
+        auto &itms = m.i_at( u.posx, u.posy );
+        for( size_t i = 0; i < itms.size(); ++i ) {
+            if( itms[i].typeId() != "corpse" ) {
+                continue;
+            }
+            mtype *corpse = itms[i].corpse;
+            if( corpse == nullptr ) {
+                continue;
+            }
+            int time_to_cut = 0;
+            switch (corpse->size) { // Time in turns to cut up te corpse
+            case MS_TINY:
+                time_to_cut = 2;
+                break;
+            case MS_SMALL:
+                time_to_cut = 5;
+                break;
+            case MS_MEDIUM:
+                time_to_cut = 10;
+                break;
+            case MS_LARGE:
+                time_to_cut = 18;
+                break;
+            case MS_HUGE:
+                time_to_cut = 40;
+                break;
+            }
+            time_to_cut *= 100; // Convert to movement points
+            time_to_cut -= u.butcher_factor() * 5; // Penalty for poor tool or benefit for good tool
+            if (time_to_cut < 250) {
+                time_to_cut = 250;
+            }
+            u.activity.type = ACT_BUTCHER;
+            u.activity.moves_left = time_to_cut;
+            u.activity.index = i;
+            add_msg( m_info, "You continue butchering the %s.", itms[i].tname().c_str() );
+            break;
         }
     }
 }
