@@ -14969,7 +14969,7 @@ void game::quicksave()
     if (!moves_since_last_save) {
         return;
     }
-    add_msg(m_info, _("Saving game, this may take a while"));
+    popup_nowait( _("Saving game, this may take a while") );
 
     time_t now = time(NULL);    //timestamp for start of saving procedure
 
