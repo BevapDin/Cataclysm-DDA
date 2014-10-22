@@ -125,6 +125,7 @@ ifdef RELEASE
   # OTHERS += -mmmx -m3dnow -msse -msse2 -msse3 -mfpmath=sse -mtune=native
   # Strip symbols, generates smaller executable.
   OTHERS += $(RELEASE_FLAGS)
+  LDFLAGS += $(RELEASE_FLAGS)
   DEBUG =
 endif
 
