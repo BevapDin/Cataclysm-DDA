@@ -14011,11 +14011,11 @@ void game::vertical_move(int movez, bool force)
             const oter_id &ter = overmap_buffer.ter(cursx, cursy, levz);
             const oter_id &ter2 = overmap_buffer.ter(cursx, cursy, z_coord);
             if (OPTIONS["AUTO_NOTES"] == true) {
-                if (movez == +1 && otermap[ter].known_up && !otermap[ter2].known_down) {
+                if (movez == +1 && otermap[ter].known_up && !otermap[ter2].known_down && !overmap_buffer.is_explored(cursx, cursy, z_coord)) {
                     overmap_buffer.set_seen(cursx, cursy, z_coord, true);
                     overmap_buffer.add_note(cursx, cursy, z_coord, _(">:W;AUTO: goes down"));
                 }
-                if (movez == -1 && otermap[ter].known_down && !otermap[ter2].known_up) {
+                if (movez == -1 && otermap[ter].known_down && !otermap[ter2].known_up && !overmap_buffer.is_explored(cursx, cursy, z_coord)) {
                     overmap_buffer.set_seen(cursx, cursy, z_coord, true);
                     overmap_buffer.add_note(cursx, cursy, z_coord, _("<:W;AUTO: goes up"));
                 }
