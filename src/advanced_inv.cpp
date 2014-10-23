@@ -1088,6 +1088,7 @@ void advanced_inventory::display()
     exit = false;
     recalc = true;
     redraw = true;
+    bool show_examine = false;
 
     while( !exit ) {
         if( g->u.moves < 0 ) {
@@ -1117,6 +1118,18 @@ void advanced_inventory::display()
         // current item in source pane, might be null
         advanced_inv_listitem *sitem = spane.get_cur_item_ptr();
         aim_location changeSquare;
+        if( show_examine && sitem != nullptr && sitem->is_item_entry() && spane.area != AIM_INVENTORY ) {
+            std::vector<iteminfo> vThisItem, vDummy;
+            sitem->it->info( true, &vThisItem );
+            int rightWidth = w_width / 2;
+            int ret = draw_item_info( colstart + ( src == left ? w_width / 2 : 0 ),
+                                      rightWidth, 0, 0, sitem->it->tname(), vThisItem, vDummy, -1, true, false );
+            if( ret == KEY_NPAGE || ret == KEY_DOWN ) {
+                spane.scroll_by( +1 );
+            } else if( ret == KEY_PPAGE || ret == KEY_UP ) {
+                spane.scroll_by( -1 );
+            }
+        }
 
         const std::string action = ctxt.handle_input();
         if( action == "CATEGORY_SELECTION" ) {
@@ -1288,28 +1301,20 @@ void advanced_inventory::display()
             }
             redraw = true;
         } else if( action == "EXAMINE" ) {
-            if( sitem == nullptr || !sitem->is_item_entry() ) {
+            if( sitem == nullptr || !sitem->is_item_entry() || spane.area != AIM_INVENTORY ) {
+                show_examine = !show_examine;
+                redraw = true;
                 continue;
             }
-            int ret = 0;
-            if( spane.area == AIM_INVENTORY ) {
-                ret = g->inventory_item_menu( sitem->idx, colstart + ( src == left ? w_width / 2 : 0 ),
+            int ret = g->inventory_item_menu( sitem->idx, colstart + ( src == left ? w_width / 2 : 0 ),
                                               w_width / 2, ( src == right ? 0 : -1 ) );
-                // if player has started an activity, leave the screen and process it
-                if( !g->u.has_activity( ACT_NULL ) ) {
-                    exit = true;
-                }
-                // Might have changed a stack (activated an item, repaired an item, etc.)
-                g->u.inv.restack( &g->u );
-                recalc = true;
-            } else {
-                item &it = *sitem->it;
-                std::vector<iteminfo> vThisItem, vDummy;
-                it.info( true, &vThisItem );
-                int rightWidth = w_width / 2;
-                ret = draw_item_info( colstart + ( src == left ? w_width / 2 : 0 ),
-                                      rightWidth, 0, 0, it.tname(), vThisItem, vDummy );
+            // if player has started an activity, leave the screen and process it
+            if( !g->u.has_activity( ACT_NULL ) ) {
+                exit = true;
             }
+            // Might have changed a stack (activated an item, repaired an item, etc.)
+            g->u.inv.restack( &g->u );
+            recalc = true;
             if( ret == KEY_NPAGE || ret == KEY_DOWN ) {
                 spane.scroll_by( +1 );
             } else if( ret == KEY_PPAGE || ret == KEY_UP ) {
