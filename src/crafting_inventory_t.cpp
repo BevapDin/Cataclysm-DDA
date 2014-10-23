@@ -77,18 +77,15 @@ const tidvec &get_tidvec(const itype_id &type) {
     static funcmap functionTypes;
     tidvec &types = functionTypes[type];
     if(types.empty()) {
-        for(std::map<std::string, itype*>::iterator a = itypes.begin(); a != itypes.end(); ++a) {
-            itype *t = a->second;
-            if(t == 0) {
-                continue;
-            }
+        for( auto p : item_controller->get_all_itypes() ) {
+            auto t = p.second;
             if(!t->hasFunc(type)) {
                 if(type.compare(5, std::string::npos, t->id) == 0) {
-                    types.push_back(funcWithModi(a->first, 1.0f));
+                    types.push_back(funcWithModi(p.first, 1.0f));
                 }
                 continue;
             }
-            types.push_back(funcWithModi(a->first, t->getChargesModi(type)));
+            types.push_back(funcWithModi(p.first, t->getChargesModi(type)));
         }
     }
     return types;
@@ -785,30 +782,11 @@ void crafting_inventory_t::simple_req::check_overlay(crafting_inventory_t &cinv,
     set_unavailable(a_insufficent);
 }
 
-std::string name(const itype_id &type) {
-    const std::map<itype_id, itype*>::const_iterator a = itypes.find(type);
-    if(a == itypes.end()) {
-        return type;
-    }
-    return a->second->nname(1);
-}
-
-std::string pname(const itype_id &type) {
-    const std::string n = name(type);
-    assert(!n.empty());
-    switch(n[n.length() - 1]) {
-        case 's': return n;
-        case 'y': return n.substr(0, n.length() - 1) + "ies";
-        case 'h': return n + "es";
-        default:  return n + "s";
-    }
-}
-
 std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requirement &req) {
     if(req.ctype == crafting_inventory_t::C_CHARGES) {
-        buffer << name(req.type) << " (" << req.count << ")";
+        buffer << item_controller->nname(req.type) << " (" << req.count << ")";
     } else if(req.count == 1) {
-        const std::string n = name(req.type);
+        const std::string n = item_controller->nname(req.type);
         assert(!n.empty());
         if(n[n.length() - 1] == 's') {
             buffer << n;
@@ -821,7 +799,7 @@ std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requi
             }
         }
     } else {
-        buffer << req.count << " " << pname(req.type);
+        buffer << req.count << " " << item_controller->nname(req.type, req.count);
     }
     return buffer;
 }
@@ -911,7 +889,7 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
             buffer << rc.req;
             if(rc.req.type != rc.comp->type) {
                 if(rc.comp->type.compare(5, rc.req.type.length(), rc.req.type) != 0) {
-                    buffer << " (used as " << name(rc.comp->type) << ")";
+                    buffer << " (used as " << item_controller->nname(rc.comp->type) << ")";
                 }
             }
             
@@ -920,7 +898,7 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
                 for(std::vector<simple_req*>::const_iterator a = rc.overlays.begin(); a != rc.overlays.end(); a++) {
                     assert(*a != NULL);
                     if(a != rc.overlays.begin()) { buffer << ", "; }
-                    buffer << name((*a)->req.type);
+                    buffer << item_controller->nname((*a)->req.type);
                 }
             }
         }
@@ -1666,7 +1644,7 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
             // for "nearby" (if any of them apply).
             // Also show the mixed entry, but only if none of the other two
             // are shown
-            buffer << ::name(req.type);
+            buffer << item_controller->nname(req.type);
             if(sr.cnt_on_map >= count) {
                 options.push_back(buffer.str() + " (nearby)");
                 optionsIndizes.push_back(std::make_pair(nearby, i));

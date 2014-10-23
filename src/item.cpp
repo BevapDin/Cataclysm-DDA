@@ -18,8 +18,6 @@
 #include <algorithm>
 #include <cassert>
 
-extern std::string name(const itype_id &type);
-
 light_emission nolight = {0, 0, 0};
 
 item::item()
@@ -32,7 +30,7 @@ item::item(const std::string new_type, unsigned int turn, bool rand, int handed)
     init();
     type = item_controller->find_template( new_type );
     bday = turn;
-    corpse = type->corpse;
+    corpse = type->id == "corpse" ? GetMType( "mon_null" ) : nullptr;
     name = type->nname(1);
     if (type->is_gun()) {
         charges = 0;
@@ -1094,7 +1092,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
                         } else {
                             buffer_1 << ", ";
                         }
-                        buffer_1 << ::name(r.result);
+                        buffer_1 << item_controller->nname(r.result);
                         if(comps[i].size() == 1) {
                             // Means there is no alternative to this component
                             buffer_1 << "!";
@@ -1114,7 +1112,7 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug)
                         } else {
                             buffer_2 << ", ";
                         }
-                        buffer_2 << ::name(r.result);
+                        buffer_2 << item_controller->nname(r.result);
                         i = tools.size() - 1;
                         break;
                     }
