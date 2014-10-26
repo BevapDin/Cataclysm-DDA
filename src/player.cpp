@@ -2533,7 +2533,7 @@ Strength - 4;    Dexterity - 4;    Intelligence - 4;    Perception - 4"));
         iBodyTempInt = (temp_conv[i] / 100.0) * 2 - 100; // Scale of -100 to +100
         iEnc = encumb(aBodyPart[i], iLayers, iArmorEnc);
         mvwprintz(w_encumb, i + 1, 1, c_ltgray, "%s", asText[i].c_str());
-        mvwprintz(w_encumb, i + 1, 8, c_ltgray, "(%d)", iLayers);
+        mvwprintz(w_encumb, i + 1, 8, c_ltgray, "(%d)", static_cast<int>( iLayers ) );
         mvwprintz(w_encumb, i + 1, 11, c_ltgray, "%*s%d%s%d=", (iArmorEnc < 0 || iArmorEnc > 9 ? 1 : 2),
                   " ", iArmorEnc, "+", iEnc - iArmorEnc);
         wprintz(w_encumb, encumb_color(iEnc), "%s%d", (iEnc < 0 || iEnc > 9 ? "" : " ") , iEnc);
@@ -2546,16 +2546,22 @@ Strength - 4;    Dexterity - 4;    Intelligence - 4;    Perception - 4"));
     mvwprintz(w_traits, 0, 13 - utf8_width(title_TRAITS)/2, c_ltgray, title_TRAITS);
     std::sort(traitslist.begin(), traitslist.end(), trait_display_sort);
     for (size_t i = 0; i < traitslist.size() && i < trait_win_size_y; i++) {
-        if (mutation_data[traitslist[i]].threshold == true)
+        if ( (mutation_data[traitslist[i]].threshold == true) ||
+            (mutation_data[traitslist[i]].profession == true) ) {
             status = c_white;
-        else if (traits[traitslist[i]].mixed_effect == true)
+        }
+        else if (traits[traitslist[i]].mixed_effect == true) {
             status = c_pink;
-        else if (traits[traitslist[i]].points > 0)
+        }
+        else if (traits[traitslist[i]].points > 0) {
             status = c_ltgreen;
-        else if (traits[traitslist[i]].points < 0)
+        }
+        else if (traits[traitslist[i]].points < 0) {
             status = c_ltred;
-        else
+        }
+        else {
             status = c_yellow;
+        }
         mvwprintz(w_traits, i+1, 1, status, traits[traitslist[i]].name.c_str());
     }
     wrefresh(w_traits);
@@ -2884,7 +2890,7 @@ detecting traps and other things of interest."));
                 } else {
                     mvwprintz(w_encumb, i + 1 - min, 1, c_ltgray, "%s", asText[i].c_str());
                 }
-                mvwprintz(w_encumb, i + 1 - min, 8, c_ltgray, "(%d)", iLayers);
+                mvwprintz(w_encumb, i + 1 - min, 8, c_ltgray, "(%d)", static_cast<int>( iLayers ) );
                 mvwprintz(w_encumb, i + 1 - min, 11, c_ltgray, "%*s%d%s%d=", (iArmorEnc < 0 || iArmorEnc > 9 ? 1 : 2),
                           " ", iArmorEnc, "+", iEnc - iArmorEnc);
                 wprintz(w_encumb, encumb_color(iEnc), "%s%d", (iEnc < 0 || iEnc > 9 ? "" : " ") , iEnc);
@@ -2978,16 +2984,22 @@ Perception %+.1f when throwing items."),
                 mvwprintz(w_traits, 1 + i - min, 1, c_ltgray, "                         ");
                 if (i > traits.size())
                     status = c_ltblue;
-                else if (mutation_data[traitslist[i]].threshold == true)
+                else if ( (mutation_data[traitslist[i]].threshold == true) ||
+                        (mutation_data[traitslist[i]].profession == true) ) {
                     status = c_white;
-                else if (traits[traitslist[i]].mixed_effect == true)
+                }
+                else if (traits[traitslist[i]].mixed_effect == true) {
                     status = c_pink;
-                else if (traits[traitslist[i]].points > 0)
+                }
+                else if (traits[traitslist[i]].points > 0) {
                     status = c_ltgreen;
-                else if (traits[traitslist[i]].points < 0)
+                }
+                else if (traits[traitslist[i]].points < 0) {
                     status = c_ltred;
-                else
+                }
+                else {
                     status = c_yellow;
+                }
                 if (i == line) {
                     mvwprintz(w_traits, 1 + i - min, 1, hilite(status), "%s",
                               traits[traitslist[i]].name.c_str());
@@ -3016,16 +3028,22 @@ Perception %+.1f when throwing items."),
                 mvwprintz(w_traits, 0, 13 - utf8_width(title_TRAITS)/2, c_ltgray, title_TRAITS);
                 for (size_t i = 0; i < traitslist.size() && i < trait_win_size_y; i++) {
                     mvwprintz(w_traits, i + 1, 1, c_black, "                         ");
-                    if (mutation_data[traitslist[i]].threshold == true)
+                    if ((mutation_data[traitslist[i]].threshold == true) ||
+                        (mutation_data[traitslist[i]].profession == true)) {
                         status = c_white;
-                    else if (traits[traitslist[i]].mixed_effect == true)
+                    }
+                    else if (traits[traitslist[i]].mixed_effect == true) {
                         status = c_pink;
-                    else if (traits[traitslist[i]].points > 0)
+                    }
+                    else if (traits[traitslist[i]].points > 0) {
                         status = c_ltgreen;
-                    else if (traits[traitslist[i]].points < 0)
+                    }
+                    else if (traits[traitslist[i]].points < 0) {
                         status = c_ltred;
-                    else
+                    }
+                    else {
                         status = c_yellow;
+                    }
                     mvwprintz(w_traits, i + 1, 1, status, "%s", traits[traitslist[i]].name.c_str());
                 }
                 wrefresh(w_traits);
@@ -4904,12 +4922,7 @@ void player::heal(body_part healed, int dam)
             debugmsg("Wacky body part healed!");
             healpart = hp_torso;
     }
-    hp_cur[healpart] += dam;
-    if (hp_cur[healpart] > hp_max[healpart]) {
-        lifetime_stats()->damage_healed -= hp_cur[healpart] - hp_max[healpart];
-        hp_cur[healpart] = hp_max[healpart];
-    }
-    lifetime_stats()->damage_healed+=dam;
+    heal( healpart, dam );
 }
 
 void player::heal(hp_part healed, int dam)
@@ -4924,15 +4937,8 @@ void player::heal(hp_part healed, int dam)
 
 void player::healall(int dam)
 {
-    for (int i = 0; i < num_hp_parts; i++) {
-        if (hp_cur[i] > 0) {
-            hp_cur[i] += dam;
-            if (hp_cur[i] > hp_max[i]) {
-                lifetime_stats()->damage_healed -= hp_cur[i] - hp_max[i];
-                hp_cur[i] = hp_max[i];
-            }
-            lifetime_stats()->damage_healed += dam;
-        }
+    for( int healed_part = 0; healed_part < num_hp_parts; healed_part++) {
+        heal( (hp_part)healed_part, dam );
     }
 }
 

@@ -608,6 +608,9 @@
                 "name": "firstaid"
             }
         ],
+        "traits": [
+            "PROF_MED"
+        ],
         "items": {
             "both": [
                 "pants",
@@ -910,6 +913,9 @@
                 "name": "pistol"
             }
         ],
+        "traits": [
+            "PROF_POLICE"
+        ],
         "items": {
             "both": [
                 "pants_army",
@@ -918,7 +924,7 @@
                 "sheriffshirt",
                 "boots",
                 "holster",
-                "m1911",
+                "usp_45",
                 "45_acp"
             ],
             "male": [
@@ -936,21 +942,24 @@
         "name": "Police Detective",
         "description": "You were on the brink of a major breakthrough in your last homicide case when the Cataclysm struck. Now that suspect is dead. Everyone's dead. You need a smoke.",
         "points": 4,
+        "traits": [
+            "PROF_PD_DET"
+        ],
         "items": {
             "both": [
                 "pants",
                 "dress_shirt",
-		"skinny_tie",
-		"waistcoat",
-		"holster",
-		"trenchcoat",
-		"badge_detective",
-		"gloves_leather",
-		"knit_scarf",
-		"fedora",
-		"wristwatch",
-		"sw_610",
-		"40sw",
+                "skinny_tie",
+                "waistcoat",
+                "holster",
+                "trenchcoat",
+                "badge_detective",
+                "gloves_leather",
+                "knit_scarf",
+                "fedora",
+                "wristwatch",
+                "l_sp_45",
+                "45_acp",
                 "socks",
                 "dress_shoes",
                 "cig",
@@ -970,7 +979,7 @@
                 "name": "gun"
             },
             {
-                "level": 4,
+                "level": 3,
                 "name": "pistol"
             }
         ],
@@ -1563,6 +1572,9 @@
             "bio_metabolics",
             "bio_power_storage_mkII"
         ],
+        "traits": [
+            "PROF_POLICE"
+        ],
         "skills": [
             {
                 "level": 1,
@@ -2145,6 +2157,9 @@
         "name": "Hockey Player",
         "description": "You were a minor-league hockey goalie before the rest of your team became zombies.  It's just you and your hockey equipment versus the undead, but at least you can cross-check them now.",
         "points": 0,
+        "traits": [
+            "PROF_SKATER"
+        ],
         "items": {
             "both": [
                 "mask_hockey",
@@ -2826,6 +2841,9 @@
                 "level": 1,
                 "name": "dodge"
             }
+        ],
+        "traits": [
+            "PROF_SKATER"
         ],
         "items": {
             "both": [
