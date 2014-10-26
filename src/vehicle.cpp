@@ -5018,25 +5018,15 @@ bool vehicle::examine(game *g, player *p, int part) {
         crafting_inventory_t cinv(p);
         // recipe is used to check for components
         // it is automaticly copied from a recipe loaded with json
-        static recipe charcoal_recipe;
-        if(charcoal_recipe.components.empty()) {
-            const recipe *r = recipe_by_name("charcoal");
-            if(r == nullptr) {
-                // If there is no recipe for charcoal, assume this as default
-                charcoal_recipe.components.resize(1);
-                charcoal_recipe.components[0].push_back(item_comp("2x4", 3));
-                charcoal_recipe.components[0].push_back(item_comp("splinter", 20));
-                charcoal_recipe.components[0].push_back(item_comp("stick", 5));
-                charcoal_recipe.components[0].push_back(item_comp("bone", 40));
-                charcoal_recipe.components[0].push_back(item_comp("log", 1));
-                charcoal_recipe.time = 120000;
-                charcoal_recipe.result_mult = 2;
-            } else {
-                charcoal_recipe.components = r->components;
-                charcoal_recipe.time = r->time;
-                charcoal_recipe.result_mult = r->result_mult;
-            }
-        }
+        recipe charcoal_recipe;
+        charcoal_recipe.components.resize(1);
+        charcoal_recipe.components[0].push_back(item_comp("2x4", 3));
+        charcoal_recipe.components[0].push_back(item_comp("splinter", 20));
+        charcoal_recipe.components[0].push_back(item_comp("stick", 5));
+        charcoal_recipe.components[0].push_back(item_comp("bone", 40));
+        charcoal_recipe.components[0].push_back(item_comp("log", 1));
+        charcoal_recipe.time = 120000;
+        charcoal_recipe.result_mult = 2;
         if(vp.items.empty()) {
             if(!cinv.has_all_requirements(charcoal_recipe)) {
                 std::ostringstream buffer;
