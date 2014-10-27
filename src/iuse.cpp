@@ -9070,7 +9070,7 @@ int iuse::einktabletpc(player *p, item *it, bool t, point pos)
         const int choice = amenu.ret;
 
         if (ei_cancel == choice) {
-            return it->type->charges_to_use();
+            return 0;
         }
 
         if (ei_photo == choice) {
