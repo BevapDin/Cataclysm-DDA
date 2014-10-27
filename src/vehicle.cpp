@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
+#include <set>
 #include "cursesdef.h"
 #include "catacharset.h"
 #include <cassert>
@@ -3518,14 +3519,12 @@ veh_collision vehicle::part_collision (int part, int x, int y, bool just_detect)
 
     //Calculate damage resulting from d_E
     const itype *type = item_controller->find_template( part_info( parm ).item );
-    material_type* vpart_item_mat1 = material_type::find_material(type->m1);
-    material_type* vpart_item_mat2 = material_type::find_material(type->m2);
-    int vpart_dens;
-    if(vpart_item_mat2->ident() == "null") {
-        vpart_dens = vpart_item_mat1->density();
-    } else {
-        vpart_dens = (vpart_item_mat1->density() + vpart_item_mat2->density())/2; //average
+    std::vector<std::string> vpart_item_mats = type->materials;
+    int vpart_dens = 0;
+    for (auto mat_id : vpart_item_mats) {
+        vpart_dens += material_type::find_material(mat_id)->density();
     }
+    vpart_dens /= vpart_item_mats.size(); // average
 
     //k=100 -> 100% damage on part
     //k=0 -> 100% damage on obj
@@ -4750,26 +4749,15 @@ void add_item(const itype *type, const char *mat, const char *rep_item, double a
         return;
     }
     const itype *rep_it = item_controller->find_template( rep_item );
-    // Example: item of vehicle part is a steel frame,
-    // damage is 20 % -> amount = <weight-of-steel-frame> * 0.2
-    // Repair-item is steel_chunk, therefor
-    // item_count = <weight-of-steel-frame> * 0.2 / <weight-of-chunk>
-    // = 240 * 0.2 / 6 = 8
     int item_count = static_cast<int>(amount / rep_it->weight);
-    if((type->m2 == "" || type->m2 == "null") && type->m1 == mat) {
-        if(item_count >= 1) {
-            result.push_back(vpart_info::type_count_pair(rep_item, item_count));
+    for( size_t i = 0; i < type->materials.size(); ++i ) {
+        if( type->materials[i] != mat ) {
+            continue;
         }
-    } else if(type->m1 == mat) { // 66 % m1 and 33% m2
-        item_count = (item_count * 2) / 3;
-        if(item_count >= 1) {
-            result.push_back(vpart_info::type_count_pair(rep_item, item_count));
-        }
-    } else if(type->m2 == mat) {
-        item_count = item_count / 3;
-        if(item_count >= 1) {
-            result.push_back(vpart_info::type_count_pair(rep_item, item_count));
-        }
+        int j = type->materials.size() - i;
+        int cnt = item_count * j / type->materials.size();
+        result.push_back(vpart_info::type_count_pair(rep_item, cnt));
+        break;
     }
 }
 
@@ -4794,6 +4782,7 @@ vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) cons
     const double amount = rel_damage * type->weight;
     // material     item-type for repair   relative-damage
     ::add_item(type, "steel", "steel_lump", amount, result);
+    ::add_item(type, "hardsteel", "steel_lump", amount, result);
     if(result.empty()) {
         // Try again, this time use the smaller chunks, this is for
         // when the damage is to small to require a full lump
