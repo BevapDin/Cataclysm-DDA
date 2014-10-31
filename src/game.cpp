@@ -8,6 +8,7 @@
 #include "veh_interact.h"
 #include "options.h"
 #include "auto_pickup.h"
+#include "gamemode.h"
 #include "mapbuffer.h"
 #include "debug.h"
 #include "editmap.h"
@@ -577,6 +578,16 @@ void game::setup()
 
     load_auto_pickup(false); // Load global auto pickup rules
     // back to menu for save loading, new game etc
+}
+
+bool game::has_gametype() const
+{
+    return gamemode && gamemode->id() != SGAME_NULL;
+}
+
+special_game_id game::gametype() const
+{
+    return gamemode != nullptr ? gamemode->id() : SGAME_NULL;
 }
 
 // Set up all default values for a new game
@@ -1252,6 +1263,11 @@ bool game::do_turn()
                     u.hunger++;
                 }
             }
+            if (u.has_trait("MET_RAT")) {
+                if (!one_in(3)) {
+                    u.hunger++;
+                }
+            }
             if (u.has_trait("HUNGER2")) {
                 u.hunger++;
             }
@@ -1305,6 +1321,11 @@ bool game::do_turn()
             // Sleepy folks gain fatigue faster; Very Sleepy is twice as fast as typical
             if (u.has_trait("SLEEPY")) {
                 if (one_in(3)) {
+                    u.fatigue++;
+                }
+            }
+            if (u.has_trait("MET_RAT")) {
+                if (one_in(2)) {
                     u.fatigue++;
                 }
             }
@@ -1586,6 +1607,9 @@ void game::process_activity()
 void on_turn_activity_pickaxe(player *p);
 void on_finish_activity_pickaxe(player *p);
 
+void on_turn_activity_burrow(player *p);
+void on_finish_activity_burrow(player *p);
+
 void game::activity_on_turn()
 {
     switch (u.activity.type) {
@@ -1601,6 +1625,12 @@ void game::activity_on_turn()
         u.activity.moves_left -= u.moves;
         u.moves = 0;
         on_turn_activity_pickaxe(&u);
+        break;
+    case ACT_BURROW:
+        // Based on speed, not time
+        u.activity.moves_left -= u.moves;
+        u.moves = 0;
+        on_turn_activity_burrow(&u);
         break;
     case ACT_GAME:
         // Takes care of u.activity.moves_left
@@ -1840,6 +1870,10 @@ void game::activity_on_finish()
         break;
     case ACT_PICKAXE:
         on_finish_activity_pickaxe(&u);
+        u.activity.type = ACT_NULL;
+        break;
+    case ACT_BURROW:
+        on_finish_activity_burrow(&u);
         u.activity.type = ACT_NULL;
         break;
     case ACT_VIBE:
