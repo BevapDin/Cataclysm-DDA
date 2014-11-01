@@ -214,6 +214,7 @@ public:
     int camera              (player *, item *, bool, point);
     int ehandcuffs          (player *, item *, bool, point);
     int cable_attach        (player *, item *, bool, point);
+    int survivor_belt       (player *, item *, bool, point);
 
     int wood_gas_amount(const item &it);
     int wood_gas(player *p, item *, bool t, point pnt);
