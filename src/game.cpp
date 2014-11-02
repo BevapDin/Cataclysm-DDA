@@ -1602,6 +1602,9 @@ void game::process_activity()
             activity_on_finish();
         }
     } while( u.moves > 0 && u.activity.type != ACT_NULL );
+    // Cleanup
+    u.activity.values.clear();
+    u.activity.str_values.clear();
 }
 
 void on_turn_activity_pickaxe(player *p);
@@ -1683,6 +1686,9 @@ void game::activity_on_turn()
         u.rooted();
         u.pause();
         break;
+    case ACT_FILL_LIQUID:
+        activity_on_turn_fill_liquid();
+        break;
     default:
         // Based on speed, not time
         u.activity.moves_left -= u.moves;
@@ -1744,6 +1750,25 @@ void game::activity_on_turn_vibe()
     // Vibrator requires that you be able to move around, stretch, etc, so doesn't play
     // well with roots.  Sorry.  :-(
 
+    u.pause();
+}
+
+void game::activity_on_turn_fill_liquid()
+{
+    //Filling a container takes time, not speed
+    u.activity.moves_left -= 100;
+
+    item *container = &u.i_at(u.activity.position);
+    item water = item(u.activity.str_values[0], u.activity.values[1]);
+    water.poison = u.activity.values[0];
+    // Fill up 10 charges per time
+    water.charges = 10;
+    
+    if (handle_liquid(water, true, true, NULL, container) == false) {
+        u.activity.moves_left = 0;
+    }
+
+    u.rooted();
     u.pause();
 }
 
@@ -2053,10 +2078,10 @@ void game::activity_on_finish_firstaid()
 
 void game::activity_on_finish_start_fire()
 {
-        item &it = u.i_at(u.activity.position);
-        iuse tmp;
-        tmp.resolve_firestarter_use(&u, &it, u.activity.placement);
-        u.activity.type = ACT_NULL;
+    item &it = u.i_at(u.activity.position);
+    iuse tmp;
+    tmp.resolve_firestarter_use(&u, &it, u.activity.placement);
+    u.activity.type = ACT_NULL;
 }
 
 void game::activity_on_finish_fish()
@@ -5519,34 +5544,10 @@ void game::draw_sidebar()
         mvwprintz(w_location, 0, 18, weather_data[weather].color, "%s", weather_data[weather].name.c_str());
     }
 
-    int display_temp = get_temperature();
-    // Apply windchill
-    w_point weatherPoint = weatherGen.get_weather(u.pos(), calendar::turn);
-    const oter_id &cur_om_ter = overmap_buffer.ter(om_global_location());
-    std::string omtername = otermap[cur_om_ter].name;
-    bool sheltered = is_sheltered(u.pos().x, u.pos().y);
-    int vehwindspeed = 0;
-    int vpart = -1;
-    vehicle *veh = m.veh_at (u.pos().x, u.pos().y, vpart);
-    if (veh) vehwindspeed = veh->velocity / 100; // For mph
-    int windpower = weatherPoint.windpower + vehwindspeed;
-    int windchill = get_local_windchill(get_temperature(), get_local_humidity(weatherPoint.humidity, weather, sheltered), windpower, omtername, sheltered);
-    display_temp += windchill;
-
-    nc_color col_temp = c_blue;
-    if (display_temp >= 90) {
-        col_temp = c_red;
-    } else if (display_temp >= 75) {
-        col_temp = c_yellow;
-    } else if (display_temp >= 60) {
-        col_temp = c_ltgreen;
-    } else if (display_temp >= 50) {
-        col_temp = c_cyan;
-    } else if (display_temp > 32) {
-        col_temp = c_ltblue;
+    if (u.worn_with_flag("THERMOMETER")) {
+        wprintz( w_location, c_white, " %s", print_temperature( get_temperature() ).c_str());
     }
 
-    wprintz( w_location, col_temp, " %s", print_temperature( display_temp ).c_str());
     wrefresh(w_location);
 
     //Safemode coloring
