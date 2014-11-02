@@ -900,7 +900,7 @@ aim_location advanced_inventory::find_destination(const advanced_inv_listitem &i
     const itype *cont = it.it->contents.empty() ? NULL : it.it->contents.front().type;
     aim_location result = AIM_ALL;
     for( auto &s : squares ) {
-        if( s.id == AIM_INVENTORY || s.id == AIM_DRAGED || s.id == AIM_ALL ) {
+        if( s.id == AIM_INVENTORY || s.id == AIM_DRAGED || s.id == AIM_ALL || s.id == AIM_CONTAINER ) {
             continue;
         }
         if( !s.canputitemsloc || s.id == it.area ) {
