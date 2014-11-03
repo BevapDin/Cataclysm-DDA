@@ -4773,9 +4773,7 @@ bool vehicle_part::active() const {
 #include "game.h"
 
 void add_item(const itype *type, const char *mat, const char *rep_item, double amount, vpart_info::type_count_pair_vector &result) {
-    // If the item is made if mat, add rep_item to the list
-    // of repair-items.
-    // Add more if the m1 is the material, add less if m2 is the material
+    // If the item is made of mat, add rep_item to the list of repair-items.
     if( !item_controller->has_template( rep_item ) ) {
         return;
     }
@@ -4787,6 +4785,9 @@ void add_item(const itype *type, const char *mat, const char *rep_item, double a
         }
         int j = type->materials.size() - i;
         int cnt = item_count * j / type->materials.size();
+        if( cnt <= 0 ) {
+            continue;
+        }
         result.push_back(vpart_info::type_count_pair(rep_item, cnt));
         break;
     }
@@ -4794,11 +4795,6 @@ void add_item(const itype *type, const char *mat, const char *rep_item, double a
 
 vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) const {
     type_count_pair_vector result;
-    const int hp_to_repair = durability - hp;
-    if(hp_to_repair < durability / 20) {
-        // Less than 5% damage -> no further items needed
-        return result;
-    }
     if(hp <= 0) {
         result.push_back(vpart_info::type_count_pair(item, 1));
         return result;
@@ -4808,7 +4804,7 @@ vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) cons
     }
     const itype *type = item_controller->find_template( item );
     // relative amount of damage
-    const double rel_damage = static_cast<double>(hp_to_repair) / durability;
+    const double rel_damage = static_cast<double>( durability - hp ) / durability;
     // amount (as weight) of damage that must be repaired
     const double amount = rel_damage * type->weight;
     // material     item-type for repair   relative-damage
