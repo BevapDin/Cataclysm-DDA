@@ -3148,6 +3148,13 @@ static bool process_item( std::vector<item> &items, size_t n, point location, bo
 
 void map::process_active_items()
 {
+    {
+        int x = rng( 0, getmapsize() * SEEX - 1 );
+        int y = rng( 0, getmapsize() * SEEY - 1 );
+        if( ter( x, y ) == t_dirt ) {
+            ter_set( x, y, t_grass );
+        }
+    }
     process_items(
         true,
         [] ( std::vector<item> &items, size_t n, point location, vehicle *cur_veh, int part ) {
