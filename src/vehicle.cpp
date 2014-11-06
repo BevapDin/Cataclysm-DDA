@@ -4378,7 +4378,8 @@ void vehicle::damage_all (int dmg1, int dmg2, int type, const point &impact)
     if (dmg1 < 1) { return; }
     for (int p = parts.size() - 1; p >= 0; p--) {
         int distance = 1 + square_dist( parts[p].mount_dx, parts[p].mount_dy, impact.x, impact.y );
-        if( distance > 1 && part_info(p).location == part_location_structure ) {
+        if( distance > 1 && part_info(p).location == part_location_structure &&
+            !part_info(p).has_flag("PROTRUSION") ) {
             damage_direct (p, rng( dmg1, dmg2 ) / (distance * distance), type);
         }
     }
