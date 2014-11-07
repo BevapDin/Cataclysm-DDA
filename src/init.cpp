@@ -203,6 +203,7 @@ void DynamicDataLoader::initialize()
         &faction::load_faction);
     type_function_map["npc"] = new StaticFunctionAccessor(
         &npc::load_npc);
+
 }
 
 void DynamicDataLoader::reset()

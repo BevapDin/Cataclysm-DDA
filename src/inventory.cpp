@@ -129,7 +129,7 @@ inventory inventory::operator+ (const item &rhs)
             return true;
         }
         break;
-    case IC_ARMOR: // armour
+    case IC_ARMOR: // armor
         if (it.is_armor()) {
             return true;
         }
