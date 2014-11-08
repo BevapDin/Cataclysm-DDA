@@ -516,7 +516,7 @@ bool vehicle::is_engine_on(int e) {
 }
 
 bool vehicle::is_part_on(int p) {
-    return parts[p].enabled;
+    return parts[p].enabled && parts[p].active();
 }
 
 bool vehicle::is_active_engine_at(int x,int y) {
