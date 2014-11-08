@@ -3968,11 +3968,11 @@ int &game::scent(int x, int y)
 void game::update_scent()
 {
     static point player_last_position = point(u.posx, u.posy);
-    static calendar player_last_moved = calendar::turn;
+    static int player_last_moved = calendar::turn;
     // Stop updating scent after X turns of the player not moving.
     // Once wind is added, need to reset this on wind shifts as well.
     if (u.posx == player_last_position.x && u.posy == player_last_position.y) {
-        if (player_last_moved + 1000 < calendar::turn) {
+        if (player_last_moved + 1000 < (int) calendar::turn) {
             return;
         }
     } else {
