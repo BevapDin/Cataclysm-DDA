@@ -1088,6 +1088,7 @@ void advanced_inventory::display()
     input_context ctxt( "ADVANCED_INVENTORY" );
     ctxt.register_action( "HELP_KEYBINDINGS" );
     ctxt.register_action( "QUIT" );
+    ctxt.register_action( "ACTIVATE" );
     ctxt.register_action( "UP" );
     ctxt.register_action( "DOWN" );
     ctxt.register_action( "LEFT" );
@@ -1345,6 +1346,18 @@ void advanced_inventory::display()
                 sitem->autopickup = true;
             }
             recalc = true;
+        } else if( action == "ACTIVATE" ) {
+            if( sitem == nullptr || !sitem->is_item_entry() || spane.area != AIM_INVENTORY ) {
+                show_examine = !show_examine;
+                redraw = true;
+                continue;
+            }
+            g->use_item( sitem->idx );
+            g->u.inv.restack( &g->u );
+            recalc = true;
+            if( !g->u.has_activity( ACT_NULL ) ) {
+                exit = true;
+            }
         } else if( action == "EXAMINE" ) {
             if( sitem == nullptr || !sitem->is_item_entry() || spane.area != AIM_INVENTORY ) {
                 show_examine = !show_examine;
