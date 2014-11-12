@@ -5127,7 +5127,7 @@ void on_turn_activity_pickaxe(player *p)
     const int diry = p->activity.placement.y;
     if (calendar::turn % MINUTES(1) == 0) { // each turn is too much
         //~ Sound of a Pickaxe at work!
-        g->sound(dirx, diry, 30, _("CHNK! CHNK! CHNK!"));
+        g->ambient_sound(dirx, diry, 30, _("CHNK! CHNK! CHNK!"));
         if (p->activity.moves_left <= 91000 && p->activity.moves_left > 89000) {
             p->add_msg_if_player(m_info, _("Ugh.  You figure it'll take about an hour and a half at this rate."));
         }
