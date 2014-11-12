@@ -720,7 +720,6 @@ class game
         // On-request draw functions
         void draw_overmap();     // Draws the overmap, allows note-taking etc.
         void disp_kills();       // Display the player's kill counts
-        void disp_craft_count();
         void disp_NPCs();        // Currently UNUSED.  Lists global NPCs.
         void list_missions();    // Listed current, completed and failed missions.
 
@@ -752,7 +751,6 @@ class game
         int nulscent;    // Returned for OOB scent checks
         std::list<event> events;         // Game events to be processed
         std::map<std::string, int> kills;         // Player's kill count
-        std::map<std::string, int> craft_count;         // How often a recipe has been crafted
         int moves_since_last_save;
         time_t last_save_timestamp;
         unsigned char latest_lightlevel;

@@ -120,13 +120,6 @@ void game::serialize(std::ofstream & fout) {
             json.member( kill->first, kill->second );
         }
         json.end_object();
-        
-        json.member( "craft_count" );
-        json.start_object();
-        for (std::map<std::string, int>::iterator kill = craft_count.begin(); kill != craft_count.end(); ++kill){
-            json.member( kill->first, kill->second );
-        }
-        json.end_object();
 
         json.member( "player", u );
         Messages::serialize( json );
@@ -264,13 +257,6 @@ void game::unserialize(std::ifstream & fin)
         for (std::set<std::string>::const_iterator it = members.begin();
                 it != members.end(); ++it) {
             kills[*it] = odata.get_int(*it);
-        }
-        
-        odata = data.get_object("craft_count");
-        members = odata.get_member_names();
-        for (std::set<std::string>::const_iterator it = members.begin();
-                it != members.end(); ++it) {
-            craft_count[*it] = odata.get_int(*it);
         }
 
         data.read("player", u);

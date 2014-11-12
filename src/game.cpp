@@ -571,7 +571,6 @@ void game::setup()
 
     // reset kill counts
     kills.clear();
-    craft_count.clear();
     // Set the scent map to 0
     for (int i = 0; i < SEEX * MAPSIZE; i++) {
         for (int j = 0; j < SEEX * MAPSIZE; j++) {
@@ -5122,49 +5121,7 @@ void game::disp_kills()
         buffer << string_format(_("KILL COUNT: %d"), totalkills);
     }
     display_table(w, buffer.str(), 3, data);
-    werase(w);
-    wrefresh(w);
-    delwin(w);
-    refresh_all();
-    disp_craft_count();
-}
 
-void game::disp_craft_count()
-{
-    WINDOW *w = newwin(FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
-        std::max(0, (TERMY - FULL_SCREEN_HEIGHT) / 2),
-        std::max(0, (TERMX - FULL_SCREEN_WIDTH) / 2));
-
-    std::vector<std::string> data;
-    int total = 0;
-    const int colum_width = (getmaxx(w) - 2) / 3; // minus border
-    std::map<std::string, int> by_name;
-    for (std::map<std::string, int>::iterator kill = craft_count.begin(); kill != craft_count.end(); ++kill){
-        const recipe *r = recipe_by_name(kill->first);
-        if(r != NULL) {
-            by_name[item_controller->find_template(r->result)->nname(1)] += kill->second;
-        }
-    }
-    std::multimap<int,std::string> by_count;
-    for (std::map<std::string, int>::iterator kill = by_name.begin(); kill != by_name.end(); ++kill){
-        by_count.insert(std::make_pair(kill->second, kill->first));
-        total += kill->second;
-    }
-    for (std::multimap<int, std::string>::reverse_iterator kill = by_count.rbegin(); kill != by_count.rend(); ++kill){
-        std::ostringstream buffer;
-        buffer << kill->second;
-        buffer.width(colum_width - utf8_width(kill->second.c_str()) - 1); // gap between cols
-        buffer.fill(' ');
-        buffer << kill->first;
-        data.push_back(buffer.str());
-    }
-    std::ostringstream buffer;
-    if(data.empty()) {
-        buffer << _("You haven't crafted anything yet!");
-    } else {
-        buffer << _("Crafting count: ") << total;
-    }
-    display_table(w, buffer.str(), 3, data);
     werase(w);
     wrefresh(w);
     delwin(w);
