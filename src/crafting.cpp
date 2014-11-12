@@ -1303,8 +1303,6 @@ void game::complete_craft()
         return;
     }
 
-    craft_count[making->ident]++;
-
     int handed = 0;
     if (making->paired) {
         handed = menu(true, ("Handedness?:"), _("Left-handed"), _("Right-handed"), NULL);
