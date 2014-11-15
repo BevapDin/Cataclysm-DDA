@@ -512,7 +512,7 @@ void crafting_inventory_t::form_from_map(point origin, int range)
                     on_map.push_back(items);
                 }
             }
-
+            // Kludges for now!
             ter_id terrain_id = g->m.ter(x, y);
             if (g->m.has_nearby_fire(x, y, 0)) {
                 item fire("fire", 0);

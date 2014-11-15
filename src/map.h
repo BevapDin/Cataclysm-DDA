@@ -359,7 +359,6 @@ class map
 
 
  std::string features(const int x, const int y); // Words relevant to terrain (sharp, etc)
- bool is_bashable(const int x, const int y) const;
  bool has_flag(const std::string & flag, const int x, const int y) const;  // checks terrain, furniture and vehicles
  bool can_put_items(const int x, const int y); // True if items can be placed in this tile
  bool has_flag_ter(const std::string & flag, const int x, const int y) const;  // checks terrain

@@ -1851,7 +1851,6 @@ void game::activity_on_finish()
         break;
     case ACT_FORAGE:
         forage();
-        u.activity.type = ACT_NULL;
         break;
     case ACT_DISASSEMBLE:
         complete_disassemble();
@@ -4172,7 +4171,6 @@ bool game::load_master(std::string worldname)
     if (!fin.is_open()) {
         return false;
     }
-
     unserialize_master(fin);
     fin.close();
     return true;
@@ -7796,6 +7794,7 @@ void game::smash()
         m.remove_field( smashx, smashy, fd_web );
         sound( smashx, smashy, 2, "" );
         add_msg( m_info, _( "You brush aside some webs." ) );
+        m.set_transparency_cache_dirty();
         u.moves -= 100;
         return;
     }
@@ -11972,10 +11971,12 @@ void game::forage()
             add_msg(m_good, _("You found something!"));
             m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
             found_something = true;
+            u.activity.type = ACT_NULL;
         }
     } else {
         if (one_in(2)) {
             m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);
+            u.activity.type = ACT_NULL;
         }
     }
     if (!found_something) {
