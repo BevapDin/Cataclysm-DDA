@@ -298,8 +298,8 @@ void construction_menu()
                     // display time needed
                     posy++;
                     posy += current_con->print_time(w_con, posy, 31, FULL_SCREEN_WIDTH - 31 - 1, color_stage);
-                    posy += current_con->print_tools(w_con, posy, 31, FULL_SCREEN_WIDTH - 31 - 1, color_stage, total_inv);
-                    posy += current_con->print_components(w_con, posy, 31, FULL_SCREEN_WIDTH - 31 - 1, color_stage, total_inv);
+                    posy += current_con->requirements.print_tools(w_con, posy, 31, FULL_SCREEN_WIDTH - 31 - 1, color_stage, total_inv);
+                    posy += current_con->requirements.print_components(w_con, posy, 31, FULL_SCREEN_WIDTH - 31 - 1, color_stage, total_inv);
                 }
             }
         } // Finished updating
@@ -432,7 +432,7 @@ static bool player_can_build(player &p, const crafting_inventory_t& pinv, constr
     if (p.skillLevel(con->skill) < con->difficulty) {
         return false;
     }
-    return con->can_make_with_inventory( pinv );
+    return con->requirements.can_make_with_inventory(pinv);
 }
 
 static bool can_construct( const std::string &desc )
@@ -541,7 +541,7 @@ static void place_construction(const std::string &desc)
     construction *con = valid[choice];
     g->u.assign_activity(ACT_BUILD, con->time, con->id);
     g->u.activity.placement = choice;
-    total_inv.gather_input(*con, g->u.activity);
+    total_inv.gather_input(con->requirements, g->u.activity);
     move_ppoints_for_construction(*con, g->u.activity.moves_left);
 }
 
@@ -552,7 +552,7 @@ void complete_construction()
     crafting_inventory_t total_inv(&g->u);
     std::list<item> used_items;
     std::list<item> used_tools;
-    total_inv.consume_gathered(*built, g->u.activity, used_items, used_tools);
+    total_inv.consume_gathered(built->requirements, g->u.activity, used_items, used_tools);
     g->u.practice( built->skill, std::max(built->difficulty, 1) * 10,
                    (int)(built->difficulty * 1.25) );
 
@@ -1403,10 +1403,10 @@ void load_construction(JsonObject &jo)
     con->skill = jo.get_string("skill", "carpentry");
     con->difficulty = jo.get_int("difficulty");
     con->category = jo.get_string("category", "OTHER");
-    con->load(jo);
+    con->requirements.load(jo);
     // constructions use different time units in json, this makes it compatible
     // with recipes/requirements, TODO: should be changed in json
-    con->time *= 1000;
+    con->time = jo.get_int("time") * 1000;
 
     con->pre_terrain = jo.get_string("pre_terrain", "");
     if (con->pre_terrain.size() > 1
@@ -1487,7 +1487,7 @@ void check_constructions()
 {
     for( std::vector<construction *>::const_iterator a = constructions.begin();
          a != constructions.end(); ++a ) {
-        (*a)->auto_functions();
+        (*a)->requirements.auto_functions();
         const construction *c = *a;
         const std::string display_name = std::string("construction ") + c->description;
         // Note: print the description as the id is just a generated number,
@@ -1495,7 +1495,7 @@ void check_constructions()
         if (!c->skill.empty() && Skill::skill(c->skill) == NULL) {
             debugmsg("Unknown skill %s in %s", c->skill.c_str(), display_name.c_str());
         }
-        c->check_consistency(display_name);
+        c->requirements.check_consistency(display_name);
         if (!c->pre_terrain.empty() && !c->pre_is_furniture && termap.count(c->pre_terrain) == 0) {
             debugmsg("Unknown pre_terrain (terrain) %s in %s", c->pre_terrain.c_str(), display_name.c_str());
         }
@@ -1509,4 +1509,30 @@ void check_constructions()
             debugmsg("Unknown post_terrain (furniture) %s in %s", c->post_terrain.c_str(), display_name.c_str());
         }
     }
+}
+
+int construction::print_time(WINDOW *w, int ypos, int xpos, int width,
+                             nc_color col) const
+{
+    const int turns = time / 100;
+    std::string text;
+    if( turns < MINUTES( 1 ) ) {
+        const int seconds = std::max( 1, turns * 6 );
+        text = string_format( ngettext( "%d second", "%d seconds", seconds ), seconds );
+    } else {
+        const int minutes = ( turns % HOURS( 1 ) ) / MINUTES( 1 );
+        const int hours = turns / HOURS( 1 );
+        if( hours == 0 ) {
+            text = string_format( ngettext( "%d minute", "%d minutes", minutes ), minutes );
+        } else if( minutes == 0 ) {
+            text = string_format( ngettext( "%d hour", "%d hours", hours ), hours );
+        } else {
+            const std::string h = string_format( ngettext( "%d hour", "%d hours", hours ), hours );
+            const std::string m = string_format( ngettext( "%d minute", "%d minutes", minutes ), minutes );
+            //~ A time duration: first is hours, second is minutes, e.g. "4 hours" "6 minutes"
+            text = string_format( _( "%s and %s" ), h.c_str(), m.c_str() );
+        }
+    }
+    text = string_format( _( "Time to complete: %s" ), text.c_str() );
+    return fold_and_print( w, ypos, xpos, width, col, text );
 }

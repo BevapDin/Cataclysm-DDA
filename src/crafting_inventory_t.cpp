@@ -13,7 +13,7 @@
 
 void resort_item_vectors();
    
-void multiply(requirements &r, int n) {
+void multiply(requirement_data &r, int n) {
     for(auto &a : r.tools) {
         for(auto &b : a) {
 			if(b.count > 0) {
@@ -91,13 +91,13 @@ const tidvec &get_tidvec(const itype_id &type) {
     return types;
 }
 
-bool crafting_inventory_t::has_all_requirements(const requirements &making, int batch_size) {
-    requirements tmp = making;
+bool crafting_inventory_t::has_all_requirements(const requirement_data &making, int batch_size) {
+    requirement_data tmp = making;
     multiply(tmp, batch_size);
     return has_all_requirements(tmp);
 }
 
-bool crafting_inventory_t::has_all_requirements(const requirements &making) {
+bool crafting_inventory_t::has_all_requirements(const requirement_data &making) {
     solution s;
     return has_all_requirements(making, s);
 }
@@ -204,13 +204,13 @@ void crafting_inventory_t::solution::select_items_to_use() {
     }
 }
 
-void crafting_inventory_t::gather_and_consume(const requirements &making, std::list<item> &used_items, std::list<item> &used_tools) {
+void crafting_inventory_t::gather_and_consume(const requirement_data &making, std::list<item> &used_items, std::list<item> &used_tools) {
     solution s;
     gather_and_consume(making, s, used_items, used_tools);
 }
 
 void crafting_inventory_t::gather_and_consume(
-    const requirements &making,
+    const requirement_data &making,
     solution &s,
     std::list<item> &used_items,
     std::list<item> &used_tools
@@ -224,31 +224,31 @@ void crafting_inventory_t::gather_and_consume(
     s.consume(*this, used_items, used_tools);
 }
 
-void crafting_inventory_t::gather_input(const requirements &making, player_activity &activity) {
+void crafting_inventory_t::gather_input(const requirement_data &making, player_activity &activity) {
     solution s;
     gather_input(making, s, activity);
 }
 
-void crafting_inventory_t::gather_input(const requirements &making, player_activity &activity, int batch_size) {
-    requirements tmp = making;
+void crafting_inventory_t::gather_input(const requirement_data &making, player_activity &activity, int batch_size) {
+    requirement_data tmp = making;
     multiply(tmp, batch_size);
     gather_input(tmp, activity);
 }
 
 void crafting_inventory_t::consume_gathered(
-    const requirements &making,
+    const requirement_data &making,
     player_activity &activity,
     int batch_size,
     std::list<item> &used_items,
     std::list<item> &used_tools
 ) {
-    requirements tmp = making;
+    requirement_data tmp = making;
     multiply(tmp, batch_size);
     consume_gathered(tmp, activity, used_items, used_tools);
 }
 
 void crafting_inventory_t::consume_gathered(
-    const requirements &making,
+    const requirement_data &making,
     player_activity &activity,
     std::list<item> &used_items,
     std::list<item> &used_tools
@@ -258,7 +258,7 @@ void crafting_inventory_t::consume_gathered(
 }
 
 void crafting_inventory_t::consume_gathered(
-    const requirements &making,
+    const requirement_data &making,
     solution &s,
     player_activity &activity,
     std::list<item> &used_items,
@@ -272,7 +272,7 @@ void crafting_inventory_t::consume_gathered(
     s.consume(*this, used_items, used_tools);
 }
 
-void crafting_inventory_t::gather_input(const requirements &making, solution &s, player_activity &activity) {
+void crafting_inventory_t::gather_input(const requirement_data &making, solution &s, player_activity &activity) {
     if(making.tools.empty() && making.components.empty()) {
         return;
     }
@@ -315,7 +315,7 @@ void crafting_inventory_t::solution::init_single_req(const T &comp) {
     complex_reqs[0].init_pointers();
 }
 
-void crafting_inventory_t::solution::init(const requirements &making) {
+void crafting_inventory_t::solution::init(const requirement_data &making) {
     complex_reqs.resize(making.tools.size() + making.components.size());
     size_t nr = 0;
     for(size_t i = 0; i < making.tools.size(); i++, nr++) {
@@ -804,7 +804,7 @@ std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requi
     return buffer;
 }
 
-void crafting_inventory_t::solution::save(requirements &making) const {
+void crafting_inventory_t::solution::save(requirement_data &making) const {
     making.components.clear();
     making.tools.clear();
     for(size_t i = 0; i < complex_reqs.size(); i++) {
@@ -831,7 +831,7 @@ void crafting_inventory_t::solution::save(requirements &making) const {
     }
 }
 
-bool crafting_inventory_t::has_all_requirements(const requirements &making, solution &s) {
+bool crafting_inventory_t::has_all_requirements(const requirement_data &making, solution &s) {
     if(making.tools.empty() && making.components.empty()) {
         return true;
     }
@@ -2178,7 +2178,7 @@ void crafting_inventory_t::candidate_t::consume(player *p, requirement &req, std
                 used_items
             );
             return;
-        // Below are pseudo item. They should not be used in requirementss
+        // Below are pseudo item. They should not be used in requirement_datas
         // as they can not be removed (used up).
         case LT_VPART:
             ix = &(get_item());
@@ -2511,7 +2511,7 @@ std::list<item> crafting_inventory_t::consume_components(const itype_id &type, i
 }
 
 void crafting_inventory_t::consume_items(const std::vector<item_comp> &comps) {
-    requirements r;
+    requirement_data r;
     for(size_t i = 0; i < comps.size(); i++) {
         if(comps[i].count == 0) { continue; }
         r.components.resize(r.components.size() + 1);

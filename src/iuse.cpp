@@ -17,6 +17,7 @@
 #include "overmapbuffer.h"
 #include "json.h"
 #include "messages.h"
+#include "crafting.h"
 #include <vector>
 #include <sstream>
 #include <algorithm>
@@ -4569,6 +4570,37 @@ int iuse::chainsaw_on(player *p, item *it, bool t, point)
     return it->type->charges_to_use();
 }
 
+int iuse::elec_chainsaw_off(player *p, item *it, bool, point)
+{
+    p->moves -= 80;
+    if (rng(0, 10) - it->damage > 5 && it->charges > 0 && !p->is_underwater()) {
+        g->sound(p->posx, p->posy, 20,
+                 _("With a roar, the electric chainsaw leaps to life!"));
+        it->make("elec_chainsaw_on");
+        it->active = true;
+    } else {
+        p->add_msg_if_player(_("You flip the switch, but nothing happens."));
+    }
+    return it->type->charges_to_use();
+}
+int iuse::elec_chainsaw_on(player *p, item *it, bool t, point)
+{
+    if (p->is_underwater()) {
+        p->add_msg_if_player(_("Your chainsaw gurgles in the water and stops."));
+        it->make("elec_chainsaw_off");
+        it->active = false;
+    } else if (t) { // Effects while simply on
+        if (one_in(15)) {
+            g->ambient_sound(p->posx, p->posy, 12, _("Your electric chainsaw rumbles."));
+        }
+    } else { // Toggling
+        p->add_msg_if_player(_("Your electric chainsaw dies."));
+        it->make("elec_chainsaw_off");
+        it->active = false;
+    }
+    return it->type->charges_to_use();
+}
+
 int iuse::cs_lajatang_off(player *p, item *it, bool, point)
 {
     p->moves -= 80;
@@ -6911,6 +6943,7 @@ int iuse::knife(player *p, item *it, bool t, point)
     const int menu_cut_up_item = 0;
     const int menu_carve_writing = 1;
     const int menu_cauterize = 2;
+    const int menu_make_zlave = 3;
     const int menu_cancel = 4;
     item *cut;
 
@@ -6919,6 +6952,10 @@ int iuse::knife(player *p, item *it, bool t, point)
     kmenu.addentry(menu_cut_up_item, true, -1, _("Cut up fabric/plastic/kevlar/wood/nomex"));
     kmenu.addentry(menu_carve_writing, true, -1, _("Carve writing into item"));
     kmenu.addentry(menu_cauterize, true, -1, _("Cauterize"));
+    if( p->skillLevel( "survival" ) > 1 && p->skillLevel( "firstaid" ) > 1 ) {
+        kmenu.addentry(menu_make_zlave, true, -1, _("Make zombie slave"));
+    }
+    
     kmenu.addentry(menu_cancel, true, 'q', _("Cancel"));
     kmenu.query();
     choice = kmenu.ret;
@@ -6936,6 +6973,9 @@ int iuse::knife(player *p, item *it, bool t, point)
         return cut_up(p, it, cut, t);
     } else if (choice == menu_carve_writing) {
         return carve_writing(p, it);
+    } else if( choice == menu_make_zlave ) {
+        make_zlave( p );
+        return 0;
     } else {
         return 0;
     }
@@ -9018,7 +9058,6 @@ bool einkpc_download_memory_card(player *p, item *eink, item *mc)
         mc->item_vars["MC_RECIPE"] = "";
 
         std::vector<const recipe *> candidates;
-        recipe_map recipes = g->list_recipes();
 
         for (recipe_map::iterator map_iter = recipes.begin(); map_iter != recipes.end(); ++map_iter) {
             for (recipe_list::iterator list_iter = map_iter->second.begin();
@@ -10253,7 +10292,6 @@ int iuse::multicooker(player *p, item *it, bool t, point pos)
             crafting_inv.add_surround(px, item("pot", 0)); //good COOK, BOIL, CONTAIN qualities inside
 
             int counter = 1;
-            recipe_map recipes = g->list_recipes();
 
             for (recipe_map::iterator map_iter = recipes.begin(); map_iter != recipes.end(); ++map_iter) {
                 for (recipe_list::iterator list_iter = map_iter->second.begin();
@@ -10301,7 +10339,7 @@ int iuse::multicooker(player *p, item *it, bool t, point pos)
                     return 0;
                 }
 
-                for (auto it = meal->components.begin(); it != meal->components.end(); ++it) {
+                for (auto it = meal->requirements.components.begin(); it != meal->requirements.components.end(); ++it) {
                     crafting_inv.consume_items(*it);
                 }
 

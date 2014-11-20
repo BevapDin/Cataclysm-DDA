@@ -14,7 +14,7 @@ namespace picojson {
 struct player_activity;
 class vehicle;
 struct bionic;
-struct requirements;
+struct requirement_data;
 class player;
 class map;
 /**
@@ -38,9 +38,9 @@ class map;
  * The several functions to examin if something exists (has_*) iterate
  * over these stored references.
  * 
- * Usage (outside of requirementss):
+ * Usage (outside of requirement_datas):
  * 1. crreate a crafting_inventory_t object,
- * 2. check requirements: use has_*_tools and has_*_components
+ * 2. check requirement_data: use has_*_tools and has_*_components
  * 3. consume items: consume_*_tools and consume_*_items
  * Make sure that you call the matching functions for checking
  * and for consuming (e.g. has_all_tools and consume_all_tools).
@@ -267,7 +267,7 @@ public:
             };
         };
     public:
-        // type requested by the requirements or similar, might not be the same
+        // type requested by the requirement_data or similar, might not be the same
         // as the type of the actuall item.
         itype_id usageType;
         
@@ -363,7 +363,7 @@ public:
         requirement req;
         /**
          * Points to the component object that is stored
-         * in a requirements.
+         * in a requirement_data.
          */
         const component *comp;
         /**
@@ -437,7 +437,7 @@ public:
     protected:
         typedef std::vector<simple_req> SimpReqVec;
         /**
-         * Input, a list of single requirements.
+         * Input, a list of single requirement_data.
          */
         SimpReqVec simple_reqs;
         /**
@@ -534,16 +534,16 @@ public:
         void serialize(player_activity &activity) const;
         void deserialize(crafting_inventory_t &cinv, player_activity &activity);
         
-        void init(const requirements &making);
+        void init(const requirement_data &making);
         /**
-         * Init this as if from a requirements that contains only one
+         * Init this as if from a requirement_data that contains only one
          * complex requirement stored in comps.
          * @param as_tool If this requirement means tools or components.
          */
         template<typename T>
         void init_need_any(const std::vector<T> &comps);
         /**
-         * Init this as if from a requirements that contains only one
+         * Init this as if from a requirement_data that contains only one
          * complex requirement stored in comp.
          * @param as_tool If this requirement means a tool or a component.
          */
@@ -564,7 +564,7 @@ public:
          */
         void gather(crafting_inventory_t &cinv, bool store);
         /**
-         * Check if all requirements are fullfilled.
+         * Check if all requirement_data are fullfilled.
          * Must only be called after gather.
          */
         bool is_possible() const;
@@ -577,10 +577,10 @@ public:
         
         std::string to_string(int flags = simple_req::ts_normal) const;
         /**
-         * Write the requirements back into a requirements. Only the tools and
-         * the components vaector of the requirements are overriden.
+         * Write the requirement_data back into a requirement_data. Only the tools and
+         * the components vaector of the requirement_data are overriden.
          */
-        void save(requirements &making) const;
+        void save(requirement_data &making) const;
     protected:
         void find_overlays();
         void erase_empty_reqs();
@@ -688,7 +688,7 @@ protected:
     static void reduce(requirement req, candvec &candidates);
     
     /**
-     * Ask the user to select items according to the requirements in
+     * Ask the user to select items according to the requirement_data in
      * components.
      * Example: let components be { { "2x4", 10 }, { "log", 1 } }
      * and the user selected "2x4", than the function returns 0
@@ -714,7 +714,7 @@ protected:
      * modi.
      * @param tools The tools that will be used. All of them will be
      * used. The list may be empty.
-     * @param type The type of tool that was requested (e.g. by a requirements).
+     * @param type The type of tool that was requested (e.g. by a requirement_data).
      * This might not be the same type as each tools. And each tool might
      * have different time modififactions based on what it is used for.
      * E.g. a hammer is fast for hammering, but not so fast for prying.
@@ -763,15 +763,15 @@ public:
      */
     crafting_inventory_t(player *p, int range);
     
-    // Interface for requirementss: check that the requirements is possible
+    // Interface for requirement_datas: check that the requirement_data is possible
     /**
      * Disspatch everything to the solution class.
      */
-    bool has_all_requirements(const requirements &making);
-    bool has_all_requirements(const requirements &making, int batch_size);
-    bool has_all_requirements(const requirements &making, solution &s);
+    bool has_all_requirements(const requirement_data &making);
+    bool has_all_requirements(const requirement_data &making, int batch_size);
+    bool has_all_requirements(const requirement_data &making, solution &s);
     
-    // Interface for requirementss: gather what tools and components to use
+    // Interface for requirement_datas: gather what tools and components to use
     /**
      * Lets the user select which components/tools to use and
      * stores the selected ones in the activity.
@@ -781,13 +781,13 @@ public:
      * here (in str_values), also the turns left for this activity
      * might be changed.
      */
-    void gather_input(const requirements &making, player_activity &activity);
-    void gather_input(const requirements &making, player_activity &activity, int batch_size);
-    void gather_input(const requirements &making, solution &s, player_activity &activity);
+    void gather_input(const requirement_data &making, player_activity &activity);
+    void gather_input(const requirement_data &making, player_activity &activity, int batch_size);
+    void gather_input(const requirement_data &making, solution &s, player_activity &activity);
     /**
      * Loads the tools/components that the user selected in gather_input,
      * and consumes them.
-     * This function uses the requirements to ask the user again if any of
+     * This function uses the requirement_data to ask the user again if any of
      * the input items has vanished (e.g. a fire went out).
      * @param used_items The list of all the used_up items
      * or the used up charges. These are actuall items.
@@ -797,20 +797,20 @@ public:
      * dissabmling the item.
      */
     void consume_gathered(
-        const requirements &making,
+        const requirement_data &making,
         player_activity &activity,
         std::list<item> &used_items,
         std::list<item> &used_tools
     );
     void consume_gathered(
-        const requirements &making,
+        const requirement_data &making,
         player_activity &activity,
         int batch_size,
         std::list<item> &used_items,
         std::list<item> &used_tools
     );
     void consume_gathered(
-        const requirements &making,
+        const requirement_data &making,
         solution &s,
         player_activity &activity,
         std::list<item> &used_items,
@@ -818,12 +818,12 @@ public:
     );
     
     void gather_and_consume(
-        const requirements &making,
+        const requirement_data &making,
         std::list<item> &used_items,
         std::list<item> &used_tools
     );
     void gather_and_consume(
-        const requirements &making,
+        const requirement_data &making,
         solution &s,
         std::list<item> &used_items,
         std::list<item> &used_tools
@@ -852,7 +852,7 @@ public:
     /**
      * Same as has_all_components, only the input is assumed to be
      * tools and their charges (their must be a tool with that charge)
-     * or simple tools requirements (without charge) which means the
+     * or simple tools requirement_data (without charge) which means the
      * tool itself must be available.
      */
     
@@ -906,7 +906,7 @@ public:
     std::list<item> consume_tool(const itype_id &type) { return consume_tools(type); }
     
     
-    // Check requirements, avoid these two functions, use
+    // Check requirement_data, avoid these two functions, use
     // has_tools and has_items instead.
     // The has_tools and has_components handle counting by charges and
     // counting by amount better.

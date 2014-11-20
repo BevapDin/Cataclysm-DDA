@@ -481,6 +481,7 @@ bool veh_interact::is_drive_conflict(int msg_width, int engines){
 }
 
 bool veh_interact::can_install_part(int msg_width, int engines, int dif_eng){
+    auto crafting_inv = *this->crafting_inv;
     itype_id itm = sel_vpart_info->item;
     bool drive_conflict = is_drive_conflict(msg_width, engines);
     bool is_engine = sel_vpart_info->has_flag("ENGINE");
@@ -550,7 +551,6 @@ bool veh_interact::can_install_part(int msg_width, int engines, int dif_eng){
  */
 void veh_interact::do_install()
 {
-    crafting_inventory_t &crafting_inv = *this->crafting_inv;
     const task_reason reason = cant_do('i');
     display_mode('i');
     werase (w_msg);
@@ -1642,7 +1642,7 @@ item crafting_inventory_t::consume_vpart_item (const std::string &vpid)
 {
     const std::string &itid = vehicle_part_types[vpid].item;
     std::list<item> used_items;
-    recipe making;
+    requirement_data making;
     making.components.push_back(std::vector<item_comp>(1, item_comp(itid, 1)));
     gather_and_consume(making, used_items, used_items);
     if(used_items.empty()) {

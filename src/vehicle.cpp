@@ -5153,15 +5153,15 @@ bool vehicle::examine(game *g, player *p, int part) {
         crafting_inventory_t cinv(p);
         // recipe is used to check for components
         // it is automaticly copied from a recipe loaded with json
-        recipe charcoal_recipe;
+        requirement_data charcoal_recipe;
         charcoal_recipe.components.resize(1);
-        charcoal_recipe.components[0].push_back(item_comp("2x4", 3));
         charcoal_recipe.components[0].push_back(item_comp("splinter", 20));
+        charcoal_recipe.components[0].push_back(item_comp("2x4", 3));
         charcoal_recipe.components[0].push_back(item_comp("stick", 5));
         charcoal_recipe.components[0].push_back(item_comp("bone", 40));
         charcoal_recipe.components[0].push_back(item_comp("log", 1));
-        charcoal_recipe.time = 120000;
-        charcoal_recipe.result_mult = 2;
+        const int time = 120000;
+        const int result_mult = 2;
         if(vp.items.empty()) {
             if(!cinv.has_all_requirements(charcoal_recipe)) {
                 std::ostringstream buffer;
@@ -5187,7 +5187,7 @@ bool vehicle::examine(game *g, player *p, int part) {
             return true;
         } else if(vp.items[0].type->id != "charcoal") {
             const int age = calendar::turn - vp.items[0].bday;
-            const int time_to_do = charcoal_recipe.time - age * 100;
+            const int time_to_do = time - age * 100;
             if(time_to_do > 0) {
                 p->add_msg_if_player("The kiln is still working (for at least %i minutes)", time_to_do / (10 * 100));
                 return false;
@@ -5195,8 +5195,8 @@ bool vehicle::examine(game *g, player *p, int part) {
             // Done, make charcoal
             vp.items.clear();
             item newit("charcoal", calendar::turn);
-            if(charcoal_recipe.result_mult > 0) {
-                newit.charges *= charcoal_recipe.result_mult;
+            if(result_mult > 0) {
+                newit.charges *= result_mult;
             }
             vp.items.push_back(newit);
         }
