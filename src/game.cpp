@@ -1477,7 +1477,7 @@ bool game::do_turn()
     }
     m.process_fields();
     m.process_active_items();
-    m.step_in_field(u.posx, u.posy);
+    m.creature_in_field( u );
 
     monmove();
     update_stair_monsters();
@@ -6447,7 +6447,7 @@ void game::monmove()
             critter->process_turn();
         }
 
-        m.mon_in_field(critter->posx(), critter->posy(), critter);
+        m.creature_in_field( *critter );
 
         while (critter->moves > 0 && !critter->is_dead()) {
             critter->made_footstep = false;
@@ -6457,7 +6457,7 @@ void game::monmove()
             }
             critter->move(); // Move one square, possibly hit u
             critter->process_triggers();
-            m.mon_in_field(critter->posx(), critter->posy(), critter);
+            m.creature_in_field( *critter );
         }
 
         if (!critter->is_dead()) {
@@ -6490,6 +6490,7 @@ void game::monmove()
     for (std::vector<npc *>::iterator it = active_npc.begin();
          it != active_npc.end(); ++it) {
         int turns = 0;
+        m.creature_in_field( **it );
         if((*it)->hp_cur[hp_head] <= 0 || (*it)->hp_cur[hp_torso] <= 0) {
             (*it)->die( nullptr );
         } else {
@@ -11716,7 +11717,7 @@ void game::complete_butcher(int index)
             add_msg(m_good, _("You harvest some usable sinews!"));
         } else if (corpse->mat == "veggy") {
             m.spawn_item(u.posx, u.posy, "plant_fibre", sinews, 0, age);
-            add_msg(m_good, _("You harvest some plant fibres!"));
+            add_msg(m_good, _("You harvest some plant fibers!"));
         }
     }
 
@@ -13228,7 +13229,7 @@ bool game::plmove(int dx, int dy)
             }
         }
         if (one_in(20) && u.has_artifact_with(AEP_MOVEMENT_NOISE)) {
-            sound(x, y, 40, _("You emit a rattling sound."));
+            sound(u.posx, u.posy, 40, _("You emit a rattling sound."));
         }
         // If we moved out of the nonant, we need update our map data
         if (m.has_flag("SWIMMABLE", x, y) && u.has_effect("onfire")) {
