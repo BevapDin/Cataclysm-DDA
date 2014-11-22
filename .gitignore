@@ -91,3 +91,7 @@ nbproject/
 
 # GitEye files
 *.project
+
+# vimdiff backup
+*.orig
+

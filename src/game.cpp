@@ -735,7 +735,7 @@ void game::create_starting_npcs()
         reserve_random_mission(ORIGIN_OPENER_NPC, om_location(), tmp->getID()));
 }
 
-void game::cleanup_at_end()
+bool game::cleanup_at_end()
 {
     draw_sidebar();
     if (uquit == QUIT_DIED || uquit == QUIT_SUICIDE) {
@@ -985,6 +985,7 @@ void game::cleanup_at_end()
     }
     MAPBUFFER.reset();
     overmap_buffer.clear();
+    return true;
 }
 
 static int veh_lumi(vehicle *veh)
@@ -1108,8 +1109,7 @@ void game::calc_driving_offset(vehicle *veh)
 bool game::do_turn()
 {
     if (is_game_over()) {
-        cleanup_at_end();
-        return true;
+        return cleanup_at_end();
     }
     // Actual stuff
     if (new_game) {
@@ -1406,7 +1406,8 @@ bool game::do_turn()
 
     // Auto-save if autosave is enabled
     if (OPTIONS["AUTOSAVE"] &&
-        calendar::turn % ((int)OPTIONS["AUTOSAVE_TURNS"]) == 0) {
+        calendar::turn % ((int)OPTIONS["AUTOSAVE_TURNS"]) == 0 &&
+        !u.is_dead_state()) {
         autosave();
     }
 
@@ -1420,9 +1421,10 @@ bool game::do_turn()
     }
 
     process_activity();
+
     if (!u.has_disease("sleep") && !u.has_disease("lying_down")) {
-        if (u.moves > 0) {
-            while (u.moves > 0) {
+        if (u.moves > 0 || uquit == QUIT_WATCH) {
+            while (u.moves > 0 || uquit == QUIT_WATCH) {
                 cleanup_dead();
                 if (u.activity.type == ACT_NULL) {
                     draw();
@@ -1434,14 +1436,14 @@ bool game::do_turn()
                 }
 
                 if (is_game_over()) {
-                    cleanup_at_end();
-                    return true;
+                    return cleanup_at_end();
                 }
             }
         } else {
             handle_key_blocking_activity();
         }
-    }
+    } 
+
     if ((driving_view_offset.x != 0 || driving_view_offset.y != 0)) {
         // Still have a view offset, but might not be driving anymore,
         // or the option has been deactivated,
@@ -1497,7 +1499,6 @@ bool game::do_turn()
 
     u.update_bodytemp();
     u.update_body_wetness();
-
     rustCheck();
     if (calendar::turn % 10 == 0) {
         u.update_morale();
@@ -2818,7 +2819,6 @@ int game::inventory_item_menu(int pos, int iStartX, int iWidth, int position)
     }
     return cMenu;
 }
-//
 
 // Checks input to see if mouse was moved and handles the mouse view box accordingly.
 // Returns true if input requires breaking out into a game action.
@@ -2957,7 +2957,13 @@ input_context get_default_mode_input_context()
 
 input_context game::get_player_input(std::string &action)
 {
-    input_context ctxt = get_default_mode_input_context();
+    input_context ctxt("DEFAULTMODE");
+    if(uquit == QUIT_WATCH) {
+        ctxt.register_action("QUIT");
+        ctxt.register_action("ANY_INPUT");
+    } else {
+        ctxt = get_default_mode_input_context();
+    }
 
     if (OPTIONS["ANIMATIONS"]) {
         int iStartX = (TERRAIN_WINDOW_WIDTH > 121) ? (TERRAIN_WINDOW_WIDTH - 121) / 2 : 0;
@@ -2992,7 +2998,7 @@ input_context game::get_player_input(std::string &action)
         wPrint.endy = iEndY;
 
         inp_mngr.set_timeout(125);
-        while (handle_mouseview(ctxt, action)) {
+        while(handle_mouseview(ctxt, action)) {
             if (bWeatherEffect && OPTIONS["ANIMATION_RAIN"]) {
                 /*
                 Location to add rain drop animation bits! Since it refreshes w_terrain it can be added to the animation section easily
@@ -3017,7 +3023,6 @@ input_context game::get_player_input(std::string &action)
 
                 wPrint.vdrops.clear();
 
-
                 const int light_sight_range = u.sight_range( light_level() );
                 for (int i = 0; i < dropCount; i++) {
                     const int iRandX = rng(iStartX, iEndX - 1);
@@ -3036,7 +3041,6 @@ input_context game::get_player_input(std::string &action)
                     }
                 }
             }
-
             if (OPTIONS["ANIMATION_SCT"]) {
 #ifdef TILES
                 if (!use_tiles) {
@@ -3101,16 +3105,17 @@ input_context game::get_player_input(std::string &action)
                     }
                 }
             }
-
             draw_weather(wPrint);
             draw_sct();
-
+            if(uquit == QUIT_WATCH) {
+                // display "press X to continue" text at top
+                input_context ctxt("DEFAULTMODE");
+                std::string message = "Press " + ctxt.get_desc("QUIT") + " to accept your fate...";
+                mvwprintz(w_terrain, 0, ((TERRAIN_WINDOW_WIDTH / 2) - (message.length() / 2)), c_white, message.c_str());
+            }
             wrefresh(w_terrain);
-
-            inp_mngr.set_timeout(125);
         }
         inp_mngr.set_timeout(-1);
-
     } else {
         while (handle_mouseview(ctxt, action)) {};
     }
@@ -3163,7 +3168,6 @@ bool game::handle_action()
 {
     std::string action;
     input_context ctxt;
-
     action_id act = ACTION_NULL;
     // Check if we have an auto-move destination
     if (u.has_destination()) {
@@ -3176,6 +3180,14 @@ bool game::handle_action()
     } else {
         // No auto-move, ask player for input
         ctxt = get_player_input(action);
+    }
+
+    if(uquit == QUIT_WATCH) {
+        if(action == "QUIT") {
+            uquit = QUIT_DIED;
+        }
+        gamemode->post_action(act);
+        return false;
     }
 
     int veh_part;
@@ -4103,6 +4115,18 @@ void game::update_scent()
 
 bool game::is_game_over()
 {
+    if (uquit == QUIT_WATCH) {
+        // deny player movement
+        u.moves = 0;
+        return false;
+    }
+    if (uquit == QUIT_DIED) {
+        if (u.in_vehicle) {
+            m.unboard_vehicle(u.posx, u.posy);
+        }
+        u.place_corpse();
+        return true;
+    }
     if (uquit == QUIT_SUICIDE) {
         if (u.in_vehicle) {
             m.unboard_vehicle(u.posx, u.posy);
@@ -4112,15 +4136,10 @@ bool game::is_game_over()
     if (uquit != QUIT_NO) {
         return true;
     }
-    for (int i = 0; i <= hp_torso; i++) {
-        if (u.hp_cur[i] < 1) {
-            if (u.in_vehicle) {
-                m.unboard_vehicle(u.posx, u.posy);
-            }
-            u.place_corpse();
-            uquit = QUIT_DIED;
-            return true;
-        }
+    // is_dead_state() already checks hp_torso && hp_head, no need to loop it
+    if(u.is_dead_state()) {
+        uquit = query_yn("Watch the last moments of your life...?") ? QUIT_WATCH : QUIT_DIED;
+        return false;
     }
     return false;
 }
@@ -4663,8 +4682,9 @@ void game::debug()
                       _("Remove all monsters"),    // 19
                       _("Display hordes"), // 20
                       _("Test Item Group"), // 21
+                      _("Damage Self"), //22
 #ifdef LUA
-                      _("Lua Command"), // 22
+                      _("Lua Command"), // 23
 #endif
                       _("Cancel"),
                       NULL);
@@ -5066,13 +5086,23 @@ void game::debug()
     }
     break;
 
-#ifdef LUA
+    // Damage Self
     case 22: {
+        int dbg_damage = query_int("Damage self for how much? hp: %d", u.hp_cur[hp_torso]);
+        u.hp_cur[hp_torso] -= dbg_damage;
+        u.die(NULL);
+        draw_sidebar();
+    }
+    break;
+
+#ifdef LUA
+    case 23: {
         std::string luacode = string_input_popup(_("Lua:"), 60, "");
         call_lua(luacode);
     }
     break;
 #endif
+
     }
     erase();
     refresh_all();
