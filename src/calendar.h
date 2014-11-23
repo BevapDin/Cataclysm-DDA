@@ -52,9 +52,11 @@ class calendar
         int year;
         // End data
 
+        void sync(); // Synchronize all variables to the turn_number
+
     public:
         calendar();
-        calendar(const calendar &copy);
+        calendar(const calendar &copy) = default;
         calendar(int Minute, int Hour, int Day, season_type Season, int Year);
         calendar(int turn);
         int get_turn() const;
@@ -73,10 +75,6 @@ class calendar
         bool      operator ==(const calendar &rhs) const;
 
         void increment();   // Add one turn / 6 seconds
-
-        int getHour(); // return hour
-        
-        void sync(); // Synchronize all variables to the turn_number
 
         // Sunlight and day/night calculations
         int minutes_past_midnight() const; // Useful for sunrise/set calculations

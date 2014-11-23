@@ -159,9 +159,15 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         {
             return true;
         }
-
-        /** Processes long-term effects */
-        void process_effects(); // Process long-term effects
+        
+        /** Handles human-specific effect application effects before calling Creature::add_eff_effects(). */
+        virtual void add_eff_effects(effect e, bool reduced);
+        /** Processes human-specific effects effects before calling Creature::process_effects(). */
+        void process_effects();
+        /** Handles the still hard-coded effects. */
+        void hardcoded_effects(effect &it);
+        /** Returns the modifier value used for vomiting effects. */
+        double vomit_mod();
 
         virtual bool is_npc() const
         {
@@ -231,7 +237,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         void update_body_wetness();
 
         /** Returns true if the player has the entered trait */
-        bool has_trait(const std::string &flag) const;
+        virtual bool has_trait(const std::string &flag) const;
         /** Returns true if the player has the entered starting trait */
         bool has_base_trait(const std::string &flag) const;
         /** Returns true if the player has a conflicting trait to the entered trait
@@ -588,6 +594,10 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         void apply_damage(Creature *source, body_part bp, int amount);
         /** Modifies a pain value by player traits before passing it to Creature::mod_pain() */
         void mod_pain(int npain);
+        
+        void cough(bool harmful = false, int volume = 4);
+        
+        void add_pain_msg(int val, body_part bp);
 
         /** Heals a body_part for dam */
         void heal(body_part healed, int dam);
@@ -709,14 +719,14 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         void do_read( item *book );
         /** Note that we've read a book at least once. **/
         bool has_identified( std::string item_id ) const;
-        /** Handles sleep attempts by the player, adds DIS_LYING_DOWN */
+        /** Handles sleep attempts by the player, adds "lying_down" */
         void try_to_sleep();
-        /** Checked each turn during DIS_LYING_DOWN, returns true if the player falls asleep */
-        bool can_sleep(); // Checked each turn during DIS_LYING_DOWN
-        /** Adds the sleeping disease to the player */
+        /** Checked each turn during "lying_down", returns true if the player falls asleep */
+        bool can_sleep();
+        /** Adds "sleep" to the player */
         void fall_asleep(int duration);
-        /** Removes the sleeping disease from the player, displaying message */
-        void wake_up(const char *message = NULL);
+        /** Removes "sleep" and "lying_down" from the player */
+        void wake_up();
         /** Checks to see if the player is using floor items to keep warm, and return the name of one such item if so */
         std::string is_snuggling();
         /** Returns a value used for things like reading and sewing based on light level */
@@ -1042,6 +1052,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         void complete_disassemble();
 
         // yet more crafting.cpp
+        void invalidate_crafting_inventory();
         std::vector<item> get_eligible_containers_for_crafting();
         std::list<item> consume_items(const std::vector<item_comp> &components, int batch = 1);
         void consume_tools(const std::vector<tool_comp> &tools, int batch = 1);
@@ -1287,6 +1298,11 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         std::vector<point> auto_move_route;
         // Used to make sure auto move is canceled if we stumble off course
         point next_expected_position;
+
+        inventory cached_crafting_inventory;
+        int cached_moves;
+        int cached_turn;
+        point cached_position;
 
         struct reason_weight_list melee_miss_reasons;
 

@@ -36,7 +36,7 @@
  * Changes that break backwards compatibility should bump this number, so the game can
  * load a legacy format loader.
  */
-const int savegame_version = 22;
+const int savegame_version = 23;
 const int savegame_minver_game = 11;
 
 /*
@@ -393,12 +393,14 @@ void overmap::unserialize(std::ifstream & fin, std::string const & plrfilename,
             add_mon_group( mg );
             nummg++;
         } else if( datatype == 'M' ) {
-            monster_data mdata;
-            fin >> mdata.x >> mdata.y >> mdata.z;
+            tripoint mon_loc;
+            monster new_monster;
+            fin >> mon_loc.x >> mon_loc.y >> mon_loc.z;
             std::string data;
             getline( fin, data );
-            mdata.mon.deserialize( data );
-            monsters.push_back( std::move( mdata ) );
+            new_monster.deserialize( data );
+            monster_map.insert( std::make_pair( std::move(mon_loc),
+                                                std::move(new_monster) ) );
         } else if (datatype == 't') { // City
             fin >> cx >> cy >> cs;
             tmp.x = cx; tmp.y = cy; tmp.s = cs;
@@ -683,8 +685,9 @@ void overmap::save() const
         fout << "T " << i.x << " " << i.y << " " << i.strength <<
             " " << i.type << " " << std::endl << i.message << std::endl;
 
-    for( const auto &mdata : monsters ) {
-        fout << "M " << mdata.x << " " << mdata.y << " " << mdata.z << " " << mdata.mon.serialize() << std::endl;
+    for( const auto &mdata : monster_map ) {
+        fout << "M " << mdata.first.x << " " << mdata.first.y << " " << mdata.first.z <<
+            " " << mdata.second.serialize() << std::endl;
     }
 
     // store tracked vehicle locations and names

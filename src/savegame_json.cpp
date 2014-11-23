@@ -181,7 +181,11 @@ void player::load(JsonObject &data)
     }
 
     data.read("ma_styles", ma_styles);
-    data.read("illness", illness);
+    // Just too many changes here to maintain compatibility, so older characters get a free
+    // diseases wipe. Since most long lasting diseases are bad, this shouldn't be too bad for them.
+    if(savegame_loading_version >= 23) {
+        data.read("illness", illness);
+    }
 
     data.read( "addictions", addictions );
     data.read( "my_bionics", my_bionics );
@@ -1563,7 +1567,19 @@ void Creature::store( JsonOut &jsout ) const
 
     // killer is not stored, it's temporary anyway, any creature that has a non-null
     // killer is dead (as per definition) and should not be stored.
-    jsout.member( "effects", effects );
+    
+    // Because JSON requires string keys we need to convert our int keys
+    std::unordered_map<std::string, std::unordered_map<std::string, effect>> tmp_map;
+    for (auto maps : effects) {
+        for (auto i : maps.second) {
+            std::ostringstream convert;
+            convert << i.first;
+            tmp_map[maps.first][convert.str()] = i.second;
+        }
+    }
+    jsout.member( "effects", tmp_map );
+    
+    
     jsout.member( "values", values );
 
     jsout.member( "str_bonus", str_bonus );
@@ -1616,17 +1632,24 @@ void Creature::load( JsonObject &jsin )
     jsin.read( "pain", pain );
 
     killer = nullptr; // see Creature::load
-    if( jsin.has_array( "effects" ) ) {
-        // effects started out as a vector, then changed to an unordered map.
-        // This is the easiest way to maintain backwards compatibility.
-        JsonArray parray = jsin.get_array( "effects" );
-        while( parray.has_more() ) {
-            effect new_effect;
-            parray.read_next( new_effect );
-            effects[ new_effect.get_id() ] = new_effect;
+    
+    // Just too many changes here to maintain compatibility, so older characters get a free
+    // effects wipe. Since most long lasting effects are bad, this shouldn't be too bad for them.
+    if(savegame_loading_version >= 23) {
+        if( jsin.has_object( "effects" ) ) {
+            // Because JSON requires string keys we need to convert back to our bp keys
+            std::unordered_map<std::string, std::unordered_map<std::string, effect>> tmp_map;
+            jsin.read( "effects", tmp_map );
+            int key_num;
+            for (auto maps : tmp_map) {
+                for (auto i : maps.second) {
+                    if ( !(std::istringstream(i.first) >> key_num) ) {
+                        key_num = 0;
+                    }
+                    effects[maps.first][(body_part)key_num] = i.second;
+                }
+            }
         }
-    } else if( jsin.has_object( "effects" ) ) {
-        jsin.read( "effects", effects );
     }
     jsin.read( "values", values );
 

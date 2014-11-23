@@ -1103,6 +1103,11 @@ void recipe::print_item(WINDOW *w, int ypos, int xpos, nc_color col, const bypro
     mvwprintz(w, ypos, xpos, col, str.c_str());
 }
 
+void player::invalidate_crafting_inventory()
+{
+    cached_turn = -1;
+}
+
 int recipe::print_time(WINDOW *w, int ypos, int xpos, int width,
                        nc_color col, int batch) const
 {

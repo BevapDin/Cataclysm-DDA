@@ -19,12 +19,6 @@ calendar::calendar()
     year = 0;
 }
 
-calendar::calendar(const calendar &copy)
-{
-    turn_number   = copy.turn_number;
-    sync();
-}
-
 calendar::calendar(int Minute, int Hour, int Day, season_type Season, int Year)
 {
     turn_number = MINUTES(Minute) + HOURS(Hour) + DAYS(Day) + Season * season_length() + Year * year_turns();
@@ -121,12 +115,6 @@ void calendar::increment()
 {
     turn_number++;
     sync();
-}
-
-int calendar::getHour()
-{
-    sync();
-    return hour;
 }
 
 int calendar::minutes_past_midnight() const
@@ -293,7 +281,6 @@ std::string calendar::print_time(bool just_hour) const
 
 std::string calendar::textify_period()
 {
-    sync();
     int am;
     const char *tx;
     // Describe the biggest time period, as "<am> <tx>s", am = amount, tx = name

@@ -12249,7 +12249,12 @@
         "use_action" : {
             "type" : "consume_drug",
             "activation_message" : "You take some aspirin.",
-            "diseases" : { "pkill1" : 120 }
+            "effects" : [
+                {
+                    "id": "pkill1",
+                    "duration": 120
+                }
+            ]
         },
         "stim" : 0,
         "container" : "null",
@@ -12431,7 +12436,12 @@
         "use_action" : {
             "type" : "consume_drug",
             "activation_message" : "You take some codeine.",
-            "diseases" : { "pkill2" : 180 }
+            "effects" : [
+                {
+                    "id": "pkill2",
+                    "duration": 180
+                }
+            ]
         },
         "stim" : -2,
         "container" : "null",
@@ -12465,7 +12475,16 @@
         "use_action" : {
             "type" : "consume_drug",
             "activation_message" : "You take some oxycodone.",
-            "diseases" : { "pkill3" : 20, "pkill2" : 200 }
+            "effects" : [
+                {
+                    "id": "pkill3",
+                    "duration": 20
+                },
+                {
+                    "id": "pkill2",
+                    "duration": 200
+                }
+            ]
         },
         "stim" : -4,
         "container" : "null",
@@ -12499,7 +12518,12 @@
         "use_action" : {
             "type" : "consume_drug",
             "activation_message" : "You take some tramadol.",
-            "diseases" : { "pkill_l" : 4500 }
+            "effects" : [
+                {
+                    "id": "pkill_l",
+                    "duration": 4500
+                }
+            ]
         },
         "stim" : 0,
         "container" : "null",
@@ -12913,7 +12937,16 @@
             "type" : "consume_drug",
             "activation_message" : "You shoot up.",
             "tools_needed" : { "syringe" : 1 },
-            "diseases" : { "pkill3" : 80, "pkill2" : 200 }
+            "effects" : [
+                {
+                    "id": "pkill3",
+                    "duration": 80
+                },
+                {
+                    "id": "pkill2",
+                    "duration": 200
+                }
+            ]
         },
         "stim" : -10,
         "container" : "null",
@@ -12948,7 +12981,16 @@
             "type" : "consume_drug",
             "activation_message" : "You shoot up.",
             "tools_needed" : { "syringe" : 1 },
-            "diseases" : { "pkill3" : 20, "pkill2" : 200 }
+            "effects" : [
+                {
+                    "id": "pkill3",
+                    "duration": 20
+                },
+                {
+                    "id": "pkill2",
+                    "duration": 200
+                }
+            ]
         },
         "stim" : -5,
         "container" : "null",
@@ -13279,7 +13321,12 @@
         "use_action" : {
             "type" : "consume_drug",
             "activation_message" : "You take some poppy painkiller.",
-            "diseases" : { "pkill2" : 180 }
+            "effects" : [
+                {
+                    "id": "pkill2",
+                    "duration": 180
+                }
+            ]
         },
         "stim" : 0,
         "container" : "null",
@@ -13314,7 +13361,12 @@
         "use_action" : {
             "type" : "consume_drug",
             "activation_message" : "You smoke your crack rocks.  Mother would be proud.",
-            "diseases" : { "high": 15 },
+            "effects" : [
+                {
+                    "id": "high",
+                    "duration": 15
+                }
+            ],
             "stat_adjustments": {"hunger" : -10},
             "fields_produced" : {"fd_cracksmoke" : 2},
             "charges_needed" : { "fire" : 1 },
@@ -14197,7 +14249,12 @@
         "use_action" : {
             "type" : "consume_drug",
             "activation_message" : "You eat the pink tablet.",
-            "diseases" : { "hallu" : 3600 }
+            "effects" : [
+                {
+                    "id": "hallu",
+                    "duration": 3600
+                }
+            ]
         },
         "stim" : 20,
         "container" : "null",
