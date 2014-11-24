@@ -662,7 +662,7 @@
         "flags" : ["DURABLE_MELEE"],
         "weight": 1400,
         "volume": 12,
-        "bashing": 23,
+        "bashing": 19,
         "cutting": 0,
         "category" : "weapons",
         "to_hit": 3
@@ -680,7 +680,7 @@
         "flags" : ["DURABLE_MELEE"],
         "weight": 2200,
         "volume": 12,
-        "bashing": 30,
+        "bashing": 25,
         "cutting": 0,
         "category" : "weapons",
         "to_hit": 3
@@ -883,9 +883,9 @@
         "material": "gold",
         "weight": 9650,
         "volume": 2,
-        "bashing": 0,
+        "bashing": 10,
         "cutting": 0,
-        "to_hit": -8
+        "to_hit": -2
     },
     {
         "type":"GENERIC",
@@ -901,7 +901,7 @@
         "volume": 2,
         "bashing": 10,
         "cutting": 0,
-        "to_hit": -1
+        "to_hit": -2
     },
     {
         "type":"GENERIC",
@@ -963,7 +963,7 @@
         "flags": [ "LENS" ],
         "weight": 708,
         "volume": 2,
-        "bashing": 6,
+        "bashing": 4,
         "cutting": 0,
         "to_hit": -1,
         "use_action": "FIRESTARTER"
@@ -981,7 +981,7 @@
         "volume": 0,
         "bashing": 0,
         "cutting": 0,
-        "to_hit": 0
+        "to_hit": -3
     },
     {
         "type":"GENERIC",
@@ -1024,9 +1024,9 @@
         "material": "gold",
         "weight": 1514,
         "volume": 1,
-        "bashing": 6,
+        "bashing": 9,
         "cutting": 0,
-        "to_hit": 1
+        "to_hit": 0
     },
     {
         "type":"GENERIC",
@@ -1812,7 +1812,7 @@
         "volume": 3,
         "bashing": 4,
         "cutting": 0,
-        "to_hit": 5
+        "to_hit": -1
     },
     {
         "type":"GENERIC",
@@ -1827,7 +1827,7 @@
         "volume": 4,
         "bashing": 6,
         "cutting": 0,
-        "to_hit": 4
+        "to_hit": -1
     },
     {
         "type":"GENERIC",
@@ -2133,8 +2133,8 @@
         "techniques" : ["WBLOCK_1"],
         "flags" : ["DURABLE_MELEE"],
         "volume" : 8,
-        "bashing" : 21,
-        "cutting" : 4,
+        "bashing" : 20,
+        "cutting" : 6,
         "price" : 20000
     },
     {
@@ -2184,7 +2184,7 @@
         "material" : ["wood", "steel"],
         "techniques" : ["WBLOCK_1"],
         "volume" : 5,
-        "bashing" : 22,
+        "bashing" : 28,
         "cutting" : 2,
         "flags" : ["STAB"],
         "price" : 8000
@@ -2234,7 +2234,7 @@
         "techniques" : ["WBLOCK_1"],
         "flags" : ["DURABLE_MELEE"],
         "volume" : 7,
-        "bashing" : 20,
+        "bashing" : 19,
         "cutting" : 0,
         "price" : 16000
     },
@@ -2450,7 +2450,7 @@
         "techniques" : ["SWEEP"],
         "flags" : ["DURABLE_MELEE"],
         "volume" : 5,
-        "bashing" : 26,
+        "bashing" : 28,
         "cutting" : 0,
         "price" : 100000,
                 "qualities": [["HAMMER", 1]]
@@ -2467,7 +2467,7 @@
         "material" : ["iron", "wood"],
         "techniques" : ["SWEEP"],
         "volume" : 6,
-        "bashing" : 22,
+        "bashing" : 30,
         "cutting" : 4,
         "flags" : ["DURABLE_MELEE", "SPEAR"],
         "price" : 120000,

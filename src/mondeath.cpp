@@ -320,10 +320,9 @@ void mdeath::guilt(monster *z)
         msgtype = m_neutral;
     } else {
         msgtype = m_bad;
-        for (std::map<int, std::string>::iterator it = guilt_tresholds.begin();
-             it != guilt_tresholds.end(); it++) {
-            if (kill_count >= it->first) {
-                msg = it->second;
+        for( auto &guilt_treshold : guilt_tresholds ) {
+            if( kill_count >= guilt_treshold.first ) {
+                msg = guilt_treshold.second;
                 break;
             }
         }
@@ -493,11 +492,11 @@ void mdeath::focused_beam(monster *z)
         int y = z->posy() + atoi(settings.item_vars["SL_SPOT_Y"].c_str());
 
         std::vector <point> traj = line_to(z->posx(), z->posy(), x, y, 0);
-        for (auto it = traj.begin(); it != traj.end(); ++it) {
-            if( !g->m.trans( it->x, it->y ) ) {
+        for( auto &elem : traj ) {
+            if( !g->m.trans( elem.x, elem.y ) ) {
                 break;
             }
-            g->m.add_field(it->x, it->y, fd_dazzling, 2);
+            g->m.add_field( elem.x, elem.y, fd_dazzling, 2 );
         }
     }
 
@@ -616,19 +615,19 @@ void make_gibs(monster *z, int amount)
 
     for (int i = 0; i < amount; i++) {
         // leave gibs, if there are any
-        const int gibX = zposx + rng(0, 6) - 3;
-        const int gibY = zposy + rng(0, 6) - 3;
+        const int gibX = rng(zposx - 1, zposx + 1);
+        const int gibY = rng(zposy - 1, zposy + 1);
         const int gibDensity = rng(1, i + 1);
         int junk;
         if( z->gibType() != fd_null ) {
-            if(  g->m.clear_path( zposx, zposy, gibX, gibY, 3, 1, 100, junk ) ) {
+            if(  g->m.clear_path( zposx, zposy, gibX, gibY, 2, 1, 100, junk ) ) {
                 // Only place gib if there's a clear path for it to get there.
                 g->m.add_field( gibX, gibY, z->gibType(), gibDensity );
             }
         }
         if( type_blood != fd_null ) {
-            const int bloodX = zposx + (rng(0, 2) - 1);
-            const int bloodY = zposy + (rng(0, 2) - 1);
+            const int bloodX = rng(zposx - 1, zposx + 1);
+            const int bloodY = rng(zposy - 1, zposy + 1);
             if( g->m.clear_path( zposx, zposy, bloodX, bloodY, 2, 1, 100, junk ) ) {
                 // Only place blood if there's a clear path for it to get there.
                 g->m.add_field(bloodX, bloodY, type_blood, 1);

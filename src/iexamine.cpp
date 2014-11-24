@@ -1,4 +1,3 @@
-#include "item_factory.h"
 #include "helper.h"
 #include "game.h"
 #include "mapdata.h"
@@ -551,7 +550,7 @@ void iexamine::cardreader(player *p, map *m, int examx, int examy)
                 }
             }
         } else {
-            add_msg(m_info, _("Looks like you need a %s."), item_controller->nname( card_type ).c_str());
+            add_msg(m_info, _("Looks like you need a %s."), item::nname( card_type ).c_str());
         }
     }
 }
@@ -1184,9 +1183,9 @@ void iexamine::egg_sack_generic( player *p, map *m, int examx, int examy,
         monster spiderling( GetMType( montype ) );
         int monster_count = 0;
         const std::vector<point> points = closest_points_first( 1, point( examx, examy ) );
-        for( auto it = points.begin(); it != points.end(); ++it ) {
-            if( g->is_empty( it->x, it->y ) && one_in( 3 ) ) {
-                spiderling.spawn( it->x, it->y );
+        for( const auto &point : points ) {
+            if( g->is_empty( point.x, point.y ) && one_in( 3 ) ) {
+                spiderling.spawn( point.x, point.y );
                 g->add_zombie( spiderling );
                 monster_count++;
             }
@@ -1322,7 +1321,7 @@ void iexamine::aggie_plant(player *p, map *m, int examx, int examy)
                 plantCount = 12;
             }
             m->spawn_item(examx, examy, seedType.substr(5), plantCount, 0, calendar::turn);
-            if(item_controller->find_template(seedType)->count_by_charges()) {
+            if( item::count_by_charges( seedType ) ) {
                 m->spawn_item(examx, examy, seedType, 1, rng(plantCount / 4, plantCount / 2));
             } else {
                 m->spawn_item(examx, examy, seedType, rng(plantCount / 4, plantCount / 2));
@@ -1752,7 +1751,7 @@ void iexamine::harvest_tree_shrub(player *p, map *m, int examx, int examy)
     }
     //if the fruit is not ripe yet
     if (calendar::turn.get_season() != m->get_ter_harvest_season(examx, examy)) {
-        std::string fruit = item_controller->find_template(m->get_ter_harvestable(examx, examy))->nname(10);
+        std::string fruit = item::nname(m->get_ter_harvestable(examx, examy), 10);
         fruit[0] = toupper(fruit[0]);
         add_msg(m_info, _("%s ripen in %s."), fruit.c_str(), season_name[m->get_ter_harvest_season(examx, examy)].c_str());
         return;
@@ -1852,15 +1851,13 @@ int sum_up_item_weight_by_material(std::vector<item> &items, const std::string &
 
 void add_recyle_menu_entry(uimenu &menu, int w, char hk, const std::string &type)
 {
-    const itype *itt = item_controller->find_template(type);
-    const int amount = (int) (w / itt->weight);
-    menu.entries.push_back(
-        uimenu_entry(
-            menu.entries.size() + 1, // value return by uimenu for this entry
-            true, // enabled
-            hk, // hotkey
-            string_format(_("about %d %s"), amount, itt->nname(amount).c_str())
-        )
+    const auto itt = item( type, 0 );
+    const int amount = w / itt.weight();
+    menu.addentry(
+        menu.entries.size() + 1, // value return by uimenu for this entry
+        true, // enabled
+        hk, // hotkey
+        string_format(_("about %d %s"), amount, itt.tname( amount ).c_str())
     );
 }
 
@@ -1914,10 +1911,10 @@ void iexamine::recycler(player *p, map *m, int examx, int examy)
 
     g->sound(examx, examy, 80, _("Ka-klunk!"));
 
-    int lump_weight = item_controller->find_template("steel_lump")->weight;
-    int sheet_weight = item_controller->find_template("sheet_metal")->weight;
-    int chunk_weight = item_controller->find_template("steel_chunk")->weight;
-    int scrap_weight = item_controller->find_template("scrap")->weight;
+    int lump_weight = item( "steel_lump", 0 ).weight();
+    int sheet_weight = item( "sheet_metal", 0 ).weight();
+    int chunk_weight = item( "steel_chunk", 0 ).weight();
+    int scrap_weight = item( "scrap", 0 ).weight();
 
     if (steel_weight < scrap_weight) {
         add_msg(_("The recycler chews up all the items in its hopper."));
@@ -1993,7 +1990,8 @@ void iexamine::trap(player *p, map *m, int examx, int examy)
     const struct trap &t = *traplist[tid];
     const int possible = t.get_difficulty();
     if ( (t.can_see(*p, examx, examy)) && (possible == 99) ) {
-        add_msg(m_info, _("That looks too dangerous to mess with. Best leave it alone."));
+        add_msg(m_info, _("That %s looks too dangerous to mess with. Best leave it alone."),
+            t.name.c_str());
         return;
     }
     // Some traps are not actual traps. Those should get a different query.
@@ -2069,7 +2067,7 @@ itype *furn_t::crafting_pseudo_item_type() const
     if (crafting_pseudo_item.empty()) {
         return NULL;
     }
-    return item_controller->find_template(crafting_pseudo_item);
+    return item::find_type( crafting_pseudo_item );
 }
 
 itype *furn_t::crafting_ammo_item_type() const
@@ -2077,7 +2075,7 @@ itype *furn_t::crafting_ammo_item_type() const
     const it_tool *toolt = dynamic_cast<const it_tool *>(crafting_pseudo_item_type());
     if (toolt != NULL && toolt->ammo != "NULL") {
         const std::string ammoid = default_ammo(toolt->ammo);
-        return item_controller->find_template(ammoid);
+        return item::find_type( ammoid );
     }
     return NULL;
 }
@@ -2149,9 +2147,9 @@ void iexamine::reload_furniture(player *p, map *m, const int examx, const int ex
     }
     p->reduce_charges(pos, amount);
     std::vector<item> &items = m->i_at(examx, examy);
-    for (size_t i = 0; i < items.size(); i++) {
-        if (items[i].type == ammo) {
-            items[i].charges += amount;
+    for( auto &item : items ) {
+        if( item.type == ammo ) {
+            item.charges += amount;
             amount = 0;
             break;
         }
@@ -2289,8 +2287,7 @@ static int getGasDiscountCardQuality(item it)
 {
     std::set<std::string> tags = it.type->item_tags;
 
-    for( std::set<std::string>::iterator it = tags.begin(); it != tags.end(); ++it ) {
-        std::string tag = (*it);
+    for( auto tag : tags ) {
 
         if( tag.size() > 15 && tag.substr(0, 15) == "DISCOUNT_VALUE_" ) {
             return atoi(tag.substr(15).c_str());

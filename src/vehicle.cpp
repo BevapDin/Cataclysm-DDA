@@ -4,7 +4,7 @@
 #include "output.h"
 #include "game.h"
 #include "item.h"
-#include "item_factory.h"
+#include "item_group.h"
 #include "veh_interact.h"
 #include <fstream>
 #include <sstream>
@@ -173,9 +173,8 @@ void vehicle::add_missing_frames()
         if(locations_checked.count(mount_location) == 0) {
             std::vector<int> parts_here = parts_at_relative(next_x, next_y, false);
             bool found = false;
-            for(std::vector<int>::iterator here = parts_here.begin();
-                    here != parts_here.end(); here++) {
-                if(part_info(*here).location == part_location_structure) {
+            for( auto &elem : parts_here ) {
+                if( part_info( elem ).location == part_location_structure ) {
                     found = true;
                     break;
                 }
@@ -287,8 +286,8 @@ void vehicle::init_state(int init_veh_fuel, int init_veh_status)
 
     // Reactor should always start out activated if present
     std::vector<int> fuel_tanks = all_parts_with_feature(VPFLAG_FUEL_TANK);
-    for( size_t p = 0; p < fuel_tanks.size(); ++p ) {
-        if(part_info(fuel_tanks[p]).fuel_type == fuel_type_plutonium) {
+    for( auto &fuel_tank : fuel_tanks ) {
+        if( part_info( fuel_tank ).fuel_type == fuel_type_plutonium ) {
             reactor_on = true;
             break;
         }
@@ -892,9 +891,9 @@ void vehicle::use_controls()
         }
         add_msg(_("You painstakingly pack the %s into a portable configuration."), name.c_str());
         std::string itype_id = "folding_bicycle";
-        for(std::set<std::string>::const_iterator a = tags.begin(); a != tags.end(); ++a) {
-            if (a->compare(0, 12, "convertible:") == 0) {
-                itype_id = a->substr(12);
+        for( const auto &elem : tags ) {
+            if( elem.compare( 0, 12, "convertible:" ) == 0 ) {
+                itype_id = elem.substr( 12 );
                 break;
             }
         }
@@ -909,9 +908,8 @@ void vehicle::use_controls()
         // Drop stuff in containers on ground
         for (size_t p = 0; p < parts.size(); p++) {
             if( part_flag( p, "CARGO" ) ) {
-                for( std::vector<item>::iterator it = parts[p].items.begin();
-                     it != parts[p].items.end(); ++it ) {
-                    g->m.add_item_or_charges( g->u.posx, g->u.posy, *it );
+                for( auto &elem : parts[p].items ) {
+                    g->m.add_item_or_charges( g->u.posx, g->u.posy, elem );
                 }
                 parts[p].items.clear();
             }
@@ -939,7 +937,7 @@ void vehicle::use_controls()
             bicycle.item_vars["weight"] = tmpstream.str();
             // TODO: how to calculate the volume?
             tmpstream.str(std::string());
-            tmpstream << (total_mass() * 10);
+            tmpstream << (total_folded_volume());
             bicycle.item_vars["volume"] = tmpstream.str();
             bicycle.item_vars["name"] = string_format(_("folded %s"), name.c_str());
             bicycle.item_vars["vehicle_name"] = name;
@@ -1019,10 +1017,11 @@ void vehicle::start_engine()
 {
     bool muscle_powered = false;
     // TODO: Make chance of success based on engine condition.
-    for( size_t e = 0; e < engines.size(); ++e ) {
-        if(parts[engines[e]].hp > 0 && parts[engines[e]].active()) {
-            if(part_info(engines[e]).fuel_type == fuel_type_gasoline || part_info(engines[e]).fuel_type == fuel_type_diesel) {
-                int engine_power = part_power(engines[e]);
+    for( auto &elem : engines ) {
+        if( parts[elem].hp > 0 && parts[elem].active() ) {
+            if( part_info( elem ).fuel_type == fuel_type_gasoline ||
+                part_info( elem ).fuel_type == fuel_type_diesel ) {
+                int engine_power = part_power( elem );
                 if(engine_power < 50) {
                     // Small engines can be pull-started
                     engine_on = true;
@@ -1032,7 +1031,7 @@ void vehicle::start_engine()
                         engine_on = true;
                     }
                 }
-            } else if (part_info(engines[e]).fuel_type == fuel_type_muscle) {
+            } else if( part_info( elem ).fuel_type == fuel_type_muscle ) {
                 muscle_powered = true;
             } else {
                 // Electric & plasma engines
@@ -1172,8 +1171,9 @@ bool vehicle::has_structural_part(int dx, int dy)
 {
     std::vector<int> parts_here = parts_at_relative(dx, dy, false);
 
-    for( std::vector<int>::iterator it = parts_here.begin(); it != parts_here.end(); ++it ) {
-        if(part_info(*it).location == part_location_structure && !part_info(*it).has_flag("PROTRUSION")) {
+    for( auto &elem : parts_here ) {
+        if( part_info( elem ).location == part_location_structure &&
+            !part_info( elem ).has_flag( "PROTRUSION" ) ) {
             return true;
         }
     }
@@ -1214,9 +1214,8 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     }
 
     //No part type can stack with itself, or any other part in the same slot
-    for( std::vector<int>::const_iterator part_it = parts_in_square.begin();
-         part_it != parts_in_square.end(); ++part_it ) {
-        const vpart_info other_part = vehicle_part_types[parts[*part_it].id];
+    for( const auto &elem : parts_in_square ) {
+        const vpart_info other_part = vehicle_part_types[parts[elem].id];
 
         //Parts with no location can stack with each other (but not themselves)
         if(part.id == other_part.id ||
@@ -1253,10 +1252,10 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     // Alternators must be installed on a gas engine
     if(vehicle_part_types[id].has_flag(VPFLAG_ALTERNATOR)) {
         bool anchor_found = false;
-        for(std::vector<int>::const_iterator it = parts_in_square.begin();
-            it != parts_in_square.end(); ++it ) {
-            if(part_info(*it).has_flag(VPFLAG_ENGINE) &&
-               (part_info(*it).fuel_type == fuel_type_gasoline || part_info(*it).fuel_type == fuel_type_diesel)) {
+        for( const auto &elem : parts_in_square ) {
+            if( part_info( elem ).has_flag( VPFLAG_ENGINE ) &&
+                ( part_info( elem ).fuel_type == fuel_type_gasoline ||
+                  part_info( elem ).fuel_type == fuel_type_diesel ) ) {
                 anchor_found = true;
             }
         }
@@ -1268,9 +1267,8 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     //Seatbelts must be installed on a seat
     if(vehicle_part_types[id].has_flag("SEATBELT")) {
         bool anchor_found = false;
-        for( std::vector<int>::const_iterator it = parts_in_square.begin();
-             it != parts_in_square.end(); ++it ) {
-            if(part_info(*it).has_flag("BELTABLE")) {
+        for( const auto &elem : parts_in_square ) {
+            if( part_info( elem ).has_flag( "BELTABLE" ) ) {
                 anchor_found = true;
             }
         }
@@ -1282,9 +1280,8 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     //Internal must be installed into a cargo area.
     if(vehicle_part_types[id].has_flag("INTERNAL")) {
         bool anchor_found = false;
-        for( std::vector<int>::const_iterator it = parts_in_square.begin();
-             it != parts_in_square.end(); ++it ) {
-            if(part_info(*it).has_flag("CARGO")) {
+        for( const auto &elem : parts_in_square ) {
+            if( part_info( elem ).has_flag( "CARGO" ) ) {
                 anchor_found = true;
             }
         }
@@ -1297,9 +1294,8 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     // TODO: do this automatically using "location":"on_mountpoint"
     if (vehicle_part_types[id].has_flag("CURTAIN")) {
         bool anchor_found = false;
-        for ( std::vector<int>::const_iterator it = parts_in_square.begin();
-                it != parts_in_square.end(); it++) {
-            if (part_info(*it).has_flag("WINDOW")) {
+        for( const auto &elem : parts_in_square ) {
+            if( part_info( elem ).has_flag( "WINDOW" ) ) {
                 anchor_found = true;
             }
         }
@@ -1311,9 +1307,8 @@ bool vehicle::can_mount (int dx, int dy, std::string id)
     //Swappable storage battery must be installed on a BATTERY_MOUNT
     if(vehicle_part_types[id].has_flag("NEEDS_BATTERY_MOUNT")) {
         bool anchor_found = false;
-        for( std::vector<int>::const_iterator it = parts_in_square.begin();
-             it != parts_in_square.end(); ++it ) {
-            if(part_info(*it).has_flag("BATTERY_MOUNT")) {
+        for( const auto &elem : parts_in_square ) {
+            if( part_info( elem ).has_flag( "BATTERY_MOUNT" ) ) {
                 anchor_found = true;
             }
         }
@@ -1363,8 +1358,8 @@ bool vehicle::can_unmount (int p)
 
         /* To remove a structural part, there can be only structural parts left
          * in that square (might be more than one in the case of wreckage) */
-        for( size_t part_index = 0; part_index < parts_in_square.size(); ++part_index ) {
-            if(part_info(parts_in_square[part_index]).location != part_location_structure) {
+        for( auto &elem : parts_in_square ) {
+            if( part_info( elem ).location != part_location_structure ) {
                 return false;
             }
         }
@@ -1468,17 +1463,15 @@ bool vehicle::is_connected(vehicle_part &to, vehicle_part &from, vehicle_part &e
                 vehicle_part next_part = parts[parts_there[0]];
                 //Only add the part if we haven't been here before
                 bool found = false;
-                for(std::list<vehicle_part>::iterator it = discovered.begin();
-                        it != discovered.end(); it++) {
-                    if(it->mount_dx == next_x && it->mount_dy == next_y) {
+                for( auto &elem : discovered ) {
+                    if( elem.mount_dx == next_x && elem.mount_dy == next_y ) {
                         found = true;
                         break;
                     }
                 }
                 if(!found) {
-                    for(std::list<vehicle_part>::iterator it = searched.begin();
-                        it != searched.end(); it++) {
-                        if(it->mount_dx == next_x && it->mount_dy == next_y) {
+                    for( auto &elem : searched ) {
+                        if( elem.mount_dx == next_x && elem.mount_dy == next_y ) {
                             found = true;
                             break;
                         }
@@ -1672,8 +1665,8 @@ bool vehicle::remove_part (int p)
         }
         // Also unboard entity if seat gets removed
         std::vector<int> bp = boarded_parts();
-        for( size_t i = 0; i < bp.size(); i++ ) {
-            if( bp[i] == p ) {
+        for( auto &elem : bp ) {
+            if( elem == p ) {
                 g->m.unboard_vehicle( global_x() + parts[p].precalc_dx[0],
                                       global_y() + parts[p].precalc_dy[0] );
             }
@@ -1727,12 +1720,12 @@ void vehicle::part_removal_cleanup() {
  */
 void vehicle::break_part_into_pieces(int p, int x, int y, bool scatter) {
     std::vector<break_entry> break_info = part_info(p).breaks_into;
-    for( size_t index = 0; index < break_info.size(); ++index ) {
-        int quantity = rng(break_info[index].min, break_info[index].max);
+    for( auto &elem : break_info ) {
+        int quantity = rng( elem.min, elem.max );
         for(int num = 0; num < quantity; num++) {
             const int actual_x = scatter ? x + rng(-SCATTER_DISTANCE, SCATTER_DISTANCE) : x;
             const int actual_y = scatter ? y + rng(-SCATTER_DISTANCE, SCATTER_DISTANCE) : y;
-            item piece(break_info[index].item_id, calendar::turn);
+            item piece( elem.item_id, calendar::turn );
             g->m.add_item_or_charges(actual_x, actual_y, piece);
         }
     }
@@ -1829,16 +1822,10 @@ int vehicle::next_part_to_open(int p, bool outside)
     std::vector<int> parts_here = parts_at_relative(parts[p].mount_dx, parts[p].mount_dy);
 
     // We want forwards, since we open the innermost thing first (curtains), and then the innermost thing (door)
-    for(std::vector<int>::iterator part_it = parts_here.begin();
-        part_it != parts_here.end();
-        ++part_it)
-    {
-        if(part_flag(*part_it, VPFLAG_OPENABLE)
-           && parts[*part_it].hp > 0
-           && parts[*part_it].open == 0
-           && (!outside || !part_flag(*part_it, "OPENCLOSE_INSIDE")) )
-        {
-            return *part_it;
+    for( auto &elem : parts_here ) {
+        if( part_flag( elem, VPFLAG_OPENABLE ) && parts[elem].hp > 0 && parts[elem].open == 0 &&
+            ( !outside || !part_flag( elem, "OPENCLOSE_INSIDE" ) ) ) {
+            return elem;
         }
     }
     return -1;
@@ -2053,8 +2040,8 @@ int vehicle::part_displayed_at(int local_x, int local_y)
         // They're in a vehicle, but are they in /this/ vehicle?
         std::vector<int> psg_parts = boarded_parts();
         in_vehicle = false;
-        for (size_t p = 0; p < psg_parts.size(); ++p) {
-            if(get_passenger(psg_parts[p]) == &(g->u)) {
+        for( auto &psg_part : psg_parts ) {
+            if( get_passenger( psg_part ) == &( g->u ) ) {
                 in_vehicle = true;
                 break;
             }
@@ -2405,7 +2392,7 @@ int vehicle::total_mass()
         if (parts[i].removed) {
           continue;
         }
-        m += item_controller->find_template( part_info(i).item )->weight;
+        m += item::find_type( part_info(i).item )->weight;
         for (auto &j : parts[i].items) {
             m += j.type->weight;
         }
@@ -2418,6 +2405,18 @@ int vehicle::total_mass()
     return m/1000;
 }
 
+int vehicle::total_folded_volume() const
+{
+    int m = 0;
+    for( size_t i = 0; i < parts.size(); i++ ) {
+        if( parts[i].removed ) {
+            continue;
+        }
+        m += part_info(i).folded_volume;
+    }
+    return m;
+}
+
 void vehicle::center_of_mass(int &x, int &y)
 {
     float xf = 0, yf = 0;
@@ -2428,7 +2427,7 @@ void vehicle::center_of_mass(int &x, int &y)
           continue;
         }
         int m_part = 0;
-        m_part += item_controller->find_template( part_info(i).item )->weight;
+        m_part += item::find_type( part_info(i).item )->weight;
         for (auto &j : parts[i].items) {
             m_part += j.type->weight;
         }
@@ -2574,13 +2573,13 @@ int vehicle::total_power (bool fueled)
 int vehicle::solar_epower ()
 {
     int epower = 0;
-    for( size_t p = 0; p < solar_panels.size(); ++p ) {
-        if(parts[solar_panels[p]].hp > 0) {
-            int part_x = global_x() + parts[solar_panels[p]].precalc_dx[0];
-            int part_y = global_y() + parts[solar_panels[p]].precalc_dy[0];
+    for( auto &elem : solar_panels ) {
+        if( parts[elem].hp > 0 ) {
+            int part_x = global_x() + parts[elem].precalc_dx[0];
+            int part_y = global_y() + parts[elem].precalc_dy[0];
             // Can't use g->in_sunlight() because it factors in vehicle roofs.
             if( !g->m.has_flag_ter_or_furn( TFLAG_INDOORS, part_x, part_y ) ) {
-                epower += (part_epower(solar_panels[p]) * g->natural_light_level()) / DAYLIGHT_LEVEL;
+                epower += ( part_epower( elem ) * g->natural_light_level() ) / DAYLIGHT_LEVEL;
             }
         }
     }
@@ -2757,8 +2756,8 @@ float vehicle::wheels_area (int *cnt)
     int count = 0;
     int total_area = 0;
     std::vector<int> wheel_indices = all_parts_with_feature(VPFLAG_WHEEL);
-    for (size_t i = 0; i < wheel_indices.size(); ++i) {
-        int p = wheel_indices[i];
+    for( auto &wheel_indice : wheel_indices ) {
+        int p = wheel_indice;
         int width = part_info(p).wheel_width;
         int bigness = parts[p].bigness;
         // 9 inches, for reference, is about normal for cars.
@@ -2788,12 +2787,12 @@ float vehicle::k_aerodynamics ()
 {
     const int max_obst = 13;
     int obst[max_obst];
-    for (int o = 0; o < max_obst; ++o) {
-        obst[o] = 0;
+    for( auto &elem : obst ) {
+        elem = 0;
     }
     std::vector<int> structure_indices = all_parts_at_location(part_location_structure);
-    for (size_t i = 0; i < structure_indices.size(); ++i) {
-        int p = structure_indices[i];
+    for( auto &structure_indice : structure_indices ) {
+        int p = structure_indice;
         int frame_size = part_with_feature(p, VPFLAG_OBSTACLE) ? 30 : 10;
         int pos = parts[p].mount_dy + max_obst / 2;
         if (pos < 0) {
@@ -2807,8 +2806,8 @@ float vehicle::k_aerodynamics ()
         }
     }
     int frame_obst = 0;
-    for (int o = 0; o < max_obst; ++o) {
-        frame_obst += obst[o];
+    for( auto &elem : obst ) {
+        frame_obst += elem;
     }
     float ae0 = 200.0;
 
@@ -2896,7 +2895,7 @@ bool vehicle::valid_wheel_config ()
         if (parts[p].removed) {
           continue;
         }
-        w2 = item_controller->find_template( part_info(p).item )->weight;
+        w2 = item::find_type( part_info(p).item )->weight;
         if (w2 < 1)
             continue;
         xo = xo * wo / (wo + w2) + parts[p].mount_dx * w2 / (wo + w2);
@@ -2932,15 +2931,15 @@ void vehicle::consume_fuel( double load = 1.0 )
         if( x_in_y(int(amnt_precise*1000) % 1000, 1000) ) {
             amnt += 1;
         }
-        for( size_t p = 0; p < fuel.size(); p++ ) {
-            if( part_info(fuel[p]).fuel_type == ftypes[ft] ) {
-                if( parts[fuel[p]].amount >= amnt ) {
+        for( auto &elem : fuel ) {
+            if( part_info( elem ).fuel_type == ftypes[ft] ) {
+                if( parts[elem].amount >= amnt ) {
                     // enough fuel located in this part
-                    parts[fuel[p]].amount -= amnt;
+                    parts[elem].amount -= amnt;
                     break;
                 } else {
-                    amnt -= parts[fuel[p]].amount;
-                    parts[fuel[p]].amount = 0;
+                    amnt -= parts[elem].amount;
+                    parts[elem].amount = 0;
                 }
             }
         }
@@ -3006,10 +3005,10 @@ void vehicle::power_parts ()//TODO: more categories of powered part!
         // Produce additional epower from any reactors
         int reactors_epower = 0;
         int reactors_fuel_epower = 0;
-        for( size_t p = 0; p < reactors.size(); ++p ) {
-            if(parts[reactors[p]].hp > 0) {
-                reactors_epower += part_info(reactors[p]).epower;
-                reactors_fuel_epower += power_to_epower(parts[reactors[p]].amount);
+        for( auto &elem : reactors ) {
+            if( parts[elem].hp > 0 ) {
+                reactors_epower += part_info( elem ).epower;
+                reactors_fuel_epower += power_to_epower( parts[elem].amount );
             }
         }
         // check if enough fuel for full reactor output
@@ -3108,8 +3107,8 @@ vehicle* vehicle::find_vehicle(point &where)
     }
 
     // ...find the right vehicle inside it...
-    for(size_t i = 0; i < sm->vehicles.size(); i++) {
-        vehicle* found_veh = sm->vehicles[i];
+    for( auto &elem : sm->vehicles ) {
+        vehicle *found_veh = elem;
         point veh_location(found_veh->posx, found_veh->posy);
 
         if(veh_in_sm == veh_location) {
@@ -3283,9 +3282,9 @@ void vehicle::slow_leak()
 {
     //for each of your badly damaged tanks (lower than 50% health), leak a small amount of liquid
     // damaged batteries self-discharge without leaking
-    for( size_t p = 0; p < fuel.size(); ++p ) {
-        vehicle_part &part = parts[fuel[p]];
-        vpart_info pinfo = part_info( fuel[p] );
+    for( auto &elem : fuel ) {
+        vehicle_part &part = parts[elem];
+        vpart_info pinfo = part_info( elem );
         if( pinfo.fuel_type != fuel_type_gasoline && pinfo.fuel_type != fuel_type_diesel &&
             pinfo.fuel_type != fuel_type_battery && pinfo.fuel_type != fuel_type_water ) {
             // Not a liquid fuel or battery
@@ -3666,7 +3665,7 @@ veh_collision vehicle::part_collision (int part, int x, int y, bool just_detect)
     int degree = rng (70, 100);
 
     //Calculate damage resulting from d_E
-    const itype *type = item_controller->find_template( part_info( parm ).item );
+    const itype *type = item::find_type( part_info( parm ).item );
     std::vector<std::string> vpart_item_mats = type->materials;
     int vpart_dens = 0;
     for (auto mat_id : vpart_item_mats) {
@@ -4069,32 +4068,31 @@ void vehicle::place_spawn_items()
             } else {
                 bool partbroken = ( parts[part].hp < 1 );
                 int idmg = 0;
-                for(std::vector<std::string>::iterator next_id = next_spawn->item_ids.begin();
-                        next_id != next_spawn->item_ids.end(); next_id++) {
+                for( auto &elem : next_spawn->item_ids ) {
                     if ( partbroken ) {
                         int idmg = rng(1, 10);
                         if ( idmg > 5 ) {
                             continue;
                         }
                     }
-                    item new_item(*next_id, calendar::turn);
+                    item new_item( elem, calendar::turn );
                     new_item = new_item.in_its_container();
                     if ( idmg > 0 ) {
                         new_item.damage = (signed char)idmg;
                     }
                     add_item(part, new_item);
                 }
-                for(std::vector<std::string>::iterator next_group_id = next_spawn->item_groups.begin();
-                        next_group_id != next_spawn->item_groups.end(); next_group_id++) {
+                for( auto &elem : next_spawn->item_groups ) {
                     if ( partbroken ) {
                         int idmg = rng(1, 10);
                         if ( idmg > 5 ) {
                             continue;
                         }
                     }
-                    Item_tag group_tag = item_controller->id_from(*next_group_id);
-                    item new_item(group_tag, calendar::turn);
-                    new_item = new_item.in_its_container();
+                    item new_item = item_group::item_from( elem, 0 );
+                    if( new_item.is_null() ) {
+                        continue;
+                    }
                     if ( idmg > 0 ) {
                         new_item.damage = (signed char)idmg;
                     }
@@ -4262,18 +4260,18 @@ void vehicle::remove_remote_part(int part_num) {
 }
 
 void vehicle::shed_loose_parts() {
-    for( size_t i = 0; i < loose_parts.size(); i++) {
-        if (part_flag(loose_parts[i], "POWER_TRANSFER")) {
-            remove_remote_part(loose_parts[i]);
+    for( auto &elem : loose_parts ) {
+        if( part_flag( elem, "POWER_TRANSFER" ) ) {
+            remove_remote_part( elem );
         }
 
-        auto part = &parts[loose_parts[i]];
+        auto part = &parts[elem];
         int posx = global_x() + part->precalc_dx[0];
         int posy = global_y() + part->precalc_dy[0];
         item drop = part->properties_to_item();
         g->m.add_item_or_charges(posx, posy, drop);
 
-        remove_part(loose_parts[i]);
+        remove_part( elem );
     }
     loose_parts.clear();
 }
@@ -4415,9 +4413,9 @@ void vehicle::damage_all (int dmg1, int dmg2, int type, const point &impact)
  */
 void vehicle::shift_parts(const int dx, const int dy)
 {
-    for(unsigned int p = 0; p < parts.size(); p++) {
-        parts[p].mount_dx -= dx;
-        parts[p].mount_dy -= dy;
+    for( auto &elem : parts ) {
+        elem.mount_dx -= dx;
+        elem.mount_dy -= dy;
     }
 
     //Don't use the cache as it hasn't been updated yet
@@ -4604,7 +4602,7 @@ bool vehicle::fire_turret (int p, bool burst)
 {
     if (!part_flag (p, "TURRET") || parts[p].inactive())
         return false;
-    it_gun *gun = dynamic_cast<it_gun*> (item_controller->find_template( part_info( p ).item ));
+    it_gun *gun = dynamic_cast<it_gun*>( item::find_type( part_info( p ).item ) );
     if (!gun) {
         return false;
     }
@@ -4635,7 +4633,7 @@ bool vehicle::fire_turret (int p, bool burst)
         if (fleft < 1) {
             return false;
         }
-        it_ammo *ammo = dynamic_cast<it_ammo*>(item_controller->find_template( amt ));
+        it_ammo *ammo = dynamic_cast<it_ammo*>( item::find_type( amt ) );
         if (!ammo) {
             return false;
         }
@@ -4772,13 +4770,12 @@ void vehicle::close(int part_index)
 void vehicle::open_all_at(int p)
 {
     std::vector<int> parts_here = parts_at_relative(parts[p].mount_dx, parts[p].mount_dy);
-    for(std::vector<int>::iterator part_it = parts_here.begin();
-        part_it != parts_here.end(); ++part_it) {
-        if(part_flag(*part_it, VPFLAG_OPENABLE)){
+    for( auto &elem : parts_here ) {
+        if( part_flag( elem, VPFLAG_OPENABLE ) ) {
             // Note that this will open mutlisquare and non-multipart parts in the tile. This
             // means that adjacent open multisquare openables can still have closed stuff
             // on same tile after this function returns
-            open(*part_it);
+            open( elem );
         }
     }
 }
@@ -4893,10 +4890,10 @@ bool vehicle_part::active() const {
 
 void add_item(const itype *type, const char *mat, const char *rep_item, double amount, vpart_info::type_count_pair_vector &result) {
     // If the item is made of mat, add rep_item to the list of repair-items.
-    if( !item_controller->has_template( rep_item ) ) {
+    if( !item::type_is_defined( rep_item ) ) {
         return;
     }
-    const itype *rep_it = item_controller->find_template( rep_item );
+    const itype *rep_it = item::find_type( rep_item );
     int item_count = static_cast<int>(amount / rep_it->weight);
     for( size_t i = 0; i < type->materials.size(); ++i ) {
         if( type->materials[i] != mat ) {
@@ -4918,10 +4915,10 @@ vpart_info::type_count_pair_vector vpart_info::get_repair_materials(int hp) cons
         result.push_back(vpart_info::type_count_pair(item, 1));
         return result;
     }
-    if( !item_controller->has_template( item ) ) {
+    if( !item::type_is_defined( item ) ) {
         return result;
     }
-    const itype *type = item_controller->find_template( item );
+    const itype *type = item::find_type( item );
     // relative amount of damage
     const double rel_damage = static_cast<double>( durability - hp ) / durability;
     // amount (as weight) of damage that must be repaired
@@ -4998,7 +4995,7 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
     assert(other_part >= 0);
     assert(p != 0);
     if(!p->inv.has_amount(rope_type, 1)) {
-        popup(_("You need a %s to do two vehicles together!"), item_controller->find_template(rope_type)->nname(1).c_str());
+        popup(_("You need a %s to do two vehicles together!"), item::nname(rope_type).c_str());
         return false;
     }
     std::list<item> rope = p->inv.use_amount(rope_type, 1);

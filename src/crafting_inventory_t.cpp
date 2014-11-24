@@ -784,9 +784,9 @@ void crafting_inventory_t::simple_req::check_overlay(crafting_inventory_t &cinv,
 
 std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requirement &req) {
     if(req.ctype == crafting_inventory_t::C_CHARGES) {
-        buffer << item_controller->nname(req.type) << " (" << req.count << ")";
+        buffer << item::nname(req.type) << " (" << req.count << ")";
     } else if(req.count == 1) {
-        const std::string n = item_controller->nname(req.type);
+        const std::string n = item::nname(req.type);
         assert(!n.empty());
         if(n[n.length() - 1] == 's') {
             buffer << n;
@@ -799,7 +799,7 @@ std::ostream &operator<<(std::ostream &buffer, const crafting_inventory_t::requi
             }
         }
     } else {
-        buffer << req.count << " " << item_controller->nname(req.type, req.count);
+        buffer << req.count << " " << item::nname(req.type, req.count);
     }
     return buffer;
 }
@@ -889,7 +889,7 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
             buffer << rc.req;
             if(rc.req.type != rc.comp->type) {
                 if(rc.comp->type.compare(5, rc.req.type.length(), rc.req.type) != 0) {
-                    buffer << " (used as " << item_controller->nname(rc.comp->type) << ")";
+                    buffer << " (used as " << item::nname(rc.comp->type) << ")";
                 }
             }
             
@@ -898,7 +898,7 @@ std::string crafting_inventory_t::complex_req::to_string(int flags) const {
                 for(std::vector<simple_req*>::const_iterator a = rc.overlays.begin(); a != rc.overlays.end(); a++) {
                     assert(*a != NULL);
                     if(a != rc.overlays.begin()) { buffer << ", "; }
-                    buffer << item_controller->nname((*a)->req.type);
+                    buffer << item::nname((*a)->req.type);
                 }
             }
         }
@@ -1429,16 +1429,16 @@ int crafting_inventory_t::select_items_to_use(const std::vector<component> &comp
         } else if(has_different_types(candids)) {
             // several items to choose, and they are of different types, 
             // make another menu later if the user chooses this
-            options.push_back(item_controller->find_template(req.type)->nname(1) + " (different items)");
+            options.push_back(item::nname(req.type) + " (different items)");
             optionsIndizes.push_back(std::make_pair(ask_again, i));
         } else if(!all_equal(candids)) {
             // several items, but they are all of the same type,
             // but with differing properties - list by location,
-            options.push_back(item_controller->find_template(req.type)->nname(1) + " (different items)");
+            options.push_back(item::nname(req.type) + " (different items)");
             optionsIndizes.push_back(std::make_pair(ask_again, i));
         } else {
             // several items, but they are all of the same type, list by location,
-            const std::string name = item_controller->find_template(req.type)->nname(1);
+            const std::string name = item::nname(req.type);
             // Rules here are: show entry for "on person",
             // for "nearby" (if any of them apply).
             // Also show the mixed entry, but only if none of the other two
@@ -1644,7 +1644,7 @@ void crafting_inventory_t::complex_req::select_items_to_use() {
             // for "nearby" (if any of them apply).
             // Also show the mixed entry, but only if none of the other two
             // are shown
-            buffer << item_controller->nname(req.type);
+            buffer << item::nname(req.type);
             if(sr.cnt_on_map >= count) {
                 options.push_back(buffer.str() + " (nearby)");
                 optionsIndizes.push_back(std::make_pair(nearby, i));
@@ -2384,9 +2384,9 @@ crafting_inventory_t::requirement::requirement(const component &comp, bool as_to
     if(as_tool) {
         if(req > 0) {
             this->count = req;
-            itype *it = item_controller->find_template(type);
+            itype *it = item::find_type(type);
             if(type.compare(0, 5, "func:") == 0) {
-                it = item_controller->find_template(type.substr(5));
+                it = item::find_type(type.substr(5));
             }
             it_tool *itt = dynamic_cast<it_tool*>(it);
             if(itt != nullptr && itt->max_charges > 0) {
@@ -2399,7 +2399,7 @@ crafting_inventory_t::requirement::requirement(const component &comp, bool as_to
             this->ctype = C_AMOUNT;
         }
     } else {
-        if(req > 0 && item_controller->find_template(type)->count_by_charges()) {
+        if(req > 0 && item::count_by_charges(type)) {
             this->count = req;
             this->ctype = C_CHARGES;
         } else {
@@ -2602,7 +2602,7 @@ void crafting_inventory_t::add_vpart(vehicle *veh, int mpart, const std::string 
         return;
     }
     const itype_id type = vpart_name_prefix + vpart_flag_name;
-    if(!item_controller->has_template(type)) {
+    if(!item::type_is_defined(type)) {
         debugmsg("Missing template for vpart pseudo item %s", type.c_str());
         return;
     }

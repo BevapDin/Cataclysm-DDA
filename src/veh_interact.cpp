@@ -3,7 +3,6 @@
 #include "vehicle.h"
 #include "overmapbuffer.h"
 #include "game.h"
-#include "item_factory.h"
 #include "output.h"
 #include "catacharset.h"
 #include "crafting.h"
@@ -317,7 +316,7 @@ void veh_interact::deallocate_windows()
  */
 static int charges_per_use( const std::string &id )
 {
-    const it_tool *t = dynamic_cast<const it_tool *>( item_controller->find_template( id ) );
+    const it_tool *t = dynamic_cast<const it_tool *>( item::find_type( id ) );
     if( t == nullptr ) {
         debugmsg( "item %s is not a tool as expected", id.c_str() );
         return 0;
@@ -504,7 +503,7 @@ bool veh_interact::can_install_part(int msg_width, int engines, int dif_eng){
             fold_and_print(w_msg, 0, 1, msg_width - 2, c_ltgray,
                            _("Needs <color_%1$s>%2$s</color>, a <color_%3$s>wrench</color> and level <color_%4$s>%5$d</color> skill in mechanics.%6$s"),
                            has_comps ? "ltgreen" : "red",
-                           item_controller->nname( itm ).c_str(),
+                           item::nname( itm ).c_str(),
                            has_wrench ? "ltgreen" : "red",
                            has_skill ? "ltgreen" : "red",
                            sel_vpart_info->difficulty,
@@ -516,7 +515,7 @@ bool veh_interact::can_install_part(int msg_width, int engines, int dif_eng){
             fold_and_print(w_msg, 0, 1, msg_width - 2, c_ltgray,
                            _("Needs <color_%1$s>%2$s</color>, and level <color_%3$s>%4$d</color> skill in mechanics.%5$s"),
                            has_comps ? "ltgreen" : "red",
-                           item_controller->nname( itm ).c_str(),
+                           item::nname( itm ).c_str(),
                            has_skill ? "ltgreen" : "red",
                            sel_vpart_info->difficulty,
                            engine_string.c_str());
@@ -527,7 +526,7 @@ bool veh_interact::can_install_part(int msg_width, int engines, int dif_eng){
             fold_and_print(w_msg, 0, 1, msg_width - 2, c_ltgray,
                            _("Needs <color_%1$s>%2$s</color>, a <color_%3$s>wrench</color>, either a <color_%4$s>powered welder</color> or <color_%5$s>duct tape</color>, and level <color_%6$s>%7$d</color> skill in mechanics.%8$s"),
                            has_comps ? "ltgreen" : "red",
-                           item_controller->nname( itm ).c_str(),
+                           item::nname( itm ).c_str(),
                            has_wrench ? "ltgreen" : "red",
                            (has_welder && has_goggles) ? "ltgreen" : "red",
                            has_duct_tape ? "ltgreen" : "red",
@@ -712,14 +711,14 @@ void veh_interact::do_repair()
                 cc++;
                 buffer << "<color_" << (has ? "ltgreen" : "red") << ">";
                 if(count > 1) {
-                    buffer << count << " " << item_controller->nname(itm, count) << "s";
+                    buffer << count << " " << item::nname(itm, count) << "s";
                 } else {
-                    buffer << "a " << item_controller->nname(itm, 1);
+                    buffer << "a " << item::nname(itm, 1);
                 }
                 buffer << "</color>";
                 has_comps &= has;
             }
-            fold_and_print(w_msg, 1, 1, msg_width-2, c_ltgray, buffer.str().c_str());
+            fold_and_print(w_msg, 1, 1, msg_width - 2, c_ltgray, buffer.str().c_str());
         }
         wrefresh (w_msg);
         const std::string action = main_context.handle_input();
@@ -1165,12 +1164,9 @@ void veh_interact::move_cursor (int dx, int dy)
     sel_vpart_info = NULL;
     if (!obstruct) {
         int divider_index = 0;
-        for (std::map<std::string, vpart_info>::iterator
-             part_type_iterator = vehicle_part_types.begin();
-             part_type_iterator != vehicle_part_types.end();
-             ++part_type_iterator) {
-            if (veh->can_mount(vdx, vdy, part_type_iterator->first)) {
-                vpart_info *vpi = &part_type_iterator->second;
+        for( auto &vehicle_part_type : vehicle_part_types ) {
+            if( veh->can_mount( vdx, vdy, vehicle_part_type.first ) ) {
+                vpart_info *vpi = &vehicle_part_type.second;
                 if (can_currently_install(vpi)) {
                     can_mount.insert( can_mount.begin() + divider_index++, *vpi );
                 } else {
@@ -1182,12 +1178,9 @@ void veh_interact::move_cursor (int dx, int dy)
 
     //Only build the wheel list once
     if (wheel_types.empty()) {
-        for (std::map<std::string, vpart_info>::iterator
-             part_type_iterator = vehicle_part_types.begin();
-             part_type_iterator != vehicle_part_types.end();
-             ++part_type_iterator) {
-            if (part_type_iterator->second.has_flag("WHEEL")) {
-                wheel_types.push_back (part_type_iterator->second);
+        for( auto &vehicle_part_type : vehicle_part_types ) {
+            if( vehicle_part_type.second.has_flag( "WHEEL" ) ) {
+                wheel_types.push_back( vehicle_part_type.second );
             }
         }
         sel_vpart_info = NULL;
@@ -1268,8 +1261,8 @@ void veh_interact::display_veh ()
     //Iterate over structural parts so we only hit each square once
     std::vector<int> structural_parts = veh->all_parts_at_location("structure");
     int x, y;
-    for (size_t i = 0; i < structural_parts.size(); i++) {
-        const int p = structural_parts[i];
+    for( auto &structural_part : structural_parts ) {
+        const int p = structural_part;
         long sym = veh->part_sym (p);
         nc_color col = veh->part_color (p);
         if (vertical_menu) {
@@ -1305,8 +1298,8 @@ void veh_interact::display_stats()
     std::vector<int> cargo_parts = veh->all_parts_with_feature("CARGO");
     int total_cargo = 0;
     int free_cargo = 0;
-    for (size_t i = 0; i < cargo_parts.size(); i++) {
-        const int p = cargo_parts[i];
+    for( auto &cargo_part : cargo_parts ) {
+        const int p = cargo_part;
         total_cargo += veh->max_volume(p);
         free_cargo += veh->free_volume(p);
     }
@@ -1800,8 +1793,8 @@ void complete_vehicle ()
             crafting_inv.consume_any_tools(tools);
         }
         // Dump contents of part at player's feet, if any.
-        for (size_t i = 0; i < veh->parts[vehicle_part].items.size(); i++) {
-            g->m.add_item_or_charges (g->u.posx, g->u.posy, veh->parts[vehicle_part].items[i]);
+        for( auto &elem : veh->parts[vehicle_part].items ) {
+            g->m.add_item_or_charges( g->u.posx, g->u.posy, elem );
         }
         veh->parts[vehicle_part].items.clear();
 

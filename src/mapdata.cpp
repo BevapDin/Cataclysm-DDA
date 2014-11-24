@@ -1,7 +1,6 @@
 #include "mapdata.h"
 #include "color.h"
 #include "init.h"
-#include "item_factory.h"
 #include "game_constants.h"
 #include "debug.h"
 #include <ostream>
@@ -812,9 +811,9 @@ ter_furn_id::ter_furn_id() {
 
 void check_bash_items(const map_bash_info &mbi, const std::string &id, bool is_terrain)
 {
-    for(size_t i = 0; i < mbi.items.size(); i++) {
-        const std::string &it = mbi.items[i].itemtype;
-        if (!item_controller->has_template(it)) {
+    for( auto &elem : mbi.items ) {
+        const std::string &it = elem.itemtype;
+        if( !item::type_is_defined( it ) ) {
             debugmsg("%s: bash result item %s does not exist", id.c_str(), it.c_str());
         }
     }
@@ -836,9 +835,9 @@ void check_decon_items(const map_deconstruct_info &mbi, const std::string &id, b
     if (!mbi.can_do) {
         return;
     }
-    for(size_t i = 0; i < mbi.items.size(); i++) {
-        const std::string &it = mbi.items[i].itemtype;
-        if (!item_controller->has_template(it)) {
+    for( auto &elem : mbi.items ) {
+        const std::string &it = elem.itemtype;
+        if( !item::type_is_defined( it ) ) {
             debugmsg("%s: deconstruct result item %s does not exist", id.c_str(), it.c_str());
         }
     }

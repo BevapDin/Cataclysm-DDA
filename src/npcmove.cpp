@@ -6,7 +6,6 @@
 #include "debug.h"
 #include "overmapbuffer.h"
 #include "messages.h"
-#include "item_factory.h"
 
 #define dbg(x) DebugLog((DebugLevel)(x),D_NPC) << __FILE__ << ":" << __LINE__ << ": "
 #define TARGET_PLAYER -2
@@ -856,10 +855,10 @@ npc_action npc::long_term_goal_action()
 
 bool npc::alt_attack_available()
 {
-    for (int i = 0; i < NUM_ALT_ATTACK_ITEMS; i++) {
-        if ((!is_following() || combat_rules.use_grenades ||
-             !(item_controller->find_template( ALT_ATTACK_ITEMS[i] )->item_tags.count("GRENADE"))) &&
-            has_amount(ALT_ATTACK_ITEMS[i], 1)) {
+    for( auto &elem : ALT_ATTACK_ITEMS ) {
+        if( ( !is_following() || combat_rules.use_grenades ||
+              !( item::find_type( elem )->item_tags.count( "GRENADE" ) ) ) &&
+            has_amount( elem, 1 ) ) {
             return true;
         }
     }
@@ -1411,19 +1410,19 @@ void npc::find_item()
         for (int y = miny; y <= maxy; y++) {
             if (g->m.sees(posx, posy, x, y, range, linet) && g->m.sees_some_items(x, y, *this)) {
                 std::vector<item> &i = g->m.i_at(x, y);
-                for (std::vector<item>::iterator it = i.begin(); it != i.end(); ++it) {
-                    if ( it->made_of( LIQUID ) ) {
+                for( auto &elem : i ) {
+                    if( elem.made_of( LIQUID ) ) {
                         // Don't even consider liquids.
                         continue;
                     }
-                    int itval = value(*it);
-                    int wgt = it->weight(), vol = it->volume();
+                    int itval = value( elem );
+                    int wgt = elem.weight(), vol = elem.volume();
                     if (itval > best_value &&
                         //(itval > worst_item_value ||
                         (can_pickWeight(wgt) && can_pickVolume(vol))) {
                         itx = x;
                         ity = y;
-                        wanted = &(*it);
+                        wanted = &( elem );
                         best_value = itval;
                         fetching_item = true;
                     }
@@ -1575,9 +1574,9 @@ void npc::drop_items(int weight, int volume)
             index = rWgt[0].index;
             rWgt.erase(rWgt.begin());
             // Fix the rest of those indices.
-            for (size_t i = 0; i < rWgt.size(); i++) {
-                if (rWgt[i].index > index) {
-                    rWgt[i].index--;
+            for( auto &elem : rWgt ) {
+                if( elem.index > index ) {
+                    elem.index--;
                 }
             }
         } else {
@@ -1703,11 +1702,11 @@ void npc::alt_attack(int target)
      * items, from least to most important.
      * See npc.h for definition of ALT_ATTACK_ITEMS
      */
-    for (int i = 0; i < NUM_ALT_ATTACK_ITEMS; i++) {
-        if ((!is_following() || combat_rules.use_grenades ||
-             !(item_controller->find_template( ALT_ATTACK_ITEMS[i] )->item_tags.count("GRENADE"))) &&
-            has_amount(ALT_ATTACK_ITEMS[i], 1)) {
-            which = ALT_ATTACK_ITEMS[i];
+    for( auto &elem : ALT_ATTACK_ITEMS ) {
+        if( ( !is_following() || combat_rules.use_grenades ||
+              !( item::find_type( elem )->item_tags.count( "GRENADE" ) ) ) &&
+            has_amount( elem, 1 ) ) {
+            which = elem;
         }
     }
 
