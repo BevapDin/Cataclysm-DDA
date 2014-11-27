@@ -3033,6 +3033,7 @@
     {
         "type":"GENERIC",
         "id": "atomic_light",
+        "category" : "tools",
         "symbol": ",",
         "color": "light_green",
         "name": "atomic nightlight",
@@ -3050,6 +3051,7 @@
     {
         "type":"GENERIC",
         "id": "atomic_coffeepot",
+        "category" : "tools",
         "symbol": ",",
         "color": "light_green",
         "name": "atomic coffee maker",
