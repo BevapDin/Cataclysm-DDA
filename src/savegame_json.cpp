@@ -1291,6 +1291,7 @@ void vehicle::deserialize(JsonIn &jsin)
     data.read("turn_dir", turn_dir);
     data.read("velocity", velocity);
     data.read("cruise_velocity", cruise_velocity);
+    data.read("security", security);
     data.read("music_id", music_id);
     data.read("cruise_on", cruise_on);
     data.read("engine_on", engine_on);
@@ -1306,7 +1307,9 @@ void vehicle::deserialize(JsonIn &jsin)
     data.read("skidding", skidding);
     data.read("turret_mode", turret_mode);
     data.read("of_turn_carry", of_turn_carry);
-
+    data.read("is_locked", is_locked);
+    data.read("is_alarm_on", is_alarm_on);
+    
     face.init (fdir);
     move.init (mdir);
     data.read("name", name);
@@ -1355,6 +1358,7 @@ void vehicle::serialize(JsonOut &json) const
     json.member( "turn_dir", turn_dir );
     json.member( "velocity", velocity );
     json.member( "cruise_velocity", cruise_velocity );
+    json.member( "security", security );
     json.member( "music_id", music_id);
     json.member( "cruise_on", cruise_on );
     json.member( "engine_on", engine_on );
@@ -1374,6 +1378,8 @@ void vehicle::serialize(JsonOut &json) const
     json.member( "parts", parts );
     json.member( "tags", tags );
     json.member( "labels", labels );
+    json.member( "is_locked", is_locked );
+    json.member( "is_alarm_on", is_alarm_on );
     json.end_object();
 }
 
