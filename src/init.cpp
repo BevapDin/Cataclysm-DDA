@@ -372,6 +372,7 @@ void DynamicDataLoader::finalize_loaded_data()
 void DynamicDataLoader::check_consistency()
 {
     item_controller->check_definitions();
+    g->check_vehicleparts();
     MonsterGenerator::generator().check_monster_definitions();
     MonsterGroupManager::check_group_definitions();
     check_recipe_definitions();
