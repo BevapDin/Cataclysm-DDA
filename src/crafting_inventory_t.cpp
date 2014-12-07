@@ -933,7 +933,7 @@ bool crafting_inventory_t::has(component &x, bool as_tool) const {
 }
 
 std::vector<item>& crafting_inventory_t::items_on_map::items() {
-    return m->i_at(position.x, position.y);
+    return const_cast<std::vector<item>&>(m->i_at(position.x, position.y));
 }
 
 const std::vector<item>& crafting_inventory_t::items_on_map::items() const {
@@ -2173,7 +2173,7 @@ void crafting_inventory_t::candidate_t::consume(player *p, requirement &req, std
         case LT_MAP:
             remove_releated(
                 req,
-                g->m.i_at(mapitems->position.x, mapitems->position.y),
+                const_cast<std::vector<item>&>(g->m.i_at(mapitems->position.x, mapitems->position.y)),
                 mindex,
                 used_items
             );
@@ -2210,7 +2210,7 @@ void crafting_inventory_t::candidate_t::consume(player *p, requirement &req, std
             }
             if(ix->type->id == "water" && furnlist[g->m.furn(mapitems->position.x, mapitems->position.y)].examine == &iexamine::toilet) {
                 // get water charges at location
-                std::vector<item> &toiletitems = g->m.i_at(mapitems->position.x, mapitems->position.y);
+                std::vector<item> &toiletitems = const_cast<std::vector<item>&>(g->m.i_at(mapitems->position.x, mapitems->position.y));
                 for(size_t i = 0; req.count > 0 && i < toiletitems.size(); ++i) {
                     if(toiletitems[i].typeId() == "water") {
                         remove_releated(

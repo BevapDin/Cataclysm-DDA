@@ -722,7 +722,7 @@ void advanced_inventory_pane::add_items_from_area( advanced_inv_area &square )
         map &m = g->m;
         const itemslice &stacks = square.veh != nullptr ?
                                   m.i_stacked( square.veh->parts[square.vstor].items ) :
-                                  m.i_stacked( m.i_at( square.x , square.y ) );
+                                  m.i_stacked( m.i_at_mutable( square.x, square.y ) );
         for( size_t x = 0; x < stacks.size(); ++x ) {
             advanced_inv_listitem it( stacks[x].first, x, stacks[x].second, square.id );
             if( is_filtered( it ) ) {
@@ -905,7 +905,7 @@ aim_location advanced_inventory::find_destination(const advanced_inv_listitem &i
         if( !s.canputitemsloc || s.id == it.area ) {
             continue;
         }
-        std::vector<item>& items = s.veh != nullptr ?
+        auto& items = s.veh != nullptr ?
                         s.veh->parts[s.vstor].items :
                         g->m.i_at( s.x, s.y );
 
@@ -1208,7 +1208,7 @@ void advanced_inventory::display()
             auto &s = squares[srcarea];
 
             if( d.veh == nullptr && s.veh == nullptr ) {
-                g->m.i_at( s.x, s.y ).swap( g->m.i_at( d.x, d.y ) );
+                const_cast<std::vector<item>&>(g->m.i_at( s.x, s.y )).swap( const_cast<std::vector<item>&>(g->m.i_at( d.x, d.y )) );
                 recalc = true;
             } else if( d.veh != nullptr && s.veh != nullptr ) {
                 s.veh->parts[s.vstor].items.swap( d.veh->parts[d.vstor].items );
@@ -1788,7 +1788,7 @@ item* advanced_inv_area::get_container()
             map &m = g->m;
             const itemslice &stacks = veh != nullptr ?
                                       m.i_stacked( veh->parts[vstor].items ) :
-                                      m.i_stacked( m.i_at( x , y ) );
+                                      m.i_stacked( m.i_at_mutable( x, y ) );
 
             // check index first
             if (stacks.size() > (size_t)uistate.adv_inv_container_index) {

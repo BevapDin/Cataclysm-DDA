@@ -559,7 +559,7 @@ void crafting_inventory_t::form_from_map(point origin, int range)
             // crafting
             if (furnlist[g->m.furn(x, y)].examine == &iexamine::toilet) {
                 // get water charges at location
-                std::vector<item> &toiletitems = g->m.i_at(x,y);
+                auto &toiletitems = g->m.i_at(x,y);
                 for (size_t i = 0; i < toiletitems.size(); ++i) {
                     if (toiletitems[i].typeId() == "water") {
                         add_surround(p, toiletitems[i]);
@@ -570,7 +570,7 @@ void crafting_inventory_t::form_from_map(point origin, int range)
 
             // keg-kludge
             if (furnlist[g->m.furn(x, y)].examine == &iexamine::keg) {
-                std::vector<item> liq_contained = g->m.i_at(x, y);
+                auto &liq_contained = g->m.i_at(x, y);
                 for (auto &i : liq_contained)
                     if (i.made_of(LIQUID)) {
                         add_surround(p, i);
