@@ -1600,7 +1600,7 @@ void mapgen_bridge(map *m, oter_id terrain_type, mapgendata dat, int turn, float
         }
     }
     // spawn regular road out of fuel vehicles
-    if (one_in(2)) {
+    if (one_in(10)) {
         int vx = rng (10, 12);
         int vy = rng (10, 12);
         int rc = rng(1, 10);
@@ -1646,7 +1646,7 @@ void mapgen_highway(map *m, oter_id terrain_type, mapgendata dat, int turn, floa
     m->place_items("road", 8, 0, 0, SEEX * 2 - 1, SEEX * 2 - 1, false, turn);
 
     // spawn regular road out of fuel vehicles
-    if (one_in(2)) {
+    if (one_in(10)) {
         int vx = rng (10, 12);
         int vy = rng (10, 12);
         int rc = rng(1, 10);
