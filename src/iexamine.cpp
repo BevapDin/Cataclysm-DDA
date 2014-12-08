@@ -61,12 +61,13 @@ void iexamine::atm(player *p, map *m, int examx, int examy)
     (void)examx; //unused
     (void)examy; //unused
     int choice = -1;
-    const int purchase_cash_card = 0;
-    const int deposit_money = 1;
-    const int withdraw_money = 2;
-    const int transfer_money = 3;
-    const int cancel = 4;
-    const int revoke = 5;
+    const int purchase_cash_card = 1;
+    const int deposit_money = 2;
+    const int withdraw_money = 3;
+    const int transfer_money = 4;
+    const int transfer_all_money = 5;
+    const int revoke = 6;
+    const int cancel = 0;
     long amount = 0;
     long max = 0;
     std::string popupmsg;
@@ -104,6 +105,7 @@ void iexamine::atm(player *p, map *m, int examx, int examy)
 
     if (p->has_amount("cash_card", 2) && p->has_charges("cash_card", 1)) {
         amenu.addentry( transfer_money, true, -1, _("Transfer Money") );
+        amenu.addentry( transfer_all_money, true, -1, _("Transfer All Money") );
     } else if (p->has_charges("cash_card", 1)) {
         amenu.addentry( transfer_money, false, -1,
                         _("You need two cash cards before you can move money!") );
@@ -280,6 +282,26 @@ void iexamine::atm(player *p, map *m, int examx, int examy)
         p->moves -= 100;
         return;
 
+    } else if (choice == transfer_all_money) {
+        pos = g->inv(_("Insert card for bulk deposit."));
+        dep = &(p->i_at(pos));
+        if (dep->is_null()) {
+            popup(_("You do not have that item!"));
+            return;
+        }
+        if (dep->type->id != "cash_card") {
+            popup(_("Please insert cash cards only!"));
+            return;
+        }
+        
+        //for all cash cards in inventory
+        for (auto &elem : g->u.inv.all_items_by_type("cash_card")) {
+            if (elem.first == dep) continue;
+            dep->charges += elem.first->charges;
+            elem.first->charges = 0;
+            // Assuming a bulk interface for cards. Don't want to get people killed doing this.
+            p->moves -= 10;
+        }
     } else {
         return;
     }
