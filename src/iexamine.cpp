@@ -293,7 +293,7 @@ void iexamine::atm(player *p, map *m, int examx, int examy)
             popup(_("Please insert cash cards only!"));
             return;
         }
-        
+
         //for all cash cards in inventory
         for (auto &elem : g->u.inv.all_items_by_type("cash_card")) {
             if (elem.first == dep) continue;
@@ -579,9 +579,9 @@ void iexamine::cardreader(player *p, map *m, int examx, int examy)
 
 void iexamine::rubble(player *p, map *m, int examx, int examy)
 {
+    bool has_digging_tool = p->has_items_with_quality( "DIG", 2, 1 );
   // Perhaps check for vehicle covering the rubble and bail out if so (string freeze ATM)?
-    if (!(p->has_amount("shovel", 1) || p->has_amount("primitive_shovel", 1) ||
-          p->has_amount("e_tool", 1))) {
+    if (!has_digging_tool) {
         add_msg(m_info, _("If only you had a shovel..."));
         return;
     }
