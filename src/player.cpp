@@ -9465,7 +9465,7 @@ bool player::consume(int target_position)
                 if (OPTIONS["DROP_EMPTY"] == "no") {
                     drop_it = false;
                 } else if (OPTIONS["DROP_EMPTY"] == "watertight") {
-                    drop_it = target_position >= 0 && it.is_container() && !(it.has_flag("WATERTIGHT") && it.has_flag("SEALS"));
+                    drop_it = target_position >= 0 && !it.is_watertight_container();
                 } else if (OPTIONS["DROP_EMPTY"] == "all") {
                     drop_it = target_position >= 0;
                 }
@@ -11186,7 +11186,7 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
                 add_msg(_("Can't put liquids into this"));
                 return;
             }
-        } else if(itc->container != used->type->id) {
+        } else if(itc->default_container != used->type->id) {
             add_msg(_("That does not belong in this container"));
             return;
         }
@@ -11205,6 +11205,11 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
         // Get weapon mod names.
         if (mods.empty()) {
             add_msg(m_info, _("Your %s doesn't appear to be modded."), used->tname().c_str());
+            return;
+        }
+        if( inventory_position < -1 ) {
+            // Prevent removal of shoulder straps and thereby making the gun un-wearable again.
+            add_msg( _( "You can not modify your %s while it's worn." ), used->tname().c_str() );
             return;
         }
         // Create menu.
@@ -12122,11 +12127,6 @@ int player::encumb(body_part bp, double &layers, int &armorenc) const
     }
 
     for (size_t i = 0; i < worn.size(); ++i) {
-        if( !worn[i].is_armor() ) {
-            debugmsg("%s::encumb hit a non-armor item at worn[%d] (%s)", name.c_str(),
-                     i, worn[i].tname().c_str());
-        }
-
         if( worn[i].covers(bp) ) {
             if( worn[i].has_flag( "SKINTIGHT" ) ) {
                 level = UNDERWEAR;

@@ -154,8 +154,6 @@ void DynamicDataLoader::initialize()
             &Item_factory::load_gunmod);
     type_function_map["GENERIC"] = new ClassFunctionAccessor<Item_factory>(item_controller,
             &Item_factory::load_generic);
-    type_function_map["ARMOR_CONTAINER"] = new ClassFunctionAccessor<Item_factory>(item_controller,
-            &Item_factory::load_armor_container);
     type_function_map["BIONIC_ITEM"] = new ClassFunctionAccessor<Item_factory>(item_controller,
             &Item_factory::load_bionic);
     type_function_map["VAR_VEH_PART"] = new ClassFunctionAccessor<Item_factory>(item_controller,
