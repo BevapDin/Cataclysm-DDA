@@ -909,6 +909,30 @@
     "use_action": "HOTPLATE"
   },
   {
+    "id": "survivor_mess_kit",
+    "sub": "hotplate",
+    "type": "TOOL",
+    "symbol": ";",
+    "color": "brown",
+    "name": "survivor mess kit",
+    "description": "A homemade mess kit, containing everything you might need for creating post-apocalyptic cuisine. Powered by a lamp oil burner, it is composed of simple yet durable tools and materials.",
+    "price": 2000,
+    "material": ["steel", "glass"],
+    "weight": 2160,
+    "volume": 10,
+    "bashing": 6,
+    "cutting": 0,
+    "to_hit": -1,
+    "max_charges": 800,
+    "initial_charges": 0,
+    "charges_per_use": 1,
+    "turns_per_charge": 0,
+    "ammo": "lamp_oil",
+    "revert_to": "null",
+    "qualities": [["COOK", 3], ["BOIL", 2], ["CONTAIN", 1], ["CHEM", 1]],
+    "use_action": "HOTPLATE"
+  },
+  {
     "id": "coffeemaker",
     "type": "TOOL",
     "color": "light_gray",
@@ -8947,6 +8971,26 @@
     "revert_to": "null",
     "category" : "weapons",
     "use_action": "KNIFE"
-  }
-
+  },{
+    "id": "remotevehcontrol",
+    "type": "TOOL",
+    "symbol": "#",
+    "color": "yellow",
+    "name": "remote vehicle controller",
+    "description": "A remote controller for real cars. Can turn onboard devices on and off. Some cars can be driven remotely.",
+    "price": 2000,
+    "material": "plastic",
+    "weight": 907,
+    "volume": 4,
+    "bashing": -3,
+    "cutting": 0,
+    "to_hit": -1,
+    "max_charges": 100,
+    "initial_charges": 100,
+    "charges_per_use": 1,
+    "turns_per_charge": 10,
+    "ammo": "battery",
+    "revert_to": "null",
+    "use_action": "REMOTEVEH"
+    }
 ]
