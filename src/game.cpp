@@ -4423,9 +4423,8 @@ void game::debug()
         u.i_add(item(architects_cube(), calendar::turn));
         break;
 
-    case 17: {
-        point coord = look_debug();
-    }
+    case 17:
+        look_debug();
     break;
 
     case 18: {
