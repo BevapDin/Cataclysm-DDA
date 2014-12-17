@@ -791,12 +791,12 @@ private:
          * Get submap pointer in the grid at given grid coordinates. Grid coordinates must
          * be valid: 0 <= x < my_MAPSIZE, same for y.
          */
-        submap *get_submap_at_grid( int gridx, int gridy ) const;
+        submap *get_submap_at_grid( point gp ) const;
         /**
          * Get the index of a submap pointer in the grid given by grid coordinates. The grid
          * coordinates must be valid: 0 <= x < my_MAPSIZE, same for y.
          */
-        int get_nonant( int gridx, int gridy ) const;
+        int get_nonant( point gp ) const;
         /**
          * Set the submap pointer in @ref grid at the give index. This is the inverse of
          * @ref getsubmap, any existing pointer is overwritten. The index must be valid.

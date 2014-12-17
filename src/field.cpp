@@ -409,7 +409,7 @@ bool map::process_fields()
  bool found_field = false;
  for (int x = 0; x < my_MAPSIZE; x++) {
   for (int y = 0; y < my_MAPSIZE; y++) {
-   submap * const current_submap = get_submap_at_grid(x, y);
+   submap * const current_submap = get_submap_at_grid( point( x, y ) );
    if (current_submap->field_count > 0)
     found_field |= process_fields_in_submap(current_submap, x, y);
   }
