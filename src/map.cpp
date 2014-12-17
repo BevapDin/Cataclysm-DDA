@@ -3027,12 +3027,6 @@ itemslice map::i_stacked(std::vector<item>& items)
     return islice;
 }
 
-
-bool map::sees_some_items(const int x, const int y, const player &u)
-{
-    return sees_some_items( tripoint( x, y, 0 ), u );
-}
-
 bool map::sees_some_items(const tripoint &p, const player &u)
 {
     // can only see items if there are any items.

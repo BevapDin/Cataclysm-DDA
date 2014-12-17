@@ -9851,7 +9851,7 @@ std::vector<map_item_stack> game::find_nearby_items(int iRadius)
     for( auto &points_p_it : points ) {
         if( points_p_it.y >= u.posy - iRadius && points_p_it.y <= u.posy + iRadius &&
             u_see( points_p_it.x, points_p_it.y ) &&
-            m.sees_some_items( points_p_it.x, points_p_it.y, u ) ) {
+            m.sees_some_items( tripoint( points_p_it.x, points_p_it.y, 0 ), u ) ) {
 
             here.clear();
             here = m.i_at( points_p_it.x, points_p_it.y );
