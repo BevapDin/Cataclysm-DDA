@@ -1651,6 +1651,7 @@ int editmap::mapgen_preview( real_coords &tc, uimenu &gmenu )
                                 // vehicle *veh1 = veh;   // fixme: is this required?
                                 veh1->smx = target_sub.x + x;
                                 veh1->smy = target_sub.y + y;
+//                                veh1->smz = target_sub.z + 0; TODO
                                 destsm->vehicles.push_back (veh1);
                                 g->m.update_vehicle_cache(veh1);
                             }

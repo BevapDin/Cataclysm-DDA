@@ -462,6 +462,7 @@ public:
      */
     int global_x() const;
     int global_y() const;
+    int global_z() const;
     /**
      * Really global absolute coordinates in map squares.
      * This includes the overmap, the submap, and the map square.
@@ -734,14 +735,14 @@ public:
      * is loaded into the map the values are directly set. The vehicles position does
      * not change therefor no call to set_submap_moved is required.
      */
-    int smx, smy;
+    int smx, smy, smz;
     /**
      * Update the submap coordinates smx, smy, and update the tracker info in the overmap
      * (if enabled).
      * This should be called only when the vehicle has actually been moved, not when
      * the map is just shifted (in the later case simply set smx/smy directly).
      */
-    void set_submap_moved(int x, int y);
+    void set_submap_moved(int x, int y, int z);
     bool insides_dirty; // if true, then parts' "inside" flags are outdated and need refreshing
     int init_veh_fuel;
     int init_veh_status;

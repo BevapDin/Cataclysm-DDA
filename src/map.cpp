@@ -288,7 +288,7 @@ void map::destroy_vehicle (vehicle *veh)
         debugmsg("map::destroy_vehicle was passed NULL");
         return;
     }
-    submap * const current_submap = get_submap_at_grid( point( veh->smx, veh->smy ) );
+    submap * const current_submap = get_submap_at_grid( tripoint( veh->smx, veh->smy, veh->smz ) );
     for (size_t i = 0; i < current_submap->vehicles.size(); i++) {
         if (current_submap->vehicles[i] == veh) {
             vehicle_list.erase(veh);
@@ -298,9 +298,10 @@ void map::destroy_vehicle (vehicle *veh)
             return;
         }
     }
-    debugmsg ("destroy_vehicle can't find it! name=%s, x=%d, y=%d", veh->name.c_str(), veh->smx, veh->smy);
+    debugmsg ("destroy_vehicle can't find it! name=%s, x=%d, y=%d, z=%d", veh->name.c_str(), veh->smx, veh->smy, veh->smz);
 }
 
+// TODO: Z
 bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool test)
 {
     const int x2 = x + dx;
@@ -405,7 +406,8 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
     veh->posx = dst_offset_x;
     veh->posy = dst_offset_y;
     if (src_submap != dst_submap) {
-        veh->set_submap_moved( int( x2 / SEEX ), int( y2 / SEEY ) );
+        // TODO: Z
+        veh->set_submap_moved( int( x2 / SEEX ), int( y2 / SEEY ), 0 );
         dst_submap->vehicles.push_back( veh );
         src_submap->vehicles.erase( src_submap->vehicles.begin() + our_i );
     }
@@ -4976,6 +4978,7 @@ void map::shift(const int sx, const int sy)
     for( vehicle *veh : vehicle_list ) {
         veh->smx += sx;
         veh->smy += sy;
+//        veh->smz += sz; TODO
     }
 
 // Clear vehicle list and rebuild after shift
@@ -5104,6 +5107,7 @@ void map::loadn( const tripoint gp, const bool update_vehicles ) {
     // gridx/y not correct. TODO: Fix
     (*it)->smx = gp.x;
     (*it)->smy = gp.y;
+    (*it)->smz = gp.z;
     vehicle_list.insert(*it);
     update_vehicle_cache(*it);
    }

@@ -2504,16 +2504,22 @@ int vehicle::global_y() const
     return smy * SEEY + posy;
 }
 
+int vehicle::global_z() const
+{
+    return smz;
+}
+
 point vehicle::real_global_pos() const
 {
     return g->m.getabs( global_x(), global_y() );
 }
 
-void vehicle::set_submap_moved( int x, int y )
+void vehicle::set_submap_moved( int x, int y, int z )
 {
     const point old_msp = real_global_pos();
     smx = x;
     smy = y;
+    smz = z;
     if( !tracking_on ) {
         return;
     }

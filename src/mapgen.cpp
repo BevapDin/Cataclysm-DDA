@@ -11230,6 +11230,7 @@ vehicle *map::add_vehicle(std::string type, const int x, const int y, const int 
     veh->posy = y % SEEY;
     veh->smx = smx;
     veh->smy = smy;
+    veh->smz = 0; // TODO: Z
     veh->place_spawn_items();
     veh->face.init( dir );
     veh->turn_dir = dir;
@@ -11240,7 +11241,7 @@ vehicle *map::add_vehicle(std::string type, const int x, const int y, const int 
     vehicle *placed_vehicle = add_vehicle_to_map(veh, x, y, merge_wrecks);
 
     if(placed_vehicle != NULL) {
-        submap *place_on_submap = get_submap_at_grid( point( placed_vehicle->smx, placed_vehicle->smy ) );
+        submap *place_on_submap = get_submap_at_grid( tripoint( placed_vehicle->smx, placed_vehicle->smy, placed_vehicle->smz ) );
         place_on_submap->vehicles.push_back(placed_vehicle);
 
         vehicle_list.insert(placed_vehicle);
@@ -11305,6 +11306,7 @@ vehicle *map::add_vehicle_to_map(vehicle *veh, const int x, const int y, const b
             wreckage->posy = other_veh->posy;
             wreckage->smx = other_veh->smx;
             wreckage->smy = other_veh->smy;
+            wreckage->smz = other_veh->smz;
 
             //Where are we on the global scale?
             const int global_x = wreckage->smx * SEEX + wreckage->posx;
