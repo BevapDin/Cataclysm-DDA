@@ -839,7 +839,10 @@ private:
  bool outside_cache[MAPSIZE*SEEX][MAPSIZE*SEEY];
  float transparency_cache[MAPSIZE*SEEX][MAPSIZE*SEEY];
  bool seen_cache[MAPSIZE*SEEX][MAPSIZE*SEEY];
- submap* grid[MAPSIZE * MAPSIZE];
+        /**
+         * The list of currently loaded submaps.
+         */
+        std::vector<submap*> grid;
  std::map<trap_id, std::set<point> > traplocs;
 };
 

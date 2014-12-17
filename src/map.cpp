@@ -32,14 +32,12 @@ enum astar_list {
 map::map(int mapsize)
 {
     my_MAPSIZE = mapsize;
+    grid.resize( my_MAPSIZE * my_MAPSIZE, NULL );
     dbg(D_INFO) << "map::map(): my_MAPSIZE: " << my_MAPSIZE;
     veh_in_active_range = true;
     transparency_cache_dirty = true;
     outside_cache_dirty = true;
     memset(veh_exists_at, 0, sizeof(veh_exists_at));
-    for( auto &elem : grid ) {
-        elem = NULL;
-    }
 }
 
 map::~map()
@@ -5288,7 +5286,7 @@ tripoint map::get_abs_sub() const
 
 submap *map::getsubmap( const int grididx ) const
 {
-    if( grididx < 0 || grididx >= my_MAPSIZE * my_MAPSIZE ) {
+    if( grididx < 0 || grididx >= static_cast<int>( grid.size() ) ) {
         debugmsg( "Tried to access invalid grid index %d", grididx );
         return nullptr;
     }
