@@ -152,8 +152,14 @@ void monster::poly(mtype *t)
 
 void monster::spawn(int x, int y)
 {
-    _posx = x;
-    _posy = y;
+    spawn(tripoint(x, y, _posz));
+}
+
+void monster::spawn(const tripoint &p)
+{
+    _posx = p.x;
+    _posy = p.y;
+    _posz = p.z;
 }
 
 std::string monster::name(unsigned int quantity) const
@@ -366,9 +372,14 @@ bool monster::digging() const
 
 int monster::vision_range(const int x, const int y) const
 {
+    return vision_range(tripoint(x, y, _posz));
+}
+
+int monster::vision_range(const tripoint &p) const
+{
     int range = g->light_level();
     // Set to max possible value if the target is lit brightly
-    if (g->m.light_at(x, y) >= LL_LOW)
+    if (g->m.light_at(p) >= LL_LOW)
         range = DAYLIGHT_LEVEL;
 
     if(has_flag(MF_VIS10)) {
@@ -437,23 +448,25 @@ void monster::debug(player &u)
     getch();
 }
 
-void monster::shift(int sx, int sy)
+void monster::shift(const tripoint &shift)
 {
-    _posx -= sx * SEEX;
-    _posy -= sy * SEEY;
+    _posx -= shift.x * SEEX;
+    _posy -= shift.y * SEEY;
+    _posz -= shift.z;
     for (auto &i : plans) {
-        i.x -= sx * SEEX;
-        i.y -= sy * SEEY;
+        i.x -= shift.x * SEEX;
+        i.y -= shift.y * SEEY;
+        i.z -= shift.z;
     }
 }
 
-point monster::move_target()
+tripoint monster::move_target()
 {
     if (plans.empty()) {
         // if we have no plans, pretend it's intentional
-        return point(_posx, _posy);
+        return pos();
     }
-    return point(plans.back().x, plans.back().y);
+    return plans.back();
 }
 
 bool monster::is_fleeing(player &u) const
