@@ -6823,11 +6823,6 @@ monster &game::zombie(const int idx)
     return critter_tracker.find(idx);
 }
 
-bool game::update_zombie_pos(const monster &critter, const int newx, const int newy)
-{
-    return update_zombie_pos(critter, tripoint(newx, newy, critter.zpos()));
-}
-
 bool game::update_zombie_pos(const monster &critter, const tripoint &p)
 {
     return critter_tracker.update_pos(critter, p);

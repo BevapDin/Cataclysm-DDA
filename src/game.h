@@ -195,7 +195,6 @@ class game
         /** Returns the monster with match index. Redirects to the creature_tracker find() function. */
         monster &zombie(const int idx);
         /** Redirects to the creature_tracker update_pos() function. */
-        bool update_zombie_pos(const monster &critter, const int newx, const int newy);
         bool update_zombie_pos(const monster &critter, const tripoint &p);
         void remove_zombie(const int idx);
         /** Redirects to the creature_tracker clear() function. */

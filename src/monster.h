@@ -298,8 +298,9 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         std::string unique_name; // If we're unique
         bool hallucination;
 
-        bool setpos(const int x, const int y, const bool level_change = false);
-        bool setpos(const point &p, const bool level_change = false);
+        bool setpos(const int x, const int y);
+        bool setpos(const point &p);
+        bool setpos(const tripoint &p);
         const tripoint &pos() const override;
         inline int posx() const
         {
