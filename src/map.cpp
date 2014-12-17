@@ -114,7 +114,6 @@ item &map_stack::operator[]( size_t index )
 
 map::map(int mapsize)
 {
-    nulter = t_null;
     my_MAPSIZE = mapsize;
     grid.resize( my_MAPSIZE * my_MAPSIZE, nullptr );
     dbg(D_INFO) << "map::map(): my_MAPSIZE: " << my_MAPSIZE;
