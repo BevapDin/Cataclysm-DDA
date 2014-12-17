@@ -13659,6 +13659,45 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
     }
 }
 
+/**
+ * Find the destination location for a vertical movement.
+ * Search starts at @ref stair and includes the 2x2 submaps
+ * that point is on.
+ * @return false if no location in reach fulfills the requirement.
+ * Otherwise return true and store the location in @ref stair.
+ */
+bool game::find_vertical_movement_destination(tripoint &stair, int movez) {
+    // Search are is 3x3 submaps, with stair being on the middle one
+    const point omtile_align_start(stair.x - (stair.x % SEEX) - SEEX,
+                                   stair.y - (stair.y % SEEY) - SEEY);
+    const point omtile_align_end(omtile_align_start.x + SEEX * 3,
+                                 omtile_align_start.y + SEEY * 3);
+    // This point is used when consulting the map, only its
+    // x and y components are changed, z must be set here and stays unchanged
+    tripoint ts(0, 0, stair.z);
+    const tripoint center = stair;
+    int best = INT_MAX;
+    for (ts.x = omtile_align_start.x; ts.x < omtile_align_end.x; ts.x++) {
+        for (ts.y = omtile_align_start.y; ts.y < omtile_align_end.y; ts.y++) {
+            const int dist = rl_dist(center, ts);
+            if (dist >= best) {
+                continue;
+            }
+            // List of valid destinations for vertical movement:
+            if ((movez == -1 && m.has_flag("GOES_UP", ts)) ||
+                (movez == +1 && m.has_flag("GOES_DOWN", ts)) ||
+                (movez == +1 && m.ter(ts) == t_manhole_cover) ||
+                (movez == -2 && m.ter(ts) == t_elevator) ||
+                (movez == +2 && m.ter(ts) == t_elevator))
+            {
+                stair = ts;
+                best = dist;
+            }
+        }
+    }
+    return best != INT_MAX;
+}
+
 void game::vertical_move(int movez, bool force)
 {
     // > and < are used for diving underwater.
@@ -13709,41 +13748,14 @@ void game::vertical_move(int movez, bool force)
         return;
     }
 
-    map tmpmap;
-    tmpmap.load(levx, levy, levz + movez, false, cur_om);
     // Find the corresponding staircase
-    int stairx = -1, stairy = -1;
+    tripoint stair(u.posx, u.posy, movez);
     bool rope_ladder = false;
 
-    const int omtilesz=SEEX * 2;
-    real_coords rc( m.getabs(u.posx, u.posy) );
-
-    point omtile_align_start(
-        m.getlocal(rc.begin_om_pos())
-    );
-
-    if (force) {
-        stairx = u.posx;
-        stairy = u.posy;
-    } else { // We need to find the stairs.
-        int best = 999;
-        for (int i = omtile_align_start.x; i <= omtile_align_start.x + omtilesz; i++) {
-            for (int j = omtile_align_start.y; j <= omtile_align_start.y + omtilesz; j++) {
-                if (rl_dist(u.posx, u.posy, i, j) <= best &&
-                    ((movez == -1 && tmpmap.has_flag("GOES_UP", i, j)) ||
-                     (movez == 1 && (tmpmap.has_flag("GOES_DOWN", i, j) ||
-                                     tmpmap.ter(i, j) == t_manhole_cover)) ||
-                     ((movez == 2 || movez == -2) && tmpmap.ter(i, j) == t_elevator))) {
-                    stairx = i;
-                    stairy = j;
-                    best = rl_dist(u.posx, u.posy, i, j);
-                }
-            }
-        }
-
-        if (stairx == -1 || stairy == -1) { // No stairs found!
+    if (!force) { // We need to find the stairs.
+        if(!find_vertical_movement_destination(stair, movez)) { // No stairs found!
             if (movez < 0) {
-                if (tmpmap.move_cost(u.posx, u.posy) == 0) {
+                if (m.move_cost(tripoint(u.posx, u.posy, movez)) == 0) {
                     popup(_("Halfway down, the way down becomes blocked off."));
                     return;
                 } else if (u.has_trait("WEB_RAPPEL")) {
@@ -13803,8 +13815,8 @@ void game::vertical_move(int movez, bool force)
                     return;
                 }
             }
-            stairx = u.posx;
-            stairy = u.posy;
+            stair.x = u.posx;
+            stair.y = u.posy;
         }
     }
 
@@ -13854,14 +13866,14 @@ void game::vertical_move(int movez, bool force)
     m.clear_vehicle_cache();
     m.vehicle_list.clear();
     m.load( levx, levy, levz, true, cur_om );
-    u.posx = stairx;
-    u.posy = stairy;
+    u.posx = stair.x;
+    u.posy = stair.y;
     if (rope_ladder) {
         m.ter_set(u.posx, u.posy, t_rope_up);
     }
-    if (m.ter(stairx, stairy) == t_manhole_cover) {
-        m.spawn_item(stairx + rng(-1, 1), stairy + rng(-1, 1), "manhole_cover");
-        m.ter_set(stairx, stairy, t_manhole);
+    if (m.ter(stair.x, stair.y) == t_manhole_cover) {
+        m.spawn_item(stair.x + rng(-1, 1), stair.y + rng(-1, 1), "manhole_cover");
+        m.ter_set(stair.x, stair.y, t_manhole);
     }
 
     m.spawn_monsters( true );
