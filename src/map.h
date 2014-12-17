@@ -275,6 +275,8 @@ class map
   */
  std::vector<point> route(const int Fx, const int Fy, const int Tx, const int Ty,
                           const bool bash = true) const;
+ std::vector<tripoint> route(const tripoint &F, const tripoint &T,
+                          const bool bash = true) const;
 
  int coord_to_angle (const int x, const int y, const int tgtx, const int tgty);
 // vehicles

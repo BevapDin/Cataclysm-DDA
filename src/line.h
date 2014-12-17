@@ -38,6 +38,7 @@ CENTER,
 std::vector <point> line_to(const int x1, const int y1, const int x2, const int y2, int t);
 // t and t2 decide which Bresenham line is used.
 std::vector <tripoint> line_to(const tripoint loc1, const tripoint loc2, int t, int t2);
+std::vector <tripoint> line_to(const tripoint &p1, const tripoint &p2, int t);
 // sqrt(dX^2 + dY^2)
 int trig_dist(const int x1, const int y1, const int x2, const int y2);
 int trig_dist(const tripoint loc1, const tripoint loc2);
@@ -59,6 +60,7 @@ point direction_XY(direction dir);
 std::string direction_name(direction dir);
 std::string direction_name_short(direction dir);
 std::vector<point> squares_in_direction( const int x1, const int y1, const int x2, const int y2 );
+std::vector<tripoint> squares_in_direction( const tripoint &p1, const tripoint &p2 );
 
 // weird class for 2d vectors where dist is derived from rl_dist
 struct rl_vec2d {

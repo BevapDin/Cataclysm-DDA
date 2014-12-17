@@ -179,6 +179,17 @@ std::vector <tripoint> line_to(const tripoint loc1, const tripoint loc2, int t, 
     return ret;
 }
 
+std::vector <tripoint> line_to(const tripoint &p1, const tripoint &p2, int t)
+{
+    const std::vector<point> tmp = line_to(p1.x, p1.y, p2.x, p2.y, t);
+    std::vector<tripoint> ret;
+    // TODO: Z make this correct
+    for(std::vector<point>::const_iterator a = tmp.begin(); a != tmp.end(); ++a) {
+        ret.push_back(tripoint(a->x, a->y, p1.z));
+    }
+    return ret;
+}
+
 int trig_dist(const int x1, const int y1, const int x2, const int y2)
 {
     return trig_dist(tripoint(x1, y1, 0), tripoint(x2, y2, 0));
@@ -504,6 +515,28 @@ std::vector<point> squares_in_direction( const int x1, const int y1, const int x
         // Diagonally adjacent.
         adjacent_squares.push_back( point( x1, center_square.y ) );
         adjacent_squares.push_back( point( center_square.x, y1 ) );
+    }
+    return adjacent_squares;
+}
+
+std::vector<tripoint> squares_in_direction( const tripoint &p1, const tripoint &p2 )
+{
+    int junk = 0;
+    tripoint center_square = line_to( p1, p2, junk )[0];
+    std::vector<tripoint> adjacent_squares;
+    adjacent_squares.push_back( center_square );
+    if( p1.x == center_square.x ) {
+        // Horizontally adjacent.
+        adjacent_squares.push_back( tripoint( p1.x + 1, center_square.y, center_square.z ) );
+        adjacent_squares.push_back( tripoint( p1.x - 1, center_square.y, center_square.z ) );
+    } else if( p1.y == center_square.y ) {
+        // Vertically adjacent.
+        adjacent_squares.push_back( tripoint( center_square.x, p1.y + 1, center_square.z ) );
+        adjacent_squares.push_back( tripoint( center_square.x, p1.y - 1, center_square.z ) );
+    } else {
+        // Diagonally adjacent.
+        adjacent_squares.push_back( tripoint( p1.x, center_square.y, center_square.z ) );
+        adjacent_squares.push_back( tripoint( center_square.x, p1.y, center_square.z ) );
     }
     return adjacent_squares;
 }
