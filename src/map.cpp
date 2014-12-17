@@ -4422,22 +4422,22 @@ void map::draw(WINDOW* w, const tripoint &center)
 
 bool map::allows_vertical_view_down( const tripoint &p ) const
 {
-    return psm_cache[get_nonant( p.x / SEEX, p.y / SEEY, p.z )].see_down[p.x % SEEX][p.y % SEEY];
+    return psm_cache[get_nonant( tripoint( p.x / SEEX, p.y / SEEY, p.z ) )].see_down[p.x % SEEX][p.y % SEEY];
 }
 
 bool map::blocks_vertical_view_down( const tripoint &p ) const
 {
-    return !psm_cache[get_nonant( p.x / SEEX, p.y / SEEY, p.z )].see_down[p.x % SEEX][p.y % SEEY];
+    return !psm_cache[get_nonant( tripoint( p.x / SEEX, p.y / SEEY, p.z ) )].see_down[p.x % SEEX][p.y % SEEY];
 }
 
 bool map::allows_vertical_view_up( const tripoint &p ) const
 {
-    return psm_cache[get_nonant( p.x / SEEX, p.y / SEEY, p.z )].see_up[p.x % SEEX][p.y % SEEY];
+    return psm_cache[get_nonant( tripoint( p.x / SEEX, p.y / SEEY, p.z ) )].see_up[p.x % SEEX][p.y % SEEY];
 }
 
 bool map::blocks_vertical_view_up( const tripoint &p ) const
 {
-    return !psm_cache[get_nonant( p.x / SEEX, p.y / SEEY, p.z )].see_up[p.x % SEEX][p.y % SEEY];
+    return !psm_cache[get_nonant( tripoint( p.x / SEEX, p.y / SEEY, p.z ) )].see_up[p.x % SEEX][p.y % SEEY];
 }
 
 bool map::allows_vertical_air_down( const tripoint &p ) const
