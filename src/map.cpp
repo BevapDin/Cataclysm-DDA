@@ -5735,6 +5735,17 @@ std::vector<point> closest_points_first(int radius, int center_x, int center_y)
     }
     return points;
 }
+
+std::vector<tripoint> map::route(const tripoint &F, const tripoint &T, const bool can_bash) const
+{
+    // TODO: Z
+    std::vector<point> tmp = route(F.x, F.y, T.x, T.y, can_bash);
+    std::vector<tripoint> res;
+    for(std::vector<point>::const_iterator a = tmp.begin(); a != tmp.end(); ++a) {
+        res.push_back(tripoint(a->x, a->y, F.z));
+    }
+    return res;
+}
 //////////
 ///// coordinate helpers
 

@@ -503,6 +503,28 @@ std::vector<point> squares_in_direction( const int x1, const int y1, const int x
     return adjacent_squares;
 }
 
+std::vector<tripoint> squares_in_direction( const tripoint &p1, const tripoint &p2 )
+{
+    int junk = 0;
+    tripoint center_square = line_to( p1, p2, junk )[0];
+    std::vector<tripoint> adjacent_squares;
+    adjacent_squares.push_back( center_square );
+    if( p1.x == center_square.x ) {
+        // Horizontally adjacent.
+        adjacent_squares.push_back( tripoint( p1.x + 1, center_square.y, center_square.z ) );
+        adjacent_squares.push_back( tripoint( p1.x - 1, center_square.y, center_square.z ) );
+    } else if( p1.y == center_square.y ) {
+        // Vertically adjacent.
+        adjacent_squares.push_back( tripoint( center_square.x, p1.y + 1, center_square.z ) );
+        adjacent_squares.push_back( tripoint( center_square.x, p1.y - 1, center_square.z ) );
+    } else {
+        // Diagonally adjacent.
+        adjacent_squares.push_back( tripoint( p1.x, center_square.y, center_square.z ) );
+        adjacent_squares.push_back( tripoint( center_square.x, p1.y, center_square.z ) );
+    }
+    return adjacent_squares;
+}
+
 float rl_vec2d::norm()
 {
     return sqrt(x * x + y * y);
