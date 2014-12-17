@@ -196,6 +196,7 @@ class game
         monster &zombie(const int idx);
         /** Redirects to the creature_tracker update_pos() function. */
         bool update_zombie_pos(const monster &critter, const int newx, const int newy);
+        bool update_zombie_pos(const monster &critter, const tripoint &p);
         void remove_zombie(const int idx);
         /** Redirects to the creature_tracker clear() function. */
         void clear_zombies();
@@ -209,10 +210,12 @@ class game
         int  mon_at(const tripoint &p) const; // Index of the monster at (x, y); -1 for none
         /** Returns true if there is no player, NPC, or monster on the tile and move_cost > 0. */
         bool is_empty(const int x, const int y);
+        bool is_empty(const tripoint &p);
         /** Returns true if the value of test is between down and up. */
         bool isBetween(int test, int down, int up);
         /** Returns true if (x, y) is outdoors and it is sunny. */
         bool is_in_sunlight(int x, int y);
+        bool is_in_sunlight(const tripoint &p);
         /** Returns true if (x, y) is indoors, underground, or in a car. */
         bool is_sheltered(int x, int y);
         /** Revives the corpse with position n in the items at (x, y). Returns true if successful. */
@@ -299,6 +302,7 @@ class game
         bool spread_fungus(int x, int y);
         std::vector<faction *> factions_at(int x, int y);
         int &scent(int x, int y);
+        int &scent(const tripoint &p);
         float ground_natural_light_level() const;
         float natural_light_level() const;
         unsigned char light_level();
