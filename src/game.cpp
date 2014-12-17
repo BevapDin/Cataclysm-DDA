@@ -7146,23 +7146,24 @@ void game::smash()
         return;
     }
 
-    if( m.get_field( point( smashx, smashy ), fd_web ) != nullptr ) {
-        m.remove_field( smashx, smashy, fd_web );
-        sounds::sound( tripoint(smashx, smashy, 0), 2, "" );
+    const tripoint target( smashx, smashy, 0 );
+    if( m.get_field( target, fd_web ) != nullptr ) {
+        m.remove_field( target, fd_web );
+        sounds::sound( target, 2, "" );
         add_msg( m_info, _( "You brush aside some webs." ) );
         u.moves -= 100;
         return;
     }
     static const int full_pulp_threshold = 4;
-    for (auto it = m.i_at(smashx, smashy).begin(); it != m.i_at(smashx, smashy).end(); ++it) {
+    for (auto it = m.i_at(target).begin(); it != m.i_at(target).end(); ++it) {
         if (it->is_corpse() && it->damage < full_pulp_threshold) {
             // do activity forever. ACT_PULP stops itself
             u.assign_activity(ACT_PULP, INT_MAX, 0);
-            u.activity.placement = point(smashx, smashy);
+            u.activity.placement = point(target.x, target.y);
             return; // don't smash terrain if we've smashed a corpse
         }
     }
-    didit = m.bash(tripoint(smashx, smashy, 0), smashskill).first;
+    didit = m.bash(target, smashskill).first;
     if (didit) {
         u.handle_melee_wear();
         u.moves -= move_cost;
@@ -7184,13 +7185,13 @@ void game::smash()
             u.remove_weapon();
             u.check_dead_state();
         }
-        if (smashskill < m.bash_resistance(smashx, smashy) && one_in(10)) {
-            if (m.has_furn(smashx, smashy) && m.furn_at(smashx, smashy).bash.str_min != -1) {
+        if (smashskill < m.bash_resistance(target) && one_in(10)) {
+            if (m.has_furn(target) && m.furn_at(target).bash.str_min != -1) {
                 // %s is the smashed furniture
-                add_msg(m_neutral, _("You don't seem to be damaging the %s."), m.furnname(smashx, smashy).c_str());
+                add_msg(m_neutral, _("You don't seem to be damaging the %s."), m.furnname(target).c_str());
             } else {
                 // %s is the smashed terrain
-                add_msg(m_neutral, _("You don't seem to be damaging the %s."), m.tername(smashx, smashy).c_str());
+                add_msg(m_neutral, _("You don't seem to be damaging the %s."), m.tername(target).c_str());
             }
         }
     } else {
