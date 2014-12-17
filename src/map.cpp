@@ -2356,18 +2356,18 @@ void map::destroy_furn(const tripoint &p, const bool silent)
     }
 }
 
-void map::crush(const tripoint &p)
+void map::crush(const int x, const int y)
 {
-    crush( p.x, p.y );
+    crush( tripoint( x, y, 0 ) );
 }
 
-void map::crush(const int x, const int y)
+void map::crush(const tripoint &p)
 {
     int veh_part;
     player *crushed_player = nullptr;
     //The index of the NPC at (x,y), or -1 if there isn't one
-    int npc_index = g->npc_at(x, y);
-    if( g->u.posx() == x && g->u.posy() == y ) {
+    int npc_index = g->npc_at(p);
+    if( g->u.pos() == p ) {
         crushed_player = &(g->u);
     } else if( npc_index != -1 ) {
         crushed_player = static_cast<player *>(g->active_npc[npc_index]);
@@ -2376,10 +2376,10 @@ void map::crush(const int x, const int y)
     if( crushed_player != nullptr ) {
         bool player_inside = false;
         if( crushed_player->in_vehicle ) {
-            vehicle *veh = veh_at(x, y, veh_part);
+            vehicle *veh = veh_at(p, veh_part);
             player_inside = (veh && veh->is_inside(veh_part));
         }
-        if (!player_inside) { //If there's a player at (x, y) and he's not in a covered vehicle...
+        if (!player_inside) { //If there's a player at p and he's not in a covered vehicle...
             //This is the roof coming down on top of us, no chance to dodge
             crushed_player->add_msg_player_or_npc( m_bad, _("You are crushed by the falling debris!"),
                                                    _("<npcname> is crushed by the falling debris!") );
@@ -2406,9 +2406,9 @@ void map::crush(const int x, const int y)
         }
     }
 
-    //The index of the monster at (x,y), or -1 if there isn't one
-    int mon = g->mon_at(x, y);
-    if (mon != -1 && size_t(mon) < g->num_zombies()) {  //If there's a monster at (x,y)...
+    //The index of the monster at p, or -1 if there isn't one
+    int mon = g->mon_at(p);
+    if (mon != -1 && size_t(mon) < g->num_zombies()) {  //If there's a monster at p...
         monster* monhit = &(g->zombie(mon));
         // 25 ~= 60 * .45 (torso)
         monhit->deal_damage(nullptr, bp_torso, damage_instance(DT_BASH, rng(0,25)));
@@ -2418,7 +2418,7 @@ void map::crush(const int x, const int y)
         monhit->check_dead_state();
     }
 
-    vehicle *veh = veh_at(x, y, veh_part);
+    vehicle *veh = veh_at(p, veh_part);
     if (veh) {
         veh->damage(veh_part, rng(0, veh->parts[veh_part].hp), 1, false);
     }
