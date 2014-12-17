@@ -646,7 +646,7 @@ bool player::activate_bionic(int b, bool eff_only)
         g->sound(pos(), 19, _("HISISSS!"));
     } else if (bio.id == "bio_water_extractor") {
         bool extracted = false;
-        for( auto it = g->m.i_at(posx, posy).begin(); it != g->m.i_at(posx, posy).end(); ++it) {
+        for( auto it = g->m.i_at(pos()).begin(); it != g->m.i_at(pos()).end(); ++it) {
             if (it->type->id == "corpse" ) {
                 int avail = 0;
                 auto remaining_water = it->item_vars.find("remaining_water");
@@ -718,7 +718,7 @@ bool player::activate_bionic(int b, bool eff_only)
                             }
                         }
                         if (it == traj.end()) {
-                            g->m.add_item_or_charges(posx, posy, tmp_item);
+                            g->m.add_item_or_charges(pos(), tmp_item);
                         }
                     }
                 }
@@ -765,7 +765,7 @@ bool player::activate_bionic(int b, bool eff_only)
         } else if(weapon.type->id != "null") {
             add_msg(m_warning, _("Your claws extend, forcing you to drop your %s."),
                     weapon.tname().c_str());
-            g->m.add_item_or_charges(posx, posy, weapon);
+            g->m.add_item_or_charges(pos(), weapon);
             weapon = item("bio_claws_weapon", 0);
             weapon.invlet = '#';
         } else {
@@ -782,7 +782,7 @@ bool player::activate_bionic(int b, bool eff_only)
         } else if(weapon.type->id != "null") {
             add_msg(m_warning, _("Your blade extends, forcing you to drop your %s."),
                     weapon.tname().c_str());
-            g->m.add_item_or_charges(posx, posy, weapon);
+            g->m.add_item_or_charges(pos(), weapon);
             weapon = item("bio_blade_weapon", 0);
             weapon.invlet = '#';
         } else {
@@ -1003,7 +1003,7 @@ bool player::uninstall_bionic(bionic_id b_id)
         add_msg(m_neutral, _("You jiggle your parts back into their familiar places."));
         add_msg(m_good, _("Successfully removed %s."), bionics[b_id]->name.c_str());
         remove_bionic(b_id);
-        g->m.spawn_item(posx, posy, "burnt_out_bionic", 1);
+        g->m.spawn_item(pos(), "burnt_out_bionic", 1);
     } else {
         add_memorial_log(pgettext("memorial_male", "Removed bionic: %s."),
                          pgettext("memorial_female", "Removed bionic: %s."),

@@ -1051,12 +1051,12 @@ bool npc::wield(item* it)
             i_add( remove_weapon() );
             moves -= 15;
         } else { // No room for weapon, so we drop it
-            g->m.add_item_or_charges( posx, posy, remove_weapon() );
+            g->m.add_item_or_charges( pos(), remove_weapon() );
         }
     }
     moves -= 15;
     weapon = inv.remove_item(it);
-    if ( g->u_see( posx, posy ) ) {
+    if ( g->u_see( pos() ) ) {
         add_msg( m_info, _( "%1$s wields a %2$s." ), name.c_str(), weapon.tname().c_str() );
     }
     return true;
@@ -1479,12 +1479,12 @@ void npc::say(std::string line, ...) const
  line = vstring_format(line, ap);
  va_end(ap);
  parse_tags(line, &(g->u), this);
- if (g->u_see(posx, posy)) {
+ if (g->u_see(pos())) {
   add_msg(_("%1$s says: \"%2$s\""), name.c_str(), line.c_str());
-  g->sound(posx, posy, 16, "");
+  g->sound(pos(), 16, "");
  } else {
   std::string sound = string_format(_("%1$s saying \"%2$s\""), name.c_str(), line.c_str());
-  g->sound(posx, posy, 16, sound);
+  g->sound(pos(), 16, sound);
  }
 }
 
@@ -1713,7 +1713,7 @@ int npc::danger_assessment()
     int ret = 0;
     int sightdist = g->light_level(), junk;
     for (size_t i = 0; i < g->num_zombies(); i++) {
-        if (g->m.sees(posx, posy, g->zombie(i).posx(), g->zombie(i).posy(), sightdist, junk)) {
+        if (g->m.sees(pos(), g->zombie(i).pos(), sightdist, junk)) {
             ret += g->zombie(i).type->difficulty;
         }
     }
@@ -1723,19 +1723,19 @@ int npc::danger_assessment()
     }
     // Mod for the player
     if (is_enemy()) {
-        if (rl_dist(posx, posy, g->u.posx, g->u.posy) < 10) {
+        if (rl_dist(pos(), g->u.pos()) < 10) {
             if (g->u.weapon.is_gun()) {
                 ret += 10;
             } else {
-                ret += 10 - rl_dist(posx, posy, g->u.posx, g->u.posy);
+                ret += 10 - rl_dist(pos(), g->u.pos());
             }
         }
     } else if (is_friend()) {
-        if (rl_dist(posx, posy, g->u.posx, g->u.posy) < 8) {
+        if (rl_dist(pos(), g->u.pos()) < 8) {
             if (g->u.weapon.is_gun()) {
                 ret -= 8;
             } else {
-                ret -= 8 - rl_dist(posx, posy, g->u.posx, g->u.posy);
+                ret -= 8 - rl_dist(pos(), g->u.pos());
             }
         }
     }
@@ -2053,7 +2053,7 @@ void npc::die(Creature* nkiller) {
         g->m.unboard_vehicle(posx, posy);
     }
 
-    if (g->u_see(posx, posy)) {
+    if (g->u_see(pos())) {
         add_msg(_("%s dies!"), name.c_str());
     }
     if( killer == &g->u ){

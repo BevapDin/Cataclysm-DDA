@@ -221,7 +221,7 @@ int iuse::sewage(player *p, item *it, bool, const tripoint &)
 
 int iuse::honeycomb(player *p, item *it, bool, const tripoint &)
 {
-    g->m.spawn_item(p->posx, p->posy, "wax", 2);
+    g->m.spawn_item(p->pos(), "wax", 2);
     return it->type->charges_to_use();
 }
 
@@ -4239,10 +4239,10 @@ int iuse::crowbar(player *p, item *it, bool, const tripoint &)
 
 int iuse::makemound(player *p, item *it, bool, const tripoint &)
 {
-    if (g->m.has_flag("DIGGABLE", p->posx, p->posy) && !g->m.has_flag("PLANT", p->posx, p->posy)) {
+    if (g->m.has_flag("DIGGABLE", p->pos()) && !g->m.has_flag("PLANT", p->pos())) {
         p->add_msg_if_player(_("You churn up the earth here."));
         p->moves = -300;
-        g->m.ter_set(p->posx, p->posy, t_dirtmound);
+        g->m.ter_set(p->pos(), t_dirtmound);
         return it->type->charges_to_use();
     } else {
         p->add_msg_if_player(_("You can't churn up this ground."));
@@ -5344,7 +5344,7 @@ int iuse::geiger(player *p, item *it, bool t, const tripoint &pos)
             break;
         case 2:
             p->add_msg_if_player(m_info, _("The ground's radiation level: %d"),
-                                 g->m.get_radiation(p->posx, p->posy));
+                                 g->m.get_radiation(p->pos()));
             break;
         case 3:
             p->add_msg_if_player(_("The geiger counter's scan LED flicks on."));
@@ -5865,18 +5865,13 @@ int iuse::mininuke(player *p, item *it, bool, const tripoint &)
     return it->type->charges_to_use();
 }
 
-int iuse::pheromone(player *p, item *it, bool, const tripoint &)
+int iuse::pheromone(player *p, item *it, bool, const tripoint &pos)
 {
     if (it->charges < it->type->charges_to_use()) {
         return 0;
     }
     if (p->is_underwater()) {
         p->add_msg_if_player(m_info, _("You can't do that while underwater."));
-        return 0;
-    }
-    point pos(p->posx, p->posy);
-
-    if (pos.x == -999 || pos.y == -999) {
         return 0;
     }
 
@@ -6401,7 +6396,7 @@ int iuse::vacutainer(player *p, item *it, bool, const tripoint &)
 
     item blood("blood", calendar::turn);
     bool drew_blood = false;
-    for( auto &map_it : g->m.i_at(p->posx, p->posy) ) {
+    for( auto &map_it : g->m.i_at(p->pos()) ) {
         if( map_it.corpse != NULL && map_it.type->id == "corpse" &&
             query_yn(_("Draw blood from %s?"), map_it.tname().c_str()) ) {
             blood.corpse = map_it.corpse;
@@ -6933,8 +6928,8 @@ int iuse::hacksaw(player *p, item *it, bool, const tripoint &)
         p->moves -= 500;
         g->m.furn_set(dirx, diry, f_null);
         g->sound(dirx, diry, 15, _("grnd grnd grnd"));
-        g->m.spawn_item(p->posx, p->posy, "pipe", rng(1, 3));
-        g->m.spawn_item(p->posx, p->posy, "steel_chunk");
+        g->m.spawn_item(p->pos(), "pipe", rng(1, 3));
+        g->m.spawn_item(p->pos(), "steel_chunk");
         return it->type->charges_to_use();
     }
 
@@ -6957,12 +6952,12 @@ int iuse::hacksaw(player *p, item *it, bool, const tripoint &)
                 g->m.ter_set(dirx, diry, t_sewage);
                 p->moves -= 1000;
                 g->sound(dirx, diry, 15, _("grnd grnd grnd"));
-                g->m.spawn_item(p->posx, p->posy, "pipe", 3);
+                g->m.spawn_item(p->pos(), "pipe", 3);
             } else {
                 g->m.ter_set(dirx, diry, t_floor);
                 p->moves -= 500;
                 g->sound(dirx, diry, 15, _("grnd grnd grnd"));
-                g->m.spawn_item(p->posx, p->posy, "pipe", 3);
+                g->m.spawn_item(p->pos(), "pipe", 3);
             }
     } else {
             add_msg(m_info, _("You can't cut that."));
@@ -7200,7 +7195,7 @@ int iuse::boltcutters(player *p, item *it, bool, const tripoint &)
         p->moves -= 100;
         g->m.ter_set(dirx, diry, t_chaingate_c);
         g->sound(dirx, diry, 5, _("Gachunk!"));
-        g->m.spawn_item(p->posx, p->posy, "scrap", 3);
+        g->m.spawn_item(p->pos(), "scrap", 3);
     } else if (g->m.ter(dirx, diry) == t_chainfence_v || g->m.ter(dirx, diry) == t_chainfence_h) {
         p->moves -= 500;
         g->m.ter_set(dirx, diry, t_chainfence_posts);
@@ -7531,7 +7526,7 @@ int iuse::artifact(player *p, item *it, bool, const tripoint &)
 
             case AEA_FIRESTORM: {
                 p->add_msg_if_player(m_bad, _("Fire rains down around you!"));
-                std::vector<point> ps = closest_points_first(3, p->posx, p->posy);
+                std::vector<tripoint> ps = closest_points_first(3, p->pos());
                 for (auto p_it : ps) {
                     if (!one_in(3)) {
                         g->m.add_field(p_it, fd_fire, 1 + rng(0, 1) * rng(0, 1), 30);
@@ -7644,7 +7639,7 @@ int iuse::spray_can(player *p, item *it, bool, const tripoint &)
     if (message.empty()) {
         return 0;
     } else {
-        g->m.set_graffiti( p->posx, p->posy, message );
+        g->m.set_graffiti( p->pos(), message );
             add_msg(
                 ismarker ?
                 _("You write a message on the ground.") :

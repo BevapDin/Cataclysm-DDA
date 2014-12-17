@@ -117,7 +117,7 @@ void npc::move()
 
     if (is_enemy()) {
         int pl_danger = player_danger( &(g->u) );
-        if ((pl_danger > danger || rl_dist(posx, posy, g->u.posx, g->u.posy) <= 1) || target == -1) {
+        if ((pl_danger > danger || rl_dist(pos(), g->u.pos()) <= 1) || target == -1) {
             target = TARGET_PLAYER;
             danger = pl_danger;
             add_msg( m_debug, "NPC %s: Set target to PLAYER, danger = %d", name.c_str(), danger );
@@ -186,7 +186,7 @@ void npc::move()
     if (danger > 0 && (
             (action == npc_follow_embarked && in_vehicle) ||
             (action == npc_follow_player &&
-             rl_dist(posx, posy, g->u.posx, g->u.posy) <= follow_distance())
+             rl_dist(pos(), g->u.pos()) <= follow_distance())
         )) {
         action = method_of_attack(target, danger);
     }
@@ -240,7 +240,7 @@ void npc::execute_action(npc_action action, int target)
             debugmsg("NPC reload failed.");
         }
         recoil = MIN_RECOIL;
-        if (g->u_see(posx, posy)) {
+        if (g->u_see(pos())) {
             add_msg(_("%s reloads their %s."), name.c_str(),
                     weapon.tname().c_str());
         }
@@ -252,7 +252,7 @@ void npc::execute_action(npc_action action, int target)
          * we get some sleep, how long watch shifts should be, etc.
          */
         //add_effect("lying_down", 300);
-        if (is_friend() && g->u_see(posx, posy)) {
+        if (is_friend() && g->u_see(pos())) {
             say(_("I'm going to sleep."));
         }
         break;
@@ -467,14 +467,14 @@ void npc::choose_monster_target(int &enemy, int &danger,
                                 int &total_danger)
 {
     int linet = 0;
-    bool defend_u = g->sees_u(posx, posy, linet) && is_defending();
+    bool defend_u = g->sees_u(pos(), linet) && is_defending();
     int highest_priority = 0;
     total_danger = 0;
 
     for (size_t i = 0; i < g->num_zombies(); i++) {
         monster *mon = &(g->zombie(i));
         if (this->sees(mon, linet)) {
-            int distance = (100 * rl_dist(posx, posy, mon->posx(), mon->posy())) / mon->get_speed();
+            int distance = (100 * rl_dist(pos(), mon->pos())) / mon->get_speed();
             double hp_percent = (mon->type->hp - mon->hp) / mon->type->hp;
             int priority = mon->type->difficulty * (1 + hp_percent) - distance;
             int monster_danger = (mon->type->difficulty * mon->hp) / mon->type->hp;
@@ -544,9 +544,8 @@ npc_action npc::method_of_fleeing(int enemy)
 {
     int speed = (enemy == TARGET_PLAYER ? g->u.get_speed() :
                  g->zombie(enemy).get_speed());
-    point enemy_loc = (enemy == TARGET_PLAYER ? point(g->u.posx, g->u.posy) :
-                       point(g->zombie(enemy).posx(), g->zombie(enemy).posy()));
-    int distance = rl_dist(posx, posy, enemy_loc.x, enemy_loc.y);
+    tripoint enemy_loc = (enemy == TARGET_PLAYER ? g->u.pos() : g->zombie(enemy).pos());
+    int distance = rl_dist(pos(), enemy_loc);
 
     if (choose_escape_item() != INT_MIN) { // We have an escape item!
         return npc_escape_item;
@@ -712,7 +711,7 @@ npc_action npc::address_player()
             // Leave sleeping characters alone.
             return npc_undecided;
         }
-        if (rl_dist(posx, posy, g->u.posx, g->u.posy) <= 6) {
+        if (rl_dist(pos(), g->u.pos()) <= 6) {
             return npc_talk_to_player;    // Close enough to talk to you
         } else {
             if (one_in(10)) {
@@ -744,8 +743,8 @@ npc_action npc::address_player()
     }
 
     if (attitude == NPCATT_LEAD) {
-        if (rl_dist(posx, posy, g->u.posx, g->u.posy) >= 12 ||
-            !g->sees_u(posx, posy, linet)) {
+        if (rl_dist(pos(), g->u.pos()) >= 12 ||
+            !g->sees_u(pos(), linet)) {
             if(has_effect("catch_up")) {
                 int intense = get_effect_int("catch_up");
                 if (intense < 10) {
@@ -985,13 +984,13 @@ bool npc::enough_time_to_reload(int target, item &gun)
     int dist, speed, linet;
 
     if (target == TARGET_PLAYER) {
-        if (g->sees_u(posx, posy, linet) && g->u.weapon.is_gun() && rltime > 200) {
+        if (g->sees_u(pos(), linet) && g->u.weapon.is_gun() && rltime > 200) {
             return false;    // Don't take longer than 2 turns if player has a gun
         }
-        dist = rl_dist(posx, posy, g->u.posx, g->u.posy);
+        dist = rl_dist(pos(), g->u.pos());
         speed = speed_estimate(g->u.get_speed());
     } else if (target >= 0) {
-        dist = rl_dist(posx, posy, g->zombie(target).posx(), g->zombie(target).posy());
+        dist = rl_dist(pos(), g->zombie(target).pos());
         speed = speed_estimate(g->zombie(target).get_speed());
     } else {
         return true;    // No target, plenty of time to reload
@@ -1122,12 +1121,12 @@ void npc::move_to(int x, int y)
                 }
             }
             int part;
-            vehicle *veh = g->m.veh_at( posx, posy, part );
+            vehicle *veh = g->m.veh_at( pos(), part );
             if( veh != nullptr && veh->part_with_feature( part, VPFLAG_BOARDABLE ) >= 0 ) {
                 g->m.board_vehicle( posx, posy, this );
             }
             g->m.creature_in_field( *this );
-        } else if (g->m.open_door(x, y, (g->m.ter(posx, posy) == t_floor))) {
+        } else if (g->m.open_door(x, y, (g->m.ter(pos()) == t_floor))) {
             moves -= 100;
         } else if (g->m.is_bashable(tripoint(x, y, 0)) && g->m.bash_rating(str_cur + weapon.type->melee_dam, tripoint(x, y, 0)) > 0) {
             moves -= int(weapon.is_null() ? 80 : weapon.attack_time() * 0.8);;
@@ -1408,7 +1407,7 @@ void npc::pick_up_item()
         }
     }
     // Describe the pickup to the player
-    bool u_see_me = g->u_see(posx, posy);
+    bool u_see_me = g->u_see(pos());
     bool u_see_items = g->u_see(itx, ity);
     if (u_see_me) {
         if (pickup.size() == 1) {
@@ -1541,11 +1540,11 @@ void npc::drop_items(int weight, int volume)
         } else if (num_items_dropped == 2) {
             item_name << _(" and ") << dropped.tname();
         }
-        g->m.add_item_or_charges(posx, posy, dropped);
+        g->m.add_item_or_charges(pos(), dropped);
     }
     // Finally, describe the action if u can see it
     std::string item_name_str = item_name.str();
-    if (g->u_see(posx, posy)) {
+    if (g->u_see(pos())) {
         if (num_items_dropped >= 3) {
             add_msg(ngettext("%s drops %d item.", "%s drops %d items.",
                              num_items_dropped), name.c_str(),
@@ -1811,7 +1810,7 @@ bool thrown_item(item *used)
 
 void npc::heal_player(player &patient)
 {
-    int dist = rl_dist(posx, posy, patient.posx, patient.posy);
+    int dist = rl_dist(pos(), patient.pos());
 
     if (dist > 1) { // We need to move to the player
         update_path(patient.posx, patient.posy);
@@ -1834,8 +1833,8 @@ void npc::heal_player(player &patient)
             }
         }
 
-        bool u_see_me      = g->u_see(posx, posy),
-             u_see_patient = g->u_see(patient.posx, patient.posy);
+        bool u_see_me      = g->u_see(pos()),
+             u_see_patient = g->u_see(patient.pos());
         if (patient.is_npc()) {
             if (u_see_me) {
                 if (u_see_patient) {
@@ -1944,7 +1943,7 @@ void npc::heal_self()
         debugmsg("NPC tried to heal self, but has no bandages / first aid");
         move_pause();
     }
-    if (g->u_see(posx, posy)) {
+    if (g->u_see(pos())) {
         add_msg(_("%s heals %s."), name.c_str(),
                 (male ? _("himself") : _("herself")));
     }
@@ -1961,7 +1960,7 @@ void npc::use_painkiller()
         debugmsg("NPC tried to use painkillers, but has none!");
         move_pause();
     } else {
-        if (g->u_see(posx, posy)) {
+        if (g->u_see(pos())) {
             add_msg(_("%s takes some %s."), name.c_str(), it->tname().c_str());
         }
         consume(inv.position_by_item(it));
@@ -2014,12 +2013,12 @@ void npc::pick_and_eat()
 
 void npc::mug_player(player &mark)
 {
-    if (rl_dist(posx, posy, mark.posx, mark.posy) > 1) { // We have to travel
+    if (rl_dist(pos(), mark.pos()) > 1) { // We have to travel
         update_path(mark.posx, mark.posy);
         move_to_next();
     } else {
-        bool u_see_me   = g->u_see(posx, posy),
-             u_see_mark = g->u_see(mark.posx, mark.posy);
+        bool u_see_me   = g->u_see(pos()),
+             u_see_mark = g->u_see(mark.pos());
         if (mark.cash > 0) {
             cash += mark.cash;
             mark.cash = 0;
@@ -2073,8 +2072,8 @@ void npc::mug_player(player &mark)
                 }
                 moves -= 100;
             } else {
-                bool u_see_me   = g->u_see(posx, posy),
-                     u_see_mark = g->u_see(mark.posx, mark.posy);
+                bool u_see_me   = g->u_see(pos()),
+                     u_see_mark = g->u_see(mark.pos());
                 item stolen = mark.i_rem(position);
                 if (mark.is_npc()) {
                     if (u_see_me) {
@@ -2111,7 +2110,7 @@ void npc::mug_player(player &mark)
 void npc::look_for_player(player &sought)
 {
     int linet, range = sight_range(g->light_level());
-    if (g->m.sees(posx, posy, sought.posx, sought.posy, range, linet)) {
+    if (g->m.sees(pos(), sought.pos(), range, linet)) {
         if (sought.is_npc())
             debugmsg("npc::look_for_player() called, but we can see %s!",
                      sought.name.c_str());
