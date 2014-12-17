@@ -787,7 +787,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
                                 ++fuel;
                             }
                         }
-                        spawn_items( x, y, new_content );
+                        spawn_items( here, new_content );
 
                         veh = veh_at(here, part); //Get the part of the vehicle in the fire.
                         if (veh) {

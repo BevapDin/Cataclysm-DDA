@@ -11183,7 +11183,7 @@ int map::place_items(items_location loc, int chance, int x1, int y1,
 int map::put_items_from_loc(items_location loc, int x, int y, int turn)
 {
     const auto items = item_group::items_from(loc, turn);
-    spawn_items(x, y, items);
+    spawn_items( tripoint( x, y, 0 ), items );
     return items.size();
 }
 
@@ -12121,7 +12121,7 @@ void set_science_room(map *m, int x1, int y1, bool faces_right, int turn)
         for (int i = x1; i <= x2; i++) {
             for (int j = y1; j <= y2; j++) {
                 m->ter_set(i, j, rotated[x2 - (i - x1)][j]);
-                m->spawn_items(i, j, itrot[x2 - (i - x1)][j]);
+                m->spawn_items( tripoint( i, j, 0 ), itrot[x2 - (i - x1)][j]);
             }
         }
     }

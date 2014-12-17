@@ -2082,7 +2082,7 @@ std::pair<bool, bool> map::bash(const tripoint &p, const int str, bool silent, b
         }
     }
     // Now plunk in the contents of the smashed items.
-    spawn_items( p.x, p.y, smashed_contents );
+    spawn_items( p, smashed_contents );
 
     // Smash vehicle if present
     int vpart;
@@ -2700,7 +2700,7 @@ void map::shoot(const tripoint &p, int &dam,
         }
 
         if (destroyed) {
-            spawn_items( p.x, p.y, target_item->contents );
+            spawn_items( p, target_item->contents );
             target_item = target_items.erase( target_item );
         } else {
             ++target_item;
@@ -3160,12 +3160,12 @@ void map::spawn_an_item(const tripoint &p, item new_item,
     add_item_or_charges(p, new_item);
 }
 
-void map::spawn_items(const int x, const int y, const std::vector<item> &new_items)
+void map::spawn_items( const tripoint &p, const std::vector<item> &new_items )
 {
-    if (!inbounds(x, y) || has_flag("DESTROY_ITEM", x, y)) {
+    if (!inbounds(p) || has_flag("DESTROY_ITEM", p)) {
         return;
     }
-    const bool swimmable = has_flag("SWIMMABLE", x, y);
+    const bool swimmable = has_flag("SWIMMABLE", p);
     for( auto new_item : new_items ) {
 
         if (new_item.made_of(LIQUID) && swimmable) {
@@ -3175,9 +3175,9 @@ void map::spawn_items(const int x, const int y, const std::vector<item> &new_ite
             item new_item2 = new_item;
             new_item.make_handed( LEFT );
             new_item2.make_handed( RIGHT );
-            add_item_or_charges(x, y, new_item2);
+            add_item_or_charges(p, new_item2);
         }
-        add_item_or_charges(x, y, new_item);
+        add_item_or_charges(p, new_item);
     }
 }
 

@@ -815,7 +815,7 @@ void add_corpse(int x, int y);
  void spawn_an_item(const tripoint &p, item new_item,
                     const long charges, const int damlevel);
  // Similar to spawn_an_item, but spawns a list of items, or nothing if the list is empty.
- void spawn_items(const int x, const int y, const std::vector<item> &new_items);
+        void spawn_items( const tripoint &p, const std::vector<item> &new_items );
  void add_spawn(std::string type, const int count, const int x, const int y, bool friendly = false,
                 const int faction_id = -1, const int mission_id = -1,
                 std::string name = "NONE");
