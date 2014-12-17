@@ -198,7 +198,6 @@ class game
         bool add_zombie(monster &critter);
         size_t num_zombies() const;
         monster &zombie(const int idx);
-        bool update_zombie_pos(const monster &critter, const int newx, const int newy);
         bool update_zombie_pos(const monster &critter, const tripoint &p);
         void remove_zombie(const int idx);
         void clear_zombies();

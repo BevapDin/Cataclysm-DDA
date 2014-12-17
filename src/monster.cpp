@@ -107,20 +107,26 @@ monster::~monster()
 {
 }
 
-bool monster::setpos(const int x, const int y, const bool level_change)
+bool monster::setpos(const int x, const int y)
 {
-    if (!level_change && x == _posx && y == _posy) {
-        return true;
-    }
-    bool ret = level_change ? true : g->update_zombie_pos(*this, x, y);
-    _posx = x;
-    _posy = y;
-    return ret;
+    return setpos(tripoint(x, y, _posz));
 }
 
-bool monster::setpos(const point &p, const bool level_change)
+bool monster::setpos(const point &p)
 {
-    return setpos(p.x, p.y, level_change);
+    return setpos(tripoint(p.x, p.y, _posz));
+}
+
+bool monster::setpos(const tripoint &p)
+{
+    if (p == pos()) {
+        return true;
+    }
+    const bool ret = g->update_zombie_pos(*this, p);
+    _posx = p.x;
+    _posy = p.y;
+    _posz = p.z;
+    return ret;
 }
 
 tripoint monster::pos() const
