@@ -360,7 +360,9 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
          * @param t The t output of map::sees.
          */
         bool sees(int x, int y) const;
+        bool sees(const tripoint &p) const;
         bool sees(int x, int y, int &t) const;
+        bool sees(const tripoint &p, int &t) const;
         /**
          * Check if this creature can see the critter.
          * Includes checks for simple critter visibility

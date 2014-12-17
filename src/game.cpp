@@ -4058,6 +4058,12 @@ bool game::handle_action()
 
 #define SCENT_RADIUS 40
 
+int& game::scent(const tripoint &p)
+{
+    // TODO: Z  z-component is ignored
+    return scent(p.x, p.y);
+}
+
 int &game::scent(int x, int y)
 {
     if (x < (SEEX * MAPSIZE / 2) - SCENT_RADIUS || x >= (SEEX * MAPSIZE / 2) + SCENT_RADIUS ||
@@ -5698,6 +5704,7 @@ void game::draw_ter( const tripoint &center )
         for (int realx = posx - POSX; realx <= posx + POSX; realx++) {
             for (int realy = posy - POSY; realy <= posy + POSY; realy++) {
                 if (scent(realx, realy) != 0) {
+                    // TODO: Z
                     int tempx = posx - realx, tempy = posy - realy;
                     if (!(isBetween(tempx, -2, 2) && isBetween(tempy, -2, 2))) {
                         if (mon_at(realx, realy) != -1) {
@@ -6154,14 +6161,19 @@ faction *game::faction_by_ident(std::string id)
 
 bool game::sees_u(int x, int y, int &t)
 {
-    const int mondex = mon_at(x, y);
+    return sees_u(tripoint(x, y, 0), t);
+}
+
+bool game::sees_u(const tripoint &p, int &t)
+{
+    const int mondex = mon_at(p);
     if (mondex != -1) {
         const monster &critter = critter_tracker.find(mondex);
         return critter.sees_player(t);
     }
     // range = -1 = unlimited, proceeding sans critter
     return (
-               m.sees(x, y, u.posx, u.posy, -1, t) &&
+               m.sees(p, u.pos(), -1, t) &&
                !u.is_invisible()
            );
 }
@@ -6174,6 +6186,11 @@ bool game::u_see(int x, int y)
 bool game::u_see(const Creature *t)
 {
     return u.sees(t);
+}
+
+bool game::u_see(const tripoint &p)
+{
+    return u.sees(p);
 }
 
 bool game::u_see(const Creature &t)
@@ -7593,7 +7610,12 @@ monster &game::zombie(const int idx)
 
 bool game::update_zombie_pos(const monster &critter, const int newx, const int newy)
 {
-    return critter_tracker.update_pos(critter, tripoint( newx, newy, 0 ));
+    return update_zombie_pos(critter, tripoint(newx, newy, critter.zpos()));
+}
+
+bool game::update_zombie_pos(const monster &critter, const tripoint &p)
+{
+    return critter_tracker.update_pos(critter, p);
 }
 
 void game::remove_zombie(const int idx)
@@ -7653,14 +7675,23 @@ void game::rebuild_mon_at_cache()
 
 bool game::is_empty(const int x, const int y)
 {
-    return ((m.move_cost(x, y) > 0 || m.has_flag("LIQUID", x, y)) &&
-            npc_at(x, y) == -1 && mon_at(x, y) == -1 &&
-            (u.posx != x || u.posy != y));
+    return is_empty(tripoint(x, y, 0));
+}
+
+bool game::is_empty( const tripoint &p )
+{
+    return ( m.move_cost( p ) > 0 || m.has_flag( "LIQUID", p ) ) &&
+           critter_at( p ) == nullptr;
 }
 
 bool game::is_in_sunlight(int x, int y)
 {
-    return (m.is_outside(x, y) && light_level() >= 40 &&
+    return is_in_sunlight(tripoint(x, y, 0));
+}
+
+bool game::is_in_sunlight(const tripoint &p)
+{
+    return (m.is_outside(p) && light_level() >= 40 &&
             (weather == WEATHER_CLEAR || weather == WEATHER_SUNNY));
 }
 

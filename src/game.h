@@ -199,6 +199,7 @@ class game
         size_t num_zombies() const;
         monster &zombie(const int idx);
         bool update_zombie_pos(const monster &critter, const int newx, const int newy);
+        bool update_zombie_pos(const monster &critter, const tripoint &p);
         void remove_zombie(const int idx);
         void clear_zombies();
         bool spawn_hallucination(); //Spawns a hallucination close to the player
@@ -207,8 +208,10 @@ class game
         int  mon_at(point p) const;
         int  mon_at(const tripoint &p) const; // Index of the monster at (x, y); -1 for none
         bool is_empty(const int x, const int y); // True if no PC, no monster, move cost > 0
+        bool is_empty(const tripoint &p);
         bool isBetween(int test, int down, int up);
         bool is_in_sunlight(int x, int y); // Checks outdoors + sunny
+        bool is_in_sunlight(const tripoint &p);
         bool is_sheltered(int x, int y); // Checks if indoors, underground or in a car.
         bool revive_corpse(int x, int y, int n); // revives a corpse from an item pile
         bool revive_corpse(int x, int y,
@@ -265,6 +268,7 @@ class game
         bool spread_fungus(int x, int y);
         std::vector<faction *> factions_at(int x, int y);
         int &scent(int x, int y);
+        int &scent(const tripoint &p);
         float ground_natural_light_level() const;
         float natural_light_level() const;
         unsigned char light_level();
@@ -273,7 +277,9 @@ class game
         int assign_faction_id();
         faction *faction_by_ident(std::string ident);
         bool sees_u(int x, int y, int &t);
+        bool sees_u(const tripoint &p, int &t);
         bool u_see (int x, int y);
+        bool u_see (const tripoint &p);
         bool u_see (const monster *critter);
         bool u_see (const Creature *t); // for backwards compatibility
         bool u_see (const Creature &t);

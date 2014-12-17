@@ -13466,23 +13466,34 @@ Creature *player::auto_find_hostile_target(int range, int &boo_hoo, int &fire_t)
 bool player::sees(int x, int y) const
 {
     int dummy = 0;
-    return sees(x, y, dummy);
+    return sees(tripoint(x, y, 0), dummy);
+}
+
+bool player::sees(const tripoint &p) const
+{
+    int dummy = 0;
+    return sees(p, dummy);
 }
 
 bool player::sees(int x, int y, int &t) const
 {
+    return sees(tripoint(x, y, 0), t);
+}
+
+bool player::sees(const tripoint &p, int &t) const
+{
     static const std::string str_bio_night("bio_night");
-    const int wanted_range = rl_dist(posx, posy, x, y);
+    const int wanted_range = rl_dist(pos(), p);
     bool can_see = false;
     const int s_range = sight_range(g->light_level());
     if( wanted_range <= s_range || (wanted_range <= sight_range(DAYLIGHT_LEVEL) &&
-         g->m.light_at(x, y) >= LL_LOW) ) {
+         g->m.light_at(p) >= LL_LOW) ) {
         if( is_player() ) {
-            can_see = g->m.pl_sees(posx, posy, x, y, wanted_range);
-        } else  if( g->m.light_at(x, y) >= LL_LOW ) {
-            can_see = g->m.sees(posx, posy, x, y, wanted_range, t);
+            can_see = g->m.pl_sees(pos(), p, wanted_range);
+        } else  if( g->m.light_at(p) >= LL_LOW ) {
+            can_see = g->m.sees(pos(), p, wanted_range, t);
         } else {
-            can_see = g->m.sees(posx, posy, x, y, s_range, t);
+            can_see = g->m.sees(pos(), p, s_range, t);
         }
     }
     // Only check if we need to override if we already came to the opposite conclusion.
@@ -13510,20 +13521,18 @@ bool player::sees(const Creature *critter, int &t) const
         // hallucinations are always visible for the player, but never for anyone else.
         return is_player();
     }
-    const int cx = critter->xpos();
-    const int cy = critter->ypos();
-    int dist = rl_dist(posx, posy, cx, cy);
+    int dist = rl_dist(pos(), critter->pos());
     if (dist <= 3 && has_trait("ANTENNAE")) {
         return true;
     }
     if (dist > 1 && critter->digging() && !has_active_bionic("bio_ground_sonar")) {
         return false; // Can't see digging monsters until we're right next to them
     }
-    if (g->m.is_divable(cx, cy) && critter->is_underwater() && !is_underwater()) {
+    if (g->m.is_divable(critter->pos()) && critter->is_underwater() && !is_underwater()) {
         //Monster is in the water and submerged, and we're out of/above the water
         return false;
     }
-    return sees(cx, cy, t);
+    return sees(critter->pos(), t);
 }
 
 bool player::can_pickup(bool print_msg) const
