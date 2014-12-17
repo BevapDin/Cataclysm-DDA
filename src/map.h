@@ -838,6 +838,8 @@ void add_corpse(int x, int y);
  bool inbounds(const tripoint &p) const;
 
  int getmapsize() { return my_MAPSIZE; };
+ int get_zmin() const { return my_ZMIN; }
+ int get_zmax() const { return my_ZMAX; }
 
  // Not protected/private for mapgen_functions.cpp access
  void rotate(const int turns);// Rotates the current map 90*turns degress clockwise
@@ -975,7 +977,7 @@ private:
         void update_vehicle_list( const tripoint &gp );
         void update_traps( const tripoint &gp );
 
-    void spawn_monsters( int gx, int gy, mongroup &group, bool ignore_sight );
+        void spawn_monsters( const tripoint &gp, mongroup &group, bool ignore_sight );
 
  long determine_wall_corner(const int x, const int y, const long orig_sym);
  long determine_wall_corner(const tripoint &p, const long orig_sym);

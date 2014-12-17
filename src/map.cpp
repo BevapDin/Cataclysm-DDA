@@ -5419,11 +5419,11 @@ void map::actualize( const tripoint &gp )
     tmpsub->turn_last_touched = calendar::turn;
 }
 
-void map::spawn_monsters( int gx, int gy, mongroup &group, bool ignore_sight )
+void map::spawn_monsters( const tripoint &gp, mongroup &group, bool ignore_sight )
 {
     const int s_range = std::min(SEEX * (MAPSIZE / 2), g->u.sight_range( g->light_level() ) );
     int pop = group.population;
-    std::vector<point> locations;
+    std::vector<tripoint> locations;
     if( !ignore_sight ) {
         // If the submap is one of the outermost submaps, assume that monsters are
         // invisible there.
@@ -5431,34 +5431,33 @@ void map::spawn_monsters( int gx, int gy, mongroup &group, bool ignore_sight )
         // the player has still their *old* (not shifted) coordinates.
         // That makes the submaps that have come into view visible (if the sight range
         // is big enough).
-        if( gx == 0 || gy == 0 || gx + 1 == MAPSIZE || gy + 1 == MAPSIZE ) {
+        if( gp.x == 0 || gp.y == 0 || gp.x + 1 == MAPSIZE || gp.y + 1 == MAPSIZE || gp.z == my_ZMIN || gp.z == my_ZMAX ) {
             ignore_sight = true;
         }
     }
     for( int x = 0; x < SEEX; ++x ) {
         for( int y = 0; y < SEEY; ++y ) {
-            int fx = x + SEEX * gx;
-            int fy = y + SEEY * gy;
-            if( g->critter_at( fx, fy ) != nullptr ) {
+            tripoint f( y + SEEX * gp.x, y + SEEY * gp.y, gp.z );
+            if( g->critter_at( f ) != nullptr ) {
                 continue; // there is already some creature
             }
-            if( move_cost( fx, fy ) == 0 ) {
+            if( move_cost( f ) == 0 ) {
                 continue; // solid area, impassable
             }
             int t;
-            if( !ignore_sight && sees( g->u.posx(), g->u.posy(), fx, fy, s_range, t ) ) {
+            if( !ignore_sight && sees( g->u.pos(), f, s_range, t ) ) {
                 continue; // monster must spawn outside the viewing range of the player
             }
-            if( has_flag_ter_or_furn( TFLAG_INDOORS, fx, fy ) ) {
+            if( has_flag_ter_or_furn( TFLAG_INDOORS, f ) ) {
                 continue; // monster must spawn outside.
             }
-            locations.push_back( point( fx, fy ) );
+            locations.push_back( f );
         }
     }
     if( locations.empty() ) {
         // TODO: what now? there is now possible place to spawn monsters, most
         // likely because the player can see all the places.
-        dbg( D_ERROR ) << "Empty locations for group " << group.type << " at " << gx << "," << gy;
+        dbg( D_ERROR ) << "Empty locations for group " << group.type << " at " << gp.x << "," << gp.y << "," << gp.z;
         return;
     }
     for( int m = 0; m < pop; m++ ) {
@@ -5470,11 +5469,11 @@ void map::spawn_monsters( int gx, int gy, mongroup &group, bool ignore_sight )
         for( int i = 0; i < spawn_details.pack_size; i++) {
             for( int tries = 0; tries < 10 && !locations.empty(); tries++ ) {
                 const size_t index = rng( 0, locations.size() - 1 );
-                const point p = locations[index];
-                if( !tmp.can_move_to( p.x, p.y ) ) {
+                const tripoint p = locations[index];
+                if( !tmp.can_move_to( p ) ) {
                     continue; // target can not contain the monster
                 }
-                tmp.spawn( p.x, p.y );
+                tmp.spawn( p );
                 g->add_zombie( tmp );
                 locations.erase( locations.begin() + index );
                 break;
@@ -5487,14 +5486,16 @@ void map::spawn_monsters( int gx, int gy, mongroup &group, bool ignore_sight )
 
 void map::spawn_monsters(bool ignore_sight)
 {
-    for (int gx = 0; gx < my_MAPSIZE; gx++) {
-        for (int gy = 0; gy < my_MAPSIZE; gy++) {
-            auto groups = overmap_buffer.groups_at( abs_sub.x + gx, abs_sub.y + gy, abs_sub.z );
+    tripoint gp;
+    for( gp.x = 0; gp.x < my_MAPSIZE; gp.x++ ) {
+        for( gp.y = 0; gp.y < my_MAPSIZE; gp.y++ ) {
+        for( gp.z = my_ZMIN; gp.z <= my_ZMAX; gp.z++ ) {
+            auto groups = overmap_buffer.groups_at( abs_sub.x + gp.x, abs_sub.y + gp.y, abs_sub.z + gp.z);
             for( auto &mgp : groups ) {
-                spawn_monsters( gx, gy, *mgp, ignore_sight );
+                spawn_monsters( gp, *mgp, ignore_sight );
             }
 
-            submap * const current_submap = get_submap_at_grid( point( gx, gy ) );
+            submap * const current_submap = get_submap_at_grid( gp );
             for (auto &i : current_submap->spawns) {
                 for (int j = 0; j < i.count; j++) {
                     int tries = 0;
@@ -5507,9 +5508,9 @@ void map::spawn_monsters(bool ignore_sight)
                     if (i.friendly) {
                         tmp.friendly = -1;
                     }
-                    int fx = mx + gx * SEEX, fy = my + gy * SEEY;
+                    tripoint f(mx + gp.x * SEEX, my + gp.y * SEEY, gp.z);
 
-                    while ((!g->is_empty(fx, fy) || !tmp.can_move_to(fx, fy)) && tries < 10) {
+                    while ((!g->is_empty(f) || !tmp.can_move_to(f)) && tries < 10) {
                         mx = (i.posx + rng(-3, 3)) % SEEX;
                         my = (i.posy + rng(-3, 3)) % SEEY;
                         if (mx < 0) {
@@ -5518,18 +5519,22 @@ void map::spawn_monsters(bool ignore_sight)
                         if (my < 0) {
                             my += SEEY;
                         }
-                        fx = mx + gx * SEEX;
-                        fy = my + gy * SEEY;
+                        f.x = mx + gp.x * SEEX;
+                        f.y = my + gp.y * SEEY;
                         tries++;
                     }
                     if (tries != 10) {
-                        tmp.spawn(fx, fy);
+                        tmp.spawn( f );
                         g->add_zombie(tmp);
+                        add_msg( m_debug, "Spawning %s at %d,%d,%d", tmp.name().c_str(), f.x, f.y, f.z );
+                    } else {
+                        add_msg( m_debug, "Could not spawn %s near %d,%d,%d", tmp.name().c_str(), f.x, f.y, f.z );
                     }
                 }
             }
             current_submap->spawns.clear();
-            overmap_buffer.spawn_monster( abs_sub.x + gx, abs_sub.y + gy, abs_sub.z );
+            overmap_buffer.spawn_monster( abs_sub.x + gp.x, abs_sub.y + gp.y, abs_sub.z + gp.z );
+        }
         }
     }
 }
