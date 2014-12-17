@@ -1891,10 +1891,6 @@ void monster::load_legacy(std::stringstream & dump) {
 
     point ptmp;
     plans.clear();
-    for (int i = 0; i < plansize; i++) {
-        dump >> ptmp.x >> ptmp.y;
-        plans.push_back(ptmp);
-    }
 }
 ///// item.h
 
