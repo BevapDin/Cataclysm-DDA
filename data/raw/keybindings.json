@@ -1277,6 +1277,8 @@
     },
     { "type":"keybinding", "name": "Pause", "category":"DEFAULTMODE", "id":"pause", "bindings":[ { "input_method":"keyboard", "key":"." }, { "input_method":"keyboard", "key":"5" } ] },
     { "type":"keybinding", "name": "Center View", "category":"DEFAULTMODE", "id":"center", "bindings":[ { "input_method":"keyboard", "key":":" } ] },
+    { "type":"keybinding", "name": "Move View down", "category":"DEFAULTMODE", "id":"shift_down" },
+    { "type":"keybinding", "name": "Move View up", "category":"DEFAULTMODE", "id":"shift_up" },
     { "type":"keybinding", "name": "Move View North", "category":"DEFAULTMODE", "id":"shift_n", "bindings":[ { "input_method":"keyboard", "key":"K" } ] },
     { "type":"keybinding", "name": "Move View East", "category":"DEFAULTMODE", "id":"shift_e", "bindings":[ { "input_method":"keyboard", "key":"L" } ] },
     { "type":"keybinding", "name": "Move View South", "category":"DEFAULTMODE", "id":"shift_s", "bindings":[ { "input_method":"keyboard", "key":"J" } ] },
