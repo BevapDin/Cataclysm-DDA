@@ -2650,7 +2650,7 @@ void map::shoot(const int x, const int y, int &dam,
         } else if (dam > 5 + fieldhit->getFieldDensity() * 5 &&
                    one_in(5 - fieldhit->getFieldDensity())) {
             dam -= rng(1, 2 + fieldhit->getFieldDensity() * 2);
-            remove_field(x, y,fd_web);
+            remove_field(tripoint(x, y, 0),fd_web);
         }
     }
 
@@ -4182,6 +4182,16 @@ field_entry * map::get_field( const tripoint &p, const field_id t ) {
     return get_field( p ).findField(t);
 }
 
+bool map::add_field(const int x, const int y, const field_id t, const int new_density)
+{
+    return add_field( tripoint( x, y, 0 ), t, new_density, 0 );
+}
+
+bool map::add_field(const tripoint &p, const field_id t, const int new_density)
+{
+    return add_field( p, t, new_density, 0 );
+}
+
 bool map::add_field(const point p, const field_id t, int density, const int age)
 {
     return add_field(tripoint(p.x, p.y, 0), t, density, age);
@@ -4212,11 +4222,6 @@ bool map::add_field(const tripoint &p, const field_id t, int density, const int 
         creature_in_field( g->u ); //Hit the player with the field if it spawned on top of them.
     }
     return true;
-}
-
-bool map::add_field(const int x, const int y, const field_id t, const int new_density)
-{
-    return this->add_field(point(x,y), t, new_density, 0);
 }
 
 void map::remove_field(const int x, const int y, const field_id field_to_remove)

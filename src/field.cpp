@@ -1416,7 +1416,7 @@ If you wish for a field effect to do something over time (propagate, interact wi
 void map::player_in_field( player &u )
 {
     // A copy of the current field for reference. Do not add fields to it, use map::add_field
-    field &curfield = get_field( u.posx(), u.posy() );
+    field &curfield = get_field( u.pos() );
     int veh_part; // vehicle part existing on this tile.
     vehicle *veh = NULL; // Vehicle reference if there is one.
     bool inside = false; // Are we inside?
@@ -1426,7 +1426,7 @@ void map::player_in_field( player &u )
     //If we are in a vehicle figure out if we are inside (reduces effects usually)
     // and what part of the vehicle we need to deal with.
     if (u.in_vehicle) {
-        veh = veh_at( u.posx(), u.posy(), veh_part );
+        veh = veh_at( u.pos(), veh_part );
         inside = (veh && veh->is_inside(veh_part));
     }
 
@@ -1817,7 +1817,7 @@ void map::monster_in_field( monster &z )
     if (z.digging()) {
         return; // Digging monsters are immune to fields
     }
-    field &curfield = get_field( z.posx(), z.posy() );
+    field &curfield = get_field( z.pos() );
 
     int dam = 0;
     for( auto field_list_it = curfield.begin(); field_list_it != curfield.end(); ) {
