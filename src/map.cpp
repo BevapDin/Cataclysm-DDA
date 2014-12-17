@@ -192,11 +192,14 @@ void map::clear_vehicle_cache()
     }
 }
 
-void map::update_vehicle_list( submap *const to )
+void map::update_vehicle_list( const tripoint &gp )
 {
-    // Update vehicle data
+    const auto to = get_submap_at_grid( gp );
     for( auto & elem : to->vehicles ) {
         vehicle_list.insert( elem );
+        elem->smx = gp.x;
+        elem->smy = gp.y;
+        elem->smz = gp.z;
     }
 }
 
@@ -5052,53 +5055,38 @@ void map::load(const int wx, const int wy, const int wz, const bool update_vehic
     load_abs(awx, awy, wz, update_vehicle);
 }
 
-void map::forget_traps(const tripoint &gp)
+void map::update_traps( const tripoint &gp )
 {
-    const auto smap = get_submap_at_grid( gp );
-
-    for (int x = 0; x < SEEX; x++) {
-        for (int y = 0; y < SEEY; y++) {
-            trap_id t = smap->get_trap(x, y);
-            if (t != tr_null) {
-                const int fx = x + gp.x * SEEX;
-                const int fy = y + gp.y * SEEY;
-                traplocs[t].erase(point(fx, fy));
+    const auto to = get_submap_at_grid( gp );
+    for( int x = 0; x < SEEX; x++ ) {
+        for( int y = 0; y < SEEX; y++ ) {
+            auto t = to->get_trap( x, y );
+            if( t != tr_null ) {
+                traplocs[t].insert( point( gp.x * SEEX + x, gp.y * SEEY + y ) );
             }
         }
     }
 }
 
-void map::shift(const int sx, const int sy)
+void map::shift( const tripoint &s )
 {
+    const int sx = s.x;
+    const int sy = s.y;
+    const int sz = s.z;
 // Special case of 0-shift; refresh the map
-    if (sx == 0 && sy == 0) {
+    if (sx == 0 && sy == 0 && sz == 0) {
         return; // Skip this?
     }
     const int wx = get_abs_sub().x;
     const int wy = get_abs_sub().y;
     const int wz = get_abs_sub().z;
-    set_abs_sub( wx + sx, wy + sy, wz );
+    set_abs_sub( wx + sx, wy + sy, wz + sz );
 
 // if player is in vehicle, (s)he must be shifted with vehicle too
     if( g->u.in_vehicle ) {
         g->u.posx -= sx * SEEX;
         g->u.posy -= sy * SEEY;
-    }
-
-    // Forget about traps in submaps that are being unloaded.
-    if (sx != 0) {
-        const int gridx = (sx > 0) ? (my_MAPSIZE - 1) : 0;
-        for (int gridy = 0; gridy < my_MAPSIZE; gridy++) {
-            // TODO: Z
-            forget_traps( tripoint( gridx, gridy, 0 ) );
-        }
-    }
-    if (sy != 0) {
-        const int gridy = (sy > 0) ? (my_MAPSIZE - 1) : 0;
-        for (int gridx = 0; gridx < my_MAPSIZE; gridx++) {
-            // TODO: Z
-            forget_traps( tripoint( gridx, gridy, 0 ) );
-        }
+        // player is _always_ on z-level 0, so no need to shift it.
     }
 
     for( vehicle *veh : vehicle_list ) {
@@ -5110,54 +5098,30 @@ void map::shift(const int sx, const int sy)
 // Clear vehicle list and rebuild after shift
     clear_vehicle_cache();
     vehicle_list.clear();
-// Shift the map sx submaps to the right and sy submaps down.
-// sx and sy should never be bigger than +/-1.
-// absx and absy are our position in the world, for saving/loading purposes.
-    if (sx >= 0) {
-        for (int gridx = 0; gridx < my_MAPSIZE; gridx++) {
-            if (sy >= 0) {
-                for (int gridy = 0; gridy < my_MAPSIZE; gridy++) {
-                    if (gridx + sx < my_MAPSIZE && gridy + sy < my_MAPSIZE) {
-                        copy_grid( tripoint( gridx, gridy, my_ZMIN ),
-                                   tripoint( gridx + sx, gridy + sy, my_ZMIN ) );
-                        update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
-                    } else {
-                        loadn( tripoint( gridx, gridy, my_ZMIN ), true );
-                    }
-                }
-            } else { // sy < 0; work through it backwards
-                for (int gridy = my_MAPSIZE - 1; gridy >= 0; gridy--) {
-                    if (gridx + sx < my_MAPSIZE && gridy + sy >= 0) {
-                        copy_grid( tripoint( gridx, gridy, my_ZMIN ),
-                                   tripoint( gridx + sx, gridy + sy, my_ZMIN ) );
-                        update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
-                    } else {
-                        loadn( tripoint( gridx, gridy, my_ZMIN ), true );
-                    }
-                }
-            }
-        }
-    } else { // sx < 0; work through it backwards
-        for (int gridx = my_MAPSIZE - 1; gridx >= 0; gridx--) {
-            if (sy >= 0) {
-                for (int gridy = 0; gridy < my_MAPSIZE; gridy++) {
-                    if (gridx + sx >= 0 && gridy + sy < my_MAPSIZE) {
-                        copy_grid( tripoint( gridx, gridy, my_ZMIN ),
-                                   tripoint( gridx + sx, gridy + sy, my_ZMIN ) );
-                        update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
-                    } else {
-                        loadn( tripoint( gridx, gridy, my_ZMIN ), true );
-                    }
-                }
-            } else { // sy < 0; work through it backwards
-                for (int gridy = my_MAPSIZE - 1; gridy >= 0; gridy--) {
-                    if (gridx + sx >= 0 && gridy + sy >= 0) {
-                        copy_grid( tripoint( gridx, gridy, my_ZMIN ),
-                                   tripoint( gridx + sx, gridy + sy, my_ZMIN ) );
-                        update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
-                    } else {
-                        loadn( tripoint( gridx, gridy, my_ZMIN ), true );
-                    }
+    // Clear all the traps because they all will be changed and because this is a map, all entries
+    // must be removed and reinserted anyway, so remove them all at once to have a clean state.
+    traplocs.clear();
+
+    // wx and wy are our position in the world, for saving/loading purposes, they are already shifted!
+    // Move grid to oldgrid an reinitialize grid to all NULL
+    std::vector<submap*> oldgrid( grid.size(), NULL );
+    oldgrid.swap( grid );
+    // Step through each grid and get its grid point before the shift.
+    // If that point is valid, we can simply move the submap pointer,
+    // else we have to load a new submap.
+    tripoint gp;
+    for( gp.x = 0; gp.x < my_MAPSIZE; gp.x++ ) {
+        for( gp.y = 0; gp.y < my_MAPSIZE; gp.y++ ) {
+            for( gp.z = my_ZMIN; gp.z <= my_ZMAX; gp.z++ ) {
+                const tripoint oldgp( gp.x + sx, gp.y + sy, gp.z + sz );
+                if( valid_gp( oldgp ) ) {
+                    // If we can reuse an already loaded submap, we must update some stuff,
+                    // that had been cleared, otherwise this would be done directly via loadn.
+                    grid[get_nonant( gp )] = oldgrid[get_nonant( oldgp )];
+                    update_vehicle_list( gp );
+                    update_traps( gp );
+                } else {
+                    loadn( gp, true );
                 }
             }
         }
@@ -5380,31 +5344,6 @@ void map::actualize( const tripoint &gp )
 
     // the last time we touched the submap, is right now.
     tmpsub->turn_last_touched = calendar::turn;
-}
-
-void map::copy_grid( const tripoint to_gp, const tripoint from_gp )
-{
-    const auto smap = get_submap_at_grid( from );
-    setsubmap( get_nonant( to ), smap );
- for( std::vector<vehicle*>::iterator it = smap->vehicles.begin(),
-       end = smap->vehicles.end(); it != end; ++it ) {
-  (*it)->smx = to.x;
-  (*it)->smy = to.y;
- }
-
-    const int oldx = from.x * SEEX;
-    const int oldy = from.y * SEEY;
-    const int newx = to.x * SEEX;
-    const int newy = to.y * SEEY;
-    for (int x = 0; x < SEEX; x++) {
-        for (int y = 0; y < SEEY; y++) {
-            trap_id t = smap->get_trap(x, y);
-            if (t != tr_null) {
-                traplocs[t].erase(point(oldx + x, oldy + y));
-                traplocs[t].insert(point(newx + x, newy + y));
-            }
-        }
-    }
 }
 
 void map::spawn_monsters( int gx, int gy, mongroup &group, bool ignore_sight )
@@ -5960,6 +5899,13 @@ submap *map::get_submap_at_grid( const tripoint gp ) const
 int map::get_nonant( const point gp ) const
 {
     return get_nonant( tripoint( gp.x, gp.y, 0 ) );
+}
+
+bool map::valid_gp( const tripoint gp ) const
+{
+    return gp.x >= 0 && gp.x < my_MAPSIZE &&
+           gp.y >= 0 && gp.y < my_MAPSIZE &&
+           gp.z >= my_ZMIN && gp.z <= my_ZMAX;
 }
 
 int map::get_nonant( const tripoint gp ) const

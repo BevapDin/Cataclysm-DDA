@@ -13915,9 +13915,10 @@ void game::update_map(int &x, int &y, int z)
         shifty++;
     }
 
-    m.shift(shiftx, shifty);
+    m.shift(tripoint(shiftx, shifty, shiftz));
     levx += shiftx;
     levy += shifty;
+    levz += shiftz;
 
     real_coords rc( m.getabs( 0, 0 ) );
     if( cur_om->pos() != rc.abs_om ) {
@@ -13928,7 +13929,7 @@ void game::update_map(int &x, int &y, int z)
     }
 
     // Shift monsters if we're actually shifting
-    if (shiftx || shifty) {
+    if (shiftx || shifty || shiftz) {
         shift_monsters( tripoint( shiftx, shifty, shiftz ) );
         u.shift_destination(-shiftx * SEEX, -shifty * SEEY);
     }
