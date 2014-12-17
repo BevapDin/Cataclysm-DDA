@@ -101,8 +101,8 @@ void npc::move()
     }
 
     // This bypasses the logic to determine the npc action, but this all needs to be rewritten anyway.
-    if( sees_dangerous_field( pos() ) ) {
-        auto targets = closest_points_first( 1, pos() );
+    if( sees_dangerous_field( point( xpos(), ypos() ) ) ) {
+        auto targets = closest_points_first( 1, point( xpos(), ypos() ) );
         targets.erase( targets.begin() ); // current location
         auto filter = [this](const point &p) {
             return !could_move_onto( p );
@@ -1790,10 +1790,10 @@ void npc::activate_item(int position)
     item *it = &i_at(position);
     if (it->is_tool()) {
         it_tool *tool = dynamic_cast<it_tool *>(it->type);
-        tool->invoke(this, it, false, pos());
+        tool->invoke(this, it, false, point( xpos(), ypos() ));
     } else if (it->is_food()) {
         it_comest *comest = dynamic_cast<it_comest *>(it->type);
-        comest->invoke(this, it, false, pos());
+        comest->invoke(this, it, false, point( xpos(), ypos() ));
     }
 }
 

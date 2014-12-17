@@ -808,24 +808,24 @@ protected:
          * Fast forward a submap that has just been loading into this map.
          * This is used to rot and remove rotten items, grow plants, fill funnels etc.
          */
-        void actualize( const int gridx, const int gridy );
+        void actualize( const tripoint &gp );
         /**
          * Whether the item has to be removed as it has rotten away completely.
          * @param pnt The point on this map where the items are, used for rot calculation.
          * @return true if the item has rotten away and should be removed, false otherwise.
          */
-        bool has_rotten_away( item &itm, const point &pnt ) const;
+        bool has_rotten_away( item &itm, const tripoint &pnt ) const;
         /**
          * Go through the list of items, update their rotten status and remove items
          * that have rotten away completely.
          * @param pnt The point on this map where the items are, used for rot calculation.
          */
-        void remove_rotten_items( std::vector<item> &items, const point &pnt ) const;
+        void remove_rotten_items( std::vector<item> &items, const tripoint &pnt ) const;
         /**
          * Try to fill funnel based items here.
          * @param pnt The location in this map where to fill funnels.
          */
-        void fill_funnels( const point pnt );
+        void fill_funnels( tripoint pnt );
         /**
          * Try to grow a harvestable plant to the next stage(s).
          */

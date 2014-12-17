@@ -13,21 +13,20 @@ class Creature_tracker
         Creature_tracker();
         ~Creature_tracker();
         monster &find(int index);
-        int mon_at(point coords) const;
-        int mon_at(int x_pos, int y_pos) const;
+        int mon_at(const tripoint &p) const;
         bool add(monster &critter);
         size_t size() const;
-        bool update_pos(const monster &critter, const int new_x_pos, const int new_y_pos);
+        bool update_pos(const monster &critter, const tripoint &p);
         void remove(const int idx);
         void clear();
         void rebuild_cache();
-        const std::vector<monster> &list() const;
+        const std::vector<monster>& list() const;
 
     private:
         std::vector<monster *> _old_monsters_list;
-        std::unordered_map<point, int> _old_monsters_by_location;
+        std::unordered_map<tripoint, int> _old_monsters_by_location;
         // Same as mon_at, but only returns id of dead critters.
-        int dead_mon_at(point coords) const;
+        int dead_mon_at(const tripoint &coords) const;
 };
 
 #endif

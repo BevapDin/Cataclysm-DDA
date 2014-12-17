@@ -4218,9 +4218,9 @@ float player::active_light()
     return lumination;
 }
 
-point player::pos() const
+tripoint player::pos() const
 {
-    return point(posx, posy);
+    return tripoint(posx, posy, 0);
 }
 
 int player::sight_range(int light_level) const
@@ -9378,7 +9378,7 @@ bool player::consume(int target_position)
             }
             if (comest->has_use()) {
                 //Check special use
-                amount_used = comest->invoke(this, to_eat, false, pos());
+                amount_used = comest->invoke(this, to_eat, false, point( xpos(), ypos() ));
                 if( amount_used <= 0 ) {
                     return false;
                 }
@@ -9666,7 +9666,7 @@ bool player::eat(item *eaten, it_comest *comest)
     }
 
     if (comest->has_use()) {
-        to_eat = comest->invoke(this, eaten, false, pos());
+        to_eat = comest->invoke(this, eaten, false, point( xpos(), ypos() ));
         if( to_eat <= 0 ) {
             return false;
         }
@@ -11001,7 +11001,7 @@ void player::use(int inventory_position)
         if (!has_enough_charges(*used, true)) {
             return;
         }
-        const long charges_used = tool->invoke( this, used, false, pos() );
+        const long charges_used = tool->invoke( this, used, false, point( xpos(), ypos() ) );
         if (charges_used <= 0) {
             // Canceled or not used up or whatever
             return;
@@ -11187,7 +11187,7 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
         moves -= int(used->reload_time(*this) / 2);
         return;
     } else if ( used->type->has_use() ) {
-        used->type->invoke(this, used, false, pos());
+        used->type->invoke(this, used, false, point( xpos(), ypos() ));
         return;
     } else {
         add_msg(m_info, _("You can't do anything interesting with your %s."),
@@ -11591,7 +11591,7 @@ void player::do_read( item *book )
     }
 
     for( auto &m : reading->use_methods ) {
-        m.call( this, book, false, pos() );
+        m.call( this, book, false, point( xpos(), ypos() ) );
     }
 
     activity.type = ACT_NULL;

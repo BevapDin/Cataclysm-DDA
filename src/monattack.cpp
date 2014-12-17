@@ -1449,7 +1449,7 @@ void mattack::callblobs(monster *z, int index)
     // and keep the rest near the brain blob for protection.
     point enemy( g->u.xpos(), g->u.ypos() );
     std::list<monster *> allies;
-    std::vector<point> nearby_points = closest_points_first( 3, z->pos() );
+    std::vector<point> nearby_points = closest_points_first( 3, point(z->pos().x, z->pos().y) );
     // Iterate using horrible creature_tracker API.
     for( size_t i = 0; i < g->num_zombies(); i++ ) {
         monster *candidate = &g->zombie( i );
@@ -1484,7 +1484,7 @@ void mattack::jackson(monster *z, int index)
 {
     // Jackson draws nearby zombies into the dance.
     std::list<monster *> allies;
-    std::vector<point> nearby_points = closest_points_first( 3, z->pos() );
+    std::vector<point> nearby_points = closest_points_first( 3, point( z->xpos(), z->ypos() ) );
     // Iterate using horrible creature_tracker API.
     for( size_t i = 0; i < g->num_zombies(); i++ ) {
         monster *candidate = &g->zombie( i );
@@ -1498,7 +1498,7 @@ void mattack::jackson(monster *z, int index)
     int dancers = 0;
     bool converted = false;
     for( auto ally = allies.begin(); ally != allies.end(); ++ally, ++dancers ) {
-        point post = z->pos();
+        point post = point( z->xpos(), z->ypos() );
         if( dancers < num_dancers ) {
             // Each dancer is assigned a spot in the nearby_points vector based on their order.
             int assigned_spot = (nearby_points.size() * dancers) / num_dancers;
@@ -2406,7 +2406,7 @@ void mattack::tank_tur(monster *z, int index)
     tmp.skillLevel("gun").level(1);
 
     z->reset_special(index); // Reset timer
-    point aim_point;
+    tripoint aim_point;
 
     if (z->friendly != 0) {
         // Attacking monsters, not the player!

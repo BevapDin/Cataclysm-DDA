@@ -13,7 +13,7 @@ const double tau = 2 * std::acos(-1);
 weather_generator::weather_generator() { }
 weather_generator::weather_generator(unsigned seed) : SEED(seed) { }
 
-w_point weather_generator::get_weather(const point &location, const calendar &t)
+w_point weather_generator::get_weather(const tripoint &location, const calendar &t)
 {
     const double x(location.x / 2000.0);// Integer x position / widening factor of the Perlin function.
     const double y(location.y / 2000.0);// Integer y position / widening factor of the Perlin function.
@@ -73,7 +73,7 @@ w_point weather_generator::get_weather(const point &location, const calendar &t)
     return w_point(T, H, P, W);
 }
 
-weather_type weather_generator::get_weather_conditions(const point &location, const calendar &t)
+weather_type weather_generator::get_weather_conditions(const tripoint &location, const calendar &t)
 {
     w_point w(get_weather(location, t));
     weather_type wt = get_weather_conditions(w);
@@ -160,7 +160,7 @@ void weather_generator::test_weather()
 
     for (calendar i(calendar::turn); i.get_turn() < calendar::turn + 14400 * 2 * calendar::turn.year_length(); i+=200) {
         ss.str("");
-        w_point w = get_weather(point(0, 0), i);
+        w_point w = get_weather(tripoint(0,0,0),i);
         ss << i.get_turn() << "," << w.temperature << "," << w.humidity << "," << w.pressure;
         testfile << std::string( ss.str() ) << std::endl;
     }

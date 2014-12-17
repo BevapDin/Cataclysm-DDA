@@ -315,7 +315,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Removes the mutation's child flag from the player's list */
         void remove_child_flag(std::string mut);
 
-        point pos() const;
+        tripoint pos() const;
         /** Returns the player's sight range */
         int  sight_range(int light_level) const;
         /** Modifies the player's sight values
@@ -1052,6 +1052,10 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         {
             return posy;
         }
+        inline int zpos() const
+        {
+            return 0;
+        }
         int view_offset_x, view_offset_y, view_offset_z;
         bool in_vehicle;       // Means player sit inside vehicle on the tile he is now
         bool controlling_vehicle;  // Is currently in control of a vehicle
@@ -1272,7 +1276,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         inventory cached_crafting_inventory;
         int cached_moves;
         int cached_turn;
-        point cached_position;
+        tripoint cached_position;
 
         struct reason_weight_list melee_miss_reasons;
 

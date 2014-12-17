@@ -233,6 +233,16 @@ std::pair<double, double> slope_of(const std::vector<point> &line)
     return ret;
 }
 
+int rl_dist(tripoint a, point b)
+{
+    return rl_dist(a.x, a.y, b.x, b.y);
+}
+
+int rl_dist(point a, tripoint b)
+{
+    return rl_dist(a.x, a.y, b.x, b.y);
+}
+
 // returns the normalized dx, dy, dz for the current line vector.
 // ret.second contains z and can be ignored if unused.
 std::pair<std::pair<double, double>, double> slope_of(const std::vector<tripoint> &line)

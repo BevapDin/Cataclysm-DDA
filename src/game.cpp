@@ -2057,7 +2057,7 @@ void game::activity_on_finish_firstaid()
 {
     item &it = u.i_at(u.activity.position);
     iuse tmp;
-    tmp.completefirstaid(&u, &it, false, u.pos());
+    tmp.completefirstaid(&u, &it, false, point( u.xpos(), u.ypos() ));
     u.reduce_charges(u.activity.position, 1);
     // Erase activity and values.
     u.activity.type = ACT_NULL;
@@ -7524,9 +7524,14 @@ void game::emp_blast(int x, int y)
 
 int game::npc_at(const int x, const int y) const
 {
+    return npc_at( tripoint( x, y, 0 ) );
+}
+
+int game::npc_at(const tripoint &p) const
+{
     for (size_t i = 0; i < active_npc.size(); i++) {
-        if (active_npc[i]->posx == x && active_npc[i]->posy == y && !active_npc[i]->is_dead()) {
-            return (int)i;
+        if (active_npc[i]->pos() == p && !active_npc[i]->is_dead()) {
+            return i;
         }
     }
     return -1;
@@ -7544,14 +7549,19 @@ int game::npc_by_id(const int id) const
 
 Creature *game::critter_at(int x, int y)
 {
-    const int mindex = mon_at(x, y);
+    return critter_at( tripoint( x, y, 0 ) );
+}
+
+Creature *game::critter_at(const tripoint &p)
+{
+    const int mindex = mon_at(p);
     if (mindex != -1) {
         return &zombie(mindex);
     }
-    if (x == u.posx && y == u.posy) {
+    if (u.pos() == p) {
         return &u;
     }
-    const int nindex = npc_at(x, y);
+    const int nindex = npc_at(p);
     if (nindex != -1) {
         return active_npc[nindex];
     }
@@ -7578,7 +7588,7 @@ monster &game::zombie(const int idx)
 
 bool game::update_zombie_pos(const monster &critter, const int newx, const int newy)
 {
-    return critter_tracker.update_pos(critter, newx, newy);
+    return critter_tracker.update_pos(critter, tripoint( newx, newy, 0 ));
 }
 
 void game::remove_zombie(const int idx)
@@ -7618,12 +7628,17 @@ bool game::spawn_hallucination()
 
 int game::mon_at(const int x, const int y) const
 {
-    return critter_tracker.mon_at(x, y);
+    return mon_at( tripoint( x, y, 0 ) );
+}
+
+int game::mon_at(const tripoint &p) const
+{
+    return critter_tracker.mon_at(p);
 }
 
 int game::mon_at(point p) const
 {
-    return critter_tracker.mon_at(p);
+    return mon_at( p.x, p.y );
 }
 
 void game::rebuild_mon_at_cache()
@@ -8707,7 +8722,7 @@ bool pet_menu(monster *z)
             return true;
         }
 
-        bool success = g->make_drop_activity( ACT_STASH, z->pos() );
+        bool success = g->make_drop_activity( ACT_STASH, point( z->xpos(), z->ypos() ) );
         if( success ) {
             z->add_effect("controlled", 5);
         }
@@ -8726,7 +8741,7 @@ bool pet_menu(monster *z)
 
             item ball("pheromone", 0);
             iuse pheromone;
-            pheromone.pheromone(&(g->u), &ball, true, g->u.pos());
+            pheromone.pheromone(&(g->u), &ball, true, point( g->u.xpos(), g->u.ypos() ));
         }
 
     }
@@ -9615,7 +9630,7 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
                     }
                 }
 
-                point pos = u.pos();
+                tripoint pos = u.pos();
                 int range = std::max(u.sight_range(g->light_level()), LIGHT_RANGE(u.active_light()));
 
                 // Distance to new coordinates
@@ -10861,7 +10876,7 @@ int game::move_liquid(item &liquid)
 void game::drop(int pos)
 {
     if (pos == INT_MIN) {
-        make_drop_activity( ACT_DROP, u.pos() );
+        make_drop_activity( ACT_DROP, point( u.xpos(), u.ypos() ) );
     } else if (pos == -1 && u.weapon.has_flag("NO_UNWIELD")) {
         add_msg(m_info, _("You cannot drop your %s."), u.weapon.tname().c_str());
         return;
@@ -12381,7 +12396,7 @@ void game::unload(item &it)
         // Tools need to be turned off, especially when thy consume charges only every few turns,
         // otherwise they stay active until they would consume the next charge.
         if( weapon->active && weapon->is_tool() && weapon->type->has_use() ) {
-            weapon->type->invoke( &u, weapon, false, u.pos() );
+            weapon->type->invoke( &u, weapon, false, point( u.xpos(), u.ypos() ) );
         }
     }
 }

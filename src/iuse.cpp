@@ -6226,7 +6226,7 @@ void iuse::play_music( player *p, point source, int volume )
 int iuse::mp3_on(player *p, item *it, bool t, point)
 {
     if (t) { // Normal use
-        play_music( p, p->pos(), 0 );
+        play_music( p, point( p->xpos(), p->ypos() ), 0 );
     } else { // Turning it off
         p->add_msg_if_player(_("The mp3 player turns off."));
         it->make("mp3");
@@ -9651,7 +9651,7 @@ void sendRadioSignal(player *p, std::string signal)
             g->sound(p->posx, p->posy, 6, "beep.");
 
             it_tool *tmp = dynamic_cast<it_tool *>(it.type);
-            tmp->invoke(p, &it, false, p->pos());
+            tmp->invoke(p, &it, false, point( p->xpos(), p->ypos() ));
         }
     }
 

@@ -144,7 +144,8 @@ class Creature
         // player.cpp and therefore referenced everywhere
         virtual int xpos() const = 0;
         virtual int ypos() const = 0;
-        virtual point pos() const = 0;
+        virtual int zpos() const = 0;
+        virtual tripoint pos() const = 0;
 
         struct compare_by_dist_to_point {
             point center;

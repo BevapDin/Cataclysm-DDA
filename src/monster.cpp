@@ -23,6 +23,7 @@ monster::monster()
 {
  _posx = 20;
  _posy = 10;
+ _posz = 0;
  wandx = -1;
  wandy = -1;
  wandf = 0;
@@ -46,6 +47,7 @@ monster::monster(mtype *t)
 {
  _posx = 20;
  _posy = 10;
+ _posz = 0;
  wandx = -1;
  wandy = -1;
  wandf = 0;
@@ -75,6 +77,7 @@ monster::monster(mtype *t, int x, int y)
 {
  _posx = x;
  _posy = y;
+ _posz = 0;
  wandx = -1;
  wandy = -1;
  wandf = 0;
@@ -120,9 +123,9 @@ bool monster::setpos(const point &p, const bool level_change)
     return setpos(p.x, p.y, level_change);
 }
 
-point monster::pos() const
+tripoint monster::pos() const
 {
-    return point(_posx, _posy);
+    return tripoint(_posx, _posy, _posz);
 }
 
 void monster::poly(mtype *t)

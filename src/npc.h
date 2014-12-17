@@ -671,6 +671,9 @@ public:
  std::string idz; // A temp variable used to inform the game which npc json to use as a template
  int miss_id; // A temp variable used to link to the correct mission
 
+ virtual int zpos() const { return mapz; }
+ virtual tripoint pos() const { return tripoint(posx, posy, mapz); }
+
 private:
     /**
      * Global submap coordinates of the npc (minus the position on the map:

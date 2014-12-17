@@ -1064,7 +1064,7 @@ const inventory& player::crafting_inventory()
             && cached_position == pos()) {
         return cached_crafting_inventory;
     }
-    cached_crafting_inventory.form_from_map(pos(), PICKUP_RANGE, false);
+    cached_crafting_inventory.form_from_map(point(xpos(), ypos()), PICKUP_RANGE, false);
     cached_crafting_inventory += inv;
     cached_crafting_inventory += weapon;
     cached_crafting_inventory += worn;
@@ -1753,7 +1753,7 @@ void player::consume_tools(const std::vector<tool_comp> &tools, int batch)
         if(map_has.empty()) {
             use_charges(player_has[0].type, player_has[0].count * batch);
         } else {
-            g->m.use_charges(pos(), PICKUP_RANGE, map_has[0].type, map_has[0].count * batch);
+            g->m.use_charges(point(xpos(), ypos()), PICKUP_RANGE, map_has[0].type, map_has[0].count * batch);
         }
     } else { // Variety of options, list them and pick one
         // Populate the list
@@ -1773,7 +1773,7 @@ void player::consume_tools(const std::vector<tool_comp> &tools, int batch)
         // Get selection via a popup menu
         size_t selection = menu_vec(false, _("Use which tool?"), options) - 1;
         if (selection < map_has.size())
-            g->m.use_charges(pos(), PICKUP_RANGE,
+            g->m.use_charges(point(xpos(), ypos()), PICKUP_RANGE,
                           map_has[selection].type, map_has[selection].count * batch);
         else {
             selection -= map_has.size();

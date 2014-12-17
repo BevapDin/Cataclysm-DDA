@@ -665,7 +665,7 @@ int monster::group_bash_skill( point target )
 
     // pileup = more bashskill, but only help bashing mob directly infront of target
     const int max_helper_depth = 5;
-    const std::vector<point> bzone = get_bashing_zone( target, pos(), max_helper_depth );
+    const std::vector<point> bzone = get_bashing_zone( target, point( xpos(), ypos() ), max_helper_depth );
 
     for( point candidate : bzone ) {
         // Drawing this line backwards excludes the target and includes the candidate.

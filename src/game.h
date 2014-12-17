@@ -188,9 +188,11 @@ class game
         void scrambler_blast(int x, int y);
         void emp_blast(int x, int y);
         int  npc_at(const int x, const int y) const; // Index of the npc at (x, y); -1 for none
+        int  npc_at(const tripoint &p) const; // Index of the npc at p; -1 for none
         int  npc_by_id(const int id) const; // Index of the npc at (x, y); -1 for none
         // Return any critter at (x,y), be it a monster, an npc, or u (the player).
         Creature *critter_at(int x, int y);
+        Creature *critter_at(const tripoint &p);
         // void build_monmap();  // Caches data for mon_at()
 
         bool add_zombie(monster &critter);
@@ -203,6 +205,7 @@ class game
 
         int  mon_at(const int x, const int y) const; // Index of the monster at (x, y); -1 for none
         int  mon_at(point p) const;
+        int  mon_at(const tripoint &p) const; // Index of the monster at (x, y); -1 for none
         bool is_empty(const int x, const int y); // True if no PC, no monster, move cost > 0
         bool isBetween(int test, int down, int up);
         bool is_in_sunlight(int x, int y); // Checks outdoors + sunny

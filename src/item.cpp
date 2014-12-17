@@ -2070,7 +2070,7 @@ void item::set_relative_rot( float rel_rot )
     }
 }
 
-void item::calc_rot(const point &location)
+void item::calc_rot(const tripoint &location)
 {
     const int now = calendar::turn;
     if ( last_rot_check + 10 < now ) {
@@ -4206,7 +4206,7 @@ bool item::needs_processing() const
            is_artifact();
 }
 
-bool item::process_food( player * /*carrier*/, point pos )
+bool item::process_food( player * /*carrier*/, tripoint pos )
 {
     calc_rot( pos );
     if( item_tags.count( "HOT" ) > 0 ) {
@@ -4223,7 +4223,7 @@ bool item::process_food( player * /*carrier*/, point pos )
     return false;
 }
 
-bool item::process_artifact( player *carrier, point /*pos*/ )
+bool item::process_artifact( player *carrier, tripoint /*pos*/ )
 {
     // Artifacts are currently only useful for the player character, the messages
     // don't consider npcs. Also they are not processed when laying on the ground.
@@ -4236,13 +4236,13 @@ bool item::process_artifact( player *carrier, point /*pos*/ )
     return false;
 }
 
-bool item::process_corpse( player *carrier, point pos )
+bool item::process_corpse( player *carrier, tripoint pos )
 {
     // some corpses rez over time
     if( corpse == nullptr ) {
         return false;
     }
-    if( !ready_to_revive( pos ) ) {
+    if( !ready_to_revive( point( pos.x, pos.y ) ) ) {
         return false;
     }
     if( rng( 0, volume() ) > burnt && g->revive_corpse( pos.x, pos.y, this ) ) {
@@ -4273,7 +4273,7 @@ bool item::process_corpse( player *carrier, point pos )
     return false;
 }
 
-bool item::process_litcig( player *carrier, point pos )
+bool item::process_litcig( player *carrier, tripoint pos )
 {
     field_id smoke_type;
     if( has_flag( "TOBACCO" ) ) {
@@ -4346,7 +4346,7 @@ bool item::process_litcig( player *carrier, point pos )
     return false;
 }
 
-bool item::process_cable( player *p, point pos )
+bool item::process_cable( player *p, tripoint pos )
 {
     if( item_vars["state"] != "pay_out_cable" ) {
         return false;
@@ -4396,7 +4396,7 @@ void item::reset_cable( player* p )
     }
 }
 
-bool item::process_wet( player * /*carrier*/, point /*pos*/ )
+bool item::process_wet( player * /*carrier*/, tripoint /*pos*/ )
 {
     item_counter--;
     if( item_counter == 0 ) {
@@ -4414,7 +4414,7 @@ bool item::process_wet( player * /*carrier*/, point /*pos*/ )
     return true;
 }
 
-bool item::process_tool( player *carrier, point pos )
+bool item::process_tool( player *carrier, tripoint pos )
 {
     it_tool *tmp = dynamic_cast<it_tool *>( type );
     long charges_used = 0;
@@ -4444,7 +4444,7 @@ bool item::process_tool( player *carrier, point pos )
     if( charges_used == 0 ) {
         // TODO: iuse functions should expect a nullptr as player, but many of them
         // don't and therefore will fail.
-        tmp->invoke( carrier != nullptr ? carrier : &g->u, this, true, pos );
+        tmp->invoke( carrier != nullptr ? carrier : &g->u, this, true, point( pos.x, pos.y ) );
         if( charges == -1 ) {
             // Signal that the item has destroyed itself.
             return true;
@@ -4455,7 +4455,7 @@ bool item::process_tool( player *carrier, point pos )
         }
         // TODO: iuse functions should expect a nullptr as player, but many of them
         // don't and therefor will fail.
-        tmp->invoke( carrier != nullptr ? carrier : &g->u, this, false, pos );
+        tmp->invoke( carrier != nullptr ? carrier : &g->u, this, false, point( pos.x, pos.y ) );
         if( tmp->revert_to == "null" ) {
             return true; // reverts to nothing -> destroy the item
         }
@@ -4466,7 +4466,7 @@ bool item::process_tool( player *carrier, point pos )
     return false;
 }
 
-bool item::process_charger_gun( player *carrier, point pos )
+bool item::process_charger_gun( player *carrier, tripoint pos )
 {
     if( carrier == nullptr || this != &carrier->weapon ) {
         // Either on the ground or in the inventory of the player, in both cases:
@@ -4514,7 +4514,7 @@ bool item::process_charger_gun( player *carrier, point pos )
     return false;
 }
 
-bool item::process( player *carrier, point pos, bool activate )
+bool item::process( player *carrier, tripoint pos, bool activate )
 {
     const bool preserves = type->container && type->container->preserves;
     for( auto it = contents.begin(); it != contents.end(); ) {
@@ -4531,7 +4531,7 @@ bool item::process( player *carrier, point pos, bool activate )
     }
     if( activate ) {
         it_tool *tmp = dynamic_cast<it_tool *>( type );
-        return tmp->invoke( carrier != nullptr ? carrier : &g->u, this, false, pos );
+        return tmp->invoke( carrier != nullptr ? carrier : &g->u, this, false, point( pos.x, pos.y ) );
     }
     // How this works: it checks what kind of processing has to be done
     // (e.g. for food, for drying towels, lit cigars), and if that matches,

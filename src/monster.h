@@ -274,7 +274,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
 
         bool setpos(const int x, const int y, const bool level_change = false);
         bool setpos(const point &p, const bool level_change = false);
-        point pos() const;
+        tripoint pos() const;
         // posx and posy are kept to retain backwards compatibility
         inline int posx() const
         {
@@ -283,6 +283,10 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         inline int posy() const
         {
             return _posy;
+        }
+        inline int posz() const
+        {
+            return _posz;
         }
         // the creature base class uses xpos/ypos to prevent conflict with
         // player.xpos and player.ypos which are public ints that are literally used
@@ -294,6 +298,10 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         int ypos() const
         {
             return _posy;
+        }
+        int zpos() const
+        {
+            return _posz;
         }
 
         short ignoring;
@@ -311,7 +319,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
     private:
         std::vector<int> sp_timeout;
         std::vector <point> plans;
-        int _posx, _posy;
+        int _posx, _posy, _posz;
         bool dead;
         /** Attack another monster */
         void hit_monster(monster &other);
