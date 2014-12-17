@@ -12474,6 +12474,7 @@ void game::vertical_move(int movez, bool force)
     }
 
     shift_monsters( tripoint( 0, 0, movez ) );
+    shift_npcs( tripoint( 0, 0, movez ) );
 
     // Clear current scents.
     for (int x = u.posx() - SCENT_RADIUS; x <= u.posx() + SCENT_RADIUS; x++) {
@@ -12552,8 +12553,6 @@ void game::vertical_move(int movez, bool force)
         }
     }
 
-    // Clear currently active npcs and reload them
-    active_npc.clear();
     load_npcs();
     refresh_all();
 }
@@ -12604,21 +12603,10 @@ void game::update_map(int &x, int &y, int z)
     // Shift monsters if we're actually shifting
     if (shiftx || shifty || shiftz) {
         shift_monsters( tripoint( shiftx, shifty, shiftz ) );
+        shift_npcs( tripoint( shiftx, shifty, shiftz ) );
         u.shift_destination(-shiftx * SEEX, -shifty * SEEY);
     }
 
-    // Shift NPCs
-    for (std::vector<npc *>::iterator it = active_npc.begin();
-         it != active_npc.end();) {
-        (*it)->shift(shiftx, shifty);
-        if( (*it)->posx() < 0 - SEEX * 2 || (*it)->posy() < 0 - SEEX * 2 ||
-            (*it)->posx() > SEEX * (MAPSIZE + 2) || (*it)->posy() > SEEY * (MAPSIZE + 2) ) {
-            //Remove the npc from the active list. It remains in the overmap list.
-            it = active_npc.erase(it);
-        } else {
-            it++;
-        }
-    }
     // Check for overmap saved npcs that should now come into view.
     // Put those in the active list.
     load_npcs();
@@ -12697,6 +12685,19 @@ void game::despawn_monster(int mondex)
         overmap_buffer.despawn_monster( critter );
     }
     remove_zombie( mondex );
+}
+
+void game::shift_npcs( const tripoint &shift )
+{
+    for( auto it = active_npc.begin(); it != active_npc.end(); ) {
+        ( *it )->shift( shift );
+        if( !m.inbounds( ( *it )->pos() ) ) {
+            //Remove the npc from the active list. It remains in the overmap list.
+            it = active_npc.erase( it );
+        } else {
+            it++;
+        }
+    }
 }
 
 void game::shift_monsters(const tripoint &shift)

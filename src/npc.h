@@ -589,7 +589,7 @@ public:
  * from one submap to an adjacent submap.  It updates our position (shifting by
  * 12 tiles), as well as our plans.
  */
- void shift(int sx, int sy);
+        void shift( const tripoint &shift );
 
 
 // Movement; the following are defined in npcmove.cpp
