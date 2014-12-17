@@ -3008,11 +3008,6 @@ map_stack map::i_at( const tripoint &p)
     return map_stack{ &current_submap->itm[lx][ly], p, this };
 }
 
-bool map::sees_some_items(const int x, const int y, const player &u)
-{
-    return sees_some_items( tripoint( x, y, 0 ), u );
-}
-
 bool map::sees_some_items(const tripoint &p, const player &u)
 {
     // can only see items if there are any items.

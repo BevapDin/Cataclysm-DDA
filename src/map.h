@@ -433,7 +433,6 @@ class map
   * - check for CONTAINER flag (makes items only visible when
   * the player is at (x,y) or at an adjacent square).
   */
- bool sees_some_items(int x, int y, const player &u);
  bool sees_some_items(const tripoint &p, const player &u);
  /**
   * Check if the player could see items at (x,y) if there were

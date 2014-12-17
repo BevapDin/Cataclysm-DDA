@@ -8948,7 +8948,7 @@ std::vector<map_item_stack> game::find_nearby_items(int iRadius)
     for( auto &points_p_it : points ) {
         if( points_p_it.y >= u.posy() - iRadius && points_p_it.y <= u.posy() + iRadius &&
             u.sees( points_p_it ) &&
-            m.sees_some_items( points_p_it.x, points_p_it.y, u ) ) {
+            m.sees_some_items( tripoint( points_p_it.x, points_p_it.y, 0 ), u ) ) {
 
             for( auto &elem : m.i_at( points_p_it.x, points_p_it.y ) ) {
                 const std::string name = elem.tname();
