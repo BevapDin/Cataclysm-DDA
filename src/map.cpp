@@ -5019,16 +5019,16 @@ void map::load(const int wx, const int wy, const int wz, const bool update_vehic
     load_abs(awx, awy, wz, update_vehicle);
 }
 
-void map::forget_traps(int gridx, int gridy)
+void map::forget_traps(const tripoint &gp)
 {
-    const auto smap = get_submap_at_grid( point( gridx, gridy ) );
+    const auto smap = get_submap_at_grid( gp );
 
     for (int x = 0; x < SEEX; x++) {
         for (int y = 0; y < SEEY; y++) {
             trap_id t = smap->get_trap(x, y);
             if (t != tr_null) {
-                const int fx = x + gridx * SEEX;
-                const int fy = y + gridy * SEEY;
+                const int fx = x + gp.x * SEEX;
+                const int fy = y + gp.y * SEEY;
                 traplocs[t].erase(point(fx, fy));
             }
         }
@@ -5056,13 +5056,15 @@ void map::shift(const int sx, const int sy)
     if (sx != 0) {
         const int gridx = (sx > 0) ? (my_MAPSIZE - 1) : 0;
         for (int gridy = 0; gridy < my_MAPSIZE; gridy++) {
-            forget_traps(gridx, gridy);
+            // TODO: Z
+            forget_traps( tripoint( gridx, gridy, 0 ) );
         }
     }
     if (sy != 0) {
         const int gridy = (sy > 0) ? (my_MAPSIZE - 1) : 0;
         for (int gridx = 0; gridx < my_MAPSIZE; gridx++) {
-            forget_traps(gridx, gridy);
+            // TODO: Z
+            forget_traps( tripoint( gridx, gridy, 0 ) );
         }
     }
 
@@ -5083,8 +5085,8 @@ void map::shift(const int sx, const int sy)
             if (sy >= 0) {
                 for (int gridy = 0; gridy < my_MAPSIZE; gridy++) {
                     if (gridx + sx < my_MAPSIZE && gridy + sy < my_MAPSIZE) {
-                        copy_grid( point( gridx, gridy ),
-                                   point( gridx + sx, gridy + sy ) );
+                        copy_grid( tripoint( gridx, gridy, my_ZMIN ),
+                                   tripoint( gridx + sx, gridy + sy, my_ZMIN ) );
                         update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
                         loadn( tripoint( gridx, gridy, my_ZMIN ), true );
@@ -5093,8 +5095,8 @@ void map::shift(const int sx, const int sy)
             } else { // sy < 0; work through it backwards
                 for (int gridy = my_MAPSIZE - 1; gridy >= 0; gridy--) {
                     if (gridx + sx < my_MAPSIZE && gridy + sy >= 0) {
-                        copy_grid( point( gridx, gridy ),
-                                   point( gridx + sx, gridy + sy ) );
+                        copy_grid( tripoint( gridx, gridy, my_ZMIN ),
+                                   tripoint( gridx + sx, gridy + sy, my_ZMIN ) );
                         update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
                         loadn( tripoint( gridx, gridy, my_ZMIN ), true );
@@ -5107,8 +5109,8 @@ void map::shift(const int sx, const int sy)
             if (sy >= 0) {
                 for (int gridy = 0; gridy < my_MAPSIZE; gridy++) {
                     if (gridx + sx >= 0 && gridy + sy < my_MAPSIZE) {
-                        copy_grid( point( gridx, gridy ),
-                                   point( gridx + sx, gridy + sy ) );
+                        copy_grid( tripoint( gridx, gridy, my_ZMIN ),
+                                   tripoint( gridx + sx, gridy + sy, my_ZMIN ) );
                         update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
                         loadn( tripoint( gridx, gridy, my_ZMIN ), true );
@@ -5117,8 +5119,8 @@ void map::shift(const int sx, const int sy)
             } else { // sy < 0; work through it backwards
                 for (int gridy = my_MAPSIZE - 1; gridy >= 0; gridy--) {
                     if (gridx + sx >= 0 && gridy + sy >= 0) {
-                        copy_grid( point( gridx, gridy ),
-                                   point( gridx + sx, gridy + sy ) );
+                        copy_grid( tripoint( gridx, gridy, my_ZMIN ),
+                                   tripoint( gridx + sx, gridy + sy, my_ZMIN ) );
                         update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
                         loadn( tripoint( gridx, gridy, my_ZMIN ), true );
@@ -5347,7 +5349,7 @@ void map::actualize( const tripoint &gp )
     tmpsub->turn_last_touched = calendar::turn;
 }
 
-void map::copy_grid( const point to, const point from)
+void map::copy_grid( const tripoint to_gp, const tripoint from_gp )
 {
     const auto smap = get_submap_at_grid( from );
     setsubmap( get_nonant( to ), smap );
