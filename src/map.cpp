@@ -87,21 +87,21 @@ vehicle* map::veh_at(const int x, const int y, int &part_num) const
 
 vehicle* map::veh_at(const tripoint &p, int &part_num) const
 {
-    const int x = p.x;
-    const int y = p.y;
     // This function is called A LOT. Move as much out of here as possible.
-    if (!veh_in_active_range || !inbounds(x, y)) {
-        return NULL;    // Out-of-bounds - null vehicle
+    if (!veh_in_active_range || !inbounds(p)) {
+        // Out-of-bounds - null vehicle
+        return NULL;
     }
-    if(!veh_exists_at[x][y]) {
-        return NULL;    // cache cache indicates no vehicle. This should optimize a great deal.
+    if (!veh_exists_at[p.x][p.y][p.z - my_ZMIN]) {
+        // cache cache indicates no vehicle. This should optimize a great deal.
+        return NULL;
     }
-    const auto it = veh_cached_parts.find( point( x, y ) );
+    const auto it = veh_cached_parts.find( p );
     if( it != veh_cached_parts.end() ) {
         part_num = it->second.second;
         return it->second.first;
     }
-    debugmsg ("vehicle part cache cache indicated vehicle not found: %d %d",x,y);
+    debugmsg ("vehicle part cache cache indicated vehicle not found: %d %d %d", p.x, p.y, p.z);
     return NULL;
 }
 
@@ -150,8 +150,8 @@ void map::update_vehicle_cache( vehicle *veh, const bool brand_new )
         while( it != end ) {
             if( it->second.first == veh ) {
                 const auto &p = it->first;
-                if( inbounds( p.x, p.y ) ) {
-                    veh_exists_at[p.x][p.y] = false;
+                if( inbounds( p ) ) {
+                    veh_exists_at[p.x][p.y][p.z - my_ZMIN] = false;
                 }
                 veh_cached_parts.erase( it++ );
             } else {
@@ -163,18 +163,19 @@ void map::update_vehicle_cache( vehicle *veh, const bool brand_new )
     std::vector<vehicle_part> &parts = veh->parts;
     const int gx = veh->global_x();
     const int gy = veh->global_y();
+    const int gz = veh->global_z();
     int partid = 0;
     for( std::vector<vehicle_part>::iterator it = parts.begin(),
          end = parts.end(); it != end; ++it, ++partid ) {
         if( it->removed ) {
             continue;
         }
-        const point p( gx + it->precalc_dx[0],
-                       gy + it->precalc_dy[0] );
+        const tripoint p( gx + it->precalc_dx[0],
+                       gy + it->precalc_dy[0], gz );
         veh_cached_parts.insert( std::make_pair( p,
                                  std::make_pair( veh, partid ) ) );
-        if( inbounds( p.x, p.y ) ) {
-            veh_exists_at[p.x][p.y] = true;
+        if( inbounds( p ) ) {
+            veh_exists_at[p.x][p.y][p.z - my_ZMIN] = true;
         }
     }
 }
@@ -185,7 +186,7 @@ void map::clear_vehicle_cache()
         const auto part = veh_cached_parts.begin();
         const auto &p = part->first;
         if( inbounds( p.x, p.y ) ) {
-            veh_exists_at[p.x][p.y] = false;
+            veh_exists_at[p.x][p.y][p.z - my_ZMIN] = false;
         }
         veh_cached_parts.erase( part );
     }
@@ -196,6 +197,19 @@ void map::update_vehicle_list( submap *const to )
     // Update vehicle data
     for( auto & elem : to->vehicles ) {
         vehicle_list.insert( elem );
+    }
+}
+
+void map::remove_from_vehicle_cache(vehicle *veh)
+{
+    for(t_vehicle_cache::iterator it = veh_cached_parts.begin(); it != veh_cached_parts.end(); ) {
+        if(it->second.first != veh) {
+            ++it;
+            continue;
+        }
+        const tripoint &p = it->first;
+        veh_exists_at[p.x][p.y][p.z - my_ZMIN] = false;
+        veh_cached_parts.erase(it++);
     }
 }
 
@@ -292,6 +306,7 @@ void map::destroy_vehicle (vehicle *veh)
     for (size_t i = 0; i < current_submap->vehicles.size(); i++) {
         if (current_submap->vehicles[i] == veh) {
             vehicle_list.erase(veh);
+            remove_from_vehicle_cache(veh);
             reset_vehicle_cache();
             current_submap->vehicles.erase (current_submap->vehicles.begin() + i);
             delete veh;
@@ -317,6 +332,7 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
         return false;
     }
 
+ // TODO: Z
     int src_offset_x, src_offset_y, dst_offset_x, dst_offset_y;
     submap * const src_submap = get_submap_at(srcx, srcy, src_offset_x, src_offset_y);
     submap * const dst_submap = get_submap_at(dstx, dsty, dst_offset_x, dst_offset_y);
@@ -1245,8 +1261,8 @@ int map::move_cost(const tripoint &p, const vehicle *ignored_vehicle) const
     if ( cost == 0 ) {
         return 0;
     }
-    if (veh_in_active_range && veh_exists_at[p.x][p.y]) {
-        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.y][p.z - my_ZMIN]) {
+        const auto it = veh_cached_parts.find( p );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1335,8 +1351,8 @@ bool map::has_flag(const std::string &flag, const tripoint &p) const
         return false;
     }
     // veh_at const no bueno
-    if (veh_in_active_range && veh_exists_at[p.x][p.y] && flag_str_REDUCE_SCENT == flag) {
-        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.z - my_ZMIN && flag_str_REDUCE_SCENT == flag) {
+        const auto it = veh_cached_parts.find( p );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1416,8 +1432,8 @@ bool map::has_flag(const ter_bitflags flag, const tripoint &p) const
         return false;
     }
     // veh_at const no bueno
-    if (veh_in_active_range && veh_exists_at[p.x][p.y] && flag == TFLAG_REDUCE_SCENT) {
-        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.z - my_ZMIN && flag == TFLAG_REDUCE_SCENT) {
+        const auto it = veh_cached_parts.find( p );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1486,8 +1502,8 @@ bool map::is_bashable(const tripoint &p) const
         return false;
     }
 
-    if (veh_in_active_range && veh_exists_at[p.x][p.y]) {
-        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.z - my_ZMIN) {
+        const auto it = veh_cached_parts.find( p );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -4238,6 +4254,7 @@ computer* map::computer_at(const int x, const int y)
  if (!inbounds(x, y))
   return NULL;
 
+ // TODO: Z
  submap * const current_submap = get_submap_at(x, y);
 
  if (current_submap->comp.name == "") {
@@ -4283,6 +4300,7 @@ void map::add_camp(const std::string& name, const int x, const int y)
         return;
     }
 
+    // TODO: Z
     get_submap_at(x, y)->camp = basecamp(name, x, y);
 }
 
@@ -4950,10 +4968,10 @@ void map::shift(const int sx, const int sy)
     if (sx == 0 && sy == 0) {
         return; // Skip this?
     }
-    const int absx = get_abs_sub().x;
-    const int absy = get_abs_sub().y;
+    const int wx = get_abs_sub().x;
+    const int wy = get_abs_sub().y;
     const int wz = get_abs_sub().z;
-    set_abs_sub( absx + sx, absy + sy, wz );
+    set_abs_sub( wx + sx, wy + sy, wz );
 
 // if player is in vehicle, (s)he must be shifted with vehicle too
     if( g->u.in_vehicle ) {
