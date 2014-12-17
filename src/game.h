@@ -206,7 +206,6 @@ class game
         bool isBetween(int test, int down, int up);
         bool is_in_sunlight(int x, int y); // Checks outdoors + sunny
         bool is_sheltered(int x, int y); // Checks if indoors, underground or in a car.
-        bool is_in_ice_lab(point location);
         bool revive_corpse(int x, int y, int n); // revives a corpse from an item pile
         bool revive_corpse(int x, int y,
                            item *it); // revives a corpse by item pointer, caller handles item deletion
