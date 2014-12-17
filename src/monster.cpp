@@ -402,12 +402,9 @@ bool monster::sees_player(int & tc, player * p) const {
     if ( p == NULL ) {
         p = &g->u;
     }
-    const int range = vision_range(p->posx, p->posy);
+    const int range = vision_range(p->pos());
     // * p->visibility() / 100;
-    return (
-        g->m.sees( _posx, _posy, p->posx, p->posy, range, tc ) &&
-        p->is_invisible() == false
-    );
+    return g->m.sees(pos(), p->pos(), range, tc ) && !p->is_invisible();
 }
 
 bool monster::made_of(std::string m) const
@@ -475,7 +472,7 @@ bool monster::is_fleeing(player &u) const
   return true;
  monster_attitude att = attitude(&u);
  return (att == MATT_FLEE ||
-         (att == MATT_FOLLOW && rl_dist(_posx, _posy, u.posx, u.posy) <= 4));
+         (att == MATT_FOLLOW && rl_dist(pos(), u.pos()) <= 4));
 }
 
 Creature::Attitude monster::attitude_to( const Creature &other ) const
@@ -625,11 +622,11 @@ int monster::trigger_sum(std::set<monster_trigger> *triggers) const
                 break;
 
             case MTRIG_PLAYER_CLOSE:
-                if (rl_dist(_posx, _posy, g->u.posx, g->u.posy) <= 5) {
+                if (rl_dist(pos(), g->u.pos()) <= 5) {
                     ret += 5;
                 }
                 for (auto &i : g->active_npc) {
-                    if (rl_dist(_posx, _posy, i->posx, i->posy) <= 5) {
+                    if (rl_dist(pos(), i->pos()) <= 5) {
                         ret += 5;
                     }
                 }
@@ -654,8 +651,9 @@ int monster::trigger_sum(std::set<monster_trigger> *triggers) const
     if (check_terrain) {
         for (int x = _posx - 3; x <= _posx + 3; x++) {
             for (int y = _posy - 3; y <= _posy + 3; y++) {
+                tripoint pnt(_posx + x, _posy + y, _posz);
                 if (check_meat) {
-                    auto &items = g->m.i_at(x, y);
+                    auto &items = g->m.i_at(pnt);
                     for( auto &item : items ) {
                         if( item.type->id == "corpse" || item.type->id == "meat" ||
                             item.type->id == "meat_cooked" || item.type->id == "human_flesh" ) {
@@ -665,7 +663,7 @@ int monster::trigger_sum(std::set<monster_trigger> *triggers) const
                     }
                 }
                 if (check_fire) {
-                    ret += ( 5 * g->m.get_field_strength( point(x, y), fd_fire) );
+                    ret += ( 5 * g->m.get_field_strength(pnt, fd_fire) );
                 }
             }
         }
@@ -1369,7 +1367,7 @@ void monster::die(Creature* nkiller) {
                 continue;
             }
             int t = 0;
-            if( g->m.sees( critter.posx(), critter.posy(), _posx, _posy, light, t ) ) {
+            if( g->m.sees( critter.pos(), pos(), light, t ) ) {
                 critter.morale += morale_adjust;
                 critter.anger += anger_adjust;
             }
@@ -1466,7 +1464,7 @@ void monster::process_effects()
     }
 
     // If this critter dies in sunlight, check & assess damage.
-    if( has_flag( MF_SUNDEATH ) && g->is_in_sunlight( posx(), posy() ) ) {
+    if( has_flag( MF_SUNDEATH ) && g->is_in_sunlight( pos() ) ) {
         if( g->u.sees( this ) ) {
             add_msg( m_good, _( "The %s burns horribly in the sunlight!" ), name().c_str() );
         }
