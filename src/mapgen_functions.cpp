@@ -6300,7 +6300,7 @@ void mapgen_cavern(map *m, oter_id, mapgendata dat, int, float)
         }
         while (!one_in(3)) {
             for( int i = 0; i < 3; ++i ) {
-                m->put_items_from_loc( "cannedfood", x, y, 0 );
+                m->put_items_from_loc( "cannedfood", tripoint( x, y, 0 ), 0 );
             }
         }
     }

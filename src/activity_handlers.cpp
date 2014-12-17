@@ -74,7 +74,7 @@ bool butcher_cbm_group( const std::string &group, const tripoint &pos, const int
 {
     //To see if it spawns a random additional CBM
     if( one_in( 2 ) ) { //The CBM works
-        g->m.put_items_from_loc( group, pos.x, pos.y, age );
+        g->m.put_items_from_loc( group, pos, age );
         return true;
     }
     //There is a burnt out CBM
@@ -419,7 +419,7 @@ void activity_handlers::forage_finish( player_activity *act, player *p )
 
     if( one_in(12) ) {
         add_msg(m_good, _("You found some trash!"));
-        g->m.put_items_from_loc( "trash_forest", p->posx(), p->posy(), calendar::turn );
+        g->m.put_items_from_loc( "trash_forest", p->pos(), calendar::turn );
         found_something = true;
     }
     // Compromise: Survival gives a bigger boost, and Peception is leveled a bit.
@@ -440,7 +440,7 @@ void activity_handlers::forage_finish( player_activity *act, player *p )
             break;
         }
         // Returns zero if location has no defined items.
-        int cnt = g->m.put_items_from_loc( loc, p->posx(), p->posy(), calendar::turn );
+        int cnt = g->m.put_items_from_loc( loc, p->pos(), calendar::turn );
         if( cnt > 0 ) {
             add_msg(m_good, _("You found something!"));
             g->m.ter_set(act->placement.x, act->placement.y, t_dirt);

@@ -809,7 +809,7 @@ void add_corpse(int x, int y);
   * @param turn The birthday that the created items shall have.
   * @return The number of placed items.
   */
- int put_items_from_loc(items_location loc, const int x, const int y, const int turn = 0);
+        int put_items_from_loc( const items_location &loc, const tripoint &p, int turn = 0 );
  void spawn_an_item(const int x, const int y, item new_item,
                     const long charges, const int damlevel);
  void spawn_an_item(const tripoint &p, item new_item,
