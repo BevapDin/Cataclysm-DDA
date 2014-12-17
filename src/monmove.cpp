@@ -310,13 +310,13 @@ void monster::move()
     //The monster can consume objects it stands on. Check if there are any.
     //If there are. Consume them.
     if( !is_hallucination() && has_flag( MF_ABSORBS ) ) {
-        if(!g->m.i_at(posx(), posy()).empty()) {
+        if(!g->m.i_at(pos()).empty()) {
             add_msg(_("The %s flows around the objects on the floor and they are quickly dissolved!"),
                     name().c_str());
-            for( auto &elem : g->m.i_at(posx(), posy()) ) {
+            for( auto &elem : g->m.i_at(pos()) ) {
                 hp += elem.volume(); // Yeah this means it can get more HP than normal.
             }
-            g->m.i_clear(posx(), posy());
+            g->m.i_clear(pos());
         }
     }
 
@@ -862,10 +862,10 @@ int monster::move_to(const tripoint &p, bool force)
         //Hallucinations don't do any of the stuff after this point
         return 1;
     }
-    if (type->size != MS_TINY && g->m.has_flag("SHARP", posx(), posy()) && !one_in(4)) {
+    if (type->size != MS_TINY && g->m.has_flag("SHARP", pos()) && !one_in(4)) {
         apply_damage( nullptr, bp_torso, rng( 2, 3 ) );
     }
-    if (type->size != MS_TINY && g->m.has_flag("ROUGH", posx(), posy()) && one_in(6)) {
+    if (type->size != MS_TINY && g->m.has_flag("ROUGH", pos()) && one_in(6)) {
         apply_damage( nullptr, bp_torso, rng( 1, 2 ) );
     }
     if (g->m.has_flag("UNSTABLE", p)) {
@@ -874,10 +874,10 @@ int monster::move_to(const tripoint &p, bool force)
         remove_effect("bouldering");
     }
     if (!digging() && !has_flag(MF_FLIES) &&
-          g->m.tr_at(posx(), posy()) != tr_null) { // Monster stepped on a trap!
-        trap* tr = traplist[g->m.tr_at(posx(), posy())];
+          g->m.tr_at(pos()) != tr_null) { // Monster stepped on a trap!
+        trap* tr = traplist[g->m.tr_at(pos())];
         if (dice(3, type->sk_dodge + 1) < dice(3, tr->get_avoidance())) {
-            tr->trigger(this, posx(), posy());
+            tr->trigger(this, pos().x, pos().y);
         }
     }
     if( !will_be_water && ( has_flag(MF_DIGS) || has_flag(MF_CAN_DIG) ) ) {
@@ -907,12 +907,12 @@ int monster::move_to(const tripoint &p, bool force)
             factor *= 100;
         }
         if (one_in(factor)) {
-            g->m.ter_set(posx(), posy(), t_dirtmound);
+            g->m.ter_set(pos(), t_dirtmound);
         }
     }
     // Acid trail monsters leave... a trail of acid
     if (has_flag(MF_ACIDTRAIL)){
-        g->m.add_field(posx(), posy(), fd_acid, 3);
+        g->m.add_field(pos(), fd_acid, 3, 0);
     }
 
     if (has_flag(MF_SLUDGETRAIL)) {
@@ -920,7 +920,7 @@ int monster::move_to(const tripoint &p, bool force)
             for (int dy = -1; dy <= 1; dy++) {
                 const int fstr = 3 - (abs(dx) + abs(dy));
                 if (fstr >= 2) {
-                    g->m.add_field(posx() + dx, posy() + dy, fd_sludge, fstr);
+                    g->m.add_field(tripoint(posx() + dx, posy() + dy, posz()), fd_sludge, fstr, 0);
                 }
             }
         }

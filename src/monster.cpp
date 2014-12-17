@@ -641,10 +641,11 @@ int monster::trigger_sum(std::set<monster_trigger> *triggers) const
     }
 
     if (check_terrain) {
-        for (int x = posx() - 3; x <= posx() + 3; x++) {
-            for (int y = posy() - 3; y <= posy() + 3; y++) {
+        for (int x = -3; x <= +3; x++) {
+            for (int y = -3; y <= +3; y++) {
+                const tripoint pnt(posx() + x, posy() + y, posz());
                 if (check_meat) {
-                    auto items = g->m.i_at(x, y);
+                    auto items = g->m.i_at(pnt);
                     for( auto &item : items ) {
                         if( item.is_corpse() || item.type->id == "meat" ||
                             item.type->id == "meat_cooked" || item.type->id == "human_flesh" ) {
@@ -654,7 +655,7 @@ int monster::trigger_sum(std::set<monster_trigger> *triggers) const
                     }
                 }
                 if (check_fire) {
-                    ret += ( 5 * g->m.get_field_strength( point(x, y), fd_fire) );
+                    ret += ( 5 * g->m.get_field_strength(pnt, fd_fire) );
                 }
             }
         }
@@ -1467,7 +1468,7 @@ void monster::process_effects()
     }
 
     // If this critter dies in sunlight, check & assess damage.
-    if( has_flag( MF_SUNDEATH ) && g->is_in_sunlight( posx(), posy() ) ) {
+    if( has_flag( MF_SUNDEATH ) && g->is_in_sunlight( pos() ) ) {
         if( g->u.sees( *this ) ) {
             add_msg( m_good, _( "The %s burns horribly in the sunlight!" ), name().c_str() );
         }
