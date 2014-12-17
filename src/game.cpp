@@ -5057,36 +5057,36 @@ void game::draw_critter(const Creature &critter, const point &center)
         mvwputch( w_terrain, my, mx, c_red, '?' );
     }
 }
-void game::draw_ter(int posx, int posy)
+
+void game::draw_ter()
 {
-    draw_ter(posx, posy, false);
+    draw_ter( tripoint( u.posx() + u.view_offset_x, u.posy() + u.view_offset_y, u.view_offset_z ) );
 }
 
-void game::draw_ter(int posx, int posy, bool looking)
+void game::draw_ter(const tripoint &center)
 {
-    // posx/posy default to -999
-    if (posx == -999) {
-        posx = u.posx() + u.view_offset_x;
-    }
-    if (posy == -999) {
-        posy = u.posy() + u.view_offset_y;
-    }
-    const point center( posx, posy );
+    draw_ter(center, false);
+}
 
+void game::draw_ter( const tripoint &center, bool looking )
+{
+    const int posx = center.x;
+    const int posy = center.y;
     ter_view_x = posx;
     ter_view_y = posy;
+    ter_view_z = center.z;
 
     m.build_map_cache();
-    m.draw( w_terrain, center );
+    m.draw( w_terrain, point( center.x, center.y ) );
 
     // Draw monsters
     for (size_t i = 0; i < num_zombies(); i++) {
-        draw_critter( critter_tracker.find( i ), center );
+        draw_critter( critter_tracker.find( i ), point( center.x, center.y ) );
     }
 
     // Draw NPCs
     for( const npc* n : active_npc ) {
-        draw_critter( *n, center );
+        draw_critter( *n, point( center.x, center.y ) );
     }
 
     if (u.has_active_bionic("bio_scent_vision")) {
@@ -8624,7 +8624,7 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
         ly = pairCoordsFirst.y;
     }
 
-    draw_ter(lx, ly);
+    draw_ter( tripoint( lx, ly, 0 ) );
     draw_footsteps( w_terrain, {POSX - lx, POSY - ly} );
 
     int soffset = (int)OPTIONS["MOVE_VIEW_OFFSET"];
@@ -8803,7 +8803,7 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
                     ly = MAPSIZE * SEEY;
                 }
 
-                draw_ter(lx, ly, true);
+                draw_ter( tripoint( lx, ly, 0 ), true );
                 draw_footsteps( w_terrain, {POSX - lx, POSY - ly} );
             }
         }
