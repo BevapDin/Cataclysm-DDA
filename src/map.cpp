@@ -3944,21 +3944,21 @@ void map::add_trap(const tripoint &p, const trap_id t)
     }
 }
 
-void map::disarm_trap(const tripoint &p)
+void map::disarm_trap(const int x, const int y)
 {
-    disarm_trap(p.x, p.y);
+    disarm_trap(tripoint(x, y, 0));
 }
 
-void map::disarm_trap(const int x, const int y)
+void map::disarm_trap(const tripoint &p)
 {
     int skillLevel = g->u.skillLevel("traps");
 
-    if (tr_at(x, y) == tr_null) {
-        debugmsg("Tried to disarm a trap where there was none (%d %d)", x, y);
+    if (tr_at(p) == tr_null) {
+        debugmsg("Tried to disarm a trap where there was none (%d %d %d)", p.x, p.y, p.z);
         return;
     }
 
-    trap* tr = traplist[tr_at(x, y)];
+    trap* tr = traplist[tr_at(p)];
     const int tSkillLevel = g->u.skillLevel("traps");
     const int diff = tr->get_difficulty();
     int roll = rng(tSkillLevel, 4 * tSkillLevel);
@@ -3969,8 +3969,8 @@ void map::disarm_trap(const int x, const int y)
         std::vector<itype_id> comp = tr->components;
         for (auto &i : comp) {
             if (i != "null") {
-                spawn_item(x, y, i, 1, 1);
-                remove_trap(x, y);
+                spawn_item(p, i, 1, 1);
+                remove_trap(p);
             }
         }
         return;
@@ -3984,22 +3984,22 @@ void map::disarm_trap(const int x, const int y)
         std::vector<itype_id> comp = tr->components;
         for (auto &i : comp) {
             if (i != "null") {
-                spawn_item(x, y, i, 1, 1);
+                spawn_item(p, i, 1, 1);
             }
         }
-        if (tr_at(x, y) == tr_engine) {
+        if (tr_at(p) == tr_engine) {
             for (int i = -1; i <= 1; i++) {
                 for (int j = -1; j <= 1; j++) {
                     if (i != 0 || j != 0) {
-                        remove_trap(x + i, y + j);
+                        remove_trap(tripoint( p.x + i, p.y + j, p.z ));
                     }
                 }
             }
         }
-        if (tr_at(x, y) == tr_shotgun_1 || tr_at(x, y) == tr_shotgun_2) {
-            spawn_item(x,y,"shot_00",1,2);
+        if (tr_at(p) == tr_shotgun_1 || tr_at(p) == tr_shotgun_2) {
+            spawn_item(p,"shot_00",1,2);
         }
-        remove_trap(x, y);
+        remove_trap(p);
         if(diff > 1.25 * skillLevel) { // failure might have set off trap
             g->u.practice( "traps", 1.5*(diff - skillLevel) );
         }
@@ -4010,7 +4010,7 @@ void map::disarm_trap(const int x, const int y)
         }
     } else {
         add_msg(m_bad, _("You fail to disarm the trap, and you set it off!"));
-        tr->trigger(&g->u, x, y);
+        tr->trigger(&g->u, p.x, p.y);
         if(diff - roll <= 6) {
             // Give xp for failing, but not if we failed terribly (in which
             // case the trap may not be disarmable).
