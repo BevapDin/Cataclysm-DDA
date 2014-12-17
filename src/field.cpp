@@ -647,7 +647,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
                                                       true, false, false );
                                     } else if( special ) {
                                         // If it has a special effect just trigger it.
-                                        ammo_effects( here.x, here.y, ammo_type->ammo_effects );
+                                        ammo_effects( here, ammo_type->ammo_effects );
                                     }
                                 }
                                 burn_amt = rounds_exploded;

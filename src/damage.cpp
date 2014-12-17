@@ -123,57 +123,59 @@ float resistances::get_effective_resist(const damage_unit &du)
 
 
 
-void ammo_effects(int x, int y, const std::set<std::string> &effects)
+void ammo_effects( const tripoint &p, const std::set<std::string> &effects )
 {
     if (effects.count("EXPLOSIVE")) {
-        g->explosion(tripoint(x, y, 0), 24, 0, false);
+        g->explosion(p, 24, 0, false);
     }
 
     if (effects.count("FRAG")) {
-        g->explosion(tripoint(x, y, 0), 12, 28, false);
+        g->explosion(p, 12, 28, false);
     }
 
     if (effects.count("NAPALM")) {
-        g->explosion(tripoint(x, y, 0), 18, 0, true);
+        g->explosion(p, 18, 0, true);
     }
 
     if (effects.count("NAPALM_BIG")) {
-        g->explosion(tripoint(x, y, 0), 72, 0, true);
+        g->explosion(p, 72, 0, true);
     }
 
     if (effects.count("MININUKE_MOD")) {
-        g->explosion(tripoint(x, y, 0), 300, 0, false);
+        g->explosion(p, 300, 0, false);
         int junk;
         for (int i = -6; i <= 6; i++) {
             for (int j = -6; j <= 6; j++) {
-                if (g->m.sees(x, y, x + i, y + j, 3, junk) &&
-                    g->m.move_cost(x + i, y + j) > 0) {
-                    g->m.add_field(x + i, y + j, fd_nuke_gas, 3);
+                // TODO: Z
+                const tripoint n( p.x + i, p.y + j, p.z );
+                if (g->m.sees( p, n, 3, junk) &&
+                    g->m.move_cost(n) > 0) {
+                    g->m.add_field(n, fd_nuke_gas, 3);
                 }
             }
         }
     }
 
     if (effects.count("ACIDBOMB")) {
-        for (int i = x - 1; i <= x + 1; i++) {
-            for (int j = y - 1; j <= y + 1; j++) {
-                g->m.add_field(i, j, fd_acid, 3);
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                g->m.add_field( tripoint( p.x + i, p.y + j, p.z ), fd_acid, 3);
             }
         }
     }
 
     if (effects.count("EXPLOSIVE_BIG")) {
-        g->explosion(tripoint(x, y, 0), 40, 0, false);
+        g->explosion(p, 40, 0, false);
     }
 
     if (effects.count("EXPLOSIVE_HUGE")) {
-        g->explosion(tripoint(x, y, 0), 80, 0, false);
+        g->explosion(p, 80, 0, false);
     }
 
     if (effects.count("TEARGAS")) {
         for (int i = -2; i <= 2; i++) {
             for (int j = -2; j <= 2; j++) {
-                g->m.add_field(x + i, y + j, fd_tear_gas, 3);
+                g->m.add_field( tripoint( p.x + i, p.y + j, p.z ), fd_tear_gas, 3);
             }
         }
     }
@@ -181,45 +183,45 @@ void ammo_effects(int x, int y, const std::set<std::string> &effects)
     if (effects.count("SMOKE")) {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                g->m.add_field(x + i, y + j, fd_smoke, 3);
+                g->m.add_field( tripoint( p.x + i, p.y + j, p.z ), fd_smoke, 3);
             }
         }
     }
     if (effects.count("SMOKE_BIG")) {
         for (int i = -6; i <= 6; i++) {
             for (int j = -6; j <= 6; j++) {
-                g->m.add_field(x + i, y + j, fd_smoke, 18);
+                g->m.add_field( tripoint( p.x + i, p.y + j, p.z ), fd_smoke, 18);
             }
         }
     }
 
     if (effects.count("FLASHBANG")) {
-        g->flashbang(tripoint(x, y, 0));
+        g->flashbang(p);
     }
 
     // TODO: g->u? Are NPC not allowed to use those weapons, or do they ignored the flag because they are stupid ncps and have no right to use those flags.
     if (!g->u.weapon.has_flag("NO_BOOM") && effects.count("FLAME")) {
-        g->explosion(tripoint(x, y, 0), 4, 0, true);
+        g->explosion(p, 4, 0, true);
     }
 
     // TODO: g->u? Are NPC not allowed to use those weapons, or do they ignored the flag because they are stupid ncps and have no right to use those flags.
     if (g->u.weapon.has_flag("FLARE") || effects.count("FLARE")) {
-        g->m.add_field(x, y, fd_fire, 1);
+        g->m.add_field(p, fd_fire, 1);
     }
 
     if (effects.count("LIGHTNING")) {
-        for (int i = x - 1; i <= x + 1; i++) {
-            for (int j = y - 1; j <= y + 1; j++) {
-                g->m.add_field(i, j, fd_electricity, 3);
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                g->m.add_field( tripoint( p.x + i, p.y + j, p.z ), fd_electricity, 3);
             }
         }
     }
 
     if (effects.count("PLASMA")) {
-        for (int i = x - 1; i <= x + 1; i++) {
-            for (int j = y - 1; j <= y + 1; j++) {
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
                 if (one_in(2)) {
-                    g->m.add_field(i, j, fd_plasma, rng(2, 3));
+                    g->m.add_field( tripoint( p.x + i, p.y + j, p.z ), fd_plasma, rng(2, 3));
                 }
             }
         }

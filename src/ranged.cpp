@@ -76,6 +76,7 @@ double Creature::projectile_attack(const projectile &proj, const tripoint &sourc
         // Shoot a random nearby space?
         target.x += rng(0 - int(sqrt(double(missed_by))), int(sqrt(double(missed_by))));
         target.y += rng(0 - int(sqrt(double(missed_by))), int(sqrt(double(missed_by))));
+        // TODO: miss by Z
     }
 
     std::vector<tripoint> trajectory;
@@ -179,8 +180,7 @@ double Creature::projectile_attack(const projectile &proj, const tripoint &sourc
         g->m.add_item_or_charges(t, ammotmp);
     }
 
-    // TODO: Z
-    ammo_effects(t.x, t.y, proj.proj_effects);
+    ammo_effects( t, proj.proj_effects );
 
     if (proj.proj_effects.count("BOUNCE")) {
         for (unsigned long int i = 0; i < g->num_zombies(); i++) {

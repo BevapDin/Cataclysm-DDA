@@ -13,6 +13,7 @@ struct itype;
 struct it_ammo;
 class item;
 class monster;
+class tripoint;
 
 enum damage_type {
     DT_NULL = 0, // null damage, doesn't exist
@@ -115,6 +116,6 @@ struct projectile {
     { }
 };
 
-void ammo_effects(int x, int y, const std::set<std::string> &effects);
+void ammo_effects( const tripoint &p, const std::set<std::string> &effects );
 
 #endif
