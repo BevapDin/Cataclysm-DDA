@@ -2,6 +2,7 @@
 #define ENUMS_H
 
 #include <functional>
+#include <iostream>
 
 #ifndef sgn
 #define sgn(x) (((x) < 0) ? -1 : 1)
@@ -134,6 +135,11 @@ namespace std {
   };
 }
 
+inline std::ostream &operator<<( std::ostream &stream, const point &p )
+{
+    return stream << p.x << "," << p.y;
+}
+
 inline bool operator<(const point &a, const point &b)
 {
     return a.x < b.x || (a.x == b.x && a.y < b.y);
@@ -166,6 +172,11 @@ namespace std {
               std::hash<int>()( (k.z << 20) | (k.z >> 20) );
       }
   };
+}
+
+inline std::ostream &operator<<( std::ostream &stream, const tripoint &p )
+{
+    return stream << p.x << "," << p.y << "," << p.z;
 }
 
 inline bool operator==(const tripoint &a, const tripoint &b)
