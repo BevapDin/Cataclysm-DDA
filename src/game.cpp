@@ -12709,12 +12709,8 @@ void game::shift_monsters(const tripoint &shift)
     }
     for( unsigned int i = 0; i < num_zombies(); ) {
         monster &critter = zombie( i );
-        if( shiftx != 0 || shifty != 0 ) {
-            critter.shift( shiftx, shifty );
-        }
-        // TODO: with z-levels, this can be removed, instead shift the critter
-        // along shiftz, too. Than make the 3D-inbounds check.
-        if( shiftz == 0 && m.inbounds( critter.posx(), critter.posy() ) ) {
+        critter.shift( shift );
+        if( m.inbounds( critter.pos() ) ) {
             i++;
             // We're inbounds, so don't despawn after all.
             continue;

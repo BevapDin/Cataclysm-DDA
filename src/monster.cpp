@@ -151,8 +151,12 @@ void monster::poly(mtype *t)
 
 void monster::spawn(int x, int y)
 {
-    position.x = x;
-    position.y = y;
+    spawn(tripoint(x, y, posz()));
+}
+
+void monster::spawn(const tripoint &p)
+{
+    position = p;
 }
 
 std::string monster::name(unsigned int quantity) const
@@ -415,23 +419,25 @@ void monster::debug(player &u)
     getch();
 }
 
-void monster::shift(int sx, int sy)
+void monster::shift(const tripoint &shift)
 {
-    position.x -= sx * SEEX;
-    position.y -= sy * SEEY;
+    position.x -= shift.x * SEEX;
+    position.y -= shift.y * SEEY;
+    position.z -= shift.z;
     for (auto &i : plans) {
-        i.x -= sx * SEEX;
-        i.y -= sy * SEEY;
+        i.x -= shift.x * SEEX;
+        i.y -= shift.y * SEEY;
+        i.z -= shift.z;
     }
 }
 
-point monster::move_target()
+tripoint monster::move_target()
 {
     if (plans.empty()) {
         // if we have no plans, pretend it's intentional
         return pos();
     }
-    return point(plans.back().x, plans.back().y);
+    return plans.back();
 }
 
 Creature *monster::attack_target()
@@ -440,8 +446,8 @@ Creature *monster::attack_target()
         return nullptr;
     }
 
-    point target_point = move_target();
-    Creature *target = g->critter_at( target_point.x, target_point.y );
+    tripoint target_point = move_target();
+    Creature *target = g->critter_at( target_point );
 
     if( target == nullptr || attitude_to( *target ) == Creature::A_FRIENDLY ) {
         return nullptr;

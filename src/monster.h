@@ -45,6 +45,8 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
 
         void poly(mtype *t);
         void spawn(int x, int y); // All this does is moves the monster to x,y
+        void spawn(const tripoint &p);
+
         m_size get_size() const;
         int get_hp( hp_part ) const
         {
@@ -108,11 +110,11 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
 
         void debug(player &u);      // Gives debug info
 
-        point move_target(); // Returns point at the end of the monster's current plans
+        tripoint move_target(); // Returns point at the end of the monster's current plans
         Creature *attack_target(); // Returns the creature at the end of plans (if hostile)
 
         // Movement
-        void shift(int sx, int sy); // Shifts the monster to the appropriate submap
+        void shift(const tripoint &shift); // Shifts the monster to the appropriate submap
         // Updates current pos AND our plans
         bool wander(); // Returns true if we have no plans
 
@@ -123,9 +125,11 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
          * and monsters, which might only block this tile temporarily.
          */
         bool can_move_to(int x, int y) const;
+        bool can_move_to(const tripoint &p) const;
 
         void set_dest(int x, int y, int &t); // Go in a straight line to (x, y)
         // t determines WHICH Bresenham line
+        void set_dest(const tripoint &p, int &t);
 
         /**
          * Set (x, y) as wander destination.
@@ -136,7 +140,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
          * @param f The priority of the destination, as well as how long we should
          *          wander towards there.
          */
-        void wander_to(int x, int y, int f); // Try to get to (x, y), we don't know
+        void wander_to(const tripoint &p, int f); // Try to get to (x, y), we don't know
         // the route.  Give up after f steps.
 
         // How good of a target is given creature (checks for visibility)
@@ -145,12 +149,13 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         // do not iterate over each other
         void plan(const mfactions &factions);
         void move(); // Actual movement
-        void footsteps(int x, int y); // noise made by movement
+        void footsteps(const tripoint &p); // noise made by movement
         void friendly_move();
 
-        point scent_move();
-        point wander_next();
+        tripoint scent_move();
+        tripoint wander_next();
         int calc_movecost(int x1, int y1, int x2, int y2) const;
+        int calc_movecost(const tripoint &p1, const tripoint &p2) const;
 
         /**
          * Attempt to move to (x,y).
@@ -165,6 +170,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
          * @return 1 if movement successful, 0 otherwise
          */
         int move_to(int x, int y, bool force = false);
+        int move_to(const tripoint &p, bool force=false);
 
         /**
          * Attack any enemies at the given location.
@@ -175,6 +181,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
          * @return 1 if something was attacked, 0 otherwise
          */
         int attack_at(int x, int y);
+        int attack_at(const tripoint &p);
 
         /**
          * Try to smash/bash/destroy your way through the terrain at (x, y).
@@ -182,13 +189,14 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
          * @return 1 if we destroyed something, 0 otherwise.
          */
         int bash_at(int x, int y);
+        int bash_at(const tripoint &p);
 
         /** Returns innate monster bash skill, without calculating additional from helpers */
         int bash_skill();
         int bash_estimate();
         /** Returns ability of monster and any cooperative helpers to
          * bash the designated target.  **/
-        int group_bash_skill( tripoint target );
+        int group_bash_skill( const tripoint &target );
 
         void stumble(bool moved);
         void knock_back_from(int posx, int posy);
@@ -280,7 +288,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         void add_msg_player_or_npc(game_message_type type, const char *, const char *npc_str, ...) const;
 
         // TEMP VALUES
-        int wandx, wandy; // Wander destination - Just try to move in that direction
+        int wandx, wandy, wandz; // Wander destination - Just try to move in that direction
         int wandf;        // Urge to wander - Increased by sound, decrements each move
         std::vector<item> inv; // Inventory
 
@@ -336,7 +344,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
     private:
         int hp;
         std::vector<int> sp_timeout;
-        std::vector <point> plans;
+        std::vector <tripoint> plans;
         tripoint position;
         bool dead;
         /** Attack another monster */

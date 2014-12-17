@@ -1565,7 +1565,7 @@ void mattack::leap(monster *z, int index)
 {
     int linet = 0;
     std::vector<point> options;
-    point target = z->move_target();
+    tripoint target = z->move_target();
     int best = rl_dist( z->pos(), target );
 
     for (int x = z->posx() - 3; x <= z->posx() + 3; x++) {
