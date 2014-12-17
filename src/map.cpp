@@ -333,7 +333,7 @@ void map::board_vehicle(int x, int y, player *p)
         (x < SEEX * int(my_MAPSIZE / 2) || y < SEEY * int(my_MAPSIZE / 2) ||
          x >= SEEX * (1 + int(my_MAPSIZE / 2)) ||
          y >= SEEY * (1 + int(my_MAPSIZE / 2))   )) {
-        g->update_map(x, y);
+        g->update_map(x, y, 0);
     }
 }
 
@@ -533,7 +533,7 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
         } else if (upd_y >= SEEY * (1+int(my_MAPSIZE / 2))) {
             y -= SEEY;
         }
-        g->update_map(upd_x, upd_y);
+        g->update_map(upd_x, upd_y, 0);
         was_update = true;
     }
     if( remote ) { // Has to be after update_map or coords won't be valid

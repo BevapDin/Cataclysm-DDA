@@ -1393,7 +1393,7 @@ bool game::do_turn()
     // The following happens when we stay still; 10/40 minutes overdue for spawn
     if ((!u.has_trait("INCONSPICUOUS") && calendar::turn > nextspawn + 100) ||
         (u.has_trait("INCONSPICUOUS") && calendar::turn > nextspawn + 400)) {
-        spawn_mon(-1 + 2 * rng(0, 1), -1 + 2 * rng(0, 1));
+        spawn_mon(tripoint(-1 + 2 * rng(0, 1), -1 + 2 * rng(0, 1), 0));
         nextspawn = calendar::turn;
     }
 
@@ -11872,7 +11872,7 @@ bool game::plmove(int dx, int dy)
 
         if (x < SEEX * int(MAPSIZE / 2) || y < SEEY * int(MAPSIZE / 2) ||
             x >= SEEX * (1 + int(MAPSIZE / 2)) || y >= SEEY * (1 + int(MAPSIZE / 2))) {
-            update_map(x, y);
+            update_map(x, y, 0);
         }
 
         // If the player is in a vehicle, unboard them from the current part
@@ -12088,7 +12088,7 @@ void game::plswim(int x, int y)
 {
     if (x < SEEX * int(MAPSIZE / 2) || y < SEEY * int(MAPSIZE / 2) ||
         x >= SEEX * (1 + int(MAPSIZE / 2)) || y >= SEEY * (1 + int(MAPSIZE / 2))) {
-        update_map(x, y);
+        update_map(x, y, 0);
     }
     if (!m.has_flag("SWIMMABLE", x, y)) {
         dbg(D_ERROR) << "game:plswim: Tried to swim in "
@@ -12233,7 +12233,7 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
                 // If we're flinging the player around, make sure the map stays centered on them.
                 if( is_u && ( x < SEEX * int(MAPSIZE / 2) || y < SEEY * int(MAPSIZE / 2) ||
                     x >= SEEX * (1 + int(MAPSIZE / 2)) || y >= SEEY * (1 + int(MAPSIZE / 2)) ) ) {
-                    update_map( x, y );
+                    update_map( x, y, 0 );
                 }
                 if (p->in_vehicle) {
                     m.unboard_vehicle(p->posx(), p->posy());
@@ -12448,7 +12448,7 @@ void game::vertical_move(int movez, bool force)
         }
     }
 
-    shift_monsters( 0, 0, movez );
+    shift_monsters( tripoint( 0, 0, movez ) );
 
     // Clear current scents.
     for (int x = u.posx() - SCENT_RADIUS; x <= u.posx() + SCENT_RADIUS; x++) {
@@ -12537,14 +12537,14 @@ void game::update_map( player *p )
 {
     int x = p->posx();
     int y = p->posy();
-    update_map( x, y );
+    update_map( x, y, 0 );
     p->setx( x );
     p->sety( y );
 }
 
-void game::update_map(int &x, int &y)
+void game::update_map(int &x, int &y, int z)
 {
-    int shiftx = 0, shifty = 0;
+    int shiftx = 0, shifty = 0, shiftz = z;
 
     while (x < SEEX * int(MAPSIZE / 2)) {
         x += SEEX;
@@ -12577,7 +12577,7 @@ void game::update_map(int &x, int &y)
 
     // Shift monsters if we're actually shifting
     if (shiftx || shifty) {
-        shift_monsters( shiftx, shifty, 0 );
+        shift_monsters( tripoint( shiftx, shifty, shiftz ) );
         u.shift_destination(-shiftx * SEEX, -shifty * SEEY);
     }
 
@@ -12600,7 +12600,7 @@ void game::update_map(int &x, int &y)
     // Spawn monsters if appropriate
     m.spawn_monsters( false ); // Static monsters
     if (calendar::turn >= nextspawn) {
-        spawn_mon(shiftx, shifty);
+        spawn_mon(tripoint(shiftx, shifty, shiftz));
     }
 
     // Shift scent
@@ -12673,8 +12673,11 @@ void game::despawn_monster(int mondex)
     remove_zombie( mondex );
 }
 
-void game::shift_monsters( const int shiftx, const int shifty, const int shiftz )
+void game::shift_monsters(const tripoint &shift)
 {
+    const int shiftx = shift.x;
+    const int shifty = shift.y;
+    const int shiftz = shift.z;
     // If either shift argument is non-zero, we're shifting.
     if( shiftx == 0 && shifty == 0 && shiftz == 0 ) {
         return;
@@ -12700,7 +12703,7 @@ void game::shift_monsters( const int shiftx, const int shifty, const int shiftz 
     rebuild_mon_at_cache();
 }
 
-void game::spawn_mon(int /*shiftx*/, int /*shifty*/)
+void game::spawn_mon(const tripoint &shift)
 {
     // Create a new NPC?
     if (ACTIVE_WORLD_OPTIONS["RANDOM_NPC"] && one_in(100 + 15 * cur_om->npcs.size())) {
@@ -12732,7 +12735,7 @@ void game::spawn_mon(int /*shiftx*/, int /*shifty*/)
             break;
         }
         // adds the npc to the correct overmap.
-        tmp->spawn_at( msx, msy, levz );
+        tmp->spawn_at( msx, msy, levz + shift.z );
         tmp->form_opinion(&u);
         tmp->mission = NPC_MISSION_NULL;
         int mission_index = reserve_random_mission(ORIGIN_ANY_NPC, om_location(), tmp->getID());
