@@ -1234,12 +1234,17 @@ std::string map::features(const tripoint &p) const
 
 int map::move_cost(const int x, const int y, const vehicle *ignored_vehicle) const
 {
-    int cost = move_cost_ter_furn(x, y); // covers !inbounds check too
+    return move_cost(tripoint(x, y, 0), ignored_vehicle);
+}
+
+int map::move_cost(const tripoint &p, const vehicle *ignored_vehicle) const
+{
+    int cost = move_cost_ter_furn(p); // covers !inbounds check too
     if ( cost == 0 ) {
         return 0;
     }
-    if (veh_in_active_range && veh_exists_at[x][y]) {
-        const auto it = veh_cached_parts.find( point( x, y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y]) {
+        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1257,13 +1262,8 @@ int map::move_cost(const int x, const int y, const vehicle *ignored_vehicle) con
             }
         }
     }
-//    cost+= field_at(x,y).move_cost(); // <-- unimplemented in all cases
+//    cost+= field_at(p).move_cost(); // <-- unimplemented in all cases
     return cost > 0 ? cost : 0;
-}
-
-int map::move_cost(const tripoint &p, const vehicle *ignored_vehicle) const
-{
-    return move_cost(p.x, p.y, ignored_vehicle);
 }
 
 int map::move_cost_ter_furn(const int x, const int y) const
@@ -1313,23 +1313,28 @@ int map::combined_movecost(const tripoint &p1,
 
 bool map::trans(const int x, const int y) const
 {
-    return light_transparency(x, y) > LIGHT_TRANSPARENCY_SOLID;
+    return trans(tripoint(x, y, 0));
 }
 
 bool map::trans(const tripoint &p) const
 {
-    return trans(p.x, p.y);
+    return light_transparency(p.x, p.y) > LIGHT_TRANSPARENCY_SOLID;
 }
 
 bool map::has_flag(const std::string &flag, const int x, const int y) const
 {
+    return has_flag(flag, tripoint(x, y, 0));
+}
+
+bool map::has_flag(const std::string &flag, const tripoint &p) const
+{
     static const std::string flag_str_REDUCE_SCENT("REDUCE_SCENT"); // construct once per runtime, slash delay 90%
-    if (!inbounds(x, y)) {
+    if (!inbounds(p)) {
         return false;
     }
     // veh_at const no bueno
-    if (veh_in_active_range && veh_exists_at[x][y] && flag_str_REDUCE_SCENT == flag) {
-        const auto it = veh_cached_parts.find( point( x, y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y] && flag_str_REDUCE_SCENT == flag) {
+        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1342,12 +1347,7 @@ bool map::has_flag(const std::string &flag, const int x, const int y) const
             }
         }
     }
-    return has_flag_ter_or_furn(flag, x, y);
-}
-
-bool map::has_flag(const std::string &flag, const tripoint &p) const
-{
-    return has_flag(flag, p.x, p.y);
+    return has_flag_ter_or_furn(flag, p);
 }
 
 bool map::can_put_items(const int x, const int y) const
@@ -1405,12 +1405,17 @@ bool map::has_flag_ter_and_furn(const std::string & flag, const tripoint &p) con
 /////
 bool map::has_flag(const ter_bitflags flag, const int x, const int y) const
 {
-    if (!inbounds(x, y)) {
+    return has_flag(flag, tripoint(x, y, 0));
+}
+
+bool map::has_flag(const ter_bitflags flag, const tripoint &p) const
+{
+    if (!inbounds(p)) {
         return false;
     }
     // veh_at const no bueno
-    if (veh_in_active_range && veh_exists_at[x][y] && flag == TFLAG_REDUCE_SCENT) {
-        const auto it = veh_cached_parts.find( point( x, y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y] && flag == TFLAG_REDUCE_SCENT) {
+        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1423,12 +1428,7 @@ bool map::has_flag(const ter_bitflags flag, const int x, const int y) const
             }
         }
     }
-    return has_flag_ter_or_furn(flag, x, y);
-}
-
-bool map::has_flag(const ter_bitflags flag, const tripoint &p) const
-{
-    return has_flag(flag, p.x, p.y);
+    return has_flag_ter_or_furn(flag, p);
 }
 
 bool map::has_flag_ter(const ter_bitflags flag, const int x, const int y) const
@@ -1472,21 +1472,20 @@ bool map::has_flag_ter_and_furn(const ter_bitflags flag, const tripoint &p) cons
 }
 
 /////
-bool map::is_bashable(const tripoint &p) const
-{
-    return is_bashable(p.x, p.y);
-}
-
 bool map::is_bashable(const int x, const int y) const
 {
-    if (!inbounds(x, y)) {
-        DebugLog( D_WARNING, D_MAP ) << "Looking for out-of-bounds is_bashable at "
-                                     << x << ", " << y;
+    return is_bashable(tripoint(x, y, 0));
+}
+
+bool map::is_bashable(const tripoint &p) const
+{
+    if (!inbounds(p)) {
+        DebugLog( D_WARNING, D_MAP ) << "Looking for out-of-bounds is_bashable at " << p;
         return false;
     }
 
-    if (veh_in_active_range && veh_exists_at[x][y]) {
-        const auto it = veh_cached_parts.find( point( x, y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y]) {
+        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1499,9 +1498,9 @@ bool map::is_bashable(const int x, const int y) const
             }
         }
     }
-    if ( has_furn(x, y) && furn_at(x, y).bash.str_max != -1 ) {
+    if ( has_furn(p) && furn_at(p).bash.str_max != -1 ) {
         return true;
-    } else if ( ter_at(x, y).bash.str_max != -1 ) {
+    } else if ( ter_at(p).bash.str_max != -1 ) {
         return true;
     }
     return false;
@@ -1512,7 +1511,7 @@ bool map::is_bashable_ter(const int x, const int y) const
     return is_bashable_ter( tripoint( x, y, 0 ) );
 }
 
-bool map::is_bashable_ter(const tripoint &p)
+bool map::is_bashable_ter(const tripoint &p) const
 {
     if ( ter_at(p).bash.str_max != -1 ) {
         return true;
