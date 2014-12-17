@@ -883,7 +883,7 @@ protected:
         void player_in_field( player &u );
         void monster_in_field( monster &z );
 
-        void copy_grid( point to, point from );
+        void copy_grid( tripoint to_gp, tripoint from_gp );
  void draw_map(const oter_id terrain_type, const oter_id t_north, const oter_id t_east,
                 const oter_id t_south, const oter_id t_west, const oter_id t_neast,
                 const oter_id t_seast, const oter_id t_nwest, const oter_id t_swest,
@@ -987,7 +987,7 @@ private:
  void add_light_from_items( const int x, const int y, std::list<item>::iterator begin,
                             std::list<item>::iterator end );
  void calc_ray_end(int angle, int range, int x, int y, int* outx, int* outy);
- void forget_traps(int gridx, int gridy);
+ void forget_traps(const tripoint &gp);
  vehicle *add_vehicle_to_map(vehicle *veh, bool merge_wrecks);
 
  // Iterates over every item on the map, passing each item to the provided function.
