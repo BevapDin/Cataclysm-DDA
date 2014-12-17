@@ -438,7 +438,7 @@ void editmap::update_view(bool update_info)
     if ( uberdraw ) {
         uber_draw_ter( g->w_terrain, &g->m ); // Bypassing the usual draw methods; not versatile enough
     } else {
-        g->draw_ter(target.x, target.y);      // But it's optional
+        g->draw_ter( tripoint( target.x, target.y, 0 ) );      // But it's optional
     }
 
     // update target point
@@ -1263,7 +1263,7 @@ int editmap::edit_itm()
                             imenu.entries[imenu_width].txt = string_format("width: %d", (int)it->light.width);
                         }
                         werase(g->w_terrain);
-                        g->draw_ter(target.x, target.y);
+                        g->draw_ter( tripoint( target.x, target.y, 0 ) );
                     }
                     wrefresh(ilmenu.window);
                     wrefresh(imenu.window);

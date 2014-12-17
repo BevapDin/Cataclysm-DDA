@@ -136,7 +136,8 @@ class game
         void start_calendar();
         bool do_turn();
         void draw();
-        void draw_ter(int posx = -999, int posy = -999);
+        void draw_ter();
+        void draw_ter( const tripoint &p );
         void draw_veh_dir_indicator(void);
         /**
          * Add an entry to @ref events. For further information see event.h
@@ -372,7 +373,7 @@ class game
         std::vector<item> items_dragged;
         int weight_dragged; // Computed once, when you start dragging
 
-        int ter_view_x, ter_view_y;
+        int ter_view_x, ter_view_y, ter_view_z;
         WINDOW *w_terrain;
         WINDOW *w_overmap;
         WINDOW *w_omlegend;
