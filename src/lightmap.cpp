@@ -390,14 +390,14 @@ void map::build_seen_cache()
     for(int x = 0; x < my_MAPSIZE; x++) {
         for(int y = 0; y < my_MAPSIZE; y++) {
             for(int z = my_ZMIN; z <= my_ZMAX; z++) {
-                const int nonant = get_nonant(x, y, z);
+                const int nonant = get_nonant( tripoint( x, y, z ) );
                 per_submap_cache &cache = psm_cache[nonant];
                 memset(cache.seen_by_u, false, sizeof(cache.seen_by_u));
                 if ((cache.vflags & per_submap_cache::VF_MAP_DATA) == 0) {
                     const submap *sm = grid[nonant];
                     const submap *sm_above = NULL;
                     if (z < my_ZMAX) {
-                        sm_above = grid[get_nonant(x, y, z + 1)];
+                        sm_above = get_submap_at_grid( tripoint( x, y, z + 1 ) );
                     }
                     cache.build_see_up_down_cache(*sm, sm_above);
                     cache.vflags |= per_submap_cache::VF_MAP_DATA;
@@ -410,17 +410,17 @@ void map::build_seen_cache()
     const int offsetX = g->u.posx();
     const int offsetY = g->u.posy();
 
-    castLight<0, 1, 1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
-    castLight<1, 0, 0, 1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<0, 1, 1, 0>( 1, 0, 1.0f, 0.0f, my_ZMIN, my_ZMAX, offsetX, offsetY, 0 );
+    castLight<1, 0, 0, 1>( 1, 0, 1.0f, 0.0f, my_ZMIN, my_ZMAX, offsetX, offsetY, 0 );
 
-    castLight<0, -1, 1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
-    castLight<-1, 0, 0, 1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<0, -1, 1, 0>( 1, 0, 1.0f, 0.0f, my_ZMIN, my_ZMAX, offsetX, offsetY, 0 );
+    castLight<-1, 0, 0, 1>( 1, 0, 1.0f, 0.0f, my_ZMIN, my_ZMAX, offsetX, offsetY, 0 );
 
-    castLight<0, 1, -1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
-    castLight<1, 0, 0, -1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<0, 1, -1, 0>( 1, 0, 1.0f, 0.0f, my_ZMIN, my_ZMAX, offsetX, offsetY, 0 );
+    castLight<1, 0, 0, -1>( 1, 0, 1.0f, 0.0f, my_ZMIN, my_ZMAX, offsetX, offsetY, 0 );
 
-    castLight<0, -1, -1, 0>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
-    castLight<-1, 0, 0, -1>( 1, 1.0f, 0.0f, offsetX, offsetY, 0 );
+    castLight<0, -1, -1, 0>( 1, 0, 1.0f, 0.0f, my_ZMIN, my_ZMAX, offsetX, offsetY, 0 );
+    castLight<-1, 0, 0, -1>( 1, 0, 1.0f, 0.0f, my_ZMIN, my_ZMAX, offsetX, offsetY, 0 );
 
     int part;
     if ( vehicle *veh = veh_at( offsetX, offsetY, part ) ) {
@@ -471,24 +471,24 @@ void map::build_seen_cache()
             //
             // The naive solution of making the mirrors act like a second player
             // at an offset appears to give reasonable results though.
-            castLight<0, 1, 1, 0>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
-            castLight<1, 0, 0, 1>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<0, 1, 1, 0>( 1, 0, 1.0f, 0.0f, 0, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<1, 0, 0, 1>( 1, 0, 1.0f, 0.0f, 0, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
 
-            castLight<0, -1, 1, 0>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
-            castLight<-1, 0, 0, 1>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<0, -1, 1, 0>( 1, 0, 1.0f, 0.0f, 0, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<-1, 0, 0, 1>( 1, 0, 1.0f, 0.0f, 0, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
 
-            castLight<0, 1, -1, 0>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
-            castLight<1, 0, 0, -1>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<0, 1, -1, 0>( 1, 0, 1.0f, 0.0f, 0, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<1, 0, 0, -1>( 1, 0, 1.0f, 0.0f, 0, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
 
-            castLight<0, -1, -1, 0>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
-            castLight<-1, 0, 0, -1>( 1, 1.0f, 0.0f, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<0, -1, -1, 0>( 1, 0, 1.0f, 0.0f, 0, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight<-1, 0, 0, -1>( 1, 0, 1.0f, 0.0f, 0, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
         }
     }
 
     for(int x = 0; x < my_MAPSIZE; x++) {
         for(int y = 0; y < my_MAPSIZE; y++) {
             for(int z = my_ZMIN; z <= my_ZMAX; z++) {
-                per_submap_cache &cache = psm_cache[get_nonant(x, y, z)];
+                per_submap_cache &cache = psm_cache[get_nonant( tripoint( x, y, z) )];
                 cache.vflags |= per_submap_cache::VF_SEEN_BY_U;
             }
         }
@@ -496,10 +496,10 @@ void map::build_seen_cache()
 }
 
 template<int xx, int xy, int yx, int yy>
-void map::castLight( int row, float start, float end, const int offsetX, const int offsetY, const int offsetDistance)
+void map::castLight( int row, int z, float start, float end, int zmin, int zmax, const int offsetX, const int offsetY, const int offsetDistance)
 {
     float newStart = 0.0f;
-    float radius = 60.0f - offsetDistance;
+    static const int radius = 60;
     if( start < end ) {
         return;
     }
@@ -518,6 +518,12 @@ void map::castLight( int row, float start, float end, const int offsetX, const i
             } else if( end > leftSlope ) {
                 break;
             }
+#define can_see_down(x, y, z) \
+    (psm_cache[get_nonant( tripoint( (x) / SEEX, (y) / SEEY, (z)))].see_down[(x) % SEEX][(y) % SEEY])
+#define can_see_up(x, y, z) \
+    (psm_cache[get_nonant( tripoint( (x) / SEEX, (y) / SEEY, (z)))].see_up[(x) % SEEX][(y) % SEEY])
+#define light_transparency(x, y, z) \
+    (psm_cache[get_nonant( tripoint( (x) / SEEX, (y) / SEEY, (z)))].transparency[(x) % SEEX][(y) % SEEY])
 
             //check if it's within the visible area and mark visible if so
             if( rl_dist(0, 0, deltaX, deltaY) <= radius ) {
@@ -525,26 +531,39 @@ void map::castLight( int row, float start, float end, const int offsetX, const i
                 float bright = (float) (1 - (rStrat.radius(deltaX, deltaY) / radius));
                 lightMap[currentX][currentY] = bright;
                 */
-                seen_cache(currentX, currentY, 0) = true;
+                const float delta = (rightSlope - leftSlope) / 10.0f;
+                seen_cache(currentX, currentY, z) = true;
+                if (z >= 0 && z < zmax && !seen_cache(currentX, currentY, z + 1) && can_see_up(currentX, currentY, z)) {
+                    seen_cache(currentX, currentY, z + 1) = true;
+                    castLight<xx, xy, yx, yy>(distance + 1, z + 1, leftSlope + delta, rightSlope - delta, z + 1, zmax,
+                              offsetX, offsetY, offsetDistance);
+                }
+                if (z <= 0 && z > zmin && !seen_cache(currentX, currentY, z - 1) && can_see_down(currentX, currentY, z)) {
+                    seen_cache(currentX, currentY, z - 1) = true;
+                    castLight<xx, xy, yx, yy>(distance + 1, z - 1, leftSlope + delta, rightSlope - delta, zmin, z - 1,
+                              offsetX, offsetY, offsetDistance);
+                }
+#if 0
                 tripoint p(currentX, currentY, 0);
                 for(p.z = 0; p.z >= my_ZMIN; ) {
-                    if (blocks_vertical_view_down(p)) {
+                    if (!can_see_down(p.x, p.y, p.z)) {
                         break;
                     }
                     p.z--;
                     seen_cache(currentX, currentY, p.z) = true;
                 }
                 for(p.z = +1; p.z <= my_ZMAX; p.z++) {
-                    if (blocks_vertical_view_down(p)) {
+                    if (!can_see_up(p.x, p.y, p.z)) {
                         break;
                     }
                     seen_cache(currentX, currentY, p.z) = true;
                 }
+#endif
             }
 
             if( blocked ) {
                 //previous cell was a blocking one
-                if( light_transparency(currentX, currentY) == LIGHT_TRANSPARENCY_SOLID ) {
+                if( light_transparency(currentX, currentY, z) == LIGHT_TRANSPARENCY_SOLID ) {
                     //hit a wall
                     newStart = rightSlope;
                     continue;
@@ -553,18 +572,21 @@ void map::castLight( int row, float start, float end, const int offsetX, const i
                     start = newStart;
                 }
             } else {
-                if( light_transparency(currentX, currentY) == LIGHT_TRANSPARENCY_SOLID &&
+                if( light_transparency(currentX, currentY, z) == LIGHT_TRANSPARENCY_SOLID &&
                     distance < radius ) {
                     //hit a wall within sight line
                     blocked = true;
-                    castLight<xx, xy, yx, yy>(distance + 1, start, leftSlope,
+                    if (start >= leftSlope) {
+                        castLight<xx, xy, yx, yy>(distance + 1, z, start, leftSlope, zmin, zmax,
                               offsetX, offsetY, offsetDistance);
+                    }
                     newStart = rightSlope;
                 }
             }
         }
     }
 }
+#undef light_transparency
 
 void map::apply_light_source(int x, int y, float luminance, bool trig_brightcalc )
 {

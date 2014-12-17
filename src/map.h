@@ -931,7 +931,7 @@ protected:
  void generate_lightmap();
  void build_seen_cache();
  template<int xx, int xy, int yx, int yy>
- void castLight( int row, float start, float end,
+ void castLight( int row, int z, float start, float end, int zmin, int zmax,
                  const int offsetX, const int offsetY, const int offsetDistance );
 
 private:
