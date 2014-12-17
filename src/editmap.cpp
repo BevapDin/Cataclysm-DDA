@@ -1660,7 +1660,7 @@ int editmap::mapgen_preview( real_coords &tc, uimenu &gmenu )
                                 g->m.update_vehicle_cache(veh1);
                             }
                             srcsm->vehicles.clear();
-                            g->m.update_vehicle_list(destsm); // update real map's vcaches
+                            g->m.update_vehicle_list(tripoint(target_sub.x + x, target_sub.y + y, 0)); // update real map's vcaches
 
                             int spawns_todo = 0;
                             for (size_t i = 0; i < srcsm->spawns.size(); i++) { // copy spawns

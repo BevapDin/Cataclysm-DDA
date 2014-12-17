@@ -188,7 +188,7 @@ class map
      * position of the map (@ref abs_sub) plus the shift vector.
      * Note: the map must have been loaded before this can be called.
      */
-    void shift(const int sx, const int sy);
+    void shift(const tripoint &s);
     /**
      * Spawn monsters from submap spawn points and from the overmap.
      * @param ignore_sight If true, monsters may spawn in the view of the player
@@ -334,7 +334,6 @@ class map
  void update_vehicle_cache(vehicle *, const bool brand_new = false);
  void reset_vehicle_cache();
  void clear_vehicle_cache();
- void update_vehicle_list(submap * const to);
  void remove_from_vehicle_cache(vehicle *veh);
 
  void destroy_vehicle (vehicle *veh);
@@ -971,6 +970,10 @@ private:
          * The given submap pointer must not be null.
          */
         void setsubmap( size_t grididx, submap *smap );
+        bool valid_gp( tripoint gp ) const;
+
+        void update_vehicle_list( const tripoint &gp );
+        void update_traps( const tripoint &gp );
 
     void spawn_monsters( int gx, int gy, mongroup &group, bool ignore_sight );
 
