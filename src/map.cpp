@@ -33,7 +33,6 @@ enum astar_list {
 
 map::map(int mapsize)
 {
-    nulter = t_null;
     my_MAPSIZE = mapsize;
     dbg(D_INFO) << "map::map(): my_MAPSIZE: " << my_MAPSIZE;
     veh_in_active_range = true;

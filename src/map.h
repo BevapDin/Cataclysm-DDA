@@ -743,9 +743,7 @@ protected:
  int my_MAPSIZE;
 
  mutable std::vector<item> nulitems; // Returned when &i_at() is asked for an OOB value
- mutable ter_id nulter;  // Returned when &ter() is asked for an OOB value
  mutable field nulfield; // Returned when &field_at() is asked for an OOB value
- mutable vehicle nulveh; // Returned when &veh_at() is asked for an OOB value
  mutable int null_temperature;  // Because radiation does it too
 
  bool veh_in_active_range;
