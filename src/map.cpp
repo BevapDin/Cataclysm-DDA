@@ -23,8 +23,6 @@ extern bool is_valid_in_w_terrain(int,int);
 #include "overmapbuffer.h"
 
 #define SGN(a) (((a)<0) ? -1 : 1)
-#define INBOUNDS(x, y) \
- (x >= 0 && x < SEEX * my_MAPSIZE && y >= 0 && y < SEEY * my_MAPSIZE)
 #define dbg(x) DebugLog((DebugLevel)(x),D_MAP) << __FILE__ << ":" << __LINE__ << ": "
 
 enum astar_list {
@@ -1050,7 +1048,7 @@ furn_t & map::furn_at(const int x, const int y) const
 
 furn_id map::furn(const int x, const int y) const
 {
- if (!INBOUNDS(x, y)) {
+ if (!inbounds(x, y)) {
   return f_null;
  }
 
@@ -1063,7 +1061,7 @@ furn_id map::furn(const int x, const int y) const
 
 void map::furn_set(const int x, const int y, const furn_id new_furniture)
 {
- if (!INBOUNDS(x, y)) {
+ if (!inbounds(x, y)) {
   return;
  }
 
@@ -1108,7 +1106,7 @@ std::string map::furnname(const int x, const int y) {
  * to string terrain.id
  */
 ter_id map::ter(const int x, const int y) const {
- if (!INBOUNDS(x, y)) {
+ if (!inbounds(x, y)) {
   return t_null;
  }
 
@@ -1171,7 +1169,7 @@ void map::ter_set(const int x, const int y, const std::string new_terrain) {
  * for mods
  */
 void map::ter_set(const int x, const int y, const ter_id new_terrain) {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return;
     }
 
@@ -1249,7 +1247,7 @@ int map::move_cost(const int x, const int y, const vehicle *ignored_vehicle) con
 
 int map::move_cost_ter_furn(const int x, const int y) const
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return 0;
     }
 
@@ -1282,7 +1280,7 @@ int map::combined_movecost(const int x1, const int y1,
 bool map::has_flag(const std::string &flag, const int x, const int y) const
 {
     static const std::string flag_str_REDUCE_SCENT("REDUCE_SCENT"); // construct once per runtime, slash delay 90%
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return false;
     }
     // veh_at const no bueno
@@ -1320,7 +1318,7 @@ bool map::has_flag_furn(const std::string & flag, const int x, const int y) cons
 
 bool map::has_flag_ter_or_furn(const std::string & flag, const int x, const int y) const
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return false;
     }
 
@@ -1337,7 +1335,7 @@ bool map::has_flag_ter_and_furn(const std::string & flag, const int x, const int
 /////
 bool map::has_flag(const ter_bitflags flag, const int x, const int y) const
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return false;
     }
     // veh_at const no bueno
@@ -1370,7 +1368,7 @@ bool map::has_flag_furn(const ter_bitflags flag, const int x, const int y) const
 
 bool map::has_flag_ter_or_furn(const ter_bitflags flag, const int x, const int y) const
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return false;
     }
 
@@ -1382,7 +1380,7 @@ bool map::has_flag_ter_or_furn(const ter_bitflags flag, const int x, const int y
 
 bool map::has_flag_ter_and_furn(const ter_bitflags flag, const int x, const int y) const
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return false;
     }
 
@@ -1569,7 +1567,7 @@ bool map::is_divable(const int x, const int y)
 
 bool map::is_outside(const int x, const int y)
 {
- if(!INBOUNDS(x, y))
+ if(!inbounds(x, y))
   return true;
 
  return outside_cache[x][y];
@@ -2409,7 +2407,7 @@ void map::shoot(const int x, const int y, int &dam,
     }
 
     // Now, destroy items on that tile.
-    if ((move_cost(x, y) == 2 && !hit_items) || !INBOUNDS(x, y)) {
+    if ((move_cost(x, y) == 2 && !hit_items) || !inbounds(x, y)) {
         return; // Items on floor-type spaces won't be shot up.
     }
 
@@ -2599,7 +2597,7 @@ bool map::close_door(const int x, const int y, const bool inside, const bool che
 
 const std::string map::get_signage(const int x, const int y) const
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return "";
     }
 
@@ -2610,7 +2608,7 @@ const std::string map::get_signage(const int x, const int y) const
 }
 void map::set_signage(const int x, const int y, std::string message) const
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return;
     }
 
@@ -2621,7 +2619,7 @@ void map::set_signage(const int x, const int y, std::string message) const
 }
 void map::delete_signage(const int x, const int y) const
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return;
     }
 
@@ -2633,7 +2631,7 @@ void map::delete_signage(const int x, const int y) const
 
 int map::get_radiation(const int x, const int y) const
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return 0;
     }
 
@@ -2645,7 +2643,7 @@ int map::get_radiation(const int x, const int y) const
 
 void map::set_radiation(const int x, const int y, const int value)
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return;
     }
 
@@ -2657,7 +2655,7 @@ void map::set_radiation(const int x, const int y, const int value)
 
 void map::adjust_radiation(const int x, const int y, const int delta)
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return;
     }
 
@@ -2670,7 +2668,7 @@ void map::adjust_radiation(const int x, const int y, const int delta)
 
 int& map::temperature(const int x, const int y)
 {
- if (!INBOUNDS(x, y)) {
+ if (!inbounds(x, y)) {
   null_temperature = 0;
   return null_temperature;
  }
@@ -2688,7 +2686,7 @@ void map::set_temperature(const int x, const int y, int new_temperature)
 
 map_stack map::i_at( const int x, const int y )
 {
-    if( !INBOUNDS(x, y) ) {
+    if( !inbounds(x, y) ) {
         nulitems.clear();
         return map_stack{ &nulitems, point(x, y), this };
     }
@@ -2892,7 +2890,7 @@ int map::max_volume(const int x, const int y)
 
 // total volume of all the things
 int map::stored_volume(const int x, const int y) {
-    if(!INBOUNDS(x, y)) {
+    if(!inbounds(x, y)) {
         return 0;
     }
     int cur_volume = 0;
@@ -2905,7 +2903,7 @@ int map::stored_volume(const int x, const int y) {
 // free space
 int map::free_volume(const int x, const int y) {
    const int maxvolume = this->max_volume(x, y);
-   if(!INBOUNDS(x, y)) return 0;
+   if(!inbounds(x, y)) return 0;
    return ( maxvolume - stored_volume(x, y) );
 }
 
@@ -2917,7 +2915,7 @@ bool map::is_full(const int x, const int y, const int addvolume, const int addnu
    const int maxitems = MAX_ITEM_IN_SQUARE; // (game.h) 1024
    const int maxvolume = this->max_volume(x, y);
 
-   if( ! (INBOUNDS(x, y) && move_cost(x, y) > 0 && !has_flag("NOITEM", x, y) ) ) {
+   if( ! (inbounds(x, y) && move_cost(x, y) > 0 && !has_flag("NOITEM", x, y) ) ) {
        return true;
    }
 
@@ -2939,7 +2937,7 @@ bool map::is_full(const int x, const int y, const int addvolume, const int addnu
 // overflow_radius > 0: if x,y is full, attempt to drop item up to overflow_radius squares away, if x,y is full
 bool map::add_item_or_charges(const int x, const int y, item new_item, int overflow_radius) {
 
-    if(!INBOUNDS(x,y) ) {
+    if(!inbounds(x,y) ) {
         // Complain about things that should never happen.
         dbg(D_INFO) << x << "," << y << ", liquid "
                     <<(new_item.made_of(LIQUID) && has_flag("SWIMMABLE", x, y)) <<
@@ -2957,7 +2955,7 @@ bool map::add_item_or_charges(const int x, const int y, item new_item, int overf
     bool tryaddcharges = (new_item.charges  != -1 && new_item.count_by_charges());
     std::vector<point> ps = closest_points_first(overflow_radius, x, y);
     for( std::vector<point>::iterator p_it = ps.begin(); p_it != ps.end(); p_it++ ) {
-        if( !INBOUNDS(p_it->x, p_it->y) || new_item.volume() > this->free_volume(p_it->x, p_it->y) ||
+        if( !inbounds(p_it->x, p_it->y) || new_item.volume() > this->free_volume(p_it->x, p_it->y) ||
             has_flag("DESTROY_ITEM", p_it->x, p_it->y) || has_flag("NOITEM", p_it->x, p_it->y) ) {
             continue;
         }
@@ -2982,7 +2980,7 @@ bool map::add_item_or_charges(const int x, const int y, item new_item, int overf
 // map::add_item_or_charges
 void map::add_item(const int x, const int y, item new_item)
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return;
     }
     int lx, ly;
@@ -3557,7 +3555,7 @@ void map::trap_set(const int x, const int y, const trap_id id) {
 // todo: to be consistent with ???_at(...) this should return ref to the actual trap object
 trap_id map::tr_at(const int x, const int y) const
 {
- if (!INBOUNDS(x, y)) {
+ if (!inbounds(x, y)) {
   return tr_null;
  }
 /*
@@ -3577,7 +3575,7 @@ trap_id map::tr_at(const int x, const int y) const
 
 void map::add_trap(const int x, const int y, const trap_id t)
 {
-    if (!INBOUNDS(x, y)) { return; }
+    if (!inbounds(x, y)) { return; }
 
     int lx, ly;
     submap * const current_submap = get_submap_at(x, y, lx, ly);
@@ -3665,7 +3663,7 @@ void map::disarm_trap(const int x, const int y)
 
 void map::remove_trap(const int x, const int y)
 {
-    if (!INBOUNDS(x, y)) { return; }
+    if (!inbounds(x, y)) { return; }
 
     int lx, ly;
     submap * const current_submap = get_submap_at(x, y, lx, ly);
@@ -3762,14 +3760,14 @@ int map::get_field_strength( const point p, const field_id t ) {
 }
 
 field_entry * map::get_field( const point p, const field_id t ) {
-    if (!INBOUNDS(p.x, p.y))
+    if (!inbounds(p.x, p.y))
         return NULL;
     return get_field( p.x, p.y ).findField(t);
 }
 
 bool map::add_field(const point p, const field_id t, int density, const int age)
 {
-    if (!INBOUNDS(p.x, p.y)) {
+    if (!inbounds(p.x, p.y)) {
         return false;
     }
 
@@ -3801,7 +3799,7 @@ bool map::add_field(const int x, const int y, const field_id t, const int new_de
 
 void map::remove_field(const int x, const int y, const field_id field_to_remove)
 {
- if (!INBOUNDS(x, y)) {
+ if (!inbounds(x, y)) {
   return;
  }
 
@@ -3816,7 +3814,7 @@ void map::remove_field(const int x, const int y, const field_id field_to_remove)
 
 computer* map::computer_at(const int x, const int y)
 {
- if (!INBOUNDS(x, y))
+ if (!inbounds(x, y))
   return NULL;
 
  submap * const current_submap = get_submap_at(x, y);
@@ -3835,7 +3833,7 @@ bool map::allow_camp(const int x, const int y, const int radius)
 // locate the nearest camp in some radius (default CAMPSIZE)
 basecamp* map::camp_at(const int x, const int y, const int radius)
 {
-    if (!INBOUNDS(x, y)) {
+    if (!inbounds(x, y)) {
         return NULL;
     }
 
@@ -3983,7 +3981,7 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     bool show_items = show_items_arg;
     int cx = view_center_x_arg;
     int cy = view_center_y_arg;
-    if (!INBOUNDS(x, y))
+    if (!inbounds(x, y))
         return; // Out of bounds
     if (cx == -1)
         cx = u.posx();
@@ -4167,7 +4165,7 @@ bool map::sees(const int Fx, const int Fy, const int Tx, const int Ty,
                     bresenham_slope *= st;
                     return true;
                 }
-            } while (INBOUNDS(x, y) && light_transparency(x, y) > LIGHT_TRANSPARENCY_SOLID);
+            } while (inbounds(x, y) && light_transparency(x, y) > LIGHT_TRANSPARENCY_SOLID);
         }
         return false;
     } else { // Same as above, for mostly-vertical lines
@@ -4187,7 +4185,7 @@ bool map::sees(const int Fx, const int Fy, const int Tx, const int Ty,
                     bresenham_slope *= st;
      return true;
                 }
-            } while (INBOUNDS(x, y) && light_transparency(x, y) > LIGHT_TRANSPARENCY_SOLID);
+            } while (inbounds(x, y) && light_transparency(x, y) > LIGHT_TRANSPARENCY_SOLID);
         }
         return false;
     }
@@ -4232,7 +4230,7 @@ bool map::clear_path(const int Fx, const int Fy, const int Tx, const int Ty,
                     return true;
                 }
             } while (move_cost(x, y) >= cost_min && move_cost(x, y) <= cost_max &&
-                     INBOUNDS(x, y));
+                     inbounds(x, y));
         }
         return false;
     } else { // Same as above, for mostly-vertical lines
@@ -4253,7 +4251,7 @@ bool map::clear_path(const int Fx, const int Fy, const int Tx, const int Ty,
                     return true;
                 }
             } while (move_cost(x, y) >= cost_min && move_cost(x, y) <= cost_max &&
-                     INBOUNDS(x,y));
+                     inbounds(x,y));
         }
         return false;
     }
@@ -4315,7 +4313,7 @@ std::vector<point> map::route(const int Fx, const int Fy, const int Tx, const in
      * in-bounds point and go to that, then to the real origin/destination.
      */
 
-    if (!INBOUNDS(Fx, Fy) || !INBOUNDS(Tx, Ty)) {
+ if (!inbounds(Fx, Fy) || !inbounds(Tx, Ty)) {
         int linet;
         if (sees(Fx, Fy, Tx, Ty, -1, linet)) {
             return line_to(Fx, Fy, Tx, Ty, linet);
@@ -5019,6 +5017,11 @@ bool map::inbounds(const int x, const int y) const
  return (x >= 0 && x < SEEX * my_MAPSIZE && y >= 0 && y < SEEY * my_MAPSIZE);
 }
 
+bool map::inbounds(const tripoint &p) const
+{
+    return inbounds( p.x, p.y ) && p.z == 0;
+}
+
 void map::set_graffiti( int x, int y, const std::string &contents )
 {
     if( !inbounds( x, y ) ) {
@@ -5158,7 +5161,7 @@ void map::build_outside_cache()
                 {
                     for( int dy = -1; dy <= 1; dy++ )
                     {
-                        if(INBOUNDS(x + dx, y + dy))
+                        if(inbounds(x + dx, y + dy))
                         {
                             outside_cache[x + dx][y + dy] = false;
                         }
@@ -5238,7 +5241,7 @@ void map::build_map_cache()
         for (size_t part = 0; part < v.v->parts.size(); part++) {
             int px = v.x + v.v->parts[part].precalc[0].x;
             int py = v.y + v.v->parts[part].precalc[0].y;
-            if(INBOUNDS(px, py)) {
+            if(inbounds(px, py)) {
                 if (v.v->is_inside(part)) {
                     outside_cache[px][py] = false;
                 }
