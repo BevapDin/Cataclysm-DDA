@@ -442,7 +442,7 @@ class game
         void draw_zones(const point &p_pointStart, const point &p_pointEnd, const point &p_pointOffset);
         // Draw critter (if visible!) on its current position into w_terrain.
         // @param center the center of view, same as when calling map::draw
-        void draw_critter(const Creature &critter, const point &center);
+        void draw_critter(const Creature &critter, const tripoint &center);
 
         // Vehicle related JSON loaders and variables
         void load_vehiclepart(JsonObject &jo);

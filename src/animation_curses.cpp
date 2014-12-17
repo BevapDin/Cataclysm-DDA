@@ -45,7 +45,7 @@ void game::draw_bullet(Creature &p, int tx, int ty, int i, std::vector<point> tr
     if (u_see(tx, ty)) {
         if (i > 0) {
             m.drawsq(w_terrain, u, trajectory[i - 1].x, trajectory[i - 1].y, false,
-                     true, u.posx + u.view_offset_x, u.posy + u.view_offset_y);
+                     true, tripoint( u.posx + u.view_offset_x, u.posy + u.view_offset_y, u.view_offset_z), false, false);
         }
         /*
         char bullet = '*';
@@ -90,8 +90,8 @@ void game::draw_line(const int x, const int y, const point center_point, std::ve
             if( critter != nullptr && u.sees( critter ) ) {
                 critter->draw( w_terrain, center_point.x, center_point.y, true );
             } else {
-                m.drawsq( w_terrain, u, elem.x, elem.y, true, true, center_point.x,
-                          center_point.y );
+                m.drawsq( w_terrain, u, elem.x, elem.y, true, true,
+                          tripoint(center_point.x, center_point.y, 0), false, false );
             }
         }
     }
@@ -108,7 +108,7 @@ void game::draw_line(const int x, const int y, std::vector<point> vPoint)
     }
     for (std::vector<point>::iterator it = vPoint.begin();
          it != vPoint.end() - 1; it++) {
-        m.drawsq(w_terrain, u, it->x, it->y, true, true);
+        m.drawsq(w_terrain, u, it->x, it->y, true, true, u.pos(), false, false);
     }
 
     mvwputch(w_terrain, cry, crx, c_white, 'X');

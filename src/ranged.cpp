@@ -1042,11 +1042,15 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
             x = cx;
             y = cy;
         }
-        point center;
+        tripoint center;
         if (snap_to_target) {
-            center = point(x, y);
+            center.x = x;
+            center.y = y;
+            center.z = 0;
         } else {
-            center = point(u.posx + u.view_offset_x, u.posy + u.view_offset_y);
+            center.x = u.posx + u.view_offset_x;
+            center.y = u.posy + u.view_offset_y;
+            center.z = u.view_offset_z;
         }
         // Clear the target window.
         for (int i = 1; i <= getmaxy(w_target) - num_instruction_lines - 2; i++) {
@@ -1074,7 +1078,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
             // Only draw a highlighted trajectory if we can see the endpoint.
             // Provides feedback to the player, and avoids leaking information
             // about tiles they can't see.
-            draw_line(x, y, center, ret);
+            draw_line(x, y, point(center.x, center.y), ret);
 
             // Print to target window
             if (!relevant) {
@@ -1166,7 +1170,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
             if( critter != nullptr ) {
                 draw_critter( *critter, center );
             } else if (m.sees(u.posx, u.posy, x, y, -1, junk)) {
-                m.drawsq(w_terrain, u, x, y, false, true, center.x, center.y);
+                m.drawsq(w_terrain, u, x, y, false, true, center, false, false);
             } else {
                 mvwputch(w_terrain, POSY, POSX, c_black, 'X');
             }

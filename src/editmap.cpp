@@ -387,7 +387,7 @@ void editmap::uber_draw_ter( WINDOW *w, map *m )
                     if( critter != nullptr ) {
                         critter->draw( w, center.x, center.y, false );
                     } else {
-                        m->drawsq(w, g->u, x, y, false, draw_itm, center.x, center.y, false, true);
+                        m->drawsq(w, g->u, x, y, false, draw_itm, tripoint(center.x, center.y, 0), false, true);
                     }
                     monster *m = dynamic_cast<monster*>( critter );
                     if( m != nullptr ) {
@@ -399,7 +399,7 @@ void editmap::uber_draw_ter( WINDOW *w, map *m )
                         }
                     }
                 } else {
-                    m->drawsq(w, g->u, x, y, false, draw_itm, center.x, center.y, false, true);
+                    m->drawsq(w, g->u, x, y, false, draw_itm, tripoint(center.x, center.y, 0), false, true);
                 }
             } else {
                 mvwputch(w, sy, sx, col, sym);
@@ -445,7 +445,7 @@ void editmap::update_view(bool update_info)
     if( critter != nullptr ) {
         critter->draw( g->w_terrain, target.x, target.y, true );
     } else {
-        g->m.drawsq(g->w_terrain, g->u, target.x, target.y, true, true, target.x, target.y);
+        g->m.drawsq(g->w_terrain, g->u, target.x, target.y, true, true, tripoint(target.x, target.y, 0), false, false);
     }
 
     // hilight target_list points if blink=true (and if it's more than a point )
@@ -1606,7 +1606,7 @@ int editmap::mapgen_preview( real_coords &tc, uimenu &gmenu )
             tmpmap.reset_vehicle_cache();
             for(int x = 0; x < 24; x++) {
                 for(int y = 0; y < 24; y++) {
-                    tmpmap.drawsq(w_preview, g->u, x, y, false, true, 12, 12, false, true);
+                    tmpmap.drawsq(w_preview, g->u, x, y, false, true, tripoint(12, 12, 0), false, true);
                 }
             }
             wrefresh(w_preview);

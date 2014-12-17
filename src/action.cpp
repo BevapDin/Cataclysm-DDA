@@ -793,8 +793,9 @@ bool choose_adjacent_highlight(std::string message, int &x, int &y,
 
             if(can_interact_at(action_to_highlight, x, y)) {
                 highlighted = true;
-                g->m.drawsq(g->w_terrain, g->u, x, y, true, true, g->u.xpos() + g->u.view_offset_x,
-                            g->u.ypos() + g->u.view_offset_y);
+                g->m.drawsq(g->w_terrain, g->u, x, y, true, true,
+                            tripoint(g->u.posx + g->u.view_offset_x, g->u.posy + g->u.view_offset_y, g->u.view_offset_z),
+                            false, false);
             }
         }
     }

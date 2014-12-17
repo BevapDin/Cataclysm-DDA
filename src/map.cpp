@@ -4301,7 +4301,7 @@ void map::debug()
  getch();
 }
 
-void map::draw(WINDOW* w, const point center)
+void map::draw(WINDOW* w, const tripoint &center)
 {
  // We only need to draw anything if we're not in tiles mode.
  if(is_draw_tiles_mode()) {
@@ -4376,7 +4376,7 @@ void map::draw(WINDOW* w, const point center)
     else
      mvwputch(w, realy+getmaxy(w)/2 - center.y, realx+getmaxx(w)/2 - center.x, c_ltgray, '#');
    } else if (dist <= u_clairvoyance || can_see) {
-    drawsq(w, g->u, realx, realy, false, true, center.x, center.y,
+    drawsq(w, g->u, realx, realy, false, true, center,
            (dist > low_sight_range && LL_LIT > lit) ||
            (dist > sight_range && LL_LOW == lit),
            LL_BRIGHT == lit);
@@ -4389,7 +4389,7 @@ void map::draw(WINDOW* w, const point center)
 }
 
 void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool invert_arg,
-                 const bool show_items_arg, const int view_center_x_arg, const int view_center_y_arg,
+                 const bool show_items_arg, const tripoint &center,
                  const bool low_light, const bool bright_light)
 {
     // We only need to draw anything if we're not in tiles mode.
@@ -4397,16 +4397,14 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
         return;
     }
 
+    const int view_center_x_arg = center.x;
+    const int view_center_y_arg = center.y;
     bool invert = invert_arg;
     bool show_items = show_items_arg;
     int cx = view_center_x_arg;
     int cy = view_center_y_arg;
     if (!inbounds(x, y))
         return; // Out of bounds
-    if (cx == -1)
-        cx = u.posx;
-    if (cy == -1)
-        cy = u.posy;
     const int k = x + getmaxx(w)/2 - cx;
     const int j = y + getmaxy(w)/2 - cy;
     nc_color tercol;
