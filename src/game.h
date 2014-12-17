@@ -639,6 +639,7 @@ class game
          * monsters are despawned upon a vertical shift.
          */
         void shift_monsters(const tripoint &shift);
+        void shift_npcs( const tripoint &shift );
         /**
          * Despawn a specific monster, it's stored on the overmap. Also removes
          * it from the creature tracker. Keep in mind that mondex points to a

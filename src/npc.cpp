@@ -2003,13 +2003,16 @@ std::string npc::opinion_text() const
  return ret.str();
 }
 
-void npc::shift(int sx, int sy)
+void npc::shift( const tripoint &shift )
 {
+    const int sx = shift.x;
+    const int sy = shift.y;
     posx -= sx * SEEX;
     posy -= sy * SEEY;
     const point pos_om_old = overmapbuffer::sm_to_om_copy( mapx, mapy );
     mapx += sx;
     mapy += sy;
+    mapz -= shift.z;
     const point pos_om_new = overmapbuffer::sm_to_om_copy( mapx, mapy );
     if( pos_om_old != pos_om_new ) {
         overmap &om_old = overmap_buffer.get( pos_om_old.x, pos_om_old.y );
