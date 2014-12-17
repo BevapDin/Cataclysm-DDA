@@ -973,6 +973,10 @@ private:
          */
         std::vector<submap*> grid;
  std::map<trap_id, std::set<point> > traplocs;
+ bool blocks_vertical_view_down(const tripoint &p) const;
+ bool blocks_vertical_view_up(const tripoint &p) const;
+ int z_level_down_xx(const tripoint &p) const;
+ int z_level_up_xx(const tripoint &p) const;
 };
 
 std::vector<point> closest_points_first(int radius, point p);

@@ -81,6 +81,7 @@ void init_ter_bitflags_map() {
     ter_bitflags_map["FLAMMABLE_ASH"]           = TFLAG_FLAMMABLE_ASH;  // oh hey fire. again.
     ter_bitflags_map["PLANT"]                   = TFLAG_PLANT;          // full map iteration
     ter_bitflags_map["WALL"]                    = TFLAG_WALL;           // smells
+    ter_bitflags_map["NOFLOOR"]                 = TFLAG_NOFLOOR;
     ter_bitflags_map["DEEP_WATER"]              = TFLAG_DEEP_WATER;     // Deep enough to submerge things
     ter_bitflags_map["HARVESTED"]               = TFLAG_HARVESTED;      // harvested.  will not bear fruit.
     ter_bitflags_map["PERMEABLE"]               = TFLAG_PERMEABLE;      // gases can flow through.

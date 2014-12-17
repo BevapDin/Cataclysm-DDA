@@ -4409,6 +4409,67 @@ void map::draw(WINDOW* w, const tripoint &center)
     g->draw_critter( g->u, center );
 }
 
+bool map::blocks_vertical_view_down( const tripoint &p ) const
+{
+    const ter_id tid = ter( p );
+    const ter_t &ter = terlist[tid];
+    if( !ter.transparent ) {
+        return true;
+    }
+    if( !ter.has_flag( TFLAG_NOFLOOR ) ) { // no no floor -> floor
+        return true;
+    }
+    const furn_id fid = furn( p );
+    if( fid == f_null ) {
+        return false;
+    }
+    const furn_t &furn = furnlist[fid];
+    if( !furn.transparent ) {
+        return true;
+    }
+    if( !furn.has_flag( TFLAG_NOFLOOR ) ) { // no no floor -> floor
+        return true;
+    }
+    return false;
+}
+
+bool map::blocks_vertical_view_up( const tripoint &p ) const
+{
+    return blocks_vertical_view_down( tripoint( p.x, p.y, p.z + 1 ) );
+}
+
+// Returns the negative length (z-levels) of a vertical shaft
+// starting at p, and going down until an opaque floor stops it
+int map::z_level_down_xx( const tripoint &p ) const
+{
+    int z = 0;
+    tripoint pp = p;
+    while( pp.z > my_ZMIN ) {
+        if( blocks_vertical_view_down( pp ) ) {
+            break;
+        }
+        z--;
+        pp.z--;
+    }
+    return z;
+}
+
+// Returns the length (z-levels) of a vertical shaft
+// starting at p, and going up until an opaque floor stops it
+int map::z_level_up_xx( const tripoint &p ) const
+{
+    int z = 0;
+    tripoint pp = p;
+    while( pp.z < my_ZMAX ) {
+        if( blocks_vertical_view_up( pp ) ) {
+            break;
+        }
+        z++;
+        pp.z++;
+    }
+    return z;
+}
+
 void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool invert_arg,
                  const bool show_items_arg, const tripoint &center,
                  const bool low_light, const bool bright_light)
@@ -4429,25 +4490,29 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     const int k = x + getmaxx(w)/2 - cx;
     const int j = y + getmaxy(w)/2 - cy;
     nc_color tercol;
-    const ter_id curr_ter = ter(x,y);
-    const furn_id curr_furn = furn(x,y);
-    const trap_id curr_trap = tr_at(x, y);
-    const field &curr_field = field_at(x, y);
-    const std::vector<item> &curr_items = i_at(x, y);
+    // TODO: Z
+    const int zv = z_level_down_xx(tripoint(x, y, center.z));
+    const tripoint tpx(x, y, center.z + zv);
+    const bool from_above = tpx.z != 0;
+    const ter_id curr_ter = ter(tpx);
+    const furn_id curr_furn = furn(tpx);
+    const trap_id curr_trap = tr_at(tpx);
+    const field &curr_field = get_field(tpx);
+    const std::vector<item> &curr_items = i_at(tpx);
     long sym;
     bool hi = false;
     bool graf = false;
     bool draw_item_sym = false;
 
 
-    if (has_furn(x, y)) {
+    if (curr_furn != f_null) {
         sym = furnlist[curr_furn].sym;
         tercol = furnlist[curr_furn].color;
     } else {
         sym = terlist[curr_ter].sym;
         tercol = terlist[curr_ter].color;
     }
-    if (has_flag(TFLAG_SWIMMABLE, x, y) && has_flag(TFLAG_DEEP_WATER, x, y) && !u.is_underwater()) {
+    if (has_flag(TFLAG_SWIMMABLE, tpx) && has_flag(TFLAG_DEEP_WATER, tpx) && !u.is_underwater()) {
         show_items = false; // Can only see underwater items if WE are underwater
     }
     // If there's a trap here, and we have sufficient perception, draw that instead
@@ -4504,7 +4569,7 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     }
 
     // If there are items here, draw those instead
-    if (show_items && sees_some_items(x, y, g->u)) {
+    if (show_items && sees_some_items(tpx, g->u)) {
         // if there's furniture/terrain/trap/fields (sym!='.')
         // and we should not override it, then only highlight the square
         if (sym != '.' && sym != '%' && !draw_item_sym) {
@@ -4522,19 +4587,19 @@ void map::drawsq(WINDOW* w, player &u, const int x, const int y, const bool inve
     }
 
     int veh_part = 0;
-    vehicle *veh = veh_at(x, y, veh_part);
+    vehicle *veh = veh_at(tpx, veh_part);
     if (veh) {
         sym = special_symbol (veh->face.dir_symbol(veh->part_sym(veh_part)));
         tercol = veh->part_color(veh_part);
     }
     // If there's graffiti here, change background color
-    if( has_graffiti_at( x, y ) ) {
+    if( has_graffiti_at( tpx ) ) {
         graf = true;
     }
 
     //suprise, we're not done, if it's a wall adjacent to an other, put the right glyph
     if(sym == LINE_XOXO || sym == LINE_OXOX) { //vertical or horizontal
-        sym = determine_wall_corner(tripoint(x, y, 0), sym);
+        sym = determine_wall_corner(tpx, sym);
     }
 
     if (u.has_effect("boomered")) {
