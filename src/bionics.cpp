@@ -416,9 +416,10 @@ bool player::activate_bionic(int b, bool eff_only)
         g->sound(pos(), 30, _("VRRRRMP!"));
         for (int i = posx - 1; i <= posx + 1; i++) {
             for (int j = posy - 1; j <= posy + 1; j++) {
-                g->m.bash( i, j, 110 );
-                g->m.bash( i, j, 110 ); // Multibash effect, so that doors &c will fall
-                g->m.bash( i, j, 110 );
+                const tripoint bp(i, j, zpos());
+                g->m.bash( bp, 110 );
+                g->m.bash( bp, 110 ); // Multibash effect, so that doors &c will fall
+                g->m.bash( bp, 110 );
             }
         }
     } else if (bio.id == "bio_time_freeze") {
@@ -700,16 +701,16 @@ bool player::activate_bionic(int b, bool eff_only)
                                 g->zombie(index).apply_damage( this, bp_torso, tmp_item.weight() / 225 );
                                 g->m.add_item_or_charges(it->x, it->y, tmp_item);
                                 break;
-                            } else if (g->m.move_cost(it->x, it->y) == 0) {
+                            } else if (g->m.move_cost(tripoint(it->x, it->y, zpos())) == 0) {
                                 if (it != traj.begin()) {
-                                    g->m.bash( it->x, it->y, tmp_item.weight() / 225 );
-                                    if (g->m.move_cost(it->x, it->y) == 0) {
+                                    g->m.bash( tripoint(it->x, it->y, zpos()), tmp_item.weight() / 225 );
+                                    if (g->m.move_cost(tripoint(it->x, it->y, zpos())) == 0) {
                                         g->m.add_item_or_charges((it - 1)->x, (it - 1)->y, tmp_item);
                                         break;
                                     }
                                 } else {
-                                    g->m.bash( it->x, it->y, tmp_item.weight() / 225 );
-                                    if (g->m.move_cost(it->x, it->y) == 0) {
+                                    g->m.bash( tripoint(it->x, it->y, zpos()), tmp_item.weight() / 225 );
+                                    if (g->m.move_cost(tripoint(it->x, it->y, zpos())) == 0) {
                                         break;
                                     }
                                 }

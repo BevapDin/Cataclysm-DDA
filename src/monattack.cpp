@@ -1648,7 +1648,7 @@ void mattack::vortex(monster *z, int index)
             if (x == z->posx() && y == z->posy()) { // Don't throw us!
                 y++;
             }
-            g->m.bash( x, y, 14 );
+            g->m.bash( tripoint(x, y, z->zpos()), 14 );
         }
     }
     std::set<std::string> no_effects;

@@ -7397,11 +7397,12 @@ int iuse::artifact(player *p, item *it, bool, const tripoint &)
                 g->sound(p->pos(), 30, _("The earth shakes!"));
                 for (int x = p->posx - 2; x <= p->posx + 2; x++) {
                     for (int y = p->posy - 2; y <= p->posy + 2; y++) {
-                        g->m.bash(x, y, 40);
-                        g->m.bash(x, y, 40);  // Multibash effect, so that doors &c will fall
-                        g->m.bash(x, y, 40);
-                        if (g->m.is_bashable(x, y) && rng(1, 10) >= 3) {
-                            g->m.bash(x, y, 999, false, true);
+                        const tripoint bp(x, y, p->zpos());
+                        g->m.bash(bp, 40);
+                        g->m.bash(bp, 40);  // Multibash effect, so that doors &c will fall
+                        g->m.bash(bp, 40);
+                        if (g->m.is_bashable(bp) && rng(1, 10) >= 3) {
+                            g->m.bash(bp, 999, false, true);
                         }
                     }
                 }

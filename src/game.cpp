@@ -7117,7 +7117,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                     add_msg(_("%s slammed into an obstacle!"), targ->name().c_str());
                     targ->apply_damage( nullptr, bp_torso, dam_mult * force_remaining );
                 }
-                m.bash(traj[i].x, traj[i].y, 2 * dam_mult * force_remaining);
+                m.bash(tripoint(traj[i].x, traj[i].y, 0), 2 * dam_mult * force_remaining);
                 break;
             } else if (mon_at(traj[i].x, traj[i].y) != -1 || npc_at(traj[i].x, traj[i].y) != -1 ||
                        (u.posx == traj[i].x && u.posy == traj[i].y)) {
@@ -7226,7 +7226,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                         targ->deal_damage( nullptr, bp_hand_r, damage_instance( DT_BASH, force_remaining * dam_mult ) );
                     }
                 }
-                m.bash(traj[i].x, traj[i].y, 2 * dam_mult * force_remaining);
+                m.bash(tripoint(traj[i].x, traj[i].y, 0), 2 * dam_mult * force_remaining);
                 break;
             } else if (mon_at(traj[i].x, traj[i].y) != -1 || npc_at(traj[i].x, traj[i].y) != -1 ||
                        (u.posx == traj[i].x && u.posy == traj[i].y)) {
@@ -7324,7 +7324,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
                         u.deal_damage( nullptr, bp_hand_r, damage_instance( DT_BASH, force_remaining * dam_mult ) );
                     }
                 }
-                m.bash(traj[i].x, traj[i].y, 2 * dam_mult * force_remaining);
+                m.bash(tripoint(traj[i].x, traj[i].y, 0), 2 * dam_mult * force_remaining);
                 break;
             } else if (mon_at(traj[i].x, traj[i].y) != -1 || npc_at(traj[i].x, traj[i].y) != -1) {
                 u.posx = traj[i - 1].x;
@@ -8009,7 +8009,7 @@ void game::smash()
             return; // don't smash terrain if we've smashed a corpse
         }
     }
-    didit = m.bash(smashx, smashy, smashskill).first;
+    didit = m.bash(tripoint(smashx, smashy, 0), smashskill).first;
     if (didit) {
         u.handle_melee_wear();
         u.moves -= move_cost;
@@ -13621,9 +13621,9 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
             int vpart;
             vehicle *veh = m.veh_at(x, y, vpart);
             dname = veh ? veh->part_info(vpart).name : m.tername(x, y).c_str();
-            if (m.is_bashable(x, y)) {
+            if (m.is_bashable(tripoint(x, y, 0))) {
                 // Only go through if we successfully destroy what we hit
-                thru = m.bash(x, y, flvel).second;
+                thru = m.bash(tripoint(x, y, 0), flvel).second;
             } else {
                 thru = false;
             }

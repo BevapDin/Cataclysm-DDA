@@ -1129,10 +1129,10 @@ void npc::move_to(int x, int y)
             g->m.creature_in_field( *this );
         } else if (g->m.open_door(x, y, (g->m.ter(posx, posy) == t_floor))) {
             moves -= 100;
-        } else if (g->m.is_bashable(x, y) && g->m.bash_rating(str_cur + weapon.type->melee_dam, x, y) > 0) {
+        } else if (g->m.is_bashable(tripoint(x, y, 0)) && g->m.bash_rating(str_cur + weapon.type->melee_dam, tripoint(x, y, 0)) > 0) {
             moves -= int(weapon.is_null() ? 80 : weapon.attack_time() * 0.8);;
             int smashskill = str_cur + weapon.type->melee_dam;
-            g->m.bash( x, y, smashskill );
+            g->m.bash( tripoint(x, y, 0 ), smashskill );
         } else {
             moves -= 100;
         }
