@@ -848,7 +848,6 @@ std::vector<point> closest_points_first(int radius, point p);
 std::vector<point> closest_points_first(int radius,int x,int y);
 class tinymap : public map
 {
-friend class editmap;
 public:
  tinymap(int mapsize = 2);
 };
