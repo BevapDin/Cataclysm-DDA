@@ -17,6 +17,7 @@
 #include <cmath>
 #include <stdlib.h>
 #include <fstream>
+#include <cassert>
 
 extern bool is_valid_in_w_terrain(int,int);
 
@@ -110,11 +111,16 @@ item &map_stack::operator[]( size_t index )
 
 // Map class methods.
 
-map::map(int mapsize)
+map::map(int mapsize, int z_min, int z_max)
+: my_MAPSIZE(mapsize)
+, my_ZMIN(z_min)
+, my_ZMAX(z_max)
 {
-    my_MAPSIZE = mapsize;
-    grid.resize( my_MAPSIZE * my_MAPSIZE, nullptr );
-    dbg(D_INFO) << "map::map(): my_MAPSIZE: " << my_MAPSIZE;
+    assert(mapsize > 0);
+    assert(z_min <= 0 && z_max >= 0);
+    assert(z_min <= z_max);
+    grid.resize( my_MAPSIZE * my_MAPSIZE * ( 1 + my_ZMAX - my_ZMIN ), nullptr );
+    dbg( D_INFO ) << "map::map(" << mapsize << ", " << z_min << ", " << z_max << ")";
     veh_in_active_range = true;
     transparency_cache_dirty = true;
     outside_cache_dirty = true;
@@ -5019,7 +5025,7 @@ bool map::inbounds(const int x, const int y) const
 
 bool map::inbounds(const tripoint &p) const
 {
-    return inbounds( p.x, p.y ) && p.z == 0;
+    return inbounds( p.x, p.y ) && p.z >= my_ZMIN && p.z <= my_ZMAX;
 }
 
 void map::set_graffiti( int x, int y, const std::string &contents )
@@ -5337,36 +5343,56 @@ void map::setsubmap( const size_t grididx, submap * const smap )
 
 submap *map::get_submap_at( const int x, const int y ) const
 {
-    if( !inbounds( x, y ) ) {
-        debugmsg( "Tried to access invalid map position (%d,%d)", x, y );
+    return get_submap_at( x, y, 0 );
+}
+
+submap *map::get_submap_at( const int x, const int y, const int z ) const
+{
+    if( !inbounds( tripoint( x, y, z ) ) ) {
+        debugmsg( "Tried to access invalid map position (%d,%d,%d)", x, y, z );
         return nullptr;
     }
-    return get_submap_at_grid( point( x / SEEX, y / SEEY ) );
+    return get_submap_at_grid( tripoint( x / SEEX, y / SEEY, z ) );
 }
 
 submap *map::get_submap_at( const int x, const int y, int &offset_x, int &offset_y ) const
 {
+    return get_submap_at( x, y, 0, offset_x, offset_y );
+}
+
+submap *map::get_submap_at( const int x, const int y, const int z, int &offset_x, int &offset_y ) const
+{
     offset_x = x % SEEX;
     offset_y = y % SEEY;
-    return get_submap_at( x, y );
+    return get_submap_at( x, y, z );
 }
 
 submap *map::get_submap_at_grid( const point gp ) const
+{
+    return get_submap_at_grid( tripoint( gp.x, gp.y, 0 ) );
+}
+
+submap *map::get_submap_at_grid( const tripoint gp ) const
 {
     return getsubmap( get_nonant( gp ) );
 }
 
 size_t map::get_nonant( const point gp ) const
 {
-    if( gp.x < 0 || gp.x >= my_MAPSIZE || gp.y < 0 || gp.y >= my_MAPSIZE ) {
-        debugmsg( "Tried to access invalid map position at grid (%d,%d)", gp.x, gp.y );
-        return 0;
-    }
-    return gp.x + gp.y * my_MAPSIZE;
+    return get_nonant( tripoint( gp.x, gp.y, 0 ) );
 }
 
-tinymap::tinymap(int mapsize)
-: map(mapsize)
+size_t map::get_nonant( const tripoint gp ) const
+{
+    if( gp.x < 0 || gp.x >= my_MAPSIZE || gp.y < 0 || gp.y >= my_MAPSIZE || gp.z < my_ZMIN || gp.z > my_ZMAX ) {
+        debugmsg( "Tried to access invalid map position at grid (%d,%d,%d)", gp.x, gp.y, gp.z );
+        return 0;
+    }
+    return gp.x + gp.y * my_MAPSIZE + ( gp.z - my_ZMIN ) * my_MAPSIZE * my_MAPSIZE;
+}
+
+tinymap::tinymap(int mapsize, int z_min, int z_max)
+: map(mapsize, z_min, z_max)
 {
 }
 
