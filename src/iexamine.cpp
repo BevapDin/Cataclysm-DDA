@@ -598,7 +598,7 @@ void iexamine::chainfence( player *p, map *m, int examx, int examy )
     if( examx < SEEX * int( MAPSIZE / 2 ) || examy < SEEY * int( MAPSIZE / 2 ) ||
         examx >= SEEX * ( 1 + int( MAPSIZE / 2 ) ) || examy >= SEEY * ( 1 + int( MAPSIZE / 2 ) ) ) {
         if( &g->u == p ) {
-            g->update_map( examx, examy );
+            g->update_map( examx, examy, 0 );
         }
     }
     p->posx = examx;

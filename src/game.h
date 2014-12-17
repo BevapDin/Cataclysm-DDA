@@ -280,7 +280,7 @@ class game
         Creature *is_hostile_nearby();
         Creature *is_hostile_very_close();
         void refresh_all();
-        void update_map(int &x, int &y);  // Called by plmove when the map updates
+        void update_map(int &x, int &y, int z);  // Called by plmove when the map updates
         void update_overmap_seen(); // Update which overmap tiles we can see
         // Position of the player in overmap terrain coordinates, relative
         // to the current overmap (@ref cur_om).
@@ -630,7 +630,7 @@ class game
          * Note on z-levels: this works with vertical shifts, but currently all
          * monsters are despawned upon a vertical shift.
          */
-        void shift_monsters(const int shiftx, const int shifty, const int shiftz);
+        void shift_monsters(const tripoint &shift);
         /**
          * Despawn a specific monster, it's stored on the overmap. Also removes
          * it from the creature tracker. Keep in mind that mondex points to a
@@ -638,7 +638,7 @@ class game
          */
         void despawn_monster(int mondex);
 
-        void spawn_mon(int shift, int shifty); // Called by update_map, sometimes
+        void spawn_mon(const tripoint &shift); // Called by update_map, sometimes
         void rebuild_mon_at_cache();
 
         // Routine loop functions, approximately in order of execution
