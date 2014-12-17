@@ -4019,25 +4019,25 @@ void map::disarm_trap(const tripoint &p)
     }
 }
 
-void map::remove_trap(const tripoint &p)
-{
-    remove_trap(p.x, p.y);
-}
-
 void map::remove_trap(const int x, const int y)
 {
-    if (!inbounds(x,y)) { return; }
+    remove_trap(tripoint(x, y, 0));
+}
+
+void map::remove_trap(const tripoint &p)
+{
+    if (!inbounds(p)) { return; }
 
     int lx, ly;
-    submap * const current_submap = get_submap_at(x,y, lx, ly);
+    submap * const current_submap = get_submap_at(p, lx, ly);
 
     trap_id t = current_submap->get_trap(lx, ly);
     if (t != tr_null) {
         if (g != NULL && this == &g->m) {
-            g->u.add_known_trap(x, y, "tr_null");
+            g->u.add_known_trap(p.x, p.y, "tr_null");
         }
         current_submap->set_trap(lx, ly, tr_null);
-        traplocs[t].erase(point(x, y));
+        traplocs[t].erase(point(p.x, p.y));
     }
 }
 /*
