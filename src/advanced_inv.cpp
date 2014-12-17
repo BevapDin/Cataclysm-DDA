@@ -533,12 +533,15 @@ void advanced_inv_area::init()
                 max_size = MAX_ITEM_IN_VEHICLE_STORAGE;
                 max_volume = veh->max_volume( vstor );
             } else {
+                tripoint pos = g->u.pos();
+                pos.x += offx;
+                pos.y += offy;
                 veh = nullptr;
-                canputitemsloc = g->m.can_put_items( g->u.posx + offx, g->u.posy + offy );
+                canputitemsloc = g->m.can_put_items( pos );
                 max_size = MAX_ITEM_IN_SQUARE;
-                max_volume = g->m.max_volume( g->u.posx + offx, g->u.posy + offy );
-                if( g->m.has_graffiti_at( g->u.posx + offx, g->u.posy + offy ) ) {
-                    desc = g->m.graffiti_at( g->u.posx + offx, g->u.posy + offy );
+                max_volume = g->m.max_volume( pos );
+                if( g->m.has_graffiti_at( pos ) ) {
+                    desc = g->m.graffiti_at( pos );
                 }
             }
             break;

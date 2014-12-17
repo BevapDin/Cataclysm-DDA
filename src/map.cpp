@@ -5634,11 +5634,6 @@ bool map::inbounds(const tripoint &p) const
     return inbounds( p.x, p.y ) && p.z >= my_ZMIN && p.z <= my_ZMAX;
 }
 
-void map::set_graffiti( int x, int y, const std::string &contents )
-{
-    set_graffiti(tripoint(x, y, 0), contents);
-}
-
 void map::set_graffiti( const tripoint &p, const std::string &contents )
 {
     if( !inbounds( p ) ) {
@@ -5647,11 +5642,6 @@ void map::set_graffiti( const tripoint &p, const std::string &contents )
     int lx, ly;
     submap *const current_submap = get_submap_at( p, lx, ly );
     current_submap->set_graffiti( lx, ly, contents );
-}
-
-void map::delete_graffiti( int x, int y )
-{
-    delete_graffiti(tripoint(x, y, 0));
 }
 
 void map::delete_graffiti( const tripoint &p )
@@ -5664,11 +5654,6 @@ void map::delete_graffiti( const tripoint &p )
     current_submap->delete_graffiti( lx, ly );
 }
 
-const std::string &map::graffiti_at( int x, int y ) const
-{
-    return graffiti_at(tripoint(x, y, 0));
-}
-
 const std::string &map::graffiti_at( const tripoint &p ) const
 {
     if( !inbounds( p ) ) {
@@ -5678,11 +5663,6 @@ const std::string &map::graffiti_at( const tripoint &p ) const
     int lx, ly;
     submap *const current_submap = get_submap_at( p, lx, ly );
     return current_submap->get_graffiti( lx, ly );
-}
-
-bool map::has_graffiti_at( int x, int y ) const
-{
-    return has_graffiti_at(tripoint(x, y, 0));
 }
 
 bool map::has_graffiti_at( const tripoint &p ) const
