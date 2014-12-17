@@ -11838,8 +11838,8 @@ bool game::plmove(int dx, int dy)
         if (signage.size()) {
             add_msg(m_info, _("The sign says: %s"), signage.c_str());
         }
-        if( m.has_graffiti_at( x, y ) ) {
-            add_msg(_("Written here: %s"), utf8_truncate(m.graffiti_at( x, y ), 40).c_str());
+        if( m.has_graffiti_at( tripoint( x, y, 0 ) ) ) {
+            add_msg(_("Written here: %s"), utf8_truncate(m.graffiti_at( tripoint( x, y, 0 ) ), 40).c_str());
         }
         if (m.has_flag("ROUGH", x, y) && (!u.in_vehicle)) {
             bool ter_or_furn = m.has_flag_ter( "ROUGH", x, y );
