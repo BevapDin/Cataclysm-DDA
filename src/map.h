@@ -892,13 +892,13 @@ protected:
         /**
          * Try to grow a harvestable plant to the next stage(s).
          */
-        void grow_plant( const point pnt );
+        void grow_plant( tripoint pnt );
         /**
          * Try to grow fruits on static plants (not planted by the player)
          * @param time_since_last_actualize Time (in turns) since this function has been
          * called the last time.
          */
-        void restock_fruits( const point pnt, int time_since_last_actualize );
+        void restock_fruits( tripoint pnt, int time_since_last_actualize );
         void player_in_field( player &u );
         void monster_in_field( monster &z );
 

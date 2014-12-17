@@ -5368,16 +5368,16 @@ void map::remove_rotten_items( std::vector<item> &items, const tripoint &pnt ) c
 
 void map::fill_funnels( const tripoint pnt )
 {
-    const auto t = tr_at( pnt.x, pnt.y );
+    const auto t = tr_at( pnt );
     if( t == tr_null || traplist[t]->funnel_radius_mm <= 0 ) {
         // not a funnel at all
         return;
     }
     // Note: the inside/outside cache might not be correct at this time
-    if( has_flag_ter_or_furn( TFLAG_INDOORS, pnt.x, pnt.y ) ) {
+    if( has_flag_ter_or_furn( TFLAG_INDOORS, pnt ) ) {
         return;
     }
-    auto &items = i_at( pnt.x, pnt.y );
+    auto &items = i_at( pnt );
     size_t biggest_container_index = items.size();
     int maxvolume = 0;
     for( size_t i = 0; i < items.size(); ++i ) {
@@ -5386,46 +5386,46 @@ void map::fill_funnels( const tripoint pnt )
         }
     }
     if( biggest_container_index != items.size() ) {
-        retroactively_fill_from_funnel( get_item( pnt.x, pnt.y, biggest_container_index),
+        retroactively_fill_from_funnel( get_item( pnt, biggest_container_index),
                                         t, calendar::turn, pnt );
     }
 }
 
-void map::grow_plant( const point pnt )
+void map::grow_plant( const tripoint pnt )
 {
-    const auto &furn = furn_at( pnt.x, pnt.y );
+    const auto &furn = furn_at( pnt );
     if( !furn.has_flag( "PLANT" ) ) {
         return;
     }
-    auto &items = i_at( pnt.x, pnt.y );
+    auto &items = i_at( pnt );
     if( items.empty() ) {
         // No seed there anymore, we don't know what kind of plant it was.
-        dbg( D_ERROR ) << "a seed item has vanished at " << pnt.x << "," << pnt.y;
-        furn_set( pnt.x, pnt.y, f_null );
+        dbg( D_ERROR ) << "a seed item has vanished at " << pnt.x << "," << pnt.y << "," << pnt.z;
+        furn_set( pnt, f_null );
         return;
     }
     // plantEpoch is half a season; 3 epochs pass from plant to harvest
     const int plantEpoch = DAYS( calendar::season_length() ) / 2;
     // Erase fertilizer tokens, but keep the seed item
-    i_rem( pnt.x, pnt.y, 1 );
-    auto *seed = get_item( pnt.x, pnt.y, 0 );
+    i_rem( pnt, 1 );
+    auto *seed = get_item( pnt, 0 );
     // TODO: the comparisons to the loadid is very fragile. Replace with something more explicit.
     while( calendar::turn > seed->bday + plantEpoch && furn.loadid < f_plant_harvest ) {
         seed->bday += plantEpoch;
-        furn_set( pnt.x, pnt.y, static_cast<furn_id>( furn.loadid + 1 ) );
+        furn_set( pnt, static_cast<furn_id>( furn.loadid + 1 ) );
     }
 }
 
-void map::restock_fruits( const point pnt, int time_since_last_actualize )
+void map::restock_fruits( const tripoint pnt, int time_since_last_actualize )
 {
-    const auto &ter = ter_at( pnt.x, pnt.y );
+    const auto &ter = ter_at( pnt );
     //if the fruit-bearing season of the already harvested terrain has passed, make it harvestable again
     if( !ter.has_flag( TFLAG_HARVESTED ) ) {
         return;
     }
     if( ter.harvest_season != calendar::turn.get_season() ||
         time_since_last_actualize >= DAYS( calendar::season_length() ) ) {
-        ter_set( pnt.x, pnt.y, ter.transforms_into );
+        ter_set( pnt, ter.transforms_into );
     }
 }
 
@@ -5451,9 +5451,9 @@ void map::actualize( const tripoint &gp )
                 fill_funnels( pnt );
             }
 
-            grow_plant( point( pnt.x, pnt.y ) );
+            grow_plant( pnt );
 
-            restock_fruits( point( pnt.x, pnt.y ), time_since_last_actualize );
+            restock_fruits( pnt, time_since_last_actualize );
         }
     }
 
