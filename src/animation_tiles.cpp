@@ -143,7 +143,7 @@ void game::draw_line(const int x, const int y, const point center_point, std::ve
             if( critter != nullptr && u.sees( *critter ) ) {
                 critter->draw( w_terrain, center_point.x, center_point.y, true );
             } else {
-                m.drawsq(w_terrain, u, it->x, it->y, true, true, center_point.x, center_point.y);
+                m.drawsq(w_terrain, u, it->x, it->y, true, true, tripoint(center_point.x, center_point.y, 0), false, false);
             }
         }
     }
@@ -159,7 +159,7 @@ void game::draw_line(const int x, const int y, std::vector<point> vPoint)
         cry += (vPoint[vPoint.size() - 1].y - (u.posy() + u.view_offset.y));
     }
     for( std::vector<point>::iterator it = vPoint.begin(); it != vPoint.end() - 1; it++ ) {
-        m.drawsq(w_terrain, u, it->x, it->y, true, true);
+        m.drawsq(w_terrain, u, it->x, it->y, true, true, u.pos(), false, false);
     }
 
     mvwputch(w_terrain, cry, crx, c_white, 'X');

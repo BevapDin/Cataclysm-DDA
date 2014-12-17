@@ -2447,7 +2447,7 @@ input_context game::get_player_input(std::string &action)
                 //Erase previous drops from w_terrain
                 for( auto &elem : wPrint.vdrops ) {
                     m.drawsq( w_terrain, u, elem.first + offset_x, elem.second + offset_y, false,
-                              true, u.posx() + u.view_offset.x, u.posy() + u.view_offset.y );
+                              true, u.pos() + u.view_offset, false, false );
                 }
 
                 wPrint.vdrops.clear();
@@ -2481,8 +2481,8 @@ input_context game::get_player_input(std::string &action)
                             for( size_t i = 0; i < elem.getText().length(); ++i ) {
                                 if( u.sees( elem.getPosX() + i, elem.getPosY() ) ) {
                                     m.drawsq( w_terrain, u, elem.getPosX() + i, elem.getPosY(),
-                                              false, true, u.posx() + u.view_offset.x,
-                                              u.posy() + u.view_offset.y );
+                                              false, true, u.pos() + u.view_offset,
+                                              false, false );
                                 } else {
                                     const int iDY =
                                         POSY + ( elem.getPosY() - ( u.posy() + u.view_offset.y ) );
@@ -5040,7 +5040,7 @@ bool game::isBetween(int test, int down, int up)
     }
 }
 
-void game::draw_critter(const Creature &critter, const point &center)
+void game::draw_critter(const Creature &critter, const tripoint &center)
 {
     const int my = POSY + ( critter.posy() - center.y );
     const int mx = POSX + ( critter.posx() - center.x );
@@ -5076,16 +5076,16 @@ void game::draw_ter( const tripoint &center, bool looking )
     ter_view_z = center.z;
 
     m.build_map_cache();
-    m.draw( w_terrain, point( center.x, center.y ) );
+    m.draw( w_terrain, center );
 
     // Draw monsters
     for (size_t i = 0; i < num_zombies(); i++) {
-        draw_critter( critter_tracker.find( i ), point( center.x, center.y ) );
+        draw_critter( critter_tracker.find( i ), center );
     }
 
     // Draw NPCs
     for( const npc* n : active_npc ) {
-        draw_critter( *n, point( center.x, center.y ) );
+        draw_critter( *n, center );
     }
 
     if (u.has_active_bionic("bio_scent_vision")) {
@@ -8161,10 +8161,10 @@ void game::print_object_info(int lx, int ly, WINDOW *w_look, const int column, i
         mvwprintw(w_look, line++, column, _("There is a %s there. Parts:"), veh->name.c_str());
         line = veh->print_part_desc(w_look, line, (mouse_hover) ? getmaxx(w_look) : 48, veh_part);
         if (!mouse_hover) {
-            m.drawsq(w_terrain, u, lx, ly, true, true, lx, ly);
+            m.drawsq(w_terrain, u, lx, ly, true, true, tripoint(lx, ly, 0), false, false);
         }
     } else if (!mouse_hover) {
-        m.drawsq(w_terrain, u, lx, ly, true, true, lx, ly);
+        m.drawsq(w_terrain, u, lx, ly, true, true, tripoint(lx, ly, 0), false, false);
     }
     handle_multi_item_info(lx, ly, w_look, column, line, mouse_hover);
 }
@@ -8562,8 +8562,9 @@ void game::zones_manager()
                                          iY,
                                          false,
                                          false,
-                                         u.posx() + u.view_offset.x,
-                                         u.posy() + u.view_offset.y);
+                                         u.pos() + u.view_offset,
+                                         false,
+                                         false);
                             } else {
                                 if (u.has_effect("boomered")) {
                                     mvwputch(w_terrain, iY - offset_y, iX - offset_x, c_magenta, '#');
@@ -8703,8 +8704,11 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
                                              iY,
                                              false,
                                              false,
-                                             lx,
-                                             ly);
+                                             tripoint(lx,
+                                                      ly,
+                                                      0),
+                                             false,
+                                             false);
                                 } else {
                                     if (u.has_effect("boomered")) {
                                         mvwputch(w_terrain, iY - offset_y - ly + u.posy(), iX - offset_x - lx + u.posx(), c_magenta, '#');
@@ -10231,7 +10235,7 @@ void game::plthrow(int pos)
     }
 
     temp_exit_fullscreen();
-    m.draw(w_terrain, point(u.posx(), u.posy()));
+    m.draw(w_terrain, u.pos() );
 
     int x = u.posx();
     int y = u.posy();
@@ -10553,7 +10557,7 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
     int range = u.weapon.gun_range(&u);
 
     temp_exit_fullscreen();
-    m.draw(w_terrain, point(u.posx(), u.posy()));
+    m.draw(w_terrain, u.pos() );
 
     int x = u.posx();
     int y = u.posy();

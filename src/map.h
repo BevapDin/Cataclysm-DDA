@@ -139,7 +139,7 @@ class map
   * @param center The coordinate of the center of the viewport, this can
   *               be different from the player coordinate.
   */
- void draw(WINDOW* w, const point center);
+ void draw(WINDOW* w, const tripoint &center);
 
  /** Draw the map tile at the given coordinate. Called by `map::draw()`.
   *
@@ -147,8 +147,8 @@ class map
   * @param cx, cy The center of the viewport to be rendered, see `center` in `map::draw()`
   */
  void drawsq(WINDOW* w, player &u, const int x, const int y, const bool invert, const bool show_items,
-             const int view_center_x = -1, const int view_center_y = -1,
-             const bool low_light = false, const bool bright_level = false);
+             const tripoint &center,
+             const bool low_light, const bool bright_level);
 
     /**
      * Add currently loaded submaps (in @ref grid) to the @ref mapbuffer.
