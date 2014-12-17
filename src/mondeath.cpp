@@ -22,7 +22,7 @@ void mdeath::normal(monster *z)
     if (!z->has_flag(MF_VERMIN)) {
         field_id type_blood = z->bloodType();
         if (type_blood != fd_null) {
-            g->m.add_field(z->posx(), z->posy(), type_blood, 1);
+            g->m.add_field(z->pos(), type_blood, 1);
         }
     }
 
@@ -66,7 +66,7 @@ void mdeath::acid(monster *z)
             add_msg(m_warning, _("The %s's body leaks acid."), z->name().c_str());
         }
     }
-    g->m.add_field(z->posx(), z->posy(), fd_acid, 3);
+    g->m.add_field(z->pos(), fd_acid, 3);
 }
 
 void mdeath::boomer(monster *z)
@@ -517,7 +517,7 @@ void mdeath::broken(monster *z) {
     }
     // make "broken_manhack", or "broken_eyebot", ...
     item_id.insert(0, "broken_");
-    g->m.spawn_item(z->posx(), z->posy(), item_id, 1, 0, calendar::turn);
+    g->m.spawn_item(z->pos(), item_id, 1, 0, calendar::turn);
 }
 
 void mdeath::ratking(monster *z)
@@ -562,8 +562,9 @@ void mdeath::gas(monster *z)
     g->sound(z->pos(), 24, explode);
     for (int i = -2; i <= 2; i++) {
         for (int j = -2; j <= 2; j++) {
-            g->m.add_field(z->posx() + i, z->posy() + j, fd_toxic_gas, 3);
-            int mondex = g->mon_at(z->posx() + i, z->posy() + j);
+            const tripoint pos( z->posx() + i, z->posy() + j, z->posz() );
+            g->m.add_field( pos, fd_toxic_gas, 3 );
+            int mondex = g->mon_at( pos );
             if (mondex != -1) {
                 g->zombie(mondex).stumble(false);
                 g->zombie(mondex).moves -= 250;
@@ -578,8 +579,9 @@ void mdeath::smokeburst(monster *z)
     g->sound(z->pos(), 24, explode);
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
-            g->m.add_field(z->posx() + i, z->posy() + j, fd_smoke, 3);
-            int mondex = g->mon_at(z->posx() + i, z->posy() + j);
+            const tripoint pos( z->posx() + i, z->posy() + j, z->posz() );
+            g->m.add_field( pos, fd_smoke, 3 );
+            int mondex = g->mon_at( pos );
             if (mondex != -1) {
                 g->zombie(mondex).stumble(false);
                 g->zombie(mondex).moves -= 250;
@@ -647,5 +649,5 @@ void make_mon_corpse(monster *z, int damageLvl)
         // Pacified corpses have a chance of becoming un-pacified when regenerating.
         corpse.item_vars["zlave"] = one_in(2) ? "zlave" : "mutilated";
     }
-    g->m.add_item_or_charges(z->posx(), z->posy(), corpse);
+    g->m.add_item_or_charges(z->pos(), corpse);
 }

@@ -974,8 +974,8 @@ bool monster::move_effects()
     if (has_effect("lightsnare")) {
         if(x_in_y(type->melee_dice * type->melee_sides, 12)) {
             remove_effect("lightsnare");
-            g->m.spawn_item(xpos(), ypos(), "string_36");
-            g->m.spawn_item(xpos(), ypos(), "snare_trigger");
+            g->m.spawn_item(pos(), "string_36");
+            g->m.spawn_item(pos(), "snare_trigger");
             if (u_see_me) {
                 add_msg(_("The %s escapes the light snare!"), name().c_str());
             }
@@ -986,8 +986,8 @@ bool monster::move_effects()
         if (type->melee_dice * type->melee_sides >= 7) {
             if(x_in_y(type->melee_dice * type->melee_sides, 32)) {
                 remove_effect("heavysnare");
-                g->m.spawn_item(xpos(), ypos(), "rope_6");
-                g->m.spawn_item(xpos(), ypos(), "snare_trigger");
+                g->m.spawn_item(pos(), "rope_6");
+                g->m.spawn_item(pos(), "snare_trigger");
                 if (u_see_me) {
                     add_msg(_("The %s escapes the heavy snare!"), name().c_str());
                 }
@@ -999,7 +999,7 @@ bool monster::move_effects()
         if (type->melee_dice * type->melee_sides >= 18) {
             if(x_in_y(type->melee_dice * type->melee_sides, 200)) {
                 remove_effect("beartrap");
-                g->m.spawn_item(xpos(), ypos(), "beartrap");
+                g->m.spawn_item(pos(), "beartrap");
                 if (u_see_me) {
                     add_msg(_("The %s escapes the bear trap!"), name().c_str());
                 }
@@ -1290,7 +1290,7 @@ void monster::die(Creature* nkiller) {
     }
     if( !is_hallucination() ) {
         for( const auto &it : inv ) {
-            g->m.add_item_or_charges( posx(), posy(), it );
+            g->m.add_item_or_charges( pos(), it );
         }
     }
 
