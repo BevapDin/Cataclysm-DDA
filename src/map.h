@@ -68,7 +68,7 @@ class map
  friend class editmap;
  public:
 // Constructors & Initialization
- map(int mapsize = MAPSIZE);
+ map(int mapsize = MAPSIZE, int z_min = 0, int z_max = 0);
  ~map();
 
 // Visual Output
@@ -741,7 +741,11 @@ protected:
  void castLight( int row, float start, float end, int xx, int xy, int yx, int yy,
                  const int offsetX, const int offsetY, const int offsetDistance );
 
- int my_MAPSIZE;
+private:
+    int my_MAPSIZE;
+    int my_ZMIN;
+    int my_ZMAX;
+protected:
 
  mutable std::vector<item> nulitems; // Returned when &i_at() is asked for an OOB value
  mutable field nulfield; // Returned when &field_at() is asked for an OOB value
@@ -781,22 +785,26 @@ private:
          * (x,y) must be a valid coordinate, check with @ref inbounds.
          */
         submap *get_submap_at( int x, int y ) const;
+        submap *get_submap_at( int x, int y, int z ) const;
         /**
          * Get the submap pointer containing the specified position within the reality bubble.
          * The same as other get_submap_at, (x,y) must be valid (@ref inbounds).
          * Also writes the position within the submap to offset_x, offset_y
          */
         submap *get_submap_at( int x, int y, int& offset_x, int& offset_y ) const;
+        submap *get_submap_at( int x, int y, int z, int& offset_x, int& offset_y ) const;
         /**
          * Get submap pointer in the grid at given grid coordinates. Grid coordinates must
          * be valid: 0 <= x < my_MAPSIZE, same for y.
          */
         submap *get_submap_at_grid( point gp ) const;
+        submap *get_submap_at_grid( tripoint gp ) const;
         /**
          * Get the index of a submap pointer in the grid given by grid coordinates. The grid
          * coordinates must be valid: 0 <= x < my_MAPSIZE, same for y.
          */
         int get_nonant( point gp ) const;
+        int get_nonant( tripoint gp ) const;
         /**
          * Set the submap pointer in @ref grid at the give index. This is the inverse of
          * @ref getsubmap, any existing pointer is overwritten. The index must be valid.
@@ -848,10 +856,11 @@ private:
 
 std::vector<point> closest_points_first(int radius, point p);
 std::vector<point> closest_points_first(int radius,int x,int y);
+
 class tinymap : public map
 {
 public:
- tinymap(int mapsize = 2);
+ tinymap(int mapsize = 2, int z_min = 0, int z_max = 0);
 };
 
 #endif
