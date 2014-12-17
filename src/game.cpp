@@ -6272,16 +6272,20 @@ int game::mon_info(WINDOW *w)
         dangerou = false;
     }
 
-    int viewx = u.posx + u.view_offset_x;
-    int viewy = u.posy + u.view_offset_y;
+    const tripoint view( u.posx + u.view_offset_x, u.posy + u.view_offset_y, u.view_offset_z );
     new_seen_mon.clear();
 
     for( auto &c : u.get_visible_creatures( SEEX * MAPSIZE ) ) {
         const auto m = dynamic_cast<monster*>( c );
         const auto p = dynamic_cast<npc*>( c );
-        const auto dir_to_mon = direction_from( viewx, viewy, c->xpos(), c->ypos() );
-        const int mx = POSX + ( c->xpos() - viewx );
-        const int my = POSY + ( c->ypos() - viewy );
+        // TODO: is this correct? This will show the monster relative to the screen center, not
+        // relative to the PCs position.
+        // Another note: this is 2D function, it only returns 2D relations (e.g. not "below you"),
+        // this is important because the returned value is used as index into unique_mons, which
+        // is of limited size!
+        const auto dir_to_mon = direction_from( view.x, view.y, c->xpos(), c->ypos() );
+        const int mx = POSX + ( c->xpos() - view.x );
+        const int my = POSY + ( c->ypos() - view.y );
         int index;
         if( is_valid_in_w_terrain( mx, my ) ) {
             index = 8;
@@ -6313,7 +6317,7 @@ int game::mon_info(WINDOW *w)
                     }
                     if (!passmon) {
                         newseen++;
-                        new_seen_mon.push_back( mon_at( critter.posx(), critter.posy() ) );
+                        new_seen_mon.push_back( mon_at( critter.pos() ) );
                     }
                 }
             }
@@ -6323,9 +6327,8 @@ int game::mon_info(WINDOW *w)
                 unique_mons[index].push_back(critter.type->id);
             }
         } else if( p != nullptr ) {
-            const auto npcp = p->pos();
             if (p->attitude == NPCATT_KILL)
-                if (rl_dist(u.posx, u.posy, npcp.x, npcp.y) <= iProxyDist) {
+                if (rl_dist(u.pos(), p->pos()) <= iProxyDist) {
                     newseen++;
                 }
 
