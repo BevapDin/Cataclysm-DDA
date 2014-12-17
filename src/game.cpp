@@ -12485,16 +12485,6 @@ void game::vertical_move(int movez, bool force)
         }
     }
 
-    shift_monsters( tripoint( 0, 0, movez ) );
-    shift_npcs( tripoint( 0, 0, movez ) );
-
-    // Clear current scents.
-    for (int x = u.posx() - SCENT_RADIUS; x <= u.posx() + SCENT_RADIUS; x++) {
-        for (int y = u.posy() - SCENT_RADIUS; y <= u.posy() + SCENT_RADIUS; y++) {
-            grscent[x][y] = 0;
-        }
-    }
-
     // Figure out where we know there are up/down connectors
     // Fill in all the tiles we know about (e.g. subway stations)
     static const int REVEAL_RADIUS = 40;
@@ -12526,17 +12516,16 @@ void game::vertical_move(int movez, bool force)
         }
     }
 
-    levz += movez;
-    u.moves -= 100;
-    m.clear_vehicle_cache();
-    m.vehicle_list.clear();
-    m.load( levx, levy, levz, true, cur_om );
     u.setx( stair.x );
     u.sety( stair.y );
+    u.setz( u.posz() + movez );
+    update_map( &u );
+    // player still has z-level 0, player is always on z-level 0, only levz changes (in update_map)
+    u.moves -= 100;
     if (rope_ladder) {
         m.ter_set(u.posx(), u.posy(), t_rope_up);
     }
-    if (m.ter(stair.x, stair.y) == t_manhole_cover) {
+    if (m.ter(stair) == t_manhole_cover) {
         m.spawn_item(stair.x + rng(-1, 1), stair.y + rng(-1, 1), "manhole_cover");
         m.ter_set(stair.x, stair.y, t_manhole);
     }
@@ -12573,9 +12562,11 @@ void game::update_map( player *p )
 {
     int x = p->posx();
     int y = p->posy();
-    update_map( x, y, 0 );
+    int z = p->posz();
+    update_map( x, y, z );
     p->setx( x );
     p->sety( y );
+    p->setz( 0 );
 }
 
 void game::update_map(int &x, int &y, int z)
@@ -12630,6 +12621,7 @@ void game::update_map(int &x, int &y, int z)
     }
 
     // Shift scent
+    if (shiftz == 0) {
     unsigned int newscent[SEEX * MAPSIZE][SEEY * MAPSIZE];
     for (int i = 0; i < SEEX * MAPSIZE; i++) {
         for (int j = 0; j < SEEY * MAPSIZE; j++) {
@@ -12640,6 +12632,10 @@ void game::update_map(int &x, int &y, int z)
         for (int j = 0; j < SEEY * MAPSIZE; j++) {
             scent(i, j) = newscent[i][j];
         }
+    }
+    } else {
+        // Z-level change, only reset the scent
+        memset(grscent, 0x00, sizeof(grscent));
     }
 
     // Make sure map cache is consistent since it may have shifted.
