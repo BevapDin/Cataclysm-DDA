@@ -4,8 +4,6 @@
 #include "lightmap.h"
 #include "options.h"
 
-#define INBOUNDS(x, y) \
-    (x >= 0 && x < SEEX * MAPSIZE && y >= 0 && y < SEEY * MAPSIZE)
 #define LIGHTMAP_CACHE_X SEEX * MAPSIZE
 #define LIGHTMAP_CACHE_Y SEEY * MAPSIZE
 
@@ -81,7 +79,7 @@ void map::generate_lightmap()
                 if (!is_outside(sx, sy)) {
                     // Apply light sources for external/internal divide
                     for(int i = 0; i < 4; ++i) {
-                        if (INBOUNDS(sx + dir_x[i], sy + dir_y[i]) &&
+                        if (inbounds(sx + dir_x[i], sy + dir_y[i]) &&
                             is_outside(sx + dir_x[i], sy + dir_y[i])) {
                             lm[sx][sy] = natural_light;
 
@@ -166,7 +164,7 @@ void map::generate_lightmap()
         }
         int mx = critter.posx();
         int my = critter.posy();
-        if (INBOUNDS(mx, my)) {
+        if (inbounds(mx, my)) {
             if (critter.has_effect("onfire")) {
                 apply_light_source(mx, my, 3, trigdist);
             }
@@ -196,7 +194,7 @@ void map::generate_lightmap()
                 for( auto &light_indice : light_indices ) {
                     int px = vv.x + v->parts[light_indice].precalc_dx[0];
                     int py = vv.y + v->parts[light_indice].precalc_dy[0];
-                    if(INBOUNDS(px, py)) {
+                    if(inbounds(px, py)) {
                         apply_light_arc( px, py, dir + v->parts[light_indice].direction,
                                          veh_luminance, 45 );
                     }
@@ -214,7 +212,7 @@ void map::generate_lightmap()
                       !v->part_info( light_indice ).has_flag( VPFLAG_ODDTURN ) ) ) {
                     int px = vv.x + v->parts[light_indice].precalc_dx[0];
                     int py = vv.y + v->parts[light_indice].precalc_dy[0];
-                    if(INBOUNDS(px, py)) {
+                    if(inbounds(px, py)) {
                         add_light_source( px, py, v->part_info( light_indice ).bonus );
                     }
                 }
@@ -223,7 +221,7 @@ void map::generate_lightmap()
         for( size_t p = 0; p < v->parts.size(); ++p ) {
             int px = vv.x + v->parts[p].precalc_dx[0];
             int py = vv.y + v->parts[p].precalc_dy[0];
-            if( !INBOUNDS( px, py ) ) {
+            if( !inbounds( px, py ) ) {
                 continue;
             }
             if( v->part_flag( p, VPFLAG_CARGO ) && !v->part_flag( p, "COVERED" ) ) {
@@ -265,7 +263,7 @@ void map::add_light_source(int x, int y, float luminance )
 
 lit_level map::light_at(int dx, int dy)
 {
-    if (!INBOUNDS(dx, dy)) {
+    if (!inbounds(dx, dy)) {
         return LL_DARK;    // Out of bounds
     }
 
@@ -286,7 +284,7 @@ lit_level map::light_at(int dx, int dy)
 
 float map::ambient_light_at(int dx, int dy)
 {
-    if (!INBOUNDS(dx, dy)) {
+    if (!inbounds(dx, dy)) {
         return 0.0f;
     }
 
@@ -295,7 +293,7 @@ float map::ambient_light_at(int dx, int dy)
 
 bool map::pl_sees(int fx, int fy, int tx, int ty, int max_range)
 {
-    if (!INBOUNDS(tx, ty)) {
+    if (!inbounds(tx, ty)) {
         return false;
     }
 
@@ -449,7 +447,7 @@ void map::apply_light_source(int x, int y, float luminance, bool trig_brightcalc
     static bool lit[LIGHTMAP_CACHE_X][LIGHTMAP_CACHE_Y];
     memset(lit, 0, sizeof(lit));
 
-    if (INBOUNDS(x, y)) {
+    if (inbounds(x, y)) {
         lit[x][y] = true;
         lm[x][y] += std::max(luminance, static_cast<float>(LL_LOW));
         sm[x][y] += luminance;
@@ -623,7 +621,7 @@ void map::apply_light_ray(bool lit[LIGHTMAP_CACHE_X][LIGHTMAP_CACHE_Y],
             x += dx;
             t += ay;
 
-            if (INBOUNDS(x, y)) {
+            if (inbounds(x, y)) {
                 if (!lit[x][y]) {
                     // Multiple rays will pass through the same squares so we need to record that
                     lit[x][y] = true;
@@ -657,7 +655,7 @@ void map::apply_light_ray(bool lit[LIGHTMAP_CACHE_X][LIGHTMAP_CACHE_Y],
             y += dy;
             t += ax;
 
-            if (INBOUNDS(x, y)) {
+            if (inbounds(x, y)) {
                 if(!lit[x][y]) {
                     // Multiple rays will pass through the same squares so we need to record that
                     lit[x][y] = true;

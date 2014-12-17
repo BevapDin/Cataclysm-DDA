@@ -5,9 +5,6 @@
 #include "monstergenerator.h"
 #include "messages.h"
 
-#define INBOUNDS(x, y) \
- (x >= 0 && x < SEEX * my_MAPSIZE && y >= 0 && y < SEEY * my_MAPSIZE)
-
 field_t fieldlist[num_fields];
 
 void game::init_fields()
@@ -891,7 +888,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
                         for (int i = 0; i < 3; i++) {
                             for (int j = 0; j < 3; j++) {
                                 int fx = x + ((i + starti) % 3) - 1, fy = y + ((j + startj) % 3) - 1;
-                                if (INBOUNDS(fx, fy)) {
+                                if (inbounds(fx, fy)) {
                                     field &nearby_field = get_field(fx, fy);
                                     field_entry *nearwebfld = nearby_field.findField(fd_web);
                                     int spread_chance = 25 * (cur->getFieldDensity() - 1);
