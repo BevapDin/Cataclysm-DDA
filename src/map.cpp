@@ -6207,14 +6207,14 @@ void map::add_corpse(int x, int y) {
     }
 
     add_item_or_charges(x, y, body);
-    put_items_from_loc( "shoes",  x, y, 0);
-    put_items_from_loc( "pants",  x, y, 0);
-    put_items_from_loc( "shirts", x, y, 0);
+    put_items_from_loc( "shoes",  tripoint( x, y, 0 ), 0);
+    put_items_from_loc( "pants",  tripoint( x, y, 0 ), 0);
+    put_items_from_loc( "shirts", tripoint( x, y, 0 ), 0);
     if (one_in(6)) {
-        put_items_from_loc("jackets", x, y, 0);
+        put_items_from_loc("jackets", tripoint( x, y, 0 ), 0);
     }
     if (one_in(15)) {
-        put_items_from_loc("bags", x, y, 0);
+        put_items_from_loc("bags", tripoint( x, y, 0 ), 0);
     }
 }
 

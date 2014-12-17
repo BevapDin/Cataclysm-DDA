@@ -11165,7 +11165,7 @@ int map::place_items(items_location loc, int chance, int x1, int y1,
                        (!ongrass && !terlist[ter(px, py)].has_flag("FLAT")) ) &&
                      tries < 20);
             if (tries < 20) {
-                item_num += put_items_from_loc( loc, px, py, turn );
+                item_num += put_items_from_loc( loc, tripoint( px, py, 0 ), turn );
             }
         }
         if (chance == 100) {
@@ -11175,10 +11175,10 @@ int map::place_items(items_location loc, int chance, int x1, int y1,
     return item_num;
 }
 
-int map::put_items_from_loc(items_location loc, int x, int y, int turn)
+int map::put_items_from_loc( const items_location &loc, const tripoint &p, const int turn )
 {
-    const auto items = item_group::items_from(loc, turn);
-    spawn_items( tripoint( x, y, 0 ), items );
+    const auto items = item_group::items_from( loc, turn );
+    spawn_items( p, items );
     return items.size();
 }
 

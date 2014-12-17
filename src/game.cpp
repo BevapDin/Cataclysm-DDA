@@ -11871,7 +11871,7 @@ void game::complete_butcher(int index)
         if (skill_shift >= 0) {
             //To see if it spawns a random additional CBM
             if (rng(0, 1) == 1) { //The CBM works
-                m.put_items_from_loc( "bionics_common", u.posx, u.posy, age );
+                m.put_items_from_loc( "bionics_common", u.pos(), age );
             } else { //There is a burnt out CBM
                 m.spawn_item(u.posx, u.posy, "burnt_out_bionic", 1, 0, age);
             }
@@ -11893,7 +11893,7 @@ void game::complete_butcher(int index)
         if (skill_shift >= 0) {
             //To see if it spawns a random additional CBM
             if (rng(0, 1) == 1) { //The CBM works
-                m.put_items_from_loc( "bionics_sci", u.posx, u.posy, age );
+                m.put_items_from_loc( "bionics_sci", u.pos(), age );
             } else { //There is a burnt out CBM
                 m.spawn_item(u.posx, u.posy, "burnt_out_bionic", 1, 0, age);
             }
@@ -11914,7 +11914,7 @@ void game::complete_butcher(int index)
         if (skill_shift >= 0) {
             //To see if it spawns a random additional CBM
             if (rng(0, 1) == 1) { //The CBM works
-                m.put_items_from_loc( "bionics_tech", u.posx, u.posy, age );
+                m.put_items_from_loc( "bionics_tech", u.pos(), age );
             } else { //There is a burnt out CBM
                 m.spawn_item(u.posx, u.posy, "burnt_out_bionic", 1, 0, age);
             }
@@ -11935,7 +11935,7 @@ void game::complete_butcher(int index)
         if (skill_shift >= 0) {
             //To see if it spawns a random additional CBM
             if (rng(0, 1) == 1) { //The CBM works
-                m.put_items_from_loc( "bionics_subs", u.posx, u.posy, age );
+                m.put_items_from_loc( "bionics_subs", u.pos(), age );
             } else { //There is a burnt out CBM
                 m.spawn_item(u.posx, u.posy, "burnt_out_bionic", 1, 0, age);
             }
@@ -11943,7 +11943,7 @@ void game::complete_butcher(int index)
         if (skill_shift >= 0) {
             //To see if it spawns a random additional CBM
             if (rng(0, 1) == 1) { //The CBM works
-                m.put_items_from_loc( "bionics_subs", u.posx, u.posy, age );
+                m.put_items_from_loc( "bionics_subs", u.pos(), age );
             } else { //There is a burnt out CBM
                 m.spawn_item(u.posx, u.posy, "burnt_out_bionic", 1, 0, age);
             }
@@ -11965,7 +11965,7 @@ void game::complete_butcher(int index)
         if (skill_shift >= 0) {
             //To see if it spawns a random additional CBM
             if (rng(0, 1) == 1) { //The CBM works
-                m.put_items_from_loc( "bionics_op", u.posx, u.posy, age );
+                m.put_items_from_loc( "bionics_op", u.pos(), age );
             } else { //There is a burnt out CBM
                 m.spawn_item(u.posx, u.posy, "burnt_out_bionic", 1, 0, age);
             }
@@ -12045,7 +12045,7 @@ void game::forage()
 
     if (one_in(12)) {
         add_msg(m_good, _("You found some trash!"));
-        m.put_items_from_loc( "trash_forest", u.posx, u.posy, calendar::turn );
+        m.put_items_from_loc( "trash_forest", u.pos(), calendar::turn );
         found_something = true;
     }
     // Compromise: Survival gives a bigger boost, and Peception is leveled a bit.
@@ -12065,7 +12065,7 @@ void game::forage()
             loc = "forage_winter";
             break;
         }
-        int cnt = m.put_items_from_loc(loc, u.posx, u.posy, calendar::turn); // returns zero if location has no defined items
+        int cnt = m.put_items_from_loc(loc, u.pos(), calendar::turn); // returns zero if location has no defined items
         if (cnt > 0) {
             add_msg(m_good, _("You found something!"));
             m.ter_set(u.activity.placement.x, u.activity.placement.y, t_dirt);

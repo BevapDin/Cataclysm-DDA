@@ -1373,7 +1373,7 @@ void monster::drop_items_on_death()
     if (type->death_drops.empty()) {
         return;
     }
-    g->m.put_items_from_loc( type->death_drops, _posx, _posy, calendar::turn );
+    g->m.put_items_from_loc( type->death_drops, pos(), calendar::turn );
 }
 
 void monster::process_effects()
