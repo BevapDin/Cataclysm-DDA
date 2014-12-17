@@ -4636,71 +4636,104 @@ http://roguebasin.roguelikedevelopment.org/index.php?title=Simple_Line_of_Sight
 bool map::sees(const int Fx, const int Fy, const int Tx, const int Ty,
                const int range, int &tc) const
 {
-    const int dx = Tx - Fx;
-    const int dy = Ty - Fy;
+    return sees(tripoint(Fx, Fy, 0), tripoint(Tx, Ty, 0), range, tc);
+}
+
+bool map::sees(const tripoint &F, const tripoint &T,
+               const int range, int &tc) const
+{
+    const int dx = T.x - F.x;
+    const int dy = T.y - F.y;
+    const int dz = T.z - F.z;
     const int ax = abs(dx) << 1;
     const int ay = abs(dy) << 1;
+    const int az = abs(dz) << 1;
     const int sx = SGN(dx);
     const int sy = SGN(dy);
-    int x = Fx;
-    int y = Fy;
+    const int sz = SGN(dz);
+    tripoint pnt;
     int t = 0;
+    int tz;
     int st;
 
-    if (range >= 0 && range < rl_dist(Fx, Fy, Tx, Ty) ) {
+    if (range >= 0 && range < rl_dist(F, T) ) {
         return false; // Out of range!
     }
     if (ax > ay) { // Mostly-horizontal line
         st = SGN(ay - (ax >> 1));
         // Doing it "backwards" prioritizes straight lines before diagonal.
-        // This will help avoid creating a string of zombies behind you and will
+        // T.his will help avoid creating a string of zombies behind you and will
         // promote "mobbing" behavior (zombies surround you to beat on you)
         for (tc = abs(ay - (ax >> 1)) * 2 + 1; tc >= -1; tc--) {
             t = tc * st;
-            x = Fx;
-            y = Fy;
+            tz = 0;
+            pnt = F;
             do {
                 if (t > 0) {
-                    y += sy;
+                    pnt.y += sy;
                     t -= ax;
                 }
-                x += sx;
+                if (tz > 0) {
+                    bool ok;
+                    if (sz < 0) {
+                        ok = blocks_vertical_view_down(pnt);
+                    } else {
+                        ok = blocks_vertical_view_up(pnt);
+                    }
+                    if (tz == 1 && !ok) {
+                        break;
+                    } else if (ok) {
+                        pnt.z += sz;
+                        tz -= az;
+                    }
+                }
+                pnt.x += sx;
                 t += ay;
-                if (x == Tx && y == Ty) {
+                tz += ay;
+                if (pnt == T) {
                     tc *= st;
                     return true;
                 }
-            } while ((trans(x, y)) && (inbounds(x,y)));
+            } while ((trans(pnt)) && (inbounds(pnt)));
         }
         return false;
     } else { // Same as above, for mostly-vertical lines
         st = SGN(ax - (ay >> 1));
         for (tc = abs(ax - (ay >> 1)) * 2 + 1; tc >= -1; tc--) {
             t = tc * st;
-            x = Fx;
-            y = Fy;
+            tz = 0;
+            pnt = F;
             do {
                 if (t > 0) {
-                    x += sx;
+                    pnt.x += sx;
                     t -= ay;
                 }
-                y += sy;
-                t += ax;
-                if (x == Tx && y == Ty) {
-                    tc *= st;
-     return true;
+                if (tz > 0) {
+                    bool ok;
+                    if (sz < 0) {
+                        ok = blocks_vertical_view_down(pnt);
+                    } else {
+                        ok = blocks_vertical_view_up(pnt);
+                    }
+                    if (tz == 1 && !ok) {
+                        break;
+                    } else if (ok) {
+                        pnt.z += sz;
+                        tz -= az;
+                    }
                 }
-            } while ((trans(x, y)) && (inbounds(x,y)));
+                pnt.y += sy;
+                t += ax;
+                tz += ax;
+                if (pnt == T) {
+                    tc *= st;
+                    return true;
+                }
+            } while ((trans(pnt)) && (inbounds(pnt)));
         }
         return false;
     }
     return false; // Shouldn't ever be reached, but there it is.
-}
-
-bool map::sees(const tripoint &F, const tripoint &T,
-               const int range, int &tc) const
-{
-    return sees(F.x, F.y, T.x, T.y, range, tc);
 }
 
 bool map::clear_path(const int Fx, const int Fy, const int Tx, const int Ty,
