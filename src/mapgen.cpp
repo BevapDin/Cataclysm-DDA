@@ -130,7 +130,7 @@ void map::generate(const int x, const int y, const int z, const int turn)
             if (i <= 1 && j <= 1) {
                 saven( i, j );
             } else {
-                delete get_submap_at_grid( i, j );
+                delete get_submap_at_grid( point( i, j ) );
             }
         }
     }
@@ -11245,7 +11245,7 @@ vehicle *map::add_vehicle(std::string type, const int x, const int y, const int 
     vehicle *placed_vehicle = add_vehicle_to_map(veh, merge_wrecks);
 
     if(placed_vehicle != NULL) {
-        submap *place_on_submap = get_submap_at_grid(placed_vehicle->smx, placed_vehicle->smy);
+        submap *place_on_submap = get_submap_at_grid( point( placed_vehicle->smx, placed_vehicle->smy ) );
         place_on_submap->vehicles.push_back(placed_vehicle);
 
         vehicle_list.insert(placed_vehicle);
@@ -11477,20 +11477,20 @@ void map::rotate(int turns)
     //Next, spawn points
     for (int sx = 0; sx < 2; sx++) {
         for (int sy = 0; sy < 2; sy++) {
-            const auto from = get_submap_at_grid( sx, sy );
+            const auto from = get_submap_at_grid( point( sx, sy ) );
             size_t gridto = 0;
             switch(turns) {
             case 0:
-                gridto = get_nonant( sx, sy );
+                gridto = get_nonant( point( sx, sy ) );
                 break;
             case 1:
-                gridto = get_nonant( 1 - sy, sx );
+                gridto = get_nonant( point( 1 - sy, sx ) );
                 break;
             case 2:
-                gridto = get_nonant( 1 - sx, 1 - sy );
+                gridto = get_nonant( point( 1 - sx, 1 - sy ) );
                 break;
             case 3:
-                gridto = get_nonant( sy, 1 - sx );
+                gridto = get_nonant( point( sy, 1 - sx ) );
                 break;
             }
             for (auto &spawn : from->spawns) {

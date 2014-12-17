@@ -139,7 +139,7 @@ VehicleList map::get_vehicles(const int sx, const int sy, const int ex, const in
 
  for(int cx = chunk_sx; cx <= chunk_ex; ++cx) {
   for(int cy = chunk_sy; cy <= chunk_ey; ++cy) {
-   submap *current_submap = get_submap_at_grid( cx, cy );
+   submap *current_submap = get_submap_at_grid( point( cx, cy ) );
    for( auto &elem : current_submap->vehicles ) {
     wrapped_vehicle w;
     w.v = elem;
@@ -348,7 +348,7 @@ void map::destroy_vehicle (vehicle *veh)
         debugmsg("map::destroy_vehicle was passed NULL");
         return;
     }
-    submap * const current_submap = get_submap_at_grid(veh->smx, veh->smy);
+    submap * const current_submap = get_submap_at_grid( point( veh->smx, veh->smy ) );
     for (size_t i = 0; i < current_submap->vehicles.size(); i++) {
         if (current_submap->vehicles[i] == veh) {
             vehicle_list.erase(veh);
@@ -3098,7 +3098,7 @@ void map::process_items( bool active, T processor, std::string signal )
 {
     for( int gx = 0; gx < my_MAPSIZE; gx++ ) {
         for( int gy = 0; gy < my_MAPSIZE; gy++ ) {
-            submap *const current_submap = get_submap_at_grid(gx, gy);
+            submap *const current_submap = get_submap_at_grid( point( gx, gy ) );
             // Vehicles first in case they get blown up and drop active items on the map.
             if( !current_submap->vehicles.empty() ) {
                 process_items_in_vehicles(current_submap, processor, signal);
@@ -4488,7 +4488,7 @@ void map::load(const int wx, const int wy, const int wz, const bool update_vehic
 
 void map::forget_traps(int gridx, int gridy)
 {
-    const auto smap = get_submap_at_grid( gridx, gridy );
+    const auto smap = get_submap_at_grid( point( gridx, gridy ) );
 
     for (int x = 0; x < SEEX; x++) {
         for (int y = 0; y < SEEY; y++) {
@@ -4551,7 +4551,7 @@ void map::shift(const int sx, const int sy)
                     if (gridx + sx < my_MAPSIZE && gridy + sy < my_MAPSIZE) {
                         copy_grid( point( gridx, gridy ),
                                    point( gridx + sx, gridy + sy ) );
-                        update_vehicle_list(get_submap_at_grid(gridx, gridy));
+                        update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
                         loadn( gridx, gridy, true );
                     }
@@ -4561,7 +4561,7 @@ void map::shift(const int sx, const int sy)
                     if (gridx + sx < my_MAPSIZE && gridy + sy >= 0) {
                         copy_grid( point( gridx, gridy ),
                                    point( gridx + sx, gridy + sy ) );
-                        update_vehicle_list(get_submap_at_grid(gridx, gridy));
+                        update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
                         loadn( gridx, gridy, true );
                     }
@@ -4575,7 +4575,7 @@ void map::shift(const int sx, const int sy)
                     if (gridx + sx >= 0 && gridy + sy < my_MAPSIZE) {
                         copy_grid( point( gridx, gridy ),
                                    point( gridx + sx, gridy + sy ) );
-                        update_vehicle_list(get_submap_at_grid(gridx, gridy));
+                        update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
                         loadn( gridx, gridy, true );
                     }
@@ -4585,7 +4585,7 @@ void map::shift(const int sx, const int sy)
                     if (gridx + sx >= 0 && gridy + sy >= 0) {
                         copy_grid( point( gridx, gridy ),
                                    point( gridx + sx, gridy + sy ) );
-                        update_vehicle_list(get_submap_at_grid(gridx, gridy));
+                        update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
                         loadn( gridx, gridy, true );
                     }
@@ -4608,7 +4608,7 @@ void map::saven( const int gridx, const int gridy )
 {
     dbg( D_INFO ) << "map::saven(worldx[" << abs_sub.x << "], worldy[" << abs_sub.y << "], gridx[" << abs_sub.z <<
                   "], gridy[" << gridy << "])";
-    submap *submap_to_save = get_submap_at_grid( gridx, gridy );
+    submap *submap_to_save = get_submap_at_grid( point( gridx, gridy ) ) ;
     if( submap_to_save == NULL || submap_to_save->ter[0][0] == t_null ) {
         dbg( D_ERROR ) << "map::saven grid NULL!";
         return;
@@ -4633,7 +4633,7 @@ void map::loadn( const int gridx, const int gridy, const bool update_vehicles ) 
 
  const int absx = abs_sub.x + gridx,
            absy = abs_sub.y + gridy;
-    const size_t gridn = get_nonant( gridx, gridy );
+    const size_t gridn = get_nonant( point( gridx, gridy ) );
 
  dbg(D_INFO) << "map::loadn absx: " << absx << "  absy: " << absy
             << "  gridn: " << gridn;
@@ -4798,7 +4798,7 @@ void map::restock_fruits( const point pnt, int time_since_last_actualize )
 
 void map::actualize( const int gridx, const int gridy )
 {
-    submap *const tmpsub = get_submap_at_grid( gridx, gridy );
+    submap *const tmpsub = get_submap_at_grid( point( gridx, gridy ) );
     const auto time_since_last_actualize = calendar::turn - tmpsub->turn_last_touched;
     const bool do_funnels = ( abs_sub.z >= 0 );
 
@@ -4840,8 +4840,8 @@ void map::actualize( const int gridx, const int gridy )
 
 void map::copy_grid( const point to, const point from)
 {
-    const auto smap = get_submap_at_grid( from.x, from.y );
-    setsubmap( get_nonant( to.x, to.y ), smap );
+    const auto smap = get_submap_at_grid( from );
+    setsubmap( get_nonant( to ), smap );
  for( std::vector<vehicle*>::iterator it = smap->vehicles.begin(),
        end = smap->vehicles.end(); it != end; ++it ) {
   (*it)->smx = to.x;
@@ -4938,7 +4938,7 @@ void map::spawn_monsters(bool ignore_sight)
                 spawn_monsters( gx, gy, *mgp, ignore_sight );
             }
 
-            submap * const current_submap = get_submap_at_grid(gx, gy);
+            submap * const current_submap = get_submap_at_grid( point( gx, gy ) );
             for (auto &i : current_submap->spawns) {
                 for (int j = 0; j < i.count; j++) {
                     int tries = 0;
@@ -5341,7 +5341,7 @@ submap *map::get_submap_at( const int x, const int y ) const
         debugmsg( "Tried to access invalid map position (%d,%d)", x, y );
         return nullptr;
     }
-    return get_submap_at_grid( x / SEEX, y / SEEY );
+    return get_submap_at_grid( point( x / SEEX, y / SEEY ) );
 }
 
 submap *map::get_submap_at( const int x, const int y, int &offset_x, int &offset_y ) const
@@ -5351,18 +5351,18 @@ submap *map::get_submap_at( const int x, const int y, int &offset_x, int &offset
     return get_submap_at( x, y );
 }
 
-submap *map::get_submap_at_grid( const int gridx, const int gridy ) const
+submap *map::get_submap_at_grid( const point gp ) const
 {
-    return getsubmap( get_nonant( gridx, gridy ) );
+    return getsubmap( get_nonant( gp ) );
 }
 
-size_t map::get_nonant( const int gridx, const int gridy ) const
+size_t map::get_nonant( const point gp ) const
 {
-    if( gridx < 0 || gridx >= my_MAPSIZE || gridy < 0 || gridy >= my_MAPSIZE ) {
-        debugmsg( "Tried to access invalid map position at grid (%d,%d)", gridx, gridy );
+    if( gp.x < 0 || gp.x >= my_MAPSIZE || gp.y < 0 || gp.y >= my_MAPSIZE ) {
+        debugmsg( "Tried to access invalid map position at grid (%d,%d)", gp.x, gp.y );
         return 0;
     }
-    return gridx + gridy * my_MAPSIZE;
+    return gp.x + gp.y * my_MAPSIZE;
 }
 
 tinymap::tinymap(int mapsize)
