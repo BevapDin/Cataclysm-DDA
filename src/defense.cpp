@@ -291,7 +291,7 @@ void defense_game::init_map()
     g->m.load(g->levx, g->levy, g->levz, true, g->cur_om);
 
     g->update_map(g->u.posx, g->u.posy, 0);
-    monster generator(GetMType("mon_generator"), g->u.posx + 1, g->u.posy + 1);
+    monster generator(GetMType("mon_generator"), tripoint(g->u.posx + 1, g->u.posy + 1, 0));
     // Find a valid spot to spawn the generator
     std::vector<point> valid;
     for (int x = g->u.posx - 1; x <= g->u.posx + 1; x++) {
@@ -1391,24 +1391,24 @@ std::vector<std::string> defense_game::pick_monster_wave()
 
 void defense_game::spawn_wave_monster(mtype *type)
 {
-    point pnt;
+    tripoint pnt;
     int tries = 0;
     while( true ) {
         if( location == DEFLOC_HOSPITAL || location == DEFLOC_MALL ) {
             // Always spawn to the north!
-            pnt = point( rng( SEEX * ( MAPSIZE / 2 ), SEEX * ( 1 + MAPSIZE / 2 ) ), SEEY );
+            pnt = tripoint( rng( SEEX * ( MAPSIZE / 2 ), SEEX * ( 1 + MAPSIZE / 2 ) ), SEEY, 0 );
         } else if( one_in( 2 ) ) {
-            pnt = point( rng( SEEX * ( MAPSIZE / 2 ), SEEX * ( 1 + MAPSIZE / 2 ) ), rng( 1, SEEY ) );
+            pnt = tripoint( rng( SEEX * ( MAPSIZE / 2 ), SEEX * ( 1 + MAPSIZE / 2 ) ), rng( 1, SEEY ), 0 );
             if( one_in( 2 ) ) {
-                pnt = point( pnt.x, SEEY * MAPSIZE - 1 - pnt.y );
+                pnt = tripoint( pnt.x, SEEY * MAPSIZE - 1 - pnt.y, pnt.z );
             }
         } else {
-            pnt = point( rng( 1, SEEX ), rng( SEEY * ( MAPSIZE / 2 ), SEEY * ( 1 + MAPSIZE / 2 ) ) );
+            pnt = tripoint( rng( 1, SEEX ), rng( SEEY * ( MAPSIZE / 2 ), SEEY * ( 1 + MAPSIZE / 2 ) ), 0 );
             if( one_in( 2 ) ) {
-                pnt = point( SEEX * MAPSIZE - 1 - pnt.x, pnt.y );
+                pnt = tripoint( SEEX * MAPSIZE - 1 - pnt.x, pnt.y, pnt.z );
             }
         }
-        if( g->is_empty( pnt.x, pnt.y ) ) {
+        if( g->is_empty( pnt ) ) {
             break;
         }
         if( tries++ == 1000 ) {
@@ -1416,7 +1416,7 @@ void defense_game::spawn_wave_monster(mtype *type)
             return;
         }
     }
-    monster tmp( type, pnt.x, pnt.y );
+    monster tmp( type, pnt );
     tmp.wandx = g->u.posx;
     tmp.wandy = g->u.posy;
     tmp.wandf = 150;

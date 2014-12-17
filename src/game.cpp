@@ -7424,7 +7424,7 @@ void game::resonance_cascade(int x, int y)
             case 14:
             case 15:
                 spawn_details = MonsterGroupManager::GetResultFromGroup("GROUP_NETHER");
-                invader = monster(GetMType(spawn_details.name), i, j);
+                invader = monster(GetMType(spawn_details.name), tripoint(i, j, 0));
                 add_zombie(invader);
                 break;
             case 16:
@@ -7736,7 +7736,7 @@ bool game::revive_corpse(int x, int y, item *it)
         return false;
     }
     int burnt_penalty = it->burnt;
-    monster critter(it->corpse, x, y);
+    monster critter(it->corpse, tripoint(x, y, 0));
     critter.set_speed_base( int(critter.get_speed_base() * 0.8) - (burnt_penalty / 2) );
     critter.hp = int(critter.hp * 0.7) - burnt_penalty;
     if (it->damage > 0) {

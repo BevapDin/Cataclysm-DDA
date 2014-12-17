@@ -6331,19 +6331,19 @@ int iuse::vibe(player *p, item *it, bool, point)
 
 int iuse::vortex(player *p, item *it, bool, point)
 {
-    std::vector<point> spawn;
+    std::vector<tripoint> spawn;
     for (int i = -3; i <= 3; i++) {
         if (g->is_empty(p->posx - 3, p->posy + i)) {
-            spawn.push_back(point(p->posx - 3, p->posy + i));
+            spawn.push_back(tripoint(p->posx - 3, p->posy + i, 0));
         }
         if (g->is_empty(p->posx + 3, p->posy + i)) {
-            spawn.push_back(point(p->posx + 3, p->posy + i));
+            spawn.push_back(tripoint(p->posx + 3, p->posy + i, 0));
         }
         if (g->is_empty(p->posx + i, p->posy - 3)) {
-            spawn.push_back(point(p->posx + i, p->posy - 3));
+            spawn.push_back(tripoint(p->posx + i, p->posy - 3, 0));
         }
         if (g->is_empty(p->posx + i, p->posy + 3)) {
-            spawn.push_back(point(p->posx + i, p->posy + 3));
+            spawn.push_back(tripoint(p->posx + i, p->posy + 3, 0));
         }
     }
     if (spawn.empty()) {
@@ -6356,7 +6356,7 @@ int iuse::vortex(player *p, item *it, bool, point)
     int index = rng(0, spawn.size() - 1);
     p->moves -= 100;
     it->make("spiral_stone");
-    monster mvortex(GetMType("mon_vortex"), spawn[index].x, spawn[index].y);
+    monster mvortex(GetMType("mon_vortex"), spawn[index]);
     mvortex.friendly = -1;
     g->add_zombie(mvortex);
     return it->type->charges_to_use();
@@ -7486,7 +7486,7 @@ int iuse::artifact(player *p, item *it, bool, point)
                 break;
 
             case AEA_GROWTH: {
-                monster tmptriffid(GetMType("mon_null"), p->posx, p->posy);
+                monster tmptriffid(GetMType("mon_null"), p->pos());
                 mattack tmpattack;
                 tmpattack.growplants(&tmptriffid, -1);
             }
