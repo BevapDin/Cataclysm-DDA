@@ -360,11 +360,6 @@ bool monster::digging() const
     return has_flag(MF_DIGS) || (has_flag(MF_CAN_DIG) && g->m.has_flag("DIGGABLE", pos()));
 }
 
-int monster::vision_range(const int x, const int y) const
-{
-    return vision_range(tripoint(x, y, _posz));
-}
-
 int monster::vision_range(const tripoint &p) const
 {
     int range = g->light_level();

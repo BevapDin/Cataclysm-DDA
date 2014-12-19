@@ -1232,11 +1232,11 @@ void mattack::leap(monster *z, int index)
 
     for (int x = z->posx() - 3; x <= z->posx() + 3; x++) {
         for (int y = z->posy() - 3; y <= z->posy() + 3; y++) {
-            const int vision_range = z->vision_range( x, y );
             if (x == z->posx() && y == z->posy()) {
                 continue;
             }
             const tripoint pnt(x, y, z->posz());
+            const int vision_range = z->vision_range( pnt );
             if (!g->m.sees(z->pos(), pnt, vision_range, linet)) {
                 continue;
             }

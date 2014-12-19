@@ -83,8 +83,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         bool can_submerge() const; // MF_AQUATIC or MF_SWIMS or MF_NO_BREATH, and not MF_ELECTRONIC
         bool can_drown() const;    // MF_AQUATIC or MF_SWIMS or MF_NO_BREATHE or MF_FLIES
         bool digging() const;      // MF_DIGS or MF_CAN_DIG and diggable terrain
-        // Returns monster vision range, x and y are the target spot
-        int vision_range(const int x, const int y) const;
+        // Returns monster vision range, p is the target spot
         int vision_range(const tripoint &p) const;
         bool sees_player(int &tc, player *p = NULL) const;   // Sees player/npc
         bool made_of(std::string m) const; // Returns true if it's made of m
