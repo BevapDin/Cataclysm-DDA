@@ -124,7 +124,6 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
          * This is used in pathfinding and ONLY checks the terrain. It ignores players
          * and monsters, which might only block this tile temporarily.
          */
-        bool can_move_to(int x, int y) const;
         bool can_move_to(const tripoint &p) const;
 
         void set_dest(int x, int y, int &t); // Go in a straight line to (x, y)
