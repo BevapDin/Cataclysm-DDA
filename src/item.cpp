@@ -1280,51 +1280,6 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug) c
                 dump->push_back(iteminfo("DESCRIPTION", contents[0].type->description));
             }
         }
-
-        // list recipes you could use it in
-        itype_id tid;
-        if (contents.empty()) { // use this item
-            tid = type->id;
-        } else { // use the contained item
-            tid = contents[0].type->id;
-        }
-        recipe_list &rec = recipes_by_component[tid];
-        if (!rec.empty()) {
-            temp1.str("");
-            crafting_inventory_t inv(&g->u);
-            // only want known recipes
-            recipe_list known_recipes;
-            for (recipe *r : rec) {
-                if (g->u.knows_recipe(r)) {
-                    known_recipes.push_back(r);
-                }
-            }
-            if (known_recipes.size() > 24) {
-                dump->push_back(iteminfo("DESCRIPTION", _("You know dozens of things you could craft with it.")));
-            } else if (known_recipes.size() > 12) {
-                dump->push_back(iteminfo("DESCRIPTION", _("You could use it to craft various other things.")));
-            } else {
-                bool found_recipe = false;
-                for (recipe* r : known_recipes) {
-                    if (found_recipe) {
-                        temp1 << _(", ");
-                    }
-                    found_recipe = true;
-                    // darken recipes you can't currently craft
-                    bool can_make = r->can_make_with_inventory(inv);
-                    if (!can_make) {
-                        temp1 << "<color_dkgray>";
-                    }
-                    temp1 << item::nname(r->result);
-                    if (!can_make) {
-                        temp1 << "</color>";
-                    }
-                }
-                if (found_recipe) {
-                    dump->push_back(iteminfo("DESCRIPTION", string_format(_("You could use it to craft: %s"), temp1.str().c_str())));
-                }
-            }
-        }
     }
 
     for(itype::FunctionalityMap::const_iterator a = type->functionalityMap.begin(); a != type->functionalityMap.end(); ++a) {
