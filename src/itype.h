@@ -243,6 +243,7 @@ public:
     unsigned int weight; // Weight in grams. Assumes positive weight. No helium, guys!
     bigness_property_aspect bigness_aspect;
     std::map<std::string, int> qualities; //Tool quality indicators
+    std::map<std::string, std::string> properties;
 
  /**
   * A functionality is a specific usage that can be
