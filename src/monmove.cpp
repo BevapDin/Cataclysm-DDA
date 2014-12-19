@@ -21,8 +21,6 @@ bool monster::wander()
  return (plans.empty());
 }
 
-int monster::move_to(int x, int y, bool force) { return move_to(tripoint(x, y, _posz), force); }
-
 bool monster::can_attack_across_z(const tripoint &p) const
 {
     if (p.z == _posz) {

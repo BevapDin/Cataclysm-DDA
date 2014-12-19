@@ -8664,10 +8664,13 @@ bool pet_menu(monster *z)
                 z->remove_effect("tied");
             }
 
-            int x = z->posx(), y = z->posy();
-            z->move_to(g->u.posx, g->u.posy, true);
-            g->u.posx = x;
-            g->u.posy = y;
+            const auto mon_pos = z->pos();
+            z->move_to(g->u.pos(), true);
+            g->u.posx = mon_pos.x;
+            g->u.posy = mon_pos.y;
+            if( mon_pos.z != 0 ) {
+                g->vertical_move( mon_pos.z, true );
+            }
 
             if (t) {
                 z->add_effect("tied", 1, num_bp, true);
@@ -8696,7 +8699,7 @@ bool pet_menu(monster *z)
 
         int deltax = z->posx() - g->u.posx, deltay = z->posy() - g->u.posy;
 
-        z->move_to(z->posx() + deltax, z->posy() + deltay);
+        z->move_to( tripoint( z->posx() + deltax, z->posy() + deltay, z->posz() ) );
 
         return true;
     }
@@ -12740,6 +12743,8 @@ bool game::plmove(int dx, int dy)
         x = u.posx + dx;
         y = u.posy + dy;
     }
+    // This function is only for strict horizontal movement!
+    tripoint target( x, y, 0 );
 
     dbg(D_PEDANTIC_INFO) << "game:plmove: From (" << u.posx << "," << u.posy << ") to (" << x << "," <<
                          y << ")";
@@ -12749,7 +12754,7 @@ bool game::plmove(int dx, int dy)
     }
 
     // Check if our movement is actually an attack on a monster
-    int mondex = mon_at(x, y);
+    int mondex = mon_at( target );
     // Are we displacing a monster?  If it's vermin, always.
     bool displace = false;
     if (mondex != -1) {
@@ -12785,7 +12790,7 @@ bool game::plmove(int dx, int dy)
         }
     }
     // If not a monster, maybe there's an NPC there
-    int npcdex = npc_at(x, y);
+    int npcdex = npc_at( target );
     if (npcdex != -1) {
         bool force_attack = false;
         if (!active_npc[npcdex]->is_enemy()) {
@@ -12818,7 +12823,7 @@ bool game::plmove(int dx, int dy)
     // GRAB: pre-action checking.
     int vpart0 = -1, vpart1 = -1, dpart = -1;
     vehicle *veh0 = m.veh_at(u.pos(), vpart0);
-    vehicle *veh1 = m.veh_at(x, y, vpart1);
+    vehicle *veh1 = m.veh_at( target, vpart1);
     bool pushing_furniture = false;  // moving -into- furniture tile; skip check for move_cost > 0
     bool pulling_furniture = false;  // moving -away- from furniture tile; check for move_cost > 0
     bool shifting_furniture = false; // moving furniture and staying still; skip check for move_cost > 0
@@ -12873,7 +12878,7 @@ bool game::plmove(int dx, int dy)
         }
     }
 
-    if (m.has_flag_ter("NOFLOOR", x, y)) {
+    if (m.has_flag_ter("NOFLOOR", target )) {
         if (!query_yn(_("Step across the ridge?"))) {
             return false;
         }
@@ -12884,10 +12889,10 @@ bool game::plmove(int dx, int dy)
         return false;
     }
 
-    bool toSwimmable = m.has_flag("SWIMMABLE", x, y);
-    bool toDeepWater = m.has_flag(TFLAG_DEEP_WATER, x, y);
-    bool fromSwimmable = m.has_flag("SWIMMABLE", u.posx, u.posy);
-    bool fromDeepWater = m.has_flag(TFLAG_DEEP_WATER, u.posx, u.posy);
+    bool toSwimmable = m.has_flag("SWIMMABLE", target );
+    bool toDeepWater = m.has_flag(TFLAG_DEEP_WATER, target );
+    bool fromSwimmable = m.has_flag("SWIMMABLE", u.pos() );
+    bool fromDeepWater = m.has_flag(TFLAG_DEEP_WATER, u.pos() );
     bool fromBoat = veh0 && veh0->all_parts_with_feature(VPFLAG_FLOATS).size() > 0;
     bool toBoat = veh1 && veh1->all_parts_with_feature(VPFLAG_FLOATS).size() > 0;
 
@@ -12901,12 +12906,12 @@ bool game::plmove(int dx, int dy)
             }
             plswim(x, y);
         }
-    } else if (m.move_cost(x, y) > 0 || pushing_furniture || shifting_furniture || pushing_vehicle) {
+    } else if (m.move_cost(target) > 0 || pushing_furniture || shifting_furniture || pushing_vehicle) {
         // move_cost() of 0 = impassible (e.g. a wall)
         u.set_underwater(false);
 
         //Ask for EACH bad field, maybe not? Maybe say "theres X bad shit in there don't do it."
-        const field &tmpfld = m.field_at(x, y);
+        const field &tmpfld = m.field_at(target);
         for( auto &fld : tmpfld ) {
             const field_entry &cur = fld.second;
             field_id curType = cur.getFieldType();
@@ -12936,11 +12941,10 @@ bool game::plmove(int dx, int dy)
             }
         }
 
-        const tripoint tp(x, y, 0);
-        const trap_id tid = m.tr_at(tp);
+        const trap_id tid = m.tr_at( target );
         if (tid != tr_null) {
             const struct trap &t = *traplist[tid];
-            if ((t.can_see(u, tp)) && !t.is_benign() &&
+            if ((t.can_see(u, target )) && !t.is_benign() &&
                 !query_yn(_("Really step onto that %s?"), t.name.c_str())) {
                 return false;
             }
@@ -13181,19 +13185,19 @@ bool game::plmove(int dx, int dy)
 
         // Calculate cost of moving
         bool diag = trigdist && u.posx != x && u.posy != y;
-        u.moves -= int(u.run_cost(m.combined_movecost(u.posx, u.posy, x, y, grabbed_vehicle,
+        u.moves -= int(u.run_cost(m.combined_movecost(u.pos(), target, grabbed_vehicle,
                                                       movecost_modifier), diag) * drag_multiplier);
 
         // Adjust recoil down
         u.recoil -= int(u.str_cur / 2) + u.skillLevel("gun");
         u.recoil = std::max( MIN_RECOIL * 2, u.recoil );
         u.recoil = int(u.recoil / 2);
-        if ((!u.has_trait("PARKOUR") && m.move_cost(x, y) > 2) ||
-            ( u.has_trait("PARKOUR") && m.move_cost(x, y) > 4    )) {
-            if (veh1 && m.move_cost(x, y) != 2) {
+        if ((!u.has_trait("PARKOUR") && m.move_cost(target) > 2) ||
+            ( u.has_trait("PARKOUR") && m.move_cost(target) > 4    )) {
+            if (veh1 && m.move_cost(target) != 2) {
                 add_msg(m_warning, _("Moving past this %s is slow!"), veh1->part_info(vpart1).name.c_str());
             } else {
-                add_msg(m_warning, _("Moving past this %s is slow!"), m.name(x, y).c_str());
+                add_msg(m_warning, _("Moving past this %s is slow!"), m.name(target).c_str());
             }
         }
         if (veh1) {
@@ -13204,35 +13208,35 @@ bool game::plmove(int dx, int dy)
             }
         }
 
-        std::string signage = m.get_signage(x, y);
+        std::string signage = m.get_signage(target);
         if (signage.size()) {
             add_msg(m_info, _("The sign says: %s"), signage.c_str());
         }
-        if( m.has_graffiti_at( tripoint( x, y, 0 ) ) ) {
-            add_msg(_("Written here: %s"), utf8_truncate(m.graffiti_at( tripoint( x, y, 0 ) ), 40).c_str());
+        if( m.has_graffiti_at( target ) ) {
+            add_msg(_("Written here: %s"), utf8_truncate(m.graffiti_at( target ), 40).c_str());
         }
-        if (m.has_flag("ROUGH", x, y) && (!u.in_vehicle)) {
-            bool ter_or_furn = m.has_flag_ter( "ROUGH", x, y );
+        if (m.has_flag("ROUGH", target) && (!u.in_vehicle)) {
+            bool ter_or_furn = m.has_flag_ter( "ROUGH", target );
             if (one_in(5) && u.get_armor_bash(bp_foot_l) < rng(2, 5)) {
                 add_msg(m_bad, _("You hurt your left foot on the %s!"),
-                        ter_or_furn ? m.tername(x, y).c_str() : m.furnname(x, y).c_str() );
+                        ter_or_furn ? m.tername(target).c_str() : m.furnname(target).c_str() );
                 u.deal_damage( nullptr, bp_foot_l, damage_instance( DT_CUT, 1 ) );
             }
             if (one_in(5) && u.get_armor_bash(bp_foot_r) < rng(2, 5)) {
                 add_msg(m_bad, _("You hurt your right foot on the %s!"),
-                        ter_or_furn ? m.tername(x, y).c_str() : m.furnname(x, y).c_str() );
+                        ter_or_furn ? m.tername(target).c_str() : m.furnname(target).c_str() );
                 u.deal_damage( nullptr, bp_foot_l, damage_instance( DT_CUT, 1 ) );
             }
         }
-        if( m.has_flag("SHARP", x, y) && !one_in(3) && !one_in(40 - int(u.dex_cur / 2)) &&
+        if( m.has_flag("SHARP", target) && !one_in(3) && !one_in(40 - int(u.dex_cur / 2)) &&
             (!u.in_vehicle) && (!u.has_trait("PARKOUR") || one_in(4)) ) {
-            bool ter_or_furn = m.has_flag_ter( "SHARP", x, y );
+            bool ter_or_furn = m.has_flag_ter( "SHARP", target );
             body_part bp = random_body_part();
             if(u.deal_damage( nullptr, bp, damage_instance( DT_CUT, rng( 1, 4 ) ) ).total_damage() > 0) {
                 //~ 1$s - bodypart name in accusative, 2$s is terrain name.
                 add_msg(m_bad, _("You cut your %1$s on the %2$s!"),
                         body_part_name_accusative(bp).c_str(),
-                        ter_or_furn ? m.tername(x, y).c_str() : m.furnname(x, y).c_str() );
+                        ter_or_furn ? m.tername(target).c_str() : m.furnname(target).c_str() );
                 if ((u.has_trait("INFRESIST")) && (one_in(1024))) {
                 u.add_effect("tetanus", 1, num_bp, true);
                 } else if ((!u.has_trait("INFIMMUNE") || !u.has_trait("INFRESIST")) && (one_in(256))) {
@@ -13240,7 +13244,7 @@ bool game::plmove(int dx, int dy)
                  }
             }
         }
-        if (m.has_flag("UNSTABLE", x, y)) {
+        if (m.has_flag("UNSTABLE", target)) {
             u.add_effect("bouldering", 1, num_bp, true);
         } else if (u.has_effect("bouldering")) {
             u.remove_effect("bouldering");
@@ -13251,7 +13255,7 @@ bool game::plmove(int dx, int dy)
             // so this shouldn't cause too much hardship
             // Presumed that if it's swimmable, they're
             // swimming and won't stick
-            if ((!(m.has_flag("SWIMMABLE", x, y)) && (one_in(80 + u.dex_cur + u.int_cur)))) {
+            if ((!(m.has_flag("SWIMMABLE", target)) && (one_in(80 + u.dex_cur + u.int_cur)))) {
                 add_msg(_("Your tentacles stick to the ground, but you pull them free."));
                 u.fatigue++;
             }
@@ -13259,20 +13263,20 @@ bool game::plmove(int dx, int dy)
         if (!u.has_artifact_with(AEP_STEALTH) && !u.has_trait("LEG_TENTACLES") &&
             !u.has_trait("DEBUG_SILENT")) {
             if (u.has_trait("LIGHTSTEP") || u.is_wearing("rm13_armor_on")) {
-                sound(x, y, 2, "");    // Sound of footsteps may awaken nearby monsters
+                sound(target, 2, "");    // Sound of footsteps may awaken nearby monsters
             } else if (u.has_trait("CLUMSY")) {
-                sound(x, y, 10, "");
+                sound(target, 10, "");
             } else if (u.has_bionic("bio_ankles")) {
-                sound(x, y, 12, "");
+                sound(target, 12, "");
             } else {
-                sound(x, y, 6, "");
+                sound(target, 6, "");
             }
         }
         if (one_in(20) && u.has_artifact_with(AEP_MOVEMENT_NOISE)) {
-            sound(u.posx, u.posy, 40, _("You emit a rattling sound."));
+            sound(u.pos(), 40, _("You emit a rattling sound."));
         }
         // If we moved out of the nonant, we need update our map data
-        if (m.has_flag("SWIMMABLE", x, y) && u.has_effect("onfire")) {
+        if (m.has_flag("SWIMMABLE", target) && u.has_effect("onfire")) {
             add_msg(_("The water puts out the flames!"));
             u.remove_effect("onfire");
         }
@@ -13280,15 +13284,16 @@ bool game::plmove(int dx, int dy)
         if (displace) { // We displaced a friendly monster!
             // Immobile monsters can't be displaced.
             monster &critter = zombie(mondex);
-            critter.move_to(u.posx, u.posy,
-                            true); // Force the movement even though the player is there right now.
+            critter.move_to(u.pos(), true); // Force the movement even though the player is there right now.
             add_msg(_("You displace the %s."), critter.name().c_str());
         } // displace == true
 
 
-        if (x < SEEX * int(MAPSIZE / 2) || y < SEEY * int(MAPSIZE / 2) ||
-            x >= SEEX * (1 + int(MAPSIZE / 2)) || y >= SEEY * (1 + int(MAPSIZE / 2))) {
-            update_map(x, y, 0);
+        if (target.x < SEEX * int(MAPSIZE / 2) || target.y < SEEY * int(MAPSIZE / 2) ||
+            target.x >= SEEX * (1 + int(MAPSIZE / 2)) || target.y >= SEEY * (1 + int(MAPSIZE / 2))) {
+            update_map(target.x, target.y, 0);
+            x = target.x;
+            y = target.y;
         }
 
         // If the player is in a vehicle, unboard them from the current part
@@ -13297,8 +13302,8 @@ bool game::plmove(int dx, int dy)
         }
 
         // Move the player
-        u.posx = x;
-        u.posy = y;
+        u.posx = target.x;
+        u.posy = target.y;
         if (dx != 0 || dy != 0) {
             u.lifetime_stats()->squares_walked++;
         }
@@ -13318,11 +13323,10 @@ bool game::plmove(int dx, int dy)
         // Try to detect.
         u.search_surroundings();
         // We stepped on a trap!
-        const tripoint tp2(x, y, 0);
-        if (m.tr_at(tp2) != tr_null) {
-            trap *tr = traplist[m.tr_at(tp2)];
-            if (!u.avoid_trap(tr, tp2)) {
-                tr->trigger(&u, tp2);
+        if (m.tr_at(target) != tr_null) {
+            trap *tr = traplist[m.tr_at(target)];
+            if (!u.avoid_trap(tr, target)) {
+                tr->trigger(&u, target);
             }
         }
 
@@ -13330,19 +13334,19 @@ bool game::plmove(int dx, int dy)
         u.ma_onmove_effects();
 
         // Drench the player if swimmable
-        if (m.has_flag("SWIMMABLE", x, y)) {
+        if (m.has_flag("SWIMMABLE", target)) {
             u.drench(40, mfb(bp_foot_l) | mfb(bp_foot_r) | mfb(bp_leg_l) | mfb(bp_leg_r));
         }
 
         // List items here
-        if (!m.has_flag("SEALED", x, y)) {
-            if (u.has_effect("blind") && !m.i_at(x, y).empty()) {
+        if (!m.has_flag("SEALED", target)) {
+            if (u.has_effect("blind") && !m.i_at(target).empty()) {
                 add_msg(_("There's something here, but you can't see what it is."));
-            } else if (!m.i_at(x, y).empty()) {
+            } else if (!m.i_at(target).empty()) {
                 std::vector<std::string> names;
                 std::vector<size_t> counts;
                 std::vector<item> items;
-                for( auto &tmpitem : m.i_at( x, y ) ) {
+                for( auto &tmpitem : m.i_at( target ) ) {
 
                     std::string next_tname = tmpitem.tname();
                     std::string next_dname = tmpitem.display_name();
@@ -13472,15 +13476,15 @@ bool game::plmove(int dx, int dy)
     } else { // Invalid move
         if (u.has_effect("blind") || u.has_effect("stunned")) {
             // Only lose movement if we're blind
-            add_msg(_("You bump into a %s!"), m.name(x, y).c_str());
+            add_msg(_("You bump into a %s!"), m.name(target).c_str());
             u.moves -= 100;
-        } else if (m.furn(x, y) != f_safe_c && m.open_door(x, y, !m.is_outside(u.posx, u.posy))) {
+        } else if (m.furn(target) != f_safe_c && m.open_door(target.x, target.y, !m.is_outside(u.pos()))) {
             u.moves -= 100;
-        } else if (m.ter(x, y) == t_door_locked || m.ter(x, y) == t_door_locked_peep || m.ter(x, y) == t_door_locked_alarm ||
-                   m.ter(x, y) == t_door_locked_interior) {
+        } else if (m.ter(target) == t_door_locked || m.ter(target) == t_door_locked_peep || m.ter(target) == t_door_locked_alarm ||
+                   m.ter(target) == t_door_locked_interior) {
             u.moves -= 100;
             add_msg(_("That door is locked!"));
-        } else if (m.ter(x, y) == t_door_bar_locked) {
+        } else if (m.ter(target) == t_door_bar_locked) {
             u.moves -= 80;
             add_msg(_("You rattle the bars but the door is locked!"));
         }
