@@ -1298,7 +1298,7 @@ void monster::die(Creature* nkiller) {
         for( int z = 1; z >= -1; --z ) {
             for( int x = -MAPSIZE / 2; x <= MAPSIZE / 2; x++ ) {
                 for( int y = -MAPSIZE / 2; y <= MAPSIZE / 2; y++ ) {
-                    std::vector<mongroup*> groups = overmap_buffer.groups_at( abssub.x + x, abssub.y + y, g->levz + z );
+                    std::vector<mongroup*> groups = overmap_buffer.groups_at( abssub.x + x, abssub.y + y, g->levz + z + _posz );
                     for( auto &mgp : groups ) {
                         if( MonsterGroupManager::IsMonsterInGroup( mgp->type, type->id ) ) {
                             mgp->dying = true;
