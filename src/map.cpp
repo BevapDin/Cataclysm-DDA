@@ -5586,7 +5586,7 @@ void map::spawn_monsters(bool ignore_sight)
                 }
             }
             current_submap->spawns.clear();
-            overmap_buffer.spawn_monster( abs_sub.x + gp.x, abs_sub.y + gp.y, abs_sub.z + gp.z );
+            overmap_buffer.spawn_monster( tripoint( abs_sub.x + gp.x, abs_sub.y + gp.y, abs_sub.z + gp.z ) );
         }
         }
     }
@@ -5967,8 +5967,17 @@ point map::getabs(const int x, const int y) const
     return point( x + abs_sub.x * SEEX, y + abs_sub.y * SEEY );
 }
 
+tripoint map::getabs( const tripoint p ) const
+{
+    return tripoint( p.x + abs_sub.x * SEEX, p.y + abs_sub.y * SEEY, p.z + abs_sub.z );
+}
+
 point map::getlocal(const int x, const int y) const {
     return point( x - abs_sub.x * SEEX, y - abs_sub.y * SEEY );
+}
+
+tripoint map::getlocal( const tripoint p ) const {
+    return tripoint( p.x - abs_sub.x * SEEX, p.y - abs_sub.y * SEEY, p.z - abs_sub.z );
 }
 
 void map::set_abs_sub(const int x, const int y, const int z)
