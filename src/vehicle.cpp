@@ -77,7 +77,6 @@ enum vehicle_controls {
  control_cancel,
  x_control_engines,
  control_lights,
- control_turrets,
  convert_vehicle,
  toggle_reactor,
  toggle_engine,
@@ -791,7 +790,6 @@ void vehicle::use_controls()
 
     std::vector<int> engines;
     std::vector<int> lights;
-    std::vector<int> turrets;
 
     // Let go without turning the engine off.
     if (g->u.controlling_vehicle &&
@@ -829,7 +827,6 @@ void vehicle::use_controls()
         }
         if (part_flag(p, "TURRET")) {
             has_turrets = true;
-            turrets.push_back(p);
         }
         if (part_flag(p, "HORN")) {
             has_horn = true;
@@ -955,11 +952,6 @@ void vehicle::use_controls()
     if (lights.size() > 1) {
         options_choice.push_back(control_lights);
         options_message.push_back(uimenu_entry(_("Control lights"), 'L'));
-    }
-
-    if (turrets.size() > 1) {
-        options_choice.push_back(control_turrets);
-        options_message.push_back(uimenu_entry(_("Control turrets"), 'T'));
     }
 
     // Turn the reactor on/off
@@ -1155,9 +1147,6 @@ void vehicle::use_controls()
     case control_lights:
         while(toogle_active_menu(lights, "activate/deactive lights")) { ; }
         refresh();
-        break;
-    case control_turrets:
-        while(toogle_active_menu(turrets, "activate/deactive turrets")) { ; }
         break;
     case convert_vehicle:
     {
@@ -5054,7 +5043,7 @@ void vehicle::cycle_turret_mode()
 
 bool vehicle::fire_turret (int p, bool /* burst */ )
 {
-    if (!part_flag (p, "TURRET") || parts[p].inactive())
+    if (!part_flag (p, "TURRET"))
         return false;
     it_gun *gun = dynamic_cast<it_gun*>( item::find_type( part_info( p ).item ) );
     if (!gun) {
