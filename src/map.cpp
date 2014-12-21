@@ -5295,8 +5295,8 @@ void map::loadn( const tripoint gp, const bool update_vehicles ) {
         tinymap tmp_map;
         // Each overmap square is two nonants; to prevent overlap, generate only at
         //  squares divisible by 2.
-        const int newmapx = abs.x - ( abs( abs.x ) % 2 );
-        const int newmapy = abs.y - ( abs( abs.y ) % 2 );
+        const int newmapx = abs.x - ( std::abs( abs.x ) % 2 );
+        const int newmapy = abs.y - ( std::abs( abs.y ) % 2 );
         tmp_map.generate( newmapx, newmapy, abs.z, calendar::turn );
         // This is the same call to MAPBUFFER as above!
         tmpsub = MAPBUFFER.lookup_submap( abs.x, abs.y, abs.z );
@@ -5604,7 +5604,6 @@ void map::clear_traps()
     for( auto & smap : grid ) {
         for (int x = 0; x < SEEX; x++) {
             for (int y = 0; y < SEEY; y++) {
-                for (int gz = my_ZMIN; gz <= my_ZMAX; gz++) {
                 smap->set_trap(x, y, tr_null);
             }
         }
