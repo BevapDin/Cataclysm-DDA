@@ -256,24 +256,23 @@ item item::in_its_container()
         ret.invlet = invlet;
         return ret;
     }
-    if (is_food() && (dynamic_cast<it_comest*>(type))->default_container != "null") {
-        it_comest *food = dynamic_cast<it_comest*>(type);
-        item ret(food->default_container, bday);
-
-        if (made_of(LIQUID)) {
-            LIQUID_FILL_ERROR lferr;
-            charges = ret.get_remaining_capacity_for_liquid( *this, lferr );
-        }
-        ret.contents.push_back(*this);
-        ret.invlet = invlet;
-        return ret;
-    } else if (is_ammo() && (dynamic_cast<it_ammo*>(type))->default_container != "null") {
-        it_ammo *ammo = dynamic_cast<it_ammo*>(type);
-        item ret(ammo->default_container, bday);
-
-        if (made_of(LIQUID)) {
-            LIQUID_FILL_ERROR lferr;
-            charges = ret.get_remaining_capacity_for_liquid( *this, lferr );
+    itype_id container_id;
+    long liquid_factor = 1;
+    if( is_food() ) {
+        const auto comest = dynamic_cast<it_comest*>( type );
+        container_id = comest->default_container;
+        liquid_factor = comest->charges;
+    } else if( is_ammo() ) {
+        const auto ammo = dynamic_cast<it_ammo*>( type );
+        container_id = ammo->default_container;
+        liquid_factor = ammo->count;
+    }
+    if( !container_id.empty() && container_id != "null" ) {
+        item ret( container_id, bday );
+        if( made_of( LIQUID ) && ret.is_container() ) {
+            // Note: we can't use any of the normal normal container functions as they check the
+            // container being suitable (seals, watertight etc.)
+            charges = ret.type->container->contains * liquid_factor;
         }
         ret.contents.push_back(*this);
         ret.invlet = invlet;
@@ -1966,7 +1965,8 @@ int item::damage_cut() const
         for( auto &elem : contents ) {
             tmp_tp = elem.typeId();
             if ( tmp_tp == "bayonet" || tmp_tp == "pistol_bayonet" ||
-                 tmp_tp == "sword_bayonet" ) {
+                 tmp_tp == "sword_bayonet" || tmp_tp == "diamond_bayonet" ||
+                 tmp_tp == "diamond_pistol_bayonet" || tmp_tp == "diamond_sword_bayonet" ) {
                 return elem.type->melee_cut;
             }
         }
