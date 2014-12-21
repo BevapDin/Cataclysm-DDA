@@ -262,6 +262,8 @@ tripoint editmap::edit()
     target = g->u.pos() + g->u.view_offset;
     input_context ctxt("EDITMAP");
     ctxt.register_directions();
+    ctxt.register_action("LEVEL_UP");
+    ctxt.register_action("LEVEL_DOWN");
     ctxt.register_action("LEFT_WIDE");
     ctxt.register_action("RIGHT_WIDE");
     ctxt.register_action("UP_WIDE");
@@ -505,7 +507,7 @@ void editmap::update_view(bool update_info)
         int off = 1;
         draw_border(w_info);
 
-        mvwprintz(w_info, 0, 2 , c_ltgray, "< %d,%d >--", target.x, target.y);
+        mvwprintz(w_info, 0, 2 , c_ltgray, "< %d,%d,%d >--", target.x, target.y, target.z);
         for (int i = 1; i < infoHeight - 2; i++) { // clear window
             mvwprintz(w_info, i, 1, c_white, padding.c_str());
         }
@@ -525,8 +527,11 @@ void editmap::update_view(bool update_info)
                      );
             off++; // 3
         }
-        mvwprintw(w_info, off, 2, _("dist: %d u_see: %d light: %d v_in: %d scent: %d"), rl_dist( g->u.pos(), target ), g->u.sees(target), g->m.light_at(target), veh_in, g->scent(target) );
+        mvwprintw(w_info, off, 2, _("dist: %d u_see: %d light: %d"), rl_dist( g->u.pos(), target ), g->u.sees(target), g->m.light_at(target) );
+        int dummy;
         off++; // 3-4
+        mvwprintw(w_info, off, 2, _("v_in: %d scent: %d, sees u: %d"), veh_in, g->scent(target), g->m.sees( target, g->u.pos(), -1, dummy ) );
+        off++; // 4-5
 
         std::string extras = "";
         if(veh_in >= 0) {
@@ -1189,7 +1194,7 @@ int editmap::edit_itm()
     ilmenu.w_width = width;
     ilmenu.w_height = TERMY - infoHeight - 1;
     ilmenu.return_invalid = true;
-    auto items = g->m.i_at( target.x , target.y );
+    auto items = g->m.i_at( target );
     int i = 0;
     for( auto &an_item : items ) {
         ilmenu.addentry( i++, true, 0, "%s%s", an_item.tname().c_str(),
@@ -1412,6 +1417,18 @@ bool editmap::move_target( const std::string &action, int moveorigin )
             origin.y += my;
         }
         return true;
+    } else if( action == "LEVEL_UP" ) {
+        target.z++;
+        if( move_origin ) {
+            origin.z++;
+        }
+        return true;
+    } else if( action == "LEVEL_DOWN" ) {
+        target.z--;
+        if( move_origin ) {
+            origin.z--;
+        }
+        return true;
     }
     return false;
 }
@@ -1436,7 +1453,8 @@ int editmap::select_shape(shapetype shape, int mode)
     tripoint orig = target;
     tripoint origor = origin;
     input_context ctxt("EDITMAP_SHAPE");
-    ctxt.register_directions();
+    ctxt.register_action("LEVEL_UP");
+    ctxt.register_action("LEVEL_DOWN");
     ctxt.register_action("LEFT_WIDE");
     ctxt.register_action("RIGHT_WIDE");
     ctxt.register_action("UP_WIDE");
