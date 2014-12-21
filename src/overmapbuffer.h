@@ -238,9 +238,9 @@ public:
 
     /**
      * Spawn monsters from the overmap onto the main map (game::m).
-     * (x,y,z) is an absolute *submap* coordinate.
+     * @param submap_loc is an absolute *submap* coordinate.
      */
-    void spawn_monster(const int x, const int y, const int z);
+    void spawn_monster( tripoint submap_loc );
     /**
      * Despawn the monster back onto the overmap. The monsters position
      * (monster::pos()) is interpreted as relative to the main map.

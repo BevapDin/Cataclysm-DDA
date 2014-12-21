@@ -864,11 +864,13 @@ void add_corpse(int x, int y);
      */
     point getabs(const int x, const int y) const;
     point getabs(const point p) const { return getabs(p.x, p.y); }
+    tripoint getabs( tripoint p ) const;
     /**
      * Inverse of @ref getabs
      */
     point getlocal(const int x, const int y ) const;
     point getlocal(const point p) const { return getlocal(p.x, p.y); }
+    tripoint getlocal( tripoint p ) const;
  bool inboundsabs(const int x, const int y);
  bool inbounds(const int x, const int y) const;
  bool inbounds(const tripoint &p) const;
