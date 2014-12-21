@@ -1285,7 +1285,7 @@ int map::move_cost(const tripoint &p, const vehicle *ignored_vehicle) const
     if ( cost == 0 ) {
         return 0;
     }
-    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.y][p.z - my_ZMIN]) {
+    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.z - my_ZMIN]) {
         const auto it = veh_cached_parts.find( p );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
@@ -1365,7 +1365,7 @@ bool map::has_flag(const std::string &flag, const tripoint &p) const
         return false;
     }
     // veh_at const no bueno
-    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.z - my_ZMIN && flag_str_REDUCE_SCENT == flag) {
+    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.z - my_ZMIN] && flag_str_REDUCE_SCENT == flag) {
         const auto it = veh_cached_parts.find( p );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
@@ -1446,7 +1446,7 @@ bool map::has_flag(const ter_bitflags flag, const tripoint &p) const
         return false;
     }
     // veh_at const no bueno
-    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.z - my_ZMIN && flag == TFLAG_REDUCE_SCENT) {
+    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.z - my_ZMIN] && flag == TFLAG_REDUCE_SCENT) {
         const auto it = veh_cached_parts.find( p );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
@@ -1516,7 +1516,7 @@ bool map::is_bashable(const tripoint &p) const
         return false;
     }
 
-    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.z - my_ZMIN) {
+    if (veh_in_active_range && veh_exists_at[p.x][p.y][p.z - my_ZMIN]) {
         const auto it = veh_cached_parts.find( p );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
