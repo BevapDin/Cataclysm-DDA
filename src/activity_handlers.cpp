@@ -55,7 +55,7 @@ void activity_handlers::burrow_finish(player_activity *act, player *p)
         p->fatigue += 10;
         p->thirst += 5;
     }
-    g->m.destroy(dirx, diry, true);
+    g->m.destroy( tripoint( dirx, diry, p->posz() ) , true);
 }
 
 bool butcher_cbm_item( const std::string &item, const tripoint &pos, const int age )
@@ -681,7 +681,7 @@ void activity_handlers::pickaxe_finish(player_activity *act, player *p)
         p->fatigue += 10;
         p->thirst += 5;
     }
-    g->m.destroy(dirx, diry, true);
+    g->m.destroy( tripoint( dirx, diry, p->posz() ) , true);
     it->charges = std::max(long(0), it->charges - it->type->charges_to_use());
     if( it->charges == 0 && it->destroyed_at_zero_charges() ) {
         p->i_rem(act->position);

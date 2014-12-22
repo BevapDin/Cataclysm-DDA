@@ -552,7 +552,6 @@ void add_corpse(int x, int y);
  // spawn items from the list, see map_bash_item_drop
  void spawn_item_list(const std::vector<map_bash_item_drop> &items, const tripoint &p);
  /** Keeps bashing a square until it can't be bashed anymore */
- void destroy(const int x, const int y, const bool silent = false);
  void destroy(const tripoint &p, const bool silent = false);
  /** Keeps bashing a square until there is no more furniture */
  void destroy_furn(const int x, const int y, const bool silent = false);

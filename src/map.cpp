@@ -2357,11 +2357,6 @@ void map::spawn_item_list(const std::vector<map_bash_item_drop> &items, const tr
     }
 }
 
-void map::destroy(const int x, const int y, const bool silent)
-{
-    destroy(tripoint(x, y, 0), silent);
-}
-
 void map::destroy(const tripoint &p, const bool silent)
 {
     // Break if it takes more than 25 destructions to remove to prevent infinite loops

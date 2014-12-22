@@ -4743,22 +4743,23 @@ int iuse::jackhammer(player *p, item *it, bool, tripoint)
         return 0;
     }
 
-    if (dirx == p->posx() && diry == p->posy()) {
+    const tripoint dir(dirx, diry, p->posz());
+    if (dir == p->pos()) {
         p->add_msg_if_player(_("My god! Let's talk it over OK?"));
         p->add_msg_if_player(_("Don't do anything rash.."));
         return 0;
     }
-    if (g->m.is_bashable(dirx, diry) && g->m.has_flag("SUPPORTS_ROOF", dirx, diry) &&
-        g->m.ter(dirx, diry) != t_tree) {
-        g->m.destroy(dirx, diry, true);
+    if (g->m.is_bashable(dir) && g->m.has_flag("SUPPORTS_ROOF", dir) &&
+        g->m.ter(dir) != t_tree) {
+        g->m.destroy(dir, true);
         p->moves -= 500;
         //~ the sound of a jackhammer
-        sounds::sound(dirx, diry, 45, _("TATATATATATATAT!"));
-    } else if (g->m.move_cost(dirx, diry) == 2 && g->levz != -1 &&
-               g->m.ter(dirx, diry) != t_dirt && g->m.ter(dirx, diry) != t_grass) {
-        g->m.destroy(dirx, diry, true);
+        sounds::sound(dir, 45, _("TATATATATATATAT!"));
+    } else if (g->m.move_cost(dir) == 2 && g->levz != -1 &&
+               g->m.ter(dir) != t_dirt && g->m.ter(dir) != t_grass) {
+        g->m.destroy(dir, true);
         p->moves -= 500;
-        sounds::sound(dirx, diry, 45, _("TATATATATATATAT!"));
+        sounds::sound(dir, 45, _("TATATATATATATAT!"));
     } else {
         p->add_msg_if_player(m_info, _("You can't drill there."));
         return 0;
@@ -4793,18 +4794,19 @@ int iuse::jacqueshammer(player *p, item *it, bool, tripoint)
     }
     dirx += p->posx();
     diry += p->posy();
-    if (g->m.is_bashable(dirx, diry) && g->m.has_flag("SUPPORTS_ROOF", dirx, diry) &&
-        g->m.ter(dirx, diry) != t_tree) {
-        g->m.destroy(dirx, diry, true);
+    const tripoint dir(dirx, diry, p->posz());
+    if (g->m.is_bashable(dir) && g->m.has_flag("SUPPORTS_ROOF", dir) &&
+        g->m.ter(dir) != t_tree) {
+        g->m.destroy(dir, true);
         // This looked like 50 minutes, but seems more like 50 seconds.  Needs checked.
         p->moves -= 500;
         //~ the sound of a "jacqueshammer"
-        sounds::sound(dirx, diry, 45, _("OHOHOHOHOHOHOHOHO!"));
-    } else if (g->m.move_cost(dirx, diry) == 2 && g->levz != -1 &&
-               g->m.ter(dirx, diry) != t_dirt && g->m.ter(dirx, diry) != t_grass) {
-        g->m.destroy(dirx, diry, true);
+        sounds::sound(dir, 45, _("OHOHOHOHOHOHOHOHO!"));
+    } else if (g->m.move_cost(dir) == 2 && g->levz != -1 &&
+               g->m.ter(dir) != t_dirt && g->m.ter(dir) != t_grass) {
+        g->m.destroy(dir, true);
         p->moves -= 500;
-        sounds::sound(dirx, diry, 45, _("OHOHOHOHOHOHOHOHO!"));
+        sounds::sound(dir, 45, _("OHOHOHOHOHOHOHOHO!"));
     } else {
         //~ (jacqueshammer) "You can't drill there."
         p->add_msg_if_player(m_info, _("Vous ne pouvez pas percer la-bas.."));
@@ -4819,33 +4821,33 @@ int iuse::pickaxe(player *p, item *it, bool, tripoint)
         p->add_msg_if_player(m_info, _("You can't do that while underwater."));
         return 0;
     }
-    int dirx, diry;
-    if (!choose_adjacent(_("Mine where?"), dirx, diry)) {
+    tripoint dir = p->pos();
+    if (!choose_adjacent(_("Mine where?"), dir.x, dir.y)) {
         return 0;
     }
 
-    if (dirx == p->posx() && diry == p->posy()) {
+    if (dir == p->pos()) {
         p->add_msg_if_player(_("Mining the depths of your experience,"));
         p->add_msg_if_player(_("you realize that it's best not to dig"));
         p->add_msg_if_player(_("yourself into a hole. You stop digging."));
         return 0;
     }
     int turns;
-    if (g->m.is_bashable(dirx, diry) && g->m.has_flag("SUPPORTS_ROOF", dirx, diry) &&
-        g->m.ter(dirx, diry) != t_tree) {
+    if (g->m.is_bashable(dir) && g->m.has_flag("SUPPORTS_ROOF", dir) &&
+        g->m.ter(dir) != t_tree) {
         // Takes about 100 minutes (not quite two hours) base time.  Construction skill can speed this: 3 min off per level.
         turns = (100000 - 3000 * p->skillLevel("carpentry"));
-    } else if (g->m.move_cost(dirx, diry) == 2 && g->levz == 0 &&
-               g->m.ter(dirx, diry) != t_dirt && g->m.ter(dirx, diry) != t_grass) {
+    } else if (g->m.move_cost(dir) == 2 && g->levz == 0 &&
+               g->m.ter(dir) != t_dirt && g->m.ter(dir) != t_grass) {
         turns = 20000;
     } else {
         p->add_msg_if_player(m_info, _("You can't mine there."));
         return 0;
     }
     p->assign_activity(ACT_PICKAXE, turns, -1, p->get_item_position(it));
-    p->activity.placement = point(dirx, diry);
+    p->activity.placement = point( dir.x, dir.y );
     p->add_msg_if_player(_("You attack the %s with your %s."),
-                         g->m.tername(dirx, diry).c_str(), it->tname().c_str());
+                         g->m.tername(dir).c_str(), it->tname().c_str());
     return 0; // handled when the activity finishes
 }
 
