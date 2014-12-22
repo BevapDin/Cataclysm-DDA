@@ -1998,22 +1998,24 @@ void map::create_spores(const int x, const int y, Creature* source)
     }
 }
 
-int map::collapse_check(const int x, const int y)
+int map::collapse_check(const tripoint &p)
 {
     int num_supports = 0;
-    for (int i = x - 1; i <= x + 1; i++) {
-        for (int j = y - 1; j <= y + 1; j++) {
-            if (i == x && j == y) {
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            if (i == 0 && j == 0) {
                 continue;
             }
-            if (has_flag("COLLAPSES", x, y)) {
-                if (has_flag("COLLAPSES", i, j)) {
+            // TODO: proper z-level lookup
+            const tripoint pnt( p.x + i, p.y + j, p.z );
+            if (has_flag("COLLAPSES", p)) {
+                if (has_flag("COLLAPSES", pnt)) {
                     num_supports++;
-                } else if (has_flag("SUPPORTS_ROOF", i, j)) {
+                } else if (has_flag("SUPPORTS_ROOF", pnt)) {
                     num_supports += 2;
                 }
-            } else if (has_flag("SUPPORTS_ROOF", x, y)) {
-                if (has_flag("SUPPORTS_ROOF", i, j) && !has_flag("COLLAPSES", i, j)) {
+            } else if (has_flag("SUPPORTS_ROOF", p)) {
+                if (has_flag("SUPPORTS_ROOF", pnt) && !has_flag("COLLAPSES", pnt)) {
                     num_supports += 3;
                 }
             }
@@ -2032,7 +2034,7 @@ void map::collapse_at(const int x, const int y)
             if ((i == x && j == y)) {
                 continue;
             }
-            if (has_flag("COLLAPSES", i, j) && one_in(collapse_check(i, j))) {
+            if (has_flag("COLLAPSES", i, j) && one_in(collapse_check(tripoint(i, j, 0)))) {
                 destroy (i, j, false);
             // We only check for rubble spread if it doesn't already collapse to prevent double crushing
             } else if (has_flag("FLAT", i, j) && one_in(8)) {
@@ -2197,7 +2199,7 @@ std::pair<bool, bool> map::bash(const tripoint &p, const int str, bool silent, b
                             if (p2 == p || !has_flag("COLLAPSES", p2)) {
                                 continue;
                             }
-                            if (one_in(collapse_check(p2.x, p2.y))) {
+                            if (one_in(collapse_check(p2))) {
                                 collapse_at(p2.x, p2.y);
                             }
                         }
