@@ -4467,9 +4467,12 @@ int map::coord_to_angle ( const int x, const int y, const int tgtx, const int tg
 
 void map::save()
 {
-    for( int gridx = 0; gridx < my_MAPSIZE; gridx++ ) {
-        for( int gridy = 0; gridy < my_MAPSIZE; gridy++ ) {
-            saven( gridx, gridy );
+    tripoint gp;
+    for( gp.x = 0; gp.x < my_MAPSIZE; gp.x++ ) {
+        for( gp.y = 0; gp.y < my_MAPSIZE; gp.y++ ) {
+            for( gp.z = my_ZMIN; gp.z <= my_ZMAX; gp.z++ ) {
+                saven( gp );
+            }
         }
     }
 }
@@ -4478,9 +4481,12 @@ void map::load_abs(const int wx, const int wy, const int wz, const bool update_v
 {
     traplocs.clear();
     set_abs_sub( wx, wy, wz );
-    for (int gridx = 0; gridx < my_MAPSIZE; gridx++) {
-        for (int gridy = 0; gridy < my_MAPSIZE; gridy++) {
-            loadn( gridx, gridy, update_vehicle );
+    tripoint gp;
+    for( gp.x = 0; gp.x < my_MAPSIZE; gp.x++ ) {
+        for( gp.y = 0; gp.y < my_MAPSIZE; gp.y++ ) {
+            for( gp.z = my_ZMIN; gp.z <= my_ZMAX; gp.z++ ) {
+                loadn( gp, update_vehicle );
+            }
         }
     }
 }
@@ -4559,7 +4565,7 @@ void map::shift(const int sx, const int sy)
                                    point( gridx + sx, gridy + sy ) );
                         update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
-                        loadn( gridx, gridy, true );
+                        loadn( tripoint( gridx, gridy, my_ZMIN ), true );
                     }
                 }
             } else { // sy < 0; work through it backwards
@@ -4569,7 +4575,7 @@ void map::shift(const int sx, const int sy)
                                    point( gridx + sx, gridy + sy ) );
                         update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
-                        loadn( gridx, gridy, true );
+                        loadn( tripoint( gridx, gridy, my_ZMIN ), true );
                     }
                 }
             }
@@ -4583,7 +4589,7 @@ void map::shift(const int sx, const int sy)
                                    point( gridx + sx, gridy + sy ) );
                         update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
-                        loadn( gridx, gridy, true );
+                        loadn( tripoint( gridx, gridy, my_ZMIN ), true );
                     }
                 }
             } else { // sy < 0; work through it backwards
@@ -4593,7 +4599,7 @@ void map::shift(const int sx, const int sy)
                                    point( gridx + sx, gridy + sy ) );
                         update_vehicle_list(get_submap_at_grid( point( gridx, gridy ) ));
                     } else {
-                        loadn( gridx, gridy, true );
+                        loadn( tripoint( gridx, gridy, my_ZMIN ), true );
                     }
                 }
             }
@@ -4608,22 +4614,20 @@ void map::shift(const int sx, const int sy)
 // 0,0 1,0 2,0
 // 0,1 1,1 2,1
 // 0,2 1,2 2,2
-// (worldx,worldy,worldz) denotes the absolute coordinate of the submap
-// in grid[0].
-void map::saven( const int gridx, const int gridy )
+void map::saven( const tripoint gp )
 {
-    dbg( D_INFO ) << "map::saven(worldx[" << abs_sub.x << "], worldy[" << abs_sub.y << "], gridx[" << abs_sub.z <<
-                  "], gridy[" << gridy << "])";
-    submap *submap_to_save = get_submap_at_grid( point( gridx, gridy ) ) ;
+    dbg( D_INFO ) << "map::saven(abs_sub[" << abs_sub << "], " << "gp[" << gp << "])";
+    submap *submap_to_save = get_submap_at_grid( gp ) ;
     if( submap_to_save == NULL || submap_to_save->ter[0][0] == t_null ) {
         dbg( D_ERROR ) << "map::saven grid NULL!";
         return;
     }
-    const int abs_x = abs_sub.x + gridx;
-    const int abs_y = abs_sub.y + gridy;
-    dbg( D_INFO ) << "map::saven abs_x: " << abs_x << "  abs_y: " << abs_y;
+    const int abs_x = abs_sub.x + gp.x;
+    const int abs_y = abs_sub.y + gp.y;
+    const int abs_z = abs_sub.z + gp.z;
+    dbg( D_INFO ) << "map::saven abs_x: " << abs_x << "  abs_y: " << abs_y << "  abs_z: " << abs_z;
     submap_to_save->turn_last_touched = int(calendar::turn);
-    MAPBUFFER.add_submap( abs_x, abs_y, abs_sub.z, submap_to_save );
+    MAPBUFFER.add_submap( abs_x, abs_y, abs_z, submap_to_save );
 }
 
 // worldx & worldy specify where in the world this is;
@@ -4631,34 +4635,27 @@ void map::saven( const int gridx, const int gridy )
 // 0,0  1,0  2,0
 // 0,1  1,1  2,1
 // 0,2  1,2  2,2 etc
-// (worldx,worldy,worldz) denotes the absolute coordinate of the submap
-// in grid[0].
-void map::loadn( const int gridx, const int gridy, const bool update_vehicles ) {
+void map::loadn( const tripoint gp, const bool update_vehicles )
+{
+    const tripoint abs = abs_sub + gp;
+    const int gridn = get_nonant( gp );
+    dbg(D_INFO) << "map::loadn abs: " << abs << "  gridn: " << gridn;
 
- dbg(D_INFO) << "map::loadn(game[" << g << "], worldx["<<abs_sub.x<<"], worldy["<<abs_sub.y<<"], gridx["<<gridx<<"], gridy["<<gridy<<"])";
-
- const int absx = abs_sub.x + gridx,
-           absy = abs_sub.y + gridy;
-    const size_t gridn = get_nonant( point( gridx, gridy ) );
-
- dbg(D_INFO) << "map::loadn absx: " << absx << "  absy: " << absy
-            << "  gridn: " << gridn;
-
-    submap *tmpsub = MAPBUFFER.lookup_submap(absx, absy, abs_sub.z);
+    submap *tmpsub = MAPBUFFER.lookup_submap(abs.x, abs.y, abs.z);
     if( tmpsub == nullptr ) {
         // It doesn't exist; we must generate it!
         dbg( D_INFO | D_WARNING ) << "map::loadn: Missing mapbuffer data. Regenerating.";
         tinymap tmp_map;
         // Each overmap square is two nonants; to prevent overlap, generate only at
         //  squares divisible by 2.
-        const int newmapx = absx - ( abs( absx ) % 2 );
-        const int newmapy = absy - ( abs( absy ) % 2 );
-        tmp_map.generate( newmapx, newmapy, abs_sub.z, calendar::turn );
+        const int newmapx = abs.x - ( std::abs( abs.x ) % 2 );
+        const int newmapy = abs.y - ( std::abs( abs.y ) % 2 );
+        tmp_map.generate( newmapx, newmapy, abs.z, calendar::turn );
         // This is the same call to MAPBUFFER as above!
-        tmpsub = MAPBUFFER.lookup_submap( absx, absy, abs_sub.z );
+        tmpsub = MAPBUFFER.lookup_submap( abs.x, abs.y, abs.z );
         if( tmpsub == nullptr ) {
-            dbg( D_ERROR ) << "failed to generate a submap at " << absx << absy << abs_sub.z;
-            debugmsg( "failed to generate a submap at %d,%d,%d", absx, absy, abs_sub.z );
+            dbg( D_ERROR ) << "failed to generate a submap at " << abs;
+            debugmsg( "failed to generate a submap at %d,%d,%d", abs.x, abs.y, abs.z );
             return;
         }
     }
@@ -4675,14 +4672,14 @@ void map::loadn( const int gridx, const int gridy, const bool update_vehicles ) 
    // Only add if not tracking already.
    if( vehicle_list.find( *it ) == vehicle_list.end() ) {
     // gridx/y not correct. TODO: Fix
-    (*it)->smx = gridx;
-    (*it)->smy = gridy;
+    (*it)->smx = gp.x;
+    (*it)->smy = gp.y;
     vehicle_list.insert(*it);
     update_vehicle_cache(*it);
    }
   }
 
-    actualize( gridx, gridy );
+    actualize( gp.x, gp.y );
 }
 
 bool map::has_rotten_away( item &itm, const point &pnt ) const
