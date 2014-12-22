@@ -8649,14 +8649,16 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
     const int offset_x = (u.posx() + u.view_offset.x) - getmaxx(w_terrain) / 2;
     const int offset_y = (u.posy() + u.view_offset.y) - getmaxy(w_terrain) / 2;
 
-    int lx = u.posx() + u.view_offset.x, ly = u.posy() + u.view_offset.y;
+    int lx = u.posx() + u.view_offset.x;
+    int ly = u.posy() + u.view_offset.y;
+    int lz = u.view_offset.z;
 
     if (bSelectZone && bHasFirstPoint) {
         lx = pairCoordsFirst.x;
         ly = pairCoordsFirst.y;
     }
 
-    draw_ter( tripoint( lx, ly, 0 ) );
+    draw_ter( tripoint( lx, ly, lz ) );
     draw_footsteps( w_terrain, {POSX - lx, POSY - ly} );
 
     int soffset = (int)OPTIONS["MOVE_VIEW_OFFSET"];
@@ -8682,8 +8684,11 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
     ctxt.register_action("CONFIRM");
     ctxt.register_action("QUIT");
     ctxt.register_action("TOGGLE_FAST_SCROLL");
+    ctxt.register_action("LEVEL_UP");
+    ctxt.register_action("LEVEL_DOWN");
 
     do {
+        const tripoint lp(lx, ly, lz);
         if (bNewWindow) {
             werase(w_info);
             draw_border(w_info);
@@ -8725,9 +8730,7 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
                                              iY,
                                              false,
                                              false,
-                                             tripoint(lx,
-                                                      ly,
-                                                      0),
+                                             lp,
                                              false,
                                              false);
                                 } else {
@@ -8754,13 +8757,13 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
 
         } else {
             //Look around
-            if (u.sees(lx, ly)) {
+            if (u.sees(lp)) {
                 print_all_tile_info(lx, ly, w_info, 1, off, false);
 
             } else if (u.sight_impaired() &&
-                       m.light_at(lx, ly) == LL_BRIGHT &&
-                       rl_dist(u.posx(), u.posy(), lx, ly) < u.unimpaired_range() &&
-                       m.sees(u.posx(), u.posy(), lx, ly, u.unimpaired_range(), junk)) {
+                       m.light_at(lp) == LL_BRIGHT &&
+                       rl_dist(u.pos(), lp) < u.unimpaired_range() &&
+                       m.sees(u.pos(), lp, u.unimpaired_range(), junk)) {
                 if (u.has_effect("boomered")) {
                     mvwputch_inv(w_terrain, POSY + (ly - u.posy()), POSX + (lx - u.posx()), c_pink, '#');
 
@@ -8783,8 +8786,8 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
                 mvwprintz(w_info, 1, lookWidth - 1, c_ltgreen, _("F"));
             }
 
-            if( m.has_graffiti_at( lx, ly ) ) {
-                mvwprintw(w_info, ++off + 1, 1, _("Graffiti: %s"), m.graffiti_at( lx, ly ).c_str() );
+            if( m.has_graffiti_at( lp ) ) {
+                mvwprintw(w_info, ++off + 1, 1, _("Graffiti: %s"), m.graffiti_at( lp ).c_str() );
             }
 
             auto this_sound = sounds::sound_at( {lx, ly} );
@@ -8808,6 +8811,12 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
             if (action == "TOGGLE_FAST_SCROLL") {
                 fast_scroll = !fast_scroll;
 
+            } else if (action == "LEVEL_UP") {
+                lz++;
+                draw_ter( tripoint( lx, ly, lz ) );
+            } else if (action == "LEVEL_DOWN") {
+                lz--;
+                draw_ter( tripoint( lx, ly, lz ) );
             } else if (!ctxt.get_coordinates(w_terrain, lx, ly)) {
                 int dx, dy;
                 ctxt.get_direction(dx, dy, action);
@@ -8838,7 +8847,7 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
                     ly = MAPSIZE * SEEY;
                 }
 
-                draw_ter( tripoint( lx, ly, 0 ), true );
+                draw_ter( tripoint( lx, ly, lz ), true );
                 draw_footsteps( w_terrain, {POSX - lx, POSY - ly} );
             }
         }

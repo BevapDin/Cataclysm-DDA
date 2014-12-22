@@ -797,6 +797,7 @@ void add_corpse(int x, int y);
   * Or anything in between.
   */
  float light_transparency(const int x, const int y) const;
+ float light_transparency(const tripoint &p) const;
  void build_map_cache();
  lit_level light_at(int dx, int dy) const; // Assumes 0,0 is light map center
  lit_level light_at(const tripoint &p) const; // Assumes 0,0 is light map center

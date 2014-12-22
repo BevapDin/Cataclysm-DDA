@@ -4627,8 +4627,101 @@ bool map::sees( const point F, const point T, const int range, int &bresenham_sl
 
 bool map::sees( const tripoint F, const tripoint T, const int range, int &bresenham_slope ) const
 {
-    // TODO: Z
+    if( T.z == F.z ) {
     return sees( F.x, F.y, T.x, T.y, range, bresenham_slope );
+    }
+    const int dx = T.x - F.x;
+    const int dy = T.y - F.y;
+    const int dz = T.z - F.z;
+    const int ax = abs(dx) * 2;
+    const int ay = abs(dy) * 2;
+    const int az = abs(dz) * 2;
+    const int sx = SGN(dx);
+    const int sy = SGN(dy);
+    const int sz = SGN(dz);
+    tripoint pnt;
+    int t = 0;
+    int tz;
+    int st;
+
+    if (range >= 0 && range < rl_dist(F, T) ) {
+        return false; // Out of range!
+    }
+    if (ax > ay) { // Mostly-horizontal line
+        st = SGN(ay - (ax / 2));
+        // Doing it "backwards" prioritizes straight lines before diagonal.
+        // T.his will help avoid creating a string of zombies behind you and will
+        // promote "mobbing" behavior (zombies surround you to beat on you)
+        for (bresenham_slope = abs(ay - (ax / 2)) * 2 + 1; bresenham_slope >= -1; bresenham_slope--) {
+            t = bresenham_slope * st;
+            tz = 0;
+            pnt = F;
+            do {
+                if (t > 0) {
+                    pnt.y += sy;
+                    t -= ax;
+                }
+                if (tz > 0) {
+                    bool ok;
+                    if (sz < 0) {
+                        ok = blocks_vertical_view_down(pnt);
+                    } else {
+                        ok = blocks_vertical_view_up(pnt);
+                    }
+                    if (tz == 1 && !ok) {
+                        break;
+                    } else if (ok) {
+                        pnt.z += sz;
+                        tz -= az;
+                    }
+                }
+                pnt.x += sx;
+                t += ay;
+                tz += ay;
+                if (pnt == T) {
+                    bresenham_slope *= st;
+                    return true;
+                }
+            } while( inbounds( pnt ) && light_transparency( pnt ) > LIGHT_TRANSPARENCY_SOLID );
+        }
+        return false;
+    } else { // Same as above, for mostly-vertical lines
+        st = SGN(ax - (ay / 2));
+        for (bresenham_slope = abs(ax - (bresenham_slope / 2 )) * 2 + 1; bresenham_slope >= -1; bresenham_slope--) {
+            t = bresenham_slope * st;
+            tz = 0;
+            pnt = F;
+            do {
+                if (t > 0) {
+                    pnt.x += sx;
+                    t -= ay;
+                }
+                if (tz > 0) {
+                    bool ok;
+                    if (sz < 0) {
+                        ok = blocks_vertical_view_down(pnt);
+                    } else {
+                        ok = blocks_vertical_view_up(pnt);
+                    }
+                    if (tz == 1 && !ok) {
+                        break;
+                    } else if (ok) {
+                        pnt.z += sz;
+                        tz -= az;
+                    }
+                }
+                pnt.y += sy;
+                t += ax;
+                tz += ax;
+                if (pnt == T) {
+                    bresenham_slope *= st;
+                    return true;
+                }
+            } while( inbounds( pnt ) && light_transparency( pnt ) > LIGHT_TRANSPARENCY_SOLID );
+        }
+        return false;
+    }
+    return false; // Shouldn't ever be reached, but there it is.
 }
 
 /*
@@ -5680,6 +5773,11 @@ long map::determine_wall_corner(const tripoint &p, const long orig_sym)
 float map::light_transparency(const int x, const int y) const
 {
   return transparency_cache[x][y];
+}
+
+float map::light_transparency(const tripoint &p) const
+{
+    return transparency_cache[x][y];
 }
 
 void map::build_outside_cache()

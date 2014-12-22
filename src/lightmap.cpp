@@ -465,6 +465,20 @@ void map::castLight( int row, float start, float end, int xx, int xy, int yx, in
                 lightMap[currentX][currentY] = bright;
                 */
                 seen_cache[currentX][currentY][-my_ZMIN] = true;
+                tripoint p(currentX, currentY, 0);
+                for(p.z = 0; p.z >= my_ZMIN; ) {
+                    if (blocks_vertical_view_down(p)) {
+                        break;
+                    }
+                    p.z--;
+                    seen_cache[currentX][currentY][p.z - my_ZMIN] = true;
+                }
+                for(p.z = +1; p.z <= my_ZMAX; p.z++) {
+                    if (blocks_vertical_view_down(p)) {
+                        break;
+                    }
+                    seen_cache[currentX][currentY][p.z - my_ZMIN] = true;
+                }
             }
 
             if( blocked ) {
