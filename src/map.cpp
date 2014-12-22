@@ -1683,24 +1683,29 @@ int map::bash_rating(const int str, const tripoint &p)
 
 void map::make_rubble(const int x, const int y, furn_id rubble_type, bool items, ter_id floor_type, bool overwrite)
 {
+    make_rubble(tripoint(x, y, 0), rubble_type, items, floor_type, overwrite);
+}
+
+void map::make_rubble(const tripoint &p, furn_id rubble_type, bool items, ter_id floor_type, bool overwrite)
+{
     if (overwrite) {
-        ter_set(x, y, floor_type);
-        furn_set(x, y, rubble_type);
+        ter_set(p, floor_type);
+        furn_set(p, rubble_type);
     } else {
         // First see if there is existing furniture to destroy
-        if (is_bashable_furn(x, y)) {
-            destroy_furn(x, y, true);
+        if (is_bashable_furn(p)) {
+            destroy_furn(p, true);
         }
         // Leave the terrain alone unless it interferes with furniture placement
-        if (move_cost(x, y) <= 0 && is_bashable_ter(x, y)) {
-            destroy(x, y, true);
+        if (move_cost(p) <= 0 && is_bashable_ter(p)) {
+            destroy(p, true);
         }
         // Check again for new terrain after potential destruction
-        if (move_cost(x, y) <= 0) {
-            ter_set(x, y, floor_type);
+        if (move_cost(p) <= 0) {
+            ter_set(p, floor_type);
         }
 
-        furn_set(x, y, rubble_type);
+        furn_set(p, rubble_type);
     }
     if (items) {
         //Still hardcoded, but a step up from the old stuff due to being in only one place
@@ -1709,17 +1714,17 @@ void map::make_rubble(const int x, const int y, furn_id rubble_type, bool items,
             item scrap("scrap", calendar::turn);
             item pipe("pipe", calendar::turn);
             item wire("wire", calendar::turn);
-            add_item_or_charges(x, y, chunk);
-            add_item_or_charges(x, y, scrap);
+            add_item_or_charges(p, chunk);
+            add_item_or_charges(p, scrap);
             if (one_in(5)) {
-                add_item_or_charges(x, y, pipe);
-                add_item_or_charges(x, y, wire);
+                add_item_or_charges(p, pipe);
+                add_item_or_charges(p, wire);
             }
         } else if (rubble_type == f_rubble_rock) {
             item rock("rock", calendar::turn);
             int rock_count = rng(1, 3);
             for (int i = 0; i < rock_count; i++) {
-                add_item_or_charges(x, y, rock);
+                add_item_or_charges(p, rock);
             }
         } else if (rubble_type == f_rubble) {
             item splinter("splinter", calendar::turn);
@@ -1727,10 +1732,10 @@ void map::make_rubble(const int x, const int y, furn_id rubble_type, bool items,
             int splinter_count = rng(2, 8);
             int nail_count = rng(5, 10);
             for (int i = 0; i < splinter_count; i++) {
-                add_item_or_charges(x, y, splinter);
+                add_item_or_charges(p, splinter);
             }
             for (int i = 0; i < nail_count; i++) {
-                add_item_or_charges(x, y, nail);
+                add_item_or_charges(p, nail);
             }
         }
     }

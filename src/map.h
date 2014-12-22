@@ -467,6 +467,8 @@ class map
   *  floor_type is only used if there is a non-bashable wall at the location or with overwrite = true */
  void make_rubble(const int x, const int y, furn_id rubble_type = f_rubble, bool items = false,
                     ter_id floor_type = t_dirt, bool overwrite = false);
+ void make_rubble(const tripoint &p, furn_id rubble_type = f_rubble, bool items = false,
+                    ter_id floor_type = t_dirt, bool overwrite = false);
 
  bool is_divable(const int x, const int y);
  bool is_divable(const tripoint &p);
