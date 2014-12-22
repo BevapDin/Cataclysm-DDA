@@ -2024,22 +2024,24 @@ int map::collapse_check(const tripoint &p)
     return 1.7 * num_supports;
 }
 
-void map::collapse_at(const int x, const int y)
+void map::collapse_at(const tripoint &p)
 {
-    destroy (x, y, false);
-    crush(x, y);
-    make_rubble(x, y);
-    for (int i = x - 1; i <= x + 1; i++) {
-        for (int j = y - 1; j <= y + 1; j++) {
-            if ((i == x && j == y)) {
+    destroy(p, false);
+    crush(p);
+    make_rubble(p);
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            if (i == 0 && j == 0) {
                 continue;
             }
-            if (has_flag("COLLAPSES", i, j) && one_in(collapse_check(tripoint(i, j, 0)))) {
-                destroy (i, j, false);
+            // TODO: proper z-level lookup
+            const tripoint pnt( p.x + i, p.y + j, p.z );
+            if (has_flag("COLLAPSES", pnt) && one_in(collapse_check(pnt))) {
+                destroy (pnt, false);
             // We only check for rubble spread if it doesn't already collapse to prevent double crushing
-            } else if (has_flag("FLAT", i, j) && one_in(8)) {
-                crush(i, j);
-                make_rubble(i, j);
+            } else if (has_flag("FLAT", pnt) && one_in(8)) {
+                crush(pnt);
+                make_rubble(pnt);
             }
         }
     }
@@ -2189,7 +2191,7 @@ std::pair<bool, bool> map::bash(const tripoint &p, const int str, bool silent, b
                 }
 
                 if (collapses) {
-                    collapse_at(p.x, p.y);
+                    collapse_at(p);
                 }
                 // Check the flag again to ensure the new terrain doesn't support anything
                 if (supports && !has_flag("SUPPORTS_ROOF", p)) {
@@ -2200,7 +2202,7 @@ std::pair<bool, bool> map::bash(const tripoint &p, const int str, bool silent, b
                                 continue;
                             }
                             if (one_in(collapse_check(p2))) {
-                                collapse_at(p2.x, p2.y);
+                                collapse_at(p2);
                             }
                         }
                     }

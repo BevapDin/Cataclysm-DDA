@@ -543,7 +543,7 @@ void add_corpse(int x, int y);
  /** Checks if a square should collapse, returns the X for the one_in(X) collapse chance */
  int collapse_check(const tripoint &p);
  /** Causes a collapse at (x, y), such as from destroying a wall */
- void collapse_at(const int x, const int y);
+ void collapse_at(const tripoint &p);
  /** Returns a pair where first is whether something was smashed and second is if it was a success */
  std::pair<bool, bool> bash(const int x, const int y, const int str, bool silent = false,
                             bool destroy = false, vehicle *bashing_vehicle = nullptr);
