@@ -4126,7 +4126,7 @@ void mattack::riotbot(monster *z, int index)
 
         std::vector <point> traj = line_to(z->posx(), z->posy(), x, y, 0);
         for( auto &elem : traj ) {
-            if( !g->m.trans( elem.x, elem.y ) ) {
+            if( g->m.light_transparency( elem.x, elem.y ) <= LIGHT_TRANSPARENCY_SOLID ) {
                 break;
             }
             g->m.add_field( elem.x, elem.y, fd_dazzling, 1 );
