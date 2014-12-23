@@ -500,7 +500,15 @@ static bool allow_inventory_from(const player *p, const vehicle *veh) {
     return !vehicle_might_move(veh);
 }
 
-extern long count_charges_in_list(const itype *type, const std::vector<item> &items);
+static long count_charges_in_list(const itype *type, const map_stack &items)
+{
+    for( const auto &candidate : items ) {
+        if( candidate.type == type ) {
+            return candidate.charges;
+        }
+    }
+    return 0;
+}
 
 void crafting_inventory_t::form_from_map(point origin, int range)
 {
@@ -562,10 +570,10 @@ void crafting_inventory_t::form_from_map(point origin, int range)
             // crafting
             if (furnlist[g->m.furn(x, y)].examine == &iexamine::toilet) {
                 // get water charges at location
-                auto &toiletitems = g->m.i_at(x,y);
-                for (size_t i = 0; i < toiletitems.size(); ++i) {
-                    if (toiletitems[i].typeId() == "water") {
-                        add_surround(p, toiletitems[i]);
+                auto toilet = g->m.i_at(x, y);
+                for( auto candidate = toilet.begin(); candidate != toilet.end(); ++candidate ) {
+                    if( candidate->typeId() == "water" ) {
+                        add_surround( p, *candidate );
                         break;
                     }
                 }
@@ -573,11 +581,12 @@ void crafting_inventory_t::form_from_map(point origin, int range)
 
             // keg-kludge
             if (furnlist[g->m.furn(x, y)].examine == &iexamine::keg) {
-                auto &liq_contained = g->m.i_at(x, y);
-                for (auto &i : liq_contained)
-                    if (i.made_of(LIQUID)) {
-                        add_surround(p, i);
+                auto liq_contained = g->m.i_at(x, y);
+                for( auto &i : liq_contained ) {
+                    if( i.made_of(LIQUID) ) {
+                        add_surround( p, i );
                     }
+                }
             }
 
             int vpart = -1;

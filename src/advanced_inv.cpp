@@ -20,6 +20,22 @@
 #include <vector>
 #include <cassert>
 
+template<typename T>
+void _swap( T a, T b) {
+    std::vector<item> A;
+    while( !a.empty() ) {
+        A.push_back( a.front() );
+        a.erase( a.begin() );
+    }
+    while( !b.empty() ) {
+        a.push_back( b.front() );
+        b.erase( b.begin() );
+    }
+    for( auto &x : A) {
+        b.push_back( x );
+    }
+}
+
 advanced_inventory::advanced_inventory()
     : head_height( 5 )
     , min_w_height( 10 )
@@ -459,7 +475,7 @@ int advanced_inv_area::get_item_count() const
     } else if( id == AIM_ALL ) {
         return 0;
     } else if( veh != nullptr ) {
-        return veh->parts[vstor].items.size();
+        return veh->get_items(vstor).size();
     } else {
         return g->m.i_at( g->u.posx + offx, g->u.posy + offy ).size();
     }
@@ -682,6 +698,47 @@ bool advanced_inventory_pane::is_filtered( const std::string &name ) const
     return !filter.empty() && !cached_lcmatch( name, filter, filtercache );
 }
 
+template <typename Container>
+static itemslice i_stacked(Container items)
+{
+    //create a new container for our stacked items
+    itemslice islice;
+
+    //iterate through all items in the vector
+    for( auto &items_it : items ) {
+        if( items_it.count_by_charges() ) {
+            // Those exists as a single item all the item anyway
+            islice.push_back( std::make_pair( &items_it, 1 ) );
+            continue;
+        }
+        bool list_exists = false;
+
+        //iterate through stacked item lists
+        for( auto &elem : islice ) {
+            //check if the ID exists
+            item *first_item = elem.first;
+            if( first_item->type->id == items_it.type->id ) {
+                //we've found the list of items with the same type ID
+
+                if( first_item->stacks_with( items_it ) ) {
+                    //add it to the existing list
+                    elem.second++;
+                    list_exists = true;
+                    break;
+                }
+            }
+        }
+
+        if(!list_exists) {
+            //insert the list into islice
+            islice.push_back( std::make_pair( &items_it, 1 ) );
+        }
+
+    } //end items loop
+
+    return islice;
+}
+
 void advanced_inventory_pane::add_items_from_area( advanced_inv_area &square )
 {
     assert( square.id != AIM_ALL );
@@ -720,8 +777,8 @@ void advanced_inventory_pane::add_items_from_area( advanced_inv_area &square )
     } else {
         map &m = g->m;
         const itemslice &stacks = square.veh != nullptr ?
-                                  m.i_stacked( square.veh->parts[square.vstor].items ) :
-                                  m.i_stacked( m.i_at_mutable( square.x, square.y ) );
+            i_stacked( square.veh->get_items(square.vstor) ) :
+            i_stacked( m.i_at( square.x, square.y ) );
         for( size_t x = 0; x < stacks.size(); ++x ) {
             advanced_inv_listitem it( stacks[x].first, x, stacks[x].second, square.id );
             if( is_filtered( it ) ) {
@@ -892,6 +949,14 @@ void advanced_inventory::redraw_pane( side p )
     wrefresh( w );
 }
 
+std::unique_ptr<item_stack> stack_ptr(advanced_inv_area &s) {
+    if( s.veh != nullptr ) {
+        return std::unique_ptr<item_stack>( new vehicle_stack( s.veh->get_items(s.vstor) ) );
+    } else {
+        return std::unique_ptr<item_stack>( new map_stack( g->m.i_at( s.x, s.y ) ) );
+    }
+}
+
 aim_location advanced_inventory::find_destination(const advanced_inv_listitem &it)
 {
     const itype *type = it.it->type;
@@ -904,9 +969,8 @@ aim_location advanced_inventory::find_destination(const advanced_inv_listitem &i
         if( !s.canputitemsloc || s.id == it.area ) {
             continue;
         }
-        auto& items = s.veh != nullptr ?
-                        s.veh->parts[s.vstor].items :
-                        g->m.i_at( s.x, s.y );
+        auto ptr = stack_ptr( s );
+        auto& items = *ptr;
 
         if(items.empty()) {
             continue;
@@ -1028,9 +1092,6 @@ bool advanced_inventory::move_all_items()
             }
         }
     } else {
-        const std::vector<item> &source_items = sarea.veh == nullptr ?
-                                                g->m.i_at( sarea.x, sarea.y ) :
-                                                sarea.veh->parts[sarea.vstor].items;
         if( dpane.area == AIM_INVENTORY ) {
             g->u.assign_activity( ACT_PICKUP, 0 );
             g->u.activity.values.push_back( sarea.veh != nullptr );
@@ -1042,8 +1103,20 @@ bool advanced_inventory::move_all_items()
         }
         g->u.activity.placement = point( sarea.x - g->u.xpos(), sarea.y - g->u.ypos() );
 
-        for( size_t index = 0; index < source_items.size(); index++ ) {
-            if( spane.is_filtered( source_items[index].tname() ) ) {
+        std::list<item>::iterator begin;
+        std::list<item>::iterator end;
+        if( sarea.veh == nullptr ) {
+            begin = g->m.i_at( sarea.x, sarea.y ).begin();
+            end = g->m.i_at( sarea.x, sarea.y ).end();
+        } else {
+            begin = sarea.veh->get_items(sarea.vstor).begin();
+            end = sarea.veh->get_items(sarea.vstor).end();
+        }
+
+        int index = -1;
+        for( auto item_it = begin; item_it != end; ++item_it ) {
+            index++;
+            if( spane.is_filtered( item_it->tname() ) ) {
                 continue;
             }
             g->u.activity.values.push_back( index );
@@ -1207,10 +1280,10 @@ void advanced_inventory::display()
             auto &s = squares[srcarea];
 
             if( d.veh == nullptr && s.veh == nullptr ) {
-                const_cast<std::vector<item>&>(g->m.i_at( s.x, s.y )).swap( const_cast<std::vector<item>&>(g->m.i_at( d.x, d.y )) );
+                _swap( g->m.i_at( s.x, s.y ), g->m.i_at( d.x, d.y ) );
                 recalc = true;
             } else if( d.veh != nullptr && s.veh != nullptr ) {
-                s.veh->parts[s.vstor].items.swap( d.veh->parts[d.vstor].items );
+                _swap( s.veh->get_items( s.vstor ), d.veh->get_items( d.vstor ) );
                 recalc = true;
             }
         } else if( action == "AUTO_MOVE" || action == "MOVE_SINGLE_ITEM" || action == "MOVE_ITEM_STACK" ) {
@@ -1786,8 +1859,8 @@ item* advanced_inv_area::get_container()
         } else {
             map &m = g->m;
             const itemslice &stacks = veh != nullptr ?
-                                      m.i_stacked( veh->parts[vstor].items ) :
-                                      m.i_stacked( m.i_at_mutable( x, y ) );
+                i_stacked( veh->get_items( vstor) ) :
+                i_stacked( m.i_at( x, y ) );
 
             // check index first
             if (stacks.size() > (size_t)uistate.adv_inv_container_index) {

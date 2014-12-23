@@ -16,6 +16,8 @@ class vehicle;
 struct bionic;
 struct requirement_data;
 class player;
+class map_stack;
+class vehicle_stack;
 class map;
 /**
  * This inventory represents all the things the player may use
@@ -91,8 +93,7 @@ public:
         /** Point on the map */
         point position;
         map *m;
-        std::vector<item> &items();
-        const std::vector<item> &items() const;
+        map_stack items() const;
         items_on_map(const point &p, map *m) : position(p), m(m) { }
     };
     /**
@@ -106,8 +107,7 @@ public:
         /** The relative coords (mount_dx/mount_dy) of the cargo unit */
         int mount_dx;
         int mount_dy;
-        std::vector<item> &items();
-        const std::vector<item> &items() const;
+        vehicle_stack items() const;
         items_in_vehicle_cargo(vehicle *v, int x, int y) : veh(v), mount_dx(x), mount_dy(y) { }
     };
     /**

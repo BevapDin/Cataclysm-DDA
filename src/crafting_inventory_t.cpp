@@ -932,36 +932,20 @@ bool crafting_inventory_t::has(component &x, bool as_tool) const {
     return x.available == a_true;
 }
 
-std::vector<item>& crafting_inventory_t::items_on_map::items() {
-    return const_cast<std::vector<item>&>(m->i_at(position.x, position.y));
-}
-
-const std::vector<item>& crafting_inventory_t::items_on_map::items() const {
+map_stack crafting_inventory_t::items_on_map::items() const {
     return m->i_at(position.x, position.y);
 }
 
-std::vector<item>& crafting_inventory_t::items_in_vehicle_cargo::items() {
+vehicle_stack crafting_inventory_t::items_in_vehicle_cargo::items() const {
     std::vector<int> parts = veh->parts_at_relative(mount_dx, mount_dy);
     for(size_t i = 0; i < parts.size(); i++) {
         if(veh->part_info(parts[i]).has_flag("CARGO")) {
-            return veh->parts[parts[i]].items;
+            return veh->get_items( parts[i] );
         }
     }
     debugmsg("cargo part not found");
-    static std::vector<item> empty_list;
-    return empty_list;
-}
-
-const std::vector<item>& crafting_inventory_t::items_in_vehicle_cargo::items() const {
-    std::vector<int> parts = veh->parts_at_relative(mount_dx, mount_dy);
-    for(size_t i = 0; i < parts.size(); i++) {
-        if(veh->part_info(parts[i]).has_flag("CARGO")) {
-            return veh->parts[parts[i]].items;
-        }
-    }
-    debugmsg("cargo part not found");
-    static const std::vector<item> empty_list;
-    return empty_list;
+    static std::list<item> nulitems;
+    return vehicle_stack( &nulitems, point(0, 0), nullptr, 0 );
 }
 
 
@@ -997,23 +981,23 @@ int crafting_inventory_t::count(const requirement &req, int max, int sources) co
     }
     if(sources & LT_MAP) {
         for(std::list<items_on_map>::const_iterator a = on_map.begin(); a != on_map.end(); ++a) {
-            const std::vector<item> &items = a->items();
-            for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
-                if(b->made_of(LIQUID)) {
+            const auto items = a->items();
+            for( const auto & b : items ) {
+                if(b.made_of(LIQUID)) {
                     continue;
                 }
-                COUNT_IT_(*b, 1);
+                COUNT_IT_(b, 1);
             }
         }
     }
     if(sources & LT_VEHICLE_CARGO) {
         for(std::list<items_in_vehicle_cargo>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
-            const std::vector<item> &items = a->items();
-            for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
-                if(b->made_of(LIQUID)) {
+            const auto items = a->items();
+            for( const auto & b : items ) {
+                if(b.made_of(LIQUID)) {
                     continue;
                 }
-                COUNT_IT_(*b, 1);
+                COUNT_IT_(b, 1);
             }
         }
     }
@@ -1203,13 +1187,13 @@ const item &crafting_inventory_t::candidate_t::get_item() const {
     }
     switch(location) {
         case LT_MAP:
-            return mapitems->items().at(mindex);
+            return mapitems->items()[mindex];
             break;
         case LT_SURROUNDING:
             return surroundings->the_item;
             break;
         case LT_VEHICLE_CARGO:
-            return vitems->items().at(iindex);
+            return vitems->items()[iindex];
             break;
         case LT_VPART:
             return vpartitem->the_item;
@@ -2086,17 +2070,20 @@ bool crafting_inventory_t::requirement::use(item &the_item, std::list<item> &use
     return (the_item.charges == 0 && the_item.destroyed_at_zero_charges());
 }
 
-typedef std::set< std::vector<item>* > item_vector_set_t;
+typedef std::set< std::unique_ptr< item_stack > > item_vector_set_t;
 static item_vector_set_t item_vector_resort_set;
 typedef std::vector< std::pair<int, item> > invpos_vector_t;
 typedef std::map<player*,invpos_vector_t> invpos_map_t;
 static invpos_map_t item_inpos_remove_map;
 
-void remove_releated(crafting_inventory_t::requirement &req, std::vector<item> &v, int index, std::list<item> &used_items) {
+template<typename T>
+void remove_releated(crafting_inventory_t::requirement &req, const T &v_, int index, std::list<item> &used_items) {
+    std::unique_ptr< T > ptr( new T( v_ ) );
+    T &v = *ptr;
     assert((size_t) index < v.size());
     if(req.use(v[index], used_items)) {
-        item_vector_resort_set.insert(&v);
         v[index] = item();
+        item_vector_resort_set.insert( std::move( ptr ) );
     }
 }
 
@@ -2119,6 +2106,17 @@ bool invpos_item_pair_comparator(const std::pair<int, item>& a, const std::pair<
     }
 }
 
+template<typename T>
+void erase_null( T &v ) {
+    for( auto it = v.begin(); it != v.end(); ) {
+        if( it->is_null()) {
+            it = v.erase( it );
+        } else {
+            ++it;
+        }
+    }
+}
+
 void resort_item_vectors() {
     for(invpos_map_t::iterator a = item_inpos_remove_map.begin(); a != item_inpos_remove_map.end(); ++a) {
         player* p = a->first;
@@ -2133,13 +2131,14 @@ void resort_item_vectors() {
         }
     }
     item_inpos_remove_map.clear();
-    for(item_vector_set_t::iterator a = item_vector_resort_set.begin(); a != item_vector_resort_set.end(); ++a) {
-        std::vector<item> &v = **a;
-        for(size_t i = 0; i < v.size(); i++) {
-            if(v[i].is_null()) {
-                v.erase(v.begin() + i);
-                i--;
-            }
+    for( auto & ptr : item_vector_resort_set ) {
+        map_stack *ms = dynamic_cast<map_stack*>( ptr.get() );
+        if( ms != nullptr ) {
+            erase_null( *ms );
+        }
+        vehicle_stack *vs = dynamic_cast<vehicle_stack*>( ptr.get() );
+        if( vs != nullptr ) {
+            erase_null( *vs );
         }
     }
     item_vector_resort_set.clear();
@@ -2173,7 +2172,7 @@ void crafting_inventory_t::candidate_t::consume(player *p, requirement &req, std
         case LT_MAP:
             remove_releated(
                 req,
-                const_cast<std::vector<item>&>(g->m.i_at(mapitems->position.x, mapitems->position.y)),
+                g->m.i_at(mapitems->position.x, mapitems->position.y),
                 mindex,
                 used_items
             );
@@ -2210,7 +2209,7 @@ void crafting_inventory_t::candidate_t::consume(player *p, requirement &req, std
             }
             if(ix->type->id == "water" && furnlist[g->m.furn(mapitems->position.x, mapitems->position.y)].examine == &iexamine::toilet) {
                 // get water charges at location
-                std::vector<item> &toiletitems = const_cast<std::vector<item>&>(g->m.i_at(mapitems->position.x, mapitems->position.y));
+                auto toiletitems = g->m.i_at(mapitems->position.x, mapitems->position.y);
                 for(size_t i = 0; req.count > 0 && i < toiletitems.size(); ++i) {
                     if(toiletitems[i].typeId() == "water") {
                         remove_releated(
@@ -2310,21 +2309,25 @@ int crafting_inventory_t::collect_candidates(const requirement &req, int sources
     int count = 0;
     if(sources & LT_MAP) {
         for(std::list<items_on_map>::iterator a = on_map.begin(); a != on_map.end(); ++a) {
-            std::vector<item> &items = a->items();
-            for(std::vector<item>::iterator b = items.begin(); b != items.end(); ++b) {
-                if(XMATCH(*b, 1)) {
-                    candidates.push_back(candidate_t(*a, b - items.begin(), req.type));
+            const auto items = a->items();
+            int index = 0;
+            for( const auto & b : items ) {
+                if(XMATCH(b, 1)) {
+                    candidates.push_back(candidate_t(*a, index, req.type));
                 }
+                index++;
             }
         }
     }
     if(sources & LT_VEHICLE_CARGO) {
         for(std::list<items_in_vehicle_cargo>::iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
-            std::vector<item> &items = a->items();
-            for(size_t b = 0; b < items.size(); b++) {
-                if(XMATCH(items[b], 1)) {
-                    candidates.push_back(candidate_t(*a, b, req.type));
+            const auto items = a->items();
+            int index = 0;
+            for( const auto & b : items ) {
+                if(XMATCH(b, 1)) {
+                    candidates.push_back(candidate_t(*a, index, req.type));
                 }
+                index++;
             }
         }
     }
@@ -2550,12 +2553,12 @@ bool crafting_inventory_t::has_items_with_quality(const std::string &name, int l
         }
     }
     for(std::list<items_on_map>::const_iterator a = on_map.begin(); a != on_map.end(); ++a) {
-        const std::vector<item> &items = a->items();
-        for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
-            if(b->made_of(LIQUID)) {
+        const auto items = a->items();
+        for( const auto & b : items ) {
+            if(b.made_of(LIQUID)) {
                 continue;
             }
-            if(::hasQuality(*b, name, level)) {
+            if(::hasQuality(b, name, level)) {
                 amount--;
                 if(amount <= 0) {
                     return true;
@@ -2564,9 +2567,9 @@ bool crafting_inventory_t::has_items_with_quality(const std::string &name, int l
         }
     }
     for(std::list<items_in_vehicle_cargo>::const_iterator a = in_veh.begin(); a != in_veh.end(); ++a) {
-        const std::vector<item> &items = a->items();
-        for(std::vector<item>::const_iterator b = items.begin(); b != items.end(); ++b) {
-            if(::hasQuality(*b, name, level)) {
+        const auto items = a->items();
+        for( const auto & b : items ) {
+            if(::hasQuality(b, name, level)) {
                 amount--;
                 if(amount <= 0) {
                     return true;
