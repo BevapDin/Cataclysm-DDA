@@ -853,6 +853,7 @@ public:
     bool tracking_on;        // vehicle tracking on/off
     bool is_locked; //vehicle has no key
     bool is_alarm_on;  //vehicle has alarm on
+    bool camera_on;
     int om_id;          // id of the om_vehicle struct corresponding to this vehicle
     bool overhead_lights_on; //circle lights on/off
     bool fridge_on;     //fridge on/off
@@ -876,6 +877,7 @@ public:
     int fridge_epower; // total power consumed by fridges
     int alarm_epower;
     int recharger_epower; // total power consumed by rechargers
+    int camera_epower; // power consumed by camera system
     bool check_environmental_effects; // True if it has bloody or smoking parts
 };
 
