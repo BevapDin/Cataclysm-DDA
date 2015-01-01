@@ -88,7 +88,8 @@ enum vehicle_controls {
  toggle_doors,
  cont_turrets,
  manual_fire,
- toggle_camera
+ toggle_camera,
+ release_remote_control
 };
 
 // Map stack methods.
@@ -112,9 +113,10 @@ void vehicle_stack::push_back( const item &newitem )
     myorigin->add_item(part_num, newitem);
 }
 
-void vehicle_stack::push_back_fast( const item &newitem )
+void vehicle_stack::insert_at( std::list<item>::iterator index,
+                                   const item &newitem )
 {
-    myorigin->add_item(part_num, newitem);
+    myorigin->add_item_at(part_num, index, newitem);
 }
 
 std::list<item>::iterator vehicle_stack::begin()
@@ -235,15 +237,8 @@ bool vehicle::player_in_control (player *p)
 
 bool vehicle::remote_controlled (player *p)
 {
-    std::stringstream remote_veh_string( g->u.get_value( "remote_controlling_vehicle" ) );
-    if( remote_veh_string.str() == "" ) {
-        return false;
-    }
-
-    int vx, vy;
-    remote_veh_string >> vx >> vy;
-    vehicle *veh = g->m.veh_at( vx, vy );
-    if( veh == NULL || veh != this ) {
+    vehicle *veh = g->remoteveh();
+    if( veh != this ) {
         return false;
     }
 
@@ -257,7 +252,7 @@ bool vehicle::remote_controlled (player *p)
     }
     
     add_msg(m_bad, _("Lost connection with the vehicle due to distance!"));
-    p->remove_value( "remote_controlling_vehicle" );
+    g->setremoteveh( nullptr );
     return false;
 }
 
@@ -574,53 +569,6 @@ void vehicle::smash() {
     }
 }
 
-// Callback for uimenu that will center on selected part without having to
-// get into vehicle interact menu (useful if we want to see the rotated vehicle)
-// Used for remote door opening, but could be reusable for any individual part selection
-// where position matters, such as manual turret aiming
-class partpicker_cb : public uimenu_callback {
-    private:
-        const std::vector< point > &points;
-        int last; // to suppress redrawing
-        int view_x; // to reposition the view after selecting
-        int view_y;
-    public:
-        partpicker_cb( std::vector< point > &pts ) : points( pts ) { 
-            last = INT_MIN;
-            view_x = g->u.view_offset_x;
-            view_y = g->u.view_offset_y;
-        }
-        ~partpicker_cb() { }
-
-    void select( int /*num*/, uimenu * /*menu*/ ) {
-        g->u.view_offset_x = view_x;
-        g->u.view_offset_y = view_y;
-    }
-    
-    void refresh( uimenu *menu ) {
-        if( last == menu->selected ) {
-            return;
-        }
-        if( menu->selected < 0 || menu->selected >= (int)points.size() ) {
-            last = menu->selected;
-            g->u.view_offset_x = 0;
-            g->u.view_offset_y = 0;
-            g->draw_ter();
-            menu->redraw( false ); // show() won't redraw borders
-            menu->show();
-            return;
-        }
-
-        last = menu->selected;
-        const point &center = points[menu->selected];
-        g->u.view_offset_x = center.x - g->u.posx;
-        g->u.view_offset_y = center.y - g->u.posy;
-        g->draw_trail_to_square( g->u.view_offset_x, g->u.view_offset_y, true);
-        menu->redraw( false );
-        menu->show();
-    }
-};
-
 void vehicle::control_doors() {
     std::vector< int > door_motors = all_parts_with_feature( "DOOR_MOTOR", true );
     std::vector< int > doors_with_motors; // Indices of doors
@@ -649,7 +597,7 @@ void vehicle::control_doors() {
     }
 
     pmenu.addentry( doors_with_motors.size(), true, 'q', _("Cancel") );
-    partpicker_cb callback( locations );
+    pointmenu_cb callback( locations );
     pmenu.callback = &callback;
     pmenu.w_y = 0; // Move the menu so that we can see our vehicle
     pmenu.query();
@@ -870,6 +818,7 @@ void vehicle::use_controls()
     int vpart;
 
     if (!interact_vehicle_locked()) return;
+    bool remotely_controlled = g->remoteveh() == this;
     // Always have this option
 
     std::vector<int> engines;
@@ -880,6 +829,9 @@ void vehicle::use_controls()
         g->m.veh_at(g->u.posx, g->u.posy, vpart) == this) {
         options_choice.push_back(release_control);
         options_message.push_back(uimenu_entry(_("Let go of controls"), 'l'));
+    } else if( remotely_controlled ) {
+        options_choice.push_back(release_remote_control);
+        options_message.push_back(uimenu_entry(_("Stop controlling"), 'l'));
     }
 
 
@@ -953,18 +905,18 @@ void vehicle::use_controls()
     std::sort(engines.begin(), engines.end(), part_type_comparator(this));
 
     // Toggle engine on/off, stop driving if we are driving.
-    if (has_engine) {
-        if (g->u.controlling_vehicle) {
+    if( has_engine ) {
+        if( g->u.controlling_vehicle || ( remotely_controlled && engine_on ) ) {
             options_choice.push_back(toggle_engine);
             options_message.push_back(uimenu_entry(_("Stop driving"), 's'));
-        } else if (has_engine_type_not(fuel_type_muscle, true)){
+        } else if( has_engine_type_not(fuel_type_muscle, true ) ) {
             options_choice.push_back(toggle_engine);
             options_message.push_back(uimenu_entry((engine_on) ?
                         _("Turn off the engine") : _("Turn on the engine"), 'e'));
         }
     }
 
-    if( is_alarm_on && velocity == 0 && !remote_controlled( &g->u ) ) {
+    if( is_alarm_on && velocity == 0 && !remotely_controlled ) {
         options_choice.push_back(try_disarm_alarm);
         options_message.push_back(uimenu_entry(_("Try to disarm alarm."), 'z'));
     }
@@ -1030,7 +982,7 @@ void vehicle::use_controls()
 
     const bool can_be_folded = is_foldable();
     const bool is_convertible = (tags.count("convertible") > 0);
-    if( can_be_folded || is_convertible ) {
+    if( ( can_be_folded || is_convertible ) && !remotely_controlled ) {
         options_choice.push_back(convert_vehicle);
         options_message.push_back(uimenu_entry(string_format(_("Fold %s"), name.c_str()), 'f'));
     }
@@ -1214,7 +1166,7 @@ void vehicle::use_controls()
         }
         break;
     case toggle_engine:
-        if (g->u.controlling_vehicle) {
+        if( g->u.controlling_vehicle || ( remotely_controlled && engine_on ) ) {
             //if we are controlling the vehicle, stop it.
             if (engine_on && has_engine_type_not(fuel_type_muscle, true)){
                 add_msg(_("You turn the engine off and let go of the controls."));
@@ -1223,6 +1175,7 @@ void vehicle::use_controls()
             }
             engine_on = false;
             g->u.controlling_vehicle = false;
+            g->setremoteveh( nullptr );
         } else if (engine_on) {
             if (has_engine_type_not(fuel_type_muscle, true))
                 add_msg(_("You turn the engine off."));
@@ -1247,6 +1200,11 @@ void vehicle::use_controls()
     case control_lights:
         while(toogle_active_menu(lights, "activate/deactive lights")) { ; }
         refresh();
+        break;
+    case release_remote_control:
+        g->u.controlling_vehicle = false;
+        g->setremoteveh( nullptr );
+        add_msg(_("You stop controlling the vehicle."));
         break;
     case convert_vehicle:
     {
@@ -2592,7 +2550,7 @@ nc_color vehicle::part_color (int p)
 
     //Invert colors for cargo parts with stuff in them
     int cargo_part = part_with_feature(p, VPFLAG_CARGO);
-    if(cargo_part > 0 && !get_items(cargo_part).items.empty()) {
+    if(cargo_part > 0 && !get_items(cargo_part).empty()) {
         if(!invert_cargo_color && this == g->m.veh_at(g->u.posx, g->u.posy))
         return col;
         return invert_color(col);
@@ -4506,7 +4464,7 @@ bool vehicle::is_full(const int part, const int addvolume, const int addnumber) 
    const int maxvolume = this->max_volume(part);
 
    if ( addvolume == -1 ) {
-       if ( get_items(part).size() < maxitems ) return true;
+       if( get_items(part).size() < maxitems ) return true;
        int cur_volume=stored_volume(part);
        return (cur_volume >= maxvolume ? true : false );
    } else {
@@ -4529,8 +4487,9 @@ bool vehicle::add_item (int part, item itm)
         return false;
     }
 
-    if (parts[part].items.size() >= (size_t) max_storage)
+    if( (int)parts[part].items.size() >= max_storage ) {
         return false;
+    }
     it_ammo *ammo = dynamic_cast<it_ammo*> (itm.type);
     if (part_flag(part, "TURRET")) {
         if (!ammo || (ammo->type != part_info(part).fuel_type ||
@@ -4553,8 +4512,12 @@ bool vehicle::add_item (int part, item itm)
     if ( cur_volume + add_volume > maxvolume ) {
         return false;
     }
+    return add_item_at( part, parts[part].items.end(), itm );
+}
 
-    parts[part].items.push_back (itm);
+bool vehicle::add_item_at(int part, std::list<item>::iterator index, item itm)
+{
+    parts[part].items.insert( index, itm );
     if( itm.needs_processing() ) {
         active_items.add( std::prev(parts[part].items.end()),
                           point( parts[part].mount_dx, parts[part].mount_dy) );
@@ -5174,7 +5137,7 @@ void vehicle::aim_turrets()
 
     }
 
-    partpicker_cb callback( locations );
+    pointmenu_cb callback( locations );
 
     int selected = 0;
 
@@ -5281,7 +5244,7 @@ void vehicle::control_turrets() {
         }
     }
 
-    partpicker_cb callback( locations );
+    pointmenu_cb callback( locations );
 
     int selected = 0;
 
@@ -5530,6 +5493,8 @@ bool vehicle::fire_turret_internal (int p, const itype &gun, it_ammo &ammo, long
                            tmp.name.c_str(), boo_hoo);
             }
             return false;
+        } else if( auto_target->power_rating() <= 1 ) {
+            return true; // Too tiny and docile to waste ammo on
         }
         xtarg = auto_target->xpos();
         ytarg = auto_target->ypos();
@@ -5828,10 +5793,10 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
     }
     std::list<item> rope = p->inv.use_amount(rope_type, 1);
     assert(!rope.empty());
-    // Store the used rope
-    parts[0].items.push_back(rope.front());
     // Store name of this vehicle
-    parts[0].items[0].item_vars["dfkjghdfkg"] = name;
+    rope.front().item_vars["dfkjghdfkg"] = name;
+    // Store the used rope
+    get_items(0).push_back(rope.front());
     // Global coords of this vehicle
     const int x = global_x() + parts[0].precalc_dx[0] - other->global_x();
     const int y = global_y() + parts[0].precalc_dy[0] - other->global_y();
@@ -5869,7 +5834,7 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
 bool vehicle::can_untow(int part) {
     static const itype_id rope_type("rope_30");
     assert((size_t)part < parts.size());
-    if(parts[part].items.size() != 1 || parts[part].items[0].type->id != rope_type) {
+    if(get_items(part).size() != 1 || get_items(part).front().type->id != rope_type) {
         // Not towed with a rope
         return false;
     }
@@ -5918,14 +5883,14 @@ void vehicle::untow(game *g, int part, player *p) {
     assert(g != 0);
     assert((size_t) part < parts.size());
     assert(p != 0);
-    assert(!parts[part].items.empty());
+    assert(!get_items(part).empty());
     const int mx = parts[part].mount_dx;
     const int my = parts[part].mount_dy;
     const int gx = global_x() + parts[part].precalc_dx[0];
     const int gy = global_y() + parts[part].precalc_dy[0];
     // Recover rope and name of the towed vehicle
-    item rope = parts[part].items[0];
-    parts[part].items.erase(parts[part].items.begin());
+    item rope = get_items(part).front();
+    get_items(part).erase(get_items(part).begin());
     const std::string new_veh_name = rope.item_vars["dfkjghdfkg"];
     rope.item_vars.erase( "dfkjghdfkg" );
     p->add_or_drop(rope, g);
@@ -5987,7 +5952,8 @@ bool vehicle::examine(game *g, player *p, int part) {
         charcoal_recipe.components[0].push_back(item_comp("log", 1));
         const int time = 120000;
         const int result_mult = 2;
-        if(vp.items.empty()) {
+        auto vpitems = get_items(part);
+        if(vpitems.empty()) {
             if(!cinv.has_all_requirements(charcoal_recipe)) {
                 std::ostringstream buffer;
                 buffer << _("You need this to make charcoal:\n");
@@ -6004,34 +5970,38 @@ bool vehicle::examine(game *g, player *p, int part) {
             cinv.gather_and_consume(charcoal_recipe, items, items);
             print_list(buffer, items);
             for(std::list<item>::iterator a = items.begin(); a != items.end(); ++a) {
-                vp.items.push_back(*a);
-                vp.items.back().bday = calendar::turn;
+                a->bday = calendar::turn;
+                vpitems.push_back(*a);
             }
             p->moves -= 150;
             p->add_msg_if_player(buffer.str().c_str());
             return true;
-        } else if(vp.items[0].type->id != "charcoal") {
-            const int age = calendar::turn - vp.items[0].bday;
+        } else if(vpitems.front().type->id != "charcoal") {
+            const int age = calendar::turn - vpitems.front().bday;
             const int time_to_do = time - age * 100;
             if(time_to_do > 0) {
                 p->add_msg_if_player("The kiln is still working (for at least %i minutes)", time_to_do / (10 * 100));
                 return false;
             }
             // Done, make charcoal
-            vp.items.clear();
+            while(!vpitems.empty()) {
+                vpitems.erase(vpitems.begin());
+            }
             item newit("charcoal", calendar::turn);
             if(result_mult > 0) {
                 newit.charges *= result_mult;
             }
-            vp.items.push_back(newit);
+            vpitems.push_back(newit);
         }
-        assert(!vp.items.empty() && vp.items[0].type->id == "charcoal");
-        if(!query_yn(_("The kiln contains %s (%i) - grab it?"), vp.items[0].type->nname(1).c_str(), vp.items[0].charges)) {
+        assert(!vpitems.empty() && vpitems.front().type->id == "charcoal");
+        if(!query_yn(_("The kiln contains %s (%i) - grab it?"), vpitems.front().type->nname(1).c_str(), vpitems.front().charges)) {
             return false;
         }
-        p->add_or_drop(vp.items[0], g);
+        p->add_or_drop(vpitems.front(), g);
         p->moves -= 150;
-        vp.items.clear();
+        while(!vpitems.empty()) {
+            vpitems.erase(vpitems.begin());
+        }
         return true;
     }
     return false;
