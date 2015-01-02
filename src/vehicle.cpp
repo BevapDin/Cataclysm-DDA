@@ -5793,10 +5793,11 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
     }
     std::list<item> rope = p->inv.use_amount(rope_type, 1);
     assert(!rope.empty());
-    // Store name of this vehicle
-    rope.front().item_vars["dfkjghdfkg"] = name;
     // Store the used rope
-    get_items(0).push_back(rope.front());
+    auto items = get_items( 0 );
+    items.push_back(rope.front());
+    // Store name of this vehicle
+    items.front().item_vars["dfkjghdfkg"] = name;
     // Global coords of this vehicle
     const int x = global_x() + parts[0].precalc_dx[0] - other->global_x();
     const int y = global_y() + parts[0].precalc_dy[0] - other->global_y();
@@ -5834,7 +5835,8 @@ bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
 bool vehicle::can_untow(int part) {
     static const itype_id rope_type("rope_30");
     assert((size_t)part < parts.size());
-    if(get_items(part).size() != 1 || get_items(part).front().type->id != rope_type) {
+    auto items = get_items( part );
+    if(items.size() != 1 || items.front().type->id != rope_type) {
         // Not towed with a rope
         return false;
     }
@@ -5883,14 +5885,15 @@ void vehicle::untow(game *g, int part, player *p) {
     assert(g != 0);
     assert((size_t) part < parts.size());
     assert(p != 0);
-    assert(!get_items(part).empty());
+    auto items = get_items( part );
+    assert(!items.empty());
     const int mx = parts[part].mount_dx;
     const int my = parts[part].mount_dy;
     const int gx = global_x() + parts[part].precalc_dx[0];
     const int gy = global_y() + parts[part].precalc_dy[0];
     // Recover rope and name of the towed vehicle
-    item rope = get_items(part).front();
-    get_items(part).erase(get_items(part).begin());
+    item rope = items.front();
+    items.erase(items.begin());
     const std::string new_veh_name = rope.item_vars["dfkjghdfkg"];
     rope.item_vars.erase( "dfkjghdfkg" );
     p->add_or_drop(rope, g);
@@ -5938,6 +5941,7 @@ extern void print_list(std::ostream &buffer, std::list<item> &items);
 bool vehicle::examine(game *g, player *p, int part) {
     assert(part >= 0);
     vehicle_part &vp = parts[part];
+    auto vpitems = get_items( part );
     vpart_info &vpi = vehicle_part_types[vp.id];
     if(vpi.has_flag("KILN")) {
         crafting_inventory_t cinv(p);
@@ -5952,7 +5956,6 @@ bool vehicle::examine(game *g, player *p, int part) {
         charcoal_recipe.components[0].push_back(item_comp("log", 1));
         const int time = 120000;
         const int result_mult = 2;
-        auto vpitems = get_items(part);
         if(vpitems.empty()) {
             if(!cinv.has_all_requirements(charcoal_recipe)) {
                 std::ostringstream buffer;
