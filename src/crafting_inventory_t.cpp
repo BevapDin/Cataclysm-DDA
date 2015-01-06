@@ -2615,7 +2615,7 @@ void crafting_inventory_t::add_vpart(vehicle *veh, int mpart, const std::string 
     } else {
         vpart_item.charges = veh->fuel_left(fuel);
     }
-    vpart.push_back(item_from_vpart(veh, veh->parts[part].mount_dx, veh->parts[part].mount_dy, vpart_item));
+    vpart.push_back(item_from_vpart(veh, veh->parts[part].mount.x, veh->parts[part].mount.y, vpart_item));
 }
 
 void crafting_inventory_t::add_surround(const point &p, const item &it) {

@@ -197,8 +197,8 @@ void map::generate_lightmap()
             if (veh_luminance > LL_LIT) {
                 for( auto &light_indice : light_indices ) {
                     if(v->parts[light_indice].inactive()) { continue; }
-                    int px = vv.x + v->parts[light_indice].precalc_dx[0];
-                    int py = vv.y + v->parts[light_indice].precalc_dy[0];
+                    int px = vv.x + v->parts[light_indice].precalc[0].x;
+                    int py = vv.y + v->parts[light_indice].precalc[0].y;
                     if(INBOUNDS(px, py)) {
                         apply_light_arc( px, py, dir + v->parts[light_indice].direction,
                                          veh_luminance, 45 );
@@ -216,8 +216,8 @@ void map::generate_lightmap()
                       v->part_info( light_indice ).has_flag( VPFLAG_EVENTURN ) ) ||
                     ( !v->part_info( light_indice ).has_flag( VPFLAG_EVENTURN ) &&
                       !v->part_info( light_indice ).has_flag( VPFLAG_ODDTURN ) ) ) {
-                    int px = vv.x + v->parts[light_indice].precalc_dx[0];
-                    int py = vv.y + v->parts[light_indice].precalc_dy[0];
+                    int px = vv.x + v->parts[light_indice].precalc[0].x;
+                    int py = vv.y + v->parts[light_indice].precalc[0].y;
                     if(INBOUNDS(px, py)) {
                         add_light_source( px, py, v->part_info( light_indice ).bonus );
                     }
@@ -228,8 +228,8 @@ void map::generate_lightmap()
         if(v->dome_lights_on) {
             std::vector<int> light_indices = v->all_parts_with_feature(VPFLAG_DOME_LIGHT);
             for( auto &light_indice : light_indices ) {
-                int px = vv.x + v->parts[light_indice].precalc_dx[0];
-                int py = vv.y + v->parts[light_indice].precalc_dy[0];
+                int px = vv.x + v->parts[light_indice].precalc[0].x;
+                int py = vv.y + v->parts[light_indice].precalc[0].y;
                 if(INBOUNDS(px, py)) {
                     add_light_source( px, py, v->part_info( light_indice ).bonus );
                 }
@@ -238,16 +238,16 @@ void map::generate_lightmap()
         if(v->aisle_lights_on) {
             std::vector<int> light_indices = v->all_parts_with_feature(VPFLAG_AISLE_LIGHT);
             for( auto &light_indice : light_indices ) {
-                int px = vv.x + v->parts[light_indice].precalc_dx[0];
-                int py = vv.y + v->parts[light_indice].precalc_dy[0];
+                int px = vv.x + v->parts[light_indice].precalc[0].x;
+                int py = vv.y + v->parts[light_indice].precalc[0].y;
                 if(INBOUNDS(px, py)) {
                     add_light_source( px, py, v->part_info( light_indice ).bonus );
                 }
             }
         }
         for( size_t p = 0; p < v->parts.size(); ++p ) {
-            int px = vv.x + v->parts[p].precalc_dx[0];
-            int py = vv.y + v->parts[p].precalc_dy[0];
+            int px = vv.x + v->parts[p].precalc[0].x;
+            int py = vv.y + v->parts[p].precalc[0].y;
             if( !INBOUNDS( px, py ) ) {
                 continue;
             }
@@ -285,7 +285,7 @@ void map::generate_lightmap()
 
 void map::add_light_source(int x, int y, float luminance )
 {
-    light_source_buffer[x][y] = luminance;
+    light_source_buffer[x][y] = std::max(luminance, light_source_buffer[x][y]);
 }
 
 lit_level map::light_at(int dx, int dy)
@@ -373,16 +373,15 @@ void map::build_seen_cache()
         // Cameras are also handled here, so that we only need to get through all veh parts once
         int cam_control = -1;
         for (std::vector<int>::iterator m_it = mirrors.begin(); m_it != mirrors.end(); /* noop */) {
-            const int mirrorX = veh->global_x() + veh->parts[*m_it].precalc_dx[0];
-            const int mirrorY = veh->global_y() + veh->parts[*m_it].precalc_dy[0];
+            const auto mirror_pos = veh->global_pos() + veh->parts[*m_it].precalc[0];
             // We can utilize the current state of the seen cache to determine
             // if the player can see the mirror from their position.
-            if( !veh->part_info( *m_it ).has_flag( "CAMERA" ) && !g->u.sees(mirrorX, mirrorY)) {
+            if( !veh->part_info( *m_it ).has_flag( "CAMERA" ) && !g->u.sees( mirror_pos.x, mirror_pos.y )) {
                 m_it = mirrors.erase(m_it);
             } else if( !veh->part_info( *m_it ).has_flag( "CAMERA_CONTROL" ) ) {
                 ++m_it;
             } else {
-                if( offsetX == mirrorX && offsetY == mirrorY && veh->camera_on ) {
+                if( offsetX == mirror_pos.x && offsetY == mirror_pos.y && veh->camera_on ) {
                     cam_control = *m_it;
                 }
                 m_it = mirrors.erase( m_it );
@@ -396,18 +395,17 @@ void map::build_seen_cache()
                 continue; // Player not at camera control, so cameras don't work
             }
 
-            const int mirrorX = veh->global_x() + veh->parts[mirror].precalc_dx[0];
-            const int mirrorY = veh->global_y() + veh->parts[mirror].precalc_dy[0];
+            const auto mirror_pos = veh->global_pos() + veh->parts[mirror].precalc[0];
 
             // Determine how far the light has already traveled so mirrors
             // don't cheat the light distance falloff.
             int offsetDistance;
             if( !is_camera ) {
-                offsetDistance = rl_dist(offsetX, offsetY, mirrorX, mirrorY);
+                offsetDistance = rl_dist(offsetX, offsetY, mirror_pos.x, mirror_pos.y);
             } else {
                 offsetDistance = 60 - veh->part_info( mirror ).bonus *  
                                       veh->parts[mirror].hp / veh->part_info( mirror ).durability;
-                seen_cache[mirrorX][mirrorY] = true;
+                seen_cache[mirror_pos.x][mirror_pos.y] = true;
             }
 
             // @todo: Factor in the mirror facing and only cast in the
@@ -415,17 +413,17 @@ void map::build_seen_cache()
             //
             // The naive solution of making the mirrors act like a second player
             // at an offset appears to give reasonable results though.
-            castLight( 1, 1.0f, 0.0f, 0, 1, 1, 0, mirrorX, mirrorY, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, 1, 0, 0, 1, mirrorX, mirrorY, offsetDistance );
+            castLight( 1, 1.0f, 0.0f, 0, 1, 1, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight( 1, 1.0f, 0.0f, 1, 0, 0, 1, mirror_pos.x, mirror_pos.y, offsetDistance );
 
-            castLight( 1, 1.0f, 0.0f, 0, -1, 1, 0, mirrorX, mirrorY, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, -1, 0, 0, 1, mirrorX, mirrorY, offsetDistance );
+            castLight( 1, 1.0f, 0.0f, 0, -1, 1, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight( 1, 1.0f, 0.0f, -1, 0, 0, 1, mirror_pos.x, mirror_pos.y, offsetDistance );
 
-            castLight( 1, 1.0f, 0.0f, 0, 1, -1, 0, mirrorX, mirrorY, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, 1, 0, 0, -1, mirrorX, mirrorY, offsetDistance );
+            castLight( 1, 1.0f, 0.0f, 0, 1, -1, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight( 1, 1.0f, 0.0f, 1, 0, 0, -1, mirror_pos.x, mirror_pos.y, offsetDistance );
 
-            castLight( 1, 1.0f, 0.0f, 0, -1, -1, 0, mirrorX, mirrorY, offsetDistance );
-            castLight( 1, 1.0f, 0.0f, -1, 0, 0, -1, mirrorX, mirrorY, offsetDistance );
+            castLight( 1, 1.0f, 0.0f, 0, -1, -1, 0, mirror_pos.x, mirror_pos.y, offsetDistance );
+            castLight( 1, 1.0f, 0.0f, -1, 0, 0, -1, mirror_pos.x, mirror_pos.y, offsetDistance );
         }
     }
 }

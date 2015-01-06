@@ -169,8 +169,7 @@ inventory inventory::operator+ (const item &rhs)
 
 /*static*/ bool inventory::has_capacity_for_liquid(const item &it, const item &liquid)
 {
-    LIQUID_FILL_ERROR error;
-    return (it.get_remaining_capacity_for_liquid(liquid, error) > 0);
+    return (it.get_remaining_capacity_for_liquid(liquid) > 0);
 }
 
 indexed_invslice inventory::slice_filter()
@@ -596,7 +595,7 @@ void crafting_inventory_t::form_from_map(point origin, int range)
                 if(faupart >= 0 ) {
                     item water("water_clean", 0);
                     water.charges = veh->fuel_left("water");
-                    this->vpart.push_back(item_from_vpart(veh, veh->parts[faupart].mount_dx, veh->parts[faupart].mount_dy, water));
+                    this->vpart.push_back(item_from_vpart(veh, veh->parts[faupart].mount.x, veh->parts[faupart].mount.y, water));
                 }
 
                 add_vpart(veh, vpart, "KITCHEN", "battery");
@@ -607,7 +606,7 @@ void crafting_inventory_t::form_from_map(point origin, int range)
 
                 const int cpart = veh->part_with_feature(vpart, "CARGO");
                 if (cpart >= 0) {
-                    items_in_vehicle_cargo inveh(veh, veh->parts[cpart].mount_dx, veh->parts[cpart].mount_dy);
+                    items_in_vehicle_cargo inveh(veh, veh->parts[cpart].mount.x, veh->parts[cpart].mount.y);
                     if(!inveh.items().empty()) {
                         in_veh.push_back(inveh);
                     }

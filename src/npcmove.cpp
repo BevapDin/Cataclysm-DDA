@@ -203,8 +203,7 @@ struct pcomp_dist_to_u {
         return dist(a) < dist(b);
     }
     int dist(int a) const {
-        const point p(veh->global_x() + veh->parts[a].precalc_dx[0],
-                      veh->global_y() + veh->parts[a].precalc_dy[0]);
+        const point p = veh->global_pos() + veh->parts[a].precalc[0];
         return square_dist(pu.x, pu.y, p.x, p.y);
     }
     int random(std::vector<int> &positions) const {
@@ -460,8 +459,8 @@ void npc::execute_action(npc_action action, int target)
                     // TODO: be angry at player, switch to wait or leave - for now pause
                     move_pause();
                 } else {
-                    int px = veh->global_x() + veh->parts[p2].precalc_dx[0];
-                    int py = veh->global_y() + veh->parts[p2].precalc_dy[0];
+                    int px = veh->global_x() + veh->parts[p2].precalc[0].x;
+                    int py = veh->global_y() + veh->parts[p2].precalc[0].y;
                     if(px == posx && py == posy) {
                         move_pause();
                     } else {

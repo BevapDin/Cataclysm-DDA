@@ -8419,7 +8419,8 @@
       ["grapnel", 5],
       ["wearable_light", 5],
       ["toolbox", 1],
-      ["smoxygen_tank", 35]
+      ["smoxygen_tank", 35],
+      ["watercannon", 10]
     ]
   },{
     "type" : "item_group",
