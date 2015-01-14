@@ -31,8 +31,7 @@
 #include "monattack.h"
 #include "worldfactory.h"
 #include "construction.h"
-#include "file_finder.h"
-#include "file_wrapper.h"
+#include "filesystem.h"
 #include "mod_manager.h"
 #include "path_info.h"
 #include "crafting_inventory_t.h"
@@ -42,6 +41,8 @@
 #include "pickup.h"
 #include "weather_gen.h"
 #include "start_location.h"
+#include "debug.h"
+#include "catalua.h"
 #include <map>
 #include <set>
 #include <algorithm>
@@ -52,6 +53,10 @@
 #include <vector>
 #include <cassert>
 #include <locale>
+#include <cassert>
+
+//TODO replace these includes with filesystem.h
+#include <sys/stat.h>
 
 #ifdef _MSC_VER
 #include "wdirent.h"
@@ -60,11 +65,6 @@
 #include <unistd.h>
 #include <dirent.h>
 #endif
-
-#include <sys/stat.h>
-#include "debug.h"
-#include "catalua.h"
-#include <cassert>
 
 #if (defined _WIN32 || defined __WIN32__)
 #ifndef NOMINMAX
@@ -1005,7 +1005,7 @@ static int veh_lumi(vehicle *veh)
 
 void game::calc_driving_offset(vehicle *veh)
 {
-    if (veh == NULL || !(OPTIONS["DRIVING_VIEW_OFFSET"] == true)) {
+    if (veh == nullptr || !OPTIONS["DRIVING_VIEW_OFFSET"]) {
         set_driving_view_offset(point(0, 0));
         return;
     }
@@ -3057,7 +3057,7 @@ input_context game::get_player_input(std::string &action)
                     if( m.is_outside( mapx, mapy ) &&
                         ( m.light_at( mapx, mapy ) > LL_LOW ||
                           distance <= light_sight_range ) &&
-                        m.pl_sees( u.posx, u.posy, mapx, mapy, distance ) &&
+                        m.pl_sees( mapx, mapy, distance ) &&
                         !critter_at(mapx, mapy) ) {
                         // Supress if a critter is there
                         wPrint.vdrops.push_back(std::make_pair(iRandX, iRandY));
@@ -3073,7 +3073,7 @@ input_context game::get_player_input(std::string &action)
                         //Erase previous text from w_terrain
                         if( elem.getStep() > 0 ) {
                             for( size_t i = 0; i < elem.getText().length(); ++i ) {
-                                if( u_see( elem.getPosX() + i, elem.getPosY() ) ) {
+                                if( u.sees( elem.getPosX() + i, elem.getPosY() ) ) {
                                     m.drawsq( w_terrain, u, elem.getPosX() + i, elem.getPosY(),
                                               false, true, u.posx + u.view_offset_x,
                                               u.posy + u.view_offset_y );
@@ -3106,7 +3106,7 @@ input_context game::get_player_input(std::string &action)
                     for (int i = 0; i < (int)iter->getText().length(); ++i) {
                         const int dex = mon_at(iter->getPosX() + i, iter->getPosY());
 
-                        if (dex != -1 && u_see(&zombie(dex))) {
+                        if (dex != -1 && u.sees(zombie(dex))) {
                             i = -1;
 
                             int iPos = iter->getStep() + iter->getStepOffset();
@@ -3266,7 +3266,7 @@ bool game::handle_action()
                 }
 
                 int mx, my;
-                if (!ctxt.get_coordinates(w_terrain, mx, my) || !u_see(mx, my)) {
+                if (!ctxt.get_coordinates(w_terrain, mx, my) || !u.sees(mx, my)) {
                     // Not clicked in visible terrain
                     return false;
                 }
@@ -3309,7 +3309,7 @@ bool game::handle_action()
                     int mouse_selected_mondex = mon_at(mx, my);
                     if (mouse_selected_mondex != -1) {
                         monster &critter = critter_tracker.find(mouse_selected_mondex);
-                        if (!u_see(&critter)) {
+                        if (!u.sees(critter)) {
                             add_msg(_("Nothing relevant here."));
                             return false;
                         }
@@ -4561,10 +4561,9 @@ static bool isForbidden(std::string candidate)
 void game::delete_world(std::string worldname, bool delete_folder)
 {
     std::string worldpath = world_generator->all_worlds[worldname]->world_path;
-    std::vector<std::string> file_paths;
     std::set<std::string> directory_paths;
 
-    file_paths = file_finder::get_files_from_path("", worldpath, true, true);
+    auto file_paths = get_files_from_path("", worldpath, true, true);
     if (!delete_folder) {
         std::vector<std::string>::iterator forbidden = find_if(file_paths.begin(), file_paths.end(),
                 isForbidden);
@@ -5476,10 +5475,10 @@ void game::calculate_footstep_markers(std::vector<point> &result)
 {
     result.reserve(footsteps.size());
     for (size_t i = 0; i < footsteps.size(); i++) {
-        if (!u_see(footsteps_source[i]->posx(), footsteps_source[i]->posy())) {
+        if( !u.sees( footsteps_source[i] ) ) {
             std::vector<point> unseen_points;
             for( auto &elem : footsteps[i] ) {
-                if( !u_see( elem.x, elem.y ) ) {
+                if( !u.sees( elem ) ) {
                     unseen_points.push_back( elem );
                 }
             }
@@ -5652,17 +5651,12 @@ void game::draw_critter(const Creature &critter, const point &center)
     if( !is_valid_in_w_terrain( mx, my ) ) {
         return;
     }
-    if( u.sees( &critter ) || &critter == &u ) {
+    if( u.sees( critter ) || &critter == &u ) {
         critter.draw( w_terrain, center.x, center.y, false );
         return;
     }
-    const bool has_ir = u.has_active_bionic( "bio_infrared" ) ||
-                        u.has_trait( "INFRARED" ) ||
-                        u.has_trait( "LIZ_IR" ) ||
-                        u.worn_with_flag( "IR_EFFECT" );
-    const bool can_see = m.pl_sees( u.posx, u.posy, critter.xpos(), critter.ypos(),
-                                    u.sight_range( DAYLIGHT_LEVEL ) );
-    if( critter.is_warm() && has_ir && can_see ) {
+
+    if( u.sees_with_infrared( critter ) ) {
         mvwputch( w_terrain, my, mx, c_red, '?' );
     }
 }
@@ -6155,40 +6149,6 @@ faction *game::faction_by_ident(std::string id)
     return NULL;
 }
 
-bool game::sees_u(int x, int y, int &t)
-{
-    const int mondex = mon_at(x, y);
-    if (mondex != -1) {
-        const monster &critter = critter_tracker.find(mondex);
-        return critter.sees_player(t);
-    }
-    // range = -1 = unlimited, proceeding sans critter
-    return (
-               m.sees(x, y, u.posx, u.posy, -1, t) &&
-               !u.is_invisible()
-           );
-}
-
-bool game::u_see(int x, int y)
-{
-    return u.sees(x, y);
-}
-
-bool game::u_see(const Creature *t)
-{
-    return u.sees(t);
-}
-
-bool game::u_see(const Creature &t)
-{
-    return u.sees(&t);
-}
-
-bool game::u_see(const monster *critter)
-{
-    return u.sees(critter);
-}
-
 Creature *game::is_hostile_nearby()
 {
     int distance = (OPTIONS["SAFEMODEPROXIMITY"] <= 0) ? 60 : OPTIONS["SAFEMODEPROXIMITY"];
@@ -6276,8 +6236,7 @@ int game::mon_info(WINDOW *w)
 
             monster_attitude matt = critter.attitude(&u);
             if (MATT_ATTACK == matt || MATT_FOLLOW == matt) {
-                int j;
-                if (index < 8 && sees_u(critter.posx(), critter.posy(), j)) {
+                if (index < 8 && critter.sees( g->u )) {
                     dangerous[index] = true;
                 }
 
@@ -6777,7 +6736,7 @@ void game::add_footstep(int x, int y, int volume, int distance, monster *source)
         return;
     } else if (x == u.posx && y == u.posy) {
         return;
-    } else if (u_see(x, y)) {
+    } else if (u.sees(x, y)) {
         return;
     }
     int err_offset;
@@ -6806,7 +6765,7 @@ void game::add_footstep(int x, int y, int volume, int distance, monster *source)
         }
     }
     footsteps.push_back(point_vector);
-    footsteps_source.push_back(source);
+    footsteps_source.push_back(source->pos());
 }
 
 void game::do_blast(const int x, const int y, const int power, const int radius, const bool fire)
@@ -7104,14 +7063,14 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
             targ->setpos(traj[i]);
             if (m.has_flag("LIQUID", targ->posx(), targ->posy()) && !targ->can_drown() && !targ->is_dead()) {
                 targ->die( nullptr );
-                if (u_see(targ)) {
+                if (u.sees(*targ)) {
                     add_msg(_("The %s drowns!"), targ->name().c_str());
                 }
             }
             if (!m.has_flag("LIQUID", targ->posx(), targ->posy()) && targ->has_flag(MF_AQUATIC) &&
                 !targ->is_dead()) {
                 targ->die( nullptr );
-                if (u_see(targ)) {
+                if (u.sees(*targ)) {
                     add_msg(_("The %s flops around and dies!"), targ->name().c_str());
                 }
             }
@@ -8257,7 +8216,7 @@ bool game::forced_gate_closing(int x, int y, ter_id door_type, int bash_dmg)
             break;
         }
     }
-    const bool can_see = u_see(x, y);
+    const bool can_see = u.sees(x, y);
     player *npc_or_player = NULL;
     if (x == u.pos().x && y == u.pos().y) {
         npc_or_player = &u;
@@ -8730,6 +8689,11 @@ bool pet_menu(monster *z)
             }
         }
 
+        if (max_weight <= 0) {
+            add_msg(_("%s is overburdened. You can't transfer your %s"),
+                    pet_name.c_str(), it->tname(1).c_str());
+            return true;
+        }
         if (max_cap <= 0) {
             add_msg(_("There's no room in your %s's %s for that, it's too bulky!"),
                     pet_name.c_str(), it->tname(1).c_str() );
@@ -9033,7 +8997,7 @@ void game::print_object_info(int lx, int ly, WINDOW *w_look, const int column, i
     int veh_part = 0;
     vehicle *veh = m.veh_at(lx, ly, veh_part);
     const Creature *critter = critter_at( lx, ly );
-    if( critter != nullptr && ( u.sees( critter ) || critter == &u ) ) {
+    if( critter != nullptr && ( u.sees( *critter ) || critter == &u ) ) {
         if( !mouse_hover ) {
             critter->draw( w_terrain, lx, ly, true );
         }
@@ -9440,7 +9404,7 @@ void game::zones_manager()
 #endif
                     for (int iY = pStart.y; iY <= pEnd.y; ++iY) {
                         for (int iX = pStart.x; iX <= pEnd.x; ++iX) {
-                            if (u_see(iX, iY)) {
+                            if (u.sees(iX, iY)) {
                                 m.drawsq(w_terrain, u,
                                          iX,
                                          iY,
@@ -9581,7 +9545,7 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
 #endif
                         for (int iY = std::min(pairCoordsFirst.y, ly); iY <= std::max(pairCoordsFirst.y, ly); ++iY) {
                             for (int iX = std::min(pairCoordsFirst.x, lx); iX <= std::max(pairCoordsFirst.x, lx); ++iX) {
-                                if (u_see(iX, iY)) {
+                                if (u.sees(iX, iY)) {
                                     m.drawsq(w_terrain, u,
                                              iX,
                                              iY,
@@ -9613,7 +9577,7 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
 
         } else {
             //Look around
-            if (u_see(lx, ly)) {
+            if (u.sees(lx, ly)) {
                 print_all_tile_info(lx, ly, w_info, 1, off, false);
 
             } else if (u.sight_impaired() &&
@@ -9786,7 +9750,7 @@ std::vector<map_item_stack> game::find_nearby_items(int iRadius)
 
     for( auto &points_p_it : points ) {
         if( points_p_it.y >= u.posy - iRadius && points_p_it.y <= u.posy + iRadius &&
-            u_see( points_p_it.x, points_p_it.y ) &&
+            u.sees( points_p_it ) &&
             m.sees_some_items( points_p_it.x, points_p_it.y, u ) ) {
 
             for( auto &elem : m.i_at( points_p_it.x, points_p_it.y ) ) {
@@ -10508,8 +10472,7 @@ int game::list_monsters(const int iLastState)
                     const auto m = dynamic_cast<monster*>( critter );
                     const auto p = dynamic_cast<npc*>( critter );
 
-                        int iDummy;
-                        if (sees_u(critter->xpos(), critter->ypos(), iDummy)) {
+                        if( critter->sees( g->u ) ) {
                             mvwprintz(w_monsters, y, 0, c_yellow, "!");
                         }
 
@@ -12506,7 +12469,7 @@ void game::chat()
     std::vector<npc *> available;
 
     for( auto &elem : active_npc ) {
-        if( u_see( ( elem )->posx, ( elem )->posy ) &&
+        if( u.sees( elem->pos() ) &&
             rl_dist( u.pos(), elem->pos() ) <= 24 ) {
             available.push_back( elem );
         }
@@ -13469,8 +13432,6 @@ void game::plswim(int x, int y)
         x >= SEEX * (1 + int(MAPSIZE / 2)) || y >= SEEY * (1 + int(MAPSIZE / 2))) {
         update_map(x, y);
     }
-    u.posx = x;
-    u.posy = y;
     if (!m.has_flag("SWIMMABLE", x, y)) {
         dbg(D_ERROR) << "game:plswim: Tried to swim in "
                      << m.tername(x, y).c_str() << "!";
@@ -13500,6 +13461,18 @@ void game::plswim(int x, int y)
         }
     }
     bool diagonal = (x != u.posx && y != u.posy);
+    if( u.in_vehicle ) {
+        m.unboard_vehicle( u.posx, u.posy );
+    }
+    u.posx = x;
+    u.posy = y;
+    {
+        int part;
+        const auto veh = m.veh_at( u.posx, u.posy, part );
+        if( veh != nullptr && veh->part_with_feature( part, VPFLAG_BOARDABLE ) >= 0 ) {
+            m.board_vehicle( u.posx, u.posy, &u );
+        }
+    }
     u.moves -= (movecost > 200 ? 200 : movecost)  * (trigdist && diagonal ? 1.41 : 1);
     u.inv.rust_iron_items();
 
@@ -13904,7 +13877,7 @@ void game::vertical_move(int movez, bool force)
             }
             const oter_id &ter = overmap_buffer.ter(cursx, cursy, levz);
             const oter_id &ter2 = overmap_buffer.ter(cursx, cursy, z_coord);
-            if (OPTIONS["AUTO_NOTES"] == true) {
+            if (!!OPTIONS["AUTO_NOTES"]) {
                 if (movez == +1 && otermap[ter].known_up && !otermap[ter2].known_down && !overmap_buffer.is_explored(cursx, cursy, z_coord)) {
                     overmap_buffer.set_seen(cursx, cursy, z_coord, true);
                     overmap_buffer.add_note(cursx, cursy, z_coord, _(">:W;AUTO: goes down"));
@@ -14167,7 +14140,7 @@ void game::update_stair_monsters()
 
                 coming_to_stairs[i].staircount -= 4;
                 // Let the player know zombies are trying to come.
-                if (u_see(mposx, mposy)) {
+                if (u.sees(mposx, mposy)) {
                     std::stringstream dump;
                     if (coming_to_stairs[i].staircount > 4) {
                         dump << string_format(_("You see a %s on the stairs"), critter.name().c_str());
@@ -14192,7 +14165,7 @@ void game::update_stair_monsters()
                     critter.setpos(mposx, mposy, true);
                     critter.staircount = 0;
                     add_zombie(critter);
-                    if (u_see(mposx, mposy)) {
+                    if (u.sees(mposx, mposy)) {
                         if (!from_below) {
                             add_msg(m_warning, _("The %s comes down the %s!"),
                                     critter.name().c_str(),
@@ -14502,7 +14475,7 @@ void game::teleport(player *p, bool add_teleglow)
         newy = p->posy + rng(0, SEEY * 2) - SEEY;
         tries++;
     } while (tries < 15 && m.move_cost(newx, newy) == 0);
-    bool can_see = (is_u || u_see(newx, newy));
+    bool can_see = (is_u || u.sees(newx, newy));
     if (p->in_vehicle) {
         m.unboard_vehicle(p->posx, p->posy);
     }
@@ -14706,7 +14679,7 @@ bool game::spread_fungus(int x, int y)
                                 if (one_in(3)) { // young trees are Vulnerable
                                     m.ter_set(i, j, t_fungus);
                                     m.add_spawn("mon_fungal_blossom", 1, x, y);
-                                    if (u_see(x, y)) {
+                                    if (u.sees(x, y)) {
                                     add_msg(m_warning, _("The young tree blooms forth into a fungal blossom!"));
                                     }
                                 } else if (one_in(2)) {
@@ -14723,7 +14696,7 @@ bool game::spread_fungus(int x, int y)
                                 if (one_in(4)) {
                                     m.ter_set(i, j, t_fungus);
                                     m.add_spawn("mon_fungal_blossom", 1, x, y);
-                                    if (u_see(x, y)) {
+                                    if (u.sees(x, y)) {
                                     add_msg(m_warning, _("The tree blooms forth into a fungal blossom!"));
                                     }
                                 } else if (one_in(3)) {

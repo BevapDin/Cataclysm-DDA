@@ -3000,7 +3000,7 @@
     {
         "type" : "AMMO",
         "id" : "RPG-7_ammo",
-        "price" : 60000,
+        "price" : 10000,
         "name" : "PG-7VL rocket",
         "symbol" : "=",
         "color" : "dark_gray",
@@ -4217,7 +4217,7 @@
 	"type" : "AMMO",
 	"id" : "incendiary_hm_rocket",
 	"price" : 1300,
-	"name" : "explosive home-made rocket",
+	"name" : "incendiary home-made rocket",
 	"symbol" : ",",
 	"color" : "red",
 	"description" : "A home-built rocket, consisting of a container of flammable gel attached onto a pipe, filled with improvised rocket fuel. Short-range incendiary – handle with care!",

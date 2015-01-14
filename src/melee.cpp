@@ -327,7 +327,7 @@ void player::melee_attack(Creature &t, bool allow_special, matec_id force_techni
                 add_msg(_("You swing wildly and miss."));
             else
                 add_msg(_("You miss."));
-        } else if( g->u.sees( this ) ) {
+        } else if( g->u.sees( *this ) ) {
             if (stumble_pen >= 60)
                 add_msg( _("%s misses and stumbles with the momentum."),name.c_str());
             else if (stumble_pen >= 10)
@@ -544,9 +544,9 @@ int player::get_dodge_base() const {
     return Creature::get_dodge_base() + get_skill_level("dodge");
 }
 
-int player::get_dodge() const
 //Returns 1/2*DEX + dodge skill level + static bonuses from mutations
 //Return numbers range from around 4 (starting player, no boosts) to 29 (20 DEX, 10 dodge, +9 mutations)
+int player::get_dodge() const
 {
     //If we're asleep or busy we can't dodge
     if (in_sleep_state()) {

@@ -24,10 +24,33 @@
 #include <cassert>
 #include <unordered_set>
 #include <set>
+#include <array>
 
 static const std::string GUN_MODE_VAR_NAME( "item::mode" );
 static const std::string CHARGER_GUN_FLAG_NAME( "CHARGE" );
 static const std::string CHARGER_GUN_AMMO_ID( "charge_shot" );
+
+std::string const& rad_badge_color(int const rad)
+{
+    using pair_t = std::pair<int const, std::string const>;
+    
+    static std::array<pair_t, 6> const values = {{
+        pair_t {  0, _("green") },
+        pair_t { 30, _("blue")  },
+        pair_t { 60, _("yellow")},
+        pair_t {120, _("orange")},
+        pair_t {240, _("red")   },
+        pair_t {500, _("black") },
+    }};
+
+    for (auto const &i : values) {
+        if (rad <= i.first) {
+            return i.second;
+        }
+    }
+
+    return values.back().second;
+}
 
 light_emission nolight = {0, 0, 0};
 
@@ -1248,15 +1271,9 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug) c
                 _("This piece of clothing is very fancy.")));
         }
         if (is_armor() && type->id == "rad_badge") {
-            size_t i;
-            for( i = 1; i < sizeof(rad_dosage_thresholds) / sizeof(rad_dosage_thresholds[0]); i++ ) {
-                if( irridation < rad_dosage_thresholds[i] ) {
-                    break;
-                }
-            }
             dump->push_back(iteminfo("DESCRIPTION",
                 string_format(_("The film strip on the badge is %s."),
-                              _(rad_threshold_colors[i - 1].c_str()))));
+                              rad_badge_color(irridation).c_str())));
         }
         if (is_tool() && has_flag("DOUBLE_AMMO")) {
             dump->push_back(iteminfo("DESCRIPTION",
@@ -1404,9 +1421,9 @@ std::string item::info(bool showtext, std::vector<iteminfo> *dump, bool debug) c
         bool header_printed_1 = false;
         bool header_printed_2 = false;
         bool has_recipe_to_make = false;
-        for(recipe_map::const_iterator a = recipes.begin(); a != recipes.end(); ++a) {
-            const recipe_list &recipes = a->second;
-            for(recipe_list::const_iterator b = recipes.begin(); b != recipes.end(); ++b) {
+        for(auto a = recipes.begin(); a != recipes.end(); ++a) {
+            const auto &recipes = a->second;
+            for(auto b = recipes.begin(); b != recipes.end(); ++b) {
                 const recipe &r = **b;
                 if(!g->u.knows_recipe(const_cast<recipe*>(&r))) {
                     continue;
@@ -4531,7 +4548,7 @@ bool item::process_corpse( player *carrier, point pos )
     }
     if( rng( 0, volume() ) > burnt && g->revive_corpse( pos.x, pos.y, this ) ) {
         if( carrier == nullptr ) {
-            if( g->u_see( pos.x, pos.y ) ) {
+            if( g->u.sees( pos ) ) {
                 if( corpse->in_species( "ROBOT" ) ) {
                     add_msg( m_warning, _( "A nearby robot has repaired itself and stands up!" ) );
                 } else {
