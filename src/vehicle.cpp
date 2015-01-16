@@ -5139,7 +5139,7 @@ void vehicle::aim_turrets()
         std::string aimed;
         bool en;
         auto items = get_items( p );
-        if( !items.empty() && items.front().charges < 1 && fuel_left( part_info( p ).fuel_type ) < 1 ) {
+        if( fuel_left( part_info( p ).fuel_type ) < 1 && ( items.empty() || items.front().charges < 1 ) ) {
             aimed = _("No ammo");
             en = false;
         } else {
@@ -5187,7 +5187,7 @@ void vehicle::aim_turrets()
     }
     const auto ammo = am_itype->ammo.get();
     const auto &gun_data = *gun.type->gun;
-    int range = gun_data.range + ammo->range;
+    int range = gun_data.range + ( ammo != nullptr ? ammo->range : 0 );
     int x = turret_pos.x;
     int y = turret_pos.y;
     int t;

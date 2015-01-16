@@ -18,7 +18,7 @@ void iexamine::none(player *p, map *m, int examx, int examy)
 {
     (void)p; //unused
     add_msg(_("That is a %s."), m->name(examx, examy).c_str());
-};
+}
 
 void iexamine::gaspump(player *p, map *m, int examx, int examy)
 {
@@ -1517,7 +1517,7 @@ void iexamine::aggie_plant(player *p, map *m, int examx, int examy)
             }
 
             item &seed = m->i_at( examx, examy ).front();
-            
+
              if( seed.bday > fertilizerEpoch ) {
               seed.bday -= fertilizerEpoch;
             } else {
