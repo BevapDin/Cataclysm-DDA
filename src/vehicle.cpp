@@ -6,10 +6,6 @@
 #include "item.h"
 #include "item_group.h"
 #include "veh_interact.h"
-#include <fstream>
-#include <sstream>
-#include <stdlib.h>
-#include <set>
 #include "cursesdef.h"
 #include "catacharset.h"
 #include <cassert>
@@ -18,7 +14,11 @@
 #include "messages.h"
 #include "ui.h"
 #include "debug.h"
-#include "helper.h"
+
+#include <fstream>
+#include <sstream>
+#include <stdlib.h>
+#include <set>
 
 /*
  * Speed up all those if ( blarg == "structure" ) statements that are used everywhere;
@@ -3381,7 +3381,9 @@ void vehicle::consume_fuel( double load = 1.0 )
         }
     }
     //do this with chance proportional to current load
-    if (one_in((int)(1/load)) && has_engine_type(fuel_type_muscle, true)) {
+    // But only if the player is actually there!
+    if( load > 0 && one_in( (int) (1 / load) ) && 
+        fuel_left( fuel_type_muscle ) > 0 ) {
         //charge bionics when using muscle engine
         if (g->u.has_bionic("bio_torsionratchet")) {
             g->u.charge_power(1);
