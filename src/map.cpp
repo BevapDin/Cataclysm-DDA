@@ -1954,12 +1954,15 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
             bash = &(ter_at(x,y).bash);
             smash_ter = true;
         }
-        // TODO: what if silent is true? What if this was done by a hulk, not the player?
+        // TODO: what if silent is true?
         if (has_flag("ALARMED", x, y) && !g->event_queued(EVENT_WANTED)) {
-            g->sound(x, y, 40, _("An alarm sounds!"));
-            g->u.add_memorial_log(pgettext("memorial_male", "Set off an alarm."),
-                                  pgettext("memorial_female", "Set off an alarm."));
-            g->add_event(EVENT_WANTED, int(calendar::turn) + 300, 0, g->get_abs_levx(), g->get_abs_levy());
+            g->sound(x, y, 40, _("an alarm go off!"));
+            // if the player is nearby blame him/her
+            if (rl_dist(g->u.posx, g->u.posy, x, y) <= 3) {
+                g->u.add_memorial_log(pgettext("memorial_male", "Set off an alarm."),
+                                      pgettext("memorial_female", "Set off an alarm."));
+                g->add_event(EVENT_WANTED, int(calendar::turn) + 300, 0, g->get_abs_levx(), g->get_abs_levy());
+            }
         }
 
         if ( bash != NULL && (!bash->destroy_only || destroy)) {
@@ -5587,9 +5590,9 @@ void map::add_corpse(int x, int y) {
     const bool isReviveSpecial = one_in(10);
 
     if (!isReviveSpecial){
-        body.make_corpse("corpse", GetMType("mon_null"), 0);
+        body.make_corpse();
     } else {
-        body.make_corpse("corpse", GetMType("mon_zombie"), 0);
+        body.make_corpse( "mon_zombie", calendar::turn );
         body.item_tags.insert("REVIVE_SPECIAL");
         body.active = true;
     }

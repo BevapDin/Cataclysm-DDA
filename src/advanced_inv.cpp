@@ -18,6 +18,7 @@
 #include <cmath>
 #include <vector>
 #include <cassert>
+#include <cstdlib>
 
 template<typename T>
 void _swap( T a, T b) {
@@ -1778,9 +1779,9 @@ bool advanced_inventory::query_charges( aim_location destarea, const advanced_in
             popupmsg = string_format( _( "Destination can only hold %d! Move how many? (0 to cancel) " ), amount );
         }
         const long possible_max = std::min( input_amount, amount );
-        amount = std::stoi( string_input_popup( popupmsg, 20,
+        amount = std::atoi( string_input_popup( popupmsg, 20,
                                  to_string( possible_max ),
-                                 "", "", -1, true ) );
+                                 "", "", -1, true ).c_str() );
         if( amount <= 0 ) {
             return false;
         }

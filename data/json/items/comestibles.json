@@ -17732,7 +17732,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "inhaler_sewergas",
-        "name" : "sewagas",
+        "name" : "sewagas inhaler",
         "weight" : 10,
         "color" : "light_blue",
         "addiction_type" : "none",
@@ -17770,7 +17770,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "inhaler_stimgas",
-        "name" : "stimgas",
+        "name" : "stimgas inhaler",
         "weight" : 10,
         "color" : "light_blue",
         "addiction_type" : "none",
