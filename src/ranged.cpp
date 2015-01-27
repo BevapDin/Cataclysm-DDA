@@ -1024,7 +1024,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
         if (snap_to_target) {
             center = point(x, y);
         } else {
-            center = point(u.posx() + u.view_offset_x, u.posy() + u.view_offset_y);
+            center = point(u.posx() + u.view_offset.x, u.posy() + u.view_offset.y);
         }
         // Clear the target window.
         for (int i = 1; i <= getmaxy(w_target) - num_instruction_lines - 2; i++) {

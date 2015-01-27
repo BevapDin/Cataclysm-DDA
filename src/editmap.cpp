@@ -261,8 +261,8 @@ void editmap::uphelp (std::string txt1, std::string txt2, std::string title)
 
 point editmap::edit()
 {
-    target.x = g->u.posx() + g->u.view_offset_x;
-    target.y = g->u.posy() + g->u.view_offset_y;
+    target.x = g->u.posx() + g->u.view_offset.x;
+    target.y = g->u.posy() + g->u.view_offset.y;
     input_context ctxt("EDITMAP");
     ctxt.register_directions();
     ctxt.register_action("LEFT_WIDE");

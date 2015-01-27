@@ -595,8 +595,8 @@ void cata_tiles::draw(int destx, int desty, int centerx, int centery, int width,
         }
     }
     // check to see if player is located at ter
-    else if (g->u.posx() + g->u.view_offset_x != g->ter_view_x ||
-             g->u.posy() + g->u.view_offset_y != g->ter_view_y) {
+    else if (g->u.posx() + g->u.view_offset.x != g->ter_view_x ||
+             g->u.posy() + g->u.view_offset.y != g->ter_view_y) {
         draw_from_id_string("cursor", C_NONE, empty_string, g->ter_view_x, g->ter_view_y, 0, 0);
     }
 

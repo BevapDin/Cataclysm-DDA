@@ -1505,13 +1505,12 @@ void game::set_driving_view_offset(const point &p)
 {
     // remove the previous driving offset,
     // store the new offset and apply the new offset.
-    u.view_offset_x -= driving_view_offset.x;
-    u.view_offset_y -= driving_view_offset.y;
+    u.view_offset.x -= driving_view_offset.x;
+    u.view_offset.y -= driving_view_offset.y;
     driving_view_offset.x = p.x;
     driving_view_offset.y = p.y;
-    u.view_offset_x += driving_view_offset.x;
-    u.view_offset_y += driving_view_offset.y;
-    u.view_offset_z = 0;
+    u.view_offset.x += driving_view_offset.x;
+    u.view_offset.y += driving_view_offset.y;
 }
 
 void game::rustCheck()
@@ -2418,8 +2417,8 @@ input_context game::get_player_input(std::string &action)
 
         //x% of the Viewport, only shown on visible areas
         const int dropCount = int(iEndX * iEndY * mapWeatherAnim[weather].fFactor);
-        const int offset_x = (u.posx() + u.view_offset_x) - getmaxx(w_terrain) / 2;
-        const int offset_y = (u.posy() + u.view_offset_y) - getmaxy(w_terrain) / 2;
+        const int offset_x = (u.posx() + u.view_offset.x) - getmaxx(w_terrain) / 2;
+        const int offset_y = (u.posy() + u.view_offset.y) - getmaxy(w_terrain) / 2;
 
         const bool bWeatherEffect = (mapWeatherAnim[weather].cGlyph != '?');
 
@@ -2448,7 +2447,7 @@ input_context game::get_player_input(std::string &action)
                 //Erase previous drops from w_terrain
                 for( auto &elem : wPrint.vdrops ) {
                     m.drawsq( w_terrain, u, elem.first + offset_x, elem.second + offset_y, false,
-                              true, u.posx() + u.view_offset_x, u.posy() + u.view_offset_y );
+                              true, u.posx() + u.view_offset.x, u.posy() + u.view_offset.y );
                 }
 
                 wPrint.vdrops.clear();
@@ -2482,13 +2481,13 @@ input_context game::get_player_input(std::string &action)
                             for( size_t i = 0; i < elem.getText().length(); ++i ) {
                                 if( u.sees( elem.getPosX() + i, elem.getPosY() ) ) {
                                     m.drawsq( w_terrain, u, elem.getPosX() + i, elem.getPosY(),
-                                              false, true, u.posx() + u.view_offset_x,
-                                              u.posy() + u.view_offset_y );
+                                              false, true, u.posx() + u.view_offset.x,
+                                              u.posy() + u.view_offset.y );
                                 } else {
                                     const int iDY =
-                                        POSY + ( elem.getPosY() - ( u.posy() + u.view_offset_y ) );
+                                        POSY + ( elem.getPosY() - ( u.posy() + u.view_offset.y ) );
                                     const int iDX =
-                                        POSX + ( elem.getPosX() - ( u.posx() + u.view_offset_x ) );
+                                        POSX + ( elem.getPosX() - ( u.posx() + u.view_offset.x ) );
 
                                     if (u.has_effect("boomered")) {
                                         mvwputch(w_terrain, iDY, iDX + i, c_magenta, '#');
@@ -2803,45 +2802,45 @@ bool game::handle_action()
     if( uquit == QUIT_WATCH || !u.is_dead_state() ) {
         switch(act) {
         case ACTION_CENTER:
-            u.view_offset_x = driving_view_offset.x;
-            u.view_offset_y = driving_view_offset.y;
-            u.view_offset_z = 0;
+            u.view_offset.x = driving_view_offset.x;
+            u.view_offset.y = driving_view_offset.y;
+            u.view_offset.z = 0;
             break;
 
         case ACTION_SHIFT_N:
-            u.view_offset_y += soffsetr;
+            u.view_offset.y += soffsetr;
             break;
 
         case ACTION_SHIFT_NE:
-            u.view_offset_x += soffset;
-            u.view_offset_y += soffsetr;
+            u.view_offset.x += soffset;
+            u.view_offset.y += soffsetr;
             break;
 
         case ACTION_SHIFT_E:
-            u.view_offset_x += soffset;
+            u.view_offset.x += soffset;
             break;
 
         case ACTION_SHIFT_SE:
-            u.view_offset_x += soffset;
-            u.view_offset_y += soffset;
+            u.view_offset.x += soffset;
+            u.view_offset.y += soffset;
             break;
 
         case ACTION_SHIFT_S:
-            u.view_offset_y += soffset;
+            u.view_offset.y += soffset;
             break;
 
         case ACTION_SHIFT_SW:
-            u.view_offset_x += soffsetr;
-            u.view_offset_y += soffset;
+            u.view_offset.x += soffsetr;
+            u.view_offset.y += soffset;
             break;
 
         case ACTION_SHIFT_W:
-            u.view_offset_x += soffsetr;
+            u.view_offset.x += soffsetr;
             break;
 
         case ACTION_SHIFT_NW:
-            u.view_offset_x += soffsetr;
-            u.view_offset_y += soffsetr;
+            u.view_offset.x += soffsetr;
+            u.view_offset.y += soffsetr;
             break;
 
         case ACTION_LOOK:
@@ -2965,11 +2964,11 @@ bool game::handle_action()
             break;
 
         case ACTION_SHIFT_UP:
-            u.view_offset_z++;
+            u.view_offset.z++;
             break;
 
         case ACTION_SHIFT_DOWN:
-            u.view_offset_z--;
+            u.view_offset.z--;
             break;
 
         case ACTION_MOVE_DOWN:
@@ -5060,7 +5059,7 @@ void game::draw_critter(const Creature &critter, const point &center)
 
 void game::draw_ter()
 {
-    draw_ter( tripoint( u.posx() + u.view_offset_x, u.posy() + u.view_offset_y, u.view_offset_z ) );
+    draw_ter( u.pos() + u.view_offset );
 }
 
 void game::draw_ter(const tripoint &center)
@@ -5111,10 +5110,10 @@ void game::draw_ter( const tripoint &center, bool looking )
     if (!destination_preview.empty()) {
         // Draw auto-move preview trail
         point final_destination = destination_preview.back();
-        point center = point(u.posx() + u.view_offset_x, u.posy() + u.view_offset_y);
+        point center = point(u.posx() + u.view_offset.x, u.posy() + u.view_offset.y);
         draw_line(final_destination.x, final_destination.y, center, destination_preview);
-        mvwputch(w_terrain, POSY + (final_destination.y - (u.posy() + u.view_offset_y)),
-                 POSX + (final_destination.x - (u.posx() + u.view_offset_x)), c_white, 'X');
+        mvwputch(w_terrain, POSY + (final_destination.y - (u.posy() + u.view_offset.y)),
+                 POSX + (final_destination.x - (u.posx() + u.view_offset.x)), c_white, 'X');
     }
 
     if (u.controlling_vehicle && !looking) {
@@ -5148,7 +5147,7 @@ void game::draw_veh_dir_indicator(void)
         float r = 10.0;
         int x = static_cast<int>(r * face.x);
         int y = static_cast<int>(r * face.y);
-        mvwputch(w_terrain, POSY + y - u.view_offset_y, POSX + x - u.view_offset_x, c_white, 'X');
+        mvwputch(w_terrain, POSY + y - u.view_offset.y, POSX + x - u.view_offset.x, c_white, 'X');
     }
 }
 
@@ -5649,8 +5648,8 @@ int game::mon_info(WINDOW *w)
         dangerou = false;
     }
 
-    int viewx = u.posx() + u.view_offset_x;
-    int viewy = u.posy() + u.view_offset_y;
+    int viewx = u.posx() + u.view_offset.x;
+    int viewy = u.posy() + u.view_offset.y;
     new_seen_mon.clear();
 
     for( auto &c : u.get_visible_creatures( SEEX * MAPSIZE ) ) {
@@ -8264,14 +8263,11 @@ void game::zones_manager_draw_borders(WINDOW *w_border, WINDOW *w_info_border,
 
 void game::zones_manager()
 {
-    const int iStoreViewOffsetX = u.view_offset_x;
-    const int iStoreViewOffsetY = u.view_offset_y;
+    const auto old_view_offset = u.view_offset;
+    u.view_offset = tripoint( 0, 0, 0 );
 
-    u.view_offset_x = 0;
-    u.view_offset_y = 0;
-
-    const int offset_x = (u.posx() + u.view_offset_x) - getmaxx(w_terrain) / 2;
-    const int offset_y = (u.posy() + u.view_offset_y) - getmaxy(w_terrain) / 2;
+    const int offset_x = (u.posx() + u.view_offset.x) - getmaxx(w_terrain) / 2;
+    const int offset_y = (u.posy() + u.view_offset.y) - getmaxy(w_terrain) / 2;
 
     draw_ter();
 
@@ -8566,8 +8562,8 @@ void game::zones_manager()
                                          iY,
                                          false,
                                          false,
-                                         u.posx() + u.view_offset_x,
-                                         u.posy() + u.view_offset_y);
+                                         u.posx() + u.view_offset.x,
+                                         u.posy() + u.view_offset.y);
                             } else {
                                 if (u.has_effect("boomered")) {
                                     mvwputch(w_terrain, iY - offset_y, iX - offset_x, c_magenta, '#');
@@ -8616,8 +8612,7 @@ void game::zones_manager()
         }
     }
 
-    u.view_offset_x = iStoreViewOffsetX;
-    u.view_offset_y = iStoreViewOffsetY;
+    u.view_offset = old_view_offset;
 
     refresh_all();
 }
@@ -8629,10 +8624,10 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
     bool bSelectZone = (pairCoordsFirst.x != -1 && pairCoordsFirst.y != -1);
     bool bHasFirstPoint = (pairCoordsFirst.x != -999 && pairCoordsFirst.y != -999);
 
-    const int offset_x = (u.posx() + u.view_offset_x) - getmaxx(w_terrain) / 2;
-    const int offset_y = (u.posy() + u.view_offset_y) - getmaxy(w_terrain) / 2;
+    const int offset_x = (u.posx() + u.view_offset.x) - getmaxx(w_terrain) / 2;
+    const int offset_y = (u.posy() + u.view_offset.y) - getmaxy(w_terrain) / 2;
 
-    int lx = u.posx() + u.view_offset_x, ly = u.posy() + u.view_offset_y;
+    int lx = u.posx() + u.view_offset.x, ly = u.posy() + u.view_offset.y;
 
     if (bSelectZone && bHasFirstPoint) {
         lx = pairCoordsFirst.x;
@@ -9028,7 +9023,7 @@ void game::draw_trail_to_square(int x, int y, bool bDrawX)
     draw_ter();
 
     std::vector<point> vPoint;
-    point center = point(u.posx() + u.view_offset_x, u.posy() + u.view_offset_y);
+    point center = point(u.posx() + u.view_offset.x, u.posy() + u.view_offset.y);
     if (x != 0 || y != 0) {
         //Draw trail
         vPoint = line_to(u.posx(), u.posy(), u.posx() + x, u.posy() + y, 0);
@@ -9042,8 +9037,8 @@ void game::draw_trail_to_square(int x, int y, bool bDrawX)
         if (vPoint.empty()) {
             mvwputch(w_terrain, POSY, POSX, c_white, 'X');
         } else {
-            mvwputch(w_terrain, POSY + (vPoint[vPoint.size() - 1].y - (u.posy() + u.view_offset_y)),
-                     POSX + (vPoint[vPoint.size() - 1].x - (u.posx() + u.view_offset_x)),
+            mvwputch(w_terrain, POSY + (vPoint[vPoint.size() - 1].y - (u.posy() + u.view_offset.y)),
+                     POSX + (vPoint[vPoint.size() - 1].x - (u.posx() + u.view_offset.x)),
                      c_white, 'X');
         }
     }
@@ -9159,35 +9154,35 @@ void centerlistview(int iActiveX, int iActiveY)
             int yOffset = TERRAIN_WINDOW_HEIGHT / 2;
             if (!is_valid_in_w_terrain(xpos, ypos)) {
                 if (xpos < 0) {
-                    u.view_offset_x = xpos - xOffset;
+                    u.view_offset.x = xpos - xOffset;
                 } else {
-                    u.view_offset_x = xpos - (TERRAIN_WINDOW_WIDTH - 1) + xOffset;
+                    u.view_offset.x = xpos - (TERRAIN_WINDOW_WIDTH - 1) + xOffset;
                 }
 
                 if (xpos < 0) {
-                    u.view_offset_y = ypos - yOffset;
+                    u.view_offset.y = ypos - yOffset;
                 } else {
-                    u.view_offset_y = ypos - (TERRAIN_WINDOW_HEIGHT - 1) + yOffset;
+                    u.view_offset.y = ypos - (TERRAIN_WINDOW_HEIGHT - 1) + yOffset;
                 }
             } else {
-                u.view_offset_x = 0;
-                u.view_offset_y = 0;
+                u.view_offset.x = 0;
+                u.view_offset.y = 0;
             }
         } else {
             if (xpos < 0) {
-                u.view_offset_x = xpos;
+                u.view_offset.x = xpos;
             } else if (xpos >= TERRAIN_WINDOW_WIDTH) {
-                u.view_offset_x = xpos - (TERRAIN_WINDOW_WIDTH - 1);
+                u.view_offset.x = xpos - (TERRAIN_WINDOW_WIDTH - 1);
             } else {
-                u.view_offset_x = 0;
+                u.view_offset.x = 0;
             }
 
             if (ypos < 0) {
-                u.view_offset_y = ypos;
+                u.view_offset.y = ypos;
             } else if (ypos >= TERRAIN_WINDOW_HEIGHT) {
-                u.view_offset_y = ypos - (TERRAIN_WINDOW_HEIGHT - 1);
+                u.view_offset.y = ypos - (TERRAIN_WINDOW_HEIGHT - 1);
             } else {
-                u.view_offset_y = 0;
+                u.view_offset.y = 0;
             }
         }
     }
@@ -9251,11 +9246,8 @@ int game::list_items(const int iLastState)
     if (iItemNum > 0) {
         uistate.list_item_mon = 1; // remember we've tabbed here
     }
-    const int iStoreViewOffsetX = u.view_offset_x;
-    const int iStoreViewOffsetY = u.view_offset_y;
-
-    u.view_offset_x = 0;
-    u.view_offset_y = 0;
+    const auto old_view_offset = u.view_offset;
+    u.view_offset = tripoint( 0, 0, 0 );
 
     int iReturn = -1;
     int iActive = 0; // Item index that we're looking at
@@ -9367,8 +9359,7 @@ int game::list_items(const int iLastState)
                     iPage = 0;
                 }
             } else if (action == "NEXT_TAB" || action == "PREV_TAB") {
-                u.view_offset_x = iStoreViewOffsetX;
-                u.view_offset_y = iStoreViewOffsetY;
+                u.view_offset = old_view_offset;
                 return 1;
             }
 
@@ -9490,8 +9481,7 @@ int game::list_items(const int iLastState)
         }
     } while (action != "QUIT");
 
-    u.view_offset_x = iStoreViewOffsetX;
-    u.view_offset_y = iStoreViewOffsetY;
+    u.view_offset = old_view_offset;
 
     return iReturn;
 }
@@ -9524,11 +9514,8 @@ int game::list_monsters(const int iLastState)
 
     const int iWeaponRange = u.weapon.gun_range(&u);
 
-    const int iStoreViewOffsetX = u.view_offset_x;
-    const int iStoreViewOffsetY = u.view_offset_y;
-
-    u.view_offset_x = 0;
-    u.view_offset_y = 0;
+    const auto old_view_offset = u.view_offset;
+    u.view_offset = tripoint( 0, 0, 0 );
 
     int iActive = 0; // monster index that we're looking at
     const int iMaxRows = TERMY - iInfoHeight - 2 - VIEW_OFFSET_Y * 2 - 1;
@@ -9586,8 +9573,7 @@ int game::list_monsters(const int iLastState)
                     iActive = 0;
                 }
             } else if (action == "NEXT_TAB" || action == "PREV_TAB") {
-                u.view_offset_x = iStoreViewOffsetX;
-                u.view_offset_y = iStoreViewOffsetY;
+                u.view_offset = old_view_offset;
                 return 1;
             } else if (action == "look") {
                 point recentered = look_around();
@@ -9597,8 +9583,7 @@ int game::list_monsters(const int iLastState)
                 if( cCurMon != nullptr &&
                     rl_dist( u.pos(), cCurMon->pos() ) <= iWeaponRange) {
                     last_target = mon_at( cCurMon->posx(), cCurMon->posy() );
-                    u.view_offset_x = iStoreViewOffsetX;
-                    u.view_offset_y = iStoreViewOffsetY;
+                    u.view_offset = old_view_offset;
                     return 2;
                 }
             }
@@ -9711,8 +9696,7 @@ int game::list_monsters(const int iLastState)
             action = ctxt.handle_input();
     } while (action != "QUIT");
 
-    u.view_offset_x = iStoreViewOffsetX;
-    u.view_offset_y = iStoreViewOffsetY;
+    u.view_offset = old_view_offset;
 
     return -1;
 }
