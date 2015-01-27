@@ -135,6 +135,16 @@ struct point {
         y += rhs.y;
         return *this;
     }
+    point operator-(const point &rhs) const
+    {
+        return point( x - rhs.x, y - rhs.y );
+    }
+    point &operator-=(const point &rhs)
+    {
+        x -= rhs.x;
+        y -= rhs.y;
+        return *this;
+    }
 };
 
 // Make point hashable so it can be used as an unordered_set or unordered_map key,
@@ -167,6 +177,48 @@ struct tripoint {
     int y;
     int z;
     explicit tripoint(int X = 0, int Y = 0, int Z = 0) : x(X), y(Y), z(Z) {}
+    tripoint operator+(const tripoint &rhs) const
+    {
+        return tripoint( x + rhs.x, y + rhs.y, z + rhs.z );
+    }
+    tripoint operator+(const point &rhs) const
+    {
+        return tripoint( x + rhs.x, y + rhs.y, z );
+    }
+    tripoint &operator+=(const tripoint &rhs)
+    {
+        x += rhs.x;
+        y += rhs.y;
+        z += rhs.z;
+        return *this;
+    }
+    tripoint &operator+=(const point &rhs)
+    {
+        x += rhs.x;
+        y += rhs.y;
+        return *this;
+    }
+    tripoint operator-(const tripoint &rhs) const
+    {
+        return tripoint( x - rhs.x, y - rhs.y, z - rhs.z );
+    }
+    tripoint operator-(const point &rhs) const
+    {
+        return tripoint( x - rhs.x, y - rhs.y, z );
+    }
+    tripoint &operator-=(const tripoint &rhs)
+    {
+        x -= rhs.x;
+        y -= rhs.y;
+        z -= rhs.z;
+        return *this;
+    }
+    tripoint &operator-=(const point &rhs)
+    {
+        x -= rhs.x;
+        y -= rhs.y;
+        return *this;
+    }
 };
 
 // Make tripoint hashable so it can be used as an unordered_set or unordered_map key,
