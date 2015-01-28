@@ -111,7 +111,6 @@ void game::serialize(std::ofstream & fout) {
 
         // Then each monster
         json.member( "active_monsters", critter_tracker.list() );
-        json.member( "stair_monsters", coming_to_stairs );
 
         // save killcounts.
         json.member( "kills" );
@@ -242,14 +241,6 @@ void game::unserialize(std::ifstream & fin)
             monster montmp;
             vdata.read_next(montmp);
             add_zombie(montmp);
-        }
-
-        vdata = data.get_array("stair_monsters");
-        coming_to_stairs.clear();
-        while (vdata.has_more()) {
-            monster stairtmp;
-            vdata.read_next(stairtmp);
-            coming_to_stairs.push_back(stairtmp);
         }
 
         JsonObject odata = data.get_object("kills");

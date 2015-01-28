@@ -396,8 +396,6 @@ class game
         int get_abs_levz() const;
         player u;
         scenario *scen;
-        std::vector<monster> coming_to_stairs;
-        int monstairx, monstairy, monstairz;
         std::vector<npc *> active_npc;
         std::vector<faction> factions;
         std::vector<mission> active_missions; // Missions which may be assigned
@@ -644,8 +642,6 @@ class game
                                         int default_target_x = -1, int default_target_y = -1);
 
         // Map updating and monster spawning
-        void replace_stair_monsters();
-        void update_stair_monsters();
         /**
          * Shift all active monsters, the shift vector (x,y,z) is the number of
          * shifted submaps. Monsters that are outside of the reality bubble after

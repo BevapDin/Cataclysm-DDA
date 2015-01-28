@@ -916,7 +916,6 @@ void monster::load(JsonObject &data)
     data.read("anger", anger);
     data.read("morale", morale);
     data.read("hallucination", hallucination);
-    data.read("stairscount", staircount); // really?
 
     data.read("plans", plans);
 
@@ -968,7 +967,6 @@ void monster::store(JsonOut &json) const
     json.member("anger", anger);
     json.member("morale", morale);
     json.member("hallucination", hallucination);
-    json.member("stairscount", staircount);
     json.member("plans", plans);
     json.member("ammo", ammo);
     json.member( "underwater", underwater );

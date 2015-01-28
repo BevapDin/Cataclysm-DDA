@@ -124,9 +124,6 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
          */
         bool can_move_to(int x, int y) const;
 
-        bool will_reach(int x, int y); // Do we have plans to get to (x, y)?
-        int  turns_to_reach(int x, int y); // How long will it take?
-
         void set_dest(int x, int y, int &t); // Go in a straight line to (x, y)
         // t determines WHICH Bresenham line
 
@@ -314,9 +311,6 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         }
 
         short ignoring;
-
-        // Stair data.
-        int staircount;
 
         // Ammunition if we use a gun.
         std::map<std::string, int> ammo;
