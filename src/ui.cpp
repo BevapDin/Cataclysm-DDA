@@ -794,16 +794,14 @@ void uimenu::settext(const char *format, ...)
     va_end(ap);
 }
 
-pointmenu_cb::pointmenu_cb( std::vector< point > &pts ) : points( pts )
+pointmenu_cb::pointmenu_cb( std::vector< tripoint > &pts ) : points( pts )
 {
     last = INT_MIN;
-    view_x = g->u.view_offset.x;
-    view_y = g->u.view_offset.y;
+    view = g->u.view_offset;
 }
 
 void pointmenu_cb::select( int /*num*/, uimenu * /*menu*/ ) {
-    g->u.view_offset.x = view_x;
-    g->u.view_offset.y = view_y;
+    g->u.view_offset = view;
 }
 
 void pointmenu_cb::refresh( uimenu *menu ) {
@@ -812,8 +810,7 @@ void pointmenu_cb::refresh( uimenu *menu ) {
     }
     if( menu->selected < 0 || menu->selected >= (int)points.size() ) {
         last = menu->selected;
-        g->u.view_offset.x = 0;
-        g->u.view_offset.y = 0;
+        g->u.view_offset = tripoint( 0, 0, 0 );
         g->draw_ter();
         menu->redraw( false ); // show() won't redraw borders
         menu->show();
@@ -821,9 +818,8 @@ void pointmenu_cb::refresh( uimenu *menu ) {
     }
 
     last = menu->selected;
-    const point &center = points[menu->selected];
-    g->u.view_offset.x = center.x - g->u.posx();
-    g->u.view_offset.y = center.y - g->u.posy();
+    const tripoint &center = points[menu->selected];
+    g->u.view_offset = center - g->u.pos();
     g->draw_trail_to_square( g->u.view_offset.x, g->u.view_offset.y, true);
     menu->redraw( false );
     menu->show();

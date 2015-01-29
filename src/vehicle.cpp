@@ -559,7 +559,7 @@ void vehicle::smash() {
 void vehicle::control_doors() {
     std::vector< int > door_motors = all_parts_with_feature( "DOOR_MOTOR", true );
     std::vector< int > doors_with_motors; // Indices of doors
-    std::vector< point > locations; // Locations used to display the doors
+    std::vector< tripoint > locations; // Locations used to display the doors
     doors_with_motors.reserve( door_motors.size() );
     locations.reserve( door_motors.size() );
     if( door_motors.empty() ) {
@@ -4930,7 +4930,7 @@ std::string aim_type( const vehicle_part &part )
 void vehicle::aim_turrets()
 {
     std::vector< int > turrets = all_parts_with_feature( "TURRET", true );
-    std::vector< point > locations;
+    std::vector< tripoint > locations;
     
     uimenu pmenu;
     for( int p : turrets ) {
@@ -5036,7 +5036,7 @@ void vehicle::aim_turrets()
 void vehicle::control_turrets() {
     std::vector< int > all_turrets = all_parts_with_feature( "TURRET", true );
     std::vector< int > turrets;
-    std::vector< point > locations;
+    std::vector< tripoint > locations;
     
     uimenu pmenu;
     for( int p : all_turrets ) {

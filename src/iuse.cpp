@@ -8294,7 +8294,7 @@ int iuse::robotcontrol(player *p, item *it, bool, tripoint)
             pick_robot.text = _("Choose an endpoint to hack.");
             // Build a list of all unfriendly robots in range.
             std::vector< monster* > mons;
-            std::vector< point > locations;
+            std::vector< tripoint > locations;
             int entry_num = 0;
             for( size_t i = 0; i < g->num_zombies(); ++i ) {
                 monster &candidate = g->zombie( i );
@@ -8302,12 +8302,12 @@ int iuse::robotcontrol(player *p, item *it, bool, tripoint)
                     rl_dist( p->pos(), candidate.pos() ) <= 10 ) {
                     mons.push_back( &candidate );
                     pick_robot.addentry( entry_num++, true, MENU_AUTOASSIGN, candidate.name() );
-                    point seen_loc;
+                    tripoint seen_loc;
                     // Show locations of seen robots, center on player if robot is not seen
                     if( p->sees( candidate ) ) {
-                        seen_loc = point( candidate.posx(), candidate.posy() );
+                        seen_loc = candidate.pos();
                     } else {
-                        seen_loc = point( p->posx(), p->posy() );
+                        seen_loc = p->pos();
                     }
                     locations.push_back( seen_loc );
                 }
@@ -9593,10 +9593,10 @@ vehicle *pickveh( tripoint center, bool advanced )
             vehs.push_back( v );
         }
     }
-    std::vector< point > locations;
+    std::vector< tripoint > locations;
     for( int i = 0; i < (int)vehs.size(); i++ ) {
         auto veh = vehs[i];
-        locations.push_back( point( veh->global_x(), veh->global_y() ) );
+        locations.push_back( veh->global_pos() );
         pmenu.addentry( i, true, MENU_AUTOASSIGN, veh->name.c_str() );
     }
 
