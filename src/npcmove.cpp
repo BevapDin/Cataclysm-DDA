@@ -211,16 +211,6 @@ void npc::execute_action(npc_action action, int target)
                name.c_str(), target, npc_action_name(action).c_str());
     */
 
-    std::vector<point> line;
-    if (tarx != posx() || tary != posy()) {
-        int linet, dist = sight_range(g->light_level());
-        if (g->m.sees(posx(), posy(), tarx, tary, dist, linet)) {
-            line = line_to(posx(), posy(), tarx, tary, linet);
-        } else {
-            line = line_to(posx(), posy(), tarx, tary, 0);
-        }
-    }
-
     switch (action) {
 
     case npc_pause:
