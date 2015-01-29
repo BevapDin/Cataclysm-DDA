@@ -763,7 +763,7 @@ void add_corpse(int x, int y);
         void creature_in_field( Creature &critter );
 
 // Computers
- computer* computer_at(const int x, const int y);
+        computer* computer_at( tripoint p );
 
  // Camps
  bool allow_camp(const int x, const int y, const int radius = CAMPCHECK);

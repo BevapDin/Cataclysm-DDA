@@ -4277,13 +4277,12 @@ void map::remove_field(const tripoint &p, const field_id field_to_remove)
  current_submap->fld[lx][ly].removeField(field_to_remove);
 }
 
-computer* map::computer_at(const int x, const int y)
+computer* map::computer_at( const tripoint p )
 {
- if (!inbounds(x, y))
+ if (!inbounds(p))
   return NULL;
 
- // TODO: Z
- submap * const current_submap = get_submap_at(x, y);
+ submap * const current_submap = get_submap_at( p );
 
  if (current_submap->comp.name == "") {
   return NULL;

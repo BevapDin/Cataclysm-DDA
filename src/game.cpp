@@ -6554,7 +6554,7 @@ void game::knockback(std::vector<point> &traj, int force, int stun, int dam_mult
     return;
 }
 
-void game::use_computer(int x, int y)
+void game::use_computer( const tripoint p )
 {
     if (u.has_trait("ILLITERATE")) {
         add_msg(m_info, _("You can not read a computer screen!"));
@@ -6567,12 +6567,12 @@ void game::use_computer(int x, int y)
         return;
     }
 
-    computer *used = m.computer_at(x, y);
+    computer *used = m.computer_at( p );
 
     if (used == NULL) {
         dbg(D_ERROR) << "game:use_computer: Tried to use computer at (" <<
-            x << ", " << y << ") - none there";
-        debugmsg("Tried to use computer at (%d, %d) - none there", x, y);
+            p << ") - none there";
+        debugmsg("Tried to use computer at (%d, %d, %d) - none there", p.x, p.y, p.z);
         return;
     }
 
@@ -7997,7 +7997,8 @@ void game::examine(int examx, int examy)
     }
 
     if (m.has_flag("CONSOLE", examx, examy)) {
-        use_computer(examx, examy);
+        // TODO: Z
+        use_computer( tripoint( examx, examy, 0 ) );
         return;
     }
     const furn_t *xfurn_t = &furnlist[m.furn(examx, examy)];

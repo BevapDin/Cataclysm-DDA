@@ -168,7 +168,7 @@ class game
         /** Moves the player vertically. If force == true then they are falling. */
         void vertical_move(int z, bool force);
         /** Checks to see if a player can use a computer (not illiterate, etc.) and uses if able. */
-        void use_computer(int x, int y);
+        void use_computer( tripoint p );
         /** Attempts to refill the give vehicle's part with the player's current weapon. Returns true if successful. */
         bool refill_vehicle_part (vehicle &veh, vehicle_part *part, bool test = false);
         /** Identical to refill_vehicle_part(veh, &veh.parts[part], test). */

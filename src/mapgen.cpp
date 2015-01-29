@@ -11371,7 +11371,7 @@ vehicle *map::add_vehicle_to_map(vehicle *veh, const bool merge_wrecks)
 computer *map::add_computer(int x, int y, std::string name, int security)
 {
     ter_set(x, y, t_console); // TODO: Turn this off?
-    submap *place_on_submap = get_submap_at(x, y);
+    submap *place_on_submap = get_submap_at( tripoint( x, y, 0 ) );
     place_on_submap->comp = computer(name, security);
     return &(place_on_submap->comp);
 }
