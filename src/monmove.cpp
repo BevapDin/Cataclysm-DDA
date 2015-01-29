@@ -36,8 +36,15 @@ bool monster::can_move_to(const tripoint &p) const
     } else if (p.z < posz()) { // moving downwards
         // TODO: Z allow jumping down
         if (!g->m.has_flag_ter("GOES_DOWN", tripoint(p.x, p.y, posz()))) {
+            if (has_flag(MF_STUMBLES) && !g->m.blocks_vertical_air_up(p)) {
+                // Fall through thin air, if we stumble and if there is nothing that blocks us
+                return true;
+            }
             return false;
         }
+    }
+    if (g->m.has_flag_ter("NOFLOOR", p)) {
+        return false;
     }
     if (g->m.move_cost(p) == 0) {
         return false;
@@ -384,12 +391,9 @@ void monster::move()
     int mondex = !plans.empty() ? g->mon_at( plans[0] ) : -1;
     auto mon_att = mondex != -1 ? attitude_to( g->zombie( mondex ) ) : A_HOSTILE;
 
-    if( !plans.empty() &&
+    if (
         ( mon_att == A_HOSTILE || has_flag(MF_ATTACKMON) ) &&
-        ( can_move_to( plans[0] ) ||
-          ( plans[0] == g->u.pos() ) ||
-          ( ( has_flag( MF_BASHES ) || has_flag( MF_BORES ) ) &&
-          g->m.bash_rating( bash_estimate(), plans[0] ) >= 0 ) ) ) {
+        can_follow_plan()) {
         // CONCRETE PLANS - Most likely based on sight
         next = plans[0];
         moved = true;
@@ -429,6 +433,48 @@ void monster::move()
           !moved) {
         stumble(moved);
     }
+}
+
+bool monster::can_follow_plan() {
+    if (plans.empty()) {
+        return false;
+    }
+    const tripoint &next = plans[0];
+    if (next == g->u.pos() && can_attack_across_z(next)) {
+        if (next.z == posz()) {
+            return true;
+        }
+        // nope, player is above / below us, check if we can attack it
+        check_z = true;
+    }
+    if( ( has_flag(MF_BASHES) || has_flag(MF_BORES) ) && g->m.bash_rating(bash_estimate(), next) > 0) {
+        if (next.z == posz()) {
+            return true;
+        }
+        check_z = true;
+    }
+    if (check_z) {
+        if (next.z < posz()) {
+            if (g->m.blocks_vertical_air_up(next) && g->m.blocks_vertical_air_down(pos())) {
+                return false;
+            }
+        } else {
+            if (g->m.blocks_vertical_air_down(next) && g->m.blocks_vertical_air_up(pos())) {
+                return false;
+            }
+        }
+        return true;
+    }
+    if (next.z != posz()) {
+        // We attempt to make a z-level change, but we can not move there
+        // (mayby there are no stairs?), try to move on the same z-level
+        plans[0].z = posz();
+        if (plans[0] == pos()) {
+            plans.erase(plans.begin());
+        }
+        return can_follow_plan();
+    }
+    return false;
 }
 
 // footsteps will determine how loud a monster's normal movement is

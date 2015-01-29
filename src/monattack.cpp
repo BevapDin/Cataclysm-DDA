@@ -3524,6 +3524,18 @@ void mattack::bite(monster *z, int index)
     if( target == nullptr || rl_dist( z->pos(), target->pos() ) > 1 ) {
         return;
     }
+    {
+        const int zz = z->posz();
+        if (zz < 0) {
+            if (g->m.blocks_vertical_air_up(z->pos()) && g->m.blocks_vertical_air_down(g->u.pos())) {
+                return;
+            }
+        } else if(zz > 0) {
+            if (g->m.blocks_vertical_air_down(z->pos()) && g->m.blocks_vertical_air_up(g->u.pos())) {
+                return;
+            }
+        }
+    }
 
     player *foe = dynamic_cast< player* >( target );
     bool seen = g->u.sees( *z );

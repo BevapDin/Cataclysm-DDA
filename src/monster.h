@@ -353,6 +353,8 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
     protected:
         void store(JsonOut &jsout) const;
         void load(JsonObject &jsin);
+        /** Can the zombie make the next movement according to its current plan? */
+        bool can_follow_plan();
 };
 
 #endif
