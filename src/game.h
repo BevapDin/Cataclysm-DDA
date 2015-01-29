@@ -240,7 +240,10 @@ class game
         std::vector<point> target(int &x, int &y, int lowx, int lowy, int hix,
                                   int hiy, std::vector <Creature *> t, int &target,
                                   item *relevent, target_mode mode, 
-                                  point from = point(-1, -1));
+                                  tripoint from = tripoint(-1, -1, -1));
+        std::vector<point> target(int &x, int &y, int lowx, int lowy, int hix,
+                                  int hiy, std::vector <Creature *> t, int &target,
+                                  item *relevent, target_mode mode);
         /** Redirects to player::cancel_activity(). */
         void cancel_activity();
         /** Asks if the player wants to cancel their activity, and if so cancels it. */
@@ -480,6 +483,7 @@ class game
         void draw_hit_mon(int x, int y, monster critter, bool dead = false);
         void draw_hit_player(player *p, const int iDam, bool dead = false);
         void draw_line(const int x, const int y, const point center_point, std::vector<point> ret);
+        void draw_line(const tripoint &p, const tripoint &center_point, const std::vector<tripoint> &ret);
         void draw_line(const int x, const int y, std::vector<point> ret);
         void draw_weather(weather_printable wPrint);
         void draw_sct();

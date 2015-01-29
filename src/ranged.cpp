@@ -926,16 +926,22 @@ static void do_aim( player *p, std::vector <Creature *> &t, int &target,
     }
 }
 
+std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
+                                int hiy, std::vector <Creature *> t, int &ta,
+                                item *relevant, target_mode mode)
+{
+    return target( x, y, lowx, lowy, hix, hiy, t, ta, relevant, mode, u.pos() );
+}
+
 // TODO: Shunt redundant drawing code elsewhere
 std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
                                 int hiy, std::vector <Creature *> t, int &target,
-                                item *relevant, target_mode mode, point from)
+                                item *relevant, target_mode mode, tripoint from)
 {
+    int z = from.z;
     std::vector<point> ret;
+    std::vector<tripoint> ret2;
     int tarx, tary, junk, tart;
-    if( from.x == -1 && from.y == -1 ) {
-        from = u.pos();
-    }
     int range = ( hix - from.x );
     // First, decide on a target among the monsters, if there are any in range
     if (!t.empty()) {
@@ -982,6 +988,8 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
     ctxt.register_action("TOGGLE_SNAP_TO_TARGET");
     ctxt.register_action("HELP_KEYBINDINGS");
     ctxt.register_action("QUIT");
+    ctxt.register_action("LEVEL_UP");
+    ctxt.register_action("LEVEL_DOWN");
 
     int num_instruction_lines = draw_targeting_window( w_target, relevant, u, mode, ctxt );
 
@@ -996,10 +1004,13 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
     }
 
     do {
-        if (m.sees(from.x, from.y, x, y, -1, tart)) {
+        const tripoint targ(x, y, z);
+        if (m.sees(from, targ, -1, tart)) {
             ret = line_to(from.x, from.y, x, y, tart);
+            ret2 = line_to(from, targ, tart);
         } else {
             ret = line_to(from.x, from.y, x, y, 0);
+            ret2 = line_to(from, targ, 0);
         }
 
         // This chunk of code handles shifting the aim point around
@@ -1022,9 +1033,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
         }
         tripoint center;
         if (snap_to_target) {
-            center.x = x;
-            center.y = y;
-            center.z = 0;
+            center = targ;
         } else {
             center = u.pos() + u.view_offset;
         }
@@ -1054,7 +1063,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
             // Only draw a highlighted trajectory if we can see the endpoint.
             // Provides feedback to the player, and avoids leaking information
             // about tiles they can't see.
-            draw_line(x, y, point(center.x, center.y), ret);
+            draw_line( targ, center, ret2 );
 
             // Print to target window
             if (!relevant) {
@@ -1230,6 +1239,13 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
         } else if (action == "CENTER") {
             x = from.x;
             y = from.y;
+            z = 0;
+            ret.clear();
+        } else if (action == "LEVEL_UP") {
+            z++;
+            ret.clear();
+        } else if (action == "LEVEL_DOWN") {
+            z--;
             ret.clear();
         } else if (action == "TOGGLE_SNAP_TO_TARGET") {
             snap_to_target = !snap_to_target;

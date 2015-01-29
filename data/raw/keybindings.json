@@ -758,7 +758,7 @@
             },
             {
                 "input_method":"keyboard",
-                "key":"<"
+                "key":"P"
             }
         ]
     },
@@ -777,7 +777,7 @@
             },
             {
                 "input_method":"keyboard",
-                "key":">"
+                "key":"N"
             }
         ]
     },
