@@ -415,7 +415,7 @@ class map
  bool could_see_items(const tripoint &p, const player &u);
 
 
- std::string features(const int x, const int y); // Words relevant to terrain (sharp, etc)
+ std::string features(const tripoint &p); // Words relevant to terrain (sharp, etc)
  bool has_flag(const std::string & flag, const int x, const int y) const;  // checks terrain, furniture and vehicles
  bool has_flag(const std::string & flag, const tripoint &p) const;  // checks terrain, furniture and vehicles
  bool can_put_items(const int x, const int y); // True if items can be placed in this tile

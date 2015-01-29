@@ -539,7 +539,7 @@ void editmap::update_view(bool update_info)
             extras += _(" [roof]");
         }
 
-        mvwprintw(w_info, off, 1, "%s %s", g->m.features(target.x, target.y).c_str(), extras.c_str());
+        mvwprintw(w_info, off, 1, "%s %s", g->m.features(tripoint(target.x, target.y, 0)).c_str(), extras.c_str());
         off++;  // 4-5
 
         for( auto &fld : *cur_field ) {

@@ -8104,7 +8104,7 @@ void game::print_terrain_info(int lx, int ly, WINDOW *w_look, int column, int &l
         mvwprintw(w_look, ++line, column, _("Sign: %s..."), signage.substr(0, 32).c_str());
     }
 
-    mvwprintw(w_look, ++line, column, "%s", m.features(lx, ly).c_str());
+    mvwprintw(w_look, ++line, column, "%s", m.features(tripoint(lx, ly, 0)).c_str());
     if (line < ending_line) {
         line = ending_line;
     }

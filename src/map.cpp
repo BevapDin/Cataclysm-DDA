@@ -1281,29 +1281,29 @@ std::string map::tername(const tripoint &p) const
     return ter_at(p).name;
 }
 
-std::string map::features(const int x, const int y)
+std::string map::features(const tripoint &p)
 {
     // This is used in an info window that is 46 characters wide, and is expected
     // to take up one line.  So, make sure it does that.
     // FIXME: can't control length of localized text.
     // Make the caller wrap properly, if it does not already.
     std::string ret;
-    if (is_bashable(x, y)) {
+    if (is_bashable(p)) {
         ret += _("Smashable. ");
     }
-    if (has_flag("DIGGABLE", x, y)) {
+    if (has_flag("DIGGABLE", p)) {
         ret += _("Diggable. ");
     }
-    if (has_flag("ROUGH", x, y)) {
+    if (has_flag("ROUGH", p)) {
         ret += _("Rough. ");
     }
-    if (has_flag("UNSTABLE", x, y)) {
+    if (has_flag("UNSTABLE", p)) {
         ret += _("Unstable. ");
     }
-    if (has_flag("SHARP", x, y)) {
+    if (has_flag("SHARP", p)) {
         ret += _("Sharp. ");
     }
-    if (has_flag("FLAT", x, y)) {
+    if (has_flag("FLAT", p)) {
         ret += _("Flat. ");
     }
     return ret;
