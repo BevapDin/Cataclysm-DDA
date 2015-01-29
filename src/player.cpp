@@ -12679,11 +12679,10 @@ bool player::uncanny_dodge()
     bool is_u = this == &g->u;
     bool seen = g->u.sees( *this );
     if( this->power_level < 74 || !this->has_active_bionic("bio_uncanny_dodge") ) { return false; }
-    point adjacent = adjacent_tile();
+    tripoint adjacent = adjacent_tile();
     power_level -= 75;
-    if( adjacent.x != posx() || adjacent.y != posy()) {
-        position.x = adjacent.x;
-        position.y = adjacent.y;
+    if( adjacent != pos() ) {
+        position = adjacent;
         if( is_u ) {
             add_msg( _("Time seems to slow down and you instinctively dodge!") );
         } else if( seen ) {
@@ -12701,23 +12700,24 @@ bool player::uncanny_dodge()
 }
 
 // adjacent_tile() returns a safe, unoccupied adjacent tile. If there are no such tiles, returns player position instead.
-point player::adjacent_tile()
+tripoint player::adjacent_tile() const
 {
-    std::vector<point> ret;
+    std::vector<tripoint> ret;
     trap_id curtrap;
     int dangerous_fields;
     for( int i = posx() - 1; i <= posx() + 1; i++ ) {
         for( int j = posy() - 1; j <= posy() + 1; j++ ) {
-            if( i == posx() && j == posy() ) {
+            const tripoint p( i, j, posz() );
+            if( p == pos() ) {
                 // don't consider player position
                 continue;
             }
-            curtrap = g->m.tr_at(i, j);
-            if( g->mon_at(i, j) == -1 && g->npc_at(i, j) == -1 && g->m.move_cost(i, j) > 0 &&
+            curtrap = g->m.tr_at( p );
+            if( g->mon_at( p ) == -1 && g->npc_at( p ) == -1 && g->m.move_cost( p ) > 0 &&
                 (curtrap == tr_null || traplist[curtrap]->is_benign()) ) {
                 // only consider tile if unoccupied, passable and has no traps
                 dangerous_fields = 0;
-                auto &tmpfld = g->m.field_at(i, j);
+                auto &tmpfld = g->m.field_at( p );
                 for( auto &fld : tmpfld ) {
                     const field_entry &cur = fld.second;
                     if( cur.is_dangerous() ) {
@@ -12725,7 +12725,7 @@ point player::adjacent_tile()
                     }
                 }
                 if (dangerous_fields == 0) {
-                    ret.push_back(point(i, j));
+                    ret.push_back( p );
                 }
             }
         }
@@ -12733,7 +12733,7 @@ point player::adjacent_tile()
     if( ret.size() ) {
         return ret[ rng( 0, ret.size() - 1 ) ];   // return a random valid adjacent tile
     }
-    return point( posx(), posy() ); // or return player position if no valid adjacent tiles
+    return pos(); // or return player position if no valid adjacent tiles
 }
 
 // --- Library functions ---
