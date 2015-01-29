@@ -2566,9 +2566,14 @@ int vehicle::global_y() const
     return smy * SEEY + posy;
 }
 
-point vehicle::global_pos() const
+int vehicle::global_z() const
 {
-    return point( smx * SEEX + posx, smy * SEEY + posy );
+    return smz;
+}
+
+tripoint vehicle::global_pos() const
+{
+    return tripoint( smx * SEEX + posx, smy * SEEY + posy, smz );
 }
 
 point vehicle::real_global_pos() const
@@ -2576,11 +2581,12 @@ point vehicle::real_global_pos() const
     return g->m.getabs( global_x(), global_y() );
 }
 
-void vehicle::set_submap_moved( int x, int y )
+void vehicle::set_submap_moved( int x, int y, int z )
 {
     const point old_msp = real_global_pos();
     smx = x;
     smy = y;
+    smz = z;
     if( !tracking_on ) {
         return;
     }
@@ -4977,7 +4983,8 @@ void vehicle::aim_turrets()
     // Remember turret's position at the time of aiming
     auto &target = parts[turret_index].target;
     auto &turret_pos = target.second;
-    turret_pos = global_pos() + parts[turret_index].precalc[0];
+    //TODO: Z
+    turret_pos = point((global_pos() + parts[turret_index].precalc[0]).x, (global_pos() + parts[turret_index].precalc[0]).y);
 
     itype *am_itype;
     auto items = get_items( turret_index );

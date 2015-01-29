@@ -246,15 +246,15 @@ void map::update_vehicle_cache( vehicle *veh, const bool brand_new )
     }
     // Get parts
     std::vector<vehicle_part> &parts = veh->parts;
-    const point gpos = veh->global_pos();
+    const tripoint gpos = veh->global_pos();
     int partid = 0;
     for( std::vector<vehicle_part>::iterator it = parts.begin(),
          end = parts.end(); it != end; ++it, ++partid ) {
         if( it->removed ) {
             continue;
         }
-        const point p = gpos + it->precalc[0];
-        veh_cached_parts.insert( std::make_pair( p,
+        const tripoint p = gpos + it->precalc[0];
+        veh_cached_parts.insert( std::make_pair( point( p.x, p.y ),
                                  std::make_pair( veh, partid ) ) );
         if( inbounds( p.x, p.y ) ) {
             veh_exists_at[p.x][p.y] = true;
@@ -371,7 +371,7 @@ void map::destroy_vehicle (vehicle *veh)
         debugmsg("map::destroy_vehicle was passed NULL");
         return;
     }
-    submap * const current_submap = get_submap_at_grid( point( veh->smx, veh->smy ) );
+    submap * const current_submap = get_submap_at_grid( tripoint( veh->smx, veh->smy, veh->smz ) );
     for (size_t i = 0; i < current_submap->vehicles.size(); i++) {
         if (current_submap->vehicles[i] == veh) {
             vehicle_list.erase(veh);
@@ -381,9 +381,10 @@ void map::destroy_vehicle (vehicle *veh)
             return;
         }
     }
-    debugmsg ("destroy_vehicle can't find it! name=%s, x=%d, y=%d", veh->name.c_str(), veh->smx, veh->smy);
+    debugmsg ("destroy_vehicle can't find it! name=%s, x=%d, y=%d, z=%d", veh->name.c_str(), veh->smx, veh->smy, veh->smz);
 }
 
+// TODO: Z
 bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool test)
 {
     const int x2 = x + dx;
@@ -487,7 +488,8 @@ bool map::displace_vehicle (int &x, int &y, const int dx, const int dy, bool tes
     veh->posx = dst_offset_x;
     veh->posy = dst_offset_y;
     if (src_submap != dst_submap) {
-        veh->set_submap_moved( int( x2 / SEEX ), int( y2 / SEEY ) );
+        // TODO: Z
+        veh->set_submap_moved( int( x2 / SEEX ), int( y2 / SEEY ), 0 );
         dst_submap->vehicles.push_back( veh );
         src_submap->vehicles.erase( src_submap->vehicles.begin() + our_i );
     }
@@ -3501,8 +3503,10 @@ void map::process_items_in_vehicle( vehicle *cur_veh, submap *const current_subm
             vehicle_part &vp = cur_veh->parts[part_index_candidate];
             if( active_item.location == vp.mount ) {
                 part_index = part_index_candidate;
-                const auto tmp = cur_veh->global_pos() + vp.precalc[0];
-                item_location = tripoint( tmp.x, tmp.y, tmp.z );
+                auto tmp = cur_veh->global_pos();
+                tmp.x += vp.precalc[0].x;
+                tmp.y += vp.precalc[0].y;
+                item_location = tmp;
                 items = cur_veh->get_items( part_index );
                 break;
             }
@@ -4971,6 +4975,7 @@ void map::shift(const int sx, const int sy)
     for( vehicle *veh : vehicle_list ) {
         veh->smx += sx;
         veh->smy += sy;
+//        veh->smz += sz; TODO
     }
 
 // Clear vehicle list and rebuild after shift
@@ -5097,6 +5102,7 @@ void map::loadn( const tripoint gp, const bool update_vehicles )
     // gridx/y not correct. TODO: Fix
     (*it)->smx = gp.x;
     (*it)->smy = gp.y;
+    (*it)->smz = gp.z;
     vehicle_list.insert(*it);
     update_vehicle_cache(*it);
    }

@@ -72,11 +72,11 @@ struct vehicle_prototype
 class vehicle_stack : public item_stack {
 private:
     std::list<item> *mystack;
-    point location;
+    tripoint location;
     class vehicle *myorigin;
     int part_num;
 public:
-vehicle_stack( std::list<item> *newstack, point newloc, vehicle *neworigin, int part ) :
+vehicle_stack( std::list<item> *newstack, tripoint newloc, vehicle *neworigin, int part ) :
     mystack(newstack), location(newloc), myorigin(neworigin), part_num(part) {};
     size_t size() const;
     bool empty() const;
@@ -490,7 +490,8 @@ public:
      */
     int global_x() const;
     int global_y() const;
-    point global_pos() const;
+    int global_z() const;
+    tripoint global_pos() const;
     /**
      * Really global absolute coordinates in map squares.
      * This includes the overmap, the submap, and the map square.
@@ -774,14 +775,14 @@ public:
      * is loaded into the map the values are directly set. The vehicles position does
      * not change therefor no call to set_submap_moved is required.
      */
-    int smx, smy;
+    int smx, smy, smz;
     /**
      * Update the submap coordinates smx, smy, and update the tracker info in the overmap
      * (if enabled).
      * This should be called only when the vehicle has actually been moved, not when
      * the map is just shifted (in the later case simply set smx/smy directly).
      */
-    void set_submap_moved(int x, int y);
+    void set_submap_moved(int x, int y, int z);
     bool insides_dirty; // if true, then parts' "inside" flags are outdated and need refreshing
     int init_veh_fuel;
     int init_veh_status;

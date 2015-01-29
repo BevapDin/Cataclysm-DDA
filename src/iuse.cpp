@@ -9587,7 +9587,7 @@ vehicle *pickveh( point center, bool advanced )
     std::vector< point > locations;
     for( int i = 0; i < (int)vehs.size(); i++ ) {
         auto veh = vehs[i];
-        locations.push_back( veh->global_pos() );
+        locations.push_back( point( veh->global_x(), veh->global_y() ) );
         pmenu.addentry( i, true, MENU_AUTOASSIGN, veh->name.c_str() );
     }
 
