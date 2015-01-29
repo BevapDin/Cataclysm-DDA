@@ -30,6 +30,8 @@ enum action_id {
     ACTION_SHIFT_SW,
     ACTION_SHIFT_W,
     ACTION_SHIFT_NW,
+    ACTION_SHIFT_DOWN,
+    ACTION_SHIFT_UP,
     // Environment Interaction
     ACTION_OPEN,
     ACTION_CLOSE,

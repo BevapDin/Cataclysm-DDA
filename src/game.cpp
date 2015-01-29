@@ -1511,6 +1511,7 @@ void game::set_driving_view_offset(const point &p)
     driving_view_offset.y = p.y;
     u.view_offset_x += driving_view_offset.x;
     u.view_offset_y += driving_view_offset.y;
+    u.view_offset_z = 0;
 }
 
 void game::rustCheck()
@@ -2313,6 +2314,8 @@ input_context get_default_mode_input_context()
     ctxt.register_action("shift_sw");
     ctxt.register_action("shift_w");
     ctxt.register_action("shift_nw");
+    ctxt.register_action("shift_up");
+    ctxt.register_action("shift_down");
     ctxt.register_action("open");
     ctxt.register_action("close");
     ctxt.register_action("smash");
@@ -2802,6 +2805,7 @@ bool game::handle_action()
         case ACTION_CENTER:
             u.view_offset_x = driving_view_offset.x;
             u.view_offset_y = driving_view_offset.y;
+            u.view_offset_z = 0;
             break;
 
         case ACTION_SHIFT_N:
@@ -2958,6 +2962,14 @@ bool game::handle_action()
             } else {
                 continue_auto_move = plmove(-1, -1);
             }
+            break;
+
+        case ACTION_SHIFT_UP:
+            u.view_offset_z++;
+            break;
+
+        case ACTION_SHIFT_DOWN:
+            u.view_offset_z--;
             break;
 
         case ACTION_MOVE_DOWN:

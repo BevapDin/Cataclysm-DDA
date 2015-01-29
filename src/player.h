@@ -880,7 +880,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         {
             position.y = y;
         }
-        int view_offset_x, view_offset_y;
+        int view_offset_x, view_offset_y, view_offset_z;
         bool in_vehicle;       // Means player sit inside vehicle on the tile he is now
         bool controlling_vehicle;  // Is currently in control of a vehicle
         // Relative direction of a grab, add to posx, posy to get the coordinates of the grabbed thing.

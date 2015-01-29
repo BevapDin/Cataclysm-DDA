@@ -5,6 +5,7 @@
 #include "cursesdef.h" // For WINDOW
 
 #include <vector>
+#include <unordered_map>
 #include <string>
 
 class monster;

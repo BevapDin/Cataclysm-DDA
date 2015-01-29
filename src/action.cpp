@@ -139,6 +139,10 @@ std::string action_ident(action_id act)
         return "shift_w";
     case ACTION_SHIFT_NW:
         return "shift_nw";
+    case ACTION_SHIFT_UP:
+        return "shift_up";
+    case ACTION_SHIFT_DOWN:
+        return "shift_down";
     case ACTION_OPEN:
         return "open";
     case ACTION_CLOSE:

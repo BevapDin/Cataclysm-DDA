@@ -147,6 +147,7 @@ player::player() : Character()
  id = -1; // -1 is invalid
  view_offset_x = 0;
  view_offset_y = 0;
+ view_offset_z = 0;
  str_cur = 8;
  str_max = 8;
  dex_cur = 8;
