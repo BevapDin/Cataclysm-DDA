@@ -5073,7 +5073,7 @@ int iuse::geiger(player *p, item *it, bool t, tripoint pos)
             return it->type->charges_to_use();
         }
         sounds::sound( pos, 6, "" );
-        if( !p->can_hear( point( pos.x, pos.y ), 6 ) ) {
+        if( !p->can_hear( pos, 6 ) ) {
             // can not hear it, but may have alarmed other creatures
             return it->type->charges_to_use();
         }
@@ -5977,7 +5977,7 @@ void iuse::play_music( player *p, tripoint source, int volume )
         }
     }
     sounds::ambient_sound( source.x, source.y, volume, sound );
-    if( !p->has_effect("music") && !p->can_hear( point( source.x, source.y ), volume ) ) {
+    if( !p->has_effect("music") && !p->can_hear( source, volume ) ) {
         p->add_effect("music", 1);
         p->add_morale(MORALE_MUSIC, 1, 50, 5, 2);
     }
@@ -8636,7 +8636,7 @@ int iuse::einktabletpc(player *p, item *it, bool t, tripoint pos)
             const int songs = it->get_var( "EIPC_MUSIC", 0 );
 
             //if user can hear this music and not already hear music
-            if( p->can_hear( point( pos.x, pos.y ), 8 ) && !p->has_effect("music")) {
+            if( p->can_hear( pos, 8 ) && !p->has_effect("music")) {
 
                 p->add_effect("music", 1);
                 p->add_morale(MORALE_MUSIC, 1, std::min(100, songs), 5, 2);

@@ -7046,7 +7046,7 @@ void player::hardcoded_effects(effect &it)
                     }
                 } else {
                     sounds::sound(pos(), 12, _("beep-beep-beep!"));
-                    if( !can_hear( point( posx(), posy() ), 12 ) ) {
+                    if( !can_hear( pos(), 12 ) ) {
                         // 10 minute automatic snooze
                         it.mod_duration(100);
                     } else {
@@ -13114,7 +13114,7 @@ bool player::is_deaf() const
     return has_effect("deaf") || worn_with_flag("DEAF");
 }
 
-bool player::can_hear( const point source, const int volume ) const
+bool player::can_hear( const tripoint source, const int volume ) const
 {
     if( is_deaf() ) {
         return false;
