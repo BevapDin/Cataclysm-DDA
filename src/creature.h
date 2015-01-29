@@ -220,7 +220,8 @@ class Creature
 
         virtual int posx() const = 0;
         virtual int posy() const = 0;
-        virtual const point &pos() const = 0;
+        virtual int posz() const = 0;
+        virtual const tripoint &pos() const = 0;
 
         struct compare_by_dist_to_point {
             point center;

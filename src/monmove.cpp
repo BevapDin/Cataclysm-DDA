@@ -76,7 +76,7 @@ void monster::set_dest(int x, int y, int &t)
 {
  plans.clear();
 // TODO: This causes a segfault, once in a blue moon!  Whyyyyy.
- plans = line_to(position, point(x, y), t);
+ plans = line_to(point(posx(), posy()), point(x, y), t);
 }
 
 // Move towards (x,y) for f more turns--generally if we hear a sound there
@@ -246,7 +246,7 @@ void monster::plan(const mfactions &factions)
             --selected_slope;
         }
 
-        point dest = target->pos();
+        tripoint dest = target->pos();
         auto att_to_target = attitude_to( *target );
         if( att_to_target == Attitude::A_HOSTILE && !fleeing ) {
             set_dest( dest.x, dest.y, selected_slope );
@@ -737,7 +737,7 @@ int monster::group_bash_skill( point target )
 
     // pileup = more bashskill, but only help bashing mob directly infront of target
     const int max_helper_depth = 5;
-    const std::vector<point> bzone = get_bashing_zone( target, pos(), max_helper_depth );
+    const std::vector<point> bzone = get_bashing_zone( target, point( posx(), posy() ), max_helper_depth );
 
     for( point candidate : bzone ) {
         // Drawing this line backwards excludes the target and includes the candidate.
@@ -982,7 +982,7 @@ void monster::stumble(bool moved)
  // target == either end of current plan, or the player.
  int bresenham_slope;
  if (!plans.empty()) {
-  if (g->m.sees( pos(), plans.back(), -1, bresenham_slope))
+  if (g->m.sees( point(posx(), posy()), plans.back(), -1, bresenham_slope))
    set_dest(plans.back().x, plans.back().y, bresenham_slope);
   else if (sees( g->u, bresenham_slope ))
    set_dest(g->u.posx(), g->u.posy(), bresenham_slope);

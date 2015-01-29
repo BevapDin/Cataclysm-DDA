@@ -24,6 +24,7 @@ monster::monster()
 {
  position.x = 20;
  position.y = 10;
+ position.z = 0;
  wandx = -1;
  wandy = -1;
  wandf = 0;
@@ -47,6 +48,7 @@ monster::monster(mtype *t)
 {
  position.x = 20;
  position.y = 10;
+ position.z = 0;
  wandx = -1;
  wandy = -1;
  wandf = 0;
@@ -76,6 +78,7 @@ monster::monster(mtype *t, int x, int y)
 {
  position.x = x;
  position.y = y;
+ position.z = 0;
  wandx = -1;
  wandy = -1;
  wandf = 0;
@@ -122,7 +125,7 @@ bool monster::setpos(const point &p, const bool level_change)
     return setpos(p.x, p.y, level_change);
 }
 
-const point &monster::pos() const
+const tripoint &monster::pos() const
 {
     return position;
 }

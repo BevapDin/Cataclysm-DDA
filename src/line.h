@@ -39,6 +39,7 @@ std::vector <point> line_to(const int x1, const int y1, const int x2, const int 
 std::vector <point> line_to( const point &p1, const point &p2, int t );
 // t and t2 decide which Bresenham line is used.
 std::vector <tripoint> line_to(const tripoint &loc1, const tripoint &loc2, int t, int t2);
+std::vector <tripoint> line_to(const tripoint &loc1, const tripoint &loc2, int t);
 // sqrt(dX^2 + dY^2)
 int trig_dist(const int x1, const int y1, const int x2, const int y2);
 int trig_dist(const tripoint &loc1, const tripoint &loc2);
@@ -48,6 +49,8 @@ int square_dist(const tripoint &loc1, const tripoint &loc2);
 int rl_dist(const int x1, const int y1, const int x2, const int y2);
 int rl_dist(const tripoint &loc1, const tripoint &loc2);
 int rl_dist(const point &a, const point &b);
+int rl_dist(const point &a, const tripoint &b);
+int rl_dist(const tripoint &a, const point &b);
 std::pair<double, double> slope_of(const std::vector<point> &line);
 std::pair<std::pair<double, double>, double> slope_of(const std::vector<tripoint> &line);
 std::vector<point> continue_line(const std::vector<point> &line, const int distance);

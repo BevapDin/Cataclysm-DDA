@@ -889,6 +889,7 @@ void monster::load(JsonObject &data)
 
     data.read("posx", position.x);
     data.read("posy", position.y);
+    data.read("posz", position.z);
     data.read("wandx", wandx);
     data.read("wandy", wandy);
     data.read("wandf", wandf);
@@ -954,6 +955,7 @@ void monster::store(JsonOut &json) const
     json.member( "typeid", type->id );
     json.member("posx", position.x);
     json.member("posy", position.y);
+    json.member("posz", position.z);
     json.member("wandx", wandx);
     json.member("wandy", wandy);
     json.member("wandf", wandf);

@@ -284,7 +284,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Removes the mutation's child flag from the player's list */
         void remove_child_flag(std::string mut);
 
-        const point &pos() const;
+        const tripoint &pos() const override;
         /** Returns the player's sight range */
         int sight_range( int light_level ) const override;
         /** Returns the player maximum vision range factoring in mutations, diseases, and other effects */
@@ -872,6 +872,10 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         {
             return position.y;
         }
+        inline int posz() const
+        {
+            return position.z;
+        }
         inline void setx( int x )
         {
             position.x = x;
@@ -879,6 +883,10 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         inline void sety( int y )
         {
             position.y = y;
+        }
+        inline void setz( int z )
+        {
+            position.z = z;
         }
         int view_offset_x, view_offset_y, view_offset_z;
         bool in_vehicle;       // Means player sit inside vehicle on the tile he is now
@@ -1021,7 +1029,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
     protected:
         std::list<disease> illness;
         // The player's position on the local map.
-        point position;
+        tripoint position;
 
         trap_map known_traps;
 
@@ -1063,7 +1071,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         inventory cached_crafting_inventory;
         int cached_moves;
         int cached_turn;
-        point cached_position;
+        tripoint cached_position;
 
         struct reason_weight_list melee_miss_reasons;
 

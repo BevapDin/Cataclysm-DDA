@@ -1079,7 +1079,7 @@ const inventory& player::crafting_inventory()
             && cached_position == pos()) {
         return cached_crafting_inventory;
     }
-    cached_crafting_inventory.form_from_map(pos(), PICKUP_RANGE, false);
+    cached_crafting_inventory.form_from_map(point(posx(), posy()), PICKUP_RANGE, false);
     cached_crafting_inventory += inv;
     cached_crafting_inventory += weapon;
     cached_crafting_inventory += worn;
@@ -1613,7 +1613,7 @@ std::list<item> player::consume_items(const std::vector<item_comp> &components, 
     } use_from;
     item_comp selected_comp("", 0);
     inventory map_inv;
-    map_inv.form_from_map(pos(), PICKUP_RANGE);
+    map_inv.form_from_map(point(posx(), posy()), PICKUP_RANGE);
 
     for( const auto &component : components ) {
         itype_id type = component.type;
@@ -1699,7 +1699,7 @@ std::list<item> player::consume_items(const std::vector<item_comp> &components, 
         }
     }
 
-    const point &loc = pos();
+    const point loc = point( posx(), posy() );
     const bool by_charges = (item::count_by_charges( selected_comp.type ) && selected_comp.count > 0);
     // Count given to use_amount/use_charges, changed by those functions!
     int real_count = (selected_comp.count > 0) ? selected_comp.count * batch : abs(selected_comp.count);
@@ -1743,7 +1743,7 @@ void player::consume_tools(const std::vector<tool_comp> &tools, int batch)
 {
     bool found_nocharge = false;
     inventory map_inv;
-    map_inv.form_from_map(pos(), PICKUP_RANGE);
+    map_inv.form_from_map(point(posx(), posy()), PICKUP_RANGE);
     std::vector<tool_comp> player_has;
     std::vector<tool_comp> map_has;
     // Use charges of any tools that require charges used
@@ -1769,7 +1769,7 @@ void player::consume_tools(const std::vector<tool_comp> &tools, int batch)
         if(map_has.empty()) {
             use_charges(player_has[0].type, player_has[0].count * batch);
         } else {
-            g->m.use_charges(pos(), PICKUP_RANGE, map_has[0].type, map_has[0].count * batch);
+            g->m.use_charges(point(posx(), posy()), PICKUP_RANGE, map_has[0].type, map_has[0].count * batch);
         }
     } else { // Variety of options, list them and pick one
         // Populate the list
@@ -1789,7 +1789,7 @@ void player::consume_tools(const std::vector<tool_comp> &tools, int batch)
         // Get selection via a popup menu
         size_t selection = menu_vec(false, _("Use which tool?"), options) - 1;
         if (selection < map_has.size())
-            g->m.use_charges(pos(), PICKUP_RANGE,
+            g->m.use_charges(point(posx(), posy()), PICKUP_RANGE,
                           map_has[selection].type, map_has[selection].count * batch);
         else {
             selection -= map_has.size();

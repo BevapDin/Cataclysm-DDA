@@ -58,19 +58,19 @@ void activity_handlers::burrow_finish(player_activity *act, player *p)
     g->m.destroy(dirx, diry, true);
 }
 
-bool butcher_cbm_item( const std::string &item, const point &pos, const int age )
+bool butcher_cbm_item( const std::string &item, const tripoint &pos, const int age )
 {
     //To see if it spawns a random additional CBM
     if( one_in( 2 ) ) { //The CBM works
-        g->m.spawn_item( pos.x, pos.y, item, 1, 0, age );
+        g->m.spawn_item( pos, item, 1, 0, age );
         return true;
     }
     //There is a burnt out CBM
-    g->m.spawn_item( pos.x, pos.y, "burnt_out_bionic", 1, 0, age );
+    g->m.spawn_item( pos, "burnt_out_bionic", 1, 0, age );
     return false;
 }
 
-bool butcher_cbm_group( const std::string &group, const point &pos, const int age )
+bool butcher_cbm_group( const std::string &group, const tripoint &pos, const int age )
 {
     //To see if it spawns a random additional CBM
     if( one_in( 2 ) ) { //The CBM works
@@ -78,22 +78,22 @@ bool butcher_cbm_group( const std::string &group, const point &pos, const int ag
         return true;
     }
     //There is a burnt out CBM
-    g->m.spawn_item( pos.x, pos.y, "burnt_out_bionic", 1, 0, age);
+    g->m.spawn_item( pos, "burnt_out_bionic", 1, 0, age);
     return false;
 }
 
 void activity_handlers::butcher_finish( player_activity *act, player *p )
 {
     // corpses can disappear (rezzing!), so check for that
-    if( static_cast<int>(g->m.i_at(p->posx(), p->posy()).size()) <= act->index ||
-        !(g->m.i_at(p->posx(), p->posy())[act->index].is_corpse() ) ) {
+    if( static_cast<int>(g->m.i_at(p->pos()).size()) <= act->index ||
+        !(g->m.i_at(p->pos())[act->index].is_corpse() ) ) {
         add_msg(m_info, _("There's no corpse to butcher!"));
         return;
     }
-    mtype *corpse = g->m.i_at(p->posx(), p->posy())[act->index].get_mtype();
-    std::vector<item> contents = g->m.i_at(p->posx(), p->posy())[act->index].contents;
-    int age = g->m.i_at(p->posx(), p->posy())[act->index].bday;
-    g->m.i_rem(p->posx(), p->posy(), act->index);
+    mtype *corpse = g->m.i_at(p->pos())[act->index].get_mtype();
+    std::vector<item> contents = g->m.i_at(p->pos())[act->index].contents;
+    int age = g->m.i_at(p->pos())[act->index].bday;
+    g->m.i_rem(p->pos(), act->index);
     int factor = p->butcher_factor();
     int pieces = 0, skins = 0, bones = 0, fats = 0, sinews = 0, feathers = 0;
     double skill_shift = 0.;
@@ -169,26 +169,26 @@ void activity_handlers::butcher_finish( player_activity *act, player *p )
 
     if( bones > 0 ) {
         if( corpse->mat == "veggy" ) {
-            g->m.spawn_item(p->posx(), p->posy(), "plant_sac", bones, 0, age);
+            g->m.spawn_item( p->pos(), "plant_sac", bones, 0, age);
             add_msg(m_good, _("You harvest some fluid bladders!"));
         } else if( corpse->has_flag(MF_BONES) && corpse->has_flag(MF_POISON) ) {
-            g->m.spawn_item(p->posx(), p->posy(), "bone_tainted", bones / 2, 0, age);
+            g->m.spawn_item(p->pos(), "bone_tainted", bones / 2, 0, age);
             add_msg(m_good, _("You harvest some salvageable bones!"));
         } else if( corpse->has_flag(MF_BONES) && corpse->has_flag(MF_HUMAN) ) {
-            g->m.spawn_item(p->posx(), p->posy(), "bone_human", bones, 0, age);
+            g->m.spawn_item( p->pos(), "bone_human", bones, 0, age);
             add_msg(m_good, _("You harvest some salvageable bones!"));
         } else if( corpse->has_flag(MF_BONES) ) {
-            g->m.spawn_item(p->posx(), p->posy(), "bone", bones, 0, age);
+            g->m.spawn_item( p->pos(), "bone", bones, 0, age);
             add_msg(m_good, _("You harvest some usable bones!"));
         }
     }
 
     if( sinews > 0 ) {
         if( corpse->has_flag(MF_BONES) && !corpse->has_flag(MF_POISON) ) {
-            g->m.spawn_item(p->posx(), p->posy(), "sinew", sinews, 0, age);
+            g->m.spawn_item( p->pos(), "sinew", sinews, 0, age);
             add_msg(m_good, _("You harvest some usable sinews!"));
         } else if( corpse->mat == "veggy" ) {
-            g->m.spawn_item(p->posx(), p->posy(), "plant_fibre", sinews, 0, age);
+            g->m.spawn_item( p->pos(), "plant_fibre", sinews, 0, age);
             add_msg(m_good, _("You harvest some plant fibers!"));
         }
     }
@@ -219,29 +219,29 @@ void activity_handlers::butcher_finish( player_activity *act, player *p )
         }
 
         if( chitin ) {
-            g->m.spawn_item(p->posx(), p->posy(), "chitin_piece", chitin, 0, age);
+            g->m.spawn_item( p->pos(), "chitin_piece", chitin, 0, age);
         }
         if( fur ) {
-            g->m.spawn_item(p->posx(), p->posy(), "raw_fur", fur, 0, age);
+            g->m.spawn_item( p->pos(), "raw_fur", fur, 0, age);
         }
         if( leather ) {
-            g->m.spawn_item(p->posx(), p->posy(), "raw_leather", leather, 0, age);
+            g->m.spawn_item( p->pos(), "raw_leather", leather, 0, age);
         }
     }
 
     if( feathers > 0 ) {
         if( corpse->has_flag(MF_FEATHER) ) {
-            g->m.spawn_item(p->posx(), p->posy(), "feather", feathers, 0, age);
+            g->m.spawn_item( p->pos(), "feather", feathers, 0, age);
             add_msg(m_good, _("You harvest some feathers!"));
         }
     }
 
     if( fats > 0 ) {
         if( corpse->has_flag(MF_FAT) && corpse->has_flag(MF_POISON) ) {
-            g->m.spawn_item(p->posx(), p->posy(), "fat_tainted", fats, 0, age);
+            g->m.spawn_item( p->pos(), "fat_tainted", fats, 0, age);
             add_msg(m_good, _("You harvest some gooey fat!"));
         } else if( corpse->has_flag(MF_FAT) ) {
-            g->m.spawn_item(p->posx(), p->posy(), "fat", fats, 0, age);
+            g->m.spawn_item( p->pos(), "fat", fats, 0, age);
             add_msg(m_good, _("You harvest some fat!"));
         }
     }
@@ -299,11 +299,11 @@ void activity_handlers::butcher_finish( player_activity *act, player *p )
             //To see if it spawns a battery
             if( one_in(3) ) { //The battery works 33% of the time.
                 add_msg(m_good, _("You discover a power storage in the %s!"), corpse->nname().c_str());
-                g->m.spawn_item(p->posx(), p->posy(), "bio_power_storage", 1, 0, age);
+                g->m.spawn_item( p->pos(), "bio_power_storage", 1, 0, age);
             } else { //There is a burnt out CBM
                 add_msg(m_good, _("You discover a fused lump of bio-circuitry in the %s!"),
                         corpse->nname().c_str());
-                g->m.spawn_item(p->posx(), p->posy(), "burnt_out_bionic", 1, 0, age);
+                g->m.spawn_item( p->pos(), "burnt_out_bionic", 1, 0, age);
             }
         }
     }
@@ -316,7 +316,7 @@ void activity_handlers::butcher_finish( player_activity *act, player *p )
                      corpse->nname().c_str() );
             g->m.add_item_or_charges( p->posx(), p->posy(), content );
         } else if( content.is_bionic()  ) {
-            g->m.spawn_item(p->posx(), p->posy(), "burnt_out_bionic", 1, 0, age);
+            g->m.spawn_item( p->pos(), "burnt_out_bionic", 1, 0, age);
         }
     }
 
@@ -361,7 +361,7 @@ void activity_handlers::firstaid_finish( player_activity *act, player *p )
 {
     item &it = p->i_at(act->position);
     iuse tmp;
-    tmp.completefirstaid(p, &it, false, p->pos());
+    tmp.completefirstaid(p, &it, false, point( p->posx(), p->posy() ));
     p->reduce_charges(act->position, 1);
     // Erase activity and values.
     act->type = ACT_NULL;
@@ -541,7 +541,7 @@ void activity_handlers::longsalvage_finish( player_activity *act, player *p )
         add_msg(m_bad, _("You no longer have the necessary tools to keep salvaging!"));
     }
 
-    auto items = g->m.i_at(p->posx(), p->posy());
+    auto items = g->m.i_at(p->pos());
     item salvage_tool( "toolset", calendar::turn ); // TODO: Use actual tool
     for( auto it = items.begin(); it != items.end(); ++it ) {
         if( iuse::valid_to_cut_up( &*it ) ) {
@@ -560,7 +560,7 @@ void activity_handlers::make_zlave_finish( player_activity *act, player *p )
 {
     static const int full_pulp_threshold = 4;
 
-    auto items = g->m.i_at(p->posx(), p->posy());
+    auto items = g->m.i_at(p->pos());
     std::string corpse_name = act->str_values[0];
     item *body = NULL;
 

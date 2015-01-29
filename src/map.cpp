@@ -3365,7 +3365,7 @@ static void apply_in_fridge(item &it)
 }
 
 template <typename Iterator>
-static bool process_item( item_stack &items, Iterator &n, point location, bool activate )
+static bool process_item( item_stack &items, Iterator &n, tripoint location, bool activate )
 {
     // make a temporary copy, remove the item (in advance)
     // and use that copy to process it
@@ -3385,7 +3385,7 @@ static bool process_item( item_stack &items, Iterator &n, point location, bool a
     return true;
 }
 
-static bool process_map_items( item_stack &items, std::list<item>::iterator &n, point location,
+static bool process_map_items( item_stack &items, std::list<item>::iterator &n, tripoint location,
                                std::string )
 {
     return process_item( items, n, location, false );
@@ -3448,9 +3448,9 @@ void map::process_items_in_submap( submap *const current_submap, int gridx, int 
     // If they are destroyed before processing, they don't get processed.
     std::list<item_reference> active_items = current_submap->active_items.get();
     for( auto &active_item : active_items ) {
-        point map_location( gridx * SEEX + active_item.location.x,
-                            gridy * SEEY + active_item.location.y );
-        auto items = i_at( map_location.x, map_location.y );
+        tripoint map_location( gridx * SEEX + active_item.location.x,
+                            gridy * SEEY + active_item.location.y, 0 );
+        auto items = i_at( map_location );
         if( !current_submap->active_items.has( active_item ) ) {
             continue;
         }
@@ -3494,14 +3494,15 @@ void map::process_items_in_vehicle( vehicle *cur_veh, submap *const current_subm
 
         // Find the cargo part and coordinates corresponding to the current active item.
         int part_index = -1;
-        point item_location;
+        tripoint item_location;
         // Fetch a possibly empty item stack so we can replace it later.
         vehicle_stack items = cur_veh->get_items( 0 );
         for( auto part_index_candidate : cargo_parts ) {
             vehicle_part &vp = cur_veh->parts[part_index_candidate];
             if( active_item.location == vp.mount ) {
                 part_index = part_index_candidate;
-                item_location = cur_veh->global_pos() + vp.precalc[0];
+                const auto tmp = cur_veh->global_pos() + vp.precalc[0];
+                item_location = tripoint( tmp.x, tmp.y, tmp.z );
                 items = cur_veh->get_items( part_index );
                 break;
             }
@@ -3816,7 +3817,7 @@ std::list<std::pair<tripoint, item *> > map::get_rc_items( int x, int y, int z )
     return rc_pairs;
 }
 
-static bool trigger_radio_item( item_stack &items, std::list<item>::iterator &n, point pos,
+static bool trigger_radio_item( item_stack &items, std::list<item>::iterator &n, tripoint pos,
                                 std::string signal )
 {
     bool trigger_item = false;
@@ -4189,7 +4190,7 @@ bool map::add_field(const tripoint &p, const field_id t, int density, const int 
         // This is the spirit of "fd_null" that it used to be.
         current_submap->field_count++; //Only adding it to the count if it doesn't exist.
     }
-    if(g != NULL && this == &g->m && p.x == g->u.posx() && p.y == g->u.posy()) {
+    if(g != NULL && this == &g->m && p == g->u.pos()) {
         creature_in_field( g->u ); //Hit the player with the field if it spawned on top of them.
     }
     return true;
@@ -5103,10 +5104,10 @@ void map::loadn( const tripoint gp, const bool update_vehicles )
    }
   }
 
-    actualize( gp.x, gp.y );
+    actualize( gp );
 }
 
-bool map::has_rotten_away( item &itm, const point &pnt ) const
+bool map::has_rotten_away( item &itm, const tripoint &pnt ) const
 {
     if( itm.is_corpse() ) {
         itm.calc_rot( pnt );
@@ -5138,7 +5139,7 @@ bool map::has_rotten_away( item &itm, const point &pnt ) const
 }
 
 template <typename Container>
-void map::remove_rotten_items( Container &items, const point &pnt )
+void map::remove_rotten_items( Container &items, const tripoint &pnt )
 {
     for( auto it = items.begin(); it != items.end(); ) {
         if( has_rotten_away( *it, pnt ) ) {
@@ -5149,7 +5150,7 @@ void map::remove_rotten_items( Container &items, const point &pnt )
     }
 }
 
-void map::fill_funnels( const point pnt )
+void map::fill_funnels( const tripoint pnt )
 {
     const auto t = tr_at( pnt.x, pnt.y );
     if( t == tr_null || traplist[t]->funnel_radius_mm <= 0 ) {
@@ -5223,31 +5224,31 @@ void map::restock_fruits( const point pnt, int time_since_last_actualize )
     }
 }
 
-void map::actualize( const int gridx, const int gridy )
+void map::actualize( const tripoint &gp )
 {
-    submap *const tmpsub = get_submap_at_grid( point( gridx, gridy ) );
+    submap *const tmpsub = get_submap_at_grid( gp );
     const auto time_since_last_actualize = calendar::turn - tmpsub->turn_last_touched;
     const bool do_funnels = ( abs_sub.z >= 0 );
 
     // check spoiled stuff, and fill up funnels while we're at it
     for( int x = 0; x < SEEX; x++ ) {
         for( int y = 0; y < SEEY; y++ ) {
-            const point pnt( gridx * SEEX + x, gridy * SEEY + y );
+            const tripoint pnt( gp.x * SEEX + x, gp.y * SEEY + y, gp.z + my_ZMIN );
 
             remove_rotten_items( tmpsub->itm[x][y], pnt );
 
             const auto trap_here = tmpsub->get_trap( x, y );
             if( trap_here != tr_null ) {
-                traplocs[trap_here].insert( pnt );
+                traplocs[trap_here].insert( point( pnt.x, pnt.y ) );
             }
 
             if( do_funnels ) {
                 fill_funnels( pnt );
             }
 
-            grow_plant( pnt );
+            grow_plant( point( pnt.x, pnt.y ) );
 
-            restock_fruits( pnt, time_since_last_actualize );
+            restock_fruits( point( pnt.x, pnt.y ), time_since_last_actualize );
         }
     }
 

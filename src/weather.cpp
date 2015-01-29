@@ -51,7 +51,7 @@ void weather_effect::glare()
  * Retroactively determine weather-related rotting effects.
  * Applies rot based on the temperatures incurred between a turn range.
  */
-int get_rot_since( const int since, const int endturn, const point &location )
+int get_rot_since( const int since, const int endturn, const tripoint &location )
 {
     // Hack: Ensure food doesn't rot in ice labs, where the
     // temperature is much less than the weather specifies.
@@ -93,7 +93,7 @@ std::pair<int, int> rain_or_acid_level( const int wt )
  * Determine what a funnel has filled out of game, using funnelcontainer.bday as a starting point.
  */
 void retroactively_fill_from_funnel( item *it, const trap_id t, const calendar &endturn,
-                                     const point &location )
+                                     const tripoint &location )
 {
     const calendar startturn = calendar( it->bday > 0 ? it->bday - 1 : 0 );
     if ( startturn > endturn || traplist[t]->funnel_radius_mm < 1 ) {
@@ -515,7 +515,7 @@ std::string weather_forecast(radio_tower tower)
     for(int d = 0; d < 6; d++) {
         weather_type forecast = WEATHER_NULL;
         for(calendar i(last_hour + 7200 * d); i < last_hour + 7200 * (d + 1); i += 600) {
-            w_point w = g->weatherGen.get_weather(point(tower.x, tower.y), i);
+            w_point w = g->weatherGen.get_weather(tripoint(tower.x, tower.y, 0), i);
             forecast = std::max(forecast, g->weatherGen.get_weather_conditions(w));
             high = std::max(high, w.temperature);
             low = std::min(low, w.temperature);

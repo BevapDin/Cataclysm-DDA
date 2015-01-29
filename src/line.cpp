@@ -69,6 +69,11 @@ std::vector<point> line_to( const point &p1, const point &p2, const int t )
     return line_to( p1.x, p1.y, p2.x, p2.y, t );
 }
 
+std::vector <tripoint> line_to( const tripoint &p1, const tripoint &p2, const int t )
+{
+    return line_to( loc1, loc2, t, 0 );
+}
+
 std::vector <tripoint> line_to(const tripoint &loc1, const tripoint &loc2, int t, int t2)
 {
     std::vector<tripoint> ret;
@@ -236,6 +241,16 @@ std::pair<double, double> slope_of(const std::vector<point> &line)
     double normDy = (line.back().y - line.front().y) / len;
     std::pair<double, double> ret = std::make_pair(normDx, normDy); // slope of x, y
     return ret;
+}
+
+int rl_dist(const tripoint &a, const point &b)
+{
+    return rl_dist(a.x, a.y, b.x, b.y);
+}
+
+int rl_dist(const point &a, const tripoint &b)
+{
+    return rl_dist(a.x, a.y, b.x, b.y);
 }
 
 // returns the normalized dx, dy, dz for the current line vector.

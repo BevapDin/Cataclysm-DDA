@@ -181,10 +181,12 @@ class game
         void emp_blast(int x, int y);
         /** Returns the NPC index of the npc at (x, y). Returns -1 if no NPC is present. */
         int  npc_at(const int x, const int y) const;
+        int  npc_at(const tripoint &p) const; // Index of the npc at p; -1 for none
         /** Returns the NPC index of the npc with a matching ID. Returns -1 if no NPC is present. */
         int  npc_by_id(const int id) const;
         /** Returns the Creature at (x, y). */
         Creature *critter_at(int x, int y);
+        Creature *critter_at(const tripoint &p);
 
         /** Calls the creature_tracker add function. Returns true if successful. */
         bool add_zombie(monster &critter);
@@ -204,6 +206,7 @@ class game
         int  mon_at(const int x, const int y) const;
         /** Returns the monster index of the monster at the given point. Returns -1 if no monster is present. */
         int  mon_at(point p) const;
+        int  mon_at(const tripoint &p) const; // Index of the monster at (x, y); -1 for none
         /** Returns true if there is no player, NPC, or monster on the tile and move_cost > 0. */
         bool is_empty(const int x, const int y);
         /** Returns true if the value of test is between down and up. */

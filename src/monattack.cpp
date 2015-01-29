@@ -354,7 +354,7 @@ void mattack::boomer(monster *z, int index)
     }
 
     player *foe = dynamic_cast< player* >( target );
-    std::vector<point> line = line_to( z->pos(), target->pos(), t );
+    std::vector<tripoint> line = line_to( z->pos(), target->pos(), t );
     z->reset_special(index); // Reset timer
     z->moves -= 250;   // It takes a while
     bool u_see = g->u.sees( *z );
@@ -499,7 +499,7 @@ void mattack::smash(monster *z, int index)
  */
 template <size_t N = 1>
 std::pair<std::array<point, (2*N + 1)*(2*N + 1)>, size_t>
-find_empty_neighbors(point const origin) {
+find_empty_neighbors(tripoint const origin) {
     constexpr auto r = static_cast<int>(N);
 
     auto const x_min = origin.x - r;
@@ -1043,7 +1043,7 @@ void mattack::spit_sap(monster *z, int index)
         add_msg(_("The %s spits sap!"), z->name().c_str());
     }
     g->m.sees( z->pos(), target->pos(), 60, t);
-    std::vector<point> line = line_to( z->pos(), target->pos(), t );
+    std::vector<tripoint> line = line_to( z->pos(), target->pos(), t );
     int dam = 5;
     for (auto &i : line) {
         g->m.shoot(i.x, i.y, dam, false, no_effects);
@@ -1816,7 +1816,7 @@ void mattack::callblobs(monster *z, int index)
     // and keep the rest near the brain blob for protection.
     point enemy( g->u.posx(), g->u.posy() );
     std::list<monster *> allies;
-    std::vector<point> nearby_points = closest_points_first( 3, z->pos() );
+    std::vector<point> nearby_points = closest_points_first( 3, point(z->pos().x, z->pos().y) );
     // Iterate using horrible creature_tracker API.
     for( size_t i = 0; i < g->num_zombies(); i++ ) {
         monster *candidate = &g->zombie( i );
@@ -1851,7 +1851,7 @@ void mattack::jackson(monster *z, int index)
 {
     // Jackson draws nearby zombies into the dance.
     std::list<monster *> allies;
-    std::vector<point> nearby_points = closest_points_first( 3, z->pos() );
+    std::vector<point> nearby_points = closest_points_first( 3, point( z->posx(), z->posy() ) );
     // Iterate using horrible creature_tracker API.
     for( size_t i = 0; i < g->num_zombies(); i++ ) {
         monster *candidate = &g->zombie( i );
@@ -1865,7 +1865,7 @@ void mattack::jackson(monster *z, int index)
     int dancers = 0;
     bool converted = false;
     for( auto ally = allies.begin(); ally != allies.end(); ++ally, ++dancers ) {
-        point post = z->pos();
+        point post = point( z->posx(), z->posy() );
         if( dancers < num_dancers ) {
             // Each dancer is assigned a spot in the nearby_points vector based on their order.
             int assigned_spot = (nearby_points.size() * dancers) / num_dancers;
@@ -1967,7 +1967,7 @@ void mattack::tentacle(monster *z, int index)
     z->moves -= 100;
     z->reset_special(index); // Reset timer
 
-    std::vector<point> line = line_to( z->pos(), g->u.pos(), t );
+    std::vector<tripoint> line = line_to( z->pos(), g->u.pos(), t );
     std::set<std::string> no_effects;
     for (auto &i : line) {
         int tmpdam = 20;
@@ -2022,7 +2022,7 @@ void mattack::vortex(monster *z, int index)
             if (x == z->posx() && y == z->posy()) { // Don't throw us!
                 y++;
             }
-            std::vector<point> from_monster = line_to(z->posx(), z->posy(), x, y, 0);
+            std::vector<tripoint> from_monster = line_to(z->posx(), z->posy(), x, y, 0);
             while (!g->m.i_at(x, y).empty()) {
                 item thrown = g->m.i_at(x, y)[index];
                 g->m.i_rem(x, y, 0);
@@ -2249,7 +2249,7 @@ void mattack::stare(monster *z, int index)
         g->u.add_effect("teleglow", 800);
     } else {
         add_msg(m_bad, _("A piercing beam of light bursts forth!"));
-        std::vector<point> sight = line_to( z->pos(), g->u.pos(), 0 );
+        std::vector<tripoint> sight = line_to( z->pos(), g->u.pos(), 0 );
         for (auto &i : sight) {
             if (g->m.ter(i.x, i.y) == t_reinforced_glass_h ||
                 g->m.ter(i.x, i.y) == t_reinforced_glass_v) {
@@ -2843,9 +2843,8 @@ void mattack::tankgun( monster *z, Creature *target )
         z->ammo[ammo_type] = 40;
     }
 
-    point aim_point;
     int dist = rl_dist( z->pos(), target->pos() );
-    aim_point = target->pos();
+    auto aim_point = target->pos();
     if( dist > 50 ) {
         return;
     }
@@ -3127,7 +3126,7 @@ void mattack::flame( monster *z, Creature *target )
         // shouldn't happen
         debugmsg( "mattack::flame invoked on invisible target" );
       }
-      std::vector<point> traj = line_to( z->pos(), target->pos(), bres );
+      std::vector<tripoint> traj = line_to( z->pos(), target->pos(), bres );
 
       for (auto &i : traj) {
           // break out of attack if flame hits a wall
@@ -3149,7 +3148,7 @@ void mattack::flame( monster *z, Creature *target )
         // shouldn't happen
         debugmsg( "mattack::flame invoked on invisible target" );
     }
-    std::vector<point> traj = line_to( z->pos(), target->pos(), bres );
+    std::vector<tripoint> traj = line_to( z->pos(), target->pos(), bres );
 
     for (auto &i : traj) {
         // break out of attack if flame hits a wall

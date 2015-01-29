@@ -142,8 +142,7 @@ std::string morale_point::name() const
 
 player::player() : Character()
 {
- position.x = 0;
- position.y = 0;
+ position = tripoint( 0, 0, 0 );
  id = -1; // -1 is invalid
  view_offset_x = 0;
  view_offset_y = 0;
@@ -4109,7 +4108,7 @@ float player::active_light()
     return lumination;
 }
 
-const point &player::pos() const
+const tripoint &player::pos() const
 {
     return position;
 }
@@ -4967,7 +4966,7 @@ void player::knock_back_from(int x, int y)
 {
     if (x == posx() && y == posy())
         return; // No effect
-    point to = pos();
+    tripoint to = pos();
     if (x < posx()) {
         to.x++;
     }
@@ -7049,7 +7048,7 @@ void player::hardcoded_effects(effect &it)
                     }
                 } else {
                     sounds::sound(posx(), posy(), 12, _("beep-beep-beep!"));
-                    if( !can_hear( pos(), 12 ) ) {
+                    if( !can_hear( point( posx(), posy() ), 12 ) ) {
                         // 10 minute automatic snooze
                         it.mod_duration(100);
                     } else {
@@ -8929,7 +8928,7 @@ bool player::consume(int target_position)
             }
             if (comest->has_use()) {
                 //Check special use
-                amount_used = comest->invoke(this, to_eat, false, pos());
+                amount_used = comest->invoke(this, to_eat, false, point( posx(), posy() ));
                 if( amount_used <= 0 ) {
                     return false;
                 }
@@ -9223,7 +9222,7 @@ bool player::eat(item *eaten, it_comest *comest)
     }
 
     if (comest->has_use()) {
-        to_eat = comest->invoke(this, eaten, false, pos());
+        to_eat = comest->invoke(this, eaten, false, point( posx(), posy() ));
         if( to_eat <= 0 ) {
             return false;
         }
@@ -10556,7 +10555,7 @@ void player::use(int inventory_position)
         if (!has_enough_charges(*used, true)) {
             return;
         }
-        const long charges_used = tool->invoke( this, used, false, pos() );
+        const long charges_used = tool->invoke( this, used, false, point( posx(), posy() ) );
         if (charges_used <= 0) {
             // Canceled or not used up or whatever
             return;
@@ -10744,7 +10743,7 @@ activate your weapon."), gun->tname().c_str(), _(mod->location.c_str()));
         moves -= int(used->reload_time(*this) / 2);
         return;
     } else if ( used->type->has_use() ) {
-        used->type->invoke(this, used, false, pos());
+        used->type->invoke(this, used, false, point( posx(), posy() ));
         return;
     } else {
         add_msg(m_info, _("You can't do anything interesting with your %s."),
@@ -11150,7 +11149,7 @@ void player::do_read( item *book )
     }
 
     for( auto &m : reading->use_methods ) {
-        m.call( this, book, false, pos() );
+        m.call( this, book, false, point( posx(), posy() ) );
     }
 
     activity.type = ACT_NULL;
@@ -12737,7 +12736,7 @@ point player::adjacent_tile()
     if( ret.size() ) {
         return ret[ rng( 0, ret.size() - 1 ) ];   // return a random valid adjacent tile
     }
-    return pos(); // or return player position if no valid adjacent tiles
+    return point( posx(), posy() ); // or return player position if no valid adjacent tiles
 }
 
 // --- Library functions ---

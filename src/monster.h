@@ -300,7 +300,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
 
         bool setpos(const int x, const int y, const bool level_change = false);
         bool setpos(const point &p, const bool level_change = false);
-        const point &pos() const;
+        const tripoint &pos() const override;
         inline int posx() const
         {
             return position.x;
@@ -308,6 +308,10 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         inline int posy() const
         {
             return position.y;
+        }
+        inline int posz() const
+        {
+            return position.z;
         }
 
         short ignoring;
@@ -332,7 +336,7 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         int hp;
         std::vector<int> sp_timeout;
         std::vector <point> plans;
-        point position;
+        tripoint position;
         bool dead;
         /** Attack another monster */
         void hit_monster(monster &other);

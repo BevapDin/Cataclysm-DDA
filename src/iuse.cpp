@@ -5977,7 +5977,7 @@ void iuse::play_music( player *p, point source, int volume )
 int iuse::mp3_on(player *p, item *it, bool t, point)
 {
     if (t) { // Normal use
-        play_music( p, p->pos(), 0 );
+        play_music( p, point( p->posx(), p->posy() ), 0 );
     } else { // Turning it off
         p->add_msg_if_player(_("The mp3 player turns off."));
         it->make("mp3");
@@ -9000,7 +9000,7 @@ int iuse::camera(player *p, item *it, bool, point)
             return 0;
         }
 
-        std::vector <point> trajectory = line_to( p->pos(), aim_point, 0 );
+        std::vector <tripoint> trajectory = line_to( p->pos(), aim_point, 0 );
         trajectory.push_back(aim_point);
 
         p->moves -= 50;
@@ -9427,7 +9427,7 @@ void sendRadioSignal(player *p, std::string signal)
             sounds::sound(p->posx(), p->posy(), 6, "beep.");
 
             it_tool *tmp = dynamic_cast<it_tool *>(it.type);
-            tmp->invoke(p, &it, false, p->pos());
+            tmp->invoke(p, &it, false, point( p->posx(), p->posy() ));
         }
     }
 
