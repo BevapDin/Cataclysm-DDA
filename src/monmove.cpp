@@ -663,22 +663,22 @@ int monster::calc_movecost(int x1, int y1, int x2, int y2) const
  * Return points of an area extending 1 tile to either side and
  * (maxdepth) tiles behind basher.
  */
-std::vector<point> get_bashing_zone( point bashee, point basher, int maxdepth ) {
-    std::vector<point> direction;
+std::vector<tripoint> get_bashing_zone( const tripoint bashee, const tripoint basher, int maxdepth ) {
+    std::vector<tripoint> direction;
     direction.push_back(bashee);
     direction.push_back(basher);
     // Draw a line from the target through the attacker.
-    std::vector<point> path = continue_line( direction, maxdepth );
+    std::vector<tripoint> path = continue_line( direction, maxdepth );
     // Remove the target.
     path.insert( path.begin(), basher );
-    std::vector<point> zone;
+    std::vector<tripoint> zone;
     // Go ahead and reserve enough room for all the points since
     // we know how many it will be.
     zone.reserve( 3 * maxdepth );
-    point previous = bashee;
-    for( point p : path ) {
-        std::vector<point> swath = squares_in_direction( previous.x, previous.y, p.x, p.y );
-        for( point q : swath ) {
+    tripoint previous = bashee;
+    for( tripoint p : path ) {
+        std::vector<tripoint> swath = squares_in_direction( previous, p );
+        for( tripoint q : swath ) {
             zone.push_back( q );
         }
         previous = p;
@@ -697,7 +697,7 @@ int monster::bash_at(int x, int y) {
     bool try_bash = !can_move_to(x, y) || one_in(3);
     bool can_bash = g->m.is_bashable(x, y) && (has_flag(MF_BASHES) || has_flag(MF_BORES));
     if( try_bash && can_bash ) {
-        int bashskill = group_bash_skill( point(x, y) );
+        int bashskill = group_bash_skill( tripoint( x, y, posz() ) );
 
         g->m.bash( x, y, bashskill );
         moves -= 100;
@@ -728,7 +728,7 @@ int monster::bash_skill()
     return ret;
 }
 
-int monster::group_bash_skill( point target )
+int monster::group_bash_skill( const tripoint target )
 {
     if( !has_flag(MF_GROUP_BASH) ) {
         return bash_skill();
@@ -737,14 +737,14 @@ int monster::group_bash_skill( point target )
 
     // pileup = more bashskill, but only help bashing mob directly infront of target
     const int max_helper_depth = 5;
-    const std::vector<point> bzone = get_bashing_zone( target, point( posx(), posy() ), max_helper_depth );
+    const std::vector<tripoint> bzone = get_bashing_zone( target, pos(), max_helper_depth );
 
-    for( point candidate : bzone ) {
+    for( tripoint candidate : bzone ) {
         // Drawing this line backwards excludes the target and includes the candidate.
-        std::vector<point> path_to_target = line_to( target, candidate, 0 );
+        std::vector<tripoint> path_to_target = line_to( target, candidate, 0 );
         bool connected = true;
         int mondex = -1;
-        for( point in_path : path_to_target ) {
+        for( tripoint in_path : path_to_target ) {
             // If any point in the line from zombie to target is not a cooperating zombie,
             // it can't contribute.
             mondex = g->mon_at( in_path );
