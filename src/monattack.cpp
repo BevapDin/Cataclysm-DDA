@@ -62,19 +62,20 @@ void mattack::none(monster *, int)
 
 void mattack::antqueen(monster *z, int index)
 {
-    std::vector<point> egg_points;
+    std::vector<tripoint> egg_points;
     std::vector<int> ants;
     z->reset_special(index); // Reset timer
     // Count up all adjacent tiles the contain at least one egg.
     for (int x = z->posx() - 2; x <= z->posx() + 2; x++) {
         for (int y = z->posy() - 2; y <= z->posy() + 2; y++) {
-            for (auto &i : g->m.i_at(x, y)) {
+            const tripoint pn( x, y, z->posz() );
+            for (auto &i : g->m.i_at(pn)) {
                 // is_empty() because we can't hatch an ant under the player, a monster, etc.
-                if (i.type->id == "ant_egg" && g->is_empty(x, y)) {
-                    egg_points.push_back(point(x, y));
+                if (i.type->id == "ant_egg" && g->is_empty(pn)) {
+                    egg_points.push_back(pn);
                     break; // Done looking at this tile
                 }
-                int mondex = g->mon_at(x, y);
+                int mondex = g->mon_at(pn);
                 if (mondex != -1 && (g->zombie(mondex).type->id == "mon_ant_larva" ||
                                      g->zombie(mondex).type->id == "mon_ant"         )) {
                     ants.push_back(mondex);
@@ -106,10 +107,10 @@ void mattack::antqueen(monster *z, int index)
             add_msg(m_warning, _("The %s tends nearby eggs, and they hatch!"), z->name().c_str());
         }
         for (auto &i : egg_points) {
-            for (size_t j = 0; j < g->m.i_at(i.x, i.y).size(); j++) {
-                if (g->m.i_at(i.x, i.y)[j].type->id == "ant_egg") {
-                    g->m.i_rem(i.x, i.y, j);
-                    monster tmp(GetMType("mon_ant_larva"), i.x, i.y);
+            for (size_t j = 0; j < g->m.i_at(i).size(); j++) {
+                if (g->m.i_at(i)[j].type->id == "ant_egg") {
+                    g->m.i_rem(i, j);
+                    monster tmp(GetMType("mon_ant_larva"), i);
                     tmp.faction = z->faction;
                     g->add_zombie(tmp);
                     break; // Max one hatch per tile

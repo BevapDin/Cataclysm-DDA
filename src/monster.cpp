@@ -74,11 +74,9 @@ monster::monster(mtype *t)
  ammo = t->starting_ammo;
 }
 
-monster::monster(mtype *t, int x, int y)
+monster::monster(mtype *t, const tripoint &p)
 {
- position.x = x;
- position.y = y;
- position.z = 0;
+    position = p;
  wandx = -1;
  wandy = -1;
  wandf = 0;
