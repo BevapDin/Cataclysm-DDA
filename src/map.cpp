@@ -1041,7 +1041,7 @@ std::string map::get_furn(const int x, const int y) const {
     return furn_at(x, y).id;
 }
 
-furn_t & map::furn_at(const int x, const int y) const
+const furn_t & map::furn_at(const int x, const int y) const
 {
     return furnlist[ furn(x,y) ];
 }
@@ -1149,7 +1149,7 @@ int map::get_ter_harvest_season(const int x, const int y) const {
 /*
  * Get a reference to the actual terrain struct.
  */
-ter_t & map::ter_at(const int x, const int y) const
+const ter_t & map::ter_at(const int x, const int y) const
 {
     return terlist[ ter(x,y) ];
 }
@@ -1836,7 +1836,7 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
         // Else smash furniture or terrain
         bool smash_furn = false;
         bool smash_ter = false;
-        map_bash_info *bash = NULL;
+        const map_bash_info *bash = NULL;
 
         if ( has_furn(x, y) && furn_at(x, y).bash.str_max != -1 ) {
             bash = &(furn_at(x,y).bash);
