@@ -3361,21 +3361,21 @@ void vehicle::power_parts (tripoint sm_loc)//TODO: more categories of powered pa
     }
 }
 
-vehicle* vehicle::find_vehicle(point &where)
+vehicle* vehicle::find_vehicle(tripoint &where)
 {
     // Is it in the reality bubble?
-    point veh_local = g->m.getlocal(where);
-    vehicle* veh = g->m.veh_at(veh_local.x, veh_local.y);
+    tripoint veh_local = g->m.getlocal(where);
+    vehicle* veh = g->m.veh_at(veh_local);
 
     if (veh != nullptr) {
         return veh;
     }
 
     // Nope. Load up its submap...
-    point veh_in_sm = where;
-    point veh_sm = overmapbuffer::ms_to_sm_remain(veh_in_sm);
+    tripoint veh_in_sm = where;
+    point veh_sm = overmapbuffer::ms_to_sm_remain(veh_in_sm.x, veh_in_sm.y);
 
-    auto sm = MAPBUFFER.lookup_submap(veh_sm.x, veh_sm.y, g->levz);
+    auto sm = MAPBUFFER.lookup_submap(veh_sm.x, veh_sm.y, veh_in_sm.z);
     if(sm == nullptr) {
         return nullptr;
     }
@@ -3383,7 +3383,7 @@ vehicle* vehicle::find_vehicle(point &where)
     // ...find the right vehicle inside it...
     for( auto &elem : sm->vehicles ) {
         vehicle *found_veh = elem;
-        point veh_location(found_veh->posx, found_veh->posy);
+        tripoint veh_location(found_veh->posx, found_veh->posy, veh_in_sm.z);
 
         if(veh_in_sm == veh_location) {
             veh = found_veh;
@@ -4564,7 +4564,7 @@ void vehicle::remove_remote_part(int part_num) {
     // If the target vehicle is still there, ask it to remove its part
     if (veh != nullptr) {
         auto pos = global_pos() + parts[part_num].precalc[0];
-        point local_abs = g->m.getabs(pos.x, pos.y);
+        tripoint local_abs = g->m.getabs(pos);
 
         for( size_t j = 0; j < veh->loose_parts.size(); j++) {
             int remote_partnum = veh->loose_parts[j];
@@ -4983,8 +4983,7 @@ void vehicle::aim_turrets()
     // Remember turret's position at the time of aiming
     auto &target = parts[turret_index].target;
     auto &turret_pos = target.second;
-    //TODO: Z
-    turret_pos = point((global_pos() + parts[turret_index].precalc[0]).x, (global_pos() + parts[turret_index].precalc[0]).y);
+    turret_pos = global_pos() + parts[turret_index].precalc[0];
 
     itype *am_itype;
     auto items = get_items( turret_index );
@@ -4998,27 +4997,22 @@ void vehicle::aim_turrets()
     const auto ammo = am_itype->ammo.get();
     const auto &gun_data = *gun.type->gun;
     int range = gun_data.range + ( ammo != nullptr ? ammo->range : 0 );
-    int x = turret_pos.x;
-    int y = turret_pos.y;
+    tripoint targ = turret_pos;
     int t;
     auto mons = g->u.get_visible_creatures( range );
     target_mode tmode = TARGET_MODE_TURRET; // We can't aim here yet
     item weap( part_info( turret_index ).item, 0 );
-    // TODO: Z
-    tripoint targ( x, y, 0 );
     std::vector<tripoint> trajectory =
-                        g->target( targ, x - range, y - range,
-                                   x + range, y + range, mons,
-                                   t, &weap, tmode, global_pos() + parts[turret_index].precalc[0] );
-    x = targ.x;
-    y = targ.y;
+                        g->target( targ, targ.x - range, targ.y - range,
+                                   targ.x + range, targ.y + range, mons,
+                                   t, &weap, tmode, turret_pos );
 
     if( trajectory.empty() ) {
         target.first = turret_pos;
         return;
     }
 
-    target.first = point( x, y );
+    target.first = targ;
     if( parts[turret_index].mode <= 0 ) {
         // Fire only one full burst, then back to off
         parts[turret_index].mode = INT_MIN;
@@ -5140,7 +5134,7 @@ bool vehicle::fire_turret (int p, bool /* burst */ )
     if( !gun.is_gun() ) {
         return false;
     }
-    std::pair< point, point > &target = parts[p].target;
+    auto &target = parts[p].target;
     // Manually aimed turrets will shoot even when disabled
     if( parts[p].mode <= 0 && target.first == target.second ) {
         return false;
@@ -5253,8 +5247,7 @@ int aoe_size( std::set< std::string > tags )
 
 bool vehicle::fire_turret_internal (int p, const itype &gun, const itype &ammo, long &charges, const std::string &extra_sound)
 {
-    int x = global_x() + parts[p].precalc[0].x;
-    int y = global_y() + parts[p].precalc[0].y;
+    tripoint turret_pos = global_pos() + parts[p].precalc[0];
     int range = part_info( p ).range;
     bool burst = abs( parts[p].mode ) > 1;
 
@@ -5264,8 +5257,9 @@ bool vehicle::fire_turret_internal (int p, const itype &gun, const itype &ammo, 
     tmp.skillLevel(gun.gun->skill_used).level(8);
     tmp.skillLevel("gun").level(4);
     tmp.recoil = abs(velocity) / 100 / 4;
-    tmp.setx( x );
-    tmp.sety( y );
+    tmp.setx( turret_pos.x );
+    tmp.sety( turret_pos.y );
+    tmp.setz( turret_pos.z );
     tmp.str_cur = 16;
     tmp.dex_cur = 8;
     tmp.per_cur = 12;
@@ -5282,10 +5276,10 @@ bool vehicle::fire_turret_internal (int p, const itype &gun, const itype &ammo, 
     }
 
     tripoint targ = global_pos();
-    std::pair< point, point > &target = parts[p].target;
+    auto &target = parts[p].target;
     if( target.first == target.second ) {
         // Manual target not set, find one automatically
-        const bool u_see = g->u.sees(x, y);
+        const bool u_see = g->u.sees( turret_pos );
         int boo_hoo;
         Creature *auto_target = tmp.auto_find_hostile_target( range, boo_hoo, area );
         if( auto_target == nullptr ) {
@@ -5302,20 +5296,17 @@ bool vehicle::fire_turret_internal (int p, const itype &gun, const itype &ammo, 
         // Target set manually
         // Second value of 'target' is last position
         // If vehicle moved, move the "sights" with it
-        // TODO: Z
-        targ.x = target.first.x + (x - target.second.x);
-        targ.y = target.first.y + (y - target.second.y);
+        targ = target.first + (turret_pos - target.second);
         // Remove the target
-        target.first.x = x;
-        target.first.y = y;
+        target.first = turret_pos;
     }
 
     // make a noise, if extra noise is to be made
     if (extra_sound != "") {
-        sounds::sound(x, y, 20, extra_sound);
+        sounds::sound( turret_pos, 20, extra_sound);
     }
     // notify player if player can see the shot
-    if( g->u.sees(x, y) ) {
+    if( g->u.sees( turret_pos ) ) {
         add_msg(_("The %s fires its %s!"), name.c_str(), part_info(p).name.c_str());
     }
     // Spawn a fake UPS to power any turreted weapons that need electricity.
@@ -5548,14 +5539,14 @@ item vehicle_part::properties_to_item() const
     // Cables get special handling: their target coordinates need to remain
     // stored, and if a cable actually drops, it should be half-connected.
     if( tmp.has_flag("CABLE_SPOOL") ) {
-        point local_pos = g->m.getlocal(target.first);
-        if(g->m.veh_at(local_pos.x, local_pos.y) == nullptr) {
+        tripoint local_pos = g->m.getlocal(target.first);
+        if(g->m.veh_at(local_pos) == nullptr) {
             tmp.item_tags.insert("NO_DROP"); // That vehicle ain't there no more.
         }
 
         tmp.set_var( "source_x", target.first.x );
         tmp.set_var( "source_y", target.first.y );
-        tmp.set_var( "source_z", g->levz );
+        tmp.set_var( "source_z", target.first.z );
         tmp.set_var( "state", "pay_out_cable" );
         tmp.active = true;
     }

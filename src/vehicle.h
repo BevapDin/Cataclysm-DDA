@@ -104,7 +104,7 @@ struct vehicle_part : public JsonSerializer, public JsonDeserializer
                  const item *it = NULL) : id("null"), iid(0), mount( dx, dy ),
                  precalc( { { point( -1, -1 ), point( -1, -1 ) } } ),
                  hp(0), blood(0), bigness(0), inside(false), removed(false),enabled(1), flags(0),
-                 passenger_id(0), amount(0), target(point(0,0),point(0,0)) {
+                 passenger_id(0), amount(0), target(tripoint(0,0,0),tripoint(0,0,0)) {
         if (!sid.empty()) {
             setid(sid);
         }
@@ -138,7 +138,7 @@ struct vehicle_part : public JsonSerializer, public JsonDeserializer
         int direction;      // direction the part is facing
         int mode;           // turret mode
     };
-    std::pair<point,point> target;  // coordinates for some kind of target; jumper cables use this
+    std::pair<tripoint,tripoint> target;  // coordinates for some kind of target; jumper cables use this
                     // Two coord pairs are stored: actual target point, and target vehicle center.
                     // Both cases use absolute coordinates (relative to world origin)
 private:
@@ -318,7 +318,7 @@ private:
      * give it the coordinates of the origin tile of a target vehicle.
      * @param where Location of the other vehicle's origin tile.
      */
-    vehicle* find_vehicle(point &where);
+    vehicle* find_vehicle(tripoint &where);
 
     /**
      * Traverses the graph of connected vehicles, starting from start_veh, and continuing

@@ -10043,17 +10043,18 @@ int iuse::cable_attach(player *p, item *it, bool, tripoint)
         if(!choose_adjacent(_("Attach cable to vehicle where?"),posx,posy)) {
             return 0;
         }
-        auto veh = g->m.veh_at(posx, posy);
+        const tripoint pnt( posx, posy, 0 );
+        auto veh = g->m.veh_at( pnt );
         if (veh == nullptr) {
             p->add_msg_if_player(_("There's no vehicle there."));
             return 0;
         } else {
-            point abspos = g->m.getabs(posx, posy);
+            const tripoint abspos = g->m.getabs( pnt );
             it->active = true;
             it->set_var( "state", "pay_out_cable" );
             it->set_var( "source_x", abspos.x );
             it->set_var( "source_y", abspos.y );
-            it->set_var( "source_z", g->levz );
+            it->set_var( "source_z", abspos.z );
             it->process( p, p->pos(), false );
         }
         p->moves -= 15;
@@ -10080,15 +10081,17 @@ int iuse::cable_attach(player *p, item *it, bool, tripoint)
         if(!choose_adjacent(_("Attach cable to vehicle where?"),posx,posy)) {
             return 0;
         }
-        auto target_veh = g->m.veh_at(posx, posy);
+        const tripoint pnt( posx, posy, 0 );
+        auto target_veh = g->m.veh_at( pnt );
         if (target_veh == nullptr) {
             p->add_msg_if_player(_("There's no vehicle there."));
             return 0;
         } else {
-            point source_global(it->get_var( "source_x", 0 ),
-                                it->get_var( "source_y", 0 ));
-            point source_local = g->m.getlocal(source_global);
-            auto source_veh = g->m.veh_at(source_local.x, source_local.y);
+            const tripoint source_global( it->get_var( "source_x", 0 ),
+                                          it->get_var( "source_y", 0 ),
+                                          it->get_var( "source_z", 0 ) );
+            const tripoint source_local = g->m.getlocal(source_global);
+            auto source_veh = g->m.veh_at(source_local);
 
             if(source_veh == target_veh) {
                 if (p != nullptr && p->has_item(it)) {
@@ -10098,8 +10101,8 @@ int iuse::cable_attach(player *p, item *it, bool, tripoint)
                 return 0;
             }
 
-            point target_global = g->m.getabs(posx, posy);
-            point target_local(posx, posy);
+            const tripoint target_global = g->m.getabs( pnt );
+            const tripoint target_local( pnt );
 
             if(source_veh == nullptr) {
                 if( p != nullptr && p->has_item(it) ) {
@@ -10109,13 +10112,13 @@ int iuse::cable_attach(player *p, item *it, bool, tripoint)
                 return 0;
             }
 
-            point vcoords = g->m.veh_part_coordinates(source_local.x, source_local.y);
+            point vcoords = g->m.veh_part_coordinates( source_local );
             vehicle_part source_part(it->typeId(), vcoords.x, vcoords.y, it);
             source_part.target.first = target_global;
             source_part.target.second = target_veh->real_global_pos();
             source_veh->install_part(vcoords.x, vcoords.y, source_part);
 
-            vcoords = g->m.veh_part_coordinates(target_local.x, target_local.y);
+            vcoords = g->m.veh_part_coordinates(target_local);
             vehicle_part target_part(it->typeId(), vcoords.x, vcoords.y, it);
             target_part.target.first = source_global;
             target_part.target.second = source_veh->real_global_pos();
