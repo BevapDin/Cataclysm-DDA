@@ -1311,12 +1311,17 @@ std::string map::features(const tripoint &p)
 
 int map::move_cost(const int x, const int y, const vehicle *ignored_vehicle) const
 {
-    int cost = move_cost_ter_furn(x, y); // covers !inbounds check too
+    return move_cost(tripoint(x, y, 0), ignored_vehicle);
+}
+
+int map::move_cost(const tripoint &p, const vehicle *ignored_vehicle) const
+{
+    int cost = move_cost_ter_furn(p); // covers !inbounds check too
     if ( cost == 0 ) {
         return 0;
     }
-    if (veh_in_active_range && veh_exists_at[x][y]) {
-        const auto it = veh_cached_parts.find( point( x, y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y]) {
+        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1334,13 +1339,8 @@ int map::move_cost(const int x, const int y, const vehicle *ignored_vehicle) con
             }
         }
     }
-//    cost+= field_at(x,y).move_cost(); // <-- unimplemented in all cases
+//    cost+= field_at(p).move_cost(); // <-- unimplemented in all cases
     return cost > 0 ? cost : 0;
-}
-
-int map::move_cost(const tripoint &p, const vehicle *ignored_vehicle) const
-{
-    return move_cost(p.x, p.y, ignored_vehicle);
 }
 
 int map::move_cost_ter_furn(const int x, const int y) const
