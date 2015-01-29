@@ -3955,17 +3955,14 @@ void mattack::riotbot(monster *z, int index)
     }
     z->reset_special(index); // Reset timer
 
-    const int monx = z->posx();
-    const int mony = z->posy();
-
     if (calendar::turn % 10 == 0) {
 
         int junk = 0;
         for (int i = -4; i <= 4; i++) {
             for (int j = -4; j <= 4; j++) {
-                if( g->m.move_cost( monx + i, mony + j ) != 0 &&
-                    g->m.clear_path(monx, mony, monx + i, mony + j, 3, 1, 100, junk) ) {
-                    g->m.add_field(monx + i, mony + j, fd_relax_gas, rng(1, 3));
+                if( g->m.move_cost( z->posx() + i, z->posy() + j ) != 0 &&
+                    g->m.clear_path(z->posx(), z->posy(), z->posx() + i, z->posy() + j, 3, 1, 100, junk) ) {
+                    g->m.add_field(z->posx() + i, z->posy() + j, fd_relax_gas, rng(1, 3));
                 }
             }
         }
@@ -3977,7 +3974,7 @@ void mattack::riotbot(monster *z, int index)
         z->anger = 0;
 
         if (calendar::turn % 25 == 0) {
-            sounds::sound(monx, mony, 10,
+            sounds::sound(z->posx(), z->posy(), 10,
                      _("Halt and submit to arrest, citizen! The police will be here any moment."));
         }
 
@@ -3994,7 +3991,7 @@ void mattack::riotbot(monster *z, int index)
     //we need empty hands to arrest
     if (!g->u.is_armed()) {
 
-        sounds::sound(monx, mony, 15, _("Please stay in place, citizen, do not make any movements!"));
+        sounds::sound(z->posx(), z->posy(), 15, _("Please stay in place, citizen, do not make any movements!"));
 
         //we need to come closer and arrest
         if (dist > 1) {
@@ -4095,9 +4092,9 @@ void mattack::riotbot(monster *z, int index)
             int junk = 0;
             for (int i = -2; i <= 2; i++) {
                 for (int j = -2; j <= 2; j++) {
-                    if( g->m.move_cost( monx + i, mony + j ) != 0 &&
-                        g->m.clear_path(monx, mony, monx + i, mony + j, 3, 1, 100, junk) ) {
-                        g->m.add_field(monx + i, mony + j, fd_tear_gas, rng(1, 3));
+                    if( g->m.move_cost( z->posx() + i, z->posy() + j ) != 0 &&
+                        g->m.clear_path(z->posx(), z->posy(), z->posx() + i, z->posy() + j, 3, 1, 100, junk) ) {
+                        g->m.add_field(z->posx() + i, z->posy() + j, fd_tear_gas, rng(1, 3));
                     }
                 }
             }
@@ -4109,7 +4106,7 @@ void mattack::riotbot(monster *z, int index)
     }
 
     if (calendar::turn % 5 == 0) {
-        sounds::sound(monx, mony, 25, _("Empty your hands and hold your position, citizen!"));
+        sounds::sound(z->posx(), z->posy(), 25, _("Empty your hands and hold your position, citizen!"));
     }
 
     if (dist > 5 && dist < 18 && one_in(10)) {
@@ -4127,7 +4124,7 @@ void mattack::riotbot(monster *z, int index)
         //~ Sound of a riotbot using its blinding flash
         sounds::sound(x, y, 3, _("fzzzzzt"));
 
-        std::vector <point> traj = line_to(monx, mony, x, y, 0);
+        std::vector <point> traj = line_to(z->posx(), z->posy(), x, y, 0);
         for( auto &elem : traj ) {
             if( !g->m.trans( elem.x, elem.y ) ) {
                 break;
