@@ -6054,11 +6054,6 @@ void map::setsubmap( const size_t grididx, submap * const smap )
     grid[grididx] = smap;
 }
 
-submap *map::get_submap_at( const int x, const int y ) const
-{
-    return get_submap_at( x, y, 0 );
-}
-
 submap *map::get_submap_at( const int x, const int y, const int z ) const
 {
     return get_submap_at( tripoint( x, y, z ) );
