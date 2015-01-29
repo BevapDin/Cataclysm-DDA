@@ -1601,7 +1601,6 @@ void mattack::leap(monster *z, int index)
 
     // Go back and remove all options that aren't tied for best
     for (size_t i = 0; i < options.size() && options.size() > 1; i++) {
-        point p = options[i];
         if (rl_dist( target, options[i] ) != best) {
             options.erase(options.begin() + i);
             i--;
