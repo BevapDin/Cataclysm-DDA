@@ -335,6 +335,7 @@ class map
  void reset_vehicle_cache();
  void clear_vehicle_cache();
  void update_vehicle_list(submap * const to);
+ void remove_from_vehicle_cache(vehicle *veh);
 
  void destroy_vehicle (vehicle *veh);
 // Change vehicle coords and move vehicle's driver along.
@@ -809,11 +810,13 @@ void add_corpse(int x, int y);
          */
         bool pl_sees( int tx, int ty, int max_range ) const;
         bool pl_sees( tripoint t, int max_range ) const;
- std::set<vehicle*> vehicle_list;
- std::set<vehicle*> dirty_vehicle_list;
 
- std::map< point, std::pair<vehicle*,int> > veh_cached_parts;
- bool veh_exists_at [SEEX * MAPSIZE][SEEY * MAPSIZE];
+    typedef std::set<vehicle*> t_vehicles;
+    t_vehicles vehicle_list;
+    std::set<vehicle*> dirty_vehicle_list;
+    typedef std::map< tripoint, std::pair<vehicle*,int> > t_vehicle_cache;
+    t_vehicle_cache veh_cached_parts;
+    bool veh_exists_at [SEEX * MAPSIZE][SEEY * MAPSIZE][MAPHEIGHT * 2 + 1];
 
     /** return @ref abs_sub */
     tripoint get_abs_sub() const;
