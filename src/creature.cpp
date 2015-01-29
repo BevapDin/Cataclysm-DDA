@@ -188,13 +188,11 @@ bool Creature::sees( const Creature &critter, int &bresenham_slope ) const
         return false;
     }
 
-    int cx = critter.posx();
-    int cy = critter.posy();
     const int wanted_range = rl_dist( pos(), critter.pos() );
     if( wanted_range <= 1 ) {
         return true;
     } else if( ( wanted_range > 1 && critter.digging() ) ||
-        ( g->m.is_divable( cx, cy ) && critter.is_underwater() && !is_underwater() ) ) {
+        ( g->m.is_divable( critter.pos() ) && critter.is_underwater() && !is_underwater() ) ) {
         return false;
     }
 
@@ -204,7 +202,7 @@ bool Creature::sees( const Creature &critter, int &bresenham_slope ) const
 bool Creature::sees( const int tx, const int ty ) const
 {
     int bresenham_slope;
-    return sees( point( tx, ty ), bresenham_slope );
+    return sees( tripoint( tx, ty, posz() ), bresenham_slope );
 }
 
 bool Creature::sees( const point t ) const
@@ -215,10 +213,21 @@ bool Creature::sees( const point t ) const
 
 bool Creature::sees( const int tx, const int ty, int &bresenham_slope ) const
 {
-    return sees( point( tx, ty ), bresenham_slope );
+    return sees( tripoint( tx, ty, posz() ), bresenham_slope );
 }
 
 bool Creature::sees( const point t, int &bresenham_slope ) const
+{
+    return sees( tripoint( t.x, t.y, posz() ), bresenham_slope );
+}
+
+bool Creature::sees( const tripoint t ) const
+{
+    int bresenham_slope;
+    return sees( t, bresenham_slope );
+}
+
+bool Creature::sees( const tripoint t, int &bresenham_slope ) const
 {
     const int range_cur = sight_range( g->light_level() );
     const int range_day = sight_range( DAYLIGHT_LEVEL );
@@ -226,10 +235,10 @@ bool Creature::sees( const point t, int &bresenham_slope ) const
     const int wanted_range = rl_dist( pos(), t );
     if( wanted_range <= range_min ||
         ( wanted_range <= range_day &&
-          g->m.light_at( t.x, t.y ) >= LL_LOW ) ) {
+          g->m.light_at( t ) >= LL_LOW ) ) {
         if( is_player() ) {
-            return g->m.pl_sees( t.x, t.y, wanted_range );
-        } else if( g->m.light_at( t.x, t.y ) >= LL_LOW ) {
+            return g->m.pl_sees( t, wanted_range );
+        } else if( g->m.light_at( t ) >= LL_LOW ) {
             return g->m.sees( pos(), t, wanted_range, bresenham_slope );
         } else {
             return g->m.sees( pos(), t, range_min, bresenham_slope );

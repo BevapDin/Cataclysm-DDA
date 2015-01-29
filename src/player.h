@@ -313,7 +313,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
 
         using Creature::sees;
         // see Creature::sees
-        bool sees( point c, int &bresenham_slope ) const override;
+        bool sees( tripoint c, int &bresenham_slope ) const override;
         // see Creature::sees
         bool sees( const Creature &critter, int &bresenham_slope ) const override;
         /**
