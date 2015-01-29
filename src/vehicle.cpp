@@ -2576,14 +2576,14 @@ tripoint vehicle::global_pos() const
     return tripoint( smx * SEEX + posx, smy * SEEY + posy, smz );
 }
 
-point vehicle::real_global_pos() const
+tripoint vehicle::real_global_pos() const
 {
-    return g->m.getabs( global_x(), global_y() );
+    return g->m.getabs( global_pos() );
 }
 
 void vehicle::set_submap_moved( int x, int y, int z )
 {
-    const point old_msp = real_global_pos();
+    const tripoint old_msp = real_global_pos();
     smx = x;
     smy = y;
     smz = z;

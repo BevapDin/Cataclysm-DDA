@@ -275,17 +275,19 @@ std::vector<mongroup*> overmapbuffer::groups_at(int x, int y, int z)
     return result;
 }
 
-void overmapbuffer::move_vehicle( vehicle *veh, const point &old_msp )
+void overmapbuffer::move_vehicle( vehicle *veh, const tripoint &old_msp )
 {
-    const point new_msp = veh->real_global_pos();
-    point old_omt = ms_to_omt_copy( old_msp );
-    point new_omt = ms_to_omt_copy( new_msp );
+    const tripoint new_msp = veh->real_global_pos();
+    tripoint old_omt = ms_to_omt_copy( old_msp );
+    tripoint new_omt = ms_to_omt_copy( new_msp );
     overmap &old_om = get_om_global( old_omt.x, old_omt.y );
     overmap &new_om = get_om_global( new_omt.x, new_omt.y );
     // *_omt is now local to the overmap, and it's in overmap terrain system
     if( &old_om == &new_om ) {
         new_om.vehicles[veh->om_id].x = new_omt.x;
         new_om.vehicles[veh->om_id].y = new_omt.y;
+        // TODO: Z
+        // new_om.vehicles[veh->om_id].z = new_omt.z;
     } else {
         old_om.vehicles.erase( veh->om_id );
         add_vehicle( veh );
@@ -294,14 +296,14 @@ void overmapbuffer::move_vehicle( vehicle *veh, const point &old_msp )
 
 void overmapbuffer::remove_vehicle( const vehicle *veh )
 {
-    const point omt = ms_to_omt_copy( veh->real_global_pos() );
-    overmap &om = get_om_global( omt );
+    const tripoint omt = ms_to_omt_copy( veh->real_global_pos() );
+    overmap &om = get_om_global( point( omt.x, omt.y ) );
     om.vehicles.erase( veh->om_id );
 }
 
 void overmapbuffer::add_vehicle( vehicle *veh )
 {
-    point omt = ms_to_omt_copy( veh->real_global_pos() );
+    tripoint omt = ms_to_omt_copy( veh->real_global_pos() );
     overmap &om = get_om_global( omt.x, omt.y );
     int id = om.vehicles.size() + 1;
     // this *should* be unique but just in case
@@ -311,6 +313,8 @@ void overmapbuffer::add_vehicle( vehicle *veh )
     om_vehicle &tracked_veh = om.vehicles[id];
     tracked_veh.x = omt.x;
     tracked_veh.y = omt.y;
+    // TODO: Z
+    // tracked_veh.z = omt.z;
     tracked_veh.name = veh->name;
     veh->om_id = id;
 }

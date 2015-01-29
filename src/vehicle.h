@@ -496,7 +496,7 @@ public:
      * Really global absolute coordinates in map squares.
      * This includes the overmap, the submap, and the map square.
      */
-    point real_global_pos() const;
+    tripoint real_global_pos() const;
 
 // Checks how much certain fuel left in tanks.
     int fuel_left (const ammotype & ftype, bool recurse=false);
