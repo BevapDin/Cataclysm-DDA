@@ -378,7 +378,7 @@ struct submap {
         ter[x][y] = terr;
     }
 
-    int get_radiation(int x, int y) {
+    int get_radiation(int x, int y) const {
         return rad[x][y];
     }
 
@@ -402,9 +402,10 @@ struct submap {
         return false;
     }
     // Dependent on furniture + cosmetics.
-    inline const std::string get_signage(int x, int y) {
-        if (has_signage(x, y)) {
-            return cosmetics[x][y]["SIGNAGE"];
+    inline const std::string get_signage(int x, int y) const {
+        const auto iter = cosmetics[x][y].find( "SIGNAGE" );
+        if( iter != cosmetics[x][y].end() ) {
+            return iter->second;
         }
         return "";
     }

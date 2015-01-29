@@ -999,20 +999,25 @@ private:
          * (x,y) must be a valid coordinate, check with @ref inbounds.
          */
         submap *get_submap_at( tripoint gp ) const;
+        const submap *get_csubmap_at( tripoint gp ) const;
         /**
          * Get the submap pointer containing the specified position within the reality bubble.
          * The same as other get_submap_at, (x,y) must be valid (@ref inbounds).
          * Also writes the position within the submap to offset_x, offset_y
          */
         submap *get_submap_at( int x, int y, int& offset_x, int& offset_y ) const;
+        const submap *get_csubmap_at( int x, int y, int& offset_x, int& offset_y ) const;
         submap *get_submap_at( int x, int y, int z, int& offset_x, int& offset_y ) const;
+        const submap *get_csubmap_at( int x, int y, int z, int& offset_x, int& offset_y ) const;
         submap *get_submap_at( tripoint p, int& offset_x, int& offset_y ) const;
+        const submap *get_csubmap_at( tripoint p, int& offset_x, int& offset_y ) const;
         /**
          * Get submap pointer in the grid at given grid coordinates. Grid coordinates must
          * be valid: 0 <= x < my_MAPSIZE, same for y.
          */
         submap *get_submap_at_grid( point gp ) const;
         submap *get_submap_at_grid( tripoint gp ) const;
+        const submap *get_csubmap_at_grid( tripoint gp ) const;
         /**
          * Get the index of a submap pointer in the grid given by grid coordinates. The grid
          * coordinates must be valid: 0 <= x < my_MAPSIZE, same for y.

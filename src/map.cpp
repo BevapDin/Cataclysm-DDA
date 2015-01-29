@@ -1140,7 +1140,7 @@ furn_id map::furn(const tripoint &p) const
   return f_null;
  }
  int lx, ly;
-    const submap *sm = get_submap_at( p, lx, ly );
+    const submap *sm = get_csubmap_at( p, lx, ly );
     return sm->frn[lx][ly];
 }
 
@@ -1153,6 +1153,9 @@ void map::furn_set(const int x, const int y, const furn_id new_furniture)
 void map::furn_set(const tripoint &p, const furn_id new_furniture)
 {
     if (!inbounds(p)) {
+        return;
+    }
+    if( furn( p ) == new_furniture ) {
         return;
     }
  int lx, ly;
@@ -1220,7 +1223,7 @@ ter_id map::ter(const tripoint &p) const {
         return t_null;
     }
  int lx, ly;
-    const submap *sm = get_submap_at( p, lx, ly );
+    const submap *sm = get_csubmap_at( p, lx, ly );
     return sm->ter[lx][ly];
 }
 
@@ -1297,7 +1300,9 @@ void map::ter_set(const tripoint &p, const ter_id new_terrain) {
     if (!inbounds(p)) {
         return;
     }
-
+    if( ter( p ) == new_terrain ) {
+        return;
+    }
     // set the dirty flags
     // TODO: consider checking if the transparency value actually changes
     set_transparency_cache_dirty();
@@ -1396,7 +1401,7 @@ int map::move_cost_ter_furn(const tripoint &p) const
     }
 
     int lx, ly;
-    submap * const current_submap = get_submap_at(p, lx, ly);
+    const auto current_submap = get_csubmap_at(p, lx, ly);
 
     const int tercost = terlist[ current_submap->ter[lx][ly] ].movecost;
     if ( tercost == 0 ) {
@@ -2882,7 +2887,7 @@ const std::string map::get_signage(const tripoint &p) const
     }
 
     int lx, ly;
-    submap * const current_submap = get_submap_at(p, lx, ly);
+    const auto current_submap = get_csubmap_at(p, lx, ly);
 
     return current_submap->get_signage(lx, ly);
 }
@@ -2895,7 +2900,9 @@ void map::set_signage(const tripoint &p, const std::string &message) const
     if (!inbounds(p)) {
         return;
     }
-
+    if( get_signage( p ) == message ) {
+        return;
+    }
     int lx, ly;
     submap * const current_submap = get_submap_at(p, lx, ly);
 
@@ -2910,7 +2917,9 @@ void map::delete_signage(const tripoint &p) const
     if (!inbounds(p)) {
         return;
     }
-
+    if( get_signage( p ).empty() ) {
+        return;
+    }
     int lx, ly;
     submap * const current_submap = get_submap_at(p, lx, ly);
 
@@ -2928,7 +2937,7 @@ int map::get_radiation(const tripoint &p) const
         return 0;
     }
     int lx, ly;
-    submap *sm = get_submap_at( p, lx, ly );
+    const submap *sm = get_csubmap_at( p, lx, ly );
     return sm->get_radiation( lx, ly );
 }
 
@@ -2940,6 +2949,9 @@ void map::set_radiation(const int x, const int y, const int value)
 void map::set_radiation(const tripoint &p, const int value)
 {
     if (!inbounds(p)) {
+        return;
+    }
+    if( get_radiation( p ) == value ) {
         return;
     }
     int lx, ly;
@@ -2957,6 +2969,9 @@ void map::adjust_radiation(const tripoint &p, const int delta)
     if (!inbounds(p)) {
         return;
     }
+    if( delta == 0 ) {
+        return;
+    }
     int lx, ly;
     submap *sm = get_submap_at( p, lx, ly );
     int current_radiation = sm->get_radiation( lx, ly );
@@ -2968,6 +2983,7 @@ int& map::temperature(const int x, const int y)
     return temperature(tripoint(x, y, 0));
 }
 
+//TODO: Make into getter & setter pair!
 int& map::temperature(const tripoint &p)
 {
     if (!inbounds(p)) {
@@ -3003,6 +3019,13 @@ map_stack map::i_at( const tripoint &p)
     }
 
     int lx, ly;
+    {
+        const auto s = get_csubmap_at( p, lx, ly );
+        if( s->itm[lx][ly].empty() ) {
+            nulitems.clear();
+            return map_stack{ &nulitems, p, this };
+        }
+    }
     submap *const current_submap = get_submap_at( p, lx, ly );
 
     return map_stack{ &current_submap->itm[lx][ly], p, this };
@@ -3119,16 +3142,10 @@ void map::i_clear(const int x, const int y)
 
 void map::i_clear(const tripoint &p)
 {
-    int lx, ly;
-    submap *const current_submap = get_submap_at( p, lx, ly );
-
-    for( auto item_it = current_submap->itm[lx][ly].begin();
-         item_it != current_submap->itm[lx][ly].end(); ++item_it ) {
-        if( current_submap->active_items.has( item_it, point( lx, ly ) ) ) {
-            current_submap->active_items.remove( item_it, point( lx, ly ) );
-        }
+    auto map_items = i_at( p );
+    while( !map_items.empty() ) {
+        map_items.erase( map_items.begin() );
     }
-    current_submap->itm[lx][ly].clear();
 }
 
 void map::spawn_an_item(const int x, const int y, item new_item,
@@ -3469,6 +3486,7 @@ void map::process_items( bool active, T processor, std::string signal )
     for( int gx = 0; gx < my_MAPSIZE; gx++ ) {
         for( int gy = 0; gy < my_MAPSIZE; gy++ ) {
             for (int gz = my_ZMIN; gz <= my_ZMAX; gz++) {
+                //TODO: check for empty submap
             submap *const current_submap = get_submap_at_grid( tripoint( gx, gy, gz ) );
             // Vehicles first in case they get blown up and drop active items on the map.
             if( !current_submap->vehicles.empty() ) {
@@ -3957,7 +3975,7 @@ trap_id map::tr_at(const tripoint &p) const
 */
 
  int lx, ly;
- submap * const current_submap = get_submap_at(p, lx, ly);
+ const submap * const current_submap = get_csubmap_at(p, lx, ly);
 
  if (terlist[ current_submap->ter[lx][ly] ].trap != tr_null) {
   return terlist[ current_submap->ter[lx][ly] ].trap;
@@ -4281,6 +4299,11 @@ computer* map::computer_at( const tripoint p )
 {
  if (!inbounds(p))
   return NULL;
+
+    const auto s = get_csubmap_at( p );
+    if( s->comp.name.empty() ) {
+        return nullptr;
+    }
 
  submap * const current_submap = get_submap_at( p );
 
@@ -6063,14 +6086,33 @@ submap *map::get_submap_at( const tripoint p ) const
     return get_submap_at_grid( tripoint( p.x / SEEX, p.y / SEEY, p.z ) );
 }
 
+const submap *map::get_csubmap_at( const tripoint p ) const
+{
+    if( !inbounds( p ) ) {
+        debugmsg( "Tried to access invalid map position (%d,%d,%d)", p.x, p.y, p.z );
+        return nullptr;
+    }
+    return get_csubmap_at_grid( tripoint( p.x / SEEX, p.y / SEEY, p.z ) );
+}
+
 submap *map::get_submap_at( const int x, const int y, int &offset_x, int &offset_y ) const
 {
     return get_submap_at( x, y, 0, offset_x, offset_y );
 }
 
+const submap *map::get_csubmap_at( const int x, const int y, int &offset_x, int &offset_y ) const
+{
+    return get_csubmap_at( x, y, 0, offset_x, offset_y );
+}
+
 submap *map::get_submap_at( const int x, const int y, const int z, int &offset_x, int &offset_y ) const
 {
     return get_submap_at( tripoint( x, y, z ), offset_x, offset_y );
+}
+
+const submap *map::get_csubmap_at( const int x, const int y, const int z, int &offset_x, int &offset_y ) const
+{
+    return get_csubmap_at( tripoint( x, y, z ), offset_x, offset_y );
 }
 
 submap *map::get_submap_at( const tripoint p, int &offset_x, int &offset_y ) const
@@ -6080,12 +6122,24 @@ submap *map::get_submap_at( const tripoint p, int &offset_x, int &offset_y ) con
     return get_submap_at( p );
 }
 
+const submap *map::get_csubmap_at( const tripoint p, int &offset_x, int &offset_y ) const
+{
+    offset_x = p.x % SEEX;
+    offset_y = p.y % SEEY;
+    return get_csubmap_at( p );
+}
+
 submap *map::get_submap_at_grid( const point gp ) const
 {
     return get_submap_at_grid( tripoint( gp.x, gp.y, 0 ) );
 }
 
 submap *map::get_submap_at_grid( const tripoint gp ) const
+{
+    return getsubmap( get_nonant( gp ) );
+}
+
+const submap *map::get_csubmap_at_grid( const tripoint gp ) const
 {
     return getsubmap( get_nonant( gp ) );
 }
