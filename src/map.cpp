@@ -1539,21 +1539,20 @@ bool map::has_flag_ter_and_furn(const ter_bitflags flag, const tripoint &p) cons
 }
 
 /////
-bool map::is_bashable(const tripoint &p)
-{
-    return is_bashable(p.x, p.y);
-}
-
 bool map::is_bashable(const int x, const int y)
 {
-    if (!inbounds(x, y)) {
-        DebugLog( D_WARNING, D_MAP ) << "Looking for out-of-bounds is_bashable at "
-                                     << x << ", " << y;
+    return is_bashable(tripoint(x, y, 0));
+}
+
+bool map::is_bashable(const tripoint &p)
+{
+    if (!inbounds(p)) {
+        DebugLog( D_WARNING, D_MAP ) << "Looking for out-of-bounds is_bashable at " << p;
         return false;
     }
 
-    if (veh_in_active_range && veh_exists_at[x][y]) {
-        const auto it = veh_cached_parts.find( point( x, y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y]) {
+        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1566,9 +1565,9 @@ bool map::is_bashable(const int x, const int y)
             }
         }
     }
-    if ( has_furn(x, y) && furn_at(x, y).bash.str_max != -1 ) {
+    if ( has_furn(p) && furn_at(p).bash.str_max != -1 ) {
         return true;
-    } else if ( ter_at(x, y).bash.str_max != -1 ) {
+    } else if ( ter_at(p).bash.str_max != -1 ) {
         return true;
     }
     return false;
