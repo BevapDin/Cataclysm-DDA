@@ -1444,7 +1444,7 @@ bool game::do_turn()
         // or the option has been deactivated,
         // might also happen when someone dives from a moving car.
         // or when using the handbrake.
-        vehicle *veh = m.veh_at(u.posx(), u.posy());
+        vehicle *veh = m.veh_at(g->u.pos());
         if (veh == 0) {
             calc_driving_offset(0); // reset to (0,0)
         } else {
@@ -1674,7 +1674,7 @@ void game::update_weather()
         lightning_active = false;
         nextweather += 50; // Check weather each 50 turns.
         if (weather != old_weather && weather_data[weather].dangerous &&
-            levz >= 0 && m.is_outside(u.posx(), u.posy())
+            levz >= 0 && m.is_outside(u.pos())
             && !u.has_activity(ACT_WAIT_WEATHER)) {
             cancel_activity_query(_("The weather changed to %s!"), weather_data[weather].name.c_str());
         }
@@ -2662,7 +2662,7 @@ bool game::handle_action()
     }
 
     int veh_part;
-    vehicle *veh = m.veh_at( u.posx(), u.posy(), veh_part );
+    vehicle *veh = m.veh_at( u.pos(), veh_part );
     bool veh_ctrl = !u.is_dead_state() &&
         ( ( veh && veh->player_in_control(&u) ) || remoteveh() != nullptr );
 
@@ -4311,7 +4311,7 @@ void game::debug()
         break;
 
     case 10:
-        if (m.veh_at(u.posx(), u.posy())) {
+        if (m.veh_at(u.pos())) {
             dbg(D_ERROR) << "game:load: There's already vehicle here";
             debugmsg("There's already vehicle here");
         } else {
@@ -5151,7 +5151,7 @@ void game::draw_veh_dir_indicator(void)
 {
     // don't draw indicator if doing look_around()
     if (OPTIONS["VEHICLE_DIR_INDICATOR"]) {
-        vehicle *veh = m.veh_at(u.posx(), u.posy());
+        vehicle *veh = m.veh_at(u.pos());
         if (!veh) {
             debugmsg("game::draw_veh_dir_indicator: no vehicle!");
             return;
@@ -6981,7 +6981,7 @@ void game::open()
     if (veh) {
         int openable = veh->next_part_to_open(vpart);
         if (openable >= 0) {
-            const vehicle *player_veh = m.veh_at(u.posx(), u.posy());
+            const vehicle *player_veh = m.veh_at(u.pos());
             bool outside = !player_veh || player_veh != veh;
             if (!outside) {
                 veh->open(openable);
@@ -7011,7 +7011,7 @@ void game::open()
         return;
     }
 
-    bool didit = m.open_door(openx, openy, !m.is_outside(u.posx(), u.posy()));
+    bool didit = m.open_door(openx, openy, !m.is_outside(u.pos()));
 
     if (!didit) {
         const std::string terid = m.get_ter(openx, openy);
@@ -7040,7 +7040,7 @@ void game::close(int closex, int closey)
     }
 
     bool didit = false;
-    const bool inside = !m.is_outside(u.posx(), u.posy());
+    const bool inside = !m.is_outside(u.pos());
 
     auto items_in_way = m.i_at(closex, closey);
     int vpart;
@@ -7054,7 +7054,7 @@ void game::close(int closex, int closey)
         if (openable >= 0) {
             const char *name = veh->part_info(openable).name.c_str();
             if (veh->part_info(openable).has_flag("OPENCLOSE_INSIDE")) {
-                const vehicle *in_veh = m.veh_at(u.posx(), u.posy());
+                const vehicle *in_veh = m.veh_at(u.pos());
                 if (!in_veh || in_veh != veh) {
                     add_msg(m_info, _("That %s can only closed from the inside."), name);
                     return;
@@ -7174,7 +7174,7 @@ void game::smash()
             rng(0, u.weapon.volume() + 3) < u.weapon.volume()) {
             add_msg(m_bad, _("Your %s shatters!"), u.weapon.tname().c_str());
             for( auto &elem : u.weapon.contents ) {
-                m.add_item_or_charges( u.posx(), u.posy(), elem );
+                m.add_item_or_charges( u.pos(), elem );
             }
             sounds::sound(u.posx(), u.posy(), 24, "");
             u.deal_damage( nullptr, bp_hand_r, damage_instance( DT_CUT, rng( 0, u.weapon.volume() ) ) );
@@ -7329,7 +7329,7 @@ bool game::pl_refill_vehicle(vehicle &veh, int part, bool test)
 
 void game::handbrake()
 {
-    vehicle *veh = m.veh_at(u.posx(), u.posy());
+    vehicle *veh = m.veh_at(u.pos());
     if (!veh) {
         return;
     }
@@ -7656,7 +7656,7 @@ void game::open_gate(const int examx, const int examy, const ter_id handle_type)
 void game::moving_vehicle_dismount(int tox, int toy)
 {
     int vpart;
-    vehicle *veh = m.veh_at(u.posx(), u.posy(), vpart);
+    vehicle *veh = m.veh_at(u.pos(), vpart);
     if (!veh) {
         debugmsg("Tried to exit non-existent vehicle.");
         return;
@@ -7687,7 +7687,7 @@ void game::control_vehicle()
     int veh_part = -1;
     vehicle *veh = remoteveh();
     if( veh == nullptr ) {
-        veh = m.veh_at(u.posx(), u.posy(), veh_part);
+        veh = m.veh_at(u.pos(), veh_part);
     }
 
     if( veh != nullptr && veh->player_in_control( &u ) ) {
@@ -7956,7 +7956,7 @@ void game::examine(int examx, int examy)
     if (examx == -1) {
         // if we are driving a vehicle, examine the
         // current tile without asking.
-        veh = m.veh_at(u.posx(), u.posy(), veh_part);
+        veh = m.veh_at(u.pos(), veh_part);
         if (veh && veh->player_in_control(&u)) {
             examx = u.posx();
             examy = u.posy();
@@ -10580,8 +10580,8 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
 
     if (u.weapon.has_flag("MOUNTED_GUN")) {
         int vpart = -1;
-        vehicle *veh = m.veh_at(u.posx(), u.posy(), vpart);
-        if (!m.has_flag_ter_or_furn("MOUNTABLE", u.posx(), u.posy()) &&
+        vehicle *veh = m.veh_at(u.pos(), vpart);
+        if (!m.has_flag_ter_or_furn("MOUNTABLE", u.pos()) &&
             (veh == NULL || veh->part_with_feature(vpart, "MOUNTABLE") < 0)) {
             add_msg(m_info,
                     _("You need to be standing near acceptable terrain or furniture to use this weapon. A table, a mound of dirt, a broken window, etc."));
@@ -10631,7 +10631,7 @@ void game::butcher()
     bool has_item = false;
     // indices of corpses / items that can be disassembled
     std::vector<int> corpses;
-    auto items = m.i_at(u.posx(), u.posy());
+    auto items = m.i_at(u.pos());
     const inventory &crafting_inv = u.crafting_inventory();
     bool has_salvage_tool = u.has_items_with_quality( "CUT", 1, 1 );
 
@@ -10969,10 +10969,10 @@ bool add_or_drop_with_msg( player &u, item &it )
     if( !u.can_pickVolume( it.volume() ) ) {
         add_msg( _( "There's no room in your inventory for the %s, so you drop it." ),
                  it.tname().c_str() );
-        g->m.add_item_or_charges( u.posx(), u.posy(), it );
+        g->m.add_item_or_charges( u.pos(), it );
     } else if( !u.can_pickWeight( it.weight(), !OPTIONS["DANGEROUS_PICKUPS"] ) ) {
         add_msg( _( "The %s is too heavy to carry, so you drop it." ), it.tname().c_str() );
-        g->m.add_item_or_charges( u.posx(), u.posy(), it );
+        g->m.add_item_or_charges( u.pos(), it );
     } else {
         auto &ni = u.i_add( it );
         add_msg( _( "You put the %s in your inventory." ), ni.tname().c_str() );
@@ -11199,7 +11199,7 @@ void game::pldrive(int x, int y)
     bool remote = true;
     int part = -1;
     if( !veh ) {
-        veh = m.veh_at(u.posx(), u.posy(), part);
+        veh = m.veh_at(u.pos(), part);
         remote = false;
     }
     if (!veh) {
@@ -11436,7 +11436,7 @@ bool game::plmove(int dx, int dy)
 
     // GRAB: pre-action checking.
     int vpart0 = -1, vpart1 = -1, dpart = -1;
-    vehicle *veh0 = m.veh_at(u.posx(), u.posy(), vpart0);
+    vehicle *veh0 = m.veh_at(u.pos(), vpart0);
     vehicle *veh1 = m.veh_at(x, y, vpart1);
     bool pushing_furniture = false;  // moving -into- furniture tile; skip check for move_cost > 0
     bool pulling_furniture = false;  // moving -away- from furniture tile; check for move_cost > 0
@@ -11935,7 +11935,7 @@ bool game::plmove(int dx, int dy)
 
         //Autopickup
         if (OPTIONS["AUTO_PICKUP"] && (!OPTIONS["AUTO_PICKUP_SAFEMODE"] || mostseen == 0) &&
-            ((m.i_at(u.posx(), u.posy())).size() || OPTIONS["AUTO_PICKUP_ADJACENT"])) {
+            ((m.i_at(u.pos())).size() || OPTIONS["AUTO_PICKUP_ADJACENT"])) {
             Pickup::pick_up(u.posx(), u.posy(), -1);
         }
 
@@ -12081,8 +12081,8 @@ bool game::plmove(int dx, int dy)
             u.setx( u.posx() + (tunneldist + 1) * (x - u.posx()) );
             u.sety( u.posy() + (tunneldist + 1) * (y - u.posy()) ); //ditto for y
             add_msg(_("You quantum tunnel through the %d-tile wide barrier!"), tunneldist);
-            if (m.veh_at(u.posx(), u.posy(), vpart1) &&
-                m.veh_at(u.posx(), u.posy(), vpart1)->part_with_feature(vpart1, "BOARDABLE") >= 0) {
+            if (m.veh_at(u.pos(), vpart1) &&
+                m.veh_at(u.pos(), vpart1)->part_with_feature(vpart1, "BOARDABLE") >= 0) {
                 m.board_vehicle(u.posx(), u.posy(), &u);
             }
         } else { //or you couldn't tunnel due to lack of energy

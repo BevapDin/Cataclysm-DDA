@@ -525,8 +525,7 @@ npc_action npc::method_of_fleeing(int enemy)
 {
     int speed = (enemy == TARGET_PLAYER ? g->u.get_speed() :
                  g->zombie(enemy).get_speed());
-    point enemy_loc = (enemy == TARGET_PLAYER ? point(g->u.posx(), g->u.posy()) :
-                       point(g->zombie(enemy).posx(), g->zombie(enemy).posy()));
+    tripoint enemy_loc = (enemy == TARGET_PLAYER ? g->u.pos() : g->zombie(enemy).pos());
     int distance = rl_dist(pos(), enemy_loc);
 
     if (choose_escape_item() != INT_MIN) { // We have an escape item!
@@ -1096,12 +1095,12 @@ void npc::move_to(int x, int y)
                 }
             }
             int part;
-            vehicle *veh = g->m.veh_at( posx(), posy(), part );
+            vehicle *veh = g->m.veh_at( pos(), part );
             if( veh != nullptr && veh->part_with_feature( part, VPFLAG_BOARDABLE ) >= 0 ) {
                 g->m.board_vehicle( posx(), posy(), this );
             }
             g->m.creature_in_field( *this );
-        } else if (g->m.open_door(x, y, (g->m.ter(posx(), posy()) == t_floor))) {
+        } else if (g->m.open_door(x, y, (g->m.ter(pos()) == t_floor))) {
             moves -= 100;
         } else if (g->m.is_bashable(tripoint(x, y, 0)) && g->m.bash_rating(str_cur + weapon.type->melee_dam, tripoint(x, y, 0)) > 0) {
             moves -= int(weapon.is_null() ? 80 : weapon.attack_time() * 0.8);;
@@ -1513,7 +1512,7 @@ void npc::drop_items(int weight, int volume)
         } else if (num_items_dropped == 2) {
             item_name << _(" and ") << dropped.tname();
         }
-        g->m.add_item_or_charges(posx(), posy(), dropped);
+        g->m.add_item_or_charges(pos(), dropped);
     }
     // Finally, describe the action if u can see it
     std::string item_name_str = item_name.str();
@@ -1986,8 +1985,8 @@ void npc::pick_and_eat()
 
 void npc::mug_player(player &mark)
 {
-    if( rl_dist( pos(), mark.pos() ) > 1 ) { // We have to travel
-        update_path( mark.posx(), mark.posy() );
+    if (rl_dist(pos(), mark.pos()) > 1) { // We have to travel
+        update_path(mark.posx(), mark.posy());
         move_to_next();
     } else {
         bool u_see_me   = g->u.sees( *this ),

@@ -314,7 +314,7 @@ void activity_handlers::butcher_finish( player_activity *act, player *p )
         if( (skill_shift + 10) * 5 > rng(0, 100) ) {
             add_msg( m_good, _( "You discover a %s in the %s!" ), content.tname().c_str(),
                      corpse->nname().c_str() );
-            g->m.add_item_or_charges( p->posx(), p->posy(), content );
+            g->m.add_item_or_charges( p->pos(), content );
         } else if( content.is_bionic()  ) {
             g->m.spawn_item( p->pos(), "burnt_out_bionic", 1, 0, age);
         }
@@ -332,7 +332,7 @@ void activity_handlers::butcher_finish( player_activity *act, player *p )
         tmpitem.set_mtype( corpse );
         while ( pieces > 0 ) {
             pieces--;
-            g->m.add_item_or_charges(p->posx(), p->posy(), tmpitem);
+            g->m.add_item_or_charges(p->pos(), tmpitem);
         }
     }
 }
@@ -380,7 +380,7 @@ static void rod_fish( player *p, int sSkillLevel, int fishChance )
                 std::vector<std::string> fish_group = MonsterGroupManager::GetMonstersFromGroup("GROUP_FISH");
                 std::string fish_mon = fish_group[rng(1, fish_group.size()) - 1];
                 fish.make_corpse( fish_mon, calendar::turn );
-                g->m.add_item_or_charges(p->posx(), p->posy(), fish);
+                g->m.add_item_or_charges(p->pos(), fish);
                 p->add_msg_if_player(m_good, _("You caught a %s."), GetMType(fish_mon)->nname().c_str());
             } else {
                 p->add_msg_if_player(_("You didn't catch anything."));

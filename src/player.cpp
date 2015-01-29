@@ -13225,10 +13225,10 @@ bool player::sees_with_infrared( const Creature &critter ) const
     }
     const auto range = sight_range( DAYLIGHT_LEVEL );
     if( is_player() ) {
-        return g->m.pl_sees(critter.posx(), critter.posy(), range );
+        return g->m.pl_sees( critter.pos(), range );
     } else {
         int bresenham_slope;
-        return g->m.sees(critter.posx(), critter.posy(), range, bresenham_slope );
+        return g->m.sees( pos(), critter.pos(), range, bresenham_slope );
     }
 }
 
