@@ -2043,27 +2043,26 @@ void map::collapse_at(const int x, const int y)
     }
 }
 
-std::pair<bool, bool> map::bash(const tripoint &p, const int str,
-                                bool silent, bool destroy, vehicle *bashing_vehicle )
-{
-    return bash( p.x, p.y, str, silent, destroy, bashing_vehicle );
-}
-
 std::pair<bool, bool> map::bash(const int x, const int y, const int str,
                                 bool silent, bool destroy, vehicle *bashing_vehicle )
+{
+    return bash(tripoint(x, y, 0), str, silent, destroy, bashing_vehicle);
+}
+
+std::pair<bool, bool> map::bash(const tripoint &p, const int str, bool silent, bool destroy, vehicle *bashing_vehicle)
 {
     bool success = false;
     int sound_volume = 0;
     std::string sound;
     bool smashed_something = false;
-    if( get_field( point( x, y ), fd_web ) != nullptr ) {
+    if( get_field( p, fd_web ) != nullptr ) {
         smashed_something = true;
-        remove_field(x, y, fd_web);
+        remove_field(p, fd_web);
     }
 
     // Destroy glass items, spilling their contents.
     std::vector<item> smashed_contents;
-    auto bashed_items = i_at(x, y);
+    auto bashed_items = i_at(p);
     for( auto bashed_item = bashed_items.begin(); bashed_item != bashed_items.end(); ) {
         // the check for active supresses molotovs smashing themselves with their own explosion
         if (bashed_item->made_of("glass") && !bashed_item->active && one_in(2)) {
@@ -2079,11 +2078,11 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
         }
     }
     // Now plunk in the contents of the smashed items.
-    spawn_items( x, y, smashed_contents );
+    spawn_items( p.x, p.y, smashed_contents );
 
     // Smash vehicle if present
     int vpart;
-    vehicle *veh = veh_at(x, y, vpart);
+    vehicle *veh = veh_at(p, vpart);
     if (veh && veh != bashing_vehicle) {
         veh->damage (vpart, str, 1);
         sound = _("crash!");
@@ -2096,18 +2095,18 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
         bool smash_ter = false;
         const map_bash_info *bash = NULL;
 
-        if ( has_furn(x, y) && furn_at(x, y).bash.str_max != -1 ) {
-            bash = &(furn_at(x,y).bash);
+        if ( has_furn(p) && furn_at(p).bash.str_max != -1 ) {
+            bash = &(furn_at(p).bash);
             smash_furn = true;
-        } else if ( ter_at(x, y).bash.str_max != -1 ) {
-            bash = &(ter_at(x,y).bash);
+        } else if ( ter_at(p).bash.str_max != -1 ) {
+            bash = &(ter_at(p).bash);
             smash_ter = true;
         }
         // TODO: what if silent is true?
-        if (has_flag("ALARMED", x, y) && !g->event_queued(EVENT_WANTED)) {
-            sounds::sound(x, y, 40, _("an alarm go off!"));
+        if (has_flag("ALARMED", p) && !g->event_queued(EVENT_WANTED)) {
+            sounds::sound(p.x, p.y, 40, _("an alarm go off!"));
             // if the player is nearby blame him/her
-            if( rl_dist( g->u.posx(), g->u.posy(), x, y ) <= 3 ) {
+            if (rl_dist(g->u.pos(), p) <= 3) {
                 g->u.add_memorial_log(pgettext("memorial_male", "Set off an alarm."),
                                       pgettext("memorial_female", "Set off an alarm."));
                 g->add_event(EVENT_WANTED, int(calendar::turn) + 300, 0,
@@ -2124,7 +2123,7 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
                 success = true;
             } else {
                 if ( bash->str_min_blocked != -1 || bash->str_max_blocked != -1 ) {
-                    if( has_adjacent_furniture(x, y) ) {
+                    if( has_adjacent_furniture(p) ) {
                         if ( bash->str_min_blocked != -1 ) {
                             smin = bash->str_min_blocked;
                         }
@@ -2140,17 +2139,17 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
 
             if (success || destroy) {
                 // Clear out any partially grown seeds
-                if (has_flag_ter_or_furn("PLANT", x, y)) {
-                    i_clear( x, y );
+                if (has_flag_ter_or_furn("PLANT", p)) {
+                    i_clear( p );
                 }
 
                 if (smash_furn) {
-                    if (has_flag_furn("FUNGUS", x, y)) {
-                        create_spores(x, y);
+                    if (has_flag_furn("FUNGUS", p)) {
+                        create_spores(p.x, p.y);
                     }
                 } else if (smash_ter) {
-                    if (has_flag_ter("FUNGUS", x, y)) {
-                        create_spores(x, y);
+                    if (has_flag_ter("FUNGUS", p)) {
+                        create_spores(p.x, p.y);
                     }
                 }
 
@@ -2165,40 +2164,41 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
                 }
                 sound = _(bash->sound.c_str());
                 // Set this now in case the ter_set below changes this
-                bool collapses = has_flag("COLLAPSES", x, y) && smash_ter;
-                bool supports = has_flag("SUPPORTS_ROOF", x, y) && smash_ter;
+                bool collapses = has_flag("COLLAPSES", p) && smash_ter;
+                bool supports = has_flag("SUPPORTS_ROOF", p) && smash_ter;
                 if (smash_furn == true) {
-                    furn_set(x, y, bash->furn_set);
+                    furn_set(p, bash->furn_set);
                     // Hack alert.
                     // Signs have cosmetics associated with them on the submap since
                     // furniture can't store dynamic data to disk. To prevent writing
                     // mysteriously appearing for a sign later built here, remove the
                     // writing from the submap.
-                    delete_signage(x, y);
+                    delete_signage(p);
                 } else if (smash_ter == true) {
-                    ter_set(x, y, bash->ter_set);
+                    ter_set(p, bash->ter_set);
                 } else {
                     debugmsg( "data/json/terrain.json does not have %s.bash.ter_set set!",
-                              ter_at(x,y).id.c_str() );
+                              ter_at(p).id.c_str() );
                 }
 
-                spawn_item_list(bash->items, x, y);
+                spawn_item_list(bash->items, p);
                 if (bash->explosive > 0) {
-                    g->explosion(x, y, bash->explosive, 0, false);
+                    g->explosion(p, bash->explosive, 0, false);
                 }
 
                 if (collapses) {
-                    collapse_at(x, y);
+                    collapse_at(p.x, p.y);
                 }
                 // Check the flag again to ensure the new terrain doesn't support anything
-                if (supports && !has_flag("SUPPORTS_ROOF", x, y)) {
-                    for (int i = x - 1; i <= x + 1; i++) {
-                        for (int j = y - 1; j <= y + 1; j++) {
-                            if ((i == x && j == y) || !has_flag("COLLAPSES", i, j)) {
+                if (supports && !has_flag("SUPPORTS_ROOF", p)) {
+                    for (int i = p.x - 1; i <= p.x + 1; i++) {
+                        for (int j = p.y - 1; j <= p.y + 1; j++) {
+                            const tripoint p2( i, j, p.z );
+                            if (p2 == p || !has_flag("COLLAPSES", p2)) {
                                 continue;
                             }
-                            if (one_in(collapse_check(i, j))) {
-                                collapse_at(i, j);
+                            if (one_in(collapse_check(p2.x, p2.y))) {
+                                collapse_at(p2.x, p2.y);
                             }
                         }
                     }
@@ -2214,45 +2214,46 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
                 smashed_something = true;
             }
         } else {
-            furn_id furnid = furn(x, y);
+            furn_id furnid = furn(p);
             if ( furnid == f_skin_wall || furnid == f_skin_door || furnid == f_skin_door_o ||
                  furnid == f_skin_groundsheet || furnid == f_canvas_wall || furnid == f_canvas_door ||
                  furnid == f_canvas_door_o || furnid == f_groundsheet || furnid == f_fema_groundsheet) {
                 if (str >= rng(0, 6) || destroy) {
                     // Special code to collapse the tent if destroyed
-                    int tentx = -1, tenty = -1;
+                    tripoint tent(-1, -1, -1);
                     // Find the center of the tent
                     for (int i = -1; i <= 1; i++) {
                         for (int j = -1; j <= 1; j++) {
-                            if (furn(x + i, y + j) == f_groundsheet ||
-                                furn(x + i, y + j) == f_fema_groundsheet ||
-                                furn(x + i, y + j) == f_skin_groundsheet){
-                                tentx = x + i;
-                                tenty = y + j;
+                            const tripoint pn(p.x + i, p.y + j, p.z);
+                            if (furn(pn) == f_groundsheet ||
+                                furn(pn) == f_fema_groundsheet ||
+                                furn(pn) == f_skin_groundsheet){
+                                tent = pn;
                                 break;
                             }
                         }
                     }
                     // Never found tent center, bail out
-                    if (tentx == -1 && tenty == -1) {
+                    if (tent.x == -1) {
                         smashed_something = true;
                     }
                     // Take the tent down
                     for (int i = -1; i <= 1; i++) {
                         for (int j = -1; j <= 1; j++) {
-                            if (furn(tentx + i, tenty + j) == f_groundsheet) {
-                                spawn_item(tentx + i, tenty + j, "broketent");
+                            const tripoint pn(tent.x + i, tent.y + j, tent.z);
+                            if (furn(pn) == f_groundsheet) {
+                                spawn_item(pn, "broketent");
                             }
-                            if (furn(tentx + i, tenty + j) == f_skin_groundsheet) {
-                                spawn_item(tentx + i, tenty + j, "damaged_shelter_kit");
+                            if (furn(pn) == f_skin_groundsheet) {
+                                spawn_item(pn, "damaged_shelter_kit");
                             }
-                            furn_id check_furn = furn(tentx + i, tenty + j);
+                            furn_id check_furn = furn(pn);
                             if (check_furn == f_skin_wall || check_furn == f_skin_door ||
                                   check_furn == f_skin_door_o || check_furn == f_skin_groundsheet ||
                                   check_furn == f_canvas_wall || check_furn == f_canvas_door ||
                                   check_furn == f_canvas_door_o || check_furn == f_groundsheet ||
                                   check_furn == f_fema_groundsheet) {
-                                furn_set(tentx + i, tenty + j, f_null);
+                                furn_set(pn, f_null);
                             }
                         }
                     }
@@ -2272,28 +2273,29 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
                      furnid == f_large_canvas_door_o) {
                 if (str >= rng(0, 6) || destroy) {
                     // Special code to collapse the tent if destroyed
-                    int tentx = -1, tenty = -1;
+                    tripoint tent(-1, -1, -1);
                     // Find the center of the tent
                     for (int i = -2; i <= 2; i++) {
                         for (int j = -2; j <= 2; j++) {
-                            if (furn(x + i, y + j) == f_center_groundsheet){
-                                tentx = x + i;
-                                tenty = y + j;
+                            const tripoint pn(p.x + i, p.y + j, p.z);
+                            if (furn(pn) == f_center_groundsheet){
+                                tent = pn;
                                 break;
                             }
                         }
                     }
                     // Never found tent center, bail out
-                    if (tentx == -1 && tenty == -1) {
+                    if (tent.x == -1) {
                         smashed_something = true;
                     }
                     // Take the tent down
                     for (int i = -2; i <= 2; i++) {
                         for (int j = -2; j <= 2; j++) {
-                             if (furn(tentx + i, tenty + j) == f_center_groundsheet) {
-                             spawn_item(tentx + i, tenty + j, "largebroketent");
+                            const tripoint pn(tent.x + i, tent.y + j, tent.z);
+                            if (furn(pn) == f_center_groundsheet) {
+                                spawn_item(pn, "largebroketent");
                             }
-                            furn_set(tentx + i, tenty + j, f_null);
+                            furn_set(pn, f_null);
                         }
                     }
                     sound_volume = 8;
@@ -2308,13 +2310,13 @@ std::pair<bool, bool> map::bash(const int x, const int y, const int str,
             }
         }
     }
-    if( move_cost(x, y) <= 0  && !smashed_something ) {
+    if( move_cost(p) <= 0  && !smashed_something ) {
         sound = _("thump!");
         sound_volume = 18;
         smashed_something = true;
     }
     if( !sound.empty() && !silent) {
-        sounds::sound( x, y, sound_volume, sound);
+        sounds::sound( p.x, p.y, sound_volume, sound);
     }
     return std::pair<bool, bool> (smashed_something, success);
 }

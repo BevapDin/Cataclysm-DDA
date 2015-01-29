@@ -11009,7 +11009,7 @@ void map::post_process(unsigned zones)
         if (!one_in(10)) { // 90% chance of smashing stuff up
             for (int x = 0; x < 24; x++) {
                 for (int y = 0; y < 24; y++) {
-                    bash(x, y, 20, true);
+                    bash(tripoint(x, y, 0), 20, true);
                 }
             }
         }
@@ -12966,9 +12966,9 @@ void map::add_extra(map_extra type)
             for (int y = 0; y < SEEY * 2; y++) {
                 if (x >= cx - 4 && x <= cx + 4 && y >= cy - 4 && y <= cy + 4) {
                     if (!one_in(5)) {
-                        make_rubble(x, y, f_wreckage, true);
-                    } else if (is_bashable(x, y)) {
-                        destroy(x, y, true);
+                        make_rubble(tripoint(x, y, 0), f_wreckage, true);
+                    } else if (is_bashable(tripoint(x, y, 0))) {
+                        destroy(tripoint(x, y, 0), true);
                     }
                 } else if (one_in(10)) { // 1 in 10 chance of being wreckage anyway
                     make_rubble(x, y, f_wreckage, true);
