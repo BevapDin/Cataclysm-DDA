@@ -998,7 +998,6 @@ private:
          * Get the submap pointer containing the specified position within the reality bubble.
          * (x,y) must be a valid coordinate, check with @ref inbounds.
          */
-        submap *get_submap_at( int x, int y, int z ) const;
         submap *get_submap_at( tripoint gp ) const;
         /**
          * Get the submap pointer containing the specified position within the reality bubble.
