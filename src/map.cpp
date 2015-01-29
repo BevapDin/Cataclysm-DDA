@@ -1390,13 +1390,18 @@ int map::combined_movecost(const tripoint &p1,
 
 bool map::has_flag(const std::string &flag, const int x, const int y) const
 {
+    return has_flag(flag, tripoint(x, y, 0));
+}
+
+bool map::has_flag(const std::string &flag, const tripoint &p) const
+{
     static const std::string flag_str_REDUCE_SCENT("REDUCE_SCENT"); // construct once per runtime, slash delay 90%
-    if (!inbounds(x, y)) {
+    if (!inbounds(p)) {
         return false;
     }
     // veh_at const no bueno
-    if (veh_in_active_range && veh_exists_at[x][y] && flag_str_REDUCE_SCENT == flag) {
-        const auto it = veh_cached_parts.find( point( x, y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y] && flag_str_REDUCE_SCENT == flag) {
+        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1409,12 +1414,7 @@ bool map::has_flag(const std::string &flag, const int x, const int y) const
             }
         }
     }
-    return has_flag_ter_or_furn(flag, x, y);
-}
-
-bool map::has_flag(const std::string &flag, const tripoint &p) const
-{
-    return has_flag(flag, p.x, p.y);
+    return has_flag_ter_or_furn(flag, p);
 }
 
 bool map::can_put_items(const int x, const int y)
@@ -1472,12 +1472,17 @@ bool map::has_flag_ter_and_furn(const std::string & flag, const tripoint &p) con
 /////
 bool map::has_flag(const ter_bitflags flag, const int x, const int y) const
 {
-    if (!inbounds(x, y)) {
+    return has_flag(flag, tripoint(x, y, 0));
+}
+
+bool map::has_flag(const ter_bitflags flag, const tripoint &p) const
+{
+    if (!inbounds(p)) {
         return false;
     }
     // veh_at const no bueno
-    if (veh_in_active_range && veh_exists_at[x][y] && flag == TFLAG_REDUCE_SCENT) {
-        const auto it = veh_cached_parts.find( point( x, y ) );
+    if (veh_in_active_range && veh_exists_at[p.x][p.y] && flag == TFLAG_REDUCE_SCENT) {
+        const auto it = veh_cached_parts.find( point( p.x, p.y ) );
         if( it != veh_cached_parts.end() ) {
             const int vpart = it->second.second;
             vehicle *veh = it->second.first;
@@ -1490,12 +1495,7 @@ bool map::has_flag(const ter_bitflags flag, const int x, const int y) const
             }
         }
     }
-    return has_flag_ter_or_furn(flag, x, y);
-}
-
-bool map::has_flag(const ter_bitflags flag, const tripoint &p) const
-{
-    return has_flag(flag, p.x, p.y);
+    return has_flag_ter_or_furn(flag, p);
 }
 
 bool map::has_flag_ter(const ter_bitflags flag, const int x, const int y) const
