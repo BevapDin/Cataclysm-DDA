@@ -1079,7 +1079,7 @@ const inventory& player::crafting_inventory()
             && cached_position == pos()) {
         return cached_crafting_inventory;
     }
-    cached_crafting_inventory.form_from_map(point(posx(), posy()), PICKUP_RANGE, false);
+    cached_crafting_inventory.form_from_map( pos(), PICKUP_RANGE, false);
     cached_crafting_inventory += inv;
     cached_crafting_inventory += weapon;
     cached_crafting_inventory += worn;
@@ -1613,7 +1613,7 @@ std::list<item> player::consume_items(const std::vector<item_comp> &components, 
     } use_from;
     item_comp selected_comp("", 0);
     inventory map_inv;
-    map_inv.form_from_map(point(posx(), posy()), PICKUP_RANGE);
+    map_inv.form_from_map( pos(), PICKUP_RANGE);
 
     for( const auto &component : components ) {
         itype_id type = component.type;
@@ -1743,7 +1743,7 @@ void player::consume_tools(const std::vector<tool_comp> &tools, int batch)
 {
     bool found_nocharge = false;
     inventory map_inv;
-    map_inv.form_from_map(point(posx(), posy()), PICKUP_RANGE);
+    map_inv.form_from_map( pos(), PICKUP_RANGE);
     std::vector<tool_comp> player_has;
     std::vector<tool_comp> map_has;
     // Use charges of any tools that require charges used

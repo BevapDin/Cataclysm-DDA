@@ -488,7 +488,7 @@ static long count_charges_in_list(const itype *type, const map_stack &items)
     return 0;
 }
 
-void inventory::form_from_map(point origin, int range, bool assign_invlet)
+void inventory::form_from_map(const tripoint origin, int range, bool assign_invlet)
 {
     items.clear();
     for (int x = origin.x - range; x <= origin.x + range; x++) {
