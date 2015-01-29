@@ -766,9 +766,9 @@ void add_corpse(int x, int y);
         computer* computer_at( tripoint p );
 
  // Camps
- bool allow_camp(const int x, const int y, const int radius = CAMPCHECK);
- basecamp* camp_at(const int x, const int y, const int radius = CAMPSIZE);
- void add_camp(const std::string& name, const int x, const int y);
+        bool allow_camp( tripoint p, int radius = CAMPCHECK );
+        basecamp* camp_at( tripoint p, int radius = CAMPSIZE );
+        void add_camp( const std::string &name, tripoint p );
 
 // Graffiti
     bool has_graffiti_at(int x, int y) const;

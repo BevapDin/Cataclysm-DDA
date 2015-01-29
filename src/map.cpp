@@ -4290,26 +4290,27 @@ computer* map::computer_at( const tripoint p )
  return &(current_submap->comp);
 }
 
-bool map::allow_camp(const int x, const int y, const int radius)
+bool map::allow_camp( const tripoint p, const int radius )
 {
-    return camp_at(x, y, radius) == NULL;
+    return camp_at(p, radius) == NULL;
 }
 
 // locate the nearest camp in some radius (default CAMPSIZE)
-basecamp* map::camp_at(const int x, const int y, const int radius)
+basecamp* map::camp_at( const tripoint p, const int radius )
 {
-    if (!inbounds(x, y)) {
+    if (!inbounds(p)) {
         return NULL;
     }
 
-    const int sx = std::max(0, x / SEEX - radius);
-    const int sy = std::max(0, y / SEEY - radius);
-    const int ex = std::min(MAPSIZE - 1, x / SEEX + radius);
-    const int ey = std::min(MAPSIZE - 1, y / SEEY + radius);
+    const int sx = std::max(0, p.x / SEEX - radius);
+    const int sy = std::max(0, p.y / SEEY - radius);
+    const int ex = std::min(MAPSIZE - 1, p.x / SEEX + radius);
+    const int ey = std::min(MAPSIZE - 1, p.y / SEEY + radius);
 
     for (int ly = sy; ly < ey; ++ly) {
         for (int lx = sx; lx < ex; ++lx) {
-            submap * const current_submap = get_submap_at(x, y);
+            // TODO: why not use lx/ly?
+            submap * const current_submap = get_submap_at( p );
             if (current_submap->camp.is_valid()) {
                 // we only allow on camp per size radius, kinda
                 return &(current_submap->camp);
@@ -4320,15 +4321,14 @@ basecamp* map::camp_at(const int x, const int y, const int radius)
     return NULL;
 }
 
-void map::add_camp(const std::string& name, const int x, const int y)
+void map::add_camp( const std::string &name, const tripoint p )
 {
-    if (!allow_camp(x, y)) {
+    if (!allow_camp(p)) {
         dbg(D_ERROR) << "map::add_camp: Attempting to add camp when one in local area.";
         return;
     }
 
-    // TODO: Z
-    get_submap_at(x, y)->camp = basecamp(name, x, y);
+    get_submap_at( p )->camp = basecamp(name, p.x, p.y);
 }
 
 void map::debug()
