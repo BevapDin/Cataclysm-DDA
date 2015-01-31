@@ -489,7 +489,7 @@ static bool allow_inventory_from(const player *p, const vehicle *veh) {
         // if the vehicle is moving (the player is too than),
         // allow only items from that vehicle.
         // Otherwise allow items from any non-moving vehicle.
-        vehicle *veh_p = g->m.veh_at(p->posx, p->posy);
+        vehicle *veh_p = g->m.veh_at(p->posx(), p->posy());
         if(veh_p != NULL && vehicle_might_move(veh_p)) {
             return veh_p == veh;
         }

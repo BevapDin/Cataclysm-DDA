@@ -48,7 +48,7 @@ void crafting_inventory_t::init(int range)
 {
     if(range != -1) {
         assert(range >= 0);
-        form_from_map(point(p->posx, p->posy), range);
+        form_from_map(p->pos(), range);
     }
     // iterator of all bionics of the player and grab the toolsets automaticly
     // This allows easy addition of more toolsets
