@@ -5790,10 +5790,9 @@ bool vehicle::tow_to(vehicle *other, int other_part, player *p) {
     std::list<item> rope = p->inv.use_amount(rope_type, 1);
     assert(!rope.empty());
     // Store the used rope
-    auto items = get_items( 0 );
-    items.push_back(rope.front());
+    parts.front().items.push_back(rope.front());
     // Store name of this vehicle
-    items.front().set_var( "dfkjghdfkg", name );
+    parts.front().items.front().set_var( "dfkjghdfkg", name );
     // Global coords of this vehicle
     const int x = global_x() + parts[0].precalc[0].x - other->global_x();
     const int y = global_y() + parts[0].precalc[0].y - other->global_y();
@@ -5814,8 +5813,19 @@ bool vehicle::tow_to(vehicle *other, int other_part, player *p) {
         parts[i].mount.y = oy;
     }
     const std::string this_name = name;
-    // Move parts
-    other->parts.insert(other->parts.end(), parts.begin(), parts.end());
+    // 1. Copy the part, clear the item list in the new part. This keeps the other vehicle
+    // in a valid state (no items added to it), it also keeps this vehicle in a valid state
+    // (nothing changed).
+    // 2. Copy the items using a simple loop over the original items, again all is valid, new items
+    // are added through add_item and no items in this vehicle are changed.
+    for( size_t i = 0; i < parts.size(); ++i ) {
+        other->parts.push_back( parts[i] );
+        decltype(parts[i].items) tmp;
+        tmp.swap( other->parts.back().items ); // new part is now empty as it should be
+        for( auto &itm : tmp ) {
+            other->add_item( other->parts.size() - 1, itm );
+        }
+    }
     // Destroy me
     g->m.destroy_vehicle(this);
     // Update this vehicle, see install_part/remove_part
@@ -5900,11 +5910,11 @@ void vehicle::untow(int part, player *p) {
             parts[i].mount.x = 0;
             parts[i].mount.y = 0;
             tmp_parts.push_back(parts[i]);
-            parts.erase(parts.begin() + i);
-            i--;
+            parts[i].removed = true;
         }
     }
-    sort_parts();
+    part_removal_cleanup();
+//    sort_parts();
     // Update this vehicle, see install_part/remove_part
     precalc_mounts(0, face.dir());
     insides_dirty = true;
@@ -6030,7 +6040,7 @@ void vehicle::sort_parts() {
             }
         }
         assert(p != static_cast<size_t>(-1));
-        ptmp[i] = parts[p];
+        ptmp[i] = std::move( parts[p] );
         parts[p].id.clear();
     }
     parts.swap(ptmp);
