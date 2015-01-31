@@ -13481,6 +13481,7 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
     int x = c->posx();
     int y = c->posy();
     while (range > 0) {
+        c->underwater = false;
         bool seen = is_u || u.sees( *c ); // To avoid redrawing when not seen
         tdir.advance();
         x = c->posx() + tdir.dx();
@@ -13590,11 +13591,14 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
                 add_msg(_("You land on the ground."));
             }
         }
-    } else if (is_u) {
-        if (controlled) {
-            add_msg(_("You dive into water."));
-        } else {
-            add_msg(m_warning, _("You fall into water."));
+    } else {
+        c->underwater = true;
+        if (is_u) {
+            if (controlled) {
+                add_msg(_("You dive into water."));
+            } else {
+                add_msg(m_warning, _("You fall into water."));
+            }
         }
     }
 }
