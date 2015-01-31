@@ -8750,10 +8750,10 @@ void game::examine(int examx, int examy)
         if(vpkiln >= 0 && veh->examine(this, &u, vpkiln)) {
             return;
         }
-        if(veh->can_tow(this, other, other_part) &&
+        if(veh->can_tow(other, other_part) &&
             query_yn(_("Tow the vehicles together?"))) {
             const std::string veh_name = veh->name;
-            veh->tow_to(this, other, other_part, &u);
+            veh->tow_to(other, other_part, &u);
             // If the player had grabbed the vehicle, release it automaticly
             if((u.grab_point.x != 0 || u.grab_point.y != 0) && u.grab_type == OBJECT_VEHICLE) {
                 if(examx == u.posx + u.grab_point.x && examy == u.posy + u.grab_point.y) {
@@ -8764,7 +8764,7 @@ void game::examine(int examx, int examy)
             return;
         } else if(veh->can_untow(veh_part) &&
             query_yn(_("Untow the vehicles?"))) {
-            veh->untow(this, veh_part, &u);
+            veh->untow(veh_part, &u);
             if(u.grab_point.x == 0 && u.grab_point.y == 0) {
                 u.grab_point.x = examx - u.posx;
                 u.grab_point.y = examy - u.posy;

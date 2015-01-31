@@ -5764,7 +5764,7 @@ bool vehicle::is_or_might_move() const {
     return velocity != 0 || cruise_velocity != 0;
 }
 
-bool vehicle::can_tow(game *g, vehicle *&other, int &other_part) const {
+bool vehicle::can_tow(vehicle *&other, int &other_part) const {
     if(!is_single_tile() || is_or_might_move()) {
         // Can only tow single tile non-moving vehicles
         return false;
@@ -5778,9 +5778,8 @@ bool vehicle::can_tow(game *g, vehicle *&other, int &other_part) const {
     return false;
 }
 
-bool vehicle::tow_to(game *g, vehicle *other, int other_part, player *p) {
+bool vehicle::tow_to(vehicle *other, int other_part, player *p) {
     static const itype_id rope_type("rope_30");
-    assert(g != 0);
     assert(other != 0);
     assert(other_part >= 0);
     assert(p != 0);
@@ -5878,8 +5877,7 @@ bool vehicle::can_untow(int part) {
     return true;
 }
 
-void vehicle::untow(game *g, int part, player *p) {
-    assert(g != 0);
+void vehicle::untow(int part, player *p) {
     assert((size_t) part < parts.size());
     assert(p != 0);
     auto items = get_items( part );

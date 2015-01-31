@@ -726,7 +726,7 @@ public:
      * point to the other vehicle and a part that this can be towed
      * to. If the function returns false, other and other_part are invalid.
      */
-    bool can_tow(game *g, vehicle *&other, int &other_part) const;
+    bool can_tow(vehicle *&other, int &other_part) const;
     /**
      * Tows this vehicle to the other one. If this succeeds, this vehicle
      * will be delted, so don't use this after calling this function.
@@ -737,7 +737,7 @@ public:
      * Returns false if towing was not possible (missing rope) - a dialog
      * is shown in this case.
      */
-    bool tow_to(game *g, vehicle *other, int other_part, player *p);
+    bool tow_to(vehicle *other, int other_part, player *p);
     /**
      * Check if the given part can be untowed.
      */
@@ -746,7 +746,7 @@ public:
      * Untow the given part as a new vehicle from this one.
      * One must first check with #can_untow before calling this function.
      */
-    void untow(game *g, int part, player *p);
+    void untow(int part, player *p);
     
     //main method for the control of individual engines
     void control_engines();
