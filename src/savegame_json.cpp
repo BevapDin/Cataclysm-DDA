@@ -934,13 +934,13 @@ void monster::load(JsonObject &data)
     } else {
         data.read("ammo", ammo);
     }
-    std::string fac;
-    if( data.read( "faction", fac ) ) {
-        faction = GetMFact(fac);
+    std::string fac = data.get_string( "faction", "" );
+    const monfaction *monfac = GetMFact( fac );
+    if( monfac->id == 0 ) {
+        // Legacy saves
+        faction = type->default_faction;
     } else {
-        // Handle faction-less monsters (legacy)
-        fac = type->species.begin() == type->species.end() ? "" : *( type->species.begin() );
-        faction = GetMFact(fac);
+        faction = monfac;
     }
 }
 
@@ -978,6 +978,7 @@ void monster::store(JsonOut &json) const
     json.member("stairscount", staircount);
     json.member("plans", plans);
     json.member("ammo", ammo);
+    json.member( "underwater", underwater );
 
     json.member( "inv", inv );
 }
@@ -1681,6 +1682,8 @@ void Creature::load( JsonObject &jsin )
 
     jsin.read( "grab_resist", grab_resist );
     jsin.read( "throw_resist", throw_resist );
+
+    jsin.read( "underwater", underwater );
 
     fake = false; // see Creature::load
 }
