@@ -5185,9 +5185,6 @@ int iuse::can_goo(player *p, item *it, bool, point)
 
 int iuse::throwable_extinguisher_act(player *, item *it, bool, point pos)
 {
-    if (pos.x == -999 || pos.y == -999) {
-        return 0;
-    }
     if( g->m.get_field( pos, fd_fire ) != nullptr ) {
         // Reduce the strength of fire (if any) in the target tile.
         g->m.adjust_field_strength(pos, fd_fire, 0 - 1);
@@ -5207,9 +5204,6 @@ int iuse::throwable_extinguisher_act(player *, item *it, bool, point pos)
 
 int iuse::pipebomb_act(player *, item *it, bool t, point pos)
 {
-    if (pos.x == -999 || pos.y == -999) {
-        return 0;
-    }
     if (t) { // Simple timer effects
         //~ the sound of a lit fuse
         sounds::sound(pos.x, pos.y, 0, _("ssss...")); // Vol 0 = only heard if you hold it
@@ -5240,9 +5234,6 @@ int iuse::granade(player *p, item *it, bool, point)
 
 int iuse::granade_act(player *, item *it, bool t, point pos)
 {
-    if (pos.x == -999 || pos.y == -999) {
-        return 0;
-    }
     if (t) { // Simple timer effects
         sounds::sound(pos.x, pos.y, 0, _("Merged!"));  // Vol 0 = only heard if you hold it
     } else if (it->charges > 0) {
@@ -5389,9 +5380,6 @@ int iuse::c4(player *p, item *it, bool, point)
 int iuse::acidbomb_act(player *p, item *it, bool, point pos)
 {
     if (!p->has_item(it)) {
-        if (pos.x == -999) {
-            pos = p->pos();
-        }
         it->charges = -1;
         for (int x = pos.x - 1; x <= pos.x + 1; x++) {
             for (int y = pos.y - 1; y <= pos.y + 1; y++) {
@@ -5404,10 +5392,6 @@ int iuse::acidbomb_act(player *p, item *it, bool, point pos)
 
 int iuse::grenade_inc_act(player *p, item *it, bool t, point pos)
 {
-    if (pos.x == -999 || pos.y == -999) {
-        return 0;
-    }
-
     if (t) { // Simple timer effects
         sounds::sound(pos.x, pos.y, 0, _("Tick!")); // Vol 0 = only heard if you hold it
     } else if (it->charges > 0) {
@@ -5614,9 +5598,6 @@ int iuse::firecracker(player *p, item *it, bool, point)
 
 int iuse::firecracker_act(player *, item *it, bool t, point pos)
 {
-    if (pos.x == -999 || pos.y == -999) {
-        return 0;
-    }
     if (t) {// Simple timer effects
         sounds::sound(pos.x, pos.y, 0, _("ssss..."));
     } else if (it->charges > 0) {
@@ -5656,10 +5637,6 @@ int iuse::pheromone(player *p, item *it, bool, point)
         return 0;
     }
     point pos = p->pos();
-
-    if (pos.x == -999 || pos.y == -999) {
-        return 0;
-    }
 
     p->add_msg_player_or_npc(_("You squeeze the pheromone ball..."),
                              _("<npcname> squeezes the pheromone ball..."));
