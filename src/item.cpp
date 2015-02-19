@@ -1563,6 +1563,8 @@ nc_color item::color(player *u) const
         ret = c_cyan;
     } else if(has_flag("LITCIG")) {
         ret = c_red;
+    } else if ( has_flag("LEAK_DAM") && has_flag("RADIOACTIVE") && damage > 0 ) {
+        ret = c_ltgreen;
     } else if (active && !is_food() && !is_food_container()) { // Active items show up as yellow
         ret = c_yellow;
     } else if (is_gun()) { // Guns are green if you are carrying ammo for them
@@ -3739,8 +3741,22 @@ void item::use()
 
 bool item::burn(int amount)
 {
-    burnt += amount;
-    return (burnt >= volume() * 3);
+    if( amount < 0 ) {
+        return false;
+    }
+
+    if( !count_by_charges() ) {
+        burnt += amount;
+        return burnt >= volume() * 3;
+    }
+
+    amount *= rng( type->stack_size / 2, type->stack_size );
+    if( charges <= amount ) {
+        return true;
+    }
+
+    charges -= amount;
+    return false;
 }
 
 bool item::flammable() const
@@ -3758,11 +3774,7 @@ bool item::flammable() const
         return false;
     }
 
-    if( made_of("paper") || made_of("powder") || made_of("plastic") ||
-        type->id == "whiskey" || type->id == "vodka" ||
-        type->id == "rum" || type->id == "tequila" ||
-        type->id == "single_malt_whiskey" || type->id == "gin" ||
-        type->id == "moonshine" || type->id == "brandy") {
+    if( made_of("paper") || made_of("powder") || made_of("plastic") ) {
         return true;
     }
 
