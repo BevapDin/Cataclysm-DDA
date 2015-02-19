@@ -2842,6 +2842,8 @@ std::list<item>::iterator map::i_rem( const point location, std::list<item>::ite
         current_submap->active_items.remove( it, point( lx, ly ) );
     }
 
+    current_submap->update_lum_rem(*it, lx, ly);
+
     return current_submap->itm[lx][ly].erase( it );
 }
 
@@ -2886,6 +2888,8 @@ void map::i_clear(const int x, const int y)
             current_submap->active_items.remove( item_it, point( lx, ly ) );
         }
     }
+
+    current_submap->lum[lx][ly] = 0;
     current_submap->itm[lx][ly].clear();
 }
 
@@ -3089,6 +3093,9 @@ void map::add_item_at( const int x, const int y,
 
     int lx, ly;
     submap * const current_submap = get_submap_at(x, y, lx, ly);
+
+    current_submap->update_lum_add(new_item, lx, ly);
+
     const auto new_pos = current_submap->itm[lx][ly].insert( index, new_item );
     if( new_item.needs_processing() ) {
         current_submap->active_items.add( new_pos, point(lx, ly) );
