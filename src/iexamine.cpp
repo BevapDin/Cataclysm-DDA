@@ -74,15 +74,13 @@ public:
     atm_menu& operator=(atm_menu const&) = delete;
     atm_menu& operator=(atm_menu&&)      = delete;
 
-    explicit atm_menu(player &p) : u {p} {
+    explicit atm_menu(player &p) : u(p) {
         reset(false);
     }
 
     void start() {
-        while (!quit) {
+        for (bool result = false; !result; ) {
             amenu.query();
-
-            bool result = false;
 
             switch (uistate.iexamine_atm_selected = amenu.ret) {
             case purchase_card:      result = do_purchase_card();      break;
@@ -90,23 +88,24 @@ public:
             case withdraw_money:     result = do_withdraw_money();     break;
             case transfer_money:     result = do_transfer_money();     break;
             case transfer_all_money: result = do_transfer_all_money(); break;
-            default :
+            default:
                 if (amenu.keypress != KEY_ESCAPE) {
                     continue; // only interested in escape.
                 }
                 //fallthrough
             case cancel:
-                quit = true;
-                break;
+                if (u.activity.type == ACT_ATM) {
+                    u.activity.index = 0; // stop activity
+                }
+                return;
             };
 
-            if (result) {
-                reset();
-            } else {
-                amenu.redraw();
-            }
-
+            amenu.redraw();
             g->draw();
+        }
+
+        if (u.activity.type != ACT_ATM) {
+            u.assign_activity(ACT_ATM, 0);
         }
     }
 private:
@@ -163,26 +162,14 @@ private:
         amenu.addentry(cancel, true, 'q', _("Cancel"));
     }
 
-    //! Transfer @p n cents from @p from to, optionally, @p to and
     //! print a bank statement for @p print = true;
-    void transfer_funds(long const n, long &from, long *const to = nullptr,
-                        bool const print = true)
-    {
-        from -= n;
-        if (to) {
-            *to += n;
-        }
-
+    void finish_interaction(bool const print = true) {
         if (print) {
             add_msg(m_info, ngettext("Your account now holds %d cent.",
                                      "Your account now holds %d cents.", u.cash), u.cash);
         }
 
         u.moves -= 100;
-    }
-
-    void transfer_funds(long const n, long &from, long &to, bool const print = true) {
-        transfer_funds(n, from, &to);
     }
 
     //! Prompt for a card to use (includes worn items).
@@ -225,7 +212,8 @@ private:
         item card("cash_card", calendar::turn);
         card.charges = 0;
         u.i_add(card);
-        transfer_funds(100, u.cash);
+        u.cash -= 100;
+        finish_interaction();
 
         return true;
     }
@@ -249,7 +237,9 @@ private:
             return false;
         }
 
-        transfer_funds(amount, src->charges, u.cash);
+        src->charges -= amount;
+        u.cash += amount;
+        finish_interaction();
 
         return true;
     }
@@ -268,7 +258,9 @@ private:
             return false;
         }
 
-        transfer_funds(amount, u.cash, dst->charges);
+        dst->charges += amount;
+        u.cash -= amount;
+        finish_interaction();
 
         return true;
     }
@@ -298,7 +290,9 @@ private:
             return false;
         }
 
-        transfer_funds(amount, src->charges, dst->charges, false);
+        src->charges -= amount;
+        dst->charges += amount;
+        finish_interaction();
 
         return true;
     }
@@ -327,9 +321,8 @@ private:
         return true;
     }
 
-    player& u;
-    uimenu  amenu;
-    bool    quit = false;
+    player &u;
+    uimenu amenu;
 };
 } //namespace
 
