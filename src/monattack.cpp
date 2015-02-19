@@ -502,10 +502,10 @@ std::pair<std::array<point, (2*N + 1)*(2*N + 1)>, size_t>
 find_empty_neighbors(point const origin) {
     constexpr auto r = static_cast<int>(N);
 
-    auto const x_min = origin.x - r;
-    auto const x_max = origin.x + r;
-    auto const y_min = origin.y - r;
-    auto const y_max = origin.y + r;
+    const int x_min = origin.x - r;
+    const int x_max = origin.x + r;
+    const int y_min = origin.y - r;
+    const int y_max = origin.y + r;
 
     std::pair<std::array<point, (2*N + 1)*(2*N + 1)>, size_t> result;
 
@@ -599,7 +599,7 @@ void mattack::science(monster *const z, int const index) // I said SCIENCE again
     }
 
     // too far
-    auto const dist = rl_dist(z->pos(), target->pos());
+    const int dist = rl_dist(z->pos(), target->pos());
     if (dist > max_distance) {
         return;
     }
@@ -640,7 +640,7 @@ void mattack::science(monster *const z, int const index) // I said SCIENCE again
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // choose and do a valid attack
-    auto const attack_index = get_random_index(valid_attack_count);
+    const int attack_index = get_random_index(valid_attack_count);
     switch (valid_attacks[attack_index]) {
     default :
         DebugLog(D_WARNING, D_GAME) << "Bad enum value in science.";
@@ -693,7 +693,7 @@ void mattack::science(monster *const z, int const index) // I said SCIENCE again
                 z->name().c_str());
         }
         
-        auto const where = empty_neighbors.first[get_random_index(empty_neighbor_count)];
+        const point where = empty_neighbors.first[get_random_index(empty_neighbor_count)];
 
         monster manhack {GetMType("mon_manhack")};
         manhack.spawn(where.x, where.y);
@@ -711,13 +711,13 @@ void mattack::science(monster *const z, int const index) // I said SCIENCE again
         
         // fill empty tiles with acid
         for (size_t i = 0; i < empty_neighbor_count; ++i) {
-            auto const& p = empty_neighbors.first[i];
+            const point &p = empty_neighbors.first[i];
             g->m.add_field(p.x, p.y, fd_acid, att_acid_density);
         }
 
         break;
     case att_flavor : {
-        auto const i = get_random_index(m_flavor);
+        const int i = get_random_index(m_flavor);
 
         // the special case; see above
         if (i == m_flavor.size() - 1) {
@@ -1081,7 +1081,7 @@ void mattack::triffid_heartbeat(monster *z, int index)
         // TODO: when friendly: open a way to the stairs, don't spawn monsters
     }
     if (rl_dist( z->posx(), g->u.pos() ) > 5 &&
-        !g->m.route(g->u.posx(), g->u.posy(), z->posx(), z->posy()).empty()) {
+        !g->m.route( g->u.posx(), g->u.posy(), z->posx(), z->posy(), 10 ).empty()) {
         add_msg(m_warning, _("The root walls creak around you."));
         for (int x = g->u.posx(); x <= z->posx() - 3; x++) {
             for (int y = g->u.posy(); y <= z->posy() - 3; y++) {
@@ -1094,7 +1094,7 @@ void mattack::triffid_heartbeat(monster *z, int index)
         }
         // Open blank tiles as long as there's no possible route
         int tries = 0;
-        while (g->m.route(g->u.posx(), g->u.posy(), z->posx(), z->posy()).empty() &&
+        while (g->m.route( g->u.posx(), g->u.posy(), z->posx(), z->posy(), 10 ).empty() &&
                tries < 20) {
             int x = rng(g->u.posx(), z->posx() - 3), y = rng(g->u.posy(), z->posy() - 3);
             tries++;

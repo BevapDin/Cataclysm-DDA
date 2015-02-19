@@ -216,8 +216,7 @@ void monster::plan(const mfactions &factions)
     }
     swarms = swarms && target == nullptr; // Only swarm if we have no target
     if( group_morale || swarms ) {
-        auto const &myfaction = myfaction_iter->second;
-        for( int i : myfaction ) {
+        for( const int i : myfaction_iter->second ) {
             monster &mon = g->zombie( i );
             float rating = rate_target( mon, bresenham_slope, dist, electronic );
             if( group_morale && rating <= 10 ) {
@@ -1102,7 +1101,7 @@ bool monster::will_reach(int x, int y)
  if (has_flag(MF_IMMOBILE) && (posx() != x || posy() != y))
   return false;
 
- std::vector<point> path = g->m.route(posx(), posy(), x, y, false);
+ std::vector<point> path = g->m.route( posx(), posy(), x, y, 0 );
  if (path.empty())
    return false;
 
@@ -1123,7 +1122,7 @@ bool monster::will_reach(int x, int y)
 
 int monster::turns_to_reach(int x, int y)
 {
-    std::vector<point> path = g->m.route(posx(), posy(), x, y, false);
+    std::vector<point> path = g->m.route( posx(), posy(), x, y, 0 );
     if (path.empty())
         return 999;
 
