@@ -17,6 +17,7 @@
 #include "itype.h"
 #include "iuse_actor.h"
 #include "compatibility.h"
+#include "monstergenerator.h"
 
 #include <cmath> // floor
 #include <sstream>
