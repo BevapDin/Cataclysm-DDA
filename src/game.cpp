@@ -2370,6 +2370,9 @@ input_context get_default_mode_input_context()
     ctxt.register_action("ignore_enemy");
     ctxt.register_action("save");
     ctxt.register_action("quicksave");
+#ifndef RELEASE
+    ctxt.register_action("quickload");
+#endif
     ctxt.register_action("quit");
     ctxt.register_action("player_data");
     ctxt.register_action("map");
@@ -3378,6 +3381,14 @@ bool game::handle_action()
             quicksave();
             return false;
 
+        case ACTION_QUICKLOAD:
+            MAPBUFFER.reset();
+            overmap_buffer.clear();
+            setup();
+            MAPBUFFER.load( world_generator->active_world->world_name );
+            load( world_generator->active_world->world_name, base64_encode(u.name) );
+            return false;
+
         case ACTION_PL_INFO:
             u.disp_info();
             refresh_all();
@@ -4011,7 +4022,7 @@ void game::delete_world(std::string worldname, bool delete_folder)
 #else
     // Delete files, order doesn't matter.
     for( auto &file_path : file_paths ) {
-        (void)unlink( file_path.c_str() );
+        (void)remove( file_path.c_str() );
     }
     // Delete directories -- directories are ordered deepest to shallowest.
     for (std::set<std::string>::reverse_iterator it = directory_paths.rbegin();
@@ -12904,8 +12915,7 @@ void game::update_stair_monsters()
                             u.moves -= 100;
                             if (resiststhrow && (u.is_throw_immune())) {
                                 //we have a judoka who isn't getting pushed but counterattacking now.
-                                mattack defend;
-                                defend.thrown_by_judo(&critter, -1);
+                                mattack::thrown_by_judo(&critter, -1);
                                 return;
                             }
                             std::string msg = "";
