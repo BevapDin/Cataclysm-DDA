@@ -8568,7 +8568,6 @@ int iuse::robotcontrol(player *p, item *it, bool, point)
 
     }
     if( p->has_trait("ILLITERATE") ) {
-        // bio_remote makes interaction with wifi-enabled computers intuitive
         p->add_msg_if_player(_("You cannot read a computer screen."));
         return 0;
     }
@@ -9959,9 +9958,9 @@ int iuse::remoteveh(player *p, item *it, bool t, point pos)
     }
 
     if( choice == 2 ) {
+        it->active = true;
         g->setremoteveh( veh );
         p->add_msg_if_player(m_good, _("You take control of the vehicle."));
-        it->active = true;
         if( !veh->engine_on ) {
             veh->start_engine();
         }
