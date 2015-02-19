@@ -31,6 +31,7 @@ public:
     bool has( item_reference const &itm ) const;
     bool empty() const;
     std::list<item_reference> get();
+    void clear();
 };
 
 #endif

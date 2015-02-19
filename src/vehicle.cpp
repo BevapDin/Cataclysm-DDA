@@ -2213,7 +2213,7 @@ int vehicle::next_part_to_open(int p, bool outside)
     return -1;
 }
 
-int vehicle::part_with_feature (int part, const vpart_bitflags &flag, bool unbroken) {
+int vehicle::part_with_feature (int part, const vpart_bitflags &flag, bool unbroken) const {
     const int dx = parts[part].mount.x;
     const int dy = parts[part].mount.y;
     while(part > 0) {
@@ -2256,7 +2256,7 @@ void vpart_range(vehicle *veh, int &part_begin, int &part_end, int dx, int dy) {
     assert(part_begin < part_end);
 }
 
-int vehicle::part_with_feature (int part, const std::string &flag, bool unbroken)
+int vehicle::part_with_feature (int part, const std::string &flag, bool unbroken) const
 {
     const int dx = parts[part].mount.x;
     const int dy = parts[part].mount.y;
@@ -6032,6 +6032,7 @@ bool vehicle::examine(game *g, player *p, int part) {
 }
 
 void vehicle::sort_parts() {
+    active_items.clear();
     std::vector<vehicle_part> ptmp(parts.size());
     for(size_t i = 0; i < parts.size(); i++) {
         size_t p = static_cast<size_t>(-1);
@@ -6060,6 +6061,13 @@ void vehicle::sort_parts() {
         parts[p].id.clear();
     }
     parts.swap(ptmp);
+    for( auto & p : parts ) {
+        for( auto i = p.items.begin(); i != p.items.end(); ++i ) {
+            if( i->needs_processing() ) {
+                active_items.add( i, p.mount );
+            }
+        }
+    }
     refresh();
 }
 
