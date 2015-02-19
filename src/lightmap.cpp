@@ -43,12 +43,10 @@ void map::build_transparency_cache()
     std::uninitialized_fill_n(
         &transparency_cache[0][0], MAPSIZE*SEEX * MAPSIZE*SEEY, LIGHT_TRANSPARENCY_CLEAR);
 
-    const int stride = my_MAPSIZE;
-
     // Traverse the submaps in order
-    for( int smx = 0; smx < MAPSIZE; ++smx ) {
-        for( int smy = 0; smy < MAPSIZE; ++smy ) {
-            auto const cur_submap = grid[smx + smy * stride];
+    for( int smx = 0; smx < my_MAPSIZE; ++smx ) {
+        for( int smy = 0; smy < my_MAPSIZE; ++smy ) {
+            auto const cur_submap = grid[smx + smy * my_MAPSIZE];
     
             for( int sx = 0; sx < SEEX; ++sx ) {
                 for( int sy = 0; sy < SEEY; ++sy ) {
@@ -156,10 +154,9 @@ void map::generate_lightmap()
     // LIGHTMAP_CACHE_X = MAPSIZE * SEEX
     // LIGHTMAP_CACHE_Y = MAPSIZE * SEEY
     // Traverse the submaps in order
-    const int stride = my_MAPSIZE;
-    for (int smx = 0; smx < MAPSIZE; ++smx) {
-        for (int smy = 0; smy < MAPSIZE; ++smy) {
-            auto const cur_submap = grid[smx + smy * stride];
+    for (int smx = 0; smx < my_MAPSIZE; ++smx) {
+        for (int smy = 0; smy < my_MAPSIZE; ++smy) {
+            auto const cur_submap = grid[smx + smy * my_MAPSIZE];
     
             for (int sx = 0; sx < SEEX; ++sx) {
                 for (int sy = 0; sy < SEEY; ++sy) {
@@ -702,7 +699,7 @@ void map::apply_light_arc(int x, int y, int angle, float luminance, int wideangl
     }
 }
 
-void map::calc_ray_end(int angle, int range, int x, int y, int *outx, int *outy)
+void map::calc_ray_end(int angle, int range, int x, int y, int *outx, int *outy) const
 {
     double rad = (PI * angle) / 180;
     if (trigdist) {

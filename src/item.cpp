@@ -1865,7 +1865,7 @@ std::string item::tname( unsigned int quantity, bool with_prefix ) const
 
     ret.str("");
 
-    //~ This is a string to construct the item name as it is displayed. This format string has been added for maximum flexibility. The strings are: %1$s: Damage text (eg. “bruised”). %2$s: burn adjectives (eg. “burnt”). %3$s: sided adjectives (eg. "left"). %4$s: tool modifier text (eg. “atomic”). %5$s: vehicle part text (eg. “3.8-Liter”). $6$s: main item text (eg. “apple”). %7$s: tags (eg. “ (wet) (fits)”).
+    //~ This is a string to construct the item name as it is displayed. This format string has been added for maximum flexibility. The strings are: %1$s: Damage text (eg. "bruised"). %2$s: burn adjectives (eg. "burnt"). %3$s: sided adjectives (eg. "left"). %4$s: tool modifier text (eg. "atomic"). %5$s: vehicle part text (eg. "3.8-Liter"). $6$s: main item text (eg. "apple"). %7$s: tags (eg. "(wet) (fits)").
     ret << string_format(_("%1$s%2$s%3$s%4$s%5$s%6$s%7$s"), damtext.c_str(), burntext.c_str(),
                         sidedtext.c_str(), toolmodtext.c_str(),
                         vehtext.c_str(), maintext.c_str(), tagtext.c_str());
@@ -2327,12 +2327,17 @@ int item::get_storage() const
     int result = (static_cast<int> (static_cast<unsigned int>( t->storage ) ) );
 
     if (item::item_tags.count("pocketed") > 0){
-        pockets = ((volume() * get_coverage()) / 100) / 1.333;
-        if (result > (volume() / 2)){
-            pockets = (pockets / 2);
+        // Cache this so we don't have to keep recalculating it.
+        float vol = volume();
+        pockets = vol * (float(get_coverage()) / 100) / 1.333;
+        if (result > .3 * vol) {
+            // Scales from 1 to 3 as result goes from .3 * vol to .7 * vol
+            float mod = 1 + (result - .3 * vol) / (.7 * vol - .3 * vol) * 2;
+            pockets = pockets / mod;
         }
         return result + pockets;
-        } else { return result;
+    } else {
+        return result;
     }
 }
 int item::get_env_resist() const
@@ -2394,10 +2399,11 @@ int item::get_warmth() const
     // it_armor::warmth is signed char
     int result = static_cast<int>( t->warmth );
 
-     if (item::item_tags.count("furred") > 0){
-        warmed = 2 * ((volume() * get_coverage()) / 100); // Doubles an item's warmth
+    if (item::item_tags.count("furred") > 0){
+        warmed = 2 * volume() * (float(get_coverage()) / 100);
         return result + warmed;
-        } else { return result;
+    } else {
+        return result;
     }
 }
 
@@ -2551,13 +2557,13 @@ int item::bash_resist() const
         return resist;
     }
     if (item::item_tags.count("leather_padded") > 0){
-        l_padding = ((volume() * get_coverage()) / 100) / 2.5;
+        l_padding = volume() * (float(get_coverage()) / 100) / 2.5;
         if (l_padding > 5 ){
             l_padding = l_padding / 2.5;   //Hard cap so coats don't become solid steel
         }
     }
     if (item::item_tags.count("kevlar_padded") > 0){
-        k_padding = ((volume() * get_coverage()) / 100) / 2.5;
+        k_padding = volume() * (float(get_coverage()) / 100) / 2.5;
         if (k_padding > 5 ){
             k_padding = k_padding / 2.5;
         }
@@ -2593,13 +2599,13 @@ int item::cut_resist() const
         return resist;
     }
     if (item::item_tags.count("leather_padded") > 0){
-        l_padding = ((volume() * get_coverage()) / 100) / 2.5;
+        l_padding = volume() * (float(get_coverage()) / 100) / 2.5;
         if (l_padding > 5 ){
             l_padding = l_padding / 2.5;
         }
     }
     if (item::item_tags.count("kevlar_padded") > 0){
-        k_padding = ((volume() * get_coverage()) / 100) / 2;
+        k_padding = volume() * (float(get_coverage()) / 100) / 2;
         if (k_padding > 5 ){
             k_padding = k_padding / 2;
         }

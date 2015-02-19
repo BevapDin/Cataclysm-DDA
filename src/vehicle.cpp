@@ -2103,7 +2103,7 @@ void vehicle::break_part_into_pieces(int p, int x, int y, bool scatter) {
     }
 }
 
-const std::vector<int> vehicle::parts_at_relative (const int dx, const int dy, bool use_cache)
+const std::vector<int> vehicle::parts_at_relative (const int dx, const int dy, bool use_cache) const
 {
     (void) use_cache;
     std::vector<int> res;
@@ -6068,6 +6068,24 @@ bool vehicle::restore(const std::string &data)
     precalc_mounts(0, 0);
     precalc_mounts(1, 0);
     return true;
+}
+
+int vehicle::obstacle_at_part( int p ) const
+{
+    if( part_flag( p, VPFLAG_OBSTACLE ) && parts[p].hp > 0 ) {
+        return p;
+    }
+
+    int part = part_with_feature( p, VPFLAG_OBSTACLE );
+    if( part < 0 || parts[p].hp <= 0 ) {
+        return -1; // No obstacle here
+    }
+
+    if( part_flag( part, VPFLAG_OPENABLE ) && parts[part].open ) {
+        return -1; // Open door here
+    }
+
+    return part;
 }
 
 /*-----------------------------------------------------------------------------
