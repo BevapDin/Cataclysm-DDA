@@ -2,7 +2,7 @@
     {
         "type" : "ITEM_CATEGORY",
         "id" : "chems",
-        "name" : "chemical stuff",
+        "name" : "CHEMICAL STUFF",
         "sort_rank" : 5
     },
     {
@@ -7539,7 +7539,7 @@
         "bashing": 0,
         "fun": 0
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_blueberries",
         "category": "other",
@@ -7702,7 +7702,7 @@
         "bashing" : 0,
         "fun" : -10
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_wheat",
         "category": "other",
@@ -7726,7 +7726,7 @@
         "stack_size" : 40,
         "flags": ["SEED"]
     },
-    
+
     {
         "type" : "COMESTIBLE",
         "id" : "buckwheat",
@@ -7844,7 +7844,7 @@
         "bashing" : 0,
         "fun" : -15
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_hops",
         "category": "other",
@@ -7896,7 +7896,7 @@
         "bashing" : 0,
         "fun" : -15
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_barley",
         "category": "other",
@@ -7999,7 +7999,7 @@
         "bashing" : 0,
         "fun" : 0
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_lettuce",
         "category": "other",
@@ -8052,7 +8052,7 @@
         "bashing" : 0,
         "fun" : 0
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_tomato",
         "category": "other",
@@ -8076,7 +8076,7 @@
         "stack_size" : 100,
         "flags": ["SEED"]
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_cotton_boll",
         "category": "other",
@@ -8191,7 +8191,7 @@
         "flags" : ["EATEN_HOT"],
         "fun" : 0
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_broccoli",
         "category": "other",
@@ -8244,7 +8244,7 @@
         "flags" : ["EATEN_HOT"],
         "fun" : 0
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_zucchini",
         "category": "other",
@@ -8297,7 +8297,7 @@
         "fun" : -1,
         "fun_comment" : "Raw onions probably aren't all that tasty to most people."
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_onion",
         "category": "other",
@@ -8350,7 +8350,7 @@
         "bashing" : 0,
         "fun" : -1
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_carrot",
         "category": "other",
@@ -8404,7 +8404,7 @@
         "flags" : ["EATEN_HOT"],
         "fun" : 0
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_corn",
         "category": "other",
@@ -10062,7 +10062,7 @@
         "bashing" : 0,
         "fun" : -10
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_oats",
         "category": "other",
@@ -11027,7 +11027,7 @@
         "bashing" : 0,
         "fun" : -3
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_potato_raw",
         "category": "other",
@@ -15330,7 +15330,7 @@
         "charges" : 1,
         "bashing" : 0,
         "fun" : 4
-    },{   
+    },{
         "type" : "COMESTIBLE",
         "id" : "coffee_bean",
         "category": "other",
@@ -15351,7 +15351,7 @@
         "charges" : 1,
         "stack_size" : 40,
 		"weight" : 1
-    },{   
+    },{
         "type" : "COMESTIBLE",
         "id" : "roasted_coffee_bean",
         "category": "other",
@@ -17315,7 +17315,7 @@
         "charges" : 1,
         "bashing" : 0,
         "fun" : 0
-    },{   
+    },{
         "type" : "COMESTIBLE",
         "id" : "seed_cucumber",
         "category": "other",
@@ -17393,7 +17393,7 @@
         "bashing" : 0,
         "fun" : 0
     },
-    {   
+    {
         "type" : "COMESTIBLE",
         "id" : "seed_celery",
         "category": "other",

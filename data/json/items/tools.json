@@ -49,7 +49,7 @@
   {
     "type" : "ITEM_CATEGORY",
     "id" : "spare_parts",
-    "name" : "spare parts",
+    "name" : "SPARE PARTS",
     "sort_rank" : 8
   },
 
@@ -1093,8 +1093,8 @@
     "ammo": "NULL",
     "revert_to": "null",
     "qualities": [["SMOOTH", 1]]
-  },    
-  {    
+  },
+  {
     "id": "soldering_iron",
     "type": "TOOL",
     "symbol": ",",
@@ -6402,7 +6402,7 @@
         "container": "jar_glass"
     }
   },
-  
+
   {
     "id": "jar_soup_woods",
     "type": "GENERIC",
@@ -6427,7 +6427,7 @@
         "container": "jar_glass"
     }
   },
-  
+
   {
     "id": "jar_soup_meat",
     "type": "GENERIC",
@@ -6452,7 +6452,7 @@
         "container": "jar_glass"
     }
   },
-  
+
   {
     "id": "jar_soup_fish",
     "type": "GENERIC",
@@ -6502,7 +6502,7 @@
         "container": "jar_glass"
     }
   },
-  
+
   {
     "id": "jar_soup_human",
     "type": "GENERIC",
@@ -6527,7 +6527,7 @@
         "container": "jar_glass"
     }
   },
-  
+
   {
     "id": "jar_broth",
     "type": "GENERIC",
@@ -6552,7 +6552,7 @@
         "container": "jar_glass"
     }
   },
-  
+
   {
     "id": "jar_broth_bone",
     "type": "GENERIC",
@@ -7738,7 +7738,7 @@
     "use_action": "KNIFE",
     "qualities": [["CUT", 1], ["BUTCHER", 18]]
   },
-  
+
   {
     "id": "diamond_kukri",
     "type": "TOOL",
