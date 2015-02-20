@@ -238,6 +238,7 @@ public:
      */
     struct candidate_t {
     private:
+        friend struct requirement;
         LocationType location;
         union {
             struct {

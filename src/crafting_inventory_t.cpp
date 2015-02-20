@@ -2070,8 +2070,10 @@ bool crafting_inventory_t::requirement::use(item &the_item, std::list<item> &use
     return (the_item.charges == 0 && the_item.destroyed_at_zero_charges());
 }
 
-typedef std::set< std::unique_ptr< item_stack > > item_vector_set_t;
-static item_vector_set_t item_vector_resort_set;
+using isptr = std::unique_ptr<item_stack>;
+using ipair = std::pair<isptr, item>;
+using ipvec = std::vector<ipair>;
+static ipvec item_vector_resort_set;
 typedef std::vector< std::pair<int, item> > invpos_vector_t;
 typedef std::map<player*,invpos_vector_t> invpos_map_t;
 static invpos_map_t item_inpos_remove_map;
@@ -2082,8 +2084,9 @@ void remove_releated(crafting_inventory_t::requirement &req, const T &v_, int in
     T &v = *ptr;
     assert((size_t) index < v.size());
     if(req.use(v[index], used_items)) {
+        const item olditem = v[index];
         v[index] = item();
-        item_vector_resort_set.insert( std::move( ptr ) );
+        item_vector_resort_set.push_back( ipair( std::move( ptr ), olditem ) );
     }
 }
 
@@ -2107,12 +2110,12 @@ bool invpos_item_pair_comparator(const std::pair<int, item>& a, const std::pair<
 }
 
 template<typename T>
-void erase_null( T &v ) {
-    for( auto it = v.begin(); it != v.end(); ) {
+void erase_null( T &v, const item &olditem ) {
+    for( auto it = v.begin(); it != v.end(); ++it ) {
         if( it->is_null()) {
-            it = v.erase( it );
-        } else {
-            ++it;
+            *it = olditem;
+            v.erase( it );
+            return;
         }
     }
 }
@@ -2131,14 +2134,15 @@ void resort_item_vectors() {
         }
     }
     item_inpos_remove_map.clear();
-    for( auto & ptr : item_vector_resort_set ) {
-        map_stack *ms = dynamic_cast<map_stack*>( ptr.get() );
+    for( auto & p : item_vector_resort_set ) {
+        const auto pp = p.first.get();
+        map_stack *ms = dynamic_cast<map_stack*>( pp );
         if( ms != nullptr ) {
-            erase_null( *ms );
+            erase_null( *ms, p.second );
         }
-        vehicle_stack *vs = dynamic_cast<vehicle_stack*>( ptr.get() );
+        vehicle_stack *vs = dynamic_cast<vehicle_stack*>( pp );
         if( vs != nullptr ) {
-            erase_null( *vs );
+            erase_null( *vs, p.second );
         }
     }
     item_vector_resort_set.clear();

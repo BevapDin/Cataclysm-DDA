@@ -9007,7 +9007,7 @@ std::vector<map_item_stack> game::filter_item_stacks(std::vector<map_item_stack>
     std::string sFilterTemp = filter;
 
     for( auto &elem : stack ) {
-        if(exclude_clothing && elem.example.type->armor) {
+        if(exclude_clothing && elem.example->type->armor) {
             continue;
         }
         if( sFilterTemp == "" || list_items_match( elem.example, sFilterTemp ) ) {
