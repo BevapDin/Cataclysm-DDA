@@ -5966,6 +5966,7 @@ bool vehicle::examine(game *g, player *p, int part) {
     assert(part >= 0);
     vehicle_part &vp = parts[part];
     auto vpitems = get_items( part );
+    auto &vpitemvec = parts[part].items;
     vpart_info &vpi = vehicle_part_types[vp.id];
     if(vpi.has_flag("KILN")) {
         crafting_inventory_t cinv(p);
@@ -5998,7 +5999,7 @@ bool vehicle::examine(game *g, player *p, int part) {
             print_list(buffer, items);
             for(std::list<item>::iterator a = items.begin(); a != items.end(); ++a) {
                 a->bday = calendar::turn;
-                vpitems.push_back(*a);
+                vpitemvec.push_back(*a);
             }
             p->moves -= 150;
             p->add_msg_if_player(buffer.str().c_str());
@@ -6018,7 +6019,7 @@ bool vehicle::examine(game *g, player *p, int part) {
             if(result_mult > 0) {
                 newit.charges *= result_mult;
             }
-            vpitems.push_back(newit);
+            vpitemvec.push_back(newit);
         }
         assert(!vpitems.empty() && vpitems.front().type->id == "charcoal");
         if(!query_yn(_("The kiln contains %s (%i) - grab it?"), vpitems.front().type->nname(1).c_str(), vpitems.front().charges)) {
