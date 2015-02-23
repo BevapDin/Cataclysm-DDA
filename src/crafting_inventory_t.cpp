@@ -1497,29 +1497,43 @@ int crafting_inventory_t::select_items_to_use(const std::vector<component> &comp
     return index_of_component;
 }
 
-bool sort_by_likeness(const item& a, const item& b) {
+int sort_by_likeness(const item& a, const item& b) {
     if(!a.is_container() && b.is_container()) {
-        return true; // Prefer stuff outside of containers
+        return -1; // Prefer stuff outside of containers
     } else if(a.is_container() && !b.is_container()) {
-        return false; // same
+        return +1; // same
     }
     if(a.is_container() && !a.contents.empty() && b.is_container() && !b.contents.empty()) {
-        return sort_by_likeness(a.contents[0], b.contents[0]);
+        // if both are containers, sort by contents, if contents sort equal, sort by container
+        // item type instead (to keep same container item together).
+        const int r = sort_by_likeness(a.contents[0], b.contents[0]);
+        if( r != 0 ) {
+            return r;
+        }
     }
-    if(a.bday != b.bday) {
-        return a.bday < b.bday; // Prefer the older stuff
+    if( a.goes_bad() && b.goes_bad() ) {
+        if( a.bday != b.bday ) {
+            return a.bday < b.bday ? -1 : +1; // Prefer the older stuff
+        }
+    } else if( a.goes_bad() ) {
+        return -1;
+    } else if( b.goes_bad() ) {
+        return +1;
     }
     if(a.charges != b.charges) {
-        return a.charges < b.charges; // Prefer stuff with less charges
+        return a.charges < b.charges ? -1 : +1; // Prefer stuff with less charges
     }
-    return false;
+    if( a.damage != b.damage ) {
+        return a.damage > b.damage ? -1 : +1; // Prefer more damaged stuff
+    }
+    return 0;
 }
 
 bool sort_bylikeness(const crafting_inventory_t::candidate_t& a, const crafting_inventory_t::candidate_t& b) {
     if(a.getLocation() != b.getLocation()) {
         return a.getLocation() < b.getLocation();
     }
-    return sort_by_likeness(a.get_item(), b.get_item());
+    return sort_by_likeness(a.get_item(), b.get_item()) < 0;
 }
 
 void crafting_inventory_t::complex_req::select_items_to_use() {
