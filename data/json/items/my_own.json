@@ -27,6 +27,22 @@
         }
     },
     {
+        "type":"GENERIC",
+        "id" : "huge_ass_cargo_bay",
+        "name" : "huge ass cargo bay",
+        "description" : "A really huge cargo compartment, it's heavy as hell and can store (nearly) the whole universe.",
+        "weight" : 80000,
+        "to_hit" : -4,
+        "color" : "cyan",
+        "symbol" : "]",
+        "material" : ["steel", "plastic"],
+        "volume" : 1000,
+        "bashing" : 2,
+        "cutting" : 0,
+        "category" : "veh_parts",
+        "price" : 40000
+    },
+    {
         "id": "bot_hazmatbot",
         "type": "TOOL",
         "symbol": ";",

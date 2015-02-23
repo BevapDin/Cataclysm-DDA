@@ -37,6 +37,28 @@
         ]
     },{
         "type" : "vehicle_part",
+        "id" : "huge_ass_cargo_bay",
+        "name" : "huge ass cargo bay",
+        "symbol" : "O",
+        "color" : "red",
+        "broken_symbol" : "#",
+        "broken_color" : "red",
+        "damage_modifier" : 100,
+        "durability" : 500,
+        "size" : 6000,
+        "item" : "huge_ass_cargo_bay",
+        "difficulty" : 8,
+        "location" : "center",
+        "flags" : [
+            "CARGO", "OPAQUE", "OBSTACLE", "COVERED"
+        ],
+        "breaks_into" : [
+            {"item": "steel_lump", "min": 1, "max": 5},
+            {"item": "steel_chunk", "min": 1, "max": 5},
+            {"item": "scrap", "min": 1, "max": 5}
+        ]
+    },{
+        "type" : "vehicle_part",
         "id" : "tracker",
         "name": "tracking device",
         "symbol": "*",

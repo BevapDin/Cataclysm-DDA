@@ -1,5 +1,28 @@
 [
 {
+         "type" : "recipe",
+  "result": "huge_ass_cargo_bay",
+  "category": "CC_OTHER",
+  "skill_used": "fabrication",
+  "difficulty": 10,
+  "time": 120000,
+  "reversible": false,
+  "autolearn": true,
+  "tools": [
+        [ [ "func:hammer", -1 ] ] ,
+        [ [ "func:screwdriver", -1 ] ],
+        [ [ "func:wrench", -1 ] ],
+        [ [ "func:hacksaw", -1 ] ],
+        [ [ "func:welder", 600 ] ]
+      ],
+  "components": [
+        [ [ "frame", 2 ] ],
+        [ [ "sheet_metal", 10 ] ],
+        [ [ "scrap", 20 ] ],
+        [ [ "steel_chunk", 4 ] ],
+        [ [ "plastic_chunk", 40 ] ]
+      ]
+ },{
         "type" : "recipe",
   "result": "heap_circuit",
   "category": "CC_OTHER",
