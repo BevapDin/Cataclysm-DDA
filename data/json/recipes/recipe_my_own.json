@@ -54,6 +54,16 @@
   "components": [ [ [ "fur", 100 ] ], [ [ "ragpouch", 1 ] ] ]
   },{
         "type" : "recipe",
+  "result": "heap_leather",
+  "category": "CC_OTHER",
+  "subcategory": "CSC_OTHER_OTHER",
+  "difficulty": 0,
+  "time": 500,
+  "reversible": true,
+  "autolearn": true,
+  "components": [ [ [ "leather", 100 ] ], [ [ "ragpouch", 1 ] ] ]
+  },{
+        "type" : "recipe",
   "result": "heap_bone",
   "category": "CC_OTHER",
   "subcategory": "CSC_OTHER_OTHER",
