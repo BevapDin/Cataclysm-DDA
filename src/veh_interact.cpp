@@ -2165,9 +2165,9 @@ void complete_vehicle ()
     switch (cmd) {
     case 'i':
         if(is_wood) {
-            tools.push_back(tool_comp("nail", NAILS_USED));
-            tools.push_back(tool_comp("duct_tape", DUCT_TAPE_USED));
-            crafting_inv.consume_any_tools(tools);
+            tools.push_back(item_comp("nail", NAILS_USED));
+            tools.push_back(item_comp("duct_tape", DUCT_TAPE_USED));
+            crafting_inv.consume_any_components(tools);
         }
         // Only parts that use charges
         else if (!is_wrenchable && !is_hand_remove){
