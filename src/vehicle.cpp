@@ -5788,8 +5788,8 @@ bool vehicle::can_tow(vehicle *&other, int &other_part) const {
         // Can only tow single tile non-moving vehicles
         return false;
     }
-    const int gx = const_cast<vehicle*>(this)->global_x() + parts[0].precalc[0].x;
-    const int gy = const_cast<vehicle*>(this)->global_y() + parts[0].precalc[0].y;
+    const int gx = global_x() + parts[0].precalc[0].x;
+    const int gy = global_y() + parts[0].precalc[0].y;
     if((other = g->m.veh_at(gx, gy + 1, other_part)) != 0 && !other->is_or_might_move()) { return true; }
     if((other = g->m.veh_at(gx + 1, gy, other_part)) != 0 && !other->is_or_might_move()) { return true; }
     if((other = g->m.veh_at(gx - 1, gy, other_part)) != 0 && !other->is_or_might_move()) { return true; }
@@ -5803,7 +5803,7 @@ bool vehicle::tow_to(vehicle *other, int other_part, player *p) {
     assert(other_part >= 0);
     assert(p != 0);
     if(!p->inv.has_amount(rope_type, 1)) {
-        popup(_("You need a %s to do two vehicles together!"), item::nname(rope_type).c_str());
+        popup(_("You need a %s to tow two vehicles together!"), item::nname(rope_type).c_str());
         return false;
     }
     std::list<item> rope = p->inv.use_amount(rope_type, 1);
@@ -5832,17 +5832,23 @@ bool vehicle::tow_to(vehicle *other, int other_part, player *p) {
         parts[i].mount.y = oy;
     }
     const std::string this_name = name;
+    // Clear references to items in this vehice, now we can freely add/remove items here
+    active_items.clear();
     // 1. Copy the part, clear the item list in the new part. This keeps the other vehicle
     // in a valid state (no items added to it), it also keeps this vehicle in a valid state
     // (nothing changed).
     // 2. Copy the items using a simple loop over the original items, again all is valid, new items
     // are added through add_item and no items in this vehicle are changed.
     for( size_t i = 0; i < parts.size(); ++i ) {
+        const auto new_part_index = other->parts.size();
         other->parts.push_back( parts[i] );
-        decltype(parts[i].items) tmp;
-        tmp.swap( other->parts.back().items ); // new part is now empty as it should be
+        auto &new_part = other->parts.back();
+        decltype( new_part.items ) tmp;
+        tmp.swap( new_part.items ); // new part is now empty as it should be
         for( auto &itm : tmp ) {
-            other->add_item( other->parts.size() - 1, itm );
+            if( !other->add_item( new_part_index, itm ) ) {
+                new_part.items.push_back( itm ); // add it anyway (-:
+            }
         }
     }
     // Destroy me
