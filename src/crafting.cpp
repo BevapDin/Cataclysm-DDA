@@ -14,7 +14,6 @@
 #include "itype.h"
 #include <queue>
 #include "crafting_inventory_t.h"
-#include "helper.h"
 #include <math.h>    //sqrt
 #include <algorithm> //std::min
 

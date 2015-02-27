@@ -183,10 +183,20 @@ class furniture:
                 for a in d:
                     self.bash.append( a[ "item" ] )
     def dump( self ):
-        True # currently nothing.
+        path = os.path.join( OUTPUT_PATH, "furnitures", self.iid + ".html" )
+        with open( path, 'w' ) as fp:
+            write_html_header( fp, "Furniture " + self.name, "furniture" )
+            fp.write( "Deconstructs into:<ul>\n" )
+            for v in self.deconstruct:
+                fp.write( "<li>" + iname( v ) + "</li>\n" )
+            fp.write( "</ul>\n" )
+            fp.write( "Bashed into:<ul>\n" )
+            for v in self.bash:
+                fp.write( "<li>" + iname( v ) + "</li>\n" )
+            fp.write( "</ul>\n" )
+            fp.write( "</body>\n</html>\n")
     def link( self ):
-        return cgi.escape( self.name )
-#        return "<a href=\"../furnitures/" + self.iid + ".html\">" + cgi.escape( self.name ) + "</a>"
+        return "<a href=\"../furnitures/" + self.iid + ".html\">" + cgi.escape( self.name ) + "</a>"
     def crossref( self ):
         for i in self.deconstruct:
             if i in item.types:
@@ -216,10 +226,20 @@ class terrain:
                 for a in d:
                     self.bash.append( a[ "item" ] )
     def dump( self ):
-        True # currently nothing.
+        path = os.path.join( OUTPUT_PATH, "terrains", self.iid + ".html" )
+        with open( path, 'w' ) as fp:
+            write_html_header( fp, "Terrain " + self.name, "terrain" )
+            fp.write( "Deconstructs into:<ul>\n" )
+            for v in self.deconstruct:
+                fp.write( "<li>" + iname( v ) + "</li>\n" )
+            fp.write( "</ul>\n" )
+            fp.write( "Bashed into:<ul>\n" )
+            for v in self.bash:
+                fp.write( "<li>" + iname( v ) + "</li>\n" )
+            fp.write( "</ul>\n" )
+            fp.write( "</body>\n</html>\n")
     def link( self ):
-        return cgi.escape( self.name )
-#        return "<a href=\"../terrains/" + self.iid + ".html\">" + cgi.escape( self.name ) + "</a>"
+        return "<a href=\"../terrains/" + self.iid + ".html\">" + cgi.escape( self.name ) + "</a>"
     def crossref( self ):
         for i in self.deconstruct:
             if i in item.types:
@@ -441,7 +461,6 @@ class recipe:
             self.volume[1] += v[1]
             self.weight[0] += w[0]
             self.weight[1] += w[1]
-        True # currently nothing.
 
 class quality:
     types = { }
@@ -520,6 +539,9 @@ class item:
                 continue
             self.obj[ x ] = obj[ x ]
         self.count_by_charges = (obj["type"] == "COMESTIBLE" or obj["type"] == "AMMO" or "ammo_data" in obj or self.phase == "liquid")
+        self.count = 1;
+        if "count" in obj:
+            self.count = obj["count"]
         self.stack_size = 1
         if self.count_by_charges:
             if "stack_size" in obj:
@@ -554,8 +576,10 @@ class item:
                 fp.write( "<tr>\n<td>" + cgi.escape( x ) + "</td>\n<td>" + cgi.escape( str( self.obj[ x ] ) ) + "</td>\n</tr>\n")
             fp.write( "</table>\n")
             fp.write( "<table><tr>" )
-            fp.write( "<td>volume</td><td>" + str( self.volume(1) ) + "</td>\n" )
+            fp.write( "<td>volume</td><td>" + str( self.volume( self.count ) ) + "</td>\n" )
             fp.write( "<td>weight</td><td>" + str( self.weight ) + "</td>\n" )
+            fp.write( "<td>stack_size</td><td>" + str( self.stack_size ) + "</td>\n" )
+            fp.write( "<td>count</td><td>" + str( self.count ) + "</td>\n" )
             if "container" in self.obj and not self.obj[ "container" ] == "null":
                 fp.write( "<td>Spawns in a " + iname( self.obj[ "container" ] ) + "</td>\n" )
             fp.write( "</tr></table>" )
@@ -597,7 +621,10 @@ class item:
                 if r.is_result( self.iid ) and not r.uncraft_only():
                     fp.write( "<li>" )
                     if r.result == self.iid:
-                        fp.write( open_close( "crafting" ) + " it:\n" )
+                        fp.write( open_close( "crafting" ) )
+                        if r.reversible:
+                            fp.write( " (reversible)" )
+                        fp.write( " it:\n" )
                     else:
                         fp.write( "byproduct of " + open_close( "crafting" ) + " " + iname( r.result ) + ":\n" )
                     r.write_line( fp )
