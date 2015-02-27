@@ -376,7 +376,7 @@ void game::init_ui()
     int locX, locY, locW, locH;
     int statX, statY, statW, statH;
     int stat2X, stat2Y, stat2W, stat2H;
-    int mouseview_y, mouseview_h;
+    int mouseview_y, mouseview_h, mouseview_w;
 
     if (use_narrow_sidebar()) {
         // First, figure out how large each element will be.
@@ -407,6 +407,7 @@ void game::init_ui()
 
         mouseview_y = messY + 7;
         mouseview_h = TERMY - mouseview_y - 5;
+        mouseview_w = sidebarWidth;
     } else {
         // standard sidebar style
         minimapX = 0;
@@ -438,6 +439,7 @@ void game::init_ui()
 
         mouseview_y = stat2Y + stat2H;
         mouseview_h = TERMY - mouseview_y;
+        mouseview_w = sidebarWidth - MINIMAP_WIDTH;
     }
 
     int _y = VIEW_OFFSET_Y;
@@ -458,20 +460,19 @@ void game::init_ui()
     w_status = newwin(statH, statW, _y + statY, _x + statX);
     werase(w_status);
 
-    int mouse_view_x = _x + minimapX;
-    int mouse_view_width = sidebarWidth;
+    int mouseview_x = _x + minimapX;
     if (mouseview_h < lookHeight) {
         // Not enough room below the status bar, just use the regular lookaround area
-        get_lookaround_dimensions(mouse_view_width, mouseview_y, mouse_view_x);
+        get_lookaround_dimensions(mouseview_w, mouseview_y, mouseview_x);
         mouseview_h = lookHeight;
-        liveview.compact_view = true;
+        liveview.set_compact(true);
         if (!use_narrow_sidebar()) {
             // Second status window must now take care of clearing the area to the
             // bottom of the screen.
             stat2H = std::max( 1, TERMY - stat2Y );
         }
     }
-    liveview.init(mouse_view_x, mouseview_y, sidebarWidth, mouseview_h);
+    liveview.init(mouseview_x, mouseview_y, mouseview_w, mouseview_h);
 
     w_status2 = newwin(stat2H, stat2W, _y + stat2Y, _x + stat2X);
     werase(w_status2);
@@ -612,7 +613,7 @@ void game::start_game(std::string worldname)
     u.setID( assign_npc_id() ); // should be as soon as possible, but *after* load_master
 
     const start_location &start_loc = *start_location::find( u.start_location );
-    start_loc.setup( cur_om, levx, levy, levz );
+    tripoint omtstart = start_loc.setup( cur_om, levx, levy, levz );
 
     // Start the overmap with out immediate neighborhood visible
     overmap_buffer.reveal(point(om_global_location().x, om_global_location().y), OPTIONS["DISTANCE_INITIAL_VISIBILITY"], 0);
@@ -630,6 +631,14 @@ void game::start_game(std::string worldname)
     u.next_climate_control_check = 0;  // Force recheck at startup
     u.last_climate_control_ret = false;
 
+    // A quick hack because the proper rework didn't get into 0.C
+    // Remove it as soon as the rework is in
+    if( u.has_trait( "NIGHTVISION" ) ) {
+        traits["NIGHTVISION"].powered = true;
+    } else if( u.has_trait( "URSINE_EYE" ) ) {
+        traits["URSINE_EYE"].powered = true;
+    }
+
     //Reset character pickup rules
     vAutoPickupRules[2].clear();
     //Put some NPCs in there!
@@ -643,10 +652,8 @@ void game::start_game(std::string worldname)
     u.set_highest_cat_level();
     //Calc mutation drench protection stats
     u.drench_mut_calc();
-    if (scen->has_flag("FIRE_START")){
-            m.add_field(u.pos().x + 5, u.pos().y + 3, field_from_ident("fd_fire"), 3 );
-            m.add_field(u.pos().x + 7, u.pos().y + 6, field_from_ident("fd_fire"), 3 );
-            m.add_field(u.pos().x + 3, u.pos().y + 4, field_from_ident("fd_fire"), 3 );
+    if ( scen->has_flag("FIRE_START") ){
+        start_loc.burn( cur_om, omtstart, 3, 3 );
     }
     if (scen->has_flag("INFECTED")){
         u.add_effect("infected", 1, random_body_part(), true);
@@ -4906,7 +4913,7 @@ void game::draw_sidebar()
     if( sideStyle ) {
         werase(w_status2);
     }
-    if (!liveview.compact_view) {
+    if (!liveview.is_compact()) {
         liveview.hide(true, false);
     }
     u.disp_status(w_status, w_status2);
