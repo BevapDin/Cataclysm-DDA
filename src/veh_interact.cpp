@@ -266,7 +266,7 @@ void veh_interact::do_main_loop()
         } else if (action == "CHANGE_ORIGIN") {
             const int vp = part_at(0, 0);
             if (vp > -1) {
-                veh->shift_parts(veh->parts[vp].mount.x, veh->parts[vp].mount.y);
+                veh->shift_parts( veh->parts[vp].mount );
             }
             ddx = 0;
             ddy = 0;
