@@ -262,6 +262,11 @@ class item_group:
                     self.content.append( a[0] )
                 else:
                     self.content.append( a[ "item" ] )
+        if "entries" in obj:
+            i = obj[ "entries" ]
+            for a in i:
+                if "item" in a:
+                    self.content.append( a[ "item" ] )
     def has_item( self, iid ):
         for a in self.content:
             if a == iid:
