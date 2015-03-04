@@ -1251,7 +1251,7 @@
         "name" : "forest",
         "sym" : 70,
         "rotate" : true,
-        "color" : "green",
+        "color" : "brown",
         "see_cost" : 4
     },{
         "type" : "overmap_terrain",
@@ -1259,7 +1259,7 @@
         "name" : "forest",
         "sym" : 70,
         "rotate" : true,
-        "color" : "green",
+        "color" : "brown",
         "see_cost" : 4
     },{
 
@@ -1268,7 +1268,7 @@
         "name" : "forest",
         "sym" : 70,
         "rotate" : true,
-        "color" : "green",
+        "color" : "brown",
         "see_cost" : 4
     },{
         "type" : "overmap_terrain",
@@ -1276,7 +1276,7 @@
         "name" : "forest",
         "sym" : 70,
         "rotate" : true,
-        "color" : "green",
+        "color" : "brown",
         "see_cost" : 4
     },{
         "type" : "overmap_terrain",
@@ -1284,7 +1284,7 @@
         "name" : "ruined cabin",
         "sym" : 70,
         "rotate" : true,
-        "color" : "green",
+        "color" : "brown",
         "see_cost" : 4
     },{
         "type" : "overmap_terrain",
@@ -1292,7 +1292,7 @@
         "name" : "barn",
         "sym" : 70,
         "rotate" : true,
-        "color" : "green",
+        "color" : "brown",
         "see_cost" : 4
     },{
         "type" : "overmap_terrain",
@@ -1300,7 +1300,7 @@
         "name" : "green",
         "sym" : 70,
         "rotate" : true,
-        "color" : "green",
+        "color" : "brown",
         "see_cost" : 4
     },{
         "type" : "overmap_terrain",
@@ -4475,7 +4475,7 @@
         "id" : "bandit_cabin",
         "name" : "forest",
         "sym" : 70,
-        "color" : "green",
+        "color" : "red",
         "see_cost" : 5,
         "extras" : "field"
     },{
@@ -4483,7 +4483,7 @@
         "id" : "bandit_camp_1",
         "name" : "forest",
         "sym" : 70,
-        "color" : "green",
+        "color" : "red",
         "see_cost" : 5,
         "extras" : "field"
     },{
@@ -4491,7 +4491,7 @@
         "id" : "bandit_camp_2",
         "name" : "forest",
         "sym" : 70,
-        "color" : "green",
+        "color" : "red",
         "see_cost" : 5,
         "extras" : "field"
     },{
@@ -4499,7 +4499,7 @@
         "id" : "bandit_camp_3",
         "name" : "forest",
         "sym" : 70,
-        "color" : "green",
+        "color" : "red",
         "see_cost" : 5,
         "extras" : "field"
     },{
@@ -4507,7 +4507,7 @@
         "id" : "bandit_camp_4",
         "name" : "forest",
         "sym" : 70,
-        "color" : "green",
+        "color" : "red",
         "see_cost" : 5,
         "extras" : "field"
     },{
