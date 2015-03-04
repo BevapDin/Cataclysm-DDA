@@ -6000,9 +6000,12 @@ bool vehicle::examine(game *g, player *p, int part) {
         charcoal_recipe.components[0].push_back(item_comp("2x4", 3));
         charcoal_recipe.components[0].push_back(item_comp("stick", 5));
         charcoal_recipe.components[0].push_back(item_comp("bone", 40));
+        charcoal_recipe.components[0].push_back(item_comp("bone_human", 40));
+        charcoal_recipe.components[0].push_back(item_comp("bone_tainted", 40));
+        charcoal_recipe.components[0].push_back(item_comp("pine_bough", 40));
         charcoal_recipe.components[0].push_back(item_comp("log", 1));
-        const int time = 120000;
-        const int result_mult = 2;
+        const int time = 3600;
+        const int result_count = 15;
         if(vpitems.empty()) {
             if(!cinv.has_all_requirements(charcoal_recipe)) {
                 std::ostringstream buffer;
@@ -6024,13 +6027,13 @@ bool vehicle::examine(game *g, player *p, int part) {
                 vpitemvec.push_back(*a);
             }
             p->moves -= 150;
-            p->add_msg_if_player(buffer.str().c_str());
+            p->add_msg_if_player("%s", buffer.str().c_str());
             return true;
         } else if(vpitems.front().type->id != "charcoal") {
             const int age = calendar::turn - vpitems.front().bday;
-            const int time_to_do = time - age * 100;
+            const int time_to_do = time - age;
             if(time_to_do > 0) {
-                p->add_msg_if_player("The kiln is still working (for at least %i minutes)", time_to_do / (10 * 100));
+                p->add_msg_if_player("The kiln is still working (for at least %i minutes)", time_to_do / MINUTES(1));
                 return false;
             }
             // Done, make charcoal
@@ -6038,13 +6041,11 @@ bool vehicle::examine(game *g, player *p, int part) {
                 vpitems.erase(vpitems.begin());
             }
             item newit("charcoal", calendar::turn);
-            if(result_mult > 0) {
-                newit.charges *= result_mult;
-            }
+            newit.charges = result_count;
             vpitemvec.push_back(newit);
         }
         assert(!vpitems.empty() && vpitems.front().type->id == "charcoal");
-        if(!query_yn(_("The kiln contains %s (%i) - grab it?"), vpitems.front().type->nname(1).c_str(), vpitems.front().charges)) {
+        if(!query_yn(_("The kiln contains %s - grab it?"), vpitems.front().display_name(1).c_str())) {
             return false;
         }
         p->add_or_drop(vpitems.front(), g);
