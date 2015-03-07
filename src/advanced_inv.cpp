@@ -962,7 +962,7 @@ aim_location advanced_inventory::find_destination(const advanced_inv_listitem &i
         if( s.id == AIM_INVENTORY || s.id == AIM_DRAGED || s.id == AIM_ALL || s.id == AIM_CONTAINER ) {
             continue;
         }
-        if( !s.canputitemsloc || s.id == it.area ) {
+        if( !s.canputitemsloc || s.is_same( squares[it.area] ) ) {
             continue;
         }
         auto ptr = stack_ptr( s );
@@ -1290,7 +1290,7 @@ void advanced_inventory::display()
             aim_location srcarea = sitem->area;
             if( action == "AUTO_MOVE" ) {
                 destarea = find_destination( *sitem );
-                if( destarea == AIM_ALL || squares[srcarea].is_same( squares[destarea] ) ) {
+                if( destarea == AIM_ALL ) {
                     spane.scroll_by( +1 );
                     continue;
                 }
