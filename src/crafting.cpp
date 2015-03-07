@@ -609,6 +609,7 @@ const recipe *select_crafting_recipe( int &batch_size )
     int batch_line = 0;
     int display_mode = 0;
     const recipe *chosen = NULL;
+    bool spoiling = true;
     input_context ctxt("CRAFTING");
     ctxt.register_action("CRAFT_INFO");
     ctxt.register_cardinal();
@@ -622,6 +623,7 @@ const recipe *select_crafting_recipe( int &batch_size )
     ctxt.register_action("HELP_RECIPE");
     ctxt.register_action("HELP_KEYBINDINGS");
     ctxt.register_action("CYCLE_BATCH");
+    ctxt.register_action("TOOGLE_SPOILING");
 
     crafting_inventory_t crafting_inv(&g->u);
     std::string filterstring = "";
@@ -649,6 +651,16 @@ const recipe *select_crafting_recipe( int &batch_size )
             } else {
                 // Set current to all recipes in the current tab; available are possible to make
                 pick_recipes(crafting_inv, current, available, tab, subtab, filterstring);
+            }
+            if( !spoiling ) {
+                for( size_t i = 0; i < current.size(); ++i ) {
+                    const auto r = current[i]->create_result();
+                    if( r.goes_bad() ) {
+                        current.erase( current.begin() + i );
+                        available.erase( available.begin() + i );
+                        i--;
+                    }
+                }
             }
         }
 
@@ -912,6 +924,9 @@ const recipe *select_crafting_recipe( int &batch_size )
             done = true;
         } else if (action == "RESET_FILTER") {
             filterstring = "";
+            redraw = true;
+        } else if (action == "TOOGLE_SPOILING") {
+            spoiling = !spoiling;
             redraw = true;
         } else if (action == "CYCLE_BATCH") {
             if (current.empty()) {
