@@ -1010,18 +1010,18 @@ bool advanced_inventory::move_all_items()
         popup( _( "You have to choose a destination area." ) );
         return false;
     }
-    if( spane.area == AIM_ALL ) {
-        popup( _( "You have to choose a source area." ) );
-        return false;
-    }
     if( spane.area == AIM_INVENTORY &&
         !query_yn( _( "Really move everything from your inventory?" ) ) ) {
         return false;
     }
     auto &sarea = squares[spane.area];
     auto &darea = squares[dpane.area];
+    if( sarea.is_same( darea ) ) {
+        popup( _( "Source and destination are actually the same." ) );
+        return false;
+    }
 
-    if( spane.area != AIM_INVENTORY && dpane.area != AIM_INVENTORY && !sarea.is_same( darea ) ) {
+    if( spane.area != AIM_INVENTORY && dpane.area != AIM_INVENTORY ) {
         auto &i = spane.items;
         while( !i.empty() ) {
             if( i.front().it == nullptr ) {
@@ -1029,6 +1029,10 @@ bool advanced_inventory::move_all_items()
                 continue;
             }
             advanced_inv_listitem *sitem = &i.front();
+            if( spane.area == AIM_ALL && darea.is_same( squares[sitem->area] ) ) {
+                i.erase( i.begin() );
+                continue;
+            }
             const bool by_charges = sitem->it->count_by_charges();
             long amount_to_move = 0;
             if( !query_charges( dpane.area, *sitem, false, amount_to_move ) ) {
