@@ -14,31 +14,32 @@ TYPES_TO_IGNORE = [ "overmap_terrain", "BULLET_PULLING", "dream", "mutation", "m
                     "MONSTER", "hint", "speech", "skill", "ITEM_CATEGORY", "technique",
                     "profession", "start_location", "overmap_special", "npc", "faction", "recipe_category",
                     "lab_note", "martial_art", "bionic", "snippet", "vehicle", "scenario", "item_action",
-                    "MONSTER_FACTION" ]
+                    "MONSTER_FACTION", "MOD_INFO", "ITEM_BLACKLIST", "MONSTER_BLACKLIST",
+                    "MONSTER_WHITELIST" ]
 
-for d in [ "items", "qualities", "ammo_types", "vparts", "materials", "furnitures", "terrains", "constructions", "traps" ]:
+# First create some output directories in one go. If this fails, the script is aborted.
+for d in [ "items", "qualities", "ammo_types", "vparts", "materials", "furnitures", "terrains",
+           "constructions", "traps", "gunmod_locations", "mods" ]:
     d = os.path.join( OUTPUT_PATH, d )
     if not os.path.exists( d ):
         os.makedirs( d )
 
+# Copy the static files, if it fails, the script is aborted.
 for f in [ "THE-style-sheet.css", "THE-java-script.js" ]:
     if os.path.exists( f ):
         shutil.copyfile( f, os.path.join( OUTPUT_PATH, f ) )
 
-files_to_scan = [ ]
-
 def scandir( dir ):
-    files = os.listdir( dir )
-    for f in files:
+    result = []
+    for f in os.listdir( dir ):
         f = os.path.join( dir, f )
         if os.path.isdir( f ):
-            scandir( f )
+            result.extend( scandir( f ) )
             continue
         if f[-5:] != ".json":
             continue
-        files_to_scan.append( f )
-
-scandir( "data/json" )
+        result.append( f )
+    return result
 
 def write_html_header( fp, title, otype ):
     title = cgi.escape( title, True )
@@ -49,7 +50,7 @@ def write_html_header( fp, title, otype ):
     fp.write( "<link rel=\"stylesheet\" type=\"text/css\" href=\"../THE-style-sheet.css\" />\n" )
     fp.write( "<script src=\"../THE-java-script.js\"></script>\n" )
     fp.write( "</head>\n" )
-    # assumes that otype is alread a proper identifier
+    # assumes that otype is already a proper identifier
     fp.write( "<body class=\"" + otype + "\" onload=\"close_all(this)\">\n" )
     fp.write( "<h1>" + title + "</h1>\n" )
 
@@ -59,6 +60,26 @@ def open_close( text ):
 def scanfiles( files, mod = None ):
     for f in files:
         scanfile( f, mod )
+
+def scanmods( files ):
+    for f in files:
+        if not f[-12:] == "modinfo.json":
+            continue
+        scanmod( f )
+
+def scanmod( file ):
+    with open( file, 'r' ) as fp:
+        try:
+            jdata = json.load( fp )
+        except UnicodeDecodeError as e:
+            print("Failed to load " + file + ": " + str(e))
+            return
+    if type( jdata ) is list:
+        for obj in jdata:
+            if obj[ "type" ] == "MOD_INFO":
+                dummy_load( mod( obj, file ) )
+    else:
+        dummy_load( mod( jdata, file ) )
 
 def scanfile( file, mod ):
     with open( file, 'r' ) as fp:
@@ -148,6 +169,8 @@ class ammotype:
         path = os.path.join( OUTPUT_PATH, "ammo_types", self.iid + ".html" )
         with open( path, 'w' ) as fp:
             write_html_header( fp, "Ammo type " + self.name, "ammo" )
+            if not self.mod is None:
+                fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
             fp.write( "Used by:\n<table>")
             fp.write( "<tr>\n" )
             for x in self.ammodata:
@@ -160,7 +183,8 @@ class ammotype:
             fp.write( "</table>\n")
             fp.write( "</body>\n</html>\n")
     def crossref( self ):
-        True # currently nothing.
+        if not self.mod is None:
+            self.mod.objects.append( self )
 
 class furniture:
     types = { }
@@ -186,6 +210,8 @@ class furniture:
         path = os.path.join( OUTPUT_PATH, "furnitures", self.iid + ".html" )
         with open( path, 'w' ) as fp:
             write_html_header( fp, "Furniture " + self.name, "furniture" )
+            if not self.mod is None:
+                fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
             fp.write( "Deconstructs into:<ul>\n" )
             for v in self.deconstruct:
                 fp.write( "<li>" + iname( v ) + "</li>\n" )
@@ -204,6 +230,8 @@ class furniture:
         for i in self.bash:
             if i in item.types:
                 item.types[ i ].bash.append( self )
+        if not self.mod is None:
+            self.mod.objects.append( self )
 
 class terrain:
     types = { }
@@ -229,6 +257,8 @@ class terrain:
         path = os.path.join( OUTPUT_PATH, "terrains", self.iid + ".html" )
         with open( path, 'w' ) as fp:
             write_html_header( fp, "Terrain " + self.name, "terrain" )
+            if not self.mod is None:
+                fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
             fp.write( "Deconstructs into:<ul>\n" )
             for v in self.deconstruct:
                 fp.write( "<li>" + iname( v ) + "</li>\n" )
@@ -247,6 +277,8 @@ class terrain:
         for i in self.bash:
             if i in item.types:
                 item.types[ i ].bash.append( self )
+        if not self.mod is None:
+            self.mod.objects.append( self )
 
 class item_group:
     types = { }
@@ -276,6 +308,38 @@ class item_group:
         return cgi.escape( self.iid )
     def crossref( self ):
         True
+#        if not self.mod is None:
+#            self.mod.objects.append( self )
+
+class mod:
+    types = { }
+    def __init__(self, obj, file):
+        self.iid = obj[ "ident" ]
+        self.name = obj[ "name" ]
+        self.objects = []
+        if "path" in obj:
+            path = obj[ "path" ]
+            if path == "":
+                scanfiles( scandir( file[:-12] ), self )
+            elif path == "modinfo.json":
+                scanfiles( [ file ], self )
+            else:
+                print("Unknown path: " + path + " in mod " + self.name)
+        else:
+            print("Missing path in mod " + self.name)
+    def link( self ):
+        return "<a href=\"../mods/" + self.iid + ".html\">" + cgi.escape( self.name ) + "</a>"
+    def dump( self ):
+        path = os.path.join( OUTPUT_PATH, "mods", self.iid + ".html" )
+        with open( path, 'w' ) as fp:
+            write_html_header( fp, "Mod " + self.name, "mod" )
+            fp.write( "Contains:\n<ul>\n" )
+            for o in self.objects:
+                fp.write( "<li>" + o.link() + "</li>\n" )
+            fp.write( "</ul>\n" )
+            fp.write( "</body>\n</html>\n")
+    def crossref( self ):
+        True # currently nothing.
 
 class material:
     types = { }
@@ -294,6 +358,8 @@ class material:
         path = os.path.join( OUTPUT_PATH, "materials", self.iid + ".html" )
         with open( path, 'w' ) as fp:
             write_html_header( fp, "Material " + self.name, "material" )
+            if not self.mod is None:
+                fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
             if self.salvage_id:
                 fp.write( "salvaged into " + iname( self.salvage_id ) + "<br/>\n" )
             fp.write( "Part of:\n<ul>\n" )
@@ -302,6 +368,32 @@ class material:
                     fp.write( "<li>" + a.link() + " (and other materials)</li>\n" )
                 else:
                     fp.write( "<li>" + a.link() + "</li>\n" )
+            fp.write( "</ul>\n" )
+            fp.write( "</body>\n</html>\n")
+    def crossref( self ):
+        if not self.mod is None:
+            self.mod.objects.append( self )
+
+class gunmod_location:
+    types = { }
+    def __init__(self, iid):
+        self.iid = iid
+        self.name = iid
+        self.guns = []
+        self.mods = []
+    def link( self ):
+        return "<a href=\"../gunmod_locations/" + self.iid + ".html\">" + cgi.escape( self.name ) + "</a>"
+    def dump( self ):
+        path = os.path.join( OUTPUT_PATH, "gunmod_locations", self.iid + ".html" )
+        with open( path, 'w' ) as fp:
+            write_html_header( fp, "Gunmod location " + self.iid, "material" )
+            fp.write( "Guns having this:<ul>\n" );
+            for a in self.guns:
+                fp.write( "<li>" + a.link() + "</li>\n" )
+            fp.write( "</ul>\n" )
+            fp.write( "Gunmods using this:<ul>\n" );
+            for a in self.mods:
+                fp.write( "<li>" + a.link() + "</li>\n" )
             fp.write( "</ul>\n" )
             fp.write( "</body>\n</html>\n")
     def crossref( self ):
@@ -324,6 +416,8 @@ class vehicle_part:
         path = os.path.join( OUTPUT_PATH, "vparts", self.iid + ".html" )
         with open( path, 'w' ) as fp:
             write_html_header( fp, "Vehicle part " + self.name, "vpart" )
+            if not self.mod is None:
+                fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
             fp.write( "Made from " + iname( self.item ) + "<br>\n" )
             fp.write( "Breaks into:<ul>\n" )
             for x in self.breaks_into:
@@ -336,6 +430,8 @@ class vehicle_part:
                 item.types[ i ].broken_vparts.append( self )
         if self.item in item.types:
                 item.types[ self.item ].the_vparts.append( self )
+        if not self.mod is None:
+            self.mod.objects.append( self )
 
 class recipe:
     types = { }
@@ -479,6 +575,8 @@ class quality:
         path = os.path.join( OUTPUT_PATH, "qualities", self.iid + ".html" )
         with open( path, 'w' ) as fp:
             write_html_header( fp, "Quality " + self.name, "quality" )
+            if not self.mod is None:
+                fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
             fp.write( "Provided by:\n<ul>")
             provided = []
             for i in item.types:
@@ -505,7 +603,8 @@ class quality:
             fp.write( "</ul>\n</div>\n" )
             fp.write( "</body>\n</html>\n" )
     def crossref( self ):
-        True # currently nothing.
+        if not self.mod is None:
+            self.mod.objects.append( self )
 
 class item:
     types = { }
@@ -513,9 +612,16 @@ class item:
         self.iid = obj[ "id" ]
         self.name = obj[ "name" ]
         self.mod = mod
+        # List of terrains / furniture that produce this item when deconstructed
         self.deconstruct = []
+        # List of terrains / furniture that produce this item when bashed
         self.bash = []
+        # List of items that use this item as their default container
         self.container_for = []
+        # List of vehicle parts that produce this item when broken down
+        self.broken_vparts = []
+        # List of vehicle parts that can be created from this item
+        self.the_vparts = []
         self.weight = obj["weight"]
         self._volume = obj["volume"]
         self.desc = obj["description"]
@@ -536,11 +642,18 @@ class item:
             self.phase = obj["phase"]
         else:
             self.phase = "solid"
-        self.broken_vparts = []
-        self.the_vparts = []
+        if "valid_mod_locations" in obj:
+            self.valid_mod_locations = obj["valid_mod_locations"]
+        else:
+            self.valid_mod_locations = []
+        if "container" in obj:
+            self.container = obj["container"]
+        else:
+            self.container = "null"
         self.obj = { }
         for x in obj:
-            if x in [ "id", "name", "phase", "qualities", "material", "volume", "weight", "description" ]:
+            if x in [ "container", "valid_mod_locations", "id", "name", "phase", "qualities",
+                      "material", "volume", "weight", "description" ]:
                 continue
             self.obj[ x ] = obj[ x ]
         self.count_by_charges = (obj["type"] == "COMESTIBLE" or obj["type"] == "AMMO" or "ammo_data" in obj or self.phase == "liquid")
@@ -575,6 +688,8 @@ class item:
         path = os.path.join( OUTPUT_PATH, "items", self.iid + ".html" )
         with open( path, 'w' ) as fp:
             write_html_header( fp, "Item " + self.name, "item" )
+            if not self.mod is None:
+                fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
             fp.write( "<div>" + cgi.escape(self.desc) + "</div>\n" )
             fp.write( "<table class=\"item-data\">\n")
             for x in self.obj:
@@ -583,14 +698,24 @@ class item:
             fp.write( "<table><tr>" )
             fp.write( "<td>volume</td><td>" + str( self.volume( self.count ) ) + "</td>\n" )
             fp.write( "<td>weight</td><td>" + str( self.weight ) + "</td>\n" )
-            fp.write( "<td>stack_size</td><td>" + str( self.stack_size ) + "</td>\n" )
-            fp.write( "<td>count</td><td>" + str( self.count ) + "</td>\n" )
-            if "container" in self.obj and not self.obj[ "container" ] == "null":
-                fp.write( "<td>Spawns in a " + iname( self.obj[ "container" ] ) + "</td>\n" )
+            if self.stack_size > 1:
+                fp.write( "<td>stack_size</td><td>" + str( self.stack_size ) + "</td>\n" )
+            if self.count > 1:
+                fp.write( "<td>count</td><td>" + str( self.count ) + "</td>\n" )
+            if "location" in self.obj:
+                v = self.obj["location"]
+                fp.write( "<td>location</td><td>" + gunmod_location.types[v].link() + "</td>\n" )
+            if not self.container == "null":
+                fp.write( "<td>Spawns in a " + iname( self.container ) + "</td>\n" )
             fp.write( "</tr></table>" )
             self.write_ammo( fp, "Ammo", "ammo_type" )
             self.write_ammo( fp, "Ammo", "ammo" )
             self.write_ammo( fp, "New ammo", "newtype" ) # for gunmods
+            if len( self.valid_mod_locations ) > 0:
+                fp.write( "<div>Gunmod locations:\n<ul>\n" )
+                for v in self.valid_mod_locations:
+                    fp.write( "<li>" + gunmod_location.types[ v[ 0 ] ].link() + " (" + str( v[ 1 ] ) + ")</li>\n" )
+                fp.write( "</ul></div>\n" )
             if len( self.qualities ) > 0:
                 fp.write( "<div class=\"qualities\">Qualities:\n<ul>\n" )
                 for q in self.qualities:
@@ -680,21 +805,29 @@ class item:
 
             fp.write( "</body>\n</html>\n")
     def crossref( self ):
-        if "container" in self.obj:
-            c = self.obj[ "container" ]
-            if c in item.types:
-                item.types[ c ].container_for.append( self )
+        if not self.container == "null":
+            item.types[ self.container ].container_for.append( self )
+        for v in self.valid_mod_locations:
+            v = v[0]
+            if not v in gunmod_location.types:
+                gunmod_location.types[ v ] = gunmod_location( v )
+            gunmod_location.types[ v ].guns.append( self )
+        if "location" in self.obj:
+            v = self.obj["location"]
+            if not v in gunmod_location.types:
+                gunmod_location.types[ v ] = gunmod_location( v )
+            gunmod_location.types[ v ].mods.append( self )
         for m in self.material:
-            if m in material.types:
-                material.types[ m ].usage.append( self )
+            material.types[ m ].usage.append( self )
         for am in [ "ammo_type", "ammo", "newtype" ]:
             if not am in self.obj:
                 continue
             am = self.obj[ am ]
             if am == "NULL" or am == "":
                 continue
-            if am in ammotype.types:
-                ammotype.types[ am ].usage.append( self )
+            ammotype.types[ am ].usage.append( self )
+        if not self.mod is None:
+            self.mod.objects.append( self )
 
 def dummy_load( obj ):
     obj.types[ obj.iid ] = obj
@@ -726,13 +859,14 @@ def load_obj( obj, mod ):
     elif not t in TYPES_TO_IGNORE:
         print( "unknown type: " + t )
 
+dummy_load( item( { "id": "toolset", "name": "bionic tools", "weight": 0, "volume": 0, "description": "", "type": "GENERIC" }, None ) )
+dummy_load( item( { "id": "fire", "name": "a nearby fire", "weight": 0, "volume": 0, "description": "", "type": "GENERIC" }, None ) )
+
 if "null" in material.types:
     del materials.types[ "null" ]
 
-scanfiles( files_to_scan )
-
-dummy_load( item( { "id": "toolset", "name": "bionic tools", "weight": 0, "volume": 0, "description": "", "type": "GENERIC" }, None ) )
-dummy_load( item( { "id": "fire", "name": "a nearby fire", "weight": 0, "volume": 0, "description": "", "type": "GENERIC" }, None ) )
+scanfiles( scandir( "data/json" ) )
+#scanmods( scandir( "data/mods") )
 
 def crossref( dd ):
     for iid in dd.types:
@@ -776,6 +910,8 @@ print_index( ammotype, "ammo_types", "Ammo type" )
 print_index( vehicle_part, "vparts", "Vehicle part" )
 print_index( furniture, "furnitures", "Furniture" )
 print_index( terrain, "terrains", "Terrain" )
+print_index( gunmod_location, "gunmod_locations", "Gunmod locations" )
+print_index( mod, "mods", "Mods" )
 
 def dump( dd, name ):
     for iid in dd.types:
@@ -789,3 +925,5 @@ dump( furniture, "furnitures" )
 dump( terrain, "terrains" )
 dump( ammotype, "ammotypes" )
 dump( material, "materials" )
+dump( gunmod_location, "gunmod_locations" )
+dump( mod, "mods" )
