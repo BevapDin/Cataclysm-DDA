@@ -1316,12 +1316,8 @@ bool game::do_turn()
             }
         }
         if (u.fatigue == 192 && !u.in_sleep_state()) {
-            if (u.activity.type == ACT_NULL) {
                 add_msg(m_warning, _("You're feeling tired.  %s to lie down for sleep."),
                         press_x(ACTION_SLEEP).c_str());
-            } else {
-                cancel_activity_query(_("You're feeling tired."));
-            }
         }
         if (u.stim < 0) {
             u.stim++;
