@@ -28,7 +28,11 @@ void _swap( T a, T b) {
         a.erase( a.begin() );
     }
     while( !b.empty() ) {
+        const size_t old_size = a.size();
         a.push_back( b.front() );
+        if( a.size() == old_size ) {
+            break;
+        }
         b.erase( b.begin() );
     }
     for( auto &x : A) {
@@ -1278,7 +1282,7 @@ void advanced_inventory::display()
             }
             auto &d = squares[destarea];
             auto &s = squares[srcarea];
-
+            
             if( d.veh == nullptr && s.veh == nullptr ) {
                 _swap( g->m.i_at( s.x, s.y ), g->m.i_at( d.x, d.y ) );
                 recalc = true;
