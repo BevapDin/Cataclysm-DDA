@@ -57,22 +57,6 @@
     },
     {
         "type":"GENERIC",
-        "id" : "veh_char_kiln",
-        "name" : "vehicle charcoal kiln",
-        "description" : "This is charchol kiln can be mounted into a vehicle. It will work automaticly.",
-        "weight" : 21607,
-        "to_hit" : -5,
-        "color" : "dark_gray",
-        "symbol" : ";",
-        "material" : ["steel", "null"],
-        "volume" : 60,
-        "bashing" : 20,
-        "cutting" : 0,
-        "category" : "veh_parts",
-        "price" : 550
-    },
-    {
-        "type":"GENERIC",
         "id" : "basket",
         "name" : "wire basket",
         "description" : "A large wire basket from a shopping cart.",

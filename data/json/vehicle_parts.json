@@ -3492,19 +3492,6 @@
         ]
     },{
         "type" : "vehicle_part",
-        "id" : "veh_char_kiln",
-        "name": "mounted charcoal kiln",
-        "symbol": "&",
-        "color": "dark_gray",
-        "broken_symbol": "x",
-        "broken_color": "light_gray",
-        "durability": 200,
-        "item": "veh_char_kiln",
-        "difficulty": 6,
-        "location": "center",
-        "flags": ["OBSTACLE", "KILN"]
-    },{
-        "type" : "vehicle_part",
         "id" : "m249",
         "name" : "mounted M249",
         "symbol" : "t",
