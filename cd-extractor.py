@@ -54,6 +54,12 @@ def write_html_header( fp, title, otype ):
     fp.write( "<body class=\"" + otype + "\" onload=\"close_all(this)\">\n" )
     fp.write( "<h1>" + title + "</h1>\n" )
 
+def dump_json( fp, obj, css_class ):
+    fp.write( "<table class=\"" + css_class + "\">\n" )
+    for x in obj:
+        fp.write( "<tr>\n<td>" + cgi.escape( x ) + "</td>\n<td>" + cgi.escape( str( obj[ x ] ) ) + "</td>\n</tr>\n" )
+    fp.write( "</table>\n")
+
 def open_close( text ):
     return "<a href=\"#\" onclick=\"javascript:return oc(this)\">" + text + "</a>";
 
@@ -194,6 +200,7 @@ class furniture:
         self.name = obj[ "name" ]
         self.deconstruct = []
         self.bash = []
+        self.obj = obj
         if "deconstruct" in obj:
             d = obj[ "deconstruct" ]
             if "items" in d:
@@ -212,6 +219,7 @@ class furniture:
             write_html_header( fp, "Furniture " + self.name, "furniture" )
             if not self.mod is None:
                 fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
+            dump_json( fp, self.obj, "furniture-data" )
             fp.write( "Deconstructs into:<ul>\n" )
             for v in self.deconstruct:
                 fp.write( "<li>" + iname( v ) + "</li>\n" )
@@ -219,6 +227,13 @@ class furniture:
             fp.write( "Bashed into:<ul>\n" )
             for v in self.bash:
                 fp.write( "<li>" + iname( v ) + "</li>\n" )
+            fp.write( "</ul>\n" )
+            fp.write( "Constructed:<ul>\n" )
+            for c in construction.types:
+                if c.post_terrain == self.iid:
+                    fp.write( "<li>" + open_close( c.desc ) + "\n" )
+                    c.write_line( fp )
+                    fp.write( "</li>" )
             fp.write( "</ul>\n" )
             fp.write( "</body>\n</html>\n")
     def link( self ):
@@ -241,6 +256,7 @@ class terrain:
         self.name = obj[ "name" ]
         self.deconstruct = []
         self.bash = []
+        self.obj = obj
         if "deconstruct" in obj:
             d = obj[ "deconstruct" ]
             if "items" in d:
@@ -259,6 +275,7 @@ class terrain:
             write_html_header( fp, "Terrain " + self.name, "terrain" )
             if not self.mod is None:
                 fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
+            dump_json( fp, self.obj, "terrain-data" )
             fp.write( "Deconstructs into:<ul>\n" )
             for v in self.deconstruct:
                 fp.write( "<li>" + iname( v ) + "</li>\n" )
@@ -266,6 +283,13 @@ class terrain:
             fp.write( "Bashed into:<ul>\n" )
             for v in self.bash:
                 fp.write( "<li>" + iname( v ) + "</li>\n" )
+            fp.write( "</ul>\n" )
+            fp.write( "Constructed:<ul>\n" )
+            for c in construction.types:
+                if c.post_terrain == self.iid:
+                    fp.write( "<li>" + open_close( c.desc ) + "\n" )
+                    c.write_line( fp )
+                    fp.write( "</li>" )
             fp.write( "</ul>\n" )
             fp.write( "</body>\n</html>\n")
     def link( self ):
@@ -348,6 +372,7 @@ class material:
         self.mod = mod
         self.name = obj[ "name" ]
         self.usage = []
+        self.obj = obj
         if "salvage_id" in obj:
             self.salvage_id = obj[ "salvage_id" ]
         else:
@@ -360,6 +385,7 @@ class material:
             write_html_header( fp, "Material " + self.name, "material" )
             if not self.mod is None:
                 fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
+            dump_json( fp, self.obj, "meterial-data" )
             if self.salvage_id:
                 fp.write( "salvaged into " + iname( self.salvage_id ) + "<br/>\n" )
             fp.write( "Part of:\n<ul>\n" )
@@ -406,6 +432,7 @@ class vehicle_part:
         self.mod = mod
         self.item = obj[ "item" ]
         self.name = obj[ "name" ]
+        self.obj = obj
         self.breaks_into = [];
         if "breaks_into" in obj:
             for i in obj[ "breaks_into" ]:
@@ -418,6 +445,7 @@ class vehicle_part:
             write_html_header( fp, "Vehicle part " + self.name, "vpart" )
             if not self.mod is None:
                 fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
+            dump_json( fp, self.obj, "vpart-data" )
             fp.write( "Made from " + iname( self.item ) + "<br>\n" )
             fp.write( "Breaks into:<ul>\n" )
             for x in self.breaks_into:
@@ -434,7 +462,7 @@ class vehicle_part:
             self.mod.objects.append( self )
 
 class recipe:
-    types = { }
+    types = []
     def __init__(self, obj, mod):
         self.result = obj["result"]
         self.iid = self.result;
@@ -445,15 +473,27 @@ class recipe:
         if "byproducts" in obj:
             by = obj[ "byproducts" ];
             if type( by ) is str:
-                self.byproducts.append( by )
+                self.byproducts.append( { "id": by, "charges_mult": 1, "amount": 1 } )
             elif type( by ) is dict:
-                self.byproducts.append( by["id"] )
+                if not "charges_mult" in by:
+                    by[ "charges_mult" ] = 1
+                if not "amount" in by:
+                    by[ "amount" ] = 1
+                self.byproducts.append( by )
             else:
                 for b in by:
                     if type( b ) is str:
-                        self.byproducts.append( b )
+                        self.byproducts.append( { "id": b, "charges_mult": 1, "amount": 1 } )
                     else:
-                        self.byproducts.append( b["id"] )
+                        if not "charges_mult" in b:
+                            b[ "charges_mult" ] = 1
+                        if not "amount" in b:
+                            b[ "amount" ] = 1
+                        self.byproducts.append( b )
+        if "charges_mult" in obj:
+            self.charges_mult = obj["charges_mult"]
+        else:
+            self.charges_mult = 1
         if "reversible" in obj:
             self.reversible = obj["reversible"]
         else:
@@ -482,8 +522,12 @@ class recipe:
         return self.reversible and len( self.book_learn ) == 0 and not self.autolearn
 
     def is_result( self, iid ):
-        return self.result == iid or iid in self.byproducts
-
+        if self.result == iid:
+            return True
+        for b in self.byproducts:
+            if b[ "id" ] == iid:
+                return True
+        return False
     def is_dissasemble_result( self, iid ):
         if not self.reversible:
             return False
@@ -563,6 +607,84 @@ class recipe:
             self.weight[0] += w[0]
             self.weight[1] += w[1]
 
+class construction:
+    types = []
+    def __init__(self, obj, mod):
+        self.desc = obj["description"]
+        self.mod = mod
+        if "pre_terrain" in obj:
+            self.pre_terrain = obj["pre_terrain"]
+        else:
+            self.pre_terrain = None
+        if "post_terrain" in obj:
+            self.post_terrain = obj["post_terrain"]
+        else:
+            self.post_terrain = None
+        if "components" in obj:
+            self.components = obj["components"]
+        else:
+            self.components = []
+        if "tools" in obj:
+            self.tools = obj["tools"]
+        else:
+            self.tools = []
+        if "qualities" in obj:
+            self.qualities = obj["qualities"]
+        else:
+            self.qualities = []
+    def is_item_usage( self, iid ):
+        for a in self.components:
+            for b in a:
+                if b[0] == iid:
+                    return True
+        return False
+    def is_tool_usage( self, iid ):
+        for a in self.tools:
+            for b in a:
+                if b[0] == iid:
+                    return True
+        return False
+    def is_quality_usage( self, iid ):
+        for a in self.qualities:
+            if type( a ) is dict:
+                if a["id"] == iid:
+                    return True
+            else:
+                for b in a:
+                    if b["id"] == iid:
+                        return True
+        return False
+    def result( self ):
+        r = self.desc;
+        if not self.post_terrain is None:
+            if self.post_terrain in terrain.types:
+                r = r + " (" + terrain.types[ self.post_terrain ].link() + ")"
+            elif self.post_terrain in furniture.types:
+                r = r + " (" + furniture.types[ self.post_terrain ].link() + ")"
+        return r
+    def write_line( self, fp ):
+        fp.write( "<ul>\n" )
+        if len( self.tools ) > 0:
+            fp.write( "<li>tools:\n" )
+            fp.write( andify( self.tools ) )
+            fp.write( "</li>\n" )
+        fp.write( "<li>components:\n" )
+        fp.write( andify( self.components ) )
+        fp.write( "</li>\n" )
+        if len( self.qualities ) > 0:
+            fp.write( "<li>qualities:\n" )
+            fp.write( "<ul>\n" )
+            for a in self.qualities:
+                if type( a ) is dict:
+                    fp.write( "<li>" + qualname( a ) + "</li>\n" )
+                else:
+                    fp.write( "<li>" + concat( a, " or ", qualname ) + "</li>" )
+            fp.write( "</ul>\n" )
+            fp.write( "</li>\n" )
+        fp.write( "</ul>\n" )
+    def crossref( self ):
+        True
+
 class quality:
     types = { }
     def __init__( self, obj, mod ):
@@ -589,7 +711,6 @@ class quality:
             fp.write( "</ul>\n")
             fp.write( "<div class=\"usage\">Usage:\n<ul>\n" )
             for r in recipe.types:
-                r = recipe.types[ r ]
                 if not r.is_quality_usage( self.iid ):
                     continue
                 fp.write("<li>")
@@ -600,6 +721,9 @@ class quality:
                 else:
                     fp.write( "to make " + iname( r.result ) )
                 fp.write("</li>")
+            for c in construction.types:
+                if c.is_quality_usage( self.iid ):
+                    fp.write( "<li>" + open_close( "to construct" ) + " " + c.result() + "</li>\n" )
             fp.write( "</ul>\n</div>\n" )
             fp.write( "</body>\n</html>\n" )
     def crossref( self ):
@@ -691,10 +815,7 @@ class item:
             if not self.mod is None:
                 fp.write( "Mod: " + self.mod.link() + "<br/>\n" )
             fp.write( "<div>" + cgi.escape(self.desc) + "</div>\n" )
-            fp.write( "<table class=\"item-data\">\n")
-            for x in self.obj:
-                fp.write( "<tr>\n<td>" + cgi.escape( x ) + "</td>\n<td>" + cgi.escape( str( self.obj[ x ] ) ) + "</td>\n</tr>\n")
-            fp.write( "</table>\n")
+            dump_json( fp, self.obj, "item-data" )
             fp.write( "<table><tr>" )
             fp.write( "<td>volume</td><td>" + str( self.volume( self.count ) ) + "</td>\n" )
             fp.write( "<td>weight</td><td>" + str( self.weight ) + "</td>\n" )
@@ -747,7 +868,6 @@ class item:
                 if i.has_item( self.iid ):
                     fp.write( "<li>item group " + i.link() + "</li>\n" )
             for r in recipe.types:
-                r = recipe.types[ r ]
                 if r.is_result( self.iid ) and not r.uncraft_only():
                     fp.write( "<li>" )
                     if r.result == self.iid:
@@ -783,7 +903,6 @@ class item:
 
             fp.write( "<div class=\"usage\">\n<h6>Usage:</h6>\n<ul>\n" )
             for r in recipe.types:
-                r = recipe.types[ r ]
                 for b in r.book_learn:
                     if b[ 0 ] == self.iid:
                         if r.uncraft_only():
@@ -798,6 +917,11 @@ class item:
                 if ( r.is_item_usage( self.iid ) or r.is_tool_usage( self.iid ) ) and not r.uncraft_only():
                     fp.write( "<li>" + open_close( "to make" ) + " " + iname( r.result ) + ":\n" )
                     r.write_line( fp )
+                    fp.write( "</li>" )
+            for c in construction.types:
+                if c.is_item_usage( self.iid ) or c.is_tool_usage( self.iid ):
+                    fp.write( "<li>" + open_close( "to construct" ) + " " + c.result() + ":\n" )
+                    c.write_line( fp )
                     fp.write( "</li>" )
             for v in self.the_vparts:
                 fp.write( "<li>installing vehicle part " + v.link() + "</li>" )
@@ -830,7 +954,10 @@ class item:
             self.mod.objects.append( self )
 
 def dummy_load( obj ):
-    obj.types[ obj.iid ] = obj
+    if type( obj.types ) is dict:
+        obj.types[ obj.iid ] = obj
+    else:
+        obj.types.append( obj )
 
 def load_obj( obj, mod ):
     t = obj["type"]
@@ -849,7 +976,7 @@ def load_obj( obj, mod ):
     elif t == "item_group":
         dummy_load( item_group( obj, mod ) )
     elif t == "construction":
-        ...
+        dummy_load( construction( obj, mod ) )
     elif t == "trap":
         ...
     elif t == "material":
@@ -869,8 +996,13 @@ scanfiles( scandir( "data/json" ) )
 #scanmods( scandir( "data/mods") )
 
 def crossref( dd ):
-    for iid in dd.types:
-        dd.types[ iid ].crossref()
+    if type( dd.types ) is dict:
+        for iid in dd.types:
+            dd.types[ iid ].crossref()
+    else:
+        for v in dd.types:
+            v.crossref()
+    
 
 crossref( quality )
 crossref( vehicle_part )
@@ -881,6 +1013,7 @@ crossref( furniture )
 crossref( terrain )
 crossref( item_group )
 crossref( recipe )
+crossref( construction )
 
 def print_index( obj, path, title ):
     index = { }
