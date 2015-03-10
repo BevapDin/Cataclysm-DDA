@@ -85,6 +85,7 @@ class monster;
 class calendar;
 class crafting_inventory_t;
 class DynamicDataLoader;
+class salvage_actor;
 
 class game
 {
@@ -350,7 +351,7 @@ class game
         int inv_activatable(std::string const &title);
         int inv_type(std::string const &title, item_cat inv_item_type = IC_NULL);
         int inv_for_liquid(const item &liquid, const std::string &title, bool auto_choose_single);
-        int inv_for_salvage(const std::string &title);
+        int inv_for_salvage(const std::string &title, const salvage_actor &actor );
         item *inv_map_for_liquid(const item &liquid, const std::string &title);
         int inv_for_flag(const std::string &flag, const std::string &title, bool auto_choose_single);
         int inv_for_filter(const std::string &title, item_filter filter );

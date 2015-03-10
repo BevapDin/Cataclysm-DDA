@@ -43,6 +43,7 @@
 #include "debug.h"
 #include "catalua.h"
 #include "sounds.h"
+#include "iuse_actor.h"
 
 #include <map>
 #include <set>
@@ -628,14 +629,6 @@ void game::start_game(std::string worldname)
     update_weather(); // Springtime-appropriate, definitely.
     u.next_climate_control_check = 0;  // Force recheck at startup
     u.last_climate_control_ret = false;
-
-    // A quick hack because the proper rework didn't get into 0.C
-    // Remove it as soon as the rework is in
-    if( u.has_trait( "NIGHTVISION" ) ) {
-        traits["NIGHTVISION"].powered = true;
-    } else if( u.has_trait( "URSINE_EYE" ) ) {
-        traits["URSINE_EYE"].powered = true;
-    }
 
     //Reset character pickup rules
     vAutoPickupRules[2].clear();
@@ -2648,7 +2641,6 @@ void game::setremoteveh(vehicle *veh)
     u.set_value( "remote_controlling_vehicle", remote_veh_string.str() );
 }
 
-void use_item_menu(player &p);
 bool game::handle_action()
 {
     std::string action;
@@ -3264,8 +3256,9 @@ bool game::handle_action()
                     }
                 }
                 for ( auto &mut : g->u.get_mutations() ) {
-                    if ( traits[mut].powered && traits[mut].cost > 0 ) {
-                        active.push_back( traits[mut].name );
+                    const auto &mdata = mutation_branch::get( mut );
+                    if( mdata.cost > 0 && u.has_active_mutation( mut ) ) {
+                        active.push_back( mdata.name );
                     }
                 }
                 std::stringstream data;
@@ -10875,7 +10868,28 @@ void game::butcher()
     std::vector<int> corpses;
     auto items = m.i_at(u.posx(), u.posy());
     crafting_inventory_t crafting_inv(&u);
-    bool has_salvage_tool = u.has_items_with_quality( "CUT", 1, 1 );
+
+    // TODO: Properly handle different material whitelists
+    // TODO: Improve quality of this section
+    std::vector<item*> dumpvec;
+    u.inv.dump( dumpvec );
+    int salvage_tool_index = INT_MIN;
+    item *salvage_tool = nullptr;
+    salvage_actor *salvage_iuse = nullptr;
+    for( auto &it : dumpvec ) {
+        if( it == nullptr ) {
+            continue;
+        }
+
+        const auto fun = it->type->get_use( "salvage" );
+        if( fun != nullptr ) {
+            salvage_tool_index = u.inv.position_by_item( it );
+            salvage_iuse = dynamic_cast<salvage_actor*>( fun->get_actor_ptr() );
+            salvage_tool = it;
+            break;
+        }
+    }
+
 
     // check if we have a butchering tool
     if( factor > INT_MIN ) {
@@ -10899,10 +10913,10 @@ void game::butcher()
     }
     // Now salvageable items
     size_t salvage_index = corpses.size();
-    if( has_salvage_tool ) {
+    if( salvage_tool_index != INT_MIN ) {
         for( size_t i = 0; i < items.size(); i++ ) {
             if( !items[i].is_corpse() ) {
-                if( iuse::valid_to_cut_up( &items[i] ) ) {
+                if( salvage_iuse->valid_to_cut_up( &items[i] ) ) {
                     corpses.push_back(i);
                     has_item = true;
                 }
@@ -10971,7 +10985,7 @@ void game::butcher()
     }
 
     if( multisalvage == true && butcher_corpse_index == (int)corpses.size() ) {
-        u.assign_activity( ACT_LONGSALVAGE, 0 );
+        u.assign_activity( ACT_LONGSALVAGE, 0, salvage_tool_index );
         return;
     }
     const item &dis_item = items[corpses[butcher_corpse_index]];
@@ -10986,8 +11000,7 @@ void game::butcher()
         u.activity.values.push_back(1);
         return;
     } else if( !dis_item.is_corpse() ) {
-        item salvage_tool( "toolset", calendar::turn ); //TODO: Get the actual tool
-        iuse::cut_up( &u, &salvage_tool, &items[corpses[butcher_corpse_index]], false );
+        salvage_iuse->cut_up( &u, salvage_tool, &items[corpses[butcher_corpse_index]] );
         return;
     }
     mtype *corpse = dis_item.get_mtype();
@@ -11336,8 +11349,8 @@ void game::unload(item &it)
         weapon->unset_curammo();
         // Tools need to be turned off, especially when thy consume charges only every few turns,
         // otherwise they stay active until they would consume the next charge.
-        if( weapon->active && weapon->is_tool() && weapon->type->has_use() ) {
-            weapon->type->invoke( &u, weapon, false, u.pos() );
+        if( weapon->active && weapon->is_tool() ) {
+            weapon->type->tick( &u, weapon, u.pos() );
         }
     }
 }

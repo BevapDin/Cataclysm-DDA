@@ -302,7 +302,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1]]
   },
 
@@ -4077,7 +4077,7 @@
     "revert_to": "null",
     "functions": [ ["func:blade", 0.85, -1] ],
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1]]
   },
 
@@ -4104,7 +4104,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.7, -1 ], [ "func:scissors", 0.7, -1 ] ],
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1]]
   },
 
@@ -4132,7 +4132,7 @@
     "revert_to": "null",
     "functions": [ [ "func:blade", 1.05, -1 ], [ "func:scissors", 1.4, -1 ] ],
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 15]]
   },
 
@@ -4160,7 +4160,21 @@
     "ammo": "gasoline",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "FIREMACHETE_OFF"
+    "use_action": [
+        {
+            "type": "fireweapon_off",
+            "target_id": "firemachete_on",
+            "success_message": "Your No. 9 glows!",
+            "lacks_fuel_message": "Click.",
+            "failure_message": "Click.",
+            "noise": 0,
+            "moves": 10,
+            "success_chance": 2
+        },
+        {
+            "type": "knife"
+        }
+    ]
   },
 
   {
@@ -4187,7 +4201,27 @@
     "ammo": "gasoline",
     "revert_to": "firemachete_off",
     "category": "weapons",
-    "use_action": "FIREMACHETE_ON"
+    "use_action": [
+        {
+            "type": "fireweapon_on",
+            "target_id": "firemachete_off",
+            "noise_message": "Your No. 9 hisses.",
+            "voluntary_extinguish_message": "Your No. 9 goes dark.",
+            "charges_extinguish_message": "Out of ammo!",
+            "water_extinguish_message": "Your No. 9 hisses in the water and goes out.",
+            "auto_extinguish_message": "Your No. 9 cuts out!",
+            "noise": 5,
+            "noise_chance": 25,
+            "auto_extinguish_chance": 100
+        },
+        {
+            "type": "firestarter",
+            "moves": 15
+        },
+        {
+            "type": "knife"
+        }
+    ]
   },
   {
     "id": "diamond_knife",
@@ -4213,7 +4247,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 24]]
   },
   {
@@ -4239,7 +4273,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 20]]
   },
   {
@@ -4264,7 +4298,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 16]]
   },
@@ -4291,7 +4325,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 18]]
   },
   {
@@ -4318,7 +4352,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 12]]
   },
   {
@@ -4344,7 +4378,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 13]]
   },
@@ -4371,7 +4405,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.9, 0] ],
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 9]]
   },
@@ -4399,7 +4433,19 @@
     "ammo": "gasoline",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "FIREKATANA_OFF"
+    "use_action": [
+        {
+            "type": "fireweapon_off",
+            "target_id": "firekatana_on",
+            "success_message": "The Sun rises.",
+            "lacks_fuel_message": "Time stands still.",
+            "noise": 10,
+            "moves": 10
+        },
+        {
+            "type": "knife"
+        }
+    ]
   },
 
   {
@@ -4426,7 +4472,24 @@
     "ammo": "gasoline",
     "revert_to": "firekatana_off",
     "category": "weapons",
-    "use_action": "FIREKATANA_ON"
+    "use_action": [
+        {
+            "type": "fireweapon_on",
+            "target_id": "firemachete_off",
+            "noise_message": "The Sun shines brightly.",
+            "voluntary_extinguish_message": "The Sun sets.",
+            "charges_extinguish_message": "The Light Fades.",
+            "water_extinguish_message": "Your sword hisses in the water and goes out.",
+            "noise_chance": 35
+        },
+        {
+            "type": "firestarter",
+            "moves": 15
+        },
+        {
+            "type": "knife"
+        }
+    ]
   },
 
   {
@@ -4453,7 +4516,7 @@
     "revert_to": "null",
     "functions": [ [ "func:blade", 1.1, -1] ],
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["COOK", 1]]
   },
 
@@ -4480,7 +4543,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.92 ] ],
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 9]]
   },
@@ -4509,7 +4572,7 @@
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.8 ] ],
     "category": "weapons",
-    "use_action": "KNIFE"
+    "use_action": { "type": "knife" }
   },
 
   {
@@ -4535,7 +4598,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.8 ] ],
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 9]]
   },
@@ -4564,7 +4627,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "KNIFE"
+    "use_action": { "type": "knife" }
   },
 
   {
@@ -4592,7 +4655,19 @@
     "ammo": "gasoline",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "ZWEIFIRE_OFF"
+    "use_action": [
+        {
+            "type": "fireweapon_off",
+            "target_id": "zweifire_on",
+            "success_message": "Die Klinge deines Schwertes brennt!",
+            "lacks_fuel_message": "Dein Flammenschwert hat keinen Brennstoff mehr.",
+            "noise": 10,
+            "moves": 10
+        },
+        {
+            "type": "knife"
+        }
+    ]
   },
 
   {
@@ -4620,7 +4695,23 @@
     "ammo": "gasoline",
     "revert_to": "zweifire_off",
     "category" : "weapons",
-    "use_action": "ZWEIFIRE_ON"
+    "use_action": [
+        {
+            "type": "fireweapon_on",
+            "noise_message": "Das Feuer um deine Schwertklinge leuchtet hell!",
+            "voluntary_extinguish_message": "Die Flamme deines Schwertes erlischt.",
+            "charges_extinguish_message": "Deinem Flammenschwert ist der Brennstoff ausgegangen!",
+            "water_extinguish_message": "Dein Schwert zischt und erlischt.",
+            "noise_chance": 35
+        },
+        {
+            "type": "firestarter",
+            "moves": 15
+        },
+        {
+            "type": "knife"
+        }
+    ]
   },
 
   {
@@ -4647,7 +4738,19 @@
     "ammo": "gasoline",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "BROADFIRE_OFF"
+    "use_action": [
+        {
+            "type": "fireweapon_off",
+            "target_id": "broadfire_on",
+            "success_message": "Charge!!",
+            "lacks_fuel_message": "No strength to fight!",
+            "noise": 10,
+            "moves": 10
+        },
+        {
+            "type": "knife"
+        }
+    ]
   },
 
   {
@@ -4674,7 +4777,23 @@
     "ammo": "gasoline",
     "revert_to": "broadfire_off",
     "category" : "weapons",
-    "use_action": "BROADFIRE_ON"
+    "use_action": [
+        {
+            "type": "fireweapon_on",
+            "noise_message": "Your blade burns for combat!",
+            "voluntary_extinguish_message": "Run away!",
+            "charges_extinguish_message": "Thy strength fades!",
+            "water_extinguish_message": "Your sword hisses in the water and goes out.",
+            "noise_chance": 35
+        },
+        {
+            "type": "firestarter",
+            "moves": 15
+        },
+        {
+            "type": "knife"
+        }
+    ]
   },
 
   {
@@ -4700,7 +4819,7 @@
     "revert_to": "null",
     "functions": [ [ "func:blade", 1.05 ] ],
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", -27]]
   },
 
@@ -4727,7 +4846,21 @@
     "ammo": "gasoline",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "SHISHKEBAB_OFF"
+    "use_action": [
+        {
+            "type": "fireweapon_off",
+            "target_id": "shishkebab_on",
+            "success_message": "Let's dance, Zeds!",
+            "lacks_fuel_message": "This thing needs some fuel!",
+            "failure_message": "Aw, dangit. It fails to start!",
+            "noise": 10,
+            "moves": 10,
+            "success_chance": 5
+        },
+        {
+            "type": "knife"
+        }
+    ]
   },
 
   {
@@ -4753,7 +4886,26 @@
     "ammo": "gasoline",
     "revert_to": "shishkebab_off",
     "category" : "weapons",
-    "use_action": "SHISHKEBAB_ON"
+    "use_action": [
+        {
+            "type": "fireweapon_on",
+            "noise_message": "Your shishkebab crackles!",
+            "voluntary_extinguish_message": "Peace out. Your shishkebab's flame dies.",
+            "charges_extinguish_message": "Uncool, outta gas! Your shishkebab's flame goes out.",
+            "water_extinguish_message": "Your shishkebab hisses in the water and goes out.",
+            "auto_extinguish_message": "Bummer, man! Your shishkebab's flame flickers and dies out.",
+            "noise": 10,
+            "noise_chance": 25,
+            "auto_extinguish_chance": 75
+        },
+        {
+            "type": "firestarter",
+            "moves": 15
+        },
+        {
+            "type": "knife"
+        }
+    ]
   },
 
   {
@@ -4781,7 +4933,7 @@
     "revert_to": "null",
     "functions": [ [ "func:blade", 1.05 ] ],
     "category" : "weapons",
-    "use_action": "KNIFE"
+    "use_action": { "type": "knife" }
   },
 
   {
@@ -4806,7 +4958,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.99 ] ],
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 20]],
     "flags": ["STAB", "SHEATH_KNIFE"]
   },
@@ -4833,7 +4985,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.99 ] ],
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 25]],
     "flags": ["CHOP", "SHEATH_KNIFE"]
   },
@@ -4862,7 +5014,7 @@
     "revert_to": "null",
     "functions": [ [ "func:blade", 0.96 ] ],
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 19]]
   },
 
@@ -5818,7 +5970,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "functions": [ [ "func:blade", 1.03, -1 ], [ "func:scissors" ] ],
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 12]]
   },
 
@@ -5843,7 +5995,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 11]],
     "flags": ["STAB", "SHEATH_KNIFE"]
    },
@@ -5994,7 +6146,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 11]],
     "flags": ["STAB", "SHEATH_KNIFE"]
   },
@@ -7291,7 +7443,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "KNIFE"
+    "use_action": { "type": "knife" }
   },
 
   {
@@ -7378,14 +7530,20 @@
     "turns_per_charge": 0,
     "ammo": "gasoline",
     "revert_to": "null",
-    "use_action": {
-        "type": "transform",
-        "msg": "You flick the lighter.",
-        "target": "ref_lighter_on",
-        "active": true,
-        "need_charges": 1,
-        "need_charges_msg": "Nothing happens."
-    }
+    "use_action": [
+        {
+            "type": "transform",
+            "msg": "You flick the lighter.",
+            "target": "ref_lighter_on",
+            "active": true,
+            "need_charges": 1,
+            "need_charges_msg": "Nothing happens."
+        },
+        {
+            "type": "firestarter",
+            "moves": 25
+        }
+    ]
   },
 
 {
@@ -7410,10 +7568,19 @@
     "turns_per_charge": 10,
     "ammo": "gasoline",
     "revert_to": "ref_lighter",
-    "use_action": {
+    "use_action": [
+        {
             "type": "firestarter",
             "moves_cost": 15
-    }
+        },
+        {
+            "type": "auto_transform",
+            "msg": "You extinguish the lighter.",
+            "when_underwater": "The lighter is extinguished.",
+            "target": "ref_lighter_off",
+            "active": false
+        }
+    ]
   },
 
   {
@@ -7706,7 +7873,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 19]]
   },
 
@@ -7754,7 +7921,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 14]]
   },
 
@@ -7781,7 +7948,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 18]]
   },
 
@@ -7808,7 +7975,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 20]]
   },
 
@@ -7836,7 +8003,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 30]]
   },
 
@@ -7865,7 +8032,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["SAW_W", 1], ["SAW_M", 1], ["BUTCHER", 7]]
   },
 
@@ -7892,7 +8059,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["SAW_W", 1], ["SAW_M", 1], ["SCREW", 1], ["BUTCHER", 8]]
   },
 
@@ -7918,7 +8085,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["SAW_W", 1], ["SAW_M", 1], ["WRENCH", 1], ["SCREW", 1], ["SCREW_FINE", 1], ["BUTCHER", 7]]
   },
   {
@@ -7945,7 +8112,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 19]]
   },
 
@@ -8139,7 +8306,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 15]],
     "flags": ["CHOP", "SHEATH_KNIFE"]
   },
@@ -9249,7 +9416,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category": "weapons",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 10]]
   },
 
@@ -9275,7 +9442,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 16]]
   },
@@ -9302,7 +9469,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 16]]
   },
@@ -9330,7 +9497,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "KNIFE"
+    "use_action": { "type": "knife" }
   },
 
   {
@@ -9356,7 +9523,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null",
-    "use_action": "KNIFE",
+    "use_action": { "type": "knife" },
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 23]]
   },
@@ -9385,7 +9552,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "category" : "weapons",
-    "use_action": "KNIFE"
+    "use_action": { "type": "knife" }
   },{
     "id": "remotevehcontrol",
     "type": "TOOL",
