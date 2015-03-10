@@ -11,6 +11,7 @@ namespace picojson {
     class value;
 }
 
+class calendar;
 struct player_activity;
 class vehicle;
 struct bionic;

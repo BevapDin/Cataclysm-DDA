@@ -12,6 +12,8 @@
 #include "catacharset.h"
 #include "messages.h"
 #include "itype.h"
+#include "rng.h"
+
 #include <queue>
 #include "crafting_inventory_t.h"
 #include <math.h>    //sqrt

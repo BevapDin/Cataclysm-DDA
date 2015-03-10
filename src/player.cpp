@@ -1904,7 +1904,7 @@ void player::memorial( std::ofstream &memorial_file, std::string epitaph )
     memorial_file << string_format("%s was %s when the apocalypse began.",
                                    pronoun.c_str(), profession_name.c_str()) << "\n";
     memorial_file << string_format("%s died on %s of year %d, day %d, at %s.",
-                     pronoun.c_str(), season_name_uc[calendar::turn.get_season()].c_str(), (calendar::turn.years() + 1),
+                     pronoun.c_str(), season_name_upper(calendar::turn.get_season()).c_str(), (calendar::turn.years() + 1),
                      (calendar::turn.days() + 1), calendar::turn.print_time().c_str()) << "\n";
     memorial_file << kill_place << "\n";
     memorial_file << "\n";
@@ -2130,7 +2130,7 @@ void player::add_memorial_log(const char* male_msg, const char* female_msg, ...)
     std::stringstream timestamp;
     //~ A timestamp. Parameters from left to right: Year, season, day, time
     timestamp << string_format(_("Year %1$d, %2$s %3$d, %4$s"), calendar::turn.years() + 1,
-                               season_name_uc[calendar::turn.get_season()].c_str(),
+                               season_name_upper(calendar::turn.get_season()).c_str(),
                                calendar::turn.days() + 1, calendar::turn.print_time().c_str()
                                );
 
@@ -7147,7 +7147,7 @@ void player::suffer()
                     traits[mut].cooldown = traits[mut].cost;
                 }
             }
-            
+
             if (traits[mut].powered == false) {
                 apply_mods(mut, false);
             }
@@ -9875,7 +9875,7 @@ hint_rating player::rate_action_wear(item *it)
     if (count == 2) {
         return HINT_IFFY;
     }
-    if (has_trait("WOOLALLERGY") && it->made_of("wool")) {
+    if (has_trait("WOOLALLERGY") && (it->made_of("wool") || it->item_tags.count("wooled") > 0)) {
         return HINT_IFFY; //should this be HINT_CANT? I kinda think not, because HINT_CANT is more for things that can NEVER happen
     }
     if (it->covers(bp_head) && encumb(bp_head) != 0) {
@@ -10064,7 +10064,7 @@ bool player::wear_item(item *to_wear, bool interactive)
     }
 
     if (!to_wear->has_flag("OVERSIZE")) {
-        if (has_trait("WOOLALLERGY") && to_wear->made_of("wool")) {
+        if (has_trait("WOOLALLERGY") && (to_wear->made_of("wool") || to_wear->item_tags.count("wooled"))) {
             if(interactive) {
                 add_msg(m_info, _("You can't wear that, it's made of wool!"));
             }
@@ -10413,7 +10413,7 @@ hint_rating player::rate_action_reload(item *it) {
         return HINT_GOOD;
     } else if (it->is_tool()) {
         it_tool* tool = dynamic_cast<it_tool*>(it->type);
-        if (tool->ammo == "NULL") {
+        if (tool->ammo_id == "NULL") {
             return HINT_CANT;
         }
         return HINT_GOOD;
@@ -13367,6 +13367,34 @@ void player::blossoms()
             g->m.add_field( i, j, fd_fungal_haze, rng(1, 2));
         }
     }
+}
+
+int player::add_ammo_to_worn_quiver( item &ammo )
+{
+    std::vector<item *>quivers;
+    for( auto & worn_item : worn) {
+        if( worn_item.type->can_use( "QUIVER")) {
+            quivers.push_back( &worn_item);
+        }
+    }
+
+    // sort quivers by contents, such that empty quivers go last
+    std::sort( quivers.begin(), quivers.end(), item_compare_by_charges);
+
+    int quivered_sum = 0;
+    int move_cost_per_arrow = 10;
+    for( std::vector<item *>::iterator it = quivers.begin(); it != quivers.end(); it++) {
+        item *quiver = *it;
+        int stored = quiver->quiver_store_arrow( ammo);
+        if( stored > 0) {
+            add_msg_if_player( ngettext( "You store %d %s in your %s.", "You store %d %s in your %s.", stored),
+                               stored, quiver->contents[0].type_name(stored).c_str(), quiver->type_name().c_str());
+        }
+        moves -= std::min( 100, stored * move_cost_per_arrow);
+        quivered_sum += stored;
+    }
+
+    return quivered_sum;
 }
 
 float player::power_rating() const

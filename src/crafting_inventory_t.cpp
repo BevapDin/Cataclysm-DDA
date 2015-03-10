@@ -1280,7 +1280,7 @@ int crafting_inventory_t::deserialize(JsonArray &arr, candvec &vec) {
     }
     const int index = arr.get_int(0);
     vec.clear();
-    for(int i = 1; i < arr.size(); i++) {
+    for(size_t i = 1; i < arr.size(); i++) {
         JsonObject o(arr.get_object(i));
         candidate_t ci(*this, o);
         if(!ci.valid()) {

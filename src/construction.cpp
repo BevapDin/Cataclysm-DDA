@@ -12,6 +12,7 @@
 #include "veh_interact.h"
 #include "crafting_inventory_t.h"
 #include "messages.h"
+#include "rng.h"
 
 #include <algorithm>
 #include <sstream>
