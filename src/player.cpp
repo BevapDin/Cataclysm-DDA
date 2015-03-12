@@ -144,6 +144,7 @@ player::player() : Character()
 {
  position.x = 0;
  position.y = 0;
+ zpos = 0;
  id = -1; // -1 is invalid
  view_offset_x = 0;
  view_offset_y = 0;
@@ -10749,7 +10750,8 @@ bool player::invoke_item( item* used )
     }
         
     if( used->type->use_methods.size() < 2 ) {
-        return used->type->invoke( this, used, pos() );
+        const long charges_used = used->type->invoke( this, used, pos() );
+        return consume_charges( used, charges_used );
     }
 
     uimenu umenu;
