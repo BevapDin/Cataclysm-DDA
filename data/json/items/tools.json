@@ -6072,9 +6072,28 @@
     "functions" : [ [ "func:hammer", 1.7 ], ["func:hammering", 1.7] , ["func:nailing", 1.7] ],
     "use_action": "HAMMER",
     "qualities": [["HAMMER", 2], ["HAMMER_FINE", 1]]
-  },
-
-  {
+  },{
+    "id": "primitive_adze",
+    "type": "TOOL",
+    "symbol": ";",
+    "color": "brown",
+    "name": "stone adze",
+    "description": "This is a stone adze, somewhat useful for cutting through wood objects.",
+    "price": 1000,
+    "material": ["stone", "wood"],
+    "weight": 1300,
+    "volume": 4,
+    "bashing": 8,
+    "cutting": 7,
+    "to_hit": 0,
+    "max_charges": 0,
+    "initial_charges": 0,
+    "charges_per_use": 0,
+    "turns_per_charge": 0,
+    "ammo": "NULL",
+    "revert_to": "null",
+    "qualities":[ ["SAW_W", 1] ]
+  },{
     "id": "primitive_axe",
     "type": "TOOL",
     "symbol": "/",
@@ -6098,9 +6117,7 @@
     "functions": [ ["func:ax", 2] ],
     "qualities": [["AXE", 2]],
     "use_action": "LUMBER"
-  },
-
-  {
+  },{
     "id": "primitive_shovel",
     "type": "TOOL",
     "symbol": "/",
@@ -6123,9 +6140,7 @@
     "functions": [ ["func:shovel", 2] ],
     "qualities": [["DIG", 2]],
     "use_action": "DIG"
-  },
-
-  {
+  },{
     "id": "primitive_knife",
     "type": "TOOL",
     "symbol": ";",
@@ -6149,9 +6164,7 @@
     "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 11]],
     "flags": ["STAB", "SHEATH_KNIFE"]
-  },
-
-  {
+  },{
     "id": "e_tool",
     "type": "TOOL",
     "symbol": "/",
@@ -6175,9 +6188,7 @@
     "to_hit": 1,
     "functions": [ ["func:shovel", 1.05] ],
     "qualities": [["CUT", 1], ["DIG", 3], ["BUTCHER", -8]]
-  },
-
-  {
+  },{
     "id": "digging_stick",
     "type": "TOOL",
     "symbol": "/",
@@ -6199,9 +6210,7 @@
     "revert_to": "null",
     "qualities": [["DIG", 1]],
     "use_action": "DIG"
-  },
-
-  {
+  },{
     "id": "shelter_kit",
     "type": "TOOL",
     "symbol": ";",
@@ -6222,9 +6231,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "use_action": "PORTABLE_STRUCTURE"
-  },
-
-  {
+  },{
     "id": "damaged_shelter_kit",
     "type": "TOOL",
     "symbol": ";",
@@ -6244,9 +6251,7 @@
     "turns_per_charge": 0,
     "ammo": "NULL",
     "revert_to": "null"
-  },
-
-  {
+  },{
     "id": "heatpack",
     "type": "TOOL",
     "symbol": ";",
@@ -6267,9 +6272,7 @@
     "ammo": "NULL",
     "revert_to": "null",
     "use_action": "HEATPACK"
-  },
-
-  {
+  },{
     "id": "heatpack_used",
     "type": "TOOL",
     "symbol": ";",
@@ -6290,9 +6293,7 @@
     "ammo": "NULL",
     "category": "other",
     "revert_to": "null"
-  },
-
-  {
+  },{
     "id": "LAW_Packed",
     "type": "TOOL",
     "symbol": ")",
@@ -6315,9 +6316,7 @@
     "revert_to": "null",
     "category": "guns",
     "use_action": "LAW"
-  },
-
-  {
+  },{
     "id": "jar_meat_canned",
     "type": "GENERIC",
     "symbol": "%",
@@ -7290,7 +7289,7 @@
     "symbol": ";",
     "color": "light_gray",
     "name": "electric polisher",
-    "description": "An electric polisher used to polish metal surfaces capable of making them reflect light as a mirror would",
+    "description": "An electric polisher which can be used to buff metal surfaces until they are reflective like a mirror.",
     "price": 35000,
     "material": ["steel", "plastic"],
     "weight": 1000,
@@ -9335,7 +9334,6 @@
         "target": "tanned_hide"
     }
   },
-
   {
     "id": "tanning_pelt",
     "type": "TOOL",
@@ -9367,7 +9365,6 @@
         "target": "tanned_pelt"
     }
   },
-
   {
     "id": "lobotomizer",
     "type": "TOOL",
@@ -9392,7 +9389,6 @@
     "qualities": [["DIG", 2], ["AXE", 1], ["CUT", 1], ["BUTCHER", -11]],
     "use_action": "DIG"
   },
-
   {
     "id": "survivor_machete",
     "type": "TOOL",
@@ -9419,7 +9415,6 @@
     "use_action": { "type": "knife" },
     "qualities": [["CUT", 1], ["BUTCHER", 10]]
   },
-
   {
     "id": "diamond_rapier",
     "type": "TOOL",
@@ -9446,7 +9441,6 @@
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 16]]
   },
-
   {
     "id": "diamond_broadsword",
     "type": "TOOL",
@@ -9473,7 +9467,6 @@
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 16]]
   },
-
   {
     "id": "diamond_zweihander",
     "type": "TOOL",
@@ -9499,7 +9492,6 @@
     "category" : "weapons",
     "use_action": { "type": "knife" }
   },
-
   {
     "id": "diamond_wakizashi",
     "type": "TOOL",
@@ -9527,7 +9519,6 @@
     "category" : "weapons",
     "qualities": [["CUT", 1], ["BUTCHER", 23]]
   },
-
   {
     "id": "diamond_nodachi",
     "type": "TOOL",
@@ -9952,10 +9943,4 @@
 "fields_max_density": 3
 }
 }
-
-
-
-
-
-
 ]
