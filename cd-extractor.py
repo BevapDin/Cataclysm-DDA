@@ -15,7 +15,7 @@ TYPES_TO_IGNORE = [ "overmap_terrain", "BULLET_PULLING", "dream", "mutation", "m
                     "profession", "start_location", "overmap_special", "npc", "faction", "recipe_category",
                     "lab_note", "martial_art", "bionic", "snippet", "vehicle", "scenario", "item_action",
                     "MONSTER_FACTION", "MOD_INFO", "ITEM_BLACKLIST", "MONSTER_BLACKLIST",
-                    "MONSTER_WHITELIST" ]
+                    "MONSTER_WHITELIST", "mutation_category" ]
 
 # First create some output directories in one go. If this fails, the script is aborted.
 for d in [ "items", "qualities", "ammo_types", "vparts", "materials", "furnitures", "terrains",
@@ -851,6 +851,12 @@ class item:
                 on_id = self.iid[ :-4 ] + "_on"
                 if on_id in item.types:
                     fp.write( "<div>There is also an <b>on</b> item there: " + iname( on_id ) + "</div>\n" )
+            if "seed_" + self.iid in item.types:
+                fp.write( "<div>There is also a seed item for this: " + iname( "seed_" + self.iid ) + "</div>\n" )
+            if self.iid[ 0:5 ] == "seed_":
+                non_seed_id = self.iid[ 5: ]
+                if non_seed_id in item.types:
+                    fp.write( "<div>There is also an non-seed item: " + iname( non_seed_id ) + "</div>\n" )
             if len( self.container_for ) > 0:
                 fp.write( "<div class=\"container-for\">\n<h6>Container for:</h6>\n<ul>\n" )
                 for c in self.container_for:
