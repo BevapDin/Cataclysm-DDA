@@ -23,6 +23,8 @@
 #define ISNAN std::isnan
 #endif
 
+static const std::string repair_hotkeys("r1234567890");
+
 /**
  * Creates a blank veh_interact window.
  */
@@ -818,7 +820,7 @@ void veh_interact::do_repair()
     int msg_width = getmaxx(w_msg);
     switch (reason) {
     case LOW_MORALE:
-        mvwprintz(w_msg, 0, 1, c_ltred, _("Your morale is too low to construct..."));
+        mvwprintz(w_msg, 0, 1, c_ltred, _("Your morale is too low to repair..."));
         wrefresh (w_msg);
         return;
     case INVALID_TARGET:

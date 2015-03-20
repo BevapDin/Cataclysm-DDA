@@ -657,31 +657,32 @@ void place_construction(const std::string &desc)
 
 void complete_construction()
 {
-    construction *built = &constructions[g->u.activity.index];
+    player &u = g->u;
+    const construction &built = constructions[u.activity.index];
 
-    crafting_inventory_t total_inv(&g->u);
+    crafting_inventory_t total_inv(&u);
     std::list<item> used_items;
     std::list<item> used_tools;
-    total_inv.consume_gathered(built->requirements, g->u.activity, used_items, used_tools);
-    g->u.practice( built->skill, std::max(built->difficulty, 1) * 10,
-                   (int)(built->difficulty * 1.25) );
+    total_inv.consume_gathered(built.requirements, u.activity, used_items, used_tools);
+    u.practice( built.skill, std::max(built.difficulty, 1) * 10,
+                   (int)(built.difficulty * 1.25) );
 
     // Make the terrain change
-    int terx = g->u.activity.placement.x, tery = g->u.activity.placement.y;
-    if (built->post_terrain != "") {
-        if (built->post_is_furniture) {
-            g->m.furn_set(terx, tery, built->post_terrain);
+    int terx = u.activity.placement.x, tery = u.activity.placement.y;
+    if (built.post_terrain != "") {
+        if (built.post_is_furniture) {
+            g->m.furn_set(terx, tery, built.post_terrain);
         } else {
-            g->m.ter_set(terx, tery, built->post_terrain);
+            g->m.ter_set(terx, tery, built.post_terrain);
         }
     }
 
     // clear the activity
-    g->u.activity.type = ACT_NULL;
+    u.activity.type = ACT_NULL;
 
     // This comes after clearing the activity, in case the function interrupts
     // activities
-    built->post_special(point(terx, tery));
+    built.post_special(point(terx, tery));
 }
 
 bool construct::check_empty(point p)
