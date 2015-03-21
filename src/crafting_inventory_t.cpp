@@ -1853,6 +1853,10 @@ void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_
         return;
     }
     
+    std::ostringstream buffer;
+    buffer << "Select the items to use as " << req;
+    uimenu menu;
+    menu.text = buffer.str();
     // sort to make it nicer looking
     // sorts by location first
     std::sort(const_cast<candvec&>(candidates).begin(), const_cast<candvec&>(candidates).end(), sort_bylikeness);
@@ -1862,37 +1866,37 @@ void crafting_inventory_t::ask_for_items_to_use(const requirement &req, consume_
     // of all selected items. If this reaches the required count, we can break out
     // of this loop.
     int cntFromSelectedOnes = 0;
-    // FIXME make this better, like a real menu that is not regenerated in each loop
-    std::ostringstream buffer;
-    buffer << "Select the items to use as " << req;
+    for( size_t i = 0; i < candidates.size() && cntFromSelectedOnes < req.count; i++ ) {
+        selected[i] = true;
+        cntFromSelectedOnes += req(candidates[i]);
+    }
+    for( size_t i = 0; i < candidates.size(); i++ ) {
+        const std::string prefix( selected[i] ? "    using " : "not using " );
+        menu.addentry( prefix + candidates[i].to_string( flags != assume_components ) );
+    }
+    menu.addentry( candidates.size(), cntFromSelectedOnes >= req.count, -1, "OK" );
     while(true) {
         // FIXME condens identical lines (e.g. 10 x "2x4 (on person)" -> "10 x 2x4 (on person)")
-        std::vector<std::string> options;
-        for(size_t i = 0; i < candidates.size(); i++) {
-            const std::string prefix(selected[i] ? "    using " : "not using ");
-            options.push_back(prefix + candidates[i].to_string(flags != assume_components));
-        }
-        if(cntFromSelectedOnes >= req.count) {
-            options.push_back("OK");
-        }
-        const size_t selection = menu_vec(false, buffer.str().c_str(), options) - 1;
-        if(selection >= candidates.size()) {
+        menu.query();
+        const size_t selection = menu.ret;
+        if( selection >= candidates.size() && cntFromSelectedOnes >= req.count ) {
             for(size_t i = 0; i < candidates.size(); i++) {
                 if(selected[i]) {
                     selected_candidates.push_back(candidates[i]);
                 }
             }
             return;
-        }
-        if(!selected[selection] && cntFromSelectedOnes >= req.count) {
-            popup("You can't select more items, deselect some before selecting more");
-        } else {
+        } else if( selection < candidates.size() ) {
+            auto &c = candidates[selection];
             selected[selection] = !selected[selection];
-            if(selected[selection]) {
-                cntFromSelectedOnes += req(candidates[selection]);
+            if( selected[selection] ) {
+                cntFromSelectedOnes += req( c );
             } else {
-                cntFromSelectedOnes -= req(candidates[selection]);
+                cntFromSelectedOnes -= req( c );
             }
+            const std::string prefix( selected[selection] ? "    using " : "not using " );
+            menu.entries[selection].txt = prefix + c.to_string( flags != assume_components );
+            menu.entries.back().enabled = cntFromSelectedOnes >= req.count;
         }
     }
 }
