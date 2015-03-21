@@ -547,17 +547,17 @@ void crafting_inventory_t::form_from_map(point origin, int range)
             if (terrain_id == t_water_sh || terrain_id == t_water_dp ||
                 terrain_id == t_water_pool || terrain_id == t_water_pump) {
                 item water("water", 0);
-                water.charges = 50;
+                water.charges = INT_MAX; // basically infinite anyway
                 add_surround(p, water);
             }
             if ((g->m.field_at(x, y).findField(fd_acid))) {
                 item acid("water_acid", 0);
-                acid.charges = 50;
+                acid.charges = INT_MAX; // basically infinite anyway
                 add_surround(p, acid);
             }
             if (terrain_id == t_swater_sh || terrain_id == t_swater_dp) {
                 item swater("salt_water", 0);
-                swater.charges = 50;
+                swater.charges = INT_MAX; // basically infinite anyway
                 add_surround(p, swater);
             }
             // add cvd forge from terrain
