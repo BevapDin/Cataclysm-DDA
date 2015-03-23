@@ -378,6 +378,9 @@ public:
 // Operate vehicle
     void use_controls();
 
+// Fold up the vehicle
+    bool fold_up();
+
 // Start the vehicle's engine, if there are any
     void start_engine();
 
