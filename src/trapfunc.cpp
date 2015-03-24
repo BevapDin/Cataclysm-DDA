@@ -298,7 +298,7 @@ void trapfunc::shotgun(Creature *c, int x, int y)
         player *n = dynamic_cast<player *>(c);
         if (n != NULL) {
             shots = (one_in(8) || one_in(20 - n->str_max) ? 2 : 1);
-            if (g->m.tr_at(x, y).loadid == tr_shotgun_1) {
+            if (g->m.tr_at(x, y).id == "tr_shotgun_1") {
                 shots = 1;
             }
             if (rng(5, 50) > n->get_dodge()) {
@@ -359,7 +359,7 @@ void trapfunc::shotgun(Creature *c, int x, int y)
                     break;
             }
             shots = (one_in(8) || one_in(chance) ? 2 : 1);
-            if (g->m.tr_at(x, y).loadid == tr_shotgun_1) {
+            if (g->m.tr_at(x, y).id == "tr_shotgun_1") {
                 shots = 1;
             }
             if (seen) {
@@ -369,12 +369,12 @@ void trapfunc::shotgun(Creature *c, int x, int y)
         }
         c->check_dead_state();
     }
-    if (shots == 2 || g->m.tr_at(x, y).loadid == tr_shotgun_1) {
+    if (shots == 2 || g->m.tr_at(x, y).id == "tr_shotgun_1") {
         g->m.remove_trap(x, y);
         g->m.spawn_item(x, y, "shotgun_sawn");
         g->m.spawn_item(x, y, "string_6");
     } else {
-        g->m.add_trap(x, y, tr_shotgun_1);
+        g->m.trap_set(x, y, "tr_shotgun_1");
     }
 }
 
@@ -714,7 +714,7 @@ void trapfunc::pit_spikes(Creature *c, int x, int y)
             add_msg(_("The spears break!"));
         }
         g->m.ter_set(x, y, t_pit);
-        g->m.add_trap(x, y, tr_pit);
+        g->m.trap_set(x, y, "tr_pit");
         for (int i = 0; i < 4; i++) { // 4 spears to a pit
             if (one_in(3)) {
                 g->m.spawn_item(x, y, "pointy_stick");
@@ -791,7 +791,7 @@ void trapfunc::pit_glass(Creature *c, int x, int y)
             add_msg(_("The shards shatter!"));
         }
         g->m.ter_set(x, y, t_pit);
-        g->m.add_trap(x, y, tr_pit);
+        g->m.trap_set(x, y, "tr_pit");
         for (int i = 0; i < 20; i++) { // 20 shards in a pit.
             if (one_in(3)) {
                 g->m.spawn_item(x, y, "glass_shard");
@@ -865,7 +865,7 @@ void trapfunc::sinkhole(Creature *c, int /*x*/, int /*y*/) {
                 std::vector<point> safe;
                 for (int i = g->u.posx() - 1; i <= g->u.posx() + 1; i++) {
                     for (int j = g->u.posy() - 1; j <= g->u.posy() + 1; j++) {
-                        if (g->m.move_cost(i, j) > 0 && g->m.tr_at(i, j).loadid != tr_pit) {
+                        if (g->m.move_cost(i, j) > 0 && g->m.tr_at(i, j).id != "tr_pit") {
                             safe.push_back(point(i, j));
                         }
                     }
@@ -924,7 +924,7 @@ void trapfunc::sinkhole(Creature *c, int /*x*/, int /*y*/) {
                     std::vector<point> safe;
                     for (int i = g->u.posx() - 1; i <= g->u.posx() + 1; i++) {
                         for (int j = g->u.posy() - 1; j <= g->u.posy() + 1; j++) {
-                            if (g->m.move_cost(i, j) > 0 && g->m.tr_at(i, j).loadid != tr_pit) {
+                            if (g->m.move_cost(i, j) > 0 && g->m.tr_at(i, j).id != "tr_pit") {
                                 safe.push_back(point(i, j));
                             }
                         }
@@ -957,7 +957,7 @@ void trapfunc::sinkhole(Creature *c, int /*x*/, int /*y*/) {
                 std::vector<point> safe;
                 for (int i = g->u.posx() - 1; i <= g->u.posx() + 1; i++) {
                     for (int j = g->u.posy() - 1; j <= g->u.posy() + 1; j++) {
-                        if (g->m.move_cost(i, j) > 0 && g->m.tr_at(i, j).loadid != tr_pit) {
+                        if (g->m.move_cost(i, j) > 0 && g->m.tr_at(i, j).id != "tr_pit") {
                             safe.push_back(point(i, j));
                         }
                     }

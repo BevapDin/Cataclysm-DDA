@@ -235,46 +235,27 @@ void trap::on_disarmed( const tripoint &p ) const
 // convenient int-lookup names for hard-coded functions
 trap_id
 tr_null,
-tr_bubblewrap,
 tr_cot,
 tr_brazier,
-tr_funnel,
-tr_makeshift_funnel,
-tr_leather_funnel,
 tr_rollmat,
 tr_fur_rollmat,
 tr_beartrap,
-tr_beartrap_buried,
-tr_nailboard,
-tr_caltrops,
 tr_tripwire,
-tr_crossbow,
-tr_shotgun_2,
-tr_shotgun_1,
-tr_engine,
-tr_blade,
-tr_light_snare,
-tr_heavy_snare,
-tr_landmine,
 tr_landmine_buried,
 tr_telepad,
 tr_goo,
 tr_dissector,
 tr_sinkhole,
-tr_pit,
-tr_spike_pit,
 tr_lava,
 tr_portal,
 tr_ledge,
-tr_boobytrap,
 tr_temple_flood,
 tr_temple_toggle,
 tr_glow,
 tr_hum,
 tr_shadow,
 tr_drain,
-tr_snake,
-tr_glass_pit;
+tr_snake;
 
 void trap::check_consistency()
 {
@@ -290,38 +271,20 @@ void trap::check_consistency()
 void trap::finalize()
 {
     tr_null = trapfind("tr_null");
-    tr_bubblewrap = trapfind("tr_bubblewrap");
     tr_cot = trapfind("tr_cot");
     tr_brazier = trapfind("tr_brazier");
-    tr_funnel = trapfind("tr_funnel");
-    tr_makeshift_funnel = trapfind("tr_makeshift_funnel");
-    tr_leather_funnel = trapfind("tr_leather_funnel");
     tr_rollmat = trapfind("tr_rollmat");
     tr_fur_rollmat = trapfind("tr_fur_rollmat");
     tr_beartrap = trapfind("tr_beartrap");
-    tr_beartrap_buried = trapfind("tr_beartrap_buried");
-    tr_nailboard = trapfind("tr_nailboard");
-    tr_caltrops = trapfind("tr_caltrops");
     tr_tripwire = trapfind("tr_tripwire");
-    tr_crossbow = trapfind("tr_crossbow");
-    tr_shotgun_2 = trapfind("tr_shotgun_2");
-    tr_shotgun_1 = trapfind("tr_shotgun_1");
-    tr_engine = trapfind("tr_engine");
-    tr_blade = trapfind("tr_blade");
-    tr_light_snare = trapfind("tr_light_snare");
-    tr_heavy_snare = trapfind("tr_heavy_snare");
-    tr_landmine = trapfind("tr_landmine");
     tr_landmine_buried = trapfind("tr_landmine_buried");
     tr_telepad = trapfind("tr_telepad");
     tr_goo = trapfind("tr_goo");
     tr_dissector = trapfind("tr_dissector");
     tr_sinkhole = trapfind("tr_sinkhole");
-    tr_pit = trapfind("tr_pit");
-    tr_spike_pit = trapfind("tr_spike_pit");
     tr_lava = trapfind("tr_lava");
     tr_portal = trapfind("tr_portal");
     tr_ledge = trapfind("tr_ledge");
-    tr_boobytrap = trapfind("tr_boobytrap");
     tr_temple_flood = trapfind("tr_temple_flood");
     tr_temple_toggle = trapfind("tr_temple_toggle");
     tr_glow = trapfind("tr_glow");
@@ -329,7 +292,6 @@ void trap::finalize()
     tr_shadow = trapfind("tr_shadow");
     tr_drain = trapfind("tr_drain");
     tr_snake = trapfind("tr_snake");
-    tr_glass_pit = trapfind("tr_glass_pit");
 
     // Set ter_t.trap using ter_t.trap_id_str.
     for( auto &elem : terlist ) {
