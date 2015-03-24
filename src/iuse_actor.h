@@ -563,4 +563,82 @@ class musical_instrument_actor : public iuse_actor
         virtual iuse_actor *clone() const;
 };
 
+/**
+ * Places a trap.
+ */
+class place_trap_actor : public iuse_actor
+{
+    public:
+        struct trap_data_t {
+            /**
+             * The string id of the trap to place.
+             */
+            std::string trap;
+            /*
+             * set when the use function is run the first time via the call to @ref valid.
+             * -1 is never a valid trap id (ids start with 0), if the trap is optional and trap
+             * is an empty string, it will be set to tr_null, if the trap string is invalid,
+             * valid() return false and no further processing should be done.
+             */
+            mutable int trap_id = -1;
+            bool valid( bool optional ) const;
+        };
+        struct data_t : trap_data_t {
+            /**
+             * The message shown when the trap has been set.
+             */
+            std::string done_message;
+            /**
+             * Practice of the "trap" skill.
+             */
+            int practice;
+            /**
+             * Move points that are used when placing the trap.
+             */
+            int moves;
+            void load( JsonObject jo );
+        };
+        /**
+         * Whether one can place the trap when underwater.
+         */
+        bool allow_underwater;
+        /**
+         * Whether one can place the trap directly under the character itself.
+         */
+        bool allow_under_player;
+        /**
+         * If true, the trap needs solid neighbor squares (e.g. for trap wire).
+         */
+        bool needs_solid_neighbor;
+        /**
+         * Contains a terrain id of the terrain that must exist in a neighbor square to allow
+         * placing this trap. If empty, it is ignored. This is for example for snare traps.
+         */
+        std::string needs_neighbor_terrain;
+        /**
+         * Data that applies to unburied traps and to traps that *can * not be buried.
+         */
+        data_t unburied_data;
+        /**
+         * Contains the question asked when the player can bury the trap. Something like "Bury the trap?"
+         */
+        std::string bury_question;
+        /**
+         * Data that applies to buried traps.
+         */
+        data_t buried_data;
+        /**
+         * The trap that makes up the outer layer of a 3x3 trap. This is not supported for buried traps!
+         */
+        trap_data_t outer_layer_trap;
+        bool is_allowed( player &p, tripoint const &pos, char const *name ) const;
+        void place_and_add_as_known( player &p, tripoint const &pos, std::string const &trap ) const;
+
+        place_trap_actor() : iuse_actor() { }
+        virtual ~place_trap_actor() { }
+        virtual void load( JsonObject &jo );
+        virtual long use( player*, item*, bool, point ) const;
+        virtual iuse_actor *clone() const;
+};
+
 #endif

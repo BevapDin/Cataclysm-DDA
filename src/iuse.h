@@ -113,7 +113,6 @@ public:
     int jackhammer          (player *, item *, bool, point);
     int jacqueshammer       (player *, item *, bool, point);
     int pickaxe             (player *, item *, bool, point);
-    int set_trap            (player *, item *, bool, point);
     int geiger              (player *, item *, bool, point);
     int teleport            (player *, item *, bool, point);
     int can_goo             (player *, item *, bool, point);
