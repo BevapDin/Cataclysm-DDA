@@ -5,9 +5,11 @@
 #include "itype.h"
 #include "json.h"
 #include <string>
+#include <functional>
 
 class Creature;
 class item;
+class vehicle;
 
 typedef int trap_id;
 /** map trap ids to index into <B>traps</B> */
@@ -142,6 +144,16 @@ struct trap {
          * Whether this is the null-traps, aka no trap at all.
          */
         bool is_null() const;
+        /**
+         * Called when a wheel of the vehicle has run over the trap.
+         * @param part The index of the wheel part of the wheel that triggered the trap. This
+         * index must be valid.
+         * @param pos The position of the trap in the main map.
+         * @param wheel_damage_func The function to damage the wheel directly, which should bypass
+         * the armor that might be at the same location as the wheel.
+         */
+        void triggered_by_wheel( vehicle &veh, int part, tripoint const &pos,
+                                 std::function<void(int)> wheel_damage_func ) const;
 
         /*@{*/
         /**

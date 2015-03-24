@@ -4186,91 +4186,14 @@ void vehicle::handle_trap (int x, int y, int part)
     if (pwh < 0) {
         return;
     }
-    const trap &tr = g->m.tr_at(x, y);
-    const trap_id t = tr.loadid;
-    int noise = 0;
-    int chance = 100;
-    int expl = 0;
-    int shrap = 0;
-    int part_damage = 0;
-    std::string snd;
-    // todo; make trapfuncv?
-
-    if ( t == tr_bubblewrap ) {
-        noise = 18;
-        snd = _("Pop!");
-    } else if ( t == tr_beartrap || t == tr_beartrap_buried ) {
-        noise = 8;
-        snd = _("SNAP!");
-        part_damage = 300;
-        g->m.remove_trap(x, y);
-        g->m.spawn_item(x, y, "beartrap");
-    } else if ( t == tr_nailboard || t == tr_caltrops ) {
-        part_damage = 300;
-    } else if ( t == tr_blade ) {
-        noise = 1;
-        snd = _("Swinnng!");
-        part_damage = 300;
-    } else if ( t == tr_crossbow ) {
-        chance = 30;
-        noise = 1;
-        snd = _("Clank!");
-        part_damage = 300;
-        g->m.remove_trap(x, y);
-        g->m.spawn_item(x, y, "crossbow");
-        g->m.spawn_item(x, y, "string_6");
-        if (!one_in(10)) {
-            g->m.spawn_item(x, y, "bolt_steel");
-        }
-    } else if ( t == tr_shotgun_2 || t == tr_shotgun_1 ) {
-        noise = 60;
-        snd = _("Bang!");
-        chance = 70;
-        part_damage = 300;
-        if (t == tr_shotgun_2) {
-            g->m.add_trap(x, y, tr_shotgun_1);
-        } else {
-            g->m.remove_trap(x, y);
-            g->m.spawn_item(x, y, "shotgun_sawn");
-            g->m.spawn_item(x, y, "string_6");
-        }
-    } else if ( t == tr_landmine_buried || t == tr_landmine ) {
-        expl = 10;
-        shrap = 8;
-        g->m.remove_trap(x, y);
-        part_damage = 1000;
-    } else if ( t == tr_boobytrap ) {
-        expl = 18;
-        shrap = 12;
-        part_damage = 1000;
-    } else if ( t == tr_dissector ) {
-        noise = 10;
-        snd = _("BRZZZAP!");
-        part_damage = 500;
-    } else if ( t == tr_sinkhole || t == tr_pit || t == tr_spike_pit || t == tr_ledge || t == tr_glass_pit ) {
-        part_damage = 500;
-    } else {
-        return;
-    }
-    if( g->u.sees(x, y) ) {
-        if( g->u.knows_trap( tripoint( x, y, g->get_levz() ) ) ) {
-            add_msg(m_bad, _("The %s's %s runs over %s."), name.c_str(),
-                    part_info(part).name.c_str(), tr.name.c_str() );
-        } else {
-            add_msg(m_bad, _("The %s's %s runs over something."), name.c_str(),
-                    part_info(part).name.c_str() );
-        }
-    }
-    if (noise > 0) {
-        sounds::sound(x, y, noise, snd);
-    }
-    if( part_damage && chance >= rng (1, 100) ) {
+    // damage_direct is protected and can not be called by the trap class, this creates a wrapper
+    // that allows the trap class to call it.
+    std::function<void(int)> damage_direct_func = [this, pwh]( int const damage ) {
         // Hit the wheel directly since it ran right over the trap.
-        damage_direct( pwh, part_damage );
-    }
-    if (expl > 0) {
-        g->explosion(x, y, expl, shrap, false);
-    }
+        damage_direct( pwh, damage );
+    };
+    const trap &tr = g->m.tr_at( x, y );
+    tr.triggered_by_wheel( *this, pwh, tripoint( x, y, g->get_levz() ), damage_direct_func );
 }
 
 // total volume of all the things

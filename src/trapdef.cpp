@@ -1,6 +1,8 @@
 #include <vector>
 #include <memory>
 #include "game.h"
+#include "sounds.h"
+#include "vehicle.h"
 
 void trap::load( JsonObject &jo )
 {
@@ -108,6 +110,93 @@ bool trap::is_null() const
 bool trap::triggered_by_item( const item &itm ) const
 {
     return !is_null() && itm.weight() >= trigger_weight;
+}
+
+void trap::triggered_by_wheel( vehicle &veh, int const part, tripoint const & pos,
+                              std::function<void(int)> const wheel_damage_func ) const
+{
+    int noise = 0;
+    std::string snd;
+    int chance = 100;
+    int expl = 0;
+    int shrap = 0;
+    int part_damage = 0;
+
+    if( id == "tr_bubblewrap" ) {
+        noise = 18;
+        snd = _( "Pop!" );
+    } else if( id == "tr_beartrap" || id == "tr_beartrap_buried" ) {
+        noise = 8;
+        snd = _( "SNAP!" );
+        part_damage = 300;
+        g->m.remove_trap( pos );
+        g->m.spawn_item( pos.x, pos.y, "beartrap" );
+    } else if( id == "tr_nailboard" || id == "tr_caltrops" ) {
+        part_damage = 300;
+    } else if( id == "tr_blade" ) {
+        noise = 1;
+        snd = _( "Swinnng!" );
+        part_damage = 300;
+    } else if( id == "tr_crossbow" ) {
+        chance = 30;
+        noise = 1;
+        snd = _( "Clank!" );
+        part_damage = 300;
+        g->m.remove_trap( pos );
+        g->m.spawn_item( pos.x, pos.y, "crossbow" );
+        g->m.spawn_item( pos.x, pos.y, "string_6" );
+        if( !one_in( 10 ) ) {
+            g->m.spawn_item( pos.x, pos.y, "bolt_steel" );
+        }
+    } else if( id == "tr_shotgun_2" || id == "tr_shotgun_1" ) {
+        noise = 60;
+        snd = _( "Bang!" );
+        chance = 70;
+        part_damage = 300;
+        if( id == "tr_shotgun_2" ) {
+            g->m.trap_set( pos, "tr_shotgun_1" );
+        } else {
+            g->m.remove_trap( pos );
+            g->m.spawn_item( pos.x, pos.y, "shotgun_sawn" );
+            g->m.spawn_item( pos.x, pos.y, "string_6" );
+        }
+    } else if( id == "tr_landmine_buried" || id == "tr_landmine" ) {
+        expl = 10;
+        shrap = 8;
+        g->m.remove_trap( pos );
+        part_damage = 1000;
+    } else if( id == "tr_boobytrap" ) {
+        expl = 18;
+        shrap = 12;
+        part_damage = 1000;
+    } else if( id == "tr_dissector" ) {
+        noise = 10;
+        snd = _( "BRZZZAP!" );
+        part_damage = 500;
+    } else if( id == "tr_sinkhole" || id == "tr_pit" || id == "tr_spike_pit" || id == "tr_ledge" || id == "tr_glass_pit" ) {
+        part_damage = 500;
+    } else {
+        return;
+    }
+
+    if( noise > 0 ) {
+        sounds::sound( pos.x, pos.y, noise, snd );
+    }
+    if( g->u.sees( pos.x, pos.y ) ) {
+        if( g->u.knows_trap( pos ) ) {
+            add_msg( m_bad, _( "The %s's %s runs over %s." ), veh.name.c_str(),
+            veh.part_info( part ).name.c_str(), name.c_str() );
+        } else {
+            add_msg( m_bad, _( "The %s's %s runs over something." ), veh.name.c_str(),
+                     veh.part_info( part ).name.c_str() );
+        }
+    }
+    if( part_damage != 0 && chance < rng( 1, 100 ) ) {
+        wheel_damage_func( part_damage );
+    }
+    if( expl > 0 ) {
+        g->explosion( pos.x, pos.y, expl, shrap, false );
+    }
 }
 
 bool trap::is_funnel() const
