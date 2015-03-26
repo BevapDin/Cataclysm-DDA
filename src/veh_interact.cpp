@@ -659,6 +659,7 @@ void veh_interact::do_install()
                                                    part.has_flag(VPFLAG_CIRCLE_LIGHT) ||
                                                    part.has_flag(VPFLAG_DOME_LIGHT) ||
                                                    part.has_flag(VPFLAG_AISLE_LIGHT) ||
+                                                   part.has_flag(VPFLAG_ATOMIC_LIGHT) ||
                                                    part.has_flag(VPFLAG_EVENTURN) ||
                                                    part.has_flag(VPFLAG_ODDTURN); };
     tab_filters[3] = [&](vpart_info part) { return part.has_flag("TRACK") || //Util
@@ -1848,7 +1849,7 @@ void veh_interact::display_details( const vpart_info *part )
         } else if ( part->has_flag(VPFLAG_LIGHT) || part->has_flag(VPFLAG_CONE_LIGHT) ||
                     part->has_flag(VPFLAG_CIRCLE_LIGHT) || part->has_flag(VPFLAG_DOME_LIGHT) ||
                     part->has_flag(VPFLAG_AISLE_LIGHT) || part->has_flag(VPFLAG_EVENTURN) ||
-                    part->has_flag(VPFLAG_ODDTURN)) {
+                    part->has_flag(VPFLAG_ODDTURN) || part->has_flag(VPFLAG_ATOMIC_LIGHT)) {
             label = _("Light");
         } else {
             label = small_mode ? _("Cap") : _("Capacity");
