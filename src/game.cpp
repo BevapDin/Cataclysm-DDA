@@ -8397,17 +8397,10 @@ void game::zones_manager()
 
                     //Draw direction + distance
                     mvwprintz(w_zones, iNum - iStartPos, 35, colorLine, "%*d %s",
-                              5, trig_dist(pCenter.x,
-                                           pCenter.y,
-                                           pointPlayer.x,
-                                           pointPlayer.y
-                                          ),
-                              direction_name_short(direction_from(pCenter.x,
-                                                   pCenter.y,
-                                                   pointPlayer.x,
-                                                   pointPlayer.y
-                                                                 )
-                                                  ).c_str()
+                              5, trig_dist(pCenter.x, pCenter.y,
+                                           pointPlayer.x, pointPlayer.y),
+                              direction_name_short(direction_from(pCenter.x, pCenter.y,
+                                                   pointPlayer.x, pointPlayer.y)).c_str()
                              );
                 }
                 iNum++;
