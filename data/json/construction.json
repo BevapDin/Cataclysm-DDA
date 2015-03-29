@@ -1000,33 +1000,18 @@
         "post_terrain" : "t_palisade"
     },{
         "type" : "construction",
-        "description" : "Build Stone Wall", "//": "Step 1: half the wall",
-        "category" : "CONSTRUCT",
-        "difficulty" : 6,
-        "time" : 90,
-        "qualities": [ [
-            { "id": "HAMMER", "level": 2 },
-            { "id": "DIG", "level": 2 }
-        ] ],
-        "components" : [
-            [ [ "rock", 12 ] ]
-        ],
-        "pre_special" : "check_empty",
-        "post_terrain" : "t_rock_wall_half"
-    },{
-        "type" : "construction",
         "description" : "Build Stone Wall", "//": "Step 2: the full wall",
         "category" : "CONSTRUCT",
         "difficulty" : 6,
-        "time" : 90,
+        "time" : 1,
         "qualities": [ [
             { "id": "HAMMER", "level": 2 },
             { "id": "DIG", "level": 2 }
         ] ],
         "components" : [
-            [ [ "rock", 12 ] ]
+            [ [ "rock", 24 ] ]
         ],
-        "pre_terrain" : "t_rock_wall_half",
+        "pre_special" : "check_empty",
         "post_terrain" : "t_rock_wall"
     },{
         "type" : "construction",
