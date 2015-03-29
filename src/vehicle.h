@@ -644,6 +644,7 @@ public:
     // add item to part's cargo. if false, then there's no cargo at this part or cargo is full(*)
     // *: "full" means more than 1024 items, or max_volume(part) volume (500 for now)
     bool add_item( int part, item itm );
+    bool add_item_wrap( int part, const item &itm );
     // Position specific item insertion that skips a bunch of safety checks
     // since it should only ever be used by item processing code.
     bool add_item_at( int part, std::list<item>::iterator index, item itm );

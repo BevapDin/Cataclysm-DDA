@@ -4523,6 +4523,9 @@ int vehicle::stored_volume(int part) {
 
 int vehicle::max_volume(int part) {
     if (part_flag(part, "CARGO")) {
+        if( get_label( parts[part].mount.x, parts[part].mount.y ).find( "AUTODROP" ) != std::string::npos ) {
+            return INT_MAX / 32; // Just to prevent actual INT_MAX
+        }
         return vehicle_part_types[parts[part].id].size;
     }
     return 0;
@@ -4554,7 +4557,39 @@ bool vehicle::is_full(const int part, const int addvolume, const int addnumber) 
 
 }
 
-bool vehicle::add_item (int part, item itm)
+struct dist_comparator {
+    point center;
+    bool operator()(const vehicle_part*a, const vehicle_part*b) const {
+        const int A = rl_dist(a->precalc[0], center);
+        const int B = rl_dist(b->precalc[0], center);
+        if( A != B ) {
+            return A < B;
+        }
+        return a->precalc[0] < b->precalc[0];
+    }
+};
+bool vehicle::add_item(int p, item itm)
+{
+    const std::string label = get_label( parts[p].mount.x, parts[p].mount.y );
+    if( label.find( "AUTODROP" ) == std::string::npos ) {
+        return add_item_wrap( p, itm );
+    }
+    std::set<vehicle_part*, dist_comparator> pptrs(dist_comparator{parts[p].precalc[0]});
+    for( auto & p : parts ) {
+        if( vehicle_part_int_types[p.iid].has_flag( VPFLAG_CARGO ) ) {
+            pptrs.insert( &p );
+        }
+    }
+    for( auto & pp : pptrs ) {
+        const size_t index = pp - &(parts.front());
+        if( add_item_wrap( index, itm ) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool vehicle::add_item_wrap (int part, const item &itm)
 {
     const int max_storage = MAX_ITEM_IN_VEHICLE_STORAGE; // (game.h)
     const int maxvolume = this->max_volume(part);         // (game.h => vehicle::max_volume(part) ) in theory this could differ per vpart ( seat vs trunk )
