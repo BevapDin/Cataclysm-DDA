@@ -1587,7 +1587,6 @@ void veh_interact::display_stats()
                            _("Wheels:  <color_ltred>unbalanced</color>"));
         } else {
             fold_and_print(w_stats, y[5], x[5], w[5], c_ltgray,
-                           _("Wheels:    <color_ltgreen>enough</color>"));
                            _("Wheels:    <color_ltgreen>enough</color> (%d)"), wheel_count);
         }
     }   else {
