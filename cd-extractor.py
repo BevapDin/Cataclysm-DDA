@@ -235,6 +235,8 @@ class furniture:
                     c.write_line( fp )
                     fp.write( "</li>" )
             fp.write( "</ul>\n" )
+            if "crafting_pseudo_item" in self.obj:
+                fp.write( "<div>Acts as a " + iname( self.obj["crafting_pseudo_item"] ) + " when crafting</div>\n" )
             fp.write( "</body>\n</html>\n")
     def link( self ):
         return "<a href=\"../furnitures/" + self.iid + ".html\">" + cgi.escape( self.name ) + "</a>"
@@ -1059,10 +1061,10 @@ def dump( dd, name ):
 
 dump( quality, "qualities" )
 dump( vehicle_part, "vehicle parts" )
-dump( item, "items" )
 dump( furniture, "furnitures" )
 dump( terrain, "terrains" )
 dump( ammotype, "ammotypes" )
 dump( material, "materials" )
 dump( gunmod_location, "gunmod_locations" )
 dump( mod, "mods" )
+dump( item, "items" )
