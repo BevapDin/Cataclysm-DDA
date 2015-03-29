@@ -2588,6 +2588,25 @@ int iuse::sew(player *p, item *it, bool, point)
     } );
     item *fix = &(p->i_at(pos));
     if (fix == NULL || fix->is_null()) {
+        if( query_yn("Repaier all?")) {
+            for( int i = 0; i < INT_MAX && it->charges > 0; i++ ) {
+                item &itm = p->i_at( i );
+                if( itm.is_null() ) {
+                    break;
+                }
+                if( itm.damage > 0 && ( itm.made_of( "cotton" ) || itm.made_of( "leather" ) || itm.made_of( "fur" ) || itm.made_of( "nomex" ) || itm.made_of( "wool" ) ) ) {
+                    const long c = repair_clothing( p, it, &itm, i );
+                    if( c <= 0 ) {
+                        break;
+                    }
+                    it->charges = std::max( 0l, it->charges - c );
+                    p->inv.restack(p);
+                    p->inv.sort();
+                    i--;
+                }
+            }
+            return 0;
+        }
             p->add_msg_if_player(m_info, _("You do not have that item!"));
             return 0;
     };
