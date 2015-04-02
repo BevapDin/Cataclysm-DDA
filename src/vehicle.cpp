@@ -22,6 +22,7 @@
 #include <set>
 #include <algorithm>
 
+
 /*
  * Speed up all those if ( blarg == "structure" ) statements that are used everywhere;
  *   assemble "structure" once here instead of repeatedly later.
@@ -56,19 +57,25 @@ struct part_type_comparator {
     }
 };
 
-const std::array<fuel_type, 7> fuel_types = { {
-    fuel_type { fuel_type_gasoline, c_ltred, 100, 1 },
-    fuel_type { fuel_type_diesel, c_brown, 100, 1 },
-    fuel_type { fuel_type_battery, c_yellow, 1, 1 },
-    fuel_type { fuel_type_plutonium, c_ltgreen, 1, 1000 },
-    fuel_type { fuel_type_plasma, c_ltblue, 100, 100 },
-    fuel_type { fuel_type_water, c_ltcyan, 1, 1 },
-    fuel_type { fuel_type_muscle, c_white, 0, 1 }
-} };
+const std::array<fuel_type, 7> &get_fuel_types()
+{
+
+    static const std::array<fuel_type, 7> fuel_types = {{
+        fuel_type {fuel_type_gasoline,  c_ltred,   100, 1},
+        fuel_type {fuel_type_diesel,    c_brown,   100, 1},
+        fuel_type {fuel_type_battery,   c_yellow,  1,   1},
+        fuel_type {fuel_type_plutonium, c_ltgreen, 1,   1000},
+        fuel_type {fuel_type_plasma,    c_ltblue,  100, 100},
+        fuel_type {fuel_type_water,     c_ltcyan,  1,   1},
+        fuel_type {fuel_type_muscle,    c_white,   0,   1}
+    }};
+
+    return fuel_types;
+}
 
 int fuel_charges_to_amount_factor( const ammotype &ftype )
 {
-    for( auto & ft : fuel_types ) {
+    for( auto & ft : get_fuel_types() ) {
         if( ft.id == ftype ) {
             return ft.charges_to_amount_factor;
         }
@@ -2760,7 +2767,7 @@ void vehicle::print_fuel_indicator (void *w, int y, int x, bool fullsize, bool v
     int max_gauge = (isHorizontal) ? 12 : 5;
     int cur_gauge = 0;
     std::vector< ammotype > fuels;
-    for( auto &ft : fuel_types ) {
+    for( auto &ft : get_fuel_types() ) {
         fuels.push_back( ft.id );
     }
     // Find non-hardcoded fuel types, add them after the hardcoded
@@ -2776,8 +2783,8 @@ void vehicle::print_fuel_indicator (void *w, int y, int x, bool fullsize, bool v
         int cap = fuel_capacity( f );
         int f_left = fuel_left( f );
         nc_color f_color;
-        if( i < static_cast<int>( fuel_types.size() ) ) {
-            f_color = fuel_types[i].color;
+        if( i < static_cast<int>( get_fuel_types().size() ) ) {
+            f_color = get_fuel_types()[i].color;
         } else {
             // Get color of the default item of this type
             f_color = item::find_type( default_ammo( f ) )->color;
@@ -3509,7 +3516,7 @@ bool vehicle::valid_wheel_config ()
 void vehicle::consume_fuel( double load = 1.0 )
 {
     float st = strain();
-    for( auto &ft : fuel_types ) {
+    for( auto &ft : get_fuel_types() ) {
         // if no engines use this fuel, skip
         int amnt_fuel_use = basic_consumption( ft.id );
         if (amnt_fuel_use == 0) continue;
