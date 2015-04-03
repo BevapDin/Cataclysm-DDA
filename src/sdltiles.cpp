@@ -10,6 +10,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <memory>
 #include <sys/stat.h>
 #include <stdexcept>
 #include "cata_tiles.h"
@@ -80,7 +81,9 @@ public:
     bool draw_window(WINDOW *win);
     bool draw_window(WINDOW *win, int offsetx, int offsety);
 
-    static Font *load_font(const std::string &typeface, int fontsize, int fontwidth, int fontheight);
+    static std::unique_ptr<Font> load_font(const std::string &typeface, int fontsize, int fontwidth, int fontheight);
+private:
+    virtual void load_font( const std::string &file, int size ) = 0;
 public:
     // the width of the font, background is always this size
     int fontwidth;
@@ -97,8 +100,9 @@ public:
     virtual ~CachedTTFFont();
 
     void clear();
-    void load_font(std::string typeface, int fontsize);
     virtual void OutputChar(std::string ch, int x, int y, unsigned char color);
+private:
+    void load_font( const std::string &typeface, int fontsize ) override;
 protected:
     SDL_Texture *create_glyph(const std::string &ch, int color);
 
@@ -133,18 +137,19 @@ public:
     virtual ~BitmapFont();
 
     void clear();
-    void load_font(const std::string &path);
     virtual void OutputChar(std::string ch, int x, int y, unsigned char color);
     void OutputChar(long t, int x, int y, unsigned char color);
     virtual void draw_ascii_lines(unsigned char line_id, int drawx, int drawy, int FG) const;
+private:
+    void load_font( const std::string &path, int size ) override;
 protected:
     SDL_Texture *ascii[16];
     int tilewidth;
 };
 
-static Font *font = NULL;
-static Font *map_font = NULL;
-static Font *overmap_font = NULL;
+static std::unique_ptr<Font> font;
+static std::unique_ptr<Font> map_font;
+static std::unique_ptr<Font> overmap_font;
 
 std::array<std::string, 16> main_color_names{ { "BLACK","RED","GREEN","BROWN","BLUE","MAGENTA",
 "CYAN","GRAY","DGRAY","LRED","LGREEN","YELLOW","LBLUE","LMAGENTA","LCYAN","WHITE" } };
@@ -656,7 +661,7 @@ void curses_drawwindow(WINDOW *win)
         invalidate_framebuffer(win->x, win->y, TERRAIN_WINDOW_TERM_WIDTH, TERRAIN_WINDOW_TERM_HEIGHT);
 
         update = true;
-    } else if (g && win == g->w_terrain && map_font != NULL) {
+    } else if (g && win == g->w_terrain && map_font) {
         // When the terrain updates, predraw a black space around its edge
         // to keep various former interface elements from showing through the gaps
         // TODO: Maybe track down screen changes and use g->w_blackspace to draw this instead
@@ -668,10 +673,10 @@ void curses_drawwindow(WINDOW *win)
                     fontwidth, TERRAIN_WINDOW_TERM_HEIGHT * fontheight, COLOR_BLACK);
         // Special font for the terrain window
         update = map_font->draw_window(win);
-    } else if (g && win == g->w_overmap && overmap_font != NULL) {
+    } else if (g && win == g->w_overmap && overmap_font) {
         // Special font for the terrain window
         update = overmap_font->draw_window(win);
-    } else if (win == w_hit_animation && map_font != NULL) {
+    } else if (win == w_hit_animation && map_font) {
         // The animation window overlays the terrain window,
         // it uses the same font, but it's only 1 square in size.
         // The offset must not use the global font, but the map font
@@ -1436,7 +1441,7 @@ WINDOW *curses_init(void)
 
     // Reset the font pointer
     font = Font::load_font(typeface, fontsize, fontwidth, fontheight);
-    if (font == NULL) {
+    if( !font ) {
         return NULL;
     }
     map_font = Font::load_font(map_typeface, map_fontsize, map_fontwidth, map_fontheight);
@@ -1446,33 +1451,31 @@ WINDOW *curses_init(void)
     return mainwin;   //create the 'stdscr' window and return its ref
 }
 
-Font *Font::load_font(const std::string &typeface, int fontsize, int fontwidth, int fontheight)
+std::unique_ptr<Font> Font::load_font(const std::string &typeface, int fontsize, int fontwidth, int fontheight)
 {
     if (ends_with(typeface, ".bmp") || ends_with(typeface, ".png")) {
         // Seems to be an image file, not a font.
         // Try to load as bitmap font.
-        BitmapFont *bm_font = new BitmapFont(fontwidth, fontheight);
+        std::unique_ptr<Font> bm_font( new BitmapFont(fontwidth, fontheight) );
         try {
-            bm_font->load_font(FILENAMES["fontdir"] + typeface);
+            bm_font->load_font(FILENAMES["fontdir"] + typeface, 0 );
             // It worked, tell the world to use bitmap_font.
             return bm_font;
         } catch(std::exception &err) {
-            delete bm_font;
             dbg( D_ERROR ) << "Failed to load " << typeface << ": " << err.what();
             // Continue to load as truetype font
         }
     }
     // Not loaded as bitmap font (or it failed), try to load as truetype
-    CachedTTFFont *ttf_font = new CachedTTFFont(fontwidth, fontheight);
+    std::unique_ptr<Font> ttf_font( new CachedTTFFont(fontwidth, fontheight) );
     try {
         ttf_font->load_font(typeface, fontsize);
         // It worked, tell the world to use cached_ttf_font
         return ttf_font;
     } catch(std::exception &err) {
-        delete ttf_font;
         dbg( D_ERROR ) << "Failed to load " << typeface << ": " << err.what();
     }
-    return NULL;
+    return std::unique_ptr<Font>{};
 }
 
 //Ported from windows and copied comments as well
@@ -1493,10 +1496,9 @@ int curses_getch(WINDOW* win)
 //Ends the terminal, destroy everything
 int curses_destroy(void)
 {
-    delete font;
-    font = NULL;
-    delete map_font;
-    map_font = NULL;
+    font.reset();
+    map_font.reset();
+    overmap_font.reset();
     WinDestroy();
     return 1;
 }
@@ -1710,7 +1712,7 @@ void BitmapFont::clear()
     }
 }
 
-void BitmapFont::load_font(const std::string &typeface)
+void BitmapFont::load_font( const std::string &typeface, int )
 {
     clear();
     dbg( D_INFO ) << "Loading bitmap font [" + typeface + "]." ;
@@ -1825,8 +1827,9 @@ void CachedTTFFont::clear()
     glyph_cache_map.clear();
 }
 
-void CachedTTFFont::load_font(std::string typeface, int fontsize)
+void CachedTTFFont::load_font(const std::string &typeface_, int fontsize)
 {
+    std::string typeface = typeface_;
     clear();
     int faceIndex = 0;
     const std::string sysfnt = find_system_font(typeface, faceIndex);
