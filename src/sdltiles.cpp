@@ -696,8 +696,6 @@ void curses_drawwindow(WINDOW *win)
         // Either not using tiles (tilecontext) or not the w_terrain window.
         update = font->draw_window(win);
     }
-    // Not using sdl tiles anyway
-    update = font->draw_window(win);
     if(update) {
         needupdate = true;
     }
