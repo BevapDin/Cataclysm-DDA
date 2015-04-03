@@ -42,9 +42,20 @@ static const std::string TILE_CATEGORY_IDS[] = {
 
 cata_tiles::cata_tiles(SDL_Renderer *render)
 : last_pos( INT_MIN, INT_MIN, INT_MIN )
+, current_buffer(NULL)
+, previous_buffer(NULL)
 {
     //ctor
     renderer = render;
+    // TODO: leak ahead: if the constructor throws, those will not be cleared as the constructor is not run
+    previous_buffer = SDL_CreateTexture( renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, WindowWidth, WindowHeight );
+    if( previous_buffer == NULL ) {
+        dbg( D_ERROR ) << "cata_tiles: previous_buffer = SDL_CreateTexture failed!";
+    }
+    current_buffer = SDL_CreateTexture( renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, WindowWidth, WindowHeight );
+    if( current_buffer == NULL ) {
+        dbg( D_ERROR ) << "cata_tiles: current_buffer = SDL_CreateTexture failed!";
+    }
 
     tile_height = 0;
     tile_width = 0;
@@ -65,6 +76,12 @@ cata_tiles::cata_tiles(SDL_Renderer *render)
 
 cata_tiles::~cata_tiles()
 {
+    if (previous_buffer != NULL) {
+        SDL_DestroyTexture(previous_buffer);
+    }
+    if (current_buffer != NULL) {
+        SDL_DestroyTexture(current_buffer);
+    }
     clear();
 }
 
@@ -501,37 +518,20 @@ void cata_tiles::draw(int destx, int desty, int centerx, int centery, int width,
     if (!g) {
         return;
     }
+    tiles_to_draw_this_frame.clear();
 
-    {
-        //set clipping to prevent drawing over stuff we shouldn't
-        SDL_Rect clipRect = {destx, desty, width, height};
-        SDL_RenderSetClipRect(renderer, &clipRect);
-    }
+    get_window_tile_counts(width, height, screen_tile_count_x, screen_tile_count_y);
 
-    int posx = centerx;
-    int posy = centery;
-
-    int sx, sy;
-    get_window_tile_counts(width, height, sx, sy);
-
-    init_light();
-
-    int x, y;
-    LIGHTING l;
-
-    o_x = posx - POSX;
-    o_y = posy - POSY;
+    o_x = centerx - POSX;
+    o_y = centery - POSY;
     op_x = destx;
     op_y = desty;
-    // Rounding up to include incomplete tiles at the bottom/right edges
-    screentile_width = (width + tile_width - 1) / tile_width;
-    screentile_height = (height + tile_height - 1) / tile_height;
 
-    for (int my = 0; my < sy; ++my) {
-        for (int mx = 0; mx < sx; ++mx) {
-            x = mx + o_x;
-            y = my + o_y;
-            l = light_at(x, y);
+    for (int my = 0; my < screen_tile_count_y; ++my) {
+        for (int mx = 0; mx < screen_tile_count_x; ++mx) {
+            const int x = mx + o_x;
+            const int y = my + o_y;
+            const LIGHTING l = light_at(x, y);
             const auto critter = g->critter_at( x, y );
             if (l != CLEAR) {
                 // Draw lighting
@@ -594,7 +594,7 @@ void cata_tiles::draw(int destx, int desty, int centerx, int centery, int width,
         draw_from_id_string("cursor", C_NONE, empty_string, g->ter_view_x, g->ter_view_y, 0, 0);
     }
 
-    SDL_RenderSetClipRect(renderer, NULL);
+    apply_changes(destx, desty, width, height);
 }
 
 void cata_tiles::clear_buffer()
@@ -624,8 +624,8 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
 
     // check to make sure that we are drawing within a valid area
     // [0->width|height / tile_width|height]
-    if( x - o_x < 0 || x - o_x >= screentile_width ||
-        y - o_y < 0 || y - o_y >= screentile_height ) {
+    if( x - o_x < 0 || x - o_x >= screen_tile_count_x ||
+        y - o_y < 0 || y - o_y >= screen_tile_count_y ) {
         return false;
     }
 
@@ -786,21 +786,21 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
         rota = 0;
     }
 
-    // translate from player-relative to screen relative tile position
-    const int screen_x = (x - o_x) * tile_width + op_x;
-    const int screen_y = (y - o_y) * tile_height + op_y;
-
-    //draw it!
-    draw_tile_at(display_tile, screen_x, screen_y, rota);
+    // Schedule the draw call to be invoked later
+    tile_drawing_cache& cache_item = tiles_to_draw_this_frame[point(x - o_x, y - o_y)];
+    cache_item.sprites.push_back(tile_drawing_cache::tile_rota(display_tile, rota));
 
     return true;
 }
 
-bool cata_tiles::draw_tile_at(tile_type *tile, int x, int y, int rota)
+bool cata_tiles::draw_tile_at(tile_type *tile, const point &p, int rota)
 {
     // don't need to check for tile existance, should always exist if it gets this far
     const int fg = tile->fg;
     const int bg = tile->bg;
+    // translate from player-relative to screen relative tile position
+    const int x = p.x * tile_width + op_x;
+    const int y = p.y * tile_height + op_y;
 
     SDL_Rect destination;
     destination.x = x;
@@ -943,6 +943,76 @@ bool cata_tiles::draw_furniture(int x, int y)
         draw_item_highlight(x, y);
     }
     return ret;
+}
+
+void cata_tiles::apply_changes(int destx, int desty, int width, int height) {
+    /**
+     * How this works:
+     * - store original rendering target (the window)
+     * - set render target to current buffer
+     * - scroll copies (and moves) the content of the previous buffer to renderer (current buffer),
+     * - scroll moves the entries in the @ref cache
+     * - or scroll does nothing, current buffer is not changed at all (everything needs to be redrawn)
+     * - go through all the tiles that the draw function added, if their content matches
+     *   the stuff that's already there, ignore it, otherwise draw it to renderer (still current buffer)
+     * - set render target to original target (the window)
+     * - we copy current buffer (that we just draw to) to the window.
+     * - we swap the buffer pointers so we can copy from it the next time
+     * At the end, current buffer contains the recently drawn data, it is reused in the next frame.
+     * The previous buffer contains the data drawn on the frame before, it has no value anymore.
+     */
+
+    SDL_Rect clipRect = { destx, desty, width, height };
+    // This is just to protect the area outside of the game::w_terrain window.
+    if (SDL_RenderSetClipRect(renderer, &clipRect) != 0) {
+        dbg( D_ERROR ) << "cata_tiles: SDL_RenderSetClipRect(renderer, &clipRect) returned != 0";
+        dbg( D_ERROR ) << "clipRect = { " << clipRect.x << ", " << clipRect.y << ", " << clipRect.w << ", " << clipRect.h << " }";
+    }
+    SDL_Texture *original_target = SDL_GetRenderTarget(renderer);
+    if (original_target == NULL) {
+        dbg( D_ERROR ) << "cata_tiles: SDL_GetRenderTarget returned NULL!";
+    }
+    if (SDL_SetRenderTarget(renderer, current_buffer) != 0) {
+        dbg( D_ERROR ) << "cata_tiles: SDL_SetRenderTarget(renderer, current_buffer) returned != 0";
+    }
+    const tripoint newpos = g->u.pos3();
+    const tripoint delta_pos( newpos.x - last_pos.x, newpos.y - last_pos.y, newpos.z - last_pos.z );
+    if( delta_pos.z == 0 ) {
+        scroll( delta_pos.x, delta_pos.y, width, height );
+    }
+    last_pos = newpos;
+
+    int cnt = 0;
+    for(auto &tile : tiles_to_draw_this_frame) {
+        const point& location = tile.first;
+        const tile_drawing_cache& compare_to = cache[location];
+        const tile_drawing_cache& to_draw = tile.second;
+
+        if (to_draw != compare_to) {
+            const int x = location.x * tile_width + op_x;
+            const int y = location.y * tile_height + op_y;
+            SDL_Rect rect = { x, y, tile_width, tile_height };
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderFillRect(renderer, &rect);
+            for( auto &sprite : to_draw.sprites ) {
+                draw_tile_at(sprite.first, location, sprite.second);
+            }
+            cnt++;
+        }
+    }
+    dbg( D_ERROR ) << cnt << " tiles drawn";
+    if (SDL_SetRenderTarget(renderer, original_target) != 0) {
+        dbg( D_ERROR ) << "cata_tiles: SDL_SetRenderTarget(renderer, original_target) returned != 0";
+    }
+    if (SDL_RenderCopy(renderer, current_buffer, NULL, NULL) != 0) {
+        dbg( D_ERROR ) << "cata_tiles: SDL_RenderCopy(renderer, current_buffer, NULL, NULL) returned != 0";
+    }
+    if (SDL_RenderSetClipRect(renderer, NULL) != 0) {
+        dbg( D_ERROR ) << "cata_tiles: SDL_RenderSetClipRect(renderer, NULL) returned != 0";
+    }
+    std::swap(previous_buffer, current_buffer);
+
+    cache = tiles_to_draw_this_frame;
 }
 
 bool cata_tiles::draw_trap(int x, int y)
@@ -1625,6 +1695,55 @@ void cata_tiles::get_wall_values(const int x, const int y, const long vertical_w
         }
     }
     get_rotation_and_subtile(val, num_connects, rotation, subtile);
+}
+
+void cata_tiles::scroll(int dx, int dy, int width, int height) {
+    if (dx > screen_tile_count_x || dy > screen_tile_count_y) {
+        // Scrolled to far, everything is outside of the view and must be redrawn.
+        cache.clear();
+        return;
+    }
+    // Convert from tile shift to screen shift
+    const int x = dx * tile_width;
+    const int y = dy * tile_height;
+
+    // location of partially drawn tiles at the right / bottom borders,
+    // or -1 if those tiles are drawn completely (wdith%tile_width==0)
+    // or -1 if scrolling would invalidate them anyway
+    const int include_x_border = (dx > 0 && width % tile_width != 0) ? screen_tile_count_x - 1 : -1;
+    const int include_y_border = (dy > 0 && height % tile_height != 0) ? screen_tile_count_y - 1 : -1;
+
+    SDL_Rect srcrect = { op_x, op_y, width - abs(x), height - abs(y) };
+    SDL_Rect dstrect = { op_x, op_y, width - abs(x), height - abs(y) };
+    if (x > 0) {
+        srcrect.x += x;
+    } else if (x < 0) {
+        dstrect.x -= x;
+    }
+    if (y > 0) {
+        srcrect.y += y;
+    } else if (y < 0) {
+        dstrect.y -= y;
+    }
+
+    if (SDL_RenderCopy(renderer, previous_buffer, &srcrect, &dstrect) != 0) {
+        dbg( D_ERROR ) << "SDL_RenderCopy(renderer, previous_buffer, &srcrect, &dstrect) returned != 0 - " <<
+        "srcrect = { " << srcrect.x << ", " << srcrect.y << ", " << srcrect.w << ", " << srcrect.h << " }" <<
+        "dstrect = { " << dstrect.x << ", " << dstrect.y << ", " << dstrect.w << ", " << dstrect.h << " }";
+    }
+    dbg( D_ERROR ) << "scrolled by " << dx << "," << dy << "";
+
+    // This moves the entries of cache by (dx,dy), it's done by moving them into
+    // a temporary map with the new coordinates, that map is than put into the cache
+    std::map<point, tile_drawing_cache> new_cache;
+    for(std::map<point,tile_drawing_cache>::iterator i=cache.begin(); i!=cache.end(); i++) {
+        const point& old_point = i->first;
+        if (old_point.x == include_x_border || old_point.y == include_y_border) {
+            continue;
+        }
+        new_cache[point(old_point.x - dx, old_point.y - dy)].swap(i->second);
+    }
+    cache.swap(new_cache);
 }
 
 void cata_tiles::get_tile_values(const int t, const int *tn, int &subtile, int &rotation)

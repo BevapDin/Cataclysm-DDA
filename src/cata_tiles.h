@@ -106,35 +106,24 @@ typedef tile_id_map::iterator tile_id_iterator;
 
 // Cache of a single tile, used to avoid redrawing what didn't change.
 struct tile_drawing_cache {
-
-    tile_drawing_cache() { };
+    // Tile that should be drawn and its rotation
+    typedef std::pair<tile_type *, int> tile_rota;
+    typedef std::vector<tile_rota> tile_rota_vec;
 
     // Sprite indices drawn on this tile.
     // The same indices in a different order need to be drawn differently!
-    std::vector<tile_type *> sprites;
-    std::vector<int> rotations;
+    tile_rota_vec sprites;
 
-    bool operator==(const tile_drawing_cache &other) const {
-        if(sprites.size() != other.sprites.size()) {
-            return false;
-        } else {
-            for( size_t i = 0; i < sprites.size(); ++i ) {
-                if(sprites[i] != other.sprites[i] || rotations[i] != other.rotations[i]) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+    void swap( tile_drawing_cache &other ) {
+        sprites.swap( other.sprites );
     }
 
-    bool operator!=(const tile_drawing_cache &other) const {
-        return !(this->operator==(other));
+    bool operator==( const tile_drawing_cache &other ) const {
+        return sprites == other.sprites;
     }
 
-    void operator=(const tile_drawing_cache &other) {
-        this->sprites = other.sprites;
-        this->rotations = other.rotations;
+    bool operator!=( const tile_drawing_cache &other ) const {
+        return !( this->operator==( other ) );
     }
 };
 
@@ -220,11 +209,12 @@ class cata_tiles
         bool draw_from_id_string(std::string id, int x, int y, int subtile, int rota);
         bool draw_from_id_string(std::string id, TILE_CATEGORY category,
                                  const std::string &subcategory, int x, int y, int subtile, int rota);
-        bool draw_tile_at(tile_type *tile, int x, int y, int rota);
+        bool draw_tile_at(tile_type *tile, const point &p, int rota);
 
         /**
          * Redraws all the tiles that have changed since the last frame.
          */
+        void apply_changes(int destx, int desty, int width, int height);
         void clear_buffer();
 
         /** Surface/Sprite rotation specifics */
@@ -296,6 +286,15 @@ class cata_tiles
         int get_tile_width() const { return tile_width; }
         void do_tile_loading_report();
     protected:
+        /**
+         * Scroll the display buffer by (x, y) - in map coordinates.
+         *
+         * scroll(1, 1) would move the view one to the right and one down.
+         *
+         * Useful for keeping part of the previous "frame" and redrawing
+         * only what changed.
+         */
+        void scroll(int x, int y, int width, int height);
         void get_tile_information(std::string dir_path, std::string &json_path, std::string &tileset_path);
         template <typename maptype>
         void tile_loading_report(maptype const & tiletypemap, std::string const & label, std::string const & prefix = "");
@@ -320,10 +319,11 @@ class cata_tiles
          * definition. This means before scaling by the zoom factor.
          */
         int default_tile_width, default_tile_height;
-        // The width and height of the area we can draw in,
-        // measured in map coordinates, *not* in pixels.
-        int screentile_width, screentile_height;
-        float tile_ratiox, tile_ratioy;
+        /**
+         * The width and height of the area we can draw in,
+         * measured in tile counts *not* in pixels.
+         */
+        int screen_tile_count_x, screen_tile_count_y;
 
         bool in_animation;
 
@@ -387,6 +387,11 @@ class cata_tiles
          */
         tripoint last_pos;
 
+        SDL_Texture *current_buffer;
+        SDL_Texture *previous_buffer;
+
+        std::map<point, tile_drawing_cache> cache;
+        std::map<point, tile_drawing_cache> tiles_to_draw_this_frame;
 };
 
 #endif // if define(TILES)
