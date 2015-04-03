@@ -557,7 +557,7 @@ void BitmapFont::OutputChar(long t, int x, int y, unsigned char color)
 void try_update()
 {
     unsigned long now = SDL_GetTicks();
-    if (now - lastupdate >= interval) {
+    if (true||now - lastupdate >= interval) {
         // Select default target (the window), copy rendered buffer
         // there, present it, select the buffer as target again.
         if( SDL_SetRenderTarget( renderer, NULL ) != 0 ) {
@@ -570,6 +570,7 @@ void try_update()
         if( SDL_SetRenderTarget( renderer, display_buffer ) != 0 ) {
             dbg(D_ERROR) << "SDL_SetRenderTarget failed: " << SDL_GetError();
         }
+         SDL_Delay(1);
         needupdate = false;
         lastupdate = now;
     } else {

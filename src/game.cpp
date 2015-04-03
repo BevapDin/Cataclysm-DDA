@@ -4670,8 +4670,8 @@ void game::draw()
     if( !is_draw_tiles_mode() ) {
         draw_footsteps( w_terrain, { POSX - (u.posx() + u.view_offset_x),
                     POSY - (u.posy() + u.view_offset_y) } );
-        wrefresh(w_terrain);
     }
+    wrefresh(w_terrain);
     draw_sidebar();
 }
 
