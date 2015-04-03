@@ -2235,9 +2235,7 @@ input_context game::get_player_input(std::string &action)
             }
             // don't bother calculating SCT if we won't show it
             if (uquit != QUIT_WATCH && OPTIONS["ANIMATION_SCT"]) {
-#ifdef TILES
                 if (!use_tiles) {
-#endif
                     for( auto &elem : SCT.vSCT ) {
                         //Erase previous text from w_terrain
                         if( elem.getStep() > 0 ) {
@@ -2262,9 +2260,7 @@ input_context game::get_player_input(std::string &action)
                             }
                         }
                     }
-#ifdef TILES
                 }
-#endif
 
                 SCT.advanceAllSteps();
 
@@ -8453,9 +8449,7 @@ void game::zones_manager()
                 draw_zones(pStart, pEnd, pOffset);
             } else {
                 //clear marked area
-#ifdef TILES
                 if (!use_tiles) {
-#endif
                     for (int iY = pStart.y; iY <= pEnd.y; ++iY) {
                         for (int iX = pStart.x; iX <= pEnd.x; ++iX) {
                             if (u.sees(iX, iY)) {
@@ -8476,9 +8470,7 @@ void game::zones_manager()
                             }
                         }
                     }
-#ifdef TILES
                 }
-#endif
             }
 
             wrefresh(w_terrain);
@@ -8602,18 +8594,14 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
                     const point pEnd = point(std::max(dx, POSX), std::max(dy, POSY));
 
                     point pOffset = point(0, 0); //ASCII/SDL
-#ifdef TILES
                     if (use_tiles) {
                         pOffset = point(offset_x + lx - u.posx(), offset_y + ly - u.posy()); //TILES
                     }
-#endif
 
                     draw_zones(pStart, pEnd, pOffset);
 
                 } else {
-#ifdef TILES
                     if (!use_tiles) {
-#endif
                         for (int iY = std::min(pairCoordsFirst.y, ly); iY <= std::max(pairCoordsFirst.y, ly); ++iY) {
                             for (int iX = std::min(pairCoordsFirst.x, lx); iX <= std::max(pairCoordsFirst.x, lx); ++iX) {
                                 if (u.sees(iX, iY)) {
@@ -8634,9 +8622,7 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
                                 }
                             }
                         }
-#ifdef TILES
                     }
-#endif
                 }
 
                 //Draw first point

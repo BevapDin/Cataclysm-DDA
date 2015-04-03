@@ -693,12 +693,10 @@ action_id handle_action_menu()
             REGISTER_ACTION(ACTION_MUTATIONS);
             REGISTER_ACTION(ACTION_CONTROL_VEHICLE);
             REGISTER_ACTION(ACTION_ITEMACTION);
-#ifdef TILES
             if (use_tiles) {
                 REGISTER_ACTION(ACTION_ZOOM_OUT);
                 REGISTER_ACTION(ACTION_ZOOM_IN);
             }
-#endif
         }
 
         std::string title = _("Back");

@@ -16,7 +16,7 @@
 #include <sstream>
 
 bool trigdist;
-bool use_tiles;
+bool use_tiles = false;
 
 bool used_tiles_changed;
 #ifdef TILES
@@ -1369,7 +1369,9 @@ void load_options()
     }
 
     trigdist = OPTIONS["CIRCLEDIST"]; // cache to global due to heavy usage.
+#if defined TILES
     use_tiles = OPTIONS["USE_TILES"]; // cache to global due to heavy usage.
+#endif
 }
 
 std::string options_header()
@@ -1423,7 +1425,9 @@ void save_options(bool ingame)
         world_generator->save_world( world_generator->active_world, false );
     }
     trigdist = OPTIONS["CIRCLEDIST"]; // update trigdist as well
+#if defined TILES
     use_tiles = OPTIONS["USE_TILES"]; // and use_tiles
+#endif
 }
 
 bool use_narrow_sidebar()
