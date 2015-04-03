@@ -198,10 +198,23 @@ class cata_tiles
         void load_ascii_set(JsonObject &entry, int offset, int size);
         void add_ascii_subtile(tile_type *curr_tile, const std::string &t_id, int fg, const std::string &s_id);
     public:
-        /** Draw to screen */
+        /**
+         * Draw to the renderer.
+         * This will draw into the area (destx,desty) - (destx+width,desty+height).
+         * @param destx
+         * @param desty screen coordinates (pixel) where to start drawing.
+         * @param width
+         * @param height screen dimensions (pixel) into which should be drawn.
+         * @param centerx
+         * @param centery The map coordinates of the center (where the PC/the
+         * cursor is).
+         */
         void draw(int destx, int desty, int centerx, int centery, int width, int height);
     protected:
-        /** How many rows and columns of tiles fit into given dimensions **/
+        /**
+         * How many rows and columns of tiles fit into given dimensions.
+         * This includes incomplete tiles at the right / bottom border.
+         */
         void get_window_tile_counts(const int width, const int height, int &columns, int &rows) const;
 
         bool draw_from_id_string(std::string id, int x, int y, int subtile, int rota);
@@ -297,7 +310,16 @@ class cata_tiles
         tile_map tile_values;
         tile_id_map tile_ids;
 
-        int tile_height, tile_width, default_tile_width, default_tile_height;
+        /**
+         * Height and width of the tiles as they are drawn on screen,
+         * this is after scaling by the zoom factor.
+         */
+        int tile_height, tile_width;
+        /**
+         * Height and width of the tiles as they come from the tileset
+         * definition. This means before scaling by the zoom factor.
+         */
+        int default_tile_width, default_tile_height;
         // The width and height of the area we can draw in,
         // measured in map coordinates, *not* in pixels.
         int screentile_width, screentile_height;
@@ -333,9 +355,15 @@ class cata_tiles
         point pEndZone;
         point pZoneOffset;
 
-        // offset values, in tile coordinates, not pixels
+        /**
+         * Offset (in map coordinates) of the top left tile. That tile
+         * should show the content of g->m.ter(o_x,o_y).
+         */
         int o_x, o_y;
-        // offset for drawing, in pixels.
+        /**
+         * Drawing offset (in pixel) of the top left tile. That tile
+         * should be drawn into the renderer at (op_x, op_y).
+         */
         int op_x, op_y;
 
     protected:
@@ -353,7 +381,11 @@ class cata_tiles
             boomered,
             sight_impaired,
             bionight_bionic_active;
-        int last_pos_x, last_pos_y;
+        /**
+         * Position of the player character (absolute) when the tiles have been
+         * drawn the last time.
+         */
+        tripoint last_pos;
 
 };
 

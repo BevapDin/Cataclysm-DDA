@@ -41,6 +41,7 @@ static const std::string TILE_CATEGORY_IDS[] = {
 };
 
 cata_tiles::cata_tiles(SDL_Renderer *render)
+: last_pos( INT_MIN, INT_MIN, INT_MIN )
 {
     //ctor
     renderer = render;
@@ -60,9 +61,6 @@ cata_tiles::cata_tiles(SDL_Renderer *render)
     boomered = false;
     sight_impaired = false;
     bionight_bionic_active = false;
-
-    last_pos_x = 0;
-    last_pos_y = 0;
 }
 
 cata_tiles::~cata_tiles()
