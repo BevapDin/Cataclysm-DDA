@@ -215,6 +215,14 @@ bool fexists(const char *filename)
   return (bool)ifile;
 }
 
+void add_quit_handler( void( *f )() )
+{
+    if( atexit( f ) != 0 ) {
+        const char *errmsg = strerror( errno );
+        dbg( D_ERROR ) << "atexit() failed: " << ( errmsg == NULL ? "NULL" : errmsg );
+    }
+}
+
 bool InitSDL()
 {
     int init_flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;
@@ -225,17 +233,20 @@ bool InitSDL()
         dbg( D_ERROR ) << "SDL_Init failed with " << ret << ", error: " << SDL_GetError();
         return false;
     }
+    add_quit_handler( SDL_Quit );
     ret = TTF_Init();
     if( ret != 0 ) {
         dbg( D_ERROR ) << "TTF_Init failed with " << ret << ", error: " << TTF_GetError();
         return false;
     }
+    add_quit_handler( TTF_Quit );
     ret = IMG_Init( IMG_INIT_PNG );
     if( (ret & IMG_INIT_PNG) != IMG_INIT_PNG ) {
         dbg( D_ERROR ) << "IMG_Init failed to initialize PNG support, tiles won't work, error: " << IMG_GetError();
         // cata_tiles won't be able to load the tiles, but the normal SDL
         // code will display fine.
     }
+    add_quit_handler( IMG_Quit );
 
     ret = SDL_InitSubSystem( SDL_INIT_JOYSTICK );
     if( ret != 0 ) {
@@ -245,8 +256,6 @@ bool InitSDL()
 
     //SDL2 has no functionality for INPUT_DELAY, we would have to query it manually, which is expensive
     //SDL2 instead uses the OS's Input Delay.
-
-    atexit(SDL_Quit);
 
     return true;
 }
