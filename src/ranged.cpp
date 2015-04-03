@@ -1134,7 +1134,7 @@ std::vector<point> game::target(int &x, int &y, int lowx, int lowy, int hix,
         // Our coordinates will either be determined by coordinate input(mouse),
         // by a direction key, or by the previous value.
         if (action == "SELECT" && ctxt.get_coordinates(g->w_terrain, tarx, tary)) {
-            if (!use_tiles && snap_to_target) {
+            if (!is_draw_tiles_mode() && snap_to_target) {
                 // Snap to target doesn't currently work with tiles.
                 tarx += x - from.x;
                 tary += y - from.y;

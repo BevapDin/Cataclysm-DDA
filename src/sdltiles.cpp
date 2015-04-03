@@ -62,6 +62,8 @@ std::string current_playlist = "";
 int current_playlist_at = 0;
 #endif
 
+extern bool use_tiles; // options.cpp
+
 /**
  * A class that draws a single character on screen.
  */
@@ -640,7 +642,7 @@ extern WINDOW *w_hit_animation;
 void curses_drawwindow(WINDOW *win)
 {
     bool update = false;
-    if (g && win == g->w_terrain && use_tiles) {
+    if (g && win == g->w_terrain && is_draw_tiles_mode()) {
         // game::w_terrain can be drawn by the tilecontext.
         // skip the normal drawing code for it.
         tilecontext->draw(
@@ -1648,7 +1650,7 @@ bool input_context::get_coordinates(WINDOW* capture_win, int& x, int& y) {
     int fw = fontwidth;
     int fh = fontheight;
     // tiles might have different dimensions than standard font
-    if (use_tiles && capture_win == g->w_terrain) {
+    if (is_draw_tiles_mode() && capture_win == g->w_terrain) {
         fw = tilecontext->get_tile_width();
         fh = tilecontext->get_tile_height();
     } else
@@ -1861,14 +1863,14 @@ void CachedTTFFont::load_font(std::string typeface, int fontsize)
 }
 
 int map_font_width() {
-    if (use_tiles && tilecontext != NULL) {
+    if (is_draw_tiles_mode() && tilecontext != NULL) {
         return tilecontext->get_tile_width();
     }
     return (map_font != NULL ? map_font : font)->fontwidth;
 }
 
 int map_font_height() {
-    if (use_tiles && tilecontext != NULL) {
+    if (is_draw_tiles_mode() && tilecontext != NULL) {
         return tilecontext->get_tile_height();
     }
     return (map_font != NULL ? map_font : font)->fontheight;

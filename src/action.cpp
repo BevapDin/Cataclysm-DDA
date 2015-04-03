@@ -693,7 +693,7 @@ action_id handle_action_menu()
             REGISTER_ACTION(ACTION_MUTATIONS);
             REGISTER_ACTION(ACTION_CONTROL_VEHICLE);
             REGISTER_ACTION(ACTION_ITEMACTION);
-            if (use_tiles) {
+            if( is_draw_tiles_mode() ) {
                 REGISTER_ACTION(ACTION_ZOOM_OUT);
                 REGISTER_ACTION(ACTION_ZOOM_IN);
             }

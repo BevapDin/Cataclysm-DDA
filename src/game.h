@@ -30,7 +30,6 @@ extern game *g;
 
 #define PICKUP_RANGE 6
 extern bool trigdist;
-extern bool use_tiles;
 
 extern const int savegame_version;
 extern int savegame_loading_version;

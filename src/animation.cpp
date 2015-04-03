@@ -60,7 +60,7 @@ void draw_explosion_curses(game &g, int const x, int const y, int const r, nc_co
 #if defined(TILES)
 void game::draw_explosion(int const x, int const y, int const r, nc_color const col)
 {
-    if (!use_tiles) {
+    if (!is_draw_tiles_mode()) {
         draw_explosion_curses(*this, x, y, r, col);
         return;
     }
@@ -119,7 +119,7 @@ void game::draw_bullet(Creature const &p, int const tx, int const ty, int const 
         return;
     }
 
-    if (!use_tiles) {
+    if (!is_draw_tiles_mode()) {
         draw_bullet_curses(w_terrain, u, m, tx, ty, bullet, nullptr, p.is_player());
         return;
     }
@@ -170,7 +170,7 @@ void draw_hit_mon_curses(int const x, int const y, const monster &m, player cons
 #if defined(TILES)
 void game::draw_hit_mon(int const x, int const y, const monster &m, bool const dead)
 {
-    if (!use_tiles) {
+    if (!is_draw_tiles_mode()) {
         draw_hit_mon_curses(x, y, m, u, dead);
         return;
     }
@@ -201,7 +201,7 @@ void draw_hit_player_curses(game const& g, player const &p, const int dam)
 #if defined(TILES)
 void game::draw_hit_player(player const &p, const int dam)
 {
-    if (!use_tiles) {
+    if (!is_draw_tiles_mode()) {
         draw_hit_player_curses(*this, p, dam);
         return;
     }
@@ -254,7 +254,7 @@ void game::draw_line(int const x, int const y, point const center, std::vector<p
         return;
     }
 
-    if (!use_tiles) {
+    if (!is_draw_tiles_mode()) {
         draw_line_curses(*this, x, y, center, ret); // TODO needed for tiles ver too??
         return;
     }
@@ -313,7 +313,7 @@ void draw_weather_curses(WINDOW *const win, weather_printable const &w)
 #if defined(TILES)
 void game::draw_weather(weather_printable const &w)
 {
-    if (!use_tiles) {
+    if (!is_draw_tiles_mode()) {
         draw_weather_curses(w_terrain, w);
         return;
     }
@@ -382,7 +382,7 @@ void draw_sct_curses(game &g)
 #if defined(TILES)
 void game::draw_sct()
 {
-    if (use_tiles) {
+    if (is_draw_tiles_mode()) {
         tilecontext->init_draw_sct();
     } else {
         draw_sct_curses(*this);
@@ -415,7 +415,7 @@ void draw_zones_curses(WINDOW *const w, point const &beg, point const &end, poin
 #if defined(TILES)
 void game::draw_zones(point const &beg, point const &end, point const &off)
 {
-    if (use_tiles) {
+    if (is_draw_tiles_mode()) {
         tilecontext->init_draw_zones(beg, end, off);
     } else {
         draw_zones_curses(w_terrain, beg, end, off);

@@ -2235,7 +2235,7 @@ input_context game::get_player_input(std::string &action)
             }
             // don't bother calculating SCT if we won't show it
             if (uquit != QUIT_WATCH && OPTIONS["ANIMATION_SCT"]) {
-                if (!use_tiles) {
+                if (!is_draw_tiles_mode()) {
                     for( auto &elem : SCT.vSCT ) {
                         //Erase previous text from w_terrain
                         if( elem.getStep() > 0 ) {
@@ -8439,7 +8439,7 @@ void game::zones_manager()
                 //draw marked area
                 point pOffset = point(offset_x, offset_y); //ASCII
 #ifdef TILES
-                if (use_tiles) {
+                if (is_draw_tiles_mode()) {
                     pOffset = point(0, 0); //TILES
                 } else {
                     pOffset = point(-offset_x, -offset_y); //SDL
@@ -8449,7 +8449,7 @@ void game::zones_manager()
                 draw_zones(pStart, pEnd, pOffset);
             } else {
                 //clear marked area
-                if (!use_tiles) {
+                if (!is_draw_tiles_mode()) {
                     for (int iY = pStart.y; iY <= pEnd.y; ++iY) {
                         for (int iX = pStart.x; iX <= pEnd.x; ++iX) {
                             if (u.sees(iX, iY)) {
@@ -8594,14 +8594,14 @@ point game::look_around(WINDOW *w_info, const point pairCoordsFirst)
                     const point pEnd = point(std::max(dx, POSX), std::max(dy, POSY));
 
                     point pOffset = point(0, 0); //ASCII/SDL
-                    if (use_tiles) {
+                    if (is_draw_tiles_mode()) {
                         pOffset = point(offset_x + lx - u.posx(), offset_y + ly - u.posy()); //TILES
                     }
 
                     draw_zones(pStart, pEnd, pOffset);
 
                 } else {
-                    if (!use_tiles) {
+                    if (!is_draw_tiles_mode()) {
                         for (int iY = std::min(pairCoordsFirst.y, ly); iY <= std::max(pairCoordsFirst.y, ly); ++iY) {
                             for (int iX = std::min(pairCoordsFirst.x, lx); iX <= std::max(pairCoordsFirst.x, lx); ++iX) {
                                 if (u.sees(iX, iY)) {
