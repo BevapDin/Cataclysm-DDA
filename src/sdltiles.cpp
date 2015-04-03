@@ -262,7 +262,7 @@ bool WinCreate()
     WindowHeight = TERMINAL_HEIGHT * fontheight;
 
     if (OPTIONS["FULLSCREEN"]) {
-        window_flags |= SDL_WINDOW_FULLSCREEN;
+        window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     }
 
     window = SDL_CreateWindow(version.c_str(),
