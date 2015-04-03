@@ -276,12 +276,12 @@ ifdef LUA
   BINDIST_EXTRAS  += $(LUA_DIR)
 endif
 
+# Backwards compatibility only, use TILES=1 in the future
 ifdef SDL
   TILES = 1
 endif
 
 ifdef TILES
-  SDL = 1
   BINDIST_EXTRAS += gfx
   ifeq ($(NATIVE),osx)
     ifdef FRAMEWORK
@@ -313,9 +313,6 @@ ifdef TILES
     ifdef TILES
       LDFLAGS += -lSDL2_image
     endif
-  endif
-  ifdef TILES
-    DEFINES += -DSDLTILES
   endif
   DEFINES += -DTILES
   ifeq ($(TARGETSYSTEM),WINDOWS)

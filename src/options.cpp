@@ -8,9 +8,9 @@
 #include "path_info.h"
 #include "mapsharing.h"
 
-#ifdef SDLTILES
+#ifdef TILES
 #include "cata_tiles.h"
-#endif // SDLTILES
+#endif // TILES
 
 #include <stdlib.h>
 #include <fstream>
@@ -22,9 +22,9 @@ bool trigdist;
 bool use_tiles;
 
 bool used_tiles_changed;
-#ifdef SDLTILES
+#ifdef TILES
 extern cata_tiles *tilecontext;
-#endif // SDLTILES
+#endif // TILES
 
 std::unordered_map<std::string, cOpt> OPTIONS;
 std::unordered_map<std::string, cOpt> ACTIVE_WORLD_OPTIONS;
@@ -166,14 +166,14 @@ bool cOpt::is_hidden()
         return false;
 
     case COPT_SDL_HIDE:
-#ifdef SDLTILES
+#ifdef TILES
         return true;
 #else
         return false;
 #endif
 
     case COPT_CURSES_HIDE:
-#ifndef SDLTILES // If not defined. it's curses interface.
+#ifndef TILES // If not defined. it's curses interface.
         return true;
 #else
         return false;
@@ -181,7 +181,7 @@ bool cOpt::is_hidden()
 
     case COPT_POSIX_CURSES_HIDE:
         // Check if we on windows and using wincuses.
-#if ((defined TILES && defined SDLTILES) || defined _WIN32 || defined WINDOWS)
+#if ((defined TILES && defined TILES) || defined _WIN32 || defined WINDOWS)
         return false;
 #else
         return true;
@@ -1153,7 +1153,7 @@ void show_options(bool ingame)
 
         wrefresh(w_options_header);
 
-#if (defined TILES || defined SDLTILES || defined _WIN32 || defined WINDOWS)
+#if (defined TILES || defined TILES || defined _WIN32 || defined WINDOWS)
         if (mPageItems[iCurrentPage][iCurrentLine] == "TERMINAL_X") {
             int new_terminal_x, new_window_width;
             std::stringstream value_conversion(OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getValueName());
@@ -1305,7 +1305,7 @@ void show_options(bool ingame)
         g->mmenu_refresh_motd();
         g->mmenu_refresh_credits();
     }
-#ifdef SDLTILES
+#ifdef TILES
     if( used_tiles_changed ) {
         //try and keep SDL calls limited to source files that deal specifically with them
         try {
@@ -1320,7 +1320,7 @@ void show_options(bool ingame)
             use_tiles = false;
         }
     }
-#endif // SDLTILES
+#endif // TILES
     delwin(w_options);
     delwin(w_options_border);
     delwin(w_options_header);

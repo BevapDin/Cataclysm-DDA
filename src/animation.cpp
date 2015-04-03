@@ -1,5 +1,5 @@
 #include "game.h"
-#ifdef SDLTILES
+#ifdef TILES
 #include "cata_tiles.h" // all animation functions will be pushed out to a cata_tiles function in some manner
 
 extern cata_tiles *tilecontext; // obtained from sdltiles.cpp
@@ -57,7 +57,7 @@ void draw_explosion_curses(game &g, int const x, int const y, int const r, nc_co
 }
 } // namespace
 
-#if defined(SDLTILES)
+#if defined(TILES)
 void game::draw_explosion(int const x, int const y, int const r, nc_color const col)
 {
     if (!use_tiles) {
@@ -104,7 +104,7 @@ void draw_bullet_curses(WINDOW *const w, player &u, map &m, int const tx, int co
 
 } ///namespace
 
-#if defined(SDLTILES)
+#if defined(TILES)
 /* Bullet Animation -- Maybe change this to animate the ammo itself flying through the air?*/
 // need to have a version where there is no player defined, possibly. That way shrapnel works as intended
 void game::draw_bullet(Creature const &p, int const tx, int const ty, int const i,
@@ -167,7 +167,7 @@ void draw_hit_mon_curses(int const x, int const y, const monster &m, player cons
 
 } // namespace
 
-#if defined(SDLTILES)
+#if defined(TILES)
 void game::draw_hit_mon(int const x, int const y, const monster &m, bool const dead)
 {
     if (!use_tiles) {
@@ -198,7 +198,7 @@ void draw_hit_player_curses(game const& g, player const &p, const int dam)
 }
 } //namespace
 
-#if defined(SDLTILES)
+#if defined(TILES)
 void game::draw_hit_player(player const &p, const int dam)
 {
     if (!use_tiles) {
@@ -247,7 +247,7 @@ void draw_line_curses(game &g, int const x, int const y, point const center,
 }
 } //namespace
 
-#if defined(SDLTILES)
+#if defined(TILES)
 void game::draw_line(int const x, int const y, point const center, std::vector<point> const &ret)
 {
     if (!u.sees(x, y)) {
@@ -285,7 +285,7 @@ void draw_line_curses(game &g, std::vector<point> const &points)
 }
 } //namespace
 
-#if defined(SDLTILES)
+#if defined(TILES)
 void game::draw_line(const int x, const int y, std::vector<point> const &vPoint)
 {
     draw_line_curses(*this, vPoint);
@@ -310,7 +310,7 @@ void draw_weather_curses(WINDOW *const win, weather_printable const &w)
 }
 } //namespace
 
-#if defined(SDLTILES)
+#if defined(TILES)
 void game::draw_weather(weather_printable const &w)
 {
     if (!use_tiles) {
@@ -379,7 +379,7 @@ void draw_sct_curses(game &g)
 }
 } //namespace
 
-#if defined(SDLTILES)
+#if defined(TILES)
 void game::draw_sct()
 {
     if (use_tiles) {
@@ -412,7 +412,7 @@ void draw_zones_curses(WINDOW *const w, point const &beg, point const &end, poin
 }
 } //namespace
 
-#if defined(SDLTILES)
+#if defined(TILES)
 void game::draw_zones(point const &beg, point const &end, point const &off)
 {
     if (use_tiles) {

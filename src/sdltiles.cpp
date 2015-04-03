@@ -38,9 +38,7 @@
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_ttf.h"
-#ifdef SDLTILES
 #include "SDL2/SDL_image.h"
-#endif
 
 #ifdef SDL_SOUND
 #include "SDL_mixer.h"
@@ -52,12 +50,10 @@
 //Globals                           *
 //***********************************
 
-#ifdef SDLTILES
 cata_tiles *tilecontext;
 static unsigned long lastupdate = 0;
 static unsigned long interval = 25;
 static bool needupdate = false;
-#endif
 
 #ifdef SDL_SOUND
 /** The music we're currently playing. */
@@ -188,7 +184,6 @@ static std::vector<curseline> framebuffer;
 static WINDOW *winBuffer; //tracking last drawn window to fix the framebuffer
 static int fontScaleBuffer; //tracking zoom levels to fix framebuffer w/tiles
 
-#ifdef SDLTILES
 //***********************************
 //Tile-version specific functions   *
 //***********************************
@@ -197,7 +192,6 @@ void init_interface()
 {
     return; // dummy function, we have nothing to do here
 }
-#endif
 //***********************************
 //Non-curses, Window functions      *
 //***********************************
@@ -229,14 +223,12 @@ bool InitSDL()
         dbg( D_ERROR ) << "TTF_Init failed with " << ret << ", error: " << TTF_GetError();
         return false;
     }
-    #ifdef SDLTILES
     ret = IMG_Init( IMG_INIT_PNG );
     if( (ret & IMG_INIT_PNG) != IMG_INIT_PNG ) {
         dbg( D_ERROR ) << "IMG_Init failed to initialize PNG support, tiles won't work, error: " << IMG_GetError();
         // cata_tiles won't be able to load the tiles, but the normal SDL
         // code will display fine.
     }
-    #endif // SDLTILES
 
     ret = SDL_InitSubSystem( SDL_INIT_JOYSTICK );
     if( ret != 0 ) {
@@ -550,7 +542,6 @@ void BitmapFont::OutputChar(long t, int x, int y, unsigned char color)
     }
 }
 
-#ifdef SDLTILES
 // only update if the set interval has elapsed
 void try_update()
 {
@@ -574,7 +565,6 @@ void try_update()
         needupdate = true;
     }
 }
-#endif
 
 // line_id is one of the LINE_*_C constants
 // FG is a curses color
@@ -650,7 +640,6 @@ extern WINDOW *w_hit_animation;
 void curses_drawwindow(WINDOW *win)
 {
     bool update = false;
-#ifdef SDLTILES
     if (g && win == g->w_terrain && use_tiles) {
         // game::w_terrain can be drawn by the tilecontext.
         // skip the normal drawing code for it.
@@ -700,10 +689,8 @@ void curses_drawwindow(WINDOW *win)
         // Either not using tiles (tilecontext) or not the w_terrain window.
         update = font->draw_window(win);
     }
-#else
     // Not using sdl tiles anyway
     update = font->draw_window(win);
-#endif
     if(update) {
         needupdate = true;
     }
@@ -1091,11 +1078,9 @@ void CheckMessages()
                 break;
         }
     }
-#ifdef SDLTILES
     if (needupdate) {
         try_update();
     }
-#endif
     if(quit) {
         endwin();
         exit(0);
@@ -1429,7 +1414,6 @@ WINDOW *curses_init(void)
         return NULL;
     }
 
-    #ifdef SDLTILES
     dbg( D_INFO ) << "Initializing SDL Tiles context";
     tilecontext = new cata_tiles(renderer);
     try {
@@ -1442,7 +1426,6 @@ WINDOW *curses_init(void)
         // Setting it to false disables this from getting used.
         use_tiles = false;
     }
-    #endif // SDLTILES
 
     init_colors();
 
@@ -1463,7 +1446,6 @@ WINDOW *curses_init(void)
 
 Font *Font::load_font(const std::string &typeface, int fontsize, int fontwidth, int fontheight)
 {
-    #ifdef SDLTILES
     if (ends_with(typeface, ".bmp") || ends_with(typeface, ".png")) {
         // Seems to be an image file, not a font.
         // Try to load as bitmap font.
@@ -1478,7 +1460,6 @@ Font *Font::load_font(const std::string &typeface, int fontsize, int fontwidth, 
             // Continue to load as truetype font
         }
     }
-    #endif // SDLTILES
     // Not loaded as bitmap font (or it failed), try to load as truetype
     CachedTTFFont *ttf_font = new CachedTTFFont(fontwidth, fontheight);
     try {
@@ -1648,11 +1629,9 @@ bool gamepad_available() {
 }
 
 void rescale_tileset(int size) {
-    #ifdef SDLTILES
-        tilecontext->set_draw_scale(size);
-        g->init_ui();
-        ClearScreen();
-    #endif
+    tilecontext->set_draw_scale(size);
+    g->init_ui();
+    ClearScreen();
 }
 
 bool input_context::get_coordinates(WINDOW* capture_win, int& x, int& y) {
@@ -1668,13 +1647,11 @@ bool input_context::get_coordinates(WINDOW* capture_win, int& x, int& y) {
     // not necessarily the global standard font dimensions.
     int fw = fontwidth;
     int fh = fontheight;
-#ifdef SDLTILES
     // tiles might have different dimensions than standard font
     if (use_tiles && capture_win == g->w_terrain) {
         fw = tilecontext->get_tile_width();
         fh = tilecontext->get_tile_height();
     } else
-#endif
     if (map_font != NULL && capture_win == g->w_terrain) {
         // map font (if any) might differ from standard font
         fw = map_font->fontwidth;
@@ -1884,20 +1861,16 @@ void CachedTTFFont::load_font(std::string typeface, int fontsize)
 }
 
 int map_font_width() {
-#ifdef SDLTILES
     if (use_tiles && tilecontext != NULL) {
         return tilecontext->get_tile_width();
     }
-#endif
     return (map_font != NULL ? map_font : font)->fontwidth;
 }
 
 int map_font_height() {
-#ifdef SDLTILES
     if (use_tiles && tilecontext != NULL) {
         return tilecontext->get_tile_height();
     }
-#endif
     return (map_font != NULL ? map_font : font)->fontheight;
 }
 

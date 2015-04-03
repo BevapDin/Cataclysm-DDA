@@ -1,4 +1,4 @@
-#if (defined SDLTILES)
+#if (defined TILES)
 #include "cata_tiles.h"
 #include "debug.h"
 #include "json.h"
@@ -1697,4 +1697,4 @@ void cata_tiles::tile_loading_report(arraytype const & array, int array_length, 
     DebugLog( D_INFO, DC_ALL ) << "Missing " << label << ": " << missing_list;
 }
 
-#endif // SDL_TILES
+#endif // TILES
