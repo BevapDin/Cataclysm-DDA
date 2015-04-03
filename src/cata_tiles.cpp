@@ -47,8 +47,6 @@ cata_tiles::cata_tiles(SDL_Renderer *render)
 
     tile_height = 0;
     tile_width = 0;
-    tile_ratiox = 0;
-    tile_ratioy = 0;
 
     in_animation = false;
     do_draw_explosion = false;
@@ -234,9 +232,6 @@ int cata_tiles::load_tileset(std::string path, int R, int G, int B)
 void cata_tiles::set_draw_scale(int scale) {
     tile_width = default_tile_width * scale / 16;
     tile_height = default_tile_height * scale / 16;
-
-    tile_ratiox = ((float)tile_width/(float)fontwidth);
-    tile_ratioy = ((float)tile_height/(float)fontheight);
 }
 
 void cata_tiles::load_tilejson(std::string path, const std::string &image_path)

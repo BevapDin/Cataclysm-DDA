@@ -281,8 +281,6 @@ class cata_tiles
         void reinit(std::string load_file_path);
         int get_tile_height() const { return tile_height; }
         int get_tile_width() const { return tile_width; }
-        float get_tile_ratiox() const { return tile_ratiox; }
-        float get_tile_ratioy() const { return tile_ratioy; }
         void do_tile_loading_report();
     protected:
         void get_tile_information(std::string dir_path, std::string &json_path, std::string &tileset_path);
