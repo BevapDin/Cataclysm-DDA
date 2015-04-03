@@ -208,13 +208,6 @@ void ClearScreen()
     SDL_RenderClear(renderer);
 }
 
-
-bool fexists(const char *filename)
-{
-  std::ifstream ifile(filename);
-  return (bool)ifile;
-}
-
 void add_quit_handler( void( *f )() )
 {
     if( atexit( f ) != 0 ) {
@@ -1845,13 +1838,13 @@ void CachedTTFFont::load_font(const std::string &typeface_, int fontsize)
         dbg( D_INFO ) << "Using font [" + typeface + "]." ;
     }
     //make fontdata compatible with wincurse
-    if(!fexists(typeface.c_str())) {
+    if(!file_exist(typeface)) {
         faceIndex = 0;
         typeface = FILENAMES["fontdir"] + typeface + ".ttf";
         dbg( D_INFO ) << "Using compatible font [" + typeface + "]." ;
     }
     //different default font with wincurse
-    if(!fexists(typeface.c_str())) {
+    if(!file_exist(typeface)) {
         faceIndex = 0;
         typeface = FILENAMES["fontdir"] + "fixedsys.ttf";
         dbg( D_INFO ) << "Using fallback font [" + typeface + "]." ;
