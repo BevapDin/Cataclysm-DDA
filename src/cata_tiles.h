@@ -1,5 +1,6 @@
 #ifndef CATA_TILES_H
 #define CATA_TILES_H
+#if defined(TILES)
 
 // make sure that SDL systems are included: Until testing is available for other systems, keep Windows specific
 #if !(defined _WIN32 || defined WINDOWS)
@@ -357,5 +358,7 @@ class cata_tiles
         int last_pos_x, last_pos_y;
 
 };
+
+#endif // if define(TILES)
 
 #endif

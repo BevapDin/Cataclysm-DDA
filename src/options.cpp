@@ -7,10 +7,7 @@
 #include "cursesdef.h"
 #include "path_info.h"
 #include "mapsharing.h"
-
-#ifdef TILES
 #include "cata_tiles.h"
-#endif // TILES
 
 #include <stdlib.h>
 #include <fstream>
