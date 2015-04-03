@@ -1436,7 +1436,7 @@ void iexamine::egg_sackws( player *p, map *m, int examx, int examy )
 void iexamine::fungus(player *p, map *m, int examx, int examy)
 {
     add_msg(_("The %s crumbles into spores!"), m->furnname(examx, examy).c_str());
-    m->create_spores(examx, examy, p);
+    m->create_spores( tripoint( examx, examy, p->posz() ), p);
     m->furn_set(examx, examy, f_null);
     p->moves -= 50;
 }
@@ -2392,7 +2392,7 @@ void iexamine::trap(player *p, map *m, int examx, int examy)
 
 void iexamine::water_source(player *p, map *m, const int examx, const int examy)
 {
-    item water = m->water_from(examx, examy);
+    item water = m->water_from( tripoint( examx, examy, p->posz() ) );
     const std::string text = string_format(_("Container for %s"), water.tname().c_str());
     item *cont = g->inv_map_for_liquid(water, text);
     if (cont == NULL || cont->is_null()) {
@@ -2415,7 +2415,7 @@ void iexamine::water_source(player *p, map *m, const int examx, const int examy)
 }
 void iexamine::swater_source(player *p, map *m, const int examx, const int examy)
 {
-    item swater = m->swater_from(examx, examy);
+    item swater = m->swater_from( tripoint( examx, examy, p->posz() ) );
     const std::string text = string_format(_("Container for %s"), swater.tname().c_str());
     item *cont = g->inv_map_for_liquid(swater, text);
     if (cont == NULL || cont->is_null()) {
@@ -2434,13 +2434,6 @@ void iexamine::swater_source(player *p, map *m, const int examx, const int examy
             p->activity.values.push_back(swater.poison);
             p->activity.values.push_back(swater.bday);
         }
-    }
-}
-void iexamine::acid_source(player *p, map *m, const int examx, const int examy)
-{
-    item acid = m->acid_from(examx, examy);
-    if (g->handle_liquid(acid, true, true)) {
-        p->moves -= 100;
     }
 }
 
@@ -3232,9 +3225,6 @@ iexamine_function iexamine_function_from_string(std::string const &function_name
     }
     if ("swater_source" == function_name) {
         return &iexamine::swater_source;
-    }
-    if ("acid_source" == function_name) {
-        return &iexamine::acid_source;
     }
     if ("reload_furniture" == function_name) {
         return &iexamine::reload_furniture;

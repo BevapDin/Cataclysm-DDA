@@ -92,10 +92,10 @@ public:
      */
     struct items_on_map {
         /** Point on the map */
-        point position;
+        tripoint position;
         map *m;
         map_stack items() const;
-        items_on_map(const point &p, map *m) : position(p), m(m) { }
+        items_on_map(const tripoint &p, map *m) : position(p), m(m) { }
     };
     /**
      * Items that are in the cargo slot of a vehicle.
@@ -141,10 +141,10 @@ public:
      */
     struct item_from_surrounding {
         /** Point on the map */
-        point position;
+        tripoint position;
         /** The pseudo-item representing something (like water or fire) */
         item the_item;
-        item_from_surrounding(const point &p, const item &i) : position(p), the_item(i) { }
+        item_from_surrounding(const tripoint &p, const item &i) : position(p), the_item(i) { }
     };
 
 
@@ -642,7 +642,7 @@ protected:
      * vpart with pseudo items as wrapper for vehicle vparts.
      * surround with pseudo items from the surrounding.
      */
-    void form_from_map(point position, int distance);
+    void form_from_map(tripoint position, int distance);
     
     typedef enum { assume_components, assume_tools } consume_flags;
     int consume(const std::vector<component> &x, consume_flags flags, std::list<item> &used_items);
@@ -936,7 +936,7 @@ public:
      */
     bool has_items_with_quality(const std::string &name, int level, int amount) const;
     
-    void add_surround(const point &p, const item &it);
+    void add_surround(const tripoint &p, const item &it);
 private:
     typedef std::map<itype_id, int> CacheMap;
     mutable CacheMap counted_by_charges;

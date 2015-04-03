@@ -48,7 +48,7 @@ void crafting_inventory_t::init(int range)
 {
     if(range != -1) {
         assert(range >= 0);
-        form_from_map(p->pos(), range);
+        form_from_map(p->pos3(), range);
     }
     // iterator of all bionics of the player and grab the toolsets automaticly
     // This allows easy addition of more toolsets
@@ -1089,13 +1089,15 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
     location = (LocationType) obj.get_int("location");
     assert(obj.has_string("utype"));
     usageType = obj.get_string("utype");
-    point tmppnt;
+    tripoint tmppnt;
+    tmppnt.z = g->get_levz();
     std::string tmpstr;
     int veh_ptr;
     switch(location) {
         case LT_MAP:
             tmppnt.x = obj.get_int("x");
             tmppnt.y = obj.get_int("y");
+            tmppnt.z = obj.get_int("z");
             mapitems = NULL;
             for(std::list<items_on_map>::iterator a = cinv.on_map.begin(); a != cinv.on_map.end(); ++a) {
                 if(a->position == tmppnt) {
@@ -1108,6 +1110,7 @@ void crafting_inventory_t::candidate_t::deserialize(crafting_inventory_t &cinv, 
         case LT_SURROUNDING:
             tmppnt.x = obj.get_int("x");
             tmppnt.y = obj.get_int("y");
+            tmppnt.z = obj.get_int("z");
             tmpstr = obj.get_string("type");
             surroundings = NULL;
             for(std::list<item_from_surrounding>::iterator a = cinv.surround.begin(); a != cinv.surround.end(); ++a) {
@@ -1216,11 +1219,13 @@ void crafting_inventory_t::candidate_t::serialize(JsonOut &json) const {
         case LT_MAP:
             json.member("x", mapitems->position.x);
             json.member("y", mapitems->position.y);
+            json.member("z", mapitems->position.z);
             json.member("index", mindex);
             break;
         case LT_SURROUNDING:
             json.member("x", surroundings->position.x);
             json.member("y", surroundings->position.y);
+            json.member("z", surroundings->position.z);
             json.member("type", surroundings->the_item.type->id);
             break;
         case LT_VEHICLE_CARGO:
@@ -2640,6 +2645,6 @@ void crafting_inventory_t::add_vpart(vehicle *veh, int mpart, const std::string 
     vpart.push_back(item_from_vpart(veh, veh->parts[part].mount.x, veh->parts[part].mount.y, vpart_item));
 }
 
-void crafting_inventory_t::add_surround(const point &p, const item &it) {
+void crafting_inventory_t::add_surround(const tripoint &p, const item &it) {
     surround.push_back(item_from_surrounding(p, it));
 }
