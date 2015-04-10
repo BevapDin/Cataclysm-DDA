@@ -2495,7 +2495,7 @@ bool game::handle_action()
 
                         act = ACTION_FIRE;
                     } else if (std::abs(mx - u.posx()) <= 1 && std::abs(my - u.posy()) <= 1 &&
-                               m.close_door(mx, my, !m.is_outside(u.posx(), u.posy()), true)) {
+                               m.close_door( tripoint( mx, my, u.posz() ), !m.is_outside(u.pos3()), true)) {
                         // Can only close doors when adjacent to it.
                         act = ACTION_CLOSE;
                     } else {
@@ -5858,15 +5858,18 @@ void game::do_blast( const tripoint &p, const int power, const int radius, const
     int x = p.x;
     int y = p.y;
     int dam;
-    for (int i = x - radius; i <= x + radius; i++) {
-        for (int j = y - radius; j <= y + radius; j++) {
+    tripoint t( 0, 0, p.z );
+    int &i = t.x;
+    int &j = t.y;
+    for( i = x - radius; i <= x + radius; i++ ) {
+        for( j = y - radius; j <= y + radius; j++ ) {
             if (i == x && j == y) {
                 dam = 3 * power;
             } else {
                 dam = 3 * power / (rl_dist(x, y, i, j));
             }
-            m.bash(i, j, dam);
-            m.bash(i, j, dam); // Double up for tough doors, etc.
+            m.bash( t, dam );
+            m.bash( t, dam ); // Double up for tough doors, etc.
 
             int mon_hit = mon_at(i, j), npc_hit = npc_at(i, j);
             if (mon_hit != -1) {
@@ -5982,7 +5985,7 @@ void game::explosion( const tripoint &p, int power, int shrapnel, bool fire, boo
                 u.check_dead_state();
             } else {
                 std::set<std::string> shrapnel_effects;
-                m.shoot(tx, ty, dam, j == traj.size() - 1, shrapnel_effects);
+                m.shoot( tripoint( tx, ty, u.posz() ), dam, j == traj.size() - 1, shrapnel_effects);
             }
         }
     }
@@ -6123,7 +6126,7 @@ void game::knockback( std::vector<tripoint> &traj, int force, int stun, int dam_
                     targ->apply_damage( nullptr, bp_torso, dam_mult * force_remaining );
                     targ->check_dead_state();
                 }
-                m.bash(traj[i].x, traj[i].y, 2 * dam_mult * force_remaining);
+                m.bash( traj[i], 2 * dam_mult * force_remaining );
                 break;
             } else if (mon_at(traj[i].x, traj[i].y) != -1 || npc_at(traj[i].x, traj[i].y) != -1 ||
                        (u.posx() == traj[i].x && u.posy() == traj[i].y)) {
@@ -6232,7 +6235,7 @@ void game::knockback( std::vector<tripoint> &traj, int force, int stun, int dam_
                     }
                     targ->check_dead_state();
                 }
-                m.bash(traj[i].x, traj[i].y, 2 * dam_mult * force_remaining);
+                m.bash( traj[i], 2 * dam_mult * force_remaining );
                 break;
             } else if( mon_at(traj[i]) != -1 || 
                        npc_at(traj[i]) != -1 ||
@@ -6329,7 +6332,7 @@ void game::knockback( std::vector<tripoint> &traj, int force, int stun, int dam_
                     }
                     u.check_dead_state();
                 }
-                m.bash(traj[i].x, traj[i].y, 2 * dam_mult * force_remaining);
+                m.bash( traj[i], 2 * dam_mult * force_remaining );
                 break;
             } else if( mon_at( traj[i] ) != -1 || npc_at( traj[i] ) != -1 ) {
                 u.setpos( traj[i - 1] );
@@ -6867,7 +6870,8 @@ void game::open()
         return;
     }
 
-    bool didit = m.open_door(openx, openy, !m.is_outside( u.pos3() ) );
+    tripoint openp( openx, openy, u.posz() );
+    bool didit = m.open_door( openp, !m.is_outside( u.pos3() ) );
 
     if (!didit) {
         const std::string terid = m.get_ter(openx, openy);
@@ -6896,7 +6900,8 @@ void game::close(int closex, int closey)
     }
 
     bool didit = false;
-    const bool inside = !m.is_outside(u.posx(), u.posy());
+    const bool inside = !m.is_outside(u.pos3());
+    tripoint closep( closex, closey, u.posz() );
 
     auto items_in_way = m.i_at(closex, closey);
     int vpart;
@@ -6932,7 +6937,7 @@ void game::close(int closex, int closey)
         } else {
             add_msg(m_info, _("There's a %s in the way!"), m.furnname(closex, closey).c_str());
         }
-    } else if (!m.close_door(closex, closey, inside, true)) {
+    } else if (!m.close_door( closep, inside, true )) {
         // ^^ That checks if the PC could close something there, it
         // does not actually do anything.
         std::string door_name;
@@ -6944,7 +6949,7 @@ void game::close(int closex, int closey)
         // Print a message that we either can not close whatever is there
         // or (if we're outside) that we can only close it from the
         // inside.
-        if (!inside && m.close_door(closex, closey, true, true)) {
+        if (!inside && m.close_door( closep, true, true )) {
             add_msg(m_info, _("You cannot close the %s from outside. You must be inside the building."),
                     door_name.c_str());
         } else {
@@ -6980,7 +6985,7 @@ void game::close(int closex, int closey)
             u.moves -= items_in_way.size() * 10;
         }
 
-        didit = m.close_door(closex, closey, inside, false);
+        didit = m.close_door( closep, inside, false );
         if (didit && m.has_flag_ter_or_furn("NOITEM", closex, closey)) {
             // Just plopping items back on their origin square will displace them to adjacent squares
             // since the door is closed now.
@@ -7024,7 +7029,7 @@ void game::smash()
             return; // don't smash terrain if we've smashed a corpse
         }
     }
-    didit = m.bash(smashx, smashy, smashskill).first;
+    didit = m.bash( tripoint( smashx, smashy, u.posz() ), smashskill).first;
     if (didit) {
         u.handle_melee_wear();
         u.moves -= move_cost;
@@ -7713,7 +7718,10 @@ bool pet_menu(monster *z)
     }
 
     if (attach_bag == choice) {
-        int pos = g->inv_type(_("Bag item:"), IC_ARMOR);
+        auto filter = []( const item &it ) {
+            return it.is_armor() && it.get_storage() > 0;
+        };
+        int pos = g->inv_for_filter( _("Bag item:"), filter );
         if (pos == INT_MIN) {
             add_msg(_("Never mind."));
             return true;
@@ -8037,6 +8045,8 @@ void game::print_all_tile_info(int lx, int ly, WINDOW *w_look, int column, int &
 
 void game::print_terrain_info(int lx, int ly, WINDOW *w_look, int column, int &line)
 {
+    // TODO: Z
+    tripoint lp( lx, ly, get_levz() );
     int ending_line = line + 3;
     std::string tile = m.tername(lx, ly);
     if (m.has_furn(lx, ly)) {
@@ -8056,7 +8066,7 @@ void game::print_terrain_info(int lx, int ly, WINDOW *w_look, int column, int &l
                   m.move_cost(lx, ly) * 50);
     }
 
-    std::string signage = m.get_signage(lx, ly);
+    std::string signage = m.get_signage( lp );
     if (signage.size() > 0 && signage.size() < 36) {
         mvwprintw(w_look, ++line, column, _("Sign: %s"), signage.c_str());
     } else if (signage.size() > 0) {
@@ -10963,7 +10973,10 @@ void game::eat(int pos)
         return;
     }
     if (pos == INT_MIN) {
-        pos = inv_type(_("Consume item:"), IC_COMESTIBLE);
+        auto filter = [this]( const item &it ) {
+            return it.is_food( &u ) || it.is_food_container( &u );
+        };
+        pos = inv_for_filter( _("Consume item:"), filter );
     }
 
     if (pos == INT_MIN) {
@@ -10977,7 +10990,12 @@ void game::eat(int pos)
 void game::wear(int pos)
 {
     if (pos == INT_MIN) {
-        pos = inv_type(_("Wear item:"), IC_ARMOR);
+        auto filter = [this]( const item &it ) {
+            // TODO: Add more filter conditions like "not made of wool if allergic to it".
+            return it.is_armor() &&
+                   u.get_item_position( &it ) >= -1; // not already worn
+        };
+        pos = inv_for_filter( _("Wear item:"), filter );
     }
 
     u.wear(pos);
@@ -10986,7 +11004,10 @@ void game::wear(int pos)
 void game::takeoff(int pos)
 {
     if (pos == INT_MIN) {
-        pos = inv_type(_("Take off item:"), IC_NULL);
+        auto filter = [this]( const item &it ) {
+            return u.get_item_position( &it ) < -1; // means item is worn.
+        };
+        pos = inv_for_filter( _("Take off item:"), filter );
     }
 
     if (pos == INT_MIN) {
@@ -11298,7 +11319,10 @@ void game::wield(int pos)
 
 void game::read()
 {
-    int pos = inv_type(_("Read:"), IC_BOOK);
+    auto filter = []( const item &it ) {
+        return it.is_book();
+    };
+    int pos = inv_for_filter( _("Read:"), filter );
 
     if (pos == INT_MIN) {
         add_msg(_("Never mind."));
@@ -12047,7 +12071,7 @@ bool game::plmove(int dx, int dy)
             }
         }
 
-        std::string signage = m.get_signage(x, y);
+        std::string signage = m.get_signage( tripoint( x, y, get_levz() ) );
         if (signage.size()) {
             add_msg(m_info, _("The sign says: %s"), signage.c_str());
         }
@@ -12310,7 +12334,7 @@ bool game::plmove(int dx, int dy)
             // Only lose movement if we're blind
             add_msg(_("You bump into a %s!"), m.name(x, y).c_str());
             u.moves -= 100;
-        } else if (m.furn(x, y) != f_safe_c && m.open_door(x, y, !m.is_outside(u.posx(), u.posy()))) {
+        } else if (m.furn(x, y) != f_safe_c && m.open_door( tripoint( x, y, u.posz() ), !m.is_outside(u.pos3()))) {
             u.moves -= 100;
         } else if (m.ter(x, y) == t_door_locked || m.ter(x, y) == t_door_locked_peep || m.ter(x, y) == t_door_locked_alarm ||
                    m.ter(x, y) == t_door_locked_interior) {
@@ -12462,7 +12486,7 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
             dname = veh ? veh->part_info(vpart).name : m.tername(x, y).c_str();
             if (m.is_bashable(x, y)) {
                 // Only go through if we successfully destroy what we hit
-                thru = m.bash(x, y, flvel).second;
+                thru = m.bash( tripoint( x, y, c->posz() ), flvel).second;
             } else {
                 thru = false;
             }
@@ -13472,15 +13496,18 @@ void game::nuke( const tripoint &p )
     int y = p.y;
     tinymap tmpmap;
     tmpmap.load( x * 2, y * 2, 0, false);
-    for (int i = 0; i < SEEX * 2; i++) {
-        for (int j = 0; j < SEEY * 2; j++) {
+    tripoint dest( 0, 0, p.z );
+    int &i = dest.x;
+    int &j = dest.y;
+    for( i = 0; i < SEEX * 2; i++ ) {
+        for( j = 0; j < SEEY * 2; j++ ) {
             if (!one_in(10)) {
-                tmpmap.make_rubble(i, j, f_rubble_rock, true, t_dirt, true);
+                tmpmap.make_rubble( dest, f_rubble_rock, true, t_dirt, true);
             }
             if (one_in(3)) {
                 tmpmap.add_field(i, j, fd_nuke_gas, 3);
             }
-            tmpmap.adjust_radiation( tripoint( i, j, 0 ), rng(20, 80));
+            tmpmap.adjust_radiation( dest, rng(20, 80));
         }
     }
     tmpmap.save();

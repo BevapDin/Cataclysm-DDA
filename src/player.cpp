@@ -6481,7 +6481,7 @@ void player::hardcoded_effects(effect &it)
             } while (((x == posx() && y == posy()) || g->mon_at(x, y) != -1) && tries < 10);
             if (tries < 10) {
                 if (g->m.move_cost(x, y) == 0) {
-                    g->m.make_rubble(x, y, f_rubble_rock, true);
+                    g->m.make_rubble( tripoint( x, y, posz() ), f_rubble_rock, true);
                 }
                 beast.spawn(x, y);
                 g->add_zombie(beast);
@@ -6564,7 +6564,7 @@ void player::hardcoded_effects(effect &it)
                 } while (((x == posx() && y == posy()) || g->mon_at(x, y) != -1));
                 if (tries < 10) {
                     if (g->m.move_cost(x, y) == 0) {
-                        g->m.make_rubble(x, y, f_rubble_rock, true);
+                        g->m.make_rubble( tripoint( x, y, posz() ), f_rubble_rock, true);
                     }
                     beast.spawn(x, y);
                     g->add_zombie(beast);
