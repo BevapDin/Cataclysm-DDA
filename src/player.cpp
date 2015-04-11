@@ -2924,7 +2924,7 @@ Strength - 4;    Dexterity - 4;    Intelligence - 4;    Perception - 4"));
 
                     fold_and_print(w_info, 0, 1, FULL_SCREEN_WIDTH - 2, c_magenta,
                      _("Intelligence is less important in most situations, but it is vital for more complex tasks like "
-                     "electronics crafting. It also affects how much skill you can pick up from reading a book."));
+                     "electronics crafting.  It also affects how much skill you can pick up from reading a book."));
                 } else if (line == 3) {
                     // Display player current perception effects
                     mvwprintz(w_stats, 5, 1, h_ltgray, _("Perception:"));
@@ -2934,7 +2934,7 @@ Strength - 4;    Dexterity - 4;    Intelligence - 4;    Perception - 4"));
                     mvwprintz(w_stats, 7, 23, c_magenta, "%2d", get_per());
 
                     fold_and_print(w_info, 0, 1, FULL_SCREEN_WIDTH - 2, c_magenta,
-                     _("Perception is the most important stat for ranged combat. It's also used for "
+                     _("Perception is the most important stat for ranged combat.  It's also used for "
                      "detecting traps and other things of interest."));
                 }
                 wrefresh(w_stats);
@@ -8635,7 +8635,7 @@ bool player::has_fire(const int quantity) const
 {
 // TODO: Replace this with a "tool produces fire" flag.
 
-    if (g->m.has_nearby_fire(posx(), posy())) {
+    if( g->m.has_nearby_fire( pos3() ) ) {
         return true;
     } else if (has_charges("torch_lit", 1)) {
         return true;
@@ -8689,7 +8689,7 @@ void player::use_fire(const int quantity)
 // (home made, military), hotplate, welder in that order.
 // bio_lighter, bio_laser, bio_tools, has_bionic("bio_tools"
 
-    if (g->m.has_nearby_fire(posx(), posy())) {
+    if( g->m.has_nearby_fire( pos3() ) ) {
         return;
     } else if (has_charges("torch_lit", 1)) {
         return;

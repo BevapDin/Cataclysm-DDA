@@ -2989,10 +2989,10 @@ void map::shoot( const tripoint &p, int &dam,
         }
     }
 
-    ter_t terrain = ter_at(x, y);
-    if( 0 == terrain.id.compare("t_wall_wood_broken") ||
-        0 == terrain.id.compare("t_wall_log_broken") ||
-        0 == terrain.id.compare("t_door_b") ) {
+    ter_id terrain = ter( p );
+    if( terrain == t_wall_wood_broken ||
+        terrain == t_wall_log_broken ||
+        terrain == t_door_b ) {
         if (hit_items || one_in(8)) { // 1 in 8 chance of hitting the door
             dam -= rng(20, 40);
             if (dam > 0) {
@@ -3003,26 +3003,26 @@ void map::shoot( const tripoint &p, int &dam,
         else {
             dam -= rng(0, 1);
         }
-    } else if( 0 == terrain.id.compare("t_door_c") ||
-               0 == terrain.id.compare("t_door_locked") ||
-               0 == terrain.id.compare("t_door_locked_peep") ||
-               0 == terrain.id.compare("t_door_locked_alarm") ) {
+    } else if( terrain == t_door_c ||
+               terrain == t_door_locked ||
+               terrain == t_door_locked_peep ||
+               terrain == t_door_locked_alarm ) {
         dam -= rng(15, 30);
         if (dam > 0) {
             sounds::sound(x, y, 10, _("smash!"));
             ter_set(x, y, t_door_b);
         }
-    } else if( 0 == terrain.id.compare("t_door_boarded") ||
-               0 == terrain.id.compare("t_door_boarded_damaged") ||
-               0 == terrain.id.compare("t_rdoor_boarded") ||
-               0 == terrain.id.compare("t_rdoor_boarded_damaged") ) {
+    } else if( terrain == t_door_boarded ||
+               terrain == t_door_boarded_damaged ||
+               terrain == t_rdoor_boarded ||
+               terrain == t_rdoor_boarded_damaged ) {
         dam -= rng(15, 35);
         if (dam > 0) {
             sounds::sound(x, y, 10, _("crash!"));
             ter_set(x, y, t_door_b);
         }
-    } else if( 0 == terrain.id.compare("t_window_domestic_taped") ||
-               0 == terrain.id.compare("t_curtains") ) {
+    } else if( terrain == t_window_domestic_taped ||
+               terrain == t_curtains ) {
         if (ammo_effects.count("LASER")) {
             dam -= rng(1, 5);
         }
@@ -3038,7 +3038,7 @@ void map::shoot( const tripoint &p, int &dam,
                 spawn_item(x, y, "string_36");
             }
         }
-    } else if( 0 == terrain.id.compare("t_window_domestic") ) {
+    } else if( terrain == t_window_domestic ) {
         if (ammo_effects.count("LASER")) {
             dam -= rng(0, 5);
         } else {
@@ -3051,8 +3051,8 @@ void map::shoot( const tripoint &p, int &dam,
                 spawn_item(x, y, "string_36");
             }
         }
-    } else if( 0 == terrain.id.compare("t_window_taped") ||
-               0 == terrain.id.compare("t_window_alarm_taped") ) {
+    } else if( terrain == t_window_taped ||
+               terrain == t_window_alarm_taped ) {
         if (ammo_effects.count("LASER")) {
             dam -= rng(1, 5);
         }
@@ -3065,8 +3065,8 @@ void map::shoot( const tripoint &p, int &dam,
                 ter_set(x, y, t_window_frame);
             }
         }
-    } else if( 0 == terrain.id.compare("t_window") ||
-               0 == terrain.id.compare("t_window_alarm") ) {
+    } else if( terrain == t_window ||
+               terrain == t_window_alarm ) {
         if (ammo_effects.count("LASER")) {
             dam -= rng(0, 5);
         } else {
@@ -3076,16 +3076,15 @@ void map::shoot( const tripoint &p, int &dam,
                 ter_set(x, y, t_window_frame);
             }
         }
-    } else if( 0 == terrain.id.compare("t_window_boarded") ) {
+    } else if( terrain == t_window_boarded ) {
         dam -= rng(10, 30);
         if (dam > 0) {
             sounds::sound(x, y, 16, _("glass breaking!"));
             ter_set(x, y, t_window_frame);
         }
-    } else if( 0 == terrain.id.compare("t_wall_glass_h") ||
-               0 == terrain.id.compare("t_wall_glass_v") ||
-               0 == terrain.id.compare("t_wall_glass_h_alarm") ||
-               0 == terrain.id.compare("t_wall_glass_v_alarm") ) {
+    } else if( terrain == t_wall_glass  ||
+               terrain == t_wall_glass_alarm ||
+               terrain == t_door_glass_c ) {
         if (ammo_effects.count("LASER")) {
             dam -= rng(0,5);
         } else {
@@ -3095,8 +3094,7 @@ void map::shoot( const tripoint &p, int &dam,
                 ter_set(x, y, t_floor);
             }
         }
-    } else if( 0 == terrain.id.compare("t_reinforced_glass_v") ||
-               0 == terrain.id.compare("t_reinforced_glass_h") ) {
+    } else if( terrain == t_reinforced_glass ) {
         // reinforced glass stops most bullets
         // laser beams are attenuated
         if (ammo_effects.count("LASER")) {
@@ -3113,7 +3111,7 @@ void map::shoot( const tripoint &p, int &dam,
                 ter_set(x, y, t_floor);
             }
         }
-    } else if( 0 == terrain.id.compare("t_paper") ) {
+    } else if( terrain == t_paper ) {
         dam -= rng(4, 16);
         if (dam > 0) {
             sounds::sound(x, y, 8, _("rrrrip!"));
@@ -3122,7 +3120,7 @@ void map::shoot( const tripoint &p, int &dam,
         if (ammo_effects.count("INCENDIARY")) {
             add_field(x, y, fd_fire, 1);
         }
-    } else if( 0 == terrain.id.compare("t_gas_pump") ) {
+    } else if( terrain == t_gas_pump ) {
         if (hit_items || one_in(3)) {
             if (dam > 15) {
                 if (ammo_effects.count("INCENDIARY") || ammo_effects.count("FLAME")) {
@@ -3141,7 +3139,7 @@ void map::shoot( const tripoint &p, int &dam,
             }
             dam -= 60;
         }
-    } else if( 0 == terrain.id.compare("t_vat") ) {
+    } else if( terrain == t_vat ) {
         if (dam >= 10) {
             sounds::sound(x, y, 20, _("ke-rash!"));
             ter_set(x, y, t_floor);
@@ -5839,17 +5837,54 @@ void map::loadn( const int gridx, const int gridy, const bool update_vehicles ) 
     }
 }
 
-void map::loadn( const int gridx, const int gridy, const int gridz, const bool update_vehicles ) {
+// Optimized mapgen function that only works properly for very simple overmap types
+// Does not create or require a temporary map and does its own saving
+static void generate_uniform( const int x, const int y, const int z, const oter_id &terrain_type )
+{
+    static const oter_id rock("empty_rock");
+    static const oter_id air("open_air");
 
- dbg(D_INFO) << "map::loadn(game[" << g << "], worldx[" << abs_sub.x << "], worldy[" << abs_sub.y << "], gridx["
-             << gridx << "], gridy[" << gridy << "], gridz[" << gridz << "])";
+    dbg( D_INFO ) << "generate_uniform x: " << x << "  y: " << y << "  abs_z: " << z
+                  << "  terrain_type: " << static_cast<std::string const&>(terrain_type);
 
- const int absx = abs_sub.x + gridx,
-           absy = abs_sub.y + gridy;
+    ter_id fill = t_null;
+    if( terrain_type == rock ) {
+        fill = t_rock;
+    } else if( terrain_type == air ) {
+        fill = t_open_air;
+    } else {
+        debugmsg( "map::generate_uniform called on non-uniform type: %s",
+                  static_cast<std::string const&>(terrain_type).c_str() );
+        return;
+    }
+
+    constexpr size_t block_size = SEEX * SEEY;
+    for( int xd = 0; xd <= 1; xd++ ) {
+        for( int yd = 0; yd <= 1; yd++ ) {
+            submap *sm = new submap();
+            sm->is_uniform = true;
+            std::uninitialized_fill_n( &sm->ter[0][0], block_size, fill );
+            sm->turn_last_touched = int(calendar::turn);
+            MAPBUFFER.add_submap( x + xd, y + yd, z, sm );
+        }
+    }
+}
+
+void map::loadn( const int gridx, const int gridy, const int gridz, const bool update_vehicles )
+{
+    // Cache empty overmap types
+    static const oter_id rock("empty_rock");
+    static const oter_id air("open_air");
+
+    dbg(D_INFO) << "map::loadn(game[" << g << "], worldx[" << abs_sub.x << "], worldy[" << abs_sub.y << "], gridx["
+                << gridx << "], gridy[" << gridy << "], gridz[" << gridz << "])";
+
+    const int absx = abs_sub.x + gridx,
+              absy = abs_sub.y + gridy;
     const size_t gridn = get_nonant( gridx, gridy, gridz );
 
- dbg(D_INFO) << "map::loadn absx: " << absx << "  absy: " << absy
-            << "  gridn: " << gridn;
+    dbg(D_INFO) << "map::loadn absx: " << absx << "  absy: " << absy
+                << "  gridn: " << gridn;
 
     const int old_abs_z = abs_sub.z; // Ugly, but necessary at the moment
     abs_sub.z = gridz;
@@ -5858,12 +5893,23 @@ void map::loadn( const int gridx, const int gridy, const int gridz, const bool u
     if( tmpsub == nullptr ) {
         // It doesn't exist; we must generate it!
         dbg( D_INFO | D_WARNING ) << "map::loadn: Missing mapbuffer data. Regenerating.";
-        tinymap tmp_map;
+
         // Each overmap square is two nonants; to prevent overlap, generate only at
         //  squares divisible by 2.
         const int newmapx = absx - ( abs( absx ) % 2 );
         const int newmapy = absy - ( abs( absy ) % 2 );
-        tmp_map.generate( newmapx, newmapy, gridz, calendar::turn );
+        // Short-circuit if the map tile is uniform
+        int overx = newmapx;
+        int overy = newmapy;
+        overmapbuffer::sm_to_omt( overx, overy );
+        oter_id terrain_type = overmap_buffer.ter( overx, overy, gridz );
+        if( terrain_type == rock || terrain_type == air ) {
+            generate_uniform( newmapx, newmapy, gridz, terrain_type );
+        } else {
+            tinymap tmp_map;
+            tmp_map.generate( newmapx, newmapy, gridz, calendar::turn );
+        }
+
         // This is the same call to MAPBUFFER as above!
         tmpsub = MAPBUFFER.lookup_submap( absx, absy, gridz );
         if( tmpsub == nullptr ) {
