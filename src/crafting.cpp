@@ -1548,7 +1548,7 @@ void player::complete_craft()
 
     handedness handed = NONE;
     if (making->paired) {
-        switch( menu(true, ("Handedness?:"), _("Left-handed"), _("Right-handed"), NULL) ) {
+        switch( menu(true, _("Handedness?:"), _("Left-handed"), _("Right-handed"), NULL) ) {
             case 1:
                 handed = LEFT;
                 break;

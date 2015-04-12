@@ -3660,13 +3660,13 @@ void vehicle::power_parts (tripoint sm_loc)//TODO: more categories of powered pa
         dome_lights_on = false;
         aisle_lights_on = false;
         if(player_in_control(&g->u) || g->u.sees( global_pos() )) {
-            add_msg("The %s's battery dies!",name.c_str());
+            add_msg(_("The %s's battery dies!"),name.c_str());
         }
         if(gas_epower < 0) {
             // Not enough epower to run gas engine ignition system
             engine_on = false;
             if(player_in_control(&g->u) || g->u.sees( global_pos() )) {
-                add_msg("The %s's engine dies!",name.c_str());
+                add_msg(_("The %s's engine dies!"),name.c_str());
             }
         }
     }
@@ -5653,7 +5653,7 @@ bool vehicle::fire_turret( int p, bool manual )
     // Don't let non-manual turrets get aimed manually
     if( manual && part_flag( p, "NO_MANUAL" ) ) {
         if( manual ) {
-            add_msg( m_bad, "This turret can't be aimed manually" );
+            add_msg( m_bad, _("This turret can't be aimed manually") );
         }
 
         return false;
@@ -5679,7 +5679,7 @@ bool vehicle::fire_turret( int p, bool manual )
     const int power = fuel_left( fuel_type_battery );
     if( gun_data.ups_charges > 0 && gun_data.ups_charges < power ) {
         if( manual ) {
-            add_msg( m_bad, "This turret is not powered" );
+            add_msg( m_bad, _("This turret is not powered") );
         }
 
         return false;
@@ -5728,7 +5728,7 @@ bool vehicle::fire_turret( int p, bool manual )
         charges = std::min( charges, turret_has_ammo( p ) );
         if( charges <= 0 ) {
             if( manual ) {
-                add_msg( m_bad, "This turret doesn't have enough ammo" );
+                add_msg( m_bad, _("This turret doesn't have enough ammo") );
             }
 
             return false;
@@ -5939,7 +5939,7 @@ bool vehicle::manual_fire_turret( int p, player &shooter, const itype &guntype,
     // Deactivate automatic aiming
     if( parts[p].mode > 0 ) {
         parts[p].mode = -parts[p].mode;
-        add_msg( m_warning, "Deactivating automatic target acquisition for this turret" );
+        add_msg( m_warning, _("Deactivating automatic target acquisition for this turret" ));
     }
 
     return !trajectory.empty();
