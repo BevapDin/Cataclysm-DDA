@@ -18,6 +18,8 @@
       [
         [ "fire", -1 ],
         [ "func:press", 2 ]
+        [ "hotplate", 2 ],
+        [ "char_smoker", 1 ]
       ]
     ],
     "components": [
@@ -61,6 +63,8 @@
     [
       [ "fire", -1 ],
       [ "func:press", 2 ]
+      [ "hotplate", 2 ],
+      [ "char_smoker", 1 ]
     ]
   ],
   "components": [
@@ -105,6 +109,8 @@
     [
       [ "fire", -1 ],
       [ "func:press", 2 ]
+      [ "hotplate", 2 ],
+      [ "char_smoker", 1 ]
     ]
   ],
   "components": [
@@ -144,6 +150,7 @@
   "tools": [
   [
       [ "func:forge", 50]
+      [ "oxy_torch", 10 ]
   ],
   [
       [ "swage", -1]
@@ -185,7 +192,8 @@
     [
       [ "welder", 30 ],
       [ "toolset", 40 ],
-      [ "welder_crude", 40]
+      [ "welder_crude", 40],
+      [ "oxy_torch", 6 ]
     ]
   ],
   "components": [

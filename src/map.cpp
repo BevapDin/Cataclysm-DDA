@@ -290,7 +290,7 @@ bool map::vehproceed()
         return true;
     }
 
-    bool pl_ctrl = veh->player_in_control(&g->u);
+    bool pl_ctrl = veh->player_in_control(g->u);
 
     // k slowdown first.
     int slowdown = 20; // mph lost per tile when coasting
@@ -1163,7 +1163,7 @@ bool map::displace_vehicle( tripoint &p, const tripoint &dp, bool test )
     }
 
     // Need old coords to check for remote control
-    bool remote = veh->remote_controlled( &g->u );
+    bool remote = veh->remote_controlled( g->u );
 
     p += dp;
 

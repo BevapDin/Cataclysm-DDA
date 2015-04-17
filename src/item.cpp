@@ -3448,14 +3448,10 @@ int item::noise() const
     if( gunmod != nullptr ) {
         return gunmod->noise();
     }
-    // TODO: use islot_gun::loudness here.
-    int ret = 0;
+    const islot_gun* gun = type->gun.get();
+    int ret = gun->loudness;
     if( has_curammo() ) {
-        ret = get_curammo()->ammo->damage;
-    }
-    ret *= .8;
-    if (ret >= 5) {
-        ret += 20;
+        ret += get_curammo()->ammo->damage;
     }
     for( auto &elem : contents ) {
         if( elem.is_gunmod() ) {
@@ -3765,7 +3761,7 @@ int item::pick_reload_ammo( const player &u, bool interactive )
     amenu.query();
     if( amenu.ret < 0 || amenu.ret >= ( int )ammo_list.size() ) {
         // invalid selection / escaped from the menu
-        return -1;
+        return INT_MIN + 2;
     }    
     const auto &selected = ammo_list[ amenu.ret ];
     uistate.lastreload[ ammo_type() ] = std::get<0>( selected )->id;
