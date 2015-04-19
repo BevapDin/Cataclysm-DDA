@@ -3,6 +3,9 @@
 #include "translations.h"
 #include "game.h"
 #include "crafting_inventory_t.h"
+#include "map.h"
+#include "debug.h"
+#include "inventory.h"
 #include "output.h"
 #include "itype.h"
 #include <sstream>

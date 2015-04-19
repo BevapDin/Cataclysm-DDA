@@ -1,5 +1,6 @@
 #include "iuse.h"
 #include "game.h"
+#include "map.h"
 #include "mapdata.h"
 #include "output.h"
 #include "debug.h"
@@ -630,7 +631,7 @@ int iuse::raw_meat(player *p, item *it, bool, point)
         p->add_effect("tapeworm", 1, num_bp, true);
     }
     if ((one_in(64)) && !(p->has_effect("bloodworms") || p->has_bionic("bio_digestion") ||
-                          p->has_trait("PARAIMMUNE"))) {
+                          p->has_trait("PARAIMMUNE") || p->has_trait("ACIDBLOOD"))) {
         p->add_effect("bloodworms", 1, num_bp, true);
     }
     if ((one_in(128)) && !(p->has_effect("brainworm") || p->has_bionic("bio_digestion") ||
@@ -652,7 +653,7 @@ int iuse::raw_fat(player *p, item *it, bool, point)
         p->add_effect("tapeworm", 1, num_bp, true);
     }
     if ((one_in(128)) && !(p->has_effect("bloodworms") || p->has_bionic("bio_digestion") ||
-                           p->has_trait("PARAIMMUNE"))) {
+                           p->has_trait("PARAIMMUNE") || p->has_trait("ACIDBLOOD"))) {
         p->add_effect("bloodworms", 1, num_bp, true);
     }
     if ((one_in(128)) && !(p->has_effect("brainworm") || p->has_bionic("bio_digestion") ||
@@ -665,7 +666,7 @@ int iuse::raw_fat(player *p, item *it, bool, point)
 int iuse::raw_bone(player *p, item *it, bool, point)
 {
     if ((one_in(128)) && !(p->has_effect("bloodworms") || p->has_bionic("bio_digestion") ||
-                           p->has_trait("PARAIMMUNE"))) {
+                           p->has_trait("PARAIMMUNE") || p->has_trait("ACIDBLOOD"))) {
         p->add_effect("bloodworms", 1, num_bp, true);
     }
     return it->type->charges_to_use();
@@ -679,7 +680,7 @@ int iuse::raw_fish(player *p, item *it, bool, point)
         p->add_effect("tapeworm", 1, num_bp, true);
     }
     if ((one_in(256)) && !(p->has_effect("bloodworms") || p->has_bionic("bio_digestion") ||
-                           p->has_trait("PARAIMMUNE"))) {
+                           p->has_trait("PARAIMMUNE") || p->has_trait("ACIDBLOOD"))) {
         p->add_effect("bloodworms", 1, num_bp, true);
     }
     if ((one_in(256)) && !(p->has_effect("brainworm") || p->has_bionic("bio_digestion") ||
@@ -701,7 +702,7 @@ int iuse::raw_wildveg(player *p, item *it, bool, point)
         p->add_effect("tapeworm", 1, num_bp, true);
     }
     if ((one_in(256)) && !(p->has_effect("bloodworms") || p->has_bionic("bio_digestion") ||
-                           p->has_trait("PARAIMMUNE"))) {
+                           p->has_trait("PARAIMMUNE") || p->has_trait("ACIDBLOOD"))) {
         p->add_effect("bloodworms", 1, num_bp, true);
     }
     if ((one_in(512)) && !(p->has_effect("brainworm") || p->has_bionic("bio_digestion") ||
@@ -5112,7 +5113,7 @@ int iuse::granade_act(player *, item *it, bool t, point pos)
         switch (effect_roll) {
             case 1:
                 sounds::sound(pos.x, pos.y, 100, _("BUGFIXES!!"));
-                g->draw_explosion(pos.x, pos.y, explosion_radius, c_ltcyan );
+                g->draw_explosion( tripoint( pos, g->get_levz() ), explosion_radius, c_ltcyan );
                 for (int i = -explosion_radius; i <= explosion_radius; i++) {
                     for (int j = -explosion_radius; j <= explosion_radius; j++) {
                         const int zid = g->mon_at(pos.x + i, pos.y + j);
@@ -5127,7 +5128,7 @@ int iuse::granade_act(player *, item *it, bool t, point pos)
 
             case 2:
                 sounds::sound(pos.x, pos.y, 100, _("BUFFS!!"));
-                g->draw_explosion( pos.x, pos.y, explosion_radius, c_green );
+                g->draw_explosion( tripoint( pos, g->get_levz() ), explosion_radius, c_green );
                 for (int i = -explosion_radius; i <= explosion_radius; i++) {
                     for (int j = -explosion_radius; j <= explosion_radius; j++) {
                         const int mon_hit = g->mon_at(pos.x + i, pos.y + j);
@@ -5161,7 +5162,7 @@ int iuse::granade_act(player *, item *it, bool t, point pos)
 
             case 3:
                 sounds::sound(pos.x, pos.y, 100, _("NERFS!!"));
-                g->draw_explosion(pos.x, pos.y, explosion_radius, c_red);
+                g->draw_explosion( tripoint( pos, g->get_levz() ), explosion_radius, c_red);
                 for (int i = -explosion_radius; i <= explosion_radius; i++) {
                     for (int j = -explosion_radius; j <= explosion_radius; j++) {
                         const int mon_hit = g->mon_at(pos.x + i, pos.y + j);
@@ -5194,7 +5195,7 @@ int iuse::granade_act(player *, item *it, bool t, point pos)
 
             case 4:
                 sounds::sound(pos.x, pos.y, 100, _("REVERTS!!"));
-                g->draw_explosion(pos.x, pos.y, explosion_radius, c_pink);
+                g->draw_explosion( tripoint( pos, g->get_levz() ), explosion_radius, c_pink);
                 for (int i = -explosion_radius; i <= explosion_radius; i++) {
                     for (int j = -explosion_radius; j <= explosion_radius; j++) {
                         const int mon_hit = g->mon_at(pos.x + i, pos.y + j);
@@ -5214,7 +5215,7 @@ int iuse::granade_act(player *, item *it, bool t, point pos)
                 break;
             case 5:
                 sounds::sound(pos.x, pos.y, 100, _("BEES!!"));
-                g->draw_explosion(pos.x, pos.y, explosion_radius, c_yellow);
+                g->draw_explosion( tripoint( pos, g->get_levz() ), explosion_radius, c_yellow);
                 for (int i = -explosion_radius; i <= explosion_radius; i++) {
                     for (int j = -explosion_radius; j <= explosion_radius; j++) {
                         if (one_in(5) && -1 == g->mon_at(pos.x + i, pos.y + j) &&
@@ -6044,6 +6045,7 @@ int iuse::vacutainer(player *p, item *it, bool, point)
     }
 
     item blood("blood", calendar::turn);
+    item acid("acid", calendar::turn);
     bool drew_blood = false;
     for( auto &map_it : g->m.i_at(p->posx(), p->posy()) ) {
         if( map_it.is_corpse() &&
@@ -6055,6 +6057,19 @@ int iuse::vacutainer(player *p, item *it, bool, point)
 
     if (!drew_blood && query_yn(_("Draw your own blood?"))) {
         drew_blood = true;
+        if (p->has_trait ("ACIDBLOOD")) {
+            it->put_in(acid);
+            if (one_in(2) && it->damage <= 3){
+                it->damage++;
+                p->add_msg_if_player(m_info, _("Your acidic blood damages the %s!"), it->tname().c_str());
+            }
+            if (!one_in(4) && it->damage >= 4){
+                p->add_msg_if_player(m_info, _("Your acidic blood melts the %s, destroying it!"), it->tname().c_str());
+                p->inv.remove_item(it);
+                return 0;
+            }
+            return it->type->charges_to_use();
+        }
     }
 
     if (!drew_blood) {
@@ -9339,8 +9354,8 @@ int iuse::remoteveh(player *p, item *it, bool t, point pos)
         return 0;
     }
 
-    int px = g->u.view_offset_x;
-    int py = g->u.view_offset_y;
+    int px = g->u.view_offset.x;
+    int py = g->u.view_offset.y;
 
     vehicle* veh = pickveh( pos, choice == 2 );
 
@@ -9365,8 +9380,8 @@ int iuse::remoteveh(player *p, item *it, bool t, point pos)
         return 0;
     }
 
-    g->u.view_offset_x = px;
-    g->u.view_offset_y = py;
+    g->u.view_offset.x = px;
+    g->u.view_offset.y = py;
     return it->type->charges_to_use();
 }
 
@@ -9588,7 +9603,7 @@ int iuse::multicooker(player *p, item *it, bool t, point pos)
             //add some tools and qualities. we can't add this qualities to json, because multicook must be used only by activating, not as component other crafts.
             crafting_inv.add_surround(px, item("hotplate", 0)); //hotplate inside
             crafting_inv.add_surround(px, item("tongs", 0)); //some recipes requires tongs
-            crafting_inv.add_surround(px, item("toolset", 0)); //toolset with CUT and other qualities inside
+            crafting_inv.add_surround(px, item("toolset_knife", 0)); //toolset with CUT and other qualities inside
             crafting_inv.add_surround(px, item("pot", 0)); //good COOK, BOIL, CONTAIN qualities inside
 
             int counter = 1;

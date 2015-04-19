@@ -2,6 +2,8 @@
 #include "messages.h"
 #include "game.h"
 #include "bionics.h"
+#include "debug.h"
+#include "map.h"
 #include "player.h"
 #include "item_factory.h"
 #include "inventory.h"
