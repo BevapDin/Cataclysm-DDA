@@ -5791,6 +5791,7 @@
   "time": 24000,
   "reversible": false,
   "autolearn": true,
+  "batch_time_factors": [ 90, 1 ],
   "qualities":[
     {"id":"CHEM","level":2,"amount":1}
   ], "tools": [
@@ -5882,6 +5883,7 @@
   "reversible": false,
   "autolearn": false,
   "book_learn": [["adv_chemistry", 7] , ["textbook_chemistry", 8] , ["recipe_labchem", 6]],
+  "batch_time_factors": [ 90, 1 ],
   "qualities":[
     {"id":"CHEM","level":2,"amount":1}
   ], "tools": [
@@ -7002,6 +7004,7 @@
   "reversible": false,
   "autolearn": true,
   "book_learn": [ ["brewing_cookbook", 2] ],
+  "batch_time_factors": [ 90, 1 ],
   "qualities":[
     {"id":"BREW","level":2,"amount":1}
   ], "tools": [
@@ -7024,6 +7027,7 @@
   "reversible": false,
   "autolearn": false,
   "book_learn": [ ["brewing_cookbook", 5], [ "scots_cookbook", 5 ] ],
+  "batch_time_factors": [ 90, 1 ],
   "qualities":[
     {"id":"BREW","level":2,"amount":1}
   ], "tools": [
@@ -7055,6 +7059,7 @@
   "reversible": false,
   "autolearn": false,
   "book_learn": [ ["brewing_cookbook", 6] ],
+  "batch_time_factors": [ 90, 1 ],
   "qualities":[
     {"id":"BREW","level":2,"amount":1}
   ], "tools": [
@@ -7084,6 +7089,7 @@
   "reversible": false,
   "autolearn": false,
   "book_learn": [ ["brewing_cookbook", 4] ],
+  "batch_time_factors": [ 90, 1 ],
   "qualities":[
     {"id":"BREW","level":2,"amount":1}
   ], "tools": [
@@ -7115,6 +7121,7 @@
   "reversible": false,
   "autolearn": false,
   "book_learn": [ ["brewing_cookbook", 1], ["family_cookbook", 1] ],
+  "batch_time_factors": [ 90, 1 ],
   "tools": [
     [ [ "still", -1], [ "v6_combustion", -1], [ "v8_combustion", -1]],
     [ [ "hotplate", 10 ], [ "char_smoker", 1 ], [ "toolset", 10 ], [ "fire", -1 ] ]
@@ -7145,6 +7152,7 @@
   "reversible": false,
   "autolearn": true,
   "book_learn": [ ["brewing_cookbook", 1], ["family_cookbook", 2] ],
+  "batch_time_factors": [ 90, 1 ],
   "qualities":[
     {"id":"BREW","level":1,"amount":1}
   ], "tools": [
@@ -7182,6 +7190,7 @@
   "reversible": false,
   "autolearn": true,
   "book_learn": [ ["brewing_cookbook", 1], ["family_cookbook", 2] ],
+  "batch_time_factors": [ 90, 1 ],
   "qualities":[
     {"id":"BREW","level":1,"amount":1}
   ], "tools": [
@@ -7217,6 +7226,7 @@
   "reversible": false,
   "autolearn": true,
   "book_learn": [ ["brewing_cookbook", 2] ],
+  "batch_time_factors": [ 90, 1 ],
   "qualities":[
     {"id":"BREW","level":2,"amount":1}
   ], "tools": [
@@ -7248,6 +7258,7 @@
   "reversible": false,
   "autolearn": false,
   "book_learn": [ ["brewing_cookbook", 4] ],
+  "batch_time_factors": [ 90, 1 ],
   "qualities":[
     {"id":"BREW","level":2,"amount":1}
   ], "tools": [
