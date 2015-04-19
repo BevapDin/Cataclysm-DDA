@@ -1245,6 +1245,26 @@ void item::deserialize(JsonObject &data)
 
     data.read("contents", contents);
     data.read("components", components);
+
+    if( charges == 1 && !count_by_charges() && !is_gun() && !is_tool() && item( type->id, false ).charges == -1 ) {
+        charges = -1;
+    } else if( charges == 0 && count_by_charges() ) {
+        charges = item( type->id, 0 ).charges;
+    }
+    if( type->container && type->container->preserves ) {
+        for( auto & itm : contents ) {
+            itm.bday = bday;
+            itm.last_rot_check = calendar::turn;
+            itm.rot = 0;
+        }
+    }
+    if( type->container && type->container->preserves && type->container->seals ) {
+        for( auto & itm : contents ) {
+            itm.bday = bday;
+            itm.last_rot_check = calendar::turn;
+            itm.rot = 0;
+        }
+    }
 }
 
 void item::serialize(JsonOut &json, bool save_contents) const
