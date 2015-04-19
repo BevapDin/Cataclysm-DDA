@@ -6147,6 +6147,25 @@ void map::actualize( const int gridx, const int gridy, const int gridz )
             if( do_funnels ) {
                 fill_funnels( pnt );
             }
+            auto &fields = tmpsub->fld[x][y];
+            for( auto & fld : fields ) {
+                auto &cur = fld.second;
+                switch( cur.getFieldType() ) {
+                    case fd_blood:
+                    case fd_blood_veggy:
+                    case fd_blood_insect:
+                    case fd_blood_invertebrate:
+                    case fd_bile:
+                    case fd_gibs_flesh:
+                    case fd_gibs_veggy:
+                    case fd_gibs_insect:
+                    case fd_gibs_invertebrate:
+                        cur.setFieldAge( cur.getFieldAge() + time_since_last_actualize );
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             grow_plant( pnt );
 
