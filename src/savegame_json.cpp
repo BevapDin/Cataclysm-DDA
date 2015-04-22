@@ -4,7 +4,7 @@
 #include "bionics.h"
 #include "mission.h"
 #include "game.h"
-#include "disease.h"
+#include "rng.h"
 #include "addiction.h"
 #include "moraledata.h"
 #include "inventory.h"
@@ -20,7 +20,6 @@
 #include "name.h"
 #include "cursesdef.h"
 #include "catacharset.h"
-#include "disease.h"
 #include "crafting.h"
 #include "get_version.h"
 #include "monstergenerator.h"
@@ -285,12 +284,6 @@ void player::load(JsonObject &data)
     }
 
     data.read("ma_styles", ma_styles);
-    // Just too many changes here to maintain compatibility, so older characters get a free
-    // diseases wipe. Since most long lasting diseases are bad, this shouldn't be too bad for them.
-    if(savegame_loading_version >= 23) {
-        data.read("illness", illness);
-    }
-
     data.read( "addictions", addictions );
 
     JsonArray traps = data.get_array("known_traps");
@@ -363,10 +356,6 @@ void player::store(JsonOut &json) const
         ptmpvect.push_back( pv( ma_styles[i] ) );
     }*/
     json.member( "ma_styles", ma_styles );
-
-    // disease
-    json.member( "illness", illness );
-
     // "Looks like I picked the wrong week to quit smoking." - Steve McCroskey
     json.member( "addictions", addictions );
 
@@ -1203,6 +1192,8 @@ void item::deserialize(JsonObject &data)
         // There was a bug that set all comestibles active, this reverses that.
         active = false;
     }
+
+    data.read("techniques", techniques);
     // We need item tags here to make sure HOT/COLD food is active
     // and bugged WET towels get reactivated
     data.read("item_tags", item_tags);
@@ -1325,6 +1316,10 @@ void item::serialize(JsonOut &json, bool save_contents) const
     }
     if ( mission_id != -1 ) {
         json.member( "mission_id", mission_id );
+    }
+
+    if ( ! techniques.empty() ) {
+        json.member( "techniques", techniques );
     }
 
     if ( ! item_tags.empty() ) {
