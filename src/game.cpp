@@ -71,6 +71,10 @@
 #include <iterator>
 #include <ctime>
 
+#if !(defined _WIN32 || defined WINDOWS || defined TILES)
+#include <langinfo.h>
+#endif
+
 #if (defined _WIN32 || defined __WIN32__)
 #   include "platform_win.h"
 #   include <tchar.h>
@@ -2239,9 +2243,9 @@ input_context game::get_player_input(std::string &action)
                         if( elem.getStep() > 0 ) {
                             for( size_t i = 0; i < elem.getText().length(); ++i ) {
                                 if( u.sees( elem.getPosX() + i, elem.getPosY() ) ) {
-                                    m.drawsq( w_terrain, u, 
+                                    m.drawsq( w_terrain, u,
                                               tripoint( elem.getPosX() + i, elem.getPosY(), u.posz() + u.view_offset.z ),
-                                              false, true, u.pos3() + u.view_offset );
+                                              false, true, u.posx() + u.view_offset.x, u.posy() + u.view_offset.y );
                                 } else {
                                     const int iDY =
                                         POSY + ( elem.getPosY() - ( u.posy() + u.view_offset.y ) );
@@ -3265,6 +3269,11 @@ int &game::scent(int x, int y)
     return grscent[x][y];
 }
 
+int &game::scent( const tripoint &p ) // A wrapper for now
+{
+    return scent( p.x, p.y );
+}
+
 void game::update_scent()
 {
     static point player_last_position = point(u.posx(), u.posy());
@@ -3903,7 +3912,7 @@ void game::debug()
                       _("Increase all skills"),    // 11
                       _("Learn all melee styles"), // 12
                       _("Unlock all recipes"),     // 13
-                      _("Check NPC"),              // 14
+                      _("Edit player/NPC"),        // 14
                       _("Spawn Artifact"),         // 15
                       _("Spawn Clairvoyance Artifact"), //16
                       _("Map editor"), // 17
@@ -4100,62 +4109,163 @@ void game::debug()
     case 14: {
         point pos = look_around();
         int npcdex = npc_at(pos.x, pos.y);
-        if (npcdex == -1) {
-            popup(_("No NPC there."));
+        if( npcdex == -1 && pos != u.pos() ) {
+            popup(_("No character there."));
         } else {
-            std::stringstream data;
-            npc *p = active_npc[npcdex];
+            player &p = npcdex != -1 ? *active_npc[npcdex] : u;
+            // The NPC is also required for "Add mission", so has to be in this scope
+            npc *np = npcdex != -1 ? active_npc[npcdex] : nullptr;
             uimenu nmenu;
             nmenu.return_invalid = true;
-            data << p->name << " " << (p->male ? _("Male") : _("Female")) << std::endl;
 
-            data << npc_class_name(p->myclass) << "; " <<
-                 npc_attitude_name(p->attitude) << std::endl;
-            if (p->has_destination()) {
-                data << string_format(_("Destination: %d:%d (%s)"),
-                        p->goal.x, p->goal.y,
-                        otermap[overmap_buffer.ter(p->goal)].name.c_str()) << std::endl;
+            if( p.is_npc() ) {
+                std::stringstream data;
+                data << np->name << " " << ( np->male ? _("Male") : _("Female") ) << std::endl;
+                data << npc_class_name(np->myclass) << "; " <<
+                     npc_attitude_name(np->attitude) << std::endl;
+                if (np->has_destination()) {
+                    data << string_format(_("Destination: %d:%d%d (%s)"),
+                            np->goal.x, np->goal.y, np->goal.z,
+                            otermap[overmap_buffer.ter(np->goal)].name.c_str()) << std::endl;
+                } else {
+                    data << _("No destination.") << std::endl;
+                }
+                data << string_format(_("Trust: %d"), np->op_of_u.trust) << " "
+                     << string_format(_("Fear: %d"), np->op_of_u.fear) << " "
+                     << string_format(_("Value: %d"), np->op_of_u.value) << " "
+                     << string_format(_("Anger: %d"), np->op_of_u.anger) << " "
+                     << string_format(_("Owed: %d"), np->op_of_u.owed) << std::endl;
+
+                data << string_format(_("Aggression: %d"), int(np->personality.aggression)) << " "
+                     << string_format(_("Bravery: %d"), int(np->personality.bravery)) << " "
+                     << string_format(_("Collector: %d"), int(np->personality.collector)) << " "
+                     << string_format(_("Altruism: %d"), int(np->personality.altruism)) << std::endl;
+
+                nmenu.text = data.str();
             } else {
-                data << _("No destination.") << std::endl;
+                nmenu.text = _("Player");
             }
-            data << string_format(_("Trust: %d"), p->op_of_u.trust) << " "
-                 << string_format(_("Fear: %d"), p->op_of_u.fear) << " "
-                 << string_format(_("Value: %d"), p->op_of_u.value) << " "
-                 << string_format(_("Anger: %d"), p->op_of_u.anger) << " "
-                 << string_format(_("Owed: %d"), p->op_of_u.owed) << std::endl;
 
-            data << string_format(_("Aggression: %d"), int(p->personality.aggression)) << " "
-                 << string_format(_("Bravery: %d"), int(p->personality.bravery)) << " "
-                 << string_format(_("Collector: %d"), int(p->personality.collector)) << " "
-                 << string_format(_("Altruism: %d"), int(p->personality.altruism)) << std::endl;
-
-            nmenu.text = data.str();
-            nmenu.addentry(0, true, 's', "%s", _("Edit [s]kills"));
-            nmenu.addentry(1, true, 'i', "%s", _("Grant [i]tems"));
-            nmenu.addentry(2, true, 'h', "%s", _("Cause [h]urt (to torso)"));
-            nmenu.addentry(3, true, 'p', "%s", _("Cause [p]ain"));
-            nmenu.addentry(4, true, '@', "%s", _("Status Window [@]"));
-            nmenu.addentry(5, true, 'm', "%s", _("Add mission"));
-            nmenu.addentry(999, true, 'q', "%s", _("[q]uit"));
+            enum { D_SKILLS, D_STATS, D_ITEMS, D_HURT, D_PAIN, D_NEEDS, D_STATUS, D_MISSION };
+            nmenu.addentry( D_SKILLS, true, 's', "%s", _("Edit [s]kills") );
+            nmenu.addentry( D_STATS, true, 't', "%s", _("Edit s[t]ats") );
+            nmenu.addentry( D_ITEMS, true, 'i', "%s", _("Grant [i]tems"));
+            nmenu.addentry( D_HURT, true, 'h', "%s", _("Cause [h]urt (to torso)") );
+            nmenu.addentry( D_PAIN, true, 'p', "%s", _("Cause [p]ain") );
+            nmenu.addentry( D_NEEDS, true, 'n', "%s", _("Set [n]eeds") );
+            nmenu.addentry( D_STATUS, true, '@', "%s", _("Status Window [@]") );
+            if( p.is_npc() ) {
+                nmenu.addentry( D_MISSION, true, 'm', "%s", _("Add [m]ission") );
+            }
+            nmenu.addentry( 999, true, 'q', "%s", _("[q]uit") );
             nmenu.selected = 0;
             nmenu.query();
             switch (nmenu.ret) {
-            case 0:
-                wishskill(p);
+            case D_SKILLS:
+                wishskill(&p);
                 break;
-            case 1:
-                wishitem(p);
+            case D_STATS:
+            {
+                uimenu smenu;
+                smenu.addentry( 0, true, 's', "%s: %d", _("Current strength"), p.str_cur );
+                smenu.addentry( 1, true, 'd', "%s: %d", _("Current dexterity"), p.dex_cur );
+                smenu.addentry( 2, true, 'i', "%s: %d", _("Current intelligence"), p.int_cur );
+                smenu.addentry( 3, true, 'p', "%s: %d", _("Current perception"), p.per_cur );
+                smenu.addentry( 4, true, 'S', "%s: %d", _("Maximum strength"), p.str_max );
+                smenu.addentry( 5, true, 'D', "%s: %d", _("Maximum dexterity"), p.dex_max );
+                smenu.addentry( 6, true, 'I', "%s: %d", _("Maximum intelligence"), p.int_max );
+                smenu.addentry( 7, true, 'I', "%s: %d", _("Maximum perception"), p.per_max );
+                smenu.addentry( 999, true, 'q', "%s", _("[q]uit") );
+                smenu.selected = 0;
+                smenu.query();
+                int *stat_ptr = nullptr;
+                switch( smenu.ret ) {
+                case 0:
+                    stat_ptr = &p.str_cur;
+                    break;
+                case 1:
+                    stat_ptr = &p.dex_cur;
+                    break;
+                case 2:
+                    stat_ptr = &p.int_cur;
+                    break;
+                case 3:
+                    stat_ptr = &p.per_cur;
+                    break;
+                case 4:
+                    stat_ptr = &p.str_max;
+                    break;
+                case 5:
+                    stat_ptr = &p.dex_max;
+                    break;
+                case 6:
+                    stat_ptr = &p.int_max;
+                    break;
+                case 7:
+                    stat_ptr = &p.per_max;
+                    break;
+                default:
+                    break;
+                }
+
+                if( stat_ptr != nullptr ) {
+                    int value = query_int( "Set the stat to? Currently: %d", *stat_ptr );
+                    if( value >= 0 ) {
+                        *stat_ptr = value;
+                    }
+                }
+            }
                 break;
-            case 2:
-                p->apply_damage( nullptr, bp_torso, 20 );
+            case D_ITEMS:
+                wishitem(&p);
                 break;
-            case 3:
-                p->mod_pain(20);
+            case D_HURT:
+            {
+                int dbg_damage = query_int( "Damage NPC for how much? hp: %d", p.hp_cur[hp_torso] );
+                p.apply_damage( nullptr, bp_torso, dbg_damage );
+            }
                 break;
-            case 4:
-                p->disp_info();
+            case D_PAIN:
+            {
+                int dbg_damage = query_int( "Cause how much pain? pain: %d", p.pain );
+                p.mod_pain(dbg_damage);
+            }
                 break;
-            case 5:
+            case D_NEEDS:
+            {
+                uimenu smenu;
+                smenu.addentry( 0, true, 'h', "%s: %d", _("Hunger"), p.hunger );
+                smenu.addentry( 1, true, 't', "%s: %d", _("Thirst"), p.thirst );
+                smenu.addentry( 2, true, 'f', "%s: %d", _("Fatigue"), p.fatigue );
+                smenu.addentry( 999, true, 'q', "%s", _("[q]uit") );
+                smenu.selected = 0;
+                smenu.query();
+                int *stat_ptr = nullptr;
+                switch( smenu.ret ) {
+                case 0:
+                    stat_ptr = &p.hunger;
+                    break;
+                case 1:
+                    stat_ptr = &p.thirst;
+                    break;
+                case 2:
+                    stat_ptr = &p.fatigue;
+                    break;
+                default:
+                    break;
+                }
+
+                if( stat_ptr != nullptr ) {
+                    int value = query_int( "Set the value to? Currently: %d", *stat_ptr );
+                    // No cancelling here
+                    *stat_ptr = value;
+                }
+            }
+                break;
+            case D_STATUS:
+                p.disp_info();
+                break;
+            case D_MISSION:
                 {
                     uimenu types;
                     types.text = _( "Choose mission type" );
@@ -4165,7 +4275,7 @@ void game::debug()
                     types.addentry( INT_MAX, true, -1, _( "Cancel" ) );
                     types.query();
                     if( types.ret != INT_MAX ) {
-                        p->add_new_mission( mission::reserve_new( static_cast<mission_type_id>( types.ret ), p->getID() ) );
+                        np->add_new_mission( mission::reserve_new( static_cast<mission_type_id>( types.ret ), np->getID() ) );
                     }
                 }
                 break;
@@ -4276,7 +4386,7 @@ void game::debug()
     break;
     case 26:
     {
-        int time = std::atoi( string_input_popup( _("Set the time to? (One day is 19200)"), 
+        int time = std::atoi( string_input_popup( _("Set the time to? (One day is 19200)"),
                                                   20, to_string( (int)calendar::turn ) ).c_str() );
         if( time > 0 ) {
             calendar::turn = time;
@@ -5872,7 +5982,7 @@ void game::monmove()
         }
 
         monster &critter = critter_tracker.find(i);
-        while (!critter.is_dead() && !critter.can_move_to(critter.posx(), critter.posy())) {
+        while (!critter.is_dead() && !critter.can_move_to(critter.pos3())) {
             // If we can't move to our current position, assign us to a new one
                 dbg(D_ERROR) << "game:monmove: " << critter.name().c_str()
                              << " can't move to its location! (" << critter.posx()
@@ -5886,8 +5996,9 @@ void game::monmove()
             int starty = critter.posy() - 3 * ydir, endy = critter.posy() + 3 * ydir;
             for (int x = startx; x != endx && !okay; x += xdir) {
                 for (int y = starty; y != endy && !okay; y += ydir) {
-                    if (critter.can_move_to(x, y) && is_empty(x, y)) {
-                        critter.setpos(x, y);
+                    tripoint dest( x, y, get_levz() );
+                    if (critter.can_move_to( dest ) && is_empty( dest )) {
+                        critter.setpos( dest );
                         okay = true;
                     }
                 }
@@ -5948,26 +6059,31 @@ void game::monmove()
 
     // Now, do active NPCs.
     for( auto &elem : active_npc ) {
-        if( elem->is_dead() ) {
+        npc &np = *elem;
+        if( np.is_dead() ) {
             continue;
         }
         int turns = 0;
         m.creature_in_field( *elem );
-            ( elem )->process_turn();
-            while( !( elem )->is_dead() && ( elem )->moves > 0 && turns < 10 ) {
-                int moves = ( elem )->moves;
-                ( elem )->move();
-                if( moves == ( elem )->moves ) {
-                    // Count every time we exit npc::move() without spending any moves.
-                    turns++;
-                }
+        np.process_turn();
+        while( !np.is_dead() && !np.in_sleep_state() && np.moves > 0 && turns < 10 ) {
+            int moves = np.moves;
+            np.move();
+            if( moves == np.moves ) {
+                // Count every time we exit npc::move() without spending any moves.
+                turns++;
             }
-            // If we spun too long trying to decide what to do (without spending moves),
-            // Invoke cranial detonation to prevent an infinite loop.
-            if (turns == 10) {
-                add_msg( _( "%s's brain explodes!" ), ( elem )->name.c_str() );
-                ( elem )->die( nullptr );
-            }
+        }
+        // If we spun too long trying to decide what to do (without spending moves),
+        // Invoke cranial detonation to prevent an infinite loop.
+        if( turns == 10 ) {
+            add_msg( _( "%s's brain explodes!" ), np.name.c_str() );
+            np.die( nullptr );
+        }
+
+        if( !np.is_dead() ) {
+            np.process_active_items();
+        }
     }
     cleanup_dead();
 }
@@ -6018,7 +6134,6 @@ void game::do_blast( const tripoint &p, const int power, const int radius, const
                 n->deal_damage( nullptr, bp_leg_r, damage_instance( DT_BASH, rng( dam / 3, dam ) ) );
                 n->deal_damage( nullptr, bp_arm_l, damage_instance( DT_BASH, rng( dam / 3, dam ) ) );
                 n->deal_damage( nullptr, bp_arm_r, damage_instance( DT_BASH, rng( dam / 3, dam ) ) );
-                n->check_dead_state();
             }
             if (fire) {
                 m.add_field(i, j, fd_fire, dam / 10);
@@ -6086,7 +6201,6 @@ void game::explosion( const tripoint &p, int power, int shrapnel, bool fire, boo
                 monster &critter = critter_tracker.find(zid);
                 dam -= critter.get_armor_cut(bp_torso);
                 critter.apply_damage( nullptr, bp_torso, dam );
-                critter.check_dead_state();
             } else if( npcdex != -1 ) {
                 body_part hit = random_body_part();
                 // TODO: why is this different for NPC vs player character?
@@ -6096,13 +6210,11 @@ void game::explosion( const tripoint &p, int power, int shrapnel, bool fire, boo
                     dam = rng(long(1.5 * dam), 3 * dam);
                 }
                 active_npc[npcdex]->deal_damage( nullptr, hit, damage_instance( DT_CUT, dam ) );
-                active_npc[npcdex]->check_dead_state();
             } else if (tx == u.posx() && ty == u.posy()) {
                 body_part hit = random_body_part();
                 //~ %s is bodypart name in accusative.
                 add_msg(m_bad, _("Shrapnel hits your %s!"), body_part_name_accusative(hit).c_str());
                 u.deal_damage( nullptr, hit, damage_instance( DT_CUT, dam ) );
-                u.check_dead_state();
             } else {
                 std::set<std::string> shrapnel_effects;
                 m.shoot( tripoint( tx, ty, u.posz() ), dam, j == traj.size() - 1, shrapnel_effects);
@@ -6785,6 +6897,15 @@ Creature const* game::critter_at( const tripoint &p ) const
     return const_cast<game*>(this)->critter_at( p );
 }
 
+bool game::summon_mon( const std::string id, const tripoint &p )
+{
+    monster mon(GetMType(id));
+    // Set their last upgrade check to the current day.
+    mon.reset_last_load();
+    mon.spawn(p);
+    return add_zombie(mon);
+}
+
 bool game::add_zombie(monster &critter)
 {
     if( !m.inbounds( critter.posx(), critter.posy(), critter.posz() ) ) {
@@ -6859,6 +6980,11 @@ int game::mon_at(point p) const
 int game::mon_at( const tripoint &p ) const
 {
     return critter_tracker.mon_at( p );
+}
+
+monster *game::monster_at(const tripoint &p)
+{
+    return &zombie(critter_tracker.mon_at(p));
 }
 
 void game::rebuild_mon_at_cache()
@@ -7788,7 +7914,7 @@ bool pet_menu(monster *z)
             }
 
             int x = z->posx(), y = z->posy(), zpos = z->posz();
-            z->move_to(g->u.posx(), g->u.posy(), true); // TODO: Use player zpos here
+            z->move_to( g->u.pos3(), true);
             g->u.setx( x );
             g->u.sety( y );
             g->u.setz( zpos );
@@ -7820,7 +7946,7 @@ bool pet_menu(monster *z)
 
         int deltax = z->posx() - g->u.posx(), deltay = z->posy() - g->u.posy();
 
-        z->move_to(z->posx() + deltax, z->posy() + deltay);
+        z->move_to( tripoint( z->posx() + deltax, z->posy() + deltay, z->posz() ) );
 
         return true;
     }
@@ -8227,10 +8353,10 @@ void game::print_object_info( const tripoint &lp, WINDOW *w_look, const int colu
         mvwprintw(w_look, line++, column, _("There is a %s there. Parts:"), veh->name.c_str());
         line = veh->print_part_desc(w_look, line, (mouse_hover) ? getmaxx(w_look) : 48, veh_part);
         if (!mouse_hover) {
-            m.drawsq( w_terrain, u, lp, true, true, lp );
+            m.drawsq( w_terrain, u, lp, true, true, lp.x, lp.y );
         }
     } else if (!mouse_hover) {
-        m.drawsq(w_terrain, u, lp, true, true, lp );
+        m.drawsq(w_terrain, u, lp, true, true, lp.x, lp.y );
     }
     handle_multi_item_info( lp, w_look, column, line, mouse_hover );
 }
@@ -8621,7 +8747,8 @@ void game::zones_manager()
                                          tripoint( iX, iY, u.posz() + u.view_offset.z ),
                                          false,
                                          false,
-                                         u.pos3() + u.view_offset );
+                                         u.posx() + u.view_offset.x,
+                                         u.posy() + u.view_offset.y );
                             } else {
                                 if (u.has_effect("boomered")) {
                                     mvwputch(w_terrain, iY - offset_y, iX - offset_x, c_magenta, '#');
@@ -11726,7 +11853,7 @@ bool game::plmove(int dx, int dy)
             if (!query_yn(_("Really attack %s?"), active_npc[npcdex]->name.c_str())) {
                 if (active_npc[npcdex]->is_friend()) {
                     add_msg(_("%s moves out of the way."), active_npc[npcdex]->name.c_str());
-                    active_npc[npcdex]->move_away_from(u.posx(), u.posy());
+                    active_npc[npcdex]->move_away_from( u.pos3() );
                 }
 
                 return false; // Cancel the attack
@@ -12274,8 +12401,7 @@ bool game::plmove(int dx, int dy)
         if (displace) { // We displaced a friendly monster!
             // Immobile monsters can't be displaced.
             monster &critter = zombie(mondex);
-            critter.move_to(u.posx(), u.posy(),
-                            true); // Force the movement even though the player is there right now.
+            critter.move_to(u.pos3(), true); // Force the movement even though the player is there right now.
             add_msg(_("You displace the %s."), critter.name().c_str());
         } // displace == true
 
@@ -13300,8 +13426,9 @@ void game::update_stair_monsters()
                 pushx = rng(-1, 1), pushy = rng(-1, 1);
                 int iposx = mposx + pushx;
                 int iposy = mposy + pushy;
-                if ((pushx != 0 || pushy != 0) && (mon_at(iposx, iposy) == -1) &&
-                    critter.can_move_to(iposx, iposy)) {
+                tripoint pos( iposx, iposy, get_levz() );
+                if ((pushx != 0 || pushy != 0) && (mon_at(pos) == -1) &&
+                    critter.can_move_to( pos )) {
                     bool resiststhrow = (u.is_throw_immune()) ||
                                         (u.has_trait("LEG_TENT_BRACE"));
                     if (resiststhrow && one_in(player_throw_resist_chance)) {
@@ -13358,10 +13485,11 @@ void game::update_stair_monsters()
                 pushy = rng(-1, 1);
                 int iposx = mposx + pushx;
                 int iposy = mposy + pushy;
+                tripoint pos( iposx, iposy, get_levz() );
                 if ((pushx == 0 && pushy == 0) || ((iposx == u.posx()) && (iposy == u.posy()))) {
                     continue;
                 }
-                if ((mon_at(iposx, iposy) == -1) && other.can_move_to(iposx, iposy)) {
+                if ((mon_at(pos) == -1) && other.can_move_to(pos)) {
                     other.setpos( iposx, iposy, get_levz() );
                     other.moves -= 50;
                     std::string msg = "";
@@ -13982,36 +14110,12 @@ void intro()
     }
     werase(tmp);
 
-/*                      *** NOTE ***
- * Not all locale are equal! Gentoo Linux, for instance,
- * reports ${LANG} for UTF-8 as "en_US.utf8"! Be aware!
- */
 #if !(defined _WIN32 || defined WINDOWS || defined TILES)
-    // Check if locale has UTF-8 encoding
-    const char *p_locale = setlocale(LC_ALL, NULL);
-    bool not_utf8 = p_locale == NULL ? true : false;
-    if(not_utf8 == false) {
-        std::string locale = p_locale;
-        // convert all to uppercase
-        for(size_t i = 0; i < locale.length(); ++i)
-            locale[i] = toupper(locale[i]);
-        auto index = locale.find("UTF");
-        // were we able to find those three magical letters?
-        not_utf8 = index == std::string::npos ? true : false;
-        if(not_utf8 == false) {
-            // replace entirety of string with important part
-            locale.erase(0, index);
-            // afterwards, it should simply be UTF8
-            index = locale.find('-');
-            if(index != std::string::npos)
-                locale.erase(index, 1);
-            // anything but zero indicates failure
-            not_utf8 = locale.compare("UTF8") != 0;
-        }
-    }
-    if (not_utf8 == true) {
-        const char *unicode_error_msg =
-            _("You don't seem to have a valid Unicode locale. You may see some weird "
+    // Check whether LC_CTYPE supports the UTF-8 encoding
+    // and show a warning if it doesn't
+    if (strcmp(nl_langinfo(CODESET), "UTF-8") != 0) {
+        const char *unicode_error_msg = 
+            _("You don't seem to have a valid Unicode locale. You may see some weird " 
               "characters (e.g. empty boxes or question marks). You have been warned.");
         fold_and_print(tmp, 0, 0, maxx, c_white, unicode_error_msg, minWidth, minHeight, maxx, maxy);
         wrefresh(tmp);
