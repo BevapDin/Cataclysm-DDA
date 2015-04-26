@@ -17,7 +17,7 @@
       ],
       [
         [ "fire", -1 ],
-        [ "func:press", 2 ]
+        [ "func:press", 2 ],
         [ "hotplate", 2 ],
         [ "char_smoker", 1 ]
       ]
@@ -62,7 +62,7 @@
     ],
     [
       [ "fire", -1 ],
-      [ "func:press", 2 ]
+      [ "func:press", 2 ],
       [ "hotplate", 2 ],
       [ "char_smoker", 1 ]
     ]
@@ -108,7 +108,7 @@
     ],
     [
       [ "fire", -1 ],
-      [ "func:press", 2 ]
+      [ "func:press", 2 ],
       [ "hotplate", 2 ],
       [ "char_smoker", 1 ]
     ]
@@ -149,7 +149,7 @@
   "book_learn": [[ "recipe_bullets", 2]],
   "tools": [
   [
-      [ "func:forge", 50]
+      [ "func:forge", 50],
       [ "oxy_torch", 10 ]
   ],
   [
