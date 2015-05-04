@@ -3,6 +3,9 @@
 #include "debug.h"
 #include "overmapbuffer.h"
 #include "crafting_inventory_t.h"
+#include "translations.h"
+#include "requirements.h"
+#include "overmap.h"
 
 #include <fstream>
 #include <sstream>

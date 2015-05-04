@@ -8,6 +8,10 @@
 #include "item_factory.h"
 #include "inventory.h"
 #include "crafting.h"
+#include "translations.h"
+#include "veh_type.h"
+#include "ui.h"
+#include <cstring>
 #include <algorithm>
 #include <cmath>
 #include <cassert>
