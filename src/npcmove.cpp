@@ -223,7 +223,7 @@ struct pcomp_dist_to_u {
 };
 
 int find_nice_seat(vehicle *veh) {
-    pcomp_dist_to_u comp{ veh, g->u.pos() };
+    pcomp_dist_to_u comp{ veh, g->u.pos2() };
 
     std::vector<int> boardable;
     std::vector<int> belted;
