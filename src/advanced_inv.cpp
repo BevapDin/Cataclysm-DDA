@@ -1076,7 +1076,7 @@ void advanced_inventory::redraw_pane( side p )
 }
 
 std::unique_ptr<item_stack> stack_ptr(advanced_inv_area &s) {
-    if( ( s.id == AIM_DRAGGED) && s.can_store_in_vehicle() ) {
+    if( s.can_store_in_vehicle() ) {
         return std::unique_ptr<item_stack>( new vehicle_stack( s.veh->get_items(s.vstor) ) );
     } else {
         return std::unique_ptr<item_stack>( new map_stack( g->m.i_at( s.pos ) ) );
@@ -1089,7 +1089,8 @@ aim_location advanced_inventory::find_destination(const advanced_inv_listitem &i
     const itype *cont = it.it->contents.empty() ? NULL : it.it->contents.front().type;
     aim_location result = AIM_ALL;
     for( auto &s : squares ) {
-        if( s.id == AIM_INVENTORY || s.id == AIM_DRAGGED || s.id == AIM_ALL || s.id == AIM_CONTAINER ) {
+        if( s.id == AIM_INVENTORY || s.id == AIM_DRAGGED || s.id == AIM_ALL ||
+            s.id == AIM_CONTAINER || s.id == AIM_WORN ) {
             continue;
         }
         if( !s.canputitemsloc || s.is_same( squares[it.area] ) ) {
@@ -1352,7 +1353,6 @@ void advanced_inventory::display()
     ctxt.register_action( "ITEMS_AROUND" );
     ctxt.register_action( "ITEMS_DRAGGED_CONTAINER" );
     ctxt.register_action( "ITEMS_CONTAINER" );
-    ctxt.register_action( "ITEMS_VEHICLE" );
     ctxt.register_action( "SWAP" );
     ctxt.register_action( "AUTO_MOVE" );
 

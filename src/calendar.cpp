@@ -43,7 +43,9 @@ calendar::operator int() const
 
 calendar &calendar::operator =(int rhs)
 {
-    return operator=( calendar( rhs ) );
+    turn_number = rhs;
+    sync();
+    return *this;
 }
 
 calendar &calendar::operator -=(const calendar &rhs)
