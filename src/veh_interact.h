@@ -83,7 +83,7 @@ class veh_interact
         bool has_jack;
         bool has_siphon;
         bool has_wheel;
-        std::auto_ptr<crafting_inventory_t> crafting_inv;
+        std::unique_ptr<crafting_inventory_t> crafting_inv;
         input_context main_context;
 
         int part_at(int dx, int dy);
