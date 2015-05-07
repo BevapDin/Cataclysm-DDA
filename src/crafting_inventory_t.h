@@ -7,10 +7,6 @@
 #include "item.h"
 #include "crafting.h"
 
-namespace picojson {
-    class value;
-}
-
 class calendar;
 struct player_activity;
 class vehicle;

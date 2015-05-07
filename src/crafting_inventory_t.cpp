@@ -11,6 +11,7 @@
 #include "translations.h"
 #include "veh_type.h"
 #include "ui.h"
+#include "itype.h"
 #include <cstring>
 #include <algorithm>
 #include <cmath>

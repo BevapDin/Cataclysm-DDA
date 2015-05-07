@@ -20,6 +20,7 @@
 #include "mission.h"
 #include "mongroup.h"
 #include "options.h"
+#include "trap.h"
 
 #define SGN(a) (((a)<0) ? -1 : 1)
 #define SQR(a) ((a)*(a))
@@ -1617,7 +1618,7 @@ void monster::process_effects()
     }
 
     // If this critter dies in sunlight, check & assess damage.
-    if( has_flag( MF_SUNDEATH ) && g->is_in_sunlight( posx(), posy() ) ) {
+    if( has_flag( MF_SUNDEATH ) && g->is_in_sunlight( pos() ) ) {
         if( g->u.sees( *this ) ) {
             add_msg( m_good, _( "The %s burns horribly in the sunlight!" ), name().c_str() );
         }

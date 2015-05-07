@@ -19,6 +19,8 @@
 #include "event.h"
 #include "catacharset.h"
 #include "ui.h"
+#include "trap.h"
+#include "itype.h"
 
 #include <sstream>
 #include <algorithm>
@@ -649,7 +651,7 @@ void iexamine::rubble(player *p, map *m, int examx, int examy)
     std::string xname = m->furnname(examx, examy);
     if( ( m->veh_at( examx, examy ) != nullptr ||
           !m->tr_at( examx, examy ).is_null() ||
-          g->critter_at( examx, examy ) != nullptr ) &&
+          g->critter_at( { examx, examy, p->posz() } ) != nullptr ) &&
           !query_yn(_("Clear up that %s?"), xname.c_str() ) ) {
         none(p, m, examx, examy);
         return;
@@ -682,7 +684,7 @@ void iexamine::crate(player *p, map *m, int examx, int examy)
     std::string xname = m->furnname(examx, examy);
     if( ( m->veh_at( examx, examy ) != nullptr ||
           !m->tr_at( examx, examy ).is_null() ||
-          g->critter_at( examx, examy ) != nullptr ) &&
+          g->critter_at( { examx, examy, p->posz() } ) != nullptr ) &&
           !query_yn(_("Pry that %s?"), xname.c_str() ) ) {
         none(p, m, examx, examy);
         return;
@@ -1114,7 +1116,7 @@ void iexamine::pedestal_wyrm(player *p, map *m, int examx, int examy)
             monx = rng(0, SEEX * MAPSIZE);
             mony = rng(0, SEEY * MAPSIZE);
             tries++;
-        } while (tries < 10 && !g->is_empty(monx, mony) &&
+        } while (tries < 10 && !g->is_empty( { monx, mony, p->posz() } ) &&
                     rl_dist(g->u.posx(), g->u.posy(), monx, mony) <= 2);
         if (tries < 10) {
             g->m.ter_set(monx, mony, t_rock_floor);
@@ -1425,10 +1427,10 @@ void iexamine::egg_sack_generic( player *p, map *m, int examx, int examy,
     m->furn_set( examx, examy, f_egg_sacke );
     if( one_in( 2 ) ) {
         int monster_count = 0;
-        const std::vector<point> points = closest_points_first( 1, point( examx, examy ) );
-        for( const auto &point : points ) {
-            if( g->is_empty( point.x, point.y ) && one_in( 3 ) ) {
-                g->summon_mon(montype, tripoint(point.x, point.y, p->posz()));
+        const std::vector<tripoint> pts = closest_tripoints_first( 1, tripoint( examx, examy, p->posz() ) );
+        for( const auto &pt : pts ) {
+            if( g->is_empty( pt ) && one_in( 3 ) ) {
+                g->summon_mon( montype, pt );
                 monster_count++;
             }
         }
@@ -2240,7 +2242,7 @@ void iexamine::shrub_wildveggies(player *p, map *m, int examx, int examy)
     if( ( !m->i_at( examx, examy ).empty() ||
           m->veh_at( examx, examy ) != nullptr ||
           !m->tr_at( examx, examy ).is_null() ||
-          g->critter_at( examx, examy ) != nullptr ) &&
+          g->critter_at( { examx, examy, p->posz() } ) != nullptr ) &&
           !query_yn(_("Forage through %s?"), m->tername(examx, examy).c_str() ) ) {
         none(p, m, examx, examy);
         return;
@@ -2248,7 +2250,7 @@ void iexamine::shrub_wildveggies(player *p, map *m, int examx, int examy)
 
     add_msg(_("You forage through the %s."), m->tername(examx, examy).c_str());
     p->assign_activity(ACT_FORAGE, 500 / (p->skillLevel("survival") + 1), 0);
-    p->activity.placement = point(examx, examy);
+    p->activity.placement = tripoint(examx, examy, p->posz());
     return;
 }
 

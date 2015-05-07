@@ -12,6 +12,8 @@
 #include "input.h"
 #include "crafting.h"
 #include "ui.h"
+#include "trap.h"
+#include "itype.h"
 #include <istream>
 #include <sstream>
 #include <fstream>
