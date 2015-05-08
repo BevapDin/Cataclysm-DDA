@@ -481,7 +481,7 @@ long place_monster_iuse::use( player *p, item *it, bool, const tripoint &pos ) c
     }
     p->moves -= moves;
     newmon.reset_last_load();
-    newmon.spawn( target.x, target.y );
+    newmon.spawn( target );
     if (!newmon.has_flag(MF_INTERIOR_AMMO)) {
         for( auto & amdef : newmon.ammo ) {
             item ammo_item( amdef.first, 0 );
@@ -1597,7 +1597,7 @@ long musical_instrument_actor::use( player *p, item *it, bool t, const tripoint&
 
     sounds::ambient_sound( p->posx(), p->posy(), volume, desc );
 
-    if( !p->has_effect( "music" ) && p->can_hear( p->pos2(), volume ) ) {
+    if( !p->has_effect( "music" ) && p->can_hear( p->pos(), volume ) ) {
         p->add_effect( "music", 1 );
         const int sign = morale_effect > 0 ? 1 : -1;
         p->add_morale( MORALE_MUSIC, sign, morale_effect, 5, 2 );

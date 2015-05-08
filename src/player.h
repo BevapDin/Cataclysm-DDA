@@ -448,12 +448,12 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Returns true if the player scores a critical hit */
         bool scored_crit(int target_dodge = 0);
 
-        /** Returns the player's total bash damage roll */
-        int roll_bash_damage(bool crit);
-        /** Returns the player's total cut damage roll */
-        int roll_cut_damage(bool crit);
-        /** Returns the player's total stab damage roll */
-        int roll_stab_damage(bool crit);
+        /** Adds player's total bash damage to the damage instance */
+        void roll_bash_damage( bool crit, damage_instance &di );
+        /** Adds player's total cut damage to the damage instance */
+        void roll_cut_damage( bool crit, damage_instance &di );
+        /** Adds player's total stab damage to the damage instance */
+        void roll_stab_damage( bool crit, damage_instance &di );
         /** Returns the number of moves unsticking a weapon will penalize for */
         int roll_stuck_penalty(bool stabbing, ma_technique &tec);
         std::vector<matec_id> get_all_techniques();
@@ -463,8 +463,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Returns a random valid technique */
         matec_id pick_technique(Creature &t,
                                 bool crit, bool dodge_counter, bool block_counter);
-        void perform_technique(ma_technique technique, Creature &t, int &bash_dam, int &cut_dam,
-                               int &stab_dam, int &move_cost);
+        void perform_technique(ma_technique technique, Creature &t, damage_instance &di, int &move_cost);
         /** Performs special attacks and their effects (poisonous, stinger, etc.) */
         void perform_special_attacks(Creature &t);
 
@@ -1024,7 +1023,6 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         bool is_deaf() const;
         // Checks whether a player can hear a sound at a given volume and location.
         bool can_hear( const tripoint &source, const int volume ) const;
-        bool can_hear( const point &source, const int volume ) const;
         // Returns a multiplier indicating the keeness of a player's hearing.
         float hearing_ability() const;
         int visibility( bool check_color = false,
