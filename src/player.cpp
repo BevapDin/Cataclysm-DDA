@@ -965,7 +965,7 @@ void player::update_bodytemp()
                     if (frostbite_timer[i] > 0) {
                         frostbite_timer[i] -= heat_intensity - fire_dist / 2;
                     }
-                    temp_conv[i] +=  300 * heat_intensity * heat_intensity / (fire_dist * fire_dist);
+                    temp_conv[i] +=  300 * heat_intensity * heat_intensity / (fire_dist);
                     blister_count += heat_intensity / (fire_dist * fire_dist);
                     if( fire_dist <= 1 ) {
                         // Extend limbs/lean over a single adjacent fire to warm up
@@ -10095,7 +10095,7 @@ void player::pick_style() // Style selection menu
 
     uimenu kmenu;
     kmenu.text = _("Select a style (press ? for more info)");
-    std::auto_ptr<ma_style_callback> ma_style_info(new ma_style_callback());
+    std::unique_ptr<ma_style_callback> ma_style_info(new ma_style_callback());
     kmenu.callback = ma_style_info.get();
     kmenu.desc_enabled = true;
     kmenu.addentry( 0, true, 'c', _("Cancel") );
