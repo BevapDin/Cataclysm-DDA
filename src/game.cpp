@@ -30,6 +30,7 @@
 #include "monstergenerator.h"
 #include "monattack.h"
 #include "mondefense.h"
+#include "monfaction.h"
 #include "worldfactory.h"
 #include "construction.h"
 #include "filesystem.h"
@@ -5765,14 +5766,13 @@ void game::monmove()
     tripoint cached_lev = m.get_abs_sub() + tripoint( 1, 0, 0 );
 
     mfactions monster_factions;
-
+    const auto &playerfaction = mfaction_str_id( "player" );
     for (size_t i = 0; i < num_zombies(); i++) {
         // The first time through, and any time the map has been shifted,
         // recalculate monster factions.
         if( cached_lev != m.get_abs_sub() ) {
             // monster::plan() needs to know about all monsters on the same team as the monster.
             monster_factions.clear();
-            auto playerfaction = GetMFact( "player" );
             for( int i = 0, numz = num_zombies(); i < numz; i++ ) {
                 monster &critter = zombie( i );
                 if( critter.friendly == 0 ) {
@@ -5790,10 +5790,10 @@ void game::monmove()
             // If we can't move to our current position, assign us to a new one
                 dbg(D_ERROR) << "game:monmove: " << critter.name().c_str()
                              << " can't move to its location! (" << critter.posx()
-                             << ":" << critter.posy() << "), "
+                             << ":" << critter.posy() << ":" << critter.posz() << "), "
                              << m.tername(critter.posx(), critter.posy()).c_str();
-                add_msg( m_debug, "%s can't move to its location! (%d:%d), %s", critter.name().c_str(),
-                         critter.posx(), critter.posy(), m.tername(critter.posx(), critter.posy()).c_str());
+                add_msg( m_debug, "%s can't move to its location! (%d,%d,%d), %s", critter.name().c_str(),
+                         critter.posx(), critter.posy(), critter.posz(), m.tername(critter.pos()).c_str());
             bool okay = false;
             int xdir = rng(1, 2) * 2 - 3, ydir = rng(1, 2) * 2 - 3; // -1 or 1
             int startx = critter.posx() - 3 * xdir, endx = critter.posx() + 3 * xdir;
@@ -12494,7 +12494,7 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
         if (controlled) {
             dam1 = std::max((dam1 / 2) - 5, 0);
         }
-        if (mondex >= 0) {
+        if( mondex >= 0 ) {
             critter = &zombie(mondex);
             slam = true;
             dname = critter->name();
@@ -12503,6 +12503,9 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
             critter->check_dead_state();
             if( !critter->is_dead() ) {
                 thru = false;
+                // NOTE: The inverse is not true!
+                // Even if we killed the former occupant of the tile,
+                // it isn't necessarily free (due to creature-spawning mondeath).
             }
         } else if (m.move_cost( pt ) == 0) {
             slam = true;
@@ -12552,8 +12555,14 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
                     m.unboard_vehicle(p->pos());
                 }
                 p->setpos( pt );
-            } else {
+            } else if( mon_at( pt ) < 0 ) {
+                // We have to handle the rare case where monster lands on a fungus/blob
+                // and can't occupy the new location because the dead parent spawned
+                // new monsters that occupy it.
                 zz->setpos( pt );
+            } else {
+                // TODO: Handle it nicely (retry) instead of bailing out
+                break;
             }
         } else {
             break;
