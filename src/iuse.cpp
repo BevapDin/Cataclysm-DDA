@@ -4104,7 +4104,8 @@ int iuse::noise_emitter_on(player *p, item *it, bool t, const tripoint &pos)
 int iuse::ma_manual(player *p, item *it, bool, const tripoint& )
 {
     // strip "manual_" from the start of the item id, add the rest to "style_"
-    std::string style_to_learn = "style_" + it->type->id.substr(7);
+    // TODO: replace this terrible hack to rely on the item name matching the style name, it's terrible.
+    const matype_id style_to_learn( "style_" + it->type->id.substr(7) );
 
     if (p->has_martialart(style_to_learn)) {
         p->add_msg_if_player(m_info, _("You already know all this book has to teach."));
@@ -7108,7 +7109,7 @@ int iuse::holster_gun(player *p, item *it, bool, const tripoint& )
         int minvol = maxvol / 3;
 
         auto filter = [maxvol, minvol]( const item &it ) {
-            return it.is_gun() && it.volume() <= maxvol && it.volume() >= minvol;
+            return it.is_gun() && it.volume() <= maxvol && it.volume() >= minvol && (it.skill() != "archery");
         };
         int const inventory_index = g->inv_for_filter( _("Holster what?"), filter );
         item &put = p->i_at( inventory_index );
@@ -7120,6 +7121,12 @@ int iuse::holster_gun(player *p, item *it, bool, const tripoint& )
         // make sure we're holstering a pistol
         if (!put.is_gun()) {
             p->add_msg_if_player(m_info, _("That isn't a gun!"), put.tname().c_str());
+            return 0;
+        }
+
+        // make sure we're not holstering bows / crossbows
+        if (put.skill() == "archery") {
+            p->add_msg_if_player(m_info, _("You can't holster your %s!"), put.tname().c_str());
             return 0;
         }
 
@@ -7351,7 +7358,7 @@ int iuse::sheath_sword(player *p, item *it, bool, const tripoint& )
             }
 
             // Glow/Glimmer
-            if (p->weapon.has_flag("VORPAL") &&p->weapon.techniques.count("VORPAL") &&
+            if (p->weapon.has_flag("VORPAL") &&p->weapon.has_technique( matec_id( "VORPAL" ) ) &&
                   !x_in_y(g->natural_light_level(), 40)) {
                 std::string part = "";
                 int roll = rng(1,3);
