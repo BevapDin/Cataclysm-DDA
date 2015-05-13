@@ -1425,6 +1425,107 @@ void map::draw_map(const oter_id terrain_type, const oter_id t_north, const oter
     bool terrain_type_found = true;
     const std::string function_key = terrain_type.obj().id_mapgen;
 
+    const oter_id apartments_con_tower_1_entrance( "apartments_con_tower_1_entrance" );
+    const oter_id apartments_con_tower_1( "apartments_con_tower_1" );
+    const oter_id apartments_mod_tower_1_entrance( "apartments_mod_tower_1_entrance" );
+    const oter_id apartments_mod_tower_1( "apartments_mod_tower_1" );
+    const oter_id office_tower_1_entrance( "office_tower_1_entrance" );
+    const oter_id office_tower_1( "office_tower_1" );
+    const oter_id office_tower_b_entrance( "office_tower_b_entrance" );
+    const oter_id office_tower_b( "office_tower_b" );
+    const oter_id cathedral_1_entrance( "cathedral_1_entrance" );
+    const oter_id cathedral_1( "cathedral_1" );
+    const oter_id cathedral_b_entrance( "cathedral_b_entrance" );
+    const oter_id cathedral_b( "cathedral_b" );
+    const oter_id lab( "lab" );
+    const oter_id lab_stairs( "lab_stairs" );
+    const oter_id lab_core( "lab_core" );
+    const oter_id ice_lab( "ice_lab" );
+    const oter_id ice_lab_stairs( "ice_lab_stairs" );
+    const oter_id ice_lab_core( "ice_lab_core" );
+    const oter_id lab_finale( "lab_finale" );
+    const oter_id ice_lab_finale( "ice_lab_finale" );
+    const oter_id bunker( "bunker" );
+    const oter_id outpost( "outpost" );
+    const oter_id silo( "silo" );
+    const oter_id silo_finale( "silo_finale" );
+    const oter_id temple( "temple" );
+    const oter_id temple_stairs( "temple_stairs" );
+    const oter_id temple_finale( "temple_finale" );
+    const oter_id sewage_treatment( "sewage_treatment" );
+    const oter_id sewage_treatment_hub( "sewage_treatment_hub" );
+    const oter_id sewage_treatment_under( "sewage_treatment_under" );
+    const oter_id mine_entrance( "mine_entrance" );
+    const oter_id mine_shaft( "mine_shaft" );
+    const oter_id mine( "mine" );
+    const oter_id mine_down( "mine_down" );
+    const oter_id mine_finale( "mine_finale" );
+    const oter_id spiral_hub( "spiral_hub" );
+    const oter_id spiral( "spiral" );
+    const oter_id radio_tower( "radio_tower" );
+    const oter_id station_radio_east( "station_radio_east" );
+    const oter_id station_radio_north( "station_radio_north" );
+    const oter_id station_radio_west( "station_radio_west" );
+    const oter_id public_works_entrance( "public_works_entrance" );
+    const oter_id public_works( "public_works" );
+    const oter_id school_1( "school_1" );
+    const oter_id school_2( "school_2" );
+    const oter_id school_3( "school_3" );
+    const oter_id school_4( "school_4" );
+    const oter_id school_5( "school_5" );
+    const oter_id school_6( "school_6" );
+    const oter_id school_7( "school_7" );
+    const oter_id school_8( "school_8" );
+    const oter_id school_9( "school_9" );
+    const oter_id prison_1( "prison_1" );
+    const oter_id prison_2( "prison_2" );
+    const oter_id prison_3( "prison_3" );
+    const oter_id prison_4( "prison_4" );
+    const oter_id prison_5( "prison_5" );
+    const oter_id prison_6( "prison_6" );
+    const oter_id prison_7( "prison_7" );
+    const oter_id prison_8( "prison_8" );
+    const oter_id prison_9( "prison_9" );
+    const oter_id prison_b_entrance( "prison_b_entrance" );
+    const oter_id prison_b( "prison_b" );
+    const oter_id hotel_tower_1_1( "hotel_tower_1_1" );
+    const oter_id hotel_tower_1_2( "hotel_tower_1_2" );
+    const oter_id hotel_tower_1_3( "hotel_tower_1_3" );
+    const oter_id hotel_tower_1_4( "hotel_tower_1_4" );
+    const oter_id hotel_tower_1_5( "hotel_tower_1_5" );
+    const oter_id hotel_tower_1_6( "hotel_tower_1_6" );
+    const oter_id hotel_tower_1_7( "hotel_tower_1_7" );
+    const oter_id hotel_tower_1_8( "hotel_tower_1_8" );
+    const oter_id hotel_tower_1_9( "hotel_tower_1_9" );
+    const oter_id hotel_tower_b_1( "hotel_tower_b_1" );
+    const oter_id hotel_tower_b_2( "hotel_tower_b_2" );
+    const oter_id hotel_tower_b_3( "hotel_tower_b_3" );
+    const oter_id office_doctor_east( "office_doctor_east" );
+    const oter_id office_doctor_north( "office_doctor_north" );
+    const oter_id office_doctor_west( "office_doctor_west" );
+    const oter_id toxic_dump( "toxic_dump" );
+    const oter_id haz_sar_entrance( "haz_sar_entrance" );
+    const oter_id haz_sar( "haz_sar" );
+    const oter_id haz_sar_entrance_b1( "haz_sar_entrance_b1" );
+    const oter_id haz_sar_b1( "haz_sar_b1" );
+    const oter_id farm( "farm" );
+    const oter_id farm_field( "farm_field" );
+    const oter_id megastore_entrance( "megastore_entrance" );
+    const oter_id megastore( "megastore" );
+    const oter_id hospital_entrance( "hospital_entrance" );
+    const oter_id hospital( "hospital" );
+    const oter_id mansion_entrance( "mansion_entrance" );
+    const oter_id mansion( "mansion" );
+    const oter_id fema_entrance( "fema_entrance" );
+    const oter_id fema( "fema" );
+    const oter_id spider_pit_under( "spider_pit_under" );
+    const oter_id anthill( "anthill" );
+    const oter_id slimepit_down( "slimepit_down" );
+    const oter_id triffid_grove( "triffid_grove" );
+    const oter_id triffid_roots( "triffid_roots" );
+    const oter_id triffid_finale( "triffid_finale" );
+    const oter_id slimepit( "slimepit" );
+    const oter_id road_nesw_manhole( "road_nesw_manhole" );
 
     std::map<std::string, std::vector<mapgen_function*> >::const_iterator fmapit = oter_mapgen.find( function_key );
     if ( fmapit != oter_mapgen.end() && !fmapit->second.empty() ) {
@@ -1437,7 +1538,7 @@ void map::draw_map(const oter_id terrain_type, const oter_id t_north, const oter
 
         fmapit->second[fidx]->generate(this, terrain_type, dat, turn, density);
     // todo; make these mappable functions
-    } else if (terrain_type == "apartments_con_tower_1_entrance") {
+    } else if (terrain_type == apartments_con_tower_1_entrance) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -1508,24 +1609,24 @@ void map::draw_map(const oter_id terrain_type, const oter_id t_north, const oter
         } else {
             add_spawn("mon_zombie", rng(1, 8), 15, 10);
         }
-        if (t_north == "apartments_con_tower_1" && t_west == "apartments_con_tower_1") {
+        if (t_north == apartments_con_tower_1 && t_west == apartments_con_tower_1) {
             rotate(3);
-        } else if (t_north == "apartments_con_tower_1" && t_east == "apartments_con_tower_1") {
+        } else if (t_north == apartments_con_tower_1 && t_east == apartments_con_tower_1) {
             rotate(0);
-        } else if (t_south == "apartments_con_tower_1" && t_east == "apartments_con_tower_1") {
+        } else if (t_south == apartments_con_tower_1 && t_east == apartments_con_tower_1) {
             rotate(1);
-        } else if (t_west == "apartments_con_tower_1" && t_south == "apartments_con_tower_1") {
+        } else if (t_west == apartments_con_tower_1 && t_south == apartments_con_tower_1) {
             rotate(2);
         }
 
-    } else if (terrain_type == "apartments_con_tower_1") {
+    } else if (terrain_type == apartments_con_tower_1) {
 
         // Init to grass & dirt;
         dat.fill_groundcover();
-        if ((t_south == "apartments_con_tower_1_entrance" && t_east == "apartments_con_tower_1") ||
-            (t_north == "apartments_con_tower_1" && t_east == "apartments_con_tower_1_entrance")
-            || (t_west == "apartments_con_tower_1" && t_north == "apartments_con_tower_1_entrance") ||
-            (t_south == "apartments_con_tower_1" && t_west == "apartments_con_tower_1_entrance")) {
+        if ((t_south == apartments_con_tower_1_entrance && t_east == apartments_con_tower_1) ||
+            (t_north == apartments_con_tower_1 && t_east == apartments_con_tower_1_entrance)
+            || (t_west == apartments_con_tower_1 && t_north == apartments_con_tower_1_entrance) ||
+            (t_south == apartments_con_tower_1 && t_west == apartments_con_tower_1_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
                         \n\
@@ -1600,21 +1701,21 @@ void map::draw_map(const oter_id terrain_type, const oter_id t_north, const oter
             } else {
                 add_spawn("mon_zombie", rng(1, 8), 15, 10);
             }
-            if (t_west == "apartments_con_tower_1_entrance") {
+            if (t_west == apartments_con_tower_1_entrance) {
                 rotate(1);
             }
-            if (t_north == "apartments_con_tower_1_entrance") {
+            if (t_north == apartments_con_tower_1_entrance) {
                 rotate(2);
             }
-            if (t_east == "apartments_con_tower_1_entrance") {
+            if (t_east == apartments_con_tower_1_entrance) {
                 rotate(3);
             }
         }
 
-        else if ((t_west == "apartments_con_tower_1_entrance" && t_north == "apartments_con_tower_1") ||
-                 (t_north == "apartments_con_tower_1_entrance" && t_east == "apartments_con_tower_1")
-                 || (t_west == "apartments_con_tower_1" && t_south == "apartments_con_tower_1_entrance") ||
-                 (t_south == "apartments_con_tower_1" && t_east == "apartments_con_tower_1_entrance")) {
+        else if ((t_west == apartments_con_tower_1_entrance && t_north == apartments_con_tower_1) ||
+                 (t_north == apartments_con_tower_1_entrance && t_east == apartments_con_tower_1)
+                 || (t_west == apartments_con_tower_1 && t_south == apartments_con_tower_1_entrance) ||
+                 (t_south == apartments_con_tower_1 && t_east == apartments_con_tower_1_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ...|---|-|-|-|------|   \n\
@@ -1689,13 +1790,13 @@ ss                      \n",
             } else {
                 add_spawn("mon_zombie", rng(1, 8), 15, 10);
             }
-            if (t_north == "apartments_con_tower_1_entrance") {
+            if (t_north == apartments_con_tower_1_entrance) {
                 rotate(1);
             }
-            if (t_east == "apartments_con_tower_1_entrance") {
+            if (t_east == apartments_con_tower_1_entrance) {
                 rotate(2);
             }
-            if (t_south == "apartments_con_tower_1_entrance") {
+            if (t_south == apartments_con_tower_1_entrance) {
                 rotate(3);
             }
         } else {
@@ -1776,17 +1877,17 @@ ss                      \n",
             } else {
                 add_spawn("mon_zombie", rng(1, 8), 15, 10);
             }
-            if (t_west == "apartments_con_tower_1" && t_north == "apartments_con_tower_1") {
+            if (t_west == apartments_con_tower_1 && t_north == apartments_con_tower_1) {
                 rotate(1);
-            } else if (t_east == "apartments_con_tower_1" && t_north == "apartments_con_tower_1") {
+            } else if (t_east == apartments_con_tower_1 && t_north == apartments_con_tower_1) {
                 rotate(2);
-            } else if (t_east == "apartments_con_tower_1" && t_south == "apartments_con_tower_1") {
+            } else if (t_east == apartments_con_tower_1 && t_south == apartments_con_tower_1) {
                 rotate(3);
             }
         }
 
 
-    } else if (terrain_type == "apartments_mod_tower_1_entrance") {
+    } else if (terrain_type == apartments_mod_tower_1_entrance) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -1865,25 +1966,25 @@ ss                      \n",
         } else {
             add_spawn("mon_zombie", rng(1, 8), 15, 10);
         }
-        if (t_north == "apartments_mod_tower_1" && t_west == "apartments_mod_tower_1") {
+        if (t_north == apartments_mod_tower_1 && t_west == apartments_mod_tower_1) {
             rotate(3);
-        } else if (t_north == "apartments_mod_tower_1" && t_east == "apartments_mod_tower_1") {
+        } else if (t_north == apartments_mod_tower_1 && t_east == apartments_mod_tower_1) {
             rotate(0);
-        } else if (t_south == "apartments_mod_tower_1" && t_east == "apartments_mod_tower_1") {
+        } else if (t_south == apartments_mod_tower_1 && t_east == apartments_mod_tower_1) {
             rotate(1);
-        } else if (t_west == "apartments_mod_tower_1" && t_south == "apartments_mod_tower_1") {
+        } else if (t_west == apartments_mod_tower_1 && t_south == apartments_mod_tower_1) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "apartments_mod_tower_1") {
+    } else if (terrain_type == apartments_mod_tower_1) {
 
         // Init to grass & dirt;
         dat.fill_groundcover();
-        if ((t_south == "apartments_mod_tower_1_entrance" && t_east == "apartments_mod_tower_1") ||
-            (t_north == "apartments_mod_tower_1" && t_east == "apartments_mod_tower_1_entrance")
-            || (t_west == "apartments_mod_tower_1" && t_north == "apartments_mod_tower_1_entrance") ||
-            (t_south == "apartments_mod_tower_1" && t_west == "apartments_mod_tower_1_entrance")) {
+        if ((t_south == apartments_mod_tower_1_entrance && t_east == apartments_mod_tower_1) ||
+            (t_north == apartments_mod_tower_1 && t_east == apartments_mod_tower_1_entrance)
+            || (t_west == apartments_mod_tower_1 && t_north == apartments_mod_tower_1_entrance) ||
+            (t_south == apartments_mod_tower_1 && t_west == apartments_mod_tower_1_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
                         \n\
@@ -1960,21 +2061,21 @@ ss                      \n",
             } else {
                 add_spawn("mon_zombie", rng(1, 8), 15, 10);
             }
-            if (t_west == "apartments_mod_tower_1_entrance") {
+            if (t_west == apartments_mod_tower_1_entrance) {
                 rotate(1);
             }
-            if (t_north == "apartments_mod_tower_1_entrance") {
+            if (t_north == apartments_mod_tower_1_entrance) {
                 rotate(2);
             }
-            if (t_east == "apartments_mod_tower_1_entrance") {
+            if (t_east == apartments_mod_tower_1_entrance) {
                 rotate(3);
             }
         }
 
-        else if ((t_west == "apartments_mod_tower_1_entrance" && t_north == "apartments_mod_tower_1") ||
-                 (t_north == "apartments_mod_tower_1_entrance" && t_east == "apartments_mod_tower_1")
-                 || (t_west == "apartments_mod_tower_1" && t_south == "apartments_mod_tower_1_entrance") ||
-                 (t_south == "apartments_mod_tower_1" && t_east == "apartments_mod_tower_1_entrance")) {
+        else if ((t_west == apartments_mod_tower_1_entrance && t_north == apartments_mod_tower_1) ||
+                 (t_north == apartments_mod_tower_1_entrance && t_east == apartments_mod_tower_1)
+                 || (t_west == apartments_mod_tower_1 && t_south == apartments_mod_tower_1_entrance) ||
+                 (t_south == apartments_mod_tower_1 && t_east == apartments_mod_tower_1_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ....|cSe.u.htth...oo.w  \n\
@@ -2051,13 +2152,13 @@ ss                      \n",
             } else {
                 add_spawn("mon_zombie", rng(1, 8), 15, 10);
             }
-            if (t_north == "apartments_mod_tower_1_entrance") {
+            if (t_north == apartments_mod_tower_1_entrance) {
                 rotate(1);
             }
-            if (t_east == "apartments_mod_tower_1_entrance") {
+            if (t_east == apartments_mod_tower_1_entrance) {
                 rotate(2);
             }
-            if (t_south == "apartments_mod_tower_1_entrance") {
+            if (t_south == apartments_mod_tower_1_entrance) {
                 rotate(3);
             }
         }
@@ -2142,17 +2243,17 @@ EE|.+..........e|ssR    \n\
             } else {
                 add_spawn("mon_zombie", rng(1, 8), 15, 10);
             }
-            if (t_west == "apartments_mod_tower_1" && t_north == "apartments_mod_tower_1") {
+            if (t_west == apartments_mod_tower_1 && t_north == apartments_mod_tower_1) {
                 rotate(1);
-            } else if (t_east == "apartments_mod_tower_1" && t_north == "apartments_mod_tower_1") {
+            } else if (t_east == apartments_mod_tower_1 && t_north == apartments_mod_tower_1) {
                 rotate(2);
-            } else if (t_east == "apartments_mod_tower_1" && t_south == "apartments_mod_tower_1") {
+            } else if (t_east == apartments_mod_tower_1 && t_south == apartments_mod_tower_1) {
                 rotate(3);
             }
         }
 
 
-    } else if (terrain_type == "office_tower_1_entrance") {
+    } else if (terrain_type == office_tower_1_entrance) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -2214,25 +2315,25 @@ ssssss______ss______ssss\n",
                 add_vehicle ("swivel_chair", rng(6, 16), rng(6, 16), 0, -1, -1, false);
             }
         }
-        if (t_north == "office_tower_1" && t_west == "office_tower_1") {
+        if (t_north == office_tower_1 && t_west == office_tower_1) {
             rotate(3);
-        } else if (t_north == "office_tower_1" && t_east == "office_tower_1") {
+        } else if (t_north == office_tower_1 && t_east == office_tower_1) {
             rotate(0);
-        } else if (t_south == "office_tower_1" && t_east == "office_tower_1") {
+        } else if (t_south == office_tower_1 && t_east == office_tower_1) {
             rotate(1);
-        } else if (t_west == "office_tower_1" && t_south == "office_tower_1") {
+        } else if (t_west == office_tower_1 && t_south == office_tower_1) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "office_tower_1") {
+    } else if (terrain_type == office_tower_1) {
 
         // Init to grass & dirt;
         dat.fill_groundcover();
-        if ((t_south == "office_tower_1_entrance" && t_east == "office_tower_1") ||
-            (t_north == "office_tower_1" && t_east == "office_tower_1_entrance") ||
-            (t_west == "office_tower_1" && t_north == "office_tower_1_entrance") ||
-            (t_south == "office_tower_1" && t_west == "office_tower_1_entrance")) {
+        if ((t_south == office_tower_1_entrance && t_east == office_tower_1) ||
+            (t_north == office_tower_1 && t_east == office_tower_1_entrance) ||
+            (t_west == office_tower_1 && t_north == office_tower_1_entrance) ||
+            (t_south == office_tower_1 && t_west == office_tower_1_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ssssssssssssssssssssssss\n\
@@ -2295,21 +2396,21 @@ ss%|rrrr|...|.R.|EEED...\n",
                     add_vehicle ("swivel_chair", rng(6, 16), rng(6, 16), 0, -1, -1, false);
                 }
             }
-            if (t_west == "office_tower_1_entrance") {
+            if (t_west == office_tower_1_entrance) {
                 rotate(1);
             }
-            if (t_north == "office_tower_1_entrance") {
+            if (t_north == office_tower_1_entrance) {
                 rotate(2);
             }
-            if (t_east == "office_tower_1_entrance") {
+            if (t_east == office_tower_1_entrance) {
                 rotate(3);
             }
         }
 
-        else if ((t_west == "office_tower_1_entrance" && t_north == "office_tower_1") ||
-                 (t_north == "office_tower_1_entrance" && t_east == "office_tower_1") ||
-                 (t_west == "office_tower_1" && t_south == "office_tower_1_entrance") ||
-                 (t_south == "office_tower_1" && t_east == "office_tower_1_entrance")) {
+        else if ((t_west == office_tower_1_entrance && t_north == office_tower_1) ||
+                 (t_north == office_tower_1_entrance && t_east == office_tower_1) ||
+                 (t_west == office_tower_1 && t_south == office_tower_1_entrance) ||
+                 (t_south == office_tower_1 && t_east == office_tower_1_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ...DEEE|...|..|-----|%ss\n\
@@ -2366,13 +2467,13 @@ ssssssssssssssssssssssss\n",
                     add_vehicle ("swivel_chair", rng(6, 16), rng(6, 16), 0, -1, -1, false);
                 }
             }
-            if (t_north == "office_tower_1_entrance") {
+            if (t_north == office_tower_1_entrance) {
                 rotate(1);
             }
-            if (t_east == "office_tower_1_entrance") {
+            if (t_east == office_tower_1_entrance) {
                 rotate(2);
             }
-            if (t_south == "office_tower_1_entrance") {
+            if (t_south == office_tower_1_entrance) {
                 rotate(3);
             }
         }
@@ -2434,17 +2535,17 @@ ssssssssssssssssssssssss\n\
                     add_vehicle ("swivel_chair", rng(6, 16), rng(6, 16), 0, -1, -1, false);
                 }
             }
-            if (t_west == "office_tower_1" && t_north == "office_tower_1") {
+            if (t_west == office_tower_1 && t_north == office_tower_1) {
                 rotate(1);
-            } else if (t_east == "office_tower_1" && t_north == "office_tower_1") {
+            } else if (t_east == office_tower_1 && t_north == office_tower_1) {
                 rotate(2);
-            } else if (t_east == "office_tower_1" && t_south == "office_tower_1") {
+            } else if (t_east == office_tower_1 && t_south == office_tower_1) {
                 rotate(3);
             }
         }
 
 
-    } else if (terrain_type == "office_tower_b_entrance") {
+    } else if (terrain_type == office_tower_b_entrance) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -2489,25 +2590,25 @@ ssssssssssssssssssssssss\n",
         } else {
             add_spawn("mon_zombie", rng(0, 5), SEEX * 2 - 1, SEEX * 2 - 1);
         }
-        if (t_north == "office_tower_b" && t_west == "office_tower_b") {
+        if (t_north == office_tower_b && t_west == office_tower_b) {
             rotate(3);
-        } else if (t_north == "office_tower_b" && t_east == "office_tower_b") {
+        } else if (t_north == office_tower_b && t_east == office_tower_b) {
             rotate(0);
-        } else if (t_south == "office_tower_b" && t_east == "office_tower_b") {
+        } else if (t_south == office_tower_b && t_east == office_tower_b) {
             rotate(1);
-        } else if (t_west == "office_tower_b" && t_south == "office_tower_b") {
+        } else if (t_west == office_tower_b && t_south == office_tower_b) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "office_tower_b") {
+    } else if (terrain_type == office_tower_b) {
 
         // Init to grass & dirt;
         dat.fill_groundcover();
-        if ((t_south == "office_tower_b_entrance" && t_east == "office_tower_b") ||
-            (t_north == "office_tower_b" && t_east == "office_tower_b_entrance") ||
-            (t_west == "office_tower_b" && t_north == "office_tower_b_entrance") ||
-            (t_south == "office_tower_b" && t_west == "office_tower_b_entrance")) {
+        if ((t_south == office_tower_b_entrance && t_east == office_tower_b) ||
+            (t_north == office_tower_b && t_east == office_tower_b_entrance) ||
+            (t_west == office_tower_b && t_north == office_tower_b_entrance) ||
+            (t_south == office_tower_b && t_west == office_tower_b_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ssssssssssssssssssssssss\n\
@@ -2550,7 +2651,7 @@ sss|........|.R.|EEED___\n",
             } else {
                 add_spawn("mon_zombie", rng(0, 5), SEEX * 2 - 1, SEEX * 2 - 1);
             }
-            if (t_west == "office_tower_b_entrance") {
+            if (t_west == office_tower_b_entrance) {
                 rotate(1);
                 if (x_in_y(1, 5)) {
                     add_vehicle ("car", 17, 7, 180);
@@ -2565,7 +2666,7 @@ sss|........|.R.|EEED___\n",
                     else
                     add_vehicle ("pickup", 17, 19, 180);
                 }
-            } else if (t_north == "office_tower_b_entrance") {
+            } else if (t_north == office_tower_b_entrance) {
                 rotate(2);
                 if (x_in_y(1, 5)) {
                     add_vehicle ("car", 10, 17, 270);
@@ -2580,7 +2681,7 @@ sss|........|.R.|EEED___\n",
                     else
                     add_vehicle ("pickup", 16, 17, 270);
                 }
-            } else if (t_east == "office_tower_b_entrance") {
+            } else if (t_east == office_tower_b_entrance) {
                 rotate(3);
                 if (x_in_y(1, 5)) {
                     add_vehicle ("car", 6, 4, 0);
@@ -2605,10 +2706,10 @@ sss|........|.R.|EEED___\n",
             }
         }
 
-        else if ((t_west == "office_tower_b_entrance" && t_north == "office_tower_b") ||
-                 (t_north == "office_tower_b_entrance" && t_east == "office_tower_b") ||
-                 (t_west == "office_tower_b" && t_south == "office_tower_b_entrance") ||
-                 (t_south == "office_tower_b" && t_east == "office_tower_b_entrance")) {
+        else if ((t_west == office_tower_b_entrance && t_north == office_tower_b) ||
+                 (t_north == office_tower_b_entrance && t_east == office_tower_b) ||
+                 (t_west == office_tower_b && t_south == office_tower_b_entrance) ||
+                 (t_south == office_tower_b && t_east == office_tower_b_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ___DEEE|...|...,,...|sss\n\
@@ -2651,7 +2752,7 @@ ssssssssssssssssssssssss\n",
             } else {
                 add_spawn("mon_zombie", rng(0, 5), SEEX * 2 - 1, SEEX * 2 - 1);
             }
-            if (t_north == "office_tower_b_entrance") {
+            if (t_north == office_tower_b_entrance) {
                 rotate(1);
                 if (x_in_y(1, 5)) {
                     add_vehicle ("car", 8, 15, 0);
@@ -2662,7 +2763,7 @@ ssssssssssssssssssssssss\n",
                 if (x_in_y(1, 3)) {
                     add_vehicle ("beetle", 7, 3, 0);
                 }
-            } else if (t_east == "office_tower_b_entrance") {
+            } else if (t_east == office_tower_b_entrance) {
                 rotate(2);
                 if (x_in_y(1, 5)) {
                     if (one_in(3)) {
@@ -2677,7 +2778,7 @@ ssssssssssssssssssssssss\n",
                 if (x_in_y(1, 3)) {
                     add_vehicle ("beetle", 20, 7, 90);
                 }
-            } else if (t_south == "office_tower_b_entrance") {
+            } else if (t_south == office_tower_b_entrance) {
                 rotate(3);
                 if (x_in_y(1, 5)) {
                     add_vehicle ("pickup", 16, 7, 0);
@@ -2744,7 +2845,7 @@ ___DEEE|.R.|...,,...|sss\n",
             } else {
                 add_spawn("mon_zombie", rng(0, 5), SEEX * 2 - 1, SEEX * 2 - 1);
             }
-            if (t_west == "office_tower_b" && t_north == "office_tower_b") {
+            if (t_west == office_tower_b && t_north == office_tower_b) {
                 rotate(1);
                 if (x_in_y(1, 5)) {
                     if (one_in(3)) {
@@ -2759,7 +2860,7 @@ ___DEEE|.R.|...,,...|sss\n",
                 if (x_in_y(1, 3)) {
                     add_vehicle ("car", 17, 17, 180);
                 }
-            } else if (t_east == "office_tower_b" && t_north == "office_tower_b") {
+            } else if (t_east == office_tower_b && t_north == office_tower_b) {
                 rotate(2);
                 if (x_in_y(1, 5)) {
                     if (one_in(3)) {
@@ -2774,7 +2875,7 @@ ___DEEE|.R.|...,,...|sss\n",
                 if (x_in_y(1, 3)) {
                     add_vehicle ("fire_truck", 18, 17, 270);
                 }
-            } else if (t_east == "office_tower_b" && t_south == "office_tower_b") {
+            } else if (t_east == office_tower_b && t_south == office_tower_b) {
                 rotate(3);
                 if (x_in_y(1, 5)) {
                     add_vehicle ("cube_van_cheap", 6, 6, 0);
@@ -2801,7 +2902,7 @@ ___DEEE|.R.|...,,...|sss\n",
                 }
             }
         }
-    } else if (terrain_type == "cathedral_1_entrance") {
+    } else if (terrain_type == cathedral_1_entrance) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -2864,25 +2965,25 @@ ssssssssssssssssssssssss\n",
         } else {
             place_spawns("GROUP_ZOMBIE", 2, 0, 0, 23, 23, .20);
         }
-        if (t_north == "cathedral_1" && t_west == "cathedral_1") {
+        if (t_north == cathedral_1 && t_west == cathedral_1) {
             rotate(3);
-        } else if (t_north == "cathedral_1" && t_east == "cathedral_1") {
+        } else if (t_north == cathedral_1 && t_east == cathedral_1) {
             rotate(0);
-        } else if (t_south == "cathedral_1" && t_east == "cathedral_1") {
+        } else if (t_south == cathedral_1 && t_east == cathedral_1) {
             rotate(1);
-        } else if (t_west == "cathedral_1" && t_south == "cathedral_1") {
+        } else if (t_west == cathedral_1 && t_south == cathedral_1) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "cathedral_1") {
+    } else if (terrain_type == cathedral_1) {
 
         // Init to grass & dirt;
         dat.fill_groundcover();
-        if ((t_south == "cathedral_1_entrance" && t_east == "cathedral_1") || (t_north == "cathedral_1" &&
-                t_east == "cathedral_1_entrance") || (t_west == "cathedral_1" &&
-                        t_north == "cathedral_1_entrance") ||
-            (t_south == "cathedral_1" && t_west == "cathedral_1_entrance")) {
+        if ((t_south == cathedral_1_entrance && t_east == cathedral_1) || (t_north == cathedral_1 &&
+                t_east == cathedral_1_entrance) || (t_west == cathedral_1 &&
+                        t_north == cathedral_1_entrance) ||
+            (t_south == cathedral_1 && t_west == cathedral_1_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
                   ##    \n\
@@ -2944,21 +3045,21 @@ ss          #bbbb...bbbb\n",
             } else {
                 place_spawns("GROUP_ZOMBIE", 2, 0, 0, 23, 23, .20);
             }
-            if (t_west == "cathedral_1_entrance") {
+            if (t_west == cathedral_1_entrance) {
                 rotate(1);
             }
-            if (t_north == "cathedral_1_entrance") {
+            if (t_north == cathedral_1_entrance) {
                 rotate(2);
             }
-            if (t_east == "cathedral_1_entrance") {
+            if (t_east == cathedral_1_entrance) {
                 rotate(3);
             }
         }
 
-        else if ((t_west == "cathedral_1_entrance" && t_north == "cathedral_1") ||
-                 (t_north == "cathedral_1_entrance" && t_east == "cathedral_1") || (t_west == "cathedral_1" &&
-                         t_south == "cathedral_1_entrance") ||
-                 (t_south == "cathedral_1" && t_east == "cathedral_1_entrance")) {
+        else if ((t_west == cathedral_1_entrance && t_north == cathedral_1) ||
+                 (t_north == cathedral_1_entrance && t_east == cathedral_1) || (t_west == cathedral_1 &&
+                         t_south == cathedral_1_entrance) ||
+                 (t_south == cathedral_1 && t_east == cathedral_1_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ..........##          ss\n\
@@ -3019,13 +3120,13 @@ ssssssssssssssssssssssss\n",
             } else {
                 place_spawns("GROUP_ZOMBIE", 2, 0, 0, 23, 23, .20);
             }
-            if (t_north == "cathedral_1_entrance") {
+            if (t_north == cathedral_1_entrance) {
                 rotate(1);
             }
-            if (t_east == "cathedral_1_entrance") {
+            if (t_east == cathedral_1_entrance) {
                 rotate(2);
             }
-            if (t_south == "cathedral_1_entrance") {
+            if (t_south == cathedral_1_entrance) {
                 rotate(3);
             }
         }
@@ -3089,17 +3190,17 @@ bbb...bbbb#           ss\n",
             } else {
                 place_spawns("GROUP_ZOMBIE", 2, 0, 0, 23, 23, .20);
             }
-            if (t_west == "cathedral_1" && t_north == "cathedral_1") {
+            if (t_west == cathedral_1 && t_north == cathedral_1) {
                 rotate(1);
-            } else if (t_east == "cathedral_1" && t_north == "cathedral_1") {
+            } else if (t_east == cathedral_1 && t_north == cathedral_1) {
                 rotate(2);
-            } else if (t_east == "cathedral_1" && t_south == "cathedral_1") {
+            } else if (t_east == cathedral_1 && t_south == cathedral_1) {
                 rotate(3);
             }
         }
 
 
-    } else if (terrain_type == "cathedral_b_entrance") {
+    } else if (terrain_type == cathedral_b_entrance) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -3158,25 +3259,25 @@ bbb...bbbb#           ss\n",
         } else {
             place_spawns("GROUP_ZOMBIE", 2, 0, 0, 23, 23, .20);
         }
-        if (t_north == "cathedral_b" && t_west == "cathedral_b") {
+        if (t_north == cathedral_b && t_west == cathedral_b) {
             rotate(3);
-        } else if (t_north == "cathedral_b" && t_east == "cathedral_b") {
+        } else if (t_north == cathedral_b && t_east == cathedral_b) {
             rotate(0);
-        } else if (t_south == "cathedral_b" && t_east == "cathedral_b") {
+        } else if (t_south == cathedral_b && t_east == cathedral_b) {
             rotate(1);
-        } else if (t_west == "cathedral_b" && t_south == "cathedral_b") {
+        } else if (t_west == cathedral_b && t_south == cathedral_b) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "cathedral_b") {
+    } else if (terrain_type == cathedral_b) {
 
         // Init to grass & dirt;
         dat.fill_groundcover();
-        if ((t_south == "cathedral_b_entrance" && t_east == "cathedral_b") || (t_north == "cathedral_b" &&
-                t_east == "cathedral_b_entrance") || (t_west == "cathedral_b" &&
-                        t_north == "cathedral_b_entrance") ||
-            (t_south == "cathedral_b" && t_west == "cathedral_b_entrance")) {
+        if ((t_south == cathedral_b_entrance && t_east == cathedral_b) || (t_north == cathedral_b &&
+                t_east == cathedral_b_entrance) || (t_west == cathedral_b &&
+                        t_north == cathedral_b_entrance) ||
+            (t_south == cathedral_b && t_west == cathedral_b_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ########################\n\
@@ -3229,19 +3330,19 @@ bbb...bbbb#           ss\n",
                 }
             }
             add_spawn("mon_blank", rng(1, 3), 23, 5);
-            if (t_west == "cathedral_b_entrance") {
+            if (t_west == cathedral_b_entrance) {
                 rotate(1);
-            } else if (t_north == "cathedral_b_entrance") {
+            } else if (t_north == cathedral_b_entrance) {
                 rotate(2);
-            } else if (t_east == "cathedral_b_entrance") {
+            } else if (t_east == cathedral_b_entrance) {
                 rotate(3);
             }
         }
 
-        else if ((t_west == "cathedral_b_entrance" && t_north == "cathedral_b") ||
-                 (t_north == "cathedral_b_entrance" && t_east == "cathedral_b") || (t_west == "cathedral_b" &&
-                         t_south == "cathedral_b_entrance") ||
-                 (t_south == "cathedral_b" && t_east == "cathedral_b_entrance")) {
+        else if ((t_west == cathedral_b_entrance && t_north == cathedral_b) ||
+                 (t_north == cathedral_b_entrance && t_east == cathedral_b) || (t_west == cathedral_b &&
+                         t_south == cathedral_b_entrance) ||
+                 (t_south == cathedral_b && t_east == cathedral_b_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 .|..|+|D|+|#############\n\
@@ -3298,11 +3399,11 @@ cc-|-D----|#############\n\
             } else {
                 place_spawns("GROUP_ZOMBIE", 2, 0, 0, 23, 23, .20);
             }
-            if (t_north == "cathedral_b_entrance") {
+            if (t_north == cathedral_b_entrance) {
                 rotate(1);
-            } else if (t_east == "cathedral_b_entrance") {
+            } else if (t_east == cathedral_b_entrance) {
                 rotate(2);
-            } else if (t_south == "cathedral_b_entrance") {
+            } else if (t_south == cathedral_b_entrance) {
                 rotate(3);
             }
         }
@@ -3348,20 +3449,20 @@ C..C..C...|hhh|#########\n\
                                                f_counter, f_desk,  f_locker, f_null));
             spawn_item(0, 3, "small_relic");
             add_spawn("mon_blank", rng(1, 3), 0, 5);
-            if (t_west == "cathedral_b" && t_north == "cathedral_b") {
+            if (t_west == cathedral_b && t_north == cathedral_b) {
                 rotate(1);
-            } else if (t_east == "cathedral_b" && t_north == "cathedral_b") {
+            } else if (t_east == cathedral_b && t_north == cathedral_b) {
                 rotate(2);
-            } else if (t_east == "cathedral_b" && t_south == "cathedral_b") {
+            } else if (t_east == cathedral_b && t_south == cathedral_b) {
                 rotate(3);
             }
         }
-    } else if (terrain_type == "lab" ||
-               terrain_type == "lab_stairs" ||
-               terrain_type == "lab_core" ||
-               terrain_type == "ice_lab" ||
-               terrain_type == "ice_lab_stairs" ||
-               terrain_type == "ice_lab_core") {
+    } else if (terrain_type == lab ||
+               terrain_type == lab_stairs ||
+               terrain_type == lab_core ||
+               terrain_type == ice_lab ||
+               terrain_type == ice_lab_stairs ||
+               terrain_type == ice_lab_core) {
 
         if (is_ot_type("ice_lab", terrain_type)) {
             has_ice_lab = true;
@@ -3664,7 +3765,7 @@ C..C..C...|hhh|#########\n\
                 if (lw == 2) {
                     rotate(1);
                 }
-                if (t_above == "lab_stairs" || t_above == "ice_lab_stairs") {
+                if (t_above == lab_stairs || t_above == ice_lab_stairs) {
                     int sx, sy;
                     do {
                         sx = rng(lw, SEEX * 2 - 1 - rw);
@@ -3673,7 +3774,7 @@ C..C..C...|hhh|#########\n\
                     ter_set(sx, sy, t_stairs_up);
                 }
 
-                if (terrain_type == "lab_stairs" || terrain_type == "ice_lab_stairs") {
+                if (terrain_type == lab_stairs || terrain_type == ice_lab_stairs) {
                     int sx, sy;
                     do {
                         sx = rng(lw, SEEX * 2 - 1 - rw);
@@ -3696,7 +3797,7 @@ C..C..C...|hhh|#########\n\
                             }
                         }
                     }
-                    if (t_above == "lab_stairs" || t_above == "ice_lab_stairs") {
+                    if (t_above == lab_stairs || t_above == ice_lab_stairs) {
                         ter_set(rng(SEEX - 1, SEEX), rng(SEEY - 1, SEEY), t_stairs_up);
                     }
                     // Top left
@@ -3741,7 +3842,7 @@ C..C..C...|hhh|#########\n\
                         ter_set(SEEX - 1, SEEY * 2 - 1, t_door_metal_c);
                         ter_set(SEEX    , SEEY * 2 - 1, t_door_metal_c);
                     }
-                    if (terrain_type == "lab_stairs" || terrain_type == "ice_lab_stairs") { // Stairs going down
+                    if (terrain_type == lab_stairs || terrain_type == ice_lab_stairs) { // Stairs going down
                         std::vector<point> stair_points;
                         if (tw != 0) {
                             stair_points.push_back(point(SEEX - 1, 2));
@@ -3793,7 +3894,7 @@ C..C..C...|hhh|#########\n\
                             }
                         }
                     }
-                    if (t_above == "lab_stairs" || t_above == "ice_lab_stairs") {
+                    if (t_above == lab_stairs || t_above == ice_lab_stairs) {
                         ter_set(SEEX - 1, SEEY - 1, t_stairs_up);
                         ter_set(SEEX    , SEEY - 1, t_stairs_up);
                         ter_set(SEEX - 1, SEEY    , t_stairs_up);
@@ -3828,7 +3929,7 @@ C..C..C...|hhh|#########\n\
                         ter_set(SEEX - 1, SEEY * 2 - 1, t_door_metal_c);
                         ter_set(SEEX    , SEEY * 2 - 1, t_door_metal_c);
                     }
-                    if (terrain_type == "lab_stairs" || terrain_type == "ice_lab_stairs") {
+                    if (terrain_type == lab_stairs || terrain_type == ice_lab_stairs) {
                         ter_set(SEEX - 3 + 5 * rng(0, 1), SEEY - 3 + 5 * rng(0, 1), t_stairs_down);
                     }
                     break;
@@ -3847,7 +3948,7 @@ C..C..C...|hhh|#########\n\
                     }
                     science_room(this, lw, tw, SEEX * 2 - 1 - rw, SEEY * 2 - 1 - bw,
                                  zlevel, rng(0, 3));
-                    if (t_above == "lab_stairs" || t_above == "ice_lab_stairs") {
+                    if (t_above == lab_stairs || t_above == ice_lab_stairs) {
                         int sx, sy;
                         do {
                             sx = rng(lw, SEEX * 2 - 1 - rw);
@@ -3863,7 +3964,7 @@ C..C..C...|hhh|#########\n\
                         ter_set(SEEX - 1, SEEY * 2 - 1, t_door_metal_c);
                         ter_set(SEEX    , SEEY * 2 - 1, t_door_metal_c);
                     }
-                    if (terrain_type == "lab_stairs" || terrain_type == "ice_lab_stairs") {
+                    if (terrain_type == lab_stairs || terrain_type == ice_lab_stairs) {
                         int sx, sy;
                         do {
                             sx = rng(lw, SEEX * 2 - 1 - rw);
@@ -4143,7 +4244,7 @@ ff.......|....|WWWWWWWW|\n\
                             }
                         }
                     }
-                    if (t_above == "lab_stairs" || t_above == "ice_lab_stairs") {
+                    if (t_above == lab_stairs || t_above == ice_lab_stairs) {
                         int sx, sy;
                         do {
                             sx = rng(lw, SEEX * 2 - 1 - rw);
@@ -4151,7 +4252,7 @@ ff.......|....|WWWWWWWW|\n\
                         } while (ter(sx, sy) != t_rock_floor);
                         ter_set(sx, sy, t_stairs_up);
                     }
-                    if (terrain_type == "lab_stairs" || terrain_type == "ice_lab_stairs") {
+                    if (terrain_type == lab_stairs || terrain_type == ice_lab_stairs) {
                         int sx, sy;
                         do {
                             sx = rng(lw, SEEX * 2 - 1 - rw);
@@ -4197,10 +4298,10 @@ ff.......|....|WWWWWWWW|\n\
         }
 
         // Slimes pretty much wreck up the place, too, but only underground
-        tw = (t_north == "slimepit" ? SEEY     : 0);
-        rw = (t_east  == "slimepit" ? SEEX + 1 : 0);
-        bw = (t_south == "slimepit" ? SEEY + 1 : 0);
-        lw = (t_west  == "slimepit" ? SEEX     : 0);
+        tw = (t_north == slimepit ? SEEY     : 0);
+        rw = (t_east  == slimepit ? SEEX + 1 : 0);
+        bw = (t_south == slimepit ? SEEY + 1 : 0);
+        lw = (t_west  == slimepit ? SEEX     : 0);
         if (tw != 0 || rw != 0 || bw != 0 || lw != 0) {
             for (int i = 0; i < SEEX * 2; i++) {
                 for (int j = 0; j < SEEY * 2; j++) {
@@ -4217,8 +4318,8 @@ ff.......|....|WWWWWWWW|\n\
         }
 
 
-    } else if (terrain_type == "lab_finale" ||
-               terrain_type == "ice_lab_finale") {
+    } else if (terrain_type == lab_finale ||
+               terrain_type == ice_lab_finale) {
 
         if (is_ot_type("ice_lab", terrain_type)) {
             has_ice_lab = true;
@@ -4396,7 +4497,7 @@ ff.......|....|WWWWWWWW|\n\
             break;
         }
 
-    } else if (terrain_type == "bunker") {
+    } else if (terrain_type == bunker) {
 
         if (zlevel == 0) { // We're on ground level
             dat.fill_groundcover();
@@ -4564,7 +4665,7 @@ ff.......|....|WWWWWWWW|\n\
         }
 
 
-    } else if (terrain_type == "outpost") {
+    } else if (terrain_type == outpost) {
 
         dat.fill_groundcover();
 
@@ -4765,7 +4866,7 @@ ff.......|....|WWWWWWWW|\n\
         }
 
 
-    } else if (terrain_type == "silo") {
+    } else if (terrain_type == silo) {
 
         if (zlevel == 0) { // We're on ground level
             for (int i = 0; i < SEEX * 2; i++) {
@@ -4830,7 +4931,7 @@ ff.......|....|WWWWWWWW|\n\
         }
 
 
-    } else if (terrain_type == "silo_finale") {
+    } else if (terrain_type == silo_finale) {
 
         for (int i = 0; i < SEEX * 2; i++) {
             for (int j = 0; j < SEEY * 2; j++) {
@@ -4855,8 +4956,8 @@ ff.......|....|WWWWWWWW|\n\
         tmpcomp->add_failure(COMPFAIL_DAMAGE);
 
 
-    } else if (terrain_type == "temple" ||
-               terrain_type == "temple_stairs") {
+    } else if (terrain_type == temple ||
+               terrain_type == temple_stairs) {
 
         if (zlevel == 0) { // Ground floor
             // TODO: More varieties?
@@ -5062,18 +5163,18 @@ ff.......|....|WWWWWWWW|\n\
             break;
             } // Done with room type switch
             // Stairs down if we need them
-            if (terrain_type == "temple_stairs") {
+            if (terrain_type == temple_stairs) {
                 line(this, t_stairs_down, SEEX, 0, SEEX + 1, 0);
             }
             // Stairs at the south if t_above has stairs down.
-            if (t_above == "temple_stairs") {
+            if (t_above == temple_stairs) {
                 line(this, t_stairs_up, SEEX, SEEY * 2 - 1, SEEX + 1, SEEY * 2 - 1);
             }
 
         } // Done with underground-only stuff
 
 
-    } else if (terrain_type == "temple_finale") {
+    } else if (terrain_type == temple_finale) {
 
         fill_background(this, t_rock);
         square(this, t_rock_floor, SEEX - 1, 1, SEEX + 2, 4);
@@ -5083,7 +5184,7 @@ ff.......|....|WWWWWWWW|\n\
         spawn_artifact( tripoint( rng(SEEX, SEEX + 1), rng(2, 3), abs_sub.z ) );
         return;
 
-    } else if (terrain_type == "sewage_treatment") {
+    } else if (terrain_type == sewage_treatment) {
 
         fill_background(this, t_floor); // Set all to floor
         line(this, t_wall,  0,  0, 23,  0); // Top wall
@@ -5143,7 +5244,7 @@ ff.......|....|WWWWWWWW|\n\
         place_items("sewage_plant", 80, 1, 6, 1, 13, false, 0);
 
 
-    } else if (terrain_type == "sewage_treatment_hub") {
+    } else if (terrain_type == sewage_treatment_hub) {
         // Stairs up, center of 3x3 of treatment_below
 
         fill_background(this, t_rock_floor);
@@ -5310,14 +5411,14 @@ ff.......|....|WWWWWWWW|\n\
         }
 
 
-    } else if (terrain_type == "sewage_treatment_under") {
+    } else if (terrain_type == sewage_treatment_under) {
 
         fill_background(this, t_floor);
 
-        if (t_north == "sewage_treatment_under" || t_north == "sewage_treatment_hub" ||
+        if (t_north == sewage_treatment_under || t_north == sewage_treatment_hub ||
             (is_ot_type("sewer", t_north) && connects_to(t_north, 2))) {
-            if (t_north == "sewage_treatment_under" ||
-                t_north == "sewage_treatment_hub") {
+            if (t_north == sewage_treatment_under ||
+                t_north == sewage_treatment_hub) {
                 line(this, t_wall,  0,  0, 23,  0);
                 ter_set(3, 0, t_door_c);
             }
@@ -5325,25 +5426,25 @@ ff.......|....|WWWWWWWW|\n\
             square(this, t_sewage, 10, 0, 13, 13);
         }
 
-        if (t_east == "sewage_treatment_under" ||
-            t_east == "sewage_treatment_hub" ||
+        if (t_east == sewage_treatment_under ||
+            t_east == sewage_treatment_hub ||
             (is_ot_type("sewer", t_east) && connects_to(t_east, 3))) {
             e_fac = 1;
             square(this, t_sewage, 10, 10, 23, 13);
         }
 
-        if (t_south == "sewage_treatment_under" ||
-            t_south == "sewage_treatment_hub" ||
+        if (t_south == sewage_treatment_under ||
+            t_south == sewage_treatment_hub ||
             (is_ot_type("sewer", t_south) && connects_to(t_south, 0))) {
             s_fac = 1;
             square(this, t_sewage, 10, 10, 13, 23);
         }
 
-        if (t_west == "sewage_treatment_under" ||
-            t_west == "sewage_treatment_hub" ||
+        if (t_west == sewage_treatment_under ||
+            t_west == sewage_treatment_hub ||
             (is_ot_type("sewer", t_west) && connects_to(t_west, 1))) {
-            if (t_west == "sewage_treatment_under" ||
-                t_west == "sewage_treatment_hub") {
+            if (t_west == sewage_treatment_under ||
+                t_west == sewage_treatment_hub) {
                 line(this, t_wall,  0,  1,  0, 23);
                 ter_set(0, 20, t_door_c);
             }
@@ -5352,7 +5453,7 @@ ff.......|....|WWWWWWWW|\n\
         }
 
 
-    } else if (terrain_type == "mine_entrance") {
+    } else if (terrain_type == mine_entrance) {
 
         dat.fill_groundcover();
         int tries = 0;
@@ -5387,7 +5488,7 @@ ff.......|....|WWWWWWWW|\n\
         ter_set(ladderx, laddery, t_manhole_cover);
 
 
-    } else if (terrain_type == "mine_shaft") {
+    } else if (terrain_type == mine_shaft) {
         // Not intended to actually be inhabited!
 
         fill_background(this, t_rock);
@@ -5398,8 +5499,8 @@ ff.......|....|WWWWWWWW|\n\
         rotate(rng(0, 3));
 
 
-    } else if (terrain_type == "mine" ||
-               terrain_type == "mine_down") {
+    } else if (terrain_type == mine ||
+               terrain_type == mine_down) {
 
         if (is_ot_type("mine", t_north)) {
             n_fac = (one_in(10) ? 0 : -2);
@@ -5434,7 +5535,7 @@ ff.......|....|WWWWWWWW|\n\
             }
         }
 
-        if (t_above == "mine_shaft") { // We need the entrance room
+        if (t_above == mine_shaft) { // We need the entrance room
             square(this, t_floor, 10, 10, 15, 15);
             line(this, t_wall,  9,  9, 16,  9);
             line(this, t_wall,  9, 16, 16, 16);
@@ -5577,7 +5678,7 @@ ff.......|....|WWWWWWWW|\n\
             }
         }
 
-        if (terrain_type == "mine_down") { // Don't forget to build a slope down!
+        if (terrain_type == mine_down) { // Don't forget to build a slope down!
             std::vector<direction> open;
             if (n_fac == 4) {
                 open.push_back(NORTH);
@@ -5641,7 +5742,7 @@ ff.......|....|WWWWWWWW|\n\
             }
         } // Done building a slope down
 
-        if (t_above == "mine_down") {  // Don't forget to build a slope up!
+        if (t_above == mine_down) {  // Don't forget to build a slope up!
             std::vector<direction> open;
             if (n_fac == 6 && ter(SEEX, 6) != t_slope_down) {
                 open.push_back(NORTH);
@@ -5702,7 +5803,7 @@ ff.......|....|WWWWWWWW|\n\
         } // Done building a slope up
 
 
-    } else if (terrain_type == "mine_finale") {
+    } else if (terrain_type == mine_finale) {
 
         // Set up the basic chamber
         for (int i = 0; i < SEEX * 2; i++) {
@@ -5717,25 +5818,25 @@ ff.......|....|WWWWWWWW|\n\
         }
         std::vector<direction> face; // Which walls are solid, and can be a facing?
         // Now draw the entrance(s)
-        if (t_north == "mine") {
+        if (t_north == mine) {
             square(this, t_rock_floor, SEEX, 0, SEEX + 1, 3);
         } else {
             face.push_back(NORTH);
         }
 
-        if (t_east  == "mine") {
+        if (t_east  == mine) {
             square(this, t_rock_floor, SEEX * 2 - 4, SEEY, SEEX * 2 - 1, SEEY + 1);
         } else {
             face.push_back(EAST);
         }
 
-        if (t_south == "mine") {
+        if (t_south == mine) {
             square(this, t_rock_floor, SEEX, SEEY * 2 - 4, SEEX + 1, SEEY * 2 - 1);
         } else {
             face.push_back(SOUTH);
         }
 
-        if (t_west  == "mine") {
+        if (t_west  == mine) {
             square(this, t_rock_floor, 0, SEEY, 3, SEEY + 1);
         } else {
             face.push_back(WEST);
@@ -5822,7 +5923,7 @@ ff.......|....|WWWWWWWW|\n\
         }
 
 
-    } else if (terrain_type == "spiral_hub") {
+    } else if (terrain_type == spiral_hub) {
 
         fill_background(this, t_rock_floor);
         line(this, t_rock, 23,  0, 23, 23);
@@ -5844,7 +5945,7 @@ ff.......|....|WWWWWWWW|\n\
         rotate(rng(0, 3));
 
 
-    } else if (terrain_type == "spiral") {
+    } else if (terrain_type == spiral) {
 
         fill_background(this, t_rock_floor);
         const int num_spiral = rng(1, 4);
@@ -5880,7 +5981,7 @@ ff.......|....|WWWWWWWW|\n\
         }
 
 
-    } else if (terrain_type == "radio_tower") {
+    } else if (terrain_type == radio_tower) {
 
         dat.fill_groundcover();
         lw = rng(1, SEEX * 2 - 2);
@@ -5979,18 +6080,18 @@ ff.......|....|WWWWWWWW|\n\
         place_items("fridge", 10,  5,  9, 7,  9, false, 0);
         place_items("cleaning", 70,  2,  16, 2,  17, false, 0);
         place_items("electronics", 80,  6,  5, 7,  5, false, 0);
-        if (terrain_type == "station_radio_east") {
+        if (terrain_type == station_radio_east) {
             rotate(3);
         }
-        if (terrain_type == "station_radio_north") {
+        if (terrain_type == station_radio_north) {
             rotate(2);
         }
-        if (terrain_type == "station_radio_west") {
+        if (terrain_type == station_radio_west) {
             rotate(1);
         }
 
 
-    } else if (terrain_type == "public_works_entrance") {
+    } else if (terrain_type == public_works_entrance) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6033,25 +6134,25 @@ ff.......|....|WWWWWWWW|\n\
         place_items("office", 80,  18,  11, 20,  11, false, 0);
         place_items("office", 60,  18,  13, 18,  13, false, 0);
         place_spawns("GROUP_PUBLICWORKERS", 1, 0, 0, SEEX * 2 - 1, SEEX * 2 - 1, 0.2);
-        if (t_north == "public_works" && t_west == "public_works") {
+        if (t_north == public_works && t_west == public_works) {
             rotate(3);
-        } else if (t_north == "public_works" && t_east == "public_works") {
+        } else if (t_north == public_works && t_east == public_works) {
             rotate(0);
-        } else if (t_south == "public_works" && t_east == "public_works") {
+        } else if (t_south == public_works && t_east == public_works) {
             rotate(1);
-        } else if (t_west == "public_works" && t_south == "public_works") {
+        } else if (t_west == public_works && t_south == public_works) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "public_works") {
+    } else if (terrain_type == public_works) {
 
         // Init to grass & dirt;
         dat.fill_groundcover();
-        if ((t_south == "public_works_entrance" && t_east == "public_works") ||
-            (t_north == "public_works" && t_east == "public_works_entrance") || (t_west == "public_works" &&
-                    t_north == "public_works_entrance") ||
-            (t_south == "public_works" && t_west == "public_works_entrance")) {
+        if ((t_south == public_works_entrance && t_east == public_works) ||
+            (t_north == public_works && t_east == public_works_entrance) || (t_west == public_works &&
+                    t_north == public_works_entrance) ||
+            (t_south == public_works && t_west == public_works_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
                         \n\
@@ -6099,21 +6200,21 @@ ff.......|....|WWWWWWWW|\n\
             spawn_item(13, 2, "nail");
             spawn_item(14, 2, "material_sand", rng(1, 10));
             place_spawns("GROUP_PUBLICWORKERS", 1, 0, 0, SEEX * 2 - 1, SEEX * 2 - 1, 0.1);
-            if (t_west == "public_works_entrance") {
+            if (t_west == public_works_entrance) {
                 rotate(1);
             }
-            if (t_north == "public_works_entrance") {
+            if (t_north == public_works_entrance) {
                 rotate(2);
             }
-            if (t_east == "public_works_entrance") {
+            if (t_east == public_works_entrance) {
                 rotate(3);
             }
         }
 
-        else if ((t_west == "public_works_entrance" && t_north == "public_works") ||
-                 (t_north == "public_works_entrance" && t_east == "public_works") || (t_west == "public_works" &&
-                         t_south == "public_works_entrance") ||
-                 (t_south == "public_works" && t_east == "public_works_entrance")) {
+        else if ((t_west == public_works_entrance && t_north == public_works) ||
+                 (t_north == public_works_entrance && t_east == public_works) || (t_west == public_works &&
+                         t_south == public_works_entrance) ||
+                 (t_south == public_works && t_east == public_works_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 __________           f  \n\
@@ -6156,13 +6257,13 @@ ____sss                 \n",
             place_items("office", 80,  15,  19, 17,  19, false, 0);
             place_items("cleaning", 80,  17,  16, 17,  16, false, 0);
             place_spawns("GROUP_PUBLICWORKERS", 1, 0, 0, SEEX * 2 - 1, SEEX * 2 - 1, 0.3);
-            if (t_north == "public_works_entrance") {
+            if (t_north == public_works_entrance) {
                 rotate(1);
             }
-            if (t_east == "public_works_entrance") {
+            if (t_east == public_works_entrance) {
                 rotate(2);
             }
-            if (t_south == "public_works_entrance") {
+            if (t_south == public_works_entrance) {
                 rotate(3);
             }
         }
@@ -6214,7 +6315,7 @@ __________           f  \n",
             place_items("cleaning", 85,  12,  2, 13,  2, false, 0);
             spawn_item(3, 2, "log", rng(1, 3));
             place_spawns("GROUP_PUBLICWORKERS", 1, 0, 0, SEEX * 2 - 1, SEEX * 2 - 1, 0.1);
-            if (t_west == "public_works" && t_north == "public_works") {
+            if (t_west == public_works && t_north == public_works) {
                 rotate(1);
                 if (x_in_y(2, 3)) {
                 int roller_check=rng(0,100);
@@ -6224,7 +6325,7 @@ __________           f  \n",
                         add_vehicle ("road_roller", 2, 0, 90);
                     }
                 }
-            } else if (t_east == "public_works" && t_north == "public_works") {
+            } else if (t_east == public_works && t_north == public_works) {
                 rotate(2);
                 if (x_in_y(2, 3)) {
                 int roller_check=rng(0,100);
@@ -6234,7 +6335,7 @@ __________           f  \n",
                         add_vehicle ("road_roller", 23, 10, 270);
                     }
                 }
-            } else if (t_east == "public_works" && t_south == "public_works") {
+            } else if (t_east == public_works && t_south == public_works) {
                 rotate(3);
                 if (x_in_y(2, 3)) {
                 int roller_check=rng(0,100);
@@ -6256,7 +6357,7 @@ __________           f  \n",
             }
         }
 
-    } else if (terrain_type == "school_1") {
+    } else if (terrain_type == school_1) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6294,18 +6395,18 @@ ssssssssssssssssssssssss\n",
                                            f_null,   f_bench, f_table, f_null,   f_null,              f_null,        f_null,   f_toilet,
                                            f_sink,  f_fridge, f_bookcase, f_chair, f_counter, f_desk,  f_locker, f_null));
         add_spawn("mon_zombie_child", rng(20, 60), SEEX, SEEY);
-        if (t_north == "school_2") {
+        if (t_north == school_2) {
             rotate(3);
-        } else if (t_east == "school_2") {
+        } else if (t_east == school_2) {
             rotate(0);
-        } else if (t_south == "school_2") {
+        } else if (t_south == school_2) {
             rotate(1);
-        } else if (t_west == "school_2") {
+        } else if (t_west == school_2) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "school_2") {
+    } else if (terrain_type == school_2) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6353,18 +6454,18 @@ ssssssssssssssssssssssss\n",
                 }
             }
         }
-        if (t_north == "school_5") {
+        if (t_north == school_5) {
             rotate(0);
-        } else if (t_east == "school_5") {
+        } else if (t_east == school_5) {
             rotate(1);
-        } else if (t_south == "school_5") {
+        } else if (t_south == school_5) {
             rotate(2);
-        } else if (t_west == "school_5") {
+        } else if (t_west == school_5) {
             rotate(3);
         }
 
 
-    } else if (terrain_type == "school_3") {
+    } else if (terrain_type == school_3) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6402,7 +6503,7 @@ sssssssss_______ssssssss\n",
                                            f_null,   f_bench, f_table, f_null,   f_null,              f_null,        f_null,   f_toilet,
                                            f_sink,  f_fridge, f_bookcase, f_chair, f_counter, f_desk,  f_locker, f_null));
         add_spawn("mon_zombie_child", rng(0, 8), SEEX, SEEY);
-        if (t_north == "school_2") {
+        if (t_north == school_2) {
             rotate(1);
             if (x_in_y(1, 7)) {
                 add_vehicle ("schoolbus", 19, 10, 0);
@@ -6410,7 +6511,7 @@ sssssssss_______ssssssss\n",
             else if (one_in(5)) {
                 add_vehicle ("fire_truck", 19, 10, 0);
                 }
-        } else if (t_east == "school_2") {
+        } else if (t_east == school_2) {
             rotate(2);
             if (x_in_y(1, 7)) {
                 add_vehicle ("schoolbus", 9, 7, 0);
@@ -6418,7 +6519,7 @@ sssssssss_______ssssssss\n",
             else if (one_in(5)) {
                 add_vehicle ("fire_truck", 9, 7, 0);
                 }
-        } else if (t_south == "school_2") {
+        } else if (t_south == school_2) {
             rotate(3);
             if (x_in_y(1, 7)) {
                 add_vehicle ("schoolbus", 12, 18, 180);
@@ -6426,7 +6527,7 @@ sssssssss_______ssssssss\n",
             else if (one_in(5)) {
                 add_vehicle ("fire_truck", 12, 18, 180);
                 }
-        } else if (t_west == "school_2") {
+        } else if (t_west == school_2) {
             rotate(0);
             if (x_in_y(1, 7)) {
                 add_vehicle ("schoolbus", 17, 7, 0);
@@ -6437,7 +6538,7 @@ sssssssss_______ssssssss\n",
         }
 
 
-    } else if (terrain_type == "school_4") {
+    } else if (terrain_type == school_4) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6485,18 +6586,18 @@ sssssssss_______ssssssss\n",
                 }
             }
         }
-        if (t_north == "school_5") {
+        if (t_north == school_5) {
             rotate(3);
-        } else if (t_east == "school_5") {
+        } else if (t_east == school_5) {
             rotate(0);
-        } else if (t_south == "school_5") {
+        } else if (t_south == school_5) {
             rotate(1);
-        } else if (t_west == "school_5") {
+        } else if (t_west == school_5) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "school_5") {
+    } else if (terrain_type == school_5) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6548,18 +6649,18 @@ sssssssss_______ssssssss\n",
                 }
             }
         }
-        if (t_north == "school_2") {
+        if (t_north == school_2) {
             rotate(2);
-        } else if (t_east == "school_2") {
+        } else if (t_east == school_2) {
             rotate(3);
-        } else if (t_south == "school_2") {
+        } else if (t_south == school_2) {
             rotate(0);
-        } else if (t_west == "school_2") {
+        } else if (t_west == school_2) {
             rotate(1);
         }
 
 
-    } else if (terrain_type == "school_6") {
+    } else if (terrain_type == school_6) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6607,18 +6708,18 @@ ssssssssssssssssssssssss\n",
                 }
             }
         }
-        if (t_north == "school_5") {
+        if (t_north == school_5) {
             rotate(1);
-        } else if (t_east == "school_5") {
+        } else if (t_east == school_5) {
             rotate(2);
-        } else if (t_south == "school_5") {
+        } else if (t_south == school_5) {
             rotate(3);
-        } else if (t_west == "school_5") {
+        } else if (t_west == school_5) {
             rotate(0);
         }
 
 
-    } else if (terrain_type == "school_7") {
+    } else if (terrain_type == school_7) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6666,18 +6767,18 @@ ssssssssssssssssssssssss\n",
                 }
             }
         }
-        if (t_north == "school_8") {
+        if (t_north == school_8) {
             rotate(3);
-        } else if (t_east == "school_8") {
+        } else if (t_east == school_8) {
             rotate(0);
-        } else if (t_south == "school_8") {
+        } else if (t_south == school_8) {
             rotate(1);
-        } else if (t_west == "school_8") {
+        } else if (t_west == school_8) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "school_8") {
+    } else if (terrain_type == school_8) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6718,18 +6819,18 @@ w                       \n\
         add_spawn("mon_zombie", rng(0, 1), SEEX, SEEY);
         place_items("cleaning", 80,  22, 23, 23,  23, false, 0);
         spawn_item(12, 15, "american_flag");
-        if (t_north == "school_5") {
+        if (t_north == school_5) {
             rotate(2);
-        } else if (t_east == "school_5") {
+        } else if (t_east == school_5) {
             rotate(3);
-        } else if (t_south == "school_5") {
+        } else if (t_south == school_5) {
             rotate(0);
-        } else if (t_west == "school_5") {
+        } else if (t_west == school_5) {
             rotate(1);
         }
 
 
-    } else if (terrain_type == "school_9") {
+    } else if (terrain_type == school_9) {
 
         mapf::formatted_set_simple(this, 0, 0,
                                    "\
@@ -6783,18 +6884,18 @@ wd.d.d.d.|....|----|-|-|\n\
                 }
             }
         }
-        if (t_north == "school_8") {
+        if (t_north == school_8) {
             rotate(1);
-        } else if (t_east == "school_8") {
+        } else if (t_east == school_8) {
             rotate(2);
-        } else if (t_south == "school_8") {
+        } else if (t_south == school_8) {
             rotate(3);
-        } else if (t_west == "school_8") {
+        } else if (t_west == school_8) {
             rotate(0);
         }
 
 
-    } else if (terrain_type == "prison_1") {
+    } else if (terrain_type == prison_1) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6847,18 +6948,18 @@ wd.d.d.d.|....|----|-|-|\n\
                 }
             }
         }
-        if (t_north == "prison_2") {
+        if (t_north == prison_2) {
             rotate(3);
-        } else if (t_east == "prison_2") {
+        } else if (t_east == prison_2) {
             rotate(0);
-        } else if (t_south == "prison_2") {
+        } else if (t_south == prison_2) {
             rotate(1);
-        } else if (t_west == "prison_2") {
+        } else if (t_west == prison_2) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "prison_2") {
+    } else if (terrain_type == prison_2) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6912,18 +7013,18 @@ fffffffffHHHHHHfffffffff\n\
             }
         }
         add_spawn("mon_eyebot", 1, rng(5, 18), rng(12, 18));
-        if (t_north == "prison_5") {
+        if (t_north == prison_5) {
             rotate(0);
-        } else if (t_east == "prison_5") {
+        } else if (t_east == prison_5) {
             rotate(1);
-        } else if (t_south == "prison_5") {
+        } else if (t_south == prison_5) {
             rotate(2);
-        } else if (t_west == "prison_5") {
+        } else if (t_west == prison_5) {
             rotate(3);
         }
 
 
-    } else if (terrain_type == "prison_3") {
+    } else if (terrain_type == prison_3) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -6975,18 +7076,18 @@ fffffffffffffffff|,,| % \n\
                 }
             }
         }
-        if (t_north == "prison_2") {
+        if (t_north == prison_2) {
             rotate(1);
-        } else if (t_east == "prison_2") {
+        } else if (t_east == prison_2) {
             rotate(2);
-        } else if (t_south == "prison_2") {
+        } else if (t_south == prison_2) {
             rotate(3);
-        } else if (t_west == "prison_2") {
+        } else if (t_west == prison_2) {
             rotate(0);
         }
 
 
-    } else if (terrain_type == "prison_4") {
+    } else if (terrain_type == prison_4) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -7042,18 +7143,18 @@ fffffffffffffffff|,,| % \n\
                 }
             }
         }
-        if (t_north == "prison_5") {
+        if (t_north == prison_5) {
             rotate(3);
-        } else if (t_east == "prison_5") {
+        } else if (t_east == prison_5) {
             rotate(0);
-        } else if (t_south == "prison_5") {
+        } else if (t_south == prison_5) {
             rotate(1);
-        } else if (t_west == "prison_5") {
+        } else if (t_west == prison_5) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "prison_5") {
+    } else if (terrain_type == prison_5) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -7114,18 +7215,18 @@ bb| ss____________ss |bb\n\
                 }
             }
         }
-        if (t_north == "prison_2") {
+        if (t_north == prison_2) {
             rotate(2);
-        } else if (t_east == "prison_2") {
+        } else if (t_east == prison_2) {
             rotate(3);
-        } else if (t_south == "prison_2") {
+        } else if (t_south == prison_2) {
             rotate(0);
-        } else if (t_west == "prison_2") {
+        } else if (t_west == prison_2) {
             rotate(1);
         }
 
 
-    } else if (terrain_type == "prison_6") {
+    } else if (terrain_type == prison_6) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -7181,18 +7282,18 @@ bb| ss____________ss |bb\n\
                 }
             }
         }
-        if (t_north == "prison_5") {
+        if (t_north == prison_5) {
             rotate(1);
-        } else if (t_east == "prison_5") {
+        } else if (t_east == prison_5) {
             rotate(2);
-        } else if (t_south == "prison_5") {
+        } else if (t_south == prison_5) {
             rotate(3);
-        } else if (t_west == "prison_5") {
+        } else if (t_west == prison_5) {
             rotate(0);
         }
 
 
-    } else if (terrain_type == "prison_7") {
+    } else if (terrain_type == prison_7) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -7244,18 +7345,18 @@ bb| ss____________ss |bb\n\
                 }
             }
         }
-        if (t_north == "prison_8") {
+        if (t_north == prison_8) {
             rotate(3);
-        } else if (t_east == "prison_8") {
+        } else if (t_east == prison_8) {
             rotate(0);
-        } else if (t_south == "prison_8") {
+        } else if (t_south == prison_8) {
             rotate(1);
-        } else if (t_west == "prison_8") {
+        } else if (t_west == prison_8) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "prison_8") {
+    } else if (terrain_type == prison_8) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -7324,18 +7425,18 @@ bb|o,,,,|,,,,,l|,,,,,|bb\n",
                 }
             }
         }
-        if (t_north == "prison_5") {
+        if (t_north == prison_5) {
             rotate(2);
-        } else if (t_east == "prison_5") {
+        } else if (t_east == prison_5) {
             rotate(3);
-        } else if (t_south == "prison_5") {
+        } else if (t_south == prison_5) {
             rotate(0);
-        } else if (t_west == "prison_5") {
+        } else if (t_west == prison_5) {
             rotate(1);
         }
 
 
-    } else if (terrain_type == "prison_9") {
+    } else if (terrain_type == prison_9) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -7387,18 +7488,18 @@ fffffffffffffffff|,,| % \n\
                 }
             }
         }
-        if (t_north == "prison_8") {
+        if (t_north == prison_8) {
             rotate(1);
-        } else if (t_east == "prison_8") {
+        } else if (t_east == prison_8) {
             rotate(2);
-        } else if (t_south == "prison_8") {
+        } else if (t_south == prison_8) {
             rotate(3);
-        } else if (t_west == "prison_8") {
+        } else if (t_west == prison_8) {
             rotate(0);
         }
 
 
-    } else if (terrain_type == "prison_b_entrance") {
+    } else if (terrain_type == prison_b_entrance) {
 
         fill_background(this, t_rock);
         mapf::formatted_set_simple(this, 0, 0,
@@ -7451,19 +7552,19 @@ bb|#####################\n\
                 }
             }
         }
-        if (t_west != "prison_b") {
+        if (t_west != prison_b) {
             rotate(1);
-        } else if (t_north != "prison_b") {
+        } else if (t_north != prison_b) {
             rotate(2);
-        } else if (t_east != "prison_b") {
+        } else if (t_east != prison_b) {
             rotate(3);
         }
 
 
-    } else if (terrain_type == "prison_b") {
+    } else if (terrain_type == prison_b) {
 
         dat.fill_groundcover();
-        if (t_above == "prison_1") {
+        if (t_above == prison_1) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 #########|bb,,|,,,,,,|,,\n\
@@ -7514,16 +7615,16 @@ bb|#####################\n\
                     }
                 }
             }
-            if (t_south == "prison_b_entrance") {
+            if (t_south == prison_b_entrance) {
                 rotate(1);
-            } else if (t_west == "prison_b_entrance") {
+            } else if (t_west == prison_b_entrance) {
                 rotate(2);
-            } else if (t_north == "prison_b_entrance") {
+            } else if (t_north == prison_b_entrance) {
                 rotate(3);
             }
         }
 
-        if (t_above == "prison_3") {
+        if (t_above == prison_3) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ####|,,|################\n\
@@ -7560,16 +7661,16 @@ bb|#####################\n\
                                                f_null,   f_null,     f_null,     f_bookcase, f_desk,  f_null,           f_toilet, f_bed,   f_null,
                                                f_null,  f_null,  f_null, f_null,       f_null,       f_null,         f_null,         f_null,
                                                f_sink));
-            if (t_north == "prison_b_entrance") {
+            if (t_north == prison_b_entrance) {
                 rotate(1);
-            } else if (t_east == "prison_b_entrance") {
+            } else if (t_east == prison_b_entrance) {
                 rotate(2);
-            } else if (t_south == "prison_b_entrance") {
+            } else if (t_south == prison_b_entrance) {
                 rotate(3);
             }
         }
 
-        if (t_above == "prison_4") {
+        if (t_above == prison_4) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ############|,,,+,,|#|--\n\
@@ -7620,16 +7721,16 @@ bb|#####################\n\
                     }
                 }
             }
-            if (t_north != "prison_b") {
+            if (t_north != prison_b) {
                 rotate(1);
-            } else if (t_east != "prison_b") {
+            } else if (t_east != prison_b) {
                 rotate(2);
-            } else if (t_south != "prison_b") {
+            } else if (t_south != prison_b) {
                 rotate(3);
             }
         }
 
-        if (t_above == "prison_5") {
+        if (t_above == prison_5) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 --|t,,,,|------|c,,,,|--\n\
@@ -7695,16 +7796,16 @@ bb|,,,,,,,,,,,,,,,,,,|##\n\
                     }
                 }
             }
-            if (t_west == "prison_b_entrance") {
+            if (t_west == prison_b_entrance) {
                 rotate(1);
-            } else if (t_north == "prison_b_entrance") {
+            } else if (t_north == prison_b_entrance) {
                 rotate(2);
-            } else if (t_east == "prison_b_entrance") {
+            } else if (t_east == prison_b_entrance) {
                 rotate(3);
             }
         }
 
-        if (t_above == "prison_6") {
+        if (t_above == prison_6) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 +-|#####################\n\
@@ -7751,16 +7852,16 @@ h,h,g,,,|###############\n\
                     }
                 }
             }
-            if (t_south != "prison_b") {
+            if (t_south != prison_b) {
                 rotate(1);
-            } else if (t_west != "prison_b") {
+            } else if (t_west != prison_b) {
                 rotate(2);
-            } else if (t_north != "prison_b") {
+            } else if (t_north != prison_b) {
                 rotate(3);
             }
         }
 
-        else if (t_above == "prison_7") {
+        else if (t_above == prison_7) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ########################\n\
@@ -7804,14 +7905,14 @@ h,h,g,,,|###############\n\
                     }
                 }
             }
-            if (t_west == "prison_b" && t_south == "prison_b") {
+            if (t_west == prison_b && t_south == prison_b) {
                 rotate(1);
-            } else if (t_north == "prison_b" && t_west == "prison_b") {
+            } else if (t_north == prison_b && t_west == prison_b) {
                 rotate(2);
-            } else if (t_north == "prison_b" && t_east == "prison_b") {
+            } else if (t_north == prison_b && t_east == prison_b) {
                 rotate(3);
             }
-        } else if (t_above == "prison_8") {
+        } else if (t_above == prison_8) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ########################\n\
@@ -7849,14 +7950,14 @@ h,h,g,,,|###############\n\
                                                f_toilet, f_bed,   f_null,            f_null,  f_null,  f_null, f_null,       f_null,       f_null,
                                                f_null,         f_null,         f_sink));
             add_spawn("mon_zombie_cop", rng(0, 2), 12, 19);
-            if (t_east != "prison_b") {
+            if (t_east != prison_b) {
                 rotate(1);
-            } else if (t_south != "prison_b") {
+            } else if (t_south != prison_b) {
                 rotate(2);
-            } else if (t_west != "prison_b") {
+            } else if (t_west != prison_b) {
                 rotate(3);
             }
-        } else if (t_above == "prison_9") {
+        } else if (t_above == prison_9) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ########################\n\
@@ -7899,11 +8000,11 @@ ee|,,,,,,r|#############\n\
                     }
                 }
             }
-            if (t_north == "prison_b" && t_west == "prison_b") {
+            if (t_north == prison_b && t_west == prison_b) {
                 rotate(1);
-            } else if (t_north == "prison_b" && t_east == "prison_b") {
+            } else if (t_north == prison_b && t_east == prison_b) {
                 rotate(2);
-            } else if (t_south == "prison_b" && t_east == "prison_b") {
+            } else if (t_south == prison_b && t_east == prison_b) {
                 rotate(3);
             }
         }
@@ -7944,18 +8045,18 @@ ee|,,,,,,r|#############\n\
                 }
             }
         }
-        if (t_north == "prison_2") {
+        if (t_north == prison_2) {
             rotate(3);
-        } else if (t_east == "prison_2") {
+        } else if (t_east == prison_2) {
             rotate(0);
-        } else if (t_south == "prison_2") {
+        } else if (t_south == prison_2) {
             rotate(1);
-        } else if (t_west == "prison_2") {
+        } else if (t_west == prison_2) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "hotel_tower_1_1") {
+    } else if (terrain_type == hotel_tower_1_1) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -7993,18 +8094,18 @@ ssssssssssssssssssssssss\n",
                                            f_null,   f_null,              f_null,        f_null,   f_toilet, f_sink,  f_fridge, f_bookcase,
                                            f_chair, f_counter, f_dresser, f_locker, f_null));
         place_spawns("GROUP_ZOMBIE", 2, 6, 6, 18, 18, density);
-        if (t_north == "hotel_tower_1_2") {
+        if (t_north == hotel_tower_1_2) {
             rotate(3);
-        } else if (t_east == "hotel_tower_1_2") {
+        } else if (t_east == hotel_tower_1_2) {
             rotate(0);
-        } else if (t_south == "hotel_tower_1_2") {
+        } else if (t_south == hotel_tower_1_2) {
             rotate(1);
-        } else if (t_west == "hotel_tower_1_2") {
+        } else if (t_west == hotel_tower_1_2) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "hotel_tower_1_2") {
+    } else if (terrain_type == hotel_tower_1_2) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8042,18 +8143,18 @@ s________sssss________ss\n",
                                            f_null,   f_null,              f_null,        f_null,   f_toilet, f_sink,  f_fridge, f_bookcase,
                                            f_chair, f_counter, f_dresser, f_locker, f_null));
         place_spawns("GROUP_ZOMBIE", 2, 0, 0, 23, 23, density);
-        if (t_north == "hotel_tower_1_5") {
+        if (t_north == hotel_tower_1_5) {
             rotate(0);
-        } else if (t_east == "hotel_tower_1_5") {
+        } else if (t_east == hotel_tower_1_5) {
             rotate(1);
-        } else if (t_south == "hotel_tower_1_5") {
+        } else if (t_south == hotel_tower_1_5) {
             rotate(2);
-        } else if (t_west == "hotel_tower_1_5") {
+        } else if (t_west == hotel_tower_1_5) {
             rotate(3);
         }
 
 
-    } else if (terrain_type == "hotel_tower_1_3") {
+    } else if (terrain_type == hotel_tower_1_3) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8091,7 +8192,7 @@ sssssssssssssssssssssss\n",
                                            f_null,   f_null,              f_null,        f_null,   f_toilet, f_sink,  f_fridge, f_bookcase,
                                            f_chair, f_counter, f_dresser, f_locker, f_null));
         place_spawns("GROUP_ZOMBIE", 2, 0, 0, 23, 23, density);
-        if (t_north == "hotel_tower_1_2") {
+        if (t_north == hotel_tower_1_2) {
             rotate(1);
             if (x_in_y(1, 12)) {
                 add_vehicle ("car", 12, 18, 180);
@@ -8099,7 +8200,7 @@ sssssssssssssssssssssss\n",
             else if (x_in_y(2, 9)) {
                 add_vehicle ("fire_truck", 12, 18, 180);
                 }
-        } else if (t_east == "hotel_tower_1_2") {
+        } else if (t_east == hotel_tower_1_2) {
             rotate(2);
             if (x_in_y(1, 12)) {
                 add_vehicle ("car", 9, 7, 0);
@@ -8107,7 +8208,7 @@ sssssssssssssssssssssss\n",
             else if (x_in_y(2, 9)) {
                 add_vehicle ("fire_truck", 9, 7, 0);
                 }
-        } else if (t_south == "hotel_tower_1_2") {
+        } else if (t_south == hotel_tower_1_2) {
             rotate(3);
             if (x_in_y(1, 12)) {
                 add_vehicle ("car", 12, 18, 180);
@@ -8115,7 +8216,7 @@ sssssssssssssssssssssss\n",
             else if (x_in_y(2, 9)) {
                 add_vehicle ("fire_truck", 12, 18, 180);
                 }
-        } else if (t_west == "hotel_tower_1_2") {
+        } else if (t_west == hotel_tower_1_2) {
             rotate(0);
             if (x_in_y(1, 12)) {
                 add_vehicle ("car", 17, 7, 0);
@@ -8126,7 +8227,7 @@ sssssssssssssssssssssss\n",
         }
 
 
-    } else if (terrain_type == "hotel_tower_1_4") {
+    } else if (terrain_type == hotel_tower_1_4) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8176,18 +8277,18 @@ s_____,_____,_____,_____\n",
             }
         }
         place_spawns("GROUP_ZOMBIE", 2, 0, 0, 23, 23, density);
-        if (t_north == "hotel_tower_1_5") {
+        if (t_north == hotel_tower_1_5) {
             rotate(3);
-        } else if (t_east == "hotel_tower_1_5") {
+        } else if (t_east == hotel_tower_1_5) {
             rotate(0);
-        } else if (t_south == "hotel_tower_1_5") {
+        } else if (t_south == hotel_tower_1_5) {
             rotate(1);
-        } else if (t_west == "hotel_tower_1_5") {
+        } else if (t_west == hotel_tower_1_5) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "hotel_tower_1_5") {
+    } else if (terrain_type == hotel_tower_1_5) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8254,18 +8355,18 @@ ________________________\n\
                 add_vehicle ("luggage_cart", rng(5, 18), rng(2, 12), 90, -1, -1, false);
             }
         }
-        if (t_north == "hotel_tower_1_2") {
+        if (t_north == hotel_tower_1_2) {
             rotate(2);
-        } else if (t_east == "hotel_tower_1_2") {
+        } else if (t_east == hotel_tower_1_2) {
             rotate(3);
-        } else if (t_south == "hotel_tower_1_2") {
+        } else if (t_south == hotel_tower_1_2) {
             rotate(0);
-        } else if (t_west == "hotel_tower_1_2") {
+        } else if (t_west == hotel_tower_1_2) {
             rotate(1);
         }
 
 
-    } else if (terrain_type == "hotel_tower_1_6") {
+    } else if (terrain_type == hotel_tower_1_6) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8315,18 +8416,18 @@ ____,_____,_____,_____s\n",
             }
         }
         place_spawns("GROUP_ZOMBIE", 2, 0, 0, 23, 23, density);
-        if (t_north == "hotel_tower_1_5") {
+        if (t_north == hotel_tower_1_5) {
             rotate(1);
-        } else if (t_east == "hotel_tower_1_5") {
+        } else if (t_east == hotel_tower_1_5) {
             rotate(2);
-        } else if (t_south == "hotel_tower_1_5") {
+        } else if (t_south == hotel_tower_1_5) {
             rotate(3);
-        } else if (t_west == "hotel_tower_1_5") {
+        } else if (t_west == hotel_tower_1_5) {
             rotate(0);
         }
 
 
-    } else if (terrain_type == "hotel_tower_1_7") {
+    } else if (terrain_type == hotel_tower_1_7) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8390,18 +8491,18 @@ s    |c....|c....|c....|\n",
         } else {
             add_spawn("mon_zombie", rng(0, 12), 14, 11);
         }
-        if (t_north == "hotel_tower_1_8") {
+        if (t_north == hotel_tower_1_8) {
             rotate(3);
-        } else if (t_east == "hotel_tower_1_8") {
+        } else if (t_east == hotel_tower_1_8) {
             rotate(0);
-        } else if (t_south == "hotel_tower_1_8") {
+        } else if (t_south == hotel_tower_1_8) {
             rotate(1);
-        } else if (t_west == "hotel_tower_1_8") {
+        } else if (t_west == hotel_tower_1_8) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "hotel_tower_1_8") {
+    } else if (terrain_type == hotel_tower_1_8) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8465,18 +8566,18 @@ c...d|t.........t|....c|\n",
         } else {
             add_spawn("mon_zombie", rng(1, 18), 12, 12);
         }
-        if (t_north == "hotel_tower_1_5") {
+        if (t_north == hotel_tower_1_5) {
             rotate(2);
-        } else if (t_east == "hotel_tower_1_5") {
+        } else if (t_east == hotel_tower_1_5) {
             rotate(3);
-        } else if (t_south == "hotel_tower_1_5") {
+        } else if (t_south == hotel_tower_1_5) {
             rotate(0);
-        } else if (t_west == "hotel_tower_1_5") {
+        } else if (t_west == hotel_tower_1_5) {
             rotate(1);
         }
 
 
-    } else if (terrain_type == "hotel_tower_1_9") {
+    } else if (terrain_type == hotel_tower_1_9) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8540,18 +8641,18 @@ h....|h....|h....|    s \n\
         } else {
             add_spawn("mon_zombie", rng(1, 8), 12, 12);
         }
-        if (t_north == "hotel_tower_1_8") {
+        if (t_north == hotel_tower_1_8) {
             rotate(1);
-        } else if (t_east == "hotel_tower_1_8") {
+        } else if (t_east == hotel_tower_1_8) {
             rotate(2);
-        } else if (t_south == "hotel_tower_1_8") {
+        } else if (t_south == hotel_tower_1_8) {
             rotate(3);
-        } else if (t_west == "hotel_tower_1_8") {
+        } else if (t_west == hotel_tower_1_8) {
             rotate(0);
         }
 
 
-    } else if (terrain_type == "hotel_tower_b_1") {
+    } else if (terrain_type == hotel_tower_b_1) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8590,18 +8691,18 @@ h....|h....|h....|    s \n\
                                            f_toilet, f_sink,  f_fridge, f_bookcase, f_chair, f_counter, f_dresser, f_locker, f_null));
         place_items("snacks", 60,  15,  2, 16,  2, false, 0);
         add_spawn("mon_sewer_snake", rng(0, 3), SEEX, SEEY);
-        if (t_north == "hotel_tower_b_2") {
+        if (t_north == hotel_tower_b_2) {
             rotate(3);
-        } else if (t_east == "hotel_tower_b_2") {
+        } else if (t_east == hotel_tower_b_2) {
             rotate(0);
-        } else if (t_south == "hotel_tower_b_2") {
+        } else if (t_south == hotel_tower_b_2) {
             rotate(1);
-        } else if (t_west == "hotel_tower_b_2") {
+        } else if (t_west == hotel_tower_b_2) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "hotel_tower_b_2") {
+    } else if (terrain_type == hotel_tower_b_2) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8647,18 +8748,18 @@ T+...|l..l...rrr.|...+T|\n\
             }
         }
         add_spawn("mon_sewer_snake", rng(0, 10), SEEX, SEEY);
-        if (t_north == "hotel_tower_b_1") {
+        if (t_north == hotel_tower_b_1) {
             rotate(1);
-        } else if (t_east == "hotel_tower_b_1") {
+        } else if (t_east == hotel_tower_b_1) {
             rotate(2);
-        } else if (t_south == "hotel_tower_b_1") {
+        } else if (t_south == hotel_tower_b_1) {
             rotate(3);
-        } else if (t_west == "hotel_tower_b_1") {
+        } else if (t_west == hotel_tower_b_1) {
             rotate(0);
         }
 
 
-    } else if (terrain_type == "hotel_tower_b_3") {
+    } else if (terrain_type == hotel_tower_b_3) {
 
         dat.fill_groundcover();
         mapf::formatted_set_simple(this, 0, 0,
@@ -8712,13 +8813,13 @@ tth.............^|..|###\n\
             }
         }
         add_spawn("mon_sewer_snake", rng(0, 3), SEEX, SEEY);
-        if (t_north == "hotel_tower_b_2") {
+        if (t_north == hotel_tower_b_2) {
             rotate(1);
-        } else if (t_east == "hotel_tower_b_2") {
+        } else if (t_east == hotel_tower_b_2) {
             rotate(2);
-        } else if (t_south == "hotel_tower_b_2") {
+        } else if (t_south == hotel_tower_b_2) {
             rotate(3);
-        } else if (t_west == "hotel_tower_b_2") {
+        } else if (t_west == hotel_tower_b_2) {
             rotate(0);
         }
 
@@ -8786,18 +8887,18 @@ tth.............^|..|###\n\
         place_items("softdrugs", 60,  20,  9, 20, 7, false, 0);
         place_items("cleaning", 50,  4,  2, 6,  3, false, 0);
 
-        if (terrain_type == "office_doctor_east") {
+        if (terrain_type == office_doctor_east) {
             rotate(3);
         }
-        if (terrain_type == "office_doctor_north") {
+        if (terrain_type == office_doctor_north) {
             rotate(2);
         }
-        if (terrain_type == "office_doctor_west") {
+        if (terrain_type == office_doctor_west) {
             rotate(1);
         }
 
 
-    } else if (terrain_type == "toxic_dump") {
+    } else if (terrain_type == toxic_dump) {
 
         fill_background(this, t_dirt);
         for (int n = 0; n < 6; n++) {
@@ -8826,7 +8927,7 @@ tth.............^|..|###\n\
         rotate(rng(0, 3));
 
 
-    } else if (terrain_type == "haz_sar_entrance") {
+    } else if (terrain_type == haz_sar_entrance) {
 
         // Init to grass & dirt;
         dat.fill_groundcover();
@@ -8882,23 +8983,23 @@ tth.............^|..|###\n\
                 adjust_radiation(x, y, rng(10, 30));
             }
         }
-        if (t_north == "haz_sar" && t_west == "haz_sar") {
+        if (t_north == haz_sar && t_west == haz_sar) {
             rotate(3);
-        } else if (t_north == "haz_sar" && t_east == "haz_sar") {
+        } else if (t_north == haz_sar && t_east == haz_sar) {
             rotate(0);
-        } else if (t_south == "haz_sar" && t_east == "haz_sar") {
+        } else if (t_south == haz_sar && t_east == haz_sar) {
             rotate(1);
-        } else if (t_west == "haz_sar" && t_south == "haz_sar") {
+        } else if (t_west == haz_sar && t_south == haz_sar) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "haz_sar") {
+    } else if (terrain_type == haz_sar) {
 
         dat.fill_groundcover();
-        if ((t_south == "haz_sar_entrance" && t_east == "haz_sar") || (t_north == "haz_sar" &&
-                t_east == "haz_sar_entrance") || (t_west == "haz_sar" && t_north == "haz_sar_entrance") ||
-            (t_south == "haz_sar" && t_west == "haz_sar_entrance")) {
+        if ((t_south == haz_sar_entrance && t_east == haz_sar) || (t_north == haz_sar &&
+                t_east == haz_sar_entrance) || (t_west == haz_sar && t_north == haz_sar_entrance) ||
+            (t_south == haz_sar && t_west == haz_sar_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
                         \n\
@@ -8953,17 +9054,17 @@ tth.............^|..|###\n\
                     adjust_radiation(x, y, rng(10, 30));
                 }
             }
-            if (t_west == "haz_sar_entrance") {
+            if (t_west == haz_sar_entrance) {
                 rotate(1);
                 if (x_in_y(1, 4)) {
                     add_vehicle ("military_cargo_truck", 10, 11, 0);
                 }
-            } else if (t_north == "haz_sar_entrance") {
+            } else if (t_north == haz_sar_entrance) {
                 rotate(2);
                 if (x_in_y(1, 4)) {
                     add_vehicle ("military_cargo_truck", 12, 10, 90);
                 }
-            } else if (t_east == "haz_sar_entrance") {
+            } else if (t_east == haz_sar_entrance) {
                 rotate(3);
                 if (x_in_y(1, 4)) {
                     add_vehicle ("military_cargo_truck", 13, 12, 180);
@@ -8974,9 +9075,9 @@ tth.............^|..|###\n\
 
         }
 
-        else if ((t_west == "haz_sar_entrance" && t_north == "haz_sar") || (t_north == "haz_sar_entrance" &&
-                 t_east == "haz_sar") || (t_west == "haz_sar" && t_south == "haz_sar_entrance") ||
-                 (t_south == "haz_sar" && t_east == "haz_sar_entrance")) {
+        else if ((t_west == haz_sar_entrance && t_north == haz_sar) || (t_north == haz_sar_entrance &&
+                 t_east == haz_sar) || (t_west == haz_sar && t_south == haz_sar_entrance) ||
+                 (t_south == haz_sar && t_east == haz_sar_entrance)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ......|-+-|-+|...h..w f \n\
@@ -9025,13 +9126,13 @@ FFFFFFFFFFFFFFFFFFFFFFf \n\
                     adjust_radiation(x, y, rng(10, 30));
                 }
             }
-            if (t_north == "haz_sar_entrance") {
+            if (t_north == haz_sar_entrance) {
                 rotate(1);
             }
-            if (t_east == "haz_sar_entrance") {
+            if (t_east == haz_sar_entrance) {
                 rotate(2);
             }
-            if (t_south == "haz_sar_entrance") {
+            if (t_south == haz_sar_entrance) {
                 rotate(3);
             }
         }
@@ -9103,19 +9204,19 @@ FFFFFFFFFFFFFFFFFFFFFFf \n\
             tmpcomp->add_option(_("COMMAND: REACTIVATE ELEVATOR"), COMPACT_SRCF_ELEVATOR, 0);
             tmpcomp->add_option(_("COMMAND: SEAL SRCF [4423]"), COMPACT_SRCF_SEAL, 5);
             tmpcomp->add_failure(COMPFAIL_ALARM);
-            if (t_west == "haz_sar" && t_north == "haz_sar") {
+            if (t_west == haz_sar && t_north == haz_sar) {
                 rotate(1);
             }
-            if (t_east == "haz_sar" && t_north == "haz_sar") {
+            if (t_east == haz_sar && t_north == haz_sar) {
                 rotate(2);
             }
-            if (t_east == "haz_sar" && t_south == "haz_sar") {
+            if (t_east == haz_sar && t_south == haz_sar) {
                 rotate(3);
             }
         }
 
 
-    } else if (terrain_type == "haz_sar_entrance_b1") {
+    } else if (terrain_type == haz_sar_entrance_b1) {
 
         // Init to grass & dirt;
         dat.fill_groundcover();
@@ -9192,23 +9293,23 @@ FFFFFFFFFFFFFFFFFFFFFFf \n\
                 }
             }
         }
-        if (t_north == "haz_sar_b1" && t_west == "haz_sar_b1") {
+        if (t_north == haz_sar_b1 && t_west == haz_sar_b1) {
             rotate(3);
-        } else if (t_north == "haz_sar_b1" && t_east == "haz_sar_b1") {
+        } else if (t_north == haz_sar_b1 && t_east == haz_sar_b1) {
             rotate(0);
-        } else if (t_south == "haz_sar_b1" && t_east == "haz_sar_b1") {
+        } else if (t_south == haz_sar_b1 && t_east == haz_sar_b1) {
             rotate(1);
-        } else if (t_west == "haz_sar_b1" && t_south == "haz_sar_b1") {
+        } else if (t_west == haz_sar_b1 && t_south == haz_sar_b1) {
             rotate(2);
         }
 
 
-    } else if (terrain_type == "haz_sar_b1") {
+    } else if (terrain_type == haz_sar_b1) {
 
         dat.fill_groundcover();
-        if ((t_south == "haz_sar_entrance_b1" && t_east == "haz_sar_b1") || (t_north == "haz_sar_b1" &&
-                t_east == "haz_sar_entrance_b1") || (t_west == "haz_sar_b1" && t_north == "haz_sar_entrance_b1") ||
-            (t_south == "haz_sar_b1" && t_west == "haz_sar_entrance_b1")) {
+        if ((t_south == haz_sar_entrance_b1 && t_east == haz_sar_b1) || (t_north == haz_sar_b1 &&
+                t_east == haz_sar_entrance_b1) || (t_west == haz_sar_b1 && t_north == haz_sar_entrance_b1) ||
+            (t_south == haz_sar_b1 && t_west == haz_sar_entrance_b1)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ####################.M..\n\
@@ -9285,19 +9386,19 @@ FFFFFFFFFFFFFFFFFFFFFFf \n\
                     }
                 }
             }
-            if (t_west == "haz_sar_entrance_b1") {
+            if (t_west == haz_sar_entrance_b1) {
                 rotate(1);
-            } else if (t_north == "haz_sar_entrance_b1") {
+            } else if (t_north == haz_sar_entrance_b1) {
                 rotate(2);
-            } else if (t_east == "haz_sar_entrance_b1") {
+            } else if (t_east == haz_sar_entrance_b1) {
                 rotate(3);
             }
         }
 
-        else if ((t_west == "haz_sar_entrance_b1" && t_north == "haz_sar_b1") ||
-                 (t_north == "haz_sar_entrance_b1" && t_east == "haz_sar_b1") || (t_west == "haz_sar_b1" &&
-                         t_south == "haz_sar_entrance_b1") ||
-                 (t_south == "haz_sar_b1" && t_east == "haz_sar_entrance_b1")) {
+        else if ((t_west == haz_sar_entrance_b1 && t_north == haz_sar_b1) ||
+                 (t_north == haz_sar_entrance_b1 && t_east == haz_sar_b1) || (t_west == haz_sar_b1 &&
+                         t_south == haz_sar_entrance_b1) ||
+                 (t_south == haz_sar_b1 && t_east == haz_sar_entrance_b1)) {
             mapf::formatted_set_simple(this, 0, 0,
                                        "\
 ....M..|,,,,|........###\n\
@@ -9371,13 +9472,13 @@ FFFFFFFFFFFFFFFFFFFFFFf \n\
                     }
                 }
             }
-            if (t_north == "haz_sar_entrance_b1") {
+            if (t_north == haz_sar_entrance_b1) {
                 rotate(1);
             }
-            if (t_east == "haz_sar_entrance_b1") {
+            if (t_east == haz_sar_entrance_b1) {
                 rotate(2);
             }
-            if (t_south == "haz_sar_entrance_b1") {
+            if (t_south == haz_sar_entrance_b1) {
                 rotate(3);
             }
         }
@@ -9478,13 +9579,13 @@ $$$$-|-|=HH-|-HHHH-|####\n",
             tmpcomp->add_option(_("USARMY: SEAL SRCF [987167]"), COMPACT_SRCF_SEAL_ORDER, 4);
             tmpcomp->add_option(_("COMMAND: REACTIVATE ELEVATOR"), COMPACT_SRCF_ELEVATOR, 0);
             tmpcomp->add_failure(COMPFAIL_ALARM);
-            if (t_west == "haz_sar_b1" && t_north == "haz_sar_b1") {
+            if (t_west == haz_sar_b1 && t_north == haz_sar_b1) {
                 rotate(1);
             }
-            if (t_east == "haz_sar_b1" && t_north == "haz_sar_b1") {
+            if (t_east == haz_sar_b1 && t_north == haz_sar_b1) {
                 rotate(2);
             }
-            if (t_east == "haz_sar_b1" && t_south == "haz_sar_b1") {
+            if (t_east == haz_sar_b1 && t_south == haz_sar_b1) {
                 rotate(3);
             }
         }
@@ -9497,7 +9598,7 @@ $$$$-|-|=HH-|-HHHH-|####\n",
     // break the clause in two so MSVC compiles work, until this file is refactored.
     // "please, shoot me now" - refactorer
     if (!terrain_type_found) {
-    if (terrain_type == "farm") {
+    if (terrain_type == farm) {
 
         if (!one_in(10)) {
             dat.fill_groundcover();
@@ -9627,10 +9728,10 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         }
 
 
-    } else if (terrain_type == "farm_field") {
+    } else if (terrain_type == farm_field) {
 
         //build barn
-        if (t_east == "farm") {
+        if (t_east == farm) {
             dat.fill_groundcover();
             square(this, t_wall_wood, 3, 3, 20, 20);
             square(this, t_dirtfloor, 4, 4, 19, 19);
@@ -9666,7 +9767,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             ter_set(5, 20, t_window_boarded);
             ter_set(18, 20, t_window_boarded);
 
-            if(t_south == "farm_field") {
+            if(t_south == farm_field) {
                 square(this, t_fence_barbed, 1, 20, 1, 23);
                 ter_set(2, 20, t_fence_barbed);
                 ter_set(1, 20, t_fence_barbed);
@@ -9715,39 +9816,39 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             int xStart = 4;
             int xEnd = 19;
             //acidia, connecting fields
-            if(t_east == "farm_field") {
+            if(t_east == farm_field) {
                 square(this, t_fence_barbed, 22, 1, 23, 22);
                 square(this, t_dirt, 21, 2, 23, 21);
                 xEnd = 22;
             }
-            if(t_west == "farm_field") {
+            if(t_west == farm_field) {
                 square(this, t_fence_barbed, 0, 1, 1, 22);
                 square(this, t_dirt, 0, 2, 2, 21);
                 xStart = 1;
             }
-            if(t_south == "farm_field") {
+            if(t_south == farm_field) {
                 square(this, t_fence_barbed, 1, 22, 22, 23);
                 square(this, t_dirt, 2, 21, 21, 23);
                 line(this, t_dirtmound, xStart, 21, xEnd, 21);
-                if(t_east == "farm_field") {
+                if(t_east == farm_field) {
                     square(this, t_dirt, 20, 20, 23, 23);
                 }
-                if(t_west == "farm_field") {
+                if(t_west == farm_field) {
                     square(this, t_dirt, 0, 20, 3, 23);
                 }
             }
-            if(t_north == "farm_field" || t_north == "farm") {
+            if(t_north == farm_field || t_north == farm) {
                 square(this, t_fence_barbed, 1, 0, 22, 1);
                 square(this, t_dirt, 2, 0, 21, 2);
                 line(this, t_dirtmound, xStart, 1, xEnd, 1);
-                if(t_east == "farm_field") {
+                if(t_east == farm_field) {
                     square(this, t_dirt, 20, 0, 23, 3);
                 }
-                if(t_west == "farm_field") {
+                if(t_west == farm_field) {
                     square(this, t_dirt, 0, 0, 3, 3);
                 }
             }
-            if(t_west == "farm") {
+            if(t_west == farm) {
                 square(this, t_fence_barbed, 0, 22, 1, 22);
                 square(this, t_dirt, 0, 23, 2, 23);
                 ter_set(1, 22, t_fence_barbed);
@@ -9774,7 +9875,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             place_items("hydro", 70, xStart, 19, xEnd, 19, true, turn);
         }
 
-    } else if (terrain_type == "megastore_entrance") {
+    } else if (terrain_type == megastore_entrance) {
 
         fill_background(this, t_floor);
         // Construct facing north; below, we'll rotate to face road
@@ -9830,7 +9931,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         }
 
 
-    } else if (terrain_type == "megastore") {
+    } else if (terrain_type == megastore) {
 
         square(this, t_floor, 0, 0, SEEX * 2 - 1, SEEY * 2 - 1);
 
@@ -9948,21 +10049,21 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         // Rotate randomly...
         rotate(rng(0, 3));
         // ... then place walls as needed.
-        if (t_north != "megastore_entrance" && t_north != "megastore") {
+        if (t_north != megastore_entrance && t_north != megastore) {
             line(this, t_wall, 0, 0, SEEX * 2 - 1, 0);
         }
-        if (t_east != "megastore_entrance" && t_east != "megastore") {
+        if (t_east != megastore_entrance && t_east != megastore) {
             line(this, t_wall, SEEX * 2 - 1, 0, SEEX * 2 - 1, SEEY * 2 - 1);
         }
-        if (t_south != "megastore_entrance" && t_south != "megastore") {
+        if (t_south != megastore_entrance && t_south != megastore) {
             line(this, t_wall, 0, SEEY * 2 - 1, SEEX * 2 - 1, SEEY * 2 - 1);
         }
-        if (t_west != "megastore_entrance" && t_west != "megastore") {
+        if (t_west != megastore_entrance && t_west != megastore) {
             line(this, t_wall, 0, 0, 0, SEEY * 2 - 1);
         }
 
 
-    } else if (terrain_type == "hospital_entrance") {
+    } else if (terrain_type == hospital_entrance) {
 
         square(this, t_pavement, 0, 0, SEEX * 2 - 1, 5);
         square(this, t_floor, 0, 6, SEEX * 2 - 1, SEEY * 2 - 1);
@@ -10094,24 +10195,24 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         }
 
 
-    } else if (terrain_type == "hospital") {
+    } else if (terrain_type == hospital) {
 
         fill_background(this, t_floor);
         // We always have walls on the left and bottom
         line(this, t_wall, 0,  0,  0, 22);
         line(this, t_wall, 0, 23, 23, 23);
         // These walls contain doors if they lead to more hospital
-        if (t_west == "hospital_entrance" || t_west == "hospital") {
+        if (t_west == hospital_entrance || t_west == hospital) {
             line(this, t_door_c, 0, 11, 0, 12);
         }
-        if (t_south == "hospital_entrance" || t_south == "hospital") {
+        if (t_south == hospital_entrance || t_south == hospital) {
             line(this, t_door_c, 11, 23, 12, 23);
         }
 
-        if ((t_north == "hospital_entrance" || t_north == "hospital") &&
-            (t_east  == "hospital_entrance" || t_east  == "hospital") &&
-            (t_south == "hospital_entrance" || t_south == "hospital") &&
-            (t_west  == "hospital_entrance" || t_west  == "hospital")   ) {
+        if ((t_north == hospital_entrance || t_north == hospital) &&
+            (t_east  == hospital_entrance || t_east  == hospital) &&
+            (t_south == hospital_entrance || t_south == hospital) &&
+            (t_west  == hospital_entrance || t_west  == hospital)   ) {
             // We're in the center; center is always blood lab
             // Large lab
             line(this, t_wall,  1,  2, 21,  2);
@@ -10424,10 +10525,10 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
 
 
             // We have walls to the north and east if they're not hospitals
-            if (t_east != "hospital_entrance" && t_east != "hospital") {
+            if (t_east != hospital_entrance && t_east != hospital) {
                 line(this, t_wall, 23, 0, 23, 23);
             }
-            if (t_north != "hospital_entrance" && t_north != "hospital") {
+            if (t_north != hospital_entrance && t_north != hospital) {
                 line(this, t_wall, 0, 0, 23, 0);
             }
         }
@@ -10456,7 +10557,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         }
 
 
-    } else if (terrain_type == "mansion_entrance") {
+    } else if (terrain_type == mansion_entrance) {
         dat.fill_groundcover();
 
         // Front wall
@@ -10477,15 +10578,15 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         build_mansion_room(this, room_mansion_entry, 0, 11, SEEX * 2 - 1, SEEY * 2 - 1, dat);
         // Rotate to face the road
         if (is_ot_type("road", t_east) || is_ot_type("bridge", t_east) ||
-            ((t_east != "mansion") && (t_north == "mansion") && (t_south == "mansion"))) {
+            ((t_east != mansion) && (t_north == mansion) && (t_south == mansion))) {
             rotate(1);
         }
         if (is_ot_type("road", t_south) || is_ot_type("bridge", t_south) ||
-            ((t_south != "mansion") && (t_west == "mansion") && (t_east == "mansion"))) {
+            ((t_south != mansion) && (t_west == mansion) && (t_east == mansion))) {
             rotate(2);
         }
         if (is_ot_type("road", t_west) || is_ot_type("bridge", t_west) ||
-            ((t_west != "mansion") && (t_north == "mansion") && (t_south == "mansion"))) {
+            ((t_west != mansion) && (t_north == mansion) && (t_south == mansion))) {
             rotate(3);
         }
         // add zombies
@@ -10493,17 +10594,17 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             add_spawn("mon_zombie", rng(1, 8), 12, 12);
         }
         // Left wall
-        if( t_west == "mansion_entrance" || t_west == "mansion" ) {
+        if( t_west == mansion_entrance || t_west == mansion ) {
             line(this, t_wall,  0,  0,  0, SEEY * 2 - 2);
             line(this, t_door_c,  0, SEEY - 1, 0, SEEY);
         }
         // Bottom wall
-        if( t_south == "mansion_entrance" || t_south == "mansion" ) {
+        if( t_south == mansion_entrance || t_south == mansion ) {
             line(this, t_wall,  0, SEEY * 2 - 1, SEEX * 2 - 1, SEEY * 2 - 1);
             line(this, t_door_c, SEEX - 1, SEEY * 2 - 1, SEEX, SEEY * 2 - 1);
         }
 
-    } else if (terrain_type == "mansion") {
+    } else if (terrain_type == mansion) {
 
         // Start with floors all over
         square(this, t_floor, 1, 0, SEEX * 2 - 1, SEEY * 2 - 2);
@@ -10515,11 +10616,11 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         rw = SEEX * 2 - 1;
         // ...if we need outside walls, adjust tw & rw and build them
         // We build windows below.
-        if (t_north != "mansion_entrance" && t_north != "mansion") {
+        if (t_north != mansion_entrance && t_north != mansion) {
             tw = 1;
             line(this, t_wall, 0, 0, SEEX * 2 - 1, 0);
         }
-        if (t_east != "mansion_entrance" && t_east != "mansion") {
+        if (t_east != mansion_entrance && t_east != mansion) {
             rw = SEEX * 2 - 2;
             line(this, t_wall, SEEX * 2 - 1, 0, SEEX * 2 - 1, SEEX * 2 - 1);
         }
@@ -10528,10 +10629,10 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
 
         case 1: // Just one. big. room.
             mansion_room(this, 1, tw, rw, SEEY * 2 - 2, dat);
-            if (t_west == "mansion_entrance" || t_west == "mansion") {
+            if (t_west == mansion_entrance || t_west == mansion) {
                 line(this, t_door_c, 0, SEEY - 1, 0, SEEY);
             }
-            if (t_south == "mansion_entrance" || t_south == "mansion") {
+            if (t_south == mansion_entrance || t_south == mansion) {
                 line(this, t_door_c, SEEX - 1, SEEY * 2 - 1, SEEX, SEEY * 2 - 1);
             }
             break;
@@ -10557,10 +10658,10 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
                 ter_set(rng(3, rw - 2),  9, t_door_c);
                 ter_set(rng(3, rw - 2), 14, t_door_c);
             }
-            if (t_west == "mansion_entrance" || t_west == "mansion") {
+            if (t_west == mansion_entrance || t_west == mansion) {
                 line(this, t_door_c, 0, SEEY - 1, 0, SEEY);
             }
-            if (t_south == "mansion_entrance" || t_south == "mansion") {
+            if (t_south == mansion_entrance || t_south == mansion) {
                 line(this, t_floor, SEEX - 1, SEEY * 2 - 1, SEEX, SEEY * 2 - 1);
             }
             break;
@@ -10607,10 +10708,10 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             mansion_room(this, 14, tw, rw,  9, dat);
             mansion_room(this,  1, 14,  9, SEEY * 2 - 2, dat);
             mansion_room(this, 14, 14, rw, SEEY * 2 - 2, dat);
-            if (t_west == "mansion_entrance" || t_west == "mansion") {
+            if (t_west == mansion_entrance || t_west == mansion) {
                 line(this, t_floor, 0, SEEY - 1, 0, SEEY);
             }
-            if (t_south == "mansion_entrance" || t_south == "mansion") {
+            if (t_south == mansion_entrance || t_south == mansion) {
                 line(this, t_floor, SEEX - 1, SEEY * 2 - 1, SEEX, SEEY * 2 - 1);
             }
             break;
@@ -10642,17 +10743,17 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
                 ter_set(cw, rng(y + 2, SEEY * 2 - 3), t_door_c);
             }
 
-            if (t_west == "mansion_entrance" || t_west == "mansion") {
+            if (t_west == mansion_entrance || t_west == mansion) {
                 line(this, t_floor, 0, SEEY - 1, 0, SEEY);
             }
-            if (t_south == "mansion_entrance" || t_south == "mansion") {
+            if (t_south == mansion_entrance || t_south == mansion) {
                 line(this, t_floor, SEEX - 1, SEEY * 2 - 1, SEEX, SEEY * 2 - 1);
             }
             break;
         } // switch (rng(1, 4))
 
         // Finally, place windows on outside-facing walls if necessary
-        if (t_west != "mansion_entrance" && t_west != "mansion") {
+        if (t_west != mansion_entrance && t_west != mansion) {
             int consecutive = 0;
             for (int i = 1; i < SEEY; i++) {
                 if (move_cost(1, i) != 0 && move_cost(1, SEEY * 2 - 1 - i) != 0) {
@@ -10668,7 +10769,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
                 }
             }
         }
-        if (t_south != "mansion_entrance" && t_south != "mansion") {
+        if (t_south != mansion_entrance && t_south != mansion) {
             int consecutive = 0;
             for (int i = 1; i < SEEX; i++) {
                 if (move_cost(i, SEEY * 2 - 2) != 0 &&
@@ -10685,7 +10786,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
                 }
             }
         }
-        if (t_east != "mansion_entrance" && t_east != "mansion") {
+        if (t_east != mansion_entrance && t_east != mansion) {
             int consecutive = 0;
             for (int i = 1; i < SEEY; i++) {
                 if (move_cost(SEEX * 2 - 2, i) != 0 &&
@@ -10703,7 +10804,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             }
         }
 
-        if (t_north != "mansion_entrance" && t_north != "mansion") {
+        if (t_north != mansion_entrance && t_north != mansion) {
             int consecutive = 0;
             for (int i = 1; i < SEEX; i++) {
                 if (move_cost(i, 1) != 0 && move_cost(SEEX * 2 - 1 - i, 1) != 0) {
@@ -10725,7 +10826,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         }
 
 
-    } else if (terrain_type == "fema_entrance") {
+    } else if (terrain_type == fema_entrance) {
 
         fill_background(this, t_dirt);
         // Left wall
@@ -10763,23 +10864,23 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         }
 
 
-    } else if (terrain_type == "fema") {
+    } else if (terrain_type == fema) {
 
         fill_background(this, t_dirt);
         // check all sides for non fema/fema entrance, place fence on those sides
-        if(t_north != "fema" && t_north != "fema_entrance") {
+        if(t_north != fema && t_north != fema_entrance) {
             line(this, t_chainfence_h, 0, 0, 23, 0);
         }
-        if(t_south != "fema" && t_south != "fema_entrance") {
+        if(t_south != fema && t_south != fema_entrance) {
             line(this, t_chainfence_h, 0, 23, 23, 23);
         }
-        if(t_west != "fema" && t_west != "fema_entrance") {
+        if(t_west != fema && t_west != fema_entrance) {
             line(this, t_chainfence_v, 0, 0, 0, 23);
         }
-        if(t_east != "fema" && t_east != "fema_entrance") {
+        if(t_east != fema && t_east != fema_entrance) {
             line(this, t_chainfence_v, 23, 0, 23, 23);
         }
-        if(t_west == "fema" && t_east == "fema" && t_south != "fema") {
+        if(t_west == fema && t_east == fema && t_south != fema) {
             //lab bottom side
             square(this, t_dirt, 1, 1, 22, 22);
             square(this, t_floor, 4, 4, 19, 19);
@@ -10815,7 +10916,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             if (one_in(2)) {
                 add_spawn("mon_zombie_brute", 1, 16, 17);
             }
-        } else if (t_west == "fema_entrance") {
+        } else if (t_west == fema_entrance) {
             square(this, t_dirt, 1, 1, 22, 22); //Supply tent
             line_furn(this, f_canvas_wall, 4, 4, 19, 4);
             line_furn(this, f_canvas_wall, 4, 4, 4, 19);
@@ -10937,7 +11038,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             }
         }
 
-    } else if (terrain_type == "spider_pit_under") {
+    } else if (terrain_type == spider_pit_under) {
 
         for (int i = 0; i < SEEX * 2; i++) {
             for (int j = 0; j < SEEY * 2; j++) {
@@ -10957,7 +11058,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         add_spawn("mon_spider_trapdoor", 1, rng(3, SEEX * 2 - 5), rng(3, SEEY * 2 - 4));
 
 
-    } else if (terrain_type == "anthill") {
+    } else if (terrain_type == anthill) {
 
         for (int i = 0; i < SEEX * 2; i++) {
             for (int j = 0; j < SEEY * 2; j++) {
@@ -10974,7 +11075,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
     } else if (is_ot_type("slimepit", terrain_type)) {
 
         for (int i = 0; i < 4; i++) {
-            nesw_fac[i] = (t_nesw[i] == "slimepit" || t_nesw[i] == "slimepit_down" ? 1 : 0);
+            nesw_fac[i] = (t_nesw[i] == slimepit || t_nesw[i] == slimepit_down ? 1 : 0);
         }
 
         for (int i = 0; i < SEEX * 2; i++) {
@@ -10992,11 +11093,11 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             }
         }
 
-        if (terrain_type == "slimepit_down") {
+        if (terrain_type == slimepit_down) {
             ter_set(rng(3, SEEX * 2 - 4), rng(3, SEEY * 2 - 4), t_slope_down);
         }
 
-        if (t_above == "slimepit_down") {
+        if (t_above == slimepit_down) {
             switch (rng(1, 4)) {
             case 1:
                 ter_set(rng(0, 2), rng(0, 2), t_slope_up);
@@ -11013,7 +11114,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         place_items("sewer", 40, 0, 0, SEEX * 2 - 1, SEEY * 2 - 1, true, 0);
 
 
-    } else if (terrain_type == "triffid_grove") {
+    } else if (terrain_type == triffid_grove) {
 
         fill_background(this, t_dirt);
         for (int rad = 5; rad < SEEX - 2; rad += rng(2, 3)) {
@@ -11034,7 +11135,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         square(this, t_slope_down, SEEX - 1, SEEY - 1, SEEX, SEEY);
 
 
-    } else if (terrain_type == "triffid_roots") {
+    } else if (terrain_type == triffid_roots) {
 
         fill_background(this, t_root_wall);
         int node = 0;
@@ -11118,7 +11219,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         rotate(rng(0, 3));
 
 
-    } else if (terrain_type == "triffid_finale") {
+    } else if (terrain_type == triffid_finale) {
 
         fill_background(this, t_root_wall);
         square(this, t_dirt, 1, 1, 4, 4);
@@ -11271,7 +11372,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             }
         }
     } else if (is_ot_type("sewer", terrain_type)) {
-        if (t_above == "road_nesw_manhole") {
+        if (t_above == road_nesw_manhole) {
             ter_set(rng(SEEX - 2, SEEX + 1), rng(SEEY - 2, SEEY + 1), t_ladder_up);
         }
         if (is_ot_type("subway", t_north) &&
@@ -11311,7 +11412,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
             ter_set(SEEX - 3, SEEY - 1, t_door_metal_c);
         }
     } else if (is_ot_type("ants", terrain_type)) {
-        if (t_above == "anthill") {
+        if (t_above == anthill) {
             bool done = false;
             do {
                 int x = rng(0, SEEX * 2 - 1), y = rng(0, SEEY * 2 - 1);
@@ -11943,8 +12044,9 @@ void map::rotate(int turns)
 }
 
 // Hideous function, I admit...
-bool connects_to(oter_id there, int dir)
+bool connects_to(oter_id _there, int dir)
 {
+    const std::string there = _there.obj().id;
     switch (dir) {
     case 2:
         if (there == "subway_ns"  || there == "subway_es" || there == "subway_sw" ||
