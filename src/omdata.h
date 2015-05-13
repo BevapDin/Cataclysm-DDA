@@ -86,8 +86,6 @@ struct oter_id {
     operator int() const;
     // pretending to be a
     operator std::string const&() const;
-    // in order to map
-    operator oter_t() const;
 
     const oter_t &obj() const;
 

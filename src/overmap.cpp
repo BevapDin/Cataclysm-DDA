@@ -3581,7 +3581,7 @@ void overmap::place_special(overmap_special special, tripoint p, int rotation)
         overmap_special_terrain terrain = *it;
 
         oter_id id = (oter_id) terrain.terrain;
-        oter_t t = (oter_t) id;
+        const oter_t &t = id.obj();
 
         tripoint rp = rotate_tripoint(terrain.p, rotation);
         tripoint location = tripoint(p.x + rp.x, p.y + rp.y, p.z + rp.z);
@@ -3665,7 +3665,7 @@ void overmap::place_special(overmap_special special, tripoint p, int rotation)
 
 oter_id overmap::rotate(const oter_id &oter, int dir)
 {
-    const oter_t &otert = oter;
+    const oter_t &otert = oter.obj();
     if (! otert.has_flag(rotates) && dir != 0) {
         debugmsg("%s does not rotate.", oter.c_str());
         return oter;
@@ -3918,12 +3918,6 @@ bool oter_id::operator!=(const oter_id &v) const
 bool oter_id::operator==(const oter_id &v) const
 {
     return ( _val == v._val );
-}
-
-// oter_t( ter(...) ).name // WARNING
-oter_id::operator oter_t() const
-{
-    return oterlist[_val];
 }
 
 const oter_t &oter_id::obj() const
