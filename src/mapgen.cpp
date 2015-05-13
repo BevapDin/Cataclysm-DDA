@@ -1413,7 +1413,7 @@ void map::draw_map(const oter_id terrain_type, const oter_id t_north, const oter
     int y = 0;
 
     // To distinguish between types of labs
-    bool ice_lab = true;
+    bool has_ice_lab = true;
 
     oter_id t_nesw[] = {t_north, t_east, t_south, t_west, t_neast, t_seast, t_nwest, t_swest};
     int nesw_fac[] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -3364,12 +3364,12 @@ C..C..C...|hhh|#########\n\
                terrain_type == "ice_lab_core") {
 
         if (is_ot_type("ice_lab", terrain_type)) {
-            ice_lab = true;
+            has_ice_lab = true;
         } else {
-            ice_lab = false;
+            has_ice_lab = false;
         }
 
-        if (ice_lab) {
+        if (has_ice_lab) {
             int temperature = -20 + 30 * (zlevel);
             set_temperature(x, y, temperature);
         }
@@ -3469,7 +3469,7 @@ C..C..C...|hhh|#########\n\
         } else { // We're below ground, and no sewers
             // Set up the boudaries of walls (connect to adjacent lab squares)
             // Are we in an ice lab?
-            if ( ice_lab ) {
+            if ( has_ice_lab ) {
                 tw = is_ot_type("ice_lab", t_north) ? 0 : 2;
                 rw = is_ot_type("ice_lab", t_east) ? 1 : 2;
                 bw = is_ot_type("ice_lab", t_south) ? 1 : 2;
@@ -4221,12 +4221,12 @@ ff.......|....|WWWWWWWW|\n\
                terrain_type == "ice_lab_finale") {
 
         if (is_ot_type("ice_lab", terrain_type)) {
-            ice_lab = true;
+            has_ice_lab = true;
         } else {
-            ice_lab = false;
+            has_ice_lab = false;
         }
 
-        if ( ice_lab ) {
+        if ( has_ice_lab ) {
             int temperature = -20 + 30 * zlevel;
             set_temperature(x, y, temperature);
 
