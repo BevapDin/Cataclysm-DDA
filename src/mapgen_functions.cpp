@@ -978,7 +978,7 @@ void mapgen_road_straight(map *m, oter_id terrain_type, mapgendata dat, int turn
 {
     bool sidewalks = false;
     for (int i = 0; i < 8; i++) {
-        if (otermap[dat.t_nesw[i]].has_flag(has_sidewalk)) {
+        if (dat.t_nesw[i].obj().has_flag(has_sidewalk)) {
             sidewalks = true;
         }
     }
@@ -1026,7 +1026,7 @@ void mapgen_road_end(map *m, oter_id terrain_type, mapgendata dat, int turn, flo
 {
     bool sidewalks = false;
     for (int i = 0; i < 8; i++) {
-        if (otermap[dat.t_nesw[i]].has_flag(has_sidewalk)) {
+        if (dat.t_nesw[i].obj().has_flag(has_sidewalk)) {
             sidewalks = true;
         }
     }
@@ -1126,7 +1126,7 @@ void mapgen_road_curved(map *m, oter_id terrain_type, mapgendata dat, int turn, 
 {
     bool sidewalks = false;
     for (int i = 0; i < 8; i++) {
-        if (otermap[dat.t_nesw[i]].has_flag(has_sidewalk)) {
+        if (dat.t_nesw[i].obj().has_flag(has_sidewalk)) {
             sidewalks = true;
         }
     }
@@ -1230,7 +1230,7 @@ void mapgen_road_tee(map *m, oter_id terrain_type, mapgendata dat, int turn, flo
 {
     bool sidewalks = false;
     for (int i = 0; i < 8; i++) {
-        if (otermap[dat.t_nesw[i]].has_flag(has_sidewalk)) {
+        if (dat.t_nesw[i].obj().has_flag(has_sidewalk)) {
             sidewalks = true;
         }
     }
@@ -1284,7 +1284,7 @@ void mapgen_road_four_way(map *m, oter_id terrain_type, mapgendata dat, int turn
     }
     bool sidewalks = false;
     for (int i = 0; i < 8; i++) {
-        if (otermap[dat.t_nesw[i]].has_flag(has_sidewalk)) {
+        if (dat.t_nesw[i].obj().has_flag(has_sidewalk)) {
             sidewalks = true;
         }
     }

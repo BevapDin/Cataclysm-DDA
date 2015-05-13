@@ -91,7 +91,7 @@ void map::generate(const int x, const int y, const int z, const int turn)
     float density = 0.0;
     for (int i = overx - MON_RADIUS; i <= overx + MON_RADIUS; i++) {
         for (int j = overy - MON_RADIUS; j <= overy + MON_RADIUS; j++) {
-            density += otermap[overmap_buffer.ter(i, j, z)].mondensity;
+            density += overmap_buffer.ter(i, j, z).obj().mondensity;
         }
     }
     density = density / 100;
@@ -99,7 +99,7 @@ void map::generate(const int x, const int y, const int z, const int turn)
     draw_map(terrain_type, t_north, t_east, t_south, t_west, t_neast, t_seast, t_nwest, t_swest,
              t_above, turn, density, z, rsettings);
 
-    map_extras ex = get_extras(otermap[terrain_type].extras);
+    map_extras ex = get_extras(terrain_type.obj().extras);
     if ( one_in( ex.chance )) {
         add_extra( random_map_extra( ex ));
     }
@@ -11182,7 +11182,7 @@ FFFFFFFFFFFFFFFFFFFFFFFF\n\
         // not one of the hardcoded ones!
         // load from JSON???
         debugmsg("Error: tried to generate map for omtype %s, \"%s\" (id_mapgen %s)",
-                 terrain_type.c_str(), otermap[terrain_type].name.c_str(), function_key.c_str() );
+                 terrain_type.c_str(), terrain_type.obj().name.c_str(), function_key.c_str() );
         fill_background(this, t_floor);
 
     }}
