@@ -277,6 +277,8 @@ void vehicle::load (std::ifstream &stin)
  * loading from a game saved before the vehicle construction rules overhaul). */
 void vehicle::add_missing_frames()
 {
+    static const vpart_str_id frame_id( "frame_vertical" );
+    const vpart_info &frame_part = frame_id.obj(); // NOT static, could be different each time
     //No need to check the same (x, y) spot more than once
     std::set< std::pair<int, int> > locations_checked;
     for (auto &i : parts) {
@@ -296,10 +298,10 @@ void vehicle::add_missing_frames()
             if(!found) {
                 //No frame here! Install one.
                 vehicle_part new_part;
-                new_part.setid("frame_vertical");
+                new_part.set_id( frame_part.id );
                 new_part.mount.x = next_x;
                 new_part.mount.y = next_y;
-                new_part.hp = vehicle_part_types["frame_vertical"].durability;
+                new_part.hp = frame_part.durability;
                 new_part.amount = 0;
                 new_part.blood = 0;
                 new_part.bigness = 0;
@@ -330,7 +332,7 @@ void vehicle::init_state(int init_veh_fuel, int init_veh_status)
     bool has_no_key = false;
     bool destroyAlarm = false;
 
-    std::map<std::string, int> consistent_bignesses;
+    std::map<vpart_id, int> consistent_bignesses;
 
     // veh_fuel_multiplier is percentage of fuel
     // 0 is empty, 100 is full tank, -1 is random 1% to 7%
@@ -429,12 +431,13 @@ void vehicle::init_state(int init_veh_fuel, int init_veh_status)
     int blood_inside_y = 0;
     for( size_t p = 0; p < parts.size(); p++ ) {
         if( part_flag(p, "VARIABLE_SIZE") ) { // generate its bigness attribute.?
-            if( consistent_bignesses.count(parts[p].id) < 1 ) {
+            const vpart_info &vpinfo = parts[p].info();
+            if( consistent_bignesses.count( vpinfo.id ) < 1 ) {
                 //generate an item for this type, & cache its bigness
-                item tmp (part_info(p).item, 0);
-                consistent_bignesses[parts[p].id] = tmp.bigness;
+                item tmp (vpinfo.item, 0);
+                consistent_bignesses[vpinfo.id] = tmp.bigness;
             }
-            parts[p].bigness = consistent_bignesses[parts[p].id];
+            parts[p].bigness = consistent_bignesses[vpinfo.id];
         }
         if( part_flag( p, "REACTOR" ) ) {
             // De-hardcoded reactors. Should always start active
@@ -1457,8 +1460,8 @@ void vehicle::honk_horn()
             continue;
         }
         //Only bicycle horn doesn't need electricity to work
-        vpart_info &horn_type = part_info( p );
-        if( ( horn_type.id != "horn_bicycle" ) && no_power ) {
+        const vpart_info &horn_type = part_info( p );
+        if( ( horn_type.id != vpart_str_id( "horn_bicycle" ) ) && no_power ) {
             continue;
         }
         if( ! honked ) {
@@ -1496,15 +1499,15 @@ void vehicle::play_music()
         iuse::play_music( &g->u, radio_pos, 15, 50 );
     }
 }
-vpart_info& vehicle::part_info (int index, bool include_removed) const
+
+const vpart_info& vehicle::part_info (int index, bool include_removed) const
 {
     if (index < (int)parts.size()) {
         if (!parts[index].removed || include_removed) {
-            return vehicle_part_int_types[parts[index].iid];
-            // slow autovivification // vehicle_part_types[parts[index].id];
+            return parts[index].info();
         }
     }
-    return vehicle_part_int_types[0];//"null"];
+    return vpart_info::null.obj();
 }
 
 // engines & alternators all have power.
@@ -1594,15 +1597,15 @@ bool vehicle::has_structural_part(int const dx, int const dy) const
  * @param id The id of the part to install.
  * @return true if the part can be mounted, false if not.
  */
-bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
+bool vehicle::can_mount(int const dx, int const dy, const vpart_str_id &id) const
 {
     //The part has to actually exist.
-    if(vehicle_part_types.count(id) == 0) {
+    if( !id.is_valid() ) {
         return false;
     }
 
     //It also has to be a real part, not the null part
-    const vpart_info part = vehicle_part_types[id];
+    const vpart_info &part = id.obj();
     if(part.has_flag("NOINSTALL")) {
         return false;
     }
@@ -1621,10 +1624,10 @@ bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
 
     //No part type can stack with itself, or any other part in the same slot
     for( const auto &elem : parts_in_square ) {
-        const vpart_info other_part = vehicle_part_types[parts[elem].id];
+        const vpart_info &other_part = parts[elem].info();
 
         //Parts with no location can stack with each other (but not themselves)
-        if(part.id == other_part.id ||
+        if( part.loadid == other_part.loadid ||
                 (!part.location.empty() && part.location == other_part.location)) {
             return false;
         }
@@ -1654,7 +1657,7 @@ bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
     }
 
     // Alternators must be installed on a gas engine
-    if(vehicle_part_types[id].has_flag(VPFLAG_ALTERNATOR)) {
+    if(part.has_flag(VPFLAG_ALTERNATOR)) {
         bool anchor_found = false;
         for( const auto &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( VPFLAG_ENGINE ) &&
@@ -1670,7 +1673,7 @@ bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
     }
 
     //Seatbelts must be installed on a seat
-    if(vehicle_part_types[id].has_flag("SEATBELT")) {
+    if(part.has_flag("SEATBELT")) {
         bool anchor_found = false;
         for( const auto &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( "BELTABLE" ) ) {
@@ -1683,7 +1686,7 @@ bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
     }
 
     //Internal must be installed into a cargo area.
-    if(vehicle_part_types[id].has_flag("INTERNAL")) {
+    if(part.has_flag("INTERNAL")) {
         bool anchor_found = false;
         for( const auto &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( "CARGO" ) ) {
@@ -1697,7 +1700,7 @@ bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
 
     // curtains must be installed on (reinforced)windshields
     // TODO: do this automatically using "location":"on_mountpoint"
-    if (vehicle_part_types[id].has_flag("CURTAIN")) {
+    if (part.has_flag("CURTAIN")) {
         bool anchor_found = false;
         for( const auto &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( "WINDOW" ) ) {
@@ -1710,7 +1713,7 @@ bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
     }
 
     // Security system must be installed on controls
-    if(vehicle_part_types[id].has_flag("ON_CONTROLS")) {
+    if(part.has_flag("ON_CONTROLS")) {
         bool anchor_found = false;
         for( std::vector<int>::const_iterator it = parts_in_square.begin();
              it != parts_in_square.end(); ++it ) {
@@ -1723,7 +1726,7 @@ bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
         }
     }
     //Swappable storage battery must be installed on a BATTERY_MOUNT
-    if(vehicle_part_types[id].has_flag("NEEDS_BATTERY_MOUNT")) {
+    if(part.has_flag("NEEDS_BATTERY_MOUNT")) {
         bool anchor_found = false;
         for( const auto &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( "BATTERY_MOUNT" ) ) {
@@ -1736,7 +1739,7 @@ bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
     }
 
     //Door motors need OPENABLE
-    if( vehicle_part_types[id].has_flag( "DOOR_MOTOR" ) ) {
+    if( part.has_flag( "DOOR_MOTOR" ) ) {
         bool anchor_found = false;
         for( const auto &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( "OPENABLE" ) ) {
@@ -1749,8 +1752,7 @@ bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
     }
 
     //Mirrors cannot be mounted on OPAQUE parts
-    if( vehicle_part_types[id].has_flag( "VISION" ) &&
-        !vehicle_part_types[id].has_flag( "CAMERA" ) ) {
+    if( part.has_flag( "VISION" ) && !part.has_flag( "CAMERA" ) ) {
         for( const auto &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( "OPAQUE" ) ) {
                 return false;
@@ -1758,7 +1760,7 @@ bool vehicle::can_mount(int const dx, int const dy, std::string const &id) const
         }
     }
     //and vice versa
-    if( vehicle_part_types[id].has_flag( "OPAQUE" ) ) {
+    if( part.has_flag( "OPAQUE" ) ) {
         for( const auto &elem : parts_in_square ) {
             if( part_info( elem ).has_flag( "VISION" ) &&
                 !part_info( elem ).has_flag( "CAMERA" ) ) {
@@ -1947,12 +1949,12 @@ bool vehicle::is_connected(vehicle_part const &to, vehicle_part const &from, veh
  *              false if illegal part installation should fail.
  * @return false if the part could not be installed, true otherwise.
  */
-int vehicle::install_part (int dx, int dy, std::string id, int hp, bool force)
+int vehicle::install_part (int dx, int dy, const vpart_str_id &id, int hp, bool force)
 {
     if (!force && !can_mount (dx, dy, id)) {
         return -1;  // no money -- no ski!
     }
-    item tmp(vehicle_part_types[id].item, 0);
+    item tmp(id.obj().item, 0);
     vehicle_part new_part(id, dx, dy, &tmp);
     if (hp >= 0) {
         new_part.hp = hp;
@@ -1960,7 +1962,7 @@ int vehicle::install_part (int dx, int dy, std::string id, int hp, bool force)
     return install_part(dx, dy, new_part);
 }
 
-int vehicle::install_part (int dx, int dy, const std::string &id, const item &used_item)
+int vehicle::install_part (int dx, int dy, const vpart_str_id &id, const item &used_item)
 {
     if (!can_mount (dx, dy, id)) {
         return -1;  // no money -- no ski!
@@ -1981,7 +1983,7 @@ int vehicle::install_part( int dx, int dy, const vehicle_part &new_part )
             return parts_here[i];
         }
     }
-    debugmsg("Did not found new installed vpart %s at %d,%d", new_part.id.c_str(), dx, dy);
+    debugmsg("Did not found new installed vpart %s at %d,%d", new_part.get_id().c_str(), dx, dy);
     return parts.size() - 1;
 }
 
@@ -2425,7 +2427,7 @@ int vehicle::global_part_at(int const x, int const y) const
  * @param part The part to find.
  * @return The part index, -1 if it is not part of this vehicle.
  */
-int vehicle::index_of_part(vehicle_part *const part, bool const check_removed) const
+int vehicle::index_of_part(const vehicle_part *const part, bool const check_removed) const
 {
   if(part != NULL) {
     for( size_t index = 0; index < parts.size(); ++index ) {
@@ -2434,7 +2436,7 @@ int vehicle::index_of_part(vehicle_part *const part, bool const check_removed) c
       if (!check_removed && next_part.removed) {
         continue;
       }
-      if(part->id == next_part.id &&
+      if(part->get_id() == next_part.get_id() &&
               part->mount == next_part.mount &&
               part->hp == next_part.hp) {
         return index;
@@ -2517,16 +2519,15 @@ char vehicle::part_sym(int const p) const
 
 // similar to part_sym(int p) but for use when drawing SDL tiles. Called only by cata_tiles during draw_vpart
 // vector returns at least 1 element, max of 2 elements. If 2 elements the second denotes if it is open or damaged
-std::string vehicle::part_id_string(int const p, char &part_mod) const
+const vpart_str_id &vehicle::part_id_string(int const p, char &part_mod) const
 {
     part_mod = 0;
-    std::string idinfo;
     if( p < 0 || p >= (int)parts.size() || parts[p].removed ) {
-        return "";
+        return vpart_info::null;
     }
 
     int displayed_part = part_displayed_at(parts[p].mount.x, parts[p].mount.y);
-    idinfo = parts[displayed_part].id;
+    const vpart_str_id &idinfo = parts[displayed_part].get_id();
 
     if (part_flag (displayed_part, VPFLAG_OPENABLE) && parts[displayed_part].open) {
         part_mod = 1; // open
@@ -4507,7 +4508,7 @@ int vehicle::max_volume(int const part) const
         if( get_label( parts[part].mount.x, parts[part].mount.y ).find( "AUTODROP" ) != std::string::npos ) {
             return INT_MAX / 32; // Just to prevent actual INT_MAX
         }
-        return vehicle_part_types[parts[part].id].size;
+        return parts[part].info().size;
     }
     return 0;
 }
@@ -4559,7 +4560,7 @@ bool vehicle::add_item(int p, item itm)
     }
     std::set<vehicle_part*, dist_comparator> pptrs(dist_comparator{parts[p].precalc[0]});
     for( auto & p : parts ) {
-        if( vehicle_part_int_types[p.iid].has_flag( VPFLAG_CARGO ) ) {
+        if( p.info().has_flag( VPFLAG_CARGO ) ) {
             pptrs.insert( &p );
         }
     }
@@ -5879,7 +5880,7 @@ void vehicle::open(int part_index)
 {
   if(!part_info(part_index).has_flag("OPENABLE")) {
     debugmsg("Attempted to open non-openable part %d (%s) on a %s!", part_index,
-               vehicle_part_types[parts[part_index].id].name.c_str(), name.c_str());
+               parts[part_index].info().name.c_str(), name.c_str());
   } else {
     open_or_close(part_index, true);
   }
@@ -5894,7 +5895,7 @@ void vehicle::close(int part_index)
 {
   if(!part_info(part_index).has_flag("OPENABLE")) {
     debugmsg("Attempted to close non-closeable part %d (%s) on a %s!", part_index,
-               vehicle_part_types[parts[part_index].id].name.c_str(), name.c_str());
+               parts[part_index].info().name.c_str(), name.c_str());
   } else {
     open_or_close(part_index, false);
   }
@@ -5937,7 +5938,7 @@ void vehicle::open_or_close(int const part_index, bool const opening)
         const int delta = dx * dx + dy * dy;
 
         const bool is_near = (delta == 1);
-        const bool is_id = part_info(next_index).id == part_info(part_index).id;
+        const bool is_id = part_info(next_index).loadid == part_info(part_index).loadid;
         const bool do_next = !!parts[next_index].open ^ opening;
 
         if (is_near && is_id && do_next) {
@@ -6308,7 +6309,7 @@ bool vehicle::examine(game *g, player *p, int part) {
     vehicle_part &vp = parts[part];
     auto vpitems = get_items( part );
     auto &vpitemvec = parts[part].items;
-    vpart_info &vpi = vehicle_part_types[vp.id];
+    const vpart_info &vpi = vp.info();
     if(vpi.has_flag("KILN")) {
         crafting_inventory_t cinv(p);
         // recipe is used to check for components
@@ -6379,32 +6380,26 @@ bool vehicle::examine(game *g, player *p, int part) {
 
 void vehicle::sort_parts() {
     active_items.clear();
-    std::vector<vehicle_part> ptmp(parts.size());
-    for(size_t i = 0; i < parts.size(); i++) {
-        size_t p = static_cast<size_t>(-1);
-        for(size_t j = 0; j < parts.size(); j++) {
-            if(parts[j].id.empty()) {
+    std::vector<vehicle_part> ptmp;
+    while( !parts.empty() ) {
+        const point &mp = parts.front().mount;
+        size_t j = 0;
+        for( ; j < ptmp.size(); j++ ) {
+            if(mp.x < ptmp[j].mount.x) {
+                break;
+            } else if(mp.x > ptmp[j].mount.x) {
                 continue;
             }
-            if(p == static_cast<size_t>(-1)) {
-                p = j;
+            if(mp.y < ptmp[j].mount.y) {
+                break;
+            } else if(mp.y > ptmp[j].mount.y) {
                 continue;
             }
-            if(parts[p].mount.x > parts[j].mount.x) {
-                p = j;
-                continue;
-            }
-            if(parts[p].mount.x < parts[j].mount.x) {
-                continue;
-            }
-            if(parts[p].mount.y > parts[j].mount.y) {
-                p = j;
-                continue;
-            }
+            continue;
         }
-        assert(p != static_cast<size_t>(-1));
-        ptmp[i] = std::move( parts[p] );
-        parts[p].id.clear();
+        assert(j <= ptmp.size());
+        ptmp.insert( ptmp.begin() + j, std::move( parts.front() ) );
+        parts.erase( parts.begin() );
     }
     parts.swap(ptmp);
     for( auto & p : parts ) {
@@ -6473,20 +6468,37 @@ std::set<tripoint> &vehicle::get_points()
 /*-----------------------------------------------------------------------------
  *                              VEHICLE_PART
  *-----------------------------------------------------------------------------*/
-bool vehicle_part::setid( const std::string & str )
+vehicle_part::vehicle_part( int const dx, int const dy )
+: id( vpart_info::null )
+, mount( dx, dy )
+, precalc( { { point( -1, -1 ), point( -1, -1 ) } } )
+, amount( 0 )
 {
-    auto const vpit = vehicle_part_types.find( str );
-    if( vpit == vehicle_part_types.end() ) {
-        return false;
+}
+
+vehicle_part::vehicle_part( const vpart_str_id &sid, int const dx, int const dy,
+                            const item *const it )
+: vehicle_part( dx, dy )
+{
+    set_id( sid );
+    if( it != nullptr ) {
+        properties_from_item( *it );
     }
+}
+
+void vehicle_part::set_id( const vpart_str_id & str )
+{
     id = str;
-    iid = vpit->second.loadid;
-    return true;
+}
+
+const vpart_str_id &vehicle_part::get_id() const
+{
+    return id.id();
 }
 
 void vehicle_part::properties_from_item( const item &used_item )
 {
-    const vpart_info &vpinfo = vehicle_part_int_types[iid];
+    const vpart_info &vpinfo = info();
     if( used_item.is_var_veh_part() ) {
         bigness = used_item.bigness;
     }
@@ -6511,7 +6523,7 @@ void vehicle_part::properties_from_item( const item &used_item )
 
 item vehicle_part::properties_to_item() const
 {
-    const vpart_info &vpinfo = vehicle_part_int_types[iid];
+    const vpart_info &vpinfo = info();
     item tmp( vpinfo.item, calendar::turn );
     if( tmp.is_var_veh_part() ) {
         tmp.bigness = bigness;
@@ -6557,3 +6569,7 @@ item vehicle_part::properties_to_item() const
     return tmp;
 }
 
+const vpart_info &vehicle_part::info() const
+{
+    return id.obj();
+}
