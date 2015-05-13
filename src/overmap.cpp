@@ -167,7 +167,7 @@ bool is_ot_type(const std::string &otype, const oter_id &oter)
     if (compare_size > oter.size()) {
         return false;
     } else {
-        return std::string(oter).compare(0, compare_size, otype ) == 0;
+        return oter.id().compare(0, compare_size, otype ) == 0;
     }
 
 }
@@ -1599,7 +1599,7 @@ void overmap::draw(WINDOW *w, WINDOW *wbar, const tripoint &center,
                 }
                 // Nope, look in the hash map next
                 if (!info) {
-                    auto const it = otermap.find(cur_ter);
+                    auto const it = otermap.find(cur_ter.id());
                     if (it == otermap.end()) {
                         debugmsg("Bad ter %s (%d, %d)", cur_ter.c_str(), omx, omy);
                         ter_color = c_red;
@@ -2378,7 +2378,7 @@ void overmap::place_cities()
         } else if (one_in(3)) {
             size = village_size;
         }
-        if (ter(cx, cy, 0) == settings.default_oter ) {
+        if (ter(cx, cy, 0).id() == settings.default_oter ) {
             ter(cx, cy, 0) = "road_nesw";
             city tmp;
             tmp.x = cx;
@@ -2397,7 +2397,7 @@ void overmap::put_buildings(int x, int y, int dir, city town)
 {
     int ychange = dir % 2, xchange = (dir + 1) % 2;
     for (int i = -1; i <= 1; i += 2) {
-        if ((ter(x + i * xchange, y + i * ychange, 0) == settings.default_oter ) &&
+        if ((ter(x + i * xchange, y + i * ychange, 0).id() == settings.default_oter ) &&
             !one_in(STREETCHANCE)) {
             if (rng(0, 99) > 80 * trig_dist(x, y, town.x, town.y) / town.s) {
                 ter(x + i * xchange, y + i * ychange, 0) =
@@ -2455,7 +2455,7 @@ void overmap::make_road(int x, int y, int cs, int dir, city town)
 
     // Grow in the stated direction, sprouting off sub-roads and placing buildings as we go.
     while( c > 0 && y > 0 && x > 0 && y < OMAPY - 1 && x < OMAPX - 1 &&
-           (ter(x + dirx, y + diry, 0) == settings.default_oter || c == cs) ) {
+           (ter(x + dirx, y + diry, 0).id() == settings.default_oter || c == cs) ) {
         x += dirx;
         y += diry;
         c--;
@@ -2475,8 +2475,8 @@ void overmap::make_road(int x, int y, int cs, int dir, city town)
         }
         put_buildings(x, y, dir, town);
         // Look to each side, and branch if the way is clear.
-        if (c < croad - 1 && c >= 2 && ( ter(x + diry, y + dirx, 0) == settings.default_oter &&
-                                         ter(x - diry, y - dirx, 0) == settings.default_oter ) ) {
+        if (c < croad - 1 && c >= 2 && ( ter(x + diry, y + dirx, 0).id() == settings.default_oter &&
+                                         ter(x - diry, y - dirx, 0).id() == settings.default_oter ) ) {
             croad = c;
             make_road(x, y, cs - rng(1, 3), (dir + 1) % 4, town);
             make_road(x, y, cs - rng(1, 3), (dir + 3) % 4, town);
@@ -3867,8 +3867,8 @@ const unsigned &oter_id::operator=(const int &i)
     _val = i;
     return _val;
 }
-// ter(...) = "rock"
-oter_id::operator std::string const&() const
+
+const std::string & oter_id::id() const
 {
     if ( _val > oterlist.size() ) {
         debugmsg("oterlist[%d] > %d", _val, oterlist.size()); // remove me after testing (?)

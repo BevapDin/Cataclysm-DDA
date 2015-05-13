@@ -1877,7 +1877,7 @@ int editmap::edit_mapgen()
         oter_id id = oter_id( i );
         const oter_t &ter = id.obj();
         gmenu.addentry( -1, true, 0, "[%3d] %s", ( int )id, ter.id.c_str() );
-        if( broken_oter_blacklist.find( id ) != broken_oter_blacklist.end() ) {
+        if( broken_oter_blacklist.find( id.id() ) != broken_oter_blacklist.end() ) {
             gmenu.entries[i].enabled = false;
         }
         gmenu.entries[i].extratxt.left = 1;

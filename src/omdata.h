@@ -85,7 +85,7 @@ struct oter_id {
     // Hi, I'm an
     operator int() const;
     // pretending to be a
-    operator std::string const&() const;
+    std::string const& id() const;
 
     const oter_t &obj() const;
 
