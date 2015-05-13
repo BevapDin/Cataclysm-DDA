@@ -19,9 +19,6 @@ struct mongroup;
 class JsonObject;
 class input_context;
 
-// base oters: exactly what's defined in json before things are split up into blah_east or roadtype_ns, etc
-extern std::unordered_map<std::string, oter_t> obasetermap;
-
 struct oter_weight {
     inline bool operator ==(const oter_weight &other) const {
         return ot_sid == other.ot_sid;

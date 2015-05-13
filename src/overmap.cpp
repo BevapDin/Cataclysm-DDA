@@ -72,7 +72,6 @@ map_extras build_extras(
 std::unordered_map<std::string, oter_t> otermap;
 std::vector<oter_t> oterlist;
 
-std::unordered_map<std::string, oter_t> obasetermap;
 //const regional_settings default_region_settings;
 t_regional_settings_map region_settings_map;
 
@@ -441,19 +440,6 @@ void load_overmap_terrain(JsonObject &jo)
  */
 void finalize_overmap_terrain( )
 {
-    unsigned c = 0;
-    for( std::vector<oter_t>::const_iterator it = oterlist.begin(); it != oterlist.end(); ++it ) {
-        if ( (*it).loadid == (*it).loadid_base ) {
-            if ( (*it).loadid != c ) { // might as well sanity check while we're here da? da.
-                debugmsg("ERROR: oterlist[%d]: mismatch with loadid (%d). (id = %s, id_base = %s)",
-                         c, (*it).loadid, (*it).id.c_str(), (*it).id_base.c_str()
-                        );
-                // aaaaaaaand continue to inevitable crash
-            }
-            obasetermap.insert( std::pair<std::string, oter_t>( (*it).id_base, oterlist[c] ) );;
-        }
-        c++;
-    }
     // here's another sanity check, yay.
     if ( region_settings_map.find("default") == region_settings_map.end() ) {
         debugmsg("ERROR: can't find default overmap settings (region_map_settings 'default'),"
@@ -4052,15 +4038,27 @@ void regional_settings::setup()
 }
 
 void regional_settings::setup_oter(oter_weight &oter) {
-    if ( oter.ot_iid == -1 ) {
-        std::unordered_map<std::string, oter_t>::const_iterator it = obasetermap.find(oter.ot_sid);
-        if ( it == obasetermap.end() ) {
-            debugmsg("Bad oter_weight_list entry in region settings: overmap_terrain '%s' not found.", oter.ot_sid.c_str() );
-            oter.ot_iid = 0;
-        } else {
-            oter.ot_iid = it->second.loadid;
-        }
+    // This function translates the string-id (oter.ot_sid) into a integer-id (oter.ot_iid).
+    // ot_iid starts out as -1 (which indicates it has not been translated), otherwise it has been
+    // translated already.
+    if ( oter.ot_iid != -1 ) {
+        return;
     }
+    // We can not use the otermap because the terrain id might have a rotation-specific suffix, e.g.
+    // "road_ew", the actual id (which is stored in ot_sid) is "road".
+    for( auto it = oterlist.begin(); it != oterlist.end(); ++it ) {
+        const oter_t &ter = *it;
+        // Only link the base terrain (which has links to its rotated version, this is resolved
+        // later when the terrain is placed, for the decision which terrain to place, the rotation
+        // is of no interest).
+        if( ter.loadid != ter.loadid_base ) {
+            continue;
+        }
+        oter.ot_iid = ter.loadid;
+        return;
+    }
+    debugmsg("Bad oter_weight_list entry in region settings: overmap_terrain '%s' not found.", oter.ot_sid.c_str() );
+    oter.ot_iid = 0;
 }
 
 void overmap::add_mon_group(const mongroup &group)
