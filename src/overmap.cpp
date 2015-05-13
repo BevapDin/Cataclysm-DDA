@@ -3849,13 +3849,6 @@ void set_oter_ids()   // fixme constify
 //////////////////////////
 //// sneaky
 
-// ter(...) = 0;
-const unsigned &oter_id::operator=(const int &i)
-{
-    _val = i;
-    return _val;
-}
-
 const std::string & oter_id::id() const
 {
     if ( _val > oterlist.size() ) {

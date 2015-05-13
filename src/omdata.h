@@ -96,7 +96,6 @@ struct oter_id {
     const oter_t &obj() const;
 
     // set and compare by string
-    const unsigned &operator=(const int &i);
     bool operator!=(const char *v) const;
     bool operator==(const char *v) const;
     bool operator>=(const char *v) const;
