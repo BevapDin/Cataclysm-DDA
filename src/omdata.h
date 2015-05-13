@@ -89,7 +89,7 @@ struct oter_id {
     // in order to map
     operator oter_t() const;
 
-    const oter_t &t() const;
+    const oter_t &obj() const;
 
     // set and compare by string
     const unsigned &operator=(const int &i);

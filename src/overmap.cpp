@@ -158,7 +158,7 @@ bool is_river(const oter_id &ter)
     // if the id starts with "river" or "bridge", count as a river, but this
     // is done in data init.
     // return (ter.compare(0,5,"river",5) == 0 || ter.compare(0,6,"bridge",6) == 0);
-    return ter.t().has_flag(river_tile);
+    return ter.obj().has_flag(river_tile);
 }
 
 bool is_ot_type(const std::string &otype, const oter_id &oter)
@@ -174,7 +174,7 @@ bool is_ot_type(const std::string &otype, const oter_id &oter)
 
 bool road_allowed(const oter_id &ter)
 {
-    return ter.t().has_flag(allow_road);
+    return ter.obj().has_flag(allow_road);
 }
 
 /*
@@ -212,7 +212,7 @@ oter_id house(int dir, int chance_of_basement)
         debugmsg("Bad rotation of house: %d.", dir);
         return "";
     }
-    return ( one_in( chance_of_basement) ? iid_house : iid_house_base ).t().directional_peers[dir];
+    return ( one_in( chance_of_basement) ? iid_house : iid_house_base ).obj().directional_peers[dir];
 }
 
 map_extras &get_extras(const std::string &name)
@@ -2061,7 +2061,7 @@ tripoint overmap::find_random_omt( const std::string &omt_base_type ) const
     for( int i = 0; i < OMAPX; i++ ) {
         for( int j = 0; j < OMAPY; j++ ) {
             for( int k = -OVERMAP_DEPTH; k <= OVERMAP_HEIGHT; k++ ) {
-                if( get_ter( i, j, k ).t().id_base == omt_base_type ) {
+                if( get_ter( i, j, k ).obj().id_base == omt_base_type ) {
                     valid.push_back( tripoint( i, j, k ) );
                 }
             }
@@ -3090,7 +3090,7 @@ bool overmap::is_road(int x, int y, int z)
             }
         }
     }
-    return ter(x, y, z).t().has_flag(road_tile);
+    return ter(x, y, z).obj().has_flag(road_tile);
     //oter_t(ter(x, y, z)).is_road;
 }
 
@@ -3645,7 +3645,7 @@ void overmap::place_special(overmap_special special, tripoint p, int rotation)
             default:
                 break;
             }
-            if(ter(conn.x, conn.y, p.z).t().has_flag(allow_road)) {
+            if(ter(conn.x, conn.y, p.z).obj().has_flag(allow_road)) {
                 make_hiway(conn.x, conn.y, closest.x, closest.y, p.z, "road");
             } else { // in case the entrance does not come out the top, try wherever possible...
                 conn = connection.second;
@@ -3926,7 +3926,7 @@ oter_id::operator oter_t() const
     return oterlist[_val];
 }
 
-const oter_t &oter_id::t() const
+const oter_t &oter_id::obj() const
 {
     return oterlist[_val];
 }
