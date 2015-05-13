@@ -98,8 +98,6 @@ struct oter_id {
     // set and compare by string
     bool operator!=(const char *v) const;
     bool operator==(const char *v) const;
-    bool operator>=(const char *v) const;
-    bool operator<=(const char *v) const;
 
     // initialize as raw value
     oter_id() : _val(0) { };

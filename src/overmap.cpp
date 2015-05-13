@@ -3880,16 +3880,6 @@ bool oter_id::operator==(const char *v) const
 {
     return oterlist[_val].id.compare(v) == 0;
 }
-bool oter_id::operator<=(const char *v) const
-{
-    std::unordered_map<std::string, oter_t>::const_iterator it = otermap.find(v);
-    return ( it == otermap.end() || it->second.loadid <= _val);
-}
-bool oter_id::operator>=(const char *v) const
-{
-    std::unordered_map<std::string, oter_t>::const_iterator it = otermap.find(v);
-    return ( it != otermap.end() && it->second.loadid >= _val);
-}
 
 const oter_t &oter_id::obj() const
 {
