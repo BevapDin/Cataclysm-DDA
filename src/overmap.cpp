@@ -3833,12 +3833,10 @@ void overmap::open()
 #include "omdata.h"
 ////////////////
 oter_iid ot_null,
-         ot_crater,
          ot_field,
          ot_forest,
          ot_forest_thick,
-         ot_forest_water,
-         ot_river_center;
+         ot_forest_water;
 
 
 oter_iid oterfind(const std::string id)
@@ -3853,13 +3851,10 @@ oter_iid oterfind(const std::string id)
 void set_oter_ids()   // fixme constify
 {
     ot_null = oterfind("");
-    // NOT required.
-    ot_crater = oterfind("crater");
     ot_field = oterfind("field");
     ot_forest = oterfind("forest");
     ot_forest_thick = oterfind("forest_thick");
     ot_forest_water = oterfind("forest_water");
-    ot_river_center = oterfind("river_center");
 }
 
 

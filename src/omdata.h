@@ -204,12 +204,10 @@ enum overmap_zone {
 //////////////////////////////////
 ///// convenience definitions for hard-coded functions.
 extern oter_iid ot_null,
-       ot_crater,
        ot_field,
        ot_forest,
        ot_forest_thick,
-       ot_forest_water,
-       ot_river_center;
+       ot_forest_water;
 
 void set_oter_ids();
 
