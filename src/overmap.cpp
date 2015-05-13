@@ -3832,14 +3832,14 @@ void overmap::open()
 
 #include "omdata.h"
 ////////////////
-oter_iid ot_null,
+oter_id ot_null,
          ot_field,
          ot_forest,
          ot_forest_thick,
          ot_forest_water;
 
 
-oter_iid oterfind(const std::string id)
+oter_id oterfind(const std::string id)
 {
     if( otermap.find(id) == otermap.end() ) {
         debugmsg("Can't find %s", id.c_str());

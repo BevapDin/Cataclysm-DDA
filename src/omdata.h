@@ -118,11 +118,6 @@ struct oter_id {
     int compare(size_t pos, size_t len, const char *s, size_t n = 0) const;
 };
 
-
-
-//typedef std::string oter_id;
-typedef oter_id oter_iid;
-
 // LINE_**** corresponds to the ACS_**** macros in ncurses, and are patterned
 // the same way; LINE_NESW, where X indicates a line and O indicates no line
 // (thus, LINE_OXXX looks like 'T'). LINE_ is defined in output.h.  The ACS_
@@ -203,7 +198,7 @@ enum overmap_zone {
 
 //////////////////////////////////
 ///// convenience definitions for hard-coded functions.
-extern oter_iid ot_null,
+extern oter_id ot_null,
        ot_field,
        ot_forest,
        ot_forest_thick,
