@@ -246,6 +246,7 @@ bool isroad(std::string bstr)
 void load_oter(oter_t &oter)
 {
     oter.loadid = oterlist.size();
+    oter.rotation = oter.loadid - oter.loadid_base;
     otermap[oter.id] = oter;
     oterlist.push_back(oter);
 }

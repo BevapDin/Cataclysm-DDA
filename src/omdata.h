@@ -61,6 +61,12 @@ struct oter_t {
     std::vector<int> directional_peers; // fast reliable (?) method of determining whatever_west, etc.
     std::string id_mapgen;  // *only* for mapgen and almost always == id_base. Unless line_drawing / road.
 
+    /**
+     * Rotation that is applied after mapgen, valid values are in the range [0,3].
+     * 0 Means no rotation at all.
+     */
+    int rotation = 0;
+
     // Spawns are added to the submaps *once* upon mapgen of the submaps
     overmap_spawns static_spawns;
     //this bitset contains boolean values for:

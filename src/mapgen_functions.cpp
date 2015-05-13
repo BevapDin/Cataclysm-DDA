@@ -361,17 +361,11 @@ ter_id mapgendata::groundcover() {
 }
 
 void mapgen_rotate( map * m, oter_id terrain_type, bool north_is_down ) {
+    int iid_diff = terrain_type.obj().rotation;
     if ( north_is_down ) {
-        int iid_diff = (int)terrain_type - terrain_type.obj().loadid_base + 2;
-        if ( iid_diff != 4 ) {
-            m->rotate(iid_diff);
-        }
-    } else {
-        int iid_diff = (int)terrain_type - terrain_type.obj().loadid_base;
-        if ( iid_diff > 0 ) {
-            m->rotate(iid_diff);
-        }
+        iid_diff += 2; // modulo is done by map::rotate
     }
+    m->rotate( iid_diff );
 }
 
 #define autorotate(x) mapgen_rotate(m, terrain_type, x)
@@ -2894,10 +2888,7 @@ void mapgen_generic_house(map *m, oter_id terrain_type, mapgendata dat, int turn
         m->place_spawns("GROUP_ZOMBIE", 2, 0, 0, SEEX * 2 - 1, SEEX * 2 - 1, density);
     }
 
-    int iid_diff = (int)terrain_type - terrain_type.obj().loadid_base;
-    if ( iid_diff > 0 ) {
-        m->rotate(iid_diff);
-    }
+    m->rotate( terrain_type.obj().rotation );
 }
 
 /////////////////////////////
