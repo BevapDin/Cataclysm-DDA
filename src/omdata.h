@@ -96,11 +96,6 @@ struct oter_id {
     bool operator>=(const char *v) const;
     bool operator<=(const char *v) const;
 
-    // or faster, with another oter_id
-    bool operator!=(const oter_id &v) const;
-    bool operator==(const oter_id &v) const;
-
-
     // initialize as raw value
     oter_id() : _val(0) { };
     oter_id(int i) : _val(i) { };

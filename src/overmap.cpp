@@ -3910,16 +3910,6 @@ bool oter_id::operator>=(const char *v) const
     return ( it != otermap.end() && it->second.loadid >= _val);
 }
 
-// o_id1 != o_id2
-bool oter_id::operator!=(const oter_id &v) const
-{
-    return ( _val != v._val );
-}
-bool oter_id::operator==(const oter_id &v) const
-{
-    return ( _val == v._val );
-}
-
 const oter_t &oter_id::obj() const
 {
     return oterlist[_val];
