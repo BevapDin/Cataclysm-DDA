@@ -2116,7 +2116,7 @@
     "revert_to": "null",
     "use_action": "JACKHAMMER"
   },{
-    "id": "jacqueshammer",
+    "id": "jacqueshammer", "//": "All of this is SUPPOSED to be in French.",
     "type": "TOOL",
     "symbol": ";",
     "color": "light_gray",
@@ -4924,7 +4924,7 @@
   },
 
   {
-    "id": "zweifire_off",
+    "id": "zweifire_off", "//": "All of this is SUPPOSED to be in German.",
     "type": "TOOL",
     "symbol": "/",
     "color": "light_gray",
@@ -4964,7 +4964,7 @@
   },
 
   {
-    "id": "zweifire_on",
+    "id": "zweifire_on", "//": "All of this is SUPPOSED to be in German.",
     "type": "TOOL",
     "symbol": "/",
     "color": "red",
