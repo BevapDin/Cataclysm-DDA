@@ -22,7 +22,7 @@ fi
 
 git stash pop || exit $?
 
-make RELEASE=1 -j2 || exit $?
+make CCACHE=1 RELEASE=1 -j2 || exit $?
 
 ./backup-save.sh
 ./xo.sh

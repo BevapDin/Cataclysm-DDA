@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <set>
 #include <algorithm>
-
+#include <queue>
 
 /*
  * Speed up all those if ( blarg == "structure" ) statements that are used everywhere;
@@ -198,7 +198,7 @@ item &vehicle_stack::operator[]( size_t index )
     return *(std::next(mystack->begin(), index));
 }
 
-vehicle::vehicle(std::string type_id, int init_veh_fuel, int init_veh_status): type(type_id)
+vehicle::vehicle(const vproto_id &type_id, int init_veh_fuel, int init_veh_status): type(type_id)
 {
     turn_dir = 0;
     face.init(0);
@@ -206,16 +206,19 @@ vehicle::vehicle(std::string type_id, int init_veh_fuel, int init_veh_status): t
     of_turn_carry = 0;
     cached_gen_turn = 0;
 
-    //type can be null if the type_id parameter is omitted
-    if(type != "null") {
-      if(g->vtypes.count(type) > 0) {
-        //If this template already exists, copy it
-        *this = *(g->vtypes[type]);
+    if( !type.str().empty() && type.is_valid() ) {
+        const vehicle_prototype &proto = type.obj();
+        // Copy the already made vehicle. The blueprint is created when the json data is loaded
+        // and is guaranteed to be valid (has valid parts etc.).
+        *this = *proto.blueprint;
         init_state(init_veh_fuel, init_veh_status);
-      }
     }
     precalc_mounts(0, face.dir());
     refresh();
+}
+
+vehicle::vehicle() : vehicle( vproto_id() )
+{
 }
 
 vehicle::~vehicle()
@@ -255,7 +258,9 @@ bool vehicle::remote_controlled(player const &p) const
 
 void vehicle::load (std::ifstream &stin)
 {
+    std::string type;
     getline(stin, type);
+    this->type = vproto_id( type );
 
     if ( type.size() > 1 && ( type[0] == '{' || type[1] == '{' ) ) {
         std::stringstream derp;
@@ -1389,8 +1394,8 @@ bool vehicle::start_engine( const int e )
         if( einfo.fuel_type == fuel_type_gasoline && dmg > 0.75 && one_in( 20 ) ) {
             backfire( e );
         } else {
-            const point pos = global_pos() + parts[engines[e]].precalc[0];
-            sounds::ambient_sound( pos.x, pos.y, engine_start_time( e ) / 10, "" );
+            const tripoint pos = global_pos3() + parts[engines[e]].precalc[0];
+            sounds::ambient_sound( pos, engine_start_time( e ) / 10, "" );
         }
     }
 
@@ -1446,8 +1451,8 @@ void vehicle::start_engines( const bool take_control )
 void vehicle::backfire( const int e )
 {
     const int power = part_power( engines[e], true );
-    const point pos = global_pos() + parts[engines[e]].precalc[0];
-    sounds::ambient_sound( pos.x, pos.y, 40 + (power / 30), "BANG!" );
+    const tripoint pos = global_pos3() + parts[engines[e]].precalc[0];
+    sounds::ambient_sound( pos, 40 + (power / 30), "BANG!" );
 }
 
 void vehicle::honk_horn()
@@ -1469,14 +1474,14 @@ void vehicle::honk_horn()
             honked = true;
         }
         //Get global position of horn
-        const auto horn_pos = global_pos() + parts[p].precalc[0];
+        const auto horn_pos = global_pos3() + parts[p].precalc[0];
         //Determine sound
         if( horn_type.bonus >= 40 ) {
-            sounds::sound( horn_pos.x, horn_pos.y, horn_type.bonus, _("HOOOOORNK!") );
+            sounds::sound( horn_pos, horn_type.bonus, _("HOOOOORNK!") );
         } else if( horn_type.bonus >= 20 ) {
-            sounds::sound( horn_pos.x, horn_pos.y, horn_type.bonus, _("BEEEP!") );
+            sounds::sound( horn_pos, horn_type.bonus, _("BEEEP!") );
         } else {
-            sounds::sound( horn_pos.x, horn_pos.y, horn_type.bonus, _("honk.") );
+            sounds::sound( horn_pos, horn_type.bonus, _("honk.") );
         }
     }
 
@@ -3126,13 +3131,12 @@ bool vehicle::do_environmental_effects()
     bool needed = false;
     // check for smoking parts
     for( size_t p = 0; p < parts.size(); p++ ) {
-        auto part_pos = global_pos() + parts[p].precalc[0];
-        const tripoint part_tri = tripoint( part_pos, smz );
+        auto part_pos = global_pos3() + parts[p].precalc[0];
 
         /* Only lower blood level if:
          * - The part is outside.
          * - The weather is any effect that would cause the player to be wet. */
-        if( parts[p].blood > 0 && g->m.is_outside( part_tri ) && g->get_levz() >= 0 ) {
+        if( parts[p].blood > 0 && g->m.is_outside( part_pos ) ) {
             needed = true;
             if( g->weather >= WEATHER_DRIZZLE && g->weather <= WEATHER_ACID_RAIN ) {
                 parts[p].blood--;
@@ -3141,10 +3145,13 @@ bool vehicle::do_environmental_effects()
         if( part_flag(p, VPFLAG_ENGINE) && parts[p].hp <= 0 && parts[p].amount > 0 && parts[p].active() ) {
             needed = true;
             parts[p].amount--;
-            for( int ix = -1; ix <= 1; ix++ ) {
-                for( int iy = -1; iy <= 1; iy++ ) {
+            tripoint tmp = part_pos;
+            int &tx = tmp.x;
+            int &ty = tmp.y;
+            for( tx = part_pos.x - 1; tx <= part_pos.x + 1; tx++ ) {
+                for( ty = part_pos.y - 1; ty <= part_pos.y + 1; ty++ ) {
                     if( !rng(0, 2) ) {
-                        g->m.add_field( part_pos.x + ix, part_pos.y + iy, fd_smoke, rng(2, 4) );
+                        g->m.add_field( tmp, fd_smoke, rng(2, 4), 0 );
                     }
                 }
             }
@@ -3203,7 +3210,8 @@ void vehicle::spew_smoke( double joules, int part )
     }
     int rdx, rdy;
     coord_translate( p.x, p.y, rdx, rdy );
-    g->m.add_field( global_x() + rdx, global_y() + rdy, fd_smoke, smoke );
+    tripoint dest( global_x() + rdx, global_y() + rdy, smz );
+    g->m.add_field( dest, fd_smoke, smoke, 0 );
 }
 
 /**
@@ -3275,7 +3283,7 @@ void vehicle::noise_and_smoke( double load, double time )
            lvl++;
        }
     }
-    sounds::ambient_sound( global_x(), global_y(), noise, sound_msgs[lvl] );
+    sounds::ambient_sound( global_pos3(), noise, sound_msgs[lvl] );
 }
 
 float vehicle::wheels_area (int *const cnt) const
@@ -3821,7 +3829,7 @@ void vehicle::alarm(){
         //if alarm found, make noise, else set alarm disabled
         if (found_alarm){
             const char *sound_msgs[] = { "WHOOP WHOOP", "NEEeu NEEeu NEEeu", "BLEEEEEEP", "WREEP"};
-            sounds::sound( global_x(), global_y(), (int) rng(45,80), sound_msgs[rng(0,3)]);
+            sounds::sound( global_pos3(), (int) rng(45,80), sound_msgs[rng(0,3)]);
             if (one_in(1000)) is_alarm_on = false;
         } else{
             is_alarm_on = false;
@@ -4339,7 +4347,7 @@ veh_collision vehicle::part_collision (int part, int x, int y, bool just_detect)
         } else if (snd.length() > 0) {
             add_msg (m_warning, _("You hear a %s"), snd.c_str());
         }
-        sounds::sound(x, y, smashed? 80 : 50, "");
+        sounds::sound(p, smashed? 80 : 50, "");
     } else {
         std::string dname;
         if (z) {
@@ -4360,9 +4368,9 @@ veh_collision vehicle::part_collision (int part, int x, int y, bool just_detect)
         }
 
         if (part_flag(part, "SHARP")) {
-            g->m.adjust_field_strength(point(x, y), fd_blood, 1 );
+            g->m.adjust_field_strength( p, fd_blood, 1 );
         } else {
-            sounds::sound(x, y, 20, "");
+            sounds::sound(p, 20, "");
         }
     }
 
@@ -4398,11 +4406,12 @@ veh_collision vehicle::part_collision (int part, int x, int y, bool just_detect)
 
 void vehicle::handle_trap( int x, int y, int part )
 {
+    tripoint p( x, y, smz );
     int pwh = part_with_feature (part, VPFLAG_WHEEL);
     if (pwh < 0) {
         return;
     }
-    const trap &tr = g->m.tr_at(x, y);
+    const trap &tr = g->m.tr_at(p);
     const trap_id t = tr.loadid;
     int noise = 0;
     int chance = 100;
@@ -4419,8 +4428,8 @@ void vehicle::handle_trap( int x, int y, int part )
         noise = 8;
         snd = _("SNAP!");
         part_damage = 300;
-        g->m.remove_trap(x, y);
-        g->m.spawn_item(x, y, "beartrap");
+        g->m.remove_trap(p);
+        g->m.spawn_item(p, "beartrap");
     } else if ( t == tr_nailboard || t == tr_caltrops ) {
         part_damage = 300;
     } else if ( t == tr_blade ) {
@@ -4432,11 +4441,11 @@ void vehicle::handle_trap( int x, int y, int part )
         noise = 1;
         snd = _("Clank!");
         part_damage = 300;
-        g->m.remove_trap(x, y);
-        g->m.spawn_item(x, y, "crossbow");
-        g->m.spawn_item(x, y, "string_6");
+        g->m.remove_trap(p);
+        g->m.spawn_item(p, "crossbow");
+        g->m.spawn_item(p, "string_6");
         if (!one_in(10)) {
-            g->m.spawn_item(x, y, "bolt_steel");
+            g->m.spawn_item(p, "bolt_steel");
         }
     } else if ( t == tr_shotgun_2 || t == tr_shotgun_1 ) {
         noise = 60;
@@ -4444,16 +4453,16 @@ void vehicle::handle_trap( int x, int y, int part )
         chance = 70;
         part_damage = 300;
         if (t == tr_shotgun_2) {
-            g->m.add_trap(x, y, tr_shotgun_1);
+            g->m.add_trap(p, tr_shotgun_1);
         } else {
-            g->m.remove_trap(x, y);
-            g->m.spawn_item(x, y, "shotgun_sawn");
-            g->m.spawn_item(x, y, "string_6");
+            g->m.remove_trap(p);
+            g->m.spawn_item(p, "shotgun_sawn");
+            g->m.spawn_item(p, "string_6");
         }
     } else if ( t == tr_landmine_buried || t == tr_landmine ) {
         expl = 10;
         shrap = 8;
-        g->m.remove_trap(x, y);
+        g->m.remove_trap(p);
         part_damage = 1000;
     } else if ( t == tr_boobytrap ) {
         expl = 18;
@@ -4468,8 +4477,8 @@ void vehicle::handle_trap( int x, int y, int part )
     } else {
         return;
     }
-    if( g->u.sees(x, y) ) {
-        if( g->u.knows_trap( tripoint( x, y, g->get_levz() ) ) ) {
+    if( g->u.sees(p) ) {
+        if( g->u.knows_trap( p ) ) {
             add_msg(m_bad, _("The %s's %s runs over %s."), name.c_str(),
                     part_info(part).name.c_str(), tr.name.c_str() );
         } else {
@@ -4478,14 +4487,14 @@ void vehicle::handle_trap( int x, int y, int part )
         }
     }
     if (noise > 0) {
-        sounds::sound(x, y, noise, snd);
+        sounds::sound(p, noise, snd);
     }
     if( part_damage && chance >= rng (1, 100) ) {
         // Hit the wheel directly since it ran right over the trap.
         damage_direct( pwh, part_damage );
     }
     if (expl > 0) {
-        g->explosion( tripoint( x, y, g->get_levz() ), expl, shrap, false);
+        g->explosion( p, expl, shrap, false);
     }
 }
 
@@ -4676,15 +4685,18 @@ vehicle_stack vehicle::get_items( int const part ) const
 
 void vehicle::place_spawn_items()
 {
-    for( std::vector<vehicle_item_spawn>::iterator next_spawn = item_spawns.begin();
-         next_spawn != item_spawns.end(); next_spawn++ ) {
+    if( !type.is_valid() ) {
+        return;
+    }
+    for( auto &spawn : type.obj().item_spawns ) {
+        const vehicle_item_spawn *next_spawn = &spawn;
         if(rng(1, 100) <= next_spawn->chance) {
             //Find the cargo part in that square
-            int part = part_at(next_spawn->x, next_spawn->y);
+            int part = part_at(next_spawn->pos.x, next_spawn->pos.y);
             part = part_with_feature(part, "CARGO", false);
             if(part < 0) {
                 debugmsg("No CARGO parts at (%d, %d) of %s!",
-                        next_spawn->x, next_spawn->y, name.c_str());
+                        next_spawn->pos.x, next_spawn->pos.y, name.c_str());
             } else {
                 bool partbroken = ( parts[part].hp < 1 );
                 int idmg = 0;
@@ -5777,7 +5789,7 @@ bool vehicle::automatic_fire_turret( int p, const itype &gun, const itype &ammo,
 
     // Move the charger gun "whoosh" here - no need to pass it from above
     if( tmp.weapon.is_charger_gun() && charges > 20 ) {
-        sounds::sound( targ.x, targ.y, 20, _("whoosh!") );
+        sounds::sound( targ, 20, _("whoosh!") );
     }
     // notify player if player can see the shot
     if( g->u.sees( pos ) ) {
@@ -6282,7 +6294,7 @@ void vehicle::untow(int part, player *p) {
     g->m.update_vehicle_cache(this, false);
     
     // Create the new vehicle
-    vehicle *new_veh = g->m.add_vehicle ("custom", gx, gy, 270, 0, 0);
+    vehicle *new_veh = g->m.add_vehicle( vproto_id( "custom" ), gx, gy, 270, 0, 0);
     if(new_veh == 0) {
         // FIXME: this will lose the parts in tmp_parts!
         debugmsg ("error constructing vehicle");

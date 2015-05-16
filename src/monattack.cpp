@@ -688,7 +688,13 @@ void mattack::resurrect(monster *z, int index)
         z->moves -= z->type->speed; // Takes one turn
         // Lose 20% of our maximum speed
         z->set_speed_base(z->get_speed_base() - .2 * z->type->speed);
-        monster *zed = &g->zombie(g->mon_at(raised.first));
+        const int mondex = g->mon_at(raised.first);
+        if( mondex == -1 ) {
+            debugmsg( "Misplaced or failed to revive a zombie corpse" );
+            return;
+        }
+
+        monster *zed = &g->zombie( mondex );
         zed->make_ally(z);
         if (g->u.sees(*zed)) {
             add_msg(m_warning, _("A nearby %s rises from the dead!"), zed->name().c_str());
@@ -2382,19 +2388,12 @@ void mattack::stare(monster *z, int index)
     z->moves -= 200;
     z->reset_special(index); // Reset timer
     if( z->sees( g->u ) ) {
-        add_msg(m_bad, _("The %s stares at you, and you shudder."), z->name().c_str());
-        g->u.add_effect("teleglow", 800);
-    } else {
-        add_msg(m_bad, _("A piercing beam of light bursts forth!"));
-        std::vector<tripoint> sight = line_to( z->pos(), g->u.pos(), 0, 0 );
-        for (auto &i : sight) {
-            if( g->m.ter( i ) == t_reinforced_glass ) {
-                break;
-            } else if( g->m.is_bashable( i ) ) {
-                //Destroy it
-                g->m.bash( i, 999, false, true );
-            }
+        if( g->u.sees(*z) ) {
+            add_msg(m_bad, _("The %s stares at you, and you shudder."), z->name().c_str());
+        } else {
+	    add_msg(m_bad, _("You feel like you're being watched, it makes you sick."));
         }
+        g->u.add_effect("teleglow", 800);
     }
 }
 
@@ -3246,7 +3245,7 @@ void mattack::flame( monster *z, Creature *target )
                           g->m.tername(i.x, i.y).c_str());
               return;
           }
-          g->m.add_field(i.x, i.y, fd_fire, 1);
+          g->m.add_field( i, fd_fire, 1, 0 );
       }
       target->add_effect("onfire", 8);
 
@@ -3268,7 +3267,7 @@ void mattack::flame( monster *z, Creature *target )
                         g->m.tername(i.x, i.y).c_str());
             return;
         }
-        g->m.add_field(i.x, i.y, fd_fire, 1);
+        g->m.add_field(i, fd_fire, 1, 0);
     }
     if( !target->uncanny_dodge() ) {
         target->add_effect("onfire", 8);
@@ -4414,7 +4413,7 @@ void mattack::suicide(monster *z, int index)
     z->die(z);
 }
 
-bool remove_field(point p, field_id f, monster *z) {
+bool remove_field(const tripoint &p, field_id f, monster *z) {
     auto fl = g->m.get_field( p, f );
     if( fl == nullptr ) {
         return false;
@@ -4423,7 +4422,7 @@ bool remove_field(point p, field_id f, monster *z) {
         add_msg( "The %s cleans up the %s.", z->name().c_str(), fl->name().c_str() );
     }
     z->moves -= fl->getFieldDensity() * 100;
-    g->m.remove_field( p.x, p.y, f );
+    g->m.remove_field( p, f );
     return true;
 }
 
@@ -4435,7 +4434,7 @@ void mattack::cleanup(monster *z, int)
     const int off = rng( 0, 8 );
     for( int i = 0; i < 9; i++ ) {
         const int idx = ( i + off ) % 9;
-        const point p( areas[idx].x + z->posx(), areas[idx].y + z->posy() );
+        const tripoint p( areas[idx].x + z->posx(), areas[idx].y + z->posy(), z->posz() );
         if( remove_field( p, fd_acid, z ) ||
             remove_field( p, fd_blood, z ) ||
             remove_field( p, fd_bile, z ) ||
@@ -4453,7 +4452,7 @@ void mattack::cleanup(monster *z, int)
             remove_field( p, fd_gibs_invertebrate, z ) ) {
             return;
         }
-        auto &f = g->m.furn_at( p.x, p.y );
+        auto &f = g->m.furn_at( p );
         if( f.examine != &iexamine::rubble ) {
             continue;
         }
@@ -4461,7 +4460,7 @@ void mattack::cleanup(monster *z, int)
             add_msg( "The %s cleans up the %s.", z->name().c_str(), f.name.c_str() );
         }
         z->moves -= 200;
-        g->m.furn_set( p.x, p.y, f_null );
+        g->m.furn_set( p, f_null );
         return;
     }
 }

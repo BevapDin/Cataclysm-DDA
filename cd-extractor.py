@@ -830,6 +830,7 @@ class item:
                 fp.write( "<td>location</td><td>" + gunmod_location.types[v].link() + "</td>\n" )
             if not self.container == "null":
                 fp.write( "<td>Spawns in a " + iname( self.container ) + "</td>\n" )
+            fp.write( "<td>phase</td><td>" + self.phase + "</td>\n" )
             fp.write( "</tr></table>" )
             self.write_ammo( fp, "Ammo", "ammo_type" )
             self.write_ammo( fp, "Ammo", "ammo" )

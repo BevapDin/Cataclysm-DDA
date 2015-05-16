@@ -495,7 +495,7 @@ void crafting_inventory_t::form_from_map(tripoint origin, int range)
                 water.charges = INT_MAX; // basically infinite anyway
                 add_surround(p, water);
             }
-            if ((g->m.field_at(x, y).findField(fd_acid))) {
+            if ((g->m.field_at(p).findField(fd_acid))) {
                 item acid("water_acid", 0);
                 acid.charges = INT_MAX; // basically infinite anyway
                 add_surround(p, acid);
@@ -535,7 +535,7 @@ void crafting_inventory_t::form_from_map(tripoint origin, int range)
             }
 
             int vpart = -1;
-            vehicle *veh = g->m.veh_at(x, y, vpart);
+            vehicle *veh = g->m.veh_at(p, vpart);
             if (veh && allow_inventory_from(this->p, veh)) {
                 const int faupart = veh->part_with_feature(vpart, "FAUCET");
                 if(faupart >= 0 ) {
