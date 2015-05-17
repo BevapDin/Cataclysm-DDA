@@ -2997,7 +2997,7 @@ std::pair<bool, bool> map::bash( const tripoint &p, const int str,
         smashed_something = true;
     }
     if( !sound.empty() && !silent) {
-        sounds::sound( p, sound_volume, sound);
+        sounds::sound( p, sound_volume, sound, false, "bash", sound);
     }
     return std::pair<bool, bool> (smashed_something, success);
 }
@@ -3142,7 +3142,7 @@ void map::shoot( const tripoint &p, int &dam,
         if (hit_items || one_in(8)) { // 1 in 8 chance of hitting the door
             dam -= rng(20, 40);
             if (dam > 0) {
-                sounds::sound(p, 10, _("crash!"));
+                sounds::sound(p, 10, _("crash!"), false, "smash", "wall");
                 ter_set(p, t_dirt);
             }
         }
@@ -3155,7 +3155,7 @@ void map::shoot( const tripoint &p, int &dam,
                terrain == t_door_locked_alarm ) {
         dam -= rng(15, 30);
         if (dam > 0) {
-            sounds::sound(p, 10, _("smash!"));
+            sounds::sound(p, 10, _("smash!"), false, "smash", "door");
             ter_set(p, t_door_b);
         }
     } else if( terrain == t_door_boarded ||
@@ -3164,7 +3164,7 @@ void map::shoot( const tripoint &p, int &dam,
                terrain == t_rdoor_boarded_damaged ) {
         dam -= rng(15, 35);
         if (dam > 0) {
-            sounds::sound(p, 10, _("crash!"));
+            sounds::sound(p, 10, _("crash!"), false, "smash", "door_boarded");
             ter_set(p, t_door_b);
         }
     } else if( terrain == t_window_domestic_taped ||
@@ -3177,7 +3177,7 @@ void map::shoot( const tripoint &p, int &dam,
         } else {
             dam -= rng(1,3);
             if (dam > 0) {
-                sounds::sound(p, 16, _("glass breaking!"));
+                sounds::sound(p, 16, _("glass breaking!"), false, "smash", "glass");
                 ter_set(p, t_window_frame);
                 spawn_item(p, "sheet", 1);
                 spawn_item(p, "stick");
@@ -3190,7 +3190,7 @@ void map::shoot( const tripoint &p, int &dam,
         } else {
             dam -= rng(1,3);
             if (dam > 0) {
-                sounds::sound(p, 16, _("glass breaking!"));
+                sounds::sound(p, 16, _("glass breaking!"), false, "smash", "glass");
                 ter_set(p, t_window_frame);
                 spawn_item(p, "sheet", 1);
                 spawn_item(p, "stick");
@@ -3207,7 +3207,7 @@ void map::shoot( const tripoint &p, int &dam,
         } else {
             dam -= rng(1,3);
             if (dam > 0) {
-                sounds::sound(p, 16, _("glass breaking!"));
+                sounds::sound(p, 16, _("glass breaking!"), false, "smash", "glass");
                 ter_set(p, t_window_frame);
             }
         }
@@ -3218,14 +3218,14 @@ void map::shoot( const tripoint &p, int &dam,
         } else {
             dam -= rng(1,3);
             if (dam > 0) {
-                sounds::sound(p, 16, _("glass breaking!"));
+                sounds::sound(p, 16, _("glass breaking!"), false, "smash", "glass");
                 ter_set(p, t_window_frame);
             }
         }
     } else if( terrain == t_window_boarded ) {
         dam -= rng(10, 30);
         if (dam > 0) {
-            sounds::sound(p, 16, _("glass breaking!"));
+                sounds::sound(p, 16, _("glass breaking!"), false, "smash", "glass");
             ter_set(p, t_window_frame);
         }
     } else if( terrain == t_wall_glass  ||
@@ -3236,7 +3236,7 @@ void map::shoot( const tripoint &p, int &dam,
         } else {
             dam -= rng(1,8);
             if (dam > 0) {
-                sounds::sound(p, 20, _("glass breaking!"));
+                sounds::sound(p, 16, _("glass breaking!"), false, "smash", "glass");
                 ter_set(p, t_floor);
             }
         }
@@ -3253,7 +3253,7 @@ void map::shoot( const tripoint &p, int &dam,
             } else if (dam >= 40) {
                 //high powered bullets penetrate the glass, but only extremely strong
                 // ones (80 before reduction) actually destroy the glass itself.
-                sounds::sound(p, 20, _("glass breaking!"));
+                sounds::sound(p, 16, _("glass breaking!"), false, "smash", "glass");
                 ter_set(p, t_floor);
             }
         }
@@ -3451,7 +3451,8 @@ bool map::open_door( const tripoint &p, const bool inside, const bool check_only
         }
 
         if(!check_only) {
-            ter_set( p, ter.open );
+            sounds::sound(p, 6, "", true, "open_door", ter.id);
+            ter_set(p, ter.open );
         }
 
         return true;
@@ -3466,6 +3467,7 @@ bool map::open_door( const tripoint &p, const bool inside, const bool check_only
         }
 
         if(!check_only) {
+            sounds::sound(p, 6, "", true, "open_door", furn.id);
             furn_set(p, furn.open );
         }
 
@@ -3547,6 +3549,7 @@ bool map::close_door( const tripoint &p, const bool inside, const bool check_onl
          return false;
      }
      if (!check_only) {
+        sounds::sound(p, 10, "", true, "close_door", ter.id);
         ter_set(p, ter.close );
      }
      return true;
@@ -3559,6 +3562,7 @@ bool map::close_door( const tripoint &p, const bool inside, const bool check_onl
          return false;
      }
      if (!check_only) {
+         sounds::sound(p, 10, "", true, "close_door", furn.id);
          furn_set(p, furn.close );
      }
      return true;
@@ -7109,212 +7113,6 @@ void map::add_corpse( const tripoint &p ) {
     }
     if (one_in(15)) {
         put_items_from_loc("bags", p, 0);
-    }
-}
-
-/**
- * Adds vehicles to the current submap, selected from a random weighted
- * distribution of possible vehicles. If the road has a pavement, then set the
- * 'city' flag to true to spawn wrecks. If it doesn't (ie, highway or country
- * road,) then set 'city' to false to spawn far fewer vehicles that are out
- * of gas instead of wrecked.
- * @param city Whether or not to spawn city wrecks.
- * @param facing The direction the spawned car should face (multiple of 90).
- */
-void map::add_road_vehicles(bool city, int facing)
-{
-    if (city) {
-        int spawn_type = rng(0, 100);
-        if(spawn_type <= 33) {
-            //Randomly-distributed wrecks
-            int maxwrecks = rng(1, 3);
-            for (int nv = 0; nv < maxwrecks; nv++) {
-                int vx = rng(0, 19);
-                int vy = rng(0, 19);
-                int car_type = rng(1, 100);
-                if(car_type <= 4) {
-                    add_vehicle( vproto_id( "suv" ), vx, vy, facing, -1, 1);
-                } else if(car_type <= 6) {
-                    add_vehicle( vproto_id( "suv_electric" ), vx, vy, facing, -1, 1);
-                } else if(car_type <= 10) {
-                    add_vehicle( vproto_id( "pickup" ), vx, vy, facing, -1, 1);
-                }else if (car_type <= 25) {
-                    add_vehicle( vproto_id( "car" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 30) {
-                    add_vehicle( vproto_id( "policecar" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 39) {
-                    add_vehicle( vproto_id( "ambulance" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 40) {
-                    add_vehicle( vproto_id( "bicycle_electric" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 45) {
-                    add_vehicle( vproto_id( "beetle" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 48) {
-                    add_vehicle( vproto_id( "car_sports" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 50) {
-                    add_vehicle( vproto_id( "scooter" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 53) {
-                    add_vehicle( vproto_id( "scooter_electric" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 55) {
-                    add_vehicle( vproto_id( "motorcycle" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 65) {
-                    add_vehicle( vproto_id( "hippie_van" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 70) {
-                    add_vehicle( vproto_id( "cube_van_cheap" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 75) {
-                    add_vehicle( vproto_id( "cube_van" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 80) {
-                    add_vehicle( vproto_id( "electric_car" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 90) {
-                    add_vehicle( vproto_id( "flatbed_truck" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 95) {
-                    add_vehicle( vproto_id( "rv" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 96) {
-                    add_vehicle( vproto_id( "lux_rv" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 98) {
-                    add_vehicle( vproto_id( "meth_lab" ), vx, vy, facing, -1, 1);
-                } else if (car_type <= 99) {
-                    add_vehicle( vproto_id( "apc" ), vx, vy, facing, -1, 1);
-                } else {
-                    add_vehicle( vproto_id( "motorcycle_sidecart" ), vx, vy, facing, -1, 1);
-                }
-            }
-        } else if(spawn_type <= 66) {
-            //Parked vehicles
-            int veh_x = 0;
-            int veh_y = 0;
-            if(facing == 0) {
-                veh_x = rng(4, 16);
-                veh_y = 17;
-            } else if(facing == 90) {
-                veh_x = 6;
-                veh_y = rng(4, 16);
-            } else if(facing == 180) {
-                veh_x = rng(4, 16);
-                veh_y = 6;
-            } else if(facing == 270) {
-                veh_x = 17;
-                veh_y = rng(4, 16);
-            }
-            int veh_type = rng(0, 100);
-            if(veh_type <= 6) {
-                add_vehicle( vproto_id( "suv" ), veh_x, veh_y, facing, -1, 1);
-            } else if(veh_type <= 10) {
-                add_vehicle( vproto_id( "suv_electric" ), veh_x, veh_y, facing, -1, 1);
-            } else if(veh_type <= 14) {
-                add_vehicle( vproto_id( "pickup" ), veh_x, veh_y, facing, -1, 1);
-            } else if(veh_type <= 18) {
-                add_vehicle( vproto_id( "car_mini" ), veh_x, veh_y, facing, -1, 1);
-            } else if(veh_type <= 20) {
-                add_vehicle( vproto_id( "truck_swat" ), veh_x, veh_y, facing, -1, 1);
-            } else if(veh_type <= 67) {
-                add_vehicle( vproto_id( "car" ), veh_x, veh_y, facing, -1, 1);
-            } else if(veh_type <= 89) {
-                add_vehicle( vproto_id( "electric_car" ), veh_x, veh_y, facing, -1, 1);
-            } else if(veh_type <= 92) {
-                add_vehicle( vproto_id( "road_roller" ), veh_x, veh_y, facing, -1, 1);
-            } else if(veh_type <= 97) {
-                add_vehicle( vproto_id( "policecar" ), veh_x, veh_y, facing, -1, 1);
-            } else {
-                add_vehicle( vproto_id( "autosweeper" ), veh_x, veh_y, facing, -1, 1);
-            }
-        } else if(spawn_type <= 99) {
-            //Totally clear section of road
-            return;
-        } else {
-            //Road-blocking obstacle of some kind.
-            int block_type = rng(0, 100);
-            if(block_type <= 75) {
-                //Jack-knifed semi
-                int semi_x = 0;
-                int semi_y = 0;
-                int trailer_x = 0;
-                int trailer_y = 0;
-                if(facing == 0) {
-                    semi_x = rng(0, 16);
-                    semi_y = rng(14, 16);
-                    trailer_x = semi_x + 4;
-                    trailer_y = semi_y - 10;
-                } else if(facing == 90) {
-                    semi_x = rng(0, 8);
-                    semi_y = rng(4, 15);
-                    trailer_x = semi_x + 12;
-                    trailer_y = semi_y + 1;
-                } else if(facing == 180) {
-                    semi_x = rng(4, 16);
-                    semi_y = rng(4, 6);
-                    trailer_x = semi_x - 4;
-                    trailer_y = semi_y + 10;
-                } else {
-                    semi_x = rng(12, 20);
-                    semi_y = rng(5, 16);
-                    trailer_x = semi_x - 12;
-                    trailer_y = semi_y - 1;
-                }
-                add_vehicle( vproto_id( "semi_truck" ), semi_x, semi_y, (facing + 135) % 360, -1, 1);
-                add_vehicle( vproto_id( "truck_trailer" ), trailer_x, trailer_y, (facing + 90) % 360, -1, 1);
-            } else {
-                //Huge pileup of random vehicles
-                vproto_id next_vehicle;
-                int num_cars = rng(18, 22);
-                bool policecars = block_type >= 95; //Policecar pileup, Blues Brothers style
-                vehicle *last_added_car = NULL;
-                for(int i = 0; i < num_cars; i++) {
-                    if(policecars) {
-                        next_vehicle = vproto_id( "policecar" );
-                    } else {
-                        //Random car
-                        int car_type = rng(0, 100);
-                        if(car_type <= 70) {
-                            next_vehicle = vproto_id( "car" );
-                        } else if(car_type <= 90) {
-                            next_vehicle = vproto_id( "pickup" );
-                        } else if(car_type <= 95) {
-                            next_vehicle = vproto_id( "cube_van" );
-                        } else {
-                            next_vehicle = vproto_id( "hippie_van" );
-                        }
-                    }
-                    last_added_car = add_vehicle(next_vehicle, rng(4, 16), rng(4, 16), rng(0, 3) * 90, -1, 1);
-                }
-
-                //Hopefully by the last one we've got a giant pileup, so name it
-                if (last_added_car != NULL) {
-                    if(policecars) {
-                        last_added_car->name = _("policecar pile-up");
-                    } else {
-                        last_added_car->name = _("pile-up");
-                    }
-                }
-            }
-        }
-    } else {
-        // spawn regular road out of fuel vehicles
-        if (one_in(40)) {
-            int vx = rng(8, 16);
-            int vy = rng(8, 16);
-            int car_type = rng(1, 30);
-            if (car_type <= 10) {
-                add_vehicle( vproto_id( "car" ), vx, vy, facing, 0, -1);
-            } else if (car_type <= 14) {
-                add_vehicle( vproto_id( "car_sports" ), vx, vy, facing, 0, -1);
-            } else if (car_type <= 16) {
-                add_vehicle( vproto_id( "pickup" ), vx, vy, facing, 0, -1);
-            } else if (car_type <= 18) {
-                add_vehicle( vproto_id( "semi_truck" ), vx, vy, facing, 0, -1);
-            } else if (car_type <= 20) {
-                add_vehicle( vproto_id( "humvee" ), vx, vy, facing, 0, -1);
-            } else if (car_type <= 21) {
-                add_vehicle( vproto_id( "car_fbi" ), vx, vy, facing, 0, -1);
-            } else if (car_type <= 24) {
-                add_vehicle( vproto_id( "rara_x" ), vx, vy, facing, 0, -1);
-            } else if (car_type <= 25) {
-                add_vehicle( vproto_id( "apc" ), vx, vy, facing, 0, -1);
-            } else if (car_type <= 28) {
-                add_vehicle( vproto_id( "car_sports_electric" ), vx, vy, facing, 0, -1);
-            } else {
-                add_vehicle( vproto_id( "armored_car" ), vx, vy, facing, 0, -1);
-            }
-        }
     }
 }
 

@@ -15,7 +15,8 @@ TYPES_TO_IGNORE = [ "overmap_terrain", "BULLET_PULLING", "dream", "mutation", "m
                     "profession", "start_location", "overmap_special", "npc", "faction", "recipe_category",
                     "lab_note", "martial_art", "bionic", "snippet", "vehicle", "scenario", "item_action",
                     "MONSTER_FACTION", "MOD_INFO", "ITEM_BLACKLIST", "MONSTER_BLACKLIST",
-                    "MONSTER_WHITELIST", "mutation_category", "talk_topic", "epilogue" ]
+                    "MONSTER_WHITELIST", "mutation_category", "talk_topic", "epilogue",
+                    "vehicle_group", "vehicle_placement", "vehicle_spawn" ]
 
 # First create some output directories in one go. If this fails, the script is aborted.
 for d in [ "items", "qualities", "ammo_types", "vparts", "materials", "furnitures", "terrains",
