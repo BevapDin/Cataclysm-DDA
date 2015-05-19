@@ -540,7 +540,7 @@ void crafting_inventory_t::form_from_map(tripoint origin, int range)
                 const int faupart = veh->part_with_feature(vpart, "FAUCET");
                 if(faupart >= 0 ) {
                     item water("water_clean", 0);
-                    water.charges = veh->fuel_left("water");
+                    water.charges = veh->fuel_left("water_clean");
                     this->vpart.push_back(item_from_vpart(veh, veh->parts[faupart].mount.x, veh->parts[faupart].mount.y, water));
                 }
 

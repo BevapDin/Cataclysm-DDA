@@ -2222,7 +2222,7 @@ void crafting_inventory_t::candidate_t::consume(player *p, requirement &req, std
             if(ix->type->id == "vpart_KITCHEN") {
                 drainVehicle(vpartitem->veh, *ix, "battery", req.count, used_items);
             } else if(ix->type->id == "water_clean") {
-                drainVehicle(vpartitem->veh, *ix, "water", req.count, used_items);
+                drainVehicle(vpartitem->veh, *ix, "water_clean", req.count, used_items);
             } else if(ix->type->id == "vpart_WELDRIG") {
                 drainVehicle(vpartitem->veh, *ix, "battery", req.count, used_items);
             } else if(ix->type->id == "vpart_CHEMLAB") {
