@@ -4562,7 +4562,15 @@
       ["hat_hard", 50],
       ["wearable_light", 100],
       ["bio_flashlight", 10],
-      ["bio_tools", 10]
+      ["bio_tools_press", 10],
+      ["bio_tools_knife", 10],
+      ["bio_tools_screwdriver", 10],
+      ["bio_tools_wrench", 10],
+      ["bio_tools_hacksaw", 10],
+      ["bio_tools_hammer", 10],
+      ["bio_tools_welder", 10],
+      ["bio_tools_hotplate", 10],
+      ["bio_tools_soldering_iron", 10]
     ]
   },{
     "type" : "item_group",
