@@ -84,7 +84,7 @@ struct advanced_inv_area {
     void init();
     // if you want vehicle cargo, specify so via `in_vehicle'
     int free_volume(bool in_vehicle = false) const;
-    int get_item_count() const;
+    int get_item_count( bool in_vehicle = false ) const;
     // Other area is actually the same item source, e.g. dragged vehicle to the south and AIM_SOUTH
     bool is_same( const advanced_inv_area &other ) const;
     // does _not_ check vehicle storage, do that with `can_store_in_vehicle()' below
@@ -367,7 +367,7 @@ class advanced_inventory
         // displayed right right of it, everything left of it is till free.
         int print_header(advanced_inventory_pane &pane, aim_location sel);
         void init();
-        aim_location find_destination(const advanced_inv_listitem &it);
+        aim_location find_destination(const advanced_inv_listitem &it, bool &in_vehicle);
         /**
          * Translate an action ident from the input context to an aim_location.
          * @param ret If the action ident referred to a location, its id is stored
@@ -397,7 +397,7 @@ class advanced_inventory
          * @param inv_item Pointer-pointer for the inventory's item pointer, if applicable.
          * @return true if adding has been done, false if adding the item failed.
          */
-        bool add_item( aim_location destarea, item &new_item );
+        bool add_item( aim_location destarea, bool in_vehicle, item &new_item );
         /**
          * Move content of source container into destination container (destination pane = AIM_CONTAINER)
          * @param src_container Source container
@@ -414,7 +414,7 @@ class advanced_inventory
          * should be moved. A return value of true indicates that amount now contains
          * a valid item count to be moved.
          */
-        bool query_charges(aim_location destarea, const advanced_inv_listitem &sitem, bool askamount, long &amount );
+        bool query_charges(aim_location destarea, bool in_veh, const advanced_inv_listitem &sitem, bool askamount, long &amount );
         /**
          * Remove the item from source area. Must not be used on items with area
          * AIM_ALL or AIM_INVENTORY! (but is... and seems to work)
