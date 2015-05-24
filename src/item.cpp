@@ -24,6 +24,7 @@
 #include "martialarts.h"
 #include "npc.h"
 #include "ui.h"
+#include "vehicle.h"
 
 #include <cmath> // floor
 #include <sstream>

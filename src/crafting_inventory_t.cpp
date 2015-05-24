@@ -12,6 +12,7 @@
 #include "veh_type.h"
 #include "ui.h"
 #include "itype.h"
+#include "vehicle.h"
 #include <cstring>
 #include <algorithm>
 #include <cmath>
