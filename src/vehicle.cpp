@@ -2950,8 +2950,8 @@ void vehicle::center_of_mass(int &x, int &y) const
     m_total = m_total / 1000;
     xf /= m_total;
     yf /= m_total;
-    x = std::round(xf);
-    y = std::round(yf);
+    x = round(xf);
+    y = round(yf);
 }
 
 int vehicle::fuel_left (const itype_id & ftype, bool recurse) const
