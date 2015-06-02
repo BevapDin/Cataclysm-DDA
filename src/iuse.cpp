@@ -214,10 +214,6 @@ std::vector<tripoint> points_for_gas_cloud(const tripoint &center, int radius)
             continue;
         }
         if( p != center ) {
-            if (!g->m.sees( center, p, radius )) {
-                // No clear line of sight
-                continue;
-            }
             if (!g->m.clear_path( center, p, radius, 1, 100, junk, trash)) {
                 // Can not splatter gas from center to that point, something is in the way
                 continue;
@@ -1457,7 +1453,7 @@ int iuse::oxygen_bottle(player *p, item *it, bool, const tripoint& )
 int iuse::blech(player *p, item *it, bool, const tripoint& )
 {
     // TODO: Add more effects?
-    if (it->is_drink()) {
+    if( it->made_of( LIQUID ) ) {
         if (!query_yn(_("This looks unhealthy, sure you want to drink it?"))) {
             return 0;
         }
