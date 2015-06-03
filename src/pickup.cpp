@@ -764,7 +764,7 @@ void Pickup::pick_up( const tripoint &pos, int min )
                     if (cur_it < (int)pickup_chars.size() ) {
                         mvwputch(w_pickup, 1 + (cur_it % maxitems), 0, icolor,
                                  char(pickup_chars[cur_it]));
-                    } else {
+                    } else if (cur_it < (int)((1+pickup_chars.size()) * pickup_chars.size())) {
                         int p = cur_it - pickup_chars.size();
                         int p1 = p / pickup_chars.size();
                         int p2 = p % pickup_chars.size();
