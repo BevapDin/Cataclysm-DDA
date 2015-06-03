@@ -144,7 +144,7 @@ public:
     int passenger_id = 0;         // carrying passenger
 
     union {
-        int amount;    // amount of fuel for tank/charge in battery
+        long amount;    // amount of fuel for tank/charge in battery
         int open;      // door is open
         int direction; // direction the part is facing
         int mode;      // turret mode
@@ -293,16 +293,16 @@ private:
     //damages vehicle controls and security system
     void smash_security_system();
     // get vpart powerinfo for part number, accounting for variable-sized parts and hps.
-    int part_power( int index, bool at_full_hp = false ) const;
+    long part_power( int index, bool at_full_hp = false ) const;
 
     // get vpart epowerinfo for part number.
-    int part_epower (int index) const;
+    long part_epower (int index) const;
 
     // convert epower (watts) to power.
-    static int epower_to_power (int epower);
+    static long epower_to_power (long epower);
 
     // convert power to epower (watts).
-    static int power_to_epower (int power);
+    static long power_to_epower (long power);
 
     //Refresh all caches and re-locate all parts
     void refresh();
@@ -339,7 +339,7 @@ private:
      * @return The last visitor's return value.
      */
     template <typename Func, typename Vehicle>
-    static int traverse_vehicle_graph(Vehicle *start_veh, int amount, Func visitor);
+    static long traverse_vehicle_graph(Vehicle *start_veh, long amount, Func visitor);
 public:
     vehicle(const vproto_id &type_id, int veh_init_fuel = -1, int veh_init_status = -1);
     vehicle();
@@ -527,19 +527,19 @@ public:
     std::map<itype_id, long> fuels_left() const;
 
     // Checks how much certain fuel left in tanks.
-    int fuel_left (const itype_id &ftype, bool recurse = false) const;
-    int fuel_capacity (const itype_id &ftype) const;
+    long fuel_left (const itype_id &ftype, bool recurse = false) const;
+    long fuel_capacity (const itype_id &ftype) const;
 
     // refill fuel tank(s) with given type of fuel
     // returns amount of leftover fuel
-    int refill (const itype_id &ftype, int amount);
+    long refill (const itype_id &ftype, long amount);
 
     // drains a fuel type (e.g. for the kitchen unit)
     // returns amount actually drained, does not engage reactor
-    int drain (const itype_id &ftype, int amount);
+    long drain (const itype_id &ftype, long amount);
 
     // fuel consumption of vehicle engines of given type, in one-hundreth of fuel
-    int basic_consumption (const itype_id &ftype) const;
+    long basic_consumption (const itype_id &ftype) const;
 
     void consume_fuel( double load );
 
@@ -549,13 +549,13 @@ public:
      * Try to charge our (and, optionally, connected vehicles') batteries by the given amount.
      * @return amount of charge left over.
      */
-    int charge_battery (int amount, bool recurse = true);
+    long charge_battery (long amount, bool recurse = true);
 
     /**
      * Try to discharge our (and, optionally, connected vehicles') batteries by the given amount.
      * @return amount of request unfulfilled (0 if totally successful).
      */
-    int discharge_battery (int amount, bool recurse = true);
+    long discharge_battery (long amount, bool recurse = true);
 
     // get the total mass of vehicle, including cargo and passengers
     int total_mass () const;
@@ -565,10 +565,10 @@ public:
 
     // Get combined power of all engines. If fueled == true, then only engines which
     // vehicle have fuel for are accounted
-    int total_power (bool fueled = true) const;
+    long total_power (bool fueled = true) const;
 
     // Get combined epower of solar panels
-    int solar_epower( const tripoint &sm_loc ) const;
+    long solar_epower( const tripoint &sm_loc ) const;
 
     // Get acceleration gained by combined power of all engines. If fueled == true, then only engines which
     // vehicle have fuel for are accounted
@@ -926,15 +926,15 @@ public:
     // returns true if examine was done
     bool examine(game *g, player *p, int part);
 
-    int lights_epower       = 0; // total power of components with LIGHT or CONE_LIGHT flag
-    int overhead_epower     = 0; // total power of components with CIRCLE_LIGHT flag
-    int tracking_epower     = 0; // total power consumed by tracking devices (why would you use more than one?)
-    int fridge_epower       = 0; // total power consumed by fridges
-    int alarm_epower        = 0;
-    int dome_lights_epower  = 0;
-    int aisle_lights_epower = 0;
-    int recharger_epower    = 0; // total power consumed by rechargers
-    int camera_epower       = 0; // power consumed by camera system
+    long lights_epower       = 0; // total power of components with LIGHT or CONE_LIGHT flag
+    long overhead_epower     = 0; // total power of components with CIRCLE_LIGHT flag
+    long tracking_epower     = 0; // total power consumed by tracking devices (why would you use more than one?)
+    long fridge_epower       = 0; // total power consumed by fridges
+    long alarm_epower        = 0;
+    long dome_lights_epower  = 0;
+    long aisle_lights_epower = 0;
+    long recharger_epower    = 0; // total power consumed by rechargers
+    long camera_epower       = 0; // power consumed by camera system
 
     // TODO: change these to a bitset + enum?
     bool cruise_on                  = true;  // cruise control on/off

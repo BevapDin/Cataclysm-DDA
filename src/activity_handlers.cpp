@@ -859,8 +859,8 @@ void activity_handlers::refill_vehicle_do_turn( player_activity *act, player *p 
             for( auto gas = maybe_gas.begin(); gas != maybe_gas.end(); ) {
                 if( gas->type->id == "gasoline" || gas->type->id == "diesel" ) {
                     fuel_pumped = true;
-                    int lack = std::min( veh->fuel_capacity(gas->type->id) -
-                                         veh->fuel_left(gas->type->id),  200 );
+                    long lack = std::min( veh->fuel_capacity(gas->type->id) -
+                                         veh->fuel_left(gas->type->id),  200l );
                     if( gas->charges > lack ) {
                         veh->refill(gas->type->id, lack);
                         gas->charges -= lack;

@@ -1422,7 +1422,7 @@ bool vehicle::start_engine( const int e )
     }
 
     const double dmg = 1.0 - ((double)parts[engines[e]].hp / einfo.durability);
-    const int engine_power = part_power( engines[e], true );
+    const long engine_power = part_power( engines[e], true );
     const double cold_factor = engine_cold_factor( e );
 
     if( einfo.fuel_type != fuel_type_muscle ) {
@@ -1437,7 +1437,7 @@ bool vehicle::start_engine( const int e )
     if( einfo.fuel_type == fuel_type_gasoline || einfo.fuel_type == fuel_type_diesel ) {
         // Small engines can be started without a battery (pull start or kick start)
         if( engine_power >= 50 ) {
-            const int penalty = ((engine_power * dmg) / 2) + ((engine_power * cold_factor) / 5);
+            const long penalty = ((engine_power * dmg) / 2) + ((engine_power * cold_factor) / 5);
             if( discharge_battery( (engine_power + penalty) / 10, true ) != 0 ) {
                 add_msg( _("The %s makes a rapid clicking sound."), einfo.name.c_str() );
                 return false;
@@ -1552,7 +1552,7 @@ const vpart_info& vehicle::part_info (int index, bool include_removed) const
 
 // engines & alternators all have power.
 // engines provide, whilst alternators consume.
-int vehicle::part_power(int const index, bool const at_full_hp) const
+long vehicle::part_power(int const index, bool const at_full_hp) const
 {
     if( !part_flag(index, VPFLAG_ENGINE) &&
         !part_flag(index, VPFLAG_ALTERNATOR) ) {
@@ -1561,7 +1561,7 @@ int vehicle::part_power(int const index, bool const at_full_hp) const
     if(parts[index].inactive()) {
         return 0; //not active.
     }
-    int pwr;
+    long pwr;
     if( part_flag (index, VPFLAG_VARIABLE_SIZE) ) { // example: 2.42-L V-twin engine
        pwr = parts[index].bigness;
     } else { // example: foot crank
@@ -1584,22 +1584,22 @@ int vehicle::part_power(int const index, bool const at_full_hp) const
 
 // alternators, solar panels, reactors, and accessories all have epower.
 // alternators, solar panels, and reactors provide, whilst accessories consume.
-int vehicle::part_epower(int const index) const
+long vehicle::part_epower(int const index) const
 {
-    int e = part_info(index).epower;
+    long e = part_info(index).epower;
     if( e < 0 ) {
         return e; // Consumers always draw full power, even if broken
     }
     return e * parts[index].hp / part_info(index).durability;
 }
 
-int vehicle::epower_to_power(int const epower)
+long vehicle::epower_to_power(long const epower)
 {
     // Convert epower units (watts) to power units
     // Used primarily for calculating battery charge/discharge
     // TODO: convert batteries to use energy units based on watts (watt-ticks?)
-    constexpr int conversion_factor = 373; // 373 epower == 373 watts == 1 power == 0.5 HP
-    int power = epower / conversion_factor;
+    constexpr long conversion_factor = 373; // 373 epower == 373 watts == 1 power == 0.5 HP
+    long power = epower / conversion_factor;
     // epower remainder results in chance at additional charge/discharge
     if (x_in_y(abs(epower % conversion_factor), conversion_factor)) {
         power += epower >= 0 ? 1 : -1;
@@ -1607,12 +1607,12 @@ int vehicle::epower_to_power(int const epower)
     return power;
 }
 
-int vehicle::power_to_epower(int const power)
+long vehicle::power_to_epower(long const power)
 {
     // Convert power units to epower units (watts)
     // Used primarily for calculating battery charge/discharge
     // TODO: convert batteries to use energy units based on watts (watt-ticks?)
-    constexpr int conversion_factor = 373; // 373 epower == 373 watts == 1 power == 0.5 HP
+    constexpr long conversion_factor = 373; // 373 epower == 373 watts == 1 power == 0.5 HP
     return power * conversion_factor;
 }
 
@@ -2957,9 +2957,9 @@ void vehicle::center_of_mass(int &x, int &y) const
     y = round(yf);
 }
 
-int vehicle::fuel_left (const itype_id & ftype, bool recurse) const
+long vehicle::fuel_left (const itype_id & ftype, bool recurse) const
 {
-    int fl = 0;
+    long fl = 0;
     for(auto &p : fuel) {
         if(ftype == part_info(p).fuel_type) {
             fl += parts[p].amount;
@@ -2967,7 +2967,7 @@ int vehicle::fuel_left (const itype_id & ftype, bool recurse) const
     }
 
     if(recurse && ftype == fuel_type_battery) {
-        auto fuel_counting_visitor = [&] (vehicle const* veh, int amount, int) {
+        auto fuel_counting_visitor = [&] (vehicle const* veh, long amount, long) {
             return amount + veh->fuel_left(ftype, false);
         };
 
@@ -2995,9 +2995,9 @@ int vehicle::fuel_left (const itype_id & ftype, bool recurse) const
     return fl;
 }
 
-int vehicle::fuel_capacity (const itype_id &ftype) const
+long vehicle::fuel_capacity (const itype_id &ftype) const
 {
-    int cap = 0;
+    long cap = 0;
     for(auto &p : fuel) {
         if(ftype == part_info(p).fuel_type) {
             cap += part_info(p).size;
@@ -3006,7 +3006,7 @@ int vehicle::fuel_capacity (const itype_id &ftype) const
     return cap;
 }
 
-int vehicle::refill (const itype_id & ftype, int amount)
+long vehicle::refill (const itype_id & ftype, long amount)
 {
     for (size_t p = 0; p < parts.size(); p++)
     {
@@ -3015,7 +3015,7 @@ int vehicle::refill (const itype_id & ftype, int amount)
             parts[p].amount < part_info(p).size &&
             parts[p].hp > 0)
         {
-            int need = part_info(p).size - parts[p].amount;
+            long need = part_info(p).size - parts[p].amount;
             if (amount < need)
             {
                 parts[p].amount += amount;
@@ -3031,12 +3031,12 @@ int vehicle::refill (const itype_id & ftype, int amount)
     return amount;
 }
 
-int vehicle::drain (const itype_id & ftype, int amount) {
+long vehicle::drain (const itype_id & ftype, long amount) {
     if(ftype == "battery") {
         // Batteries get special handling to take advantage of jumper
         // cables -- discharge_battery knows how to recurse properly
         // (including taking cable power loss into account).
-        int remnant = discharge_battery(amount, true);
+        long remnant = discharge_battery(amount, true);
 
         // discharge_battery returns amount of charges that were not
         // found anywhere in the power network, whereas this function
@@ -3044,7 +3044,7 @@ int vehicle::drain (const itype_id & ftype, int amount) {
         return amount - remnant;
     }
 
-    int drained = 0;
+    long drained = 0;
 
     for (auto &p : fuel) {
         vehicle_part &tank = parts[p];
@@ -3063,9 +3063,9 @@ int vehicle::drain (const itype_id & ftype, int amount) {
     return drained;
 }
 
-int vehicle::basic_consumption(const itype_id &ftype) const
+long vehicle::basic_consumption(const itype_id &ftype) const
 {
-    int fcon = 0;
+    long fcon = 0;
     for( size_t e = 0; e < engines.size(); ++e ) {
         if(is_engine_type_on(e, ftype)) {
             if( part_info( engines[e] ).fuel_type == fuel_type_battery &&
@@ -3080,13 +3080,13 @@ int vehicle::basic_consumption(const itype_id &ftype) const
     return fcon;
 }
 
-int vehicle::total_power(bool const fueled) const
+long vehicle::total_power(bool const fueled) const
 {
-    int pwr = 0;
-    int cnt = 0;
+    long pwr = 0;
+    long cnt = 0;
 
     for (size_t e = 0; e < engines.size(); e++) {
-        int p = engines[e];
+        long p = engines[e];
         if (is_engine_on(e) && (fuel_left (part_info(p).fuel_type) || !fueled)) {
             pwr += part_power(p);
             cnt++;
@@ -3094,7 +3094,7 @@ int vehicle::total_power(bool const fueled) const
     }
 
     for (size_t a = 0; a < alternators.size();a++){
-        int p = alternators[a];
+        long p = alternators[a];
         if (is_alternator_on(a)) {
             pwr += part_power(p); // alternators have negative power
         }
@@ -3105,7 +3105,7 @@ int vehicle::total_power(bool const fueled) const
     return pwr;
 }
 
-int vehicle::solar_epower( const tripoint &sm_loc ) const
+long vehicle::solar_epower( const tripoint &sm_loc ) const
 {
     // this will obviosuly be wrong for vehicles spanning z-levels, when
     // that gets possible...
@@ -3113,7 +3113,7 @@ int vehicle::solar_epower( const tripoint &sm_loc ) const
         return 0;
     }
 
-    int epower = 0;
+    long epower = 0;
     for( auto &elem : solar_panels ) {
         if( parts[elem].hp > 0 ) {
             int px = posx + parts[elem].precalc[0].x; // veh. origin submap relative
@@ -3200,8 +3200,8 @@ bool vehicle::do_environmental_effects()
 
 int vehicle::safe_velocity(bool const fueled) const
 {
-    int pwrs = 0;
-    int cnt = 0;
+    long pwrs = 0;
+    long cnt = 0;
     for (size_t e = 0; e < engines.size(); e++){
         if (is_engine_on(e) && parts[engines[e]].active() &&
             (!fueled || is_engine_type(e, fuel_type_muscle) ||
@@ -3495,16 +3495,16 @@ void vehicle::consume_fuel( double load = 1.0 )
     float st = strain();
     for( auto &ft : get_fuel_types() ) {
         // if no engines use this fuel, skip
-        int amnt_fuel_use = basic_consumption( ft.id );
+        long amnt_fuel_use = basic_consumption( ft.id );
         if (amnt_fuel_use == 0) continue;
 
         //get exact amount of fuel needed
         double amnt_precise = double(amnt_fuel_use) / ft.coeff;
 
         amnt_precise *= load * (1.0 + st * st * 100);
-        int amnt = int(amnt_precise);
+        long amnt = amnt_precise;
         // consumption remainder results in chance at additional fuel consumption
-        if( x_in_y(int(amnt_precise*1000) % 1000, 1000) ) {
+        if( x_in_y(long(amnt_precise*1000) % 1000, 1000) ) {
             amnt += 1;
         }
         for( auto &elem : fuel ) {
@@ -3522,7 +3522,7 @@ void vehicle::consume_fuel( double load = 1.0 )
     }
     //do this with chance proportional to current load
     // But only if the player is actually there!
-    if( load > 0 && one_in( (int) (1 / load) ) &&
+    if( load > 0 && one_in( (long) (1 / load) ) &&
         fuel_left( fuel_type_muscle ) > 0 ) {
         //charge bionics when using muscle engine
         if (g->u.has_bionic("bio_torsionratchet")) {
@@ -3541,7 +3541,7 @@ void vehicle::consume_fuel( double load = 1.0 )
 
 void vehicle::power_parts( const tripoint &sm_loc )//TODO: more categories of powered part!
 {
-    int epower = 0;
+    long epower = 0;
 
     // Consumers of epower
     if( lights_on ) epower += lights_epower;
@@ -3556,7 +3556,7 @@ void vehicle::power_parts( const tripoint &sm_loc )//TODO: more categories of po
 
     // Engines: can both produce (plasma) or consume (gas, diesel)
     // Gas engines require epower to run for ignition system, ECU, etc.
-    int engine_epower = 0;
+    long engine_epower = 0;
     if( engine_on ) {
         for( size_t e = 0; e < engines.size(); ++e ) {
             // Electric engines consume power when actually used, not passively
@@ -3573,8 +3573,8 @@ void vehicle::power_parts( const tripoint &sm_loc )//TODO: more categories of po
 
     if(engine_on) {
         // If the engine is on, the alternators are working.
-        int alternators_epower = 0;
-        int alternators_power = 0;
+        long alternators_epower = 0;
+        long alternators_power = 0;
         for( size_t p = 0; p < alternators.size(); ++p ) {
             if(is_alternator_on(p)) {
                 alternators_epower += part_info(alternators[p]).epower;
@@ -3587,7 +3587,7 @@ void vehicle::power_parts( const tripoint &sm_loc )//TODO: more categories of po
         }
     }
 
-    int epower_capacity_left = power_to_epower(fuel_capacity(fuel_type_battery) - fuel_left(fuel_type_battery));
+    long epower_capacity_left = power_to_epower(fuel_capacity(fuel_type_battery) - fuel_left(fuel_type_battery));
     if( reactor_on && epower_capacity_left - epower > 0 ) {
         // Still not enough surplus epower to fully charge battery
         // Produce additional epower from any reactors
@@ -3596,16 +3596,16 @@ void vehicle::power_parts( const tripoint &sm_loc )//TODO: more categories of po
             if( parts[elem].hp > 0 && parts[elem].amount > 0 ) {
                 // Efficiency: one unit of fuel is this many units of battery
                 // Note: One battery is roughtly 373 units of epower
-                const int efficiency = part_info( elem ).power;
-                const int avail_fuel = parts[elem].amount * efficiency;
+                const long efficiency = part_info( elem ).power;
+                const long avail_fuel = parts[elem].amount * efficiency;
 
-                const int elem_epower = std::min( part_epower( elem ), power_to_epower( avail_fuel ) );
+                const long elem_epower = std::min( part_epower( elem ), power_to_epower( avail_fuel ) );
                 // Cap output at what we can achieve and utilize
-                const int reactors_output = std::min( elem_epower, epower_capacity_left - epower );
+                const long reactors_output = std::min( elem_epower, epower_capacity_left - epower );
                 // Units of fuel consumed before adjustment for efficiency
-                const int battery_consumed = epower_to_power( reactors_output );
+                const long battery_consumed = epower_to_power( reactors_output );
                 // Fuel consumed in actual units of the resource
-                int fuel_consumed = battery_consumed / efficiency;
+                long fuel_consumed = battery_consumed / efficiency;
                 // Remainder has a chance of resulting in more fuel consumption
                 if( x_in_y( battery_consumed % efficiency, efficiency ) ) {
                     fuel_consumed++;
@@ -3627,7 +3627,7 @@ void vehicle::power_parts( const tripoint &sm_loc )//TODO: more categories of po
         }
     }
 
-    int battery_deficit = 0;
+    long battery_deficit = 0;
     if(epower > 0) {
         // store epower surplus in battery
         charge_battery(epower_to_power(epower));
@@ -3695,17 +3695,17 @@ vehicle* vehicle::find_vehicle( const tripoint &where )
 }
 
 template <typename Func, typename Vehicle>
-int vehicle::traverse_vehicle_graph(Vehicle *start_veh, int amount, Func action)
+long vehicle::traverse_vehicle_graph(Vehicle *start_veh, long amount, Func action)
 {
     // Breadth-first search! Initialize the queue with a pointer to ourselves and go!
-    std::queue< std::pair<Vehicle*, int> > connected_vehs;
+    std::queue< std::pair<Vehicle*, long> > connected_vehs;
     std::set<Vehicle*> visited_vehs;
     connected_vehs.push(std::make_pair(start_veh, 0));
 
     while(amount > 0 && connected_vehs.size() > 0) {
         auto current_node = connected_vehs.front();
         Vehicle *current_veh = current_node.first;
-        int current_loss = current_node.second;
+        long current_loss = current_node.second;
 
         visited_vehs.insert(current_veh);
         connected_vehs.pop();
@@ -3727,14 +3727,14 @@ int vehicle::traverse_vehicle_graph(Vehicle *start_veh, int amount, Func action)
             // Add this connected vehicle to the queue of vehicles to search next,
             // but only if we haven't seen this one before.
             if(visited_vehs.count(target_veh) < 1) {
-                int target_loss = current_loss + current_veh->part_info(p).epower;
+                long target_loss = current_loss + current_veh->part_info(p).epower;
                 connected_vehs.push(std::make_pair(target_veh, target_loss));
 
                 float loss_amount = ((float)amount * (float)target_loss) / 100;
                 g->u.add_msg_if_player(m_debug, "Visiting remote %p with %d power (loss %f, which is %d percent)",
                                         (void*)target_veh, amount, loss_amount, target_loss);
 
-                amount = action(target_veh, amount, (int)loss_amount);
+                amount = action(target_veh, amount, (long)loss_amount);
                 g->u.add_msg_if_player(m_debug, "After remote %p, %d power", (void*)target_veh, amount);
 
                 if(amount < 1) {
@@ -3746,11 +3746,11 @@ int vehicle::traverse_vehicle_graph(Vehicle *start_veh, int amount, Func action)
     return amount;
 }
 
-int vehicle::charge_battery (int amount, bool include_other_vehicles)
+long vehicle::charge_battery (long amount, bool include_other_vehicles)
 {
     for(auto &f : fuel) {
         if(part_info(f).fuel_type == fuel_type_battery && parts[f].hp > 0) {
-            int empty = part_info(f).size - parts[f].amount;
+            long empty = part_info(f).size - parts[f].amount;
             if(empty < amount) {
                 amount -= empty;
                 parts[f].amount = part_info(f).size;
@@ -3765,7 +3765,7 @@ int vehicle::charge_battery (int amount, bool include_other_vehicles)
         }
     }
 
-    auto charge_visitor = [] (vehicle* veh, int amount, int lost) {
+    auto charge_visitor = [] (vehicle* veh, long amount, long lost) {
         g->u.add_msg_if_player(m_debug, "CH: %d", amount - lost);
         return veh->charge_battery(amount - lost, false);
     };
@@ -3777,9 +3777,9 @@ int vehicle::charge_battery (int amount, bool include_other_vehicles)
     return amount;
 }
 
-int vehicle::discharge_battery (int amount, bool recurse)
+long vehicle::discharge_battery (long amount, bool recurse)
 {
-    int avail_charge;
+    long avail_charge;
 
     for(auto &f : fuel) {
         if(part_info(f).fuel_type == fuel_type_battery && parts[f].hp > 0) {
@@ -3799,7 +3799,7 @@ int vehicle::discharge_battery (int amount, bool recurse)
         }
     }
 
-    auto discharge_visitor = [] (vehicle* veh, int amount, int lost) {
+    auto discharge_visitor = [] (vehicle* veh, long amount, long lost) {
         g->u.add_msg_if_player(m_debug, "CH: %d", amount + lost);
         return veh->discharge_battery(amount + lost, false);
     };
@@ -3824,7 +3824,7 @@ void vehicle::do_engine_damage(size_t e, int strain) {
 }
 
 void vehicle::idle(bool on_map) {
-    int engines_power = 0;
+    long engines_power = 0;
     float idle_rate;
 
     if (engine_on && total_power() > 0) {
@@ -4792,7 +4792,7 @@ void vehicle::gain_moves()
     // Force off-map vehicles to load by visiting them every time we gain moves.
     // Shouldn't be too expensive if there aren't fifty trillion vehicles in the graph...
     // ...and if there are, it's the player's fault for putting them there.
-    auto nil_visitor = [] (vehicle*, int amount, int) { return amount; };
+    auto nil_visitor = [] (vehicle*, long amount, long) { return amount; };
     traverse_vehicle_graph(this, 1, nil_visitor);
 
     if( check_environmental_effects ) {
