@@ -317,7 +317,7 @@ void requirement_data::auto_functions()
                 continue;
             }
             itype *it = item::find_type(tools[a].type);
-            if(it->hasFunc(ff) || (tools[a].type == "toolset" && tools.size() > 1)) {
+            if(it->hasFunc(ff) || (tools[a].type == "toolset_knife" && tools.size() > 1)) {
                 tools.erase(tools.begin() + a);
                 a--;
             }
