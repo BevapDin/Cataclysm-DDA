@@ -520,6 +520,8 @@ classes = {
             reload_time = { rval = "int", args = { "player" } },
             reset_cable = { rval = nil, args = { "player" } },
             rotten = { rval = "bool", args = { } },
+            serialize = { rval = "string", args = { } },
+            deserialize = { rval = nil, args = { "string" } },
             set_auxiliary_mode = { rval = nil, args = { } },
             set_curammo = { rval = nil, args = { "item" } },
             set_gun_mode = { rval = nil, args = { "string" } },
@@ -1402,6 +1404,11 @@ global_functions = {
         cpp_name = "g->revive_corpse",
         args = { "tripoint", "item" },
         rval = "bool"
+    },
+    deserialize_and_put_item_on_map = {
+        cpp_name = "deserialize_and_put_item_on_map",
+        args = { "tripoint", "string" },
+        rval = nil
     },
     zombie = {
         cpp_name = "g->zombie",

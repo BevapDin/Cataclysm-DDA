@@ -451,6 +451,15 @@ monster *create_monster( const std::string &mon_type, const tripoint &p )
     }
 }
 
+void deserialize_and_put_item_on_map( const tripoint &pos, const std::string &data) {
+    item tmp;
+    try {
+        tmp.deserialize(data);
+        g->m.add_item_or_charges(pos, tmp);
+    } catch( ... ) {
+    }
+}
+
 it_comest *get_comestible_type(std::string name)
 {
     return dynamic_cast<it_comest *>(item::find_type(name));

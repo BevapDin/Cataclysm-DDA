@@ -1,6 +1,20 @@
 -- This is executed before any json data is loaded.
 -- Place all iuse actions that shall be available for item here.
 
+function si(pos)
+    local result = {}
+    for itm in item_stack_iterator(pos) do
+        result[#result + 1] = itm:serialize()
+    end
+    return result
+end
+
+function di(pos, items)
+    for _,i in ipairs(items) do
+        game.deserialize_and_put_item_on_map(pos, i)
+    end
+end
+
 function hiccup(item, active, pos)
     item_store = item
     game.add_msg("You hiccup because of "..item:tname())
