@@ -1132,36 +1132,47 @@ bool advanced_inventory::move_all_items()
     auto &spane = panes[src];
     auto &dpane = panes[dest];
 
-    // AIM_ALL source area routine
     if(spane.get_area() == AIM_ALL) {
-        // future feature :-)
-        popup(_("You can't do that (yet!)"));
+        if(dpane.get_area() == AIM_INVENTORY || dpane.get_area() == AIM_ALL || dpane.get_area() == AIM_WORN) {
+            popup("Nope.");
+            return false;
+        }
+        auto &darea = squares[dpane.get_area()];
+        auto &i = spane.items;
+        while( !i.empty() ) {
+            advanced_inv_listitem &sitem = i.front();
+            if( sitem.it == nullptr ) {
+                i.erase( i.begin() );
+                continue;
+            }
+            auto &sarea = squares[sitem.area];
+            if( darea.is_same( sarea ) ) {
+                i.erase( i.begin() );
+                continue;
+            }
+            const bool by_charges = sitem.it->count_by_charges();
+            long amount_to_move = 0;
+            if( !query_charges( dpane.get_area(), dpane.in_vehicle(), sitem, false, amount_to_move ) ) {
+                break;
+            }
+            assert( amount_to_move > 0 );
+            item new_item( *sitem.it );
+            if( by_charges ) {
+                new_item.charges = amount_to_move;
+            }
+            if( !add_item( dpane.get_area(), dpane.in_vehicle(), new_item ) ) {
+                break;
+            }
+            if( by_charges && amount_to_move < sitem.it->charges ) {
+                sitem.it->charges -= amount_to_move;
+                break;
+            } else {
+                remove_item( sitem );
+            }
+            recalc_pane( src );
+        }
+        recalc = true;
         return false;
-        // make a copy of the current pane for below loop
-        auto shadow = panes[src];
-        // here we recursively call this function with each area in order to 
-        // put all items in the proper destination area, with minimal fuss
-        auto &loc = uistate.adv_inv_aim_all_location;
-        // vehicle items for said square
-        if(squares[loc].can_store_in_vehicle()) {
-            // either do the inverse of the pane (if it is the one we are transferring to),
-            // or just transfer the contents (if it is not the one we are transferring to)
-            spane.set_area(squares[loc], (dpane.get_area() == loc) ? !dpane.in_vehicle() : true);
-            // add items, calculate weights and volumes... the fun stuff
-            recalc_pane(src);
-            // then move the items to the destination area
-            move_all_items();
-        }
-        // same as above, but for map items
-        spane.set_area(squares[loc++], false);
-        recalc_pane(src);
-        move_all_items();
-        if(loc > AIM_NORTHEAST) {
-            loc = 0;
-        }
-        // restore the pane to its former glory
-        panes[src] = shadow;
-        // done! that was easy!
     }
 
     // Check some preconditions to quickly leave the function.
