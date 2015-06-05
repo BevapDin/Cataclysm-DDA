@@ -495,6 +495,8 @@ void npc::execute_action(npc_action action, int target)
                 debugmsg("Following an embarked player with no vehicle at their location?");
                 // TODO: change to wait? - for now pause
                 move_pause();
+            } else if(in_vehicle && veh == g->m.veh_at(pos())) {
+                move_pause();
             } else {
                 int p2 = find_nice_seat(veh);
                 if( p2 < 0 ) {
