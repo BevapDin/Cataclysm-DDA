@@ -70,6 +70,7 @@ fontlist.txt
 gprof.output
 c
 cur/
+cataclysm.rel
 
 # Compiled binary translations
 lang/mo/
