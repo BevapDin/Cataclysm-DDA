@@ -514,7 +514,7 @@ void crafting_inventory_t::form_from_map(tripoint origin, int range)
             }
             // kludge that can probably be done better to check specifically for toilet water to use in
             // crafting
-            if (furnlist[g->m.furn(x, y)].examine == &iexamine::toilet) {
+            if (g->m.furn_at(x, y).examine == &iexamine::toilet) {
                 // get water charges at location
                 auto toilet = g->m.i_at(x, y);
                 for( auto candidate = toilet.begin(); candidate != toilet.end(); ++candidate ) {
@@ -526,7 +526,7 @@ void crafting_inventory_t::form_from_map(tripoint origin, int range)
             }
 
             // keg-kludge
-            if (furnlist[g->m.furn(x, y)].examine == &iexamine::keg) {
+            if (g->m.furn_at(x, y).examine == &iexamine::keg) {
                 auto liq_contained = g->m.i_at(x, y);
                 for( auto &i : liq_contained ) {
                     if( i.made_of(LIQUID) ) {

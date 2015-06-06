@@ -3138,8 +3138,8 @@ long vehicle::solar_epower( const tripoint &sm_loc ) const
                 continue;
             }
 
-            if( !(terlist[sm->ter[pg.x][pg.y]].has_flag(TFLAG_INDOORS) ||
-                  furnlist[sm->get_furn(pg.x, pg.y)].has_flag(TFLAG_INDOORS)) ) {
+            if( !(sm->ter[pg.x][pg.y].obj().has_flag(TFLAG_INDOORS) ||
+                  sm->get_furn(pg.x, pg.y).obj().has_flag(TFLAG_INDOORS)) ) {
                 epower += ( part_epower( elem ) * g->ground_natural_light_level() ) / DAYLIGHT_LEVEL;
             }
         }
