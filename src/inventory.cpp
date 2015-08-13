@@ -168,18 +168,6 @@ void inventory::add_stack(const std::list<item> newits)
     }
 }
 
-/*
- *  Bypass troublesome add_item for situations where we want an -exact- copy.
- */
-void inventory::clone_stack (const std::list<item> &rhs)
-{
-    std::list<item> newstack;
-    for( const auto &rh : rhs ) {
-        newstack.push_back( rh );
-    }
-    items.push_back(newstack);
-}
-
 void inventory::push_back(std::list<item> newits)
 {
     add_stack(newits);
