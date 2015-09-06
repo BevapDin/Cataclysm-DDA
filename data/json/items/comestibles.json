@@ -18,6 +18,12 @@
         "fun" : 0
     },
     {
+        "type" : "ITEM_CATEGORY",
+        "id" : "seeds",
+        "name" : "SEEDS",
+        "sort_rank" : 30
+    },
+    {
         "type" : "COMESTIBLE",
         "id" : "oj",
         "name" : "orange juice",
@@ -4462,7 +4468,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_barley",
-        "category": "other",
+        "category": "seeds",
         "price" : 160,
         "name" : "barley seed",
         "name_plural" : "barley seeds",
@@ -4503,7 +4509,7 @@
     },
     {   "type" : "COMESTIBLE",
         "id" : "seed_sugar_beet",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "sugar beet seed",
         "name_plural" : "sugar beet seeds",
@@ -4543,7 +4549,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_lettuce",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "lettuce seed",
         "name_plural" : "lettuce seeds",
@@ -4585,7 +4591,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_cabbage",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "cabbage seed",
         "name_plural" : "cabbage seeds",
@@ -4628,7 +4634,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_tomato",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "tomato seed",
         "name_plural" : "tomato seeds",
@@ -4651,7 +4657,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_cotton_boll",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "cotton seed",
         "name_plural" : "cotton seeds",
@@ -4715,7 +4721,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_broccoli",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "broccoli seed",
         "name_plural" : "broccoli seeds",
@@ -4758,7 +4764,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_zucchini",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "zucchini seed",
         "name_plural" : "zucchini seeds",
@@ -4801,7 +4807,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_onion",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "onion seed",
         "name_plural" : "onion seeds",
@@ -4843,7 +4849,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_garlic",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "garlic clove",
         "name_plural" : "garlic cloves",
@@ -4889,7 +4895,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_carrot",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "carrot seed",
         "name_plural" : "carrot seeds",
@@ -4933,7 +4939,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_corn",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "corn seed",
         "name_plural" : "corn seeds",
@@ -5978,6 +5984,7 @@
         "id" : "marloss_seed",
         "name" : "marloss seed",
         "name_plural" : "marloss seeds",
+        "category": "seeds",
         "weight" : 177,
         "color" : "cyan",
         "addiction_type" : "marloss_b",
@@ -6122,7 +6129,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_oats",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "oat seed",
         "name_plural" : "oat seeds",
@@ -6845,6 +6852,7 @@
     },{
         "type" : "COMESTIBLE",
         "id" : "raw_beans",
+        "category": "seeds",
         "name" : "raw beans",
         "name_plural" : "raw beans",
         "weight" : 210,
@@ -6870,7 +6878,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_potato_raw",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "seed potato",
         "name_plural" : "seed potatoes",
@@ -8126,7 +8134,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_weed",
-        "category": "other",
+        "category": "seeds",
         "name" : "cannabis seed",
         "color" : "green",
         "use_action" : "SEED",
@@ -8917,7 +8925,7 @@
     },
     {   "type" : "AMMO",
         "id" : "fungal_seeds",
-        "category": "other",
+        "category": "seeds",
         "price" : 100,
         "name" : "fungal seed",
         "symbol" : ".",
@@ -10415,7 +10423,7 @@
     },{
         "type" : "COMESTIBLE",
         "id" : "seed_cucumber",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "cucumber seed",
         "name_plural" : "cucumber seeds",
@@ -10473,7 +10481,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "seed_celery",
-        "category": "other",
+        "category": "seeds",
         "price" : 50,
         "name" : "celery seed",
         "name_plural" : "celery seeds",
@@ -11407,7 +11415,7 @@
     },{
         "type" : "COMESTIBLE",
         "id" : "seed_thyme",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "thyme seeds",
         "name_plural" : "thyme seeds",
@@ -11428,7 +11436,7 @@
     },{
         "type" : "COMESTIBLE",
         "id" : "seed_canola",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "canola seeds",
         "name_plural" : "canola seeds",
@@ -11450,7 +11458,7 @@
     },{
         "type" : "COMESTIBLE",
         "id" : "seed_pumpkin",
-        "category": "other",
+        "category": "seeds",
         "name" : "pumpkin seed",
         "weight" : 1,
         "color" : "green",
@@ -11476,7 +11484,7 @@
     },{
         "type" : "COMESTIBLE",
         "id" : "seed_sunflower",
-        "category": "other",
+        "category": "seeds",
         "name" : "sunflower seed",
         "weight" : 1,
         "color" : "green",
@@ -11537,7 +11545,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_dogbane",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "dogbane seeds",
         "name_plural" : "dogbane seeds",
@@ -11576,7 +11584,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_bee_balm",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "bee balm seeds",
         "name_plural" : "bee balm seeds",
@@ -11639,7 +11647,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_mugwort",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "mugwort seeds",
         "name_plural" : "mugwort seeds",
@@ -11660,7 +11668,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_buckwheat",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "buckwheat seeds",
         "name_plural" : "buckwheat seeds",
@@ -11682,7 +11690,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_wild_herbs",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "wild herb seeds",
         "name_plural" : "wild herb seeds",
@@ -11703,7 +11711,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_veggy_wild",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "wild vegetable stems",
         "name_plural" : "wild vegetable stems",
@@ -11725,7 +11733,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_raw_dandelion",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "dandelion seeds",
         "name_plural" : "dandelion seeds",
@@ -11746,7 +11754,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_rhubarb",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "rhubarb stems",
         "name_plural" : "rhubarb stems",
@@ -11768,7 +11776,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_mushroom",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "mushroom spores",
         "name_plural" : "mushroom spores",
@@ -11789,7 +11797,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_mushroom_morel",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "morel mushroom spores",
         "name_plural" : "morel mushroom spores",
@@ -11810,7 +11818,7 @@
 },{
         "type" : "COMESTIBLE",
         "id" : "seed_mushroom_magic",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "mushroom spores",
         "name_plural" : "mushroom spores",
@@ -11832,7 +11840,7 @@
     },{
         "type" : "COMESTIBLE",
         "id" : "seed_mushroom_poison",
-        "category": "other",
+        "category": "seeds",
         "price" : 120,
         "name" : "mushroom spores",
         "name_plural" : "mushroom spores",
