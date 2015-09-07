@@ -10927,6 +10927,34 @@ void player::use(int inventory_position)
         read(inventory_position);
         return;
 
+    } else if( used->is_container() && used->contents.empty() ) {
+        const auto filter = [used]( const item &i ) {
+            return i.type->default_container == used->typeId();
+        };
+        auto nc = g->inv_map_splice( filter, _("Put something into the container:"), 1 );
+        if( !nc ) {
+            return;
+        }
+        auto &new_content = *nc;
+        if( new_content.type->default_container != used->typeId() ) {
+            add_msg( _("The %s does not belong into a %s."), new_content.type_name().c_str(),
+                     used->type_name().c_str() );
+            return;
+        }
+
+        const long def_charges = new_content.type->charges_default();
+        used->contents.push_back( new_content );
+        if( new_content.count_by_charges() && new_content.charges > def_charges ) {
+            new_content.charges -= def_charges;
+            used->contents.back().charges = def_charges;
+        } else {
+            nc.remove_item();
+        }
+
+        inv.unsort();
+        inv.restack();
+        return;
+
     } else if (used->is_gun()) {
         auto mods = used->gunmods();
 
