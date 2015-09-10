@@ -173,6 +173,7 @@
         "material": "plastic",
         "weight": 45,
         "volume": 1,
+        "category": "spare_parts",
         "to_hit": -2,
         "flags" : ["UNRECOVERABLE"]
     },
@@ -187,6 +188,7 @@
         "material": "bone",
         "weight": 45,
         "volume": 1,
+        "category": "spare_parts",
         "to_hit": -2,
         "flags" : ["UNRECOVERABLE"]
     },
@@ -277,6 +279,7 @@
     {
         "type":"GENERIC",
         "id": "chitin_piece",
+        "category": "spare_parts",
         "symbol": ",",
         "color": "light_gray",
         "name": "chunk of chitin",
@@ -501,6 +504,7 @@
     {
         "type":"AMMO",
         "id": "concrete",
+        "category": "other",
         "symbol": "%",
         "color": "light_gray",
         "name": "concrete",

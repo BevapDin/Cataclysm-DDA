@@ -165,7 +165,7 @@
     },
     {
         "type": "AMMO",
-        "category": "other",
+        "category": "spare_parts",
         "id": "rolling_paper",
         "symbol": ",",
         "color": "white",

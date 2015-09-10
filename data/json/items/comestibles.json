@@ -2260,7 +2260,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "meat_tainted",
-        "category": "other",
+        "category": "chems",
         "name" : "chunk of tainted meat",
         "name_plural" : "chunks of tainted meat",
         "weight" : 238,
@@ -2282,7 +2282,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "bone_tainted",
-        "category": "other",
+        "category": "chems",
         "name" : "tainted bone",
         "weight" : 212,
         "color" : "light_gray",
@@ -2321,7 +2321,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "fat_tainted",
-        "category": "other",
+        "category": "chems",
         "name" : "tainted fat",
         "weight" : 192,
         "color" : "yellow",
@@ -2343,7 +2343,7 @@
         "type" : "COMESTIBLE",
         "id" : "tallow_tainted",
         "name" : "tainted tallow",
-        "category": "other",
+        "category": "chems",
         "weight" : 128,
         "color" : "light_gray",
         "use_action" : "POISON",
@@ -2363,7 +2363,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "slime_scrap",
-        "category": "other",
+        "category": "chems",
         "name" : "blob glob",
         "weight" : 238,
         "color" : "dkgray",
@@ -2381,7 +2381,7 @@
     {
         "type" : "COMESTIBLE",
         "id" : "veggy_tainted",
-        "category": "other",
+        "category": "chems",
         "name" : "tainted veggie",
         "weight" : 238,
         "color" : "green",

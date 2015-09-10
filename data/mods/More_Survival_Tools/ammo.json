@@ -2,7 +2,7 @@
     {
         "type" : "AMMO",
         "id" : "tinder",
-        "category" : "other",
+        "category" : "spare_parts",
         "price" : 0,
         "name" : "tinder",
         "name_plural" : "tinder",
