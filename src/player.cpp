@@ -7922,10 +7922,12 @@ void player::suffer()
             auto_use = false;
         }
 
+        bool was_sleeping = false;
         if( has_effect( effect_sleep ) ) {
             add_msg_if_player(_("You have an asthma attack!"));
             wake_up();
             auto_use = false;
+            was_sleeping = true;
         } else {
             add_msg_if_player( m_bad, _( "You have an asthma attack!" ) );
         }
@@ -7946,6 +7948,11 @@ void player::suffer()
             if (!is_npc()) {
                 g->cancel_activity_query(_("You have an asthma attack!"));
             }
+        }
+
+        if( was_sleeping && get_fatigue() > TIRED ) {
+            add_msg( m_info, _("You go back to sleep.") );
+            try_to_sleep();
         }
     }
 
