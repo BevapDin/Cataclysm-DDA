@@ -163,3 +163,5 @@ game.register_iuse("CUSTOM_SLEEP", custom_sleep)
 game.register_iuse("CUSTOM_FLUMED", custom_flumed)
 game.register_iuse("CUSTOM_IODINE", custom_iodine)
 game.register_iuse("CUSTOM_IUSE_TEST", custom_iuse_test)
+
+game.dofile("my-functions.lua")
