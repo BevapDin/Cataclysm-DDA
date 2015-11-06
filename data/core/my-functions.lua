@@ -8,7 +8,7 @@ check_empty = function(p)
 end
 
 copymap = function(p0, dx, dy)
---    game.add_msg("copymap("..tostring(p0.x)..","..tostring(p0.y)..","..tostring(p0.z)..","..tostring(dx)..","..tostring(dy)..")")
+    game.add_msg("copymap("..tostring(p0.x)..","..tostring(p0.y)..","..tostring(p0.z)..","..tostring(dx)..","..tostring(dy)..")")
     local t = {}
     local f = {}
     for x = p0.x,p0.x + dx - 1 do
@@ -28,7 +28,7 @@ pastemap = function(tab, p0)
     local dx = tab.dx
     local dy = tab.dy
     local i = 1
---    game.add_msg("pastemap("..tostring(p0.x)..","..tostring(p0.y)..","..tostring(p0.z)..","..tostring(dx)..","..tostring(dy)..")")
+    game.add_msg("pastemap("..tostring(p0.x)..","..tostring(p0.y)..","..tostring(p0.z)..","..tostring(dx)..","..tostring(dy)..")")
     for x = p0.x,p0.x + dx - 1 do
         for y = p0.y,p0.y + dx - 1 do
             p = tripoint(x, y, p0.z)
