@@ -11,7 +11,22 @@
 struct iteminfo;
 enum direction : unsigned;
 
-//      LINE_NESW  - X for on, O for off
+/**
+ * @name Unicode line drawing codes
+ *
+ * Unicode characters to draw different line segments in curses. Each segments goes from
+ * the center of a console cell horizontal or vertical towards the cell edge.
+ * The name of the constants (`LINE_NESW` NESW stands for the 4 cardinal directions)
+ * indicates which segment is drawn:
+ * 'X' indicates the line is drawn at that cardinal direction,
+ * 'O' indicates no line is drawn.
+ * Example: `LINE_XXOO` draws lines from the center to the north and the east, which
+ * can be used as a lower left corner of a rectangle.
+ *
+ * The constants here can be used to draw lines in the console. Use them as argument
+ * to the @ref waddch curses functions (and similar ones that expect a single character).
+ */
+/*@{*/
 #define LINE_XOXO 4194424 // '|'   Vertical line. ncurses: ACS_VLINE; Unicode: U+2502
 #define LINE_OXOX 4194417 // '-'   Horizontal line. ncurses: ACS_HLINE; Unicode: U+2500
 #define LINE_XXOO 4194413 // '|_'  Lower left corner. ncurses: ACS_LLCORNER; Unicode: U+2514
@@ -23,7 +38,17 @@ enum direction : unsigned;
 #define LINE_XOXX 4194421 // '-|'  Tee pointing left. ncurses: ACS_RTEE; Unicode: U+2524
 #define LINE_OXXX 4194423 // '^|^' Tee pointing down. ncurses: ACS_TTEE; Unicode: U+252C
 #define LINE_XXXX 4194414 // '-|-' Large Plus or cross over. ncurses: ACS_PLUS; Unicode: U+253C
-
+/*@}*/
+/**
+ * @name curses emulation line drawing
+ *
+ * The constants here have the same meaning as above, but they fit into a single `char`.
+ * They are used by the curses emulation (cursesport.cpp) instead of the above
+ * (which do not fit into a `char`). The emulation translates the above values
+ * (which you should use throughout the code) into the below only to store them into
+ * their internal buffers. Again: use the constants above.
+ */
+/*@{*/
 #define LINE_XOXO_C 0xa0
 #define LINE_OXOX_C 0xa1
 #define LINE_XXOO_C 0xa2
@@ -35,6 +60,7 @@ enum direction : unsigned;
 #define LINE_XOXX_C 0xa8
 #define LINE_OXXX_C 0xa9
 #define LINE_XXXX_C 0xaa
+/*@}*/
 
 // a consistent border colour
 #define BORDER_COLOR c_ltgray
