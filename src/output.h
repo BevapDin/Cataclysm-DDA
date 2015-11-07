@@ -117,8 +117,14 @@ void print_colored_text( WINDOW *w, int y, int x, nc_color &cur_color, nc_color 
  * This allows the caller to restrict the begin_line number on future calls / when modified by the user.
  */
 int print_scrollable( WINDOW *w, int begin_line, const std::string &text, nc_color base_color, const std::string &scroll_msg );
-
-std::vector<std::string> foldstring (std::string str, int width);
+/**
+ * Split the input text into separate lines and wrap long lines. Each resulting line is at most
+ * `width` console cells long.
+ * The functions handles @ref color_tags.
+ * @return A vector of lines, it may contain empty strings. Each entry is at most `width`
+ * console cells width.
+ */
+std::vector<std::string> foldstring( std::string str, int width );
 /**
  * Format, fold and print text in the given window. The function handles @ref color_tags and
  * uses them while printing. It expects a printf-like format string and matching
