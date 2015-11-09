@@ -281,11 +281,32 @@ std::string string_input_win (WINDOW *w, std::string input, int max_length, int 
                               int starty, int endx, bool loop, long &key, int &pos,
                               std::string identifier = "", int w_x = -1, int w_y = -1,
                               bool dorefresh = true, bool only_digits = false);
-
-// for the next two functions, if cancelable is true, esc returns the last option
+/**
+ * @name uimenu wrapper
+ *
+ * The functions here invoke the @ref uimenu to display a set of options in the form of a
+ * menu to the player.
+ *
+ * @param mes The menu text (see @ref uimenu::text).
+ * @param cancelable If `true`, the menu can be canceled (see @ref uimenu::return_invalid).
+ * If `false`, the uimenu enforces a valid selection, the menu can only be left by selecting
+ * an entry of it.
+ * @param options A list of menu entries to display. Must not be empty!
+ * Instead of the vector, one can supply a list of c-strings as final parameters to @ref menu.
+ * The list must terminate with a `nullptr`!
+ * \code
+ *     menu( false, "...", "opt 1", "opt 2", "opt 3", nullptr );
+ * \endcode
+ * @param hotkeys_override Override the default list of hotkeys that are used by the uimenu to
+ * assign hotkeys to the menu entries. See @ref uimenu::hotkeys.
+ * @return The number (not index) of the selected entry. If the first entry was selected, it
+ * will return 1 and so on. Returns 0 if the menu was canceled.
+ */
+/*@{*/
 int  menu_vec(bool cancelable, const char *mes, const std::vector<std::string> options);
 int  menu_vec(bool cancelable, const char *mes, const std::vector<std::string> &options, const std::string &hotkeys_override);
 int  menu(bool cancelable, const char *mes, ...);
+/*@}*/
 
 /**
  * @name Popup windows
