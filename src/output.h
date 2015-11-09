@@ -179,6 +179,20 @@ void multipage(WINDOW *w, std::vector<std::string> text, std::string caption = "
 std::string name_and_value(std::string name, int value, int field_width);
 std::string name_and_value(std::string name, std::string value, int field_width);
 
+/**
+ * @name curses wrapper functions with color
+ *
+ * The functions here provide a convenient way to print text in a specific color
+ * in one function call. The plain curses interface would require one to do this with
+ * three functions calls: one to set up the color, one to print the text and another to
+ * reset the color. The functions here do all three steps at once.
+ *
+ * For specific documentation, please refer to the curses documentation.
+ * Function that expect `const char *, ...` format the given text using the additional
+ * arguments (see @ref string_format).
+ * Functions that expect a `std::string` or a single character do no further formatting.
+ */
+/*@{*/
 void mvputch(int y, int x, nc_color FG, const std::string &ch);
 void wputch(WINDOW *w, nc_color FG, long ch);
 // Using long ch is deprecated, use an UTF-8 encoded string instead
@@ -196,6 +210,7 @@ void mvprintz(int y, int x, nc_color FG, const char *mes, ...);
 void mvwprintz(WINDOW *w, int y, int x, nc_color FG, const char *mes, ...);
 void printz(nc_color FG, const char *mes, ...);
 void wprintz(WINDOW *w, nc_color FG, const char *mes, ...);
+/*@}*/
 
 void draw_custom_border(WINDOW *w, chtype ls = 1, chtype rs = 1, chtype ts = 1, chtype bs = 1, chtype tl = 1, chtype tr = 1, chtype bl = 1, chtype br = 1, nc_color FG = BORDER_COLOR);
 void draw_border(WINDOW *w, nc_color FG = BORDER_COLOR);
