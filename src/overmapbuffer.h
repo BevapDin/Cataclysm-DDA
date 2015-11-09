@@ -165,7 +165,7 @@ public:
      * Only npcs on the given z-level are considered.
      * Uses square_dist for distance calculation.
      * x,y are submap coordinates.
-     * @radius Maximal distance of npc from (x,y). If the npc
+     * @param radius Maximal distance of npc from (x,y). If the npc
      * is at most this far away from (x,y) it will be returned.
      * A radius of 0 returns only those npcs that are on the
      * specifc submap.

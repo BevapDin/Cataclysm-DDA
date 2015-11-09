@@ -196,7 +196,7 @@ class Creature
          * post-mitigation object.
          * Does nothing if this creature is already dead.
          * Does not call @ref check_dead_state (see there).
-         * @ref source The attacking creature, can be null.
+         * @param source The attacking creature, can be null.
          */
         virtual dealt_damage_instance deal_damage(Creature *source, body_part bp,
                 const damage_instance &d);

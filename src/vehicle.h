@@ -336,7 +336,7 @@ private:
     /**
      * Traverses the graph of connected vehicles, starting from start_veh, and continuing
      * along all vehicles connected by some kind of POWER_TRANSFER part.
-     * @param start_vehicle The vehicle to start traversing from. NB: the start_vehicle is
+     * @param start_veh The vehicle to start traversing from. NB: the start_vehicle is
      * assumed to have been already visited!
      * @param amount An amount of power to traverse with. This is passed back to the visitor,
      * and reset to the visitor's return value at each step.

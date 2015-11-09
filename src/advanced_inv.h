@@ -168,7 +168,7 @@ struct advanced_inv_listitem {
      */
     bool is_category_header() const;
     /**
-     * Whether this is an item entry (where @ref it is a valid pointer).
+     * Whether this is an item entry (where @ref items is not empty).
      */
     bool is_item_entry() const;
     /**
@@ -182,7 +182,7 @@ struct advanced_inv_listitem {
     advanced_inv_listitem();
     /**
      * Create a normal item entry.
-     * @param an_item The item pointer, stored in @ref it. Must not be null.
+     * @param an_item The item pointer, stored in @ref items. Must not be null.
      * @param index The index, stored in @ref idx.
      * @param count The stack size, stored in @ref stacks.
      * @param area The source area, stored in @ref area. Must not be AIM_ALL.
@@ -192,7 +192,7 @@ struct advanced_inv_listitem {
             aim_location area, bool from_vehicle);
     /**
      * Create a normal item entry.
-     * @param items The list of item pointers, stored in @ref it.
+     * @param items The list of item pointers, stored as @ref items.
      * @param index The index, stored in @ref idx.
      * @param area The source area, stored in @ref area. Must not be AIM_ALL.
      * @param from_vehicle Is the item from a vehicle cargo space?
@@ -301,7 +301,7 @@ class advanced_inventory
         void display();
     private:
         /**
-         * Refers to the two panels, used as index into @ref panels.
+         * Refers to the two panels, used as index into @ref panes.
          */
         enum side {
             left  = 0,
@@ -420,8 +420,8 @@ class advanced_inventory
         int remove_item(advanced_inv_listitem &sitem, int count = 1);
         /**
          * Move content of source container into destination container (destination pane = AIM_CONTAINER)
-         * @param src_container Source container
-         * @param dest_container Destination container
+         * @param src Source container
+         * @param dest Destination container
          */
         bool move_content(item &src, item &dest);
         /**

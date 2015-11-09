@@ -489,8 +489,8 @@ class Character : public Creature
             char key = ' ';
             /**
              * Time (in turns) until the mutation increase hunger/thirst/fatigue according
-             * to its cost (@ref mutation_data::cost). When those costs have been paid, this
-             * is reset to @ref mutation_data::cooldown.
+             * to its cost (@ref mutation_branch::cost). When those costs have been paid, this
+             * is reset to @ref mutation_branch::cooldown.
              */
             int charge = 0;
             /** Whether the mutation is activated. */

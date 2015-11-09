@@ -231,7 +231,7 @@ class map
     /** Determine the visible light level for a tile, based on light_at
      * for the tile, vision distance, etc
      *
-     * @param x, y The tile on this map to draw.
+     * @param p The tile on this map to draw.
      */
     lit_level apparent_light_at( const tripoint &p, const visibility_variables &cache ) const;
     visibility_type get_visibility( const lit_level ll,
@@ -1143,13 +1143,13 @@ protected:
         /**
          * Go through the list of items, update their rotten status and remove items
          * that have rotten away completely.
-         * @param pnt The point on this map where the items are, used for rot calculation.
+         * @param p The point on this map where the items are, used for rot calculation.
          */
         template <typename Container>
         void remove_rotten_items( Container &items, const tripoint &p );
         /**
          * Try to fill funnel based items here.
-         * @param pnt The location in this map where to fill funnels.
+         * @param p The location in this map where to fill funnels.
          */
         void fill_funnels( const tripoint &p );
         /**

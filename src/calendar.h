@@ -120,7 +120,7 @@ class calendar
         }
 
         /**
-         * Predicate to handle rate-limiting, returns true once every @event_frequency turns.
+         * Predicate to handle rate-limiting, returns true once every @p event_frequency turns.
          */
         static bool once_every(int event_frequency);
 

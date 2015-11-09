@@ -390,7 +390,7 @@ struct islot_bionic {
      */
     int difficulty = 0;
     /**
-     * Id of the bionic, see @ref bionics.
+     * Id of the bionic, see @ref bionic_info.
      */
     std::string bionic_id;
 };

@@ -1950,7 +1950,7 @@ bool vehicle::can_unmount(int const p) const
  * if a part can be legally removed.
  * @param to The part to reach.
  * @param from The part to start the search from.
- * @param excluded The part that is being removed and, therefore, should not
+ * @param excluded_part The part that is being removed and, therefore, should not
  *        be included in the path.
  * @return true if a path exists without the excluded part, false otherwise.
  */
@@ -2620,7 +2620,7 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
 /**
  * Prints a list of all parts to the screen inside of a boxed window, possibly
  * highlighting a selected one.
- * @param w The window to draw in.
+ * @param win The window to draw in.
  * @param y1 The y-coordinate to start drawing at.
  * @param width The width of the window.
  * @param p The index of the part being examined.
@@ -5343,8 +5343,7 @@ void vehicle::damage_all( int dmg1, int dmg2, damage_type type, const point &imp
  * vehicle itself in the opposite direction. The end result is that the vehicle
  * appears to have not moved. Useful for re-zeroing a vehicle to ensure that a
  * (0, 0) part is always present.
- * @param dx How much to shift on the x-axis.
- * @param dy How much to shift on the y-axis.
+ * @param delta How much to shift on the x,y-axis.
  */
 void vehicle::shift_parts( const point delta )
 {

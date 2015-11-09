@@ -370,9 +370,9 @@ class monster : public Creature, public JsonSerializer, public JsonDeserializer
         std::map<std::string, int> ammo;
 
         /**
-         * Convert this monster into an item (see @ref mtype::revet_to_itype).
+         * Convert this monster into an item (see @ref mtype::revert_to_itype).
          * Only useful for robots and the like, the monster must have at least
-         * a non-empty item id as revet_to_itype.
+         * a non-empty item id as revert_to_itype.
          */
         item to_item() const;
         /**
