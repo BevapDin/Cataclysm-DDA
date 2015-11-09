@@ -361,14 +361,15 @@ public:
     void process_mongroups();
     void move_hordes();
 
-    // drawing relevant data, e.g. what to draw
+    /** What to draw with @ref draw_overmap. */
     struct draw_data_t {
-        // draw monster groups on the overmap
+        /** draw monster groups on the overmap. */
         bool debug_mongroup = false;
-        // draw weather, e.g. clouds etc.
+        /** draw weather, e.g. clouds etc. */
         bool debug_weather = false;
-        // draw zone location
+        /** draw zone location */
         tripoint select = tripoint(-1, -1, -1);
+        /** index of zone to draw, see @ref zone_manager */
         int iZoneIndex = -1;
     };
     static tripoint draw_overmap(const tripoint& center, const draw_data_t &data);
@@ -379,7 +380,6 @@ public:
    * of the view. The z-component is used to determine the z-level.
    * @param orig The global overmap terrain coordinates of the player.
    * It will be marked specially.
-   * @param debug_monstergroups Displays monster groups on the overmap.
    */
   static void draw(WINDOW *w, WINDOW *wbar, const tripoint &center,
             const tripoint &orig, bool blink, bool showExplored,
