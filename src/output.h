@@ -65,7 +65,20 @@ enum direction : unsigned;
 // a consistent border colour
 #define BORDER_COLOR c_ltgray
 
-// Display data
+/**
+ * @name Dimensions and positions of windows
+ *
+ * See @ref game::init_ui for their setup.
+ *
+ * TERMY and TERMX are the actual size of the console (windows created
+ * via @ref newwin not be larger than this).
+ *
+ * FULL_SCREEN_HEIGHT and FULL_SCREEN_WIDTH define the required minimal
+ * console dimensions. The game won't start on smaller consoles. They
+ * can be used for windows that require a fixed size and can not
+ * adapt their layout to larger sizes
+ */
+/*@{*/
 extern int TERMX; // width available for display
 extern int TERMY; // height available for display
 extern int POSX; // X position of '@' inside terrain window
@@ -80,6 +93,7 @@ extern int FULL_SCREEN_WIDTH; // width of "full screen" popups
 extern int FULL_SCREEN_HEIGHT; // height of "full screen" popups
 extern int OVERMAP_WINDOW_WIDTH; // width of overmap window
 extern int OVERMAP_WINDOW_HEIGHT; // height of overmap window
+/*@}*/
 
 /**
  * @name WINDOW pointer wrappers
