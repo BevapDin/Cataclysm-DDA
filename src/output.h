@@ -265,7 +265,21 @@ std::vector<std::string> split_by_color(const std::string &s);
 std::string remove_color_tags(const std::string &s);
 /*@}*/
 
+/**
+ * Requests simple yes/no choice from the player. There is no default and no way to cancel
+ * the query.
+ * @param mes The message to show. It is formatted via @ref string_format (including any
+ * further arguments). It should contain a yes/no question.
+ * @return `true` if the player has chosen "yes", `false` otherwise.
+ */
 bool query_yn(const char *mes, ...);
+/**
+ * Requests the player to input a number (integer).
+ * @param mes The message to show. It is formatted via @ref string_format (including any
+ * further arguments).
+ * @return The entered number. 0 is returned upon invalid input (including canceling the query),
+ * there is currently no way distinguish this from an explicitly entered 0.
+ */
 int  query_int(const char *mes, ...);
 
 /**
