@@ -740,11 +740,6 @@ int iuse::alcohol_strong(player *p, item *it, bool, const tripoint& )
 /**
  * Entry point for intentional bodily intake of smoke via paper wrapped one
  * time use items: cigars, cigarettes, etc.
- *
- * @param p
- * @param it the item to be smoked.
- * @param
- * @return
  */
 int iuse::smoking(player *p, item *it, bool, const tripoint& )
 {
