@@ -109,28 +109,33 @@ typedef std::unique_ptr<WINDOW, delwin_functor> WINDOW_PTR;
  * The messages are printed in different colors based on the message type (e.g. red
  * for `m_bad` and green for `m_good`).
  *
- * `m_debug` is special: messages of that type are *only* printed if @ref debug_mode
- * is `true`. They are otherwise completely ignored.
- *
  * The two functions return the color that is used to print a message of the given type.
  */
 /*@{*/
 enum game_message_type : int {
-    m_good,    /* something good happened to the player character, eg. health boost, increasing in skill */
-    m_bad,      /* something bad happened to the player character, eg. damage, decreasing in skill */
-    m_mixed,   /* something happened to the player character which is mixed (has good and bad parts),
-                  eg. gaining a mutation with mixed effect*/
-    m_warning, /* warns the player about a danger. eg. enemy appeared, an alarm sounds, noise heard. */
-    m_info,    /* informs the player about something, eg. on examination, seeing an item,
-                  about how to use a certain function, etc. */
-    m_neutral,  /* neutral or indifferent events which aren’t informational or nothing really happened eg.
-                  a miss, a non-critical failure. May also effect for good or bad effects which are
-                  just very slight to be notable. This is the default message type. */
-
-    m_debug, /* only shown when debug_mode is true */
-    /* custom SCT colors */
+    /** something good happened to the player character, eg. health boost, increasing in skill */
+    m_good,
+    /** something bad happened to the player character, eg. damage, decreasing in skill */
+    m_bad,
+    /** something happened to the player character which is mixed (has good and bad parts),
+      * eg. gaining a mutation with mixed effect */
+    m_mixed,
+    /** warns the player about a danger. eg. enemy appeared, an alarm sounds, noise heard. */
+    m_warning,
+    /** informs the player about something, eg. on examination, seeing an item,
+      * about how to use a certain function, etc. */
+    m_info,
+    /** neutral or indifferent events which aren’t informational or nothing really happened eg.
+      * a miss, a non-critical failure. May also effect for good or bad effects which are
+      * just very slight to be notable. This is the default message type. */
+    m_neutral,
+    /** Only shown when @ref debug_mode is `true`. */
+    m_debug,
+    /** custom SCT color */
     m_headshot,
+    /** custom SCT color */
     m_critical,
+    /** custom SCT color */
     m_grazing
 };
 
