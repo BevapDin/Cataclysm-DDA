@@ -132,7 +132,6 @@ class Creature
          * chooses a target. This is for creatures that are friendly towards
          * the player and therefor choose a target that is hostile
          * to the player.
-         * @param pos Position of the fake-player
          * @param range The maximal range to look for monsters, anything
          * outside of that range is ignored.
          * @param boo_hoo The number of targets that have been skipped

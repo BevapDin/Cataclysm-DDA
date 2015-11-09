@@ -655,9 +655,6 @@ void veh_interact::move_fuel_cursor(int delta)
 
 /**
  * Handles installing a new part.
- * @param reason INVALID_TARGET if the square can't have anything installed,
- *               LACK_TOOLS if the player is lacking tools,
- *               LOW_MORALE if the player's morale is too low.
  */
 void veh_interact::do_install()
 {
@@ -866,9 +863,6 @@ bool veh_interact::move_in_list(int &pos, const std::string &action, const int s
 
 /**
  * Handles repairing a vehicle part.
- * @param reason INVALID_TARGET if there's no damaged parts in the selected square,
- *               LACK_TOOLS if the player is lacking tools,
- *               LOW_MORALE if the player's morale is too low.
  */
 void veh_interact::do_repair()
 {
@@ -962,8 +956,6 @@ void veh_interact::do_repair()
 
 /**
  * Handles refilling a vehicle's fuel tank.
- * @param reason INVALID_TARGET if there's no fuel tank in the spot,
- *               CANT_REFILL All tanks are broken or player has nothing to fill the tank with.
  */
 void veh_interact::do_refill()
 {
@@ -1104,11 +1096,6 @@ bool veh_interact::can_remove_part(int veh_part_index, int mech_skill, int msg_w
 
 /**
  * Handles removing a part from the vehicle.
- * @param reason INVALID_TARGET if there are no parts to remove,
- *               LACK_TOOLS if the player is lacking tools,
- *               NOT_FREE if there's something attached that needs to be removed first,
- *               LACK_SKILL if the player's mechanics skill isn't high enough,
- *               LOW_MORALE if the player's morale is too low.
  */
 void veh_interact::do_remove()
 {
@@ -1178,8 +1165,6 @@ void veh_interact::do_remove()
 
 /**
  * Handles siphoning gas.
- * @param reason INVALID_TARGET if the vehicle has no gas,
- *               NO_TOOLS if the player has no hose.
  */
 void veh_interact::do_siphon()
 {
@@ -1210,8 +1195,6 @@ void veh_interact::do_siphon()
 
 /**
  * Handles changing a tire.
- * @param reason INVALID_TARGET if there's no wheel in the selected square,
- *               LACK_TOOLS if the player is missing a tool.
  */
 void veh_interact::do_tirechange()
 {
@@ -1271,7 +1254,6 @@ void veh_interact::do_tirechange()
 
 /**
  * Handles renaming a vehicle.
- * @param reason Unused.
  */
 void veh_interact::do_rename()
 {
