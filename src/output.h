@@ -100,6 +100,21 @@ struct delwin_functor {
  */
 typedef std::unique_ptr<WINDOW, delwin_functor> WINDOW_PTR;
 
+/**
+ * @defgroup game_message_type Message types
+ *
+ * Abstract type of the messages handled by @ref Messages. Use one of those types
+ * as first argument to @ref add_msg or the add_msg* functions in Creature.
+ *
+ * The messages are printed in different colors based on the message type (e.g. red
+ * for `m_bad` and green for `m_good`).
+ *
+ * `m_debug` is special: messages of that type are *only* printed if @ref debug_mode
+ * is `true`. They are otherwise completely ignored.
+ *
+ * The two functions return the color that is used to print a message of the given type.
+ */
+/*@{*/
 enum game_message_type : int {
     m_good,    /* something good happened to the player character, eg. health boost, increasing in skill */
     m_bad,      /* something bad happened to the player character, eg. damage, decreasing in skill */
@@ -121,6 +136,7 @@ enum game_message_type : int {
 
 nc_color msgtype_to_color(const game_message_type type, const bool bOldMsg = false);
 int msgtype_to_tilecolor(const game_message_type type, const bool bOldMsg = false);
+/*@}*/
 
 /**
  * Print text with embedded @ref color_tags, x, y are in curses system.
