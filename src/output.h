@@ -247,28 +247,25 @@ int  menu(bool cancelable, const char *mes, ...);
  * The functions return the key (taken from @ref getch) that was entered by the user.
  *
  * The message is a printf-like string. It may contain color tags, which are used while printing.
- *
- * - PF_GET_KEY (ignored when combined with PF_NO_WAIT) cancels the popup on *any* user input.
- *   Without the flag the popup is only canceled when the user enters new-line, space and escape.
- *   This flag is passed by @ref popup_getkey.
- * - PF_NO_WAIT displays the popup, but does not wait for the user input. The popup window is
- *   immediately destroyed (but will be visible until another window is redrawn over it).
- *   The function always returns 0 upon this flag, no call to `getch` is done at all.
- *   This flag is passed by @ref popup_nowait.
- * - PF_ON_TOP makes the window appear on the top of the screen (at the upper most row). Without
- *   this flag, the popup is centered on the screen.
- *   The flag is passed by @ref popup_top.
- * - PF_FULLSCREEN makes the popup window as big as the whole screen.
- *   This flag is passed by @ref full_screen_popup.
- * - PF_NONE is a placeholder for none of the above flags.
- *
  */
 /*@{*/
 typedef enum {
     PF_NONE        = 0,
+    /** Cancels the popup on *any* user input (ignored when combined with @ref PF_NO_WAIT).
+     * Without the flag the popup is only canceled when the user enters new-line, space and escape.
+     * This flag is passed by @ref popup_getkey. */
     PF_GET_KEY     = 1 << 0,
+    /** Displays the popup, but does not wait for the user input. The popup window is
+     * immediately destroyed (but will be visible until another window is redrawn over it).
+     * The function always returns 0 upon this flag, no call to @ref getch is done at all.
+     * This flag is passed by @ref popup_nowait. */
     PF_NO_WAIT     = 1 << 1,
+    /** Makes the window appear on the top of the screen (at the upper most row). Without
+     * this flag, the popup is centered on the screen.
+     * The flag is passed by @ref popup_top. */
     PF_ON_TOP      = 1 << 2,
+    /** Makes the popup window as big as the whole screen.
+     * This flag is passed by @ref full_screen_popup. */
     PF_FULLSCREEN  = 1 << 3,
     PF_NO_WAIT_ON_TOP = PF_NO_WAIT | PF_ON_TOP,
 } PopupFlags;
