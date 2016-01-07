@@ -28,7 +28,6 @@
 #include "field.h"
 #include "sounds.h"
 
-#define SGN(a) (((a)<0) ? -1 : 1)
 #define SQR(a) ((a)*(a))
 
 // Limit the number of iterations for next upgrade_time calculations.
