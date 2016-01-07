@@ -28,8 +28,6 @@
 #include "field.h"
 #include "sounds.h"
 
-#define SQR(a) ((a)*(a))
-
 // Limit the number of iterations for next upgrade_time calculations.
 // This also sets the percentage of monsters that will never upgrade.
 // The rough formula is 2^(-x), e.g. for x = 5 it's 0.03125 (~ 3%).
