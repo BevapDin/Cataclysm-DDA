@@ -132,11 +132,6 @@ inline std::stringstream & stream_line(std::ifstream & f, std::stringstream & s,
     return s;
 }
 
-/*
- * Convenience macro for the above
- */
-#define parseline() stream_line(fin,linein,linebuf)
-
 void chkversion(std::istream & fin) {
    if ( fin.peek() == '#' ) {
        std::string vline;
