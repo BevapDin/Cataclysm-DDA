@@ -4,9 +4,21 @@
 #include <string>
 
 // Convert minutes, hours, days to turns
-#define MINUTES(x) ((x) * 10)
-#define HOURS(x)   ((x) * 600)
-#define DAYS(x)    ((x) * 14400)
+template<typename T>
+constexpr int MINUTES( const T &minutes )
+{
+    return minutes * 10;
+}
+template<typename T>
+constexpr int HOURS( const T &hours )
+{
+    return hours * 10 * 60;
+}
+template<typename T>
+constexpr int DAYS( const T &days )
+{
+    return days * 10 * 60 * 24;
+}
 
 // How much light the moon provides per quater
 #define MOONLIGHT_PER_QUATER 2.25
