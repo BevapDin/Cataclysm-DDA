@@ -20,7 +20,11 @@
  * @{
  */
 
-#define PLAYER_OUTSIDE (g->m.is_outside(g->u.posx(), g->u.posy()) && g->get_levz() >= 0)
+bool is_player_outside()
+{
+    return g->m.is_outside( g->u.posx(), g->u.posy() ) && g->get_levz() >= 0;
+}
+
 #define THUNDER_CHANCE 50
 #define LIGHTNING_CHANCE 600
 
@@ -30,7 +34,7 @@
  */
 void weather_effect::glare()
 {
-    if (PLAYER_OUTSIDE && g->is_in_sunlight(g->u.pos()) &&
+    if (is_player_outside() && g->is_in_sunlight(g->u.pos()) &&
         !g->u.worn_with_flag("SUN_GLASSES") && !g->u.has_bionic("bio_sunglasses")) {
         if(!g->u.has_effect("glare")) {
             if (g->u.has_trait("CEPH_VISION")) {
@@ -314,7 +318,7 @@ void generic_wet(bool acid)
 {
     if ((!g->u.worn_with_flag("RAINPROOF") || one_in(100)) &&
         (!g->u.weapon.has_flag("RAIN_PROTECT") || one_in(20)) && !g->u.has_trait("FEATHERS") &&
-        (g->u.warmth(bp_torso) * 4 / 5 + g->u.warmth(bp_head) / 5) < 30 && PLAYER_OUTSIDE &&
+        (g->u.warmth(bp_torso) * 4 / 5 + g->u.warmth(bp_head) / 5) < 30 && is_player_outside() &&
         one_in(2)) {
         if (g->u.weapon.has_flag("RAIN_PROTECT")) {
             // Umbrellas tend to protect one's head and torso pretty well
@@ -342,7 +346,7 @@ void generic_very_wet(bool acid)
 {
     if ((!g->u.worn_with_flag("RAINPROOF") || one_in(50)) &&
         (!g->u.weapon.has_flag("RAIN_PROTECT") || one_in(10)) && !g->u.has_trait("FEATHERS") &&
-        (g->u.warmth(bp_torso) * 4 / 5 + g->u.warmth(bp_head) / 5) < 60 && PLAYER_OUTSIDE) {
+        (g->u.warmth(bp_torso) * 4 / 5 + g->u.warmth(bp_head) / 5) < 60 && is_player_outside()) {
         if (g->u.weapon.has_flag("RAIN_PROTECT")) {
             // Umbrellas tend to protect one's head and torso pretty well
             g->u.drench(60 - ((g->u.warmth(bp_leg_l) + g->u.warmth(bp_leg_r)) * 2 / 5 +
@@ -431,7 +435,7 @@ void weather_effect::lightning()
 void weather_effect::light_acid()
 {
     generic_wet(true);
-    if( calendar::once_every(MINUTES(1)) && PLAYER_OUTSIDE ) {
+    if( calendar::once_every(MINUTES(1)) && is_player_outside() ) {
         if (g->u.weapon.has_flag("RAIN_PROTECT") && !one_in(3)) {
             add_msg(_("Your %s protects you from the acidic drizzle."), g->u.weapon.tname().c_str());
         } else {
@@ -458,7 +462,7 @@ void weather_effect::light_acid()
  */
 void weather_effect::acid()
 {
-    if( calendar::once_every(2) && PLAYER_OUTSIDE ) {
+    if( calendar::once_every(2) && is_player_outside() ) {
         if (g->u.weapon.has_flag("RAIN_PROTECT") && one_in(4)) {
             add_msg(_("Your umbrella protects you from the acid rain."));
         } else {
