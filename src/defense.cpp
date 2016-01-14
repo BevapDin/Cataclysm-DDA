@@ -35,7 +35,6 @@ const skill_id skill_barter( "barter" );
 
 std::string caravan_category_name(caravan_category cat);
 std::vector<itype_id> caravan_items(caravan_category cat);
-std::set<m_flag> monflags_to_add;
 
 int caravan_price(player &u, int price);
 
