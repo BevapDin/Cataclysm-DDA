@@ -121,17 +121,6 @@ void game::serialize(std::ofstream & fout) {
         json.end_object();
 }
 
-/*
- * Properly reuse a stringstream object for line by line parsing
- */
-inline std::stringstream & stream_line(std::ifstream & f, std::stringstream & s, std::string & buf) {
-    s.clear();
-    s.str("");
-    getline(f, buf);
-    s.str(buf);
-    return s;
-}
-
 void chkversion(std::istream & fin) {
    if ( fin.peek() == '#' ) {
        std::string vline;
