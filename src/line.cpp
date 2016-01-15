@@ -5,7 +5,11 @@
 
 #include "output.h"
 
-#define SGN(a) (((a)<0) ? -1 : 1)
+template<typename T>
+constexpr int SGN( const T &a )
+{
+    return a < T( 0 ) ? -1 : +1;
+}
 
 void bresenham( const int x1, const int y1, const int x2, const int y2, int t,
                 const std::function<bool(const point &)> &interact )
