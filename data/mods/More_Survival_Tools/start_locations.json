@@ -2,6 +2,7 @@
   {
     "type" : "start_location",
     "ident" : "forest",
+    "edit-mode": "override",
     "name" : "Middle of Nowhere",
     "target" : "forest_thick",
     "flags" : ["ALLOW_OUTSIDE"]
