@@ -72,11 +72,16 @@ void start_location::load_location( JsonObject &jsonobj )
     start_location new_location;
 
     new_location.id = string_id<start_location>( jsonobj.get_string( "ident" ) );
-    new_location._name = jsonobj.get_string("name");
-    new_location._target = jsonobj.get_string("target");
-    new_location._flags = jsonobj.get_tags("flags");
+    new_location.load( jsonobj );
 
     _locations[new_location.id] = new_location;
+}
+
+void start_location::load( JsonObject &jsonobj )
+{
+    _name = jsonobj.get_string("name");
+    _target = jsonobj.get_string("target");
+    _flags = jsonobj.get_tags("flags");
 }
 
 void start_location::reset()
