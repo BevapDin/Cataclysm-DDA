@@ -16,6 +16,7 @@
 #include "addiction.h"
 #include "pldata.h"
 #include "itype.h"
+#include "generic_factory.h"
 
 template<>
 const profession &string_id<profession>::obj() const
@@ -55,58 +56,95 @@ void profession::load_profession(JsonObject &jsobj)
     DebugLog( D_INFO, DC_ALL ) << "Loaded profession: " << prof.id.str();
 }
 
-void profession::load( JsonObject &jsobj )
+bool operator==( const addiction &a, const addiction &b )
 {
-    JsonArray jsarr;
+    // Comparing only the type on purpose, so a mod can remove an
+    // addiction by its id, ignoring the addiction level.
+    return a.type == b.type;
+}
+
+bool operator==( const profession::itypedec &a, const profession::itypedec &b )
+{
+    // Comparing only the type on purpose, so a mod can remove an
+    // item by its id, ignoring the snippet id.
+    return a.type_id == b.type_id;
+}
+
+namespace {
+class skilllevel_reader : public generic_typed_reader<std::pair<skill_id, int>> {
+    private:
+        std::pair<skill_id, int> get_next( JsonIn &jin ) const override {
+            JsonObject jo = jin.get_object();
+            return std::pair<skill_id, int>( skill_id( jo.get_string( "name" ) ), jo.get_int( "level" ) );
+        }
+};
+
+class addiction_reader : public generic_typed_reader<addiction> {
+    private:
+        addiction get_next( JsonIn &jin ) const override {
+            JsonObject jo = jin.get_object();
+            return addiction( addiction_type( jo.get_string( "type" ) ), jo.get_int( "intensity" ) );
+        }
+};
+
+class item_reader : public generic_typed_reader<profession::itypedec> {
+    private:
+        profession::itypedec get_next( JsonIn &jin ) const override {
+            // either a plain item type id string, or an array with item type id
+            // and as second entry the item description.
+            if( jin.test_array() ) {
+                JsonArray arr = jin.get_array();
+                const auto id = arr.get_string( 0 );
+                const auto snippet = _( arr.get_string( 1 ).c_str() );
+                return profession::itypedec( id, snippet );
+            } else {
+                return profession::itypedec( jin.get_string(), "" );
+            }
+        }
+};
+} // namespace
+
+void profession::load( JsonObject &jo )
+{
+    const bool was_loaded = false;
 
     //If the "name" is an object then we have to deal with gender-specific titles,
-    if(jsobj.has_object("name")) {
-        JsonObject name_obj = jsobj.get_object("name");
-        _name_male = pgettext("profession_male", name_obj.get_string("male").c_str());
-        _name_female = pgettext("profession_female", name_obj.get_string("female").c_str());
-    } else {
+    if( jo.has_object( "name" ) ) {
+        JsonObject name_obj = jo.get_object( "name" );
+        _name_male = pgettext( "profession_male", name_obj.get_string( "male" ).c_str() );
+        _name_female = pgettext( "profession_female", name_obj.get_string( "female" ).c_str() );
+    } else if( jo.has_string( "name" ) ) {
         // Same profession names for male and female in English.
         // Still need to different names in other languages.
-        const std::string name = jsobj.get_string("name");
-        _name_female = pgettext("profession_female", name.c_str());
-        _name_male = pgettext("profession_male", name.c_str());
+        const std::string name = jo.get_string( "name" );
+        _name_female = pgettext( "profession_female", name.c_str() );
+        _name_male = pgettext( "profession_male", name.c_str() );
+    } else if( !was_loaded ) {
+        jo.throw_error( "missing mandatory member \"name\"" );
     }
 
-    const std::string desc = jsobj.get_string("description").c_str();
-    _description_male = pgettext("prof_desc_male", desc.c_str());
-    _description_female = pgettext("prof_desc_female", desc.c_str());
+    if( !was_loaded || jo.has_object( "description" ) ) {
+        const std::string desc = jo.get_string( "description" );
+        _description_male = pgettext( "prof_desc_male", desc.c_str() );
+        _description_female = pgettext( "prof_desc_female", desc.c_str() );
+    }
 
-    _point_cost = jsobj.get_int("points");
+    mandatory( jo, was_loaded, "points", _point_cost );
 
-    JsonObject items_obj = jsobj.get_object("items");
-    add_items_from_jsonarray(items_obj.get_array("both"), _starting_items);
-    add_items_from_jsonarray(items_obj.get_array("male"), _starting_items_male);
-    add_items_from_jsonarray(items_obj.get_array("female"), _starting_items_female);
+    if( !was_loaded || jo.has_member( "items" ) ) {
+        JsonObject items_obj = jo.get_object( "items" );
+        optional( items_obj, was_loaded, "both", _starting_items, item_reader{} );
+        optional( items_obj, was_loaded, "male", _starting_items_male, item_reader{} );
+        optional( items_obj, was_loaded, "female", _starting_items_female, item_reader{} );
+    }
 
-    jsarr = jsobj.get_array("skills");
-    while (jsarr.has_more()) {
-        JsonObject jo = jsarr.next_object();
-        add_skill(skill_id( jo.get_string("name") ),
-                       jo.get_int("level"));
-    }
-    jsarr = jsobj.get_array("addictions");
-    while (jsarr.has_more()) {
-        JsonObject jo = jsarr.next_object();
-        add_addiction(addiction_type(jo.get_string("type")),
-                           jo.get_int("intensity"));
-    }
-    jsarr = jsobj.get_array("CBMs");
-    while (jsarr.has_more()) {
-        add_CBM(jsarr.next_string());
-    }
-    jsarr = jsobj.get_array("traits");
-    while (jsarr.has_more()) {
-        add_trait(jsarr.next_string());
-    }
-    jsarr = jsobj.get_array("flags");
-    while (jsarr.has_more()) {
-        flags.insert(jsarr.next_string());
-    }
+    optional( jo, was_loaded, "skills", _starting_skills, skilllevel_reader{} );
+    optional( jo, was_loaded, "addictions", _starting_addictions, addiction_reader{} );
+    // TODO: use string_id<bionic_type> or so
+    optional( jo, was_loaded, "CBMs", _starting_CBMs, auto_flags_reader<> {} );
+    // TODO: use string_id<mutation_branch> or so
+    optional( jo, was_loaded, "traits", _starting_traits, auto_flags_reader<> {} );
+    optional( jo, was_loaded, "flags", flags, auto_flags_reader<> {} );
 }
 
 const profession *profession::generic()
