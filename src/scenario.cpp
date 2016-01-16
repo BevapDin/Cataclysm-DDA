@@ -18,6 +18,7 @@
 #include "profession.h"
 #include "mutation.h"
 #include "mapgen.h"
+#include "generic_factory.h"
 
 template<>
 const scenario &string_id<scenario>::obj() const
@@ -57,68 +58,56 @@ void scenario::load_scenario(JsonObject &jsobj)
     DebugLog( D_INFO, DC_ALL ) << "Loaded scenario: " << scen.id.str();
 }
 
-void scenario::load( JsonObject &jsobj )
+void scenario::load( JsonObject &jo )
 {
-    JsonArray jsarr;
+    const bool was_loaded = false;
+
+    // TODO: loading the names and items is identical with the code in profession.cpp,
+    // maybe combine them somehow. Mabye make scenario a subtype of profession? Or the other way round?
 
     //If the "name" is an object then we have to deal with gender-specific titles,
-    if(jsobj.has_object("name")) {
-        JsonObject name_obj=jsobj.get_object("name");
-        _name_male = pgettext("scenario_male", name_obj.get_string("male").c_str());
-        _name_female = pgettext("scenario_female", name_obj.get_string("female").c_str());
-    }
-    else {
-        // Same scenario names for male and female in English.
+    if( jo.has_object( "name" ) ) {
+        JsonObject name_obj = jo.get_object( "name" );
+        _name_male = pgettext( "profession_male", name_obj.get_string( "male" ).c_str() );
+        _name_female = pgettext( "profession_female", name_obj.get_string( "female" ).c_str() );
+    } else if( jo.has_string( "name" ) ) {
+        // Same profession names for male and female in English.
         // Still need to different names in other languages.
-        const std::string name = jsobj.get_string("name");
-        _name_female = pgettext("scenario_female", name.c_str());
-        _name_male = pgettext("scenario_male", name.c_str());
+        const std::string name = jo.get_string( "name" );
+        _name_female = pgettext( "profession_female", name.c_str() );
+        _name_male = pgettext( "profession_male", name.c_str() );
+    } else if( !was_loaded ) {
+        jo.throw_error( "missing mandatory member \"name\"" );
     }
 
-    const std::string desc = jsobj.get_string("description").c_str();
-    _description_male = pgettext("scen_desc_male", desc.c_str());
-    _description_female = pgettext("scen_desc_female", desc.c_str());
-
-    const std::string stame = jsobj.get_string("start_name").c_str();
-    _start_name = pgettext("start_name", stame.c_str());
-
-
-    _point_cost = jsobj.get_int("points");
-
-    JsonObject items_obj=jsobj.get_object("items");
-    add_items_from_jsonarray(items_obj.get_array("both"), _starting_items);
-    add_items_from_jsonarray(items_obj.get_array("male"), _starting_items_male);
-    add_items_from_jsonarray(items_obj.get_array("female"), _starting_items_female);
-
-    jsarr = jsobj.get_array("professions");
-    while (jsarr.has_more()) {
-        _allowed_professions.push_back( string_id<profession>( jsarr.next_string() ) );
+    if( !was_loaded || jo.has_object( "description" ) ) {
+        const std::string desc = jo.get_string( "description" );
+        _description_male = pgettext( "prof_desc_male", desc.c_str() );
+        _description_female = pgettext( "prof_desc_female", desc.c_str() );
     }
 
-    jsarr = jsobj.get_array("traits");
-    while (jsarr.has_more()) {
-        _allowed_traits.insert(jsarr.next_string());
+    mandatory( jo, was_loaded, "start_name", _start_name, translated_string_reader );
+    mandatory( jo, was_loaded, "points", _point_cost );
+
+    if( !was_loaded || jo.has_member( "items" ) ) {
+        JsonObject items_obj = jo.get_object( "items" );
+        optional( items_obj, was_loaded, "both", _starting_items, auto_flags_reader<> {} );
+        optional( items_obj, was_loaded, "male", _starting_items_male, auto_flags_reader<> {} );
+        optional( items_obj, was_loaded, "female", _starting_items_female, auto_flags_reader<> {} );
     }
-    jsarr = jsobj.get_array("forced_traits");
-    while (jsarr.has_more()) {
-        _forced_traits.insert(jsarr.next_string());
-    }
-    jsarr = jsobj.get_array("forbidden_traits");
-    while (jsarr.has_more()) {
-        _forbidden_traits.insert(jsarr.next_string());
-    }
-    jsarr = jsobj.get_array("allowed_locs");
-    while (jsarr.has_more()) {
-        _allowed_locs.push_back( start_location_id( jsarr.next_string() ) );
-    }
+
+    optional( jo, was_loaded, "professions", _allowed_professions,
+              auto_flags_reader<string_id<profession>> {} );
+    optional( jo, was_loaded, "traits", _allowed_traits, auto_flags_reader<> {} );
+    optional( jo, was_loaded, "forced_traits", _forced_traits, auto_flags_reader<> {} );
+    optional( jo, was_loaded, "forbidden_traits", _forbidden_traits, auto_flags_reader<> {} );
+    mandatory( jo, was_loaded, "allowed_locs", _allowed_locs, auto_flags_reader<start_location_id> {} );
     if( _allowed_locs.empty() ) {
-        jsobj.throw_error( "at least one starting location (member \"allowed_locs\") must be defined" );
+        jo.throw_error( "at least one starting location (member \"allowed_locs\") must be defined" );
     }
-    jsarr = jsobj.get_array("flags");
-    while (jsarr.has_more()) {
-        flags.insert(jsarr.next_string());
-    }
-    _map_special = jsobj.get_string( "map_special", "mx_null" );
+
+    optional( jo, was_loaded, "flags", flags, auto_flags_reader<> {} );
+    optional( jo, was_loaded, "map_special", _map_special, "mx_null" );
 }
 
 const scenario *scenario::generic()
