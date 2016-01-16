@@ -10,6 +10,7 @@
 #include "overmap.h"
 #include "field.h"
 #include "mapgen.h"
+#include "generic_factory.h"
 
 typedef std::map<string_id<start_location>, start_location> location_map;
 
@@ -77,11 +78,12 @@ void start_location::load_location( JsonObject &jsonobj )
     _locations[new_location.id] = new_location;
 }
 
-void start_location::load( JsonObject &jsonobj )
+void start_location::load( JsonObject &jo )
 {
-    _name = jsonobj.get_string("name");
-    _target = jsonobj.get_string("target");
-    _flags = jsonobj.get_tags("flags");
+    const bool was_loaded = false;
+    mandatory( jo, was_loaded, "name", _name );
+    mandatory( jo, was_loaded, "target", _target );
+    optional( jo, was_loaded, "flags", _flags, auto_flags_reader<>{} );
 }
 
 void start_location::reset()
