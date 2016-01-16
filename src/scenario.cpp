@@ -20,23 +20,20 @@
 #include "mapgen.h"
 #include "generic_factory.h"
 
+namespace {
+generic_factory<scenario> scenario_factory( "scenario", "ident" );
+}
+
 template<>
 const scenario &string_id<scenario>::obj() const
 {
-    const auto prof = scenario::_all_scens.find( *this );
-    if( prof != scenario::_all_scens.end() ) {
-        return prof->second;
-    } else {
-        debugmsg( "Tried to get invalid scenario: %s", c_str() );
-        static const scenario dummy{};
-        return dummy;
-    }
+    return scenario_factory.obj( *this );
 }
 
 template<>
 bool string_id<scenario>::is_valid() const
 {
-    return scenario::_all_scens.count( *this ) > 0;
+    return scenario_factory.is_valid( *this );
 }
 
 const string_id<scenario> generic_scenario_id( "evacuee" );
@@ -47,21 +44,13 @@ scenario::scenario()
 {
 }
 
-scenmap scenario::_all_scens;
-
 void scenario::load_scenario(JsonObject &jsobj)
 {
-    scenario scen;
-    scen.id = string_id<scenario>( jsobj.get_string( "ident" ) );
-    scen.load( jsobj );
-    _all_scens[scen.id] = scen;
-    DebugLog( D_INFO, DC_ALL ) << "Loaded scenario: " << scen.id.str();
+    scenario_factory.load( jsobj );
 }
 
 void scenario::load( JsonObject &jo )
 {
-    const bool was_loaded = false;
-
     // TODO: loading the names and items is identical with the code in profession.cpp,
     // maybe combine them somehow. Mabye make scenario a subtype of profession? Or the other way round?
 
@@ -122,39 +111,30 @@ const scenario *scenario::weighted_random()
 {
     if (one_in(3)) {
         return generic();
-    } else {
-        const scenario* retval = 0;
-        while(retval == 0) {
-            scenmap::iterator iter = _all_scens.begin();
-            for (int i = rng(0, _all_scens.size() - 1); i > 0; --i) {
-                ++iter;
-            }
-            if (x_in_y(2, abs(iter->second.point_cost()) + 2)) {
-                retval = &(iter->second);
-            }  // else reroll in the while loop.
+    }
+    while( true ) {
+        const auto &pair = random_entry( scenario_factory.all_ref() );
+        const scenario &scen = pair.second;
+        if( x_in_y( 2, abs( scen.point_cost() ) + 2 ) ) {
+            return &scen;
         }
-        return retval;
     }
 }
 
 std::vector<const scenario*> scenario::get_all()
 {
-    std::vector<const scenario*> result;
-    for( auto &p : _all_scens ) {
-        result.push_back( &p.second );
-}
-    return result;
+    return scenario_factory.get_all();
 }
 
 void scenario::reset()
 {
-    _all_scens.clear();
+    scenario_factory.reset();
 }
 
 void scenario::check_definitions()
 {
-    for (scenmap::const_iterator a = _all_scens.begin(); a != _all_scens.end(); ++a) {
-        a->second.check_definition();
+    for( const auto &p : scenario_factory.all_ref() ) {
+        p.second.check_definition();
     }
 }
 
