@@ -470,11 +470,11 @@ class generic_typed_reader
 
         /**
          * Loads the set from JSON, similar to `JsonObject::get_tags`, but returns
-         * a properly typed set. It uses the @ref get_next to actually read the typed
+         * a properly typed container. It uses the @ref get_next to actually read the typed
          * values.
          */
-        std::set<FlagType> get_tags( JsonObject &jo, const std::string &member_name ) const {
-            std::set<FlagType> result;
+        std::vector<FlagType> get_tags( JsonObject &jo, const std::string &member_name ) const {
+            std::vector<FlagType> result;
             if( !jo.has_member( member_name ) ) {
                 return result;
             }
@@ -482,10 +482,10 @@ class generic_typed_reader
             if( jin.test_array() ) {
                 jin.start_array();
                 while( !jin.end_array() ) {
-                    result.insert( get_next( jin ) );
+                    result.push_back( get_next( jin ) );
                 }
             } else {
-                result.insert( get_next( jin ) );
+                result.push_back( get_next( jin ) );
             }
             return result;
         }
@@ -544,8 +544,8 @@ class generic_typed_reader
             container.erase( data );
         }
         template<typename = void>
-        void assign( std::set<FlagType> &container, std::set<FlagType> &&entries ) const {
-            container = entries;
+        void assign( std::set<FlagType> &container, std::vector<FlagType> &&entries ) const {
+            container = std::set<FlagType>( entries.begin(), entries.end() );
         }
         /**@}*/
 
@@ -561,10 +561,10 @@ class generic_typed_reader
             container.reset( data );
         }
         template<size_t N>
-        void assign( std::bitset<N> &container, std::set<FlagType> &&entries ) const {
+        void assign( std::bitset<N> &container, std::vector<FlagType> &&entries ) const {
             container.reset();
             for( auto && data : entries ) {
-                container.set( data );
+                insert( container, data );
             }
         }
         /**@}*/
@@ -582,8 +582,8 @@ class generic_typed_reader
                 container.erase( iter );
             }
         }
-        void assign( std::vector<FlagType> &container, std::set<FlagType> &&entries ) const {
-            container = std::vector<FlagType>( entries.begin(), entries.end() );
+        void assign( std::vector<FlagType> &container, std::vector<FlagType> &&entries ) const {
+            container = std::move( entries );
         }
         /**@}*/
 };
