@@ -56,8 +56,6 @@ class generic_factory;
         std::set<std::string> flags; // flags for some special properties of the profession
         StartingSkillList  _starting_skills;
 
-        void add_CBM( std::string CBM );
-
         void check_item_definitions( const itypedecvec &items ) const;
 
         void load( JsonObject &jsobj );
