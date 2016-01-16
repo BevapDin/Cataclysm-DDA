@@ -533,12 +533,17 @@ class generic_typed_reader
 
     private:
         /**@{*/
+        // Meaningless template here so the function is only created when needed, some
+        // types may not have an operator< and are therefor not directly usable in a set
+        template<typename = void>
         void insert( std::set<FlagType> &container, const FlagType &data ) const {
             container.insert( data );
         }
+        template<typename = void>
         void erase( std::set<FlagType> &container, const FlagType &data ) const {
             container.erase( data );
         }
+        template<typename = void>
         void assign( std::set<FlagType> &container, std::set<FlagType> &&entries ) const {
             container = entries;
         }
@@ -568,6 +573,9 @@ class generic_typed_reader
         void insert( std::vector<FlagType> &container, const FlagType &data ) const {
             container.push_back( data );
         }
+        // Meaningless template here so the function is only created when needed, some
+        // types may not have an operator== and are therefor std::find won't work.
+        template<typename = void>
         void erase( std::vector<FlagType> &container, const FlagType &data ) const {
             const auto iter = std::find( container.begin(), container.end(), data );
             if( iter != container.end() ) {
