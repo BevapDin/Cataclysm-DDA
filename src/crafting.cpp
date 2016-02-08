@@ -588,7 +588,7 @@ void batch_recipes( const inventory &crafting_inv,
     current.clear();
     available.clear();
 
-    for( int i = 1; i <= 20; i++ ) {
+    for( int i = 1; i <= 64; i++ ) {
         current.push_back( rec );
         available.push_back( rec->can_make_with_inventory( crafting_inv, helpers, i ) );
     }
