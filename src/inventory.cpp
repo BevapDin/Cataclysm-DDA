@@ -71,7 +71,7 @@ size_t inventory::size() const
 inventory &inventory::operator+= (const inventory &rhs)
 {
     for (size_t i = 0; i < rhs.size(); i++) {
-        add_stack(rhs.const_stack(i));
+        push_back(rhs.const_stack(i));
     }
     return *this;
 }
@@ -147,16 +147,11 @@ void inventory::clear()
     items.clear();
 }
 
-void inventory::add_stack(const std::list<item> newits)
+void inventory::push_back(std::list<item> newits)
 {
     for( const auto &newit : newits ) {
         add_item( newit, true );
     }
-}
-
-void inventory::push_back(std::list<item> newits)
-{
-    add_stack(newits);
 }
 
 // This function keeps the invlet cache updated when a new item is added.

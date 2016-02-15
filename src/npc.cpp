@@ -565,7 +565,7 @@ void npc::randomize(npc_class type)
  starting_weapon(type);
  worn = starting_clothes(type, male);
  inv.clear();
- inv.add_stack(starting_inv(this, type));
+ inv.push_back(starting_inv(this, type));
  update_worst_item_value();
 }
 
@@ -1741,7 +1741,7 @@ void npc::shop_restock(){
         }
     }
     this->inv.clear();
-    this->inv.add_stack(ret);
+    this->inv.push_back(ret);
     this->update_worst_item_value();
 }
 
