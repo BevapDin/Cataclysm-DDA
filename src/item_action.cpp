@@ -256,7 +256,7 @@ void game::item_action_menu()
         u.i_rem( iter->second );
     }
 
-    u.inv.restack( &u );
+    u.inv.restack( u );
     u.inv.unsort();
 }
 

@@ -11430,7 +11430,7 @@ void game::reload( int pos, bool prompt )
 
         u.assign_activity( ACT_RELOAD, mv, qty, pos, ss.str() );
 
-        u.inv.restack( &u );
+        u.inv.restack( u );
     }
 
     refresh_all();

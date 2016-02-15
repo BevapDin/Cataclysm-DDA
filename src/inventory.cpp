@@ -288,17 +288,12 @@ void inventory::push_back(item newit)
     add_item(newit);
 }
 
-
-void inventory::restack(player *p)
+void inventory::restack(player &p)
 {
     // tasks that the old restack seemed to do:
     // 1. reassign inventory letters
     // 2. remove items from non-matching stacks
     // 3. combine matching stacks
-
-    if (!p) {
-        return;
-    }
 
     std::list<item> to_restack;
     int idx = 0;
@@ -306,7 +301,7 @@ void inventory::restack(player *p)
         std::list<item> &stack = *iter;
         item &topmost = stack.front();
 
-        const int ipos = p->invlet_to_position(topmost.invlet);
+        const int ipos = p.invlet_to_position(topmost.invlet);
         if( !inv_chars.valid( topmost.invlet ) || ( ipos != INT_MIN && ipos != idx ) ) {
             assign_empty_invlet(topmost);
             for( std::list<item>::iterator stack_iter = stack.begin();

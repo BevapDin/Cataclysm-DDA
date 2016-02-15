@@ -937,7 +937,7 @@ std::list<std::pair<int, int>> inventory_selector::execute_multidrop( const std:
 // Display current inventory.
 int game::inv( const int position )
 {
-    u.inv.restack( &u );
+    u.inv.restack( u );
     u.inv.sort();
 
     return inventory_selector( u ).execute_pick( _( "Inventory:" ), position );
@@ -945,7 +945,7 @@ int game::inv( const int position )
 
 int game::inv_for_filter( const std::string &title, item_filter filter, const std::string &none_message )
 {
-    u.inv.restack( &u );
+    u.inv.restack( u );
     u.inv.sort();
 
     inventory_selector inv_s( u, filter );
@@ -1017,7 +1017,7 @@ item_location game::inv_map_splice(
     item_filter inv_filter, item_filter ground_filter, item_filter vehicle_filter,
     const std::string &title, int radius, const std::string &none_message )
 {
-    u.inv.restack( &u );
+    u.inv.restack( u );
     u.inv.sort();
 
     inventory_selector inv_s( u, inv_filter );
@@ -1164,7 +1164,7 @@ int inventory_selector::num_items_at_position( int const position ) const
 
 std::list<std::pair<int, int>> game::multidrop()
 {
-    u.inv.restack( &u );
+    u.inv.restack( u );
     u.inv.sort();
 
     inventory_selector inv_s( u, [ this ]( const item &it ) -> bool {
@@ -1225,7 +1225,7 @@ void game::compare( const tripoint &offset )
         -1000
     );
 
-    u.inv.restack(&u);
+    u.inv.restack( u );
     u.inv.sort();
 
     inventory_selector inv_s( u );

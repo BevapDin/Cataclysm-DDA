@@ -2156,7 +2156,7 @@ void player::memorial( std::ostream &memorial_file, std::string epitaph )
 
     //Inventory
     memorial_file << _("Inventory:") << "\n";
-    inv.restack(this);
+    inv.restack( *this );
     inv.sort();
     invslice slice = inv.slice();
     for( auto &elem : slice ) {
@@ -9408,7 +9408,7 @@ bool player::consume(int target_position)
 
     if( target_position >= 0 ) {
         // Always restack and resort the inventory when items in it have been changed.
-        inv.restack( this );
+        inv.restack( *this );
         inv.unsort();
     }
 
@@ -10225,7 +10225,7 @@ bool player::wear( int pos, bool interactive )
         // in case it's a stack, reset the invlet to avoid duplicates
         to_wear.invlet = 0;
         inv.remove_item( &to_wear );
-        inv.restack( this );
+        inv.restack( *this );
     }
 
     return true;
