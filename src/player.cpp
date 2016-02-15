@@ -9172,7 +9172,9 @@ std::list<item> player::use_charges( const itype_id& what, long qty )
 
 item* player::pick_usb()
 {
-    std::vector<std::pair<item*, int> > drives = inv.all_items_by_type("usb_drive");
+    std::vector<item *> drives = items_with( []( const item &i ) {
+        return i.typeId() == "usb_drive";
+    } );
 
     if (drives.empty()) {
         return NULL; // None available!
@@ -9180,12 +9182,12 @@ item* player::pick_usb()
 
     std::vector<std::string> selections;
     for (size_t i = 0; i < drives.size() && i < 9; i++) {
-        selections.push_back( drives[i].first->tname() );
+        selections.push_back( drives[i]->tname() );
     }
 
     int select = menu_vec(false, _("Choose drive:"), selections);
 
-    return drives[ select - 1 ].first;
+    return drives[ select - 1 ];
 }
 
 bool player::covered_with_flag( const std::string &flag, const std::bitset<num_bp> &parts ) const
