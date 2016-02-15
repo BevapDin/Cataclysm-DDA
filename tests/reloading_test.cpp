@@ -16,7 +16,7 @@ TEST_CASE( "reload_gun_with_integral_magazine" ) {
 
     // TODO: inline the gun and ammo definitions so this test doesn't rely on json.
     item &ammo = dummy.i_add( item( "40sw", 0, item::default_charges_tag{} ) );
-    item &gun = dummy.i_add( item( "sw_610", 0, false ) );
+    item &gun = dummy.i_add( item( "sw_610", 0, item::default_charges_tag{} ) );
     int ammo_pos = dummy.inv.position_by_item( &ammo );
 
     REQUIRE( ammo_pos != INT_MIN );
@@ -37,12 +37,12 @@ TEST_CASE( "reload_gun_with_swappable_magazine" ) {
     while( dummy.takeoff( -2, true, &taken_off_items) );
     // Make sure the player doesn't drop anything :P
     dummy.wear_item( item( "backpack", 0 ) );
-    
+
     dummy.remove_weapon();
 
     // TODO: inline the gun and ammo definitions so this test doesn't rely on json.
     item &ammo = dummy.i_add( item( "9mm", 0, item::default_charges_tag{} ) );
-    item &gun = dummy.i_add( item( "glock_19", 0, false ) );
+    item &gun = dummy.i_add( item( "glock_19", 0, item::default_charges_tag{} ) );
     gun.emplace_back( "glockmag" );
 
     int gun_pos = dummy.inv.position_by_type( "glock_19" );

@@ -22,7 +22,7 @@ player &get_sanitized_player(  ) {
 TEST_CASE( "use_eyedrops" ) {
     player &dummy = get_sanitized_player();
 
-    item &test_item = dummy.i_add( item( "saline", 0, false ) );
+    item &test_item = dummy.i_add( item( "saline", 0, item::default_charges_tag{} ) );
 
     REQUIRE( test_item.charges == 5 );
 
@@ -70,19 +70,19 @@ TEST_CASE( "use_manhack" ) {
     player &dummy = get_sanitized_player();
 
     g->clear_zombies();
-    item &test_item = dummy.i_add( item( "bot_manhack", 0, false ) );
+    item &test_item = dummy.i_add( item( "bot_manhack", 0, item::default_charges_tag{} ) );
 
     int test_item_pos = dummy.inv.position_by_item( &test_item );
     REQUIRE( test_item_pos != INT_MIN );
-    
+
     monster *new_manhack = find_adjacent_monster( dummy.pos() );
     REQUIRE( new_manhack == nullptr );
-    
+
     dummy.invoke_item( &test_item );
 
     test_item_pos = dummy.inv.position_by_item( &test_item );
     REQUIRE( test_item_pos == INT_MIN );
-    
+
     new_manhack = find_adjacent_monster( dummy.pos() );
     REQUIRE( new_manhack != nullptr );
     REQUIRE( new_manhack->type->id == mtype_id( "mon_manhack" ) );
