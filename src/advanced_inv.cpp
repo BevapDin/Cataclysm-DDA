@@ -785,6 +785,95 @@ void advanced_inventory::redraw_pane( side p )
     wnoutrefresh( w );
 }
 
+static bool is_matching_item( const item &it, const item &ex )
+{
+    if( it.type != ex.type ) {
+        return false;
+    }
+    // don't sort filthy items into the same location as non-filthy items.
+    if( it.is_filthy() != ex.is_filthy() ) {
+        return false;
+    }
+
+    return true;
+}
+
+template<typename T>
+bool has_matching_item( T &&stack, const item &it, const item *const cont )
+{
+    for( const item &ex : stack ) {
+        const auto excontained = ex.all_items_top();
+        if( cont == nullptr && excontained.empty() ) {
+            // Both are empty, check container only
+            if( !is_matching_item( ex, it ) ) {
+                continue;
+            }
+        } else if( cont != nullptr && !excontained.empty() ) {
+            // Both are non-empty, check content only
+            if( !is_matching_item( *excontained.front(), *cont ) ) {
+                continue;
+            }
+        } else {
+            continue;
+        }
+        return true;
+    }
+    return false;
+}
+
+static bool has_matching_item( advanced_inv_area &s, bool &in_vehicle, const item &it,
+                               const item *const cont )
+{
+    if( s.can_store_in_vehicle() ) {
+        in_vehicle = true;
+        return has_matching_item( s.veh->get_items( s.vstor ), it, cont );
+    } else {
+        in_vehicle = false;
+        return has_matching_item( get_map().i_at( s.pos ), it, cont );
+    }
+}
+
+std::pair<aim_location, bool> advanced_inventory::find_destination( const advanced_inv_listitem
+        &lit )
+{
+    const item &it = *lit.items.front();
+    const auto contained = it.all_items_top();
+    const item *cont = contained.empty() ? nullptr : contained.front();
+    auto result = std::make_pair( AIM_ALL, false );
+    // Some items are never auto-moved:
+
+    if(
+        // Reinforced, probably important (e.g. clothing)
+        ( it.damage() < 0 ) or
+        // items with inscriptions (may not actually work anymore)
+        it.has_var( "item_note" ) or
+        // favorited
+        it.is_favorite
+        or false
+    ) {
+        return std::make_pair( AIM_ALL, false );
+    }
+    for( auto &s : squares ) {
+        if( s.id == AIM_INVENTORY || s.id == AIM_DRAGGED || s.id == AIM_ALL ||
+            s.id == AIM_CONTAINER || s.id == AIM_WORN ) {
+            continue;
+        }
+        if( !s.canputitemsloc || s.is_same( squares[lit.area] ) ) {
+            continue;
+        }
+        bool in_vehicle;
+        if( has_matching_item( s, in_vehicle, it, cont ) ) {
+            if( result.first != AIM_ALL ) {
+                // Already found another place that has it, bail out, no automated decision possible.
+                return std::make_pair( AIM_ALL, false );
+            }
+            result = std::make_pair( s.id, in_vehicle );
+            break;
+        }
+    }
+    return result;
+}
+
 void outfit::adv_inv_move_all_items( Character &player_character, advanced_inventory_pane &spane,
                                      drop_locations &dropped, drop_locations &dropped_favorite )
 {
@@ -1217,6 +1306,7 @@ input_context advanced_inventory::register_ctxt() const
     ctxt.register_action( "ITEMS_AROUND" );
     ctxt.register_action( "ITEMS_DRAGGED_CONTAINER" );
     ctxt.register_action( "ITEMS_CONTAINER" );
+    ctxt.register_action( "AUTO_MOVE" );
 
     ctxt.register_action( "ITEMS_DEFAULT" );
     ctxt.register_action( "SAVE_DEFAULT" );
@@ -1358,6 +1448,27 @@ bool advanced_inventory::action_move_item( advanced_inv_listitem *sitem,
     bool exit = false;
     if( sitem == nullptr ) {
         return false;
+    }
+
+    struct pane_reseter {
+        advanced_inventory_pane prev;
+        advanced_inventory_pane &ref;
+        pane_reseter( advanced_inventory_pane &p ) : prev( p ), ref( p ) { }
+        ~pane_reseter() {
+            ref = prev;
+        }
+    };
+    std::unique_ptr<pane_reseter> dummyptr;
+    if( action == "AUTO_MOVE" ) {
+        const auto auto_dest = find_destination( *sitem );
+        if( auto_dest.first == AIM_ALL ) {
+            const_cast<advanced_inventory_pane &>( spane ).scroll_by( +1 );
+            return false;
+        }
+        if( dpane.get_area() != auto_dest.first ) {
+            dummyptr = std::make_unique<pane_reseter>( dpane );
+            dummyptr->ref.set_area( squares[auto_dest.first], auto_dest.second );
+        }
     }
     aim_location destarea = dpane.get_area();
     aim_location srcarea = sitem->area;
@@ -1651,6 +1762,7 @@ void advanced_inventory::display()
             recalc = true;
         } else if( action == "MOVE_SINGLE_ITEM" ||
                    action == "MOVE_VARIABLE_ITEM" ||
+                   action == "AUTO_MOVE" ||
                    action == "MOVE_ITEM_STACK" ) {
             exit = action_move_item( sitem, dpane, spane, action );
         } else if( action == "MOVE_ALL_ITEMS" ) {
@@ -1985,6 +2097,8 @@ bool advanced_inventory::query_charges( aim_location destarea, const advanced_in
         const int possible_max = std::min( input_amount, amount );
         if( amount <= 0 ) {
             popup( _( "The destination is already full!" ) );
+        } else if( action == "AUTO_MOVE" ) {
+            return possible_max;
         } else {
             amount = string_input_popup()
                      .title( popupmsg )
