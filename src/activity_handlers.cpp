@@ -1404,6 +1404,7 @@ enum repeat_type : int {
     REPEAT_ONCE = 0,    // Repeat just once
     REPEAT_FOREVER,     // Repeat for as long as possible
     REPEAT_FULL,        // Repeat until damage==0
+    REPEAT_ALL_ITEMS,
     REPEAT_EVENT,       // Repeat until something interesting happens
     REPEAT_CANCEL,      // Stop repeating
     REPEAT_INIT         // Haven't found repeat value yet.
@@ -1417,6 +1418,7 @@ repeat_type repeat_menu( const std::string &title, repeat_type last_selection )
     rmenu.addentry( REPEAT_FOREVER, true, '2', _("Repeat as long as you can") );
     rmenu.addentry( REPEAT_FULL, true, '3', _("Repeat until fully repaired, but don't reinforce") );
     rmenu.addentry( REPEAT_EVENT, true, '4', _("Repeat until success/failure/level up") );
+    rmenu.addentry( REPEAT_ALL_ITEMS, true, '5', _("Repair all items") );
     rmenu.addentry( REPEAT_CANCEL, true, 'q', _("Cancel") );
     rmenu.selected = last_selection;
 
@@ -1581,6 +1583,24 @@ void activity_handlers::repair_item_finish( player_activity *act, player *p )
         }
 
         act->values[0] = ( int )answer;
+    }
+
+    if( repeat == REPEAT_ALL_ITEMS && fix.damage() == 0 ) {
+        bool found_next = false;
+        p->inv.restack( p );
+        p->inv.sort();
+        for( size_t i = 0; i < p->inv.size(); ++i ) {
+            const item &it = p->inv.const_stack( i ).front();
+            if( it.damage() > 0 && actor->can_repair( *p, *used_tool, it, false ) ) {
+                act->position = i;
+                found_next = true;
+                break;
+            }
+        }
+        if( !found_next ) {
+            act->type = ACT_NULL;
+            return;
+        }
     }
 
     // Otherwise keep retrying
