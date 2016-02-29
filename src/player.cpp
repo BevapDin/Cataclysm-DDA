@@ -4286,6 +4286,21 @@ void player::update_needs( int rate_multiplier )
 
     if( !foodless && thirst_rate > 0.0f ) {
         mod_thirst( divide_roll_remainder( thirst_rate * rate_multiplier, 1.0 ) );
+        if( get_thirst() >= 52 && !in_sleep_state() && get_hostile_creatures(10).empty() ) {
+            for( item &w : worn ) {
+                if( w.contents.empty() ) {
+                    continue;
+				}
+				if( w.contents.front().typeId() != "water_clean" ) {
+                    continue;
+                }
+                if( consume_item( w ) ) {
+                    add_msg( m_warning, "You are now wearing an empty %s.", w.tname().c_str() );
+                    w.contents.erase( w.contents.begin() );
+                }
+                break;
+            }
+        }
     }
     if( mycus ) {
         // Mycus feeders synchronize hunger and thirst, since their only source of both is the mycus fruit.
