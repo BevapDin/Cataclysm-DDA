@@ -91,38 +91,68 @@ mswap = function()
     pastemap(t2, p1)
 end
 
-sponageable = { "rag", "scrap", "steel_lump", "steel_chunk", "frame", "hdframe",
+Sponge = {}
+Sponge.__index = Sponge
+Sponge.sponageable = { "rag", "scrap", "steel_lump", "steel_chunk", "frame", "hdframe",
 "splinter", "log", "rock", "rebar", "2x4", "ceramic_shard", "pipe",
 "steel_plate", "xlframe", "glass_shard", "glass_sheet" }
 
-function has_value (tab, val)
-    for index, value in ipairs (tab) do
-        if value == val then
+function Sponge.create(it)
+   local new_object = {}
+   setmetatable(new_object, Sponge)
+   new_object.it = it
+   return new_object
+end
+
+function Sponge.can_sponge(item_type_id)
+    for _, value in ipairs(Sponge.sponageable) do
+        if value == item_type_id then
             return true
         end
     end
-
     return false
 end
 
-function sponge_2(it, pos, added)
+function Sponge:add_count(item_type_id, count)
+    local old_count = self:get_count(item_type_id)
+    self:set_count(item_type_id, old_count + count)
+end
+function Sponge:get_count(item_type_id)
+    if not item_type_id then
+        return 0
+    end
+    return tonumber(self.it:get_var("cnt:" .. item_type_id, 0))
+end
+function Sponge:set_count(item_type_id, count)
+    if not item_type_id then
+        return
+    end
+    if count == 0 then
+        self.it:erase_var("cnt:" .. item_type_id)
+    else
+        self.it:set_var("cnt:" .. item_type_id, string.format("%.0f", count))
+    end
+    if self:get_count(item_type_id) ~= count then
+        error("failed to store the count")
+    end
+end
+
+-- Collect all spongable items from the map at given position.
+-- The items are removed from the map.
+-- The collected amount is added to `self.added[item_type_id]`
+function Sponge:collect(pos)
     local map_stack = map:i_at(pos)
     local iter = map_stack:cppbegin()
     while iter ~= map_stack:cppend() do
         local e = iter:elem()
         local t = e:typeId()
-        if e:damage() == 0 and has_value(sponageable, t) then
-            local var = "cnt:" .. t
-            local cnt = it:get_var(var, 0)
-            cnt = cnt + 1
-            it:set_var(var, cnt)
-            if it:get_var(var, 0) ~= cnt then
-                error("failed to store the count")
+        if e:damage() == 0 and Sponge.can_sponge(t) then
+            -- TODO: check for charges!
+            self:add_count(t, 1)
+            if not self.added[t] then
+                self.added[t] = 0
             end
-            if not added[t] then
-                added[t] = 0
-            end
-            added[t] = added[t] + 1
+            self.added[t] = self.added[t] + 1
             iter = map_stack:erase(iter)
         else
             iter:inc()
@@ -130,98 +160,133 @@ function sponge_2(it, pos, added)
     end
 end
 
-function unsponge_specific(it, t, query)
-    local var = "cnt:" .. t
-    local count_avail = it:get_var(var, 0)
-    if count_avail > 0 then
-        local count_todo = count_avail
-        if query then
-            local foo = game.string_input_popup("How many " .. item(t, 0):tname() .. " to drop?", 80, tostring(count_avail))
-            count_todo = tonumber(foo)
-            if count_todo > count_avail then
-                game.popop("Too much. Aborting.")
-                count_todo = 0
-            elseif count_todo < 0 then
-                count_todo = 0
-            end
-        end
-        if count_todo > 0 then
-            game.add_msg("Dropping " .. tostring(count_todo) .. " " .. item(t, 0):tname(count_todo) .. ".")
-            map:spawn_item(player:pos(), t, count_todo)
-            if count_avail == count_todo then
-                it:erase_var(var)
-            else
-                it:set_var(var, count_avail - count_todo)
-            end
-        end
-    end
-end
-
-function unsponge(it)
+-- Shows a menu containing all the contained items. Returns the select item type id,
+-- or nil if nothing was selected.
+function Sponge:query_item_type(title)
     local menu = game.create_uimenu()
-    menu.title = "Drop which items?"
+    menu.title = title
     local sp = {}
     local i = 0
-    for _, t in ipairs(sponageable) do
-        local cnt = it:get_var("cnt:" .. t, 0)
-        if cnt > 0 then
-            menu:addentry("Drop up to " .. tostring(cnt) .. " " .. item(t, 0):tname(cnt) .. ".")
-            sp[i] = t
+    for _, item_type_id in ipairs(Sponge.sponageable) do
+        local count = self:get_count(item_type_id)
+        if count > 0 then
+            menu:addentry(Sponge.name_with_count(item_type_id, count))
+            sp[i] = item_type_id
             i = i + 1
         end
     end
     menu:addentry("Cancel.")
     menu:query(true)
-    if sp[menu.selected] then
-        unsponge_specific(it, sp[menu.selected], true)
+    return sp[menu.selected]
+end
+
+function Sponge:query_count(item_type_id, title)
+    local count_avail = self:get_count(item_type_id)
+    if count_avail <= 0 then
+        return nil
+    end
+    title = title .. " (" .. Sponge.name_with_count(item_type_id, count_avail) .. ")?"
+    local answer = game.string_input_popup(title, 80, "")
+    if answer:len() == 0 then
+        return nil
+    end
+    if answer:sub(-1) == "x" then
+        local portion = tonumber(answer:sub(1, answer:len() - 1))
+        if portion <= 0 or portion > count_avail then
+            return nil
+        end
+        local count_chosen = math.floor(count_avail / portion) * portion
+        return {
+            portion = portion,
+            count = count_chosen,
+            text = string.format("%.0f", count_chosen / portion) .. " x " .. Sponge.name_with_count(item_type_id, portion)
+        }
+    else
+        local count_chosen = tonumber(answer)
+        if count_chosen <= 0 or count_chosen > count_avail then
+            return nil
+        end
+        return {
+            portion = 1,
+            count = count_chosen,
+            text = Sponge.name_with_count(item_type_id, count_chosen)
+        }
     end
 end
 
-function unsponge_destroy(it)
-    local menu = game.create_uimenu()
-    menu.title = "Destroy which items?"
-    local sp = {}
-    local i = 0
-    for _, t in ipairs(sponageable) do
-        local cnt = it:get_var("cnt:" .. t, 0)
-        if cnt > 0 then
-            menu:addentry("Destroy up to " .. tostring(cnt) .. " " .. item(t, 0):tname(cnt) .. ".")
-            sp[i] = t
-            i = i + 1
-        end
+function Sponge:drop_some(pos)
+    local item_type_id = self:query_item_type("Drop which items?")
+    self:drop(item_type_id, pos, self:query_count(item_type_id, "Drop how many"))
+end
+
+function Sponge:destroy_some()
+    local item_type_id = self:query_item_type("Destroy which items?")
+    self:destroy(item_type_id, self:query_count(item_type_id, "Destroy how many"))
+end
+
+function Sponge:drop(item_type_id, pos, cpair)
+    if not item_type_id or not cpair then
+        return
     end
-    menu:addentry("Cancel.")
-    menu:query(true)
-    if sp[menu.selected] then
-        local t = sp[menu.selected]
-        local var = "cnt:" .. t
-        local count_avail = it:get_var(var, 0)
-        local foo = game.string_input_popup("Multiples of " .. item(t, 0):tname() .. " to destroy?", 80, "")
-        local mult = tonumber(foo)
-        if mult <= 0 or mult > count_avail or count_avail <= 0 then
-            return
-        end
-        local count_todo = math.floor(count_avail / mult) * mult
-        game.add_msg("Destroying " .. tostring(count_todo / mult) .. " x " .. tostring(mult) .. " " .. item(t, 0):tname(count_todo) .. ".")
-        if count_avail == count_todo then
-            it:erase_var(var)
-        else
-            it:set_var(var, count_avail - count_todo)
+    game.add_msg("Dropping " .. cpair.text .. ".")
+    -- TODO: charges!
+    map:spawn_item(pos, item_type_id, cpair.count)
+    self:add_count(item_type_id, -cpair.count)
+end
+
+function Sponge:destroy(item_type_id, cpair)
+    if not item_type_id or not cpair then
+        return
+    end
+    game.add_msg("Destroying " .. cpair.text .. ".")
+    self:add_count(item_type_id, -cpair.count)
+end
+
+function Sponge:list()
+    for _, item_type_id in ipairs(Sponge.sponageable) do
+        local count = self:get_count(item_type_id)
+        if count > 0 then
+            game.add_msg("The " .. self.it:tname() .. " contains " .. Sponge.name_with_count(item_type_id, count) .. ".")
         end
     end
 end
 
-function list_sponged(it)
-    for _, t in ipairs(sponageable) do
-        local var = "cnt:" .. t
-        local cnt = it:get_var(var, 0)
-        if cnt > 0 then
-            game.add_msg(it:tname() .. " contains " .. tostring(cnt) .. " " .. item(t, 0):tname(cnt) .. ".")
-        end
+function Sponge.name_with_count(item_type_id, count)
+    if not item_type_id then
+        return ""
+    elseif count == 1 then
+        return "a " .. item(item_type_id, 0):tname(1)
+    elseif count < 0 then
+        return "nothing"
+    else
+        return string.format("%.0f %s", count, item(item_type_id, 0):tname(count))
     end
 end
 
-function custom_sponge(it, active, pos)
+function Sponge:collect_around(center)
+    local p = center
+    self.added = {}
+    self:collect(tripoint(p.x - 1, p.y - 1, p.z))
+    self:collect(tripoint(p.x - 1, p.y    , p.z))
+    self:collect(tripoint(p.x - 1, p.y + 1, p.z))
+    self:collect(tripoint(p.x    , p.y - 1, p.z))
+    self:collect(tripoint(p.x    , p.y    , p.z))
+    self:collect(tripoint(p.x    , p.y + 1, p.z))
+    self:collect(tripoint(p.x + 1, p.y - 1, p.z))
+    self:collect(tripoint(p.x + 1, p.y    , p.z))
+    self:collect(tripoint(p.x + 1, p.y + 1, p.z))
+    for item_type_id, count in pairs(self.added) do
+        game.add_msg("Collected " .. Sponge.name_with_count(item_type_id, count) .. ".")
+    end
+end
+
+function Sponge:drop_all(pos)
+    for _, item_type_id in ipairs(Sponge.sponageable) do
+        self:drop(item_type_id, pos, { portion = 1, count = self:get_count(item_type_id), text = Sponge.name_with_count(item_type_id, count) } )
+    end
+end
+
+function Sponge:invoke()
     local menu = game.create_uimenu()
     menu.title = "What to do?"
     menu:addentry("Collect surrounding items.")
@@ -232,32 +297,22 @@ function custom_sponge(it, active, pos)
     menu:addentry("Cancel.")
     menu:query(true)
     if menu.selected == 0 then
-        local p = player:pos()
-        local added = {}
-        sponge_2(it, tripoint(p.x - 1, p.y - 1, p.z), added)
-        sponge_2(it, tripoint(p.x - 1, p.y    , p.z), added)
-        sponge_2(it, tripoint(p.x - 1, p.y + 1, p.z), added)
-        sponge_2(it, tripoint(p.x    , p.y - 1, p.z), added)
-        sponge_2(it, tripoint(p.x    , p.y    , p.z), added)
-        sponge_2(it, tripoint(p.x    , p.y + 1, p.z), added)
-        sponge_2(it, tripoint(p.x + 1, p.y - 1, p.z), added)
-        sponge_2(it, tripoint(p.x + 1, p.y    , p.z), added)
-        sponge_2(it, tripoint(p.x + 1, p.y + 1, p.z), added)
-        for t, c in pairs(added) do
-            game.add_msg("Collected " .. tostring(c) .. " " .. item(t, 0):tname(c) .. ".")
-        end
+        self:collect_around(player:pos())
     elseif menu.selected == 1 then
-        for _, t in ipairs(sponageable) do
-            unsponge_specific(it, t, false)
-        end
+        self:drop_all(player:pos())
     elseif menu.selected == 2 then
-        unsponge(it)
+        self:drop_some(player:pos())
     elseif menu.selected == 3 then
-        unsponge_destroy(it)
+        self:destroy_some()
     elseif menu.selected == 4 then
-        list_sponged(it)
+        self:list()
     end
     return 0
+end
+
+function custom_sponge(it, active, pos)
+    local sponge = Sponge.create(it)
+    sponge:invoke()
 end
 
 game.register_iuse("CUSTOM_SPONGE", custom_sponge)
