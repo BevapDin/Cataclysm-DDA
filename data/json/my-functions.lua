@@ -190,7 +190,13 @@ function Sponge:query_count(item_type_id, title)
     if answer:len() == 0 then
         return nil
     end
-    if answer:sub(-1) == "x" then
+    if answer == "all" then
+        return {
+            portion = 1,
+            count = count_avail,
+            text = "all " .. Sponge.name_with_count(item_type_id, count_avail)
+        }
+    elseif answer:sub(-1) == "x" then
         local portion = tonumber(answer:sub(1, answer:len() - 1))
         if portion <= 0 or portion > count_avail then
             return nil
@@ -276,7 +282,7 @@ function Sponge:collect_around(center)
     self:collect(tripoint(p.x + 1, p.y    , p.z))
     self:collect(tripoint(p.x + 1, p.y + 1, p.z))
     for item_type_id, count in pairs(self.added) do
-        game.add_msg("Collected " .. Sponge.name_with_count(item_type_id, count) .. ".")
+        game.add_msg("Collected " .. Sponge.name_with_count(item_type_id, count) .. ", now " .. string.format("%.0f", self:get_count(item_type_id)) .. ".")
     end
 end
 
