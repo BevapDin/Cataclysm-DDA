@@ -286,17 +286,10 @@ function Sponge:collect_around(center)
     end
 end
 
-function Sponge:drop_all(pos)
-    for _, item_type_id in ipairs(Sponge.sponageable) do
-        self:drop(item_type_id, pos, { portion = 1, count = self:get_count(item_type_id), text = Sponge.name_with_count(item_type_id, count) } )
-    end
-end
-
 function Sponge:invoke()
     local menu = game.create_uimenu()
     menu.title = "What to do?"
     menu:addentry("Collect surrounding items.")
-    menu:addentry("Drop all contained items.")
     menu:addentry("Drop some contained items.")
     menu:addentry("Destroy some contained items.")
     menu:addentry("List contained items.")
@@ -305,12 +298,10 @@ function Sponge:invoke()
     if menu.selected == 0 then
         self:collect_around(player:pos())
     elseif menu.selected == 1 then
-        self:drop_all(player:pos())
-    elseif menu.selected == 2 then
         self:drop_some(player:pos())
-    elseif menu.selected == 3 then
+    elseif menu.selected == 2 then
         self:destroy_some()
-    elseif menu.selected == 4 then
+    elseif menu.selected == 3 then
         self:list()
     end
     return 0
