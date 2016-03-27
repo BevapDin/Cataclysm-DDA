@@ -1,6 +1,6 @@
 [
     {
-        "type":"GENERIC",
+        "type":"TOOL",
         "id" : "foo:sponge",
         "name" : "sponge",
         "description" : "Use it.",
@@ -9,6 +9,10 @@
         "symbol" : "µ",
         "volume" : 0,
         "use_action": "CUSTOM_SPONGE",
+        "ammo": "NULL",
+        "initial_charges": 0,
+        "charges_per_use": 0,
+        "turns_per_charge": 0,
         "armor_data" : {
            "coverage" : 0,
            "material_thickness" : 0
