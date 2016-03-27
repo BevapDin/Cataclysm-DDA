@@ -293,6 +293,7 @@ function Sponge:invoke()
     menu:addentry("Drop some contained items.")
     menu:addentry("Destroy some contained items.")
     menu:addentry("List contained items.")
+    menu:addentry("Toggle active state.")
     menu:addentry("Cancel.")
     menu:query(true)
     if menu.selected == 0 then
@@ -303,13 +304,19 @@ function Sponge:invoke()
         self:destroy_some()
     elseif menu.selected == 3 then
         self:list()
+    elseif menu.selected == 4 then
+        self.it.active = not self.it.active
     end
     return 0
 end
 
 function custom_sponge(it, active, pos)
     local sponge = Sponge.create(it)
-    sponge:invoke()
+    if active then
+        sponge:collect_around(player:pos())
+    else
+        sponge:invoke()
+    end
 end
 
 game.register_iuse("CUSTOM_SPONGE", custom_sponge)
