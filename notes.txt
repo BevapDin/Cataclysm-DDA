@@ -1,0 +1,136 @@
+This extends the reality bubble to contain several z-level at once.
+
+My approach was this:
+
+1. Remove the unused (or soon to be) stuff, including the monsters-on-stairs hack.
+2. Add 3D-overloads for many functions, using tripoints.
+ - The overloads redirect to other functions (other 3D, or 2D), or contain the 2D-logic directly. The z-component would be ignored or simply forwarded to the next function (e.g. `map::is_divable` forwards its parameters to `map::ter_at` / `map::has_flag` and does not care about 2D/3D). `map::ter_at` will simply ignored the z-component.
+3. Implement a 3D-map.
+ - This makes most functions that have a 3D point use the z-component.
+4. Transform function to use (and forward) 3D points.
+5. Change logic to incorporate 3D-surrounding.
+
+----
+
+See doc/Z_LEVELS.md
+
+I added `my_ZMIN` and `my_ZMAX` to the `map`. They define the z-level range that the map supports (and are set with the constructor like `my_MAPSIZE`). They are relative to the player character z-level, which is assumed to be 0. This is for compatibility with code that still used 2D-coordinates: `i_at(x, y)` will be interpreted as `i_at(tripoint(x, y, 0))`. Accessing stuff at `i_at(tripoint(x, y, -1))` means the z-level below the PC.
+
+The range `my_ZMIN` to `my_ZMAX` (inclusive!) defines the vertical size of the reality bubble. They work very similar to `MAPSIZE`. The horizontal space of the reality bubble is `[0, SEEX*MAPSIZE)`, the vertical space is `[my_ZMIN, my_ZMAX]`. A single value (MAPHEIGHT) could be used, but this allows asymmetrical ranges: for example 2 levels below and 7 levels above the player.
+
+For tinymap it starts with `my_ZMIN = my_ZMAX = 0` which gives one z-level only.
+
+Z-components of monsters/... are generally relative to `g->levz`. The position of the PC has always the z-component 0. If the PC goes up or down, `g->levz` is changed according to match this. In other words: the PC is always at absolute z-level `g->levz`.
+
+The system is mostly (perhaps even completely) compatible with existing saves, as it uses the already existing submaps. New submaps (needed for the above ground area and for the rock below) will be created when needed.
+
+It currently uses the exist, flat submaps. One could change that so that submaps are cubes of n*m*o squares. But I don't see a real advantage of that. Submaps could be changed to be bigger (like 24*24 squares, which would be 2x2 current submaps, this makes the submap coordinate system equal to the overmap terrain coordinate system).
+
+----
+
+The monster related code (except monattack.cpp and mondeath.cpp) has been changed to use tripoints. (Mostly, some parts are still missing.) But the monster still very much use one plane only (most code that looks at the surrounding squares does so on the same z-level as the monster, not on the levels above/below). They can however use stairs (and do so).
+
+From above one sees a gray area of '.' and maybe a gray vehicle and some gray '7'. And monsters. And some tiles might be highlighted. Using the look around command one can examine the area, including different z-levels.
+
+Something to experience:
+- Go onto the roof. Spawn a (small) vehicle, like the beetle. Drive it.
+- While on z=0 got to the stairs, spawn a zombie in some distance (near enough so it sees you), quickly go onto the roof. Watch the zombie come for you.
+- Get a good gun and ammo (and skill), teleport into a city into a house with second floor (use overmap reveal). Stand in a window on the second floor and shoot at the zombies.
+
+
+# TODO:
+
+## main thing: make more functions use tripoints. This consists of two parts:
+
+1. (for functions that have x,y parameters) Change the x,y parameters to tripoint.
+
+Add a wrapper function that looks the same as the function did so far and forwards any calls directly to the version with the tripoint. Use a good value for the missing z-component (0 is good for a start).
+
+In the new function: replace x and y with references to the components of the tripoint. If possible use the tripoint directly, or at least forward its z-component.
+Example:
+```
+void smash(int x, int y) {
+    if(ter(x, y) == ...) {
+        foo(x, y);
+        bar(x, y + 1);
+    }
+}
+
+// becomes:
+
+void smash(int x, int y) { smash(tripoint(x, y, 0)); }
+void smash(const tripoint &p) {
+    if(ter(p) = ...) {
+        foo(p.x, p.y); // TODO Z-level: foo is not yet ported
+        bar(tripoint(p.x, p.y + 1, p.z)); // bar is ported
+    }
+}
+```
+
+2. Change calls that still use x,y to use tripoints, use sensible value for z-components. For example with monsters I used  their current z-level (`monster::posz()`)as default z-component.
+
+## Change things that currently happen on one plane only to be actually 3D (I look at explosions).
+
+## Line-of-sight is not acceptable at all.
+
+## Light map is not acceptable at all.
+
+## Falling multiple z-levels is in, but needs balancing.
+
+## the overmap visibility algorithm must be updated
+
+## Zooming was suggested in the forum. It is certainly possible.
+
+## Vehicles can only move on z=0 (that is always the level where the PC is)
+
+## Vehicles don't "fall down"
+
+## most monster special attacks are not ported and ignore usually the z-level
+
+## digging for fun & profit
+
+## newly build walls will not create a roof on top of them. The air stays.
+
+## scent is only tracked in the level the PC is currently on. On vertical movement it is reset completely.
+
+## water/river should perhaps have more z-level below
+
+## support in tiles mode is ... limited.
+
+## integrating the default algorithm to create above ground submaps with "real" mapgen (e.g. second floor of a house, not directly its roof).
+
+## make list monsters z-level aware and check items/monsters on other z-levels as well.
+
+## in player.cpp ambient temperature: only searches for fires on the current z-level
+
+## the advanced inventory must be changed, too
+
+## jumping, different methods of gently going down a slope, methods of going upwards are not in
+
+## vehicle roofs should be in-transparent from above!
+
+## transparent vehicle roofs
+
+## 3-dimensional vehicles
+
+## use a flag to indicate above what terrain a roof should be, this is complicated because a paper wall can spawn inside and outside
+
+## Check the trap functions. Do hey need to access squares on other z-levels?
+
+## up stairs in basements are not synchronized to the downstairs above!!!!! - yes, this *is* insane!!!!
+
+----
+
+TODO:
+
+- "Slightly enhanced what is drawn on the map" add note about new terrain in shelter
+- when making map::generate: watch for om
+- game::smash earlier!
+- check the changes in iuse calls for find_item!
+- fix first commit!
+- squis removed uoutdated zombie_set_pos function somewhere
+- game::fire in ranged.cpp must be changed before.
+- move "Make non-const field access private to map" to a later state or remove it altogether.
+- "made map::blocks_vertical_* methods public, why were they not before" should be eralier!
+- TODO: Z make a flag that indicates that terrain/furniture is flat '.';
+- port all usage of disarm_trap in one go
