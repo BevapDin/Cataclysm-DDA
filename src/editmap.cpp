@@ -55,6 +55,9 @@ static const ter_id undefined_ter_id( -1 );
 static const furn_id undefined_furn_id( -1 );
 static const trap_id undefined_trap_id( -1 );
 
+static std::map<ter_id, int> ter_delta;
+static std::map<furn_id, int> furn_delta;
+
 bool inbounds( const int x, const int y, const int z )
 {
     return x >= 0 && x < maplim &&
@@ -371,6 +374,7 @@ tripoint editmap::edit()
     ctxt.register_action( "HELP_KEYBINDINGS" );
     // Needed for timeout to be useful
     ctxt.register_action( "ANY_INPUT" );
+    ctxt.register_action( "PRINT_DELTAS" );
     std::string action;
 
     uberdraw = uistate.editmap_nsa_viewmode;
@@ -396,6 +400,50 @@ tripoint editmap::edit()
 
         if( action == "EDIT_TERRAIN" ) {
             edit_ter();
+        } else if( action == "PRINT_DELTAS" ) {
+            ter_delta[t_dirt] += ter_delta[t_grass];
+            ter_delta[t_grass] = 0;
+
+            for(auto iter = ter_delta.begin(); iter != ter_delta.end(); ) {
+                if(iter->second == 0) {
+                    ter_delta.erase(iter++);
+                } else {
+                    ++iter;
+                }
+            }
+            for(auto iter = furn_delta.begin(); iter != furn_delta.end(); ) {
+                if(iter->second == 0) {
+                    furn_delta.erase(iter++);
+                } else {
+                    ++iter;
+                }
+            }
+            uimenu men;
+            men.text = "Positive values: removed from map, negative values: added to map";
+            for( auto &e : ter_delta ) {
+                men.addentry("%d x %s", -e.second, e.first.obj().name.c_str());
+            }
+            for( auto &e : furn_delta ) {
+                men.addentry("%d x %s", -e.second, e.first.obj().name.c_str());
+            }
+            men.addentry("Reset the stats");
+            men.addentry("Cancel");
+            men.selected = men.entries.size() - 1;
+            men.return_invalid = true;
+            men.query();
+            const size_t q = static_cast<size_t>( men.ret );
+            if( q < ter_delta.size() ) {
+                auto iter = ter_delta.begin();
+                std::advance(iter, q);
+                ter_delta.erase(iter);
+            } else if( q < ter_delta.size() + furn_delta.size() ) {
+                auto iter = furn_delta.begin();
+                std::advance(iter, q - ter_delta.size());
+                furn_delta.erase(iter);
+            } else if( q == ter_delta.size() + furn_delta.size() ) {
+                ter_delta.clear();
+                furn_delta.clear();
+            }
         } else if( action == "EDIT_FIELDS" ) {
             edit_fld();
         } else if( action == "EDIT_ITEMS" ) {
@@ -987,6 +1035,8 @@ int editmap::edit_ter()
                             wter = teralt;
                         }
                     }
+                    ter_delta[g->m.ter( elem )]--;
+                    ter_delta[wter]++;
                     g->m.ter_set( elem, wter );
                 }
                 if( action == "CONFIRM_QUIT" ) {
@@ -1020,6 +1070,8 @@ int editmap::edit_ter()
                 }
             } else if( action == "CONFIRM" || action == "CONFIRM_QUIT" ) {
                 for( auto &elem : target_list ) {
+                    furn_delta[g->m.furn( elem )]--;
+                    furn_delta[sel_frn]++;
                     g->m.furn_set( elem, sel_frn );
                 }
                 if( action == "CONFIRM_QUIT" ) {
