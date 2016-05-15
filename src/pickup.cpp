@@ -587,6 +587,9 @@ void Pickup::pick_up( const tripoint &pos, int min )
         if( g->check_zone( "NO_AUTO_PICKUP", pos ) ) {
             here.clear();
         }
+        if( g->m.has_flag( "SEALED", pos ) ) {
+            here.clear();
+        }
 
         // Recursively pick up adjacent items if that option is on.
         if( get_option<bool>( "AUTO_PICKUP_ADJACENT" ) && g->u.pos() == pos ) {
