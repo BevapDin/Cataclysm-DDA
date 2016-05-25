@@ -160,6 +160,8 @@ class inventory_selector
         void print_inv_weight_vol(int weight_carried, int vol_carried, int vol_capacity) const;
         void print_right_column(size_t right_column_width, size_t right_column_offset) const;
 
+        int num_items_at_position( int const position ) const;
+
         /** Returns an entry from @ref items by its invlet */
         const itemstack_or_category *invlet_to_itemstack( long invlet ) const;
         /** Toggle item dropping for item position it_pos:
@@ -924,7 +926,7 @@ std::list<std::pair<int, int>> inventory_selector::execute_multidrop( const std:
     for( auto drop_pair : dropping ) {
         int num_to_drop = drop_pair.second;
         if( num_to_drop == -1 ) {
-            num_to_drop = inventory::num_items_at_position( drop_pair.first );
+            num_to_drop = num_items_at_position( drop_pair.first );
         }
         dropped_pos_and_qty.push_back( std::make_pair( drop_pair.first, num_to_drop ) );
     }
@@ -1142,15 +1144,15 @@ item *game::inv_map_for_liquid(const item &liquid, const std::string &title, int
                            liquid.type_name( 1 ).c_str() ) ).get_item();
 }
 
-int inventory::num_items_at_position( int const position )
+int inventory_selector::num_items_at_position( int const position ) const
 {
     if( position < -1 ) {
-        const item& armor = g->u.i_at( position );
+        const item& armor = u.i_at( position );
         return armor.count_by_charges() ? armor.charges : 1;
     } else if( position == -1 ) {
-        return g->u.weapon.count_by_charges() ? g->u.weapon.charges : 1;
+        return u.weapon.count_by_charges() ? u.weapon.charges : 1;
     } else {
-        const std::list<item> &stack = g->u.inv.const_stack(position);
+        const std::list<item> &stack = u.inv.const_stack(position);
         if( stack.size() == 1 ) {
             return stack.front().count_by_charges() ?
                 stack.front().charges : 1;
