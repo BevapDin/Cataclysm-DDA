@@ -835,10 +835,6 @@ void map::move_vehicle( vehicle &veh, const tripoint &dp, const tileray &facing 
             }
 
             veh.handle_trap( wheel_p, w );
-            if( !has_flag( "SEALED", wheel_p ) ) {
-                // TODO: Make this value depend on the wheel
-                smash_items( wheel_p, 5 );
-            }
         }
     }
 
