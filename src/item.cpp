@@ -533,7 +533,10 @@ bool item::stacks_with( const item &rhs ) const
         return false;
     }
     return std::equal( contents.begin(), contents.end(), rhs.contents.begin(), []( const item& a, const item& b ) {
-        return a.charges == b.charges && a.stacks_with( b );
+        if(!a.stacks_with(b)) {
+            return false;
+        }
+        return !a.count_by_charges() || a.charges == b.charges;
     } );
 }
 
