@@ -165,3 +165,4 @@ game.register_iuse("CUSTOM_IODINE", custom_iodine)
 game.register_iuse("CUSTOM_IUSE_TEST", custom_iuse_test)
 
 game.dofile("my-functions.lua")
+game.dofile("my-functions-2.lua")
