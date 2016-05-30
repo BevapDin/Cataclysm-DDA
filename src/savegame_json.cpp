@@ -1483,6 +1483,8 @@ void item::io( Archive& archive )
         std::swap( irridation, poison );
     }
 
+	item_tags.erase("FILTHY");
+
     // Compatiblity for item type changes: for example soap changed from being a generic item
     // (item::charges -1 or 0 or anything else) to comestible (and thereby counted by charges),
     // old saves still have invalid charges, this fixes the charges value to the default charges.

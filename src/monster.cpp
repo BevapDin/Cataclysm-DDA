@@ -1661,7 +1661,6 @@ void monster::drop_items_on_death()
     }
     for( const auto &it : dropped ) {
         if( it->is_armor() ) {
-            it->item_tags.insert( "FILTHY" );
         }
     }
 }
