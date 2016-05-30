@@ -4,7 +4,8 @@
         "subtype": "collection",
         "comment": "contains cloth for an average zombie",
         "id": "default_zombie_clothes",
-        "entries":
+        "entries": [ ],
+        "old_entries":
         [
             { "group": "pants", "damage": [1, 4] },
             { "group": "shirts", "damage": [1, 4] },
@@ -52,7 +53,8 @@
         "type" : "item_group",
         "subtype": "collection",
         "id": "mon_zombie_swimmer_death_drops",
-        "entries":
+        "entries": [ ],
+        "old_entries":
         [
             { "distribution": [
                 { "group": "swimmer_wetsuit", "damage": [1, 4], "prob": 10 },
@@ -205,7 +207,8 @@
         "type" : "item_group",
         "subtype": "collection",
         "id": "mon_zombie_fireman_death_drops",
-        "entries":
+        "entries": [ ],
+        "old_entries":
         [
             { "group": "fireman_torso", "damage": [1, 4] },
             { "group": "fireman_pants", "damage": [1, 4] },
