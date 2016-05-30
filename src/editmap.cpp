@@ -369,6 +369,7 @@ tripoint editmap::edit()
     ctxt.register_action( "EDIT_MONSTER" );
     ctxt.register_action( "EDITMAP_SHOW_ALL" );
     ctxt.register_action( "QUIT" );
+    ctxt.register_action( "CONFIRM" );
     ctxt.register_action( "HELP_KEYBINDINGS" );
     // Needed for timeout to be useful
     ctxt.register_action( "ANY_INPUT" );
@@ -432,7 +433,7 @@ tripoint editmap::edit()
         } else {
             blink = !blink;
         }
-    } while( action != "QUIT" );
+    } while( action != "QUIT" && action != "CONFIRM" );
 
     uistate.editmap_nsa_viewmode = uberdraw;
 
