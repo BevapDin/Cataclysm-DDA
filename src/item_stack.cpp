@@ -6,7 +6,7 @@
 #include <list>
 #include <algorithm>
 
-size_t item_stack::size() const
+std::list<item>::size_type item_stack::size() const
 {
     return mystack->size();
 }
@@ -61,7 +61,7 @@ item &item_stack::front()
     return mystack->front();
 }
 
-item &item_stack::operator[]( size_t index )
+item &item_stack::operator[]( std::list<item>::size_type index )
 {
     return *( std::next( mystack->begin(), index ) );
 }
