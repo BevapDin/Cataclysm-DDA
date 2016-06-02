@@ -1,0 +1,18 @@
+[
+    {
+        "type":"GENERIC",
+        "id" : "foo:sponge",
+        "name" : "sponge",
+        "description" : "Use it.",
+        "weight" : 0,
+        "color" : "light_gray",
+        "symbol" : "µ",
+        "volume" : 0,
+        "use_action": "CUSTOM_SPONGE",
+        "armor_data" : {
+           "coverage" : 0,
+           "material_thickness" : 0
+        },
+        "price" : 0
+    }
+]
