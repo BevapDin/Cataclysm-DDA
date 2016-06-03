@@ -18,5 +18,25 @@
            "material_thickness" : 0
         },
         "price" : 0
+    },
+    {
+        "type" : "vehicle_part",
+        "id" : "foo:mounted_heavy_rail_rifle",
+        "name" : "mounted railgun",
+        "symbol" : "r",
+        "color" : "dark_gray",
+        "broken_symbol" : "#",
+        "broken_color" : "cyan",
+        "damage_modifier" : 80,
+        "durability" : 500,
+        "range" : 20,
+        "item" : "heavy_rail_rifle",
+        "size" : 200,
+        "difficulty" : 6,
+        "location" : "on_roof",
+        "flags" : ["TURRET", "CARGO"],
+        "breaks_into" : [
+            {"item": "heavy_rail_rifle", "prob": 100}
+        ]
     }
 ]
