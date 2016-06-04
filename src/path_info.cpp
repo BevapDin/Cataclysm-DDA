@@ -67,7 +67,6 @@ void PATH_INFO::update_datadir()
     update_pathname("luadir", FILENAMES["datadir"] + "lua/");
 
     // Shared dirs
-    update_pathname("class_defslua", FILENAMES["luadir"] + "class_definitions.lua");
     update_pathname("fontdir", FILENAMES["datadir"] + "font/");
     update_pathname("rawdir", FILENAMES["datadir"] + "raw/");
     update_pathname("jsondir", FILENAMES["datadir"] + "json/");
@@ -128,7 +127,6 @@ void PATH_INFO::set_standard_filenames(void)
     }
 
     // Shared dirs
-    update_pathname("class_defslua", FILENAMES["luadir"] + "class_definitions.lua");
     update_pathname("fontdir", FILENAMES["datadir"] + "font/");
     update_pathname("rawdir", FILENAMES["datadir"] + "raw/");
     update_pathname("jsondir", FILENAMES["datadir"] + "json/");
