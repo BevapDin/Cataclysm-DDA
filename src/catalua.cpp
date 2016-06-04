@@ -1198,8 +1198,6 @@ void game::init_lua()
     // override default print to our version
     lua_register( lua_state, "print", game_myPrint );
 
-    // Load lua-side metatables etc.
-    lua_dofile(lua_state, FILENAMES["class_defslua"].c_str());
     lua_dofile(lua_state, FILENAMES["autoexeclua"].c_str());
 }
 
