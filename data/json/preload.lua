@@ -1,6 +1,20 @@
 -- This is executed before any json data is loaded.
 -- Place all iuse actions that shall be available for item here.
 
+-- Callbacks for mods. This function is called from the game. Mods can attach a callback
+-- to the global `mods` table to recieve the callback:
+-- `mods["my_mod"] = { "on_skill_increased" = some_mod_function }`
+mods = { }
+function mod_callback(callback_name)
+    for modname, mod_instance in pairs(mods) do
+        if type(mod_instance[callback_name]) == "function" then
+            mod_instance[callback_name]()
+        end
+    end
+end
+
+
+
 function hiccup(item, active, pos)
     item_store = item
     game.add_msg("You hiccup because of "..item:tname())
