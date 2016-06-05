@@ -2489,6 +2489,7 @@ classes = {
             { name = "fuel_left", rval = "int", args = { "std::string" } },
             { name = "fuel_left", rval = "int", args = { "std::string", "bool" } },
             { name = "gain_moves", rval = nil, args = { } },
+            { name = "get_items", rval = "vehicle_stack", args = { "int" } },
             { name = "get_label", rval = "std::string", args = { "int", "int" } },
             { name = "get_passenger", rval = "player&", args = { "int" } },
             { name = "get_points", rval = "std::set<tripoint>", args = { "bool" } },
@@ -2674,6 +2675,19 @@ classes = {
             { name = "wheel_area", rval = "int", args = { } },
             { name = "wheel_diameter", rval = "int", args = { } },
             { name = "wheel_width", rval = "int", args = { } },
+        }
+    },
+    vehicle_stack = {
+        by_value = true,
+        functions = {
+            { name = "cppbegin", rval = "std::list<item>::iterator", cpp_name = "begin", args = { } },
+            { name = "cppend", rval = "std::list<item>::iterator", cpp_name = "end", args = { } },
+            { name = "empty", rval = "bool", args = { } },
+            { name = "erase", rval = "std::list<item>::iterator", args = { "std::list<item>::iterator" } },
+            { name = "front", rval = "item&", args = { } },
+            { name = "insert_at", rval = nil, args = { "std::list<item>::iterator", "item" } },
+            { name = "push_back", rval = nil, args = { "item" } },
+            { name = "size", rval = "int", args = { } },
         }
     },
 }

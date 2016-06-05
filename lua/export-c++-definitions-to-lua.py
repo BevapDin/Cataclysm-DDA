@@ -65,6 +65,7 @@ parser.add_export_by_reference('trap')
 parser.add_export_by_reference('w_point')
 parser.add_export_by_reference('vehicle')
 parser.add_export_by_value_and_reference('vehicle_part')
+parser.add_export_by_value('vehicle_stack')
 
 # Enums that should be available in Lua.
 parser.add_export_enumeration('body_part')
@@ -97,6 +98,7 @@ parser.blocked_identifiers.add(re.compile('.*::was_loaded$'))
 parser.blocked_identifiers.add(re.compile('.*::active_items$'))
 # Stack objects are created by the containing class and not by anyone else.
 parser.blocked_identifiers.add(re.compile('map_stack::map_stack\(.*\)'))
+parser.blocked_identifiers.add(re.compile('vehicle_stack::vehicle_stack\(.*\)'))
 # Those are used during loading from JSON and should not be used any other time.
 parser.blocked_identifiers.add(re.compile('static .*::load\(.*JsonObject.*\)$'))
 parser.blocked_identifiers.add(re.compile('static .*::reset\(\)$'))
