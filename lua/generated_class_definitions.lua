@@ -162,6 +162,7 @@ classes = {
             { name = "mod_str_bonus", rval = nil, args = { "int" } },
             { name = "mod_thirst", rval = nil, args = { "int" } },
             { name = "mutation_armor", rval = "float", args = { "body_part", "damage_type" } },
+            { name = "mutation_armor", rval = "float", args = { "body_part", "damage_unit" } },
             { name = "mutation_effect", rval = nil, args = { "std::string" } },
             { name = "mutation_loss_effect", rval = nil, args = { "std::string" } },
             { name = "on_item_takeoff", rval = nil, args = { "item" } },
@@ -501,6 +502,7 @@ classes = {
             { name = "amount_worn", rval = "int", args = { "std::string" } },
             { name = "apply_persistent_morale", rval = nil, args = { } },
             { name = "apply_wetness_morale", rval = nil, args = { "int" } },
+            { name = "armor_absorb", rval = "bool", args = { "damage_unit", "item" } },
             { name = "attack_speed", rval = "int", args = { "item" } },
             { name = "attack_speed", rval = "int", args = { "item", "bool" } },
             { name = "best_shield", rval = "item&", args = { } },
@@ -653,6 +655,7 @@ classes = {
             { name = "hp_to_bp", static = true, rval = "body_part", args = { "hp_part" } },
             { name = "hurtall", rval = nil, args = { "int", "Creature" } },
             { name = "hurtall", rval = nil, args = { "int", "Creature", "bool" } },
+            { name = "immune_to", rval = "bool", args = { "body_part", "damage_unit" } },
             { name = "in_climate_control", rval = "bool", args = { } },
             { name = "install_bionics", rval = "bool", args = { "itype" } },
             { name = "install_bionics", rval = "bool", args = { "itype", "int" } },
@@ -724,6 +727,7 @@ classes = {
             { name = "on_hurt", rval = nil, args = { "Creature", "bool" } },
             { name = "overmap_los", rval = "bool", args = { "tripoint", "int" } },
             { name = "overmap_sight_range", rval = "int", args = { "int" } },
+            { name = "passive_absorb_hit", rval = nil, args = { "body_part", "damage_unit" } },
             { name = "pause", rval = nil, args = { } },
             { name = "perform_special_attacks", rval = nil, args = { "Creature" } },
             { name = "pick_style", rval = "bool", args = { } },
@@ -1132,6 +1136,7 @@ classes = {
             { name = "max_quality", rval = "int", args = { "quality_id" } },
             { name = "merge_charges", rval = "bool", args = { "item" } },
             { name = "min_damage", rval = "int", args = { } },
+            { name = "mitigate_damage", rval = nil, args = { "damage_unit" } },
             { name = "mod_charges", rval = nil, args = { "int" } },
             { name = "mod_damage", rval = "bool", args = { "float" } },
             { name = "mod_damage", rval = "bool", args = { "float", "damage_type" } },
@@ -2912,6 +2917,9 @@ classes = {
             { },
         },
         by_value = true,
+        attributes = {
+            damage_units = { type = "std::vector<damage_unit>", writable = true },
+        },
         functions = {
             { name = "add", rval = nil, args = { "damage_instance" } },
             { name = "add_damage", rval = nil, args = { "damage_type", "float" } },
@@ -2927,6 +2935,22 @@ classes = {
             { name = "total_damage", rval = "float", args = { } },
             { name = "type_damage", rval = "float", args = { "damage_type" } },
         }
+    },
+    damage_unit = {
+        new = {
+            { "damage_type", "float" },
+            { "damage_type", "float", "float" },
+            { "damage_type", "float", "float", "float" },
+            { "damage_type", "float", "float", "float", "float" },
+        },
+        by_value = true,
+        attributes = {
+            amount = { type = "float", writable = true },
+            damage_multiplier = { type = "float", writable = true },
+            res_mult = { type = "float", writable = true },
+            res_pen = { type = "float", writable = true },
+            type = { type = "damage_type", writable = true },
+        },
     },
 }
 
@@ -3135,6 +3159,7 @@ make_set_class("species_id")
 make_set_class("std::string")
 make_set_class("tripoint")
 make_vector_class("body_part")
+make_vector_class("damage_unit")
 make_vector_class("efftype_id")
 make_vector_class("item")
 make_vector_class("mabuff_id")
