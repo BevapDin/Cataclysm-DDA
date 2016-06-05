@@ -74,6 +74,7 @@ classes = {
             str_cur = { type = "int", writable = true },
             str_max = { type = "int", writable = true },
             weapon = { type = "item", writable = true },
+            worn = { type = "std::list<item>", writable = true },
         },
         functions = {
             { name = "add_traits", rval = nil, args = { } },
@@ -209,6 +210,7 @@ classes = {
             { name = "empty", rval = "bool", args = { } },
             { name = "erase", rval = "std::list<item>::iterator", args = { "std::list<item>::iterator" } },
             { name = "front", rval = "item&", args = { } },
+            { name = "insert_at", rval = nil, args = { "std::list<item>::iterator", "item" } },
             { name = "push_back", rval = nil, args = { "item" } },
             { name = "size", rval = "int", args = { } },
         }
@@ -297,6 +299,10 @@ classes = {
             { name = "handle_liquid", rval = "bool", args = { "item", "item", "int" } },
             { name = "handle_liquid_from_container", rval = "bool", args = { "item" } },
             { name = "handle_liquid_from_container", rval = "bool", args = { "item", "int" } },
+            { name = "handle_liquid_from_container", rval = "bool", args = { "std::list<item>::iterator", "item" } },
+            { name = "handle_liquid_from_container", rval = "bool", args = { "std::list<item>::iterator", "item", "int" } },
+            { name = "handle_liquid_from_ground", rval = "bool", args = { "std::list<item>::iterator", "tripoint" } },
+            { name = "handle_liquid_from_ground", rval = "bool", args = { "std::list<item>::iterator", "tripoint", "int" } },
             { name = "has_gametype", rval = "bool", args = { } },
             { name = "has_option", rval = "bool", args = { "std::string" } },
             { name = "increase_kill_count", rval = nil, args = { "mtype_id" } },
@@ -777,6 +783,8 @@ classes = {
             { name = "update_needs", rval = nil, args = { "int" } },
             { name = "update_stamina", rval = nil, args = { "int" } },
             { name = "use", rval = nil, args = { "int" } },
+            { name = "use_amount", rval = "std::list<item>", args = { "std::string", "int" } },
+            { name = "use_charges", rval = "std::list<item>", args = { "std::string", "int" } },
             { name = "use_charges_if_avail", rval = "bool", args = { "std::string", "int" } },
             { name = "use_wielded", rval = nil, args = { } },
             { name = "visibility", rval = "int", args = { "bool" } },
@@ -819,6 +827,7 @@ classes = {
             bigness = { type = "int", writable = true },
             burnt = { type = "int", writable = true },
             charges = { type = "int", writable = true },
+            contents = { type = "std::list<item>", writable = true },
             damage = { type = "int", writable = true },
             frequency = { type = "int", writable = true },
             fridge = { type = "int", writable = true },
@@ -1233,6 +1242,7 @@ classes = {
             { name = "add_field", rval = "bool", args = { "tripoint", "field_id", "int", "int" } },
             { name = "add_item", rval = "item&", args = { "tripoint", "item" } },
             { name = "add_item", rval = nil, args = { "int", "int", "item" } },
+            { name = "add_item_at", rval = "item&", args = { "tripoint", "std::list<item>::iterator", "item" } },
             { name = "add_item_or_charges", rval = "bool", args = { "int", "int", "item" } },
             { name = "add_item_or_charges", rval = "bool", args = { "int", "int", "item", "int" } },
             { name = "add_item_or_charges", rval = "item&", args = { "tripoint", "item" } },
@@ -1400,7 +1410,9 @@ classes = {
             { name = "i_clear", rval = nil, args = { "tripoint" } },
             { name = "i_rem", rval = "int", args = { "int", "int", "int" } },
             { name = "i_rem", rval = "int", args = { "tripoint", "int" } },
+            { name = "i_rem", rval = "std::list<item>::iterator", args = { "point", "std::list<item>::iterator" } },
             { name = "i_rem", rval = "std::list<item>::iterator", args = { "tripoint", "std::list<item>::iterator" } },
+            { name = "i_rem", rval = nil, args = { "int", "int", "item" } },
             { name = "i_rem", rval = nil, args = { "tripoint", "item" } },
             { name = "impassable", rval = "bool", args = { "int", "int" } },
             { name = "impassable", rval = "bool", args = { "tripoint" } },
@@ -2390,4 +2402,4 @@ enums = {
     },
 }
 
-make_iterator_class('std::list<item>', 'item')
+make_list_class("item")
