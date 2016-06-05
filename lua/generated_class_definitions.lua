@@ -1944,6 +1944,32 @@ classes = {
     },
     ma_technique = {
         string_id = "matec_id",
+        attributes = {
+            aoe = { type = "std::string", writable = true },
+            block_counter = { type = "bool", writable = true },
+            crit_tec = { type = "bool", writable = true },
+            defensive = { type = "bool", writable = true },
+            disarms = { type = "bool", writable = true },
+            dodge_counter = { type = "bool", writable = true },
+            down_dur = { type = "int", writable = true },
+            dummy = { type = "bool", writable = true },
+            goal = { type = "std::string", writable = true },
+            grab_break = { type = "bool", writable = true },
+            id = { type = "matec_id" },
+            knockback_dist = { type = "int", writable = true },
+            knockback_spread = { type = "float", writable = true },
+            miss_recovery = { type = "bool", writable = true },
+            name = { type = "std::string", writable = true },
+            npc_message = { type = "std::string", writable = true },
+            player_message = { type = "std::string", writable = true },
+            stun_dur = { type = "int", writable = true },
+            weighting = { type = "int", writable = true },
+        },
+        functions = {
+            { name = "is_valid_player", rval = "bool", args = { "player" } },
+            { name = "move_cost_multiplier", rval = "float", args = { "player" } },
+            { name = "move_cost_penalty", rval = "float", args = { "player" } },
+        }
     },
     Skill = {
         string_id = "skill_id",
