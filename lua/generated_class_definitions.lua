@@ -856,6 +856,7 @@ classes = {
             { name = "update_morale", rval = nil, args = { } },
             { name = "update_needs", rval = nil, args = { "int" } },
             { name = "update_stamina", rval = nil, args = { "int" } },
+            { name = "update_vitamins", rval = nil, args = { "vitamin_id" } },
             { name = "use", rval = nil, args = { "int" } },
             { name = "use_amount", rval = "std::list<item>", args = { "std::string", "int" } },
             { name = "use_charges", rval = "std::list<item>", args = { "std::string", "int" } },
@@ -864,6 +865,11 @@ classes = {
             { name = "visibility", rval = "int", args = { "bool" } },
             { name = "visibility", rval = "int", args = { "bool", "int" } },
             { name = "visibility", rval = "int", args = { } },
+            { name = "vitamin_get", rval = "int", args = { "vitamin_id" } },
+            { name = "vitamin_mod", rval = "int", args = { "vitamin_id", "int" } },
+            { name = "vitamin_mod", rval = "int", args = { "vitamin_id", "int", "bool" } },
+            { name = "vitamin_rate", rval = "int", args = { "vitamin_id" } },
+            { name = "vitamin_set", rval = "bool", args = { "vitamin_id", "int" } },
             { name = "vomit", rval = nil, args = { } },
             { name = "vomit_mod", rval = "float", args = { } },
             { name = "wake_up", rval = nil, args = { } },
@@ -2065,6 +2071,7 @@ classes = {
             { name = "repaired_with", rval = "std::string", args = { } },
             { name = "salvaged_into", rval = "std::string", args = { } },
             { name = "soft", rval = "bool", args = { } },
+            { name = "vitamin", rval = "float", args = { "vitamin_id" } },
         }
     },
     start_location = {
@@ -2809,6 +2816,20 @@ classes = {
             { name = "set_intensity", rval = "int", args = { "int", "bool" } },
             { name = "unpause_effect", rval = nil, args = { } },
             { name = "use_part_descs", rval = "bool", args = { } },
+        }
+    },
+    vitamin = {
+        string_id = "vitamin_id",
+        functions = {
+            { name = "deficiency", rval = "efftype_id", args = { } },
+            { name = "excess", rval = "efftype_id", args = { } },
+            { name = "id", rval = "vitamin_id", args = { } },
+            { name = "is_null", rval = "bool", args = { } },
+            { name = "max", rval = "int", args = { } },
+            { name = "min", rval = "int", args = { } },
+            { name = "name", rval = "std::string", args = { } },
+            { name = "rate", rval = "int", args = { } },
+            { name = "severity", rval = "int", args = { "int" } },
         }
     },
 }
