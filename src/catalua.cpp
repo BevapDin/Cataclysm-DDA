@@ -51,6 +51,8 @@ using volume = units::volume;
 using mass = units::mass;
 using npc_template_id = string_id<npc_template>;
 
+static const char * const OUTDATED_METATABLE_NAME = "outdated_metatable";
+
 lua_State *lua_state = nullptr;
 
 // Keep track of the current mod from which we are executing, so that
@@ -789,9 +791,9 @@ public:
         // being used anymore by setting a metatable that will error on
         // access.
         luah_remove_from_registry( L, item_in_registry );
-        luah_setmetatable( L, "outdated_metatable");
+        luah_setmetatable( L, OUTDATED_METATABLE_NAME );
         luah_remove_from_registry( L, tripoint_in_registry );
-        luah_setmetatable( L, "outdated_metatable" );
+        luah_setmetatable( L, OUTDATED_METATABLE_NAME );
 
         return lua_tointeger( L, -1 );
     }
@@ -1174,6 +1176,21 @@ void game::init_lua()
     luaL_setfuncs(lua_state, &lib_funcs.front(), 0);
     lua_setglobal(lua_state, "game");
 #endif
+
+    // create the "outdated_metatable" table.
+    luaL_newmetatable( lua_state, OUTDATED_METATABLE_NAME );
+    lua_pushvalue( lua_state, -1 );
+    lua_pushcfunction( lua_state, static_cast<int( * )( lua_State * )>( []( lua_State * const L )
+    {
+        return luaL_error( L, "Attempt to access outdated gamedata." );
+    } ) );
+    lua_setfield( lua_state, -2, "__index" );
+    lua_pushcfunction( lua_state, static_cast<int( * )( lua_State * )>( []( lua_State * const L )
+    {
+        return luaL_error( L, "Attempt to access outdated gamedata." );
+    } ) );
+    lua_setfield( lua_state, -2, "__newindex" );
+    lua_pop( lua_state, 1 );
 
     load_metatables( lua_state );
     LuaEnum<body_part>::export_global( lua_state, "body_part" );
