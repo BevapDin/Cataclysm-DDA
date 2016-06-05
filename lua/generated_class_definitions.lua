@@ -9,6 +9,7 @@ classes = {
             { name = "get_apply_memorial_log", rval = "std::string", args = { } },
             { name = "get_apply_message", rval = "std::string", args = { } },
             { name = "get_main_parts", rval = "bool", args = { } },
+            { name = "get_rating", rval = "effect_rating", args = { } },
             { name = "get_remove_memorial_log", rval = "std::string", args = { } },
             { name = "get_remove_message", rval = "std::string", args = { } },
             { name = "lose_game_message_type", rval = "game_message_type", args = { } },
@@ -3236,6 +3237,12 @@ enums = {
         "MF_AVOID_DANGER_2",
         "MF_PRIORITIZE_TARGETS",
         "MF_MAX",
+    },
+    effect_rating = {
+        "e_good",
+        "e_neutral",
+        "e_bad",
+        "e_mixed",
     },
 }
 
