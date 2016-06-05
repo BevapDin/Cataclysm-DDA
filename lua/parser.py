@@ -104,6 +104,7 @@ class Parser:
 
         self.enums = { }
         self.classes = { }
+        self.visited_files = [ ]
         self.index = clang.cindex.Index.create()
 
         self.build_in_typedefs = {
@@ -250,6 +251,9 @@ class Parser:
 
 
     def parse(self, header):
+        if header in self.visited_files:
+            print('Skipping file %s as it was already included by another file' % (header))
+            return
         try:
             opts = clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES | clang.cindex.TranslationUnit.PARSE_INCOMPLETE
             # @todo the include path should not be fixed!
@@ -258,6 +262,8 @@ class Parser:
             for d in tu.diagnostics:
                 print("Diagnostic at %s:%s: %s" % (d.location.file.name, d.location.line, d.spelling))
             self.parse_cursor(tu.cursor)
+            for i in tu.get_includes():
+                self.visited_files.append(i.source.name)
         except clang.cindex.TranslationUnitLoadError as e:
             print("Failed to parse %s: %s" % (header, str(e)))
 
