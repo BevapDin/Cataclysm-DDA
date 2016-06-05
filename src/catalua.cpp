@@ -31,6 +31,7 @@
 #include "mtype.h"
 #include "field.h"
 #include "martialarts.h"
+#include "material.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"

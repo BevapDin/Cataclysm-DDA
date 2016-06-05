@@ -1891,6 +1891,24 @@ classes = {
     },
     material_type = {
         string_id = "material_id",
+        functions = {
+            { name = "acid_resist", rval = "int", args = { } },
+            { name = "bash_dmg_verb", rval = "std::string", args = { } },
+            { name = "bash_resist", rval = "int", args = { } },
+            { name = "chip_resist", rval = "int", args = { } },
+            { name = "cut_dmg_verb", rval = "std::string", args = { } },
+            { name = "cut_resist", rval = "int", args = { } },
+            { name = "density", rval = "int", args = { } },
+            { name = "dmg_adj", rval = "std::string", args = { "int" } },
+            { name = "edible", rval = "bool", args = { } },
+            { name = "elec_resist", rval = "int", args = { } },
+            { name = "fire_resist", rval = "int", args = { } },
+            { name = "ident", rval = "material_id", args = { } },
+            { name = "is_null", rval = "bool", args = { } },
+            { name = "name", rval = "std::string", args = { } },
+            { name = "salvage_id", rval = "std::string", args = { } },
+            { name = "salvage_multiplier", rval = "float", args = { } },
+        }
     },
     start_location = {
         string_id = "start_location_id",
