@@ -629,6 +629,7 @@ classes = {
             { name = "get_armor_cut_base", rval = "int", args = { "body_part" } },
             { name = "get_armor_fire", rval = "int", args = { "body_part" } },
             { name = "get_category_dream", rval = "std::string", args = { "std::string", "int" } },
+            { name = "get_combat_style", rval = "martialart&", args = { } },
             { name = "get_comestible_from", rval = "item&", args = { "item" } },
             { name = "get_dodge", rval = "float", args = { } },
             { name = "get_dodge_base", rval = "float", args = { } },
@@ -2067,6 +2068,30 @@ classes = {
     },
     martialart = {
         string_id = "matype_id",
+        attributes = {
+            arm_block = { type = "int", writable = true },
+            arm_block_with_bio_armor_arms = { type = "bool", writable = true },
+            description = { type = "std::string", writable = true },
+            force_unarmed = { type = "bool", writable = true },
+            id = { type = "matype_id", writable = true },
+            leg_block = { type = "int", writable = true },
+            leg_block_with_bio_armor_legs = { type = "bool", writable = true },
+            name = { type = "std::string", writable = true },
+            strictly_unarmed = { type = "bool", writable = true },
+            was_loaded = { type = "bool", writable = true },
+        },
+        functions = {
+            { name = "apply_onattack_buffs", rval = nil, args = { "player" } },
+            { name = "apply_onblock_buffs", rval = nil, args = { "player" } },
+            { name = "apply_ondodge_buffs", rval = nil, args = { "player" } },
+            { name = "apply_ongethit_buffs", rval = nil, args = { "player" } },
+            { name = "apply_onhit_buffs", rval = nil, args = { "player" } },
+            { name = "apply_onmove_buffs", rval = nil, args = { "player" } },
+            { name = "apply_static_buffs", rval = nil, args = { "player" } },
+            { name = "has_technique", rval = "bool", args = { "player", "matec_id" } },
+            { name = "has_weapon", rval = "bool", args = { "std::string" } },
+            { name = "weapon_valid", rval = "bool", args = { "item" } },
+        }
     },
     material_type = {
         string_id = "material_id",
