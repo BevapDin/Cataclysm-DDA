@@ -99,9 +99,6 @@ classes['point'].has_equal = true
 classes['tripoint'].new[#classes['tripoint'].new] = { 'tripoint' }
 classes['point'].new[#classes['point'].new] = { 'point' }
 
--- Doesn't support iterators at all.
-make_iterator_class('std::list<item>', 'item')
-
 -- Classes from templates can not be detected.
 classes['units::volume'] = {
     by_value = true,

@@ -103,9 +103,7 @@ classes = {
             visibility = { type = "int", writable = true },
         },
         functions = {
-            { name = "check_consistency", static = true, rval = nil, args = { } },
             { name = "conflicts_with_item", rval = "bool", args = { "item" } },
-            { name = "finalize", static = true, rval = nil, args = { } },
             { name = "finalize_trait_blacklist", static = true, rval = nil, args = { } },
             { name = "get_display_color", rval = "nc_color", args = { } },
             { name = "get_name", static = true, rval = "std::string", args = { "trait_id" } },
@@ -130,6 +128,7 @@ classes = {
             str_cur = { type = "int", writable = true },
             str_max = { type = "int", writable = true },
             weapon = { type = "item", writable = true },
+            worn = { type = "std::list<item>", writable = true },
         },
         functions = {
             { name = "add_traits", rval = nil, args = { } },
@@ -287,9 +286,13 @@ classes = {
         functions = {
             { name = "amount_can_fit", rval = "int", args = { "item" } },
             { name = "count_limit", rval = "int", args = { } },
+            { name = "cppbegin", rval = "std::list<item>::iterator", cpp_name = "begin", args = { } },
+            { name = "cppend", rval = "std::list<item>::iterator", cpp_name = "end", args = { } },
             { name = "empty", rval = "bool", args = { } },
+            { name = "erase", rval = "std::list<item>::iterator", args = { "std::list<item>::iterator" } },
             { name = "free_volume", rval = "units::volume", args = { } },
             { name = "front", rval = "item&", args = { } },
+            { name = "insert_at", rval = nil, args = { "std::list<item>::iterator", "item" } },
             { name = "max_volume", rval = "units::volume", args = { } },
             { name = "push_back", rval = nil, args = { "item" } },
             { name = "size", rval = "int", args = { } },
@@ -302,7 +305,6 @@ classes = {
             driving_view_offset = { type = "point", writable = true },
             fullscreen = { type = "bool", writable = true },
             lightning_active = { type = "bool", writable = true },
-            m = { type = "map", writable = true },
             monstairz = { type = "int", writable = true },
             narrow_sidebar = { type = "bool", writable = true },
             new_game = { type = "bool", writable = true },
@@ -312,7 +314,6 @@ classes = {
             ter_view_x = { type = "int", writable = true },
             ter_view_y = { type = "int", writable = true },
             ter_view_z = { type = "int", writable = true },
-            u = { type = "player", writable = true },
             was_fullscreen = { type = "bool", writable = true },
         },
         functions = {
@@ -350,6 +351,11 @@ classes = {
             { name = "draw_veh_dir_indicator", rval = nil, args = { "bool" } },
             { name = "draw_zones", rval = nil, args = { "tripoint", "tripoint", "tripoint" } },
             { name = "emp_blast", rval = nil, args = { "tripoint" } },
+            { name = "explosion", rval = nil, args = { "tripoint", "float" } },
+            { name = "explosion", rval = nil, args = { "tripoint", "float", "float" } },
+            { name = "explosion", rval = nil, args = { "tripoint", "float", "float", "bool" } },
+            { name = "explosion", rval = nil, args = { "tripoint", "float", "float", "bool", "int" } },
+            { name = "explosion", rval = nil, args = { "tripoint", "float", "float", "bool", "int", "int" } },
             { name = "extended_description", rval = nil, args = { "tripoint" } },
             { name = "flashbang", rval = nil, args = { "tripoint" } },
             { name = "flashbang", rval = nil, args = { "tripoint", "bool" } },
@@ -370,6 +376,10 @@ classes = {
             { name = "handle_liquid", rval = "bool", args = { "item", "item", "int" } },
             { name = "handle_liquid_from_container", rval = "bool", args = { "item" } },
             { name = "handle_liquid_from_container", rval = "bool", args = { "item", "int" } },
+            { name = "handle_liquid_from_container", rval = "bool", args = { "std::list<item>::iterator", "item" } },
+            { name = "handle_liquid_from_container", rval = "bool", args = { "std::list<item>::iterator", "item", "int" } },
+            { name = "handle_liquid_from_ground", rval = "bool", args = { "std::list<item>::iterator", "tripoint" } },
+            { name = "handle_liquid_from_ground", rval = "bool", args = { "std::list<item>::iterator", "tripoint", "int" } },
             { name = "has_gametype", rval = "bool", args = { } },
             { name = "increase_kill_count", rval = nil, args = { "mtype_id" } },
             { name = "init_ui", rval = nil, args = { } },
@@ -786,6 +796,7 @@ classes = {
             { name = "swim_speed", rval = "int", args = { } },
             { name = "takeoff", rval = "bool", args = { "int" } },
             { name = "takeoff", rval = "bool", args = { "item" } },
+            { name = "takeoff", rval = "bool", args = { "item", "std::list<item>" } },
             { name = "talk_skill", rval = "int", args = { } },
             { name = "temp_equalizer", rval = nil, args = { "body_part", "body_part" } },
             { name = "thirst_speed_penalty", static = true, rval = "int", args = { "int" } },
@@ -807,6 +818,8 @@ classes = {
             { name = "update_needs", rval = nil, args = { "int" } },
             { name = "update_stamina", rval = nil, args = { "int" } },
             { name = "use", rval = nil, args = { "int" } },
+            { name = "use_amount", rval = "std::list<item>", args = { "std::string", "int" } },
+            { name = "use_charges", rval = "std::list<item>", args = { "std::string", "int" } },
             { name = "use_charges_if_avail", rval = "bool", args = { "std::string", "int" } },
             { name = "use_wielded", rval = nil, args = { } },
             { name = "visibility", rval = "int", args = { "bool" } },
@@ -849,6 +862,7 @@ classes = {
             active = { type = "bool", writable = true },
             burnt = { type = "int", writable = true },
             charges = { type = "int", writable = true },
+            contents = { type = "std::list<item>", writable = true },
             frequency = { type = "int", writable = true },
             fridge = { type = "int", writable = true },
             invlet = { type = "int", writable = true },
@@ -1304,6 +1318,7 @@ classes = {
             { name = "add_field", rval = "bool", args = { "tripoint", "field_id", "int", "int" } },
             { name = "add_item", rval = "item&", args = { "tripoint", "item" } },
             { name = "add_item", rval = nil, args = { "int", "int", "item" } },
+            { name = "add_item_at", rval = "item&", args = { "tripoint", "std::list<item>::iterator", "item" } },
             { name = "add_item_or_charges", rval = "item&", args = { "int", "int", "item" } },
             { name = "add_item_or_charges", rval = "item&", args = { "int", "int", "item", "bool" } },
             { name = "add_item_or_charges", rval = "item&", args = { "tripoint", "item" } },
@@ -1441,6 +1456,8 @@ classes = {
             { name = "i_clear", rval = nil, args = { "tripoint" } },
             { name = "i_rem", rval = "int", args = { "int", "int", "int" } },
             { name = "i_rem", rval = "int", args = { "tripoint", "int" } },
+            { name = "i_rem", rval = "std::list<item>::iterator", args = { "point", "std::list<item>::iterator" } },
+            { name = "i_rem", rval = "std::list<item>::iterator", args = { "tripoint", "std::list<item>::iterator" } },
             { name = "i_rem", rval = nil, args = { "int", "int", "item" } },
             { name = "i_rem", rval = nil, args = { "tripoint", "item" } },
             { name = "impassable", rval = "bool", args = { "int", "int" } },
@@ -1505,6 +1522,8 @@ classes = {
             { name = "process_fields", rval = "bool", args = { } },
             { name = "propagate_field", rval = nil, args = { "tripoint", "field_id", "int" } },
             { name = "propagate_field", rval = nil, args = { "tripoint", "field_id", "int", "int" } },
+            { name = "put_items_from_loc", rval = nil, args = { "std::string", "tripoint" } },
+            { name = "put_items_from_loc", rval = nil, args = { "std::string", "tripoint", "time_point" } },
             { name = "random_outdoor_tile", rval = "point", args = { } },
             { name = "ranged_target_size", rval = "float", args = { "tripoint" } },
             { name = "remove_field", rval = nil, args = { "tripoint", "field_id" } },
@@ -1588,7 +1607,6 @@ classes = {
             transparent = { type = "bool", writable = true },
             trap = { type = "trap_id", writable = true },
             trap_id_str = { type = "std::string", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "check", rval = nil, args = { } },
@@ -1617,7 +1635,6 @@ classes = {
             movecost = { type = "int", writable = true },
             open = { type = "furn_str_id", writable = true },
             transparent = { type = "bool", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "check", rval = nil, args = { } },
@@ -1916,7 +1933,6 @@ classes = {
             leg_block_with_bio_armor_legs = { type = "bool", writable = true },
             name = { type = "std::string", writable = true },
             strictly_unarmed = { type = "bool", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "apply_onattack_buffs", rval = nil, args = { "player" } },
@@ -1935,7 +1951,6 @@ classes = {
         string_id = "material_id",
         attributes = {
             id = { type = "material_id" },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "acid_resist", rval = "int", args = { } },
@@ -1967,7 +1982,6 @@ classes = {
             { name = "name", rval = "std::string", args = { } },
             { name = "place_player", rval = nil, args = { "player" } },
             { name = "prepare_map", rval = nil, args = { "tripoint" } },
-            { name = "reset", static = true, rval = nil, args = { } },
             { name = "surround_with_monsters", rval = nil, args = { "tripoint", "mongroup_id", "float" } },
             { name = "target", rval = "std::string", args = { } },
         }
@@ -1986,7 +2000,6 @@ classes = {
             quiet = { type = "bool", writable = true },
             strictly_unarmed = { type = "bool", writable = true },
             throw_immune = { type = "bool", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "apply_buff", rval = nil, args = { "player" } },
@@ -2024,7 +2037,6 @@ classes = {
             npc_message = { type = "std::string", writable = true },
             player_message = { type = "std::string", writable = true },
             stun_dur = { type = "int", writable = true },
-            was_loaded = { type = "bool", writable = true },
             weighting = { type = "int", writable = true },
         },
         functions = {
@@ -2045,7 +2057,6 @@ classes = {
             { name = "is_contextual_skill", rval = "bool", args = { } },
             { name = "name", rval = "std::string", args = { } },
             { name = "random_skill", static = true, rval = "skill_id", args = { } },
-            { name = "reset", static = true, rval = nil, args = { } },
             { name = "skill_count", static = true, rval = "int", args = { } },
         }
     },
@@ -2054,11 +2065,7 @@ classes = {
         attributes = {
             id = { type = "quality_id" },
             name = { type = "std::string", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
-        functions = {
-            { name = "reset", static = true, rval = nil, args = { } },
-        }
     },
     npc_template = {
         string_id = "npc_template_id",
@@ -2122,7 +2129,6 @@ classes = {
             upgrades = { type = "bool", writable = true },
             vision_day = { type = "int", writable = true },
             vision_night = { type = "int", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "bloodType", rval = "field_id", args = { } },
@@ -2274,14 +2280,11 @@ classes = {
             id = { type = "trap_str_id" },
             loadid = { type = "trap_id" },
             sym = { type = "int", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "can_see", rval = "bool", args = { "tripoint", "player" } },
-            { name = "check_consistency", static = true, rval = nil, args = { } },
             { name = "count", static = true, rval = "int", args = { } },
             { name = "detect_trap", rval = "bool", args = { "tripoint", "player" } },
-            { name = "finalize", static = true, rval = nil, args = { } },
             { name = "funnel_turns_per_charge", rval = "float", args = { "float" } },
             { name = "get_avoidance", rval = "int", args = { } },
             { name = "get_difficulty", rval = "int", args = { } },
@@ -2292,7 +2295,6 @@ classes = {
             { name = "is_null", rval = "bool", args = { } },
             { name = "name", rval = "std::string", args = { } },
             { name = "on_disarmed", rval = nil, args = { "tripoint" } },
-            { name = "reset", static = true, rval = nil, args = { } },
             { name = "trigger", rval = nil, args = { "tripoint", "Creature" } },
             { name = "triggered_by_item", rval = "bool", args = { "item" } },
         }
@@ -2436,3 +2438,5 @@ enums = {
         "num_fields",
     },
 }
+
+make_list_class("item")
