@@ -84,8 +84,6 @@ no connection at all to the monster.
 classes = {
     effect_type = {
         string_id = "efftype_id",
-        functions = {
-        }
     },
     calendar = {
         new = {
@@ -382,8 +380,6 @@ classes = {
             encumbrance = { type = "int", writable = true },
             layer_penalty = { type = "int", writable = true },
         },
-        functions = {
-        }
     },
     stats = {
         attributes = {
@@ -1073,8 +1069,6 @@ classes = {
             { "point" },
             { "int", "int" },
         },
-        functions = {
-        }
     },
     tripoint = {
         by_value = true,
@@ -1688,46 +1682,30 @@ classes = {
     },
     martialart = {
         string_id = "matype_id",
-        functions = {
-        }
     },
     material_type = {
         string_id = "material_id",
-        functions = {
-        }
     },
     start_location = {
         string_id = "start_location_id",
-        functions = {
-        }
     },
     ma_buff = {
         string_id = "mabuff_id",
-        functions = {
-        }
     },
     ma_technique = {
         string_id = "matec_id",
-        functions = {
-        }
     },
     Skill = {
         string_id = "skill_id",
-        functions = {
-        }
     },
     quality = {
         string_id = "quality_id",
         attributes = {
             name = { type = "std::string", writable = false }
         },
-        functions = {
-        }
     },
     species_type = {
         string_id = "species_id",
-        functions = {
-        }
     },
     ammunition_type = {
         string_id = "ammotype",
@@ -1909,8 +1887,6 @@ classes = {
             temperature = { type = "float" },
             windpower = { type = "float" },
         },
-        functions = {
-        }
     }
 }
 
