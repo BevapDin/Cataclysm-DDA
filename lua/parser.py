@@ -545,6 +545,12 @@ class CppClass:
                 if c.kind == clang.cindex.CursorKind.CXX_OVERRIDE_ATTR:
                     self.overridden = True
 
+        # Function names that are keywords in Lua need to be translated to valid names.
+        function_name_translation_table = {
+            'begin': 'cppbegin',
+            'end': 'cppend',
+        }
+
         def cb(self, args):
             # TODO: add support for *some* operators
             if re.match('^operator[^a-zA-Z0-9_]', self.cursor.spelling):
@@ -561,10 +567,15 @@ class CppClass:
             result = self.parent.parser.translate_result_type(self.cursor.result_type)
             line = ""
             line = line + "{ "
-            line = line + "name = \"" + self.cursor.spelling + "\", "
+            name = self.cursor.spelling
+            if name in self.function_name_translation_table:
+                name = self.function_name_translation_table[name]
+            line = line + "name = \"" + name + "\", "
             if self.cursor.is_static_method():
                 line = line + "static = true, "
             line = line + "rval = " + result + ", "
+            if name != self.cursor.spelling:
+                line = line + "cpp_name = \"" + self.cursor.spelling + "\", "
             if self.cursor.raw_comment and self.parent.parser.export_comments:
                 line = line + "comment = \"" + re.sub('"', '\\"', self.cursor.raw_comment) + "\", "
             line = line + "args = " + args
