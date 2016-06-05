@@ -603,6 +603,7 @@ classes = {
             { name = "gun_value", rval = "float", args = { "item", "int" } },
             { name = "gunmod_add", rval = nil, args = { "item", "item" } },
             { name = "gunmod_remove", rval = "bool", args = { "item", "item" } },
+            { name = "handle_gun_damage", rval = "bool", args = { "itype", "std::set<std::string>" } },
             { name = "handle_melee_wear", rval = "bool", args = { "float" } },
             { name = "handle_melee_wear", rval = "bool", args = { "item" } },
             { name = "handle_melee_wear", rval = "bool", args = { "item", "float" } },
@@ -855,6 +856,7 @@ classes = {
             invlet = { type = "int", writable = true },
             irridation = { type = "int", writable = true },
             item_counter = { type = "int", writable = true },
+            item_tags = { type = "std::set<std::string>", writable = true },
             mission_id = { type = "int", writable = true },
             note = { type = "int", writable = true },
             player_id = { type = "int", writable = true },
@@ -877,6 +879,8 @@ classes = {
             { name = "ammo_data", rval = "itype&", args = { } },
             { name = "ammo_default", rval = "std::string", args = { "bool" } },
             { name = "ammo_default", rval = "std::string", args = { } },
+            { name = "ammo_effects", rval = "std::set<std::string>", args = { "bool" } },
+            { name = "ammo_effects", rval = "std::set<std::string>", args = { } },
             { name = "ammo_remaining", rval = "int", args = { } },
             { name = "ammo_required", rval = "int", args = { } },
             { name = "ammo_set", rval = "item&", args = { "std::string" } },
@@ -959,6 +963,7 @@ classes = {
             { name = "get_rot", rval = "int", args = { } },
             { name = "get_side", rval = "int", args = { } },
             { name = "get_storage", rval = "int", args = { } },
+            { name = "get_techniques", rval = "std::set<matec_id>", args = { } },
             { name = "get_thickness", rval = "int", args = { } },
             { name = "get_usable_item", rval = "item&", args = { "std::string" } },
             { name = "get_var", rval = "float", args = { "std::string", "float" } },
@@ -1063,6 +1068,8 @@ classes = {
             { name = "made_of", rval = "bool", args = { "phase_id" } },
             { name = "made_of", rval = "std::vector<material_id>", args = { } },
             { name = "made_of_any", rval = "bool", args = { "std::vector<material_id>" } },
+            { name = "magazine_compatible", rval = "std::set<std::string>", args = { "bool" } },
+            { name = "magazine_compatible", rval = "std::set<std::string>", args = { } },
             { name = "magazine_convert", rval = "std::vector<item>", args = { } },
             { name = "magazine_current", rval = "item&", args = { } },
             { name = "magazine_default", rval = "std::string", args = { "bool" } },
@@ -1515,6 +1522,7 @@ classes = {
             { name = "reset_vehicle_cache", rval = nil, args = { "int" } },
             { name = "rotate", rval = nil, args = { "int" } },
             { name = "route", rval = "std::vector<tripoint>", args = { "tripoint", "tripoint", "int", "int" } },
+            { name = "route", rval = "std::vector<tripoint>", args = { "tripoint", "tripoint", "int", "int", "std::set<tripoint>" } },
             { name = "save", rval = nil, args = { } },
             { name = "sees", rval = "bool", args = { "tripoint", "tripoint", "int" } },
             { name = "sees_some_items", rval = "bool", args = { "tripoint", "Creature" } },
@@ -1926,6 +1934,8 @@ classes = {
             onmove_buffs = { type = "std::vector<mabuff_id>", writable = true },
             static_buffs = { type = "std::vector<mabuff_id>", writable = true },
             strictly_unarmed = { type = "bool", writable = true },
+            techniques = { type = "std::set<matec_id>", writable = true },
+            weapons = { type = "std::set<std::string>", writable = true },
         },
         functions = {
             { name = "apply_onattack_buffs", rval = nil, args = { "player" } },
@@ -1967,6 +1977,7 @@ classes = {
             { name = "add_map_special", rval = nil, args = { "tripoint", "std::string" } },
             { name = "burn", rval = nil, args = { "tripoint", "int", "int" } },
             { name = "find_player_initial_location", rval = "tripoint", args = { } },
+            { name = "flags", rval = "std::set<std::string>", args = { } },
             { name = "handle_heli_crash", rval = nil, args = { "player" } },
             { name = "name", rval = "std::string", args = { } },
             { name = "place_player", rval = nil, args = { "player" } },
@@ -2014,6 +2025,7 @@ classes = {
             dodge_counter = { type = "bool", writable = true },
             down_dur = { type = "int", writable = true },
             dummy = { type = "bool", writable = true },
+            flags = { type = "std::set<std::string>", writable = true },
             goal = { type = "std::string", writable = true },
             grab_break = { type = "bool", writable = true },
             id = { type = "matec_id" },
@@ -2084,6 +2096,7 @@ classes = {
             armor_stab = { type = "int", writable = true },
             attack_cost = { type = "int", writable = true },
             burn_into = { type = "mtype_id", writable = true },
+            categories = { type = "std::set<std::string>", writable = true },
             color = { type = "int", writable = true },
             death_drops = { type = "std::string", writable = true },
             def_chance = { type = "int", writable = true },
@@ -2103,6 +2116,7 @@ classes = {
             size = { type = "m_size", writable = true },
             sk_dodge = { type = "int", writable = true },
             special_attacks_names = { type = "std::vector<std::string>", writable = true },
+            species = { type = "std::set<species_id>", writable = true },
             speed = { type = "int", writable = true },
             sym = { type = "std::string", writable = true },
             upgrade_group = { type = "mongroup_id", writable = true },
@@ -2193,6 +2207,7 @@ classes = {
             explode_in_fire = { type = "bool", writable = true },
             id = { type = "std::string" },
             integral_volume = { type = "int", writable = true },
+            item_tags = { type = "std::set<std::string>", writable = true },
             light_emission = { type = "int", writable = true },
             m_to_hit = { type = "int", writable = true },
             magazine_well = { type = "int", writable = true },
@@ -2210,6 +2225,7 @@ classes = {
             snippet_category = { type = "std::string", writable = true },
             stack_size = { type = "int", writable = true },
             sym = { type = "std::string", writable = true },
+            techniques = { type = "std::set<matec_id>", writable = true },
             volume = { type = "int", writable = true },
             weight = { type = "int", writable = true },
         },
@@ -2449,6 +2465,10 @@ enums = {
 }
 
 make_list_class("item")
+make_set_class("matec_id")
+make_set_class("species_id")
+make_set_class("std::string")
+make_set_class("tripoint")
 make_vector_class("item")
 make_vector_class("mabuff_id")
 make_vector_class("matec_id")
