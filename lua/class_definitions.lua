@@ -279,24 +279,13 @@ classes = {
             { name = "mod_stat", rval = nil, args = { "std::string", "int" } }
         }
     },
-    item_stack_iterator = {
-        by_value = true,
-        has_equal = true,
-        new = {
-            { "item_stack_iterator" },
-        },
-        functions = {
-            { name = "elem", rval = "item&", cpp_name = "operator*"; args = { } },
-            { name = "inc", rval = nil, cpp_name = "operator++", args = { } },
-        }
-    },
     map_stack = {
         by_value = true,
         functions = {
-            { name = "cppbegin", rval = "item_stack_iterator", cpp_name = "begin", args = { } },
-            { name = "cppend", rval = "item_stack_iterator", cpp_name = "end", args = {} },
+            { name = "cppbegin", rval = "std::list<item>::iterator", cpp_name = "begin", args = { } },
+            { name = "cppend", rval = "std::list<item>::iterator", cpp_name = "end", args = {} },
             { name = "empty", rval = "bool", args = { } },
-            { name = "erase", rval = "item_stack_iterator", args = { "item_stack_iterator" } },
+            { name = "erase", rval = "std::list<item>::iterator", args = { "std::list<item>::iterator" } },
             { name = "push_back", rval = nil, args = { "item" } },
             { name = "size", rval = "int", args = { } },
         }
@@ -1236,7 +1225,7 @@ classes = {
             { name = "i_at", rval = "map_stack", args = { "tripoint" } },
             { name = "i_clear", rval = nil, args = { "tripoint" } },
             { name = "i_rem", rval = "int", args = { "tripoint", "int" } },
-            { name = "i_rem", rval = "item_stack_iterator", args = { "tripoint", "item_stack_iterator" } },
+            { name = "i_rem", rval = "std::list<item>::iterator", args = { "tripoint", "std::list<item>::iterator" } },
             { name = "i_rem", rval = nil, args = { "tripoint", "item" } },
             { name = "impassable", rval = "bool", args = { "tripoint" } },
             { name = "impassable_ter_furn", rval = "bool", args = { "tripoint" } },
@@ -2038,6 +2027,8 @@ enums = {
         "num_fields",
     }
 }
+
+make_iterator_class('std::list<item>', 'item')
 
 global_functions = {
     add_msg = {
