@@ -1082,21 +1082,6 @@ classes = {
             { name = "weight", rval = "int", args = { } },
         }
     },
-    item_location = {
-        by_value = true,
-        has_equal = true,
-        functions = {
-            { name = "describe", rval = "std::string", args = { "Character" } },
-            { name = "describe", rval = "std::string", args = { } },
-            { name = "get_item", rval = "item&", args = { } },
-            { name = "obtain", rval = "int", args = { "Character" } },
-            { name = "obtain", rval = "int", args = { "Character", "int" } },
-            { name = "obtain_cost", rval = "int", args = { "Character" } },
-            { name = "obtain_cost", rval = "int", args = { "Character", "int" } },
-            { name = "position", rval = "tripoint", args = { } },
-            { name = "remove_item", rval = nil, args = { } },
-        }
-    },
     point = {
         new = {
             { "int", "int" },
