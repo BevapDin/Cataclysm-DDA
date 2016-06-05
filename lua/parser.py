@@ -388,6 +388,8 @@ class Parser:
         if res: return res
         res = self.register_container('vector', t)
         if res: return res
+        res = self.register_container('set', t)
+        if res: return res
 
         return None
 
