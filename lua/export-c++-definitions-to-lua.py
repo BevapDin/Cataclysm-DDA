@@ -9,7 +9,7 @@ headers = [
     'player.h', 'character.h', 'bodypart.h', 'creature.h', 'game.h',
     'map.h', 'enums.h', 'calendar.h', 'mtype.h', 'itype.h', 'item.h',
     'ui.h', 'martialarts.h', 'trap.h', 'field.h', 'overmap.h',
-    'mutation.h', 'effect.h', 'material.h',
+    'mutation.h', 'effect.h', 'material.h', 'start_location.h',
     'monstergenerator.h', 'item_stack.h', 'mongroup.h', 'weather_gen.h',
 ]
 
@@ -40,7 +40,7 @@ parser.add_export_by_reference('Creature')
 parser.add_export_by_reference('monster')
 parser.add_export_by_reference('martialart')
 parser.add_export_by_reference('material_type')
-parser.add_export_for_string_id('start_location_id', 'start_location')
+parser.add_export_by_reference('start_location')
 parser.add_export_by_reference('ma_buff')
 parser.add_export_by_reference('ma_technique')
 parser.add_export_by_reference('Skill')
