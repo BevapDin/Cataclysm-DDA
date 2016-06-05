@@ -30,6 +30,7 @@
 #include "overmap.h"
 #include "mtype.h"
 #include "field.h"
+#include "martialarts.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
