@@ -1912,6 +1912,16 @@ classes = {
     },
     start_location = {
         string_id = "start_location_id",
+        functions = {
+            { name = "add_map_special", rval = nil, args = { "tripoint", "std::string" } },
+            { name = "burn", rval = nil, args = { "tripoint", "int", "int" } },
+            { name = "find_player_initial_location", rval = "tripoint", args = { } },
+            { name = "handle_heli_crash", rval = nil, args = { "player" } },
+            { name = "name", rval = "std::string", args = { } },
+            { name = "place_player", rval = nil, args = { "player" } },
+            { name = "prepare_map", rval = nil, args = { "tripoint" } },
+            { name = "target", rval = "std::string", args = { } },
+        }
     },
     ma_buff = {
         string_id = "mabuff_id",
