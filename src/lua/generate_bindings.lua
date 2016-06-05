@@ -539,6 +539,32 @@ function make_vector_class(element_type)
     }
     return iterator_type
 end
+function make_set_class(element_type)
+    local container_type = 'std::set<' .. element_type .. '>'
+    local iterator_type = make_iterator_class(container_type, element_type)
+    classes[container_type] = {
+        by_value_and_reference = true,
+        has_equal = true,
+        new = {
+            { },
+            { container_type },
+        },
+        attributes = {
+        },
+        functions = {
+            { name = "cppbegin", rval = iterator_type, cpp_name = "begin", args = { } },
+            { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
+            { name = "size", rval = 'int', args = { } },
+            { name = "empty", rval = 'bool', args = { } },
+            { name = "insert", rval = nil, args = { element_type } },
+            { name = "count", rval = 'int', args = { element_type } },
+            { name = "find", rval = iterator_type, args = { element_type } },
+            { name = "erase", rval = nil, args = { element_type } },
+            { name = "erase", rval = nil, args = { iterator_type } },
+        }
+    }
+    return iterator_type
+end
 
 dofile "../../lua/generated_class_definitions.lua"
 dofile "../../lua/class_definitions.lua"
