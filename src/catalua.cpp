@@ -42,8 +42,6 @@ extern "C" {
 #define LUA_OK 0
 #endif
 
-using item_stack_iterator = std::list<item>::iterator;
-
 static const char * const OUTDATED_METATABLE_NAME = "outdated_metatable";
 
 lua_State *lua_state = nullptr;
