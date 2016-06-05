@@ -38,6 +38,7 @@
 #include "fault.h"
 #include "vitamin.h"
 #include "npc.h"
+#include "weather.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"

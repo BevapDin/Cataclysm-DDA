@@ -241,6 +241,7 @@ classes = {
             ter_view_y = { type = "int", writable = true },
             ter_view_z = { type = "int", writable = true },
             was_fullscreen = { type = "bool", writable = true },
+            weather = { type = "weather_type", writable = true },
             weight_dragged = { type = "int", writable = true },
         },
         functions = {
@@ -3243,6 +3244,22 @@ enums = {
         "e_neutral",
         "e_bad",
         "e_mixed",
+    },
+    weather_type = {
+        "WEATHER_NULL",
+        "WEATHER_CLEAR",
+        "WEATHER_SUNNY",
+        "WEATHER_CLOUDY",
+        "WEATHER_DRIZZLE",
+        "WEATHER_RAINY",
+        "WEATHER_THUNDER",
+        "WEATHER_LIGHTNING",
+        "WEATHER_ACID_DRIZZLE",
+        "WEATHER_ACID_RAIN",
+        "WEATHER_FLURRIES",
+        "WEATHER_SNOW",
+        "WEATHER_SNOWSTORM",
+        "NUM_WEATHER_TYPES",
     },
 }
 

@@ -14,6 +14,7 @@ headers = [
     'morale_types.h', 'material.h', 'start_location.h',
     'monstergenerator.h', 'item_stack.h', 'mongroup.h', 'weather_gen.h',
     'vehicle.h', 'veh_type.h', 'fault.h', 'vitamin.h', 'npc.h', 'damage.h',
+    'weather.h',
 ]
 
 parser = Parser()
@@ -78,6 +79,7 @@ parser.add_export_enumeration('field_id')
 parser.add_export_enumeration('damage_type')
 parser.add_export_enumeration('m_flag')
 parser.add_export_enumeration('effect_rating')
+parser.add_export_enumeration('weather_type')
 
 # Data members are checked against `readonly_identifiers` to see whether
 # they should be writable from Lua. Const members are always non-writable.
