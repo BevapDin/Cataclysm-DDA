@@ -2126,6 +2126,33 @@ classes = {
     },
     ma_buff = {
         string_id = "mabuff_id",
+        attributes = {
+            blocks_bonus = { type = "int", writable = true },
+            buff_duration = { type = "int", writable = true },
+            description = { type = "std::string", writable = true },
+            dodges_bonus = { type = "int", writable = true },
+            id = { type = "mabuff_id", writable = true },
+            max_stacks = { type = "int", writable = true },
+            melee_allowed = { type = "bool", writable = true },
+            name = { type = "std::string", writable = true },
+            quiet = { type = "bool", writable = true },
+            strictly_unarmed = { type = "bool", writable = true },
+            throw_immune = { type = "bool", writable = true },
+            was_loaded = { type = "bool", writable = true },
+        },
+        functions = {
+            { name = "apply_buff", rval = nil, args = { "player" } },
+            { name = "apply_player", rval = nil, args = { "player" } },
+            { name = "block_bonus", rval = "int", args = { "player" } },
+            { name = "can_melee", rval = "bool", args = { } },
+            { name = "dodge_bonus", rval = "int", args = { "player" } },
+            { name = "get_effect_id", rval = "efftype_id", args = { } },
+            { name = "hit_bonus", rval = "int", args = { "player" } },
+            { name = "is_quiet", rval = "bool", args = { } },
+            { name = "is_throw_immune", rval = "bool", args = { } },
+            { name = "is_valid_player", rval = "bool", args = { "player" } },
+            { name = "speed_bonus", rval = "int", args = { "player" } },
+        }
     },
     ma_technique = {
         string_id = "matec_id",
