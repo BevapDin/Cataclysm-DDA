@@ -901,6 +901,7 @@ classes = {
             charges = { type = "int", writable = true },
             components = { type = "std::vector<item>", writable = true },
             contents = { type = "std::list<item>", writable = true },
+            faults = { type = "std::set<fault_id>", writable = true },
             frequency = { type = "int", writable = true },
             fridge = { type = "int", writable = true },
             invlet = { type = "int", writable = true },
@@ -988,6 +989,7 @@ classes = {
             { name = "display_name", rval = "std::string", args = { } },
             { name = "engine_displacement", rval = "int", args = { } },
             { name = "erase_var", rval = nil, args = { "std::string" } },
+            { name = "faults_potential", rval = "std::set<fault_id>", args = { } },
             { name = "fill_with", rval = nil, args = { "item" } },
             { name = "fill_with", rval = nil, args = { "item", "int" } },
             { name = "find_parent", rval = "item&", args = { "item" } },
@@ -2664,6 +2666,9 @@ classes = {
             { name = "can_reload", rval = "bool", args = { "std::string" } },
             { name = "can_reload", rval = "bool", args = { } },
             { name = "deserialize", rval = nil, args = { "std::string" } },
+            { name = "fault_set", rval = "bool", args = { "fault_id" } },
+            { name = "faults", rval = "std::set<fault_id>", args = { } },
+            { name = "faults_potential", rval = "std::set<fault_id>", args = { } },
             { name = "get_id", rval = "vpart_str_id", args = { } },
             { name = "has_flag", rval = "bool", args = { "int" } },
             { name = "hp", rval = "int", args = { } },
@@ -2732,6 +2737,16 @@ classes = {
             { name = "name", rval = "std::string", args = { } },
             { name = "removal_time", rval = "int", args = { "Character" } },
             { name = "set_flag", rval = nil, args = { "std::string" } },
+        }
+    },
+    fault = {
+        string_id = "fault_id",
+        functions = {
+            { name = "description", rval = "std::string", args = { } },
+            { name = "id", rval = "fault_id", args = { } },
+            { name = "is_null", rval = "bool", args = { } },
+            { name = "name", rval = "std::string", args = { } },
+            { name = "time", rval = "int", args = { } },
         }
     },
 }
@@ -2867,6 +2882,7 @@ enums = {
 
 make_list_class("item")
 make_set_class("body_part")
+make_set_class("fault_id")
 make_set_class("matec_id")
 make_set_class("material_id")
 make_set_class("species_id")

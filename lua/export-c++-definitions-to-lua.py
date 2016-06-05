@@ -13,7 +13,7 @@ headers = [
     'ui.h', 'martialarts.h', 'trap.h', 'field.h', 'overmap.h',
     'mutation.h', 'effect.h', 'material.h', 'start_location.h', 'ammo.h',
     'monstergenerator.h', 'item_stack.h', 'mongroup.h', 'weather_gen.h',
-    'vehicle.h', 'veh_type.h',
+    'vehicle.h', 'veh_type.h', 'fault.h',
 ]
 
 parser = Parser()
@@ -67,6 +67,7 @@ parser.add_export_by_reference('vehicle')
 parser.add_export_by_value_and_reference('vehicle_part')
 parser.add_export_by_value('vehicle_stack')
 parser.add_export_by_reference('vpart_info')
+parser.add_export_by_reference('fault')
 
 # Enums that should be available in Lua.
 parser.add_export_enumeration('body_part')
