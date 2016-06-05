@@ -392,6 +392,8 @@ class Parser:
     def register_generic(self, t):
         res = self.register_container('list', t)
         if res: return res
+        res = self.register_container('vector', t)
+        if res: return res
 
         return None
 
