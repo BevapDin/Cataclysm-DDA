@@ -80,6 +80,7 @@ parser.add_export_enumeration('damage_type')
 parser.add_export_enumeration('m_flag')
 parser.add_export_enumeration('effect_rating')
 parser.add_export_enumeration('weather_type')
+parser.add_export_enumeration('monster_trigger')
 
 # Data members are checked against `readonly_identifiers` to see whether
 # they should be writable from Lua. Const members are always non-writable.

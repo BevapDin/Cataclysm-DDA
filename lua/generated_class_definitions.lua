@@ -1959,6 +1959,7 @@ classes = {
             { name = "on_load", rval = nil, args = { } },
             { name = "on_unload", rval = nil, args = { } },
             { name = "poly", rval = nil, args = { "mtype_id" } },
+            { name = "process_trigger", rval = nil, args = { "monster_trigger", "int" } },
             { name = "process_triggers", rval = nil, args = { } },
             { name = "push_to", rval = "bool", args = { "tripoint", "int", "int" } },
             { name = "rate_target", rval = "float", args = { "Creature", "float" } },
@@ -1974,6 +1975,7 @@ classes = {
             { name = "spawn", rval = nil, args = { "tripoint" } },
             { name = "stumble", rval = nil, args = { } },
             { name = "to_item", rval = "item", args = { } },
+            { name = "trigger_sum", rval = "int", args = { "std::set<monster_trigger>" } },
             { name = "try_upgrade", rval = nil, args = { "bool" } },
             { name = "turns_to_reach", rval = "int", args = { "int", "int" } },
             { name = "unset_dest", rval = nil, args = { } },
@@ -2143,8 +2145,11 @@ classes = {
     species_type = {
         string_id = "species_id",
         attributes = {
+            anger_trig = { type = "std::set<monster_trigger>", writable = true },
+            fear_trig = { type = "std::set<monster_trigger>", writable = true },
             flags = { type = "std::set<m_flag>", writable = true },
             id = { type = "species_id" },
+            placate_trig = { type = "std::set<monster_trigger>", writable = true },
         },
     },
     MonsterGroup = {
@@ -2165,6 +2170,7 @@ classes = {
         string_id = "mtype_id",
         attributes = {
             agro = { type = "int", writable = true },
+            anger = { type = "std::set<monster_trigger>", writable = true },
             armor_acid = { type = "int", writable = true },
             armor_bash = { type = "int", writable = true },
             armor_cut = { type = "int", writable = true },
@@ -2178,6 +2184,7 @@ classes = {
             def_chance = { type = "int", writable = true },
             description = { type = "std::string", writable = true },
             difficulty = { type = "int", writable = true },
+            fear = { type = "std::set<monster_trigger>", writable = true },
             flags = { type = "std::set<m_flag>", writable = true },
             half_life = { type = "int", writable = true },
             hp = { type = "int", writable = true },
@@ -2190,6 +2197,7 @@ classes = {
             melee_skill = { type = "int", writable = true },
             morale = { type = "int", writable = true },
             phase = { type = "phase_id", writable = true },
+            placate = { type = "std::set<monster_trigger>", writable = true },
             revert_to_itype = { type = "std::string", writable = true },
             size = { type = "m_size", writable = true },
             sk_dodge = { type = "int", writable = true },
@@ -2208,8 +2216,11 @@ classes = {
             { name = "get_meat_chunks_count", rval = "int", args = { } },
             { name = "get_meat_itype", rval = "std::string", args = { } },
             { name = "gibType", rval = "field_id", args = { } },
+            { name = "has_anger_trigger", rval = "bool", args = { "monster_trigger" } },
+            { name = "has_fear_trigger", rval = "bool", args = { "monster_trigger" } },
             { name = "has_flag", rval = "bool", args = { "m_flag" } },
             { name = "has_flag", rval = "bool", args = { "std::string" } },
+            { name = "has_placate_trigger", rval = "bool", args = { "monster_trigger" } },
             { name = "has_special_attack", rval = "bool", args = { "std::string" } },
             { name = "in_category", rval = "bool", args = { "std::string" } },
             { name = "in_species", rval = "bool", args = { "species_id" } },
@@ -3261,6 +3272,19 @@ enums = {
         "WEATHER_SNOWSTORM",
         "NUM_WEATHER_TYPES",
     },
+    monster_trigger = {
+        "MTRIG_NULL",
+        "MTRIG_STALK",
+        "MTRIG_MEAT",
+        "MTRIG_HOSTILE_WEAK",
+        "MTRIG_HOSTILE_CLOSE",
+        "MTRIG_HURT",
+        "MTRIG_FIRE",
+        "MTRIG_FRIEND_DIED",
+        "MTRIG_FRIEND_ATTACKED",
+        "MTRIG_SOUND",
+        "N_MONSTER_TRIGGERS",
+    },
 }
 
 make_list_class("item")
@@ -3268,6 +3292,7 @@ make_set_class("fault_id")
 make_set_class("m_flag")
 make_set_class("matec_id")
 make_set_class("material_id")
+make_set_class("monster_trigger")
 make_set_class("species_id")
 make_set_class("std::string")
 make_set_class("tripoint")
