@@ -477,6 +477,7 @@ function make_iterator_class(container_type, element_type)
     return iterator_type
 end
 
+dofile "../../lua/generated_class_definitions.lua"
 dofile "../../lua/class_definitions.lua"
 
 generate_overload_tree(classes)
