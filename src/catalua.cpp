@@ -46,7 +46,6 @@ extern "C" {
 #define LUA_OK 0
 #endif
 
-using item_stack_iterator = std::list<item>::iterator;
 using volume = units::volume;
 
 static const char * const OUTDATED_METATABLE_NAME = "outdated_metatable";
