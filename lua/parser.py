@@ -127,6 +127,7 @@ class Parser:
 
         self.export_comments = False
 
+        self.generic_types = { }
         self.build_in_typedefs = {
         }
 
@@ -322,6 +323,10 @@ class Parser:
                     handled_types.append(e)
             f.write("}\n")
 
+            f.write("\n")
+            for e in sorted(set(self.generic_types.itervalues())):
+                f.write(e + "\n")
+
         for t in self.types_to_export:
             if not t in handled_types and not self.export_for_id_only_enabled(base_type):
                 print("Type %s not found in any input source file" % (t))
@@ -346,6 +351,43 @@ class Parser:
             self.parse_cursor(c)
 
 
+
+    def register_container(self, name, t):
+        sp = re.sub('^const ', '', t.spelling)
+        iterator = False
+        m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>$', sp)
+        if not m:
+            m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>::iterator$', sp)
+            if m:
+                iterator = True
+
+        if not m:
+            if t.kind == clang.cindex.TypeKind.TYPEDEF:
+                return self.register_container(name, t.get_declaration().underlying_typedef_type)
+            return None
+
+        element_type = m.group(1)
+        if self.build_in_lua_type(element_type) == 'std::string':
+            bt = 'std::string'
+            debug_print("%s is a %s based on %s (%s)" % (t.spelling, name, element_type, bt))
+            element_type = bt
+        elif self.export_by_value(element_type):
+            debug_print("%s is a %s based on %s" % (t.spelling, name, element_type))
+        else:
+            debug_print("%s is a %s based on %s, but is not exported" % (t.spelling, name, element_type))
+            return None
+
+        self.generic_types[sp] = 'make_' + name + '_class("%s")' % element_type
+        if iterator:
+            return '"std::' + name + '<' + element_type + '>::iterator"'
+        else:
+            return '"std::' + name + '<' + element_type + '>"'
+
+    def register_generic(self, t):
+        res = self.register_container('list', t)
+        if res: return res
+
+        return None
 
     '''
     Returns the build-in Lua type of the given C++ type, if there is one. It returns
@@ -402,6 +444,9 @@ class Parser:
         if self.export_by_value(t):
             return '"%s"' % t.spelling
 
+        res = self.register_generic(t)
+        if res: return res
+
         # Only allowed as result type, therefor hard coded here.
         if t.get_canonical().kind == clang.cindex.TypeKind.VOID:
             return "nil"
@@ -420,6 +465,10 @@ class Parser:
             # const and non-const reference:
             if self.export_by_reference(pt):
                 return '"%s&"' % re.sub('^const ', '', spt)
+
+            # Generic types are exported as values and as reference
+            res = self.register_generic(pt)
+            if res: return res
 
         if t.kind == clang.cindex.TypeKind.POINTER:
             pt = t.get_pointee()
@@ -447,6 +496,9 @@ class Parser:
         if self.export_by_value(t):
             return '"%s"' % re.sub('^const ', '', t.spelling)
 
+        res = self.register_generic(t)
+        if res: return res
+
         if t.kind == clang.cindex.TypeKind.LVALUEREFERENCE:
             pt = t.get_pointee()
             spt = pt.spelling
@@ -463,6 +515,8 @@ class Parser:
                 return '"%s"' % re.sub('^const ', '', spt)
             if self.export_by_reference(pt):
                 return '"%s"' % re.sub('^const ', '', spt)
+            res = self.register_generic(pt)
+            if res: return res
 
         if t.kind == clang.cindex.TypeKind.POINTER:
             pt = t.get_pointee()
@@ -471,6 +525,8 @@ class Parser:
             # have an overload that provides the pointer. It does not work for by-value objects.
             if self.export_by_reference(pt):
                 return '"%s"' % re.sub('^const ', '', spt)
+            res = self.register_generic(pt)
+            if res: return res
 
         if t.kind == clang.cindex.TypeKind.TYPEDEF:
             return self.translate_argument_type(t.get_declaration().underlying_typedef_type)
@@ -489,6 +545,9 @@ class Parser:
             return '"%s"' % re.sub('^const ', '', t.spelling)
         if self.export_by_value(t):
             return '"%s"' % re.sub('^const ', '', t.spelling)
+
+        res = self.register_generic(t)
+        if res: return res
 
         if t.kind == clang.cindex.TypeKind.LVALUEREFERENCE:
             pt = t.get_pointee()
