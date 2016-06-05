@@ -36,6 +36,7 @@
 #include "string_input_popup.h"
 #include "mutation.h"
 #include "martialarts.h"
+#include "material.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
