@@ -2683,6 +2683,7 @@ classes = {
             { name = "can_reload", rval = "bool", args = { } },
             { name = "consume_energy", rval = "float", args = { "std::string", "float" } },
             { name = "damage", rval = "float", args = { } },
+            { name = "fault_set", rval = "bool", args = { "fault_id" } },
             { name = "fill_with", rval = "bool", args = { "item" } },
             { name = "fill_with", rval = "bool", args = { "item", "int" } },
             { name = "get_base", rval = "item", args = { } },
@@ -2763,6 +2764,16 @@ classes = {
             { name = "removal_time", rval = "int", args = { "Character" } },
             { name = "repair_time", rval = "int", args = { "Character" } },
             { name = "set_flag", rval = nil, args = { "std::string" } },
+        }
+    },
+    fault = {
+        string_id = "fault_id",
+        functions = {
+            { name = "description", rval = "std::string", args = { } },
+            { name = "id", rval = "fault_id", args = { } },
+            { name = "is_null", rval = "bool", args = { } },
+            { name = "name", rval = "std::string", args = { } },
+            { name = "time", rval = "int", args = { } },
         }
     },
 }
