@@ -84,8 +84,6 @@ no connection at all to the monster.
 classes = {
     effect_type = {
         string_id = "efftype_id",
-        attributes = {
-        },
         functions = {
         }
     },
@@ -96,8 +94,6 @@ classes = {
             { "int", "int", "int", "season_type", "int" },
         },
         by_value_and_reference = true,
-        attributes = {
-        },
         functions = {
             { name = "day_of_week", rval = "std::string", args = { } },
             { name = "day_of_year", rval = "int", args = { } },
@@ -291,8 +287,6 @@ classes = {
         new = {
             { "item_stack_iterator" },
         },
-        attributes = {
-        },
         functions = {
             { name = "elem", rval = "item&", cpp_name = "operator*"; args = { } },
             { name = "inc", rval = nil, cpp_name = "operator++", args = { } },
@@ -300,8 +294,6 @@ classes = {
     },
     map_stack = {
         by_value = true,
-        attributes = {
-        },
         functions = {
             { name = "cppbegin", rval = "item_stack_iterator", cpp_name = "begin", args = { } },
             { name = "cppend", rval = "item_stack_iterator", cpp_name = "end", args = {} },
@@ -1039,8 +1031,6 @@ classes = {
         }
     },
     item_location = {
-        attributes = {
-        },
         by_value = true,
         functions = {
             { name = "describe", rval = "std::string", args = { "Character" } },
@@ -1115,8 +1105,6 @@ classes = {
         }
     },
     field_entry = {
-        attributes = {
-        },
         functions = {
             { name = "getFieldAge", rval = "int", args = { } },
             { name = "getFieldDensity", rval = "int", args = { } },
@@ -1131,8 +1119,6 @@ classes = {
         }
     },
     field = {
-        attributes = {
-        },
         functions = {
             { name = "addField", rval = "bool", args = { "field_id" } },
             { name = "addField", rval = "bool", args = { "field_id", "int" } },
@@ -1146,8 +1132,6 @@ classes = {
         }
     },
     map = {
-        attributes = {
-        },
         functions = {
             { name = "accessible_furniture", rval = "bool", args = { "tripoint", "tripoint", "int" } },
             { name = "accessible_items", rval = "bool", args = { "tripoint", "tripoint", "int" } },
@@ -1381,8 +1365,6 @@ classes = {
         }
     },
     Creature = {
-        attributes = {
-        },
         functions = {
             { name = "add_effect", rval = nil, args = { "efftype_id", "int" } },
             { name = "add_effect", rval = nil, args = { "efftype_id", "int", "body_part" } },
@@ -1693,43 +1675,31 @@ classes = {
     },
     martialart = {
         string_id = "matype_id",
-        attributes = {
-        },
         functions = {
         }
     },
     material_type = {
         string_id = "material_id",
-        attributes = {
-        },
         functions = {
         }
     },
     start_location = {
         string_id = "start_location_id",
-        attributes = {
-        },
         functions = {
         }
     },
     ma_buff = {
         string_id = "mabuff_id",
-        attributes = {
-        },
         functions = {
         }
     },
     ma_technique = {
         string_id = "matec_id",
-        attributes = {
-        },
         functions = {
         }
     },
     Skill = {
         string_id = "skill_id",
-        attributes = {
-        },
         functions = {
         }
     },
@@ -1750,8 +1720,6 @@ classes = {
     },
     species_type = {
         string_id = "species_id",
-        attributes = {
-        },
         functions = {
         }
     },
@@ -1843,8 +1811,6 @@ classes = {
         }
     },
     overmap = {
-        attributes = {
-        },
         functions = {
             { name = "add_note", rval = nil, args = { "int", "int", "int", "std::string" } },
             { name = "clear_mon_groups", rval = nil, args = { } },
@@ -2176,7 +2142,6 @@ for name, value in pairs(classes) do
             has_equal = true,
             -- IDs *could* be constructed from int, but where does the Lua script get the int from?
             -- The int is only exposed as int_id<T>, so Lua should never know about it.
-            attributes = { },
             -- Copy and default constructor
             new = { { value.int_id }, { } },
             functions = {
@@ -2200,7 +2165,6 @@ for name, value in pairs(classes) do
             has_equal = true,
             -- Copy and default constructor and construct from plain string.
             new = { { value.string_id }, { }, { "std::string" } },
-            attributes = { },
             functions = {
                 { name = "str", rval = "std::string", args = { } },
                 { name = "is_valid", rval = "bool", args = { } },
