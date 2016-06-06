@@ -537,10 +537,17 @@ class CppClass:
             return ('static ' if self.cursor.is_static_method() else '') + self.parent.cpp_name + '::' + self.cursor.spelling
 
     class CppFunction(CppCallable):
+        def __init__(self, parent, cursor):
+            CppClass.CppCallable.__init__(self, parent, cursor)
+            self.const_overload = False
+
         def cb(self, args):
             # TODO: add support for *some* operators
             if re.match('^operator[^a-zA-Z0-9_]', self.cursor.spelling):
                 raise SkippedObjectError("operator")
+
+            if self.const_overload:
+                return None # silently ignored.
 
             result = self.parent.parser.translate_result_type(self.cursor.result_type)
             line = ""
@@ -557,6 +564,16 @@ class CppClass:
 
         def export(self):
             return self.export_cb(lambda x : self.cb(x))
+
+        def has_same_arguments(self, other):
+            fargs = list(self.cursor.get_arguments())
+            oargs = list(other.cursor.get_arguments())
+            if len(fargs) != len(oargs):
+                return False
+            for i in xrange(len(fargs)):
+                if fargs[i].type.get_canonical() != oargs[i].type.get_canonical():
+                    return False
+            return True
 
     class CppConstructor(CppCallable):
         def export(self):
@@ -597,12 +614,28 @@ class CppClass:
         for c in cursor.get_children():
             result.parse(c)
 
+        # Overloads that only differ on the const of the method are merged into one
+        # because Lua doesn't know about const and handles everything as non-const.
+        # Example `bar &foo::get(int)` and `const bar &foo:get(int) const` are the
+        # same to Lua. For convenience we only export the non-const version.
+        for f in result.functions:
+            if f.cursor.is_const_method() and result.has_non_const_overload(f):
+                f.const_overload = True
+
         return result
 
     @staticmethod
     def from_name(parser, cpp_name):
         result = CppClass(parser, cpp_name)
         return result
+
+    def has_non_const_overload(self, func):
+        for f in self.functions:
+            if f == func or f.cursor.is_const_method() or f.pretty_name() != func.pretty_name():
+                continue
+            if f.has_same_arguments(func):
+                return True
+        return False
 
     def parse(self, cursor):
         if not is_public(cursor):
