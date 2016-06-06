@@ -81,6 +81,26 @@ parser.add_export_enumeration('field_id')
 parser.readonly_identifiers.add(re.compile('.*::id$'))
 parser.readonly_identifiers.add(re.compile('.*::loadid$'))
 
+
+# One can block specific members from being exported:
+# The given string or regex is matched against the C++ name of the member.
+# This includes the parameter list (only type names) for function.
+
+# Exported to Lua via a global variables:
+parser.blocked_identifiers.add('game::m')
+parser.blocked_identifiers.add('game::u')
+# Never exported, internal usage only:
+parser.blocked_identifiers.add(re.compile('.*::was_loaded$'))
+parser.blocked_identifiers.add(re.compile('.*::active_items$'))
+# Stack objects are created by the containing class and not by anyone else.
+parser.blocked_identifiers.add(re.compile('map_stack::map_stack\(.*\)'))
+# Those are used during loading from JSON and should not be used any other time.
+parser.blocked_identifiers.add(re.compile('static .*::load\(.*JsonObject.*\)$'))
+parser.blocked_identifiers.add(re.compile('static .*::reset\(\)$'))
+parser.blocked_identifiers.add(re.compile('static .*::check_consistency\(\)$'))
+parser.blocked_identifiers.add(re.compile('static .*::finalize\(\)$'))
+
+
 for header in headers:
     parser.parse('src/' + header)
 
