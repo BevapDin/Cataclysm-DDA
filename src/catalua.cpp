@@ -42,6 +42,7 @@
 #include "material.h"
 #include "start_location.h"
 #include "vehicle.h"
+#include "veh_type.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
