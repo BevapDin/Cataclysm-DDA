@@ -1104,7 +1104,6 @@ classes = {
             { },
         },
         by_value = true,
-        has_equal = true,
         attributes = {
             x = { type = "int", writable = true },
             y = { type = "int", writable = true },
@@ -1122,7 +1121,6 @@ classes = {
             { },
         },
         by_value = true,
-        has_equal = true,
         attributes = {
             x = { type = "int", writable = true },
             y = { type = "int", writable = true },

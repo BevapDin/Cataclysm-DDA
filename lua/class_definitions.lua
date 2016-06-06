@@ -88,6 +88,9 @@ variable can be used long after `some_monster` has been killed and removed from 
 no connection at all to the monster.
 --]]
 
+classes['tripoint'].has_equal = true
+classes['point'].has_equal = true
+
 global_functions = {
     add_msg = {
         cpp_name = "add_msg_wrapper",
