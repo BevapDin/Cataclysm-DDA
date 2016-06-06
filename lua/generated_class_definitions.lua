@@ -1,6 +1,21 @@
 classes = {
     effect_type = {
         string_id = "efftype_id",
+        attributes = {
+            id = { type = "efftype_id", writable = true },
+        },
+        functions = {
+            { name = "gain_game_message_type", rval = "game_message_type", args = { } },
+            { name = "get_apply_memorial_log", rval = "std::string", args = { } },
+            { name = "get_apply_message", rval = "std::string", args = { } },
+            { name = "get_main_parts", rval = "bool", args = { } },
+            { name = "get_remove_memorial_log", rval = "std::string", args = { } },
+            { name = "get_remove_message", rval = "std::string", args = { } },
+            { name = "is_show_in_info", rval = "bool", args = { } },
+            { name = "lose_game_message_type", rval = "game_message_type", args = { } },
+            { name = "use_desc_ints", rval = "bool", args = { "bool" } },
+            { name = "use_name_ints", rval = "bool", args = { } },
+        }
     },
     calendar = {
         new = {

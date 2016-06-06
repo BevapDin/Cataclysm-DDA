@@ -24,6 +24,7 @@
 #ifdef LUA
 #include "ui.h"
 #include "mongroup.h"
+#include "effect.h"
 #include "itype.h"
 #include "morale_types.h"
 #include "trap.h"

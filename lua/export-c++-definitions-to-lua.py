@@ -9,7 +9,7 @@ headers = [
     'player.h', 'character.h', 'bodypart.h', 'creature.h', 'game.h',
     'map.h', 'enums.h', 'calendar.h', 'mtype.h', 'itype.h', 'item.h',
     'ui.h', 'martialarts.h', 'trap.h', 'field.h', 'overmap.h',
-    'mutation.h',
+    'mutation.h', 'effect.h',
     'monstergenerator.h', 'item_stack.h', 'mongroup.h', 'weather_gen.h',
 ]
 
@@ -17,7 +17,7 @@ parser = Parser()
 
 # All the classes that should be available in Lua. See doc/LUA_SUPPORT.md for
 # the meaning of by_reference/by_value/by_value_and_reference.
-parser.add_export_for_string_id('efftype_id', 'effect_type')
+parser.add_export_by_reference('effect_type')
 parser.add_export_by_value_and_reference('calendar')
 parser.add_export_by_reference('mutation_branch')
 parser.add_export_by_reference('Character')
