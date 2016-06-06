@@ -1973,6 +1973,17 @@ classes = {
     },
     Skill = {
         string_id = "skill_id",
+        has_equal = true,
+        functions = {
+            { name = "description", rval = "std::string", args = { } },
+            { name = "from_legacy_int", static = true, rval = "skill_id", args = { "int" } },
+            { name = "ident", rval = "skill_id", args = { } },
+            { name = "is_combat_skill", rval = "bool", args = { } },
+            { name = "name", rval = "std::string", args = { } },
+            { name = "random_skill", static = true, rval = "skill_id", args = { } },
+            { name = "random_skill_with_tag", static = true, rval = "skill_id", args = { "std::string" } },
+            { name = "skill_count", static = true, rval = "int", args = { } },
+        }
     },
     quality = {
         string_id = "quality_id",
