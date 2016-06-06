@@ -114,6 +114,7 @@ class Parser:
         '''
         self.types_to_export_for_id_only = [ ]
         self.readonly_identifiers = Matcher()
+        self.blocked_identifiers = Matcher()
 
         self.string_ids = { }
         self.int_ids = { }
@@ -541,6 +542,8 @@ class CppClass:
         # Result is an array. Each entry is created by calling the callback with exported
         # list of arguments (as string, ready to be printed) as parameter.
         def export_cb(self, callback):
+            if self.parent.parser.blocked_identifiers.match(self.pretty_name() + '(' + ', '.join([ a.type.spelling for a in self.cursor.get_arguments()]) + ')'):
+                return [ ] # silently ignored.
             result = [ ]
             try:
                 m = self.min_arguments
@@ -628,6 +631,9 @@ class CppClass:
             self.cpp_name = cursor.spelling
         def export(self):
             try:
+                if self.parent.parser.blocked_identifiers.match(self.parent.cpp_name + "::" + self.cpp_name):
+                    return [ ] # silently ignored.
+
                 line = ""
                 line = line + self.cpp_name + " = { "
                 line = line + "type = " + self.parent.parser.translate_member_type(self.cursor.type)

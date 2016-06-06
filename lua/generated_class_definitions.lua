@@ -87,9 +87,7 @@ classes = {
             visibility = { type = "int", writable = true },
         },
         functions = {
-            { name = "check_consistency", static = true, rval = nil, args = { } },
             { name = "conflicts_with_item", rval = "bool", args = { "item" } },
-            { name = "finalize", static = true, rval = nil, args = { } },
             { name = "finalize_trait_blacklist", static = true, rval = nil, args = { } },
             { name = "get_display_color", rval = "nc_color", args = { } },
             { name = "get_name", static = true, rval = "std::string", args = { "trait_id" } },
@@ -290,7 +288,6 @@ classes = {
             driving_view_offset = { type = "point", writable = true },
             fullscreen = { type = "bool", writable = true },
             lightning_active = { type = "bool", writable = true },
-            m = { type = "map", writable = true },
             monstairz = { type = "int", writable = true },
             narrow_sidebar = { type = "bool", writable = true },
             new_game = { type = "bool", writable = true },
@@ -300,7 +297,6 @@ classes = {
             ter_view_x = { type = "int", writable = true },
             ter_view_y = { type = "int", writable = true },
             ter_view_z = { type = "int", writable = true },
-            u = { type = "player", writable = true },
             was_fullscreen = { type = "bool", writable = true },
         },
         functions = {
@@ -1614,7 +1610,6 @@ classes = {
             transparent = { type = "bool", writable = true },
             trap = { type = "trap_id", writable = true },
             trap_id_str = { type = "std::string", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "check", rval = nil, args = { } },
@@ -1644,7 +1639,6 @@ classes = {
             movecost = { type = "int", writable = true },
             open = { type = "furn_str_id", writable = true },
             transparent = { type = "bool", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "check", rval = nil, args = { } },
@@ -1946,7 +1940,6 @@ classes = {
             leg_block_with_bio_armor_legs = { type = "bool", writable = true },
             name = { type = "std::string", writable = true },
             strictly_unarmed = { type = "bool", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "apply_onattack_buffs", rval = nil, args = { "player" } },
@@ -1965,7 +1958,6 @@ classes = {
         string_id = "material_id",
         attributes = {
             id = { type = "material_id" },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "acid_resist", rval = "int", args = { } },
@@ -1999,7 +1991,6 @@ classes = {
             { name = "name", rval = "std::string", args = { } },
             { name = "place_player", rval = nil, args = { "player" } },
             { name = "prepare_map", rval = nil, args = { "tripoint" } },
-            { name = "reset", static = true, rval = nil, args = { } },
             { name = "surround_with_monsters", rval = nil, args = { "tripoint", "mongroup_id", "float" } },
             { name = "target", rval = "std::string", args = { } },
         }
@@ -2018,7 +2009,6 @@ classes = {
             quiet = { type = "bool", writable = true },
             strictly_unarmed = { type = "bool", writable = true },
             throw_immune = { type = "bool", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "apply_buff", rval = nil, args = { "player" } },
@@ -2060,7 +2050,6 @@ classes = {
             npc_message = { type = "std::string", writable = true },
             player_message = { type = "std::string", writable = true },
             stun_dur = { type = "int", writable = true },
-            was_loaded = { type = "bool", writable = true },
             weighting = { type = "int", writable = true },
         },
         functions = {
@@ -2140,7 +2129,6 @@ classes = {
             upgrades = { type = "bool", writable = true },
             vision_day = { type = "int", writable = true },
             vision_night = { type = "int", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "bloodType", rval = "field_id", args = { } },
@@ -2291,14 +2279,11 @@ classes = {
             id = { type = "trap_str_id" },
             loadid = { type = "trap_id" },
             sym = { type = "int", writable = true },
-            was_loaded = { type = "bool", writable = true },
         },
         functions = {
             { name = "can_see", rval = "bool", args = { "tripoint", "player" } },
-            { name = "check_consistency", static = true, rval = nil, args = { } },
             { name = "count", static = true, rval = "int", args = { } },
             { name = "detect_trap", rval = "bool", args = { "tripoint", "player" } },
-            { name = "finalize", static = true, rval = nil, args = { } },
             { name = "funnel_turns_per_charge", rval = "float", args = { "float" } },
             { name = "get_avoidance", rval = "int", args = { } },
             { name = "get_difficulty", rval = "int", args = { } },
@@ -2309,7 +2294,6 @@ classes = {
             { name = "is_null", rval = "bool", args = { } },
             { name = "name", rval = "std::string", args = { } },
             { name = "on_disarmed", rval = nil, args = { "map", "tripoint" } },
-            { name = "reset", static = true, rval = nil, args = { } },
             { name = "trigger", rval = nil, args = { "tripoint", "Creature" } },
             { name = "triggered_by_item", rval = "bool", args = { "item" } },
         }
@@ -2651,7 +2635,6 @@ classes = {
         },
         functions = {
             { name = "check", static = true, rval = nil, args = { } },
-            { name = "finalize", static = true, rval = nil, args = { } },
             { name = "get_id", rval = "vpart_id", args = { } },
             { name = "has_flag", rval = "bool", args = { "std::string" } },
             { name = "install_time", rval = "int", args = { "Character" } },
@@ -2659,19 +2642,16 @@ classes = {
             { name = "name", rval = "std::string", args = { } },
             { name = "removal_time", rval = "int", args = { "Character" } },
             { name = "repair_time", rval = "int", args = { "Character" } },
-            { name = "reset", static = true, rval = nil, args = { } },
             { name = "set_flag", rval = nil, args = { "std::string" } },
         }
     },
     fault = {
         string_id = "fault_id",
         functions = {
-            { name = "check_consistency", static = true, rval = nil, args = { } },
             { name = "description", rval = "std::string", args = { } },
             { name = "id", rval = "fault_id", args = { } },
             { name = "is_null", rval = "bool", args = { } },
             { name = "name", rval = "std::string", args = { } },
-            { name = "reset", static = true, rval = nil, args = { } },
             { name = "time", rval = "int", args = { } },
         }
     },
@@ -2732,7 +2712,6 @@ classes = {
     vitamin = {
         string_id = "vitamin_id",
         functions = {
-            { name = "check_consistency", static = true, rval = nil, args = { } },
             { name = "deficiency", rval = "efftype_id", args = { } },
             { name = "excess", rval = "efftype_id", args = { } },
             { name = "id", rval = "vitamin_id", args = { } },
@@ -2741,7 +2720,6 @@ classes = {
             { name = "min", rval = "int", args = { } },
             { name = "name", rval = "std::string", args = { } },
             { name = "rate", rval = "int", args = { } },
-            { name = "reset", static = true, rval = nil, args = { } },
             { name = "severity", rval = "int", args = { "int" } },
         }
     },
