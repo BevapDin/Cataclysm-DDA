@@ -540,6 +540,10 @@ class CppClass:
         def __init__(self, parent, cursor):
             CppClass.CppCallable.__init__(self, parent, cursor)
             self.const_overload = False
+            self.overridden = False
+            for c in cursor.walk_preorder():
+                if c.kind == clang.cindex.CursorKind.CXX_OVERRIDE_ATTR:
+                    self.overridden = True
 
         def cb(self, args):
             # TODO: add support for *some* operators
@@ -547,6 +551,11 @@ class CppClass:
                 raise SkippedObjectError("operator")
 
             if self.const_overload:
+                return None # silently ignored.
+
+            # Overridden methods are ignored because the parent class already contains
+            # them and we scan the parent class and include it in the output anyway.
+            if self.overridden:
                 return None # silently ignored.
 
             result = self.parent.parser.translate_result_type(self.cursor.result_type)
