@@ -115,6 +115,7 @@ class Parser:
         self.types_to_export_for_id_only = [ ]
         self.readonly_identifiers = Matcher()
         self.blocked_identifiers = Matcher()
+        self.ignore_result_of = Matcher()
 
         self.string_ids = { }
         self.int_ids = { }
@@ -611,7 +612,12 @@ class CppClass:
             if self.overridden:
                 return None # silently ignored.
 
-            result = self.parent.parser.translate_result_type(self.cursor.result_type)
+            result = 'nil'
+            try:
+                result = self.parent.parser.translate_result_type(self.cursor.result_type)
+            except TypeTranslationError as e:
+                if not self.parent.parser.ignore_result_of.match(self.pretty_name() + '(' + ', '.join([ a.type.spelling for a in self.cursor.get_arguments()]) + ')'):
+                    raise e
             line = ""
             line = line + "{ "
             name = self.cursor.spelling

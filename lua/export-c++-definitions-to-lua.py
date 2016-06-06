@@ -101,6 +101,13 @@ parser.blocked_identifiers.add(re.compile('static .*::check_consistency\(\)$'))
 parser.blocked_identifiers.add(re.compile('static .*::finalize\(\)$'))
 
 
+# Some functions can be used even if the return type can not be exported (their
+# side effects are still useful). Functions listed here will be exported as returning
+# "void", if their actual result type can not be exported directly.
+parser.ignore_result_of.add(re.compile('game::explosion\(.*\)'))
+parser.ignore_result_of.add(re.compile('map::put_items_from_loc\(.*\)'))
+
+
 for header in headers:
     parser.parse('src/' + header)
 
