@@ -66,6 +66,7 @@ parser.add_export_by_value_and_reference('vehicle_part')
 parser.add_export_by_value('vehicle_stack')
 parser.add_export_by_reference('vpart_info')
 parser.add_export_by_reference('fault')
+parser.add_export_by_reference('effect')
 
 # Enums that should be available in Lua.
 parser.add_export_enumeration('body_part')
