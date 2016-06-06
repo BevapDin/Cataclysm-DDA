@@ -556,7 +556,7 @@ class CppClass:
             return result
 
         def pretty_name(self):
-            return self.parent.cpp_name + '::' + self.cursor.spelling
+            return ('static ' if self.cursor.is_static_method() else '') + self.parent.cpp_name + '::' + self.cursor.spelling
 
     class CppFunction(CppCallable):
         def cb(self, args):
@@ -564,13 +564,12 @@ class CppClass:
             if re.match('^operator[^a-zA-Z0-9_]', self.cursor.spelling):
                 raise SkippedObjectError("operator")
 
-            if self.cursor.is_static_method():
-                raise SkippedObjectError("static functions are not supported")
-
             result = self.parent.parser.translate_result_type(self.cursor.result_type)
             line = ""
             line = line + "{ "
             line = line + "name = \"" + self.cursor.spelling + "\", "
+            if self.cursor.is_static_method():
+                line = line + "static = true, "
             line = line + "rval = " + result + ", "
             line = line + "args = " + args
             line = line + " }"
