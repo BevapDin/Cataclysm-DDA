@@ -2,6 +2,8 @@
 
 from parser import Parser
 
+import re
+
 # All the headers in the src folder that will be searched for the definitions
 # of the exported types. The script will complain if a type is requested, but
 # not found.
@@ -71,6 +73,13 @@ parser.add_export_enumeration('game_message_type')
 parser.add_export_enumeration('season_type')
 parser.add_export_enumeration('add_type')
 parser.add_export_enumeration('field_id')
+
+# Data members are checked against `readonly_identifiers` to see whether
+# they should be writable from Lua. Const members are always non-writable.
+
+# Not writable to avoid messing things up (can be changed via JSON):
+parser.readonly_identifiers.add(re.compile('.*::id$'))
+parser.readonly_identifiers.add(re.compile('.*::loadid$'))
 
 for header in headers:
     parser.parse('src/' + header)
