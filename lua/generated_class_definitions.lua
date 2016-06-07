@@ -263,7 +263,6 @@ classes = {
             { name = "consume_liquid", rval = "bool", args = { "item", "int" } },
             { name = "critter_at", rval = "Creature&", args = { "tripoint" } },
             { name = "critter_at", rval = "Creature&", args = { "tripoint", "bool" } },
-            { name = "cycle_item_mode", rval = nil, args = { "bool" } },
             { name = "delete_world", rval = nil, args = { "std::string", "bool" } },
             { name = "do_blast", rval = nil, args = { "tripoint", "float", "float", "bool" } },
             { name = "do_turn", rval = "bool", args = { } },
