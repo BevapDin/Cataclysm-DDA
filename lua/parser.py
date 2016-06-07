@@ -4,6 +4,21 @@ clang.cindex.Config.set_library_path('/usr/lib')
 
 import re
 
+class Matcher:
+    def __init__(self):
+        self.matches = [ ]
+    def match(self, name):
+        for i in self.matches:
+            if type(i) is str:
+                if i == name:
+                    return True
+            else:
+                if i.match(name):
+                    return True
+        return False
+    def add(self, match):
+        self.matches.append(match)
+
 def debug_print(text):
     pass
 #    print(text)
@@ -93,6 +108,7 @@ class Parser:
         or to both.
         '''
         self.types_to_export = [ ]
+        self.readonly_identifiers = Matcher()
 
         self.string_ids = { }
         self.int_ids = { }
@@ -617,7 +633,8 @@ class CppClass:
                 line = ""
                 line = line + self.cpp_name + " = { "
                 line = line + "type = " + self.parent.parser.translate_member_type(self.cursor.type)
-                if not self.cursor.type.is_const_qualified():
+                readonly = self.parent.parser.readonly_identifiers.match(self.parent.cpp_name + "::" + self.cpp_name)
+                if not self.cursor.type.is_const_qualified() and not readonly:
                     line = line + ", writable = true"
                 line = line + " }"
                 return [ line ]
