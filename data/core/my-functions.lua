@@ -95,7 +95,7 @@ Sponge = {}
 Sponge.__index = Sponge
 Sponge.sponageable = { "rag", "scrap", "steel_lump", "steel_chunk", "frame", "hdframe",
 "splinter", "log", "rock", "rebar", "2x4", "ceramic_shard", "pipe",
-"steel_plate", "xlframe", "glass_shard", "glass_sheet" }
+"steel_plate", "xlframe", "glass_shard", "nail", "sheet_metal", "glass_sheet" }
 
 function Sponge.create(it)
    local new_object = {}
@@ -147,12 +147,15 @@ function Sponge:collect(pos)
         local e = iter:elem()
         local t = e:typeId()
         if e:damage() == 0 and Sponge.can_sponge(t) then
-            -- TODO: check for charges!
-            self:add_count(t, 1)
+            local cnt = 1
+            if e:count_by_charges() then
+                cnt = e.charges
+            end
+            self:add_count(t, cnt)
             if not self.added[t] then
                 self.added[t] = 0
             end
-            self.added[t] = self.added[t] + 1
+            self.added[t] = self.added[t] + cnt
             iter = map_stack:erase(iter)
         else
             iter:inc()
@@ -235,8 +238,12 @@ function Sponge:drop(item_type_id, pos, cpair)
         return
     end
     game.add_msg("Dropping " .. cpair.text .. ".")
-    -- TODO: charges!
-    map:spawn_item(pos, item_type_id, cpair.count)
+    local itm_tmp = item(item_type_id, -1)
+    if itm_tmp:count_by_charges() then
+        map:spawn_item(pos, item_type_id, 1, cpair.count)
+    else
+        map:spawn_item(pos, item_type_id, cpair.count)
+    end
     self:add_count(item_type_id, -cpair.count)
 end
 
