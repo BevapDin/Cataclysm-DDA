@@ -1483,6 +1483,12 @@ void item::io( Archive& archive )
         std::swap( irridation, poison );
     }
 
+    if( type->container && type->container->preserves ) {
+        for( auto &c : contents ) {
+            c.bday = 0;
+        }
+    }
+
 	item_tags.erase("FILTHY");
 
     // Compatiblity for item type changes: for example soap changed from being a generic item
