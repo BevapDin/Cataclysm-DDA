@@ -2,7 +2,7 @@ classes = {
     effect_type = {
         string_id = "efftype_id",
         attributes = {
-            id = { type = "efftype_id", writable = true },
+            id = { type = "efftype_id" },
         },
         functions = {
             { name = "gain_game_message_type", rval = "game_message_type", args = { } },
@@ -1605,7 +1605,7 @@ classes = {
             close = { type = "ter_str_id", writable = true },
             connect_group = { type = "int", writable = true },
             description = { type = "std::string", writable = true },
-            id = { type = "ter_str_id", writable = true },
+            id = { type = "ter_str_id" },
             max_volume = { type = "units::volume", writable = true },
             movecost = { type = "int", writable = true },
             open = { type = "ter_str_id", writable = true },
@@ -1638,7 +1638,7 @@ classes = {
             crafting_pseudo_item = { type = "std::string", writable = true },
             deployed_item = { type = "std::string", writable = true },
             description = { type = "std::string", writable = true },
-            id = { type = "furn_str_id", writable = true },
+            id = { type = "furn_str_id" },
             max_volume = { type = "units::volume", writable = true },
             move_str_req = { type = "int", writable = true },
             movecost = { type = "int", writable = true },
@@ -1941,7 +1941,7 @@ classes = {
             arm_block_with_bio_armor_arms = { type = "bool", writable = true },
             description = { type = "std::string", writable = true },
             force_unarmed = { type = "bool", writable = true },
-            id = { type = "matype_id", writable = true },
+            id = { type = "matype_id" },
             leg_block = { type = "int", writable = true },
             leg_block_with_bio_armor_legs = { type = "bool", writable = true },
             name = { type = "std::string", writable = true },
@@ -1964,7 +1964,7 @@ classes = {
     material_type = {
         string_id = "material_id",
         attributes = {
-            id = { type = "material_id", writable = true },
+            id = { type = "material_id" },
             was_loaded = { type = "bool", writable = true },
         },
         functions = {
@@ -2011,7 +2011,7 @@ classes = {
             buff_duration = { type = "int", writable = true },
             description = { type = "std::string", writable = true },
             dodges_bonus = { type = "int", writable = true },
-            id = { type = "mabuff_id", writable = true },
+            id = { type = "mabuff_id" },
             max_stacks = { type = "int", writable = true },
             melee_allowed = { type = "bool", writable = true },
             name = { type = "std::string", writable = true },
@@ -2052,7 +2052,7 @@ classes = {
             dummy = { type = "bool", writable = true },
             goal = { type = "std::string", writable = true },
             grab_break = { type = "bool", writable = true },
-            id = { type = "matec_id", writable = true },
+            id = { type = "matec_id" },
             knockback_dist = { type = "int", writable = true },
             knockback_spread = { type = "float", writable = true },
             miss_recovery = { type = "bool", writable = true },
@@ -2123,7 +2123,7 @@ classes = {
             difficulty = { type = "int", writable = true },
             half_life = { type = "int", writable = true },
             hp = { type = "int", writable = true },
-            id = { type = "mtype_id", writable = true },
+            id = { type = "mtype_id" },
             luminance = { type = "float", writable = true },
             melee_dice = { type = "int", writable = true },
             melee_sides = { type = "int", writable = true },
@@ -2288,8 +2288,8 @@ classes = {
         int_id = "trap_id",
         attributes = {
             color = { type = "nc_color", writable = true },
-            id = { type = "trap_str_id", writable = true },
-            loadid = { type = "trap_id", writable = true },
+            id = { type = "trap_str_id" },
+            loadid = { type = "trap_id" },
             sym = { type = "int", writable = true },
             was_loaded = { type = "bool", writable = true },
         },
