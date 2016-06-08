@@ -531,8 +531,7 @@ bool player::create(character_type type, std::string tempname)
     }
 
     // Learn recipes
-    for( auto &cur_recipe_ : recipe_dict ) {
-        const recipe &cur_recipe = *cur_recipe_;
+    for( auto &cur_recipe : recipe_dict ) {
         if( cur_recipe.valid_learn() && !has_recipe_autolearned( cur_recipe ) &&
             has_recipe_requirements( cur_recipe ) &&
             learned_recipes.find( cur_recipe.ident() ) == learned_recipes.end() ) {
@@ -1643,8 +1642,7 @@ tab_direction set_skills(WINDOW *w, player *u, points_left &points)
         }
 
         std::map<std::string, std::vector<std::pair<std::string, int> > > recipes;
-        for( auto cur_recipe_ : recipe_dict ) {
-            const recipe &cur_recipe = *cur_recipe_;
+        for( auto &cur_recipe : recipe_dict ) {
             //Find out if the current skill and its level is in the requirement list
             auto req_skill = cur_recipe.required_skills.find( currentSkill->ident() );
             int skill = (req_skill != cur_recipe.required_skills.end()) ? req_skill->second : 0;

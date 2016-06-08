@@ -2326,8 +2326,7 @@ int repair_item_actor::repair_recipe_difficulty( const player &pl,
 {
     const auto &type = fix.typeId();
     int min = 5;
-    for( const auto *cur_recipe_ : recipe_dict ) {
-        const recipe &cur_recipe = *cur_recipe_;
+    for( const auto &cur_recipe : recipe_dict ) {
         if( type != cur_recipe.result ) {
             continue;
         }

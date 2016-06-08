@@ -7,9 +7,10 @@ using itype_id = std::string; // From itype.h
 
 recipe_dictionary recipe_dict;
 
-void recipe_dictionary::add( recipe *rec )
+void recipe_dictionary::add( recipe rec_ )
 {
-    recipes.push_back( rec );
+    recipes.push_back( std::move( rec_ )  );
+    recipe * const rec = &recipes.back();
     add_to_component_lookup( rec );
     by_name[rec->ident()] = rec;
     by_category[rec->cat].push_back( rec );
@@ -19,17 +20,16 @@ void recipe_dictionary::delete_if( const std::function<bool( recipe & )> &pred )
 {
     for( auto iter = recipes.begin(); iter != recipes.end(); ) {
         const auto old_iter = iter;
-        recipe *const r = *iter;
+        recipe &r = *iter;
         // Already moving to the next, so we can erase the recipe without invalidating `iter`.
         ++iter;
-        if( pred( *r ) ) {
-            recipes.erase( old_iter );
-            remove_from_component_lookup( r );
-            by_name.erase( r->ident() );
+        if( pred( r ) ) {
+            remove_from_component_lookup( &r );
+            by_name.erase( r.ident() );
             // Terse name for category vector since it's repeated so many times.
-            auto &cat_vec = by_category[r->cat];
-            cat_vec.erase( std::remove( cat_vec.begin(), cat_vec.end(), r ), cat_vec.end() );
-            delete r;
+            auto &cat_vec = by_category[r.cat];
+            cat_vec.erase( std::remove( cat_vec.begin(), cat_vec.end(), &r ), cat_vec.end() );
+            recipes.erase( old_iter );
         }
     }
 }
@@ -61,9 +61,6 @@ void recipe_dictionary::reset()
     by_component.clear();
     by_name.clear();
     by_category.clear();
-    for( auto &recipe : recipes ) {
-        delete recipe;
-    }
     recipes.clear();
 }
 

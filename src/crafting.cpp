@@ -167,19 +167,18 @@ void recipe::load( JsonObject &jsobj )
 
 void recipe_dictionary::load( JsonObject &jsobj )
 {
-    recipe *rec = new recipe();
-    rec->load( jsobj );
+    recipe rec;
+    rec.load( jsobj );
 
-    check_recipe_ident( rec->ident(), jsobj ); // may delete recipes
+    check_recipe_ident( rec.ident(), jsobj ); // may delete recipes
 
     // Note, a recipe has to be fully instantiated before adding
-    add( rec );
+    add( std::move( rec ) );
 }
 
 void recipe_dictionary::finalize()
 {
-    for( auto r_ : recipes ) {
-        recipe &r = *r_;
+    for( auto &r : recipes ) {
         r.finalize();
     }
 }
@@ -1197,8 +1196,7 @@ void player::consume_tools( const std::vector<tool_comp> &tools, int batch,
 
 const recipe *get_disassemble_recipe( const itype_id &type )
 {
-    for( auto cur_recipe_ : recipe_dict ) {
-        const recipe &cur_recipe = *cur_recipe_;
+    for( auto &cur_recipe : recipe_dict ) {
         if( type == cur_recipe.result && cur_recipe.reversible ) {
             return &cur_recipe;
         }
@@ -1214,8 +1212,7 @@ bool player::can_disassemble( const item &dis_item, const inventory &crafting_in
         return true;
     }
 
-    for( auto cur_recipe_ : recipe_dict ) {
-        const recipe &cur_recipe = *cur_recipe_;
+    for( auto &cur_recipe : recipe_dict ) {
         if( dis_item.type->id == cur_recipe.result && cur_recipe.reversible ) {
             return can_disassemble( dis_item, &cur_recipe, crafting_inv, print_msg );
         }
@@ -1702,8 +1699,7 @@ const recipe *recipe_by_name( const std::string &name )
 
 void recipe_dictionary::check_consistency() const
 {
-    for( auto &elem : recipes ) {
-        const recipe &r = *elem;
+    for( auto &r : recipes ) {
         r.check_consistency();
     }
 }

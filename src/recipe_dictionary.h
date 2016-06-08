@@ -20,7 +20,7 @@ class JsonObject;
 class recipe_dictionary
 {
     public:
-        void add( recipe *rec );
+        void add( recipe rec );
 
         /** Returns a list of recipes in the 'cat' category */
         const std::vector<const recipe *> &in_category( const std::string &cat );
@@ -40,10 +40,10 @@ class recipe_dictionary
         }
 
         /** Allows for iteration over all recipes like: 'for( recipe &r : recipe_dict )'. */
-        std::list<recipe *>::const_iterator begin() const {
+        std::list<recipe>::const_iterator begin() const {
             return recipes.begin();
         }
-        std::list<recipe *>::const_iterator end() const {
+        std::list<recipe>::const_iterator end() const {
             return recipes.end();
         }
 
@@ -59,7 +59,9 @@ class recipe_dictionary
         void reset();
 
     private:
-        std::list<recipe *> recipes;
+        // A list because adding and removing entries does not change the memory location
+        // of the other entries. Pointers to entries stay therefor valid.
+        std::list<recipe> recipes;
 
         std::map<const std::string, std::vector<const recipe *>> by_category;
         std::map<const itype_id, std::vector<const recipe *>> by_component;
