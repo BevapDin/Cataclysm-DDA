@@ -2326,17 +2326,18 @@ int repair_item_actor::repair_recipe_difficulty( const player &pl,
 {
     const auto &type = fix.typeId();
     int min = 5;
-    for( const auto *cur_recipe : recipe_dict ) {
-        if( type != cur_recipe->result ) {
+    for( const auto *cur_recipe_ : recipe_dict ) {
+        const recipe &cur_recipe = *cur_recipe_;
+        if( type != cur_recipe.result ) {
             continue;
         }
 
-        int cur_difficulty = cur_recipe->difficulty;
-        if( !training && !pl.knows_recipe( cur_recipe ) ) {
+        int cur_difficulty = cur_recipe.difficulty;
+        if( !training && !pl.knows_recipe( &cur_recipe ) ) {
             cur_difficulty++;
         }
 
-        if( !training && !pl.has_recipe_requirements( *cur_recipe ) ) {
+        if( !training && !pl.has_recipe_requirements( cur_recipe ) ) {
             cur_difficulty++;
         }
 

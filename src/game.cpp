@@ -4154,9 +4154,10 @@ void game::debug()
         case 13: {
             add_msg( m_info, _( "Recipe debug." ) );
             add_msg( _( "Your eyes blink rapidly as knowledge floods your brain." ) );
-            for( auto cur_recipe : recipe_dict ) {
-                if( !( u.learned_recipes.find( cur_recipe->ident() ) != u.learned_recipes.end() ) )  {
-                    u.learn_recipe( ( recipe * )cur_recipe, true );
+            for( auto cur_recipe_ : recipe_dict ) {
+                const recipe &cur_recipe = *cur_recipe_;
+                if( !( u.learned_recipes.find( cur_recipe.ident() ) != u.learned_recipes.end() ) )  {
+                    u.learn_recipe( ( recipe * ) &cur_recipe, true );
                 }
             }
             add_msg( m_good, _( "You know how to craft that now." ) );
@@ -11720,7 +11721,7 @@ void game::pldrive(int x, int y)
             // At 10 skill, with a perfect vehicle, we could turn up to 3 times per turn
             cost = std::max( u.get_speed(), 100 ) * ( 1.0f - ( -penalty / 10.0f ) * 2 / 3 );
         }
- 
+
         if( penalty > skill || cost > 400 ) {
             add_msg( m_warning, _("You fumble with the %s's controls."), veh->name.c_str() );
             // Anything from a wasted attempt to 2 turns in the intended direction

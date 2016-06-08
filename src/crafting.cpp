@@ -206,28 +206,29 @@ void reset_recipes()
 
 void finalize_recipes()
 {
-    for( auto r : recipe_dict ) {
-        for( auto j = r->booksets.begin(); j != r->booksets.end(); ++j ) {
+    for( auto r_ : recipe_dict ) {
+        recipe &r = *r_;
+        for( auto j = r.booksets.begin(); j != r.booksets.end(); ++j ) {
             const std::string &book_id = j->book_id;
             if( !item::type_is_defined( book_id ) ) {
-                debugmsg( "book %s for recipe %s does not exist", book_id.c_str(), r->ident().c_str() );
+                debugmsg( "book %s for recipe %s does not exist", book_id.c_str(), r.ident().c_str() );
                 continue;
             }
             const itype *t = item::find_type( book_id );
             if( !t->book ) {
                 // TODO: we could make up a book slot?
-                debugmsg( "book %s for recipe %s is not a book", book_id.c_str(), r->ident().c_str() );
+                debugmsg( "book %s for recipe %s is not a book", book_id.c_str(), r.ident().c_str() );
                 continue;
             }
-            islot_book::recipe_with_description_t rwd{ r, j->skill_level, "", j->hidden };
+            islot_book::recipe_with_description_t rwd{ &r, j->skill_level, "", j->hidden };
             if( j->recipe_name.empty() ) {
-                rwd.name = item::nname( r->result );
+                rwd.name = item::nname( r.result );
             } else {
                 rwd.name = _( j->recipe_name.c_str() );
             }
             t->book->recipes.insert( rwd );
         }
-        r->booksets.clear();
+        r.booksets.clear();
     }
 }
 
@@ -1219,10 +1220,10 @@ void player::consume_tools( const std::vector<tool_comp> &tools, int batch,
 
 const recipe *get_disassemble_recipe( const itype_id &type )
 {
-    for( auto cur_recipe : recipe_dict ) {
-
-        if( type == cur_recipe->result && cur_recipe->reversible ) {
-            return cur_recipe;
+    for( auto cur_recipe_ : recipe_dict ) {
+        const recipe &cur_recipe = *cur_recipe_;
+        if( type == cur_recipe.result && cur_recipe.reversible ) {
+            return &cur_recipe;
         }
     }
     // no matching disassemble recipe found.
@@ -1236,9 +1237,10 @@ bool player::can_disassemble( const item &dis_item, const inventory &crafting_in
         return true;
     }
 
-    for( auto cur_recipe : recipe_dict ) {
-        if( dis_item.type->id == cur_recipe->result && cur_recipe->reversible ) {
-            return can_disassemble( dis_item, cur_recipe, crafting_inv, print_msg );
+    for( auto cur_recipe_ : recipe_dict ) {
+        const recipe &cur_recipe = *cur_recipe_;
+        if( dis_item.type->id == cur_recipe.result && cur_recipe.reversible ) {
+            return can_disassemble( dis_item, &cur_recipe, crafting_inv, print_msg );
         }
     }
 
