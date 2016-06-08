@@ -7793,7 +7793,7 @@ int iuse::multicooker(player *p, item *it, bool t, const tripoint &pos)
                                                     cur_recipe.subcat == "CSC_FOOD_VEGGI" ||
                                                     cur_recipe.subcat == "CSC_FOOD_PASTA" ) ) {
 
-                    if( p->knows_recipe( &cur_recipe ) ) {
+                    if( p->knows_recipe( cur_recipe ) ) {
                         dishes.push_back( &cur_recipe );
                         const bool can_make = cur_recipe.can_make_with_inventory( crafting_inv );
                         item dummy( cur_recipe.result, 0 );

@@ -438,7 +438,7 @@ bool recipe::can_make_with_inventory( const inventory &crafting_inv, int batch )
         return true;
     }
 
-    if( !g->u.knows_recipe( this ) && -1 == g->u.has_recipe( this, crafting_inv ) ) {
+    if( !g->u.knows_recipe( *this ) && -1 == g->u.has_recipe( this, crafting_inv ) ) {
         return false;
     }
     return requirements.can_make_with_inventory( crafting_inv, batch );
@@ -812,7 +812,7 @@ void player::complete_craft()
         // messages, learning of recipe, food spoilage calc only once
         if( first ) {
             first = false;
-            if( knows_recipe( making ) ) {
+            if( knows_recipe( *making ) ) {
                 add_msg( _( "You craft %s from memory." ), newit.type_name( 1 ).c_str() );
             } else {
                 add_msg( _( "You craft %s using a book as a reference." ), newit.type_name( 1 ).c_str() );
@@ -1680,7 +1680,7 @@ void player::complete_disassemble( int item_pos, const tripoint &loc,
         }
     }
 
-    if( !dis.learn_by_disassembly.empty() && !knows_recipe( &dis ) ) {
+    if( !dis.learn_by_disassembly.empty() && !knows_recipe( dis ) ) {
         if( can_decomp_learn( dis ) ) {
             // @todo: make this depend on intelligence
             if( one_in( 4 ) ) {

@@ -11110,7 +11110,7 @@ void player::do_read( item *book )
         std::vector<std::string> recipe_list;
         for( auto const & elem : reading->recipes ) {
             // If the player knows it, they recognize it even if it's not clearly stated.
-            if( elem.is_hidden() && !knows_recipe( elem.recipe ) ) {
+            if( elem.is_hidden() && !knows_recipe( *elem.recipe ) ) {
                 continue;
             }
             recipe_list.push_back( elem.name );
@@ -11307,7 +11307,7 @@ bool player::can_study_recipe(const itype &book) const
     }
     for( auto const &elem : book.book->recipes ) {
         auto const r = elem.recipe;
-        if( !knows_recipe( r ) &&
+        if( !knows_recipe( *r ) &&
             ( !r->skill_used ||
               get_skill_level( r->skill_used ) >= elem.skill_level ) ) {
             return true;
@@ -11322,7 +11322,7 @@ bool player::studied_all_recipes(const itype &book) const
         return true;
     }
     for( auto &elem : book.book->recipes ) {
-        if( !knows_recipe( elem.recipe ) ) {
+        if( !knows_recipe( *elem.recipe ) ) {
             return false;
         }
     }
@@ -11336,7 +11336,7 @@ bool player::try_study_recipe( const itype &book )
     }
     for( auto const & elem : book.book->recipes ) {
         auto const r = elem.recipe;
-        if( knows_recipe( r ) || !r->valid_learn() ) {
+        if( knows_recipe( *r ) || !r->valid_learn() ) {
             continue;
         }
         if( !r->skill_used || get_skill_level( r->skill_used ) >= elem.skill_level ) {
@@ -12508,13 +12508,13 @@ bool player::can_decomp_learn( const recipe &rec ) const
            meets_skill_requirements( rec.learn_by_disassembly );
 }
 
-bool player::knows_recipe(const recipe *rec) const
+bool player::knows_recipe( const recipe &rec ) const
 {
-    if( learned_recipes.count( rec->ident() ) > 0 ) {
+    if( learned_recipes.count( rec.ident() ) > 0 ) {
         return true;
     }
 
-    if( has_recipe_autolearned( *rec ) ) {
+    if( has_recipe_autolearned( rec ) ) {
         return true;
     }
 
