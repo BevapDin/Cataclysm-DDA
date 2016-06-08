@@ -1059,7 +1059,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
 
         // Checks crafting inventory for books providing the requested recipe.
         // Returns -1 to indicate recipe not found, otherwise difficulty to learn.
-        int has_recipe( const recipe *r, const inventory &crafting_inv ) const;
+        int has_recipe( const recipe &rec, const inventory &crafting_inv ) const;
         bool knows_recipe( const recipe &rec ) const;
         void learn_recipe( const recipe &rec, bool force = false );
         int exceeds_recipe_requirements( const recipe &rec ) const;

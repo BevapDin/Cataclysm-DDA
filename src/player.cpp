@@ -12521,7 +12521,7 @@ bool player::knows_recipe( const recipe &rec ) const
     return false;
 }
 
-int player::has_recipe( const recipe *r, const inventory &crafting_inv ) const
+int player::has_recipe( const recipe &rec, const inventory &crafting_inv ) const
 {
     // Iterate over the nearby items and see if there's a book that has the recipe.
     const_invslice slice = crafting_inv.const_slice();
@@ -12532,13 +12532,13 @@ int player::has_recipe( const recipe *r, const inventory &crafting_inv ) const
         if( candidate.is_book() && items_identified.count(candidate.type->id) ) {
             for( auto const & elem : candidate.type->book->recipes ) {
                 // Does it have the recipe, and do we meet it's requirements?
-                if( elem.recipe != r ) {
+                if( elem.recipe != &rec ) {
                     continue;
                 }
-                if( ( !r->skill_used ||
-                      get_skill_level(r->skill_used) >= r->difficulty ) &&
-                    ( difficulty == -1 || r->difficulty < difficulty ) ) {
-                    difficulty = r->difficulty;
+                if( ( !rec.skill_used ||
+                      get_skill_level(rec.skill_used) >= rec.difficulty ) &&
+                    ( difficulty == -1 || rec.difficulty < difficulty ) ) {
+                    difficulty = rec.difficulty;
                 }
             }
         } else {

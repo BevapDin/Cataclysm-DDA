@@ -438,7 +438,7 @@ bool recipe::can_make_with_inventory( const inventory &crafting_inv, int batch )
         return true;
     }
 
-    if( !g->u.knows_recipe( *this ) && -1 == g->u.has_recipe( this, crafting_inv ) ) {
+    if( !g->u.knows_recipe( *this ) && -1 == g->u.has_recipe( *this, crafting_inv ) ) {
         return false;
     }
     return requirements.can_make_with_inventory( crafting_inv, batch );
@@ -823,7 +823,7 @@ void player::complete_craft()
                 // but also keeps going up as difficulty goes up.
                 // Worst case is lvl 10, which will typically take
                 // 10^4/10 (1,000) minutes, or about 16 hours of crafting it to learn.
-                int difficulty = has_recipe( making, crafting_inventory() );
+                int difficulty = has_recipe( *making, crafting_inventory() );
                 ///\EFFECT_INT increases chance to learn recipe when crafting from a book
                 if( x_in_y( making->time, ( 1000 * 8 *
                                             ( difficulty * difficulty * difficulty * difficulty ) ) /

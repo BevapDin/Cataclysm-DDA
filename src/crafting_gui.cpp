@@ -736,7 +736,7 @@ void pick_recipes( const inventory &crafting_inv,
         if( subtab == "CSC_ALL" || rec->subcat == subtab ||
             ( rec->subcat == "" && craft_subcat_list[tab].back() == subtab ) ||
             filter != "" ) {
-            if( ( !g->u.knows_recipe( *rec ) && -1 == g->u.has_recipe( rec, crafting_inv ) )
+            if( ( !g->u.knows_recipe( *rec ) && -1 == g->u.has_recipe( *rec, crafting_inv ) )
                 || ( rec->difficulty < 0 ) ) {
                 continue;
             }
