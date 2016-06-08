@@ -64,120 +64,94 @@ void recipe::load( JsonObject &jsobj )
     JsonArray jsarr;
 
     // required
-    std::string result = jsobj.get_string( "result" );
-    std::string category = jsobj.get_string( "category" );
-    int time = jsobj.get_int( "time" );
-    int difficulty = jsobj.get_int( "difficulty" );
+    result = jsobj.get_string( "result" );
+    cat = jsobj.get_string( "category" );
+    time = jsobj.get_int( "time" );
+    difficulty = jsobj.get_int( "difficulty" );
 
     // optional
-    bool contained = jsobj.get_bool( "contained", false );
-    std::string subcategory = jsobj.get_string( "subcategory", "" );
-    bool reversible = jsobj.get_bool( "reversible", false );
-    skill_id skill_used( jsobj.get_string( "skill_used", skill_id::NULL_ID.str() ) );
-    std::string id_suffix = jsobj.get_string( "id_suffix", "" );
-    double batch_rscale = 0.0;
-    int batch_rsize = 0;
+    contained = jsobj.get_bool( "contained", false );
+    subcat = jsobj.get_string( "subcategory", "" );
+    reversible = jsobj.get_bool( "reversible", false );
+    skill_used = skill_id( jsobj.get_string( "skill_used", skill_id::NULL_ID.str() ) );
+    batch_rscale = 0.0;
+    batch_rsize = 0;
     if( jsobj.has_array( "batch_time_factors" ) ) {
         jsarr = jsobj.get_array( "batch_time_factors" );
         batch_rscale = ( double )jsarr.get_int( 0 ) / 100.0;
         batch_rsize = jsarr.get_int( 1 );
     }
-    int result_mult = jsobj.get_int( "result_mult", 1 );
+    result_mult = jsobj.get_int( "result_mult", 1 );
 
-    std::map<std::string, int> requires_skills;
     jsarr = jsobj.get_array( "skills_required" );
     if( !jsarr.empty() ) {
         // could be a single requirement, or multiple
         if( jsarr.has_array( 0 ) ) {
             while( jsarr.has_more() ) {
                 JsonArray ja = jsarr.next_array();
-                requires_skills[ja.get_string( 0 )] = ja.get_int( 1 );
+                required_skills[skill_id( ja.get_string( 0 ) )] = ja.get_int( 1 );
             }
         } else {
-            requires_skills[jsarr.get_string( 0 )] = jsarr.get_int( 1 );
+            required_skills[skill_id( jsarr.get_string( 0 ) )] = jsarr.get_int( 1 );
         }
     }
 
-    std::map<std::string, int> autolearn_requirements;
     if( jsobj.has_array( "autolearn" ) ) {
         JsonArray jarr = jsobj.get_array( "autolearn" );
         while( jarr.has_more() ) {
             JsonArray ja = jarr.next_array();
-            autolearn_requirements[ja.get_string( 0 )] = ja.get_int( 1 );
+            autolearn_requirements[skill_id( ja.get_string( 0 ) )] = ja.get_int( 1 );
         }
     } else if( jsobj.has_bool( "autolearn" ) ) {
         if( jsobj.get_bool( "autolearn" ) ) {
             // Short definition of autolearn (equal to required skills)
-            autolearn_requirements = requires_skills;
+            autolearn_requirements = required_skills;
             if( skill_used ) {
-                autolearn_requirements[skill_used.str()] = difficulty;
+                autolearn_requirements[skill_used] = difficulty;
             }
         }
     }
 
-    std::map<std::string, int> learn_by_disassembly;
     if( jsobj.has_int( "decomp_learn" ) ) {
         // Short definition of decomp_learn - only the main skill
         int val = jsobj.get_int( "decomp_learn" );
         if( val >= 0 && !skill_used ) {
             jsobj.throw_error( "decomp_learn specified with no skill_used" );
         } else if( val >= 0 ) {
-            learn_by_disassembly[skill_used.str()] = val;
+            learn_by_disassembly[skill_used] = val;
         }
     } else if( jsobj.has_array( "decomp_learn" ) ) {
         JsonArray jarr = jsobj.get_array( "decomp_learn" );
         while( jarr.has_more() ) {
             JsonArray ja = jarr.next_array();
-            learn_by_disassembly[ja.get_string( 0 )] = ja.get_int( 1 );
+            learn_by_disassembly[skill_id( ja.get_string( 0 ) )] = ja.get_int( 1 );
         }
     }
 
-    std::vector<byproduct> bps;
     // could be a single byproduct - either id or byproduct, or array of ids and byproducts
     if( jsobj.has_string( "byproducts" ) ) {
-        bps.push_back( byproduct( jsobj.get_string( "byproducts" ) ) );
+        byproducts.push_back( byproduct( jsobj.get_string( "byproducts" ) ) );
     } else if( jsobj.has_object( "byproducts" ) ) {
         JsonObject jsbp = jsobj.get_object( "byproducts" );
-        bps.push_back( byproduct( jsbp.get_string( "id" ), jsbp.get_int( "charges_mult", 1 ),
+        byproducts.push_back( byproduct( jsbp.get_string( "id" ), jsbp.get_int( "charges_mult", 1 ),
                                   jsbp.get_int( "amount", 1 ) ) );
     } else if( jsobj.has_array( "byproducts" ) ) {
         jsarr = jsobj.get_array( "byproducts" );
         while( jsarr.has_more() ) {
             if( jsarr.has_string( 0 ) ) {
-                bps.push_back( byproduct( jsarr.next_string() ) );
+                byproducts.push_back( byproduct( jsarr.next_string() ) );
             } else if( jsarr.has_object( 0 ) ) {
                 JsonObject jsbp = jsarr.next_object();
-                bps.push_back( byproduct( jsbp.get_string( "id" ), jsbp.get_int( "charges_mult", 1 ),
+                byproducts.push_back( byproduct( jsbp.get_string( "id" ), jsbp.get_int( "charges_mult", 1 ),
                                           jsbp.get_int( "amount", 1 ) ) );
             }
         }
     }
 
-    this->ident_ = result + id_suffix;
-    this->result = result;
-    this->time = time;
-    this->difficulty = difficulty;
-    this->byproducts = bps;
-    this->cat = category;
-    this->contained = contained;
-    this->subcat = subcategory;
-    this->skill_used = skill_used;
-    for( const auto &elem : requires_skills ) {
-        this->required_skills[skill_id( elem.first )] = elem.second;
-    }
-    for( const auto &elem : autolearn_requirements ) {
-        this->autolearn_requirements[skill_id( elem.first )] = elem.second;
-    }
-    for( const auto &elem : learn_by_disassembly ) {
-        this->learn_by_disassembly[skill_id( elem.first )] = elem.second;
-    }
-    this->reversible = reversible;
-    this->batch_rscale = batch_rscale;
-    this->batch_rsize = batch_rsize;
-    this->result_mult = result_mult;
-    this->flags = jsobj.get_tags( "flags" );
+    ident_ = result + jsobj.get_string( "id_suffix", "" );
+    flags = jsobj.get_tags( "flags" );
 
-    this->requirements.load( jsobj );
+    requirements.load( jsobj );
 
     jsarr = jsobj.get_array( "book_learn" );
     while( jsarr.has_more() ) {
@@ -187,7 +161,7 @@ void recipe::load( JsonObject &jsobj )
             bd.recipe_name = ja.get_string( 2 );
             bd.hidden = bd.recipe_name.empty();
         }
-        this->booksets.push_back( bd );
+        booksets.push_back( bd );
     }
 }
 
