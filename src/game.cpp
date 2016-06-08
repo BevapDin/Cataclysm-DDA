@@ -11037,7 +11037,7 @@ void game::butcher()
         }
 
         if( items[i].is_book() ||
-            u.can_disassemble( items[i], cur_recipe, crafting_inv, false ) ) {
+            u.can_disassemble( items[i], *cur_recipe, crafting_inv, false ) ) {
             disassembles.push_back(i);
         } else if( first_item_without_tools == nullptr ) {
             first_item_without_tools = &items[i];
@@ -11064,7 +11064,7 @@ void game::butcher()
             add_msg( m_info, _("You don't have the necessary tools to disassemble any items here.") );
             const recipe *cur_recipe = get_disassemble_recipe( first_item_without_tools->type->id );
             // Just for the "You need x to disassemble y" messages
-            u.can_disassemble( *first_item_without_tools, cur_recipe, crafting_inv, true );
+            u.can_disassemble( *first_item_without_tools, *cur_recipe, crafting_inv, true );
         }
         return;
     }

@@ -1217,20 +1217,20 @@ bool player::can_disassemble( const item &dis_item, const inventory &crafting_in
 
     for( auto &cur_recipe : recipe_dict ) {
         if( dis_item.type->id == cur_recipe.result && cur_recipe.reversible ) {
-            return can_disassemble( dis_item, &cur_recipe, crafting_inv, print_msg );
+            return can_disassemble( dis_item, cur_recipe, crafting_inv, print_msg );
         }
     }
 
     return false;
 }
 
-bool player::can_disassemble( const item &dis_item, const recipe *cur_recipe,
+bool player::can_disassemble( const item &dis_item, const recipe &cur_recipe,
                               const inventory &crafting_inv, bool print_msg ) const
 {
     const std::string dis_name = dis_item.tname().c_str();
-    if( dis_item.count_by_charges() && !cur_recipe->has_flag( "UNCRAFT_SINGLE_CHARGE" ) ) {
+    if( dis_item.count_by_charges() && !cur_recipe.has_flag( "UNCRAFT_SINGLE_CHARGE" ) ) {
         // Create a new item to get the default charges
-        const item tmp = cur_recipe->create_result();
+        const item tmp = cur_recipe.create_result();
         if( dis_item.charges < tmp.charges ) {
             if( print_msg ) {
                 popup( ngettext( "You need at least %d charge of %s to disassemble it.",
@@ -1243,7 +1243,7 @@ bool player::can_disassemble( const item &dis_item, const recipe *cur_recipe,
     }
 
     bool have_all_qualities = true;
-    const auto &dis_requirements = cur_recipe->requirements.disassembly_requirements();
+    const auto &dis_requirements = cur_recipe.requirements.disassembly_requirements();
     for( const auto &itq : dis_requirements.get_qualities() ) {
         for( const auto &it : itq ) {
             if( !it.has( crafting_inv ) ) {
@@ -1351,7 +1351,7 @@ bool player::disassemble( item &dis_item, int dis_pos,
     int recipe_time = 100;
     const inventory &crafting_inv = crafting_inventory();
     if( cur_recipe != nullptr &&
-        can_disassemble( dis_item, cur_recipe, crafting_inv, msg_and_query ) ) {
+        can_disassemble( dis_item, *cur_recipe, crafting_inv, msg_and_query ) ) {
         if( msg_and_query && !query_disassemble( dis_item ) ) {
             return false;
         }
