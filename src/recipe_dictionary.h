@@ -51,6 +51,12 @@ class recipe_dictionary
         }
 
         /**
+         * Returns the recipe that can be used to disassemble an item of the given type.
+         * May return nullptr if there is no matching recipe.
+         */
+        const recipe *get_disassemble_recipe( const itype_id &type ) const;
+
+        /**
          * Goes over all recipes and calls the predicate, if it returns true, the recipe
          * is removed *and* deleted.
          */

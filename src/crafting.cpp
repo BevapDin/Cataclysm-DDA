@@ -1197,15 +1197,15 @@ void player::consume_tools( const std::vector<tool_comp> &tools, int batch,
     consume_tools( select_tool_component( tools, batch, map_inv, hotkeys ), batch );
 }
 
-const recipe *get_disassemble_recipe( const itype_id &type )
+const recipe *recipe_dictionary::get_disassemble_recipe( const itype_id &type ) const
 {
-    for( auto &cur_recipe : recipe_dict ) {
+    for( auto &cur_recipe : recipes ) {
         if( type == cur_recipe.result && cur_recipe.reversible ) {
             return &cur_recipe;
         }
     }
     // no matching disassemble recipe found.
-    return NULL;
+    return nullptr;
 }
 
 bool player::can_disassemble( const item &dis_item, const inventory &crafting_inv,
@@ -1321,7 +1321,7 @@ bool player::disassemble( int dis_pos )
 bool player::disassemble( item &dis_item, int dis_pos,
                           bool ground, bool msg_and_query )
 {
-    const recipe *cur_recipe = get_disassemble_recipe( dis_item.type->id );
+    const recipe *cur_recipe = recipe_dict.get_disassemble_recipe( dis_item.type->id );
 
     // No disassembly without proper light
     // But book-ripping is OK

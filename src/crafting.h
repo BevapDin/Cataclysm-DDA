@@ -119,7 +119,6 @@ void remove_ammo( item *dis_item, player &p );
 // same as above but for each item in the list
 void remove_ammo( std::list<item> &dis_items, player &p );
 
-const recipe *get_disassemble_recipe( const itype_id &type );
 // Show the "really disassemble?" query along with a list of possible results.
 // Returns false if the player answered no to the query.
 bool query_dissamble( const item &dis_item );

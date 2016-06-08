@@ -1308,7 +1308,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info ) const
         info.push_back( iteminfo( "DESCRIPTION", string_format( _( "Made from: %s" ),
                                   components_to_string().c_str() ) ) );
     } else {
-        const recipe *dis_recipe = get_disassemble_recipe( type->id );
+        const recipe *dis_recipe = recipe_dict.get_disassemble_recipe( type->id );
         if( dis_recipe != nullptr ) {
             std::ostringstream buffer;
             bool first_component = true;
@@ -3542,7 +3542,7 @@ bool item::is_disassemblable() const
     if( is_null() ) {
         return false;
     }
-    return get_disassemble_recipe(typeId()) != NULL;
+    return recipe_dict.get_disassemble_recipe( typeId() ) != nullptr;
 }
 
 bool item::is_funnel_container(int &bigger_than) const
