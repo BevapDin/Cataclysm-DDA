@@ -208,28 +208,33 @@ void finalize_recipes()
 {
     for( auto r_ : recipe_dict ) {
         recipe &r = *r_;
-        for( auto j = r.booksets.begin(); j != r.booksets.end(); ++j ) {
-            const std::string &book_id = j->book_id;
-            if( !item::type_is_defined( book_id ) ) {
-                debugmsg( "book %s for recipe %s does not exist", book_id.c_str(), r.ident().c_str() );
-                continue;
-            }
-            const itype *t = item::find_type( book_id );
-            if( !t->book ) {
-                // TODO: we could make up a book slot?
-                debugmsg( "book %s for recipe %s is not a book", book_id.c_str(), r.ident().c_str() );
-                continue;
-            }
-            islot_book::recipe_with_description_t rwd{ &r, j->skill_level, "", j->hidden };
-            if( j->recipe_name.empty() ) {
-                rwd.name = item::nname( r.result );
-            } else {
-                rwd.name = _( j->recipe_name.c_str() );
-            }
-            t->book->recipes.insert( rwd );
-        }
-        r.booksets.clear();
+        r.finalize();
     }
+}
+
+void recipe::finalize()
+{
+    for( auto j = booksets.begin(); j != booksets.end(); ++j ) {
+        const std::string &book_id = j->book_id;
+        if( !item::type_is_defined( book_id ) ) {
+            debugmsg( "book %s for recipe %s does not exist", book_id.c_str(), ident().c_str() );
+            return;
+        }
+        const itype *t = item::find_type( book_id );
+        if( !t->book ) {
+            // TODO: we could make up a book slot?
+            debugmsg( "book %s for recipe %s is not a book", book_id.c_str(), ident().c_str() );
+            return;
+        }
+        islot_book::recipe_with_description_t rwd{ this, j->skill_level, "", j->hidden };
+        if( j->recipe_name.empty() ) {
+            rwd.name = item::nname( result );
+        } else {
+            rwd.name = _( j->recipe_name.c_str() );
+        }
+        t->book->recipes.insert( rwd );
+    }
+    booksets.clear();
 }
 
 static bool crafting_allowed( const player &p, const recipe &rec )
