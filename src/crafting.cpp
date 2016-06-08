@@ -176,11 +176,6 @@ void recipe_dictionary::load( JsonObject &jsobj )
     add( rec );
 }
 
-void recipe_dictionary::reset()
-{
-    clear();
-}
-
 void recipe_dictionary::finalize()
 {
     for( auto r_ : recipes ) {

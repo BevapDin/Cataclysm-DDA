@@ -56,7 +56,7 @@ void recipe_dictionary::remove_from_component_lookup( recipe *r )
     }
 }
 
-void recipe_dictionary::clear()
+void recipe_dictionary::reset()
 {
     by_component.clear();
     by_name.clear();

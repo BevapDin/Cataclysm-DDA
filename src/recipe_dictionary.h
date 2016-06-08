@@ -21,7 +21,6 @@ class recipe_dictionary
 {
     public:
         void add( recipe *rec );
-        void clear();
 
         /** Returns a list of recipes in the 'cat' category */
         const std::vector<recipe *> &in_category( const std::string &cat );
