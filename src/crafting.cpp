@@ -165,7 +165,7 @@ void recipe::load( JsonObject &jsobj )
     }
 }
 
-void load_recipe( JsonObject &jsobj )
+void recipe_dictionary::load( JsonObject &jsobj )
 {
     recipe *rec = new recipe();
     rec->load( jsobj );
@@ -173,17 +173,17 @@ void load_recipe( JsonObject &jsobj )
     check_recipe_ident( rec->ident(), jsobj ); // may delete recipes
 
     // Note, a recipe has to be fully instantiated before adding
-    recipe_dict.add( rec );
+    add( rec );
 }
 
-void reset_recipes()
+void recipe_dictionary::reset()
 {
-    recipe_dict.clear();
+    clear();
 }
 
-void finalize_recipes()
+void recipe_dictionary::finalize()
 {
-    for( auto r_ : recipe_dict ) {
+    for( auto r_ : recipes ) {
         recipe &r = *r_;
         r.finalize();
     }
@@ -1705,9 +1705,9 @@ const recipe *recipe_by_name( const std::string &name )
     return recipe_dict[name];
 }
 
-void check_recipe_definitions()
+void recipe_dictionary::check_consistency() const
 {
-    for( auto &elem : recipe_dict ) {
+    for( auto &elem : recipes ) {
         const recipe &r = *elem;
         r.check_consistency();
     }

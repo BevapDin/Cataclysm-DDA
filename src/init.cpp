@@ -16,6 +16,7 @@
 #include "item_factory.h"
 #include "vehicle_group.h"
 #include "crafting.h"
+#include "recipe_dictionary.h"
 #include "crafting_gui.h"
 #include "computer.h"
 #include "help.h"
@@ -181,7 +182,7 @@ void DynamicDataLoader::initialize()
     (&MonsterGenerator::generator(), &MonsterGenerator::load_species);
 
     type_function_map["recipe_category"] = new StaticFunctionAccessor(&load_recipe_category);
-    type_function_map["recipe"] = new StaticFunctionAccessor(&load_recipe);
+    type_function_map["recipe"] = new ClassFunctionAccessor<recipe_dictionary>(&recipe_dict, &recipe_dictionary::load);
     type_function_map["tool_quality"] = new StaticFunctionAccessor(&quality::load_static);
     type_function_map["technique"] = new StaticFunctionAccessor(&load_technique);
     type_function_map["martial_art"] = new StaticFunctionAccessor(&load_martial_art);
@@ -350,7 +351,7 @@ void DynamicDataLoader::unload_data()
     vpart_info::reset();
     MonsterGenerator::generator().reset();
     reset_recipe_categories();
-    reset_recipes();
+    recipe_dict.reset();
     quality::reset();
     trap::reset();
     reset_constructions();
@@ -388,7 +389,7 @@ void DynamicDataLoader::finalize_loaded_data()
     MonsterGenerator::generator().finalize_mtypes();
     MonsterGroupManager::FinalizeMonsterGroups();
     monfactions::finalize();
-    finalize_recipes();
+    recipe_dict.finalize();
     finialize_martial_arts();
     check_consistency();
 }
@@ -401,7 +402,7 @@ void DynamicDataLoader::check_consistency()
     vpart_info::check();
     MonsterGenerator::generator().check_monster_definitions();
     MonsterGroupManager::check_group_definitions();
-    check_recipe_definitions();
+    recipe_dict.check_consistency();
     check_furniture_and_terrain();
     check_constructions();
     profession::check_definitions();

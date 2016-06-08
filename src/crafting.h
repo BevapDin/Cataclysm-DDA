@@ -118,11 +118,8 @@ void remove_ammo( item *dis_item, player &p );
 // same as above but for each item in the list
 void remove_ammo( std::list<item> &dis_items, player &p );
 
-void load_recipe( JsonObject &jsobj );
-void reset_recipes();
 const recipe *recipe_by_name( const std::string &name );
 const recipe *get_disassemble_recipe( const itype_id &type );
-void finalize_recipes();
 // Show the "really disassemble?" query along with a list of possible results.
 // Returns false if the player answered no to the query.
 bool query_dissamble( const item &dis_item );
@@ -134,8 +131,6 @@ void pick_recipes( const inventory &crafting_inv,
 void batch_recipes( const inventory &crafting_inv,
                     std::vector<const recipe *> &current,
                     std::vector<bool> &available, const recipe *r );
-
-void check_recipe_definitions();
 
 void set_item_spoilage( item &newit, float used_age_tally, int used_age_count );
 void set_item_food( item &newit );

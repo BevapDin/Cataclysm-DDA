@@ -10,6 +10,8 @@
 struct recipe;
 using itype_id = std::string; // From itype.h
 
+class JsonObject;
+
 /**
 *   Repository class for recipes.
 *
@@ -47,6 +49,11 @@ class recipe_dictionary
          * is removed *and* deleted.
          */
         void delete_if( const std::function<bool( recipe & )> &pred );
+
+        void load( JsonObject &jsobj );
+        void finalize();
+        void check_consistency() const;
+        void reset();
 
     private:
         std::list<recipe *> recipes;
