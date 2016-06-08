@@ -1215,7 +1215,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
 
         int focus_pool;
 
-        std::map<recipe_id, const recipe *> learned_recipes;
+        std::set<recipe_id> learned_recipes;
 
         std::vector<matype_id> ma_styles;
         matype_id style_selected;

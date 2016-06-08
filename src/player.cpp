@@ -12510,7 +12510,7 @@ bool player::can_decomp_learn( const recipe &rec ) const
 
 bool player::knows_recipe(const recipe *rec) const
 {
-    if( learned_recipes.find( rec->ident() ) != learned_recipes.end() ) {
+    if( learned_recipes.count( rec->ident() ) > 0 ) {
         return true;
     }
 
@@ -12555,7 +12555,7 @@ int player::has_recipe( const recipe *r, const inventory &crafting_inv ) const
 void player::learn_recipe( const recipe * const rec, bool force )
 {
     if( force || rec->valid_learn() ) {
-        learned_recipes[rec->ident()] = rec;
+        learned_recipes.insert( rec->ident() );
     } else {
         debugmsg( "Tried to learn unlearnable recipe %s", rec->ident().c_str() );
     }

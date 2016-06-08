@@ -616,8 +616,8 @@ void player::serialize(JsonOut &json) const
     // npc: unimplemented, potentially useful
     json.member( "learned_recipes" );
     json.start_array();
-    for( auto iter = learned_recipes.cbegin(); iter != learned_recipes.cend(); ++iter ) {
-        json.write( iter->first );
+    for( auto &id : learned_recipes ) {
+        json.write( id );
     }
     json.end_array();
 
@@ -747,7 +747,7 @@ void player::deserialize(JsonIn &jsin)
         learned_recipes.clear();
         while ( parray.has_more() ) {
             if ( parray.read_next(pstr) ) {
-                learned_recipes[ pstr ] = (recipe *)recipe_by_name( pstr );
+                learned_recipes.insert( pstr );
             }
         }
     }
