@@ -28,7 +28,7 @@ class recipe_dictionary
         const std::vector<const recipe *> &of_component( const itype_id &id );
 
         /** Allows for lookup like: 'recipe_dict[name]'. */
-        recipe *operator[]( const std::string &rec_name ) {
+        const recipe *operator[]( const std::string &rec_name ) {
             return by_name[rec_name];
         }
         size_t size() const {
@@ -60,7 +60,7 @@ class recipe_dictionary
         std::map<const std::string, std::vector<const recipe *>> by_category;
         std::map<const itype_id, std::vector<const recipe *>> by_component;
 
-        std::map<const std::string, recipe *> by_name;
+        std::map<const std::string, const recipe *> by_name;
 
         /** Maps a component to a list of recipes. So we can look up what we can make with an item */
         void add_to_component_lookup( const recipe *r );
