@@ -715,7 +715,7 @@ void pick_recipes( const inventory &crafting_inv,
         }
         filter = filter.substr( pos + 1 );
     }
-    std::vector<recipe *> available_recipes;
+    std::vector<const recipe *> available_recipes;
 
     if( filter == "" ) {
         available_recipes = recipe_dict.in_category( tab );

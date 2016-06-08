@@ -23,7 +23,7 @@ class recipe_dictionary
         void add( recipe *rec );
 
         /** Returns a list of recipes in the 'cat' category */
-        const std::vector<recipe *> &in_category( const std::string &cat );
+        const std::vector<const recipe *> &in_category( const std::string &cat );
         /** Returns a list of recipes in which the component with itype_id 'id' can be used */
         const std::vector<recipe *> &of_component( const itype_id &id );
 
@@ -57,7 +57,7 @@ class recipe_dictionary
     private:
         std::list<recipe *> recipes;
 
-        std::map<const std::string, std::vector<recipe *>> by_category;
+        std::map<const std::string, std::vector<const recipe *>> by_category;
         std::map<const itype_id, std::vector<recipe *>> by_component;
 
         std::map<const std::string, recipe *> by_name;
