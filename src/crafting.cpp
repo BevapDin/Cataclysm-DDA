@@ -41,27 +41,6 @@ recipe::recipe() :
 {
 }
 
-// Check that the given recipe ident (rec_name) is unique, throw if not,
-// If the recipe should override an existing one, the function removes the existing
-// recipe.
-void check_recipe_ident( const recipe_id &rec_name, JsonObject &jsobj )
-{
-    const bool override_existing = jsobj.get_bool( "override", false );
-
-    recipe_dict.delete_if( [&]( const recipe &rec ) {
-        if( rec.ident() != rec_name ) {
-            return false;
-        }
-        if( !override_existing ) {
-            jsobj.throw_error(
-                std::string( "Recipe name collision (set a unique value for the id_suffix field to fix): " ) +
-                rec_name.str(), "result" );
-            // throw_error doesn't return
-        }
-        return true;
-    } );
-}
-
 void recipe::load( JsonObject &jsobj )
 {
     JsonArray jsarr;
@@ -173,9 +152,19 @@ void recipe_dictionary::load( JsonObject &jsobj )
     recipe rec;
     rec.load( jsobj );
 
-    check_recipe_ident( rec.ident(), jsobj ); // may delete recipes
+    if( jsobj.get_bool( "override", false ) ) {
+        // Remove the existing recipe of the same ident (if any).
+        delete_if( [&]( const recipe &existing_rec ) {
+            return existing_rec.ident() == rec.ident();
+        } );
 
-    // Note, a recipe has to be fully instantiated before adding
+    } else if( operator[]( rec.ident() ) != nullptr ) {
+        // Not overriding: throw if there is an existing recipe.
+        jsobj.throw_error(
+            std::string( "Recipe name collision (set a unique value for the id_suffix field to fix): " ) +
+            rec.result, "result" );
+    }
+
     add( std::move( rec ) );
 }
 
