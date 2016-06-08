@@ -333,15 +333,32 @@ class Parser:
 
 
 
-    def register_container(self, name, t):
+    def register_iterator(self, name, t):
         sp = re.sub('^const ', '', t.spelling)
-        iterator = False
-        m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>$', sp)
+        m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>::iterator$', sp)
         if not m:
-            m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>::iterator$', sp)
-            if m:
-                iterator = True
+            if t.kind == clang.cindex.TypeKind.TYPEDEF:
+                return self.register_iterator(name, t.get_declaration().underlying_typedef_type)
+            return None
 
+        element_type = m.group(1)
+        if self.build_in_lua_type(element_type) == 'std::string':
+            element_type = 'std::string'
+        elif self.export_by_value(element_type):
+            pass
+        else:
+            print("%s is a %s based on %s, but is not exported" % (t.spelling, name, element_type))
+            return None
+
+        self.generic_types[sp] = 'make_' + name + '_class("%s")' % element_type
+        return '"std::' + name + '<' + element_type + '>::iterator"'
+
+    def register_container(self, name, t):
+        res = self.register_iterator(name, t)
+        if res: return res
+
+        sp = re.sub('^const ', '', t.spelling)
+        m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>$', sp)
         if not m:
             if t.kind == clang.cindex.TypeKind.TYPEDEF:
                 return self.register_container(name, t.get_declaration().underlying_typedef_type)
@@ -349,20 +366,15 @@ class Parser:
 
         element_type = m.group(1)
         if self.build_in_lua_type(element_type) == 'std::string':
-            bt = 'std::string'
-            debug_print("%s is a %s based on %s (%s)" % (t.spelling, name, element_type, bt))
-            element_type = bt
+            element_type = 'std::string'
         elif self.export_by_value(element_type):
-            debug_print("%s is a %s based on %s" % (t.spelling, name, element_type))
+            pass
         else:
-            debug_print("%s is a %s based on %s, but is not exported" % (t.spelling, name, element_type))
+            print("%s is a %s based on %s, but is not exported" % (t.spelling, name, element_type))
             return None
 
         self.generic_types[sp] = 'make_' + name + '_class("%s")' % element_type
-        if iterator:
-            return '"std::' + name + '<' + element_type + '>::iterator"'
-        else:
-            return '"std::' + name + '<' + element_type + '>"'
+        return '"std::' + name + '<' + element_type + '>"'
 
     def register_id_type(self, t, ids_map, id_type):
         typedef = t
