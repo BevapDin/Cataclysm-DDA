@@ -298,7 +298,7 @@ bool player::making_would_work( const recipe_id &id_to_make, int batch_size )
         return false;
     }
 
-    if( !can_make( making, batch_size ) ) {
+    if( !can_make( *making, batch_size ) ) {
         std::ostringstream buffer;
         buffer << _( "You can no longer make that craft!" ) << "\n";
         buffer << making->requirements.list_missing();
@@ -422,14 +422,14 @@ std::vector<item> player::get_eligible_containers_for_crafting()
     return conts;
 }
 
-bool player::can_make( const recipe *r, int batch_size )
+bool player::can_make( const recipe &rec, int batch_size )
 {
     if( has_trait( "DEBUG_HS" ) ) {
         return true;
     }
 
     const inventory &crafting_inv = crafting_inventory();
-    return r->can_make_with_inventory( crafting_inv, batch_size );
+    return rec.can_make_with_inventory( crafting_inv, batch_size );
 }
 
 bool recipe::can_make_with_inventory( const inventory &crafting_inv, int batch ) const
