@@ -147,34 +147,6 @@ void recipe::load( JsonObject &jsobj )
     }
 }
 
-void recipe_dictionary::load( JsonObject &jsobj )
-{
-    recipe rec;
-    rec.load( jsobj );
-
-    if( jsobj.get_bool( "override", false ) ) {
-        // Remove the existing recipe of the same ident (if any).
-        delete_if( [&]( const recipe &existing_rec ) {
-            return existing_rec.ident() == rec.ident();
-        } );
-
-    } else if( operator[]( rec.ident() ) != nullptr ) {
-        // Not overriding: throw if there is an existing recipe.
-        jsobj.throw_error(
-            std::string( "Recipe name collision (set a unique value for the id_suffix field to fix): " ) +
-            rec.result, "result" );
-    }
-
-    add( std::move( rec ) );
-}
-
-void recipe_dictionary::finalize()
-{
-    for( auto &r : recipes ) {
-        r.finalize();
-    }
-}
-
 void recipe::finalize()
 {
     for( auto j = booksets.begin(); j != booksets.end(); ++j ) {
@@ -1186,17 +1158,6 @@ void player::consume_tools( const std::vector<tool_comp> &tools, int batch,
     consume_tools( select_tool_component( tools, batch, map_inv, hotkeys ), batch );
 }
 
-const recipe *recipe_dictionary::get_disassemble_recipe( const itype_id &type ) const
-{
-    for( auto &cur_recipe : recipes ) {
-        if( type == cur_recipe.result && cur_recipe.reversible ) {
-            return &cur_recipe;
-        }
-    }
-    // no matching disassemble recipe found.
-    return nullptr;
-}
-
 bool player::can_disassemble( const item &dis_item, const inventory &crafting_inv,
                               const bool print_msg ) const
 {
@@ -1681,13 +1642,6 @@ void player::complete_disassemble( int item_pos, const tripoint &loc,
         } else {
             add_msg( m_info, _( "If you had better skills, you might learn a recipe next time." ) );
         }
-    }
-}
-
-void recipe_dictionary::check_consistency() const
-{
-    for( auto &r : recipes ) {
-        r.check_consistency();
     }
 }
 

@@ -73,3 +73,49 @@ const std::vector<const recipe *> &recipe_dictionary::of_component( const itype_
 {
     return by_component[id];
 }
+
+void recipe_dictionary::load( JsonObject &jsobj )
+{
+    recipe rec;
+    rec.load( jsobj );
+
+    if( jsobj.get_bool( "override", false ) ) {
+        // Remove the existing recipe of the same ident (if any).
+        delete_if( [&]( const recipe &existing_rec ) {
+            return existing_rec.ident() == rec.ident();
+        } );
+
+    } else if( operator[]( rec.ident() ) != nullptr ) {
+        // Not overriding: throw if there is an existing recipe.
+        jsobj.throw_error(
+            std::string( "Recipe name collision (set a unique value for the id_suffix field to fix): " ) +
+            rec.result, "result" );
+    }
+
+    add( std::move( rec ) );
+}
+
+void recipe_dictionary::finalize()
+{
+    for( auto &r : recipes ) {
+        r.finalize();
+    }
+}
+
+void recipe_dictionary::check_consistency() const
+{
+    for( auto &r : recipes ) {
+        r.check_consistency();
+    }
+}
+
+const recipe *recipe_dictionary::get_disassemble_recipe( const itype_id &type ) const
+{
+    for( auto &cur_recipe : recipes ) {
+        if( type == cur_recipe.result && cur_recipe.reversible ) {
+            return &cur_recipe;
+        }
+    }
+    // no matching disassemble recipe found.
+    return nullptr;
+}
