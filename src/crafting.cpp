@@ -59,7 +59,7 @@ void check_recipe_ident( const std::string &rec_name, JsonObject &jsobj )
     } );
 }
 
-void load_recipe( JsonObject &jsobj )
+void recipe::load( JsonObject &jsobj )
 {
     JsonArray jsarr;
 
@@ -153,36 +153,31 @@ void load_recipe( JsonObject &jsobj )
         }
     }
 
-    std::string rec_name = result + id_suffix;
-    check_recipe_ident( rec_name, jsobj ); // may delete recipes
-
-    recipe *rec = new recipe();
-
-    rec->ident_ = rec_name;
-    rec->result = result;
-    rec->time = time;
-    rec->difficulty = difficulty;
-    rec->byproducts = bps;
-    rec->cat = category;
-    rec->contained = contained;
-    rec->subcat = subcategory;
-    rec->skill_used = skill_used;
+    this->ident_ = result + id_suffix;
+    this->result = result;
+    this->time = time;
+    this->difficulty = difficulty;
+    this->byproducts = bps;
+    this->cat = category;
+    this->contained = contained;
+    this->subcat = subcategory;
+    this->skill_used = skill_used;
     for( const auto &elem : requires_skills ) {
-        rec->required_skills[skill_id( elem.first )] = elem.second;
+        this->required_skills[skill_id( elem.first )] = elem.second;
     }
     for( const auto &elem : autolearn_requirements ) {
-        rec->autolearn_requirements[skill_id( elem.first )] = elem.second;
+        this->autolearn_requirements[skill_id( elem.first )] = elem.second;
     }
     for( const auto &elem : learn_by_disassembly ) {
-        rec->learn_by_disassembly[skill_id( elem.first )] = elem.second;
+        this->learn_by_disassembly[skill_id( elem.first )] = elem.second;
     }
-    rec->reversible = reversible;
-    rec->batch_rscale = batch_rscale;
-    rec->batch_rsize = batch_rsize;
-    rec->result_mult = result_mult;
-    rec->flags = jsobj.get_tags( "flags" );
+    this->reversible = reversible;
+    this->batch_rscale = batch_rscale;
+    this->batch_rsize = batch_rsize;
+    this->result_mult = result_mult;
+    this->flags = jsobj.get_tags( "flags" );
 
-    rec->requirements.load( jsobj );
+    this->requirements.load( jsobj );
 
     jsarr = jsobj.get_array( "book_learn" );
     while( jsarr.has_more() ) {
@@ -192,8 +187,16 @@ void load_recipe( JsonObject &jsobj )
             bd.recipe_name = ja.get_string( 2 );
             bd.hidden = bd.recipe_name.empty();
         }
-        rec->booksets.push_back( bd );
+        this->booksets.push_back( bd );
     }
+}
+
+void load_recipe( JsonObject &jsobj )
+{
+    recipe *rec = new recipe();
+    rec->load( jsobj );
+
+    check_recipe_ident( rec->ident(), jsobj ); // may delete recipes
 
     // Note, a recipe has to be fully instantiated before adding
     recipe_dict.add( rec );

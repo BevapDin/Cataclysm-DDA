@@ -40,8 +40,6 @@ struct recipe {
     private:
         std::string ident_;
 
-        friend void load_recipe( JsonObject &jsobj );
-
     public:
         itype_id result;
         int time; // in movement points (100 per turn)
@@ -82,6 +80,7 @@ struct recipe {
 
         recipe();
 
+        void load( JsonObject &jsobj );
         void finalize();
         void check_consistency() const;
 
