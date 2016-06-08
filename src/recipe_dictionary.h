@@ -19,7 +19,6 @@ class recipe_dictionary
 {
     public:
         void add( recipe *rec );
-        void remove( recipe *rec );
         void clear();
 
         /** Returns a list of recipes in the 'cat' category */
