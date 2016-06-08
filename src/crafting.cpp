@@ -1732,19 +1732,24 @@ void check_recipe_definitions()
 {
     for( auto &elem : recipe_dict ) {
         const recipe &r = *elem;
-        const std::string display_name = std::string( "recipe " ) + r.ident();
-        r.requirements.check_consistency( display_name );
-        if( !item::type_is_defined( r.result ) ) {
-            debugmsg( "result %s in recipe %s is not a valid item template", r.result.c_str(),
-                      r.ident().c_str() );
-        }
-        if( r.skill_used && !r.skill_used.is_valid() ) {
-            debugmsg( "recipe %s uses invalid skill %s", r.ident().c_str(), r.skill_used.c_str() );
-        }
-        for( auto &e : r.required_skills ) {
-            if( e.first && !e.first.is_valid() ) {
-                debugmsg( "recipe %s uses invalid required skill %s", r.ident().c_str(), e.first.c_str() );
-            }
+        r.check_consistency();
+    }
+}
+
+void recipe::check_consistency() const
+{
+    const std::string display_name = std::string( "recipe " ) + ident();
+    requirements.check_consistency( display_name );
+    if( !item::type_is_defined( result ) ) {
+        debugmsg( "result %s in recipe %s is not a valid item template", result.c_str(),
+                  ident().c_str() );
+    }
+    if( skill_used && !skill_used.is_valid() ) {
+        debugmsg( "recipe %s uses invalid skill %s", ident().c_str(), skill_used.c_str() );
+    }
+    for( auto &e : required_skills ) {
+        if( e.first && !e.first.is_valid() ) {
+            debugmsg( "recipe %s uses invalid required skill %s", ident().c_str(), e.first.c_str() );
         }
     }
 }

@@ -83,6 +83,7 @@ struct recipe {
         recipe();
 
         void finalize();
+        void check_consistency() const;
 
         // Create an item instance as if the recipe was just finished,
         // Contain charges multiplier
