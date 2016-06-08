@@ -828,7 +828,7 @@ void player::complete_craft()
                 if( x_in_y( making->time, ( 1000 * 8 *
                                             ( difficulty * difficulty * difficulty * difficulty ) ) /
                             ( std::max( get_skill_level( making->skill_used ).level(), 1 ) * std::max( get_int(), 1 ) ) ) ) {
-                    learn_recipe( ( recipe * )making );
+                    learn_recipe( *making );
                     add_msg( m_good, _( "You memorized the recipe for %s!" ),
                              newit.type_name( 1 ).c_str() );
                 }
@@ -1684,7 +1684,7 @@ void player::complete_disassemble( int item_pos, const tripoint &loc,
         if( can_decomp_learn( dis ) ) {
             // @todo: make this depend on intelligence
             if( one_in( 4 ) ) {
-                learn_recipe( &dis );
+                learn_recipe( dis );
                 add_msg( m_good, _( "You learned a recipe from disassembling it!" ) );
             } else {
                 add_msg( m_info, _( "You might be able to learn a recipe if you disassemble another." ) );

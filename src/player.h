@@ -1061,7 +1061,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         // Returns -1 to indicate recipe not found, otherwise difficulty to learn.
         int has_recipe( const recipe *r, const inventory &crafting_inv ) const;
         bool knows_recipe( const recipe *rec ) const;
-        void learn_recipe( const recipe *rec, bool force = false );
+        void learn_recipe( const recipe &rec, bool force = false );
         int exceeds_recipe_requirements( const recipe &rec ) const;
         bool has_recipe_requirements( const recipe &rec ) const;
         bool has_recipe_autolearned( const recipe &rec ) const;

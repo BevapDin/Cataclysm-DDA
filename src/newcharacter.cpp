@@ -536,7 +536,7 @@ bool player::create(character_type type, std::string tempname)
             has_recipe_requirements( cur_recipe ) &&
             learned_recipes.count( cur_recipe.ident() ) == 0 ) {
 
-            learn_recipe( &cur_recipe );
+            learn_recipe( cur_recipe );
         }
     }
 

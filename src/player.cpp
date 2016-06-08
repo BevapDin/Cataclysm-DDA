@@ -11342,7 +11342,7 @@ bool player::try_study_recipe( const itype &book )
         if( !r->skill_used || get_skill_level( r->skill_used ) >= elem.skill_level ) {
             if( !r->skill_used ||
                 rng(0, 4) <= (get_skill_level(r->skill_used) - elem.skill_level) / 2 ) {
-                learn_recipe( r );
+                learn_recipe( *r );
                 add_msg(m_good, _("Learned a recipe for %1$s from the %2$s."),
                                 item::nname( r->result ).c_str(), book.nname(1).c_str());
                 return true;
@@ -12552,12 +12552,12 @@ int player::has_recipe( const recipe *r, const inventory &crafting_inv ) const
     return difficulty;
 }
 
-void player::learn_recipe( const recipe * const rec, bool force )
+void player::learn_recipe( const recipe &rec, bool force )
 {
-    if( force || rec->valid_learn() ) {
-        learned_recipes.insert( rec->ident() );
+    if( force || rec.valid_learn() ) {
+        learned_recipes.insert( rec.ident() );
     } else {
-        debugmsg( "Tried to learn unlearnable recipe %s", rec->ident().c_str() );
+        debugmsg( "Tried to learn unlearnable recipe %s", rec.ident().c_str() );
     }
 }
 
