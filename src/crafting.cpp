@@ -293,7 +293,7 @@ void player::long_craft()
 
 bool player::making_would_work( const recipe_id &id_to_make, int batch_size )
 {
-    const recipe *making = recipe_by_name( id_to_make );
+    const recipe *making = recipe_dict[id_to_make];
     if( making == nullptr || !crafting_allowed( *this, *making ) ) {
         return false;
     }
@@ -559,7 +559,7 @@ void player::make_all_craft( const recipe_id &id_to_make, int batch_size )
 
 void player::make_craft_with_command( const recipe_id &id_to_make, int batch_size, bool is_long )
 {
-    const recipe *recipe_to_make = recipe_by_name( id_to_make );
+    const recipe *recipe_to_make = recipe_dict[id_to_make];
 
     if( recipe_to_make == nullptr ) {
         return;
@@ -670,7 +670,7 @@ void set_components( std::vector<item> &components, const std::list<item> &used,
 
 void player::complete_craft()
 {
-    const recipe *making = recipe_by_name( recipe_id( activity.name ) ); // Which recipe is it?
+    const recipe *making = recipe_dict[recipe_id( activity.name )]; // Which recipe is it?
     int batch_size = activity.values.front();
     if( making == nullptr ) {
         debugmsg( "no recipe with id %s found", activity.name.c_str() );
@@ -1504,7 +1504,7 @@ void player::complete_disassemble()
         }
     } else {
         // Now regular recipe
-        const recipe *dis_ptr = recipe_by_name( recipe_name ); // Which recipe is it?
+        const recipe *dis_ptr = recipe_dict[recipe_name]; // Which recipe is it?
         if( dis_ptr == nullptr ) {
             debugmsg( "no recipe with name %s found", recipe_name.c_str() );
             activity.type = ACT_NULL;
@@ -1535,7 +1535,7 @@ void player::complete_disassemble()
     if( next_recipe_name == fake_recipe_book ) {
         activity.moves_left = 100;
     } else {
-        const recipe *next_recipe = recipe_by_name( next_recipe_name );
+        const recipe *next_recipe = recipe_dict[next_recipe_name];
         if( next_recipe == nullptr ) {
             activity.type = ACT_NULL;
             return;
@@ -1693,11 +1693,6 @@ void player::complete_disassemble( int item_pos, const tripoint &loc,
             add_msg( m_info, _( "If you had better skills, you might learn a recipe next time." ) );
         }
     }
-}
-
-const recipe *recipe_by_name( const recipe_id &name )
-{
-    return recipe_dict[name];
 }
 
 void recipe_dictionary::check_consistency() const
