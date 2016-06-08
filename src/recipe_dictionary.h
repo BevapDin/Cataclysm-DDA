@@ -25,7 +25,7 @@ class recipe_dictionary
         /** Returns a list of recipes in the 'cat' category */
         const std::vector<const recipe *> &in_category( const std::string &cat );
         /** Returns a list of recipes in which the component with itype_id 'id' can be used */
-        const std::vector<recipe *> &of_component( const itype_id &id );
+        const std::vector<const recipe *> &of_component( const itype_id &id );
 
         /** Allows for lookup like: 'recipe_dict[name]'. */
         recipe *operator[]( const std::string &rec_name ) {
@@ -58,13 +58,13 @@ class recipe_dictionary
         std::list<recipe *> recipes;
 
         std::map<const std::string, std::vector<const recipe *>> by_category;
-        std::map<const itype_id, std::vector<recipe *>> by_component;
+        std::map<const itype_id, std::vector<const recipe *>> by_component;
 
         std::map<const std::string, recipe *> by_name;
 
         /** Maps a component to a list of recipes. So we can look up what we can make with an item */
-        void add_to_component_lookup( recipe *r );
-        void remove_from_component_lookup( recipe *r );
+        void add_to_component_lookup( const recipe *r );
+        void remove_from_component_lookup( const recipe *r );
 };
 
 extern recipe_dictionary recipe_dict;

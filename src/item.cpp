@@ -1833,13 +1833,13 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info ) const
         } else { // use the contained item
             tid = contents.front().typeId();
         }
-        const std::vector<recipe *> &rec = recipe_dict.of_component( tid );
+        const std::vector<const recipe *> &rec = recipe_dict.of_component( tid );
         if( !rec.empty() ) {
             temp1.str( "" );
             const inventory &inv = g->u.crafting_inventory();
             // only want known recipes
-            std::vector<recipe *> known_recipes;
-            for( recipe *r : rec ) {
+            std::vector<const recipe *> known_recipes;
+            for( const recipe *r : rec ) {
                 if( g->u.knows_recipe( r ) ) {
                     known_recipes.push_back( r );
                 }
@@ -1853,7 +1853,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info ) const
                 info.push_back( iteminfo( "DESCRIPTION", _( "You could use it to craft various other things." ) ) );
             } else {
                 bool found_recipe = false;
-                for( recipe *r : known_recipes ) {
+                for( const recipe *r : known_recipes ) {
                     if( found_recipe ) {
                         temp1 << _( ", " );
                     }

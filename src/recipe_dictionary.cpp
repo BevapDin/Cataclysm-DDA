@@ -34,7 +34,7 @@ void recipe_dictionary::delete_if( const std::function<bool( recipe & )> &pred )
     }
 }
 
-void recipe_dictionary::add_to_component_lookup( recipe *r )
+void recipe_dictionary::add_to_component_lookup( const recipe *r )
 {
     std::unordered_set<itype_id> counted;
     for( const auto &comp_choices : r->requirements.get_components() ) {
@@ -48,10 +48,10 @@ void recipe_dictionary::add_to_component_lookup( recipe *r )
     }
 }
 
-void recipe_dictionary::remove_from_component_lookup( recipe *r )
+void recipe_dictionary::remove_from_component_lookup( const recipe *r )
 {
     for( auto &map_item : by_component ) {
-        std::vector<recipe *> &rlist = map_item.second;
+        std::vector<const recipe *> &rlist = map_item.second;
         rlist.erase( std::remove( rlist.begin(), rlist.end(), r ), rlist.end() );
     }
 }
@@ -72,7 +72,7 @@ const std::vector<const recipe *> &recipe_dictionary::in_category( const std::st
     return by_category[cat];
 }
 
-const std::vector<recipe *> &recipe_dictionary::of_component( const itype_id &id )
+const std::vector<const recipe *> &recipe_dictionary::of_component( const itype_id &id )
 {
     return by_component[id];
 }
