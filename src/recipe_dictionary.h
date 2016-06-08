@@ -27,9 +27,13 @@ class recipe_dictionary
         /** Returns a list of recipes in which the component with itype_id 'id' can be used */
         const std::vector<const recipe *> &of_component( const itype_id &id );
 
-        /** Allows for lookup like: 'recipe_dict[name]'. */
-        const recipe *operator[]( const std::string &rec_name ) {
-            return by_name[rec_name];
+        /**
+         * Lookup and return the recipe of the given ident.
+         * Returns nullptr if there is no recipe with the given ident.s
+         */
+        const recipe *operator[]( const std::string &rec_name ) const {
+            const auto iter = by_name.find( rec_name );
+            return iter == by_name.end() ? nullptr : iter->second;
         }
         size_t size() const {
             return recipes.size();
