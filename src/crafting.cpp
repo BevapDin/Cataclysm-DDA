@@ -28,9 +28,12 @@
 #include <string>
 #include <sstream>
 
+template<>
+const string_id<recipe> string_id<recipe>::NULL_ID( "" );
+
 const efftype_id effect_contacts( "contacts" );
 
-static const std::string fake_recipe_book = "book";
+static const recipe_id fake_recipe_book( "book" );
 
 recipe::recipe() :
     result( "null" ), contained( false ), skill_used( NULL_ID ), reversible( false ),
@@ -41,7 +44,7 @@ recipe::recipe() :
 // Check that the given recipe ident (rec_name) is unique, throw if not,
 // If the recipe should override an existing one, the function removes the existing
 // recipe.
-void check_recipe_ident( const std::string &rec_name, JsonObject &jsobj )
+void check_recipe_ident( const recipe_id &rec_name, JsonObject &jsobj )
 {
     const bool override_existing = jsobj.get_bool( "override", false );
 
@@ -52,7 +55,7 @@ void check_recipe_ident( const std::string &rec_name, JsonObject &jsobj )
         if( !override_existing ) {
             jsobj.throw_error(
                 std::string( "Recipe name collision (set a unique value for the id_suffix field to fix): " ) +
-                rec_name, "result" );
+                rec_name.str(), "result" );
             // throw_error doesn't return
         }
         return true;
@@ -148,7 +151,7 @@ void recipe::load( JsonObject &jsobj )
         }
     }
 
-    ident_ = result + jsobj.get_string( "id_suffix", "" );
+    ident_ = recipe_id( result + jsobj.get_string( "id_suffix", "" ) );
     flags = jsobj.get_tags( "flags" );
 
     requirements.load( jsobj );
@@ -269,7 +272,7 @@ void player::craft()
 
 void player::recraft()
 {
-    if( lastrecipe.empty() ) {
+    if( !lastrecipe ) {
         popup( _( "Craft something first" ) );
         g->refresh_all();
     } else if( making_would_work( lastrecipe, last_batch ) ) {
@@ -288,7 +291,7 @@ void player::long_craft()
     }
 }
 
-bool player::making_would_work( const std::string &id_to_make, int batch_size )
+bool player::making_would_work( const recipe_id &id_to_make, int batch_size )
 {
     const recipe *making = recipe_by_name( id_to_make );
     if( making == nullptr || !crafting_allowed( *this, *making ) ) {
@@ -544,17 +547,17 @@ bool recipe::has_flag( const std::string &flag_name ) const
     return flags.count( flag_name );
 }
 
-void player::make_craft( const std::string &id_to_make, int batch_size )
+void player::make_craft( const recipe_id &id_to_make, int batch_size )
 {
     make_craft_with_command( id_to_make, batch_size );
 }
 
-void player::make_all_craft( const std::string &id_to_make, int batch_size )
+void player::make_all_craft( const recipe_id &id_to_make, int batch_size )
 {
     make_craft_with_command( id_to_make, batch_size, true );
 }
 
-void player::make_craft_with_command( const std::string &id_to_make, int batch_size, bool is_long )
+void player::make_craft_with_command( const recipe_id &id_to_make, int batch_size, bool is_long )
 {
     const recipe *recipe_to_make = recipe_by_name( id_to_make );
 
@@ -667,7 +670,7 @@ void set_components( std::vector<item> &components, const std::list<item> &used,
 
 void player::complete_craft()
 {
-    const recipe *making = recipe_by_name( activity.name ); // Which recipe is it?
+    const recipe *making = recipe_by_name( recipe_id( activity.name ) ); // Which recipe is it?
     int batch_size = activity.values.front();
     if( making == nullptr ) {
         debugmsg( "no recipe with id %s found", activity.name.c_str() );
@@ -1344,7 +1347,7 @@ bool player::disassemble( item &dis_item, int dis_pos,
 
     // First check regular disassembly, then book "fake disassembly"
     // Note: this may get weird if books ever get regular disassembly
-    std::string recipe_ident;
+    recipe_id recipe_ident;
     int recipe_time = 100;
     const inventory &crafting_inv = crafting_inventory();
     if( cur_recipe != nullptr &&
@@ -1367,7 +1370,7 @@ bool player::disassemble( item &dis_item, int dis_pos,
         }
     }
 
-    if( recipe_ident.empty() ) {
+    if( !recipe_ident ) {
         // No recipe exists, or the item cannot be disassembled
         if( msg_and_query ) {
             add_msg( m_info, _( "The %s cannot be disassembled!" ),
@@ -1384,7 +1387,7 @@ bool player::disassemble( item &dis_item, int dis_pos,
 
     activity.values.push_back( dis_pos );
     activity.coords.push_back( ground ? pos() : tripoint_min );
-    activity.str_values.push_back( recipe_ident );
+    activity.str_values.push_back( recipe_ident.str() );
 
     return true;
 }
@@ -1468,7 +1471,7 @@ void player::complete_disassemble()
     // This is to avoid having to maintain indices
     const int item_pos = activity.values.back();
     const tripoint loc = activity.coords.back();
-    const auto recipe_name = activity.str_values.back();
+    const recipe_id recipe_name( activity.str_values.back() );
 
     activity.values.pop_back();
     activity.str_values.pop_back();
@@ -1528,7 +1531,7 @@ void player::complete_disassemble()
         return;
     }
 
-    const auto &next_recipe_name = activity.str_values.back();
+    const recipe_id next_recipe_name( activity.str_values.back() );
     if( next_recipe_name == fake_recipe_book ) {
         activity.moves_left = 100;
     } else {
@@ -1692,7 +1695,7 @@ void player::complete_disassemble( int item_pos, const tripoint &loc,
     }
 }
 
-const recipe *recipe_by_name( const std::string &name )
+const recipe *recipe_by_name( const recipe_id &name )
 {
     return recipe_dict[name];
 }
@@ -1706,7 +1709,7 @@ void recipe_dictionary::check_consistency() const
 
 void recipe::check_consistency() const
 {
-    const std::string display_name = std::string( "recipe " ) + ident();
+    const std::string display_name = std::string( "recipe " ) + ident().str();
     requirements.check_consistency( display_name );
     if( !item::type_is_defined( result ) ) {
         debugmsg( "result %s in recipe %s is not a valid item template", result.c_str(),
@@ -1787,7 +1790,7 @@ std::string recipe::required_skills_string() const
     return skills_as_stream.str();
 }
 
-const std::string &recipe::ident() const
+const recipe_id &recipe::ident() const
 {
     return ident_;
 }

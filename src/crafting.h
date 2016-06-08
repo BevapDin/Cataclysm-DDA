@@ -18,6 +18,7 @@ using skill_id = string_id<Skill>;
 class inventory;
 class player;
 struct recipe;
+using recipe_id = string_id<recipe>;
 
 enum body_part : int; // From bodypart.h
 typedef int nc_color; // From color.h
@@ -38,7 +39,7 @@ struct byproduct {
 
 struct recipe {
     private:
-        std::string ident_;
+        recipe_id ident_;
 
     public:
         itype_id result;
@@ -72,7 +73,7 @@ struct recipe {
         std::vector<bookdata_t> booksets;
         std::set<std::string> flags;
 
-        const std::string &ident() const;
+        const recipe_id &ident() const;
 
         //Create a string list to describe the skill requirements fir this recipe
         // Format: skill_name(amount), skill_name(amount)
@@ -118,7 +119,7 @@ void remove_ammo( item *dis_item, player &p );
 // same as above but for each item in the list
 void remove_ammo( std::list<item> &dis_items, player &p );
 
-const recipe *recipe_by_name( const std::string &name );
+const recipe *recipe_by_name( const recipe_id &name );
 const recipe *get_disassemble_recipe( const itype_id &type );
 // Show the "really disassemble?" query along with a list of possible results.
 // Returns false if the player answered no to the query.

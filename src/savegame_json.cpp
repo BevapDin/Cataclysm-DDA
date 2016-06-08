@@ -743,7 +743,7 @@ void player::deserialize(JsonIn &jsin)
 
     parray = data.get_array("learned_recipes");
     if ( !parray.empty() ) {
-        std::string pstr = "";
+        recipe_id pstr;
         learned_recipes.clear();
         while ( parray.has_more() ) {
             if ( parray.read_next(pstr) ) {

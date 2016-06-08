@@ -28,6 +28,7 @@ enum game_message_type : int;
 class ma_technique;
 class martialart;
 struct recipe;
+using recipe_id = string_id<recipe>;
 struct item_comp;
 struct tool_comp;
 class vehicle;
@@ -1072,12 +1073,12 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         float lighting_craft_speed_multiplier( const recipe & rec ) const;
         bool has_morale_to_craft() const;
         bool can_make( const recipe * r, int batch_size = 1 ); // have components?
-        bool making_would_work( const std::string & id_to_make, int batch_size );
+        bool making_would_work( const recipe_id &id_to_make, int batch_size );
         void craft();
         void recraft();
         void long_craft();
-        void make_craft( const std::string & id, int batch_size );
-        void make_all_craft( const std::string & id, int batch_size );
+        void make_craft( const recipe_id &id, int batch_size );
+        void make_all_craft( const recipe_id &id, int batch_size );
         void complete_craft();
 
         // also crafting.cpp
@@ -1214,7 +1215,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
 
         int focus_pool;
 
-        std::map<std::string, const recipe *> learned_recipes;
+        std::map<recipe_id, const recipe *> learned_recipes;
 
         std::vector<matype_id> ma_styles;
         matype_id style_selected;
@@ -1222,10 +1223,10 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
 
         std::vector <addiction> addictions;
 
-        void make_craft_with_command( const std::string &id_to_make, int batch_size, bool is_long = false );
+        void make_craft_with_command( const recipe_id &id_to_make, int batch_size, bool is_long = false );
         craft_command last_craft;
 
-        std::string lastrecipe;
+        recipe_id lastrecipe;
         int last_batch;
         itype_id lastconsumed;        //used in crafting.cpp and construction.cpp
 

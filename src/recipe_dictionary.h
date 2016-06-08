@@ -1,6 +1,8 @@
 #ifndef RECIPE_DICTIONARY_H
 #define RECIPE_DICTIONARY_H
 
+#include "string_id.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -9,6 +11,7 @@
 
 struct recipe;
 using itype_id = std::string; // From itype.h
+using recipe_id = string_id<recipe>;
 
 class JsonObject;
 
@@ -31,7 +34,7 @@ class recipe_dictionary
          * Lookup and return the recipe of the given ident.
          * Returns nullptr if there is no recipe with the given ident.s
          */
-        const recipe *operator[]( const std::string &rec_name ) const {
+        const recipe *operator[]( const recipe_id &rec_name ) const {
             const auto iter = by_name.find( rec_name );
             return iter == by_name.end() ? nullptr : iter->second;
         }
@@ -66,7 +69,7 @@ class recipe_dictionary
         std::map<const std::string, std::vector<const recipe *>> by_category;
         std::map<const itype_id, std::vector<const recipe *>> by_component;
 
-        std::map<const std::string, const recipe *> by_name;
+        std::map<recipe_id, const recipe *> by_name;
 
         /** Maps a component to a list of recipes. So we can look up what we can make with an item */
         void add_to_component_lookup( const recipe *r );
