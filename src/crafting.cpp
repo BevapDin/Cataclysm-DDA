@@ -32,8 +32,6 @@ const efftype_id effect_contacts( "contacts" );
 
 static const std::string fake_recipe_book = "book";
 
-void remove_from_component_lookup( recipe *r );
-
 recipe::recipe() :
     result( "null" ), contained( false ), skill_used( NULL_ID ), reversible( false ),
     autolearn_requirements(), learn_by_disassembly(), result_mult( 1 )
