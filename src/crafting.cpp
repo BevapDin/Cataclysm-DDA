@@ -45,18 +45,18 @@ void check_recipe_ident( const std::string &rec_name, JsonObject &jsobj )
 {
     const bool override_existing = jsobj.get_bool( "override", false );
 
-    for( auto list_iter : recipe_dict ) {
-        if( list_iter->ident() == rec_name ) {
-            if( !override_existing ) {
-                jsobj.throw_error(
-                    std::string( "Recipe name collision (set a unique value for the id_suffix field to fix): " ) +
-                    rec_name, "result" );
-            }
-            recipe_dict.remove( list_iter );
-            delete list_iter;
-            break;
+    recipe_dict.delete_if( [&]( const recipe &rec ) {
+        if( rec.ident() != rec_name ) {
+            return false;
         }
-    }
+        if( !override_existing ) {
+            jsobj.throw_error(
+                std::string( "Recipe name collision (set a unique value for the id_suffix field to fix): " ) +
+                rec_name, "result" );
+            // throw_error doesn't return
+        }
+        return true;
+    } );
 }
 
 void load_recipe( JsonObject &jsobj )
