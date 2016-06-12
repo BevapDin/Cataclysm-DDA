@@ -38,5 +38,39 @@
         "breaks_into" : [
             {"item": "heavy_rail_rifle", "prob": 100}
         ]
+    },
+    {
+        "type" : "GENERIC",
+        "id" : "foo:flowerpot",
+        "name" : "empty flowerpot",
+        "description" : "A flowerpot. Use it (while you have a digging tool with you) to dig out a plant around you and place it into the pot. Use it again to put the plant back into the soil.",
+        "weight" : 200,
+        "color" : "light_gray",
+        "symbol" : "⚘",
+        "volume" : 20,
+        "use_action" : "CUSTOM_FLOWERPOT",
+        "price" : 0
+    },
+    {
+        "type" : "recipe",
+        "result" : "foo:flowerpot",
+        "category" : "CC_OTHER",
+        "subcategory" : "CSC_OTHER_TOOLS",
+        "skill_used" : "fabrication",
+        "difficulty" : 2,
+        "time" : 10000,
+        "reversible" : false,
+        "autolearn" : true,
+        "qualities": [
+            { "id" : "HAMMER", "level" : 3 }
+        ],
+        "tools": [
+            [ ["tongs", -1] ],
+            [ ["anvil", -1] ],
+            [ ["forge", 200] ]
+        ],
+        "components": [
+            [ [ "steel_lump", 8 ], [ "steel_chunk", 32 ], [ "scrap", 96 ] ]
+        ]
     }
 ]
