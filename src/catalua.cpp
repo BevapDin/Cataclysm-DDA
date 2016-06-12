@@ -30,6 +30,15 @@
 #include "overmap.h"
 #include "mtype.h"
 #include "field.h"
+#include "martialarts.h"
+#include "material.h"
+#include "start_location.h"
+#include "vehicle.h"
+#include "veh_type.h"
+#include "fault.h"
+#include "vitamin.h"
+#include "npc.h"
+#include "weather.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
@@ -1173,10 +1182,6 @@ void game::init_lua()
 
     // override default print to our version
     lua_register( lua_state, "print", game_myPrint );
-
-    // Load lua-side metatables etc.
-    lua_dofile(lua_state, FILENAMES["class_defslua"].c_str());
-    lua_dofile(lua_state, FILENAMES["autoexeclua"].c_str());
 }
 
 #endif // #ifdef LUA
