@@ -17,9 +17,11 @@ if "$do_stash" ; then
 	git stash pop || exit $?
 fi
 
-make CCACHE=1 LUA=1 RELEASE=1 -j2 cataclysm || exit $?
+./run-ex.sh || exit $?
 
-../keeping-track/cd-extractor.py Boats More_Survival_Tools Craft_Gunpowder
+make CLANG=1 RELEASE=1 -j2 cataclysm || exit $?
+
+# ../keeping-track/cd-extractor.py Boats More_Survival_Tools Craft_Gunpowder
 
 exit 0
 
