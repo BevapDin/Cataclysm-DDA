@@ -4,7 +4,6 @@
         "id" : "foo:sponge",
         "name" : "sponge",
         "description" : "Use it.",
-        "weight" : 0,
         "color" : "light_gray",
         "symbol" : "µ",
         "volume" : 0,
