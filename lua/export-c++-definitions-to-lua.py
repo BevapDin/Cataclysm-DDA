@@ -108,6 +108,7 @@ parser.blocked_identifiers.add(re.compile('static .*::load\(.*JsonObject.*\)$'))
 parser.blocked_identifiers.add(re.compile('static .*::reset\(\)$'))
 parser.blocked_identifiers.add(re.compile('static .*::check_consistency\(\)$'))
 parser.blocked_identifiers.add(re.compile('static .*::finalize\(\)$'))
+parser.blocked_identifiers.add(re.compile('.*item::get_remaining_capacity_for_liquid.*'));
 
 
 # Some functions can be used even if the return type can not be exported (their
