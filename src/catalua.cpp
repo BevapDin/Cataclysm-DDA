@@ -1179,6 +1179,7 @@ void game::init_lua()
 
     load_metatables( lua_state );
     LuaEnum<body_part>::export_global( lua_state, "body_part" );
+    LuaEnum<m_flag>::export_global( lua_state, "m_flag" );
 
     // override default print to our version
     lua_register( lua_state, "print", game_myPrint );

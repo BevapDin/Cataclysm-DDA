@@ -128,3 +128,11 @@ function monster_move.dog(monster)
         monster.moves = monster.moves - 100
     end
 end
+
+for _, monster_type in ipairs(game.get_monster_types()) do
+    local mtype = monster_type:obj()
+    if mtype:in_species(species_id("ZOMBIE")) then
+        mtype.flags:erase(m_flag.MF_BASHES)
+        mtype.flags:erase(m_flag.MF_GROUP_BASH)
+    end
+end
