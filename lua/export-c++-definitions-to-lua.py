@@ -14,7 +14,8 @@ headers = [
     'morale_types.h', 'material.h', 'start_location.h',
     'monstergenerator.h', 'item_stack.h', 'mongroup.h', 'weather_gen.h',
     'vehicle.h', 'veh_type.h', 'fault.h', 'vitamin.h', 'npc.h', 'damage.h',
-    'weather.h',
+    'weather.h', 'crafting.h', 'recipe_dictionary.h', 'craft_command.h',
+    'crafting_gui.h', 'requirements.h',
 ]
 
 parser = Parser()
@@ -65,6 +66,13 @@ parser.add_export_by_reference('vitamin')
 parser.add_export_by_reference('npc')
 parser.add_export_by_value('damage_instance')
 parser.add_export_by_value('damage_unit')
+parser.add_export_by_reference('recipe')
+parser.add_export_by_value('tool_comp')
+parser.add_export_by_value('item_comp')
+parser.add_export_by_value('quality_requirement')
+parser.add_export_by_value('byproduct')
+parser.add_export_by_value_and_reference('requirement_data')
+parser.add_export_by_reference('recipe_dictionary')
 
 # Enums that should be available in Lua.
 parser.add_export_enumeration('body_part')

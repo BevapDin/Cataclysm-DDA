@@ -51,6 +51,8 @@ class recipe_dictionary
          */
         void delete_if( const std::function<bool( recipe & )> &pred );
 
+		static recipe_dictionary &dict();
+
     private:
         std::list<recipe *> recipes;
 
@@ -65,5 +67,7 @@ class recipe_dictionary
 };
 
 extern recipe_dictionary recipe_dict;
+
+inline recipe_dictionary &recipe_dictionary::dict() { return recipe_dict; }
 
 #endif
