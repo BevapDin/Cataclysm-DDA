@@ -5796,6 +5796,38 @@ visibility_type map::get_visibility( const lit_level ll, const visibility_variab
     return VIS_HIDDEN;
 }
 
+static tripoint global_hack_point;
+class MapDataMemory {
+private:
+    std::unordered_map<tripoint, std::pair<int, std::string>> data;
+
+public:
+    void update(const tripoint &p, const std::string &tile) {
+        auto &e = data[p];
+        e.first = 0;
+        e.second = tile;
+    }
+    void update(const tripoint &p, const int sym) {
+        auto &e = data[p];
+        e.first = sym;
+        e.second.clear();
+    }
+    void putch( WINDOW * const w, const nc_color color, const int symbol ) {
+        const auto iter = data.find(global_hack_point);
+        if(iter != data.end()) {
+            auto &e = iter->second;
+            if(e.first) {
+                wputch( w, c_dkgray, e.first );
+            } else {
+                wprintz( w, c_dkgray, "%s", e.second.c_str() );
+            }
+        } else {
+            wputch( w, color, symbol );
+        }
+    }
+};
+static MapDataMemory mapDataMemory;
+
 bool map::apply_vision_effects( WINDOW *w, lit_level ll,
                                 const visibility_variables &cache ) const {
     int symbol = ' ';
@@ -5823,7 +5855,7 @@ bool map::apply_vision_effects( WINDOW *w, lit_level ll,
             color = c_black;
             break;
     }
-    wputch( w, color, symbol );
+    mapDataMemory.putch( w, color, symbol );
     return true;
 }
 
@@ -5877,6 +5909,7 @@ void map::draw( WINDOW* w, const tripoint &center )
                 get_submap_at( p.x, p.y, p.z - 1, lx, ly ) : cur_submap;
             while( lx < SEEX && x < maxx )  {
                 const lit_level lighting = visibility_cache[x][y];
+                global_hack_point = getabs(p);
                 if( !apply_vision_effects( w, lighting, cache ) ) {
                     const maptile curr_maptile = maptile( cur_submap, lx, ly );
                     const bool just_this_zlevel =
@@ -6087,6 +6120,11 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
         tercol = red_background(tercol);
     }
 
+    if( item_sym.empty() ) {
+        mapDataMemory.update( getabs(p), sym );
+    } else {
+        mapDataMemory.update( getabs(p), item_sym );
+    }
     if( inorder ) {
         // Rastering the whole map, take advantage of automatically moving the cursor.
         if( item_sym.empty() ) {
