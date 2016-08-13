@@ -155,7 +155,7 @@ void game::init_fields()
 
         {
             "fd_smoke",
-            {_("thin smoke"), _("smoke"), _("thick smoke")}, "8", 8,
+            {_("thin smoke"), _("smoke"), _("thick smoke")}, "\u2601", 8,
             {c_white, c_ltgray, c_dkgray}, {true, false, false},{true, true, true}, MINUTES(2),
             {0,0,0},
             GAS,
