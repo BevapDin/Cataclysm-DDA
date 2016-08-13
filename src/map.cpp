@@ -7436,14 +7436,14 @@ const std::string &map::determine_wall_corner( const tripoint &p ) const
                       ( left_connects  ? 8 : 0 );
     static const std::array<std::string, 2 * 2 * 2 * 2> symbols = { {
         "",       // 0 | 0 | 0 | 0
-        "\u2502", // 1 | 0 | 0 | 0 - LINE_XOOO would be better, but we don't have that
-        "\u2500", // 0 | 2 | 0 | 0 - LINE_OXOO would be better, but we don't have that
+        "\u2575", // 1 | 0 | 0 | 0
+        "\u2576", // 0 | 2 | 0 | 0
         "\u2514", // 1 | 2 | 0 | 0
-        "\u2502", // 0 | 0 | 4 | 0 - LINE_OOXO would be better, but we don't have that
+        "\u2577", // 0 | 0 | 4 | 0
         "\u2502", // 1 | 0 | 4 | 0
         "\u250C", // 0 | 2 | 4 | 0
         "\u251C", // 1 | 2 | 4 | 0
-        "\u2500", // 0 | 0 | 0 | 8 - LINE_OOOX would be better, but we don't have that
+        "\u2574", // 0 | 0 | 0 | 8
         "\u2518", // 1 | 0 | 0 | 8
         "\u2500", // 0 | 2 | 0 | 8
         "\u2534", // 1 | 2 | 0 | 8
