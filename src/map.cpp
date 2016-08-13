@@ -5959,22 +5959,19 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     bool graf = false;
     bool draw_item_sym = false;
     static const std::string AUTO_WALL_PLACEHOLDER = ""; // this should never appear as a real symbol!
-    // TODO: change the local variable sym to std::string and use it instead of this hack.
-    // Currently this are different variables because terrain/... uses long as symbol type and
-    // item now use string. Ideally they should all be strings.
-    std::string item_sym;
+    std::string sym;
 
     if( curr_furn.id ) {
-        item_sym = curr_furn.symbol();
+        sym = curr_furn.symbol();
         tercol = curr_furn.color();
     } else {
         if( curr_ter.has_flag( TFLAG_AUTO_WALL_SYMBOL ) ) {
             // If the terrain symbol is later overriden by something, we don't need to calculate
             // the wall symbol at all. This case will be detected by comparing sym to this
             // placeholder, if it's still the same, we have to calculate the wall symbol.
-            item_sym = AUTO_WALL_PLACEHOLDER;
+            sym = AUTO_WALL_PLACEHOLDER;
         } else {
-            item_sym = curr_ter.symbol();
+            sym = curr_ter.symbol();
         }
         tercol = curr_ter.color();
     }
@@ -5986,14 +5983,14 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
         tercol = curr_trap.color;
         if (curr_trap.sym == "%") {
             switch(rng(1, 5)) {
-            case 1: item_sym = "*"; break;
-            case 2: item_sym = "0"; break;
-            case 3: item_sym = "8"; break;
-            case 4: item_sym = "&"; break;
-            case 5: item_sym = "+"; break;
+            case 1: sym = "*"; break;
+            case 2: sym = "0"; break;
+            case 3: sym = "8"; break;
+            case 4: sym = "&"; break;
+            case 5: sym = "+"; break;
             }
         } else {
-            item_sym = curr_trap.sym;
+            sym = curr_trap.sym;
         }
     }
     if( curr_field.fieldCount() > 0 ) {
@@ -6005,11 +6002,11 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
         } else if (f.sym == "*") {
             // A random symbol.
             switch (rng(1, 5)) {
-            case 1: item_sym = "*"; break;
-            case 2: item_sym = "0"; break;
-            case 3: item_sym = "8"; break;
-            case 4: item_sym = "&"; break;
-            case 5: item_sym = "+"; break;
+            case 1: sym = "*"; break;
+            case 2: sym = "0"; break;
+            case 3: sym = "8"; break;
+            case 4: sym = "&"; break;
+            case 5: sym = "+"; break;
             }
         } else {
             // A field symbol '%' indicates the field should not hide
@@ -6025,10 +6022,10 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
             draw_item_sym = (f.sym == "%");
             // If field priority is > 1, and the field is set to hide items,
             //draw the field as it obscures what's under it.
-            if( (f.sym != "%" && f.priority > 1) || (f.sym != "%" && item_sym == "."))  {
+            if( (f.sym != "%" && f.priority > 1) || (f.sym != "%" && sym == "."))  {
                 // default terrain '.' and
                 // non-default field symbol -> field symbol overrides terrain
-                item_sym = f.sym;
+                sym = f.sym;
             }
             tercol = f.color[fe->getFieldDensity() - 1];
         }
@@ -6038,11 +6035,11 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     if( show_items && curr_maptile.get_item_count() > 0 && sees_some_items( p, g->u ) ) {
         // if there's furniture/terrain/trap/fields (sym!='.')
         // and we should not override it, then only highlight the square
-        if (item_sym != "." && item_sym != "%" && !draw_item_sym) {
+        if (sym != "." && sym != "%" && !draw_item_sym) {
             hi = true;
         } else {
             // otherwise override with the symbol of the last item
-            item_sym = curr_maptile.get_uppermost_item().symbol();
+            sym = curr_maptile.get_uppermost_item().symbol();
             if (!draw_item_sym) {
                 tercol = curr_maptile.get_uppermost_item().color();
             }
@@ -6055,7 +6052,7 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     int veh_part = 0;
     const vehicle *veh = veh_at_internal( p, veh_part );
     if( veh != nullptr ) {
-        item_sym = special_symbol( veh->face.dir_symbol( veh->part_sym( veh_part ) ) );
+        sym = special_symbol( veh->face.dir_symbol( veh->part_sym( veh_part ) ) );
         tercol = veh->part_color( veh_part );
     }
 
@@ -6065,8 +6062,8 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     }
 
     //suprise, we're not done, if it's a wall adjacent to an other, put the right glyph
-    if( item_sym == AUTO_WALL_PLACEHOLDER ) {
-        item_sym = utf32_to_utf8( determine_wall_corner( p ) );
+    if( sym == AUTO_WALL_PLACEHOLDER ) {
+        sym = utf32_to_utf8( determine_wall_corner( p ) );
     }
 
     const auto u_vision = u.get_vision_modes();
@@ -6090,15 +6087,15 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
 
     if( inorder ) {
         // Rastering the whole map, take advantage of automatically moving the cursor.
-        wprintz( w, tercol, "%s", item_sym.c_str() );
+        wprintz( w, tercol, "%s", sym.c_str() );
     } else {
         // Otherwise move the cursor before drawing.
         const int k = p.x + getmaxx(w) / 2 - view_center.x;
         const int j = p.y + getmaxy(w) / 2 - view_center.y;
-        mvwprintz( w, j, k, tercol, "%s", item_sym.c_str() );
+        mvwprintz( w, j, k, tercol, "%s", sym.c_str() );
     }
 
-    return !zlevels || !item_sym.empty() || p.z <= -OVERMAP_DEPTH || !curr_ter.has_flag( TFLAG_NO_FLOOR );
+    return !zlevels || !sym.empty() || p.z <= -OVERMAP_DEPTH || !curr_ter.has_flag( TFLAG_NO_FLOOR );
 }
 
 void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
