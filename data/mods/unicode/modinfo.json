@@ -1,0 +1,65 @@
+[
+    {
+        "type": "MOD_INFO",
+        "mod_type": "SUPPLEMENTAL",
+        "ident": "unicode",
+        "name": "Unicode symbols",
+        "description": "Items/furniture/terrain/traps/vehicle parts with Unicode symbols.",
+        "path": ""
+    },
+    {
+        "type":"GENERIC",
+        "id" : "pocketwatch",
+        "name" : "pocket watch",
+        "description" : "An old fashioned pocket watch.  This one tells you the time and looks good doing it.  Can also be disassembled into some useful parts.",
+        "weight" : 42,
+        "to_hit" : -3,
+        "color" : "light_gray",
+        "symbol" : "\u2602",
+        "material" : ["gold", "glass"],
+        "volume" : 0,
+        "price" : 25000,
+        "price_postapoc": 1000,
+        "flags" : ["WATCH", "FANCY"]
+    },
+    {
+        "type" : "furniture",
+        "id" : "f_coffin_c",
+        "edit-mode": "modify",
+        "symbol": "\u26B0",
+        "color": "red"
+    },
+    {
+        "type" : "terrain",
+        "id" : "t_door_locked",
+        "edit-mode": "modify",
+        "symbol": "\u2603",
+        "color": "red"
+    },
+    {
+        "type" : "vehicle_part",
+        "id" : "clock",
+        "name" : "clock",
+        "symbol" : "\u2615",
+        "color" : "light_gray",
+        "broken_symbol" : "\u2691",
+        "broken_color" : "light_blue",
+        "damage_modifier" : 120,
+        "durability" : 200,
+        "item" : "pocketwatch",
+        "difficulty" : 0,
+        "location" : "roof"
+    },
+    {
+        "type" : "trap",
+        "id": "tr_bell",
+        "name" : "bell trap",
+        "color" : "brown",
+        "symbol" : "\u260E",
+        "visibility" : -1,
+        "avoidance" : 0,
+        "difficulty" : 0,
+        "action" : "none",
+        "benign" : true
+    }
+]
