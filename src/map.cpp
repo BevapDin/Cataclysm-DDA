@@ -5955,7 +5955,6 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     const furn_t &curr_furn = curr_maptile.get_furn_t();
     const trap &curr_trap = curr_maptile.get_trap().obj();
     const field &curr_field = curr_maptile.get_field();
-    long sym;
     bool hi = false;
     bool graf = false;
     bool draw_item_sym = false;
@@ -6091,23 +6090,15 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
 
     if( inorder ) {
         // Rastering the whole map, take advantage of automatically moving the cursor.
-        if( item_sym.empty() ) {
-            wputch(w, tercol, sym);
-        } else {
-            wprintz( w, tercol, "%s", item_sym.c_str() );
-        }
+        wprintz( w, tercol, "%s", item_sym.c_str() );
     } else {
         // Otherwise move the cursor before drawing.
         const int k = p.x + getmaxx(w) / 2 - view_center.x;
         const int j = p.y + getmaxy(w) / 2 - view_center.y;
-        if( item_sym.empty() ) {
-            mvwputch(w, j, k, tercol, sym);
-        } else {
-            mvwprintz( w, j, k, tercol, "%s", item_sym.c_str() );
-        }
+        mvwprintz( w, j, k, tercol, "%s", item_sym.c_str() );
     }
 
-    return !zlevels || sym != ' ' || !item_sym.empty() || p.z <= -OVERMAP_DEPTH || !curr_ter.has_flag( TFLAG_NO_FLOOR );
+    return !zlevels || !item_sym.empty() || p.z <= -OVERMAP_DEPTH || !curr_ter.has_flag( TFLAG_NO_FLOOR );
 }
 
 void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
