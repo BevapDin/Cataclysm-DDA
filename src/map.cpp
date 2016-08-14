@@ -6057,9 +6057,8 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     int veh_part = 0;
     const vehicle *veh = veh_at_internal( p, veh_part );
     if( veh != nullptr ) {
-        sym = special_symbol( veh->face.dir_symbol( veh->part_sym( veh_part ) ) );
+        item_sym = special_symbol( veh->face.dir_symbol( veh->part_sym( veh_part ) ) );
         tercol = veh->part_color( veh_part );
-        item_sym = ""; // clear the item symbol so `sym` is used instead.
     }
 
     // If there's graffiti here, change background color
@@ -6136,7 +6135,7 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
     } else if( ( veh = veh_at_internal( p, part_below ) ) != nullptr ) {
         const int roof = veh->roof_at_part( part_below );
         const int displayed_part = roof >= 0 ? roof : part_below;
-        sym = special_symbol( veh->face.dir_symbol( veh->part_sym( displayed_part, true ) ) );
+        sym = special_symbol( veh->face.dir_symbol( veh->part_sym( displayed_part, true ) ) )[0];
         tercol = (roof >= 0 || veh->obstacle_at_part( part_below ) ) ? c_ltgray : c_ltgray_cyan;
     } else if( curr_ter.has_flag( TFLAG_SEEN_FROM_ABOVE ) ) {
         if( curr_ter.has_flag( TFLAG_AUTO_WALL_SYMBOL ) ) {

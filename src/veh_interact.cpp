@@ -676,7 +676,7 @@ void veh_interact::do_install()
                         uimenu_entry entry = uimenu_entry( i, true, UIMENU_INVALID,
                                                            shapes[i]->name() );
                         entry.extratxt.left = 1;
-                        entry.extratxt.sym = special_symbol( shapes[i]->sym );
+                        entry.extratxt.sym = special_symbol( shapes[i]->sym )[0];
                         entry.extratxt.color = shapes[i]->color;
                         shape_ui_entries.push_back( entry );
                     }
@@ -1315,9 +1315,9 @@ void veh_interact::move_cursor (int dx, int dy)
         obstruct = true;
     }
     nc_color col = cpart >= 0 ? veh->part_color (cpart) : c_black;
-    long sym = cpart >= 0 ? veh->part_sym( cpart ) : ' ';
-    mvwputch (w_disp, hh, hw, obstruct ? red_background(col) : hilite(col),
-              special_symbol(sym));
+    std::string sym = cpart >= 0 ? veh->part_sym( cpart ) : std::string(" ");
+    mvwprintz( w_disp, hh, hw, obstruct ? red_background(col) : hilite(col),
+               "%s", special_symbol(sym).c_str() );
     wrefresh (w_disp);
     werase (w_parts);
     veh->print_part_desc (w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, -1);
@@ -1365,7 +1365,7 @@ void veh_interact::move_cursor (int dx, int dy)
 void veh_interact::display_contents()
 {
     werase( w_list );
-    
+
     if( parts_here.empty() ) {
         wrefresh( w_list );
         return;
@@ -1512,7 +1512,7 @@ void veh_interact::display_veh ()
     std::vector<int> structural_parts = veh->all_parts_at_location("structure");
     for( auto &structural_part : structural_parts ) {
         const int p = structural_part;
-        long sym = veh->part_sym (p);
+        const std::string &sym = veh->part_sym (p);
         nc_color col = veh->part_color (p);
 
         int x =   veh->parts[p].mount.y + ddy;
@@ -1522,7 +1522,7 @@ void veh_interact::display_veh ()
             col = hilite(col);
             cpart = p;
         }
-        mvwputch (w_disp, hh + y, hw + x, col, special_symbol(sym));
+        mvwprintz( w_disp, hh + y, hw + x, col, "%s", special_symbol( sym ).c_str() );
     }
     wrefresh (w_disp);
 }
@@ -1794,7 +1794,7 @@ void veh_interact::display_list(size_t pos, std::vector<const vpart_info*> list,
     for (size_t i = page * lines_per_page; i < (page + 1) * lines_per_page && i < list.size(); i++) {
         const vpart_info &info = *list[i];
         int y = i - page * lines_per_page + header;
-        mvwputch( w_list, y, 1, info.color, special_symbol( info.sym ) );
+        mvwprintz( w_list, y, 1, info.color, "%s", special_symbol( info.sym ).c_str() );
         nc_color col = can_potentially_install( info ) ? c_white : c_dkgray;
         trim_and_print( w_list, y, 3, getmaxx( w_list ) - 3, pos == i ? hilite( col ) : col,
                         info.name().c_str() );

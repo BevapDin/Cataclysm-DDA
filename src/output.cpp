@@ -1396,28 +1396,27 @@ char rand_char()
     return '?';
 }
 
-// this translates symbol y, u, n, b to NW, NE, SE, SW lines correspondingly
-// h, j, c to horizontal, vertical, cross correspondingly
-long special_symbol( long sym )
+std::string special_symbol( const std::string &sym )
 {
-    switch( sym ) {
-        case 'j':
-            return LINE_XOXO;
-        case 'h':
-            return LINE_OXOX;
-        case 'c':
-            return LINE_XXXX;
-        case 'y':
-            return LINE_OXXO;
-        case 'u':
-            return LINE_OOXX;
-        case 'n':
-            return LINE_XOOX;
-        case 'b':
-            return LINE_XXOO;
-        default:
-            return sym;
+    if( sym.size() == 1 ) {
+        switch( sym[0] ) {
+            case 'j':
+                return "\u2502";
+            case 'h':
+                return "\u2500";
+            case 'c':
+                return "\u253C";
+            case 'y':
+                return "\u250C";
+            case 'u':
+                return "\u2510";
+            case 'n':
+                return "\u2518";
+            case 'b':
+                return "\u2514";
+        }
     }
+    return sym;
 }
 
 std::string trim( const std::string &s )

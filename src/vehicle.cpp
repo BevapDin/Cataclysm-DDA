@@ -912,7 +912,7 @@ void vehicle::use_controls( const tripoint &pos )
     if( has_part( "ENGINE" ) ) {
         if( g->u.controlling_vehicle || ( remote && engine_on ) ) {
             options.emplace_back( _( "Stop driving" ), keybind( "TOGGLE_ENGINE" ) );
-            actions.push_back( [&] { 
+            actions.push_back( [&] {
                 if( engine_on && has_engine_type_not( fuel_type_muscle, true ) ){
                     add_msg( _( "You turn the engine off and let go of the controls." ) );
                 } else {
@@ -925,7 +925,7 @@ void vehicle::use_controls( const tripoint &pos )
 
         } else if( has_engine_type_not(fuel_type_muscle, true ) ) {
             options.emplace_back( engine_on ? _( "Turn off the engine" ) : _( "Turn on the engine" ), keybind( "TOGGLE_ENGINE" ) );
-            actions.push_back( [&] { 
+            actions.push_back( [&] {
                 if( engine_on ) {
                     engine_on = false;
                     add_msg( _( "You turn the engine off." ) );
@@ -2449,16 +2449,18 @@ int vehicle::roof_at_part( const int part ) const
     return -1;
 }
 
-char vehicle::part_sym( const int p, const bool exact ) const
+const std::string &vehicle::part_sym( const int p, const bool exact ) const
 {
     if (p < 0 || p >= (int)parts.size() || parts[p].removed) {
-        return ' ';
+        static const std::string space( " " );
+        return space;
     }
 
     const int displayed_part = exact ? p : part_displayed_at(parts[p].mount.x, parts[p].mount.y);
 
     if (part_flag (displayed_part, VPFLAG_OPENABLE) && parts[displayed_part].open) {
-        return '\''; // open door
+        static const std::string open_door( "'" );
+        return open_door;
     } else {
         return parts[ displayed_part ].is_broken() ?
             part_info(displayed_part).sym_broken : part_info(displayed_part).sym;

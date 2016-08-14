@@ -1,6 +1,8 @@
 #ifndef TILERAY_H
 #define TILERAY_H
 
+#include <string>
+
 // Class for calculating tile coords
 // of a point that moves along the ray with given
 // direction (dir) or delta tile coords (dx, dy).
@@ -40,6 +42,7 @@ class tileray
         int dir8() const;     // return 8-sided direction (0 = east, 1 = southeast, 2 = south ...)
         long dir_symbol( long sym )
         const; // convert certain symbols from north-facing variant into current dir facing
+        std::string dir_symbol( const std::string &sym ) const;
         int ortho_dx( int od ) const; // return dx for point at "od" distance in orthogonal direction
         int ortho_dy( int od ) const; // return dy for point at "od" distance in orthogonal direction
         bool mostly_vertical() const;  // return if ray is mostly vertical

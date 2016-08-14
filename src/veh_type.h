@@ -100,12 +100,12 @@ class vpart_info
         nc_color color_broken = c_ltgray;
 
         /**
-         * Symbol of part which will be translated as follows:
-         * y, u, n, b to NW, NE, SE, SW lines correspondingly
-         * h, j, c to horizontal, vertical, cross correspondingly
+         * Symbol of part. This is UTF8 encoded string that is exactly 1 console cell
+         * width.
+         * It will be translated via @ref special_symbol.
          */
-        long sym = 0;
-        char sym_broken = '#';
+        std::string sym;
+        std::string sym_broken = "#";
 
         /** Maximum damage part can sustain before being destroyed */
         int durability = 0;

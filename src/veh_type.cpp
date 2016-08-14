@@ -4,6 +4,7 @@
 #include "game.h"
 #include "debug.h"
 #include "item_group.h"
+#include "catacharset.h"
 #include "json.h"
 #include "translations.h"
 #include "color.h"
@@ -246,10 +247,10 @@ void vpart_info::load( JsonObject &jo, const std::string &src )
     }
 
     if( jo.has_member( "symbol" ) ) {
-        def.sym = jo.get_string( "symbol" )[ 0 ];
+        def.sym = jo.get_string( "symbol" );
     }
     if( jo.has_member( "broken_symbol" ) ) {
-        def.sym_broken = jo.get_string( "broken_symbol" )[ 0 ];
+        def.sym_broken = jo.get_string( "broken_symbol" );
     }
 
     if( jo.has_member( "color" ) ) {
@@ -297,7 +298,7 @@ void vpart_info::load( JsonObject &jo, const std::string &src )
         vpart_info &new_entry = vehicle_part_types[ def.id ];
         new_entry = def;
         vehicle_part_int_types.push_back( &new_entry );
-    }    
+    }
 }
 
 void vpart_info::set_flag( const std::string &flag )
@@ -349,7 +350,7 @@ void vpart_info::finalize()
             auto b = vpart_bitflag_map.find( f );
             if( b != vpart_bitflag_map.end() ) {
                 e.second.bitflags.set( b->second );
-            }            
+            }
         }
 
         // Calculate and cache z-ordering based off of location
@@ -482,11 +483,11 @@ void vpart_info::check()
             debugmsg( "Vehicle part %s breaks into non-existent item group %s.",
                       part.id.c_str(), part.breaks_into_group.c_str() );
         }
-        if( part.sym == 0 ) {
-            debugmsg( "vehicle part %s does not define a symbol", part.id.c_str() );
+        if( utf8_width( part.sym ) != 1 ) {
+            debugmsg( "vehicle part %s has invalid symbol: must be one console cell width", part.id.c_str() );
         }
-        if( part.sym_broken == 0 ) {
-            debugmsg( "vehicle part %s does not define a broken symbol", part.id.c_str() );
+        if( utf8_width( part.sym_broken ) != 1 ) {
+            debugmsg( "vehicle part %s has invalid broken symbol: must be one console cell width", part.id.c_str() );
         }
         if( part.durability <= 0 ) {
             debugmsg( "vehicle part %s has zero or negative durability", part.id.c_str() );

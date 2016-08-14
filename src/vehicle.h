@@ -675,8 +675,14 @@ public:
     // Given a part, finds its index in the vehicle
     int index_of_part(const vehicle_part *part, bool check_removed = false) const;
 
-    // get symbol for map
-    char part_sym( int p, bool exact = false ) const;
+    /**
+     * Get symbol of the given part that should be displayed on the map.
+     * See @ref veh_type::symbol.
+     * @param exact If true: the symbol of the given part index is returned, otherwise
+     * the symbol of the displayed part at the position of the given part is returned.
+     * The displayed part is typically the topmost part (e.g. on the roof).
+     */
+    const std::string &part_sym( int p, bool exact = false ) const;
     const vpart_str_id &part_id_string(int p, char &part_mod) const;
 
     // get color for map
@@ -831,7 +837,7 @@ public:
     /**
      * Wheel friction coefficient of the vehicle.
      * Inversely proportional to (wheel area + constant).
-     * 
+     *
      * Affects @ref k_dynamics, which in turn affects velocity and acceleration.
      */
     float k_friction() const;
@@ -850,7 +856,7 @@ public:
     /**
      * Mass coefficient of the vehicle.
      * Roughly proportional to vehicle's mass divided by wheel area, times constant.
-     * 
+     *
      * Affects safe velocity (moderately), acceleration (heavily).
      * Also affects braking (including handbraking) and velocity drop during coasting.
      */
@@ -860,7 +866,7 @@ public:
      * Traction coefficient of the vehicle.
      * 1.0 on road. Outside roads, depends on mass divided by wheel area
      * and the surface beneath wheels.
-     * 
+     *
      * Affects safe velocity, acceleration and handling difficulty.
      */
     float k_traction( float wheel_traction_area ) const;

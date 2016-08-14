@@ -417,9 +417,9 @@ Mods can modify this via "add:traits" and "remove:traits".
 ```C++
 "id": "wheel",                // Unique identifier
 "name": "wheel",              // Displayed name
-"symbol": "0",                // ASCII character displayed when part is working
+"symbol": "0",                // UTF8 encoded symbol displayed when part is working. Must be exactly once console cell width.
 "color": "dark_gray",         // Color used when part is working
-"broken_symbol": "x",         // ASCII character displayed when part is broken
+"broken_symbol": "x",         // UTF8 encoded symbol displayed when part is broken. Must be exactly once console cell width.
 "broken_color": "light_gray", // Color used when part is broken
 "damage_modifier": 50,        // (Optional, default = 100) Dealt damage multiplier when this part hits something, as a percentage. Higher = more damage to creature struck
 "durability": 200,            // How much damage the part can take before breaking

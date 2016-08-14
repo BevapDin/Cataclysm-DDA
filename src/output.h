@@ -383,7 +383,13 @@ int draw_item_info( const int iLeft, int iWidth, const int iTop, const int iHeig
                     const bool use_full_win = false );
 
 char rand_char();
-long special_symbol( long sym );
+/**
+ * Translates symbol y, u, n, b to NW, NE, SE, SW lines correspondingly and
+ * h, j, c to horizontal, vertical, cross correspondingly.
+ * If the input is not a single character of the above letters, it returns the
+ * input as is.
+ */
+std::string special_symbol( const std::string &sym );
 
 std::string trim( const std::string &s ); // Remove spaces from the start and the end of a string
 std::string to_upper_case( const std::string &s ); // Converts the string to upper case

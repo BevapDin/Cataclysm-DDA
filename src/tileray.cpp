@@ -150,6 +150,13 @@ long tileray::dir_symbol( long sym ) const
     return sym;
 }
 
+std::string tileray::dir_symbol( const std::string &sym ) const {
+    if( sym.size() == 1 ) {
+        return std::string( 1, dir_symbol( sym.front() ) );
+    }
+    return sym;
+}
+
 int tileray::ortho_dx( int od ) const
 {
     int quadr = ( direction / 90 ) % 4;

@@ -1496,9 +1496,9 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
             const vpart_str_id vpid( id.substr( 3 ) );
             if( vpid.is_valid() ) {
                 const vpart_info &v = vpid.obj();
-                sym = v.sym;
+                sym = v.sym[0];
                 if (!subcategory.empty()) {
-                    sym = special_symbol(subcategory[0]);
+                    sym = special_symbol( subcategory )[0];
                     rota = 0;
                     subtile = -1;
                 }
@@ -2106,8 +2106,7 @@ bool cata_tiles::draw_vpart( const tripoint &p, lit_level ll, int &height_3d )
     // get the vpart_id
     char part_mod = 0;
     const vpart_str_id &vp_id = veh->part_id_string(veh_part, part_mod);
-    const char sym = veh->face.dir_symbol(veh->part_sym(veh_part));
-    std::string subcategory(1, sym);
+    const std::string &subcategory = veh->face.dir_symbol(veh->part_sym(veh_part));
 
     // prefix with vp_ ident
     const std::string vpid = "vp_" + vp_id.str();
