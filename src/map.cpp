@@ -6063,7 +6063,7 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
 
     //suprise, we're not done, if it's a wall adjacent to an other, put the right glyph
     if( sym == AUTO_WALL_PLACEHOLDER ) {
-        sym = utf32_to_utf8( determine_wall_corner( p ) );
+        sym = determine_wall_corner( p );
     }
 
     const auto u_vision = u.get_vision_modes();
@@ -6150,7 +6150,7 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
     }
 
     if( sym == AUTO_WALL_PLACEHOLDER ) {
-        sym = determine_wall_corner( p );
+        sym = determine_wall_corner( p )[0];
     }
 
     const auto u_vision = u.get_vision_modes();
@@ -7422,7 +7422,7 @@ bool map::has_graffiti_at( const tripoint &p ) const
     return current_submap->has_graffiti( lx, ly );
 }
 
-long map::determine_wall_corner( const tripoint &p ) const
+const std::string &map::determine_wall_corner( const tripoint &p ) const
 {
     // This could be cached nicely
     int test_connect_group = ter( tripoint( p.x, p.y, p.z ) ).obj().connect_group;
@@ -7434,32 +7434,29 @@ long map::determine_wall_corner( const tripoint &p ) const
                       ( right_connects ? 2 : 0 ) +
                       ( below_connects ? 4 : 0 ) +
                       ( left_connects  ? 8 : 0 );
-    switch( bits ) {
-        case 1 | 2 | 4 | 8: return LINE_XXXX;
-        case 0 | 2 | 4 | 8: return LINE_OXXX;
-
-        case 1 | 0 | 4 | 8: return LINE_XOXX;
-        case 0 | 0 | 4 | 8: return LINE_OOXX;
-
-        case 1 | 2 | 0 | 8: return LINE_XXOX;
-        case 0 | 2 | 0 | 8: return LINE_OXOX;
-        case 1 | 0 | 0 | 8: return LINE_XOOX;
-        case 0 | 0 | 0 | 8: return LINE_OXOX; // LINE_OOOX would be better
-
-        case 1 | 2 | 4 | 0: return LINE_XXXO;
-        case 0 | 2 | 4 | 0: return LINE_OXXO;
-        case 1 | 0 | 4 | 0: return LINE_XOXO;
-        case 0 | 0 | 4 | 0: return LINE_XOXO; // LINE_OOXO would be better
-        case 1 | 2 | 0 | 0: return LINE_XXOO;
-        case 0 | 2 | 0 | 0: return LINE_OXOX; // LINE_OXOO would be better
-        case 1 | 0 | 0 | 0: return LINE_XOXO; // LINE_XOOO would be better
-
-        case 0 | 0 | 0 | 0: return ter( p ).obj().symbol()[0]; // technically just a column
-
-        default:
-            // assert( false );
-            // this shall not happen
-            return '?';
+    static const std::array<std::string, 2 * 2 * 2 * 2> symbols = { {
+        "",       // 0 | 0 | 0 | 0
+        "\u2502", // 1 | 0 | 0 | 0 - LINE_XOOO would be better, but we don't have that
+        "\u2500", // 0 | 2 | 0 | 0 - LINE_OXOO would be better, but we don't have that
+        "\u2514", // 1 | 2 | 0 | 0
+        "\u2502", // 0 | 0 | 4 | 0 - LINE_OOXO would be better, but we don't have that
+        "\u2502", // 1 | 0 | 4 | 0
+        "\u250C", // 0 | 2 | 4 | 0
+        "\u251C", // 1 | 2 | 4 | 0
+        "\u2500", // 0 | 0 | 0 | 8 - LINE_OOOX would be better, but we don't have that
+        "\u2518", // 1 | 0 | 0 | 8
+        "\u2500", // 0 | 2 | 0 | 8
+        "\u2534", // 1 | 2 | 0 | 8
+        "\u2510", // 0 | 0 | 4 | 8
+        "\u2524", // 1 | 0 | 4 | 8
+        "\u252C", // 0 | 2 | 4 | 8
+        "\u253C", // 1 | 2 | 4 | 8
+    } };
+    if( bits == 0 ) {
+        // technically just a column
+        return ter( p ).obj().symbol();
+    } else {
+        return symbols[bits];
     }
 }
 
