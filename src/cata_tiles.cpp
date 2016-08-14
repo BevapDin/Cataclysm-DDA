@@ -1513,7 +1513,7 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
             const trap_str_id tmp( id );
             if( tmp.is_valid() ) {
                 const trap &t = tmp.obj();
-                sym = t.sym;
+                sym = t.sym[0];
                 col = t.color;
             }
         } else if (category == C_ITEM) {

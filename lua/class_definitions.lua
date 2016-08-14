@@ -1945,7 +1945,7 @@ classes = {
             loadid = { type = "trap_id" },
             color = { type = "int" },
             name = { type = "string" },
-            sym = { type = "int" },
+            sym = { type = "string" },
         },
         functions = {
             { name = "can_see", rval = "bool", args = { "tripoint", "player" } },

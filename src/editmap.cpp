@@ -1263,7 +1263,7 @@ int editmap::edit_trp()
                         tnam = tr.id.str();
                     }
                 }
-                mvwputch( w_picktrap, t + 1 - tshift, 2, tr.color, tr.sym );
+                mvwprintz( w_picktrap, t + 1 - tshift, 2, tr.color, "%s", tr.sym.c_str() );
                 mvwprintz( w_picktrap, t + 1 - tshift, 4,
                            ( trsel == tr.loadid ? h_white : ( cur_trap == tr.loadid ? c_green : c_ltgray ) ), "%d %s", t,
                            tnam.c_str() );

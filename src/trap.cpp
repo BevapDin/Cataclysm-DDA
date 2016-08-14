@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "line.h"
 #include "player.h"
+#include "catacharset.h"
 
 #include <vector>
 #include <memory>
@@ -96,7 +97,10 @@ void trap::load( JsonObject &jo )
     }
     t.id = trap_str_id( jo.get_string( "id" ) );
     t.color = color_from_string( jo.get_string( "color" ) );
-    t.sym = jo.get_string( "symbol" ).at( 0 );
+    t.sym = jo.get_string( "symbol" );
+    if( utf8_width( t.sym ) != 1 ) {
+        jo.throw_error( "trap symbol most be one console cell width", "symbol" );
+    }
     t.visibility = jo.get_int( "visibility" );
     t.avoidance = jo.get_int( "avoidance" );
     t.difficulty = jo.get_int( "difficulty" );

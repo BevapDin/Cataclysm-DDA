@@ -5960,6 +5960,10 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     bool graf = false;
     bool draw_item_sym = false;
     static const long AUTO_WALL_PLACEHOLDER = 2; // this should never appear as a real symbol!
+    // TODO: change the local variable sym to std::string and use it instead of this hack.
+    // Currently this are different variables because terrain/... uses long as symbol type and
+    // item now use string. Ideally they should all be strings.
+    std::string item_sym;
 
     if( curr_furn.id ) {
         sym = curr_furn.symbol();
@@ -5981,16 +5985,16 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     // If there's a trap here, and we have sufficient perception, draw that instead
     if( curr_trap.can_see( p, g->u ) ) {
         tercol = curr_trap.color;
-        if (curr_trap.sym == '%') {
+        if (curr_trap.sym == "%") {
             switch(rng(1, 5)) {
-            case 1: sym = '*'; break;
-            case 2: sym = '0'; break;
-            case 3: sym = '8'; break;
-            case 4: sym = '&'; break;
-            case 5: sym = '+'; break;
+            case 1: item_sym = "*"; break;
+            case 2: item_sym = "0"; break;
+            case 3: item_sym = "8"; break;
+            case 4: item_sym = "&"; break;
+            case 5: item_sym = "+"; break;
             }
         } else {
-            sym = curr_trap.sym;
+            item_sym = curr_trap.sym;
         }
     }
     if( curr_field.fieldCount() > 0 ) {
@@ -6030,11 +6034,6 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
             tercol = f.color[fe->getFieldDensity() - 1];
         }
     }
-
-    // TODO: change the local variable sym to std::string and use it instead of this hack.
-    // Currently this are different variables because terrain/... uses long as symbol type and
-    // item now use string. Ideally they should all be strings.
-    std::string item_sym;
 
     // If there are items here, draw those instead
     if( show_items && curr_maptile.get_item_count() > 0 && sees_some_items( p, g->u ) ) {

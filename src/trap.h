@@ -61,7 +61,7 @@ struct trap {
         trap_str_id id;
         trap_id loadid;
 
-        long sym;
+        std::string sym;
         nc_color color;
         std::string name;
     private:
