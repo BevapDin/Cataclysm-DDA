@@ -7,6 +7,7 @@
 #include "translations.h"
 #include "output.h"
 #include "item.h"
+#include "catacharset.h"
 #include "item_group.h"
 
 #include <unordered_map>
@@ -233,7 +234,7 @@ furn_t null_furniture_t() {
   furn_t new_furniture;
   new_furniture.id = NULL_ID;
   new_furniture.name = _("nothing");
-  new_furniture.symbol_.fill( ' ' );
+  new_furniture.symbol_.fill( " " );
   new_furniture.color_.fill( c_white );
   new_furniture.movecost = 0;
   new_furniture.move_str_req = -1;
@@ -249,7 +250,7 @@ ter_t null_terrain_t() {
 
   new_terrain.id = NULL_ID;
   new_terrain.name = _("nothing");
-  new_terrain.symbol_.fill( ' ' );
+  new_terrain.symbol_.fill( " " );
   new_terrain.color_.fill( c_white );
   new_terrain.movecost = 2;
   new_terrain.transparent = true;
@@ -260,17 +261,17 @@ ter_t null_terrain_t() {
   return new_terrain;
 }
 
-long string_to_symbol( JsonIn &js )
+std::string string_to_symbol( JsonIn &js )
 {
     const std::string s = js.get_string();
     if( s == "LINE_XOXO" ) {
-        return LINE_XOXO;
+        return "\u2502";
     } else if( s == "LINE_OXOX" ) {
-        return LINE_OXOX;
-    } else if( s.length() != 1 ) {
-        js.error( "Symbol string must be exactly 1 character long." );
+        return "\u2500";
+    } else if( utf8_width( s ) != 1 ) {
+        js.error( "Symbol string must be exactly 1 console cell width." );
     }
-    return s[0];
+    return s;
 }
 
 template<typename C, typename F>
@@ -314,7 +315,7 @@ void map_data_common_t::load_symbol( JsonObject &jo )
     }
 }
 
-long map_data_common_t::symbol() const
+const std::string &map_data_common_t::symbol() const
 {
     return symbol_[calendar::turn.get_season()];
 }

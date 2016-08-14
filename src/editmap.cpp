@@ -241,12 +241,12 @@ void editmap_hilight::draw( editmap *hm, bool update )
             // but only if there's no vehicles/mobs/npcs on a point
             if( ! g->m.veh_at( p, vpart ) && ( g->mon_at( p ) == -1 ) && ( g->npc_at( p ) == -1 ) ) {
                 const ter_t &terrain = g->m.ter( p ).obj();
-                char t_sym = terrain.symbol();
+                char t_sym = terrain.symbol()[0];
                 nc_color t_col = terrain.color();
 
                 if( g->m.furn( p ) > 0 ) {
                     const furn_t &furniture_type = g->m.furn( p ).obj();
-                    t_sym = furniture_type.symbol();
+                    t_sym = furniture_type.symbol()[0];
                     t_col = furniture_type.color();
                 }
                 const field *t_field = &g->m.field_at( p );
@@ -551,13 +551,13 @@ void editmap::update_view( bool update_info )
             // but only if there's no vehicles/mobs/npcs on a point
             if( ! g->m.veh_at( p, vpart ) && ( g->mon_at( p ) == -1 ) && ( g->npc_at( p ) == -1 ) ) {
                 const ter_t &terrain = g->m.ter( p ).obj();
-                char t_sym = terrain.symbol();
+                char t_sym = terrain.symbol()[0];
                 nc_color t_col = terrain.color();
 
 
                 if( g->m.has_furn( p ) ) {
                     const furn_t &furniture_type = g->m.furn( p ).obj();
-                    t_sym = furniture_type.symbol();
+                    t_sym = furniture_type.symbol()[0];
                     t_col = furniture_type.color();
                 }
                 const field *t_field = &g->m.field_at( p );
@@ -604,14 +604,14 @@ void editmap::update_view( bool update_info )
             mvwprintz( w_info, i, 1, c_white, padding.c_str() );
         }
 
-        mvwputch( w_info, off, 2, terrain_type.color(), terrain_type.symbol() );
+        mvwprintz( w_info, off, 2, terrain_type.color(), "%s", terrain_type.symbol().c_str() );
         mvwprintw( w_info, off, 4, _( "%d: %s; movecost %d" ), g->m.ter( target ),
                    terrain_type.name.c_str(),
                    terrain_type.movecost
                  );
         off++; // 2
         if( g->m.furn( target ) > 0 ) {
-            mvwputch( w_info, off, 2, furniture_type.color(), furniture_type.symbol() );
+            mvwprintz( w_info, off, 2, furniture_type.color(), "%s", furniture_type.symbol().c_str() );
             mvwprintw( w_info, off, 4, _( "%d: %s; movecost %d movestr %d" ), g->m.furn( target ),
                        furniture_type.name.c_str(),
                        furniture_type.movecost,
@@ -824,7 +824,7 @@ int editmap::edit_ter()
             for( int x = xmin; x < pickw && cur_t < ( int ) ter_t::count(); x++, cur_t++ ) {
                 const ter_id tid( cur_t );
                 const ter_t &ttype = tid.obj();
-                mvwputch( w_pickter, y, x, ( ter_frn_mode == 0 ? ttype.color() : c_dkgray ) , ttype.symbol() );
+                mvwprintz( w_pickter, y, x, ( ter_frn_mode == 0 ? ttype.color() : c_dkgray ), "%s", ttype.symbol().c_str() );
                 if( tid == sel_ter ) {
                     sel_terp = tripoint( x, y, target.z );
                 } else if( tid == lastsel_ter ) {
@@ -880,7 +880,7 @@ int editmap::edit_ter()
             for( int x = xmin; x < pickw && cur_f < ( int ) furn_t::count(); x++, cur_f++ ) {
                 const furn_id fid( cur_f );
                 const furn_t &ftype = fid.obj();
-                mvwputch( w_pickter, y, x, ( ter_frn_mode == 1 ? ftype.color() : c_dkgray ), ftype.symbol() );
+                mvwprintz( w_pickter, y, x, ( ter_frn_mode == 1 ? ftype.color() : c_dkgray ), "%s", ftype.symbol().c_str() );
 
                 if( fid == sel_frn ) {
                     sel_frnp = tripoint( x, y, target.z );
@@ -975,10 +975,10 @@ int editmap::edit_ter()
                 int altb = -1;
                 if( editshape == editmap_rect ) {
                     const ter_t &t = sel_ter.obj();
-                    if( t.symbol() == LINE_XOXO || t.symbol() == '|' ) {
+                    if( t.symbol() == "\u2502" || t.symbol() == "|" ) {
                         isvert = true;
                         teralt = get_alt_ter( isvert, sel_ter );
-                    } else if( t.symbol() == LINE_OXOX || t.symbol() == '-' ) {
+                    } else if( t.symbol() == "\u2500" || t.symbol() == "-" ) {
                         ishori = true;
                         teralt = get_alt_ter( isvert, sel_ter );
                     }

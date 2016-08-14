@@ -1284,7 +1284,7 @@ Example: `-` , `|` , `X` and `Y` are terrain which share the same `connects_to` 
 ```
 
 #### "symbol"
-ASCII symbol of the object as it appears in the game. The symbol string must be exactly one character long. This can also be an array of 4 strings, which define the symbol during the different seasons. The first entry defines the symbol during spring. If it's not an array, the same symbol is used all year round.
+Symbol of the object as it appears in the game. The string should be UTF8 encoded and must be exactly one console cell width. This can also be an array of 4 strings, which define the symbol during the different seasons. The first entry defines the symbol during spring. If it's not an array, the same symbol is used all year round.
 
 #### "color" or "bgcolor"
 Color of the object as it appears in the game. "color" defines the the foreground color (no background color), "bgcolor" defines a solid background color. You must use EXACTLY ONE of "color" or "bgcolor". As with the "symbol" value, this can be an array with 4 entries, each entry being the color during the different seasons.

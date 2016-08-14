@@ -1398,7 +1398,7 @@ classes = {
         },
         functions = {
             { name = "color", rval = "int", args = { } },
-            { name = "symbol", rval = "int", args = { } },
+            { name = "symbol", rval = "string", args = { } },
         }
     },
     furn_t = {
@@ -1417,7 +1417,7 @@ classes = {
         },
         functions = {
             { name = "color", rval = "int", args = { } },
-            { name = "symbol", rval = "int", args = { } },
+            { name = "symbol", rval = "string", args = { } },
         }
     },
     Creature = {

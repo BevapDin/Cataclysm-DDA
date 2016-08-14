@@ -207,7 +207,7 @@ public:
     * as to which possible object/field/entity in a single square gets drawn and that some symbols
     * are "reserved" such as * and % to do programmatic behavior.
     */
-    std::array<long, SEASONS_PER_YEAR> symbol_;
+    std::array<std::string, SEASONS_PER_YEAR> symbol_;
 
     int movecost;   // The amount of movement points required to pass this terrain by default.
     int max_volume; // Maximal volume of items that can be stored in/on this furniture
@@ -239,7 +239,7 @@ public:
         return ( connect_group != TERCONN_NONE ) && ( connect_group == test_connect_group );
     }
 
-    long symbol() const;
+    const std::string &symbol() const;
     nc_color color() const;
 };
 

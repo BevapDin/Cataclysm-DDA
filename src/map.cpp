@@ -5959,23 +5959,23 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     bool hi = false;
     bool graf = false;
     bool draw_item_sym = false;
-    static const long AUTO_WALL_PLACEHOLDER = 2; // this should never appear as a real symbol!
+    static const std::string AUTO_WALL_PLACEHOLDER = ""; // this should never appear as a real symbol!
     // TODO: change the local variable sym to std::string and use it instead of this hack.
     // Currently this are different variables because terrain/... uses long as symbol type and
     // item now use string. Ideally they should all be strings.
     std::string item_sym;
 
     if( curr_furn.id ) {
-        sym = curr_furn.symbol();
+        item_sym = curr_furn.symbol();
         tercol = curr_furn.color();
     } else {
         if( curr_ter.has_flag( TFLAG_AUTO_WALL_SYMBOL ) ) {
             // If the terrain symbol is later overriden by something, we don't need to calculate
             // the wall symbol at all. This case will be detected by comparing sym to this
             // placeholder, if it's still the same, we have to calculate the wall symbol.
-            sym = AUTO_WALL_PLACEHOLDER;
+            item_sym = AUTO_WALL_PLACEHOLDER;
         } else {
-            sym = curr_ter.symbol();
+            item_sym = curr_ter.symbol();
         }
         tercol = curr_ter.color();
     }
@@ -6026,7 +6026,7 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
             draw_item_sym = (f.sym == "%");
             // If field priority is > 1, and the field is set to hide items,
             //draw the field as it obscures what's under it.
-            if( (f.sym != "%" && f.priority > 1) || (f.sym != "%" && sym == '.'))  {
+            if( (f.sym != "%" && f.priority > 1) || (f.sym != "%" && item_sym == "."))  {
                 // default terrain '.' and
                 // non-default field symbol -> field symbol overrides terrain
                 item_sym = f.sym;
@@ -6039,7 +6039,7 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     if( show_items && curr_maptile.get_item_count() > 0 && sees_some_items( p, g->u ) ) {
         // if there's furniture/terrain/trap/fields (sym!='.')
         // and we should not override it, then only highlight the square
-        if (sym != '.' && sym != '%' && !draw_item_sym) {
+        if (item_sym != "." && item_sym != "%" && !draw_item_sym) {
             hi = true;
         } else {
             // otherwise override with the symbol of the last item
@@ -6066,8 +6066,8 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     }
 
     //suprise, we're not done, if it's a wall adjacent to an other, put the right glyph
-    if( sym == AUTO_WALL_PLACEHOLDER ) {
-        sym = determine_wall_corner( p );
+    if( item_sym == AUTO_WALL_PLACEHOLDER ) {
+        item_sym = utf32_to_utf8( determine_wall_corner( p ) );
     }
 
     const auto u_vision = u.get_vision_modes();
@@ -6126,7 +6126,7 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
     int part_below;
     const vehicle *veh;
     if( curr_furn.has_flag( TFLAG_SEEN_FROM_ABOVE ) ) {
-        sym = curr_furn.symbol();
+        sym = curr_furn.symbol()[0];
         tercol = curr_furn.color();
     } else if( curr_furn.movecost < 0 ) {
         sym = '.';
@@ -6142,7 +6142,7 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
         } else if( curr_ter.has_flag( TFLAG_RAMP ) ) {
             sym = '>';
         } else {
-            sym = curr_ter.symbol();
+            sym = curr_ter.symbol()[0];
         }
         tercol = curr_ter.color();
     } else if( curr_ter.movecost == 0 ) {
@@ -6157,7 +6157,7 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
             tercol = c_black_cyan;
         }
     } else {
-        sym = curr_ter.symbol();
+        sym = curr_ter.symbol()[0];
         tercol = curr_ter.color();
     }
 
@@ -7466,7 +7466,7 @@ long map::determine_wall_corner( const tripoint &p ) const
         case 0 | 2 | 0 | 0: return LINE_OXOX; // LINE_OXOO would be better
         case 1 | 0 | 0 | 0: return LINE_XOXO; // LINE_XOOO would be better
 
-        case 0 | 0 | 0 | 0: return ter( p ).obj().symbol(); // technically just a column
+        case 0 | 0 | 0 | 0: return ter( p ).obj().symbol()[0]; // technically just a column
 
         default:
             // assert( false );

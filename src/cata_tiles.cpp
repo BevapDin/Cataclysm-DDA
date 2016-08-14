@@ -1473,14 +1473,14 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
             const furn_str_id fid( id );
             if( fid.is_valid() ) {
                 const furn_t &f = fid.obj();
-                sym = f.symbol();
+                sym = f.symbol()[0];
                 col = f.color();
             }
         } else if (category == C_TERRAIN) {
             const ter_str_id tid( id );
             if ( tid.is_valid() ) {
                 const ter_t &t = tid.obj();
-                sym = t.symbol();
+                sym = t.symbol()[0];
                 col = t.color();
             }
         } else if (category == C_MONSTER) {
