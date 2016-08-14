@@ -19,6 +19,8 @@ enum direction : unsigned;
 class input_context;
 
 //      LINE_NESW  - X for on, O for off
+// If you have to / want to use a string instead of a single character of the below, use the
+// Unicode version of it, e.g. std::string("\u2524") instead of LINE_XOXX.
 #define LINE_XOXO 4194424 // '|'   Vertical line. ncurses: ACS_VLINE; Unicode: U+2502
 #define LINE_OXOX 4194417 // '-'   Horizontal line. ncurses: ACS_HLINE; Unicode: U+2500
 #define LINE_XXOO 4194413 // '|_'  Lower left corner. ncurses: ACS_LLCORNER; Unicode: U+2514
