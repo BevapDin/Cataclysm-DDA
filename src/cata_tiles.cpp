@@ -1469,36 +1469,39 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
     if (it == tile_ids.end()) {
         uint32_t sym = UNKNOWN_UNICODE;
         nc_color col = c_white;
+        static const auto sym_from_utf8 = []( const std::string &sym ) {
+            int len = sym.length();
+            const char *s = sym.c_str();
+            return UTF8_getch( &s, &len );
+        };
         if (category == C_FURNITURE) {
             const furn_str_id fid( id );
             if( fid.is_valid() ) {
                 const furn_t &f = fid.obj();
-                sym = f.symbol()[0];
+                sym = sym_from_utf8( f.symbol() );
                 col = f.color();
             }
         } else if (category == C_TERRAIN) {
             const ter_str_id tid( id );
             if ( tid.is_valid() ) {
                 const ter_t &t = tid.obj();
-                sym = t.symbol()[0];
+                sym = sym_from_utf8( t.symbol() );
                 col = t.color();
             }
         } else if (category == C_MONSTER) {
             const mtype_id mid( id );
             if( mid.is_valid() ) {
                 const mtype &mt = mid.obj();
-                int len = mt.sym.length();
-                const char *s = mt.sym.c_str();
-                sym = UTF8_getch(&s, &len);
+                sym = sym_from_utf8( mt.sym );
                 col = mt.color;
             }
         } else if (category == C_VEHICLE_PART) {
             const vpart_str_id vpid( id.substr( 3 ) );
             if( vpid.is_valid() ) {
                 const vpart_info &v = vpid.obj();
-                sym = v.sym[0];
+                sym = sym_from_utf8( v.sym );
                 if (!subcategory.empty()) {
-                    sym = special_symbol( subcategory )[0];
+                    sym = sym_from_utf8( special_symbol( subcategory ) );
                     rota = 0;
                     subtile = -1;
                 }
@@ -1506,35 +1509,34 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
             }
         } else if (category == C_FIELD) {
             const field_id fid = field_from_ident( id );
-            sym = fieldlist[fid].sym[0];
+            sym = sym_from_utf8( fieldlist[fid].sym );
             // TODO: field density?
             col = fieldlist[fid].color[0];
         } else if (category == C_TRAP) {
             const trap_str_id tmp( id );
             if( tmp.is_valid() ) {
                 const trap &t = tmp.obj();
-                sym = t.sym[0];
+                sym = sym_from_utf8( t.sym );
                 col = t.color;
             }
         } else if (category == C_ITEM) {
             const auto tmp = item( id, 0 );
-            sym = tmp.symbol().empty() ? ' ' : tmp.symbol().front();
+            sym = sym_from_utf8( tmp.symbol() );
             col = tmp.color();
         }
         // Special cases for walls
         switch(sym) {
-            case LINE_XOXO: sym = LINE_XOXO_C; break;
-            case LINE_OXOX: sym = LINE_OXOX_C; break;
-            case LINE_XXOO: sym = LINE_XXOO_C; break;
-            case LINE_OXXO: sym = LINE_OXXO_C; break;
-            case LINE_OOXX: sym = LINE_OOXX_C; break;
-            case LINE_XOOX: sym = LINE_XOOX_C; break;
-            case LINE_XXXO: sym = LINE_XXXO_C; break;
-            case LINE_XXOX: sym = LINE_XXOX_C; break;
-            case LINE_XOXX: sym = LINE_XOXX_C; break;
-            case LINE_OXXX: sym = LINE_OXXX_C; break;
-            case LINE_XXXX: sym = LINE_XXXX_C; break;
-            default: break; // sym goes unchanged
+            case U'\u2502': sym = LINE_XOXO_C; break;
+            case U'\u2500': sym = LINE_OXOX_C; break;
+            case U'\u2514': sym = LINE_XXOO_C; break;
+            case U'\u250C': sym = LINE_OXXO_C; break;
+            case U'\u2510': sym = LINE_OOXX_C; break;
+            case U'\u2518': sym = LINE_XOOX_C; break;
+            case U'\u251C': sym = LINE_XXXO_C; break;
+            case U'\u2534': sym = LINE_XXOX_C; break;
+            case U'\u2524': sym = LINE_XOXX_C; break;
+            case U'\u252C': sym = LINE_OXXX_C; break;
+            case U'\u253C': sym = LINE_XXXX_C; break;
         }
         if( sym != 0 && sym < 256 ) {
             // see cursesport.cpp, function wattron
