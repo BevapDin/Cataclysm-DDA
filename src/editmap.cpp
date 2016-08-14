@@ -241,12 +241,12 @@ void editmap_hilight::draw( editmap *hm, bool update )
             // but only if there's no vehicles/mobs/npcs on a point
             if( ! g->m.veh_at( p, vpart ) && ( g->mon_at( p ) == -1 ) && ( g->npc_at( p ) == -1 ) ) {
                 const ter_t &terrain = g->m.ter( p ).obj();
-                char t_sym = terrain.symbol()[0];
+                std::string t_sym = terrain.symbol();
                 nc_color t_col = terrain.color();
 
                 if( g->m.furn( p ) > 0 ) {
                     const furn_t &furniture_type = g->m.furn( p ).obj();
-                    t_sym = furniture_type.symbol()[0];
+                    t_sym = furniture_type.symbol();
                     t_col = furniture_type.color();
                 }
                 const field *t_field = &g->m.field_at( p );
@@ -255,14 +255,14 @@ void editmap_hilight::draw( editmap *hm, bool update )
                     const field_entry *t_fld = t_field->findField( t_ftype );
                     if( t_fld != NULL ) {
                         t_col =  fieldlist[t_ftype].color[t_fld->getFieldDensity() - 1];
-                        t_sym = fieldlist[t_ftype].sym[0];
+                        t_sym = fieldlist[t_ftype].sym;
                     }
                 }
                 if( blink_interval[ cur_blink ] == true ) {
                     t_col = getbg( t_col );
                 }
                 tripoint scrpos = hm->pos2screen( p );
-                mvwputch( g->w_terrain, scrpos.y, scrpos.x, t_col, t_sym );
+                mvwprintz( g->w_terrain, scrpos.y, scrpos.x, t_col, "%s", t_sym.c_str() );
             }
         }
     }
@@ -551,13 +551,13 @@ void editmap::update_view( bool update_info )
             // but only if there's no vehicles/mobs/npcs on a point
             if( ! g->m.veh_at( p, vpart ) && ( g->mon_at( p ) == -1 ) && ( g->npc_at( p ) == -1 ) ) {
                 const ter_t &terrain = g->m.ter( p ).obj();
-                char t_sym = terrain.symbol()[0];
+                std::string t_sym = terrain.symbol();
                 nc_color t_col = terrain.color();
 
 
                 if( g->m.has_furn( p ) ) {
                     const furn_t &furniture_type = g->m.furn( p ).obj();
-                    t_sym = furniture_type.symbol()[0];
+                    t_sym = furniture_type.symbol();
                     t_col = furniture_type.color();
                 }
                 const field *t_field = &g->m.field_at( p );
@@ -566,12 +566,12 @@ void editmap::update_view( bool update_info )
                     const field_entry *t_fld = t_field->findField( t_ftype );
                     if( t_fld != NULL ) {
                         t_col =  fieldlist[t_ftype].color[t_fld->getFieldDensity() - 1];
-                        t_sym = fieldlist[t_ftype].sym[0];
+                        t_sym = fieldlist[t_ftype].sym;
                     }
                 }
                 t_col = ( altblink == true ? green_background( t_col ) : cyan_background( t_col ) );
                 tripoint scrpos = pos2screen( p );
-                mvwputch( g->w_terrain, scrpos.y, scrpos.x, t_col, t_sym );
+                mvwprintz( g->w_terrain, scrpos.y, scrpos.x, t_col, "%s", t_sym.c_str() );
             }
         }
     }
