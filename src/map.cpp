@@ -6104,40 +6104,40 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
                            const tripoint &view_center,
                            bool low_light, bool bright_light, bool inorder ) const
 {
-    static const long AUTO_WALL_PLACEHOLDER = 2; // this should never appear as a real symbol!
+    static const std::string AUTO_WALL_PLACEHOLDER = ""; // this should never appear as a real symbol!
 
     nc_color tercol = c_dkgray;
-    long sym = ' ';
+    std::string sym = " ";
 
     const ter_t &curr_ter = curr_tile.get_ter_t();
     const furn_t &curr_furn = curr_tile.get_furn_t();
     int part_below;
     const vehicle *veh;
     if( curr_furn.has_flag( TFLAG_SEEN_FROM_ABOVE ) ) {
-        sym = curr_furn.symbol()[0];
+        sym = curr_furn.symbol();
         tercol = curr_furn.color();
     } else if( curr_furn.movecost < 0 ) {
-        sym = '.';
+        sym = ".";
         tercol = curr_furn.color();
     } else if( ( veh = veh_at_internal( p, part_below ) ) != nullptr ) {
         const int roof = veh->roof_at_part( part_below );
         const int displayed_part = roof >= 0 ? roof : part_below;
-        sym = special_symbol( veh->face.dir_symbol( veh->part_sym( displayed_part, true ) ) )[0];
+        sym = special_symbol( veh->face.dir_symbol( veh->part_sym( displayed_part, true ) ) );
         tercol = (roof >= 0 || veh->obstacle_at_part( part_below ) ) ? c_ltgray : c_ltgray_cyan;
     } else if( curr_ter.has_flag( TFLAG_SEEN_FROM_ABOVE ) ) {
         if( curr_ter.has_flag( TFLAG_AUTO_WALL_SYMBOL ) ) {
             sym = AUTO_WALL_PLACEHOLDER;
         } else if( curr_ter.has_flag( TFLAG_RAMP ) ) {
-            sym = '>';
+            sym = ">";
         } else {
-            sym = curr_ter.symbol()[0];
+            sym = curr_ter.symbol();
         }
         tercol = curr_ter.color();
     } else if( curr_ter.movecost == 0 ) {
-        sym = '.';
+        sym = ".";
         tercol = curr_ter.color();
     } else if( !curr_ter.has_flag( TFLAG_NO_FLOOR ) ) {
-        sym = '.';
+        sym = ".";
         if( curr_ter.color() != c_cyan ) {
             // Need a special case here, it doesn't cyanize well
             tercol = cyan_background( curr_ter.color() );
@@ -6145,12 +6145,12 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
             tercol = c_black_cyan;
         }
     } else {
-        sym = curr_ter.symbol()[0];
+        sym = curr_ter.symbol();
         tercol = curr_ter.color();
     }
 
     if( sym == AUTO_WALL_PLACEHOLDER ) {
-        sym = determine_wall_corner( p )[0];
+        sym = determine_wall_corner( p );
     }
 
     const auto u_vision = u.get_vision_modes();
@@ -6169,11 +6169,11 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
     }
 
     if( inorder ) {
-        wputch( w, tercol, sym );
+        wprintz( w, tercol, "%s", sym.c_str() );
     } else {
         const int k = p.x + getmaxx(w) / 2 - view_center.x;
         const int j = p.y + getmaxy(w) / 2 - view_center.y;
-        mvwputch(w, j, k, tercol, sym);
+        mvwprintz( w, j, k, tercol, "%s", sym.c_str() );
     }
 }
 
