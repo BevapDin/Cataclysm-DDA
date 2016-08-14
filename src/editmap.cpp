@@ -255,7 +255,7 @@ void editmap_hilight::draw( editmap *hm, bool update )
                     const field_entry *t_fld = t_field->findField( t_ftype );
                     if( t_fld != NULL ) {
                         t_col =  fieldlist[t_ftype].color[t_fld->getFieldDensity() - 1];
-                        t_sym = fieldlist[t_ftype].sym;
+                        t_sym = fieldlist[t_ftype].sym[0];
                     }
                 }
                 if( blink_interval[ cur_blink ] == true ) {
@@ -566,7 +566,7 @@ void editmap::update_view( bool update_info )
                     const field_entry *t_fld = t_field->findField( t_ftype );
                     if( t_fld != NULL ) {
                         t_col =  fieldlist[t_ftype].color[t_fld->getFieldDensity() - 1];
-                        t_sym = fieldlist[t_ftype].sym;
+                        t_sym = fieldlist[t_ftype].sym[0];
                     }
                 }
                 t_col = ( altblink == true ? green_background( t_col ) : cyan_background( t_col ) );
@@ -1093,7 +1093,7 @@ void editmap::setup_fmenu( uimenu *fmenu )
         fname = ( ftype.name[fdens - 1].empty() ? fids[fid] : ftype.name[fdens - 1] );
         fmenu->addentry( fid, true, -2, "%s", fname.c_str() );
         fmenu->entries[fid].extratxt.left = 1;
-        fmenu->entries[fid].extratxt.txt = string_format( "%c", ftype.sym );
+        fmenu->entries[fid].extratxt.txt = ftype.sym;
         update_fmenu_entry( fmenu, cur_field, fid );
     }
     if( sel_field >= 0 ) {

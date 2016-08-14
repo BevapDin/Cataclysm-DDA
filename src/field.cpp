@@ -49,7 +49,7 @@ void game::init_fields()
     {
         {
             "fd_null",
-            {"", "", ""}, '%', 0,
+            {"", "", ""}, "%", 0,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0},
             PNULL,
@@ -57,7 +57,7 @@ void game::init_fields()
         },
         {
             "fd_blood",
-            {_("blood splatter"), _("blood stain"), _("puddle of blood")}, '%', 0,
+            {_("blood splatter"), _("blood stain"), _("puddle of blood")}, "%", 0,
             {c_red, c_red, c_red}, {true, true, true}, {false, false, false}, HOURS(48),
             {0,0,0},
             LIQUID,
@@ -65,7 +65,7 @@ void game::init_fields()
         },
         {
             "fd_bile",
-            {_("bile splatter"), _("bile stain"), _("puddle of bile")}, '%', 0,
+            {_("bile splatter"), _("bile stain"), _("puddle of bile")}, "%", 0,
             {c_pink, c_pink, c_pink}, {true, true, true}, {false, false, false}, HOURS(24),
             {0,0,0},
             LIQUID,
@@ -74,7 +74,7 @@ void game::init_fields()
 
         {
             "fd_gibs_flesh",
-            {_("scraps of flesh"), _("bloody meat chunks"), _("heap of gore")}, '~', 0,
+            {_("scraps of flesh"), _("bloody meat chunks"), _("heap of gore")}, "~", 0,
             {c_brown, c_ltred, c_red}, {true, true, true}, {false, false, false}, HOURS(48),
             {0,0,0},
             SOLID,
@@ -83,7 +83,7 @@ void game::init_fields()
 
         {
             "fd_gibs_veggy",
-            {_("shredded leaves and twigs"), _("shattered branches and leaves"), _("broken vegetation tangle")}, '~', 0,
+            {_("shredded leaves and twigs"), _("shattered branches and leaves"), _("broken vegetation tangle")}, "~", 0,
             {c_ltgreen, c_ltgreen, c_green}, {true, true, true}, {false, false, false}, HOURS(48),
             {0,0,0},
             SOLID,
@@ -92,7 +92,7 @@ void game::init_fields()
 
         {
             "fd_web",
-            {_("cobwebs"),_("webs"), _("thick webs")}, '}', 2,
+            {_("cobwebs"),_("webs"), _("thick webs")}, "}", 2,
             {c_white, c_white, c_white}, {true, true, false},{true, true, true}, 0,
             {0,0,0},
             SOLID,
@@ -101,7 +101,7 @@ void game::init_fields()
 
         {
             "fd_slime",
-            {_("slime trail"), _("slime stain"), _("puddle of slime")}, '%', 0,
+            {_("slime trail"), _("slime stain"), _("puddle of slime")}, "%", 0,
             {c_ltgreen, c_ltgreen, c_green},{true, true, true},{false, false, false}, HOURS(24),
             {0,0,0},
             LIQUID,
@@ -110,7 +110,7 @@ void game::init_fields()
 
         {
             "fd_acid",
-            {_("acid splatter"), _("acid streak"), _("pool of acid")}, '5', 2,
+            {_("acid splatter"), _("acid streak"), _("pool of acid")}, "5", 2,
             {c_ltgreen, c_green, c_green}, {true, true, true}, {true, true, true}, MINUTES(2),
             {0,0,0},
             LIQUID,
@@ -119,7 +119,7 @@ void game::init_fields()
 
         {
             "fd_sap",
-            {_("sap splatter"), _("glob of sap"), _("pool of sap")}, '5', 2,
+            {_("sap splatter"), _("glob of sap"), _("pool of sap")}, "5", 2,
             {c_yellow, c_brown, c_brown}, {true, true, true}, {true, true, true}, MINUTES(2),
             {0,0,0},
             LIQUID,
@@ -128,7 +128,7 @@ void game::init_fields()
 
         {
             "fd_sludge",
-            {_("thin sludge trail"), _("sludge trail"), _("thick sludge trail")}, '5', 2,
+            {_("thin sludge trail"), _("sludge trail"), _("thick sludge trail")}, "5", 2,
             {c_ltgray, c_dkgray, c_black}, {true, true, true}, {true, true, true}, HOURS(6),
             {0,0,0},
             LIQUID,
@@ -137,7 +137,7 @@ void game::init_fields()
 
         {
             "fd_fire",
-            {_("small fire"), _("fire"), _("raging fire")}, '4', 4,
+            {_("small fire"), _("fire"), _("raging fire")}, "4", 4,
             {c_yellow, c_ltred, c_red}, {true, true, true}, {true, true, true}, MINUTES(30),
             {0,0,0},
             PLASMA,
@@ -146,7 +146,7 @@ void game::init_fields()
 
        {
            "fd_rubble",
-           {_("legacy rubble"), _("legacy rubble"), _("legacy rubble")}, '#', 0,
+           {_("legacy rubble"), _("legacy rubble"), _("legacy rubble")}, "#", 0,
            {c_dkgray, c_dkgray, c_dkgray}, {true, true, true},{false, false, false},  1,
            {0,0,0},
            SOLID,
@@ -155,7 +155,7 @@ void game::init_fields()
 
         {
             "fd_smoke",
-            {_("thin smoke"), _("smoke"), _("thick smoke")}, '8', 8,
+            {_("thin smoke"), _("smoke"), _("thick smoke")}, "8", 8,
             {c_white, c_ltgray, c_dkgray}, {true, false, false},{true, true, true}, MINUTES(2),
             {0,0,0},
             GAS,
@@ -163,7 +163,7 @@ void game::init_fields()
         },
         {
             "fd_toxic_gas",
-            {_("hazy cloud"),_("toxic gas"),_("thick toxic gas")}, '8', 8,
+            {_("hazy cloud"),_("toxic gas"),_("thick toxic gas")}, "8", 8,
             {c_white, c_ltgreen, c_green}, {true, false, false},{true, true, true}, MINUTES(90),
             {0,0,0},
             GAS,
@@ -172,7 +172,7 @@ void game::init_fields()
 
         {
             "fd_tear_gas",
-            {_("hazy cloud"),_("tear gas"),_("thick tear gas")}, '8', 8,
+            {_("hazy cloud"),_("tear gas"),_("thick tear gas")}, "8", 8,
             {c_white, c_yellow, c_brown}, {true, false, false},{true, true, true}, MINUTES(5),
             {0,0,0},
             GAS,
@@ -181,7 +181,7 @@ void game::init_fields()
 
         {
             "fd_nuke_gas",
-            {_("hazy cloud"),_("radioactive gas"), _("thick radioactive gas")}, '8', 8,
+            {_("hazy cloud"),_("radioactive gas"), _("thick radioactive gas")}, "8", 8,
             {c_white, c_ltgreen, c_green}, {true, true, false}, {true, true, true}, MINUTES(100),
             {0,0,0},
             GAS,
@@ -190,7 +190,7 @@ void game::init_fields()
 
         {
             "fd_gas_vent",
-            {_("gas vent"), _("gas vent"), _("gas vent")}, '%', 0,
+            {_("gas vent"), _("gas vent"), _("gas vent")}, "%", 0,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0},
             GAS,
@@ -199,7 +199,7 @@ void game::init_fields()
 
         { // Fire Vents
             "fd_fire_vent",
-            {"", "", ""}, '&', -1,
+            {"", "", ""}, "&", -1,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0},
             GAS,
@@ -208,7 +208,7 @@ void game::init_fields()
 
         {
             "fd_flame_burst",
-            {_("fire"), _("fire"), _("fire")}, '5', 4,
+            {_("fire"), _("fire"), _("fire")}, "5", 4,
             {c_red, c_red, c_red}, {true, true, true}, {true, true, true}, 0,
             {0,0,0},
             GAS,
@@ -217,7 +217,7 @@ void game::init_fields()
 
         {
             "fd_electricity",
-            {_("sparks"), _("electric crackle"), _("electric cloud")}, '9', 4,
+            {_("sparks"), _("electric crackle"), _("electric cloud")}, "9", 4,
             {c_white, c_cyan, c_blue}, {true, true, true}, {true, true, true}, 2,
             {0,0,0},
             PLASMA,
@@ -226,7 +226,7 @@ void game::init_fields()
 
         {
             "fd_fatigue",
-            {_("odd ripple"), _("swirling air"), _("tear in reality")}, '*', 8,
+            {_("odd ripple"), _("swirling air"), _("tear in reality")}, "*", 8,
             {c_ltgray, c_dkgray, c_magenta},{true, true, false},{true, true, true},  0,
             {0,0,0},
             PNULL,
@@ -235,7 +235,7 @@ void game::init_fields()
 
         { //Push Items
             "fd_push_items",
-            {"", "", ""}, '&', -1,
+            {"", "", ""}, "&", -1,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0},
             PNULL,
@@ -244,7 +244,7 @@ void game::init_fields()
 
         { // shock vents
             "fd_shock_vent",
-            {"", "", ""}, '&', -1,
+            {"", "", ""}, "&", -1,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0},
             PLASMA,
@@ -253,7 +253,7 @@ void game::init_fields()
 
         { // acid vents
             "fd_acid_vent",
-            {"", "", ""}, '&', -1,
+            {"", "", ""}, "&", -1,
             {c_white, c_white, c_white}, {true, true, true}, {false, false, false}, 0,
             {0,0,0},
             LIQUID,
@@ -262,7 +262,7 @@ void game::init_fields()
 
         { // plasma glow (for plasma weapons)
             "fd_plasma",
-            {_("faint plasma"), _("glowing plasma"), _("glaring plasma")}, '9', 4,
+            {_("faint plasma"), _("glowing plasma"), _("glaring plasma")}, "9", 4,
             {c_magenta, c_pink, c_white}, {true, true, true}, {false, false, false}, 2,
             {0,0,0},
             PLASMA,
@@ -271,7 +271,7 @@ void game::init_fields()
 
         { // laser beam (for laser weapons)
             "fd_laser",
-            {_("faint glimmer"), _("beam of light"), _("intense beam of light")}, '#', 4,
+            {_("faint glimmer"), _("beam of light"), _("intense beam of light")}, "#", 4,
             {c_blue, c_ltblue, c_white}, {true, true, true}, {false, false, false}, 1,
             {0,0,0},
             PLASMA,
@@ -279,7 +279,7 @@ void game::init_fields()
         },
         {
             "fd_spotlight",
-            { _("spotlight"), _("spotlight"), _("spotlight") }, '&', 1,
+            { _("spotlight"), _("spotlight"), _("spotlight") }, "&", 1,
             {c_white, c_white, c_white}, { true, true, true }, { false, false, false }, 1,
             {0,0,0},
             PNULL,
@@ -287,7 +287,7 @@ void game::init_fields()
         },
         {
             "fd_dazzling",
-            { _("dazzling"), _("dazzling"), _("dazzling") }, '#', 4,
+            { _("dazzling"), _("dazzling"), _("dazzling") }, "#", 4,
             {c_ltred_yellow, c_ltred_yellow, c_ltred_yellow}, { true, true, true }, { false, false, false }, 1,
             { 0, 0, 0 },
             PLASMA,
@@ -295,7 +295,7 @@ void game::init_fields()
         },
         {
             "fd_blood_veggy",
-            {_("plant sap splatter"), _("plant sap stain"), _("puddle of resin")}, '%', 0,
+            {_("plant sap splatter"), _("plant sap stain"), _("puddle of resin")}, "%", 0,
             {c_ltgreen, c_ltgreen, c_ltgreen}, {true, true, true}, {false, false, false}, HOURS(48),
             {0,0,0},
             LIQUID,
@@ -303,7 +303,7 @@ void game::init_fields()
         },
         {
             "fd_blood_insect",
-            {_("bug blood splatter"), _("bug blood stain"), _("puddle of bug blood")}, '%', 0,
+            {_("bug blood splatter"), _("bug blood stain"), _("puddle of bug blood")}, "%", 0,
             {c_green, c_green, c_green}, {true, true, true}, {false, false, false}, HOURS(48),
             {0,0,0},
             LIQUID,
@@ -311,7 +311,7 @@ void game::init_fields()
         },
         {
             "fd_blood_invertebrate",
-            {_("hemolymph splatter"), _("hemolymph stain"), _("puddle of hemolymph")}, '%', 0,
+            {_("hemolymph splatter"), _("hemolymph stain"), _("puddle of hemolymph")}, "%", 0,
             {c_ltgray, c_ltgray, c_ltgray}, {true, true, true}, {false, false, false}, HOURS(48),
             {0,0,0},
             LIQUID,
@@ -319,7 +319,7 @@ void game::init_fields()
         },
         {
             "fd_gibs_insect",
-            {_("shards of chitin"), _("shattered bug leg"), _("torn insect organs")}, '~', 0,
+            {_("shards of chitin"), _("shattered bug leg"), _("torn insect organs")}, "~", 0,
             {c_ltgreen, c_green, c_yellow}, {true, true, true}, {false, false, false}, HOURS(48),
             {0,0,0},
             SOLID,
@@ -327,7 +327,7 @@ void game::init_fields()
         },
         {
             "fd_gibs_invertebrate",
-            {_("gooey scraps"), _("icky mess"), _("heap of squishy gore")}, '~', 0,
+            {_("gooey scraps"), _("icky mess"), _("heap of squishy gore")}, "~", 0,
             {c_ltgray, c_ltgray, c_dkgray}, {true, true, true}, {false, false, false}, HOURS(48),
             {0,0,0},
             SOLID,
@@ -335,7 +335,7 @@ void game::init_fields()
         },
         {
             "fd_cigsmoke",
-            {_("swirl of tobacco smoke"), _("tobacco smoke"), _("thick tobacco smoke")}, '%', 8,
+            {_("swirl of tobacco smoke"), _("tobacco smoke"), _("thick tobacco smoke")}, "%", 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false}, MINUTES(35),
             {0,0,0},
             GAS,
@@ -343,7 +343,7 @@ void game::init_fields()
         },
         {
             "fd_weedsmoke",
-            {_("swirl of pot smoke"), _("pot smoke"), _("thick pot smoke")}, '%', 8,
+            {_("swirl of pot smoke"), _("pot smoke"), _("thick pot smoke")}, "%", 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  325,
             {0,0,0},
             GAS,
@@ -352,7 +352,7 @@ void game::init_fields()
 
         {
             "fd_cracksmoke",
-            {_("swirl of crack smoke"), _("crack smoke"), _("thick crack smoke")}, '%', 8,
+            {_("swirl of crack smoke"), _("crack smoke"), _("thick crack smoke")}, "%", 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  225,
             {0,0,0},
             GAS,
@@ -360,7 +360,7 @@ void game::init_fields()
         },
         {
             "fd_methsmoke",
-            {_("swirl of meth smoke"), _("meth smoke"), _("thick meth smoke")}, '%', 8,
+            {_("swirl of meth smoke"), _("meth smoke"), _("thick meth smoke")}, "%", 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, true},{false, false, false},  275,
             {0,0,0},
             GAS,
@@ -368,7 +368,7 @@ void game::init_fields()
         },
         {
             "fd_bees",
-            {_("some bees"), _("swarm of bees"), _("angry swarm of bees")}, '8', 8,
+            {_("some bees"), _("swarm of bees"), _("angry swarm of bees")}, "8", 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, true},{true, true, true}, MINUTES(100),
             {0,0,0},
             PNULL,
@@ -377,7 +377,7 @@ void game::init_fields()
 
         {
             "fd_incendiary",
-            {_("smoke"),_("airborne incendiary"), _("airborne incendiary")}, '8', 8,
+            {_("smoke"),_("airborne incendiary"), _("airborne incendiary")}, "8", 8,
             {c_white, c_ltred, c_ltred_red}, {true, true, false}, {true, true, true}, MINUTES(50),
             {0,0,0},
             GAS,
@@ -386,7 +386,7 @@ void game::init_fields()
 
         {
             "fd_relax_gas",
-            {_("hazy cloud"),_("sedative gas"),_("relaxation gas")}, '.', 8,
+            {_("hazy cloud"),_("sedative gas"),_("relaxation gas")}, ".", 8,
             { c_white, c_pink, c_cyan }, { true, true, true }, { true, true, true }, MINUTES(50),
             {0,0,0},
             GAS,
@@ -395,7 +395,7 @@ void game::init_fields()
 
         {
             "fd_fungal_haze",
-            {_("hazy cloud"),_("fungal haze"),_("thick fungal haze")}, '.', 8,
+            {_("hazy cloud"),_("fungal haze"),_("thick fungal haze")}, ".", 8,
             { c_white, c_cyan, c_cyan }, { true, true, false }, { true, true, true }, MINUTES(4),
             {0,0,0},
             GAS,
@@ -404,7 +404,7 @@ void game::init_fields()
 
         {
             "fd_hot_air1",
-            {"", "", ""}, '&', -1,
+            {"", "", ""}, "&", -1,
             {c_white, c_yellow, c_red}, {true, true, true}, {false, false, false}, MINUTES(50),
             {0,0,0},
             GAS,
@@ -413,7 +413,7 @@ void game::init_fields()
 
         {
             "fd_hot_air2",
-            {"", "", ""}, '&', -1,
+            {"", "", ""}, "&", -1,
             {c_white, c_yellow, c_red}, {true, true, true}, {false, false, false}, MINUTES(50),
             {0,0,0},
             GAS,
@@ -422,7 +422,7 @@ void game::init_fields()
 
         {
             "fd_hot_air3",
-            {"", "", ""}, '&', -1,
+            {"", "", ""}, "&", -1,
             {c_white, c_yellow, c_red}, {true, true, true}, {false, false, false}, MINUTES(50),
             {0,0,0},
             GAS,
@@ -431,7 +431,7 @@ void game::init_fields()
 
         {
             "fd_hot_air4",
-            {"", "", ""}, '&', -1,
+            {"", "", ""}, "&", -1,
             {c_white, c_yellow, c_red}, {true, true, true}, {false, false, false}, MINUTES(50),
             {0,0,0},
             GAS,
@@ -440,7 +440,7 @@ void game::init_fields()
 
         {
             "fd_fungicidal_gas",
-            {_("hazy cloud"),_("fungicidal gas"),_("thick fungicidal gas")}, '8', 8,
+            {_("hazy cloud"),_("fungicidal gas"),_("thick fungicidal gas")}, "8", 8,
             {c_white, c_ltgray, c_dkgray}, {true, true, false}, {true, true, true}, MINUTES(90),
             {0,0,0},
             GAS,

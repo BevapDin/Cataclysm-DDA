@@ -24,7 +24,11 @@ struct field_t {
      /** Display name for field at given density (eg. light smoke, smoke, heavy smoke) */
      std::string name[ MAX_FIELD_DENSITY ];
 
- char sym; //The symbol to draw for this field. Note that some are reserved like * and %. You will have to check the draw function for specifics.
+    /**
+     * The symbol to draw for this field. Note that some are reserved like '*' and '%'.
+     * You will have to check the draw function for specifics.
+     */
+    std::string sym;
  int priority; //Inferior numbers have lower priority. 0 is "ground" (splatter), 2 is "on the ground", 4 is "above the ground" (fire), 6 is reserved for furniture, and 8 is "in the air" (smoke).
 
      /** Color the field will be drawn as on the screen at a given density */

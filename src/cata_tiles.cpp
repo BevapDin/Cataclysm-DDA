@@ -1506,7 +1506,7 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
             }
         } else if (category == C_FIELD) {
             const field_id fid = field_from_ident( id );
-            sym = fieldlist[fid].sym;
+            sym = fieldlist[fid].sym[0];
             // TODO: field density?
             col = fieldlist[fid].color[0];
         } else if (category == C_TRAP) {
