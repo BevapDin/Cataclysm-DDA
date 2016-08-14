@@ -676,7 +676,10 @@ void veh_interact::do_install()
                         uimenu_entry entry = uimenu_entry( i, true, UIMENU_INVALID,
                                                            shapes[i]->name() );
                         entry.extratxt.left = 1;
-                        entry.extratxt.sym = special_symbol( shapes[i]->sym )[0];
+                        const std::string sym = special_symbol( shapes[i]->sym );
+                        int len = sym.length();
+                        const char *ptr = sym.c_str();
+                        entry.extratxt.sym = UTF8_getch( &ptr, &len );
                         entry.extratxt.color = shapes[i]->color;
                         shape_ui_entries.push_back( entry );
                     }
