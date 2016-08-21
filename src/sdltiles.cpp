@@ -755,10 +755,14 @@ void Font::draw_ascii_lines(unsigned long line_id, int drawx, int drawy, int FG)
     }
 }
 
-void invalidate_framebuffer( std::vector<curseline> &framebuffer, int x, int y, int width, int height )
+void invalidate_framebuffer( std::vector<curseline> &framebuffer, const size_t x, const size_t y, const size_t width, const size_t height )
 {
-    for( int j = 0, fby = y; j < height; j++, fby++ ) {
-        std::fill_n( framebuffer[fby].chars.begin() + x, width, cursecell( "" ) );
+    for( size_t j = 0, fby = y; j < height && fby < framebuffer.size(); j++, fby++ ) {
+        if(x >= framebuffer[fby].chars.size() ) {
+            continue;
+        }
+        const size_t w = std::min( width, framebuffer[fby].chars.size() - x );
+        std::fill_n( framebuffer[fby].chars.begin() + x, w, cursecell( "" ) );
     }
 }
 
