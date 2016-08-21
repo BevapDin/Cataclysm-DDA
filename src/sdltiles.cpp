@@ -119,7 +119,7 @@ public:
      * using (curses) color.
      */
     virtual void OutputChar(std::string ch, int x, int y, unsigned char color) = 0;
-    virtual void draw_ascii_lines(unsigned char line_id, int drawx, int drawy, int FG) const;
+    virtual void draw_ascii_lines(unsigned long line_id, int drawx, int drawy, int FG) const;
     bool draw_window(WINDOW *win);
     bool draw_window(WINDOW *win, int offsetx, int offsety);
 
@@ -179,7 +179,7 @@ public:
     void load_font(const std::string &path);
     virtual void OutputChar(std::string ch, int x, int y, unsigned char color);
     void OutputChar(long t, int x, int y, unsigned char color);
-    virtual void draw_ascii_lines(unsigned char line_id, int drawx, int drawy, int FG) const;
+    virtual void draw_ascii_lines(unsigned long line_id, int drawx, int drawy, int FG) const;
 protected:
     SDL_Texture *ascii[16];
     int tilewidth;
@@ -694,47 +694,58 @@ void find_videodisplays() {
 
 // line_id is one of the LINE_*_C constants
 // FG is a curses color
-void Font::draw_ascii_lines(unsigned char line_id, int drawx, int drawy, int FG) const
+void Font::draw_ascii_lines(unsigned long line_id, int drawx, int drawy, int FG) const
 {
     switch (line_id) {
+        case U'\u2500':
         case LINE_OXOX_C://box bottom/top side (horizontal line)
             HorzLineDIB(drawx, drawy + (fontheight / 2), drawx + fontwidth, 1, FG);
             break;
+        case U'\u2502':
         case LINE_XOXO_C://box left/right side (vertical line)
             VertLineDIB(drawx + (fontwidth / 2), drawy, drawy + fontheight, 2, FG);
             break;
+        case U'\u250C':
         case LINE_OXXO_C://box top left
             HorzLineDIB(drawx + (fontwidth / 2), drawy + (fontheight / 2), drawx + fontwidth, 1, FG);
             VertLineDIB(drawx + (fontwidth / 2), drawy + (fontheight / 2), drawy + fontheight, 2, FG);
             break;
+        case U'\u2510':
         case LINE_OOXX_C://box top right
             HorzLineDIB(drawx, drawy + (fontheight / 2), drawx + (fontwidth / 2), 1, FG);
             VertLineDIB(drawx + (fontwidth / 2), drawy + (fontheight / 2), drawy + fontheight, 2, FG);
             break;
+        case U'\u2518':
         case LINE_XOOX_C://box bottom right
             HorzLineDIB(drawx, drawy + (fontheight / 2), drawx + (fontwidth / 2), 1, FG);
             VertLineDIB(drawx + (fontwidth / 2), drawy, drawy + (fontheight / 2) + 1, 2, FG);
             break;
+        case U'\u2514':
         case LINE_XXOO_C://box bottom left
             HorzLineDIB(drawx + (fontwidth / 2), drawy + (fontheight / 2), drawx + fontwidth, 1, FG);
             VertLineDIB(drawx + (fontwidth / 2), drawy, drawy + (fontheight / 2) + 1, 2, FG);
             break;
+        case U'\u2534':
         case LINE_XXOX_C://box bottom north T (left, right, up)
             HorzLineDIB(drawx, drawy + (fontheight / 2), drawx + fontwidth, 1, FG);
             VertLineDIB(drawx + (fontwidth / 2), drawy, drawy + (fontheight / 2), 2, FG);
             break;
+        case U'\u251C':
         case LINE_XXXO_C://box bottom east T (up, right, down)
             VertLineDIB(drawx + (fontwidth / 2), drawy, drawy + fontheight, 2, FG);
             HorzLineDIB(drawx + (fontwidth / 2), drawy + (fontheight / 2), drawx + fontwidth, 1, FG);
             break;
+        case U'\u252C':
         case LINE_OXXX_C://box bottom south T (left, right, down)
             HorzLineDIB(drawx, drawy + (fontheight / 2), drawx + fontwidth, 1, FG);
             VertLineDIB(drawx + (fontwidth / 2), drawy + (fontheight / 2), drawy + fontheight, 2, FG);
             break;
+        case U'\u253C':
         case LINE_XXXX_C://box X (left down up right)
             HorzLineDIB(drawx, drawy + (fontheight / 2), drawx + fontwidth, 1, FG);
             VertLineDIB(drawx + (fontwidth / 2), drawy, drawy + fontheight, 2, FG);
             break;
+        case U'\u2524':
         case LINE_XOXX_C://box bottom east T (left, down, up)
             VertLineDIB(drawx + (fontwidth / 2), drawy, drawy + fontheight, 2, FG);
             HorzLineDIB(drawx, drawy + (fontheight / 2), drawx + (fontwidth / 2), 1, FG);
@@ -1019,8 +1030,13 @@ bool Font::draw_window( WINDOW *win, int offsetx, int offsety )
                 FillRectDIB( drawx, drawy, fontwidth * cw, fontheight, BG );
                 OutputChar( cell.ch, drawx, drawy, FG );
             } else {
+                static const auto sym_from_utf8 = []( const std::string &sym ) {
+                    int len = sym.length();
+                    const char *s = sym.c_str();
+                    return UTF8_getch( &s, &len );
+                };
                 FillRectDIB( drawx, drawy, fontwidth, fontheight, BG );
-                draw_ascii_lines( static_cast<unsigned char>( cell.ch[0] ), drawx, drawy, FG );
+                draw_ascii_lines( sym_from_utf8( cell.ch ), drawx, drawy, FG );
             }
 
         }
@@ -1989,40 +2005,51 @@ void BitmapFont::load_font(const std::string &typeface)
     }
 }
 
-void BitmapFont::draw_ascii_lines(unsigned char line_id, int drawx, int drawy, int FG) const
+void BitmapFont::draw_ascii_lines(unsigned long line_id, int drawx, int drawy, int FG) const
 {
     BitmapFont *t = const_cast<BitmapFont*>(this);
     switch (line_id) {
+        case U'\u2500':
         case LINE_OXOX_C://box bottom/top side (horizontal line)
             t->OutputChar(0xcd, drawx, drawy, FG);
             break;
+        case U'\u2502':
         case LINE_XOXO_C://box left/right side (vertical line)
             t->OutputChar(0xba, drawx, drawy, FG);
             break;
+        case U'\u250C':
         case LINE_OXXO_C://box top left
             t->OutputChar(0xc9, drawx, drawy, FG);
             break;
+        case U'\u2510':
         case LINE_OOXX_C://box top right
             t->OutputChar(0xbb, drawx, drawy, FG);
             break;
+        case U'\u2518':
         case LINE_XOOX_C://box bottom right
             t->OutputChar(0xbc, drawx, drawy, FG);
             break;
+        case U'\u2514':
         case LINE_XXOO_C://box bottom left
             t->OutputChar(0xc8, drawx, drawy, FG);
             break;
+        case U'\u2534':
         case LINE_XXOX_C://box bottom north T (left, right, up)
             t->OutputChar(0xca, drawx, drawy, FG);
             break;
+        case U'\u251C':
         case LINE_XXXO_C://box bottom east T (up, right, down)
             t->OutputChar(0xcc, drawx, drawy, FG);
             break;
+        case U'\u252C':
         case LINE_OXXX_C://box bottom south T (left, right, down)
             t->OutputChar(0xcb, drawx, drawy, FG);
             break;
+        case U'\u253C':
         case LINE_XXXX_C://box X (left down up right)
             t->OutputChar(0xce, drawx, drawy, FG);
             break;
+        case U'\u2524':
         case LINE_XOXX_C://box bottom east T (left, down, up)
             t->OutputChar(0xb9, drawx, drawy, FG);
             break;
