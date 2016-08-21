@@ -106,6 +106,8 @@ class Parser:
         self.classes = { }
         self.index = clang.cindex.Index.create()
 
+        self.export_comments = False
+
         self.build_in_typedefs = {
         }
 
@@ -548,6 +550,8 @@ class CppClass:
             line = line + "{ "
             line = line + "name = \"" + self.cursor.spelling + "\", "
             line = line + "rval = " + result + ", "
+            if self.cursor.raw_comment and self.parent.parser.export_comments:
+                line = line + "comment = \"" + re.sub('"', '\\"', self.cursor.raw_comment) + "\", "
             line = line + "args = " + args
             line = line + " }"
             return line
