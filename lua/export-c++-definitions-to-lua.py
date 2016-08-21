@@ -62,6 +62,7 @@ parser.add_export_by_reference('fault')
 parser.add_export_by_reference('effect')
 parser.add_export_by_reference('vitamin')
 parser.add_export_by_reference('npc')
+parser.add_export_by_value('damage_instance')
 
 # Enums that should be available in Lua.
 parser.add_export_enumeration('body_part')
