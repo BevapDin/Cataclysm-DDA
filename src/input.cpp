@@ -60,15 +60,6 @@ static int str_to_int( const std::string &number )
     return result;
 }
 
-static std::string int_to_str( int number )
-{
-    // ensure user's locale doesn't interfere with number format
-    std::ostringstream buffer;
-    buffer.imbue( std::locale::classic() );
-    buffer << number;
-    return buffer.str();
-}
-
 bool is_mouse_enabled()
 {
 #if defined(_WIN32) && !defined(TILES)
@@ -326,7 +317,7 @@ void input_event::serialize( JsonOut &jsout ) const
     jsout.member( "key" );
     jsout.start_array();
     for( size_t i = 0; i < sequence.size(); i++ ) {
-        jsout.write( inp_mngr.get_keyname( sequence[i], type, true ) );
+        jsout.write( inp_mngr.get_keyname_portable( sequence[i], type ) );
     }
     jsout.end_array();
     jsout.end_object();
@@ -417,7 +408,7 @@ int input_manager::get_keycode( const std::string &name ) const
     return 0;
 }
 
-std::string input_manager::get_keyname( int ch, input_event_t inp_type, bool portable ) const
+std::string input_manager::get_keyname( int ch, input_event_t inp_type ) const
 {
     cata::optional<std::string> raw;
     if( inp_type == CATA_INPUT_KEYBOARD ) {
@@ -426,11 +417,7 @@ std::string input_manager::get_keyname( int ch, input_event_t inp_type, bool por
             if( IS_F_KEY( ch ) ) {
                 // special case it since F<num> key names are generated using loop
                 // and not marked individually for translation
-                if( portable ) {
-                    return a->second;
-                } else {
-                    return string_format( pgettext( "function key name", "F%d" ), F_KEY_NUM( ch ) );
-                }
+                return string_format( pgettext( "function key name", "F%d" ), F_KEY_NUM( ch ) );
             } else if( ch >= char_key_beg && ch <= char_key_end && ch != ' ' ) {
                 // character keys except space need no translation
                 return a->second;
@@ -458,12 +445,37 @@ std::string input_manager::get_keyname( int ch, input_event_t inp_type, bool por
         raw = translate_marker_context( "key name", "UNKNOWN" );
     }
     if( !raw ) {
-        if( portable ) {
-            return std::string( "UNKNOWN_" ) + int_to_str( ch );
-        }
         return string_format( _( "unknown key %ld" ), ch );
     }
-    return portable ? *raw : pgettext( "key name", raw->c_str() );
+    return pgettext( "key name", raw->c_str() );
+}
+
+std::string input_manager::get_keyname_portable( int ch, input_event_t inp_type ) const
+{
+    if( inp_type == CATA_INPUT_KEYBOARD ) {
+        const t_key_to_name_map::const_iterator a = keycode_to_keyname.find( ch );
+        if( a != keycode_to_keyname.end() ) {
+            return a->second;
+        }
+    } else if( inp_type == CATA_INPUT_MOUSE ) {
+        if( ch == MOUSE_BUTTON_LEFT ) {
+            return "MOUSE_LEFT";
+        } else if( ch == MOUSE_BUTTON_RIGHT ) {
+            return "MOUSE_RIGHT";
+        } else if( ch == SCROLLWHEEL_UP ) {
+            return "SCROLL_UP";
+        } else if( ch == SCROLLWHEEL_DOWN ) {
+            return "SCROLL_DOWN";
+        } else if( ch == MOUSE_MOVE ) {
+            return "MOUSE_MOVE";
+        }
+    } else if( inp_type == CATA_INPUT_GAMEPAD ) {
+        const t_key_to_name_map::const_iterator a = gamepad_keycode_to_keyname.find( ch );
+        if( a != gamepad_keycode_to_keyname.end() ) {
+            return a->second;
+        }
+    }
+    return std::string( "UNKNOWN_" ) + std::to_string( ch );
 }
 
 const std::vector<input_event> &input_manager::get_input_for_action( const std::string
