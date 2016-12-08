@@ -205,29 +205,7 @@ void input_manager::load( const std::string &file_name, bool is_user_preferences
         t_input_event_list events;
         while( bindings.has_more() ) {
             JsonObject keybinding = bindings.next_object();
-            std::string input_method = keybinding.get_string( "input_method" );
-            input_event new_event;
-            if( input_method == "keyboard" ) {
-                new_event.type = CATA_INPUT_KEYBOARD;
-            } else if( input_method == "gamepad" ) {
-                new_event.type = CATA_INPUT_GAMEPAD;
-            } else if( input_method == "mouse" ) {
-                new_event.type = CATA_INPUT_MOUSE;
-            }
-
-            if( keybinding.has_array( "key" ) ) {
-                JsonArray keys = keybinding.get_array( "key" );
-                while( keys.has_more() ) {
-                    new_event.sequence.push_back(
-                        get_keycode( keys.next_string() )
-                    );
-                }
-            } else { // assume string if not array, and throw if not string
-                new_event.sequence.push_back(
-                    get_keycode( keybinding.get_string( "key" ) )
-                );
-            }
-
+            input_event new_event( keybinding );
             events.push_back( new_event );
         }
 
@@ -288,6 +266,33 @@ void input_manager::save()
         }
         jsout.end_array();
     }, _( "key bindings configuration" ) );
+}
+
+input_event::input_event( JsonObject &keybinding )
+{
+    std::string input_method = keybinding.get_string( "input_method" );
+    if( input_method == "keyboard" ) {
+        type = CATA_INPUT_KEYBOARD;
+    } else if( input_method == "gamepad" ) {
+        type = CATA_INPUT_GAMEPAD;
+    } else if( input_method == "mouse" ) {
+        type = CATA_INPUT_MOUSE;
+    } else {
+        keybinding.throw_error( "invalid type", "input_method" );
+    }
+
+    if( keybinding.has_array( "key" ) ) {
+        JsonArray keys = keybinding.get_array( "key" );
+        while( keys.has_more() ) {
+            sequence.push_back(
+                inp_mngr.get_keycode( keys.next_string() )
+            );
+        }
+    } else { // assume string if not array, and throw if not string
+        sequence.push_back(
+            inp_mngr.get_keycode( keybinding.get_string( "key" ) )
+        );
+    }
 }
 
 void input_event::serialize( JsonOut &jsout ) const
