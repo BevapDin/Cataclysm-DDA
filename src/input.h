@@ -28,6 +28,7 @@ namespace catacurses
 class window;
 } // namespace catacurses
 class JsonOut;
+class JsonObject;
 
 static constexpr int KEY_ESCAPE     = 27;
 static constexpr int KEY_MIN        =
@@ -128,6 +129,7 @@ struct input_event {
         shortcut_last_used_action_counter = 0;
 #endif
     }
+    input_event( const JsonObject &jsobj );
 
     int get_first_input() const;
 
