@@ -241,13 +241,18 @@ class input_manager
         /**
          * Get the key name associated with the given keyboard keycode.
          *
+         * @ref get_keyname_portable returns a language independent and
+         * portable name of the key. This acts as the inverse to get_keyname:
+         * <code>get_keyname(get_keycode(a), ...) == a</code>
+         * @ref get_keyname returns a translated name instead.
+         *
          * @param ch Character code.
          * @param input_type Whether the keycode is a gamepad or a keyboard code.
-         * @param portable If true, return a language independent and portable name
-         * of the key. This acts as the inverse to get_keyname:
-         * <code>get_keyname(get_keycode(a), , true) == a</code>
          */
-        std::string get_keyname( long ch, input_event_t input_type, bool portable = false ) const;
+        /**@{*/
+        std::string get_keyname( long ch, input_event_t input_type ) const;
+        std::string get_keyname_portable( long ch, input_event_t input_type ) const;
+        /**@}*/
 
         /**
          * curses getch() replacement.

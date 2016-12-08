@@ -313,7 +313,7 @@ void input_event::serialize( JsonOut &jsout ) const
     jsout.member( "key" );
     jsout.start_array();
     for( size_t i = 0; i < sequence.size(); i++ ) {
-        jsout.write( inp_mngr.get_keyname( sequence[i], type, true ) );
+        jsout.write( inp_mngr.get_keyname_portable( sequence[i], type ) );
     }
     jsout.end_array();
     jsout.end_object();
@@ -399,7 +399,7 @@ long input_manager::get_keycode( const std::string &name ) const
     return 0;
 }
 
-std::string input_manager::get_keyname( long ch, input_event_t inp_type, bool portable ) const
+std::string input_manager::get_keyname( long ch, input_event_t inp_type ) const
 {
     if( inp_type == CATA_INPUT_KEYBOARD ) {
         const t_key_to_name_map::const_iterator a = keycode_to_keyname.find( ch );
@@ -426,10 +426,35 @@ std::string input_manager::get_keyname( long ch, input_event_t inp_type, bool po
     } else {
         return "UNKNOWN";
     }
-    if( portable ) {
-        return std::string( "UNKNOWN_" ) + long_to_str( ch );
-    }
     return string_format( _( "unknown key %ld" ), ch );
+}
+
+std::string input_manager::get_keyname_portable( long ch, input_event_t inp_type ) const
+{
+    if( inp_type == CATA_INPUT_KEYBOARD ) {
+        const t_key_to_name_map::const_iterator a = keycode_to_keyname.find( ch );
+        if( a != keycode_to_keyname.end() ) {
+            return a->second;
+        }
+    } else if( inp_type == CATA_INPUT_MOUSE ) {
+        if( ch == MOUSE_BUTTON_LEFT ) {
+            return "MOUSE_LEFT";
+        } else if( ch == MOUSE_BUTTON_RIGHT ) {
+            return "MOUSE_RIGHT";
+        } else if( ch == SCROLLWHEEL_UP ) {
+            return "SCROLL_UP";
+        } else if( ch == SCROLLWHEEL_DOWN ) {
+            return "SCROLL_DOWN";
+        } else if( ch == MOUSE_MOVE ) {
+            return "MOUSE_MOVE";
+        }
+    } else if( inp_type == CATA_INPUT_GAMEPAD ) {
+        const t_key_to_name_map::const_iterator a = gamepad_keycode_to_keyname.find( ch );
+        if( a != gamepad_keycode_to_keyname.end() ) {
+            return a->second;
+        }
+    }
+    return std::string( "UNKNOWN_" ) + long_to_str( ch );
 }
 
 const std::vector<input_event> &input_manager::get_input_for_action( const std::string
