@@ -30,6 +30,7 @@ namespace catacurses
 class window;
 } // namespace catacurses
 class JsonOut;
+class JsonObject;
 
 // Curses key constants
 static constexpr int KEY_ESCAPE     = 27;
@@ -213,6 +214,8 @@ struct input_event {
         sequence.push_back( s );
     }
     input_event( const std::set<keymod_t> &mod, int s, input_event_t t );
+
+    static void load_events( std::vector<input_event> &events, const JsonObject &keybinding );
 
     int get_first_input() const;
 

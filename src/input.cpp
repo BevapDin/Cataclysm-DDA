@@ -304,81 +304,27 @@ void input_manager::load( const std::string &file_name, bool is_user_preferences
 
         t_input_event_list events;
         for( const JsonObject keybinding : action.get_array( "bindings" ) ) {
-            std::string input_method = keybinding.get_string( "input_method" );
-            std::vector<input_event> new_events( 1 );
-            if( input_method == "keyboard_any" ) {
-                new_events.resize( 2 );
-                new_events[0].type = input_event_t::keyboard_char;
-                new_events[1].type = input_event_t::keyboard_code;
-            } else if( input_method == "keyboard_char" || input_method == "keyboard" ) {
-                new_events[0].type = input_event_t::keyboard_char;
-            } else if( input_method == "keyboard_code" ) {
-                new_events[0].type = input_event_t::keyboard_code;
-            } else if( input_method == "gamepad" ) {
-                new_events[0].type = input_event_t::gamepad;
-            } else if( input_method == "mouse" ) {
-                new_events[0].type = input_event_t::mouse;
-            } else {
-                keybinding.throw_error( "unknown input_method", "input_method" );
-            }
+            input_event::load_events( events, keybinding );
+        }
 
-            if( keybinding.has_member( "mod" ) ) {
-                for( const JsonValue val : keybinding.get_array( "mod" ) ) {
-                    const std::string str = val;
-                    keymod_t mod = keymod_t::ctrl;
-                    if( str == "ctrl" ) {
-                        mod = keymod_t::ctrl;
-                    } else if( str == "alt" ) {
-                        mod = keymod_t::alt;
-                    } else if( str == "shift" ) {
-                        mod = keymod_t::shift;
-                    } else {
-                        val.throw_error( "unknown modifier name" );
-                    }
-                    for( input_event &new_event : new_events ) {
-                        new_event.modifiers.emplace( mod );
-                    }
-                }
-            }
-
-            if( keybinding.has_array( "key" ) ) {
-                for( const std::string line : keybinding.get_array( "key" ) ) {
-                    for( input_event &new_event : new_events ) {
-                        new_event.sequence.push_back( get_keycode( new_event.type, line ) );
-                    }
-                }
-            } else { // assume string if not array, and throw if not string
-                for( input_event &new_event : new_events ) {
-                    new_event.sequence.push_back(
-                        get_keycode( new_event.type, keybinding.get_string( "key" ) )
-                    );
-                }
-            }
-
-            for( const input_event &evt : new_events ) {
-                if( std::find( events.begin(), events.end(), evt ) == events.end() ) {
-                    events.emplace_back( evt );
-                }
-            }
-
-            if( is_user_preferences && version <= 1 ) {
-                // Add keypad enter to old keybindings with return key
-                for( const input_event &evt : new_events ) {
-                    input_event new_evt = evt;
-                    bool has_return = false;
-                    // As of version 2 the key sequence actually only supports
-                    // one key, so we just replace all return with enter
-                    if( new_evt.type == input_event_t::keyboard_char ) {
-                        for( int &key : new_evt.sequence ) {
-                            if( key == '\n' ) {
-                                key = KEY_ENTER;
-                                has_return = true;
-                            }
+        if( is_user_preferences && version <= 1 ) {
+            // Add keypad enter to old keybindings with return key
+            const auto copy_for_save_iteration = events;
+            for( const input_event &evt : copy_for_save_iteration ) {
+                input_event new_evt = evt;
+                bool has_return = false;
+                // As of version 2 the key sequence actually only supports
+                // one key, so we just replace all return with enter
+                if( new_evt.type == input_event_t::keyboard_char ) {
+                    for( int &key : new_evt.sequence ) {
+                        if( key == '\n' ) {
+                            key = KEY_ENTER;
+                            has_return = true;
                         }
                     }
-                    if( has_return && std::find( events.begin(), events.end(), new_evt ) == events.end() ) {
-                        events.emplace_back( new_evt );
-                    }
+                }
+                if( has_return && std::find( events.begin(), events.end(), new_evt ) == events.end() ) {
+                    events.emplace_back( new_evt );
                 }
             }
         }
@@ -484,6 +430,66 @@ void input_event::serialize( JsonOut &jsout ) const
     }
     jsout.end_array();
     jsout.end_object();
+}
+
+void input_event::load_events( std::vector<input_event> &events, const JsonObject &keybinding )
+{
+    std::string input_method = keybinding.get_string( "input_method" );
+    std::vector<input_event> new_events( 1 );
+    if( input_method == "keyboard_any" ) {
+        new_events.resize( 2 );
+        new_events[0].type = input_event_t::keyboard_char;
+        new_events[1].type = input_event_t::keyboard_code;
+    } else if( input_method == "keyboard_char" || input_method == "keyboard" ) {
+        new_events[0].type = input_event_t::keyboard_char;
+    } else if( input_method == "keyboard_code" ) {
+        new_events[0].type = input_event_t::keyboard_code;
+    } else if( input_method == "gamepad" ) {
+        new_events[0].type = input_event_t::gamepad;
+    } else if( input_method == "mouse" ) {
+        new_events[0].type = input_event_t::mouse;
+    } else {
+        keybinding.throw_error( "unknown input_method", "input_method" );
+    }
+
+    if( keybinding.has_member( "mod" ) ) {
+        for( const JsonValue val : keybinding.get_array( "mod" ) ) {
+            const std::string str = val;
+            keymod_t mod = keymod_t::ctrl;
+            if( str == "ctrl" ) {
+                mod = keymod_t::ctrl;
+            } else if( str == "alt" ) {
+                mod = keymod_t::alt;
+            } else if( str == "shift" ) {
+                mod = keymod_t::shift;
+            } else {
+                val.throw_error( "unknown modifier name" );
+            }
+            for( input_event &new_event : new_events ) {
+                new_event.modifiers.emplace( mod );
+            }
+        }
+    }
+
+    if( keybinding.has_array( "key" ) ) {
+        for( const std::string line : keybinding.get_array( "key" ) ) {
+            for( input_event &new_event : new_events ) {
+                new_event.sequence.push_back( inp_mngr.get_keycode( new_event.type, line ) );
+            }
+        }
+    } else { // assume string if not array, and throw if not string
+        for( input_event &new_event : new_events ) {
+            new_event.sequence.push_back(
+                inp_mngr.get_keycode( new_event.type, keybinding.get_string( "key" ) )
+            );
+        }
+    }
+
+    for( const input_event &evt : new_events ) {
+        if( std::find( events.begin(), events.end(), evt ) == events.end() ) {
+            events.emplace_back( evt );
+        }
+    }
 }
 
 void input_manager::add_keyboard_char_keycode_pair( int ch, const std::string &name )
