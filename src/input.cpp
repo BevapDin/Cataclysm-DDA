@@ -427,50 +427,7 @@ void input_manager::save()
                 jsout.member( "bindings" );
                 jsout.start_array();
                 for( const auto &event : events ) {
-                    jsout.start_object();
-                    switch( event.type ) {
-                        case input_event_t::keyboard_char:
-                            jsout.member( "input_method", "keyboard_char" );
-                            break;
-                        case input_event_t::keyboard_code:
-                            jsout.member( "input_method", "keyboard_code" );
-                            break;
-                        case input_event_t::gamepad:
-                            jsout.member( "input_method", "gamepad" );
-                            break;
-                        case input_event_t::mouse:
-                            jsout.member( "input_method", "mouse" );
-                            break;
-                        default:
-                            throw std::runtime_error( "unknown input_event_t" );
-                    }
-
-                    jsout.member( "mod" );
-                    jsout.start_array();
-                    for( const keymod_t mod : event.modifiers ) {
-                        switch( mod ) {
-                            case keymod_t::ctrl:
-                                jsout.write( "ctrl" );
-                                break;
-                            case keymod_t::alt:
-                                jsout.write( "alt" );
-                                break;
-                            case keymod_t::shift:
-                                jsout.write( "shift" );
-                                break;
-                            default:
-                                throw std::runtime_error( "unknown keymod_t" );
-                        }
-                    }
-                    jsout.end_array();
-
-                    jsout.member( "key" );
-                    jsout.start_array();
-                    for( size_t i = 0; i < event.sequence.size(); i++ ) {
-                        jsout.write( get_keyname( event.sequence[i], event.type, true ) );
-                    }
-                    jsout.end_array();
-                    jsout.end_object();
+                    event.serialize( jsout );
                 }
                 jsout.end_array();
 
@@ -479,6 +436,54 @@ void input_manager::save()
         }
         jsout.end_array();
     }, _( "key bindings configuration" ) );
+}
+
+void input_event::serialize( JsonOut &jsout ) const
+{
+    jsout.start_object();
+    switch( type ) {
+        case input_event_t::keyboard_char:
+            jsout.member( "input_method", "keyboard_char" );
+            break;
+        case input_event_t::keyboard_code:
+            jsout.member( "input_method", "keyboard_code" );
+            break;
+        case input_event_t::gamepad:
+            jsout.member( "input_method", "gamepad" );
+            break;
+        case input_event_t::mouse:
+            jsout.member( "input_method", "mouse" );
+            break;
+        default:
+            throw std::runtime_error( "unknown input_event_t" );
+    }
+
+    jsout.member( "mod" );
+    jsout.start_array();
+    for( const keymod_t mod : modifiers ) {
+        switch( mod ) {
+            case keymod_t::ctrl:
+                jsout.write( "ctrl" );
+                break;
+            case keymod_t::alt:
+                jsout.write( "alt" );
+                break;
+            case keymod_t::shift:
+                jsout.write( "shift" );
+                break;
+            default:
+                throw std::runtime_error( "unknown keymod_t" );
+        }
+    }
+    jsout.end_array();
+
+    jsout.member( "key" );
+    jsout.start_array();
+    for( size_t i = 0; i < sequence.size(); i++ ) {
+        jsout.write( inp_mngr.get_keyname( sequence[i], type, true ) );
+    }
+    jsout.end_array();
+    jsout.end_object();
 }
 
 void input_manager::add_keyboard_char_keycode_pair( int ch, const std::string &name )

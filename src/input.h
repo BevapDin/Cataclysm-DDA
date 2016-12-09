@@ -29,6 +29,7 @@ namespace catacurses
 {
 class window;
 } // namespace catacurses
+class JsonOut;
 
 // Curses key constants
 static constexpr int KEY_ESCAPE     = 27;
@@ -233,6 +234,8 @@ struct input_event {
      * modifiers, and key code sequence.
      */
     static bool compare_type_mod_code( const input_event &lhs, const input_event &rhs );
+
+    void serialize( JsonOut &jsout ) const;
 };
 
 /**
