@@ -27,6 +27,7 @@ namespace catacurses
 {
 class window;
 } // namespace catacurses
+class JsonOut;
 
 static constexpr int KEY_ESCAPE     = 27;
 static constexpr int KEY_MIN        =
@@ -171,6 +172,8 @@ struct input_event {
 
         return true;
     }
+
+    void serialize( JsonOut &jsout ) const;
 };
 
 /**
