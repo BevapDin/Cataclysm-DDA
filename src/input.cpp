@@ -279,27 +279,7 @@ void input_manager::save()
                 jsout.member( "bindings" );
                 jsout.start_array();
                 for( const auto &event : events ) {
-                    jsout.start_object();
-                    switch( event.type ) {
-                        case CATA_INPUT_KEYBOARD:
-                            jsout.member( "input_method", "keyboard" );
-                            break;
-                        case CATA_INPUT_GAMEPAD:
-                            jsout.member( "input_method", "gamepad" );
-                            break;
-                        case CATA_INPUT_MOUSE:
-                            jsout.member( "input_method", "mouse" );
-                            break;
-                        default:
-                            throw std::runtime_error( "unknown input_event_t" );
-                    }
-                    jsout.member( "key" );
-                    jsout.start_array();
-                    for( size_t i = 0; i < event.sequence.size(); i++ ) {
-                        jsout.write( get_keyname( event.sequence[i], event.type, true ) );
-                    }
-                    jsout.end_array();
-                    jsout.end_object();
+                    event.serialize( jsout );
                 }
                 jsout.end_array();
 
@@ -308,6 +288,31 @@ void input_manager::save()
         }
         jsout.end_array();
     }, _( "key bindings configuration" ) );
+}
+
+void input_event::serialize( JsonOut &jsout ) const
+{
+    jsout.start_object();
+    switch( type ) {
+        case CATA_INPUT_KEYBOARD:
+            jsout.member( "input_method", "keyboard" );
+            break;
+        case CATA_INPUT_GAMEPAD:
+            jsout.member( "input_method", "gamepad" );
+            break;
+        case CATA_INPUT_MOUSE:
+            jsout.member( "input_method", "mouse" );
+            break;
+        default:
+            throw std::runtime_error( "unknown input_event_t" );
+    }
+    jsout.member( "key" );
+    jsout.start_array();
+    for( size_t i = 0; i < sequence.size(); i++ ) {
+        jsout.write( inp_mngr.get_keyname( sequence[i], type, true ) );
+    }
+    jsout.end_array();
+    jsout.end_object();
 }
 
 void input_manager::add_keycode_pair( long ch, const std::string &name )
