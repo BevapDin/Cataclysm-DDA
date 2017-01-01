@@ -354,7 +354,7 @@ bool mod_manager::copy_mod_contents( const t_mod_list &mods_to_copy,
 
 void mod_manager::load_mod_info( const std::string &info_file_path )
 {
-    const std::string main_path = info_file_path.substr( 0, info_file_path.find_last_of( "/\\" ) );
+    const std::string main_path = cata::path( info_file_path ).parent_path();
     read_from_file_optional_json( info_file_path, [&]( JsonIn & jsin ) {
         if( jsin.test_object() ) {
             // find type and dispatch single object

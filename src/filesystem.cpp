@@ -428,3 +428,14 @@ cata::path cata::path::filename() const
     }
     return path( data.substr( p + 1 ) );
 }
+
+cata::path cata::path::parent_path() const
+{
+    const std::string::size_type p = data.find_last_of( "/\\" );
+    if( p == std::string::npos ) {
+        return *this;
+    }
+    // strip *multiple* '/' at the end
+    const std::string::size_type q = data.find_last_not_of( "/\\", p );
+    return path( data.substr( 0, q ) );
+}

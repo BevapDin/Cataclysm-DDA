@@ -1556,13 +1556,11 @@ void worldfactory::delete_world( const std::string &worldname, const bool delete
     }
     for( auto &file_path : file_paths ) {
         // strip to path and remove worldpath from it
-        std::string part = file_path.substr( worldpath.size(),
-                                             file_path.find_last_of( "/\\" ) - worldpath.size() );
-        size_t last_separator = part.find_last_of( "/\\" );
-        while( last_separator != std::string::npos && part.size() > 1 ) {
+        std::string part = cata::path( file_path.substr( worldpath.size(),
+                                       std::string::npos ) ).parent_path();
+        while( !part.empty() ) {
             directory_paths.insert( part );
-            part = part.substr( 0, last_separator );
-            last_separator = part.find_last_of( "/\\" );
+            part = cata::path( part ).parent_path();
         }
     }
 

@@ -38,6 +38,18 @@ class path
          * </code>
          */
         path filename() const;
+        /**
+         * Returns the directory name of the given path. Handles Windows and Unix
+         * path separators. If the path does not contain a separator, an empty
+         * string will be returned.
+         *
+         * Examples:
+         * <code>
+         * assert( path( "/a/b" ).parent_path() == "/a" );
+         * assert( path( "b" ).parent_path() == "b" );
+         * </code>
+         */
+        path parent_path() const;
 
         const std::string &native() const {
             return data;
