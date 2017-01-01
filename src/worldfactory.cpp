@@ -243,7 +243,7 @@ WORLDPTR worldfactory::convert_to_world( const std::string &origin_path )
     if( save_world( newworld, true ) ) {
         // move files from origin_path into new world path
         for( auto &origin_file : get_files_from_path( ".", origin_path, false ) ) {
-            std::string filename = origin_file.substr( origin_file.find_last_of( "/\\" ) );
+            std::string filename = cata::path( origin_file ).filename();
 
             rename( origin_file.c_str(), std::string( newworld->folder_path() + filename ).c_str() );
         }
@@ -336,9 +336,7 @@ void worldfactory::init()
                                                     save_index - ( world_dir.size() + 1 ) );
         }
         // the directory name is the name of the world
-        std::string worldname;
-        size_t name_index = world_dir.find_last_of( "/\\" );
-        worldname = native_to_utf8( world_dir.substr( name_index + 1 ) );
+        const std::string worldname = native_to_utf8( cata::path( world_dir ).filename() );
 
         // create and store the world
         all_worlds[worldname] = new WORLD();

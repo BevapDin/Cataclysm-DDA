@@ -337,7 +337,7 @@ void main_menu::load_char_templates()
 
     for( std::string path : get_files_from_path( ".template", FILENAMES["templatedir"], false,
             true ) ) {
-        path = native_to_utf8( path );
+        path = native_to_utf8( cata::path( path ).filename() );
         path.erase( path.find( ".template" ), std::string::npos );
         path.erase( 0, path.find_last_of( "\\//" ) + 1 );
         templates.push_back( path );

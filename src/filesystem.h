@@ -25,6 +25,20 @@ class path
         path &operator=( const path & ) = default;
         path &operator=( path && ) = default;
 
+        /**
+         * Returns the file name component of the given path, that is everything
+         * after the last directory separator. Handles Windows and Unix path separators.
+         * If the path does not contain a separator, the input is returned directly.
+         *
+         * Examples:
+         * <code>
+         * assert( path( "/a/b" ).filename() == "b" );
+         * assert( path( "b" ).filename() == "b" );
+         * assert( path( "/a/b/" ).filename() == "." );
+         * </code>
+         */
+        path filename() const;
+
         const std::string &native() const {
             return data;
         }

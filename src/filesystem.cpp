@@ -417,3 +417,14 @@ cata::path cata::path::operator/( const path &p ) const
     //@todo fix this to work properly
     return path( native() + '/' + p.native() );
 }
+
+cata::path cata::path::filename() const
+{
+    const std::string::size_type p = data.find_last_of( "/\\" );
+    if( p + 1 == data.length() ) {
+        return path( "." );
+    } else if( p == std::string::npos ) {
+        return *this;
+    }
+    return path( data.substr( p + 1 ) );
+}
