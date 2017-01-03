@@ -88,7 +88,7 @@ RELEASE_FLAGS = -Werror
 WARNINGS = -Wall -Wextra
 # Uncomment below to disable warnings
 #WARNINGS = -w
-DEBUGSYMS = -g
+DEBUGSYMS = -g -pg
 ifeq ($(shell sh -c 'uname -o 2>/dev/null || echo not'),Cygwin)
   DEBUG =
 else
