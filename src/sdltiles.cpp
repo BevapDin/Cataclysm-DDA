@@ -3148,7 +3148,7 @@ void input_manager::set_timeout( const int t )
 
 // This is how we're actually going to handle input events, SDL getch
 // is simply a wrapper around this.
-input_event input_manager::get_input_event() {
+input_event input_manager::get_input_event_impl( const catacurses::window &/*win*/ ) {
     previously_pressed_key = 0;
     // standards note: getch is sometimes required to call refresh
     // see, e.g., http://linux.die.net/man/3/getch

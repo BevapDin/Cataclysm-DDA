@@ -605,7 +605,7 @@ uint64_t GetPerfCount()
     return Count;
 }
 
-input_event input_manager::get_input_event()
+input_event input_manager::get_input_event_impl( const catacurses::window &/*win*/ )
 {
     // standards note: getch is sometimes required to call refresh
     // see, e.g., http://linux.die.net/man/3/getch
