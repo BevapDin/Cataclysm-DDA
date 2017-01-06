@@ -231,7 +231,7 @@ void catacurses::init_interface()
     init_colors();
 }
 
-input_event input_manager::get_input_event()
+input_event input_manager::get_input_event_impl()
 {
     previously_pressed_key = 0;
     const int key = getch();
