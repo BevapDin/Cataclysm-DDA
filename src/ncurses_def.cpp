@@ -287,11 +287,11 @@ void input_manager::pump_events()
 
 // there isn't a portable way to get raw key code on curses,
 // ignoring preferred keyboard mode
-input_event input_manager::get_input_event( const keyboard_mode /*preferred_keyboard_mode*/ )
+input_event input_manager::get_input_event_impl( const keyboard_mode /*preferred_keyboard_mode*/ )
 {
     if( test_mode ) {
         // input should be skipped in caller's code
-        throw std::runtime_error( "input_manager::get_input_event called in test mode" );
+        throw std::runtime_error( "input_manager::get_input_event_impl called in test mode" );
     }
 
     int key = ERR;

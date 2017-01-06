@@ -382,8 +382,6 @@ class input_manager
 
         /**
          * curses getch() replacement.
-         *
-         * Defined in the respective platform wrapper, e.g. sdlcurse.cpp
          */
         input_event get_input_event( keyboard_mode preferred_keyboard_mode = keyboard_mode::keycode );
         /**
@@ -441,6 +439,9 @@ class input_manager
         void add_keyboard_code_keycode_pair( int ch, const std::string &name );
         void add_gamepad_keycode_pair( int ch, const std::string &name );
         void add_mouse_keycode_pair( int ch, const std::string &name );
+
+        // Defined in the respective platform wrapper, e.g. sdltiles.cpp
+        input_event get_input_event_impl( keyboard_mode preferred_keyboard_mode );
 
         /**
          * Load keybindings from a json file, override existing bindings.

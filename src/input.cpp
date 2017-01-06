@@ -1774,6 +1774,11 @@ bool gamepad_available()
     return false;
 }
 
+input_event input_manager::get_input_event( const keyboard_mode preferred_keyboard_mode )
+{
+    return get_input_event_impl( preferred_keyboard_mode );
+}
+
 cata::optional<tripoint> input_context::get_coordinates( const catacurses::window &capture_win )
 {
     if( !coordinate_input_received ) {

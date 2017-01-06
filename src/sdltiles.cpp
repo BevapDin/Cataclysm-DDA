@@ -3706,11 +3706,11 @@ void input_manager::pump_events()
 
 // This is how we're actually going to handle input events, SDL getch
 // is simply a wrapper around this.
-input_event input_manager::get_input_event( const keyboard_mode preferred_keyboard_mode )
+input_event input_manager::get_input_event_impl( const keyboard_mode preferred_keyboard_mode )
 {
     if( test_mode ) {
         // input should be skipped in caller's code
-        throw std::runtime_error( "input_manager::get_input_event called in test mode" );
+        throw std::runtime_error( "input_manager::get_input_event_impl called in test mode" );
     }
 
 #if !defined(__ANDROID__) && !defined(TARGET_OS_IPHONE)

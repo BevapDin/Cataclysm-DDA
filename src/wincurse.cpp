@@ -678,11 +678,11 @@ void input_manager::pump_events()
 
 // we can probably add support for keycode mode, but wincurse is deprecated
 // so we just ignore the mode argument.
-input_event input_manager::get_input_event( const keyboard_mode /*preferred_keyboard_mode*/ )
+input_event input_manager::get_input_event_impl( const keyboard_mode /*preferred_keyboard_mode*/ )
 {
     if( test_mode ) {
         // input should be skipped in caller's code
-        throw std::runtime_error( "input_manager::get_input_event called in test mode" );
+        throw std::runtime_error( "input_manager::get_input_event_impl called in test mode" );
     }
 
     // standards note: getch is sometimes required to call refresh
