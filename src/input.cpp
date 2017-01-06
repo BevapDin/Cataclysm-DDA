@@ -1198,6 +1198,11 @@ void input_manager::wait_for_any_key()
     }
 }
 
+input_event input_manager::get_input_event()
+{
+    return get_input_event_impl();
+}
+
 #if !(defined TILES || defined _WIN32 || defined WINDOWS)
 // Also specify that we don't have a gamepad plugged in.
 bool gamepad_available()

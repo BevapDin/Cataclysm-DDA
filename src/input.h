@@ -256,8 +256,6 @@ class input_manager
 
         /**
          * curses getch() replacement.
-         *
-         * Defined in the respective platform wrapper, e.g. sdlcurse.cpp
          */
         input_event get_input_event();
 
@@ -306,6 +304,9 @@ class input_manager
         void init_keycode_mapping();
         void add_keycode_pair( long ch, const std::string &name );
         void add_gamepad_keycode_pair( long ch, const std::string &name );
+
+        // Defined in the respective platform wrapper, e.g. sdltiles.cpp
+        input_event get_input_event_impl();
 
         /**
          * Load keybindings from a json file, override existing bindings.
