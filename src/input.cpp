@@ -1211,9 +1211,107 @@ input_event input_manager::get_input_event( const catacurses::window &win )
     return get_input_event( win, ":NONE" );
 }
 
-input_event input_manager::get_input_event( WINDOW * const win, const std::string &category )
+namespace {
+
+class macro_controller {
+    private:
+        using macro_element = std::pair<input_event, std::string>;
+        using macro = std::vector<macro_element>;
+
+        enum class state_type {
+            NONE,
+            RECORDING,
+            PLAYING,
+        };
+
+        macro recording;
+        macro playing;
+        macro current;
+        state_type state = state_type::NONE;
+
+    public:
+        void toogle_record() {
+            switch( state ) {
+                case state_type::NONE:
+                    state = state_type::RECORDING;
+                    break;
+                case state_type::RECORDING:
+                    state = state_type::NONE;
+                    current = recording;
+                    recording.clear();
+                    break;
+                case state_type::PLAYING:
+                    // ignore recording-request during playback
+                    break;
+            }
+        }
+        void toogle_playing() {
+            switch( state ) {
+                case state_type::NONE:
+                    state = state_type::PLAYING;
+                    playing = current;
+                    break;
+                case state_type::RECORDING:
+                    // ignore playing request during recording
+                    break;
+                case state_type::PLAYING:
+                    // ignore playing request during playing
+                    break;
+            }
+        }
+        bool on_input( const std::string &category, const input_event &event ) {
+            if( event.type == CATA_INPUT_KEYBOARD && event.get_first_input() == KEY_F( 1 ) ) {
+                toogle_record();
+                return false;
+            } else if( event.type == CATA_INPUT_KEYBOARD && event.get_first_input() == KEY_F( 2 ) ) {
+                toogle_playing();
+                return false;
+            } else {
+                if( state == state_type::RECORDING ) {
+                    recording.push_back( std::make_pair( event, category ) );
+                }
+                return true;
+            }
+        }
+        bool is_playing( const std::string &category, input_event &event ) {
+            if( state != state_type::PLAYING ) {
+                return false;
+            }
+            if( playing.empty() ) {
+                state = state_type::NONE;
+                return false;
+            }
+            const auto &next = playing.front();
+            if( next.second != category ) {
+                state = state_type::NONE;
+                popup( _( "Category mismatch in macro: %s vs %s" ), category.c_str(), next.second.c_str() );
+                return false;
+            }
+            event = next.first;
+            playing.erase( playing.begin() );
+            return true;
+        }
+};
+
+macro_controller &get_macro_controller() {
+    static macro_controller instance;
+    return instance;
+}
+
+} // namespace
+
+input_event input_manager::get_input_event( WINDOW *const win, const std::string &category )
 {
-    return get_input_event_impl( win );
+    input_event result;
+    while( true ) {
+        if( get_macro_controller().is_playing( category, result ) ) {
+            return result;
+        }
+        result = get_input_event_impl( win );
+        if( get_macro_controller().on_input( category, result ) ) {
+            return result;
+        }
+    }
 }
 
 #if !(defined TILES || defined _WIN32 || defined WINDOWS)
