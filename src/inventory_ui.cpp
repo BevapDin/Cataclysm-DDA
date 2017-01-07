@@ -1727,8 +1727,8 @@ std::pair<const item *, const item *> inventory_compare_selector::execute()
                 }
             }
         } else if( input.action == "CONFIRM" ) {
-            popup_getkey( _( "You need two items for comparison.  Use %s to select them." ),
-                          ctxt.get_desc( "RIGHT" ).c_str() );
+            popup( _( "You need two items for comparison.  Use %s to select them." ),
+                   ctxt.get_desc( "RIGHT" ).c_str() );
         } else if( input.action == "QUIT" ) {
             return std::make_pair( nullptr, nullptr );
         } else if( input.action == "INVENTORY_FILTER" ) {
@@ -1922,8 +1922,8 @@ std::list<std::pair<int, int>> inventory_drop_selector::execute()
             count = 0;
         } else if( input.action == "CONFIRM" ) {
             if( dropping.empty() ) {
-                popup_getkey( _( "No items were selected.  Use %s to select them." ),
-                              ctxt.get_desc( "RIGHT" ).c_str() );
+                popup( _( "No items were selected.  Use %s to select them." ),
+                       ctxt.get_desc( "RIGHT" ).c_str() );
                 continue;
             }
             break;

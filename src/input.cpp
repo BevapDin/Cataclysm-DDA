@@ -1056,7 +1056,7 @@ void input_context::display_menu()
                 const input_event new_event( newbind, CATA_INPUT_KEYBOARD );
 
                 if( action_uses_input( action_id, new_event ) ) {
-                    popup_getkey( _( "This key is already used for %s." ), name.c_str() );
+                    popup( _( "This key is already used for %s." ), name.c_str() );
                     status = s_show;
                     continue;
                 }
