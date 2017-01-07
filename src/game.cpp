@@ -12438,7 +12438,7 @@ void game::quickload()
             load( save_t::from_player_name( u.name ) );
         }
     } else {
-        popup_getkey( _( "No saves for %s yet." ), u.name.c_str() );
+        popup( _( "No saves for %s yet." ), u.name.c_str() );
     }
 }
 
