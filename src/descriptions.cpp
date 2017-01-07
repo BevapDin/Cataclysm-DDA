@@ -102,7 +102,7 @@ c to describe creatures, f to describe furniture, t to describe terrain, Esc/Ent
         fold_and_print_from( w_main, 0, 0, width, 0, c_light_gray, desc );
         wrefresh( w_main );
         // TODO: use input context
-        ch = inp_mngr.get_input_event().get_first_input();
+        ch = get_input_manager().get_input_event().get_first_input();
         switch( ch ) {
             case 'c':
                 cur_target = description_target::creature;

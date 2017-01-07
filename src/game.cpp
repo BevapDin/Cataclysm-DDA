@@ -1764,7 +1764,7 @@ bool game::cancel_activity_or_ignore_query( const distraction_type type, const s
         ch = popup( stop_message, PF_NO_WAIT );
         ch = inp_mngr.get_input_event().get_first_input();
 #else
-        ch = popup( stop_message, PF_GET_KEY );
+        ch = popup( stop_message, PF_GET_KEY ).get_first_input();
 #endif
     } while( ch != '\n' && ch != ' ' && ch != KEY_ESCAPE &&
              ch != 'Y' && ch != 'N' && ch != 'I' &&

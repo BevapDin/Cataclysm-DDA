@@ -1044,7 +1044,7 @@ void game_menus::inv::reassign_letter( player &p, item &it )
 {
     while( true ) {
         const long invlet = popup_getkey(
-                                _( "Enter new letter (press SPACE for none, ESCAPE to cancel)." ) );
+                                _( "Enter new letter (press SPACE for none, ESCAPE to cancel)." ) ).get_first_input();
 
         if( invlet == KEY_ESCAPE ) {
             break;

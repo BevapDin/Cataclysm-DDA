@@ -28,6 +28,7 @@
 #include "requirements.h"
 #include "map_iterator.h"
 #include "clzones.h"
+#include "input.h"
 
 #include <list>
 #include <vector>

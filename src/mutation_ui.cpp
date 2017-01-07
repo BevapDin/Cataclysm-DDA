@@ -229,9 +229,10 @@ void player::power_mutations()
                 continue;
             }
             redraw = true;
-            const long newch = popup_getkey( _( "%s; enter new letter." ),
+            const input_event event = popup_getkey( _( "%s; enter new letter." ),
                                              mutation_branch::get_name( mut_id ).c_str() );
             wrefresh( wBio );
+            const int newch = event.get_first_input();
             if( newch == ch || newch == ' ' || newch == KEY_ESCAPE ) {
                 continue;
             }

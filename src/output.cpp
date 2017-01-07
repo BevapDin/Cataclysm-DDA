@@ -757,7 +757,7 @@ catacurses::window create_wait_popup_window( const std::string &text, nc_color b
     return create_popup_window( featured_text, PF_ON_TOP );
 }
 
-long popup( const std::string &text, PopupFlags flags )
+input_event popup( const std::string &text, PopupFlags flags )
 {
     if( test_mode ) {
         std::cerr << text << std::endl;
@@ -765,7 +765,7 @@ long popup( const std::string &text, PopupFlags flags )
     }
 
     catacurses::window w = create_popup_window( text, flags );
-    long ch = 0;
+    input_event result;
     // Don't wait if not required.
     while( ( flags & PF_NO_WAIT ) == 0 ) {
 #ifdef __ANDROID__
@@ -773,16 +773,23 @@ long popup( const std::string &text, PopupFlags flags )
 #endif
         wrefresh( w );
         // TODO: use input context
-        ch = inp_mngr.get_input_event().get_first_input();
-        if( ch == ' ' || ch == '\n' || ch == KEY_ESCAPE || ( flags & PF_GET_KEY ) != 0 ) {
+        result = inp_mngr.get_input_event();
+        if( ( flags & PF_GET_KEY ) != 0 ) {
+            // return the first key that got pressed.
             werase( w );
-            break; // return the first key that got pressed.
+            break;
+        }
+        const int ch = result.get_first_input();
+        if( ch == ' ' || ch == '\n' || ch == KEY_ESCAPE ) {
+            // The usuall "escape menu/window" keys.
+            werase( w );
+            break;
         }
     }
     wrefresh( w );
     catacurses::refresh();
     refresh_display();
-    return ch;
+    return result;
 }
 
 void popup_status( const char *const title, const std::string &fmt )
