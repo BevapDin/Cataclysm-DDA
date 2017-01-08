@@ -1440,168 +1440,142 @@ art_charge string_to_enum<art_charge>( const std::string &data )
 }
 } // namespace io
 
-void game::add_artifact_messages(player &u, std::vector<art_effect_passive> effects)
+void game::add_artifact_messages( player &u, std::vector<art_effect_passive> effects )
 {
-    int net_str = 0, net_dex = 0, net_per = 0, net_int = 0, net_speed = 0;
+    int net_str = 0;
+    int net_dex = 0;
+    int net_per = 0;
+    int net_int = 0;
+    int net_speed = 0;
 
-    for (auto &i : effects) {
-        switch (i) {
-        case AEP_STR_UP:
-            net_str += 4;
-            break;
-        case AEP_DEX_UP:
-            net_dex += 4;
-            break;
-        case AEP_PER_UP:
-            net_per += 4;
-            break;
-        case AEP_INT_UP:
-            net_int += 4;
-            break;
-        case AEP_ALL_UP:
-            net_str += 2;
-            net_dex += 2;
-            net_per += 2;
-            net_int += 2;
-            break;
-        case AEP_STR_DOWN:
-            net_str -= 3;
-            break;
-        case AEP_DEX_DOWN:
-            net_dex -= 3;
-            break;
-        case AEP_PER_DOWN:
-            net_per -= 3;
-            break;
-        case AEP_INT_DOWN:
-            net_int -= 3;
-            break;
-        case AEP_ALL_DOWN:
-            net_str -= 2;
-            net_dex -= 2;
-            net_per -= 2;
-            net_int -= 2;
-            break;
-
-        case AEP_SPEED_UP:
-            net_speed += 20;
-            break;
-        case AEP_SPEED_DOWN:
-            net_speed -= 20;
-            break;
-
-        case AEP_PBLUE:
-            break; // No message
-
-        case AEP_SNAKES:
-            u.add_msg_if_player(m_warning, _("Your skin feels slithery."));
-            break;
-
-        case AEP_INVISIBLE:
-            u.add_msg_if_player(m_good, _("You fade into invisibility!"));
-            break;
-
-        case AEP_CLAIRVOYANCE:
-            u.add_msg_if_player(m_good, _("You can see through walls!"));
-            break;
-
-        case AEP_SUPER_CLAIRVOYANCE:
-            u.add_msg_if_player(m_good, _("You can see through everything!"));
-            break;
-
-        case AEP_STEALTH:
-            u.add_msg_if_player(m_good, _("Your steps stop making noise."));
-            break;
-
-        case AEP_GLOW:
-            u.add_msg_if_player(_("A glow of light forms around you."));
-            break;
-
-        case AEP_PSYSHIELD:
-            u.add_msg_if_player(m_good, _("Your mental state feels protected."));
-            break;
-
-        case AEP_RESIST_ELECTRICITY:
-            u.add_msg_if_player(m_good, _("You feel insulated."));
-            break;
-
-        case AEP_CARRY_MORE:
-            u.add_msg_if_player(m_good, _("Your back feels strengthened."));
-            break;
-
-        case AEP_HUNGER:
-            u.add_msg_if_player(m_warning, _("You feel hungry."));
-            break;
-
-        case AEP_THIRST:
-            u.add_msg_if_player(m_warning, _("You feel thirsty."));
-            break;
-
-        case AEP_EVIL:
-            u.add_msg_if_player(m_warning, _("You feel an evil presence..."));
-            break;
-
-        case AEP_SCHIZO:
-            u.add_msg_if_player(m_bad, _("You feel a tickle of insanity."));
-            break;
-
-        case AEP_RADIOACTIVE:
-            u.add_msg_if_player(m_warning, _("Your skin prickles with radiation."));
-            break;
-
-        case AEP_MUTAGENIC:
-            u.add_msg_if_player(m_bad, _("You feel your genetic makeup degrading."));
-            break;
-
-        case AEP_ATTENTION:
-            u.add_msg_if_player(m_warning, _("You feel an otherworldly attention upon you..."));
-            break;
-
-        case AEP_FORCE_TELEPORT:
-            u.add_msg_if_player(m_bad, _("You feel a force pulling you inwards."));
-            break;
-
-        case AEP_MOVEMENT_NOISE:
-            u.add_msg_if_player(m_warning, _("You hear a rattling noise coming from inside yourself."));
-            break;
-
-        case AEP_BAD_WEATHER:
-            u.add_msg_if_player(m_warning, _("You feel storms coming."));
-            break;
-
-        case AEP_SICK:
-            u.add_msg_if_player(m_bad, _("You feel unwell."));
-            break;
-        default:
-            //Suppress warnings
-            break;
+    for( auto &i : effects ) {
+        switch( i ) {
+            case AEP_STR_UP:
+                net_str += 4;
+                break;
+            case AEP_DEX_UP:
+                net_dex += 4;
+                break;
+            case AEP_PER_UP:
+                net_per += 4;
+                break;
+            case AEP_INT_UP:
+                net_int += 4;
+                break;
+            case AEP_ALL_UP:
+                net_str += 2;
+                net_dex += 2;
+                net_per += 2;
+                net_int += 2;
+                break;
+            case AEP_STR_DOWN:
+                net_str -= 3;
+                break;
+            case AEP_DEX_DOWN:
+                net_dex -= 3;
+                break;
+            case AEP_PER_DOWN:
+                net_per -= 3;
+                break;
+            case AEP_INT_DOWN:
+                net_int -= 3;
+                break;
+            case AEP_ALL_DOWN:
+                net_str -= 2;
+                net_dex -= 2;
+                net_per -= 2;
+                net_int -= 2;
+                break;
+            case AEP_SPEED_UP:
+                net_speed += 20;
+                break;
+            case AEP_SPEED_DOWN:
+                net_speed -= 20;
+                break;
+            case AEP_PBLUE:
+                break; // No message
+            case AEP_SNAKES:
+                u.add_msg_if_player( m_warning, _( "Your skin feels slithery." ) );
+                break;
+            case AEP_INVISIBLE:
+                u.add_msg_if_player( m_good, _( "You fade into invisibility!" ) );
+                break;
+            case AEP_CLAIRVOYANCE:
+                u.add_msg_if_player( m_good, _( "You can see through walls!" ) );
+                break;
+            case AEP_SUPER_CLAIRVOYANCE:
+                u.add_msg_if_player( m_good, _( "You can see through everything!" ) );
+                break;
+            case AEP_STEALTH:
+                u.add_msg_if_player( m_good, _( "Your steps stop making noise." ) );
+                break;
+            case AEP_GLOW:
+                u.add_msg_if_player( _( "A glow of light forms around you." ) );
+                break;
+            case AEP_PSYSHIELD:
+                u.add_msg_if_player( m_good, _( "Your mental state feels protected." ) );
+                break;
+            case AEP_RESIST_ELECTRICITY:
+                u.add_msg_if_player( m_good, _( "You feel insulated." ) );
+                break;
+            case AEP_CARRY_MORE:
+                u.add_msg_if_player( m_good, _( "Your back feels strengthened." ) );
+                break;
+            case AEP_HUNGER:
+                u.add_msg_if_player( m_warning, _( "You feel hungry." ) );
+                break;
+            case AEP_THIRST:
+                u.add_msg_if_player( m_warning, _( "You feel thirsty." ) );
+                break;
+            case AEP_EVIL:
+                u.add_msg_if_player( m_warning, _( "You feel an evil presence..." ) );
+                break;
+            case AEP_SCHIZO:
+                u.add_msg_if_player( m_bad, _( "You feel a tickle of insanity." ) );
+                break;
+            case AEP_RADIOACTIVE:
+                u.add_msg_if_player( m_warning, _( "Your skin prickles with radiation." ) );
+                break;
+            case AEP_MUTAGENIC:
+                u.add_msg_if_player( m_bad, _( "You feel your genetic makeup degrading." ) );
+                break;
+            case AEP_ATTENTION:
+                u.add_msg_if_player( m_warning, _( "You feel an otherworldly attention upon you..." ) );
+                break;
+            case AEP_FORCE_TELEPORT:
+                u.add_msg_if_player( m_bad, _( "You feel a force pulling you inwards." ) );
+                break;
+            case AEP_MOVEMENT_NOISE:
+                u.add_msg_if_player( m_warning, _( "You hear a rattling noise coming from inside yourself." ) );
+                break;
+            case AEP_BAD_WEATHER:
+                u.add_msg_if_player( m_warning, _( "You feel storms coming." ) );
+                break;
+            case AEP_SICK:
+                u.add_msg_if_player( m_bad, _( "You feel unwell." ) );
+                break;
+            default:
+                //Suppress warnings
+                break;
         }
     }
-
-    std::string stat_info = "";
-    if (net_str != 0) {
-        stat_info += string_format(_("Str %s%d! "),
-                                   (net_str > 0 ? "+" : ""), net_str);
+    std::string stat_info;
+    if( net_str != 0 ) {
+        stat_info += string_format( _( "Str %s%d! " ), net_str > 0 ? "+" : "", net_str );
     }
-    if (net_dex != 0) {
-        stat_info += string_format(_("Dex %s%d! "),
-                                   (net_dex > 0 ? "+" : ""), net_dex);
+    if( net_dex != 0 ) {
+        stat_info += string_format( _( "Dex %s%d! " ), net_dex > 0 ? "+" : "", net_dex );
     }
-    if (net_int != 0) {
-        stat_info += string_format(_("Int %s%d! "),
-                                   (net_int > 0 ? "+" : ""), net_int);
+    if( net_int != 0 ) {
+        stat_info += string_format( _( "Int %s%d! " ), net_int > 0 ? "+" : "", net_int );
     }
-    if (net_per != 0) {
-        stat_info += string_format(_("Per %s%d! "),
-                                   (net_per > 0 ? "+" : ""), net_per);
+    if( net_per != 0 ) {
+        stat_info += string_format( _( "Per %s%d! " ), net_per > 0 ? "+" : "", net_per );
     }
-
-    if (!stat_info.empty()) {
-        u.add_msg_if_player(stat_info.c_str());
+    if( !stat_info.empty() ) {
+        u.add_msg_if_player( "%s", stat_info.c_str() );
     }
-
-
-    if (net_speed != 0) {
-        u.add_msg_if_player(m_info, _("Speed %s%d! "), (net_speed > 0 ? "+" : ""), net_speed);
+    if( net_speed != 0 ) {
+        u.add_msg_if_player( m_info, _( "Speed %s%d! " ), net_speed > 0 ? "+" : "", net_speed );
     }
 }
