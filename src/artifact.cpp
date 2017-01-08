@@ -7,6 +7,7 @@
 #include "cata_utility.h"
 #include "rng.h"
 #include "translations.h"
+#include "player.h"
 
 #include <bitset>
 #include <cmath>
@@ -1439,7 +1440,7 @@ art_charge string_to_enum<art_charge>( const std::string &data )
 }
 } // namespace io
 
-void game::add_artifact_messages(std::vector<art_effect_passive> effects)
+void game::add_artifact_messages(player &u, std::vector<art_effect_passive> effects)
 {
     int net_str = 0, net_dex = 0, net_per = 0, net_int = 0, net_speed = 0;
 
@@ -1493,83 +1494,83 @@ void game::add_artifact_messages(std::vector<art_effect_passive> effects)
             break; // No message
 
         case AEP_SNAKES:
-            add_msg(m_warning, _("Your skin feels slithery."));
+            u.add_msg_if_player(m_warning, _("Your skin feels slithery."));
             break;
 
         case AEP_INVISIBLE:
-            add_msg(m_good, _("You fade into invisibility!"));
+            u.add_msg_if_player(m_good, _("You fade into invisibility!"));
             break;
 
         case AEP_CLAIRVOYANCE:
-            add_msg(m_good, _("You can see through walls!"));
+            u.add_msg_if_player(m_good, _("You can see through walls!"));
             break;
 
         case AEP_SUPER_CLAIRVOYANCE:
-            add_msg(m_good, _("You can see through everything!"));
+            u.add_msg_if_player(m_good, _("You can see through everything!"));
             break;
 
         case AEP_STEALTH:
-            add_msg(m_good, _("Your steps stop making noise."));
+            u.add_msg_if_player(m_good, _("Your steps stop making noise."));
             break;
 
         case AEP_GLOW:
-            add_msg(_("A glow of light forms around you."));
+            u.add_msg_if_player(_("A glow of light forms around you."));
             break;
 
         case AEP_PSYSHIELD:
-            add_msg(m_good, _("Your mental state feels protected."));
+            u.add_msg_if_player(m_good, _("Your mental state feels protected."));
             break;
 
         case AEP_RESIST_ELECTRICITY:
-            add_msg(m_good, _("You feel insulated."));
+            u.add_msg_if_player(m_good, _("You feel insulated."));
             break;
 
         case AEP_CARRY_MORE:
-            add_msg(m_good, _("Your back feels strengthened."));
+            u.add_msg_if_player(m_good, _("Your back feels strengthened."));
             break;
 
         case AEP_HUNGER:
-            add_msg(m_warning, _("You feel hungry."));
+            u.add_msg_if_player(m_warning, _("You feel hungry."));
             break;
 
         case AEP_THIRST:
-            add_msg(m_warning, _("You feel thirsty."));
+            u.add_msg_if_player(m_warning, _("You feel thirsty."));
             break;
 
         case AEP_EVIL:
-            add_msg(m_warning, _("You feel an evil presence..."));
+            u.add_msg_if_player(m_warning, _("You feel an evil presence..."));
             break;
 
         case AEP_SCHIZO:
-            add_msg(m_bad, _("You feel a tickle of insanity."));
+            u.add_msg_if_player(m_bad, _("You feel a tickle of insanity."));
             break;
 
         case AEP_RADIOACTIVE:
-            add_msg(m_warning, _("Your skin prickles with radiation."));
+            u.add_msg_if_player(m_warning, _("Your skin prickles with radiation."));
             break;
 
         case AEP_MUTAGENIC:
-            add_msg(m_bad, _("You feel your genetic makeup degrading."));
+            u.add_msg_if_player(m_bad, _("You feel your genetic makeup degrading."));
             break;
 
         case AEP_ATTENTION:
-            add_msg(m_warning, _("You feel an otherworldly attention upon you..."));
+            u.add_msg_if_player(m_warning, _("You feel an otherworldly attention upon you..."));
             break;
 
         case AEP_FORCE_TELEPORT:
-            add_msg(m_bad, _("You feel a force pulling you inwards."));
+            u.add_msg_if_player(m_bad, _("You feel a force pulling you inwards."));
             break;
 
         case AEP_MOVEMENT_NOISE:
-            add_msg(m_warning, _("You hear a rattling noise coming from inside yourself."));
+            u.add_msg_if_player(m_warning, _("You hear a rattling noise coming from inside yourself."));
             break;
 
         case AEP_BAD_WEATHER:
-            add_msg(m_warning, _("You feel storms coming."));
+            u.add_msg_if_player(m_warning, _("You feel storms coming."));
             break;
 
         case AEP_SICK:
-            add_msg(m_bad, _("You feel unwell."));
+            u.add_msg_if_player(m_bad, _("You feel unwell."));
             break;
         default:
             //Suppress warnings
@@ -1596,11 +1597,11 @@ void game::add_artifact_messages(std::vector<art_effect_passive> effects)
     }
 
     if (!stat_info.empty()) {
-        add_msg(stat_info.c_str());
+        u.add_msg_if_player(stat_info.c_str());
     }
 
 
     if (net_speed != 0) {
-        add_msg(m_info, _("Speed %s%d! "), (net_speed > 0 ? "+" : ""), net_speed);
+        u.add_msg_if_player(m_info, _("Speed %s%d! "), (net_speed > 0 ? "+" : ""), net_speed);
     }
 }

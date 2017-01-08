@@ -2047,9 +2047,8 @@ void item::on_wear( Character &p )
         set_side( lhs <= rhs ? side::LEFT : side::RIGHT );
     }
 
-    // TODO: artifacts currently only work with the player character
-    if( &p == &g->u && type->artifact ) {
-        g->add_artifact_messages( type->artifact->effects_worn );
+    if( type->artifact ) {
+        g->add_artifact_messages( p, type->artifact->effects_worn );
     }
 
     p.on_item_wear( *this );
@@ -2066,9 +2065,8 @@ void item::on_takeoff( Character &p )
 
 void item::on_wield( player &p, int mv )
 {
-    // TODO: artifacts currently only work with the player character
-    if( &p == &g->u && type->artifact ) {
-        g->add_artifact_messages( type->artifact->effects_wielded );
+    if( type->artifact ) {
+        g->add_artifact_messages( p, type->artifact->effects_wielded );
     }
 
     if( has_flag("SLOW_WIELD") && !is_gunmod() ) {
@@ -2106,9 +2104,8 @@ void item::on_pickup( Character &p )
         return;
     }
 
-    // TODO: artifacts currently only work with the player character
-    if( &p == &g->u && type->artifact ) {
-        g->add_artifact_messages( type->artifact->effects_carried );
+    if( type->artifact ) {
+        g->add_artifact_messages( p, type->artifact->effects_carried );
     }
 
     if( is_bucket_nonempty() ) {

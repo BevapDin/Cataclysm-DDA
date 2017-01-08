@@ -430,7 +430,7 @@ class game
         void update_overmap_seen(); // Update which overmap tiles we can see
 
         void process_artifact(item *it, player *p);
-        void add_artifact_messages(std::vector<art_effect_passive> effects);
+        void add_artifact_messages( player &p, std::vector<art_effect_passive> effects);
 
         void peek();
         void peek( const tripoint &p );
