@@ -5355,11 +5355,7 @@ void item::process_artifact( player *carrier, const tripoint & /*pos*/ )
     if( !is_artifact() ) {
         return;
     }
-    // Artifacts are currently only useful for the player character, the messages
-    // don't consider npcs. Also they are not processed when laying on the ground.
-    // TODO: change game::process_artifact to work with npcs,
-    // TODO: consider moving game::process_artifact here.
-    if( carrier == &g->u ) {
+    if( carrier ) {
         process_artifact( *this, *carrier );
     }
 }

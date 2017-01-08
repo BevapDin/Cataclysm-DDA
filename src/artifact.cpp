@@ -1622,14 +1622,14 @@ void process_artifact( item &it, player &p )
             // (So DON'T route them through mod_pain!)
             case ARTC_PAIN:
                 if (calendar::turn.seconds() == 0) {
-                    add_msg(m_bad, _("You suddenly feel sharp pain for no reason."));
+                    p.add_msg_if_player(m_bad, _("You suddenly feel sharp pain for no reason."));
                     p.mod_pain_noresist( 3 * rng(1, 3) );
                     it.charges++;
                 }
                 break;
             case ARTC_HP:
                 if (calendar::turn.seconds() == 0) {
-                    add_msg(m_bad, _("You feel your body decaying."));
+                    p.add_msg_if_player(m_bad, _("You feel your body decaying."));
                     p.hurtall(1, nullptr);
                     it.charges++;
                 }
@@ -1673,7 +1673,7 @@ void process_artifact( item &it, player &p )
                              p.posy() + rng(-1, 1),
                              p.posz() );
                 if( g->m.add_field( pt, fd_smoke, rng(1, 3), 0 ) ) {
-                    add_msg(_("The %s emits some smoke."),
+                    p.add_msg_if_player(_("The %s emits some smoke."),
                             it.tname().c_str());
                 }
             }
@@ -1706,11 +1706,11 @@ void process_artifact( item &it, player &p )
                 p.add_effect( effect_evil, 300);
                 if( it.is_armor() ) {
                     if( !worn ) {
-                    add_msg(_("You have an urge to wear the %s."),
+                    p.add_msg_if_player(_("You have an urge to wear the %s."),
                             it.tname().c_str());
                     }
                 } else if (!wielded) {
-                    add_msg(_("You have an urge to wield the %s."),
+                    p.add_msg_if_player(_("You have an urge to wield the %s."),
                             it.tname().c_str());
                 }
             }
