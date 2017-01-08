@@ -1440,7 +1440,7 @@ art_charge string_to_enum<art_charge>( const std::string &data )
 }
 } // namespace io
 
-void game::add_artifact_messages( player &u, std::vector<art_effect_passive> effects )
+void add_artifact_messages( player &u, std::vector<art_effect_passive> effects )
 {
     int net_str = 0;
     int net_dex = 0;

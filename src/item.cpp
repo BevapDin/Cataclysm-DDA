@@ -2048,7 +2048,7 @@ void item::on_wear( Character &p )
     }
 
     if( type->artifact ) {
-        g->add_artifact_messages( p, type->artifact->effects_worn );
+        add_artifact_messages( p, type->artifact->effects_worn );
     }
 
     p.on_item_wear( *this );
@@ -2066,7 +2066,7 @@ void item::on_takeoff( Character &p )
 void item::on_wield( player &p, int mv )
 {
     if( type->artifact ) {
-        g->add_artifact_messages( p, type->artifact->effects_wielded );
+        add_artifact_messages( p, type->artifact->effects_wielded );
     }
 
     if( has_flag("SLOW_WIELD") && !is_gunmod() ) {
@@ -2105,7 +2105,7 @@ void item::on_pickup( Character &p )
     }
 
     if( type->artifact ) {
-        g->add_artifact_messages( p, type->artifact->effects_carried );
+        add_artifact_messages( p, type->artifact->effects_carried );
     }
 
     if( is_bucket_nonempty() ) {
