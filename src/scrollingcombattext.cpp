@@ -1,5 +1,6 @@
 #include "scrollingcombattext.h"
 
+#include "output.h"
 #include "line.h"
 #include "rng.h"
 #include "options.h"

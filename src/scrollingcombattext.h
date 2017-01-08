@@ -1,8 +1,6 @@
 #ifndef SCROLLINGCOMBATTEXT_H
 #define SCROLLINGCOMBATTEXT_H
 
-#include "output.h"
-
 #include <string>
 #include <vector>
 
@@ -37,8 +35,8 @@ class scrollingcombattext
             public:
                 cSCT( const int p_iPosX, const int p_iPosY, direction p_oDir,
                       const std::string p_sText, const game_message_type p_gmt,
-                      const std::string p_sText2 = "", const game_message_type p_gmt2 = m_neutral,
-                      const std::string p_sType = "" );
+                      const std::string p_sText2, const game_message_type p_gmt2,
+                      const std::string p_sType );
 
                 int getStep() const {
                     return iStep;
@@ -74,8 +72,8 @@ class scrollingcombattext
 
         void add( const int p_iPosX, const int p_iPosY, const direction p_oDir,
                   const std::string p_sText, const game_message_type p_gmt,
-                  const std::string p_sText2 = "", const game_message_type p_gmt2 = m_neutral,
-                  const std::string p_sType = "" );
+                  const std::string p_sText2, const game_message_type p_gmt2,
+                  const std::string p_sType );
         void advanceAllSteps();
         void removeCreatureHP();
 };
