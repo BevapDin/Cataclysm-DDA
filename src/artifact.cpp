@@ -8,6 +8,8 @@
 #include "rng.h"
 #include "translations.h"
 #include "player.h"
+#include "game.h"
+#include "map.h"
 
 #include <bitset>
 #include <cmath>
@@ -17,6 +19,8 @@
 #ifndef mfb
 #define mfb(n) static_cast <unsigned long> (1 << (n))
 #endif
+
+const efftype_id effect_evil( "evil" );
 
 using namespace units::literals;
 
@@ -1580,7 +1584,7 @@ void add_artifact_messages( const player &u, const std::vector<art_effect_passiv
     }
 }
 
-void game::process_artifact( item &it, player &p )
+void process_artifact( item &it, player &p )
 {
     const bool worn = p.is_worn( it );
     const bool wielded = ( &it == &p.weapon );
@@ -1609,7 +1613,7 @@ void game::process_artifact( item &it, player &p )
                 break;
             case ARTC_SOLAR:
                 if (calendar::turn.seconds() == 0 && calendar::turn.minutes() % 10 == 0 &&
-                    is_in_sunlight(p.pos())) {
+                    g->is_in_sunlight(p.pos())) {
                     it.charges++;
                 }
                 break;
@@ -1668,7 +1672,7 @@ void game::process_artifact( item &it, player &p )
                 tripoint pt( p.posx() + rng(-1, 1),
                              p.posy() + rng(-1, 1),
                              p.posz() );
-                if( m.add_field( pt, fd_smoke, rng(1, 3), 0 ) ) {
+                if( g->m.add_field( pt, fd_smoke, rng(1, 3), 0 ) ) {
                     add_msg(_("The %s emits some smoke."),
                             it.tname().c_str());
                 }
@@ -1681,7 +1685,7 @@ void game::process_artifact( item &it, player &p )
         case AEP_EXTINGUISH:
             for (int x = p.posx() - 1; x <= p.posx() + 1; x++) {
                 for (int y = p.posy() - 1; y <= p.posy() + 1; y++) {
-                    m.adjust_field_age( tripoint( x, y, p.posz() ), fd_fire, -1);
+                    g->m.adjust_field_age( tripoint( x, y, p.posz() ), fd_fire, -1);
                 }
             }
 

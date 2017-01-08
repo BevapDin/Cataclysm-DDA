@@ -429,8 +429,6 @@ class game
         void update_map(int &x, int &y);
         void update_overmap_seen(); // Update which overmap tiles we can see
 
-        void process_artifact( item &it, player &p );
-
         void peek();
         void peek( const tripoint &p );
         tripoint look_debug();

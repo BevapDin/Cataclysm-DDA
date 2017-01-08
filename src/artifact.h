@@ -106,6 +106,7 @@ std::string new_natural_artifact( artifact_natural_property prop );
 std::string architects_cube();
 
 void add_artifact_messages( const player &u, const std::vector<art_effect_passive> &effects );
+void process_artifact( item &it, player &p );
 
 // note: needs to be called by main() before MAPBUFFER.load
 void load_artifacts( const std::string &filename );

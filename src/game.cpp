@@ -148,7 +148,6 @@ const efftype_id effect_deaf( "deaf" );
 const efftype_id effect_docile( "docile" );
 const efftype_id effect_downed( "downed" );
 const efftype_id effect_drunk( "drunk" );
-const efftype_id effect_evil( "evil" );
 const efftype_id effect_flu( "flu" );
 const efftype_id effect_glowing( "glowing" );
 const efftype_id effect_has_bag( "has_bag" );
