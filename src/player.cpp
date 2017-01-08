@@ -19,6 +19,7 @@
 #include "options.h"
 #include "weather.h"
 #include "item.h"
+#include "scrollingcombattext.h"
 #include "material.h"
 #include "translations.h"
 #include "cursesdef.h"

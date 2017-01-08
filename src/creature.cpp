@@ -16,6 +16,7 @@
 #include "field.h"
 #include "projectile.h"
 #include "anatomy.h"
+#include "scrollingcombattext.h"
 
 #include <algorithm>
 #include <numeric>

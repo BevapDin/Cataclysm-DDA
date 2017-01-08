@@ -13,6 +13,7 @@
 #include "auto_pickup.h"
 #include "effect.h"
 #include "bionics.h"
+#include "scrollingcombattext.h"
 #include "gamemode.h"
 #include "mapbuffer.h"
 #include "map_item_stack.h"

@@ -33,6 +33,7 @@
 #include "cata_utility.h"
 #include "cursesport.h"
 #include "rect_range.h"
+#include "scrollingcombattext.h"
 
 #include <cassert>
 #include <algorithm>
