@@ -1601,159 +1601,159 @@ void process_artifact( item &it, player &p )
     if( it.is_tool() ) {
         // Recharge it if necessary
         if( it.ammo_remaining() < it.ammo_capacity() ) {
-            switch (it.type->artifact->charge_type) {
-            case ARTC_NULL:
-            case NUM_ARTCS:
-                break; // dummy entries
-            case ARTC_TIME:
-                // Once per hour
-                if (calendar::turn.seconds() == 0 && calendar::turn.minutes() == 0) {
-                    it.charges++;
-                }
-                break;
-            case ARTC_SOLAR:
-                if (calendar::turn.seconds() == 0 && calendar::turn.minutes() % 10 == 0 &&
-                    g->is_in_sunlight(p.pos())) {
-                    it.charges++;
-                }
-                break;
-            // Artifacts can inflict pain even on Deadened folks.
-            // Some weird Lovecraftian thing.  ;P
-            // (So DON'T route them through mod_pain!)
-            case ARTC_PAIN:
-                if (calendar::turn.seconds() == 0) {
-                    p.add_msg_if_player(m_bad, _("You suddenly feel sharp pain for no reason."));
-                    p.mod_pain_noresist( 3 * rng(1, 3) );
-                    it.charges++;
-                }
-                break;
-            case ARTC_HP:
-                if (calendar::turn.seconds() == 0) {
-                    p.add_msg_if_player(m_bad, _("You feel your body decaying."));
-                    p.hurtall(1, nullptr);
-                    it.charges++;
-                }
-                break;
+            switch( it.type->artifact->charge_type ) {
+                case ARTC_NULL:
+                case NUM_ARTCS:
+                    break; // dummy entries
+                case ARTC_TIME:
+                    // Once per hour
+                    if( calendar::turn.seconds() == 0 && calendar::turn.minutes() == 0 ) {
+                        it.charges++;
+                    }
+                    break;
+                case ARTC_SOLAR:
+                    if( calendar::turn.seconds() == 0 && calendar::turn.minutes() % 10 == 0 &&
+                        g->is_in_sunlight( p.pos() ) ) {
+                        it.charges++;
+                    }
+                    break;
+                // Artifacts can inflict pain even on Deadened folks.
+                // Some weird Lovecraftian thing.  ;P
+                // (So DON'T route them through mod_pain!)
+                case ARTC_PAIN:
+                    if( calendar::turn.seconds() == 0 ) {
+                        p.add_msg_if_player( m_bad, _( "You suddenly feel sharp pain for no reason." ) );
+                        p.mod_pain_noresist( 3 * rng( 1, 3 ) );
+                        it.charges++;
+                    }
+                    break;
+                case ARTC_HP:
+                    if( calendar::turn.seconds() == 0 ) {
+                        p.add_msg_if_player( m_bad, _( "You feel your body decaying." ) );
+                        p.hurtall( 1, nullptr );
+                        it.charges++;
+                    }
+                    break;
             }
         }
     }
 
-    for (auto &i : effects) {
-        switch (i) {
-        case AEP_STR_UP:
-            p.mod_str_bonus(+4);
-            break;
-        case AEP_DEX_UP:
-            p.mod_dex_bonus(+4);
-            break;
-        case AEP_PER_UP:
-            p.mod_per_bonus(+4);
-            break;
-        case AEP_INT_UP:
-            p.mod_int_bonus(+4);
-            break;
-        case AEP_ALL_UP:
-            p.mod_str_bonus(+2);
-            p.mod_dex_bonus(+2);
-            p.mod_per_bonus(+2);
-            p.mod_int_bonus(+2);
-            break;
-        case AEP_SPEED_UP: // Handled in player::current_speed()
-            break;
+    for( auto &i : effects ) {
+        switch( i ) {
+            case AEP_STR_UP:
+                p.mod_str_bonus( +4 );
+                break;
+            case AEP_DEX_UP:
+                p.mod_dex_bonus( +4 );
+                break;
+            case AEP_PER_UP:
+                p.mod_per_bonus( +4 );
+                break;
+            case AEP_INT_UP:
+                p.mod_int_bonus( +4 );
+                break;
+            case AEP_ALL_UP:
+                p.mod_str_bonus( +2 );
+                p.mod_dex_bonus( +2 );
+                p.mod_per_bonus( +2 );
+                p.mod_int_bonus( +2 );
+                break;
+            case AEP_SPEED_UP: // Handled in player::current_speed()
+                break;
 
-        case AEP_PBLUE:
-            if (p.radiation > 0) {
-                p.radiation--;
-            }
-            break;
-
-        case AEP_SMOKE:
-            if (one_in(10)) {
-                tripoint pt( p.posx() + rng(-1, 1),
-                             p.posy() + rng(-1, 1),
-                             p.posz() );
-                if( g->m.add_field( pt, fd_smoke, rng(1, 3), 0 ) ) {
-                    p.add_msg_if_player(_("The %s emits some smoke."),
-                            it.tname().c_str());
+            case AEP_PBLUE:
+                if( p.radiation > 0 ) {
+                    p.radiation--;
                 }
-            }
-            break;
+                break;
 
-        case AEP_SNAKES:
-            break; // Handled in player::hit()
-
-        case AEP_EXTINGUISH:
-            for (int x = p.posx() - 1; x <= p.posx() + 1; x++) {
-                for (int y = p.posy() - 1; y <= p.posy() + 1; y++) {
-                    g->m.adjust_field_age( tripoint( x, y, p.posz() ), fd_fire, -1);
-                }
-            }
-
-        case AEP_HUNGER:
-            if (one_in(100)) {
-                p.mod_hunger(1);
-            }
-            break;
-
-        case AEP_THIRST:
-            if (one_in(120)) {
-                p.mod_thirst(1);
-            }
-            break;
-
-        case AEP_EVIL:
-            if (one_in(150)) { // Once every 15 minutes, on average
-                p.add_effect( effect_evil, 300);
-                if( it.is_armor() ) {
-                    if( !worn ) {
-                    p.add_msg_if_player(_("You have an urge to wear the %s."),
-                            it.tname().c_str());
+            case AEP_SMOKE:
+                if( one_in( 10 ) ) {
+                    tripoint pt( p.posx() + rng( -1, 1 ),
+                                 p.posy() + rng( -1, 1 ),
+                                 p.posz() );
+                    if( g->m.add_field( pt, fd_smoke, rng( 1, 3 ), 0 ) ) {
+                        p.add_msg_if_player( _( "The %s emits some smoke." ),
+                                             it.tname().c_str() );
                     }
-                } else if (!wielded) {
-                    p.add_msg_if_player(_("You have an urge to wield the %s."),
-                            it.tname().c_str());
                 }
-            }
-            break;
+                break;
 
-        case AEP_SCHIZO:
-            break; // Handled in player::suffer()
+            case AEP_SNAKES:
+                break; // Handled in player::hit()
 
-        case AEP_RADIOACTIVE:
-            if (one_in(4)) {
-                p.radiation++;
-            }
-            break;
+            case AEP_EXTINGUISH:
+                for( int x = p.posx() - 1; x <= p.posx() + 1; x++ ) {
+                    for( int y = p.posy() - 1; y <= p.posy() + 1; y++ ) {
+                        g->m.adjust_field_age( tripoint( x, y, p.posz() ), fd_fire, -1 );
+                    }
+                }
 
-        case AEP_STR_DOWN:
-            p.mod_str_bonus(-3);
-            break;
+            case AEP_HUNGER:
+                if( one_in( 100 ) ) {
+                    p.mod_hunger( 1 );
+                }
+                break;
 
-        case AEP_DEX_DOWN:
-            p.mod_dex_bonus(-3);
-            break;
+            case AEP_THIRST:
+                if( one_in( 120 ) ) {
+                    p.mod_thirst( 1 );
+                }
+                break;
 
-        case AEP_PER_DOWN:
-            p.mod_per_bonus(-3);
-            break;
+            case AEP_EVIL:
+                if( one_in( 150 ) ) { // Once every 15 minutes, on average
+                    p.add_effect( effect_evil, 300 );
+                    if( it.is_armor() ) {
+                        if( !worn ) {
+                            p.add_msg_if_player( _( "You have an urge to wear the %s." ),
+                                                 it.tname().c_str() );
+                        }
+                    } else if( !wielded ) {
+                        p.add_msg_if_player( _( "You have an urge to wield the %s." ),
+                                             it.tname().c_str() );
+                    }
+                }
+                break;
 
-        case AEP_INT_DOWN:
-            p.mod_int_bonus(-3);
-            break;
+            case AEP_SCHIZO:
+                break; // Handled in player::suffer()
 
-        case AEP_ALL_DOWN:
-            p.mod_str_bonus(-2);
-            p.mod_dex_bonus(-2);
-            p.mod_per_bonus(-2);
-            p.mod_int_bonus(-2);
-            break;
+            case AEP_RADIOACTIVE:
+                if( one_in( 4 ) ) {
+                    p.radiation++;
+                }
+                break;
 
-        case AEP_SPEED_DOWN:
-            break; // Handled in player::current_speed()
+            case AEP_STR_DOWN:
+                p.mod_str_bonus( -3 );
+                break;
 
-        default:
-            //Suppress warnings
-            break;
+            case AEP_DEX_DOWN:
+                p.mod_dex_bonus( -3 );
+                break;
+
+            case AEP_PER_DOWN:
+                p.mod_per_bonus( -3 );
+                break;
+
+            case AEP_INT_DOWN:
+                p.mod_int_bonus( -3 );
+                break;
+
+            case AEP_ALL_DOWN:
+                p.mod_str_bonus( -2 );
+                p.mod_dex_bonus( -2 );
+                p.mod_per_bonus( -2 );
+                p.mod_int_bonus( -2 );
+                break;
+
+            case AEP_SPEED_DOWN:
+                break; // Handled in player::current_speed()
+
+            default:
+                //Suppress warnings
+                break;
         }
     }
     // Recalculate, as it might have changed (by mod_*_bonus above)
