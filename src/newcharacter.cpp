@@ -419,6 +419,9 @@ void player::randomize( const bool random_scenario, points_left &points )
     }
 }
 
+#include "ui_tabs.h"
+#include "ui_tabs.cpp"
+
 bool player::create(character_type type, std::string tempname)
 {
     weapon = item("null", 0);
@@ -426,22 +429,70 @@ bool player::create(character_type type, std::string tempname)
     prof = profession::generic();
     g->scen = scenario::generic();
 
-
-    catacurses::window w;
-    if( type != PLTYPE_NOW ) {
-        w = catacurses::newwin( TERMY, TERMX, 0, 0 );
-    }
-
-    int tab = 0;
     points_left points = points_left();
+    std::unique_ptr<ui_tabs> tabs;
+    bool canceld = false;
 
+    const auto handle_tab_result = [&canceld]( ui_tabs &u, const tab_direction d ) {
+        switch( d ) {
+            case tab_direction::NONE:
+                return false;
+            case tab_direction::FORWARD:
+                if( u.current() == u.size() ) {
+                    return true;
+                }
+                u.next();
+                return false;
+            case tab_direction::BACKWARD:
+                if( u.current() == 0 ) {
+                    canceld = true;
+                    return true;
+                }
+                u.prev();
+                return false;
+            case tab_direction::QUIT:
+                canceld = true;
+                return true;
+        }
+        return false;
+    };
+    if( type != PLTYPE_NOW ) {
+        tabs.reset( new ui_tabs( FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
+                       (TERMY > FULL_SCREEN_HEIGHT) ? (TERMY - FULL_SCREEN_HEIGHT) / 2 : 0,
+                       (TERMX > FULL_SCREEN_WIDTH) ? (TERMX - FULL_SCREEN_WIDTH) / 2 : 0 ) );
+        auto &t = *tabs;
+        t.add( _( "POINTS" ), [handle_tab_result, this, &points](ui_tabs &u) {
+            return handle_tab_result( u, set_points( u.window(), this, points ) );
+        } );
+        t.add( _( "SCENARIO" ), [handle_tab_result, this, &points](ui_tabs &u) {
+            return handle_tab_result( u, set_scenario( u.window(), this, points ) );
+        } );
+        t.add( _( "PROFESSION" ), [handle_tab_result, this, &points](ui_tabs &u) {
+            return handle_tab_result( u, set_profession( u.window(), this, points ) );
+        } );
+        t.add( _( "TRAITS" ), [handle_tab_result, this, &points](ui_tabs &u) {
+            return handle_tab_result( u, set_traits( u.window(), this, points ) );
+        } );
+        t.add( _( "STATS" ), [handle_tab_result, this, &points](ui_tabs &u) {
+            return handle_tab_result( u, set_stats( u.window(), this, points ) );
+        } );
+        t.add( _( "SKILLS" ), [handle_tab_result, this, &points](ui_tabs &u) {
+            return handle_tab_result( u, set_skills( u.window(), this, points ) );
+        } );
+        const bool allow_reroll = type == PLTYPE_RANDOM;
+        t.add( _( "DESCRIPTION" ), [handle_tab_result, this, &points, allow_reroll](ui_tabs &u) {
+            return handle_tab_result( u, set_description( u.window(), this, allow_reroll, points ) );
+        } );
+    }
     switch (type) {
     case PLTYPE_CUSTOM:
         break;
     case PLTYPE_NOW:
     case PLTYPE_RANDOM:
         randomize( false, points );
-        tab = NEWCHAR_TAB_MAX;
+        if( tabs) {
+            tabs->current(tabs->size() - 1);
+        }
         break;
     case PLTYPE_TEMPLATE:
         if( !load_template( tempname ) ) {
@@ -453,80 +504,17 @@ bool player::create(character_type type, std::string tempname)
         // We want to prevent recipes known by the template from being applied to the
         // new character. The recipe list will be rebuilt when entering the game.
         learned_recipes->clear();
-        tab = NEWCHAR_TAB_MAX;
+        if( tabs ) {
+            tabs->current( tabs->size() - 1 );
+        }
         break;
     }
 
-    auto nameExists = [&]( const std::string &name ) {
-        return world_generator->active_world->save_exists( save_t::from_player_name( name ) ) &&
-                    !query_yn( string_format( _("A character with the name '%s' already exists in this world.\n"
-                        "Saving will override the already existing character.\n\n"
-                        "Continue anyways?" ), name ) );
-    };
+    if( tabs ) {
+        tabs->loop();
+    }
 
-    const bool allow_reroll = type == PLTYPE_RANDOM;
-    do {
-        if( !w ) {
-            // assert( type == PLTYPE_NOW );
-            // no window is created because "Play now"  does not require any configuration
-            if( nameExists( name ) ) {
-                return false;
-            }
-
-            break;
-        }
-        werase( w );
-        wrefresh( w );
-        tab_direction result = tab_direction::QUIT;
-        switch( tab ) {
-            case 0:
-                result = set_points     ( w, *this, points );
-                break;
-            case 1:
-                result = set_scenario   ( w, *this, points );
-                break;
-            case 2:
-                result = set_profession ( w, *this, points );
-                break;
-            case 3:
-                result = set_traits     ( w, *this, points );
-                break;
-            case 4:
-                result = set_stats      ( w, *this, points );
-                break;
-            case 5:
-                result = set_skills     ( w, *this, points );
-                break;
-            case 6:
-                result = set_description( w, *this, allow_reroll, points );
-                break;
-        }
-
-        switch( result ) {
-            case tab_direction::NONE:
-                break;
-            case tab_direction::FORWARD:
-                tab++;
-                break;
-            case tab_direction::BACKWARD:
-                tab--;
-                break;
-            case tab_direction::QUIT:
-                tab = -1;
-                break;
-        }
-
-        if( !( tab >= 0 && tab <= NEWCHAR_TAB_MAX ) ) {
-            if( tab != -1 && nameExists( name ) ) {
-                tab = NEWCHAR_TAB_MAX;
-            } else {
-                break;
-            }
-        }
-
-    } while( true );
-
-    if( tab < 0 ) {
+    if( canceld ) {
         return false;
     }
 
@@ -623,61 +611,6 @@ bool player::create(character_type type, std::string tempname)
     return true;
 }
 
-void draw_tabs( const catacurses::window &w, std::string sTab )
-{
-    for (int i = 1; i < TERMX - 1; i++) {
-        mvwputch(w, 2, i, BORDER_COLOR, LINE_OXOX);
-        mvwputch(w, 4, i, BORDER_COLOR, LINE_OXOX);
-        mvwputch(w, TERMY - 1, i, BORDER_COLOR, LINE_OXOX);
-
-        if (i > 2 && i < TERMY - 1) {
-            mvwputch(w, i, 0, BORDER_COLOR, LINE_XOXO);
-            mvwputch(w, i, TERMX - 1, BORDER_COLOR, LINE_XOXO);
-        }
-    }
-
-    std::vector<std::string> tab_captions;
-    tab_captions.push_back(_("POINTS"));
-    tab_captions.push_back(_("SCENARIO"));
-    tab_captions.push_back(_("PROFESSION"));
-    tab_captions.push_back(_("TRAITS"));
-    tab_captions.push_back(_("STATS"));
-    tab_captions.push_back(_("SKILLS"));
-    tab_captions.push_back(_("DESCRIPTION"));
-
-    size_t temp_len = 0;
-    size_t tabs_length = 0;
-    std::vector<int> tab_len;
-    for (auto tab_name : tab_captions) {
-        // String length + borders
-        temp_len = utf8_width(tab_name) + 2;
-        tabs_length += temp_len;
-        tab_len.push_back(temp_len);
-    }
-
-    int next_pos = 2;
-    // Free space on tabs window. '<', '>' symbols is drawing on free space.
-    // Initial value of next_pos is free space too.
-    // '1' is used for SDL/curses screen column reference.
-    int free_space = (TERMX - tabs_length - 1 - next_pos);
-    int spaces = free_space / ((int)tab_captions.size() - 1);
-    if (spaces < 0) {
-        spaces = 0;
-    }
-    for (size_t i = 0; i < tab_captions.size(); ++i) {
-        draw_tab(w, next_pos, tab_captions[i], (sTab == tab_captions[i]));
-        next_pos += tab_len[i] + spaces;
-    }
-
-    mvwputch(w, 2,  0, BORDER_COLOR, LINE_OXXO); // |^
-    mvwputch(w, 2, TERMX - 1, BORDER_COLOR, LINE_OOXX); // ^|
-
-    mvwputch(w, 4, 0, BORDER_COLOR, LINE_XXXO); // |-
-    mvwputch(w, 4, TERMX - 1, BORDER_COLOR, LINE_XOXX); // -|
-
-    mvwputch(w, TERMY - 1, 0, BORDER_COLOR, LINE_XXOO); // |_
-    mvwputch(w, TERMY - 1, TERMX - 1, BORDER_COLOR, LINE_XOOX); // _|
-}
 void draw_points( const catacurses::window &w, points_left &points, int netPointCost )
 {
     // Clear line (except borders)
@@ -710,8 +643,6 @@ tab_direction set_points( const catacurses::window &w, player &, points_left &po
     const int content_height = TERMY - 6;
     catacurses::window w_description = catacurses::newwin( content_height, TERMX - 35,
                                     5 + getbegy( w ), 31 + getbegx( w ) );
-
-    draw_tabs( w, _("POINTS") );
 
     input_context ctxt("NEW_CHAR_POINTS");
     ctxt.register_cardinal();
@@ -789,7 +720,7 @@ Scenarios and professions affect skill point pool" ) );
             retval = tab_direction::QUIT;
         } else if( action == "HELP_KEYBINDINGS" ) {
             // Need to redraw since the help window obscured everything.
-            draw_tabs( w, _("POINTS") );
+            return tab_direction::NONE;
         } else if( action == "CONFIRM" ) {
             points.limit = std::get<0>( cur_opt );
         }
@@ -823,8 +754,6 @@ tab_direction set_stats( const catacurses::window &w, player &u, points_left &po
     u.reset();
 
     do {
-        werase(w);
-        draw_tabs(w, _("STATS"));
         fold_and_print(w, 16, 2, getmaxx(w) - 4, COL_NOTE_MINOR, _("\
     <color_light_green>%s</color> / <color_light_green>%s</color> to select a statistic.\n\
     <color_light_green>%s</color> to increase the statistic.\n\
@@ -2072,8 +2001,6 @@ tab_direction set_scenario( const catacurses::window &w, player &u, points_left 
 
 tab_direction set_description( const catacurses::window &w, player &u, const bool allow_reroll, points_left &points )
 {
-    draw_tabs( w, _("DESCRIPTION") );
-
     catacurses::window w_name = catacurses::newwin(2, 42, getbegy(w) + 5, getbegx(w) + 2);
     catacurses::window w_gender = catacurses::newwin(2, 33, getbegy(w) + 5, getbegx(w) + 46);
     catacurses::window w_location = catacurses::newwin(1, 76, getbegy(w) + 7, getbegx(w) + 2);
