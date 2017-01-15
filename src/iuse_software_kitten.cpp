@@ -322,13 +322,18 @@ robot_finds_kitten::robot_finds_kitten(WINDOW *w)
     int old_y = robot.y;
 
     wrefresh(w);
-    /* Now the fun begins. */
-    int input = '.';
-    // TODO: use input context
-    input = inp_mngr.get_input_event().get_first_input();
 
-    while (input != 'q' && input != 'Q' && input != 27 /*escape*/) {
-        process_input(input, w);
+    input_context ctxt( "IUSE_SOFTWARE_KITTEN" );
+    ctxt.register_action( "QUIT" );
+    ctxt.register_cardinal();
+    ctxt.register_action( "HELP_KEYBINDINGS" );
+
+    while( true ) {
+        const std::string action = ctxt.handle_input();
+        if( action == "QUIT" ) {
+            break;
+        }
+        process_input( action, w );
         if(ret == true) {
             break;
         }
@@ -344,8 +349,6 @@ robot_finds_kitten::robot_finds_kitten(WINDOW *w)
             old_y = robot.y;
         }
         wrefresh(w);
-        // TODO: use input context / rewrite loop so this is only called at one place
-        input = inp_mngr.get_input_event().get_first_input();
     }
 }
 
@@ -372,7 +375,7 @@ The game ends when robotfindskitten. Alternatively, you may end the game by hitt
     inp_mngr.wait_for_any_key();
 }
 
-void robot_finds_kitten::process_input(int input, WINDOW *w)
+void robot_finds_kitten::process_input( const std::string &action, WINDOW *w)
 {
     timespec ts;
     ts.tv_sec = 1;
@@ -381,29 +384,14 @@ void robot_finds_kitten::process_input(int input, WINDOW *w)
     int check_x = robot.x;
     int check_y = robot.y;
 
-    switch (input) {
-    case KEY_UP: /* up */
+    if( action == "UP" ) {
         check_y--;
-        break;
-    case KEY_DOWN: /* down */
+    } else if( action == "DOWN" ) {
         check_y++;
-        break;
-    case KEY_LEFT: /* left */
+    } else if( action == "LEFT" ) {
         check_x--;
-        break;
-    case KEY_RIGHT: /* right */
+    } else if( action == "RIGHT" ) {
         check_x++;
-        break;
-    case 0:
-        break;
-    default: { /* invalid command */
-        for (int c = 0; c < rfkCOLS; c++) {
-            mvwputch (w, 0, c, c_white, ' ');
-            mvwputch (w, 1, c, c_white, ' ');
-        }
-        mvwprintz (w, 0, 0, c_white, _("Invalid command: Use direction keys or press 'q'."));
-        return;
-    }
     }
 
     if (check_y < 3 || check_y > rfkLINES - 1 || check_x < 0 || check_x > rfkCOLS - 1) {
@@ -428,13 +416,13 @@ void robot_finds_kitten::process_input(int input, WINDOW *w)
                 wmove(w, 1, (rfkCOLS / 2) + 4 - c);
                 wputch(w, c_white, ' ');
                 wmove(w, 1, (rfkCOLS / 2) - 4 + c);
-                if (input == KEY_LEFT || input == KEY_UP) {
+                if( action == "LEFT" || action == "UP" ) {
                     draw_kitten(w);
                 } else {
                     draw_robot(w);
                 }
                 wmove(w, 1, (rfkCOLS / 2) + 3 - c);
-                if (input == KEY_LEFT || input == KEY_UP) {
+                if( action == "LEFT" || action == "UP" ) {
                     draw_robot(w);
                 } else {
                     draw_kitten(w);
@@ -454,11 +442,7 @@ void robot_finds_kitten::process_input(int input, WINDOW *w)
             mvwprintz (w, 0, 0, c_white, _("You found kitten! Way to go, robot!"));
             wrefresh(w);
             ret = true;
-            int ech = input;
-            do {
-                // TODO: use input context
-                ech = inp_mngr.get_input_event().get_first_input();
-            } while ( ech == input );
+            inp_mngr.wait_for_any_key();
         }
         break;
 

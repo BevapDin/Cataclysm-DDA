@@ -23,7 +23,7 @@ class robot_finds_kitten
         void instructions( WINDOW *w );
         void draw_robot( WINDOW *w );
         void draw_kitten( WINDOW *w );
-        void process_input( int input, WINDOW *w );
+        void process_input( const std::string &action, WINDOW *w );
         kobject robot;
         kobject kitten;
         kobject empty;
