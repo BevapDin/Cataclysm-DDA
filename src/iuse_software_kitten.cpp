@@ -224,7 +224,13 @@ std::string robot_finds_kitten::getmessage(int idx)
 }
 
 robot_finds_kitten::robot_finds_kitten(WINDOW *w)
+: ctxt_ptr( new input_context( "IUSE_SOFTWARE_KITTEN" ) )
+, ctxt( *ctxt_ptr )
 {
+    ctxt.register_action( "QUIT" );
+    ctxt.register_cardinal();
+    ctxt.register_action( "HELP_KEYBINDINGS" );
+
     ret = false;
     char ktile[83] =
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#&()*+./:;=?![]{|}y";
@@ -323,11 +329,6 @@ robot_finds_kitten::robot_finds_kitten(WINDOW *w)
 
     wrefresh(w);
 
-    input_context ctxt( "IUSE_SOFTWARE_KITTEN" );
-    ctxt.register_action( "QUIT" );
-    ctxt.register_cardinal();
-    ctxt.register_action( "HELP_KEYBINDINGS" );
-
     while( true ) {
         const std::string action = ctxt.handle_input();
         if( action == "QUIT" ) {
@@ -368,8 +369,8 @@ ported to CDDA gaming system by a nutcase."));
     pos += 1 + fold_and_print(w, pos, 1, getmaxx(w) - 4, c_ltgray, _("\
 Your job is to find kitten. This task is complicated by the existance of various things \
 which are not kitten. Robot must touch items to determine if they are kitten or not. \
-The game ends when robotfindskitten. Alternatively, you may end the game by hitting \
-'q', 'Q' or the escape key."));
+The game ends when robotfindskitten. %s to end the game. %s to view and change the \
+keybindings." ), ctxt.press_x( "QUIT" ).c_str(), ctxt.press_x( "HELP_KEYBINDINGS" ).c_str() );
     fold_and_print(w, pos, 1, getmaxx(w) - 4, c_ltgray, _("Press any key to start."));
     wrefresh(w);
     inp_mngr.wait_for_any_key();

@@ -3,7 +3,11 @@
 
 #include "cursesdef.h"
 #include "color.h"
+
+#include <memory>
 #include <string>
+
+class input_context;
 
 struct kobject {
     int x;
@@ -16,6 +20,10 @@ struct kobject {
 
 class robot_finds_kitten
 {
+    private:
+        const std::unique_ptr<input_context> ctxt_ptr;
+        input_context &ctxt;
+
     public:
         bool ret;
         std::string getmessage( int idx );
