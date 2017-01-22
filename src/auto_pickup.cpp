@@ -613,7 +613,7 @@ void auto_pickup::load_character()
     bChar = true;
     std::string sFile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.json";
     if( !read_from_file_optional( sFile, *this ) ) {
-        if (load_legacy(true)) {
+        if (load_legacy_character()) {
             if (save_character()) {
                 remove_file(sFile);
             }
@@ -630,7 +630,7 @@ void auto_pickup::load_global()
     std::string sFile = FILENAMES["autopickup"];
 
     if( !read_from_file_optional_json( sFile, [this]( JsonIn &jsin ) { deserialize( jsin ); } ) ) {
-        if (load_legacy(false)) {
+        if (load_legacy_global()) {
             if (save_global()) {
                 remove_file(sFile);
             }
@@ -674,24 +674,27 @@ void auto_pickup::deserialize(JsonIn &jsin)
     }
 }
 
-bool auto_pickup::load_legacy(const bool bCharacter)
+bool auto_pickup::load_legacy_character()
+{
+    std::string sFile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.txt";
+
+    auto &rules = vRules[CHARACTER_TAB];
+
+    using namespace std::placeholders;
+    const auto& reader = std::bind( &auto_pickup::load_legacy_rules, this, std::ref( rules ), _1 );
+    return read_from_file_optional( sFile, reader );
+}
+
+bool auto_pickup::load_legacy_global()
 {
     std::string sFile = FILENAMES["legacy_autopickup2"];
 
-    if (bCharacter) {
-        sFile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.txt";
-    }
-
-    auto &rules = vRules[(bCharacter) ? CHARACTER_TAB : GLOBAL_TAB];
+    auto &rules = vRules[GLOBAL_TAB];
 
     using namespace std::placeholders;
     const auto& reader = std::bind( &auto_pickup::load_legacy_rules, this, std::ref( rules ), _1 );
     if( !read_from_file_optional( sFile, reader ) ) {
-        if( !bCharacter ) {
-            return read_from_file_optional( FILENAMES["legacy_autopickup"], reader );
-        } else {
-            return false;
-        }
+        return read_from_file_optional( FILENAMES["legacy_autopickup"], reader );
     }
 
     return true;
