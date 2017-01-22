@@ -610,26 +610,28 @@ bool auto_pickup::save_global()
 
 void auto_pickup::load_character()
 {
-    load(true);
+    bChar = true;
+    std::string sFile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.json";
+    if( !read_from_file_optional( sFile, *this ) ) {
+        if (load_legacy(true)) {
+            if (save_character()) {
+                remove_file(sFile);
+            }
+        }
+    }
+
+    ready = false;
 }
 
 void auto_pickup::load_global()
 {
-    load(false);
-}
-
-void auto_pickup::load(const bool bCharacter)
-{
-    bChar = bCharacter;
+    bChar = false;
 
     std::string sFile = FILENAMES["autopickup"];
-    if (bCharacter) {
-        sFile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.json";
-    }
 
     if( !read_from_file_optional_json( sFile, [this]( JsonIn &jsin ) { deserialize( jsin ); } ) ) {
-        if (load_legacy(bCharacter)) {
-            if (bCharacter ? save_character() : save_global()) {
+        if (load_legacy(false)) {
+            if (save_global()) {
                 remove_file(sFile);
             }
         }
