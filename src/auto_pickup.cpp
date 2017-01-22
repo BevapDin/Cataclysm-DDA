@@ -586,29 +586,23 @@ void auto_pickup::clear_character_rules()
 
 bool auto_pickup::save_character()
 {
-    return save(true);
+    bChar = true;
+    std::string savefile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.json";
+    const std::string player_save = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".sav";
+    if( !file_exist( player_save ) ) {
+        return true; //Character not saved yet.
+    }
+
+    return write_to_file( savefile, [&]( std::ostream &fout ) {
+        JsonOut jout( fout, true );
+        serialize(jout);
+    }, _( "autopickup configuration" ) );
 }
 
 bool auto_pickup::save_global()
 {
-    return save(false);
-}
-
-bool auto_pickup::save(const bool bCharacter)
-{
-    bChar = bCharacter;
-    auto savefile = FILENAMES["autopickup"];
-
-        if (bCharacter) {
-            savefile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.json";
-
-            const std::string player_save = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".sav";
-            if( !file_exist( player_save ) ) {
-                return true; //Character not saved yet.
-            }
-        }
-
-    return write_to_file( savefile, [&]( std::ostream &fout ) {
+    bChar = false;
+    return write_to_file( FILENAMES["autopickup"], [&]( std::ostream &fout ) {
         JsonOut jout( fout, true );
         serialize(jout);
     }, _( "autopickup configuration" ) );
@@ -635,7 +629,7 @@ void auto_pickup::load(const bool bCharacter)
 
     if( !read_from_file_optional_json( sFile, [this]( JsonIn &jsin ) { deserialize( jsin ); } ) ) {
         if (load_legacy(bCharacter)) {
-            if (save(bCharacter)) {
+            if (bCharacter ? save_character() : save_global()) {
                 remove_file(sFile);
             }
         }
