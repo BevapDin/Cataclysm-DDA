@@ -18,7 +18,8 @@ class auto_pickup
 {
     private:
         void test_pattern( const int iCurrentPage, const int iCurrentLine );
-        bool load_legacy( const bool bCharacter );
+        bool load_legacy_character();
+        bool load_legacy_global();
 
         bool bChar;
 
