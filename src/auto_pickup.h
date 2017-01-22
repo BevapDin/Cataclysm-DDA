@@ -21,8 +21,6 @@ class auto_pickup
         bool load_legacy_character();
         bool load_legacy_global();
 
-        bool bChar;
-
         enum TAB : int {
             GLOBAL_TAB,
             CHARACTER_TAB,
@@ -46,6 +44,9 @@ class auto_pickup
                     this->bActive = bActiveIn;
                     this->bExclude = bExcludeIn;
                 }
+
+                void serialize( JsonOut &json ) const;
+                void deserialize( JsonIn &jsin );
         };
 
         mutable bool ready; //< true if map_items has been populated from vRules
@@ -69,7 +70,7 @@ class auto_pickup
         void refresh_map_items() const; //< Only modifies mutable state
 
     public:
-        auto_pickup() : bChar( false ), ready( false ) {}
+        auto_pickup() : ready( false ) {}
 
         bool has_rule( const std::string &sRule );
         void add_rule( const std::string &sRule );
@@ -86,9 +87,6 @@ class auto_pickup
         void load_global();
 
         bool empty() const;
-
-        void serialize( JsonOut &json ) const;
-        void deserialize( JsonIn &jsin );
 };
 
 auto_pickup &get_auto_pickup();
