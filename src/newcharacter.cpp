@@ -461,27 +461,27 @@ bool player::create(character_type type, std::string tempname)
                        (TERMY > FULL_SCREEN_HEIGHT) ? (TERMY - FULL_SCREEN_HEIGHT) / 2 : 0,
                        (TERMX > FULL_SCREEN_WIDTH) ? (TERMX - FULL_SCREEN_WIDTH) / 2 : 0 ) );
         auto &t = *tabs;
-        t.add( _( "POINTS" ), [handle_tab_result, this, &points](ui_tabs &u) {
+        t.add( _( "POINTS" ), [&t, handle_tab_result, this, &points](ui_tabs &u) {
             return handle_tab_result( u, set_points( u.window(), this, points ) );
         } );
-        t.add( _( "SCENARIO" ), [handle_tab_result, this, &points](ui_tabs &u) {
+        t.add( _( "SCENARIO" ), [&t, handle_tab_result, this, &points](ui_tabs &u) {
             return handle_tab_result( u, set_scenario( u.window(), this, points ) );
         } );
-        t.add( _( "PROFESSION" ), [handle_tab_result, this, &points](ui_tabs &u) {
+        t.add( _( "PROFESSION" ), [&t, handle_tab_result, this, &points](ui_tabs &u) {
             return handle_tab_result( u, set_profession( u.window(), this, points ) );
         } );
-        t.add( _( "TRAITS" ), [handle_tab_result, this, &points](ui_tabs &u) {
+        t.add( _( "TRAITS" ), [&t, handle_tab_result, this, &points](ui_tabs &u) {
             return handle_tab_result( u, set_traits( u.window(), this, points ) );
         } );
-        t.add( _( "STATS" ), [handle_tab_result, this, &points](ui_tabs &u) {
+        t.add( _( "STATS" ), [&t, handle_tab_result, this, &points](ui_tabs &u) {
             return handle_tab_result( u, set_stats( u.window(), this, points ) );
         } );
-        t.add( _( "SKILLS" ), [handle_tab_result, this, &points](ui_tabs &u) {
+        t.add( _( "SKILLS" ), [&t, handle_tab_result, this, &points](ui_tabs &u) {
             return handle_tab_result( u, set_skills( u.window(), this, points ) );
         } );
         const bool allow_reroll = type == PLTYPE_RANDOM;
-        t.add( _( "DESCRIPTION" ), [handle_tab_result, this, &points, allow_reroll](ui_tabs &u) {
-            return handle_tab_result( u, set_description( u.window(), this, allow_reroll, points ) );
+        t.add( _( "DESCRIPTION" ), [&t, handle_tab_result, this, &points, allow_reroll]() {
+            return handle_tab_result( t, set_description( u.window(), this, allow_reroll, points ) );
         } );
     }
     switch (type) {

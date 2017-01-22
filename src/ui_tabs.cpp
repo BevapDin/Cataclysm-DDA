@@ -14,7 +14,7 @@ ui_tabs::ui_tabs(WINDOW *w)
 
 ui_tabs::~ui_tabs() = default;
 
-void ui_tabs::draw_tabs()
+void ui_tabs::draw()
 {
     werase( w );
 
@@ -34,7 +34,7 @@ void ui_tabs::draw_tabs()
     std::vector<int> tab_len;
     for (const auto &t : _tabs) {
         // +2 for the border
-        const size_t len = utf8_width(t.caption) + 2;
+        const size_t len = utf8_width(t->caption) + 2;
         tabs_length += len;
         tab_len.push_back( len );
     }
@@ -63,7 +63,7 @@ void ui_tabs::draw_tabs()
 void ui_tabs::draw_tab( int offset_x, const size_t index ) const
 {
     const bool selected = index == _current;
-    const std::string &caption = _tabs[index].caption;
+    const std::string &caption = _tabs[index]->caption;
     
     int offset_x_right = offset_x + utf8_width( caption ) + 1;
 
@@ -93,10 +93,4 @@ void ui_tabs::draw_tab( int offset_x, const size_t index ) const
         mvwputch( w, 2, offset_x,       c_ltgray, LINE_XXOX ); // _|_
         mvwputch( w, 2, offset_x_right, c_ltgray, LINE_XXOX ); // _|_
     }
-}
-
-void ui_tabs::loop() {
-    do {
-        draw_tabs();
-    } while(!_tabs[_current].callback(*this));
 }
