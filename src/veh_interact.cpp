@@ -193,6 +193,7 @@ veh_interact::veh_interact( vehicle &veh, int x, int y )
     main_context.register_action( "CONFIRM" );
     main_context.register_action( "HELP_KEYBINDINGS" );
     main_context.register_action( "FILTER" );
+    main_context.register_action( "CHANGE_ORIGIN" );
 
     countDurability();
     cache_tool_availability();
@@ -303,6 +304,15 @@ void veh_interact::do_main_loop()
             move_cursor( dx, dy );
         } else if( action == "QUIT" ) {
             finish = true;
+        } else if( action == "CHANGE_ORIGIN" ) {
+            const int vp = part_at( 0, 0 );
+            if( vp > -1 ) {
+                veh->shift_parts( veh->parts[vp].mount );
+                ddx = 0;
+                ddy = 0;
+                move_cursor( 0, 0 );
+            }
+            display_veh();
         } else if( action == "INSTALL" ) {
             redraw = do_install( msg );
         } else if( action == "REPAIR" ) {
