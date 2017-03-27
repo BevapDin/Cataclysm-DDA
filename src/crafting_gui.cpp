@@ -235,7 +235,7 @@ const recipe *select_crafting_recipe( int &batch_size )
 
             if( batch ) {
                 current.clear();
-                for( int i = 1; i <= 20; i++ ) {
+                for( int i = 1; i <= 64; i++ ) {
                     current.push_back( chosen );
                     available.push_back( chosen->requirements().can_make_with_inventory( crafting_inv, i ) );
                 }
