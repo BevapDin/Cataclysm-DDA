@@ -250,6 +250,7 @@ veh_interact::veh_interact( vehicle &veh, const point &p )
     main_context.register_action( "RELABEL" );
     main_context.register_action( "PREV_TAB" );
     main_context.register_action( "NEXT_TAB" );
+    main_context.register_action( "CHANGE_ORIGIN" );
     main_context.register_action( "OVERVIEW_DOWN" );
     main_context.register_action( "OVERVIEW_UP" );
     main_context.register_action( "FUEL_LIST_DOWN" );
@@ -478,6 +479,15 @@ void veh_interact::do_main_loop()
             move_cursor( vec->xy() );
         } else if( action == "QUIT" ) {
             finish = true;
+        } else if( action == "CHANGE_ORIGIN" ) {
+            const int vp = part_at( point( 0, 0 ) );
+            if( vp > -1 ) {
+                // copy because the value is changed during the function call
+                veh->shift_parts( get_map(), point( veh->part( vp ).mount ) );
+                dd = point( 0, 0 );
+                move_cursor( point( 0, 0 ) );
+            }
+            display_veh();
         } else if( action == "INSTALL" ) {
             if( veh->handle_potential_theft( dynamic_cast<Character &>( player_character ) ) ) {
                 do_install();
