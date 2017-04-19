@@ -688,6 +688,8 @@ class CppClass:
             line = line + "rval = " + result + ", "
             if name != self.cursor.spelling:
                 line = line + "cpp_name = \"" + self.cursor.spelling + "\", "
+            if self.cursor.raw_comment:
+                line = line + "comment = \"" + self.cursor.raw_comment + "\", "
             line = line + "args = " + args
             line = line + " }"
             return line
