@@ -1,0 +1,67 @@
+[
+    {
+        "type": "MOD_INFO",
+        "ident": "Lua",
+        "name": "Lua stuff",
+        "authors": [ "BevapDin" ],
+        "description": "Additional functionality provided via Lua",
+        "dependencies": [ "dda" ]
+    },
+    {
+        "id": "lua:outfit-manager",
+        "type": "GENERIC",
+        "name": "Lua outfit manager",
+        "description": "Activate to manage your outfits,",
+        "weight": 0,
+        "volume": "0ml",
+        "price": 0,
+        "symbol": " ",
+        "color": "red",
+        "armor_data": {
+          "covers": [ "TORSO" ],
+          "coverage": 0,
+          "encumbrance": 0,
+          "material_thickness": 0
+      },
+        "use_action": "Lua:outfits"
+    },
+    {
+        "type" : "item_action",
+        "id" : "Lua:outfits",
+        "name" : "Manage outfits"
+    },
+    {
+        "id": "lua:journal",
+        "type": "GENERIC",
+        "name": "Lua journal",
+        "description": "Activate to write to your journal,",
+        "weight": 0,
+        "volume": "0ml",
+        "price": 0,
+        "symbol": "#",
+        "color": "white",
+        "use_action": "Lua:journal"
+    },
+    {
+        "type" : "item_action",
+        "id" : "Lua:journal",
+        "name" : "Read or write journal"
+    },
+    {
+        "id": "lua:flowerpot",
+        "type": "GENERIC",
+        "name": "Lua flowerpot",
+        "description": "Activate to dig up a flower or to plant a flower from the pot.",
+        "weight": 0,
+        "volume": "0ml",
+        "price": 0,
+        "symbol": ":",
+        "color": "red",
+        "use_action": "Lua:flowerpot"
+    },
+    {
+        "type" : "item_action",
+        "id" : "Lua:flowerpot",
+        "name" : "Dig up flower or plant flower"
+    }
+]
