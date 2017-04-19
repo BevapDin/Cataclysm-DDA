@@ -386,6 +386,38 @@ class Parser:
         self.generic_types[sp] = 'make_' + name + '_class("%s")' % element_type
         return '"std::' + name + '<' + element_type + '>"'
 
+    def register_map(self, name, t):
+        sp = re.sub('^const ', '', t.spelling)
+        m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*), *([a-zA-Z][_a-zA-Z0-9:]*)>$', sp)
+        if not m:
+            if t.kind == clang.cindex.TypeKind.TYPEDEF:
+                return self.register_map(name, t.get_declaration().underlying_typedef_type)
+            return None
+
+        res = self.register_iterator(name, t)
+        if res: return res
+
+        key_type = m.group(1)
+        if self.build_in_lua_type(key_type) == 'std::string':
+            key_type = 'std::string'
+        elif self.export_by_value(key_type):
+            pass
+        else:
+            print("%s is a %s based on %s, but is not exported" % (t.spelling, name, key_type))
+            return None
+
+        value_type = m.group(2)
+        if self.build_in_lua_type(value_type) == 'std::string':
+            value_type = 'std::string'
+        elif self.export_by_value(value_type):
+            pass
+        else:
+            print("%s is a %s based on %s, but is not exported" % (t.spelling, name, value_type))
+            return None
+
+        self.generic_types[sp] = 'make_' + name + '_class("%s", "%s")' % (key_type, value_type)
+        return '"std::' + name + '<' + key_type + ", " + value_type + '>"'
+
     def register_id_type(self, t, ids_map, id_type):
         typedef = t
         if t.kind == clang.cindex.TypeKind.TYPEDEF:
@@ -417,6 +449,8 @@ class Parser:
         res = self.register_container('vector', t)
         if res: return res
         res = self.register_container('set', t)
+        if res: return res
+        res = self.register_map('map', t)
         if res: return res
 
         return None
@@ -722,10 +756,11 @@ class CppClass:
             return self.export_cb(lambda x : x)
 
     class CppAttribute:
-        def __init__(self, parent, cursor):
+        def __init__(self, parent, cursor, static):
             self.parent = parent
             self.cursor = cursor
             self.cpp_name = cursor.spelling
+            self.static = static
         def export(self):
             try:
                 if self.parent.parser.blocked_identifiers.match(self.parent.cpp_name + "::" + self.cpp_name):
@@ -737,6 +772,8 @@ class CppClass:
                 readonly = self.parent.parser.readonly_identifiers.match(self.parent.cpp_name + "::" + self.cpp_name)
                 if not self.cursor.type.is_const_qualified() and not readonly:
                     line = line + ", writable = true"
+                if self.static:
+                    line = line + ", static = true"
                 line = line + " }"
                 return [ line ]
             except TypeTranslationError as e:
@@ -797,11 +834,13 @@ class CppClass:
                 # and not with a different type. TODO: check the arguments.
                 self.has_equal = True
         elif k == clang.cindex.CursorKind.FIELD_DECL:
-            self.attributes.append(CppClass.CppAttribute(self, cursor))
+            self.attributes.append(CppClass.CppAttribute(self, cursor, False))
         elif k == clang.cindex.CursorKind.CONSTRUCTOR:
             self.constructors.append(CppClass.CppConstructor(self, cursor))
         elif k == clang.cindex.CursorKind.CXX_BASE_SPECIFIER:
             self.parents.append(cursor)
+        elif k == clang.cindex.CursorKind.VAR_DECL:
+            self.attributes.append(CppClass.CppAttribute(self, cursor, True))
 
     def print_objects(self, objects, prefix, postfix):
         lines = [ ]

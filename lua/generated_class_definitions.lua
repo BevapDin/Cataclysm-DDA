@@ -27,6 +27,12 @@ classes['calendar'] = {
     },
     by_value_and_reference = true,
     has_equal = true,
+    attributes = {
+        INDEFINITELY_LONG = { type = "int", static = true },
+        initial_season = { type = "season_type", writable = true, static = true },
+        start = { type = "calendar", writable = true, static = true },
+        turn = { type = "calendar", writable = true, static = true },
+    },
     functions = {
         { name = "current_daylight_level", rval = "float", args = { }, comment = "Returns the current seasonally-adjusted maximum daylight level" },
         { name = "day_of_week", rval = "std::string", args = { }, comment = "Returns the name of the current day of the week          *          * @note: Day 0 is a Thursday for highly technical reasons which are hard to explain" },
@@ -924,6 +930,7 @@ classes['item'] = {
     },
     by_value_and_reference = true,
     attributes = {
+        INFINITE_CHARGES = { type = "int", static = true },
         active = { type = "bool", writable = true },
         bday = { type = "int", writable = true },
         burnt = { type = "int", writable = true },
@@ -1766,6 +1773,7 @@ classes['furn_t'] = {
 classes['Creature'] = {
     attributes = {
         moves = { type = "int", writable = true },
+        size_map = { type = "std::map<std::string, m_size>", static = true },
         underwater = { type = "bool", writable = true },
     },
     functions = {
@@ -2325,6 +2333,9 @@ classes['mongroup'] = {
     }
 }
 classes['overmap'] = {
+    attributes = {
+        invalid_tripoint = { type = "tripoint", static = true },
+    },
     functions = {
         { name = "add_note", rval = nil, args = { "int", "int", "int", "std::string" } },
         { name = "add_npc", rval = nil, args = { "npc" } },
@@ -2378,6 +2389,7 @@ classes['itype'] = {
         phase = { type = "phase_id", writable = true },
         price = { type = "int", writable = true },
         price_post = { type = "int", writable = true },
+        properties = { type = "std::map<std::string, std::string>", writable = true },
         repair = { type = "std::set<std::string>", writable = true },
         rigid = { type = "bool", writable = true },
         snippet_category = { type = "std::string", writable = true },
@@ -2801,6 +2813,9 @@ classes['fault'] = {
     }
 }
 classes['effect'] = {
+    attributes = {
+        null_effect = { type = "effect", writable = true, static = true },
+    },
     functions = {
         { name = "activated", rval = "bool", args = { "int", "std::string", "int" }, comment = "Checks to see if a given modifier type can activate, and performs any rolls required to do so. mod is a direct          *  multiplier on the overall chance of a modifier type activating." },
         { name = "activated", rval = "bool", args = { "int", "std::string", "int", "bool" }, comment = "Checks to see if a given modifier type can activate, and performs any rolls required to do so. mod is a direct          *  multiplier on the overall chance of a modifier type activating." },
@@ -2890,6 +2905,7 @@ classes['npc'] = {
         last_updated = { type = "int", writable = true },
         marked_for_death = { type = "bool", writable = true },
         mission = { type = "npc_mission", writable = true },
+        no_goal_point = { type = "tripoint", static = true },
         path = { type = "std::vector<tripoint>", writable = true },
         patience = { type = "int", writable = true },
         pulp_location = { type = "tripoint", writable = true },
@@ -3181,6 +3197,7 @@ classes['requirement_data'] = {
     string_id = "requirement_id",
     by_value_and_reference = true,
     functions = {
+        { name = "all", static = true, rval = "std::map<requirement_id, requirement_data>", args = { }, comment = "Get all currently loaded requirements" },
         { name = "blacklist_item", rval = nil, args = { "std::string" }, comment = "Remove tools or components of given type leaving qualities unchanged          * @note if the last available component of a grouping is removed the recipe          * will be marked as @ref blacklisted" },
         { name = "can_make_with_inventory", rval = "bool", args = { "inventory" } },
         { name = "can_make_with_inventory", rval = "bool", args = { "inventory", "int" } },
@@ -3771,6 +3788,9 @@ enums['available_status'] = {
 }
 
 make_list_class("item")
+make_map_class("requirement_id", "requirement_data")
+make_map_class("std::string", "m_size")
+make_map_class("std::string", "std::string")
 make_set_class("fault_id")
 make_set_class("m_flag")
 make_set_class("matec_id")
