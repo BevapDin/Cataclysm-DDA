@@ -99,6 +99,9 @@ end
 -- of it onto the stack.
 function push_lua_value(in_variable, value_type)
     local wrapper
+    if value_type == nil or value_type == 'void' then
+        return '(' .. in_variable .. '), 0;';
+    end
     if value_type:sub(-1) == "&" then
         -- A reference is to be pushed. Copying the referred to object may not be allowed  (it may
         -- be a reference to a global game object).
@@ -123,7 +126,7 @@ function push_lua_value(in_variable, value_type)
         wrapper = member_type_to_cpp_type(value_type)
     end
 
-    return wrapper .. "::push(L, " .. in_variable .. ");"
+    return wrapper .. "::push(L, " .. in_variable .. "), 1;"
 end
 
 -- Generates a getter function for a specific class and member variable.
@@ -134,9 +137,7 @@ function generate_getter(class_name, member_name, member_type, cpp_name)
     text = text .. tab .. load_instance(class_name)..br
 
     -- adding the "&" to the type, so push_lua_value knows it's a reference.
-    text = text .. tab .. push_lua_value("instance."..cpp_name, member_type .. "&")..br
-
-    text = text .. tab .. "return 1;  // 1 return value"..br
+    text = text .. tab .. 'return ' .. push_lua_value("instance."..cpp_name, member_type .. "&")..br
     text = text .. "}" .. br
 
     return text
@@ -179,13 +180,7 @@ function generate_global_function_wrapper(function_name, function_to_call, args,
     end
     func_invoc = func_invoc .. ")"
 
-    if rval then
-        text = text .. tab .. push_lua_value(func_invoc, rval)..br
-        text = text .. tab .. "return 1; // 1 return values"..br
-    else
-        text = text .. tab .. func_invoc .. ";"..br
-        text = text .. tab .. "return 0; // 0 return values"..br
-    end
+    text = text .. tab .. 'return ' .. push_lua_value(func_invoc, rval) .. br
     text = text .. "}"..br
 
     return text
@@ -395,13 +390,7 @@ function generate_class_function_wrapper(class_name, function_name, func)
         func_invoc = func_invoc .. ")"
 
         local text
-        if data.rval then
-            text = tab .. push_lua_value(func_invoc, data.rval)..br
-            text = text .. tab .. "return 1; // 1 return values"..br
-        else
-            text = tab .. func_invoc .. ";"..br
-            text = text .. tab .. "return 0; // 0 return values"..br
-        end
+        text = tab .. 'return ' .. push_lua_value(func_invoc, data.rval) .. br
         return text
     end
 
@@ -454,8 +443,7 @@ function generate_operator(class_name, operator_id, cppname)
     end
     text = text .. ";"..br
 
-    text = text .. tab .. push_lua_value("rval", "bool")..br
-    text = text .. tab .. "return 1; // 1 return values"..br
+    text = text .. tab .. 'return ' .. push_lua_value("rval", "bool") .. br
     text = text .. "}"..br
 
     return text
