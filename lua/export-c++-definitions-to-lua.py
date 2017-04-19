@@ -63,7 +63,9 @@ parser.add_export_enumeration('season_type')
 parser.add_export_enumeration('add_type')
 parser.add_export_enumeration('field_id')
 
+source = ''
 for header in headers:
-    parser.parse('src/' + header)
+    source = source + '#include "src/' + header + "\"\n"
+parser.parse_source(source)
 
 parser.export('lua/generated_class_definitions.lua')

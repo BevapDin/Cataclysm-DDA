@@ -93,7 +93,6 @@ class Parser:
 
         self.enums = { }
         self.classes = { }
-        self.visited_files = [ ]
         self.index = clang.cindex.Index.create()
 
         self.build_in_typedefs = {
@@ -237,21 +236,22 @@ class Parser:
             self.build_in_typedefs[a] = bt
 
 
-    def parse(self, header):
-        if header in self.visited_files:
-            print('Skipping file %s as it was already included by another file' % (header))
-            return
+    '''
+    Main entry point for the Parser class:
+    source is supposed to be the C++ source code that contains *all* the types that should be exported.
+    This is typically a list of include statements, e.g. '#include "foo.h" #include "bar.h"'
+    '''
+    def parse_source(self, source):
         try:
             opts = clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES | clang.cindex.TranslationUnit.PARSE_INCOMPLETE
             foo = ['-x', 'c++', '-std=c++11', '-isystem', '/usr/lib/clang/4.0.0/include']
-            tu = self.index.parse(header, foo, options=opts)
+            tu = self.index.parse("dummy.h", foo, unsaved_files = [["dummy.h", source]], options=opts)
             for d in tu.diagnostics:
                 print("Diagnostic at %s:%s: %s" % (d.location.file.name, d.location.line, d.spelling))
             self.parse_cursor(tu.cursor)
-            for i in tu.get_includes():
-                self.visited_files.append(i.source.name)
+
         except clang.cindex.TranslationUnitLoadError as e:
-            print("Failed to parse %s: %s" % (header, str(e)))
+            print("Failed to parse %s: %s" % (source, str(e)))
 
 
 
