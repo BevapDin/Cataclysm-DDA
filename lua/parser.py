@@ -3,6 +3,7 @@ import clang.cindex
 clang.cindex.Config.set_library_path('/usr/lib')
 
 import re
+import glob
 
 class Matcher:
     def __init__(self):
@@ -266,8 +267,16 @@ class Parser:
     def parse_source(self, source):
         try:
             opts = clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES | clang.cindex.TranslationUnit.PARSE_INCOMPLETE
-            foo = ['-x', 'c++', '-std=c++11', '-isystem', '/usr/lib/clang/4.0.0/include']
-            tu = self.index.parse("dummy.h", foo, unsaved_files = [["dummy.h", source]], options=opts)
+            args = ['-x', 'c++', '-std=c++11']
+            # You may need to adjust this. The script may show Diagnostic messages about
+            # missing headers, if so, add the *correct* path to the clang include directory
+            # here (*not* the gcc include directory!)
+            includes = glob.glob('/usr/lib/clang/*/include')
+            if includes.count == 0:
+                raise RuntimeError("Failed to locate the clang includes. They should be in /usr/lib/clang/*/include")
+            # TODO: handled multiple versions: includes.count > 1
+            args += ['-isystem', includes[0]]
+            tu = self.index.parse("dummy.h", args, unsaved_files = [["dummy.h", source]], options=opts)
             for d in tu.diagnostics:
                 print("Diagnostic at %s:%s: %s" % (d.location.file.name, d.location.line, d.spelling))
             self.parse_cursor(tu.cursor)
