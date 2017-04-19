@@ -302,19 +302,17 @@ class Parser:
 
         handled_types = [ ]
         with open(lua_file, 'wb') as f:
-            f.write("classes = {\n")
+            f.write("classes = { }\n")
             for c in self.types_to_export:
                 if c in self.classes:
-                    f.write(self.classes[c].export() + ",\n")
+                    f.write(self.classes[c].export() + "\n")
                     handled_types.append(c)
-            f.write("}\n")
 
-            f.write("\n" + "enums = {\n")
+            f.write("\n" + "enums = { }\n")
             for e in self.types_to_export:
                 if e in self.enums:
-                    f.write(self.enums[e].export() + ",\n")
+                    f.write(self.enums[e].export() + "\n")
                     handled_types.append(e)
-            f.write("}\n")
 
             f.write("\n")
             for e in sorted(set(self.generic_types.itervalues())):
@@ -818,7 +816,7 @@ class CppClass:
             return ''
         r = prefix
         for l in sorted(lines):
-            r = r + ' ' * 12 + l + ',\n'
+            r = r + ' ' * 8 + l + ',\n'
         r = r + postfix
         return r
 
@@ -836,13 +834,13 @@ class CppClass:
             parent.gather_parent(pc, functions, attributes)
 
     def export(self):
-        tab = ' ' * 8
+        tab = ' ' * 4
         # Both lists will include the functions of parent classes
         functions = self.functions
         attributes = self.attributes
 
         r = ""
-        r = r + "    " + self.cpp_name + " = {\n"
+        r = r + "classes['" + self.cpp_name + "'] = {\n"
 
         for pc in self.parents:
             definition = pc.get_definition()
@@ -877,7 +875,7 @@ class CppClass:
         r = r + self.print_objects(attributes, tab + 'attributes = {\n', tab + '},\n')
         r = r + self.print_objects(functions, tab + 'functions = {\n', tab + '}\n')
 
-        r = r + "    }"
+        r = r + "}"
 
         return r
 
@@ -894,8 +892,8 @@ class CppEnum:
 
     def export(self):
         r = ""
-        r = r + "    " + self.cpp_name + " = {\n"
+        r = r + "enums['" + self.cpp_name + "'] = {\n"
         for a in self.values:
-            r = r + "        \"" + a + "\",\n"
-        r = r + "    }"
+            r = r + "    \"" + a + "\",\n"
+        r = r + "}"
         return r
