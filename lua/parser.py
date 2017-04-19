@@ -79,6 +79,9 @@ class SkippedObjectError:
 def is_public(cursor):
     return cursor.access_specifier == clang.cindex.AccessSpecifier.PUBLIC
 
+def fixcoments(comment):
+    return comment.replace("\\", "\\\\").replace("\n", " ").replace("\"", "'").strip(" */\n\t")
+
 class Parser:
     def __init__(self):
         '''
@@ -688,9 +691,9 @@ class CppClass:
             line = line + "rval = " + result + ", "
             if name != self.cursor.spelling:
                 line = line + "cpp_name = \"" + self.cursor.spelling + "\", "
-            if self.cursor.raw_comment:
-                line = line + "comment = \"" + self.cursor.raw_comment + "\", "
             line = line + "args = " + args
+            if self.cursor.raw_comment:
+                line = line + ", comment = \"" + fixcoments(self.cursor.raw_comment) + "\""
             line = line + " }"
             return line
 
