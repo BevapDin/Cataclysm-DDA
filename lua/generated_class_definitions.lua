@@ -176,6 +176,7 @@ classes['Character'] = {
         { name = "mod_stomach_water", rval = nil, args = { "int" } },
         { name = "mod_str_bonus", rval = nil, args = { "int" } },
         { name = "mod_thirst", rval = nil, args = { "int" } },
+        { name = "mutation_armor", rval = "float", args = { "body_part", "damage_unit" } },
         { name = "mutation_effect", rval = nil, args = { "std::string" }, comment = "Handles things like destruction of armor, etc." },
         { name = "mutation_loss_effect", rval = nil, args = { "std::string" }, comment = "Handles what happens when you lose a mutation." },
         { name = "mutation_value", rval = "float", args = { "std::string" }, comment = "Goes over all mutations, gets min and max of a value with given name          * @return min( 0, lowest ) + max( 0, highest )" },
@@ -509,6 +510,7 @@ classes['player'] = {
         { name = "amount_worn", rval = "int", args = { "std::string" }, comment = "Returns the amount of item `type' that is currently worn" },
         { name = "apply_persistent_morale", rval = nil, args = { }, comment = "Ensures persistent morale effects are up-to-date" },
         { name = "apply_wetness_morale", rval = nil, args = { "int" }, comment = "Recalculates morale penalty/bonus from wetness based on mutations, equipment and temperature" },
+        { name = "armor_absorb", rval = "bool", args = { "damage_unit", "item" }, comment = "Reduces and mutates du, prints messages about armor taking damage.          * @return true if the armor was completely destroyed (and the item must be deleted)." },
         { name = "attack_speed", rval = "int", args = { "item" }, comment = "Returns cost (in moves) of attacking with given item (no modifiers, like stuck)" },
         { name = "best_shield", rval = "item&", args = { }, comment = "Returns the best item for blocking with" },
         { name = "blossoms", rval = nil, args = { } },
@@ -656,6 +658,7 @@ classes['player'] = {
         { name = "hunger_speed_penalty", static = true, rval = "int", args = { "int" }, comment = "Returns the penalty to speed from hunger" },
         { name = "hurtall", rval = nil, args = { "int", "Creature" }, comment = "Hurts all body parts for dam, no armor reduction" },
         { name = "hurtall", rval = nil, args = { "int", "Creature", "bool" }, comment = "Hurts all body parts for dam, no armor reduction" },
+        { name = "immune_to", rval = "bool", args = { "body_part", "damage_unit" }, comment = "Check if a given body part is immune to a given damage type          *          * This function checks whether a given body part cannot be damaged by a given          * damage_unit.  Note that this refers only to reduction of hp on that part. It          * does not account for clothing damage, pain, status effects, etc.          *          * @param bp: Body part to perform the check on          * @param dam: Type of damage to check for          * @returns true if given damage can not reduce hp of given body part" },
         { name = "in_climate_control", rval = "bool", args = { }, comment = "Returns true if the player is in a climate controlled area or armor" },
         { name = "install_bionics", rval = "bool", args = { "itype" }, comment = "Attempts to install bionics, returns false if the player cancels prior to installation" },
         { name = "install_bionics", rval = "bool", args = { "itype", "int" }, comment = "Attempts to install bionics, returns false if the player cancels prior to installation" },
@@ -726,6 +729,7 @@ classes['player'] = {
         { name = "on_hurt", rval = nil, args = { "Creature", "bool" }, comment = "Handles effects that happen when the player is damaged and aware of the fact." },
         { name = "overmap_los", rval = "bool", args = { "tripoint", "int" }, comment = "Returns true if overmap tile is within player line-of-sight" },
         { name = "overmap_sight_range", rval = "int", args = { "int" }, comment = "Returns the distance the player can see on the overmap" },
+        { name = "passive_absorb_hit", rval = nil, args = { "body_part", "damage_unit" }, comment = "Check for relevant passive, non-clothing that can absorb damage, and reduce by specified          * damage unit.  Only flat bonuses are checked here.  Multiplicative ones are checked in          * @ref player::absorb_hit.  The damage amount will never be reduced to less than 0.          * This is called from @ref player::absorb_hit" },
         { name = "pause", rval = nil, args = { } },
         { name = "perform_special_attacks", rval = nil, args = { "Creature" }, comment = "Performs special attacks and their effects (poisonous, stinger, etc.)" },
         { name = "pick_style", rval = "bool", args = { }, comment = "Creates the UI and handles player input for picking martial arts styles" },
@@ -1127,6 +1131,7 @@ classes['item'] = {
         { name = "melee_skill", rval = "skill_id", args = { }, comment = "The most relevant skill used with this melee weapon. Can be 'null' if this is not a weapon.      * Note this function returns null if the item is a gun for which you can use gun_skill() instead." },
         { name = "merge_charges", rval = "bool", args = { "item" }, comment = "Merge charges of the other item into this item.          * @return true if the items have been merged, otherwise false.          * Merging is only done for items counted by charges (@ref count_by_charges) and          * items that stack together (@ref stacks_with)." },
         { name = "min_damage", rval = "int", args = { }, comment = "Minimum amount of damage to an item (state of maximum repair)" },
+        { name = "mitigate_damage", rval = nil, args = { "damage_unit" }, comment = "Assuming that specified du hit the armor, reduce du based on the item's resistance to the      * damage type. This will never reduce du.amount below 0." },
         { name = "mod_charges", rval = nil, args = { "int" }, comment = "Modify the charges of this item, only use for items counted by charges!      * The item must have enough charges for this (>= quantity) and be counted      * by charges.      * @param mod How many charges should be removed." },
         { name = "mod_damage", rval = "bool", args = { "float" }, comment = "Apply damage to item constrained by @ref min_damage and @ref max_damage      * @param qty maximum amount by which to adjust damage (negative permissible)      * @param dt type of damage which may be passed to @ref on_damage callback      * @return whether item should be destroyed" },
         { name = "needs_processing", rval = "bool", args = { }, comment = "Whether the item should be processed (by calling @ref process)." },
@@ -2917,8 +2922,12 @@ classes['damage_instance'] = {
         { },
     },
     by_value = true,
+    attributes = {
+        damage_units = { type = "std::vector<damage_unit>", writable = true },
+    },
     functions = {
         { name = "add", rval = nil, args = { "damage_instance" } },
+        { name = "add", rval = nil, args = { "damage_unit" } },
         { name = "clear", rval = nil, args = { } },
         { name = "empty", rval = "bool", args = { } },
         { name = "mult_damage", rval = nil, args = { "float" } },
@@ -2927,6 +2936,15 @@ classes['damage_instance'] = {
         { name = "physical", static = true, rval = "damage_instance", args = { "float", "float", "float", "float" } },
         { name = "total_damage", rval = "float", args = { } },
     }
+}
+classes['damage_unit'] = {
+    by_value = true,
+    attributes = {
+        amount = { type = "float", writable = true },
+        damage_multiplier = { type = "float", writable = true },
+        res_mult = { type = "float", writable = true },
+        res_pen = { type = "float", writable = true },
+    },
 }
 
 enums = { }
@@ -3060,6 +3078,7 @@ make_set_class("species_id")
 make_set_class("std::string")
 make_set_class("tripoint")
 make_vector_class("body_part")
+make_vector_class("damage_unit")
 make_vector_class("efftype_id")
 make_vector_class("item")
 make_vector_class("mabuff_id")
