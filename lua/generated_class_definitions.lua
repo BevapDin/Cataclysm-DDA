@@ -1295,6 +1295,11 @@ classes['tripoint'] = {
     }
 }
 classes['uimenu'] = {
+    new = {
+        { "std::string" },
+        { },
+    },
+    by_value_and_reference = true,
     attributes = {
         border = { type = "bool", writable = true },
         border_color = { type = "int", writable = true },

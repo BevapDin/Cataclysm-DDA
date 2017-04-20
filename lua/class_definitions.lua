@@ -117,11 +117,6 @@ global_functions = {
         args = { "std::string", "int", "std::string" },
         rval = "std::string"
     },
-    create_uimenu = {
-        cpp_name = "create_uimenu",
-        args = {},
-        rval = "uimenu&"
-    },
     get_terrain_type = {
         cpp_name = "get_terrain_type",
         args = {"int"},
