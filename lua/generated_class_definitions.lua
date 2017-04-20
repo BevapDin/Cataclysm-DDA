@@ -864,6 +864,7 @@ classes['item'] = {
         charges = { type = "int", writable = true },
         components = { type = "std::vector<item>", writable = true },
         contents = { type = "std::list<item>", writable = true },
+        faults = { type = "std::set<fault_id>", writable = true },
         frequency = { type = "int", writable = true },
         fridge = { type = "int", writable = true },
         invlet = { type = "int", writable = true },
@@ -947,6 +948,7 @@ classes['item'] = {
         { name = "display_name", rval = "std::string", args = { }, comment = "Returns the item name and the charges or contained charges (if the item can have      * charges at at all). Calls @ref tname with given quantity and with_prefix being true." },
         { name = "engine_displacement", rval = "int", args = { }, comment = "for combustion engines the displacement (cc)" },
         { name = "erase_var", rval = nil, args = { "std::string" }, comment = "Erase the value of the given variable." },
+        { name = "faults_potential", rval = "std::set<fault_id>", args = { }, comment = "What faults can potentially occur with this item?" },
         { name = "fill_with", rval = nil, args = { "item" }, comment = "Fill item with liquid up to its capacity. This works for guns and tools that accept      * liquid ammo.      * @param liquid Liquid to fill the container with.      * @param amount Amount to fill item with, capped by remaining capacity" },
         { name = "fill_with", rval = nil, args = { "item", "int" }, comment = "Fill item with liquid up to its capacity. This works for guns and tools that accept      * liquid ammo.      * @param liquid Liquid to fill the container with.      * @param amount Amount to fill item with, capped by remaining capacity" },
         { name = "find_parent", rval = "item&", args = { "item" }, comment = "Determine the immediate parent container (if any) for an item.          * @param it item to search for which must be contained (at any depth) by this object          * @return parent container or nullptr if the item is not within a container" },
@@ -2563,6 +2565,9 @@ classes['vehicle_part'] = {
         { name = "consume_energy", rval = "float", args = { "std::string", "float" }, comment = "Consume fuel by energy content.      * @param ftype Type of fuel to consume      * @param energy Energy to consume, in kJ      * @return Energy actually consumed, in kJ" },
         { name = "damage", rval = "float", args = { }, comment = "Current part damage in same units as item::damage." },
         { name = "deserialize", rval = nil, args = { "std::string" } },
+        { name = "fault_set", rval = "bool", args = { "fault_id" }, comment = "Try to set fault returning false if specified fault cannot occur with this item" },
+        { name = "faults", rval = "std::set<fault_id>", args = { }, comment = "Current faults affecting this part (if any)" },
+        { name = "faults_potential", rval = "std::set<fault_id>", args = { }, comment = "Faults which could potentially occur with this part (if any)" },
         { name = "fill_with", rval = "bool", args = { "item" }, comment = "Try adding @param liquid to tank optionally limited by @param qty      *  @return whether any of the liquid was consumed (which may be less than qty)" },
         { name = "fill_with", rval = "bool", args = { "item", "int" }, comment = "Try adding @param liquid to tank optionally limited by @param qty      *  @return whether any of the liquid was consumed (which may be less than qty)" },
         { name = "has_flag", rval = "bool", args = { "int" } },
@@ -2643,6 +2648,16 @@ classes['vpart_info'] = {
         { name = "removal_time", rval = "int", args = { "Character" }, comment = "Removal time (in moves) for this component accounting for player skills" },
         { name = "repair_time", rval = "int", args = { "Character" }, comment = "Repair time (in moves) to fully repair this component, accounting for player skills" },
         { name = "set_flag", rval = nil, args = { "std::string" } },
+    }
+}
+classes['fault'] = {
+    string_id = "fault_id",
+    functions = {
+        { name = "description", rval = "std::string", args = { } },
+        { name = "id", rval = "fault_id", args = { } },
+        { name = "is_null", rval = "bool", args = { } },
+        { name = "name", rval = "std::string", args = { } },
+        { name = "time", rval = "int", args = { } },
     }
 }
 
@@ -2770,6 +2785,7 @@ enums['field_id'] = {
 }
 
 make_list_class("item")
+make_set_class("fault_id")
 make_set_class("matec_id")
 make_set_class("material_id")
 make_set_class("species_id")
