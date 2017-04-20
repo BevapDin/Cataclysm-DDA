@@ -34,6 +34,7 @@
 #include "martialarts.h"
 #include "material.h"
 #include "start_location.h"
+#include "vehicle.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
