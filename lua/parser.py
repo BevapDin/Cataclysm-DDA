@@ -45,15 +45,25 @@ def xydump2(cursor, ident, prefix, visited):
         return
     visited.append(cursor)
 
+    for i in xrange(cursor.get_num_template_arguments()):
+        print("%s%stemplate: %s - %s - %s - %s - %s" % (prefix, "   " * ident, str(i), \
+            str(cursor.get_template_argument_kind(i)), str(cursor.get_template_argument_type(i)), \
+            str(cursor.get_template_argument_value(i)), str(cursor.get_template_argument_unsigned_value(i))))
+
     defi = cursor.get_definition()
     if defi:
         print("%s%sdefinition: %s[%s]" % (prefix, "   " * ident, defi.spelling, str(defi.kind)))
         xydump2(defi, 0, '   ' * ident + 'd  ', visited)
 
     ty = cursor.type
-    if ty:
+    if ty.kind != clang.cindex.TypeKind.INVALID:
         print("%s%stype: %s[%s]" % (prefix, "   " * ident, ty.spelling, str(ty.kind)))
         xydump2(ty.get_declaration(), 0, '   ' * ident + 't  ', visited)
+
+        tp = ty.get_pointee()
+        if tp.kind != clang.cindex.TypeKind.INVALID:
+            print("%s%spointee: %s[%s]" % (prefix, "   " * ident, tp.spelling, str(tp.kind)))
+            xydump2(tp.get_declaration(), 0, '   ' * ident + 'p  ', visited)
 
     for c in cursor.get_children():
         xydump2(c, ident + 1, prefix, visited)
@@ -269,6 +279,7 @@ class Parser:
         if self.parse_id_typedef(cursor, 'int_id', self.int_ids):
             return
 
+        # We need this later in `register_container`
         bt = self.build_in_lua_type(cursor.underlying_typedef_type)
         if bt:
             a = re.sub('^const ', '', cursor.spelling)
@@ -447,19 +458,16 @@ class Parser:
         if not m:
             m = re.match('^const ' + id_type + '<([a-zA-Z][_a-zA-Z0-9]*)>$', t.spelling)
             if not m:
-                debug_print("%s (%s) is not a %s" % (t.spelling, typedef.spelling, id_type))
                 return None
 
         base_type = m.group(1)
         name = re.sub('^const ', '', typedef.spelling)
         if not name in ids_map:
             if not self.export_enabled(base_type):
-                debug_print("%s (%s) is a %s, but it's not exported" % (t.spelling, typedef.spelling, id_type))
                 return None
             ids_map[name] = base_type
             # A id itself is always handled by value. It's basically a std::string/int.
             self.types_exported_by_value.append(name)
-            debug_print('Automatically added "%s" as "%s<%s>"' % (name, id_type, base_type))
 
         return '"%s"' % name
 
@@ -589,7 +597,6 @@ class Parser:
             pt = t.get_pointee()
             spt = pt.spelling
             if pt.is_const_qualified():
-                debug_print("pointee: %s (from %s)" % (pt.spelling, t.spelling))
                 # "const int &" can be satisfied by the build-in Lua "int".
                 # But it won't work correctly with "int &" as the value passed to
                 # the C++ functions is a temporary.
@@ -681,6 +688,12 @@ class CppClass:
             if m == 0:
                 return '{ }'
             args = list(self.cursor.get_arguments())[0:m]
+#            for a in args:
+#                print(">> %s[%s]" % (a.spelling, a.kind))
+#                xydump(a.type.get_pointee().get_declaration())
+#                for c in a.type.get_pointee().get_declaration().get_children():
+#                    print("%s[%s]" % (c.spelling, c.kind))
+
             args = [ self.parent.parser.translate_argument_type(a.type) for a in args]
             return "{ " + ", ".join(args) + " }"
 
