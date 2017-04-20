@@ -939,36 +939,6 @@ static void add_msg_wrapper(const std::string &text) {
     add_msg( "%s", text.c_str() );
 }
 
-// items = game.items_at(x, y)
-static int game_items_at(lua_State *L)
-{
-    int x = lua_tointeger(L, 1);
-    int y = lua_tointeger(L, 2);
-
-    auto items = g->m.i_at(x, y);
-    lua_createtable(L, items.size(), 0); // Preallocate enough space for all our items.
-
-    // Iterate over the monster list and insert each monster into our returned table.
-    int i = 0;
-    for( auto &an_item : items ) {
-        // The stack will look like this:
-        // 1 - t, table containing item
-        // 2 - k, index at which the next item will be inserted
-        // 3 - v, next item to insert
-        //
-        // lua_rawset then does t[k] = v and pops v and k from the stack
-
-        lua_pushnumber(L, i++ + 1);
-        item **item_userdata = (item **) lua_newuserdata(L, sizeof(item *));
-        *item_userdata = &an_item;
-        // TODO: update using LuaReference<item>
-        luah_setmetatable(L, "item_metatable");
-        lua_rawset(L, -3);
-    }
-
-    return 1; // 1 return values
-}
-
 // item_groups = game.get_item_groups()
 static int game_get_item_groups(lua_State *L)
 {
@@ -1139,7 +1109,6 @@ static int game_myPrint( lua_State *L )
 static const struct luaL_Reg global_funcs [] = {
     {"register_iuse", game_register_iuse},
     //{"get_monsters", game_get_monsters},
-    {"items_at", game_items_at},
     {"choose_adjacent", game_choose_adjacent},
     {"dofile", game_dofile},
     {"get_monster_types", game_get_monster_types},
