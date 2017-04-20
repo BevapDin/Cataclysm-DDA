@@ -146,7 +146,8 @@ class Parser:
         self.types_exported_by_reference.append(cpp_name)
         self.types_to_export.append(cpp_name)
     def add_export_enumeration(self, cpp_name):
-        self.add_export_by_value(cpp_name)
+        if not self.export_by_value(cpp_name):
+            self.add_export_by_value(cpp_name)
 
 
 
@@ -191,16 +192,32 @@ class Parser:
 
 
 
-    def parse_enum(self, cursor):
-        if not self.export_enabled(cursor.type):
+    def parse_enum(self, cursor, namespace):
+        # unnamed enum -> can not be exported at all
+        if cursor.spelling == '':
             return
-        # Just a declaration, skip the actual parsing as it requires a proper definition.
+        # enum from the std library, only exported if explicitly requested, it's probably
+        # not needed
+        if re.match('^std::.*', namespace) and not self.export_by_value(cursor.type):
+            return
+        # internal enum (everything with '_' is internal to the std library)
+        if re.match('^_.*', cursor.spelling) or re.match('^_.*', namespace):
+            return
+        name = namespace + cursor.spelling
         if not cursor.is_definition():
+            if not cursor.type.get_declaration().is_definition():
+                debug_print("Skipping enum %s, it has no definition" % (name))
+                # Found no actual definition of the enum, therefor can't export it )-:
+                return
+            # Just a declaration, skip it for now, the actual definition will be parsed later
+            # Register it anyway, so code that uses it (before the actual definition) knows it's available in Lua.
+            self.add_export_enumeration(name)
             return
-        e = CppEnum(self, cursor);
+        e = CppEnum(self, cursor, namespace)
         self.enums.setdefault(e.cpp_name, e)
+        self.add_export_enumeration(e.cpp_name)
 
-    def parse_class(self, cursor):
+    def parse_class(self, cursor, namespace):
         sp = cursor.spelling
         if not self.export_enabled(cursor.type):
             return
@@ -243,7 +260,7 @@ class Parser:
 
 
 
-    def parse_typedef(self, cursor):
+    def parse_typedef(self, cursor, namespace):
         # string_id and int_id typedefs are handled separately so we can include the typedef
         # name in the definition of the class. This allows Lua code to use the typedef name
         # instead of the underlying type `string_id<T>`.
@@ -279,7 +296,7 @@ class Parser:
             tu = self.index.parse("dummy.h", args, unsaved_files = [["dummy.h", source]], options=opts)
             for d in tu.diagnostics:
                 print("Diagnostic at %s:%s: %s" % (d.location.file.name, d.location.line, d.spelling))
-            self.parse_cursor(tu.cursor)
+            self.parse_cursor(tu.cursor, "")
 
         except clang.cindex.TranslationUnitLoadError as e:
             print("Failed to parse %s: %s" % (source, str(e)))
@@ -324,22 +341,25 @@ class Parser:
 
 
 
-    def parse_cursor(self, cursor):
+    def parse_cursor(self, cursor, namespace):
         k = cursor.kind
         if k == clang.cindex.CursorKind.STRUCT_DECL or k == clang.cindex.CursorKind.CLASS_DECL or k == clang.cindex.CursorKind.CLASS_TEMPLATE:
-            self.parse_class(cursor)
+            self.parse_class(cursor, namespace)
             return
 
         if k == clang.cindex.CursorKind.ENUM_DECL:
-            self.parse_enum(cursor)
+            self.parse_enum(cursor, namespace)
             return
 
         if k == clang.cindex.CursorKind.TYPEDEF_DECL or k == clang.cindex.CursorKind.TYPE_ALIAS_DECL:
-            self.parse_typedef(cursor)
+            self.parse_typedef(cursor, namespace)
             return
 
+        if k == clang.cindex.CursorKind.NAMESPACE:
+            namespace = namespace + cursor.spelling + "::"
+
         for c in cursor.get_children():
-            self.parse_cursor(c)
+            self.parse_cursor(c, namespace)
 
 
 
@@ -921,9 +941,9 @@ class CppClass:
 
 
 class CppEnum:
-    def __init__(self, parser, cursor):
+    def __init__(self, parser, cursor, namespace):
         self.values = [ ]
-        self.cpp_name = cursor.spelling
+        self.cpp_name = namespace + cursor.spelling
 
         for c in cursor.get_children():
             if c.kind == clang.cindex.CursorKind.ENUM_CONSTANT_DECL:
