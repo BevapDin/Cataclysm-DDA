@@ -39,6 +39,7 @@
 #include "fault.h"
 #include "effect.h"
 #include "vitamin.h"
+#include "npc.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
