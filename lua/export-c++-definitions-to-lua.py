@@ -15,6 +15,7 @@ headers = [
     'monstergenerator.h', 'item_stack.h', 'mongroup.h', 'weather_gen.h',
     'vehicle.h', 'veh_type.h', 'fault.h', 'effect.h', 'vitamin.h',
     'npc.h', 'damage.h',
+    'weather.h', 'recipe.h', 'recipe_dictionary.h', 'inventory.h'
 ]
 
 parser = Parser()
@@ -66,6 +67,14 @@ parser.add_export_by_reference('vitamin')
 parser.add_export_by_reference('npc')
 parser.add_export_by_value('damage_instance')
 parser.add_export_by_value('damage_unit')
+parser.add_export_by_reference('recipe_dictionary')
+parser.add_export_by_value_and_reference('recipe')
+parser.add_export_by_value_and_reference('inventory')
+parser.add_export_by_value_and_reference('requirement_data')
+parser.add_export_by_reference('quality')
+parser.add_export_by_value_and_reference('tool_comp')
+parser.add_export_by_value_and_reference('item_comp')
+parser.add_export_by_value_and_reference('quality_requirement')
 
 # Enums that should be available in Lua.
 parser.add_export_enumeration('body_part')
@@ -78,6 +87,24 @@ parser.add_export_enumeration('add_type')
 parser.add_export_enumeration('field_id')
 parser.add_export_enumeration('damage_type')
 parser.add_export_enumeration('m_flag')
+parser.add_export_enumeration('effect_rating')
+parser.add_export_enumeration('weather_type')
+parser.add_export_enumeration('monster_trigger')
+parser.add_export_enumeration('moon_phase')
+parser.add_export_enumeration('art_effect_passive')
+parser.add_export_enumeration('special_game_id')
+parser.add_export_enumeration('safe_mode_type')
+parser.add_export_enumeration('edible_rating')
+parser.add_export_enumeration('hint_rating')
+parser.add_export_enumeration('side')
+parser.add_export_enumeration('lit_level')
+parser.add_export_enumeration('ter_bitflags')
+parser.add_export_enumeration('direction')
+parser.add_export_enumeration('monster_attitude')
+parser.add_export_enumeration('vpart_bitflags')
+parser.add_export_enumeration('npc_attitude')
+parser.add_export_enumeration('npc_mission')
+parser.add_export_enumeration('available_status')
 
 # Data members are checked against `readonly_identifiers` to see whether
 # they should be writable from Lua. Const members are always non-writable.
@@ -105,6 +132,8 @@ parser.blocked_identifiers.add(re.compile('static .*::load\(.*JsonObject.*\)$'))
 parser.blocked_identifiers.add(re.compile('static .*::reset\(\)$'))
 parser.blocked_identifiers.add(re.compile('static .*::check_consistency\(\)$'))
 parser.blocked_identifiers.add(re.compile('static .*::finalize\(\)$'))
+# Problematic because of overloading in C++
+parser.blocked_identifiers.add(re.compile('.*item::get_remaining_capacity_for_liquid\(.*'))
 
 
 # Some functions can be used even if the return type can not be exported (their
