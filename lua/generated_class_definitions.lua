@@ -709,6 +709,7 @@ classes['player'] = {
         { name = "make_craft_with_command", rval = nil, args = { "std::string", "int" } },
         { name = "make_craft_with_command", rval = nil, args = { "std::string", "int", "bool" } },
         { name = "making_would_work", rval = "bool", args = { "std::string", "int" } },
+        { name = "melee_special_effects", rval = "std::string", args = { "Creature", "damage_instance", "ma_technique" }, comment = "Handles combat effects, returns a string of any valid combat effect messages" },
         { name = "melee_value", rval = "float", args = { "item" } },
         { name = "mend", rval = nil, args = { "int" }, comment = "Handles the chance for broken limbs to spontaneously heal to 1 HP" },
         { name = "metabolic_rate", rval = "float", args = { }, comment = "Current metabolic rate due to traits, hunger, speed, etc." },
@@ -757,6 +758,11 @@ classes['player'] = {
         { name = "remove_child_flag", rval = nil, args = { "std::string" }, comment = "Removes the mutation's child flag from the player's list" },
         { name = "remove_mutation", rval = nil, args = { "std::string" }, comment = "Removes a mutation, downgrading to the previous level if possible" },
         { name = "remove_random_bionic", rval = "bool", args = { }, comment = "Randomly removes a bionic from my_bionics[]" },
+        { name = "roll_all_damage", rval = nil, args = { "bool", "damage_instance" }, comment = "Adds all 3 types of physical damage to instance" },
+        { name = "roll_all_damage", rval = nil, args = { "bool", "damage_instance", "bool", "item" } },
+        { name = "roll_bash_damage", rval = nil, args = { "bool", "damage_instance", "bool", "item" }, comment = "Adds player's total bash damage to the damage instance" },
+        { name = "roll_cut_damage", rval = nil, args = { "bool", "damage_instance", "bool", "item" }, comment = "Adds player's total cut damage to the damage instance" },
+        { name = "roll_stab_damage", rval = nil, args = { "bool", "damage_instance", "bool", "item" }, comment = "Adds player's total stab damage to the damage instance" },
         { name = "rooted", rval = nil, args = { } },
         { name = "rooted_message", rval = nil, args = { }, comment = "Handles rooting effects" },
         { name = "run_cost", rval = "int", args = { "int" }, comment = "Returns the player's modified base movement cost" },
@@ -915,6 +921,8 @@ classes['item'] = {
         { name = "amount_of", rval = "int", args = { "std::string", "bool" }, comment = "Count items matching id including both this instance and any contained items          * @param what ID of items to count          * @param pseudo whether pseudo-items (from map/vehicle tiles, bionics etc) are considered          * @param limit stop searching after this many matches          * @note items must be empty to be considered a match" },
         { name = "amount_of", rval = "int", args = { "std::string", "bool", "int" }, comment = "Count items matching id including both this instance and any contained items          * @param what ID of items to count          * @param pseudo whether pseudo-items (from map/vehicle tiles, bionics etc) are considered          * @param limit stop searching after this many matches          * @note items must be empty to be considered a match" },
         { name = "attack_time", rval = "int", args = { }, comment = "Base number of moves (@ref Creature::moves) that a single melee attack with this items      * takes. The actual time depends heavily on the attacker, see melee.cpp." },
+        { name = "base_damage_melee", rval = "damage_instance", args = { }, comment = "All damage types this item deals when used in melee (no skill modifiers etc. applied)." },
+        { name = "base_damage_thrown", rval = "damage_instance", args = { }, comment = "All damage types this item deals when thrown (no skill modifiers etc. applied)." },
         { name = "base_volume", rval = "units::volume", args = { }, comment = "Simplified, faster volume check for when processing time is important and exact volume is not." },
         { name = "bash_resist", rval = "int", args = { "bool" } },
         { name = "bash_resist", rval = "int", args = { } },
@@ -1689,6 +1697,7 @@ classes['Creature'] = {
         underwater = { type = "bool", writable = true },
     },
     functions = {
+        { name = "absorb_hit", rval = nil, args = { "body_part", "damage_instance" } },
         { name = "add_effect", rval = nil, args = { "efftype_id", "int" }, comment = "Adds or modifies an effect. If intensity is given it will set the effect intensity             to the given value, or as close as max_intensity values permit." },
         { name = "add_effect", rval = nil, args = { "efftype_id", "int", "body_part" }, comment = "Adds or modifies an effect. If intensity is given it will set the effect intensity             to the given value, or as close as max_intensity values permit." },
         { name = "add_effect", rval = nil, args = { "efftype_id", "int", "body_part", "bool" }, comment = "Adds or modifies an effect. If intensity is given it will set the effect intensity             to the given value, or as close as max_intensity values permit." },
@@ -1703,6 +1712,7 @@ classes['Creature'] = {
         { name = "avoid_trap", rval = "bool", args = { "tripoint", "trap" }, comment = "Called when a creature triggers a trap, returns true if they don't set it off.          * @param tr is the trap that was triggered.          * @param pos is the location of the trap (not necessarily of the creature) in the main map." },
         { name = "basic_symbol_color", rval = "int", args = { } },
         { name = "bleed", rval = nil, args = { }, comment = "Adds an appropriate blood splatter." },
+        { name = "block_hit", rval = "bool", args = { "Creature", "body_part", "damage_instance" } },
         { name = "bloodType", rval = "field_id", args = { } },
         { name = "check_dead_state", rval = nil, args = { }, comment = "This function checks the creatures @ref is_dead_state and (if true) calls @ref die.          * You can either call this function after hitting this creature, or let the game          * call it during @ref game::cleanup_dead.          * As @ref die has many side effects (messages, on-death-triggers, ...), you should be          * careful when calling this and expect that at least a 'The monster dies!' message might          * have been printed. If you want to print any message relating to the attack (e.g. how          * much damage has been dealt, how the attack was performed, what has been blocked...), do          * it *before* calling this function." },
         { name = "clear_effects", rval = nil, args = { }, comment = "Remove all effects." },
@@ -2154,6 +2164,7 @@ classes['mtype'] = {
         id = { type = "mtype_id" },
         luminance = { type = "float", writable = true },
         mat = { type = "std::vector<material_id>", writable = true },
+        melee_damage = { type = "damage_instance", writable = true },
         melee_dice = { type = "int", writable = true },
         melee_sides = { type = "int", writable = true },
         melee_skill = { type = "int", writable = true },
@@ -2276,6 +2287,7 @@ classes['itype'] = {
         stackable = { type = "bool", writable = true },
         sym = { type = "std::string", writable = true },
         techniques = { type = "std::set<matec_id>", writable = true },
+        thrown_damage = { type = "damage_instance", writable = true },
         volume = { type = "units::volume", writable = true },
         weight = { type = "int", writable = true },
     },
@@ -2898,6 +2910,22 @@ classes['npc'] = {
         { name = "wield_better_weapon", rval = "bool", args = { } },
         { name = "will_accept_from_player", rval = "bool", args = { "item" }, comment = "Is the item safe or does the NPC trust you enough?" },
         { name = "wont_hit_friend", rval = "bool", args = { "tripoint", "item", "bool" } },
+    }
+}
+classes['damage_instance'] = {
+    new = {
+        { },
+    },
+    by_value = true,
+    functions = {
+        { name = "add", rval = nil, args = { "damage_instance" } },
+        { name = "clear", rval = nil, args = { } },
+        { name = "empty", rval = "bool", args = { } },
+        { name = "mult_damage", rval = nil, args = { "float" } },
+        { name = "mult_damage", rval = nil, args = { "float", "bool" } },
+        { name = "physical", static = true, rval = "damage_instance", args = { "float", "float", "float" } },
+        { name = "physical", static = true, rval = "damage_instance", args = { "float", "float", "float", "float" } },
+        { name = "total_damage", rval = "float", args = { } },
     }
 }
 
