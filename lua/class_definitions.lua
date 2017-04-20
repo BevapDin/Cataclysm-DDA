@@ -157,11 +157,6 @@ global_functions = {
         args = { "mtype_id", "tripoint" },
         rval = "monster&",
         desc = "Creates and spawns a new monster of given type. Returns a refernce to it, *or* nil if it could not be spawned."
-    },
-    get_calendar_turn = {
-        cpp_name = "get_calendar_turn_wrapper",
-        args = {},
-        rval = "calendar&"
     }
 }
 

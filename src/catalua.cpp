@@ -879,10 +879,6 @@ const ter_t &get_terrain_type(int id)
     return ter_id( id ).obj();
 }
 
-static calendar &get_calendar_turn_wrapper() {
-    return calendar::turn;
-}
-
 static std::string string_input_popup_wrapper(std::string title, int width, std::string desc) {
     return string_input_popup().title(title).width(width).description(desc).query_string();
 }
