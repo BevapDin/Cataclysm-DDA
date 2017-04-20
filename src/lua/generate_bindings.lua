@@ -30,7 +30,7 @@ local tab = "    "
 -- 'X_part::info' would create the same wrapper function. Adding the separator makes
 -- them 'X_LUA_part_info' and 'X_part_LUA_info'
 function cpp_ident(name)
-    return name:gsub('%A', '_') .. '_LUA_'
+    return name:gsub('%W', '_') .. '_LUA_'
 end
 
 -- Convert a given type such as "std::string" to the corresponding C++ wrapper class,
