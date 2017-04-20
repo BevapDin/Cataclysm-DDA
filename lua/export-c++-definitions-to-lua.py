@@ -75,6 +75,8 @@ parser.add_export_by_reference('quality')
 parser.add_export_by_value_and_reference('tool_comp')
 parser.add_export_by_value_and_reference('item_comp')
 parser.add_export_by_value_and_reference('quality_requirement')
+parser.add_export_by_reference('JsonSerializer')
+parser.add_export_by_reference('JsonDeserializer')
 
 # Enums that should be available in Lua.
 parser.add_export_enumeration('body_part')

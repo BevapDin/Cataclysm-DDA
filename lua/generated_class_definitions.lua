@@ -71,7 +71,9 @@ classes['calendar'] = {
     }
 }
 classes['Character'] = {
-    parent = "Creature",
+    parents = {
+        "Creature",
+    },
     attributes = {
         dex_cur = { type = "int", writable = true },
         dex_max = { type = "int", writable = true },
@@ -463,6 +465,10 @@ classes['encumbrance_data'] = {
     },
 }
 classes['stats'] = {
+    parents = {
+        "JsonSerializer",
+        "JsonDeserializer",
+    },
     attributes = {
         damage_healed = { type = "int", writable = true },
         damage_taken = { type = "int", writable = true },
@@ -470,13 +476,15 @@ classes['stats'] = {
         squares_walked = { type = "int", writable = true },
     },
     functions = {
-        { name = "deserialize", rval = nil, args = { "std::string" } },
         { name = "reset", rval = nil, args = { } },
-        { name = "serialize", rval = "std::string", args = { } },
     }
 }
 classes['player'] = {
-    parent = "Character",
+    parents = {
+        "Character",
+        "JsonSerializer",
+        "JsonDeserializer",
+    },
     attributes = {
         blocks_left = { type = "int", writable = true },
         cash = { type = "int", writable = true },
@@ -600,7 +608,6 @@ classes['player'] = {
         { name = "crossed_threshold", rval = "bool", args = { }, comment = "Returns true if the player has crossed a mutation threshold          *  Player can only cross one mutation threshold." },
         { name = "deactivate_bionic", rval = "bool", args = { "int" }, comment = "Handles bionic deactivation effects of the entered bionic, returns if anything deactivated" },
         { name = "deactivate_bionic", rval = "bool", args = { "int", "bool" }, comment = "Handles bionic deactivation effects of the entered bionic, returns if anything deactivated" },
-        { name = "deserialize", rval = nil, args = { "std::string" } },
         { name = "disarm", rval = nil, args = { "npc" }, comment = "Try to disarm the NPC. May result in fail attempt, you receiving the wepon and instantly wielding it,          * or the weapon falling down on the floor nearby. NPC is always getting angry with you.          * @param target Target NPC to disarm" },
         { name = "disassemble", rval = "bool", args = { "int" } },
         { name = "disassemble", rval = "bool", args = { "item", "int", "bool" } },
@@ -833,7 +840,6 @@ classes['player'] = {
         { name = "scored_crit", rval = "bool", args = { }, comment = "Returns true if the player scores a critical hit" },
         { name = "search_surroundings", rval = nil, args = { }, comment = "Search surrounding squares for traps (and maybe other things in the future)." },
         { name = "sees_with_infrared", rval = "bool", args = { "Creature" }, comment = "Check whether the this player can see the other creature with infrared. This implies          * this player can see infrared and the target is visible with infrared (is warm).          * And of course a line of sight exists." },
-        { name = "serialize", rval = "std::string", args = { } },
         { name = "setID", rval = nil, args = { "int" } },
         { name = "set_cat_level_rec", rval = nil, args = { "std::string" }, comment = "Modifies mutation_category_level[] based on the entered trait" },
         { name = "set_destination", rval = nil, args = { "std::vector<tripoint>" } },
@@ -923,6 +929,10 @@ classes['player'] = {
     }
 }
 classes['item'] = {
+    parents = {
+        "JsonSerializer",
+        "JsonDeserializer",
+    },
     new = {
         { "item" },
         { "itype" },
@@ -1024,7 +1034,6 @@ classes['item'] = {
         { name = "deactivate", rval = "item&", args = { "Character" }, comment = "Filter converting this instance to the inactive type          * If the item is either inactive or cannot be deactivated is a no-op          * @param ch character currently possessing or acting upon the item (if any)          * @param alert whether to display any messages          * @return same instance to allow method chaining" },
         { name = "deactivate", rval = "item&", args = { "Character", "bool" }, comment = "Filter converting this instance to the inactive type          * If the item is either inactive or cannot be deactivated is a no-op          * @param ch character currently possessing or acting upon the item (if any)          * @param alert whether to display any messages          * @return same instance to allow method chaining" },
         { name = "deactivate", rval = "item&", args = { }, comment = "Filter converting this instance to the inactive type          * If the item is either inactive or cannot be deactivated is a no-op          * @param ch character currently possessing or acting upon the item (if any)          * @param alert whether to display any messages          * @return same instance to allow method chaining" },
-        { name = "deserialize", rval = nil, args = { "std::string" } },
         { name = "destroyed_at_zero_charges", rval = "bool", args = { } },
         { name = "detonate", rval = "bool", args = { "tripoint", "std::vector<item>" }, comment = "Detonates the item and adds remains (if any) to drops.      * Returns true if the item actually detonated,      * potentially destroying other items and invalidating iterators.      * Should NOT be called on an item on the map, but on a local copy." },
         { name = "display_name", rval = "std::string", args = { "int" }, comment = "Returns the item name and the charges or contained charges (if the item can have      * charges at at all). Calls @ref tname with given quantity and with_prefix being true." },
@@ -1222,7 +1231,6 @@ classes['item'] = {
         { name = "repaired_with", rval = "std::set<std::string>", args = { }, comment = "If possible to repair this item what tools could potentially be used for this purpose?" },
         { name = "reset_cable", rval = nil, args = { "player" }, comment = "Helper to bring a cable back to its initial state." },
         { name = "rotten", rval = "bool", args = { }, comment = "returns true if item is now rotten after all shelf life has elapsed" },
-        { name = "serialize", rval = "std::string", args = { } },
         { name = "set_countdown", rval = nil, args = { "int" }, comment = "Sets time until activation for an item that will self-activate in the future." },
         { name = "set_damage", rval = "item&", args = { "float" }, comment = "Filter setting damage constrained by @ref min_damage and @ref max_damage          * @note this method does not invoke the @ref on_damage callback          * @return same instance to allow method chaining" },
         { name = "set_flag", rval = "item&", args = { "std::string" }, comment = "Idempotent filter setting an item specific flag." },
@@ -1266,6 +1274,10 @@ classes['item'] = {
     }
 }
 classes['point'] = {
+    parents = {
+        "JsonSerializer",
+        "JsonDeserializer",
+    },
     new = {
         { "int", "int" },
         { "point" },
@@ -1276,12 +1288,12 @@ classes['point'] = {
         x = { type = "int", writable = true },
         y = { type = "int", writable = true },
     },
-    functions = {
-        { name = "deserialize", rval = nil, args = { "std::string" } },
-        { name = "serialize", rval = "std::string", args = { } },
-    }
 }
 classes['tripoint'] = {
+    parents = {
+        "JsonSerializer",
+        "JsonDeserializer",
+    },
     new = {
         { "int", "int", "int" },
         { "point", "int" },
@@ -1294,10 +1306,6 @@ classes['tripoint'] = {
         y = { type = "int", writable = true },
         z = { type = "int", writable = true },
     },
-    functions = {
-        { name = "deserialize", rval = nil, args = { "std::string" } },
-        { name = "serialize", rval = "std::string", args = { } },
-    }
 }
 classes['uimenu'] = {
     new = {
@@ -1970,7 +1978,11 @@ classes['Creature'] = {
     }
 }
 classes['monster'] = {
-    parent = "Creature",
+    parents = {
+        "Creature",
+        "JsonSerializer",
+        "JsonDeserializer",
+    },
     attributes = {
         anger = { type = "int", writable = true },
         friendly = { type = "int", writable = true },
@@ -2008,7 +2020,6 @@ classes['monster'] = {
         { name = "can_submerge", rval = "bool", args = { } },
         { name = "can_upgrade", rval = "bool", args = { } },
         { name = "color_with_effects", rval = "int", args = { } },
-        { name = "deserialize", rval = nil, args = { "std::string" } },
         { name = "die_in_explosion", rval = nil, args = { "Creature" } },
         { name = "disable_special", rval = nil, args = { "std::string" }, comment = "Sets the enabled flag for the given special to false" },
         { name = "drop_items_on_death", rval = nil, args = { } },
@@ -2048,7 +2059,6 @@ classes['monster'] = {
         { name = "reset_special", rval = nil, args = { "std::string" }, comment = "Resets a given special to its monster type cooldown value" },
         { name = "reset_special_rng", rval = nil, args = { "std::string" }, comment = "Resets a given special to a value between 0 and its monster type cooldown value." },
         { name = "scent_move", rval = "tripoint", args = { } },
-        { name = "serialize", rval = "std::string", args = { } },
         { name = "set_dest", rval = nil, args = { "tripoint" } },
         { name = "set_hp", rval = nil, args = { "int" }, comment = "Directly set the current @ref hp of the monster (not capped at the maximal hp).          * You might want to use @ref heal / @ref apply_damage or @ref deal_damage instead." },
         { name = "set_special", rval = nil, args = { "std::string", "int" }, comment = "Sets a given special to the given value" },
@@ -2320,6 +2330,10 @@ classes['mtype'] = {
     }
 }
 classes['mongroup'] = {
+    parents = {
+        "JsonSerializer",
+        "JsonDeserializer",
+    },
     attributes = {
         diffuse = { type = "bool", writable = true },
         dying = { type = "bool", writable = true },
@@ -2335,11 +2349,9 @@ classes['mongroup'] = {
     functions = {
         { name = "clear", rval = nil, args = { } },
         { name = "dec_interest", rval = nil, args = { "int" } },
-        { name = "deserialize", rval = nil, args = { "std::string" } },
         { name = "empty", rval = "bool", args = { } },
         { name = "inc_interest", rval = nil, args = { "int" } },
         { name = "is_safe", rval = "bool", args = { } },
-        { name = "serialize", rval = "std::string", args = { } },
         { name = "set_interest", rval = nil, args = { "int" } },
         { name = "set_target", rval = nil, args = { "int", "int" } },
         { name = "wander", rval = nil, args = { "overmap" } },
@@ -2466,6 +2478,10 @@ classes['w_point'] = {
     },
 }
 classes['vehicle'] = {
+    parents = {
+        "JsonSerializer",
+        "JsonDeserializer",
+    },
     attributes = {
         alarm_epower = { type = "int", writable = true },
         alternator_load = { type = "float", writable = true },
@@ -2535,7 +2551,6 @@ classes['vehicle'] = {
         { name = "damage", rval = "int", args = { "int", "int", "damage_type" } },
         { name = "damage", rval = "int", args = { "int", "int", "damage_type", "bool" } },
         { name = "damage_all", rval = nil, args = { "int", "int", "damage_type", "point" } },
-        { name = "deserialize", rval = nil, args = { "std::string" } },
         { name = "discharge_battery", rval = "int", args = { "int" }, comment = "Try to discharge our (and, optionally, connected vehicles') batteries by the given amount.      * @return amount of request unfulfilled (0 if totally successful)." },
         { name = "discharge_battery", rval = "int", args = { "int", "bool" }, comment = "Try to discharge our (and, optionally, connected vehicles') batteries by the given amount.      * @return amount of request unfulfilled (0 if totally successful)." },
         { name = "disp_name", rval = "std::string", args = { } },
@@ -2658,7 +2673,6 @@ classes['vehicle'] = {
         { name = "safe_velocity", rval = "int", args = { "bool" } },
         { name = "safe_velocity", rval = "int", args = { } },
         { name = "select_engine", rval = "int", args = { } },
-        { name = "serialize", rval = "std::string", args = { } },
         { name = "set_hp", rval = nil, args = { "vehicle_part", "int" }, comment = "Set stat for part constrained by range [0,durability]      * @note does not invoke base @ref item::on_damage callback" },
         { name = "set_label", rval = nil, args = { "int", "int", "std::string" } },
         { name = "set_submap_moved", rval = nil, args = { "int", "int" }, comment = "Update the submap coordinates smx, smy, and update the tracker info in the overmap      * (if enabled).      * This should be called only when the vehicle has actually been moved, not when      * the map is just shifted (in the later case simply set smx/smy directly)." },
@@ -2695,6 +2709,10 @@ classes['vehicle'] = {
     }
 }
 classes['vehicle_part'] = {
+    parents = {
+        "JsonSerializer",
+        "JsonDeserializer",
+    },
     new = {
         { },
     },
@@ -2723,7 +2741,6 @@ classes['vehicle_part'] = {
         { name = "consume_energy", rval = "float", args = { "std::string", "float" }, comment = "Consume fuel by energy content.      * @param ftype Type of fuel to consume      * @param energy Energy to consume, in kJ      * @return Energy actually consumed, in kJ" },
         { name = "crew", rval = "npc&", args = { }, comment = "Get NPC currently assigned to this part (seat, turret etc)?      *  @note checks crew member is alive and currently allied to the player      *  @return nullptr if no valid crew member is currently assigned" },
         { name = "damage", rval = "float", args = { }, comment = "Current part damage in same units as item::damage." },
-        { name = "deserialize", rval = nil, args = { "std::string" } },
         { name = "fault_set", rval = "bool", args = { "fault_id" }, comment = "Try to set fault returning false if specified fault cannot occur with this item" },
         { name = "faults", rval = "std::set<fault_id>", args = { }, comment = "Current faults affecting this part (if any)" },
         { name = "faults_potential", rval = "std::set<fault_id>", args = { }, comment = "Faults which could potentially occur with this part (if any)" },
@@ -2743,7 +2760,6 @@ classes['vehicle_part'] = {
         { name = "name", rval = "std::string", args = { }, comment = "Translated name of a part inclusive of any current status effects" },
         { name = "properties_to_item", rval = "item", args = { }, comment = "Generate the corresponding item from this vehicle part. It includes      * the hp (item damage), fuel charges (battery or liquids), aspect, ..." },
         { name = "remove_flag", rval = "int", args = { "int" } },
-        { name = "serialize", rval = "std::string", args = { } },
         { name = "set_crew", rval = "bool", args = { "npc" }, comment = "Set crew member for this part (seat, truret etc) who must be a player ally)      *  @return true if part can have crew members and passed npc was suitable" },
         { name = "set_flag", rval = "int", args = { "int" } },
         { name = "unset_crew", rval = nil, args = { }, comment = "Remove any currently assigned crew member for this part" },
@@ -2826,6 +2842,10 @@ classes['fault'] = {
     }
 }
 classes['effect'] = {
+    parents = {
+        "JsonSerializer",
+        "JsonDeserializer",
+    },
     attributes = {
         null_effect = { type = "effect", writable = true, static = true },
     },
@@ -2834,7 +2854,6 @@ classes['effect'] = {
         { name = "activated", rval = "bool", args = { "int", "std::string", "int", "bool" }, comment = "Checks to see if a given modifier type can activate, and performs any rolls required to do so. mod is a direct          *  multiplier on the overall chance of a modifier type activating." },
         { name = "activated", rval = "bool", args = { "int", "std::string", "int", "bool", "float" }, comment = "Checks to see if a given modifier type can activate, and performs any rolls required to do so. mod is a direct          *  multiplier on the overall chance of a modifier type activating." },
         { name = "decay", rval = nil, args = { "std::vector<efftype_id>", "std::vector<body_part>", "int", "bool" }, comment = "Decays effect durations, pushing their id and bp's back to rem_ids and rem_bps for removal later          *  if their duration is <= 0. This is called in the middle of a loop through all effects, which is          *  why we aren't allowed to remove the effects here." },
-        { name = "deserialize", rval = nil, args = { "std::string" } },
         { name = "disp_desc", rval = "std::string", args = { "bool" }, comment = "Returns the description displayed in the player status window." },
         { name = "disp_desc", rval = "std::string", args = { }, comment = "Returns the description displayed in the player status window." },
         { name = "disp_name", rval = "std::string", args = { }, comment = "Returns the name displayed in the player status window." },
@@ -2877,7 +2896,6 @@ classes['effect'] = {
         { name = "mod_intensity", rval = "int", args = { "int", "bool" }, comment = "Modify inensity of effect capped by range [1..max_intensity]          * @param mod Amount to increase current intensity by          * @param alert whether decay messages should be displayed          * @return new intensity of the effect after modification and capping" },
         { name = "mult_duration", rval = nil, args = { "float" }, comment = "Multiplies the duration, capping at max_duration if it exists." },
         { name = "pause_effect", rval = nil, args = { }, comment = "Makes an effect permanent. Note: This pauses the duration, but does not otherwise change it." },
-        { name = "serialize", rval = "std::string", args = { } },
         { name = "set_bp", rval = nil, args = { "body_part" }, comment = "Sets the targeted body_part of an effect." },
         { name = "set_duration", rval = nil, args = { "int" }, comment = "Sets the duration, capping at max_duration if it exists." },
         { name = "set_intensity", rval = "int", args = { "int" }, comment = "Sets inensity of effect capped by range [1..max_intensity]          * @param val Value to set intensity to          * @param alert whether decay messages should be displayed          * @return new intensity of the effect after val subjected to above cap" },
@@ -2901,7 +2919,9 @@ classes['vitamin'] = {
     }
 }
 classes['npc'] = {
-    parent = "player",
+    parents = {
+        "player",
+    },
     attributes = {
         attitude = { type = "npc_attitude", writable = true },
         companion_mission = { type = "std::string", writable = true },
@@ -2918,6 +2938,7 @@ classes['npc'] = {
         last_updated = { type = "int", writable = true },
         marked_for_death = { type = "bool", writable = true },
         mission = { type = "npc_mission", writable = true },
+        needs = { type = "std::vector<npc_need>", writable = true },
         no_goal_point = { type = "tripoint", static = true },
         path = { type = "std::vector<tripoint>", writable = true },
         patience = { type = "int", writable = true },
@@ -3305,6 +3326,16 @@ classes['quality_requirement'] = {
         { name = "has", rval = "bool", args = { "inventory", "int" } },
         { name = "to_string", rval = "std::string", args = { "int" } },
         { name = "to_string", rval = "std::string", args = { } },
+    }
+}
+classes['JsonSerializer'] = {
+    functions = {
+        { name = "serialize", rval = "std::string", args = { } },
+    }
+}
+classes['JsonDeserializer'] = {
+    functions = {
+        { name = "deserialize", rval = nil, args = { "std::string" } },
     }
 }
 
@@ -4443,6 +4474,7 @@ make_vector_class("mabuff_id")
 make_vector_class("matec_id")
 make_vector_class("material_id")
 make_vector_class("matype_id")
+make_vector_class("npc_need")
 make_vector_class("point")
 make_vector_class("skill_id")
 make_vector_class("std::string")

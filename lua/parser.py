@@ -901,14 +901,20 @@ class CppClass:
         r = ""
         r = r + "classes['" + self.cpp_name + "'] = {\n"
 
+        exported_parents = []
         for pc in self.parents:
             definition = pc.get_definition()
             if self.parser.export_enabled(definition.type):
-                r = r + tab + "parent = \"" + definition.spelling + "\",\n"
+                exported_parents.append(definition.spelling)
             else:
                 # Parent class is not exported directly, but we still have to include its
                 # functions and attributes
                 self.gather_parent(pc, functions, attributes)
+        if len(exported_parents) > 0:
+            r = r + tab + "parents = {\n"
+            for p in exported_parents:
+                r = r + tab + "    \"" + p + "\",\n"
+            r = r + tab + "},\n"
 
         # Exporting the constructor only makes sense for types that can have by-value semantic
         if self.parser.export_by_value(self.cpp_name):

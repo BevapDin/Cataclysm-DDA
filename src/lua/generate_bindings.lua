@@ -669,11 +669,11 @@ exporting `Child::func`.
 --]]
 for class_name, class in pairs(classes) do
     local derived_functions = class.functions
-    local parent_name = class.parent
-    while parent_name do
-        local parent_class = classes[parent_name]
-        merge_parent_class_functions(derived_functions, parent_class.functions)
-        parent_name = parent_class.parent
+    if class.parents then
+        for _, parent_name in pairs(class.parents) do
+            local parent_class = classes[parent_name]
+            merge_parent_class_functions(derived_functions, parent_class.functions)
+        end
     end
 end
 
