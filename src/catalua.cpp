@@ -37,6 +37,7 @@
 #include "vehicle.h"
 #include "veh_type.h"
 #include "fault.h"
+#include "effect.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"

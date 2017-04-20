@@ -623,6 +623,7 @@ classes['player'] = {
         { name = "handle_melee_wear", rval = "bool", args = { "item" } },
         { name = "handle_melee_wear", rval = "bool", args = { "item", "float" } },
         { name = "handle_melee_wear", rval = "bool", args = { }, comment = "Calculates melee weapon wear-and-tear through use, returns true if item is destroyed." },
+        { name = "hardcoded_effects", rval = nil, args = { "effect" }, comment = "Handles the still hard-coded effects." },
         { name = "has_active_optcloak", rval = "bool", args = { }, comment = "Returns true if the player is wearing an active optical cloak" },
         { name = "has_addiction", rval = "bool", args = { "add_type" }, comment = "Returns true if the player has an addiction of the specified type" },
         { name = "has_alarm_clock", rval = "bool", args = { }, comment = "Returns true if the player or their vehicle has an alarm clock" },
@@ -1720,6 +1721,8 @@ classes['Creature'] = {
         { name = "get_dodge", rval = "float", args = { } },
         { name = "get_dodge_base", rval = "float", args = { } },
         { name = "get_dodge_bonus", rval = "float", args = { } },
+        { name = "get_effect", rval = "effect&", args = { "efftype_id" } },
+        { name = "get_effect", rval = "effect&", args = { "efftype_id", "body_part" } },
         { name = "get_effect_dur", rval = "int", args = { "efftype_id" }, comment = "Returns the duration of the matching effect. Returns 0 if effect doesn't exist." },
         { name = "get_effect_dur", rval = "int", args = { "efftype_id", "body_part" }, comment = "Returns the duration of the matching effect. Returns 0 if effect doesn't exist." },
         { name = "get_effect_int", rval = "int", args = { "efftype_id" }, comment = "Returns the intensity of the matching effect. Returns 0 if effect doesn't exist." },
@@ -2037,6 +2040,7 @@ classes['ma_buff'] = {
         { name = "block_bonus", rval = "int", args = { "player" } },
         { name = "can_melee", rval = "bool", args = { } },
         { name = "dodge_bonus", rval = "int", args = { "player" } },
+        { name = "from_effect", static = true, rval = "ma_buff&", args = { "effect" } },
         { name = "get_effect_id", rval = "efftype_id", args = { } },
         { name = "hit_bonus", rval = "int", args = { "player" } },
         { name = "is_quiet", rval = "bool", args = { } },
@@ -2660,6 +2664,64 @@ classes['fault'] = {
         { name = "time", rval = "int", args = { } },
     }
 }
+classes['effect'] = {
+    functions = {
+        { name = "activated", rval = "bool", args = { "int", "std::string", "int" }, comment = "Checks to see if a given modifier type can activate, and performs any rolls required to do so. mod is a direct          *  multiplier on the overall chance of a modifier type activating." },
+        { name = "activated", rval = "bool", args = { "int", "std::string", "int", "bool" }, comment = "Checks to see if a given modifier type can activate, and performs any rolls required to do so. mod is a direct          *  multiplier on the overall chance of a modifier type activating." },
+        { name = "activated", rval = "bool", args = { "int", "std::string", "int", "bool", "float" }, comment = "Checks to see if a given modifier type can activate, and performs any rolls required to do so. mod is a direct          *  multiplier on the overall chance of a modifier type activating." },
+        { name = "decay", rval = nil, args = { "std::vector<efftype_id>", "std::vector<body_part>", "int", "bool" }, comment = "Decays effect durations, pushing their id and bp's back to rem_ids and rem_bps for removal later          *  if their duration is <= 0. This is called in the middle of a loop through all effects, which is          *  why we aren't allowed to remove the effects here." },
+        { name = "deserialize", rval = nil, args = { "std::string" } },
+        { name = "disp_desc", rval = "std::string", args = { "bool" }, comment = "Returns the description displayed in the player status window." },
+        { name = "disp_desc", rval = "std::string", args = { }, comment = "Returns the description displayed in the player status window." },
+        { name = "disp_name", rval = "std::string", args = { }, comment = "Returns the name displayed in the player status window." },
+        { name = "get_addict_mod", rval = "float", args = { "std::string", "int" }, comment = "Returns the modifier caused by addictions. Currently only handles painkiller addictions." },
+        { name = "get_amount", rval = "int", args = { "std::string" }, comment = "Returns the amount of a modifier type applied when a new effect is first added." },
+        { name = "get_amount", rval = "int", args = { "std::string", "bool" }, comment = "Returns the amount of a modifier type applied when a new effect is first added." },
+        { name = "get_avg_mod", rval = "int", args = { "std::string" }, comment = "Returns the average return of get_mod for a modifier type. Used in effect description displays." },
+        { name = "get_avg_mod", rval = "int", args = { "std::string", "bool" }, comment = "Returns the average return of get_mod for a modifier type. Used in effect description displays." },
+        { name = "get_blocks_effects", rval = "std::vector<efftype_id>", args = { }, comment = "Returns the string ids of the effects blocked by this effect to be used in add_effect('id')." },
+        { name = "get_bp", rval = "body_part", args = { }, comment = "Returns the targeted body_part of the effect. This is num_bp for untargeted effects." },
+        { name = "get_dur_add_perc", rval = "int", args = { }, comment = "Returns the percentage value by further applications of existing effects' duration is multiplied by." },
+        { name = "get_duration", rval = "int", args = { }, comment = "Returns the remaining duration of an effect." },
+        { name = "get_effect_type", rval = "effect_type&", args = { }, comment = "Returns the effect's matching effect_type." },
+        { name = "get_harmful_cough", rval = "bool", args = { }, comment = "Returns true if the coughs caused by an effect can harm the player directly." },
+        { name = "get_id", rval = "efftype_id", args = { }, comment = "Returns the effect's matching effect_type id." },
+        { name = "get_int_add_val", rval = "int", args = { }, comment = "Returns the amount an already existing effect intensity is modified by further applications of the same effect." },
+        { name = "get_int_dur_factor", rval = "int", args = { }, comment = "Returns the number of turns it takes for the intensity to fall by 1 or 0 if intensity isn't based on duration." },
+        { name = "get_intensity", rval = "int", args = { }, comment = "Returns the intensity of an effect." },
+        { name = "get_max_duration", rval = "int", args = { }, comment = "Returns the maximum duration of an effect." },
+        { name = "get_max_intensity", rval = "int", args = { }, comment = "Returns the maximum intensity of an effect." },
+        { name = "get_max_val", rval = "int", args = { "std::string" }, comment = "Returns the maximum value of a modifier type that get_mod() and get_amount() will push the player to." },
+        { name = "get_max_val", rval = "int", args = { "std::string", "bool" }, comment = "Returns the maximum value of a modifier type that get_mod() and get_amount() will push the player to." },
+        { name = "get_min_val", rval = "int", args = { "std::string" }, comment = "Returns the minimum value of a modifier type that get_mod() and get_amount() will push the player to." },
+        { name = "get_min_val", rval = "int", args = { "std::string", "bool" }, comment = "Returns the minimum value of a modifier type that get_mod() and get_amount() will push the player to." },
+        { name = "get_mod", rval = "int", args = { "std::string" }, comment = "Returns the matching modifier type from an effect, used for getting actual effect effects." },
+        { name = "get_mod", rval = "int", args = { "std::string", "bool" }, comment = "Returns the matching modifier type from an effect, used for getting actual effect effects." },
+        { name = "get_percentage", rval = "float", args = { "std::string", "int" }, comment = "Returns the approximate percentage chance of a modifier type activating on any given tick, used for descriptions." },
+        { name = "get_percentage", rval = "float", args = { "std::string", "int", "bool" }, comment = "Returns the approximate percentage chance of a modifier type activating on any given tick, used for descriptions." },
+        { name = "get_removes_effects", rval = "std::vector<efftype_id>", args = { }, comment = "Returns the string ids of the effects removed by this effect to be used in remove_effect('id')." },
+        { name = "get_resist_effects", rval = "std::vector<efftype_id>", args = { }, comment = "Returns the string id of the resist effect to be used in has_effect('id')." },
+        { name = "get_resist_traits", rval = "std::vector<std::string>", args = { }, comment = "Returns the string id of the resist trait to be used in has_trait('id')." },
+        { name = "get_sizing", rval = "bool", args = { "std::string" }, comment = "Returns true if the given modifier type's trigger chance is affected by size mutations." },
+        { name = "get_speed_name", rval = "std::string", args = { }, comment = "Returns the value used for display on the speed modifier window in the player status menu." },
+        { name = "get_start_turn", rval = "int", args = { }, comment = "Returns the turn the effect was applied." },
+        { name = "impairs_movement", rval = "bool", args = { }, comment = "Returns if the effect is supposed to be handed in Creature::movement" },
+        { name = "is_null", rval = "bool", args = { }, comment = "Compares pointers of this effect with the dummy above." },
+        { name = "is_permanent", rval = "bool", args = { }, comment = "Returns true if an effect is permanent, i.e. it's duration does not decrease over time." },
+        { name = "mod_duration", rval = nil, args = { "int" }, comment = "Mods the duration, capping at max_duration if it exists." },
+        { name = "mod_intensity", rval = "int", args = { "int" }, comment = "Modify inensity of effect capped by range [1..max_intensity]          * @param mod Amount to increase current intensity by          * @param alert whether decay messages should be displayed          * @return new intensity of the effect after modification and capping" },
+        { name = "mod_intensity", rval = "int", args = { "int", "bool" }, comment = "Modify inensity of effect capped by range [1..max_intensity]          * @param mod Amount to increase current intensity by          * @param alert whether decay messages should be displayed          * @return new intensity of the effect after modification and capping" },
+        { name = "mult_duration", rval = nil, args = { "float" }, comment = "Multiplies the duration, capping at max_duration if it exists." },
+        { name = "pause_effect", rval = nil, args = { }, comment = "Makes an effect permanent. Note: This pauses the duration, but does not otherwise change it." },
+        { name = "serialize", rval = "std::string", args = { } },
+        { name = "set_bp", rval = nil, args = { "body_part" }, comment = "Sets the targeted body_part of an effect." },
+        { name = "set_duration", rval = nil, args = { "int" }, comment = "Sets the duration, capping at max_duration if it exists." },
+        { name = "set_intensity", rval = "int", args = { "int" }, comment = "Sets inensity of effect capped by range [1..max_intensity]          * @param val Value to set intensity to          * @param alert whether decay messages should be displayed          * @return new intensity of the effect after val subjected to above cap" },
+        { name = "set_intensity", rval = "int", args = { "int", "bool" }, comment = "Sets inensity of effect capped by range [1..max_intensity]          * @param val Value to set intensity to          * @param alert whether decay messages should be displayed          * @return new intensity of the effect after val subjected to above cap" },
+        { name = "unpause_effect", rval = nil, args = { }, comment = "Makes an effect not permanent. Note: This unpauses the duration, but does not otherwise change it." },
+        { name = "use_part_descs", rval = "bool", args = { }, comment = "Returns true if a description will be formatted as 'Your' + body_part + description." },
+    }
+}
 
 enums = { }
 enums['body_part'] = {
@@ -2792,6 +2854,7 @@ make_set_class("species_id")
 make_set_class("std::string")
 make_set_class("tripoint")
 make_vector_class("body_part")
+make_vector_class("efftype_id")
 make_vector_class("item")
 make_vector_class("mabuff_id")
 make_vector_class("matec_id")
