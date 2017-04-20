@@ -2394,6 +2394,7 @@ classes['vehicle'] = {
         { name = "fuel_left", rval = "int", args = { "std::string" } },
         { name = "fuel_left", rval = "int", args = { "std::string", "bool" } },
         { name = "gain_moves", rval = nil, args = { } },
+        { name = "get_items", rval = "vehicle_stack", args = { "int" } },
         { name = "get_label", rval = "std::string", args = { "int", "int" } },
         { name = "get_passenger", rval = "player&", args = { "int" } },
         { name = "get_points", rval = "std::set<tripoint>", args = { "bool" } },
@@ -2578,6 +2579,25 @@ classes['vehicle_part'] = {
         { name = "wheel_area", rval = "int", args = { }, comment = "Get wheel diameter times wheel width (inches^2) or return 0 if part is not wheel" },
         { name = "wheel_diameter", rval = "int", args = { }, comment = "Get wheel diameter (inches) or return 0 if part is not wheel" },
         { name = "wheel_width", rval = "int", args = { }, comment = "Get wheel width (inches) or return 0 if part is not wheel" },
+    }
+}
+classes['vehicle_stack'] = {
+    by_value = true,
+    functions = {
+        { name = "amount_can_fit", rval = "int", args = { "item" }, comment = "Returns how many of the specified item (or how many charges if it's counted by charges)          * could be added without violating either the volume or itemcount limits.          *          * @returns Value of zero or greater for all items. For items counted by charges, it is always at          * most it.charges." },
+        { name = "count_limit", rval = "int", args = { }, comment = "Maximum number of items allowed here" },
+        { name = "cppbegin", rval = "std::list<item>::iterator", cpp_name = "begin", args = { } },
+        { name = "cppend", rval = "std::list<item>::iterator", cpp_name = "end", args = { } },
+        { name = "empty", rval = "bool", args = { } },
+        { name = "erase", rval = "std::list<item>::iterator", args = { "std::list<item>::iterator" } },
+        { name = "free_volume", rval = "units::volume", args = { } },
+        { name = "front", rval = "item&", args = { } },
+        { name = "insert_at", rval = nil, args = { "std::list<item>::iterator", "item" } },
+        { name = "max_volume", rval = "units::volume", args = { }, comment = "Maximum volume allowed here" },
+        { name = "push_back", rval = nil, args = { "item" } },
+        { name = "size", rval = "int", args = { } },
+        { name = "stacks_with", rval = "item&", args = { "item" }, comment = "Return the item (or nullptr) that stacks with the argument" },
+        { name = "stored_volume", rval = "units::volume", args = { }, comment = "Total volume of the items here" },
     }
 }
 
