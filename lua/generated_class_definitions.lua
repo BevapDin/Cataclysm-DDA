@@ -938,9 +938,13 @@ classes['item'] = {
         { "itype" },
         { "itype", "int" },
         { "itype", "int", "int" },
+        { "itype", "int", "item::default_charges_tag" },
+        { "itype", "int", "item::solitary_tag" },
         { "std::string" },
         { "std::string", "int" },
         { "std::string", "int", "int" },
+        { "std::string", "int", "item::default_charges_tag" },
+        { "std::string", "int", "item::solitary_tag" },
         { },
     },
     by_value_and_reference = true,
@@ -1084,12 +1088,16 @@ classes['item'] = {
         { name = "get_warmth", rval = "int", args = { }, comment = "Returns the warmth value that this item has when worn. See player class for temperature          * related code, or @ref player::warmth. Returned values should be positive. A value          * of 0 indicates no warmth from this item at all (this is also the default for non-armor)." },
         { name = "getlight_emit", rval = "int", args = { }, comment = "How much light (see lightmap.cpp) the item emits (it's assumed to be circular)." },
         { name = "goes_bad", rval = "bool", args = { }, comment = "whether an item is perishable (can rot)" },
+        { name = "gun_current_mode", rval = "item::gun_mode", args = { }, comment = "Get the current mode for this gun (or an invalid mode if item is not a gun)" },
         { name = "gun_cycle_mode", rval = nil, args = { }, comment = "Switch to the next available firing mode" },
         { name = "gun_damage", rval = "int", args = { "bool" }, comment = "Summed ranged damage of a gun, including values from mods. Returns 0 on non-gun items." },
         { name = "gun_damage", rval = "int", args = { }, comment = "Summed ranged damage of a gun, including values from mods. Returns 0 on non-gun items." },
         { name = "gun_dispersion", rval = "int", args = { "bool" }, comment = "Summed dispersion of a gun, including values from mods. Returns 0 on non-gun items." },
         { name = "gun_dispersion", rval = "int", args = { }, comment = "Summed dispersion of a gun, including values from mods. Returns 0 on non-gun items." },
+        { name = "gun_get_mode", rval = "const item::gun_mode", args = { "std::string" }, comment = "Check if gun supports a specific mode returning an invalid/empty mode if not" },
         { name = "gun_get_mode_id", rval = "std::string", args = { }, comment = "Get id of mode a gun is currently set to, eg. DEFAULT, AUTO, BURST" },
+        { name = "gun_noise", rval = "item::sound_data", args = { "bool" }, comment = "Returns the sound of the gun being fired.          * @param burst Whether the gun was fired in burst mode (the sound string is usually different)." },
+        { name = "gun_noise", rval = "item::sound_data", args = { }, comment = "Returns the sound of the gun being fired.          * @param burst Whether the gun was fired in burst mode (the sound string is usually different)." },
         { name = "gun_pierce", rval = "int", args = { "bool" }, comment = "Summed ranged armor-piercing of a gun, including values from mods. Returns 0 on non-gun items." },
         { name = "gun_pierce", rval = "int", args = { }, comment = "Summed ranged armor-piercing of a gun, including values from mods. Returns 0 on non-gun items." },
         { name = "gun_range", rval = "int", args = { "bool" }, comment = "Summed range value of a gun, including values from mods. Returns 0 on non-gun items." },
@@ -2967,6 +2975,8 @@ classes['npc'] = {
         { name = "choose_target", rval = nil, args = { } },
         { name = "complain", rval = "bool", args = { } },
         { name = "confidence_mult", rval = "float", args = { } },
+        { name = "confident_gun_mode_range", rval = "int", args = { "item::gun_mode" } },
+        { name = "confident_gun_mode_range", rval = "int", args = { "item::gun_mode", "int" } },
         { name = "confident_shoot_range", rval = "int", args = { "item" } },
         { name = "confident_throw_range", rval = "int", args = { "item", "Creature" } },
         { name = "consume_food", rval = "bool", args = { }, comment = "Returns true if food was consumed, false otherwise." },
@@ -3337,6 +3347,35 @@ classes['JsonDeserializer'] = {
     functions = {
         { name = "deserialize", rval = nil, args = { "std::string" } },
     }
+}
+classes['item::solitary_tag'] = {
+    by_value = true,
+}
+classes['item::default_charges_tag'] = {
+    by_value = true,
+}
+classes['item::gun_mode'] = {
+    new = {
+        { "std::string", "item", "int", "std::set<std::string>" },
+        { },
+    },
+    by_value = true,
+    attributes = {
+        flags = { type = "std::set<std::string>", writable = true },
+        mode = { type = "std::string", writable = true },
+        qty = { type = "int", writable = true },
+        target = { type = "item", writable = true },
+    },
+    functions = {
+        { name = "melee", rval = "bool", args = { }, comment = "if true perform a melee attach as opposed to shooting" },
+    }
+}
+classes['item::sound_data'] = {
+    by_value = true,
+    attributes = {
+        sound = { type = "std::string", writable = true },
+        volume = { type = "int", writable = true },
+    },
 }
 
 enums = { }

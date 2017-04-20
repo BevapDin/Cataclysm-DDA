@@ -846,7 +846,8 @@ class CppClass:
 
         k = cursor.kind
         if k == clang.cindex.CursorKind.STRUCT_DECL or k == clang.cindex.CursorKind.CLASS_DECL:
-            pass # Inner classes. Skipped for now. Maybe later. TODO.
+            # TODO: proper namespace support
+            self.parser.parse_class(cursor)
         elif k == clang.cindex.CursorKind.CXX_METHOD:
             self.functions.append(CppClass.CppFunction(self, cursor))
             if cursor.spelling == 'operator==':
