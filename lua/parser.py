@@ -226,7 +226,7 @@ class Parser:
             return
         if not self.export_by_reference(cursor.type) and not self.export_by_value(cursor.type):
             raise RuntimeError("Class %s should be exported, but is not marked as by-value nor by-reference!" % sp)
-        c = CppClass.from_cursor(self, cursor)
+        c = CppClass.from_cursor(self, cursor, namespace)
         self.classes.setdefault(c.cpp_name, c)
     '''
     Parse the cursor under the assumption it's a typedef for a string/int id.
@@ -811,8 +811,8 @@ class CppClass:
         self.has_equal = False
 
     @staticmethod
-    def from_cursor(parser, cursor):
-        result = CppClass(parser, cursor.spelling)
+    def from_cursor(parser, cursor, namespace):
+        result = CppClass(parser, namespace + cursor.spelling)
 
         for c in cursor.get_children():
             result.parse(c)
@@ -846,8 +846,7 @@ class CppClass:
 
         k = cursor.kind
         if k == clang.cindex.CursorKind.STRUCT_DECL or k == clang.cindex.CursorKind.CLASS_DECL:
-            # TODO: proper namespace support
-            self.parser.parse_class(cursor)
+            self.parser.parse_class(cursor, self.cpp_name + '::')
         elif k == clang.cindex.CursorKind.CXX_METHOD:
             self.functions.append(CppClass.CppFunction(self, cursor))
             if cursor.spelling == 'operator==':
@@ -887,7 +886,7 @@ class CppClass:
             if c.kind == clang.cindex.CursorKind.TEMPLATE_REF:
                 definition = c.get_definition()
                 break
-        parent = CppClass.from_cursor(self.parser, definition)
+        parent = CppClass.from_cursor(self.parser, definition, '')
         functions += parent.functions
         attributes += parent.attributes
         for pc in parent.parents:
