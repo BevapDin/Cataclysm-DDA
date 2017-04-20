@@ -819,6 +819,7 @@ classes['player'] = {
         { name = "update_morale", rval = nil, args = { }, comment = "Ticks down morale counters and removes them" },
         { name = "update_needs", rval = nil, args = { "int" }, comment = "Increases hunger, thirst, fatigue and stimms wearing off. `rate_multiplier` is for retroactive updates." },
         { name = "update_stamina", rval = nil, args = { "int" }, comment = "Regenerates stamina" },
+        { name = "update_vitamins", rval = nil, args = { "vitamin_id" }, comment = "Set vitamin deficiency/excess disease states dependent upon current vitamin levels" },
         { name = "use", rval = nil, args = { "int" }, comment = "Uses a tool" },
         { name = "use_amount", rval = "std::list<item>", args = { "std::string", "int" } },
         { name = "use_charges", rval = "std::list<item>", args = { "std::string", "int" } },
@@ -827,6 +828,11 @@ classes['player'] = {
         { name = "visibility", rval = "int", args = { "bool" } },
         { name = "visibility", rval = "int", args = { "bool", "int" } },
         { name = "visibility", rval = "int", args = { } },
+        { name = "vitamin_get", rval = "int", args = { "vitamin_id" }, comment = "Check current level of a vitamin          *          * Accesses level of a given vitamin.  If the vitamin_id specified does not          * exist then this function simply returns 0.          *          * @param vit ID of vitamin to check level for.          * @returns current level for specified vitamin" },
+        { name = "vitamin_mod", rval = "int", args = { "vitamin_id", "int" }, comment = "Add or subtract vitamins from player storage pools          * @param vit ID of vitamin to modify          * @param qty amount by which to adjust vitamin (negative values are permitted)          * @param capped if true prevent vitamins which can accumulate in excess from doing so          * @return adjusted level for the vitamin or zero if vitamin does not exist" },
+        { name = "vitamin_mod", rval = "int", args = { "vitamin_id", "int", "bool" }, comment = "Add or subtract vitamins from player storage pools          * @param vit ID of vitamin to modify          * @param qty amount by which to adjust vitamin (negative values are permitted)          * @param capped if true prevent vitamins which can accumulate in excess from doing so          * @return adjusted level for the vitamin or zero if vitamin does not exist" },
+        { name = "vitamin_rate", rval = "int", args = { "vitamin_id" }, comment = "Get vitamin usage rate (minutes per unit) accounting for bionics, mutations and effects" },
+        { name = "vitamin_set", rval = "bool", args = { "vitamin_id", "int" }, comment = "Sets level of a vitamin or returns false if id given in vit does not exist          *          * @note status effects are still set for deficiency/excess          *          * @param[in] vit ID of vitamin to adjust quantity for          * @param[in] qty Quantity to set level to          * @returns false if given vitamin_id does not exist, otherwise true" },
         { name = "vomit", rval = nil, args = { }, comment = "Handles player vomiting effects" },
         { name = "vomit_mod", rval = "float", args = { }, comment = "Returns the modifier value used for vomiting effects." },
         { name = "wake_up", rval = nil, args = { }, comment = "Removes 'sleep' and 'lying_down' from the player" },
@@ -2003,6 +2009,7 @@ classes['material_type'] = {
         { name = "repaired_with", rval = "std::string", args = { } },
         { name = "salvaged_into", rval = "std::string", args = { } },
         { name = "soft", rval = "bool", args = { } },
+        { name = "vitamin", rval = "float", args = { "vitamin_id" } },
     }
 }
 classes['start_location'] = {
@@ -2720,6 +2727,20 @@ classes['effect'] = {
         { name = "set_intensity", rval = "int", args = { "int", "bool" }, comment = "Sets inensity of effect capped by range [1..max_intensity]          * @param val Value to set intensity to          * @param alert whether decay messages should be displayed          * @return new intensity of the effect after val subjected to above cap" },
         { name = "unpause_effect", rval = nil, args = { }, comment = "Makes an effect not permanent. Note: This unpauses the duration, but does not otherwise change it." },
         { name = "use_part_descs", rval = "bool", args = { }, comment = "Returns true if a description will be formatted as 'Your' + body_part + description." },
+    }
+}
+classes['vitamin'] = {
+    string_id = "vitamin_id",
+    functions = {
+        { name = "deficiency", rval = "efftype_id", args = { }, comment = "Disease effect with increasing intensity proportional to vitamin deficiency" },
+        { name = "excess", rval = "efftype_id", args = { }, comment = "Disease effect with increasing intensity proportional to vitamin excess" },
+        { name = "id", rval = "vitamin_id", args = { } },
+        { name = "is_null", rval = "bool", args = { } },
+        { name = "max", rval = "int", args = { }, comment = "Upper bound for any accumulation of this vitamin" },
+        { name = "min", rval = "int", args = { }, comment = "Lower bound for deficiency of this vitamin" },
+        { name = "name", rval = "std::string", args = { } },
+        { name = "rate", rval = "int", args = { }, comment = "Usage rate of vitamin (turns to consume unit)          * Lower bound is zero whereby vitamin is not required (but may still accumulate)          * If unspecified in JSON a default value of 60 minutes is used" },
+        { name = "severity", rval = "int", args = { "int" }, comment = "Get intensity of deficiency or zero if not deficient for specified qty" },
     }
 }
 
