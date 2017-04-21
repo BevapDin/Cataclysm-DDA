@@ -28,6 +28,7 @@
 #include "trap.h"
 #include "overmap.h"
 #include "mtype.h"
+#include "mattack_common.h"
 #include "field.h"
 #include "filesystem.h"
 #include "string_input_popup.h"
@@ -747,6 +748,33 @@ void update_globals(lua_State *L)
     luah_setglobal( L, "g", -1 );
 }
 
+class mattack_actor_wrapper : public mattack_actor {
+    int lua_function;
+public:
+    mattack_actor_wrapper ( const mattack_id &id, const int func ) : mattack_actor( id ), lua_function( func ) { }
+
+    ~mattack_actor_wrapper() override = default;
+    bool call( monster &m ) const override {
+        update_globals( lua_state );
+        lua_rawgeti( lua_state, LUA_REGISTRYINDEX, lua_function );
+        const int monster_in_registry = LuaReference<monster>::push_reg( lua_state, m );
+        int err = lua_pcall( lua_state, 1, 1, 0 );
+        lua_report_error( lua_state, err, "mattack_actor_wrapper::call" );
+        luah_remove_from_registry( lua_state, monster_in_registry );
+        luah_setmetatable( lua_state, "outdated_metatable" );
+        return true; // TODO
+    }
+    mattack_actor *clone() const override {
+        return new mattack_actor_wrapper( *this );
+    }
+    void load_internal( JsonObject &/*jo*/, const std::string &/*src*/ ) override {
+    }
+};
+
+void MonsterGenerator::add_attack_lua( const std::string &name, int func ) {
+    add_attack( new mattack_actor_wrapper( name, func ) );
+}
+
 class lua_iuse_wrapper : public iuse_actor {
 private:
     int lua_function;
@@ -1022,6 +1050,17 @@ static int game_choose_adjacent(lua_State *L)
     }
 }
 
+static int game_register_attack( lua_State * const L )
+{
+    const char * const name = luaL_checkstring( L, 1 );
+    if( !name ) {
+        return luaL_error( L, "First argument to game.register_mattack is not a string." );
+    }
+    luaL_checktype( L, 2, LUA_TFUNCTION );
+    MonsterGenerator::generator().add_attack_lua( name, luaL_ref( L, LUA_REGISTRYINDEX ) );
+    return 0;
+}
+
 // game.register_iuse(string, function_object)
 static int game_register_iuse(lua_State *L)
 {
@@ -1126,6 +1165,7 @@ static int game_myPrint( lua_State *L )
 // -----------------------------------------------------------
 static const struct luaL_Reg global_funcs [] = {
     {"register_iuse", game_register_iuse},
+    {"register_attack", game_register_attack},
     //{"get_monsters", game_get_monsters},
     {"items_at", game_items_at},
     {"choose_adjacent", game_choose_adjacent},

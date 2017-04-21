@@ -72,6 +72,8 @@ class MonsterGenerator
         friend struct species_type;
         friend class mattack_actor;
 
+        void add_attack_lua( const std::string &name, int func );
+
     protected:
         m_flag m_flag_from_string( std::string flag ) const;
     private:
