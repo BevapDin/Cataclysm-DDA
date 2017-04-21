@@ -263,7 +263,7 @@ function generate_overload_tree(classes)
                 base = base[class_name]
             end
             local leaf = generate_overload_path(base, func.args)
-            leaf.r = { rval = func.rval, cpp_name = func.cpp_name or func.name, class_name = class_name, static = func.static }
+            leaf.r = { rval = func.rval, cpp_name = func.cpp_name or func.name, class_name = class_name, static = func.static, comment = func.comment, location = func.location }
         end
         return functions_by_name
     end
@@ -275,7 +275,7 @@ function generate_overload_tree(classes)
             local new_root = {}
             for _, func in ipairs(value.new) do
                 local leaf = generate_overload_path(new_root, func)
-                leaf.r = { rval = nil, cpp_name = class_name .. "::" .. class_name, class_name = class_name }
+                leaf.r = { rval = nil, cpp_name = class_name .. "::" .. class_name, class_name = class_name, comment = func.comment, location = func.location }
             end
             value.new = new_root
         end
@@ -605,6 +605,48 @@ end
 dofile "../../lua/generated_class_definitions.lua"
 dofile "../../lua/class_definitions.lua"
 
+html_output = ''
+html_output = html_output .. '<html><body>'
+for class_name, class in pairs(classes) do
+    html_output = html_output .. '<a name="#' .. class_name .. '"></a>\n'
+    html_output = html_output .. '<h2>' .. class_name .. '</h2>\n'
+    html_output = html_output .. '<ul>\n'
+    if class.functions then
+        for _, func in pairs(class.functions) do
+            name = func.name
+            if func.rval then
+                name = '<a href="#' .. func.rval .. '">' .. func.rval .. '</a> ' .. name
+            end
+            name = name .. "("
+            for i, a in ipairs(func.args) do
+                if i > 1 then
+                    name = name .. ", "
+                end
+                name = name .. '<a href="#' .. a .. '">' .. a .. '</a>'
+            end
+            name = name .. ")"
+            if func.location then
+                url = func.location[1]
+                url = url:gsub("./src/", '')
+                url = url:gsub('_', '__')
+                url = url:gsub("[.]", '_8')
+                url = url .. '_source.html'
+                url = "../../doxygen_doc/html/" .. url
+                url = url .. '#l' .. string.format('%05d', func.location[2])
+                html_output = html_output .. '<li><a href="' .. url .. '">' .. name .. '</a>'
+            else
+                html_output = html_output .. '<li>' .. name
+            end
+            if func.comment then
+                html_output = html_output .. '<pre>' .. func.comment .. '</pre>'
+            end
+            html_output = html_output .. '</li>\n'
+        end
+    end
+    html_output = html_output .. '</ul>\n'
+end
+html_output = html_output .. '</body></html>'
+
 generate_overload_tree(classes)
 
 function generate_accessors(class, class_name)
@@ -865,3 +907,4 @@ function writeFile(path,data)
 end
 
 writeFile("catabindings.cpp", cpp_output)
+writeFile("catabindings.html", html_output)

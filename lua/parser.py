@@ -768,6 +768,7 @@ class CppClass:
             line = line + "args = " + args
             if self.cursor.raw_comment:
                 line = line + ", comment = \"" + fixcoments(self.cursor.raw_comment) + "\""
+            line = line + ", location = { \"" + self.cursor.location.file.name + "\", " + str(self.cursor.location.line) + " }"
             line = line + " }"
             return line
 
