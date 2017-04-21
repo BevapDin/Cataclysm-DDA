@@ -1,0 +1,36 @@
+[
+  {
+    "type": "MOD_INFO",
+    "ident": "Lua",
+    "name": "Lua",
+    "description": "Lua text mod",
+    "dependencies": [ "dda" ],
+    "obsolete": true
+  },{
+    "id": "mon_nymph",
+    "type": "MONSTER",
+    "name": "nymph",
+    "description": "TODO",
+    "default_faction": "zombie",
+    "species": [ "ZOMBIE" ],
+    "diff": 3,
+    "size": "MEDIUM",
+    "hp": 80,
+    "speed": 70,
+    "material": [ "flesh" ],
+    "symbol": "N",
+    "color": "ltred",
+    "aggression": 100,
+    "morale": 100,
+    "melee_skill": 4,
+    "melee_dice": 2,
+    "melee_dice_sides": 3,
+    "melee_cut": 0,
+    "vision_night": 3,
+    "special_attacks": [
+      [ "nymph_attack", 3 ]
+    ],
+    "death_drops": "default_zombie_death_drops",
+    "death_function": [ "NORMAL" ]
+  }
+]
