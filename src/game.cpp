@@ -1033,12 +1033,11 @@ bool game::cleanup_at_end()
         try {
             save_factions_missions_npcs(); //missions need to be saved as they are global for all saves.
             save_artifacts();
+            // and the overmap, and the local map.
+            save_maps(); //Omap also contains the npcs who need to be saved.
         } catch( ... ) {
             // ignored for now. TODO: report me
         }
-
-        // and the overmap, and the local map.
-        save_maps(); //Omap also contains the npcs who need to be saved.
     }
 
     if (uquit == QUIT_DIED || uquit == QUIT_SUICIDE) {
@@ -3777,17 +3776,11 @@ void game::save_artifacts()
     ::save_artifacts( artfilename );
 }
 
-bool game::save_maps()
+void game::save_maps()
 {
-    try {
-        m.save();
-        overmap_buffer.save(); // can throw
-        MAPBUFFER.save(); // can throw
-        return true;
-    } catch( const std::exception &err ) {
-        popup( _( "Failed to save the maps: %s" ), err.what() );
-        return false;
-    }
+    m.save();
+    overmap_buffer.save(); // can throw
+    MAPBUFFER.save(); // can throw
 }
 
 bool game::save_uistate()
@@ -3820,8 +3813,8 @@ bool game::save()
         save_player_data();
         save_factions_missions_npcs();
         save_artifacts();
-        if ( !save_maps() ||
-             !get_auto_pickup().save_character() ||
+        save_maps();
+        if ( !get_auto_pickup().save_character() ||
              !get_safemode().save_character() ||
              !save_uistate()){
             return false;

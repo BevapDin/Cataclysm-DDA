@@ -801,8 +801,6 @@ class game
 
         //private save functions.
         void serialize_master(std::ostream &fout);
-        // returns false if saving failed for whatever reason
-        bool save_maps();
         void save_weather(std::ostream &fout);
         // returns false if saving failed for whatever reason
         bool save_uistate();
@@ -1049,6 +1047,7 @@ private:
 
         void move_save_to_graveyard();
 
+        bool save_maps(); // throws
         void save_artifacts(); // throws
         void save_factions_missions_npcs(); // throws
         void save_player_data(); // throws
