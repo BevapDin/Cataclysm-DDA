@@ -797,6 +797,7 @@ void game::load_map( tripoint pos_sm )
 // Set up all default values for a new game
 bool game::start_game( WORLD &world, const character_type ct, const std::string &template_name )
 {
+    setup( *world );
     if( !u.create( ct, template_name ) ) {
         u = player();
         return false;

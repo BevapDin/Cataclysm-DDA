@@ -602,19 +602,18 @@ bool main_menu::new_character_tab()
                     if( world == NULL ) {
                         continue;
                     }
+                    const auto ct = sel2 == 0 ? PLTYPE_CUSTOM : ( sel2 == 2 ? PLTYPE_RANDOM : PLTYPE_NOW );
                     try {
-                        g->setup( *world );
+                        if( !g->start_game( *world, ct, "" ) ) {
+                            g->u = player();
+                            continue;
+                        }
                     } catch( const std::exception &err ) {
                         debugmsg( "Error: %s", err.what() );
                         g->u = player();
                         continue;
                     }
 
-                    const auto ct = sel2 == 0 ? PLTYPE_CUSTOM : ( sel2 == 2 ? PLTYPE_RANDOM : PLTYPE_NOW );
-                    if( !g->start_game( *world, ct, "" ) ) {
-                        g->u = player();
-                        continue;
-                    }
                     start = true;
                 } else if( sel2 == 1 ) {
                     layer = 3;
@@ -679,13 +678,12 @@ bool main_menu::new_character_tab()
                     continue;
                 }
                 try {
-                    g->setup( *world );
+                    if( !g->start_game( *world_generator->active_world, PLTYPE_TEMPLATE, templates[sel3] ) ) {
+                        g->u = player();
+                        continue;
+                    }
                 } catch( const std::exception &err ) {
                     debugmsg( "Error: %s", err.what() );
-                    g->u = player();
-                    continue;
-                }
-                if( !g->start_game( *world_generator->active_world, PLTYPE_TEMPLATE, templates[sel3] ) ) {
                     g->u = player();
                     continue;
                 }
