@@ -1031,7 +1031,7 @@ bool game::cleanup_at_end()
         // Save the factions', missions and set the NPC's overmap coordinates
         // Npcs are saved in the overmap.
         try {
-            save_factions_missions_npcs(); //missions need to be saved as they are global for all saves.
+            save_game_data(); //missions need to be saved as they are global for all saves.
             save_artifacts();
             // and the overmap, and the local map.
             save_maps(); //Omap also contains the npcs who need to be saved.
@@ -3762,7 +3762,7 @@ bool game::load_packs( const std::string &msg, const std::vector<std::string>& p
 }
 
 //Saves all factions and missions and npcs.
-void game::save_factions_missions_npcs()
+void game::save_game_data()
 {
     std::string masterfile = world_generator->active_world->world_path + "/master.gsav";
     write_to_file_throw( masterfile, [&]( std::ostream &fout ) {
@@ -3808,7 +3808,7 @@ bool game::save()
 {
     try {
         save_player_data();
-        save_factions_missions_npcs();
+        save_game_data();
         save_artifacts();
         save_maps();
 
