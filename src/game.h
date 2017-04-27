@@ -1052,7 +1052,7 @@ private:
         Creature *is_hostile_within(int distance);
 
         void move_save_to_graveyard();
-        bool save_player_data();
+        void save_player_data(); // throws
 };
 
 #endif

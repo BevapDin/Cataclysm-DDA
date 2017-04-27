@@ -279,6 +279,22 @@ void ofstream_wrapper::close()
     }
 }
 
+bool write_to_file_throw( const std::string &path, const std::function<void( std::ostream & )> &writer,
+                          const char *const fail_message )
+{
+    try {
+        ofstream_wrapper fout( path );
+        writer( fout.stream() );
+        fout.close();
+    } catch( const std::exception &err ) {
+        if( fail_message ) {
+            throw std::runtime_error( string_format( "Failed to write %1$s to \"%2$s\": %3$s" ), fail_message, path.c_str(), err.what() );
+        } else {
+            throw std::runtime_error( string_format( "Failed to write to \"%1$s\": %2$s" ), path.c_str(), err.what() );
+        }
+    }
+}
+
 bool write_to_file( const std::string &path, const std::function<void( std::ostream & )> &writer,
                     const char *const fail_message )
 {

@@ -3797,28 +3797,26 @@ bool game::save_uistate()
     }, _( "uistate data" ) );
 }
 
-bool game::save_player_data()
+void game::save_player_data()
 {
     const std::string playerfile = world_generator->active_world->world_path + "/" + base64_encode(u.name);
 
-    const bool saved_data = write_to_file( playerfile + ".sav", [&]( std::ostream &fout ) {
+    write_to_file_throw( playerfile + ".sav", [&]( std::ostream &fout ) {
         serialize(fout);
     }, _( "player data" ) );
-    const bool saved_weather = write_to_file( playerfile + ".weather", [&]( std::ostream &fout ) {
+    write_to_file_throw( playerfile + ".weather", [&]( std::ostream &fout ) {
         save_weather(fout);
     }, _( "weather state" ) );
-    const bool saved_log = write_to_file( playerfile + ".log", [&]( std::ostream &fout ) {
+    write_to_file_throw( playerfile + ".log", [&]( std::ostream &fout ) {
         fout << u.dump_memorial();
     }, _( "player memorial" ) );
-
-    return saved_data && saved_weather && saved_log;
 }
 
 bool game::save()
 {
     try {
-        if ( !save_player_data() ||
-             !save_factions_missions_npcs() ||
+        save_player_data();
+        if ( !save_factions_missions_npcs() ||
              !save_artifacts() ||
              !save_maps() ||
              !get_auto_pickup().save_character() ||

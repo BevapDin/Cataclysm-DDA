@@ -331,6 +331,11 @@ class ofstream_wrapper
  */
 bool write_to_file( const std::string &path, const std::function<void( std::ostream & )> &writer,
                     const char *fail_message );
+/**
+ * Same as above, but reports errors as exception.
+ */
+void write_to_file_throw( const std::string &path, const std::function<void( std::ostream & )> &writer,
+                          const char *fail_message );
 class JsonDeserializer;
 /**
  * Try to open and read from given file using the given callback.
