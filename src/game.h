@@ -38,6 +38,7 @@ extern int savegame_loading_version;
 
 class input_context;
 input_context get_default_mode_input_context();
+enum character_type : int;
 
 enum class dump_mode {
     TSV,
@@ -796,7 +797,7 @@ class game
         void load( WORLD &world, const save_t &name ); // Load a player-specific save file
         bool load_master(std::string worldname); // Load the master data file, with factions &c
         void load_weather(std::istream &fin);
-        bool start_game( WORLD &world ); // Starts a new game in a world
+        bool start_game( WORLD &world, character_type ct, const std::string &template_name ); // Starts a new game in a world
         void start_special_game(special_game_id gametype); // See gamemode.cpp
 
         //private save functions.

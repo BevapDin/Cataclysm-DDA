@@ -609,17 +609,9 @@ bool main_menu::new_character_tab()
                         g->u = player();
                         continue;
                     }
-                    if( !g->u.create( sel2 == 0 ? PLTYPE_CUSTOM : ( sel2 == 2 ? PLTYPE_RANDOM : PLTYPE_NOW ) ) ) {
-                        g->u = player();
-                        werase( w_background );
-                        wrefresh( w_background );
-                        continue;
-                    }
 
-                    werase( w_background );
-                    wrefresh( w_background );
-
-                    if( !g->start_game( *world ) ) {
+                    const auto ct = sel2 == 0 ? PLTYPE_CUSTOM : ( sel2 == 2 ? PLTYPE_RANDOM : PLTYPE_NOW );
+                    if( !g->start_game( *world, ct, "" ) ) {
                         g->u = player();
                         continue;
                     }
@@ -693,15 +685,7 @@ bool main_menu::new_character_tab()
                     g->u = player();
                     continue;
                 }
-                if( !g->u.create( PLTYPE_TEMPLATE, templates[sel3] ) ) {
-                    g->u = player();
-                    werase( w_background );
-                    wrefresh( w_background );
-                    continue;
-                }
-                werase( w_background );
-                wrefresh( w_background );
-                if( !g->start_game( *world_generator->active_world ) ) {
+                if( !g->start_game( *world_generator->active_world, PLTYPE_TEMPLATE, templates[sel3] ) ) {
                     g->u = player();
                     continue;
                 }
