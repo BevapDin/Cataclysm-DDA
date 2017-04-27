@@ -1032,8 +1032,6 @@ bool game::cleanup_at_end()
         // Npcs are saved in the overmap.
         try {
             save_game_data(); //missions need to be saved as they are global for all saves.
-            // and the overmap, and the local map.
-            save_maps(); //Omap also contains the npcs who need to be saved.
         } catch( ... ) {
             // ignored for now. TODO: report me
         }
@@ -3770,10 +3768,7 @@ void game::save_game_data()
 
     std::string artfilename = world_generator->active_world->world_path + "/artifacts.gsav";
     ::save_artifacts( artfilename );
-}
 
-void game::save_maps()
-{
     m.save();
     overmap_buffer.save(); // can throw
     MAPBUFFER.save(); // can throw
@@ -3805,7 +3800,6 @@ bool game::save()
     try {
         save_player_data();
         save_game_data();
-        save_maps();
 
         world_generator->active_world->add_save( save_t::from_player_name( u.name ) );
         return true;

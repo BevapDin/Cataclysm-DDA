@@ -1045,7 +1045,6 @@ private:
 
         void move_save_to_graveyard();
 
-        bool save_maps(); // throws
         void save_game_data(); // throws
         void save_player_data(); // throws
 };
