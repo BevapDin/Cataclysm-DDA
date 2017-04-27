@@ -795,7 +795,7 @@ class game
     private:
         // Game-start procedures
         void load( WORLD &world, const save_t &name ); // Load a player-specific save file
-        void load_master(std::string worldname); // Load the master data file, with factions &c
+        void load_master( WORLD &world ); // Load the master data file, with factions &c
         void load_weather(std::istream &fin);
         bool start_game( WORLD &world, character_type ct, const std::string &template_name ); // Starts a new game in a world
 
