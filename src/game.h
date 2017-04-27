@@ -800,8 +800,6 @@ class game
         bool start_game( WORLD &world, character_type ct, const std::string &template_name ); // Starts a new game in a world
 
         //private save functions.
-        // returns false if saving failed for whatever reason
-        bool save_factions_missions_npcs();
         void serialize_master(std::ostream &fout);
         // returns false if saving failed for whatever reason
         bool save_artifacts();
@@ -1052,6 +1050,8 @@ private:
         Creature *is_hostile_within(int distance);
 
         void move_save_to_graveyard();
+
+        void save_factions_missions_npcs(); // throws
         void save_player_data(); // throws
 };
 
