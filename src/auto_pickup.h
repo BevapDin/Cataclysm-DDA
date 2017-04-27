@@ -81,7 +81,7 @@ class auto_pickup
 
         void show();
         void show( const std::string &custom_name, bool is_autopickup = true );
-        bool save_character();
+        void save_character(); // throws
         bool save_global();
         void load_character();
         void load_global();

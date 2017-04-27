@@ -3814,8 +3814,8 @@ bool game::save()
         save_factions_missions_npcs();
         save_artifacts();
         save_maps();
-        if ( !get_auto_pickup().save_character() ||
-             !get_safemode().save_character() ||
+        get_auto_pickup().save_character();
+        if ( !get_safemode().save_character() ||
              !save_uistate()){
             return false;
         } else {

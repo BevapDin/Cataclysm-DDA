@@ -584,9 +584,11 @@ void auto_pickup::clear_character_rules()
     ready = false;
 }
 
-bool auto_pickup::save_character()
+void auto_pickup::save_character()
 {
-    return save(true);
+    if( !save(true) ) {
+        throw std::runtime_error( "failed to store character auto pickup rules" );
+    }
 }
 
 bool auto_pickup::save_global()
