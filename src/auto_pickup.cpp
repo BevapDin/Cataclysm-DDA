@@ -590,33 +590,29 @@ void auto_pickup::clear_character_rules()
 
 void auto_pickup::save_character()
 {
-    if( !save(true) ) {
-        throw std::runtime_error( "failed to store character auto pickup rules" );
-    }
+    save(true);
 }
 
 void auto_pickup::save_global()
 {
-    if( !save(false) ) {
-        throw std::runtime_error( "failed to store character auto pickup rules" );
-    }
+    save(false);
 }
 
-bool auto_pickup::save(const bool bCharacter)
+void auto_pickup::save(const bool bCharacter)
 {
     bChar = bCharacter;
     auto savefile = FILENAMES["autopickup"];
 
-        if (bCharacter) {
-            savefile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.json";
+    if (bCharacter) {
+        savefile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.json";
 
-            const std::string player_save = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".sav";
-            if( !file_exist( player_save ) ) {
-                return true; //Character not saved yet.
-            }
+        const std::string player_save = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".sav";
+        if( !file_exist( player_save ) ) {
+            return; //Character not saved yet.
         }
+    }
 
-    return write_to_file( savefile, [&]( std::ostream &fout ) {
+    write_to_file_throw( savefile, [&]( std::ostream &fout ) {
         JsonOut jout( fout, true );
         serialize(jout);
     }, _( "autopickup configuration" ) );
