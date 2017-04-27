@@ -3796,6 +3796,12 @@ void game::save_player_data()
     write_to_file_throw( playerfile + ".log", [&]( std::ostream &fout ) {
         fout << u.dump_memorial();
     }, _( "player memorial" ) );
+    get_auto_pickup().save_character();
+    get_safemode().save_character();
+    write_to_file_throw( world_generator->active_world->world_path + "/uistate.json", [&]( std::ostream &fout ) {
+        JsonOut jsout( fout );
+        uistate.serialize( jsout );
+    }, _( "uistate data" ) );
 }
 
 bool game::save()
@@ -3805,12 +3811,6 @@ bool game::save()
         save_factions_missions_npcs();
         save_artifacts();
         save_maps();
-        get_auto_pickup().save_character();
-        get_safemode().save_character();
-        write_to_file_throw( world_generator->active_world->world_path + "/uistate.json", [&]( std::ostream &fout ) {
-            JsonOut jsout( fout );
-            uistate.serialize( jsout );
-        }, _( "uistate data" ) );
 
         world_generator->active_world->add_save( save_t::from_player_name( u.name ) );
         return true;
