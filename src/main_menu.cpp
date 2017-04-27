@@ -831,14 +831,13 @@ bool main_menu::load_character_tab()
                     wrefresh( w_background );
                     WORLDPTR world = world_generator->get_world( all_worldnames[sel2] );
                     try {
-                        g->setup( *world );
+                        g->load( *world, savegames[sel3] );
                     } catch( const std::exception &err ) {
                         debugmsg( "Error: %s", err.what() );
                         g->u = player();
                         continue;
                     }
 
-                    g->load( *world, savegames[sel3] );
                     start = true;
                 }
             }

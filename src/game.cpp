@@ -3606,7 +3606,6 @@ bool game::load( const std::string &world ) {
     }
 
     try {
-        g->setup( *wptr );
         g->load( *wptr, wptr->world_saves.front() );
     } catch( const std::exception &err ) {
         debugmsg( "cannot load world '%s': %s", world.c_str(), err.what() );
@@ -3618,6 +3617,7 @@ bool game::load( const std::string &world ) {
 
 void game::load( WORLD &world, const save_t &name )
 {
+    setup( world );
     using namespace std::placeholders;
 
     const std::string worldpath = world.world_path + "/";
@@ -13526,11 +13526,10 @@ void game::quickload()
             MAPBUFFER.reset();
             overmap_buffer.clear();
             try {
-                setup( *active_world);
+                load( *active_world, save_t::from_player_name( u.name ) );
             } catch( const std::exception &err ) {
                 debugmsg( "Error: %s", err.what() );
             }
-            load( *active_world, save_t::from_player_name( u.name ) );
         }
     } else {
         popup_getkey( _( "No saves for %s yet." ), u.name.c_str() );
