@@ -3589,16 +3589,6 @@ void game::load_master( WORLD &world )
     }
 }
 
-void game::load_uistate(std::string worldname)
-{
-    using namespace std::placeholders;
-    const auto savefile = world_generator->get_world( worldname )->world_path + "/uistate.json";
-    read_from_file_optional( savefile, []( std::istream &stream ) {
-        JsonIn jsin( stream );
-        uistate.deserialize( jsin );
-    } );
-}
-
 bool game::load( const std::string &world ) {
     world_generator->init();
     const WORLDPTR wptr = world_generator->get_world( world );
@@ -3659,7 +3649,10 @@ void game::load( WORLD &world, const save_t &name )
     get_auto_pickup().load_character(); // Load character auto pickup rules
     get_safemode().load_character(); // Load character safemode rules
     zone_manager::get_manager().load_zones(); // Load character world zones
-    load_uistate(world.world_name);
+    read_from_file_optional( worldpath + "/uistate.json", []( std::istream &stream ) {
+        JsonIn jsin( stream );
+        uistate.deserialize( jsin );
+    } );
 
     reload_npcs();
     update_map( u );
