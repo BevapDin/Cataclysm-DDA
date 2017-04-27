@@ -1031,9 +1031,9 @@ bool game::cleanup_at_end()
         // Save the factions', missions and set the NPC's overmap coordinates
         // Npcs are saved in the overmap.
         try {
-            save_game_data(); //missions need to be saved as they are global for all saves.
-        } catch( ... ) {
-            // ignored for now. TODO: report me
+            save_game_data();
+        } catch( const std::exception &err ) {
+            debugmsg( "Failed to save game data: %s", err.what() );
         }
     }
 
