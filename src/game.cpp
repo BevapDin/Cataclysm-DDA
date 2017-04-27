@@ -732,13 +732,15 @@ void game::reenter_fullscreen()
 /*
  * Initialize more stuff after mapbuffer is loaded.
  */
-void game::setup()
+void game::setup( WORLD &active_world )
 {
+    world_generator->set_active_world( &active_world );
+
     popup_status( _( "Please wait while the world data loads..." ), _( "Loading core data" ) );
     loading_ui ui( true );
     load_core_data( ui );
 
-    load_world_modfiles( world_generator->active_world, ui );
+    load_world_modfiles( &active_world, ui );
 
     m =  map( get_option<bool>( "ZLEVELS" ) );
 
@@ -3604,8 +3606,7 @@ bool game::load( const std::string &world ) {
     }
 
     try {
-        world_generator->set_active_world( wptr );
-        g->setup();
+        g->setup( *wptr );
         g->load( world, wptr->world_saves.front() );
     } catch( const std::exception &err ) {
         debugmsg( "cannot load world '%s': %s", world.c_str(), err.what() );
@@ -13525,7 +13526,7 @@ void game::quickload()
             MAPBUFFER.reset();
             overmap_buffer.clear();
             try {
-                setup();
+                setup( *active_world);
             } catch( const std::exception &err ) {
                 debugmsg( "Error: %s", err.what() );
             }

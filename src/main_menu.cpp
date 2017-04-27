@@ -448,9 +448,8 @@ bool main_menu::opening_screen()
                         if( world == NULL ) {
                             continue;
                         }
-                        world_generator->set_active_world( world );
                         try {
-                            g->setup();
+                            g->setup( *world );
                         } catch( const std::exception &err ) {
                             debugmsg( "Error: %s", err.what() );
                             g->gamemode.reset();
@@ -603,9 +602,8 @@ bool main_menu::new_character_tab()
                     if( world == NULL ) {
                         continue;
                     }
-                    world_generator->set_active_world( world );
                     try {
-                        g->setup();
+                        g->setup( *world );
                     } catch( const std::exception &err ) {
                         debugmsg( "Error: %s", err.what() );
                         g->u = player();
@@ -688,9 +686,8 @@ bool main_menu::new_character_tab()
                     g->u = player();
                     continue;
                 }
-                world_generator->set_active_world( world );
                 try {
-                    g->setup();
+                    g->setup( *world );
                 } catch( const std::exception &err ) {
                     debugmsg( "Error: %s", err.what() );
                     g->u = player();
@@ -833,9 +830,8 @@ bool main_menu::load_character_tab()
                     werase( w_background );
                     wrefresh( w_background );
                     WORLDPTR world = world_generator->get_world( all_worldnames[sel2] );
-                    world_generator->set_active_world( world );
                     try {
-                        g->setup();
+                        g->setup( *world );
                     } catch( const std::exception &err ) {
                         debugmsg( "Error: %s", err.what() );
                         g->u = player();
