@@ -3607,7 +3607,7 @@ bool game::load( const std::string &world ) {
 
     try {
         g->setup( *wptr );
-        g->load( world, wptr->world_saves.front() );
+        g->load( *wptr, wptr->world_saves.front() );
     } catch( const std::exception &err ) {
         debugmsg( "cannot load world '%s': %s", world.c_str(), err.what() );
         return false;
@@ -3616,15 +3616,15 @@ bool game::load( const std::string &world ) {
     return true;
 }
 
-void game::load(std::string worldname, const save_t &name)
+void game::load( WORLD &world, const save_t &name )
 {
     using namespace std::placeholders;
 
-    const std::string worldpath = world_generator->get_world( worldname )->world_path + "/";
+    const std::string worldpath = world.world_path + "/";
     const std::string playerfile = worldpath + name.base_path() + ".sav";
 
     // Now load up the master game data; factions (and more?)
-    if( !load_master( worldname ) || factions.empty() ) {
+    if( !load_master( world.world_name ) || factions.empty() ) {
         create_factions();
     }
     u = player();
@@ -3656,7 +3656,7 @@ void game::load(std::string worldname, const save_t &name)
     get_auto_pickup().load_character(); // Load character auto pickup rules
     get_safemode().load_character(); // Load character safemode rules
     zone_manager::get_manager().load_zones(); // Load character world zones
-    load_uistate(worldname);
+    load_uistate(world.world_name);
 
     reload_npcs();
     update_map( u );
@@ -13530,7 +13530,7 @@ void game::quickload()
             } catch( const std::exception &err ) {
                 debugmsg( "Error: %s", err.what() );
             }
-            load( active_world->world_name, save_t::from_player_name( u.name ) );
+            load( *active_world, save_t::from_player_name( u.name ) );
         }
     } else {
         popup_getkey( _( "No saves for %s yet." ), u.name.c_str() );
