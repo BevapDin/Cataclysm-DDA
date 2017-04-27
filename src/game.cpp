@@ -795,7 +795,7 @@ void game::load_map( tripoint pos_sm )
 }
 
 // Set up all default values for a new game
-bool game::start_game(std::string worldname)
+bool game::start_game( WORLD &world )
 {
     if( !gamemode ) {
         gamemode.reset( new special_game() );
@@ -814,7 +814,7 @@ bool game::start_game(std::string worldname)
     catacurses::refresh();
     popup_nowait(_("Please wait as we build your world"));
     // Init some factions.
-    if( !load_master( worldname ) || factions.empty() ) { // Master data record contains factions.
+    if( !load_master( world.world_name ) || factions.empty() ) { // Master data record contains factions.
         create_factions();
     }
     u.setID( assign_npc_id() ); // should be as soon as possible, but *after* load_master
