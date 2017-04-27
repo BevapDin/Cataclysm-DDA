@@ -1045,7 +1045,6 @@ private:
 
         void move_save_to_graveyard();
 
-        void save_uistate(); // throws
         bool save_maps(); // throws
         void save_artifacts(); // throws
         void save_factions_missions_npcs(); // throws
