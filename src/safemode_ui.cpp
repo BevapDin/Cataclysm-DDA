@@ -387,7 +387,11 @@ void safemode::show( const std::string &custom_name_in, bool is_safemode_in )
         if( is_safemode_in ) {
             save_global();
             if( !g->u.name.empty() ) {
-                save_character();
+                try {
+                    save_character();
+                } catch( ... ) {
+                    // todo: handle this error
+                }
             }
         } else {
             create_rules();
@@ -614,9 +618,11 @@ void safemode::clear_character_rules()
     character_rules.clear();
 }
 
-bool safemode::save_character()
+void safemode::save_character()
 {
-    return save( true );
+    if( !save( true ) ) {
+        throw std::runtime_error( "failed to write character safemode rules" );
+    }
 }
 
 bool safemode::save_global()

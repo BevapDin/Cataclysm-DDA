@@ -3815,8 +3815,8 @@ bool game::save()
         save_artifacts();
         save_maps();
         get_auto_pickup().save_character();
-        if ( !get_safemode().save_character() ||
-             !save_uistate()){
+        get_safemode().save_character();
+        if ( !save_uistate()){
             return false;
         } else {
             world_generator->active_world->add_save( save_t::from_player_name( u.name ) );

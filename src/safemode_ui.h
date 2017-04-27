@@ -91,7 +91,7 @@ class safemode
         void show();
         void show( const std::string &custom_name_in, bool is_autopickup_in );
 
-        bool save_character();
+        void save_character();
         bool save_global();
         void load_character();
         void load_global();
