@@ -3803,8 +3803,8 @@ bool game::save()
 
         world_generator->active_world->add_save( save_t::from_player_name( u.name ) );
         return true;
-    } catch (std::ios::failure &err) {
-        popup(_("Failed to save game data"));
+    } catch( std::exception &err ) {
+        popup( _( "Failed to save game data: %s" ), err.what() );
         return false;
     }
 }
