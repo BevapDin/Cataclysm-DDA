@@ -802,8 +802,6 @@ class game
         //private save functions.
         void serialize_master(std::ostream &fout);
         void save_weather(std::ostream &fout);
-        // returns false if saving failed for whatever reason
-        bool save_uistate();
         // Data Initialization
         void init_autosave();     // Initializes autosave parameters
         void init_lua();          // Initializes lua interpreter.
@@ -1047,6 +1045,7 @@ private:
 
         void move_save_to_graveyard();
 
+        void save_uistate(); // throws
         bool save_maps(); // throws
         void save_artifacts(); // throws
         void save_factions_missions_npcs(); // throws

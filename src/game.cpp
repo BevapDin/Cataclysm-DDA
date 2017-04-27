@@ -3783,10 +3783,10 @@ void game::save_maps()
     MAPBUFFER.save(); // can throw
 }
 
-bool game::save_uistate()
+void game::save_uistate()
 {
     std::string savefile = world_generator->active_world->world_path + "/uistate.json";
-    return write_to_file( savefile, [&]( std::ostream &fout ) {
+    write_to_file_throw( savefile, [&]( std::ostream &fout ) {
         JsonOut jsout( fout );
         uistate.serialize( jsout );
     }, _( "uistate data" ) );
@@ -3816,12 +3816,9 @@ bool game::save()
         save_maps();
         get_auto_pickup().save_character();
         get_safemode().save_character();
-        if ( !save_uistate()){
-            return false;
-        } else {
-            world_generator->active_world->add_save( save_t::from_player_name( u.name ) );
-            return true;
-        }
+        save_uistate();
+        world_generator->active_world->add_save( save_t::from_player_name( u.name ) );
+        return true;
     } catch (std::ios::failure &err) {
         popup(_("Failed to save game data"));
         return false;
