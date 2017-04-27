@@ -798,7 +798,6 @@ class game
         bool load_master(std::string worldname); // Load the master data file, with factions &c
         void load_weather(std::istream &fin);
         bool start_game( WORLD &world, character_type ct, const std::string &template_name ); // Starts a new game in a world
-        void start_special_game(special_game_id gametype); // See gamemode.cpp
 
         //private save functions.
         // returns false if saving failed for whatever reason
