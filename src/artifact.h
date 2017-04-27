@@ -98,6 +98,6 @@ std::string architects_cube();
 // note: needs to be called by main() before MAPBUFFER.load
 void load_artifacts( const std::string &filename );
 // save artifact definitions to json, path must be the same as for loading.
-bool save_artifacts( const std::string &path );
+void save_artifacts( const std::string &path ); // throws
 
 #endif
