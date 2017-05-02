@@ -3770,7 +3770,7 @@ bool game::load_packs( const std::string &msg, const std::vector<std::string>& p
 bool game::save_factions_missions_npcs()
 {
     std::string masterfile = world_generator->active_world->world_path + "/master.gsav";
-    return write_to_file_exclusive( masterfile, [&]( std::ostream &fout ) {
+    return write_to_file( masterfile, [&]( std::ostream &fout ) {
         serialize_master(fout);
     }, _( "factions data" ) );
 }
@@ -3797,7 +3797,7 @@ bool game::save_maps()
 bool game::save_uistate()
 {
     std::string savefile = world_generator->active_world->world_path + "/uistate.json";
-    return write_to_file_exclusive( savefile, [&]( std::ostream &fout ) {
+    return write_to_file( savefile, [&]( std::ostream &fout ) {
         JsonOut jsout( fout );
         uistate.serialize( jsout );
     }, _( "uistate data" ) );
