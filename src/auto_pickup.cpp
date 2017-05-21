@@ -686,10 +686,12 @@ bool auto_pickup::load_legacy(const bool bCharacter)
         sFile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.txt";
     }
 
+    ready = false;
+
     auto &rules = vRules[(bCharacter) ? CHARACTER_TAB : GLOBAL_TAB];
 
     using namespace std::placeholders;
-    const auto& reader = std::bind( &auto_pickup::load_legacy_rules, this, std::ref( rules ), _1 );
+    const auto& reader = std::bind( &rule_set::load_legacy_rules, std::ref( rules ), _1 );
     if( !read_from_file_optional( sFile, reader ) ) {
         if( !bCharacter ) {
             return read_from_file_optional( FILENAMES["legacy_autopickup"], reader );
@@ -701,10 +703,9 @@ bool auto_pickup::load_legacy(const bool bCharacter)
     return true;
 }
 
-void auto_pickup::load_legacy_rules( std::vector<cRules> &rules, std::istream &fin )
+void auto_pickup::rule_set::load_legacy_rules( std::istream &fin )
 {
-    rules.clear();
-    ready = false;
+    clear();
 
     std::string sLine;
     while(!fin.eof()) {
@@ -745,7 +746,7 @@ void auto_pickup::load_legacy_rules( std::vector<cRules> &rules, std::istream &f
 
                 } while(iPos != std::string::npos);
 
-                rules.push_back(cRules(sRule, bActive, bExclude));
+                push_back(cRules(sRule, bActive, bExclude));
             }
         }
     }

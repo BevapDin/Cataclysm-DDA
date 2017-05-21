@@ -62,14 +62,14 @@ class auto_pickup
                 using JsonSerializer::serialize;
                 void serialize( JsonOut &json ) const override;
                 void deserialize( JsonIn &jsin ) override;
+
+                void load_legacy_rules( std::istream &fin );
         };
         /**
          * - vRules[0,1] aka vRules[GLOBAL,CHARACTER]: current rules split into global and
          *      character-specific. Allows the editor to show one or the other.
          */
         std::array<rule_set, MAX_TAB> vRules;
-
-        void load_legacy_rules( std::vector<cRules> &rules, std::istream &fin );
 
         void refresh_map_items() const; //< Only modifies mutable state
 
