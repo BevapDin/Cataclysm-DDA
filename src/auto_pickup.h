@@ -11,15 +11,13 @@
 #include "json.h"
 #include "enums.h"
 
-class auto_pickup : public JsonSerializer, public JsonDeserializer
+class auto_pickup
 {
     private:
         void test_pattern( const int iCurrentPage, const int iCurrentLine );
         void load( const bool bCharacter );
-        bool save( const bool bCharacter );
+        bool save( const bool bCharacter ) const;
         bool load_legacy( const bool bCharacter );
-
-        bool bChar;
 
         enum TAB : int {
             GLOBAL_TAB,
@@ -59,18 +57,24 @@ class auto_pickup : public JsonSerializer, public JsonDeserializer
          */
         mutable std::unordered_map<std::string, rule_state> map_items;
 
+        class rule_set : public std::vector<cRules>, public JsonSerializer, public JsonDeserializer {
+            public:
+                using JsonSerializer::serialize;
+                void serialize( JsonOut &json ) const override;
+                void deserialize( JsonIn &jsin ) override;
+        };
         /**
          * - vRules[0,1] aka vRules[GLOBAL,CHARACTER]: current rules split into global and
          *      character-specific. Allows the editor to show one or the other.
          */
-        std::array<std::vector<cRules>, MAX_TAB> vRules;
+        std::array<rule_set, MAX_TAB> vRules;
 
         void load_legacy_rules( std::vector<cRules> &rules, std::istream &fin );
 
         void refresh_map_items() const; //< Only modifies mutable state
 
     public:
-        auto_pickup() : bChar( false ), ready( false ) {}
+        auto_pickup() : ready( false ) {}
 
         bool has_rule( const std::string &sRule );
         void add_rule( const std::string &sRule );
@@ -81,16 +85,12 @@ class auto_pickup : public JsonSerializer, public JsonDeserializer
 
         void show();
         void show( const std::string &custom_name, bool is_autopickup = true );
-        bool save_character();
-        bool save_global();
+        bool save_character() const;
+        bool save_global() const;
         void load_character();
         void load_global();
 
         bool empty() const;
-
-        using JsonSerializer::serialize;
-        void serialize( JsonOut &json ) const override;
-        void deserialize( JsonIn &jsin ) override;
 };
 
 auto_pickup &get_auto_pickup();

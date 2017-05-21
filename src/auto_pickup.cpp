@@ -588,19 +588,18 @@ void auto_pickup::clear_character_rules()
     ready = false;
 }
 
-bool auto_pickup::save_character()
+bool auto_pickup::save_character() const
 {
     return save(true);
 }
 
-bool auto_pickup::save_global()
+bool auto_pickup::save_global() const
 {
     return save(false);
 }
 
-bool auto_pickup::save(const bool bCharacter)
+bool auto_pickup::save(const bool bCharacter) const
 {
-    bChar = bCharacter;
     auto savefile = FILENAMES["autopickup"];
 
         if (bCharacter) {
@@ -614,7 +613,7 @@ bool auto_pickup::save(const bool bCharacter)
 
     return write_to_file( savefile, [&]( std::ostream &fout ) {
         JsonOut jout( fout, true );
-        serialize(jout);
+        vRules[bCharacter ? CHARACTER_TAB : GLOBAL_TAB].serialize(jout);
     }, _( "autopickup configuration" ) );
 }
 
@@ -630,14 +629,12 @@ void auto_pickup::load_global()
 
 void auto_pickup::load(const bool bCharacter)
 {
-    bChar = bCharacter;
-
     std::string sFile = FILENAMES["autopickup"];
     if (bCharacter) {
         sFile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.json";
     }
 
-    if( !read_from_file_optional( sFile, *this ) ) {
+    if( !read_from_file_optional( sFile, vRules[bCharacter ? CHARACTER_TAB : GLOBAL_TAB] ) ) {
         if (load_legacy(bCharacter)) {
             if (save(bCharacter)) {
                 remove_file(sFile);
@@ -648,11 +645,11 @@ void auto_pickup::load(const bool bCharacter)
     ready = false;
 }
 
-void auto_pickup::serialize(JsonOut &json) const
+void auto_pickup::rule_set::serialize(JsonOut &json) const
 {
     json.start_array();
 
-    for( auto &elem : vRules[( bChar ) ? CHARACTER_TAB : GLOBAL_TAB] ) {
+    for( auto &elem : *this ) {
         json.start_object();
 
         json.member( "rule", elem.sRule );
@@ -665,10 +662,9 @@ void auto_pickup::serialize(JsonOut &json) const
     json.end_array();
 }
 
-void auto_pickup::deserialize(JsonIn &jsin)
+void auto_pickup::rule_set::deserialize(JsonIn &jsin)
 {
-    vRules[(bChar) ? CHARACTER_TAB : GLOBAL_TAB].clear();
-    ready = false;
+    clear();
 
     jsin.start_array();
     while (!jsin.end_array()) {
@@ -678,7 +674,7 @@ void auto_pickup::deserialize(JsonIn &jsin)
         const bool bActive = jo.get_bool("active");
         const bool bExclude = jo.get_bool("exclude");
 
-        vRules[(bChar) ? CHARACTER_TAB : GLOBAL_TAB].push_back(cRules(sRule, bActive, bExclude));
+        push_back(cRules(sRule, bActive, bExclude));
     }
 }
 
