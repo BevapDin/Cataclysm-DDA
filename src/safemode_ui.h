@@ -11,7 +11,7 @@
 #include "enums.h"
 #include "creature.h"
 
-class safemode : public JsonSerializer, public JsonDeserializer
+class safemode
 {
     private:
         enum Tabs : int {
@@ -56,15 +56,21 @@ class safemode : public JsonSerializer, public JsonDeserializer
          */
         std::unordered_map < std::string, std::array < rule_state_class, 3 > > safemode_rules;
 
+        class rules_class_vector : public std::vector<rules_class>, public JsonSerializer, public JsonDeserializer
+        {
+            public:
+                using JsonSerializer::serialize;
+                void serialize( JsonOut &json ) const override;
+                void deserialize( JsonIn &jsin ) override;
+        };
+
         /**
          * current rules for global and character tab
          */
-        std::vector<rules_class> global_rules;
-        std::vector<rules_class> character_rules;
+        rules_class_vector global_rules;
+        rules_class_vector character_rules;
 
         void test_pattern( const int tab_in, const int row_in );
-
-        bool is_character;
 
         void create_rules();
         void add_rules( std::vector<rules_class> &rules_in );
@@ -92,10 +98,6 @@ class safemode : public JsonSerializer, public JsonDeserializer
         void load_global();
 
         bool empty() const;
-
-        using JsonSerializer::serialize;
-        void serialize( JsonOut &json ) const override;
-        void deserialize( JsonIn &jsin ) override;
 };
 
 safemode &get_safemode();

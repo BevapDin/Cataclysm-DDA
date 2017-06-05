@@ -621,7 +621,6 @@ void safemode::clear_character_rules()
 
 bool safemode::save_character()
 {
-    is_character = true;
     auto file = world_generator->active_world->world_path + "/" + base64_encode(
                g->u.name ) + ".sfm.json";
     if( !file_exist( world_generator->active_world->world_path + "/" +
@@ -631,26 +630,23 @@ bool safemode::save_character()
 
     return write_to_file( file, [&]( std::ostream & fout ) {
         JsonOut jout( fout, true );
-        serialize( jout );
+        character_rules.serialize( jout );
     }, _( "safemode configuration" ) );
 }
 
 bool safemode::save_global()
 {
-    is_character = false;
     auto file = FILENAMES["safemode"];
 
     return write_to_file( file, [&]( std::ostream & fout ) {
         JsonOut jout( fout, true );
-        serialize( jout );
+        global_rules.serialize( jout );
         create_rules();
     }, _( "safemode configuration" ) );
 }
 
 void safemode::load_character()
 {
-    is_character = true;
-
     std::ifstream fin;
     std::string file = world_generator->active_world->world_path + "/" + base64_encode( g->u.name ) + ".sfm.json";
 
@@ -659,7 +655,7 @@ void safemode::load_character()
     if( fin.good() ) {
         try {
             JsonIn jsin( fin );
-            deserialize( jsin );
+            character_rules.deserialize( jsin );
         } catch( const JsonError &e ) {
             DebugLog( D_ERROR, DC_ALL ) << "safemode::load: " << e;
         }
@@ -671,8 +667,6 @@ void safemode::load_character()
 
 void safemode::load_global()
 {
-    is_character = false;
-
     std::ifstream fin;
     std::string file = FILENAMES["safemode"];
 
@@ -681,7 +675,7 @@ void safemode::load_global()
     if( fin.good() ) {
         try {
             JsonIn jsin( fin );
-            deserialize( jsin );
+            global_rules.deserialize( jsin );
         } catch( const JsonError &e ) {
             DebugLog( D_ERROR, DC_ALL ) << "safemode::load: " << e;
         }
@@ -691,12 +685,11 @@ void safemode::load_global()
     create_rules();
 }
 
-void safemode::serialize( JsonOut &json ) const
+void safemode::rules_class_vector::serialize( JsonOut &json ) const
 {
     json.start_array();
 
-    auto &temp_rules = ( is_character ) ? character_rules : global_rules;
-    for( auto &elem : temp_rules ) {
+    for( auto &elem : *this ) {
         json.start_object();
 
         json.member( "rule", elem.rule );
@@ -711,10 +704,9 @@ void safemode::serialize( JsonOut &json ) const
     json.end_array();
 }
 
-void safemode::deserialize( JsonIn &jsin )
+void safemode::rules_class_vector::deserialize( JsonIn &jsin )
 {
-    auto &temp_rules = ( is_character ) ? character_rules : global_rules;
-    temp_rules.clear();
+    clear();
 
     jsin.start_array();
     while( !jsin.end_array() ) {
@@ -726,7 +718,7 @@ void safemode::deserialize( JsonIn &jsin )
         const Creature::Attitude attitude = ( Creature::Attitude ) jo.get_int( "attitude" );
         const int proximity = jo.get_int( "proximity" );
 
-        temp_rules.push_back(
+        push_back(
             rules_class( rule, active, whitelist, attitude, proximity )
         );
     }
