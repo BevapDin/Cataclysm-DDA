@@ -621,35 +621,29 @@ void safemode::clear_character_rules()
 
 bool safemode::save_character()
 {
-    return save( true );
-}
-
-bool safemode::save_global()
-{
-    return save( false );
-}
-
-bool safemode::save( const bool is_character_in )
-{
-    is_character = is_character_in;
-    auto file = FILENAMES["safemode"];
-
-    if( is_character ) {
-        file = world_generator->active_world->world_path + "/" + base64_encode(
-                   g->u.name ) + ".sfm.json";
-        if( !file_exist( world_generator->active_world->world_path + "/" +
-                         base64_encode( g->u.name ) + ".sav" ) ) {
-            return true; //Character not saved yet.
-        }
+    is_character = true;
+    auto file = world_generator->active_world->world_path + "/" + base64_encode(
+               g->u.name ) + ".sfm.json";
+    if( !file_exist( world_generator->active_world->world_path + "/" +
+                     base64_encode( g->u.name ) + ".sav" ) ) {
+        return true; //Character not saved yet.
     }
 
     return write_to_file( file, [&]( std::ostream & fout ) {
         JsonOut jout( fout, true );
         serialize( jout );
+    }, _( "safemode configuration" ) );
+}
 
-        if( !is_character ) {
-            create_rules();
-        }
+bool safemode::save_global()
+{
+    is_character = false;
+    auto file = FILENAMES["safemode"];
+
+    return write_to_file( file, [&]( std::ostream & fout ) {
+        JsonOut jout( fout, true );
+        serialize( jout );
+        create_rules();
     }, _( "safemode configuration" ) );
 }
 
