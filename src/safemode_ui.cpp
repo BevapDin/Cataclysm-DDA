@@ -649,23 +649,32 @@ bool safemode::save_global()
 
 void safemode::load_character()
 {
-    load( true );
+    is_character = true;
+
+    std::ifstream fin;
+    std::string file = world_generator->active_world->world_path + "/" + base64_encode( g->u.name ) + ".sfm.json";
+
+    fin.open( file.c_str(), std::ifstream::in | std::ifstream::binary );
+
+    if( fin.good() ) {
+        try {
+            JsonIn jsin( fin );
+            deserialize( jsin );
+        } catch( const JsonError &e ) {
+            DebugLog( D_ERROR, DC_ALL ) << "safemode::load: " << e;
+        }
+    }
+
+    fin.close();
+    create_rules();
 }
 
 void safemode::load_global()
 {
-    load( false );
-}
-
-void safemode::load( const bool is_character_in )
-{
-    is_character = is_character_in;
+    is_character = false;
 
     std::ifstream fin;
     std::string file = FILENAMES["safemode"];
-    if( is_character ) {
-        file = world_generator->active_world->world_path + "/" + base64_encode( g->u.name ) + ".sfm.json";
-    }
 
     fin.open( file.c_str(), std::ifstream::in | std::ifstream::binary );
 

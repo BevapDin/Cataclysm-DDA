@@ -64,8 +64,6 @@ class safemode : public JsonSerializer, public JsonDeserializer
 
         void test_pattern( const int tab_in, const int row_in );
 
-        void load( const bool character_in );
-
         bool is_character;
 
         void create_rules();
