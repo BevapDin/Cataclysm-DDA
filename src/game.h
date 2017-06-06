@@ -838,7 +838,6 @@ private:
         void despawn_monster(int mondex);
 
         void spawn_mon(int shift, int shifty); // Called by update_map, sometimes
-        void rebuild_mon_at_cache();
 
         // Routine loop functions, approximately in order of execution
         void cleanup_dead();     // Delete any dead NPCs/monsters
