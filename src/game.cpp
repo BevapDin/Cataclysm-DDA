@@ -3216,20 +3216,7 @@ bool game::handle_action()
             break;
 
         case ACTION_TOGGLE_SAFEMODE:
-            if (get_safemode().mode == SAFE_MODE_OFF ) {
-                get_safemode.set_mode( SAFE_MODE_ON );
-                get_safemode().mostseen = 0;
-                add_msg(m_info, _("Safe mode ON!"));
-            } else {
-                get_safemode().turnssincelastmon = 0;
-                get_safemode.set_mode( SAFE_MODE_OFF );
-                add_msg( m_info, get_option<bool>( "AUTOSAFEMODE" )
-                    ? _( "Safe mode OFF! (Auto safe mode still enabled!)" ) : _( "Safe mode OFF!" ) );
-            }
-            if( u.has_effect( effect_laserlocked ) ) {
-                u.remove_effect( effect_laserlocked );
-                get_safemode().warning_logged = false;
-            }
+            get_safemode().toggle();
             break;
 
         case ACTION_TOGGLE_AUTOSAFE: {

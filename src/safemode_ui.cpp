@@ -787,3 +787,21 @@ bool safemode::check_allowed( const bool repeat_safe_mode_warnings )
     warning_logged = true;
     return false;
 }
+
+void safemode::toggle()
+{
+    if( mode == SAFE_MODE_OFF ) {
+        set_mode( SAFE_MODE_ON );
+        mostseen = 0;
+        add_msg( m_info, _( "Safe mode ON!" ) );
+    } else {
+        turnssincelastmon = 0;
+        set_mode( SAFE_MODE_OFF );
+        add_msg( m_info, get_option<bool>( "AUTOSAFEMODE" )
+                 ? _( "Safe mode OFF! (Auto safe mode still enabled!)" ) : _( "Safe mode OFF!" ) );
+    }
+    if( g->u.has_effect( effect_laserlocked ) ) {
+        g->u.remove_effect( effect_laserlocked );
+        warning_logged = false;
+    }
+}
