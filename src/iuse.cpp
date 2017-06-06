@@ -2929,8 +2929,8 @@ int iuse::crowbar(player *p, item *it, bool, const tripoint &pos)
             p->add_memorial_log(pgettext("memorial_male", "Set off an alarm."),
                                   pgettext("memorial_female", "Set off an alarm."));
             sounds::sound(p->pos(), 40, _("an alarm sound!"));
-            if (!g->event_queued(EVENT_WANTED)) {
-                g->add_event(EVENT_WANTED, int(calendar::turn) + 300, 0, p->global_sm_location());
+            if (!event_manager::get_instance().queued(EVENT_WANTED)) {
+                event_manager::get_instance().add(EVENT_WANTED, int(calendar::turn) + 300, 0, p->global_sm_location());
             }
         }
     } else {
@@ -4969,7 +4969,7 @@ int iuse::artifact(player *p, item *it, bool, const tripoint& )
 
             case AEA_LIGHT:
                 p->add_msg_if_player(_("The %s glows brightly!"), it->tname().c_str());
-                g->add_event(EVENT_ARTIFACT_LIGHT, int(calendar::turn) + 30);
+                event_manager::get_instance().add(EVENT_ARTIFACT_LIGHT, int(calendar::turn) + 30);
                 break;
 
             case AEA_GROWTH: {
@@ -5048,7 +5048,7 @@ int iuse::artifact(player *p, item *it, bool, const tripoint& )
 
             case AEA_DIM:
                 p->add_msg_if_player(_("The sky starts to dim."));
-                g->add_event(EVENT_DIM, int(calendar::turn) + 50);
+                event_manager::get_instance().add(EVENT_DIM, int(calendar::turn) + 50);
                 break;
 
             case AEA_FLASH:

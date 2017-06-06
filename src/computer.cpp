@@ -728,7 +728,7 @@ INITIATING STANDARD TREMOR TEST..."));
         break;
 
     case COMPACT_AMIGARA_START:
-        g->add_event(EVENT_AMIGARA, int(calendar::turn) + 10);
+        event_manager::get_instance().add(EVENT_AMIGARA, int(calendar::turn) + 10);
         if (!g->u.has_artifact_with(AEP_PSYSHIELD)) {
             g->u.add_effect( effect_amigara, 20);
         }
@@ -1212,8 +1212,8 @@ void computer::activate_failure(computer_failure fail)
         g->u.add_memorial_log(pgettext("memorial_male", "Set off an alarm."),
                               pgettext("memorial_female", "Set off an alarm."));
         sounds::sound(g->u.pos(), 60, _("an alarm sound!"));
-        if (g->get_levz() > 0 && !g->event_queued(EVENT_WANTED)) {
-            g->add_event(EVENT_WANTED, int(calendar::turn) + 300, 0, g->u.global_sm_location());
+        if (g->get_levz() > 0 && !event_manager::get_instance().queued(EVENT_WANTED)) {
+            event_manager::get_instance().add(EVENT_WANTED, int(calendar::turn) + 300, 0, g->u.global_sm_location());
         }
         break;
 
@@ -1311,7 +1311,7 @@ void computer::activate_failure(computer_failure fail)
         break;
 
     case COMPFAIL_AMIGARA:
-        g->add_event(EVENT_AMIGARA, int(calendar::turn) + 5);
+        event_manager::get_instance().add(EVENT_AMIGARA, int(calendar::turn) + 5);
         g->u.add_effect( effect_amigara, 20);
         g->explosion( tripoint( rng(0, SEEX * MAPSIZE), rng(0, SEEY * MAPSIZE), g->get_levz() ), 10, 0.7, false, 10 );
         g->explosion( tripoint( rng(0, SEEX * MAPSIZE), rng(0, SEEY * MAPSIZE), g->get_levz() ), 10, 0.7, false, 10 );

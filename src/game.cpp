@@ -766,7 +766,7 @@ void game::setup()
     factions.clear();
     mission::clear_all();
     Messages::clear_messages();
-    events.clear();
+    event_manager::get_instance().add::get_instance().reset();
 
     SCT.vSCT.clear(); //Delete pending messages
 
@@ -1410,7 +1410,7 @@ bool game::do_turn()
         load_npcs();
     }
 
-    process_events();
+    event_manager::get_instance().add::get_instance().process();
     mission::process_all();
     if (calendar::turn.hours() == 0 && calendar::turn.minutes() == 0 &&
         calendar::turn.seconds() == 0) { // Midnight!
@@ -1625,19 +1625,6 @@ void game::rustCheck()
         if (newSkill < oldSkillLevel) {
             add_msg(m_bad, _("Your skill in %s has reduced to %d!"),
                     aSkill.name().c_str(), newSkill);
-        }
-    }
-}
-
-void game::process_events()
-{
-    for( auto it = events.begin(); it != events.end(); ) {
-        it->per_turn();
-        if (it->turn <= int(calendar::turn)) {
-            it->actualize();
-            it = events.erase(it);
-        } else {
-            it++;
         }
     }
 }
@@ -3933,27 +3920,6 @@ void game::write_memorial_file(std::string sLastWords)
     }, _( "player memorial" ) );
 }
 
-void game::add_event(event_type type, int on_turn, int faction_id)
-{
-    add_event( type, on_turn, faction_id, u.global_sm_location() );
-}
-
-void game::add_event(event_type type, int on_turn, int faction_id, const tripoint center )
-{
-    event tmp( type, on_turn, faction_id, center );
-    events.push_back(tmp);
-}
-
-bool game::event_queued(event_type type) const
-{
-    for( const auto &e : events ) {
-        if( e.type == type ) {
-            return true;
-        }
-    }
-    return false;
-}
-
 void game::debug()
 {
     int action = menu( true, // cancelable
@@ -4043,7 +4009,6 @@ void game::debug()
             s += _( "Current turn: %d; Next spawn %d.\n%s\n" );
             s += ngettext( "%d monster exists.\n", "%d monsters exist.\n", num_zombies() );
             s += ngettext( "%d currently active NPC.\n", "%d currently active NPCs.\n", active_npc.size() );
-            s += ngettext( "%d event planned.", "%d events planned", events.size() );
             popup_top(
                 s.c_str(),
                 u.posx(), u.posy(), get_levx(), get_levy(),
@@ -4051,7 +4016,7 @@ void game::debug()
                 int( calendar::turn ), int( nextspawn ),
                 ( get_option<bool>( "RANDOM_NPC" ) ? _( "NPCs are going to spawn." ) :
                   _( "NPCs are NOT going to spawn." ) ),
-                num_zombies(), active_npc.size(), events.size() );
+                num_zombies(), active_npc.size() );
             if( !active_npc.empty() ) {
                 for( auto & elem : active_npc ) {
                     tripoint t = ( elem )->global_sm_location();
