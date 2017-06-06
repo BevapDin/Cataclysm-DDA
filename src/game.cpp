@@ -2625,13 +2625,13 @@ bool game::handle_action()
             break; // handled above
 
         case ACTION_TIMEOUT:
-            if( check_safe_mode_allowed(false) ) {
+            if( get_safemode().check_allowed(false) ) {
                 u.pause();
             }
             break;
 
         case ACTION_PAUSE:
-            if( check_safe_mode_allowed() ) {
+            if( get_safemode().check_allowed() ) {
                 u.pause();
             }
             break;
@@ -10794,7 +10794,7 @@ void game::chat()
 
 void game::pldrive(int x, int y)
 {
-    if( !check_safe_mode_allowed() ) {
+    if( !get_safemode().check_allowed() ) {
         return;
     }
     vehicle *veh = remoteveh();
@@ -10902,56 +10902,6 @@ void game::pldrive(int x, int y)
             veh->move.init(veh->turn_dir);
         }
     }
-}
-
-bool game::check_safe_mode_allowed( bool repeat_safe_mode_warnings )
-{
-    if ( !repeat_safe_mode_warnings && get_safemode().warning_logged ) {
-        // Already warned player since get_safemode().warning_logged is set.
-        return false;
-    }
-
-    std::string msg_ignore = press_x(ACTION_IGNORE_ENEMY);
-    if (!msg_ignore.empty()) {
-        msg_ignore[0] = tolower(msg_ignore[0]); // TODO this probably isn't localization friendly
-    }
-
-    if (u.has_effect( effect_laserlocked)) {
-        // Automatic and mandatory safemode.  Make BLOODY sure the player notices!
-        add_msg(m_warning, _("You are being laser-targeted, %s to ignore."),
-                msg_ignore.c_str());
-        get_safemode().warning_logged = true;
-        return false;
-    }
-    if( get_safemode().mode != SAFE_MODE_STOP ) {
-        return true;
-    }
-    // Currently driving around, ignore the monster, they have no chance against a proper car anyway (-:
-    if( u.controlling_vehicle && !get_option<bool>( "SAFEMODEVEH" ) ) {
-        return true;
-    }
-    // Monsters around and we don't wanna run
-    std::string spotted_creature_name;
-    if( get_safemode().new_seen_mon.empty() ) {
-        // naming consistent with code in game::mon_info
-        spotted_creature_name = _( "a survivor" );
-        get_safemode().lastmon_whitelist = get_safemode().npc_type_name();
-    } else {
-        spotted_creature_name = zombie( get_safemode().new_seen_mon.back() ).name();
-        get_safemode().lastmon_whitelist = spotted_creature_name;
-    }
-
-    std::string whitelist = "";
-    if ( !get_safemode().empty() ) {
-        whitelist = string_format( _( " or %s to whitelist the monster" ), press_x( ACTION_WHITELIST_ENEMY ).c_str() );
-    }
-
-    std::string const msg_safe_mode = press_x(ACTION_TOGGLE_SAFEMODE);
-    add_msg( m_warning,
-             _( "Spotted %s--safe mode is on! (%s to turn it off, %s to ignore monster%s)" ),
-             spotted_creature_name.c_str(), msg_safe_mode.c_str(), msg_ignore.c_str(), whitelist.c_str() );
-    get_safemode().warning_logged = true;
-    return false;
 }
 
 bool game::disable_robot( const tripoint &p )
@@ -11067,7 +11017,7 @@ bool game::prompt_dangerous_tile( const tripoint &dest_loc ) const
 
 bool game::plmove(int dx, int dy, int dz)
 {
-    if( (!check_safe_mode_allowed()) || u.has_active_mutation( trait_SHELL2 ) ) {
+    if( (!get_safemode().check_allowed()) || u.has_active_mutation( trait_SHELL2 ) ) {
         if( u.has_active_mutation( trait_SHELL2 ) ) {
             add_msg(m_warning, _("You can't move while in your shell.  Deactivate it to go mobile."));
         }

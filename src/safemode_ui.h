@@ -11,6 +11,12 @@
 #include "enums.h"
 #include "creature.h"
 
+enum safe_mode_type : int {
+    SAFE_MODE_OFF = 0, // Moving always allowed
+    SAFE_MODE_ON = 1, // Moving allowed, but if a new monsters spawns, go to SAFE_MODE_STOP
+    SAFE_MODE_STOP = 2, // New monsters spotted, no movement allowed
+};
+
 class safemode : public JsonSerializer, public JsonDeserializer
 {
     private:
@@ -79,9 +85,14 @@ class safemode : public JsonSerializer, public JsonDeserializer
         int mostseen = 0;  // # of mons seen last turn; if this increases, set safe_mode to SAFE_MODE_STOP
         bool warning_logged = false;
         int turnssincelastmon; // needed for auto run mode
-        safe_mode_type mode = SAFE_MODE_ON,
+        safe_mode_type mode = SAFE_MODE_ON;
 
-        void set_safe_mode( safe_mode_type mode );
+        void set_mode( safe_mode_type mode );
+        /**
+         * Check whether movement is allowed according to safe mode settings.
+         * @return true if the movement is allowed, otherwise false.
+         */
+        bool check_allowed( bool repeat_safe_mode_warnings = true );
 
         bool has_rule( const std::string &rule_in, const Creature::Attitude attitude_in );
         void add_rule( const std::string &rule_in, const Creature::Attitude attitude_in,

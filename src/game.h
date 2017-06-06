@@ -63,11 +63,7 @@ enum quit_status {
     QUIT_ERROR
 };
 
-enum safe_mode_type {
-    SAFE_MODE_OFF = 0, // Moving always allowed
-    SAFE_MODE_ON = 1, // Moving allowed, but if a new monsters spawns, go to SAFE_MODE_STOP
-    SAFE_MODE_STOP = 2, // New monsters spotted, no movement allowed
-};
+enum safe_mode_type : int;
 
 enum body_part : int;
 enum weather_type : int;
@@ -655,12 +651,6 @@ class game
         // Draw critter (if visible!) on its current position into w_terrain.
         // @param center the center of view, same as when calling map::draw
         void draw_critter( const Creature &critter, const tripoint &center );
-
-        /**
-         * Check whether movement is allowed according to safe mode settings.
-         * @return true if the movement is allowed, otherwise false.
-         */
-        bool check_safe_mode_allowed( bool repeat_safe_mode_warnings = true );
 
         const int dangerous_proximity;
         bool narrow_sidebar;

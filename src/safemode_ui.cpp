@@ -15,6 +15,9 @@
 #include "worldfactory.h"
 #include "monstergenerator.h"
 #include "string_input_popup.h"
+#include "action.h"
+#include "messages.h"
+#include "monster.h"
 
 #include <stdlib.h>
 #include <fstream>
@@ -731,6 +734,56 @@ void safemode::deserialize( JsonIn &jsin )
 
 void safemode::set_mode( const safe_mode_type mode )
 {
-    mode = mode;
+    this->mode = mode;
     warning_logged = false;
+}
+
+bool safemode::check_allowed( const bool repeat_safe_mode_warnings )
+{
+    if ( !repeat_safe_mode_warnings && warning_logged ) {
+        // Already warned player since warning_logged is set.
+        return false;
+    }
+
+    std::string msg_ignore = press_x(ACTION_IGNORE_ENEMY);
+    if (!msg_ignore.empty()) {
+        msg_ignore[0] = tolower(msg_ignore[0]); // TODO this probably isn't localization friendly
+    }
+
+    if (g->u.has_effect( efftype_id( "laserlocked" ) ) ) {
+        // Automatic and mandatory safemode.  Make BLOODY sure the player notices!
+        add_msg(m_warning, _("You are being laser-targeted, %s to ignore."),
+                msg_ignore.c_str());
+        warning_logged = true;
+        return false;
+    }
+    if( mode != SAFE_MODE_STOP ) {
+        return true;
+    }
+    // Currently driving around, ignore the monster, they have no chance against a proper car anyway (-:
+    if( g->u.controlling_vehicle && !get_option<bool>( "SAFEMODEVEH" ) ) {
+        return true;
+    }
+    // Monsters around and we don't wanna run
+    std::string spotted_creature_name;
+    if( new_seen_mon.empty() ) {
+        // naming consistent with code in game::mon_info
+        spotted_creature_name = _( "a survivor" );
+        lastmon_whitelist = npc_type_name();
+    } else {
+        spotted_creature_name = g->zombie( new_seen_mon.back() ).name();
+        lastmon_whitelist = spotted_creature_name;
+    }
+
+    std::string whitelist = "";
+    if ( !empty() ) {
+        whitelist = string_format( _( " or %s to whitelist the monster" ), press_x( ACTION_WHITELIST_ENEMY ).c_str() );
+    }
+
+    std::string const msg_safe_mode = press_x(ACTION_TOGGLE_SAFEMODE);
+    add_msg( m_warning,
+             _( "Spotted %s--safe mode is on! (%s to turn it off, %s to ignore monster%s)" ),
+             spotted_creature_name.c_str(), msg_safe_mode.c_str(), msg_ignore.c_str(), whitelist.c_str() );
+    warning_logged = true;
+    return false;
 }
