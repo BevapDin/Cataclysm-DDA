@@ -1561,7 +1561,7 @@ static void refresh_tiles( bool used_tiles_changed, bool pixel_minimap_height_ch
         try {
             tilecontext->reinit();
             //g->init_ui is called when zoom is changed
-            g->reset_zoom();
+            tilecontext->reset_zoom();
             if( ingame ) {
                 if( g->pixel_minimap_option ) {
                     wrefresh(g->w_pixel_minimap);

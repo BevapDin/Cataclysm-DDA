@@ -465,9 +465,6 @@ class game
         void toggle_pixel_minimap(void);
         void temp_exit_fullscreen(void);
         void reenter_fullscreen(void);
-        void zoom_in();
-        void zoom_out();
-        void reset_zoom();
         int get_user_action_counter() const;
 
         signed char temperature;              // The air temperature
@@ -943,9 +940,6 @@ private:
         int moveCount; //Times the player has moved (not pause, sleep, etc)
         int user_action_counter; // Times the user has input an action
         const int lookHeight; // Look Around window height
-
-        /** How far the tileset should be zoomed out, 16 is default. 32 is zoomed in by x2, 8 is zoomed out by x0.5 */
-        int tileset_zoom;
 
         /** Seed for all the random numbers that should have consistent randomness (weather). */
         unsigned int seed;

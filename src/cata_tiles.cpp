@@ -88,6 +88,8 @@ cata_tiles::cata_tiles(SDL_Renderer *render)
     //ctor
     renderer = render;
 
+    tileset_zoom = 16;
+
     tile_height = 0;
     tile_width = 0;
     tile_ratiox = 0;
@@ -2797,6 +2799,33 @@ void cata_tiles::tile_loading_report(arraytype const & array, int array_length, 
                 []( decltype(begin) const v ) {
                     return v->id;
                 }, label, prefix );
+}
+
+#define MAXIMUM_ZOOM_LEVEL 4
+void cata_tiles::zoom_out()
+{
+    if( tileset_zoom > MAXIMUM_ZOOM_LEVEL ) {
+        tileset_zoom = tileset_zoom / 2;
+    } else {
+        tileset_zoom = 64;
+    }
+    rescale_tileset( tileset_zoom );
+}
+
+void cata_tiles::zoom_in()
+{
+    if( tileset_zoom == 64 ) {
+        tileset_zoom = MAXIMUM_ZOOM_LEVEL;
+    } else {
+        tileset_zoom = tileset_zoom * 2;
+    }
+    rescale_tileset( tileset_zoom );
+}
+
+void cata_tiles::reset_zoom()
+{
+    tileset_zoom = 16;
+    rescale_tileset( tileset_zoom );
 }
 
 #endif // SDL_TILES

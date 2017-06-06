@@ -263,7 +263,6 @@ game::game() :
     gamemode(),
     user_action_counter(0),
     lookHeight(13),
-    tileset_zoom(16),
     weather_override( WEATHER_NULL )
 {
     world_generator.reset( new worldfactory() );
@@ -3403,11 +3402,15 @@ bool game::handle_action()
             break;
 
         case ACTION_ZOOM_IN:
-            zoom_in();
+#ifdef TILES
+            tilecontext->zoom_in();
+#endif
             break;
 
         case ACTION_ZOOM_OUT:
-            zoom_out();
+#ifdef TILES
+            tilecontext->zoom_out();
+#endif
             break;
 
         case ACTION_ITEMACTION:
@@ -8812,39 +8815,6 @@ void centerlistview( const tripoint &active_item_position )
         }
     }
 
-}
-
-#define MAXIMUM_ZOOM_LEVEL 4
-void game::zoom_out()
-{
-#ifdef TILES
-    if (tileset_zoom > MAXIMUM_ZOOM_LEVEL) {
-        tileset_zoom = tileset_zoom / 2;
-    } else {
-        tileset_zoom = 64;
-    }
-    tilecontext->rescale_tileset(tileset_zoom);
-#endif
-}
-
-void game::zoom_in()
-{
-#ifdef TILES
-    if (tileset_zoom == 64) {
-        tileset_zoom = MAXIMUM_ZOOM_LEVEL;
-    } else {
-        tileset_zoom = tileset_zoom * 2;
-    }
-    tilecontext->rescale_tileset(tileset_zoom);
-#endif
-}
-
-void game::reset_zoom()
-{
-#ifdef TILES
-    tileset_zoom = 16;
-    tilecontext->rescale_tileset(tileset_zoom);
-#endif // TILES
 }
 
 int game::get_user_action_counter() const

@@ -458,7 +458,15 @@ class cata_tiles
             return tile_ratioy;
         }
         void do_tile_loading_report();
+
+        void zoom_in();
+        void zoom_out();
+        void reset_zoom();
+
     protected:
+        /** How far the tileset should be zoomed out, 16 is default. 32 is zoomed in by x2, 8 is zoomed out by x0.5 */
+        int tileset_zoom;
+
         void get_tile_information( std::string dir_path, std::string &json_path,
                                    std::string &tileset_path );
         template <typename maptype>
