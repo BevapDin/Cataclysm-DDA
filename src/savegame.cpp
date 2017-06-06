@@ -74,7 +74,7 @@ void game::serialize(std::ostream & fout) {
         json.member("initial_season", (int)calendar::initial_season);
         json.member( "last_target", (int)last_target );
         json.member( "run_mode", (int)safe_mode );
-        json.member( "mostseen", mostseen );
+        json.member( "mostseen", get_safemode().mostseen );
         json.member( "nextspawn", (int)nextspawn );
         // current map coordinates
         tripoint pos_sm = m.get_abs_sub();
@@ -189,7 +189,7 @@ void game::unserialize(std::istream & fin)
         calendar::initial_season = (season_type)data.get_int("initial_season",(int)SPRING);
         data.read("last_target",tmptar);
         data.read("run_mode", tmprun);
-        data.read("mostseen", mostseen);
+        data.read("mostseen", get_safemode().mostseen);
         data.read("nextspawn",tmpspawn);
         data.read("levx",levx);
         data.read("levy",levy);

@@ -76,6 +76,7 @@ class safemode : public JsonSerializer, public JsonDeserializer
     public:
         std::string lastmon_whitelist;
         std::vector<int> new_seen_mon;
+        int mostseen = 0;  // # of mons seen last turn; if this increases, set safe_mode to SAFE_MODE_STOP
 
         bool has_rule( const std::string &rule_in, const Creature::Attitude attitude_in );
         void add_rule( const std::string &rule_in, const Creature::Attitude attitude_in,

@@ -259,7 +259,6 @@ game::game() :
     pixel_minimap_option(0),
     safe_mode(SAFE_MODE_ON),
     safe_mode_warning_logged(false),
-    mostseen(0),
     gamemode(),
     user_action_counter(0),
     lookHeight(13),
@@ -803,7 +802,7 @@ bool game::start_game(std::string worldname)
     start_calendar();
     nextweather = calendar::turn;
     safe_mode = (get_option<bool>( "SAFEMODE" ) ? SAFE_MODE_ON : SAFE_MODE_OFF);
-    mostseen = 0; // ...and mostseen is 0, we haven't seen any monsters yet.
+    get_safemode().mostseen = 0; // ...and mostseen is 0, we haven't seen any monsters yet.
 
     init_autosave();
 
@@ -3221,7 +3220,7 @@ bool game::handle_action()
         case ACTION_TOGGLE_SAFEMODE:
             if (safe_mode == SAFE_MODE_OFF ) {
                 set_safe_mode( SAFE_MODE_ON );
-                mostseen = 0;
+                get_safemode().mostseen = 0;
                 add_msg(m_info, _("Safe mode ON!"));
             } else {
                 turnssincelastmon = 0;
@@ -3263,7 +3262,7 @@ bool game::handle_action()
                 get_safemode().add_rule( get_safemode().lastmon_whitelist, Creature::A_ANY, 0, RULE_WHITELISTED );
                 add_msg( m_info, _( "Creature whitelisted: %s" ), get_safemode().lastmon_whitelist.c_str() );
                 set_safe_mode( SAFE_MODE_ON );
-                mostseen = 0;
+                get_safemode().mostseen = 0;
             } else {
                 get_safemode().show();
             }
@@ -3662,7 +3661,7 @@ void game::load(std::string worldname, const save_t &name)
     }
 
     safe_mode = get_option<bool>( "SAFEMODE" ) ? SAFE_MODE_ON : SAFE_MODE_OFF;
-    mostseen = 0; // ...and mostseen is 0, we haven't seen any monsters yet.
+    get_safemode().mostseen = 0; // ...and mostseen is 0, we haven't seen any monsters yet.
 
     init_autosave();
     get_auto_pickup().load_character(); // Load character auto pickup rules
@@ -5611,8 +5610,8 @@ int game::mon_info(WINDOW *w)
         }
     }
 
-    if (newseen > mostseen) {
-        if (newseen - mostseen == 1) {
+    if (newseen > get_safemode().mostseen) {
+        if (newseen - get_safemode().mostseen == 1) {
             if (!get_safemode().new_seen_mon.empty()) {
                 monster &critter = critter_tracker->find(get_safemode().new_seen_mon.back());
                 cancel_activity_query(_("%s spotted!"), critter.name().c_str());
@@ -5649,7 +5648,7 @@ int game::mon_info(WINDOW *w)
         set_safe_mode( SAFE_MODE_ON );
     }
 
-    mostseen = newseen;
+    get_safemode().mostseen = newseen;
 
     // Print the direction headings
     // Reminder:
@@ -11599,7 +11598,7 @@ void game::place_player( const tripoint &dest_loc )
     // and dest_loc was not adjusted and therefor is still in the un-shifted system and probably wrong.
 
     //Autopickup
-    if (get_option<bool>( "AUTO_PICKUP" ) && (!get_option<bool>( "AUTO_PICKUP_SAFEMODE" ) || mostseen == 0) &&
+    if (get_option<bool>( "AUTO_PICKUP" ) && (!get_option<bool>( "AUTO_PICKUP_SAFEMODE" ) || get_safemode().mostseen == 0) &&
         ( m.has_items( u.pos() ) || get_option<bool>( "AUTO_PICKUP_ADJACENT" ) ) ) {
         Pickup::pick_up(u.pos(), -1);
     }
