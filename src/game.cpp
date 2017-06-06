@@ -3228,18 +3228,7 @@ bool game::handle_action()
         }
 
         case ACTION_IGNORE_ENEMY:
-            if (get_safemode().mode == SAFE_MODE_STOP) {
-                add_msg(m_info, _("Ignoring enemy!"));
-                for( auto &elem : get_safemode().new_seen_mon ) {
-                    monster &critter = critter_tracker->find( elem );
-                    critter.ignoring = rl_dist( u.pos(), critter.pos() );
-                }
-                get_safemode.set_mode( SAFE_MODE_ON );
-            } else if( u.has_effect( effect_laserlocked) ) {
-                add_msg(m_info, _("Ignoring laser targeting!"));
-                u.remove_effect( effect_laserlocked);
-                get_safemode().warning_logged = false;
-            }
+            get_safemode().ignore_enemy();
             break;
 
         case ACTION_WHITELIST_ENEMY:

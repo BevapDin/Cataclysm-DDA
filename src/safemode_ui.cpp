@@ -805,3 +805,19 @@ void safemode::toggle()
         warning_logged = false;
     }
 }
+
+void safemode::ignore_enemy()
+{
+    if( mode == SAFE_MODE_STOP ) {
+        add_msg( m_info, _( "Ignoring enemy!" ) );
+        for( auto &elem : new_seen_mon ) {
+            monster &critter = critter_tracker->find( elem );
+            critter.ignoring = rl_dist( u.pos(), critter.pos() );
+        }
+        set_mode( SAFE_MODE_ON );
+    } else if( g->u.has_effect( effect_laserlocked ) ) {
+        add_msg( m_info, _( "Ignoring laser targeting!" ) );
+        g->u.remove_effect( effect_laserlocked );
+        warning_logged = false;
+    }
+}

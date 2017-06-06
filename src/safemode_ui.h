@@ -89,6 +89,8 @@ class safemode : public JsonSerializer, public JsonDeserializer
 
         void set_mode( safe_mode_type mode );
         void toggle();
+        void ignore_enemy();
+
         /**
          * Check whether movement is allowed according to safe mode settings.
          * @return true if the movement is allowed, otherwise false.
