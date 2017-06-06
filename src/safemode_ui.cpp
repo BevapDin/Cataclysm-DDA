@@ -821,3 +821,15 @@ void safemode::ignore_enemy()
         warning_logged = false;
     }
 }
+
+void safemode::whitelist_enemy()
+{
+    if( mode == SAFE_MODE_STOP && !empty() ) {
+        add_rule( lastmon_whitelist, Creature::A_ANY, 0, RULE_WHITELISTED );
+        add_msg( m_info, _( "Creature whitelisted: %s" ), lastmon_whitelist.c_str() );
+        set_mode( SAFE_MODE_ON );
+        mostseen = 0;
+    } else {
+        show();
+    }
+}

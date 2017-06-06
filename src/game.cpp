@@ -3232,14 +3232,7 @@ bool game::handle_action()
             break;
 
         case ACTION_WHITELIST_ENEMY:
-            if ( get_safemode().mode == SAFE_MODE_STOP && !get_safemode().empty() ) {
-                get_safemode().add_rule( get_safemode().lastmon_whitelist, Creature::A_ANY, 0, RULE_WHITELISTED );
-                add_msg( m_info, _( "Creature whitelisted: %s" ), get_safemode().lastmon_whitelist.c_str() );
-                get_safemode.set_mode( SAFE_MODE_ON );
-                get_safemode().mostseen = 0;
-            } else {
-                get_safemode().show();
-            }
+            get_safemode().whitelist_enemy();
             break;
 
         case ACTION_QUIT:
