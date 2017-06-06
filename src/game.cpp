@@ -258,7 +258,6 @@ game::game() :
     dangerous_proximity(5),
     pixel_minimap_option(0),
     safe_mode(SAFE_MODE_ON),
-    safe_mode_warning_logged(false),
     gamemode(),
     user_action_counter(0),
     lookHeight(13),
@@ -3230,7 +3229,7 @@ bool game::handle_action()
             }
             if( u.has_effect( effect_laserlocked ) ) {
                 u.remove_effect( effect_laserlocked );
-                safe_mode_warning_logged = false;
+                get_safemode().warning_logged = false;
             }
             break;
 
@@ -3253,7 +3252,7 @@ bool game::handle_action()
             } else if( u.has_effect( effect_laserlocked) ) {
                 add_msg(m_info, _("Ignoring laser targeting!"));
                 u.remove_effect( effect_laserlocked);
-                safe_mode_warning_logged = false;
+                get_safemode().warning_logged = false;
             }
             break;
 
@@ -10908,8 +10907,8 @@ void game::pldrive(int x, int y)
 
 bool game::check_safe_mode_allowed( bool repeat_safe_mode_warnings )
 {
-    if ( !repeat_safe_mode_warnings && safe_mode_warning_logged ) {
-        // Already warned player since safe_mode_warning_logged is set.
+    if ( !repeat_safe_mode_warnings && get_safemode().warning_logged ) {
+        // Already warned player since get_safemode().warning_logged is set.
         return false;
     }
 
@@ -10922,7 +10921,7 @@ bool game::check_safe_mode_allowed( bool repeat_safe_mode_warnings )
         // Automatic and mandatory safemode.  Make BLOODY sure the player notices!
         add_msg(m_warning, _("You are being laser-targeted, %s to ignore."),
                 msg_ignore.c_str());
-        safe_mode_warning_logged = true;
+        get_safemode().warning_logged = true;
         return false;
     }
     if( safe_mode != SAFE_MODE_STOP ) {
@@ -10952,14 +10951,14 @@ bool game::check_safe_mode_allowed( bool repeat_safe_mode_warnings )
     add_msg( m_warning,
              _( "Spotted %s--safe mode is on! (%s to turn it off, %s to ignore monster%s)" ),
              spotted_creature_name.c_str(), msg_safe_mode.c_str(), msg_ignore.c_str(), whitelist.c_str() );
-    safe_mode_warning_logged = true;
+    get_safemode().warning_logged = true;
     return false;
 }
 
 void game::set_safe_mode( safe_mode_type mode )
 {
     safe_mode = mode;
-    safe_mode_warning_logged = false;
+    get_safemode().warning_logged = false;
 }
 
 bool game::disable_robot( const tripoint &p )
