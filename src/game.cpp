@@ -752,7 +752,7 @@ void game::setup()
     // Weather shift in 30
     nextweather = HOURS( get_option<int>( "INITIAL_TIME" ) ) + MINUTES(30);
 
-    turnssincelastmon = 0; //Auto safe mode init
+    get_safemode().turnssincelastmon = 0; //Auto safe mode init
 
     sounds::reset_sounds();
     clear_zombies();
@@ -3222,7 +3222,7 @@ bool game::handle_action()
                 get_safemode().mostseen = 0;
                 add_msg(m_info, _("Safe mode ON!"));
             } else {
-                turnssincelastmon = 0;
+                get_safemode().turnssincelastmon = 0;
                 set_safe_mode( SAFE_MODE_OFF );
                 add_msg( m_info, get_option<bool>( "AUTOSAFEMODE" )
                     ? _( "Safe mode OFF! (Auto safe mode still enabled!)" ) : _( "Safe mode OFF!" ) );
@@ -4870,7 +4870,7 @@ void game::draw_sidebar()
     mvwprintz(day_window, 0, sideStyle ? 0 : 41, c_white, _("%s, day %d"),
               season_name_upper(calendar::turn.get_season()).c_str(), calendar::turn.days() + 1);
     if( safe_mode != SAFE_MODE_OFF || get_option<bool>( "AUTOSAFEMODE" ) ) {
-        int iPercent = turnssincelastmon * 100 / get_option<int>( "AUTOSAFEMODETURNS" );
+        int iPercent = get_safemode().turnssincelastmon * 100 / get_option<int>( "AUTOSAFEMODETURNS" );
         wmove(w_status, sideStyle ? 4 : 1, getmaxx(w_status) - 4);
         const std::array<std::string, 4> letters = {{ "S", "A", "F", "E" }};
         for (int i = 0; i < 4; i++) {
@@ -5632,13 +5632,13 @@ int game::mon_info(WINDOW *w)
         } else {
             cancel_activity_query(_("Monsters spotted!"));
         }
-        turnssincelastmon = 0;
+        get_safemode().turnssincelastmon = 0;
         if (safe_mode == SAFE_MODE_ON) {
             set_safe_mode( SAFE_MODE_STOP );
         }
     } else if ( get_option<bool>( "AUTOSAFEMODE" ) && newseen == 0 ) { // Auto-safe mode
-        turnssincelastmon++;
-        if (turnssincelastmon >= get_option<int>( "AUTOSAFEMODETURNS" ) && safe_mode == SAFE_MODE_OFF) {
+        get_safemode().turnssincelastmon++;
+        if (get_safemode().turnssincelastmon >= get_option<int>( "AUTOSAFEMODETURNS" ) && safe_mode == SAFE_MODE_OFF) {
             set_safe_mode( SAFE_MODE_ON );
         }
     }

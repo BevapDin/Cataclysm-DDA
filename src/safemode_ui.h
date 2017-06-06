@@ -78,6 +78,7 @@ class safemode : public JsonSerializer, public JsonDeserializer
         std::vector<int> new_seen_mon;
         int mostseen = 0;  // # of mons seen last turn; if this increases, set safe_mode to SAFE_MODE_STOP
         bool warning_logged = false;
+        int turnssincelastmon; // needed for auto run mode
 
         bool has_rule( const std::string &rule_in, const Creature::Attitude attitude_in );
         void add_rule( const std::string &rule_in, const Creature::Attitude attitude_in,
