@@ -441,6 +441,8 @@ class cata_tiles
          */
         void reinit();
 
+        void rescale_tileset( int size );
+
         void reinit_minimap();
 
         int get_tile_height() const {

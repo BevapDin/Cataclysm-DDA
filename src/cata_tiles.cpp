@@ -2766,6 +2766,13 @@ void cata_tiles::lr_generic( Iter begin, Iter end, Func id_func, const std::stri
     DebugLog( D_INFO, DC_ALL ) << "Missing " << label << ": " << missing_list;
 }
 
+void cata_tiles::rescale_tileset( const int size )
+{
+    set_draw_scale( size );
+    g->init_ui();
+    ClearScreen();
+}
+
 template <typename maptype>
 void cata_tiles::tile_loading_report(maptype const & tiletypemap, std::string const & label, std::string const & prefix) {
     lr_generic( tiletypemap.begin(), tiletypemap.end(),

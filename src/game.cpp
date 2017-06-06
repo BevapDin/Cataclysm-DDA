@@ -2058,10 +2058,6 @@ bool game::handle_mouseview(input_context &ctxt, std::string &action)
     return true;
 }
 
-#ifdef TILES
-void rescale_tileset(int size);
-#endif
-
 input_context get_default_mode_input_context()
 {
     input_context ctxt("DEFAULTMODE");
@@ -8827,7 +8823,7 @@ void game::zoom_out()
     } else {
         tileset_zoom = 64;
     }
-    rescale_tileset(tileset_zoom);
+    tilecontext->rescale_tileset(tileset_zoom);
 #endif
 }
 
@@ -8839,7 +8835,7 @@ void game::zoom_in()
     } else {
         tileset_zoom = tileset_zoom * 2;
     }
-    rescale_tileset(tileset_zoom);
+    tilecontext->rescale_tileset(tileset_zoom);
 #endif
 }
 
@@ -8847,7 +8843,7 @@ void game::reset_zoom()
 {
 #ifdef TILES
     tileset_zoom = 16;
-    rescale_tileset(tileset_zoom);
+    tilecontext->rescale_tileset(tileset_zoom);
 #endif // TILES
 }
 

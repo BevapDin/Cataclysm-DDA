@@ -1866,12 +1866,6 @@ bool gamepad_available() {
     return joystick != NULL;
 }
 
-void rescale_tileset(int size) {
-    tilecontext->set_draw_scale(size);
-    g->init_ui();
-    ClearScreen();
-}
-
 bool input_context::get_coordinates(WINDOW* capture_win, int& x, int& y) {
     if(!coordinate_input_received) {
         return false;
