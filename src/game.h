@@ -661,7 +661,6 @@ class game
          * @return true if the movement is allowed, otherwise false.
          */
         bool check_safe_mode_allowed( bool repeat_safe_mode_warnings = true );
-        void set_safe_mode( safe_mode_type mode );
 
         const int dangerous_proximity;
         bool narrow_sidebar;

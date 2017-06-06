@@ -728,3 +728,9 @@ void safemode::deserialize( JsonIn &jsin )
         );
     }
 }
+
+void safemode::set_mode( const safe_mode_type mode )
+{
+    mode = mode;
+    warning_logged = false;
+}

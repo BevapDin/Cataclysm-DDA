@@ -3217,12 +3217,12 @@ bool game::handle_action()
 
         case ACTION_TOGGLE_SAFEMODE:
             if (get_safemode().mode == SAFE_MODE_OFF ) {
-                set_safe_mode( SAFE_MODE_ON );
+                get_safemode.set_mode( SAFE_MODE_ON );
                 get_safemode().mostseen = 0;
                 add_msg(m_info, _("Safe mode ON!"));
             } else {
                 get_safemode().turnssincelastmon = 0;
-                set_safe_mode( SAFE_MODE_OFF );
+                get_safemode.set_mode( SAFE_MODE_OFF );
                 add_msg( m_info, get_option<bool>( "AUTOSAFEMODE" )
                     ? _( "Safe mode OFF! (Auto safe mode still enabled!)" ) : _( "Safe mode OFF!" ) );
             }
@@ -3247,7 +3247,7 @@ bool game::handle_action()
                     monster &critter = critter_tracker->find( elem );
                     critter.ignoring = rl_dist( u.pos(), critter.pos() );
                 }
-                set_safe_mode( SAFE_MODE_ON );
+                get_safemode.set_mode( SAFE_MODE_ON );
             } else if( u.has_effect( effect_laserlocked) ) {
                 add_msg(m_info, _("Ignoring laser targeting!"));
                 u.remove_effect( effect_laserlocked);
@@ -3259,7 +3259,7 @@ bool game::handle_action()
             if ( get_safemode().mode == SAFE_MODE_STOP && !get_safemode().empty() ) {
                 get_safemode().add_rule( get_safemode().lastmon_whitelist, Creature::A_ANY, 0, RULE_WHITELISTED );
                 add_msg( m_info, _( "Creature whitelisted: %s" ), get_safemode().lastmon_whitelist.c_str() );
-                set_safe_mode( SAFE_MODE_ON );
+                get_safemode.set_mode( SAFE_MODE_ON );
                 get_safemode().mostseen = 0;
             } else {
                 get_safemode().show();
@@ -5633,17 +5633,17 @@ int game::mon_info(WINDOW *w)
         }
         get_safemode().turnssincelastmon = 0;
         if (get_safemode().mode == SAFE_MODE_ON) {
-            set_safe_mode( SAFE_MODE_STOP );
+            get_safemode.set_mode( SAFE_MODE_STOP );
         }
     } else if ( get_option<bool>( "AUTOSAFEMODE" ) && newseen == 0 ) { // Auto-safe mode
         get_safemode().turnssincelastmon++;
         if (get_safemode().turnssincelastmon >= get_option<int>( "AUTOSAFEMODETURNS" ) && get_safemode().mode == SAFE_MODE_OFF) {
-            set_safe_mode( SAFE_MODE_ON );
+            get_safemode.set_mode( SAFE_MODE_ON );
         }
     }
 
     if (newseen == 0 && get_safemode().mode == SAFE_MODE_STOP) {
-        set_safe_mode( SAFE_MODE_ON );
+        get_safemode.set_mode( SAFE_MODE_ON );
     }
 
     get_safemode().mostseen = newseen;
@@ -10952,12 +10952,6 @@ bool game::check_safe_mode_allowed( bool repeat_safe_mode_warnings )
              spotted_creature_name.c_str(), msg_safe_mode.c_str(), msg_ignore.c_str(), whitelist.c_str() );
     get_safemode().warning_logged = true;
     return false;
-}
-
-void game::set_safe_mode( safe_mode_type mode )
-{
-    get_safemode().mode = mode;
-    get_safemode().warning_logged = false;
 }
 
 bool game::disable_robot( const tripoint &p )

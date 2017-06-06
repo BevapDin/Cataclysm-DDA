@@ -81,6 +81,8 @@ class safemode : public JsonSerializer, public JsonDeserializer
         int turnssincelastmon; // needed for auto run mode
         safe_mode_type mode = SAFE_MODE_ON,
 
+        void set_safe_mode( safe_mode_type mode );
+
         bool has_rule( const std::string &rule_in, const Creature::Attitude attitude_in );
         void add_rule( const std::string &rule_in, const Creature::Attitude attitude_in,
                        const int proximity_in, const rule_state state_in );
