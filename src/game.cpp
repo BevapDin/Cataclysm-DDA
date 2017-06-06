@@ -3246,7 +3246,7 @@ bool game::handle_action()
         case ACTION_IGNORE_ENEMY:
             if (safe_mode == SAFE_MODE_STOP) {
                 add_msg(m_info, _("Ignoring enemy!"));
-                for( auto &elem : new_seen_mon ) {
+                for( auto &elem : get_safemode().new_seen_mon ) {
                     monster &critter = critter_tracker->find( elem );
                     critter.ignoring = rl_dist( u.pos(), critter.pos() );
                 }
@@ -5491,7 +5491,7 @@ int game::mon_info(WINDOW *w)
     }
 
     tripoint view = u.pos() + u.view_offset;
-    new_seen_mon.clear();
+    get_safemode().new_seen_mon.clear();
 
     for( auto &c : u.get_visible_creatures( SEEX * MAPSIZE ) ) {
         const auto m = dynamic_cast<monster*>( c );
@@ -5582,7 +5582,7 @@ int game::mon_info(WINDOW *w)
                         int news = mon_at( critter.pos(), true );
                         if( news != -1 ) {
                             newseen++;
-                            new_seen_mon.push_back( news );
+                            get_safemode().new_seen_mon.push_back( news );
                         } else {
                             debugmsg( "%s at (%d,%d,%d) was not found in the tracker",
                                       critter.disp_name().c_str(),
@@ -5613,8 +5613,8 @@ int game::mon_info(WINDOW *w)
 
     if (newseen > mostseen) {
         if (newseen - mostseen == 1) {
-            if (!new_seen_mon.empty()) {
-                monster &critter = critter_tracker->find(new_seen_mon.back());
+            if (!get_safemode().new_seen_mon.empty()) {
+                monster &critter = critter_tracker->find(get_safemode().new_seen_mon.back());
                 cancel_activity_query(_("%s spotted!"), critter.name().c_str());
                 if (u.has_trait( trait_id( "M_DEFENDER" ) ) && critter.type->in_species( PLANT )) {
                     add_msg(m_warning, _("We have detected a %s."), critter.name().c_str());
@@ -10935,12 +10935,12 @@ bool game::check_safe_mode_allowed( bool repeat_safe_mode_warnings )
     }
     // Monsters around and we don't wanna run
     std::string spotted_creature_name;
-    if( new_seen_mon.empty() ) {
+    if( get_safemode().new_seen_mon.empty() ) {
         // naming consistent with code in game::mon_info
         spotted_creature_name = _( "a survivor" );
         get_safemode().lastmon_whitelist = get_safemode().npc_type_name();
     } else {
-        spotted_creature_name = zombie( new_seen_mon.back() ).name();
+        spotted_creature_name = zombie( get_safemode().new_seen_mon.back() ).name();
         get_safemode().lastmon_whitelist = spotted_creature_name;
     }
 

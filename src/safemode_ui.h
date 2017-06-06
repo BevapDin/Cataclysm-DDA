@@ -75,6 +75,7 @@ class safemode : public JsonSerializer, public JsonDeserializer
 
     public:
         std::string lastmon_whitelist;
+        std::vector<int> new_seen_mon;
 
         bool has_rule( const std::string &rule_in, const Creature::Attitude attitude_in );
         void add_rule( const std::string &rule_in, const Creature::Attitude attitude_in,
