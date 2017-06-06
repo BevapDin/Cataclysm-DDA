@@ -912,7 +912,6 @@ private:
 
         int last_target; // The last monster targeted
         bool last_target_was_npc;
-        safe_mode_type safe_mode;
         //  quit_status uquit;    // Set to true if the player quits ('Q')
         bool bVMonsterLookFire;
         calendar nextspawn; // The turn on which monsters will spawn next.

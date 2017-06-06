@@ -73,7 +73,7 @@ void game::serialize(std::ostream & fout) {
         json.member("calendar_start", (int)calendar::start);
         json.member("initial_season", (int)calendar::initial_season);
         json.member( "last_target", (int)last_target );
-        json.member( "run_mode", (int)safe_mode );
+        json.member( "run_mode", (int)get_safemode().mode );
         json.member( "mostseen", get_safemode().mostseen );
         json.member( "nextspawn", (int)nextspawn );
         // current map coordinates
@@ -203,9 +203,9 @@ void game::unserialize(std::istream & fin)
 
         load_map( tripoint( levx + comx * OMAPX * 2, levy + comy * OMAPY * 2, levz ) );
 
-        safe_mode = static_cast<safe_mode_type>( tmprun );
-        if (get_option<bool>( "SAFEMODE" ) && safe_mode == SAFE_MODE_OFF) {
-            safe_mode = SAFE_MODE_ON;
+        get_safemode().mode = static_cast<safe_mode_type>( tmprun );
+        if (get_option<bool>( "SAFEMODE" ) && get_safemode().mode == SAFE_MODE_OFF) {
+            get_safemode().mode = SAFE_MODE_ON;
         }
         last_target = tmptar;
 

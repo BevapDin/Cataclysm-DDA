@@ -257,7 +257,6 @@ game::game() :
     w_blackspace(NULL),
     dangerous_proximity(5),
     pixel_minimap_option(0),
-    safe_mode(SAFE_MODE_ON),
     gamemode(),
     user_action_counter(0),
     lookHeight(13),
@@ -800,7 +799,7 @@ bool game::start_game(std::string worldname)
     new_game = true;
     start_calendar();
     nextweather = calendar::turn;
-    safe_mode = (get_option<bool>( "SAFEMODE" ) ? SAFE_MODE_ON : SAFE_MODE_OFF);
+    get_safemode().mode = (get_option<bool>( "SAFEMODE" ) ? SAFE_MODE_ON : SAFE_MODE_OFF);
     get_safemode().mostseen = 0; // ...and mostseen is 0, we haven't seen any monsters yet.
 
     init_autosave();
@@ -3217,7 +3216,7 @@ bool game::handle_action()
             break;
 
         case ACTION_TOGGLE_SAFEMODE:
-            if (safe_mode == SAFE_MODE_OFF ) {
+            if (get_safemode().mode == SAFE_MODE_OFF ) {
                 set_safe_mode( SAFE_MODE_ON );
                 get_safemode().mostseen = 0;
                 add_msg(m_info, _("Safe mode ON!"));
@@ -3242,7 +3241,7 @@ bool game::handle_action()
         }
 
         case ACTION_IGNORE_ENEMY:
-            if (safe_mode == SAFE_MODE_STOP) {
+            if (get_safemode().mode == SAFE_MODE_STOP) {
                 add_msg(m_info, _("Ignoring enemy!"));
                 for( auto &elem : get_safemode().new_seen_mon ) {
                     monster &critter = critter_tracker->find( elem );
@@ -3257,7 +3256,7 @@ bool game::handle_action()
             break;
 
         case ACTION_WHITELIST_ENEMY:
-            if ( safe_mode == SAFE_MODE_STOP && !get_safemode().empty() ) {
+            if ( get_safemode().mode == SAFE_MODE_STOP && !get_safemode().empty() ) {
                 get_safemode().add_rule( get_safemode().lastmon_whitelist, Creature::A_ANY, 0, RULE_WHITELISTED );
                 add_msg( m_info, _( "Creature whitelisted: %s" ), get_safemode().lastmon_whitelist.c_str() );
                 set_safe_mode( SAFE_MODE_ON );
@@ -3659,7 +3658,7 @@ void game::load(std::string worldname, const save_t &name)
         gamemode.reset( new special_game() );
     }
 
-    safe_mode = get_option<bool>( "SAFEMODE" ) ? SAFE_MODE_ON : SAFE_MODE_OFF;
+    get_safemode().mode = get_option<bool>( "SAFEMODE" ) ? SAFE_MODE_ON : SAFE_MODE_OFF;
     get_safemode().mostseen = 0; // ...and mostseen is 0, we haven't seen any monsters yet.
 
     init_autosave();
@@ -4869,12 +4868,12 @@ void game::draw_sidebar()
     WINDOW *day_window = sideStyle ? w_status2 : w_status;
     mvwprintz(day_window, 0, sideStyle ? 0 : 41, c_white, _("%s, day %d"),
               season_name_upper(calendar::turn.get_season()).c_str(), calendar::turn.days() + 1);
-    if( safe_mode != SAFE_MODE_OFF || get_option<bool>( "AUTOSAFEMODE" ) ) {
+    if( get_safemode().mode != SAFE_MODE_OFF || get_option<bool>( "AUTOSAFEMODE" ) ) {
         int iPercent = get_safemode().turnssincelastmon * 100 / get_option<int>( "AUTOSAFEMODETURNS" );
         wmove(w_status, sideStyle ? 4 : 1, getmaxx(w_status) - 4);
         const std::array<std::string, 4> letters = {{ "S", "A", "F", "E" }};
         for (int i = 0; i < 4; i++) {
-            nc_color c = (safe_mode == SAFE_MODE_OFF && iPercent < (i + 1) * 25) ? c_red : c_green;
+            nc_color c = (get_safemode().mode == SAFE_MODE_OFF && iPercent < (i + 1) * 25) ? c_red : c_green;
             wprintz(w_status, c, letters[i].c_str());
         }
     }
@@ -5569,7 +5568,7 @@ int game::mon_info(WINDOW *w)
                 if (!safemode_empty || mon_dist <= iProxyDist) {
                     bool passmon = false;
                     if (critter.ignoring > 0) {
-                        if (safe_mode != SAFE_MODE_ON) {
+                        if (get_safemode().mode != SAFE_MODE_ON) {
                             critter.ignoring = 0;
                         } else if (mon_dist > critter.ignoring / 2 || mon_dist < 6) {
                             passmon = true;
@@ -5633,17 +5632,17 @@ int game::mon_info(WINDOW *w)
             cancel_activity_query(_("Monsters spotted!"));
         }
         get_safemode().turnssincelastmon = 0;
-        if (safe_mode == SAFE_MODE_ON) {
+        if (get_safemode().mode == SAFE_MODE_ON) {
             set_safe_mode( SAFE_MODE_STOP );
         }
     } else if ( get_option<bool>( "AUTOSAFEMODE" ) && newseen == 0 ) { // Auto-safe mode
         get_safemode().turnssincelastmon++;
-        if (get_safemode().turnssincelastmon >= get_option<int>( "AUTOSAFEMODETURNS" ) && safe_mode == SAFE_MODE_OFF) {
+        if (get_safemode().turnssincelastmon >= get_option<int>( "AUTOSAFEMODETURNS" ) && get_safemode().mode == SAFE_MODE_OFF) {
             set_safe_mode( SAFE_MODE_ON );
         }
     }
 
-    if (newseen == 0 && safe_mode == SAFE_MODE_STOP) {
+    if (newseen == 0 && get_safemode().mode == SAFE_MODE_STOP) {
         set_safe_mode( SAFE_MODE_ON );
     }
 
@@ -10924,7 +10923,7 @@ bool game::check_safe_mode_allowed( bool repeat_safe_mode_warnings )
         get_safemode().warning_logged = true;
         return false;
     }
-    if( safe_mode != SAFE_MODE_STOP ) {
+    if( get_safemode().mode != SAFE_MODE_STOP ) {
         return true;
     }
     // Currently driving around, ignore the monster, they have no chance against a proper car anyway (-:
@@ -10957,7 +10956,7 @@ bool game::check_safe_mode_allowed( bool repeat_safe_mode_warnings )
 
 void game::set_safe_mode( safe_mode_type mode )
 {
-    safe_mode = mode;
+    get_safemode().mode = mode;
     get_safemode().warning_logged = false;
 }
 
