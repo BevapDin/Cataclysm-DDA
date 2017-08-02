@@ -14,11 +14,6 @@
 namespace veh_utils
 {
 
-int calc_xp_gain( const vpart_info &vp, const skill_id &sk )
-{
-    return calc_xp_gain( vp, sk, g->u );
-}
-
 int calc_xp_gain( const vpart_info &vp, const skill_id &sk, Character &who )
 {
     auto iter = vp.install_skills.find( sk );
@@ -129,7 +124,7 @@ bool repair_part( vehicle &veh, vehicle_part &pt, Character &who_c )
     who.invalidate_crafting_inventory();
 
     for( const auto &sk : pt.is_broken() ? vp.install_skills : vp.repair_skills ) {
-        who.practice( sk.first, calc_xp_gain( vp, sk.first ) );
+        who.practice( sk.first, calc_xp_gain( vp, sk.first, who ) );
     }
 
     // If part is broken, it will be destroyed and references invalidated

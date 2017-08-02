@@ -12,7 +12,6 @@ using skill_id = string_id<Skill>;
 namespace veh_utils
 {
 /** Calculates xp for interacting with given part. */
-int calc_xp_gain( const vpart_info &vp, const skill_id &sk );
 int calc_xp_gain( const vpart_info &vp, const skill_id &sk, Character &who );
 /**
  * Returns a part on a given vehicle that a given character can repair.

@@ -2376,7 +2376,7 @@ void veh_interact::complete_vehicle()
         add_msg( m_good, _("You install a %1$s into the %2$s." ), veh->parts[ partnum ].name().c_str(), veh->name.c_str() );
 
         for( const auto &sk : vpinfo.install_skills ) {
-            g->u.practice( sk.first, veh_utils::calc_xp_gain( vpinfo, sk.first ) );
+            g->u.practice( sk.first, veh_utils::calc_xp_gain( vpinfo, sk.first, g->u ) );
         }
 
         break;
@@ -2468,7 +2468,7 @@ void veh_interact::complete_vehicle()
             g->m.add_item_or_charges( g->u.pos(), veh->parts[vehicle_part].properties_to_item() );
             for( const auto &sk : vpinfo.install_skills ) {
                 // removal is half as educational as installation
-                g->u.practice( sk.first, veh_utils::calc_xp_gain( vpinfo, sk.first ) / 2 );
+                g->u.practice( sk.first, veh_utils::calc_xp_gain( vpinfo, sk.first, g->u ) / 2 );
             }
 
         } else {
