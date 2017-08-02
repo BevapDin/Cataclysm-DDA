@@ -9,6 +9,8 @@
 
 extern bool trigdist;
 
+extern bool trigdist;
+
 void bresenham( const int x1, const int y1, const int x2, const int y2, int t,
                 const std::function<bool(const point &)> &interact )
 {
