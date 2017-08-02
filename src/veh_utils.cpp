@@ -9,7 +9,7 @@
 #include "veh_type.h"
 #include "player.h"
 #include "messages.h"
-#include "game.h"
+#include "skill.h"
 
 namespace veh_utils
 {
