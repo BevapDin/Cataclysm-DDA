@@ -3,7 +3,6 @@
 #include "color.h"
 #include "map.h"
 #include "output.h"
-#include "game.h"
 
 #include <cassert>
 #include <cmath>
