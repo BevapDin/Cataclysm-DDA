@@ -249,7 +249,7 @@ game::game() :
     u_ptr(),
     liveview_ptr(),
     liveview( *liveview_ptr ),
-    scent_ptr( *this ),
+    scent_ptr( *map_ptr ),
     event_manager_ptr(),
     new_game(false),
     uquit(QUIT_NO),

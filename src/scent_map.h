@@ -8,7 +8,6 @@
 #include <array>
 
 class map;
-class game;
 namespace catacurses
 {
 class window;
@@ -24,10 +23,10 @@ class scent_map
         tripoint player_last_position = tripoint_min;
         time_point player_last_moved = calendar::before_time_starts;
 
-        const game &gm;
+        const map &m;
 
     public:
-        scent_map( const game &g ) : gm( g ) { };
+        scent_map( const map &m ) : m( m ) { };
 
         void deserialize( const std::string &data );
         std::string serialize() const;
