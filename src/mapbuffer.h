@@ -10,6 +10,7 @@
 struct point;
 struct tripoint;
 struct submap;
+class map;
 
 /**
  * Store, buffer, save and load the entire world map.
@@ -24,7 +25,7 @@ class mapbuffer
          * @param delete_after_save If true, the saved submaps are removed
          * from the mapbuffer (and deleted).
          **/
-        void save( bool delete_after_save = false );
+        void save( const map &m, bool delete_after_save = false );
 
         /** Delete all buffered submaps. **/
         void reset();

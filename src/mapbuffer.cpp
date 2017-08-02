@@ -100,7 +100,7 @@ submap *mapbuffer::lookup_submap( const tripoint &p )
     return iter->second;
 }
 
-void mapbuffer::save( bool delete_after_save )
+void mapbuffer::save( const map &m, bool delete_after_save )
 {
     std::stringstream map_directory;
     map_directory << g->get_world_base_save_path() << "/maps";
@@ -109,8 +109,8 @@ void mapbuffer::save( bool delete_after_save )
     int num_saved_submaps = 0;
     int num_total_submaps = submaps.size();
 
-    const tripoint map_origin = sm_to_omt_copy( g->m.get_abs_sub() );
-    const bool map_has_zlevels = g != nullptr && g->m.has_zlevels();
+    const tripoint map_origin = sm_to_omt_copy( m.get_abs_sub() );
+    const bool map_has_zlevels = m.has_zlevels();
 
     // A set of already-saved submaps, in global overmap coordinates.
     std::set<tripoint> saved_submaps;
@@ -148,7 +148,7 @@ void mapbuffer::save( bool delete_after_save )
 
         // delete_on_save deletes everything, otherwise delete submaps
         // outside the current map.
-        const bool zlev_del = !map_has_zlevels && om_addr.z != g->m.get_abs_sub().z;
+        const bool zlev_del = !map_has_zlevels && om_addr.z != m.get_abs_sub().z;
         save_quad( dirname.str(), quad_path.str(), om_addr, submaps_to_delete,
                    delete_after_save || zlev_del ||
                    om_addr.x < map_origin.x || om_addr.y < map_origin.y ||
