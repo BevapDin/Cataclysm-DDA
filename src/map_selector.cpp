@@ -1,6 +1,5 @@
 #include "map_selector.h"
 
-#include "game.h"
 #include "map.h"
 #include "optional.h"
 #include "rng.h"
