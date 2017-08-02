@@ -8,11 +8,12 @@
 
 #include <vector>
 
-map_selector::map_selector( const tripoint &pos, int radius, bool accessible )
+map_selector::map_selector( map &m, const tripoint &pos, int radius, bool accessible )
+: m( m )
 {
     for( const auto &e : closest_tripoints_first( radius, pos ) ) {
-        if( !accessible || g->m.clear_path( pos, e, radius, 1, 100 ) ) {
-            data.emplace_back( e );
+        if( !accessible || m.clear_path( pos, e, radius, 1, 100 ) ) {
+            data.emplace_back( m, e );
         }
     }
 }

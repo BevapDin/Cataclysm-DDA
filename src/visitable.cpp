@@ -422,11 +422,11 @@ VisitResponse visitable<map_cursor>::visit_items(
     auto cur = static_cast<map_cursor *>( this );
 
     // skip inaccessible items
-    if( g->m.has_flag( "SEALED", *cur ) ) {
+    if( cur->m.has_flag( "SEALED", *cur ) ) {
         return VisitResponse::NEXT;
     }
 
-    for( auto &e : g->m.i_at( *cur ) ) {
+    for( auto &e : cur->m.i_at( *cur ) ) {
         if( visit_internal( func, &e ) == VisitResponse::ABORT ) {
             return VisitResponse::ABORT;
         }
@@ -631,14 +631,14 @@ std::list<item> visitable<map_cursor>::remove_items_with( const
         return res; // nothing to do
     }
 
-    if( !g->m.inbounds( *cur ) ) {
+    if( !cur->m.inbounds( *cur ) ) {
         debugmsg( "cannot remove items from map: cursor out-of-bounds" );
         return res;
     }
 
     // fetch the appropriate item stack
     int x, y;
-    submap *sub = g->m.get_submap_at( *cur, x, y );
+    submap *sub = cur->m.get_submap_at( *cur, x, y );
 
     for( auto iter = sub->itm[ x ][ y ].begin(); iter != sub->itm[ x ][ y ].end(); ) {
         if( filter( *iter ) ) {

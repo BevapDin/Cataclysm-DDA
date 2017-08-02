@@ -487,7 +487,7 @@ void item_location::deserialize( JsonIn &js )
         ptr.reset( new impl::item_on_person( g->u, idx ) );
 
     } else if( type == "map" ) {
-        ptr.reset( new impl::item_on_map( pos, idx ) );
+        ptr.reset( new impl::item_on_map( map_cursor( g->m, pos ), idx ) );
 
     } else if( type == "vehicle" ) {
         auto *veh = g->m.veh_at( pos );
