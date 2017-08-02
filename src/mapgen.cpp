@@ -3,7 +3,6 @@
 #include "coordinate_conversions.h"
 #include "omdata.h"
 #include "output.h"
-#include "game.h"
 #include "fungal_effects.h"
 #include "rng.h"
 #include "line.h"
