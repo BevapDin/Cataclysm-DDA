@@ -11718,26 +11718,31 @@ bool player::has_item_with_flag( const std::string &flag ) const
 void player::on_mutation_gain( const trait_id &mid )
 {
     morale->on_mutation_gain( mid );
+    lua_callback( "on_mutation_gain" );
 }
 
 void player::on_mutation_loss( const trait_id &mid )
 {
     morale->on_mutation_loss( mid );
+    lua_callback( "on_mutation_loss" );
 }
 
 void player::on_stat_change( const std::string &stat, int value )
 {
     morale->on_stat_change( stat, value );
+    lua_callback( "on_stat_change" );
 }
 
 void player::on_item_wear( const item &it )
 {
     morale->on_item_wear( it );
+    lua_callback( "on_item_wear" );
 }
 
 void player::on_item_takeoff( const item &it )
 {
     morale->on_item_takeoff( it );
+    lua_callback( "on_item_takeoff" );
 }
 
 void player::on_effect_int_change( const efftype_id &eid, int intensity, body_part bp )
@@ -11756,6 +11761,7 @@ void player::on_mission_assignment( mission &new_mission )
 {
     active_missions.push_back( &new_mission );
     set_active_mission( new_mission );
+    lua_callback( "on_mission_assignment" );
 }
 
 void player::on_mission_finished( mission &mission )
@@ -11780,6 +11786,7 @@ void player::on_mission_finished( mission &mission )
             active_mission = active_missions.front();
         }
     }
+    lua_callback( "on_mission_finished" );
 }
 
 const targeting_data &player::get_targeting_data() {
