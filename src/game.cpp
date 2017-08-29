@@ -907,7 +907,7 @@ bool game::start_game(std::string worldname)
     u.add_memorial_log(pgettext("memorial_male", "%s began their journey into the Cataclysm."),
                        pgettext("memorial_female", "%s began their journey into the Cataclysm."),
                        u.name.c_str());
-   lua_callback("on_new_player_created");
+   lua_callback( "on_new_player_created" );
 
     return true;
 }
@@ -1413,19 +1413,24 @@ bool game::do_turn()
 
     process_events();
     mission::process_all();
-    if (calendar::turn.hours() == 0 && calendar::turn.minutes() == 0 &&
-        calendar::turn.seconds() == 0) { // Midnight!
+    if( calendar::turn.hours() == 0 && calendar::turn.minutes() == 0 &&
+        calendar::turn.seconds() == 0 ) { // Midnight!
         overmap_buffer.process_mongroups();
-        lua_callback("on_day_passed");
+        lua_callback( "on_day_passed" );
     }
 
     // Run a LUA callback once per minute
-    if (calendar::turn.seconds() == 0) {
-        lua_callback("on_minute_passed");
+    if( calendar::turn.seconds() == 0 ) {
+        lua_callback( "on_minute_passed" );
+    }
+
+    // Run a LUA callback once per turn
+    if( calendar::once_every( 1 ) ) {
+        lua_callback( "on_turn_passed" );
     }
 
     // Move hordes every 5 min
-    if( calendar::once_every(MINUTES(5)) ) {
+    if( calendar::once_every( MINUTES( 5 ) ) ) {
         overmap_buffer.move_hordes();
         // Hordes that reached the reality bubble need to spawn,
         // make them spawn in invisible areas only.
@@ -10887,7 +10892,7 @@ void game::chat()
 
     uimenu nmenu;
     nmenu.text = std::string( _( "Who do you want to talk to or yell at?" ) );
-    
+
     int i = 0;
 
     for( auto &elem : available ) {
