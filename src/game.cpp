@@ -3744,6 +3744,8 @@ void game::load(std::string worldname, const save_t &name)
 
     u.reset();
     draw();
+
+    lua_callback( "on_savegame_loaded" );
 }
 
 void game::load_world_modfiles(WORLDPTR world)
