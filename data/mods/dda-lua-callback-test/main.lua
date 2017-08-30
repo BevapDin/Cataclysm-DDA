@@ -43,9 +43,21 @@ function MOD.on_minute_passed()
 
 end
 
+function MOD.on_hour_passed()
+
+  MOD.Update("on_hour_passed")
+
+end
+
 function MOD.on_day_passed()
 
   MOD.Update("on_day_passed")
+
+end
+
+function MOD.on_year_passed()
+
+  MOD.Update("on_year_passed")
 
 end
 
