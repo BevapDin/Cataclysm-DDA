@@ -11730,19 +11730,19 @@ void player::on_mutation_loss( const trait_id &mid )
 void player::on_stat_change( const std::string &stat, int value )
 {
     morale->on_stat_change( stat, value );
-    lua_callback( "on_stat_change" );
+    lua_callback( "on_stat_change", stat.c_str(), std::to_string( value ).c_str() );
 }
 
 void player::on_item_wear( const item &it )
 {
     morale->on_item_wear( it );
-    lua_callback( "on_item_wear" );
+    lua_callback( "on_item_wear", it.typeId().c_str() );
 }
 
 void player::on_item_takeoff( const item &it )
 {
     morale->on_item_takeoff( it );
-    lua_callback( "on_item_takeoff" );
+    lua_callback( "on_item_takeoff", it.typeId().c_str() );
 }
 
 void player::on_effect_int_change( const efftype_id &eid, int intensity, body_part bp )
@@ -11755,6 +11755,7 @@ void player::on_effect_int_change( const efftype_id &eid, int intensity, body_pa
     }
 
     morale->on_effect_int_change( eid, intensity, bp );
+    lua_callback( "on_effect_int_change", eid.str().c_str(), std::to_string( intensity ).c_str(), bodypart_id( bp ).id().c_str() );
 }
 
 void player::on_mission_assignment( mission &new_mission )
