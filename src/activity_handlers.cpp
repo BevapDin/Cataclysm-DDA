@@ -1340,7 +1340,7 @@ void activity_handlers::train_finish( player_activity *act, player *p )
                                 new_skill_level, skill.name().c_str());
         }
 
-        lua_callback( "on_skill_increased" );
+        lua_callback( "on_skill_increased", skill.obj().ident().c_str(), std::to_string( new_skill_level - 1 ).c_str(), std::to_string( new_skill_level ).c_str() );
         act->set_to_null();
         return;
     }

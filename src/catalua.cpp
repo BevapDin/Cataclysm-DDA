@@ -821,58 +821,6 @@ int call_lua(std::string tocall)
     return err;
 }
 
-void lua_callback( const char *callback_name )
-{
-    call_lua(std::string("mod_callback(\"") + std::string(callback_name) + "\")");
-}
-
-void lua_callback( const char *callback_name, const char *callback_arg1 )
-{
-
-    if( lua_state == nullptr ) {
-        return;
-    }
-    lua_State *L = lua_state;
-
-    lua_pushstring( L, callback_name );
-    lua_setglobal( L, "callback_last" );
-
-    lua_pushstring( L, callback_arg1 );
-    lua_setglobal( L, "callback_arg1" );
-
-    lua_pushstring( L, nullptr );
-    lua_setglobal( L, "callback_arg2" );
-
-    lua_pushstring( L, nullptr );
-    lua_setglobal( L, "callback_arg3" );
-
-    lua_callback( callback_name );
-}
-
-void lua_callback( const char *callback_name, const char *callback_arg1, const char *callback_arg2 )
-{
-
-    if( lua_state == nullptr ) {
-        return;
-    }
-    lua_State *L = lua_state;
-
-    lua_pushstring( L, callback_name );
-    lua_setglobal( L, "callback_last" );
-
-    lua_pushstring( L, callback_arg1 );
-    lua_setglobal( L, "callback_arg1" );
-
-    lua_pushstring( L, callback_arg2 );
-    lua_setglobal( L, "callback_arg2" );
-
-    lua_pushstring( L, nullptr );
-    lua_setglobal( L, "callback_arg3" );
-
-    lua_callback( callback_name );
-}
-
-
 void lua_callback( const char *callback_name, const char *callback_arg1, const char *callback_arg2, const char *callback_arg3 )
 {
 
@@ -893,7 +841,7 @@ void lua_callback( const char *callback_name, const char *callback_arg1, const c
     lua_pushstring( L, callback_arg3 );
     lua_setglobal( L, "callback_arg3" );
 
-    lua_callback( callback_name );
+    call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
 }
 
 //

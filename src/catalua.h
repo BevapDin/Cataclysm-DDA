@@ -30,22 +30,7 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &md, int t
                 const std::string &scr );
 
 /**
- * Execute a callback that can be overriden by all mods.
- */
-void lua_callback( const char *callback_name );
-
-/**
- * Execute a callback that can be overriden by all mods with 1 argument(s) put to global table (_G).
- */
-void lua_callback( const char *callback_name, const char *callback_arg1 );
-
-/**
- * Execute a callback that can be overriden by all mods with 2 argument(s) put to global table (_G).
- */
-void lua_callback( const char *callback_name, const char *callback_arg1, const char *callback_arg2 );
-
-/**
- * Execute a callback that can be overriden by all mods with 3 argument(s) put to global table (_G).
+ * Execute a callback that can be overriden by all mods with 3 callback argument(s) put to global table (_G).
  */
 void lua_callback( const char *callback_name, const char *callback_arg1, const char *callback_arg2, const char *callback_arg3 );
 
