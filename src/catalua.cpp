@@ -821,7 +821,8 @@ int call_lua(std::string tocall)
     return err;
 }
 
-void lua_callback( const char *callback_name, const char *callback_arg1, const char *callback_arg2, const char *callback_arg3 )
+void lua_callback( const char *callback_name, const char *callback_arg1, const char *callback_arg2,
+                   const char *callback_arg3 )
 {
 
     if( lua_state == nullptr ) {
