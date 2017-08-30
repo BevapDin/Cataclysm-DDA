@@ -1413,10 +1413,23 @@ bool game::do_turn()
 
     process_events();
     mission::process_all();
+
+    // Run a LUA callback once per year
+    if( calendar::turn.day_of_year() == 0 && calendar::turn.hours() == 0 &&
+        calendar::turn.minutes() == 0 && calendar::turn.seconds() == 0 ) { // Midnight!
+        lua_callback( "on_year_passed" );
+    }
+
+    // Run a LUA callback once per day
     if( calendar::turn.hours() == 0 && calendar::turn.minutes() == 0 &&
         calendar::turn.seconds() == 0 ) { // Midnight!
         overmap_buffer.process_mongroups();
         lua_callback( "on_day_passed" );
+    }
+
+    // Run a LUA callback once per hour
+    if( calendar::turn.minutes() == 0 && calendar::turn.seconds() == 0 ) {
+        lua_callback( "on_hour_passed" );
     }
 
     // Run a LUA callback once per minute
