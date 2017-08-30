@@ -9,124 +9,125 @@ mods[MOD.id] = MOD
 
 function MOD.on_game_loaded() 
 
-  MOD.Init("on_game_loaded")
+  MOD.Test("on_game_loaded")
 
 end
 
-function MOD.on_new_player_created()
+function MOD.on_savegame_loaded()
 
-  MOD.Update("on_new_player_created")
-
-end
-
-function MOD.on_skill_increased()
-
-  MOD.Update("on_skill_increased")
-
-end
-
-function MOD.on_turn_passed()
-
-  MOD.Update("on_turn_passed")
-
-end
-
-function MOD.on_second_passed()
-
-  MOD.Update("on_second_passed")
-
-end
-
-function MOD.on_minute_passed()
-
-  MOD.Update("on_minute_passed")
-
-end
-
-function MOD.on_hour_passed()
-
-  MOD.Update("on_hour_passed")
-
-end
-
-function MOD.on_day_passed()
-
-  MOD.Update("on_day_passed")
-
-end
-
-function MOD.on_year_passed()
-
-  MOD.Update("on_year_passed")
-
-end
-
-function MOD.on_mutation_gain()
-
-  MOD.Update("on_mutation_gain")
-
-end
-
-function MOD.on_mutation_loss()
-
-  MOD.Update("on_mutation_loss")
+  MOD.Test("on_savegame_loaded")
 
 end
 
 function MOD.on_stat_change()
 
-  MOD.Update("on_stat_change")
+  MOD.Test("on_stat_change")
+
+end
+
+function MOD.on_skill_increased()
+
+  MOD.Test("on_skill_increased")
+
+end
+
+function MOD.on_turn_passed()
+
+  MOD.Test("on_turn_passed")
+
+end
+
+function MOD.on_second_passed()
+
+  MOD.Test("on_second_passed")
+
+end
+
+function MOD.on_minute_passed()
+
+  MOD.Test("on_minute_passed")
+
+end
+
+function MOD.on_hour_passed()
+
+  MOD.Test("on_hour_passed")
+
+end
+
+function MOD.on_day_passed()
+
+  MOD.Test("on_day_passed")
+
+end
+
+function MOD.on_year_passed()
+
+  MOD.Test("on_year_passed")
+
+end
+
+function MOD.on_mutation_gain()
+
+  MOD.Test("on_mutation_gain")
+
+end
+
+function MOD.on_mutation_loss()
+
+  MOD.Test("on_mutation_loss")
+
+end
+
+function MOD.on_stat_change()
+
+  MOD.Test("on_stat_change")
 
 end
 
 function MOD.on_item_wear()
 
-  MOD.Update("on_item_wear")
+  MOD.Test("on_item_wear")
 
 end
 
 function MOD.on_item_takeoff()
 
-  MOD.Update("on_item_takeoff")
+  MOD.Test("on_item_takeoff")
 
 end
 
 function MOD.on_effect_int_changes()
 
-  MOD.Update("on_effect_int_change")
+  MOD.Test("on_effect_int_change")
 
 end
 
 function MOD.on_mission_assignment()
 
-  MOD.Update("on_mission_assignment")
+  MOD.Test("on_mission_assignment")
 
 end
 
 function MOD.on_mission_finished()
 
-  MOD.Update("on_mission_finished")
+  MOD.Test("on_mission_finished")
 
 end
 
-MOD.Init = function(s)
+MOD.Test = function(s)
 
   if (game.add_msg) then
-    game.add_msg ("Initialization logic goes here...")
-    game.add_msg (tostring(s))
-  end
-
-end
-
-MOD.Update = function(s)
-
-  if (game.add_msg) then
-    game.add_msg ("Update logic goes here...")
-    game.add_msg (tostring(s))
-    game.add_msg ("callback_last:"..tostring(callback_last))
-    game.add_msg ("callback_arg1:"..tostring(callback_arg1))
-    game.add_msg ("callback_arg2:"..tostring(callback_arg2))
-    game.add_msg ("callback_arg3:"..tostring(callback_arg3))
+    game.add_msg ("<color_cyan>     function: </color><color_ltcyan>"..tostring(s).."</color>")
+    game.add_msg ("callback_last: <color_yellow>"..tostring(callback_last).."</color>")
+    for i = 1, 3 do
+    local arg = _G["callback_arg"..i]
+    local arg_color = "green"
+      if (arg == nil or arg == "callback_arg_unused") then
+        arg_color = "red"
+      end
+      game.add_msg ("callback_arg"..i..": <color_"..arg_color..">"..tostring(arg).."</color>")
+    end
   end
 
 end
