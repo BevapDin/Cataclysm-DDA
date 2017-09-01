@@ -907,7 +907,7 @@ bool game::start_game(std::string worldname)
     u.add_memorial_log(pgettext("memorial_male", "%s began their journey into the Cataclysm."),
                        pgettext("memorial_female", "%s began their journey into the Cataclysm."),
                        u.name.c_str());
-   lua_callback( "on_new_player_created", nullptr, nullptr, nullptr );
+   lua_callback( "on_new_player_created" );
 
     return true;
 }
@@ -1417,29 +1417,29 @@ bool game::do_turn()
     // Run a LUA callback once per year
     if( calendar::turn.day_of_year() == 0 && calendar::turn.hours() == 0 &&
         calendar::turn.minutes() == 0 && calendar::turn.seconds() == 0 ) { // Midnight!
-        lua_callback( "on_year_passed", nullptr, nullptr, nullptr );
+        lua_callback( "on_year_passed" );
     }
 
     // Run a LUA callback once per day
     if( calendar::turn.hours() == 0 && calendar::turn.minutes() == 0 &&
         calendar::turn.seconds() == 0 ) { // Midnight!
         overmap_buffer.process_mongroups();
-        lua_callback( "on_day_passed", nullptr, nullptr, nullptr );
+        lua_callback( "on_day_passed" );
     }
 
     // Run a LUA callback once per hour
     if( calendar::turn.minutes() == 0 && calendar::turn.seconds() == 0 ) {
-        lua_callback( "on_hour_passed", nullptr, nullptr, nullptr );
+        lua_callback( "on_hour_passed" );
     }
 
     // Run a LUA callback once per minute
     if( calendar::turn.seconds() == 0 ) {
-        lua_callback( "on_minute_passed", nullptr, nullptr, nullptr );
+        lua_callback( "on_minute_passed" );
     }
 
     // Run a LUA callback once per turn
     if( calendar::once_every( 1 ) ) {
-        lua_callback( "on_turn_passed", nullptr, nullptr, nullptr );
+        lua_callback( "on_turn_passed" );
     }
 
     // Move hordes every 5 min
@@ -3745,7 +3745,7 @@ void game::load(std::string worldname, const save_t &name)
     u.reset();
     draw();
 
-    lua_callback( "on_savegame_loaded", nullptr, nullptr, nullptr );
+    lua_callback( "on_savegame_loaded" );
 }
 
 void game::load_world_modfiles(WORLDPTR world)

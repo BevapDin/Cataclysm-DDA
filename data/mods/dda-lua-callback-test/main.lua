@@ -25,6 +25,12 @@ function MOD.on_stat_change()
 
 end
 
+function MOD.on_readbook_skill_increased()
+
+  MOD.Test("on_readbook_skill_increased")
+
+end
+
 function MOD.on_skill_increased()
 
   MOD.Test("on_skill_increased")

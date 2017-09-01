@@ -621,7 +621,7 @@ template<typename T>
 struct LuaType<LuaReference<T>> : public LuaReference<T> {
 };
 
-/** This basically transforms a string (therefor inheriting from LuaType<string>) into a C++
+/** This basically transforms a string (therefore inheriting from LuaType<string>) into a C++
  * enumeration value. It simply contains a table of string-to-enum-values. */
 template<typename E>
 class LuaEnum : private LuaType<std::string> {
@@ -821,27 +821,31 @@ int call_lua(std::string tocall)
     return err;
 }
 
-void lua_callback( const char *callback_name, const char *callback_arg1, const char *callback_arg2,
-                   const char *callback_arg3 )
+void lua_callback_store_args( const int callback_arg_idx )
 {
-
     if( lua_state == nullptr ) {
         return;
     }
     lua_State *L = lua_state;
+    lua_pushinteger( L, callback_arg_idx - 1 );
+    lua_setglobal( L, "callback_arg_count" );
+}
 
-    lua_pushstring( L, callback_name );
-    lua_setglobal( L, "callback_last" );
+template<typename ArgType>
+void lua_callback_store_arg( const int callback_arg_idx, ArgType callback_arg )
+{
+    if( lua_state == nullptr ) {
+        return;
+    }
+    const char callback_arg_name = "callback_arg" + std::to_string( callback_arg_idx );
+    lua_State *L = lua_state;
+    //lua_pushvalue( L, callback_arg );
+    lua_pushinteger( L, callback_arg_idx );
+    lua_setglobal( L, &callback_arg_name );
+}
 
-    lua_pushstring( L, callback_arg1 );
-    lua_setglobal( L, "callback_arg1" );
-
-    lua_pushstring( L, callback_arg2 );
-    lua_setglobal( L, "callback_arg2" );
-
-    lua_pushstring( L, callback_arg3 );
-    lua_setglobal( L, "callback_arg3" );
-
+void lua_callback( const char *callback_name )
+{
     call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
 }
 

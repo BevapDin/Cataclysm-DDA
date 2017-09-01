@@ -30,11 +30,40 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &md, int t
                 const std::string &scr );
 
 /**
- * Execute a callback that can be overriden by all mods
- * Now with 3 callback arguments to put to _G table.
+ * Actually store provided callback argument in _G.
  */
-void lua_callback( const char *callback_name, const char *callback_arg1, const char *callback_arg2,
-                   const char *callback_arg3 );
+template<typename ArgType>
+void lua_callback_store_arg( const int callback_arg_idx, ArgType callback_arg );
+
+/**
+ * Fake function used when all arguments are empty.
+ */
+void lua_callback_store_args( const int callback_arg_idx );
+
+/**
+ * Store provided callback arguments in _G.
+ */
+template<typename ArgType, typename... Args>
+void lua_callback_store_args( const int callback_arg_idx, ArgType callback_arg, Args... callback_args )
+{
+    lua_callback_store_arg( callback_arg_idx, callback_arg );
+    lua_callback_store_args( callback_arg_idx + 1, callback_args... );
+}
+
+/**
+ * Execute a callback that can be overriden by all mods
+ */
+void lua_callback( const char *callback_name );
+
+/**
+ * Execute a callback that can be overriden by all mods, storing provided callback arguments in _G.
+ */
+template<typename... Args>
+void lua_callback( const char *callback_name, Args... callback_args )
+{
+    lua_callback_store_args( 1, callback_args... );
+    lua_callback( callback_name );
+}
 
 /**
  * Load the main file of a lua mod.
