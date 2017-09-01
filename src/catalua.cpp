@@ -786,27 +786,36 @@ int call_lua( std::string tocall )
     return err;
 }
 
-template<typename ArgType> void lua_callback_store_arg( lua_State *const L,
-        const int callback_arg_idx, ArgType callback_arg )
+template<typename ArgType> void lua_callback_store_arg(
+    const int callback_arg_idx, ArgType callback_arg )
 {
-
     const char *callback_arg_name = std::string( "callback_arg" + std::to_string(
                                         callback_arg_idx ) ).c_str();
-
+    if( lua_state == nullptr ) {
+        return;
+    }
+    lua_State *L = lua_state;
     lua_pushstring( L, callback_arg );
     lua_setglobal( L, callback_arg_name );
 }
 
-void lua_callback_store_args( lua_State *const L, const int callback_arg_idx )
+void lua_callback_store_args( const int callback_arg_idx )
 {
+    if( lua_state == nullptr ) {
+        return;
+    }
+    lua_State *L = lua_state;
     lua_pushinteger( L, callback_arg_idx - 1 );
     lua_setglobal( L, "callback_arg_count" );
 }
 
-template<typename ArgType, typename... Args> void lua_callback_store_args( lua_State *const L,
-        const int callback_arg_idx, ArgType callback_arg,
-        Args... callback_args )
+template<typename ArgType, typename... Args> void lua_callback_store_args(
+    const int callback_arg_idx, ArgType callback_arg,     Args... callback_args )
 {
+    if( lua_state == nullptr ) {
+        return;
+    }
+    lua_State *L = lua_state;
     lua_callback_store_arg( L, callback_arg_idx, callback_arg );
     lua_callback_store_args( L, callback_arg_idx + 1, callback_args... );
 }
@@ -1243,6 +1252,11 @@ int call_lua( std::string )
 void lua_callback( const char * )
 {
 }
+
+template<typename ... Args> void lua_callback( const char *, Args...  )
+{
+}
+
 void lua_loadmod( std::string, std::string )
 {
 }

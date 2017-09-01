@@ -7,12 +7,6 @@
 #include <string>
 #include <sstream>
 
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
-
 class map;
 class monster;
 struct mapgendata;
@@ -39,21 +33,21 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &md, int t
 /**
  * Actually store provided callback argument in _G.
  */
-template<typename ArgType> void lua_callback_store_arg( lua_State *const L,
-        const int callback_arg_idx, ArgType callback_arg );
+template<typename ArgType> void lua_callback_store_arg( const int callback_arg_idx,
+        ArgType callback_arg );
 
 /**
  * Store total number of callback arguments
  * or 0 when no callback arguments are provided.
  */
-void lua_callback_store_args( lua_State *const L, const int callback_arg_idx );
+void lua_callback_store_args( const int callback_arg_idx );
 
 /**
  * Store provided callback arguments in _G.
  */
-template<typename ArgType, typename... Args> void lua_callback_store_args( lua_State *const L,
-        const int callback_arg_idx, ArgType callback_arg,
-        Args... callback_args );
+template<typename ArgType, typename... Args> void lua_callback_store_args(
+    const int callback_arg_idx, ArgType callback_arg,
+    Args... callback_args );
 
 /**
  * Execute a callback that can be overriden by all mods
