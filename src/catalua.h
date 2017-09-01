@@ -24,7 +24,8 @@ extern std::stringstream lua_output_stream;
 extern std::stringstream lua_error_stream;
 
 /** If this returns 0, no lua function was defined to override behavior.
- *  If this returns 1, lua behavior was called and regular behavior should be omitted.
+ *  If this returns 1, lua behavior was called and
+ *                     regular behavior should be omitted.
  */
 int lua_monster_move( monster *m );
 
@@ -32,8 +33,11 @@ int lua_monster_move( monster *m );
  * Call the given string as lua code, used for interactive debugging.
  */
 int call_lua( std::string tocall );
-int lua_mapgen( map *m, const oter_id &terrain_type,
-                const mapgendata &md, int t, float d,
+int lua_mapgen( map *m,
+                const oter_id &terrain_type,
+                const mapgendata &md,
+                int t,
+                float d,
                 const std::string &scr );
 
 /**
@@ -58,7 +62,7 @@ template<typename ArgType, typename... Args>
 void lua_callback_store_args( lua_State* const L,
                               const int callback_arg_idx,
                               ArgType callback_arg,
-                              Args... callback_args );
+                              Args ... callback_args );
 
 /**
  * Execute a callback that can be overriden by all mods
