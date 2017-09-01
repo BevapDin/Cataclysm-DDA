@@ -367,7 +367,7 @@ class LuaValue
             T *value_in_lua = static_cast<T *>( lua_newuserdata( L, sizeof( T ) ) );
             // Push metatable,
             get_metatable( L );
-            // -1 would the the metatable, -2 is the uservalue, the table is popped
+            // -1 would be the metatable, -2 is the uservalue, the table is popped
             lua_setmetatable( L, -2 );
             // This is where the copy happens:
             new( value_in_lua ) T( std::forward<Args>( args )... );
@@ -786,10 +786,8 @@ int call_lua( std::string tocall )
     return err;
 }
 
-template<typename ArgType>
-void lua_callback_store_arg( lua_State *const L,
-                             const int callback_arg_idx,
-                             ArgType callback_arg )
+template<typename ArgType> void lua_callback_store_arg( lua_State *const L,
+        const int callback_arg_idx, ArgType callback_arg )
 {
 
     const char *callback_arg_name = std::string( "callback_arg" + std::to_string(
@@ -799,18 +797,15 @@ void lua_callback_store_arg( lua_State *const L,
     lua_setglobal( L, callback_arg_name );
 }
 
-void lua_callback_store_args( lua_State *const L,
-                              const int callback_arg_idx )
+void lua_callback_store_args( lua_State *const L, const int callback_arg_idx )
 {
     lua_pushinteger( L, callback_arg_idx - 1 );
     lua_setglobal( L, "callback_arg_count" );
 }
 
-template<typename ArgType, typename... Args>
-void lua_callback_store_args( lua_State *const L,
-                              const int callback_arg_idx,
-                              ArgType callback_arg,
-                              Args... callback_args )
+template<typename ArgType, typename... Args> void lua_callback_store_args( lua_State *const L,
+        const int callback_arg_idx, ArgType callback_arg,
+        Args... callback_args )
 {
     lua_callback_store_arg( L, callback_arg_idx, callback_arg );
     lua_callback_store_args( L, callback_arg_idx + 1, callback_args... );
@@ -821,8 +816,7 @@ void lua_callback( const char *callback_name )
     call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
 }
 
-template<typename... Args>
-void lua_callback( const char *callback_name, Args... callback_args )
+template<typename ... Args> void lua_callback( const char *callback_name, Args... callback_args )
 {
     if( lua_state == nullptr ) {
         return;
