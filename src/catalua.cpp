@@ -821,32 +821,51 @@ int call_lua(std::string tocall)
     return err;
 }
 
-void lua_callback_store_args( const int callback_arg_idx )
+template<typename ArgType>
+void lua_callback_store_arg( lua_State* const L,
+                             const int callback_arg_idx,
+                             ArgType callback_arg )
 {
-    if( lua_state == nullptr ) {
-        return;
-    }
-    lua_State *L = lua_state;
+
+    const char* callback_arg_name = std::string( "callback_arg" + std::to_string( callback_arg_idx ) ).c_str();
+
+    lua_pushstring( L, callback_arg );
+    lua_setglobal( L, callback_arg_name );
+}
+
+void lua_callback_store_args( lua_State* const L,
+                              const int callback_arg_idx )
+{
     lua_pushinteger( L, callback_arg_idx - 1 );
     lua_setglobal( L, "callback_arg_count" );
 }
 
-template<typename ArgType>
-void lua_callback_store_arg( const int callback_arg_idx, ArgType callback_arg )
+template<typename ArgType, typename... Args>
+void lua_callback_store_args( lua_State* const L,
+                              const int callback_arg_idx,
+                              ArgType callback_arg,
+                              Args... callback_args )
 {
-    if( lua_state == nullptr ) {
-        return;
-    }
-    const char callback_arg_name = "callback_arg" + std::to_string( callback_arg_idx );
-    lua_State *L = lua_state;
-    //lua_pushvalue( L, callback_arg );
-    lua_pushinteger( L, callback_arg_idx );
-    lua_setglobal( L, &callback_arg_name );
+    lua_callback_store_arg( L, callback_arg_idx, callback_arg );
+    lua_callback_store_args( L, callback_arg_idx + 1, callback_args... );
 }
 
 void lua_callback( const char *callback_name )
 {
     call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
+}
+
+template<typename... Args>
+void lua_callback( const char *callback_name, Args... callback_args )
+{
+    if( lua_state == nullptr ) {
+        return;
+    }
+    lua_State *L = lua_state;
+    lua_callback_store_args( L,  1, callback_args... );
+    lua_pushstring( L, callback_name );
+    lua_setglobal( L, "callback_last" );
+    lua_callback( callback_name );
 }
 
 //

@@ -7,6 +7,12 @@
 #include <string>
 #include <sstream>
 
+extern "C" {
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+}
+
 class map;
 class monster;
 struct mapgendata;
@@ -26,29 +32,33 @@ int lua_monster_move( monster *m );
  * Call the given string as lua code, used for interactive debugging.
  */
 int call_lua( std::string tocall );
-int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &md, int t, float d,
+int lua_mapgen( map *m, const oter_id &terrain_type,
+                const mapgendata &md, int t, float d,
                 const std::string &scr );
 
 /**
  * Actually store provided callback argument in _G.
  */
 template<typename ArgType>
-void lua_callback_store_arg( const int callback_arg_idx, ArgType callback_arg );
+void lua_callback_store_arg( lua_State* const L,
+                             const int callback_arg_idx,
+                             ArgType callback_arg );
 
 /**
- * Fake function used when all arguments are empty.
+ * Store total number of callback arguments
+ * or 0 when no callback arguments are provided.
  */
-void lua_callback_store_args( const int callback_arg_idx );
+void lua_callback_store_args( lua_State* const L,
+                              const int callback_arg_idx );
 
 /**
  * Store provided callback arguments in _G.
  */
 template<typename ArgType, typename... Args>
-void lua_callback_store_args( const int callback_arg_idx, ArgType callback_arg, Args... callback_args )
-{
-    lua_callback_store_arg( callback_arg_idx, callback_arg );
-    lua_callback_store_args( callback_arg_idx + 1, callback_args... );
-}
+void lua_callback_store_args( lua_State* const L,
+                              const int callback_arg_idx,
+                              ArgType callback_arg,
+                              Args... callback_args );
 
 /**
  * Execute a callback that can be overriden by all mods
@@ -56,14 +66,11 @@ void lua_callback_store_args( const int callback_arg_idx, ArgType callback_arg, 
 void lua_callback( const char *callback_name );
 
 /**
- * Execute a callback that can be overriden by all mods, storing provided callback arguments in _G.
+ * Execute a callback that can be overriden by all mods,
+ * storing provided callback arguments in _G.
  */
 template<typename... Args>
-void lua_callback( const char *callback_name, Args... callback_args )
-{
-    lua_callback_store_args( 1, callback_args... );
-    lua_callback( callback_name );
-}
+void lua_callback( const char *callback_name, Args... callback_args );
 
 /**
  * Load the main file of a lua mod.

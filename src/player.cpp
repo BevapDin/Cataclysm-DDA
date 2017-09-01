@@ -9589,7 +9589,7 @@ void player::do_read( item *book )
                                           pgettext( "memorial_female", "Reached skill level %1$d in %2$s." ),
                                           ( int )skill_level, skill.obj().name().c_str() );
                     }
-                    lua_callback( "on_readbook_skill_increased", skill, originalSkillLevel, skill_level );
+                    lua_callback( "on_skill_increased", "book" );
                 } else {
                     add_msg( m_good, _( "%s increases their %s level." ), learner->disp_name().c_str(),
                              skill.obj().name().c_str() );
@@ -10723,7 +10723,7 @@ void player::practice( const skill_id &id, int amount, int cap )
         int newLevel = get_skill_level( id );
         if (is_player() && newLevel > oldLevel) {
             add_msg(m_good, _("Your skill in %s has increased to %d!"), skill.name().c_str(), newLevel);
-            lua_callback( "on_skill_increased", id, amount, cap );
+            lua_callback( "on_skill_increased", "practice" );
         }
         if(is_player() && newLevel > cap) {
             //inform player immediately that the current recipe can't be used to train further
@@ -11718,31 +11718,31 @@ bool player::has_item_with_flag( const std::string &flag ) const
 void player::on_mutation_gain( const trait_id &mid )
 {
     morale->on_mutation_gain( mid );
-    lua_callback( "on_mutation_gain", mid );
+    lua_callback( "on_mutation_gain" );
 }
 
 void player::on_mutation_loss( const trait_id &mid )
 {
     morale->on_mutation_loss( mid );
-    lua_callback( "on_mutation_loss", mid );
+    lua_callback( "on_mutation_loss" );
 }
 
 void player::on_stat_change( const std::string &stat, int value )
 {
     morale->on_stat_change( stat, value );
-    lua_callback( "on_stat_change", stat, value );
+    lua_callback( "on_stat_change" );
 }
 
 void player::on_item_wear( const item &it )
 {
     morale->on_item_wear( it );
-    lua_callback( "on_item_wear", it );
+    lua_callback( "on_item_wear" );
 }
 
 void player::on_item_takeoff( const item &it )
 {
     morale->on_item_takeoff( it );
-    lua_callback( "on_item_takeoff", it );
+    lua_callback( "on_item_takeoff" );
 }
 
 void player::on_effect_int_change( const efftype_id &eid, int intensity, body_part bp )
@@ -11755,7 +11755,7 @@ void player::on_effect_int_change( const efftype_id &eid, int intensity, body_pa
     }
 
     morale->on_effect_int_change( eid, intensity, bp );
-    lua_callback( "on_effect_int_change", eid, intensity, bp );
+    lua_callback( "on_effect_int_change" );
 }
 
 void player::on_mission_assignment( mission &new_mission )

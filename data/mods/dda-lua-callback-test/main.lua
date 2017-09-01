@@ -1,7 +1,7 @@
 local MOD = {
 
   id = "dda-lua-callback-test",
-  version = "2017-08-31"
+  version = "2017-09-01"
 
 }
 
@@ -22,12 +22,6 @@ end
 function MOD.on_stat_change()
 
   MOD.Test("on_stat_change")
-
-end
-
-function MOD.on_readbook_skill_increased()
-
-  MOD.Test("on_readbook_skill_increased")
 
 end
 
@@ -126,13 +120,14 @@ MOD.Test = function(s)
   if (game.add_msg) then
     game.add_msg ("<color_cyan>     function: </color><color_ltcyan>"..tostring(s).."</color>")
     game.add_msg ("callback_last: <color_yellow>"..tostring(callback_last).."</color>")
-    for i = 1, 3 do
-    local arg = _G["callback_arg"..i]
-    local arg_color = "green"
-      if (arg == nil or arg == "callback_arg_unused") then
-        arg_color = "red"
+    game.add_msg ("callback_last: <color_green>"..tostring(callback_arg_count).."</color>")
+    for i = 1, callback_arg_count do
+    local callback_arg = _G["callback_arg"..i]
+    local callback_arg_color = "green"
+      if (callback_arg == nil) then
+        callback_arg_color = "red"
       end
-      game.add_msg ("callback_arg"..i..": <color_"..arg_color..">"..tostring(arg).."</color>")
+      game.add_msg ("callback_arg"..i..": <color_"..callback_arg_color..">"..tostring(callback_arg).."</color>")
     end
   end
 
