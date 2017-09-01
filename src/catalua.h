@@ -39,9 +39,8 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &md, int t
 /**
  * Actually store provided callback argument in _G.
  */
-template<typename... ArgType>
-void lua_callback_store_arg( lua_State *const L, const int callback_arg_idx,
-                             ArgType... callback_arg );
+template<typename ArgType>
+void lua_callback_store_arg( lua_State *const L, const int callback_arg_idx, ArgType callback_arg );
 
 /**
  * Store total number of callback arguments

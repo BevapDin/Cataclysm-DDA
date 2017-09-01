@@ -786,10 +786,10 @@ int call_lua( std::string tocall )
     return err;
 }
 
-template<typename... ArgType>
+template<typename ArgType>
 void lua_callback_store_arg( lua_State *const L,
                              const int callback_arg_idx,
-                             ArgType... callback_arg )
+                             ArgType callback_arg )
 {
 
     const char *callback_arg_name = std::string( "callback_arg" + std::to_string(
