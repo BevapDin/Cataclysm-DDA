@@ -11718,13 +11718,13 @@ bool player::has_item_with_flag( const std::string &flag ) const
 void player::on_mutation_gain( const trait_id &mid )
 {
     morale->on_mutation_gain( mid );
-    lua_callback( "on_mutation_gain" );
+    lua_callback( "on_mutation_gain", mid.c_str() );
 }
 
 void player::on_mutation_loss( const trait_id &mid )
 {
     morale->on_mutation_loss( mid );
-    lua_callback( "on_mutation_loss" );
+    lua_callback( "on_mutation_loss", mid.c_str() );
 }
 
 void player::on_stat_change( const std::string &stat, int value )

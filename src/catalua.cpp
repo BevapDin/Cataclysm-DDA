@@ -44,6 +44,8 @@ extern "C" {
     #define LUA_OK 0
 #endif
 
+template void lua_callback<const char*>( const char*, const char* );
+
 using item_stack_iterator = std::list<item>::iterator;
 using volume = units::volume;
 using mass = units::mass;
@@ -674,7 +676,7 @@ struct LuaType<LuaEnum<E>> : public LuaEnum<E> {
 /**
  * Wrapper class to access objects in Lua that are stored as either a pointer or a value.
  * Technically, this class could inherit from both `LuaValue<T>` and `LuaReference<T>`,
- * but that would basically the same code anyway.
+ * but that would be basically the same code anyway.
  * It behaves like a LuaValue if there is a value on the stack, and like LuaReference is there
  * is a reference on the stack. Functions behave like the functions in a `LuaType`.
  * Note that it does not have a push function because it can not know whether to push a reference
@@ -786,16 +788,24 @@ int call_lua( std::string tocall )
     return err;
 }
 
+void lua_delete_global( const char* name ) {
+    lua_State *L = lua_state;
+    lua_pushnil( L );
+    lua_setglobal( L, name );
+}
+
 template<typename ArgType> void lua_callback_store_arg(
     const int callback_arg_idx, ArgType callback_arg )
 {
     const char *callback_arg_name = std::string( "callback_arg" + std::to_string(
                                         callback_arg_idx ) ).c_str();
+
     if( lua_state == nullptr ) {
         return;
     }
     lua_State *L = lua_state;
     lua_pushstring( L, callback_arg );
+    //LuaReference<ArgType>::push( L, callback_arg );
     lua_setglobal( L, callback_arg_name );
 }
 
@@ -810,31 +820,54 @@ void lua_callback_store_args( const int callback_arg_idx )
 }
 
 template<typename ArgType, typename... Args> void lua_callback_store_args(
-    const int callback_arg_idx, ArgType callback_arg,     Args... callback_args )
+    const int callback_arg_idx, ArgType callback_arg, Args... callback_args )
+{
+    lua_callback_store_arg( callback_arg_idx, callback_arg );
+    lua_callback_store_args( callback_arg_idx + 1, callback_args... );
+}
+
+void lua_callback_savelast( const char *callback_name )
 {
     if( lua_state == nullptr ) {
         return;
     }
     lua_State *L = lua_state;
-    lua_callback_store_arg( L, callback_arg_idx, callback_arg );
-    lua_callback_store_args( L, callback_arg_idx + 1, callback_args... );
+
+    lua_pushstring( L, callback_name );
+    lua_setglobal( L, "callback_last" );
+}
+
+void lua_callback_cleanup()
+{
+
+    lua_delete_global( "callback_last" );
+    lua_delete_global( "callback_arg_count" );
+    lua_delete_global( "callback_arg1" );
+    lua_delete_global( "callback_arg2" );
+    lua_delete_global( "callback_arg3" );
+    lua_delete_global( "callback_arg4" );
+    lua_delete_global( "callback_arg5" );
+    lua_delete_global( "callback_arg6" );
+    lua_delete_global( "callback_arg7" );
+    lua_delete_global( "callback_arg8" );
+    lua_delete_global( "callback_arg9" );
+
 }
 
 void lua_callback( const char *callback_name )
 {
+    lua_callback_cleanup();
+    lua_callback_savelast( callback_name );
     call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
 }
 
 template<typename ... Args> void lua_callback( const char *callback_name, Args... callback_args )
 {
-    if( lua_state == nullptr ) {
-        return;
-    }
-    lua_State *L = lua_state;
-    lua_callback_store_args( L,  1, callback_args... );
-    lua_pushstring( L, callback_name );
-    lua_setglobal( L, "callback_last" );
-    lua_callback( callback_name );
+    lua_callback_cleanup();
+    int callback_arg_idx = 1;
+    lua_callback_store_args( callback_arg_idx, callback_args... );
+    lua_callback_savelast( callback_name );
+    call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
 }
 
 //

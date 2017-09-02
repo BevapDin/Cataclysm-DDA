@@ -46,8 +46,7 @@ void lua_callback_store_args( const int callback_arg_idx );
  * Store provided callback arguments in _G.
  */
 template<typename ArgType, typename... Args> void lua_callback_store_args(
-    const int callback_arg_idx, ArgType callback_arg,
-    Args... callback_args );
+    const int callback_arg_idx, ArgType callback_arg, Args... callback_args );
 
 /**
  * Execute a callback that can be overriden by all mods

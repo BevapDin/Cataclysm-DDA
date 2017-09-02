@@ -120,14 +120,16 @@ MOD.Test = function(s)
   if (game.add_msg) then
     game.add_msg ("<color_cyan>     function: </color><color_ltcyan>"..tostring(s).."</color>")
     game.add_msg ("callback_last: <color_yellow>"..tostring(callback_last).."</color>")
-    game.add_msg ("callback_last: <color_green>"..tostring(callback_arg_count).."</color>")
-    for i = 1, callback_arg_count do
-    local callback_arg = _G["callback_arg"..i]
-    local callback_arg_color = "green"
-      if (callback_arg == nil) then
-        callback_arg_color = "red"
+    if (callback_arg_count) then
+      game.add_msg ("callback_arg_count: <color_green>"..tostring(callback_arg_count).."</color>")
+      for i = 1, callback_arg_count do
+      local callback_arg = _G["callback_arg"..i]
+      local callback_arg_color = "green"
+        if (callback_arg == nil) then
+          callback_arg_color = "red"
+        end
+        game.add_msg ("callback_arg"..i..": <color_"..callback_arg_color..">"..tostring(callback_arg).."</color>")
       end
-      game.add_msg ("callback_arg"..i..": <color_"..callback_arg_color..">"..tostring(callback_arg).."</color>")
     end
   end
 
