@@ -3,7 +3,6 @@
 #include <cmath> // pow
 #include <cstdlib> // strtoul
 #include <cstring> // strcmp
-#include <fstream>
 #include <istream>
 #include <locale> // ensure user's locale doesn't interfere with output
 #include <set>
