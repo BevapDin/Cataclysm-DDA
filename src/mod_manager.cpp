@@ -13,7 +13,6 @@
 #include <math.h>
 #include <queue>
 #include <iostream>
-#include <fstream>
 #include <unordered_set>
 
 static const std::string MOD_SEARCH_FILE( "modinfo.json" );
