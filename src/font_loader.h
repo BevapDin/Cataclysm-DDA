@@ -5,6 +5,7 @@
 #include "json.h"
 #include "path_info.h"
 #include "filesystem.h"
+#include "cata_utility.h"
 #include "debug.h"
 
 #include <string>
@@ -53,26 +54,25 @@ class font_loader
             }
         }
         void save( const std::string &path ) const {
-            std::ofstream stream( path.c_str(), std::ofstream::binary );
-            JsonOut json( stream, true ); // pretty-print
-            json.start_object();
-            json.member( "fontblending", fontblending );
-            json.member( "fontwidth", fontwidth );
-            json.member( "fontheight", fontheight );
-            json.member( "fontsize", fontsize );
-            json.member( "typeface", typeface );
-            json.member( "map_fontwidth", map_fontwidth );
-            json.member( "map_fontheight", map_fontheight );
-            json.member( "map_fontsize", map_fontsize );
-            json.member( "map_typeface", map_typeface );
-            json.member( "overmap_fontwidth", overmap_fontwidth );
-            json.member( "overmap_fontheight", overmap_fontheight );
-            json.member( "overmap_fontsize", overmap_fontsize );
-            json.member( "overmap_typeface", overmap_typeface );
-            json.end_object();
-            stream << "\n";
-            stream.close();
-            if( !stream.good() ) {
+            if( !write_to_file( path, [&]( std::ostream &stream ) {
+                JsonOut json( stream, true ); // pretty-print
+                json.start_object();
+                json.member( "fontblending", fontblending );
+                json.member( "fontwidth", fontwidth );
+                json.member( "fontheight", fontheight );
+                json.member( "fontsize", fontsize );
+                json.member( "typeface", typeface );
+                json.member( "map_fontwidth", map_fontwidth );
+                json.member( "map_fontheight", map_fontheight );
+                json.member( "map_fontsize", map_fontsize );
+                json.member( "map_typeface", map_typeface );
+                json.member( "overmap_fontwidth", overmap_fontwidth );
+                json.member( "overmap_fontheight", overmap_fontheight );
+                json.member( "overmap_fontsize", overmap_fontsize );
+                json.member( "overmap_typeface", overmap_typeface );
+                json.end_object();
+                stream << "\n";
+            }, "font settings" ) ) {
                 DebugLog( D_ERROR, D_SDL ) << "saving font settings to " << path << " failed";
             }
         }

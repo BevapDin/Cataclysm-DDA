@@ -15,6 +15,7 @@
 #include "uistate.h"
 #include "artifact.h"
 #include "trap.h"
+#include "cata_utility.h"
 #include "mapdata.h"
 #include "overmapbuffer.h"
 #include "compatibility.h"
@@ -33,7 +34,6 @@
 #include "debug_menu.h"
 #include "string_input_popup.h"
 
-#include <fstream>
 #include <sstream>
 #include <map>
 #include <set>
@@ -146,14 +146,13 @@ void edit_json( SAVEOBJ &it )
                 tmret = -2;
             }
         } else if( tmret == 2 ) {
-            std::ofstream fout;
-            fout.open( "save/jtest-1j.txt" );
-            fout << osave1;
-            fout.close();
+            write_to_file( "save/jtest-1j.txt", [&]( std::ostream &fout ) {
+                fout << osave1;
+            }, "save test 1" );
 
-            fout.open( "save/jtest-2j.txt" );
-            fout << serialize( it );
-            fout.close();
+            write_to_file( "save/jtest-2j.txt", [&]( std::ostream &fout ) {
+                fout << serialize( it );
+            }, "save test 2" );
         }
         tm.addentry( 0, true, 'r', pgettext( "item manipulation debug menu entry", "rehash" ) );
         tm.addentry( 1, true, 'e', pgettext( "item manipulation debug menu entry", "edit" ) );
