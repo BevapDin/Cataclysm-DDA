@@ -123,7 +123,7 @@ class zone_manager
         void cache_data();
         bool has( const zone_type_id &type, const tripoint &where ) const;
 
-        bool save_zones();
+        void save_zones(); // can throw
         void load_zones();
         void serialize( JsonOut &json ) const;
         void deserialize( JsonIn &jsin );

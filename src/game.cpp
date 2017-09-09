@@ -8268,7 +8268,7 @@ void game::zones_manager()
     if( stuff_changed ) {
         auto &zones = zone_manager::get_manager();
         if( query_yn( _("Save changes?") ) ) {
-            zones.save_zones();
+            catch_with_popup( [&]() { zones.save_zones(); } );
         } else {
             zones.load_zones();
         }

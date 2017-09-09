@@ -186,12 +186,12 @@ void zone_manager::deserialize( JsonIn &jsin )
 }
 
 
-bool zone_manager::save_zones()
+void zone_manager::save_zones()
 {
     std::string savefile = world_generator->active_world->world_path + "/" + base64_encode(
                                g->u.name ) + ".zones.json";
 
-    return write_to_file( savefile, [&]( std::ostream & fout ) {
+    write_to_file_throw( savefile, [&]( std::ostream & fout ) {
         JsonOut jsout( fout );
         serialize( jsout );
     }, _( "zones date" ) );
