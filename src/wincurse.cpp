@@ -10,7 +10,6 @@
 #include "catacharset.h"
 #include "get_version.h"
 #include <cstdlib>
-#include <fstream>
 #include <sstream>
 #include "catacharset.h"
 #include "init.h"
