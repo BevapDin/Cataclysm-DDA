@@ -298,7 +298,7 @@ float multi_lerp( const std::vector<std::pair<float, float>> &points, float x )
     return ( t * points[i].second ) + ( ( 1 - t ) * points[i - 1].second );
 }
 
-bool write_to_file_throw( const std::string &path, const std::function<void( std::ostream & )> &writer,
+void write_to_file_throw( const std::string &path, const std::function<void( std::ostream & )> &writer,
                           const char *const fail_message )
 {
     try {
@@ -307,9 +307,9 @@ bool write_to_file_throw( const std::string &path, const std::function<void( std
         fout.close();
     } catch( const std::exception &err ) {
         if( fail_message ) {
-            throw std::runtime_error( string_format( "Failed to write %1$s to \"%2$s\": %3$s" ), fail_message, path.c_str(), err.what() );
+            throw std::runtime_error( string_format( "Failed to write %1$s to \"%2$s\": %3$s", fail_message, path.c_str(), err.what() ) );
         } else {
-            throw std::runtime_error( string_format( "Failed to write to \"%1$s\": %2$s" ), path.c_str(), err.what() );
+            throw std::runtime_error( string_format( "Failed to write to \"%1$s\": %2$s", path.c_str(), err.what() ) );
         }
     }
 }
