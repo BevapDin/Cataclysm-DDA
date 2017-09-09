@@ -11,7 +11,6 @@
 #include <map>
 #include <string>
 #include <array>
-#include <fstream>
 
 template<typename ColorType>
 class color_loader
@@ -49,14 +48,14 @@ class color_loader
         }
 
         void load_colorfile( const std::string &path ) {
-            std::ifstream colorfile( path.c_str(), std::ifstream::in | std::ifstream::binary );
-            JsonIn jsin( colorfile );
-            jsin.start_array();
-            while( !jsin.end_array() ) {
-                JsonObject jo = jsin.get_object();
-                load_colors( jo );
-                jo.finish();
-            }
+            read_from_file_json( path, [&]( JsonIn &jsin ) {
+                jsin.start_array();
+                while( !jsin.end_array() ) {
+                    JsonObject jo = jsin.get_object();
+                    load_colors( jo );
+                    jo.finish();
+                }
+            } );
         }
 
     public:
