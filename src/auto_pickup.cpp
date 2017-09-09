@@ -354,14 +354,12 @@ void auto_pickup::show( const std::string &custom_name, bool is_autopickup )
     if( query_yn( _("Save changes?") ) ) {
         // NPC pickup rules don't need to be saved explicitly
         if( is_autopickup ) {
-            try {
+            catch_with_popup( [&]() {
                 save_global();
                 if( !g->u.name.empty() ) {
                     save_character();
                 }
-            } catch( const std::exception &err ) {
-                popup( "Failed to write the rules: %s", err.what() );
-            }
+            }, "Failed to write the rules" );
         }
 
         ready = false;

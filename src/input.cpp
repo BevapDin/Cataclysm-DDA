@@ -1083,11 +1083,7 @@ void input_context::display_help()
     }
 
     if( changed && query_yn( _( "Save changes?" ) ) ) {
-        try {
-            inp_mngr.save();
-        } catch( std::exception &err ) {
-            popup( _( "saving keybindings failed: %s" ), err.what() );
-        }
+        catch_with_popup( [&]() { inp_mngr.save(); }, _( "saving keybindings failed" ) );
     } else if( changed ) {
         inp_mngr.action_contexts.swap( old_action_contexts );
     }

@@ -117,13 +117,11 @@ void edit_json( SAVEOBJ &it )
             tm.addentry( -1, true, -2, elem );
         }
         if( tmret == 0 ) {
-            try {
+            catch_with_popup( [&]() {
                 SAVEOBJ tmp;
                 deserialize( tmp, save1 );
                 it = std::move( tmp );
-            } catch( const std::exception &err ) {
-                popup( "Error on deserialization: %s", err.what() );
-            }
+            } );
             save2 = serialize( it );
             fs2 = fld_string( save2, TERMX - 10 );
 

@@ -474,3 +474,14 @@ void deserialize_wrapper( const std::function<void( JsonIn & )> &callback, const
     JsonIn jsin( buffer );
     callback( jsin );
 }
+
+bool catch_with_popup( const std::function<void()> &func, const char * const msg )
+{
+    try {
+        func();
+        return true;
+    } catch( const std::exception &err ) {
+        popup( "%s: %s", msg ? msg : "Error: ", err.what() );
+        return false;
+    }
+}

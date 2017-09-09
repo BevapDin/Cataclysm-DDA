@@ -3797,16 +3797,12 @@ void game::save_player_data()
 
 bool game::save()
 {
-    try {
+    return catch_with_popup( [&]() {
         save_player_data();
         save_game_data();
 
         world_generator->active_world->add_save( save_t::from_player_name( u.name ) );
-        return true;
-    } catch( std::exception &err ) {
-        popup( _( "Failed to save game data: %s" ), err.what() );
-        return false;
-    }
+    }, _( "Failed to save game data" ) );
 }
 
 std::vector<std::string> game::list_active_characters()
@@ -13493,11 +13489,9 @@ void game::quickload()
         if( moves_since_last_save != 0 ) { // See if we need to reload anything
             MAPBUFFER.reset();
             overmap_buffer.clear();
-            try {
+            catch_with_popup( [&]() {
                 load( *active_world, save_t::from_player_name( u.name ) );
-            } catch( const std::exception &err ) {
-                debugmsg( "Error: %s", err.what() );
-            }
+            } );
         }
     } else {
         popup_getkey( _( "No saves for %s yet." ), u.name.c_str() );

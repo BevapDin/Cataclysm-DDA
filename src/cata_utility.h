@@ -288,6 +288,8 @@ class list_circularizer
         }
 };
 
+bool catch_with_popup( const std::function<void()> &func, const char *msg = nullptr );
+
 /**
  * Wrapper around std::ofstream that handles error checking and throws on errors.
  *
