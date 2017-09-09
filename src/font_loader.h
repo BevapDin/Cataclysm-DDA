@@ -9,7 +9,6 @@
 #include "debug.h"
 
 #include <string>
-#include <fstream>
 #include <stdexcept>
 
 class font_loader
@@ -31,9 +30,7 @@ class font_loader
 
     private:
         void load_throws( const std::string &path ) {
-            try {
-                std::ifstream stream( path.c_str(), std::ifstream::binary );
-                JsonIn json( stream );
+            if( !read_from_file_json( path, [&]( JsonIn &json ) {
                 JsonObject config = json.get_object();
                 config.read( "fontblending", fontblending );
                 config.read( "fontwidth", fontwidth );
@@ -48,9 +45,8 @@ class font_loader
                 config.read( "overmap_fontheight", overmap_fontheight );
                 config.read( "overmap_fontsize", overmap_fontsize );
                 config.read( "overmap_typeface", overmap_typeface );
-            } catch( const std::exception &err ) {
-                throw std::runtime_error( std::string( "loading font settings from " ) + path + " failed: " +
-                                          err.what() );
+            } ) ) {
+                throw std::runtime_error( std::string( "loading font settings from " ) + path + " failed" );
             }
         }
         void save( const std::string &path ) const {

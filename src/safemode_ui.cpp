@@ -18,7 +18,6 @@
 #include "string_input_popup.h"
 
 #include <stdlib.h>
-#include <fstream>
 #include <sstream>
 #include <string>
 #include <locale>
@@ -663,24 +662,15 @@ void safemode::load( const bool is_character_in )
 {
     is_character = is_character_in;
 
-    std::ifstream fin;
     std::string file = FILENAMES["safemode"];
     if( is_character ) {
         file = world_generator->active_world->world_path + "/" + base64_encode( g->u.name ) + ".sfm.json";
     }
 
-    fin.open( file.c_str(), std::ifstream::in | std::ifstream::binary );
+    read_from_file_optional_json( file, [&]( JsonIn &jsin ) {
+        deserialize( jsin );
+    } );
 
-    if( fin.good() ) {
-        try {
-            JsonIn jsin( fin );
-            deserialize( jsin );
-        } catch( const JsonError &e ) {
-            DebugLog( D_ERROR, DC_ALL ) << "safemode::load: " << e;
-        }
-    }
-
-    fin.close();
     create_rules();
 }
 

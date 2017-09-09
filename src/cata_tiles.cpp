@@ -36,7 +36,6 @@
 
 #include <cassert>
 #include <algorithm>
-#include <fstream>
 #include <stdlib.h>     /* srand, rand */
 #include <sstream>
 #include <array>
@@ -539,11 +538,7 @@ void tileset_loader::load( const std::string &tileset_id, const bool precheck )
     std::string img_path = tileset_root + '/' + tileset_path;
 
     dbg( D_INFO ) << "Attempting to Load JSON file " << json_path;
-    std::ifstream config_file(json_path.c_str(), std::ifstream::in | std::ifstream::binary);
-
-    if (!config_file.good()) {
-        throw std::runtime_error( std::string("Failed to open tile info json: ") + json_path );
-    }
+    if( !read_from_file( json_path, [&]( std::istream &config_file ) {
 
     JsonIn config_json( config_file );
     JsonObject config = config_json.get_object();
@@ -645,6 +640,10 @@ void tileset_loader::load( const std::string &tileset_id, const bool precheck )
     ensure_default_item_highlight();
 
     ts.tileset_id = tileset_id;
+
+    } ) ) {
+        throw std::runtime_error( std::string("Failed to open tile info json: ") + json_path );
+    }
 }
 
 void tileset_loader::process_variations_after_loading( weighted_int_list<std::vector<int>> &vs )
