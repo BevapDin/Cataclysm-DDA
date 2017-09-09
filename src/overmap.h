@@ -264,7 +264,7 @@ class overmap
 
     point const& pos() const { return loc; }
 
-    void save() const;
+    void save() const; // can throw
 
     /**
      * @return The (local) overmap terrain coordinates of a randomly

@@ -68,7 +68,7 @@ public:
      * compared with the position of the overmap.
      */
     overmap &get( const int x, const int y );
-    void save();
+    void save(); // can throw
     void clear();
     void create_custom_overmap( int const x, int const y, overmap_special_batch &specials );
 

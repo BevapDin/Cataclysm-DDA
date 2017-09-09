@@ -24,7 +24,7 @@ class mapbuffer
          * @param delete_after_save If true, the saved submaps are removed
          * from the mapbuffer (and deleted).
          **/
-        void save( bool delete_after_save = false );
+        void save( bool delete_after_save = false ); // can throw
 
         /** Delete all buffered submaps. **/
         void reset();
@@ -75,7 +75,7 @@ class mapbuffer
         void deserialize( JsonIn &jsin );
         void save_quad( const std::string &dirname, const std::string &filename,
                         const tripoint &om_addr, std::list<tripoint> &submaps_to_delete,
-                        bool delete_after_save );
+                        bool delete_after_save ); // can throw
         submap_map_t submaps;
 };
 

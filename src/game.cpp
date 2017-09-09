@@ -3770,8 +3770,8 @@ void game::save_game_data()
     ::save_artifacts( artfilename );
 
     m.save();
-    overmap_buffer.save(); // can throw
-    MAPBUFFER.save(); // can throw
+    overmap_buffer.save();
+    MAPBUFFER.save();
 }
 
 void game::save_player_data()
