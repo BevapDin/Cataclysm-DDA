@@ -195,7 +195,7 @@ class input_manager
          * Opposite of @ref init, save the data that has been loaded by @ref init,
          * and possibly been modified.
          */
-        void save();
+        void save(); // can throw
 
         /**
          * Return the previously pressed key, or 0 if there is no previous input

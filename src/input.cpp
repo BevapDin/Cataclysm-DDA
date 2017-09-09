@@ -246,7 +246,7 @@ void input_manager::load( const std::string &file_name, bool is_user_preferences
 
 void input_manager::save()
 {
-    write_to_file( FILENAMES["user_keybindings"], [&]( std::ostream & data_file ) {
+    write_to_file_throw( FILENAMES["user_keybindings"], [&]( std::ostream & data_file ) {
         JsonOut jsout( data_file, true );
 
         jsout.start_array();
