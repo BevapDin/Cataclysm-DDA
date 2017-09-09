@@ -200,7 +200,7 @@ void mapbuffer::save_quad( const std::string &dirname, const std::string &filena
 
     // Don't create the directory if it would be empty
     assure_dir_exist( dirname );
-    ofstream_wrapper_exclusive fout( filename );
+    write_to_file_throw( filename, [&]( std::ostream &fout ) {
     JsonOut jsout( fout );
     jsout.start_array();
     for( auto &submap_addr : submap_addrs ) {
@@ -389,7 +389,7 @@ void mapbuffer::save_quad( const std::string &dirname, const std::string &filena
     }
 
     jsout.end_array();
-    fout.close();
+    } );
 }
 
 // We're reading in way too many entities here to mess around with creating sub-objects and

@@ -4557,13 +4557,13 @@ void overmap::save() const
     std::string const plrfilename = overmapbuffer::player_filename(loc.x, loc.y);
     std::string const terfilename = overmapbuffer::terrain_filename(loc.x, loc.y);
 
-    ofstream_wrapper fout_player( plrfilename );
-    serialize_view( fout_player );
-    fout_player.close();
+    write_to_file( plrfilename, [&]( std::ostream &fout_player ) {
+        serialize_view( fout_player );
+    }, "player overmap data" );
 
-    ofstream_wrapper_exclusive fout_terrain( terfilename );
-    serialize( fout_terrain );
-    fout_terrain.close();
+    write_to_file( terfilename, [&]( std::ostream &fout_terrain ) {
+        serialize( fout_terrain );
+    }, "overmap terrain data" );
 }
 
 
