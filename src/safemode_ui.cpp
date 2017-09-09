@@ -385,14 +385,12 @@ void safemode::show( const std::string &custom_name_in, bool is_safemode_in )
 
     if( query_yn( _( "Save changes?" ) ) ) {
         if( is_safemode_in ) {
-            save_global();
-            if( !g->u.name.empty() ) {
-                try {
+            catch_with_popup( [&]() {
+                save_global();
+                if( !g->u.name.empty() ) {
                     save_character();
-                } catch( ... ) {
-                    // todo: handle this error
                 }
-            }
+            } );
         } else {
             create_rules();
         }
@@ -620,17 +618,15 @@ void safemode::clear_character_rules()
 
 void safemode::save_character()
 {
-    if( !save( true ) ) {
-        throw std::runtime_error( "failed to write character safemode rules" );
-    }
+    save( true );
 }
 
-bool safemode::save_global()
+void safemode::save_global()
 {
-    return save( false );
+    save( false );
 }
 
-bool safemode::save( const bool is_character_in )
+void safemode::save( const bool is_character_in )
 {
     is_character = is_character_in;
     auto file = FILENAMES["safemode"];
@@ -640,11 +636,11 @@ bool safemode::save( const bool is_character_in )
                    g->u.name ) + ".sfm.json";
         if( !file_exist( world_generator->active_world->world_path + "/" +
                          base64_encode( g->u.name ) + ".sav" ) ) {
-            return true; //Character not saved yet.
+            return; //Character not saved yet.
         }
     }
 
-    return write_to_file( file, [&]( std::ostream & fout ) {
+    write_to_file_throw( file, [&]( std::ostream & fout ) {
         JsonOut jout( fout, true );
         serialize( jout );
 

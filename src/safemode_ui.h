@@ -67,7 +67,7 @@ class safemode
         void test_pattern( const int tab_in, const int row_in );
 
         void load( const bool character_in );
-        bool save( const bool character_in );
+        void save( const bool character_in ); // can throw
 
         bool is_character;
 
@@ -91,8 +91,8 @@ class safemode
         void show();
         void show( const std::string &custom_name_in, bool is_autopickup_in );
 
-        void save_character();
-        bool save_global();
+        void save_character(); // can throw
+        void save_global(); // can throw
         void load_character();
         void load_global();
 
