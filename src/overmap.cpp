@@ -4551,7 +4551,6 @@ void overmap::open( overmap_special_batch &enabled_specials )
     }
 }
 
-// Note: this may throw io errors from std::ofstream
 void overmap::save() const
 {
     std::string const plrfilename = overmapbuffer::player_filename(loc.x, loc.y);
