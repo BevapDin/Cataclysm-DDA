@@ -11,6 +11,10 @@ class item;
 class Character;
 class map_cursor;
 class vehicle_cursor;
+template<typename tag_type>
+class int_index;
+struct inventory_index_tag;
+using inventory_index = int_index<inventory_index_tag>;
 
 /**
  * A lightweight handle to an item independent of it's location
@@ -72,7 +76,7 @@ class item_location : public JsonSerializer, public JsonDeserializer
          *  @warning all further operations using this class are invalid
          *  @warning it is unsafe to call this within unsequenced operations (see #15542)
          *  @return inventory position for the item */
-        int obtain( Character &ch, long qty = -1 );
+        inventory_index obtain( Character &ch, long qty = -1 );
 
         /** Calculate (but do not deduct) number of moves required to obtain an item
          *  @see item_location::obtain */

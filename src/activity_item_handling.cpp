@@ -40,7 +40,7 @@ struct act_item {
 };
 
 // @todo Deliberately unified with multidrop. Unify further.
-typedef std::list<std::pair<int, int>> drop_indexes;
+typedef std::list<std::pair<inventory_index, int>> drop_indexes;
 
 bool same_type( const std::list<item> &items )
 {
@@ -218,9 +218,9 @@ drop_indexes convert_to_indexes( const player &p, const std::list<act_item> &ite
     drop_indexes res;
 
     for( const auto &ait : items ) {
-        const int pos = p.get_item_position( ait.it );
+        const inventory_index pos = p.get_item_position( ait.it );
 
-        if( pos != INT_MIN && ait.count > 0 ) {
+        if( pos != inventory_index() && ait.count > 0 ) {
             if( res.empty() || res.back().first != pos ) {
                 res.emplace_back( pos, ait.count );
             } else {

@@ -510,9 +510,9 @@ void player::sort_armor()
             // filter inventory for all items that are armor/clothing
             // NOTE: This is from player's inventory, even for NPCs!
             // @todo Allow making NPCs equip their own stuff
-            int pos = game_menus::inv::wear( g->u );
+            inventory_index pos = game_menus::inv::wear( g->u );
             // only equip if something valid selected!
-            if( pos != INT_MIN ) {
+            if( pos != inventory_index() ) {
                 // wear the item
                 if( wear( pos ) ) {
                     // reorder `worn` vector to place new item at cursor
@@ -555,7 +555,7 @@ void player::sort_armor()
                     item &w = *witer;
                     if( invlet == w.invlet ) {
                         ++witer;
-                    } else if( invlet_to_position( invlet ) != INT_MIN ) {
+                    } else if( invlet_to_position( invlet ) != inventory_index() ) {
                         ++iiter;
                     } else {
                         inv.reassign_item( w, invlet );

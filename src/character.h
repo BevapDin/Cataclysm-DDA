@@ -20,6 +20,10 @@ class field_entry;
 class vehicle;
 struct resistances;
 struct mutation_branch;
+template<typename tag_type>
+class int_index;
+struct inventory_index_tag;
+using inventory_index = int_index<inventory_index_tag>;
 
 enum vision_modes {
     DEBUG_NIGHTVISION,
@@ -337,10 +341,7 @@ class Character : public Creature, public visitable<Character>
         };
 
         // -2 position is 0 worn index, -3 position is 1 worn index, etc
-        static int worn_position_to_index(int position)
-        {
-            return -2 - position;
-        }
+        static inventory_index worn_position_to_index( const inventory_index position );
 
         // checks to see if an item is worn
         bool is_worn(const item &thing) const
@@ -363,8 +364,8 @@ class Character : public Creature, public visitable<Character>
          */
         std::list<item> remove_worn_items_with( std::function<bool(item &)> filter );
 
-        item &i_at(int position);  // Returns the item with a given inventory position.
-        const item &i_at(int position) const;
+        item &i_at( inventory_index position );  // Returns the item with a given inventory position.
+        const item &i_at( inventory_index position ) const;
         /**
          * Returns the item position (suitable for @ref i_at or similar) of a
          * specific item. Returns INT_MIN if the item is not found.
@@ -372,7 +373,7 @@ class Character : public Creature, public visitable<Character>
          * same when the given item points to the container and when it points to the item inside
          * the container. All items that are part of the same stack have the same item position.
          */
-        int get_item_position( const item *it ) const;
+        inventory_index get_item_position( const item *it ) const;
 
         /**
          * Returns a reference to the item which will be used to make attacks.
@@ -412,7 +413,7 @@ class Character : public Creature, public visitable<Character>
          * exists, use @ref has_item to check this.
          * @return A copy of the removed item.
          */
-        item i_rem(int pos);
+        item i_rem( inventory_index pos );
         /**
          * Remove a specific item from player possession. The item is compared
          * by pointer. Contents of the item are removed as well.
@@ -421,7 +422,7 @@ class Character : public Creature, public visitable<Character>
          * @return A copy of the removed item.
          */
         item i_rem(const item *it);
-        void i_rem_keep_contents( int pos );
+        void i_rem_keep_contents( inventory_index pos );
         /** Sets invlet and adds to inventory if possible, drops otherwise, returns true if either succeeded.
          *  An optional qty can be provided (and will perform better than separate calls). */
         bool i_add_or_drop(item &it, int qty = 1);

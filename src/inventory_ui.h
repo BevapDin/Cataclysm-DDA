@@ -18,6 +18,10 @@ class Character;
 class item;
 class item_category;
 class item_location;
+template<typename tag_type>
+class int_index;
+struct inventory_index_tag;
+using inventory_index = int_index<inventory_index_tag>;
 
 class player;
 
@@ -601,7 +605,7 @@ class inventory_drop_selector : public inventory_multiselector
     public:
         inventory_drop_selector( const player &p,
                                  const inventory_selector_preset &preset = default_preset );
-        std::list<std::pair<int, int>> execute();
+        std::list<std::pair<inventory_index, int>> execute();
 
     protected:
         const player &get_player_for_stats() const;

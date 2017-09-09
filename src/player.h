@@ -759,7 +759,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** used for drinking from hands, returns how many charges were consumed */
         int drink_from_hands(item &water);
         /** Used for eating object at pos, returns true if object is removed from inventory (last charge was consumed) */
-        bool consume(int pos);
+        bool consume( inventory_index pos );
         /** Used for eating a particular item that doesn't need to be in inventory.
          *  Returns true if the item is to be removed (doesn't remove). */
         bool consume_item( item &eat );
@@ -952,21 +952,21 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         int item_wear_cost( const item& to_wear ) const;
 
         /** Wear item; returns false on fail. If interactive is false, don't alert the player or drain moves on completion. */
-        bool wear( int pos, bool interactive = true );
+        bool wear( inventory_index pos, bool interactive = true );
         /** Wear item; returns false on fail. If interactive is false, don't alert the player or drain moves on completion. */
         bool wear_item( const item &to_wear, bool interactive = true );
         /** Swap side on which item is worn; returns false on fail. If interactive is false, don't alert player or drain moves */
         bool change_side( item &it, bool interactive = true );
-        bool change_side( int pos, bool interactive = true );
+        bool change_side( inventory_index pos, bool interactive = true );
 
         /** Returns all items that must be taken off before taking off this item */
         std::list<const item *> get_dependent_worn_items( const item &it ) const;
         /** Takes off an item, returning false on fail. The taken off item is processed in the interact */
         bool takeoff( const item &it, std::list<item> *res = nullptr );
-        bool takeoff( int pos );
+        bool takeoff( inventory_index pos );
         /** Drops an item to the specified location */
-        void drop( int pos, const tripoint &where = tripoint_min );
-        void drop( const std::list<std::pair<int, int>> &what, const tripoint &where = tripoint_min, bool stash = false );
+        void drop( inventory_index pos, const tripoint &where = tripoint_min );
+        void drop( const std::list<std::pair<inventory_index, int>> &what, const tripoint &where = tripoint_min, bool stash = false );
 
         /**
          * Try to wield a contained item consuming moves proportional to weapon skill and volume.
@@ -989,7 +989,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Draws the UI and handles player input for the armor re-ordering window */
         void sort_armor();
         /** Uses a tool */
-        void use( int pos );
+        void use( inventory_index pos );
         /** Uses the current wielded weapon */
         void use_wielded();
         /**
@@ -1046,7 +1046,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         int time_to_read( const item &book, const player &reader, const player *learner = nullptr ) const;
         bool fun_to_read( const item &book ) const;
         /** Handles reading effects and returns true if activity started */
-        bool read( int inventory_position, const bool continuous = false );
+        bool read( inventory_index inventory_position, const bool continuous = false );
         /** Completes book reading action. **/
         void do_read( item *book );
         /** Note that we've read a book at least once. **/
@@ -1163,7 +1163,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
          * @return An item that contains the removed charges, it's effectively a
          * copy of the item with the proper charges.
          */
-        item reduce_charges( int position, long quantity );
+        item reduce_charges( inventory_index position, long quantity );
         /**
          * Remove charges from a specific item (given by a pointer to it).
          * Otherwise identical to @ref reduce_charges(int,long)
@@ -1174,7 +1174,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Return the item position of the item with given invlet, return INT_MIN if
          * the player does not have such an item with that invlet. Don't use this on npcs.
          * Only use the invlet in the user interface, otherwise always use the item position. */
-        int invlet_to_position( long invlet ) const;
+        inventory_index invlet_to_position( long invlet ) const;
 
         /**
         * Check whether player has a bionic power armor interface.
@@ -1274,11 +1274,11 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         ret_val<bool> can_disassemble( const item &obj, const inventory &inv ) const;
 
         bool disassemble();
-        bool disassemble( int pos );
-        bool disassemble( item &obj, int pos, bool ground, bool interactive = true );
+        bool disassemble( inventory_index pos );
+        bool disassemble( item &obj, inventory_index pos, bool ground, bool interactive = true );
         void disassemble_all( bool one_pass ); // Disassemble all items on the tile
         void complete_disassemble();
-        void complete_disassemble( int item_pos, const tripoint &loc,
+        void complete_disassemble( inventory_index item_pos, const tripoint &loc,
                                    bool from_ground, const recipe &dis );
 
         // yet more crafting.cpp

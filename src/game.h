@@ -10,6 +10,7 @@
 #include "item_location.h"
 #include "cursesdef.h"
 #include "ranged.h"
+#include "int_index.h"
 
 #include <vector>
 #include <map>
@@ -116,6 +117,10 @@ struct w_point;
 struct explosion_data;
 struct visibility_variables;
 class scent_map;
+template<typename tag_type>
+class int_index;
+struct inventory_index_tag;
+using inventory_index = int_index<inventory_index_tag>;
 
 // Note: this is copied from inventory.h
 // Entire inventory.h would also bring item.h here
@@ -461,10 +466,10 @@ class game
         void draw_trail_to_square( const tripoint &t, bool bDrawX );
 
         // @todo Move these functions to game_menus::inv and isolate them.
-        int inv_for_filter( const std::string &title, item_filter filter, const std::string &none_message = "" );
-        int inv_for_all( const std::string &title, const std::string &none_message = "" );
-        int inv_for_flag( const std::string &flag, const std::string &title );
-        int inv_for_id( const itype_id &id, const std::string &title );
+        inventory_index inv_for_filter( const std::string &title, item_filter filter, const std::string &none_message = "" );
+        inventory_index inv_for_all( const std::string &title, const std::string &none_message = "" );
+        inventory_index inv_for_flag( const std::string &flag, const std::string &title );
+        inventory_index inv_for_id( const itype_id &id, const std::string &title );
 
         enum inventory_item_menu_positon {
             RIGHT_TERMINAL_EDGE,
@@ -472,7 +477,7 @@ class game
             RIGHT_OF_INFO,
             LEFT_TERMINAL_EDGE,
         };
-        int inventory_item_menu(int pos, int startx = 0, int width = 50, inventory_item_menu_positon position = RIGHT_OF_INFO);
+        int inventory_item_menu(inventory_index pos, int startx = 0, int width = 50, inventory_item_menu_positon position = RIGHT_OF_INFO);
 
         /** Custom-filtered menu for inventory and nearby items and those that within specified radius */
         item_location inv_map_splice( item_filter filter, const std::string &title, int radius = 0,
@@ -800,20 +805,20 @@ class game
         void examine();
 
         void grab(); // Establish a grab on something.
-        void drop(int pos = INT_MIN, const tripoint &where = tripoint_min ); // Drop an item  'd'
+        void drop(inventory_index pos = inventory_index(), const tripoint &where = tripoint_min ); // Drop an item  'd'
         void drop_in_direction(); // Drop w/ direction  'D'
 
-        void reassign_item(int pos = INT_MIN); // Reassign the letter of an item  '='
+        void reassign_item(inventory_index pos = inventory_index()); // Reassign the letter of an item  '='
         void butcher(); // Butcher a corpse  'B'
-        void eat(int pos = INT_MIN); // Eat food or fuel  'E' (or 'a')
-        void use_item(int pos = INT_MIN); // Use item; also tries E,R,W  'a'
+        void eat(inventory_index pos = inventory_index()); // Eat food or fuel  'E' (or 'a')
+        void use_item(inventory_index pos = inventory_index()); // Use item; also tries E,R,W  'a'
         void use_wielded_item();
-        void wear(int pos = INT_MIN); // Wear armor  'W' (or 'a')
-        void takeoff(int pos = INT_MIN); // Remove armor  'T'
-        void change_side(int pos = INT_MIN); // Change the side on which an item is worn 'c'
+        void wear(inventory_index pos = inventory_index()); // Wear armor  'W' (or 'a')
+        void takeoff(inventory_index pos = inventory_index()); // Remove armor  'T'
+        void change_side(inventory_index pos = inventory_index()); // Change the side on which an item is worn 'c'
         void reload(); // Reload a wielded gun/tool  'r'
-        void reload( int pos, bool prompt = false );
-        void mend( int pos = INT_MIN );
+        void reload( inventory_index pos, bool prompt = false );
+        void mend( inventory_index pos = inventory_index() );
         void autoattack();
 public:
         // Places the player at the specified point; hurts feet, lists items etc.
@@ -821,7 +826,7 @@ public:
         void place_player_overmap( const tripoint &om_dest );
 
         bool unload( item &it ); // Unload a gun/tool  'U'
-        void unload(int pos = INT_MIN);
+        void unload(inventory_index pos = inventory_index());
 
         unsigned int get_seed() const;
 
@@ -831,12 +836,12 @@ public:
         void set_critter_died();
 private:
         void wield();
-        void wield( int pos ); // Wield a weapon  'w'
+        void wield( inventory_index pos ); // Wield a weapon  'w'
         void wield( item_location& loc );
 
         void read(); // Read a book  'R' (or 'a')
         void chat(); // Talk to a nearby NPC  'C'
-        void plthrow(int pos = INT_MIN); // Throw an item  't'
+        void plthrow(inventory_index pos = inventory_index()); // Throw an item  't'
 
         // Internal methods to show "look around" info
         void print_fields_info( const tripoint &lp, WINDOW *w_look, int column, int &line );

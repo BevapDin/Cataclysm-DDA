@@ -41,6 +41,7 @@
 #include "input.h"
 #include "fault.h"
 #include "vehicle_selector.h"
+#include "int_index.h"
 
 #include <cmath> // floor
 #include <sstream>

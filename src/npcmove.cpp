@@ -84,8 +84,8 @@ hp_part most_damaged_hp_part( const Character &c );
 // Used in npc::drop_items()
 struct ratio_index {
     double ratio;
-    int index;
-    ratio_index(double R, int I) : ratio (R), index (I) {};
+    inventory_index index;
+    ratio_index(double R, inventory_index I) : ratio (R), index (I) {};
 };
 
 bool clear_shot_reach( const tripoint &from, const tripoint &to )
@@ -2034,20 +2034,20 @@ void npc::drop_items(int weight, int volume)
         for (size_t j = 0; j < rWgt.size() && !added_wgt; j++) {
             if (wgt_ratio > rWgt[j].ratio) {
                 added_wgt = true;
-                rWgt.insert(rWgt.begin() + j, ratio_index(wgt_ratio, i));
+                rWgt.insert(rWgt.begin() + j, ratio_index(wgt_ratio, inventory_index( i )));
             }
         }
         if (!added_wgt) {
-            rWgt.push_back(ratio_index(wgt_ratio, i));
+            rWgt.push_back(ratio_index(wgt_ratio, inventory_index( i )));
         }
         for (size_t j = 0; j < rVol.size() && !added_vol; j++) {
             if (vol_ratio > rVol[j].ratio) {
                 added_vol = true;
-                rVol.insert(rVol.begin() + j, ratio_index(vol_ratio, i));
+                rVol.insert(rVol.begin() + j, ratio_index(vol_ratio, inventory_index( i )));
             }
         }
         if (!added_vol) {
-            rVol.push_back(ratio_index(vol_ratio, i));
+            rVol.push_back(ratio_index(vol_ratio, inventory_index( i )));
         }
     }
 
@@ -2059,7 +2059,7 @@ void npc::drop_items(int weight, int volume)
         // decreasing that variable is not important.
         int dWeight = (weight <= 0 ? -1 : weight - weight_dropped);
         int dVolume = (volume <= 0 ? -1 : volume - volume_dropped);
-        int index;
+        inventory_index index;
         // Which is more important, weight or volume?
         if (dWeight > dVolume) {
             index = rWgt[0].index;
@@ -2083,8 +2083,8 @@ void npc::drop_items(int weight, int volume)
                 }
             }
         }
-        weight_dropped += slice[index]->front().weight() / 1_gram;
-        volume_dropped += slice[index]->front().volume() / units::legacy_volume_factor;
+        weight_dropped += slice[index.value()]->front().weight() / 1_gram;
+        volume_dropped += slice[index.value()]->front().volume() / units::legacy_volume_factor;
         item dropped = i_rem(index);
         num_items_dropped++;
         if (num_items_dropped == 1) {
@@ -2298,7 +2298,7 @@ void npc::wield_best_melee()
     wield( *it );
 }
 
-void npc_throw( npc &np, item &it, int index, const tripoint &pos )
+void npc_throw( npc &np, item &it, inventory_index index, const tripoint &pos )
 {
     if( g->u.sees( np ) ) {
         add_msg( _("%1$s throws a %2$s."), np.name.c_str(), it.tname().c_str() );
@@ -2377,8 +2377,8 @@ bool npc::alt_attack()
         return false;
     }
 
-    int weapon_index = get_item_position( used );
-    if( weapon_index == INT_MIN ) {
+    inventory_index weapon_index = get_item_position( used );
+    if( weapon_index == inventory_index() ) {
         debugmsg( "npc::alt_attack() couldn't find expected item %s",
                   used->tname().c_str() );
         return false;
@@ -2456,7 +2456,7 @@ bool npc::alt_attack()
     return true;
 }
 
-void npc::activate_item(int item_index)
+void npc::activate_item(inventory_index item_index)
 {
     const int oldmoves = moves;
     item &it = i_at( item_index );
@@ -2636,7 +2636,7 @@ float rate_food( const item &it, int want_nutr, int want_quench )
 bool npc::consume_food()
 {
     float best_weight = 0.0f;
-    int index = -1;
+    inventory_index index;
     int want_hunger = get_hunger();
     int want_quench = get_thirst();
     invslice slice = inv.slice();
@@ -2648,11 +2648,11 @@ bool npc::consume_food()
         // Note: will_eat is expensive, avoid calling it if possible
         if( cur_weight > best_weight && will_eat( food_item ).success() ) {
             best_weight = cur_weight;
-            index = i;
+            index = inventory_index( i );
         }
     }
 
-    if( index == -1 ) {
+    if( index == inventory_index() ) {
         if( !is_friend() ) {
             // TODO: Remove this and let player "exploit" hungry NPCs
             set_hunger( 0 );
@@ -2712,17 +2712,17 @@ void npc::mug_player(player &mark)
         value_mod -= double((8 - op_of_u.value) * .07);
     }
     int best_value = minimum_item_value() * value_mod;
-    int item_index = INT_MIN;
+    inventory_index item_index;
     invslice slice = mark.inv.slice();
     for (size_t i = 0; i < slice.size(); i++) {
         if( value(slice[i]->front()) >= best_value &&
             can_pickVolume( slice[i]->front(), true ) &&
             can_pickWeight( slice[i]->front(), true ) ) {
             best_value = value(slice[i]->front());
-            item_index = i;
+            item_index = inventory_index( i );
         }
     }
-    if (item_index == INT_MIN) { // Didn't find anything worthwhile!
+    if (item_index == inventory_index()) { // Didn't find anything worthwhile!
         attitude = NPCATT_FLEE;
         if (!one_in(3)) {
             say("<done_mugging>");

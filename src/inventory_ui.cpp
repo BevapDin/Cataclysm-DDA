@@ -13,6 +13,7 @@
 #include "cata_utility.h"
 #include "item.h"
 #include "itype.h"
+#include "int_index.h"
 
 #include <set>
 #include <string>
@@ -1596,7 +1597,7 @@ inventory_drop_selector::inventory_drop_selector( const player &p,
     inventory_multiselector( p, preset, _( "ITEMS TO DROP" ) ),
     max_chosen_count( std::numeric_limits<decltype( max_chosen_count )>::max() ) {}
 
-std::list<std::pair<int, int>> inventory_drop_selector::execute()
+std::list<std::pair<inventory_index, int>> inventory_drop_selector::execute()
 {
     int count = 0;
     while( true ) {
@@ -1641,14 +1642,14 @@ std::list<std::pair<int, int>> inventory_drop_selector::execute()
             }
             break;
         } else if( input.action == "QUIT" ) {
-            return std::list<std::pair<int, int> >();
+            return std::list<std::pair<inventory_index, int> >();
         } else {
             on_input( input );
             count = 0;
         }
     }
 
-    std::list<std::pair<int, int>> dropped_pos_and_qty;
+    std::list<std::pair<inventory_index, int>> dropped_pos_and_qty;
 
     for( auto drop_pair : dropping ) {
         dropped_pos_and_qty.push_back( std::make_pair( u.get_item_position( drop_pair.first ), drop_pair.second ) );
@@ -1688,7 +1689,7 @@ const player &inventory_drop_selector::get_player_for_stats() const
         if( elem.first->count_by_charges() ) {
             elem.first->mod_charges( -elem.second );
         } else {
-            const int pos = dummy->get_item_position( elem.first );
+            const inventory_index pos = dummy->get_item_position( elem.first );
             for( int i = 0; i < elem.second; ++i ) {
                 dummy->i_rem( pos );
             }

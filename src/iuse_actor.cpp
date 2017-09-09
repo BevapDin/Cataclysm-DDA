@@ -749,7 +749,7 @@ long ups_based_armor_actor::use( player &p, item &it, bool t, const tripoint& ) 
         // Normal, continuous usage, do nothing. The item is *not* charge-based.
         return 0;
     }
-    if( p.get_item_position( &it ) >= -1 ) {
+    if( !p.is_worn( it ) ) {
         p.add_msg_if_player( m_info, _( "You should wear the %s before activating it." ), it.tname().c_str() );
         return 0;
     }
@@ -1065,7 +1065,7 @@ long firestarter_actor::use( player &p, item &it, bool t, const tripoint &spos )
         p.mod_moves( -moves );
         return it.type->charges_to_use();
     }
-    p.assign_activity( activity_id( "ACT_START_FIRE" ), moves, -1, p.get_item_position( &it ), it.tname() );
+    p.assign_activity( activity_id( "ACT_START_FIRE" ), moves, -1, p.get_item_position( &it ).value(), it.tname() );
     p.activity.values.push_back( g->natural_light_level( pos.z ) );
     p.activity.placement = pos;
     p.practice( skill_survival, moves_modifier + moves_cost_fast / 100 + 2, 5 );
@@ -1094,7 +1094,7 @@ long salvage_actor::use( player &p, item &it, bool t, const tripoint& ) const
         return 0;
     }
 
-    int inventory_index = g->inv_for_filter( _("Cut up what?"), [ this ]( const item &it ) {
+    inventory_index inventory_index = g->inv_for_filter( _("Cut up what?"), [ this ]( const item &it ) {
         return valid_to_cut_up( it );
     } );
 
@@ -1135,7 +1135,7 @@ bool salvage_actor::valid_to_cut_up(const item &it) const
 // This is the former valid_to_cut_up with all the messages and queries
 bool salvage_actor::try_to_cut_up( player &p, item &it ) const
 {
-    int pos = p.get_item_position( &it );
+    inventory_index pos = p.get_item_position( &it );
 
     if( it.is_null() ) {
         add_msg(m_info, _("You do not have that item."));
@@ -1167,10 +1167,10 @@ bool salvage_actor::try_to_cut_up( player &p, item &it ) const
         if(!query_yn(_("You are wielding that, are you sure?"))) {
             return false;
         }
-    } else if( pos == INT_MIN ) {
+    } else if( pos == inventory_index() ) {
         // Not in inventory
         return true;
-    } else if( pos < -1 ) {
+    } else if( p.is_worn( it ) ) {
         if(!query_yn(_("You're wearing that, are you sure?"))) {
             return false;
         }
@@ -1185,7 +1185,7 @@ bool salvage_actor::try_to_cut_up( player &p, item &it ) const
 int salvage_actor::cut_up( player &p, item &it, item &cut ) const
 {
     const bool filthy = cut.is_filthy();
-    int pos = p.get_item_position( &cut );
+    inventory_index pos = p.get_item_position( &cut );
     // total number of raw components == total volume of item.
     // This can go awry if there is a volume / recipe mismatch.
     int count = cut.volume() / minimal_volume_to_cut;
@@ -1246,7 +1246,7 @@ int salvage_actor::cut_up( player &p, item &it, item &cut ) const
     // Clean up before removing the item.
     remove_ammo( &cut, p );
     // Original item has been consumed.
-    if( pos != INT_MIN ) {
+    if( pos != inventory_index() ) {
         p.i_rem(pos);
     } else {
         g->m.i_rem( p.posx(), p.posy(), &cut );
@@ -1262,7 +1262,7 @@ int salvage_actor::cut_up( player &p, item &it, item &cut ) const
             if( filthy ) {
                 result.item_tags.insert( "FILTHY" );
             }
-            if( pos != INT_MIN ) {
+            if( pos != inventory_index() ) {
                 p.i_add_or_drop(result, amount);
             } else {
                 for( int i = 0; i < amount; i++ ) {
@@ -1403,7 +1403,7 @@ long inscribe_actor::use( player &p, item &it, bool t, const tripoint& ) const
         return iuse::handle_ground_graffiti( &p, &it, string_format( _("%s what?"), _( verb.c_str() ) ) );
     }
 
-    int pos = g->inv_for_all( _( "Inscribe which item?" ) );
+    inventory_index pos = g->inv_for_all( _( "Inscribe which item?" ) );
     item &cut = p.i_at( pos );
     // inscribe_item returns false if the action fails or is canceled somehow.
 
@@ -1825,8 +1825,8 @@ long musical_instrument_actor::use( player &p, item &it, bool t, const tripoint&
 
     // Check for worn or wielded - no "floating"/bionic instruments for now
     // TODO: Distinguish instruments played with hands and with mouth, consider encumbrance
-    const int inv_pos = p.get_item_position( &it );
-    if( inv_pos >= 0 || inv_pos == INT_MIN ) {
+    const inventory_index inv_pos = p.get_item_position( &it );
+    if( !(p.is_worn( it ) || &p.weapon == &it ) || inv_pos == inventory_index() ) {
         p.add_msg_if_player( m_bad, _("You need to hold or wear %s to play it"), it.display_name().c_str() );
         it.active = false;
         return 0;
@@ -2257,16 +2257,16 @@ long repair_item_actor::use( player &p, item &it, bool, const tripoint & ) const
     if( !could_repair( p, it, true ) ) {
         return 0;
     }
-    const int pos = g->inv_for_filter( _( "Repair what?" ), [this, it]( const item &itm ) {
+    const inventory_index pos = g->inv_for_filter( _( "Repair what?" ), [this, it]( const item &itm ) {
         return itm.made_of_any( materials ) && !itm.count_by_charges() && !itm.is_firearm() && &itm != &it;
     }, string_format( _( "You have no items that could be repaired with a %s." ), it.type_name( 1 ).c_str() ) );
 
-    if( pos == INT_MIN ) {
+    if( pos == inventory_index() ) {
         p.add_msg_if_player( m_info, _( "Never mind." ) );
         return 0;
     }
 
-    p.assign_activity( activity_id( "ACT_REPAIR_ITEM" ), 0, p.get_item_position( &it ), pos );
+    p.assign_activity( activity_id( "ACT_REPAIR_ITEM" ), 0, p.get_item_position( &it ).value(), pos.value() );
     // We also need to store the repair actor subtype in the activity
     p.activity.str_values.push_back( type );
     // All repairs are done in the activity, including charge cost
@@ -2526,8 +2526,8 @@ bool damage_item( player &pl, item &fix )
     pl.add_msg_if_player(m_bad, _("You damage your %s!"), fix.tname().c_str());
     if( fix.inc_damage() ) {
         pl.add_msg_if_player(m_bad, _("You destroy it!"));
-        const int pos = pl.get_item_position( &fix );
-        if( pos != INT_MIN ) {
+        const inventory_index pos = pl.get_item_position( &fix );
+        if( pos != inventory_index() ) {
             pl.i_rem_keep_contents( pos );
         } else {
             // NOTE: Repairing items outside inventory is NOT yet supported!
@@ -2725,7 +2725,7 @@ long heal_actor::use( player &p, item &it, bool, const tripoint &pos ) const
     if( long_action && &patient == &p && !p.is_npc() ) {
         // Assign first aid long action.
         /** @EFFECT_FIRSTAID speeds up firstaid activity */
-        p.assign_activity( activity_id( "ACT_FIRSTAID" ), cost, 0, p.get_item_position( &it ), it.tname() );
+        p.assign_activity( activity_id( "ACT_FIRSTAID" ), cost, 0, p.get_item_position( &it ).value(), it.tname() );
         p.activity.values.push_back( hpp );
         p.moves = 0;
         return 0;

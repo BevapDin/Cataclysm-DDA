@@ -259,9 +259,9 @@ private:
 
     //! Prompt for a card to use (includes worn items).
     item* choose_card(char const *const msg) {
-        const int index = g->inv_for_id( itype_id( "cash_card" ), msg );
+        const inventory_index index = g->inv_for_id( itype_id( "cash_card" ), msg );
 
-        if (index == INT_MIN) {
+        if (index == inventory_index()) {
             add_msg(m_info, _("Never mind."));
             return nullptr; // player canceled
         }
@@ -385,7 +385,7 @@ private:
         item *dst;
         if( u.activity.id() == activity_id( "ACT_ATM" ) ) {
             u.activity.set_to_null(); // stop for now, if required, it will be created again.
-            dst = &u.i_at( u.activity.position );
+            dst = &u.i_at( inventory_index( u.activity.position ) );
             if( dst->is_null() || dst->typeId() != "cash_card" ) {
                 return false;
             }
@@ -404,7 +404,7 @@ private:
                 // Money from `*i` could be transferred, but we're out of moves, schedule it for
                 // the next turn. Putting this here makes sure there will be something to be
                 // done next turn.
-                u.assign_activity( activity_id( "ACT_ATM" ), 0, transfer_all_money, u.get_item_position( dst ) );
+                u.assign_activity( activity_id( "ACT_ATM" ), 0, transfer_all_money, u.get_item_position( dst ).value() );
                 break;
             }
 
@@ -3016,7 +3016,7 @@ static int findBestGasDiscount(player &p)
     int discount = 0;
 
     for (size_t i = 0; i < p.inv.size(); i++) {
-        item &it = p.inv.find_item(i);
+        item &it = p.inv.find_item( inventory_index( i ) );
 
         if (it.has_flag("GAS_DISCOUNT")) {
 
@@ -3277,9 +3277,9 @@ void iexamine::pay_gas( player &p, const tripoint &examp )
     if( buy_gas == choice ) {
         item *cashcard;
 
-        const int pos = g->inv_for_id( itype_id( "cash_card" ), _( "Insert card." ) );
+        const inventory_index pos = g->inv_for_id( itype_id( "cash_card" ), _( "Insert card." ) );
 
-        if( pos == INT_MIN ) {
+        if( pos == inventory_index() ) {
             add_msg( _( "Never mind." ) );
             return;
         }
@@ -3355,9 +3355,9 @@ void iexamine::pay_gas( player &p, const tripoint &examp )
     if( refund == choice ) {
         item *cashcard;
 
-        const int pos = g->inv_for_id( itype_id( "cash_card" ), _( "Insert card." ) );
+        const inventory_index pos = g->inv_for_id( itype_id( "cash_card" ), _( "Insert card." ) );
 
-        if( pos == INT_MIN ) {
+        if( pos == inventory_index() ) {
             add_msg( _( "Never mind." ) );
             return;
         }

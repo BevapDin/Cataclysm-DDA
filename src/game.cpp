@@ -1872,7 +1872,7 @@ void game::handle_key_blocking_activity()
 * @param iWidth width of the item info window (height = height of terminal)
 * @return getch
 */
-int game::inventory_item_menu(int pos, int iStartX, int iWidth, const inventory_item_menu_positon position)
+int game::inventory_item_menu(inventory_index pos, int iStartX, int iWidth, const inventory_item_menu_positon position)
 {
     int cMenu = (int)'+';
 
@@ -6966,9 +6966,9 @@ void game::smash()
     }
 }
 
-void game::use_item( int pos )
+void game::use_item( inventory_index pos )
 {
-    if( pos == INT_MIN ) {
+    if( pos == inventory_index() ) {
         auto loc = game_menus::inv::use( u );
 
         if( !loc ) {
@@ -7335,11 +7335,11 @@ bool pet_menu(monster *z)
     }
 
     if (attach_bag == choice) {
-        int pos = g->inv_for_filter( _("Bag item"), []( const item &it ) {
+        inventory_index pos = g->inv_for_filter( _("Bag item"), []( const item &it ) {
             return it.is_armor() && it.get_storage() > 0;
         } );
 
-        if (pos == INT_MIN) {
+        if (pos == inventory_index()) {
             add_msg(_("Never mind."));
             return true;
         }
@@ -7536,9 +7536,9 @@ bool game::npc_menu( npc &who )
                    actor->head_power >= 0 &&
                    actor->torso_power >= 0;
         };
-        const int pos = inv_for_filter( _( "Use which item?" ), will_accept );
+        const inventory_index pos = inv_for_filter( _( "Use which item?" ), will_accept );
 
-        if( pos == INT_MIN ) {
+        if( pos == inventory_index() ) {
             add_msg( _("Never mind") );
             return false;
         }
@@ -9738,11 +9738,11 @@ bool game::handle_liquid( item &liquid, item * const source, const int radius,
             add_msg( m_info, _( "That's the same container!" ) );
             return; // The user has intended to do something, but mistyped.
         }
-        const int item_index = u.get_item_position( cont );
+        const inventory_index item_index = u.get_item_position( cont );
         // Currently activities can only store item position in the players inventory,
         // not on ground or similar. TODO: implement storing arbitrary container locations.
-        if( item_index != INT_MIN && create_activity() ) {
-            serialize_liquid_target( u.activity, item_index );
+        if( item_index != inventory_index() && create_activity() ) {
+            serialize_liquid_target( u.activity, item_index.value() );
         } else if( u.pour_into( *cont, liquid ) ) {
             if( cont->needs_processing() ) {
                 // Polymorphism fail, have to introspect into the type to set the target container as active.
@@ -9862,9 +9862,9 @@ bool game::handle_liquid( item &liquid, item * const source, const int radius,
     return true;
 }
 
-void game::drop( int pos, const tripoint &where )
+void game::drop( inventory_index pos, const tripoint &where )
 {
-    if( pos != INT_MIN ) {
+    if( pos != inventory_index() ) {
         u.drop( pos, where );
     } else {
         u.drop( game_menus::inv::multidrop( u ), where );
@@ -9877,23 +9877,23 @@ void game::drop_in_direction()
 
     if( choose_adjacent( _( "Drop where?" ), dirp ) ) {
         refresh_all();
-        drop( INT_MIN, dirp );
+        drop( inventory_index(), dirp );
     }
 }
 
-void game::plthrow( int pos )
+void game::plthrow( inventory_index pos )
 {
     if( u.has_active_mutation( trait_SHELL2 ) ) {
         add_msg( m_info, _( "You can't effectively throw while you're in your shell." ) );
         return;
     }
 
-    if( pos == INT_MIN ) {
+    if( pos == inventory_index() ) {
         pos = inv_for_all( _( "Throw item" ), _( "You don't have any items to throw." ) );
         refresh_all();
     }
 
-    if( pos == INT_MIN ) {
+    if( pos == inventory_index() ) {
         add_msg( _( "Never mind." ) );
         return;
     }
@@ -9908,7 +9908,7 @@ void game::plthrow( int pos )
         return;
     }
 
-    if( pos == -1 && thrown.has_flag( "NO_UNWIELD" ) ) {
+    if( pos == inventory_index( -1 ) && thrown.has_flag( "NO_UNWIELD" ) ) { //@todo
         // pos == -1 is the weapon, NO_UNWIELD is used for bio_claws_weapon
         add_msg( m_info, _( "That's part of your body, you can't throw that!" ) );
         return;
@@ -10226,7 +10226,7 @@ void game::butcher()
     };
 
     std::vector< item * > salvage_tools = u.items_with( salvage_filter );
-    int salvage_tool_index = INT_MIN;
+    inventory_index salvage_tool_index;
     item *salvage_tool = nullptr;
     const salvage_actor *salvage_iuse = nullptr;
     if( !salvage_tools.empty() ) {
@@ -10260,7 +10260,7 @@ void game::butcher()
         }
     }
     // Now salvageable items
-    if( salvage_tool_index != INT_MIN ) {
+    if( salvage_tool_index != inventory_index() ) {
         for( size_t i = 0; i < items.size(); i++ ) {
             if( !items[i].is_corpse() &&
                 salvage_iuse->valid_to_cut_up( items[i] ) ) {
@@ -10367,7 +10367,7 @@ void game::butcher()
     case BUTCHER_OTHER:
         switch( indexer_index ) {
         case MULTISALVAGE:
-            u.assign_activity( activity_id( "ACT_LONGSALVAGE" ), 0, salvage_tool_index );
+            u.assign_activity( activity_id( "ACT_LONGSALVAGE" ), 0, salvage_tool_index.value() );
             break;
         case MULTIBUTCHER:
             u.assign_activity( activity_id( "ACT_BUTCHER" ), 0, -1 );
@@ -10397,7 +10397,7 @@ void game::butcher()
     case BUTCHER_DISASSEMBLE:
         {
             size_t index = disassembles[indexer_index];
-            u.disassemble( items[index], index, true );
+            u.disassemble( items[index], inventory_index( index ), true );
         }
         break;
     case BUTCHER_SALVAGE:
@@ -10409,7 +10409,7 @@ void game::butcher()
     }
 }
 
-void game::eat(int pos)
+void game::eat(inventory_index pos)
 {
     if( ( u.has_active_mutation( trait_RUMINANT ) || u.has_active_mutation( trait_GRAZER ) ) &&
         m.ter( u.pos() ) == t_underbrush ) {
@@ -10435,7 +10435,7 @@ void game::eat(int pos)
         }
     }
 
-    if( pos != INT_MIN ) {
+    if( pos != inventory_index() ) {
         u.consume(pos);
         return;
     }
@@ -10448,7 +10448,7 @@ void game::eat(int pos)
 
     item *it = item_loc.get_item();
     pos = u.get_item_position( it );
-    if( pos != INT_MIN ) {
+    if( pos != inventory_index() ) {
         u.consume( pos );
 
     } else if( u.consume_item( *it ) ) {
@@ -10461,13 +10461,13 @@ void game::eat(int pos)
     }
 }
 
-void game::wear(int pos)
+void game::wear(inventory_index pos)
 {
-    if (pos == INT_MIN) {
+    if (pos == inventory_index()) {
         pos = game_menus::inv::wear( u );
     }
 
-    if( pos == INT_MIN ) {
+    if( pos == inventory_index() ) {
         add_msg( _( "Never mind." ) );
         return;
     }
@@ -10475,33 +10475,33 @@ void game::wear(int pos)
     u.wear( pos );
 }
 
-void game::takeoff(int pos)
+void game::takeoff(inventory_index pos)
 {
-    if (pos == INT_MIN) {
+    if (pos == inventory_index()) {
         pos = game_menus::inv::take_off( u );
     }
-    if (pos == INT_MIN) {
+    if (pos == inventory_index()) {
         add_msg(_("Never mind."));
         return;
     }
     u.takeoff( pos );
 }
 
-void game::change_side(int pos)
+void game::change_side(inventory_index pos)
 {
-    if (pos == INT_MIN) {
+    if (pos == inventory_index()) {
         pos = inv_for_filter( _( "Change side for item" ), [&]( const item &it ) {
             return u.is_worn(it) && it.is_sided();
         }, _( "You don't have sided items worn." ) );
     }
-    if (pos == INT_MIN) {
+    if (pos == inventory_index()) {
         add_msg(_("Never mind."));
         return;
     }
     u.change_side(pos);
 }
 
-void game::reload( int pos, bool prompt )
+void game::reload( inventory_index pos, bool prompt )
 {
     item *it = &u.i_at( pos );
 
@@ -10576,18 +10576,18 @@ void game::reload()
 
         add_msg(m_info, _( "You're not wielding anything." ) );
     } else {
-        reload( -1 );
+        reload( inventory_index( -1 ) ); //@todo
     }
 }
 
 // Unload a container, gun, or tool
 // If it's a gun, some gunmods can also be loaded
-void game::unload(int pos)
+void game::unload(inventory_index pos)
 {
     item *it = nullptr;
     item_location item_loc;
 
-    if( pos == INT_MIN ) {
+    if( pos == inventory_index() ) {
         item_loc = inv_map_splice( [&]( const item &it ) {
             return u.rate_action_unload( it ) == HINT_GOOD;
         }, _( "Unload item" ), 1, _( "You have nothing to unload." ) );
@@ -10613,11 +10613,11 @@ void game::unload(int pos)
     }
 }
 
-void game::mend( int pos )
+void game::mend( inventory_index pos )
 {
-    if( pos == INT_MIN ) {
+    if( pos == inventory_index() ) {
         if( u.is_armed() ) {
-            pos = -1;
+            pos = inventory_index( -1 ); //@todo
         } else {
             add_msg(m_info, _( "You're not wielding anything." ) );
         }
@@ -10802,7 +10802,7 @@ bool game::unload( item &it )
     return true;
 }
 
-void game::wield( int pos )
+void game::wield( inventory_index pos )
 {
     item_location loc( u, &u.i_at( pos ) );
     wield( loc );

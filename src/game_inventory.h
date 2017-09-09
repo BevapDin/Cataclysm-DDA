@@ -10,6 +10,10 @@
 class item;
 class item_location;
 class player;
+template<typename tag_type>
+class int_index;
+struct inventory_index_tag;
+using inventory_index = int_index<inventory_index_tag>;
 
 namespace game_menus
 {
@@ -34,14 +38,14 @@ void reassign_letter( player &p, item &it );
 void swap_letters( player &p );
 
 /** Todo: let them return item_location */
-int take_off( player &p );
-int wear( player &p );
+inventory_index take_off( player &p );
+inventory_index wear( player &p );
 
 /**
  * Select items to drop.
  * @return A list of pairs of position, quantity.
  */
-std::list<std::pair<int, int>> multidrop( player &p );
+std::list<std::pair<inventory_index, int>> multidrop( player &p );
 
 /** Consuming an item. */
 item_location consume( player &p );

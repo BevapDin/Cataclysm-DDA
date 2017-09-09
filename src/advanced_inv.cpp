@@ -1254,7 +1254,7 @@ bool advanced_inventory::move_all_items(bool nested_call)
     }
 
     if( spane.get_area() == AIM_INVENTORY || spane.get_area() == AIM_WORN ) {
-        std::list<std::pair<int, int>> dropped;
+        std::list<std::pair<inventory_index, int>> dropped;
 
         if( spane.get_area() == AIM_INVENTORY ) {
             for( size_t index = 0; index < g->u.inv.size(); ++index ) {
@@ -1262,14 +1262,14 @@ bool advanced_inventory::move_all_items(bool nested_call)
                 const auto &it = stack.front();
 
                 if( !spane.is_filtered( &it ) ) {
-                    dropped.emplace_back( static_cast<int>( index ), it.count_by_charges() ? static_cast<int>( it.charges ) : static_cast<int>( stack.size() ) );
+                    dropped.emplace_back( inventory_index( index ), it.count_by_charges() ? static_cast<int>( it.charges ) : static_cast<int>( stack.size() ) );
                 }
             }
         } else if( spane.get_area() == AIM_WORN ) {
             // do this in reverse, to account for vector item removal messing with future indices
             auto iter = g->u.worn.rbegin();
             for( size_t idx = 0; idx < g->u.worn.size(); ++idx, ++iter ) {
-                const size_t index = ( g->u.worn.size() - idx - 1 );
+                const inventory_index index( g->u.worn.size() - idx - 1 ); //@todo
                 const auto &it = *iter;
 
                 if( !spane.is_filtered( &it ) ) {
@@ -1568,7 +1568,8 @@ void advanced_inventory::display()
                 // If no item has actually been moved, continue.
 
                 // if worn, we need to fix with the worn index number (starts at -2, as -1 is weapon)
-                int idx = (srcarea == AIM_INVENTORY) ? sitem->idx : player::worn_position_to_index(sitem->idx);
+                //@todo
+                inventory_index idx = (srcarea == AIM_INVENTORY) ? inventory_index(sitem->idx) : player::worn_position_to_index(inventory_index(sitem->idx));
                 if(by_charges) {
                     item moving_item = g->u.reduce_charges(idx, amount_to_move);
                     assert(!moving_item.is_null());
@@ -1709,8 +1710,8 @@ void advanced_inventory::display()
             const int info_width = w_width / 2;
             const int info_startx = colstart + ( src == left ? info_width : 0 );
             if( spane.get_area() == AIM_INVENTORY || spane.get_area() == AIM_WORN ) {
-                int idx = ( spane.get_area() == AIM_INVENTORY ) ?
-                          sitem->idx : player::worn_position_to_index( sitem->idx );
+                inventory_index idx = ( spane.get_area() == AIM_INVENTORY ) ?
+                          inventory_index(sitem->idx) : player::worn_position_to_index( inventory_index(sitem->idx) );
                 // Setup a "return to AIM" activity. If examining the item creates a new activity
                 // (e.g. reading, reloading, activating), the new activity will be put on top of
                 // "return to AIM". Once the new activity is finished, "return to AIM" comes back
@@ -1958,7 +1959,7 @@ int advanced_inventory::remove_item( advanced_inv_listitem &sitem, int count )
             assert( &cont->contents.front() == sitem.items.front() );
             cont->contents.erase( cont->contents.begin() );
         } else if( sitem.area == AIM_WORN ) {
-            rc &= g->u.takeoff( sitem.idx );
+            rc &= g->u.takeoff( inventory_index(sitem.idx) );
         } else if( sitem.from_vehicle ) {
             rc &= s.veh->remove_item( s.vstor, sitem.items.front() );
         } else {

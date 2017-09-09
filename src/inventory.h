@@ -24,6 +24,11 @@ typedef std::unordered_map< itype_id, std::list<const item *> > itype_bin;
 
 class salvage_actor;
 
+template<typename tag_type>
+class int_index;
+struct inventory_index_tag;
+using inventory_index = int_index<inventory_index_tag>;
+
 /**
  * Wrapper to handled a set of valid "inventory" letters. "inventory" can be any set of
  * objects that the player can access via a single character (e.g. bionics).
@@ -100,15 +105,15 @@ class inventory : public visitable<inventory>
          * @return A copy of the removed item.
          */
         item remove_item(const item *it);
-        item remove_item(int position);
+        item remove_item( inventory_index position );
         /**
          * Randomly select items until the volume quota is filled.
          */
         std::list<item> remove_randomly_by_volume( const units::volume &volume );
-        std::list<item> reduce_stack(int position, int quantity);
+        std::list<item> reduce_stack( inventory_index position, int quantity );
 
-        const item &find_item(int position) const;
-        item &find_item(int position);
+        const item &find_item( inventory_index position ) const;
+        item &find_item( inventory_index position );
 
         /**
          * Returns the item position of the stack that contains the given item (compared by
@@ -117,13 +122,13 @@ class inventory : public visitable<inventory>
          * same when the given item points to the container and when it points to the item inside
          * the container. All items that are part of the same stack have the same item position.
          */
-        int position_by_item( const item *it ) const;
-        int position_by_type(itype_id type);
+        inventory_index position_by_item( const item *it ) const;
+        inventory_index position_by_type( itype_id type );
         /** Return the item position of the item with given invlet, return INT_MIN if
          * the inventory does not have such an item with that invlet. Don't use this on npcs inventory. */
-        int invlet_to_position(char invlet) const;
+        inventory_index invlet_to_position( char invlet ) const;
 
-        std::vector<std::pair<item *, int> > all_items_by_type(itype_id type);
+        std::vector<std::pair<item *, inventory_index> > all_items_by_type(itype_id type);
 
         // Below, "amount" refers to quantity
         //        "charges" refers to charges

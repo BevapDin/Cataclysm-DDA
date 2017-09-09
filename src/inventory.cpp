@@ -11,6 +11,8 @@
 #include "vehicle.h"
 #include "mapdata.h"
 #include "map_iterator.h"
+#include "int_index.h"
+
 #include <algorithm>
 
 const invlet_wrapper inv_chars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#&()*+./:;=@[\\]^_{|}");
@@ -198,7 +200,7 @@ char inventory::find_usable_cached_invlet(const std::string &item_type)
             continue;
         }
         // Check if anything is using this invlet.
-        if( g->u.invlet_to_position( invlet ) != INT_MIN ) {
+        if( g->u.invlet_to_position( invlet ) != inventory_index() ) {
             continue;
         }
         return invlet;
@@ -271,13 +273,13 @@ void inventory::restack(player *p)
 
     binned = false;
     std::list<item> to_restack;
-    int idx = 0;
+    inventory_index idx( 0 );
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter, ++idx) {
         std::list<item> &stack = *iter;
         item &topmost = stack.front();
 
-        const int ipos = p->invlet_to_position(topmost.invlet);
-        if( !inv_chars.valid( topmost.invlet ) || ( ipos != INT_MIN && ipos != idx ) ) {
+        const inventory_index ipos = p->invlet_to_position(topmost.invlet);
+        if( !inv_chars.valid( topmost.invlet ) || ( ipos != inventory_index() && ipos != idx ) ) {
             assign_empty_invlet(topmost);
             for( std::list<item>::iterator stack_iter = stack.begin();
                  stack_iter != stack.end(); ++stack_iter ) {
@@ -492,9 +494,9 @@ void inventory::form_from_map( const tripoint &origin, int range, bool assign_in
     }
 }
 
-std::list<item> inventory::reduce_stack( const int position, const int quantity )
+std::list<item> inventory::reduce_stack( const inventory_index position, const int quantity )
 {
-    int pos = 0;
+    inventory_index pos( 0 );
     std::list<item> ret;
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter) {
         if( position == pos ) {
@@ -525,9 +527,9 @@ item inventory::remove_item(const item *it)
     return nullitem;
 }
 
-item inventory::remove_item( const int position )
+item inventory::remove_item( const inventory_index position )
 {
-    int pos = 0;
+    inventory_index pos( 0 );
     for (invstack::iterator iter = items.begin(); iter != items.end(); ++iter) {
         if( position == pos ) {
             binned = false;
@@ -591,38 +593,38 @@ void inventory::dump(std::vector<item *> &dest)
     }
 }
 
-const item &inventory::find_item(int position) const
+const item &inventory::find_item( const inventory_index position ) const
 {
-    if (position < 0 || position >= (int)items.size()) {
+    if (position.value() < 0 || position.value() >= (int)items.size()) {
         return nullitem;
     }
     invstack::const_iterator iter = items.begin();
-    for (int j = 0; j < position; ++j) {
+    for (int j = 0; j < position.value(); ++j) {
         ++iter;
     }
     return iter->front();
 }
 
-item &inventory::find_item(int position)
+item &inventory::find_item( const inventory_index position )
 {
     return const_cast<item&>( const_cast<const inventory*>(this)->find_item( position ) );
 }
 
-int inventory::invlet_to_position( char invlet ) const
+inventory_index inventory::invlet_to_position( char invlet ) const
 {
-    int i = 0;
+    inventory_index i( 0 );
     for( const auto &elem : items ) {
         if( elem.begin()->invlet == invlet ) {
             return i;
         }
         ++i;
     }
-    return INT_MIN;
+    return inventory_index();
 }
 
-int inventory::position_by_item( const item *it ) const
+inventory_index inventory::position_by_item( const item *it ) const
 {
-    int p = 0;
+    inventory_index p( 0 );
     for( const auto &stack : items ) {
         for( const auto &e : stack ) {
             if( e.has_item( *it ) ) {
@@ -631,25 +633,25 @@ int inventory::position_by_item( const item *it ) const
         }
         p++;
     }
-    return INT_MIN;
+    return inventory_index();
 }
 
-int inventory::position_by_type(itype_id type)
+inventory_index inventory::position_by_type(itype_id type)
 {
-    int i = 0;
+    inventory_index i( 0 );
     for( auto &elem : items ) {
         if( elem.front().typeId() == type ) {
             return i;
         }
         ++i;
     }
-    return INT_MIN;
+    return inventory_index();
 }
 
-std::vector<std::pair<item *, int> > inventory::all_items_by_type(itype_id type)
+std::vector<std::pair<item *, inventory_index> > inventory::all_items_by_type(itype_id type)
 {
-    std::vector<std::pair<item *, int> > ret;
-    int i = 0;
+    std::vector<std::pair<item *, inventory_index> > ret;
+    inventory_index i( 0 );
     for( auto &elem : items ) {
         for( auto &elem_stack_iter : elem ) {
             if( elem_stack_iter.typeId() == type ) {
@@ -950,7 +952,7 @@ void inventory::update_invlet( item &newit, bool assign_invlet ) {
     if( newit.invlet ) {
         char tmp_invlet = newit.invlet;
         newit.invlet = '\0';
-        if( g->u.invlet_to_position( tmp_invlet ) == INT_MIN ) {
+        if( g->u.invlet_to_position( tmp_invlet ) == inventory_index() ) {
             newit.invlet = tmp_invlet;
         }
     }
@@ -998,3 +1000,71 @@ const itype_bin &inventory::get_binned_items() const
     binned = true;
     return binned_items;
 }
+#if 0
+class inventory_range  {
+    private:
+        inventory &inv;
+
+    public:
+        inventory_range( inventory &inv ) : inv( inv ) { }
+
+        class iterator {
+            private:
+                class data {
+                    private:
+                        std::list<std::list<item>>::iterator iter;
+                        inventory_index index_;
+                    public:
+                        inventory_index index() const {
+                            return index_;
+                        }
+                        item &item() const {
+                            return (*iter)->front().front();
+                        }
+                        operator item&() const {
+                            return item();
+                        }
+                        operator inventory_index() const {
+                            return index();
+                        }
+                };
+                data data_;
+                
+            public:
+                iterator( const decltype( iter ) iter, const size_t index ) : data_{ iter, inventory_index( index ) } {
+                }
+
+                iterator &operator++() {
+                    ++data_.iter;
+                    ++data_.index_;
+                }
+                data &operator*() {
+                    return data_;
+                }
+                bool operator==(const iterator &rhs ) const {
+                    return data_.iter == rhs.data_.iter;
+                }
+                bool operator!=(const iterator &rhs ) const {
+                    return !operator==( rhs );
+                }
+        };
+
+        iterator begin() {
+            return iterator( inv.begin(), 0 );
+        }
+        iterator begin() {
+            return iterator( inv.end(), INT_MIN );
+        }
+};
+
+void foo() {
+    for( auto &&o : inventory_range( g->u.inv ) ) {
+        const inventory_index ii = o.index();
+        const item &it = o.item();
+    }
+    for( auto &&o : inventory_range( g->u.inv ) ) {
+        const inventory_index ii = o;
+        const item &it = o;
+    }
+}
+#endif

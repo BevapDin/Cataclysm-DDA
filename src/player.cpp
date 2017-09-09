@@ -59,6 +59,7 @@
 #include "recipe_dictionary.h"
 #include "ranged.h"
 #include "ammo.h"
+#include "int_index.h"
 
 #include <map>
 #include <iterator>
@@ -964,7 +965,7 @@ void player::update_mental_focus()
     // Moved from calc_focus_equilibrium, because it is now const
     if( activity.id() == activity_id( "ACT_READ" ) ) {
         const item *book = activity.targets[0].get_item();
-        if( get_item_position( book ) == INT_MIN || !book->is_book() ) {
+        if( get_item_position( book ) == inventory_index() || !book->is_book() ) {
             add_msg_if_player( m_bad, _( "You lost your book! You stop reading." ) );
             activity.set_to_null();
         }
@@ -979,7 +980,7 @@ int player::calc_focus_equilibrium() const
 
     if( activity.id() == activity_id( "ACT_READ" ) ) {
         const item &book = *activity.targets[0].get_item();
-        if( book.is_book() && get_item_position( &book ) != INT_MIN ) {
+        if( book.is_book() && get_item_position( &book ) != inventory_index() ) {
             auto &bt = *book.type->book;
             // apply a penalty when we're actually learning something
             const auto &skill_level = get_skill_level( bt.skill );
@@ -6712,7 +6713,7 @@ void player::process_active_items()
     ch_UPS = charges_of( "UPS" ); // might have been changed by cloak
     long ch_UPS_used = 0;
     for( size_t i = 0; i < inv.size() && ch_UPS_used < ch_UPS; i++ ) {
-        item &it = inv.find_item(i);
+        item &it = inv.find_item( inventory_index( i ) );
         if( !it.has_flag( "USE_UPS" ) ) {
             continue;
         }
@@ -6744,7 +6745,7 @@ void player::process_active_items()
     }
 }
 
-item player::reduce_charges( int position, long quantity )
+item player::reduce_charges( const inventory_index position, long quantity )
 {
     item &it = i_at( position );
     if( it.is_null() ) {
@@ -6775,26 +6776,26 @@ item player::reduce_charges( item *it, long quantity )
     return result;
 }
 
-int player::invlet_to_position( const long linvlet ) const
+inventory_index player::invlet_to_position( const long linvlet ) const
 {
     // Invlets may come from curses, which may also return any kind of key codes, those being
     // of type long and they can become valid, but different characters when casted to char.
     // Example: KEY_NPAGE (returned when the player presses the page-down key) is 0x152,
     // casted to char would yield 0x52, which happesn to be 'R', a valid invlet.
     if( linvlet > std::numeric_limits<char>::max() || linvlet < std::numeric_limits<char>::min() ) {
-        return INT_MIN;
+        return inventory_index();
     }
     const char invlet = static_cast<char>( linvlet );
     if( is_npc() ) {
         DebugLog( D_WARNING,  D_GAME ) << "Why do you need to call player::invlet_to_position on npc " << name;
     }
     if( weapon.invlet == invlet ) {
-        return -1;
+        return inventory_index( -1 ); //@todo
     }
     auto iter = worn.begin();
     for( size_t i = 0; i < worn.size(); i++, iter++ ) {
         if( iter->invlet == invlet ) {
-            return worn_position_to_index( i );
+            return worn_position_to_index( inventory_index( i ) );
         }
     }
     return inv.invlet_to_position( invlet );
@@ -7045,7 +7046,7 @@ std::list<item> player::use_charges( const itype_id& what, long qty )
 
 item* player::pick_usb()
 {
-    std::vector<std::pair<item*, int> > drives = inv.all_items_by_type("usb_drive");
+    std::vector<std::pair<item*, inventory_index> > drives = inv.all_items_by_type("usb_drive");
 
     if (drives.empty()) {
         return nullptr; // None available!
@@ -7211,7 +7212,7 @@ bool player::consume_item( item &target )
     return false;
 }
 
-bool player::consume(int target_position)
+bool player::consume( const inventory_index target_position )
 {
     auto &target = i_at( target_position );
 
@@ -7225,14 +7226,14 @@ bool player::consume(int target_position)
         }
 
         //Restack and sort so that we don't lie about target's invlet
-        if( target_position >= 0 ) {
+        if( !( target_position < inventory_index( 0 ) ) ) { //@todo
             inv.restack( this );
             inv.sort();
         }
 
-        if( was_in_container && target_position == -1 ) {
+        if( was_in_container && target_position == inventory_index( -1 ) ) {
             add_msg_if_player(_("You are now wielding an empty %s."), weapon.tname().c_str());
-        } else if( was_in_container && target_position < -1 ) {
+        } else if( was_in_container && target_position < inventory_index( - 1) ) {
             add_msg_if_player(_("You are now wearing an empty %s."), target.tname().c_str());
         } else if( was_in_container && !is_npc() ) {
             bool drop_it = false;
@@ -7247,12 +7248,12 @@ bool player::consume(int target_position)
                 add_msg(_("You drop the empty %s."), target.tname().c_str());
                 g->m.add_item_or_charges( pos(), inv.remove_item(&target) );
             } else {
-                int quantity = inv.const_stack( inv.position_by_item( &target ) ).size();
+                int quantity = inv.const_stack( inv.position_by_item( &target ).value() ).size();
                 char letter = target.invlet ? target.invlet : ' ';
                 add_msg( m_info, _( "%c - %d empty %s" ), letter, quantity, target.tname( quantity ).c_str() );
             }
         }
-    } else if( target_position >= 0 ) {
+    } else if( !( target_position < inventory_index( 0 ) ) ) { //@todo
         inv.restack( this );
         inv.unsort();
     }
@@ -8255,7 +8256,7 @@ int player::item_wear_cost( const item& it ) const
     return mv;
 }
 
-bool player::wear( int pos, bool interactive )
+bool player::wear( const inventory_index pos, bool interactive )
 {
     item& to_wear = i_at( pos );
 
@@ -8362,7 +8363,7 @@ bool player::change_side( item &it, bool interactive )
     return true;
 }
 
-bool player::change_side (int pos, bool interactive) {
+bool player::change_side( const inventory_index pos, bool interactive) {
     item &it( i_at( pos ) );
 
     if( !is_worn( it ) ) {
@@ -8472,12 +8473,12 @@ bool player::takeoff( const item &it, std::list<item> *res )
     return true;
 }
 
-bool player::takeoff( int pos )
+bool player::takeoff( const inventory_index pos )
 {
     return takeoff( i_at( pos ) );
 }
 
-void player::drop( int pos, const tripoint &where )
+void player::drop( const inventory_index pos, const tripoint &where )
 {
     const item &it = i_at( pos );
     const int count = it.count_by_charges() ? it.charges : 1;
@@ -8485,7 +8486,7 @@ void player::drop( int pos, const tripoint &where )
     drop( { std::make_pair( pos, count ) }, where );
 }
 
-void player::drop( const std::list<std::pair<int, int>> &what, const tripoint &where, bool stash )
+void player::drop( const std::list<std::pair<inventory_index, int>> &what, const tripoint &where, bool stash )
 {
     const activity_id type( stash ? "ACT_STASH" : "ACT_DROP" );
 
@@ -8505,7 +8506,7 @@ void player::drop( const std::list<std::pair<int, int>> &what, const tripoint &w
 
     for( auto item_pair : what ) {
         if( can_unwield( i_at( item_pair.first ) ).success() ) {
-            activity.values.push_back( item_pair.first );
+            activity.values.push_back( item_pair.first.value() );
             activity.values.push_back( item_pair.second );
         }
     }
@@ -8516,7 +8517,7 @@ void player::drop( const std::list<std::pair<int, int>> &what, const tripoint &w
 }
 
 void player::use_wielded() {
-    use(-1);
+    use( inventory_index( -1 ) );
 }
 
 hint_rating player::rate_action_reload( const item &it ) const
@@ -8692,7 +8693,7 @@ bool player::consume_charges( item& used, long qty )
     return false;
 }
 
-void player::use( int inventory_position )
+void player::use( const inventory_index inventory_position )
 {
     item *used = &i_at( inventory_position );
     item copy;
@@ -8952,8 +8953,8 @@ void player::gunmod_add( item &gun, item &mod )
 
     int turns = !has_trait( trait_DEBUG_HS ) ? mod.type->gunmod->install_time : 0;
 
-    assign_activity( activity_id( "ACT_GUNMOD_ADD" ), turns, -1, get_item_position( &gun ), tool );
-    activity.values.push_back( get_item_position( &mod ) );
+    assign_activity( activity_id( "ACT_GUNMOD_ADD" ), turns, -1, get_item_position( &gun ).value(), tool );
+    activity.values.push_back( get_item_position( &mod ).value() );
     activity.values.push_back( roll ); // chance of success (%)
     activity.values.push_back( risk ); // chance of damage (%)
     activity.values.push_back( qty ); // tool charges
@@ -8976,8 +8977,8 @@ void player::toolmod_add( item &tool, item &mod )
         return; // player cancelled installation
     }
 
-    assign_activity( activity_id( "ACT_TOOLMOD_ADD" ), 1, -1, get_item_position( &tool ) );
-    activity.values.push_back( get_item_position( &mod ) );
+    assign_activity( activity_id( "ACT_TOOLMOD_ADD" ), 1, -1, get_item_position( &tool ).value() );
+    activity.values.push_back( get_item_position( &mod ).value() );
 }
 
 hint_rating player::rate_action_read( const item &it ) const
@@ -9128,7 +9129,7 @@ bool player::fun_to_read( const item &book ) const
  *             Experience gained = Experience normally gained * penalty
  */
 
-bool player::read( int inventory_position, const bool continuous )
+bool player::read( const inventory_index inventory_position, const bool continuous )
 {
     item &it = i_at( inventory_position );
     if( it.is_null() ) {

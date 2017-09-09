@@ -1007,12 +1007,12 @@ bool player::disassemble()
     return disassemble( loc.obtain( *this ) );
 }
 
-bool player::disassemble( int dis_pos )
+bool player::disassemble( const inventory_index dis_pos )
 {
     return disassemble( i_at( dis_pos ), dis_pos, false );
 }
 
-bool player::disassemble( item &obj, int pos, bool ground, bool interactive )
+bool player::disassemble( item &obj, const inventory_index pos, bool ground, bool interactive )
 {
     const auto ret = can_disassemble( obj, crafting_inventory() );
 
@@ -1044,7 +1044,7 @@ bool player::disassemble( item &obj, int pos, bool ground, bool interactive )
         activity.moves_left = r.time;
     }
 
-    activity.values.push_back( pos );
+    activity.values.push_back( pos.value() );
     activity.coords.push_back( ground ? this->pos() : tripoint_min );
     activity.str_values.push_back( r.result );
 
@@ -1068,7 +1068,7 @@ void player::disassemble_all( bool one_pass )
     }
 
     for( size_t i = 0; i < items.size(); i++ ) {
-        if( disassemble( items[i], i, true, false ) ) {
+        if( disassemble( items[i], inventory_index( i ), true, false ) ) {
             found_any = true;
         }
     }
@@ -1093,16 +1093,16 @@ item_comp find_component( const std::vector<item_comp> &altercomps, const item &
     return altercomps.front();
 }
 
-item &get_item_for_uncraft( player &p, int item_pos,
+item &get_item_for_uncraft( player &p, inventory_index item_pos,
                             const tripoint &loc, bool from_ground )
 {
     item *org_item;
     if( from_ground ) {
         auto items_on_ground = g->m.i_at( loc );
-        if( static_cast<size_t>( item_pos ) >= items_on_ground.size() ) {
+        if( static_cast<size_t>( item_pos.value() ) >= items_on_ground.size() ) {
             return p.ret_null;
         }
-        org_item = &items_on_ground[item_pos];
+        org_item = &items_on_ground[item_pos.value()];
     } else {
         org_item = &p.i_at( item_pos );
     }
@@ -1143,7 +1143,7 @@ void player::complete_disassemble()
 
     const bool from_ground = loc != tripoint_min;
 
-    complete_disassemble( item_pos, loc, from_ground, recipe_dictionary::get_uncraft( recipe_name ) );
+    complete_disassemble( inventory_index( item_pos ), loc, from_ground, recipe_dictionary::get_uncraft( recipe_name ) );
 
     if( !activity ) {
         // Something above went wrong, don't continue
@@ -1174,7 +1174,7 @@ void player::complete_disassemble()
 // TODO: Make them accessible in a less ugly way
 void remove_radio_mod( item &, player & );
 
-void player::complete_disassemble( int item_pos, const tripoint &loc,
+void player::complete_disassemble( const inventory_index item_pos, const tripoint &loc,
                                    bool from_ground, const recipe &dis )
 {
     // Get the proper recipe - the one for disassembly, not assembly
@@ -1210,7 +1210,7 @@ void player::complete_disassemble( int item_pos, const tripoint &loc,
     // remove the item, except when it's counted by charges and still has some
     if( !org_item.count_by_charges() || org_item.charges <= 0 ) {
         if( from_ground ) {
-            g->m.i_rem( loc, item_pos );
+            g->m.i_rem( loc, item_pos.value() );
         } else {
             i_rem( item_pos );
         }

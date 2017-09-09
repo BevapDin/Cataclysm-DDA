@@ -11,6 +11,7 @@
 #include "vehicle.h"
 #include "vehicle_selector.h"
 #include "veh_type.h"
+#include "int_index.h"
 #include "itype.h"
 #include "iuse_actor.h"
 #include "translations.h"
@@ -76,8 +77,8 @@ class item_location::impl
             return "";
         }
 
-        virtual int obtain( Character &, long ) {
-            return INT_MIN;
+        virtual inventory_index obtain( Character &, long ) {
+            return inventory_index();
         }
 
         virtual int obtain_cost( const Character &, long ) const {
@@ -156,14 +157,14 @@ class item_location::impl::item_on_map : public item_location::impl
             return res;
         }
 
-        int obtain( Character &ch, long qty ) override {
+        inventory_index obtain( Character &ch, long qty ) override {
             ch.moves -= obtain_cost( ch, qty );
 
             item obj = target()->split( qty );
             if( !obj.is_null() ) {
                 return ch.get_item_position( &ch.i_add( obj ) );
             } else {
-                int inv = ch.get_item_position( &ch.i_add( *target() ) );
+                const inventory_index inv = ch.get_item_position( &ch.i_add( *target() ) );
                 remove_item();
                 return inv;
             }
@@ -247,7 +248,7 @@ class item_location::impl::item_on_person : public item_location::impl
             }
         }
 
-        int obtain( Character &ch, long qty ) override {
+        inventory_index obtain( Character &ch, long qty ) override {
             ch.mod_moves( -obtain_cost( ch, qty ) );
 
             if( &ch.i_at( ch.get_item_position( target() ) ) == target() ) {
@@ -259,7 +260,7 @@ class item_location::impl::item_on_person : public item_location::impl
             if( !obj.is_null() ) {
                 return ch.get_item_position( &ch.i_add( obj ) );
             } else {
-                int inv = ch.get_item_position( &ch.i_add( *target() ) );
+                const inventory_index inv = ch.get_item_position( &ch.i_add( *target() ) );
                 remove_item();  // This also takes off the item from whoever wears it.
                 return inv;
             }
@@ -369,14 +370,14 @@ class item_location::impl::item_on_vehicle : public item_location::impl
             return res;
         }
 
-        int obtain( Character &ch, long qty ) override {
+        inventory_index obtain( Character &ch, long qty ) override {
             ch.moves -= obtain_cost( ch, qty );
 
             item obj = target()->split( qty );
             if( !obj.is_null() ) {
                 return ch.get_item_position( &ch.i_add( obj ) );
             } else {
-                int inv = ch.get_item_position( &ch.i_add( *target() ) );
+                const inventory_index inv = ch.get_item_position( &ch.i_add( *target() ) );
                 remove_item();
                 return inv;
             }
@@ -512,11 +513,11 @@ std::string item_location::describe( const Character *ch ) const
     return ptr->describe( ch );
 }
 
-int item_location::obtain( Character &ch, long qty )
+inventory_index item_location::obtain( Character &ch, long qty )
 {
     if( !ptr->valid() ) {
         debugmsg( "item location does not point to valid item" );
-        return INT_MIN;
+        return inventory_index();
     }
     return ptr->obtain( ch, qty );
 }

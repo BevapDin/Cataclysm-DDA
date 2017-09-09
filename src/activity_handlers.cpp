@@ -743,7 +743,7 @@ void activity_handlers::fill_liquid_do_turn( player_activity *act_, player *p )
             }
             break;
         case LTT_CONTAINER:
-            p->pour_into( p->i_at( act.values.at( 3 ) ), liquid );
+            p->pour_into( p->i_at( inventory_index( act.values.at( 3 ) ) ), liquid );
             break;
         case LTT_MAP:
             if( iexamine::has_keg( act.coords.at( 1 ) ) ) {
@@ -819,7 +819,7 @@ void activity_handlers::pickup_finish(player_activity *act, player *p)
     // if no str_values present, carry on
     for(auto &elem : act->str_values) {
         if(elem == "equip") {
-            item &it = p->i_at(act->position);
+            item &it = p->i_at( inventory_index( act->position ) );
             p->wear_item(it);
         }
     }
@@ -834,7 +834,7 @@ void activity_handlers::firstaid_finish( player_activity *act, player *p )
 {
     static const std::string iuse_name_string( "heal" );
 
-    item &it = p->i_at( act->position );
+    item &it = p->i_at( inventory_index( act->position ) );
     item *used_tool = it.get_usable_item( iuse_name_string );
     if( used_tool == nullptr ) {
         debugmsg( "Lost tool used for healing" );
@@ -888,7 +888,7 @@ static void rod_fish( player *p, int sSkillLevel, int fishChance )
 
 void activity_handlers::fish_finish( player_activity *act, player *p )
 {
-    item &it = p->i_at(act->position);
+    item &it = p->i_at(inventory_index( act->position ) );
     int sSkillLevel = 0;
     int fishChance = 20;
     if( it.has_flag("FISH_POOR") ) {
@@ -980,7 +980,7 @@ void activity_handlers::game_do_turn( player_activity *act, player *p )
     //Gaming takes time, not speed
     act->moves_left -= 100;
 
-    item &game_item = p->i_at(act->position);
+    item &game_item = p->i_at( inventory_index( act->position ) );
 
     //Deduct 1 battery charge for every minute spent playing
     if( calendar::once_every(MINUTES(1)) ) {
@@ -1028,7 +1028,7 @@ void activity_handlers::hotwire_finish( player_activity *act, player *pl )
 void activity_handlers::longsalvage_finish( player_activity *act, player *p )
 {
     const static std::string salvage_string = "salvage";
-    item &main_tool = p->i_at( act->index );
+    item &main_tool = p->i_at( inventory_index( act->index ) );
     auto items = g->m.i_at( p->pos() );
     item *salvage_tool = main_tool.get_usable_item( salvage_string );
     if( salvage_tool == nullptr ) {
@@ -1152,7 +1152,7 @@ void activity_handlers::pickaxe_do_turn(player_activity *act, player *p)
 void activity_handlers::pickaxe_finish( player_activity *act, player *p )
 {
     const tripoint pos( act->placement );
-    item *it = &p->i_at( act->position );
+    item *it = &p->i_at( inventory_index( act->position ) );
 
     act->set_to_null(); // Invalidate the activity early to prevent a query from mod_pain()
 
@@ -1303,14 +1303,14 @@ void activity_handlers::reload_finish( player_activity *act, player *p )
 
 void activity_handlers::start_fire_finish( player_activity *act, player *p )
 {
-    item &it = p->i_at(act->position);
+    item &it = p->i_at( inventory_index( act->position ) );
     firestarter_actor::resolve_firestarter_use( *p, it, act->placement );
     act->set_to_null();
 }
 
 void activity_handlers::start_fire_do_turn( player_activity *act, player *p )
 {
-    item &lens_item = p->i_at(act->position);
+    item &lens_item = p->i_at( inventory_index( act->position ) );
     const auto usef = lens_item.type->get_use( "firestarter" );
     if( usef == nullptr || usef->get_actor_ptr() == nullptr ) {
         add_msg( m_bad, "You have lost the item you were using to start the fire." );
@@ -1406,7 +1406,7 @@ void activity_handlers::vibe_do_turn( player_activity *act, player *p )
     //Deduct 1 battery charge for every minute in use, or vibrator is much less effective
     act->moves_left -= 100;
 
-    item &vibrator_item = p->i_at(act->position);
+    item &vibrator_item = p->i_at( inventory_index( act->position ) );
 
     if( (p->is_wearing("rebreather")) || (p->is_wearing("rebreather_xl")) ||
         (p->is_wearing("mask_h20survivor")) ) {
@@ -1488,7 +1488,7 @@ void activity_handlers::oxytorch_do_turn( player_activity *act, player *p )
         return;
     }
 
-    item &it = p->i_at( act->position );
+    item &it = p->i_at( inventory_index( act->position ) );
     // act->values[0] is the number of charges yet to be consumed
     const long charges_used = std::min( long( act->values[0] ), it.ammo_required() );
 
@@ -1507,7 +1507,7 @@ void activity_handlers::oxytorch_finish( player_activity *act, player *p )
     const ter_id ter = g->m.ter( pos );
 
     // fast players might still have some charges left to be consumed
-    p->i_at( act->position ).ammo_consume( act->values[0], p->pos() );
+    p->i_at( inventory_index( act->position ) ).ammo_consume( act->values[0], p->pos() );
 
     if( g->m.furn( pos ) == f_rack ) {
         g->m.furn_set( pos, f_null );
@@ -1652,7 +1652,7 @@ void activity_handlers::repair_item_finish( player_activity *act, player *p )
     repeat_type repeat = ( repeat_type )act->get_value( 0, REPEAT_INIT );
     weldrig_hack w_hack;
     item &main_tool = !w_hack.init( *act ) ?
-                      p->i_at( act->index ) : w_hack.get_item();
+                      p->i_at( inventory_index( act->index ) ) : w_hack.get_item();
 
     item *used_tool = main_tool.get_usable_item( iuse_name_string );
     if( used_tool == nullptr ) {
@@ -1679,7 +1679,7 @@ void activity_handlers::repair_item_finish( player_activity *act, player *p )
         return;
     }
 
-    item &fix = p->i_at( act->position );
+    item &fix = p->i_at( inventory_index( act->position ) );
 
     // The first time through we just find out how many times the player wants to repeat the action.
     if( repeat != REPEAT_INIT ) {
@@ -1792,8 +1792,8 @@ void activity_handlers::gunmod_add_finish( player_activity *act, player *p )
         return;
     }
 
-    item &gun = p->i_at( act->position );
-    item &mod = p->i_at( act->values[0] );
+    item &gun = p->i_at( inventory_index( act->position ) );
+    item &mod = p->i_at( inventory_index( act->values[0] ) );
 
     int roll = act->values[1]; // chance of success (%)
     int risk = act->values[2]; // chance of damage (%)
@@ -1838,8 +1838,8 @@ void activity_handlers::toolmod_add_finish( player_activity *act, player *p )
         debugmsg( "Incompatible arguments to ACT_TOOLMOD_ADD" );
         return;
     }
-    item &tool = p->i_at( act->position );
-    item &mod = p->i_at( act->values[0] );
+    item &tool = p->i_at( inventory_index( act->position ) );
+    item &mod = p->i_at( inventory_index( act->values[0] ) );
     add_msg( m_good, _( "You successfully attached the %1$s to your %2$s." ), mod.tname().c_str(),
                 tool.tname().c_str() );
     tool.contents.push_back( p->i_rem( &mod ) );
@@ -2008,7 +2008,7 @@ void activity_handlers::aim_finish( player_activity *, player * )
 
 void activity_handlers::washing_finish( player_activity *act, player *p )
 {
-    item &filthy_item = p->i_at( act->position );
+    item &filthy_item = p->i_at( inventory_index( act->position ) );
 
     if( p->is_worn( filthy_item ) ) {
         filthy_item.on_takeoff( *p );

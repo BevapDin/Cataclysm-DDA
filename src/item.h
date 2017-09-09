@@ -49,6 +49,10 @@ struct quality;
 using quality_id = string_id<quality>;
 struct fire_data;
 struct damage_instance;
+template<typename tag_type>
+class int_index;
+struct inventory_index_tag;
+using inventory_index = int_index<inventory_index_tag>;
 
 enum damage_type : int;
 

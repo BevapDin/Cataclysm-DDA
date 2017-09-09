@@ -106,41 +106,41 @@ void game_menus::inv::common( player &p )
     } while( allowed_selections.count( res ) != 0 );
 }
 
-int game::inv_for_filter( const std::string &title, item_filter filter,
+inventory_index game::inv_for_filter( const std::string &title, item_filter filter,
                           const std::string &none_message )
 {
     return u.get_item_position( inv_map_splice( filter, title, -1, none_message ).get_item() );
 }
 
-int game::inv_for_all( const std::string &title, const std::string &none_message )
+inventory_index game::inv_for_all( const std::string &title, const std::string &none_message )
 {
     const std::string msg = ( none_message.empty() ) ? _( "Your inventory is empty." ) : none_message;
     return u.get_item_position( inv_internal( u, inventory_selector_preset(),
                                 title, -1, none_message ).get_item() );
 }
 
-int game::inv_for_flag( const std::string &flag, const std::string &title )
+inventory_index game::inv_for_flag( const std::string &flag, const std::string &title )
 {
     return inv_for_filter( title, [ &flag ]( const item & it ) {
         return it.has_flag( flag );
     } );
 }
 
-int game::inv_for_id( const itype_id &id, const std::string &title )
+inventory_index game::inv_for_id( const itype_id &id, const std::string &title )
 {
     return inv_for_filter( title, [ &id ]( const item & it ) {
         return it.typeId() == id;
     }, string_format( _( "You don't have a %s." ), item::nname( id ).c_str() ) );
 }
 
-int game_menus::inv::take_off( player &p )
+inventory_index game_menus::inv::take_off( player &p )
 {
     return g->inv_for_filter( _( "Take off item" ), [ &p ]( const item & it ) {
         return p.is_worn( it );
     }, _( "You don't wear anything." ) );
 }
 
-int game_menus::inv::wear( player &p )
+inventory_index game_menus::inv::wear( player &p )
 {
     return g->inv_for_filter( _( "Wear item" ), [ &p ]( const item & it ) {
         return it.is_armor() && !p.is_worn( it );
@@ -809,7 +809,7 @@ item_location game_menus::inv::saw_barrel( player &p, item &tool )
                        );
 }
 
-std::list<std::pair<int, int>> game_menus::inv::multidrop( player &p )
+std::list<std::pair<inventory_index, int>> game_menus::inv::multidrop( player &p )
 {
     p.inv.restack( &p );
     p.inv.sort();
@@ -826,7 +826,7 @@ std::list<std::pair<int, int>> game_menus::inv::multidrop( player &p )
 
     if( inv_s.empty() ) {
         popup( std::string( _( "You have nothing to drop." ) ), PF_GET_KEY );
-        return std::list<std::pair<int, int> >();
+        return std::list<std::pair<inventory_index, int> >();
     }
 
     return inv_s.execute();
@@ -936,7 +936,7 @@ void game_menus::inv::swap_letters( player &p )
         [ &p ]( const std::string::value_type & elem ) {
             if( p.assigned_invlet.count( elem ) ) {
                 return c_yellow;
-            } else if( p.invlet_to_position( elem ) != INT_MIN ) {
+            } else if( p.invlet_to_position( elem ) != inventory_index() ) {
                 return c_white;
             } else {
                 return c_dkgray;

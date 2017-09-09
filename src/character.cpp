@@ -17,6 +17,7 @@
 #include "mutation.h"
 #include "vehicle.h"
 #include "veh_interact.h"
+#include "int_index.h"
 #include "cata_utility.h"
 
 #include <algorithm>
@@ -103,6 +104,8 @@ static const trait_id trait_WEBBED( "WEBBED" );
 static const trait_id trait_WINGS_BAT( "WINGS_BAT" );
 static const trait_id trait_WINGS_BUTTERFLY( "WINGS_BUTTERFLY" );
 static const trait_id debug_nodmg( "DEBUG_NODMG" );
+
+static const inventory_index weapon_index( -1 );
 
 Character::Character() : Creature(), visitable<Character>()
 {
@@ -735,16 +738,16 @@ std::list<item> Character::remove_worn_items_with( std::function<bool(item &)> f
 }
 
 // Negative positions indicate weapon/clothing, 0 & positive indicate inventory
-const item& Character::i_at(int position) const
+const item& Character::i_at( const inventory_index position ) const
 {
-    if( position == -1 ) {
+    if( position == weapon_index ) {
         return weapon;
     }
-    if( position < -1 ) {
-        int worn_index = worn_position_to_index(position);
-        if (size_t(worn_index) < worn.size()) {
+    if( position < weapon_index ) {
+        const inventory_index worn_index = worn_position_to_index( position );
+        if (size_t(worn_index.value()) < worn.size()) { //@todo
             auto iter = worn.begin();
-            std::advance( iter, worn_index );
+            std::advance( iter, worn_index.value() ); //@todo
             return *iter;
         }
     }
@@ -752,18 +755,18 @@ const item& Character::i_at(int position) const
     return inv.find_item(position);
 }
 
-item& Character::i_at(int position)
+item& Character::i_at( const inventory_index position )
 {
     return const_cast<item&>( const_cast<const Character*>(this)->i_at( position ) );
 }
 
-int Character::get_item_position( const item *it ) const
+inventory_index Character::get_item_position( const item *it ) const
 {
     if( weapon.has_item( *it ) ) {
-        return -1;
+        return weapon_index;
     }
 
-    int p = 0;
+    inventory_index p( 0 );
     for( const auto &e : worn ) {
         if( e.has_item( *it ) ) {
             return worn_position_to_index( p );
@@ -774,16 +777,16 @@ int Character::get_item_position( const item *it ) const
     return inv.position_by_item( it );
 }
 
-item Character::i_rem(int pos)
+item Character::i_rem( const inventory_index pos )
 {
  item tmp;
- if (pos == -1) {
+    if( pos == weapon_index ) {
      tmp = weapon;
      weapon = ret_null;
      return tmp;
- } else if (pos < -1 && pos > worn_position_to_index(worn.size())) {
+    } else if( pos < weapon_index && pos > worn_position_to_index( inventory_index( worn.size() ) ) ) { //@todo
      auto iter = worn.begin();
-     std::advance( iter, worn_position_to_index( pos ) );
+     std::advance( iter, worn_position_to_index( pos ).value() ); //@todo
      tmp = *iter;
      tmp.on_takeoff( *this );
      worn.erase( iter );
@@ -802,7 +805,7 @@ item Character::i_rem(const item *it)
     return tmp.front();
 }
 
-void Character::i_rem_keep_contents( const int pos )
+void Character::i_rem_keep_contents( const inventory_index pos )
 {
     for( auto &content : i_rem( pos ).contents ) {
         i_add_or_drop( content );
@@ -2551,4 +2554,9 @@ float Character::healing_rate( float at_rest_quality ) const
     }
 
     return final_rate;
+}
+
+inventory_index Character::worn_position_to_index( const inventory_index position )
+{
+    return inventory_index( -2 - position.value() ); //@todo
 }

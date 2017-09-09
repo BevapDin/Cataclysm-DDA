@@ -259,7 +259,7 @@ static bool inscribe_item(player *p, std::string verb, std::string gerund, bool 
     //Note: this part still strongly relies on English grammar.
     //Although it can be easily worked around in language like Chinese,
     //but might need to be reworked for some European languages that have more verb forms
-    int pos = g->inv_for_all(string_format(_("%s on what?"), verb.c_str()));
+    inventory_index pos = g->inv_for_all(string_format(_("%s on what?"), verb.c_str()));
     item *cut = &(p->i_at(pos));
     if( cut->is_null() ) {
         add_msg(m_info, _("You do not have that item!"));
@@ -2024,7 +2024,7 @@ int iuse::sew_advanced(player *p, item *it, bool, const tripoint& )
         return 0;
     }
 
-    int pos = g->inv_for_filter( _("Enhance what?"), []( const item & itm ) {
+    inventory_index pos = g->inv_for_filter( _("Enhance what?"), []( const item & itm ) {
             return itm.made_of( material_id( "cotton" ) ) ||
             itm.made_of( material_id( "leather" ) ) ||
             itm.made_of( material_id( "fur" ) ) ||
@@ -2232,7 +2232,7 @@ int iuse::radio_mod( player *p, item *, bool, const tripoint& )
         return 0;
     }
 
-    int inventory_index = g->inv_for_filter( _("Modify what?"), []( const item & itm ) {
+    inventory_index inventory_index = g->inv_for_filter( _("Modify what?"), []( const item & itm ) {
         return itm.has_flag( "RADIO_MODABLE" );
     } );
     item &modded = p->i_at( inventory_index );
@@ -2337,7 +2337,7 @@ int iuse::fishing_rod(player *p, item *it, bool, const tripoint& )
 
     p->add_msg_if_player(_("You cast your line and wait to hook something..."));
 
-    p->assign_activity( activity_id( "ACT_FISH" ), 30000, 0, p->get_item_position( it ), it->tname() );
+    p->assign_activity( activity_id( "ACT_FISH" ), 30000, 0, p->get_item_position( it ).value(), it->tname() );
 
     return 0;
 }
@@ -2581,8 +2581,7 @@ int iuse::pack_item(player *p, item *it, bool t, const tripoint& )
         return 0;
     }
     if (t) { // Normal use
-        // Numbers below -1 are reserved for worn items
-    } else if (p->get_item_position(it) < -1) {
+    } else if (p->is_worn(*it)) {
         p->add_msg_if_player(m_info, _("You can't pack your %s until you take it off."),
                              it->tname().c_str());
         return 0;
@@ -3314,7 +3313,7 @@ int iuse::pickaxe(player *p, item *it, bool, const tripoint& )
         p->add_msg_if_player(m_info, _("You can't mine there."));
         return 0;
     }
-    p->assign_activity( activity_id( "ACT_PICKAXE" ), turns, -1, p->get_item_position( it ) );
+    p->assign_activity( activity_id( "ACT_PICKAXE" ), turns, -1, p->get_item_position( it ).value() );
     p->activity.placement = tripoint(dirx, diry, p->posz()); // TODO: Z
     p->add_msg_if_player(_("You attack the %1$s with your %2$s."),
                          g->m.tername(dirx, diry).c_str(), it->tname().c_str());
@@ -4184,7 +4183,7 @@ int iuse::portable_game(player *p, item *it, bool, const tripoint& )
         int time = 15000;
 
         p->add_msg_if_player(_("You play on your %s for a while."), it->tname().c_str());
-        p->assign_activity( activity_id( "ACT_GAME" ), time, -1, p->get_item_position( it ), "gaming" );
+        p->assign_activity( activity_id( "ACT_GAME" ), time, -1, p->get_item_position( it ).value(), "gaming" );
 
         std::map<std::string, std::string> game_data;
         game_data.clear();
@@ -4235,7 +4234,7 @@ int iuse::vibe(player *p, item *it, bool, const tripoint& )
         int time = 20000; // 20 minutes per
         p->add_msg_if_player(_("You fire up your %s and start getting the tension out."),
                              it->tname().c_str());
-        p->assign_activity( activity_id( "ACT_VIBE" ), time, -1, p->get_item_position( it ), "de-stressing" );
+        p->assign_activity( activity_id( "ACT_VIBE" ), time, -1, p->get_item_position( it ).value(), "de-stressing" );
     }
     return it->type->charges_to_use();
 }
@@ -4384,7 +4383,7 @@ int iuse::lumber(player *p, item *it, bool t, const tripoint& )
     }
 
     // If the player is not standing on a log, check inventory
-    int pos = g->inv_for_id( itype_id( "log" ), _( "Cut up what?" ) );
+    inventory_index pos = g->inv_for_id( itype_id( "log" ), _( "Cut up what?" ) );
 
     item* cut = &( p->i_at( pos ) );
 
@@ -4449,7 +4448,7 @@ int iuse::oxytorch(player *p, item *it, bool, const tripoint& )
     }
 
     // placing ter here makes resuming tasks work better
-    p->assign_activity( activity_id( "ACT_OXYTORCH" ), moves, (int)ter, p->get_item_position( it ) );
+    p->assign_activity( activity_id( "ACT_OXYTORCH" ), moves, (int)ter, p->get_item_position( it ).value() );
     p->activity.placement = dirp;
     p->activity.values.push_back( charges );
 
@@ -5358,7 +5357,7 @@ int iuse::jet_injector(player *p, item *it, bool, const tripoint& )
 
 int iuse::stimpack(player *p, item *it, bool, const tripoint& )
 {
-    if (p->get_item_position(it) >= -1) {
+    if( !p->is_worn( *it ) ) {
         p->add_msg_if_player(m_info,
                              _("You must wear the stimulant delivery system before you can activate it."));
         return 0;
@@ -5381,7 +5380,7 @@ int iuse::stimpack(player *p, item *it, bool, const tripoint& )
 
 int iuse::radglove(player *p, item *it, bool, const tripoint& )
 {
-    if (p->get_item_position(it) >= -1) {
+    if( !p->is_worn( *it ) ) {
         p->add_msg_if_player(m_info,
                              _("You must wear the radiation biomonitor before you can activate it."));
         return 0;
@@ -5512,7 +5511,7 @@ int iuse::gun_repair(player *p, item *it, bool, const tripoint& )
         p->add_msg_if_player(m_info, _("You need a mechanics skill of 2 to use this repair kit."));
         return 0;
     }
-    int inventory_index = g->inv_for_all(_("Select the firearm to repair"));
+    inventory_index inventory_index = g->inv_for_all(_("Select the firearm to repair"));
     item *fix = &(p->i_at(inventory_index));
     if (fix == NULL || fix->is_null()) {
         p->add_msg_if_player(m_info, _("You do not have that item!"));
@@ -5642,7 +5641,7 @@ int iuse::misc_repair(player *p, item *it, bool, const tripoint& )
         p->add_msg_if_player(m_info, _("You need a fabrication skill of 1 to use this repair kit."));
         return 0;
     }
-    int inventory_index = g->inv_for_filter( _("Select the item to repair"), []( const item & itm ) {
+    inventory_index inventory_index = g->inv_for_filter( _("Select the item to repair"), []( const item & itm ) {
         return ( !itm.is_firearm() ) && (itm.made_of( material_id( "wood" ) ) || itm.made_of( material_id( "paper" ) ) ||
                                  itm.made_of( material_id( "bone" ) ) || itm.made_of( material_id( "chitin" ) ) ) &&
                !itm.count_by_charges();
@@ -6332,7 +6331,7 @@ int iuse::einktabletpc(player *p, item *it, bool t, const tripoint &pos)
 
             p->moves -= 200;
 
-            const int inventory_index = g->inv_for_flag("MC_MOBILE", _("Insert memory card"));
+            const inventory_index inventory_index = g->inv_for_flag("MC_MOBILE", _("Insert memory card"));
             item *mc = &(p->i_at(inventory_index));
 
             if (mc == NULL || mc->is_null()) {
@@ -6362,7 +6361,7 @@ int iuse::einktabletpc(player *p, item *it, bool t, const tripoint &pos)
 
         if (ei_decrypt == choice) {
             p->moves -= 200;
-            const int inventory_index = g->inv_for_flag("MC_MOBILE", _("Insert memory card"));
+            const inventory_index inventory_index = g->inv_for_flag("MC_MOBILE", _("Insert memory card"));
             item *mc = &(p->i_at(inventory_index));
 
             if (mc == NULL || mc->is_null()) {
@@ -6649,7 +6648,7 @@ int iuse::camera(player *p, item *it, bool, const tripoint& )
 
         p->moves -= 200;
 
-        const int inventory_index = g->inv_for_flag("MC_MOBILE", _("Insert memory card"));
+        const inventory_index inventory_index = g->inv_for_flag("MC_MOBILE", _("Insert memory card"));
         item *mc = &(p->i_at(inventory_index));
 
         if (mc == NULL || mc->is_null()) {
@@ -6821,7 +6820,7 @@ int iuse::radiocar(player *p, item *it, bool, const tripoint& )
     if (choice == 2) {
 
         if( it->contents.empty() ) { //arming car with bomb
-            int inventory_index = g->inv_for_flag("RADIOCARITEM", _("Arm what?"));
+            inventory_index inventory_index = g->inv_for_flag("RADIOCARITEM", _("Arm what?"));
             item *put = &(p->i_at(inventory_index));
             if (put == NULL || put->is_null()) {
                 p->add_msg_if_player(m_info, _("You do not have that item!"));
@@ -6898,7 +6897,7 @@ int iuse::radiocaron(player *p, item *it, bool t, const tripoint &pos)
 void sendRadioSignal(player *p, std::string signal)
 {
     for (size_t i = 0; i < p->inv.size(); i++) {
-        item &it = p->inv.find_item(i);
+        item &it = p->inv.find_item( inventory_index( i ) );
 
         if (it.has_flag("RADIO_ACTIVATION") && it.has_flag(signal)) {
             sounds::sound(p->pos(), 6, _("beep."));
@@ -7861,9 +7860,9 @@ int iuse::washclothes( player *p, item *it, bool, const tripoint& )
         return 0;
     }
 
-    const int pos = g->inv_for_flag( "FILTHY", _( "Wash what?" ) );
+    const inventory_index pos = g->inv_for_flag( "FILTHY", _( "Wash what?" ) );
     item &mod = p->i_at( pos );
-    if( pos == INT_MIN ) {
+    if( pos == inventory_index() ) {
         p->add_msg_if_player( m_info, _( "Never mind." ) );
         return 0;
     }
@@ -7895,7 +7894,7 @@ int iuse::washclothes( player *p, item *it, bool, const tripoint& )
     comps1.push_back( item_comp( "detergent", required_cleanser ) );
     p->consume_items( comps1 );
 
-    p->assign_activity( activity_id( "ACT_WASH" ), time, 0, p->get_item_position( &mod ) );
+    p->assign_activity( activity_id( "ACT_WASH" ), time, 0, p->get_item_position( &mod ).value() );
 
     return 0;
 }
