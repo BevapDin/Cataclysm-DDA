@@ -410,7 +410,7 @@ class color_manager
         std::unordered_map<nc_color, color_id> inverted_map;
         std::unordered_map<std::string, color_id> name_map;
 
-        bool save_custom();
+        void save_custom(); // can throw
 
     public:
         color_manager() {};

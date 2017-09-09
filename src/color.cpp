@@ -945,7 +945,7 @@ void color_manager::show_gui()
         }
 
         finalize();
-        save_custom();
+        catch_with_popup( [&]() { save_custom(); } );
 
         clear();
         load_default();
@@ -953,11 +953,11 @@ void color_manager::show_gui()
     }
 }
 
-bool color_manager::save_custom()
+void color_manager::save_custom()
 {
     const auto savefile = FILENAMES["custom_colors"];
 
-    return write_to_file( savefile, [&]( std::ostream &fout ) {
+    write_to_file_throw( savefile, [&]( std::ostream &fout ) {
         JsonOut jsout( fout );
         serialize( jsout );
     }, _( "custom colors" ) );
