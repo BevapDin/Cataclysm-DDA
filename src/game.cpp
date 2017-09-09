@@ -1030,11 +1030,7 @@ bool game::cleanup_at_end()
         }
         // Save the factions', missions and set the NPC's overmap coordinates
         // Npcs are saved in the overmap.
-        try {
-            save_game_data();
-        } catch( const std::exception &err ) {
-            debugmsg( "Failed to save game data: %s", err.what() );
-        }
+        catch_with_popup( [&]() { save_game_data(); }, "Failed to save game data" );
     }
 
     if (uquit == QUIT_DIED || uquit == QUIT_SUICIDE) {
