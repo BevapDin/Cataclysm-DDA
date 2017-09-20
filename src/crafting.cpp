@@ -509,11 +509,8 @@ void player::complete_craft()
                 consume_tools( it, batch_size );
             }
         }
-    } else if( !has_trait( trait_id( "DEBUG_HS" ) ) ) {
+    } else {
         used = last_craft->consume_components();
-        if( used.empty() ) {
-            return;
-        }
     }
 
     // Set up the new item, and assign an inventory letter if available
