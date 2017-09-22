@@ -73,6 +73,9 @@ const efftype_id effect_shakes( "shakes" );
 const efftype_id effect_sleep( "sleep" );
 const efftype_id effect_weed_high( "weed_high" );
 
+const material_id mat_leather( "leather" );
+const material_id mat_kevlar( "kevlar" );
+
 std::string const& rad_badge_color(int const rad)
 {
     using pair_t = std::pair<int const, std::string const>;
@@ -147,7 +150,7 @@ item::item( const itype *type, int turn, long qty ) : type( type )
 
     } else if( type->tool ) {
         if( ammo_remaining() && ammo_type() ) {
-            ammo_set( default_ammo( ammo_type() ), ammo_remaining() );
+            ammo_set( ammo_type()->default_ammotype(), ammo_remaining() );
         }
     }
 
@@ -889,7 +892,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info ) const
     if( is_magazine() && !has_flag( "NO_RELOAD" ) ) {
         info.emplace_back( "MAGAZINE", _( "Capacity: " ),
                            string_format( ngettext( "<num> round of %s", "<num> rounds of %s", ammo_capacity() ),
-                                          ammo_name( ammo_type() ).c_str() ), ammo_capacity(), true );
+                                          ammo_type()->name().c_str() ), ammo_capacity(), true );
 
         info.emplace_back( "MAGAZINE", _( "Reload time: " ), _( "<num> per round" ),
                            type->magazine->reload_time, true, "", true, true );
@@ -904,7 +907,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info ) const
             } else if( is_ammo() ) {
                 info.emplace_back( "AMMO", _( "Types: " ),
                                    enumerate_as_string( type->ammo->type.begin(), type->ammo->type.end(),
-                                                        []( const ammotype &e ) { return _( e->name().c_str() ); }, false ) );
+                                                        []( const ammotype &e ) { return e->name(); }, false ) );
             }
 
             const auto& ammo = *ammo_data()->ammo;
@@ -972,10 +975,10 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info ) const
             if( mod->ammo_capacity() ) {
                 info.emplace_back( "GUN", _( "<bold>Capacity:</bold> " ),
                                    string_format( ngettext( "<num> round of %s", "<num> rounds of %s", mod->ammo_capacity() ),
-                                                  ammo_name( mod->ammo_type() ).c_str() ), mod->ammo_capacity(), true );
+                                                  mod->ammo_type()->name().c_str() ), mod->ammo_capacity(), true );
             }
         } else {
-            info.emplace_back( "GUN", _( "Type: " ), ammo_name( mod->ammo_type() ) );
+            info.emplace_back( "GUN", _( "Type: " ), mod->ammo_type()->name() );
             if( mod->magazine_current() ) {
                 info.emplace_back( "GUN", _( "Magazine: " ), string_format( "<stat>%s</stat>", mod->magazine_current()->tname().c_str() ) );
             }
@@ -1182,7 +1185,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info ) const
         }
         if( type->mod->ammo_modifier ) {
             info.push_back( iteminfo( "GUNMOD",
-                                      string_format( _( "Ammo: <stat>%s</stat>" ), ammo_name( type->mod->ammo_modifier ).c_str() ) ) );
+                                      string_format( _( "Ammo: <stat>%s</stat>" ), type->mod->ammo_modifier->name().c_str() ) ) );
         }
 
         temp1.str( "" );
@@ -1434,7 +1437,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info ) const
             if( ammo_type() ) {
                 //~ "%s" is ammunition type. This types can't be plural.
                 tmp = ngettext( "Maximum <num> charge of %s.", "Maximum <num> charges of %s.", ammo_capacity() );
-                tmp = string_format( tmp, _( ammo_name( ammo_type() ).c_str() ) );
+                tmp = string_format( tmp, ammo_type()->name().c_str() );
             } else {
                 tmp = ngettext( "Maximum <num> charge.", "Maximum <num> charges.", ammo_capacity() );
             }
@@ -2453,7 +2456,7 @@ units::mass item::weight( bool include_contents ) const
 
     } else if( magazine_integral() && !is_magazine() ) {
         if ( ammo_type() == ammotype( "plutonium" ) ) {
-            ret += ammo_remaining() * find_type( default_ammo( ammo_type() ) )->weight / PLUTONIUM_CHARGES;
+            ret += ammo_remaining() * find_type( ammo_type()->default_ammotype() )->weight / PLUTONIUM_CHARGES;
         } else if( ammo_data() ) {
             ret += ammo_remaining() * ammo_data()->weight;
         }
@@ -2946,11 +2949,11 @@ int item::get_encumber() const
         encumber += 1 + 4 * coverage / 100;
     }
 
-    if( item_tags.count("leather_padded") ) {
-        encumber += thickness * coverage / 100 + 5;
+    if( item_tags.count( "leather_padded" ) ) {
+        encumber += ceil( 2 * thickness * coverage / 100.0f );
     }
-    if( item_tags.count("kevlar_padded") ) {
-        encumber += thickness * coverage / 100 + 5;
+    if( item_tags.count( "kevlar_padded" ) ) {
+        encumber += ceil( 2 * thickness * coverage / 100.0f );
     }
 
     return encumber;
@@ -3084,28 +3087,15 @@ bool item::craft_has_charges()
 
 int item::bash_resist( bool to_self ) const
 {
-    float resist = 0;
-    float l_padding = 0;
-    float k_padding = 0;
-    int eff_thickness = 1;
-    // With the multiplying and dividing in previous code, the following
-    // is a coefficient equivalent to the bonuses and maluses hardcoded in
-    // previous versions. Adjust to make you happier/sadder.
-    float adjustment = 1.5;
-
-    static constexpr float max_value = 10.0f;
-    static constexpr float stepness = -0.8f;
-    static constexpr float center_of_S = 2.0f;
-
     if( is_null() ) {
-        return resist;
+        return 0;
     }
-    if( item_tags.count("leather_padded") > 0 ){
-        l_padding = max_value / ( 1 + exp( stepness * ( get_thickness() - center_of_S )));
-    }
-    if( item_tags.count("kevlar_padded") > 0 ){
-        k_padding = max_value / ( 1 + exp( stepness * ( get_thickness() - center_of_S )));
-    }
+
+    const int base_thickness = get_thickness();
+    float resist = 0;
+    float padding = 0;
+    int eff_thickness = 1;
+
     // Armor gets an additional multiplier.
     if( is_armor() ) {
         // base resistance
@@ -3113,6 +3103,12 @@ int item::bash_resist( bool to_self ) const
         const int dmg = damage();
         const int eff_damage = to_self ? std::min( dmg , 0 ) : std::max( dmg, 0 );
         eff_thickness = std::max( 1, get_thickness() - eff_damage );
+    }
+    if( item_tags.count( "leather_padded" ) > 0 ) {
+        padding += base_thickness;
+    }
+    if( item_tags.count("kevlar_padded") > 0 ) {
+        padding += base_thickness;
     }
 
     const std::vector<const material_type*> mat_types = made_of_types();
@@ -3124,42 +3120,33 @@ int item::bash_resist( bool to_self ) const
         resist /= mat_types.size();
     }
 
-    return lround((resist * eff_thickness * adjustment) + l_padding + k_padding);
+    return lround( ( resist * eff_thickness ) + padding );
 }
 
 int item::cut_resist( bool to_self ) const
 {
-    float resist = 0;
-    float l_padding = 0;
-    float k_padding = 0;
-    int eff_thickness = 1;
-    // With the multiplying and dividing in previous code, the following
-    // is a coefficient equivalent to the bonuses and maluses hardcoded in
-    // previous versions. Adjust to make you happier/sadder.
-    float adjustment = 1.5;
-
     if( is_null() ) {
-        return resist;
+        return 0;
     }
-    if( item_tags.count("leather_padded") > 0 ){
-        static constexpr float max_value = 10.0f;
-        static constexpr float stepness = -0.8f;
-        static constexpr float center_of_S = 2.0f;
-        l_padding = max_value / ( 1 + exp( stepness * ( get_thickness() - center_of_S )));
-    }
-    if( item_tags.count("kevlar_padded") > 0 ){
-        static constexpr float max_value = 15.0f;
-        static constexpr float stepness = -0.5f;
-        static constexpr float center_of_S = 2.0f;
-        k_padding = max_value / ( 1 + exp( stepness * ( get_thickness() - center_of_S )));
-    }
+
+    const int base_thickness = get_thickness();
+    float resist = 0;
+    float padding = 0;
+    int eff_thickness = 1;
+
     // Armor gets an additional multiplier.
     if( is_armor() ) {
         // base resistance
         // Don't give reinforced items +armor, just more resistance to ripping
         const int dmg = damage();
         const int eff_damage = to_self ? std::min(dmg, 0) : std::max(dmg, 0);
-        eff_thickness = std::max( 1, get_thickness() - eff_damage );
+        eff_thickness = std::max( 1, base_thickness - eff_damage );
+    }
+    if( item_tags.count( "leather_padded" ) > 0 ) {
+        padding += base_thickness;
+    }
+    if( item_tags.count("kevlar_padded") > 0 ) {
+        padding += base_thickness * 2;
     }
 
     const std::vector<const material_type*> mat_types = made_of_types();
@@ -3171,7 +3158,7 @@ int item::cut_resist( bool to_self ) const
         resist /= mat_types.size();
     }
 
-    return lround((resist * eff_thickness * adjustment) + l_padding + k_padding);
+    return lround( ( resist * eff_thickness ) + padding );
 }
 
 #ifdef _MSC_VER
@@ -4289,7 +4276,7 @@ ammotype item::ammo_type( bool conversion ) const
 
 itype_id item::ammo_default( bool conversion ) const
 {
-    auto res = default_ammo( ammo_type( conversion ) );
+    auto res = ammo_type( conversion )->default_ammotype();
     return !res.empty() ? res : "NULL";
 }
 
@@ -4414,44 +4401,44 @@ ret_val<bool> item::is_gunmod_compatible( const item& mod ) const
     }
 
     if( !is_gun() ) {
-        return ret_val<bool>::make_failure( string_format( _( "isn't a weapon" ) ) );
+        return ret_val<bool>::make_failure( _( "isn't a weapon" ) );
 
     } else if( is_gunmod() ) {
-        return ret_val<bool>::make_failure( string_format( _( "is a gunmod and cannot be modded" ) ) );
+        return ret_val<bool>::make_failure( _( "is a gunmod and cannot be modded" ) );
 
     } else if( gunmod_find( mod.typeId() ) ) {
-        return ret_val<bool>::make_failure( string_format( _( "already has a %s" ), mod.tname( 1 ).c_str() ) );
+        return ret_val<bool>::make_failure( _( "already has a %s" ), mod.tname( 1 ).c_str() );
 
     } else if( !type->gun->valid_mod_locations.count( mod.type->gunmod->location ) ) {
-        return ret_val<bool>::make_failure( string_format( _( "doesn't have a slot for this mod" ) ) );
+        return ret_val<bool>::make_failure( _( "doesn't have a slot for this mod" ) );
 
     } else if( get_free_mod_locations( mod.type->gunmod->location ) <= 0 ) {
-        return ret_val<bool>::make_failure( string_format( _( "doesn't have enough room for another %s mod" ),
-                                            mod.type->gunmod->location.name().c_str() ) );
+        return ret_val<bool>::make_failure( _( "doesn't have enough room for another %s mod" ),
+                                            mod.type->gunmod->location.name().c_str() );
 
     } else if( !mod.type->gunmod->usable.count( gun_type() ) ) {
-        return ret_val<bool>::make_failure( string_format( _( "cannot have a %s" ), mod.tname().c_str() ) );
+        return ret_val<bool>::make_failure( _( "cannot have a %s" ), mod.tname().c_str() );
 
     } else if( typeId() == "hand_crossbow" && !!mod.type->gunmod->usable.count( "pistol" ) ) {
-        return ret_val<bool>::make_failure( string_format( _("isn't big enough to use that mod") ) );
+        return ret_val<bool>::make_failure( _("isn't big enough to use that mod") );
 
     } else if ( !mod.type->mod->acceptable_ammo.empty() && !mod.type->mod->acceptable_ammo.count( ammo_type( false ) ) ) {
         //~ %1$s - name of the gunmod, %2$s - name of the ammo
-        return ret_val<bool>::make_failure( string_format( _( "%1$s cannot be used on %2$s" ), mod.tname( 1 ).c_str(),
-                                            ammo_name( ammo_type( false ) ).c_str() ) );
+        return ret_val<bool>::make_failure( _( "%1$s cannot be used on %2$s" ), mod.tname( 1 ).c_str(),
+                                            ammo_type( false )->name().c_str() );
 
     } else if( mod.typeId() == "waterproof_gunmod" && has_flag( "WATERPROOF_GUN" ) ) {
-        return ret_val<bool>::make_failure( string_format( _( "is already waterproof" ) ) );
+        return ret_val<bool>::make_failure( _( "is already waterproof" ) );
 
     } else if( mod.typeId() == "tuned_mechanism" && has_flag( "NEVER_JAMS" ) ) {
-        return ret_val<bool>::make_failure( string_format( _( "is already eminently reliable" ) ) );
+        return ret_val<bool>::make_failure( _( "is already eminently reliable" ) );
 
     } else if( mod.typeId() == "brass_catcher" && has_flag( "RELOAD_EJECT" ) ) {
-        return ret_val<bool>::make_failure( string_format( _( "cannot have a brass catcher" ) ) );
+        return ret_val<bool>::make_failure( _( "cannot have a brass catcher" ) );
 
     } else if( ( mod.type->mod->ammo_modifier || !mod.type->mod->magazine_adaptor.empty() )
                && ( ammo_remaining() > 0 || magazine_current() ) ) {
-        return ret_val<bool>::make_failure( string_format( _( "must be unloaded before installing this mod" ) ) );
+        return ret_val<bool>::make_failure( _( "must be unloaded before installing this mod" ) );
     }
 
     return ret_val<bool>::make_success();

@@ -1759,6 +1759,13 @@
                 { "item": "splinter", "count": [3, 6] },
                 { "item": "nail", "charges": [6, 12] }
             ]
+        },
+        "deconstruct": {
+            "ter_set": "t_floor",
+            "items": [
+                { "item": "2x4", "count": 12 },
+                { "item": "nail", "charges": 24 }
+            ]
         }
     },{
         "type" : "terrain",
@@ -3461,7 +3468,7 @@
     },{
         "type" : "terrain",
         "id" : "t_underbrush_harvested_spring",
-        "name": "foliage",
+        "name": "underbrush",
         "symbol": "#",
         "color": "green",
         "move_cost": 6,
@@ -3480,7 +3487,7 @@
     },{
         "type" : "terrain",
         "id" : "t_underbrush_harvested_summer",
-        "name": "foliage",
+        "name": "underbrush",
         "symbol": "#",
         "color": "green",
         "move_cost": 6,
@@ -3499,7 +3506,7 @@
     },{
         "type" : "terrain",
         "id" : "t_underbrush_harvested_autumn",
-        "name": "foliage",
+        "name": "underbrush",
         "symbol": "#",
         "color": "green",
         "move_cost": 6,
@@ -3518,7 +3525,7 @@
     },{
         "type" : "terrain",
         "id" : "t_underbrush_harvested_winter",
-        "name": "foliage",
+        "name": "underbrush",
         "symbol": "#",
         "color": "green",
         "move_cost": 6,

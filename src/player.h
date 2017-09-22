@@ -77,8 +77,13 @@ enum edible_rating {
     NO_TOOL
 };
 
-// EDIBLE/INEDIBLE are used as the defaults for success/failure respectively.
-using edible_ret_val = ret_val<edible_rating, EDIBLE, INEDIBLE>;
+/** @relates ret_val */
+template<>
+struct ret_val<edible_rating>::default_success : public std::integral_constant<edible_rating, EDIBLE> {};
+
+/** @relates ret_val */
+template<>
+struct ret_val<edible_rating>::default_failure : public std::integral_constant<edible_rating, INEDIBLE> {};
 
 enum class rechargeable_cbm {
     none = 0,
@@ -769,12 +774,12 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         bool eat( item &food, bool force = false );
 
         /** Can the food be [theoretically] eaten no matter the consquences? */
-        edible_ret_val can_eat( const item &food ) const;
+        ret_val<edible_rating> can_eat( const item &food ) const;
         /**
          * Same as @ref can_eat, but takes consequences into account.
          * Asks about them if @param interactive is true, refuses otherwise.
          */
-        edible_ret_val will_eat( const item &food, bool interactive = false ) const;
+        ret_val<edible_rating> will_eat( const item &food, bool interactive = false ) const;
 
         // TODO: Move these methods out of the class.
         rechargeable_cbm get_cbm_rechargeable_with( const item &it ) const;
@@ -862,7 +867,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
             } else if( has_trait( trait_id( "BADBACK" ) ) ) {
                 str /= 1.35;
             }
-            return get_str() >= obj.lift_strength();
+            return str >= obj.lift_strength();
         }
 
         /**
@@ -875,24 +880,25 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /**
          * Check player capable of wielding an item.
          * @param it Thing to be wielded
-         * @param alert display reason for any failure
          */
-        bool can_wield( const item& it, bool alert = true ) const;
+        ret_val<bool> can_wield( const item& it ) const;
         /**
          * Check player capable of unwielding an item.
          * @param it Thing to be unwielded
-         * @param alert display reason for any failure
          */
-        bool can_unwield( const item& it, bool alert = true ) const;
+        ret_val<bool> can_unwield( const item& it ) const;
         /** Check player's capability of consumption overall */
         bool can_consume( const item &it ) const;
 
+        bool is_wielding( const item& target ) const;
         /**
-         * Removes currently wielded item (if any) and replaces it with the target item
+         * Removes currently wielded item (if any) and replaces it with the target item.
          * @param target replacement item to wield or null item to remove existing weapon without replacing it
          * @return whether both removal and replacement were successful (they are performed atomically)
          */
         virtual bool wield( item& target );
+        bool unwield();
+
         /** Creates the UI and handles player input for picking martial arts styles */
         bool pick_style();
         /**
@@ -1111,7 +1117,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Returns 1 if the player is wearing an item of that count on one foot, 2 if on both, and zero if on neither */
         int shoe_type_count(const itype_id &it) const;
         /** Returns true if the player is wearing power armor */
-        bool is_wearing_power_armor(bool *hasHelmet = NULL) const;
+        bool is_wearing_power_armor(bool *hasHelmet = nullptr) const;
         /** Returns wind resistance provided by armor, etc **/
         int get_wind_resistance(body_part bp) const;
         /** Returns the effect of pain on stats */
@@ -1490,7 +1496,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /**
          * Set which mission is active. The mission must be listed in @ref active_missions.
          */
-        void set_active_mission( mission &mission );
+        void set_active_mission( mission &cur_mission );
         /**
          * Called when a mission has been assigned to the player.
          */
@@ -1499,7 +1505,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
          * Called when a mission has been completed or failed. Either way it's finished.
          * Check @ref mission::has_failed to see which case it is.
          */
-        void on_mission_finished( mission &mission );
+        void on_mission_finished( mission &cur_mission );
         /**
          * Called when a mutation is gained
          */
