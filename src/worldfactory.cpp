@@ -1299,8 +1299,9 @@ void worldfactory::draw_worldgen_tabs(WINDOW *w, unsigned int current)
 
     int x = 2;
     for (size_t i = 0; i < tab_strings.size(); ++i) {
-        draw_tab(w, x, tab_strings[i], (i == current) ? true : false);
-        x += utf8_width( tab_strings[i] ) + 7;
+        const std::string title = _( tab_strings[i].c_str() );
+        draw_tab(w, x, title, (i == current) ? true : false);
+        x += utf8_width( title ) + 7;
     }
 
     mvwputch(w, 2, 0, BORDER_COLOR, LINE_OXXO); // |^
