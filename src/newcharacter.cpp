@@ -856,6 +856,10 @@ tab_direction set_stats(WINDOW *w, player *u, points_left &points)
                       u->get_hit_base());
             mvwprintz( w_description, 1, 0, COL_STAT_BONUS, _("Throwing penalty per target's dodge: +%d"),
                        u->throw_dispersion_per_dodge( false ) );
+            if( u->ranged_dex_mod() != 0 ) {
+                mvwprintz( w_description, 2, 0, COL_STAT_PENALTY, _( "Ranged penalty: -%d" ),
+                           std::abs( u->ranged_dex_mod() ) );
+            }
             fold_and_print(w_description, 4, 0, getmaxx(w_description) - 1, COL_STAT_NEUTRAL,
                            _("Dexterity also enhances many actions which require finesse."));
             break;
@@ -877,13 +881,17 @@ tab_direction set_stats(WINDOW *w, player *u, points_left &points)
             break;
 
         case 4:
-            mvwprintz(w, 9,  2, COL_STAT_ACT, _("Perception:"));
-            mvwprintz(w, 9,  16, COL_STAT_ACT, "%2d", u->per_max);
-            if (u->per_max >= HIGH_STAT) {
-                mvwprintz(w, 3, iSecondColumn, c_ltred, _("Increasing Per further costs 2 points."));
+            mvwprintz( w, 9,  2, COL_STAT_ACT, _( "Perception:" ) );
+            mvwprintz( w, 9,  16, COL_STAT_ACT, "%2d", u->per_max );
+            if( u->per_max >= HIGH_STAT ) {
+                mvwprintz( w, 3, iSecondColumn, c_ltred, _( "Increasing Per further costs 2 points." ) );
             }
-            fold_and_print(w_description, 2, 0, getmaxx(w_description) - 1, COL_STAT_NEUTRAL,
-                           _("Perception is also used for detecting traps and other things of interest."));
+            if( u->ranged_per_mod() > 0 ) {
+                mvwprintz( w_description, 0, 0, COL_STAT_PENALTY, _( "Aiming penalty: -%d" ),
+                           u->ranged_per_mod() );
+            }
+            fold_and_print( w_description, 2, 0, getmaxx( w_description ) - 1, COL_STAT_NEUTRAL,
+                            _( "Perception is also used for detecting traps and other things of interest." ) );
             break;
         }
 
@@ -1653,7 +1661,7 @@ tab_direction set_skills(WINDOW *w, player *u, points_left &points)
                         5, getmaxx(w) - 1, BORDER_COLOR, true );
 
         int first_i, end_i, base_y;
-        if (cur_pos < iHalf) {
+        if (iContentHeight - 1 > num_skills || cur_pos < iHalf) {
             first_i = 0;
             end_i = iContentHeight;
             base_y = 5;
