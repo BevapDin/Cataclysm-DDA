@@ -1345,6 +1345,7 @@ void activity_handlers::train_finish( player_activity *act, player *p )
                                 new_skill_level, skill.name().c_str());
         }
 
+        // possible callback arguments: skill_increase_type, skill_id, skill_value_prev, skill_value_new
         lua_callback( "on_skill_increased", "training" );
         act->set_to_null();
         return;

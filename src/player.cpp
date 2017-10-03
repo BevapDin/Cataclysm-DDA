@@ -9518,6 +9518,7 @@ void player::do_read( item *book )
                                           pgettext( "memorial_female", "Reached skill level %1$d in %2$s." ),
                                           ( int )skill_level, skill.obj().name().c_str() );
                     }
+                    // possible callback arguments: skill_increase_type, skill_id, skill_value_prev, skill_value_new
                     lua_callback( "on_skill_increased", "book" );
                 } else {
                     add_msg( m_good, _( "%s increases their %s level." ), learner->disp_name().c_str(),
@@ -10639,6 +10640,7 @@ void player::practice( const skill_id &id, int amount, int cap )
         int newLevel = get_skill_level( id );
         if (is_player() && newLevel > oldLevel) {
             add_msg(m_good, _("Your skill in %s has increased to %d!"), skill.name().c_str(), newLevel);
+            // possible callback arguments: skill_increase_type, skill_id, skill_value_prev, skill_value_new
             lua_callback( "on_skill_increased", "practice" );
         }
         if(is_player() && newLevel > cap) {
@@ -11636,30 +11638,35 @@ bool player::has_item_with_flag( const std::string &flag ) const
 void player::on_mutation_gain( const trait_id &mid )
 {
     morale->on_mutation_gain( mid );
+    // possible callback arguments: gained_mutation_id
     lua_callback( "on_mutation_gain", mid.c_str() );
 }
 
 void player::on_mutation_loss( const trait_id &mid )
 {
     morale->on_mutation_loss( mid );
+    // possible callback arguments: lost_mutation_id
     lua_callback( "on_mutation_loss", mid.c_str() );
 }
 
 void player::on_stat_change( const std::string &stat, int value )
 {
     morale->on_stat_change( stat, value );
+    // possible callback arguments: stat_id, stat_value_prev, stat_value_new
     lua_callback( "on_stat_change" );
 }
 
 void player::on_item_wear( const item &it )
 {
     morale->on_item_wear( it );
+    // possible callback arguments: worn_item_id
     lua_callback( "on_item_wear" );
 }
 
 void player::on_item_takeoff( const item &it )
 {
     morale->on_item_takeoff( it );
+    // possible callback arguments: taken_off_item_id
     lua_callback( "on_item_takeoff" );
 }
 
@@ -11673,6 +11680,7 @@ void player::on_effect_int_change( const efftype_id &eid, int intensity, body_pa
     }
 
     morale->on_effect_int_change( eid, intensity, bp );
+    // possible callback arguments: effect_id, effect_intensity, affected_body_part
     lua_callback( "on_effect_int_change" );
 }
 
@@ -11680,6 +11688,7 @@ void player::on_mission_assignment( mission &new_mission )
 {
     active_missions.push_back( &new_mission );
     set_active_mission( new_mission );
+    // possible callback arguments: assigned_mission_ref
     lua_callback( "on_mission_assignment" );
 }
 
@@ -11705,6 +11714,7 @@ void player::on_mission_finished( mission &cur_mission )
             active_mission = active_missions.front();
         }
     }
+    // possible callback arguments:finished_mission_ref
     lua_callback( "on_mission_finished" );
 }
 
