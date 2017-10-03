@@ -115,6 +115,12 @@ function MOD.on_mission_finished()
 
 end
 
+function MOD.on_mapgen_finished() 
+
+  MOD.Test("on_mapgen_finished")
+
+end
+
 MOD.Test = function(s)
 
   if (game.add_msg) then

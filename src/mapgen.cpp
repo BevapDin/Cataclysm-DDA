@@ -1758,6 +1758,8 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
     if( terrain_type->is_rotatable() ) {
         mapgen_rotate(m, terrain_type, false );
     }
+
+    lua_callback( "on_mapgen_finished" );
 }
 
 /*
