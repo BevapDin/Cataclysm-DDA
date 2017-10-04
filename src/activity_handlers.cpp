@@ -1346,10 +1346,7 @@ void activity_handlers::train_finish( player_activity *act, player *p )
         }
 
         // possible callback arguments: skill_increase_type, skill_id, skill_level_new
-        const static auto skill_increase_type = "training";
-        const static auto skill_id = skill.ident().c_str();
-        const static auto skill_level_new = std::to_string( new_skill_level ).c_str();
-        lua_callback( "on_skill_increased", skill_increase_type, skill_id, skill_level_new );
+        lua_callback( "on_skill_increased", "training", skill.ident().c_str(), to_string( new_skill_level ).c_str() );
         act->set_to_null();
         return;
     }

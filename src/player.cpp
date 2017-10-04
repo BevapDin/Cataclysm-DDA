@@ -9519,10 +9519,7 @@ void player::do_read( item *book )
                                           ( int )skill_level, skill.obj().name().c_str() );
                     }
                     // possible callback arguments: skill_increase_type, skill_id, skill_level_new
-                    const static auto skill_increase_type = "book";
-                    const static auto skill_id = skill.c_str();
-                    const static auto skill_level_new = std::to_string( originalSkillLevel + 1 ).c_str();
-                    lua_callback( "on_skill_increased", skill_increase_type, skill_id, skill_level_new );
+                    lua_callback( "on_skill_increased", "book", skill.c_str(), to_string( originalSkillLevel + 1 ).c_str() );
                 } else {
                     add_msg( m_good, _( "%s increases their %s level." ), learner->disp_name().c_str(),
                              skill.obj().name().c_str(), skill.obj().name().c_str() );
@@ -10644,10 +10641,7 @@ void player::practice( const skill_id &id, int amount, int cap )
         if (is_player() && newLevel > oldLevel) {
             add_msg(m_good, _("Your skill in %s has increased to %d!"), skill.name().c_str(), newLevel);
             // possible callback arguments: skill_increase_type, skill_id, skill_level_new
-            const static auto skill_increase_type = "practice";
-            const static auto skill_id = skill.ident().c_str();
-            const static auto skill_level_new = std::to_string( newLevel ).c_str();
-            lua_callback( "on_skill_increased", skill_increase_type, skill_id, skill_level_new );
+            lua_callback( "on_skill_increased", "practice", skill.ident().c_str(), to_string( newLevel ).c_str() );
         }
         if(is_player() && newLevel > cap) {
             //inform player immediately that the current recipe can't be used to train further

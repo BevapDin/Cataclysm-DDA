@@ -47,18 +47,6 @@ extern "C" {
 template void lua_callback<const char *>( const char *, const char * );
 template void lua_callback<const char *>( const char *, const char *, const char * );
 template void lua_callback<const char *>( const char *, const char *, const char *, const char * );
-template void lua_callback<const char *>( const char *, const char *, const char *, const char *,
-        const char * );
-template void lua_callback<const char *>( const char *, const char *, const char *, const char *,
-        const char *, const char * );
-template void lua_callback<const char *>( const char *, const char *, const char *, const char *,
-        const char *, const char *, const char * );
-template void lua_callback<const char *>( const char *, const char *, const char *, const char *,
-        const char *, const char *, const char *, const char * );
-template void lua_callback<const char *>( const char *, const char *, const char *, const char *,
-        const char *, const char *, const char *, const char *, const char * );
-template void lua_callback<const char *>( const char *, const char *, const char *, const char *,
-        const char *, const char *, const char *, const char *, const char *, const char * );
 
 using item_stack_iterator = std::list<item>::iterator;
 using volume = units::volume;
