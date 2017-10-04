@@ -115,15 +115,9 @@ function MOD.on_mission_finished()
 
 end
 
-function MOD.on_json_mapgen_finished() 
+function MOD.on_mapgen_finished() 
 
-  MOD.PrintDebugInfo("on_json_mapgen_finished")
-
-end
-
-function MOD.on_lua_mapgen_finished() 
-
-  MOD.PrintDebugInfo("on_lua_mapgen_finished")
+  MOD.PrintDebugInfo("on_mapgen_finished")
 
 end
 
