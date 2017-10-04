@@ -1759,7 +1759,8 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
         mapgen_rotate(m, terrain_type, false );
     }
 
-    lua_callback( "on_mapgen_finished" );
+    // possible callback arguments: mapgen_id
+    lua_callback( "on_json_mapgen_finished", terrain_type.id().c_str() );
 }
 
 /*
@@ -1804,6 +1805,8 @@ int lua_mapgen( map *m, const oter_id &id, const mapgendata &md, int t, float d,
 
 void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &dat, int t, float d ) {
     lua_mapgen( m, terrain_type, dat, t, d, scr );
+    // possible callback arguments: mapgen_id
+    lua_callback( "on_lua_mapgen_finished", terrain_type.id().c_str() );
 }
 
 /////////////
