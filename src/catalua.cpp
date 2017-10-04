@@ -44,10 +44,6 @@ extern "C" {
     #define LUA_OK 0
 #endif
 
-template void lua_callback<const char *>( const char *, const char * );
-template void lua_callback<const char *>( const char *, const char *, const char * );
-template void lua_callback<const char *>( const char *, const char *, const char *, const char * );
-
 using item_stack_iterator = std::list<item>::iterator;
 using volume = units::volume;
 using mass = units::mass;
@@ -1299,3 +1295,7 @@ void game::init_lua()
 {
 }
 #endif
+
+template void lua_callback<const char *>( const char *, const char * );
+template void lua_callback<const char *>( const char *, const char *, const char * );
+template void lua_callback<const char *>( const char *, const char *, const char *, const char * );
