@@ -1345,8 +1345,11 @@ void activity_handlers::train_finish( player_activity *act, player *p )
                                 new_skill_level, skill.name().c_str());
         }
 
-        // possible callback arguments: skill_increase_type, skill_id, skill_value_prev, skill_value_new
-        lua_callback( "on_skill_increased", "training" );
+        // possible callback arguments: skill_increase_type, skill_id, skill_level_new
+        const static auto skill_increase_type = "training";
+        const static auto skill_id = skill.ident().c_str();
+        const static auto skill_level_new = std::to_string( new_skill_level ).c_str();
+        lua_callback( "on_skill_increased", skill_increase_type, skill_id, skill_level_new );
         act->set_to_null();
         return;
     }
@@ -1419,12 +1422,12 @@ void activity_handlers::vibe_do_turn( player_activity *act, player *p )
         p->mod_fatigue(1);
         if( vibrator_item.ammo_remaining() > 0 ) {
             vibrator_item.ammo_consume( 1, p->pos() );
-            p->add_morale(MORALE_FEELING_GOOD, 3, 40); 
+            p->add_morale(MORALE_FEELING_GOOD, 3, 40);
             if( vibrator_item.ammo_remaining() == 0 ) {
                 add_msg(m_info, _("The %s runs out of batteries."), vibrator_item.tname().c_str());
             }
         }
-        else { 
+        else {
             p->add_morale(MORALE_FEELING_GOOD, 1, 40); //twenty minutes to fill
         }
     }
