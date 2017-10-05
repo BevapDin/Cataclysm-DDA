@@ -1322,15 +1322,16 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
             recalc_profs = false;
         }
 
-        int netPointCost = sorted_profs[cur_id]->point_cost() - u->prof->point_cost();
-        bool can_pick = sorted_profs[cur_id]->can_pick(u, points.skill_points_left());
+        const profession &cur_prof = *sorted_profs[cur_id];
+        int netPointCost = cur_prof.point_cost() - u->prof->point_cost();
+        bool can_pick = cur_prof.can_pick(u, points.skill_points_left());
         const std::string clear_line( getmaxx( w ) - 2, ' ' );
 
         // Clear the bottom of the screen and header.
         werase(w_description);
         mvwprintz( w, 3, 1, c_ltgray, clear_line.c_str() );
 
-        int pointsForProf = sorted_profs[cur_id]->point_cost();
+        int pointsForProf = cur_prof.point_cost();
         bool negativeProf = pointsForProf < 0;
         if (negativeProf) {
             pointsForProf *= -1;
@@ -1352,11 +1353,11 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
 
         int pMsg_length = utf8_width( remove_color_tags( points.to_string() ) );
         mvwprintz(w, 3, pMsg_length + 9, can_pick ? c_green : c_ltred, prof_msg_temp.c_str(),
-                  sorted_profs[cur_id]->gender_appropriate_name(u->male).c_str(),
+                  cur_prof.gender_appropriate_name(u->male).c_str(),
                   pointsForProf);
 
         fold_and_print(w_description, 0, 0, TERMX - 2, c_green,
-                       sorted_profs[cur_id]->description(u->male));
+                       cur_prof.description(u->male));
 
         //Draw options
         calcStartPos(iStartPos, cur_id, iContentHeight, profs_length);
@@ -1367,13 +1368,13 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
             mvwprintz(w, 5 + i - iStartPos, 2, c_ltgray, "\
                                              "); // Clear the line
             nc_color col;
-            if( u->prof != &sorted_profs[i].obj() ) {
+            if( u->prof != &cur_prof ) {
                 col = (sorted_profs[i] == sorted_profs[cur_id] ? h_ltgray : c_ltgray);
             } else {
                 col = (sorted_profs[i] == sorted_profs[cur_id] ? hilite(COL_SKILL_USED) : COL_SKILL_USED);
             }
             mvwprintz(w, 5 + i - iStartPos, 2, col,
-                      sorted_profs[i]->gender_appropriate_name(u->male).c_str());
+                      cur_prof.gender_appropriate_name(u->male).c_str());
         }
         //Clear rest of space in case stuff got filtered out
         for (; i < iStartPos + iContentHeight; ++i) {
@@ -1384,7 +1385,7 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
         std::ostringstream buffer;
 
         // Profession addictions
-        const auto prof_addictions = sorted_profs[cur_id]->addictions();
+        const auto prof_addictions = cur_prof.addictions();
         if( !prof_addictions.empty() ) {
             buffer << "<color_ltblue>" << _( "Addictions:" ) << "</color>\n";
             for( const auto &a : prof_addictions ) {
@@ -1394,7 +1395,7 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
         }
 
         // Profession traits
-        const auto prof_traits = sorted_profs[cur_id]->get_locked_traits();
+        const auto prof_traits = cur_prof.get_locked_traits();
         buffer << "<color_ltblue>" << _( "Profession traits:" ) << "</color>\n";
         if( prof_traits.empty() ) {
             buffer << pgettext( "set_profession_trait", "None" ) << "\n";
@@ -1405,7 +1406,7 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
         }
 
         // Profession skills
-        const auto prof_skills = sorted_profs[cur_id]->skills();
+        const auto prof_skills = cur_prof.skills();
         buffer << "<color_ltblue>" << _( "Profession skills:" ) << "</color>\n";
         if( prof_skills.empty() ) {
             buffer << pgettext( "set_profession_skill", "None" ) << "\n";
@@ -1417,7 +1418,7 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
         }
 
         // Profession items
-        const auto prof_items = sorted_profs[cur_id]->items( u->male, u->get_mutations() );
+        const auto prof_items = cur_prof.items( u->male, u->get_mutations() );
         if( prof_items.empty() ) {
             buffer << pgettext( "set_profession_item", "None" ) << "\n";
         } else {
@@ -1432,7 +1433,7 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
         }
 
         // Profession bionics, active bionics shown first
-        auto prof_CBMs = sorted_profs[cur_id]->CBMs();
+        auto prof_CBMs = cur_prof.CBMs();
         std::sort(begin(prof_CBMs), end(prof_CBMs), [](bionic_id const &a, bionic_id const &b) {
             return a->activated && !b->activated;
         });
@@ -1468,7 +1469,7 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
                                    _("Press %1$s to switch to %2$s(male).");
         mvwprintz(w_genderswap, 0, 0, c_magenta, g_switch_msg.c_str(),
                   ctxt.get_desc("CHANGE_GENDER").c_str(),
-                  sorted_profs[cur_id]->gender_appropriate_name(!u->male).c_str());
+                  cur_prof.gender_appropriate_name(!u->male).c_str());
 
         draw_scrollbar(w, cur_id, iContentHeight, profs_length, 5);
 
@@ -1504,7 +1505,7 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
             for( const trait_id &old_trait : u->prof->get_locked_traits() ) {
                 u->toggle_trait( old_trait );
             }
-            u->prof = &sorted_profs[cur_id].obj();
+            u->prof = &cur_prof;
             // Add traits for the new profession (and perhaps scenario, if, for example,
             // both the scenario and old profession require the same trait)
             u->add_traits();
