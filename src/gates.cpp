@@ -312,3 +312,66 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
     }
 }
 
+bool gate_set::attempt_to_open( const tripoint &where, player &u )
+{
+    if( is_locked() ) {
+        u.add_msg_if_player( m_info, _( "The %s is locked!" ), ident->name().c_str() );
+        return false;
+    }
+    if( is_open() ) {
+        u.add_msg_if_player( m_info, _( "The %s is already open." ), ident->name().c_str() );
+        return false;
+    }
+    g->m.ter_set( where, closed );
+    u.mod_moves( moves );
+    u.add_msg_player_or_npc( player_msg.c_str(), npc_msg.c_str(), ident->name().c_str() );
+    return true;
+}
+
+bool gate_set::can_open( const tripoint &where, player &u )
+{
+    if( is_locked() ) {
+        return false;
+    }
+    if( is_open() ) {
+        return false;
+    }
+    return true;
+}
+
+bool gates::attempt_to_open( const tripoint &where, player &u )
+{
+    map &m = g->m;
+    if( const gate_set<ter_t> *const gs_ptr = find_set( m.ter( where ) ) ) {
+        if( gs_ptr->attempt_to_open( where, u ) ) {
+            return true;
+        }
+    }
+    if( const gate_set<furn_t> *const gs_ptr = find_set( m.furn( where ) ) ) {
+        if( gs_ptr->attempt_to_open( where, u ) ) {
+            return true;
+        }
+    }
+
+    bool didit = m.open_door( openp, !m.is_outside( u.pos() ) );
+
+    if (!didit) {
+        const ter_str_id tid = m.ter( openp ).id();
+
+        if( tid.str().find("t_door") != std::string::npos ) {
+            if( tid.str().find("_locked") != std::string::npos ) {
+                add_msg(m_info, _("The door is locked!"));
+                return;
+            } else if ( tid.obj().close ) {
+                // if the following message appears unexpectedly, the prior check was for t_door_o
+                add_msg(m_info, _("That door is already open."));
+                u.moves += 100;
+                return;
+            }
+        }
+        add_msg(m_info, _("No door there."));
+        u.moves += 100;
+    }
+
+    return didit;
+}

@@ -6836,6 +6836,10 @@ void game::open()
         return;
     }
 
+    if( doors::attempt_to_open( openp, u ) ) {
+        return;
+    }
+
     u.moves -= 100;
 
     int vpart;
@@ -6873,33 +6877,13 @@ void game::open()
         }
         return;
     }
-
-    bool didit = m.open_door( openp, !m.is_outside( u.pos() ) );
-
-    if (!didit) {
-        const ter_str_id tid = m.ter( openp ).id();
-
-        if( tid.str().find("t_door") != std::string::npos ) {
-            if( tid.str().find("_locked") != std::string::npos ) {
-                add_msg(m_info, _("The door is locked!"));
-                return;
-            } else if ( tid.obj().close ) {
-                // if the following message appears unexpectedly, the prior check was for t_door_o
-                add_msg(m_info, _("That door is already open."));
-                u.moves += 100;
-                return;
-            }
-        }
-        add_msg(m_info, _("No door there."));
-        u.moves += 100;
-    }
 }
 
 void game::close()
 {
     tripoint closep;
     if( choose_adjacent_highlight( _("Close where?"), closep, ACTION_CLOSE ) ) {
-        doors::close_door( m, u, closep );
+        doors::attempt_to_close( closep, u );
     }
 }
 

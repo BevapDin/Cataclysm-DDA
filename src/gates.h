@@ -6,6 +6,11 @@
 #include "enums.h"
 #include "json.h"
 
+template<typename T>
+class int_id;
+struct ter_id;
+using ter_id = int_id<ter_t>;
+
 namespace gates
 {
 
@@ -17,6 +22,21 @@ void reset();
 void open_gate( const tripoint &pos, player &p );
 /** opens the gate immediately */
 void open_gate( const tripoint &pos );
+
+template<typename T>
+class gate_action {
+    private:
+        int_id<T> source;
+        int_id<T> target;
+
+    public:
+        bool is_locked() const;
+        bool is_open() const;
+        bool is_closed() const;
+};
+
+const gate_set &gate_set_from( ter_id t );
+bool can_open( ter_id t );
 
 };
 
