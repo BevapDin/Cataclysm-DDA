@@ -14,6 +14,7 @@
 #include "catacharset.h"
 #include "debug.h"
 #include "char_validity_check.h"
+#include "scrollable_list.h"
 #include "path_info.h"
 #include "mapsharing.h"
 #include "translations.h"
@@ -1248,15 +1249,36 @@ struct {
     }
 } profession_sorter;
 
+namespace
+{
+class profession_list_data : public filterable_scroll_data<std::vector<string_id<profession>>>
+{
+    public:
+        const player &u;
+
+        profession_list_data( std::vector<string_id<profession>> &data, const player &u ) : filterable_scroll_data( data ), u( u ) { }
+        ~profession_list_data() override = default;
+
+        std::string get_entry_by_value( const string_id<profession> &prof_id, const bool active ) const override {
+            const profession &prof = *prof_id;
+            const std::string name = prof.gender_appropriate_name( u.male );
+            if( u.prof == &prof ) {
+                return "<color_" + get_all_colors().get_name( active ? hilite( COL_SKILL_USED ) : COL_SKILL_USED ) +
+                       ">" + name + "</color>";
+            } else {
+                return name;
+            }
+        }
+};
+} // namespace
+
 /** Handle the profession tab of teh character generation menu */
 tab_direction set_profession(WINDOW *w, player *u, points_left &points)
 {
     draw_tabs( w, _("PROFESSION") );
-    int cur_id = 0;
     tab_direction retval = tab_direction::NONE;
     int desc_offset = 0;
     const int iContentHeight = TERMY - 10;
-    int iStartPos = 0;
 
     WINDOW *w_description = newwin(4, TERMX - 2,
                                    TERMY - 5 + getbegy(w), 1 + getbegx(w));
@@ -1277,38 +1299,30 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
     ctxt.register_action("QUIT");
 
     bool recalc_profs = true;
-    int profs_length = 0;
     std::string filterstring;
     std::vector<string_id<profession>> sorted_profs;
+
+    profession_list_data prof_list_data( sorted_profs, *u );
+    scrollable_list professions_list( w, 2, 5, 45, iContentHeight, prof_list_data );
+    professions_list.default_color( c_ltgray );
+    professions_list.active_color( h_ltgray );
 
     do {
         if (recalc_profs) {
             sorted_profs = g->scen->permitted_professions();
-            const auto new_end = std::remove_if( sorted_profs.begin(), sorted_profs.end(), [&]( const string_id<profession> &arg ) {
-                return !lcmatch( arg->gender_appropriate_name( u->male ), filterstring );
-            } );
-            sorted_profs.erase( new_end, sorted_profs.end() );
-            profs_length = sorted_profs.size();
-            if (profs_length == 0) {
-                popup(_("Nothing found.")); // another case of black box in tiles
-                filterstring.clear();
-                continue;
-            }
 
             // Sort professions by points.
             // profession_display_sort() keeps "unemployed" at the top.
             profession_sorter.male = u->male;
-            std::stable_sort(sorted_profs.begin(), sorted_profs.end(), profession_sorter);
+            ::sort( profession_sorter, prof_list_data, professions_list );
 
-            // Select the current profession, if possible.
-            for (int i = 0; i < profs_length; ++i) {
-                if( sorted_profs[i] == u->prof->ident() ) {
-                    cur_id = i;
-                    break;
-                }
-            }
-            if (cur_id > profs_length - 1) {
-                cur_id = 0;
+            const bool empty = !prof_list_data.filter_by( [&]( const string_id<profession> &arg ) {
+                return filterstring.empty() || lcmatch( arg->gender_appropriate_name( u->male ), filterstring );
+            }, professions_list );
+            if( empty ) {
+                popup(_("Nothing found.")); // another case of black box in tiles
+                filterstring.clear();
+                continue;
             }
 
             // Draw filter indicator
@@ -1322,6 +1336,7 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
             recalc_profs = false;
         }
 
+        const size_t cur_id = professions_list.cursor();
         const profession &cur_prof = *sorted_profs[cur_id];
         int netPointCost = cur_prof.point_cost() - u->prof->point_cost();
         bool can_pick = cur_prof.can_pick(u, points.skill_points_left());
@@ -1359,28 +1374,9 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
         fold_and_print(w_description, 0, 0, TERMX - 2, c_green,
                        cur_prof.description(u->male));
 
-        //Draw options
-        calcStartPos(iStartPos, cur_id, iContentHeight, profs_length);
-        const int end_pos = iStartPos + ((iContentHeight > profs_length) ?
-                            profs_length : iContentHeight);
-        int i;
-        for (i = iStartPos; i < end_pos; i++) {
-            mvwprintz(w, 5 + i - iStartPos, 2, c_ltgray, "\
-                                             "); // Clear the line
-            nc_color col;
-            if( u->prof != &cur_prof ) {
-                col = (sorted_profs[i] == sorted_profs[cur_id] ? h_ltgray : c_ltgray);
-            } else {
-                col = (sorted_profs[i] == sorted_profs[cur_id] ? hilite(COL_SKILL_USED) : COL_SKILL_USED);
-            }
-            mvwprintz(w, 5 + i - iStartPos, 2, col,
-                      cur_prof.gender_appropriate_name(u->male).c_str());
-        }
-        //Clear rest of space in case stuff got filtered out
-        for (; i < iStartPos + iContentHeight; ++i) {
-            mvwprintz(w, 5 + i - iStartPos, 2, c_ltgray, "\
-                                             "); // Clear the line
-        }
+        professions_list.erase();
+        professions_list.draw();
+        professions_list.draw_scrollbar( 5 );
 
         std::ostringstream buffer;
 
@@ -1471,8 +1467,6 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
                   ctxt.get_desc("CHANGE_GENDER").c_str(),
                   cur_prof.gender_appropriate_name(!u->male).c_str());
 
-        draw_scrollbar(w, cur_id, iContentHeight, profs_length, 5);
-
         wrefresh(w);
         wrefresh(w_description);
         wrefresh(w_items);
@@ -1481,16 +1475,10 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
 
         const std::string action = ctxt.handle_input();
         if (action == "DOWN") {
-            cur_id++;
-            if (cur_id > (int)profs_length - 1) {
-                cur_id = 0;
-            }
+            professions_list.move_cursor_down();
             desc_offset = 0;
         } else if (action == "UP") {
-            cur_id--;
-            if (cur_id < 0) {
-                cur_id = profs_length - 1;
-            }
+            professions_list.move_cursor_up();
             desc_offset = 0;
         } else if( action == "LEFT" ) {
             if( desc_offset > 0 ) {
@@ -1771,14 +1759,35 @@ struct {
     }
 } scenario_sorter;
 
+namespace
+{
+class scenario_list_data : public filterable_scroll_data<std::vector<const scenario*>>
+{
+    public:
+        const player &u;
+
+        scenario_list_data( std::vector<const scenario*> &data, const player &u ) : filterable_scroll_data( data ), u( u ) { }
+        ~scenario_list_data() override = default;
+
+        std::string get_entry_by_value( const scenario *const scen_ptr, const bool active ) const override {
+            const scenario &scen = *scen_ptr;
+            const std::string name = prof.gender_appropriate_name( u.male );
+            if( u.prof == &prof ) {
+                return "<color_" + get_all_colors().get_name( active ? hilite( COL_SKILL_USED ) : COL_SKILL_USED ) +
+                       ">" + name + "</color>";
+            } else {
+                return name;
+            }
+        }
+};
+} // namespace
+
 tab_direction set_scenario(WINDOW *w, player *u, points_left &points)
 {
     draw_tabs( w, _("SCENARIO") );
 
-    int cur_id = 0;
     tab_direction retval = tab_direction::NONE;
     const int iContentHeight = TERMY - 10;
-    int iStartPos = 0;
 
     WINDOW *w_description = newwin(4, TERMX - 2,
                                    TERMY - 5 + getbegy(w), 1 + getbegx(w));
@@ -1814,32 +1823,29 @@ tab_direction set_scenario(WINDOW *w, player *u, points_left &points)
     ctxt.register_action("QUIT");
 
     bool recalc_scens = true;
-    int scens_length = 0;
-    std::string filterstring;
-    std::vector<const scenario *> sorted_scens;
+    std::vector<const scenario *> sorted_scens = scenario::get_all();
+    profession_list_data scen_list_data( sorted_scens, *u );
+    scrollable_list scenario_list( w, 2, 5, 45, iContentHeight, scen_list_data );
+    scenario_list.default_color( c_ltgray );
+    scenario_list.active_color( h_ltgray );
 
     do {
         if (recalc_scens) {
-            sorted_scens.clear();
+            // Sort scenarios by points.
+            // scenario_display_sort() keeps "Evacuee" at the top.
+            scenario_sorter.male = u->male;
             auto &wopts = world_generator->active_world->WORLD_OPTIONS;
-            for( const auto &scen : scenario::get_all() ) {
-                if( !lcmatch( scen.gender_appropriate_name( u->male ), filterstring ) ) {
-                    continue;
-                }
-                sorted_scens.push_back( &scen );
-            }
-            scens_length = sorted_scens.size();
-            if (scens_length == 0) {
+            scenario_sorter.cities_enabled = wopts["CITY_SIZE"].getValue() != "0";
+            ::sort( scenario_sorter, scen_list_data, scenario_list );
+
+            const bool empty = !scenario_list.filter_by( [&]( const scenario *const scen_ptr ) {
+                return filterstring.empty() || lcmatch( scen_ptr->gender_appropriate_name( u->male ), filterstring );
+            }, scen_list );
+            if( empty ) {
                 popup(_("Nothing found.")); // another case of black box in tiles
                 filterstring.clear();
                 continue;
             }
-
-            // Sort scenarios by points.
-            // scenario_display_sort() keeps "Evacuee" at the top.
-            scenario_sorter.male = u->male;
-            scenario_sorter.cities_enabled = wopts["CITY_SIZE"].getValue() != "0";
-            std::stable_sort(sorted_scens.begin(), sorted_scens.end(), scenario_sorter);
 
             // If city size is 0 but the current scenario requires cities reset the scenario
             if( !scenario_sorter.cities_enabled && g->scen->has_flag( "CITY_START" ) ) {
