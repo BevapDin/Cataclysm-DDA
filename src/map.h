@@ -494,10 +494,10 @@ class map
         vehicle *veh_at_internal( const tripoint &p, int &part_num );
         const vehicle *veh_at_internal( const tripoint &p, int &part_num ) const;
         /**
-        * Same as `veh_at(const int, const int, int)`, but doesn't return part number.
-        */
-        vehicle *veh_at( const tripoint &p );// checks if tile is occupied by vehicle
-        const vehicle *veh_at( const tripoint &p ) const;
+         * Returns the vehicle at the given position on the map, or `nullptr` if there is no vehicle.
+         * Returns `nullptr` if the position is outside of the map.
+         */
+        vehicle *vehicle_at( const tripoint &pos ) const;
         // put player on vehicle at x,y
         void board_vehicle( const tripoint &p, player *pl );
         void unboard_vehicle( const tripoint &p );//remove player from vehicle at p

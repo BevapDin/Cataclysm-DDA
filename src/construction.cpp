@@ -818,7 +818,7 @@ bool construct::check_empty( const tripoint &p )
 {
     return ( g->m.has_flag( "FLAT", p ) && !g->m.has_furn( p ) &&
              g->is_empty( p ) && g->m.tr_at( p ).is_null() &&
-             g->m.i_at( p ).empty() && g->m.veh_at( p ) == NULL );
+             g->m.i_at( p ).empty() && g->m.vehicle_at( p ) == NULL );
 }
 
 inline std::array<tripoint, 4> get_orthogonal_neighbors( const tripoint &p )

@@ -1093,10 +1093,8 @@ void player::update_bodytemp()
     // Converts temperature to Celsius/10
     int Ctemperature = int( 100 * temp_to_celsius( g->get_temperature() ) );
     w_point const weather = *g->weather_precise;
-    int vpart = -1;
-    vehicle *veh = g->m.veh_at( pos(), vpart );
     int vehwindspeed = 0;
-    if( veh != nullptr ) {
+    if( const vehicle *const veh = g->m.vehicle_at( pos() ) ) {
         vehwindspeed = abs( veh->velocity / 100 ); // vehicle velocity in mph
     }
     const oter_id &cur_om_ter = overmap_buffer.ter( global_omt_location() );
@@ -2186,8 +2184,7 @@ double player::recoil_vehicle() const
     // @todo vary penalty dependent upon vehicle part on which player is boarded
 
     if( in_vehicle ) {
-        vehicle *veh = g->m.veh_at( pos() );
-        if( veh ) {
+        if( const vehicle *const veh = g->m.vehicle_at( pos() ) ) {
             return double( abs( veh->velocity ) ) * 3 / 100;
         }
     }
@@ -2804,7 +2801,7 @@ void player::disp_status( WINDOW *w, WINDOW *w2 )
 
     vehicle *veh = g->remoteveh();
     if( veh == nullptr && in_vehicle ) {
-        veh = g->m.veh_at( pos() );
+        veh = g->m.vehicle_at( pos() );
     }
     if( veh ) {
         veh->print_fuel_indicators( w, sideStyle ? 2 : 3, sideStyle ? getmaxx( w ) - 5 : 49 );
@@ -3338,8 +3335,8 @@ bool player::has_alarm_clock() const
 {
     return ( has_item_with_flag( "ALARMCLOCK" ) ||
              (
-                 ( g->m.veh_at( pos() ) != nullptr ) &&
-                 !g->m.veh_at( pos() )->all_parts_with_feature( "ALARMCLOCK", true ).empty()
+                 ( g->m.vehicle_at( pos() ) != nullptr ) &&
+                 !g->m.vehicle_at( pos() )->all_parts_with_feature( "ALARMCLOCK", true ).empty()
              ) ||
              has_bionic( bio_watch )
            );
@@ -3349,8 +3346,8 @@ bool player::has_watch() const
 {
     return ( has_item_with_flag( "WATCH" ) ||
              (
-                 ( g->m.veh_at( pos() ) != nullptr ) &&
-                 !g->m.veh_at( pos() )->all_parts_with_feature( "WATCH", true ).empty()
+                 ( g->m.vehicle_at( pos() ) != nullptr ) &&
+                 !g->m.vehicle_at( pos() )->all_parts_with_feature( "WATCH", true ).empty()
              ) ||
              has_bionic( bio_watch )
            );
@@ -8927,7 +8924,7 @@ const player *player::get_book_reader( const item &book, std::vector<std::string
     }
 
     // Check for conditions that immediately disqualify the player from reading:
-    const vehicle *veh = g->m.veh_at( pos() );
+    const vehicle *veh = g->m.vehicle_at( pos() );
     if( veh != nullptr && veh->player_in_control( *this ) ) {
         reasons.emplace_back( _( "It's a bad idea to read while driving!" ) );
         return nullptr;

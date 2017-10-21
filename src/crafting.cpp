@@ -186,8 +186,7 @@ bool player::check_eligible_containers_for_crafting( const recipe &rec, int batc
 
         // also check if we're currently in a vehicle that has the necessary storage
         if( charges_to_store > 0 ) {
-            vehicle *veh = g->m.veh_at( pos() );
-            if( veh != NULL ) {
+            if( const vehicle *const veh = g->m.vehicle_at( pos() ) ) {
                 const itype_id &ftype = prod.typeId();
                 int fuel_cap = veh->fuel_capacity( ftype );
                 int fuel_amnt = veh->fuel_left( ftype );

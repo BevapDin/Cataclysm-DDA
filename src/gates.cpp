@@ -249,7 +249,7 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
     int vpart;
     vehicle *const veh = m.veh_at( closep, vpart );
     if( veh ) {
-        const int closable = veh->next_part_to_close( vpart, m.veh_at( who.pos() ) != veh );
+        const int closable = veh->next_part_to_close( vpart, m.vehicle_at( who.pos() ) != veh );
         const int inside_closable = veh->next_part_to_close( vpart );
         const int openable = veh->next_part_to_open( vpart );
         if( closable >= 0 ) {

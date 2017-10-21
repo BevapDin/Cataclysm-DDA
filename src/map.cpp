@@ -835,7 +835,7 @@ void map::move_vehicle( vehicle &veh, const tripoint &dp, const tileray &facing 
     }
     // If the PC is in the currently moved vehicle, adjust the
     //  view offset.
-    if( g->u.controlling_vehicle && veh_at( g->u.pos() ) == &veh ) {
+    if( g->u.controlling_vehicle && vehicle_at( g->u.pos() ) == &veh ) {
         g->calc_driving_offset( &veh );
         if( veh.skidding && can_move ) {
             // TODO: Make skid recovery in air hard
@@ -1160,16 +1160,10 @@ vehicle* map::veh_at_internal( const tripoint &p, int &part_num )
     return const_cast<vehicle *>( const_cast<const map*>(this)->veh_at_internal( p, part_num ) );
 }
 
-vehicle* map::veh_at( const tripoint &p )
+vehicle* map::vehicle_at( const tripoint &p ) const
 {
     int part = 0;
-    return veh_at( p, part );
-}
-
-const vehicle* map::veh_at( const tripoint &p ) const
-{
-    int part = 0;
-    return veh_at( p, part );
+    return const_cast<vehicle*>( veh_at( p, part ) );
 }
 
 void map::board_vehicle( const tripoint &pos, player *p )
@@ -1270,7 +1264,7 @@ vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
         }
     }
     if( our_i < 0 ) {
-        vehicle *v = veh_at( p );
+        vehicle *v = vehicle_at( p );
         for( auto & smap : grid ) {
             for (size_t i = 0; i < smap->vehicles.size(); i++) {
                 if (smap->vehicles[i] == v) {
@@ -2081,9 +2075,7 @@ int map::climb_difficulty( const tripoint &p ) const
             best_difficulty = std::min( best_difficulty, 10 );
             blocks_movement++;
         } else {
-            int part;
-            const vehicle *veh = veh_at( pt, part );
-            if( veh != nullptr ) {
+            if( vehicle_at( pt ) ) {
                 // Vehicle tiles are quite good for climbing
                 // TODO: Penalize spiked parts?
                 best_difficulty = std::min( best_difficulty, 7 );
@@ -2128,7 +2120,7 @@ bool map::supports_above( const tripoint &p ) const
         }
     }
 
-    if( veh_at( p ) != nullptr ) {
+    if( vehicle_at( p ) != nullptr ) {
         return true;
     }
 
@@ -2321,7 +2313,7 @@ void map::drop_items( const tripoint &p )
 
 void map::drop_vehicle( const tripoint &p )
 {
-    vehicle *veh = veh_at( p );
+    vehicle *veh = vehicle_at( p );
     if( veh == nullptr ) {
         return;
     }
@@ -3516,7 +3508,7 @@ bash_params map::bash( const tripoint &p, const int str,
     bash_field( p, bsh );
     bash_items( p, bsh );
     // Don't bash the vehicle doing the bashing
-    const vehicle *veh = veh_at( p );
+    const vehicle *veh = vehicle_at( p );
     if( veh != nullptr && veh != bashing_vehicle ) {
         bash_vehicle( p, bsh );
     }

@@ -1500,7 +1500,7 @@ bool game::do_turn()
         // or the option has been deactivated,
         // might also happen when someone dives from a moving car.
         // or when using the handbrake.
-        vehicle *veh = m.veh_at(u.pos());
+        vehicle *veh = m.vehicle_at(u.pos());
         calc_driving_offset(veh);
     }
 
@@ -2472,7 +2472,7 @@ vehicle *game::remoteveh()
     } else {
         tripoint vp;
         remote_veh_string >> vp.x >> vp.y >> vp.z;
-        vehicle *veh = m.veh_at( vp );
+        vehicle *veh = m.vehicle_at( vp );
         if( veh && veh->fuel_left( "battery", true ) > 0 ) {
             remoteveh_cache = veh;
         } else {
@@ -2520,8 +2520,7 @@ bool game::handle_action()
         ctxt = get_player_input(action);
     }
 
-    int veh_part;
-    vehicle *veh = m.veh_at( u.pos(), veh_part );
+    vehicle *veh = m.vehicle_at( u.pos() );
     bool veh_ctrl = !u.is_dead_state() &&
         ( ( veh && veh->player_in_control(u) ) || remoteveh() != nullptr );
 
@@ -4113,7 +4112,7 @@ void game::debug()
             break;
 
         case 10:
-            if( m.veh_at( u.pos() ) ) {
+            if( m.vehicle_at( u.pos() ) ) {
                 dbg( D_ERROR ) << "game:load: There's already vehicle here";
                 debugmsg( "There's already vehicle here" );
             } else {
@@ -5109,7 +5108,7 @@ tripoint game::get_veh_dir_indicator_location( bool next ) const
     if( !get_option<bool>( "VEHICLE_DIR_INDICATOR" ) ) {
         return tripoint_min;
     }
-    vehicle *veh = m.veh_at( u.pos() );
+    vehicle *veh = m.vehicle_at( u.pos() );
     if( !veh ) {
         return tripoint_min;
     }
@@ -6864,7 +6863,7 @@ void game::open()
     if( veh != nullptr ) {
         int openable = veh->next_part_to_open(vpart);
         if (openable >= 0) {
-            const vehicle *player_veh = m.veh_at(u.pos());
+            const vehicle *player_veh = m.vehicle_at(u.pos());
             bool outside = !player_veh || player_veh != veh;
             if (!outside) {
                 veh->open(openable);
@@ -7030,7 +7029,7 @@ void game::use_wielded_item()
 
 void game::handbrake()
 {
-    vehicle *veh = m.veh_at(u.pos());
+    vehicle *veh = m.vehicle_at(u.pos());
     if (!veh) {
         return;
     }
@@ -7191,8 +7190,7 @@ void game::open_gate( const tripoint &p )
 
 void game::moving_vehicle_dismount( const tripoint &dest_loc )
 {
-    int vpart;
-    vehicle *veh = m.veh_at(u.pos(), vpart);
+    vehicle *veh = m.vehicle_at( u.pos() );
     if( veh == nullptr ) {
         debugmsg("Tried to exit non-existent vehicle.");
         return;
@@ -7608,7 +7606,7 @@ void game::examine()
 {
     // if we are driving a vehicle, examine the
     // current tile without asking.
-    const vehicle * const veh = m.veh_at( u.pos() );
+    const vehicle * const veh = m.vehicle_at( u.pos() );
     if( veh && veh->player_in_control( u ) ) {
         examine( u.pos() );
         return;
@@ -7640,11 +7638,8 @@ void game::examine( const tripoint &examp )
         }
     }
 
-    int veh_part = 0;
-    vehicle *veh = nullptr;
-
-    veh = m.veh_at( examp, veh_part );
-    if( veh != nullptr ) {
+    const vehicle *const veh = m.vehicle_at( examp );
+    if( veh ) {
         if( u.controlling_vehicle ) {
             add_msg(m_info, _("You can't do that while driving."));
         } else if( abs(veh->velocity) > 0 ) {
@@ -9638,7 +9633,7 @@ void game::grab()
 {
     tripoint grabp( 0, 0, 0 );
     if( u.grab_type != OBJECT_NONE ) {
-        vehicle *veh = m.veh_at( u.pos() + u.grab_point );
+        vehicle *veh = m.vehicle_at( u.pos() + u.grab_point );
         if( veh != nullptr ) {
             add_msg(_("You release the %s."), veh->name.c_str());
         } else if (m.has_furn(u.pos() + u.grab_point)) {
@@ -9658,7 +9653,7 @@ void game::grab()
             return;
         }
 
-        vehicle *veh = m.veh_at( grabp );
+        vehicle *veh = m.vehicle_at( grabp );
         if( veh != nullptr ) { // If there's a vehicle, grab that.
             u.grab_point = grabp - u.pos();
             u.grab_type = OBJECT_VEHICLE;
@@ -9687,7 +9682,7 @@ std::vector<vehicle*> nearby_vehicles_for( const itype_id &ft )
 {
     std::vector<vehicle*> result;
     for( auto && p : g->m.points_in_radius( g->u.pos(), 1 ) ) {
-        vehicle * const veh = g->m.veh_at( p );
+        vehicle * const veh = g->m.vehicle_at( p );
         // TODO: constify fuel_left and fuel_capacity
         // TODO: add a fuel_capacity_left function
         if( std::find( result.begin(), result.end(), veh ) != result.end() ) {
@@ -9840,7 +9835,7 @@ bool game::handle_liquid( item &liquid, item * const source, const int radius,
                     m.make_active( target );
                     break;
                 case item_location::type::vehicle:
-                    m.veh_at( target.position() )->make_active( target );
+                    m.vehicle_at( target.position() )->make_active( target );
                     break;
                 case item_location::type::character:
                 case item_location::type::invalid:
@@ -9854,7 +9849,7 @@ bool game::handle_liquid( item &liquid, item * const source, const int radius,
     // This handles liquids stored in vehicle parts directly (e.g. tanks).
     std::set<vehicle *> opts;
     for( const auto &e : g->m.points_in_radius( g->u.pos(), 1 ) ) {
-        auto veh = g->m.veh_at( e );
+        auto veh = g->m.vehicle_at( e );
         if( veh && std::any_of( veh->parts.begin(), veh->parts.end(), [&liquid]( const vehicle_part &pt ) {
             // cannot refill using active liquids (those that rot) due to #18570
             return !liquid.active && pt.can_reload( liquid.typeId() );
@@ -10077,7 +10072,7 @@ bool game::plfire_check( const targeting_data &args ) {
         return false;
     }
 
-    vehicle *veh = m.veh_at( u.pos() );
+    vehicle *veh = m.vehicle_at( u.pos() );
     if( veh != nullptr && veh->player_in_control( u ) && gun->is_two_handed( u ) ) {
         add_msg( m_info, _( "You need a free arm to drive!" ) );
         return false;
@@ -10674,7 +10669,7 @@ void game::reload( item_location &loc, bool prompt )
 void game::reload()
 {
     if( !u.is_armed() || !u.can_reload( u.weapon ) ) {
-        vehicle *veh = m.veh_at( u.pos() );
+        vehicle *veh = m.vehicle_at( u.pos() );
         turret_data turret;
         if( veh && ( turret = veh->turret_query( u.pos() ) ) && turret.can_reload() ) {
             item::reload_option opt = g->u.select_ammo( *turret.base(), true );
@@ -11444,8 +11439,8 @@ bool game::plmove(int dx, int dy, int dz)
     }
 
     // GRAB: pre-action checking.
-    int vpart0 = -1, vpart1 = -1, dpart = -1;
-    vehicle *veh0 = m.veh_at( u.pos(), vpart0 );
+    int vpart1 = -1, dpart = -1;
+    vehicle *veh0 = m.vehicle_at( u.pos() );
     vehicle *veh1 = m.veh_at( dest_loc, vpart1 );
 
     bool veh_closed_door = false;
@@ -11627,7 +11622,7 @@ bool game::walk_move( const tripoint &dest_loc )
             grabbed = false;
         }
     } else if( grabbed && u.grab_type == OBJECT_VEHICLE ) {
-        grabbed_vehicle = m.veh_at( u.pos() + u.grab_point );
+        grabbed_vehicle = m.vehicle_at( u.pos() + u.grab_point );
         if( grabbed_vehicle == nullptr ) {
             // We were grabbing a vehicle that isn't there anymore
             grabbed = false;
@@ -12099,7 +12094,7 @@ bool game::grabbed_furn_move( const tripoint &dp )
         ( !pulling_furniture || is_empty( u.pos() + dp ) ) &&
         ( !has_floor || m.has_flag( "FLAT", fdest ) ) &&
         !m.has_furn( fdest ) &&
-        m.veh_at( fdest ) == nullptr &&
+        m.vehicle_at( fdest ) == nullptr &&
         ( !has_floor || m.tr_at( fdest ).is_null() )
         );
 

@@ -43,8 +43,8 @@ TEST_CASE( "visitable_remove", "[visitable]" )
             if( !g->m.inbounds( e ) ) {
                 return false;
             }
-            if( g->m.veh_at( e ) ) {
-                g->m.destroy_vehicle( g->m.veh_at( e ) );
+            if( g->m.vehicle_at( e ) ) {
+                g->m.destroy_vehicle( g->m.vehicle_at( e ) );
             }
             g->m.i_clear( e );
             return g->m.passable( e );
@@ -396,7 +396,7 @@ TEST_CASE( "visitable_remove", "[visitable]" )
         REQUIRE( g->m.add_vehicle( vproto_id( "shopping_cart" ), veh, 0, 0, 0 ) );
 
         REQUIRE( std::count_if( tiles.begin(), tiles.end(), []( const tripoint & e ) {
-            return g->m.veh_at( e );
+            return g->m.vehicle_at( e );
         } ) == 1 );
 
         int part = -1;

@@ -16,7 +16,7 @@ bool game::grabbed_veh_move( const tripoint &dp )
         return false;
     }
 
-    const vehicle *veh_under_player = m.veh_at( u.pos() );
+    const vehicle *veh_under_player = m.vehicle_at( u.pos() );
     if( grabbed_vehicle == veh_under_player ) {
         u.grab_point = -dp;
         return false;

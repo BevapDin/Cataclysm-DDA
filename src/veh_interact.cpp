@@ -1579,7 +1579,7 @@ void veh_interact::move_cursor (int dx, int dy)
     tripoint vehp = veh->global_pos3() + q;
     const bool has_critter = g->critter_at( vehp );
     bool obstruct = g->m.impassable_ter_furn( vehp );
-    vehicle *oveh = g->m.veh_at( vehp );
+    vehicle *oveh = g->m.vehicle_at( vehp );
     if( oveh != nullptr && oveh != veh ) {
         obstruct = true;
     }
@@ -2274,7 +2274,7 @@ void veh_interact::complete_vehicle()
         debugmsg ("Invalid activity ACT_VEHICLE values:%d", g->u.activity.values.size());
         return;
     }
-    vehicle *veh = g->m.veh_at( tripoint( g->u.activity.values[0], g->u.activity.values[1], g->u.posz() ) );
+    vehicle *veh = g->m.vehicle_at( tripoint( g->u.activity.values[0], g->u.activity.values[1], g->u.posz() ) );
     if (!veh) {
         debugmsg ("Activity ACT_VEHICLE: vehicle not found");
         return;

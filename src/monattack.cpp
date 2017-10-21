@@ -2825,7 +2825,7 @@ void mattack::tankgun( monster *z, Creature *target )
         return;
     }
     // Target the vehicle itself instead if there is one.
-    vehicle *veh = g->m.veh_at( target->pos() );
+    vehicle *veh = g->m.vehicle_at( target->pos() );
     if( veh != nullptr ) {
         aim_point = veh->global_pos3() + veh->rotated_center_of_mass();
     }

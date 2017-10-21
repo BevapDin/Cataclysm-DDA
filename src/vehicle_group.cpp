@@ -286,7 +286,7 @@ void builtin_parkinglot( map &m, const std::string & )
         pos_p.y = rng( 0, 4 ) * 4 + rng( 2, 4 );
         pos_p.z = m.get_abs_sub().z;
 
-        if( !m.veh_at( pos_p ) ) {
+        if( !m.vehicle_at( pos_p ) ) {
             m.add_vehicle( vgroup_id( "parkinglot" ), pos_p,
                            ( one_in( 2 ) ? 0 : 180 ) + ( one_in( 10 ) * rng( 0, 179 ) ), -1, -1 );
         }

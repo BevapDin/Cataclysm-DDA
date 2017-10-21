@@ -2761,8 +2761,8 @@ int iuse::siphon(player *p, item *it, bool, const tripoint& )
         return 0;
     }
 
-    vehicle *veh = g->m.veh_at(posp);
-    if (veh == NULL) {
+    vehicle *const veh = g->m.vehicle_at( posp );
+    if( !veh ) {
         p->add_msg_if_player(m_info, _("There's no vehicle there."));
         return 0;
     }
@@ -4277,7 +4277,7 @@ int iuse::portable_structure(player *p, item *it, bool, const tripoint& )
         for (int j = -radius; j <= radius; j++) {
             tripoint dest( posx + i, posy + j, p->posz() );
             if (!g->m.has_flag("FLAT", dest) ||
-                 g->m.veh_at( dest ) != nullptr ||
+                 g->m.vehicle_at( dest ) ||
                 !g->is_empty( dest ) ||
                  g->critter_at( dest ) != nullptr ||
                     g->m.has_furn(dest)) {
@@ -7231,9 +7231,8 @@ int iuse::cable_attach(player *p, item *it, bool, const tripoint& )
         if(!choose_adjacent(_("Attach cable to vehicle where?"),posp)) {
             return 0;
         }
-        auto veh = g->m.veh_at( posp );
         auto ter = g->m.ter( posp );
-        if( veh == nullptr && ter != t_chainfence_h && ter != t_chainfence_v ) {
+        if( !g->m.vehicle_at( posp ) && ter != t_chainfence_h && ter != t_chainfence_v ) {
             p->add_msg_if_player(_("There's no vehicle there."));
             return 0;
         } else {
@@ -7394,11 +7393,9 @@ int iuse::weather_tool( player *p, item *it, bool, const tripoint& )
     }
 
     if( it->typeId() == "weather_reader" ) {
-        int vpart = -1;
-        vehicle *veh = g->m.veh_at( p->pos(), vpart );
         int vehwindspeed = 0;
-        if( veh ) {
-            vehwindspeed = abs( veh->velocity / 100 ); // For mph
+        if( const vehicle *const vpart = g->m.vehicle_at( p->pos() ) ) {
+            vehwindspeed = abs( vpart->velocity / 100 ); // For mph
         }
         const oter_id &cur_om_ter = overmap_buffer.ter( p->global_omt_location() );
         /* windpower defined in internal velocity units (=.01 mph) */

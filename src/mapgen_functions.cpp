@@ -409,7 +409,7 @@ void mapgen_dirtlot(map *m, oter_id, mapgendata, int, float)
     for(int v = 0; v < num_v; v++) {
         const tripoint vp( rng(0, 16) + 4, rng(0, 16) + 4, m->get_abs_sub().z );
         int theta = rng(0,3)*180 + one_in(3)*rng(0,89);
-        if( !m->veh_at( vp ) ) {
+        if( !m->vehicle_at( vp ) ) {
             m->add_vehicle( vgroup_id("dirtlot"), vp, theta, -1, -1 );
         }
     }
