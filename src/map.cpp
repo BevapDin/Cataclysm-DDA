@@ -37,6 +37,7 @@
 #include "item_group.h"
 #include "pathfinding.h"
 #include "scent_map.h"
+#include "vehicle_part_reference.h"
 #include "harvest.h"
 #include "input.h"
 
@@ -1116,6 +1117,13 @@ VehicleList map::get_vehicles( const tripoint &start, const tripoint &end )
     }
 
     return vehs;
+}
+
+vehicle_part_reference map::veh_part_at( const tripoint &pos ) const
+{
+    int part;
+    vehicle *const veh = const_cast<vehicle*>( veh_at( pos, part ) );
+    return veh ? vehicle_part_reference( *veh, part ) : vehicle_part_reference();
 }
 
 vehicle* map::veh_at( const tripoint &p, int &part_num )
@@ -2445,10 +2453,10 @@ bool map::can_put_items( const tripoint &p ) const
 {
     if (can_put_items_ter_furn( p )) {
         return true;
+    } else if( veh_part_at( p ).part_with_feature( "CARGO" ) ) {
+        return true;
     } else {
-        int part = -1;
-        const vehicle * const veh = veh_at( p, part );
-        return veh != nullptr && veh->part_with_feature( part, "CARGO" ) >= 0;
+        return false;
     }
 }
 

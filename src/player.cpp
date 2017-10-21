@@ -20,6 +20,7 @@
 #include "item.h"
 #include "material.h"
 #include "translations.h"
+#include "vehicle_part_reference.h"
 #include "cursesdef.h"
 #include "catacharset.h"
 #include "get_version.h"
@@ -9618,8 +9619,7 @@ const recipe_subset player::get_available_recipes( const inventory &crafting_inv
 
 void player::try_to_sleep()
 {
-    int vpart = -1;
-    vehicle *veh = g->m.veh_at( pos(), vpart );
+    const vehicle_part_reference vpart = g->m.veh_part_at( pos() );
     const trap &trap_at_pos = g->m.tr_at(pos());
     const ter_id ter_at_pos = g->m.ter(pos());
     const furn_id furn_at_pos = g->m.furn(pos());
@@ -9632,10 +9632,10 @@ void player::try_to_sleep()
         plantsleep = true;
         if( (ter_at_pos == t_dirt || ter_at_pos == t_pit ||
               ter_at_pos == t_dirtmound || ter_at_pos == t_pit_shallow ||
-              ter_at_pos == t_grass) && !veh &&
+              ter_at_pos == t_grass) && !vpart &&
               furn_at_pos == f_null ) {
             add_msg_if_player(m_good, _("You relax as your roots embrace the soil."));
-        } else if (veh) {
+        } else if( vpart ) {
             add_msg_if_player(m_bad, _("It's impossible to sleep in this wheeled pot!"));
         } else if (furn_at_pos != f_null) {
             add_msg_if_player(m_bad, _("The humans' furniture blocks your roots. You can't get comfortable."));
@@ -9681,8 +9681,8 @@ void player::try_to_sleep()
          trap_at_pos.loadid == tr_fur_rollmat || furn_at_pos == f_armchair ||
          furn_at_pos == f_sofa || furn_at_pos == f_hay || furn_at_pos == f_straw_bed ||
          ter_at_pos == t_improvised_shelter || (in_shell) || (websleeping) ||
-         (veh && veh->part_with_feature (vpart, "SEAT") >= 0) ||
-         (veh && veh->part_with_feature (vpart, "BED") >= 0)) ) {
+         vpart.part_with_feature( "SEAT" ) ||
+         vpart.part_with_feature( "BED" ) ) ) {
         add_msg_if_player(m_good, _("This is a comfortable place to sleep."));
     } else if (ter_at_pos != t_floor && !plantsleep) {
         add_msg_if_player( ter_at_pos.obj().movecost <= 2 ?
@@ -9726,8 +9726,7 @@ int player::sleep_spot( const tripoint &p ) const
         // Your shell's interior is a comfortable place to sleep.
         in_shell = true;
     }
-    int vpart = -1;
-    vehicle *veh = g->m.veh_at(p, vpart);
+    const vehicle_part_reference vpart = g->m.veh_part_at( p );
     const maptile tile = g->m.maptile_at( p );
     const trap &trap_at_pos = tile.get_trap_t();
     const ter_id ter_at_pos = tile.get_ter();
@@ -9740,10 +9739,10 @@ int player::sleep_spot( const tripoint &p ) const
         if (in_shell) {
             sleepy += 4;
         // Else use the vehicle tile if we are in one
-        } else if (veh) {
-            if (veh->part_with_feature (vpart, "BED") >= 0) {
+        } else if( vpart ) {
+            if( vpart.part_with_feature( "BED" ) ) {
                 sleepy += 4;
-            } else if (veh->part_with_feature (vpart, "SEAT") >= 0) {
+            } else if( vpart.part_with_feature( "SEAT" ) ) {
                 sleepy += 3;
             } else {
                 // Sleeping elsewhere is uncomfortable
@@ -9772,7 +9771,7 @@ int player::sleep_spot( const tripoint &p ) const
         }
     // Has plantsleep
     } else if (plantsleep) {
-        if (veh || furn_at_pos != f_null) {
+        if (vpart || furn_at_pos != f_null) {
             // Sleep ain't happening in a vehicle or on furniture
             sleepy -= 999;
         } else {

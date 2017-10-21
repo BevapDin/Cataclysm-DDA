@@ -14,6 +14,7 @@
 #include "effect.h"
 #include "bionics.h"
 #include "gamemode.h"
+#include "vehicle_part_reference.h"
 #include "mapbuffer.h"
 #include "map_item_stack.h"
 #include "debug.h"
@@ -6766,14 +6767,11 @@ bool game::swap_critters( Creature &a, Creature &b )
     second.setpos( first.pos() );
     first.setpos( temp );
 
-    int part = -1;
-    vehicle *veh = g->m.veh_at( u_or_npc->pos(), part );
-    if( veh != nullptr && veh->part_with_feature( part, VPFLAG_BOARDABLE ) >= 0 ) {
+    if( g->m.veh_part_at( u_or_npc->pos() ).part_with_feature( VPFLAG_BOARDABLE ) ) {
         g->m.board_vehicle( u_or_npc->pos(), u_or_npc );
     }
 
-    vehicle *oveh = g->m.veh_at( other_npc->pos(), part );
-    if( oveh != nullptr && oveh->part_with_feature( part, VPFLAG_BOARDABLE ) >= 0 ) {
+    if( g->m.veh_part_at( other_npc->pos() ).part_with_feature( VPFLAG_BOARDABLE ) ) {
         g->m.board_vehicle( other_npc->pos(), other_npc );
     }
 
@@ -10118,11 +10116,9 @@ bool game::plfire_check( const targeting_data &args ) {
         }
 
         if( gun->has_flag( "MOUNTED_GUN" ) ) {
-            int vpart = -1;
-            veh = m.veh_at( u.pos(), vpart );
-            bool v_mountable = ( veh && veh->part_with_feature( vpart, "MOUNTABLE" ) >= 0 );
+            const auto vpart = m.veh_part_at( u.pos() ).part_with_feature( "MOUNTABLE" );
             bool t_mountable = m.has_flag_ter_or_furn( "MOUNTABLE", u.pos() );
-            if( !t_mountable && !v_mountable ) {
+            if( !t_mountable && !vpart ) {
                 add_msg(m_info,
                         _( "You must stand near acceptable terrain or furniture to use this weapon. A table, a mound of dirt, a broken window, etc." ) );
                 return false;
@@ -11269,9 +11265,7 @@ bool game::prompt_dangerous_tile( const tripoint &dest_loc ) const
 
     if( !u.is_blind() ) {
         const trap &tr = m.tr_at(dest_loc);
-        int vpart;
-        const vehicle *const veh = m.veh_at( dest_loc, vpart );
-        const bool boardable = veh && veh->part_with_feature( vpart, "BOARDABLE" ) >= 0;
+        const bool boardable = static_cast<bool>( m.veh_part_at( dest_loc ).part_with_feature( "BOARDABLE" ) );
         // Hack for now, later ledge should stop being a trap
         // Note: in non-z-level mode, ledges obey different rules and so should be handled as regular traps
         if( tr.loadid == tr_ledge && m.has_zlevels() ) {
@@ -12048,10 +12042,7 @@ bool game::phasing_move( const tripoint &dest_loc )
         u.moves -= 100; //tunneling costs 100 moves
         u.setpos( dest );
 
-        int vpart;
-        const vehicle *veh = m.veh_at( u.pos(), vpart );
-        if( veh != nullptr &&
-            veh->part_with_feature(vpart, "BOARDABLE") >= 0) {
+        if( m.veh_part_at( u.pos() ).part_with_feature( "BOARDABLE" ) ) {
             m.board_vehicle( u.pos(), &u );
         }
 
@@ -12298,12 +12289,8 @@ void game::plswim( const tripoint &p )
     }
     u.setpos( p );
     update_map( u );
-    {
-        int part;
-        const auto veh = m.veh_at( u.pos(), part );
-        if( veh != nullptr && veh->part_with_feature( part, VPFLAG_BOARDABLE ) >= 0 ) {
-            m.board_vehicle( u.pos(), &u );
-        }
+    if( m.veh_part_at( u.pos() ).part_with_feature( VPFLAG_BOARDABLE ) ) {
+        m.board_vehicle( u.pos(), &u );
     }
     u.moves -= (movecost > 200 ? 200 : movecost)  * (trigdist && diagonal ? 1.41 : 1);
     u.inv.rust_iron_items();

@@ -39,6 +39,7 @@ struct maptile;
 class basecamp;
 class computer;
 struct itype;
+class vehicle_part_reference;
 struct mapgendata;
 class map_cursor;
 class Character;
@@ -498,6 +499,12 @@ class map
          * Returns `nullptr` if the position is outside of the map.
          */
         vehicle *vehicle_at( const tripoint &pos ) const;
+        /**
+         * Returns a reference to a vehicle part at the given position on the map,
+         * or an invalid reference if there is no vehicle at all.
+         * Returns an invalid reference if the position is outside of the map.
+         */
+        vehicle_part_reference veh_part_at( const tripoint &pos ) const;
         // put player on vehicle at x,y
         void board_vehicle( const tripoint &p, player *pl );
         void unboard_vehicle( const tripoint &p );//remove player from vehicle at p
