@@ -123,7 +123,8 @@ int_id<furn_t>::int_id( const string_id<furn_t> &id ) : _id( id.id() )
 {
 }
 
-static const std::unordered_map<std::string, ter_bitflags> ter_bitflags_map = { {
+template<>
+const std::unordered_map<std::string, ter_bitflags> generic_flag_set<ter_bitflags, NUM_TERFLAGS>::string_to_enum_map = { {
     { "DESTROY_ITEM",             TFLAG_DESTROY_ITEM },   // add/spawn_item*()
     { "ROUGH",                    TFLAG_ROUGH },          // monmove
     { "UNSTABLE",                 TFLAG_UNSTABLE },       // monmove
@@ -382,17 +383,13 @@ void load_terrain( JsonObject &jo, const std::string &src )
 
 void map_data_common_t::set_flag( const std::string &flag )
 {
-    flags.insert( flag );
-    auto const it = ter_bitflags_map.find( flag );
-    if( it != ter_bitflags_map.end() ) {
-        bitflags.set( it->second );
-        if( !transparent && it->second == TFLAG_TRANSPARENT ) {
-            transparent = true;
-        }
-        // wall connection check for JSON backwards compatibility
-        if( it->second == TFLAG_WALL || it->second == TFLAG_CONNECT_TO_WALL ) {
-            set_connects( "WALL" );
-        }
+    flags.set( flag );
+    if( !transparent && flag == "TRANSPARENT" ) {
+        transparent = true;
+    }
+    // wall connection check for JSON backwards compatibility
+    if( flag == "WALL" || flag == "CONNECT_TO_WALL" ) {
+        set_connects( "WALL" );
     }
 }
 

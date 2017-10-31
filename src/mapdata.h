@@ -5,6 +5,7 @@
 #include "int_id.h"
 #include "string_id.h"
 #include "units.h"
+#include "generic_flag_set.h"
 
 #include <bitset>
 #include <vector>
@@ -193,8 +194,7 @@ struct map_data_common_t {
         std::string name_;
 
 private:
-    std::set<std::string> flags;    // string flags which possibly refer to what's documented above.
-    std::bitset<NUM_TERFLAGS> bitflags; // bitfield of -certian- string flags which are heavily checked
+        generic_flag_set<ter_bitflags, NUM_TERFLAGS> flags;
 
 public:
         std::string name() const;
@@ -227,15 +227,11 @@ public:
 
     bool transparent;
 
-    bool has_flag(const std::string & flag) const {
-        return flags.count(flag) > 0;
-    }
-
-    bool has_flag(const ter_bitflags flag) const {
-        return bitflags.test( flag );
-    }
-
-    void set_flag( const std::string &flag );
+        template<typename T>
+        bool has_flag( T flag) const {
+            return flags.has( flag );
+        }
+    void set_flag(const std::string &flag);
 
     int connect_group;
 

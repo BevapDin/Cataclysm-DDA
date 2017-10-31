@@ -181,6 +181,48 @@ typename std::enable_if<std::is_constructible<T, std::string>::value, bool>::typ
     return res;
 }
 
+template<typename T>
+class generic_flag_set;
+
+template <typename T>
+bool assign(
+    JsonObject &jo, const std::string &name, generic_flag_set<T> &val, bool = false )
+{
+    auto add = jo.get_object( "extend" );
+    auto del = jo.get_object( "delete" );
+
+    if( jo.has_string( name ) || jo.has_array( name ) ) {
+        val.clear();
+        for( const auto &f : jo.get_tags( name ) ) {
+            val.set( f );
+        }
+
+        if( add.has_member( name ) || del.has_member( name ) ) {
+            // ill-formed to (re)define a value and then extend/delete within same definition
+            jo.throw_error( "multiple assignment of value", name );
+        }
+        return true;
+    }
+
+    bool res = false;
+
+    if( add.has_string( name ) || add.has_array( name ) ) {
+        for( const auto &e : del.get_tags( name ) ) {
+            val.set( e );
+        }
+        res = true;
+    }
+
+    if( del.has_string( name ) || del.has_array( name ) ) {
+        for( const auto &e : del.get_tags( name ) ) {
+            val.unset( e );
+        }
+        res = true;
+    }
+
+    return res;
+}
+
 inline bool assign( JsonObject &jo, const std::string &name, units::volume &val,
                     bool strict = false,
                     const units::volume lo = units::volume_min,

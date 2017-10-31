@@ -8,6 +8,7 @@
 #include "damage.h"
 #include "calendar.h"
 #include "units.h"
+#include "generic_flag_set.h"
 
 #include <vector>
 #include <bitset>
@@ -197,8 +198,7 @@ class vpart_info
         /** Name from vehicle part definition which if set overrides the base item name */
         mutable std::string name_;
 
-        std::set<std::string> flags;    // flags
-        std::bitset<NUM_VPFLAGS> bitflags; // flags checked so often that things slow down due to string cmp
+        generic_flag_set<vpart_bitflags> flags;
 
         /** Second field is the multiplier */
         std::vector<std::pair<requirement_id, int>> install_reqs;
@@ -210,13 +210,14 @@ class vpart_info
         int z_order;        // z-ordering, inferred from location, cached here
         int list_order;     // Display order in vehicle interact display
 
-        bool has_flag( const std::string &flag ) const {
-            return flags.count( flag ) != 0;
+        template<typename T>
+        bool has_flag( T flag ) const {
+            return flags.has( flag );
         }
-        bool has_flag( const vpart_bitflags flag ) const {
-            return bitflags.test( flag );
+        template<typename T>
+        void set_flag( T flag ) {
+            flags.set( flag );
         }
-        void set_flag( const std::string &flag );
 
         static void load( JsonObject &jo, const std::string &src );
         static void finalize();

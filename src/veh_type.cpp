@@ -45,7 +45,8 @@ std::unordered_map<vproto_id, vehicle_prototype> vtypes;
 // vehicle_parts.json
 // If you use wrong config, installation of part will fail
 
-static const std::unordered_map<std::string, vpart_bitflags> vpart_bitflag_map = {
+template<>
+const std::unordered_map<std::string, vpart_bitflags> generic_flag_set<vpart_bitflags>::string_to_enum_map = {
     { "ARMOR", VPFLAG_ARMOR },
     { "EVENTURN", VPFLAG_EVENTURN },
     { "ODDTURN", VPFLAG_ODDTURN },
@@ -233,15 +234,6 @@ void vpart_info::load( JsonObject &jo, const std::string &src )
     }
 }
 
-void vpart_info::set_flag( const std::string &flag )
-{
-    flags.insert( flag );
-    const auto iter = vpart_bitflag_map.find( flag );
-    if( iter != vpart_bitflag_map.end() ) {
-        bitflags.set( iter->second );
-    }
-}
-
 void vpart_info::finalize()
 {
     DynamicDataLoader::get_instance().load_deferred( deferred );
@@ -255,13 +247,6 @@ void vpart_info::finalize()
 
         if( e.second.folded_volume > 0 ) {
             e.second.set_flag( "FOLDABLE" );
-        }
-
-        for( const auto& f : e.second.flags ) {
-            auto b = vpart_bitflag_map.find( f );
-            if( b != vpart_bitflag_map.end() ) {
-                e.second.bitflags.set( b->second );
-            }
         }
 
         // Calculate and cache z-ordering based off of location
