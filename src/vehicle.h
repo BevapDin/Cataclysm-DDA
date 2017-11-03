@@ -25,6 +25,7 @@ class map;
 class player;
 class npc;
 class vehicle;
+class vehicle_stack;
 class vpart_info;
 enum vpart_bitflags : int;
 using vpart_id = string_id<vpart_info>;
@@ -57,23 +58,6 @@ struct veh_collision {
     std::string   target_name;
 
     veh_collision() = default;
-};
-
-class vehicle_stack : public item_stack {
-private:
-    tripoint location;
-    vehicle *myorigin;
-    int part_num;
-public:
-vehicle_stack( std::list<item> *newstack, tripoint newloc, vehicle *neworigin, int part ) :
-    item_stack( newstack ), location( newloc ), myorigin( neworigin ), part_num( part ) {};
-    std::list<item>::iterator erase( std::list<item>::iterator it ) override;
-    void push_back( const item &newitem ) override;
-    void insert_at( std::list<item>::iterator index, const item &newitem ) override;
-    int count_limit() const override {
-        return MAX_ITEM_IN_VEHICLE_STORAGE;
-    }
-    units::volume max_volume() const override;
 };
 
 /**

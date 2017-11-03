@@ -11,6 +11,7 @@
 #include "map.h"
 #include "submap.h"
 #include "vehicle.h"
+#include "vehicle_stack.h"
 #include "veh_type.h"
 #include "game.h"
 #include "itype.h"

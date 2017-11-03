@@ -10,6 +10,7 @@
 #include "output.h"
 #include "options.h"
 #include "ui.h"
+#include "vehicle_stack.h"
 #include "itype.h"
 #include "vehicle.h"
 #include "mapdata.h"

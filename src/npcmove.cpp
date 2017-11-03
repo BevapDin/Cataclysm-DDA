@@ -9,6 +9,7 @@
 #include "line.h"
 #include "debug.h"
 #include "overmapbuffer.h"
+#include "vehicle_stack.h"
 #include "messages.h"
 #include "ammo.h"
 #include "translations.h"

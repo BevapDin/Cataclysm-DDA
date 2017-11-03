@@ -10,6 +10,7 @@
 #include "inventory.h"
 #include "itype.h"
 #include "ammo.h"
+#include "vehicle_stack.h"
 #include "map.h"
 #include "messages.h"
 #include "item.h"

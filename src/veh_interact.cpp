@@ -17,6 +17,7 @@
 #include "veh_type.h"
 #include "ui.h"
 #include "itype.h"
+#include "vehicle_stack.h"
 #include "cata_utility.h"
 #include "vehicle_selector.h"
 #include "fault.h"

@@ -12,6 +12,7 @@
 #include "player_activity.h"
 #include "string_formatter.h"
 #include "compatibility.h"
+#include "vehicle_stack.h"
 #include "enums.h"
 #include "input.h"
 #include "options.h"

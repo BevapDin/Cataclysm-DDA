@@ -7,6 +7,7 @@
 #include "iuse.h"
 #include "iuse_actor.h"
 #include "options.h"
+#include "vehicle_stack.h"
 #include "npc.h"
 #include "itype.h"
 #include "vehicle.h"

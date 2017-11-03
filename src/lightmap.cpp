@@ -7,6 +7,7 @@
 #include "monster.h"
 #include "veh_type.h"
 #include "vehicle.h"
+#include "vehicle_stack.h"
 #include "submap.h"
 #include "mtype.h"
 #include "weather.h"

@@ -6,6 +6,7 @@
 #include "map.h"
 #include "translations.h"
 #include "string_formatter.h"
+#include "vehicle_stack.h"
 #include "options.h"
 #include "messages.h"
 #include "catacharset.h"

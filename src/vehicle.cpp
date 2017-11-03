@@ -18,6 +18,7 @@
 #include "ui.h"
 #include "debug.h"
 #include "sounds.h"
+#include "vehicle_stack.h"
 #include "translations.h"
 #include "ammo.h"
 #include "options.h"

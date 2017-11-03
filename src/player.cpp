@@ -31,6 +31,7 @@
 #include "martialarts.h"
 #include "output.h"
 #include "overmapbuffer.h"
+#include "vehicle_stack.h"
 #include "messages.h"
 #include "sounds.h"
 #include "item_action.h"

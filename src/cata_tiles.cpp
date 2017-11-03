@@ -14,6 +14,7 @@
 #include "map.h"
 #include "trap.h"
 #include "monster.h"
+#include "vehicle_stack.h"
 #include "options.h"
 #include "overmapbuffer.h"
 #include "player.h"

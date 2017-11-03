@@ -14,6 +14,7 @@
 #include "translations.h"
 #include "iexamine.h"
 #include "string_formatter.h"
+#include "vehicle_stack.h"
 #include "sounds.h"
 #include "debug.h"
 #include "trap.h"
