@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "visitable.h"
+#include "vehicle_part_reference.h"
 
 class vehicle;
 struct tripoint;
@@ -12,9 +13,8 @@ struct tripoint;
 class vehicle_cursor : public visitable<vehicle_cursor>
 {
     public:
-        vehicle_cursor( vehicle &veh, int part ) : veh( veh ), part( part ) {};
-        vehicle &veh;
-        int part;
+        vehicle_cursor( const vehicle_part_reference part ) : part( part ) {}
+        vehicle_part_reference part;
 };
 
 class vehicle_selector : public visitable<vehicle_selector>

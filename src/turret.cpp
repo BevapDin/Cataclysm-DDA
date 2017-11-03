@@ -73,12 +73,12 @@ std::string turret_data::name() const
 
 item_location turret_data::base()
 {
-    return item_location( vehicle_cursor( *veh, veh->index_of_part( part ) ), &part->base );
+    return item_location( vehicle_cursor( vehicle_part_reference( *veh, veh->index_of_part( part ) ) ), &part->base );
 }
 
 const item_location turret_data::base() const
 {
-    return item_location( vehicle_cursor( *veh, veh->index_of_part( part ) ), &part->base );
+    return item_location( vehicle_cursor( vehicle_part_reference( *veh, veh->index_of_part( part ) ) ), &part->base );
 }
 
 long turret_data::ammo_remaining() const

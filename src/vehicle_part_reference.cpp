@@ -97,3 +97,9 @@ std::list<item>::iterator vehicle_part_reference::remove_item( const std::list<i
     assert( is_valid() );
     return veh_->remove_item( index_, it );
 }
+
+vehicle_part &vehicle_part_reference::part() const
+{
+    assert( is_valid() );
+    return veh_->parts[index_];
+}

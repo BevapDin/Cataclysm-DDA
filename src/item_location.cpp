@@ -359,13 +359,13 @@ class item_location::impl::item_on_vehicle : public item_location::impl
         }
 
         tripoint position() const override {
-            return cur.veh.global_part_pos3( cur.part );
+            return cur.part.veh()->global_part_pos3( cur.part.index() );
         }
 
         std::string describe( const Character *ch ) const override {
-            std::string res = cur.veh.parts[ cur.part ].name();
+            std::string res = cur.part.name();
             if( ch ) {
-                res += std::string( " " ) += direction_suffix( ch->pos(), cur.veh.global_part_pos3( cur.part ) );
+                res += std::string( " " ) += direction_suffix( ch->pos(), cur.part.veh->global_part_pos3( cur.part.index() ) );
             }
             return res;
         }
@@ -396,7 +396,7 @@ class item_location::impl::item_on_vehicle : public item_location::impl
 
             int mv = dynamic_cast<const player *>( &ch )->item_handling_cost( obj, true,
                      VEHICLE_HANDLING_PENALTY );
-            mv += 100 * rl_dist( ch.pos(), cur.veh.global_part_pos3( cur.part ) );
+            mv += 100 * rl_dist( ch.pos(), cur.part.veh()->global_part_pos3( cur.part.index() ) );
 
             //@ todo handle unpacking costs
 
@@ -404,9 +404,9 @@ class item_location::impl::item_on_vehicle : public item_location::impl
         }
 
         void remove_item() override {
-            item &base = cur.veh.parts[ cur.part ].base;
+            item &base = cur.part.part().base;
             if( &base == target() ) {
-                cur.veh.remove_part( cur.part ); // vehicle_part::base
+                cur.part.veh()->remove_part( cur.part.index() ); // vehicle_part::base
             } else {
                 cur.remove_item( *target() ); // item within CARGO
             }
@@ -493,7 +493,7 @@ void item_location::deserialize( JsonIn &js )
         auto *veh = g->m.vehicle_at( pos );
         int part = obj.get_int( "part" );
         if( veh && part >= 0 && part < int( veh->parts.size() ) ) {
-            ptr.reset( new impl::item_on_vehicle( vehicle_cursor( *veh, part ), idx ) );
+            ptr.reset( new impl::item_on_vehicle( vehicle_cursor( vehicle_part_reference( *veh, part ) ), idx ) );
         }
     }
 }

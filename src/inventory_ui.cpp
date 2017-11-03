@@ -975,7 +975,7 @@ void inventory_selector::add_vehicle_items( const tripoint &target )
         const item_category vehicle_cat( name, name, 200 );
 
         add_items( map_column, [ veh, part ]( item *it ) {
-            return item_location( vehicle_cursor( *veh, part ), it );
+            return item_location( vehicle_cursor( vehicle_part_reference( *veh, part ) ), it );
         }, restack_items( items.begin(), items.end() ), &vehicle_cat );
     }
 }

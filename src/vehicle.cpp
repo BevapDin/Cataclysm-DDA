@@ -2034,7 +2034,7 @@ void vehicle::part_removal_cleanup() {
 
 item_location vehicle::part_base( int p )
 {
-    return item_location( vehicle_cursor( *this, p ), &parts[ p ].base );
+    return item_location( vehicle_cursor( vehicle_part_reference( *this, p ) ), &parts[ p ].base );
 }
 
 int vehicle::find_part( const item& it ) const

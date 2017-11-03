@@ -16,6 +16,7 @@ class quantity;
 class volume_in_milliliter_tag;
 using volume = quantity<int, volume_in_milliliter_tag>;
 } // namespace units
+struct vehicle_part;
 
 /**
  * This is a wrapper over a vehicle pointer and a part index. The index refers to
@@ -56,13 +57,20 @@ class vehicle_part_reference
         vehicle *veh() const {
             return veh_;
         }
-
+        /// Returns the part index this refers to. The result is unspecified
+        /// if this reference is invalid.
+        int index() const {
+            return index_;
+        }
         bool operator==( const vehicle_part_reference &rhs ) const {
             return veh_ == rhs.veh_ && ( !veh_ || index_ == rhs.index_ );
         }
         bool operator!=( const vehicle_part_reference &rhs ) const {
             return !operator==( rhs );
         }
+        /// Returns the referred vehicle part from the parts vector @ref vehicle::parts.
+        /// Must be called on a valid reference.
+        vehicle_part &part() const;
         /// Returns an empty string on an invalid reference.
         std::string get_label() const;
         /// May return an invalid reference.

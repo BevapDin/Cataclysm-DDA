@@ -115,12 +115,13 @@ static int has_quality_internal( const T &self, const quality_id &qual, int leve
     return std::min( qty, limit );
 }
 
-static int has_quality_from_vpart( const vehicle &veh, int part, const quality_id &qual, int level,
+static int has_quality_from_vpart( const vehicle_part_reference &part, const quality_id &qual, int level,
                                    int limit )
 {
     int qty = 0;
 
-    auto pos = veh.parts[ part ].mount;
+    const vehicle &veh = *part.veh();
+    auto pos = veh.parts[ part.index() ].mount;
     for( const auto &n : veh.parts_at_relative( pos.x, pos.y ) ) {
 
         // only unbroken parts can provide tool qualities
@@ -162,7 +163,7 @@ template <>
 bool visitable<vehicle_selector>::has_quality( const quality_id &qual, int level, int qty ) const
 {
     for( const auto &cursor : static_cast<const vehicle_selector &>( *this ) ) {
-        qty -= has_quality_from_vpart( cursor.veh, cursor.part, qual, level, qty );
+        qty -= has_quality_from_vpart( cursor.part, qual, level, qty );
         if( qty <= 0 ) {
             return true;
         }
@@ -176,7 +177,7 @@ bool visitable<vehicle_cursor>::has_quality( const quality_id &qual, int level, 
 {
     auto self = static_cast<const vehicle_cursor *>( this );
 
-    qty -= has_quality_from_vpart( self->veh, self->part, qual, level, qty );
+    qty -= has_quality_from_vpart( self->part, qual, level, qty );
     return qty <= 0 ? true : has_quality_internal( *this, qual, level, qty ) == qty;
 }
 
@@ -210,11 +211,12 @@ static int max_quality_internal( const T &self, const quality_id &qual )
     return res;
 }
 
-static int max_quality_from_vpart( const vehicle &veh, int part, const quality_id &qual )
+static int max_quality_from_vpart( const vehicle_part_reference &part, const quality_id &qual )
 {
     int res = INT_MIN;
 
-    auto pos = veh.parts[ part ].mount;
+    const vehicle &veh = *part.veh();
+    auto pos = veh.parts[ part.index() ].mount;
     for( const auto &n : veh.parts_at_relative( pos.x, pos.y ) ) {
 
         // only unbroken parts can provide tool qualities
@@ -268,7 +270,7 @@ template <>
 int visitable<vehicle_cursor>::max_quality( const quality_id &qual ) const
 {
     auto self = static_cast<const vehicle_cursor *>( this );
-    return std::max( max_quality_from_vpart( self->veh, self->part, qual ),
+    return std::max( max_quality_from_vpart( self->part, qual ),
                      max_quality_internal( *this, qual ) );
 }
 
@@ -455,9 +457,8 @@ VisitResponse visitable<vehicle_cursor>::visit_items(
 {
     auto self = static_cast<vehicle_cursor *>( this );
 
-    int idx = self->veh.part_with_feature( self->part, "CARGO" );
-    if( idx >= 0 ) {
-        for( auto &e : self->veh.get_items( idx ) ) {
+    if( const auto cargo = self->part.part_with_feature( "CARGO" ) ) {
+        for( auto &e : cargo.get_items() ) {
             if( visit_internal( func, &e ) == VisitResponse::ABORT ) {
                 return VisitResponse::ABORT;
             }
@@ -696,17 +697,18 @@ std::list<item> visitable<vehicle_cursor>::remove_items_with( const
         return res; // nothing to do
     }
 
-    int idx = cur->veh.part_with_feature( cur->part, "CARGO" );
-    if( idx < 0 ) {
+    const vehicle_part_reference cargo = cur->part.part_with_feature( "CARGO" );
+    if( !cargo ) {
         return res;
     }
 
-    vehicle_part &part = cur->veh.parts[ idx ];
+    vehicle_part &part = cargo.part();
+    vehicle &veh = *cargo.veh();
     for( auto iter = part.items.begin(); iter != part.items.end(); ) {
         if( filter( *iter ) ) {
             // check for presence in the active items cache
-            if( cur->veh.active_items.has( iter, part.mount ) ) {
-                cur->veh.active_items.remove( iter, part.mount );
+            if( veh.active_items.has( iter, part.mount ) ) {
+                veh.active_items.remove( iter, part.mount );
             }
             res.splice( res.end(), part.items, iter++ );
             if( --count == 0 ) {
@@ -723,7 +725,7 @@ std::list<item> visitable<vehicle_cursor>::remove_items_with( const
 
     if( !res.empty() ) {
         // if we removed any items then invalidate the cached mass
-        cur->veh.invalidate_mass();
+        veh.invalidate_mass();
     }
 
     return res;
