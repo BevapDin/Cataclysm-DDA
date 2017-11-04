@@ -5,6 +5,7 @@
 #include <string>
 #include <list>
 
+class player;
 class vehicle;
 enum vpart_bitflags : int;
 class vehicle_stack;
@@ -128,6 +129,8 @@ class vehicle_part_reference
         const vpart_info &part_info() const;
         /// Returns an unspecific, but valid color when called on an invalid reference.
         nc_color part_color( bool exact = false ) const;
+        /// Returns `nullptr` on an invalid reference.
+        player *get_passenger() const;
 };
 
 /// Compares @ref vehicle_part_reference::veh() to given vehicle pointer.

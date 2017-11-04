@@ -181,3 +181,8 @@ nc_color vehicle_part_reference::part_color( const bool exact ) const
 {
     return is_valid() ? veh_->part_color( index_ ) : c_white;
 }
+
+player *vehicle_part_reference::get_passenger() const
+{
+    return is_valid() ? veh_->get_passenger( index_ ) : nullptr;
+}

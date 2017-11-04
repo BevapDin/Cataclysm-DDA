@@ -1171,7 +1171,7 @@ void map::board_vehicle( const tripoint &pos, player *p )
         return;
     }
     if( seat_part.part().has_flag( vehicle_part::passenger_flag ) ) {
-        player *psg = seat_part.veh()->get_passenger( seat_part.index() );
+        player *psg = seat_part.get_passenger();
         debugmsg( "map::board_vehicle: passenger (%s) is already there",
                   psg ? psg->name.c_str() : "<null>" );
         unboard_vehicle( pos );
@@ -1207,17 +1207,16 @@ void map::unboard_vehicle( const tripoint &p )
                   vpart.name().c_str() );
         return;
     }
-    vehicle *const veh = vpart.veh();
-    passenger = veh->get_passenger( vpart.index() );
+    passenger = vpart.get_passenger();
     if( !passenger ) {
         debugmsg ("map::unboard_vehicle: passenger not found");
         return;
     }
     passenger->in_vehicle = false;
     passenger->controlling_vehicle = false;
-    veh->parts[vpart.index()].remove_flag(vehicle_part::passenger_flag);
-    veh->skidding = true;
-    veh->invalidate_mass();
+    vpart.part().remove_flag(vehicle_part::passenger_flag);
+    vpart.veh()->skidding = true;
+    vpart.veh()->invalidate_mass();
 }
 
 vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
