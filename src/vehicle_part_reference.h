@@ -42,6 +42,8 @@ class vehicle_part_reference
             return veh_ != nullptr;
         }
 
+        /// Returns an empty string on an invalid reference.
+        std::string get_label() const;
         /// May return an invalid reference.
         /// Returns an invalid reference if called on an invalid reference.
         /**@{*/

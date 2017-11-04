@@ -11735,11 +11735,9 @@ bool game::walk_move( const tripoint &dest_loc )
 
 void game::place_player( const tripoint &dest_loc )
 {
-    int vpart1;
-    const vehicle *veh1 = m.veh_at( dest_loc, vpart1 );
-    if( veh1 != nullptr ) {
-        const vehicle_part *part = &(veh1->parts[vpart1]);
-        std::string label = veh1->get_label(part->mount.x, part->mount.y);
+    const auto vpart = m.veh_part_at( dest_loc );
+    if( vpart ) {
+        const std::string label = vpart.get_label();
         if (!label.empty()) {
             add_msg(m_info, _("Label here: %s"), label.c_str());
         }
@@ -11865,7 +11863,7 @@ void game::place_player( const tripoint &dest_loc )
     }
 
     // If the new tile is a boardable part, board it
-    if( veh1 != nullptr && veh1->part_with_feature(vpart1, "BOARDABLE") >= 0 ) {
+    if( vpart.part_with_feature( "BOARDABLE" ) ) {
         m.board_vehicle( u.pos(), &u );
     }
 
@@ -11955,7 +11953,7 @@ void game::place_player( const tripoint &dest_loc )
         }
     }
 
-    if( veh1 != nullptr && veh1->part_with_feature(vpart1, "CONTROLS") >= 0 && u.in_vehicle ) {
+    if( vpart.part_with_feature( "CONTROLS" ) && u.in_vehicle ) {
         add_msg(_("There are vehicle controls here."));
         add_msg(m_info, _("%s to drive."),
                 press_x(ACTION_CONTROL_VEHICLE).c_str());

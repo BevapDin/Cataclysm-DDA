@@ -36,6 +36,15 @@ vehicle_part_reference vehicle_part_reference::part_with_feature( const vpart_bi
                                    unbroken ) : -1 );
 }
 
+std::string vehicle_part_reference::get_label() const
+{
+    if( !is_valid() ) {
+        return std::string();
+    }
+    const vehicle_part &part = veh_->parts[index_];
+    return veh_->get_label( part.mount.x, part.mount.y );
+}
+
 bool vehicle_part_reference::is_inside() const
 {
     return is_valid() && veh_->is_inside( index_ );
