@@ -3,9 +3,19 @@
 #define VEHICLE_PART_REFERENCE_H
 
 #include <string>
+#include <list>
 
 class vehicle;
 enum vpart_bitflags : int;
+class vehicle_stack;
+class item;
+namespace units
+{
+template<typename V, typename U>
+class quantity;
+class volume_in_milliliter_tag;
+using volume = quantity<int, volume_in_milliliter_tag>;
+} // namespace units
 
 /**
  * This is a wrapper over a vehicle pointer and a part index. The index refers to
@@ -41,7 +51,18 @@ class vehicle_part_reference
         bool is_valid() const {
             return veh_ != nullptr;
         }
+        /// Returns the vehicle this refers to, if any. Returns `nullptr` on
+        /// invalid references.
+        vehicle *veh() const {
+            return veh_;
+        }
 
+        bool operator==( const vehicle_part_reference &rhs ) const {
+            return veh_ == rhs.veh_ && ( !veh_ || index_ == rhs.index_ );
+        }
+        bool operator!=( const vehicle_part_reference &rhs ) const {
+            return !operator==( rhs );
+        }
         /// Returns an empty string on an invalid reference.
         std::string get_label() const;
         /// May return an invalid reference.
@@ -50,8 +71,28 @@ class vehicle_part_reference
         vehicle_part_reference part_with_feature( const std::string &feature, bool unbroken = true ) const;
         vehicle_part_reference part_with_feature( vpart_bitflags feature, bool unbroken = true ) const;
         /**@}*/
+        /// Returns 0 on an invalid reference.
+        units::volume max_volume() const;
+        /// Returns 0 on an invalid reference.
+        units::volume free_volume() const;
+        /// Returns 0 on an invalid reference.
+        units::volume stored_volume() const;
+        /// Returns `false` on an invalid reference.
         /// Returns `false` on an invalid reference.
         bool is_inside() const;
+        /// *Must* be called on an valid reference.
+        vehicle_stack get_items() const;
+        /// Returns `false` on an invalid reference.
+        bool add_item( const item &obj ) const;
+        /// Returns 0 on an invalid reference.
+        long add_charges( const item &itm ) const;
+        /// Returns `false` on an invalid reference, but the overload with
+        /// the iterator *must* be called on a valid reference.
+        /**@{*/
+        bool remove_item( size_t item_index ) const;
+        bool remove_item( const item &it ) const;
+        std::list<item>::iterator remove_item( std::list<item>::iterator it );
+        /**@}*/
 };
 
 #endif

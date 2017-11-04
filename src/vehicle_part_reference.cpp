@@ -1,6 +1,7 @@
 #include "vehicle_part_reference.h"
 
 #include "vehicle.h"
+#include "vehicle_stack.h"
 
 #include <cassert>
 
@@ -45,7 +46,54 @@ std::string vehicle_part_reference::get_label() const
     return veh_->get_label( part.mount.x, part.mount.y );
 }
 
+units::volume vehicle_part_reference::max_volume() const
+{
+    return is_valid() ? veh_->max_volume( index_ ) : 0;
+}
+
+units::volume vehicle_part_reference::free_volume() const
+{
+    return is_valid() ? veh_->free_volume( index_ ) : 0;
+}
+
+units::volume vehicle_part_reference::stored_volume() const
+{
+    return is_valid() ? veh_->stored_volume( index_ ) : 0;
+}
+
 bool vehicle_part_reference::is_inside() const
 {
     return is_valid() && veh_->is_inside( index_ );
+}
+
+vehicle_stack vehicle_part_reference::get_items() const
+{
+    assert( is_valid() );
+    return veh_->get_items( index_ );
+}
+
+bool vehicle_part_reference::add_item( const item &obj ) const
+{
+    return is_valid() && veh_->add_item( index_, obj );
+}
+
+long vehicle_part_reference::add_charges( const item &itm ) const
+{
+    return is_valid() ? veh_->add_charges( index_, itm ) : 0l;
+}
+
+bool vehicle_part_reference::remove_item( const size_t item_index ) const
+{
+    return is_valid() && veh_->remove_item( index_, item_index );
+}
+
+bool vehicle_part_reference::remove_item( const item &it ) const
+{
+    return is_valid() && veh_->remove_item( index_, &it );
+}
+
+std::list<item>::iterator vehicle_part_reference::remove_item( const std::list<item>::iterator it )
+{
+    assert( is_valid() );
+    return veh_->remove_item( index_, it );
 }
