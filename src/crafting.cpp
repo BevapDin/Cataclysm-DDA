@@ -24,6 +24,7 @@
 #include "ui.h"
 #include "vehicle.h"
 #include "crafting_gui.h"
+#include "vehicle_part_reference.h"
 
 #include <algorithm> //std::min
 #include <iostream>
@@ -247,15 +248,10 @@ std::vector<const item *> player::get_eligible_containers_for_crafting() const
             }
         }
 
-        int part = -1;
-        vehicle *veh = g->m.veh_at( loc, part );
-        if( veh && part >= 0 ) {
-            part = veh->part_with_feature( part, "CARGO" );
-            if( part != -1 ) {
-                for( const auto &it : veh->get_items( part ) ) {
-                    if( is_container_eligible_for_crafting( it, false ) ) {
-                        conts.emplace_back( &it );
-                    }
+        if( const auto vpart = g->m.veh_part_at( loc ).part_with_feature( "CARGO" ) ) {
+            for( const auto &it : vpart.get_items() ) {
+                if( is_container_eligible_for_crafting( it, false ) ) {
+                    conts.emplace_back( &it );
                 }
             }
         }

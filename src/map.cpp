@@ -4859,16 +4859,10 @@ std::list<item> map::use_amount_square( const tripoint &p, const itype_id type,
         quantity = 0;
         return ret;
     }
-    int vpart = -1;
-    vehicle *veh = veh_at( p, vpart );
-
-    if( veh ) {
-        const int cargo = veh->part_with_feature(vpart, "CARGO");
-        if( cargo >= 0 ) {
-            std::list<item> tmp = use_amount_stack( veh->get_items(cargo), type,
-                                                    quantity );
-            ret.splice( ret.end(), tmp );
-        }
+    if( const auto cargo = veh_part_at( p ).part_with_feature( "CARGO" ) ) {
+        std::list<item> tmp = use_amount_stack( cargo.get_items(), type,
+                                                quantity );
+        ret.splice( ret.end(), tmp );
     }
     std::list<item> tmp = use_amount_stack( i_at( p ), type, quantity );
     ret.splice( ret.end(), tmp );
@@ -5020,20 +5014,20 @@ std::list<item> map::use_charges(const tripoint &origin, const int range,
             return ret;
         }
 
-        int vpart = -1;
-        vehicle *veh = veh_at( p, vpart );
-        if( veh == nullptr ) {
+        const auto vpart = veh_part_at( p );
+        if( !vpart ) {
             continue;
         }
+        vehicle *const veh = vpart.veh();
 
-        const int kpart = veh->part_with_feature(vpart, "FAUCET");
-        const int weldpart = veh->part_with_feature(vpart, "WELDRIG");
-        const int craftpart = veh->part_with_feature(vpart, "CRAFTRIG");
-        const int forgepart = veh->part_with_feature(vpart, "FORGE");
-        const int chempart = veh->part_with_feature(vpart, "CHEMLAB");
-        const int cargo = veh->part_with_feature(vpart, "CARGO");
+        const auto kpart = vpart.part_with_feature( "FAUCET" );
+        const auto weldpart = vpart.part_with_feature( "WELDRIG" );
+        const auto craftpart = vpart.part_with_feature( "CRAFTRIG" );
+        const auto forgepart = vpart.part_with_feature( "FORGE" );
+        const auto chempart = vpart.part_with_feature( "CHEMLAB" );
+        const auto cargo = vpart.part_with_feature( "CARGO" );
 
-        if (kpart >= 0) { // we have a faucet, now to see what to drain
+        if( kpart ) { // we have a faucet, now to see what to drain
             itype_id ftype = "null";
 
             // Special case hotplates which draw battery power
@@ -5054,7 +5048,7 @@ std::list<item> map::use_charges(const tripoint &origin, const int range,
             }
         }
 
-        if (weldpart >= 0) { // we have a weldrig, now to see what to drain
+        if( weldpart ) { // we have a weldrig, now to see what to drain
             itype_id ftype = "null";
 
             if (type == "welder") {
@@ -5073,7 +5067,7 @@ std::list<item> map::use_charges(const tripoint &origin, const int range,
             }
         }
 
-        if (craftpart >= 0) { // we have a craftrig, now to see what to drain
+        if( craftpart ) { // we have a craftrig, now to see what to drain
             itype_id ftype = "null";
 
             if (type == "press") {
@@ -5096,7 +5090,7 @@ std::list<item> map::use_charges(const tripoint &origin, const int range,
             }
         }
 
-        if (forgepart >= 0) { // we have a veh_forge, now to see what to drain
+        if( forgepart ) { // we have a veh_forge, now to see what to drain
             itype_id ftype = "null";
 
             if (type == "forge") {
@@ -5113,7 +5107,7 @@ std::list<item> map::use_charges(const tripoint &origin, const int range,
             }
         }
 
-        if (chempart >= 0) { // we have a chem_lab, now to see what to drain
+        if( chempart ) { // we have a chem_lab, now to see what to drain
             itype_id ftype = "null";
 
             if (type == "chemistry_set") {
@@ -5132,9 +5126,9 @@ std::list<item> map::use_charges(const tripoint &origin, const int range,
             }
         }
 
-        if (cargo >= 0) {
+        if( cargo ) {
             std::list<item> tmp =
-                use_charges_from_stack( veh->get_items(cargo), type, quantity, p );
+                use_charges_from_stack( cargo.get_items(), type, quantity, p );
             ret.splice(ret.end(), tmp);
             if (quantity <= 0) {
                 return ret;
