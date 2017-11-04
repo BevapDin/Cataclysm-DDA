@@ -3615,8 +3615,7 @@ void map::crush( const tripoint &p )
     if( crushed_player != nullptr ) {
         bool player_inside = false;
         if( crushed_player->in_vehicle ) {
-            vehicle *veh = veh_at(p, veh_part);
-            player_inside = veh != nullptr && veh->is_inside(veh_part);
+            player_inside = veh_part_at( p ).is_inside();
         }
         if (!player_inside) { //If there's a player at p and he's not in a covered vehicle...
             //This is the roof coming down on top of us, no chance to dodge

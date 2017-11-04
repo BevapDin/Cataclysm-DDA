@@ -35,3 +35,8 @@ vehicle_part_reference vehicle_part_reference::part_with_feature( const vpart_bi
     return vehicle_part_reference( *this, is_valid() ? veh_->part_with_feature( index_, feature,
                                    unbroken ) : -1 );
 }
+
+bool vehicle_part_reference::is_inside() const
+{
+    return is_valid() && veh_->is_inside( index_ );
+}

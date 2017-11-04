@@ -12,6 +12,7 @@
 #include "material.h"
 #include "monster.h"
 #include "npc.h"
+#include "vehicle_part_reference.h"
 #include "trap.h"
 #include "itype.h"
 #include "emit.h"
@@ -1624,17 +1625,14 @@ void map::player_in_field( player &u )
 {
     // A copy of the current field for reference. Do not add fields to it, use map::add_field
     field &curfield = get_field( u.pos() );
-    int veh_part; // vehicle part existing on this tile.
-    vehicle *veh = NULL; // Vehicle reference if there is one.
     bool inside = false; // Are we inside?
     //to modify power of a field based on... whatever is relevant for the effect.
     int adjusted_intensity;
 
     //If we are in a vehicle figure out if we are inside (reduces effects usually)
     // and what part of the vehicle we need to deal with.
-    if (u.in_vehicle) {
-        veh = veh_at( u.pos(), veh_part );
-        inside = (veh && veh->is_inside(veh_part));
+    if( u.in_vehicle && veh_part_at( u.pos() ).is_inside() ) {
+        inside = true;
     }
 
     // Iterate through all field effects on this tile.

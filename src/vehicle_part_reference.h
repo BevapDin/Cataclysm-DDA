@@ -48,6 +48,8 @@ class vehicle_part_reference
         vehicle_part_reference part_with_feature( const std::string &feature, bool unbroken = true ) const;
         vehicle_part_reference part_with_feature( vpart_bitflags feature, bool unbroken = true ) const;
         /**@}*/
+        /// Returns `false` on an invalid reference.
+        bool is_inside() const;
 };
 
 #endif

@@ -6796,12 +6796,9 @@ bool game::is_in_sunlight( const tripoint &p )
 
 bool game::is_sheltered( const tripoint &p )
 {
-    int vpart = -1;
-    vehicle *veh = m.veh_at( p, vpart );
-
     return ( !m.is_outside( p ) ||
              p.z < 0 ||
-             ( veh && veh->is_inside(vpart) ) );
+             m.veh_part_at( p ).is_inside() );
 }
 
 bool game::revive_corpse( const tripoint &p, item &it )
