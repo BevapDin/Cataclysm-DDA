@@ -179,10 +179,16 @@ vehicle_part_reference vehicle_part_reference::obstacle_at_part() const
 
 nc_color vehicle_part_reference::part_color( const bool exact ) const
 {
-    return is_valid() ? veh_->part_color( index_ ) : c_white;
+    return is_valid() ? veh_->part_color( index_, exact ) : c_white;
 }
 
 player *vehicle_part_reference::get_passenger() const
 {
     return is_valid() ? veh_->get_passenger( index_ ) : nullptr;
+}
+
+point vehicle_part_reference::mount_point() const
+{
+    assert( is_valid() );
+    return part().mount;
 }

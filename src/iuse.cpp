@@ -10,6 +10,7 @@
 #include "effect.h" // for weed_msg
 #include "debug.h"
 #include "options.h"
+#include "vehicle_part_reference.h"
 #include "iexamine.h"
 #include "requirements.h"
 #include "rng.h"
@@ -7268,9 +7269,8 @@ int iuse::cable_attach(player *p, item *it, bool, const tripoint& )
         if(!choose_adjacent(_("Attach cable to vehicle where?"), vpos)) {
             return 0;
         }
-        int target_part_num;
-        auto target_veh = g->m.veh_at( vpos, target_part_num );
-        if (target_veh == nullptr) {
+        const vehicle_part_reference target_vpart = g->m.veh_part_at( vpos );
+        if( !target_vpart ) {
             p->add_msg_if_player(_("There's no vehicle there."));
             return 0;
         } else {
@@ -7278,20 +7278,19 @@ int iuse::cable_attach(player *p, item *it, bool, const tripoint& )
                                     it->get_var( "source_y", 0 ),
                                     it->get_var( "source_z", 0 ) );
             tripoint source_local = g->m.getlocal(source_global);
-            int source_part_num;
-            auto source_veh = g->m.veh_at( source_local, source_part_num );
+            const vehicle_part_reference source_vpart = g->m.veh_part_at( source_local );
 
-            if(source_veh == target_veh) {
+            if( is_same_vehicle( source_vpart, target_vpart ) ) {
                 if( p != nullptr && p->has_item( *it ) ) {
                     p->add_msg_if_player(m_warning, _("The %s already has access to its own electric system!"),
-                                        source_veh->name.c_str());
+                                        source_vpart.veh()->name.c_str());
                 }
                 return 0;
             }
 
             tripoint target_global = g->m.getabs( vpos );
 
-            if(source_veh == nullptr) {
+            if( !source_vpart ) {
                 if( p != nullptr && p->has_item( *it ) ) {
                     p->add_msg_if_player(m_bad, _("You notice the cable has come loose!"));
                 }
@@ -7299,29 +7298,25 @@ int iuse::cable_attach(player *p, item *it, bool, const tripoint& )
                 return 0;
             }
 
-            const auto veh_part_coordinates = []( const vehicle &veh, const int part_num ) {
-                return veh.parts[part_num].mount;
-            };
-
             // TODO: make sure there is always a matching vpart id here. Maybe transform this into
             // a iuse_actor class, or add a check in item_factory.
             const vpart_id vpid( it->typeId() );
 
-            point vcoords = veh_part_coordinates( *source_veh, source_part_num );
+            point vcoords = source_vpart.mount_point();
             vehicle_part source_part( vpid, vcoords.x, vcoords.y, item( *it ) );
             source_part.target.first = target_global;
-            source_part.target.second = target_veh->real_global_pos3();
-            source_veh->install_part(vcoords.x, vcoords.y, source_part);
+            source_part.target.second = target_vpart.veh()->real_global_pos3();
+            source_vpart.veh()->install_part(vcoords.x, vcoords.y, source_part);
 
-            vcoords = veh_part_coordinates( *target_veh, target_part_num );
+            vcoords = target_vpart.mount_point();
             vehicle_part target_part( vpid, vcoords.x, vcoords.y, item( *it ) );
             target_part.target.first = source_global;
-            target_part.target.second = source_veh->real_global_pos3();
-            target_veh->install_part(vcoords.x, vcoords.y, target_part);
+            target_part.target.second = source_vpart.veh()->real_global_pos3();
+            target_vpart.veh()->install_part(vcoords.x, vcoords.y, target_part);
 
             if( p != nullptr && p->has_item( *it ) ) {
                 p->add_msg_if_player(m_good, _("You link up the electric systems of the %1$s and the %2$s."),
-                                     source_veh->name.c_str(), target_veh->name.c_str());
+                                     source_vpart.veh()->name.c_str(), target_vpart.veh()->name.c_str());
             }
 
             return 1; // Let the cable be destroyed.

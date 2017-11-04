@@ -121,7 +121,7 @@ static int has_quality_from_vpart( const vehicle_part_reference &part, const qua
     int qty = 0;
 
     const vehicle &veh = *part.veh();
-    auto pos = part.part().mount;
+    auto pos = part.mount_point();
     for( const auto &n : veh.parts_at_relative( pos.x, pos.y ) ) {
 
         // only unbroken parts can provide tool qualities
@@ -216,7 +216,7 @@ static int max_quality_from_vpart( const vehicle_part_reference &part, const qua
     int res = INT_MIN;
 
     const vehicle &veh = *part.veh();
-    auto pos = veh.parts[ part.index() ].mount;
+    const point pos = part.mount_point();
     for( const auto &n : veh.parts_at_relative( pos.x, pos.y ) ) {
 
         // only unbroken parts can provide tool qualities

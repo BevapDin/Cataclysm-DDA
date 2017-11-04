@@ -18,6 +18,7 @@ class volume_in_milliliter_tag;
 using volume = quantity<int, volume_in_milliliter_tag>;
 } // namespace units
 struct tripoint;
+struct point;
 struct vehicle_part;
 class vpart_info;
 enum damage_type : int;
@@ -110,6 +111,8 @@ class vehicle_part_reference
         bool remove_item( const item &it ) const;
         std::list<item>::iterator remove_item( std::list<item>::iterator it );
         /**@}*/
+        /// @return vehicle_part::mount. Must not be called on an invalid reference.
+        point mount_point() const;
         /// Returns an empty string on an invalid reference.
         std::string name() const;
         /// Returns an invalid reference when called on an invalid reference.

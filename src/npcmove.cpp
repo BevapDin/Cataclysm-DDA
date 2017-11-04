@@ -585,7 +585,7 @@ void npc::execute_action( npc_action action )
             if( !path.empty() ) {
                 const vehicle_part_reference vpart = g->m.veh_part_at( path[path.size() - 1] );
                 if( is_same_vehicle( vpart, player_vehicle ) ) {
-                    last_dest = vpart.part().mount;
+                    last_dest = vpart.mount_point();
                 }
             }
 
