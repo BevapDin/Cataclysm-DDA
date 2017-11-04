@@ -1318,15 +1318,11 @@ void player::complete_disassemble( int item_pos, const tripoint &loc,
                 }
             }
 
-            int veh_part = -1;
-            vehicle *veh = g->m.veh_at( pos(), veh_part );
-            if( veh != nullptr ) {
-                veh_part = veh->part_with_feature( veh_part, "CARGO" );
-            }
+            const auto vpart = g->m.veh_part_at( pos() ).part_with_feature( "CARGO" );
 
             if( act_item.made_of( LIQUID ) ) {
                 g->handle_all_liquid( act_item, PICKUP_RANGE );
-            } else if( veh_part != -1 && veh->add_item( veh_part, act_item ) ) {
+            } else if( vpart.add_item( act_item ) ) {
                 // add_item did put the items in the vehicle, nothing further to be done
             } else {
                 // TODO: For items counted by charges, add as much as we can to the vehicle, and

@@ -61,6 +61,16 @@ units::volume vehicle_part_reference::stored_volume() const
     return is_valid() ? veh_->stored_volume( index_ ) : 0;
 }
 
+bool vehicle_part_reference::part_flag( const std::string &flag ) const
+{
+    return is_valid() && veh_->part_flag( index_, flag );
+}
+
+bool vehicle_part_reference::part_flag( const vpart_bitflags flag ) const
+{
+    return is_valid() && veh_->part_flag( index_, flag );
+}
+
 bool vehicle_part_reference::is_inside() const
 {
     return is_valid() && veh_->is_inside( index_ );
@@ -98,8 +108,76 @@ std::list<item>::iterator vehicle_part_reference::remove_item( const std::list<i
     return veh_->remove_item( index_, it );
 }
 
+std::string vehicle_part_reference::name() const
+{
+    return is_valid() ? veh_->parts[index_].name() : std::string();
+}
+
+vehicle_part_reference vehicle_part_reference::next_part_to_close( const bool outside ) const
+{
+    return vehicle_part_reference( *this, is_valid() ? veh_->next_part_to_close( index_,
+                                   outside ) : -1 );
+}
+
+vehicle_part_reference vehicle_part_reference::next_part_to_open( const bool outside ) const
+{
+    return vehicle_part_reference( *this, is_valid() ? veh_->next_part_to_open( index_,
+                                   outside ) : -1 );
+}
+
+void vehicle_part_reference::close() const
+{
+    if( !is_valid() ) {
+        return;
+    }
+    veh_->close( index_ );
+}
+
+void vehicle_part_reference::open() const
+{
+    if( !is_valid() ) {
+        return;
+    }
+    veh_->open( index_ );
+}
+
+void vehicle_part_reference::open_all_at() const
+{
+    if( !is_valid() ) {
+        return;
+    }
+    veh_->open_all_at( index_ );
+}
+
+tripoint vehicle_part_reference::global_part_pos3() const
+{
+    assert( is_valid() );
+    return veh_->global_part_pos3( index_ );
+}
+
 vehicle_part &vehicle_part_reference::part() const
 {
     assert( is_valid() );
     return veh_->parts[index_];
+}
+
+const vpart_info &vehicle_part_reference::part_info() const
+{
+    assert( is_valid() );
+    return veh_->part_info( index_ );
+}
+
+int vehicle_part_reference::damage( const int dmg, const damage_type type, const bool aimed ) const
+{
+    return is_valid() ? veh_->damage( index_, dmg, type, aimed ) : dmg;
+}
+
+vehicle_part_reference vehicle_part_reference::obstacle_at_part() const
+{
+    return vehicle_part_reference( *this, is_valid() ? veh_->obstacle_at_part( index_ ) : -1 );
+}
+
+nc_color vehicle_part_reference::part_color( const bool exact ) const
+{
+    return is_valid() ? veh_->part_color( index_ ) : c_white;
 }

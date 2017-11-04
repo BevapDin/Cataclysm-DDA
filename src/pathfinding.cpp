@@ -4,9 +4,11 @@
 #include "enums.h"
 #include "game.h"
 #include "player.h"
+#include "line.h"
 #include "map.h"
 #include "trap.h"
 #include "map_iterator.h"
+#include "vehicle_part_reference.h"
 #include "vehicle.h"
 #include "veh_type.h"
 #include "submap.h"
@@ -297,18 +299,17 @@ std::vector<tripoint> map::route( const tripoint &f, const tripoint &t,
                 // Boring flat dirt - the most common case above the ground
                 newg += 2;
             } else {
-                int part = -1;
                 const maptile &tile = maptile_at_internal( p );
                 const auto &terrain = tile.get_ter_t();
                 const auto &furniture = tile.get_furn_t();
-                const vehicle *veh = veh_at_internal( p, part );
+                const vehicle_part_reference vpart = veh_part_at_internal( p );
 
-                const int cost = move_cost_internal( furniture, terrain, veh, part );
+                const int cost = move_cost_internal( furniture, terrain, vpart );
                 // Don't calculate bash rating unless we intend to actually use it
                 const int rating = ( bash == 0 || cost != 0 ) ? -1 :
-                                   bash_rating_internal( bash, furniture, terrain, false, veh, part );
+                                   bash_rating_internal( bash, furniture, terrain, false, vpart );
 
-                if( cost == 0 && rating <= 0 && ( !doors || !terrain.open ) && veh == nullptr && climb_cost <= 0 ) {
+                if( cost == 0 && rating <= 0 && ( !doors || !terrain.open ) && !vpart && climb_cost <= 0 ) {
                     layer.state[index] = ASL_CLOSED; // Close it so that next time we won't try to calc costs
                     continue;
                 }
@@ -323,18 +324,17 @@ std::vector<tripoint> map::route( const tripoint &f, const tripoint &t,
                         // Only try to open INSIDE doors from the inside
                         // To open and then move onto the tile
                         newg += 4;
-                    } else if( veh != nullptr ) {
-                        part = veh->obstacle_at_part( part );
-                        int dummy = -1;
-                        if( doors && veh->part_flag( part, VPFLAG_OPENABLE ) &&
-                            ( !veh->part_flag( part, "OPENCLOSE_INSIDE" ) ||
-                              veh_at_internal( cur, dummy ) == veh ) ) {
+                    } else if( vpart ) {
+                        const vehicle_part_reference part = vpart.obstacle_at_part();
+                        if( doors && part.part_flag( VPFLAG_OPENABLE ) &&
+                            ( !part.part_flag( "OPENCLOSE_INSIDE" ) ||
+                              is_same_vehicle( veh_part_at_internal( cur ), vpart ) ) ) {
                             // Handle car doors, but don't try to path through curtains
                             newg += 10; // One turn to open, 4 to move there
-                        } else if( part >= 0 && bash > 0 ) {
+                        } else if( part && bash > 0 ) {
                             // Car obstacle that isn't a door
                             // @todo Account for armor
-                            int hp = veh->parts[part].hp();
+                            int hp = part.part().hp();
                             if( hp / 20 > bash ) {
                                 // Threshold damage thing means we just can't bash this down
                                 layer.state[index] = ASL_CLOSED;
@@ -345,8 +345,8 @@ std::vector<tripoint> map::route( const tripoint &f, const tripoint &t,
                             }
 
                             newg += 2 * hp / bash + 8 + 4;
-                        } else if( part >= 0 ) {
-                            if( !doors || !veh->part_flag( part, VPFLAG_OPENABLE ) ) {
+                        } else if( part ) {
+                            if( !doors || !part.part_flag( VPFLAG_OPENABLE ) ) {
                                 // Won't be openable, don't try from other sides
                                 layer.state[index] = ASL_CLOSED;
                             }

@@ -753,8 +753,6 @@ bool map::process_fields_in_submap( submap *const current_submap,
                     curtype = fd_null;
                 }
 
-                int part;
-                vehicle *veh;
                 switch (curtype) {
                     case fd_null:
                     case num_fields:
@@ -897,9 +895,9 @@ bool map::process_fields_in_submap( submap *const current_submap,
                         }
 
                         //Get the part of the vehicle in the fire.
-                        veh = veh_at_internal( p, part ); // _internal skips the boundary check
-                        if( veh != nullptr ) {
-                            veh->damage(part, cur->getFieldDensity() * 10, DT_HEAT, true);
+                        const auto vpart = veh_part_at_internal( p ); // _internal skips the boundary check
+                        if( vpart ) {
+                            vpart.damage( cur->getFieldDensity() * 10, DT_HEAT, true );
                             //Damage the vehicle in the fire.
                         }
                         if( can_spread ) {

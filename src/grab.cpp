@@ -4,12 +4,12 @@
 #include "vehicle.h"
 #include "messages.h"
 #include "sounds.h"
+#include "vehicle_part_reference.h"
 
 bool game::grabbed_veh_move( const tripoint &dp )
 {
-    int grabbed_part = 0;
-    vehicle *grabbed_vehicle = m.veh_at( u.pos() + u.grab_point, grabbed_part );
-    if( nullptr == grabbed_vehicle ) {
+    const auto grabbed_part = m.veh_part_at( u.pos() + u.grab_point );
+    if( !grabbed_part ) {
         add_msg( m_info, _( "No vehicle at grabbed point." ) );
         u.grab_point = tripoint_zero;
         u.grab_type = OBJECT_NONE;
@@ -17,7 +17,7 @@ bool game::grabbed_veh_move( const tripoint &dp )
     }
 
     const vehicle *veh_under_player = m.vehicle_at( u.pos() );
-    if( grabbed_vehicle == veh_under_player ) {
+    if( is_same_vehicle( grabbed_part, veh_under_player ) ) {
         u.grab_point = -dp;
         return false;
     }
@@ -49,6 +49,7 @@ bool game::grabbed_veh_move( const tripoint &dp )
         next_grab = -dp;
     }
 
+    vehicle *const grabbed_vehicle = grabbed_part.veh();
     // Make sure the mass and pivot point are correct
     grabbed_vehicle->invalidate_mass();
 
@@ -123,7 +124,7 @@ bool game::grabbed_veh_move( const tripoint &dp )
         // Grabbed part has to stay at distance 1 to the player
         // and in roughly the same direction.
         const tripoint new_part_pos = grabbed_vehicle->global_pos3() +
-                                      grabbed_vehicle->parts[ grabbed_part ].precalc[ 1 ];
+                                      grabbed_part.part().precalc[ 1 ];
         const tripoint expected_pos = u.pos() + dp + from;
         const tripoint actual_dir = expected_pos - new_part_pos;
 
@@ -157,16 +158,14 @@ bool game::grabbed_veh_move( const tripoint &dp )
     u.grab_point = next_grab;
 
     tripoint gp = grabbed_vehicle->global_pos3();
-    grabbed_vehicle = m.displace_vehicle( gp, final_dp_veh );
-
-    if( grabbed_vehicle == nullptr ) {
+    if( m.displace_vehicle( gp, final_dp_veh ) == nullptr ) {
         debugmsg( "Grabbed vehicle disappeared" );
         return false;
     }
 
     for( int p : wheel_indices ) {
         if( one_in( 2 ) ) {
-            tripoint wheel_p = grabbed_vehicle->global_part_pos3( grabbed_part );
+            tripoint wheel_p = grabbed_part.global_part_pos3();
             grabbed_vehicle->handle_trap( wheel_p, p );
         }
     }

@@ -7,6 +7,7 @@
 #include "line.h"
 #include "computer.h"
 #include "veh_interact.h"
+#include "vehicle_part_reference.h"
 #include "options.h"
 #include "auto_pickup.h"
 #include "debug.h"
@@ -505,12 +506,8 @@ void editmap::update_view( bool update_info )
 {
     // Debug helper 2, child of debug helper
     // Gather useful data
-    int veh_part = 0;
-    vehicle *veh = g->m.veh_at( target, veh_part );
-    int veh_in = -1;
-    if( veh ) {
-        veh_in = veh->is_inside( veh_part );
-    }
+    const vehicle_part_reference veh_part = g->m.veh_part_at( target );
+    const int veh_in = veh_part.is_inside() ? 1 : -1;
 
     target_ter = g->m.ter( target );
     const ter_t &terrain_type = target_ter.obj();
@@ -659,10 +656,10 @@ void editmap::update_view( bool update_info )
 
         if( critter != nullptr ) {
             off = critter->print_info( w_info, off, 5, 1 );
-        } else if( veh ) {
-            mvwprintw( w_info, off, 1, _( "There is a %s there. Parts:" ), veh->name.c_str() );
+        } else if( veh_part ) {
+            mvwprintw( w_info, off, 1, _( "There is a %s there. Parts:" ), veh_part.veh()->name.c_str() );
             off++;
-            veh->print_part_desc( w_info, off, getmaxy( w_info ) - 1, width, veh_part );
+            veh_part.veh()->print_part_desc( w_info, off, getmaxy( w_info ) - 1, width, veh_part.index() );
             off += 6;
         }
 

@@ -19,6 +19,7 @@
 #include "effect.h"
 #include "vehicle.h"
 #include "mtype.h"
+#include "vehicle_part_reference.h"
 #include "field.h"
 #include "sounds.h"
 #include "gates.h"
@@ -569,10 +570,9 @@ void npc::execute_action( npc_action action )
             break;
 
         case npc_follow_embarked: {
-            int p1;
-            vehicle *veh = g->m.veh_at( g->u.pos(), p1 );
+            const auto player_vehicle = g->m.veh_part_at( g->u.pos() );
 
-            if( veh == nullptr ) {
+            if( !player_vehicle ) {
                 debugmsg( "Following an embarked player with no vehicle at their location?" );
                 // TODO: change to wait? - for now pause
                 move_pause();
@@ -582,14 +582,18 @@ void npc::execute_action( npc_action action )
             // Try to find the last destination
             // This is mount point, not actual position
             point last_dest( INT_MIN, INT_MIN );
-            if( !path.empty() && g->m.veh_at( path[path.size() - 1], p1 ) == veh && p1 >= 0 ) {
-                last_dest = veh->parts[p1].mount;
+            if( !path.empty() ) {
+                const vehicle_part_reference vpart = g->m.veh_part_at( path[path.size() - 1] );
+                if( is_same_vehicle( vpart, player_vehicle ) ) {
+                    last_dest = vpart.part().mount;
+                }
             }
 
             // Prioritize last found path, then seats
             // Don't change spots if ours is nice
             int my_spot = -1;
             std::vector<std::pair<int, int> > seats;
+            vehicle *const veh = player_vehicle.veh();
             for( size_t p2 = 0; p2 < veh->parts.size(); p2++ ) {
                 if( !veh->part_flag( p2, VPFLAG_BOARDABLE ) ) {
                     continue;
@@ -1502,14 +1506,12 @@ void npc::move_to( const tripoint &pt, bool no_bashing )
 
     // Boarding moving vehicles is fine, unboarding isn't
     bool moved = false;
-    int vpart;
-    vehicle *veh = g->m.veh_at( pos(), vpart );
-    if( veh != nullptr ) {
-        int other_part = -1;
-        const vehicle *oveh = g->m.veh_at( p, other_part );
-        if( abs( veh->velocity ) > 0 &&
-            ( oveh != veh ||
-              veh->part_with_feature( other_part, VPFLAG_BOARDABLE ) < 0 ) ) {
+    const auto vpart = g->m.veh_part_at( pos() );
+    if( vpart ) {
+        const auto other_part = g->m.veh_part_at( p );
+        if( abs( vpart.veh()->velocity ) > 0 &&
+            ( !is_same_vehicle( other_part, vpart ) ||
+              !other_part.part_with_feature( VPFLAG_BOARDABLE ) ) ) {
             move_pause();
             return;
         }
@@ -1566,9 +1568,7 @@ void npc::move_to( const tripoint &pt, bool no_bashing )
             doors::close_door( g->m, *this, old_pos );
         }
 
-        int part;
-        vehicle *veh = g->m.veh_at( p, part );
-        if( veh != nullptr && veh->part_with_feature( part, VPFLAG_BOARDABLE ) >= 0 ) {
+        if( g->m.veh_part_at( p ).part_with_feature( VPFLAG_BOARDABLE ) ) {
             g->m.board_vehicle( p, this );
         }
 
@@ -1802,25 +1802,23 @@ void npc::find_item()
         // Allow terrain check without sight, because it would cost more CPU than it is worth
         consider_terrain( p );
 
-        int veh_part = -1;
-        const vehicle *veh = g->m.veh_at( p, veh_part );
-        if( veh == nullptr || veh->velocity != 0 || !sees( p ) ) {
+        auto veh_part = g->m.veh_part_at( p );
+        if( !veh_part || veh_part.veh()->velocity != 0 || !sees( p ) ) {
             continue;
         }
 
-        veh_part = veh->part_with_feature( veh_part, VPFLAG_CARGO, true );
+        veh_part = veh_part.part_with_feature( VPFLAG_CARGO );
         static const std::string locked_string( "LOCKED" );
         //TODO Let player know what parts are safe from NPC thieves
-        if( veh_part < 0 || veh->part_flag( veh_part, locked_string ) ) {
+        if( !veh_part || veh_part.part_flag( locked_string ) ) {
             continue;
         }
-
         static const std::string cargo_locking_string( "CARGO_LOCKING" );
-        if( veh->part_with_feature( veh_part, cargo_locking_string, true ) != -1 ) {
+        if( veh_part.part_with_feature( cargo_locking_string, true ) ) {
             continue;
         }
 
-        for( const item &it : veh->get_items( veh_part ) ) {
+        for( const item &it : veh_part.get_items() ) {
             consider_item( it, p );
         }
     }
@@ -1860,15 +1858,10 @@ void npc::pick_up_item()
         return;
     }
 
-    int veh_part = -1;
-    vehicle *veh = g->m.veh_at( wanted_item_pos, veh_part );
-    if( veh != nullptr ) {
-        veh_part = veh->part_with_feature( veh_part, VPFLAG_CARGO, false );
-    }
+    auto veh_part = g->m.veh_part_at( wanted_item_pos ).part_with_feature( VPFLAG_CARGO, false );
 
-    const bool has_cargo = veh != nullptr &&
-                           veh_part >= 0 &&
-                           !veh->part_flag( veh_part, "LOCKED" );
+    const bool has_cargo = veh_part &&
+                           !veh_part.part_flag( "LOCKED" );
 
     if( ( !g->m.has_items( wanted_item_pos ) && !has_cargo &&
           !g->m.is_harvestable( wanted_item_pos ) && sees( wanted_item_pos ) ) ||
@@ -1906,7 +1899,7 @@ void npc::pick_up_item()
 
     auto picked_up = pick_up_item_map( wanted_item_pos );
     if( picked_up.empty() && has_cargo ) {
-        picked_up = pick_up_item_vehicle( *veh, veh_part );
+        picked_up = pick_up_item_vehicle( veh_part );
     }
 
     if( picked_up.empty() ) {
@@ -2004,9 +1997,9 @@ std::list<item> npc::pick_up_item_map( const tripoint &where )
     return npc_pickup_from_stack( *this, stack );
 }
 
-std::list<item> npc::pick_up_item_vehicle( vehicle &veh, int part_index )
+std::list<item> npc::pick_up_item_vehicle( const vehicle_part_reference vpart )
 {
-    auto stack = veh.get_items( part_index );
+    auto stack = vpart.get_items();
     return npc_pickup_from_stack( *this, stack );
 }
 

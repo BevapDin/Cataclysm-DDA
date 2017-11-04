@@ -7,7 +7,7 @@
 #include "player.h"
 #include "messages.h"
 #include "json.h"
-#include "vehicle.h"
+#include "vehicle_part_reference.h"
 
 #include <string>
 #include <algorithm>
@@ -246,23 +246,19 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
         return;
     }
 
-    int vpart;
-    vehicle *const veh = m.veh_at( closep, vpart );
-    if( veh ) {
-        const int closable = veh->next_part_to_close( vpart, m.vehicle_at( who.pos() ) != veh );
-        const int inside_closable = veh->next_part_to_close( vpart );
-        const int openable = veh->next_part_to_open( vpart );
-        if( closable >= 0 ) {
-            veh->close( closable );
+    if( const auto vpart = m.veh_part_at( closep ) ) {
+        if( const auto closable = vpart.next_part_to_close( !is_same_vehicle( vpart,
+                                  m.vehicle_at( who.pos() ) ) ) ) {
+            closable.close();
             didit = true;
-        } else if( inside_closable >= 0 ) {
+        } else if( const auto inside_closable = vpart.next_part_to_close() ) {
             who.add_msg_if_player( m_info, _( "That %s can only be closed from the inside." ),
-                                   veh->parts[inside_closable].name().c_str() );
-        } else if( openable >= 0 ) {
+                                   inside_closable.name().c_str() );
+        } else if( const auto openable = vpart.next_part_to_open() ) {
             who.add_msg_if_player( m_info, _( "That %s is already closed." ),
-                                   veh->parts[openable].name().c_str() );
+                                   openable.name().c_str() );
         } else {
-            who.add_msg_if_player( m_info, _( "You cannot close the %s." ), veh->parts[vpart].name().c_str() );
+            who.add_msg_if_player( m_info, _( "You cannot close the %s." ), vpart.name().c_str() );
         }
     } else if( m.furn( closep ) == furn_str_id( "f_crate_o" ) ) {
         who.add_msg_if_player( m_info, _( "You'll need to construct a seal to close the crate!" ) );

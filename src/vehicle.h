@@ -390,7 +390,7 @@ struct label {
  *   to vehicle, keep in mind it can be invalidated
  *   by functions such as `map::displace_vehicle()`.
  * - To check if there's any vehicle at given map tile,
- *   call `map::veh_at()`, and check vehicle type (`veh_null`
+ *   call `map::vehicle_at()`, and check vehicle type (`veh_null`
  *   means there's no vehicle there).
  * - Vehicle consists of parts (represented by vector). Parts have some
  *   constant info: see veh_type.h, `vpart_info` structure and
@@ -756,7 +756,7 @@ public:
      * coordinate system that player::posx uses.
      * Global apparently means relative to the currently loaded map (game::m).
      * This implies:
-     * <code>g->m.veh_at(this->global_x(), this->global_y()) == this;</code>
+     * <code>g->m.vehicle_at(this->global_x(), this->global_y()) == this;</code>
      */
     int global_x() const;
     int global_y() const;

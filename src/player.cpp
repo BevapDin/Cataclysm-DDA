@@ -1592,10 +1592,9 @@ int player::floor_bedding_warmth( const tripoint &pos )
     int floor_bedding_warmth = 0;
 
 
-    int vpart = -1;
-    vehicle *veh = g->m.veh_at( pos, vpart );
-    bool veh_bed = ( veh != nullptr && veh->part_with_feature( vpart, "BED" ) >= 0 );
-    bool veh_seat = ( veh != nullptr && veh->part_with_feature( vpart, "SEAT" ) >= 0 );
+    const vehicle_part_reference vpart = g->m.veh_part_at( pos );
+    const vehicle_part_reference veh_bed = vpart.part_with_feature( "BED" );
+    const vehicle_part_reference veh_seat = vpart.part_with_feature( "SEAT" );
 
     // Search the floor for bedding
     if( furn_at_pos == f_bed ) {
@@ -3087,12 +3086,11 @@ bool player::in_climate_control()
     if( int( calendar::turn ) >= next_climate_control_check ) {
         // save cpu and simulate acclimation.
         next_climate_control_check = int( calendar::turn ) + 20;
-        int vpart = -1;
-        vehicle *veh = g->m.veh_at( pos(), vpart );
-        if( veh ) {
+        if( const auto vpart = g->m.veh_part_at( pos() ) ) {
             regulated_area = (
-                                 veh->is_inside( vpart ) &&  // Already checks for opened doors
-                                 veh->total_power( true ) > 0 // Out of gas? No AC for you!
+            //@todo move this into vehicle_part_reference?
+                                 vpart.is_inside() &&  // Already checks for opened doors
+                                 vpart.veh()->total_power( true ) > 0 // Out of gas? No AC for you!
                              );  // TODO: (?) Force player to scrounge together an AC unit
         }
         // TODO: AC check for when building power is implemented
@@ -4281,8 +4279,7 @@ int player::impact( const int force, const tripoint &p )
     const bool slam = p != pos();
     std::string target_name = "a swarm of bugs";
     Creature *critter = g->critter_at( p );
-    int part_num = -1;
-    vehicle *veh = g->m.veh_at( p, part_num );
+    const auto vpart = g->m.veh_part_at( p );
     if( critter != this && critter != nullptr ) {
         target_name = critter->disp_name();
         // Slamming into creatures and NPCs
@@ -4291,18 +4288,19 @@ int player::impact( const int force, const tripoint &p )
         // TODO: Modify based on something?
         mod = 1.0f;
         effective_force = force;
-    } else if( veh != nullptr ) {
+    } else if( vpart ) {
         // Slamming into vehicles
         // TODO: Integrate it with vehicle collision function somehow
-        target_name = veh->disp_name();
-        if( veh->part_with_feature( part_num, "SHARP" ) != -1 ) {
+        target_name = vpart.veh()->disp_name();
+        if( vpart.part_with_feature( "SHARP" ) ) {
             // Now we're actually getting impaled
             cut = force; // Lots of fun
         }
 
         mod = slam ? 1.0f : fall_damage_mod();
         armor_eff = 0.25f; // Not much
-        if( !slam && veh->part_with_feature( part_num, "ROOF" ) ) {
+        // bug fixed! orignal code should have compared with -1
+        if( !slam && vpart.part_with_feature( "ROOF" ) ) {
             // Roof offers better landing than frame or pavement
             effective_force /= 2; // TODO: Make this not happen with heavy duty/plated roof
         }
@@ -9861,15 +9859,10 @@ std::string player::is_snuggling() const
     auto end = g->m.i_at( pos() ).end();
 
     if( in_vehicle ) {
-        int vpart;
-        vehicle *veh = g->m.veh_at( pos(), vpart );
-        if( veh != nullptr ) {
-            int cargo = veh->part_with_feature( vpart, VPFLAG_CARGO, false );
-            if( cargo >= 0 ) {
-                if( !veh->get_items(cargo).empty() ) {
-                    begin = veh->get_items(cargo).begin();
-                    end = veh->get_items(cargo).end();
-                }
+        if( const auto cargo = g->m.veh_part_at( pos() ).part_with_feature( VPFLAG_CARGO, false ) ) {
+            if( !cargo.get_items().empty() ) {
+                begin = cargo.get_items().begin();
+                end = cargo.get_items().end();
             }
         }
     }

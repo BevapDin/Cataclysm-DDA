@@ -10,7 +10,8 @@
 #include "options.h"
 #include "messages.h"
 #include "catacharset.h"
-#include "vehicle.h"
+#include "vehicle_part_reference.h"
+#include "line.h"
 #include "vehicle_selector.h"
 #include "cata_utility.h"
 #include "item.h"
@@ -966,18 +967,17 @@ void inventory_selector::add_map_items( const tripoint &target )
 
 void inventory_selector::add_vehicle_items( const tripoint &target )
 {
-    int part = -1;
-    vehicle *veh = g->m.veh_at( target, part );
-
-    if( veh != nullptr && ( part = veh->part_with_feature( part, "CARGO" ) ) >= 0 ) {
-        const auto items = veh->get_items( part );
-        const std::string name = to_upper_case( veh->parts[part].name() );
+    const auto vpart = g->m.veh_part_at( target ).part_with_feature( "CARGO" );
+    if( !vpart ) {
+        return;
+    }
+        const auto items = vpart.get_items();
+        const std::string name = to_upper_case( vpart.name() );
         const item_category vehicle_cat( name, name, 200 );
 
-        add_items( map_column, [ veh, part ]( item *it ) {
-            return item_location( vehicle_cursor( vehicle_part_reference( *veh, part ) ), it );
+        add_items( map_column, [ vpart ]( item *it ) {
+            return item_location( vehicle_cursor( vpart ), it );
         }, restack_items( items.begin(), items.end() ), &vehicle_cat );
-    }
 }
 
 void inventory_selector::add_nearby_items( int radius )

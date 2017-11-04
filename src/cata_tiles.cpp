@@ -1335,18 +1335,14 @@ void cata_tiles::draw_minimap( int destx, int desty, const tripoint &center, int
                 color.r = 12;
                 color.g = 12;
                 color.b = 12;
+            } else if( const auto vpart = g->m.veh_part_at( p ) ) {
+                color = cursesColorToSDL( vpart.part_color() );
+            } else if( g->m.has_furn( p ) ) {
+                auto &furniture = g->m.furn( p ).obj();
+                color = cursesColorToSDL( furniture.color() );
             } else {
-                int veh_part = 0;
-                vehicle *veh = g->m.veh_at( p, veh_part );
-                if( veh != nullptr ) {
-                    color = cursesColorToSDL( veh->part_color( veh_part ) );
-                } else if( g->m.has_furn( p ) ) {
-                    auto &furniture = g->m.furn( p ).obj();
-                    color = cursesColorToSDL( furniture.color() );
-                } else {
-                    auto &terrain = g->m.ter( p ).obj();
-                    color = cursesColorToSDL( terrain.color() );
-                }
+                auto &terrain = g->m.ter( p ).obj();
+                color = cursesColorToSDL( terrain.color() );
             }
             pixel pix( color );
             //color terrain according to lighting conditions
@@ -1708,11 +1704,8 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
         case C_VEHICLE_PART:
             // vehicle parts, seed based on coordinates within the vehicle
             // TODO also use some vehicle id, for less predictability
-        {
-            // new scope for variable declarations
-            int partid;
-            vehicle *veh = g->m.veh_at( pos, partid );
-            vehicle_part &part = veh->parts[partid];
+            if( const auto vpart = g->m.veh_part_at( pos ) ) {
+                const vehicle_part &part = vpart.part();
             seed = part.mount.x + part.mount.y * 65536;
         }
         break;
@@ -1928,7 +1921,6 @@ bool cata_tiles::draw_terrain_below( const tripoint &p, lit_level /*ll*/, int &/
 
     const ter_t &curr_ter = g->m.ter( pbelow ).obj();
     const furn_t &curr_furn = g->m.furn( pbelow ).obj();
-    int part_below;
     int sizefactor = 2;
     const vehicle *veh;
     //        const vehicle *veh;
@@ -1936,11 +1928,12 @@ bool cata_tiles::draw_terrain_below( const tripoint &p, lit_level /*ll*/, int &/
         tercol = cursesColorToSDL( curr_furn.color() );
     } else if( curr_furn.movecost < 0 ) {
         tercol = cursesColorToSDL( curr_furn.color() );
-    } else if( ( veh = g->m.veh_at_internal( pbelow, part_below ) ) != nullptr ) {
-        const int roof = veh->roof_at_part( part_below );
+    } else if( const auto part_below = g->m.veh_part_at_internal( pbelow ) ) {
+        vehicle *const veh = part_below.veh();
+        const int roof = veh->roof_at_part( part_below.index() );
         tercol = cursesColorToSDL( ( roof >= 0 ||
-                                     veh->obstacle_at_part( part_below ) ) ? c_light_gray : c_magenta );
-        sizefactor = ( roof >= 0 || veh->obstacle_at_part( part_below ) ) ? 4 : 2;
+                                     part_below.obstacle_at_part() ) ? c_light_gray : c_magenta );
+        sizefactor = ( roof >= 0 || part_below.obstacle_at_part() ) ? 4 : 2;
     } else if( curr_ter.has_flag( TFLAG_SEEN_FROM_ABOVE ) || curr_ter.movecost == 0 ) {
         tercol = cursesColorToSDL( curr_ter.color() );
     } else if( !curr_ter.has_flag( TFLAG_NO_FLOOR ) ) {
@@ -2154,12 +2147,11 @@ bool cata_tiles::draw_vpart_below( const tripoint &p, lit_level /*ll*/, int &/*h
 
 bool cata_tiles::draw_vpart( const tripoint &p, lit_level ll, int &height_3d )
 {
-    int veh_part = 0;
-    vehicle *veh = g->m.veh_at( p, veh_part );
-
-    if (!veh) {
+    const auto vpart = g->m.veh_part_at( p );
+    if( !vpart ) {
         return false;
     }
+    const vehicle *const veh = vpart.veh();
     // veh_part is the index of the part
     // get a north-east-south-west value instead of east-south-west-north value to use with rotation
     int veh_dir = (veh->face.dir4() + 1) % 4;
@@ -2170,8 +2162,8 @@ bool cata_tiles::draw_vpart( const tripoint &p, lit_level ll, int &height_3d )
     // Gets the visible part, should work fine once tileset vp_ids are updated to work with the vehicle part json ids
     // get the vpart_id
     char part_mod = 0;
-    const vpart_id &vp_id = veh->part_id_string(veh_part, part_mod);
-    const char sym = veh->face.dir_symbol(veh->part_sym(veh_part));
+    const vpart_id &vp_id = veh->part_id_string( vpart.index(), part_mod );
+    const char sym = veh->face.dir_symbol( veh->part_sym( vpart.index() ) );
     std::string subcategory(1, sym);
 
     // prefix with vp_ ident

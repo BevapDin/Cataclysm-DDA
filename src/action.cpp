@@ -13,11 +13,11 @@
 #include "input.h"
 #include "crafting.h"
 #include "ui.h"
+#include "vehicle_part_reference.h"
 #include "trap.h"
 #include "itype.h"
 #include "mapdata.h"
 #include "cata_utility.h"
-#include "vehicle.h"
 
 #include <istream>
 #include <sstream>
@@ -529,9 +529,8 @@ bool can_interact_at( action_id action, const tripoint &p )
             return g->m.open_door( p, !g->m.is_outside( g->u.pos() ), true );
             break;
         case ACTION_CLOSE: {
-            int vpart;
-            const vehicle *const veh = g->m.veh_at( p, vpart );
-            return ( veh && veh->next_part_to_close( vpart, g->m.vehicle_at( g->u.pos() ) != veh ) >= 0 ) ||
+            const auto vpart = g->m.veh_part_at( p );
+            return ( vpart.next_part_to_close( !is_same_vehicle( vpart, g->m.vehicle_at( g->u.pos() ) ) ) ) ||
                    g->m.close_door( p, !g->m.is_outside( g->u.pos() ), true );
             break;
         }

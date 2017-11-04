@@ -7,6 +7,7 @@
 #include "map.h"
 #include "rng.h"
 #include "vehicle.h"
+#include "vehicle_part_reference.h"
 #include "vehicle_selector.h"
 
 template <typename T>
@@ -399,18 +400,16 @@ TEST_CASE( "visitable_remove", "[visitable]" )
             return g->m.vehicle_at( e );
         } ) == 1 );
 
-        int part = -1;
-        vehicle *v = g->m.veh_at( veh, part );
-        REQUIRE( v != nullptr );
-        REQUIRE( part >= 0 );
-        part = v->part_with_feature( part, "CARGO" );
-        REQUIRE( part >= 0 );
+        auto part = g->m.veh_part_at( veh );
+        REQUIRE( part );
+        part = part.part_with_feature( "CARGO" );
+        REQUIRE( part );
         // Empty the vehicle of any cargo.
-        while( !v->get_items( part ).empty() ) {
-            v->remove_item( part, 0 );
+        while( !part.get_items().empty() ) {
+            part.remove_item( 0 );
         }
         for( int i = 0; i != count; ++i ) {
-            v->add_item( part, obj );
+            part.add_item( obj );
         }
 
         vehicle_selector sel( p.pos(), 1 );

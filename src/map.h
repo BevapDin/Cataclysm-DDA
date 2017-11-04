@@ -484,17 +484,6 @@ class map
         // 3D vehicles
         VehicleList get_vehicles( const tripoint &start, const tripoint &end );
         /**
-        * Checks if tile is occupied by vehicle and by which part.
-        *
-        * @param p Tile to check for vehicle
-        * @param part_num The part number of the part at this tile will be returned in this parameter.
-        * @return A pointer to the vehicle in this tile.
-        */
-        vehicle *veh_at( const tripoint &p, int &part_num );
-        const vehicle *veh_at( const tripoint &p, int &part_num ) const;
-        vehicle *veh_at_internal( const tripoint &p, int &part_num );
-        const vehicle *veh_at_internal( const tripoint &p, int &part_num ) const;
-        /**
          * Returns the vehicle at the given position on the map, or `nullptr` if there is no vehicle.
          * Returns `nullptr` if the position is outside of the map.
          */
@@ -505,6 +494,7 @@ class map
          * Returns an invalid reference if the position is outside of the map.
          */
         vehicle_part_reference veh_part_at( const tripoint &pos ) const;
+        vehicle_part_reference veh_part_at_internal( const tripoint &p ) const;
         // put player on vehicle at x,y
         void board_vehicle( const tripoint &p, player *pl );
         void unboard_vehicle( const tripoint &p );//remove player from vehicle at p
@@ -961,7 +951,7 @@ class map
         /**
          * Fetch an item from this vehicle, with sanity checks to ensure it still exists.
          */
-        item *item_from( vehicle *veh, const int cargo_part, const size_t index );
+        item *item_from( vehicle_part_reference vpart, const size_t index );
 
         // Traps: 3D
         void trap_set( const tripoint &p, const trap_id id );
@@ -1416,10 +1406,10 @@ class map
          * They lack safety checks, because their callers already do those.
          */
         int move_cost_internal( const furn_t &furniture, const ter_t &terrain,
-                                const vehicle *veh, const int vpart ) const;
+                                vehicle_part_reference vpart ) const;
         int bash_rating_internal( const int str, const furn_t &furniture,
                                   const ter_t &terrain, bool allow_floor,
-                                  const vehicle *veh, const int part ) const;
+                                  vehicle_part_reference vpart ) const;
 
         /**
          * Internal version of the drawsq. Keeps a cached maptile for less re-getting.

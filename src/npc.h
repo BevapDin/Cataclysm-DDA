@@ -21,6 +21,7 @@ class field_entry;
 class npc_class;
 class auto_pickup;
 class monfaction;
+class vehicle_part_reference;
 struct mission_type;
 enum game_message_type : int;
 
@@ -657,7 +658,7 @@ class npc : public player
 
         /** Picks up items and returns a list of them. */
         std::list<item> pick_up_item_map( const tripoint &where );
-        std::list<item> pick_up_item_vehicle( vehicle &veh, int part_index );
+        std::list<item> pick_up_item_vehicle( vehicle_part_reference vpart );
 
         bool has_item_whitelist() const;
         bool item_name_whitelisted( const std::string &name );

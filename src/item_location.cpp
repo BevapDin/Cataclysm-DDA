@@ -330,7 +330,7 @@ class item_location::impl::item_on_vehicle : public item_location::impl
             if( !target() ) {
                 return false;
             }
-            if( &cur.veh.parts[ cur.part ].base == target() ) {
+            if( &cur.part.part().base == target() ) {
                 return true; // vehicle_part::base
             }
             if( cur.has_item( *target() ) ) {
@@ -343,15 +343,15 @@ class item_location::impl::item_on_vehicle : public item_location::impl
             js.start_object();
             js.member( "type", "vehicle" );
             js.member( "pos", position() );
-            js.member( "part", cur.part );
-            if( target() != &cur.veh.parts[ cur.part ].base ) {
+            js.member( "part", cur.part.index() );
+            if( target() != &cur.part.part().base ) {
                 js.member( "idx", find_index( cur, target() ) );
             }
             js.end_object();
         }
 
         item *unpack( int idx ) const override {
-            return idx >= 0 ? retrieve_index( cur, idx ) : &cur.veh.parts[ cur.part ].base;
+            return idx >= 0 ? retrieve_index( cur, idx ) : &cur.part.part().base;
         }
 
         type where() const override {
@@ -359,13 +359,13 @@ class item_location::impl::item_on_vehicle : public item_location::impl
         }
 
         tripoint position() const override {
-            return cur.part.veh()->global_part_pos3( cur.part.index() );
+            return cur.part.global_part_pos3();
         }
 
         std::string describe( const Character *ch ) const override {
             std::string res = cur.part.name();
             if( ch ) {
-                res += std::string( " " ) += direction_suffix( ch->pos(), cur.part.veh->global_part_pos3( cur.part.index() ) );
+                res += std::string( " " ) += direction_suffix( ch->pos(), cur.part.global_part_pos3() );
             }
             return res;
         }
@@ -396,7 +396,7 @@ class item_location::impl::item_on_vehicle : public item_location::impl
 
             int mv = dynamic_cast<const player *>( &ch )->item_handling_cost( obj, true,
                      VEHICLE_HANDLING_PENALTY );
-            mv += 100 * rl_dist( ch.pos(), cur.part.veh()->global_part_pos3( cur.part.index() ) );
+            mv += 100 * rl_dist( ch.pos(), cur.part.global_part_pos3() );
 
             //@ todo handle unpacking costs
 

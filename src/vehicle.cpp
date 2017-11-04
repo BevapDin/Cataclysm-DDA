@@ -10,6 +10,7 @@
 #include "item_group.h"
 #include "veh_interact.h"
 #include "cursesdef.h"
+#include "vehicle_part_reference.h"
 #include "catacharset.h"
 #include "overmapbuffer.h"
 #include "messages.h"
@@ -156,10 +157,9 @@ bool vehicle::player_in_control(player const& p) const
         return true;
     }
 
-    int veh_part;
-
-    if( g->m.veh_at( p.pos(), veh_part ) == this &&
-        part_with_feature(veh_part, VPFLAG_CONTROLS, false) >= 0 && p.controlling_vehicle ) {
+    const vehicle_part_reference veh_part = g->m.veh_part_at( p.pos() );
+    if( is_same_vehicle( veh_part, this ) &&
+        part_with_feature( veh_part.index(), VPFLAG_CONTROLS, false ) && p.controlling_vehicle ) {
         return true;
     }
 
@@ -2918,14 +2918,13 @@ int vehicle::fuel_left (const itype_id & ftype, bool recurse) const
 
     //muscle engines have infinite fuel
     if (ftype == fuel_type_muscle) {
-        int part_under_player;
         // @todo Allow NPCs to power those
-        vehicle *veh = g->m.veh_at( g->u.pos(), part_under_player );
+        const auto part_under_player = g->m.veh_part_at( g->u.pos() );
         bool player_controlling = player_in_control(g->u);
 
         //if the engine in the player tile is a muscle engine, and player is controlling vehicle
-        if( veh == this && player_controlling && part_under_player >= 0 ) {
-            int p = part_with_feature(part_under_player, VPFLAG_ENGINE);
+        if( is_same_vehicle( part_under_player, this ) && player_controlling ) {
+            const auto p = part_with_feature(part_under_player.index(), VPFLAG_ENGINE);
             if( p >= 0 && part_info(p).fuel_type == fuel_type_muscle && is_part_on( p ) ) {
                 fl += 10;
             }
@@ -4362,11 +4361,10 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
         ph = nullptr;
     }
 
-    int target_part = -1;
-    vehicle *oveh = g->m.veh_at( p, target_part );
+    const auto target_part = g->m.veh_part_at( p );
     // Disable veh/critter collisions when bashing floor
     // TODO: More elegant code
-    const bool is_veh_collision = !bash_floor && oveh != nullptr && oveh != this;
+    const bool is_veh_collision = !bash_floor && target_part && !is_same_vehicle( target_part, this );
     const bool is_body_collision = !bash_floor && critter != nullptr;
 
     veh_collision ret;
@@ -4378,9 +4376,9 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
     if( is_veh_collision ) {
        ret.type = veh_coll_veh;
        //"imp" is too simplistic for veh-veh collisions
-       ret.target = oveh;
-       ret.target_part = target_part;
-       ret.target_name = oveh->disp_name();
+       ret.target = target_part.veh();
+       ret.target_part = target_part.index();
+       ret.target_name = target_part.veh()->disp_name();
        return ret;
     }
 

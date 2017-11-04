@@ -2940,13 +2940,10 @@ bool game::handle_action()
             // @todo: Move handling ACTION_FIRE to a new function.
             // Use vehicle turret or draw a pistol from a holster if unarmed
             if( !u.is_armed() ) {
-
-                int part = -1;
-                vehicle *veh = m.veh_at( u.pos(), part );
-
+                const auto vpart = m.veh_part_at( u.pos() );
                 turret_data turret;
                 // @todo: move direct turret firing from ACTION_FIRE to separate function.
-                if( veh && ( turret = veh->turret_query( u.pos() ) ) ) {
+                if( vpart && ( turret = vpart.veh()->turret_query( u.pos() ) ) ) {
                     switch( turret.query() ) {
                         case turret_data::status::no_ammo:
                             add_msg( m_bad, _( "The %s is out of ammo." ), turret.name().c_str() );
@@ -3005,9 +3002,8 @@ bool game::handle_action()
                     break;
                 }
 
-                if( veh ) {
-                    int vpcontrols = veh->part_with_feature( part, "CONTROLS", true );
-                    if( vpcontrols >= 0 && veh->turrets_aim_and_fire() ) {
+                if( const auto vpcontrols = vpart.part_with_feature( "CONTROLS", true ) ) {
+                    if( vpart.veh()->turrets_aim_and_fire() ) {
                         break;
                     }
                 }
@@ -3725,13 +3721,8 @@ void game::load(std::string worldname, const save_t &name)
         u.setID( assign_npc_id() );
         // The vehicle stores the IDs of the boarded players, so update it, too.
         if( u.in_vehicle ) {
-            int vpart;
-            vehicle *veh = m.veh_at( u.pos(), vpart );
-            if( veh != nullptr ) {
-                vpart = veh->part_with_feature( vpart, "BOARDABLE" );
-                if( vpart >= 0 ) {
-                    veh->parts[vpart].passenger_id = u.getID();
-                }
+            if( const auto vpart = m.veh_part_at( u.pos() ).part_with_feature( "BOARDABLE" ) ) {
+                vpart.part().passenger_id = u.getID();
             }
         }
     }
@@ -6852,35 +6843,29 @@ void game::open()
 
     u.moves -= 100;
 
-    int vpart;
-    vehicle *veh = m.veh_at(openp, vpart);
-
-    if( veh != nullptr ) {
-        int openable = veh->next_part_to_open(vpart);
-        if (openable >= 0) {
+    if( const auto vpart = m.veh_part_at( openp ) ) {
+        if( const auto openable = vpart.next_part_to_open() ) {
             const vehicle *player_veh = m.vehicle_at(u.pos());
-            bool outside = !player_veh || player_veh != veh;
+            bool outside = !player_veh || !is_same_vehicle( openable, player_veh );
             if (!outside) {
-                veh->open(openable);
+                openable.open();
             } else {
                 // Outside means we check if there's anything in that tile outside-openable.
                 // If there is, we open everything on tile. This means opening a closed,
                 // curtained door from outside is possible, but it will magically open the
                 // curtains as well.
-                int outside_openable = veh->next_part_to_open(vpart, true);
-                if (outside_openable == -1) {
-                    const std::string name = veh->part_info( openable ).name();
+                if( !vpart.next_part_to_open( true ) ) {
+                    const std::string name = openable.part_info().name();
                     add_msg(m_info, _("That %s can only opened from the inside."), name.c_str());
                     u.moves += 100;
                 } else {
-                    veh->open_all_at(openable);
+                    openable.open_all_at();
                 }
             }
         } else {
             // If there are any OPENABLE parts here, they must be already open
-            int already_open = veh->part_with_feature(vpart, "OPENABLE");
-            if (already_open >= 0) {
-                const std::string name = veh->part_info( already_open ).name();
+            if( const auto already_open = vpart.part_with_feature( "OPENABLE" ) ) {
+                const std::string name = already_open.part_info().name();
                 add_msg(m_info, _("That %s is already open."), name.c_str());
             }
             u.moves += 100;
@@ -7123,14 +7108,13 @@ bool game::forced_door_closing( const tripoint &p, const ter_id door_type, int b
             }
         }
     }
-    int vpart = -1;
-    vehicle *veh = m.veh_at( p, vpart );
-    if( veh != nullptr ) {
+    
+    if( const auto vpart = m.veh_part_at( p ) ) {
         if (bash_dmg <= 0) {
             return false;
         }
-        veh->damage(vpart, bash_dmg);
-        if( m.veh_at( p, vpart) != nullptr ) {
+        vpart.damage( bash_dmg, DT_BASH );
+        if( m.vehicle_at( p ) != nullptr ) {
             // Check again in case all parts at the door tile
             // have been destroyed, if there is still a vehicle
             // there, the door can not be closed
@@ -7213,15 +7197,16 @@ void game::moving_vehicle_dismount( const tripoint &dest_loc )
 
 void game::control_vehicle()
 {
-    int veh_part = -1;
+    vehicle_part_reference vpart;
     vehicle *veh = remoteveh();
     if( veh == nullptr ) {
-        veh = m.veh_at(u.pos(), veh_part);
+        vpart = m.veh_part_at( u.pos() );
+        veh = vpart.veh();
     }
 
     if( veh != nullptr && veh->player_in_control( u ) ) {
         veh->use_controls( u.pos() );
-    } else if( veh && veh->part_with_feature( veh_part, "CONTROLS" ) >= 0 && u.in_vehicle ) {
+    } else if( vpart.part_with_feature( "CONTROLS" ) && u.in_vehicle ) {
         if( !veh->interact_vehicle_locked() ) {
             return;
         }
@@ -7236,7 +7221,7 @@ void game::control_vehicle()
         if (!choose_adjacent(_("Control vehicle where?"), examp)) {
             return;
         }
-        veh = m.veh_at(examp, veh_part);
+        veh = m.vehicle_at( examp );
         if (!veh) {
             add_msg(_("No vehicle there."));
             return;
@@ -7742,14 +7727,12 @@ void game::print_all_tile_info( const tripoint &lp, WINDOW *w_look, int column, 
     switch( visibility ) {
         case VIS_CLEAR:
             {
-                int veh_part = 0;
-                const vehicle *veh = m.veh_at( lp, veh_part);
                 const Creature *creature = critter_at( lp, true );
                 print_terrain_info( lp, w_look, column, line );
                 print_fields_info( lp, w_look, column, line );
                 print_trap_info( lp, w_look, column, line );
                 print_creature_info( creature, w_look, column, line );
-                print_vehicle_info( veh, veh_part, w_look, column, line, last_line );
+                print_vehicle_info( m.veh_part_at( lp ), w_look, column, line, last_line );
                 print_items_info( lp, w_look, column, line, last_line );
                 print_graffiti_info( lp, w_look, column, line, last_line );
 
@@ -7898,12 +7881,12 @@ void game::print_creature_info( const Creature *creature, WINDOW *w_look,
     }
 }
 
-void game::print_vehicle_info( const vehicle *veh, int veh_part, WINDOW *w_look,
+void game::print_vehicle_info( const vehicle_part_reference vpart, WINDOW *w_look,
                                const int column, int &line, const int last_line )
 {
-    if (veh) {
-        mvwprintw(w_look, line++, column, _("There is a %s there. Parts:"), veh->name.c_str());
-        line = veh->print_part_desc(w_look, line, last_line, getmaxx(w_look), veh_part);
+    if( vpart ) {
+        mvwprintw(w_look, line++, column, _("There is a %s there. Parts:"), vpart.veh()->name.c_str());
+        line = vpart.veh()->print_part_desc( w_look, line, last_line, getmaxx(w_look), vpart.index() );
     }
 }
 
@@ -11026,10 +11009,10 @@ void game::pldrive(int x, int y)
         return;
     }
     vehicle *veh = remoteveh();
+    const vehicle_part_reference vpart = m.veh_part_at( u.pos() );
     bool remote = true;
-    int part = -1;
     if( !veh ) {
-        veh = m.veh_at(u.pos(), part);
+        veh = vpart.veh();
         remote = false;
     }
     if (!veh) {
@@ -11039,8 +11022,7 @@ void game::pldrive(int x, int y)
         return;
     }
     if( !remote ) {
-        int pctr = veh->part_with_feature(part, "CONTROLS");
-        if (pctr < 0) {
+        if( !vpart.part_with_feature( "CONTROLS" ) ) {
             add_msg(m_info, _("You can't drive the vehicle from here. You need controls!"));
             u.controlling_vehicle = false;
             return;
@@ -11430,27 +11412,27 @@ bool game::plmove(int dx, int dy, int dz)
     }
 
     // GRAB: pre-action checking.
-    int vpart1 = -1, dpart = -1;
+    vehicle_part_reference dpart;
     vehicle *veh0 = m.vehicle_at( u.pos() );
-    vehicle *veh1 = m.veh_at( dest_loc, vpart1 );
+    const vehicle_part_reference vpart1 = m.veh_part_at( dest_loc );
 
     bool veh_closed_door = false;
-    bool outside_vehicle = ( veh0 == nullptr || veh0 != veh1 );
-    if( veh1 != nullptr ) {
-        dpart = veh1->next_part_to_open(vpart1, outside_vehicle);
-        veh_closed_door = dpart >= 0 && !veh1->parts[dpart].open;
+    bool outside_vehicle = veh0 == nullptr || !is_same_vehicle( veh0, vpart1 );
+    if( vpart1 ) {
+        dpart = vpart1.next_part_to_open( outside_vehicle );
+        veh_closed_door = dpart && !dpart.part().open;
     }
 
     if( veh0 != nullptr && abs(veh0->velocity) > 100 ) {
-        if( veh1 == nullptr ) {
+        if( !vpart1 ) {
             if (query_yn(_("Dive from moving vehicle?"))) {
                 moving_vehicle_dismount( dest_loc );
             }
             return false;
-        } else if( veh1 != veh0 ) {
+        } else if( !is_same_vehicle( vpart1, veh0 ) ) {
             add_msg(m_info, _("There is another vehicle in the way."));
             return false;
-        } else if( veh1->part_with_feature(vpart1, "BOARDABLE") < 0 ) {
+        } else if( !vpart1.part_with_feature( "BOARDABLE" ) ) {
             add_msg(m_info, _("That part of the vehicle is currently unsafe."));
             return false;
         }
@@ -11461,7 +11443,7 @@ bool game::plmove(int dx, int dy, int dz)
     bool fromSwimmable = m.has_flag("SWIMMABLE", u.pos());
     bool fromDeepWater = m.has_flag(TFLAG_DEEP_WATER, u.pos());
     bool fromBoat = veh0 != nullptr && !veh0->all_parts_with_feature(VPFLAG_FLOATS).empty();
-    bool toBoat = veh1 != nullptr && !veh1->all_parts_with_feature(VPFLAG_FLOATS).empty();
+    bool toBoat = vpart1 && !vpart1.veh()->all_parts_with_feature(VPFLAG_FLOATS).empty();
 
     if( toSwimmable && toDeepWater && !toBoat ) { // Dive into water!
         // Requires confirmation if we were on dry land previously
@@ -11488,11 +11470,11 @@ bool game::plmove(int dx, int dy, int dz)
 
     if( veh_closed_door ) {
         if( outside_vehicle ) {
-            veh1->open_all_at( dpart );
+            dpart.open_all_at();
         } else {
-            veh1->open(dpart);
-            add_msg(_("You open the %1$s's %2$s."), veh1->name.c_str(),
-                    veh1->part_info( dpart ).name().c_str() );
+            dpart.open();
+            add_msg(_("You open the %1$s's %2$s."), vpart1.veh()->name.c_str(),
+                    dpart.part_info().name().c_str() );
         }
 
         u.moves -= 100;
@@ -11580,9 +11562,8 @@ bool game::ramp_move( const tripoint &dest_loc )
 
 bool game::walk_move( const tripoint &dest_loc )
 {
-    int vpart_here, vpart_there;
-    const vehicle *const veh_here = m.veh_at( u.pos(), vpart_here );
-    const vehicle *const veh_there = m.veh_at( dest_loc, vpart_there );
+    const auto vpart_here = m.veh_part_at( u.pos() );
+    const auto vpart_there = m.veh_part_at( dest_loc );
 
     bool pushing = false;  // moving -into- grabbed tile; skip check for move_cost > 0
     bool pulling = false;  // moving -away- from grabbed tile; check for move_cost > 0
@@ -11669,16 +11650,16 @@ bool game::walk_move( const tripoint &dest_loc )
     if( slowed ) {
         // Unless u.pos() has a higher movecost than dest_loc, state that dest_loc is the cause
         if( mcost_to >= mcost_from ) {
-            if( veh_there ) {
+            if( vpart_there ) {
                 add_msg( m_warning, _( "Moving onto this %s is slow!" ),
-                         veh_there->part_info( vpart_there ).name().c_str() );
+                         vpart_there.part_info().name().c_str() );
             } else {
                 add_msg( m_warning, _( "Moving onto this %s is slow!"), m.name( dest_loc ).c_str() );
             }
         } else {
-            if( veh_here ) {
+            if( vpart_here ) {
                 add_msg( m_warning, _( "Moving off of this %s is slow!" ),
-                         veh_here->part_info( vpart_here ).name().c_str() );
+                         vpart_here.part_info().name().c_str() );
             } else {
                 add_msg( m_warning, _( "Moving off of this %s is slow!" ), m.name( u.pos() ).c_str() );
             }
@@ -12383,11 +12364,9 @@ void game::fling_creature(Creature *c, const int &dir, float flvel, bool control
                 thru = false;
             }
         } else if( m.impassable( pt ) ) {
-            int part = -1;
-            vehicle *veh = m.veh_at( pt, part );
-            if( veh != nullptr ) {
-                part = veh->obstacle_at_part( part );
-                if( part == -1 ) {
+            if( auto vpart = m.veh_part_at( pt ) ) {
+                vpart = vpart.obstacle_at_part();
+                if( !vpart ) {
                     force = std::min<float>( m.bash_strength( pt ), flvel );
                 } else {
                     // No good way of limiting force here

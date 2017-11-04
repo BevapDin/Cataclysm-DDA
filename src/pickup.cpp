@@ -18,6 +18,7 @@
 #include "string_formatter.h"
 #include "debug.h"
 #include "vehicle_selector.h"
+#include "vehicle_part_reference.h"
 #include "veh_interact.h"
 #include "item_search.h"
 #include "string_input_popup.h"
@@ -32,7 +33,7 @@ typedef std::map<std::string, ItemCount> PickupMap;
 
 // Pickup helper functions
 static bool pick_one_up( const tripoint &pickup_target, item &newit,
-                         vehicle *veh, int cargo_part, int index, int quantity,
+                         vehicle_part_reference cargo_part, int index, int quantity,
                          bool &got_water, bool &offered_swap,
                          PickupMap &mapPickup, bool autopickup );
 
@@ -40,10 +41,9 @@ typedef enum {
     DONE, ITEMS_FROM_CARGO, ITEMS_FROM_GROUND,
 } interact_results;
 
-static interact_results interact_with_vehicle( vehicle *veh, const tripoint &vpos,
-        int veh_root_part );
+static interact_results interact_with_vehicle( vehicle_part_reference vpart, const tripoint &vpos );
 
-static void remove_from_map_or_vehicle( const tripoint &pos, vehicle *veh, int cargo_part,
+static void remove_from_map_or_vehicle( const tripoint &pos, vehicle_part_reference cargo_part,
                                         int &moves_taken, int curmit );
 static void show_pickup_message( const PickupMap &mapPickup );
 
@@ -59,12 +59,12 @@ struct item_idx {
 };
 
 // Handles interactions with a vehicle in the examine menu.
-interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
-                                        int veh_root_part )
+interact_results interact_with_vehicle( const vehicle_part_reference vpart, const tripoint &pos )
 {
-    if( veh == nullptr ) {
+    if( !vpart ) {
         return ITEMS_FROM_GROUND;
     }
+    vehicle *const veh = vpart.veh();
 
     std::vector<std::string> menu_items;
     std::vector<uimenu_entry> options_message;
@@ -73,15 +73,15 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
 
     auto turret = veh->turret_query( pos );
 
-    const bool has_kitchen = ( veh->part_with_feature( veh_root_part, "KITCHEN" ) >= 0 );
-    const bool has_faucet = ( veh->part_with_feature( veh_root_part, "FAUCET" ) >= 0 );
-    const bool has_weldrig = ( veh->part_with_feature( veh_root_part, "WELDRIG" ) >= 0 );
-    const bool has_chemlab = ( veh->part_with_feature( veh_root_part, "CHEMLAB" ) >= 0 );
-    const bool has_purify = ( veh->part_with_feature( veh_root_part, "WATER_PURIFIER" ) >= 0 );
-    const bool has_controls = ( ( veh->part_with_feature( veh_root_part, "CONTROLS" ) >= 0 ) ||
-                                ( veh->part_with_feature( veh_root_part, "CTRL_ELECTRONIC" ) >= 0 ) );
-    const int cargo_part = veh->part_with_feature( veh_root_part, "CARGO", false );
-    const bool from_vehicle = veh && cargo_part >= 0 && !veh->get_items( cargo_part ).empty();
+    const bool has_kitchen = static_cast<bool>( vpart.part_with_feature( "KITCHEN" ) );
+    const bool has_faucet = static_cast<bool>( vpart.part_with_feature( "FAUCET" ) );
+    const bool has_weldrig = static_cast<bool>( vpart.part_with_feature( "WELDRIG" ) );
+    const bool has_chemlab = static_cast<bool>( vpart.part_with_feature( "CHEMLAB" ) );
+    const bool has_purify = static_cast<bool>( vpart.part_with_feature( "WATER_PURIFIER" ) );
+    const bool has_controls = vpart.part_with_feature( "CONTROLS" ) ||
+                              vpart.part_with_feature( "CTRL_ELECTRONIC" );
+    const vehicle_part_reference cargo_part = vpart.part_with_feature( "CARGO", false );
+    const bool from_vehicle = !cargo_part.get_items().empty();
     const bool can_be_folded = veh->is_foldable();
     const bool is_convertible = ( veh->tags.count( "convertible" ) > 0 );
     const bool remotely_controlled = g->remoteveh() == veh;
@@ -194,7 +194,7 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
                     act.coords.push_back( pos );
                     // Finally tell it it is the vehicle part with weldrig
                     act.values.resize( 2 );
-                    act.values[1] = veh->part_with_feature( veh_root_part, "WELDRIG" );
+                    act.values[1] = vpart.part_with_feature( "WELDRIG" ).index();
                 }
             }
             return DONE;
@@ -377,8 +377,8 @@ pickup_answer handle_problematic_pickup( const item &it, bool &offered_swap,
 }
 
 // Returns false if pickup caused a prompt and the player selected to cancel pickup
-bool pick_one_up( const tripoint &pickup_target, item &newit, vehicle *veh,
-                  int cargo_part, int index, int quantity, bool &got_water,
+bool pick_one_up( const tripoint &pickup_target, item &newit,
+                  const vehicle_part_reference cargo_part, int index, int quantity, bool &got_water,
                   bool &offered_swap, PickupMap &mapPickup, bool autopickup )
 {
     player &u = g->u;
@@ -478,12 +478,12 @@ bool pick_one_up( const tripoint &pickup_target, item &newit, vehicle *veh,
     }
 
     if( picked_up ) {
-        remove_from_map_or_vehicle( pickup_target, veh, cargo_part, moves_taken, index );
+        remove_from_map_or_vehicle( pickup_target, cargo_part, moves_taken, index );
     }
     if( leftovers.charges > 0 ) {
-        bool to_map = veh == nullptr;
+        bool to_map = !cargo_part;
         if( !to_map ) {
-            to_map = !veh->add_item( cargo_part, leftovers );
+            to_map = !cargo_part.add_item( leftovers );
         }
         if( to_map ) {
             g->m.add_item_or_charges( pickup_target, leftovers );
@@ -497,8 +497,7 @@ bool Pickup::do_pickup( const tripoint &pickup_target_arg, bool from_vehicle,
                         std::list<int> &indices, std::list<int> &quantities, bool autopickup )
 {
     bool got_water = false;
-    int cargo_part = -1;
-    vehicle *veh = nullptr;
+    vehicle_part_reference cargo_part;
     bool weight_is_okay = ( g->u.weight_carried() <= g->u.weight_capacity() );
     bool volume_is_okay = ( g->u.volume_carried() <= g->u.volume_capacity() );
     bool offered_swap = false;
@@ -509,9 +508,7 @@ bool Pickup::do_pickup( const tripoint &pickup_target_arg, bool from_vehicle,
     PickupMap mapPickup;
 
     if( from_vehicle ) {
-        int veh_root_part = -1;
-        veh = g->m.veh_at( pickup_target, veh_root_part );
-        cargo_part = veh->part_with_feature( veh_root_part, "CARGO", false );
+        cargo_part = g->m.veh_part_at( pickup_target ).part_with_feature( "CARGO", false );
     }
 
     bool problem = false;
@@ -527,7 +524,7 @@ bool Pickup::do_pickup( const tripoint &pickup_target_arg, bool from_vehicle,
 
         item *target = nullptr;
         if( from_vehicle ) {
-            target = g->m.item_from( veh, cargo_part, index );
+            target = g->m.item_from( cargo_part, index );
         } else {
             target = g->m.item_from( pickup_target, index );
         }
@@ -536,7 +533,7 @@ bool Pickup::do_pickup( const tripoint &pickup_target_arg, bool from_vehicle,
             continue; // No such item.
         }
 
-        problem = !pick_one_up( pickup_target, *target, veh, cargo_part, index, quantity,
+        problem = !pick_one_up( pickup_target, *target, cargo_part, index, quantity,
                                 got_water, offered_swap, mapPickup, autopickup );
     }
 
@@ -560,19 +557,17 @@ bool Pickup::do_pickup( const tripoint &pickup_target_arg, bool from_vehicle,
 // Pick up items at (pos).
 void Pickup::pick_up( const tripoint &pos, int min )
 {
-    int veh_root_part = 0;
-    int cargo_part = -1;
-
-    vehicle *veh = g->m.veh_at( pos, veh_root_part );
+    vehicle_part_reference cargo_part;
+    const vehicle_part_reference vpart = g->m.veh_part_at( pos );
     bool from_vehicle = false;
 
     if( min != -1 ) {
-        switch( interact_with_vehicle( veh, pos, veh_root_part ) ) {
+        switch( interact_with_vehicle( vpart, pos ) ) {
             case DONE:
                 return;
             case ITEMS_FROM_CARGO:
-                cargo_part = veh->part_with_feature( veh_root_part, "CARGO", false );
-                from_vehicle = cargo_part >= 0;
+                cargo_part = vpart.part_with_feature( "CARGO", false );
+                from_vehicle = static_cast<bool>( cargo_part );
                 break;
             case ITEMS_FROM_GROUND:
                 // Nothing to change, default is to pick from ground anyway.
@@ -607,7 +602,7 @@ void Pickup::pick_up( const tripoint &pos, int min )
     // which items are we grabbing?
     std::vector<item> here;
     if( from_vehicle ) {
-        auto vehitems = veh->get_items( cargo_part );
+        auto vehitems = cargo_part.get_items();
         here.resize( vehitems.size() );
         std::copy( vehitems.begin(), vehitems.end(), here.begin() );
     } else {
@@ -1105,11 +1100,11 @@ void Pickup::pick_up( const tripoint &pos, int min )
 }
 
 //helper function for Pickup::pick_up (singular item)
-void remove_from_map_or_vehicle( const tripoint &pos, vehicle *veh, int cargo_part,
+void remove_from_map_or_vehicle( const tripoint &pos, const vehicle_part_reference cargo_part,
                                  int &moves_taken, int curmit )
 {
-    if( veh != nullptr ) {
-        veh->remove_item( cargo_part, curmit );
+    if( cargo_part ) {
+        cargo_part.remove_item( curmit );
     } else {
         g->m.i_rem( pos, curmit );
     }

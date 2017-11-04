@@ -11,6 +11,7 @@
 #include "mtype.h"
 #include "npc.h"
 #include "itype.h"
+#include "vehicle_part_reference.h"
 #include "vehicle.h"
 #include "debug.h"
 #include "field.h"
@@ -240,14 +241,13 @@ Creature *Creature::auto_find_hostile_target( int range, int &boo_hoo, int area 
     bool area_iff = false;      // Need to check distance from target to player
     bool angle_iff = true;      // Need to check if player is in a cone between us and target
     int pldist = rl_dist( pos(), g->u.pos() );
-    int part;
-    vehicle *in_veh = is_fake() ? g->m.veh_at( pos(), part ) : nullptr;
+    const vehicle_part_reference in_veh = is_fake() ? g->m.veh_part_at( pos() ) : vehicle_part_reference();
     if( pldist < iff_dist && sees( g->u ) ) {
         area_iff = area > 0;
         angle_iff = true;
         // Player inside vehicle won't be hit by shots from the roof,
         // so we can fire "through" them just fine.
-        if( in_veh && g->m.veh_at( u.pos(), part ) == in_veh && in_veh->is_inside( part ) ) {
+        if( in_veh && g->m.veh_part_at( u.pos() ).is_inside() ) {
             angle_iff = false; // No angle IFF, but possibly area IFF
         } else if( pldist < 3 ) {
             iff_hangle = (pldist == 2 ? 30 : 60);    // granularity increases with proximity
@@ -255,7 +255,7 @@ Creature *Creature::auto_find_hostile_target( int range, int &boo_hoo, int area 
         u_angle = g->m.coord_to_angle(posx(), posy(), u.posx(), u.posy());
     }
 
-    if( area > 0 && in_veh != nullptr ) {
+    if( area > 0 && in_veh ) {
         self_area_iff = true;
     }
 
@@ -289,7 +289,7 @@ Creature *Creature::auto_find_hostile_target( int range, int &boo_hoo, int area 
             continue;
         }
 
-        if( in_veh != nullptr && g->m.veh_at( m->pos(), part ) == in_veh ) {
+        if( in_veh && is_same_vehicle( in_veh, g->m.vehicle_at( m->pos() ) ) ) {
             // No shooting stuff on vehicle we're a part of
             continue;
         }
@@ -326,7 +326,7 @@ Creature *Creature::auto_find_hostile_target( int range, int &boo_hoo, int area 
             continue; // Handle this late so that boo_hoo++ can happen
         }
         // Expensive check for proximity to vehicle
-        if( self_area_iff && overlaps_vehicle( in_veh->get_points(), m->pos(), area ) ) {
+        if( self_area_iff && overlaps_vehicle( in_veh.veh()->get_points(), m->pos(), area ) ) {
             continue;
         }
 

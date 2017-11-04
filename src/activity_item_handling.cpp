@@ -13,6 +13,7 @@
 #include "monster.h"
 #include "vehicle.h"
 #include "veh_type.h"
+#include "vehicle_part_reference.h"
 #include "player.h"
 #include "string_formatter.h"
 #include "debug.h"
@@ -50,13 +51,13 @@ bool same_type( const std::list<item> &items )
     } );
 }
 
-void put_into_vehicle( player &p, const std::list<item> &items, vehicle &veh, int part )
+void put_into_vehicle( player &p, const std::list<item> &items, const vehicle_part_reference part )
 {
     if( items.empty() ) {
         return;
     }
 
-    const tripoint where = veh.global_part_pos3( part );
+    const tripoint where = part.global_part_pos3();
     const std::string ter_name = g->m.name( where );
     int fallen_count = 0;
 
@@ -70,17 +71,17 @@ void put_into_vehicle( player &p, const std::list<item> &items, vehicle &veh, in
             g->m.add_item_or_charges( where, it );
             continue;
         }
-        if( !veh.add_item( part, it ) ) {
+        if( !part.add_item( it ) ) {
             if( it.count_by_charges() ) {
                 // Maybe we can add a few charges in the trunk and the rest on the ground.
-                it.mod_charges( -veh.add_charges( part, it ) );
+                it.mod_charges( -part.add_charges( it ) );
             }
             g->m.add_item_or_charges( where, it );
             ++fallen_count;
         }
     }
 
-    const std::string part_name = veh.part_info( part ).name();
+    const std::string part_name = part.part_info().name();
 
     if( same_type( items ) ) {
         const item &it = items.front();
@@ -91,13 +92,13 @@ void put_into_vehicle( player &p, const std::list<item> &items, vehicle &veh, in
                       "You put your %1$s in the %2$s's %3$s.", dropcount ),
             ngettext( "<npcname> puts their %1$s in the %2$s's %3$s.",
                       "<npcname> puts their %1$s in the %2$s's %3$s.", dropcount ),
-            it.tname( dropcount ).c_str(), veh.name.c_str(), part_name.c_str()
+            it.tname( dropcount ).c_str(), part.veh()->name.c_str(), part_name.c_str()
         );
     } else {
         p.add_msg_player_or_npc(
             _( "You put several items in the %1$s's %2$s." ),
             _( "<npcname> puts several items in the %1$s's %2$s." ),
-            veh.name.c_str(), part_name.c_str()
+            part.veh()->name.c_str(), part_name.c_str()
         );
     }
 
@@ -188,14 +189,9 @@ void drop_on_map( const player &p, const std::list<item> &items, const tripoint 
 void put_into_vehicle_or_drop( player &p, const std::list<item> &items,
                                const tripoint &where )
 {
-    int veh_part = 0;
-    vehicle *veh = g->m.veh_at( where, veh_part );
-    if( veh != nullptr ) {
-        veh_part = veh->part_with_feature( veh_part, "CARGO" );
-        if( veh_part >= 0 ) {
-            put_into_vehicle( p, items, *veh, veh_part );
-            return;
-        }
+    if( const auto cargo = g->m.veh_part_at( where ).part_with_feature( "CARGO" ) ) {
+        put_into_vehicle( p, items, cargo );
+        return;
     }
     drop_on_map( p, items, where );
 }
@@ -462,23 +458,12 @@ static void move_items( const tripoint &src, bool from_vehicle,
     tripoint source = src + g->u.pos();
     tripoint destination = dest + g->u.pos();
 
-    int s_cargo, d_cargo;   // oui oui, mon frere
-    s_cargo = d_cargo = -1;
-    vehicle *s_veh, *d_veh; // 2diva4me
-    s_veh = d_veh = nullptr;
+    vehicle_part_reference s_cargo;   // oui oui, mon frere
 
     // load vehicle information if requested
     if( from_vehicle == true ) {
-        s_veh = g->m.veh_at( source, s_cargo );
-        assert( s_veh != nullptr );
-        s_cargo = s_veh->part_with_feature( s_cargo, "CARGO", false );
-        assert( s_cargo >= 0 );
-    }
-    if( to_vehicle == true ) {
-        d_veh = g->m.veh_at( destination, d_cargo );
-        assert( d_veh != nullptr );
-        d_cargo = d_veh->part_with_feature( d_cargo, "CARGO", false );
-        assert( d_cargo >= 0 );
+        s_cargo = g->m.veh_part_at( source );
+        assert( s_cargo );
     }
 
     while( g->u.moves > 0 && !indices.empty() ) {
@@ -490,7 +475,7 @@ static void move_items( const tripoint &src, bool from_vehicle,
         item *temp_item = nullptr;
 
         temp_item = ( from_vehicle == true ) ?
-                    g->m.item_from( s_veh, s_cargo, index ) :
+                    g->m.item_from( s_cargo, index ) :
                     g->m.item_from( source, index );
 
         if( temp_item == nullptr ) {
@@ -519,7 +504,7 @@ static void move_items( const tripoint &src, bool from_vehicle,
             }
             // Remove from map or vehicle.
             if( from_vehicle == true ) {
-                s_veh->remove_item( s_cargo, index );
+                s_cargo.remove_item( index );
             } else {
                 g->m.i_rem( source, index );
             }
@@ -529,7 +514,7 @@ static void move_items( const tripoint &src, bool from_vehicle,
         if( leftovers.charges > 0 ) {
             bool to_map = !from_vehicle;
             if( !to_map ) {
-                to_map = !s_veh->add_item( s_cargo, leftovers );
+                to_map = !s_cargo.add_item( leftovers );
             }
             if( to_map ) {
                 g->m.add_item_or_charges( source, leftovers );

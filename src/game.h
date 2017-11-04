@@ -106,6 +106,7 @@ class overmap;
 struct event;
 enum event_type : int;
 struct vehicle_part;
+class vehicle_part_reference;
 struct ter_t;
 using ter_id = int_id<ter_t>;
 class weather_generator;
@@ -954,7 +955,7 @@ private:
         void print_trap_info( const tripoint &lp, WINDOW *w_look, const int column, int &line );
         void print_creature_info( const Creature *creature, WINDOW *w_look, int column,
                                   int &line );
-        void print_vehicle_info( const vehicle *veh, int veh_part, WINDOW *w_look,
+        void print_vehicle_info( vehicle_part_reference vpart, WINDOW *w_look,
                                  int column, int &line, int last_line );
         void print_visibility_info( WINDOW *w_look, int column, int &line,
                                     visibility_type visibility );

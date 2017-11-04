@@ -8,12 +8,12 @@
 #include "map.h"
 #include "messages.h"
 #include "monster.h"
+#include "vehicle_part_reference.h"
 #include "options.h"
 #include "player.h"
 #include "projectile.h"
 #include "sounds.h"
 #include "trap.h"
-#include "vehicle.h"
 
 #include <algorithm>
 
@@ -292,9 +292,8 @@ dealt_projectile_attack projectile_attack( const projectile &proj_arg, const tri
         }
 
         if( in_veh != nullptr ) {
-            int part;
-            vehicle *other = g->m.veh_at( tp, part );
-            if( in_veh == other && other->is_inside( part ) ) {
+            const auto other = g->m.veh_part_at( tp );
+            if( is_same_vehicle( in_veh, other ) && other.is_inside() ) {
                 continue; // Turret is on the roof and can't hit anything inside
             }
         }
