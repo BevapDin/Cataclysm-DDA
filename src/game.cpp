@@ -763,9 +763,8 @@ void game::setup()
     turnssincelastmon = 0; //Auto safe mode init
 
     sounds::reset_sounds();
-    clear_zombies();
+    clear_creatures();
     coming_to_stairs.clear();
-    active_npc.clear();
     factions.clear();
     mission::clear_all();
     Messages::clear_messages();
@@ -6690,9 +6689,11 @@ void game::remove_zombie( const monster &critter )
     critter_tracker->remove( critter );
 }
 
-void game::clear_zombies()
+void game::clear_creatures()
 {
     critter_tracker->clear();
+    active_npc.clear();
+    assert( num_creatures() == 1 ); // the player character
 }
 
 /**

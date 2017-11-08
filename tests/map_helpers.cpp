@@ -24,9 +24,8 @@ void wipe_map_terrain()
 
 void clear_creatures()
 {
-    // Remove any interfering monsters.
-    g->clear_zombies();
-    g->unload_npcs();
+    // Remove any interfering creatures.
+    g->clear_creatures();
 }
 
 void clear_map()

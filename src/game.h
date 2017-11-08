@@ -323,8 +323,13 @@ class game
         /** Redirects to the creature_tracker update_pos() function. */
         bool update_zombie_pos( const monster &critter, const tripoint &pos );
         void remove_zombie( const monster &critter );
-        /** Redirects to the creature_tracker clear() function. */
-        void clear_zombies();
+        /**
+         * Removes all zombies (as if by calling @ref remove_zombie) and active npcs
+         * from the game. Note that the npcs remain stored in an overmap, but monsters
+         * are effectively lost.
+         * Postcondition: `num_creatures() == 1` ( @ref u).
+         */
+        void clear_creatures();
         /** Spawns a hallucination close to the player. */
         bool spawn_hallucination();
         /** Swaps positions of two creatures */
