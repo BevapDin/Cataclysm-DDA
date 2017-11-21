@@ -1125,21 +1125,18 @@ item_comp find_component( const std::vector<item_comp> &altercomps, const item &
     return altercomps.front();
 }
 
-item &get_item_for_uncraft( player &p, int item_pos,
+item *get_item_for_uncraft( player &p, int item_pos,
                             const tripoint &loc, bool from_ground )
 {
-    item *org_item;
     if( from_ground ) {
         auto items_on_ground = g->m.i_at( loc );
         if( static_cast<size_t>( item_pos ) >= items_on_ground.size() ) {
-            return p.ret_null;
+            return nullptr;
         }
-        org_item = &items_on_ground[item_pos];
+        return &items_on_ground[item_pos];
     } else {
-        org_item = &p.i_at( item_pos );
+        return &p.i_at( item_pos );
     }
-
-    return *org_item;
 }
 
 void player::complete_disassemble()
@@ -1211,12 +1208,13 @@ void player::complete_disassemble( int item_pos, const tripoint &loc,
 {
     // Get the proper recipe - the one for disassembly, not assembly
     const auto dis_requirements = dis.disassembly_requirements();
-    item &org_item = get_item_for_uncraft( *this, item_pos, loc, from_ground );
-    if( org_item.is_null() ) {
+    item *const org_item_ptr = get_item_for_uncraft( *this, item_pos, loc, from_ground );
+    if( !org_item_ptr ) {
         add_msg( _( "The item has vanished." ) );
         activity.set_to_null();
         return;
     }
+    item &org_item = *org_item_ptr;
     const bool filthy = org_item.is_filthy();
 
     if( org_item.typeId() != dis.result ) {
