@@ -1542,12 +1542,12 @@ int npc::value( const item &it, int market_price ) const
 
 bool npc::has_healing_item( bool bleed, bool bite, bool infect )
 {
-    return !get_healing_item( bleed, bite, infect, true ).is_null();
+    return !get_healing_item( bleed, bite, infect, true );
 }
 
-item &npc::get_healing_item( bool bleed, bool bite, bool infect, bool first_best )
+item *npc::get_healing_item( bool bleed, bool bite, bool infect, bool first_best )
 {
-    item *best = &ret_null;
+    item *best = nullptr;
     visit_items( [&best, bleed, bite, infect, first_best]( item * node ) {
         const auto use = node->type->get_use( "heal" );
         if( use == nullptr ) {
@@ -1567,7 +1567,7 @@ item &npc::get_healing_item( bool bleed, bool bite, bool infect, bool first_best
         return VisitResponse::NEXT;
     } );
 
-    return *best;
+    return best;
 }
 
 bool npc::has_painkiller()

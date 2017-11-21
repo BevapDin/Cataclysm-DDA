@@ -551,7 +551,7 @@ class npc : public player
         bool wield( item &it ) override;
         bool adjust_worn();
         bool has_healing_item( bool bleed = false, bool bite = false, bool infect = false );
-        item &get_healing_item( bool bleed = false, bool bite = false, bool infect = false,
+        item *get_healing_item( bool bleed = false, bool bite = false, bool infect = false,
                                 bool first_best = false );
         bool has_painkiller();
         bool took_painkiller() const;

@@ -2491,11 +2491,12 @@ void npc::heal_player( player &patient )
         add_msg( _( "%1$s heals %2$s." ), name.c_str(), patient.name.c_str() );
     }
 
-    item &used = get_healing_item();
-    if( used.is_null() ) {
+    item *const used_ptr = get_healing_item();
+    if( !used_ptr ) {
         debugmsg( "%s tried to heal you but has no healing item", disp_name().c_str() );
         return;
     }
+    item &used = *used_ptr;
 
     long charges_used = used.type->invoke( *this, used, patient.pos(), "heal" );
     consume_charges( used, charges_used );
@@ -2515,11 +2516,12 @@ void npc::heal_player( player &patient )
 
 void npc::heal_self()
 {
-    item &used = get_healing_item();
-    if( used.is_null() ) {
+    item *const used_ptr = get_healing_item();
+    if( !used_ptr ) {
         debugmsg( "%s tried to heal self but has no healing item", disp_name().c_str() );
         return;
     }
+    item &used = *used_ptr;
 
     if( g->u.sees( *this ) ) {
         add_msg( _( "%s applies a %s" ), name.c_str(), used.tname().c_str() );
