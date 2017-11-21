@@ -1014,7 +1014,7 @@ bool wants_to_reload_with( const item &weap, const item &ammo )
     return true;
 }
 
-item &npc::find_reloadable()
+item *npc::find_reloadable()
 {
     // Check wielded gun, non-wielded guns, mags and tools
     // TODO: Build a proper gun->mag->ammo DAG (Directed Acyclic Graph)
@@ -1036,16 +1036,12 @@ item &npc::find_reloadable()
         return VisitResponse::NEXT;
     } );
 
-    if( reloadable != nullptr ) {
-        return *reloadable;
-    }
-
-    return ret_null;
+    return reloadable;
 }
 
-const item &npc::find_reloadable() const
+const item *npc::find_reloadable() const
 {
-    return const_cast<const item &>( const_cast<npc *>( this )->find_reloadable() );
+    return const_cast<const item *>( const_cast<npc *>( this )->find_reloadable() );
 }
 
 bool npc::can_reload_current()
@@ -1090,9 +1086,8 @@ npc_action npc::address_needs( float danger )
         return npc_reload;
     }
 
-    item &reloadable = find_reloadable();
-    if( !reloadable.is_null() ) {
-        do_reload( reloadable );
+    if( item *const reloadable_ptr = find_reloadable() ) {
+        do_reload( *reloadable_ptr );
         return npc_noop;
     }
 

@@ -627,8 +627,8 @@ class npc : public player
         /** Can reload currently wielded gun? */
         bool can_reload_current();
         /** Has a gun or magazine that can be reloaded */
-        const item &find_reloadable() const;
-        item &find_reloadable();
+        const item *find_reloadable() const;
+        item *find_reloadable();
         /** Finds ammo the NPC could use to reload a given object */
         item_location find_usable_ammo( const item &weap );
         const item_location find_usable_ammo( const item &weap ) const;
