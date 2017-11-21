@@ -93,7 +93,7 @@ std::string melee_message( const ma_technique &tech, player &p, const dealt_dama
 
 const item &Character::used_weapon() const
 {
-    return dynamic_cast<const player &>( *this ).get_combat_style().force_unarmed ? ret_null : weapon;
+    return dynamic_cast<const player &>( *this ).get_combat_style().force_unarmed ? inv.nullitem : weapon;
 }
 
 item &Character::used_weapon()
