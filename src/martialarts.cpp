@@ -578,12 +578,14 @@ bool martialart::weapon_valid( const item &it ) const
 // Player stuff
 
 // technique
-std::vector<matec_id> player::get_all_techniques( const item &weap ) const
+std::vector<matec_id> player::get_all_techniques( const item *const weap ) const
 {
     std::vector<matec_id> tecs;
-    // Grab individual item techniques
-    const auto &weapon_techs = weap.get_techniques();
-    tecs.insert( tecs.end(), weapon_techs.begin(), weapon_techs.end() );
+    if( weap ) {
+        // Grab individual item techniques
+        const auto &weapon_techs = weap->get_techniques();
+        tecs.insert( tecs.end(), weapon_techs.begin(), weapon_techs.end() );
+    }
     // and martial art techniques
     const auto &style = style_selected.obj();
     tecs.insert( tecs.end(), style.techniques.begin(), style.techniques.end() );
@@ -594,7 +596,7 @@ std::vector<matec_id> player::get_all_techniques( const item &weap ) const
 // defensive technique-related
 bool player::has_miss_recovery_tec( const item &weap ) const
 {
-    for( auto &technique : get_all_techniques( weap ) ) {
+    for( auto &technique : get_all_techniques( &weap ) ) {
         if( technique.obj().miss_recovery ) {
             return true;
         }
@@ -605,7 +607,7 @@ bool player::has_miss_recovery_tec( const item &weap ) const
 // This one isn't used with a weapon
 bool player::has_grab_break_tec() const
 {
-    for( auto &technique : get_all_techniques( ret_null ) ) {
+    for( auto &technique : get_all_techniques( nullptr ) ) {
         if( technique.obj().grab_break ) {
             return true;
         }

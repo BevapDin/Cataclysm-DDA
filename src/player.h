@@ -599,7 +599,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Adds player's total stab damage to the damage instance */
         void roll_stab_damage( bool crit, damage_instance &di, bool average, const item &weap ) const;
 
-        std::vector<matec_id> get_all_techniques( const item &weap ) const;
+        std::vector<matec_id> get_all_techniques( const item *weap ) const;
 
         /** Returns true if the player has a weapon or martial arts skill available with the entered technique */
         bool has_technique( const matec_id &tec, const item &weap ) const;

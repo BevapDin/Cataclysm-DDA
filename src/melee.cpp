@@ -868,7 +868,7 @@ matec_id player::pick_technique( Creature &t, const item &weap,
                                  bool crit, bool dodge_counter, bool block_counter )
 {
 
-    std::vector<matec_id> all = get_all_techniques( weap );
+    std::vector<matec_id> all = get_all_techniques( &weap );
 
     std::vector<matec_id> possible;
 
