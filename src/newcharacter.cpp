@@ -537,7 +537,6 @@ bool player::create(character_type type, std::string tempname)
         scent = 300;
     }
 
-    ret_null = item("null", 0);
     weapon = item();
 
     // Grab the skills from the profession, if there are any
