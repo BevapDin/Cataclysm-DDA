@@ -482,7 +482,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
 
         // melee.cpp
         /** Returns the best item for blocking with */
-        item &best_shield();
+        item *best_shield();
         using Creature::melee_attack;
         /**
          * Sets up a melee attack and handles melee attack function calls

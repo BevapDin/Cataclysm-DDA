@@ -1215,18 +1215,18 @@ int blocking_ability( const item &shield )
     return block_bonus;
 }
 
-item &player::best_shield()
+item *player::best_shield()
 {
     // Note: wielded weapon, not one used for attacks
     int best_value = blocking_ability( weapon );
-    item *best = best_value > 0 ? &weapon : &ret_null;
+    item *best = best_value > 0 ? &weapon : nullptr;
     for( item &shield : worn ) {
         if( shield.has_flag( "BLOCK_WHILE_WORN" ) && blocking_ability( shield ) >= best_value ) {
             best = &shield;
         }
     }
 
-    return *best;
+    return best;
 }
 
 bool player::block_hit(Creature *source, body_part &bp_hit, damage_instance &dam) {
@@ -1246,9 +1246,9 @@ bool player::block_hit(Creature *source, body_part &bp_hit, damage_instance &dam
     // but it still counts as a block even if it absorbs all the damage.
     float total_phys_block = mabuff_block_bonus();
     // Extract this to make it easier to implement shields/multiwield later
-    item &shield = best_shield();
-    bool conductive_shield = shield.conductive();
-    bool unarmed = shield.has_flag( "UNARMED_WEAPON" );
+    item *const shield_ptr = best_shield();
+    bool conductive_shield = shield_ptr && shield_ptr->conductive();
+    bool unarmed = shield_ptr && shield_ptr->has_flag( "UNARMED_WEAPON" );
 
     // This gets us a number between:
     // str ~0 + skill 0 = 0
@@ -1256,12 +1256,12 @@ bool player::block_hit(Creature *source, body_part &bp_hit, damage_instance &dam
     int block_score = 1;
     // Remember if we're using a weapon or a limb to block.
     // So that we don't suddenly switch that for any reason.
-    const bool weapon_blocking = !shield.is_null();
+    const bool weapon_blocking = shield_ptr != nullptr;
     if( weapon_blocking ) {
         /** @EFFECT_STR increases attack blocking effectiveness with a weapon */
 
         /** @EFFECT_MELEE increases attack blocking effectiveness with a weapon */
-        block_bonus = blocking_ability( shield );
+        block_bonus = blocking_ability( *shield_ptr );
         block_score = str_cur + block_bonus + (int)get_skill_level( skill_melee );
     } else if( can_limb_block() ) {
         /** @EFFECT_STR increases attack blocking effectiveness with a limb */
@@ -1329,14 +1329,14 @@ bool player::block_hit(Creature *source, body_part &bp_hit, damage_instance &dam
     // weapon blocks are preferred to limb blocks
     std::string thing_blocked_with;
     if( weapon_blocking ) {
-        thing_blocked_with = shield.tname();
+        thing_blocked_with = shield_ptr->tname();
         // TODO: Change this depending on damage blocked
         float wear_modifier = 1.0f;
         if( source != nullptr && source->is_hallucination() ) {
             wear_modifier = 0.0f;
         }
 
-        handle_melee_wear( shield, wear_modifier );
+        handle_melee_wear( *shield_ptr, wear_modifier );
     } else {
         //Choose which body part to block with, assume left side first
         if (can_leg_block() && can_arm_block()) {
@@ -1395,7 +1395,7 @@ bool player::block_hit(Creature *source, body_part &bp_hit, damage_instance &dam
                            damage_blocked_description.c_str(), thing_blocked_with.c_str() );
 
     // Check if we have any block counters
-    matec_id tec = pick_technique( *source, &shield, false, false, true );
+    matec_id tec = pick_technique( *source, shield_ptr, false, false, true );
 
     if( tec != tec_none ) {
         melee_attack( *source, false, tec );
