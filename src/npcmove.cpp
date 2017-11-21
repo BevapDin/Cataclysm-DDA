@@ -2241,7 +2241,8 @@ bool npc::wield_better_weapon()
     best_value *= std::max<float>( 1.0f, ai_cache.danger_assessment / 10.0f );
 
     // Fists aren't checked below
-    compare_weapon( ret_null );
+    item null_item;
+    compare_weapon( null_item );
 
     visit_items( [&compare_weapon]( item * node ) {
         // Skip some bad items
@@ -2290,10 +2291,11 @@ void npc::wield_best_melee()
     item *it = inv.best_for_melee( *this, best_value );
     if( unarmed_value() >= best_value ) {
         // "I cast fist!"
-        it = &ret_null;
+        item null_item;
+        wield( null_item );
+    } else {
+        wield( *it );
     }
-
-    wield( *it );
 }
 
 void npc_throw( npc &np, item &it, int index, const tripoint &pos )

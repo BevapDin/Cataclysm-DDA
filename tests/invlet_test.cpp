@@ -252,7 +252,8 @@ item &item_at( player &p, int pos, inventory_location loc ) {
         FAIL( "unimplemented" );
         break;
     }
-    return p.ret_null;
+	static item null_item;
+    return null_item;
 }
 
 void move_item( player &p, int pos, inventory_location from, inventory_location to ) {

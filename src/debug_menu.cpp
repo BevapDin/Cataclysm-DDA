@@ -209,7 +209,7 @@ void npc_edit_menu()
             }
             p.worn.clear();
             p.inv.clear();
-            p.weapon = p.ret_null;
+            p.weapon = item();
             break;
         case D_ITEM_WORN: {
             int item_pos = g->inv_for_all( _( "Make target equip" ) );
