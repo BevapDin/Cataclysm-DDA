@@ -1255,12 +1255,12 @@ void player::complete_disassemble( int item_pos, const tripoint &loc,
     // Get the proper recipe - the one for disassembly, not assembly
     const auto dis_requirements = dis.disassembly_requirements();
     item &org_item = get_item_for_uncraft( *this, item_pos, loc, from_ground );
-    bool filthy = org_item.is_filthy();
     if( org_item.is_null() ) {
         add_msg( _( "The item has vanished." ) );
         activity.set_to_null();
         return;
     }
+    const bool filthy = org_item.is_filthy();
 
     if( org_item.typeId() != dis.result() ) {
         add_msg( _( "The item might be gone, at least it is not at the expected position anymore." ) );
