@@ -575,7 +575,7 @@ class player : public Character
         /** Returns true if the player has a weapon or martial arts skill available with the entered technique */
         bool has_technique( const matec_id &tec, const item &weap ) const;
         /** Returns a random valid technique */
-        matec_id pick_technique( Creature &t, const item &weap,
+        matec_id pick_technique( Creature &t, const item *weap,
                                  bool crit, bool dodge_counter, bool block_counter );
         void perform_technique(const ma_technique &technique, Creature &t, damage_instance &di, int &move_cost);
         /** Performs special attacks and their effects (poisonous, stinger, etc.) */

@@ -362,7 +362,7 @@ void player::melee_attack(Creature &t, bool allow_special, const matec_id &force
         // Pick one or more special attacks
         matec_id technique_id;
         if( allow_special && !has_force_technique ) {
-            technique_id = pick_technique( t, cur_weapon, critical_hit, false, false );
+            technique_id = pick_technique( t, &cur_weapon, critical_hit, false, false );
         } else if ( has_force_technique ) {
             technique_id = force_technique;
         } else {
@@ -876,7 +876,7 @@ void player::roll_stab_damage( bool crit, damage_instance &di, bool average, con
     di.add_damage( DT_STAB, cut_dam, 0, armor_mult, stab_mul );
 }
 
-matec_id player::pick_technique( Creature &t, const item &weap,
+matec_id player::pick_technique( Creature &t, const item *const weap,
                                  bool crit, bool dodge_counter, bool block_counter )
 {
 
@@ -1398,7 +1398,7 @@ bool player::block_hit(Creature *source, body_part &bp_hit, damage_instance &dam
                            damage_blocked_description.c_str(), thing_blocked_with.c_str() );
 
     // Check if we have any block counters
-    matec_id tec = pick_technique( *source, shield, false, false, true );
+    matec_id tec = pick_technique( *source, &shield, false, false, true );
 
     if( tec != tec_none ) {
         melee_attack( *source, false, tec );
