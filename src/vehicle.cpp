@@ -174,7 +174,7 @@ bool vehicle::remote_controlled(player const &p) const
 
     auto remote = all_parts_with_feature( "REMOTE_CONTROLS", true );
     for( int part : remote ) {
-        if( rl_dist( p.pos(), tripoint( global_pos() + parts[part].precalc[0], p.posz() ) ) <= 40 ) {
+        if( rl_dist( p.pos(), global_part_pos3( part ) ) <= 40 ) {
             return true;
         }
     }
@@ -590,7 +590,7 @@ void vehicle::control_doors() {
 
             int val = doors_with_motors.size();
             doors_with_motors.push_back(door);
-            locations.push_back(tripoint(global_pos() + parts[p].precalc[0], smz));
+            locations.push_back( global_part_pos3( p) );
             const char *actname = parts[door].open ? _("Close") : _("Open");
             pmenu.addentry(val, true, MENU_AUTOASSIGN, "%s %s", actname, parts[ door ].name().c_str() );
         }
@@ -1905,9 +1905,7 @@ bool vehicle::remove_part( int p )
         return false;
     }
 
-    int x = parts[p].precalc[0].x;
-    int y = parts[p].precalc[0].y;
-    tripoint part_loc( global_x() + x, global_y() + y, smz );
+    const tripoint part_loc = global_part_pos3( p );
 
     // If `p` has flag `parent_flag`, remove child with flag `child_flag`
     // Returns true if removal occurs
@@ -3050,7 +3048,7 @@ bool vehicle::do_environmental_effects()
     bool needed = false;
     // check for smoking parts
     for( size_t p = 0; p < parts.size(); p++ ) {
-        auto part_pos = global_pos3() + parts[p].precalc[0];
+        const tripoint part_pos = global_part_pos3( p );
 
         /* Only lower blood level if:
          * - The part is outside.
@@ -3849,7 +3847,7 @@ void vehicle::on_move(){
 
 void vehicle::operate_plow(){
     for( const int plow_id : all_parts_with_feature( "PLOW" ) ){
-        const tripoint start_plow = global_pos3() + parts[plow_id].precalc[0];
+        const tripoint start_plow = global_part_pos3( plow_id );
         if( g->m.has_flag("DIGGABLE", start_plow) ){
             g->m.ter_set( start_plow, t_dirtmound );
         } else {
@@ -3862,9 +3860,8 @@ void vehicle::operate_plow(){
 }
 
 void vehicle::operate_reaper(){
-    const tripoint &veh_start = global_pos3();
     for( const int reaper_id : all_parts_with_feature( "REAPER" ) ){
-        const tripoint reaper_pos = veh_start + parts[ reaper_id ].precalc[ 0 ];
+        const tripoint reaper_pos = global_part_pos3( reaper_id );
         const int plant_produced =  rng( 1, parts[ reaper_id ].info().bonus );
         const int seed_produced = rng( 1, 3 );
         const units::volume max_pickup_volume = parts[ reaper_id ].info().size / 20;
@@ -3902,7 +3899,7 @@ void vehicle::operate_reaper(){
 void vehicle::operate_planter(){
     std::vector<int> planters = all_parts_with_feature("PLANTER");
     for( int planter_id : planters ){
-        const tripoint &loc = global_pos3() + parts[planter_id].precalc[0];
+        const tripoint loc = global_part_pos3( planter_id );
         vehicle_stack v = get_items(planter_id);
         for( auto i = v.begin(); i != v.end(); i++ ){
             if( i->is_seed() ){
@@ -3943,11 +3940,11 @@ void vehicle::operate_scoop()
         const std::array<std::string, 4> sound_msgs = {{
             _("Whirrrr"), _("Ker-chunk"), _("Swish"), _("Cugugugugug")
         }};
-        sounds::sound( global_pos3() + parts[scoop].precalc[0], rng( 20, 35 ),
+        sounds::sound( global_part_pos3( scoop ), rng( 20, 35 ),
                        sound_msgs[rng( 0, 3 )] );
         std::vector<tripoint> parts_points;
         for( const tripoint &current :
-                 g->m.points_in_radius( global_pos3() + parts[scoop].precalc[0], 1 ) ) {
+                 g->m.points_in_radius( global_part_pos3( scoop ), 1 ) ) {
             parts_points.push_back( current );
         }
         for( const tripoint &position : parts_points ) {
@@ -4935,7 +4932,7 @@ std::list<item>::iterator vehicle::remove_item( int part, std::list<item>::itera
 
 vehicle_stack vehicle::get_items(int const part)
 {
-    return vehicle_stack( &parts[part].items, global_pos() + parts[part].precalc[0],
+    return vehicle_stack( &parts[part].items, global_part_pos3( part ),
                           this, part );
 }
 
@@ -5254,7 +5251,7 @@ void vehicle::remove_remote_part(int part_num) {
 
     // If the target vehicle is still there, ask it to remove its part
     if (veh != nullptr) {
-        auto pos = global_pos3() + parts[part_num].precalc[0];
+        const tripoint pos = global_part_pos3( part_num );
         tripoint local_abs = g->m.getabs( pos );
 
         for( size_t j = 0; j < veh->loose_parts.size(); j++) {
@@ -5279,7 +5276,7 @@ void vehicle::shed_loose_parts() {
         }
 
         auto part = &parts[elem];
-        auto pos = global_pos3() + part->precalc[0];
+        const tripoint pos = global_part_pos3( *part );
         item drop = part->properties_to_item();
         g->m.add_item_or_charges( pos, drop );
 
@@ -5349,9 +5346,7 @@ void vehicle::unboard_all ()
 {
     std::vector<int> bp = boarded_parts();
     for( auto &i : bp ) {
-        g->m.unboard_vehicle( tripoint( global_x() + parts[i].precalc[0].x,
-                                        global_y() + parts[i].precalc[0].y,
-                                        smz ) );
+        g->m.unboard_vehicle( global_part_pos3( i ) );
     }
 }
 
@@ -5926,10 +5921,8 @@ std::set<tripoint> &vehicle::get_points( const bool force_refresh )
     if( force_refresh || occupied_cache_turn != calendar::turn ) {
         occupied_cache_turn = calendar::turn;
         occupied_points.clear();
-        tripoint pos = global_pos3();
         for( const auto &p : parts ) {
-            const auto &pt = p.precalc[0];
-            occupied_points.insert( tripoint( pos.x + pt.x, pos.y + pt.y, pos.z ) );
+            occupied_points.insert( global_part_pos3( p ) );
         }
     }
 
@@ -5997,7 +5990,7 @@ void vehicle::update_time( const calendar &update_to )
         const auto &pt = parts[idx];
 
         // we need an unbroken funnel mounted on the exterior of the vehicle
-        if( pt.is_broken() || !is_sm_tile_outside( veh_loc + pt.precalc[0] ) ) {
+        if( pt.is_broken() || !is_sm_tile_outside( global_part_pos3( pt ) ) ) {
             continue;
         }
 
@@ -6033,7 +6026,7 @@ void vehicle::update_time( const calendar &update_to )
                 continue;
             }
 
-            const tripoint part_loc = veh_loc + parts[part].precalc[0];
+            const tripoint part_loc = global_part_pos3( part );
             if( !is_sm_tile_outside( part_loc ) ) {
                 continue;
             }

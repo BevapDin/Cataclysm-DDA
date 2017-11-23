@@ -69,9 +69,8 @@ bool game::grabbed_veh_move( const tripoint &dp )
     const auto &wheel_indices = grabbed_vehicle->wheelcache;
     if( grabbed_vehicle->valid_wheel_config( false ) ) {
         //determine movecost for terrain touching wheels
-        const tripoint vehpos = grabbed_vehicle->global_pos3();
         for( int p : wheel_indices ) {
-            const tripoint wheel_pos = vehpos + grabbed_vehicle->parts[p].precalc[0];
+            const tripoint wheel_pos = grabbed_vehicle->global_part_pos3( p );
             const int mapcost = m.move_cost( wheel_pos, grabbed_vehicle );
             mc += ( str_req / wheel_indices.size() ) * mapcost;
         }

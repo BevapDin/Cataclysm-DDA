@@ -199,14 +199,13 @@ void map::add_vehicle_to_cache( vehicle *veh )
     ch.veh_in_active_range = true;
     // Get parts
     std::vector<vehicle_part> &parts = veh->parts;
-    const tripoint gpos = veh->global_pos3();
     int partid = 0;
     for( std::vector<vehicle_part>::iterator it = parts.begin(),
          end = parts.end(); it != end; ++it, ++partid ) {
         if( it->removed ) {
             continue;
         }
-        const tripoint p = gpos + it->precalc[0];
+        const tripoint p = veh->global_part_pos3( *it );
         ch.veh_cached_parts.insert( std::make_pair( p,
                                     std::make_pair( veh, partid ) ) );
         if( inbounds( p.x, p.y ) ) {
@@ -586,7 +585,6 @@ bool map::vehicle_falling( vehicle &veh )
 
 float map::vehicle_wheel_traction( const vehicle &veh ) const
 {
-    const tripoint pt = veh.global_pos3();
     // TODO: Remove this and allow amphibious vehicles
     if( !veh.floating.empty() ) {
         return vehicle_buoyancy( veh );
@@ -605,7 +603,7 @@ float map::vehicle_wheel_traction( const vehicle &veh ) const
     float traction_wheel_area = 0.0f;
     for( int w = 0; w < num_wheels; w++ ) {
         const int p = wheel_indices[w];
-        const tripoint pp = pt + veh.parts[p].precalc[0];
+        const tripoint pp = veh.global_part_pos3( p );
 
         const float wheel_area = veh.parts[ p ].wheel_area();
 
@@ -647,14 +645,13 @@ float map::vehicle_wheel_traction( const vehicle &veh ) const
 
 float map::vehicle_buoyancy( const vehicle &veh ) const
 {
-    const tripoint pt = veh.global_pos3();
     const auto &float_indices = veh.floating;
     const int num = float_indices.size();
     int moored = 0;
     float total_wheel_area = 0.0f;
     for( int w = 0; w < num; w++ ) {
         const int p = float_indices[w];
-        const tripoint pp = pt + veh.parts[p].precalc[0];
+        const tripoint pp = veh.global_part_pos3( p );
         total_wheel_area += veh.parts[ p ].wheel_width() * veh.parts[ p ].wheel_diameter();
 
         if( !has_flag( "SWIMMABLE", pp ) ) {
@@ -789,7 +786,7 @@ void map::move_vehicle( vehicle &veh, const tripoint &dp, const tileray &facing 
     if( !vertical && can_move ) {
         const auto wheel_indices = veh.wheelcache; // Don't use a reference here, it causes a crash.
         for( auto &w : wheel_indices ) {
-            const tripoint wheel_p = pt + veh.parts[w].precalc[0];
+            const tripoint wheel_p = veh.global_part_pos3( w );
             if( one_in( 2 ) && displace_water( wheel_p ) ) {
                 sounds::sound( wheel_p, 4, _("splash!"), false, "environment", "splash");
             }
@@ -855,7 +852,6 @@ void map::move_vehicle( vehicle &veh, const tripoint &dp, const tileray &facing 
 
 int map::shake_vehicle( vehicle &veh, const int velocity_before, const int direction )
 {
-    const tripoint &pt = veh.global_pos3();
     const int d_vel = abs( veh.velocity - velocity_before ) / 100;
 
     const std::vector<int> boarded = veh.boarded_parts();
@@ -868,7 +864,7 @@ int map::shake_vehicle( vehicle &veh, const int velocity_before, const int direc
             continue;
         }
 
-        const tripoint part_pos = pt + veh.parts[ps].precalc[0];
+        const tripoint part_pos = veh.global_part_pos3( ps );
         if( psg->pos() != part_pos ) {
             debugmsg( "throw passenger: passenger at %d,%d,%d, part at %d,%d,%d",
                 psg->posx(), psg->posy(), psg->posz(), part_pos.x, part_pos.y, part_pos.z );
@@ -1313,11 +1309,10 @@ vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
     bool need_update = false;
     int z_change = 0;
     // Move passengers
-    const tripoint old_veh_pos = veh->global_pos3();
     for( size_t i = 0; i < psg_parts.size(); i++ ) {
         player *psg = psgs[i];
         const int prt = psg_parts[i];
-        const tripoint part_pos = old_veh_pos + veh->parts[prt].precalc[0];
+        const tripoint part_pos = veh->global_part_pos3( prt );
         if( psg == nullptr ) {
             debugmsg( "Empty passenger part %d pcoord=%d,%d,%d u=%d,%d,%d?",
                 prt,
@@ -4772,9 +4767,7 @@ void map::process_items_in_vehicle( vehicle *const cur_veh, submap *const curren
 
         // Find the cargo part and coordinates corresponding to the current active item.
         auto const part_index = static_cast<size_t>(*it);
-        const point partloc = cur_veh->global_pos() + cur_veh->parts[part_index].precalc[0];
-        // TODO: Make this 3D when vehicles know their Z coord
-        const tripoint item_location = tripoint( partloc, abs_sub.z );
+        const tripoint item_location = cur_veh->global_part_pos3( part_index );
         auto items = cur_veh->get_items(static_cast<int>(part_index));
         if(!processor(items, active_item.item_iterator, item_location, signal)) {
             // If the item was NOT destroyed, we can skip the remainder,
@@ -7554,11 +7547,12 @@ void map::build_map_cache( const int zlev, bool skip_lightmap )
         auto &transparency_cache = ch.transparency_cache;
         auto &floor_cache = ch.floor_cache;
         for( size_t part = 0; part < v.v->parts.size(); part++ ) {
-            int px = v.x + v.v->parts[part].precalc[0].x;
-            int py = v.y + v.v->parts[part].precalc[0].y;
-            if( !INBOUNDS( px, py ) ) {
+            const tripoint ppos = v.v->global_part_pos3( part );
+            if( !inbounds( ppos ) ) {
                 continue;
             }
+            const int px = ppos.x;
+            const int py = ppos.y;
 
             if( v.v->is_inside( part ) ) {
                 outside_cache[px][py] = false;
@@ -8034,7 +8028,7 @@ void map::scent_blockers( std::array<std::array<bool, SEEX * MAPSIZE>, SEEY * MA
     // Now vehicles
 
     // Currently the scentmap is limited to an area around the player rather than entire map
-    auto local_bounds = [=]( const point &coord ) {
+    auto local_bounds = [=]( const tripoint &coord ) {
         return coord.x >= minx && coord.x <= maxx && coord.y >= miny && coord.y <= maxy;
     };
 
@@ -8043,7 +8037,7 @@ void map::scent_blockers( std::array<std::array<bool, SEEX * MAPSIZE>, SEEY * MA
         vehicle &veh = *(wrapped_veh.v);
         auto obstacles = veh.all_parts_with_feature( VPFLAG_OBSTACLE, true );
         for( const int p : obstacles ) {
-            const point part_pos = veh.global_pos() + veh.parts[p].precalc[0];
+            const tripoint part_pos = veh.global_part_pos3( p );
             if( local_bounds( part_pos ) ) {
                 reduces_scent[part_pos.x][part_pos.y] = true;
             }
@@ -8056,7 +8050,7 @@ void map::scent_blockers( std::array<std::array<bool, SEEX * MAPSIZE>, SEEY * MA
                 continue;
             }
 
-            const point part_pos = veh.global_pos() + veh.parts[p].precalc[0];
+            const tripoint part_pos = veh.global_part_pos3( p );
             if( local_bounds( part_pos ) ) {
                 reduces_scent[part_pos.x][part_pos.y] = true;
             }
