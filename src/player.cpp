@@ -8513,8 +8513,6 @@ hint_rating player::rate_action_use( const item &it ) const
         } else {
             return HINT_GOOD;
         }
-    } else if (it.is_bionic()) {
-        return HINT_GOOD;
     } else if( it.is_food() || it.is_medication() || it.is_book() || it.is_armor() ) {
         return HINT_IFFY; //the rating is subjective, could be argued as HINT_CANT or HINT_GOOD as well
     } else if ( it.is_gun() ) {
@@ -8635,11 +8633,6 @@ void player::use( int inventory_position )
             return;
         }
         invoke_item( used );
-
-    } else if( used->is_bionic() ) {
-        if( install_bionics( *used->type ) ) {
-            i_rem( inventory_position );
-        }
 
     } else if( used->is_food() ||
                used->is_medication() ||

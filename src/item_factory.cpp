@@ -2,7 +2,6 @@
 
 #include "addiction.h"
 #include "artifact.h"
-#include "bionics.h"
 #include "catacharset.h"
 #include "construction.h"
 #include "crafting.h"
@@ -661,6 +660,7 @@ void Item_factory::init()
     add_actor( new place_trap_actor() );
     add_actor( new emit_actor() );
     add_actor( new saw_barrel_actor() );
+    add_actor( new install_bionic_actor() );
     // An empty dummy group, it will not spawn anything. However, it makes that item group
     // id valid, so it can be used all over the place without need to explicitly check for it.
     m_template_groups["EMPTY_GROUP"] = new Item_group( Item_group::G_COLLECTION, 100, 0, 0 );
@@ -926,11 +926,6 @@ void Item_factory::check_definitions() const
             }
             if( !type->tool->subtype.empty() && !has_template( type->tool->subtype ) ) {
                 msg << _( "Invalid tool subtype" ) << type->tool->subtype << "\n";
-            }
-        }
-        if( type->bionic ) {
-            if( !type->bionic->id.is_valid() ) {
-                msg << string_format("there is no bionic with id %s", type->bionic->id.c_str()) << "\n";
             }
         }
 
@@ -1560,24 +1555,6 @@ void Item_factory::load_magazine( JsonObject &jo, const std::string &src )
     }
 }
 
-void Item_factory::load( islot_bionic &slot, JsonObject &jo, const std::string &src )
-{
-    bool strict = src == "dda";
-
-    assign( jo, "difficulty", slot.difficulty, strict, 0 );
-    // TODO: must be the same as the item type id, for compatibility
-    assign( jo, "id", slot.id, strict );
-}
-
-void Item_factory::load_bionic( JsonObject &jo, const std::string &src )
-{
-    itype def;
-    if( load_definition( jo, src, def ) ) {
-        load_slot( def.bionic, jo, src );
-        load_basic_info( jo, def, src );
-    }
-}
-
 void Item_factory::load_generic( JsonObject &jo, const std::string &src )
 {
     itype def;
@@ -1812,7 +1789,6 @@ void Item_factory::load_basic_info( JsonObject &jo, itype &def, const std::strin
     load_slot_optional( def.armor, jo, "armor_data", src );
     load_slot_optional( def.book, jo, "book_data", src );
     load_slot_optional( def.gun, jo, "gun_data", src );
-    load_slot_optional( def.bionic, jo, "bionic_data", src );
     load_slot_optional( def.ammo, jo, "ammo_data", src );
     load_slot_optional( def.seed, jo, "seed_data", src );
     load_slot_optional( def.artifact, jo, "artifact_data", src );
@@ -2337,8 +2313,6 @@ const std::string calc_category( const itype &obj )
     if( obj.gunmod ) {
         return "mods";
     }
-    if( obj.bionic ) {
-        return "bionics";
     }
 
     bool weap = std::any_of( obj.melee.begin(), obj.melee.end(), []( int qty ) {

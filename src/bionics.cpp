@@ -9,6 +9,7 @@
 #include "map_iterator.h"
 #include "debug.h"
 #include "rng.h"
+#include "iuse_actor.h"
 #include "input.h"
 #include "item.h"
 #include "bodypart.h"
@@ -821,8 +822,10 @@ bool player::uninstall_bionic( bionic_id const &b_id, int skill_level )
     const inventory &crafting_inv = crafting_inventory();
     if( item::type_is_defined( b_id.c_str() ) ) {
         auto type = item::find_type( b_id.c_str() );
-        if( type->bionic ) {
-            difficulty = type->bionic->difficulty;
+        for( const auto &use : type->use_methods ) {
+            if( const auto ptr = dynamic_cast<const install_bionic_actor*>( use.second.get_actor_ptr() ) ) {
+                difficulty = ptr->difficulty;
+            }
         }
     }
 
@@ -931,13 +934,8 @@ bool player::uninstall_bionic( bionic_id const &b_id, int skill_level )
     return true;
 }
 
-bool player::install_bionics( const itype &type, int skill_level )
+bool player::install_bionics( const bionic_id &bioid, const int difficult, const int skill_level )
 {
-    if( type.bionic.get() == nullptr ) {
-        debugmsg( "Tried to install NULL bionic" );
-        return false;
-    }
-    const bionic_id &bioid = type.bionic->id;
     if( !bioid.is_valid() ) {
         popup( "invalid / unknown bionic id %s", bioid.c_str() );
         return false;
@@ -954,7 +952,6 @@ bool player::install_bionics( const itype &type, int skill_level )
             return false;
         }
     }
-    const int difficult = type.bionic->difficulty;
     int chance_of_success;
     if( skill_level != -1 ) {
         chance_of_success = bionic_manip_cos( skill_level,

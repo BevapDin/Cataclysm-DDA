@@ -1698,12 +1698,6 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
             }
         }
 
-        // @todo Unhide when enforcing limits
-        if( is_bionic() && g->u.has_trait( trait_id( "DEBUG_CBM_SLOTS" ) ) ) {
-            info.push_back( iteminfo( "DESCRIPTION", list_occupied_bps( type->bionic->id,
-                _( "This bionic is installed in the following body part(s):" ) ) ) );
-        }
-
         if( is_gun() && has_flag( "FIRE_TWOHAND" ) ) {
             info.push_back( iteminfo( "DESCRIPTION",
                                       _( "* This weapon needs <info>two free hands</info> to fire." ) ) );
@@ -2039,10 +2033,6 @@ nc_color item::color_in_inventory() const
             }
         } else {
             ret = c_red; // Book hasn't been identified yet: red
-        }
-    } else if (is_bionic()) {
-        if( !u->has_bionic( type->bionic->id ) ) {
-            ret = u->bionic_installation_issues( type->bionic->id ).empty() ? c_green : c_red;
         }
     }
     return ret;
@@ -3511,11 +3501,6 @@ bool item::is_silent() const
 bool item::is_gunmod() const
 {
     return type->gunmod.get() != nullptr;
-}
-
-bool item::is_bionic() const
-{
-    return type->bionic.get() != nullptr;
 }
 
 bool item::is_magazine() const

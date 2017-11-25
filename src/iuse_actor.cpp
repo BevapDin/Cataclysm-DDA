@@ -3259,3 +3259,40 @@ iuse_actor *saw_barrel_actor::clone() const
 {
     return new saw_barrel_actor( *this );
 }
+
+iuse_actor *install_bionic_actor::clone() const
+{
+    return new install_bionic_actor(*this);
+}
+
+void install_bionic_actor::load( JsonObject &obj )
+{
+    bionic = bionic_id( obj.get_string( "bionic_id" ) );
+    obj.read( "difficulty", difficulty );
+}
+
+long install_bionic_actor::use( player &p, item &it, const bool /*t*/, const tripoint &/*pnt*/ ) const
+{
+    return p.install_bionics( bionic, difficulty ) ? 1 : 0;
+}
+
+std::string install_bionic_actor::get_name() const
+{
+    return string_format( _( "Install bionic %s" ), bionic->name );
+}
+
+void install_bionic_actor::info( const item &/*it*/, std::vector<iteminfo> &dump ) const
+{
+    // @todo Unhide when enforcing limits
+    if( g->u.has_trait( trait_id( "DEBUG_CBM_SLOTS" ) ) ) {
+        dump.push_back( iteminfo( "DESCRIPTION", list_occupied_bps( bionic,
+            _( "This bionic is installed in the following body part(s):" ) ) ) );
+    }
+}
+
+void install_bionic_actor::finalize( const itype_id &itype )
+{
+    if( !bionic.is_valid() ) {
+        debugmsg( "there is no bionic with id %s (used in item type %s)", bionic.c_str(), itype );
+    }
+}

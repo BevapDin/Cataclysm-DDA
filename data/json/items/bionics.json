@@ -18,7 +18,11 @@
     "name": "Adrenaline Pump CBM",
     "description": "A stimulator system has been implanted alongside your adrenal glands, allowing you to trigger your body's adrenaline response at the cost of some bionic power.",
     "price": 4000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": "bio_adrenaline"
+    }
   },
   {
     "id": "bio_ads",
@@ -27,7 +31,11 @@
     "name": "Active Defense System CBM",
     "description": "A thin forcefield surrounds your body, continually draining power.  Anything attempting to penetrate this field has a chance of being deflected at the cost of more energy.  Melee attacks will be stopped more often than bullets.",
     "price": 950000,
-    "difficulty": 7
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 7,
+        "bionic_id": "bio_ads"
+    }
   },
   {
     "id": "bio_advreactor",
@@ -36,7 +44,11 @@
     "name": "Advanced Microreactor CBM",
     "description": "Storage tank and stripped down plutonium reactor, allowing generation of power from small amounts of plutonium.  This one has been heavily upgraded.  Warning: minimal radiation shielding.",
     "price": 900000,
-    "difficulty": 13
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 13,
+        "bionic_id": "bio_advreactor"
+    }
   },
   {
     "id": "bio_alarm",
@@ -45,7 +57,11 @@
     "name": "Alarm System CBM",
     "description": "A motion-detecting alarm system will notice almost all movement within a fifteen-foot radius, and will silently alert you.  This is very useful during sleep, or if you suspect a cloaked pursuer.",
     "price": 25000,
-    "difficulty": 1
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 1,
+        "bionic_id": "bio_alarm"
+    }
   },
   {
     "id": "bio_armor_arms",
@@ -54,7 +70,11 @@
     "name": "Arms Alloy Plating CBM",
     "description": "The flesh on your arms has been replaced by a strong armor, protecting you greatly.",
     "price": 350000,
-    "difficulty": 3
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 3,
+        "bionic_id": "bio_armor_arms"
+    }
   },
   {
     "id": "bio_armor_eyes",
@@ -63,7 +83,11 @@
     "name": "Protective Lenses CBM",
     "description": "Your eye sockets have been sealed with highly protective mirrored lenses and your tear ducts have been re-routed to your mouth.  When you cry, you must spit out or swallow your tears.",
     "price": 550000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": "bio_armor_eyes"
+    }
   },
   {
     "id": "bio_armor_head",
@@ -72,7 +96,11 @@
     "name": "Head Alloy Plating CBM",
     "description": "The flesh on your head has been replaced by a strong armor, protecting both your head and jaw regions.",
     "price": 350000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": "bio_armor_head"
+    }
   },
   {
     "id": "bio_armor_legs",
@@ -81,7 +109,11 @@
     "name": "Legs Alloy Plating CBM",
     "description": "The flesh on your legs has been replaced by a strong armor, protecting you greatly.",
     "price": 350000,
-    "difficulty": 3
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 3,
+        "bionic_id": "bio_armor_legs"
+    }
   },
   {
     "id": "bio_armor_torso",
@@ -90,7 +122,11 @@
     "name": "Torso Alloy Plating CBM",
     "description": "The flesh on your torso has been replaced by a strong armor, protecting you greatly.",
     "price": 350000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": "bio_armor_torso"
+    }
   },
   {
     "id": "bio_batteries",
@@ -99,7 +135,11 @@
     "name": "Battery System CBM",
     "description": "You have a battery draining attachment, and thus can make use of the energy contained in normal, everyday batteries.  Use 'E' to consume batteries.  Can be toggled on and off at will.",
     "price": 80000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": "bio_batteries"
+    }
   },
   {
     "id": "bio_blade",
@@ -108,7 +148,11 @@
     "name": "Monomolecular Blade CBM",
     "description": "A deadly foot-long blade made of advanced material now resides inside your forearm, capable of being extended through the back of your wrist at the cost of a small amount of power.  Though exceptionally sharp, it will prevent you from holding anything else while extended.",
     "price": 8000,
-    "difficulty": 8
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 8,
+        "bionic_id": "bio_blade"
+    }
   },
   {
     "id": "bio_blaster",
@@ -117,7 +161,11 @@
     "name": "Fusion Blaster Arm CBM",
     "description": "Your left arm has been replaced by a heavy-duty fusion blaster!  You may use your energy banks to fire a damaging heat ray; however, you are unable to use or carry two-handed items, and may only fire handguns.",
     "price": 220000,
-    "difficulty": 3
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 3,
+        "bionic_id": "bio_blaster"
+    }
   },
   {
     "id": "bio_blood_anal",
@@ -126,7 +174,11 @@
     "name": "Blood Analysis CBM",
     "description": "Small sensors have been implanted in your heart, allowing you to analyze your blood.  This will detect many illnesses, drugs, and other conditions.",
     "price": 320000,
-    "difficulty": 2
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 2,
+        "bionic_id": "bio_blood_anal"
+    }
   },
   {
     "id": "bio_blood_filter",
@@ -135,7 +187,11 @@
     "name": "Blood Filter CBM",
     "description": "A filtration system in your heart allows you to actively filter out chemical impurities, primarily drugs.  It will have limited impact on viruses.  Note that it is not a targeted filter; ALL drugs in your system will be affected.",
     "price": 350000,
-    "difficulty": 3
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 3,
+        "bionic_id": "bio_blood_filter"
+    }
   },
   {
     "id": "bio_cable",
@@ -144,7 +200,11 @@
     "name": "Cable Charger System CBM",
     "description": "You have a complex port mounted above your hip.  While active, it will drain power through a jumper cable held on your person.",
     "price": 80000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": "bio_cable"
+    }
   },
   {
     "id": "bio_carbon",
@@ -153,7 +213,11 @@
     "name": "Subdermal Carbon Filament CBM",
     "description": "Lying just beneath your skin is a thin armor made of carbon nanotubes.  This reduces bashing damage by 2 and cutting damage by 4.",
     "price": 750000,
-    "difficulty": 9
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 9,
+        "bionic_id": "bio_carbon"
+    }
   },
   {
     "id": "bio_chain_lightning",
@@ -162,7 +226,11 @@
     "name": "Chain Lightning CBM",
     "description": "Your body is equipped with a chain lightning generator, allowing you to emit a blast of lightning at a target, leaving a trail of lightning in its wake, jumping to additional targets within 4 tiles of the previous target.",
     "price": 220000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": "bio_chain_lightning"
+    }
   },
   {
     "id": "bio_claws",
@@ -171,7 +239,11 @@
     "name": "Bionic Claws CBM",
     "description": "Vicious claws have been installed inside your fingers, allowing you to extend and retract them at the cost of a small amount of power.  These do considerable cutting damage, but prevent you from holding anything else while extended.",
     "price": 550000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": "bio_claws"
+    }
   },
   {
     "id": "bio_climate",
@@ -180,7 +252,11 @@
     "name": "Internal Climate Control CBM",
     "description": "Throughout your body lies a network of thermal piping which eases the effects of high and low ambient temperatures.",
     "price": 350000,
-    "difficulty": 3
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 3,
+        "bionic_id": "bio_climate"
+    }
   },
   {
     "id": "bio_cloak",
@@ -189,7 +265,11 @@
     "name": "Cloaking System CBM",
     "description": "This high-power system uses a set of cameras and LEDs to make you blend into your background, rendering you fully invisible to normal vision.  However, you may be detected by infrared, sonar, etc.",
     "price": 850000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": "bio_cloak"
+    }
   },
   {
     "id": "bio_cqb",
@@ -198,7 +278,11 @@
     "name": "Close Quarters Battle CBM",
     "description": "Databanks and processors loaded with extensive martial arts combat programs are integrated directly into your spinal column.  While active, your close combat skills are superseded by the machine's programming.  You have the option of activating Karate, Judo, Muay Thai, or Bio Combatives algorithms.  The cybernetic disconnect prevents you from improving the affected combat skills while this bionic is active.  However, with extended use in combat, it is possible to learn the chosen martial art.",
     "price": 220000,
-    "difficulty": 8
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 8,
+        "bionic_id": "bio_cqb"
+    }
   },
   {
     "id": "bio_dex_enhancer",
@@ -207,7 +291,11 @@
     "name": "Wired Reflexes CBM",
     "description": "Your reaction time has been greatly enhanced with bionic nerve stimulators, giving you a +2 bonus to dexterity.",
     "price": 800000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": "bio_dex_enhancer"
+    }
   },
   {
     "id": "bio_digestion",
@@ -216,7 +304,11 @@
     "name": "Expanded Digestive System CBM",
     "description": "You have been outfitted with three synthetic stomachs and industrial-grade intestines.  Not only can you extract much more nutrition from food, but you are highly resistant to foodborne illness, and can sometimes eat rotten food.",
     "price": 550000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": "bio_digestion"
+    }
   },
   {
     "id": "bio_ears",
@@ -225,7 +317,11 @@
     "name": "Enhanced Hearing CBM",
     "description": "When this bionic is active, your hearing will be drastically improved, allowing you to hear ten times better than the average person.  Additionally, high-intensity sounds will be automatically dampened before they can damage your hearing.  You can also toggle those sound dampeners on demand, should you wish to reduce the effect of the bionic or become completely deaf.",
     "price": 500000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": "bio_ears"
+    }
   },
   {
     "id": "bio_emp",
@@ -234,7 +330,11 @@
     "name": "Directional EMP CBM",
     "description": "Mounted in the palms of your hand are small parabolic EMP field generators.  You may use power to fire a short-ranged blast which will disable electronics and robots.",
     "price": 720000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": "bio_emp"
+    }
   },
   {
     "id": "bio_ethanol",
@@ -243,7 +343,11 @@
     "name": "Ethanol Burner CBM",
     "description": "You burn alcohol as fuel in an extremely efficient reaction.  However, you will still suffer the inebriating effects of the substance.",
     "price": 120000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": "bio_ethanol"
+    }
   },
   {
     "id": "bio_evap",
@@ -252,7 +356,11 @@
     "name": "Aero-Evaporator CBM",
     "description": "This unit draws moisture from the surrounding air, which then is poured from a fingertip in the form of water.  It may fail in very dry environments.",
     "price": 550000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": "bio_evap"
+    }
   },
   {
     "id": "bio_eye_enhancer",
@@ -261,7 +369,11 @@
     "name": "Diamond Cornea CBM",
     "description": "Your vision is greatly enhanced, giving you a +2 bonus to perception.",
     "price": 800000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": "bio_eye_enhancer"
+    }
   },
   {
     "id": "bio_eye_optic",
@@ -270,7 +382,11 @@
     "name": "Telescopic Eyes CBM",
     "description": "Much of the material in your inner eye has been removed and replaced with an array of high-powered, auto-focusing lenses.  You can now see much farther and more clearly than before, any vision problems you might have had are now gone.",
     "price": 500000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": "bio_eye_optic"
+    }
   },
   {
     "id": "bio_face_mask",
@@ -279,7 +395,11 @@
     "name": "Facial Distortion CBM",
     "description": "Through controlled application of electrochemical impulses, you are capable of altering your facial structure so as to subtly affect the reactions of others.  This grants a bonus to all social interactions.",
     "price": 850000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": "bio_face_mask"
+    }
   },
   {
     "id": "bio_faraday",
@@ -288,7 +408,11 @@
     "name": "Dielectric Capacitance System CBM",
     "description": "Throughout your body lies a network of miniature piezoelectric capacitors which can be charged with bionic power to temporarily protect you from external electrical discharge.",
     "price": 5000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": "bio_faraday"
+    }
   },
   {
     "id": "bio_fingerhack",
@@ -297,7 +421,11 @@
     "name": "Fingerhack CBM",
     "description": "One of your fingers has an electrohack embedded in it; an all-purpose hacking unit used to override control panels and the like (but not computers).  Skill in computers is important, and a failed use may damage your circuits.",
     "price": 350000,
-    "difficulty": 2
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 2,
+        "bionic_id": "bio_fingerhack"
+    }
   },
   {
     "id": "bio_flashbang",
@@ -306,7 +434,11 @@
     "name": "Flashbang Generator CBM",
     "description": "Light emitting diodes integrated into your skin can release a flash comparable to a flashbang grenade, blinding nearby enemies.  Speakers integrated into your body mimic the loud sound, deafening those nearby.",
     "price": 720000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": "bio_flashbang"
+    }
   },
   {
     "id": "bio_flashlight",
@@ -315,7 +447,11 @@
     "name": "Cranial Flashlight CBM",
     "description": "Mounted between your eyes is a small but powerful LED flashlight.",
     "price": 20000,
-    "difficulty": 2
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 2,
+        "bionic_id": "bio_flashlight"
+    }
   },
   {
     "id": "bio_furnace",
@@ -324,7 +460,11 @@
     "name": "Internal Furnace CBM",
     "description": "You can burn nearly any organic material as fuel (use 'E'), recharging your power level.  Some materials will burn better than others.  Can be toggled on and off at will.",
     "price": 450000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": "bio_furnace"
+    }
   },
   {
     "id": "bio_geiger",
@@ -333,7 +473,11 @@
     "name": "Integrated Dosimeter CBM",
     "description": "Small radiation sensors have been implanted throughout your body, allowing you to analyze your level of absorbed radiation.  They will also alert you whenever exposed to environmental radiation.",
     "price": 350000,
-    "difficulty": 3
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 3,
+        "bionic_id": "bio_geiger"
+    }
   },
   {
     "id": "bio_gills",
@@ -342,7 +486,11 @@
     "name": "Oxygenator CBM",
     "description": "A complex oxygen delivery system.  Improves the ability to extract oxygen from air and allows extracting it from water.  Will automatically turn on when drowning.  Turn on to recharge stamina faster, at moderate power cost.",
     "price": 450000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": "bio_gills"
+    }
   },
   {
     "id": "bio_ground_sonar",
@@ -351,7 +499,11 @@
     "name": "Terranian Sonar CBM",
     "description": "Your feet are equipped with precision sonar equipment, allowing you to detect the movements of creatures below the ground.",
     "price": 450000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": "bio_ground_sonar"
+    }
   },
   {
     "id": "bio_heat_absorb",
@@ -360,7 +512,11 @@
     "name": "Heat Drain CBM",
     "description": "While fighting unarmed against a warm-blooded opponent, there is a chance that a successful hit will drain body heat, inflicting a small amount of extra damage, and increasing your power reserves slightly.",
     "price": 550000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_heatsink",
@@ -369,7 +525,11 @@
     "name": "Thermal Dissipation CBM",
     "description": "Powerful heatsinks and supermaterials are woven into your flesh.  While powered, this system will prevent heat damage up to 2000 degrees Fahrenheit.  Note that this does not affect your internal temperature.",
     "price": 350000,
-    "difficulty": 3
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 3,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_hydraulics",
@@ -378,7 +538,11 @@
     "name": "Hydraulic Muscles CBM",
     "description": "While activated, your muscles will be greatly enhanced, increasing your strength by 20.",
     "price": 400000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_infrared",
@@ -387,7 +551,11 @@
     "name": "Infrared Vision CBM",
     "description": "Your range of vision extends into the infrared, allowing you to see warm-blooded creatures in the dark, and even through walls.",
     "price": 450000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_int_enhancer",
@@ -396,7 +564,11 @@
     "name": "Cerebral Booster CBM",
     "description": "Your brain has been enhanced with bionic coprocessors, giving you a +2 bonus to intelligence.",
     "price": 800000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_laser",
@@ -405,7 +577,11 @@
     "name": "Finger-Mounted Laser CBM",
     "description": "One of your fingers has a small high-powered laser embedded in it.  This long range weapon is not incredibly damaging, but is very accurate, and has the potential to start fires.",
     "price": 720000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_leukocyte",
@@ -414,7 +590,11 @@
     "name": "Leukocyte Breeder System CBM",
     "description": "You are equipped with bionic stimulators which augment your haematopoiesis system, allowing you to accelerate white blood cell production using bionic power.  It is supposed to run continuously and may cause unpleasant side effects when turned off.",
     "price": 6000,
-    "difficulty": 7
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 7,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_lighter",
@@ -423,7 +603,11 @@
     "name": "Mini-Flamethrower CBM",
     "description": "The index fingers of both hands have powerful fire starters which extend from the tip.",
     "price": 130000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_lockpick",
@@ -432,7 +616,11 @@
     "name": "Fingerpick CBM",
     "description": "One of your fingers has an electronic lockpick embedded in it.  This automatic system will quickly unlock all but the most advanced key locks without any skill required on the part of the user.",
     "price": 350000,
-    "difficulty": 2
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 2,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_magnet",
@@ -441,7 +629,11 @@
     "name": "Electromagnetic Unit CBM",
     "description": "Embedded in your hand is a powerful electromagnet, allowing you to pull items made of iron over short distances.",
     "price": 200000,
-    "difficulty": 2
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 2,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_membrane",
@@ -450,7 +642,11 @@
     "name": "Nictating Membrane CBM",
     "description": "Your eyes have a thin membrane that closes over your eyes while underwater, negating any vision penalties.",
     "price": 450000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_memory",
@@ -459,7 +655,11 @@
     "name": "Enhanced Memory Banks CBM",
     "description": "Your memory has been enhanced with small quantum storage drives.  Any time you start to forget a skill, if this bionic is active you will retain all knowledge, at the cost of a small amount of power.",
     "price": 1000000,
-    "difficulty": 9
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 9,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_metabolics",
@@ -468,7 +668,11 @@
     "name": "Metabolic Interchange CBM",
     "description": "Your digestive system and power supply are interconnected.  Energy drains will be regularly counteracted by increasing hunger.  Can be toggled on and off at will.",
     "price": 70000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_meteorologist",
@@ -477,7 +681,11 @@
     "name": "Weather Reader CBM",
     "description": "A multitude of scientific instruments and sensors collect environmental data.  The data is compiled and presented as a simple readout of the current weather.  It also passively tells you your external temperature.",
     "price": 350000,
-    "difficulty": 3
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 3,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_nanobots",
@@ -486,7 +694,11 @@
     "name": "Repair Nanobots CBM",
     "description": "Inside your body is a fleet of tiny dormant robots.  Once charged from your energy banks, they will flit about your body, repairing damage and stopping bleeding.",
     "price": 950000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_night",
@@ -495,7 +707,11 @@
     "name": "Artificial Night Generator CBM",
     "description": "Destructive interference eliminates all light within a 15 tile radius.",
     "price": 850000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_night_vision",
@@ -504,7 +720,11 @@
     "name": "Implanted Night Vision CBM",
     "description": "Your eyes have been modified to amplify existing light, allowing you to see in the dark.",
     "price": 900000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_ods",
@@ -513,7 +733,11 @@
     "name": "Offensive Defense System CBM",
     "description": "A thin forcefield surrounds your body, continually draining power.  This field does not deflect penetration, but rather delivers a very strong shock, damaging unarmed attackers and those with a conductive weapon.",
     "price": 950000,
-    "difficulty": 7
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 7,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_painkiller",
@@ -522,7 +746,11 @@
     "name": "Sensory Dulling CBM",
     "description": "Your nervous system is wired to allow you to inhibit the signals of pain, allowing you to dull your senses at will.  However, the use of this system may cause delayed reaction time and drowsiness.",
     "price": 200000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_plut_filter",
@@ -531,7 +759,11 @@
     "name": "Plutonium Filter CBM",
     "description": "System of tanks and filters to extract plutonium more rapidly from slurry for a microreactor.",
     "price": 60000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_power_armor_interface",
@@ -540,7 +772,11 @@
     "name": "Power Armor Interface CBM",
     "description": "Interfaces your power system with the internal charging port on suits of power armor.",
     "price": 120000,
-    "difficulty": 1
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 1,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_power_armor_interface_mkII",
@@ -549,7 +785,11 @@
     "name": "Power Armor Mk. II Interface CBM",
     "description": "Interfaces your power system with the internal charging port on suits of power armor.  The Mk. II was designed by DoubleTech Inc., to meet the popularity of the Mk. II power armor series.",
     "price": 1000000,
-    "difficulty": 8
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 8,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_power_storage",
@@ -558,7 +798,11 @@
     "name": "Power Storage CBM",
     "description": "Compact Bionics Module that upgrades your power capacity by 100 units.  Having at least one of these is a prerequisite to using powered bionics.  You will also need a power supply, found in another CBM.",
     "price": 380000,
-    "difficulty": 1
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 1,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_power_storage_mkII",
@@ -568,7 +812,11 @@
     "name_plural": "Power Storage CBMs Mk. II",
     "description": "Compact Bionics Module developed at DoubleTech Industries as a replacement for the highly successful Power Storage CBM.  Increases your power capacity by 250 units.",
     "price": 1000000,
-    "difficulty": 1
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 1,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_probability_travel",
@@ -577,7 +825,11 @@
     "name": "Probability Travel CBM",
     "description": "Increases your body's wavelength, allowing you to quantum tunnel through walls, reappearing on the other side.  Power drain in standby is minimal, but each tile tunneled through costs 250 bionic power.",
     "price": 1400000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_purifier",
@@ -586,7 +838,11 @@
     "name": "Air Filtration System CBM",
     "description": "Implanted in your trachea is an advanced filtration system.  If toxins find their way into your windpipe, the filter will attempt to remove them.",
     "price": 450000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_radscrubber",
@@ -595,7 +851,11 @@
     "name": "Radiation Scrubber System CBM",
     "description": "A system of advanced piezomechanical blood filters have been implanted throughout your body, allowing you to purge yourself of absorbed radiation at the cost of some bionic power.",
     "price": 450000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_railgun",
@@ -604,7 +864,11 @@
     "name": "Railgun CBM",
     "description": "EM field generators in your arms double the range and damage of thrown iron and steel objects at a cost of 1 power per throw, causing them to leave a trail of electricity that can cause additional damage.",
     "price": 220000,
-    "difficulty": 3
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 3,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_razors",
@@ -613,7 +877,11 @@
     "name": "Fingertip Razors CBM",
     "description": "You possess razor-sharp retractable claws underneath your fingernails, ten double-edged blades four centimeters in length that do a small amount of unarmed slashing damage whenever your fingertips are uncovered.",
     "price": 450000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_reactor",
@@ -622,7 +890,11 @@
     "name": "Internal Microreactor CBM",
     "description": "Storage tank and stripped down plutonium reactor, allowing generation of power from small amounts of plutonium.  Warning: minimal radiation shielding.",
     "price": 900000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_reactor_upgrade",
@@ -631,7 +903,11 @@
     "name": "Microreactor Upgrade CBM",
     "description": "A kit for upgrading a pre-installed microreactor with enhanced maximum yield and automatic radiation scrubbing.",
     "price": 250000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_recycler",
@@ -640,7 +916,11 @@
     "name": "Recycler Unit CBM",
     "description": "Your digestive system has been outfitted with a series of filters and processors, allowing you to reclaim waste liquid and, to a lesser degree, nutrients.  The net effect is a greatly reduced need to eat and drink.",
     "price": 850000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_remote",
@@ -649,7 +929,11 @@
     "name": "Remote Controller CBM",
     "description": "A small module connected to your brain allows you to interface with nearby devices with wireless capabilities.",
     "price": 600000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_resonator",
@@ -658,7 +942,11 @@
     "name": "Sonic Resonator CBM",
     "description": "Your entire body may resonate at very high power, creating a short-range shockwave.  While it will not do much damage to flexible creatures, stiff items such as walls, doors, and even robots will be severely damaged.",
     "price": 1200000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_scent_mask",
@@ -667,7 +955,11 @@
     "name": "Olfactory Mask CBM",
     "description": "While this system is powered, your body will produce very little odor, making it nearly impossible for creatures to track you by scent.",
     "price": 850000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_scent_vision",
@@ -676,7 +968,11 @@
     "name": "Scent Vision CBM",
     "description": "While this system is powered, you're able to visually sense your own scent, making it possible for you to recognize your surroundings even if you can't see it.",
     "price": 450000,
-    "difficulty": 8
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 8,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_shock",
@@ -685,7 +981,11 @@
     "name": "Electroshock Unit CBM",
     "description": "While fighting unarmed, or with a weapon that conducts electricity, there is a chance that a successful hit will shock your opponent, inflicting extra damage and disabling them temporarily at the cost of some energy.",
     "price": 550000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_shockwave",
@@ -694,7 +994,11 @@
     "name": "Shockwave Generator CBM",
     "description": "You generate a powerful shockwave, knocking back all nearby creatures.  Targets are stunned briefly, take damage and additional stun upon impact with impassable terrain, and knockback any creatures they collide with.",
     "price": 550000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_solar",
@@ -703,7 +1007,11 @@
     "name": "Solar Panels CBM",
     "description": "You have a few solar panels installed.  While in direct sunlight, your power level will slowly recharge.",
     "price": 350000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_speed",
@@ -712,7 +1020,11 @@
     "name": "Synaptic Accelerator CBM",
     "description": "Your nervous system has been enhanced with bionic stimulators, giving you a 10% boost to your speed.",
     "price": 10000,
-    "difficulty": 12
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 12,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_storage",
@@ -721,7 +1033,11 @@
     "name": "Internal Storage CBM",
     "description": "Space inside your chest cavity has been converted into a storage area.  You may carry an extra 2 liters of volume.",
     "price": 400000,
-    "difficulty": 7
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 7,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_str_enhancer",
@@ -730,7 +1046,11 @@
     "name": "Muscle Augmentation CBM",
     "description": "Your muscular system has been enhanced with myomer fibers, giving you a +2 bonus to strength.",
     "price": 800000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_sunglasses",
@@ -739,7 +1059,11 @@
     "name": "Anti-Glare Compensators CBM",
     "description": "Your eyes have high-power, quick-reacting transition lenses installed over them, negating any glare penalties and protecting you from bright flashes including those of a welder.  Additionally you can toggle them to block out all light.",
     "price": 450000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_targeting",
@@ -748,7 +1072,11 @@
     "name": "Targeting System CBM",
     "description": "Your eyes are equipped with range finders, and their movement is synced with that of your arms, to a degree.  Shots you fire will be much more accurate, particularly at long range.",
     "price": 650000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_teleport",
@@ -757,7 +1085,11 @@
     "name": "Teleportation Unit CBM",
     "description": "This highly experimental unit folds space over short distances, instantly transporting your body up to 25 feet at the cost of much power.  Note that prolonged or frequent use may have dangerous side effects.",
     "price": 700000,
-    "difficulty": 7
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 7,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_time_freeze",
@@ -766,7 +1098,11 @@
     "name": "Time Dilation CBM",
     "description": "At an immense cost of power, you may increase your body speed and reactions dramatically, essentially freezing time.  You are still delicate, however, and violent or rapid movements may damage you due to friction.",
     "price": 1400000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_tools",
@@ -775,7 +1111,11 @@
     "name": "Integrated Toolset CBM",
     "description": "Implanted in your hands and fingers is a complete tool set - screwdriver, hammer, wrench, and heating elements.  You can use this in place of many tools when crafting.",
     "price": 800000,
-    "difficulty": 6
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 6,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_torsionratchet",
@@ -784,7 +1124,11 @@
     "name": "Joint Torsion Ratchet CBM",
     "description": "Your joints have been equipped with torsion ratchets that generate power slowly when you move.",
     "price": 380000,
-    "difficulty": 4
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 4,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_uncanny_dodge",
@@ -793,7 +1137,11 @@
     "name": "Uncanny Dodge CBM",
     "description": "Your nervous system has been augmented with bionic processors, allowing you to dodge attacks beyond normal human capability, including bullets.",
     "price": 950000,
-    "difficulty": 11
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 11,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_ups",
@@ -802,7 +1150,11 @@
     "name": "Unified Power System CBM",
     "description": "A UPS fully integrated with your bionic power system.  Allows you to run devices requiring a UPS off of your internal power, which is much more efficient than standard battery power.",
     "price": 25000,
-    "difficulty": 3
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 3,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_watch",
@@ -811,7 +1163,11 @@
     "name": "Internal Chronometer CBM",
     "description": "You have been equipped with an internal atomic clock, ensuring that you will always know the current time.",
     "price": 1000,
-    "difficulty": 1
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 1,
+        "bionic_id": ""
+    }
   },
   {
     "id": "bio_water_extractor",
@@ -820,6 +1176,10 @@
     "name": "Water Extraction Unit CBM",
     "description": "Nanotubes embedded in the palm of your hand will pump any available fluid out of a dead body, cleanse it of impurities and convert it into drinkable water.  You must, however, have a container to store the water in.",
     "price": 550000,
-    "difficulty": 5
+    "use_action": {
+        "type": "install_bionic",
+        "difficulty": 5,
+        "bionic_id": ""
+    }
   }
 ]

@@ -910,7 +910,6 @@ public:
  bool is_food_container() const;      // Ignoring the ability to eat batteries, etc.
  bool is_ammo_container() const; // does this item contain ammo? (excludes magazines)
  bool is_medication() const;            // Is it a medication that only pretends to be food?
- bool is_bionic() const;
  bool is_magazine() const;
  bool is_ammo_belt() const;
  bool is_bandolier() const;
@@ -1656,9 +1655,7 @@ public:
         /**
          * Check whether the type id refers to a known type.
          * This should be used either before instantiating an item when it's possible
-         * that the item type is unknown and the caller can do something about it (e.g. the
-         * uninstall-bionics function checks this to see if there is a CBM item type and has
-         * logic to handle the case when that item type does not exist).
+         * that the item type is unknown and the caller can do something about it.
          * Or one can use this to check that type ids from json refer to valid items types (e.g.
          * the items that make up the vehicle parts must be defined somewhere, or the result of
          * crafting recipes must be valid type ids).

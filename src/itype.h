@@ -31,8 +31,6 @@ using emit_id = string_id<emit>;
 struct itype;
 class Skill;
 using skill_id = string_id<Skill>;
-struct bionic_data;
-using bionic_id = string_id<bionic_data>;
 class player;
 class item;
 class ma_technique;
@@ -559,17 +557,6 @@ struct islot_ammo : common_ranged_data {
     bool special_cookoff = false;
 };
 
-struct islot_bionic {
-    /**
-     * Arbitrary difficulty scale, see bionics.cpp for its usage.
-     */
-    int difficulty = 0;
-    /**
-     * Id of the bionic, see bionics.cpp for its usage.
-     */
-    bionic_id id;
-};
-
 struct islot_seed {
     /**
      * Time it takes for a seed to grow (in days, based of off a season length of 91)
@@ -628,7 +615,6 @@ struct itype {
     copyable_unique_ptr<islot_gun> gun;
     copyable_unique_ptr<islot_gunmod> gunmod;
     copyable_unique_ptr<islot_magazine> magazine;
-    copyable_unique_ptr<islot_bionic> bionic;
     copyable_unique_ptr<islot_ammo> ammo;
     copyable_unique_ptr<islot_seed> seed;
     copyable_unique_ptr<islot_artifact> artifact;
@@ -756,8 +742,6 @@ public:
             return "BOOK";
         } else if( gun ) {
             return "GUN";
-        } else if( bionic ) {
-            return "BIONIC";
         } else if( ammo ) {
             return "AMMO";
         }

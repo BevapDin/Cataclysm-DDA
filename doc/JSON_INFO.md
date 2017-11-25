@@ -1260,6 +1260,11 @@ The contents of use_action fields can either be a string indicating a built-in f
     "done_message": "Place the beartrap on the %s.", // The message that appears after the trap has been placed. %s is replaced with the terrain name of the place where the trap has been put.
     "practice": 4, // How much practice to the "traps" skill placing the trap gives.
     "moves": 10 // (optional, default is 100): the move points that are used by placing the trap.
+},
+"use_action": {
+    "type": "install_bionic", // attempt to install a bionic
+    "bionic_id": "bio_ads", // Ident of the bionic that is to be installed (see BIONICS).
+    "difficulty": 6 // Installation difficulty, if 0, use the difficulty of the bionic (see BIONICS). (optional, default: 0)
 }
 ```
 

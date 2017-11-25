@@ -1027,7 +1027,7 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         void toolmod_add( item_location tool, item_location mod );
 
         /** Attempts to install bionics, returns false if the player cancels prior to installation */
-        bool install_bionics(const itype &type, int skill_level = -1);
+        bool install_bionics( const bionic_id &type, int difficulty, int skill_level = -1 );
         /**
          * Helper function for player::read.
          *

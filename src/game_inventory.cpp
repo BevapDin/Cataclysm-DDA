@@ -518,8 +518,6 @@ class activatable_inventory_preset : public pickup_inventory_preset
                     return _( "Consume" );
                 } else if( it.is_book() ) {
                     return _( "Read" );
-                } else if( it.is_bionic() ) {
-                    return _( "Install bionic" );
                 }
             } else if( uses.size() == 1 ) {
                 return uses.begin()->second.get_name();

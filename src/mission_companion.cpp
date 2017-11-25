@@ -10,6 +10,7 @@
 #include "messages.h"
 #include "mission.h"
 #include "ammo.h"
+#include "iuse_actor.h"
 #include "overmapbuffer.h"
 #include "json.h"
 #include "translations.h"
@@ -46,10 +47,21 @@ static const trait_id trait_NPC_CONSTRUCTION_LEV_1( "NPC_CONSTRUCTION_LEV_1" );
 static const trait_id trait_NPC_CONSTRUCTION_LEV_2( "NPC_CONSTRUCTION_LEV_2" );
 static const trait_id trait_NPC_MISSION_LEV_1( "NPC_MISSION_LEV_1" );
 
+static const install_bionic_actor *get_bionic_data( const itype &t )
+{
+    for( const auto &use : t.use_methods ) {
+        if( const auto ptr = dynamic_cast<const install_bionic_actor *>( use.second.get_actor_ptr() ) ) {
+            return ptr;
+        }
+    }
+    return nullptr;
+}
+
 void talk_function::bionic_install(npc &p)
 {
+
     std::vector<item *> bionic_inv = g->u.items_with( []( const item &itm ) {
-        return itm.is_bionic();
+        return get_bionic_data( *itm.type ) != nullptr;
     } );
     if( bionic_inv.empty() ) {
         popup(_("You have no bionics to install!"));
@@ -91,8 +103,9 @@ void talk_function::bionic_install(npc &p)
         return;
     }
 
+    const install_bionic_actor &actor = *get_bionic_data( it );
     //Makes the doctor awesome at installing but not perfect
-    if (g->u.install_bionics(it, 20)){
+    if( g->u.install_bionics( actor.bionic, actor.difficulty, 20 ) ) {
         g->u.cash -= price;
         p.cash += price;
         g->u.amount_of( bionic_types[bionic_index] );

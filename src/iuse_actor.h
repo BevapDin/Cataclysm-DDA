@@ -13,6 +13,8 @@
 #include "units.h"
 #include <limits.h>
 
+struct bionic_data;
+using bionic_id = string_id<bionic_data>;
 struct vehicle_prototype;
 using vproto_id = string_id<vehicle_prototype>;
 enum field_id : int;
@@ -900,6 +902,29 @@ class saw_barrel_actor : public iuse_actor
         iuse_actor *clone() const override;
 
         ret_val<bool> can_use_on( const player &p, const item &it, const item &target ) const;
+};
+
+/**
+ * Installing a bionic.
+ */
+class install_bionic_actor : public iuse_actor
+{
+    public:
+        /** Id of the bionic, must match the bionic id in @ref bionics. */
+        bionic_id bionic;
+        /** Difficulty for installation, optional, if 0, use the bionics own
+         * difficulty setting (see bionic_data). */
+        int difficulty;
+
+        install_bionic_actor( const std::string &type = "install_bionic" ) : iuse_actor( type ), difficulty( 0 ) { }
+
+        void load( JsonObject &jo ) override;
+        long use( player &p, item &it, bool t, const tripoint &pnt ) const override;
+        iuse_actor *clone() const override;
+
+        std::string get_name() const override;
+        void info( const item &it, std::vector<iteminfo> &dump ) const override;
+        void finalize( const itype_id &itype ) override;
 };
 
 #endif
