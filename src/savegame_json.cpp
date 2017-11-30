@@ -1742,7 +1742,7 @@ void vehicle_part::deserialize(JsonIn &jsin)
     data.read("enabled", enabled );
     data.read("flags", flags );
     data.read("passenger_id", passenger );
-    data.read("crew_id", crew_id );
+    data.read("crew_id", crew_ );
     data.read("items", items);
     data.read("target_first_x", target.first.x);
     data.read("target_first_y", target.first.y);
@@ -1798,7 +1798,7 @@ void vehicle_part::serialize(JsonOut &json) const
     json.member("enabled", enabled);
     json.member("flags", flags);
     json.member( "passenger_id", passenger );
-    json.member("crew_id", crew_id);
+    json.member( "crew_id", crew_ );
     json.member("items", items);
     json.member("target_first_x", target.first.x);
     json.member("target_first_y", target.first.y);
