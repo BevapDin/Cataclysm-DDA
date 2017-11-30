@@ -1559,7 +1559,7 @@ void dialogue::gen_responses( const talk_topic &the_topic )
             SUCCESS( "TALK_NONE" );
             FAILURE( "TALK_MISSION_FAILURE" );
             FAILURE_OPINION( -3, 0, -1, 2, 0 );
-        } else if( !mission->is_complete( p->getID() ) ) {
+        } else if( !mission->is_complete( creature_reference( *p ) ) ) {
             add_response_none( _( "Not yet." ) );
             if( mission->get_type().goal == MGOAL_KILL_MONSTER ) {
                 RESPONSE( _( "Yup, I killed it." ) );
@@ -2853,7 +2853,7 @@ void talk_function::clear_mission( npc &p )
         p.chatbin.mission_selected = p.chatbin.missions_assigned.front();
     }
     if( miss->has_follow_up() ) {
-        p.add_new_mission( mission::reserve_new( miss->get_follow_up(), p.getID() ) );
+        p.add_new_mission( mission::reserve_new( miss->get_follow_up(), creature_reference( p ) ) );
     }
 }
 
@@ -3202,7 +3202,7 @@ void talk_function::player_weapon_drop( npc &p )
 
 void talk_function::lead_to_safety( npc &p )
 {
-    const auto mission = mission::reserve_new( mission_type_id( "MISSION_REACH_SAFETY" ), -1 );
+    const auto mission = mission::reserve_new( mission_type_id( "MISSION_REACH_SAFETY" ), cata::nullopt );
     mission->assign( g->u );
     p.goal = mission->get_target();
     p.attitude = NPCATT_LEAD;

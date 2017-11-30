@@ -1012,7 +1012,7 @@ void game::create_starting_npcs()
     tmp->mission = NPC_MISSION_SHELTER;
     tmp->chatbin.first_topic = "TALK_SHELTER";
     //one random shelter mission.
-    tmp->add_new_mission( mission::reserve_random( ORIGIN_OPENER_NPC, tmp->global_omt_location(), tmp->getID() ) );
+    tmp->add_new_mission( mission::reserve_random( ORIGIN_OPENER_NPC, tmp->global_omt_location(), creature_reference( *tmp ) ) );
 }
 
 bool game::cleanup_at_end()
@@ -3988,7 +3988,7 @@ void game::debug()
             temp->form_opinion( u );
             temp->mission = NPC_MISSION_NULL;
             temp->add_new_mission( mission::reserve_random( ORIGIN_ANY_NPC, temp->global_omt_location(),
-                                   temp->getID() ) );
+                                   creature_reference( *temp ) ) );
             load_npcs();
         }
         break;
@@ -13302,7 +13302,7 @@ void game::spawn_mon(int /*shiftx*/, int /*shifty*/)
         overmap_buffer.insert_npc( tmp );
         tmp->form_opinion( u );
         tmp->mission = NPC_MISSION_NULL;
-        tmp->add_new_mission( mission::reserve_random(ORIGIN_ANY_NPC, tmp->global_omt_location(), tmp->getID()) );
+        tmp->add_new_mission( mission::reserve_random(ORIGIN_ANY_NPC, tmp->global_omt_location(), creature_reference( *tmp ) ) );
         // This will make the new NPC active
         load_npcs();
     }

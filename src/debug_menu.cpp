@@ -386,7 +386,7 @@ void character_edit_menu()
             types.addentry( INT_MAX, true, -1, _( "Cancel" ) );
             types.query();
             if( types.ret >= 0 && types.ret < ( int )mts.size() ) {
-                np->add_new_mission( mission::reserve_new( mts[ types.ret ]->id, np->getID() ) );
+                np->add_new_mission( mission::reserve_new( mts[ types.ret ]->id, creature_reference( *np ) ) );
             }
         }
         break;
@@ -449,9 +449,7 @@ std::string mission_debug::describe( const mission &m )
     data << _( "Type:" ) << m.type->id.str();
     data << _( " Status:" ) << mission_status_string( m.status );
     data << _( " ID:" ) << m.uid;
-    data << _( " NPC ID:" ) << m.npc_id;
     data << _( " Target:" ) << m.target.x << "," << m.target.y << "," << m.target.z;
-    data << _( "Player ID:" ) << m.player_id;
 
     return data.str();
 }
@@ -561,8 +559,7 @@ void mission_debug::remove_mission( mission &m )
         add_msg( _( "Unsetting active mission" ) );
     }
 
-    const auto giver = g->find_npc( m.npc_id );
-    if( giver != nullptr ) {
+    if( npc *const giver = m.get_giver() ) {
         if( remove_from_vec( giver->chatbin.missions_assigned, &m ) ) {
             add_msg( _( "Removing from %s missions_assigned" ), giver->name.c_str() );
         }

@@ -200,7 +200,7 @@ struct mission_type {
                  std::function<void(mission *)> END,
                  std::function<void(mission *)> FAIL );
 
-    mission create( int npc_id ) const;
+    mission create( const cata::optional<creature_reference> &giver ) const;
 
     /**
      * Get the mission_type object of the given id. Returns null if the input is invalid!
@@ -260,7 +260,7 @@ private:
         std::string monster_type;    // Monster ID that are to be killed
         int monster_kill_goal;  // the kill count you wish to reach
         int deadline;           // Turn number
-        int npc_id;             // ID of a related npc
+        cata::optional<creature_reference> giver;             // The npc that gave out the mission.
         int good_fac_id, bad_fac_id; // IDs of the protagonist/antagonist factions
         int step;               // How much have we completed?
         mission_type_id follow_up;   // What mission do we get after this succeeds?
@@ -286,7 +286,9 @@ public:
     long get_value() const;
     int get_id() const;
     const std::string &get_item_id() const;
-    int get_npc_id() const;
+    npc *get_giver() const {
+        return giver ? giver->get<npc>() : nullptr;
+    }
     /**
      * Whether the mission is assigned to a player character. If not, the mission is free and
      * can be assigned.
@@ -317,7 +319,7 @@ public:
     /** Handles partial mission completion (kill complete, now report back!). */
     void step_complete( int step );
     /** Checks if the player has completed the matching mission and returns true if they have. */
-    bool is_complete( int npc_id ) const;
+    bool is_complete( const creature_reference &some_npc ) const;
     /** Checks if the player has failed the matching mission and returns true if they have. */
     bool has_failed() const;
     /** Checks if the mission is started, but not failed and not succeeded. */
@@ -332,8 +334,8 @@ public:
      * Create a new mission of the given type and assign it to the given npc.
      * Returns the new mission.
      */
-    static mission* reserve_new( mission_type_id type, int npc_id );
-    static mission* reserve_random( mission_origin origin, const tripoint &p, int npc_id );
+    static mission* reserve_new( mission_type_id type, const cata::optional<creature_reference> &giver );
+    static mission* reserve_random( mission_origin origin, const tripoint &p, const cata::optional<creature_reference> &giver );
     /**
      * Returns the mission with the matching id (@ref uid). Returns NULL if no mission with that
      * id exists.

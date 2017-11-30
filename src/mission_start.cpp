@@ -159,13 +159,13 @@ void mission_start::standard( mission * )
 
 void mission_start::join( mission *miss )
 {
-    npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
     p->attitude = NPCATT_FOLLOW;
 }
 
 void mission_start::infect_npc( mission *miss )
 {
-    npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
     if( p == NULL ) {
         debugmsg( "mission_start::infect_npc() couldn't find an NPC!" );
         return;
@@ -181,7 +181,7 @@ void mission_start::infect_npc( mission *miss )
 
 void mission_start::need_drugs_npc( mission *miss )
 {
-    npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
     if( p == NULL ) {
         debugmsg( "mission_start::need_drugs_npc() couldn't find an NPC!" );
         return;
@@ -197,9 +197,9 @@ void mission_start::need_drugs_npc( mission *miss )
 void mission_start::place_dog( mission *miss )
 {
     const tripoint house = random_house_in_closest_city();
-    npc *dev = g->find_npc( miss->npc_id );
+    npc *const dev = miss->get_giver();
     if( dev == NULL ) {
-        debugmsg( "Couldn't find NPC! %d", miss->npc_id );
+        debugmsg( "Couldn't find NPC!" );
         return;
     }
     g->u.i_add( item( "dog_whistle", 0 ) );
@@ -332,7 +332,7 @@ void mission_start::place_grabber( mission *miss )
 
 void mission_start::place_bandit_camp( mission *miss )
 {
-    npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
     g->u.i_add( item( "ruger_redhawk", calendar::turn ) );
     g->u.i_add( item( "44magnum", calendar::turn ) );
     g->u.i_add( item( "holster", calendar::turn ) );
@@ -362,7 +362,7 @@ void mission_start::place_jabberwock( mission *miss )
 
 void mission_start::kill_100_z( mission *miss )
 {
-    npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
     p->attitude = NPCATT_FOLLOW;//npc joins you
     miss->monster_type = mon_zombie.str(); // TODO: change monster_type to be mtype_id (better: species!)
     int killed = 0;
@@ -381,7 +381,7 @@ void mission_start::kill_20_nightmares( mission *miss )
 
 void mission_start::kill_horde_master( mission *miss )
 {
-    npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
     p->attitude = NPCATT_FOLLOW;//npc joins you
     //pick one of the below locations for the horde to haunt
     const auto center = p->global_omt_location();
@@ -418,9 +418,9 @@ void mission_start::kill_horde_master( mission *miss )
 
 void mission_start::place_npc_software( mission *miss )
 {
-    npc *dev = g->find_npc( miss->npc_id );
+    npc *const dev = miss->get_giver();
     if( dev == NULL ) {
-        debugmsg( "Couldn't find NPC! %d", miss->npc_id );
+        debugmsg( "Couldn't find NPC!" );
         return;
     }
     g->u.i_add( item( "usb_drive", 0 ) );
@@ -519,7 +519,7 @@ void mission_start::place_priest_diary( mission *miss )
 
 void mission_start::place_deposit_box( mission *miss )
 {
-    npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
     p->attitude = NPCATT_FOLLOW;//npc joins you
     tripoint site = overmap_buffer.find_closest( p->global_omt_location(), "bank", 0, false );
     if( site == overmap::invalid_tripoint ) {
@@ -560,7 +560,7 @@ void mission_start::place_deposit_box( mission *miss )
 
 void mission_start::reveal_lab_black_box( mission *miss )
 {
-    npc *dev = g->find_npc( miss->npc_id );
+    npc *const dev = miss->get_giver();
     if( dev != NULL ) {
         g->u.i_add( item( "black_box", 0 ) );
         add_msg( _( "%s gave you back the black box." ), dev->name.c_str() );
@@ -570,7 +570,7 @@ void mission_start::reveal_lab_black_box( mission *miss )
 
 void mission_start::open_sarcophagus( mission *miss )
 {
-    npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
     if( p != NULL ) {
         p->attitude = NPCATT_FOLLOW;
         g->u.i_add( item( "sarcophagus_access_code", 0 ) );
@@ -583,7 +583,7 @@ void mission_start::open_sarcophagus( mission *miss )
 
 void mission_start::reveal_hospital( mission *miss )
 {
-    npc *dev = g->find_npc( miss->npc_id );
+    npc *const dev = miss->get_giver();
     if( dev != NULL ) {
         g->u.i_add( item( "vacutainer", 0 ) );
         add_msg( _( "%s gave you a blood draw kit." ), dev->name.c_str() );
@@ -653,7 +653,7 @@ void mission_start::point_cabin_strange( mission *miss )
 
 void mission_start::recruit_tracker( mission *miss )
 {
-    npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
     p->attitude = NPCATT_FOLLOW;// NPC joins you
 
     tripoint site = target_om_ter( "cabin", 2, miss, false );
@@ -669,7 +669,7 @@ void mission_start::recruit_tracker( mission *miss )
     temp->mission = NPC_MISSION_SHOPKEEP;
     temp->personality.aggression -= 1;
     temp->op_of_u.owed = 10;
-    temp->add_new_mission( mission::reserve_new( mission_type_id( "MISSION_JOIN_TRACKER" ), temp->getID() ) );
+    temp->add_new_mission( mission::reserve_new( mission_type_id( "MISSION_JOIN_TRACKER" ), *temp ) );
 }
 
 void mission_start::radio_repeater( mission *miss )
@@ -687,7 +687,7 @@ void mission_start::start_commune(mission *miss)
  bay.place_npc(SEEX+4, SEEY+3, string_id<npc_template>( "ranch_foreman" ) );
  bay.place_npc(SEEX-3, SEEY+5, string_id<npc_template>( "ranch_construction_1" ) );
  bay.save();
- npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
  p->set_mutation( trait_id( "NPC_MISSION_LEV_1" ) );
 }
 
@@ -1519,7 +1519,7 @@ void mission_start::ranch_nurse_9(mission *miss)
 
 void mission_start::ranch_scavenger_1(mission *miss)
 {
- npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
  p->my_fac->combat_ability += rng(1,2);
 
  tripoint site = target_om_ter_random("ranch_camp_48", 1, miss, false, RANCH_SIZE);
@@ -1541,7 +1541,7 @@ void mission_start::ranch_scavenger_1(mission *miss)
 
 void mission_start::ranch_scavenger_2(mission *miss)
 {
- npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
  p->my_fac->combat_ability += rng(1,2);
 
  tripoint site = target_om_ter_random("ranch_camp_48", 1, miss, false, RANCH_SIZE);
@@ -1563,7 +1563,7 @@ void mission_start::ranch_scavenger_2(mission *miss)
 
 void mission_start::ranch_scavenger_3(mission *miss)
 {
- npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
  p->my_fac->combat_ability += rng(1,2);
 
  tripoint site = target_om_ter_random("ranch_camp_48", 1, miss, false, RANCH_SIZE);
@@ -1592,7 +1592,7 @@ void mission_start::ranch_scavenger_3(mission *miss)
 
 void mission_start::ranch_bartender_1(mission *miss)
 {
- npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
  p->my_fac->wealth += rng(500,2500);
  p->set_mutation( trait_id( "NPC_BRANDY" ) );
 
@@ -1614,7 +1614,7 @@ void mission_start::ranch_bartender_1(mission *miss)
 
 void mission_start::ranch_bartender_2(mission *miss)
 {
- npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
  p->my_fac->wealth += rng(500,2500);
  p->set_mutation( trait_id( "NPC_RUM" ) );
 
@@ -1638,7 +1638,7 @@ void mission_start::ranch_bartender_2(mission *miss)
 
 void mission_start::ranch_bartender_3(mission *miss)
 {
- npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
  p->my_fac->wealth += rng(500,2500);
  p->set_mutation( trait_id( "NPC_WHISKEY" ) );
 
@@ -1655,7 +1655,7 @@ void mission_start::ranch_bartender_3(mission *miss)
 
 void mission_start::ranch_bartender_4(mission *miss)
 {
- npc *p = g->find_npc( miss->npc_id );
+    npc *const p = miss->get_giver();
  p->my_fac->wealth += rng(500,2500);
 
  tripoint site = target_om_ter_random("ranch_camp_51", 1, miss, false, RANCH_SIZE);
@@ -1696,7 +1696,7 @@ const tripoint reveal_destination( const std::string &type )
 
 void reveal_route( mission *miss, const tripoint destination )
 {
-    const npc *p = g->find_npc( miss->get_npc_id() );
+    const npc *const p = miss->get_giver();
     if( p == nullptr ) {
         debugmsg( "mission_start::infect_npc() couldn't find an NPC!" );
         return;
@@ -1715,7 +1715,7 @@ void reveal_route( mission *miss, const tripoint destination )
 
 void reveal_target( mission *miss, const std::string &omter_id )
 {
-    const npc *p = g->find_npc( miss->get_npc_id() );
+    const npc *const p = miss->get_giver();
     if( p == nullptr ) {
         debugmsg( "mission_start::infect_npc() couldn't find an NPC!" );
         return;

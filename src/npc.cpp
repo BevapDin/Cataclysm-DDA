@@ -243,7 +243,7 @@ void npc::load_npc_template( const string_id<npc_template> &ident )
     mission = tguy.mission;
     chatbin.first_topic = tguy.chatbin.first_topic;
     if( !tguy.miss_id.is_null() ) {
-        add_new_mission( mission::reserve_new( tguy.miss_id, getID() ) );
+        add_new_mission( mission::reserve_new( tguy.miss_id, creature_reference( *this ) ) );
     }
 }
 
