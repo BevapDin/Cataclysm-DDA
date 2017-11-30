@@ -15,6 +15,7 @@ class creature_reference {
 		creature_reference() = default;
 		//@todo change to Creature, but currently only works for player
 		creature_reference( const player &critter );
+		creature_reference( const player *critter );
 
 		template<typename T = Creature>
 		T *get() const;

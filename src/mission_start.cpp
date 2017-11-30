@@ -251,7 +251,7 @@ void mission_start::place_caravan_ambush( mission *miss )
     madd_field( &bay, SEEX, SEEY + 9, fd_blood, 1 );
     bay.place_npc( SEEX + 3, SEEY - 5, string_id<npc_template>( "bandit" ) );
     bay.place_npc( SEEX, SEEY - 7, string_id<npc_template>( "thug" ) );
-    miss->target_npc_id = bay.place_npc( SEEX - 3, SEEY - 4, string_id<npc_template>( "bandit" ) )->getID();
+    miss->target_npc = bay.place_npc( SEEX - 3, SEEY - 4, string_id<npc_template>( "bandit" ) );
     bay.save();
 }
 
@@ -264,7 +264,7 @@ void mission_start::place_bandit_cabin( mission *miss )
     cabin.trap_set( {SEEX - 7, SEEY - 7, site.z}, tr_landmine_buried );
     cabin.trap_set( {SEEX - 4, SEEY - 7, site.z}, tr_landmine_buried );
     cabin.trap_set( {SEEX - 12, SEEY - 1, site.z}, tr_landmine_buried );
-    miss->target_npc_id = cabin.place_npc( SEEX, SEEY, string_id<npc_template>( "bandit" ) )->getID();
+    miss->target_npc = cabin.place_npc( SEEX, SEEY, string_id<npc_template>( "bandit" ) );
     cabin.save();
 }
 
@@ -273,7 +273,7 @@ void mission_start::place_informant( mission *miss )
     tripoint site = target_om_ter_random( "evac_center_19", 1, miss, false, EVAC_CENTER_SIZE );
     tinymap bay;
     bay.load( site.x * 2, site.y * 2, site.z, false );
-    miss->target_npc_id = bay.place_npc( SEEX, SEEY, string_id<npc_template>( "evac_guard3" ) )->getID();
+    miss->target_npc = bay.place_npc( SEEX, SEEY, string_id<npc_template>( "evac_guard3" ) );
     bay.save();
 
     site = target_om_ter_random( "evac_center_7", 1, miss, false, EVAC_CENTER_SIZE );
@@ -310,7 +310,7 @@ void mission_start::place_bandit_camp( mission *miss )
     tripoint site = target_om_ter_random( "bandit_camp_1", 1, miss, false, 50 );
     tinymap bay1;
     bay1.load( site.x * 2, site.y * 2, site.z, false );
-    miss->target_npc_id = bay1.place_npc( SEEX + 5, SEEY - 3, string_id<npc_template>( "bandit" ) )->getID();
+    miss->target_npc = bay1.place_npc( SEEX + 5, SEEY - 3, string_id<npc_template>( "bandit" ) );
     bay1.save();
 }
 

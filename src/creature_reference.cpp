@@ -10,6 +10,11 @@ creature_reference::creature_reference( const player &critter )
 	creature_id = critter.getID();
 }
 
+creature_reference::creature_reference( const player *const critter )
+{
+	creature_id = critter ? critter->getID() : 0;
+}
+
 template<typename T>
 T *creature_reference::get() const
 {
