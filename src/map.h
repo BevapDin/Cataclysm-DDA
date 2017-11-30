@@ -1147,7 +1147,7 @@ class map
         // 6 liters at 250 ml per charge
         void place_toilet( const int x, const int y, const int charges = 6 * 4 );
         void place_vending( int x, int y, std::string type, bool reinforced = false );
-        int place_npc( int x, int y, const string_id<npc_template> &type );
+        npc *place_npc( int x, int y, const string_id<npc_template> &type );
 
         void add_spawn( const mtype_id &type, const int count, const int x, const int y,
                         bool friendly = false,

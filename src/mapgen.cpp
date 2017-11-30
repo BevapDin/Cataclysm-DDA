@@ -6684,17 +6684,17 @@ void map::place_vending(int x, int y, std::string type, bool reinforced)
     }
 }
 
-int map::place_npc( int x, int y, const string_id<npc_template> &type )
+npc *map::place_npc( int x, int y, const string_id<npc_template> &type )
 {
     if(!get_option<bool>( "STATIC_NPC" ) ) {
-        return -1; //Do not generate an npc.
+        return nullptr; //Do not generate an npc.
     }
     std::shared_ptr<npc> temp = std::make_shared<npc>();
     temp->normalize();
     temp->load_npc_template(type);
     temp->spawn_at_precise( { abs_sub.x, abs_sub.y }, { x, y, abs_sub.z } );
     overmap_buffer.insert_npc( temp );
-    return temp->getID();
+    return temp.get();
 }
 
 std::vector<item*> map::place_items( const items_location loc, const int chance, const tripoint &f,
