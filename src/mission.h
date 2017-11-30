@@ -264,7 +264,7 @@ private:
         int good_fac_id, bad_fac_id; // IDs of the protagonist/antagonist factions
         int step;               // How much have we completed?
         mission_type_id follow_up;   // What mission do we get after this succeeds?
-        int player_id; // The id of the player that has accepted this mission.
+        cata::optional<creature_reference> assigned_player; // The player character that has accepted this mission.
 public:
 
         std::string name();
@@ -293,10 +293,11 @@ public:
      */
     bool is_assigned() const;
     /**
-     * To which player the mission is assigned. It returns the id (@ref player::getID) of the
-     * player.
+     * To which player the mission is assigned.
      */
-    int get_assigned_player_id() const;
+    player *get_assigned_player() const {
+        return assigned_player ? assigned_player->get<player>() : nullptr;
+    }
     /*@}*/
 
     /**
@@ -370,8 +371,8 @@ public:
     static mission_status status_from_string( const std::string &s );
     static const std::string status_to_string( mission_status st );
 
-    /** Used to handle saves from before player_id was a member of mission */
-    void set_player_id_legacy_0c( int id );
+    /** Used to handle saves from before assigned_player was a member of mission */
+    void set_player_id_legacy_0c( const player &u );
 
 private:
     bool legacy_no_player_id = false;

@@ -493,7 +493,7 @@ void npc::talk_to_u()
     chatbin.check_missions();
 
     for( auto &mission : chatbin.missions_assigned ) {
-        if( mission->get_assigned_player_id() == g->u.getID() ) {
+        if( mission->get_assigned_player() == &g->u ) {
             d.missions_assigned.push_back( mission );
         }
     }
@@ -518,7 +518,7 @@ void npc::talk_to_u()
     most_difficult_mission = 0;
     bool chosen_urgent = false;
     for( auto &mission : chatbin.missions_assigned ) {
-        if( mission->get_assigned_player_id() != g->u.getID() ) {
+        if( mission->get_assigned_player() != &g->u ) {
             // Not assigned to the player that is currently talking to the npc
             continue;
         }
@@ -532,7 +532,7 @@ void npc::talk_to_u()
         }
     }
     if( chatbin.mission_selected != nullptr ) {
-        if( chatbin.mission_selected->get_assigned_player_id() != g->u.getID() ) {
+        if( chatbin.mission_selected->get_assigned_player() != &g->u ) {
             // Don't talk about a mission that is assigned to someone else.
             chatbin.mission_selected = nullptr;
         }
@@ -3245,7 +3245,7 @@ void talk_function::start_training( npc &p )
     }
 
     mission *miss = p.chatbin.mission_selected;
-    if( miss != nullptr && miss->get_assigned_player_id() == g->u.getID() ) {
+    if( miss != nullptr && miss->get_assigned_player() == &g->u ) {
         clear_mission( p );
     } else if( !pay_npc( p, cost ) ) {
         return;
@@ -3484,7 +3484,7 @@ talk_topic talk_response::effect_t::apply( dialogue &d ) const
     ma.clear();
     // Update the missions we can talk about (must only be current, non-complete ones)
     for( auto &mission : d.beta->chatbin.missions_assigned ) {
-        if( mission->get_assigned_player_id() == d.alpha->getID() ) {
+        if( mission->get_assigned_player() == d.alpha ) {
             ma.push_back( mission );
         }
     }

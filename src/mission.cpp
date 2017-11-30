@@ -134,7 +134,7 @@ void mission::on_creature_death( Creature &poor_dead_dude )
         // Must be the player
         for( auto &miss : g->u.get_active_missions() ) {
             // mission is free and can be reused
-            miss->player_id = -1;
+            miss->assigned_player.reset();
         }
         // The missions remains assigned to the (dead) character. This should not cause any problems
         // as the character is dismissed anyway.
@@ -172,16 +172,15 @@ mission *mission::reserve_random( const mission_origin origin, const tripoint &p
 
 void mission::assign( player &u )
 {
-    if( player_id == u.getID() ) {
+    if( assigned_player && *assigned_player == creature_reference( u ) ) {
         debugmsg( "strange: player is already assigned to mission %d", uid );
         return;
     }
-    if( player_id != -1 ) {
-        debugmsg( "tried to assign mission %d to player, but mission is already assigned to %d", uid,
-                  player_id );
+    if( assigned_player ) {
+        debugmsg( "tried to assign mission %d to player, but mission is already assigned", uid );
         return;
     }
-    player_id = u.getID();
+    assigned_player = creature_reference( u );
     u.on_mission_assignment( *this );
     if( status == mission_status::yet_to_start ) {
         type->start( this );
@@ -192,7 +191,7 @@ void mission::assign( player &u )
 void mission::fail()
 {
     status = mission_status::failure;
-    if( g->u.getID() == player_id ) {
+    if( assigned_player && *assigned_player == creature_reference( g->u ) ) {
         g->u.on_mission_finished( *this );
     }
 
@@ -230,11 +229,10 @@ void mission::step_complete( const int _step )
 void mission::wrap_up()
 {
     auto &u = g->u;
-    if( u.getID() != player_id ) {
+    if( assigned_player && *assigned_player != creature_reference( u ) ) {
         // This is called from npctalk.cpp, the npc should only offer the option to wrap up mission
         // that have been assigned to the current player.
-        debugmsg( "mission::wrap_up called, player %d was assigned, but current player is %d", player_id,
-                  u.getID() );
+        debugmsg( "mission::wrap_up called, player was assigned, but current player is different" );
     }
 
     status = mission_status::success;
@@ -431,20 +429,15 @@ void mission::set_target( const tripoint &new_target )
 
 bool mission::is_assigned() const
 {
-    return player_id != -1 || legacy_no_player_id;
+    return assigned_player || legacy_no_player_id;
 }
 
-int mission::get_assigned_player_id() const
+void mission::set_player_id_legacy_0c( const player &u )
 {
-    return player_id;
-}
-
-void mission::set_player_id_legacy_0c( int id )
-{
-    if( !legacy_no_player_id || player_id != -1 ) {
-        debugmsg( "Not a legacy mission, tried to set id %d", id );
+    if( !legacy_no_player_id || !assigned_player ) {
+        debugmsg( "Not a legacy mission, tried to set id" );
     } else {
-        player_id = id;
+        assigned_player = creature_reference( u );
         legacy_no_player_id = false;
     }
 }
@@ -538,7 +531,6 @@ mission::mission()
     good_fac_id = -1;
     bad_fac_id = -1;
     step = 0;
-    player_id = -1;
 }
 
 mission_type::mission_type( mission_type_id ID, std::string NAME, mission_goal GOAL, int DIF,
