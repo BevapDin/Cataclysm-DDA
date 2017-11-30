@@ -372,7 +372,7 @@ void npc_edit_menu()
             types.addentry( INT_MAX, true, -1, _( "Cancel" ) );
             types.query();
             if( types.ret >= 0 && types.ret < ( int )mts.size() ) {
-                np->add_new_mission( mission::reserve_new( mts[ types.ret ]->id, np->getID() ) );
+                np->add_new_mission( mission::reserve_new( mts[ types.ret ]->id, *np ) );
             }
         }
         break;
@@ -547,7 +547,7 @@ void mission_debug::remove_mission( mission &m )
         add_msg( _( "Unsetting active mission" ) );
     }
 
-    const auto giver = g->find_npc( m.npc_id );
+    npc *const giver = m.get_giver().get<npc>();
     if( giver != nullptr ) {
         if( remove_from_vec( giver->chatbin.missions_assigned, &m ) ) {
             add_msg( _( "Removing from %s missions_assigned" ), giver->name.c_str() );

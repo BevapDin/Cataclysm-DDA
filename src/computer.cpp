@@ -1427,7 +1427,7 @@ TO WRITE US A LETTER PLEASE SEND IT TO...\n" ) );
     if( !std::any_of( missions.begin(), missions.end(), [ &mission_type ]( mission * mission ) {
         return mission->get_type().id == mission_type;
     } ) ) {
-        const auto mission = mission::reserve_new( mission_type, -1 );
+        const auto mission = mission::reserve_new( mission_type, creature_reference() );
         mission->assign( g->u );
     }
 

@@ -2054,7 +2054,7 @@ void mission::deserialize(JsonIn &jsin)
     jo.read("deadline", deadline );
     jo.read("step", step );
     jo.read("item_count", item_count );
-    jo.read("npc_id", npc_id );
+    jo.read( "npc_id", giver );
     jo.read("good_fac_id", good_fac_id );
     jo.read("bad_fac_id", bad_fac_id );
 
@@ -2092,7 +2092,7 @@ void mission::serialize(JsonOut &json) const
     json.member("monster_type", monster_type);
     json.member("monster_kill_goal", monster_kill_goal);
     json.member("deadline", deadline);
-    json.member("npc_id", npc_id);
+    json.member( "npc_id", giver );
     json.member("good_fac_id", good_fac_id);
     json.member("bad_fac_id", bad_fac_id);
     json.member("step", step);

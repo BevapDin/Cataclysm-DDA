@@ -17,12 +17,12 @@
 
 #define dbg(x) DebugLog((DebugLevel)(x),D_GAME) << __FILE__ << ":" << __LINE__ << ": "
 
-mission mission_type::create( const int npc_id ) const
+mission mission_type::create( const creature_reference &giver ) const
 {
     mission ret;
     ret.uid = g->assign_mission_id();
     ret.type = this;
-    ret.npc_id = npc_id;
+    ret.giver = giver;
     ret.item_id = item_id;
     ret.item_count = item_count;
     ret.value = value;
@@ -39,9 +39,9 @@ mission mission_type::create( const int npc_id ) const
 
 std::unordered_map<int, std::unique_ptr<mission>> world_missions;
 
-mission* mission::reserve_new( const mission_type_id type, const int npc_id )
+mission* mission::reserve_new( const mission_type_id type, const creature_reference &giver )
 {
-    const auto tmp = mission_type::get( type )->create( npc_id );
+    const auto tmp = mission_type::get( type )->create( giver );
     // @todo Warn about overwrite?
     auto &iter = world_missions[ tmp.uid ];
     iter = std::unique_ptr<mission>( new mission( tmp ) );
@@ -149,7 +149,7 @@ void mission::on_creature_death( Creature &poor_dead_dude )
             i.step_complete( 1 );
         }
         //fail the mission if the mission giver dies
-        if( i.npc_id == p->getID() ) {
+        if( i.giver == *p ) {
             i.fail();
         }
         //fail the mission if recruit target dies
@@ -159,13 +159,13 @@ void mission::on_creature_death( Creature &poor_dead_dude )
     }
 }
 
-mission* mission::reserve_random( const mission_origin origin, const tripoint &p, const int npc_id )
+mission* mission::reserve_random( const mission_origin origin, const tripoint &p, const creature_reference &giver )
 {
     const auto type = mission_type::get_random_id( origin, p );
     if( type.is_null() ) {
         return nullptr;
     }
-    return mission::reserve_new( type, npc_id );
+    return mission::reserve_new( type, giver );
 }
 
 void mission::assign( player &u )
@@ -198,7 +198,7 @@ void mission::fail()
 
 void mission::set_target_to_mission_giver()
 {
-    const auto giver = g->find_npc( npc_id );
+    npc *const giver = giver.get<npc>();
     if( giver != nullptr ) {
         target = giver->global_omt_location();
     } else {
@@ -252,7 +252,7 @@ void mission::wrap_up()
     type->end( this );
 }
 
-bool mission::is_complete( const int _npc_id ) const
+bool mission::is_complete( const creature_reference &some_npc ) const
 {
     if( status == mission_status::success ) {
         return true;
@@ -281,17 +281,17 @@ bool mission::is_complete( const int _npc_id ) const
             if (!tmp_inv.has_amount(type->item_id, item_count)) {
                 return tmp_inv.has_amount( type->item_id, 1 ) && tmp_inv.has_charges( type->item_id, item_count );
             }
-            if( npc_id != -1 && npc_id != _npc_id ) {
+            if( giver != creature_reference() && giver != some_npc ) {
                 return false;
             }
         }
             return true;
 
         case MGOAL_FIND_ANY_ITEM:
-            return u.has_mission_item( uid ) && ( npc_id == -1 || npc_id == _npc_id );
+            return u.has_mission_item( uid ) && ( giver == creature_reference() || giver == some_npc );
 
         case MGOAL_FIND_MONSTER:
-            if( npc_id != -1 && npc_id != _npc_id ) {
+            if( giver != creature_reference() && giver != some_npc ) {
                 return false;
             }
             return g->get_creature_if( [&]( const Creature &critter ) {
