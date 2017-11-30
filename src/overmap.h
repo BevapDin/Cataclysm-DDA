@@ -25,7 +25,7 @@ class JsonObject;
 class npc;
 class overmapbuffer;
 class overmap_connection;
-
+class creature_reference;
 struct mongroup;
 
 namespace pf
@@ -399,8 +399,8 @@ public:
 
         /// Adds the npc to the contained list of npcs ( @ref npcs ).
         void insert_npc( std::shared_ptr<npc> who );
-        /// Removes the npc and returns it ( or returns nullptr if not found ).
-        std::shared_ptr<npc> erase_npc( const int id );
+        /// Removes the npc and returns it (or returns nullptr if not found).
+        std::shared_ptr<npc> erase_npc( const creature_reference &ref );
 
         void for_each_npc( std::function<void( npc & )> callback );
         void for_each_npc( std::function<void( const npc & )> callback ) const;

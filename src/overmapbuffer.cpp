@@ -17,6 +17,7 @@
 #include "vehicle.h"
 #include "filesystem.h"
 #include "cata_utility.h"
+#include "creature_reference.h"
 
 #include <algorithm>
 #include <cassert>
@@ -711,14 +712,13 @@ void overmapbuffer::insert_npc( const std::shared_ptr<npc> who )
     get( npc_om_pos.x, npc_om_pos.y ).insert_npc( who );
 }
 
-std::shared_ptr<npc> overmapbuffer::remove_npc( const int id )
+std::shared_ptr<npc> overmapbuffer::remove_npc( const creature_reference &ref )
 {
     for( auto &it : overmaps ) {
-        if( const auto p = it.second->erase_npc( id ) ) {
+        if( const auto p = it.second->erase_npc( ref ) ) {
             return p;
         }
     }
-    debugmsg("overmapbuffer::remove_npc: NPC (%d) not found.", id);
     return nullptr;
 }
 
