@@ -2816,7 +2816,7 @@ player *vehicle::get_passenger(int p) const
     p = part_with_feature (p, VPFLAG_BOARDABLE, false);
     if (p >= 0 && parts[p].has_flag(vehicle_part::passenger_flag))
     {
-        return g->critter_by_id<player>( parts[p].passenger_id );
+        return parts[p].passenger.get<player>();
     }
     return 0;
 }

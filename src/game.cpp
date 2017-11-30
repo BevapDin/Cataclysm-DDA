@@ -3720,7 +3720,7 @@ void game::load(std::string worldname, const save_t &name)
             if( veh != nullptr ) {
                 vpart = veh->part_with_feature( vpart, "BOARDABLE" );
                 if( vpart >= 0 ) {
-                    veh->parts[vpart].passenger_id = u.getID();
+                    veh->parts[vpart].passenger = u;
                 }
             }
         }

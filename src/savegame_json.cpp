@@ -1755,7 +1755,7 @@ void vehicle_part::deserialize(JsonIn &jsin)
     data.read("blood", blood );
     data.read("enabled", enabled );
     data.read("flags", flags );
-    data.read("passenger_id", passenger_id );
+    data.read("passenger_id", passenger );
     data.read("crew_id", crew_id );
     data.read("items", items);
     data.read("target_first_x", target.first.x);
@@ -1811,7 +1811,7 @@ void vehicle_part::serialize(JsonOut &json) const
     json.member("blood", blood);
     json.member("enabled", enabled);
     json.member("flags", flags);
-    json.member("passenger_id", passenger_id);
+    json.member( "passenger_id", passenger );
     json.member("crew_id", crew_id);
     json.member("items", items);
     json.member("target_first_x", target.first.x);
@@ -2372,4 +2372,14 @@ void tripoint::serialize( JsonOut &jsout ) const
     jsout.write( y );
     jsout.write( z );
     jsout.end_array();
+}
+
+void creature_reference::serialize( JsonOut &jsout ) const
+{
+    jsout.write( creature_id );
+}
+
+void creature_reference::deserialize( JsonIn &jsin )
+{
+    creature_id = jsin.get_int();
 }
