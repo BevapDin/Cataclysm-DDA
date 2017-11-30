@@ -10,6 +10,8 @@
 
 #include "enums.h"
 #include "npc_favor.h"
+#include "creature_reference.h"
+#include "optional.h"
 
 class player;
 class mission;
@@ -177,7 +179,7 @@ struct mission_type {
     itype_id item_id = "null";
     int item_count = 1;
     npc_class_id recruit_class = npc_class_id( "NC_NONE" );  // The type of NPC you are to recruit
-    int target_npc_id = -1;
+    cata::optional<creature_reference> target_npc;
     std::string monster_type = "mon_null";
     int monster_kill_goal = -1;
     string_id<oter_type_t> target_id;
@@ -254,7 +256,7 @@ private:
         int item_count;         // The number of above items needed
         string_id<oter_type_t> target_id;      // Destination type to be reached
         npc_class_id recruit_class;// The type of NPC you are to recruit
-        int target_npc_id;     // The ID of a specific NPC to interact with
+        cata::optional<creature_reference> target_npc;     // The specific NPC to interact with
         std::string monster_type;    // Monster ID that are to be killed
         int monster_kill_goal;  // the kill count you wish to reach
         int deadline;           // Turn number

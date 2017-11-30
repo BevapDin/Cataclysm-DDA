@@ -141,22 +141,21 @@ void mission::on_creature_death( Creature &poor_dead_dude )
         // Technically, the active missions could be moved to the failed mission section.
         return;
     }
-    const auto dead_guys_id = p->getID();
     for( auto &e : world_missions ) {
         auto &i = *e.second;
         if( !i.in_progress() ) {
             continue;
         }
         //complete the mission if you needed killing
-        if( i.type->goal == MGOAL_ASSASSINATE && i.target_npc_id == dead_guys_id ) {
+        if( i.type->goal == MGOAL_ASSASSINATE && i.target_npc && *i.target_npc == creature_reference( *p ) ) {
             i.step_complete( 1 );
         }
         //fail the mission if the mission giver dies
-        if( i.npc_id == dead_guys_id ) {
+        if( i.npc_id == p->getID() ) {
             i.fail();
         }
         //fail the mission if recruit target dies
-        if( i.type->goal == MGOAL_RECRUIT_NPC && i.target_npc_id == dead_guys_id ) {
+        if( i.type->goal == MGOAL_RECRUIT_NPC && i.target_npc && *i.target_npc == creature_reference( *p ) ) {
             i.fail();
         }
     }
@@ -302,7 +301,7 @@ bool mission::is_complete( const int _npc_id ) const
             } );
 
         case MGOAL_RECRUIT_NPC: {
-            npc *p = g->find_npc( target_npc_id );
+            npc *p = target_npc ? target_npc->get<npc>() : nullptr;
             return p != nullptr && p->attitude == NPCATT_FOLLOW;
         }
 
@@ -532,7 +531,6 @@ mission::mission()
     item_count = 1;
     target_id = string_id<oter_type_t>::NULL_ID();
     recruit_class = NC_NONE;
-    target_npc_id = -1;
     monster_type = "mon_null";
     monster_kill_goal = -1;
     deadline = 0;

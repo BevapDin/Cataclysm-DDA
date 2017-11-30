@@ -2034,7 +2034,7 @@ void mission::deserialize(JsonIn &jsin)
         recruit_class = npc_class_id( jo.get_string( "recruit_class", "NC_NONE" ) );
     }
 
-    jo.read( "target_npc_id", target_npc_id );
+    jo.read( "target_npc_id", target_npc );
     jo.read( "monster_type", monster_type );
     jo.read( "monster_kill_goal", monster_kill_goal );
     jo.read("deadline", deadline );
@@ -2074,7 +2074,7 @@ void mission::serialize(JsonOut &json) const
     json.member("item_count", item_count);
     json.member("target_id", target_id.str());
     json.member("recruit_class", recruit_class);
-    json.member("target_npc_id", target_npc_id);
+    json.member( "target_npc_id", target_npc );
     json.member("monster_type", monster_type);
     json.member("monster_kill_goal", monster_kill_goal);
     json.member("deadline", deadline);
