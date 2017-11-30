@@ -1126,7 +1126,8 @@ bool veh_interact::overview( std::function<bool(const vehicle_part &pt)> enable,
         auto details = []( const vehicle_part &pt, const catacurses::window &w, int y ) {
             const npc *who = pt.crew();
             if( who ) {
-                right_print( w, y, 1, pt.passenger_id == who->getID() ? c_green : c_light_gray, who->name );
+                const bool is_there = pt.passenger && *pt.passenger == creature_reference( *who );
+                right_print( w, y, 1, is_there ? c_green : c_light_gray, who->name );
             }
         };
         if( pt.is_seat() && !pt.is_broken() ) {

@@ -1201,7 +1201,7 @@ void map::board_vehicle( const tripoint &pos, player *p )
         unboard_vehicle( pos );
     }
     veh->parts[seat_part].set_flag(vehicle_part::passenger_flag);
-    veh->parts[seat_part].passenger_id = p->getID();
+    veh->parts[seat_part].passenger = creature_reference( *p );
     veh->invalidate_mass();
 
     p->setpos( pos );

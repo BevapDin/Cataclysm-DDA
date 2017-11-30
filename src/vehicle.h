@@ -11,6 +11,8 @@
 #include "active_item_cache.h"
 #include "string_id.h"
 #include "units.h"
+#include "optional.h"
+#include "creature_reference.h"
 
 #include <vector>
 #include <array>
@@ -239,7 +241,7 @@ public:
                                   // so our indices can remain consistent.
     bool enabled     = true;      //
     int flags        = 0;         //
-    int passenger_id = 0;         // carrying passenger
+    cata::optional<creature_reference> passenger; // carrying passenger
 
     bool open = false;            // door is open
     int direction = 0;            // direction the part is facing
