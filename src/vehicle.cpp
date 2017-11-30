@@ -6357,11 +6357,11 @@ int vehicle_part::wheel_width() const
 
 npc * vehicle_part::crew() const
 {
-    if( is_broken() || crew_id < 0 ) {
+    if( is_broken() ) {
         return nullptr;
     }
 
-    npc *const res = g->critter_by_id<npc>( crew_id );
+    npc *const res = crew_.get<npc>();
     if( !res ) {
         return nullptr;
     }
@@ -6376,13 +6376,13 @@ bool vehicle_part::set_crew( const npc &who )
     if( is_broken() || ( !is_seat() && !is_turret() ) ) {
         return false;
     }
-    crew_id = who.getID();
+    crew_ = who;
     return true;
 }
 
 void vehicle_part::unset_crew()
 {
-    crew_id = -1;
+    crew_ = creature_reference();
 }
 
 void vehicle_part::reset_target( tripoint pos )
