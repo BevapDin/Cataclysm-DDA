@@ -39,6 +39,7 @@
 #include "messages.h"
 #include "rotatable_symbols.h"
 #include "string_input_popup.h"
+#include "creature_reference.h"
 
 #include <cassert>
 #include <stdlib.h>
@@ -1299,9 +1300,11 @@ void overmap::insert_npc( std::shared_ptr<npc> who )
     g->set_npcs_dirty();
 }
 
-std::shared_ptr<npc> overmap::erase_npc( const int id )
+std::shared_ptr<npc> overmap::erase_npc( const creature_reference &ref )
 {
-    const auto iter = std::find_if( npcs.begin(), npcs.end(), [id]( const std::shared_ptr<npc> &n ) { return n->getID() == id; } );
+    const auto iter = std::find_if( npcs.begin(), npcs.end(), [&ref]( const std::shared_ptr<npc> &n ) {
+        return ref == creature_reference( *n );
+    } );
     if( iter == npcs.end() ) {
         return nullptr;
     }

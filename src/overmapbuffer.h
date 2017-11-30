@@ -16,7 +16,7 @@ struct mongroup;
 class monster;
 class npc;
 struct om_vehicle;
-
+class creature_reference;
 struct oter_t;
 using oter_id = int_id<oter_t>;
 
@@ -177,11 +177,11 @@ public:
      * Searches all loaded overmaps.
      */
     std::shared_ptr<npc> find_npc( int id );
-    /**
-     * Find npc by id and if found, erase it from the npc list
-     * and return it ( or return nullptr if not found ).
-     */
-    std::shared_ptr<npc> remove_npc( int id );
+        /**
+         * Find npc by reference and if found, erase it from the npc list
+         * and return it (or return nullptr if not found).
+         */
+        std::shared_ptr<npc> remove_npc( const creature_reference &ref );
         /**
          * Adds the npc to an overmap ( based on the npcs current location )
          * and stores it there. The overmap takes ownership of the pointer.

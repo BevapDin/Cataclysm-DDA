@@ -1912,7 +1912,7 @@ void npc::setpos( const tripoint &pos )
     if( !is_fake() && pos_om_old != pos_om_new ) {
         overmap &om_old = overmap_buffer.get( pos_om_old.x, pos_om_old.y );
         overmap &om_new = overmap_buffer.get( pos_om_new.x, pos_om_new.y );
-        if( const auto ptr = om_old.erase_npc( getID() ) ) {
+        if( const auto ptr = om_old.erase_npc( creature_reference( *this ) ) ) {
             om_new.insert_npc( ptr );
         } else {
             // Don't move the npc pointer around to avoid having two overmaps

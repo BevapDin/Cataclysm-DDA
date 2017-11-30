@@ -7026,7 +7026,7 @@ void map::rotate(int turns)
         // OK, this is ugly: we remove the NPC from the whole map
         // Then we place it back from scratch
         // It could be rewritten to utilize the fact that rotation shouldn't cross overmaps
-        auto npc_ptr = overmap_buffer.remove_npc( np.getID() );
+        auto npc_ptr = overmap_buffer.remove_npc( creature_reference( np ) );
 
         int old_x = np_rc.sub_pos.x;
         int old_y = np_rc.sub_pos.y;

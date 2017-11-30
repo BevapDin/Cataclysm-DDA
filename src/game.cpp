@@ -5795,7 +5795,7 @@ void game::cleanup_dead()
     if( npc_is_dead ) {
         for( auto it = active_npc.begin(); it != active_npc.end(); ) {
             if( (*it)->is_dead() ) {
-                overmap_buffer.remove_npc( ( *it )->getID() );
+                overmap_buffer.remove_npc( creature_reference( **it ) );
                 it = active_npc.erase( it );
             } else {
                 it++;
