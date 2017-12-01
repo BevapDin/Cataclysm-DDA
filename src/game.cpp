@@ -12307,7 +12307,14 @@ void game::plswim( const tripoint &p )
         }
     }
     u.moves -= (movecost > 200 ? 200 : movecost)  * (trigdist && diagonal ? 1.41 : 1);
-    u.inv.rust_iron_items();
+    u.visit_items( []( item *const it_ptr, const item *const parent ) {
+        //@todo properly check for container that protects its contents from water,
+        //currently any contained item is protected
+        if( parent == nullptr ) {
+            inventory::rust_iron_item( *it_ptr );
+        }
+        return VisitResponse::SKIP;
+    } );
 
     u.burn_move_stamina( movecost );
 

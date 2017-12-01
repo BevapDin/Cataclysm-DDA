@@ -145,7 +145,7 @@ class inventory : public visitable<inventory>
         item *best_for_melee( player &p, double &best );
         item *most_loaded_gun();
 
-        void rust_iron_items();
+        static void rust_iron_item( item &it );
 
         units::mass weight() const;
         units::volume volume() const;
