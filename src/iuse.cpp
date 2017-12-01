@@ -6604,9 +6604,8 @@ int iuse::radiocaron(player *p, item *it, bool t, const tripoint &pos)
 
 void sendRadioSignal(player *p, std::string signal)
 {
-    for (size_t i = 0; i < p->inv.size(); i++) {
-        item &it = p->inv.find_item(i);
-
+    p->visit_items( [&]( item *const it_ptr, const item * ) {
+        item &it = *it_ptr;
         if (it.has_flag("RADIO_ACTIVATION") && it.has_flag(signal)) {
             sounds::sound(p->pos(), 6, _("beep."));
 
@@ -6619,7 +6618,8 @@ void sendRadioSignal(player *p, std::string signal)
 
             it.type->invoke( *p, it, p->pos() );
         }
-    }
+        return VisitResponse::NEXT;
+    } );
 
     g->m.trigger_rc_items( signal );
 }

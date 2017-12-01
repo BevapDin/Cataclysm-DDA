@@ -3161,10 +3161,8 @@ static int getGasDiscountCardQuality(item it)
 static int findBestGasDiscount(player &p)
 {
     int discount = 0;
-
-    for (size_t i = 0; i < p.inv.size(); i++) {
-        item &it = p.inv.find_item(i);
-
+    p.visit_items( [&]( const item *const it_ptr, const item * ) {
+        const item &it = *it_ptr;
         if (it.has_flag("GAS_DISCOUNT")) {
 
             int q = getGasDiscountCardQuality(it);
@@ -3172,7 +3170,8 @@ static int findBestGasDiscount(player &p)
                 discount = q;
             }
         }
-    }
+        return VisitResponse::NEXT;
+    } );
 
     return discount;
 }
