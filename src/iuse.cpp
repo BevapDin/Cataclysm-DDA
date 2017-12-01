@@ -412,27 +412,28 @@ int iuse::smoking(player *p, item *it, bool, const tripoint&)
         return 0;
     }
 
-    item cig;
+    const std::string unlit_name = it->tname();
+    const bool is_joint = it->typeId() == "joint";
     if (it->typeId() == "cig") {
-        cig = item("cig_lit", int(calendar::turn));
-        cig.item_counter = 40;
+        it->convert( "cig_lit" );
+        it->item_counter = 40;
         p->mod_hunger(-3);
         p->mod_thirst(2);
     } else if (it->typeId() == "handrolled_cig") {
         // This transforms the hand-rolled into a normal cig, which isn't exactly
         // what I want, but leaving it for now.
-        cig = item("cig_lit", int(calendar::turn));
-        cig.item_counter = 40;
+        it->convert( "cig_lit" );
+        it->item_counter = 40;
         p->mod_thirst(2);
         p->mod_hunger(-3);
     } else if (it->typeId() == "cigar") {
-        cig = item("cigar_lit", int(calendar::turn));
-        cig.item_counter = 120;
+        it->convert( "cigar_lit" );
+        it->item_counter = 120;
         p->mod_thirst(3);
         p->mod_hunger(-4);
     } else if (it->typeId() == "joint") {
-        cig = item("joint_lit", int(calendar::turn));
-        cig.item_counter = 40;
+        it->convert( "joint_lit" );
+        it->item_counter = 40;
         p->mod_hunger(4);
         p->mod_thirst(6);
         if( p->get_painkiller() < 5 ) {
@@ -446,12 +447,11 @@ int iuse::smoking(player *p, item *it, bool, const tripoint&)
     }
     // If we're here, we better have a cig to light.
     p->use_charges_if_avail("fire", 1);
-    cig.active = true;
-    p->inv.add_item(cig, false, true);
-    p->add_msg_if_player(m_neutral, _("You light a %s."), cig.tname().c_str());
+    it->active = true;
+    p->add_msg_if_player( m_neutral, _( "You light a %s." ), unlit_name );
 
     // Parting messages
-    if (it->typeId() == "joint") {
+    if( is_joint ) {
         // Would group with the joint, but awkward to mutter before lighting up.
         if (one_in(5)) {
             weed_msg(p);
@@ -461,7 +461,7 @@ int iuse::smoking(player *p, item *it, bool, const tripoint&)
         p->add_msg_if_player(m_bad, _("Ugh, too much smoke... you feel nasty."));
     }
 
-    return it->type->charges_to_use();
+    return 0;
 }
 
 
