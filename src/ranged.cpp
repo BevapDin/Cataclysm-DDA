@@ -9,6 +9,7 @@
 #include "output.h"
 #include "line.h"
 #include "skill.h"
+#include "string_formatter.h"
 #include "rng.h"
 #include "item.h"
 #include "options.h"
@@ -782,7 +783,7 @@ static int print_aim( const player &p, WINDOW *w, int line_number, item *weapon,
     const double steadiness_range = MAX_RECOIL - min_dispersion;
     // This is a relative measure of how steady the player's aim is,
     // 0 is the best the player can do.
-    const double steady_score = predicted_recoil - min_dispersion;
+    const double steady_score = std::max( 0.0, predicted_recoil - min_dispersion );
     // Fairly arbitrary cap on steadiness...
     const double steadiness = 1.0 - ( steady_score / steadiness_range );
 
@@ -1441,7 +1442,6 @@ static void cycle_action( item& weap, const tripoint &pos ) {
     if( weap.ammo_data() && weap.ammo_data()->ammo->casing != "null" ) {
         if( weap.has_flag( "RELOAD_EJECT" ) || weap.gunmod_find( "brass_catcher" ) ) {
             weap.contents.push_back( item( weap.ammo_data()->ammo->casing ).set_flag( "CASING" ) );
-
         } else {
             if( cargo.empty() ) {
                 g->m.add_item_or_charges( eject, item( weap.ammo_data()->ammo->casing ) );
@@ -1458,8 +1458,9 @@ static void cycle_action( item& weap, const tripoint &pos ) {
     const auto mag = weap.magazine_current();
     if( mag && mag->type->magazine->linkage != "NULL" ) {
         item linkage( mag->type->magazine->linkage, calendar::turn, 1 );
-        if (weap.gunmod_find("brass_catcher")) {
-            g->u.inv.add_item(linkage, true, false);
+        if( weap.gunmod_find( "brass_catcher" ) ) {
+            linkage.set_flag( "CASING" );
+            weap.contents.push_back( linkage );
         }
         else if( cargo.empty() ) {
             g->m.add_item_or_charges( eject, linkage );
@@ -1558,7 +1559,7 @@ static bool is_driving( const player &p )
 // utility functions for projectile_attack
 dispersion_sources player::get_weapon_dispersion( const item &obj ) const
 {
-    int weapon_dispersion = std::max( obj.gun_dispersion() / 3, 45 );
+    int weapon_dispersion = obj.gun_dispersion();
     dispersion_sources dispersion( weapon_dispersion );
     /** @EFFECT_GUN improves usage of accurate weapons and sights */
     dispersion.add_range( 3 * ( MAX_SKILL - std::min( int( get_skill_level( skill_gun ) ), MAX_SKILL ) ) );

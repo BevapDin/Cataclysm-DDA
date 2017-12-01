@@ -807,7 +807,7 @@ void talk_function::field_plant( npc &p, std::string place )
                 } else {
                     used_seed = g->u.use_amount( seed_id, 1 );
                 }
-                used_seed.front().bday = calendar::turn;
+                used_seed.front().set_age( 0 );
                 bay.add_item_or_charges( x, y, used_seed.front() );
                 bay.set( x, y, t_dirt, f_plant_seed);
                 limiting_number--;
@@ -1437,13 +1437,10 @@ std::vector<std::shared_ptr<npc>> talk_function::companion_list( const npc &p, c
 }
 
 npc *talk_function::companion_choose(){
-    std::vector<npc *> available;
-    for( auto &elem : g->active_npc ) {
-        if( g->u.sees( elem->pos() ) && elem->is_friend() &&
-            rl_dist( g->u.pos(), elem->pos() ) <= 24 ) {
-            available.push_back( elem.get() );
-        }
-    }
+    const std::vector<npc *> available = g->get_npcs_if( [&]( const npc &guy ) {
+        return g->u.sees( guy.pos() ) && guy.is_friend() &&
+            rl_dist( g->u.pos(), guy.pos() ) <= 24;
+    } );
 
     if (available.empty()) {
         popup(_("You don't have any companions to send out..."));

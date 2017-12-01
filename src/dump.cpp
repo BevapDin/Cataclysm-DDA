@@ -10,18 +10,21 @@
 #include "iuse_actor.h"
 #include "player.h"
 #include "vehicle.h"
+#include "string_formatter.h"
 #include "veh_type.h"
 #include "npc.h"
 #include "ammo.h"
 #include "crafting.h"
+#include "loading_ui.h"
 
 bool game::dump_stats( const std::string &what, dump_mode mode,
                        const std::vector<std::string> &opts )
 {
     try {
-        load_core_data();
-        load_packs( _( "Loading content packs" ), { "dda" } );
-        DynamicDataLoader::get_instance().finalize_loaded_data();
+        loading_ui ui( false );
+        load_core_data( ui );
+        load_packs( _( "Loading content packs" ), { "dda" }, ui );
+        DynamicDataLoader::get_instance().finalize_loaded_data( ui );
     } catch( const std::exception &err ) {
         std::cerr << "Error loading data from json: " << err.what() << std::endl;
         return false;

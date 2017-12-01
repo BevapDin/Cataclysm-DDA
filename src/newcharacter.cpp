@@ -9,6 +9,7 @@
 #include "rng.h"
 #include "game.h"
 #include "name.h"
+#include "string_formatter.h"
 #include "options.h"
 #include "catacharset.h"
 #include "debug.h"
@@ -22,6 +23,7 @@
 #include "mutation.h"
 #include "crafting.h"
 #include "string_input_popup.h"
+#include "worldfactory.h"
 
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -172,6 +174,7 @@ tab_direction set_skills( WINDOW *w, player *u, points_left &points );
 tab_direction set_description(WINDOW *w, player *u, bool allow_reroll, points_left &points);
 
 void save_template( player *u, std::string name = "" );
+void reset_scenario( player *u, const scenario *scen );
 
 void Character::pick_name(bool bUseDefault)
 {
@@ -446,11 +449,22 @@ bool player::create(character_type type, std::string tempname)
         break;
     }
 
+    auto nameExists = [&]( const std::string &name ) {
+        return world_generator->active_world->save_exists( save_t::from_player_name( name ) ) &&
+                    !query_yn( string_format( _("A character with the name '%s' already exists in this world.\n"
+                        "Saving will override the already existing character.\n\n"
+                        "Continue anyways?" ), name ) );
+    };
+
     const bool allow_reroll = type == PLTYPE_RANDOM;
     do {
         if( w == nullptr ) {
             // assert( type == PLTYPE_NOW );
             // no window is created because "Play now"  does not require any configuration
+            if( nameExists( g->u.name ) ) {
+                return false;
+            }
+
             break;
         }
         werase( w );
@@ -493,7 +507,16 @@ bool player::create(character_type type, std::string tempname)
                 tab = -1;
                 break;
         }
-    } while( tab >= 0 && tab <= NEWCHAR_TAB_MAX );
+
+        if( !( tab >= 0 && tab <= NEWCHAR_TAB_MAX ) ) {
+            if( tab != -1 && nameExists( g->u.name ) ) {
+                tab = NEWCHAR_TAB_MAX;
+            } else {
+                break;
+            }
+        }
+
+    } while( true );
     delwin(w);
 
     if( tab < 0 ) {
@@ -589,7 +612,8 @@ bool player::create(character_type type, std::string tempname)
 
     // Ensure that persistent morale effects (e.g. Optimist) are present at the start.
     apply_persistent_morale();
-    return 1;
+
+    return true;
 }
 
 void draw_tabs(WINDOW *w, std::string sTab)
@@ -652,7 +676,7 @@ void draw_points( WINDOW *w, points_left &points, int netPointCost )
     // Clear line (except borders)
     mvwprintz( w, 3, 2, c_black, std::string( getmaxx( w ) - 3, ' ' ).c_str() );
     std::string points_msg = points.to_string();
-    int pMsg_length = utf8_width( points_msg, true );
+    int pMsg_length = utf8_width( remove_color_tags( points_msg ), true );
     nc_color color = c_ltgray;
     print_colored_text( w, 3, 2, color, c_ltgray, points_msg );
     if( netPointCost > 0 ) {
@@ -992,6 +1016,11 @@ tab_direction set_traits(WINDOW *w, player *u, points_left &points)
     std::vector<trait_id> vStartingTraits[2];
 
     for( auto &traits_iter : mutation_branch::get_all() ) {
+        // Don't list blacklisted traits
+        if( mutation_branch::trait_is_blacklisted( traits_iter.first ) ) {
+            continue;
+        }
+
         // We show all starting traits, even if we can't pick them, to keep the interface consistent.
         if( traits_iter.second.startingtrait || g->scen->traitquery( traits_iter.first ) ) {
             if( traits_iter.second.points >= 0 ) {
@@ -1079,7 +1108,8 @@ tab_direction set_traits(WINDOW *w, player *u, points_left &points)
                     i >= start_y + ( int )std::min( traits_size[iCurrentPage], iContentHeight ) ) {
                     continue;
                 }
-                auto &mdata = vStartingTraits[iCurrentPage][i].obj();
+                auto &cur_trait = vStartingTraits[iCurrentPage][i];
+                auto &mdata = cur_trait.obj();
                 if (cur_line_y == i && iCurrentPage == iCurWorkingPage) {
                     // Clear line from 41 to end of line (minus border)
                     mvwprintz( w, 3, 41, c_ltgray, std::string( getmaxx( w ) - 41 - 1, ' ' ).c_str() );
@@ -1102,23 +1132,23 @@ tab_direction set_traits(WINDOW *w, player *u, points_left &points)
                     cLine = col_off_act;
                     if( cur_line_y == i ) {
                         cLine = hi_off;
-                        if (u->has_conflicting_trait(vStartingTraits[iCurrentPage][i])) {
+                        if (u->has_conflicting_trait(cur_trait)) {
                             cLine = hilite(c_dkgray);
-                        } else if (u->has_trait(vStartingTraits[iCurrentPage][i])) {
+                        } else if (u->has_trait(cur_trait)) {
                             cLine = hi_on;
                         }
                     } else {
-                        if (u->has_conflicting_trait(vStartingTraits[iCurrentPage][i])) {
+                        if (u->has_conflicting_trait(cur_trait) || g->scen->is_forbidden_trait(cur_trait)) {
                             cLine = c_dkgray;
 
-                        } else if (u->has_trait(vStartingTraits[iCurrentPage][i])) {
+                        } else if (u->has_trait(cur_trait)) {
                             cLine = col_on_act;
                         }
                     }
-                } else if (u->has_trait(vStartingTraits[iCurrentPage][i])) {
+                } else if (u->has_trait(cur_trait)) {
                     cLine = col_on_pas;
 
-                } else if (u->has_conflicting_trait(vStartingTraits[iCurrentPage][i])) {
+                } else if (u->has_conflicting_trait(cur_trait) || g->scen->is_forbidden_trait(cur_trait)) {
                     cLine = c_ltgray;
                 }
 
@@ -1257,9 +1287,9 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
     WINDOW *w_description = newwin(4, TERMX - 2,
                                    TERMY - 5 + getbegy(w), 1 + getbegx(w));
 
-    WINDOW *w_sorting =     newwin(1,                  55,  5 + getbegy(w), 24 + getbegx(w));
-    WINDOW *w_genderswap =  newwin(1,                  55,  6 + getbegy(w), 24 + getbegx(w));
-    WINDOW *w_items =       newwin(iContentHeight - 2, 55,  7 + getbegy(w), 24 + getbegx(w));
+    WINDOW *w_sorting =     newwin(1,                  55,  5 + getbegy(w), (TERMX / 2) + getbegx(w));
+    WINDOW *w_genderswap =  newwin(1,                  55,  6 + getbegy(w), (TERMX / 2) + getbegx(w));
+    WINDOW *w_items =       newwin(iContentHeight - 2, 55,  7 + getbegy(w), (TERMX / 2) + getbegx(w));
 
     input_context ctxt("NEW_CHAR_PROFESSIONS");
     ctxt.register_cardinal();
@@ -1345,9 +1375,9 @@ tab_direction set_profession(WINDOW *w, player *u, points_left &points)
                                      "Profession %1$s costs %2$d points",
                                      pointsForProf);
         }
-        // This string has fixed start pos(7 = 2(start) + 5(length of "(+%d)" and space))
-        int pMsg_length = utf8_width( points.to_string() );
-        mvwprintz(w, 3, pMsg_length + 7, can_pick ? c_green : c_ltred, prof_msg_temp.c_str(),
+
+        int pMsg_length = utf8_width( remove_color_tags( points.to_string() ) );
+        mvwprintz(w, 3, pMsg_length + 9, can_pick ? c_green : c_ltred, prof_msg_temp.c_str(),
                   sorted_profs[cur_id]->gender_appropriate_name(u->male).c_str(),
                   pointsForProf);
 
@@ -1556,7 +1586,6 @@ tab_direction set_skills(WINDOW *w, player *u, points_left &points)
 {
     draw_tabs( w, _("SKILLS") );
     const int iContentHeight = TERMY - 6;
-    const int iHalf = iContentHeight / 2;
     WINDOW *w_description = newwin(iContentHeight, TERMX - 35,
                                    5 + getbegy(w), 31 + getbegx(w));
 
@@ -1565,6 +1594,7 @@ tab_direction set_skills(WINDOW *w, player *u, points_left &points)
     });
 
     const int num_skills = sorted_skills.size();
+    int cur_offset = 0;
     int cur_pos = 0;
     const Skill* currentSkill = sorted_skills[cur_pos];
     int selected = 0;
@@ -1660,30 +1690,17 @@ tab_direction set_skills(WINDOW *w, player *u, points_left &points)
         draw_scrollbar( w, selected, iContentHeight, iLines,
                         5, getmaxx(w) - 1, BORDER_COLOR, true );
 
-        int first_i, end_i, base_y;
-        if (iContentHeight - 1 > num_skills || cur_pos < iHalf) {
-            first_i = 0;
-            end_i = iContentHeight;
-            base_y = 5;
-        } else if (cur_pos > num_skills - iContentHeight + iHalf) {
-            first_i = num_skills - iContentHeight;
-            end_i = num_skills;
-            base_y = TERMY - 1 - num_skills;
-        } else {
-            first_i = cur_pos - iHalf;
-            end_i = cur_pos + iContentHeight - iHalf;
-            base_y = 5 + iHalf - cur_pos;
-        }
-        end_i = std::min( end_i, ( int )sorted_skills.size() );
-        for (int i = first_i; i < end_i; ++i) {
+        calcStartPos( cur_offset, cur_pos, iContentHeight, num_skills );
+        for( int i = cur_offset; i < num_skills && i - cur_offset < iContentHeight; ++i ) {
+            const int y = 5 + i - cur_offset;
             const Skill* thisSkill = sorted_skills[i];
             // Clear the line
-            mvwprintz(w, base_y + i, 2, c_ltgray, std::string( getmaxx( w ) - 3, ' ' ).c_str() );
+            mvwprintz(w, y, 2, c_ltgray, std::string( getmaxx( w ) - 3, ' ' ).c_str() );
             if (u->get_skill_level(thisSkill->ident()) == 0) {
-                mvwprintz(w, base_y + i, 2,
+                mvwprintz(w, y, 2,
                           (i == cur_pos ? h_ltgray : c_ltgray), thisSkill->name().c_str());
             } else {
-                mvwprintz(w, base_y + i, 2,
+                mvwprintz(w, y, 2,
                           (i == cur_pos ? hilite(COL_SKILL_USED) : COL_SKILL_USED), _("%s"),
                           thisSkill->name().c_str());
                 wprintz(w, (i == cur_pos ? hilite(COL_SKILL_USED) : COL_SKILL_USED),
@@ -1754,18 +1771,23 @@ tab_direction set_skills(WINDOW *w, player *u, points_left &points)
 struct {
     bool sort_by_points = true;
     bool male;
+    bool cities_enabled;
     /** @related player */
     bool operator() (const scenario *a, const scenario *b)
     {
-        // The generic ("Unemployed") profession should be listed first.
-        const scenario *gen = scenario::generic();
-        if (b == gen) {
-            return false;
-        } else if (a == gen) {
-            return true;
+        if( cities_enabled ) {
+            // The generic ("Unemployed") profession should be listed first.
+            const scenario *gen = scenario::generic();
+            if( b == gen ) {
+                return false;
+            } else if( a == gen ) {
+                return true;
+            }
         }
 
-        if (sort_by_points) {
+        if( !cities_enabled && a->has_flag( "CITY_START" ) != b->has_flag( "CITY_START" ) ) {
+            return a->has_flag( "CITY_START" ) < b->has_flag( "CITY_START" );
+        } else if ( sort_by_points ) {
             return a->point_cost() < b->point_cost();
         } else {
             return a->gender_appropriate_name(male) <
@@ -1824,8 +1846,9 @@ tab_direction set_scenario(WINDOW *w, player *u, points_left &points)
     do {
         if (recalc_scens) {
             sorted_scens.clear();
+            auto &wopts = world_generator->active_world->WORLD_OPTIONS;
             for( const auto &scen : scenario::get_all() ) {
-                if (!lcmatch(scen.gender_appropriate_name(u->male), filterstring)) {
+                if( !lcmatch( scen.gender_appropriate_name( u->male ), filterstring ) ) {
                     continue;
                 }
                 sorted_scens.push_back( &scen );
@@ -1840,7 +1863,15 @@ tab_direction set_scenario(WINDOW *w, player *u, points_left &points)
             // Sort scenarios by points.
             // scenario_display_sort() keeps "Evacuee" at the top.
             scenario_sorter.male = u->male;
+            scenario_sorter.cities_enabled = wopts["CITY_SIZE"].getValue() != "0";
             std::stable_sort(sorted_scens.begin(), sorted_scens.end(), scenario_sorter);
+
+            // If city size is 0 but the current scenario requires cities reset the scenario
+            if( !scenario_sorter.cities_enabled && g->scen->has_flag( "CITY_START" ) ) {
+                reset_scenario( u, sorted_scens[0] );
+                points.init_from_options();
+                points.skill_points -= sorted_scens[cur_id]->point_cost();
+            }
 
             // Select the current scenario, if possible.
             for (int i = 0; i < scens_length; ++i) {
@@ -1893,14 +1924,21 @@ tab_direction set_scenario(WINDOW *w, player *u, points_left &points)
                                      "Scenario %1$s cost %2$d points",
                                      pointsForScen);
         }
-        ///* This string has fixed start pos(7 = 2(start) + 5(length of "(+%d)" and space))
-        int pMsg_length = utf8_width( points.to_string().c_str() );
-        mvwprintz(w, 3, pMsg_length + 7, can_pick ? c_green : c_ltred, scen_msg_temp.c_str(),
+
+        int pMsg_length = utf8_width( remove_color_tags( points.to_string() ) );
+        mvwprintz(w, 3, pMsg_length + 9, can_pick ? c_green : c_ltred, scen_msg_temp.c_str(),
                   sorted_scens[cur_id]->gender_appropriate_name(u->male).c_str(),
                   pointsForScen);
 
-        fold_and_print(w_description, 0, 0, TERMX - 2, c_green,
-                       sorted_scens[cur_id]->description(u->male).c_str());
+        std::string scenUnavailable = _( "This scenario is not available in this world due to city size settings. " );
+        std::string scenDesc = sorted_scens[cur_id]->description( u->male );
+
+        if( sorted_scens[cur_id]->has_flag( "CITY_START" ) && !scenario_sorter.cities_enabled ) {
+            fold_and_print( w_description, 0, 0, TERMX - 2, c_red, scenUnavailable );
+            fold_and_print( w_description, 1, 0, TERMX - 2, c_green, scenDesc );
+        } else {
+            fold_and_print( w_description, 0, 0, TERMX - 2, c_green, scenDesc );
+        }
 
         //Draw options
         calcStartPos(iStartPos, cur_id, iContentHeight, scens_length);
@@ -1912,7 +1950,13 @@ tab_direction set_scenario(WINDOW *w, player *u, points_left &points)
                                              ");
             nc_color col;
             if (g->scen != sorted_scens[i]) {
-                col = (sorted_scens[i] == sorted_scens[cur_id] ? h_ltgray : c_ltgray);
+                if( sorted_scens[i] == sorted_scens[cur_id] && (sorted_scens[i]->has_flag( "CITY_START" ) && !scenario_sorter.cities_enabled ) ) {
+                    col = h_dkgray;
+                } else if( sorted_scens[i] != sorted_scens[cur_id] && (sorted_scens[i]->has_flag( "CITY_START" ) && !scenario_sorter.cities_enabled) ) {
+                    col = c_dkgray;
+                } else {
+                    col = (sorted_scens[i] == sorted_scens[cur_id] ? h_ltgray : c_ltgray);
+                }
             } else {
                 col = (sorted_scens[i] == sorted_scens[cur_id] ? hilite(COL_SKILL_USED) : COL_SKILL_USED);
             }
@@ -2014,20 +2058,12 @@ tab_direction set_scenario(WINDOW *w, player *u, points_left &points)
                 cur_id = scens_length - 1;
             }
         } else if (action == "CONFIRM") {
-            u->start_location = sorted_scens[cur_id]->start_location();
-            u->str_max = 8;
-            u->dex_max = 8;
-            u->int_max = 8;
-            u->per_max = 8;
-            g->scen = sorted_scens[cur_id];
-            u->prof = &default_prof.obj();
-            u->empty_traits();
-            u->empty_skills();
-            u->add_traits();
+            if( sorted_scens[cur_id]->has_flag( "CITY_START" ) && !scenario_sorter.cities_enabled ) {
+                continue;
+            }
+            reset_scenario( u, sorted_scens[cur_id] );
             points.init_from_options();
             points.skill_points -= sorted_scens[cur_id]->point_cost();
-
-
         } else if( action == "PREV_TAB" ) {
             retval = tab_direction::BACKWARD;
         } else if( action == "NEXT_TAB" ) {
@@ -2063,7 +2099,7 @@ tab_direction set_description(WINDOW *w, player *u, const bool allow_reroll, poi
     WINDOW_PTR w_genderptr( w_gender );
     WINDOW *w_location = newwin(1, 76, getbegy(w) + 7, getbegx(w) + 2);
     WINDOW_PTR w_locationptr( w_location );
-    WINDOW *w_stats = newwin(6, 16, getbegy(w) + 9, getbegx(w) + 2);
+    WINDOW *w_stats = newwin(6, 20, getbegy(w) + 9, getbegx(w) + 2);
     WINDOW_PTR w_statstptr( w_stats );
     WINDOW *w_traits = newwin(13, 24, getbegy(w) + 9, getbegx(w) + 22);
     WINDOW_PTR w_traitsptr( w_traits );
@@ -2073,7 +2109,7 @@ tab_direction set_description(WINDOW *w, player *u, const bool allow_reroll, poi
     WINDOW_PTR w_professionptr( w_profession );
     WINDOW *w_skills = newwin(9, 33, getbegy(w) + 11, getbegx(w) + 46);
     WINDOW_PTR w_skillsptr( w_skills );
-    WINDOW *w_guide = newwin(4, TERMX - 3, getbegy(w) + 19, getbegx(w) + 2);
+    WINDOW *w_guide = newwin(TERMY - getbegy(w) - 19 - 1, TERMX - 3, getbegy(w) + 19, getbegx(w) + 2);
     WINDOW_PTR w_guideptr( w_guide );
 
     draw_points( w, points );
@@ -2127,6 +2163,11 @@ tab_direction set_description(WINDOW *w, player *u, const bool allow_reroll, poi
                 }
             }
             wrefresh(w);
+
+            wclear(w_stats);
+            wclear(w_traits);
+            wclear(w_skills);
+            wclear(w_guide);
 
             std::vector<std::string> vStatNames;
             mvwprintz(w_stats, 0, 0, COL_HEADER, _("Stats:"));
@@ -2195,18 +2236,18 @@ tab_direction set_description(WINDOW *w, player *u, const bool allow_reroll, poi
             }
             wrefresh(w_skills);
 
-            mvwprintz(w_guide, 2, 0, c_green,
+            mvwprintz(w_guide, getmaxy( w_guide ) - 1, 0, c_green,
                       _("Press %s to finish character creation or %s to go back."),
                       ctxt.get_desc("NEXT_TAB").c_str(),
                       ctxt.get_desc("PREV_TAB").c_str());
             if( allow_reroll ) {
-                    mvwprintz( w_guide, 0, 0, c_green,
+                mvwprintz( w_guide, getmaxy( w_guide ) - 2, 0, c_green,
                                _("Press %s to save character template, %s to re-roll or %s for random scenario."),
                                ctxt.get_desc("SAVE_TEMPLATE").c_str(),
                                ctxt.get_desc("REROLL_CHARACTER").c_str(),
                                ctxt.get_desc("REROLL_CHARACTER_WITH_SCENARIO").c_str());
             } else {
-                    mvwprintz(w_guide, 0, 0, c_green, _("Press %s to save a template of this character."),
+                mvwprintz(w_guide, getmaxy( w_guide ) - 2, 0, c_green, _("Press %s to save a template of this character."),
                     ctxt.get_desc("SAVE_TEMPLATE").c_str());
             }
             wrefresh(w_guide);
@@ -2443,11 +2484,10 @@ trait_id Character::random_bad_trait()
 void save_template( player *u, std::string name )
 {
     if( name.empty() ) {
-        static const std::string title = _( "Name of template:" );
         name = string_input_popup()
-            .title( title )
-            .width( TERMX - utf8_width( title ) - 8 )
-            .query_string();
+               .title( _( "Name of template:" ) )
+               .width( 40 )
+               .query_string();
 
         if( name.empty() ) {
             return;
@@ -2457,4 +2497,22 @@ void save_template( player *u, std::string name )
     write_to_file( playerfile, [&]( std::ostream &fout ) {
         fout << u->save_info();
     }, _( "player template" ) );
+}
+
+void reset_scenario( player *u, const scenario *scen ) {
+    auto psorter = profession_sorter;
+    psorter.sort_by_points = true;
+    const auto permitted = scen->permitted_professions();
+    const auto default_prof = *std::min_element( permitted.begin(), permitted.end(), psorter );
+
+    u->start_location = scen->start_location();
+    u->str_max = 8;
+    u->dex_max = 8;
+    u->int_max = 8;
+    u->per_max = 8;
+    g->scen = scen;
+    u->prof = &default_prof.obj();
+    u->empty_traits();
+    u->empty_skills();
+    u->add_traits();
 }

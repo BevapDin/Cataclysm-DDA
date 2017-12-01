@@ -3,6 +3,7 @@
 #include "color.h"
 #include "init.h"
 #include "game_constants.h"
+#include "string_formatter.h"
 #include "generic_factory.h"
 #include "harvest.h"
 #include "debug.h"
@@ -10,13 +11,11 @@
 #include "output.h"
 #include "item.h"
 #include "item_group.h"
+#include "calendar.h"
+#include "trap.h"
+#include "iexamine.h"
 
 #include <unordered_map>
-
-const std::set<std::string> classic_extras = { "mx_helicopter", "mx_military",
-"mx_roadblock", "mx_drugdeal", "mx_supplydrop", "mx_minefield",
-"mx_crater", "mx_collegekids"
-};
 
 namespace
 {
@@ -168,9 +167,9 @@ static const std::unordered_map<std::string, ter_connects> ter_connects_map = { 
     { "WATER",                    TERCONN_WATER },
 } };
 
-void load_map_bash_tent_centers( JsonArray ja, std::vector<std::string> &centers ) {
+void load_map_bash_tent_centers( JsonArray ja, std::vector<furn_str_id> &centers ) {
     while ( ja.has_more() ) {
-        centers.push_back( ja.next_string() );
+        centers.emplace_back( ja.next_string() );
     }
 }
 
@@ -278,7 +277,7 @@ ter_t null_terrain_t() {
   new_terrain.name_ = translate_marker( "nothing" );
   new_terrain.symbol_.fill( ' ' );
   new_terrain.color_.fill( c_white );
-  new_terrain.movecost = 2;
+  new_terrain.movecost = 0;
   new_terrain.transparent = true;
   new_terrain.set_flag("TRANSPARENT");
   new_terrain.set_flag("DIGGABLE");
@@ -425,6 +424,7 @@ ter_id t_null,
     t_grass,
     t_metal_floor,
     t_pavement, t_pavement_y, t_sidewalk, t_concrete,
+    t_thconc_floor,
     t_floor, t_floor_waxed,
     t_dirtfloor,//Dirt floor(Has roof)
     t_carpet_red,t_carpet_yellow,t_carpet_purple,t_carpet_green,
@@ -532,6 +532,7 @@ void set_ter_ids() {
     t_pavement_y = ter_id( "t_pavement_y" );
     t_sidewalk = ter_id( "t_sidewalk" );
     t_concrete = ter_id( "t_concrete" );
+    t_thconc_floor = ter_id( "t_thconc_floor" );
     t_floor = ter_id( "t_floor" );
     t_floor_waxed = ter_id( "t_floor_waxed" );
     t_dirtfloor = ter_id( "t_dirtfloor" );
@@ -815,7 +816,8 @@ furn_id f_null,
     f_floor_canvas,
     f_tatami,
     f_kiln_empty, f_kiln_full, f_kiln_metal_empty, f_kiln_metal_full,
-    f_robotic_arm, f_vending_reinforced;
+    f_robotic_arm, f_vending_reinforced,
+    f_brazier;
 
 void set_furn_ids() {
     f_null = furn_id( "f_null" );
@@ -915,6 +917,7 @@ void set_furn_ids() {
     f_kiln_metal_empty = furn_id( "f_kiln_metal_empty" );
     f_kiln_metal_full = furn_id( "f_kiln_metal_full" );
     f_robotic_arm = furn_id( "f_robotic_arm" );
+    f_brazier = furn_id( "f_brazier" );
 }
 
 size_t ter_t::count()
@@ -1124,5 +1127,3 @@ void check_furniture_and_terrain()
     terrain_data.check();
     furniture_data.check();
 }
-
-ter_furn_id::ter_furn_id() : ter( t_null ), furn( f_null ) { }

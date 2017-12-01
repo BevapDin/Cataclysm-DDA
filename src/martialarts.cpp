@@ -1,7 +1,7 @@
+#include "martialarts.h"
 #include "player.h"
 #include "game.h"
 #include "debug.h"
-#include "martialarts.h"
 #include "json.h"
 #include "translations.h"
 #include "itype.h"
@@ -10,6 +10,7 @@
 #include <string>
 #include <algorithm>
 #include "generic_factory.h"
+#include "string_formatter.h"
 
 const skill_id skill_melee( "melee" );
 const skill_id skill_bashing( "bashing" );
@@ -63,6 +64,7 @@ void ma_requirements::load( JsonObject &jo, const std::string & )
 void ma_technique::load( JsonObject &jo, const std::string &src )
 {
     optional( jo, was_loaded, "name", name, translated_string_reader );
+    optional( jo, was_loaded, "description", description, translated_string_reader );
 
     if( jo.has_member( "messages" ) ) {
         JsonArray jsarr = jo.get_array("messages");

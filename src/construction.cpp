@@ -11,6 +11,7 @@
 #include "inventory.h"
 #include "mapdata.h"
 #include "skill.h"
+#include "string_formatter.h"
 #include "action.h"
 #include "translations.h"
 #include "messages.h"
@@ -292,6 +293,7 @@ void construction_menu()
                 previous_index = tabindex;
             } else if( category_name == "FILTER" ) {
                 constructs.clear();
+                previous_select = -1;
                 std::copy_if( available.begin(), available.end(),
                     std::back_inserter( constructs ),
                     [&](const std::string &a){
@@ -801,6 +803,8 @@ void complete_construction()
         }
     }
 
+    add_msg( m_info, _( "You finish your construction: %s." ), built.description.c_str() );
+
     // clear the activity
     u.activity.set_to_null();
 
@@ -1160,7 +1164,7 @@ void load_construction(JsonObject &jo)
         con.requirements = requirement_id( jo.get_string( "using" ) );
     } else {
         // Warning: the IDs may change!
-        std::string req_id = string_format( "inline_construction_%i", con.id );
+        std::string req_id = string_format( "inline_construction_%u", con.id );
         requirement_data::load_requirement( jo, req_id );
         con.requirements = requirement_id( req_id );
     }
@@ -1184,7 +1188,7 @@ void load_construction(JsonObject &jo)
     }
 
     con.pre_flags = jo.get_tags("pre_flags");
-    
+
     static const std::map<std::string, std::function<bool( const tripoint & )>> pre_special_map = {{
         { "", construct::check_nothing },
         { "check_empty", construct::check_empty },
@@ -1261,7 +1265,7 @@ void check_constructions()
             }
         }
         if( c->id != i ) {
-            debugmsg( "Construction \"%s\" has id %d, but should have %d",
+            debugmsg( "Construction \"%s\" has id %u, but should have %u",
                       c->description.c_str(), c->id, i );
         }
     }
