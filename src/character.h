@@ -4,8 +4,8 @@
 
 #include "visitable.h"
 #include "creature.h"
-#include "inventory.h"
 #include "copyable_unique_ptr.h"
+#include "item.h"
 #include "skill.h"
 #include "map_selector.h"
 #include "pathfinding.h"
@@ -23,6 +23,7 @@ struct mutation_branch;
 class bionic_collection;
 struct bionic_data;
 using bionic_id = string_id<bionic_data>;
+class inventory;
 
 enum vision_modes {
     DEBUG_NIGHTVISION,
@@ -600,7 +601,7 @@ class Character : public Creature, public visitable<Character>
         std::array<int, num_hp_parts> hp_cur, hp_max;
         bool nv_cached;
 
-        inventory inv;
+        copyable_unique_ptr<inventory> inv;
         itype_id last_item;
         item weapon;
         item ret_null; // Null item, sometimes returns by weapon() etc

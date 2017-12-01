@@ -3587,7 +3587,7 @@ inventory inventory_exchange( inventory &inv,
                               const std::set<item *> &without, const std::vector<item *> &added )
 {
     std::vector<item *> item_dump;
-    inv.dump( item_dump );
+    inv->dump( item_dump );
     item_dump.insert( item_dump.end(), added.begin(), added.end() );
     inventory new_inv;
 
@@ -3603,7 +3603,7 @@ inventory inventory_exchange( inventory &inv,
 std::vector<item_pricing> init_selling( npc &p )
 {
     std::vector<item_pricing> result;
-    invslice slice = p.inv.slice();
+    invslice slice = p.inv->slice();
     for( auto &i : slice ) {
         auto &it = i->front();
 
@@ -3649,7 +3649,7 @@ std::vector<item_pricing> init_buying( npc &p, player &u )
         }
     };
 
-    invslice slice = u.inv.slice();
+    invslice slice = u.inv->slice();
     for( auto &i : slice ) {
         // @todo Sane way of handling multi-item stacks
         check_item( item_location( u, &i->front() ) );

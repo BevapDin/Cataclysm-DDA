@@ -440,7 +440,7 @@ void npc::execute_action( npc_action action )
             break;
 
         case npc_wield_loaded_gun: {
-            item *it = inv.most_loaded_gun();
+            item *it = inv->most_loaded_gun();
             if( it->is_null() ) {
                 debugmsg( "NPC tried to wield a loaded gun, but has none!" );
                 move_pause();
@@ -453,7 +453,7 @@ void npc::execute_action( npc_action action )
         case npc_wield_empty_gun: {
             bool ammo_found = false;
             int index = -1;
-            invslice slice = inv.slice();
+            invslice slice = inv->slice();
             for( size_t i = 0; i < slice.size(); i++ ) {
                 item &it = slice[i]->front();
                 bool am = ( it.is_gun() &&
@@ -2011,7 +2011,7 @@ std::list<item> npc::pick_up_item_vehicle( vehicle &veh, int part_index )
 void npc::drop_items( int weight, int volume )
 {
     add_msg( m_debug, "%s is dropping items-%d,%d (%d items, wgt %d/%d, vol %d/%d)",
-             name.c_str(), weight, volume, inv.size(), to_gram( weight_carried() ),
+             name.c_str(), weight, volume, inv->size(), to_gram( weight_carried() ),
              to_gram( weight_capacity() ), volume_carried() / units::legacy_volume_factor,
              volume_capacity() / units::legacy_volume_factor );
 
@@ -2019,7 +2019,7 @@ void npc::drop_items( int weight, int volume )
     std::vector<ratio_index> rWgt, rVol; // Weight/Volume to value ratios
 
     // First fill our ratio vectors, so we know which things to drop first
-    invslice slice = inv.slice();
+    invslice slice = inv->slice();
     for( unsigned int i = 0; i < slice.size(); i++ ) {
         item &it = slice[i]->front();
         double wgt_ratio, vol_ratio;
@@ -2211,7 +2211,7 @@ bool npc::wield_better_weapon()
     // TODO: Allow wielding weaker weapons against weaker targets
     bool can_use_gun = ( !is_following() || rules.use_guns );
     bool use_silent = ( is_following() && rules.use_silent );
-    invslice slice = inv.slice();
+    invslice slice = inv->slice();
 
     // Check if there's something better to wield
     item *best = &weapon;
@@ -2292,7 +2292,7 @@ bool npc::scan_new_items()
 void npc::wield_best_melee()
 {
     double best_value = 0.0;
-    item *it = inv.best_for_melee( *this, best_value );
+    item *it = inv->best_for_melee( *this, best_value );
     if( unarmed_value() >= best_value ) {
         // "I cast fist!"
         it = &ret_null;
@@ -2371,7 +2371,7 @@ bool npc::alt_attack()
     };
 
     check_alt_item( weapon );
-    for( auto &sl : inv.slice() ) {
+    for( auto &sl : inv->slice() ) {
         // @todo Cached values - an itype slot maybe?
         check_alt_item( sl->front() );
     }
@@ -2534,7 +2534,7 @@ void npc::heal_self()
 void npc::use_painkiller()
 {
     // First, find the best painkiller for our pain level
-    item *it = inv.most_appropriate_painkiller( get_pain() );
+    item *it = inv->most_appropriate_painkiller( get_pain() );
 
     if( it->is_null() ) {
         debugmsg( "NPC tried to use painkillers, but has none!" );
@@ -2543,7 +2543,7 @@ void npc::use_painkiller()
         if( g->u.sees( *this ) ) {
             add_msg( _( "%1$s takes some %2$s." ), name.c_str(), it->tname().c_str() );
         }
-        consume( inv.position_by_item( it ) );
+        consume( inv->position_by_item( it ) );
         moves = 0;
     }
 }
@@ -2642,7 +2642,7 @@ bool npc::consume_food()
     int index = -1;
     int want_hunger = get_hunger();
     int want_quench = get_thirst();
-    invslice slice = inv.slice();
+    invslice slice = inv->slice();
     for( unsigned int i = 0; i < slice.size(); i++ ) {
         const item &it = slice[i]->front();
         const item &food_item = it.is_food_container() ?
@@ -2716,7 +2716,7 @@ void npc::mug_player( player &mark )
     }
     double best_value = minimum_item_value() * value_mod;
     int item_index = INT_MIN;
-    invslice slice = mark.inv.slice();
+    invslice slice = mark.inv->slice();
     for( unsigned int i = 0; i < slice.size(); i++ ) {
         if( value( slice[i]->front() ) >= best_value &&
             can_pickVolume( slice[i]->front(), true ) &&

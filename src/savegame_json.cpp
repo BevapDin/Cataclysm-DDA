@@ -334,10 +334,10 @@ void Character::load(JsonObject &data)
         debugmsg("Error, incompatible hp_max in save file '%s'", parray.str().c_str());
     }
 
-    inv.clear();
+    inv->clear();
     if ( data.has_member( "inv" ) ) {
         JsonIn *invin = data.get_raw( "inv" );
-        inv.json_load_items( *invin );
+        inv->json_load_items( *invin );
     }
 
     weapon = item( "null", 0 );
@@ -576,7 +576,7 @@ void player::store(JsonOut &json) const
     json.member( "worn", worn ); // also saves contents
 
     json.member( "inv" );
-    inv.json_save_items( json );
+    inv->json_save_items( json );
 
     if( !weapon.is_null() ) {
         json.member( "weapon", weapon ); // also saves contents
@@ -657,7 +657,7 @@ void player::serialize(JsonOut &json) const
 
     json.member("assigned_invlet");
     json.start_array();
-    for (auto iter : inv.assigned_invlet) {
+    for (auto iter : inv->assigned_invlet) {
         json.start_array();
         json.write(iter.first);
         json.write(iter.second);
@@ -666,7 +666,7 @@ void player::serialize(JsonOut &json) const
     json.end_array();
 
     json.member("invcache");
-    inv.json_save_invcache(json);
+    inv->json_save_invcache(json);
 
     //FIXME: seperate function, better still another file
     /*      for( size_t i = 0; i < memorial_log.size(); ++i ) {
@@ -842,12 +842,12 @@ void player::deserialize(JsonIn &jsin)
     parray = data.get_array("assigned_invlet");
     while (parray.has_more()) {
         JsonArray pair = parray.next_array();
-        inv.assigned_invlet[(char)pair.get_int(0)] = pair.get_string(1);
+        inv->assigned_invlet[(char)pair.get_int(0)] = pair.get_string(1);
     }
 
     if ( data.has_member("invcache") ) {
         JsonIn *jip = data.get_raw("invcache");
-        inv.json_load_invcache( *jip );
+        inv->json_load_invcache( *jip );
     }
 }
 

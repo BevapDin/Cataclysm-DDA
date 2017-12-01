@@ -4830,7 +4830,7 @@ bool item::reload( player &u, item_location loc, long qty )
     if( ammo->charges == 0 ) {
         if( container != nullptr ) {
             container->contents.erase(container->contents.begin());
-            u.inv.restack(&u); // emptied containers do not stack with non-empty ones
+            u.inv->restack(&u); // emptied containers do not stack with non-empty ones
         } else {
             loc.remove_item();
         }
@@ -5066,7 +5066,7 @@ long item::get_remaining_capacity_for_liquid( const item &liquid, const Characte
     const bool allow_bucket = this == &p.weapon || !p.has_item( *this );
     long res = get_remaining_capacity_for_liquid( liquid, allow_bucket, err );
 
-    if( res > 0 && !type->rigid && p.inv.has_item( *this ) ) {
+    if( res > 0 && !type->rigid && p.inv->has_item( *this ) ) {
         const units::volume volume_to_expand = std::max( p.volume_capacity() - p.volume_carried(), units::volume( 0 ) );
 
         res = std::min( liquid.charges_per_volume( volume_to_expand ), res );

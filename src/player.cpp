@@ -2448,9 +2448,9 @@ void player::memorial( std::ostream &memorial_file, std::string epitaph )
 
     //Inventory
     memorial_file << _( "Inventory:" ) << eol;
-    inv.restack( this );
-    inv.sort();
-    invslice slice = inv.slice();
+    inv->restack( this );
+    inv->sort();
+    invslice slice = inv->slice();
     for( auto &elem : slice ) {
         item &next_item = elem->front();
         memorial_file << indent << next_item.invlet << " - " <<
@@ -3117,7 +3117,7 @@ bool player::in_climate_control()
 std::list<item *> player::get_radio_items()
 {
     std::list<item *> rc_items;
-    const invslice &stacks = inv.slice();
+    const invslice &stacks = inv->slice();
     for( auto &stack : stacks ) {
         item &itemit = stack->front();
         item *stack_iter = &itemit;
@@ -5931,7 +5931,7 @@ void player::suffer()
             it->irridation += delta;
 
             // If in inventory (not worn), don't print anything.
-            if( inv.has_item( *it ) ) {
+            if( inv->has_item( *it ) ) {
                 continue;
             }
 
@@ -6601,11 +6601,11 @@ void player::process_active_items()
         weapon = ret_null;
     }
 
-    std::vector<item *> inv_active = inv.active_items();
+    std::vector<item *> inv_active = inv->active_items();
     for( auto tmp_it : inv_active ) {
 
         if( tmp_it->process( this, pos(), false ) ) {
-            inv.remove_item(tmp_it);
+            inv->remove_item(tmp_it);
         }
     }
 
@@ -6665,8 +6665,8 @@ void player::process_active_items()
     // The tool is not really useful if its charges are below charges_to_use
     ch_UPS = charges_of( "UPS" ); // might have been changed by cloak
     long ch_UPS_used = 0;
-    for( size_t i = 0; i < inv.size() && ch_UPS_used < ch_UPS; i++ ) {
-        item &it = inv.find_item(i);
+    for( size_t i = 0; i < inv->size() && ch_UPS_used < ch_UPS; i++ ) {
+        item &it = inv->find_item(i);
         if( !it.has_flag( "USE_UPS" ) ) {
             continue;
         }
@@ -6751,7 +6751,7 @@ int player::invlet_to_position( const long linvlet ) const
             return worn_position_to_index( i );
         }
     }
-    return inv.invlet_to_position( invlet );
+    return inv->invlet_to_position( invlet );
 }
 
 bool player::can_interface_armor() const {
@@ -6774,7 +6774,7 @@ std::vector<item *> player::inv_dump()
     for (auto &i : worn) {
         ret.push_back(&i);
     }
-    inv.dump(ret);
+    inv->dump(ret);
     return ret;
 }
 
@@ -6796,7 +6796,7 @@ std::list<item> player::use_amount(itype_id it, int _quantity)
     if (quantity <= 0) {
         return ret;
     }
-    std::list<item> tmp = inv.use_amount(it, quantity);
+    std::list<item> tmp = inv->use_amount(it, quantity);
     ret.splice(ret.end(), tmp);
     return ret;
 }
@@ -7049,7 +7049,7 @@ bool player::has_charges(const itype_id &it, long quantity) const
 int  player::leak_level( std::string flag ) const
 {
     int leak_level = 0;
-    leak_level = inv.leak_level(flag);
+    leak_level = inv->leak_level(flag);
     return leak_level;
 }
 
@@ -7162,8 +7162,8 @@ bool player::consume(int target_position)
 
         //Restack and sort so that we don't lie about target's invlet
         if( target_position >= 0 ) {
-            inv.restack( this );
-            inv.sort();
+            inv->restack( this );
+            inv->sort();
         }
 
         if( was_in_container && target_position == -1 ) {
@@ -7181,16 +7181,16 @@ bool player::consume(int target_position)
             }
             if (drop_it) {
                 add_msg(_("You drop the empty %s."), target.tname().c_str());
-                g->m.add_item_or_charges( pos(), inv.remove_item(&target) );
+                g->m.add_item_or_charges( pos(), inv->remove_item(&target) );
             } else {
-                int quantity = inv.const_stack( inv.position_by_item( &target ) ).size();
+                int quantity = inv->const_stack( inv->position_by_item( &target ) ).size();
                 char letter = target.invlet ? target.invlet : ' ';
                 add_msg( m_info, _( "%c - %d empty %s" ), letter, quantity, target.tname( quantity ).c_str() );
             }
         }
     } else if( target_position >= 0 ) {
-        inv.restack( this );
-        inv.unsort();
+        inv->restack( this );
+        inv->unsort();
     }
 
     return true;
@@ -7662,8 +7662,8 @@ bool player::wield( item& target )
 
     weapon.on_wield( *this, mv );
 
-    inv.update_invlet( weapon );
-    inv.update_cache_with_item( weapon );
+    inv->update_invlet( weapon );
+    inv->update_cache_with_item( weapon );
 
     return true;
 }
@@ -7684,7 +7684,7 @@ bool player::unwield()
         return false;
     }
 
-    inv.unsort();
+    inv->unsort();
 
     return true;
 }
@@ -7866,8 +7866,8 @@ bool player::dispose_item( item_location &&obj, const std::string& prompt )
             }
 
             moves -= item_handling_cost( *obj );
-            inv.add_item_keep_invlet( *obj );
-            inv.unsort();
+            inv->add_item_keep_invlet( *obj );
+            inv->unsort();
             obj.remove_item();
             return true;
         }
@@ -8173,8 +8173,8 @@ bool player::wear( item& to_wear, bool interactive )
         weapon = ret_null;
         was_weapon = true;
     } else {
-        inv.remove_item( &to_wear );
-        inv.restack( this );
+        inv->remove_item( &to_wear );
+        inv->restack( this );
         was_weapon = false;
     }
 
@@ -8182,7 +8182,7 @@ bool player::wear( item& to_wear, bool interactive )
         if( was_weapon ) {
             weapon = to_wear_copy;
         } else {
-            inv.add_item( to_wear_copy, true );
+            inv->add_item( to_wear_copy, true );
         }
         return false;
     }
@@ -8226,8 +8226,8 @@ bool player::wear_item( const item &to_wear, bool interactive )
     item &new_item = worn.back();
     new_item.on_wear( *this );
 
-    inv.update_invlet( new_item );
-    inv.update_cache_with_item( new_item );
+    inv->update_invlet( new_item );
+    inv->update_cache_with_item( new_item );
 
     recalc_sight_limits();
     reset_encumbrance();
@@ -8352,7 +8352,7 @@ bool player::takeoff( const item &it, std::list<item> *res )
             return false;
         }
         iter->on_takeoff( *this );
-        inv.add_item_keep_invlet( it );
+        inv->add_item_keep_invlet( it );
     } else {
         iter->on_takeoff( *this );
         res->push_back( it );
@@ -8723,20 +8723,20 @@ void player::reassign_item( item &it, long invlet )
         item &prev = i_at( invlet_to_position( invlet ) );
         if( !prev.is_null() ) {
             remove_old = it.typeId() != prev.typeId();
-            inv.reassign_item( prev, it.invlet, remove_old );
+            inv->reassign_item( prev, it.invlet, remove_old );
         }
     }
 
     if( !invlet || inv_chars.valid( invlet ) ) {
-        const auto iter = inv.assigned_invlet.find( it.invlet );
-        bool found = iter != inv.assigned_invlet.end();
+        const auto iter = inv->assigned_invlet.find( it.invlet );
+        bool found = iter != inv->assigned_invlet.end();
         if( found ) {
-            inv.assigned_invlet.erase( iter );
+            inv->assigned_invlet.erase( iter );
         }
         if( invlet && ( !found || it.invlet != invlet ) ) {
-            inv.assigned_invlet[invlet] = it.typeId();
+            inv->assigned_invlet[invlet] = it.typeId();
         }
-        inv.reassign_item( it, invlet, remove_old );
+        inv->reassign_item( it, invlet, remove_old );
     }
 }
 
@@ -10783,14 +10783,14 @@ bool player::wield_contents( item &container, int pos, bool penalties, int base_
         if( !unwield() ) {
             return false;
         }
-        inv.unsort();
+        inv->unsort();
     }
 
     weapon = std::move( *target );
     container.contents.erase( target );
     container.on_contents_changed();
 
-    inv.assign_empty_invlet( weapon, this, true );
+    inv->assign_empty_invlet( weapon, this, true );
     last_item = weapon.typeId();
 
     /**

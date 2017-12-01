@@ -229,8 +229,8 @@ std::vector<const item *> player::get_eligible_containers_for_crafting() const
             conts.push_back( &it );
         }
     }
-    for( size_t i = 0; i < inv.size(); i++ ) {
-        for( const auto &it : inv.const_stack( i ) ) {
+    for( size_t i = 0; i < inv->size(); i++ ) {
+        for( const auto &it : inv->const_stack( i ) ) {
             if( is_container_eligible_for_crafting( it, false ) ) {
                 conts.push_back( &it );
             }
@@ -283,7 +283,7 @@ const inventory &player::crafting_inventory()
         return cached_crafting_inventory;
     }
     cached_crafting_inventory.form_from_map( pos(), PICKUP_RANGE, false );
-    cached_crafting_inventory += inv;
+    cached_crafting_inventory += *inv;
     cached_crafting_inventory += weapon;
     cached_crafting_inventory += worn;
     for( const auto &bio : *my_bionics ) {
@@ -581,7 +581,7 @@ void player::complete_craft()
         }
     }
 
-    inv.restack( this );
+    inv->restack( this );
 }
 
 void set_item_spoilage( item &newit, float used_age_tally, int used_age_count )
@@ -615,7 +615,7 @@ void set_item_inventory( item &newit )
     if( newit.made_of( LIQUID ) ) {
         g->handle_all_liquid( newit, PICKUP_RANGE );
     } else {
-        g->u.inv.assign_empty_invlet( newit, &( g->u ) );
+        g->u.inv->assign_empty_invlet( newit, &( g->u ) );
         // We might not have space for the item
         if( !g->u.can_pickVolume( newit ) ) { //Accounts for result_mult
             add_msg( _( "There's no room in your inventory for the %s, so you drop it." ),

@@ -275,7 +275,7 @@ void npc::randomize( const npc_class_id &type )
     }
 
     weapon   = item( "null", 0 );
-    inv.clear();
+    inv->clear();
     personality.aggression = rng( -10, 10 );
     personality.bravery =    rng( -3, 10 );
     personality.collector =  rng( -1, 10 );
@@ -730,7 +730,7 @@ void starting_clothes( npc &who, const npc_class_id &type, bool male )
 void starting_inv( npc &me, const npc_class_id &type )
 {
     std::list<item> res;
-    me.inv.clear();
+    me.inv->clear();
     if( item_group::group_is_defined( type->carry_override ) ) {
         me.inv += item_group::items_from( type->carry_override );
         return;
@@ -1313,7 +1313,7 @@ void npc::decide_needs()
     needrank[need_weapon] = weapon_value( weapon );
     needrank[need_food] = 15 - get_hunger();
     needrank[need_drink] = 15 - get_thirst();
-    invslice slice = inv.slice();
+    invslice slice = inv->slice();
     for( auto &i : slice ) {
         if( i->front().is_food( ) ) {
             needrank[ need_food ] += nutrition_for( i->front() ) / 4;
@@ -1438,8 +1438,8 @@ void npc::shop_restock()
     }
 
     has_new_items = true;
-    inv.clear();
-    inv.push_back( ret );
+    inv->clear();
+    inv->push_back( ret );
 }
 
 
@@ -1455,7 +1455,7 @@ void npc::update_worst_item_value()
 {
     worst_item_value = 99999;
     // TODO: Cache this
-    int inv_val = inv.worst_item_value( this );
+    int inv_val = inv->worst_item_value( this );
     if( inv_val < worst_item_value ) {
         worst_item_value = inv_val;
     }
@@ -1582,7 +1582,7 @@ item &npc::get_healing_item( bool bleed, bool bite, bool infect, bool first_best
 
 bool npc::has_painkiller()
 {
-    return inv.has_enough_painkiller( get_pain() );
+    return inv->has_enough_painkiller( get_pain() );
 }
 
 bool npc::took_painkiller() const
@@ -2263,9 +2263,9 @@ bool npc::dispose_item( item_location &&obj, const std::string & )
             item_handling_cost( *obj ),
             [this, &obj] {
                 moves -= item_handling_cost( *obj );
-                inv.add_item_keep_invlet( *obj );
+                inv->add_item_keep_invlet( *obj );
                 obj.remove_item();
-                inv.unsort();
+                inv->unsort();
             }
         } );
     }

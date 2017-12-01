@@ -8,6 +8,8 @@
 #include "mission.h"
 #include "translations.h"
 #include "options.h"
+#include "inventory.h"
+#include "item_location.h"
 #include "map_iterator.h"
 #include "field.h"
 #include "messages.h"
@@ -132,6 +134,7 @@ Character::Character() : Creature(), visitable<Character>()
 
     path_settings = pathfinding_settings{ 0, 1000, 1000, 0, true, false, true };
 
+    inv.reset( new inventory() );
     my_bionics.reset( new bionic_collection() );
 }
 
@@ -710,13 +713,13 @@ item& Character::i_add(item it)
 
     if( it.is_food() || it.is_ammo() || it.is_gun()  || it.is_armor() ||
         it.is_book() || it.is_tool() || it.is_melee() || it.is_food_container() ) {
-        inv.unsort();
+        inv->unsort();
     }
 
     // if there's a desired invlet for this item type, try to use it
     bool keep_invlet = false;
     const std::set<char> cur_inv = allocated_invlets();
-    for (auto iter : inv.assigned_invlet) {
+    for (auto iter : inv->assigned_invlet) {
         if (iter.second == item_type_id && !cur_inv.count(iter.first)) {
             it.invlet = iter.first;
             keep_invlet = true;
@@ -724,7 +727,7 @@ item& Character::i_add(item it)
         }
     }
 
-    auto &item_in_inv = inv.add_item(it, keep_invlet);
+    auto &item_in_inv = inv->add_item(it, keep_invlet);
     item_in_inv.on_pickup( *this );
     return item_in_inv;
 }
@@ -758,7 +761,7 @@ const item& Character::i_at(int position) const
         }
     }
 
-    return inv.find_item(position);
+    return inv->find_item(position);
 }
 
 item& Character::i_at(int position)
@@ -780,7 +783,7 @@ int Character::get_item_position( const item *it ) const
         p++;
     }
 
-    return inv.position_by_item( it );
+    return inv->position_by_item( it );
 }
 
 item Character::i_rem(int pos)
@@ -798,7 +801,7 @@ item Character::i_rem(int pos)
      worn.erase( iter );
      return tmp;
  }
- return inv.remove_item(pos);
+    return inv->remove_item(pos);
 }
 
 item Character::i_rem(const item *it)
@@ -822,7 +825,7 @@ bool Character::i_add_or_drop( item& it, int qty ) {
     bool retval = true;
     bool drop = it.made_of( LIQUID );
     bool add = it.is_gun() || !it.has_flag( "IRREMOVABLE" );
-    inv.assign_empty_invlet( it , this );
+    inv->assign_empty_invlet( it , this );
     for( int i = 0; i < qty; ++i ) {
         drop |= !can_pickWeight( it, !get_option<bool>( "DANGEROUS_PICKUPS" ) ) || !can_pickVolume( it );
         if( drop ) {
@@ -836,7 +839,7 @@ bool Character::i_add_or_drop( item& it, int qty ) {
 }
 
 std::set<char> Character::allocated_invlets() const {
-    std::set<char> invlets = inv.allocated_invlets();
+    std::set<char> invlets = inv->allocated_invlets();
 
     if (weapon.invlet != 0) {
         invlets.insert(weapon.invlet);
@@ -950,13 +953,13 @@ units::mass Character::weight_carried() const
     for (auto &i : worn) {
         ret += i.weight();
     }
-    ret += inv.weight();
+    ret += inv->weight();
     return ret;
 }
 
 units::volume Character::volume_carried() const
 {
-    return inv.volume();
+    return inv->volume();
 }
 
 units::mass Character::weight_capacity() const
@@ -1026,7 +1029,7 @@ units::volume Character::volume_capacity_reduced_by( units::volume mod ) const
 
 bool Character::can_pickVolume( const item &it, bool ) const
 {
-    inventory projected = inv;
+    inventory projected = *inv;
     projected.add_item( it, true );
     return projected.volume() <= volume_capacity();
 }
@@ -1071,7 +1074,7 @@ bool Character::can_use( const item& it, const item& context ) const {
 void Character::drop_inventory_overflow() {
     if( volume_carried() > volume_capacity() ) {
         for( auto &item_to_drop :
-               inv.remove_randomly_by_volume( volume_carried() - volume_capacity() ) ) {
+               inv->remove_randomly_by_volume( volume_carried() - volume_capacity() ) ) {
             g->m.add_item_or_charges( pos(), item_to_drop );
         }
         add_msg_if_player( m_bad, _("Some items tumble to the ground.") );
@@ -1248,15 +1251,15 @@ void Character::die(Creature* nkiller)
     set_killer( nkiller );
     set_turn_died(int(calendar::turn));
     if( has_effect( effect_lightsnare ) ) {
-        inv.add_item( item( "string_36", 0 ) );
-        inv.add_item( item( "snare_trigger", 0 ) );
+        inv->add_item( item( "string_36", 0 ) );
+        inv->add_item( item( "snare_trigger", 0 ) );
     }
     if( has_effect( effect_heavysnare ) ) {
-        inv.add_item( item( "rope_6", 0 ) );
-        inv.add_item( item( "snare_trigger", 0 ) );
+        inv->add_item( item( "rope_6", 0 ) );
+        inv->add_item( item( "snare_trigger", 0 ) );
     }
     if( has_effect( effect_beartrap ) ) {
-        inv.add_item( item( "beartrap", 0 ) );
+        inv->add_item( item( "beartrap", 0 ) );
     }
     mission::on_creature_death( *this );
 }
@@ -1405,7 +1408,7 @@ units::mass Character::get_weight() const
                      } );
 
     ret += Creature::get_weight(); // The base weight of the player's body
-    ret += inv.weight();           // Weight of the stored inventory
+    ret += inv->weight();           // Weight of the stored inventory
     ret += wornWeight;             // Weight of worn items
     ret += weapon.weight();        // Weight of wielded item
     return ret;
@@ -2228,7 +2231,7 @@ bool Character::pour_into( item &container, item &liquid )
                        container.tname().c_str() );
 
     container.fill_with( liquid, amount );
-    inv.unsort();
+    inv->unsort();
 
     if( liquid.charges > 0 ) {
         add_msg_if_player( _( "There's some left over!" ) );

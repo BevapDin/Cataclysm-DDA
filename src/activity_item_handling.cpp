@@ -245,7 +245,7 @@ std::list<act_item> convert_to_items( const player &p, const drop_indexes &drop,
             continue;
         } else if( pos >= 0 ) {
             int obtained = 0;
-            for( const auto &it : p.inv.const_stack( pos ) ) {
+            for( const auto &it : p.inv->const_stack( pos ) ) {
                 if( obtained >= count ) {
                     break;
                 }
@@ -366,7 +366,7 @@ std::list<item> obtain_activity_items( player_activity &act, player &p )
     // Avoid tumbling to the ground. Unload cleanly.
     const units::volume excessive_volume = p.volume_carried() - p.volume_capacity();
     if( excessive_volume > 0 ) {
-        const auto excess = p.inv.remove_randomly_by_volume( excessive_volume );
+        const auto excess = p.inv->remove_randomly_by_volume( excessive_volume );
         res.insert( res.begin(), excess.begin(), excess.end() );
     }
     // Load anything that remains (if any) into the activity

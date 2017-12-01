@@ -579,7 +579,7 @@ int advanced_inventory::print_header( advanced_inventory_pane &pane, aim_locatio
 int advanced_inv_area::get_item_count() const
 {
     if( id == AIM_INVENTORY ) {
-        return g->u.inv.size();
+        return g->u.inv->size();
     } else if( id == AIM_WORN ) {
         return g->u.worn.size();
     } else if( id == AIM_ALL ) {
@@ -901,7 +901,7 @@ void advanced_inventory_pane::add_items_from_area( advanced_inv_area &square, bo
     // Existing items are *not* cleared on purpose, this might be called
     // several times in case all surrounding squares are to be shown.
     if( square.id == AIM_INVENTORY ) {
-        const invslice &stacks = u.inv.slice();
+        const invslice &stacks = u.inv->slice();
         for( size_t x = 0; x < stacks.size(); ++x ) {
             auto &an_item = stacks[x]->front();
             advanced_inv_listitem it( &an_item, x, stacks[x]->size(), square.id, false );
@@ -1258,8 +1258,8 @@ bool advanced_inventory::move_all_items(bool nested_call)
         std::list<std::pair<int, int>> dropped;
 
         if( spane.get_area() == AIM_INVENTORY ) {
-            for( size_t index = 0; index < g->u.inv.size(); ++index ) {
-                const auto &stack = g->u.inv.const_stack( index );
+            for( size_t index = 0; index < g->u.inv->size(); ++index ) {
+                const auto &stack = g->u.inv->const_stack( index );
                 const auto &it = stack.front();
 
                 if( !spane.is_filtered( &it ) ) {
@@ -1369,8 +1369,8 @@ void advanced_inventory::display()
 {
     init();
 
-    g->u.inv.sort();
-    g->u.inv.restack( ( &g->u ) );
+    g->u.inv->sort();
+    g->u.inv->restack( ( &g->u ) );
 
     input_context ctxt( "ADVANCED_INVENTORY" );
     ctxt.register_action( "HELP_KEYBINDINGS" );
@@ -1583,7 +1583,7 @@ void advanced_inventory::display()
                 } else {
                     std::list<item> moving_items;
                     if(srcarea == AIM_INVENTORY) {
-                        moving_items = g->u.inv.reduce_stack(idx, amount_to_move);
+                        moving_items = g->u.inv->reduce_stack(idx, amount_to_move);
                     } else if(srcarea == AIM_WORN) {
                         g->u.takeoff( *sitem->items.front(), &moving_items );
                     }
@@ -1648,8 +1648,8 @@ void advanced_inventory::display()
             // This is only reached when at least one item has been moved.
             g->u.mod_moves( -move_cost );
             // Just in case the items have moved from/to the inventory
-            g->u.inv.sort();
-            g->u.inv.restack( &g->u );
+            g->u.inv->sort();
+            g->u.inv->restack( &g->u );
             // if dest was AIM_ALL then we used query_destination and should undo that
             if (restore_area) {
                 dpane.restore_area();
@@ -1729,7 +1729,7 @@ void advanced_inventory::display()
                 }
                 // Might have changed a stack (activated an item, repaired an item, etc.)
                 if( spane.get_area() == AIM_INVENTORY ) {
-                    g->u.inv.restack( &g->u );
+                    g->u.inv->restack( &g->u );
                 }
                 recalc = true;
             } else {
@@ -2245,7 +2245,7 @@ item *advanced_inv_area::get_container( bool in_vehicle )
     if( uistate.adv_inv_container_location != -1 ) {
         // try to find valid container in the area
         if( uistate.adv_inv_container_location == AIM_INVENTORY ) {
-            const invslice &stacks = g->u.inv.slice();
+            const invslice &stacks = g->u.inv->slice();
 
             // check index first
             if( stacks.size() > ( size_t )uistate.adv_inv_container_index ) {

@@ -114,7 +114,7 @@ nc_color inventory_entry::get_invlet_color() const
 {
     if( !is_selectable() ) {
         return c_dkgray;
-    } else if( g->u.inv.assigned_invlet.count( get_invlet() ) ) {
+    } else if( g->u.inv->assigned_invlet.count( get_invlet() ) ) {
         return c_yellow;
     } else {
         return c_white;
@@ -945,7 +945,7 @@ void inventory_selector::add_character_items( Character &character )
         return VisitResponse::NEXT;
     } );
     // Visitable interface does not support stacks so it has to be here
-    for( const auto &elem: character.inv.slice() ) {
+    for( const auto &elem: character.inv->slice() ) {
         add_item( own_inv_column, item_location( character, &elem->front() ), elem->size() );
     }
 }
