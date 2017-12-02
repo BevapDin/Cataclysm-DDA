@@ -426,11 +426,6 @@ void game::init_ui()
     static bool first_init = true;
 
     if (first_init) {
-        clear();
-
-        // set minimum FULL_SCREEN sizes
-        FULL_SCREEN_WIDTH = 80;
-        FULL_SCREEN_HEIGHT = 24;
         // print an intro screen, making sure the terminal is the correct size
         intro();
 
@@ -13621,6 +13616,11 @@ void game::autosave()
 
 void intro()
 {
+    clear();
+
+    // set minimum FULL_SCREEN sizes
+    FULL_SCREEN_WIDTH = 80;
+    FULL_SCREEN_HEIGHT = 24;
     int maxy = getmaxy( stdscr );
     int maxx = getmaxx( stdscr );
     const int minHeight = FULL_SCREEN_HEIGHT;
