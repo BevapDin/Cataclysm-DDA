@@ -47,36 +47,32 @@ void print_terminal_size_checks()
     int maxx = getmaxx( stdscr );
     const int minHeight = FULL_SCREEN_HEIGHT;
     const int minWidth = FULL_SCREEN_WIDTH;
-    WINDOW *tmp = newwin( minHeight, minWidth, 0, 0 );
-    WINDOW_PTR w_tmpptr( tmp );
 
     while( maxy < minHeight || maxx < minWidth ) {
-        werase( tmp );
+        werase( stdscr );
         if( maxy < minHeight && maxx < minWidth ) {
-            fold_and_print( tmp, 0, 0, maxx, c_white,
+            fold_and_print( stdscr, 0, 0, maxx, c_white,
                             _( "Whoa! Your terminal is tiny! This game requires a minimum terminal size of "
                                "%dx%d to work properly. %dx%d just won't do. Maybe a smaller font would help?" ),
                             minWidth, minHeight, maxx, maxy );
         } else if( maxx < minWidth ) {
-            fold_and_print( tmp, 0, 0, maxx, c_white,
+            fold_and_print( stdscr, 0, 0, maxx, c_white,
                             _( "Oh! Hey, look at that. Your terminal is just a little too narrow. This game "
                                "requires a minimum terminal size of %dx%d to function. It just won't work "
                                "with only %dx%d. Can you stretch it out sideways a bit?" ),
                             minWidth, minHeight, maxx, maxy );
         } else {
-            fold_and_print( tmp, 0, 0, maxx, c_white,
+            fold_and_print( stdscr, 0, 0, maxx, c_white,
                             _( "Woah, woah, we're just a little short on space here. The game requires a "
                                "minimum terminal size of %dx%d to run. %dx%d isn't quite enough! Can you "
                                "make the terminal just a smidgen taller?" ),
                             minWidth, minHeight, maxx, maxy );
         }
-        wrefresh( tmp );
+        wrefresh( stdscr );
         inp_mngr.wait_for_any_key();
         maxy = getmaxy( stdscr );
         maxx = getmaxx( stdscr );
     }
-    werase( tmp );
-    wrefresh( tmp );
     erase();
 }
 
