@@ -176,6 +176,8 @@ class input_manager
          */
         long get_keycode( const std::string &name ) const;
 
+        bool was_resized();
+
         /**
          * Get the key name associated with the given keyboard keycode.
          *

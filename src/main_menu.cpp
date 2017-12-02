@@ -262,8 +262,12 @@ bool main_menu::opening_screen()
     world_generator->set_active_world( NULL );
     world_generator->init();
 
+    WINDOW_PTR w_backgroundptr;
+    WINDOW_PTR w_openptr;
+
+    const auto init_code = [&]() {
     w_background = newwin( TERMY, TERMX, 0, 0 );
-    WINDOW_PTR w_backgroundptr( w_background );
+    w_backgroundptr.reset( w_background );
     werase( w_background );
     wrefresh( w_background );
 
@@ -281,7 +285,7 @@ bool main_menu::opening_screen()
     const int y0 = ( TERMY - total_h ) / 2;
 
     w_open = newwin( total_h, total_w, y0, x0 );
-    WINDOW_PTR w_openptr( w_open );
+    w_openptr.reset( w_open );
 
     iMenuOffsetY = total_h - 3;
     // note: if iMenuOffset is changed,
@@ -289,6 +293,8 @@ bool main_menu::opening_screen()
 
     init_strings();
     print_menu( w_open, 0, iMenuOffsetX, iMenuOffsetY );
+    };
+    init_code();
 
     if( !assure_dir_exist( FILENAMES["config_dir"] ) ) {
         popup( _( "Unable to make config directory. Check permissions." ) );
@@ -330,6 +336,10 @@ bool main_menu::opening_screen()
     }
 
     while( !start ) {
+        if( inp_mngr.was_resized() ) {
+            g->init_ui();
+            init_code();
+        }
         print_menu( w_open, sel1, iMenuOffsetX, iMenuOffsetY, ( sel1 != 0 ) );
 
         if( layer == 1 ) {

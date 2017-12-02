@@ -2377,6 +2377,11 @@ input_context game::get_player_input(std::string &action)
         inp_mngr.reset_timeout();
     }
 
+    if( inp_mngr.was_resized() ) {
+        init_ui();
+        refresh_all();
+    }
+
     return ctxt;
 }
 

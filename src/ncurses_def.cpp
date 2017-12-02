@@ -30,6 +30,9 @@ void init_interface()
     init_colors();
 }
 
+void print_terminal_size_checks();
+static bool terminal_was_resized = false;
+
 input_event input_manager::get_input_event()
 {
     previously_pressed_key = 0;
@@ -77,6 +80,26 @@ input_event input_manager::get_input_event()
         } else {
             rval.type = CATA_INPUT_ERROR;
         }
+    } else if( key == KEY_RESIZE ) {
+        terminal_was_resized = true;
+        // print_terminal_size_checks calls this function again, and the user is expected
+        // to resize the terminal again (to make it fit the minimum required size),
+        // so it would trigger KEY_RESIZE again, and print_terminal_size_checks() would be
+        // called again and so on. To prevent this potentially endless recursion we have
+        // this flag.
+        // Note that this could be done in the caller, but it will be different for
+        // non-ncurses builds.
+        static bool has_entered_print_terminal_size_checks = false;
+        if( !has_entered_print_terminal_size_checks ) {
+            has_entered_print_terminal_size_checks = true;
+            print_terminal_size_checks();
+            has_entered_print_terminal_size_checks = false;
+        }
+        // Note that print_terminal_size_checks only returns when the terminal has the
+        // required minimum size.
+        // just let the caller try again.
+        // Use error as type, instead of timeout for compatibility with wait_for_any_key
+        rval.type = CATA_INPUT_ERROR;
     } else {
         if( key == 127 ) { // == Unicode DELETE
             previously_pressed_key = KEY_BACKSPACE;
@@ -127,6 +150,15 @@ void input_manager::set_timeout( const int delay )
     timeout( delay );
     // Use this to determine when curses should return a CATA_INPUT_TIMEOUT event.
     input_timeout = delay;
+}
+
+
+bool input_manager::was_resized() {
+    if( !terminal_was_resized ) {
+        return false;
+    }
+    terminal_was_resized = false;
+    return true;
 }
 
 #endif
