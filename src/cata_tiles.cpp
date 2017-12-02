@@ -1468,7 +1468,6 @@ void cata_tiles::draw_minimap( int destx, int desty, const tripoint &center, int
 
 void cata_tiles::clear_buffer()
 {
-    //TODO convert this to use sdltiles ClearScreen() function
     SDL_RenderClear(renderer);
 }
 

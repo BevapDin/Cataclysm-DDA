@@ -243,11 +243,6 @@ extern WINDOW *w_hit_animation; //this window overlays w_terrain which can be ov
 //Non-curses, Window functions      *
 //***********************************
 
-void ClearScreen()
-{
-    SDL_RenderClear( renderer.get() );
-}
-
 bool InitSDL()
 {
     int init_flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;
@@ -401,7 +396,7 @@ bool WinCreate()
         }
     }
 
-    ClearScreen();
+    SDL_RenderClear( renderer.get() );
 
     // Errors here are ignored, worst case: the option does not work as expected,
     // but that won't crash
@@ -1673,7 +1668,7 @@ bool gamepad_available() {
 void rescale_tileset(int size) {
     tilecontext->set_draw_scale(size);
     g->init_ui();
-    ClearScreen();
+    SDL_RenderClear( renderer.get() );
 }
 
 bool input_context::get_coordinates(WINDOW* capture_win, int& x, int& y) {
