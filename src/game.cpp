@@ -289,6 +289,7 @@ void game::load_static_data()
     DynamicDataLoader::get_instance();
     narrow_sidebar = get_option<std::string>( "SIDEBAR_STYLE" ) == "narrow";
     right_sidebar = get_option<std::string>( "SIDEBAR_POSITION" ) == "right";
+    pixel_minimap_option = get_option<bool>( "PIXEL_MINIMAP" );
     fullscreen = false;
     was_fullscreen = false;
 
@@ -430,12 +431,6 @@ void game::init_ui()
         intro();
 
         first_init = false;
-
-#ifdef TILES
-        //class variable to track the option being active
-        //only set once, toggle action is used to change during game
-        pixel_minimap_option = get_option<bool>( "PIXEL_MINIMAP" );
-#endif // TILES
     }
 
     int sidebarWidth = narrow_sidebar ? 45 : 55;
