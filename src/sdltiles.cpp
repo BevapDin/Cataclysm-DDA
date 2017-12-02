@@ -344,7 +344,7 @@ static void WinCreate()
     std::string version = string_format("Cataclysm: Dark Days Ahead - %s", getVersionString());
 
     // Common flags used for fulscreen and for windowed
-    int window_flags = 0;
+    int window_flags = SDL_WINDOW_RESIZABLE;
 
     if( get_option<std::string>( "SCALING_MODE" ) != "none" ) {
         window_flags |= SDL_WINDOW_RESIZABLE;
@@ -1191,6 +1191,10 @@ long sdl_keysym_to_curses(SDL_Keysym keysym)
     }
 }
 
+extern const int MINIMAL_SCREEN_WIDTH;
+extern const int MINIMAL_SCREEN_HEIGHT;
+static bool window_was_resized = false;
+
 //Check for any window messages (keypress, paint, mousemove, etc)
 void CheckMessages()
 {
@@ -1210,6 +1214,20 @@ void CheckMessages()
                 case SDL_WINDOWEVENT_EXPOSED:
                 case SDL_WINDOWEVENT_RESTORED:
                     needupdate = true;
+                    break;
+                case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    {
+                        const int w = ev.window.data1 / fontwidth;
+                        const int h = ev.window.data2 / fontheight;
+                        // pretty much ignore the event if we have not started yet,
+                        // or we the size is too small. Output will look weird, but
+                        // not crash.
+                        if (g != NULL && ( w >= MINIMAL_SCREEN_WIDTH && h >= MINIMAL_SCREEN_HEIGHT ) && (w != TERMINAL_WIDTH || h != TERMINAL_HEIGHT)) {
+                            window_was_resized = true;
+                            last_input = input_event( 0, CATA_INPUT_ERROR );
+                            return;
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -1653,6 +1671,14 @@ input_event input_manager::get_input_event() {
     }
 
     return last_input;
+}
+
+bool input_manager::was_resized() {
+    if( !window_was_resized ) {
+        return false;
+    }
+    window_was_resized = false;
+    return true;
 }
 
 bool gamepad_available() {
