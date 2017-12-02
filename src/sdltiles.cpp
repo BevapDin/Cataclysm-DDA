@@ -243,7 +243,7 @@ extern WINDOW *w_hit_animation; //this window overlays w_terrain which can be ov
 //Non-curses, Window functions      *
 //***********************************
 
-bool InitSDL()
+static void InitSDL()
 {
     int init_flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;
     int ret;
@@ -254,13 +254,11 @@ bool InitSDL()
 
     ret = SDL_Init( init_flags );
     if( ret != 0 ) {
-        dbg( D_ERROR ) << "SDL_Init failed with " << ret << ", error: " << SDL_GetError();
-        return false;
+        throw std::runtime_error( string_format( "SDL_Init failed with %i, error: %s", ret, SDL_GetError() ) );
     }
     ret = TTF_Init();
     if( ret != 0 ) {
-        dbg( D_ERROR ) << "TTF_Init failed with " << ret << ", error: " << TTF_GetError();
-        return false;
+        throw std::runtime_error( string_format( "TTF_Init failed with %i, error: %s", ret, TTF_GetError() ) );
     }
     ret = IMG_Init( IMG_INIT_PNG );
     if( (ret & IMG_INIT_PNG) != IMG_INIT_PNG ) {
@@ -279,8 +277,6 @@ bool InitSDL()
     //SDL2 instead uses the OS's Input Delay.
 
     atexit(SDL_Quit);
-
-    return true;
 }
 
 bool SetupRenderTarget()
@@ -1516,9 +1512,7 @@ void init_interface()
     ::fontwidth = fl.fontwidth;
     ::fontheight = fl.fontheight;
 
-    if(!InitSDL()) {
-        throw std::runtime_error( "InitSDL failed" );
-    }
+    InitSDL();
 
     find_videodisplays();
 
