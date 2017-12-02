@@ -279,7 +279,7 @@ static void InitSDL()
     atexit(SDL_Quit);
 }
 
-bool SetupRenderTarget()
+static void SetupRenderTarget()
 {
     if( SDL_SetRenderDrawBlendMode( renderer.get(), SDL_BLENDMODE_NONE ) != 0 ) {
         dbg( D_ERROR ) << "SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE) failed: " << SDL_GetError();
@@ -287,15 +287,11 @@ bool SetupRenderTarget()
     }
     display_buffer.reset( SDL_CreateTexture( renderer.get(), SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, WindowWidth, WindowHeight ) );
     if( !display_buffer ) {
-        dbg( D_ERROR ) << "Failed to create window buffer: " << SDL_GetError();
-        return false;
+        throw std::runtime_error( string_format( "Failed to create window buffer: %s", SDL_GetError() ) );
     }
     if( SDL_SetRenderTarget( renderer.get(), display_buffer.get() ) != 0 ) {
-        dbg( D_ERROR ) << "Failed to select render target: " << SDL_GetError();
-        return false;
+        throw std::runtime_error( string_format( "Failed to select render target: %s", SDL_GetError() ) );
     }
-
-    return true;
 }
 
 //Registers, creates, and shows the Window!!
@@ -369,11 +365,15 @@ static void WinCreate()
         if( !renderer ) {
             dbg( D_ERROR ) << "Failed to initialize accelerated renderer, falling back to software rendering: " << SDL_GetError();
             software_renderer = true;
-        } else if( !SetupRenderTarget() ) {
-            dbg( D_ERROR ) << "Failed to initialize display buffer under accelerated rendering, falling back to software rendering.";
-            software_renderer = true;
-            display_buffer.reset();
-            renderer.reset();
+        } else {
+            try {
+                SetupRenderTarget();
+            } catch( const std::exception &err ) {
+                dbg( D_ERROR ) << "Error from SetupRenderTarget: " << err.what();
+                software_renderer = true;
+                display_buffer.reset();
+                renderer.reset();
+            }
         }
     }
     if( software_renderer ) {
@@ -383,8 +383,8 @@ static void WinCreate()
         renderer.reset( SDL_CreateRenderer( window.get(), -1, SDL_RENDERER_SOFTWARE | SDL_RENDERER_TARGETTEXTURE ) );
         if( !renderer ) {
             throw std::runtime_error( string_format( "Failed to initialize software renderer: %s", SDL_GetError() ) );
-        } else if( !SetupRenderTarget() ) {
-            throw std::runtime_error( "Failed to initialize display buffer under software rendering, unable to continue." );
+        } else {
+            SetupRenderTarget();
         }
     }
 
