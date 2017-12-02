@@ -36,13 +36,14 @@ void exit_handler(int s);
 
 extern bool test_dirty;
 
+const int MINIMAL_SCREEN_WIDTH = 80;
+const int MINIMAL_SCREEN_HEIGHT = 24;
 void print_terminal_size_checks()
 {
     clear();
 
-    // set minimum FULL_SCREEN sizes
-    FULL_SCREEN_WIDTH = 80;
-    FULL_SCREEN_HEIGHT = 24;
+    FULL_SCREEN_WIDTH = MINIMAL_SCREEN_WIDTH;
+    FULL_SCREEN_HEIGHT = MINIMAL_SCREEN_HEIGHT;
     int maxy = getmaxy( stdscr );
     int maxx = getmaxx( stdscr );
     const int minHeight = FULL_SCREEN_HEIGHT;
