@@ -301,6 +301,8 @@ static void WinCreate()
 
     // Common flags used for fulscreen and for windowed
     int window_flags = 0;
+    TERMINAL_WIDTH = get_option<int>( "TERMINAL_X" );
+    TERMINAL_HEIGHT = get_option<int>( "TERMINAL_Y" );
     WindowWidth = TERMINAL_WIDTH * fontwidth;
     WindowHeight = TERMINAL_HEIGHT * fontheight;
 
@@ -1509,9 +1511,6 @@ void init_interface()
     InitSDL();
 
     find_videodisplays();
-
-    TERMINAL_WIDTH = get_option<int>( "TERMINAL_X" );
-    TERMINAL_HEIGHT = get_option<int>( "TERMINAL_Y" );
 
     WinCreate();
 
