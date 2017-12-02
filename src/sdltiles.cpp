@@ -296,6 +296,43 @@ static void SetupRenderTarget()
     }
 }
 
+static void create_renderer()
+{
+    bool software_renderer = get_option<bool>( "SOFTWARE_RENDERING" );
+    if( !software_renderer ) {
+        dbg( D_INFO ) << "Attempting to initialize accelerated SDL renderer.";
+
+        renderer.reset( SDL_CreateRenderer( window.get(), -1, SDL_RENDERER_ACCELERATED |
+                                            SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE ) );
+        if( !renderer ) {
+            dbg( D_ERROR ) << "Failed to initialize accelerated renderer, falling back to software rendering: " << SDL_GetError();
+            software_renderer = true;
+        } else {
+            try {
+                SetupRenderTarget();
+            } catch( const std::exception &err ) {
+                dbg( D_ERROR ) << "Error from SetupRenderTarget: " << err.what();
+                software_renderer = true;
+                display_buffer.reset();
+                renderer.reset();
+            }
+        }
+    }
+    if( software_renderer ) {
+        if( get_option<bool>( "FRAMEBUFFER_ACCEL" ) ) {
+            SDL_SetHint( SDL_HINT_FRAMEBUFFER_ACCELERATION, "1" );
+        }
+        renderer.reset( SDL_CreateRenderer( window.get(), -1, SDL_RENDERER_SOFTWARE | SDL_RENDERER_TARGETTEXTURE ) );
+        if( !renderer ) {
+            throw std::runtime_error( string_format( "Failed to initialize software renderer: %s", SDL_GetError() ) );
+        } else {
+            SetupRenderTarget();
+        }
+    }
+
+    SDL_RenderClear( renderer.get() );
+}
+
 //Registers, creates, and shows the Window!!
 static void WinCreate()
 {
@@ -360,39 +397,7 @@ static void WinCreate()
         throw std::runtime_error( string_format( "SDL_AllocFormat(%i) failed: %s", wformat, SDL_GetError() ) );
     }
 
-    bool software_renderer = get_option<bool>( "SOFTWARE_RENDERING" );
-    if( !software_renderer ) {
-        dbg( D_INFO ) << "Attempting to initialize accelerated SDL renderer.";
-
-        renderer.reset( SDL_CreateRenderer( window.get(), -1, SDL_RENDERER_ACCELERATED |
-                                            SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE ) );
-        if( !renderer ) {
-            dbg( D_ERROR ) << "Failed to initialize accelerated renderer, falling back to software rendering: " << SDL_GetError();
-            software_renderer = true;
-        } else {
-            try {
-                SetupRenderTarget();
-            } catch( const std::exception &err ) {
-                dbg( D_ERROR ) << "Error from SetupRenderTarget: " << err.what();
-                software_renderer = true;
-                display_buffer.reset();
-                renderer.reset();
-            }
-        }
-    }
-    if( software_renderer ) {
-        if( get_option<bool>( "FRAMEBUFFER_ACCEL" ) ) {
-            SDL_SetHint( SDL_HINT_FRAMEBUFFER_ACCELERATION, "1" );
-        }
-        renderer.reset( SDL_CreateRenderer( window.get(), -1, SDL_RENDERER_SOFTWARE | SDL_RENDERER_TARGETTEXTURE ) );
-        if( !renderer ) {
-            throw std::runtime_error( string_format( "Failed to initialize software renderer: %s", SDL_GetError() ) );
-        } else {
-            SetupRenderTarget();
-        }
-    }
-
-    SDL_RenderClear( renderer.get() );
+    create_renderer();
 
     // Errors here are ignored, worst case: the option does not work as expected,
     // but that won't crash
