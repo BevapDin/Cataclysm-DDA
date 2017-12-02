@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
     }
 
     // Now we do the actual game.
-
+    intro();
     g->init_ui();
 
     curs_set(0); // Invisible cursor here, because MAPBUFFER.load() is crash-prone

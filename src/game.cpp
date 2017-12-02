@@ -189,7 +189,6 @@ static const trait_id trait_VINES2( "VINES2" );
 static const trait_id trait_VINES3( "VINES3" );
 
 void advanced_inv(); // player_activity.cpp
-void intro();
 
 //The one and only game instance
 game *g;
@@ -419,16 +418,6 @@ void reinitialize_framebuffer() { }
 
 void game::init_ui()
 {
-    // clear the screen
-    static bool first_init = true;
-
-    if (first_init) {
-        // print an intro screen, making sure the terminal is the correct size
-        intro();
-
-        first_init = false;
-    }
-
     int sidebarWidth = narrow_sidebar ? 45 : 55;
 
     // First get TERMX, TERMY
