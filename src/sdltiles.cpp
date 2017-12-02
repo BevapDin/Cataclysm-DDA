@@ -299,7 +299,7 @@ bool SetupRenderTarget()
 }
 
 //Registers, creates, and shows the Window!!
-bool WinCreate()
+static void WinCreate()
 {
     std::string version = string_format("Cataclysm: Dark Days Ahead - %s", getVersionString());
 
@@ -334,8 +334,7 @@ bool WinCreate()
         ) );
 
     if( !window ) {
-        dbg(D_ERROR) << "SDL_CreateWindow failed: " << SDL_GetError();
-        return false;
+        throw std::runtime_error( string_format( "SDL_CreateWindow failed: %s", SDL_GetError() ) );
     }
     if (window_flags & SDL_WINDOW_FULLSCREEN || window_flags & SDL_WINDOW_FULLSCREEN_DESKTOP) {
         SDL_GetWindowSize( window.get(), &WindowWidth, &WindowHeight );
@@ -358,8 +357,7 @@ bool WinCreate()
     const Uint32 wformat = SDL_GetWindowPixelFormat( window.get() );
     format.reset( SDL_AllocFormat( wformat ) );
     if( !format ) {
-        dbg(D_ERROR) << "SDL_AllocFormat(" << wformat << ") failed: " << SDL_GetError();
-        return false;
+        throw std::runtime_error( string_format( "SDL_AllocFormat(%i) failed: %s", wformat, SDL_GetError() ) );
     }
 
     bool software_renderer = get_option<bool>( "SOFTWARE_RENDERING" );
@@ -384,11 +382,9 @@ bool WinCreate()
         }
         renderer.reset( SDL_CreateRenderer( window.get(), -1, SDL_RENDERER_SOFTWARE | SDL_RENDERER_TARGETTEXTURE ) );
         if( !renderer ) {
-            dbg( D_ERROR ) << "Failed to initialize software renderer: " << SDL_GetError();
-            return false;
+            throw std::runtime_error( string_format( "Failed to initialize software renderer: %s", SDL_GetError() ) );
         } else if( !SetupRenderTarget() ) {
-            dbg( D_ERROR ) << "Failed to initialize display buffer under software rendering, unable to continue.";
-            return false;
+            throw std::runtime_error( "Failed to initialize display buffer under software rendering, unable to continue." );
         }
     }
 
@@ -441,8 +437,6 @@ bool WinCreate()
     Mix_GroupChannels( 11, 14, 3 );
     Mix_GroupChannels( 15, 17, 4 );
 #endif
-
-    return true;
 }
 
 // forward declaration
@@ -1519,9 +1513,7 @@ void init_interface()
     TERMINAL_WIDTH = get_option<int>( "TERMINAL_X" );
     TERMINAL_HEIGHT = get_option<int>( "TERMINAL_Y" );
 
-    if(!WinCreate()) {
-        throw std::runtime_error( "WinCreate failed" ); //@todo throw from WinCreate
-    }
+    WinCreate();
 
     dbg( D_INFO ) << "Initializing SDL Tiles context";
     tilecontext.reset( new cata_tiles( renderer.get() ) );
