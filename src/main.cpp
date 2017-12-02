@@ -36,7 +36,7 @@ void exit_handler(int s);
 
 extern bool test_dirty;
 
-void intro()
+void print_terminal_size_checks()
 {
     clear();
 
@@ -47,49 +47,55 @@ void intro()
     int maxx = getmaxx( stdscr );
     const int minHeight = FULL_SCREEN_HEIGHT;
     const int minWidth = FULL_SCREEN_WIDTH;
-    WINDOW *tmp = newwin(minHeight, minWidth, 0, 0);
+    WINDOW *tmp = newwin( minHeight, minWidth, 0, 0 );
     WINDOW_PTR w_tmpptr( tmp );
 
-    while (maxy < minHeight || maxx < minWidth) {
-        werase(tmp);
-        if (maxy < minHeight && maxx < minWidth) {
-            fold_and_print(tmp, 0, 0, maxx, c_white, _("Whoa! Your terminal is tiny! This game requires a minimum terminal size of "
-                                                       "%dx%d to work properly. %dx%d just won't do. Maybe a smaller font would help?"),
-                           minWidth, minHeight, maxx, maxy);
-        } else if (maxx < minWidth) {
-            fold_and_print(tmp, 0, 0, maxx, c_white, _("Oh! Hey, look at that. Your terminal is just a little too narrow. This game "
-                                                       "requires a minimum terminal size of %dx%d to function. It just won't work "
-                                                       "with only %dx%d. Can you stretch it out sideways a bit?"),
-                           minWidth, minHeight, maxx, maxy);
+    while( maxy < minHeight || maxx < minWidth ) {
+        werase( tmp );
+        if( maxy < minHeight && maxx < minWidth ) {
+            fold_and_print( tmp, 0, 0, maxx, c_white,
+                            _( "Whoa! Your terminal is tiny! This game requires a minimum terminal size of "
+                               "%dx%d to work properly. %dx%d just won't do. Maybe a smaller font would help?" ),
+                            minWidth, minHeight, maxx, maxy );
+        } else if( maxx < minWidth ) {
+            fold_and_print( tmp, 0, 0, maxx, c_white,
+                            _( "Oh! Hey, look at that. Your terminal is just a little too narrow. This game "
+                               "requires a minimum terminal size of %dx%d to function. It just won't work "
+                               "with only %dx%d. Can you stretch it out sideways a bit?" ),
+                            minWidth, minHeight, maxx, maxy );
         } else {
-            fold_and_print(tmp, 0, 0, maxx, c_white, _("Woah, woah, we're just a little short on space here. The game requires a "
-                                                       "minimum terminal size of %dx%d to run. %dx%d isn't quite enough! Can you "
-                                                       "make the terminal just a smidgen taller?"),
-                           minWidth, minHeight, maxx, maxy);
+            fold_and_print( tmp, 0, 0, maxx, c_white,
+                            _( "Woah, woah, we're just a little short on space here. The game requires a "
+                               "minimum terminal size of %dx%d to run. %dx%d isn't quite enough! Can you "
+                               "make the terminal just a smidgen taller?" ),
+                            minWidth, minHeight, maxx, maxy );
         }
-        wrefresh(tmp);
+        wrefresh( tmp );
         inp_mngr.wait_for_any_key();
         maxy = getmaxy( stdscr );
         maxx = getmaxx( stdscr );
     }
-    werase(tmp);
+    werase( tmp );
+    wrefresh( tmp );
+    erase();
+}
 
+static void print_utf8_warning()
+{
 #if !(defined _WIN32 || defined WINDOWS || defined TILES)
     // Check whether LC_CTYPE supports the UTF-8 encoding
     // and show a warning if it doesn't
-    if (std::strcmp(nl_langinfo(CODESET), "UTF-8") != 0) {
+    if( std::strcmp( nl_langinfo( CODESET ), "UTF-8" ) != 0 ) {
         const char *unicode_error_msg =
-            _("You don't seem to have a valid Unicode locale. You may see some weird "
-              "characters (e.g. empty boxes or question marks). You have been warned.");
-        fold_and_print(tmp, 0, 0, maxx, c_white, unicode_error_msg, minWidth, minHeight, maxx, maxy);
-        wrefresh(tmp);
+            _( "You don't seem to have a valid Unicode locale. You may see some weird "
+               "characters (e.g. empty boxes or question marks). You have been warned." );
+        fold_and_print( stdscr, 0, 0, getmaxx( stdscr ), c_white, unicode_error_msg );
+        wrefresh( stdscr );
         inp_mngr.wait_for_any_key();
-        werase(tmp);
+        werase( stdscr );
+        wrefresh( stdscr );
     }
 #endif
-
-    wrefresh(tmp);
-    erase();
 }
 
 namespace {
@@ -531,7 +537,8 @@ int main(int argc, char *argv[])
     }
 
     // Now we do the actual game.
-    intro();
+    print_terminal_size_checks();
+    print_utf8_warning();
     g->init_ui();
 
     curs_set(0); // Invisible cursor here, because MAPBUFFER.load() is crash-prone
