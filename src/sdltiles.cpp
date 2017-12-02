@@ -212,8 +212,6 @@ static SDL_Window_Ptr window;
 static SDL_Renderer_Ptr renderer;
 static SDL_PixelFormat_Ptr format;
 static SDL_Texture_Ptr display_buffer;
-static int WindowWidth;        //Width of the actual window, not the curses window
-static int WindowHeight;       //Height of the actual window, not the curses window
 // input from various input sources. Each input source sets the type and
 // the actual input value (key pressed, mouse button clicked, ...)
 // This value is finally returned by input_manager::get_input_event.
@@ -238,6 +236,12 @@ static std::vector<curseline> terminal_framebuffer;
 static WINDOW *winBuffer; //tracking last drawn window to fix the framebuffer
 static int fontScaleBuffer; //tracking zoom levels to fix framebuffer w/tiles
 extern WINDOW *w_hit_animation; //this window overlays w_terrain which can be oversized
+
+static std::pair<int, int> get_window_size( const SDL_Window_Ptr &win ) {
+    int wwidth = 0, wheight = 0;
+    SDL_GetWindowSize( win.get(), &wwidth, &wheight );
+    return std::make_pair( wwidth, wheight );
+}
 
 //***********************************
 //Non-curses, Window functions      *
@@ -287,7 +291,8 @@ static void SetupRenderTarget()
         dbg( D_ERROR ) << "SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE) failed: " << SDL_GetError();
         // Ignored for now, rendering could still work
     }
-    display_buffer.reset( SDL_CreateTexture( renderer.get(), SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, WindowWidth, WindowHeight ) );
+    const auto size = get_window_size( window );
+    display_buffer.reset( SDL_CreateTexture( renderer.get(), SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, size.first, size.second ) );
     if( !display_buffer ) {
         throw std::runtime_error( string_format( "Failed to create window buffer: %s", SDL_GetError() ) );
     }
@@ -340,10 +345,6 @@ static void WinCreate()
 
     // Common flags used for fulscreen and for windowed
     int window_flags = 0;
-    TERMINAL_WIDTH = get_option<int>( "TERMINAL_X" );
-    TERMINAL_HEIGHT = get_option<int>( "TERMINAL_Y" );
-    WindowWidth = TERMINAL_WIDTH * fontwidth;
-    WindowHeight = TERMINAL_HEIGHT * fontheight;
 
     if( get_option<std::string>( "SCALING_MODE" ) != "none" ) {
         window_flags |= SDL_WINDOW_RESIZABLE;
@@ -362,23 +363,23 @@ static void WinCreate()
         display = 0;
     }
 
+    int wwidth = get_option<int>( "TERMINAL_X" ) * fontwidth;
+    int wheight = get_option<int>( "TERMINAL_Y" ) * fontheight;
     window.reset( SDL_CreateWindow( version.c_str(),
             SDL_WINDOWPOS_CENTERED_DISPLAY( display ),
             SDL_WINDOWPOS_CENTERED_DISPLAY( display ),
-            WindowWidth,
-            WindowHeight,
+            wwidth,
+            wheight,
             window_flags
         ) );
 
     if( !window ) {
         throw std::runtime_error( string_format( "SDL_CreateWindow failed: %s", SDL_GetError() ) );
     }
-    if (window_flags & SDL_WINDOW_FULLSCREEN || window_flags & SDL_WINDOW_FULLSCREEN_DESKTOP) {
-        SDL_GetWindowSize( window.get(), &WindowWidth, &WindowHeight );
-        // Ignore previous values, use the whole window, but nothing more.
-        TERMINAL_WIDTH = WindowWidth / fontwidth;
-        TERMINAL_HEIGHT = WindowHeight / fontheight;
-    }
+    SDL_GetWindowSize( window.get(), &wwidth, &wheight );
+    // Ignore previous values, use the whole window, but nothing more.
+    TERMINAL_WIDTH = wwidth / fontwidth;
+    TERMINAL_HEIGHT = wheight / fontheight;
 
     // Initialize framebuffer caches
     terminal_framebuffer.resize(TERMINAL_HEIGHT);
@@ -626,7 +627,8 @@ void refresh_display()
     if( SDL_SetRenderTarget( renderer.get(), NULL ) != 0 ) {
         dbg(D_ERROR) << "SDL_SetRenderTarget failed: " << SDL_GetError();
     }
-    SDL_RenderSetLogicalSize( renderer.get(), WindowWidth, WindowHeight );
+    const auto size = get_window_size( window );
+    SDL_RenderSetLogicalSize( renderer.get(), size.first, size.second );
     if( SDL_RenderCopy( renderer.get(), display_buffer.get(), NULL, NULL ) != 0 ) {
         dbg(D_ERROR) << "SDL_RenderCopy failed: " << SDL_GetError();
     }
@@ -949,6 +951,8 @@ bool Font::draw_window( WINDOW *win, int offsetx, int offsety )
         }
     }
 
+    const auto wsize = get_window_size( window );
+
     // @todo Get this from UTF system to make sure it is exactly the kind of space we need
     static const std::string space_string = " ";
 
@@ -964,7 +968,7 @@ bool Font::draw_window( WINDOW *win, int offsetx, int offsety )
 
             const int drawx = offsetx + i * fontwidth;
             const int drawy = offsety + j * fontheight;
-            if( drawx + fontwidth > WindowWidth || drawy + fontheight > WindowHeight ) {
+            if( drawx + fontwidth > wsize.first || drawy + fontheight > wsize.second ) {
                 // Outside of the display area, would not render anyway
                 continue;
             }
