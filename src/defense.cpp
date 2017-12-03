@@ -15,6 +15,7 @@
 #include "messages.h"
 #include "map_iterator.h"
 #include "rng.h"
+#include "output.h"
 #include "mongroup.h"
 #include "translations.h"
 #include "input.h"

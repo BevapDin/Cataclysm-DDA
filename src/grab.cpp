@@ -5,6 +5,7 @@
 #include "vehicle.h"
 #include "messages.h"
 #include "sounds.h"
+#include "output.h"
 
 bool game::grabbed_veh_move( const tripoint &dp )
 {

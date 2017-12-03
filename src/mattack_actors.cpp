@@ -5,6 +5,7 @@
 #include "map.h"
 #include "map_iterator.h"
 #include "itype.h"
+#include "output.h"
 #include "monster.h"
 #include "messages.h"
 #include "translations.h"

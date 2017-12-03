@@ -11,6 +11,7 @@
 #include "options.h"
 #include "player.h"
 #include "projectile.h"
+#include "output.h"
 #include "sounds.h"
 #include "output.h"
 #include "trap.h"

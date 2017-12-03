@@ -8,6 +8,7 @@
 #include "mapbuffer.h"
 #include "overmapbuffer.h"
 #include "translations.h"
+#include "output.h"
 #include "catacharset.h"
 #include "get_version.h"
 #include "help.h"

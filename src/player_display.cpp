@@ -9,6 +9,7 @@
 #include "profession.h"
 #include "effect.h"
 #include "input.h"
+#include "output.h"
 #include "addiction.h"
 #include "skill.h"
 

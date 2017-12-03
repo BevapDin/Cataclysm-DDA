@@ -4,6 +4,7 @@
 #include "filesystem.h"
 #include "cursesdef.h"
 #include "input.h"
+#include "cursesdef.h"
 #include <time.h>
 #include <cassert>
 #include <cstdlib>

@@ -10,6 +10,7 @@
 #include "messages.h"
 #include "output.h"
 #include "mapdata.h"
+#include "output.h"
 #include "monster.h"
 #include "vitamin.h"
 #include "mongroup.h"

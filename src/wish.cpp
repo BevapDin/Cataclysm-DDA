@@ -9,6 +9,7 @@
 #include "compatibility.h"
 #include "translations.h"
 #include "input.h"
+#include "output.h"
 #include "monster.h"
 #include "ui.h"
 #include "skill.h"

@@ -6,6 +6,7 @@
 #include "enums.h"
 #include "fire.h"
 #include "game.h"
+#include "output.h"
 #include "fungal_effects.h"
 #include "messages.h"
 #include "translations.h"

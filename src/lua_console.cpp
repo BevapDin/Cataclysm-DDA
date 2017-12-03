@@ -4,10 +4,11 @@
 #include "catacharset.h"
 #include "input.h"
 #include "string_input_popup.h"
+#include "output.h"
 
 #include <map>
 
-lua_console::lua_console() : cWin( catacurses::newwin( lines, width, 0, 0 ) ),
+lua_console::lua_console() : width( TERMX ), cWin( catacurses::newwin( lines, width, 0, 0 ) ),
     iWin( catacurses::newwin( 1, width, lines, 0 ) )
 {
 #ifndef LUA

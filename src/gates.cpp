@@ -8,6 +8,7 @@
 #include "output.h"
 #include "messages.h"
 #include "json.h"
+#include "output.h"
 #include "vehicle.h"
 
 #include <string>

@@ -17,6 +17,7 @@
 #include "itype.h"
 #include "output.h"
 #include "string_formatter.h"
+#include "output.h"
 #include "line.h"
 #include "mtype.h"
 #include "field.h"

@@ -6,6 +6,7 @@
 #include "output.h"
 #include "messages.h"
 #include "npc.h"
+#include "output.h"
 
 const efftype_id effect_infection( "infection" );
 

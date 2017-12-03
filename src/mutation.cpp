@@ -9,6 +9,7 @@
 #include "overmapbuffer.h"
 #include "map_iterator.h"
 #include "sounds.h"
+#include "output.h"
 #include "options.h"
 #include "mapdata.h"
 #include "string_formatter.h"

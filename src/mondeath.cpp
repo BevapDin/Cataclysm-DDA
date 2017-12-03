@@ -18,6 +18,7 @@
 #include "mtype.h"
 #include "field.h"
 #include "player.h"
+#include "output.h"
 
 #include <math.h>  // rounding
 #include <sstream>

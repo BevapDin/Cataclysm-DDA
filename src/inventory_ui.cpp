@@ -11,6 +11,7 @@
 #include "options.h"
 #include "messages.h"
 #include "catacharset.h"
+#include "output.h"
 #include "vehicle.h"
 #include "vehicle_selector.h"
 #include "cata_utility.h"

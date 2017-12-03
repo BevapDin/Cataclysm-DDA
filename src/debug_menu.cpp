@@ -7,6 +7,7 @@
 #include "overmap.h"
 #include "player.h"
 #include "ui.h"
+#include "output.h"
 #include "npc.h"
 #include "npc_class.h"
 #include "output.h"

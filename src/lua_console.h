@@ -2,7 +2,6 @@
 #ifndef LUA_CONSOLE_H
 #define LUA_CONSOLE_H
 
-#include "output.h"
 #include "cursesdef.h"
 
 #include <string>
@@ -18,7 +17,7 @@ class lua_console
         ~lua_console();
         void run();
     private:
-        const int width = TERMX;
+        const int width;
         const int lines = 10;
 
         catacurses::window cWin;

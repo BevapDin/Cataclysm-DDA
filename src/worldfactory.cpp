@@ -10,6 +10,7 @@
 #include "translations.h"
 #include "input.h"
 #include "output.h"
+#include "cursesdef.h"
 #include "string_formatter.h"
 #include "enums.h"
 #include "catacharset.h"

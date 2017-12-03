@@ -10,6 +10,7 @@
 #include "overmap.h"
 #include "overmapbuffer.h"
 #include "trap.h"
+#include "output.h"
 #include "math.h"
 #include "string_formatter.h"
 #include "translations.h"

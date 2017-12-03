@@ -8,6 +8,7 @@
 #include "monstergenerator.h"
 #include "item_factory.h"
 #include "item.h"
+#include "output.h"
 #include "veh_type.h"
 #include "filesystem.h"
 #include "sounds.h"

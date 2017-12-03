@@ -9,6 +9,7 @@
 #include "debug.h"
 #include "monster.h"
 #include "overmapbuffer.h"
+#include "output.h"
 #include "sounds.h"
 #include "translations.h"
 #include "morale_types.h"

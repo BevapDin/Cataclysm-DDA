@@ -5,6 +5,7 @@
 #include "output.h"
 #include "game.h"
 #include "player.h"
+#include "output.h"
 #include "debug.h"
 #include "inventory.h"
 #include "string_formatter.h"

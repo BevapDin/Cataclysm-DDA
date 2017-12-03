@@ -12,6 +12,7 @@
 #include "options.h"
 #include "map_iterator.h"
 #include "field.h"
+#include "output.h"
 #include "messages.h"
 #include "input.h"
 #include "monster.h"

@@ -6,6 +6,8 @@
 #include "messages.h"
 #include "mtype.h"
 #include "calendar.h"
+#include "translations.h"
+
 #include <utility>
 
 const efftype_id effect_milked( "milked" );

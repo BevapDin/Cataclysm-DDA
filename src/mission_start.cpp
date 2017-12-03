@@ -10,6 +10,7 @@
 #include "string_formatter.h"
 #include "omdata.h"
 #include "overmapbuffer.h"
+#include "output.h"
 #include "mapdata.h"
 #include "messages.h"
 #include "translations.h"

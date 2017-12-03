@@ -9,6 +9,7 @@
 #include "sounds.h"
 #include "translations.h"
 #include "event.h"
+#include "output.h"
 #include "npc.h"
 #include "monster.h"
 #include "mapdata.h"

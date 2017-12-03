@@ -9,6 +9,7 @@
 #include "itype.h"
 #include "mapdata.h"
 #include "overmapbuffer.h"
+#include "output.h"
 #include "messages.h"
 #include "skill.h"
 #include "mission.h"

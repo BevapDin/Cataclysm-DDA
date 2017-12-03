@@ -13,6 +13,7 @@
 #include "bodypart.h"
 #include "messages.h"
 #include "translations.h"
+#include "output.h"
 #include "field.h"
 #include "player.h"
 

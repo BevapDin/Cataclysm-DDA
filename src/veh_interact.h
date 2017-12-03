@@ -4,6 +4,7 @@
 
 #include "inventory.h"
 #include "input.h"
+#include "color.h"
 #include "cursesdef.h"
 #include "string_id.h"
 #include "color.h"

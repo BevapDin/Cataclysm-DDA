@@ -24,6 +24,7 @@
 #include "mapdata.h"
 #include "iexamine.h"
 #include "mtype.h"
+#include "output.h"
 #include "field.h"
 #include "weather.h"
 #include "ui.h"

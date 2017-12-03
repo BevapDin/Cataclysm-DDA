@@ -11,6 +11,7 @@
 #include "output.h"
 #include "debug.h"
 #include "messages.h"
+#include "output.h"
 #include "translations.h"
 #include "sounds.h"
 #include "vehicle.h"

@@ -7,6 +7,7 @@
 #include "game.h"
 #include "output.h"
 #include "line.h"
+#include "output.h"
 #include "rng.h"
 #include "pldata.h"
 #include "messages.h"

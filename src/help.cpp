@@ -8,6 +8,7 @@
 #include "cursesdef.h"
 #include "string_formatter.h"
 #include "translations.h"
+#include "cursesdef.h"
 #include "text_snippets.h"
 #include <cmath>  // max in help_main
 #include <vector>

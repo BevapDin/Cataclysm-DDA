@@ -6,6 +6,7 @@
 #include "rng.h"
 #include "output.h"
 #include "translations.h"
+#include "output.h"
 
 const efftype_id effect_hallu( "hallu" );
 const efftype_id effect_shakes( "shakes" );

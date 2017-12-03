@@ -21,6 +21,7 @@
 #include "line.h"
 #include "requirements.h"
 #include "weather_gen.h"
+#include "output.h"
 
 #ifdef LUA
 #include "ui.h"

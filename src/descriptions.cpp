@@ -11,6 +11,7 @@
 #include "input.h"
 #include "ui.h"
 #include "harvest.h"
+#include "output.h"
 
 const skill_id skill_survival( "survival" );
 

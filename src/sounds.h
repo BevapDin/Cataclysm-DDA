@@ -2,11 +2,11 @@
 #ifndef SOUNDS_H
 #define SOUNDS_H
 
-#include "enums.h" // For point
-
 #include <vector>
+#include <utility>
 #include <string>
 
+class tripoint;
 class monster;
 class player;
 class Creature;

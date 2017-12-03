@@ -5,6 +5,7 @@
 #include "item_group.h"
 #include "json.h"
 #include "translations.h"
+#include "output.h"
 #include "string_formatter.h"
 #include "color.h"
 #include "itype.h"

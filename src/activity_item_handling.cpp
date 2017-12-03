@@ -13,6 +13,7 @@
 #include "monster.h"
 #include "output.h"
 #include "vehicle.h"
+#include "output.h"
 #include "veh_type.h"
 #include "player.h"
 #include "string_formatter.h"

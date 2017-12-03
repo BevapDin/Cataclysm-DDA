@@ -4,6 +4,7 @@
 #include "game.h"
 #include "map.h"
 #include "debug.h"
+#include "output.h"
 #include "enums.h"
 #include "output.h"
 #include "overmapbuffer.h"

@@ -10,6 +10,7 @@
 #include "string_formatter.h"
 #include "item.h"
 #include "itype.h"
+#include "output.h"
 #include "iuse_actor.h"
 #include "skill.h"
 

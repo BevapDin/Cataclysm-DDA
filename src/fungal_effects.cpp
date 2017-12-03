@@ -10,6 +10,7 @@
 #include "output.h"
 #include "player.h"
 #include "messages.h"
+#include "output.h"
 #include "field.h"
 
 const mtype_id mon_fungal_blossom( "mon_fungal_blossom" );

@@ -10,6 +10,7 @@
 #include "translations.h"
 #include "overmapbuffer.h"
 #include "messages.h"
+#include "output.h"
 #include "sounds.h"
 #include "morale_types.h"
 #include "mapdata.h"
