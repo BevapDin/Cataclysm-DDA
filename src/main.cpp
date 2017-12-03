@@ -36,6 +36,8 @@ void exit_handler(int s);
 
 extern bool test_dirty;
 
+extern const int MINIMAL_SCREEN_WIDTH;
+extern const int MINIMAL_SCREEN_HEIGHT;
 const int MINIMAL_SCREEN_WIDTH = 80;
 const int MINIMAL_SCREEN_HEIGHT = 24;
 void print_terminal_size_checks()
