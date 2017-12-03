@@ -281,8 +281,6 @@ static void InitSDL()
     //SDL2 instead uses the OS's Input Delay.
 
     atexit(SDL_Quit);
-
-    find_videodisplays();
 }
 
 static void SetupRenderTarget()
@@ -1538,6 +1536,8 @@ void init_interface()
     ::fontheight = fl.fontheight;
 
     InitSDL();
+
+    find_videodisplays();
 
     WinCreate();
 
