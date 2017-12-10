@@ -1159,7 +1159,6 @@ void it_artifact_armor::deserialize(JsonObject &jo)
     }
 }
 
-void serialize_artifact_itype( const itype &it, JsonOut &json );
 bool save_artifacts( const std::string &path )
 {
     return write_to_file_exclusive( path, [&]( std::ostream &fout ) {
