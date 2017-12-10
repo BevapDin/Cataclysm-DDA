@@ -569,14 +569,6 @@ it_artifact_tool::it_artifact_tool() : itype()
     use_methods.emplace( "ARTIFACT", use_function( "ARTIFACT", &iuse::artifact ) );
 }
 
-it_artifact_tool::it_artifact_tool( JsonObject &jo ) : itype()
-{
-    tool.reset( new islot_tool() );
-    artifact.reset( new islot_artifact() );
-    use_methods.emplace( "ARTIFACT", use_function( "ARTIFACT", &iuse::artifact ) );
-    deserialize( jo );
-}
-
 it_artifact_armor::it_artifact_armor() : itype()
 {
     armor.reset( new islot_armor() );
@@ -1034,7 +1026,12 @@ void load_artifacts(const std::string &artfilename)
             JsonObject jo = artifact_json.get_object();
             std::string type = jo.get_string("type");
             if (type == "artifact_tool") {
-                item_controller->add_item_type( static_cast<const itype &>( it_artifact_tool( jo ) ) );
+                it_artifact_tool tmp;
+                tmp.tool.reset( new islot_tool() );
+                tmp.artifact.reset( new islot_artifact() );
+                tmp.use_methods.emplace( "ARTIFACT", use_function( "ARTIFACT", &iuse::artifact ) );
+                tmp.deserialize( jo );
+                item_controller->add_item_type( static_cast<const itype &>( tmp ) );
             } else if (type == "artifact_armor") {
                 item_controller->add_item_type( static_cast<const itype &>( it_artifact_armor( jo ) ) );
             } else {

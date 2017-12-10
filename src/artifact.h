@@ -67,8 +67,6 @@ class it_artifact_tool : public itype
         void deserialize( JsonObject &jo );
 
         it_artifact_tool();
-        it_artifact_tool( JsonObject &jo );
-        it_artifact_tool( const itype &base ) : itype( base ) {};
 
         void create_name( const std::string &type );
         void create_name( const std::string &property_name, const std::string &shape_name );
