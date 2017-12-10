@@ -26,6 +26,7 @@
 class item_category;
 class Item_factory;
 class JsonOut;
+class JsonObject;
 class recipe;
 class emit;
 using emit_id = string_id<emit>;
@@ -611,6 +612,7 @@ struct islot_artifact {
 struct itype {
     friend class Item_factory;
     friend void serialize_artifact_itype( const itype &it, JsonOut &json );
+    friend void deserialize_artifact_itype( itype &it, JsonObject &json );
 
     /**
      * Slots for various item type properties. Each slot may contain a valid pointer or null, check

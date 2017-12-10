@@ -1011,7 +1011,6 @@ std::string artifact_name(std::string type)
 
 /* Json Loading and saving */
 
-void deserialize_artifact_itype( itype &it, JsonObject &jo );
 void load_artifacts(const std::string &artfilename)
 {
     read_from_file_optional_json( artfilename, []( JsonIn &artifact_json ) {
