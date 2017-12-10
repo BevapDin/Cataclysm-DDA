@@ -1160,6 +1160,7 @@ void it_artifact_armor::deserialize(JsonObject &jo)
 }
 
 void serialize_tool_artifact_itype( const itype &it, JsonOut &json );
+void serialize_armor_artifact_itype( const itype &it, JsonOut &json );
 bool save_artifacts( const std::string &path )
 {
     return write_to_file_exclusive( path, [&]( std::ostream &fout ) {
@@ -1175,7 +1176,7 @@ bool save_artifacts( const std::string &path )
                 serialize_tool_artifact_itype( *e, json );
 
             } else if( e->armor ) {
-                json.write( it_artifact_armor( *e ) );
+                serialize_armor_artifact_itype( *e, json );
             }
         }
         json.end_array();
@@ -1240,49 +1241,49 @@ void serialize_tool_artifact_itype( const itype &it, JsonOut &json )
     json.end_object();
 }
 
-void it_artifact_armor::serialize(JsonOut &json) const
+void serialize_armor_artifact_itype( const itype &it, JsonOut &json )
 {
     json.start_object();
 
     json.member("type", "artifact_armor");
 
     // generic data
-    json.member("id", id);
-    json.member("name", name);
-    json.member("description", description);
-    json.member("sym", sym);
-    json.member("color", color);
-    json.member("price", price);
+    json.member("id", it.id);
+    json.member("name", it.name);
+    json.member("description", it.description);
+    json.member("sym", it.sym);
+    json.member("color", it.color);
+    json.member("price", it.price);
     json.member("materials");
     json.start_array();
-    for (auto mat : materials) {
+    for (const auto &mat : it.materials) {
         json.write(mat);
     }
     json.end_array();
-    json.member("volume", volume / units::legacy_volume_factor);
-    json.member( "weight", to_gram( weight ) );
+    json.member("volume", it.volume / units::legacy_volume_factor);
+    json.member( "weight", to_gram( it.weight ) );
 
-    json.member( "melee_dam", melee[DT_BASH] );
-    json.member( "melee_cut", melee[DT_CUT] );
+    json.member( "melee_dam", it.melee[DT_BASH] );
+    json.member( "melee_cut", it.melee[DT_CUT] );
 
-    json.member("m_to_hit", m_to_hit);
+    json.member("m_to_hit", it.m_to_hit);
 
-    json.member("item_flags", item_tags);
+    json.member("item_flags", it.item_tags);
 
-    json.member("techniques", techniques);
+    json.member("techniques", it.techniques);
 
     // armor data
-    json.member("covers", armor->covers);
-    json.member("encumber", armor->encumber);
-    json.member("coverage", armor->coverage);
-    json.member("material_thickness", armor->thickness);
-    json.member("env_resist", armor->env_resist);
-    json.member("warmth", armor->warmth);
-    json.member("storage", armor->storage / units::legacy_volume_factor);
-    json.member("power_armor", armor->power_armor);
+    json.member("covers", it.armor->covers);
+    json.member("encumber", it.armor->encumber);
+    json.member("coverage", it.armor->coverage);
+    json.member("material_thickness", it.armor->thickness);
+    json.member("env_resist", it.armor->env_resist);
+    json.member("warmth", it.armor->warmth);
+    json.member("storage", it.armor->storage / units::legacy_volume_factor);
+    json.member("power_armor", it.armor->power_armor);
 
     // artifact data
-    serialize_enum_vector_as_int( json, "effects_worn", artifact->effects_worn );
+    serialize_enum_vector_as_int( json, "effects_worn", it.artifact->effects_worn );
 
     json.end_object();
 }

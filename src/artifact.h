@@ -77,7 +77,6 @@ class it_artifact_tool : public itype
 class it_artifact_armor : public itype
 {
     public:
-        void serialize( JsonOut &json ) const;
         void deserialize( JsonObject &jo );
 
         it_artifact_armor();
