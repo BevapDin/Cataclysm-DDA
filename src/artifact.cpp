@@ -1011,6 +1011,7 @@ std::string artifact_name(std::string type)
 
 /* Json Loading and saving */
 
+void deserialize_tool_artifact( itype &it, JsonObject &jo );
 void load_artifacts(const std::string &artfilename)
 {
     read_from_file_optional_json( artfilename, []( JsonIn &artifact_json ) {
@@ -1023,7 +1024,7 @@ void load_artifacts(const std::string &artfilename)
                 tmp.tool.reset( new islot_tool() );
                 tmp.artifact.reset( new islot_artifact() );
                 tmp.use_methods.emplace( "ARTIFACT", use_function( "ARTIFACT", &iuse::artifact ) );
-                tmp.deserialize( jo );
+                deserialize_tool_artifact( tmp, jo );
                 item_controller->add_item_type( static_cast<const itype &>( tmp ) );
             } else if (type == "artifact_armor") {
                 it_artifact_armor tmp;
@@ -1038,66 +1039,66 @@ void load_artifacts(const std::string &artfilename)
     } );
 }
 
-void it_artifact_tool::deserialize(JsonObject &jo)
+void deserialize_tool_artifact( itype &it, JsonObject &jo )
 {
-    id = jo.get_string("id");
-    name = jo.get_string("name");
-    description = jo.get_string("description");
+    it.id = jo.get_string("id");
+    it.name = jo.get_string("name");
+    it.description = jo.get_string("description");
     if( jo.has_int( "sym" ) ) {
-        sym = std::string( 1, jo.get_int( "sym" ) );
+        it.sym = std::string( 1, jo.get_int( "sym" ) );
     } else {
-        sym = jo.get_string( "sym" );
+        it.sym = jo.get_string( "sym" );
     }
-    jo.read( "color", color );
-    price = jo.get_int("price");
+    jo.read( "color", it.color );
+    it.price = jo.get_int("price");
     // LEGACY: Since it seems artifacts get serialized out to disk, and they're
     // dynamic, we need to allow for them to be read from disk for, oh, I guess
     // quite some time. Loading and saving once will write things out as a JSON
     // array.
     if (jo.has_string("m1")) {
-        materials.push_back( material_id( jo.get_string( "m1" ) ) );
+        it.materials.push_back( material_id( jo.get_string( "m1" ) ) );
     }
     if (jo.has_string("m2")) {
-        materials.push_back( material_id( jo.get_string( "m2" ) ) );
+        it.materials.push_back( material_id( jo.get_string( "m2" ) ) );
     }
     // Assumption, perhaps dangerous, that we won't wind up with m1 and m2 and
     // a materials array in our serialized objects at the same time.
     if (jo.has_array("materials")) {
         JsonArray jarr = jo.get_array("materials");
         for( size_t i = 0; i < jarr.size(); ++i) {
-            materials.push_back( material_id ( jarr.get_string( i ) ) );
+            it.materials.push_back( material_id ( jarr.get_string( i ) ) );
         }
     }
-    volume = jo.get_int("volume") * units::legacy_volume_factor;
-    weight = units::from_gram( jo.get_int( "weight" ) );
-    melee[DT_BASH] = jo.get_int("melee_dam");
-    melee[DT_CUT] = jo.get_int("melee_cut");
-    m_to_hit = jo.get_int("m_to_hit");
-    item_tags = jo.get_tags("item_flags");
+    it.volume = jo.get_int("volume") * units::legacy_volume_factor;
+    it.weight = units::from_gram( jo.get_int( "weight" ) );
+    it.melee[DT_BASH] = jo.get_int("melee_dam");
+    it.melee[DT_CUT] = jo.get_int("melee_cut");
+    it.m_to_hit = jo.get_int("m_to_hit");
+    it.item_tags = jo.get_tags("item_flags");
 
-    tool->max_charges = jo.get_long("max_charges");
-    tool->def_charges = jo.get_long("def_charges");
+    it.tool->max_charges = jo.get_long("max_charges");
+    it.tool->def_charges = jo.get_long("def_charges");
 
-    tool->charges_per_use = jo.get_int("charges_per_use");
-    tool->turns_per_charge = jo.get_int("turns_per_charge");
-    tool->ammo_id = ammotype( jo.get_string("ammo") );
-    tool->revert_to = jo.get_string("revert_to");
+    it.tool->charges_per_use = jo.get_int("charges_per_use");
+    it.tool->turns_per_charge = jo.get_int("turns_per_charge");
+    it.tool->ammo_id = ammotype( jo.get_string("ammo") );
+    it.tool->revert_to = jo.get_string("revert_to");
 
-    artifact->charge_type = (art_charge)jo.get_int("charge_type");
+    it.artifact->charge_type = (art_charge)jo.get_int("charge_type");
 
     JsonArray ja = jo.get_array("effects_wielded");
     while (ja.has_more()) {
-        artifact->effects_wielded.push_back((art_effect_passive)ja.next_int());
+        it.artifact->effects_wielded.push_back((art_effect_passive)ja.next_int());
     }
 
     ja = jo.get_array("effects_activated");
     while (ja.has_more()) {
-        artifact->effects_activated.push_back((art_effect_active)ja.next_int());
+        it.artifact->effects_activated.push_back((art_effect_active)ja.next_int());
     }
 
     ja = jo.get_array("effects_carried");
     while (ja.has_more()) {
-        artifact->effects_carried.push_back((art_effect_passive)ja.next_int());
+        it.artifact->effects_carried.push_back((art_effect_passive)ja.next_int());
     }
 }
 

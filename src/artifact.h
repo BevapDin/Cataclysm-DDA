@@ -64,8 +64,6 @@ enum art_charge : int {
 class it_artifact_tool : public itype
 {
     public:
-        void deserialize( JsonObject &jo );
-
         it_artifact_tool();
 
         void create_name( const std::string &type );
