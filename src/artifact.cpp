@@ -1159,6 +1159,7 @@ void it_artifact_armor::deserialize(JsonObject &jo)
     }
 }
 
+void serialize_tool_artifact_itype( const itype &it, JsonOut &json );
 bool save_artifacts( const std::string &path )
 {
     return write_to_file_exclusive( path, [&]( std::ostream &fout ) {
@@ -1171,7 +1172,7 @@ bool save_artifacts( const std::string &path )
             }
 
             if( e->tool ) {
-                json.write( it_artifact_tool( *e ) );
+                serialize_tool_artifact_itype( *e, json );
 
             } else if( e->armor ) {
                 json.write( it_artifact_armor( *e ) );
@@ -1192,49 +1193,49 @@ void serialize_enum_vector_as_int( JsonOut &json, const std::string &member, con
     json.end_array();
 }
 
-void it_artifact_tool::serialize(JsonOut &json) const
+void serialize_tool_artifact_itype( const itype &it, JsonOut &json )
 {
     json.start_object();
 
     json.member("type", "artifact_tool");
 
     // generic data
-    json.member("id", id);
-    json.member("name", name);
-    json.member("description", description);
-    json.member("sym", sym);
-    json.member("color", color);
-    json.member("price", price);
+    json.member("id", it.id);
+    json.member("name", it.name);
+    json.member("description", it.description);
+    json.member("sym", it.sym);
+    json.member("color", it.color);
+    json.member("price", it.price);
     json.member("materials");
     json.start_array();
-    for (auto mat : materials) {
+    for (const auto &mat : it.materials) {
         json.write(mat);
     }
     json.end_array();
-    json.member("volume", volume / units::legacy_volume_factor);
-    json.member( "weight", to_gram( weight ) );
+    json.member("volume", it.volume / units::legacy_volume_factor);
+    json.member( "weight", to_gram( it.weight ) );
 
-    json.member( "melee_dam", melee[DT_BASH] );
-    json.member( "melee_cut", melee[DT_CUT] );
+    json.member( "melee_dam", it.melee[DT_BASH] );
+    json.member( "melee_cut", it.melee[DT_CUT] );
 
-    json.member("m_to_hit", m_to_hit);
+    json.member("m_to_hit", it.m_to_hit);
 
-    json.member("item_flags", item_tags);
-    json.member("techniques", techniques);
+    json.member("item_flags", it.item_tags);
+    json.member("techniques", it.techniques);
 
     // tool data
-    json.member("ammo", tool->ammo_id);
-    json.member("max_charges", tool->max_charges);
-    json.member("def_charges", tool->def_charges);
-    json.member("charges_per_use", tool->charges_per_use);
-    json.member("turns_per_charge", tool->turns_per_charge);
-    json.member("revert_to", tool->revert_to);
+    json.member("ammo", it.tool->ammo_id);
+    json.member("max_charges", it.tool->max_charges);
+    json.member("def_charges", it.tool->def_charges);
+    json.member("charges_per_use", it.tool->charges_per_use);
+    json.member("turns_per_charge", it.tool->turns_per_charge);
+    json.member("revert_to", it.tool->revert_to);
 
     // artifact data
-    json.member("charge_type", artifact->charge_type);
-    serialize_enum_vector_as_int( json, "effects_wielded", artifact->effects_wielded );
-    serialize_enum_vector_as_int( json, "effects_activated", artifact->effects_activated );
-    serialize_enum_vector_as_int( json, "effects_carried", artifact->effects_carried );
+    json.member("charge_type", it.artifact->charge_type);
+    serialize_enum_vector_as_int( json, "effects_wielded", it.artifact->effects_wielded );
+    serialize_enum_vector_as_int( json, "effects_activated", it.artifact->effects_activated );
+    serialize_enum_vector_as_int( json, "effects_carried", it.artifact->effects_carried );
 
     json.end_object();
 }
