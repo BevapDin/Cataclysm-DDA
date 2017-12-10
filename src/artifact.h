@@ -78,8 +78,6 @@ class it_artifact_armor : public itype
         void deserialize( JsonObject &jo );
 
         it_artifact_armor();
-        it_artifact_armor( JsonObject &jo );
-        it_artifact_armor( const itype &base ) : itype( base ) {};
 
         void create_name( const std::string &type );
 };

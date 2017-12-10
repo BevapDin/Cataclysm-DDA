@@ -577,13 +577,6 @@ it_artifact_armor::it_artifact_armor() : itype()
     price = 0;
 }
 
-it_artifact_armor::it_artifact_armor( JsonObject &jo ) : itype()
-{
-    armor.reset( new islot_armor() );
-    artifact.reset( new islot_artifact() );
-    deserialize( jo );
-}
-
 void it_artifact_tool::create_name(const std::string &type)
 {
     name = artifact_name(type);
@@ -1033,7 +1026,11 @@ void load_artifacts(const std::string &artfilename)
                 tmp.deserialize( jo );
                 item_controller->add_item_type( static_cast<const itype &>( tmp ) );
             } else if (type == "artifact_armor") {
-                item_controller->add_item_type( static_cast<const itype &>( it_artifact_armor( jo ) ) );
+                it_artifact_armor tmp;
+                tmp.armor.reset( new islot_armor() );
+                tmp.artifact.reset( new islot_artifact() );
+                tmp.deserialize( jo );
+                item_controller->add_item_type( static_cast<const itype &>( tmp ) );
             } else {
                 jo.throw_error( "unrecognized artifact type.", "type" );
             }
