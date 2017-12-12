@@ -1328,7 +1328,7 @@ void iexamine::pedestal_wyrm(player &p, const tripoint &examp)
                     rl_dist( p.pos(), monp ) <= 2);
         if (tries < 10) {
             g->m.ter_set( monp, t_rock_floor);
-            g->summon_mon(mon_dark_wyrm, monp);
+            g->summon_mon( mon_dark_wyrm, monp, calendar::turn );
         }
     }
     add_msg(_("The pedestal sinks into the ground, with an ominous grinding noise..."));
@@ -1724,7 +1724,7 @@ void iexamine::egg_sack_generic( player &p, const tripoint &examp,
         const std::vector<tripoint> pts = closest_tripoints_first( 1, examp );
         for( const auto &pt : pts ) {
             if( g->is_empty( pt ) && one_in( 3 ) ) {
-                g->summon_mon( montype, pt );
+                g->summon_mon( montype, pt, calendar::turn );
                 monster_count++;
             }
         }
@@ -1922,7 +1922,7 @@ void iexamine::aggie_plant(player &p, const tripoint &examp)
                 add_msg(m_info, _("We have altered this unit's configuration to extract and provide local nutriment.  The Mycus provides."));
             } else if ( (p.has_trait(trait_M_DEFENDER)) || ( (p.has_trait(trait_M_SPORES) || p.has_trait(trait_M_FERTILE)) &&
                 one_in(2)) ) {
-                g->summon_mon( mon_fungal_blossom, examp );
+                g->summon_mon( mon_fungal_blossom, examp, calendar::turn );
                 add_msg(m_info, _("The seed blooms forth!  We have brought true beauty to this world."));
             } else if ( (p.has_trait(trait_THRESH_MYCUS)) || one_in(4)) {
                 g->m.furn_set(examp, f_flower_marloss);

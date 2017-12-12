@@ -331,7 +331,7 @@ void mdeath::worm(monster *z)
     while(worms < 2 && !wormspots.empty()) {
         const tripoint target = random_entry_removed( wormspots );
         if( !g->critter_at( target ) ) {
-            g->summon_mon(mon_halfworm, target);
+            g->summon_mon( mon_halfworm, target, calendar::turn );
             worms++;
         }
     }
@@ -438,7 +438,7 @@ void mdeath::blobsplit(monster *z)
 
     for (int s = 0; s < 2 && !valid.empty(); s++) {
         const tripoint target = random_entry_removed( valid );
-        if( monster * const blob = g->summon_mon( speed < 50 ? mon_blob_small : mon_blob, target ) ) {
+        if( monster * const blob = g->summon_mon( speed < 50 ? mon_blob_small : mon_blob, target, calendar::turn ) ) {
             blob->make_ally(z);
             blob->set_speed_base(speed);
             blob->set_hp(speed);
@@ -497,7 +497,7 @@ void mdeath::amigara(monster *z)
 
 void mdeath::thing(monster *z)
 {
-    g->summon_mon(mon_thing, z->pos());
+    g->summon_mon( mon_thing, z->pos(), calendar::turn );
 }
 
 void mdeath::explode(monster *z)
@@ -589,7 +589,7 @@ void mdeath::ratking(monster *z)
         }
     }
     for (int rats = 0; rats < 7 && !ratspots.empty(); rats++) {
-        g->summon_mon( mon_sewer_rat, random_entry_removed( ratspots ) );
+        g->summon_mon( mon_sewer_rat, random_entry_removed( ratspots ), calendar::turn );
     }
 }
 
@@ -763,7 +763,7 @@ void mdeath::preg_roach( monster *z )
     while( !roachspots.empty() ) {
         const tripoint target = random_entry_removed( roachspots );
         if( !g->critter_at( target ) ) {
-            g->summon_mon( mon_giant_cockroach_nymph, target );
+            g->summon_mon( mon_giant_cockroach_nymph, target, calendar::turn );
             num_roach--;
             if( g->u.sees(*z) ) {
                 add_msg(m_warning, _("A cockroach nymph crawls out of the pregnant giant cockroach corpse."));

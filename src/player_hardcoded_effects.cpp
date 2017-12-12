@@ -470,7 +470,7 @@ void player::hardcoded_effects( effect &it )
                     }
                     tripoint dest( i, j, posz() );
                     if( !g->critter_at( dest ) ) {
-                        if( monster *const grub = g->summon_mon( mon_dermatik_larva, dest ) ) {
+                        if( monster *const grub = g->summon_mon( mon_dermatik_larva, dest, calendar::turn ) ) {
                             if( one_in( 3 ) ) {
                                 grub->friendly = -1;
                             }
@@ -557,7 +557,7 @@ void player::hardcoded_effects( effect &it )
                 }
                 MonsterGroupResult spawn_details = MonsterGroupManager::GetResultFromGroup(
                                                        mongroup_id( "GROUP_NETHER" ) );
-                g->summon_mon( spawn_details.name, dest );
+                g->summon_mon( spawn_details.name, dest, calendar::turn );
                 if( g->u.sees( dest ) ) {
                     g->cancel_activity_query( _( "A monster appears nearby!" ) );
                     add_msg_if_player( m_warning, _( "A portal opens nearby, and a monster crawls through!" ) );
@@ -643,7 +643,7 @@ void player::hardcoded_effects( effect &it )
                     }
                     MonsterGroupResult spawn_details = MonsterGroupManager::GetResultFromGroup(
                                                            mongroup_id( "GROUP_NETHER" ) );
-                    g->summon_mon( spawn_details.name, dest );
+                    g->summon_mon( spawn_details.name, dest, calendar::turn );
                     if( g->u.sees( x, y ) ) {
                         g->cancel_activity_query( _( "A monster appears nearby!" ) );
                         add_msg( m_warning, _( "A portal opens nearby, and a monster crawls through!" ) );

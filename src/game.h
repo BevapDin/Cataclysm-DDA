@@ -316,8 +316,12 @@ class game
         /**
          * Summons a brand new monster at the current time. Returns the summoned monster.
          * Returns a `nullptr` if the monster could not be created.
+         * @param birthday The time the monster is considered to be created at. This
+         * affects immediately monster upgrades: if birthday is the current time, no
+         * upgrade is done, otherwise the monster may get upgraded during the spawning.
+         * This may result in a monster of a type different from @p id being returned.
          */
-        monster *summon_mon( const mtype_id& id, const tripoint &p );
+        monster *summon_mon( const mtype_id& id, const tripoint &p, int birthday );
         /** Calls the creature_tracker add function. Returns true if successful. */
         bool add_zombie(monster &critter, bool pin_upgrade = false);
         /**

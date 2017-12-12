@@ -48,7 +48,7 @@ void event::actualize()
                                     pgettext("memorial_female", "Became wanted by the police!"));
             int robx = (u_pos.x > map_point.x ? 0 - SEEX * 2 : SEEX * 4);
             int roby = (u_pos.y > map_point.y ? 0 - SEEY * 2 : SEEY * 4);
-            g->summon_mon(robot_type, tripoint(robx, roby, g->u.posz()));
+            g->summon_mon( robot_type, tripoint( robx, roby, g->u.posz() ), calendar::turn );
         }
     } break;
 
@@ -70,7 +70,7 @@ void event::actualize()
                     rl_dist(g->u.pos(), monp) <= 2);
             if (tries < 10) {
                 g->m.ter_set(monp, t_rock_floor);
-                g->summon_mon(mon_dark_wyrm, monp);
+                g->summon_mon( mon_dark_wyrm, monp, calendar::turn );
             }
         }
         // You could drop the flag, you know.
@@ -124,7 +124,7 @@ void event::actualize()
             } while ((monx == -1 || mony == -1 || !g->is_empty({monx, mony, g->u.posz()})) &&
                         tries < 10);
             if (tries < 10) {
-                g->summon_mon(mon_amigara_horror, tripoint(monx, mony, g->u.posz()));
+                g->summon_mon( mon_amigara_horror, tripoint( monx, mony, g->u.posz() ), calendar::turn );
             }
         }
     } break;
@@ -230,7 +230,7 @@ void event::actualize()
         } while (tries < 20 && !g->is_empty({x, y, g->u.posz()}) &&
                     rl_dist(x, y, g->u.posx(), g->u.posy()) <= 2);
         if (tries < 20) {
-            g->summon_mon(montype, tripoint(x, y, g->u.posz()));
+            g->summon_mon( montype, tripoint( x, y, g->u.posz() ), calendar::turn );
         }
     } break;
 
@@ -249,7 +249,7 @@ void event::per_turn()
             if (place.x == -1 && place.y == -1) {
                 return; // We're safely indoors!
             }
-            g->summon_mon(mon_eyebot, tripoint(place.x, place.y, g->u.posz()));
+            g->summon_mon( mon_eyebot, tripoint( place.x, place.y, g->u.posz() ), calendar::turn );
             if (g->u.sees( place )) {
                 add_msg(m_warning, _("An eyebot swoops down nearby!"));
             }

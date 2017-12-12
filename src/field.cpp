@@ -1369,7 +1369,7 @@ bool map::process_fields_in_submap( submap *const current_submap,
                         if (cur->getFieldDensity() < 3 && calendar::once_every(HOURS(6)) && one_in(10)) {
                             cur->setFieldDensity(cur->getFieldDensity() + 1);
                         } else if (cur->getFieldDensity() == 3 && one_in(600)) { // Spawn nether creature!
-                            g->summon_mon( random_entry( monids ), p);
+                            g->summon_mon( random_entry( monids ), p, calendar::turn );
                         }
                     }
                         break;

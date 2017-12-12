@@ -6644,10 +6644,11 @@ template player *game::critter_by_id<player>( int );
 template npc *game::critter_by_id<npc>( int );
 template Creature *game::critter_by_id<Creature>( int );
 
-monster *game::summon_mon( const mtype_id& id, const tripoint &p )
+monster *game::summon_mon( const mtype_id& id, const tripoint &p, const int birthday )
 {
     monster mon( id );
     mon.spawn( p );
+    mon.last_updated = birthday;
     return add_zombie( mon, true ) ? critter_at<monster>( p ) : nullptr;
 }
 

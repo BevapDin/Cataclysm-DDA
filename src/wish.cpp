@@ -387,7 +387,7 @@ void debug_menu::wishmonster( const tripoint &p )
                 const std::vector<tripoint> spawn_points = closest_tripoints_first( cb.group, spawn );
                 int num_spawned = 0;
                 for( const tripoint &spawn_point : spawn_points ) {
-                    if( monster *const mon = g->summon_mon( mon_type, spawn_point ) ) {
+                    if( monster *const mon = g->summon_mon( mon_type, spawn_point, calendar::turn ) ) {
                         ++num_spawned;
                         if( cb.friendly ) {
                             mon->friendly = -1;

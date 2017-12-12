@@ -1260,7 +1260,7 @@ void computer::activate_failure(computer_failure_type fail)
             } while (!g->is_empty( mp ) && tries < 10);
             if (tries != 10) {
                 add_msg(m_warning, _("Manhacks drop from compartments in the ceiling."));
-                g->summon_mon( mon_manhack, mp );
+                g->summon_mon( mon_manhack, mp, calendar::turn );
             }
         }
     }
@@ -1278,7 +1278,7 @@ void computer::activate_failure(computer_failure_type fail)
             } while (!g->is_empty(mp) && tries < 10);
             if (tries != 10) {
                 add_msg(m_warning, _("Secubots emerge from compartments in the floor."));
-                g->summon_mon(mon_secubot, mp);
+                g->summon_mon( mon_secubot, mp, calendar::turn );
             }
         }
     }

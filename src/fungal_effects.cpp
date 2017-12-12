@@ -60,7 +60,7 @@ void fungal_effects::fungalize( const tripoint &sporep, Creature *origin, double
             add_msg( m_warning, _( "You're covered in tiny spores!" ) );
         }
     } else if( gm.num_creatures() < 250 && x_in_y( spore_chance, 1.0 ) ) { // Spawn a spore
-        if( monster *const spore = gm.summon_mon( mon_spore, sporep ) ) {
+        if( monster *const spore = gm.summon_mon( mon_spore, sporep, calendar::turn ) ) {
             monster *origin_mon = dynamic_cast<monster *>( origin );
             if( origin_mon != nullptr ) {
                 spore->make_ally( origin_mon );
@@ -230,7 +230,7 @@ bool fungal_effects::spread_fungus( const tripoint &p )
                             if( m.get_field_strength( p, fd_fungal_haze ) != 0 ) {
                                 if( one_in( 8 ) ) { // young trees are vulnerable
                                     m.ter_set( dest, t_fungus );
-                                    gm.summon_mon( mon_fungal_blossom, p );
+                                    gm.summon_mon( mon_fungal_blossom, p, calendar::turn );
                                     if( gm.u.sees( p ) ) {
                                         add_msg( m_warning, _( "The young tree blooms forth into a fungal blossom!" ) );
                                     }
@@ -247,7 +247,7 @@ bool fungal_effects::spread_fungus( const tripoint &p )
                             if( m.get_field_strength( p, fd_fungal_haze ) != 0 ) {
                                 if( one_in( 10 ) ) {
                                     m.ter_set( dest, t_fungus );
-                                    gm.summon_mon( mon_fungal_blossom, p );
+                                    gm.summon_mon( mon_fungal_blossom, p, calendar::turn );
                                     if( gm.u.sees( p ) ) {
                                         add_msg( m_warning, _( "The tree blooms forth into a fungal blossom!" ) );
                                     }

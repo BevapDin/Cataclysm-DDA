@@ -838,7 +838,7 @@ void player::consume_effects( const item &food )
         int numslime = 1;
         for( int i = 0; i < numslime && !valid.empty(); i++ ) {
             const tripoint target = random_entry_removed( valid );
-            if( monster *const slime = g->summon_mon( mon_player_blob, target ) ) {
+            if( monster *const slime = g->summon_mon( mon_player_blob, target, calendar::turn ) ) {
                 slime->friendly = -1;
             }
         }
