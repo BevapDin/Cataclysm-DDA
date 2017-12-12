@@ -381,22 +381,20 @@ void debug_menu::wishmonster( const tripoint &p )
     do {
         wmenu.query();
         if( wmenu.ret >= 0 ) {
-            monster mon = monster( mtypes[ wmenu.ret ]->id );
-            if( cb.friendly ) {
-                mon.friendly = -1;
-            }
-            if( cb.hallucination ) {
-                mon.hallucination = true;
-            }
+            const mtype_id mon_type = mtypes[ wmenu.ret ]->id;
             tripoint spawn = ( p == tripoint_min ? g->look_around() : p );
             if( spawn != tripoint_min ) {
                 const std::vector<tripoint> spawn_points = closest_tripoints_first( cb.group, spawn );
                 int num_spawned = 0;
                 for( const tripoint &spawn_point : spawn_points ) {
-                    if( g->critter_at( spawn_point ) == nullptr ) {
+                    if( monster *const mon = g->summon_mon( mon_type, spawn_point ) ) {
                         ++num_spawned;
-                        mon.spawn( spawn_point );
-                        g->add_zombie( mon, true );
+                        if( cb.friendly ) {
+                            mon->friendly = -1;
+                        }
+                        if( cb.hallucination ) {
+                            mon->hallucination = true;
+                        }
                     }
                 }
                 input_context ctxt( "UIMENU" );
