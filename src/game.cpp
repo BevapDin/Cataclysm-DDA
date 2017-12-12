@@ -6651,12 +6651,6 @@ monster *game::summon_mon( const mtype_id& id, const tripoint &p )
     return add_zombie( mon, true ) ? critter_at<monster>( p ) : nullptr;
 }
 
-// By default don't pin upgrades to current day
-bool game::add_zombie(monster &critter)
-{
-    return add_zombie(critter, false);
-}
-
 bool game::add_zombie(monster &critter, bool pin_upgrade)
 {
     if( !m.inbounds( critter.pos() ) ) {

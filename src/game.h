@@ -319,8 +319,7 @@ class game
          */
         monster *summon_mon( const mtype_id& id, const tripoint &p );
         /** Calls the creature_tracker add function. Returns true if successful. */
-        bool add_zombie(monster &critter);
-        bool add_zombie(monster &critter, bool pin_upgrade);
+        bool add_zombie(monster &critter, bool pin_upgrade = false);
         /**
          * Returns the approximate number of creatures in the reality bubble.
          * Because of performance restrictions it may return a slightly incorrect
