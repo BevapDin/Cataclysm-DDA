@@ -2387,9 +2387,10 @@ int vehicle::part_at(int const dx, int const dy) const
     return -1;
 }
 
-int vehicle::global_part_at(int const x, int const y) const
+int vehicle::global_part_at( const tripoint &pos ) const
 {
-    return part_at(x - global_x(), y - global_y());
+    //@todo 3D: use pos.z
+    return part_at( pos.x - global_x(), pos.y - global_y() );
 }
 
 /**

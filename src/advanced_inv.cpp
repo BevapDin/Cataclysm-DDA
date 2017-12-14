@@ -658,7 +658,7 @@ void advanced_inv_area::init()
             max_size = MAX_ITEM_IN_SQUARE;
             if( can_store_in_vehicle() ) {
                 // get storage label
-                const auto part = veh->parts[veh->global_part_at(pos.x, pos.y)];
+                const auto part = veh->parts[veh->global_part_at( pos )];
                 desc[1] = veh->get_label(part.mount.x, part.mount.y);
             }
             // get graffiti or terrain name
