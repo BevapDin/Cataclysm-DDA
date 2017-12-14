@@ -2377,10 +2377,10 @@ bool vehicle::part_flag( int part, const vpart_bitflags flag) const
     }
 }
 
-int vehicle::part_at(int const dx, int const dy) const
+int vehicle::part_at( const point &pos ) const
 {
     for (size_t p = 0; p < parts.size(); p++) {
-        if (parts[p].precalc[0].x == dx && parts[p].precalc[0].y == dy && !parts[p].removed) {
+        if (parts[p].precalc[0] == pos && !parts[p].removed) {
             return (int)p;
         }
     }
@@ -2390,7 +2390,7 @@ int vehicle::part_at(int const dx, int const dy) const
 int vehicle::global_part_at( const tripoint &pos ) const
 {
     //@todo 3D: use pos.z
-    return part_at( pos.x - global_x(), pos.y - global_y() );
+    return part_at( point( pos.x - global_x(), pos.y - global_y() ) );
 }
 
 /**
