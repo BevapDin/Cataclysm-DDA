@@ -845,9 +845,7 @@ item_location game_menus::inv::holster( player &p, item &holster )
         return item_location();
     }
 
-    const std::string title = actor->holster_prompt.empty()
-                              ? _( "Holster item" )
-                              : _( actor->holster_prompt.c_str() );
+    const std::string title = actor->holster_prompt;
     const std::string hint = string_format( _( "Choose a weapon to put into your %s" ),
                                             holster_name.c_str() );
 

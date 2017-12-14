@@ -6,6 +6,7 @@
 #include "translations.h"
 #include "itype.h"
 #include "damage.h"
+#include "assign.h"
 
 #include <map>
 #include <string>
@@ -65,19 +66,13 @@ void ma_requirements::load( JsonObject &jo, const std::string & )
 
 void ma_technique::load( JsonObject &jo, const std::string &src )
 {
-    optional( jo, was_loaded, "name", name, translated_string_reader );
-    optional( jo, was_loaded, "description", description, translated_string_reader );
+    assign( jo, "name", name );
+    assign( jo, "description", description );
 
     if( jo.has_member( "messages" ) ) {
         JsonArray jsarr = jo.get_array( "messages" );
-        player_message = jsarr.get_string( 0 );
-        if( !player_message.empty() ) {
-            player_message = _( player_message.c_str() );
-        }
-        npc_message = jsarr.get_string( 1 );
-        if( !npc_message.empty() ) {
-            npc_message = _( npc_message.c_str() );
-        }
+        player_message = translatable_text( jsarr.get_string( 0 ) );
+        npc_message = translatable_text( jsarr.get_string( 1 ) );
     }
 
     optional( jo, was_loaded, "crit_tec", crit_tec, false );
@@ -122,8 +117,8 @@ bool string_id<ma_technique>::is_valid() const
 
 void ma_buff::load( JsonObject &jo, const std::string &src )
 {
-    mandatory( jo, was_loaded, "name", name, translated_string_reader );
-    mandatory( jo, was_loaded, "description", description, translated_string_reader );
+    assign( jo, "name", name );
+    assign( jo, "description", description );
 
     optional( jo, was_loaded, "buff_duration", buff_duration, 2 );
     optional( jo, was_loaded, "max_stacks", max_stacks, 1 );
@@ -177,8 +172,8 @@ void martialart::load( JsonObject &jo, const std::string & )
 {
     JsonArray jsarr;
 
-    mandatory( jo, was_loaded, "name", name, translated_string_reader );
-    mandatory( jo, was_loaded, "description", description, translated_string_reader );
+    assign( jo, "name", name );
+    assign( jo, "description", description );
 
     optional( jo, was_loaded, "static_buffs", static_buffs, ma_buff_reader{} );
     optional( jo, was_loaded, "onmove_buffs", onmove_buffs, ma_buff_reader{} );
@@ -243,14 +238,14 @@ void check_martialarts()
              technique != ma.techniques.cend(); ++technique ) {
             if( !technique->is_valid() ) {
                 debugmsg( "Technique with id %s in style %s doesn't exist.",
-                          technique->c_str(), ma.name.c_str() );
+                          technique->c_str(), ma.id );
             }
         }
         for( auto weapon = ma.weapons.cbegin();
              weapon != ma.weapons.cend(); ++weapon ) {
             if( !item::type_is_defined( *weapon ) ) {
                 debugmsg( "Weapon %s in style %s doesn't exist.",
-                          weapon->c_str(), ma.name.c_str() );
+                          weapon->c_str(), ma.id.c_str() );
             }
         }
     }

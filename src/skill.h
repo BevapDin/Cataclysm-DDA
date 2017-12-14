@@ -4,6 +4,7 @@
 
 #include "calendar.h"
 #include "string_id.h"
+#include "translatable_text.h"
 
 #include <functional>
 #include <string>
@@ -22,8 +23,8 @@ class Skill
         friend class string_id<Skill>;
         skill_id _ident;
 
-        std::string _name;
-        std::string _description;
+        translatable_text _name;
+        translatable_text _description;
         std::set<std::string> _tags;
         // these are not real skills, they depend on context
         static std::map<skill_id, Skill> contextual_skills;
@@ -41,16 +42,16 @@ class Skill
             std::function<bool ( Skill const &, Skill const & )> pred );
 
         Skill();
-        Skill( skill_id ident, std::string name, std::string description,
+        Skill( skill_id ident, translatable_text name, translatable_text description,
                std::set<std::string> tags );
 
         skill_id const &ident() const {
             return _ident;
         }
-        std::string const &name() const {
+        translatable_text const &name() const {
             return _name;
         }
-        std::string const &description() const {
+        translatable_text const &description() const {
             return _description;
         }
 

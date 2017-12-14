@@ -8,6 +8,7 @@
 #include <random>
 #include <functional>
 
+#include "translatable_text.h"
 #include "string_id.h"
 
 class JsonObject;
@@ -57,8 +58,8 @@ class distribution
 class npc_class
 {
     private:
-        std::string name;
-        std::string job_description;
+        translatable_text name;
+        translatable_text job_description;
 
         bool common = true;
 
@@ -86,8 +87,8 @@ class npc_class
 
         npc_class();
 
-        const std::string &get_name() const;
-        const std::string &get_job_description() const;
+        const translatable_text &get_name() const;
+        const translatable_text &get_job_description() const;
 
         int roll_strength() const;
         int roll_dexterity() const;

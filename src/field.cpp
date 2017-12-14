@@ -1924,7 +1924,7 @@ void map::player_in_field( player &u )
                 }
                 if( inhaled ) {
                     // player does not know how the npc feels, so no message.
-                    u.add_msg_if_player(m_bad, _("You feel sick from inhaling the %s"), cur.name().c_str());
+                    u.add_msg_if_player(m_bad, _("You feel sick from inhaling the %s"), cur.name());
                 }
             }
             break;
@@ -2073,11 +2073,11 @@ void map::player_in_field( player &u )
                 if( u.has_trait( trait_id( "THRESH_MYCUS" ) ) || u.has_trait( trait_id( "THRESH_MARLOSS" ) ) ) {
                     inhaled |= u.add_env_effect( effect_badpoison, bp_mouth, 5, density * 10 );
                     u.hurtall( rng( density, density * 2 ), nullptr );
-                    u.add_msg_if_player( m_bad, _("The %s burns your skin."), cur.name().c_str() );
+                    u.add_msg_if_player( m_bad, _("The %s burns your skin."), cur.name() );
                 }
 
                 if( inhaled ) {
-                    u.add_msg_if_player( m_bad, _("The %s makes you feel sick."), cur.name().c_str() );
+                    u.add_msg_if_player( m_bad, _("The %s makes you feel sick."), cur.name() );
                 }
             }
             break;
@@ -2551,10 +2551,9 @@ std::map<field_id, field_entry>::const_iterator field::end() const
     return field_list.end();
 }
 
-std::string field_t::name( const int density ) const
+translatable_text field_t::name( const int density ) const
 {
-    const std::string &n = untranslated_name[std::min( std::max( 0, density ), MAX_FIELD_DENSITY - 1 )];
-    return n.empty() ? n : _( n.c_str() );
+    return untranslated_name[std::min( std::max( 0, density ), MAX_FIELD_DENSITY - 1 )];
 }
 
 /*

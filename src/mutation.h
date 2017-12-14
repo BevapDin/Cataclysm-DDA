@@ -6,6 +6,8 @@
 #include "bodypart.h"
 #include "damage.h"
 #include "string_id.h"
+#include "translatable_text.h"
+
 #include <string>
 #include <vector>
 #include <utility>
@@ -40,7 +42,7 @@ extern std::vector<dream> dreams;
 extern std::map<std::string, std::vector<trait_id> > mutations_category;
 
 struct dream {
-    std::vector<std::string> messages; // The messages that the dream will give
+    std::vector<translatable_text> messages; // The messages that the dream will give
     std::string category; // The category that will trigger the dream
     int strength; // The category strength required for the dream
 
@@ -51,9 +53,9 @@ struct dream {
 
 struct mut_attack {
     /** Text printed when the attack is proced by you */
-    std::string attack_text_u;
+    translatable_text attack_text_u;
     /** As above, but for npc */
-    std::string attack_text_npc;
+    translatable_text attack_text_npc;
     /** Need all of those to qualify for this attack */
     std::set<trait_id> required_mutations;
     /** Need none of those to qualify for this attack */
@@ -131,7 +133,7 @@ struct mutation_branch {
 
     /** The item, if any, spawned by the mutation */
     itype_id spawn_item;
-    std::string spawn_item_message;
+    translatable_text spawn_item_message;
 
     /** Attacks granted by this mutation */
     std::vector<mut_attack> attacks_granted;
@@ -158,8 +160,8 @@ struct mutation_branch {
     std::map<body_part, resistances> armor;
     std::vector<matype_id>
     initial_ma_styles; // Martial art styles that can be chosen upon character generation
-    std::string name;
-    std::string description;
+    translatable_text name;
+    translatable_text description;
     /**
      * Returns the color to display the mutation name with.
      */
@@ -176,7 +178,7 @@ struct mutation_branch {
      * Shortcut for getting the name of a (translated) mutation, same as
      * @code get( mutation_id ).name @endcode
      */
-    static const std::string &get_name( const trait_id &mutation_id );
+    static const translatable_text &get_name( const trait_id &mutation_id );
     /**
      * All known mutations. Key is the mutation id, value is the mutation_branch that you would
      * also get by calling @ref get.
@@ -277,7 +279,7 @@ struct mutation_branch {
 };
 
 struct mutation_category_trait {
-    std::string name;
+    translatable_text name;
     std::string id;
     // Mutation category i.e "BIRD", "CHIMERA"
     std::string category;
@@ -290,13 +292,13 @@ struct mutation_category_trait {
 
     // The flag a mutagen needs to target this category
     std::string mutagen_flag;
-    std::string mutagen_message; // message when you consume mutagen
+    translatable_text mutagen_message; // message when you consume mutagen
     int mutagen_hunger  = 10;//these are defaults
     int mutagen_thirst  = 10;
     int mutagen_pain    = 2;
     int mutagen_fatigue = 5;
     int mutagen_morale  = 0;
-    std::string iv_message; //message when you inject an iv;
+    translatable_text iv_message; //message when you inject an iv;
     int iv_min_mutations    = 1; //the minimum mutations an injection provides
     int iv_additional_mutations = 2;
     int iv_additional_mutations_chance = 3; //chance of additional mutations
@@ -307,13 +309,13 @@ struct mutation_category_trait {
     int iv_morale   = 0;
     int iv_morale_max = 0;
     bool iv_sound = false;  //determines if you make a sound when you inject mutagen
-    std::string iv_sound_message = "NULL";
+    translatable_text iv_sound_message = translatable_text( "NULL" );
     int iv_noise = 0;    //the amount of noise produced by the sound
     bool iv_sleep = false;  //whether the iv has a chance of knocking you out.
-    std::string iv_sleep_message = "NULL";
+    translatable_text iv_sleep_message = translatable_text( "NULL" );
     int iv_sleep_dur = 0;
-    std::string junkie_message;
-    std::string memorial_message; //memorial message when you cross a threshold
+    translatable_text junkie_message;
+    translatable_text memorial_message; //memorial message when you cross a threshold
 
     static const std::map<std::string, mutation_category_trait> &get_all();
     static void reset();

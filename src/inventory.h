@@ -180,8 +180,8 @@ class inventory : public visitable<inventory>
 
     private:
         // For each item ID, store a set of "favorite" inventory letters.
-        std::map<std::string, std::vector<char> > invlet_cache;
-        char find_usable_cached_invlet( const std::string &item_type );
+        std::map<itype_id, std::vector<char> > invlet_cache;
+        char find_usable_cached_invlet( const itype_id &item_type );
 
         invstack items;
 

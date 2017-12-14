@@ -11,6 +11,7 @@
 #include "damage.h"
 #include "pathfinding.h"
 #include "mattack_common.h"
+#include "translatable_text.h"
 
 #include <bitset>
 #include <string>
@@ -183,7 +184,7 @@ struct mtype {
         friend class MonsterGenerator;
         std::string name;
         std::string name_plural;
-        std::string description;
+        translatable_text description;
 
         std::set< const species_type * > species_ptrs;
 
@@ -243,7 +244,7 @@ struct mtype {
 
         damage_instance melee_damage; // Basic melee attack damage
 
-        std::map<std::string, int> starting_ammo; // Amount of ammo the monster spawns with.
+        std::map<itype_id, int> starting_ammo; // Amount of ammo the monster spawns with.
         // Name of item group that is used to create item dropped upon death, or empty.
         std::string death_drops;
         harvest_id harvest;
@@ -308,7 +309,7 @@ struct mtype {
         // if there is no matching item type. e.g. "veggy" for plant monsters.
         itype_id get_meat_itype() const;
         int get_meat_chunks_count() const;
-        std::string get_description() const;
+        translatable_text get_description() const;
 
         // Historically located in monstergenerator.cpp
         void load( JsonObject &jo, const std::string &src );

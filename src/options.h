@@ -2,6 +2,8 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include "translatable_text.h"
+
 #include <string>
 #include <map>
 #include <utility>
@@ -63,9 +65,9 @@ class options_manager
                 std::string getName() const;
                 std::string getPage() const;
                 /// The translated displayed option name.
-                std::string getMenuText() const;
+                translatable_text getMenuText() const;
                 /// The translated displayed option tool tip.
-                std::string getTooltip() const;
+                translatable_text getTooltip() const;
                 std::string getType() const;
 
                 std::string getValue( bool classis_locale = false ) const;
@@ -102,10 +104,10 @@ class options_manager
             private:
                 std::string sName;
                 std::string sPage;
-                // The *untranslated* displayed option name ( short string ).
-                std::string sMenuText;
-                // The *untranslated* displayed option tool tip ( longer string ).
-                std::string sTooltip;
+                // displayed option name (short string)
+                translatable_text sMenuText;
+                // displayed option tool tip (longer string)
+                translatable_text sTooltip;
                 std::string sType;
 
                 std::string format;
@@ -132,7 +134,7 @@ class options_manager
                 int iMin;
                 int iMax;
                 int iDefault;
-                std::map<int, std::string> mIntValues;
+                std::map<int, translatable_text> mIntValues;
 
                 //sType == "float"
                 float fSet;
@@ -171,42 +173,42 @@ class options_manager
 
         //add hidden external option with value
         void add_external( const std::string sNameIn, const std::string sPageIn, const std::string sType,
-                           const std::string sMenuTextIn, const std::string sTooltipIn );
+                           const translatable_text sMenuTextIn, const translatable_text sTooltipIn );
 
         //add string select option
         void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
+                  const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
                   // first is option value, second is display name of that value
                   std::vector<std::pair<std::string, std::string>> sItemsIn, std::string sDefaultIn,
                   copt_hide_t opt_hide = COPT_NO_HIDE );
 
         //add string input option
         void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
+                  const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
                   const std::string sDefaultIn, const int iMaxLengthIn,
                   copt_hide_t opt_hide = COPT_NO_HIDE );
 
         //add bool option
         void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
+                  const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
                   const bool bDefaultIn, copt_hide_t opt_hide = COPT_NO_HIDE );
 
         //add int option
         void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
+                  const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
                   const int iMinIn, int iMaxIn, int iDefaultIn,
                   copt_hide_t opt_hide = COPT_NO_HIDE,
                   const std::string &format = "%i" );
 
         //add int map option
         void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
-                  const std::map<int, std::string> mIntValuesIn, int iInitialIn,
+                  const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
+                  const std::map<int, translatable_text> mIntValuesIn, int iInitialIn,
                   int iDefaultIn, copt_hide_t opt_hide = COPT_NO_HIDE );
 
         //add float option
         void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
+                  const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
                   const float fMinIn, float fMaxIn,
                   float fDefaultIn, float fStepIn,
                   copt_hide_t opt_hide = COPT_NO_HIDE,
@@ -215,7 +217,7 @@ class options_manager
     private:
         options_container options;
         // first is page id, second is untranslated page name
-        std::vector<std::pair<std::string, std::string>> vPages;
+        std::vector<std::pair<std::string, translatable_text>> vPages;
         std::map<int, std::vector<std::string>> mPageItems;
         int iWorldOptPage;
 };

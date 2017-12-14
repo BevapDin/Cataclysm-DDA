@@ -14,6 +14,7 @@
 #include "overmap.h"
 #include "overmapbuffer.h"
 #include "player.h"
+#include "assign.h"
 
 #include <algorithm>
 
@@ -40,7 +41,7 @@ bool string_id<start_location>::is_valid() const
 }
 
 start_location::start_location()
-    : _name( "null" ), _target( "shelter" )
+    : _name(), _target( "shelter" )
 {
 }
 
@@ -49,9 +50,9 @@ const string_id<start_location> &start_location::ident() const
     return id;
 }
 
-std::string start_location::name() const
+translatable_text start_location::name() const
 {
-    return _( _name.c_str() );
+    return _name;
 }
 
 std::string start_location::target() const
@@ -76,7 +77,7 @@ void start_location::load_location( JsonObject &jo, const std::string &src )
 
 void start_location::load( JsonObject &jo, const std::string & )
 {
-    mandatory( jo, was_loaded, "name", _name );
+    assign( jo, "name", _name );
     mandatory( jo, was_loaded, "target", _target );
     optional( jo, was_loaded, "flags", _flags, auto_flags_reader<> {} );
 }

@@ -1545,7 +1545,7 @@ void map::furn_set( const tripoint &p, const furn_id new_furniture )
 
     // If player has grabbed this furniture and it's no longer grabbable, release the grab.
     if( g->u.grab_type == OBJECT_FURNITURE && g->u.grab_point == p && new_t.move_str_req < 0 ) {
-        add_msg( _( "The %s you were grabbing is destroyed!" ), old_t.name().c_str() );
+        add_msg( _( "The %s you were grabbing is destroyed!" ), old_t.name() );
         g->u.grab_type = OBJECT_NONE;
         g->u.grab_point = tripoint_zero;
     }
@@ -1594,7 +1594,7 @@ std::string map::furnname( const tripoint &p ) {
     if( f.has_flag( "PLANT" ) && !i_at( p ).empty() ) {
         const item &seed = i_at( p ).front();
         const std::string &plant = seed.get_plant_name();
-        return string_format( "%s (%s)", f.name().c_str(), plant.c_str() );
+        return string_format( "%s (%s)", f.name(), plant );
     } else {
         return f.name();
     }
@@ -3232,7 +3232,6 @@ ter_id map::get_roof( const tripoint &p, const bool allow_air )
 
 void map::bash_ter_furn( const tripoint &p, bash_params &params )
 {
-    std::string sound;
     int sound_volume = 0;
     std::string soundfxid;
     std::string soundfxvariant;
@@ -3348,10 +3347,9 @@ void map::bash_ter_furn( const tripoint &p, bash_params &params )
             sound_volume = sound_fail_vol;
         }
 
-        sound = _(bash->sound_fail.c_str());
         params.did_bash = true;
         if( !params.silent ) {
-            sounds::sound( p, sound_volume, sound, false, "smash_fail", soundfxvariant );
+            sounds::sound( p, sound_volume, bash->sound_fail, false, "smash_fail", soundfxvariant );
         }
 
         return;
@@ -3378,7 +3376,7 @@ void map::bash_ter_furn( const tripoint &p, bash_params &params )
     }
 
     soundfxid = "smash_success";
-    sound = _(bash->sound.c_str());
+    const translatable_text sound = bash->sound;
     // Set this now in case the ter_set below changes this
     const bool collapses = smash_ter && has_flag("COLLAPSES", p);
     const bool supports = smash_ter && has_flag("SUPPORTS_ROOF", p);
@@ -4005,8 +4003,8 @@ void map::translate(const ter_id from, const ter_id to)
 {
     if (from == to) {
         debugmsg( "map::translate %s => %s",
-                  from.obj().name().c_str(),
-                  from.obj().name().c_str() );
+                  from.obj().name(),
+                  from.obj().name() );
         return;
         }
 
@@ -4027,8 +4025,8 @@ void map::translate_radius(const ter_id from, const ter_id to, float radi, const
 {
     if( from == to ) {
         debugmsg( "map::translate %s => %s",
-                  from.obj().name().c_str(),
-                  from.obj().name().c_str() );
+                  from.obj().name(),
+                  from.obj().name() );
         return;
     }
 
@@ -5288,7 +5286,7 @@ void map::trap_set( const tripoint &p, const trap_id t)
     const ter_t &ter = current_submap->get_ter( lx, ly ).obj();
     if( ter.trap != tr_null ) {
         debugmsg( "set trap %s on top of terrain %s which already has a builit-in trap",
-                  t.obj().name().c_str(), ter.name().c_str() );
+                  t.obj().name(), ter.name() );
         return;
     }
 
@@ -5317,7 +5315,7 @@ void map::disarm_trap( const tripoint &p )
 
     // Some traps are not actual traps. Skip the rolls, different message and give the option to grab it right away.
     if( tr.get_avoidance() ==  0 && tr.get_difficulty() == 0 ) {
-        add_msg(_("You take down the %s."), tr.name().c_str());
+        add_msg( _( "You take down the %s." ), tr.name() );
         tr.on_disarmed( *this, p );
         return;
     }

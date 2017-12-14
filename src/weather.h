@@ -3,6 +3,7 @@
 #define WEATHER_H
 
 #include "color.h"
+#include "translatable_text.h"
 
 /**
  * @name BODYTEMP
@@ -104,7 +105,7 @@ void snowstorm();   //!< Currently snowstorms have no additional effects.
 } //namespace weather_effect
 
 struct weather_datum {
-    std::string name;       //!< UI name of weather type.
+    translatable_text name;       //!< UI name of weather type.
     nc_color color;         //!< UI color of weather type.
     int ranged_penalty;     //!< Penalty to ranged attacks.
     float sight_penalty;    //!< Penalty to per-square visibility, applied in transparency map.

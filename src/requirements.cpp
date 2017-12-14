@@ -10,6 +10,7 @@
 #include "string_formatter.h"
 #include "itype.h"
 #include "item_factory.h"
+#include "assign.h"
 #include "calendar.h"
 #include "generic_factory.h"
 
@@ -59,7 +60,7 @@ void quality::load_static( JsonObject &jo, const std::string &src )
 
 void quality::load( JsonObject &jo, const std::string & )
 {
-    mandatory( jo, was_loaded, "name", name, translated_string_reader );
+    assign( jo, "name", name );
 
     JsonArray arr = jo.get_array( "usages" );
     while( arr.has_more() ) {
@@ -89,7 +90,7 @@ std::string quality_requirement::to_string( int ) const
 {
     return string_format( ngettext( "%d tool with %s of %d or more.",
                                     "%d tools with %s of %d or more.", count ),
-                          count, type.obj().name.c_str(), level );
+                          count, type.obj().name, level );
 }
 
 bool tool_comp::by_charges() const

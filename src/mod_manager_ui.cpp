@@ -51,7 +51,7 @@ std::string mod_ui::get_information( const MOD_INFORMATION *mod )
     }
 
     if( !mod->description.empty() ) {
-        info << _( mod->description.c_str() ) << "\n";
+        info << static_cast<std::string>( mod->description ) << "\n";
     }
 
     if( mod->need_lua() ) {

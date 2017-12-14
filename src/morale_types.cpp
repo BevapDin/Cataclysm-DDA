@@ -1,6 +1,7 @@
 #include "morale_types.h"
 #include "generic_factory.h"
 #include "json.h"
+#include "assign.h"
 #include "itype.h"
 #include "string_formatter.h"
 
@@ -182,10 +183,10 @@ void morale_type_data::reset()
 void morale_type_data::load( JsonObject &jo, const std::string & )
 {
     mandatory( jo, was_loaded, "id", id );
-    mandatory( jo, was_loaded, "text", text, translated_string_reader );
+    assign( jo, "text", text );
 
     optional( jo, was_loaded, "permanent", permanent, false );
-    needs_item = text.find( "%s" ) != std::string::npos;
+    needs_item = text.get_untranslated_text().find( "%s" ) != std::string::npos;
 }
 
 void morale_type_data::check() const

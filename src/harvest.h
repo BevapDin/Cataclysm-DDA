@@ -7,6 +7,7 @@
 #include <set>
 
 #include "string_id.h"
+#include "translatable_text.h"
 
 typedef std::string itype_id;
 class JsonObject;
@@ -34,7 +35,7 @@ class harvest_list
 
         const harvest_id &id() const;
 
-        std::string message() const;
+        translatable_text message() const;
 
         bool is_null() const;
 
@@ -80,7 +81,7 @@ class harvest_list
         harvest_id id_;
         std::list<harvest_entry> entries_;
         std::set<std::string> names_;
-        std::string message_;
+        translatable_text message_;
 
         void finalize();
 };

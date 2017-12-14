@@ -40,7 +40,7 @@ const harvest_id &harvest_list::id() const
     return id_;
 }
 
-std::string harvest_list::message() const
+translatable_text harvest_list::message() const
 {
     return message_;
 }
@@ -76,7 +76,7 @@ const harvest_id &harvest_list::load( JsonObject &jo, const std::string &src,
     }
 
     if( jo.has_string( "message" ) ) {
-        ret.message_ = jo.get_string( "message" );
+        ret.message_ = translatable_text( jo.get_string( "message" ) );
     }
 
     JsonArray jo_entries = jo.get_array( "entries" );

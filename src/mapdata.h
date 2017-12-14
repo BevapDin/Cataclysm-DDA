@@ -6,6 +6,7 @@
 #include "string_id.h"
 #include "units.h"
 #include "color.h"
+#include "translatable_text.h"
 
 #include <bitset>
 #include <vector>
@@ -47,8 +48,8 @@ struct map_bash_info {
     bool destroy_only;      // Only used for destroying, not normally bashable
     bool bash_below;        // This terrain is the roof of the tile below it, try to destroy that too
     std::string drop_group; // item group of items that are dropped when the object is bashed
-    std::string sound;      // sound made on success ('You hear a "smash!"')
-    std::string sound_fail; // sound  made on fail
+    translatable_text sound;      // sound made on success ('You hear a "smash!"')
+    translatable_text sound_fail; // sound  made on fail
     ter_str_id ter_set;    // terrain to set (REQUIRED for terrain))
     furn_str_id furn_set;   // furniture to set (only used by furniture, not terrain)
     // ids used for the special handling of tents
@@ -190,15 +191,14 @@ struct map_data_common_t {
     protected:
         friend furn_t null_furniture_t();
         friend ter_t null_terrain_t();
-        // The (untranslated) plaintext name of the terrain type the user would see (i.e. dirt)
-        std::string name_;
+        translatable_text name_;
 
 private:
     std::set<std::string> flags;    // string flags which possibly refer to what's documented above.
     std::bitset<NUM_TERFLAGS> bitflags; // bitfield of -certain- string flags which are heavily checked
 
 public:
-        std::string name() const;
+        translatable_text name() const;
 
     enum { SEASONS_PER_YEAR = 4 };
     /*
@@ -211,7 +211,7 @@ public:
     int movecost;   // The amount of movement points required to pass this terrain by default.
     units::volume max_volume; // Maximal volume of items that can be stored in/on this furniture
 
-    std::string description;
+    translatable_text description;
 
     std::array<nc_color, SEASONS_PER_YEAR> color_; //The color the sym will draw in on the GUI.
     void load_symbol( JsonObject &jo );
@@ -301,7 +301,7 @@ struct furn_t : map_data_common_t {
     furn_str_id id;
     furn_str_id open;  // Open action: transform into furniture with matching id
     furn_str_id close; // Close action: transform into furniture with matching id
-    std::string crafting_pseudo_item;
+    itype_id crafting_pseudo_item;
     itype_id deployed_item; // item id string used to create furniture
 
     int move_str_req; //The amount of strength required to move through this furniture easily.

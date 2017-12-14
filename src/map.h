@@ -35,6 +35,7 @@ class item;
 class Creature;
 class tripoint_range;
 enum field_id : int;
+class translatable_text;
 class field;
 class field_entry;
 class vehicle;
@@ -835,7 +836,7 @@ class map
         std::list<item>::iterator i_rem( const point location, std::list<item>::iterator it );
         int i_rem( const int x, const int y, const int index );
         void i_rem( const int x, const int y, item *it );
-        void spawn_item( const int x, const int y, const std::string &itype_id,
+        void spawn_item( const int x, const int y, const itype_id &id,
                          const unsigned quantity = 1, const long charges = 0,
                          const time_point &birthday = calendar::time_of_cataclysm, const int damlevel = 0 );
 
@@ -861,7 +862,7 @@ class map
         void i_rem( const tripoint &p, const item *it );
         void spawn_artifact( const tripoint &p );
         void spawn_natural_artifact( const tripoint &p, const artifact_natural_property prop );
-        void spawn_item( const tripoint &p, const std::string &itype_id,
+        void spawn_item( const tripoint &p, const itype_id &id,
                          const unsigned quantity = 1, const long charges = 0,
                          const time_point &birthday = calendar::time_of_cataclysm, const int damlevel = 0 );
         units::volume max_volume( const tripoint &p );
@@ -1143,10 +1144,10 @@ class map
         void place_spawns( const mongroup_id &group, const int chance,
                            const int x1, const int y1, const int x2, const int y2, const float density );
         void place_gas_pump( const int x, const int y, const int charges );
-        void place_gas_pump( const int x, const int y, const int charges, std::string fuel_type );
+        void place_gas_pump( const int x, const int y, const int charges, itype_id fuel_type );
         // 6 liters at 250 ml per charge
         void place_toilet( const int x, const int y, const int charges = 6 * 4 );
-        void place_vending( int x, int y, std::string type, bool reinforced = false );
+        void place_vending( int x, int y, items_location type, bool reinforced = false );
         int place_npc( int x, int y, const string_id<npc_template> &type );
 
         void add_spawn( const mtype_id &type, const int count, const int x, const int y,

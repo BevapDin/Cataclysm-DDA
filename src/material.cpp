@@ -144,9 +144,9 @@ material_id material_type::ident() const
     return id;
 }
 
-std::string material_type::name() const
+translatable_text material_type::name() const
 {
-    return _( _name.c_str() );
+    return _name;
 }
 
 itype_id material_type::salvaged_into() const
@@ -169,25 +169,25 @@ int material_type::cut_resist() const
     return _cut_resist;
 }
 
-std::string material_type::bash_dmg_verb() const
+translatable_text material_type::bash_dmg_verb() const
 {
-    return _( _bash_dmg_verb.c_str() );
+    return _bash_dmg_verb;
 }
 
-std::string material_type::cut_dmg_verb() const
+translatable_text material_type::cut_dmg_verb() const
 {
-    return _( _cut_dmg_verb.c_str() );
+    return _cut_dmg_verb;
 }
 
-std::string material_type::dmg_adj( int damage ) const
+translatable_text material_type::dmg_adj( int damage ) const
 {
     if( damage <= 0 ) {
         // not damaged (+/- reinforced)
-        return std::string();
+        return translatable_text();
     }
 
     // apply bounds checking
-    return _( _dmg_adj[std::min( size_t( damage ), _dmg_adj.size() ) - 1].c_str() );
+    return _dmg_adj[std::min( size_t( damage ), _dmg_adj.size() ) - 1];
 }
 
 int material_type::acid_resist() const

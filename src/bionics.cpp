@@ -114,9 +114,9 @@ bool bionic_data::is_included( const bionic_id &id ) const
 void bionics_install_failure( player *u, int difficulty, int success );
 
 bionic_data::bionic_data()
+    : name()
+    , description()
 {
-    name = "bad bionic";
-    description = "This bionic was not set up correctly, this is a bug";
 }
 
 void force_comedown( effect &eff )
@@ -154,7 +154,7 @@ bool player::activate_bionic( int b, bool eff_only )
         }
         if( power_level < bionics[bio.id].power_activate ) {
             add_msg( m_info, _( "You don't have the power to activate your %s." ),
-                     bionics[bio.id].name.c_str() );
+                     bionics[bio.id].name );
             return false;
         }
 
@@ -166,7 +166,7 @@ bool player::activate_bionic( int b, bool eff_only )
         if( bionics[bio.id].charge_time > 0 ) {
             bio.charge = bionics[bio.id].charge_time;
         }
-        add_msg( m_info, _( "You activate your %s." ), bionics[bio.id].name.c_str() );
+        add_msg( m_info, _( "You activate your %s." ), bionics[bio.id].name );
     }
 
     item tmp_item;
@@ -197,14 +197,14 @@ bool player::activate_bionic( int b, bool eff_only )
         for( auto &i : *my_bionics ) {
             if( i.id == "bio_earplugs" ) {
                 i.powered = false;
-                add_msg( m_info, _( "Your %s automatically turn off." ), bionics[i.id].name.c_str() );
+                add_msg( m_info, _( "Your %s automatically turn off." ), bionics[i.id].name );
             }
         }
     } else if( bio.id == "bio_earplugs" && has_active_bionic( bionic_id( "bio_ears" ) ) ) {
         for( auto &i : *my_bionics ) {
             if( i.id == "bio_ears" ) {
                 i.powered = false;
-                add_msg( m_info, _( "Your %s automatically turns off." ), bionics[i.id].name.c_str() );
+                add_msg( m_info, _( "Your %s automatically turns off." ), bionics[i.id].name );
             }
         }
     } else if( bio.id == "bio_tools" ) {
@@ -568,19 +568,19 @@ bool player::deactivate_bionic( int b, bool eff_only )
         }
         if( !bionics[bio.id].toggled ) {
             // It's a fire-and-forget bionic, we can't turn it off but have to wait for it to run out of charge
-            add_msg( m_info, _( "You can't deactivate your %s manually!" ), bionics[bio.id].name.c_str() );
+            add_msg( m_info, _( "You can't deactivate your %s manually!" ), bionics[bio.id].name );
             return false;
         }
         if( power_level < bionics[bio.id].power_deactivate ) {
             add_msg( m_info, _( "You don't have the power to deactivate your %s." ),
-                     bionics[bio.id].name.c_str() );
+                     bionics[bio.id].name );
             return false;
         }
 
         //We can actually deactivate now, do deactivation-y things
         charge_power( -bionics[bio.id].power_deactivate );
         bio.powered = false;
-        add_msg( m_neutral, _( "You deactivate your %s." ), bionics[bio.id].name.c_str() );
+        add_msg( m_neutral, _( "You deactivate your %s." ), bionics[bio.id].name );
     }
 
     // Deactivation effects go here
@@ -683,7 +683,7 @@ void player::process_bionic( int b )
             if( !recharged ) {
                 // No power to recharge, so deactivate
                 bio.powered = false;
-                add_msg( m_neutral, _( "Your %s powers down." ), bio.info().name.c_str() );
+                add_msg( m_neutral, _( "Your %s powers down." ), bio.info().name );
                 // This purposely bypasses the deactivation cost
                 deactivate_bionic( b, true );
                 return;
@@ -703,7 +703,7 @@ void player::process_bionic( int b )
         if( g->remoteveh() == nullptr && get_value( "remote_controlling" ).empty() ) {
             bio.powered = false;
             add_msg( m_warning, _( "Your %s has lost connection and is turning off." ),
-                     bionics[bio.id].name.c_str() );
+                     bionics[bio.id].name );
         }
     } else if( bio.id == "bio_hydraulics" ) {
         // Sound of hissing hydraulic muscle! (not quite as loud as a car horn)
@@ -845,7 +845,7 @@ bool player::uninstall_bionic( bionic_id const &b_id, int skill_level )
     if( !( crafting_inv.has_quality( CUT_FINE ) && crafting_inv.has_amount( "1st_aid", 1 ) ) &&
         skill_level == -1 ) {
         popup( _( "Removing bionics requires a tool with %s quality, and a first aid kit." ),
-               CUT_FINE.obj().name.c_str() );
+               CUT_FINE.obj().name );
         return false;
     }
 
@@ -863,8 +863,8 @@ bool player::uninstall_bionic( bionic_id const &b_id, int skill_level )
 
     for( const auto &e : bionics ) {
         if( e.second.is_included( b_id ) ) {
-            popup( _( "You must remove the %s bionic to remove the %s." ), e.second.name.c_str(),
-                   b_id->name.c_str() );
+            popup( _( "You must remove the %s bionic to remove the %s." ), e.second.name,
+                   b_id->name );
             return false;
         }
     }
@@ -921,10 +921,10 @@ bool player::uninstall_bionic( bionic_id const &b_id, int skill_level )
     if( success > 0 ) {
         add_memorial_log( pgettext( "memorial_male", "Removed bionic: %s." ),
                           pgettext( "memorial_female", "Removed bionic: %s." ),
-                          bionics[b_id].name.c_str() );
+                          bionics[b_id].name );
         // until bionics can be flagged as non-removable
         add_msg( m_neutral, _( "You jiggle your parts back into their familiar places." ) );
-        add_msg( m_good, _( "Successfully removed %s." ), bionics[b_id].name.c_str() );
+        add_msg( m_good, _( "Successfully removed %s." ), bionics[b_id].name );
         // remove power bank provided by bionic
         max_power_level -= bionics[b_id].capacity;
         remove_bionic( b_id );
@@ -932,7 +932,7 @@ bool player::uninstall_bionic( bionic_id const &b_id, int skill_level )
     } else {
         add_memorial_log( pgettext( "memorial_male", "Removed bionic: %s." ),
                           pgettext( "memorial_female", "Removed bionic: %s." ),
-                          bionics[b_id].name.c_str() );
+                          bionics[b_id].name );
         bionics_uninstall_failure( this );
     }
     g->refresh_all();
@@ -1053,16 +1053,16 @@ bool player::install_bionics( const itype &type, int skill_level )
     if( success > 0 ) {
         add_memorial_log( pgettext( "memorial_male", "Installed bionic: %s." ),
                           pgettext( "memorial_female", "Installed bionic: %s." ),
-                          bioid->name.c_str() );
+                          bioid->name );
 
         if( bioid->upgraded_bionic ) {
             remove_bionic( bioid->upgraded_bionic );
             //~ %1$s - name of the bionic to be upgraded (inferior), %2$s - name of the upgraded bionic (superior).
             add_msg( m_good, _( "Successfully upgraded %1$s to %2$s." ),
-                     bioid->upgraded_bionic->name.c_str(), bioid->name.c_str() );
+                     bioid->upgraded_bionic->name, bioid->name );
         } else {
             //~ %s - name of the bionic.
-            add_msg( m_good, _( "Successfully installed %s." ), bioid->name.c_str() );
+            add_msg( m_good, _( "Successfully installed %s." ), bioid->name );
         }
 
         add_bionic( bioid );
@@ -1075,7 +1075,7 @@ bool player::install_bionics( const itype &type, int skill_level )
     } else {
         add_memorial_log( pgettext( "memorial_male", "Installed bionic: %s." ),
                           pgettext( "memorial_female", "Installed bionic: %s." ),
-                          bioid->name.c_str() );
+                          bioid->name );
         bionics_install_failure( this, difficult, success );
     }
     g->refresh_all();
@@ -1197,7 +1197,7 @@ void bionics_install_failure( player *u, int difficulty, int success )
                 u->add_bionic( id );
                 u->add_memorial_log( pgettext( "memorial_male", "Installed bad bionic: %s." ),
                                      pgettext( "memorial_female", "Installed bad bionic: %s." ),
-                                     bionics[ id ].name.c_str() );
+                                     bionics[ id ].name );
             }
         }
         break;
@@ -1392,7 +1392,7 @@ bool player::remove_random_bionic()
         int rem = rng( 0, num_bionics() - 1 );
         const auto bionic = ( *my_bionics )[rem];
         remove_bionic( bionic.id );
-        add_msg( m_bad, _( "Your %s fails, and is destroyed!" ), bionics[ bionic.id ].name.c_str() );
+        add_msg( m_bad, _( "Your %s fails, and is destroyed!" ), bionics[ bionic.id ].name );
         recalc_sight_limits();
     }
     return numb;
@@ -1424,8 +1424,8 @@ void load_bionic( JsonObject &jsobj )
     bionic_data new_bionic;
 
     const bionic_id id( jsobj.get_string( "id" ) );
-    new_bionic.name = _( jsobj.get_string( "name" ).c_str() );
-    new_bionic.description = _( jsobj.get_string( "description" ).c_str() );
+    new_bionic.name = translatable_text( jsobj.get_string( "name" ) );
+    new_bionic.description = translatable_text( jsobj.get_string( "description" ) );
     new_bionic.power_activate = jsobj.get_int( "act_cost", 0 );
 
     new_bionic.toggled = get_bool_or_flag( jsobj, "toggled", "BIONIC_TOGGLED", false );

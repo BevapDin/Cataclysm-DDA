@@ -11,6 +11,7 @@
 #include "explosion.h"
 #include "units.h"
 #include "calendar.h"
+#include "translatable_text.h"
 
 #include <limits.h>
 #include <set>
@@ -57,13 +58,13 @@ class iuse_transform : public iuse_actor
 {
     public:
         /** displayed if player sees transformation with %s replaced by item name */
-        std::string msg_transform;
+        translatable_text msg_transform;
 
         /** type of the resulting item */
-        std::string target;
+        itype_id target;
 
         /** if set transform item to container and place new item (of type @ref target) inside */
-        std::string container;
+        itype_id container;
 
         /** if zero or positive set remaining ammo of @ref target to this (after transformation) */
         long ammo_qty = -1;
@@ -72,7 +73,7 @@ class iuse_transform : public iuse_actor
         int countdown = 0;
 
         /** if both this and ammo_qty are specified then set @ref target to this specific ammo */
-        std::string ammo_type;
+        itype_id ammo_type;
 
         /** used to set the active property of the transformed @ref target */
         bool active = false;
@@ -84,17 +85,17 @@ class iuse_transform : public iuse_actor
         long need_fire = 0;
 
         /** displayed if item is in player possession with %s replaced by item name */
-        std::string need_fire_msg;
+        translatable_text need_fire_msg;
 
         /** minimum charges (if any) required for transformation */
         long need_charges = 0;
 
         /** displayed if item is in player possession with %s replaced by item name */
-        std::string need_charges_msg;
+        translatable_text need_charges_msg;
 
-        std::string menu_text;
+        translatable_text menu_text;
 
-        iuse_transform( const std::string &type = "transform" ) : iuse_actor( type ) {}
+        iuse_transform( const std::string &type = "transform" );
 
         ~iuse_transform() override = default;
         void load( JsonObject &jo ) override;
@@ -111,13 +112,13 @@ class countdown_actor : public iuse_actor
         countdown_actor( const std::string &type = "countdown" ) : iuse_actor( type ) {}
 
         /** if specified overrides default action name */
-        std::string name;
+        translatable_text name;
 
         /** turns before countdown action (defaults to @ref itype::countdown_interval) */
         int interval = 0;
 
         /** message if player sees activation with %s replaced by item name */
-        std::string message;
+        translatable_text message;
 
         ~countdown_actor() override = default;
         void load( JsonObject &jo ) override;
@@ -158,10 +159,10 @@ class explosion_iuse : public iuse_actor
         int scrambler_blast_radius = -1;
         /** Volume of sound each turn, -1 means no sound at all */
         int sound_volume = -1;
-        std::string sound_msg;
+        translatable_text sound_msg;
         /** Message shown when the player tries to deactivate the item,
          * which is not allowed. */
-        std::string no_deactivate_msg;
+        translatable_text no_deactivate_msg;
 
         explosion_iuse( const std::string &type = "explosion" ) : iuse_actor( type ) {}
 
@@ -182,10 +183,10 @@ class unfold_vehicle_iuse : public iuse_actor
          * created when unfolding the item. */
         vproto_id vehicle_id;
         /** Message shown after successfully unfolding the item. */
-        std::string unfold_msg;
+        translatable_text unfold_msg;
         /** Creature::moves it takes to unfold. */
         int moves = 0;
-        std::map<std::string, int> tools_needed;
+        std::map<itype_id, int> tools_needed;
 
         unfold_vehicle_iuse( const std::string &type = "unfold_vehicle" ) : iuse_actor( type ) {}
 
@@ -213,13 +214,13 @@ class consume_drug_iuse : public iuse_actor
 {
     public:
         /** Message to display when drug is consumed. **/
-        std::string activation_message;
+        translatable_text activation_message;
         /** Fields to produce when you take the drug, mostly intended for various kinds of smoke. **/
         std::map<std::string, int> fields_produced;
         /** Tool charges needed to take the drug, e.g. fire. **/
-        std::map<std::string, int> charges_needed;
+        std::map<itype_id, int> charges_needed;
         /** Tools needed, but not consumed, e.g. "smoking apparatus". **/
-        std::map<std::string, int> tools_needed;
+        std::map<itype_id, int> tools_needed;
         /** An effect or effects (conditions) to give the player for the stated duration. **/
         std::vector<effect_data> effects;
         /** A list of stats and adjustments to them. **/
@@ -257,7 +258,7 @@ class delayed_transform_iuse : public iuse_transform
          * Message to display when the user activates the item before the
          * age has been reached.
          */
-        std::string not_ready_msg;
+        translatable_text not_ready_msg;
 
         /** How much longer (in turns) until the transformation can be done, can be negative. */
         int time_to_do( const item &it ) const;
@@ -286,9 +287,9 @@ class place_monster_iuse : public iuse_actor
         /** Difficulty of programming the monster (to be friendly). */
         int difficulty = 0;
         /** Shown when programming the monster succeeded and it's friendly. Can be empty. */
-        std::string friendly_msg;
+        translatable_text friendly_msg;
         /** Shown when programming the monster failed and it's hostile. Can be empty. */
-        std::string hostile_msg;
+        translatable_text hostile_msg;
         /** Skills used to make the monster not hostile when activated. **/
         skill_id skill1 = skill_id::NULL_ID();
         skill_id skill2 = skill_id::NULL_ID();
@@ -309,11 +310,11 @@ class ups_based_armor_actor : public iuse_actor
 {
     public:
         /** Shown when activated. */
-        std::string activate_msg;
+        translatable_text activate_msg;
         /** Shown when deactivated. */
-        std::string deactive_msg;
+        translatable_text deactive_msg;
         /** Shown when it runs out of power. */
-        std::string out_of_power_msg;
+        translatable_text out_of_power_msg;
 
         ups_based_armor_actor( const std::string &type = "ups_based_armor" ) : iuse_actor( type ) {}
 
@@ -380,7 +381,7 @@ class reveal_map_actor : public iuse_actor
         /**
          * The message displayed after revealing.
          */
-        std::string message;
+        translatable_text message;
 
         void reveal_targets( tripoint const &center, const std::string &target, int reveal_distance ) const;
 
@@ -489,6 +490,7 @@ class inscribe_actor : public iuse_actor
         };
 
         // How will the inscription be described
+        //@todo this is not translated
         std::string verb = "Carve";
         std::string gerund = "Carved";
 
@@ -544,10 +546,10 @@ class enzlave_actor : public iuse_actor
 class fireweapon_off_actor : public iuse_actor
 {
     public:
-        std::string target_id;
-        std::string success_message;
-        std::string lacks_fuel_message;
-        std::string failure_message; // Due to bad roll
+        itype_id target_id;
+        translatable_text success_message;
+        translatable_text lacks_fuel_message;
+        translatable_text failure_message; // Due to bad roll
         int noise = 0; // If > 0 success message is a success sound instead
         int moves = 0;
         int success_chance = INT_MIN; // Lower is better: rng(0, 10) - item.damage > this variable
@@ -567,11 +569,11 @@ class fireweapon_off_actor : public iuse_actor
 class fireweapon_on_actor : public iuse_actor
 {
     public:
-        std::string noise_message; // If noise is 0, message content instead
-        std::string voluntary_extinguish_message;
-        std::string charges_extinguish_message;
-        std::string water_extinguish_message;
-        std::string auto_extinguish_message;
+        translatable_text noise_message; // If noise is 0, message content instead
+        translatable_text voluntary_extinguish_message;
+        translatable_text charges_extinguish_message;
+        translatable_text water_extinguish_message;
+        translatable_text auto_extinguish_message;
         int noise = 0; // If 0, it produces a message instead of noise
         int noise_chance = 1; // one_in(this variable)
         int auto_extinguish_chance; // one_in(this) per turn to fail
@@ -590,9 +592,9 @@ class fireweapon_on_actor : public iuse_actor
 class manualnoise_actor : public iuse_actor
 {
     public:
-        std::string no_charges_message;
-        std::string use_message;
-        std::string noise_message;
+        translatable_text no_charges_message;
+        translatable_text use_message;
+        translatable_text noise_message;
         int noise = 0; // Should work even with no volume, even if it seems impossible
         int moves = 0;
 
@@ -630,11 +632,11 @@ class musical_instrument_actor : public iuse_actor
         /**
         * List of sound descriptions for players
         */
-        std::vector< std::string > player_descriptions;
+        std::vector<translatable_text> player_descriptions;
         /**
         * List of sound descriptions for NPCs
         */
-        std::vector< std::string > npc_descriptions;
+        std::vector<translatable_text> npc_descriptions;
         /**
          * Display description once per this duration (@ref calendar::once_every).
          */
@@ -656,9 +658,9 @@ class holster_actor : public iuse_actor
 {
     public:
         /** Prompt to use when selecting an item */
-        std::string holster_prompt;
+        translatable_text holster_prompt;
         /** Message to show when holstering an item */
-        std::string holster_msg;
+        translatable_text holster_msg;
         /** Maximum volume of each item that can be holstered */
         units::volume max_volume;
         /** Minimum volume of each item that can be holstered or 1/3 max_volume if unspecified */
@@ -680,7 +682,7 @@ class holster_actor : public iuse_actor
         /** Store an object in the holster */
         bool store( player &p, item &holster, item &obj ) const;
 
-        holster_actor( const std::string &type = "holster" ) : iuse_actor( type ) {}
+        holster_actor( const std::string &type = "holster" );
 
         ~holster_actor() override = default;
         void load( JsonObject &jo ) override;
@@ -836,7 +838,7 @@ class heal_actor : public iuse_actor
          * If the used item is a tool it, it will be turned into the used up item.
          * If it is not a tool a new item with this id will be created.
          */
-        std::string used_up_item;
+        itype_id used_up_item;
 
         /** How much hp would `healer` heal using this actor on `healed` body part. */
         int get_heal_value( const player &healer, hp_part healed ) const;
@@ -866,7 +868,7 @@ class place_trap_actor : public iuse_actor
             data();
             trap_str_id trap;
             /** The message shown when the trap has been set. */
-            std::string done_message;
+            translatable_text done_message;
             /** Amount of practice of the "trap" skill. */
             int practice = 0;
             /** Move points that are used when placing the trap. */
@@ -889,7 +891,7 @@ class place_trap_actor : public iuse_actor
         /**
          * Contains the question asked when the player can bury the trap. Something like "Bury the trap?"
          */
-        std::string bury_question;
+        translatable_text bury_question;
         /** Data that applies to buried traps. */
         data buried_data;
         /**

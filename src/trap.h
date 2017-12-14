@@ -6,6 +6,8 @@
 #include "string_id.h"
 #include "int_id.h"
 #include "units.h"
+#include "translatable_text.h"
+
 #include <string>
 #include <functional>
 #include <vector>
@@ -75,7 +77,7 @@ struct trap {
         int difficulty; // 0 to ??, difficulty of assembly & disassembly
         bool benign = false;
         trap_function act;
-        std::string name_;
+        translatable_text name_;
         /**
          * If an item with this weight or more is thrown onto the trap, it triggers.
          */
@@ -83,7 +85,7 @@ struct trap {
         int funnel_radius_mm;
         std::vector<itype_id> components; // For disassembly?
     public:
-        std::string name() const;
+        translatable_text name() const;
         /**
          * How easy it is to spot the trap. Smaller values means it's easier to spot.
          */

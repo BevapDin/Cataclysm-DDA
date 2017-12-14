@@ -208,8 +208,12 @@ bool map_bash_info::load(JsonObject &jsobj, std::string member, bool isfurniture
 
     bash_below = j.get_bool("bash_below", false);
 
-    sound = j.get_string("sound", _("smash!"));
-    sound_fail = j.get_string("sound_fail", _("thump!"));
+    if( !j.read( "sound", sound ) ) {
+        sound = _( "smash!" );
+    }
+    if( !j.read( "sound_fail", sound_fail ) ) {
+        sound_fail = _( "thump!" );
+    }
 
     if( isfurniture ) {
         furn_set = furn_str_id( j.get_string( "furn_set", "f_null" ) );
@@ -312,9 +316,9 @@ void load_season_array( JsonObject &jo, const std::string &key, C &container, F 
     }
 }
 
-std::string map_data_common_t::name() const
+translatable_text map_data_common_t::name() const
 {
-    return _( name_.c_str() );
+    return name_;
 }
 
 void map_data_common_t::load_symbol( JsonObject &jo )
@@ -984,13 +988,13 @@ void map_data_common_t::load( JsonObject &jo, const std::string &src )
         }
     }
 
-    optional( jo, false, "description", description, translated_string_reader );
+    assign( jo, "description", description );
 }
 
 void ter_t::load( JsonObject &jo, const std::string &src )
 {
     map_data_common_t::load( jo, src );
-    mandatory( jo, was_loaded, "name", name_ );
+    assign( jo, "name", name_ );
     mandatory( jo, was_loaded, "move_cost", movecost );
     optional( jo, was_loaded, "max_volume", max_volume, legacy_volume_reader, DEFAULT_MAX_VOLUME_IN_SQUARE );
     optional( jo, was_loaded, "trap", trap_id_str );
@@ -1112,7 +1116,7 @@ void map_data_common_t::check() const
 {
     for( auto &harvest : harvest_by_season ) {
         if( !harvest.is_null() && examine == iexamine::none ) {
-            debugmsg( "Harvest data defined without examine function for %s", name_.c_str() );
+            debugmsg( "Harvest data defined without examine function for %s", name_ );
         }
     }
 }

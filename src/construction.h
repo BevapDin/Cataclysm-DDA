@@ -3,6 +3,7 @@
 #define CONSTRUCTION_H
 
 #include "string_id.h"
+#include "translatable_text.h"
 
 #include <string>
 #include <set>
@@ -25,8 +26,8 @@ using requirement_id = string_id<requirement_data>;
 
 struct construction {
         std::string category; //Construction type category
-        std::string description; // how the action is displayed to the player
-        std::string pre_note; // Additional note displayed along with construction requirements.
+        translatable_text description; // how the action is displayed to the player
+        translatable_text pre_note; // Additional note displayed along with construction requirements.
         std::string pre_terrain; // beginning terrain for construction
         std::string post_terrain;// final terrain after construction
 

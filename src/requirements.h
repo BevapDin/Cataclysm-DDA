@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "string_id.h"
+#include "translatable_text.h"
 
 class nc_color;
 class JsonObject;
@@ -32,8 +33,7 @@ enum available_status {
 struct quality {
     bool was_loaded = false;
     quality_id id;
-    // Translated name
-    std::string name;
+    translatable_text name;
 
     std::vector<std::pair<int, std::string>> usages;
 

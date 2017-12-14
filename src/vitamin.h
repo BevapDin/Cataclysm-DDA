@@ -3,6 +3,7 @@
 #define VITAMIN_H
 
 #include "string_id.h"
+#include "translatable_text.h"
 
 #include <string>
 #include <map>
@@ -28,7 +29,7 @@ class vitamin
             return id_ == vitamin_id( "null" );
         }
 
-        const std::string &name() const {
+        const translatable_text &name() const {
             return name_;
         }
 
@@ -78,7 +79,7 @@ class vitamin
 
     private:
         vitamin_id id_;
-        std::string name_;
+        translatable_text name_;
         efftype_id deficiency_;
         efftype_id excess_;
         int min_;

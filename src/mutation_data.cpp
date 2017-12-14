@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "translations.h"
 #include "trait_group.h"
+#include "assign.h"
 
 #include "color.h"
 
@@ -78,7 +79,7 @@ void load_mutation_category(JsonObject &jsobj)
 {
     mutation_category_trait new_category;
     new_category.id = jsobj.get_string("id");
-    new_category.name =_(jsobj.get_string("name").c_str());
+    assign( jsobj, "name", new_category.name );
     new_category.category = jsobj.get_string( "category" );
     // @todo: Remove
     new_category.category_full = jsobj.get_string( "category_full", "MUTCAT_" + new_category.category );
@@ -86,13 +87,15 @@ void load_mutation_category(JsonObject &jsobj)
     new_category.threshold_mut = trait_id( jsobj.get_string( "threshold_mut", "THRESH_" + new_category.category ) );
     new_category.mutagen_flag = jsobj.get_string( "mutagen_flag", "MUTAGEN_" + new_category.category );
 
-    new_category.mutagen_message = _(jsobj.get_string("mutagen_message", "You drink your mutagen").c_str());
+    new_category.mutagen_message = translatable_text( translate_marker( "You drink your mutagen" ) );
+    assign( jsobj, "mutagen_message", new_category.mutagen_message );
     new_category.mutagen_hunger  = jsobj.get_int("mutagen_hunger", 10);
     new_category.mutagen_thirst  = jsobj.get_int("mutagen_thirst", 10);
     new_category.mutagen_pain    = jsobj.get_int("mutagen_pain", 2);
     new_category.mutagen_fatigue = jsobj.get_int("mutagen_fatigue", 5);
     new_category.mutagen_morale  = jsobj.get_int("mutagen_morale", 0);
-    new_category.iv_message = _(jsobj.get_string("iv_message", "You inject yourself").c_str());
+    new_category.iv_message = translatable_text( translate_marker( "You inject yourself" ) );
+    assign( jsobj, "iv_message", new_category.iv_message );
     new_category.iv_min_mutations    = jsobj.get_int("iv_min_mutations", 1);
     new_category.iv_additional_mutations = jsobj.get_int("iv_additional_mutations", 2);
     new_category.iv_additional_mutations_chance = jsobj.get_int("iv_additional_mutations_chance", 3);
@@ -103,14 +106,17 @@ void load_mutation_category(JsonObject &jsobj)
     new_category.iv_morale   = jsobj.get_int("iv_morale", 0);
     new_category.iv_morale_max   = jsobj.get_int("iv_morale_max", 0);
     new_category.iv_sound = jsobj.get_bool("iv_sound", false);
-    new_category.iv_sound_message = _(jsobj.get_string("iv_sound_message", "You inject yoursel-arRGH!").c_str());
+    new_category.iv_sound_message = translatable_text( translate_marker( "You inject yoursel-arRGH!" ) );
+    assign( jsobj, "iv_sound_message", new_category.iv_sound_message );
     new_category.iv_noise = jsobj.get_int("iv_noise", 0);
     new_category.iv_sleep = jsobj.get_bool("iv_sleep", false);
-    new_category.iv_sleep_message =_(jsobj.get_string("iv_sleep_message", "Fell asleep").c_str());
+    new_category.iv_sleep_message = translatable_text( translate_marker( "Fell asleep" ) );
+    assign( jsobj, "iv_sleep_message", new_category.iv_sleep_message );
     new_category.iv_sleep_dur = jsobj.get_int("iv_sleep_dur", 0);
-    new_category.memorial_message = _(jsobj.get_string("memorial_message", "Crossed a threshold").c_str());
-    new_category.junkie_message = _(jsobj.get_string("junkie_message", "Oh, yeah! That's the stuff!").c_str());
-
+    new_category.memorial_message = translatable_text( translate_marker( "Crossed a threshold" ) );
+    assign( jsobj, "memorial_message", new_category.memorial_message );
+    new_category.junkie_message = translatable_text( translate_marker( "Oh, yeah! That's the stuff!" ) );
+    assign( jsobj, "junkie_message", new_category.junkie_message );
     mutation_category_traits[new_category.id] = new_category;
 }
 
@@ -189,8 +195,8 @@ void mutation_branch::load( JsonObject &jsobj )
     mutation_branch &new_mut = mutation_data[id];
 
     JsonArray jsarr;
-    new_mut.name = _(jsobj.get_string("name").c_str());
-    new_mut.description = _(jsobj.get_string("description").c_str());
+    assign( jsobj, "name", new_mut.name );
+    assign( jsobj, "description", new_mut.description );
     new_mut.points = jsobj.get_int("points");
     new_mut.visibility = jsobj.get_int("visibility", 0);
     new_mut.ugliness = jsobj.get_int("ugliness", 0);
@@ -210,7 +216,7 @@ void mutation_branch::load( JsonObject &jsobj )
     if( jsobj.has_object( "spawn_item" ) ) {
         JsonObject spawn_item = jsobj.get_object( "spawn_item" );
         new_mut.spawn_item = spawn_item.get_string( "type", "" );
-        new_mut.spawn_item_message = spawn_item.get_string( "message", "" );
+        new_mut.spawn_item_message = translatable_text( spawn_item.get_string( "message", "" ) );
     }
     for( auto & s : jsobj.get_string_array( "initial_ma_styles" ) ) {
         new_mut.initial_ma_styles.push_back( matype_id( s ) );
@@ -388,7 +394,7 @@ nc_color mutation_branch::get_display_color() const
     }
 }
 
-const std::string &mutation_branch::get_name( const trait_id &mutation_id )
+const translatable_text &mutation_branch::get_name( const trait_id &mutation_id )
 {
     return mutation_id->name;
 }
@@ -415,9 +421,10 @@ void load_dream(JsonObject &jsobj)
     newdream.strength = jsobj.get_int("strength");
     newdream.category = jsobj.get_string("category");
 
+    assign( jsobj, "messages", newdream.messages );
     JsonArray jsarr = jsobj.get_array("messages");
     while (jsarr.has_more()) {
-        newdream.messages.push_back(_(jsarr.next_string().c_str()));
+        newdream.messages.emplace_back( jsarr.next_string() );
     }
 
     dreams.push_back(newdream);
@@ -425,7 +432,7 @@ void load_dream(JsonObject &jsobj)
 
 bool trait_display_sort( const trait_id &a, const trait_id &b ) noexcept
 {
-    return a->name < b->name;
+    return a->name.translated() < b->name.translated();
 }
 
 void mutation_branch::load_trait_blacklist( JsonObject &jsobj )

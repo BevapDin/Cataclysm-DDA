@@ -2,14 +2,6 @@
 #ifndef TRANSLATIONS_H
 #define TRANSLATIONS_H
 
-#ifndef translate_marker
-/**
- * Marks a string literal to be extracted for translation. This is only for running `xgettext` via
- * "lang/update_pot.sh". Use `_` to extract *and* translate at run time. The macro itself does not
- * do anything, the argument is passed through it without any changes.
- */
-#define translate_marker(x) x
-#endif
 #ifndef translate_marker_context
 /**
  * Same as @ref translate_marker, but also provides a context (string literal). This is similar
@@ -34,10 +26,37 @@
 #include <libintl.h>
 #include <clocale>
 
-inline const char *_( const char *msg )
+inline const char *translate( const char * const msg )
 {
     return ( msg[0] == '\0' ) ? msg : gettext( msg );
 }
+
+template<unsigned int N>
+inline const char *_( const char ( &text )[N] )
+{
+    return translate( text );
+}
+
+inline const char *_( const std::string &text )
+{
+    return translate( text.c_str() );
+}
+
+class translatable_text;
+class translate_marker {
+    private:
+        const char *const text;
+
+    public:
+        template<unsigned int N>
+        translate_marker( const char (&text)[N] ) : text( text ) {
+        }
+
+        operator const char *() const {
+            return text;
+        }
+        operator translatable_text() const
+};
 
 const char *pgettext( const char *context, const char *msgid );
 
@@ -52,6 +71,15 @@ const char *npgettext( const char *context, const char *msgid, const char *msgid
 #include <locale>
 
 #define _(STRING) (STRING)
+
+#ifndef translate_marker
+/**
+ * Marks a string literal to be extracted for translation. This is only for running `xgettext` via
+ * "lang/update_pot.sh". Use `_` to extract *and* translate at run time. The macro itself does not
+ * do anything, the argument is passed through it without any changes.
+ */
+#define translate_marker(x) translatable_text(x)
+#endif
 
 #define ngettext(STRING1, STRING2, COUNT) (COUNT < 2 ? _(STRING1) : _(STRING2))
 #define pgettext(STRING1, STRING2) _(STRING2)

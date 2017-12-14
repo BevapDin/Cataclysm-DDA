@@ -229,7 +229,7 @@ item& item::deactivate( const Character *ch, bool alert )
 
     if( is_tool() && type->tool->revert_to != "null" ) {
         if( ch && alert && !type->tool->revert_msg.empty() ) {
-            ch->add_msg_if_player( m_info, _( type->tool->revert_msg.c_str() ), tname().c_str() );
+            ch->add_msg_if_player( m_info, type->tool->revert_msg, tname() );
         }
         convert( type->tool->revert_to );
         active = false;
@@ -801,7 +801,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
         if( !mat_types.empty() ) {
             const std::string material_list = enumerate_as_string( mat_types.begin(), mat_types.end(),
             []( const material_type *material ) {
-                return string_format( "<stat>%s</stat>", _( material->name().c_str() ) );
+                return string_format( "<stat>%s</stat>", material->name() );
             }, false );
             info.push_back( iteminfo( "BASE", string_format( _( "Material: %s" ), material_list.c_str() ) ) );
         }
@@ -914,7 +914,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
     if( is_magazine() && !has_flag( "NO_RELOAD" ) ) {
         info.emplace_back( "MAGAZINE", _( "Capacity: " ),
                            string_format( ngettext( "<num> round of %s", "<num> rounds of %s", ammo_capacity() ),
-                                          ammo_type()->name().c_str() ), ammo_capacity(), true );
+                                          ammo_type()->name() ), ammo_capacity(), true );
 
         info.emplace_back( "MAGAZINE", _( "Reload time: " ), _( "<num> per round" ),
                            type->magazine->reload_time, true, "", true, true );
@@ -998,7 +998,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
             if( mod->ammo_capacity() ) {
                 info.emplace_back( "GUN", _( "<bold>Capacity:</bold> " ),
                                    string_format( ngettext( "<num> round of %s", "<num> rounds of %s", mod->ammo_capacity() ),
-                                                  mod->ammo_type()->name().c_str() ), mod->ammo_capacity(), true );
+                                                  mod->ammo_type()->name() ), mod->ammo_capacity(), true );
             }
         } else {
             info.emplace_back( "GUN", _( "Type: " ), mod->ammo_type()->name() );
@@ -1221,7 +1221,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
         }
         if( type->mod->ammo_modifier ) {
             info.push_back( iteminfo( "GUNMOD",
-                                      string_format( _( "Ammo: <stat>%s</stat>" ), type->mod->ammo_modifier->name().c_str() ) ) );
+                                      string_format( _( "Ammo: <stat>%s</stat>" ), type->mod->ammo_modifier->name() ) ) );
         }
 
         temp1.str( "" );
@@ -1474,7 +1474,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
             if( ammo_type() ) {
                 //~ "%s" is ammunition type. This types can't be plural.
                 tmp = ngettext( "Maximum <num> charge of %s.", "Maximum <num> charges of %s.", ammo_capacity() );
-                tmp = string_format( tmp, ammo_type()->name().c_str() );
+                tmp = string_format( tmp, ammo_type()->name() );
             } else {
                 tmp = ngettext( "Maximum <num> charge.", "Maximum <num> charges.", ammo_capacity() );
             }
@@ -1484,7 +1484,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
 
     if( !components.empty() ) {
         info.push_back( iteminfo( "DESCRIPTION", string_format( _( "Made from: %s" ),
-                                  _( components_to_string().c_str() ) ) ) );
+                                  components_to_string() ) ) );
     } else {
         const auto &dis = recipe_dictionary::get_uncraft( typeId() );
         const auto &req = dis.disassembly_requirements();
@@ -1538,7 +1538,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
         } else if( idescription != item_vars.end() ) {
             info.push_back( iteminfo( "DESCRIPTION", idescription->second ) );
         } else {
-            info.push_back( iteminfo( "DESCRIPTION", _( type->description.c_str() ) ) );
+            info.push_back( iteminfo( "DESCRIPTION", type->description ) );
         }
         auto all_techniques = type->techniques;
         all_techniques.insert( techniques.begin(), techniques.end() );
@@ -1770,7 +1770,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
         for( const auto &e : faults ) {
             //~ %1$s is the name of a fault and %2$s is the description of the fault
             info.emplace_back( "DESCRIPTION", string_format( _( "* <bad>Faulty %1$s</bad>.  %2$s" ),
-                               e.obj().name().c_str(), e.obj().description().c_str() ) );
+                               e.obj().name(), e.obj().description() ) );
         }
 
         // does the item fit in any holsters?
@@ -1834,10 +1834,10 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
                 }
                 insert_separation_line();
                 info.emplace_back( "DESCRIPTION", temp1.str() );
-                info.emplace_back( "DESCRIPTION", _( mod->type->description.c_str() ) );
+                info.emplace_back( "DESCRIPTION", mod->type->description );
             }
             if( !contents.front().type->mod ) {
-                info.emplace_back( "DESCRIPTION", _( contents.front().type->description.c_str() ) );
+                info.emplace_back( "DESCRIPTION", contents.front().type->description );
             }
         }
 
@@ -2220,7 +2220,7 @@ std::string item::tname( unsigned int quantity, bool with_prefix ) const
         } else if( get_option<bool>( "ITEM_HEALTH_BAR" ) ) {
             damtext = "<color_" + string_from_color( damage_color() ) + ">" + damage_symbol() + " </color>";
         } else {
-            damtext = string_format( "%s ", get_base_material().dmg_adj( damage() ).c_str() );
+            damtext = string_format( "%s ", get_base_material().dmg_adj( damage() ) );
         }
     }
     if( !faults.empty() ) {
@@ -4498,7 +4498,7 @@ ret_val<bool> item::is_gunmod_compatible( const item& mod ) const
     } else if ( !mod.type->mod->acceptable_ammo.empty() && !mod.type->mod->acceptable_ammo.count( ammo_type( false ) ) ) {
         //~ %1$s - name of the gunmod, %2$s - name of the ammo
         return ret_val<bool>::make_failure( _( "%1$s cannot be used on %2$s" ), mod.tname( 1 ).c_str(),
-                                            ammo_type( false )->name().c_str() );
+                                            ammo_type( false )->name() );
 
     } else if( mod.typeId() == "waterproof_gunmod" && has_flag( "WATERPROOF_GUN" ) ) {
         return ret_val<bool>::make_failure( _( "is already waterproof" ) );

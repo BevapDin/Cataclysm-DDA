@@ -29,6 +29,7 @@
 #include "get_version.h"
 #include "scenario.h"
 #include "calendar.h"
+#include "translatable_text.h"
 #include "monster.h"
 #include "monfaction.h"
 #include "morale.h"
@@ -2438,4 +2439,9 @@ void deserialize( recipe_subset &value, JsonIn &jsin )
     while( !jsin.end_array() ) {
         value.include( &recipe_id( jsin.get_string() ).obj() );
     }
+}
+
+void translatable_text::deserialize( JsonIn &jsin )
+{
+    text_ = jsin.get_string();
 }

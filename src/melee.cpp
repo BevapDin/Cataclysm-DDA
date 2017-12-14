@@ -1197,7 +1197,7 @@ void player::perform_technique(const ma_technique &technique, Creature &t, damag
         if (one_in(1400 - (get_int() * 50))) {
             ma_styles.push_back(style_selected);
             add_msg_if_player(m_good, _("You have learned %s from extensive practice with the CQB Bionic."),
-                       style_selected.obj().name.c_str());
+                       style_selected.obj().name );
         }
     }
 }
@@ -1642,9 +1642,9 @@ std::vector<special_attack> player::mutation_attacks(Creature &t) const
             // Can't use <npcname> here
             // @todo: Fix
             if( is_player() ) {
-                tmp.text = string_format( _( mut_atk.attack_text_u.c_str() ), target.c_str() );
+                tmp.text = string_format( mut_atk.attack_text_u, target );
             } else {
-                tmp.text = string_format( _( mut_atk.attack_text_npc.c_str() ), name.c_str(), target.c_str() );
+                tmp.text = string_format( mut_atk.attack_text_npc, name, target );
             }
 
             // Attack starts here

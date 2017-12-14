@@ -19,6 +19,7 @@
 #include "rng.h"
 #include "requirements.h"
 #include "trap.h"
+#include "assign.h"
 #include "overmapbuffer.h"
 #include "options.h"
 #include "npc.h"
@@ -76,11 +77,11 @@ void failure_standard( const tripoint & );
 };
 
 // Helper functions, nobody but us needs to call these.
-static bool can_construct( const std::string &desc );
+static bool can_construct( const translatable_text &desc );
 static bool can_construct( const construction &con );
 static bool player_can_build( player &p, const inventory &inv, const construction &con );
-static bool player_can_build( player &p, const inventory &pinv, const std::string &desc );
-static void place_construction( const std::string &desc );
+static bool player_can_build( player &p, const inventory &pinv, const translatable_text &desc );
+static void place_construction( const translatable_text &desc );
 
 std::vector<construction> constructions;
 
@@ -91,7 +92,7 @@ void standardize_construction_times( int const time )
     }
 }
 
-std::vector<construction *> constructions_by_desc( const std::string &description )
+std::vector<construction *> constructions_by_desc( const translatable_text &description )
 {
     std::vector<construction *> result;
     for( auto &constructions_a : constructions ) {
@@ -102,8 +103,8 @@ std::vector<construction *> constructions_by_desc( const std::string &descriptio
     return result;
 }
 
-void load_available_constructions( std::vector<std::string> &available,
-                                   std::map<std::string, std::vector<std::string>> &cat_available,
+void load_available_constructions( std::vector<translatable_text> &available,
+                                   std::map<std::string, std::vector<translatable_text>> &cat_available,
                                    bool hide_unconstructable )
 {
     cat_available.clear();
@@ -141,7 +142,7 @@ void draw_grid( const catacurses::window &w, const int list_width )
     wrefresh( w );
 }
 
-nc_color construction_color( std::string &con_name, bool highlight )
+nc_color construction_color( translatable_text &con_name, bool highlight )
 {
     nc_color col = c_dark_gray;
     if( g->u.has_trait( trait_id( "DEBUG_HS" ) ) ) {
@@ -175,8 +176,8 @@ void construction_menu()
 {
     static bool hide_unconstructable = false;
     // only display constructions the player can theoretically perform
-    std::vector<std::string> available;
-    std::map<std::string, std::vector<std::string>> cat_available;
+    std::vector<translatable_text> available;
+    std::map<std::string, std::vector<translatable_text>> cat_available;
     load_available_constructions( available, cat_available, hide_unconstructable );
 
     if( available.empty() ) {
@@ -222,7 +223,7 @@ void construction_menu()
     int offset = 0;
     bool exit = false;
     std::string category_name = "";
-    std::vector<std::string> constructs;
+    std::vector<translatable_text> constructs;
     //storage for the color text so it can be scrolled
     std::vector< std::vector < std::string > > construct_buffers;
     std::vector<std::string> full_construct_buffer;
@@ -307,7 +308,7 @@ void construction_menu()
                     select = std::distance( constructs.begin(),
                                             std::find( constructs.begin(),
                                                        constructs.end(),
-                                                       uistate.last_construction ) );
+                                                       translatable_text( uistate.last_construction ) ) );
                 }
                 filter = uistate.construction_filter;
             }
@@ -322,7 +323,7 @@ void construction_menu()
         // Print the constructions between offset and max (or how many will fit)
         for( size_t i = 0; ( int )i < w_list_height && ( i + offset ) < constructs.size(); i++ ) {
             int current = i + offset;
-            std::string con_name = constructs[current];
+            translatable_text con_name = constructs[current];
             bool highlight = ( current == select );
 
             trim_and_print( w_list, i, 0, w_list_width,
@@ -363,7 +364,7 @@ void construction_menu()
                 if( select >= ( int ) constructs.size() ) {
                     select = 0;
                 }
-                std::string current_desc = constructs[select];
+                translatable_text current_desc = constructs[select];
                 // Print construction name
                 trim_and_print( w_con, 1, pos_x, available_window_width, c_white,
                                 current_desc );
@@ -468,7 +469,7 @@ void construction_menu()
                         }
                         if( !current_con->pre_note.empty() ) {
                             std::vector<std::string> folded_result_string =
-                                foldstring( _( current_con->pre_note.c_str() ), available_window_width );
+                                foldstring( current_con->pre_note, available_window_width );
                             current_buffer.insert( current_buffer.end(), folded_result_string.begin(),
                                                    folded_result_string.end() );
                         }
@@ -622,7 +623,8 @@ void construction_menu()
             }
             if( player_can_build( g->u, total_inv, constructs[select] ) ) {
                 place_construction( constructs[select] );
-                uistate.last_construction = constructs[select];
+                //@todo change uistate.last_construction to translatable_text
+                uistate.last_construction = constructs[select].get_untranslated_text();
                 exit = true;
             } else {
                 popup( _( "You can't build that!" ) );
@@ -637,7 +639,7 @@ void construction_menu()
     g->refresh_all();
 }
 
-bool player_can_build( player &p, const inventory &pinv, const std::string &desc )
+bool player_can_build( player &p, const inventory &pinv, const translatable_text &desc )
 {
     // check all with the same desc to see if player can build any
     std::vector<construction *> cons = constructions_by_desc( desc );
@@ -669,7 +671,7 @@ bool player_can_build( player &p, const inventory &pinv, const construction &con
     return con.requirements->can_make_with_inventory( pinv );
 }
 
-bool can_construct( const std::string &desc )
+bool can_construct( const translatable_text &desc )
 {
     // check all with the same desc to see if player can build any
     std::vector<construction *> cons = constructions_by_desc( desc );
@@ -724,7 +726,7 @@ bool can_construct( const construction &con )
     return false;
 }
 
-void place_construction( const std::string &desc )
+void place_construction( const translatable_text &desc )
 {
     g->refresh_all();
     const inventory &total_inv = g->u.crafting_inventory();
@@ -803,7 +805,7 @@ void complete_construction()
         }
     }
 
-    add_msg( m_info, _( "You finish your construction: %s." ), built.description.c_str() );
+    add_msg( m_info, _( "You finish your construction: %s." ), built.description );
 
     // clear the activity
     u.activity.set_to_null();
@@ -928,7 +930,7 @@ void construct::done_deconstruct( const tripoint &p )
     if( g->m.has_furn( p ) ) {
         const furn_t &f = g->m.furn( p ).obj();
         if( !f.deconstruct.can_do ) {
-            add_msg( m_info, _( "That %s can not be disassembled!" ), f.name().c_str() );
+            add_msg( m_info, _( "That %s can not be disassembled!" ), f.name() );
             return;
         }
         if( f.deconstruct.furn_set.str().empty() ) {
@@ -936,7 +938,7 @@ void construct::done_deconstruct( const tripoint &p )
         } else {
             g->m.furn_set( p, f.deconstruct.furn_set );
         }
-        add_msg( _( "You disassemble the %s." ), f.name().c_str() );
+        add_msg( _( "You disassemble the %s." ), f.name() );
         g->m.spawn_items( p, item_group::items_from( f.deconstruct.drop_group, calendar::turn ) );
         // Hack alert.
         // Signs have cosmetics associated with them on the submap since
@@ -947,7 +949,7 @@ void construct::done_deconstruct( const tripoint &p )
     } else {
         const ter_t &t = g->m.ter( p ).obj();
         if( !t.deconstruct.can_do ) {
-            add_msg( _( "That %s can not be disassembled!" ), t.name().c_str() );
+            add_msg( _( "That %s can not be disassembled!" ), t.name() );
             return;
         }
         if( t.id == "t_console_broken" )  {
@@ -961,7 +963,7 @@ void construct::done_deconstruct( const tripoint &p )
             }
         }
         g->m.ter_set( p, t.deconstruct.ter_set );
-        add_msg( _( "You disassemble the %s." ), t.name().c_str() );
+        add_msg( _( "You disassemble the %s." ), t.name() );
         g->m.spawn_items( p, item_group::items_from( t.deconstruct.drop_group, calendar::turn ) );
     }
 }
@@ -1126,7 +1128,7 @@ void load_construction( JsonObject &jo )
     construction con;
     con.id = constructions.size();
 
-    con.description = _( jo.get_string( "description" ).c_str() );
+    assign( jo, "description", con.description );
     if( jo.has_member( "required_skills" ) ) {
         auto sk = jo.get_array( "required_skills" );
         while( sk.has_more() ) {
@@ -1152,7 +1154,7 @@ void load_construction( JsonObject &jo )
         requirement_data::load_requirement( jo, req_id );
         con.requirements = requirement_id( req_id );
     }
-    con.pre_note = jo.get_string( "pre_note", "" );
+    assign( jo, "pre_note", con.pre_note );
     con.pre_terrain = jo.get_string( "pre_terrain", "" );
     if( con.pre_terrain.size() > 1
         && con.pre_terrain[0] == 'f'
@@ -1217,7 +1219,7 @@ void check_constructions()
 {
     for( size_t i = 0; i < constructions.size(); i++ ) {
         const construction &c = constructions[ i ];
-        const std::string display_name = std::string( "construction " ) + c.description;
+        const std::string display_name = std::string( "construction " ) + c.description.get_untranslated_text();
         // Note: print the description as the id is just a generated number,
         // the description can be searched for in the json files.
         for( const auto &pr : c.required_skills ) {
@@ -1252,7 +1254,7 @@ void check_constructions()
         }
         if( c.id != i ) {
             debugmsg( "Construction \"%s\" has id %u, but should have %u",
-                      c.description.c_str(), c.id, i );
+                      c.description, c.id, i );
         }
     }
 }

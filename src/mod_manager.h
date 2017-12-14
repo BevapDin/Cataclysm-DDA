@@ -4,14 +4,13 @@
 
 #include "string_id.h"
 #include "pimpl.h"
+#include "translatable_text.h"
 
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
 #include <memory>
-
-const std::vector<std::pair<std::string, std::string> > &get_mod_list_categories();
 
 struct WORLD;
 typedef WORLD *WORLDPTR;
@@ -32,7 +31,7 @@ using mod_id = string_id<MOD_INFORMATION>;
 struct MOD_INFORMATION {
     private:
         friend mod_manager;
-        std::string name_;
+        translatable_text name_;
 
     public:
         std::string name() const;
@@ -54,7 +53,7 @@ struct MOD_INFORMATION {
          */
         std::set<std::string> maintainers;
 
-        std::string description;
+        translatable_text description;
         std::string version;
 
         /** What other mods must be loaded prior to this one? */

@@ -45,7 +45,7 @@ std::string MOD_INFORMATION::name() const
         //~ name of a mod that has no name entry, (%s is the mods identifier)
         return string_format( _( "No name (%s)" ), ident.c_str() );
     } else {
-        return _( name_.c_str() );
+        return name_;
     }
 }
 
@@ -219,7 +219,7 @@ void mod_manager::load_modfile( JsonObject &jo, const std::string &path )
         return;
     }
 
-    std::string m_name = jo.get_string( "name", "" );
+    translatable_text m_name( jo.get_string( "name", "" ) );
 
     std::string m_cat = jo.get_string( "category", "" );
     std::pair<int, std::string> p_cat = {-1, ""};

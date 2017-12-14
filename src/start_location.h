@@ -3,6 +3,7 @@
 #define START_LOCATION_H
 
 #include "string_id.h"
+#include "translatable_text.h"
 
 #include <vector>
 #include <string>
@@ -26,7 +27,7 @@ class start_location
         start_location();
 
         const string_id<start_location> &ident() const;
-        std::string name() const;
+        translatable_text name() const;
         std::string target() const;
         const std::set<std::string> &flags() const;
 
@@ -77,7 +78,7 @@ class start_location
         friend class generic_factory<start_location>;
         string_id<start_location> id;
         bool was_loaded = false;
-        std::string _name;
+        translatable_text _name;
         std::string _target;
         std::set<std::string> _flags;
 

@@ -498,15 +498,15 @@ class Creature
         virtual int print_info( const catacurses::window &w, int vStart, int vLines, int column ) const = 0;
 
         // Message related stuff
-        template<typename ...Args>
-        void add_msg_if_player( const char *const msg, Args &&... args ) const {
-            return add_msg_if_player( string_format( msg, std::forward<Args>( args )... ) );
+        template<typename T, typename F, typename ...Args>
+        typename std::enable_if<!std::is_same<typename std::decay<T>::type, game_message_type>::value>::type add_msg_if_player( T &&msg, F && first, Args &&... args ) const {
+            return add_msg_if_player( string_format( std::forward<T>( msg ), std::forward<F>( first ), std::forward<Args>( args )... ) );
         }
         virtual void add_msg_if_player( const std::string &/*msg*/ ) const {}
-        template<typename ...Args>
-        void add_msg_if_player( const game_message_type type, const char *const msg,
-                                Args &&... args ) const {
-            return add_msg_if_player( type, string_format( msg, std::forward<Args>( args )... ) );
+
+        template<typename T, typename F, typename ...Args>
+        void add_msg_if_player( const game_message_type type, T && msg, F && first, Args &&... args ) const {
+            return add_msg_if_player( type, string_format( std::forward<T>( msg ), std::forward<F>( first ), std::forward<Args>( args )... ) );
         }
         virtual void add_msg_if_player( game_message_type /*type*/, const std::string &/*msg*/ ) const {}
 

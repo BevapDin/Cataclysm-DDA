@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 
+#include "translatable_text.h"
 #include "game_constants.h"
 #include "string_id.h"
 #include "fire.h"
@@ -26,7 +27,7 @@ class material_type
         bool was_loaded = false;
 
     private:
-        std::string _name;
+        translatable_text _name;
         itype_id _salvaged_into = itype_id( "null" ); // this material turns into this item when salvaged
         itype_id _repaired_with = itype_id( "null" ); // this material can be repaired with this item
         int _bash_resist = 0;                         // negative integers means susceptibility
@@ -39,9 +40,9 @@ class material_type
         bool _edible = false;
         bool _soft = false;
 
-        std::string _bash_dmg_verb;
-        std::string _cut_dmg_verb;
-        std::vector<std::string> _dmg_adj;
+        translatable_text _bash_dmg_verb;
+        translatable_text _cut_dmg_verb;
+        std::vector<translatable_text> _dmg_adj;
 
         std::map<vitamin_id, double> _vitamins;
 
@@ -56,14 +57,14 @@ class material_type
         int dam_resist( damage_type damtype ) const;
 
         material_id ident() const;
-        std::string name() const;
+        translatable_text name() const;
         itype_id salvaged_into() const;
         itype_id repaired_with() const;
         int bash_resist() const;
         int cut_resist() const;
-        std::string bash_dmg_verb() const;
-        std::string cut_dmg_verb() const;
-        std::string dmg_adj( int damage ) const;
+        translatable_text bash_dmg_verb() const;
+        translatable_text cut_dmg_verb() const;
+        translatable_text dmg_adj( int damage ) const;
         int acid_resist() const;
         int elec_resist() const;
         int fire_resist() const;

@@ -139,7 +139,7 @@ struct oter_type_t {
 
     public:
         string_id<oter_type_t> id;
-        std::string name;               // Untranslated name
+        translatable_text name;
         long sym = '\0';                // This is a long, so we can support curses line drawing
         nc_color color = c_black;
         unsigned char see_cost = 0;     // Affects how far the player can see in the overmap
@@ -201,8 +201,8 @@ struct oter_t {
         std::string get_mapgen_id() const;
         oter_id get_rotated( om_direction::type dir ) const;
 
-        const std::string get_name() const {
-            return _( type->name.c_str() );
+        const translatable_text &get_name() const {
+            return type->name;
         }
 
         long get_sym() const {

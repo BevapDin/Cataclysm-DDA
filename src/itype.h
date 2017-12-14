@@ -13,6 +13,7 @@
 #include "units.h"
 #include "damage.h"
 #include "translations.h"
+#include "translatable_text.h"
 #include "calendar.h"
 
 #include <string>
@@ -82,7 +83,7 @@ struct islot_tool {
     ammotype ammo_id = ammotype::NULL_ID();
 
     itype_id revert_to = "null";
-    std::string revert_msg;
+    translatable_text revert_msg;
 
     std::string subtype;
 
@@ -99,7 +100,7 @@ struct islot_comestible
     std::string comesttype;
 
      /** tool needed to consume (e.g. lighter for cigarettes) */
-    std::string tool = "null";
+    itype_id tool = "null";
 
     /** Defaults # of charges (drugs, loaf of bread? etc) */
     long def_charges = 1;
@@ -144,7 +145,7 @@ struct islot_comestible
 
 struct islot_brewable {
     /** What are the results of fermenting this item? */
-    std::vector<std::string> results;
+    std::vector<itype_id> results;
 
     /** How long for this brew to ferment. */
     time_duration time = 0;
@@ -260,7 +261,7 @@ struct islot_book {
         /**
          * The name for the recipe as it appears in the book.
          */
-        std::string name;
+        translatable_text name;
         /**
          * Hidden means it does not show up in the description of the book.
          */
@@ -376,7 +377,7 @@ struct islot_gun : common_ranged_data {
     /**
      * Noise displayed when reloading the weapon.
      */
-    std::string reload_noise = translate_marker( "click." );
+    translatable_text reload_noise = translatable_text( translate_marker( "click." ) );
     /**
      * Volume of the noise made when reloading this weapon.
      */
@@ -521,7 +522,7 @@ struct islot_ammo : common_ranged_data {
     /**
      * Type id of casings, can be "null" for no casings at all.
      */
-    std::string casing = "null";
+    itype_id casing = "null";
     /**
      * Default charges.
      */
@@ -588,11 +589,11 @@ struct islot_seed {
     /**
      * Name of the plant, already translated.
      */
-    std::string plant_name;
+    translatable_text plant_name;
     /**
      * Type id of the fruit item.
      */
-    std::string fruit_id;
+    itype_id fruit_id;
     /**
      * Whether to spawn seed items additionally to the fruit items.
      */
@@ -600,7 +601,7 @@ struct islot_seed {
     /**
      * Additionally items (a list of their item ids) that will spawn when harvesting the plant.
      */
-    std::vector<std::string> byproducts;
+    std::vector<itype_id> byproducts;
 
     islot_seed() { }
 };
@@ -641,7 +642,7 @@ struct itype {
     /*@}*/
 
 protected:
-    std::string id = "null"; /** unique string identifier for this type */
+    itype_id id = "null"; /** unique string identifier for this type */
 
     // private because is should only be accessed through itype::nname!
     // name and name_plural are not translated automatically
@@ -658,9 +659,9 @@ public:
     }
 
     std::string snippet_category;
-    std::string description; // Flavor text
+    translatable_text description; // Flavor text
 
-    std::string default_container = "null"; // The container it comes in
+    itype_id default_container = "null"; // The container it comes in
 
     std::map<quality_id, int> qualities; //Tool quality indicators
     std::map<std::string, std::string> properties;

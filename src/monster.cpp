@@ -127,12 +127,12 @@ static const trait_id trait_PHEROMONE_INSECT( "PHEROMONE_INSECT" );
 static const trait_id trait_PHEROMONE_MAMMAL( "PHEROMONE_MAMMAL" );
 static const trait_id trait_TERRIFYING( "TERRIFYING" );
 
-static const std::map<m_size, std::string> size_names {
-    {m_size::MS_TINY, translate_marker( "tiny" )},
-    {m_size::MS_SMALL, translate_marker( "small" )},
-    {m_size::MS_MEDIUM, translate_marker( "medium" )},
-    {m_size::MS_LARGE, translate_marker( "large" )},
-    {m_size::MS_HUGE, translate_marker( "huge" )},
+static const std::map<m_size, translatable_text> size_names {
+    {m_size::MS_TINY, translatable_text( translate_marker( "tiny" ) )},
+    {m_size::MS_SMALL, translatable_text( translate_marker( "small" ) )},
+    {m_size::MS_MEDIUM, translatable_text( translate_marker( "medium" ) )},
+    {m_size::MS_LARGE, translatable_text( translate_marker( "large" ) )},
+    {m_size::MS_HUGE, translatable_text( translate_marker( "huge" ) )},
 };
 
 static const std::map<monster_attitude, std::pair<std::string, color_id>> attitude_names {
@@ -462,7 +462,7 @@ std::string monster::extended_description() const
     ss << string_format( "<dark>%s</dark>", type->get_description().c_str() ) << std::endl;
     ss << "--" << std::endl;
 
-    ss << string_format( _( "It is %s in size." ), _( size_names.at( get_size() ).c_str() ) ) << std::endl;
+    ss << string_format( _( "It is %s in size." ), size_names.at( get_size() ) ) << std::endl;
 
     std::vector<std::string> types;
     if( type->has_flag( MF_ANIMAL ) ) {

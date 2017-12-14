@@ -4,12 +4,14 @@
 
 #include "bodypart.h"
 #include "string_id.h"
+#include "translatable_text.h"
 
 #include <set>
 #include <string>
 #include <vector>
 #include <map>
 
+using itype_id = std::string;
 class player;
 class JsonObject;
 class JsonIn;
@@ -24,8 +26,8 @@ using bionic_id = string_id<bionic_data>;
 struct bionic_data {
     bionic_data();
 
-    std::string name;
-    std::string description;
+    translatable_text name;
+    translatable_text description;
     /** Power cost on activation */
     int power_activate = 0;
     /** Power cost on deactivation */
@@ -68,7 +70,7 @@ struct bionic_data {
      * Fake item created for crafting with this bionic available.
      * Also the item used for gun bionics.
      */
-    std::string fake_item;
+    itype_id fake_item;
     /**
      * Mutations/trait that are removed upon installing this CBM.
      * E.g. enhanced optic bionic may cancel HYPEROPIC trait.

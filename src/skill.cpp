@@ -39,12 +39,12 @@ bool string_id<Skill>::is_valid() const
     return &obj() != &invalid_skill;
 }
 
-Skill::Skill() : Skill( skill_id::NULL_ID(), "nothing", "The zen-most skill there is.",
+Skill::Skill() : Skill( skill_id::NULL_ID(), translatable_text("nothing"), translatable_text("The zen-most skill there is."),
                             std::set<std::string> {} )
 {
 }
 
-Skill::Skill( skill_id ident, std::string name, std::string description,
+Skill::Skill( skill_id ident, translatable_text name, translatable_text description,
               std::set<std::string> tags )
     : _ident( std::move( ident ) ), _name( std::move( name ) ),
       _description( std::move( description ) ), _tags( std::move( tags ) )
@@ -81,8 +81,8 @@ void Skill::load_skill( JsonObject &jsobj )
         return s._ident == ident;
     } ), end( skills ) );
 
-    const Skill sk( ident, _( jsobj.get_string( "name" ).c_str() ),
-                    _( jsobj.get_string( "description" ).c_str() ),
+    const Skill sk( ident, translatable_text( jsobj.get_string( "name" ) ),
+                    translatable_text( jsobj.get_string( "description" ) ),
                     jsobj.get_tags( "tags" ) );
 
     if( sk.is_contextual_skill() ) {

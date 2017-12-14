@@ -2,6 +2,7 @@
 #ifndef FAULT_H
 #define FAULT_H
 
+#include "translatable_text.h"
 #include "string_id.h"
 
 #include <string>
@@ -31,11 +32,11 @@ class fault
             return id_ == fault_id( "null" );
         }
 
-        const std::string &name() const {
+        const translatable_text &name() const {
             return name_;
         }
 
-        const std::string &description() const {
+        const translatable_text &description() const {
             return description_;
         }
 
@@ -65,8 +66,8 @@ class fault
 
     private:
         fault_id id_;
-        std::string name_;
-        std::string description_;
+        translatable_text name_;
+        translatable_text description_;
         int time_;
         std::map<skill_id, int> skills_;
         requirement_id requirements_;

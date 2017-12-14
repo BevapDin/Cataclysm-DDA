@@ -2,6 +2,7 @@
 #include "skill.h"
 #include "debug.h"
 #include "rng.h"
+#include "assign.h"
 #include "generic_factory.h"
 #include "item_group.h"
 #include "mutation.h"
@@ -221,8 +222,8 @@ distribution load_distribution( JsonObject &jo, const std::string &name )
 
 void npc_class::load( JsonObject &jo, const std::string & )
 {
-    mandatory( jo, was_loaded, "name", name, translated_string_reader );
-    mandatory( jo, was_loaded, "job_description", job_description, translated_string_reader );
+    assign( jo, "name", name );
+    assign( jo, "job_description", job_description );
 
     optional( jo, was_loaded, "common", common, true );
     bonus_str = load_distribution( jo, "bonus_str" );
@@ -315,12 +316,12 @@ const npc_class_id &npc_class::random_common()
     return *random_entry( common_classes );
 }
 
-const std::string &npc_class::get_name() const
+const translatable_text &npc_class::get_name() const
 {
     return name;
 }
 
-const std::string &npc_class::get_job_description() const
+const translatable_text &npc_class::get_job_description() const
 {
     return job_description;
 }

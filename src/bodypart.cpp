@@ -221,14 +221,14 @@ void body_part_struct::check() const
     }
 }
 
-std::string body_part_name( body_part bp )
+translatable_text body_part_name( body_part bp )
 {
-    return _( get_bp( bp ).name.c_str() );
+    return get_bp( bp ).name;
 }
 
 std::string body_part_name_accusative( body_part bp )
 {
-    return pgettext( "bodypart_accusative", get_bp( bp ).name.c_str() );
+    return pgettext( "bodypart_accusative", get_bp( bp ).name.get_untranslated_text().c_str() );
 }
 
 std::string body_part_name_as_heading( body_part bp, int number )
@@ -238,15 +238,14 @@ std::string body_part_name_as_heading( body_part bp, int number )
                      number );
 }
 
-std::string body_part_hp_bar_ui_text( body_part bp )
+translatable_text body_part_hp_bar_ui_text( body_part bp )
 {
-    return _( get_bp( bp ).hp_bar_ui_text.c_str() );
+    return get_bp( bp ).hp_bar_ui_text;
 }
 
-std::string encumb_text( body_part bp )
+translatable_text encumb_text( body_part bp )
 {
-    const std::string &txt = get_bp( bp ).encumb_text;
-    return !txt.empty() ? _( txt.c_str() ) : txt;
+    return get_bp( bp ).encumb_text;
 }
 
 body_part random_body_part( bool main_parts_only )

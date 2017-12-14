@@ -3,6 +3,7 @@
 #define MORALE_TYPES_H
 
 #include "string_id.h"
+#include "translatable_text.h"
 
 class JsonObject;
 
@@ -15,8 +16,8 @@ class morale_type_data
 {
     private:
         bool permanent;
-        // Translated, may contain '%s' format string
-        std::string text;
+        // may contain '%s' format string
+        translatable_text text;
         // If true, this morale type needs an item paired with every instance
         bool needs_item;
     public:

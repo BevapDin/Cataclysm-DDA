@@ -4,6 +4,8 @@
 
 #include "string_id.h"
 #include "bonuses.h"
+#include "translatable_text.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -14,6 +16,7 @@ class JsonObject;
 class effect;
 class player;
 class item;
+using itype_id = std::string;
 class martialart;
 using matype_id = string_id<martialart>;
 class ma_buff;
@@ -64,9 +67,9 @@ class ma_technique
 
         matec_id id;
         bool was_loaded = false;
-        std::string name;
+        translatable_text name;
 
-        std::string description;
+        translatable_text description;
 
         std::string goal; // the melee goal this achieves
 
@@ -76,8 +79,8 @@ class ma_technique
         std::set<std::string> flags;
 
         // message to be displayed when player or npc uses the technique
-        std::string player_message;
-        std::string npc_message;
+        translatable_text player_message;
+        translatable_text npc_message;
 
         bool defensive;
         bool dummy;
@@ -158,8 +161,8 @@ class ma_buff
 
         mabuff_id id;
         bool was_loaded = false;
-        std::string name;
-        std::string description;
+        translatable_text name;
+        translatable_text description;
 
         ma_requirements reqs;
 
@@ -207,20 +210,20 @@ class martialart
         // determines if a technique is valid or not for this style
         bool has_technique( const player &u, const matec_id &tech ) const;
         // determines if a weapon is valid for this style
-        bool has_weapon( const std::string &item ) const;
+        bool has_weapon( const itype_id &item ) const;
         // Is this weapon OK with this art?
         bool weapon_valid( const item &u ) const;
 
         matype_id id;
         bool was_loaded = false;
-        std::string name;
-        std::string description;
+        translatable_text name;
+        translatable_text description;
         int arm_block;
         int leg_block;
         bool arm_block_with_bio_armor_arms;
         bool leg_block_with_bio_armor_legs;
         std::set<matec_id> techniques; // all available techniques
-        std::set<std::string> weapons; // all style weapons
+        std::set<itype_id> weapons; // all style weapons
         bool strictly_unarmed; // Punch daggers etc.
         bool force_unarmed; // Don't use ANY weapon - punch or kick if needed
         std::vector<mabuff_id> static_buffs; // all buffs triggered by each condition

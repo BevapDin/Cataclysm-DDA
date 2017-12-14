@@ -7,6 +7,7 @@
 #include "translations.h"
 #include "path_info.h"
 #include "name.h"
+#include "translatable_text.h"
 
 #include <string>
 #include <set>
@@ -235,6 +236,11 @@ std::string getOSXSystemLang()
 }
 #endif
 
+translate_marker::operator translatable_text()
+{
+    return translate_marker( text );
+}
+
 #else // !LOCALIZE
 
 #include <cstring> // strcmp
@@ -262,3 +268,11 @@ void set_language()
 }
 
 #endif // LOCALIZE
+
+const char *translatable_text::translated_cstring() const
+{
+    if( text_.empty() ) {
+        return "";
+    }
+    return _( text_.c_str() );
+}

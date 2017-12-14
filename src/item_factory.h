@@ -13,7 +13,7 @@
 
 #include "itype.h"
 
-bool item_is_blacklisted( const std::string &id );
+bool item_is_blacklisted( const itype_id &id );
 
 typedef std::string Item_tag;
 typedef std::string Group_tag;
@@ -33,11 +33,11 @@ extern std::unique_ptr<Item_factory> item_controller;
 class migration
 {
     public:
-        std::string id;
-        std::string replace;
+        itype_id id;
+        itype_id replace;
         std::set<std::string> flags;
         int charges = 0;
-        std::set<std::string> contents;
+        std::set<itype_id> contents;
 };
 
 /**
@@ -244,7 +244,7 @@ class Item_factory
         /** Set at finalization and prevents alterations to the static item templates */
         bool frozen = false;
 
-        std::map<const std::string, itype> m_abstracts;
+        std::map<const itype_id, itype> m_abstracts;
 
         std::unordered_map<itype_id, itype> m_templates;
 
@@ -265,7 +265,7 @@ class Item_factory
         // This map should only grow, categories should never be removed from
         // it as itype::category contains a pointer to the values of this map
         // The key is the id of the item_category.
-        std::map<std::string, item_category> categories;
+        std::map<Group_tag, item_category> categories;
 
         /**
          * Called before creating a new template and handles inheritance via copy-from

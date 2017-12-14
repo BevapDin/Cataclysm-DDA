@@ -111,7 +111,7 @@ options_manager::cOpt::cOpt()
 //add hidden external option with value
 void options_manager::add_external( const std::string sNameIn, const std::string sPageIn,
                                     const std::string sType,
-                                    const std::string sMenuTextIn, const std::string sTooltipIn )
+                                    const translatable_text sMenuTextIn, const translatable_text sTooltipIn )
 {
     cOpt thisOpt;
 
@@ -135,7 +135,7 @@ void options_manager::add_external( const std::string sNameIn, const std::string
 
 //add string select option
 void options_manager::add( const std::string sNameIn, const std::string sPageIn,
-                           const std::string sMenuTextIn, const std::string sTooltipIn,
+                           const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
                            std::vector<std::pair<std::string, std::string>> sItemsIn, std::string sDefaultIn,
                            copt_hide_t opt_hide )
 {
@@ -164,7 +164,7 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
 
 //add string input option
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
-                            const std::string sMenuTextIn, const std::string sTooltipIn,
+                            const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
                             const std::string sDefaultIn, const int iMaxLengthIn,
                             copt_hide_t opt_hide)
 {
@@ -189,7 +189,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 
 //add bool option
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
-                            const std::string sMenuTextIn, const std::string sTooltipIn,
+                            const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
                             const bool bDefaultIn, copt_hide_t opt_hide)
 {
     cOpt thisOpt;
@@ -212,7 +212,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 
 //add int option
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
-                            const std::string sMenuTextIn, const std::string sTooltipIn,
+                            const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
                             const int iMinIn, int iMaxIn, int iDefaultIn,
                             copt_hide_t opt_hide, const std::string &format )
 {
@@ -249,8 +249,8 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 
 //add int map option
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
-                            const std::string sMenuTextIn, const std::string sTooltipIn,
-                            const std::map<int, std::string> mIntValuesIn, int iInitialIn,
+                            const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
+                            const std::map<int, translatable_text> mIntValuesIn, int iInitialIn,
                             int iDefaultIn, copt_hide_t opt_hide)
 {
     cOpt thisOpt;
@@ -285,7 +285,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 
 //add float option
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
-                            const std::string sMenuTextIn, const std::string sTooltipIn,
+                            const translatable_text sMenuTextIn, const translatable_text sTooltipIn,
                             const float fMinIn, float fMaxIn, float fDefaultIn,
                             float fStepIn, copt_hide_t opt_hide, const std::string &format )
 {
@@ -416,14 +416,14 @@ std::string options_manager::cOpt::getPage() const
     return sPage;
 }
 
-std::string options_manager::cOpt::getMenuText() const
+translatable_text options_manager::cOpt::getMenuText() const
 {
-    return _( sMenuText.c_str() );
+    return sMenuText;
 }
 
-std::string options_manager::cOpt::getTooltip() const
+translatable_text options_manager::cOpt::getTooltip() const
 {
-    return _( sTooltip.c_str() );
+    return sTooltip;
 }
 
 std::string options_manager::cOpt::getType() const
@@ -524,7 +524,7 @@ std::string options_manager::cOpt::getValueName() const
         return (bSet) ? _("True") : _("False");
 
     } else if ( sType == "int_map" ) {
-        return string_format(_("%d: %s"), iSet, mIntValues.find( iSet )->second.c_str());
+        return string_format( _( "%d: %s" ), iSet, mIntValues.find( iSet )->second );
     }
 
     return getValue();
@@ -556,7 +556,7 @@ std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
         return string_format(_("Default: %d - Min: %d, Max: %d"), iDefault, iMin, iMax);
 
     } else if (sType == "int_map") {
-        return string_format( _( "Default: %d: %s" ), iDefault, mIntValues.find( iDefault )->second.c_str() );
+        return string_format( _( "Default: %d: %s" ), iDefault, mIntValues.find( iDefault )->second );
 
     } else if (sType == "float") {
         return string_format(_("Default: %.2f - Min: %.2f, Max: %.2f"), fDefault, fMin, fMax);
@@ -604,10 +604,11 @@ void options_manager::cOpt::setNext()
         sSet = vItems[iNext].first;
 
     } else if (sType == "string_input") {
-        int iMenuTextLength = sMenuText.length();
+        const std::string desc = sMenuText;
+        const int desc_length = desc.length();
         string_input_popup()
-        .width( ( iMaxLength > 80 ) ? 80 : ( ( iMaxLength < iMenuTextLength ) ? iMenuTextLength : iMaxLength + 1) )
-        .description( _( sMenuText.c_str() ) )
+        .width( ( iMaxLength > 80 ) ? 80 : ( ( iMaxLength < desc_length ) ? desc_length : iMaxLength + 1) )
+        .description( desc )
         .max_length( iMaxLength )
         .edit( sSet );
 
@@ -843,7 +844,7 @@ void options_manager::init()
     ////////////////////////////GENERAL//////////////////////////
     add( "DEF_CHAR_NAME", "general", translate_marker( "Default character name" ),
         translate_marker( "Set a default character name that will be used instead of a random name on character creation." ),
-        "", 30
+        std::string(), 30
         );
 
     mOptionsSort["general"]++;
@@ -1820,7 +1821,7 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
                             (iCurrentPage == i) ? hilite(c_light_green) : c_light_green, _("Current world"));
                 } else {
                     wprintz(w_options_header, (iCurrentPage == i) ?
-                            hilite( c_light_green ) : c_light_green, "%s", _( vPages[i].second.c_str() ) );
+                            hilite( c_light_green ) : c_light_green, "%s", vPages[i].second );
                 }
                 wprintz(w_options_header, c_white, "]");
                 wputch(w_options_header, BORDER_COLOR, LINE_OXOX);
@@ -1841,7 +1842,7 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
                            ngettext("%s #%s -- The window will be %d pixel wide with the selected value.",
                                     "%s #%s -- The window will be %d pixels wide with the selected value.",
                                     new_window_width),
-                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip().c_str(),
+                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip(),
                            OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getDefaultText().c_str(),
                            new_window_width);
         } else if (mPageItems[iCurrentPage][iCurrentLine] == "TERMINAL_Y") {
@@ -1855,14 +1856,14 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
                            ngettext("%s #%s -- The window will be %d pixel tall with the selected value.",
                                     "%s #%s -- The window will be %d pixels tall with the selected value.",
                                     new_window_height),
-                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip().c_str(),
+                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip(),
                            OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getDefaultText().c_str(),
                            new_window_height);
         } else
 #endif
         {
             fold_and_print(w_options_tooltip, 0, 0, 78, c_white, "%s #%s",
-                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip().c_str(),
+                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip(),
                            OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getDefaultText().c_str());
         }
 

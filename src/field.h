@@ -4,6 +4,7 @@
 
 #include "game_constants.h"
 #include "color.h"
+#include "translatable_text.h"
 
 #include <vector>
 #include <string>
@@ -24,9 +25,9 @@ struct field_t {
     std::string id;
 
      /** Display name for field at given density (e.g. light smoke, smoke, heavy smoke) */
-    std::string untranslated_name[ MAX_FIELD_DENSITY ];
+    translatable_text untranslated_name[ MAX_FIELD_DENSITY ];
     /// Can be empty! \p density must be in the range [0, MAX_FIELD_DENSITY - 1].
-    std::string name( int density ) const;
+    translatable_text name( int density ) const;
 
  char sym; //The symbol to draw for this field. Note that some are reserved like * and %. You will have to check the draw function for specifics.
  int priority; //Inferior numbers have lower priority. 0 is "ground" (splatter), 2 is "on the ground", 4 is "above the ground" (fire), 6 is reserved for furniture, and 8 is "in the air" (smoke).
@@ -184,7 +185,7 @@ public:
 
     //Returns the display name of the current field given its current density.
     //IE: light smoke, smoke, heavy smoke
-    std::string name() const
+    translatable_text name() const
     {
         return fieldlist[type].name( density - 1 );
     }

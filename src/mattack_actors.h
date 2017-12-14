@@ -6,6 +6,8 @@
 #include "damage.h"
 #include "weighted_list.h"
 #include "mattack_common.h"
+#include "translatable_text.h"
+
 #include <tuple>
 #include <vector>
 #include <map>
@@ -61,18 +63,18 @@ class melee_actor : public mattack_actor
         std::vector<mon_effect_data> effects;
 
         /** Message for missed attack against the player. */
-        std::string miss_msg_u;
+        translatable_text miss_msg_u;
         /** Message for 0 damage hit against the player. */
-        std::string no_dmg_msg_u;
+        translatable_text no_dmg_msg_u;
         /** Message for damaging hit against the player. */
-        std::string hit_dmg_u;
+        translatable_text hit_dmg_u;
 
         /** Message for missed attack against a non-player. */
-        std::string miss_msg_npc;
+        translatable_text miss_msg_npc;
         /** Message for 0 damage hit against a non-player. */
-        std::string no_dmg_msg_npc;
+        translatable_text no_dmg_msg_npc;
         /** Message for damaging hit against a non-player. */
-        std::string hit_dmg_npc;
+        translatable_text hit_dmg_npc;
 
         melee_actor();
         ~melee_actor() override = default;
@@ -125,13 +127,13 @@ class gun_actor : public mattack_actor
         int max_ammo = INT_MAX; /** limited also by monster starting_ammo */
 
         /** Description of the attack being run */
-        std::string description;
+        translatable_text description;
 
         /** Message to display (if any) for failures to fire excluding lack of ammo */
-        std::string failure_msg;
+        translatable_text failure_msg;
 
         /** Sound (if any) when either starting_ammo depleted or max_ammo reached */
-        std::string no_ammo_sound;
+        translatable_text no_ammo_sound;
 
         /** Number of moves required for each attack */
         int move_cost = 150;
@@ -148,7 +150,7 @@ class gun_actor : public mattack_actor
         int targeting_timeout = 8; /** Default turns after which targeting is lost and needs repeating */
         int targeting_timeout_extend = 3; /** Increase timeout by this many turns after each shot */
 
-        std::string targeting_sound;
+        translatable_text targeting_sound;
         int targeting_volume = 6; /** If set to zero don't emit any targeting sounds */
 
         bool laser_lock = false; /** Does switching between targets incur further targeting penalty */

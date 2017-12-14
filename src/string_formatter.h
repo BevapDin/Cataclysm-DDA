@@ -12,6 +12,8 @@
 #include <type_traits>
 #include <utility>
 
+class translatable_text;
+
 namespace cata
 {
 
@@ -70,6 +72,9 @@ template<typename T>
 using is_cstring = typename std::conditional <
                    std::is_same<typename std::decay<T>::type, const char *>::value ||
                    std::is_same<typename std::decay<T>::type, char *>::value, std::true_type, std::false_type >::type;
+template<typename T>
+using is_our_string = typename std::conditional <
+                      std::is_same<typename std::decay<T>::type, translatable_text>::value, std::true_type, std::false_type >::type;
 
 template<typename RT, typename T>
 inline typename std::enable_if < is_integer<RT>::value &&is_integer<T>::value,
@@ -105,6 +110,12 @@ inline typename std::enable_if < std::is_same<RT, const char *>::value &&is_stri
     return value.c_str();
 }
 template<typename RT, typename T>
+inline typename std::enable_if < std::is_same<RT, const char *>::value &&std::is_same<typename std::decay<T>::type, translatable_text>::value,
+       const char * >::type convert( RT *, const string_formatter &, T &&value, int )
+{
+    return value.translated_cstring();
+}
+template<typename RT, typename T>
 inline typename std::enable_if < std::is_same<RT, const char *>::value &&is_cstring<T>::value,
        const char * >::type convert( RT *, const string_formatter &, T &&value, int )
 {
@@ -132,7 +143,7 @@ template<typename RT, typename T>
 inline typename std::enable_if < std::is_pointer<typename std::decay<T>::type>::value ||
 is_numeric<T>::value || is_string<T>::value || is_char<T>::value ||
 std::is_enum<typename std::decay<T>::type>::value ||
-is_cstring<T>::value, RT >::type convert( RT *, const string_formatter &sf, T &&, ... )
+is_cstring<T>::value || is_our_string<T>::value, RT >::type convert( RT *, const string_formatter &sf, T &&, ... )
 {
     throw_error( sf, "Tried to convert argument of type " + std::string( typeid(
                      T ).name() ) + " to " + std::string( typeid( RT ).name() ) + ", which is not possible" );
