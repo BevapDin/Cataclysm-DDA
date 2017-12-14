@@ -2421,11 +2421,9 @@ int vehicle::index_of_part(const vehicle_part *const part, bool const check_remo
  * Returns which part (as an index into the parts list) is the one that will be
  * displayed for the given square. Returns -1 if there are no parts in that
  * square.
- * @param local_x The local x-coordinate.
- * @param local_y The local y-coordinate.
  * @return The index of the part that will be displayed.
  */
-int vehicle::part_displayed_at(int const local_x, int const local_y) const
+int vehicle::part_displayed_at( const point &local ) const
 {
     // Z-order is implicitly defined in game::load_vehiclepart, but as
     // numbers directly set on parts rather than constants that can be
@@ -2433,7 +2431,7 @@ int vehicle::part_displayed_at(int const local_x, int const local_y) const
     // it's clear where the magic number comes from.
     const int ON_ROOF_Z = 9;
 
-    std::vector<int> parts_in_square = parts_at_relative(local_x, local_y);
+    std::vector<int> parts_in_square = parts_at_relative(local.x, local.y);
 
     if(parts_in_square.empty()) {
         return -1;
@@ -2485,7 +2483,7 @@ char vehicle::part_sym( const int p, const bool exact ) const
         return ' ';
     }
 
-    const int displayed_part = exact ? p : part_displayed_at(parts[p].mount.x, parts[p].mount.y);
+    const int displayed_part = exact ? p : part_displayed_at( parts[p].mount );
 
     if (part_flag (displayed_part, VPFLAG_OPENABLE) && parts[displayed_part].open) {
         return '\''; // open door
@@ -2504,7 +2502,7 @@ vpart_id vehicle::part_id_string(int const p, char &part_mod) const
         return vpart_id::NULL_ID();
     }
 
-    int displayed_part = part_displayed_at(parts[p].mount.x, parts[p].mount.y);
+    int displayed_part = part_displayed_at( parts[p].mount );
     const vpart_id idinfo = parts[displayed_part].id;
 
     if (part_flag (displayed_part, VPFLAG_OPENABLE) && parts[displayed_part].open) {
@@ -2534,7 +2532,7 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
     if( parm >= 0 ) {
         col = part_info(parm).color;
     } else {
-        const int displayed_part = exact ? p : part_displayed_at(parts[p].mount.x, parts[p].mount.y);
+        const int displayed_part = exact ? p : part_displayed_at( parts[p].mount );
 
         if (displayed_part < 0 || displayed_part >= (int)parts.size()) {
             return c_black;
