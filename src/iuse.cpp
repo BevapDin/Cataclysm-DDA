@@ -6772,13 +6772,16 @@ vehicle *pickveh( const tripoint& center, bool advanced )
         if( v.fuel_left( "battery", true ) >= 0 ) {
             continue;
         }
+
+        const auto is_near = [&center, &v]( const int part ) {
+            return rl_dist( center, v.global_part_pos3( part ) ) < 40;
+        };
+        const auto is_any_near = [&is_near]( const std::vector<int> &parts ) {
+            return std::any_of( parts.begin(), parts.end(), is_near );
+        };
         const auto &advctrls = v.all_parts_with_feature( advctrl, true );
         const auto &ctrls = v.all_parts_with_feature( ctrl, true );
-        if( advctrls.size() == 0 && ( advanced || ctrls.size() == 0 ) ) {
-            continue;
-        }
-        const auto gp = v.global_pos();
-        if( rl_dist( center.x, center.y, gp.x, gp.y ) >= 40 ) {
+        if( !is_any_near( advctrls ) && ( advanced || !is_any_near( ctrls ) ) ) {
             continue;
         }
         vehs.push_back( veh.v );
