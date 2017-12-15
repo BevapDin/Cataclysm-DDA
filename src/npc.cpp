@@ -1187,8 +1187,8 @@ float npc::vehicle_danger( int radius ) const
         if( vehicles[i].v->velocity > 0 ) {
             float facing = vehicles[i].v->face.dir();
 
-            int ax = vehicles[i].v->global_x();
-            int ay = vehicles[i].v->global_y();
+            int ax = vehicles[i].v->global_pos3().x;
+            int ay = vehicles[i].v->global_pos3().y;
             int bx = int( ax + cos( facing * M_PI / 180.0 ) * radius );
             int by = int( ay + sin( facing * M_PI / 180.0 ) * radius );
 

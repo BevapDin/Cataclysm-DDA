@@ -768,13 +768,11 @@ public:
 
     /**
      * Get the coordinates (in map squares) of this vehicle, it's the same
-     * coordinate system that player::posx uses.
+     * coordinate system that player::pos uses.
      * Global apparently means relative to the currently loaded map (game::m).
      * This implies:
-     * <code>g->m.veh_at(this->global_x(), this->global_y()) == this;</code>
+     * <code>g->m.veh_at(this->global_pos3()) == this;</code>
      */
-    int global_x() const;
-    int global_y() const;
     point global_pos() const;
     tripoint global_pos3() const;
     /**

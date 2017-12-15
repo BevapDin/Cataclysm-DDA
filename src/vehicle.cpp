@@ -749,8 +749,8 @@ bool vehicle::interact_vehicle_locked()
                 g->u.assign_activity( activity_id( "ACT_HOTWIRE_CAR" ), hotwire_time, -1, INT_MIN, _( "Hotwire" ) );
                 // use part 0 as the reference point
                 point q = coord_translate(parts[0].mount);
-                g->u.activity.values.push_back(global_x() + q.x);//[0]
-                g->u.activity.values.push_back(global_y() + q.y);//[1]
+                g->u.activity.values.push_back(global_pos3().x + q.x);//[0]
+                g->u.activity.values.push_back(global_pos3().y + q.y);//[1]
                 g->u.activity.values.push_back(g->u.get_skill_level( skill_mechanics ));//[2]
             } else {
                 if( has_security_working() && query_yn(_("Trigger the %s's Alarm?"), name.c_str()) ) {
@@ -2130,11 +2130,10 @@ bool vehicle::has_part( const std::string &flag, bool enabled ) const
 
 bool vehicle::has_part( const tripoint &pos, const std::string &flag, bool enabled ) const
 {
-    auto px = pos.x - global_x();
-    auto py = pos.y - global_y();
-
+    const auto rpos = pos - global_pos3();
     for( const auto &e : parts ) {
-        if( e.precalc[0].x != px || e.precalc[0].y != py ) {
+        //@todo: 3D consider rpos.z
+        if( e.precalc[0].x != rpos.px || e.precalc[0].y != rpos.y ) {
             continue;
         }
         if( !e.removed && ( !enabled || e.enabled ) && !e.is_broken() && e.info().has_flag( flag ) ) {
@@ -2185,10 +2184,11 @@ std::vector<const vehicle_part *> vehicle::get_parts( vpart_bitflags flag, bool 
 
 std::vector<vehicle_part *> vehicle::get_parts( const tripoint &pos, const std::string &flag, bool enabled )
 {
+    const auto rpos = pos - global_pos3();
     std::vector<vehicle_part *> res;
     for( auto &e : parts ) {
-        if( e.precalc[ 0 ].x != pos.x - global_x() ||
-            e.precalc[ 0 ].y != pos.y - global_y() ) {
+        //@todo 3D: consider rpos.z
+        if( e.precalc[ 0 ].x != rpos.x || e.precalc[ 0 ].y != rpos.y ) {
             continue;
         }
         if( !e.removed && ( !enabled || e.enabled ) && !e.is_broken() && ( flag.empty() || e.info().has_flag( flag ) ) ) {
@@ -2200,10 +2200,11 @@ std::vector<vehicle_part *> vehicle::get_parts( const tripoint &pos, const std::
 
 std::vector<const vehicle_part *> vehicle::get_parts( const tripoint &pos, const std::string &flag, bool enabled ) const
 {
+    const auto rpos = pos - global_pos3();
     std::vector<const vehicle_part *> res;
     for( const auto &e : parts ) {
-        if( e.precalc[ 0 ].x != pos.x - global_x() ||
-            e.precalc[ 0 ].y != pos.y - global_y() ) {
+        //@todo 3D: consider rpos.z
+        if( e.precalc[ 0 ].x != rpos.x || e.precalc[ 0 ].y != rpos.y ) {
             continue;
         }
         if( !e.removed && ( !enabled || e.enabled ) && !e.is_broken() && ( flag.empty() || e.info().has_flag( flag ) ) ) {
@@ -2388,7 +2389,7 @@ int vehicle::part_at( const point &pos ) const
 int vehicle::global_part_at( const tripoint &pos ) const
 {
     //@todo 3D: use pos.z
-    return part_at( point( pos.x - global_x(), pos.y - global_y() ) );
+    return part_at( point( pos.x - global_pos3().x, pos.y - global_pos3().y ) );
 }
 
 /**
@@ -2793,16 +2794,6 @@ player *vehicle::get_passenger(int p) const
     return 0;
 }
 
-int vehicle::global_x() const
-{
-    return smx * SEEX + posx;
-}
-
-int vehicle::global_y() const
-{
-    return smy * SEEY + posy;
-}
-
 point vehicle::global_pos() const
 {
     return point( smx * SEEX + posx, smy * SEEY + posy );
@@ -2825,12 +2816,12 @@ tripoint vehicle::global_part_pos3( const vehicle_part &pt ) const
 
 point vehicle::real_global_pos() const
 {
-    return g->m.getabs( global_x(), global_y() );
+    return g->m.getabs( global_pos() );
 }
 
 tripoint vehicle::real_global_pos3() const
 {
-    return g->m.getabs( tripoint( global_x(), global_y(), smz ) );
+    return g->m.getabs( global_pos3() );
 }
 
 void vehicle::set_submap_moved( int x, int y )
@@ -3113,7 +3104,7 @@ void vehicle::spew_smoke( double joules, int part, int density )
         p.x += ( velocity < 0 ? 1 : -1 );
     }
     point q = coord_translate(p);
-    tripoint dest( global_x() + q.x, global_y() + q.y, smz );
+    const tripoint dest = global_pos3() + q;
     g->m.adjust_field_strength( dest, fd_smoke, density );
 }
 
@@ -4027,7 +4018,7 @@ void vehicle::slow_leak()
         if( fuel != fuel_type_battery ) {
             item leak( fuel, calendar::turn, qty );
             point q = coord_translate( p.mount );
-            tripoint dest( global_x() + q.x, global_y() + q.y, smz );
+            const tripoint dest = global_pos3() + q;
             g->m.add_item_or_charges( dest, leak );
         }
 
