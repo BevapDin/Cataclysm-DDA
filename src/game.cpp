@@ -7886,7 +7886,7 @@ void game::print_vehicle_info( const vehicle_part_reference vpart, WINDOW *w_loo
 {
     if( vpart ) {
         mvwprintw(w_look, line++, column, _("There is a %s there. Parts:"), vpart.veh()->name.c_str());
-        line = vpart.veh()->print_part_desc( w_look, line, last_line, getmaxx(w_look), vpart.index() );
+        line = vpart.print_part_desc( w_look, line, last_line, getmaxx( w_look ) );
     }
 }
 

@@ -659,7 +659,7 @@ void editmap::update_view( bool update_info )
         } else if( veh_part ) {
             mvwprintw( w_info, off, 1, _( "There is a %s there. Parts:" ), veh_part.veh()->name.c_str() );
             off++;
-            veh_part.veh()->print_part_desc( w_info, off, getmaxy( w_info ) - 1, width, veh_part.index() );
+            veh_part.print_part_desc( w_info, off, getmaxy( w_info ) - 1, width );
             off += 6;
         }
 

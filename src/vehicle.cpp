@@ -2577,15 +2577,14 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
  * @param y1 The y-coordinate to start drawing at.
  * @param max_y Draw no further than this y-coordinate.
  * @param width The width of the window.
- * @param p The index of the part being examined.
  * @param hl The index of the part to highlight (if any).
  */
-int vehicle::print_part_desc(WINDOW *win, int y1, const int max_y, int width, int p, int hl /*= -1*/) const
+int vehicle_part_reference::print_part_desc( const catacurses::window &win, int y1, const int max_y, int width, int hl /*= -1*/ ) const
 {
-    if (p < 0 || p >= (int)parts.size()) {
+    if( !is_valid() ) {
         return y1;
     }
-    std::vector<int> pl = this->parts_at_relative(parts[p].mount.x, parts[p].mount.y);
+    std::vector<int> pl = veh_->parts_at_relative( mount_point().x, mount_point().y );
     int y = y1;
     for (size_t i = 0; i < pl.size(); i++)
     {
@@ -2595,7 +2594,7 @@ int vehicle::print_part_desc(WINDOW *win, int y1, const int max_y, int width, in
             break;
         }
 
-        const vehicle_part& vp = parts[ pl [ i ] ];
+        const vehicle_part& vp = veh_->parts[ pl [ i ] ];
         nc_color col_cond = vp.is_broken() ? c_dark_gray : vp.base.damage_color();
 
         std::string partname = vp.name();
@@ -2604,19 +2603,19 @@ int vehicle::print_part_desc(WINDOW *win, int y1, const int max_y, int width, in
             partname += string_format( " (%s)", item::nname( vp.ammo_current() ).c_str() );
         }
 
-        if( part_flag( pl[i], "CARGO" ) ) {
+        if( veh_->part_flag( pl[i], "CARGO" ) ) {
             //~ used/total volume of a cargo vehicle part
             partname += string_format( _(" (vol: %s/%s %s)"),
-                                       format_volume( stored_volume( pl[i] ) ).c_str(), 
-                                       format_volume( max_volume( pl[i] ) ).c_str(),
+                                       format_volume( veh_->stored_volume( pl[i] ) ).c_str(),
+                                       format_volume( veh_->max_volume( pl[i] ) ).c_str(),
                                        volume_units_abbr() );
         }
 
-        bool armor = part_flag(pl[i], "ARMOR");
+        bool armor = veh_->part_flag(pl[i], "ARMOR");
         std::string left_sym, right_sym;
         if(armor) {
             left_sym = "("; right_sym = ")";
-        } else if(part_info(pl[i]).location == part_location_structure) {
+        } else if(veh_->part_info(pl[i]).location == part_location_structure) {
             left_sym = "["; right_sym = "]";
         } else {
             left_sym = "-"; right_sym = "-";
@@ -2627,7 +2626,7 @@ int vehicle::print_part_desc(WINDOW *win, int y1, const int max_y, int width, in
                         ( int )i == hl ? hilite( col_cond ) : col_cond, "%s", partname.c_str() );
         wprintz( win, sym_color, "%s", right_sym.c_str() );
 
-        if (i == 0 && is_inside(pl[i])) {
+        if (i == 0 && veh_->is_inside(pl[i])) {
             //~ indicates that a vehicle part is inside
             mvwprintz(win, y, width-2-utf8_width(_("Interior")), c_light_gray, _("Interior"));
         } else if (i == 0) {
@@ -2638,7 +2637,7 @@ int vehicle::print_part_desc(WINDOW *win, int y1, const int max_y, int width, in
     }
 
     // print the label for this location
-    const std::string label = get_label(parts[p].mount.x, parts[p].mount.y);
+    const std::string label = get_label();
     if (label != "" && y <= max_y) {
         mvwprintz(win, y++, 1, c_light_red, _("Label: %s"), label.c_str());
     }

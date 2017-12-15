@@ -918,7 +918,7 @@ bool veh_interact::do_repair( std::string &msg )
         wrefresh (w_msg);
 
         werase (w_parts);
-        veh->print_part_desc(w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, need_repair[pos]);
+        vehicle_part_reference( *veh, cpart ).print_part_desc( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), need_repair[pos] );
         wrefresh (w_parts);
 
         const std::string action = main_context.handle_input();
@@ -930,7 +930,7 @@ bool veh_interact::do_repair( std::string &msg )
 
         } else if (action == "QUIT") {
             werase (w_parts);
-            veh->print_part_desc (w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, -1);
+            vehicle_part_reference( *veh, cpart ).print_part_desc( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
             wrefresh (w_parts);
             werase (w_msg);
             wrefresh(w_msg);
@@ -1355,7 +1355,7 @@ bool veh_interact::do_remove( std::string &msg )
     while (true) {
         //redraw list of parts
         werase (w_parts);
-        veh->print_part_desc (w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, pos);
+        vehicle_part_reference( *veh, cpart ).print_part_desc( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), pos );
         wrefresh (w_parts);
         int part = parts_here[ pos ];
 
@@ -1371,7 +1371,7 @@ bool veh_interact::do_remove( std::string &msg )
             break;
         } else if (action == "QUIT") {
             werase (w_parts);
-            veh->print_part_desc (w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, -1);
+            vehicle_part_reference( *veh, cpart ).print_part_desc( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
             wrefresh (w_parts);
             werase (w_msg);
             wrefresh(w_msg);
@@ -1590,7 +1590,7 @@ void veh_interact::move_cursor (int dx, int dy)
               special_symbol(sym));
     wrefresh (w_disp);
     werase (w_parts);
-    veh->print_part_desc (w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, -1);
+    vehicle_part_reference( *veh, cpart ).print_part_desc( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
     wrefresh (w_parts);
 
     can_mount.clear();

@@ -17,12 +17,16 @@ class quantity;
 class volume_in_milliliter_tag;
 using volume = quantity<int, volume_in_milliliter_tag>;
 } // namespace units
+namespace catacurses
+{
+class window;
+} // namespace catacurses
 struct tripoint;
 struct point;
 struct vehicle_part;
 class vpart_info;
 enum damage_type : int;
-using nc_color = int;
+class nc_color;
 
 /**
  * This is a wrapper over a vehicle pointer and a part index. The index refers to
@@ -134,6 +138,8 @@ class vehicle_part_reference
         nc_color part_color( bool exact = false ) const;
         /// Returns `nullptr` on an invalid reference.
         player *get_passenger() const;
+        /// Does nothing and returns @p y1 when called on an invalid reference.
+        int print_part_desc( const catacurses::window &win, int y1, int max_y, int width, int hl = -1 ) const;
 };
 
 /// Compares @ref vehicle_part_reference::veh() to given vehicle pointer.
