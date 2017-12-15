@@ -352,8 +352,7 @@ void map::generate_lightmap( const int zlev )
         };
 
         for( size_t p = 0; p < v->parts.size(); ++p ) {
-            tripoint pp = tripoint( vv.x, vv.y, vv.z ) +
-                          v->parts[p].precalc[0];
+            const tripoint pp = v->global_part_pos3( p );
             if( !inbounds( pp ) ) {
                 continue;
             }
@@ -770,7 +769,7 @@ void map::build_seen_cache( const tripoint &origin, const int target_z )
     // Cameras are also handled here, so that we only need to get through all veh parts once
     int cam_control = -1;
     for (std::vector<int>::iterator m_it = mirrors.begin(); m_it != mirrors.end(); /* noop */) {
-        const auto mirror_pos = veh->global_pos() + veh->parts[*m_it].precalc[0];
+        const tripoint mirror_pos = veh->global_part_pos3( *m_it );
         // We can utilize the current state of the seen cache to determine
         // if the player can see the mirror from their position.
         if( !veh->part_info( *m_it ).has_flag( "CAMERA" ) &&
@@ -793,7 +792,7 @@ void map::build_seen_cache( const tripoint &origin, const int target_z )
             continue; // Player not at camera control, so cameras don't work
         }
 
-        const auto mirror_pos = veh->global_pos() + veh->parts[mirror].precalc[0];
+        const tripoint mirror_pos = veh->global_part_pos3( mirror );
 
         // Determine how far the light has already traveled so mirrors
         // don't cheat the light distance falloff.
