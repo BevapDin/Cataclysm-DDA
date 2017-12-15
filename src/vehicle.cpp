@@ -1905,9 +1905,7 @@ bool vehicle::remove_part( int p )
         return false;
     }
 
-    int x = parts[p].precalc[0].x;
-    int y = parts[p].precalc[0].y;
-    tripoint part_loc( global_x() + x, global_y() + y, smz );
+    const tripoint part_loc = global_part_pos3( p );
 
     // If `p` has flag `parent_flag`, remove child with flag `child_flag`
     // Returns true if removal occurs
@@ -5348,9 +5346,7 @@ void vehicle::unboard_all ()
 {
     std::vector<int> bp = boarded_parts();
     for( auto &i : bp ) {
-        g->m.unboard_vehicle( tripoint( global_x() + parts[i].precalc[0].x,
-                                        global_y() + parts[i].precalc[0].y,
-                                        smz ) );
+        g->m.unboard_vehicle( global_part_pos3( i ) );
     }
 }
 
