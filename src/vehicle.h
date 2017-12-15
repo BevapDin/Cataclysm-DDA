@@ -772,7 +772,6 @@ public:
      * This implies:
      * <code>g->m.veh_at(this->global_pos3()) == this;</code>
      */
-    point global_pos() const;
     tripoint global_pos3() const;
     /**
      * Get the coordinates of the studied part of the vehicle
