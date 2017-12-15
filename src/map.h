@@ -189,6 +189,7 @@ struct level_cache {
 class map
 {
         friend class editmap;
+        friend class temp_map;
         friend class visitable<map_cursor>;
 
     public:
@@ -1553,6 +1554,17 @@ class tinymap : public map
         friend class editmap;
     public:
         tinymap( int mapsize = 2, bool zlevels = false );
+};
+
+// A map that automatically deletes the contained submap pointers.
+// Either you're OK with that (because you don't need the submaps
+// any longer) or you have to save the submaps yourself.
+class temp_map : public map
+{
+    public:
+        temp_map() : map( 2, false ) {
+        }
+        ~temp_map();
 };
 
 #endif

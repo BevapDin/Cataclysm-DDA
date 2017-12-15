@@ -57,7 +57,6 @@ class editmap
         int edit_critter( Creature &critter );
         int edit_veh();
         int edit_mapgen();
-        void cleartmpmap( tinymap &tmpmap );
         int mapgen_preview( real_coords &tc, uimenu &gmenu );
         int mapgen_retarget();
         int select_shape( shapetype shape, int mode = -1 );

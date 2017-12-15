@@ -1672,10 +1672,10 @@ int editmap::mapgen_preview( real_coords &tc, uimenu &gmenu )
     // Copy to store the original value, to restore it upon canceling
     const oter_id orig_oters = omt_ref;
     omt_ref = oter_id( gmenu.ret );
-    tinymap tmpmap;
+    std::unique_ptr<temp_map> tmpmap( new temp_map() );
     // TODO: add a do-not-save-generated-submaps parameter
     // TODO: keep track of generated submaps to delete them properly and to avoid memory leaks
-    tmpmap.generate( omt_pos.x * 2, omt_pos.y * 2, target.z, calendar::turn );
+    tmpmap->generate( omt_pos.x * 2, omt_pos.y * 2, target.z, calendar::turn );
 
     tripoint pofs = pos2screen( { target.x - 11, target.y - 11, target.z } );
     catacurses::window w_preview = catacurses::newwin( 24, 24, pofs.y, pofs.x );
@@ -1708,17 +1708,17 @@ int editmap::mapgen_preview( real_coords &tc, uimenu &gmenu )
         if( gmenu.selected != lastsel ) {
             lastsel = gmenu.selected;
             omt_ref = oter_id( gmenu.selected );
-            cleartmpmap( tmpmap );
-            tmpmap.generate( omt_pos.x * 2, omt_pos.y * 2, target.z, calendar::turn );
+            tmpmap.reset( new temp_map() );
+            tmpmap->generate( omt_pos.x * 2, omt_pos.y * 2, target.z, calendar::turn );
             showpreview = true;
         }
         if( showpreview ) {
             hilights["mapgentgt"].draw( this, true );
             wrefresh( g->w_terrain );
-            tmpmap.reset_vehicle_cache( target.z );
+            tmpmap->reset_vehicle_cache( target.z );
             for( int x = 0; x < 24; x++ ) {
                 for( int y = 0; y < 24; y++ ) {
-                    tmpmap.drawsq( w_preview, g->u, tripoint( x, y, target.z ),
+                    tmpmap->drawsq( w_preview, g->u, tripoint( x, y, target.z ),
                                    false, true, tripoint( 12, 12, target.z ), false, true );
                 }
             }
@@ -1733,12 +1733,11 @@ int editmap::mapgen_preview( real_coords &tc, uimenu &gmenu )
         if( gpmenu.ret != UIMENU_INVALID ) {
             inp_mngr.reset_timeout();
             if( gpmenu.ret == 0 ) {
-
-                cleartmpmap( tmpmap );
-                tmpmap.generate( omt_pos.x * 2, omt_pos.y * 2, target.z, calendar::turn );
+                tmpmap.reset( new temp_map() );
+                tmpmap->generate( omt_pos.x * 2, omt_pos.y * 2, target.z, calendar::turn );
                 showpreview = true;
             } else if( gpmenu.ret == 1 ) {
-                tmpmap.rotate( 1 );
+                tmpmap->rotate( 1 );
                 showpreview = true;
             } else if( gpmenu.ret == 2 ) {
 
@@ -1751,7 +1750,7 @@ int editmap::mapgen_preview( real_coords &tc, uimenu &gmenu )
                         // Apply previewed mapgen to map. Since this is a function for testing, we try avoid triggering
                         // functions that would alter the results
                         submap *destsm = g->m.get_submap_at_grid( target_sub.x + x, target_sub.y + y, target.z );
-                        submap *srcsm = tmpmap.get_submap_at_grid( x, y, target.z );
+                        submap *srcsm = tmpmap->get_submap_at_grid( x, y, target.z );
                         destsm->is_uniform = false;
                         srcsm->is_uniform = false;
 
@@ -1850,7 +1849,6 @@ int editmap::mapgen_preview( real_coords &tc, uimenu &gmenu )
     gmenu.hilight_color = h_white;
     gmenu.redraw();
     hilights["mapgentgt"].points.clear();
-    cleartmpmap( tmpmap );
     return ret;
 }
 
@@ -1977,19 +1975,4 @@ int editmap::edit_mapgen()
         }
     } while( ! menu_escape( gmenu.keypress ) );
     return ret;
-}
-
-/*
- * Special voodoo sauce required to cleanse vehicles and caches to prevent debugmsg loops when re-applying mapgen.
- */
-void editmap::cleartmpmap( tinymap &tmpmap )
-{
-    for( auto &smap : tmpmap.grid ) {
-        delete smap;
-    }
-
-    auto &ch = tmpmap.get_cache( target.z );
-    std::memset( ch.veh_exists_at, 0, sizeof( ch.veh_exists_at ) );
-    ch.veh_cached_parts.clear();
-    ch.vehicle_list.clear();
 }
