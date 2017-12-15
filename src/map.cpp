@@ -6668,6 +6668,11 @@ void map::loadn( const int gridx, const int gridy, const int gridz, const bool u
         } else {
             tinymap tmp_map;
             tmp_map.generate( newmapx, newmapy, gridz, calendar::turn );
+            for (int i = 0; i < tmp_map.my_MAPSIZE; i++) {
+                for (int j = 0; j < tmp_map.my_MAPSIZE; j++) {
+                    tmp_map.saven( i, j, gridz );
+                }
+            }
         }
 
         // This is the same call to MAPBUFFER as above!
@@ -8261,9 +8266,6 @@ void map::clip_to_bounds( int &x, int &y, int &z ) const
 
 temp_map::~temp_map()
 {
-    // Note: this is correct. map::generate has created new submaps,
-    // and it has "saved" them to the MAPBUFFER, but it already had
-    // submaps for those coordinates, so it did not store the new one!
     for( submap *const smap : grid ) {
         delete smap;
     }

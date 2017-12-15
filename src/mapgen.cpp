@@ -120,6 +120,8 @@ void map::generate(const int x, const int y, const int z, const int turn)
 {
     dbg(D_INFO) << "map::generate( g[" << g << "], x[" << x << "], "
                 << "y[" << y << "], z[" << z <<"], turn[" << turn << "] )";
+    assert( my_MAPSIZE == 2 );
+    assert( !zlevels );
 
     set_abs_sub( x, y, z );
 
@@ -188,20 +190,6 @@ void map::generate(const int x, const int y, const int z, const int turn)
             }
             if( const auto p = random_point( *this, [this]( const tripoint &n ) { return passable( n ); } ) ) {
                 add_spawn( spawn_details.name, spawn_details.pack_size, p->x, p->y );
-            }
-        }
-    }
-
-    // Okay, we know who are neighbors are.  Let's draw!
-    // And finally save used submaps and delete the rest.
-    for (int i = 0; i < my_MAPSIZE; i++) {
-        for (int j = 0; j < my_MAPSIZE; j++) {
-            dbg(D_INFO) << "map::generate: submap (" << i << "," << j << ")";
-
-            if( i <= 1 && j <= 1 ) {
-                saven( i, j, z );
-            } else {
-                delete get_submap_at_grid( i, j, z );
             }
         }
     }
