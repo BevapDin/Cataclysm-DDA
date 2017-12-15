@@ -47,6 +47,8 @@ struct WORLD {
     public:
         mapbuffer &MAPBUFFER;
 
+        void save() const;
+
     std::string world_path;
     std::string world_name;
     options_manager::options_container WORLD_OPTIONS;

@@ -3844,7 +3844,7 @@ bool game::save_maps()
     try {
         m.save();
         overmap_buffer.save(); // can throw
-        world_generator->active_world->MAPBUFFER.save(); // can throw
+        world_generator->active_world->save(); // can throw
         return true;
     } catch( const std::exception &err ) {
         popup( _( "Failed to save the maps: %s" ), err.what() );

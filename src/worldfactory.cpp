@@ -72,6 +72,11 @@ WORLD::WORLD()
     active_mod_order = world_generator->get_mod_manager()->get_default_mods();
 }
 
+void WORLD::save() const
+{
+    MAPBUFFER.save();
+}
+
 bool WORLD::save_exists( const save_t &name ) const
 {
     return std::find( world_saves.begin(), world_saves.end(), name ) != world_saves.end();
