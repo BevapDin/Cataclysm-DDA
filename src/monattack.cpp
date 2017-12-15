@@ -2803,9 +2803,7 @@ void mattack::tankgun( monster *z, Creature *target )
         z->ammo[ammo_type] = 40;
     }
 
-    tripoint aim_point;
     int dist = rl_dist( z->pos(), target->pos() );
-    aim_point = target->pos();
     if( dist > 50 ) {
         return;
     }
@@ -2821,11 +2819,6 @@ void mattack::tankgun( monster *z, Creature *target )
         // Should give some ability to get behind cover,
         // even though it's patently unrealistic.
         return;
-    }
-    // Target the vehicle itself instead if there is one.
-    vehicle *veh = g->m.veh_at( target->pos() );
-    if( veh != nullptr ) {
-        aim_point = veh->global_pos3() + veh->rotated_center_of_mass();
     }
     // kevingranade KA101: yes, but make it really inaccurate
     // Sure thing.
