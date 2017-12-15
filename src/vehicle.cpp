@@ -2810,7 +2810,8 @@ tripoint vehicle::global_part_pos3( const vehicle_part &pt ) const
 
 void vehicle::set_submap_moved( int x, int y )
 {
-    const point old_msp = g->m.getabs( global_pos() );
+    // part index 0 because that part is guaranteed to exist
+    const point old_msp = g->m.getabs( global_part_pos( 0 ) );
     smx = x;
     smy = y;
     if( !tracking_on ) {

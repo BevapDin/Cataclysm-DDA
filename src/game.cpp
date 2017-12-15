@@ -2496,7 +2496,8 @@ void game::setremoteveh(vehicle *veh)
     }
 
     std::stringstream remote_veh_string;
-    const tripoint vehpos = veh->global_pos3();
+    // part index 0 because that part is guaranteed to exist
+    const tripoint vehpos = veh->global_part_pos3( 0 );
     remote_veh_string << vehpos.x << ' ' << vehpos.y << ' ' << vehpos.z;
     u.set_value( "remote_controlling_vehicle", remote_veh_string.str() );
 }
