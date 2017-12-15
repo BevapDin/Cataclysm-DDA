@@ -15,6 +15,7 @@
 class JsonIn;
 class JsonObject;
 enum special_game_id : int;
+class mapbuffer;
 
 class save_t
 {
@@ -40,6 +41,12 @@ class save_t
 };
 
 struct WORLD {
+    private:
+        std::unique_ptr<mapbuffer> mapbuffer_ptr;
+
+    public:
+        mapbuffer &MAPBUFFER;
+
     std::string world_path;
     std::string world_name;
     options_manager::options_container WORLD_OPTIONS;

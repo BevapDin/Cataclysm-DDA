@@ -21,8 +21,6 @@
 
 #define dbg(x) DebugLog((DebugLevel)(x),D_MAP) << __FILE__ << ":" << __LINE__ << ": "
 
-mapbuffer MAPBUFFER;
-
 mapbuffer::mapbuffer()
 {
 }

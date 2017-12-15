@@ -81,6 +81,4 @@ class mapbuffer
         submap_map_t submaps;
 };
 
-extern mapbuffer MAPBUFFER;
-
 #endif

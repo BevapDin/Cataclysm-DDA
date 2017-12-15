@@ -517,7 +517,7 @@ private:
 
     /**
      * Find a possibly off-map vehicle. If necessary, loads up its submap through
-     * the global MAPBUFFER and pulls it from there. For this reason, you should only
+     * the @ref mapbuffer and pulls it from there. For this reason, you should only
      * give it the coordinates of the origin tile of a target vehicle.
      * @param where Location of the other vehicle's origin tile.
      */

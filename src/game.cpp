@@ -403,7 +403,6 @@ void game::load_data_from_dir( const std::string &path, const std::string &src, 
 
 game::~game()
 {
-    MAPBUFFER.reset();
 }
 
 // Fixed window sizes
@@ -1276,7 +1275,8 @@ bool game::cleanup_at_end()
     sfx::fade_audio_group(3, 300);
     sfx::fade_audio_group(4, 300);
 
-    MAPBUFFER.reset();
+    //@todo check if this is really needed.
+    world_generator->active_world->MAPBUFFER.reset();
     overmap_buffer.clear();
     return true;
 }
@@ -1520,7 +1520,7 @@ bool game::do_turn()
 
     // Process power and fuel consumption for all vehicles, including off-map ones.
     // m.vehmove used to do this, but now it only give them moves instead.
-    for( auto &elem : MAPBUFFER ) {
+    for( auto &elem : world_generator->active_world->MAPBUFFER ) {
         tripoint sm_loc = elem.first;
         point sm_topleft = sm_to_ms_copy(sm_loc.x, sm_loc.y);
         point in_reality = m.getlocal(sm_topleft);
@@ -3844,7 +3844,7 @@ bool game::save_maps()
     try {
         m.save();
         overmap_buffer.save(); // can throw
-        MAPBUFFER.save(); // can throw
+        world_generator->active_world->MAPBUFFER.save(); // can throw
         return true;
     } catch( const std::exception &err ) {
         popup( _( "Failed to save the maps: %s" ), err.what() );
@@ -13605,7 +13605,7 @@ void game::quickload()
 
     if( active_world->save_exists( save_t::from_player_name( u.name ) ) ) {
         if( moves_since_last_save != 0 ) { // See if we need to reload anything
-            MAPBUFFER.reset();
+            world_generator->active_world->MAPBUFFER.reset();
             overmap_buffer.clear();
             try {
                 setup();

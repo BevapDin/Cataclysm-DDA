@@ -16,6 +16,7 @@
 #include "string_formatter.h"
 #include "sounds.h"
 #include "debug.h"
+#include "worldfactory.h"
 #include "trap.h"
 #include "item.h"
 #include "messages.h"
@@ -6570,7 +6571,7 @@ void map::saven( const int gridx, const int gridy, const int gridz )
     dbg( D_INFO ) << "map::saven abs_x: " << abs_x << "  abs_y: " << abs_y << "  abs_z: " << abs_z
                   << "  gridn: " << gridn;
     submap_to_save->turn_last_touched = int(calendar::turn);
-    MAPBUFFER.add_submap( abs_x, abs_y, abs_z, submap_to_save );
+    world_generator->active_world->MAPBUFFER.add_submap( abs_x, abs_y, abs_z, submap_to_save );
 }
 
 // worldx & worldy specify where in the world this is;
@@ -6624,7 +6625,7 @@ static void generate_uniform( const int x, const int y, const int z, const oter_
             sm->is_uniform = true;
             std::uninitialized_fill_n( &sm->ter[0][0], block_size, fill );
             sm->turn_last_touched = int(calendar::turn);
-            MAPBUFFER.add_submap( x + xd, y + yd, z, sm );
+            world_generator->active_world->MAPBUFFER.add_submap( x + xd, y + yd, z, sm );
         }
     }
 }
@@ -6648,7 +6649,7 @@ void map::loadn( const int gridx, const int gridy, const int gridz, const bool u
     const int old_abs_z = abs_sub.z; // Ugly, but necessary at the moment
     abs_sub.z = gridz;
 
-    submap *tmpsub = MAPBUFFER.lookup_submap(absx, absy, gridz);
+    submap *tmpsub = world_generator->active_world->MAPBUFFER.lookup_submap(absx, absy, gridz);
     if( tmpsub == nullptr ) {
         // It doesn't exist; we must generate it!
         dbg( D_INFO | D_WARNING ) << "map::loadn: Missing mapbuffer data. Regenerating.";
@@ -6670,7 +6671,7 @@ void map::loadn( const int gridx, const int gridy, const int gridz, const bool u
         }
 
         // This is the same call to MAPBUFFER as above!
-        tmpsub = MAPBUFFER.lookup_submap( absx, absy, gridz );
+        tmpsub = world_generator->active_world->MAPBUFFER.lookup_submap( absx, absy, gridz );
         if( tmpsub == nullptr ) {
             dbg( D_ERROR ) << "failed to generate a submap at " << absx << absy << abs_sub.z;
             debugmsg( "failed to generate a submap at %d,%d,%d", absx, absy, abs_sub.z );

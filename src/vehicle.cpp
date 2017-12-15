@@ -9,6 +9,7 @@
 #include "item.h"
 #include "item_group.h"
 #include "veh_interact.h"
+#include "worldfactory.h"
 #include "cursesdef.h"
 #include "catacharset.h"
 #include "overmapbuffer.h"
@@ -3644,7 +3645,7 @@ vehicle* vehicle::find_vehicle( const tripoint &where )
     point veh_in_sm = point( where.x, where.y );
     point veh_sm = ms_to_sm_remain( veh_in_sm );
 
-    auto sm = MAPBUFFER.lookup_submap( veh_sm.x, veh_sm.y, where.z );
+    auto sm = world_generator->active_world->MAPBUFFER.lookup_submap( veh_sm.x, veh_sm.y, where.z );
     if( sm == nullptr ) {
         return nullptr;
     }
@@ -5949,7 +5950,7 @@ bool is_sm_tile_outside( const tripoint &real_global_pos )
     const tripoint smp = ms_to_sm_copy( real_global_pos );
     const int px = modulo( real_global_pos.x, SEEX );
     const int py = modulo( real_global_pos.y, SEEY );
-    auto sm = MAPBUFFER.lookup_submap( smp );
+    auto sm = world_generator->active_world->MAPBUFFER.lookup_submap( smp );
     if( sm == nullptr ) {
         debugmsg( "is_sm_tile_outside(): couldn't find submap %d,%d,%d", smp.x, smp.y, smp.z );
         return false;

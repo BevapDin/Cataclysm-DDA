@@ -23,6 +23,7 @@
 #include "mapgen.h"
 #include "cata_utility.h"
 #include "uistate.h"
+#include "worldfactory.h"
 #include "mongroup.h"
 #include "mtype.h"
 #include "name.h"
@@ -2249,7 +2250,7 @@ void overmap::draw(WINDOW *w, WINDOW *wbar, const tripoint &center,
                     }
                 }
                 // Highlight areas that already have been generated
-                if( MAPBUFFER.lookup_submap(
+                if( world_generator->active_world->MAPBUFFER.lookup_submap(
                         omt_to_sm_copy( tripoint( omx, omy, z ) ) ) ) {
                     ter_color = red_background( ter_color );
                 }

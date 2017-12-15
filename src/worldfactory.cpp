@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "mapsharing.h"
 #include "gamemode.h"
+#include "mapbuffer.h"
 #include "translations.h"
 #include "input.h"
 #include "output.h"
@@ -58,6 +59,8 @@ std::string get_next_valid_worldname()
 }
 
 WORLD::WORLD()
+: mapbuffer_ptr( new mapbuffer() )
+, MAPBUFFER( *mapbuffer_ptr )
 {
     world_name = get_next_valid_worldname();
     std::ostringstream path;

@@ -945,7 +945,6 @@ void main_menu::world_tab()
                         world_generator->delete_world( all_worldnames[sel2 - 1], do_delete );
 
                         savegames.clear();
-                        MAPBUFFER.reset();
                         overmap_buffer.clear();
 
                         if( do_delete ) {
