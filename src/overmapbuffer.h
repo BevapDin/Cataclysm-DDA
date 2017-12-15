@@ -130,7 +130,7 @@ public:
      * @param veh The vehicle whose tracking device is active and
      * that has been moved.
      * @param old_msp The previous position (before the movement) of the
-     * vehicle. In map square coordinates (see vehicle::real_global_pos), it's
+     * vehicle. In map square coordinates (see map::getabs), it's
      * used to remove the vehicle from the old overmap if the new position is
      * on another overmap.
      */

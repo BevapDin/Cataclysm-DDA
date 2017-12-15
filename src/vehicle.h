@@ -781,11 +781,6 @@ public:
     tripoint global_part_pos3( const int &index ) const;
     tripoint global_part_pos3( const vehicle_part &pt ) const;
     /**
-     * Really global absolute coordinates in map squares.
-     * This includes the overmap, the submap, and the map square.
-     */
-    point real_global_pos() const;
-    /**
      * All the fuels that are in all the tanks in the vehicle, nicely summed up.
      * Note that empty tanks don't count at all. The value is the amout as it would be
      * reported by @ref fuel_left, it is always greater than 0. The key is the fuel item type.
