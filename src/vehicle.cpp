@@ -4908,8 +4908,7 @@ std::list<item>::iterator vehicle::remove_item( int part, std::list<item>::itera
 
 vehicle_stack vehicle::get_items(int const part)
 {
-    return vehicle_stack( &parts[part].items, global_pos() + parts[part].precalc[0],
-                          this, part );
+    return vehicle_stack( &parts[part].items, global_part_pos3( part ), this, part );
 }
 
 vehicle_stack vehicle::get_items( int const part ) const
