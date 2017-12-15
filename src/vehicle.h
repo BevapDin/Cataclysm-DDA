@@ -732,7 +732,6 @@ public:
     void coord_translate (int dir, const point &pivot, const point &p, point &q) const;
 
     // Seek a vehicle part which obstructs tile with given coords relative to vehicle position
-    int part_at( const point &pos ) const;
     int global_part_at( const tripoint &p ) const;
     int part_displayed_at( const point &local_pos ) const;
     int roof_at_part( int p ) const;

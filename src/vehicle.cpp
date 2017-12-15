@@ -2376,20 +2376,14 @@ bool vehicle::part_flag( int part, const vpart_bitflags flag) const
     }
 }
 
-int vehicle::part_at( const point &pos ) const
+int vehicle::global_part_at( const tripoint &pos ) const
 {
     for (size_t p = 0; p < parts.size(); p++) {
-        if (parts[p].precalc[0] == pos && !parts[p].removed) {
+        if( global_part_pos3( p ) == pos && !parts[p].removed ) {
             return (int)p;
         }
     }
     return -1;
-}
-
-int vehicle::global_part_at( const tripoint &pos ) const
-{
-    //@todo 3D: use pos.z
-    return part_at( point( pos.x - global_pos3().x, pos.y - global_pos3().y ) );
 }
 
 /**
