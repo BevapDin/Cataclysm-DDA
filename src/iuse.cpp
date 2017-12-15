@@ -6768,14 +6768,20 @@ vehicle *pickveh( const tripoint& center, bool advanced )
     std::vector< vehicle* > vehs;
 
     for( auto &veh : g->m.get_vehicles() ) {
-        auto &v = veh.v;
-        const auto gp = v->global_pos();
-        if( rl_dist( center.x, center.y, gp.x, gp.y ) < 40 &&
-            v->fuel_left( "battery", true ) > 0 &&
-            ( v->all_parts_with_feature( advctrl, true ).size() > 0 ||
-            ( !advanced && v->all_parts_with_feature( ctrl, true ).size() > 0 ) ) ) {
-            vehs.push_back( v );
+        const vehicle &v = *veh.v;
+        if( v.fuel_left( "battery", true ) >= 0 ) {
+            continue;
         }
+        const auto &advctrls = v.all_parts_with_feature( advctrl, true );
+        const auto &ctrls = v.all_parts_with_feature( ctrl, true );
+        if( advctrls.size() == 0 && ( advanced || ctrls.size() == 0 ) ) {
+            continue;
+        }
+        const auto gp = v.global_pos();
+        if( rl_dist( center.x, center.y, gp.x, gp.y ) >= 40 ) {
+            continue;
+        }
+        vehs.push_back( veh.v );
     }
     std::vector<tripoint> locations;
     for( int i = 0; i < (int)vehs.size(); i++ ) {
