@@ -6569,16 +6569,7 @@ template std::shared_ptr<npc> game::shared_from<npc>( const npc & );
 template<typename T>
 T *game::critter_by_id( const int id )
 {
-    if( id == u.getID() ) {
-        // player is always alive, therefor no is-dead check
-        return dynamic_cast<T*>( &u );
-    }
-    for( auto &cur_npc : critter_tracker->active_npc ) {
-        if( cur_npc->getID() == id && !cur_npc->is_dead() ) {
-            return dynamic_cast<T*>( cur_npc.get() );
-        }
-    }
-    return nullptr;
+    return critter_tracker->critter_by_id<T>( id );
 }
 
 // monsters don't have ids

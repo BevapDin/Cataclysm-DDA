@@ -278,11 +278,7 @@ class game
         void scrambler_blast( const tripoint &p );
         /** Triggers an emp blast at p. */
         void emp_blast( const tripoint &p );
-        /**
-         * @return The the living creature with the given id. Returns null if no living
-         * creature with such an id exists. Never returns a dead creature.
-         * Currently only the player character and npcs have ids.
-         */
+        /// @see Creature_tracker::critter_by_id
         template<typename T = Creature>
         T *critter_by_id( int id );
         /// @see Creature_tracker::critter_at

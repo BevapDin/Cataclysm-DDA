@@ -89,6 +89,15 @@ class Creature_tracker
          */
         template<typename T = Creature>
         std::shared_ptr<T> shared_from( const T &critter ) const;
+        /**
+         * Returns the living creature with the given @p id and the requested type.
+         * Returns `nullptr` if no living creature with such an id exists, of it has
+         * an incompatible type.
+         * Never returns a dead creature.
+         * Currently only the player character and npcs have ids.
+         */
+        template<typename T = Creature>
+        T *critter_by_id( int id ) const;
 
     private:
         std::vector<std::shared_ptr<monster>> monsters_list;

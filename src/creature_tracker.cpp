@@ -333,3 +333,23 @@ template std::shared_ptr<Character> Creature_tracker::shared_from<Character>( co
 template std::shared_ptr<player> Creature_tracker::shared_from<player>( const player & ) const;
 template std::shared_ptr<monster> Creature_tracker::shared_from<monster>( const monster & ) const;
 template std::shared_ptr<npc> Creature_tracker::shared_from<npc>( const npc & ) const;
+
+template<typename T>
+T *Creature_tracker::critter_by_id( const int id ) const
+{
+    if( id == player_character->getID() ) {
+        // player is always alive, therefor no is-dead check
+        return dynamic_cast<T*>( player_character.get() );
+    }
+    for( const std::shared_ptr<npc> &cur_npc : active_npc ) {
+        if( cur_npc->getID() == id && !cur_npc->is_dead() ) {
+            return dynamic_cast<T*>( cur_npc.get() );
+        }
+    }
+    return nullptr;
+}
+
+// monsters don't have ids
+template player *Creature_tracker::critter_by_id<player>( int ) const;
+template npc *Creature_tracker::critter_by_id<npc>( int ) const;
+template Creature *Creature_tracker::critter_by_id<Creature>( int ) const;
