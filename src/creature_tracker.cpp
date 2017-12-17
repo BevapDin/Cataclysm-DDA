@@ -54,6 +54,13 @@ std::shared_ptr<monster> Creature_tracker::from_temporary_id( const int id )
 
 bool Creature_tracker::add( monster &critter )
 {
+    return add( std::make_shared<monster>( critter ) );
+}
+
+bool Creature_tracker::add( std::shared_ptr<monster> critter_ptr )
+{
+    assert( critter_ptr );
+    const monster &critter = *critter_ptr;
     if( critter.type->id.is_null() ) { // Don't wanna spawn null monsters o.O
         return false;
     }
@@ -65,7 +72,11 @@ bool Creature_tracker::add( monster &critter )
 
     if( const std::shared_ptr<monster> existing_mon_ptr = find( critter.pos() ) ) {
         // We can spawn stuff on hallucinations, but we need to kill them first
-        if( existing_mon_ptr->is_hallucination() ) {
+        if( critter_ptr.get() == existing_mon_ptr.get() ) {
+            // a silent debug message because this does not cause any problems
+            dbg( D_ERROR ) << "Tried to add creature " << critter.disp_name() << " to the tracker, but it was already registered.";
+            return true;
+        } else if( existing_mon_ptr->is_hallucination() ) {
             existing_mon_ptr->die( nullptr );
             // But don't remove - that would change the monster order and could segfault
         } else if( critter.is_hallucination() ) {
@@ -81,7 +92,7 @@ bool Creature_tracker::add( monster &critter )
         return false;
     }
 
-    monsters_list.emplace_back( std::make_shared<monster>( critter ) );
+    monsters_list.emplace_back( critter_ptr );
     monsters_by_location[critter.pos()] = monsters_list.back();
     return true;
 }

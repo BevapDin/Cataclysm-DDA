@@ -37,6 +37,7 @@ class Creature_tracker
         std::shared_ptr<monster> from_temporary_id( int id );
         /** Adds the given monster to the creature_tracker. Returns whether the operation was successful. */
         bool add( monster &critter );
+        bool add( std::shared_ptr<monster> critter );
         /**
          * Returns the approximate number of creatures in the tracker.
          * Because of performance restrictions it may return a slightly incorrect
