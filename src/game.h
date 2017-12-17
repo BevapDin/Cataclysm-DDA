@@ -278,6 +278,8 @@ class game
         void scrambler_blast( const tripoint &p );
         /** Triggers an emp blast at p. */
         void emp_blast( const tripoint &p );
+        /// @see Creature_tracker::clear_creatures
+        void clear_creatures();
         /// @see Creature_tracker::num_creatures
         size_t num_creatures() const;
         /// @see Creature_tracker::critter_by_id
@@ -304,13 +306,6 @@ class game
         /** Redirects to the creature_tracker update_pos() function. */
         bool update_zombie_pos( const monster &critter, const tripoint &pos );
         void remove_zombie( const monster &critter );
-        /**
-         * Removes all zombies (as if by calling @ref remove_zombie) and active npcs
-         * from the game. Note that the npcs remain stored in an overmap, but monsters
-         * are effectively lost.
-         * Postcondition: `num_creatures() == 1` (@ref u).
-         */
-        void clear_creatures();
         /** Spawns a hallucination close to the player. */
         bool spawn_hallucination();
         /** Swaps positions of two creatures */

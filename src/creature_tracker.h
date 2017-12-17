@@ -49,7 +49,6 @@ class Creature_tracker
         bool update_pos( const monster &critter, const tripoint &new_pos );
         /** Removes the given monster from the Creature tracker, adjusting other entries as needed. */
         void remove( const monster &critter );
-        void clear();
         void rebuild_cache();
         /** Swaps the positions of two monsters */
         void swap_positions( monster &first, monster &second );
@@ -104,6 +103,13 @@ class Creature_tracker
          */
         template<typename T = Creature>
         T *critter_by_id( int id ) const;
+        /**
+         * Removes all monsters (as if by calling @ref remove) and npcs
+         * from the tracker. Note that the npcs remain stored in an overmap, but monsters
+         * are effectively lost.
+         * Postcondition: `num_creatures() == 1` (@ref player_character).
+         */
+        void clear_creatures();
 
     private:
         std::vector<std::shared_ptr<monster>> monsters_list;

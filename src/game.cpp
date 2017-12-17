@@ -6624,9 +6624,7 @@ void game::remove_zombie( const monster &critter )
 
 void game::clear_creatures()
 {
-    critter_tracker->clear();
-    critter_tracker->active_npc.clear();
-    assert( num_creatures() == 1 ); // the player character
+    critter_tracker->clear_creatures();
 }
 
 /**

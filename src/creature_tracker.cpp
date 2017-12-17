@@ -161,10 +161,12 @@ void Creature_tracker::remove( const monster &critter )
     monsters_list.erase( iter );
 }
 
-void Creature_tracker::clear()
+void Creature_tracker::clear_creatures()
 {
     monsters_list.clear();
     monsters_by_location.clear();
+    active_npc.clear();
+    assert( num_creatures() == 1 ); // the player character
 }
 
 void Creature_tracker::rebuild_cache()
