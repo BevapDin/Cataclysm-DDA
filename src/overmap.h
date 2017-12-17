@@ -207,7 +207,6 @@ radio_tower(int X = -1, int Y = -1, int S = -1, std::string M = "",
 };
 
 struct map_layer {
-    oter_id terrain[OMAPX][OMAPY];
     bool visible[OMAPX][OMAPY];
     bool explored[OMAPX][OMAPY];
     std::vector<om_note> notes;
@@ -253,8 +252,66 @@ class overmap_special_batch {
     point origin_overmap;
 };
 
-class overmap
+/**
+ * All the (not player specific) data that required is for a single overmap terrain tile.
+ * Player specific things (like whether they have seen it) are explicitly not included.
+ */
+class overmap_tile_data {
+    private:
+        oter_id type_;
+
+    public:
+        overmap_tile_data() = default;
+        overmap_tile_data( const oter_id &type ) : type_( type ) {
+        }
+        overmap_tile_data( const overmap_tile_data & ) = default;
+        overmap_tile_data( overmap_tile_data && ) = default;
+
+        ~overmap_tile_data() = default;
+
+        overmap_tile_data &operator=( const overmap_tile_data & ) = default;
+        overmap_tile_data &operator=( overmap_tile_data && ) = default;
+
+        void type( const oter_id &type ) {
+            type_ = type;
+        }
+        const oter_id &type() const {
+            return type_;
+        }
+};
+/**
+ * All the data that is stored for the whole overmap.
+ * Coordinates used here are local to the overmap.
+ */
+class overmap_data {
+    private:
+        std::array<std::array<std::array<overmap_tile_data, OVERMAP_LAYERS>, OMAPY>, OMAPX> tiles_;
+
+        overmap_tile_data &tile( const tripoint &pos );
+        const overmap_tile_data &tile( const tripoint &pos ) const;
+ 
+    public:
+        overmap_data();
+        overmap_data( const overmap_data & ) = default;
+        overmap_data( overmap_data && ) = default;
+
+        ~overmap_data();
+
+        overmap_data &operator=( const overmap_data & ) = default;
+        overmap_data &operator=( overmap_data && ) = default;
+
+        bool contains( const tripoint &pos ) const;
+
+        void ter( const tripoint &pos, const oter_id &type );
+        oter_id ter( const tripoint &pos ) const;
+};
+
+class overmap : public overmap_data
 {
+    private:
+        oter_id ter( const int x, const int y, const int z ) const {
+            return ter( tripoint( x, y, z ) );
+        }
  public:
     overmap( const overmap& ) = default;
     overmap( overmap && ) = default;
@@ -265,6 +322,7 @@ class overmap
 
     overmap& operator=(overmap const&) = default;
 
+        using overmap_data::ter;
     /**
      * Create content in the overmap.
      **/
@@ -289,10 +347,6 @@ class overmap
      */
     std::vector<point> find_terrain(const std::string &term, int zlevel);
 
-    oter_id& ter(const int x, const int y, const int z);
-    oter_id& ter( const tripoint &p );
-    const oter_id get_ter(const int x, const int y, const int z) const;
-    const oter_id get_ter( const tripoint &p ) const;
     bool&   seen(int x, int y, int z);
     bool&   explored(int x, int y, int z);
     bool is_explored(int const x, int const y, int const z) const;
