@@ -5867,23 +5867,14 @@ void game::cleanup_dead()
 {
     // Dead monsters need to stay in the tracker until everything else that needs to die does so
     // This is because dying monsters can still interact with other dying monsters (@ref Creature::killer)
-    bool monster_is_dead = critter_tracker->kill_marked_for_death();
+    bool creature_is_dead = critter_tracker->kill_marked_for_death();
 
-    bool npc_is_dead = false;
-    // can't use all_npcs as that does not include dead ones
-    for( const auto &n : critter_tracker->active_npc ) {
-        if( n->is_dead() ) {
-            n->die( nullptr ); // make sure this has been called to create corpses etc.
-            npc_is_dead = true;
-        }
-    }
-
-    if( monster_is_dead ) {
+    if( creature_is_dead ) {
         // From here on, pointers to creatures get invalidated as dead creatures get removed.
         critter_tracker->remove_dead();
     }
 
-    if( npc_is_dead ) {
+    if( creature_is_dead ) {
         for( auto it = critter_tracker->active_npc.begin(); it != critter_tracker->active_npc.end(); ) {
             if( (*it)->is_dead() ) {
                 overmap_buffer.remove_npc( ( *it )->getID() );

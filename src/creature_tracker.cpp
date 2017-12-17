@@ -213,7 +213,7 @@ bool Creature_tracker::kill_marked_for_death()
 {
     // Important: `Creature::die` must not be called after creature objects (NPCs, monsters) have
     // been removed, the dying creature could still have a pointer (the killer) to another creature.
-    bool monster_is_dead = false;
+    bool creature_is_dead = false;
     for( const auto &mon_ptr : monsters_list ) {
         monster &critter = *mon_ptr;
         if( critter.is_dead() ) {
@@ -221,11 +221,19 @@ bool Creature_tracker::kill_marked_for_death()
                                             critter.posx(), critter.posy(), critter.posz(),
                                             critter.get_hp(), critter.name().c_str() );
             critter.die( nullptr );
-            monster_is_dead = true;
+            creature_is_dead = true;
         }
     }
 
-    return monster_is_dead;
+    for( const std::shared_ptr<npc> &n : active_npc ) {
+        npc &guy = *n;
+        if( guy.is_dead() ) {
+            guy.die( nullptr ); // make sure this has been called to create corpses etc.
+            creature_is_dead = true;
+        }
+    }
+
+    return creature_is_dead;
 }
 
 void Creature_tracker::remove_dead()
