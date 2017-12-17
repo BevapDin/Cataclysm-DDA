@@ -54,9 +54,12 @@ class Creature_tracker
         void rebuild_cache();
         /** Swaps the positions of two monsters */
         void swap_positions( monster &first, monster &second );
-        /** Kills 0 hp monsters. Returns if it killed any. */
-        bool kill_marked_for_death();
-        /** Removes dead monsters from. Their pointers are invalidated. */
+        /**
+         * Removes dead creatures from the tracker.
+         * Their pointers are invalidated.
+         * Dead creatures need to stay in the tracker until everything else that needs to die does so
+         * This is because dying creatures can still interact with other dying creatures (@ref Creature::killer).
+         */
         void remove_dead();
         /**
          * Remove a specific creature and store it on the @ref overmap. Any pointer

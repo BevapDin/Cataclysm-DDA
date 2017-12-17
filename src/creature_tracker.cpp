@@ -250,7 +250,7 @@ void Creature_tracker::swap_positions( monster &first, monster &second )
     }
 }
 
-bool Creature_tracker::kill_marked_for_death()
+void Creature_tracker::remove_dead()
 {
     // Important: `Creature::die` must not be called after creature objects (NPCs, monsters) have
     // been removed, the dying creature could still have a pointer (the killer) to another creature.
@@ -274,12 +274,10 @@ bool Creature_tracker::kill_marked_for_death()
         }
     }
 
-    return creature_is_dead;
-}
+    if( !creature_is_dead ) {
+        return;
+    }
 
-void Creature_tracker::remove_dead()
-{
-    // Can't use game::all_monsters() as it would not contain *dead* monsters.
     for( auto iter = monsters_list.begin(); iter != monsters_list.end(); ) {
         const monster &critter = **iter;
         if( critter.is_dead() ) {

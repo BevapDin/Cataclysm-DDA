@@ -5850,12 +5850,7 @@ int game::mon_info(WINDOW *w)
 
 void game::cleanup_dead()
 {
-    // Dead creatures need to stay in the tracker until everything else that needs to die does so
-    // This is because dying creatures can still interact with other dying creatures (@ref Creature::killer)
-    if( critter_tracker->kill_marked_for_death() ) {
-        // From here on, pointers to creatures get invalidated as dead creatures get removed.
-        critter_tracker->remove_dead();
-    }
+    critter_tracker->remove_dead();
 }
 
 void game::monmove()
