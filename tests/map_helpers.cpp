@@ -25,7 +25,7 @@ void wipe_map_terrain()
 void clear_creatures()
 {
     // Remove any interfering creatures.
-    g->clear_creatures();
+    g->critter_tracker.clear_creatures();
 }
 
 void clear_map()

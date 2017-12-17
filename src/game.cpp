@@ -763,7 +763,7 @@ void game::setup()
     turnssincelastmon = 0; //Auto safe mode init
 
     sounds::reset_sounds();
-    clear_creatures();
+    critter_tracker.clear_creatures();
     coming_to_stairs.clear();
     factions.clear();
     mission::clear_all();
@@ -6570,11 +6570,6 @@ bool game::update_zombie_pos( const monster &critter, const tripoint &pos )
 void game::remove_zombie( const monster &critter )
 {
     critter_tracker.remove( critter );
-}
-
-void game::clear_creatures()
-{
-    critter_tracker.clear_creatures();
 }
 
 /**

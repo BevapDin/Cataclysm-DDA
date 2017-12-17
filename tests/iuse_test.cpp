@@ -5,7 +5,7 @@
 #include "monster.h"
 #include "mtype.h"
 #include "player.h"
-
+#include "creature_tracker.h"
 
 player &get_sanitized_player( )
 {
@@ -69,7 +69,7 @@ TEST_CASE( "use_manhack" )
 {
     player &dummy = get_sanitized_player();
 
-    g->clear_creatures();
+    g->critter_tracker.clear_creatures();
     item &test_item = dummy.i_add( item( "bot_manhack", 0, false ) );
 
     int test_item_pos = dummy.inv.position_by_item( &test_item );
@@ -86,5 +86,5 @@ TEST_CASE( "use_manhack" )
     new_manhack = find_adjacent_monster( dummy.pos() );
     REQUIRE( new_manhack != nullptr );
     REQUIRE( new_manhack->type->id == mtype_id( "mon_manhack" ) );
-    g->clear_creatures();
+    g->critter_tracker.clear_creatures();
 }

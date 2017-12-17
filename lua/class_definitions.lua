@@ -317,6 +317,7 @@ classes = {
         functions = {
             { name = "num_creatures", rval = "int", args = { } },
             { name = "critter_by_id", rval = "Creature&", args = { "int" } },
+            { name = "clear_creatures", rval = nil, args = { } },
         },
     },
     game = {
@@ -331,7 +332,6 @@ classes = {
             { name = "assign_mission_id", rval = "int", args = { } },
             { name = "assign_npc_id", rval = "int", args = { } },
             { name = "cancel_activity", rval = nil, args = { } },
-            { name = "clear_creatures", rval = nil, args = { } },
             { name = "critter_at", rval = "Creature&", args = { "tripoint" } },
             { name = "critter_at", rval = "Creature&", args = { "tripoint", "bool" } },
             { name = "do_blast", rval = nil, args = { "tripoint", "float", "float", "bool" } },

@@ -279,8 +279,6 @@ class game
         void scrambler_blast( const tripoint &p );
         /** Triggers an emp blast at p. */
         void emp_blast( const tripoint &p );
-        /// @see Creature_tracker::clear_creatures
-        void clear_creatures();
         /// @see Creature_tracker::critter_at
         template<typename T = Creature>
         T *critter_at( const tripoint &p, bool allow_hallucination = false );

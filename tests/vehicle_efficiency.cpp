@@ -9,6 +9,7 @@
 #include "player.h"
 #include "cata_utility.h"
 #include "options.h"
+#include "creature_tracker.h"
 #include "test_statistics.h"
 
 const efftype_id effect_blind( "blind" );
@@ -17,9 +18,7 @@ void clear_game( const ter_id &terrain )
 {
     // Set to turn 0 to prevent solars from producing power
     calendar::turn = 0;
-    for( monster &critter : g->all_monsters() ) {
-        g->remove_zombie( critter );
-    }
+    g->critter_tracker.clear_creatures();
 
     g->unload_npcs();
 
