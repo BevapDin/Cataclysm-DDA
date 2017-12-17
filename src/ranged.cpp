@@ -15,6 +15,7 @@
 #include "options.h"
 #include "action.h"
 #include "input.h"
+#include "creature_tracker.h"
 #include "messages.h"
 #include "projectile.h"
 #include "sounds.h"
@@ -1012,7 +1013,7 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
 
     const auto set_last_target = []( const tripoint &dst ) {
         if( const Creature *const critter_ptr = g->critter_at( dst, true ) ) {
-            g->last_target = g->shared_from( *critter_ptr );
+            g->last_target = g->critter_tracker.shared_from( *critter_ptr );
         }
     };
 

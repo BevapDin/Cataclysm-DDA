@@ -290,9 +290,6 @@ class game
         /// @see Creature_tracker::critter_at
         template<typename T = Creature>
         T const* critter_at( const tripoint &p, bool allow_hallucination = false ) const;
-        /// @see Creature_tracker::shared_from
-        template<typename T = Creature>
-        std::shared_ptr<T> shared_from( const T &critter );
         /// @see overmapbuffer::insert_npc
         void insert_npc( std::shared_ptr<npc> new_npc );
 

@@ -21,6 +21,7 @@
 #include "field.h"
 #include "sounds.h"
 #include "gates.h"
+#include "creature_tracker.h"
 
 #include <algorithm>
 #include <sstream>
@@ -304,7 +305,7 @@ void npc::move()
 
     if( is_enemy() && vehicle_danger( avoidance_vehicles_radius ) > 0 ) {
         // TODO: Think about how this actually needs to work, for now assume flee from player
-        ai_cache.target = g->shared_from( g->u );
+        ai_cache.target = g->critter_tracker.shared_from( g->u );
     }
 
     if( target == &g->u && attitude == NPCATT_FLEE ) {
@@ -765,7 +766,7 @@ void npc::choose_target()
 
         auto att = mon.attitude( this );
         if( att == MATT_FRIEND ) {
-            ai_cache.friends.emplace_back( g->shared_from( mon ) );
+            ai_cache.friends.emplace_back( g->critter_tracker.shared_from( mon ) );
             continue;
         }
 
@@ -791,7 +792,7 @@ void npc::choose_target()
 
         if( priority >= highest_priority ) {
             highest_priority = priority;
-            ai_cache.target = g->shared_from( mon );
+            ai_cache.target = g->critter_tracker.shared_from( mon );
             ai_cache.danger = critter_danger;
         }
     }
@@ -831,19 +832,19 @@ void npc::choose_target()
 
         auto att = attitude_to( np );
         if( att == Creature::A_FRIENDLY ) {
-            ai_cache.friends.emplace_back( g->shared_from( np ) );
+            ai_cache.friends.emplace_back( g->critter_tracker.shared_from( np ) );
         } else if( att == Creature::A_NEUTRAL ) {
             // Nothing
         } else if( sees( np ) && check_hostile_character( np ) ) {
-            ai_cache.target = g->shared_from( np );
+            ai_cache.target = g->critter_tracker.shared_from( np );
         }
     }
 
     if( is_friend() ) {
-        ai_cache.friends.emplace_back( g->shared_from( g->u ) );
+        ai_cache.friends.emplace_back( g->critter_tracker.shared_from( g->u ) );
     } else if( is_enemy() ) {
         if( sees( g->u ) && check_hostile_character( g->u ) ) {
-            ai_cache.target = g->shared_from( g->u );
+            ai_cache.target = g->critter_tracker.shared_from( g->u );
             ai_cache.danger = std::max( 1.0f, ai_cache.danger );
         }
     }
@@ -2427,7 +2428,7 @@ bool npc::alt_attack()
             if( newdist <= conf && newdist >= 2 && target_ptr &&
                 wont_hit_friend( pt, *used, true ) ) {
                 // Friendlyfire-safe!
-                ai_cache.target = g->shared_from( *target_ptr );
+                ai_cache.target = g->critter_tracker.shared_from( *target_ptr );
                 if( !one_in( 100 ) ) {
                     // Just to prevent infinite loops...
                     if( alt_attack() ) {

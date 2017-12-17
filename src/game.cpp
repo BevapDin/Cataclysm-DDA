@@ -5660,7 +5660,7 @@ int game::mon_info(WINDOW *w)
 
                     if (!passmon) {
                         newseen++;
-                        new_seen_mon.push_back( shared_from( critter ) );
+                        new_seen_mon.push_back( critter_tracker.shared_from( critter ) );
                     }
                 }
             }
@@ -6531,18 +6531,6 @@ template const player *game::critter_at<player>( const tripoint &, bool ) const;
 template const Character *game::critter_at<Character>( const tripoint &, bool ) const;
 template Character *game::critter_at<Character>( const tripoint &, bool );
 template const Creature *game::critter_at<Creature>( const tripoint &, bool ) const;
-
-template<typename T>
-std::shared_ptr<T> game::shared_from( const T &critter )
-{
-    return critter_tracker.shared_from<T>( critter );
-}
-
-template std::shared_ptr<Creature> game::shared_from<Creature>( const Creature & );
-template std::shared_ptr<Character> game::shared_from<Character>( const Character & );
-template std::shared_ptr<player> game::shared_from<player>( const player & );
-template std::shared_ptr<monster> game::shared_from<monster>( const monster & );
-template std::shared_ptr<npc> game::shared_from<npc>( const npc & );
 
 template<typename T>
 T *game::critter_by_id( const int id )
@@ -9363,7 +9351,7 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
             iLastActivePos = recentered;
         } else if (action == "fire") {
             if( cCurMon != nullptr && rl_dist( u.pos(), cCurMon->pos() ) <= max_gun_range ) {
-                last_target = shared_from( *cCurMon );
+                last_target = critter_tracker.shared_from( *cCurMon );
                 u.view_offset = stored_view_offset;
                 return game::vmenu_ret::FIRE;
             }
