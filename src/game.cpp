@@ -246,6 +246,7 @@ public:
 game::game() :
     map_ptr( new map() ),
     u_ptr( new player() ),
+    critter_tracker( new Creature_tracker() ),
     liveview_ptr( new live_view() ),
     liveview( *liveview_ptr ),
     scent_ptr( new scent_map( *this ) ),
@@ -254,7 +255,6 @@ game::game() :
     m( *map_ptr ),
     u( *u_ptr ),
     scent( *scent_ptr ),
-    critter_tracker( new Creature_tracker() ),
     weather( WEATHER_CLEAR ),
     lightning_active( false ),
     weather_precise( new w_point() ),
