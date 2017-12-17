@@ -863,7 +863,7 @@ bool game::start_game(std::string worldname)
     //Put some NPCs in there!
     create_starting_npcs();
     //Load NPCs. Set nearby npcs to active.
-    load_npcs();
+    reload_npcs();
     // Spawn the monsters
     const bool spawn_near =
         get_option<bool>( "BLACK_ROAD" ) || g->scen->has_flag("SUR_START");
@@ -928,14 +928,23 @@ void game::create_factions()
     }
 }
 
-//Make any nearby overmap npcs active, and put them in the right location.
-void game::load_npcs()
+void game::reload_npcs()
 {
+    std::set<const npc*> active_npcs;
+    for( npc &guy : all_npcs() ) {
+        if( m.inbounds( guy.pos() ) ) {
+            active_npcs.insert( &guy );
+        } else {
+            critter_tracker->despawn( guy );
+        }
+    }
+
+    std::vector<npc*> just_added;
+
     const int radius = int(MAPSIZE / 2) - 1;
     // uses submap coordinates
-    std::vector<std::shared_ptr<npc>> just_added;
     for( const auto &temp : overmap_buffer.get_npcs_near_player( radius ) ) {
-        if( temp->is_active() ) {
+        if( active_npcs.count( temp.get() ) > 0 ) {
             continue;
         }
         if( temp->has_companion_mission() ) {
@@ -961,33 +970,19 @@ void game::load_npcs()
         // it was on the overmap. Kill it.
         if (temp->marked_for_death) {
             temp->die( nullptr );
-        } else {
-            if (temp->my_fac != nullptr)
-                temp->my_fac->known_by_u = true;
-            critter_tracker->active_npc.push_back( temp );
-            just_added.push_back( temp );
+            continue;
         }
+
+        if( temp->my_fac ) {
+            temp->my_fac->known_by_u = true;
+        }
+        critter_tracker->active_npc.push_back( temp );
+        just_added.push_back( temp.get() );
     }
 
     for( const auto &npc : just_added ) {
         npc->on_load();
     }
-}
-
-void game::unload_npcs()
-{
-    for( npc &guy : all_npcs() ) {
-        critter_tracker->despawn( guy );
-    }
-    assert( critter_tracker->active_npc.empty() );
-}
-
-void game::reload_npcs()
-{
-    // TODO: Make it not invoke the "on_unload" command for the NPCs that will be loaded anyway
-    // and not invoke "on_load" for those NPCs that avoided unloading this way.
-    unload_npcs();
-    load_npcs();
 }
 
 void game::create_starting_npcs()
@@ -1739,7 +1734,7 @@ unsigned int game::get_seed() const
 void game::insert_npc( std::shared_ptr<npc> new_npc )
 {
     overmap_buffer.insert_npc( new_npc );
-    load_npcs();
+    reload_npcs();
 }
 
 void game::update_weather()
@@ -11912,7 +11907,7 @@ void game::place_player_overmap( const tripoint &om_dest )
     const tripoint player_pos( u.pos().x, u.pos().y, map_om_pos.z );
 
     load_map( map_om_pos );
-    load_npcs();
+    reload_npcs();
     m.spawn_monsters( true ); // Static monsters
     update_overmap_seen();
     // update weather now as it could be different on the new location
@@ -12937,7 +12932,7 @@ void game::update_map(int &x, int &y)
     }
     // Check for overmap saved npcs that should now come into view.
     // Put those in the active list.
-    load_npcs();
+    reload_npcs();
 
     // Spawn monsters if appropriate
     m.spawn_monsters( false ); // Static monsters

@@ -474,11 +474,7 @@ class game
         /** Returns the next available mission id. */
         int assign_mission_id();
         npc *find_npc(int id);
-        /** Makes any nearby NPCs on the overmap active. */
-        void load_npcs();
-        /** Unloads all NPCs */
-        void unload_npcs();
-        /** Unloads, then loads the NPCs */
+        /** Makes any nearby NPCs active and any npcs outside the reality bubble inactive. */
         void reload_npcs();
         /** Returns the number of kills of the given mon_id by the player. */
         int kill_count( const mtype_id& id );
