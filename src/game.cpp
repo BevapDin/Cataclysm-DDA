@@ -245,14 +245,15 @@ public:
 // This is the main game set-up process.
 game::game() :
     map_ptr( new map() ),
-    critter_tracker( new Creature_tracker() ),
+    critter_tracker_ptr( new Creature_tracker() ),
     liveview_ptr( new live_view() ),
     liveview( *liveview_ptr ),
     scent_ptr( new scent_map( *this ) ),
     new_game(false),
     uquit(QUIT_NO),
     m( *map_ptr ),
-    u( critter_tracker->get_player_character() ),
+    critter_tracker( *critter_tracker_ptr ),
+    u( critter_tracker.get_player_character() ),
     scent( *scent_ptr ),
     weather( WEATHER_CLEAR ),
     lightning_active( false ),
@@ -935,7 +936,7 @@ void game::reload_npcs()
         if( m.inbounds( guy.pos() ) ) {
             active_npcs.insert( &guy );
         } else {
-            critter_tracker->despawn( guy );
+            critter_tracker.despawn( guy );
         }
     }
 
@@ -976,7 +977,7 @@ void game::reload_npcs()
         if( temp->my_fac ) {
             temp->my_fac->known_by_u = true;
         }
-        if( critter_tracker->add( temp ) ) {
+        if( critter_tracker.add( temp ) ) {
             just_added.push_back( temp.get() );
         }
     }
@@ -1016,7 +1017,7 @@ bool game::cleanup_at_end()
 {
     draw_sidebar();
     if (uquit == QUIT_DIED || uquit == QUIT_SUICIDE) {
-        critter_tracker->despawn_all();
+        critter_tracker.despawn_all();
         // Save the factions', missions and set the NPC's overmap coords
         // Npcs are saved in the overmap.
         save_factions_missions_npcs(); //missions need to be saved as they are global for all saves.
@@ -1448,7 +1449,7 @@ bool game::do_turn()
     if (!u.in_sleep_state()) {
         if (u.moves > 0 || uquit == QUIT_WATCH) {
             while (u.moves > 0 || uquit == QUIT_WATCH) {
-                critter_tracker->remove_dead();
+                critter_tracker.remove_dead();
                 // Process any new sounds the player caused during their turn.
                 sounds::process_sound_markers( &u );
                 if( !u.activity && uquit != QUIT_WATCH ) {
@@ -4204,7 +4205,7 @@ void game::debug()
                 // and for getting a corpse.
                 critter.die( nullptr );
             }
-            critter_tracker->remove_dead();
+            critter_tracker.remove_dead();
         }
         break;
         case 20:
@@ -5850,7 +5851,7 @@ int game::mon_info(WINDOW *w)
 
 void game::monmove()
 {
-    critter_tracker->remove_dead();
+    critter_tracker.remove_dead();
 
     // Make sure these don't match the first time around.
     tripoint cached_lev = m.get_abs_sub() + tripoint( 1, 0, 0 );
@@ -5934,7 +5935,7 @@ void game::monmove()
         }
     }
 
-    critter_tracker->remove_dead();
+    critter_tracker.remove_dead();
 
     // The remaining monsters are all alive, but may be outside of the reality bubble.
     // If so, despawn them. This is not the same as dying, they will be stored for later and the
@@ -5944,7 +5945,7 @@ void game::monmove()
             critter.posy() < 0 - ( SEEY * MAPSIZE ) / 6 ||
             critter.posx() > ( SEEX * MAPSIZE * 7 ) / 6 ||
             critter.posy() > ( SEEY * MAPSIZE * 7 ) / 6 ) {
-            critter_tracker->despawn( critter );
+            critter_tracker.despawn( critter );
         }
     }
 
@@ -5983,7 +5984,7 @@ void game::monmove()
             guy.update_body();
         }
     }
-    critter_tracker->remove_dead();
+    critter_tracker.remove_dead();
 }
 
 void game::flashbang( const tripoint &p, bool player_immune)
@@ -6515,7 +6516,7 @@ void game::emp_blast( const tripoint &p )
 template<typename T>
 T *game::critter_at( const tripoint &p, bool allow_hallucination )
 {
-    return critter_tracker->critter_at<T>( p, allow_hallucination );
+    return critter_tracker.critter_at<T>( p, allow_hallucination );
 }
 
 template<typename T>
@@ -6534,7 +6535,7 @@ template const Creature *game::critter_at<Creature>( const tripoint &, bool ) co
 template<typename T>
 std::shared_ptr<T> game::shared_from( const T &critter )
 {
-    return critter_tracker->shared_from<T>( critter );
+    return critter_tracker.shared_from<T>( critter );
 }
 
 template std::shared_ptr<Creature> game::shared_from<Creature>( const Creature & );
@@ -6546,7 +6547,7 @@ template std::shared_ptr<npc> game::shared_from<npc>( const npc & );
 template<typename T>
 T *game::critter_by_id( const int id )
 {
-    return critter_tracker->critter_by_id<T>( id );
+    return critter_tracker.critter_by_id<T>( id );
 }
 
 // monsters don't have ids
@@ -6581,7 +6582,7 @@ bool game::add_zombie(monster &critter, bool pin_upgrade)
     }
 
     critter.last_updated = calendar::turn;
-    return critter_tracker->add(critter);
+    return critter_tracker.add(critter);
 }
 
 size_t game::num_creatures() const
@@ -6591,17 +6592,17 @@ size_t game::num_creatures() const
 
 bool game::update_zombie_pos( const monster &critter, const tripoint &pos )
 {
-    return critter_tracker->update_pos( critter, pos );
+    return critter_tracker.update_pos( critter, pos );
 }
 
 void game::remove_zombie( const monster &critter )
 {
-    critter_tracker->remove( critter );
+    critter_tracker.remove( critter );
 }
 
 void game::clear_creatures()
 {
-    critter_tracker->clear_creatures();
+    critter_tracker.clear_creatures();
 }
 
 /**
@@ -6618,7 +6619,7 @@ bool game::spawn_hallucination()
 
     //Don't attempt to place phantasms inside of other creatures
     if( !critter_at( phantasm.pos(), true ) ) {
-        return critter_tracker->add(phantasm);
+        return critter_tracker.add(phantasm);
     } else {
         return false;
     }
@@ -6652,7 +6653,7 @@ bool game::swap_critters( Creature &a, Creature &b )
             return false;
         }
 
-        critter_tracker->swap_positions( *m1, *m2 );
+        critter_tracker.swap_positions( *m1, *m2 );
         return true;
     }
 
@@ -11882,7 +11883,7 @@ void game::place_player( const tripoint &dest_loc )
 
 void game::place_player_overmap( const tripoint &om_dest )
 {
-    critter_tracker->despawn_all();
+    critter_tracker.despawn_all();
     if( u.in_vehicle ) {
         m.unboard_vehicle( u.pos() );
     }
@@ -12614,7 +12615,7 @@ void game::vertical_move(int movez, bool force)
     std::vector<std::shared_ptr<npc>> npcs_to_bring;
     std::vector<monster *> monsters_following;
     if( !m.has_zlevels() && abs( movez ) == 1 ) {
-        const auto &npcs = critter_tracker->get_npcs_list();
+        const auto &npcs = critter_tracker.get_npcs_list();
         std::copy_if( npcs.begin(), npcs.end(), back_inserter( npcs_to_bring ),
                       [this]( const std::shared_ptr<npc> &np ) {
             return np->is_friend() && rl_dist( np->pos(), u.pos() ) < 2;
@@ -12919,7 +12920,7 @@ void game::update_map(int &x, int &y)
         if( guy.posx() < 0 - SEEX * 2 || guy.posy() < 0 - SEEX * 2 ||
             guy.posx() > SEEX * (MAPSIZE + 2) || guy.posy() > SEEY * (MAPSIZE + 2) ) {
             //Remove the npc from the active list. It remains in the overmap list.
-            critter_tracker->despawn( guy );
+            critter_tracker.despawn( guy );
         }
     }
     // Check for overmap saved npcs that should now come into view.
@@ -13226,11 +13227,11 @@ void game::shift_monsters( const int shiftx, const int shifty, const int shiftz 
         }
         // Either a vertical shift or the critter is now outside of the reality bubble,
         // anyway: it must be saved and removed.
-        critter_tracker->despawn( critter );
+        critter_tracker.despawn( critter );
     }
     // The order in which zombies are shifted may cause zombies to briefly exist on
     // the same square. This messes up the mon_at cache, so we need to rebuild it.
-    critter_tracker->rebuild_cache();
+    critter_tracker.rebuild_cache();
 }
 
 void game::spawn_mon(int /*shiftx*/, int /*shifty*/)
@@ -14024,20 +14025,20 @@ bool game::non_dead_range<Creature>::iterator::valid() {
 }
 
 game::monster_range::monster_range( game &g ) {
-    const auto &monsters = g.critter_tracker->get_monsters_list();
+    const auto &monsters = g.critter_tracker.get_monsters_list();
     items.insert( items.end(), monsters.begin(), monsters.end() );
 }
 
 game::Creature_range::Creature_range( game &g ) : u( &g.u, []( player * ) { } ) {
-    const auto &monsters = g.critter_tracker->get_monsters_list();
+    const auto &monsters = g.critter_tracker.get_monsters_list();
     items.insert( items.end(), monsters.begin(), monsters.end() );
-    const auto &npcs = g.critter_tracker->get_npcs_list();
+    const auto &npcs = g.critter_tracker.get_npcs_list();
     items.insert( items.end(), npcs.begin(), npcs.end() );
     items.push_back( u );
 }
 
 game::npc_range::npc_range( game &g ) {
-    const auto &npcs = g.critter_tracker->get_npcs_list();
+    const auto &npcs = g.critter_tracker.get_npcs_list();
     items.insert( items.end(), npcs.begin(), npcs.end() );
 }
 

@@ -22,6 +22,7 @@
 #include "weather_gen.h"
 
 #ifdef LUA
+#include "creature_tracker.h"
 #include "ui.h"
 #include "mongroup.h"
 #include "itype.h"

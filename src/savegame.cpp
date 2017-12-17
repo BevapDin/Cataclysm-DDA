@@ -76,7 +76,7 @@ void game::serialize(std::ostream & fout) {
                 json.member( "last_target_type", +1 );
             } else if( const monster * const mon = dynamic_cast<const monster*>( lt_ptr.get() ) ) {
                 // monsters don't have IDs, so get its index in the Creature_tracker instead
-                json.member( "last_target", critter_tracker->temporary_id( *mon ) );
+                json.member( "last_target", critter_tracker.temporary_id( *mon ) );
                 json.member( "last_target_type", -1 );
             }
         }
@@ -96,7 +96,7 @@ void game::serialize(std::ostream & fout) {
         json.member( "grscent", scent.serialize() );
 
         // Then each monster
-        json.member( "active_monsters", *critter_tracker );
+        json.member( "active_monsters", critter_tracker );
         json.member( "stair_monsters", coming_to_stairs );
 
         // save killcounts.
@@ -213,14 +213,14 @@ void game::unserialize(std::istream & fin)
             scent.reset();
         }
 
-        data.read( "active_monsters", *critter_tracker );
+        data.read( "active_monsters", critter_tracker );
 
         if( tmptartyp == +1 ) {
             // Use overmap_buffer because game::active_npc is not filled yet.
             last_target = overmap_buffer.find_npc( tmptar );
         } else if( tmptartyp == -1 ) {
             // Need to do this *after* the monsters have been loaded!
-            last_target = critter_tracker->from_temporary_id( tmptar );
+            last_target = critter_tracker.from_temporary_id( tmptar );
         }
 
         JsonArray vdata = data.get_array("stair_monsters");

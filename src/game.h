@@ -166,7 +166,7 @@ class game
 
         // May be a bit hacky, but it's probably better than the header spaghetti
         std::unique_ptr<map> map_ptr;
-        std::unique_ptr<Creature_tracker> critter_tracker;
+        std::unique_ptr<Creature_tracker> critter_tracker_ptr;
         std::unique_ptr<live_view> liveview_ptr;
         live_view& liveview;
         std::unique_ptr<scent_map> scent_ptr;
@@ -213,6 +213,7 @@ class game
 
         /** Make map a reference here, to avoid map.h in game.h */
         map &m;
+        Creature_tracker &critter_tracker;
         player &u;
         scent_map &scent;
 

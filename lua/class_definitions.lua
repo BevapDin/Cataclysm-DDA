@@ -311,9 +311,16 @@ classes = {
             { name = "size", rval = "int", args = { } },
         }
     },
+    Creature_tracker = {
+        attributes = {
+        },
+        functions = {
+        },
+    },
     game = {
         attributes = {
             lightning_active = { type = "bool", writable = true },
+            critter_tracker = { type = "Creature_tracker", writable = false },
         },
         functions = {
             { name = "add_zombie", rval = "bool", args = { "monster" } },
