@@ -957,7 +957,6 @@ private:
         void shift_monsters(const int shiftx, const int shifty, const int shiftz);
 
         void spawn_mon(int shift, int shifty); // Called by update_map, sometimes
-        void rebuild_mon_at_cache();
 
         // Routine loop functions, approximately in order of execution
         void cleanup_dead();     // Delete any dead NPCs/monsters
