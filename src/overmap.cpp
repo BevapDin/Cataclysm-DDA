@@ -1280,7 +1280,6 @@ bool overmap::monster_check(const std::pair<tripoint, monster> &candidate) const
 void overmap::insert_npc( std::shared_ptr<npc> who )
 {
     npcs.push_back( who );
-    g->set_npcs_dirty();
 }
 
 std::shared_ptr<npc> overmap::erase_npc( const int id )
@@ -1291,7 +1290,6 @@ std::shared_ptr<npc> overmap::erase_npc( const int id )
     }
     auto ptr = *iter;
     npcs.erase( iter );
-    g->set_npcs_dirty();
     return ptr;
 }
 

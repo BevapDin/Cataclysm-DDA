@@ -972,8 +972,6 @@ void game::load_npcs()
     for( const auto &npc : just_added ) {
         npc->on_load();
     }
-
-    npcs_dirty = false;
 }
 
 void game::unload_npcs()
@@ -1008,7 +1006,7 @@ void game::create_starting_npcs()
     tmp->normalize();
     tmp->randomize( one_in(2) ? NC_DOCTOR : NC_NONE );
     tmp->spawn_at_precise( { get_levx(), get_levy() }, u.pos() - point( 1, 1 ) );
-    overmap_buffer.insert_npc( tmp );
+    insert_npc( tmp );
     tmp->form_opinion( u );
     tmp->attitude = NPCATT_NULL;
     //This sets the npc mission. This NPC remains in the shelter.
@@ -1409,10 +1407,6 @@ bool game::do_turn()
         calendar::turn.increment();
     }
 
-    if( npcs_dirty ) {
-        load_npcs();
-    }
-
     process_events();
     mission::process_all();
     if (calendar::turn.hours() == 0 && calendar::turn.minutes() == 0 &&
@@ -1745,9 +1739,10 @@ unsigned int game::get_seed() const
     return seed;
 }
 
-void game::set_npcs_dirty()
+void game::insert_npc( std::shared_ptr<npc> new_npc )
 {
-    npcs_dirty = true;
+    overmap_buffer.insert_npc( new_npc );
+    load_npcs();
 }
 
 void game::update_weather()
@@ -4055,12 +4050,11 @@ void game::debug()
             temp->normalize();
             temp->randomize();
             temp->spawn_at_precise( { get_levx(), get_levy() }, u.pos() + point( -4, -4 ) );
-            overmap_buffer.insert_npc( temp );
+            insert_npc( temp );
             temp->form_opinion( u );
             temp->mission = NPC_MISSION_NULL;
             temp->add_new_mission( mission::reserve_random( ORIGIN_ANY_NPC, temp->global_omt_location(),
                                    temp->getID() ) );
-            load_npcs();
         }
         break;
 
@@ -13311,12 +13305,10 @@ void game::spawn_mon(int /*shiftx*/, int /*shifty*/)
         }
         // adds the npc to the correct overmap.
         tmp->spawn_at_sm( msx, msy, 0 );
-        overmap_buffer.insert_npc( tmp );
+        insert_npc( tmp );
         tmp->form_opinion( u );
         tmp->mission = NPC_MISSION_NULL;
         tmp->add_new_mission( mission::reserve_random(ORIGIN_ANY_NPC, tmp->global_omt_location(), tmp->getID()) );
-        // This will make the new NPC active
-        load_npcs();
     }
 }
 

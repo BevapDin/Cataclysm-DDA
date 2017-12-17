@@ -294,6 +294,8 @@ class game
         /// @see Creature_tracker::shared_from
         template<typename T = Creature>
         std::shared_ptr<T> shared_from( const T &critter );
+        /// @see overmapbuffer::insert_npc
+        void insert_npc( std::shared_ptr<npc> new_npc );
 
         /**
          * Summons a brand new monster at the current time. Returns the summoned monster.
@@ -914,8 +916,6 @@ public:
 
         unsigned int get_seed() const;
 
-        /** If invoked, NPCs will be reloaded before next turn. */
-        void set_npcs_dirty();
 private:
         void wield();
         void wield( int pos ); // Wield a weapon  'w'
@@ -1039,8 +1039,6 @@ private:
         // remoteveh() cache
         int remoteveh_cache_turn;
         vehicle *remoteveh_cache;
-        /** Has a NPC been spawned since last load? */
-        bool npcs_dirty;
         /** Was the player sleeping during this turn. */
         bool player_was_sleeping;
 
