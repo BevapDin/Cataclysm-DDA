@@ -5865,24 +5865,11 @@ int game::mon_info(WINDOW *w)
 
 void game::cleanup_dead()
 {
-    // Dead monsters need to stay in the tracker until everything else that needs to die does so
-    // This is because dying monsters can still interact with other dying monsters (@ref Creature::killer)
-    bool creature_is_dead = critter_tracker->kill_marked_for_death();
-
-    if( creature_is_dead ) {
+    // Dead creatures need to stay in the tracker until everything else that needs to die does so
+    // This is because dying creatures can still interact with other dying creatures (@ref Creature::killer)
+    if( critter_tracker->kill_marked_for_death() ) {
         // From here on, pointers to creatures get invalidated as dead creatures get removed.
         critter_tracker->remove_dead();
-    }
-
-    if( creature_is_dead ) {
-        for( auto it = critter_tracker->active_npc.begin(); it != critter_tracker->active_npc.end(); ) {
-            if( (*it)->is_dead() ) {
-                overmap_buffer.remove_npc( ( *it )->getID() );
-                it = critter_tracker->active_npc.erase( it );
-            } else {
-                it++;
-            }
-        }
     }
 }
 

@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "mtype.h"
 #include "npc.h"
+#include "overmapbuffer.h"
 
 #include <algorithm>
 
@@ -246,6 +247,16 @@ void Creature_tracker::remove_dead()
             iter = monsters_list.erase( iter );
         } else {
             ++iter;
+        }
+    }
+
+    for( auto it = active_npc.begin(); it != active_npc.end(); ) {
+        const npc &guy = **it;
+        if( guy.is_dead() ) {
+            overmap_buffer.remove_npc( guy.getID() );
+            it = active_npc.erase( it );
+        } else {
+            it++;
         }
     }
 }
