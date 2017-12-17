@@ -1026,7 +1026,7 @@ bool game::cleanup_at_end()
     if (uquit == QUIT_DIED || uquit == QUIT_SUICIDE) {
         // Put (non-hallucinations) into the overmap so they are not lost.
         for( monster &critter : all_monsters() ) {
-            despawn_monster( critter );
+            critter_tracker->despawn( critter );
         }
         // Save the factions', missions and set the NPC's overmap coords
         // Npcs are saved in the overmap.
@@ -5969,7 +5969,7 @@ void game::monmove()
             critter.posy() < 0 - ( SEEY * MAPSIZE ) / 6 ||
             critter.posx() > ( SEEX * MAPSIZE * 7 ) / 6 ||
             critter.posy() > ( SEEY * MAPSIZE * 7 ) / 6 ) {
-            despawn_monster( critter );
+            critter_tracker->despawn( critter );
         }
     }
 
@@ -11953,7 +11953,7 @@ void game::place_player_overmap( const tripoint &om_dest )
     //First offload the active npcs.
     unload_npcs();
     for( monster &critter : all_monsters() ) {
-        despawn_monster( critter );
+        critter_tracker->despawn( critter );
     }
     if( u.in_vehicle ) {
         m.unboard_vehicle( u.pos() );
@@ -13282,17 +13282,6 @@ void game::update_stair_monsters()
     }
 }
 
-void game::despawn_monster( monster &critter )
-{
-    if( !critter.is_hallucination() ) {
-        // hallucinations aren't stored, they come and go as they like,
-        overmap_buffer.despawn_monster( critter );
-    }
-
-    critter.on_unload();
-    remove_zombie( critter );
-}
-
 void game::shift_monsters( const int shiftx, const int shifty, const int shiftz )
 {
     // If either shift argument is non-zero, we're shifting.
@@ -13311,7 +13300,7 @@ void game::shift_monsters( const int shiftx, const int shifty, const int shiftz 
         }
         // Either a vertical shift or the critter is now outside of the reality bubble,
         // anyway: it must be saved and removed.
-        despawn_monster( critter );
+        critter_tracker->despawn( critter );
     }
     // The order in which zombies are shifted may cause zombies to briefly exist on
     // the same square. This messes up the mon_at cache, so we need to rebuild it.

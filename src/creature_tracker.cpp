@@ -260,3 +260,16 @@ void Creature_tracker::remove_dead()
         }
     }
 }
+
+void Creature_tracker::despawn( Creature &critter )
+{
+    if( monster *const mon = dynamic_cast<monster*>( &critter ) ) {
+        // hallucinations aren't stored, they come and go as they like,
+        if( !mon->is_hallucination() ) {
+            overmap_buffer.despawn_monster( *mon );
+        }
+        mon->on_unload();
+        remove( *mon );
+    }
+    // @todo handle despawning npcs
+}

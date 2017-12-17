@@ -8,6 +8,7 @@
 #include <vector>
 #include <unordered_map>
 
+class Creature;
 class monster;
 class JsonIn;
 class JsonOut;
@@ -49,6 +50,13 @@ class Creature_tracker
         bool kill_marked_for_death();
         /** Removes dead monsters from. Their pointers are invalidated. */
         void remove_dead();
+        /**
+         * Remove a specific creature and store it on the @ref overmap. Any pointer
+         * to it will become invalid.
+         * Note that the creature may get respawned in the next turn when it's still
+         * inside the reality bubble.
+         */
+        void despawn( Creature &critter );
 
         const std::vector<std::shared_ptr<monster>> &get_monsters_list() const {
             return monsters_list;
