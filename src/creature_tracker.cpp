@@ -270,6 +270,14 @@ void Creature_tracker::despawn( Creature &critter )
         }
         mon->on_unload();
         remove( *mon );
+    } else if( npc *const guy = dynamic_cast<npc*>( &critter ) ) {
+        guy->on_unload();
+        //@todo move into remove()
+        const auto iter = std::find_if( active_npc.begin(), active_npc.end(), [&guy]( const std::shared_ptr<npc> &ptr ) {
+            return ptr.get() == guy;
+        } );
+        if( iter != active_npc.end() ) {
+            active_npc.erase( iter );
+        }
     }
-    // @todo handle despawning npcs
 }

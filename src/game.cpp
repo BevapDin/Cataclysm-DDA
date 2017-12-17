@@ -979,11 +979,10 @@ void game::load_npcs()
 
 void game::unload_npcs()
 {
-    for( const auto &npc : critter_tracker->active_npc ) {
-        npc->on_unload();
+    for( npc &guy : all_npcs() ) {
+        critter_tracker->despawn( guy );
     }
-
-    critter_tracker->active_npc.clear();
+    assert( critter_tracker->active_npc.empty() );
 }
 
 void game::reload_npcs()
@@ -12985,15 +12984,12 @@ void game::update_map(int &x, int &y)
     u.shift_destination(-shiftx * SEEX, -shifty * SEEY);
 
     // Shift NPCs
-    for( auto it = critter_tracker->active_npc.begin(); it != critter_tracker->active_npc.end(); ) {
-        (*it)->shift(shiftx, shifty);
-        if( (*it)->posx() < 0 - SEEX * 2 || (*it)->posy() < 0 - SEEX * 2 ||
-            (*it)->posx() > SEEX * (MAPSIZE + 2) || (*it)->posy() > SEEY * (MAPSIZE + 2) ) {
+    for( npc &guy : all_npcs() ) {
+        guy.shift(shiftx, shifty);
+        if( guy.posx() < 0 - SEEX * 2 || guy.posy() < 0 - SEEX * 2 ||
+            guy.posx() > SEEX * (MAPSIZE + 2) || guy.posy() > SEEY * (MAPSIZE + 2) ) {
             //Remove the npc from the active list. It remains in the overmap list.
-            (*it)->on_unload();
-            it = critter_tracker->active_npc.erase(it);
-        } else {
-            it++;
+            critter_tracker->despawn( guy );
         }
     }
     // Check for overmap saved npcs that should now come into view.
