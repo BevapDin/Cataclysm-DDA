@@ -6609,7 +6609,7 @@ bool game::add_zombie(monster &critter, bool pin_upgrade)
 
 size_t game::num_creatures() const
 {
-    return critter_tracker->size() + critter_tracker->active_npc.size() + 1; // 1 == g->u
+    return critter_tracker->num_creatures();
 }
 
 bool game::update_zombie_pos( const monster &critter, const tripoint &pos )

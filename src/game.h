@@ -278,6 +278,8 @@ class game
         void scrambler_blast( const tripoint &p );
         /** Triggers an emp blast at p. */
         void emp_blast( const tripoint &p );
+        /// @see Creature_tracker::num_creatures
+        size_t num_creatures() const;
         /// @see Creature_tracker::critter_by_id
         template<typename T = Creature>
         T *critter_by_id( int id );
@@ -299,12 +301,6 @@ class game
         /** Calls the creature_tracker add function. Returns true if successful. */
         bool add_zombie(monster &critter);
         bool add_zombie(monster &critter, bool pin_upgrade);
-        /**
-         * Returns the approximate number of creatures in the reality bubble.
-         * Because of performance restrictions it may return a slightly incorrect
-         * values (as it includes dead, but not yet cleaned up creatures).
-         */
-        size_t num_creatures() const;
         /** Redirects to the creature_tracker update_pos() function. */
         bool update_zombie_pos( const monster &critter, const tripoint &pos );
         void remove_zombie( const monster &critter );

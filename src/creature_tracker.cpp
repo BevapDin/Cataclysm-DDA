@@ -86,9 +86,9 @@ bool Creature_tracker::add( monster &critter )
     return true;
 }
 
-size_t Creature_tracker::size() const
+size_t Creature_tracker::num_creatures() const
 {
-    return monsters_list.size();
+    return monsters_list.size() + active_npc.size() + 1; // 1 == player_character
 }
 
 bool Creature_tracker::update_pos( const monster &critter, const tripoint &new_pos )

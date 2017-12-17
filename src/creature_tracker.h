@@ -37,7 +37,13 @@ class Creature_tracker
         std::shared_ptr<monster> from_temporary_id( int id );
         /** Adds the given monster to the creature_tracker. Returns whether the operation was successful. */
         bool add( monster &critter );
-        size_t size() const;
+        /**
+         * Returns the approximate number of creatures in the tracker.
+         * Because of performance restrictions it may return a slightly incorrect
+         * values as it includes dead, but not yet cleaned up creatures.
+         * The count includes any type of creature (npcs, player character, monsters).
+         */
+        size_t num_creatures() const;
         /** Updates the position of the given monster to the given point. Returns whether the operation
          *  was successful. */
         bool update_pos( const monster &critter, const tripoint &new_pos );
