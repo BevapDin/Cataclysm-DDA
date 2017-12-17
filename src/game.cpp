@@ -4060,7 +4060,7 @@ void game::debug()
             std::string s;
             s = _( "Location %d:%d in %d:%d, %s\n" );
             s += _( "Current turn: %d; Next spawn %d.\n%s\n" );
-            s += ngettext( "%d creature exists.\n", "%d creatures exist.\n", num_creatures() );
+            s += ngettext( "%d creature exists.\n", "%d creatures exist.\n", critter_tracker.num_creatures() );
             s += ngettext( "%d event planned.", "%d events planned", events.size() );
             popup_top(
                 s.c_str(),
@@ -4069,7 +4069,7 @@ void game::debug()
                 int( calendar::turn ), int( nextspawn ),
                 ( get_option<bool>( "RANDOM_NPC" ) ? _( "NPCs are going to spawn." ) :
                   _( "NPCs are NOT going to spawn." ) ),
-                num_creatures(), events.size() );
+                critter_tracker.num_creatures(), events.size() );
             for( const npc &guy : all_npcs() ) {
                 tripoint t = guy.global_sm_location();
                 add_msg( m_info, _( "%s: map ( %d:%d ) pos ( %d:%d )" ), guy.name.c_str(), t.x,
@@ -6583,11 +6583,6 @@ bool game::add_zombie(monster &critter, bool pin_upgrade)
 
     critter.last_updated = calendar::turn;
     return critter_tracker.add(critter);
-}
-
-size_t game::num_creatures() const
-{
-    return critter_tracker->num_creatures();
 }
 
 bool game::update_zombie_pos( const monster &critter, const tripoint &pos )

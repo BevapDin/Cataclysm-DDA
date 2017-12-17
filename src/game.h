@@ -281,8 +281,6 @@ class game
         void emp_blast( const tripoint &p );
         /// @see Creature_tracker::clear_creatures
         void clear_creatures();
-        /// @see Creature_tracker::num_creatures
-        size_t num_creatures() const;
         /// @see Creature_tracker::critter_by_id
         template<typename T = Creature>
         T *critter_by_id( int id );

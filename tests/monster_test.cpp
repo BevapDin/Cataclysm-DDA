@@ -13,6 +13,7 @@
 
 #include "map_helpers.h"
 #include "test_statistics.h"
+#include "creature_tracker.h"
 
 #include <fstream>
 #include <sstream>
@@ -23,7 +24,7 @@ static int moves_to_destination( const std::string &monster_type,
                                  const tripoint &start, const tripoint &end )
 {
     clear_creatures();
-    REQUIRE( g->num_creatures() == 1 ); // the player
+    REQUIRE( g->critter_tracker.num_creatures() == 1 ); // the player
     monster &test_monster = spawn_test_monster( monster_type, start );
     // Get it riled up and give it a goal.
     test_monster.anger = 100;
@@ -80,7 +81,7 @@ std::ostream &operator << ( std::ostream &os, std::vector<track> vec )
 static int can_catch_player( const std::string &monster_type, const tripoint &direction_of_flight )
 {
     clear_creatures();
-    REQUIRE( g->num_creatures() == 1 ); // the player
+    REQUIRE( g->critter_tracker.num_creatures() == 1 ); // the player
     player &test_player = g->u;
     // Strip off any potentially encumbering clothing.
     std::list<item> temp;
@@ -120,7 +121,7 @@ static int can_catch_player( const std::string &monster_type, const tripoint &di
                     }
                 }
                 // Verify that only the player and one monster are present.
-                REQUIRE( g->num_creatures() == 2 );
+                REQUIRE( g->critter_tracker.num_creatures() == 2 );
             }
             const int move_cost = g->m.combined_movecost(
                                       test_player.pos(), test_player.pos() + direction_of_flight, nullptr, 0 );
