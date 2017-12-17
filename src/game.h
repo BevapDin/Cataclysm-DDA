@@ -166,7 +166,6 @@ class game
 
         // May be a bit hacky, but it's probably better than the header spaghetti
         std::unique_ptr<map> map_ptr;
-        std::unique_ptr<player> u_ptr;
         std::unique_ptr<Creature_tracker> critter_tracker;
         std::unique_ptr<live_view> liveview_ptr;
         live_view& liveview;

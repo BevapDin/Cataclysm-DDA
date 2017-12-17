@@ -8,6 +8,7 @@
 #include <vector>
 #include <unordered_map>
 
+class player;
 class Creature;
 class monster;
 class JsonIn;
@@ -67,11 +68,17 @@ class Creature_tracker
 
         std::vector<std::shared_ptr<npc>> active_npc;
 
+        player &get_player_character() const {
+            return *player_character;
+        }
+
     private:
         std::vector<std::shared_ptr<monster>> monsters_list;
         std::unordered_map<tripoint, std::shared_ptr<monster>> monsters_by_location;
         /** Remove the monsters entry in @ref monsters_by_location */
         void remove_from_location_map( const monster &critter );
+
+        std::unique_ptr<player> player_character;
 };
 
 #endif

@@ -245,7 +245,6 @@ public:
 // This is the main game set-up process.
 game::game() :
     map_ptr( new map() ),
-    u_ptr( new player() ),
     critter_tracker( new Creature_tracker() ),
     liveview_ptr( new live_view() ),
     liveview( *liveview_ptr ),
@@ -253,7 +252,7 @@ game::game() :
     new_game(false),
     uquit(QUIT_NO),
     m( *map_ptr ),
-    u( *u_ptr ),
+    u( critter_tracker->get_player_character() ),
     scent( *scent_ptr ),
     weather( WEATHER_CLEAR ),
     lightning_active( false ),

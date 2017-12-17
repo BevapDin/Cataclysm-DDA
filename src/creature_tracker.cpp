@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "mtype.h"
 #include "npc.h"
+#include "player.h"
 #include "overmapbuffer.h"
 
 #include <algorithm>
@@ -12,6 +13,7 @@
 #define dbg(x) DebugLog((DebugLevel)(x),D_GAME) << __FILE__ << ":" << __LINE__ << ": "
 
 Creature_tracker::Creature_tracker()
+: player_character( new player() )
 {
 }
 
