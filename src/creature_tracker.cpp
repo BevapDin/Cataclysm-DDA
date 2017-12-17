@@ -310,3 +310,26 @@ template npc *Creature_tracker::critter_at<npc>( const tripoint &, bool ) const;
 template player *Creature_tracker::critter_at<player>( const tripoint &, bool ) const;
 template Character *Creature_tracker::critter_at<Character>( const tripoint &, bool ) const;
 template Creature *Creature_tracker::critter_at<Creature>( const tripoint &, bool ) const;
+
+template<typename T>
+std::shared_ptr<T> Creature_tracker::shared_from( const T &critter ) const
+{
+    if( const std::shared_ptr<monster> mon_ptr = find( critter.pos() ) ) {
+        return std::dynamic_pointer_cast<T>( mon_ptr );
+    }
+    if( static_cast<const Creature*>( &critter ) == static_cast<const Creature*>( player_character.get() ) ) {
+        return std::dynamic_pointer_cast<T>( player_character );
+    }
+    for( const auto &cur_npc : active_npc ) {
+        if( static_cast<const Creature*>( cur_npc.get() ) == static_cast<const Creature*>( &critter ) ) {
+            return std::dynamic_pointer_cast<T>( cur_npc );
+        }
+    }
+    return nullptr;
+}
+
+template std::shared_ptr<Creature> Creature_tracker::shared_from<Creature>( const Creature & ) const;
+template std::shared_ptr<Character> Creature_tracker::shared_from<Character>( const Character & ) const;
+template std::shared_ptr<player> Creature_tracker::shared_from<player>( const player & ) const;
+template std::shared_ptr<monster> Creature_tracker::shared_from<monster>( const monster & ) const;
+template std::shared_ptr<npc> Creature_tracker::shared_from<npc>( const npc & ) const;

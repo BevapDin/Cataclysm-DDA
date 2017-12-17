@@ -80,6 +80,15 @@ class Creature_tracker
          */
         template<typename T = Creature>
         T *critter_at( const tripoint &p, bool allow_hallucination ) const;
+        /**
+         * Returns a shared pointer to the given creature (which can be of any
+         * of the subclasses of @ref Creature).
+         * The function may return an empty pointer if the given critter
+         * is not stored anywhere (e.g. it was allocated on the stack).
+         * Precondition: if the returned pointer is not `nullptr`, it points to @p critter.
+         */
+        template<typename T = Creature>
+        std::shared_ptr<T> shared_from( const T &critter ) const;
 
     private:
         std::vector<std::shared_ptr<monster>> monsters_list;
@@ -87,7 +96,7 @@ class Creature_tracker
         /** Remove the monsters entry in @ref monsters_by_location */
         void remove_from_location_map( const monster &critter );
 
-        std::unique_ptr<player> player_character;
+        std::shared_ptr<player> player_character;
 };
 
 #endif
