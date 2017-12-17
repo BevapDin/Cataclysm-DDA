@@ -26,6 +26,7 @@
 #include "npc.h"
 #include "veh_type.h"
 #include "trap.h"
+#include "creature_tracker.h"
 #include "itype.h"
 #include "submap.h"
 #include "mapdata.h"
@@ -2791,7 +2792,7 @@ player *vehicle::get_passenger(int p) const
     p = part_with_feature (p, VPFLAG_BOARDABLE, false);
     if (p >= 0 && parts[p].has_flag(vehicle_part::passenger_flag))
     {
-        return g->critter_by_id<player>( parts[p].passenger_id );
+        return g->critter_tracker.critter_by_id<player>( parts[p].passenger_id );
     }
     return 0;
 }
@@ -6343,7 +6344,7 @@ npc * vehicle_part::crew() const
         return nullptr;
     }
 
-    npc *const res = g->critter_by_id<npc>( crew_id );
+    npc *const res = g->critter_tracker.critter_by_id<npc>( crew_id );
     if( !res ) {
         return nullptr;
     }

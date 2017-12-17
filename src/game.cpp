@@ -6532,17 +6532,6 @@ template const Character *game::critter_at<Character>( const tripoint &, bool ) 
 template Character *game::critter_at<Character>( const tripoint &, bool );
 template const Creature *game::critter_at<Creature>( const tripoint &, bool ) const;
 
-template<typename T>
-T *game::critter_by_id( const int id )
-{
-    return critter_tracker.critter_by_id<T>( id );
-}
-
-// monsters don't have ids
-template player *game::critter_by_id<player>( int );
-template npc *game::critter_by_id<npc>( int );
-template Creature *game::critter_by_id<Creature>( int );
-
 monster *game::summon_mon( const mtype_id& id, const tripoint &p )
 {
     monster mon( id );

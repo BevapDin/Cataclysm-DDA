@@ -1,11 +1,12 @@
 #include "mission.h"
 #include "game.h"
 #include "overmapbuffer.h"
+#include "creature_tracker.h"
 #include "npc.h"
 
 void mission_fail::kill_npc( mission *miss )
 {
-    if( npc *const elem = g->critter_by_id<npc>( miss->get_npc_id() ) ) {
+    if( npc *const elem = g->critter_tracker.critter_by_id<npc>( miss->get_npc_id() ) ) {
         elem->die( nullptr );
         // Actuall removoal of the npc is done in @ref Creature_tracker::remove_dead.
     }
