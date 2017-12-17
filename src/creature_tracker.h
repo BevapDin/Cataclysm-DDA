@@ -11,6 +11,7 @@
 class monster;
 class JsonIn;
 class JsonOut;
+class npc;
 
 class Creature_tracker
 {
@@ -55,6 +56,8 @@ class Creature_tracker
 
         void serialize( JsonOut &jsout ) const;
         void deserialize( JsonIn &jsin );
+
+        std::vector<std::shared_ptr<npc>> active_npc;
 
     private:
         std::vector<std::shared_ptr<monster>> monsters_list;

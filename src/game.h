@@ -301,7 +301,7 @@ class game
          * Returns a shared pointer to the given critter (which can be of any of the subclasses of
          * @ref Creature). The function may return an empty pointer if the given critter
          * is not stored anywhere (e.g. it was allocated on the stack, not stored in
-         * the @ref critter_tracker nor in @ref active_npc nor is it @ref u).
+         * the @ref critter_tracker nor is it @ref u).
          */
         template<typename T = Creature>
         std::shared_ptr<T> shared_from( const T &critter );
@@ -327,7 +327,7 @@ class game
          * Removes all zombies (as if by calling @ref remove_zombie) and active npcs
          * from the game. Note that the npcs remain stored in an overmap, but monsters
          * are effectively lost.
-         * Postcondition: `num_creatures() == 1` ( @ref u).
+         * Postcondition: `num_creatures() == 1` (@ref u).
          */
         void clear_creatures();
         /** Spawns a hallucination close to the player. */
@@ -630,8 +630,6 @@ class game
         /** Get all living player allies */
         std::vector<npc *> allies();
 
-    private:
-        std::vector<std::shared_ptr<npc>> active_npc;
     public:
         std::vector<faction> factions;
 

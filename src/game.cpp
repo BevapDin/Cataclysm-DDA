@@ -965,7 +965,7 @@ void game::load_npcs()
         } else {
             if (temp->my_fac != nullptr)
                 temp->my_fac->known_by_u = true;
-            active_npc.push_back( temp );
+            critter_tracker->active_npc.push_back( temp );
             just_added.push_back( temp );
         }
     }
@@ -979,11 +979,11 @@ void game::load_npcs()
 
 void game::unload_npcs()
 {
-    for( const auto &npc : active_npc ) {
+    for( const auto &npc : critter_tracker->active_npc ) {
         npc->on_unload();
     }
 
-    active_npc.clear();
+    critter_tracker->active_npc.clear();
 }
 
 void game::reload_npcs()
@@ -5871,7 +5871,7 @@ void game::cleanup_dead()
 
     bool npc_is_dead = false;
     // can't use all_npcs as that does not include dead ones
-    for( const auto &n : active_npc ) {
+    for( const auto &n : critter_tracker->active_npc ) {
         if( n->is_dead() ) {
             n->die( nullptr ); // make sure this has been called to create corpses etc.
             npc_is_dead = true;
@@ -5884,10 +5884,10 @@ void game::cleanup_dead()
     }
 
     if( npc_is_dead ) {
-        for( auto it = active_npc.begin(); it != active_npc.end(); ) {
+        for( auto it = critter_tracker->active_npc.begin(); it != critter_tracker->active_npc.end(); ) {
             if( (*it)->is_dead() ) {
                 overmap_buffer.remove_npc( ( *it )->getID() );
-                it = active_npc.erase( it );
+                it = critter_tracker->active_npc.erase( it );
             } else {
                 it++;
             }
@@ -6571,7 +6571,7 @@ T *game::critter_at( const tripoint &p, bool allow_hallucination )
     if( p == u.pos() ) {
         return dynamic_cast<T*>( &u );
     }
-    for( auto &cur_npc : active_npc ) {
+    for( auto &cur_npc : critter_tracker->active_npc ) {
         if( cur_npc->pos() == p && !cur_npc->is_dead() ) {
             return dynamic_cast<T*>( cur_npc.get() );
         }
@@ -6603,7 +6603,7 @@ std::shared_ptr<T> game::shared_from( const T &critter )
         const std::shared_ptr<player> player_ptr( &u, []( player * ) { } );
         return std::dynamic_pointer_cast<T>( player_ptr );
     }
-    for( auto &cur_npc : active_npc ) {
+    for( auto &cur_npc : critter_tracker->active_npc ) {
         if( static_cast<const Creature*>( cur_npc.get() ) == static_cast<const Creature*>( &critter ) ) {
             return std::dynamic_pointer_cast<T>( cur_npc );
         }
@@ -6624,7 +6624,7 @@ T *game::critter_by_id( const int id )
         // player is always alive, therefor no is-dead check
         return dynamic_cast<T*>( &u );
     }
-    for( auto &cur_npc : active_npc ) {
+    for( auto &cur_npc : critter_tracker->active_npc ) {
         if( cur_npc->getID() == id && !cur_npc->is_dead() ) {
             return dynamic_cast<T*>( cur_npc.get() );
         }
@@ -6669,7 +6669,7 @@ bool game::add_zombie(monster &critter, bool pin_upgrade)
 
 size_t game::num_creatures() const
 {
-    return critter_tracker->size() + active_npc.size() + 1; // 1 == g->u
+    return critter_tracker->size() + critter_tracker->active_npc.size() + 1; // 1 == g->u
 }
 
 bool game::update_zombie_pos( const monster &critter, const tripoint &pos )
@@ -6685,7 +6685,7 @@ void game::remove_zombie( const monster &critter )
 void game::clear_creatures()
 {
     critter_tracker->clear();
-    active_npc.clear();
+    critter_tracker->active_npc.clear();
     assert( num_creatures() == 1 ); // the player character
 }
 
@@ -12708,7 +12708,7 @@ void game::vertical_move(int movez, bool force)
     std::vector<std::shared_ptr<npc>> npcs_to_bring;
     std::vector<monster *> monsters_following;
     if( !m.has_zlevels() && abs( movez ) == 1 ) {
-        std::copy_if( active_npc.begin(), active_npc.end(), back_inserter( npcs_to_bring ),
+        std::copy_if( critter_tracker->active_npc.begin(), critter_tracker->active_npc.end(), back_inserter( npcs_to_bring ),
                       [this]( const std::shared_ptr<npc> &np ) {
             return np->is_friend() && rl_dist( np->pos(), u.pos() ) < 2;
         } );
@@ -13007,13 +13007,13 @@ void game::update_map(int &x, int &y)
     u.shift_destination(-shiftx * SEEX, -shifty * SEEY);
 
     // Shift NPCs
-    for( auto it = active_npc.begin(); it != active_npc.end(); ) {
+    for( auto it = critter_tracker->active_npc.begin(); it != critter_tracker->active_npc.end(); ) {
         (*it)->shift(shiftx, shifty);
         if( (*it)->posx() < 0 - SEEX * 2 || (*it)->posy() < 0 - SEEX * 2 ||
             (*it)->posx() > SEEX * (MAPSIZE + 2) || (*it)->posy() > SEEY * (MAPSIZE + 2) ) {
             //Remove the npc from the active list. It remains in the overmap list.
             (*it)->on_unload();
-            it = active_npc.erase(it);
+            it = critter_tracker->active_npc.erase(it);
         } else {
             it++;
         }
@@ -14140,12 +14140,12 @@ game::monster_range::monster_range( game &g ) {
 game::Creature_range::Creature_range( game &g ) : u( &g.u, []( player * ) { } ) {
     const auto &monsters = g.critter_tracker->get_monsters_list();
     items.insert( items.end(), monsters.begin(), monsters.end() );
-    items.insert( items.end(), g.active_npc.begin(), g.active_npc.end() );
+    items.insert( items.end(), g.critter_tracker->active_npc.begin(), g.critter_tracker->active_npc.end() );
     items.push_back( u );
 }
 
 game::npc_range::npc_range( game &g ) {
-    items.insert( items.end(), g.active_npc.begin(), g.active_npc.end() );
+    items.insert( items.end(), g.critter_tracker->active_npc.begin(), g.critter_tracker->active_npc.end() );
 }
 
 game::Creature_range game::all_creatures()
