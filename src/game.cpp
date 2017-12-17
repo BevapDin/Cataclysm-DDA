@@ -976,8 +976,9 @@ void game::reload_npcs()
         if( temp->my_fac ) {
             temp->my_fac->known_by_u = true;
         }
-        critter_tracker->active_npc.push_back( temp );
-        just_added.push_back( temp.get() );
+        if( critter_tracker->add( temp ) ) {
+            just_added.push_back( temp.get() );
+        }
     }
 
     for( const auto &npc : just_added ) {
