@@ -12624,7 +12624,8 @@ void game::vertical_move(int movez, bool force)
     std::vector<std::shared_ptr<npc>> npcs_to_bring;
     std::vector<monster *> monsters_following;
     if( !m.has_zlevels() && abs( movez ) == 1 ) {
-        std::copy_if( critter_tracker->active_npc.begin(), critter_tracker->active_npc.end(), back_inserter( npcs_to_bring ),
+        const auto &npcs = critter_tracker->get_npcs_list();
+        std::copy_if( npcs.begin(), npcs.end(), back_inserter( npcs_to_bring ),
                       [this]( const std::shared_ptr<npc> &np ) {
             return np->is_friend() && rl_dist( np->pos(), u.pos() ) < 2;
         } );
@@ -14040,12 +14041,14 @@ game::monster_range::monster_range( game &g ) {
 game::Creature_range::Creature_range( game &g ) : u( &g.u, []( player * ) { } ) {
     const auto &monsters = g.critter_tracker->get_monsters_list();
     items.insert( items.end(), monsters.begin(), monsters.end() );
-    items.insert( items.end(), g.critter_tracker->active_npc.begin(), g.critter_tracker->active_npc.end() );
+    const auto &npcs = g.critter_tracker->get_npcs_list();
+    items.insert( items.end(), npcs.begin(), npcs.end() );
     items.push_back( u );
 }
 
 game::npc_range::npc_range( game &g ) {
-    items.insert( items.end(), g.critter_tracker->active_npc.begin(), g.critter_tracker->active_npc.end() );
+    const auto &npcs = g.critter_tracker->get_npcs_list();
+    items.insert( items.end(), npcs.begin(), npcs.end() );
 }
 
 game::Creature_range game::all_creatures()

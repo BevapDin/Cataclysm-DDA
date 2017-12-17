@@ -72,11 +72,12 @@ class Creature_tracker
         const std::vector<std::shared_ptr<monster>> &get_monsters_list() const {
             return monsters_list;
         }
+        const std::vector<std::shared_ptr<npc>> &get_npcs_list() const {
+            return active_npc;
+        }
 
         void serialize( JsonOut &jsout ) const;
         void deserialize( JsonIn &jsin );
-
-        std::vector<std::shared_ptr<npc>> active_npc;
 
         player &get_player_character() const {
             return *player_character;
@@ -121,6 +122,8 @@ class Creature_tracker
         std::unordered_map<tripoint, std::shared_ptr<monster>> monsters_by_location;
         /** Remove the monsters entry in @ref monsters_by_location */
         void remove_from_location_map( const monster &critter );
+
+        std::vector<std::shared_ptr<npc>> active_npc;
 
         std::shared_ptr<player> player_character;
 };
