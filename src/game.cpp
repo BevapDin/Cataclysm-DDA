@@ -1020,10 +1020,7 @@ bool game::cleanup_at_end()
 {
     draw_sidebar();
     if (uquit == QUIT_DIED || uquit == QUIT_SUICIDE) {
-        // Put (non-hallucinations) into the overmap so they are not lost.
-        for( monster &critter : all_monsters() ) {
-            critter_tracker->despawn( critter );
-        }
+        critter_tracker->despawn_all();
         // Save the factions', missions and set the NPC's overmap coords
         // Npcs are saved in the overmap.
         save_factions_missions_npcs(); //missions need to be saved as they are global for all saves.
@@ -11899,11 +11896,7 @@ void game::place_player( const tripoint &dest_loc )
 
 void game::place_player_overmap( const tripoint &om_dest )
 {
-    //First offload the active npcs.
-    unload_npcs();
-    for( monster &critter : all_monsters() ) {
-        critter_tracker->despawn( critter );
-    }
+    critter_tracker->despawn_all();
     if( u.in_vehicle ) {
         m.unboard_vehicle( u.pos() );
     }

@@ -286,6 +286,17 @@ void Creature_tracker::despawn( Creature &critter )
     }
 }
 
+void Creature_tracker::despawn_all()
+{
+    const auto monsters_copy = monsters_list;
+    for( const auto &monster_ptr : monsters_copy ) {
+        despawn( *monster_ptr );
+    }
+    const auto npcs_copy = active_npc;
+    for( const auto &npc_ptr : npcs_copy ) {
+        despawn( *npc_ptr );
+    }
+}
 
 template<typename T>
 T *Creature_tracker::critter_at( const tripoint &p, const bool allow_hallucination ) const

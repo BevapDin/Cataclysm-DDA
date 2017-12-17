@@ -61,8 +61,11 @@ class Creature_tracker
          * to it will become invalid.
          * Note that the creature may get respawned in the next turn when it's still
          * inside the reality bubble.
+         * Note: has no effect when being called with @ref player_character.
          */
         void despawn( Creature &critter );
+        /// Calls @ref despawn for all (except @ref player_character) contained creatures.
+        void despawn_all();
 
         const std::vector<std::shared_ptr<monster>> &get_monsters_list() const {
             return monsters_list;
