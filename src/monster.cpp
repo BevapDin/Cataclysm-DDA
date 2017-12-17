@@ -18,6 +18,7 @@
 #include <numeric>
 #include "cursesdef.h"
 #include "effect.h"
+#include "creature_tracker.h"
 #include "messages.h"
 #include "mondefense.h"
 #include "mission.h"
@@ -203,7 +204,7 @@ void monster::setpos( const tripoint &p )
     }
 
     bool wandering = wander();
-    g->update_zombie_pos( *this, p );
+    g->critter_tracker.update_pos( *this, p );
     position = p;
     if( wandering ) {
         unset_dest();

@@ -6562,11 +6562,6 @@ bool game::add_zombie(monster &critter, bool pin_upgrade)
     return critter_tracker.add(critter);
 }
 
-bool game::update_zombie_pos( const monster &critter, const tripoint &pos )
-{
-    return critter_tracker.update_pos( critter, pos );
-}
-
 /**
  * Attempts to spawn a hallucination somewhere close to the player. Returns
  * false if the hallucination couldn't be spawned for whatever reason, such as

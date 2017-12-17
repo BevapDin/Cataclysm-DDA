@@ -296,8 +296,6 @@ class game
         /** Calls the creature_tracker add function. Returns true if successful. */
         bool add_zombie(monster &critter);
         bool add_zombie(monster &critter, bool pin_upgrade);
-        /** Redirects to the creature_tracker update_pos() function. */
-        bool update_zombie_pos( const monster &critter, const tripoint &pos );
         /** Spawns a hallucination close to the player. */
         bool spawn_hallucination();
         /** Swaps positions of two creatures */
