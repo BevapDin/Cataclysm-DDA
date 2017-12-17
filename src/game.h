@@ -942,8 +942,6 @@ public:
 
         /** If invoked, NPCs will be reloaded before next turn. */
         void set_npcs_dirty();
-        /** If invoked, dead will be cleaned this turn. */
-        void set_critter_died();
 private:
         void wield();
         void wield( int pos ); // Wield a weapon  'w'
@@ -1075,8 +1073,6 @@ private:
         vehicle *remoteveh_cache;
         /** Has a NPC been spawned since last load? */
         bool npcs_dirty;
-        /** Has anything died in this turn and needs to be cleaned up? */
-        bool critter_died;
         /** Was the player sleeping during this turn. */
         bool player_was_sleeping;
 

@@ -1752,11 +1752,6 @@ void game::set_npcs_dirty()
     npcs_dirty = true;
 }
 
-void game::set_critter_died()
-{
-    critter_died = true;
-}
-
 void game::update_weather()
 {
     if( weather == WEATHER_NULL || calendar::turn >= nextweather ) {
@@ -5898,8 +5893,6 @@ void game::cleanup_dead()
             }
         }
     }
-
-    critter_died = false;
 }
 
 void game::monmove()

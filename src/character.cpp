@@ -1245,7 +1245,6 @@ void Character::normalize()
 // Actual player death is mostly handled in game::is_game_over
 void Character::die(Creature* nkiller)
 {
-    g->set_critter_died();
     set_killer( nkiller );
     set_turn_died(int(calendar::turn));
     if( has_effect( effect_lightsnare ) ) {

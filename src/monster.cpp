@@ -1662,7 +1662,6 @@ void monster::die(Creature* nkiller)
         // *only* set to true in this function!
         return;
     }
-    g->set_critter_died();
     dead = true;
     set_killer( nkiller );
     if (!no_extra_death_drops) {
