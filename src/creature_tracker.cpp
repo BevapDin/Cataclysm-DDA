@@ -283,3 +283,30 @@ void Creature_tracker::despawn( Creature &critter )
         }
     }
 }
+
+
+template<typename T>
+T *Creature_tracker::critter_at( const tripoint &p, const bool allow_hallucination ) const
+{
+    if( const std::shared_ptr<monster> mon_ptr = find( p ) ) {
+        if( !allow_hallucination && mon_ptr->is_hallucination() ) {
+            return nullptr;
+        }
+        return dynamic_cast<T *>( mon_ptr.get() );
+    }
+    if( p == player_character->pos() ) {
+        return dynamic_cast<T *>( player_character.get() );
+    }
+    for( auto &cur_npc : active_npc ) {
+        if( cur_npc->pos() == p && !cur_npc->is_dead() ) {
+            return dynamic_cast<T *>( cur_npc.get() );
+        }
+    }
+    return nullptr;
+}
+
+template monster *Creature_tracker::critter_at<monster>( const tripoint &, bool ) const;
+template npc *Creature_tracker::critter_at<npc>( const tripoint &, bool ) const;
+template player *Creature_tracker::critter_at<player>( const tripoint &, bool ) const;
+template Character *Creature_tracker::critter_at<Character>( const tripoint &, bool ) const;
+template Creature *Creature_tracker::critter_at<Creature>( const tripoint &, bool ) const;

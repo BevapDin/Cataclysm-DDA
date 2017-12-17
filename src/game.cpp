@@ -6538,21 +6538,7 @@ void game::emp_blast( const tripoint &p )
 template<typename T>
 T *game::critter_at( const tripoint &p, bool allow_hallucination )
 {
-    if( const std::shared_ptr<monster> mon_ptr = critter_tracker->find( p ) ) {
-        if( !allow_hallucination && mon_ptr->is_hallucination() ) {
-            return nullptr;
-        }
-        return dynamic_cast<T*>( mon_ptr.get() );
-    }
-    if( p == u.pos() ) {
-        return dynamic_cast<T*>( &u );
-    }
-    for( auto &cur_npc : critter_tracker->active_npc ) {
-        if( cur_npc->pos() == p && !cur_npc->is_dead() ) {
-            return dynamic_cast<T*>( cur_npc.get() );
-        }
-    }
-    return nullptr;
+    return critter_tracker->critter_at<T>( p, allow_hallucination );
 }
 
 template<typename T>

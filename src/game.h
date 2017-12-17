@@ -285,14 +285,10 @@ class game
          */
         template<typename T = Creature>
         T *critter_by_id( int id );
-        /**
-         * Returns the Creature at the given location. Optionally casted to the given
-         * type of creature: @ref npc, @ref player, @ref monster - if there is a creature,
-         * but it's not of the requested tpye, returns nullptr.
-         * @param allow_hallucination Whether to return monsters that are actually hallucinations.
-         */
+        /// @see Creature_tracker::critter_at
         template<typename T = Creature>
         T *critter_at( const tripoint &p, bool allow_hallucination = false );
+        /// @see Creature_tracker::critter_at
         template<typename T = Creature>
         T const* critter_at( const tripoint &p, bool allow_hallucination = false ) const;
         /**

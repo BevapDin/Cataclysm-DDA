@@ -71,6 +71,15 @@ class Creature_tracker
         player &get_player_character() const {
             return *player_character;
         }
+        /**
+         * Returns the Creature at the given location @p p.
+         * Optionally casted to the given type of creature: @ref npc, @ref player, @ref monster.
+         * If there is a creature, but it's not of the requested type, returns `nullptr`.
+         * @param allow_hallucination Whether to return monsters that are actually
+         * hallucinations (@ref Creature::is_hallucination).
+         */
+        template<typename T = Creature>
+        T *critter_at( const tripoint &p, bool allow_hallucination ) const;
 
     private:
         std::vector<std::shared_ptr<monster>> monsters_list;
