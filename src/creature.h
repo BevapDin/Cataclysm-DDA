@@ -296,7 +296,7 @@ class Creature
         /**
          * This function checks the creatures @ref is_dead_state and (if true) calls @ref die.
          * You can either call this function after hitting this creature, or let the game
-         * call it during @ref game::cleanup_dead.
+         * call it during @ref Creature_tracker::remove_dead.
          * As @ref die has many side effects (messages, on-death-triggers, ...), you should be
          * careful when calling this and expect that at least a "The monster dies!" message might
          * have been printed. If you want to print any message relating to the attack (e.g. how

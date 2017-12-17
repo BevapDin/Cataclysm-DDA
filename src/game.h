@@ -955,7 +955,6 @@ private:
         void spawn_mon(int shift, int shifty); // Called by update_map, sometimes
 
         // Routine loop functions, approximately in order of execution
-        void cleanup_dead();     // Delete any dead NPCs/monsters
         void monmove();          // Monster movement
         void rustCheck();        // Degrades practice levels
         void process_events();   // Processes and enacts long-term events

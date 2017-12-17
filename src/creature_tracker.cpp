@@ -258,9 +258,8 @@ void Creature_tracker::remove_dead()
     for( const auto &mon_ptr : monsters_list ) {
         monster &critter = *mon_ptr;
         if( critter.is_dead() ) {
-            dbg( D_INFO ) << string_format( "cleanup_dead: critter %d,%d,%d hp:%d %s",
-                                            critter.posx(), critter.posy(), critter.posz(),
-                                            critter.get_hp(), critter.name().c_str() );
+            dbg( D_INFO ) << "Creature_tracker::remove_dead: critter " << critter.disp_name() << " at " <<
+                          critter.posx() << ", " << critter.posy() << ", " << critter.posz() << " hp: " << critter.get_hp();
             critter.die( nullptr );
             creature_is_dead = true;
         }

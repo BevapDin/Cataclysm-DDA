@@ -1448,7 +1448,7 @@ bool game::do_turn()
     if (!u.in_sleep_state()) {
         if (u.moves > 0 || uquit == QUIT_WATCH) {
             while (u.moves > 0 || uquit == QUIT_WATCH) {
-                cleanup_dead();
+                critter_tracker->remove_dead();
                 // Process any new sounds the player caused during their turn.
                 sounds::process_sound_markers( &u );
                 if( !u.activity && uquit != QUIT_WATCH ) {
@@ -4204,7 +4204,7 @@ void game::debug()
                 // and for getting a corpse.
                 critter.die( nullptr );
             }
-            cleanup_dead();
+            critter_tracker->remove_dead();
         }
         break;
         case 20:
@@ -5848,14 +5848,9 @@ int game::mon_info(WINDOW *w)
     return lastrowprinted;
 }
 
-void game::cleanup_dead()
-{
-    critter_tracker->remove_dead();
-}
-
 void game::monmove()
 {
-    cleanup_dead();
+    critter_tracker->remove_dead();
 
     // Make sure these don't match the first time around.
     tripoint cached_lev = m.get_abs_sub() + tripoint( 1, 0, 0 );
@@ -5939,7 +5934,7 @@ void game::monmove()
         }
     }
 
-    cleanup_dead();
+    critter_tracker->remove_dead();
 
     // The remaining monsters are all alive, but may be outside of the reality bubble.
     // If so, despawn them. This is not the same as dying, they will be stored for later and the
@@ -5988,7 +5983,7 @@ void game::monmove()
             guy.update_body();
         }
     }
-    cleanup_dead();
+    critter_tracker->remove_dead();
 }
 
 void game::flashbang( const tripoint &p, bool player_immune)
