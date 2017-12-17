@@ -318,6 +318,7 @@ classes = {
             { name = "num_creatures", rval = "int", args = { } },
             { name = "critter_by_id", rval = "Creature&", args = { "int" } },
             { name = "clear_creatures", rval = nil, args = { } },
+            { name = "remove", rval = nil, args = { "monster" } },
         },
     },
     game = {
@@ -387,7 +388,6 @@ classes = {
             { name = "plfire", rval = nil, args = { } },
             { name = "plswim", rval = nil, args = { "tripoint" } },
             { name = "refresh_all", rval = nil, args = { } },
-            { name = "remove_zombie", rval = nil, args = { "monster" } },
             { name = "resonance_cascade", rval = nil, args = { "tripoint" } },
             { name = "revive_corpse", rval = "bool", args = { "tripoint", "item" } },
             { name = "save", rval = "bool", args = { } },

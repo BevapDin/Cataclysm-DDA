@@ -40,12 +40,12 @@ static int moves_to_destination( const std::string &monster_type,
             test_monster.move();
             moves_spent += moves_before - test_monster.moves;
             if( test_monster.pos() == test_monster.move_target() ) {
-                g->remove_zombie( test_monster );
+                g->critter_tracker.remove( test_monster );
                 return moves_spent;
             }
         }
     }
-    g->remove_zombie( test_monster );
+    g->critter_tracker.remove( test_monster );
     // Return an unreasonably high number.
     return 100000;
 }
@@ -117,7 +117,7 @@ static int can_catch_player( const std::string &monster_type, const tripoint &di
                 g->unload_npcs();
                 for( monster &critter : g->all_monsters() ) {
                     if( &critter != &test_monster ) {
-                        g->remove_zombie( critter );
+                        g->critter_tracker.remove( critter );
                     }
                 }
                 // Verify that only the player and one monster are present.

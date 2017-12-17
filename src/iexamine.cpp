@@ -27,6 +27,7 @@
 #include "trap.h"
 #include "itype.h"
 #include "basecamp.h"
+#include "creature_tracker.h"
 #include "mtype.h"
 #include "weather.h"
 #include "sounds.h"
@@ -677,7 +678,7 @@ void iexamine::cardreader(player &p, const tripoint &examp)
         for( monster &critter : g->all_monsters() ) {
             if( ( critter.type->id == mon_turret ) ||
                 ( critter.type->id == mon_turret_rifle ) ) {
-                g->remove_zombie( critter );
+                g->critter_tracker.remove( critter );
             }
         }
         add_msg(_("You insert your ID card."));

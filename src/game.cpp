@@ -881,7 +881,7 @@ bool game::start_game(std::string worldname)
         for( monster &critter : all_monsters() ) {
             if( rl_dist( critter.pos(), u.pos() ) <= 5 ||
                 m.clear_path( critter.pos(), u.pos(), 40, 1, 100 ) ) {
-                remove_zombie( critter );
+                critter_tracker.remove( critter );
             }
         }
     }
@@ -6475,7 +6475,7 @@ void game::emp_blast( const tripoint &p )
                         m.spawn_item( x, y, ammodef.first, 1, ammodef.second, calendar::turn );
                     }
                 }
-                remove_zombie( critter );
+                critter_tracker.remove( critter );
             } else {
                 add_msg(_("The EMP blast fries the %s!"), critter.name().c_str());
                 int dam = dice(10, 10);
@@ -6565,11 +6565,6 @@ bool game::add_zombie(monster &critter, bool pin_upgrade)
 bool game::update_zombie_pos( const monster &critter, const tripoint &pos )
 {
     return critter_tracker.update_pos( critter, pos );
-}
-
-void game::remove_zombie( const monster &critter )
-{
-    critter_tracker.remove( critter );
 }
 
 /**
@@ -11098,7 +11093,7 @@ bool game::disable_robot( const tripoint &p )
                 }
             }
         }
-        remove_zombie( critter );
+        critter_tracker.remove( critter );
         return true;
     }
     // Manhacks are special, they have their own menu here.
@@ -12572,7 +12567,7 @@ void game::vertical_move(int movez, bool force)
                 critter.staircount = 10 + turns;
                 critter.on_unload();
                 coming_to_stairs.push_back(critter);
-                remove_zombie( critter );
+                critter_tracker.remove( critter );
             }
         }
 

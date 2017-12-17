@@ -19,6 +19,7 @@
 #include "player.h"
 #include "vehicle.h"
 #include "uistate.h"
+#include "creature_tracker.h"
 #include "action.h"
 #include "monstergenerator.h"
 #include "speech.h"
@@ -7522,7 +7523,7 @@ int iuse::capture_monster_act( player *p, item *it, bool, const tripoint &pos )
                     break;
                 }
                 it->set_var( "weight", new_weight );
-                g->remove_zombie( f );
+                g->critter_tracker.remove( f );
                 return 0;
             } else {
                 p->add_msg_if_player( m_bad, _("The %1$s avoids your attempts to put it in the %2$s."),
