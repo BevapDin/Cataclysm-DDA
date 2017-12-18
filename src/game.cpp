@@ -4825,9 +4825,9 @@ void game::draw()
     }
 
     //temporary fix for updating visibility for minimap
-    ter_view_z = ( u.pos() + u.view_offset ).z;
-    m.build_map_cache( ter_view_z );
-    m.update_visibility_cache( ter_view_z );
+    ter_view.z = ( u.pos() + u.view_offset ).z;
+    m.build_map_cache( ter_view.z );
+    m.update_visibility_cache( ter_view.z );
 
     draw_sidebar();
 
@@ -5038,9 +5038,7 @@ void game::draw_ter()
 
 void game::draw_ter( const tripoint &center, const bool looking )
 {
-    ter_view_x = center.x;
-    ter_view_y = center.y;
-    ter_view_z = center.z;
+    ter_view = center;
     const int posx = center.x;
     const int posy = center.y;
 

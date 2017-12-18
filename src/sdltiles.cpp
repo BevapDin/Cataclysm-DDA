@@ -836,7 +836,7 @@ void cata_cursesport::curses_drawwindow(WINDOW *win)
         tilecontext->draw(
             win->x * fontwidth,
             win->y * fontheight,
-            tripoint( g->ter_view_x, g->ter_view_y, g->ter_view_z ),
+            g->ter_view,
             TERRAIN_WINDOW_TERM_WIDTH * font->fontwidth,
             TERRAIN_WINDOW_TERM_HEIGHT * font->fontheight);
 
@@ -888,7 +888,7 @@ void cata_cursesport::curses_drawwindow(WINDOW *win)
         clear_window_area(win);
         tilecontext->draw_minimap(
             win->x * fontwidth, win->y * fontheight,
-            tripoint( g->u.pos().x, g->u.pos().y, g->ter_view_z ),
+            tripoint( g->u.pos().x, g->u.pos().y, g->ter_view.z ),
             win->width * font->fontwidth, win->height * font->fontheight);
         update = true;
     } else {
@@ -1729,14 +1729,14 @@ bool input_context::get_coordinates( const catacurses::window &capture_win_, int
         const int screen_row = round( (float) ( coordinate_y - win_top - ( win_bottom - win_top ) / 2 + win_top ) / ( fw / 4 ) );
         const int selected_x = ( screen_column - screen_row ) / 2;
         const int selected_y = ( screen_row + screen_column ) / 2;
-        x = g->ter_view_x + selected_x;
-        y = g->ter_view_y + selected_y;
+        x = g->ter_view.x + selected_x;
+        y = g->ter_view.y + selected_y;
     } else {
         const int selected_column = (coordinate_x - win_left) / fw;
         const int selected_row = (coordinate_y - win_top) / fh;
 
-        x = g->ter_view_x - ((capture_win->width / 2) - selected_column);
-        y = g->ter_view_y - ((capture_win->height / 2) - selected_row);
+        x = g->ter_view.x - ((capture_win->width / 2) - selected_column);
+        y = g->ter_view.y - ((capture_win->height / 2) - selected_row);
     }
 
     return true;

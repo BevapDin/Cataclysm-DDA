@@ -1137,8 +1137,8 @@ bool input_context::get_coordinates( const catacurses::window &capture_win, int 
         return false;
     }
 
-    x = g->ter_view_x - ( ( view_columns / 2 ) - coordinate_x );
-    y = g->ter_view_y - ( ( view_rows / 2 ) - coordinate_y );
+    x = g->ter_view.x - ( ( view_columns / 2 ) - coordinate_x );
+    y = g->ter_view.y - ( ( view_rows / 2 ) - coordinate_y );
 
     return true;
 }

@@ -630,7 +630,7 @@ class game
     public:
         std::vector<faction> factions;
 
-        int ter_view_x, ter_view_y, ter_view_z;
+        tripoint ter_view;
 
     private:
         WINDOW_PTR w_terrain_ptr;
