@@ -199,8 +199,8 @@ class game
         /** MAIN GAME LOOP. Returns true if game is over (death, saved, quit, etc.). */
         bool do_turn();
         void draw();
-        void draw_ter( bool draw_sounds = true );
-        void draw_ter( const tripoint &center, bool looking = false, bool draw_sounds = true );
+        void draw_ter();
+        void draw_ter( const tripoint &center, bool looking = false );
         /**
          * Returns the location where the indicator should go relative to the reality bubble,
          * or tripoint_min to indicate no indicator should be drawn.

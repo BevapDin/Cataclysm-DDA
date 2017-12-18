@@ -5031,12 +5031,12 @@ bool game::is_in_viewport( const tripoint& p, int margin ) const
            ( std::abs( diff.y ) <= getmaxy( w_terrain ) / 2 - margin );
 }
 
-void game::draw_ter( const bool draw_sounds )
+void game::draw_ter()
 {
-    draw_ter( u.pos() + u.view_offset, false, draw_sounds );
+    draw_ter( u.pos() + u.view_offset, false );
 }
 
-void game::draw_ter( const tripoint &center, const bool looking, const bool draw_sounds )
+void game::draw_ter( const tripoint &center, const bool looking )
 {
     ter_view_x = center.x;
     ter_view_y = center.y;
@@ -5052,9 +5052,7 @@ void game::draw_ter( const tripoint &center, const bool looking, const bool draw
 
     m.draw( w_terrain, center );
 
-    if( draw_sounds ) {
-        draw_footsteps( w_terrain, {POSX - center.x, POSY - center.y, center.z} );
-    }
+    draw_footsteps( w_terrain, {POSX - center.x, POSY - center.y, center.z} );
 
     for( Creature &critter : all_creatures() ) {
         draw_critter( critter, center );
