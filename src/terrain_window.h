@@ -6,7 +6,6 @@
 #include "enums.h"
 
 #include <memory>
-#include <algorithm>
 #include <vector>
 
 class terrain_window {
@@ -23,7 +22,7 @@ class terrain_window {
         }
 
         void center( const tripoint &c ) {
-            center_ = center;
+            center_ = c;
         }
         const tripoint &center() const {
             return center_;
@@ -60,36 +59,24 @@ class terrain_window {
                 virtual ~drawer() = default;
 
                 virtual void draw( terrain_window &win ) = 0;
-
-                bool operator<( const priority_type &rhs ) const {
-                    return priority() < rhs.priority();
-                }
         };
 
-        void insert( std::unique_ptr<drawer> drawer_ptr ) {
-            assert( drawer_ptr );
-            const auto iter = std::lower_bound( drawers.begin(), drawers.end(), *drawer_ptr );
-            drawers.insert( iter, std::move( drawer_ptr ) );
-        }
-        template<typename T, typename Args...>
+        void insert( std::unique_ptr<drawer> drawer_ptr );
+
+        template<typename T, typename ...Args>
         void emplace( Args &&... args ) {
             std::unique_ptr<drawer> ptr( new T( std::forward<Args>( args )... ) );
             insert( std::move( ptr ) );
         }
-        void clear() {
-            drawers.clear();
+
+        void clear();
+        void draw();
+
+        operator catacurses::window() const {
+            return w;
         }
-
-        void draw() {
-            const auto copy = drawers;
-            for( const std::unique_ptr<drawer> &ptr : copy ) {
-                ptr->draw( *this );
-            }
-            //@todo move into a drawer class
-            // Place the cursor over the player as is expected by screen readers.
-            wmove( w, POSY + g->u.pos().y - center_.y, POSX + g->u.pos().x - center_.x );
-
-            wrefresh( w );
+        operator catacurses::WINDOW*() const {
+            return w;
         }
 
         // operators so that this class can be used like any ordinary curses window

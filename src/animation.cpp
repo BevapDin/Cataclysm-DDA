@@ -591,25 +591,23 @@ class weather_drawer : public terrain_window::drawer {
         weather_drawer( weather_printable w ) : drawer( 110 ), w( std::move( w ) ) { }
         ~weather_drawer() override = default;
 
-        void draw( const catacurses::window &win, const tripoint &center ) {
+        void draw( terrain_window &win ) override {
             for (auto const &drop : w.vdrops) {
                 mvwputch(win, drop.second, drop.first, w.colGlyph, w.cGlyph);
             }
         }
 };
-void draw_weather_curses(WINDOW *const win, weather_printable const &w)
+void draw_weather_curses( weather_printable w )
 {
-    for (auto const &drop : w.vdrops) {
-        mvwputch(win, drop.second, drop.first, w.colGlyph, w.cGlyph);
-    }
+    g->w_terrain.emplace<weather_drawer>( std::move( w ) );
 }
 } //namespace
 
 #if defined(TILES)
-void game::draw_weather(weather_printable const &w)
+void game::draw_weather( weather_printable w )
 {
     if (!use_tiles) {
-        draw_weather_curses(w_terrain, w);
+        draw_weather_curses( std::move( w ) );
         return;
     }
 
@@ -641,12 +639,12 @@ void game::draw_weather(weather_printable const &w)
         break;
     }
 
-    tilecontext->init_draw_weather(w, std::move(weather_name));
+    tilecontext->init_draw_weather( std::move( w ), std::move( weather_name ) );
 }
 #else
 void game::draw_weather( weather_printable w )
 {
-    win.add( std::unique_ptr<terrain_window::drawer>( new weather_drawer( std::move( w ) ) ) );
+    draw_weather_curses( std::move( w ) );
 }
 #endif
 
@@ -656,14 +654,14 @@ class sct_drawer : public terrain_window::drawer {
         sct_drawer() = default;
         ~sct_drawer() override = default;
 
-        void draw( const catacurses::window &win, const tripoint &center ) {
-            tripoint const off = relative_view_pos(g.u, 0, 0, 0);
+        void draw( terrain_window &win ) override {
+            tripoint const off = relative_view_pos(g->u, 0, 0, 0);
 
             for (auto const& text : SCT.vSCT) {
                 const int dy = off.y + text.getPosY();
                 const int dx = off.x + text.getPosX();
 
-                if(!is_valid_in_w_terrain(dx, dy)) {
+                if( !win.contains( point( dx, dy ) ) ) {
                     continue;
                 }
 
@@ -672,31 +670,14 @@ class sct_drawer : public terrain_window::drawer {
                 nc_color const col1 = msgtype_to_color(text.getMsgType("first"),  is_old);
                 nc_color const col2 = msgtype_to_color(text.getMsgType("second"), is_old);
 
-                mvwprintz(g.w_terrain, dy, dx, col1, "%s", text.getText("first").c_str());
-                wprintz(g.w_terrain, col2, "%s", text.getText("second").c_str());
+                mvwprintz(win, dy, dx, col1, "%s", text.getText("first").c_str());
+                wprintz(win, col2, "%s", text.getText("second").c_str());
             }
         }
 };
-void draw_sct_curses(game &g)
+void draw_sct_curses()
 {
-    tripoint const off = relative_view_pos(g.u, 0, 0, 0);
-
-    for (auto const& text : SCT.vSCT) {
-        const int dy = off.y + text.getPosY();
-        const int dx = off.x + text.getPosX();
-
-        if( !g.w_terrain.contains( point( dx, dy ) ) ) {
-            continue;
-        }
-
-        bool const is_old = text.getStep() >= SCT.iMaxSteps / 2;
-
-        nc_color const col1 = msgtype_to_color(text.getMsgType("first"),  is_old);
-        nc_color const col2 = msgtype_to_color(text.getMsgType("second"), is_old);
-
-        mvwprintz(g.w_terrain, dy, dx, col1, "%s", text.getText("first").c_str());
-        wprintz(g.w_terrain, col2, "%s", text.getText("second").c_str());
-    }
+    g->w_terrain.emplace<sct_drawer>();
 }
 } //namespace
 
@@ -706,13 +687,13 @@ void game::draw_sct()
     if (use_tiles) {
         tilecontext->init_draw_sct();
     } else {
-        draw_sct_curses(*this);
+        draw_sct_curses();
     }
 }
 #else
 void game::draw_sct()
 {
-    win.add( std::unique_ptr<terrain_window::drawer>( new sct_drawer() ) );
+    draw_sct_curses();
 }
 #endif
 
