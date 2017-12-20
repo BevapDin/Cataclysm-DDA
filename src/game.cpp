@@ -211,11 +211,6 @@ extern std::unique_ptr<cata_tiles> tilecontext;
 
 uistatedata uistate;
 
-bool is_valid_in_w_terrain(int x, int y)
-{
-    return x >= 0 && x < TERRAIN_WINDOW_WIDTH && y >= 0 && y < TERRAIN_WINDOW_HEIGHT;
-}
-
 static void set_standard_drawers( terrain_window_drawers &drawers );
 
 class user_turn {
@@ -4996,7 +4991,7 @@ void game::draw_critter( const Creature &critter, const tripoint &center )
 {
     const int my = POSY + ( critter.posy() - center.y );
     const int mx = POSX + ( critter.posx() - center.x );
-    if( !is_valid_in_w_terrain( mx, my ) ) {
+    if( !ter_win.contains( point( mx, my ) ) ) {
         return;
     }
     if( critter.posz() != center.z && m.has_zlevels() ) {
@@ -5650,7 +5645,7 @@ int game::mon_info(WINDOW *w)
         const int mx = POSX + ( c->posx() - view.x );
         const int my = POSY + ( c->posy() - view.y );
         int index = 8;
-        if( !is_valid_in_w_terrain( mx, my ) ) {
+        if( !ter_win.contains( point( mx, my ) ) ) {
             // for compatibility with old code, see diagram below, it explains the values for index,
             // also might need revisiting one z-levels are in.
             switch( dir_to_mon ) {
@@ -8910,7 +8905,7 @@ void centerlistview( const tripoint &active_item_position )
         if (get_option<std::string>( "SHIFT_LIST_ITEM_VIEW" ) == "centered") {
             int xOffset = TERRAIN_WINDOW_WIDTH / 2;
             int yOffset = TERRAIN_WINDOW_HEIGHT / 2;
-            if (!is_valid_in_w_terrain(xpos, ypos)) {
+            if( !ter_view.contains( point( xpos, ypos ) ) ) {
                 if (xpos < 0) {
                     u.view_offset.x = xpos - xOffset;
                 } else {

@@ -17,8 +17,6 @@ extern std::unique_ptr<cata_tiles> tilecontext; // obtained from sdltiles.cpp
 #include <algorithm>
 #include <array>
 
-bool is_valid_in_w_terrain(int x, int y); // see game.cpp
-
 namespace {
 
 class basic_animation
@@ -646,7 +644,7 @@ void draw_sct_curses(game &g)
         const int dy = off.y + text.getPosY();
         const int dx = off.x + text.getPosX();
 
-        if(!is_valid_in_w_terrain(dx, dy)) {
+        if( !g.ter_win.contains( point( dx, dy ) ) ) {
             continue;
         }
 

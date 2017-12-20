@@ -9,6 +9,10 @@
 #include <vector>
 
 class terrain_window {
+    public:
+        using map_coord = tripoint;
+        using screen_coord = point;
+
     private:
         catacurses::WINDOW *&w;
         tripoint center_;
@@ -23,6 +27,11 @@ class terrain_window {
         const tripoint &center() const {
             return center_;
         }
+
+        bool contains( const map_coord &pos ) const;
+        bool contains( const screen_coord &pos ) const;
+        map_coord to_map_coord( const screen_coord &pos ) const;
+        screen_coord to_screen_coord( const map_coord &pos ) const;
 
         class drawer {
             public:

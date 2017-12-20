@@ -56,8 +56,6 @@ const efftype_id effect_boomered( "boomered" );
 const efftype_id effect_crushed( "crushed" );
 const efftype_id effect_stunned( "stunned" );
 
-extern bool is_valid_in_w_terrain(int,int);
-
 #include "overmapbuffer.h"
 
 #define SGN(a) (((a)<0) ? -1 : 1)

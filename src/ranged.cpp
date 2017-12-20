@@ -49,7 +49,6 @@ static projectile make_gun_projectile( const item &gun );
 int time_to_fire( const Character &p, const itype &firing );
 static void cycle_action( item& weap, const tripoint &pos );
 void make_gun_sound_effect(player &p, bool burst, item *weapon);
-extern bool is_valid_in_w_terrain(int, int);
 
 static double occupied_tile_fraction( m_size target_size )
 {
