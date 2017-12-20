@@ -8447,8 +8447,6 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
         lp = start_point;
     }
 
-    draw_ter( lp );
-
     draw_pixel_minimap( tripoint( lp.x, lp.y, ter_win.center().z ) );
 
     int soffset = get_option<int>( "MOVE_VIEW_OFFSET" );
@@ -8494,6 +8492,8 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
     const visibility_variables &cache = g->m.get_visibility_variables_cache();
 
     do {
+        draw_ter( lp, true );
+
         if (bNewWindow) {
             werase(w_info);
             draw_border(w_info);
@@ -8602,8 +8602,6 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
         action = ctxt.handle_input();
         if (action == "LIST_ITEMS") {
             list_items_monsters();
-            draw_ter( lp, true );
-
         } else if (action == "TOGGLE_FAST_SCROLL") {
             fast_scroll = !fast_scroll;
         } else if( action == "LEVEL_UP" || action == "LEVEL_DOWN" ) {
@@ -8622,7 +8620,6 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
             u.view_offset.z = new_levz - u.posz();
             lp.z = new_levz;
             refresh_all();
-            draw_ter( lp, true );
         } else if( action == "TRAVEL_TO" ) {
             if( !u.sees( lp ) ) {
                 add_msg(_("You can't see that destination."));
@@ -8645,7 +8642,6 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
         } else if( action == "EXTENDED_DESCRIPTION" ) {
             extended_description( lp );
             draw_sidebar();
-            draw_ter( lp, true );
         } else if (!ctxt.get_coordinates(w_terrain, lx, ly) && action != "MOUSE_MOVE") {
             int dx, dy;
             ctxt.get_direction(dx, dy, action);
@@ -8675,8 +8671,6 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
             } else if (ly > MAPSIZE * SEEY) {
                 ly = MAPSIZE * SEEY;
             }
-
-            draw_ter( lp, true );
         }
     } while (action != "QUIT" && action != "CONFIRM" && action != "SELECT");
 
