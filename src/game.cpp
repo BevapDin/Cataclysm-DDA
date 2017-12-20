@@ -250,6 +250,7 @@ game::game() :
     liveview_ptr( new live_view() ),
     liveview( *liveview_ptr ),
     scent_ptr( new scent_map( *this ) ),
+    look_around_ptr( new look_around_t() ),
     new_game(false),
     uquit(QUIT_NO),
     m( *map_ptr ),
@@ -755,7 +756,7 @@ void game::setup()
     next_mission_id = 1;
     new_game = true;
     uquit = QUIT_NO;   // We haven't quit the game
-    bVMonsterLookFire = true;
+    look_around_ptr->bVMonsterLookFire = true;
 
     weather = WEATHER_CLEAR; // Start with some nice weather...
     // Weather shift in 30
@@ -2867,7 +2868,7 @@ bool game::handle_action()
             break;
 
         case ACTION_LIST_ITEMS:
-            list_items_monsters();
+            look_around_ptr->list_items_monsters();
             break;
 
         case ACTION_ZONES:
@@ -8442,7 +8443,7 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
 
 tripoint look_around_t::invoke()
 {
-    g->bVMonsterLookFire = false;
+    bVMonsterLookFire = false;
 
     //@todo use those directly.
     map &m = g->m;
@@ -8626,7 +8627,7 @@ tripoint look_around_t::invoke()
         //Wait for input
         action = ctxt.handle_input();
         if (action == "LIST_ITEMS") {
-            g->list_items_monsters();
+            list_items_monsters();
             g->draw_ter( lp, true );
 
         } else if (action == "TOGGLE_FAST_SCROLL") {
@@ -8717,7 +8718,7 @@ tripoint look_around_t::invoke()
         delwin(w_info);
     }
     g->reenter_fullscreen();
-    g->bVMonsterLookFire = true;
+    bVMonsterLookFire = true;
 
     if( action == "CONFIRM" || action == "SELECT" ) {
         return lp;
@@ -8726,11 +8727,14 @@ tripoint look_around_t::invoke()
     return tripoint( INT_MIN, INT_MIN, INT_MIN );
 }
 
-std::vector<map_item_stack> game::find_nearby_items(int iRadius)
+std::vector<map_item_stack> look_around_t::find_nearby_items(int iRadius)
 {
     std::map<std::string, map_item_stack> temp_items;
     std::vector<map_item_stack> ret;
     std::vector<std::string> item_order;
+
+    player &u = g->u;
+    map &m = g->m;
 
     if( u.is_blind() ) {
         return ret;
@@ -8802,7 +8806,7 @@ void game::draw_trail_to_square( const tripoint &t, bool bDrawX )
 }
 
 //helper method so we can keep list_items shorter
-void game::reset_item_list_state(WINDOW *window, int height, bool bRadiusSort)
+void look_around_t::reset_item_list_state(WINDOW *window, int height, bool bRadiusSort)
 {
     const int width = use_narrow_sidebar() ? 45 : 55;
     for (int i = 1; i < TERMX; i++) {
@@ -8866,7 +8870,7 @@ void game::reset_item_list_state(WINDOW *window, int height, bool bRadiusSort)
         xpos += shortcut_print(window, ypos, xpos, c_white, c_light_green, tokens[i]) + gap_spaces;
     }
 
-    refresh_all();
+    g->refresh_all();
 }
 
 void centerlistview( const tripoint &active_item_position )
@@ -8954,8 +8958,10 @@ int game::get_user_action_counter() const
     return user_action_counter;
 }
 
-void game::list_items_monsters()
+void look_around_t::list_items_monsters()
 {
+    player &u = g->u;
+
     std::vector<Creature *> mons = u.get_visible_creatures( DAYLIGHT_LEVEL );
     ///\EFFECT_PER increases range of interacting with items on the ground from a list
     const std::vector<map_item_stack> items = find_nearby_items( 2 * u.per_cur + 12 );
@@ -8982,29 +8988,31 @@ void game::list_items_monsters()
         uistate.vmenu_show_items = true;
     }
 
-    temp_exit_fullscreen();
-    game::vmenu_ret ret;
+    g->temp_exit_fullscreen();
+    vmenu_ret ret;
     while( true ) {
         ret = uistate.vmenu_show_items ? list_items( items ) : list_monsters( mons );
-        if( ret == game::vmenu_ret::CHANGE_TAB ) {
+        if( ret == vmenu_ret::CHANGE_TAB ) {
             uistate.vmenu_show_items = !uistate.vmenu_show_items;
         } else {
             break;
         }
     }
 
-    refresh_all();
-    if( ret == game::vmenu_ret::FIRE ) {
-        plfire( u.weapon );
+    g->refresh_all();
+    if( ret == vmenu_ret::FIRE ) {
+        g->plfire( u.weapon );
     }
-    reenter_fullscreen();
+    g->reenter_fullscreen();
 }
 
-game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
+look_around_t::vmenu_ret look_around_t::list_items( const std::vector<map_item_stack> &item_list )
 {
+    player &u = g->u;
+
     int iInfoHeight = std::min(25, TERMY / 2);
     const int width = use_narrow_sidebar() ? 45 : 55;
-    const int offsetX = right_sidebar ? TERMX - VIEW_OFFSET_X - width : VIEW_OFFSET_X;
+    const int offsetX = g->right_sidebar ? TERMX - VIEW_OFFSET_X - width : VIEW_OFFSET_X;
 
     catacurses::window w_items = catacurses::newwin( TERMY - 2 - iInfoHeight - VIEW_OFFSET_Y * 2, width - 2,VIEW_OFFSET_Y + 1, offsetX + 1 );
     WINDOW_PTR w_itemsptr( w_items );
@@ -9083,7 +9091,7 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
         if( action == "COMPARE" ) {
             game_menus::inv::compare( u, active_pos );
             reset = true;
-            refresh_all();
+            g->refresh_all();
         } else if( action == "FILTER" ) {
             draw_item_filter_rules( w_item_info, 0, iInfoHeight - 1, item_filter_type::FILTER );
             string_input_popup()
@@ -9163,7 +9171,7 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
             if( !u.sees( u.pos() + active_pos ) ) {
                 add_msg( _( "You can't see that destination." ) );
             }
-            auto route = m.route( u.pos(), u.pos() + active_pos, u.get_pathfinding_settings(), u.get_path_avoid() );
+            auto route = g->m.route( u.pos(), u.pos() + active_pos, u.get_pathfinding_settings(), u.get_path_avoid() );
             if( route.size() > 1 ) {
                 route.pop_back();
                 u.set_destination( route );
@@ -9250,7 +9258,7 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
             iScrollPos++;
         } else if( action == "NEXT_TAB" || action == "PREV_TAB" ) {
             u.view_offset = stored_view_offset;
-            return game::vmenu_ret::CHANGE_TAB;
+            return vmenu_ret::CHANGE_TAB;
         }
 
         if( ground_items.empty() ) {
@@ -9347,7 +9355,7 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
                 if( active_pos != iLastActive ) {
                     iLastActive = active_pos;
                     centerlistview( active_pos );
-                    draw_trail_to_square( active_pos, true );
+                    g->draw_trail_to_square( active_pos, true );
                 }
             }
             draw_scrollbar( w_items_border, iActive, iMaxRows, iItemNum, 1 );
@@ -9363,14 +9371,16 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
     } while (action != "QUIT");
 
     u.view_offset = stored_view_offset;
-    return game::vmenu_ret::QUIT;
+    return vmenu_ret::QUIT;
 }
 
-game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list )
+look_around_t::vmenu_ret look_around_t::list_monsters( const std::vector<Creature *> &monster_list )
 {
+    player &u = g->u;
+
     int iInfoHeight = 12;
     const int width = use_narrow_sidebar() ? 45 : 55;
-    const int offsetX = right_sidebar ? TERMX - VIEW_OFFSET_X - width :
+    const int offsetX = g->right_sidebar ? TERMX - VIEW_OFFSET_X - width :
                                         VIEW_OFFSET_X;
 
     catacurses::window w_monsters = catacurses::newwin( TERMY - 2 - iInfoHeight - VIEW_OFFSET_Y * 2, width - 2,
@@ -9462,7 +9472,7 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
             }
         } else if (action == "NEXT_TAB" || action == "PREV_TAB") {
             u.view_offset = stored_view_offset;
-            return game::vmenu_ret::CHANGE_TAB;
+            return vmenu_ret::CHANGE_TAB;
         } else if (action == "SAFEMODE_BLACKLIST_REMOVE") {
             const auto m = dynamic_cast<monster*>( cCurMon );
             const std::string monName = (m != nullptr) ? m->name() : "human";
@@ -9478,13 +9488,13 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
                 get_safemode().add_rule(monName, Creature::A_ANY, get_option<int>( "SAFEMODEPROXIMITY" ), RULE_BLACKLISTED);
             }
         } else if (action == "look") {
-            tripoint recentered = look_around();
+            tripoint recentered = g->look_around();
             iLastActivePos = recentered;
         } else if (action == "fire") {
             if( cCurMon != nullptr && rl_dist( u.pos(), cCurMon->pos() ) <= max_gun_range ) {
-                last_target = shared_from( *cCurMon );
+                g->last_target = g->shared_from( *cCurMon );
                 u.view_offset = stored_view_offset;
-                return game::vmenu_ret::FIRE;
+                return vmenu_ret::FIRE;
             }
         }
 
@@ -9619,7 +9629,7 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
             if( iActivePos != iLastActivePos ) {
                 iLastActivePos = iActivePos;
                 centerlistview( iActivePos );
-                draw_trail_to_square( iActivePos, false );
+                g->draw_trail_to_square( iActivePos, false );
             }
 
             draw_scrollbar( w_monsters_border, iActive, iMaxRows, int( monster_list.size() ), 1 );
@@ -9649,7 +9659,7 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
 
     u.view_offset = stored_view_offset;
 
-    return game::vmenu_ret::QUIT;
+    return vmenu_ret::QUIT;
 }
 
 // Establish or release a grab on a vehicle

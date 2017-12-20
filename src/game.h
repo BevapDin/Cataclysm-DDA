@@ -118,6 +118,7 @@ struct explosion_data;
 struct visibility_variables;
 class scent_map;
 class loading_ui;
+class look_around_t;
 
 typedef std::function<bool( const item & )> item_filter;
 
@@ -171,6 +172,7 @@ class game
         std::unique_ptr<live_view> liveview_ptr;
         live_view& liveview;
         std::unique_ptr<scent_map> scent_ptr;
+        std::unique_ptr<look_around_t> look_around_ptr;
     public:
 
         /** Initializes the UI. */
@@ -855,24 +857,6 @@ class game
         void create_factions(); // Creates new factions (for a new game world)
         void create_starting_npcs(); // Creates NPCs that start near you
 
-        // V Menu Functions and helpers:
-        void list_items_monsters(); // Called when you invoke the `V`-menu
-
-        enum class vmenu_ret : int {
-            CHANGE_TAB,
-            QUIT,
-            FIRE, // Who knew, apparently you can do that in list_monsters
-        };
-
-        game::vmenu_ret list_items( const std::vector<map_item_stack> &item_list );
-        std::vector<map_item_stack> find_nearby_items( int iRadius );
-        void reset_item_list_state( WINDOW *window, int height, bool bRadiusSort );
-        std::string sFilter; // this is a member so that it's remembered over time
-        std::string list_item_upvote;
-        std::string list_item_downvote;
-
-        game::vmenu_ret list_monsters( const std::vector<Creature *> &monster_list );
-
         /** Check for dangerous stuff at dest_loc, return false if the player decides
         not to step there */
         bool prompt_dangerous_tile( const tripoint &dest_loc ) const;
@@ -1056,7 +1040,6 @@ private:
         int mostseen;  // # of mons seen last turn; if this increases, set safe_mode to SAFE_MODE_STOP
         int turnssincelastmon; // needed for auto run mode
         //  quit_status uquit;    // Set to true if the player quits ('Q')
-        bool bVMonsterLookFire;
         calendar nextspawn; // The turn on which monsters will spawn next.
         calendar nextweather; // The turn on which weather will shift next.
         int next_npc_id, next_faction_id, next_mission_id; // Keep track of UIDs
