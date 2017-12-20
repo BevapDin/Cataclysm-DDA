@@ -8492,7 +8492,9 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
     const visibility_variables &cache = g->m.get_visibility_variables_cache();
 
     do {
-        draw_ter( lp, true );
+        ter_win.center( lp );
+        set_standard_drawers( ter_win );
+        ter_win.draw();
 
         if (bNewWindow) {
             werase(w_info);
