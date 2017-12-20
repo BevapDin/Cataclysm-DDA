@@ -38,6 +38,7 @@ extern const int core_version;
 extern const int savegame_version;
 extern int savegame_loading_version;
 
+class terrain_window;
 class input_context;
 input_context get_default_mode_input_context();
 
@@ -630,8 +631,6 @@ class game
     public:
         std::vector<faction> factions;
 
-        tripoint ter_view;
-
     private:
         WINDOW_PTR w_terrain_ptr;
         WINDOW_PTR w_minimap_ptr;
@@ -642,6 +641,7 @@ class game
         WINDOW_PTR w_location_ptr;
         WINDOW_PTR w_status_ptr;
         WINDOW_PTR w_status2_ptr;
+        std::unique_ptr<terrain_window> terrain_window_ptr;
 
     public:
         WINDOW *w_terrain;
@@ -658,6 +658,7 @@ class game
         WINDOW *w_status;
         WINDOW *w_status2;
         WINDOW *w_blackspace;
+        terrain_window &ter_win;
 
         // View offset based on the driving speed (if any)
         // that has been added to u.view_offset,
