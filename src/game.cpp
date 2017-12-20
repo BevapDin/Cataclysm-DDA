@@ -4784,9 +4784,14 @@ void game::draw()
     draw_ter();
 }
 
+void game::draw_pixel_minimap()
+{
+    draw_pixel_minimap( tripoint( u.pos().x, u.pos().y, ter_win.center().z ) );
+}
+
 #ifndef TILES
 // otherwise it's defined in sdltiles.cpp
-void game::draw_pixel_minimap()
+void game::draw_pixel_minimap( const tripoint &/*center*/ )
 {
 }
 #endif
@@ -8444,11 +8449,7 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
 
     draw_ter( lp );
 
-    //change player location to peek location temporarily for minimap update
-    tripoint current_pos = u.pos();
-    u.setpos(lp);
-    draw_pixel_minimap();
-    u.setpos(current_pos);
+    draw_pixel_minimap( tripoint( lp.x, lp.y, ter_win.center().z ) );
 
     int soffset = get_option<int>( "MOVE_VIEW_OFFSET" );
     bool fast_scroll = false;

@@ -892,7 +892,7 @@ void cata_cursesport::curses_drawwindow(WINDOW *win)
     }
 }
 
-void game::draw_pixel_minimap()
+void game::draw_pixel_minimap( const tripoint &center )
 {
     if( !g->w_pixel_minimap ) {
         return;
@@ -908,7 +908,7 @@ void game::draw_pixel_minimap()
 
     tilecontext->draw_minimap(
         win.x * fontwidth, win.y * fontheight,
-        tripoint( g->u.pos().x, g->u.pos().y, g->w_terrain.center().z ),
+        center,
         win.width * font->fontwidth, win.height * font->fontheight);
 }
 
