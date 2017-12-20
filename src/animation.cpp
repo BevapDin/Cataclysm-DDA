@@ -698,19 +698,33 @@ void game::draw_sct()
 #endif
 
 namespace {
-void draw_zones_curses( WINDOW *const w, const tripoint &start, const tripoint &end, const tripoint &offset )
+class zones_drawer : public terrain_window::drawer {
+    public:
+        const tripoint start;
+        const tripoint end;
+        const tripoint offset;
+    
+        zones_drawer( const tripoint &s, const tripoint &e, const tripoint &o ) : start( s ), end( e ), offset( o ) { }
+        ~zones_drawer() override = default;
+
+        void draw( terrain_window &win ) override {
+            if( end.x < start.x || end.y < start.y || end.z < start.z ) {
+                return;
+            }
+
+            nc_color    const col = invert_color( c_light_green );
+            std::string const line( end.x - start.x + 1, '~' );
+            int         const x = start.x - offset.x;
+
+            for( int y = start.y; y <= end.y; ++y ) {
+                mvwprintz( w, y - offset.y, x, col, line.c_str() );
+            }
+        }
+};
+
+void draw_zones_curses( const tripoint &start, const tripoint &end, const tripoint &offset )
 {
-    if( end.x < start.x || end.y < start.y || end.z < start.z ) {
-        return;
-    }
-
-    nc_color    const col = invert_color( c_light_green );
-    std::string const line( end.x - start.x + 1, '~' );
-    int         const x = start.x - offset.x;
-
-    for( int y = start.y; y <= end.y; ++y ) {
-        mvwprintz( w, y - offset.y, x, col, line.c_str() );
-    }
+    g->ter_win.emplace<zones_drawer>();
 }
 } //namespace
 
@@ -720,12 +734,12 @@ void game::draw_zones( const tripoint &start, const tripoint &end, const tripoin
     if( use_tiles ) {
         tilecontext->init_draw_zones( start, end, offset );
     } else {
-        draw_zones_curses( w_terrain, start, end, offset );
+        draw_zones_curses( start, end, offset );
     }
 }
 #else
 void game::draw_zones( const tripoint &start, const tripoint &end, const tripoint &offset )
 {
-    draw_zones_curses( w_terrain, start, end, offset );
+    draw_zones_curses( start, end, offset );
 }
 #endif
