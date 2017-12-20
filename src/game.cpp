@@ -2233,8 +2233,8 @@ input_context game::get_player_input(std::string &action)
 
         //x% of the Viewport, only shown on visible areas
         auto const weather_info = get_weather_animation(weather);
-        int offset_x = (u.posx() + u.view_offset.x) - TERRAIN_WINDOW_WIDTH / 2;
-        int offset_y = (u.posy() + u.view_offset.y) - TERRAIN_WINDOW_HEIGHT / 2;
+        int offset_x = (u.posx() + u.view_offset.x) - POSX;
+        int offset_y = (u.posy() + u.view_offset.y) - POSY;
 
 #ifdef TILES
         if( tile_iso && use_tiles ) {
@@ -4974,8 +4974,8 @@ bool game::is_in_viewport( const tripoint& p, int margin ) const
 {
     const tripoint diff( u.pos() + u.view_offset - p );
 
-    return ( std::abs( diff.x ) <= TERRAIN_WINDOW_WIDTH / 2 - margin ) &&
-           ( std::abs( diff.y ) <= TERRAIN_WINDOW_HEIGHT / 2 - margin );
+    return ( std::abs( diff.x ) <= POSX - margin ) &&
+           ( std::abs( diff.y ) <= POSY - margin );
 }
 
 void game::draw_ter()
@@ -8071,8 +8071,8 @@ void game::zones_manager()
 
     u.view_offset = tripoint_zero;
 
-    const int offset_x = (u.posx() + u.view_offset.x) - TERRAIN_WINDOW_WIDTH / 2;
-    const int offset_y = (u.posy() + u.view_offset.y) - TERRAIN_WINDOW_HEIGHT / 2;
+    const int offset_x = (u.posx() + u.view_offset.x) - POSX;
+    const int offset_y = (u.posy() + u.view_offset.y) - POSY;
 
     draw_ter();
 
@@ -8435,8 +8435,8 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
 
     temp_exit_fullscreen();
 
-    const int offset_x = (u.posx() + u.view_offset.x) - TERRAIN_WINDOW_WIDTH / 2;
-    const int offset_y = (u.posy() + u.view_offset.y) - TERRAIN_WINDOW_HEIGHT / 2;
+    const int offset_x = (u.posx() + u.view_offset.x) - POSX;
+    const int offset_y = (u.posy() + u.view_offset.y) - POSY;
 
     tripoint lp = u.pos() + u.view_offset;
     int &lx = lp.x;
@@ -8447,7 +8447,7 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
         lp = start_point;
     }
 
-    draw_pixel_minimap( tripoint( lp.x, lp.y, ter_win.center().z ) );
+    draw_pixel_minimap( tripoint( lp.x, lp.y, w_terrain.center().z ) );
 
     int soffset = get_option<int>( "MOVE_VIEW_OFFSET" );
     bool fast_scroll = false;
@@ -8848,8 +8848,8 @@ void centerlistview( const tripoint &active_item_position )
         int xpos = POSX + active_item_position.x;
         int ypos = POSY + active_item_position.y;
         if (get_option<std::string>( "SHIFT_LIST_ITEM_VIEW" ) == "centered") {
-            int xOffset = TERRAIN_WINDOW_WIDTH / 2;
-            int yOffset = TERRAIN_WINDOW_HEIGHT / 2;
+            int xOffset = POSX;
+            int yOffset = POSY;
             if( !w_terrain.contains( point( xpos, ypos ) ) ) {
                 if (xpos < 0) {
                     u.view_offset.x = xpos - xOffset;

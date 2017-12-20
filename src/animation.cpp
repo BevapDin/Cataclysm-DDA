@@ -144,7 +144,7 @@ void draw_custom_explosion_curses( game &g,
 {
     // calculate screen offset relative to player + view offset position
     const tripoint center = g.u.pos() + g.u.view_offset;
-    const tripoint topleft( center.x - TERRAIN_WINDOW_WIDTH / 2, center.y - TERRAIN_WINDOW_HEIGHT / 2, 0 );
+    const tripoint topleft( center.x - POSX, center.y - POSY, 0 );
 
     explosion_animation anim;
 
