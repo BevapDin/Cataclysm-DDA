@@ -517,7 +517,7 @@ look_around_t::vmenu_ret look_around_t::list_items( const std::vector<map_item_s
 {
     player &u = g->u;
 
-    int iInfoHeight = std::min( 25, TERMY / 2 );
+    const int iInfoHeight = std::min( 25, TERMY / 2 );
     const int width = use_narrow_sidebar() ? 45 : 55;
     const int offsetX = g->right_sidebar ? TERMX - VIEW_OFFSET_X - width : VIEW_OFFSET_X;
 
@@ -889,7 +889,7 @@ look_around_t::vmenu_ret look_around_t::list_monsters( const std::vector<Creatur
 {
     player &u = g->u;
 
-    int iInfoHeight = 12;
+    const int iInfoHeight = 12;
     const int width = use_narrow_sidebar() ? 45 : 55;
     const int offsetX = g->right_sidebar ? TERMX - VIEW_OFFSET_X - width : VIEW_OFFSET_X;
 
