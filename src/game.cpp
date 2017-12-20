@@ -1340,8 +1340,8 @@ void game::calc_driving_offset(vehicle *veh)
         offset.x /= std::fabs(offset.y);
         offset.y = offset.y > 0 ? +1 : -1;
     }
-    point max_offset((getmaxx(w_terrain) + 1) / 2 - border_range - 1,
-                     (getmaxy(w_terrain) + 1) / 2 - border_range - 1);
+    point max_offset((TERRAIN_WINDOW_WIDTH + 1) / 2 - border_range - 1,
+                     (TERRAIN_WINDOW_HEIGHT + 1) / 2 - border_range - 1);
     offset.x *= rel_offset;
     offset.y *= rel_offset;
     offset.x *= max_offset.x;
@@ -1351,7 +1351,7 @@ void game::calc_driving_offset(vehicle *veh)
     // [ -@------# ] offset=3
     // can see sights square in every direction, total visible area is
     // (2*sight+1)x(2*sight+1), but the window is only
-    // getmaxx(w_terrain) x getmaxy(w_terrain)
+    // TERRAIN_WINDOW_WIDTH x TERRAIN_WINDOW_HEIGHT
     // The area outside of the window is maxoff (sight-getmax/2).
     // If that value is <= 0, the whole visible area fits the window.
     // don't apply the view offset at all.
@@ -1359,8 +1359,8 @@ void game::calc_driving_offset(vehicle *veh)
     // above leads to invisible area in front of the car.
     // It will display (getmax/2+offset) squares in one direction and
     // (getmax/2-offset) in the opposite direction (centered on the PC).
-    const point maxoff((sight * 2 + 1 - getmaxx(w_terrain)) / 2,
-                       (sight * 2 + 1 - getmaxy(w_terrain)) / 2);
+    const point maxoff((sight * 2 + 1 - TERRAIN_WINDOW_WIDTH) / 2,
+                       (sight * 2 + 1 - TERRAIN_WINDOW_HEIGHT) / 2);
     if (maxoff.x <= 0) {
         offset.x = 0;
     } else if (offset.x > 0 && offset.x > maxoff.x) {
@@ -2233,8 +2233,8 @@ input_context game::get_player_input(std::string &action)
 
         //x% of the Viewport, only shown on visible areas
         auto const weather_info = get_weather_animation(weather);
-        int offset_x = (u.posx() + u.view_offset.x) - getmaxx(w_terrain) / 2;
-        int offset_y = (u.posy() + u.view_offset.y) - getmaxy(w_terrain) / 2;
+        int offset_x = (u.posx() + u.view_offset.x) - TERRAIN_WINDOW_WIDTH / 2;
+        int offset_y = (u.posy() + u.view_offset.y) - TERRAIN_WINDOW_HEIGHT / 2;
 
 #ifdef TILES
         if( tile_iso && use_tiles ) {
@@ -4974,8 +4974,8 @@ bool game::is_in_viewport( const tripoint& p, int margin ) const
 {
     const tripoint diff( u.pos() + u.view_offset - p );
 
-    return ( std::abs( diff.x ) <= getmaxx( w_terrain ) / 2 - margin ) &&
-           ( std::abs( diff.y ) <= getmaxy( w_terrain ) / 2 - margin );
+    return ( std::abs( diff.x ) <= TERRAIN_WINDOW_WIDTH / 2 - margin ) &&
+           ( std::abs( diff.y ) <= TERRAIN_WINDOW_HEIGHT / 2 - margin );
 }
 
 void game::draw_ter()
@@ -8071,8 +8071,8 @@ void game::zones_manager()
 
     u.view_offset = tripoint_zero;
 
-    const int offset_x = (u.posx() + u.view_offset.x) - getmaxx(w_terrain) / 2;
-    const int offset_y = (u.posy() + u.view_offset.y) - getmaxy(w_terrain) / 2;
+    const int offset_x = (u.posx() + u.view_offset.x) - TERRAIN_WINDOW_WIDTH / 2;
+    const int offset_y = (u.posy() + u.view_offset.y) - TERRAIN_WINDOW_HEIGHT / 2;
 
     draw_ter();
 
@@ -8435,8 +8435,8 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
 
     temp_exit_fullscreen();
 
-    const int offset_x = (u.posx() + u.view_offset.x) - getmaxx(w_terrain) / 2;
-    const int offset_y = (u.posy() + u.view_offset.y) - getmaxy(w_terrain) / 2;
+    const int offset_x = (u.posx() + u.view_offset.x) - TERRAIN_WINDOW_WIDTH / 2;
+    const int offset_y = (u.posy() + u.view_offset.y) - TERRAIN_WINDOW_HEIGHT / 2;
 
     tripoint lp = u.pos() + u.view_offset;
     int &lx = lp.x;
