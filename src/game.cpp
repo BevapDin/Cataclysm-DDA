@@ -2368,12 +2368,14 @@ input_context game::get_player_input(std::string &action)
 
             werase( w_terrain );
 
-            draw_ter();
+            ter_win.center( center );
+            set_standard_drawers( ter_win );
             draw_weather( wPrint );
-
             if( uquit != QUIT_WATCH ) {
                 draw_sct();
             }
+            m.build_map_cache( center.z );
+            ter_win.draw();
 
             wrefresh( w_terrain );
 

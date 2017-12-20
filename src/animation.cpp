@@ -3,6 +3,7 @@
 #include "map.h"
 #include "options.h"
 #include "monster.h"
+#include "terrain_window.h"
 #include "mtype.h"
 #include "weather.h"
 #include "player.h"
@@ -582,6 +583,19 @@ void game::draw_line( const tripoint &p, std::vector<tripoint> const &vPoint )
 #endif
 
 namespace {
+class weather_drawer : public terrain_window::drawer {
+    public:
+        weather_printable const w;
+
+        weather_drawer( weather_printable w ) : w( std::move( w ) ) { }
+        ~weather_drawer() override = default;
+
+        void draw( const catacurses::window &win, const tripoint &center ) {
+            for (auto const &drop : w.vdrops) {
+                mvwputch(win, drop.second, drop.first, w.colGlyph, w.cGlyph);
+            }
+        }
+};
 void draw_weather_curses(WINDOW *const win, weather_printable const &w)
 {
     for (auto const &drop : w.vdrops) {
@@ -629,13 +643,39 @@ void game::draw_weather(weather_printable const &w)
     tilecontext->init_draw_weather(w, std::move(weather_name));
 }
 #else
-void game::draw_weather(weather_printable const &w)
+void game::draw_weather( weather_printable w )
 {
-    draw_weather_curses(w_terrain, w);
+    win.add( std::unique_ptr<terrain_window::drawer>( new weather_drawer( std::move( w ) ) ) );
 }
 #endif
 
 namespace {
+class sct_drawer : public terrain_window::drawer {
+    public:
+        sct_drawer() = default;
+        ~sct_drawer() override = default;
+
+        void draw( const catacurses::window &win, const tripoint &center ) {
+            tripoint const off = relative_view_pos(g.u, 0, 0, 0);
+
+            for (auto const& text : SCT.vSCT) {
+                const int dy = off.y + text.getPosY();
+                const int dx = off.x + text.getPosX();
+
+                if(!is_valid_in_w_terrain(dx, dy)) {
+                    continue;
+                }
+
+                bool const is_old = text.getStep() >= SCT.iMaxSteps / 2;
+
+                nc_color const col1 = msgtype_to_color(text.getMsgType("first"),  is_old);
+                nc_color const col2 = msgtype_to_color(text.getMsgType("second"), is_old);
+
+                mvwprintz(g.w_terrain, dy, dx, col1, "%s", text.getText("first").c_str());
+                wprintz(g.w_terrain, col2, "%s", text.getText("second").c_str());
+            }
+        }
+};
 void draw_sct_curses(game &g)
 {
     tripoint const off = relative_view_pos(g.u, 0, 0, 0);
@@ -671,7 +711,7 @@ void game::draw_sct()
 #else
 void game::draw_sct()
 {
-    draw_sct_curses(*this);
+    win.add( std::unique_ptr<terrain_window::drawer>( new sct_drawer() ) );
 }
 #endif
 
