@@ -883,14 +883,6 @@ void cata_cursesport::curses_drawwindow(WINDOW *win)
         int wheight = win->height * font->fontheight;
         FillRectDIB(offsetx, offsety, wwidth, wheight, black);
         update = true;
-    } else if (g && win == g->w_pixel_minimap && g->pixel_minimap_option) {
-        // Make sure the entire minimap window is black before drawing.
-        clear_window_area(win);
-        tilecontext->draw_minimap(
-            win->x * fontwidth, win->y * fontheight,
-            tripoint( g->u.pos().x, g->u.pos().y, g->ter_view.z ),
-            win->width * font->fontwidth, win->height * font->fontheight);
-        update = true;
     } else {
         // Either not using tiles (tilecontext) or not the w_terrain window.
         update = font->draw_window(win);
@@ -898,6 +890,26 @@ void cata_cursesport::curses_drawwindow(WINDOW *win)
     if(update) {
         needupdate = true;
     }
+}
+
+void game::draw_pixel_minimap()
+{
+    if( !g->w_pixel_minimap ) {
+        return;
+    }
+
+    needupdate = true;
+    cata_cursesport::WINDOW &win = *g->w_pixel_minimap.get<::cata_cursesport::WINDOW>();
+
+    clear_window_area( g->w_pixel_minimap );
+    if( !g->pixel_minimap_option ) {
+        return;
+    }
+
+    tilecontext->draw_minimap(
+        win.x * fontwidth, win.y * fontheight,
+        tripoint( g->u.pos().x, g->u.pos().y, g->ter_view.z ),
+        win.width * font->fontwidth, win.height * font->fontheight);
 }
 
 bool Font::draw_window(cata_cursesport::WINDOW *win)

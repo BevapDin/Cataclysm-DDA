@@ -706,10 +706,8 @@ void game::toggle_fullscreen()
 void game::toggle_pixel_minimap()
 {
 #ifdef TILES
-    if (pixel_minimap_option) {
-        clear_window_area(w_pixel_minimap);
-    }
     pixel_minimap_option = !pixel_minimap_option;
+    draw_pixel_minimap();
     init_ui();
     refresh_all();
 #endif // TILES
@@ -4838,18 +4836,12 @@ void game::draw()
     wrefresh( w_terrain );
 }
 
+#ifndef TILES
+// otherwise it's defined in sdltiles.cpp
 void game::draw_pixel_minimap()
 {
-    // Force a refresh of the pixel minimap.
-    // only do so if it is in use
-    if(pixel_minimap_option && w_pixel_minimap){
-        werase(w_pixel_minimap);
-        //trick window into rendering
-        mvwputch(w_pixel_minimap, 0, 0, c_black, ' ');
-        wrefresh(w_pixel_minimap);
-    }
 }
-
+#endif
 
 void game::draw_sidebar()
 {
