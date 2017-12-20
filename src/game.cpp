@@ -77,6 +77,7 @@
 #include "coordinates.h"
 #include "creature_tracker.h"
 #include "vehicle.h"
+#include "look_around.h"
 #include "submap.h"
 #include "mapgen_functions.h"
 #include "clzones.h"
@@ -8430,12 +8431,30 @@ tripoint game::look_around()
 tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
                             bool has_first_point, bool select_zone )
 {
-    bVMonsterLookFire = false;
+    look_around_t look;
+    look.w_info = w_info;
+    look.start_point = start_point;
+    look.has_first_point = has_first_point;
+    look.select_zone = select_zone;
+
+    return look.invoke();
+}
+
+tripoint look_around_t::invoke()
+{
+    g->bVMonsterLookFire = false;
+
+    //@todo use those directly.
+    map &m = g->m;
+    player &u = g->u;
+    catacurses::WINDOW *const w_terrain = g->w_terrain;
+    
+
     // TODO: Make this `true`
     const bool allow_zlev_move = m.has_zlevels() &&
         ( debug_mode || fov_3d || u.has_trait( trait_id( "DEBUG_NIGHTVISION" ) ) );
 
-    temp_exit_fullscreen();
+    g->temp_exit_fullscreen();
 
     const int offset_x = (u.posx() + u.view_offset.x) - getmaxx(w_terrain) / 2;
     const int offset_y = (u.posy() + u.view_offset.y) - getmaxy(w_terrain) / 2;
@@ -8449,12 +8468,12 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
         lp = start_point;
     }
 
-    draw_ter( lp );
+    g->draw_ter( lp );
 
     //change player location to peek location temporarily for minimap update
     tripoint current_pos = u.pos();
     u.setpos(lp);
-    draw_pixel_minimap();
+    g->draw_pixel_minimap();
     u.setpos(current_pos);
 
     int soffset = get_option<int>( "MOVE_VIEW_OFFSET" );
@@ -8462,7 +8481,7 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
     bool blink = false;
 
     int lookWidth, lookY, lookX;
-    get_lookaround_dimensions(lookWidth, lookY, lookX);
+    g->get_lookaround_dimensions(lookWidth, lookY, lookX);
 
     bool bNewWindow = false;
     if (w_info == nullptr) {
@@ -8494,10 +8513,10 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
     ctxt.register_action("QUIT");
     ctxt.register_action("HELP_KEYBINDINGS");
 
-    const int old_levz = get_levz();
+    const int old_levz = g->get_levz();
 
     m.update_visibility_cache( old_levz );
-    const visibility_variables &cache = g->m.get_visibility_variables_cache();
+    const visibility_variables &cache = m.get_visibility_variables_cache();
 
     do {
         if (bNewWindow) {
@@ -8538,7 +8557,7 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
                     }
 #endif
 
-                    draw_zones( start, end, offset );
+                    g->draw_zones( start, end, offset );
 
                 } else {
 #ifdef TILES
@@ -8578,7 +8597,7 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
             //Look around
             int first_line = 1;
             const int last_line = LOOK_AROUND_HEIGHT - 2;
-            print_all_tile_info( lp, w_info, 1, first_line, last_line, !is_draw_tiles_mode(), cache );
+            g->print_all_tile_info( lp, w_info, 1, first_line, last_line, !is_draw_tiles_mode(), cache );
 
             if (fast_scroll) {
                 //~ "Fast Scroll" mark below the top right corner of the info window
@@ -8607,8 +8626,8 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
         //Wait for input
         action = ctxt.handle_input();
         if (action == "LIST_ITEMS") {
-            list_items_monsters();
-            draw_ter( lp, true );
+            g->list_items_monsters();
+            g->draw_ter( lp, true );
 
         } else if (action == "TOGGLE_FAST_SCROLL") {
             fast_scroll = !fast_scroll;
@@ -8624,11 +8643,11 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
                 new_levz = -OVERMAP_DEPTH;
             }
 
-            add_msg( m_debug, "levx: %d, levy: %d, levz :%d", get_levx(), get_levy(), new_levz );
+            add_msg( m_debug, "levx: %d, levy: %d, levz :%d", g->get_levx(), g->get_levy(), new_levz );
             u.view_offset.z = new_levz - u.posz();
             lp.z = new_levz;
-            refresh_all();
-            draw_ter( lp, true );
+            g->refresh_all();
+            g->draw_ter( lp, true );
         } else if( action == "TRAVEL_TO" ) {
             if( !u.sees( lp ) ) {
                 add_msg(_("You can't see that destination."));
@@ -8646,12 +8665,12 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
             return { INT_MIN, INT_MIN, INT_MIN };
         } else if( action == "debug_scent" ){
             if( !MAP_SHARING::isCompetitive() || MAP_SHARING::isDebugger() ) {
-                display_scent();
+                g->display_scent();
             }
         } else if( action == "EXTENDED_DESCRIPTION" ) {
-            extended_description( lp );
-            draw_sidebar();
-            draw_ter( lp, true );
+            g->extended_description( lp );
+            g->draw_sidebar();
+            g->draw_ter( lp, true );
         } else if (!ctxt.get_coordinates(w_terrain, lx, ly) && action != "MOUSE_MOVE") {
             int dx, dy;
             ctxt.get_direction(dx, dy, action);
@@ -8682,7 +8701,7 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
                 ly = MAPSIZE * SEEY;
             }
 
-            draw_ter( lp, true );
+            g->draw_ter( lp, true );
         }
     } while (action != "QUIT" && action != "CONFIRM" && action != "SELECT");
 
@@ -8697,8 +8716,8 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
         werase(w_info);
         delwin(w_info);
     }
-    reenter_fullscreen();
-    bVMonsterLookFire = true;
+    g->reenter_fullscreen();
+    g->bVMonsterLookFire = true;
 
     if( action == "CONFIRM" || action == "SELECT" ) {
         return lp;

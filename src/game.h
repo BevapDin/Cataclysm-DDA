@@ -127,6 +127,7 @@ class game
         friend class advanced_inventory;
         friend class main_menu;
         friend class target_handler;
+        friend class look_around_t;
     public:
         game();
         ~game();
