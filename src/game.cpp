@@ -2276,67 +2276,21 @@ input_context game::get_player_input(std::string &action)
                 WEATHER_DRIZZLE | WEATHER_RAINY | WEATHER_THUNDER | WEATHER_LIGHTNING = "weather_rain_drop"
                 WEATHER_FLURRIES | WEATHER_SNOW | WEATHER_SNOWSTORM = "weather_snowflake"
                 */
-
-#ifdef TILES
-                if( !use_tiles ) {
-#endif //TILES
-                    //If not using tiles, erase previous drops from w_terrain
-                    for( auto &elem : wPrint.vdrops ) {
-                        const tripoint location( elem.first + offset_x, elem.second + offset_y, get_levz() );
-                        const lit_level lighting = visibility_cache[location.x][location.y];
-                        wmove( w_terrain, location.y - offset_y, location.x - offset_x );
-                        if( !m.apply_vision_effects( w_terrain, lighting, cache ) ) {
-                            m.drawsq( w_terrain, u, location, false, true,
-                                      u.pos() + u.view_offset,
-                                      lighting == LL_LOW, lighting == LL_BRIGHT );
-                        }
-                    }
-#ifdef TILES
-                }
-#endif //TILES
                 wPrint.vdrops.clear();
-
                 for( int i = 0; i < dropCount; i++ ) {
                     const int iRandX = rng( iStartX, iEndX - 1 );
                     const int iRandY = rng( iStartY, iEndY - 1 );
                     const int mapx = iRandX + offset_x;
                     const int mapy = iRandY + offset_y;
-
                     const tripoint mapp( mapx, mapy, u.posz() );
-
                     const lit_level lighting = visibility_cache[mapp.x][mapp.y];
-
-                    if( m.is_outside( mapp ) && m.get_visibility( lighting, cache ) == VIS_CLEAR &&
-                        !critter_at( mapp, true ) ) {
-                        // Suppress if a critter is there
+                    if( m.is_outside( mapp ) && m.get_visibility( lighting, cache ) == VIS_CLEAR ) {
                         wPrint.vdrops.emplace_back(std::make_pair(iRandX, iRandY));
                     }
                 }
             }
             // don't bother calculating SCT if we won't show it
             if (uquit != QUIT_WATCH && get_option<bool>( "ANIMATION_SCT" ) ) {
-#ifdef TILES
-                if (!use_tiles) {
-#endif
-                    for( auto &elem : SCT.vSCT ) {
-                        //Erase previous text from w_terrain
-                        if( elem.getStep() > 0 ) {
-                            for( size_t i = 0; i < elem.getText().length(); ++i ) {
-                                const tripoint location( elem.getPosX() + i, elem.getPosY(), get_levz() );
-                                const lit_level lighting = visibility_cache[location.x][location.y];
-                                wmove( w_terrain, location.y - offset_y, location.x - offset_x );
-                                if( !m.apply_vision_effects( w_terrain, lighting, cache ) ) {
-                                    m.drawsq( w_terrain, u, location, false, true,
-                                              u.pos() + u.view_offset,
-                                              lighting == LL_LOW, lighting == LL_BRIGHT );
-                                }
-                            }
-                        }
-                    }
-#ifdef TILES
-                }
-#endif
-
                 SCT.advanceAllSteps();
 
                 //Check for creatures on all drawing positions and offset if necessary
@@ -2366,8 +2320,6 @@ input_context game::get_player_input(std::string &action)
                 }
             }
 
-            werase( w_terrain );
-
             ter_win.center( center );
             set_standard_drawers( ter_win );
             draw_weather( wPrint );
@@ -2377,11 +2329,9 @@ input_context game::get_player_input(std::string &action)
             m.build_map_cache( center.z );
             ter_win.draw();
 
-            wrefresh( w_terrain );
-
             if( uquit == QUIT_WATCH ) {
                 draw_sidebar();
-
+                //@todo move this into a terrain_window::drawer
                 WINDOW_PTR popup = create_wait_popup_window(
                     string_format( _( "Press %s to accept your fate..." ),
                     ctxt.get_desc( "QUIT" ).c_str() ),
@@ -4252,6 +4202,7 @@ void game::debug()
                      POSY - u.posy() + u.view_offset.y
             };
             draw_ter();
+            //@todo use terrain_window::drawer
             auto sounds_to_draw = sounds::get_monster_sounds();
             for( const auto & sound : sounds_to_draw.first ) {
                 mvwputch( w_terrain, offset.y + sound.y, offset.x + sound.x, c_yellow, '?' );
@@ -4830,10 +4781,7 @@ void game::draw()
     }
 
     draw_sidebar();
-
-    werase( w_terrain );
     draw_ter();
-    wrefresh( w_terrain );
 }
 
 #ifndef TILES
@@ -5032,7 +4980,7 @@ void game::draw_ter()
 
 class basic_map_drawer : public terrain_window::drawer {
     public:
-        basic_map_drawer() = default;
+        basic_map_drawer() : drawer( 0 ) { }
         ~basic_map_drawer() override = default;
 
         void draw( const catacurses::window &w, const tripoint &center ) {
@@ -5042,7 +4990,7 @@ class basic_map_drawer : public terrain_window::drawer {
 
 class footsteps_drawer : public terrain_window::drawer {
     public:
-        footsteps_drawer() = default;
+        footsteps_drawer() : drawer( 100 ) { }
         ~footsteps_drawer() override = default;
 
         void draw( const catacurses::window &w, const tripoint &center ) {
@@ -5052,7 +5000,7 @@ class footsteps_drawer : public terrain_window::drawer {
 
 class critter_drawer : public terrain_window::drawer {
     public:
-        critter_drawer() = default;
+        critter_drawer() : drawer( 200 ) { }
         ~critter_drawer() override = default;
 
         void draw( const catacurses::window &w, const tripoint &center ) {
@@ -5064,7 +5012,7 @@ class critter_drawer : public terrain_window::drawer {
 
 class scent_vision_drawer : public terrain_window::drawer {
     public:
-        scent_vision_drawer() = default;
+        scent_vision_drawer() : drawer( 300 ) { }
         ~scent_vision_drawer() override = default;
 
         void draw( const catacurses::window &w, const tripoint &center ) {
@@ -5097,7 +5045,7 @@ class scent_vision_drawer : public terrain_window::drawer {
 
 class destination_preview_drawer : public terrain_window::drawer {
     public:
-        destination_preview_drawer() = default;
+        destination_preview_drawer() : drawer( 400 ) { }
         ~destination_preview_drawer() override = default;
 
         void draw( const catacurses::window &w, const tripoint &center ) {
@@ -5114,7 +5062,7 @@ class destination_preview_drawer : public terrain_window::drawer {
 
 class vehicle_direction_drawer : public terrain_window::drawer {
     public:
-        vehicle_direction_drawer() = default;
+        vehicle_direction_drawer() : drawer( 500 ) { }
         ~vehicle_direction_drawer() override = default;
 
         void draw( const catacurses::window &w, const tripoint &center ) {

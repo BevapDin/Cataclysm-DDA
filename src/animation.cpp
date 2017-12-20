@@ -587,7 +587,8 @@ class weather_drawer : public terrain_window::drawer {
     public:
         weather_printable const w;
 
-        weather_drawer( weather_printable w ) : w( std::move( w ) ) { }
+        // 110 is shortly after basic map drawing and before anything after it.
+        weather_drawer( weather_printable w ) : drawer( 110 ), w( std::move( w ) ) { }
         ~weather_drawer() override = default;
 
         void draw( const catacurses::window &win, const tripoint &center ) {
