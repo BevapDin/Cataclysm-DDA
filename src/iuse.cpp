@@ -6840,9 +6840,6 @@ int iuse::remoteveh(player *p, item *it, bool t, const tripoint &pos)
         return 0;
     }
 
-    int px = g->u.view_offset.x;
-    int py = g->u.view_offset.y;
-
     vehicle* veh = pickveh( pos, choice == 2 );
 
     if( veh == nullptr ) {
@@ -6866,8 +6863,6 @@ int iuse::remoteveh(player *p, item *it, bool t, const tripoint &pos)
         return 0;
     }
 
-    g->u.view_offset.x = px;
-    g->u.view_offset.y = py;
     return it->type->charges_to_use();
 }
 
