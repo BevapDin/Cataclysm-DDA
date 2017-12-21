@@ -37,6 +37,44 @@ tripoint_range terrain_window::map_range() const
                            to_map_coord( screen_coord( getmaxy( w ), getmaxx( w ) ) ) );
 }
 
+void terrain_window::center_on( const map_coord &pos )
+{
+    // v the component in screen coordinates
+    // l the maximal value of the component in screen coordinates
+    static const auto centered = []( const int v, const int l ) {
+        if( v < 0 ) {
+            return v;
+        } else {
+            return v - l + 1;
+        }
+    };
+
+    const point sp = to_screen_coord( pos );
+    center_.x = centered( sp.x, getmaxy( w ) );
+    center_.y = centered( sp.y, getmaxx( w ) );
+    center_.z = pos.z;
+}
+
+void terrain_window::scroll_into_view( const map_coord &pos )
+{
+    // v the component in screen coordinates
+    // l the maximal value of the component in screen coordinates
+    static const auto clamp = []( const int v, const int l ) {
+        if( v < 0 ) {
+            return v;
+        } else if( v > l ) {
+            return v - l + 1;
+        } else {
+            return 0;
+        }
+    };
+
+    const point sp = to_screen_coord( pos );
+    center_.x = clamp( sp.x, getmaxy( w ) );
+    center_.y = clamp( sp.y, getmaxx( w ) );
+    center_.z = pos.z;
+}
+
 static bool operator<( const std::unique_ptr<terrain_window_drawer> &lhs, const std::unique_ptr<terrain_window_drawer> &rhs )
 {
     assert( lhs );
@@ -44,11 +82,11 @@ static bool operator<( const std::unique_ptr<terrain_window_drawer> &lhs, const 
     return lhs->priority() < rhs->priority();
 }
 
-void terrain_window_drawers::insert( std::unique_ptr<terrain_window_drawer> drawer_ptr )
+terrain_window_drawer &terrain_window_drawers::insert( std::unique_ptr<terrain_window_drawer> drawer_ptr )
 {
     assert( drawer_ptr );
     const auto iter = std::lower_bound( drawers.begin(), drawers.end(), drawer_ptr );
-    drawers.insert( iter, std::move( drawer_ptr ) );
+    return **drawers.insert( iter, std::move( drawer_ptr ) );
 }
 
 void terrain_window_drawers::clear()

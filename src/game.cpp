@@ -4962,11 +4962,11 @@ class destination_preview_drawer : public terrain_window_drawer {
 static void set_standard_drawers( terrain_window_drawers &drawers )
 {
     drawers.emplace<basic_map_drawer>( g->m );
-    drawers.emplace<footsteps_drawer();
-    drawers.emplace<critter_drawer( g->u );
-    drawers.emplace<scent_vision_drawer( g->u, g->scent );
+    drawers.emplace<footsteps_drawer>();
+    drawers.emplace<critter_drawer>( g->u );
+    drawers.emplace<scent_vision_drawer>( g->u, g->scent );
     //@todo: only required in standard view?
-    drawers.emplace<destination_preview_drawer();
+    drawers.emplace<destination_preview_drawer>();
     //@todo: only required in standard view?
     drawers.emplace<vehicle_direction_drawer>( g->u, g->m );
 }
@@ -8596,40 +8596,6 @@ std::vector<map_item_stack> game::find_nearby_items(int iRadius)
     return ret;
 }
 
-void game::draw_trail_to_square( const tripoint &t, bool bDrawX )
-{
-    //Reset terrain
-    draw_ter();
-
-    std::vector<tripoint> pts;
-    if( t != tripoint_zero ) {
-        //Draw trail
-        pts = line_to( u.pos(), u.pos() + t, 0, 0 );
-    } else {
-        //Draw point
-        pts.push_back( u.pos() );
-    }
-
-    w_terrain.emplace<line_drawer>( u.pos() + t, pts, false );
-    if (bDrawX) {
-        char sym = 'X';
-        if( t.z > 0 ) {
-            sym = '^';
-        } else if( t.z < 0 ) {
-            sym = 'v';
-        }
-        if (pts.empty()) {
-            mvwputch( w_terrain, POSY, POSX, c_white, sym );
-        } else {
-            mvwputch( w_terrain, POSY + (pts[pts.size() - 1].y - (u.posy() + u.view_offset.y)),
-                      POSX + (pts[pts.size() - 1].x - (u.posx() + u.view_offset.x)),
-                      c_white, sym );
-        }
-    }
-
-    wrefresh(w_terrain);
-}
-
 //helper method so we can keep list_items shorter
 void game::reset_item_list_state(WINDOW *window, int height, bool bRadiusSort)
 {
@@ -8698,51 +8664,22 @@ void game::reset_item_list_state(WINDOW *window, int height, bool bRadiusSort)
     refresh_all();
 }
 
-void centerlistview( const tripoint &active_item_position )
+static void centerlistview( terrain_window &w, const tripoint &target )
 {
-    player &u = g->u;
-    if (get_option<std::string>( "SHIFT_LIST_ITEM_VIEW" ) != "false") {
-        u.view_offset.z = active_item_position.z;
-        int xpos = POSX + active_item_position.x;
-        int ypos = POSY + active_item_position.y;
-        if (get_option<std::string>( "SHIFT_LIST_ITEM_VIEW" ) == "centered") {
-            int xOffset = POSX;
-            int yOffset = POSY;
-            if( !w_terrain.contains( point( xpos, ypos ) ) ) {
-                if (xpos < 0) {
-                    u.view_offset.x = xpos - xOffset;
-                } else {
-                    u.view_offset.x = xpos - (TERRAIN_WINDOW_WIDTH - 1) + xOffset;
-                }
-
-                if (xpos < 0) {
-                    u.view_offset.y = ypos - yOffset;
-                } else {
-                    u.view_offset.y = ypos - (TERRAIN_WINDOW_HEIGHT - 1) + yOffset;
-                }
-            } else {
-                u.view_offset.x = 0;
-                u.view_offset.y = 0;
-            }
-        } else {
-            if (xpos < 0) {
-                u.view_offset.x = xpos;
-            } else if (xpos >= TERRAIN_WINDOW_WIDTH) {
-                u.view_offset.x = xpos - (TERRAIN_WINDOW_WIDTH - 1);
-            } else {
-                u.view_offset.x = 0;
-            }
-
-            if (ypos < 0) {
-                u.view_offset.y = ypos;
-            } else if (ypos >= TERRAIN_WINDOW_HEIGHT) {
-                u.view_offset.y = ypos - (TERRAIN_WINDOW_HEIGHT - 1);
-            } else {
-                u.view_offset.y = 0;
-            }
-        }
+    if( get_option<std::string>( "SHIFT_LIST_ITEM_VIEW" ) == "false" ) {
+        return;
     }
-
+    if( get_option<std::string>( "SHIFT_LIST_ITEM_VIEW" ) == "centered" ) {
+        if( w.contains( target ) ) {
+            // keep the viewport as is, but ensure it shows the targets z-level,
+            // we can display only one z-level so it *must* be the targets one
+            w.center( tripoint( w.center().x, w.center().y, target.z ) );
+        } else {
+            w.center_on( target );
+        }
+    } else {
+        w.scroll_into_view( target );
+    }
 }
 
 #define MAXIMUM_ZOOM_LEVEL 4
@@ -8870,10 +8807,6 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
     int lowPStart = list_filter_low_priority(filtered_items, highPEnd, list_item_downvote);
     int iItemNum = ground_items.size();
 
-    const tripoint stored_view_offset = u.view_offset;
-
-    u.view_offset = tripoint_zero;
-
     int iActive = 0; // Item index that we're looking at
     const int iMaxRows = TERMY - iInfoHeight - 2 - VIEW_OFFSET_Y * 2;
     int iStartPos = 0;
@@ -8908,11 +8841,20 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
     ctxt.register_action("SORT");
     ctxt.register_action("TRAVEL_TO");
 
+    terrain_window_drawers drawers;
+    set_standard_drawers( drawers );
+    trail_to_square_drawer &ttsw = drawers.emplace<trail_to_square_drawer>( u.pos(), u.pos() + active_pos, true );
+
     do {
+        // update the drawer
+        ttsw = trail_to_square_drawer( u.pos(), u.pos() + active_pos, true );
+        drawers.draw();
+
         if( action == "COMPARE" ) {
             game_menus::inv::compare( u, active_pos );
             reset = true;
-            refresh_all();
+            // sidebar had been overdrawn
+            draw_sidebar();
         } else if( action == "FILTER" ) {
             draw_item_filter_rules( w_item_info, 0, iInfoHeight - 1, item_filter_type::FILTER );
             string_input_popup()
@@ -9078,7 +9020,6 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
         } else if( action == "PAGE_DOWN" ) {
             iScrollPos++;
         } else if( action == "NEXT_TAB" || action == "PREV_TAB" ) {
-            u.view_offset = stored_view_offset;
             return game::vmenu_ret::CHANGE_TAB;
         }
 
@@ -9175,8 +9116,7 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
                 //Only redraw trail/terrain if x/y position changed
                 if( active_pos != iLastActive ) {
                     iLastActive = active_pos;
-                    centerlistview( active_pos );
-                    draw_trail_to_square( active_pos, true );
+                    centerlistview( w_terrain, u.pos() + active_pos );
                 }
             }
             draw_scrollbar( w_items_border, iActive, iMaxRows, iItemNum, 1 );
@@ -9187,11 +9127,9 @@ game::vmenu_ret game::list_items( const std::vector<map_item_stack> &item_list )
         draw_custom_border( w_item_info, bDrawLeft, true, false, true, LINE_XOXO, LINE_XOXO, true, true);
         wrefresh(w_items);
         wrefresh(w_item_info);
-        refresh();
         action = ctxt.handle_input();
     } while (action != "QUIT");
 
-    u.view_offset = stored_view_offset;
     return game::vmenu_ret::QUIT;
 }
 
@@ -9216,9 +9154,6 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
     WINDOW_PTR w_monster_info_borderptr( w_monster_info_border );
 
     const int max_gun_range = u.weapon.gun_range( &u );
-
-    const tripoint stored_view_offset = u.view_offset;
-    u.view_offset = tripoint_zero;
 
     int iActive = 0; // monster index that we're looking at
     const int iMaxRows = TERMY - iInfoHeight - 2 - VIEW_OFFSET_Y * 2 - 1;
@@ -9278,7 +9213,15 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
         }
     }
 
+    terrain_window_drawers drawers;
+    set_standard_drawers( drawers );
+    trail_to_square_drawer &ttsw = drawers.emplace<trail_to_square_drawer>( u.pos(), u.pos() + iActivePos, true );
+
     do {
+        // update the drawer
+        ttsw = trail_to_square_drawer( u.pos(), u.pos() + iActivePos, true );
+        drawers.draw();
+
         if (action == "UP") {
             iActive--;
             if (iActive < 0) {
@@ -9290,7 +9233,6 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
                 iActive = 0;
             }
         } else if (action == "NEXT_TAB" || action == "PREV_TAB") {
-            u.view_offset = stored_view_offset;
             return game::vmenu_ret::CHANGE_TAB;
         } else if (action == "SAFEMODE_BLACKLIST_REMOVE") {
             const auto m = dynamic_cast<monster*>( cCurMon );
@@ -9312,7 +9254,6 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
         } else if (action == "fire") {
             if( cCurMon != nullptr && rl_dist( u.pos(), cCurMon->pos() ) <= max_gun_range ) {
                 last_target = shared_from( *cCurMon );
-                u.view_offset = stored_view_offset;
                 return game::vmenu_ret::FIRE;
             }
         }
@@ -9447,8 +9388,7 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
             iActivePos = cCurMon->pos() - u.pos();
             if( iActivePos != iLastActivePos ) {
                 iLastActivePos = iActivePos;
-                centerlistview( iActivePos );
-                draw_trail_to_square( iActivePos, false );
+                centerlistview( w_terrain, u.pos() + iActivePos );
             }
 
             draw_scrollbar( w_monsters_border, iActive, iMaxRows, int( monster_list.size() ), 1 );
@@ -9471,12 +9411,8 @@ game::vmenu_ret game::list_monsters( const std::vector<Creature *> &monster_list
         wrefresh(w_monster_info_border);
         wrefresh(w_monster_info);
 
-        refresh();
-
         action = ctxt.handle_input();
     } while (action != "QUIT");
-
-    u.view_offset = stored_view_offset;
 
     return game::vmenu_ret::QUIT;
 }

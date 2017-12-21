@@ -740,3 +740,27 @@ void vehicle_direction_drawer::draw( terrain_window &w )
     draw_indicator( w, c_dark_gray, veh->face_vec() );
     draw_indicator( w, c_white, veh->dir_vec() );
 }
+
+static std::vector<tripoint> create_line_vector( const tripoint &start, const tripoint &end )
+{
+    if( start == end ) {
+        //Draw point
+        return { start };
+    } else {
+        //Draw trail
+        return line_to( start, end, 0, 0 );
+    }
+}
+
+trail_to_square_drawer::trail_to_square_drawer( const tripoint &s, const tripoint &e,
+        const bool f ) : line_drawer( e, create_line_vector( s, e ), false ), draw_final_x( f ) { }
+
+void trail_to_square_drawer::draw( terrain_window &w )
+{
+    line_drawer::draw( w );
+    if( draw_final_x ) {
+        const char sym = end.z == w.center().z ? 'X' : ( end.z > w.center().z ? '^' : 'v' );
+        const point sp = w.to_screen_coord( end );
+        mvwputch( w, sp.y, sp.x, c_white, sym );
+    }
+}

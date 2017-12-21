@@ -188,4 +188,21 @@ class vehicle_direction_drawer : public terrain_window_drawer
 #endif
 };
 
+class trail_to_square_drawer : public line_drawer
+{
+    private:
+        tripoint start;
+        tripoint end;
+        bool draw_final_x;
+
+    public:
+        trail_to_square_drawer( const tripoint &s, const tripoint &e, const bool f );
+        ~trail_to_square_drawer() override = default;
+
+        void draw( terrain_window &w ) override;
+#ifdef TILES
+        void draw( cata_tiles &tilecontext ) override;
+#endif
+};
+
 #endif

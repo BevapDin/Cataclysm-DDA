@@ -36,6 +36,14 @@ class terrain_window {
         map_coord to_map_coord( const screen_coord &pos ) const;
         screen_coord to_screen_coord( const map_coord &pos ) const;
 
+        /// Changes @ref center to
+        void center_on( const map_coord &pos );
+        /**
+         * Moves @ref center_ to ensure the given point is contained, but does
+         * not change anything if it is already contained.
+         * Postcondition: `contains( pos ) == true`
+         */
+        void scroll_into_view( const map_coord &pos );
         /**
          * Returns a range that contains all points visible in this window,
          * in map coordinates. The range may contain points that are not
@@ -94,12 +102,14 @@ class terrain_window_drawers {
         std::vector<std::unique_ptr<terrain_window_drawer>> drawers;
 
     public:
-        void insert( std::unique_ptr<terrain_window_drawer> drawer_ptr );
+        /// @returns The inserted object.
+        terrain_window_drawer &insert( std::unique_ptr<terrain_window_drawer> drawer_ptr );
 
+        /// @returns The inserted object.
         template<typename T, typename ...Args>
-        void emplace( Args &&... args ) {
+        T &emplace( Args &&... args ) {
             std::unique_ptr<terrain_window_drawer> ptr( new T( std::forward<Args>( args )... ) );
-            insert( std::move( ptr ) );
+            return static_cast<T&>( insert( std::move( ptr ) ) );
         }
 
         void clear();

@@ -552,8 +552,6 @@ class game
         /** Long description of (visible) things at tile. */
         void extended_description( const tripoint &p );
 
-        void draw_trail_to_square( const tripoint &t, bool bDrawX );
-
         // @todo Move these functions to game_menus::inv and isolate them.
         int inv_for_filter( const std::string &title, item_filter filter, const std::string &none_message = "" );
         int inv_for_all( const std::string &title, const std::string &none_message = "" );
