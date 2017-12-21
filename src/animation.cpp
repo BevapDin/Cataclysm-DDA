@@ -512,75 +512,41 @@ void game::draw_hit_player(player const &p, const int dam)
 #endif
 
 /* Line drawing code, not really an animation but should be separated anyway */
-namespace {
-void draw_line_curses(game &g, const tripoint &pos, tripoint const &center,
-    std::vector<tripoint> const &ret)
+void line_drawer::draw( terrain_window &w )
 {
-    (void)pos; // unused
-
-    for( tripoint const &p : ret ) {
-        auto const critter = g.critter_at( p, true );
-
-        // NPCs and monsters get drawn with inverted colors
-        if( critter && g.u.sees( *critter ) ) {
-            critter->draw( g.w_terrain, center, true );
+    for( const tripoint &p : points ) {
+        if( trail ) {
+            g->m.drawsq( w, g->u, p, true, true );
         } else {
-            g.m.drawsq( g.w_terrain, g.u, p, true, true, center );
+            Creature *const critter = g->critter_at( p, true );
+
+            // NPCs and monsters get drawn with inverted colors
+            if( critter && g->u.sees( *critter ) ) {
+                critter->draw( w, w.center(), true );
+            } else {
+                g->m.drawsq( w, g->u, p, true, true, w.center() );
+            }
         }
     }
+
+    if( !trail ) {
+        const tripoint mp = points.empty() ? g->u.pos() : points.back();
+        const point sc = w.to_screen_coord( mp );
+        mvwputch( w, sc.y, sc.x, c_white, 'X' );
+    }
 }
-} //namespace
 
 #if defined(TILES)
-void game::draw_line( const tripoint &p, tripoint const &center, std::vector<tripoint> const &ret )
+void line_drawer::draw( cata_tiles &tilecontext )
 {
-    if( !u.sees( p ) ) {
-        return;
+    if( trail ) {
+        tilecontext.init_draw_line( pos, points, "line_trail", false );
+    } else {
+        if( !u.sees( pos ) ) {
+            return;
+        }
+        tilecontext.init_draw_line( pos, points, "line_target", true );
     }
-
-    if (!use_tiles) {
-        draw_line_curses(*this, p, center, ret); // TODO needed for tiles ver too??
-        return;
-    }
-
-    tilecontext->init_draw_line( p, ret, "line_target", true );
-}
-#else
-void game::draw_line( const tripoint &p, tripoint const &center, std::vector<tripoint> const &ret )
-{
-    if( !u.sees( p ) ) {
-        return;
-    }
-
-    draw_line_curses( *this, p, center, ret );
-}
-#endif
-
-namespace {
-void draw_line_curses(game &g, std::vector<tripoint> const &points)
-{
-    for( tripoint const& p : points ) {
-        g.m.drawsq(g.w_terrain, g.u, p, true, true);
-    }
-
-    tripoint const p = points.empty() ? tripoint {POSX, POSY, 0} :
-        relative_view_pos(g.u, points.back());
-    mvwputch(g.w_terrain, p.y, p.x, c_white, 'X');
-}
-} //namespace
-
-#if defined(TILES)
-void game::draw_line( const tripoint &p, std::vector<tripoint> const &vPoint )
-{
-    draw_line_curses(*this, vPoint);
-    tilecontext->init_draw_line( p, vPoint, "line_trail", false);
-}
-#else
-void game::draw_line( const tripoint &p, std::vector<tripoint> const &vPoint )
-{
-    (void)p; //unused
-
-    draw_line_curses(*this, vPoint);
 }
 #endif
 

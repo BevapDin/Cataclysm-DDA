@@ -38,6 +38,23 @@ struct explosion_tile {
     nc_color color;
 };
 
+class line_drawer : public terrain_window_drawer
+{
+    private:
+        tripoint pos;
+        std::vector<tripoint> points;
+        bool trail;
+
+    public:
+        line_drawer( const tripoint &p, std::vector<tripoint> r, const bool t ) : terrain_window_drawer( 700 ), pos( p ), points( std::move( r ) ), trail( t ) { }
+        ~line_drawer() override = default;
+
+        void draw( terrain_window &w ) override;
+#ifdef TILES
+        void draw( cata_tiles &tilecontext ) override;
+#endif
+};
+
 class footsteps_drawer : public terrain_window_drawer
 {
     public:

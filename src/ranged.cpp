@@ -1063,7 +1063,6 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
             }
         }
         g->w_terrain.center( center );
-        g->draw_ter( true );
         int line_number = 1;
         Creature *critter = g->critter_at( dst, true );
         if( dst != src ) {
@@ -1074,7 +1073,7 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
             // Only draw a highlighted trajectory if we can see the endpoint.
             // Provides feedback to the player, and avoids leaking information
             // about tiles they can't see.
-            g->draw_line( dst, center, ret_this_zlevel );
+            g->w_ter.emplace<line_drawer>( dst, ret_this_zlevel, false );
 
             // Print to target window
             mvwprintw( w_target, line_number++, 1, _( "Range: %d/%d, %s" ),
@@ -1083,6 +1082,7 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
         } else {
             mvwprintw( w_target, line_number++, 1, _("Range: %d, %s"), range, enemiesmsg.c_str() );
         }
+        g->draw_ter( true );
 
         // Skip blank lines if we're short on space.
         if( !compact ) {

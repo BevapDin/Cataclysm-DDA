@@ -5027,7 +5027,8 @@ class destination_preview_drawer : public terrain_window_drawer {
             if( !g->destination_preview.empty() && g->u.pos().z == w.center().z ) {
                 // Draw auto-move preview trail
                 const tripoint &final_destination = g->destination_preview.back();
-                g->draw_line( final_destination, w.center(), destination_preview );
+                line_drawer ld( final_destination, destination_preview, false );
+                ld.draw( w );
                 const point sp = w.to_screen_coord( final_destination );
                 mvwputch( w, sp.y, sp.x, c_white, 'X' );
             }
@@ -8678,7 +8679,6 @@ void game::draw_trail_to_square( const tripoint &t, bool bDrawX )
     draw_ter();
 
     std::vector<tripoint> pts;
-    tripoint center = u.pos() + u.view_offset;
     if( t != tripoint_zero ) {
         //Draw trail
         pts = line_to( u.pos(), u.pos() + t, 0, 0 );
@@ -8687,7 +8687,7 @@ void game::draw_trail_to_square( const tripoint &t, bool bDrawX )
         pts.push_back( u.pos() );
     }
 
-    draw_line( u.pos() + t, center, pts );
+    w_terrain.emplace<line_drawer>( u.pos() + t, pts, false );
     if (bDrawX) {
         char sym = 'X';
         if( t.z > 0 ) {
