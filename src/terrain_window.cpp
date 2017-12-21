@@ -4,6 +4,7 @@
 #include "game.h"
 
 #include <algorithm>
+#include <cassert>
 
 bool terrain_window::contains( const map_coord &pos ) const
 {
@@ -25,30 +26,35 @@ terrain_window::screen_coord terrain_window::to_screen_coord( const map_coord &p
     return screen_coord( POSX + pos.x - center_.x, POSY + pos.y - center_.y );
 }
 
-void terrain_window::insert( std::unique_ptr<drawer> drawer_ptr )
+static bool operator<( const std::unique_ptr<terrain_window_drawer> &lhs, const std::unique_ptr<terrain_window_drawer> &rhs )
+{
+    assert( lhs );
+    assert( rhs );
+    return lhs->priority() < rhs->priority();
+}
+
+void terrain_window_drawers::insert( std::unique_ptr<terrain_window_drawer> drawer_ptr )
 {
     assert( drawer_ptr );
-    const auto iter = std::lower_bound( drawers.begin(), drawers.end(), [&drawer_ptr]( const std::unique_ptr<drawer> &lhs ) {
-        return lhs->priority() < drawer_ptr->priority();
-    } );
+    const auto iter = std::lower_bound( drawers.begin(), drawers.end(), drawer_ptr );
     drawers.insert( iter, std::move( drawer_ptr ) );
 }
 
-void terrain_window::clear()
+void terrain_window_drawers::clear()
 {
     drawers.clear();
 }
 
-void terrain_window::draw()
+void terrain_window_drawers::draw( terrain_window &win )
 {
-    for( const std::unique_ptr<drawer> &ptr : drawers ) {
-        ptr->draw( *this );
+    for( const std::unique_ptr<terrain_window_drawer> &ptr : drawers ) {
+        ptr->draw( win );
     }
     //@todo move into a drawer class
     // Place the cursor over the player as is expected by screen readers.
     //@todo remove the dependency on class game
-    const point mp = to_screen_coord( g->u.pos() );
-    wmove( w, mp.y, mp.x );
+    const point mp = win.to_screen_coord( g->u.pos() );
+    wmove( win, mp.y, mp.x );
 
-    wrefresh( w );
+    wrefresh( win );
 }

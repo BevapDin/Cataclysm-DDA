@@ -33,6 +33,18 @@ class terrain_window {
         map_coord to_map_coord( const screen_coord &pos ) const;
         screen_coord to_screen_coord( const map_coord &pos ) const;
 
+        // operators so that this class can be used like any ordinary curses window
+        operator catacurses::window() const {
+            return w;
+        }
+        operator catacurses::WINDOW*() const {
+            return w;
+        }
+
+};
+
+class terrain_window_drawer {
+    public:
         class priority_type {
             private:
                 int priority_;
@@ -45,50 +57,36 @@ class terrain_window {
                 }
         };
 
-        class drawer {
-            protected:
-                priority_type priority_;
+    protected:
+        priority_type priority_;
 
-            public:
-                const priority_type &priority() const {
-                    return priority_;
-                }
+    public:
+        const priority_type &priority() const {
+            return priority_;
+        }
+        
+        terrain_window_drawer() = default;
+        terrain_window_drawer( const priority_type &p ) : priority_( p ) { }
+        virtual ~terrain_window_drawer() = default;
 
-                drawer() = default;
-                drawer( const priority_type &p ) : priority_( p ) { }
-                virtual ~drawer() = default;
+        virtual void draw( terrain_window &win ) = 0;
+};
 
-                virtual void draw( terrain_window &win ) = 0;
-        };
+class terrain_window_drawers {
+    private:
+        std::vector<std::unique_ptr<terrain_window_drawer>> drawers;
 
-        void insert( std::unique_ptr<drawer> drawer_ptr );
+    public:
+        void insert( std::unique_ptr<terrain_window_drawer> drawer_ptr );
 
         template<typename T, typename ...Args>
         void emplace( Args &&... args ) {
-            std::unique_ptr<drawer> ptr( new T( std::forward<Args>( args )... ) );
+            std::unique_ptr<terrain_window_drawer> ptr( new T( std::forward<Args>( args )... ) );
             insert( std::move( ptr ) );
         }
 
         void clear();
         void draw();
-
-        operator catacurses::window() const {
-            return w;
-        }
-        operator catacurses::WINDOW*() const {
-            return w;
-        }
-
-        // operators so that this class can be used like any ordinary curses window
-        operator catacurses::window() const {
-            return w;
-        }
-        operator catacurses::WINDOW*() const {
-            return w;
-        }
-
-    private:
-        std::vector<std::unique_ptr<drawer>> drawers;
 };
 
 #endif
