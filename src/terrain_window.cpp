@@ -2,6 +2,7 @@
 
 #include "player.h"
 #include "game.h"
+#include "map_iterator.h"
 
 #include <algorithm>
 #include <cassert>
@@ -24,6 +25,12 @@ terrain_window::map_coord terrain_window::to_map_coord( const screen_coord &pos 
 terrain_window::screen_coord terrain_window::to_screen_coord( const map_coord &pos ) const
 {
     return screen_coord( POSX + pos.x - center_.x, POSY + pos.y - center_.y );
+}
+
+tripoint_range terrain_window::map_range() const
+{
+    return tripoint_range( to_map_coord( screen_coord( 0, 0 ) ),
+                           to_map_coord( screen_coord( getmaxy( w ), getmaxx( w ) ) ) );
 }
 
 static bool operator<( const std::unique_ptr<terrain_window_drawer> &lhs, const std::unique_ptr<terrain_window_drawer> &rhs )

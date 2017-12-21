@@ -9,6 +9,7 @@
 #include <vector>
 
 class cata_tiles;
+class tripoint_range;
 
 class terrain_window {
     public:
@@ -34,6 +35,14 @@ class terrain_window {
         bool contains( const screen_coord &pos ) const;
         map_coord to_map_coord( const screen_coord &pos ) const;
         screen_coord to_screen_coord( const map_coord &pos ) const;
+
+        /**
+         * Returns a range that contains all points visible in this window,
+         * in map coordinates. The range may contain points that are not
+         * valid in the reality bubble (e.g. if the window is larger than
+         * the map). The points all have the same z-component: `center().z`.
+         */
+        tripoint_range map_range() const;
 
         // operators so that this class can be used like any ordinary curses window
         operator catacurses::window() const {

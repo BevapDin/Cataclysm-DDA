@@ -10,6 +10,7 @@ class vehicle;
 class player;
 class map;
 struct rl_vec2d;
+class scent_map;
 
 enum explosion_neighbors {
     N_NO_NEIGHBORS = 0,
@@ -48,6 +49,23 @@ class line_drawer : public terrain_window_drawer
     public:
         line_drawer( const tripoint &p, std::vector<tripoint> r, const bool t ) : terrain_window_drawer( 700 ), pos( p ), points( std::move( r ) ), trail( t ) { }
         ~line_drawer() override = default;
+
+        void draw( terrain_window &w ) override;
+#ifdef TILES
+        void draw( cata_tiles &tilecontext ) override;
+#endif
+};
+
+class scent_vision_drawer : public terrain_window_drawer
+{
+    private:
+        const player &u;
+        const scent_map &scent;
+
+    public:
+        scent_vision_drawer( const player &u, const scent_map &s ) : terrain_window_drawer( 300 ), u( u ),
+            scent( s ) { }
+        ~scent_vision_drawer() override = default;
 
         void draw( terrain_window &w ) override;
 #ifdef TILES

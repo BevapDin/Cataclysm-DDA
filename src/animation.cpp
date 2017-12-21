@@ -7,8 +7,10 @@
 #include "mtype.h"
 #include "weather.h"
 #include "sounds.h"
+#include "scent_map.h"
 #include "player.h"
 #include "vehicle.h"
+#include "map_iterator.h"
 #ifdef TILES
 #include "cata_tiles.h" // all animation functions will be pushed out to a cata_tiles function in some manner
 
@@ -676,6 +678,32 @@ class zones_drawer : public terrain_window_drawer {
 void game::draw_zones( const tripoint &start, const tripoint &end, const tripoint &offset )
 {
     g->w_terrain.emplace<zones_drawer>( start, end, offset );
+}
+
+void scent_vision_drawer::draw( terrain_window &w )
+{
+    if( !u.has_active_bionic( bionic_id( "bio_scent_vision" ) ) ) {
+        return;
+    }
+    // @todo implement this for different z-levels
+    if( u.pos().z != w.center().z ) {
+        return;
+    }
+    for( const tripoint &p : w.map_range() ) {
+        if( scent.get( p ) == 0 ) {
+            continue;
+        }
+        // leave some space around the character undisturbed
+        if( square_dist( p, u.pos() ) <= 2 ) {
+            continue;
+        }
+        const point sc = w.to_screen_coord( p );
+        if( g->critter_at( p ) ) {
+            mvwputch( w, sc.y, sc.x, c_white, '?' );
+        } else {
+            mvwputch( w, sc.y, sc.x, c_magenta, '#' );
+        }
+    }
 }
 
 void footsteps_drawer::draw( terrain_window &w )

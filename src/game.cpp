@@ -4984,40 +4984,6 @@ class critter_drawer : public terrain_window_drawer {
         }
 };
 
-class scent_vision_drawer : public terrain_window_drawer {
-    public:
-        scent_vision_drawer() : terrain_window_drawer( 300 ) { }
-        ~scent_vision_drawer() override = default;
-
-        void draw( terrain_window &w ) {
-            const player &u = g->u;
-            if( u.has_active_bionic( bionic_id( "bio_scent_vision" ) ) && u.pos().z == w.center().z ) {
-                const tripoint &center = w.center();
-                tripoint tmp = center;
-                int &realx = tmp.x;
-                int &realy = tmp.y;
-                for( realx = center.x - POSX; realx <= center.x + POSX; realx++ ) {
-                    for( realy = center.y - POSY; realy <= center.y + POSY; realy++ ) {
-                        if( g->scent.get( tmp ) != 0 ) {
-                            int tempx = center.x - realx;
-                            int tempy = center.y - realy;
-                            if ( !( isBetween( tempx, -2, 2 ) &&
-                                    isBetween( tempy, -2, 2 ) ) ) {
-                                if( g->critter_at( tmp ) ) {
-                                    mvwputch( w, realy + POSY - center.y,
-                                              realx + POSX - center.x, c_white, '?' );
-                                } else {
-                                    mvwputch( w, realy + POSY - center.y,
-                                              realx + POSX - center.x, c_magenta, '#' );
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-};
-
 class destination_preview_drawer : public terrain_window_drawer {
     public:
         destination_preview_drawer() : terrain_window_drawer( 400 ) { }
@@ -5040,7 +5006,7 @@ static void set_standard_drawers( terrain_window_drawers &drawers )
     drawers.emplace<basic_map_drawer>( g->m );
     drawers.emplace<footsteps_drawer();
     drawers.emplace<critter_drawer();
-    drawers.emplace<scent_vision_drawer();
+    drawers.emplace<scent_vision_drawer( g->u, g->scent );
     //@todo: only required in standard view?
     drawers.emplace<destination_preview_drawer();
     //@todo: only required in standard view?
