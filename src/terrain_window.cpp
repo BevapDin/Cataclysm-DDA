@@ -7,6 +7,10 @@
 #include <algorithm>
 #include <cassert>
 
+#ifdef TILES
+extern std::unique_ptr<cata_tiles> tilecontext;
+#endif
+
 bool terrain_window::contains( const map_coord &pos ) const
 {
     return contains( to_screen_coord( pos ) );
@@ -71,4 +75,17 @@ void terrain_window_drawers::draw( cata_tiles &tilecontext )
     for( const std::unique_ptr<terrain_window_drawer> &ptr : drawers ) {
         ptr->draw( tilecontext );
     }
+}
+
+void terrain_window_drawers::draw()
+{
+#ifdef TILES
+    if( use_tiles ) {
+        draw( *tilecontext );
+    } else {
+        draw( g->w_terrain );
+    }
+#else
+    draw( g->w_terrain );
+#endif
 }

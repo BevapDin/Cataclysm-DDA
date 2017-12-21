@@ -2328,8 +2328,8 @@ input_context game::get_player_input(std::string &action)
             if( uquit != QUIT_WATCH ) {
                 drawers.emplace<sct_drawer>();
             }
-            m.build_map_cache( center.z );
-            drawers.draw( w_terrain ); //@todo or tilecontext
+            m.build_map_cache( center.z ); // @todo: check if this is actually needed
+            drawers.draw();
 
             if( uquit == QUIT_WATCH ) {
                 draw_sidebar();
@@ -4981,7 +4981,7 @@ void game::draw_ter( const tripoint &center, const bool looking )
         // If we're looking, the cache is built at start (entering looking mode)
         m.build_map_cache( center.z );
     }
-    drawers.draw( w_terrain ); //@todo or tilecontext
+    drawers.draw();
 }
 
 void game::refresh_all()
@@ -8354,7 +8354,7 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
 
     do {
         w_terrain.center( lp );
-        drawers.draw( w_terrain );
+        drawers.draw();
 
         if (bNewWindow) {
             werase(w_info);

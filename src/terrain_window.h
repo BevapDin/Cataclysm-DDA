@@ -106,6 +106,11 @@ class terrain_window_drawers {
 
         void draw( terrain_window &win );
         void draw( cata_tiles &tilecontext );
+        /**
+         * Draws either to the @ref cata_tiles or to game::w_terrain, depending on
+         * the build type and the option settings @ref use_tiles.
+         */
+        void draw();
 };
 
 #endif
