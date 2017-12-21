@@ -8051,7 +8051,6 @@ void game::zones_manager()
                     zone_num = zones.size();
 
                     draw_ter();
-                    wrefresh(w_terrain);
                 }
                 blink = false;
                 redraw_info = true;
