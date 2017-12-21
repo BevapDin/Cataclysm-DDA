@@ -200,8 +200,8 @@ editmap::editmap()
     editshape = editmap_rect;
     refresh_mplans = true;
 
-    tmaxx = TERRAIN_WINDOW_WIDTH;
-    tmaxy = TERRAIN_WINDOW_HEIGHT;
+    tmaxx = getmaxx( g->w_terrain );
+    tmaxy = getmaxy( g->w_terrain );
     fids[fd_null] = "-clear-";
     fids[fd_fire_vent] = "fire_vent";
     fids[fd_push_items] = "push_items";

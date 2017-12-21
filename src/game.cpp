@@ -476,8 +476,8 @@ void game::init_ui()
 #endif
     // remove some space for the sidebar, this is the maximal space
     // (using standard font) that the terrain window can have
-    TERRAIN_WINDOW_HEIGHT = TERMY;
-    TERRAIN_WINDOW_WIDTH = TERMX - sidebarWidth;
+    int TERRAIN_WINDOW_HEIGHT = TERMY;
+    int TERRAIN_WINDOW_WIDTH = TERMX - sidebarWidth;
     TERRAIN_WINDOW_TERM_WIDTH = TERRAIN_WINDOW_WIDTH;
     TERRAIN_WINDOW_TERM_HEIGHT = TERRAIN_WINDOW_HEIGHT;
 
@@ -521,15 +521,15 @@ void game::init_ui()
     // VIEW_OFFSET_* are in standard font dimension.
     from_map_font_dimension(VIEW_OFFSET_X, VIEW_OFFSET_Y);
 
-    // Position of the player in the terrain window, it is always in the center
-    POSX = TERRAIN_WINDOW_WIDTH / 2;
-    POSY = TERRAIN_WINDOW_HEIGHT / 2;
-
     // Set up the main UI windows.
     w_terrain_ptr.reset( catacurses::newwin( TERRAIN_WINDOW_HEIGHT, TERRAIN_WINDOW_WIDTH, VIEW_OFFSET_Y,
                          right_sidebar ? VIEW_OFFSET_X : VIEW_OFFSET_X + sidebarWidth ) );
     w_terrain = terrain_window( w_terrain_ptr.get() );
     werase(w_terrain);
+
+    // Position of the player in the terrain window, it is always in the center
+    POSX = getmaxx( w_terrain ) / 2;
+    POSY = getmaxy( w_terrain ) / 2;
 
     /**
      * Doing the same thing as above for the overmap
@@ -1341,8 +1341,8 @@ void game::calc_driving_offset(vehicle *veh)
         offset.x /= std::fabs(offset.y);
         offset.y = offset.y > 0 ? +1 : -1;
     }
-    point max_offset((TERRAIN_WINDOW_WIDTH + 1) / 2 - border_range - 1,
-                     (TERRAIN_WINDOW_HEIGHT + 1) / 2 - border_range - 1);
+    point max_offset((getmaxx( w_terrain ) + 1) / 2 - border_range - 1,
+                     (getmaxy( w_terrain ) + 1) / 2 - border_range - 1);
     offset.x *= rel_offset;
     offset.y *= rel_offset;
     offset.x *= max_offset.x;
@@ -1352,7 +1352,7 @@ void game::calc_driving_offset(vehicle *veh)
     // [ -@------# ] offset=3
     // can see sights square in every direction, total visible area is
     // (2*sight+1)x(2*sight+1), but the window is only
-    // TERRAIN_WINDOW_WIDTH x TERRAIN_WINDOW_HEIGHT
+    // getmaxx( w_terrain ) x getmaxy( w_terrain )
     // The area outside of the window is maxoff (sight-getmax/2).
     // If that value is <= 0, the whole visible area fits the window.
     // don't apply the view offset at all.
@@ -1360,8 +1360,8 @@ void game::calc_driving_offset(vehicle *veh)
     // above leads to invisible area in front of the car.
     // It will display (getmax/2+offset) squares in one direction and
     // (getmax/2-offset) in the opposite direction (centered on the PC).
-    const point maxoff((sight * 2 + 1 - TERRAIN_WINDOW_WIDTH) / 2,
-                       (sight * 2 + 1 - TERRAIN_WINDOW_HEIGHT) / 2);
+    const point maxoff((sight * 2 + 1 - getmaxx( w_terrain )) / 2,
+                       (sight * 2 + 1 - getmaxy( w_terrain )) / 2);
     if (maxoff.x <= 0) {
         offset.x = 0;
     } else if (offset.x > 0 && offset.x > maxoff.x) {
@@ -2218,12 +2218,12 @@ input_context game::get_player_input(std::string &action)
     user_turn current_turn;
 
     if (get_option<bool>( "ANIMATIONS" ) ) {
-        int iStartX = (TERRAIN_WINDOW_WIDTH > 121) ? (TERRAIN_WINDOW_WIDTH - 121) / 2 : 0;
-        int iStartY = (TERRAIN_WINDOW_HEIGHT > 121) ? (TERRAIN_WINDOW_HEIGHT - 121) / 2 : 0;
-        int iEndX = (TERRAIN_WINDOW_WIDTH > 121) ? TERRAIN_WINDOW_WIDTH - (TERRAIN_WINDOW_WIDTH - 121) / 2 :
-                    TERRAIN_WINDOW_WIDTH;
-        int iEndY = (TERRAIN_WINDOW_HEIGHT > 121) ? TERRAIN_WINDOW_HEIGHT - (TERRAIN_WINDOW_HEIGHT - 121) /
-                    2 : TERRAIN_WINDOW_HEIGHT;
+        int iStartX = (getmaxx( w_terrain ) > 121) ? (getmaxx( w_terrain ) - 121) / 2 : 0;
+        int iStartY = (getmaxy( w_terrain ) > 121) ? (getmaxy( w_terrain ) - 121) / 2 : 0;
+        int iEndX = (getmaxx( w_terrain ) > 121) ? getmaxx( w_terrain ) - (getmaxx( w_terrain ) - 121) / 2 :
+                    getmaxx( w_terrain );
+        int iEndY = (getmaxy( w_terrain ) > 121) ? getmaxy( w_terrain ) - (getmaxy( w_terrain ) - 121) /
+                    2 : getmaxy( w_terrain );
 
         if (fullscreen) {
             iStartX = 0;

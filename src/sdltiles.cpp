@@ -754,8 +754,8 @@ void invalidate_all_framebuffers()
 void reinitialize_framebuffer()
 {
     //Re-initialize the framebuffer with new values.
-    const int new_height = std::max( TERMY, std::max( OVERMAP_WINDOW_HEIGHT, TERRAIN_WINDOW_HEIGHT ) );
-    const int new_width = std::max( TERMX, std::max( OVERMAP_WINDOW_WIDTH, TERRAIN_WINDOW_WIDTH ) );
+    const int new_height = std::max( TERMY, std::max( OVERMAP_WINDOW_HEIGHT, getmaxy( g->w_terrain ) ) );
+    const int new_width = std::max( TERMX, std::max( OVERMAP_WINDOW_WIDTH, getmaxx( g->w_terrain ) ) );
     oversized_framebuffer.resize( new_height );
     for( int i = 0; i < new_height; i++ ) {
         oversized_framebuffer[i].chars.assign( new_width, cursecell( "" ) );
@@ -768,8 +768,8 @@ void reinitialize_framebuffer()
 
 void invalidate_framebuffer_proportion( cata_cursesport::WINDOW* win )
 {
-    const int oversized_width = std::max( TERMX, std::max( OVERMAP_WINDOW_WIDTH, TERRAIN_WINDOW_WIDTH ) );
-    const int oversized_height = std::max( TERMY, std::max( OVERMAP_WINDOW_HEIGHT, TERRAIN_WINDOW_HEIGHT ) );
+    const int oversized_width = std::max( TERMX, std::max( OVERMAP_WINDOW_WIDTH, getmaxx( g->w_terrain ) ) );
+    const int oversized_height = std::max( TERMY, std::max( OVERMAP_WINDOW_HEIGHT, getmaxy( g->w_terrain ) ) );
 
     // check if the framebuffers/windows have been prepared yet
     if ( oversized_height == 0 || oversized_width == 0 ) {
@@ -849,18 +849,18 @@ void cata_cursesport::curses_drawwindow(WINDOW *win)
         // TODO: Maybe track down screen changes and use g->w_blackspace to draw this instead
 
         //calculate width differences between map_font and font
-        int partial_width = std::max(TERRAIN_WINDOW_TERM_WIDTH * fontwidth - TERRAIN_WINDOW_WIDTH * map_font->fontwidth, 0);
-        int partial_height = std::max(TERRAIN_WINDOW_TERM_HEIGHT * fontheight - TERRAIN_WINDOW_HEIGHT * map_font->fontheight, 0);
+        int partial_width = std::max(TERRAIN_WINDOW_TERM_WIDTH * fontwidth - getmaxx( g->w_terrain ) * map_font->fontwidth, 0);
+        int partial_height = std::max(TERRAIN_WINDOW_TERM_HEIGHT * fontheight - getmaxy( g->w_terrain ) * map_font->fontheight, 0);
         //Gap between terrain and lower window edge
         if( partial_height > 0 ) {
             FillRectDIB( win->x * map_font->fontwidth,
-                         ( win->y + TERRAIN_WINDOW_HEIGHT ) * map_font->fontheight,
-                         TERRAIN_WINDOW_WIDTH * map_font->fontwidth + partial_width, partial_height, black );
+                         ( win->y + getmaxy( g->w_terrain ) ) * map_font->fontheight,
+                         getmaxx( g->w_terrain ) * map_font->fontwidth + partial_width, partial_height, black );
         }
         //Gap between terrain and sidebar
         if( partial_width > 0 ) {
-            FillRectDIB( ( win->x + TERRAIN_WINDOW_WIDTH ) * map_font->fontwidth, win->y * map_font->fontheight,
-                         partial_width, TERRAIN_WINDOW_HEIGHT * map_font->fontheight + partial_height, black );
+            FillRectDIB( ( win->x + getmaxx( g->w_terrain ) ) * map_font->fontwidth, win->y * map_font->fontheight,
+                         partial_width, getmaxy( g->w_terrain ) * map_font->fontheight + partial_height, black );
         }
         // Special font for the terrain window
         update = map_font->draw_window(win);
