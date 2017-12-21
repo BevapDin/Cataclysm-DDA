@@ -249,7 +249,6 @@ class pointmenu_cb : public uimenu_callback
     private:
         const std::vector< tripoint > &points;
         int last; // to suppress redrawing
-        tripoint last_view; // to reposition the view after selecting
     public:
         pointmenu_cb( const std::vector< tripoint > &pts );
         ~pointmenu_cb() override { };

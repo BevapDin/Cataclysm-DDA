@@ -906,11 +906,9 @@ void uimenu::settext(std::string str)
 pointmenu_cb::pointmenu_cb( const std::vector< tripoint > &pts ) : points( pts )
 {
     last = INT_MIN;
-    last_view = g->u.view_offset;
 }
 
 void pointmenu_cb::select( int /*num*/, uimenu * /*menu*/ ) {
-    g->u.view_offset = last_view;
 }
 
 void pointmenu_cb::refresh( uimenu *menu ) {
@@ -919,7 +917,6 @@ void pointmenu_cb::refresh( uimenu *menu ) {
     }
     if( menu->selected < 0 || menu->selected >= (int)points.size() ) {
         last = menu->selected;
-        g->u.view_offset = {0, 0, 0};
         g->w_terrain.center_default();
         g->draw_ter();
         menu->redraw( false ); // show() won't redraw borders
@@ -929,9 +926,7 @@ void pointmenu_cb::refresh( uimenu *menu ) {
 
     last = menu->selected;
     const tripoint &center = points[menu->selected];
-    g->u.view_offset = center - g->u.pos();
-    g->u.view_offset.z = 0; // TODO: Remove this line when it's safe
-    g->draw_trail_to_square( g->u.view_offset, true);
+    g->draw_trail_to_square( center, true);
     menu->redraw( false );
     menu->show();
 }
