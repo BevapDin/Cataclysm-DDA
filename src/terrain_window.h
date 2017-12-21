@@ -8,6 +8,8 @@
 #include <memory>
 #include <vector>
 
+class cata_tiles;
+
 class terrain_window {
     public:
         using map_coord = tripoint;
@@ -70,6 +72,12 @@ class terrain_window_drawer {
         virtual ~terrain_window_drawer() = default;
 
         virtual void draw( terrain_window &win ) = 0;
+#ifdef(TILES)
+        virtual void draw( cata_tiles &tilecontext ) = 0;
+#else
+        // dummy implementation, not used in non-tiles builds
+        void draw( cata_tiles &/*tilecontext*/ ) { };
+#endif
 };
 
 class terrain_window_drawers {
@@ -86,7 +94,9 @@ class terrain_window_drawers {
         }
 
         void clear();
-        void draw();
+
+        void draw( terrain_window &win );
+        void draw( cata_tiles &tilecontext );
 };
 
 #endif

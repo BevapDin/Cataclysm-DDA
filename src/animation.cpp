@@ -585,7 +585,7 @@ void game::draw_line( const tripoint &p, std::vector<tripoint> const &vPoint )
 namespace {
 class weather_drawer : public terrain_window::drawer {
     public:
-        weather_printable const w;
+        weather_printable w;
 
         // 110 is shortly after basic map drawing and before anything after it.
         weather_drawer( weather_printable w ) : drawer( 110 ), w( std::move( w ) ) { }
@@ -596,57 +596,46 @@ class weather_drawer : public terrain_window::drawer {
                 mvwputch(win, drop.second, drop.first, w.colGlyph, w.cGlyph);
             }
         }
+#ifdef(TILES)
+        void draw( cata_tiles &tilecontext ) override {
+            static std::string const weather_acid_drop {"weather_acid_drop"};
+            static std::string const weather_rain_drop {"weather_rain_drop"};
+            static std::string const weather_snowflake {"weather_snowflake"};
+
+            std::string weather_name;
+            switch (w.wtype) {
+            // Acid weathers; uses acid droplet tile, fallthrough intended
+            case WEATHER_ACID_DRIZZLE:
+            case WEATHER_ACID_RAIN:
+                weather_name = weather_acid_drop;
+                break;
+            // Normal rainy weathers; uses normal raindrop tile, fallthrough intended
+            case WEATHER_DRIZZLE:
+            case WEATHER_RAINY:
+            case WEATHER_THUNDER:
+            case WEATHER_LIGHTNING:
+                weather_name = weather_rain_drop;
+                break;
+            // Snowy weathers; uses snowflake tile, fallthrough intended
+            case WEATHER_FLURRIES:
+            case WEATHER_SNOW:
+            case WEATHER_SNOWSTORM:
+                weather_name = weather_snowflake;
+                break;
+            default:
+                break;
+            }
+
+            tilecontext.init_draw_weather( std::move( w ), std::move( weather_name ) );
+        }
+#endif
 };
-void draw_weather_curses( weather_printable w )
+} //namespace
+
+void game::draw_weather( weather_printable w )
 {
     g->w_terrain.emplace<weather_drawer>( std::move( w ) );
 }
-} //namespace
-
-#if defined(TILES)
-void game::draw_weather( weather_printable w )
-{
-    if (!use_tiles) {
-        draw_weather_curses( std::move( w ) );
-        return;
-    }
-
-    static std::string const weather_acid_drop {"weather_acid_drop"};
-    static std::string const weather_rain_drop {"weather_rain_drop"};
-    static std::string const weather_snowflake {"weather_snowflake"};
-
-    std::string weather_name;
-    switch (w.wtype) {
-    // Acid weathers; uses acid droplet tile, fallthrough intended
-    case WEATHER_ACID_DRIZZLE:
-    case WEATHER_ACID_RAIN:
-        weather_name = weather_acid_drop;
-        break;
-    // Normal rainy weathers; uses normal raindrop tile, fallthrough intended
-    case WEATHER_DRIZZLE:
-    case WEATHER_RAINY:
-    case WEATHER_THUNDER:
-    case WEATHER_LIGHTNING:
-        weather_name = weather_rain_drop;
-        break;
-    // Snowy weathers; uses snowflake tile, fallthrough intended
-    case WEATHER_FLURRIES:
-    case WEATHER_SNOW:
-    case WEATHER_SNOWSTORM:
-        weather_name = weather_snowflake;
-        break;
-    default:
-        break;
-    }
-
-    tilecontext->init_draw_weather( std::move( w ), std::move( weather_name ) );
-}
-#else
-void game::draw_weather( weather_printable w )
-{
-    draw_weather_curses( std::move( w ) );
-}
-#endif
 
 namespace {
 class sct_drawer : public terrain_window::drawer {
@@ -674,28 +663,17 @@ class sct_drawer : public terrain_window::drawer {
                 wprintz(win, col2, "%s", text.getText("second").c_str());
             }
         }
+#ifdef(TILES)
+        void draw( cata_tiles &tilecontext ) override {
+            tilecontext.init_draw_sct();
+        }
+#endif
 };
-void draw_sct_curses()
+} //namespace
+void game::draw_sct()
 {
     g->w_terrain.emplace<sct_drawer>();
 }
-} //namespace
-
-#if defined(TILES)
-void game::draw_sct()
-{
-    if (use_tiles) {
-        tilecontext->init_draw_sct();
-    } else {
-        draw_sct_curses();
-    }
-}
-#else
-void game::draw_sct()
-{
-    draw_sct_curses();
-}
-#endif
 
 namespace {
 class zones_drawer : public terrain_window::drawer {
@@ -720,26 +698,14 @@ class zones_drawer : public terrain_window::drawer {
                 mvwprintz( w, y - offset.y, x, col, line.c_str() );
             }
         }
-};
-
-void draw_zones_curses( const tripoint &start, const tripoint &end, const tripoint &offset )
-{
-    g->ter_win.emplace<zones_drawer>();
-}
-} //namespace
-
 #if defined(TILES)
-void game::draw_zones( const tripoint &start, const tripoint &end, const tripoint &offset )
-{
-    if( use_tiles ) {
-        tilecontext->init_draw_zones( start, end, offset );
-    } else {
-        draw_zones_curses( start, end, offset );
-    }
-}
-#else
-void game::draw_zones( const tripoint &start, const tripoint &end, const tripoint &offset )
-{
-    draw_zones_curses( start, end, offset );
-}
+        void draw( cata_tiles &tilecontext ) override {
+            tilecontext.init_draw_zones( start, end, offset );
+        }
 #endif
+};
+} //namespace
+void game::draw_zones( const tripoint &start, const tripoint &end, const tripoint &offset )
+{
+    g->w_terrain.emplace<zones_drawer>( start, end, offset );
+}

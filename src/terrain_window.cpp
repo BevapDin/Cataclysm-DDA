@@ -58,3 +58,10 @@ void terrain_window_drawers::draw( terrain_window &win )
 
     wrefresh( win );
 }
+
+void terrain_window_drawers::draw( cata_tiles &tilecontext )
+{
+    for( const std::unique_ptr<terrain_window_drawer> &ptr : drawers ) {
+        ptr->draw( tilecontext );
+    }
+}
