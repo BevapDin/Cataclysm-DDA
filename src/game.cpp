@@ -4756,19 +4756,6 @@ faction *game::list_factions(std::string title)
     return cur_frac;
 }
 
-// A little helper to draw footstep glyphs.
-static void draw_footsteps( WINDOW *window, const tripoint &offset )
-{
-    for( const auto &footstep : sounds::get_footstep_markers() ) {
-        char glyph = '?';
-        if( footstep.z != offset.z ) { // Here z isn't an offset, but a coordinate
-            glyph = footstep.z > offset.z ? '^' : 'v';
-        }
-
-        mvwputch( window, offset.y + footstep.y, offset.x + footstep.x, c_yellow, glyph );
-    }
-}
-
 void game::draw()
 {
     if( test_mode ) {
@@ -4984,16 +4971,6 @@ void game::draw_ter()
 {
     draw_ter( u.pos() + u.view_offset, false );
 }
-
-class footsteps_drawer : public terrain_window_drawer {
-    public:
-        footsteps_drawer() : terrain_window_drawer( 100 ) { }
-        ~footsteps_drawer() override = default;
-
-        void draw( terrain_window &w ) {
-            draw_footsteps( w, {POSX - w.center().x, POSY - w.center().y, w.center().z} );
-        }
-};
 
 class critter_drawer : public terrain_window_drawer {
     public:

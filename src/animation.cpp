@@ -6,6 +6,7 @@
 #include "terrain_window.h"
 #include "mtype.h"
 #include "weather.h"
+#include "sounds.h"
 #include "player.h"
 #include "vehicle.h"
 #ifdef TILES
@@ -709,6 +710,16 @@ class zones_drawer : public terrain_window_drawer {
 void game::draw_zones( const tripoint &start, const tripoint &end, const tripoint &offset )
 {
     g->w_terrain.emplace<zones_drawer>( start, end, offset );
+}
+
+void footsteps_drawer::draw( terrain_window &w )
+{
+    const int z = w.center().z;
+    for( const auto &footstep : sounds::get_footstep_markers() ) {
+        const point sp = w.to_screen_coord( footstep );
+        const char glyph = footstep.z == z ? '?' : ( footstep.z > z ? '^' : 'v' );
+        mvwputch( w, sp.y, sp.x, c_yellow, glyph );
+    }
 }
 
 void basic_map_drawer::draw( terrain_window &w )

@@ -38,6 +38,17 @@ struct explosion_tile {
     nc_color color;
 };
 
+class footsteps_drawer : public terrain_window_drawer
+{
+    public:
+        footsteps_drawer() : terrain_window_drawer( 100 ) { }
+        ~footsteps_drawer() override = default;
+
+        void draw( terrain_window &w ) override;
+#ifdef TILES
+        void draw( cata_tiles &tilecontext ) override;
+#endif
+};
 /**
  * Draws the map to the window, as much of it as possible. See map::draw.
  */
