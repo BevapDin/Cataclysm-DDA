@@ -39,6 +39,23 @@ struct explosion_tile {
 };
 
 /**
+ * Draws the map to the window, as much of it as possible. See map::draw.
+ */
+class basic_map_drawer : public terrain_window_drawer
+{
+    private:
+        map &m;
+
+    public:
+        basic_map_drawer( map &m ) : terrain_window_drawer( 0 ), m( m ) { }
+        ~basic_map_drawer() override = default;
+
+        void draw( terrain_window &w ) override;
+#ifdef TILES
+        void draw( cata_tiles &tilecontext ) override;
+#endif
+};
+/**
  * Draws an indicator where the vehicle is currently moving and facing to.
  */
 class vehicle_direction_drawer : public terrain_window_drawer

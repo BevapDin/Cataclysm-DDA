@@ -711,6 +711,11 @@ void game::draw_zones( const tripoint &start, const tripoint &end, const tripoin
     g->w_terrain.emplace<zones_drawer>( start, end, offset );
 }
 
+void basic_map_drawer::draw( terrain_window &w )
+{
+    m.draw( w, w.center() );
+}
+
 void vehicle_direction_drawer::draw_indicator( terrain_window &w, const nc_color &col, const rl_vec2d &dir ) const
 {
     const float r = 10.0; // arbitrary distance away

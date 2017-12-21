@@ -4985,16 +4985,6 @@ void game::draw_ter()
     draw_ter( u.pos() + u.view_offset, false );
 }
 
-class basic_map_drawer : public terrain_window_drawer {
-    public:
-        basic_map_drawer() : terrain_window_drawer( 0 ) { }
-        ~basic_map_drawer() override = default;
-
-        void draw( terrain_window &w ) {
-            g->m.draw( w, w.center() );
-        }
-};
-
 class footsteps_drawer : public terrain_window_drawer {
     public:
         footsteps_drawer() : terrain_window_drawer( 100 ) { }
@@ -5069,7 +5059,7 @@ class destination_preview_drawer : public terrain_window_drawer {
 
 static void set_standard_drawers( terrain_window_drawers &drawers )
 {
-    drawers.emplace<basic_map_drawer>();
+    drawers.emplace<basic_map_drawer>( g->m );
     drawers.emplace<footsteps_drawer();
     drawers.emplace<critter_drawer();
     drawers.emplace<scent_vision_drawer();
