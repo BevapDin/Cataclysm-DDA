@@ -1073,11 +1073,11 @@ void cata_tiles::draw( int destx, int desty, const tripoint &center, int width, 
             draw_zones_frame();
             void_zones();
         }
-    } else if( g->u.posx() + g->u.view_offset.x != g->ter_win.center().x ||
-               g->u.posy() + g->u.view_offset.y != g->ter_win.center().y ) {
+    } else if( g->u.posx() + g->u.view_offset.x != g->w_terrain.center().x ||
+               g->u.posy() + g->u.view_offset.y != g->w_terrain.center().y ) {
         // check to see if player is located at ter
         draw_from_id_string( "cursor", C_NONE, empty_string,
-                             {g->ter_win.center().x, g->ter_win.center().y, center.z}, 0, 0, LL_LIT, false );
+                             {g->w_terrain.center().x, g->w_terrain.center().y, center.z}, 0, 0, LL_LIT, false );
     }
     if( g->u.controlling_vehicle ) {
         tripoint indicator_offset = g->get_veh_dir_indicator_location( true );

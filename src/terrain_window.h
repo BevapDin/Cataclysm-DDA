@@ -14,11 +14,11 @@ class terrain_window {
         using screen_coord = point;
 
     private:
-        catacurses::WINDOW *&w;
+        catacurses::WINDOW *w;
         tripoint center_;
 
     public:
-        terrain_window( catacurses::WINDOW *&w ) : w ( w ) {
+        terrain_window( catacurses::WINDOW *w ) : w ( w ) {
         }
 
         void center( const tripoint &c ) {
@@ -57,6 +57,14 @@ class terrain_window {
             wmove( w, POSY + g->u.pos().y - center_.y, POSX + g->u.pos().x - center_.x );
 
             wrefresh( w );
+        }
+
+        // operators so that this class can be used like any ordinary curses window
+        operator catacurses::window() const {
+            return w;
+        }
+        operator catacurses::WINDOW*() const {
+            return w;
         }
 
     private:

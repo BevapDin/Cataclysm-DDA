@@ -644,7 +644,7 @@ void draw_sct_curses(game &g)
         const int dy = off.y + text.getPosY();
         const int dx = off.x + text.getPosX();
 
-        if( !g.ter_win.contains( point( dx, dy ) ) ) {
+        if( !g.w_terrain.contains( point( dx, dy ) ) ) {
             continue;
         }
 

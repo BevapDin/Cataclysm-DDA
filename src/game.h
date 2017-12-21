@@ -644,7 +644,7 @@ class game
         std::unique_ptr<terrain_window> terrain_window_ptr;
 
     public:
-        WINDOW *w_terrain;
+        terrain_window &w_terrain;
         WINDOW *w_overmap;
         WINDOW *w_omlegend;
         WINDOW *w_minimap;
@@ -658,7 +658,6 @@ class game
         WINDOW *w_status;
         WINDOW *w_status2;
         WINDOW *w_blackspace;
-        terrain_window &ter_win;
 
         // View offset based on the driving speed (if any)
         // that has been added to u.view_offset,

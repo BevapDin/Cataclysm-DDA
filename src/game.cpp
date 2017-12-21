@@ -256,7 +256,8 @@ game::game() :
     weather( WEATHER_CLEAR ),
     lightning_active( false ),
     weather_precise( new w_point() ),
-    w_terrain(nullptr),
+    terrain_window_ptr( new terrain_window( nullptr ) ),
+    w_terrain( *terrain_window_ptr ),
     w_overmap(nullptr),
     w_omlegend(nullptr),
     w_minimap(nullptr),
@@ -267,8 +268,6 @@ game::game() :
     w_status(nullptr),
     w_status2(nullptr),
     w_blackspace(nullptr),
-    terrain_window_ptr( new terrain_window( w_terrain ) ),
-    ter_win( *terrain_window_ptr ),
     pixel_minimap_option(0),
     safe_mode(SAFE_MODE_ON),
     safe_mode_warning_logged(false),
@@ -526,10 +525,9 @@ void game::init_ui()
     POSY = TERRAIN_WINDOW_HEIGHT / 2;
 
     // Set up the main UI windows.
-    w_terrain = catacurses::newwin( TERRAIN_WINDOW_HEIGHT, TERRAIN_WINDOW_WIDTH,
-                       VIEW_OFFSET_Y, right_sidebar ? VIEW_OFFSET_X :
-                       VIEW_OFFSET_X + sidebarWidth);
-    w_terrain_ptr.reset( w_terrain );
+    w_terrain_ptr.reset( catacurses::newwin( TERRAIN_WINDOW_HEIGHT, TERRAIN_WINDOW_WIDTH, VIEW_OFFSET_Y,
+                         right_sidebar ? VIEW_OFFSET_X : VIEW_OFFSET_X + sidebarWidth ) );
+    w_terrain = terrain_window( w_terrain_ptr.get() );
     werase(w_terrain);
 
     /**
@@ -4991,7 +4989,7 @@ void game::draw_critter( const Creature &critter, const tripoint &center )
 {
     const int my = POSY + ( critter.posy() - center.y );
     const int mx = POSX + ( critter.posx() - center.x );
-    if( !ter_win.contains( point( mx, my ) ) ) {
+    if( !w_terrain.contains( point( mx, my ) ) ) {
         return;
     }
     if( critter.posz() != center.z && m.has_zlevels() ) {
@@ -5139,14 +5137,14 @@ static void set_standard_drawers( terrain_window &win )
 
 void game::draw_ter( const tripoint &center, const bool looking )
 {
-    ter_win.center( center );
-    set_standard_drawers( ter_win );
+    w_terrain.center( center );
+    set_standard_drawers( w_terrain );
     // TODO: Make it not rebuild the cache all the time (cache point+moves?)
     if( !looking ) {
         // If we're looking, the cache is built at start (entering looking mode)
         m.build_map_cache( center.z );
     }
-    ter_win.draw();
+    w_terrain.draw();
 }
 
 tripoint game::get_veh_dir_indicator_location( bool next ) const
@@ -5645,7 +5643,7 @@ int game::mon_info(WINDOW *w)
         const int mx = POSX + ( c->posx() - view.x );
         const int my = POSY + ( c->posy() - view.y );
         int index = 8;
-        if( !ter_win.contains( point( mx, my ) ) ) {
+        if( !w_terrain.contains( point( mx, my ) ) ) {
             // for compatibility with old code, see diagram below, it explains the values for index,
             // also might need revisiting one z-levels are in.
             switch( dir_to_mon ) {
@@ -8905,7 +8903,7 @@ void centerlistview( const tripoint &active_item_position )
         if (get_option<std::string>( "SHIFT_LIST_ITEM_VIEW" ) == "centered") {
             int xOffset = TERRAIN_WINDOW_WIDTH / 2;
             int yOffset = TERRAIN_WINDOW_HEIGHT / 2;
-            if( !ter_view.contains( point( xpos, ypos ) ) ) {
+            if( !w_terrain.contains( point( xpos, ypos ) ) ) {
                 if (xpos < 0) {
                     u.view_offset.x = xpos - xOffset;
                 } else {

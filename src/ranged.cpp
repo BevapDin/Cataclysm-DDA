@@ -1062,7 +1062,7 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
                 mvwputch( w_target, i, j, c_white, ' ' );
             }
         }
-        g->ter_win.center( center );
+        g->w_terrain.center( center );
         g->draw_ter( true );
         int line_number = 1;
         Creature *critter = g->critter_at( dst, true );
