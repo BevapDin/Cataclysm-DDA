@@ -2321,13 +2321,14 @@ input_context game::get_player_input(std::string &action)
             }
 
             w_terrain.center( center );
-            set_standard_drawers( w_terrain );
+            terrain_window_drawers drawers;
+            set_standard_drawers( drawers );
             draw_weather( wPrint );
             if( uquit != QUIT_WATCH ) {
                 draw_sct();
             }
             m.build_map_cache( center.z );
-            w_terrain.draw();
+            drawers.draw( w_terrain ); //@todo or tilecontext
 
             if( uquit == QUIT_WATCH ) {
                 draw_sidebar();
@@ -4983,61 +4984,62 @@ void game::draw_ter()
     draw_ter( u.pos() + u.view_offset, false );
 }
 
-class basic_map_drawer : public terrain_window::drawer {
+class basic_map_drawer : public terrain_window_drawer {
     public:
-        basic_map_drawer() : drawer( 0 ) { }
+        basic_map_drawer() : terrain_window_drawer( 0 ) { }
         ~basic_map_drawer() override = default;
 
-        void draw( const catacurses::window &w, const tripoint &center ) {
-            g->m.draw( w, center );
+        void draw( terrain_window &w ) {
+            g->m.draw( w, w.center() );
         }
 };
 
-class footsteps_drawer : public terrain_window::drawer {
+class footsteps_drawer : public terrain_window_drawer {
     public:
-        footsteps_drawer() : drawer( 100 ) { }
+        footsteps_drawer() : terrain_window_drawer( 100 ) { }
         ~footsteps_drawer() override = default;
 
-        void draw( const catacurses::window &w, const tripoint &center ) {
-            g->draw_footsteps( w, {POSX - center.x, POSY - center.y, center.z} );
+        void draw( terrain_window &w ) {
+            draw_footsteps( w, {POSX - w.center().x, POSY - w.center().y, w.center().z} );
         }
 };
 
-class critter_drawer : public terrain_window::drawer {
+class critter_drawer : public terrain_window_drawer {
     public:
-        critter_drawer() : drawer( 200 ) { }
+        critter_drawer() : terrain_window_drawer( 200 ) { }
         ~critter_drawer() override = default;
 
-        void draw( const catacurses::window &w, const tripoint &center ) {
+        void draw( terrain_window &w ) {
             for( Creature &critter : g->all_creatures() ) {
-                g->draw_critter( critter, center );
+                g->draw_critter( critter, w.center() );
             }
         }
 };
 
-class scent_vision_drawer : public terrain_window::drawer {
+class scent_vision_drawer : public terrain_window_drawer {
     public:
-        scent_vision_drawer() : drawer( 300 ) { }
+        scent_vision_drawer() : terrain_window_drawer( 300 ) { }
         ~scent_vision_drawer() override = default;
 
-        void draw( const catacurses::window &w, const tripoint &center ) {
+        void draw( terrain_window &w ) {
             const player &u = g->u;
-            if( u.has_active_bionic( bionic_id( "bio_scent_vision" ) ) && u.view_offset.z == 0 ) {
+            if( u.has_active_bionic( bionic_id( "bio_scent_vision" ) ) && u.pos().z == w.center().z ) {
+                const tripoint &center = w.center();
                 tripoint tmp = center;
                 int &realx = tmp.x;
                 int &realy = tmp.y;
                 for( realx = center.x - POSX; realx <= center.x + POSX; realx++ ) {
                     for( realy = center.y - POSY; realy <= center.y + POSY; realy++ ) {
-                        if( scent.get( tmp ) != 0 ) {
+                        if( g->scent.get( tmp ) != 0 ) {
                             int tempx = center.x - realx;
                             int tempy = center.y - realy;
                             if ( !( isBetween( tempx, -2, 2 ) &&
                                     isBetween( tempy, -2, 2 ) ) ) {
-                                if( critter_at( tmp ) ) {
-                                    mvwputch( w_terrain, realy + POSY - center.y,
+                                if( g->critter_at( tmp ) ) {
+                                    mvwputch( w, realy + POSY - center.y,
                                               realx + POSX - center.x, c_white, '?' );
                                 } else {
-                                    mvwputch( w_terrain, realy + POSY - center.y,
+                                    mvwputch( w, realy + POSY - center.y,
                                               realx + POSX - center.x, c_magenta, '#' );
                                 }
                             }
@@ -5048,58 +5050,58 @@ class scent_vision_drawer : public terrain_window::drawer {
         }
 };
 
-class destination_preview_drawer : public terrain_window::drawer {
+class destination_preview_drawer : public terrain_window_drawer {
     public:
-        destination_preview_drawer() : drawer( 400 ) { }
+        destination_preview_drawer() : terrain_window_drawer( 400 ) { }
         ~destination_preview_drawer() override = default;
 
-        void draw( const catacurses::window &w, const tripoint &center ) {
-            if( !destination_preview.empty() && u.view_offset.z == 0 ) {
+        void draw( terrain_window &w ) {
+            if( !g->destination_preview.empty() && g->u.pos().z == w.center().z ) {
                 // Draw auto-move preview trail
-                const tripoint &final_destination = destination_preview.back();
-                tripoint line_center = u.pos() + u.view_offset;
-                draw_line( final_destination, line_center, destination_preview );
-                mvwputch(w_terrain, POSY + (final_destination.y - (u.posy() + u.view_offset.y)),
-                         POSX + (final_destination.x - (u.posx() + u.view_offset.x)), c_white, 'X');
+                const tripoint &final_destination = g->destination_preview.back();
+                g->draw_line( final_destination, w.center(), destination_preview );
+                const point sp = w.to_screen_coord( final_destination );
+                mvwputch( w, sp.y, sp.x, c_white, 'X' );
             }
         }
 };
 
-class vehicle_direction_drawer : public terrain_window::drawer {
+class vehicle_direction_drawer : public terrain_window_drawer {
     public:
-        vehicle_direction_drawer() : drawer( 500 ) { }
+        vehicle_direction_drawer() : terrain_window_drawer( 500 ) { }
         ~vehicle_direction_drawer() override = default;
 
-        void draw( const catacurses::window &w, const tripoint &center ) {
-            if( u.controlling_vehicle && !looking ) {
-                draw_veh_dir_indicator( false );
-                draw_veh_dir_indicator( true );
+        void draw( terrain_window &w ) {
+            if( g->u.controlling_vehicle ) {
+                g->draw_veh_dir_indicator( false );
+                g->draw_veh_dir_indicator( true );
             }
         }
 };
 
-static void set_standard_drawers( terrain_window &win )
+static void set_standard_drawers( terrain_window_drawers &drawers )
 {
-    win.add( std::unique_ptr<terrain_window::drawer>( new basic_map_drawer() ) );
-    win.add( std::unique_ptr<terrain_window::drawer>( new footsteps_drawer() ) );
-    win.add( std::unique_ptr<terrain_window::drawer>( new critter_drawer() ) );
-    win.add( std::unique_ptr<terrain_window::drawer>( new scent_vision_drawer() ) );
+    drawers.emplace<basic_map_drawer>();
+    drawers.emplace<footsteps_drawer();
+    drawers.emplace<critter_drawer();
+    drawers.emplace<scent_vision_drawer();
     //@todo: only required in standard view?
-    win.add( std::unique_ptr<terrain_window::drawer>( new destination_preview_drawer() ) );
+    drawers.emplace<destination_preview_drawer();
     //@todo: only required in standard view?
-    win.add( std::unique_ptr<terrain_window::drawer>( new vehicle_direction_drawer() ) );
+    drawers.emplace<vehicle_direction_drawer>();
 }
 
 void game::draw_ter( const tripoint &center, const bool looking )
 {
     w_terrain.center( center );
-    set_standard_drawers( w_terrain );
+    terrain_window_drawers drawers;
+    set_standard_drawers( drawers );
     // TODO: Make it not rebuild the cache all the time (cache point+moves?)
     if( !looking ) {
         // If we're looking, the cache is built at start (entering looking mode)
         m.build_map_cache( center.z );
     }
-    w_terrain.draw();
+    drawers.draw( w_terrain ); //@todo or tilecontext
 }
 
 tripoint game::get_veh_dir_indicator_location( bool next ) const
@@ -8491,10 +8493,12 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
     m.update_visibility_cache( old_levz );
     const visibility_variables &cache = g->m.get_visibility_variables_cache();
 
+    terrain_window_drawers drawers;
+    set_standard_drawers( drawers );
+
     do {
         w_terrain.center( lp );
-        set_standard_drawers( w_terrain );
-        w_terrain.draw();
+        drawers.draw( w_terrain );
 
         if (bNewWindow) {
             werase(w_info);
