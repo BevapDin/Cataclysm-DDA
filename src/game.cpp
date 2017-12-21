@@ -2324,7 +2324,7 @@ input_context game::get_player_input(std::string &action)
             w_terrain.center( center );
             terrain_window_drawers drawers;
             set_standard_drawers( drawers );
-            draw_weather( wPrint );
+            drawers.emplace<weather_drawer>( wPrint );
             if( uquit != QUIT_WATCH ) {
                 draw_sct();
             }

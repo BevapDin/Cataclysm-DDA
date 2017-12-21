@@ -6,11 +6,14 @@
 #include "terrain_window.h"
 #include "enums.h"
 
+#include <memory>
+
 class vehicle;
 class player;
 class map;
 struct rl_vec2d;
 class scent_map;
+struct weather_printable;
 
 enum explosion_neighbors {
     N_NO_NEIGHBORS = 0,
@@ -49,6 +52,23 @@ class line_drawer : public terrain_window_drawer
     public:
         line_drawer( const tripoint &p, std::vector<tripoint> r, const bool t ) : terrain_window_drawer( 700 ), pos( p ), points( std::move( r ) ), trail( t ) { }
         ~line_drawer() override = default;
+
+        void draw( terrain_window &w ) override;
+#ifdef TILES
+        void draw( cata_tiles &tilecontext ) override;
+#endif
+};
+
+class weather_drawer : public terrain_window_drawer
+{
+    private:
+        // private implementation to avoid including the header
+        std::unique_ptr<weather_printable> wprint_ptr;
+
+    public:
+        // 110 is shortly after basic map drawing and before anything after it.
+        weather_drawer( weather_printable w );
+        ~weather_drawer() override;
 
         void draw( terrain_window &w ) override;
 #ifdef TILES

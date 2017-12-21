@@ -552,60 +552,54 @@ void line_drawer::draw( cata_tiles &tilecontext )
 }
 #endif
 
-namespace {
-class weather_drawer : public terrain_window_drawer {
-    public:
-        weather_printable w;
+// 110 is shortly after basic map drawing and before anything after it.
+weather_drawer::weather_drawer( weather_printable w ) : terrain_window_drawer( 110 ),
+    wprint_ptr( new weather_printable( std::move( w ) ) ) { }
 
-        // 110 is shortly after basic map drawing and before anything after it.
-        weather_drawer( weather_printable w ) : terrain_window_drawer( 110 ), w( std::move( w ) ) { }
-        ~weather_drawer() override = default;
+weather_drawer::~weather_drawer() = default;
 
-        void draw( terrain_window &win ) override {
-            for (auto const &drop : w.vdrops) {
-                mvwputch(win, drop.second, drop.first, w.colGlyph, w.cGlyph);
-            }
-        }
-#ifdef TILES
-        void draw( cata_tiles &tilecontext ) override {
-            static std::string const weather_acid_drop {"weather_acid_drop"};
-            static std::string const weather_rain_drop {"weather_rain_drop"};
-            static std::string const weather_snowflake {"weather_snowflake"};
-
-            std::string weather_name;
-            switch (w.wtype) {
-            // Acid weathers; uses acid droplet tile, fallthrough intended
-            case WEATHER_ACID_DRIZZLE:
-            case WEATHER_ACID_RAIN:
-                weather_name = weather_acid_drop;
-                break;
-            // Normal rainy weathers; uses normal raindrop tile, fallthrough intended
-            case WEATHER_DRIZZLE:
-            case WEATHER_RAINY:
-            case WEATHER_THUNDER:
-            case WEATHER_LIGHTNING:
-                weather_name = weather_rain_drop;
-                break;
-            // Snowy weathers; uses snowflake tile, fallthrough intended
-            case WEATHER_FLURRIES:
-            case WEATHER_SNOW:
-            case WEATHER_SNOWSTORM:
-                weather_name = weather_snowflake;
-                break;
-            default:
-                break;
-            }
-
-            tilecontext.init_draw_weather( std::move( w ), std::move( weather_name ) );
-        }
-#endif
-};
-} //namespace
-
-void game::draw_weather( weather_printable w )
+void weather_drawer::draw( terrain_window &win )
 {
-    g->w_terrain.emplace<weather_drawer>( std::move( w ) );
+    const weather_printable &w = *wprint_ptr;
+    for( auto const &drop : w.vdrops ) {
+        mvwputch( win, drop.second, drop.first, w.colGlyph, w.cGlyph );
+    }
 }
+#ifdef TILES
+void weather_drawer::draw( cata_tiles &tilecontext )
+{
+    weather_printable &w = *wprint_ptr;
+    static std::string const weather_acid_drop {"weather_acid_drop"};
+    static std::string const weather_rain_drop {"weather_rain_drop"};
+    static std::string const weather_snowflake {"weather_snowflake"};
+
+    std::string weather_name;
+    switch( w.wtype ) {
+        // Acid weathers; uses acid droplet tile, fallthrough intended
+        case WEATHER_ACID_DRIZZLE:
+        case WEATHER_ACID_RAIN:
+            weather_name = weather_acid_drop;
+            break;
+        // Normal rainy weathers; uses normal raindrop tile, fallthrough intended
+        case WEATHER_DRIZZLE:
+        case WEATHER_RAINY:
+        case WEATHER_THUNDER:
+        case WEATHER_LIGHTNING:
+            weather_name = weather_rain_drop;
+            break;
+        // Snowy weathers; uses snowflake tile, fallthrough intended
+        case WEATHER_FLURRIES:
+        case WEATHER_SNOW:
+        case WEATHER_SNOWSTORM:
+            weather_name = weather_snowflake;
+            break;
+        default:
+            break;
+    }
+
+    tilecontext.init_draw_weather( std::move( w ), std::move( weather_name ) );
+}
+#endif
 
 namespace {
 class sct_drawer : public terrain_window_drawer {
