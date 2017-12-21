@@ -76,6 +76,21 @@ class weather_drawer : public terrain_window_drawer
 #endif
 };
 
+class critter_drawer : public terrain_window_drawer {
+    private:
+        // Only show critters visible to this player.
+        const player &u;
+
+    public:
+        critter_drawer( const player &u ) : terrain_window_drawer( 200 ), u( u ) { }
+        ~critter_drawer() override = default;
+
+        void draw( terrain_window &w ) override;
+#ifdef TILES
+        void draw( cata_tiles &tilecontext ) override;
+#endif
+};
+
 class scent_vision_drawer : public terrain_window_drawer
 {
     private:

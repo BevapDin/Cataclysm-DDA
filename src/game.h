@@ -769,9 +769,6 @@ class game
         void draw_hit_player(player const &p, int dam);
         void draw_sct();
         void draw_zones(const tripoint &start, const tripoint &end, const tripoint &offset);
-        // Draw critter (if visible!) on its current position into w_terrain.
-        // @param center the center of view, same as when calling map::draw
-        void draw_critter( const Creature &critter, const tripoint &center );
 
         bool is_in_viewport( const tripoint& p, int margin = 0 ) const;
         /**

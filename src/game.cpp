@@ -4929,36 +4929,6 @@ void game::draw_sidebar_messages()
     wrefresh(w_messages);
 }
 
-void game::draw_critter( const Creature &critter, const tripoint &center )
-{
-    const int my = POSY + ( critter.posy() - center.y );
-    const int mx = POSX + ( critter.posx() - center.x );
-    if( !w_terrain.contains( point( mx, my ) ) ) {
-        return;
-    }
-    if( critter.posz() != center.z && m.has_zlevels() ) {
-        static const tripoint up_tripoint( 0, 0, 1 );
-        if( critter.posz() == center.z - 1 &&
-            ( debug_mode || u.sees( critter ) ) &&
-            m.valid_move( critter.pos(), critter.pos() + up_tripoint, false, true ) ) {
-            // Monster is below
-            // TODO: Make this show something more informative than just green 'v'
-            // TODO: Allow looking at this mon with look command
-            // TODO: Redraw this after weather etc. animations
-            mvwputch( w_terrain, my, mx, c_green_cyan, 'v' );
-        }
-        return;
-    }
-    if( u.sees( critter ) || &critter == &u ) {
-        critter.draw( w_terrain, center.x, center.y, false );
-        return;
-    }
-
-    if( u.sees_with_infrared( critter ) ) {
-        mvwputch( w_terrain, my, mx, c_red, '?' );
-    }
-}
-
 bool game::is_in_viewport( const tripoint& p, int margin ) const
 {
     const tripoint diff( u.pos() + u.view_offset - p );
@@ -4971,18 +4941,6 @@ void game::draw_ter()
 {
     draw_ter( u.pos() + u.view_offset, false );
 }
-
-class critter_drawer : public terrain_window_drawer {
-    public:
-        critter_drawer() : terrain_window_drawer( 200 ) { }
-        ~critter_drawer() override = default;
-
-        void draw( terrain_window &w ) {
-            for( Creature &critter : g->all_creatures() ) {
-                g->draw_critter( critter, w.center() );
-            }
-        }
-};
 
 class destination_preview_drawer : public terrain_window_drawer {
     public:
@@ -5005,7 +4963,7 @@ static void set_standard_drawers( terrain_window_drawers &drawers )
 {
     drawers.emplace<basic_map_drawer>( g->m );
     drawers.emplace<footsteps_drawer();
-    drawers.emplace<critter_drawer();
+    drawers.emplace<critter_drawer( g->u );
     drawers.emplace<scent_vision_drawer( g->u, g->scent );
     //@todo: only required in standard view?
     drawers.emplace<destination_preview_drawer();

@@ -674,6 +674,35 @@ void game::draw_zones( const tripoint &start, const tripoint &end, const tripoin
     g->w_terrain.emplace<zones_drawer>( start, end, offset );
 }
 
+void critter_drawer::draw( terrain_window &w )
+{
+    for( const Creature &critter : g->all_creatures() ) {
+        const tripoint &pos = critter.pos();
+        if( !w.contains( pos ) ) {
+            continue;
+        }
+        const point sc = w.to_screen_coord( pos );
+        if( pos.z != w.center().z && g->m.has_zlevels() ) {
+            if( pos.z == w.center().z - 1 && ( debug_mode || u.sees( critter ) ) &&
+                g->m.valid_move( pos, pos + tripoint( 0, 0, 1 ), false, true ) ) {
+                // Monster is below
+                // TODO: Make this show something more informative than just green 'v'
+                // TODO: Allow looking at this mon with look command
+                // TODO: Redraw this after weather etc. animations
+                mvwputch( w, sc.y, sc.x, c_green_cyan, 'v' );
+            }
+            continue;
+        }
+        if( u.sees( critter ) || &critter == &u ) {
+            critter.draw( w, w.center().x, w.center().y, false );
+            return;
+        }
+        if( u.sees_with_infrared( critter ) ) {
+            mvwputch( w, sc.y, sc.x, c_red, '?' );
+        }
+    }
+}
+
 void scent_vision_drawer::draw( terrain_window &w )
 {
     if( !u.has_active_bionic( bionic_id( "bio_scent_vision" ) ) ) {

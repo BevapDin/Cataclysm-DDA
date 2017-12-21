@@ -1201,10 +1201,11 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
         if( targ != tripoint_zero ) {
             const Creature *critter = g->critter_at( dst, true );
             if( critter != nullptr ) {
-                g->draw_critter( *critter, center );
+                // critter was already drawn
             } else if( g->m.pl_sees( dst, -1 ) ) {
                 g->m.drawsq( g->w_terrain, pc, dst, false, true, center );
             } else {
+                // @todo make this a drawer class with *very* low priority.
                 mvwputch( g->w_terrain, POSY, POSX, c_black, 'X' );
             }
 
