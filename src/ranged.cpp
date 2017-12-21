@@ -1029,7 +1029,22 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
         return true;
     };
 
-    const tripoint old_offset = pc.view_offset;
+    terrain_window_drawers drawers;
+    set_standard_drawers( drawers );
+
+    class target_drawer : public terrain_window_drawer {
+        public:
+            tripoint dst;
+
+            ~target_drawer() override = default;
+
+            void draw( terrain_window &w ) override {
+                const point sp = w.to_screen_coord( dst );
+                mvwputch( w, sp.y, sp.x, c_red, '*' );
+            }
+    };
+    target_drawer &td = drawers.emplace<target_drawer>();
+
     do {
         ret = g->m.find_clear_path( src, dst );
 
@@ -1049,11 +1064,10 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
             }
             dst = cp;
         }
-        tripoint center;
         if( snap_to_target ) {
-            center = dst;
+            g->w_terrain.center( dst );
         } else {
-            center = pc.pos() + pc.view_offset;
+            g->w_terrain.center( pc.pos() + pc.view_offset );
         }
         // Clear the target window.
         for( int i = 1; i <= getmaxy( w_target ) - num_instruction_lines - 2; i++ ) {
@@ -1062,7 +1076,6 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
                 mvwputch( w_target, i, j, c_white, ' ' );
             }
         }
-        g->w_terrain.center( center );
         int line_number = 1;
         Creature *critter = g->critter_at( dst, true );
         if( dst != src ) {
@@ -1073,7 +1086,7 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
             // Only draw a highlighted trajectory if we can see the endpoint.
             // Provides feedback to the player, and avoids leaking information
             // about tiles they can't see.
-            g->w_ter.emplace<line_drawer>( dst, ret_this_zlevel, false );
+            drawers.emplace<line_drawer>( dst, ret_this_zlevel, false );
 
             // Print to target window
             mvwprintw( w_target, line_number++, 1, _( "Range: %d/%d, %s" ),
@@ -1082,7 +1095,6 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
         } else {
             mvwprintw( w_target, line_number++, 1, _("Range: %d, %s"), range, enemiesmsg.c_str() );
         }
-        g->draw_ter( true );
 
         // Skip blank lines if we're short on space.
         if( !compact ) {
@@ -1117,13 +1129,13 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
             }
         }
 
+        td.dst = dst;
+        drawers.draw();
         if( critter && critter != &pc && pc.sees( *critter ) ) {
             // The 12 is 2 for the border and 10 for aim bars.
             // Just print the monster name if we're short on space.
             int available_lines = compact ? 1 : ( height - num_instruction_lines - line_number - 12 );
             line_number = critter->print_info( w_target, line_number, available_lines, 1 );
-        } else {
-            mvwputch( g->w_terrain, POSY + dst.y - center.y, POSX + dst.x - center.x, c_red, '*' );
         }
 
         if( mode == TARGET_MODE_FIRE && critter != nullptr && pc.sees( *critter ) ) {
@@ -1154,8 +1166,6 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
         }
 
         wrefresh(w_target);
-        wrefresh(g->w_terrain);
-        refresh();
 
         std::string action;
         if( pc.activity.id() == activity_id( "ACT_AIM" ) && pc.activity.str_values[0] != "AIM" ) {
@@ -1191,10 +1201,10 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
         }
         if( g->m.has_zlevels() && action == "LEVEL_UP" ) {
             dst.z++;
-            pc.view_offset.z++;
+            g->w_terrain.center( g->w_terrain.center() + tripoint( 0, 0, 1 ) );
         } else if( g->m.has_zlevels() && action == "LEVEL_DOWN" ) {
             dst.z--;
-            pc.view_offset.z--;
+            g->w_terrain.center( g->w_terrain.center() - tripoint( 0, 0, 1 ) );
         }
 
         /* More drawing to terrain */
@@ -1236,7 +1246,6 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
                 // We've run out of moves, clear target vector, but leave target selected.
                 pc.assign_activity( activity_id( "ACT_AIM" ), 0, 0 );
                 pc.activity.str_values.push_back( "AIM" );
-                pc.view_offset = old_offset;
                 set_last_target( dst );
                 return empty_result;
             }
@@ -1285,7 +1294,6 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
                 // If we made it under the aim threshold, go ahead and fire.
                 // Also fire if we're at our best aim level already.
                 delwin( w_target );
-                pc.view_offset = old_offset;
                 set_last_target( dst );
                 return ret;
 
@@ -1297,7 +1305,6 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
                 // Also clear target vector, but leave target selected.
                 pc.assign_activity( activity_id( "ACT_AIM" ), 0, 0 );
                 pc.activity.str_values.push_back( action );
-                pc.view_offset = old_offset;
                 set_last_target( dst );
                 return empty_result;
             }
@@ -1323,7 +1330,6 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
     } while (true);
 
     delwin( w_target );
-    pc.view_offset = old_offset;
 
     if( ret.empty() ) {
         return ret;
