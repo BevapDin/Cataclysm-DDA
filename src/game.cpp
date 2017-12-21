@@ -2320,14 +2320,14 @@ input_context game::get_player_input(std::string &action)
                 }
             }
 
-            ter_win.center( center );
-            set_standard_drawers( ter_win );
+            w_terrain.center( center );
+            set_standard_drawers( w_terrain );
             draw_weather( wPrint );
             if( uquit != QUIT_WATCH ) {
                 draw_sct();
             }
             m.build_map_cache( center.z );
-            ter_win.draw();
+            w_terrain.draw();
 
             if( uquit == QUIT_WATCH ) {
                 draw_sidebar();
@@ -4786,7 +4786,7 @@ void game::draw()
 
 void game::draw_pixel_minimap()
 {
-    draw_pixel_minimap( tripoint( u.pos().x, u.pos().y, ter_win.center().z ) );
+    draw_pixel_minimap( tripoint( u.pos().x, u.pos().y, w_terrain.center().z ) );
 }
 
 #ifndef TILES
@@ -8492,9 +8492,9 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
     const visibility_variables &cache = g->m.get_visibility_variables_cache();
 
     do {
-        ter_win.center( lp );
-        set_standard_drawers( ter_win );
-        ter_win.draw();
+        w_terrain.center( lp );
+        set_standard_drawers( w_terrain );
+        w_terrain.draw();
 
         if (bNewWindow) {
             werase(w_info);

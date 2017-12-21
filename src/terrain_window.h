@@ -72,7 +72,7 @@ class terrain_window_drawer {
         virtual ~terrain_window_drawer() = default;
 
         virtual void draw( terrain_window &win ) = 0;
-#ifdef(TILES)
+#ifdef TILES
         virtual void draw( cata_tiles &tilecontext ) = 0;
 #else
         // dummy implementation, not used in non-tiles builds
