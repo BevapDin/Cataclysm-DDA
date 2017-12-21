@@ -8208,7 +8208,7 @@ void game::zones_manager()
                 }
 #endif
 
-                draw_zones( start, end, offset );
+                w_terrain.emplace<zones_drawer>( start, end, offset );
             } else {
                 //clear marked area
 #ifdef TILES
@@ -8394,7 +8394,7 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
                     }
 #endif
 
-                    draw_zones( start, end, offset );
+                    w_terrain.emplace<zones_drawer>( start, end, offset );
 
                 } else {
 #ifdef TILES

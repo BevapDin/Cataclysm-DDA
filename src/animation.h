@@ -76,6 +76,24 @@ class weather_drawer : public terrain_window_drawer
 #endif
 };
 
+class zones_drawer : public terrain_window_drawer
+{
+    private:
+        tripoint start;
+        tripoint end;
+        tripoint offset;
+
+    public:
+        zones_drawer( const tripoint &s, const tripoint &e, const tripoint &o ) : start( s ), end( e ),
+            offset( o ) { }
+        ~zones_drawer() override = default;
+
+        void draw( terrain_window &w ) override;
+#ifdef TILES
+        void draw( cata_tiles &tilecontext ) override;
+#endif
+};
+
 class critter_drawer : public terrain_window_drawer {
     private:
         // Only show critters visible to this player.

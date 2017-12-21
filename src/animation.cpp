@@ -639,40 +639,26 @@ void game::draw_sct()
     g->w_terrain.emplace<sct_drawer>();
 }
 
-namespace {
-class zones_drawer : public terrain_window_drawer {
-    public:
-        const tripoint start;
-        const tripoint end;
-        const tripoint offset;
-    
-        zones_drawer( const tripoint &s, const tripoint &e, const tripoint &o ) : start( s ), end( e ), offset( o ) { }
-        ~zones_drawer() override = default;
-
-        void draw( terrain_window &win ) override {
-            if( end.x < start.x || end.y < start.y || end.z < start.z ) {
-                return;
-            }
-
-            nc_color    const col = invert_color( c_light_green );
-            std::string const line( end.x - start.x + 1, '~' );
-            int         const x = start.x - offset.x;
-
-            for( int y = start.y; y <= end.y; ++y ) {
-                mvwprintz( w, y - offset.y, x, col, line.c_str() );
-            }
-        }
-#if defined(TILES)
-        void draw( cata_tiles &tilecontext ) override {
-            tilecontext.init_draw_zones( start, end, offset );
-        }
-#endif
-};
-} //namespace
-void game::draw_zones( const tripoint &start, const tripoint &end, const tripoint &offset )
+void zones_drawer::draw( terrain_window &w )
 {
-    g->w_terrain.emplace<zones_drawer>( start, end, offset );
+    if( end.x < start.x || end.y < start.y || end.z < start.z ) {
+        return;
+    }
+
+    nc_color    const col = invert_color( c_light_green );
+    std::string const line( end.x - start.x + 1, '~' );
+    int         const x = start.x - offset.x;
+
+    for( int y = start.y; y <= end.y; ++y ) {
+        mvwprintz( w, y - offset.y, x, col, line.c_str() );
+    }
 }
+#if defined(TILES)
+void zones_drawer::draw( cata_tiles &tilecontext )
+{
+    tilecontext.init_draw_zones( start, end, offset );
+}
+#endif
 
 void critter_drawer::draw( terrain_window &w )
 {

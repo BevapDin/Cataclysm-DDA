@@ -768,7 +768,6 @@ class game
         void draw_hit_mon( const tripoint &p, const monster &critter, bool dead = false);
         void draw_hit_player(player const &p, int dam);
         void draw_sct();
-        void draw_zones(const tripoint &start, const tripoint &end, const tripoint &offset);
 
         bool is_in_viewport( const tripoint& p, int margin = 0 ) const;
         /**
