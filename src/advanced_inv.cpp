@@ -2475,7 +2475,9 @@ void advanced_inventory::draw_minimap()
     }
 
     if( !invert_left || !invert_right ) {
-        g->u.draw( minimap, g->u.pos(), invert_left || invert_right );
+        const point sp = minimap.to_screen_coord( u.pos() );
+        wmove( minimap, sp.y, sp.x );
+        g->u.draw( minimap, invert_left || invert_right );
     }
 }
 

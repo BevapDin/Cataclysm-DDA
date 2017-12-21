@@ -1384,25 +1384,14 @@ units::mass Creature::get_weight() const
 /*
  * Drawing-related functions
  */
-void Creature::draw(WINDOW *w, int player_x, int player_y, bool inverted) const
+void Creature::draw( WINDOW *const w, const bool inverted ) const
 {
-    draw( w, tripoint( player_x, player_y, posz() ), inverted );
-}
-
-void Creature::draw( WINDOW *w, const tripoint &p, bool inverted ) const
-{
-    if (is_draw_tiles_mode()) {
-        return;
-    }
-
-    int draw_x = getmaxx(w) / 2 + posx() - p.x;
-    int draw_y = getmaxy(w) / 2 + posy() - p.y;
     if(inverted) {
-        mvwputch_inv(w, draw_y, draw_x, basic_symbol_color(), symbol());
+        wputch( w, invert_color( basic_symbol_color() ), symbol() );
     } else if(is_symbol_highlighted()) {
-        mvwputch_hi(w, draw_y, draw_x, basic_symbol_color(), symbol());
+        wputch( w, hilite( basic_symbol_color() ), symbol() );
     } else {
-        mvwputch(w, draw_y, draw_x, symbol_color(), symbol() );
+        wputch( w, symbol_color(), symbol() );
     }
 }
 

@@ -524,7 +524,9 @@ void line_drawer::draw( terrain_window &w )
 
             // NPCs and monsters get drawn with inverted colors
             if( critter && g->u.sees( *critter ) ) {
-                critter->draw( w, w.center(), true );
+                const point sp = w.to_screen_coord( critter->pos() );
+                wmove( w, sp.y, sp.x );
+                critter->draw( w, true );
             } else {
                 g->m.drawsq( w, g->u, p, true, true, w.center() );
             }
@@ -667,7 +669,9 @@ void critter_drawer::draw( terrain_window &w )
             continue;
         }
         if( u.sees( critter ) || &critter == &u ) {
-            critter.draw( w, w.center().x, w.center().y, false );
+            const point sp = w.to_screen_coord( critter.pos() );
+            wmove( w, sp.y, sp.x );
+            critter.draw( w, false );
             return;
         }
         if( u.sees_with_infrared( critter ) ) {

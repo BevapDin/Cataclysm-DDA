@@ -478,7 +478,9 @@ void editmap::uber_draw_ter( WINDOW *w, map *m )
                 if( game_map ) {
                     Creature *critter = g->critter_at( p );
                     if( critter != nullptr ) {
-                        critter->draw( w, center.x, center.y, false );
+                        const point sp = g->w_terrain.to_screen_coord( critter->pos() );
+                        wmove( w, sp.y, sp.x );
+                        critter->draw( w, false );
                     } else {
                         m->drawsq( w, g->u, p, false, draw_itm, center, false, true );
                     }
@@ -535,7 +537,9 @@ void editmap::update_view( bool update_info )
 
     // update target point
     if( critter != nullptr ) {
-        critter->draw( g->w_terrain, target, true );
+        const point sp = g->w_terrain.to_screen_coord( critter->pos() );
+        wmove( g->w_terrain, sp.y, sp.x );
+        critter->draw( g->w_terrain, true );
     } else {
         g->m.drawsq( g->w_terrain, g->u, target, true, true, target );
     }

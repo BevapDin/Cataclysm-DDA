@@ -486,8 +486,7 @@ class Creature
         int moves;
         bool underwater;
 
-        void draw(WINDOW *w, int plx, int ply, bool inv) const;
-        void draw(WINDOW *w, const tripoint &plp, bool inv) const;
+        void draw( WINDOW *w, bool inv ) const;
         /**
          * Write information about this creature.
          * @param w the window to print the text into.

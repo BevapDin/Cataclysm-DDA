@@ -7621,7 +7621,9 @@ void game::print_all_tile_info( const tripoint &lp, WINDOW *w_look, int column, 
 
                 if ( draw_terrain_indicators) {
                     if ( creature != nullptr && u.sees( *creature ) ) {
-                        creature->draw( w_terrain, lp, true );
+                        const point sp = w_terrain.to_screen_coord( lp );
+                        wmove( minimap, sp.y, sp.x );
+                        creature->draw( w_terrain, true );
                     } else {
                         m.drawsq( w_terrain, u, lp, true, true, lp );
                     }
