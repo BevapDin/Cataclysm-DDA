@@ -583,12 +583,12 @@ void game::draw_line( const tripoint &p, std::vector<tripoint> const &vPoint )
 #endif
 
 namespace {
-class weather_drawer : public terrain_window::drawer {
+class weather_drawer : public terrain_window_drawer {
     public:
         weather_printable w;
 
         // 110 is shortly after basic map drawing and before anything after it.
-        weather_drawer( weather_printable w ) : drawer( 110 ), w( std::move( w ) ) { }
+        weather_drawer( weather_printable w ) : terrain_window_drawer( 110 ), w( std::move( w ) ) { }
         ~weather_drawer() override = default;
 
         void draw( terrain_window &win ) override {
@@ -596,7 +596,7 @@ class weather_drawer : public terrain_window::drawer {
                 mvwputch(win, drop.second, drop.first, w.colGlyph, w.cGlyph);
             }
         }
-#ifdef(TILES)
+#ifdef TILES
         void draw( cata_tiles &tilecontext ) override {
             static std::string const weather_acid_drop {"weather_acid_drop"};
             static std::string const weather_rain_drop {"weather_rain_drop"};
@@ -638,7 +638,7 @@ void game::draw_weather( weather_printable w )
 }
 
 namespace {
-class sct_drawer : public terrain_window::drawer {
+class sct_drawer : public terrain_window_drawer {
     public:
         sct_drawer() = default;
         ~sct_drawer() override = default;
@@ -663,7 +663,7 @@ class sct_drawer : public terrain_window::drawer {
                 wprintz(win, col2, "%s", text.getText("second").c_str());
             }
         }
-#ifdef(TILES)
+#ifdef TILES
         void draw( cata_tiles &tilecontext ) override {
             tilecontext.init_draw_sct();
         }
@@ -676,7 +676,7 @@ void game::draw_sct()
 }
 
 namespace {
-class zones_drawer : public terrain_window::drawer {
+class zones_drawer : public terrain_window_drawer {
     public:
         const tripoint start;
         const tripoint end;
