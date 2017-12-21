@@ -1137,8 +1137,14 @@ bool input_context::get_coordinates( const catacurses::window &capture_win, int 
         return false;
     }
 
-    x = g->w_terrain.center().x - ( ( view_columns / 2 ) - coordinate_x );
-    y = g->w_terrain.center().y - ( ( view_rows / 2 ) - coordinate_y );
+    // @todo: this assumes capture_win is g->w_terrain - it used to be this:
+    // x = g->w_terrain.center().x - ( ( view_columns / 2 ) - coordinate_x );
+    // y = g->w_terrain.center().y - ( ( view_rows / 2 ) - coordinate_y );
+    // @todo change the callers to convert to map coordinates
+    const tripoint mp = g->w_terrain.to_map_coord( point( coordinate_x, coordinate_y ) );
+    x = mp.x;
+    y = mp.y;
+    // mp.z is ignored
 
     return true;
 }
