@@ -49,6 +49,7 @@ advanced_inventory::advanced_inventory()
     , min_w_height( 10 )
     , min_w_width( FULL_SCREEN_WIDTH )
     , max_w_width( 120 )
+    , minimap( nullptr )
     , inCategoryMode( false )
     , recalc( true )
     , redraw( true )
@@ -740,8 +741,8 @@ void advanced_inventory::init()
     head = catacurses::newwin( head_height, w_width - minimap_width, headstart, colstart );
     mm_border = catacurses::newwin( minimap_height + 2, minimap_width + 2, headstart,
                         colstart + ( w_width - ( minimap_width + 2 ) ) );
-    minimap = catacurses::newwin( minimap_height, minimap_width, headstart + 1,
-                      colstart + ( w_width - ( minimap_width + 1 ) ) );
+    minimap = terrain_window( catacurses::newwin( minimap_height, minimap_width, headstart + 1,
+                      colstart + ( w_width - ( minimap_width + 1 ) ) ) );
     left_window = catacurses::newwin( w_height, w_width / 2, headstart + head_height, colstart );
     right_window = catacurses::newwin( w_height, w_width / 2, headstart + head_height,
                            colstart + w_width / 2 );
@@ -2448,15 +2449,14 @@ void advanced_inventory::draw_minimap()
         {AIM_CENTER, AIM_INVENTORY, AIM_WORN}
     };
     static const std::array<side, NUM_PANES> sides = {{left, right}};
-    // get the center of the window
-    tripoint pc = {getmaxx(minimap) / 2, getmaxy(minimap) / 2, 0};
+    minimap.center( g->u.pos() );
     // draw the 3x3 tiles centered around player
     g->m.draw( minimap, g->u.pos() );
     for(auto s : sides) {
         char sym = get_minimap_sym(s);
         if(sym == '\0') { continue; }
         auto sq = squares[panes[s].get_area()];
-        auto pt = pc + sq.off;
+        const point pt = minimap.to_screen_coord( g->u.pos() + sq.off );
         // invert the color if pointing to the player's position
         auto cl = (sq.id == AIM_INVENTORY || sq.id == AIM_WORN) ?
             invert_color(c_light_cyan) : c_light_cyan.blink();
@@ -2475,7 +2475,7 @@ void advanced_inventory::draw_minimap()
     }
 
     if( !invert_left || !invert_right ) {
-        const point sp = minimap.to_screen_coord( u.pos() );
+        const point sp = minimap.to_screen_coord( g->u.pos() );
         wmove( minimap, sp.y, sp.x );
         g->u.draw( minimap, invert_left || invert_right );
     }

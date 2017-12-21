@@ -5,6 +5,7 @@
 #include "cursesdef.h" // WINDOW
 #include "enums.h"
 #include "units.h"
+#include "terrain_window.h"
 
 #include <string>
 #include <array>
@@ -347,7 +348,8 @@ class advanced_inventory
         void swap_panes();
 
         // minimap that displays things around character
-        WINDOW *minimap, *mm_border;
+        terrain_window minimap;
+        WINDOW *mm_border;
         const int minimap_width  = 3;
         const int minimap_height = 3;
         void draw_minimap();
