@@ -2335,15 +2335,9 @@ void veh_interact::complete_vehicle()
 
         if ( vpinfo.has_flag("CONE_LIGHT") ) {
             // Stash offset and set it to the location of the part so look_around will start there.
-            int px = g->u.view_offset.x;
-            int py = g->u.view_offset.y;
-            g->u.view_offset.x = veh->global_x() + q.x - g->u.posx();
-            g->u.view_offset.y = veh->global_y() + q.y - g->u.posy();
+            //@todo initialize g->look_around with `veh->global_pos() + q`
             popup(_("Choose a facing direction for the new headlight.  Press space to continue."));
             tripoint headlight_target = g->look_around(); // Note: no way to cancel
-            // Restore previous view offsets.
-            g->u.view_offset.x = px;
-            g->u.view_offset.y = py;
 
             int dir = 0;
             if(headlight_target.x == INT_MIN) {
