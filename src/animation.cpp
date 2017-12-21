@@ -601,43 +601,30 @@ void weather_drawer::draw( cata_tiles &tilecontext )
 }
 #endif
 
-namespace {
-class sct_drawer : public terrain_window_drawer {
-    public:
-        sct_drawer() = default;
-        ~sct_drawer() override = default;
-
-        void draw( terrain_window &win ) override {
-            tripoint const off = relative_view_pos(g->u, 0, 0, 0);
-
-            for (auto const& text : SCT.vSCT) {
-                const int dy = off.y + text.getPosY();
-                const int dx = off.x + text.getPosX();
-
-                if( !win.contains( point( dx, dy ) ) ) {
-                    continue;
-                }
-
-                bool const is_old = text.getStep() >= SCT.iMaxSteps / 2;
-
-                nc_color const col1 = msgtype_to_color(text.getMsgType("first"),  is_old);
-                nc_color const col2 = msgtype_to_color(text.getMsgType("second"), is_old);
-
-                mvwprintz(win, dy, dx, col1, "%s", text.getText("first").c_str());
-                wprintz(win, col2, "%s", text.getText("second").c_str());
-            }
-        }
-#ifdef TILES
-        void draw( cata_tiles &tilecontext ) override {
-            tilecontext.init_draw_sct();
-        }
-#endif
-};
-} //namespace
-void game::draw_sct()
+void sct_drawer::draw( terrain_window &win )
 {
-    g->w_terrain.emplace<sct_drawer>();
+    for( auto const &text : SCT.vSCT ) {
+        // z-component is ignored anyway
+        const point sp = win.to_screen_coord( tripoint( text.getPosX(), text.getPosY(), 0 ) );
+        if( !win.contains( sp ) ) {
+            continue;
+        }
+
+        bool const is_old = text.getStep() >= SCT.iMaxSteps / 2;
+
+        nc_color const col1 = msgtype_to_color( text.getMsgType( "first" ),  is_old );
+        nc_color const col2 = msgtype_to_color( text.getMsgType( "second" ), is_old );
+
+        mvwprintz( win, sp.y, sp.x, col1, "%s", text.getText( "first" ).c_str() );
+        wprintz( win, col2, "%s", text.getText( "second" ).c_str() );
+    }
 }
+#ifdef TILES
+void sct_drawer::draw( cata_tiles &tilecontext )
+{
+    tilecontext.init_draw_sct();
+}
+#endif
 
 void zones_drawer::draw( terrain_window &w )
 {

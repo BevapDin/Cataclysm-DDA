@@ -76,6 +76,18 @@ class weather_drawer : public terrain_window_drawer
 #endif
 };
 
+class sct_drawer : public terrain_window_drawer
+{
+    public:
+        sct_drawer() : terrain_window_drawer() { }
+        ~sct_drawer() override = default;
+
+        void draw( terrain_window &w ) override;
+#ifdef TILES
+        void draw( cata_tiles &tilecontext ) override;
+#endif
+};
+
 class zones_drawer : public terrain_window_drawer
 {
     private:

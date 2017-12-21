@@ -2326,7 +2326,7 @@ input_context game::get_player_input(std::string &action)
             set_standard_drawers( drawers );
             drawers.emplace<weather_drawer>( wPrint );
             if( uquit != QUIT_WATCH ) {
-                draw_sct();
+                drawers.emplace<sct_drawer>();
             }
             m.build_map_cache( center.z );
             drawers.draw( w_terrain ); //@todo or tilecontext
