@@ -23,12 +23,12 @@ bool terrain_window::contains( const screen_coord &pos ) const
 
 terrain_window::map_coord terrain_window::to_map_coord( const screen_coord &pos ) const
 {
-    return tripoint( screen_coord.x - POSX + center_.x, screen_coord.y - POSY + center_.y, center_.z );
+    return tripoint( screen_coord.x - getmaxx( w ) / 2 + center_.x, screen_coord.y - getmaxy( w ) / 2 + center_.y, center_.z );
 }
 
 terrain_window::screen_coord terrain_window::to_screen_coord( const map_coord &pos ) const
 {
-    return screen_coord( POSX + pos.x - center_.x, POSY + pos.y - center_.y );
+    return screen_coord( getmaxx( w ) / 2 + pos.x - center_.x, getmaxy( w ) / 2 + pos.y - center_.y );
 }
 
 tripoint_range terrain_window::map_range() const

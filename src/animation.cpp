@@ -93,8 +93,8 @@ bool is_layer_visible( const std::map<tripoint, explosion_tile> &layer )
 //! Get (x, y) relative to u's current position and view
 tripoint relative_view_pos( player const &u, int const x, int const y, int const z ) noexcept
 {
-    return tripoint { POSX + x - u.posx() - u.view_offset.x,
-            POSY + y - u.posy() - u.view_offset.y,
+    return tripoint { getmaxx( g->w_terrain ) / 2 + x - u.posx() - u.view_offset.x,
+            getmaxy( g->w_terrain ) / 2 + y - u.posy() - u.view_offset.y,
             z - u.posz() - u.view_offset.z };
 }
 
@@ -148,7 +148,7 @@ void draw_custom_explosion_curses( game &g,
 {
     // calculate screen offset relative to player + view offset position
     const tripoint center = g.u.pos() + g.u.view_offset;
-    const tripoint topleft( center.x - POSX, center.y - POSY, 0 );
+    const tripoint topleft( center.x - getmaxx( g.w_terrain ) / 2, center.y - getmaxy( g.w_terrain ) / 2, 0 );
 
     explosion_animation anim;
 
@@ -400,7 +400,7 @@ void draw_bullet_curses(map &m, const tripoint &t, char const bullet, const trip
         return;
     }
 
-    mvwputch(g->w_terrain, POSY + (t.y - vp.y), POSX + (t.x - vp.x), c_red, bullet);
+    mvwputch(g->w_terrain, getmaxy( g->w_terrain ) / 2 + (t.y - vp.y), getmaxx( g->w_terrain ) / 2 + (t.x - vp.x), c_red, bullet);
     bullet_animation().progress();
 }
 

@@ -1216,7 +1216,7 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
                 g->m.drawsq( g->w_terrain, pc, dst, false, true, center );
             } else {
                 // @todo make this a drawer class with *very* low priority.
-                mvwputch( g->w_terrain, POSY, POSX, c_black, 'X' );
+                mvwputch( g->w_terrain, getmaxy( g->w_terrain ) / 2, getmaxx( g->w_terrain ) / 2, c_black, 'X' );
             }
 
             // constrain by range

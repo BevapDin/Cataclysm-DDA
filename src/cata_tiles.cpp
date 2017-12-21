@@ -938,8 +938,8 @@ void cata_tiles::draw( int destx, int desty, const tripoint &center, int width, 
 
     const bool iso_mode = tile_iso;
 
-    o_x = iso_mode ? posx : posx - POSX;
-    o_y = iso_mode ? posy : posy - POSY;
+    o_x = iso_mode ? posx : posx - getmaxx( g->w_terrain ) / 2;
+    o_y = iso_mode ? posy : posy - getmaxy( g->w_terrain ) / 2;
 
     op_x = destx;
     op_y = desty;

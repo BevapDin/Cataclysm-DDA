@@ -283,7 +283,7 @@ tripoint editmap::pos2screen( const tripoint &p )
  */
 tripoint editmap::screen2pos( const tripoint &p )
 {
-    return tripoint( p.x + target.x - POSX, p.y + target.y - POSY, p.z );
+    return tripoint( p.x + target.x - getmaxx( g->w_terrain ) / 2, p.y + target.y - getmaxy( g->w_terrain ) / 2, p.z );
 }
 
 /*

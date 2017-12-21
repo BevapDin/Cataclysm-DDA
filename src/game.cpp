@@ -527,10 +527,6 @@ void game::init_ui()
     w_terrain = terrain_window( w_terrain_ptr.get() );
     werase(w_terrain);
 
-    // Position of the player in the terrain window, it is always in the center
-    POSX = getmaxx( w_terrain ) / 2;
-    POSY = getmaxy( w_terrain ) / 2;
-
     /**
      * Doing the same thing as above for the overmap
      */
@@ -2234,8 +2230,8 @@ input_context game::get_player_input(std::string &action)
 
         //x% of the Viewport, only shown on visible areas
         auto const weather_info = get_weather_animation(weather);
-        int offset_x = (u.posx() + u.view_offset.x) - POSX;
-        int offset_y = (u.posy() + u.view_offset.y) - POSY;
+        int offset_x = (u.posx() + u.view_offset.x) - getmaxx( w_terrain ) / 2;
+        int offset_y = (u.posy() + u.view_offset.y) - getmaxy( w_terrain ) / 2;
 
 #ifdef TILES
         if( tile_iso && use_tiles ) {
@@ -4200,8 +4196,8 @@ void game::debug()
         case 23: {
 #ifdef TILES
             const point offset {
-                POSX - u.posx() + u.view_offset.x,
-                     POSY - u.posy() + u.view_offset.y
+                getmaxx( w_terrain ) / 2 - u.posx() + u.view_offset.x,
+                     getmaxy( w_terrain ) / 2 - u.posy() + u.view_offset.y
             };
             draw_ter();
             //@todo use terrain_window::drawer
@@ -4933,8 +4929,8 @@ bool game::is_in_viewport( const tripoint& p, int margin ) const
 {
     const tripoint diff( u.pos() + u.view_offset - p );
 
-    return ( std::abs( diff.x ) <= POSX - margin ) &&
-           ( std::abs( diff.y ) <= POSY - margin );
+    return ( std::abs( diff.x ) <= getmaxx( w_terrain ) / 2 - margin ) &&
+           ( std::abs( diff.y ) <= getmaxy( w_terrain ) / 2 - margin );
 }
 
 void game::draw_ter()
@@ -5453,8 +5449,8 @@ int game::mon_info(WINDOW *w)
         const auto m = dynamic_cast<monster*>( c );
         const auto p = dynamic_cast<npc*>( c );
         const auto dir_to_mon = direction_from( view.x, view.y, c->posx(), c->posy() );
-        const int mx = POSX + ( c->posx() - view.x );
-        const int my = POSY + ( c->posy() - view.y );
+        const int mx = getmaxx( w_terrain ) / 2 + ( c->posx() - view.x );
+        const int my = getmaxy( w_terrain ) / 2 + ( c->posy() - view.y );
         int index = 8;
         if( !w_terrain.contains( point( mx, my ) ) ) {
             // for compatibility with old code, see diagram below, it explains the values for index,
@@ -7802,7 +7798,7 @@ void game::print_visibility_indicator( visibility_type visibility )
             break;
     }
 
-    mvwputch(w_terrain, POSY, POSX, visibility_indicator_color, visibility_indicator);
+    mvwputch(w_terrain, getmaxy( w_terrain ) / 2, getmaxx( w_terrain ) / 2, visibility_indicator_color, visibility_indicator);
 }
 
 void game::print_items_info( const tripoint &lp, WINDOW *w_look, const int column, int &line,
@@ -7931,8 +7927,8 @@ void game::zones_manager()
 
     u.view_offset = tripoint_zero;
 
-    const int offset_x = (u.posx() + u.view_offset.x) - POSX;
-    const int offset_y = (u.posy() + u.view_offset.y) - POSY;
+    const int offset_x = (u.posx() + u.view_offset.x) - getmaxx( w_terrain ) / 2;
+    const int offset_y = (u.posy() + u.view_offset.y) - getmaxy( w_terrain ) / 2;
 
     draw_ter();
 
@@ -8294,8 +8290,8 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
 
     temp_exit_fullscreen();
 
-    const int offset_x = (u.posx() + u.view_offset.x) - POSX;
-    const int offset_y = (u.posy() + u.view_offset.y) - POSY;
+    const int offset_x = (u.posx() + u.view_offset.x) - getmaxx( w_terrain ) / 2;
+    const int offset_y = (u.posy() + u.view_offset.y) - getmaxy( w_terrain ) / 2;
 
     tripoint lp = u.pos() + u.view_offset;
     int &lx = lp.x;
@@ -8385,8 +8381,8 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
                 const int dy = start_point.y - offset_y + u.posy() - ly;
 
                 if (blink) {
-                    const tripoint start = tripoint( std::min(dx, POSX), std::min(dy, POSY), lz );
-                    const tripoint end = tripoint( std::max(dx, POSX), std::max(dy, POSY), lz );
+                    const tripoint start = tripoint( std::min(dx, getmaxx( w_terrain ) / 2), std::min(dy, getmaxy( w_terrain ) / 2), lz );
+                    const tripoint end = tripoint( std::max(dx, getmaxx( w_terrain ) / 2), std::max(dy, getmaxy( w_terrain ) / 2), lz );
 
                     tripoint offset = tripoint( 0, 0, 0 ); //ASCII/SDL
 #ifdef TILES
@@ -8429,7 +8425,7 @@ tripoint game::look_around( WINDOW *w_info, const tripoint &start_point,
             }
 
             //Draw select cursor
-            mvwputch_inv(w_terrain, POSY, POSX, c_light_green, 'X');
+            mvwputch_inv(w_terrain, getmaxy( w_terrain ) / 2, getmaxx( w_terrain ) / 2, c_light_green, 'X');
 
         } else {
             //Look around

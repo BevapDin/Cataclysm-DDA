@@ -59,8 +59,6 @@ using volume = quantity<int, volume_in_milliliter_tag>;
 // Display data
 extern int TERMX; // width available for display
 extern int TERMY; // height available for display
-extern int POSX; // X position of '@' inside terrain window
-extern int POSY; // Y position of '@' inside terrain window
 extern int VIEW_OFFSET_X; // X position of terrain window
 extern int VIEW_OFFSET_Y; // Y position of terrain window
 extern int TERRAIN_WINDOW_TERM_WIDTH; // width of terrain window in terminal characters
