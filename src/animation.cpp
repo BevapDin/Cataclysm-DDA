@@ -7,6 +7,7 @@
 #include "mtype.h"
 #include "weather.h"
 #include "player.h"
+#include "vehicle.h"
 #ifdef TILES
 #include "cata_tiles.h" // all animation functions will be pushed out to a cata_tiles function in some manner
 
@@ -708,4 +709,28 @@ class zones_drawer : public terrain_window_drawer {
 void game::draw_zones( const tripoint &start, const tripoint &end, const tripoint &offset )
 {
     g->w_terrain.emplace<zones_drawer>( start, end, offset );
+}
+
+void vehicle_direction_drawer::draw_indicator( terrain_window &w, const nc_color &col, const rl_vec2d &dir ) const
+{
+    const float r = 10.0; // arbitrary distance away
+    const tripoint indicator_offset( r * dir.x, r * dir.y, u.pos().z );
+    const point sp = w.to_screen_coord( indicator_offset + u.pos() );
+    mvwputch( w, sp.y, sp.x, col, 'X' );
+}
+
+void vehicle_direction_drawer::draw( terrain_window &w )
+{
+    if( !u.controlling_vehicle ) {
+        return;
+    }
+    if( !get_option<bool>( "VEHICLE_DIR_INDICATOR" ) ) {
+        return;
+    }
+    vehicle *const veh = m.veh_at( u.pos() );
+    if( !veh ) {
+        return;
+    }
+    draw_indicator( w, c_dark_gray, veh->face_vec() );
+    draw_indicator( w, c_white, veh->dir_vec() );
 }

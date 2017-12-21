@@ -3,6 +3,13 @@
 #define ANIMATION_H
 
 #include "color.h"
+#include "terrain_window.h"
+#include "enums.h"
+
+class vehicle;
+class player;
+class map;
+struct rl_vec2d;
 
 enum explosion_neighbors {
     N_NO_NEIGHBORS = 0,
@@ -29,6 +36,28 @@ enum explosion_neighbors {
 struct explosion_tile {
     explosion_neighbors neighborhood;
     nc_color color;
+};
+
+/**
+ * Draws an indicator where the vehicle is currently moving and facing to.
+ */
+class vehicle_direction_drawer : public terrain_window_drawer
+{
+    private:
+        player &u;
+        map &m;
+
+        void draw_indicator( terrain_window &w, const nc_color &col, const rl_vec2d &dir ) const;
+
+    public:
+        vehicle_direction_drawer( player &u, map &m ) : terrain_window_drawer( 500 ), u( u ), m( m ) {
+        }
+        ~vehicle_direction_drawer() override = default;
+
+        void draw( terrain_window &w ) override;
+#ifdef TILES
+        void draw( cata_tiles &tilecontext ) override;
+#endif
 };
 
 #endif

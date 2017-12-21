@@ -23,6 +23,7 @@
 #include "bodypart.h"
 #include "map.h"
 #include "uistate.h"
+#include "animation.h"
 #include "item_group.h"
 #include "json.h"
 #include "artifact.h"
@@ -5066,19 +5067,6 @@ class destination_preview_drawer : public terrain_window_drawer {
         }
 };
 
-class vehicle_direction_drawer : public terrain_window_drawer {
-    public:
-        vehicle_direction_drawer() : terrain_window_drawer( 500 ) { }
-        ~vehicle_direction_drawer() override = default;
-
-        void draw( terrain_window &w ) {
-            if( g->u.controlling_vehicle ) {
-                g->draw_veh_dir_indicator( false );
-                g->draw_veh_dir_indicator( true );
-            }
-        }
-};
-
 static void set_standard_drawers( terrain_window_drawers &drawers )
 {
     drawers.emplace<basic_map_drawer>();
@@ -5088,7 +5076,7 @@ static void set_standard_drawers( terrain_window_drawers &drawers )
     //@todo: only required in standard view?
     drawers.emplace<destination_preview_drawer();
     //@todo: only required in standard view?
-    drawers.emplace<vehicle_direction_drawer>();
+    drawers.emplace<vehicle_direction_drawer>( g->u, g->m );
 }
 
 void game::draw_ter( const tripoint &center, const bool looking )
@@ -5102,30 +5090,6 @@ void game::draw_ter( const tripoint &center, const bool looking )
         m.build_map_cache( center.z );
     }
     drawers.draw( w_terrain ); //@todo or tilecontext
-}
-
-tripoint game::get_veh_dir_indicator_location( bool next ) const
-{
-    if( !get_option<bool>( "VEHICLE_DIR_INDICATOR" ) ) {
-        return tripoint_min;
-    }
-    vehicle *veh = m.veh_at( u.pos() );
-    if( !veh ) {
-        return tripoint_min;
-    }
-    rl_vec2d face = next ? veh->dir_vec() : veh->face_vec();
-    float r = 10.0;
-    return { static_cast<int>(r * face.x), static_cast<int>(r * face.y), u.pos().z };
-}
-
-void game::draw_veh_dir_indicator( bool next )
-{
-    tripoint indicator_offset = get_veh_dir_indicator_location( next );
-    if( indicator_offset != tripoint_min ) {
-        auto col = next ? c_white : c_dark_gray;
-        mvwputch( w_terrain, POSY + indicator_offset.y - u.view_offset.y,
-                  POSX + indicator_offset.x - u.view_offset.x, col, 'X' );
-    }
 }
 
 void game::refresh_all()
