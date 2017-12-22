@@ -1886,9 +1886,17 @@ classes = {
         functions = {
         },
     },
+    glyph = {
+        by_value_and_reference = true,
+        attributes = {
+        },
+        functions = {
+            { name = "color", rval = "nc_color", args = { } },
+            { name = "symbol", rval = "string", args = { } },
+        },
+    },
     itype = {
         attributes = {
-            color = { type = "nc_color", writable = true },
             default_container = { type = "string", writable = true },
             description = { type = "string", writable = true },
             explode_in_fire = { type = "bool", writable = true },
@@ -1906,7 +1914,6 @@ classes = {
             rigid = { type = "bool", writable = true },
             snippet_category = { type = "string", writable = true },
             stack_size = { type = "int", writable = true },
-            sym = { type = "string", writable = true },
             volume = { type = "volume", writable = true },
             weight = { type = "mass", writable = true },
         },
@@ -1921,6 +1928,7 @@ classes = {
             { name = "invoke", rval = "int", args = { "player", "item", "tripoint", "string" } },
             { name = "maximum_charges", rval = "int", args = { } },
             { name = "nname", rval = "string", args = { "int" } },
+            { name = "symbol", rval = "glyph", args = { } },
             { name = "tick", rval = "int", args = { "player", "item", "tripoint" } },
         }
     },

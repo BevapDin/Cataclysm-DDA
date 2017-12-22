@@ -5,6 +5,7 @@
 #include "optional.h"
 #include "color.h" // nc_color
 #include "enums.h" // point
+#include "glyph.h"
 #include "iuse.h" // use_function
 #include "pldata.h" // add_type
 #include "bodypart.h" // body_part::num_bp
@@ -756,8 +757,12 @@ public:
 
     const item_category *category = nullptr; // category pointer or NULL for automatic selection
 
-    nc_color color = c_white; // Color on the map (color.h)
-    std::string sym;
+        //@todo make this private
+        glyph smybol_;
+
+        const glyph &symbol() const {
+            return symbol_;
+        }
 
     int damage_min = -1; /** Minimum amount of damage to an item (state of maximum repair) */
     int damage_max =  4; /** Maximum amount of damage to an item (state before destroyed) */

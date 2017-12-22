@@ -1937,7 +1937,7 @@ int item::engine_displacement() const
 
 const std::string &item::symbol() const
 {
-    return type->sym;
+    return type->symbol().symbol();
 }
 
 nc_color item::color_in_inventory() const
@@ -2418,7 +2418,7 @@ nc_color item::color() const
     if( is_corpse() ) {
         return corpse->color;
     }
-    return type->color;
+    return type->symbol().color();
 }
 
 int item::price( bool practical ) const
