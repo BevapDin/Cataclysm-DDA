@@ -13,6 +13,7 @@
 #include "units.h"
 #include "damage.h"
 #include "translations.h"
+#include "glyph.h"
 
 #include <string>
 #include <vector>
@@ -725,8 +726,12 @@ public:
 
     const item_category *category = nullptr; // category pointer or NULL for automatic selection
 
-    nc_color color = c_white; // Color on the map (color.h)
-    std::string sym;
+        //@todo make this private
+        glyph smybol_;
+
+        const glyph &symbol() const {
+            return symbol_;
+        }
 
     int damage_min = -1; /** Minimum amount of damage to an item (state of maximum repair) */
     int damage_max =  4; /** Maximum amount of damage to an item (state before destroyed) */

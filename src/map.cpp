@@ -5927,8 +5927,8 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     }
     // If there's a trap here, and we have sufficient perception, draw that instead
     if( curr_trap.can_see( p, g->u ) ) {
-        tercol = curr_trap.color;
-        if (curr_trap.sym == '%') {
+        tercol = curr_trap.symbol().color();
+        if (curr_trap.symbol().symbol() == "%") {
             switch(rng(1, 5)) {
             case 1: sym = '*'; break;
             case 2: sym = '0'; break;
@@ -5937,7 +5937,7 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
             case 5: sym = '+'; break;
             }
         } else {
-            sym = curr_trap.sym;
+            sym = curr_trap.symbol().symbol()[0]; //@todo
         }
     }
     if( curr_field.fieldCount() > 0 ) {

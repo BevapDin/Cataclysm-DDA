@@ -622,8 +622,8 @@ std::string new_artifact()
 
         const artifact_tool_form_datum *info = &(artifact_tool_form_data[form]);
         art->create_name( _( info->name.c_str() ) );
-        art->color = info->color;
-        art->sym = std::string( 1, info->sym );
+        art->symbol_.set_color( info->color );
+        art->symbol_.set_symbol( std::string( 1, info->sym ) );
         art->materials.push_back(info->material);
         art->volume = rng(info->volume_min, info->volume_max);
         art->weight = rng(info->weight_min, info->weight_max);
@@ -742,8 +742,8 @@ std::string new_artifact()
         const artifact_armor_form_datum *info = &(artifact_armor_form_data[form]);
 
         art->create_name( _( info->name.c_str() ) );
-        art->sym = "["; // Armor is always [
-        art->color = info->color;
+        art->symbol_.set_symbol( "[" ); // Armor is always [
+        art->symbol_.set_color( info->color );
         art->materials.push_back(info->material);
         art->volume = info->volume;
         art->weight = info->weight;
@@ -858,8 +858,8 @@ std::string new_natural_artifact(artifact_natural_property prop)
                                                   ARTPROP_MAX - 1)));
     const artifact_property_datum *property_data = &(artifact_property_data[property]);
 
-    art->sym = ":";
-    art->color = c_yellow;
+    art->symbol_.set_symbol( ":" );
+    art->symbol_.set_color( c_yellow );
     art->materials.push_back( material_id( "stone" ) );
     art->volume = rng(shape_data->volume_min, shape_data->volume_max);
     art->weight = rng(shape_data->weight_min, shape_data->weight_max);
@@ -957,9 +957,9 @@ std::string architects_cube()
 
     const artifact_tool_form_datum *info = &(artifact_tool_form_data[ARTTOOLFORM_CUBE]);
     art->create_name( _( info->name.c_str() ) );
-    art->color = info->color;
-    art->sym = std::string( 1, info->sym );
-      art->materials.push_back(info->material);
+    art->symbol_.set_color( info->color );
+    art->symbol_.set_symbol( std::string( 1, info->sym ) );
+    art->materials.push_back(info->material);
     art->volume = rng(info->volume_min, info->volume_max);
     art->weight = rng(info->weight_min, info->weight_max);
     // Set up the basic weapon type
@@ -1050,11 +1050,13 @@ void it_artifact_tool::deserialize(JsonObject &jo)
     name = jo.get_string("name");
     description = jo.get_string("description");
     if( jo.has_int( "sym" ) ) {
-        sym = std::string( 1, jo.get_int( "sym" ) );
+        symbol_.set_symbol( std::string( 1, jo.get_int( "sym" ) ) );
     } else {
-        sym = jo.get_string( "sym" );
+        symbol_.set_symbol( jo.get_string( "sym" ) );
     }
+    nc_color color;
     jo.read( "color", color );
+    symbol_.set_color( color );
     price = jo.get_int("price");
     // LEGACY: Since it seems artifacts get serialized out to disk, and they're
     // dynamic, we need to allow for them to be read from disk for, oh, I guess
@@ -1113,11 +1115,13 @@ void it_artifact_armor::deserialize(JsonObject &jo)
     name = jo.get_string("name");
     description = jo.get_string("description");
     if( jo.has_int( "sym" ) ) {
-        sym = std::string( 1, jo.get_int( "sym" ) );
+        symbol_.set_symbol( std::string( 1, jo.get_int( "sym" ) ) );
     } else {
-        sym = jo.get_string( "sym" );
+        symbol_.set_symbol( jo.get_string( "sym" ) );
     }
+    nc_color color;
     jo.read( "color", color );
+    symbol_.set_color( color );
     price = jo.get_int("price");
     // LEGACY: Since it seems artifacts get serialized out to disk, and they're
     // dynamic, we need to allow for them to be read from disk for, oh, I guess
@@ -1202,8 +1206,8 @@ void it_artifact_tool::serialize(JsonOut &json) const
     json.member("id", id);
     json.member("name", name);
     json.member("description", description);
-    json.member("sym", sym);
-    json.member("color", color);
+    json.member("sym", symbol_.symbol());
+    json.member("color", symbol_.color());
     json.member("price", price);
     json.member("materials");
     json.start_array();
@@ -1249,8 +1253,8 @@ void it_artifact_armor::serialize(JsonOut &json) const
     json.member("id", id);
     json.member("name", name);
     json.member("description", description);
-    json.member("sym", sym);
-    json.member("color", color);
+    json.member("sym", symbol_.symbol());
+    json.member("color", symbol_.color());
     json.member("price", price);
     json.member("materials");
     json.start_array();

@@ -718,9 +718,7 @@ void Item_factory::check_definitions() const
             }
         }
 
-        if( type->sym.empty() ) {
-            msg << "symbol not defined" << "\n";
-        } else if( utf8_width( type->sym ) != 1 ) {
+        if( utf8_width( type->symbol().symbol() ) != 1 ) {
             msg << "symbol must be exactly one console cell width" << "\n";
         }
 
@@ -1717,14 +1715,6 @@ void Item_factory::load_basic_info( JsonObject &jo, itype &def, const std::strin
         def.description = jo.get_string( "description" );
     }
 
-    if( jo.has_string( "symbol" ) ) {
-        def.sym = jo.get_string( "symbol" );
-    }
-
-    if( jo.has_string( "color" ) ) {
-        def.color = color_from_string( jo.get_string( "color" ) );
-    }
-
     if( jo.has_member( "material" ) ) {
         def.materials.clear();
         for( auto &m : jo.get_tags( "material" ) ) {
@@ -1828,6 +1818,22 @@ void Item_factory::load_basic_info( JsonObject &jo, itype &def, const std::strin
     } else {
         def.id = jo.get_string( "id" );
     }
+#if 0
+    // If this type has been copied from some other type, keep the previously
+    // assigned tile id. JSON can manually override it.
+    if( !jo.has_member( "copy-from" ) ) {
+        def.symbol_.set_tile( tile_id( def.id ) );
+    }
+#endif
+    def.symbol_.set_tile( tile_id( def.id ) );
+    if( jo.has_string( "symbol" ) ) {
+        def.symbol_.set_symbol( jo.get_string( "symbol" ) );
+    }
+
+    if( jo.has_string( "color" ) ) {
+        def.symbol_.set_color( color_from_string( jo.get_string( "color" ) ) );
+    }
+
 
     // snippet_category should be loaded after def.id is determined
     if( jo.has_array( "snippet_category" ) ) {
