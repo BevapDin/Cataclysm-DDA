@@ -27,6 +27,7 @@
 #include "monster.h"
 #include "vehicle.h"
 #include "veh_type.h"
+#include "calendar.h"
 #include "artifact.h"
 #include "submap.h"
 #include "map_iterator.h"
@@ -2341,8 +2342,7 @@ void map::drop_fields( const tripoint &p )
         return;
     }
 
-    // Ugly two-pass for now - field access is weird
-    bool dropped = false;
+    std::list<field_id> dropped;
     const tripoint below = p - tripoint( 0, 0, 1 );
     for( const auto &iter : fld ) {
         const field_entry &entry = iter.second;
@@ -2350,19 +2350,12 @@ void map::drop_fields( const tripoint &p )
         // Active fields "drop themselves"
         if( entry.decays_on_actualize() ) {
             add_field( below, entry.getFieldType(), entry.getFieldDensity(), entry.getFieldAge() );
-            dropped = true;
+            dropped.push_back( entry.getFieldType() );
         }
     }
 
-    // Now remove the dropped fields (that's the ugly part)
-    while( dropped ) {
-        dropped = false;
-        for( auto iter = fld.begin(); !dropped && iter != fld.end(); ) {
-            if( iter->second.decays_on_actualize() ) {
-                dropped = fld.removeField( iter->second.getFieldType() );
-                break;
-            }
-        }
+    for( const auto &entry : dropped ) {
+        fld.removeField( entry );
     }
 }
 
@@ -4233,7 +4226,7 @@ void map::spawn_items(const int x, const int y, const std::vector<item> &new_ite
 
 void map::spawn_item(const int x, const int y, const std::string &type_id,
                      const unsigned quantity, const long charges,
-                     const unsigned birthday, const int damlevel)
+                     const time_point &birthday, const int damlevel)
 {
     spawn_item( tripoint( x, y, abs_sub.z ), type_id,
                 quantity, charges, birthday, damlevel );
@@ -4376,7 +4369,7 @@ void map::spawn_natural_artifact(const tripoint &p, artifact_natural_property pr
 
 void map::spawn_item(const tripoint &p, const std::string &type_id,
                      const unsigned quantity, const long charges,
-                     const unsigned birthday, const int damlevel)
+                     const time_point &birthday, const int damlevel)
 {
     if( type_id == "null" ) {
         return;
@@ -5765,7 +5758,7 @@ bool map::apply_vision_effects( WINDOW *w, lit_level ll,
             return false;
         case VIS_LIT: // can only tell that this square is bright
             symbol = '#';
-            color = c_ltgray;
+            color = c_light_gray;
             break;
         case VIS_BOOMER:
             symbol = '#';
@@ -6030,11 +6023,11 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     if( u_vision[BOOMERED] ) {
         tercol = c_magenta;
     } else if( u_vision[NV_GOGGLES] ) {
-        tercol = (bright_light) ? c_white : c_ltgreen;
+        tercol = (bright_light) ? c_white : c_light_green;
     } else if( low_light ) {
-        tercol = c_dkgray;
+        tercol = c_dark_gray;
     } else if( u_vision[DARKNESS] ) {
-        tercol = c_dkgray;
+        tercol = c_dark_gray;
     }
 
     if( invert ) {
@@ -6074,7 +6067,7 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
 {
     static const long AUTO_WALL_PLACEHOLDER = 2; // this should never appear as a real symbol!
 
-    nc_color tercol = c_dkgray;
+    nc_color tercol = c_dark_gray;
     long sym = ' ';
 
     const ter_t &curr_ter = curr_tile.get_ter_t();
@@ -6091,7 +6084,7 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
         const int roof = veh->roof_at_part( part_below );
         const int displayed_part = roof >= 0 ? roof : part_below;
         sym = special_symbol( veh->face.dir_symbol( veh->part_sym( displayed_part, true ) ) );
-        tercol = (roof >= 0 || veh->obstacle_at_part( part_below ) ) ? c_ltgray : c_ltgray_cyan;
+        tercol = (roof >= 0 || veh->obstacle_at_part( part_below ) ) ? c_light_gray : c_light_gray_cyan;
     } else if( curr_ter.has_flag( TFLAG_SEEN_FROM_ABOVE ) ) {
         if( curr_ter.has_flag( TFLAG_AUTO_WALL_SYMBOL ) ) {
             sym = AUTO_WALL_PLACEHOLDER;
@@ -6125,11 +6118,11 @@ void map::draw_from_above( WINDOW* w, player &u, const tripoint &p,
     if( u_vision[BOOMERED] ) {
         tercol = c_magenta;
     } else if( u_vision[NV_GOGGLES] ) {
-        tercol = (bright_light) ? c_white : c_ltgreen;
+        tercol = (bright_light) ? c_white : c_light_green;
     } else if( low_light ) {
-        tercol = c_dkgray;
+        tercol = c_dark_gray;
     } else if( u_vision[DARKNESS] ) {
-        tercol = c_dkgray;
+        tercol = c_dark_gray;
     }
 
     if( invert ) {
@@ -6693,40 +6686,44 @@ void map::loadn( const int gridx, const int gridy, const int gridz, const bool u
     set_pathfinding_cache_dirty( gridz );
     setsubmap( gridn, tmpsub );
 
-    // Destroy bugged no-part vehicles
-    auto &veh_vec = tmpsub->vehicles;
-    for( auto iter = veh_vec.begin(); iter != veh_vec.end(); ) {
-        auto *veh = *iter;
-        if( !veh->parts.empty() ) {
-            // Always fix submap coords for easier z-level-related operations
-            veh->smx = gridx;
-            veh->smy = gridy;
-            veh->smz = gridz;
-            iter++;
-        } else {
-            reset_vehicle_cache( gridz );
-            if( veh->tracking_on ) {
-                overmap_buffer.remove_vehicle( veh );
-            }
-            dirty_vehicle_list.erase( veh );
-            delete( veh );
-            iter = veh_vec.erase( iter );
-        }
-    }
-
-    // Update vehicle data
-    if( update_vehicles ) {
-        auto &map_cache = get_cache( gridz );
-        for( auto it : tmpsub->vehicles ) {
-            // Only add if not tracking already.
-            if( map_cache.vehicle_list.find( it ) == map_cache.vehicle_list.end() ) {
-                map_cache.vehicle_list.insert( it );
-                add_vehicle_to_cache( it );
+    // Uniform submaps don't have vehicles and are always actual
+    // Skip this costly processing for them
+    if( !tmpsub->is_uniform ) {
+        // Destroy bugged no-part vehicles
+        auto &veh_vec = tmpsub->vehicles;
+        for( auto iter = veh_vec.begin(); iter != veh_vec.end(); ) {
+            auto *veh = *iter;
+            if( !veh->parts.empty() ) {
+                // Always fix submap coords for easier z-level-related operations
+                veh->smx = gridx;
+                veh->smy = gridy;
+                veh->smz = gridz;
+                iter++;
+            } else {
+                reset_vehicle_cache( gridz );
+                if( veh->tracking_on ) {
+                    overmap_buffer.remove_vehicle( veh );
+                }
+                dirty_vehicle_list.erase( veh );
+                delete( veh );
+                iter = veh_vec.erase( iter );
             }
         }
-    }
 
-    actualize( gridx, gridy, gridz );
+        // Update vehicle data
+        if( update_vehicles ) {
+            auto &map_cache = get_cache( gridz );
+            for( auto it : tmpsub->vehicles ) {
+                // Only add if not tracking already.
+                if( map_cache.vehicle_list.find( it ) == map_cache.vehicle_list.end() ) {
+                    map_cache.vehicle_list.insert( it );
+                    add_vehicle_to_cache( it );
+                }
+            }
+        }
+
+        actualize( gridx, gridy, gridz );
+    }
 
     abs_sub.z = old_abs_z;
 }
@@ -6819,7 +6816,8 @@ void map::grow_plant( const tripoint &p )
         furn_set( p, f_null );
         return;
     }
-    const int plantEpoch = seed.get_plant_epoch();
+    //@todo change get_plant_epoch to return time_duration
+    const time_duration plantEpoch = time_duration::from_turns( seed.get_plant_epoch() );
 
     if( seed.age() >= plantEpoch ) {
         if( seed.age() < plantEpoch * 2 ) {
@@ -7091,6 +7089,12 @@ void map::add_roofs( const int gridx, const int gridy, const int gridz )
     if( check_roof && sub_below == nullptr ) {
         debugmsg( "Tried to add roofs to sm at %d,%d,%d, but sm below doesn't exist",
                   gridx, gridy, gridz );
+        return;
+    }
+
+    if( sub_below != nullptr && sub_here->is_uniform && sub_below->is_uniform ) {
+        // The most common case (at least ~5 times more common than the other)
+        // Two layers of air or two layers of rock - neither case needs any new roofs
         return;
     }
 
@@ -7473,6 +7477,18 @@ void map::build_outside_cache( const int zlev )
     for( int smx = 0; smx < my_MAPSIZE; ++smx ) {
         for( int smy = 0; smy < my_MAPSIZE; ++smy ) {
             auto const cur_submap = get_submap_at_grid( smx, smy, zlev );
+            if( cur_submap->is_uniform ) {
+                if( cur_submap->get_ter( 0, 0 ).obj().has_flag( TFLAG_INDOORS ) ||
+                    cur_submap->get_furn( 0, 0 ).obj().has_flag( TFLAG_INDOORS ) ) {
+                    // Note: filling on padded cache, meaning +2 width/height
+                    for( int sx = 0; sx < SEEX + 2; ++sx ) {
+                        const int x = sx + ( smx * SEEX );
+                        std::uninitialized_fill_n( &padded_cache[x][0], padded_h, false );
+                    }
+                }
+
+                continue;
+            }
 
             for( int sx = 0; sx < SEEX; ++sx ) {
                 for( int sy = 0; sy < SEEY; ++sy ) {
@@ -7516,6 +7532,16 @@ void map::build_floor_cache( const int zlev )
     for( int smx = 0; smx < my_MAPSIZE; ++smx ) {
         for( int smy = 0; smy < my_MAPSIZE; ++smy ) {
             auto const cur_submap = get_submap_at_grid( smx, smy, zlev );
+            if( cur_submap->is_uniform ) {
+                if( cur_submap->get_ter( 0, 0 ).obj().has_flag( TFLAG_NO_FLOOR ) ) {
+                    for( int sx = 0; sx < SEEX; ++sx ) {
+                        const int x = sx + ( smx * SEEX );
+                        std::uninitialized_fill_n( &floor_cache[x][0], MAPSIZE * SEEY, false );
+                    }
+                }
+
+                continue;
+            }
 
             for( int sx = 0; sx < SEEX; ++sx ) {
                 for( int sy = 0; sy < SEEY; ++sy ) {

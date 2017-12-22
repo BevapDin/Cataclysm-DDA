@@ -162,7 +162,7 @@ bool check_butcher_cbm( const int roll )
 }
 
 void butcher_cbm_item( const std::string &what, const tripoint &pos,
-                       const int age, const int roll )
+                       const time_point &age, const int roll )
 {
     if( roll < 0 ) {
         return;
@@ -174,7 +174,7 @@ void butcher_cbm_item( const std::string &what, const tripoint &pos,
 }
 
 void butcher_cbm_group( const std::string &group, const tripoint &pos,
-                        const int age, const int roll )
+                        const time_point &age, const int roll )
 {
     if( roll < 0 ) {
         return;
@@ -244,7 +244,7 @@ void set_up_butchery( player_activity &act, player &u )
     act.moves_left = time_to_cut;
 }
 
-void butchery_drops_hardcoded( const mtype *corpse, player *p, int age, const std::function<int(void)> &roll_butchery )
+void butchery_drops_hardcoded( const mtype *corpse, player *p, const time_point &age, const std::function<int(void)> &roll_butchery )
 {
     itype_id meat = corpse->get_meat_itype();
     if( corpse->made_of( material_id( "bone" ) ) ) {
@@ -517,7 +517,7 @@ void butchery_drops_hardcoded( const mtype *corpse, player *p, int age, const st
     }
 }
 
-void butchery_drops_harvest( const mtype &mt, player &p, int age, const std::function<int(void)> &roll_butchery )
+void butchery_drops_harvest( const mtype &mt, player &p, const time_point &age, const std::function<int(void)> &roll_butchery )
 {
     int practice = 4 + roll_butchery();
     for( const auto &entry : *mt.harvest ) {
@@ -572,7 +572,7 @@ void activity_handlers::butcher_finish( player_activity *act, player *p )
     item &corpse_item = items_here[act->index];
     auto contents = corpse_item.contents;
     const mtype *corpse = corpse_item.get_mtype();
-    const int age = corpse_item.birthday();
+    const time_point &age = corpse_item.birthday();
     g->m.i_rem( p->pos(), act->index );
 
     const int skill_level = p->get_skill_level( skill_survival );
@@ -636,7 +636,7 @@ void serialize_liquid_source( player_activity &act, const monster &mon, const it
     act.values.push_back( LST_MONSTER );
     act.values.push_back( 0 ); // dummy
     act.coords.push_back( mon.pos() );
-    act.str_values.push_back( liquid.serialize() );
+    act.str_values.push_back( serialize( liquid ) );
 }
 
 void serialize_liquid_source( player_activity &act, const tripoint &pos, const item &liquid )
@@ -653,7 +653,7 @@ void serialize_liquid_source( player_activity &act, const tripoint &pos, const i
         act.values.push_back( std::distance( stack.begin(), iter ) );
     }
     act.coords.push_back( pos );
-    act.str_values.push_back( liquid.serialize() );
+    act.str_values.push_back( serialize( liquid ) );
 }
 
 enum liquid_target_type { LTT_CONTAINER = 1, LTT_VEHICLE = 2, LTT_MAP = 3, LTT_MONSTER = 4 };
@@ -707,7 +707,7 @@ void activity_handlers::fill_liquid_do_turn( player_activity *act_, player *p )
             liquid = item( act.str_values.at( 0 ), calendar::turn, source_veh->fuel_left( act.str_values.at( 0 ) ) );
             break;
         case LST_INFINITE_MAP:
-            liquid.deserialize( act.str_values.at( 0 ) );
+            deserialize( liquid, act.str_values.at( 0 ) );
             liquid.charges = item::INFINITE_CHARGES;
             break;
         case LST_MAP_ITEM:
@@ -725,7 +725,7 @@ void activity_handlers::fill_liquid_do_turn( player_activity *act_, player *p )
                 debugmsg( "could not find source creature for liquid transfer" );
                 act.set_to_null();
             }
-            liquid.deserialize( act.str_values.at( 0 ) );
+            deserialize( liquid, act.str_values.at( 0 ) );
             liquid.charges = 1;
             break;
         }
@@ -1294,6 +1294,8 @@ void activity_handlers::reload_finish( player_activity *act, player *p )
             sfx::play_variant_sound( "reload", reloadable->typeId(), sfx::get_heard_volume( p->pos() ) );
             sounds::ambient_sound( p->pos(), reloadable->type->gun->reload_noise_volume, reloadable->type->gun->reload_noise );
         }
+    } else if( reloadable->is_watertight_container() ) {
+        msg = _( "You refill the %s." );
     }
     add_msg( msg.c_str(), reloadable->tname().c_str() );
 }
