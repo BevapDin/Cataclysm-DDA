@@ -4,7 +4,7 @@
 
 #include "string_id.h"
 #include "enums.h"
-#include "color.h"
+#include "glyph.h"
 #include "damage.h"
 #include "calendar.h"
 #include "units.h"
@@ -99,17 +99,13 @@ class vpart_info
         /** What slot of the vehicle tile does this part occupy? */
         std::string location;
 
-        /** Color of part for different states */
-        nc_color color = c_light_gray;
-        nc_color color_broken = c_light_gray;
-
         /**
          * Symbol of part which will be translated as follows:
          * y, u, n, b to NW, NE, SE, SW lines correspondingly
          * h, j, c to horizontal, vertical, cross correspondingly
          */
-        long sym = 0;
-        char sym_broken = '#';
+        glyph symbol_;
+        glyph symbol_broken_;
 
         /** Maximum damage part can sustain before being destroyed */
         int durability = 0;

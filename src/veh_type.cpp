@@ -197,17 +197,17 @@ void vpart_info::load( JsonObject &jo, const std::string &src )
     }
 
     if( jo.has_member( "symbol" ) ) {
-        def.sym = jo.get_string( "symbol" )[ 0 ];
+        def.symbol_.set_symbol( jo.get_string( "symbol" ) );
     }
     if( jo.has_member( "broken_symbol" ) ) {
-        def.sym_broken = jo.get_string( "broken_symbol" )[ 0 ];
+        def.symbol_broken_.set_symbol( jo.get_string( "broken_symbol" ) );
     }
 
     if( jo.has_member( "color" ) ) {
-        def.color = color_from_string( jo.get_string( "color" ) );
+        def.symbol_.set_color( color_from_string( jo.get_string( "color" ) ) );
     }
     if( jo.has_member( "broken_color" ) ) {
-        def.color_broken = color_from_string( jo.get_string( "broken_color" ) );
+        def.symbol_broken_.set_color( color_from_string( jo.get_string( "broken_color" ) ) );
     }
 
     if( jo.has_member( "breaks_into" ) ) {
@@ -425,10 +425,10 @@ void vpart_info::check()
             debugmsg( "Vehicle part %s breaks into non-existent item group %s.",
                       part.id.c_str(), part.breaks_into_group.c_str() );
         }
-        if( part.sym == 0 ) {
+        if( part.symbol_.symbol().empty() ) {
             debugmsg( "vehicle part %s does not define a symbol", part.id.c_str() );
         }
-        if( part.sym_broken == 0 ) {
+        if( part.symbol_broken_.symbol().empty() ) {
             debugmsg( "vehicle part %s does not define a broken symbol", part.id.c_str() );
         }
         if( part.durability <= 0 ) {
