@@ -1944,8 +1944,6 @@ classes = {
         attributes = {
             id = { type = "trap_str_id" },
             loadid = { type = "trap_id" },
-            color = { type = "nc_color" },
-            sym = { type = "int" },
         },
         functions = {
             { name = "can_see", rval = "bool", args = { "tripoint", "player" } },
@@ -1959,6 +1957,7 @@ classes = {
             { name = "is_funnel", rval = "bool", args = { } },
             { name = "is_null", rval = "bool", args = { } },
             { name = "on_disarmed", rval = nil, args = { "tripoint" } },
+            { name = "symbol", rval = "glyph", args = { } },
             { name = "trigger", rval = nil, args = { "tripoint", "Creature" } },
             { name = "triggered_by_item", rval = "bool", args = { "item" } },
         }

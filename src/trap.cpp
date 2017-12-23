@@ -93,11 +93,16 @@ void trap::load_trap( JsonObject &jo, const std::string &src )
 void trap::load( JsonObject &jo, const std::string & )
 {
     mandatory( jo, was_loaded, "id", id );
+    symbol_.set_tile( tile_id( id.str() ) );
     mandatory( jo, was_loaded, "name", name_ );
+    nc_color color;
     if( !assign( jo, "color", color ) ) {
         jo.throw_error( "missing mandatory member \"color\"" );
     }
+    symbol_.set_color( color );
+    long sym;
     mandatory( jo, was_loaded, "symbol", sym, one_char_symbol_reader );
+    symbol_.set_symbol( utf32_to_utf8( sym ) );
     mandatory( jo, was_loaded, "visibility", visibility );
     mandatory( jo, was_loaded, "avoidance", avoidance );
     mandatory( jo, was_loaded, "difficulty", difficulty );
