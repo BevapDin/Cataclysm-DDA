@@ -1618,9 +1618,12 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
         } else if (category == C_TRAP) {
             const trap_str_id tmp( id );
             if( tmp.is_valid() ) {
-                const trap &t = tmp.obj();
-                sym = t.sym;
-                col = t.color;
+                const glyph &g = tmp->symbol();
+                const std::string &sym = g.symbol();
+                int len = sym.length();
+                const char *s = sym.c_str();
+                sym = UTF8_getch(&s, &len);
+                col = g.color();
             }
         } else if (category == C_ITEM) {
             const auto tmp = item( id, 0 );

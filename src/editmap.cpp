@@ -654,7 +654,7 @@ void editmap::update_view( bool update_info )
 
         if( cur_trap != tr_null ) {
             auto &t = cur_trap.obj();
-            mvwprintz( w_info, off, 1, t.color, _( "trap: %s (%d)" ), t.name().c_str(), cur_trap.to_i() );
+            mvwprintz( w_info, off, 1, t.symbol().color(), _( "trap: %s (%d)" ), t.name().c_str(), cur_trap.to_i() );
             off++; // 6
         }
 
@@ -1251,7 +1251,7 @@ int editmap::edit_trp()
                         tnam = tr.id.str();
                     }
                 }
-                mvwputch( w_picktrap, t + 1 - tshift, 2, tr.color, tr.sym );
+                mvwprintz( w_picktrap, t + 1 - tshift, 2, tr.symbol().color(), "%s", tr.symbol().symbol().c_str() );
                 mvwprintz( w_picktrap, t + 1 - tshift, 4,
                            ( trsel == tr.loadid ? h_white : ( cur_trap == tr.loadid ? c_green : c_light_gray ) ), "%d %s", t,
                            tnam.c_str() );
