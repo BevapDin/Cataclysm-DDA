@@ -18,6 +18,9 @@ class glyph {
         tile_id tile_;
 #endif
     public:
+        glyph() = default;
+        glyph( std::string s, nc_color c ) : symbol_( std::move( s ) ), color_( std::move( c ) ) { }
+
         const std::string &symbol() const {
             return symbol_;
         }
