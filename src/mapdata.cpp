@@ -256,8 +256,7 @@ furn_t null_furniture_t() {
   furn_t new_furniture;
   new_furniture.id = furn_str_id::NULL_ID();
   new_furniture.name_ = translate_marker( "nothing" );
-  new_furniture.symbol_.fill( ' ' );
-  new_furniture.color_.fill( c_white );
+  new_furniture.symbol_.fill( glyph( " ", c_white ) );
   new_furniture.movecost = 0;
   new_furniture.move_str_req = -1;
   new_furniture.transparent = true;
@@ -276,8 +275,7 @@ ter_t null_terrain_t() {
 
   new_terrain.id = ter_str_id::NULL_ID();
   new_terrain.name_ = translate_marker( "nothing" );
-  new_terrain.symbol_.fill( ' ' );
-  new_terrain.color_.fill( c_white );
+  new_terrain.symbol_.fill( glyph( " ", c_white ) );
   new_terrain.movecost = 0;
   new_terrain.transparent = true;
   new_terrain.set_flag("TRANSPARENT");
@@ -287,20 +285,24 @@ ter_t null_terrain_t() {
   return new_terrain;
 }
 
-template<typename C, typename F>
-void load_season_array( JsonObject &jo, const std::string &key, C &container, F load_func )
+template<typename F>
+void load_season_array( JsonObject &jo, const std::string &key, std::array<glyph, map_data_common_t::SEASONS_PER_YEAR> &container, F load_func )
 {
     if( jo.has_string( key ) ) {
-        container.fill( load_func( jo.get_string( key ) ) );
+        for( auto &e : container ) {
+            load_func( e, jo.get_string( key ) );
+        }
 
     } else if( jo.has_array( key ) ) {
         auto arr = jo.get_array( key );
         if( arr.size() == 1 ) {
-            container.fill( load_func( arr.get_string( 0 ) ) );
+            for( auto &e : container ) {
+                load_func( e, arr.get_string( 0 ) );
+            }
 
         } else if( arr.size() == container.size() ) {
             for( auto &e : container ) {
-                e = load_func( arr.next_string() );
+                load_func( e, arr.next_string() );
             }
 
         } else {
@@ -319,15 +321,16 @@ std::string map_data_common_t::name() const
 
 void map_data_common_t::load_symbol( JsonObject &jo )
 {
-    load_season_array( jo, "symbol", symbol_, [&jo]( const std::string &str ) {
+    load_season_array( jo, "symbol", symbol_, [&jo]( glyph &g, const std::string &str ) {
         if( str == "LINE_XOXO" ) {
-            return LINE_XOXO;
+            g.set_symbol( utf32_to_utf8( LINE_XOXO ) );
         } else if( str == "LINE_OXOX" ) {
-            return LINE_OXOX;
+            g.set_symbol( utf32_to_utf8( LINE_OXOX ) );
         } else if( str.length() != 1 ) {
             jo.throw_error( "Symbol string must be exactly 1 character long.", "symbol" );
+        } else {
+            g.set_symbol( str );
         }
-        return (int) str[0];
     } );
 
     const bool has_color = jo.has_member( "color" );
@@ -335,9 +338,13 @@ void map_data_common_t::load_symbol( JsonObject &jo )
     if( has_color && has_bgcolor ) {
         jo.throw_error( "Found both color and bgcolor, only one of these is allowed." );
     } else if( has_color ) {
-        load_season_array( jo, "color", color_, color_from_string );
+        load_season_array( jo, "color", symbol_, []( glyph &g, const std::string &str ) {
+            g.set_color( color_from_string( str ) );
+        } );
     } else if( has_bgcolor ) {
-        load_season_array( jo, "bgcolor", color_, bgcolor_from_string );
+        load_season_array( jo, "bgcolor", symbol_, []( glyph &g, const std::string &str ) {
+            g.set_color( bgcolor_from_string( str ) );
+        } );
     } else {
         jo.throw_error( "Missing member: one of: \"color\", \"bgcolor\" must exist." );
     }
@@ -345,12 +352,15 @@ void map_data_common_t::load_symbol( JsonObject &jo )
 
 long map_data_common_t::symbol() const
 {
-    return symbol_[season_of_year( calendar::turn )];
+    const std::string &sym = symbol_[season_of_year( calendar::turn )].symbol();
+    int len = sym.length();
+    const char *s = sym.c_str();
+    return UTF8_getch( &s, &len );
 }
 
 nc_color map_data_common_t::color() const
 {
-    return color_[season_of_year( calendar::turn )];
+    return symbol_[season_of_year( calendar::turn )].color();
 }
 
 const harvest_id &map_data_common_t::get_harvest() const

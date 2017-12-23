@@ -5,7 +5,7 @@
 #include "int_id.h"
 #include "string_id.h"
 #include "units.h"
-#include "color.h"
+#include "glyph.h"
 
 #include <bitset>
 #include <vector>
@@ -206,14 +206,13 @@ public:
     * as to which possible object/field/entity in a single square gets drawn and that some symbols
     * are "reserved" such as * and % to do programmatic behavior.
     */
-    std::array<long, SEASONS_PER_YEAR> symbol_;
+    std::array<glyph, SEASONS_PER_YEAR> symbol_;
 
     int movecost;   // The amount of movement points required to pass this terrain by default.
     units::volume max_volume; // Maximal volume of items that can be stored in/on this furniture
 
     std::string description;
 
-    std::array<nc_color, SEASONS_PER_YEAR> color_; //The color the sym will draw in on the GUI.
     void load_symbol( JsonObject &jo );
 
     iexamine_function examine; //What happens when the terrain/furniture is examined
@@ -247,7 +246,7 @@ public:
     bool connects_to( int test_connect_group ) const {
         return ( connect_group != TERCONN_NONE ) && ( connect_group == test_connect_group );
     }
-
+ 
     long symbol() const;
     nc_color color() const;
 
