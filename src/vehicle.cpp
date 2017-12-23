@@ -2490,8 +2490,8 @@ char vehicle::part_sym( const int p, const bool exact ) const
     if (part_flag (displayed_part, VPFLAG_OPENABLE) && parts[displayed_part].open) {
         return '\''; // open door
     } else {
-        return parts[ displayed_part ].is_broken() ?
-            part_info(displayed_part).sym_broken : part_info(displayed_part).sym;
+        return ( parts[ displayed_part ].is_broken() ?
+            part_info(displayed_part).symbol_broken_ : part_info(displayed_part).symbol_ ).symbol()[0];
     }
 }
 
@@ -2532,7 +2532,7 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
     }
 
     if( parm >= 0 ) {
-        col = part_info(parm).color;
+        col = part_info(parm).symbol_.color();
     } else {
         const int displayed_part = exact ? p : part_displayed_at(parts[p].mount.x, parts[p].mount.y);
 
@@ -2544,9 +2544,9 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
         } else if (parts[displayed_part].blood > 0) {
             col = c_light_red;
         } else if (parts[displayed_part].is_broken()) {
-            col = part_info(displayed_part).color_broken;
+            col = part_info(displayed_part).symbol_broken_.color();
         } else {
-            col = part_info(displayed_part).color;
+            col = part_info(displayed_part).symbol_.color();
         }
 
     }
@@ -2559,7 +2559,7 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
     int curtains = part_with_feature(p, VPFLAG_CURTAIN, false);
     if (curtains >= 0) {
         if (part_with_feature(p, VPFLAG_WINDOW, true) >= 0 && !parts[curtains].open)
-            col = part_info(curtains).color;
+            col = part_info(curtains).symbol_.color();
     }
 
     //Invert colors for cargo parts with stuff in them
