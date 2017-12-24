@@ -11,66 +11,72 @@
 
 #define dbg(x) DebugLog((DebugLevel)(x),D_MAIN) << __FILE__ << ":" << __LINE__ << ": "
 
-bool needs_damage_type( affected_stat as )
+namespace {
+class strength_accessor : public stat_accessor {
+    public:
+        ~strength_accessor() override = default;
+        int get( const Character &u ) const override { return u.get_str(); }
+        void set( Character &u, const int value ) const override { u.set_str( value ); }
+} streng_acc;
+} // namespace
+
+const stat_accessor &stats::strength = streng_acc;
+/*
+const stat_accessor &stats::dexterity;
+const stat_accessor &stats::intelligence;
+const stat_accessor &stats::perception;
+
+const stat_accessor &stats::hit;
+const stat_accessor &stats::dodge;
+const stat_accessor &stats::block;
+const stat_accessor &stats::speed;
+const stat_accessor &stats::move_cost;
+const stat_accessor &stats::damage;
+const stat_accessor &stats::armor;
+const stat_accessor &stats::armor_penetration;
+const stat_accessor &stats::target_armor_multiplier;
+*/
+bool needs_damage_type( const stat_accessor &as )
 {
-    return as == AFFECTED_DAMAGE || as == AFFECTED_ARMOR ||
-           as == AFFECTED_ARMOR_PENETRATION;
+    return &as == &stats::damage || &as == &stats::armor ||
+           &as == &stats::armor_penetration;
 }
 
-static const std::map<std::string, affected_stat> affected_stat_map = {{
-        std::make_pair( "hit", AFFECTED_HIT ),
-        std::make_pair( "dodge", AFFECTED_DODGE ),
-        std::make_pair( "block", AFFECTED_BLOCK ),
-        std::make_pair( "speed", AFFECTED_SPEED ),
-        std::make_pair( "movecost", AFFECTED_MOVE_COST ),
-        std::make_pair( "damage", AFFECTED_DAMAGE ),
-        std::make_pair( "armor", AFFECTED_ARMOR ),
-        std::make_pair( "arpen", AFFECTED_ARMOR_PENETRATION ),
-        std::make_pair( "target_armor_multiplier", AFFECTED_TARGET_ARMOR_MULTIPLIER )
+static const std::map<std::string, std::reference_wrapper<const stat_accessor>> stat_map = {{
+        std::make_pair( "hit", stats::hit ),
+        std::make_pair( "dodge", stats::dodge ),
+        std::make_pair( "block", stats::block ),
+        std::make_pair( "speed", stats::speed ),
+        std::make_pair( "movecost", stats::move_cost ),
+        std::make_pair( "damage", stats::damage ),
+        std::make_pair( "armor", stats::armor ),
+        std::make_pair( "arpen", stats::armor_penetration ),
+        std::make_pair( "target_armor_multiplier", stats::target_armor_multiplier ),
+        std::make_pair( "str", stats::strength ),
+        std::make_pair( "dex", stats::dexterity ),
+        std::make_pair( "int", stats::intelligence ),
+        std::make_pair( "per", stats::perception ),
     }
 };
 
-static const std::map<std::string, scaling_stat> scaling_stat_map = {{
-        std::make_pair( "str", STAT_STR ),
-        std::make_pair( "dex", STAT_DEX ),
-        std::make_pair( "int", STAT_INT ),
-        std::make_pair( "per", STAT_PER ),
-    }
-};
-
-scaling_stat scaling_stat_from_string( const std::string &s )
+static const stat_accessor &stat_from_string( const std::string &s )
 {
-    const auto &iter = scaling_stat_map.find( s );
-    if( iter == scaling_stat_map.end() ) {
-        return STAT_NULL;
+    const auto &iter = stat_map.find( s );
+    if( iter == stat_map.end() ) {
+        throw std::runtime_error("invalid stat: " + s);
     }
 
     return iter->second;
-}
-
-affected_stat affected_stat_from_string( const std::string &s )
-{
-    const auto &iter = affected_stat_map.find( s );
-    if( iter != affected_stat_map.end() ) {
-        return iter->second;
-    }
-
-    return AFFECTED_NULL;
 }
 
 bonus_container::bonus_container()
 {
 }
 
-void effect_scaling::load( JsonArray &jarr )
+effect_scaling::effect_scaling( JsonArray &jarr )
+: stat( stat_from_string( jarr.next_string() ) )
+, scale( jarr.next_float() )
 {
-    if( jarr.test_string() ) {
-        stat = scaling_stat_from_string( jarr.next_string() );
-    } else {
-        stat = STAT_NULL;
-    }
-
-    scale = jarr.next_float();
 }
 
 void bonus_container::load( JsonObject &jo )
@@ -91,14 +97,8 @@ void bonus_container::load( JsonArray &jarr, bool mult )
     while( jarr.has_more() ) {
         JsonArray qualifiers = jarr.next_array();
 
-        affected_stat as;
         damage_type dt = DT_NULL;
-
-        const std::string affected_stat_string = qualifiers.next_string();
-        as = affected_stat_from_string( affected_stat_string );
-        if( as == AFFECTED_NULL ) {
-            jarr.throw_error( "Invalid affected stat" );
-        }
+        const stat_accessor &as = stat_from_string( qualifiers.next_string() );
 
         if( needs_damage_type( as ) ) {
             const std::string damage_string = qualifiers.next_string();
@@ -108,8 +108,7 @@ void bonus_container::load( JsonArray &jarr, bool mult )
             }
         }
 
-        effect_scaling es;
-        es.load( qualifiers );
+        effect_scaling es( qualifiers );
         affected_type at( as, dt );
         // Are we changing multipliers or flats?
         auto &selected = mult ? bonuses_mult : bonuses_flat;
@@ -117,14 +116,14 @@ void bonus_container::load( JsonArray &jarr, bool mult )
     }
 }
 
-affected_type::affected_type( affected_stat s )
+affected_type::affected_type( const stat_accessor &s )
+: stat( s )
 {
-    stat = s;
 }
 
-affected_type::affected_type( affected_stat s, damage_type t )
+affected_type::affected_type( const stat_accessor &s, damage_type t )
+: stat( s )
 {
-    stat = s;
     if( needs_damage_type( s ) ) {
         type = t;
     } else {
@@ -134,15 +133,15 @@ affected_type::affected_type( affected_stat s, damage_type t )
 
 bool affected_type::operator<( const affected_type &other ) const
 {
-    return stat < other.stat || ( stat == other.stat && type < other.type );
+    return &stat < &other.stat || ( &stat == &other.stat && type < other.type );
 }
 bool affected_type::operator==( const affected_type &other ) const
 {
     // NOTE: Constructor has to ensure type is set to NULL for some stats
-    return stat == other.stat && type == other.type;
+    return &stat == &other.stat && type == other.type;
 }
 
-float bonus_container::get_flat( const Character &u, affected_stat stat, damage_type dt ) const
+float bonus_container::get_flat( const Character &u, const stat_accessor &stat, damage_type dt ) const
 {
     affected_type type( stat, dt );
     const auto &iter = bonuses_flat.find( type );
@@ -157,12 +156,12 @@ float bonus_container::get_flat( const Character &u, affected_stat stat, damage_
 
     return ret;
 }
-float bonus_container::get_flat( const Character &u, affected_stat stat ) const
+float bonus_container::get_flat( const Character &u, const stat_accessor &stat ) const
 {
     return get_flat( u, stat, DT_NULL );
 }
 
-float bonus_container::get_mult( const Character &u, affected_stat stat, damage_type dt ) const
+float bonus_container::get_mult( const Character &u, const stat_accessor &stat, damage_type dt ) const
 {
     affected_type type( stat, dt );
     const auto &iter = bonuses_mult.find( type );
@@ -178,32 +177,12 @@ float bonus_container::get_mult( const Character &u, affected_stat stat, damage_
     // Currently all relevant effects require non-negative values
     return std::max( 0.0f, ret );
 }
-float bonus_container::get_mult( const Character &u, affected_stat stat ) const
+float bonus_container::get_mult( const Character &u, const stat_accessor &stat ) const
 {
     return get_mult( u, stat, DT_NULL );
 }
 
 float effect_scaling::get( const Character &u ) const
 {
-    float bonus = 0.0f;
-    switch( stat ) {
-        case STAT_STR:
-            bonus = scale * u.get_str();
-            break;
-        case STAT_DEX:
-            bonus = scale * u.get_dex();
-            break;
-        case STAT_INT:
-            bonus = scale * u.get_int();
-            break;
-        case STAT_PER:
-            bonus = scale * u.get_per();
-            break;
-        case STAT_NULL:
-            bonus = scale;
-        case NUM_STATS:
-            break;
-    }
-
-    return bonus;
+    return scale * stat.get( u );
 }
