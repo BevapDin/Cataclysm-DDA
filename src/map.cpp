@@ -5944,9 +5944,9 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
         const field_id& fid = curr_field.fieldSymbol();
         const field_entry* fe = curr_field.findField(fid);
         const field_t& f = fieldlist[fid];
-        if (f.sym == '&' || fe == NULL) {
+        if (f.sym == "&" || fe == NULL) {
             // Do nothing, a '&' indicates invisible fields.
-        } else if (f.sym == '*') {
+        } else if (f.sym == "*") {
             // A random symbol.
             switch (rng(1, 5)) {
             case 1: sym = '*'; break;
@@ -5966,13 +5966,13 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
             // (that are visible to the player!), we always set the symbol.
             // If there are items and the field does not hide them,
             // the code handling items will override it.
-            draw_item_sym = (f.sym == '%');
+            draw_item_sym = (f.sym == "%");
             // If field priority is > 1, and the field is set to hide items,
             //draw the field as it obscures what's under it.
-            if( (f.sym != '%' && f.priority > 1) || (f.sym != '%' && sym == '.'))  {
+            if( (f.sym != "%" && f.priority > 1) || (f.sym != "%" && sym == '.'))  {
                 // default terrain '.' and
                 // non-default field symbol -> field symbol overrides terrain
-                sym = f.sym;
+                sym = f.sym[0];
             }
             tercol = fe->color();
         }

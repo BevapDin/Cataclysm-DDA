@@ -1091,7 +1091,7 @@ void editmap::setup_fmenu( uimenu *fmenu )
         fname = ftype.name( fdens - 1 );
         fmenu->addentry( fid, true, -2, "%s", fname.c_str() );
         fmenu->entries[fid].extratxt.left = 1;
-        fmenu->entries[fid].extratxt.txt = string_format( "%c", ftype.sym );
+        fmenu->entries[fid].extratxt.txt = ftype.sym;
         update_fmenu_entry( fmenu, cur_field, fid );
     }
     if( sel_field >= 0 ) {
