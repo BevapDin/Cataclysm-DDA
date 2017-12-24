@@ -57,6 +57,7 @@ struct field_t {
     bool accelerated_decay;
 
         bool invisible() const;
+        bool hide_items() const;
 };
 
 //The master list of id's for a field, corresponding to the fieldlist array.

@@ -5956,20 +5956,16 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
             case 5: sym = '+'; break;
             }
         } else {
-            // A field symbol '%' indicates the field should not hide
-            // items/terrain. When the symbol is not '%' it will
-            // hide items (the color is still inverted if there are items,
-            // but the tile symbol is not changed).
             // draw_item_sym indicates that the item symbol should be used
             // even if sym is not '.'.
             // As we don't know at this stage if there are any items
             // (that are visible to the player!), we always set the symbol.
             // If there are items and the field does not hide them,
             // the code handling items will override it.
-            draw_item_sym = (f.sym == "%");
+            draw_item_sym = !f.hide_items();
             // If field priority is > 1, and the field is set to hide items,
             //draw the field as it obscures what's under it.
-            if( (f.sym != "%" && f.priority > 1) || (f.sym != "%" && sym == '.'))  {
+            if( (f.hide_items() && f.priority > 1) || (f.hide_items() && sym == '.'))  {
                 // default terrain '.' and
                 // non-default field symbol -> field symbol overrides terrain
                 sym = f.sym[0];
