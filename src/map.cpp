@@ -5924,7 +5924,7 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
     }
     const bool is_deep_water = curr_ter.has_flag( TFLAG_SWIMMABLE ) && curr_ter.has_flag( TFLAG_DEEP_WATER );
     // Can only see underwater items if WE are underwater
-    show_items = show_items && !( is_deep_water && !u.is_underwater() );
+    show_items = show_items && ( !is_deep_water || u.is_underwater() );
     const bool has_items = show_items && curr_maptile.get_item_count() > 0 && sees_some_items( p, u );
     // If there's a trap here, and we have sufficient perception, draw that instead
     if( curr_trap.can_see( p, g->u ) ) {
