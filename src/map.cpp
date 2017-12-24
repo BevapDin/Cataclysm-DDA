@@ -5922,7 +5922,8 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
         }
         tercol = curr_ter.color();
     }
-    if( curr_ter.has_flag( TFLAG_SWIMMABLE ) && curr_ter.has_flag( TFLAG_DEEP_WATER ) && !u.is_underwater() ) {
+    const bool is_deep_water = curr_ter.has_flag( TFLAG_SWIMMABLE ) && curr_ter.has_flag( TFLAG_DEEP_WATER );
+    if( is_deep_water && !u.is_underwater() ) {
         show_items = false; // Can only see underwater items if WE are underwater
     }
     const bool has_items = show_items && curr_maptile.get_item_count() > 0 && sees_some_items( p, u );
