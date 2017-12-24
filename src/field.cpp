@@ -457,6 +457,12 @@ bool field_t::invisible() const
     return sym == "&";
 }
 
+bool field_t::hide_items() const
+{
+    //@todo make this a flag or so?
+    return sym != "%";
+}
+
 field_id field_from_ident(const std::string &field_ident)
 {
     for( size_t i = 0; i < num_fields; i++) {
