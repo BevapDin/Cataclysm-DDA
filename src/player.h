@@ -111,7 +111,7 @@ extern const double MAX_RECOIL;
 
 //Don't forget to add new memorial counters
 //to the save and load functions in savegame_json.cpp
-struct stats {
+struct player_stats {
     int squares_walked = 0;
     int damage_taken = 0;
     int damage_healed = 0;
@@ -1402,7 +1402,7 @@ class player : public Character
         std::vector <std::string> memorial_log;
 
         //Record of player stats, for posterity only
-        stats lifetime_stats;
+        player_stats lifetime_stats;
 
         void mod_stat( const std::string &stat, float modifier ) override;
 

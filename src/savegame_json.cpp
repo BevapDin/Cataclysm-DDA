@@ -2377,7 +2377,7 @@ void addiction::deserialize( JsonIn &jsin )
     sated = jo.get_int( "sated" );
 }
 
-void stats::serialize( JsonOut &json ) const
+void player_stats::serialize( JsonOut &json ) const
 {
     json.start_object();
     json.member( "squares_walked", squares_walked );
@@ -2387,7 +2387,7 @@ void stats::serialize( JsonOut &json ) const
     json.end_object();
 }
 
-void stats::deserialize( JsonIn &jsin )
+void player_stats::deserialize( JsonIn &jsin )
 {
     JsonObject jo = jsin.get_object();
     jo.read( "squares_walked", squares_walked );
