@@ -5944,8 +5944,8 @@ bool map::draw_maptile( WINDOW* w, player &u, const tripoint &p, const maptile &
         const field_id& fid = curr_field.fieldSymbol();
         const field_entry* fe = curr_field.findField(fid);
         const field_t& f = fieldlist[fid];
-        if (f.sym == "&" || fe == NULL) {
-            // Do nothing, a '&' indicates invisible fields.
+        if( f.invisible() || fe == NULL ) {
+            // do nothing
         } else if (f.sym == "*") {
             // A random symbol.
             switch (rng(1, 5)) {

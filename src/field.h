@@ -55,6 +55,8 @@ struct field_t {
 
     /** Should it decay with out-of-bubble time too? */
     bool accelerated_decay;
+
+        bool invisible() const;
 };
 
 //The master list of id's for a field, corresponding to the fieldlist array.
