@@ -29,7 +29,7 @@ struct field_t {
     /// Can be empty! \p density must be in the range [0, MAX_FIELD_DENSITY - 1].
     std::string name( int density ) const;
 
- char sym; //The symbol to draw for this field. Note that some are reserved like * and %. You will have to check the draw function for specifics.
+        std::string sym; //The symbol to draw for this field. Note that some are reserved like * and %. You will have to check the draw function for specifics.
  int priority; //Inferior numbers have lower priority. 0 is "ground" (splatter), 2 is "on the ground", 4 is "above the ground" (fire), 6 is reserved for furniture, and 8 is "in the air" (smoke).
 
      /** Color the field will be drawn as on the screen at a given density */
