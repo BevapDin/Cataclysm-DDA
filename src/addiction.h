@@ -5,8 +5,8 @@
 #include <string>
 #include <functional>
 
-#include "string_id.h"
-
+template<typename T>
+class string_id;
 class addiction;
 class player;
 enum add_type : int;
