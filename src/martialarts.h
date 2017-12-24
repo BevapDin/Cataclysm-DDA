@@ -3,12 +3,14 @@
 #define MARTIALARTS_H
 
 #include "string_id.h"
-#include "bonuses.h"
+#include "pimpl.h"
+
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
 
+class bonus_container;
 enum damage_type : int;
 class JsonObject;
 class effect;
@@ -102,7 +104,7 @@ class ma_technique
         int weighting; //how often this technique is used
 
         /** All kinds of bonuses by types to damage, hit etc. */
-        bonus_container bonuses;
+        pimpl<bonus_container> bonuses;
 
         float damage_bonus( const player &u, damage_type type ) const;
         float damage_multiplier( const player &u, damage_type type ) const;
@@ -172,7 +174,7 @@ class ma_buff
         int blocks_bonus; // extra blocks, like karate
 
         /** All kinds of bonuses by types to damage, hit, armor etc. */
-        bonus_container bonuses;
+        pimpl<bonus_container> bonuses;
 
         bool quiet;
         bool melee_allowed;

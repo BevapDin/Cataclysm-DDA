@@ -1,5 +1,6 @@
 #include "martialarts.h"
 #include "player.h"
+#include "bonuses.h"
 #include "debug.h"
 #include "effect.h"
 #include "json.h"
@@ -99,7 +100,7 @@ void ma_technique::load( JsonObject &jo, const std::string &src )
     optional( jo, was_loaded, "flags", flags, auto_flags_reader<>{} );
 
     reqs.load( jo, src );
-    bonuses.load( jo );
+    bonuses->load( jo );
 }
 
 // Not implemented on purpose (martialart objects have no integer id)
@@ -134,7 +135,7 @@ void ma_buff::load( JsonObject &jo, const std::string &src )
     optional( jo, was_loaded, "throw_immune", throw_immune, false );
 
     reqs.load( jo, src );
-    bonuses.load( jo );
+    bonuses->load( jo );
 }
 
 // Not implemented on purpose (martialart objects have no integer id)
@@ -405,7 +406,6 @@ bool ma_technique::is_valid_player( const player &u ) const
 
 ma_buff::ma_buff()
 {
-
     buff_duration = 2; // total length this buff lasts
     max_stacks = 1; // total number of stacks this buff can have
 
@@ -449,31 +449,31 @@ void ma_buff::apply_player(player &u) const
 
 int ma_buff::hit_bonus( const player &u ) const
 {
-    return bonuses.get_flat( u, AFFECTED_HIT );
+    return bonuses->get_flat( u, AFFECTED_HIT );
 }
 int ma_buff::dodge_bonus( const player &u ) const
 {
-    return bonuses.get_flat( u, AFFECTED_DODGE );
+    return bonuses->get_flat( u, AFFECTED_DODGE );
 }
 int ma_buff::block_bonus( const player &u ) const
 {
-    return bonuses.get_flat( u, AFFECTED_BLOCK );
+    return bonuses->get_flat( u, AFFECTED_BLOCK );
 }
 int ma_buff::speed_bonus( const player &u ) const
 {
-    return bonuses.get_flat( u, AFFECTED_SPEED );
+    return bonuses->get_flat( u, AFFECTED_SPEED );
 }
 int ma_buff::armor_bonus( const player &u, damage_type dt ) const
 {
-    return bonuses.get_flat( u, AFFECTED_ARMOR, dt );
+    return bonuses->get_flat( u, AFFECTED_ARMOR, dt );
 }
 float ma_buff::damage_bonus( const player &u, damage_type dt ) const
 {
-    return bonuses.get_flat( u, AFFECTED_DAMAGE, dt );
+    return bonuses->get_flat( u, AFFECTED_DAMAGE, dt );
 }
 float ma_buff::damage_mult( const player &u, damage_type dt ) const
 {
-    return bonuses.get_mult( u, AFFECTED_DAMAGE, dt );
+    return bonuses->get_mult( u, AFFECTED_DAMAGE, dt );
 }
 bool ma_buff::is_throw_immune() const
 {
@@ -775,7 +775,7 @@ int player::mabuff_attack_cost_penalty() const
 {
     int ret = 0;
     accumulate_ma_buff_effects( *effects, [&ret, this]( const ma_buff &b, const effect &d ) {
-        ret += d.get_intensity() * b.bonuses.get_flat( *this, AFFECTED_MOVE_COST );
+        ret += d.get_intensity() * b.bonuses->get_flat( *this, AFFECTED_MOVE_COST );
     } );
     return ret;
 }
@@ -785,7 +785,7 @@ float player::mabuff_attack_cost_mult() const
     accumulate_ma_buff_effects( *effects, [&ret, this]( const ma_buff &b, const effect &d ) {
         // This is correct, so that a 20% buff (1.2) plus a 20% buff (1.2)
         // becomes 1.4 instead of 2.4 (which would be a 240% buff)
-        ret *= d.get_intensity() * ( b.bonuses.get_mult( *this, AFFECTED_MOVE_COST ) - 1 ) + 1;
+        ret *= d.get_intensity() * ( b.bonuses->get_mult( *this, AFFECTED_MOVE_COST ) - 1 ) + 1;
     } );
     return ret;
 }
@@ -832,25 +832,25 @@ void player::add_martialart(const matype_id &ma_id)
 
 float ma_technique::damage_bonus( const player &u, damage_type type ) const
 {
-    return bonuses.get_flat( u, AFFECTED_DAMAGE, type );
+    return bonuses->get_flat( u, AFFECTED_DAMAGE, type );
 }
 
 float ma_technique::damage_multiplier( const player &u, damage_type type ) const
 {
-    return bonuses.get_mult( u, AFFECTED_DAMAGE, type );
+    return bonuses->get_mult( u, AFFECTED_DAMAGE, type );
 }
 
 float ma_technique::move_cost_multiplier( const player &u ) const
 {
-    return bonuses.get_mult( u, AFFECTED_MOVE_COST );
+    return bonuses->get_mult( u, AFFECTED_MOVE_COST );
 }
 
 float ma_technique::move_cost_penalty( const player &u ) const
 {
-    return bonuses.get_flat( u, AFFECTED_MOVE_COST );
+    return bonuses->get_flat( u, AFFECTED_MOVE_COST );
 }
 
 float ma_technique::armor_penetration( const player &u, damage_type type ) const
 {
-    return bonuses.get_flat( u, AFFECTED_ARMOR_PENETRATION, type );
+    return bonuses->get_flat( u, AFFECTED_ARMOR_PENETRATION, type );
 }
