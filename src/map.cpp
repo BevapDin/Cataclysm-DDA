@@ -5895,7 +5895,7 @@ bool map::need_draw_lower_floor( const tripoint &p )
 }
 
 bool map::draw_maptile( const catacurses::window &w, player &u, const tripoint &p, const maptile &curr_maptile,
-                        bool invert, bool show_items,
+                        bool invert, const bool show_items,
                         const tripoint &view_center,
                         const bool low_light, const bool bright_light, const bool inorder ) const
 {
@@ -5926,8 +5926,8 @@ bool map::draw_maptile( const catacurses::window &w, player &u, const tripoint &
     }
     const bool is_deep_water = curr_ter.has_flag( TFLAG_SWIMMABLE ) && curr_ter.has_flag( TFLAG_DEEP_WATER );
     // Can only see underwater items if WE are underwater
-    show_items = show_items && ( !is_deep_water || u.is_underwater() );
-    const bool has_items = show_items && curr_maptile.get_item_count() > 0 && sees_some_items( p, u );
+    const bool items_underwater = show_items && ( !is_deep_water || u.is_underwater() );
+    const bool has_items = items_underwater && curr_maptile.get_item_count() > 0 && sees_some_items( p, u );
     // If there's a trap here, and we have sufficient perception, draw that instead
     if( curr_trap.can_see( p, g->u ) ) {
         tercol = curr_trap.symbol().color();
