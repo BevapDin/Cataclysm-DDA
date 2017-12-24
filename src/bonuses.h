@@ -11,38 +11,47 @@ class Character;
 class JsonObject;
 class JsonArray;
 
-enum scaling_stat : int {
-    STAT_NULL = 0,
-    STAT_STR,
-    STAT_DEX,
-    STAT_INT,
-    STAT_PER,
-    NUM_STATS
+class stat_accessor {
+    protected:
+        stat_accessor() = default;
+
+    public:
+        virtual ~stat_accessor() = default;
+
+        virtual int get( const Character &u ) const;
+        virtual void set( const Character &u, int value ) const;
+        virtual void add( const Character &u, int delta ) const;
 };
 
-enum affected_stat : int {
-    AFFECTED_NULL = 0,
-    AFFECTED_HIT,
-    AFFECTED_DODGE,
-    AFFECTED_BLOCK,
-    AFFECTED_SPEED,
-    AFFECTED_MOVE_COST,
-    AFFECTED_DAMAGE,
-    AFFECTED_ARMOR,
-    AFFECTED_ARMOR_PENETRATION,
-    AFFECTED_TARGET_ARMOR_MULTIPLIER,
-    NUM_AFFECTED
-};
+namespace stats
+{
+
+extern const stat_accessor &strength;
+extern const stat_accessor &dexterity;
+extern const stat_accessor &intelligence;
+extern const stat_accessor &perception;
+
+extern const stat_accessor &hit;
+extern const stat_accessor &dodge;
+extern const stat_accessor &block;
+extern const stat_accessor &speed;
+extern const stat_accessor &move_cost;
+extern const stat_accessor &damage;
+extern const stat_accessor &armor;
+extern const stat_accessor &armor_penetration;
+extern const stat_accessor &target_armor_multiplier;
+
+} // namespace stat
 
 // We'll be indexing bonuses with this
 struct affected_type {
     public:
-        affected_type( affected_stat s );
-        affected_type( affected_stat s, damage_type t );
+        affected_type( const stat_accessor &s );
+        affected_type( const stat_accessor &s, damage_type t );
         bool operator<( const affected_type & ) const;
         bool operator==( const affected_type & ) const;
 
-        affected_stat get_stat() const {
+        const stat_accessor &get_stat() const {
             return stat;
         }
 
@@ -51,18 +60,18 @@ struct affected_type {
         }
 
     private:
-        affected_stat stat;
+        const stat_accessor &stat;
         damage_type type;
 };
 
 // This is the bonus we are indexing
 struct effect_scaling {
-    scaling_stat stat;
+    const stat_accessor &stat;
     float scale;
 
     float get( const Character &u ) const;
 
-    void load( JsonArray &jarr );
+    effect_scaling( JsonArray &jarr );
 };
 
 class bonus_container
@@ -72,11 +81,11 @@ class bonus_container
         void load( JsonObject &jo );
         void load( JsonArray &jo, bool mult );
 
-        float get_flat( const Character &u, affected_stat stat, damage_type type ) const;
-        float get_flat( const Character &u, affected_stat stat ) const;
+        float get_flat( const Character &u, const stat_accessor &stat, damage_type type ) const;
+        float get_flat( const Character &u, const stat_accessor &stat ) const;
 
-        float get_mult( const Character &u, affected_stat stat, damage_type type ) const;
-        float get_mult( const Character &u, affected_stat stat ) const;
+        float get_mult( const Character &u, const stat_accessor &stat, damage_type type ) const;
+        float get_mult( const Character &u, const stat_accessor &stat ) const;
 
     private:
         using bonus_map = std::map<affected_type, std::vector<effect_scaling>>;
