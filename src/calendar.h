@@ -205,8 +205,6 @@ class calendar
         // Sunlight and day/night calculations
         /** Returns true if it's currently after sunset + TWILIGHT_SECONDS or before sunrise - TWILIGHT_SECONDS. */
         bool is_night() const;
-        /** Returns the current sunlight or moonlight level through the preceding functions. */
-        float sunlight() const;
 
         /** Current year, with default game start as year 0 */
         int years() const {
@@ -640,5 +638,7 @@ time_point sunset( const time_point &p );
 moon_phase get_moon_phase( const time_point &p );
 /** Returns the current seasonally-adjusted maximum daylight level */
 double current_daylight_level( const time_point &p );
+/** Returns the current sunlight or moonlight level through the preceding functions. */
+float sunlight( const time_point &p );
 
 #endif

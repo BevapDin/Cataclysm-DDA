@@ -110,7 +110,6 @@ classes = {
             { name = "get_turn", rval = "int", args = { } },
             { name = "increment", rval = nil, args = { } },
             { name = "is_night", rval = "bool", args = { } },
-            { name = "sunlight", rval = "float", args = { } },
             { name = "years", rval = "int", args = { } },
         }
     },
