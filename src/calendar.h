@@ -203,8 +203,6 @@ class calendar
         void increment();
 
         // Sunlight and day/night calculations
-        /** Returns the current light level of the moon. */
-        moon_phase moon() const;
         /** Returns true if it's currently after sunset + TWILIGHT_SECONDS or before sunrise - TWILIGHT_SECONDS. */
         bool is_night() const;
         /** Returns the current seasonally-adjusted maximum daylight level */
@@ -640,5 +638,7 @@ std::string to_string_time_of_day( const time_point &p );
 time_point sunrise( const time_point &p );
 /** Returns the current sunset time based on the time of year. */
 time_point sunset( const time_point &p );
+/** Returns the current light level of the moon. */
+moon_phase get_moon_phase( const time_point &p );
 
 #endif
