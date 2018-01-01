@@ -100,8 +100,8 @@ MonsterGroupResult MonsterGroupManager::GetResultFromGroup(
             //Collect valid time of day ranges
             if( ( elem ) == "DAY" || ( elem ) == "NIGHT" || ( elem ) == "DUSK" ||
                 ( elem ) == "DAWN" ) {
-                int sunset = calendar::turn.sunset().get_turn();
-                int sunrise = calendar::turn.sunrise().get_turn();
+                const int sunset = to_turn<int>( ::sunset( calendar::turn ) );
+                const int sunrise = to_turn<int>( ::sunrise( calendar::turn ) );
                 if( ( elem ) == "DAY" ) {
                     valid_times_of_day.push_back( std::make_pair( sunrise, sunset ) );
                 } else if( ( elem ) == "NIGHT" ) {

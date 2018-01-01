@@ -13020,9 +13020,9 @@ void game::wait()
             return ( remainder > 0 ) ? remainder : DAYS( 1 ) + remainder;
         };
 
-        add_menu_item( 7,  'd', _( "Wait till dawn" ),     diurnal_time_before( calendar::turn.sunrise() ) );
+        add_menu_item( 7,  'd', _( "Wait till dawn" ),     diurnal_time_before( to_turn<int>( sunrise( calendar::turn ) ) ) );
         add_menu_item( 8,  'n', _( "Wait till noon" ),     diurnal_time_before( HOURS( 12 ) ) );
-        add_menu_item( 9,  'k', _( "Wait till dusk" ),     diurnal_time_before( calendar::turn.sunset() ) );
+        add_menu_item( 9,  'k', _( "Wait till dusk" ),     diurnal_time_before( to_turn<int>( sunset( calendar::turn ) ) ) );
         add_menu_item( 10, 'm', _( "Wait till midnight" ), diurnal_time_before( HOURS( 0 ) ) );
         add_menu_item( 11, 'w', _( "Wait till weather changes" ) );
     }

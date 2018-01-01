@@ -113,8 +113,6 @@ classes = {
             { name = "is_night", rval = "bool", args = { } },
             { name = "sunlight", rval = "float", args = { } },
             { name = "years", rval = "int", args = { } },
-            { name = "sunset", rval = "calendar", args = { } },
-            { name = "sunrise", rval = "calendar", args = { } },
         }
     },
     mutation_branch = {

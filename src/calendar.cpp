@@ -166,73 +166,41 @@ moon_phase calendar::moon() const
     return moon_phase(current_phase);
 }
 
-calendar calendar::sunrise() const
+time_point sunrise( const time_point &p )
 {
-    int start_hour = 0, end_hour = 0, newhour = 0, newminute = 0;
-    switch (season) {
-    case SPRING:
-        start_hour = SUNRISE_EQUINOX;
-        end_hour   = SUNRISE_SUMMER;
-        break;
-    case SUMMER:
-        start_hour = SUNRISE_SUMMER;
-        end_hour   = SUNRISE_EQUINOX;
-        break;
-    case AUTUMN:
-        start_hour = SUNRISE_EQUINOX;
-        end_hour   = SUNRISE_WINTER;
-        break;
-    case WINTER:
-        start_hour = SUNRISE_WINTER;
-        end_hour   = SUNRISE_EQUINOX;
-        break;
-    }
-    double percent = double(double(day) / to_days<int>( season_length() ));
-    double time = double(start_hour) * (1. - percent) + double(end_hour) * percent;
+    const time_point midnight = p - time_past_midnight( p );
+    const time_duration season_length = calendar::season_length();
+    const season_type season = season_of_year( p );
+    const double percent = ( time_past_new_year( p ) % season_length ) / season_length;
 
-    newhour = int(time);
-    time -= int(time);
-    newminute = int(time * 60);
+    // double because it is needed as double later
+    static const std::array<double, 4> start_hours = { { SUNRISE_EQUINOX, SUNRISE_SUMMER, SUNRISE_EQUINOX, SUNRISE_WINTER } };
+    static const std::array<double, 4> end_hours = { { SUNRISE_SUMMER, SUNRISE_EQUINOX, SUNRISE_WINTER, SUNRISE_EQUINOX } };
+    const double time = start_hours[season] * ( 1.0 - percent ) + end_hours[season] * percent;
 
-    return calendar (newminute, newhour, day, season, year);
+    return midnight + time_duration::from_hours( time );
 }
 
-calendar calendar::sunset() const
+time_point sunset( const time_point &p )
 {
-    int start_hour = 0, end_hour = 0, newhour = 0, newminute = 0;
-    switch (season) {
-    case SPRING:
-        start_hour = SUNSET_EQUINOX;
-        end_hour   = SUNSET_SUMMER;
-        break;
-    case SUMMER:
-        start_hour = SUNSET_SUMMER;
-        end_hour   = SUNSET_EQUINOX;
-        break;
-    case AUTUMN:
-        start_hour = SUNSET_EQUINOX;
-        end_hour   = SUNSET_WINTER;
-        break;
-    case WINTER:
-        start_hour = SUNSET_WINTER;
-        end_hour   = SUNSET_EQUINOX;
-        break;
-    }
-    double percent = double(double(day) / to_days<int>( season_length() ));
-    double time = double(start_hour) * (1. - percent) + double(end_hour) * percent;
+    const time_point midnight = p - time_past_midnight( p );
+    const time_duration season_length = calendar::season_length();
+    const season_type season = season_of_year( p );
+    const double percent = ( time_past_new_year( p ) % season_length ) / season_length;
 
-    newhour = int(time);
-    time -= int(time);
-    newminute = int(time * 60);
+    // double because it is needed as double later
+    static const std::array<double, 4> start_hours = { { SUNSET_EQUINOX, SUNSET_SUMMER, SUNSET_EQUINOX, SUNSET_WINTER } };
+    static const std::array<double, 4> end_hours = { { SUNSET_SUMMER, SUNSET_EQUINOX, SUNSET_WINTER, SUNSET_EQUINOX } };
+    const double time = start_hours[season] * ( 1.0 - percent ) + end_hours[season] * percent;
 
-    return calendar (newminute, newhour, day, season, year);
+    return midnight + time_duration::from_hours( time );
 }
 
 bool calendar::is_night() const
 {
     const time_duration now = time_past_midnight( *this );
-    const time_duration sunrise = time_past_midnight( this->sunrise() );
-    const time_duration sunset = time_past_midnight( this->sunset() );
+    const time_duration sunrise = time_past_midnight( ::sunrise( *this ) );
+    const time_duration sunset = time_past_midnight( ::sunset( *this ) );
 
     return now > sunset + twilight_duration || now < sunrise;
 }
@@ -265,8 +233,8 @@ double calendar::current_daylight_level() const
 float calendar::sunlight() const
 {
     const time_duration now = time_past_midnight( *this );
-    const time_duration sunrise = time_past_midnight( this->sunrise() );
-    const time_duration sunset = time_past_midnight( this->sunset() );
+    const time_duration sunrise = time_past_midnight( ::sunrise( *this ) );
+    const time_duration sunset = time_past_midnight( ::sunset( *this ) );
 
     double daylight_level = current_daylight_level();
 
