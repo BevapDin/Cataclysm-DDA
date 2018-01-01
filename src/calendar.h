@@ -202,10 +202,6 @@ class calendar
         /** Increases turn_number by 1. (6 seconds) */
         void increment();
 
-        // Sunlight and day/night calculations
-        /** Returns true if it's currently after sunset + TWILIGHT_SECONDS or before sunrise - TWILIGHT_SECONDS. */
-        bool is_night() const;
-
         /** Current year, with default game start as year 0 */
         int years() const {
             return year;
@@ -640,5 +636,7 @@ moon_phase get_moon_phase( const time_point &p );
 double current_daylight_level( const time_point &p );
 /** Returns the current sunlight or moonlight level through the preceding functions. */
 float sunlight( const time_point &p );
+/** Returns true if it's currently after sunset (plus twilight time) or before sunrise (minus twilight time). */
+bool is_night( const time_point &p );
 
 #endif

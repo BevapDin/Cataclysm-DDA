@@ -579,7 +579,7 @@ std::string weather_forecast( point const &abs_sm_pos )
         std::string day;
         bool started_at_night;
         calendar c(last_hour + 7200 * d);
-        if(d == 0 && c.is_night()) {
+        if( d == 0 && is_night( c ) ) {
             day = _("Tonight");
             started_at_night = true;
         } else {

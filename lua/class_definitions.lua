@@ -109,7 +109,6 @@ classes = {
             { name = "day_of_week", rval = "string", args = { } },
             { name = "get_turn", rval = "int", args = { } },
             { name = "increment", rval = nil, args = { } },
-            { name = "is_night", rval = "bool", args = { } },
             { name = "years", rval = "int", args = { } },
         }
     },
