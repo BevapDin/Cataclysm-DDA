@@ -54,12 +54,6 @@ calendar::calendar()
     year = 0;
 }
 
-calendar::calendar(int Minute, int Hour, int Day, season_type Season, int Year)
-{
-    turn_number = MINUTES(Minute) + HOURS(Hour) + DAYS(Day) + Season * to_days<int>( season_length() ) + Year * to_turns<int>( year_length() );
-    sync();
-}
-
 calendar::calendar(int turn)
 {
     turn_number = turn;

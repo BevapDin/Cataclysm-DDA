@@ -164,9 +164,6 @@ class calendar
         calendar();
         calendar( const calendar &copy ) = default;
 
-        /** Construct calendar with specific starting time and day. */
-        calendar( int Minute, int Hour, int Day, season_type Season, int Year );
-
         /**
          * Construct calendar with specific elapsed turns count.
          * @param turn Turn count value for constructed calendar

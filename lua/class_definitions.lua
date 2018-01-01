@@ -100,7 +100,6 @@ classes = {
         new = {
             { "calendar" },
             { "int" },
-            { "int", "int", "int", "season_type", "int" },
         },
         by_value_and_reference = true,
         attributes = {
