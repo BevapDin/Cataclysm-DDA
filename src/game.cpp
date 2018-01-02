@@ -1380,7 +1380,7 @@ bool game::do_turn()
         new_game = false;
     } else {
         gamemode->per_turn();
-        calendar::turn.increment();
+        calendar::increment_current_turn();
     }
 
     if( npcs_dirty ) {
@@ -3396,8 +3396,9 @@ bool game::handle_action()
     gamemode->post_action(act);
 
     u.movecounter = (!u.is_dead_state() ? (before_action_moves - u.moves) : 0);
+    //@todo add overload for time_point and time_duration to string_formatter
     dbg(D_INFO) << string_format("%s: [%d] %d - %d = %d", action_ident(act).c_str(),
-                                 int(calendar::turn), before_action_moves, u.movecounter, u.moves);
+                                 to_turn<int>( calendar::turn ), before_action_moves, u.movecounter, u.moves);
     return (!u.is_dead_state());
 }
 
@@ -3969,7 +3970,7 @@ void game::debug()
                 s.c_str(),
                 u.posx(), u.posy(), get_levx(), get_levy(),
                 overmap_buffer.ter( u.global_omt_location() )->get_name().c_str(),
-                int( calendar::turn ),
+                to_turn<int>( calendar::turn ),
                 ( get_option<bool>( "RANDOM_NPC" ) ? _( "NPCs are going to spawn." ) :
                   _( "NPCs are NOT going to spawn." ) ),
                 num_creatures() );
@@ -4164,7 +4165,7 @@ void game::debug()
             overmap::draw_scents();
             break;
         case 27: {
-            auto set_turn = [&]( const int initial, const int factor, const char * const msg ) {
+            auto set_turn = [&]( const int initial, const time_duration &factor, const std::string &msg ) {
                 const auto text = string_input_popup()
                                   .title( msg )
                                   .width( 20 )
@@ -4174,9 +4175,9 @@ void game::debug()
                 if( text.empty() ) {
                     return;
                 }
-                const int new_value = ( std::atoi( text.c_str() ) - initial ) * factor;
-                calendar::turn += std::max( std::min( INT_MAX / 2 - calendar::turn, new_value ),
-                                            -calendar::turn );
+                const time_duration old_value = initial * factor;
+                const time_duration new_value = std::atoi( text.c_str() ) * factor;
+                calendar::increment_current_turn( new_value - old_value );
             };
 
             uimenu smenu;
@@ -4203,24 +4204,23 @@ void game::debug()
 
                 switch( smenu.ret ) {
                     case 0:
-                        set_turn( year, to_turns<int>( calendar::year_length() ), _( "Set year to?" ) );
+                        set_turn( year, calendar::year_length(), _( "Set year to?" ) );
                         break;
                     case 1:
-                        set_turn( season, to_turns<int>( calendar::turn.season_length() ),
-                                  _( "Set season to? (0 = spring)" ) );
+                        set_turn( season, calendar::season_length(), _( "Set season to? (0 = spring)" ) );
                         break;
                     case 2:
-                        set_turn( day, DAYS( 1 ), _( "Set days to?" ) );
+                        set_turn( day, 1_days, _( "Set days to?" ) );
                         break;
                     case 3:
-                        set_turn( hour, HOURS( 1 ), _( "Set hour to?" ) );
+                        set_turn( hour, 1_hours, _( "Set hour to?" ) );
                         break;
                     case 4:
-                        set_turn( minute, MINUTES( 1 ), _( "Set minute to?" ) );
+                        set_turn( minute, 1_minutes, _( "Set minute to?" ) );
                         break;
                     case 5:
-                        set_turn( turn, 1,
-                                  string_format( _( "Set turn to? (One day is %i turns)" ), int( DAYS( 1 ) ) ).c_str() );
+                        set_turn( turn, 1_turns,
+                                  string_format( _( "Set turn to? (One day is %i turns)" ), to_turns<int>( 1_days ) ) );
                         break;
                     default:
                         break;
@@ -13440,29 +13440,30 @@ void game::process_artifact( item &it, player &p )
 
 void game::start_calendar()
 {
-    calendar::start = HOURS(get_option<int>( "INITIAL_TIME" ) );
+    season_type initial_season = SPRING;
+    time_duration start = 1_hours * get_option<int>( "INITIAL_TIME" );
     const bool scen_season = scen->has_flag( "SPR_START" ) || scen->has_flag( "SUM_START" ) ||
                              scen->has_flag( "AUT_START" ) || scen->has_flag( "WIN_START" ) ||
                              scen->has_flag( "SUM_ADV_START" );
     const std::string nonscen_season = get_option<std::string>( "INITIAL_SEASON" );
     if( scen->has_flag( "SPR_START" ) || ( !scen_season && nonscen_season == "spring" ) ) {
-        calendar::initial_season = SPRING;
+        initial_season = SPRING;
     } else if( scen->has_flag( "SUM_START" ) || ( !scen_season && nonscen_season == "summer" ) ) {
-        calendar::initial_season = SUMMER;
-        calendar::start += to_turns<int>( calendar::season_length() );
+        initial_season = SUMMER;
+        start += calendar::season_length() * 1;
     } else if( scen->has_flag( "AUT_START" ) || ( !scen_season && nonscen_season == "autumn" ) ) {
-        calendar::initial_season = AUTUMN;
-        calendar::start += to_turns<int>( calendar::season_length() * 2 );
+        initial_season = AUTUMN;
+        start += calendar::season_length() * 2;
     } else if( scen->has_flag( "WIN_START" ) || ( !scen_season && nonscen_season == "winter" ) ) {
-        calendar::initial_season = WINTER;
-        calendar::start += to_turns<int>( calendar::season_length() * 3 );
+        initial_season = WINTER;
+        start += calendar::season_length() * 3;
     } else if( scen->has_flag( "SUM_ADV_START" ) ) {
-        calendar::initial_season = SUMMER;
-        calendar::start += to_turns<int>( calendar::season_length() * 5 );
+        initial_season = SUMMER;
+        start += calendar::season_length() * 5;
     } else {
         debugmsg( "The Unicorn" );
     }
-    calendar::turn = calendar::start;
+    calendar::init( start, initial_season );
 }
 
 void game::add_artifact_messages(std::vector<art_effect_passive> effects)

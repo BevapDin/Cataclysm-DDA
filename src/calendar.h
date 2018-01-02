@@ -8,6 +8,7 @@ class time_duration;
 class time_point;
 class JsonOut;
 class JsonIn;
+class JsonObject;
 
 /**
  * Convert turns to ticks
@@ -115,93 +116,19 @@ enum moon_phase {
     MOON_PHASE_MAX
 };
 
-/**
- * Time keeping class
- *
- * Encapsulates the current time of day, date, and year.  Also tracks seasonal variation in day
- * length, the passing of the seasons themselves, and the phases of the moon.
- */
+//@todo write documentation
 class calendar
 {
-    private:
-        /**
-         *  This is the basic "quantum" unit of world time.  It is a six second interval,
-         *  so "seconds" value on the clock will always be a multiple of 6.
-         */
-        int turn_number;
-
-        /** Seconds portion of time */
-        int second;
-
-        /** Minutes portion of time */
-        int minute;
-
-        /** Hours portion of time (using a 24-hour clock) */
-        int hour;
-
-        /** Day of season */
-        int day;
-
-        /** Current season */
-        season_type season;
-
-        /** Current year, starts counting from 0 in default scenarios */
-        int year;
-
-        /**
-         * Synchronize all variables to the turn_number
-         *
-         * Time is actually counted as a running total of turns since start of game.  This function
-         * calculates the current seconds/minutes/hour/day/season based on that counter value.
-         */
-        void sync();
-
     public:
-        /** Initializers */
-        /**
-         * Starts at turn count zero, (midnight of first day, year zero, spring time)
-         */
-        calendar();
-        calendar( const calendar &copy ) = default;
-
-        /**
-         * Construct calendar with specific elapsed turns count.
-         * @param turn Turn count value for constructed calendar
-         */
-        calendar( int turn );
-
-        /**
-         * Alternative accessor for current turn_number.
-         *
-         * @deprecated Use get_turn() instead
-         *
-         * @returns same value as @ref get_turn()
-         */
-        operator int() const; // Returns get_turn() for backwards compatibility
-
-        // Basic calendar operators. Usually modifies or checks the turn_number of the calendar
-        calendar &operator = ( const calendar &rhs ) = default;
-        calendar &operator = ( int rhs );
-        calendar &operator -=( const calendar &rhs );
-        calendar &operator -=( int rhs );
-        calendar &operator +=( const calendar &rhs );
-        calendar &operator +=( int rhs );
-        calendar  operator - ( const calendar &rhs ) const;
-        calendar  operator - ( int rhs ) const;
-        calendar  operator + ( const calendar &rhs ) const;
-        calendar  operator + ( int rhs ) const;
-        bool      operator ==( int rhs ) const;
-        bool      operator ==( const calendar &rhs ) const;
-
-        /** Increases turn_number by 1. (6 seconds) */
-        void increment();
-
+        // This class can not be instantiated on purpose. It only holds some static
+        // functions / variables / constants.
+        //@todo change to namespace
+        calendar() = delete;
         /**
          * Predicate to handle rate-limiting. Returns `true` after every @p event_frequency duration.
          */
         static bool once_every( const time_duration &event_frequency );
 
-    public:
         /**
          * The expected duration of the cataclysm
          *
@@ -235,9 +162,19 @@ class calendar
         /** Returns the translated name of the season (with first letter being uppercase). */
         static const std::string name_season( season_type s );
 
-        static   calendar start;
-        static   calendar turn;
-        static season_type initial_season;
+        // this is a const *reference*, one can still change it via other references to it
+        static const time_point &start;
+        // this is a const *reference*, one can still change it via other references to it
+        static const time_point &turn;
+        static void increment_current_turn( const time_duration &delta );
+        static void increment_current_turn();
+        // this is a const *reference*, one can still change it via other references to it
+        static const season_type &initial_season;
+
+        static void deserialize( JsonObject &data );
+        static void serialize( JsonOut &jsout );
+
+        static void init( const time_duration &time_into_cataclysm, season_type season = SPRING );
 
         /**
          * A time point that is always before the current turn, even when the game has
@@ -505,8 +442,6 @@ class time_point
         constexpr time_point( const int t ) : turn_( t ) { }
 
     public:
-        //@todo: replace usage of `calendar` with `time_point`, remove this constructor
-        time_point( const calendar &c ) : turn_( c ) { }
         /// Allows writing `time_point p = 0;`
         constexpr time_point( const std::nullptr_t ) : turn_( 0 ) { }
         //@todo: remove this, nobody should need it, one should use a constant `time_point`

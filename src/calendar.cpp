@@ -7,14 +7,21 @@
 #include "options.h"
 #include "translations.h"
 #include "string_formatter.h"
+#include "json.h"
+#include "debug.h"
 #include "rng.h"
 
 // Divided by 100 to prevent overflowing when converted to moves
 const int calendar::INDEFINITELY_LONG( std::numeric_limits<int>::max() / 100 );
 
-calendar calendar::start;
-calendar calendar::turn;
-season_type calendar::initial_season;
+static season_type mutable_initial_season = SPRING;
+const season_type &calendar::initial_season = mutable_initial_season;
+
+static time_point mutable_start = 0;
+const time_point &calendar::start = mutable_start;
+
+static time_point mutable_turn = 0;
+const time_point &calendar::turn = mutable_turn;
 
 const time_point calendar::before_time_starts = time_point::from_turn( -1 );
 const time_point calendar::time_of_cataclysm = time_point::from_turn( 0 );
@@ -43,104 +50,34 @@ const time_point calendar::time_of_cataclysm = time_point::from_turn( 0 );
 // How long, does sunrise/sunset last?
 static const time_duration twilight_duration = 1_hours;
 
-calendar::calendar()
+void calendar::increment_current_turn()
 {
-    turn_number = 0;
-    second = 0;
-    minute = 0;
-    hour = 0;
-    day = 0;
-    season = SPRING;
-    year = 0;
+    increment_current_turn( 1_turns );
 }
 
-calendar::calendar(int turn)
+void calendar::increment_current_turn( const time_duration &delta )
 {
-    turn_number = turn;
-    sync();
+    mutable_turn += delta;
 }
 
-calendar::operator int() const
+void calendar::init( const time_duration &time_into_cataclysm, const season_type season )
 {
-    return turn_number;
+    mutable_turn = mutable_start = time_of_cataclysm + time_into_cataclysm;
+    mutable_initial_season = season;
 }
 
-calendar &calendar::operator =(int rhs)
+void calendar::deserialize( JsonObject &data )
 {
-    turn_number = rhs;
-    sync();
-    return *this;
+    data.read( "turn", mutable_turn );
+    data.read( "calendar_start", mutable_start );
+    mutable_initial_season = static_cast<season_type>( data.get_int( "initial_season", static_cast<int>( SPRING ) ) );
 }
 
-calendar &calendar::operator -=(const calendar &rhs)
+void calendar::serialize( JsonOut &jsout )
 {
-    turn_number -= rhs.turn_number;
-    sync();
-    return *this;
-}
-
-calendar &calendar::operator -=(int rhs)
-{
-    turn_number -= rhs;
-    sync();
-    return *this;
-}
-
-calendar &calendar::operator +=(const calendar &rhs)
-{
-    turn_number += rhs.turn_number;
-    sync();
-    return *this;
-}
-
-calendar &calendar::operator +=(int rhs)
-{
-    turn_number += rhs;
-    sync();
-    return *this;
-}
-
-bool calendar::operator ==(int rhs) const
-{
-    return int(*this) == rhs;
-}
-bool calendar::operator ==(const calendar &rhs) const
-{
-    return turn_number == rhs.turn_number;
-}
-
-/*
-calendar& calendar::operator ++()
-{
- *this += 1;
- return *this;
-}
-*/
-
-calendar calendar::operator -(const calendar &rhs) const
-{
-    return calendar(*this) -= rhs;
-}
-
-calendar calendar::operator -(int rhs) const
-{
-    return calendar(*this) -= rhs;
-}
-
-calendar calendar::operator +(const calendar &rhs) const
-{
-    return calendar(*this) += rhs;
-}
-
-calendar calendar::operator +(int rhs) const
-{
-    return calendar(*this) += rhs;
-}
-
-void calendar::increment()
-{
-    turn_number++;
-    sync();
+    jsout.member( "turn", mutable_turn );
+    jsout.member( "calendar_start", mutable_start );
+    jsout.member( "initial_season", static_cast<int>( initial_season ) );
 }
 
 moon_phase get_moon_phase( const time_point &p )
@@ -434,28 +371,9 @@ float calendar::season_from_default_ratio()
     return to_days<float>( season_length() ) / default_season_length;
 }
 
-void calendar::sync()
-{
-    const int sl = to_days<int>( season_length() );
-    year = turn_number / DAYS(sl * 4);
-
-    if( eternal_season() ) {
-        // If we use calendar::start to determine the initial season, and the user shortens the season length
-        // mid-game, the result could be the wrong season!
-        season = initial_season;
-    } else {
-        season = season_type(turn_number / DAYS(sl) % 4);
-    }
-
-    day = turn_number / DAYS(1) % sl;
-    hour = turn_number / HOURS(1) % 24;
-    minute = turn_number / MINUTES(1) % 60;
-    second = (turn_number * 6) % 60;
-}
-
 bool calendar::once_every( const time_duration &event_frequency )
 {
-    return ( calendar::turn % to_turns<int>( event_frequency ) ) == 0;
+    return ( to_turn<int>( calendar::turn ) % to_turns<int>( event_frequency ) ) == 0;
 }
 
 const std::string calendar::name_season( season_type s )

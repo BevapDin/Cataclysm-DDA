@@ -888,7 +888,7 @@ const ter_t &get_terrain_type(int id)
     return ter_id( id ).obj();
 }
 
-static calendar &get_calendar_turn_wrapper() {
+static time_point get_calendar_turn_wrapper() {
     return calendar::turn;
 }
 

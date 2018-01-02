@@ -96,18 +96,6 @@ classes = {
         functions = {
         }
     },
-    calendar = {
-        new = {
-            { "calendar" },
-            { "int" },
-        },
-        by_value_and_reference = true,
-        attributes = {
-        },
-        functions = {
-            { name = "increment", rval = nil, args = { } },
-        }
-    },
     mutation_branch = {
         string_id = "trait_id",
         attributes = {
@@ -2134,7 +2122,7 @@ global_functions = {
     get_calendar_turn = {
         cpp_name = "get_calendar_turn_wrapper",
         args = {},
-        rval = "calendar&"
+        rval = "time_point"
     }
 }
 

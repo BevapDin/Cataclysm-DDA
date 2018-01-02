@@ -6085,7 +6085,7 @@ time_duration item::age() const
 
 void item::set_age( const time_duration age )
 {
-    set_birthday( time_point( calendar::turn ) - age );
+    set_birthday( calendar::turn - age );
 }
 
 time_point item::birthday() const

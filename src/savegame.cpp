@@ -67,9 +67,7 @@ void game::serialize(std::ostream & fout) {
 
         json.start_object();
         // basic game state information.
-        json.member("turn", (int)calendar::turn);
-        json.member("calendar_start", (int)calendar::start);
-        json.member("initial_season", (int)calendar::initial_season);
+        calendar::serialize( json );
         if( const auto lt_ptr = last_target.lock() ) {
             if( const npc * const guy = dynamic_cast<const npc*>( lt_ptr.get() ) ) {
                 json.member( "last_target", guy->getID() );
@@ -174,14 +172,11 @@ void game::unserialize(std::istream & fin)
     }
     std::string linebuf;
 
-    int tmpturn, tmpcalstart = 0, tmprun, tmptar, tmptartyp = 0, levx, levy, levz, comx, comy;
+    int tmprun, tmptar, tmptartyp = 0, levx, levy, levz, comx, comy;
     JsonIn jsin(fin);
     try {
         JsonObject data = jsin.get_object();
 
-        data.read("turn",tmpturn);
-        data.read("calendar_start",tmpcalstart);
-        calendar::initial_season = (season_type)data.get_int("initial_season",(int)SPRING);
         data.read("last_target",tmptar);
         data.read( "last_target_type", tmptartyp );
         data.read("run_mode", tmprun);
@@ -192,8 +187,7 @@ void game::unserialize(std::istream & fin)
         data.read("om_x",comx);
         data.read("om_y",comy);
 
-        calendar::turn = tmpturn;
-        calendar::start = tmpcalstart;
+        calendar::deserialize( data );
 
         load_map( tripoint( levx + comx * OMAPX * 2, levy + comy * OMAPY * 2, levz ) );
 
