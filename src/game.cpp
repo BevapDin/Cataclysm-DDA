@@ -4183,16 +4183,20 @@ void game::debug()
             smenu.return_invalid = true;
             do {
                 const int year = static_cast<int>( ( calendar::turn - calendar::time_of_cataclysm ) / calendar::year_length() );
+                const int season = static_cast<int>( season_of_year( calendar::turn ) );
+                const int day = day_of_season<int>( calendar::turn );
+                const int hour = hour_of_day( calendar::turn );
+                const int minute = minute_of_hour<int>( calendar::turn );
+                const int turn = to_turn<int>( calendar::turn );
                 const int iSel = smenu.ret;
                 smenu.reset();
                 smenu.return_invalid = true;
                 smenu.addentry( 0, true, 'y', "%s: %d", _( "year" ), year );
-                smenu.addentry( 1, !calendar::eternal_season(), 's', "%s: %d",
-                                _( "season" ), int( season_of_year( calendar::turn ) ) );
-                smenu.addentry( 2, true, 'd', "%s: %d", _( "day" ), day_of_season<int>( calendar::turn ) );
-                smenu.addentry( 3, true, 'h', "%s: %d", _( "hour" ), hour_of_day<int>( calendar::turn ) );
-                smenu.addentry( 4, true, 'm', "%s: %d", _( "minute" ), minute_of_hour<int>( calendar::turn ) );
-                smenu.addentry( 5, true, 't', "%s: %d", _( "turn" ), calendar::turn );
+                smenu.addentry( 1, !calendar::eternal_season(), 's', "%s: %d", _( "season" ), season );
+                smenu.addentry( 2, true, 'd', "%s: %d", _( "day" ), day );
+                smenu.addentry( 3, true, 'h', "%s: %d", _( "hour" ), hour );
+                smenu.addentry( 4, true, 'm', "%s: %d", _( "minute" ), minute );
+                smenu.addentry( 5, true, 't', "%s: %d", _( "turn" ), turn );
                 smenu.addentry( 6, true, 'q', "%s", _( "quit" ) );
                 smenu.selected = iSel;
                 smenu.query();
@@ -4202,20 +4206,20 @@ void game::debug()
                         set_turn( year, to_turns<int>( calendar::year_length() ), _( "Set year to?" ) );
                         break;
                     case 1:
-                        set_turn( int( season_of_year( calendar::turn ) ), to_turns<int>( calendar::turn.season_length() ),
+                        set_turn( season, to_turns<int>( calendar::turn.season_length() ),
                                   _( "Set season to? (0 = spring)" ) );
                         break;
                     case 2:
-                        set_turn( day_of_season<int>( calendar::turn ), DAYS( 1 ), _( "Set days to?" ) );
+                        set_turn( day, DAYS( 1 ), _( "Set days to?" ) );
                         break;
                     case 3:
-                        set_turn( hour_of_day<int>( calendar::turn ), HOURS( 1 ), _( "Set hour to?" ) );
+                        set_turn( hour, HOURS( 1 ), _( "Set hour to?" ) );
                         break;
                     case 4:
-                        set_turn( minute_of_hour<int>( calendar::turn ), MINUTES( 1 ), _( "Set minute to?" ) );
+                        set_turn( minute, MINUTES( 1 ), _( "Set minute to?" ) );
                         break;
                     case 5:
-                        set_turn( calendar::turn, 1,
+                        set_turn( turn, 1,
                                   string_format( _( "Set turn to? (One day is %i turns)" ), int( DAYS( 1 ) ) ).c_str() );
                         break;
                     default:
