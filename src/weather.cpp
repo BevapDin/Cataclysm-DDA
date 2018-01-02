@@ -566,11 +566,12 @@ std::string weather_forecast( point const &abs_sm_pos )
     double low = 100.0;
     const tripoint abs_ms_pos = tripoint( sm_to_ms_copy( abs_sm_pos ), 0 );
     // TODO wind direction and speed
-    int last_hour = calendar::turn - ( calendar::turn % HOURS(1) );
+    // this basically gets the start of the current hour
+    const time_point last_hour = calendar::turn - ( time_past_midnight( calendar::turn ) % 1_hours );
     for(int d = 0; d < 6; d++) {
         weather_type forecast = WEATHER_NULL;
         const auto wgen = g->get_cur_weather_gen();
-        for(calendar i(last_hour + 7200 * d); i < last_hour + 7200 * (d + 1); i += 600) {
+        for( time_point i = last_hour + 12_hours * d; i < last_hour + 12_hours * ( d + 1 ); i += 1_hours ) {
             w_point w = wgen.get_weather( abs_ms_pos, i, g->get_seed() );
             forecast = std::max( forecast, wgen.get_weather_conditions( w ) );
             high = std::max(high, w.temperature);
@@ -578,7 +579,7 @@ std::string weather_forecast( point const &abs_sm_pos )
         }
         std::string day;
         bool started_at_night;
-        calendar c(last_hour + 7200 * d);
+        const time_point c = last_hour + 12_hours * d;
         if( d == 0 && is_night( c ) ) {
             day = _("Tonight");
             started_at_night = true;
@@ -587,9 +588,9 @@ std::string weather_forecast( point const &abs_sm_pos )
             started_at_night = false;
         }
         if(d > 0 && ((started_at_night && !(d % 2)) || (!started_at_night && d % 2))) {
-            day = string_format( pgettext( "Mon Night", "%s Night" ), c.day_of_week().c_str() );
+            day = string_format( pgettext( "Mon Night", "%s Night" ), calendar( to_turn<int>( c ) ).day_of_week().c_str() );
         } else {
-            day = c.day_of_week();
+            day = calendar( to_turn<int>( c ) ).day_of_week();
         }
         weather_report << string_format(
                            _("%s... %s. Highs of %s. Lows of %s. "),
