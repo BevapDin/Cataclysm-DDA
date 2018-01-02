@@ -105,7 +105,6 @@ classes = {
         attributes = {
         },
         functions = {
-            { name = "day_of_week", rval = "string", args = { } },
             { name = "increment", rval = nil, args = { } },
             { name = "years", rval = "int", args = { } },
         }

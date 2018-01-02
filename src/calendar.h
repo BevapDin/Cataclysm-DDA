@@ -236,12 +236,6 @@ class calendar
          * option) to actual in-game length.
          */
         static float season_from_default_ratio();
-        /**
-         * Returns the name of the current day of the week
-         *
-         * @note: Day 0 is a Thursday for highly technical reasons which are hard to explain
-         */
-        std::string day_of_week() const;
 
         /** Returns the translated name of the season (with first letter being uppercase). */
         static const std::string name_season( season_type s );
@@ -632,5 +626,17 @@ double current_daylight_level( const time_point &p );
 float sunlight( const time_point &p );
 /** Returns true if it's currently after sunset (plus twilight time) or before sunrise (minus twilight time). */
 bool is_night( const time_point &p );
+
+enum class weekdays : int {
+    SUNDAY = 0,
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+};
+
+weekdays day_of_week( const time_point &p );
 
 #endif
