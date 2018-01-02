@@ -60,7 +60,7 @@ const MonsterGroup &MonsterGroupManager::GetUpgradedMonsterGroup( const mongroup
     if( get_option<float>( "MONSTER_UPGRADE_FACTOR" ) > 0 ) {
         const int replace_time = DAYS( groupptr->monster_group_time *
                                        get_option<float>( "MONSTER_UPGRADE_FACTOR" ) );
-        while( groupptr->replace_monster_group && calendar::turn.get_turn() > replace_time ) {
+        while( groupptr->replace_monster_group && calendar::turn > replace_time ) {
             groupptr = &groupptr->new_monster_group.obj();
         }
     }
@@ -134,7 +134,7 @@ MonsterGroupResult MonsterGroupManager::GetResultFromGroup(
         } else {
             //Otherwise, it's valid if it matches any of the times of day
             for( auto &elem : valid_times_of_day ) {
-                int time_now = calendar::turn.get_turn();
+                int time_now = calendar::turn;
                 if( time_now > elem.first && time_now < elem.second ) {
                     is_valid_time_of_day = true;
                 }
