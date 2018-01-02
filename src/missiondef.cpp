@@ -294,11 +294,11 @@ void mission_type::load( JsonObject &jo, const std::string &src )
     assign_function( jo, "fail", fail, mission_function_map );
 
     if( jo.has_int( "deadline_low" ) ) {
-        deadline_low = DAYS( jo.get_int( "deadline_low" ) );
+        deadline_low = time_duration::from_days( jo.get_int( "deadline_low" ) );
     }
 
     if( jo.has_int( "deadline_high" ) ) {
-        deadline_high = DAYS( jo.get_int( "deadline_high" ) );
+        deadline_high = time_duration::from_days( jo.get_int( "deadline_high" ) );
     }
 
     if( jo.has_member( "followup" ) ) {
