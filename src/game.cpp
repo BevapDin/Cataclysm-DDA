@@ -12992,60 +12992,64 @@ void game::perhaps_add_random_npc()
 
 void game::wait()
 {
-    std::map<int, int> durations;
+    std::map<int, time_duration> durations;
     uimenu as_m;
 
     const bool has_watch = u.has_watch();
     const auto add_menu_item = [ &as_m, &durations, has_watch ]
-        ( int retval, int hotkey, const std::string &caption = "", int duration = calendar::INDEFINITELY_LONG ) {
+        ( int retval, int hotkey, const std::string &caption, const time_duration &duration ) {
 
         std::string text( caption );
 
-        if( has_watch && duration != calendar::INDEFINITELY_LONG ) {
-            const std::string dur_str( to_string( time_duration::from_turns( duration ) ) );
+        //@todo change INDEFINITELY_LONG to time_duration
+        if( has_watch && duration != time_duration::from_turns( calendar::INDEFINITELY_LONG ) ) {
+            const std::string dur_str( to_string( duration ) );
             text += ( text.empty() ? dur_str : string_format( " (%s)", dur_str.c_str() ) );
         }
         as_m.addentry( retval, true, hotkey, text );
-        durations[retval] = duration;
+        durations.emplace( retval, duration );
     };
 
-    add_menu_item( 1, '1', !has_watch ? _( "Wait 300 heartbeats" ) : "", MINUTES( 5 ) );
-    add_menu_item( 2, '2', !has_watch ? _( "Wait 1800 heartbeats" ) : "", MINUTES( 30 ) );
+    add_menu_item( 1, '1', !has_watch ? _( "Wait 300 heartbeats" ) : "", 5_minutes );
+    add_menu_item( 2, '2', !has_watch ? _( "Wait 1800 heartbeats" ) : "", 30_minutes );
 
     if( has_watch ) {
-        add_menu_item( 3, '3', "", HOURS( 1 ) );
-        add_menu_item( 4, '4', "", HOURS( 2 ) );
-        add_menu_item( 5, '5', "", HOURS( 3 ) );
-        add_menu_item( 6, '6', "", HOURS( 6 ) );
+        add_menu_item( 3, '3', "", 1_hours );
+        add_menu_item( 4, '4', "", 2_hours );
+        add_menu_item( 5, '5', "", 3_hours );
+        add_menu_item( 6, '6', "", 6_hours );
     }
 
     if( get_levz() >= 0 || has_watch ) {
-        const auto diurnal_time_before = []( const int turn ) {
-            const int remainder = turn % DAYS( 1 ) - calendar::turn % DAYS( 1 );
-            return ( remainder > 0 ) ? remainder : DAYS( 1 ) + remainder;
+        const auto diurnal_time_before = []( const time_point &p ) {
+            const time_point next_event = p > calendar::turn ? p : p + 1_days;
+            return next_event - calendar::turn;
         };
 
-        add_menu_item( 7,  'd', _( "Wait till dawn" ),     diurnal_time_before( to_turn<int>( sunrise( calendar::turn ) ) ) );
-        add_menu_item( 8,  'n', _( "Wait till noon" ),     diurnal_time_before( HOURS( 12 ) ) );
-        add_menu_item( 9,  'k', _( "Wait till dusk" ),     diurnal_time_before( to_turn<int>( sunset( calendar::turn ) ) ) );
-        add_menu_item( 10, 'm', _( "Wait till midnight" ), diurnal_time_before( HOURS( 0 ) ) );
-        add_menu_item( 11, 'w', _( "Wait till weather changes" ) );
+        const time_point prev_midnight = calendar::turn - time_past_midnight( calendar::turn );
+        add_menu_item( 7,  'd', _( "Wait till dawn" ),     diurnal_time_before( sunrise( calendar::turn ) ) );
+        add_menu_item( 8,  'n', _( "Wait till noon" ),     diurnal_time_before( prev_midnight + 12_hours ) );
+        add_menu_item( 9,  'k', _( "Wait till dusk" ),     diurnal_time_before( sunset( calendar::turn ) ) );
+        add_menu_item( 10, 'm', _( "Wait till midnight" ), diurnal_time_before( prev_midnight + 24_hours ) );
+        add_menu_item( 11, 'w', _( "Wait till weather changes" ), time_duration::from_turns( calendar::INDEFINITELY_LONG ) );
     }
 
-    add_menu_item( 12, 'q', _( "Exit" ) );
+    as_m.addentry( 12, true, 'q', _( "Exit" ) );
 
     as_m.text = ( has_watch ) ? string_format( _( "It's %s now. " ), to_string_time_of_day( calendar::turn ) ) : "";
     as_m.text += _( "Wait for how long?" );
     as_m.return_invalid = true;
     as_m.query(); /* calculate key and window variables, generate window, and loop until we get a valid answer */
 
-    if( as_m.ret == 12 || durations.count( as_m.ret ) == 0 ) {
+    const auto iter = durations.find( as_m.ret );
+    if( iter == durations.end() ) {
         return;
     }
 
     activity_id actType = activity_id( as_m.ret == 11 ? "ACT_WAIT_WEATHER" : "ACT_WAIT" );
 
-    player_activity new_act( actType, 100 * ( durations[as_m.ret] - 1 ), 0 );
+    //@todo add a to_moves function
+    player_activity new_act( actType, 100 * to_turns<int>( iter->second - 1_turns ), 0 );
 
     u.assign_activity( new_act, false );
 }
