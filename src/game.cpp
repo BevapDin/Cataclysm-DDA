@@ -3601,7 +3601,7 @@ void game::load( const save_t &name )
     u = player();
     u.name = name.player_name();
     // This should be initialized more globally (in player/Character constructor)
-    u.weapon = item("null", 0);
+    u.weapon = item();
     if( !read_from_file( playerfile, std::bind( &game::unserialize, this, _1 ) ) ) {
         return;
     }

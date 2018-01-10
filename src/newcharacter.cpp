@@ -426,7 +426,7 @@ void player::randomize( const bool random_scenario, points_left &points, bool pl
 
 bool player::create(character_type type, std::string tempname)
 {
-    weapon = item("null", 0);
+    weapon = item();
 
     prof = profession::generic();
     g->scen = scenario::generic();
@@ -554,7 +554,7 @@ bool player::create(character_type type, std::string tempname)
         scent = 300;
     }
 
-    weapon = item("null", 0);
+    weapon = item();
 
     // Grab the skills from the profession, if there are any
     // We want to do this before the recipes

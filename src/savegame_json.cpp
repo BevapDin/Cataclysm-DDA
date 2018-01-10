@@ -341,7 +341,7 @@ void Character::load(JsonObject &data)
         inv.json_load_items( *invin );
     }
 
-    weapon = item( "null", 0 );
+    weapon = item();
     data.read( "weapon", weapon );
 
     _skills->clear();

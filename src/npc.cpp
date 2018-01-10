@@ -278,7 +278,7 @@ void npc::randomize( const npc_class_id &type )
         setID( g->assign_npc_id() );
     }
 
-    weapon   = item( "null", 0 );
+    weapon   = item();
     inv.clear();
     personality.aggression = rng( -10, 10 );
     personality.bravery =    rng( -3, 10 );

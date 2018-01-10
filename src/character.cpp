@@ -1290,7 +1290,7 @@ void Character::normalize()
 {
     Creature::normalize();
 
-    weapon   = item("null", 0);
+    weapon = item();
 
     recalc_hp();
 }
