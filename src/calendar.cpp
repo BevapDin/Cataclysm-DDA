@@ -17,10 +17,10 @@ const int calendar::INDEFINITELY_LONG( std::numeric_limits<int>::max() / 100 );
 static season_type mutable_initial_season = SPRING;
 const season_type &calendar::initial_season = mutable_initial_season;
 
-static time_point mutable_start = 0;
+static time_point mutable_start = calendar::time_of_cataclysm;
 const time_point &calendar::start = mutable_start;
 
-static time_point mutable_turn = 0;
+static time_point mutable_turn = calendar::time_of_cataclysm;
 const time_point &calendar::turn = mutable_turn;
 
 const time_point calendar::before_time_starts = time_point::from_turn( -1 );

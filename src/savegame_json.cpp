@@ -1142,7 +1142,7 @@ void npc::load(JsonObject &data)
         complaints.clear();
         JsonObject jo = data.get_object( "complaints" );
         for( const std::string &key : jo.get_member_names() ) {
-            time_point p = 0;
+            time_point p = calendar::time_of_cataclysm;
             jo.read( key, p );
             complaints.emplace( key, p );
         }

@@ -26,7 +26,7 @@ Messages player_messages;
 
 struct game_message : public JsonDeserializer, public JsonSerializer {
     std::string       message;
-    time_point timestamp_in_turns  = 0;
+    time_point timestamp_in_turns = calendar::time_of_cataclysm;
     int               timestamp_in_user_actions = 0;
     int               count = 1;
     game_message_type type  = m_neutral;
@@ -103,7 +103,7 @@ class Messages::impl_t
 {
     public:
         std::deque<game_message> messages;   // Messages to be printed
-        time_point curmes = 0; // The last-seen message.
+        time_point curmes = calendar::time_of_cataclysm; // The last-seen message.
 
         bool has_undisplayed_messages() const {
             return !messages.empty() && messages.back().turn() > curmes;

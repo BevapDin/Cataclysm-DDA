@@ -436,14 +436,9 @@ class time_point
         friend class time_duration;
         int turn_;
 
-    public:
-        //@todo: make private
-        //@todo: make explicit
-        constexpr time_point( const int t ) : turn_( t ) { }
+        explicit constexpr time_point( const int t ) : turn_( t ) { }
 
     public:
-        /// Allows writing `time_point p = 0;`
-        constexpr time_point( const std::nullptr_t ) : turn_( 0 ) { }
         //@todo: remove this, nobody should need it, one should use a constant `time_point`
         // (representing turn 0) and a `time_duration` instead.
         static constexpr time_point from_turn( const int t ) {
