@@ -211,7 +211,7 @@ void item::load_info( const std::string &data )
 
     dump >> burnt >> poison >> ammotmp >> owned >> bday_ >>
          mode >> acttmp >> corp >> mission_id >> player_id;
-    bday = time_point::from_turn( bday_ );
+    bday = 1_turns * bday_;
     corpse = NULL;
     getline(dump, corpse_name);
     if( corpse_name == " ''" ) {

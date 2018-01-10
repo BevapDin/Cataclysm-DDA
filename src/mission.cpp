@@ -486,7 +486,7 @@ void mission::load_info( std::istream &data )
     data >> failed >> value >> rewtype >> reward_id >> rew_item >> rew_skill >>
          uid >> target.x >> target.y >> itemid >> item_num >> deadline_ >> npc_id >>
          good_fac_id >> bad_fac_id >> step >> tmpfollow >> target_npc_id;
-    deadline = time_point::from_turn( deadline_ );
+    deadline = 1_turns * deadline_;
     target.z = 0;
     follow_up = mission_type::from_legacy( tmpfollow );
     reward.type = npc_favor_type( reward_id );
