@@ -1562,7 +1562,7 @@ void item::io( Archive& archive )
     // (item::charges -1 or 0 or anything else) to comestible (and thereby counted by charges),
     // old saves still have invalid charges, this fixes the charges value to the default charges.
     if( count_by_charges() && charges <= 0 ) {
-        charges = item( type, 0 ).charges;
+        charges = item( type ).charges;
     }
     if( !active && !rotten() && goes_bad() ) {
         // Rotting found *must* be active to trigger the rotting process,

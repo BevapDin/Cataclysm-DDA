@@ -7031,7 +7031,7 @@ bool pet_menu(monster *z)
         if (!one_in(3)) {
             g->u.add_msg_if_player(_("You tear out the pheromone ball from the zombie slave."));
 
-            item ball("pheromone", 0);
+            item ball( "pheromone" );
             iuse pheromone;
             pheromone.pheromone(&(g->u), &ball, true, g->u.pos());
         }
@@ -7041,7 +7041,7 @@ bool pet_menu(monster *z)
     if (rope == choice) {
         if (z->has_effect( effect_tied)) {
             z->remove_effect( effect_tied);
-            item rope_6("rope_6", 0);
+            item rope_6( "rope_6" );
             g->u.i_add(rope_6);
         } else {
             z->add_effect( effect_tied, 1_turns, num_bp, true);
