@@ -1302,15 +1302,15 @@ void Character::die(Creature* nkiller)
     set_killer( nkiller );
     set_time_died( calendar::turn );
     if( has_effect( effect_lightsnare ) ) {
-        inv.add_item( item( "string_36", 0 ) );
-        inv.add_item( item( "snare_trigger", 0 ) );
+        inv.add_item( item( "string_36" ) );
+        inv.add_item( item( "snare_trigger" ) );
     }
     if( has_effect( effect_heavysnare ) ) {
-        inv.add_item( item( "rope_6", 0 ) );
-        inv.add_item( item( "snare_trigger", 0 ) );
+        inv.add_item( item( "rope_6" ) );
+        inv.add_item( item( "snare_trigger" ) );
     }
     if( has_effect( effect_beartrap ) ) {
-        inv.add_item( item( "beartrap", 0 ) );
+        inv.add_item( item( "beartrap" ) );
     }
     mission::on_creature_death( *this );
 }

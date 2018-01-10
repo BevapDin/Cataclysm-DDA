@@ -1693,19 +1693,18 @@ void monster::die(Creature* nkiller)
     }
     // We were tied up at the moment of death, add a short rope to inventory
     if ( has_effect( effect_tied) ) {
-        item rope_6("rope_6", 0);
-        add_item(rope_6);
+        add_item( item( "rope_6" ) );
     }
     if( has_effect( effect_lightsnare ) ) {
-        add_item( item( "string_36", 0 ) );
-        add_item( item( "snare_trigger", 0 ) );
+        add_item( item( "string_36" ) );
+        add_item( item( "snare_trigger" ) );
     }
     if( has_effect( effect_heavysnare ) ) {
-        add_item( item( "rope_6", 0 ) );
-        add_item( item( "snare_trigger", 0 ) );
+        add_item( item( "rope_6" ) );
+        add_item( item( "snare_trigger" ) );
     }
     if( has_effect( effect_beartrap ) ) {
-        add_item( item( "beartrap", 0 ) );
+        add_item( item( "beartrap" ) );
     }
 
     if( !is_hallucination() ) {

@@ -717,7 +717,7 @@ void mdeath::detonate( monster &z )
     mdeath::normal( z );
     // Then detonate our suicide bombs
     for( auto bombs : dets ) {
-        item bomb_item( bombs.first, 0 );
+        item bomb_item( bombs.first );
         bomb_item.charges = bombs.second;
         bomb_item.active = true;
         g->m.add_item_or_charges( z.pos(), bomb_item );

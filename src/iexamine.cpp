@@ -778,7 +778,7 @@ void iexamine::crate(player &p, const tripoint &examp)
     // HACK ALERT: player::items_with returns const item* vector and so can't be used
     // so we'll be making a fake crowbar here
     // Not a problem for now, but if crowbar iuse-s ever get different, this will need a fix
-    item fakecrow( "crowbar", 0 );
+    item fakecrow( "crowbar" );
 
     iuse dummy;
     dummy.crowbar( &p, &fakecrow, false, examp );
@@ -950,7 +950,7 @@ void iexamine::portable_structure(player &p, const tripoint &examp)
         g->m.furn_set( pt, f_null );
     }
 
-    g->m.add_item_or_charges( examp, item( dropped, calendar::turn ) );
+    g->m.add_item_or_charges( examp, item( dropped ) );
 }
 
 /**
@@ -1163,7 +1163,7 @@ void iexamine::locked_object( player &p, const tripoint &examp) {
     }
 
     // See crate prying for why a dummy item is used
-    item fakecrow( "crowbar", 0 );
+    item fakecrow( "crowbar" );
 
     iuse dummy;
     dummy.crowbar( &p, &fakecrow, false, examp );
@@ -1771,7 +1771,7 @@ std::list<item> iexamine::get_harvest_items( const itype &type, const int plant_
     const itype_id &seed_type = type.get_id();
 
     const auto add = [&]( const itype_id &id, const int count ) {
-        item new_item( id, calendar::turn );
+        item new_item( id );
         if( new_item.count_by_charges() && count > 0 ) {
             new_item.charges *= count;
             new_item.charges /= seed_data.fruit_div;
@@ -2096,7 +2096,7 @@ void iexamine::fvat_empty(player &p, const tripoint &examp)
     }
     if (to_deposit) {
         static const auto vat_volume = units::from_liter( 50 );
-        item brew(brew_type, 0);
+        item brew( brew_type );
         int charges_held = p.charges_of(brew_type);
         brew.charges = charges_on_ground;
         for (int i = 0; i < charges_held && !vat_full; i++) {
@@ -2270,7 +2270,7 @@ void iexamine::keg(player &p, const tripoint &examp)
         //Store liquid chosen in the keg
         itype_id drink_type = drink_types[ drink_index ];
         int charges_held = p.charges_of( drink_type );
-        item drink( drink_type, 0 );
+        item drink( drink_type );
         drink.set_relative_rot( drink_rot[ drink_index ] );
         drink.charges = 0;
         bool keg_full = false;
@@ -2453,7 +2453,7 @@ void iexamine::tree_hickory(player &p, const tripoint &examp)
 }
 
 item_location maple_tree_sap_container() {
-    const item maple_sap = item( "maple_sap", 0 );
+    const item maple_sap( "maple_sap" );
     return g->inv_map_splice( [&]( const item &it ) {
         return it.get_remaining_capacity_for_liquid( maple_sap, true ) > 0;
     }, _( "Which container?" ), PICKUP_RANGE );
@@ -2503,7 +2503,7 @@ void iexamine::tree_maple_tapped(player &p, const tripoint &examp)
     bool has_container = false;
     long charges = 0;
 
-    const std::string maple_sap_name = item( "maple_sap", 0 ).tname( 1 );
+    const std::string maple_sap_name = item::nname( "maple_sap" );
 
     auto items = g->m.i_at( examp );
     for( auto &it : items ) {
@@ -2681,7 +2681,7 @@ units::mass sum_up_item_weight_by_material( map_stack &stack, const material_id 
 
 void add_recyle_menu_entry( uimenu &menu, const units::mass &w, char hk, const std::string &type )
 {
-    const auto itt = item( type, 0 );
+    const item itt( type );
     const int amount = w / itt.weight();
     menu.addentry(
         menu.entries.size() + 1, // value return by uimenu for this entry
@@ -2739,10 +2739,10 @@ void iexamine::recycler(player &p, const tripoint &examp)
 
     sounds::sound(examp, 80, _("Ka-klunk!"));
 
-    units::mass lump_weight = item( "steel_lump", 0 ).weight();
-    units::mass sheet_weight = item( "sheet_metal", 0 ).weight();
-    units::mass chunk_weight = item( "steel_chunk", 0 ).weight();
-    units::mass scrap_weight = item( "scrap", 0 ).weight();
+    units::mass lump_weight = item( "steel_lump" ).weight();
+    units::mass sheet_weight = item( "sheet_metal" ).weight();
+    units::mass chunk_weight = item( "steel_chunk" ).weight();
+    units::mass scrap_weight = item( "scrap" ).weight();
 
     if (steel_weight < scrap_weight) {
         add_msg(_("The recycler chews up all the items in its hopper."));

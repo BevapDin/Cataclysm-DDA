@@ -1424,7 +1424,7 @@ void npc::shop_restock()
     std::list<item> ret;
 
     while( total_space > 0 && !one_in( 50 ) ) {
-        item tmpit = item_group::item_from( from, 0 );
+        item tmpit = item_group::item_from( from );
         if( !tmpit.is_null() && total_space >= tmpit.volume() ) {
             ret.push_back( tmpit );
             total_space -= tmpit.volume();
