@@ -88,7 +88,33 @@ variable can be used long after `some_monster` has been killed and removed from 
 no connection at all to the monster.
 --]]
 
+-- The python script that generates generated_class_definitions.lua has some shortcomings, those
+-- are fixed here:
+
+-- Can't detect operators implemented as free function.
+classes['tripoint'].has_equal = true
+classes['point'].has_equal = true
+
+-- Can't detect implicitly defined copy constructor
+classes['tripoint'].new[#classes['tripoint'].new] = { 'tripoint' }
+classes['point'].new[#classes['point'].new] = { 'point' }
+
+-- Doesn't support iterators at all.
 make_iterator_class('std::list<item>', 'item')
+
+-- Classes from templates can not be detected.
+classes['units::volume'] = {
+    by_value = true,
+    functions = {
+        { name = "value", rval = "int", args = { } },
+    },
+}
+classes['units::mass'] = {
+    by_value = true,
+    functions = {
+        { name = "value", rval = "int", args = { } },
+    },
+}
 
 global_functions = {
     add_msg = {
