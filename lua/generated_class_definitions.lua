@@ -2223,6 +2223,10 @@ classes = {
     },
     ammunition_type = {
         string_id = "ammotype",
+        functions = {
+            { name = "default_ammotype", rval = "std::string", args = { } },
+            { name = "name", rval = "std::string", args = { } },
+        }
     },
     MonsterGroup = {
         string_id = "mongroup_id",

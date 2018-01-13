@@ -29,6 +29,7 @@
 #include "morale_types.h"
 #include "trap.h"
 #include "overmap.h"
+#include "ammo.h"
 #include "mapdata.h"
 #include "mtype.h"
 #include "field.h"
