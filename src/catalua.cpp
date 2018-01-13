@@ -31,6 +31,7 @@
 #include "trap.h"
 #include "overmap.h"
 #include "gun_mode.h"
+#include "ammo.h"
 #include "mapdata.h"
 #include "mtype.h"
 #include "field.h"
@@ -40,6 +41,7 @@
 #include "martialarts.h"
 #include "material.h"
 #include "start_location.h"
+#include "vehicle.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"

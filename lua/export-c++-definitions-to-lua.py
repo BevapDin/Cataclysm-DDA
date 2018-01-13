@@ -9,8 +9,9 @@ headers = [
     'player.h', 'character.h', 'bodypart.h', 'creature.h', 'game.h',
     'map.h', 'enums.h', 'calendar.h', 'mtype.h', 'itype.h', 'item.h',
     'ui.h', 'martialarts.h', 'trap.h', 'field.h', 'overmap.h',
-    'mutation.h', 'effect.h', 'material.h', 'start_location.h',
+    'mutation.h', 'effect.h', 'material.h', 'start_location.h', 'ammo.h',
     'monstergenerator.h', 'item_stack.h', 'mongroup.h', 'weather_gen.h',
+    'vehicle.h',
 ]
 
 parser = Parser()
@@ -47,7 +48,7 @@ parser.add_export_by_reference('Skill')
 parser.add_export_by_reference('quality')
 parser.add_export_for_string_id('npc_template_id', 'npc_template')
 parser.add_export_for_string_id('species_id', 'species_type')
-parser.add_export_for_string_id('ammotype', 'ammunition_type')
+parser.add_export_by_reference('ammunition_type')
 parser.add_export_by_reference('MonsterGroup')
 parser.add_export_by_reference('mtype')
 parser.add_export_by_reference('mongroup')
@@ -60,6 +61,7 @@ parser.add_export_by_value('time_point')
 parser.add_export_by_reference('itype')
 parser.add_export_by_reference('trap')
 parser.add_export_by_reference('w_point')
+parser.add_export_by_reference('vehicle')
 
 # Enums that should be available in Lua.
 parser.add_export_enumeration('body_part')
