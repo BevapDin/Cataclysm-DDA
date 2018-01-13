@@ -9,7 +9,7 @@ headers = [
     'player.h', 'character.h', 'bodypart.h', 'creature.h', 'game.h',
     'map.h', 'enums.h', 'calendar.h', 'mtype.h', 'itype.h', 'item.h',
     'ui.h', 'martialarts.h', 'trap.h', 'field.h', 'overmap.h',
-    'material.h', 'start_location.h', 'mutation.h', 'dialogue.h',
+    'mutation.h',
     'monstergenerator.h', 'item_stack.h', 'mongroup.h', 'weather_gen.h',
 ]
 
@@ -17,7 +17,7 @@ parser = Parser()
 
 # All the classes that should be available in Lua. See doc/LUA_SUPPORT.md for
 # the meaning of by_reference/by_value/by_value_and_reference.
-parser.add_export_by_reference('effect_type')
+parser.add_export_for_string_id('efftype_id', 'effect_type')
 parser.add_export_by_value_and_reference('calendar')
 parser.add_export_by_reference('mutation_branch')
 parser.add_export_by_reference('Character')
@@ -38,16 +38,16 @@ parser.add_export_by_reference('ter_t')
 parser.add_export_by_reference('furn_t')
 parser.add_export_by_reference('Creature')
 parser.add_export_by_reference('monster')
-parser.add_export_by_reference('martialart')
-parser.add_export_by_reference('material_type')
-parser.add_export_by_reference('start_location')
-parser.add_export_by_reference('ma_buff')
-parser.add_export_by_reference('ma_technique')
-parser.add_export_by_reference('Skill')
+parser.add_export_for_string_id('matype_id', 'martialart')
+parser.add_export_for_string_id('material_id', 'material_type')
+parser.add_export_for_string_id('start_location_id', 'start_location')
+parser.add_export_for_string_id('mabuff_id', 'ma_buff')
+parser.add_export_for_string_id('matec_id', 'ma_technique')
+parser.add_export_for_string_id('skill_id', 'Skill')
 parser.add_export_by_reference('quality')
-parser.add_export_by_reference('npc_template')
-parser.add_export_by_reference('species_type')
-parser.add_export_by_reference('ammunition_type')
+parser.add_export_for_string_id('npc_template_id', 'npc_template')
+parser.add_export_for_string_id('species_id', 'species_type')
+parser.add_export_for_string_id('ammotype', 'ammunition_type')
 parser.add_export_by_reference('MonsterGroup')
 parser.add_export_by_reference('mtype')
 parser.add_export_by_reference('mongroup')

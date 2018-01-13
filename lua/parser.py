@@ -93,6 +93,11 @@ class Parser:
         or to both.
         '''
         self.types_to_export = [ ]
+        '''
+        Types (C++ name) that are exported for usage in string_id/int_id only. None
+        of their members are exported, only code to use them in the id types is generated.
+        '''
+        self.types_to_export_for_id_only = [ ]
 
         self.string_ids = { }
         self.int_ids = { }
@@ -117,7 +122,11 @@ class Parser:
     ]
 
 
-
+    def add_export_for_string_id(self, id_name, cpp_name):
+        self.string_ids[id_name] = cpp_name
+        self.types_to_export.append(cpp_name)
+        self.types_to_export_for_id_only.append(cpp_name)
+        self.types_exported_by_value.append(id_name)
     def add_export_by_value(self, cpp_name):
         self.types_exported_by_value.append(cpp_name)
         self.types_to_export.append(cpp_name)
@@ -144,6 +153,10 @@ class Parser:
         if type(name) is str:
             return name in self.types_to_export
         return self.export_enabled(self.derived_class(name))
+    def export_for_id_only_enabled(self, name):
+        if type(name) is str:
+            return name in self.types_to_export_for_id_only
+        return self.export_for_id_only_enabled(self.derived_class(name))
     def export_by_value(self, name):
         if type(name) is str:
             return name in self.types_exported_by_value
@@ -188,6 +201,8 @@ class Parser:
         sp = cursor.spelling
         if not self.export_enabled(cursor.type):
             return
+        if self.export_for_id_only_enabled(cursor.type):
+            return
         if not self.export_by_reference(cursor.type) and not self.export_by_value(cursor.type):
             raise RuntimeError("Class %s should be exported, but is not marked as by-value nor by-reference!" % sp)
         # Just a declaration, skip the actual parsing as it requires a proper definition.
@@ -209,7 +224,7 @@ class Parser:
         if typedef_name in ids_map:
             return
 
-        if not self.export_enabled(base_type):
+        if not self.export_enabled(base_type) and not self.export_for_id_only_enabled(base_type):
             debug_print("%s is a %s, but it's not exported" % (t.spelling, id_type))
             return
 
@@ -256,12 +271,14 @@ class Parser:
             base_type = self.string_ids[c]
             if not base_type in self.classes:
                 self.classes[base_type] = CppClass.from_name(self, base_type)
-                self.types_to_export.append(base_type)
+                if not base_type in self.types_to_export:
+                    self.types_to_export.append(base_type)
         for c in self.int_ids:
             base_type = self.int_ids[c]
             if not base_type in self.classes:
                 self.classes[base_type] = CppClass.from_name(self, base_type)
-                self.types_to_export.append(base_type)
+                if not base_type in self.types_to_export:
+                    self.types_to_export.append(base_type)
 
         handled_types = [ ]
         with open(lua_file, 'wb') as f:
@@ -280,7 +297,7 @@ class Parser:
             f.write("}\n")
 
         for t in self.types_to_export:
-            if not t in handled_types:
+            if not t in handled_types and not self.export_for_id_only_enabled(base_type):
                 print("Type %s not found in any input source file" % (t))
 
 
@@ -645,7 +662,7 @@ class CppClass:
 
         for pc in self.parents:
             definition = pc.get_definition()
-            if self.parser.export_enabled(definition.type):
+            if self.parser.export_enabled(definition.type) and not self.parser.export_for_id_only_enabled(definition.type):
                 r = r + tab + "parent = \"" + definition.spelling + "\",\n"
             else:
                 # Parent class is not exported directly, but we still have to include its
