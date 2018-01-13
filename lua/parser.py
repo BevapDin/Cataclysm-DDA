@@ -230,7 +230,8 @@ class Parser:
         bt = self.build_in_lua_type(cursor.underlying_typedef_type)
         if bt:
             a = re.sub('^const ', '', cursor.spelling)
-            debug_print('Added %s (%s) -> %s' % (a, cursor.underlying_typedef_type.spelling, bt))
+            if not bt 'int':
+                debug_print('Added %s (%s) -> %s' % (a, cursor.underlying_typedef_type.spelling, bt))
             self.build_in_typedefs[a] = bt
 
 
