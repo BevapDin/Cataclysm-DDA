@@ -1078,6 +1078,16 @@ static int game_register_iuse(lua_State *L)
     return 0; // 0 return values
 }
 
+void checkArgumentCount( lua_State *const L, const char *const function_name,
+                         const int stack_index )
+{
+    const int arg_count = lua_gettop( L );
+    if( arg_count > stack_index ) {
+        luaL_error( L, "Too many arguments to \"%s\", expected only %d, got %d", function_name, stack_index,
+                    arg_count );
+    }
+}
+
 #include "lua/catabindings.cpp"
 
 // Load the main file of a mod

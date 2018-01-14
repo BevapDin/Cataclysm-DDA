@@ -335,9 +335,7 @@ function insert_overload_resolution(function_name, args, cbc, indentation, stack
             text = text .. ind .. "if(lua_gettop(L) == "..stack_index..") {"..br
         end
         -- If we're here, any further arguments will ignored, so raise an error if there are any left over
-        text = text..mind.."if(lua_gettop(L) > "..stack_index..") {"..br
-        text = text..mind..tab.."return luaL_error(L, \"Too many arguments to "..function_name..", expected only "..stack_index..", got %d\", lua_gettop(L));"..br
-        text = text..mind.."}"..br
+        text = text..mind.."checkArgumentCount( L, \""..function_name.."\", "..stack_index.." )"..br
         text = text .. cbc(ni, stack_index - 1, args.r)
         if more then
             text = text .. ind .. "}"..br
