@@ -44,15 +44,25 @@ def xydump2(cursor, ident, prefix, visited):
         return
     visited.append(cursor)
 
+    for i in xrange(cursor.get_num_template_arguments()):
+        print("%s%stemplate: %s - %s - %s - %s - %s" % (prefix, "   " * ident, str(i), \
+            str(cursor.get_template_argument_kind(i)), str(cursor.get_template_argument_type(i)), \
+            str(cursor.get_template_argument_value(i)), str(cursor.get_template_argument_unsigned_value(i))))
+
     defi = cursor.get_definition()
     if defi:
         print("%s%sdefinition: %s[%s]" % (prefix, "   " * ident, defi.spelling, str(defi.kind)))
         xydump2(defi, 0, '   ' * ident + 'd  ', visited)
 
     ty = cursor.type
-    if ty:
+    if ty.kind != clang.cindex.TypeKind.INVALID:
         print("%s%stype: %s[%s]" % (prefix, "   " * ident, ty.spelling, str(ty.kind)))
         xydump2(ty.get_declaration(), 0, '   ' * ident + 't  ', visited)
+
+        tp = ty.get_pointee()
+        if tp.kind != clang.cindex.TypeKind.INVALID:
+            print("%s%spointee: %s[%s]" % (prefix, "   " * ident, tp.spelling, str(tp.kind)))
+            xydump2(tp.get_declaration(), 0, '   ' * ident + 'p  ', visited)
 
     for c in cursor.get_children():
         xydump2(c, ident + 1, prefix, visited)
@@ -262,6 +272,7 @@ class Parser:
         self.parse_id_typedef(cursor, 'string_id', self.string_ids)
         self.parse_id_typedef(cursor, 'int_id', self.int_ids)
 
+        # We need this later in `register_container`
         bt = self.build_in_lua_type(cursor.underlying_typedef_type)
         if bt:
             a = re.sub('^const ', '', cursor.spelling)
@@ -283,6 +294,7 @@ class Parser:
             self.parse_cursor(tu.cursor)
             for i in tu.get_includes():
                 self.visited_files.append(i.source.name)
+
         except clang.cindex.TranslationUnitLoadError as e:
             print("Failed to parse %s: %s" % (header, str(e)))
 
@@ -349,15 +361,32 @@ class Parser:
 
 
 
-    def register_container(self, name, t):
+    def register_iterator(self, name, t):
         sp = re.sub('^const ', '', t.spelling)
-        iterator = False
-        m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>$', sp)
+        m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>::iterator$', sp)
         if not m:
-            m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>::iterator$', sp)
-            if m:
-                iterator = True
+            if t.kind == clang.cindex.TypeKind.TYPEDEF:
+                return self.register_iterator(name, t.get_declaration().underlying_typedef_type)
+            return None
 
+        element_type = m.group(1)
+        if self.build_in_lua_type(element_type) == 'std::string':
+            element_type = 'std::string'
+        elif self.export_by_value(element_type):
+            pass
+        else:
+            debug_print("%s is a %s based on %s, but is not exported" % (t.spelling, name, element_type))
+            return None
+
+        self.generic_types[sp] = 'make_' + name + '_class("%s")' % element_type
+        return '"std::' + name + '<' + element_type + '>::iterator"'
+
+    def register_container(self, name, t):
+        res = self.register_iterator(name, t)
+        if res: return res
+
+        sp = re.sub('^const ', '', t.spelling)
+        m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>$', sp)
         if not m:
             if t.kind == clang.cindex.TypeKind.TYPEDEF:
                 return self.register_container(name, t.get_declaration().underlying_typedef_type)
@@ -365,20 +394,16 @@ class Parser:
 
         element_type = m.group(1)
         if self.build_in_lua_type(element_type) == 'std::string':
-            bt = 'std::string'
-            debug_print("%s is a %s based on %s (%s)" % (t.spelling, name, element_type, bt))
-            element_type = bt
+            element_type = 'std::string'
         elif self.export_by_value(element_type):
             debug_print("%s is a %s based on %s" % (t.spelling, name, element_type))
+            pass
         else:
             debug_print("%s is a %s based on %s, but is not exported" % (t.spelling, name, element_type))
             return None
 
         self.generic_types[sp] = 'make_' + name + '_class("%s")' % element_type
-        if iterator:
-            return '"std::' + name + '<' + element_type + '>::iterator"'
-        else:
-            return '"std::' + name + '<' + element_type + '>"'
+        return '"std::' + name + '<' + element_type + '>"'
 
     def register_id_type(self, t, ids_map, id_type):
         typedef = t
@@ -621,6 +646,12 @@ class CppClass:
             if m == 0:
                 return '{ }'
             args = list(self.cursor.get_arguments())[0:m]
+#            for a in args:
+#                print(">> %s[%s]" % (a.spelling, a.kind))
+#                xydump(a.type.get_pointee().get_declaration())
+#                for c in a.type.get_pointee().get_declaration().get_children():
+#                    print("%s[%s]" % (c.spelling, c.kind))
+
             args = [ self.parent.parser.translate_argument_type(a.type) for a in args]
             return "{ " + ", ".join(args) + " }"
 
