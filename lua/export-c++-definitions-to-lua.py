@@ -63,6 +63,7 @@ parser.add_export_by_reference('trap')
 parser.add_export_by_reference('w_point')
 parser.add_export_by_reference('vehicle')
 parser.add_export_by_value_and_reference('vehicle_part')
+parser.add_export_by_value('vehicle_stack')
 
 # Enums that should be available in Lua.
 parser.add_export_enumeration('body_part')

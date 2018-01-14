@@ -2507,6 +2507,8 @@ classes = {
             { name = "fuel_left", rval = "int", args = { "std::string" } },
             { name = "fuel_left", rval = "int", args = { "std::string", "bool" } },
             { name = "gain_moves", rval = nil, args = { } },
+            { name = "get_items", rval = "vehicle_stack", args = { "int" } },
+            { name = "get_items", rval = "vehicle_stack", args = { "int" } },
             { name = "get_label", rval = "std::string", args = { "int", "int" } },
             { name = "get_passenger", rval = "player&", args = { "int" } },
             { name = "global_part_at", rval = "int", args = { "int", "int" } },
@@ -2698,6 +2700,25 @@ classes = {
             { name = "wheel_area", rval = "int", args = { } },
             { name = "wheel_diameter", rval = "int", args = { } },
             { name = "wheel_width", rval = "int", args = { } },
+        }
+    },
+    vehicle_stack = {
+        by_value = true,
+        functions = {
+            { name = "amount_can_fit", rval = "int", args = { "item" } },
+            { name = "count_limit", rval = "int", args = { } },
+            { name = "count_limit", rval = "int", args = { } },
+            { name = "empty", rval = "bool", args = { } },
+            { name = "free_volume", rval = "units::volume", args = { } },
+            { name = "front", rval = "item&", args = { } },
+            { name = "max_volume", rval = "units::volume", args = { } },
+            { name = "max_volume", rval = "units::volume", args = { } },
+            { name = "push_back", rval = nil, args = { "item" } },
+            { name = "push_back", rval = nil, args = { "item" } },
+            { name = "size", rval = "int", args = { } },
+            { name = "stacks_with", rval = "item&", args = { "item" } },
+            { name = "stacks_with", rval = "item&", args = { "item" } },
+            { name = "stored_volume", rval = "units::volume", args = { } },
         }
     },
 }
