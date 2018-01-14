@@ -129,14 +129,13 @@ end
 -- Generates a getter function for a specific class and member variable.
 function generate_getter(class_name, member_name, member_type, cpp_name)
     local function_name = "get_" .. cpp_ident(class_name) .. "_" .. member_name
-    local text = "static int "..function_name.."(lua_State *L) {"..br
+    local text = "static void "..function_name.."(lua_State *L) {"..br
 
     text = text .. tab .. load_instance(class_name)..br
 
     -- adding the "&" to the type, so push_lua_value knows it's a reference.
     text = text .. tab .. push_lua_value("instance."..cpp_name, member_type .. "&")..br
 
-    text = text .. tab .. "return 1;  // 1 return value"..br
     text = text .. "}" .. br
 
     return text

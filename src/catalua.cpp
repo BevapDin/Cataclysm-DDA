@@ -215,7 +215,7 @@ private:
     /** Defined by generate_bindings.lua in catabindings.cpp */
     static const luaL_Reg FUNCTIONS[];
     /** Defined by generate_bindings.lua in catabindings.cpp */
-    using MRMap = std::map<std::string, int(*)(lua_State*)>;
+    using MRMap = std::map<std::string, void(*)(lua_State*)>;
     static const MRMap READ_MEMBERS;
     /** Defined by generate_bindings.lua in catabindings.cpp */
     using MWMap = std::map<std::string, int(*)(lua_State*)>;
@@ -317,7 +317,8 @@ private:
         }
         lua_remove( L, -1 ); // remove key
         // userdata is still there (now on -1, where it is expected by the getter)
-        return iter->second( L );
+        iter->second( L );
+        return 1;
     }
     /**
      * Wrapper for the Lua __newindex entry in the metatable of the userdata.
