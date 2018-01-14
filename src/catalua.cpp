@@ -218,7 +218,7 @@ private:
     using MRMap = std::map<std::string, void(*)(lua_State*)>;
     static const MRMap READ_MEMBERS;
     /** Defined by generate_bindings.lua in catabindings.cpp */
-    using MWMap = std::map<std::string, int(*)(lua_State*)>;
+    using MWMap = std::map<std::string, void(*)(lua_State*)>;
     static const MWMap WRITE_MEMBERS;
 
     /*@{*/
@@ -337,7 +337,8 @@ private:
             luaL_error( L, "Unknown attribute" );
         }
         lua_remove( L, -2 ); // key, userdata is still there, but now on -2, and the value is on -1
-        return iter->second( L );
+        iter->second( L );
+        return 0;
     }
     /**
      * This loads the metatable (and adds the available functions) and pushes it on the stack.
