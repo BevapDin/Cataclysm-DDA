@@ -257,8 +257,11 @@ class Parser:
             return
 
         if not self.export_enabled(base_type) and not self.export_for_id_only_enabled(base_type):
-            debug_print("%s is a %s, but it's not exported" % (t.spelling, id_type))
-            return
+            if not self.export_for_id_only_enabled(base_type):
+                self.types_to_export_for_id_only.append(base_type);
+            else:
+                debug_print("%s (%s) is a %s, but it's not exported" % (t.spelling, typedef.spelling, id_type))
+                return
 
         ids_map[typedef_name] = base_type
         # A id itself is always handled by value. It's basically a std::string/int.
