@@ -403,6 +403,37 @@ class Parser:
             self.parse_typedef(cursor, namespace)
             return
 
+        elif k == clang.cindex.CursorKind.VAR_DECL:
+            pass #@todo handle this?
+            return
+
+        # which are parsed above.
+        elif k == clang.cindex.CursorKind.VISIBILITY_ATTR:
+            return
+        # This is a *definition* of a member already declared in the class definition.
+        elif k == clang.cindex.CursorKind.CONSTRUCTOR or k == clang.cindex.CursorKind.DESTRUCTOR or k == clang.cindex.CursorKind.CXX_METHOD:
+            return
+        #@todo handle this?
+        elif k == clang.cindex.CursorKind.USING_DIRECTIVE:
+            return
+        #@todo handle this?
+        elif k == clang.cindex.CursorKind.TYPE_ALIAS_TEMPLATE_DECL:
+            return
+        #@todo handle this?
+        elif k == clang.cindex.CursorKind.CLASS_TEMPLATE_PARTIAL_SPECIALIZATION:
+            return
+        #@todo handle this?
+        elif k == clang.cindex.CursorKind.FUNCTION_TEMPLATE:
+            return
+        #@todo handle this?
+        elif k == clang.cindex.CursorKind.FUNCTION_DECL:
+            return
+        #@todo handle this?
+        elif k == clang.cindex.CursorKind.UNEXPOSED_ATTR:
+            return
+        #@todo handle this?
+        elif k == clang.cindex.CursorKind.UNEXPOSED_DECL:
+            return
         elif k == clang.cindex.CursorKind.NAMESPACE:
             if is_reserved(cursor.spelling) or cursor.spelling == '':
                 return
@@ -410,6 +441,9 @@ class Parser:
         # Not needed. Maybe use it later for some optimization?
         elif k == clang.cindex.CursorKind.TRANSLATION_UNIT:
             pass
+        else:
+            print("Didn\'t understood type %s" % k)
+            xdump(cursor)
 
         for c in cursor.get_children():
             self.parse_cursor(c, namespace)
