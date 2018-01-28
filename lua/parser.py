@@ -19,6 +19,12 @@ class Matcher:
     def add(self, match):
         self.matches.append(match)
 
+def fully_qualifid(namespace, name):
+    if namespace == '':
+        return name
+    else:
+        return namespace + '::' + name
+
 def debug_print(text):
     print(text)
 #    pass
@@ -219,9 +225,10 @@ class Parser:
 
 
 
-    def parse_enum(self, cursor):
+    def parse_enum(self, cursor, namespace):
         if not self.export_enabled(cursor.type):
             return
+        name = fully_qualifid(namespace, cursor.spelling)
         # Just a declaration, skip the actual parsing as it requires a proper definition.
         if not cursor.is_definition():
             return
@@ -229,14 +236,15 @@ class Parser:
         if not e.cpp_name in self.enums:
             self.enums[e.cpp_name] = e
 
-    def parse_class(self, cursor):
+    def parse_class(self, cursor, namespace):
         sp = cursor.spelling
         if not self.export_enabled(cursor.type):
             return
+        name = fully_qualifid(namespace, cursor.spelling)
         if self.export_for_id_only_enabled(cursor.type):
             return
         if not self.export_by_reference(cursor.type) and not self.export_by_value(cursor.type):
-            raise RuntimeError("Class %s should be exported, but is not marked as by-value nor by-reference!" % sp)
+            raise RuntimeError("Class %s should be exported, but is not marked as by-value nor by-reference!" % (name))
         # Just a declaration, skip the actual parsing as it requires a proper definition.
         if not cursor.is_definition():
             return
@@ -270,7 +278,8 @@ class Parser:
 
 
 
-    def parse_typedef(self, cursor):
+    def parse_typedef(self, cursor, namespace):
+        #@todo handle namespace
         # string_id and int_id typedefs are handled separately so we can include the typedef
         # name in the definition of the class. This allows Lua code to use the typedef name
         # instead of the underlying type `string_id<T>`.
@@ -297,7 +306,7 @@ class Parser:
             tu = self.index.parse(header, foo, options=opts)
             for d in tu.diagnostics:
                 print("Diagnostic at %s:%s: %s" % (d.location.file.name, d.location.line, d.spelling))
-            self.parse_cursor(tu.cursor)
+            self.parse_cursor(tu.cursor, '')
             for i in tu.get_includes():
                 self.visited_files.append(i.source.name)
 
@@ -348,22 +357,32 @@ class Parser:
 
 
 
-    def parse_cursor(self, cursor):
+    def parse_cursor(self, cursor, namespace):
         k = cursor.kind
         if k == clang.cindex.CursorKind.STRUCT_DECL or k == clang.cindex.CursorKind.CLASS_DECL or k == clang.cindex.CursorKind.CLASS_TEMPLATE:
-            self.parse_class(cursor)
+            self.parse_class(cursor, namespace)
             return
 
-        if k == clang.cindex.CursorKind.ENUM_DECL:
-            self.parse_enum(cursor)
+        elif k == clang.cindex.CursorKind.UNION_DECL:
+            pass #@todo handle this?
             return
 
-        if k == clang.cindex.CursorKind.TYPEDEF_DECL or k == clang.cindex.CursorKind.TYPE_ALIAS_DECL:
-            self.parse_typedef(cursor)
+        elif k == clang.cindex.CursorKind.ENUM_DECL:
+            self.parse_enum(cursor, namespace)
             return
+
+        elif k == clang.cindex.CursorKind.TYPEDEF_DECL or k == clang.cindex.CursorKind.TYPE_ALIAS_DECL or k == clang.cindex.CursorKind.USING_DECLARATION:
+            self.parse_typedef(cursor, namespace)
+            return
+
+        elif k == clang.cindex.CursorKind.NAMESPACE:
+            namespace = fully_qualifid(namespace, cursor.spelling)
+        # Not needed. Maybe use it later for some optimization?
+        elif k == clang.cindex.CursorKind.TRANSLATION_UNIT:
+            pass
 
         for c in cursor.get_children():
-            self.parse_cursor(c)
+            self.parse_cursor(c, namespace)
 
 
 
@@ -392,7 +411,7 @@ class Parser:
         if res: return res
 
         sp = re.sub('^const ', '', t.spelling)
-        m = re.match('^std::' + name + '<([a-zA-Z][_a-zA-Z0-9:]*)>$', sp)
+        m = re.match('^' + fully_qualifid('std', name) + '<([a-zA-Z][_a-zA-Z0-9:]*)>$', sp)
         if not m:
             if t.kind == clang.cindex.TypeKind.TYPEDEF:
                 return self.register_container(name, t.get_declaration().underlying_typedef_type)
