@@ -19,11 +19,17 @@ class Matcher:
     def add(self, match):
         self.matches.append(match)
 
+def is_reserved(name):
+    return name.startswith('__')
+
 def fully_qualifid(namespace, name):
     if namespace == '':
         return name
     else:
         return namespace + '::' + name
+
+def skip_silently(cursor, namespace):
+    return (namespace + "::").startswith("std::") or is_reserved(cursor.spelling) or cursor.spelling == '';
 
 def debug_print(text):
     print(text)
@@ -146,6 +152,7 @@ class Parser:
         self.generic_types = { }
         self.build_in_typedefs = {
         }
+        self.skipped_entities = []
 
     numeric_fixed_points = [
         clang.cindex.TypeKind.CHAR_U, clang.cindex.TypeKind.UCHAR, clang.cindex.TypeKind.CHAR16,
@@ -224,30 +231,42 @@ class Parser:
 
 
 
+    def skipped(self, what, name, why, result = None):
+        # Register what things have been skipped, so we can avoid showing this
+        # message again for the same thing. what+!+name is a unique id for it.
+        if not (what + "!" + name) in self.skipped_entities:
+            print("Skipping %s %s (%s)" % (what, name, why))
+            self.skipped_entities.append(what + "!" + name)
+        return result
+
+
 
     def parse_enum(self, cursor, namespace):
-        if not self.export_enabled(cursor.type):
+        if skip_silently(cursor, namespace):
             return
         name = fully_qualifid(namespace, cursor.spelling)
+        if not self.export_enabled(cursor.type):
+            return self.skipped("enum", name, "not exported")
         # Just a declaration, skip the actual parsing as it requires a proper definition.
         if not cursor.is_definition():
-            return
+            return self.skipped("enum", name, "forward declaration")
         e = CppEnum(self, cursor);
         if not e.cpp_name in self.enums:
             self.enums[e.cpp_name] = e
 
     def parse_class(self, cursor, namespace):
-        sp = cursor.spelling
-        if not self.export_enabled(cursor.type):
+        if skip_silently(cursor, namespace):
             return
         name = fully_qualifid(namespace, cursor.spelling)
+        if not self.export_enabled(cursor.type):
+            return self.skipped("class", name, "not exported")
         if self.export_for_id_only_enabled(cursor.type):
-            return
+            return self.skipped("class", name, "only for ids")
         if not self.export_by_reference(cursor.type) and not self.export_by_value(cursor.type):
             raise RuntimeError("Class %s should be exported, but is not marked as by-value nor by-reference!" % (name))
         # Just a declaration, skip the actual parsing as it requires a proper definition.
         if not cursor.is_definition():
-            return
+            return self.skipped("class", name, "forward declaration")
         c = CppClass.from_cursor(self, cursor)
         if not c.cpp_name in self.classes:
             self.classes[c.cpp_name] = c
@@ -257,24 +276,25 @@ class Parser:
 
         m = re.match('^' + id_type + '<([a-zA-Z][_a-zA-Z0-9]*)>$', re.sub('^const ', '', t.spelling))
         if not m:
-            return
+            return False
 
         typedef_name = re.sub('^const ', '', cursor.spelling)
         base_type = m.group(1)
         if typedef_name in ids_map:
-            return
+            return False
 
         if not self.export_enabled(base_type) and not self.export_for_id_only_enabled(base_type):
             if not self.export_for_id_only_enabled(base_type):
                 self.types_to_export_for_id_only.append(base_type);
             else:
                 debug_print("%s (%s) is a %s, but it's not exported" % (t.spelling, typedef.spelling, id_type))
-                return
+                return False
 
         ids_map[typedef_name] = base_type
         # A id itself is always handled by value. It's basically a std::string/int.
         self.types_exported_by_value.append(typedef_name)
         debug_print('Automatically added "%s" as "%s<%s>"' % (typedef_name, id_type, base_type))
+        return True
 
 
 
@@ -283,8 +303,10 @@ class Parser:
         # string_id and int_id typedefs are handled separately so we can include the typedef
         # name in the definition of the class. This allows Lua code to use the typedef name
         # instead of the underlying type `string_id<T>`.
-        self.parse_id_typedef(cursor, 'string_id', self.string_ids)
-        self.parse_id_typedef(cursor, 'int_id', self.int_ids)
+        if self.parse_id_typedef(cursor, 'string_id', self.string_ids):
+            return
+        if self.parse_id_typedef(cursor, 'int_id', self.int_ids):
+            return
 
         # We need this later in `register_container`
         bt = self.build_in_lua_type(cursor.underlying_typedef_type)
@@ -293,6 +315,12 @@ class Parser:
             if not bt == 'int':
                 debug_print('Added %s (%s) -> %s' % (a, cursor.underlying_typedef_type.spelling, bt))
             self.build_in_typedefs[a] = bt
+            return
+
+        # We don't export any from std, except std::string, which is handled as build in type above.
+        # Skipping it here quietly will prevent the message below.
+        if skip_silently(cursor, namespace):
+            return
 
 
     def parse(self, header):
@@ -376,6 +404,8 @@ class Parser:
             return
 
         elif k == clang.cindex.CursorKind.NAMESPACE:
+            if is_reserved(cursor.spelling) or cursor.spelling == '':
+                return
             namespace = fully_qualifid(namespace, cursor.spelling)
         # Not needed. Maybe use it later for some optimization?
         elif k == clang.cindex.CursorKind.TRANSLATION_UNIT:
