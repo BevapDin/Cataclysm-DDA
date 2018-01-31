@@ -16,6 +16,8 @@ headers = [
     'vehicle.h', 'veh_type.h', 'fault.h', 'vitamin.h', 'npc.h', 'damage.h',
 ]
 
+#headers = [ "../test.h" ]
+
 parser = Parser()
 
 # All the classes that should be available in Lua. See doc/LUA_SUPPORT.md for

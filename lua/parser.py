@@ -308,12 +308,16 @@ class Parser:
         if self.parse_id_typedef(cursor, 'int_id', self.int_ids):
             return
 
+        # This is handled as special case implicitly.
+        if fully_qualifid(namespace, cursor.spelling) == 'std::string':
+            return
+
         # We need this later in `register_container`
         bt = self.build_in_lua_type(cursor.underlying_typedef_type)
         if bt:
             a = re.sub('^const ', '', cursor.spelling)
-            if not bt == 'int':
-                debug_print('Added %s (%s) -> %s' % (a, cursor.underlying_typedef_type.spelling, bt))
+#            if not bt == 'int':
+#                debug_print('Added %s (%s) -> %s' % (a, cursor.underlying_typedef_type.spelling, bt))
             self.build_in_typedefs[a] = bt
             return
 
@@ -321,6 +325,9 @@ class Parser:
         # Skipping it here quietly will prevent the message below.
         if skip_silently(cursor, namespace):
             return
+
+#        print("Did not understand typedef %s -- %s" % (cursor.spelling, cursor.underlying_typedef_type.spelling))
+#        xdump(cursor)
 
 
     def parse(self, header):
@@ -404,6 +411,7 @@ class Parser:
             return
 
         elif k == clang.cindex.CursorKind.VAR_DECL:
+#            xdump(cursor)
             pass #@todo handle this?
             return
 
@@ -485,12 +493,12 @@ class Parser:
         if self.build_in_lua_type(element_type) == 'std::string':
             element_type = 'std::string'
         elif self.export_by_value(element_type):
-            debug_print("%s is a %s based on %s" % (t.spelling, name, element_type))
             pass
         else:
             debug_print("%s is a %s based on %s, but is not exported" % (t.spelling, name, element_type))
             return None
 
+        debug_print("%s is a %s based on %s" % (t.spelling, name, element_type))
         self.generic_types[sp] = 'make_' + name + '_class("%s")' % element_type
         return '"std::' + name + '<' + element_type + '>"'
 
@@ -532,6 +540,16 @@ class Parser:
             return 'float'
         elif ct.kind == clang.cindex.TypeKind.BOOL:
             return 'bool'
+        elif ct.kind == clang.cindex.TypeKind.POINTER:
+            return None
+        elif ct.kind == clang.cindex.TypeKind.LVALUEREFERENCE:
+            return None
+        elif ct.kind == clang.cindex.TypeKind.RVALUEREFERENCE:
+            return None
+
+        # Not a known type, but if it's a typedef, maybe the underlying type is known.
+        if t.kind == clang.cindex.TypeKind.TYPEDEF:
+            return self.build_in_lua_type(t.get_declaration().underlying_typedef_type)
 
         # It's not a build-in C++ type that we can handle, so look at its actual name.
         # This removes the const because we export 'const int' and 'const std::string' the
