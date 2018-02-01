@@ -106,7 +106,6 @@ classes = {
         },
         functions = {
             { name = "increment", rval = nil, args = { } },
-            { name = "years", rval = "int", args = { } },
         }
     },
     mutation_branch = {

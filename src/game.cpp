@@ -4182,10 +4182,11 @@ void game::debug()
             uimenu smenu;
             smenu.return_invalid = true;
             do {
+                const int year = static_cast<int>( ( calendar::turn - calendar::time_of_cataclysm ) / calendar::year_length() );
                 const int iSel = smenu.ret;
                 smenu.reset();
                 smenu.return_invalid = true;
-                smenu.addentry( 0, true, 'y', "%s: %d", _( "year" ), calendar::turn.years() );
+                smenu.addentry( 0, true, 'y', "%s: %d", _( "year" ), year );
                 smenu.addentry( 1, !calendar::eternal_season(), 's', "%s: %d",
                                 _( "season" ), int( season_of_year( calendar::turn ) ) );
                 smenu.addentry( 2, true, 'd', "%s: %d", _( "day" ), day_of_season<int>( calendar::turn ) );
@@ -4198,7 +4199,7 @@ void game::debug()
 
                 switch( smenu.ret ) {
                     case 0:
-                        set_turn( calendar::turn.years(), to_turns<int>( calendar::year_length() ), _( "Set year to?" ) );
+                        set_turn( year, to_turns<int>( calendar::year_length() ), _( "Set year to?" ) );
                         break;
                     case 1:
                         set_turn( int( season_of_year( calendar::turn ) ), to_turns<int>( calendar::turn.season_length() ),
