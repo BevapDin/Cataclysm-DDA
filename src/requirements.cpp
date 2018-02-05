@@ -2,6 +2,7 @@
 
 #include "json.h"
 #include "translations.h"
+#include "output.h"
 #include "game.h"
 #include "player.h"
 #include "debug.h"
@@ -218,7 +219,7 @@ requirement_data requirement_data::operator+( const requirement_data &rhs ) cons
     // combined result is temporary which caller could store via @ref save_requirement
     res.id_ = requirement_id::NULL_ID();
 
-    // @todo deduplicate qualites and combine other requirements
+    // @todo deduplicate qualities and combine other requirements
 
     // if either operand was blacklisted then their summation should also be
     res.blacklisted |= rhs.blacklisted;
@@ -254,12 +255,6 @@ void requirement_data::save_requirement( const requirement_data &req, const std:
     auto dup = req;
     if( !id.empty() ) {
         dup.id_ = requirement_id( id );
-    }
-
-    if( requirements_all.find( req.id_ ) != requirements_all.end() ) {
-        DebugLog( D_INFO, DC_ALL ) << "Updated requirement: " << dup.id_.c_str();
-    } else {
-        DebugLog( D_INFO, DC_ALL ) << "Added requirement: " << dup.id_.c_str();
     }
 
     requirements_all[ dup.id_ ] = dup;

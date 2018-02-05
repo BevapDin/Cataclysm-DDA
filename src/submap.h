@@ -6,11 +6,9 @@
 #include "basecamp.h"
 #include "item.h"
 #include "field.h"
-#include "item_stack.h"
 #include "int_id.h"
 #include "string_id.h"
 #include "active_item_cache.h"
-#include "copyable_unique_ptr.h"
 
 #include <vector>
 #include <list>
@@ -100,7 +98,7 @@ struct submap {
             return;
         }
 
-        // Have to scan through all items to be sure removing i will actally lower
+        // Have to scan through all items to be sure removing i will actually lower
         // the count below 255.
         int count = 0;
         for (auto const &it : itm[x][y]) {
@@ -179,7 +177,7 @@ struct submap {
      * TODO: submap owns these pointers, they ought to be unique_ptrs.
      */
     std::vector<vehicle*> vehicles;
-    copyable_unique_ptr<computer> comp;
+    std::unique_ptr<computer> comp;
     basecamp camp;  // only allowing one basecamp per submap
 
     submap();
