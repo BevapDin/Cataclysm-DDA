@@ -3811,9 +3811,9 @@ void player::on_hurt( Creature *source, bool disturb /*= true*/ )
         }
         if( !is_npc() ) {
             if( source != nullptr ) {
-                g->cancel_activity_query( string_format( _( "You were attacked by %s!" ), source->disp_name().c_str() ) );
+                cancel_activity_query( string_format( _( "You were attacked by %s!" ), source->disp_name() ) );
             } else {
-                g->cancel_activity_query( _( "You were hurt!" ) );
+                cancel_activity_query( _( "You were hurt!" ) );
             }
         }
     }
@@ -4096,6 +4096,22 @@ void player::set_painkiller(int npkill)
     }
 }
 
+bool player::cancel_activity_query( const std::string &text )
+{
+    if( !activity ) {
+        if( has_destination() ) {
+            add_msg( m_warning, _( "%s. Auto-move canceled" ), text );
+            clear_destination();
+        }
+        return false;
+    }
+    if( query_yn( "%s %s", text, u.activity.get_stop_phrase() ) ) {
+        cancel_activity();
+        return true;
+    }
+    return false;
+}
+
 int player::get_painkiller() const
 {
     return pkill;
@@ -4107,7 +4123,7 @@ void player::react_to_felt_pain( int intensity )
         return;
     }
     if( is_player() && intensity >= 2 ) {
-        g->cancel_activity_query( _( "Ouch, something hurts!" ) );
+        cancel_activity_query( _( "Ouch, something hurts!" ) );
     }
     // Only a large pain burst will actually wake people while sleeping.
     if( in_sleep_state() ) {
@@ -4808,7 +4824,7 @@ void player::update_needs( int rate_multiplier )
             add_msg_if_player(m_warning, _("You're feeling tired.  %s to lie down for sleep."),
                 press_x(ACTION_SLEEP).c_str());
         } else {
-            g->cancel_activity_query( _( "You're feeling tired." ) );
+            cancel_activity_query( _( "You're feeling tired." ) );
         }
     }
 
@@ -5735,7 +5751,7 @@ void player::suffer()
         } else {
             add_effect( effect_asthma, 50 * rng( 1, 4 ) );
             if (!is_npc()) {
-                g->cancel_activity_query( _( "You have an asthma attack!" ) );
+                cancel_activity_query( _( "You have an asthma attack!" ) );
             }
         }
     }

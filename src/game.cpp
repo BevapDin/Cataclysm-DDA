@@ -1698,22 +1698,6 @@ bool game::cancel_activity_or_ignore_query( const std::string &text )
     return false;
 }
 
-bool game::cancel_activity_query( const std::string &text )
-{
-    if( !u.activity ) {
-        if (u.has_destination()) {
-            add_msg(m_warning, _("%s. Auto-move canceled"), text.c_str());
-            u.clear_destination();
-        }
-        return false;
-    }
-    if (query_yn("%s %s", text.c_str(), u.activity.get_stop_phrase().c_str())) {
-        u.cancel_activity();
-        return true;
-    }
-    return false;
-}
-
 const weather_generator &game::get_cur_weather_gen() const
 {
     const auto &om = get_cur_om();
@@ -1759,7 +1743,7 @@ void game::update_weather()
         if (weather != old_weather && weather_data(weather).dangerous &&
             get_levz() >= 0 && m.is_outside(u.pos())
             && !u.has_activity( activity_id( "ACT_WAIT_WEATHER" ) ) ) {
-            cancel_activity_query( string_format( _( "The weather changed to %s!" ), weather_data( weather ).name.c_str() ) );
+            u.cancel_activity_query( string_format( _( "The weather changed to %s!" ), weather_data( weather ).name ) );
         }
 
         if (weather != old_weather && u.has_activity( activity_id( "ACT_WAIT_WEATHER" ) ) ) {
@@ -1819,8 +1803,8 @@ void game::handle_key_blocking_activity()
         Creature *hostile_critter = is_hostile_very_close();
         if (hostile_critter != nullptr) {
             u.activity.warned_of_proximity = true;
-            if ( cancel_activity_query( string_format( _( "You see %s approaching!" ),
-                    hostile_critter->disp_name().c_str() ) ) ) {
+            if( u.cancel_activity_query( string_format( _( "You see %s approaching!" ),
+                hostile_critter->disp_name() ) ) ) {
                 return;
             }
         }
@@ -1830,7 +1814,7 @@ void game::handle_key_blocking_activity()
         input_context ctxt = get_default_mode_input_context();
         const std::string action = ctxt.handle_input( 0 );
         if (action == "pause") {
-            cancel_activity_query( _( "Confirm:" ) );
+            u.cancel_activity_query( _( "Confirm:" ) );
         } else if (action == "player_data") {
             u.disp_info();
             refresh_all();
@@ -5653,7 +5637,7 @@ int game::mon_info( const catacurses::window &w )
         if (newseen - mostseen == 1) {
             if (!new_seen_mon.empty()) {
                 monster &critter = *new_seen_mon.back();
-                cancel_activity_query( string_format( _( "%s spotted!" ), critter.name().c_str() ) );
+                u.cancel_activity_query( string_format( _( "%s spotted!" ), critter.name() ) );
                 if (u.has_trait( trait_id( "M_DEFENDER" ) ) && critter.type->in_species( PLANT )) {
                     add_msg(m_warning, _("We have detected a %s."), critter.name().c_str());
                     if (!u.has_effect( effect_adrenaline_mycus)){
@@ -5667,10 +5651,10 @@ int game::mon_info( const catacurses::window &w )
                 }
             } else {
                 //Hostile NPC
-                cancel_activity_query( _( "Hostile survivor spotted!" ) );
+                u.cancel_activity_query( _( "Hostile survivor spotted!" ) );
             }
         } else {
-            cancel_activity_query( _( "Monsters spotted!" ) );
+            u.cancel_activity_query( _( "Monsters spotted!" ) );
         }
         turnssincelastmon = 0;
         if (safe_mode == SAFE_MODE_ON) {
@@ -5927,7 +5911,7 @@ void game::monmove()
             !critter.is_hallucination()) {
                 u.charge_power(-25);
                 add_msg(m_warning, _("Your motion alarm goes off!"));
-                cancel_activity_query( _( "Your motion alarm goes off!" ) );
+                u.cancel_activity_query( _( "Your motion alarm goes off!" ) );
                 if (u.in_sleep_state()) {
                     u.wake_up();
                 }
