@@ -559,7 +559,7 @@ void player::hardcoded_effects( effect &it )
                 MonsterGroupResult spawn_details = MonsterGroupManager::GetResultFromGroup(
                                                        mongroup_id( "GROUP_NETHER" ) );
                 g->summon_mon( spawn_details.name, dest );
-                if( g->u.sees( dest ) ) {
+                if( sees( dest ) ) {
                     cancel_activity_query( _( "A monster appears nearby!" ) );
                     add_msg_if_player( m_warning, _( "A portal opens nearby, and a monster crawls through!" ) );
                 }
@@ -645,7 +645,7 @@ void player::hardcoded_effects( effect &it )
                     MonsterGroupResult spawn_details = MonsterGroupManager::GetResultFromGroup(
                                                            mongroup_id( "GROUP_NETHER" ) );
                     g->summon_mon( spawn_details.name, dest );
-                    if( g->u.sees( dest ) ) {
+                    if( sees( dest ) ) {
                         cancel_activity_query( _( "A monster appears nearby!" ) );
                         add_msg( m_warning, _( "A portal opens nearby, and a monster crawls through!" ) );
                     }
