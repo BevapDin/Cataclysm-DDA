@@ -1673,12 +1673,6 @@ void game::catch_a_monster(std::vector<monster*> &catchables, const tripoint &po
     catchables.erase (catchables.begin()+index);
 }
 
-
-void game::cancel_activity()
-{
-    u.cancel_activity();
-}
-
 bool game::cancel_activity_or_ignore_query( const std::string &text )
 {
     if( !u.activity ) {

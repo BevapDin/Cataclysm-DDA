@@ -437,8 +437,6 @@ class game
          * @return Whether an attack was actually performed.
          */
         bool plfire( item &weapon, int bp_cost = 0 );
-        /** Redirects to player::cancel_activity(). */
-        void cancel_activity();
         /** Asks if the player wants to cancel their activity, and if so cancels it. */
         bool cancel_activity_query( const std::string &message );
         /** Asks if the player wants to cancel their activity and if so cancels it. Additionally checks
