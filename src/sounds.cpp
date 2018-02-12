@@ -14,6 +14,7 @@
 #include "line.h"
 #include "string_formatter.h"
 #include "mtype.h"
+#include "input.h"
 #include "weather.h"
 #include "npc.h"
 #include "item.h"
@@ -226,6 +227,31 @@ void sounds::process_sounds()
     recent_sounds.clear();
 }
 
+static bool cancel_activity_or_ignore_query( player &u, const std::string &text )
+{
+    if( !u.activity ) {
+        return false;
+    }
+
+    const std::string stop_message = text + " " + u.activity.get_stop_phrase() + " " +
+                                     _( "(Y)es, (N)o, (I)gnore further distractions and finish." );
+
+    const bool force_uc = get_option<bool>( "FORCE_CAPITAL_YN" );
+    int ch = -1;
+    do {
+        ch = popup( stop_message, PF_GET_KEY );
+    } while( ch != '\n' && ch != ' ' && ch != KEY_ESCAPE &&
+             ch != 'Y' && ch != 'N' && ch != 'I' &&
+             ( force_uc || ( ch != 'y' && ch != 'n' && ch != 'i' ) ) );
+
+    if( ch == 'Y' || ch == 'y' ) {
+        u.cancel_activity();
+    } else if( ch == 'I' || ch == 'i' ) {
+        return true;
+    }
+    return false;
+}
+
 void sounds::process_sound_markers( player *p )
 {
     bool is_deaf = p->is_deaf();
@@ -308,7 +334,7 @@ void sounds::process_sound_markers( player *p )
                                           ? _( "Heard a noise!" )
                                           : string_format( _( "Heard %s!" ), description.c_str() );
 
-                if( g->cancel_activity_or_ignore_query( query ) ) {
+                if( cancel_activity_or_ignore_query( *p, query ) ) {
                     p->activity.ignore_trivial = true;
                     for( auto activity : p->backlog ) {
                         activity.ignore_trivial = true;

@@ -437,9 +437,6 @@ class game
          * @return Whether an attack was actually performed.
          */
         bool plfire( item &weapon, int bp_cost = 0 );
-        /** Asks if the player wants to cancel their activity and if so cancels it. Additionally checks
-         *  if the player wants to ignore further distractions. */
-        bool cancel_activity_or_ignore_query( const std::string &reason );
         /** Handles players exiting from moving vehicles. */
         void moving_vehicle_dismount( const tripoint &p );
 

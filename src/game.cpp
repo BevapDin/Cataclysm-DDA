@@ -1673,31 +1673,6 @@ void game::catch_a_monster(std::vector<monster*> &catchables, const tripoint &po
     catchables.erase (catchables.begin()+index);
 }
 
-bool game::cancel_activity_or_ignore_query( const std::string &text )
-{
-    if( !u.activity ) {
-        return false;
-    }
-
-    std::string stop_message = text + " " + u.activity.get_stop_phrase() + " " +
-                               _( "(Y)es, (N)o, (I)gnore further distractions and finish." );
-
-    bool force_uc = get_option<bool>( "FORCE_CAPITAL_YN" );
-    int ch = -1;
-    do {
-        ch = popup(stop_message, PF_GET_KEY);
-    } while (ch != '\n' && ch != ' ' && ch != KEY_ESCAPE &&
-             ch != 'Y' && ch != 'N' && ch != 'I' &&
-             (force_uc || (ch != 'y' && ch != 'n' && ch != 'i')));
-
-    if (ch == 'Y' || ch == 'y') {
-        u.cancel_activity();
-    } else if (ch == 'I' || ch == 'i') {
-        return true;
-    }
-    return false;
-}
-
 const weather_generator &game::get_cur_weather_gen() const
 {
     const auto &om = get_cur_om();
