@@ -20,193 +20,232 @@ struct iteminfo;
 typedef std::string itype_id;
 struct tripoint;
 
+class iuse_invocation_data
+{
+    private:
+        using item_class = ::item;
+        player *p;
+        item_class *it;
+        bool t;
+        //@todo change to item_location
+        tripoint pos;
+
+    public:
+        iuse_invocation_data( player *const p, item_class &it, const bool t, const tripoint &pos ) : p( p ),
+            it( &it ), t( t ), pos( pos ) {}
+
+        ///@returns `*p`
+        ///@throws if @ref p is null.
+        player &user() const;
+        ///@returns @ref p - may return a null pointer.
+        player *user_ptr() const {
+            return p;
+        }
+        bool has_user() const {
+            return p != nullptr;
+        }
+        item_class &item() const {
+            return *it;
+        }
+        bool is_active() const {
+            return t;
+        }
+        //@todo change to item_location
+        const tripoint &position() const {
+            return pos;
+        }
+        ///@returns `it->type->charges_to_use()` - intended to be used as result
+        ///of the iuse function.
+        int charges_to_use() const;
+};
+
 // iuse methods returning a bool indicating whether to consume a charge of the item being used.
 class iuse
 {
 public:
 // FOOD AND DRUGS (ADMINISTRATION)
-    int sewage              ( player*, item*, bool, const tripoint& );
-    int honeycomb           ( player*, item*, bool, const tripoint& );
-    int royal_jelly         ( player*, item*, bool, const tripoint& );
-    int completefirstaid    ( player*, item*, bool, const tripoint& );
-    int disinfectant        ( player*, item*, bool, const tripoint& );
-    int caff                ( player*, item*, bool, const tripoint& );
-    int atomic_caff         ( player*, item*, bool, const tripoint& );
-    int alcohol_weak        ( player*, item*, bool, const tripoint& );
-    int alcohol_medium      ( player*, item*, bool, const tripoint& );
-    int alcohol_strong      ( player*, item*, bool, const tripoint& );
-    int xanax               ( player*, item*, bool, const tripoint& );
-    int smoking             ( player*, item*, bool, const tripoint& );
-    int smoking_pipe        ( player*, item*, bool, const tripoint& );
-    int ecig                ( player*, item*, bool, const tripoint& );
-    int antibiotic          ( player*, item*, bool, const tripoint& );
-    int eyedrops            ( player*, item*, bool, const tripoint& );
-    int fungicide           ( player*, item*, bool, const tripoint& );
-    int antifungal          ( player*, item*, bool, const tripoint& );
-    int antiparasitic       ( player*, item*, bool, const tripoint& );
-    int anticonvulsant      ( player*, item*, bool, const tripoint& );
-    int weed_brownie        ( player*, item*, bool, const tripoint& );
-    int coke                ( player*, item*, bool, const tripoint& );
-    int meth                ( player*, item*, bool, const tripoint& );
-    int vaccine             ( player*, item*, bool, const tripoint& );
-    int flu_vaccine         ( player*, item*, bool, const tripoint& );
-    int poison              ( player*, item*, bool, const tripoint& );
-    int fun_hallu           ( player*, item*, bool, const tripoint& );
-    int meditate            ( player*, item*, bool, const tripoint& );
-    int thorazine           ( player*, item*, bool, const tripoint& );
-    int prozac              ( player*, item*, bool, const tripoint& );
-    int sleep               ( player*, item*, bool, const tripoint& );
-    int datura              ( player*, item*, bool, const tripoint& );
-    int flumed              ( player*, item*, bool, const tripoint& );
-    int flusleep            ( player*, item*, bool, const tripoint& );
-    int inhaler             ( player*, item*, bool, const tripoint& );
-    int blech               ( player*, item*, bool, const tripoint& );
-    int plantblech          ( player*, item*, bool, const tripoint& );
-    int chew                ( player*, item*, bool, const tripoint& );
-    int mutagen             ( player*, item*, bool, const tripoint& );
-    int mut_iv              ( player*, item*, bool, const tripoint& );
-    int purifier            ( player*, item*, bool, const tripoint& );
-    int purify_iv           ( player*, item*, bool, const tripoint& );
-    int marloss             ( player*, item*, bool, const tripoint& );
-    int marloss_seed        ( player*, item*, bool, const tripoint& );
-    int marloss_gel         ( player*, item*, bool, const tripoint& );
-    int mycus               ( player*, item*, bool, const tripoint& );
-    int dogfood             ( player*, item*, bool, const tripoint& );
-    int catfood             ( player*, item*, bool, const tripoint& );
-    int feedcattle          ( player*, item*, bool, const tripoint& );
+    int sewage              ( const iuse_invocation_data &data);
+    int honeycomb           ( const iuse_invocation_data &data);
+    int royal_jelly         ( const iuse_invocation_data &data);
+    int completefirstaid    ( const iuse_invocation_data &data);
+    int disinfectant        ( const iuse_invocation_data &data);
+    int caff                ( const iuse_invocation_data &data);
+    int atomic_caff         ( const iuse_invocation_data &data);
+    int alcohol_weak        ( const iuse_invocation_data &data);
+    int alcohol_medium      ( const iuse_invocation_data &data);
+    int alcohol_strong      ( const iuse_invocation_data &data);
+    int xanax               ( const iuse_invocation_data &data);
+    int smoking             ( const iuse_invocation_data &data);
+    int smoking_pipe        ( const iuse_invocation_data &data);
+    int ecig                ( const iuse_invocation_data &data);
+    int antibiotic          ( const iuse_invocation_data &data);
+    int eyedrops            ( const iuse_invocation_data &data);
+    int fungicide           ( const iuse_invocation_data &data);
+    int antifungal          ( const iuse_invocation_data &data);
+    int antiparasitic       ( const iuse_invocation_data &data);
+    int anticonvulsant      ( const iuse_invocation_data &data);
+    int weed_brownie        ( const iuse_invocation_data &data);
+    int coke                ( const iuse_invocation_data &data);
+    int meth                ( const iuse_invocation_data &data);
+    int vaccine             ( const iuse_invocation_data &data);
+    int flu_vaccine         ( const iuse_invocation_data &data);
+    int poison              ( const iuse_invocation_data &data);
+    int fun_hallu           ( const iuse_invocation_data &data);
+    int meditate            ( const iuse_invocation_data &data);
+    int thorazine           ( const iuse_invocation_data &data);
+    int prozac              ( const iuse_invocation_data &data);
+    int sleep               ( const iuse_invocation_data &data);
+    int datura              ( const iuse_invocation_data &data);
+    int flumed              ( const iuse_invocation_data &data);
+    int flusleep            ( const iuse_invocation_data &data);
+    int inhaler             ( const iuse_invocation_data &data);
+    int blech               ( const iuse_invocation_data &data);
+    int plantblech          ( const iuse_invocation_data &data);
+    int chew                ( const iuse_invocation_data &data);
+    int mutagen             ( const iuse_invocation_data &data);
+    int mut_iv              ( const iuse_invocation_data &data);
+    int purifier            ( const iuse_invocation_data &data);
+    int purify_iv           ( const iuse_invocation_data &data);
+    int marloss             ( const iuse_invocation_data &data);
+    int marloss_seed        ( const iuse_invocation_data &data);
+    int marloss_gel         ( const iuse_invocation_data &data);
+    int mycus               ( const iuse_invocation_data &data);
+    int dogfood             ( const iuse_invocation_data &data);
+    int catfood             ( const iuse_invocation_data &data);
+    int feedcattle          ( const iuse_invocation_data &data);
 // TOOLS
-    int sew_advanced        ( player*, item*, bool, const tripoint& );
-    int scissors            ( player*, item*, bool, const tripoint& );
-    int extinguisher        ( player*, item*, bool, const tripoint& );
-    int hammer              ( player*, item*, bool, const tripoint& );
-    int water_purifier      ( player*, item*, bool, const tripoint& );
-    int directional_antenna ( player*, item*, bool, const tripoint& );
-    int radio_off           ( player*, item*, bool, const tripoint& );
-    int radio_on            ( player*, item*, bool, const tripoint& );
-    int noise_emitter_off   ( player*, item*, bool, const tripoint& );
-    int noise_emitter_on    ( player*, item*, bool, const tripoint& );
-    int ma_manual           ( player*, item*, bool, const tripoint& );
-    int crowbar             ( player*, item*, bool, const tripoint& );
-    int makemound           ( player*, item*, bool, const tripoint& );
-    int dig                 ( player*, item*, bool, const tripoint& );
-    int siphon              ( player*, item*, bool, const tripoint& );
-    int chainsaw_off        ( player*, item*, bool, const tripoint& );
-    int chainsaw_on         ( player*, item*, bool, const tripoint& );
-    int elec_chainsaw_off   ( player*, item*, bool, const tripoint& );
-    int elec_chainsaw_on    ( player*, item*, bool, const tripoint& );
-    int cs_lajatang_off     ( player*, item*, bool, const tripoint& );
-    int cs_lajatang_on      ( player*, item*, bool, const tripoint& );
-    int carver_off          ( player*, item*, bool, const tripoint& );
-    int carver_on           ( player*, item*, bool, const tripoint& );
-    int trimmer_off         ( player*, item*, bool, const tripoint& );
-    int trimmer_on          ( player*, item*, bool, const tripoint& );
-    int circsaw_on          ( player*, item*, bool, const tripoint& );
-    int combatsaw_off       ( player*, item*, bool, const tripoint& );
-    int combatsaw_on        ( player*, item*, bool, const tripoint& );
-    int jackhammer          ( player*, item*, bool, const tripoint& );
-    int pickaxe             ( player*, item*, bool, const tripoint& );
-    int geiger              ( player*, item*, bool, const tripoint& );
-    int teleport            ( player*, item*, bool, const tripoint& );
-    int can_goo             ( player*, item*, bool, const tripoint& );
-    int throwable_extinguisher_act( player*, item*, bool, const tripoint& );
-    int capture_monster_act ( player*, item*, bool, const tripoint& );
-    int pipebomb_act        ( player*, item*, bool, const tripoint& );
-    int granade             ( player*, item*, bool, const tripoint& );
-    int granade_act         ( player*, item*, bool, const tripoint& );
-    int c4                  ( player*, item*, bool, const tripoint& );
-    int arrow_flamable      ( player*, item*, bool, const tripoint& );
-    int acidbomb_act        ( player*, item*, bool, const tripoint& );
-    int grenade_inc_act     ( player*, item*, bool, const tripoint& );
-    int molotov_lit         ( player*, item*, bool, const tripoint& );
-    int firecracker_pack    ( player*, item*, bool, const tripoint& );
-    int firecracker_pack_act( player*, item*, bool, const tripoint& );
-    int firecracker         ( player*, item*, bool, const tripoint& );
-    int firecracker_act     ( player*, item*, bool, const tripoint& );
-    int mininuke            ( player*, item*, bool, const tripoint& );
-    int pheromone           ( player*, item*, bool, const tripoint& );
-    int portal              ( player*, item*, bool, const tripoint& );
-    int UPS_off             ( player*, item*, bool, const tripoint& );
-    int UPS_on              ( player*, item*, bool, const tripoint& );
-    int adv_UPS_off         ( player*, item*, bool, const tripoint& );
-    int adv_UPS_on          ( player*, item*, bool, const tripoint& );
-    int tazer               ( player*, item*, bool, const tripoint& );
-    int tazer2              ( player*, item*, bool, const tripoint& );
-    int shocktonfa_off      ( player*, item*, bool, const tripoint& );
-    int shocktonfa_on       ( player*, item*, bool, const tripoint& );
-    int mp3                 ( player*, item*, bool, const tripoint& );
-    int mp3_on              ( player*, item*, bool, const tripoint& );
-    int portable_game       ( player*, item*, bool, const tripoint& );
-    int vibe                ( player*, item*, bool, const tripoint& );
-    int vortex              ( player*, item*, bool, const tripoint& );
-    int dog_whistle         ( player*, item*, bool, const tripoint& );
-    int blood_draw          ( player*, item*, bool, const tripoint& );
+    int sew_advanced        ( const iuse_invocation_data &data);
+    int scissors            ( const iuse_invocation_data &data);
+    int extinguisher        ( const iuse_invocation_data &data);
+    int hammer              ( const iuse_invocation_data &data);
+    int water_purifier      ( const iuse_invocation_data &data);
+    int directional_antenna ( const iuse_invocation_data &data);
+    int radio_off           ( const iuse_invocation_data &data);
+    int radio_on            ( const iuse_invocation_data &data);
+    int noise_emitter_off   ( const iuse_invocation_data &data);
+    int noise_emitter_on    ( const iuse_invocation_data &data);
+    int ma_manual           ( const iuse_invocation_data &data);
+    int crowbar             ( const iuse_invocation_data &data);
+    int makemound           ( const iuse_invocation_data &data);
+    int dig                 ( const iuse_invocation_data &data);
+    int siphon              ( const iuse_invocation_data &data);
+    int chainsaw_off        ( const iuse_invocation_data &data);
+    int chainsaw_on         ( const iuse_invocation_data &data);
+    int elec_chainsaw_off   ( const iuse_invocation_data &data);
+    int elec_chainsaw_on    ( const iuse_invocation_data &data);
+    int cs_lajatang_off     ( const iuse_invocation_data &data);
+    int cs_lajatang_on      ( const iuse_invocation_data &data);
+    int carver_off          ( const iuse_invocation_data &data);
+    int carver_on           ( const iuse_invocation_data &data);
+    int trimmer_off         ( const iuse_invocation_data &data);
+    int trimmer_on          ( const iuse_invocation_data &data);
+    int circsaw_on          ( const iuse_invocation_data &data);
+    int combatsaw_off       ( const iuse_invocation_data &data);
+    int combatsaw_on        ( const iuse_invocation_data &data);
+    int jackhammer          ( const iuse_invocation_data &data);
+    int pickaxe             ( const iuse_invocation_data &data);
+    int geiger              ( const iuse_invocation_data &data);
+    int teleport            ( const iuse_invocation_data &data);
+    int can_goo             ( const iuse_invocation_data &data);
+    int throwable_extinguisher_act( const iuse_invocation_data &data);
+    int capture_monster_act ( const iuse_invocation_data &data);
+    int pipebomb_act        ( const iuse_invocation_data &data);
+    int granade             ( const iuse_invocation_data &data);
+    int granade_act         ( const iuse_invocation_data &data);
+    int c4                  ( const iuse_invocation_data &data);
+    int arrow_flamable      ( const iuse_invocation_data &data);
+    int acidbomb_act        ( const iuse_invocation_data &data);
+    int grenade_inc_act     ( const iuse_invocation_data &data);
+    int molotov_lit         ( const iuse_invocation_data &data);
+    int firecracker_pack    ( const iuse_invocation_data &data);
+    int firecracker_pack_act( const iuse_invocation_data &data);
+    int firecracker         ( const iuse_invocation_data &data);
+    int firecracker_act     ( const iuse_invocation_data &data);
+    int mininuke            ( const iuse_invocation_data &data);
+    int pheromone           ( const iuse_invocation_data &data);
+    int portal              ( const iuse_invocation_data &data);
+    int UPS_off             ( const iuse_invocation_data &data);
+    int UPS_on              ( const iuse_invocation_data &data);
+    int adv_UPS_off         ( const iuse_invocation_data &data);
+    int adv_UPS_on          ( const iuse_invocation_data &data);
+    int tazer               ( const iuse_invocation_data &data);
+    int tazer2              ( const iuse_invocation_data &data);
+    int shocktonfa_off      ( const iuse_invocation_data &data);
+    int shocktonfa_on       ( const iuse_invocation_data &data);
+    int mp3                 ( const iuse_invocation_data &data);
+    int mp3_on              ( const iuse_invocation_data &data);
+    int portable_game       ( const iuse_invocation_data &data);
+    int vibe                ( const iuse_invocation_data &data);
+    int vortex              ( const iuse_invocation_data &data);
+    int dog_whistle         ( const iuse_invocation_data &data);
+    int blood_draw          ( const iuse_invocation_data &data);
     static void cut_log_into_planks(player *);
-    int lumber              ( player*, item*, bool, const tripoint& );
-    int chop_tree           ( player*, item*, bool, const tripoint& );
-    int chop_logs           ( player*, item*, bool, const tripoint& );
-    int oxytorch            ( player*, item*, bool, const tripoint& );
-    int hacksaw             ( player*, item*, bool, const tripoint& );
-    int portable_structure  ( player*, item*, bool, const tripoint& );
-    int tent                ( player*, item*, bool, const tripoint& );
-    int large_tent          ( player*, item*, bool, const tripoint& );
-    int shelter             ( player*, item*, bool, const tripoint& );
-    int torch_lit           ( player*, item*, bool, const tripoint& );
-    int battletorch_lit     ( player*, item*, bool, const tripoint& );
-    int boltcutters         ( player*, item*, bool, const tripoint& );
-    int mop                 ( player*, item*, bool, const tripoint& );
-    int spray_can           ( player*, item*, bool, const tripoint& );
-    int heatpack            ( player*, item*, bool, const tripoint& );
-    int heat_food           ( player*, item*, bool, const tripoint& );
-    int hotplate            ( player*, item*, bool, const tripoint& );
-    int towel               ( player*, item*, bool, const tripoint& );
-    int unfold_generic      ( player*, item*, bool, const tripoint& );
-    int adrenaline_injector ( player*, item*, bool, const tripoint& );
-    int jet_injector        ( player*, item*, bool, const tripoint& );
-    int stimpack            ( player*, item*, bool, const tripoint& );
-    int contacts            ( player*, item*, bool, const tripoint& );
-    int talking_doll        ( player*, item*, bool, const tripoint& );
-    int bell                ( player*, item*, bool, const tripoint& );
-    int seed                ( player*, item*, bool, const tripoint& );
-    int oxygen_bottle       ( player*, item*, bool, const tripoint& );
-    int radio_mod           ( player*, item*, bool, const tripoint& );
-    int remove_all_mods     ( player*, item*, bool, const tripoint& );
-    int fishing_rod         ( player*, item*, bool, const tripoint& );
-    int fish_trap           ( player*, item*, bool, const tripoint& );
-    int gun_repair          ( player*, item*, bool, const tripoint& );
-    int gunmod_attach       ( player*, item*, bool, const tripoint& );
-    int toolmod_attach      ( player*, item*, bool, const tripoint& );
-    int misc_repair         ( player*, item*, bool, const tripoint& );
-    int rm13armor_off       ( player*, item*, bool, const tripoint& );
-    int rm13armor_on        ( player*, item*, bool, const tripoint& );
-    int unpack_item         ( player*, item*, bool, const tripoint& );
-    int pack_item           ( player*, item*, bool, const tripoint& );
-    int radglove            ( player*, item*, bool, const tripoint& );
-    int robotcontrol        ( player*, item*, bool, const tripoint& );
-    int einktabletpc        ( player*, item*, bool, const tripoint& );
-    int camera              ( player*, item*, bool, const tripoint& );
-    int ehandcuffs          ( player*, item*, bool, const tripoint& );
-    int cable_attach        ( player*, item*, bool, const tripoint& );
-    int shavekit            ( player*, item*, bool, const tripoint& );
-    int hairkit             ( player*, item*, bool, const tripoint& );
-    int weather_tool        ( player*, item*, bool, const tripoint& );
-    int ladder              ( player*, item*, bool, const tripoint& );
-    int washclothes         ( player*, item*, bool, const tripoint& );
+    int lumber              ( const iuse_invocation_data &data);
+    int chop_tree           ( const iuse_invocation_data &data);
+    int chop_logs           ( const iuse_invocation_data &data);
+    int oxytorch            ( const iuse_invocation_data &data);
+    int hacksaw             ( const iuse_invocation_data &data);
+    int portable_structure  ( const iuse_invocation_data &data);
+    int tent                ( const iuse_invocation_data &data);
+    int large_tent          ( const iuse_invocation_data &data);
+    int shelter             ( const iuse_invocation_data &data);
+    int torch_lit           ( const iuse_invocation_data &data);
+    int battletorch_lit     ( const iuse_invocation_data &data);
+    int boltcutters         ( const iuse_invocation_data &data);
+    int mop                 ( const iuse_invocation_data &data);
+    int spray_can           ( const iuse_invocation_data &data);
+    int heatpack            ( const iuse_invocation_data &data);
+    int heat_food           ( const iuse_invocation_data &data);
+    int hotplate            ( const iuse_invocation_data &data);
+    int towel               ( const iuse_invocation_data &data);
+    int unfold_generic      ( const iuse_invocation_data &data);
+    int adrenaline_injector ( const iuse_invocation_data &data);
+    int jet_injector        ( const iuse_invocation_data &data);
+    int stimpack            ( const iuse_invocation_data &data);
+    int contacts            ( const iuse_invocation_data &data);
+    int talking_doll        ( const iuse_invocation_data &data);
+    int bell                ( const iuse_invocation_data &data);
+    int seed                ( const iuse_invocation_data &data);
+    int oxygen_bottle       ( const iuse_invocation_data &data);
+    int radio_mod           ( const iuse_invocation_data &data);
+    int remove_all_mods     ( const iuse_invocation_data &data);
+    int fishing_rod         ( const iuse_invocation_data &data);
+    int fish_trap           ( const iuse_invocation_data &data);
+    int gun_repair          ( const iuse_invocation_data &data);
+    int gunmod_attach       ( const iuse_invocation_data &data);
+    int toolmod_attach      ( const iuse_invocation_data &data);
+    int misc_repair         ( const iuse_invocation_data &data);
+    int rm13armor_off       ( const iuse_invocation_data &data);
+    int rm13armor_on        ( const iuse_invocation_data &data);
+    int unpack_item         ( const iuse_invocation_data &data);
+    int pack_item           ( const iuse_invocation_data &data);
+    int radglove            ( const iuse_invocation_data &data);
+    int robotcontrol        ( const iuse_invocation_data &data);
+    int einktabletpc        ( const iuse_invocation_data &data);
+    int camera              ( const iuse_invocation_data &data);
+    int ehandcuffs          ( const iuse_invocation_data &data);
+    int cable_attach        ( const iuse_invocation_data &data);
+    int shavekit            ( const iuse_invocation_data &data);
+    int hairkit             ( const iuse_invocation_data &data);
+    int weather_tool        ( const iuse_invocation_data &data);
+    int ladder              ( const iuse_invocation_data &data);
+    int washclothes         ( const iuse_invocation_data &data);
 
 // MACGUFFINS
 
-    int radiocar( player*, item*, bool, const tripoint& );
-    int radiocaron( player*, item*, bool, const tripoint& );
-    int radiocontrol( player*, item*, bool, const tripoint& );
+    int radiocar( const iuse_invocation_data &data);
+    int radiocaron( const iuse_invocation_data &data);
+    int radiocontrol( const iuse_invocation_data &data);
 
-    int multicooker( player*, item*, bool, const tripoint& );
+    int multicooker( const iuse_invocation_data &data);
 
-    int remoteveh( player*, item*, bool, const tripoint& );
+    int remoteveh( const iuse_invocation_data &data);
 
 // ARTIFACTS
     /* This function is used when an artifact is activated.
        It examines the item's artifact-specific properties.
        See artifact.h for a list.                        */
-    int artifact            ( player*, item*, bool, const tripoint& );
+    int artifact            ( const iuse_invocation_data &data);
 
     // Helper for listening to music, might deserve a better home, but not sure where.
     static void play_music( player *p, const tripoint &source, int volume, int max_morale );
@@ -217,7 +256,7 @@ public:
 };
 
 
-typedef int (iuse::*use_function_pointer)( player*, item*, bool, const tripoint& );
+typedef int ( iuse::*use_function_pointer )( const iuse_invocation_data & );
 
 class iuse_actor {
 
@@ -236,8 +275,8 @@ public:
 
     virtual ~iuse_actor() = default;
     virtual void load( JsonObject &jo ) = 0;
-    virtual long use( player &, item &, bool, const tripoint& ) const = 0;
-    virtual ret_val<bool> can_use( const player &, const item &, bool, const tripoint& ) const;
+    virtual long use( const iuse_invocation_data &data ) const = 0;
+    virtual ret_val<bool> can_use( const iuse_invocation_data &data ) const;
     virtual void info( const item &, std::vector<iteminfo> & ) const {};
     /**
      * Returns a deep copy of this object. Example implementation:
@@ -278,8 +317,8 @@ public:
 
     ~use_function() = default;
 
-    long call( player &, item &, bool, const tripoint & ) const;
-    ret_val<bool> can_call(const player &p, const item &it, bool t, const tripoint &pos) const;
+    long call( const iuse_invocation_data &data ) const;
+    ret_val<bool> can_call( const iuse_invocation_data &data ) const;
 
     iuse_actor *get_actor_ptr() const
     {
