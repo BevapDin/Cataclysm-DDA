@@ -13,6 +13,7 @@
 #include "name.h"
 #include "string_formatter.h"
 #include "options.h"
+#include "skill.h"
 #include "catacharset.h"
 #include "debug.h"
 #include "char_validity_check.h"
@@ -175,7 +176,8 @@ tab_direction set_profession( const catacurses::window &w, player *u, points_lef
 tab_direction set_skills( const catacurses::window &w, player *u, points_left &points );
 tab_direction set_description( const catacurses::window &w, player *u, bool allow_reroll, points_left &points );
 
-void save_template( player *u, std::string name = "" );
+static cata::optional<std::string> query_for_template_name();
+static void save_template( player *u, const std::string &name );
 void reset_scenario( player *u, const scenario *scen );
 
 void Character::pick_name(bool bUseDefault)
@@ -239,14 +241,19 @@ void player::randomize( const bool random_scenario, points_left &points )
     } else {
         g->u.name = MAP_SHARING::getUsername();
     }
+    bool cities_enabled = world_generator->active_world->WORLD_OPTIONS["CITY_SIZE"].getValue() != "0";
     if( random_scenario ) {
         std::vector<const scenario *> scenarios;
         for( const auto &scen : scenario::get_all() ) {
-            if (!scen.has_flag("CHALLENGE")) {
+            if( !scen.has_flag( "CHALLENGE" ) &&
+                ( !scen.has_flag( "CITY_START" ) || cities_enabled ) ) {
                 scenarios.emplace_back( &scen );
             }
         }
         g->scen = random_entry( scenarios );
+    } else if( !cities_enabled ) {
+        static const string_id<scenario> wilderness_only_scenario( "wilderness" );
+        g->scen = &wilderness_only_scenario.obj();
     }
 
     g->u.prof = g->scen->weighted_random_profession();
@@ -260,11 +267,10 @@ void player::randomize( const bool random_scenario, points_left &points )
     points.skill_points = points.skill_points - g->u.prof->point_cost() - g->scen->point_cost();
     // The default for each stat is 8, and that default does not cost any points.
     // Values below give points back, values above require points. The line above has removed
-    // to many points, therefor they are added back.
+    // to many points, therefore they are added back.
     points.stat_points += 8 * 4;
 
     int num_gtraits = 0, num_btraits = 0, tries = 0;
-    std::string rn = "";
     add_traits(); // adds mandatory profession/scenario traits.
     for( const auto &mut : my_mutations ) {
         const mutation_branch &mut_info = mut.first.obj();
@@ -446,7 +452,7 @@ bool player::create(character_type type, std::string tempname)
         points.skill_points = 0;
         // We want to prevent recipes known by the template from being applied to the
         // new character. The recipe list will be rebuilt when entering the game.
-        learned_recipes.clear();
+        learned_recipes->clear();
         tab = NEWCHAR_TAB_MAX;
         break;
     }
@@ -544,7 +550,7 @@ bool player::create(character_type type, std::string tempname)
     // Grab the skills from the profession, if there are any
     // We want to do this before the recipes
     for( auto &e : g->u.prof->skills() ) {
-        g->u.boost_skill_level( e.first, e.second );
+        mod_skill_level( e.first, e.second );
     }
 
     // Learn recipes
@@ -650,7 +656,7 @@ void draw_tabs( const catacurses::window &w, std::string sTab )
     }
 
     int next_pos = 2;
-    // Free space on tabs window. '<', '>' symbols is drawning on free space.
+    // Free space on tabs window. '<', '>' symbols is drawing on free space.
     // Initial value of next_pos is free space too.
     // '1' is used for SDL/curses screen column reference.
     int free_space = (TERMX - tabs_length - 1 - next_pos);
@@ -659,7 +665,7 @@ void draw_tabs( const catacurses::window &w, std::string sTab )
         spaces = 0;
     }
     for (size_t i = 0; i < tab_captions.size(); ++i) {
-        draw_tab(w, next_pos, tab_captions[i].c_str(), (sTab == tab_captions[i]));
+        draw_tab(w, next_pos, tab_captions[i], (sTab == tab_captions[i]));
         next_pos += tab_len[i] + spaces;
     }
 
@@ -864,8 +870,8 @@ tab_direction set_stats( const catacurses::window &w, player *u, points_left &po
             mvwprintz(w_description, 0, 0, COL_STAT_NEUTRAL, _("Base HP: %d"), u->hp_max[0]);
             mvwprintz(w_description, 1, 0, COL_STAT_NEUTRAL, _("Carry weight: %.1f %s"),
                       convert_weight(u->weight_capacity()), weight_units());
-            mvwprintz(w_description, 2, 0, COL_STAT_NEUTRAL, _("Melee damage bonus: %.1f"),
-                      u->bonus_damage(false) );
+            mvwprintz( w_description, 2, 0, COL_STAT_BONUS, _( "Melee damage bonus: %.1f" ),
+                       u->bonus_damage(false) );
             fold_and_print(w_description, 4, 0, getmaxx(w_description) - 1, COL_STAT_NEUTRAL,
                            _("Strength also makes you more resistant to many diseases and poisons, and makes actions which require brute force more effective."));
             break;
@@ -900,7 +906,8 @@ tab_direction set_stats( const catacurses::window &w, player *u, points_left &po
                       _("Read times: %d%%"), read_spd);
             mvwprintz(w_description, 1, 0, COL_STAT_PENALTY, _("Skill rust: %d%%"),
                       u->rust_rate(false));
-            fold_and_print(w_description, 3, 0, getmaxx(w_description) - 1, COL_STAT_NEUTRAL,
+            mvwprintz( w_description, 2, 0, COL_STAT_BONUS, _( "Crafting bonus: %2d%%" ), u->get_int() );
+            fold_and_print(w_description, 4, 0, getmaxx(w_description) - 1, COL_STAT_NEUTRAL,
                            _("Intelligence is also used when crafting, installing bionics, and interacting with NPCs."));
             break;
 
@@ -1522,7 +1529,9 @@ tab_direction set_profession( const catacurses::window &w, player *u, points_lef
         } else if (action == "CONFIRM") {
             // Remove old profession-specific traits (e.g. pugilist for boxers)
             for( const trait_id &old_trait : u->prof->get_locked_traits() ) {
-                u->toggle_trait( old_trait );
+                if( old_trait.obj().profession ) {
+                    u->toggle_trait( old_trait );
+                }
             }
             u->prof = &sorted_profs[cur_id].obj();
             // Add traits for the new profession (and perhaps scenario, if, for example,
@@ -1618,7 +1627,7 @@ tab_direction set_skills( const catacurses::window &w, player *u, points_left &p
         // Hack: copy the entire player, boost the clone's skills
         player prof_u = *u;
         for( const auto &sk : prof_skills ) {
-            prof_u.boost_skill_level( sk.first, sk.second );
+            prof_u.mod_skill_level( sk.first, sk.second );
         }
 
         std::map<std::string, std::vector<std::pair<std::string, int> > > recipes;
@@ -1694,7 +1703,7 @@ tab_direction set_skills( const catacurses::window &w, player *u, points_left &p
                           ( i == cur_pos ? hilite( COL_SKILL_USED ) : COL_SKILL_USED ),
                           thisSkill->name() );
                 wprintz(w, (i == cur_pos ? hilite(COL_SKILL_USED) : COL_SKILL_USED),
-                        " (%d)", int(u->get_skill_level(thisSkill->ident())));
+                        " (%d)", u->get_skill_level(thisSkill->ident()));
             }
             for( auto &prof_skill : u->prof->skills() ) {
                 if( prof_skill.first == thisSkill->ident() ) {
@@ -1727,7 +1736,7 @@ tab_direction set_skills( const catacurses::window &w, player *u, points_left &p
             if( level > 0 ) {
                 // For balance reasons, increasing a skill from level 0 gives 1 extra level for free, but
                 // decreasing it from level 2 forfeits the free extra level (thus changes it to 0)
-                u->boost_skill_level( currentSkill->ident(), ( level == 2 ? -2 : -1 ) );
+                u->mod_skill_level( currentSkill->ident(), level == 2 ? -2 : -1 );
                 // Done *after* the decrementing to get the original cost for incrementing back.
                 points.skill_points += skill_increment_cost( *u, currentSkill->ident() );
             }
@@ -1736,7 +1745,7 @@ tab_direction set_skills( const catacurses::window &w, player *u, points_left &p
             if( level < MAX_SKILL ) {
                 points.skill_points -= skill_increment_cost( *u, currentSkill->ident() );
                 // For balance reasons, increasing a skill from level 0 gives 1 extra level for free
-                u->boost_skill_level( currentSkill->ident(), ( level == 0 ? +2 : +1 ) );
+                u->mod_skill_level( currentSkill->ident(), level == 0 ? +2 : +1 );
             }
         } else if (action == "SCROLL_DOWN") {
             selected++;
@@ -2165,8 +2174,8 @@ tab_direction set_description( const catacurses::window &w, player *u, const boo
             mvwprintz(w_skills, 0, 0, COL_HEADER, _("Skills:"));
 
             auto skillslist = Skill::get_skills_sorted_by([&](Skill const& a, Skill const& b) {
-                int const level_a = u->get_skill_level(a.ident()).exercised_level();
-                int const level_b = u->get_skill_level(b.ident()).exercised_level();
+                int const level_a = u->get_skill_level_object( a.ident() ).exercised_level();
+                int const level_b = u->get_skill_level_object( b.ident() ).exercised_level();
                 return level_a > level_b || (level_a == level_b && a.name() < b.name());
             });
 
@@ -2306,10 +2315,15 @@ tab_direction set_description( const catacurses::window &w, player *u, const boo
             // Return tab_direction::NONE so we re-enter this tab again, but it forces a complete redrawing of it.
             return tab_direction::NONE;
         } else if (action == "SAVE_TEMPLATE") {
+            static const auto save_template = [&u]() {
+                if( const auto name = query_for_template_name() ) {
+                    ::save_template( u, *name );
+                }
+            };
             if( points.has_spare() ) {
                 if(query_yn(_("You are attempting to save a template with unused points. "
                               "Any unspent points will be lost, are you sure you want to proceed?"))) {
-                    save_template(u);
+                    save_template();
                 }
             } else if( !points.is_valid() ) {
                 if( points.skill_points_left() < 0 ) {
@@ -2323,7 +2337,7 @@ tab_direction set_description( const catacurses::window &w, player *u, const boo
                 }
 
             } else {
-                save_template(u);
+                save_template();
             }
             redraw = true;
         } else if (action == "PICK_RANDOM_NAME") {
@@ -2399,7 +2413,7 @@ void Character::empty_traits()
 
 void Character::empty_skills()
 {
-    for( auto &sk : _skills ) {
+    for( auto &sk : *_skills ) {
         sk.second.level( 0 );
     }
 }
@@ -2444,19 +2458,53 @@ trait_id Character::random_bad_trait()
     return random_entry( vTraitsBad );
 }
 
-void save_template( player *u, std::string name )
+cata::optional<std::string> query_for_template_name()
 {
-    if( name.empty() ) {
-        name = string_input_popup()
-               .title( _( "Name of template:" ) )
-               .width( 40 )
-               .query_string();
+    static const std::set<long> fname_char_blacklist = {
+#if (defined _WIN32 || defined __WIN32__)
+        '\"'  , '*'   , '/'   , ':'   , '<'   , '>'   , '?'   , '\\'  , '|'   ,
+        '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07',         '\x09',
+                '\x0B', '\x0C',         '\x0E', '\x0F', '\x10', '\x11', '\x12',
+        '\x13', '\x14',         '\x16', '\x17', '\x18', '\x19', '\x1A',
+        '\x1C', '\x1D', '\x1E', '\x1F'
+#else
+        '/'
+#endif
+    };
+    std::string title = _( "Name of template:" );
+    std::string desc = _( "Keep in mind you may not use special characters like / in filenames" );
 
-        if( name.empty() ) {
-            return;
-        }
+    string_input_popup spop;
+    spop.title( title );
+    spop.description( desc );
+    spop.width( FULL_SCREEN_WIDTH - utf8_width( title ) - 8 );
+    for( long character : fname_char_blacklist ) {
+        spop.callbacks[ character ] = [](){ return true; };
     }
-    std::string playerfile = FILENAMES["templatedir"] + utf8_to_native( name ) + ".template";
+
+    spop.query_string( true );
+    if( spop.canceled() ) {
+        return cata::nullopt;
+    } else {
+        return spop.text();
+    }
+}
+
+void save_template( player *u, const std::string &name )
+{
+    std::string native = utf8_to_native( name );
+#if (defined _WIN32 || defined __WIN32__)
+    if( native.find_first_of( "\"*/:<>?\\|"
+                            "\x01\x02\x03\x04\x05\x06\x07\x08\x09"
+                            "\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12"
+                            "\x13\x14\x15\x16\x17\x18\x19\x1A\x1B"
+                            "\x1C\x1D\x1E\x1F"
+                            ) != std::string::npos ) {
+        popup( _( "Conversion of your filename to your native character set resulted in some unsafe characters, please try an alphanumeric filename instead" ) );
+        return;
+    }
+#endif
+    std::string playerfile = FILENAMES["templatedir"] + native + ".template";
     write_to_file( playerfile, [&]( std::ostream &fout ) {
         fout << u->save_info();
     }, _( "player template" ) );

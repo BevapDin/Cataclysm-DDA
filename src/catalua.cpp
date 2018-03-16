@@ -180,7 +180,7 @@ bool lua_report_error( lua_State *L, int err, const char *path, bool simple = fa
  * thefoo.something(); // do something with it, not that myfoo and thefoo are different objects
  * \endcode
  *
- * @param T is the type of object that should be managed. It must be copy-constructable.
+ * @param T is the type of object that should be managed. It must be copy-constructible.
  */
 template<typename T>
 class LuaValue
@@ -642,9 +642,6 @@ class LuaEnum : private LuaType<std::string>
             return 1;
         }
     public:
-        static bool has( lua_State *const L, int const stack_index ) {
-            return Parent::has( L, stack_index ) && has( Parent::get( L, stack_index ) );
-        }
         static void check( lua_State *const L, int const stack_index ) {
             Parent::check( L, stack_index );
             if( !has( Parent::get( L, stack_index ) ) ) {
@@ -886,7 +883,7 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &, int t, 
     if( lua_report_error( L, err, scr.c_str() ) ) {
         return err;
     }
-    //    int function_index = luaL_ref(L, LUA_REGISTRYINDEX); // todo; make use of this
+    //    int function_index = luaL_ref(L, LUA_REGISTRYINDEX); // @todo; make use of this
     //    lua_rawgeti(L, LUA_REGISTRYINDEX, function_index);
 
     lua_pushstring( L, terrain_type.id().c_str() );
@@ -897,7 +894,7 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &, int t, 
     err = lua_pcall( L, 0, LUA_MULTRET, 0 );
     lua_report_error( L, err, scr.c_str() );
 
-    //    luah_remove_from_registry(L, function_index); // todo: make use of this
+    //    luah_remove_from_registry(L, function_index); // @todo: make use of this
 
     return err;
 }
@@ -1106,7 +1103,7 @@ void lua_loadmod( std::string base_path, std::string main_file_name )
     if( file_exist( full_path ) ) {
         lua_file_path = base_path;
         lua_dofile( lua_state, full_path.c_str() );
-        lua_file_path = "";
+        lua_file_path.clear();
     }
     // debugmsg("Loading from %s", full_path.c_str());
 }
