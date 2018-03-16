@@ -44,7 +44,7 @@ extern "C" {
 #include <type_traits>
 
 #if LUA_VERSION_NUM < 502
-    #define LUA_OK 0
+#define LUA_OK 0
 #endif
 
 using item_stack_iterator = std::list<item>::iterator;
@@ -245,11 +245,11 @@ class LuaValue
         using Type = typename std::remove_pointer<T>::type;
         static Type *get_subclass( lua_State *S, int stack_index );
         template<typename P>
-        static Type& cast( P *ptr ) {
+        static Type &cast( P *ptr ) {
             return *ptr;
         }
         template<typename P>
-        static Type& cast( P& ptr ) {
+        static Type &cast( P &ptr ) {
             return ptr;
         }
         /*@}*/
@@ -375,11 +375,11 @@ class LuaValue
             // This is where the copy happens:
             new( value_in_lua ) T( std::forward<Args>( args )... );
         }
-        static int push_reg( lua_State *const L, const T& value ) {
+        static int push_reg( lua_State *const L, const T &value ) {
             push( L, value );
             return luah_store_in_registry( L, -1 );
         }
-        static Type& get( lua_State *const L, int const stack_index ) {
+        static Type &get( lua_State *const L, int const stack_index ) {
             luaL_checktype( L, stack_index, LUA_TUSERDATA );
             T *user_data = static_cast<T *>( lua_touserdata( L, stack_index ) );
             if( user_data == nullptr ) {
@@ -481,19 +481,19 @@ class LuaReference : private LuaValue<T *>
             LuaValue<T *>::push( L, const_cast<T *>( value ) );
         }
         template<typename U = T>
-        static void push( lua_State *const L, T& value,
+        static void push( lua_State *const L, T &value,
                           typename std::enable_if < !std::is_const<U>::value >::value_type * = nullptr ) {
             LuaValue<T *>::push( L, &value );
         }
         // HACK: because Lua does not known what const is.
-        static void push( lua_State *const L, const T& value ) {
+        static void push( lua_State *const L, const T &value ) {
             LuaValue<T *>::push( L, const_cast<T *>( &value ) );
         }
         static int push_reg( lua_State *const L, T *const value ) {
             push( L, value );
             return luah_store_in_registry( L, -1 );
         }
-        static int push_reg( lua_State *const L, T& value ) {
+        static int push_reg( lua_State *const L, T &value ) {
             return LuaValue<T *>::push_reg( L, &value );
         }
         /** A proxy object that allows to convert the reference to a pointer on-demand. The proxy object can
@@ -501,9 +501,15 @@ class LuaReference : private LuaValue<T *>
          * reference. */
         struct proxy {
             T *ref;
-            operator T *() { return ref; }
-            operator T&() { return *ref; }
-            T *operator &() { return ref; }
+            operator T *() {
+                return ref;
+            }
+            operator T &() {
+                return *ref;
+            }
+            T *operator &() {
+                return ref;
+            }
         };
         /** Same as calling @ref get, but returns a @ref proxy containing the reference. */
         static proxy get( lua_State *const L, int const stack_position ) {
@@ -614,7 +620,7 @@ class LuaEnum : private LuaType<std::string>
             return iter->second;
         }
         static const std::string &to_string( E const value ) {
-            for( auto & e : BINDINGS ) {
+            for( auto &e : BINDINGS ) {
                 if( e.second == value ) {
                     return e.first;
                 }
@@ -786,7 +792,8 @@ int call_lua( std::string tocall )
     return err;
 }
 
-void lua_delete_global( const char* name ) {
+void lua_delete_global( const char *name )
+{
     lua_State *L = lua_state;
     lua_pushnil( L );
     lua_setglobal( L, name );
@@ -1256,10 +1263,12 @@ void use_function::dump_info( const item &it, std::vector<iteminfo> &dump ) cons
     }
 }
 
-ret_val<bool> use_function::can_call(const player &p, const item &it, bool t, const tripoint &pos) const
+ret_val<bool> use_function::can_call( const player &p, const item &it, bool t,
+                                      const tripoint &pos ) const
 {
     if( actor == nullptr ) {
-        return ret_val<bool>::make_failure( _( "You can't do anything interesting with your %s." ), it.tname().c_str() );
+        return ret_val<bool>::make_failure( _( "You can't do anything interesting with your %s." ),
+                                            it.tname().c_str() );
     }
 
     return actor->can_use( p, it, t, pos );
@@ -1287,7 +1296,7 @@ void lua_callback( const char * )
 {
 }
 
-template<typename ... Args> void lua_callback( const char *, Args...  )
+template<typename ... Args> void lua_callback( const char *, Args... )
 {
 }
 
