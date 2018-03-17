@@ -857,7 +857,6 @@ void lua_callback_store_args( const int callback_arg_idx )
 
 template<typename ArgType, typename... Args> void lua_callback_store_args(
     const int callback_arg_idx, ArgType callback_arg, Args... callback_args )
-void lua_callback(const char *callback_name)
 {
     lua_callback_store_arg( callback_arg_idx, callback_arg );
     lua_callback_store_args( callback_arg_idx + 1, callback_args... );

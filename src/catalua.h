@@ -18,8 +18,7 @@ extern std::stringstream lua_output_stream;
 extern std::stringstream lua_error_stream;
 
 /** If this returns 0, no lua function was defined to override behavior.
- *  If this returns 1, lua behavior was called and
- *                     regular behavior should be omitted.
+ *  If this returns 1, lua behavior was called and regular behavior should be omitted.
  */
 int lua_monster_move( monster *m );
 

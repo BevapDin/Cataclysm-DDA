@@ -1419,7 +1419,7 @@ bool game::do_turn()
     {
         overmap_buffer.process_mongroups();
         // Run a LUA callback once per year
-        if( calendar::day_of_year() == 0 ) {
+        if( calendar::turn.day_of_year() == 0 ) {
             // possible callback arguments: none (calendar is already exposed to lua)
             lua_callback( "on_year_passed" );
         }
