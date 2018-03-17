@@ -1414,15 +1414,15 @@ bool game::do_turn()
     events.process();
     mission::process_all();
 
-    // Run a LUA callback once per year
-    if( calendar::once_every( 1_years ) ) { // Midnight!
-        // possible callback arguments: none (calendar is already exposed to lua)
-        lua_callback( "on_year_passed" );
-    }
-
     // Run a LUA callback once per day
-    if( calendar::once_every( 1_days ) ) { // Midnight!
+    if( calendar::once_every( 1_days ) ) // Midnight!
+    {
         overmap_buffer.process_mongroups();
+        // Run a LUA callback once per year
+        if( calendar::day_of_year() == 0 ) {
+            // possible callback arguments: none (calendar is already exposed to lua)
+            lua_callback( "on_year_passed" );
+        }
         // possible callback arguments: none (calendar is already exposed to lua)
         lua_callback( "on_day_passed" );
     }
