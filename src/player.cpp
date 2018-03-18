@@ -9577,6 +9577,8 @@ void player::do_read( item &book )
 
             skill_level.readBook( min_ex, max_ex, reading->level );
 
+            std::string skill_name = skill.obj().name();
+
             if( skill_level != originalSkillLevel ) {
                 if( learner->is_player() ) {
                     add_msg( m_good, _( "You increase %s to level %d." ), skill.obj().name().c_str(),
@@ -9585,13 +9587,16 @@ void player::do_read( item &book )
                         //~ %s is skill name. %d is skill level
                         add_memorial_log( pgettext( "memorial_male", "Reached skill level %1$d in %2$s." ),
                                           pgettext( "memorial_female", "Reached skill level %1$d in %2$s." ),
-                                          skill_level.level(), skill->name() );
+                                          skill_level.level(), skill_name );
                     }
-                    // possible callback arguments: skill_increase_type, skill_id, skill_level_new
-                    lua_callback( "on_skill_increased", "book", skill.c_str(), to_string( originalSkillLevel + 1 ).c_str() );
+                    ArgsInfo lua_callback_args_info = {
+                        "string:skill_increased_source",
+                        "string:skill_increased_id",
+                        "int:skill_increased_level"
+                    };
+                    lua_callback( "on_skill_increased", lua_callback_args_info, "book", skill_name, originalSkillLevel + 1 );
                 } else {
-                    add_msg( m_good, _( "%s increases their %s level." ), learner->disp_name().c_str(),
-                             skill.obj().name().c_str() );
+                    add_msg( m_good, _( "%s increases their %s level." ), learner->disp_name().c_str(), skill_name );
                 }
             } else {
                 //skill_level == originalSkillLevel
@@ -9599,8 +9604,7 @@ void player::do_read( item &book )
                     continuous = true;
                 }
                 if( learner->is_player() ) {
-                    add_msg( m_info, _( "You learn a little about %s! (%d%%)" ), skill.obj().name().c_str(),
-                             skill_level.exercise() );
+                    add_msg( m_info, _( "You learn a little about %s! (%d%%)" ), skill_name, skill_level.exercise() );
                 } else {
                     little_learned.insert( learner->disp_name() );
                 }
@@ -10665,6 +10669,7 @@ void player::practice( const skill_id &id, int amount, int cap )
 {
     SkillLevel &level = get_skill_level_object( id );
     const Skill &skill = id.obj();
+    std::string skill_name = skill.name();
 
     if( !level.can_train() ) {
         // If leveling is disabled, don't train, don't drain focus, don't print anything
@@ -10717,7 +10722,7 @@ void player::practice( const skill_id &id, int amount, int cap )
         int curLevel = get_skill_level( id );
         if(is_player() && one_in(5)) {//remind the player intermittently that no skill gain takes place
             add_msg(m_info, _("This task is too simple to train your %s beyond %d."),
-                    skill.name().c_str(), curLevel);
+                    skill_name, curLevel);
         }
     }
 
@@ -10726,14 +10731,18 @@ void player::practice( const skill_id &id, int amount, int cap )
         get_skill_level_object( id ).train( amount );
         int newLevel = get_skill_level( id );
         if (is_player() && newLevel > oldLevel) {
-            add_msg(m_good, _("Your skill in %s has increased to %d!"), skill.name().c_str(), newLevel);
-            // possible callback arguments: skill_increase_type, skill_id, skill_level_new
-            lua_callback( "on_skill_increased", "practice", skill.ident().c_str(), to_string( newLevel ).c_str() );
+            add_msg( m_good, _( "Your skill in %s has increased to %d!" ), skill_name, newLevel );
+            ArgsInfo lua_callback_args_info = {
+                "string:skill_increased_source",
+                "string:skill_increased_id",
+                "int:skill_increased_level"
+            };
+            lua_callback( "on_skill_increased", lua_callback_args_info, "training", skill_name, newLevel );
         }
         if(is_player() && newLevel > cap) {
             //inform player immediately that the current recipe can't be used to train further
-            add_msg(m_info, _("You feel that %s tasks of this level are becoming trivial."),
-                    skill.name().c_str());
+            add_msg( m_info, _( "You feel that %s tasks of this level are becoming trivial." ),
+                     skill_name );
         }
 
         int chance_to_drop = focus_pool;
@@ -11700,36 +11709,47 @@ bool player::has_item_with_flag( const std::string &flag ) const
 void player::on_mutation_gain( const trait_id &mid )
 {
     morale->on_mutation_gain( mid );
-    // possible callback arguments: gained_mutation_id
-    lua_callback( "on_mutation_gain", mid.c_str() );
+    ArgsInfo lua_callback_args_info = {
+        "trait_id:mutation_gained"
+    };
+    lua_callback( "on_mutation_gain", lua_callback_args_info, mid.str() );
 }
 
 void player::on_mutation_loss( const trait_id &mid )
 {
     morale->on_mutation_loss( mid );
-    // possible callback arguments: lost_mutation_id
-    lua_callback( "on_mutation_loss", mid.c_str() );
+    ArgsInfo lua_callback_args_info = {
+        "trait_id:mutation_lost"
+    };
+    lua_callback( "on_mutation_loss", lua_callback_args_info, mid );
 }
 
 void player::on_stat_change( const std::string &stat, int value )
 {
     morale->on_stat_change( stat, value );
-    // possible callback arguments: stat_id, stat_value_prev, stat_value_new
-    lua_callback( "on_stat_change" );
+    ArgsInfo lua_callback_args_info = {
+        "string:stat_changed",
+        "int:stat_value"
+    };
+    lua_callback( "on_stat_change", lua_callback_args_info, stat, value );
 }
 
 void player::on_item_wear( const item &it )
 {
     morale->on_item_wear( it );
-    // possible callback arguments: worn_item_id
-    lua_callback( "on_item_wear" );
+    ArgsInfo lua_callback_args_info = {
+        "item:item_last_worn"
+    };
+    lua_callback( "on_item_wear", lua_callback_args_info, it );
 }
 
 void player::on_item_takeoff( const item &it )
 {
     morale->on_item_takeoff( it );
-    // possible callback arguments: taken_off_item_id
-    lua_callback( "on_item_takeoff" );
+    ArgsInfo lua_callback_args_info = {
+        "item:item_last_taken_off"
+    };
+    lua_callback( "on_item_takeoff", lua_callback_args_info, it );
 }
 
 void player::on_effect_int_change( const efftype_id &eid, int intensity, body_part bp )
@@ -11742,16 +11762,22 @@ void player::on_effect_int_change( const efftype_id &eid, int intensity, body_pa
     }
 
     morale->on_effect_int_change( eid, intensity, bp );
-    // possible callback arguments: effect_id, effect_intensity, affected_body_part
-    lua_callback( "on_effect_int_change" );
+    ArgsInfo lua_callback_args_info = {
+        "efftype_id:effect_changed",
+        "int:effect_intensity",
+        "body_part:effect_bodypart"
+    };
+    lua_callback( "on_effect_int_change", lua_callback_args_info, eid, intensity, bp );
 }
 
 void player::on_mission_assignment( mission &new_mission )
 {
     active_missions.push_back( &new_mission );
     set_active_mission( new_mission );
-    // possible callback arguments: assigned_mission_ref
-    lua_callback( "on_mission_assignment" );
+    ArgsInfo lua_callback_args_info = {
+        "mission:mission_assigned"
+    };
+    lua_callback( "on_mission_assignment", lua_callback_args_info, new_mission );
 }
 
 void player::on_mission_finished( mission &cur_mission )
@@ -11776,8 +11802,10 @@ void player::on_mission_finished( mission &cur_mission )
             active_mission = active_missions.front();
         }
     }
-    // possible callback arguments:finished_mission_ref
-    lua_callback( "on_mission_finished" );
+    ArgsInfo lua_callback_args_info = {
+        "mission:mission_finished"
+    };
+    lua_callback( "on_mission_finished", lua_callback_args_info, cur_mission );
 }
 
 const targeting_data &player::get_targeting_data() {

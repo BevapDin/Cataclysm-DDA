@@ -207,8 +207,11 @@ void mapgen_function_builtin::generate( map *m, const oter_id &terrain_type, con
 {
     (*fptr)( m, terrain_type, dat, t, d );
 
-    // possible callback args: mapgen_generator_type: builtin/json/lua, terrain_type (i.e. house_north)
-    lua_callback( "on_mapgen_finished", "builtin", terrain_type.id().c_str() );
+    ArgsInfo lua_callback_args_info = {
+        "string:mapgen_generator_type",
+        "string:mapgen_terrain_type_id"
+    };
+    lua_callback( "on_mapgen_finished", lua_callback_args_info, "builtin", terrain_type.id() );
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1939,8 +1942,11 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
         mapgen_rotate(m, terrain_type, false );
     }
 
-    // possible callback args: mapgen_generator_type: builtin/json/lua, terrain_type (i.e. house_north)
-    lua_callback( "on_mapgen_finished", "json", terrain_type.id().c_str() );
+    ArgsInfo lua_callback_args_info = {
+        "string:mapgen_generator_type",
+        "string:mapgen_terrain_type_id"
+    };
+    lua_callback( "on_mapgen_finished", lua_callback_args_info, "json", terrain_type.id() );
 }
 
 void mapgen_function_json_nested::nest( const mapgendata &dat, int offset_x, int offset_y, float density ) const
@@ -2018,7 +2024,11 @@ void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const m
     lua_mapgen( m, terrain_type, dat, t, d, scr );
 
     // possible callback args: mapgen_generator_type: builtin/json/lua, terrain_type (i.e. house_north)
-    lua_callback( "on_mapgen_finished", "lua", terrain_type.id().c_str() );
+    ArgsInfo lua_callback_args_info = {
+        "string:mapgen_generator_type",
+        "string:mapgen_terrain_type_id"
+    };
+    lua_callback( "on_mapgen_finished", lua_callback_args_info, "lua", terrain_type.id() );
 }
 
 /////////////

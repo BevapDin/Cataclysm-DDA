@@ -6,6 +6,7 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 
 class map;
 class monster;
@@ -53,10 +54,15 @@ template<typename ArgType, typename... Args> void lua_callback_store_args(
 void lua_callback( const char *callback_name );
 
 /**
+ * Vector that contains argument name and type in comma-separated string.
+ */
+typedef std::vector<std::string> ArgsInfo;
+
+/**
  * Execute a callback that can be overriden by all mods,
  * storing provided callback arguments in _G.
  */
-template<typename ... Args> void lua_callback( const char *callback_name, Args... callback_args );
+void lua_callback( const char *callback_name, ArgsInfo callback_args_info, ... );
 
 /**
  * Load the main file of a lua mod.

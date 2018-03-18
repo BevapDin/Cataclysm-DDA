@@ -907,7 +907,6 @@ bool game::start_game(std::string worldname)
     u.add_memorial_log(pgettext("memorial_male", "%s began their journey into the Cataclysm."),
                        pgettext("memorial_female", "%s began their journey into the Cataclysm."),
                        u.name.c_str());
-    // possible callback arguments: none
     lua_callback( "on_new_player_created" );
 
     return true;
@@ -1414,32 +1413,23 @@ bool game::do_turn()
     events.process();
     mission::process_all();
 
-    // Run a LUA callback once per day
-    if( calendar::once_every( 1_days ) ) // Midnight!
+    if( calendar::once_every( 1_days ) )
     {
         overmap_buffer.process_mongroups();
-        // Run a LUA callback once per year
         if( calendar::turn.day_of_year() == 0 ) {
-            // possible callback arguments: none (calendar is already exposed to lua)
             lua_callback( "on_year_passed" );
         }
-        // possible callback arguments: none (calendar is already exposed to lua)
         lua_callback( "on_day_passed" );
     }
 
-    // Run a LUA callback once per hour
     if( calendar::once_every( 1_hours ) ) {
-        // possible callback arguments: none (calendar is already exposed to lua)
         lua_callback( "on_hour_passed" );
     }
  
     if( calendar::once_every( 1_minutes ) ) {
-        // possible callback arguments: none (calendar is already exposed to lua)
         lua_callback("on_minute_passed");
     }
 
-    // Run a LUA callback once per turn
-    // possible callback arguments: none (calendar is already exposed to lua)
     lua_callback( "on_turn_passed" );
 
     // Move hordes every 5 min
@@ -1736,6 +1726,13 @@ void game::update_weather()
         // Check weather every few turns, instead of every turn.
         //@todo: predict when the weather changes and use that time.
         nextweather = calendar::turn + 50_turns;
+        if( weather != old_weather ){
+            ArgsInfo lua_callback_args_info = {
+                "weather_type:weather_new",
+                "weather_type:weather_old"
+            };
+            lua_callback( "on_weather_changed", lua_callback_args_info, weather, old_weather );
+        }
         if (weather != old_weather && weather_data(weather).dangerous &&
             get_levz() >= 0 && m.is_outside(u.pos())
             && !u.has_activity( activity_id( "ACT_WAIT_WEATHER" ) ) ) {
@@ -3700,7 +3697,6 @@ void game::load(std::string worldname, const save_t &name)
     u.reset();
     draw();
 
-    // possible callback arguments: none
     lua_callback( "on_savegame_loaded" );
 }
 

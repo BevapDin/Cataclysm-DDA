@@ -1339,20 +1339,23 @@ void activity_handlers::train_finish( player_activity *act, player *p )
     const skill_id sk( act->name );
     if( sk.is_valid() ) {
         const Skill &skill = sk.obj();
+        std::string skill_name = skill.name();
         int new_skill_level = p->get_skill_level( sk ) + 1;
         p->set_skill_level( sk, new_skill_level );
-        add_msg(m_good, _("You finish training %s to level %d."),
-                skill.name().c_str(),
-                new_skill_level);
+        add_msg( m_good, _( "You finish training %s to level %d." ), skill_name, new_skill_level );
         if( new_skill_level % 4 == 0 ) {
             //~ %d is skill level %s is skill name
             p->add_memorial_log(pgettext("memorial_male", "Reached skill level %1$d in %2$s."),
                                 pgettext("memorial_female", "Reached skill level %1$d in %2$s."),
-                                new_skill_level, skill.name().c_str());
+                                new_skill_level, skill_name );
         }
 
-        // possible callback arguments: skill_increase_type, skill_id, skill_level_new
-        lua_callback( "on_skill_increased", "training", skill.ident().c_str(), to_string( new_skill_level ).c_str() );
+        ArgsInfo lua_callback_args_info = {
+            "string:skill_increased_source",
+            "string:skill_increased_id",
+            "int:skill_increased_level"
+        };
+        lua_callback( "on_skill_increased", lua_callback_args_info, "training", skill_name, new_skill_level );
         act->set_to_null();
         return;
     }

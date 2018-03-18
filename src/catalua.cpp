@@ -830,35 +830,28 @@ void lua_delete_global( const char* name ) {
     lua_setglobal( L, name );
 }
 
-template<typename ArgType> void lua_callback_store_arg(
-    const int callback_arg_idx, ArgType callback_arg )
+void lua_callback_cleanup()
 {
-    std::string callback_arg_name = std::string( "callback_arg" + std::to_string( callback_arg_idx );
-
-    if( lua_state == nullptr ) {
-        return;
-    }
-    lua_State *L = lua_state;
-    lua_pushstring( L, callback_arg );
-    //LuaReference<ArgType>::push( L, callback_arg );
-    lua_setglobal( L, callback_arg_name );
-}
-
-void lua_callback_store_args( const int callback_arg_idx )
-{
-    if( lua_state == nullptr ) {
-        return;
-    }
-    lua_State *L = lua_state;
-    lua_pushinteger( L, callback_arg_idx - 1 );
-    lua_setglobal( L, "callback_arg_count" );
-}
-
-template<typename ArgType, typename... Args> void lua_callback_store_args(
-    const int callback_arg_idx, ArgType callback_arg, Args... callback_args )
-{
-    lua_callback_store_arg( callback_arg_idx, callback_arg );
-    lua_callback_store_args( callback_arg_idx + 1, callback_args... );
+    lua_delete_global( "callback_last" );
+    lua_delete_global( "callback_arg_count" );
+    lua_delete_global( "mapgen_generator_type" );
+    lua_delete_global( "mapgen_terrain_type_id" );
+    lua_delete_global( "skill_increased_source" );
+    lua_delete_global( "skill_increased_id" );
+    lua_delete_global( "skill_increased_level" );
+    lua_delete_global( "mutation_gained" );
+    lua_delete_global( "mutation_lost" );
+    lua_delete_global( "stat_changed" );
+    lua_delete_global( "stat_value" );
+    lua_delete_global( "item_last_worn" );
+    lua_delete_global( "item_last_taken_off" );
+    lua_delete_global( "effect_changed" );
+    lua_delete_global( "effect_intensity" );
+    lua_delete_global( "effect_bodypart" );
+    lua_delete_global( "mission_finished" );
+    lua_delete_global( "mission_assigned" );
+    lua_delete_global( "weather_new" );
+    lua_delete_global( "weather_old" );
 }
 
 void lua_callback_savelast( const char *callback_name )
@@ -872,38 +865,65 @@ void lua_callback_savelast( const char *callback_name )
     lua_setglobal( L, "callback_last" );
 }
 
-void lua_callback_cleanup()
+void lua_callback( const char *callback_name, ArgsInfo callback_args_info, ... )
 {
+    if( lua_state == nullptr ) {
+        return;
+    }
+    lua_State *L = lua_state;
 
-    lua_delete_global( "callback_last" );
-    lua_delete_global( "callback_arg_count" );
-    lua_delete_global( "callback_arg1" );
-    lua_delete_global( "callback_arg2" );
-    lua_delete_global( "callback_arg3" );
-    lua_delete_global( "callback_arg4" );
-    lua_delete_global( "callback_arg5" );
-    lua_delete_global( "callback_arg6" );
-    lua_delete_global( "callback_arg7" );
-    lua_delete_global( "callback_arg8" );
-    lua_delete_global( "callback_arg9" );
-
-}
-
-void lua_callback( const char *callback_name )
-{
     lua_callback_cleanup();
+    int callback_arg_count = callback_args_info.size();
+
+    lua_pushnumber( L, callback_arg_count );
+    lua_setglobal( L, "callback_arg_count" );
+
+    va_list callback_arg;
+    va_start( callback_arg, callback_args_info );
+    for( int i = 0; i < callback_arg_count; i++ ){
+        std::vector<std::string> callback_args_info_split;
+        wildcard_split( callback_args_info[i], ':', callback_args_info_split );
+
+        const char *callback_arg_type = callback_args_info_split[0].c_str();
+        const char *callback_arg_name = callback_args_info_split[1].c_str();
+
+        if( strcmp( callback_arg_type, "string" ) == 0 ){
+            lua_pushstring( L, va_arg( callback_arg, const char* ) );
+        } else if( strcmp( callback_arg_type, "int" ) == 0 ){
+            lua_pushnumber( L, va_arg( callback_arg, int ) );
+        } else if( strcmp( callback_arg_type, "number" ) == 0 ){
+            lua_pushnumber( L, va_arg( callback_arg, double ) );
+        } else if( strcmp( callback_arg_type, "float" ) == 0 ){
+            lua_pushnumber( L, va_arg( callback_arg, double ) );
+        } else if( strcmp( callback_arg_type, "double" ) == 0 ){
+            lua_pushnumber( L, va_arg( callback_arg, double ) );
+        } else if( strcmp( callback_arg_type, "item" ) == 0 ){
+            LuaReference<item>::push( L, va_arg( callback_arg, item ) );
+        /*
+        } else if( strcmp( callback_arg_type, "trait_id" ) == 0 ){
+            LuaReference<item>::push( L, va_arg( callback_arg, trait_id ) );
+        } else if( strcmp( callback_arg_type, "efftype_id" ) == 0 ){
+            LuaValue<efftype_id>::push( L, va_arg( callback_arg, efftype_id ) );
+        } else if( strcmp( callback_arg_type, "body_part" ) == 0 ){
+            va_arg( callback_arg, body_part );
+            lua_pushnil( L );
+        } else if( strcmp( callback_arg_type, "mission" ) == 0 ){
+            va_arg( callback_arg, mission );
+            lua_pushnil( L );
+        } else {
+            //va_arg(); // only strings or int or other known types!
+            lua_pushnil( L );
+        */
+        }
+
+        lua_setglobal( L, callback_arg_name );
+
+    }
+
+    va_end( callback_arg );
+
     lua_callback_savelast( callback_name );
     call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
-}
-
-template<typename ... Args> void lua_callback( const char *callback_name, Args... callback_args )
-{
-    lua_callback_cleanup();
-    int callback_arg_idx = 1;
-    lua_callback_store_args( callback_arg_idx, callback_args... );
-    lua_callback_savelast( callback_name );
-    call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
-    call_lua(std::string("mod_callback(\"") + std::string(callback_name) + "\")");
 }
 
 //
@@ -1330,7 +1350,3 @@ void game::init_lua()
 {
 }
 #endif
-
-template void lua_callback<const char *>( const char *, const char * );
-template void lua_callback<const char *>( const char *, const char *, const char * );
-template void lua_callback<const char *>( const char *, const char *, const char *, const char * );
