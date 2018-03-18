@@ -355,17 +355,17 @@ bool main_menu::opening_screen()
     init_strings();
     print_menu( w_open, 0, iMenuOffsetX, iMenuOffsetY );
 
-    if( !assure_dir_exist( FILENAMES["config_dir"] ) ) {
+    if( !assure_dir_exist( cata::path( FILENAMES["config_dir"] ) ) ) {
         popup( _( "Unable to make config directory. Check permissions." ) );
         return false;
     }
 
-    if( !assure_dir_exist( FILENAMES["savedir"] ) ) {
+    if( !assure_dir_exist( cata::path( FILENAMES["savedir"] ) ) ) {
         popup( _( "Unable to make save directory. Check permissions." ) );
         return false;
     }
 
-    if( !assure_dir_exist( FILENAMES["templatedir"] ) ) {
+    if( !assure_dir_exist( cata::path( FILENAMES["templatedir"] ) ) ) {
         popup( _( "Unable to make templates directory. Check permissions." ) );
         return false;
     }

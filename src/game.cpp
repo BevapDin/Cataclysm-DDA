@@ -2587,7 +2587,7 @@ void game::move_save_to_graveyard()
     const std::string &graveyard_dir = FILENAMES["graveyarddir"];
     const std::string &prefix        = base64_encode( u.name ) + ".";
 
-    if( !assure_dir_exist( graveyard_dir ) ) {
+    if( !assure_dir_exist( cata::path( graveyard_dir ) ) ) {
         debugmsg( "could not create graveyard path '%s'", graveyard_dir.c_str() );
     }
 
@@ -2897,13 +2897,13 @@ void game::write_memorial_file( std::string sLastWords )
                 world_generator->active_world->world_name ) + "/";
 
     //Check if both dirs exist. Nested assure_dir_exist fails if the first dir of the nested dir does not exist.
-    if( !assure_dir_exist( memorial_dir ) ) {
+    if( !assure_dir_exist( cata::path( memorial_dir ) ) ) {
         dbg( D_ERROR ) << "game:write_memorial_file: Unable to make memorial directory.";
         debugmsg( "Could not make '%s' directory", memorial_dir.c_str() );
         return;
     }
 
-    if( !assure_dir_exist( memorial_active_world_dir ) ) {
+    if( !assure_dir_exist( cata::path( memorial_active_world_dir ) ) ) {
         dbg( D_ERROR ) <<
                        "game:write_memorial_file: Unable to make active world directory in memorial directory.";
         debugmsg( "Could not make '%s' directory", memorial_active_world_dir.c_str() );

@@ -104,7 +104,7 @@ void mapbuffer::save( bool delete_after_save )
 {
     std::stringstream map_directory;
     map_directory << g->get_world_base_save_path() << "/maps";
-    assure_dir_exist( map_directory.str() );
+    assure_dir_exist( cata::path( map_directory.str() ) );
 
     int num_saved_submaps = 0;
     int num_total_submaps = submaps.size();
@@ -198,7 +198,7 @@ void mapbuffer::save_quad( const std::string &dirname, const std::string &filena
     }
 
     // Don't create the directory if it would be empty
-    assure_dir_exist( dirname );
+    assure_dir_exist( cata::path( dirname ) );
     ofstream_wrapper_exclusive fout( filename );
     JsonOut jsout( fout );
     jsout.start_array();

@@ -63,7 +63,7 @@ bool do_mkdir( std::string const &path, int const mode )
 
 } //anonymous namespace
 
-bool assure_dir_exist( std::string const &path )
+bool assure_dir_exist( const cata::path &path )
 {
     DIR *dir = opendir( path.c_str() );
     if( dir != nullptr ) {

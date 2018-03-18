@@ -101,7 +101,8 @@ bool remove( const path &path );
 bool rename( const path &old_path, const path &new_path );
 } // namespace cata
 
-bool assure_dir_exist( std::string const &path );
+// Note: not part of namespace cata as it is not part of std::filesystem either
+bool assure_dir_exist( const cata::path &path );
 
 namespace cata_files
 {

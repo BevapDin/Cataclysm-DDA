@@ -2974,7 +2974,7 @@ static std::string find_system_font( const std::string &name, int& faceIndex )
         fin.open(FILENAMES["legacy_fontlist"].c_str());
         if( !fin.is_open() ) {
             dbg( D_INFO ) << "Generating fontlist";
-            assure_dir_exist(FILENAMES["config_dir"]);
+            assure_dir_exist( cata::path( FILENAMES["config_dir"] ) );
             save_font_list();
             fin.open(fontlist_path.c_str());
             if( !fin ) {

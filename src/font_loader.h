@@ -86,7 +86,7 @@ class font_loader
                 load_throws( fontdata );
             } else {
                 load_throws( legacy_fontdata );
-                assure_dir_exist( FILENAMES["config_dir"] );
+                assure_dir_exist( cata::path( FILENAMES["config_dir"] ) );
                 save( fontdata );
             }
         }

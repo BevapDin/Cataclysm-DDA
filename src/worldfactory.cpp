@@ -273,7 +273,7 @@ bool worldfactory::save_world( WORLDPTR world, bool is_conversion )
         return false;
     }
 
-    if( !assure_dir_exist( world->folder_path() ) ) {
+    if( !assure_dir_exist( cata::path( world->folder_path() ) ) ) {
         DebugLog( D_ERROR, DC_ALL ) << "Unable to create or open world[" << world->world_name <<
                                     "] directory for saving";
         return false;
