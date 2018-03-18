@@ -867,7 +867,8 @@ void lua_callback_savelast( const char *callback_name )
 
 void lua_callback( const char *callback_name )
 {
-
+    ArgsInfo callback_args_info;
+    lua_callback( callback_name, callback_args_info );
 }
 
 void lua_callback( const char *callback_name, ArgsInfo callback_args_info, ... )
