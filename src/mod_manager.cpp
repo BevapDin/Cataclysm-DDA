@@ -105,7 +105,7 @@ void mod_manager::load_replacement_mods( const std::string &path )
 
 bool MOD_INFORMATION::need_lua() const
 {
-    return exists( cata::path( path + "/main.lua" ) ) || exists( cata::path( path + "/preload.lua" ) );
+    return exists( path / "main.lua" ) || exists( path / "preload.lua" );
 }
 
 mod_manager::mod_manager()
@@ -148,10 +148,10 @@ void mod_manager::refresh_mod_list()
     load_mods_from( FILENAMES["user_moddir"] );
 
     if( exists( cata::path( FILENAMES["mods-dev-default"] ) ) ) {
-        load_mod_info( FILENAMES["mods-dev-default"] );
+        load_mod_info( cata::path( FILENAMES["mods-dev-default"] ) );
     }
     if( exists( cata::path( FILENAMES["mods-user-default"] ) ) ) {
-        load_mod_info( FILENAMES["mods-user-default"] );
+        load_mod_info( cata::path( FILENAMES["mods-user-default"] ) );
     }
 
     if( set_default_mods( mod_id( "user:default" ) ) ) {
@@ -199,11 +199,11 @@ bool mod_manager::set_default_mods( const mod_id &ident )
 void mod_manager::load_mods_from( const std::string &path )
 {
     for( auto &mod_file : get_files_from_path( MOD_SEARCH_FILE, path, true ) ) {
-        load_mod_info( mod_file );
+        load_mod_info( cata::path( mod_file ) );
     }
 }
 
-void mod_manager::load_modfile( JsonObject &jo, const std::string &path )
+void mod_manager::load_modfile( JsonObject &jo, const cata::path &path )
 {
     if( !jo.has_string( "type" ) || jo.get_string( "type" ) != "MOD_INFO" ) {
         // Ignore anything that is not a mod-info
@@ -246,13 +246,15 @@ void mod_manager::load_modfile( JsonObject &jo, const std::string &path )
     modfile.name_ = m_name;
     modfile.category = p_cat;
 
-    if( assign( jo, "path", modfile.path ) ) {
-        modfile.path = path + "/" + modfile.path;
+    std::string tmp_path;
+    if( assign( jo, "path", tmp_path ) ) {
+        modfile.path = path / tmp_path;
     } else {
         modfile.path = path;
     }
-    if( assign( jo, "legacy", modfile.legacy ) ) {
-        modfile.legacy = path + "/" + modfile.legacy;
+    std::string tmp_legacy;
+    if( assign( jo, "legacy", tmp_legacy ) ) {
+        modfile.legacy = path / tmp_legacy;
     }
 
     assign( jo, "authors", modfile.authors );
@@ -305,16 +307,16 @@ bool mod_manager::copy_mod_contents( const t_mod_list &mods_to_copy,
 
     for( size_t i = 0; i < mods_to_copy.size(); ++i ) {
         const MOD_INFORMATION &mod = *mods_to_copy[i];
-        size_t start_index = mod.path.size();
+        size_t start_index = mod.path.native().size();
 
         // now to get all of the json files inside of the mod and get them ready to copy
         auto input_files = get_files_from_path( ".json", mod.path, true, true );
         auto input_dirs  = get_directories_with( search_extensions, mod.path, true );
 
-        if( input_files.empty() && mod.path.find( MOD_SEARCH_FILE ) != std::string::npos ) {
+        if( input_files.empty() && mod.path.filename() == MOD_SEARCH_FILE ) {
             // Self contained mod, all data is inside the modinfo.json file
             input_files.push_back( mod.path );
-            start_index = mod.path.find_last_of( "/\\" );
+            start_index = mod.path.native().find_last_of( "/\\" );
             if( start_index == std::string::npos ) {
                 start_index = 0;
             }
@@ -352,9 +354,9 @@ bool mod_manager::copy_mod_contents( const t_mod_list &mods_to_copy,
     return true;
 }
 
-void mod_manager::load_mod_info( const std::string &info_file_path )
+void mod_manager::load_mod_info( const cata::path &info_file_path )
 {
-    const std::string main_path = cata::path( info_file_path ).parent_path();
+    const cata::path main_path = info_file_path.parent_path();
     read_from_file_optional_json( info_file_path, [&]( JsonIn & jsin ) {
         if( jsin.test_object() ) {
             // find type and dispatch single object

@@ -4,6 +4,7 @@
 
 #include "string_id.h"
 #include "pimpl.h"
+#include "filesystem.h"
 
 #include <string>
 #include <vector>
@@ -40,7 +41,7 @@ struct MOD_INFORMATION {
         mod_id ident;
 
         /** Directory to load JSON and Lua from relative to directory containing modinfo.json */
-        std::string path;
+        cata::path path;
 
         /** If set load legacy migrations from this location dependent upon save version */
         std::string legacy;
@@ -146,14 +147,14 @@ class mod_manager
          * Load all mod information from a json file.
          * (@see load_modfile)
          */
-        void load_mod_info( const std::string &info_file_path );
+        void load_mod_info( const cata::path &info_file_path );
         /**
          * Load mod info from a json object. Put the loaded modinfo
          * directly into @ref mod_map.
          * @throws std::string on all kind of errors. The string
          * contains the error message.
          */
-        void load_modfile( JsonObject &jo, const std::string &path );
+        void load_modfile( JsonObject &jo, const cata::path &path );
 
         bool set_default_mods( const mod_id &ident );
         void remove_mod( const mod_id &ident );
