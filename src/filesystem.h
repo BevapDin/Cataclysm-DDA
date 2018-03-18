@@ -82,6 +82,15 @@ class path
         bool operator==( const path &p ) const {
             return native() == p.native();
         }
+        bool operator==( const path &rhs ) const {
+            return data == rhs.data;
+        }
+        bool operator!=( const path &rhs ) const {
+            return data != rhs.data;
+        }
+        bool operator<( const path &rhs ) const {
+            return data < rhs.data;
+        }
 };
 
 inline std::ostream &operator<<( std::ostream &s, const path &p )

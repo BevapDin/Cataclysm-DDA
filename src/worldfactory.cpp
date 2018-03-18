@@ -1526,8 +1526,8 @@ WORLDPTR worldfactory::get_world( const std::string &name )
 // Helper predicate to exclude files from deletion when resetting a world directory.
 static bool isForbidden( const cata::path &candidate )
 {
-    if( candidate.native().find( FILENAMES["worldoptions"] ) != std::string::npos ||
-        candidate.native().find( "mods.json" ) != std::string::npos ) {
+    if( candidate.filename() == FILENAMES["worldoptions"] ||
+        candidate.filename() == "mods.json" ) {
         return true;
     }
     return false;
@@ -1535,8 +1535,8 @@ static bool isForbidden( const cata::path &candidate )
 
 void worldfactory::delete_world( const std::string &worldname, const bool delete_folder )
 {
-    std::string worldpath = get_world( worldname )->folder_path();
-    std::set<std::string> directory_paths;
+    const cata::path worldpath = get_world( worldname )->folder_path();
+    std::set<cata::path> directory_paths;
 
     std::vector<cata::path> file_paths = get_files_from_path( "", worldpath, true, true );
     if( !delete_folder ) {
@@ -1547,12 +1547,8 @@ void worldfactory::delete_world( const std::string &worldname, const bool delete
         }
     }
     for( auto &file_path : file_paths ) {
-        // strip to path and remove worldpath from it
-        std::string part = cata::path( file_path.native().substr( worldpath.native().size(),
-                                       std::string::npos ) ).parent_path().native();
-        while( !part.empty() ) {
+        for( auto part = file_path.parent_path(); part != worldpath; part = part.parent_path() ) {
             directory_paths.insert( part );
-            part = cata::path( part ).parent_path();
         }
     }
 
@@ -1562,11 +1558,11 @@ void worldfactory::delete_world( const std::string &worldname, const bool delete
     // Trying to remove a non-empty parent directory before a child
     // directory will fail.  Removing directories in reverse order
     // will prevent this situation from arising.
-    for( auto it = directory_paths.rbegin(); it != directory_paths.rend(); ++it ) {
-        remove( cata::path( worldpath + dir ) );
+    for( auto &dir : directory_paths ) {
+        remove( dir );
     }
     if( delete_folder ) {
-        remove( cata::path( worldpath ) );
+        remove( worldpath );
         remove_world( worldname );
     } else {
         get_world( worldname )->world_saves.clear();
