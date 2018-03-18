@@ -2779,11 +2779,11 @@ bool game::load_packs( const std::string &msg, const std::vector<mod_id> &packs,
         load_data_from_dir( mod.path, mod.ident.str(), ui );
 
         // if mod specifies legacy migrations load any that are required
-        if( !mod.legacy.empty() ) {
+        if( mod.legacy ) {
             for( int i = get_option<int>( "CORE_VERSION" ); i < core_version; ++i ) {
                 popup_status( msg.c_str(), _( "Applying legacy migration (%s %i/%i)" ),
                               e.c_str(), i, core_version - 1 );
-                load_data_from_dir( string_format( "%s/%i", mod.legacy.c_str(), i ), mod.ident.str(), ui );
+                load_data_from_dir( *mod.legacy / to_string( i ), mod.ident, ui );
             }
         }
 

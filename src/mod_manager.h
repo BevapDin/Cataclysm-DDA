@@ -5,6 +5,7 @@
 #include "string_id.h"
 #include "pimpl.h"
 #include "filesystem.h"
+#include "optional.h"
 
 #include <string>
 #include <vector>
@@ -44,7 +45,7 @@ struct MOD_INFORMATION {
         cata::path path;
 
         /** If set load legacy migrations from this location dependent upon save version */
-        std::string legacy;
+        cata::optional<cata::path> legacy;
 
         /** All authors who have added content to the mod (excluding maintenance changes) */
         std::set<std::string> authors;
