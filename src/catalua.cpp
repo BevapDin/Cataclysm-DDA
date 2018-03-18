@@ -833,8 +833,7 @@ void lua_delete_global( const char* name ) {
 template<typename ArgType> void lua_callback_store_arg(
     const int callback_arg_idx, ArgType callback_arg )
 {
-    const char *callback_arg_name = std::string( "callback_arg" + std::to_string(
-                                        callback_arg_idx ) ).c_str();
+    std::string callback_arg_name = std::string( "callback_arg" + std::to_string( callback_arg_idx );
 
     if( lua_state == nullptr ) {
         return;
