@@ -1439,11 +1439,8 @@ bool game::do_turn()
     }
 
     // Run a LUA callback once per turn
-    if( calendar::once_every( 1_turns ) ) {
-        // possible callback arguments: none (calendar is already exposed to lua)
-        lua_callback( "on_turn_passed" );
-    }
-
+    // possible callback arguments: none (calendar is already exposed to lua)
+    lua_callback( "on_turn_passed" );
 
     // Move hordes every 5 min
     if( calendar::once_every( 5_minutes ) ) {
