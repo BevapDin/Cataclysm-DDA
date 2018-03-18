@@ -865,6 +865,11 @@ void lua_callback_savelast( const char *callback_name )
     lua_setglobal( L, "callback_last" );
 }
 
+void lua_callback( const char *callback_name )
+{
+
+}
+
 void lua_callback( const char *callback_name, ArgsInfo callback_args_info, ... )
 {
     if( lua_state == nullptr ) {

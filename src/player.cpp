@@ -9591,10 +9591,10 @@ void player::do_read( item &book )
                     }
                     ArgsInfo lua_callback_args_info = {
                         "string:skill_increased_source",
-                        "string:skill_increased_id",
+                        "skill_id:skill_increased_id",
                         "int:skill_increased_level"
                     };
-                    lua_callback( "on_skill_increased", lua_callback_args_info, "book", skill_name, originalSkillLevel + 1 );
+                    lua_callback( "on_skill_increased", lua_callback_args_info, "book", skill, originalSkillLevel + 1 );
                 } else {
                     add_msg( m_good, _( "%s increases their %s level." ), learner->disp_name().c_str(), skill_name );
                 }
@@ -10734,10 +10734,10 @@ void player::practice( const skill_id &id, int amount, int cap )
             add_msg( m_good, _( "Your skill in %s has increased to %d!" ), skill_name, newLevel );
             ArgsInfo lua_callback_args_info = {
                 "string:skill_increased_source",
-                "string:skill_increased_id",
+                "skill_id:skill_increased_id",
                 "int:skill_increased_level"
             };
-            lua_callback( "on_skill_increased", lua_callback_args_info, "training", skill_name, newLevel );
+            lua_callback( "on_skill_increased", lua_callback_args_info, "training", id, newLevel );
         }
         if(is_player() && newLevel > cap) {
             //inform player immediately that the current recipe can't be used to train further
@@ -11712,7 +11712,7 @@ void player::on_mutation_gain( const trait_id &mid )
     ArgsInfo lua_callback_args_info = {
         "trait_id:mutation_gained"
     };
-    lua_callback( "on_mutation_gain", lua_callback_args_info, mid.str() );
+    lua_callback( "on_mutation_gain", lua_callback_args_info, mid );
 }
 
 void player::on_mutation_loss( const trait_id &mid )
