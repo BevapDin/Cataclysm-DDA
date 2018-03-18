@@ -1566,10 +1566,10 @@ void worldfactory::delete_world( const std::string &worldname, const bool delete
     // directory will fail.  Removing directories in reverse order
     // will prevent this situation from arising.
     for( auto it = directory_paths.rbegin(); it != directory_paths.rend(); ++it ) {
-        remove_directory( worldpath + *it );
+        remove( cata::path( worldpath + dir ) );
     }
     if( delete_folder ) {
-        remove_directory( worldpath );
+        remove( cata::path( worldpath ) );
         remove_world( worldname );
     } else {
         get_world( worldname )->world_saves.clear();

@@ -85,9 +85,9 @@ bool cata::remove( const path &path )
     //@todo handle errors
     //@todo change to behaviour according to std::experimental::filesystem::remove
 #if (defined _WIN32 || defined __WIN32__)
-    return DeleteFile( path.c_str() ) != 0;
+    return DeleteFile( path.c_str() ) != 0 || RemoveDirectory( path.c_str() );
 #else
-    return unlink( path.c_str() ) == 0;
+    return unlink( path.c_str() ) == 0 || remove( path.c_str() ) == 0;
 #endif
 }
 
@@ -106,15 +106,6 @@ bool cata::rename( const path &old_path, const path &new_path )
     return rename( old_path.c_str(), new_path.c_str() ) == 0;
 #else
     return rename( old_path.c_str(), new_path.c_str() ) == 0;
-#endif
-}
-
-bool remove_directory( const std::string &path )
-{
-#if (defined _WIN32 || defined __WIN32__)
-    return RemoveDirectory( path.c_str() );
-#else
-    return remove( path.c_str() ) == 0;
 #endif
 }
 
