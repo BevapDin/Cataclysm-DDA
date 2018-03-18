@@ -105,7 +105,7 @@ void mod_manager::load_replacement_mods( const std::string &path )
 
 bool MOD_INFORMATION::need_lua() const
 {
-    return file_exist( path + "/main.lua" ) || file_exist( path + "/preload.lua" );
+    return exists( cata::path( path + "/main.lua" ) ) || exists( cata::path( path + "/preload.lua" ) );
 }
 
 mod_manager::mod_manager()
@@ -147,10 +147,10 @@ void mod_manager::refresh_mod_list()
     load_mods_from( FILENAMES["moddir"] );
     load_mods_from( FILENAMES["user_moddir"] );
 
-    if( file_exist( FILENAMES["mods-dev-default"] ) ) {
+    if( exists( cata::path( FILENAMES["mods-dev-default"] ) ) ) {
         load_mod_info( FILENAMES["mods-dev-default"] );
     }
-    if( file_exist( FILENAMES["mods-user-default"] ) ) {
+    if( exists( cata::path( FILENAMES["mods-user-default"] ) ) ) {
         load_mod_info( FILENAMES["mods-user-default"] );
     }
 

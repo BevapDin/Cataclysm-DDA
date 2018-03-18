@@ -672,7 +672,7 @@ bool auto_pickup::save( const bool bCharacter )
         savefile = g->get_player_base_save_path() + ".apu.json";
 
         const std::string player_save = g->get_player_base_save_path() + ".sav";
-        if( !file_exist( player_save ) ) {
+        if( !file_exist( cata::path( player_save ) ) ) {
             return true; //Character not saved yet.
         }
     }

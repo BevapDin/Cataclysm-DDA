@@ -627,7 +627,7 @@ bool safemode::save( const bool is_character_in )
 
     if( is_character ) {
         file = g->get_player_base_save_path() + ".sfm.json";
-        if( !file_exist( g->get_player_base_save_path() + ".sav" ) ) {
+        if( !exist( cata::path( g->get_player_base_save_path() + ".sav" ) ) ) {
             return true; //Character not saved yet.
         }
     }

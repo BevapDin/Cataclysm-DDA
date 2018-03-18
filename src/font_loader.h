@@ -82,7 +82,7 @@ class font_loader
         void load() {
             const std::string fontdata = FILENAMES["fontdata"];
             const std::string legacy_fontdata = FILENAMES["legacy_fontdata"];
-            if( file_exist( fontdata ) ) {
+            if( exists( cata::path( fontdata ) ) ) {
                 load_throws( fontdata );
             } else {
                 load_throws( legacy_fontdata );

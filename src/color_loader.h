@@ -65,7 +65,7 @@ class color_loader
             const std::string default_path = FILENAMES["colors"];
             const std::string custom_path = FILENAMES["base_colors"];
 
-            if( !file_exist( custom_path ) ) {
+            if( !exists( cata::path( custom_path ) ) ) {
                 copy_file( default_path, custom_path );
             }
 

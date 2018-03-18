@@ -73,10 +73,11 @@ bool assure_dir_exist( std::string const &path )
     return do_mkdir( path, 0777 );
 }
 
-bool file_exist( const std::string &path )
+bool cata::exists( const path &path )
 {
     struct stat buffer;
-    return ( stat( path.c_str(), &buffer ) == 0 );
+    //@todo actually check for errno==ENOENT
+    return stat( path.c_str(), &buffer ) == 0;
 }
 
 #if (defined _WIN32 || defined __WIN32__)
@@ -96,7 +97,7 @@ bool rename_file( const std::string &old_path, const std::string &new_path )
 {
     // Windows rename function does not override existing targets, so we
     // have to remove the target to make it compatible with the Linux rename
-    if( file_exist( new_path ) ) {
+    if( exists( cata::path( new_path ) ) ) {
         if( !remove_file( new_path ) ) {
             return false;
         }
@@ -409,4 +410,10 @@ bool copy_file( const std::string &source_path, const std::string &dest_path )
     dest_stream.close();
 
     return dest_stream && source_stream;
+}
+
+cata::path cata::path::operator/( const path &p ) const
+{
+    //@todo fix this to work properly
+    return path( native() + '/' + p.native() );
 }

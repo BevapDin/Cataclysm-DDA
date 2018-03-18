@@ -3387,13 +3387,13 @@ CachedTTFFont::CachedTTFFont( const int w, const int h, std::string typeface, in
         dbg( D_INFO ) << "Using font [" + typeface + "]." ;
     }
     //make fontdata compatible with wincurse
-    if(!file_exist(typeface)) {
+    if( !exists( cata::path( typeface ) ) ) {
         faceIndex = 0;
         typeface = FILENAMES["fontdir"] + typeface + ".ttf";
         dbg( D_INFO ) << "Using compatible font [" + typeface + "]." ;
     }
     //different default font with wincurse
-    if(!file_exist(typeface)) {
+    if( !exists( cata::path( typeface ) ) ) {
         faceIndex = 0;
         typeface = FILENAMES["fontdir"] + "fixedsys.ttf";
         dbg( D_INFO ) << "Using fallback font [" + typeface + "]." ;

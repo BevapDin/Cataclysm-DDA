@@ -5,8 +5,49 @@
 #include <string>
 #include <vector>
 
+// NOTE: this is supposed to be compatible with std::filesystem.
+// Do not add anything that is does not exist in std::filesystem!
+namespace cata
+{
+class path
+{
+    private:
+        std::string data;
+
+    public:
+        path() = default;
+        path( const path & ) = default;
+        path( path && ) = default;
+        // mostly compatible with std::filesystem, but not as generic
+        template<typename S>
+        path( const S &source ) : data( source ) { }
+
+        path &operator=( const path & ) = default;
+        path &operator=( path && ) = default;
+
+        const std::string &native() const {
+            return data;
+        }
+        const char *c_str() const {
+            return native().c_str();
+        }
+        operator std::string() const {
+            return native();
+        }
+
+        path operator/( const path &p ) const;
+        path operator/( const std::string &p ) const {
+            return operator/( path( p ) );
+        }
+};
+/**
+ * @returns Whether the given path corresponds to an existing filesystem
+ * object.
+ */
+bool exists( const path &path );
+} // namespace cata
+
 bool assure_dir_exist( std::string const &path );
-bool file_exist( const std::string &path );
 // Remove a file, does not remove folders,
 // returns true on success
 bool remove_file( const std::string &path );

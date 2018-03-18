@@ -229,7 +229,7 @@ overmap *overmapbuffer::get_existing( int x, int y )
         // checked in a previous call of this function).
         return nullptr;
     }
-    if( file_exist( terrain_filename( x, y ) ) ) {
+    if( exists( cata::path( terrain_filename( x, y ) ) ) ) {
         // File exists, load it normally (the get function
         // indirectly call overmap::open to do so).
         return &get( x, y );

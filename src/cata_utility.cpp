@@ -460,7 +460,7 @@ bool read_from_file_optional( const std::string &path,
     // Note: slight race condition here, but we'll ignore it. Worst case: the file
     // exists and got removed before reading it -> reading fails with a message
     // Or file does not exists, than everything works fine because it's optional anyway.
-    return file_exist( path ) && read_from_file( path, reader );
+    return exists( cata::path( path ) ) && read_from_file( path, reader );
 }
 
 bool read_from_file_optional_json( const std::string &path,

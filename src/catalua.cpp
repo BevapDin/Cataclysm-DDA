@@ -1247,7 +1247,7 @@ static int game_register_monattack( lua_State *L )
 void lua_loadmod( const std::string &base_path, const std::string &main_file_name )
 {
     std::string full_path = base_path + "/" + main_file_name;
-    if( file_exist( full_path ) ) {
+    if( exists( cata::path( full_path ) ) ) {
         lua_file_path = base_path;
         lua_dofile( lua_state, full_path.c_str() );
         lua_file_path.clear();
