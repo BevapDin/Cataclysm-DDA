@@ -9,6 +9,11 @@
 
 struct tripoint;
 
+namespace cata
+{
+class path;
+} // namespace cata
+
 /**
  * Enumerates all discrete actions that can be performed by player
  */
@@ -297,7 +302,7 @@ enum action_id : int {
  *  @param[out] unbound_keymap Place to store the keys explicitly unbound by the file
  */
 void load_keyboard_settings( std::map<char, action_id> &keymap,
-                             std::string &keymap_file_loaded_from,
+                             cata::path &keymap_file_loaded_from,
                              std::set<action_id> &unbound_keymap );
 
 /**

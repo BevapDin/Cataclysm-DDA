@@ -33,16 +33,16 @@ void parse_keymap( std::istream &keymap_txt, std::map<char, action_id> &kmap,
                    std::set<action_id> &unbound_keymap );
 
 void load_keyboard_settings( std::map<char, action_id> &keymap,
-                             std::string &keymap_file_loaded_from,
+                             cata::path &keymap_file_loaded_from,
                              std::set<action_id> &unbound_keymap )
 {
     const auto parser = [&]( std::istream & fin ) {
         parse_keymap( fin, keymap, unbound_keymap );
     };
     if( read_from_file_optional( FILENAMES["keymap"], parser ) ) {
-        keymap_file_loaded_from = FILENAMES["keymap"];
+        keymap_file_loaded_from = cata::path( FILENAMES["keymap"];
     } else if( read_from_file_optional( FILENAMES["legacy_keymap"], parser ) ) {
-        keymap_file_loaded_from = FILENAMES["legacy_keymap"];
+        keymap_file_loaded_from = cata::path( FILENAMES["legacy_keymap"] );
     }
 }
 

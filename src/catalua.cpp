@@ -65,7 +65,7 @@ lua_State *lua_state = nullptr;
 
 // Keep track of the current mod from which we are executing, so that
 // we know where to load files from.
-std::string lua_file_path = "";
+cata::path lua_file_path;
 
 std::stringstream lua_output_stream;
 std::stringstream lua_error_stream;
@@ -1244,13 +1244,13 @@ static int game_register_monattack( lua_State *L )
 #include "lua/catabindings.cpp"
 
 // Load the main file of a mod
-void lua_loadmod( const std::string &base_path, const std::string &main_file_name )
+void lua_loadmod( const cata::path &base_path, const std::string &main_file_name )
 {
-    std::string full_path = base_path + "/" + main_file_name;
-    if( exists( cata::path( full_path ) ) ) {
+    const cata::path full_path = base_path / main_file_name;
+    if( exists( full_path ) ) {
         lua_file_path = base_path;
         lua_dofile( lua_state, full_path.c_str() );
-        lua_file_path.clear();
+        lua_file_path = cata::path();
     }
     // debugmsg("Loading from %s", full_path.c_str());
 }
@@ -1304,7 +1304,7 @@ static int game_dofile( lua_State *L )
 {
     const char *path = luaL_checkstring( L, 1 );
 
-    std::string full_path = lua_file_path + "/" + path;
+    const cata::path full_path = lua_file_path / path;
     lua_dofile( L, full_path.c_str() );
     return 0;
 }
@@ -1433,7 +1433,7 @@ int call_lua( std::string )
 }
 // Implemented in mapgen.cpp:
 // int lua_mapgen( map *, std::string, mapgendata, int, float, const std::string & )
-void lua_loadmod( const std::string &, const std::string & )
+void lua_loadmod( const cata::path &, const std::string & )
 {
 }
 void game::init_lua()

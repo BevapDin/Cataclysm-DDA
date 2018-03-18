@@ -48,7 +48,7 @@ class color_loader
             return it->second;
         }
 
-        void load_colorfile( const std::string &path ) {
+        void load_colorfile( const cata::path &path ) {
             std::ifstream colorfile( path.c_str(), std::ifstream::in | std::ifstream::binary );
             JsonIn jsin( colorfile );
             jsin.start_array();

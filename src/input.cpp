@@ -103,7 +103,7 @@ input_manager inp_mngr;
 void input_manager::init()
 {
     std::map<char, action_id> keymap;
-    std::string keymap_file_loaded_from;
+    cata::path keymap_file_loaded_from;
     std::set<action_id> unbound_keymap;
     load_keyboard_settings( keymap, keymap_file_loaded_from, unbound_keymap );
     init_keycode_mapping();
@@ -125,7 +125,7 @@ void input_manager::init()
         throw std::runtime_error( FILENAMES["user_keybindings"].native() + ": " + err.what() );
     }
 
-    if( keymap_file_loaded_from.empty() || ( keymap.empty() && unbound_keymap.empty() ) ) {
+    if( keymap_file_loaded_from.string().empty() || ( keymap.empty() && unbound_keymap.empty() ) ) {
         // No keymap file was loaded, or the file has no mappings and no unmappings,
         // we can skip the remaining part of the function, especially the save function
         return;
@@ -167,8 +167,8 @@ void input_manager::init()
     }
     // Finally if we did import a file, and saved it to the new keybindings
     // file, delete the old keymap file to prevent re-importing it.
-    if( !keymap_file_loaded_from.empty() ) {
-        remove( cata::path( keymap_file_loaded_from ) );
+    if( !keymap_file_loaded_from.string().empty() ) {
+        remove( keymap_file_loaded_from );
     }
 }
 

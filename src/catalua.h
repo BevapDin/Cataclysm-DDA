@@ -76,6 +76,11 @@ class time_point;
 struct mapgendata;
 struct oter_t;
 
+namespace cata
+{
+class path;
+} // namespace cata
+
 using oter_id = int_id<oter_t>;
 
 extern std::stringstream lua_output_stream;
@@ -108,6 +113,6 @@ std::string lua_callback_getstring( const char *callback_name,
  * @param base_path The base path of the mod.
  * @param main_file_name The file name of the lua file, usually "main.lua"
  */
-void lua_loadmod( const std::string &base_path, const std::string &main_file_name );
+void lua_loadmod( const cata::path &base_path, const std::string &main_file_name );
 
 #endif
