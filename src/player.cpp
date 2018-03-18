@@ -9591,7 +9591,7 @@ void player::do_read( item &book )
                     lua_callback( "on_skill_increased", "book", skill.c_str(), to_string( originalSkillLevel + 1 ).c_str() );
                 } else {
                     add_msg( m_good, _( "%s increases their %s level." ), learner->disp_name().c_str(),
-                             skill.obj().name().c_str(), skill.obj().name().c_str() );
+                             skill.obj().name().c_str() );
                 }
             } else {
                 //skill_level == originalSkillLevel
