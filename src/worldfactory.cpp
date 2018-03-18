@@ -325,21 +325,19 @@ void worldfactory::init()
     // get the master files. These determine the validity of a world
     // worlds exist by having an option file
     // create worlds
-    for( const auto &world_dir : get_directories_with( qualifiers, FILENAMES["savedir"].native(),
-            true ) ) {
+    for( const auto &world_dir : get_directories_with( qualifiers, FILENAMES["savedir"], true ) ) {
         // get the save files
         auto world_sav_files = get_files_from_path( SAVE_EXTENSION, world_dir, false );
         // the directory name is the name of the world
-        const std::string worldname = native_to_utf8( cata::path( world_dir ).filename() );
+        const std::string worldname = native_to_utf8( world_dir.filename() );
 
         // create and store the world
         all_worlds[worldname] = new WORLD();
         // give the world a name
         all_worlds[worldname]->world_name = worldname;
         // add sav files
-        for( auto &world_sav_file : world_sav_files ) {
-            all_worlds[worldname]->world_saves.push_back( save_t::from_base_path( cata::path(
-                        world_sav_file ).stem() ) );
+        for( const cata::path &world_sav_file : world_sav_files ) {
+            all_worlds[worldname]->world_saves.push_back( save_t::from_base_path( world_sav_file.stem() ) );
         }
         mman->load_mods_list( all_worlds[worldname] );
 

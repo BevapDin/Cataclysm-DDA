@@ -107,6 +107,16 @@ bool remove( const path &path );
  */
 bool rename( const path &old_path, const path &new_path );
 /**
+ * Returns a vector of directories which contain files matching any of @p patterns.
+ *
+ * @param patterns A vector or patterns to match.
+ * @see get_files_from_path
+ */
+std::vector<path> get_directories_with( const std::vector<std::string> &patterns,
+                                        const path &root_path, bool recursive_search = false );
+std::vector<path> get_directories_with( const std::string &pattern, const path &root_path,
+                                        bool const recurse = false );
+/**
  * Returns a vector of files or directories matching pattern at @p root_path.
  *
  * Searches through the directory tree breadth-first. Directories are searched in lexical
@@ -134,19 +144,6 @@ const char *eol();
 std::vector<std::string> get_files_from_path( std::string const &pattern,
         std::string const &root_path = "", bool recursive_search = false,
         bool match_extension = false );
-
-//--------------------------------------------------------------------------------------------------
-/**
- * Returns a vector of directories which contain files matching any of @p patterns.
- *
- * @param patterns A vector or patterns to match.
- * @see get_files_from_path
- */
-std::vector<std::string> get_directories_with( std::vector<std::string> const &patterns,
-        std::string const &root_path = "", bool recursive_search = false );
-
-std::vector<std::string> get_directories_with( std::string const &pattern,
-        std::string const &root_path = "", bool const recurse = false );
 
 // Note: not part of the cata namespace as there is no such function in std::filesystem
 bool copy_file( const cata::path &source_path, const cata::path &dest_path );

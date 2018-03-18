@@ -328,14 +328,14 @@ std::vector<cata::path> cata::get_files_from_path( const std::string &pattern,
  *  @param recurse Be recurse or not.
  *  @return vector or directories without pattern filename at end.
  */
-std::vector<std::string> get_directories_with( std::string const &pattern,
-        std::string const &root_path, bool const recurse )
+std::vector<cata::path> cata::get_directories_with( const std::string &pattern,
+        const path &root_path, const bool recurse )
 {
     if( pattern.empty() ) {
-        return std::vector<std::string>();
+        return std::vector<path>();
     }
 
-    auto files = find_file_if_bfs( root_path, recurse, [&]( dirent const & entry, bool ) {
+    auto files = find_file_if_bfs( root_path.string(), recurse, [&]( dirent const & entry, bool ) {
         return name_contains( entry, pattern, true );
     } );
 
@@ -346,7 +346,7 @@ std::vector<std::string> get_directories_with( std::string const &pattern,
 
     files.erase( std::unique( std::begin( files ), std::end( files ) ), std::end( files ) );
 
-    return files;
+    return std::vector<path>( files.begin(), files.end() );
 }
 
 /**
@@ -356,17 +356,17 @@ std::vector<std::string> get_directories_with( std::string const &pattern,
  *  @param recurse Be recurse or not.
  *  @return vector or directories without pattern filename at end.
  */
-std::vector<std::string> get_directories_with( std::vector<std::string> const &patterns,
-        std::string const &root_path, bool const recurse )
+std::vector<cata::path> cata::get_directories_with( const std::vector<std::string> &patterns,
+        const path &root_path, const bool recurse )
 {
     if( patterns.empty() ) {
-        return std::vector<std::string>();
+        return std::vector<path>();
     }
 
     auto const ext_beg = std::begin( patterns );
     auto const ext_end = std::end( patterns );
 
-    auto files = find_file_if_bfs( root_path, recurse, [&]( dirent const & entry, bool ) {
+    auto files = find_file_if_bfs( root_path.native(), recurse, [&]( dirent const & entry, bool ) {
         return std::any_of( ext_beg, ext_end, [&]( std::string const & ext ) {
             return name_contains( entry, ext, true );
         } );
@@ -380,7 +380,7 @@ std::vector<std::string> get_directories_with( std::vector<std::string> const &p
     //remove resulting duplicates
     files.erase( std::unique( std::begin( files ), std::end( files ) ), std::end( files ) );
 
-    return files;
+    return std::vector<path>( files.begin(), files.end() );
 }
 
 bool copy_file( const cata::path &source_path, const cata::path &dest_path )
