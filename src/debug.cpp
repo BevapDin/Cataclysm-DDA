@@ -261,7 +261,7 @@ void DebugFile::init( const std::string &filename )
     if( stat( filename.c_str(), &buffer ) == 0 ) {
         // Continue with the old log file if it's smaller than 1 MiB
         if( buffer.st_size >= 1024 * 1024 ) {
-            rename_failed = !rename_file( filename, oldfile );
+            rename_failed = !rename( cata::path( filename ), cata::path( oldfile ) );
         }
     }
     file.open( filename.c_str(), std::ios::out | std::ios::app );

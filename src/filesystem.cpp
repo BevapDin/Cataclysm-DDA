@@ -91,25 +91,23 @@ bool cata::remove( const path &path )
 #endif
 }
 
-#if (defined _WIN32 || defined __WIN32__)
-bool rename_file( const std::string &old_path, const std::string &new_path )
+bool cata::rename( const path &old_path, const path &new_path )
 {
+    // @todo fix return type and behaviour to comply with std::filesystem::rename
+#if (defined _WIN32 || defined __WIN32__)
     // Windows rename function does not override existing targets, so we
     // have to remove the target to make it compatible with the Linux rename
-    if( exists( cata::path( new_path ) ) ) {
-        if( !remove( cata::path( new_path ) ) ) {
+    if( exists( new_path ) ) {
+        if( !remove( new_path ) ) {
             return false;
         }
     }
 
     return rename( old_path.c_str(), new_path.c_str() ) == 0;
-}
 #else
-bool rename_file( const std::string &old_path, const std::string &new_path )
-{
     return rename( old_path.c_str(), new_path.c_str() ) == 0;
-}
 #endif
+}
 
 bool remove_directory( const std::string &path )
 {

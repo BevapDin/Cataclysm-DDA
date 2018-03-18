@@ -245,7 +245,7 @@ WORLDPTR worldfactory::convert_to_world( const std::string &origin_path )
         // move files from origin_path into new world path
         for( auto &origin_file : get_files_from_path( ".", origin_path, false ) ) {
             std::string filename = cata::path( origin_file ).filename();
-            rename_file( origin_file, newworld->folder_path() + "/" + filename );
+            rename( cata::path( origin_file ), cata::path( newworld->world_path + "/" + filename ) );
         }
 
         DebugLog( D_INFO, DC_ALL ) << "worldfactory::convert_to_world -- World Converted Successfully!";

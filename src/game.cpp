@@ -2599,7 +2599,7 @@ void game::move_save_to_graveyard()
     for( auto const &src_path : save_files ) {
         const std::string dst_path = graveyard_dir + "/" + cata::path( src_path ).filename().native();
 
-        if( rename_file( src_path, dst_path ) ) {
+        if( rename( cata::path( src_path ), cata::path( dst_path ) ) ) {
             continue;
         }
 
