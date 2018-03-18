@@ -972,10 +972,13 @@ bool color_manager::save_custom()
     }, _( "custom colors" ) );
 }
 
-void color_manager::load_custom( const std::string &sPath )
+void color_manager::load_custom()
 {
-    const cata::path file = sPath.empty() ? FILENAMES["custom_colors"] : cata::path( sPath );
+    load_custom( FILENAMES["custom_colors"] );
+}
 
+void color_manager::load_custom( const cata::path &file )
+{
     read_from_file_optional_json( file, [this]( JsonIn & jsonin ) {
         deserialize( jsonin );
     } );

@@ -328,6 +328,11 @@ enum color_id {
 class JsonOut;
 class JsonIn;
 
+namespace cata
+{
+class path;
+} // namespace cata
+
 void init_colors();
 
 // Index for highlight cache
@@ -433,7 +438,8 @@ class color_manager
         nc_color highlight_from_names( const std::string &name, const std::string &bg_name ) const;
 
         void load_default();
-        void load_custom( const std::string &sPath = "" );
+        void load_custom();
+        void load_custom( const cata::path &sPath );
 
         void show_gui();
 
