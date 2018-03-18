@@ -78,8 +78,8 @@ class path
         }
 
         path operator/( const path &p ) const;
-        path operator/( const std::string &p ) const {
-            return operator/( path( p ) );
+        bool operator==( const path &p ) const {
+            return native() == p.native();
         }
 };
 /**
@@ -99,17 +99,6 @@ bool remove( const path &path );
  * @returns Whether renaming was successful.
  */
 bool rename( const path &old_path, const path &new_path );
-} // namespace cata
-
-// Note: not part of namespace cata as it is not part of std::filesystem either
-bool assure_dir_exist( const cata::path &path );
-
-namespace cata_files
-{
-const char *eol();
-}
-
-//--------------------------------------------------------------------------------------------------
 /**
  * Returns a vector of files or directories matching pattern at @p root_path.
  *
@@ -122,6 +111,19 @@ const char *eol();
  * @param match_extension If true, match pattern at the end of file names. Otherwise, match anywhere
  *                        in the file name.
  */
+std::vector<path> get_files_from_path( const std::string &pattern, const path &root_path,
+                                       bool recursive_search = false, bool match_extension = false );
+} // namespace cata
+
+// Note: not part of namespace cata as it is not part of std::filesystem either
+bool assure_dir_exist( const cata::path &path );
+
+namespace cata_files
+{
+const char *eol();
+}
+
+// this remains to be used by chkjson.cpp
 std::vector<std::string> get_files_from_path( std::string const &pattern,
         std::string const &root_path = "", bool recursive_search = false,
         bool match_extension = false );

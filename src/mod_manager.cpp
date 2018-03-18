@@ -196,10 +196,10 @@ bool mod_manager::set_default_mods( const mod_id &ident )
     return true;
 }
 
-void mod_manager::load_mods_from( const std::string &path )
+void mod_manager::load_mods_from( const cata::path &path )
 {
-    for( auto &mod_file : get_files_from_path( MOD_SEARCH_FILE, path, true ) ) {
-        load_mod_info( cata::path( mod_file ) );
+    for( const cata::path &mod_file : get_files_from_path( MOD_SEARCH_FILE, path, true ) ) {
+        load_mod_info( mod_file );
     }
 }
 
@@ -346,9 +346,8 @@ bool mod_manager::copy_mod_contents( const t_mod_list &mods_to_copy,
 
         // trim file paths from full length down to just /data forward
         for( auto &input_file : input_files ) {
-            std::string output_path = input_file;
-            output_path = cur_mod_dir + output_path.substr( start_index );
-            copy_file( cata::path( input_file ), cata::path( output_path ) );
+            const cata::path output_path( cur_mod_dir + input_file.native().substr( start_index ) );
+            copy_file( input_file, output_path );
         }
     }
     return true;

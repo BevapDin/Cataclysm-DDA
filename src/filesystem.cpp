@@ -312,6 +312,15 @@ std::vector<std::string> get_files_from_path( std::string const &pattern,
     } );
 }
 
+std::vector<cata::path> cata::get_files_from_path( const std::string &pattern,
+        const path &root_path, const bool recurse, const bool match_extension )
+{
+    const auto vec = find_file_if_bfs( root_path.string(), recurse, [&]( dirent const & entry, bool ) {
+        return name_contains( entry, pattern, match_extension );
+    } );
+    return std::vector<path>( vec.begin(), vec.end() );
+}
+
 /**
  *  Find directories which containing pattern.
  *  @param pattern Search pattern.

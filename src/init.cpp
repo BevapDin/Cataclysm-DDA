@@ -375,7 +375,7 @@ void DynamicDataLoader::load_data_from_path( const std::string &path, const std:
     // But not the other way round.
 
     // get a list of all files in the directory
-    str_vec files = get_files_from_path( ".json", path, true, true );
+    auto files = get_files_from_path( ".json", cata::path( path ), true, true );
     if( files.empty() ) {
         std::ifstream tmp( path.c_str(), std::ios::in );
         if( tmp ) {
@@ -385,8 +385,7 @@ void DynamicDataLoader::load_data_from_path( const std::string &path, const std:
         }
     }
     // iterate over each file
-    for( auto &files_i : files ) {
-        const std::string &file = files_i;
+    for( auto &file : files ) {
         // open the file as a stream
         std::ifstream infile( file.c_str(), std::ifstream::in | std::ifstream::binary );
         // and stuff it into ram
@@ -401,7 +400,7 @@ void DynamicDataLoader::load_data_from_path( const std::string &path, const std:
             JsonIn jsin( iss );
             load_all_from_json( jsin, src, ui, path, file );
         } catch( const JsonError &err ) {
-            throw std::runtime_error( file + ": " + err.what() );
+            throw std::runtime_error( file.native() + ": " + err.what() );
         }
     }
 }

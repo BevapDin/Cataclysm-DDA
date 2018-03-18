@@ -2870,7 +2870,7 @@ static bool ends_with( const cata::path &path, const std::string &suffix )
 //Pseudo-Curses Functions           *
 //***********************************
 
-static void font_folder_list(std::ofstream& fout, const std::string &path, std::set<std::string> &bitmap_fonts)
+static void font_folder_list( std::ofstream& fout, const cata::path &path, std::set<std::string> &bitmap_fonts )
 {
     for( const auto &f : get_files_from_path( "", path, true, false ) ) {
             TTF_Font_Ptr fnt( TTF_OpenFont( f.c_str(), 12 ) );
@@ -2897,7 +2897,7 @@ static void font_folder_list(std::ofstream& fout, const std::string &path, std::
 
                 // Add font style
                 char *style = TTF_FontFaceStyleName( fnt.get() );
-                const bool isbitmap = ends_with( cata::path( f ), ".fon" );
+                const bool isbitmap = ends_with( f, ".fon" );
                 if (style != NULL && !isbitmap && strcasecmp(style, "Regular") != 0) {
                     fout << " " << style;
                 }
@@ -2908,19 +2908,19 @@ static void font_folder_list(std::ofstream& fout, const std::string &path, std::
                         // First appearance of this font family
                         bitmap_fonts.insert(fami);
                     } else { // Font in set. Add filename to family string
-                        size_t start = f.find_last_of("/\\");
-                        size_t end = f.find_last_of(".");
+                        size_t start = f.string().find_last_of("/\\");
+                        size_t end = f.string().find_last_of(".");
                         if (start != std::string::npos && end != std::string::npos) {
-                            fout << " [" << f.substr(start + 1, end - start - 1) + "]";
+                            fout << " [" << f.string().substr(start + 1, end - start - 1) + "]";
                         } else {
-                            dbg( D_INFO ) << "Skipping wrong font file: \"" << f << "\"";
+                            dbg( D_INFO ) << "Skipping wrong font file: " << f;
                         }
                     }
                 }
                 fout << std::endl;
 
                 // Add filename and font index
-                fout << f << std::endl;
+                fout << f.string() << std::endl;
                 fout << i << std::endl;
 
                 // We use only 1 style in bitmap fonts.
@@ -2942,25 +2942,25 @@ static void save_font_list()
     char buf[256];
     GetSystemWindowsDirectory(buf, 256);
     strcat(buf, "\\fonts");
-    font_folder_list(fout, buf, bitmap_fonts);
+    font_folder_list( fout, cata::path( buf ), bitmap_fonts );
 #elif (defined _APPLE_ && defined _MACH_)
     /*
     // Well I don't know how osx actually works ....
-    font_folder_list(fout, "/System/Library/Fonts", bitmap_fonts);
-    font_folder_list(fout, "/Library/Fonts", bitmap_fonts);
+    font_folder_list( fout, cata::path( "/System/Library/Fonts" ), bitmap_fonts );
+    font_folder_list( fout, cata::path( "/Library/Fonts" ), bitmap_fonts );
 
     wordexp_t exp;
     wordexp("~/Library/Fonts", &exp, 0);
-    font_folder_list(fout, exp.we_wordv[0], bitmap_fonts);
+    font_folder_list( fout, cata::path( exp.we_wordv[0] ), bitmap_fonts);
     wordfree(&exp);*/
 #else // Other POSIX-ish systems
-    font_folder_list(fout, "/usr/share/fonts", bitmap_fonts);
-    font_folder_list(fout, "/usr/local/share/fonts", bitmap_fonts);
+    font_folder_list( fout, cata::path( "/usr/share/fonts" ), bitmap_fonts);
+    font_folder_list( fout, cata::path( "/usr/local/share/fonts" ), bitmap_fonts);
     char *home;
     if( ( home = getenv( "HOME" ) ) ) {
         std::string userfontdir = home;
         userfontdir += "/.fonts";
-        font_folder_list( fout, userfontdir, bitmap_fonts );
+        font_folder_list( fout, cata::path( userfontdir ), bitmap_fonts );
     }
 #endif
 }

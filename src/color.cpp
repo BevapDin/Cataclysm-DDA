@@ -862,7 +862,7 @@ void color_manager::show_gui()
                 ui_templates.text = _( "Color templates:" );
 
                 for( const auto &filename : vFiles ) {
-                    ui_templates.addentry( cata::path( filename ).filename() );
+                    ui_templates.addentry( filename.filename() );
                 }
 
                 ui_templates.query();

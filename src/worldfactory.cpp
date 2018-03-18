@@ -243,9 +243,8 @@ WORLDPTR worldfactory::convert_to_world( const std::string &origin_path )
     // save world as conversion world
     if( save_world( newworld, true ) ) {
         // move files from origin_path into new world path
-        for( auto &origin_file : get_files_from_path( ".", origin_path, false ) ) {
-            std::string filename = cata::path( origin_file ).filename();
-            rename( cata::path( origin_file ), cata::path( newworld->world_path + "/" + filename ) );
+        for( const cata::path &origin_file : get_files_from_path( ".", origin_path, false ) ) {
+            rename( origin_file, newworld->folder_path() / origin_file.filename() );
         }
 
         DebugLog( D_INFO, DC_ALL ) << "worldfactory::convert_to_world -- World Converted Successfully!";
@@ -1527,10 +1526,10 @@ WORLDPTR worldfactory::get_world( const std::string &name )
 }
 
 // Helper predicate to exclude files from deletion when resetting a world directory.
-static bool isForbidden( const std::string &candidate )
+static bool isForbidden( const cata::path &candidate )
 {
-    if( candidate.find( FILENAMES["worldoptions"].native() ) != std::string::npos ||
-        candidate.find( "mods.json" ) != std::string::npos ) {
+    if( candidate.native().find( FILENAMES["worldoptions"] ) != std::string::npos ||
+        candidate.native().find( "mods.json" ) != std::string::npos ) {
         return true;
     }
     return false;
@@ -1541,10 +1540,9 @@ void worldfactory::delete_world( const std::string &worldname, const bool delete
     std::string worldpath = get_world( worldname )->folder_path();
     std::set<std::string> directory_paths;
 
-    auto file_paths = get_files_from_path( "", worldpath, true, true );
+    std::vector<cata::path> file_paths = get_files_from_path( "", worldpath, true, true );
     if( !delete_folder ) {
-        std::vector<std::string>::iterator forbidden = find_if( file_paths.begin(), file_paths.end(),
-                isForbidden );
+        auto forbidden = find_if( file_paths.begin(), file_paths.end(), isForbidden );
         while( forbidden != file_paths.end() ) {
             file_paths.erase( forbidden );
             forbidden = find_if( file_paths.begin(), file_paths.end(), isForbidden );
@@ -1552,8 +1550,8 @@ void worldfactory::delete_world( const std::string &worldname, const bool delete
     }
     for( auto &file_path : file_paths ) {
         // strip to path and remove worldpath from it
-        std::string part = cata::path( file_path.substr( worldpath.size(),
-                                       std::string::npos ) ).parent_path();
+        std::string part = cata::path( file_path.native().substr( worldpath.native().size(),
+                                       std::string::npos ) ).parent_path().native();
         while( !part.empty() ) {
             directory_paths.insert( part );
             part = cata::path( part ).parent_path();
@@ -1561,7 +1559,7 @@ void worldfactory::delete_world( const std::string &worldname, const bool delete
     }
 
     for( auto &file : file_paths ) {
-        remove( cata::path( file ) );
+        remove( file );
     }
     // Trying to remove a non-empty parent directory before a child
     // directory will fail.  Removing directories in reverse order

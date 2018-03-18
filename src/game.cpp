@@ -2587,7 +2587,7 @@ void game::move_save_to_graveyard()
     const cata::path &graveyard_dir = FILENAMES["graveyarddir"];
     const std::string &prefix        = base64_encode( u.name ) + ".";
 
-    if( !assure_dir_exist( cata::path( graveyard_dir ) ) ) {
+    if( !assure_dir_exist( graveyard_dir ) ) {
         debugmsg( "could not create graveyard path '%s'", graveyard_dir.c_str() );
     }
 
@@ -2597,15 +2597,15 @@ void game::move_save_to_graveyard()
     }
 
     for( auto const &src_path : save_files ) {
-        const std::string dst_path = graveyard_dir + "/" + cata::path( src_path ).filename().native();
+        const cata::path dst_path = graveyard_dir / src_path.filename();
 
-        if( rename( cata::path( src_path ), cata::path( dst_path ) ) ) {
+        if( rename( src_path, dst_path ) ) {
             continue;
         }
 
         debugmsg( "could not rename file '%s' to '%s'", src_path.c_str(), dst_path.c_str() );
 
-        if( remove( cata::path( src_path ) ) ) {
+        if( remove( src_path ) ) {
             continue;
         }
 

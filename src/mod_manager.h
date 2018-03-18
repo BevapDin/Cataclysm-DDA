@@ -143,7 +143,7 @@ class mod_manager
          * @param path The root folder from which the modinfo
          * files are searched.
          */
-        void load_mods_from( const std::string &path );
+        void load_mods_from( const cata::path &path );
         /**
          * Load all mod information from a json file.
          * (@see load_modfile)
