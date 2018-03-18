@@ -288,7 +288,7 @@ bool mod_manager::set_default_mods( const t_mod_list &mods )
 }
 
 bool mod_manager::copy_mod_contents( const t_mod_list &mods_to_copy,
-                                     const std::string &output_base_path )
+                                     const cata::path &output_base_path )
 {
     if( mods_to_copy.empty() ) {
         // nothing to copy, so technically we succeeded already!
@@ -299,7 +299,7 @@ bool mod_manager::copy_mod_contents( const t_mod_list &mods_to_copy,
 
     DebugLog( D_INFO, DC_ALL ) << "Copying mod contents into directory: " << output_base_path;
 
-    if( !assure_dir_exist( cata::path( output_base_path ) ) ) {
+    if( !assure_dir_exist( output_base_path ) ) {
         DebugLog( D_ERROR, DC_ALL ) << "Unable to create or open mod directory at [" << output_base_path <<
                                     "] for saving";
         return false;

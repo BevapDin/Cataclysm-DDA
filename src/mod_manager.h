@@ -108,7 +108,7 @@ class mod_manager
          * puts the files there. The original folder structure is
          * retained.
          */
-        bool copy_mod_contents( const t_mod_list &mods_to_copy, const std::string &output_base_path );
+        bool copy_mod_contents( const t_mod_list &mods_to_copy, const cata::path &output_base_path );
 
         /**
          * Save list of mods that are active in that world to

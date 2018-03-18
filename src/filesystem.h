@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <iosfwd>
 
 // NOTE: this is supposed to be compatible with std::filesystem.
 // Do not add anything that is does not exist in std::filesystem!
@@ -82,6 +83,12 @@ class path
             return native() == p.native();
         }
 };
+
+inline std::ostream &operator<<( std::ostream &s, const path &p )
+{
+    return s << '"' << p.string() << '"';
+}
+
 /**
  * @returns Whether the given path corresponds to an existing filesystem
  * object.
