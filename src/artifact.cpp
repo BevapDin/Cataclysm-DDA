@@ -1092,9 +1092,9 @@ std::string artifact_name( const std::string &type )
 
 /* Json Loading and saving */
 
-void load_artifacts( const std::string &artfilename )
+void load_artifacts( const cata::path &path )
 {
-    read_from_file_optional_json( artfilename, []( JsonIn & artifact_json ) {
+    read_from_file_optional_json( path.string(), []( JsonIn & artifact_json ) {
         artifact_json.start_array();
         while( !artifact_json.end_array() ) {
             JsonObject jo = artifact_json.get_object();
@@ -1264,9 +1264,9 @@ void it_artifact_armor::deserialize( JsonObject &jo )
     }
 }
 
-bool save_artifacts( const std::string &path )
+bool save_artifacts( const cata::path &path )
 {
-    return write_to_file_exclusive( path, [&]( std::ostream & fout ) {
+    return write_to_file_exclusive( path.string(), [&]( std::ostream & fout ) {
         JsonOut json( fout, true );
         json.start_array();
         // We only want runtime types, otherwise static artifacts are loaded twice (on init and then on game load)

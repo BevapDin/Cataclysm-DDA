@@ -2808,8 +2808,7 @@ bool game::save_factions_missions_npcs()
 
 bool game::save_artifacts()
 {
-    std::string artfilename = get_world_base_save_path() + "/artifacts.gsav";
-    return ::save_artifacts( artfilename );
+    return ::save_artifacts( get_world_base_save_path() / "artifacts.gsav" );
 }
 
 bool game::save_maps()
