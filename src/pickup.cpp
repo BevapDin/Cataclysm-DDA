@@ -728,8 +728,8 @@ void Pickup::pick_up( const tripoint &pos, int min )
         int itemsY = sideStyle ? pickupY + pickupH : TERMY - itemsH;
         int itemsX = pickupX;
 
-        catacurses::window w_pickup = catacurses::newwin( pickupH, pickupW, pickupY, pickupX );
-        catacurses::window w_item_info = catacurses::newwin( itemsH,  itemsW,  itemsY,  itemsX );
+        catacurses::window w_pickup( pickupH, pickupW, pickupY, pickupX );
+        catacurses::window w_item_info( itemsH,  itemsW,  itemsY,  itemsX );
 
         std::string action;
         long raw_input_char = ' ';

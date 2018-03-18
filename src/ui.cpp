@@ -479,7 +479,7 @@ void uimenu::setup()
     if ( (int)entries.size() <= vmax ) {
         scrollbar_auto = false;
     }
-    window = catacurses::newwin( w_height, w_width, w_y, w_x );
+    window = catacurses::window( w_height, w_width, w_y, w_x );
 
     fselected = selected;
     if(fselected < 0) {

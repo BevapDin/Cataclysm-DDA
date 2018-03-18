@@ -592,7 +592,7 @@ bool query_yn( const std::string &text )
             for( auto &s : textformatted ) {
                 win_width = std::max( win_width, utf8_width( remove_color_tags( s ) ) );
             }
-            w = catacurses::newwin( textformatted.size( ) + 2, win_width + 2, ( TERMY - 3 ) / 2,
+            w = catacurses::window( textformatted.size( ) + 2, win_width + 2, ( TERMY - 3 ) / 2,
                                     std::max( TERMX - win_width - 2, 0 ) / 2 );
             draw_border( w );
         }
@@ -650,19 +650,19 @@ int menu( bool const cancelable, const char *const mes, ... )
 static catacurses::window create_popup_window( int width, int height, PopupFlags flags )
 {
     if( ( flags & PF_FULLSCREEN ) != 0 ) {
-        return catacurses::newwin(
+        return catacurses::window(
                    FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
                    std::max( ( TERMY - FULL_SCREEN_HEIGHT ) / 2, 0 ),
                    std::max( ( TERMX - FULL_SCREEN_WIDTH ) / 2, 0 )
                );
     } else if( ( flags & PF_ON_TOP ) != 0 ) {
-        return catacurses::newwin(
+        return catacurses::window(
                    height, width,
                    0,
                    std::max( ( TERMX - width ) / 2, 0 )
                );
     } else {
-        return catacurses::newwin(
+        return catacurses::window(
                    height, width,
                    std::max( ( TERMY - ( height + 1 ) ) / 2, 0 ),
                    std::max( ( TERMX - width ) / 2, 0 )
@@ -755,7 +755,7 @@ input_event draw_item_info( const int iLeft, const int iWidth, const int iTop, c
                             int &selected, const bool without_getch, const bool without_border,
                             const bool handle_scrolling, const bool scrollbar_left, const bool use_full_win )
 {
-    catacurses::window win = catacurses::newwin( iHeight, iWidth, iTop + VIEW_OFFSET_Y,
+    catacurses::window win( iHeight, iWidth, iTop + VIEW_OFFSET_Y,
                              iLeft + VIEW_OFFSET_X );
 
 #ifdef TILES
@@ -1301,7 +1301,7 @@ void hit_animation( int iX, int iY, nc_color cColor, const std::string &cTile )
     mvwputch(w, iY + VIEW_OFFSET_Y, iX + VIEW_OFFSET_X, cColor, cTile);
     */
 
-    catacurses::window w_hit = catacurses::newwin( 1, 1, iY + VIEW_OFFSET_Y, iX + VIEW_OFFSET_X );
+    catacurses::window w_hit( 1, 1, iY + VIEW_OFFSET_Y, iX + VIEW_OFFSET_X );
     if( !w_hit ) {
         return; //we passed in negative values (semi-expected), so let's not segfault
     }

@@ -241,7 +241,7 @@ bool Messages::has_undisplayed_messages()
 
 void Messages::display_messages()
 {
-    catacurses::window w = catacurses::newwin(
+    catacurses::window w(
                                FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
                                ( TERMY > FULL_SCREEN_HEIGHT ) ? ( TERMY - FULL_SCREEN_HEIGHT ) / 2 : 0,
                                ( TERMX > FULL_SCREEN_WIDTH ) ? ( TERMX - FULL_SCREEN_WIDTH ) / 2 : 0 );

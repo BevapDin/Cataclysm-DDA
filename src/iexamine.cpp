@@ -482,8 +482,8 @@ void iexamine::vending( player &p, const tripoint &examp )
 
     constexpr int first_item_offset = 3; // header size
 
-    catacurses::window const w = catacurses::newwin( window_h, w_items_w, padding_y, padding_x );
-    catacurses::window const w_item_info = catacurses::newwin( window_h, w_info_w,  padding_y,
+    catacurses::window const w( window_h, w_items_w, padding_y, padding_x );
+    catacurses::window const w_item_info( window_h, w_info_w,  padding_y,
                                            padding_x + w_items_w );
 
     bool used_machine = false;

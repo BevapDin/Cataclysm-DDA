@@ -385,7 +385,7 @@ void player_morale::display( double focus_gain )
     const int win_x = ( TERMX - win_w ) / 2;
     const int win_y = ( TERMY - win_h ) / 2;
 
-    catacurses::window w = catacurses::newwin( win_h, win_w, win_y, win_x );
+    catacurses::window w( win_h, win_w, win_y, win_x );
 
     const auto print_line = [ w ]( int y, const char *label, double value ) -> int {
         nc_color color;

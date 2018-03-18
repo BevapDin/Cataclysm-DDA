@@ -46,8 +46,8 @@ void init_interface();
  * The objects have shared ownership of the contained pointer (behaves like a
  * shared pointer).
  *
- * Use @ref newwin to get a new instance. Use the default constructor to get
- * an invalid window pointer (test for this via @ref operator bool()).
+ * Use the default constructor to get an invalid window pointer
+ * (test for this via @ref operator bool()).
  * Use the @ref operator= to reset the pointer.
  */
 class window
@@ -57,6 +57,7 @@ class window
 
     public:
         window() = default;
+        window( int nlines, int ncols, int begin_y, int begin_x );
         window( std::shared_ptr<void> ptr ) : native_window( std::move( ptr ) ) {
         }
         template<typename T = void>
@@ -90,7 +91,6 @@ using attr_t = unsigned short;
 
 extern window stdscr;
 
-window newwin( int nlines, int ncols, int begin_y, int begin_x );
 void wborder( const window &win, chtype ls, chtype rs, chtype ts, chtype bs, chtype tl, chtype tr,
               chtype bl, chtype br );
 void mvwhline( const window &win, int y, int x, chtype ch, int n );

@@ -30,11 +30,11 @@ static void curses_check_result( const int result, const int expected, const cha
     }
 }
 
-catacurses::window catacurses::newwin( const int nlines, const int ncols, const int begin_y,
-                                       const int begin_x )
+catacurses::window::window( const int nlines, const int ncols, const int begin_y,
+                            const int begin_x )
 {
     const auto w = ::newwin( nlines, ncols, begin_y, begin_x ); // @todo: check for errors
-    return std::shared_ptr<void>( w, []( void *const w ) {
+    native_window = std::shared_ptr<void>( w, []( void *const w ) {
         ::curses_check_result( ::delwin( static_cast<::WINDOW *>( w ) ), OK, "delwin" );
     } );
 }

@@ -287,27 +287,27 @@ Strength - 4;    Dexterity - 4;    Intelligence - 4;    Perception - 4" ) );
         skill_win_size_y = maxy - infooffsetybottom;
     }
 
-    catacurses::window w_grid_top    = catacurses::newwin( infooffsetybottom, FULL_SCREEN_WIDTH + 1,
+    catacurses::window w_grid_top( infooffsetybottom, FULL_SCREEN_WIDTH + 1,
                                        VIEW_OFFSET_Y, VIEW_OFFSET_X );
-    catacurses::window w_grid_skill  = catacurses::newwin( skill_win_size_y + 1, 27,
+    catacurses::window w_grid_skill( skill_win_size_y + 1, 27,
                                        infooffsetybottom + VIEW_OFFSET_Y, 0 + VIEW_OFFSET_X );
-    catacurses::window w_grid_trait  = catacurses::newwin( trait_win_size_y + 1, 27,
+    catacurses::window w_grid_trait( trait_win_size_y + 1, 27,
                                        infooffsetybottom + VIEW_OFFSET_Y, 27 + VIEW_OFFSET_X );
-    catacurses::window w_grid_effect = catacurses::newwin( effect_win_size_y + 1, 28,
+    catacurses::window w_grid_effect( effect_win_size_y + 1, 28,
                                        infooffsetybottom + VIEW_OFFSET_Y, 53 + VIEW_OFFSET_X );
 
-    catacurses::window w_tip     = catacurses::newwin( 1, FULL_SCREEN_WIDTH,  VIEW_OFFSET_Y,
+    catacurses::window w_tip( 1, FULL_SCREEN_WIDTH,  VIEW_OFFSET_Y,
                                    0 + VIEW_OFFSET_X );
-    catacurses::window w_stats   = catacurses::newwin( 9, 26,  1 + VIEW_OFFSET_Y,  0 + VIEW_OFFSET_X );
-    catacurses::window w_traits  = catacurses::newwin( trait_win_size_y, 26,
+    catacurses::window w_stats( 9, 26,  1 + VIEW_OFFSET_Y,  0 + VIEW_OFFSET_X );
+    catacurses::window w_traits( trait_win_size_y, 26,
                                    infooffsetybottom + VIEW_OFFSET_Y, 27 + VIEW_OFFSET_X );
-    catacurses::window w_encumb  = catacurses::newwin( 9, 26,  1 + VIEW_OFFSET_Y, 27 + VIEW_OFFSET_X );
-    catacurses::window w_effects = catacurses::newwin( effect_win_size_y, 26,
+    catacurses::window w_encumb( 9, 26,  1 + VIEW_OFFSET_Y, 27 + VIEW_OFFSET_X );
+    catacurses::window w_effects( effect_win_size_y, 26,
                                    infooffsetybottom + VIEW_OFFSET_Y, 54 + VIEW_OFFSET_X );
-    catacurses::window w_speed   = catacurses::newwin( 9, 26,  1 + VIEW_OFFSET_Y, 54 + VIEW_OFFSET_X );
-    catacurses::window w_skills  = catacurses::newwin( skill_win_size_y, 26,
+    catacurses::window w_speed( 9, 26,  1 + VIEW_OFFSET_Y, 54 + VIEW_OFFSET_X );
+    catacurses::window w_skills( skill_win_size_y, 26,
                                    infooffsetybottom + VIEW_OFFSET_Y, 0 + VIEW_OFFSET_X );
-    catacurses::window w_info    = catacurses::newwin( info_win_size_y, FULL_SCREEN_WIDTH,
+    catacurses::window w_info( info_win_size_y, FULL_SCREEN_WIDTH,
                                    infooffsetytop + VIEW_OFFSET_Y, 0 + VIEW_OFFSET_X );
 
     unsigned upper_info_border = 10;

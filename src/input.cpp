@@ -838,7 +838,7 @@ void input_context::display_help()
 {
     inp_mngr.reset_timeout();
     // Shamelessly stolen from help.cpp
-    catacurses::window w_help = catacurses::newwin( FULL_SCREEN_HEIGHT - 2, FULL_SCREEN_WIDTH - 2,
+    catacurses::window w_help( FULL_SCREEN_HEIGHT - 2, FULL_SCREEN_WIDTH - 2,
                                 1 + ( int )( ( TERMY > FULL_SCREEN_HEIGHT ) ? ( TERMY - FULL_SCREEN_HEIGHT ) / 2 : 0 ),
                                 1 + ( int )( ( TERMX > FULL_SCREEN_WIDTH ) ? ( TERMX - FULL_SCREEN_WIDTH ) / 2 : 0 ) );
 

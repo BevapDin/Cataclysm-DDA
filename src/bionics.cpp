@@ -315,7 +315,7 @@ bool player::activate_bionic( int b, bool eff_only )
 
         const size_t win_h = std::min( static_cast<size_t>( TERMY ), bad.size() + good.size() + 2 );
         const int win_w = 46;
-        catacurses::window w = catacurses::newwin( win_h, win_w, ( TERMY - win_h ) / 2,
+        catacurses::window w( win_h, win_w, ( TERMY - win_h ) / 2,
                                ( TERMX - win_w ) / 2 );
         draw_border( w, c_red, string_format( " %s ", _( "Blood Test Results" ) ) );
         if( good.empty() && bad.empty() ) {

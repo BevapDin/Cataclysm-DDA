@@ -104,18 +104,18 @@ void player::power_mutations()
     int WIDTH = FULL_SCREEN_WIDTH + ( TERMX - FULL_SCREEN_WIDTH ) / 2;
     int START_X = ( TERMX - WIDTH ) / 2;
     int START_Y = ( TERMY - HEIGHT ) / 2;
-    catacurses::window wBio = catacurses::newwin( HEIGHT, WIDTH, START_Y, START_X );
+    catacurses::window wBio( HEIGHT, WIDTH, START_Y, START_X );
 
     // Description window @ the bottom of the bionic window
     int DESCRIPTION_START_Y = START_Y + HEIGHT - DESCRIPTION_HEIGHT - 1;
     int DESCRIPTION_LINE_Y = DESCRIPTION_START_Y - START_Y - 1;
-    catacurses::window w_description = catacurses::newwin( DESCRIPTION_HEIGHT, WIDTH - 2,
+    catacurses::window w_description( DESCRIPTION_HEIGHT, WIDTH - 2,
                                        DESCRIPTION_START_Y, START_X + 1 );
 
     // Title window
     int TITLE_START_Y = START_Y + 1;
     int HEADER_LINE_Y = TITLE_HEIGHT + 1; // + lines with text in titlebar, local
-    catacurses::window w_title = catacurses::newwin( TITLE_HEIGHT, WIDTH - 2, TITLE_START_Y,
+    catacurses::window w_title( TITLE_HEIGHT, WIDTH - 2, TITLE_START_Y,
                                  START_X + 1 );
 
     int scroll_position = 0;

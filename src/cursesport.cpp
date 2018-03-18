@@ -61,10 +61,10 @@ static bool wmove_internal( const catacurses::window &win_, const int y, const i
 //Pseudo-Curses Functions           *
 //***********************************
 
-catacurses::window catacurses::newwin( int nlines, int ncols, int begin_y, int begin_x )
+catacurses::window::window( int nlines, int ncols, int begin_y, int begin_x )
 {
     if (begin_y < 0 || begin_x < 0) {
-        return window(); //it's the caller's problem now (since they have logging functions declared)
+        return; //it's the caller's problem now (since they have logging functions declared)
     }
 
     // default values
@@ -92,7 +92,7 @@ catacurses::window catacurses::newwin( int nlines, int ncols, int begin_y, int b
         newwindow->line[j].chars.resize(ncols);
         newwindow->line[j].touched = true; //Touch them all !?
     }
-    return std::shared_ptr<void>( newwindow, []( void *const w ) { delete static_cast<cata_cursesport::WINDOW *>( w ); } );
+    native_window = std::shared_ptr<void>( newwindow, []( void *const w ) { delete static_cast<cata_cursesport::WINDOW *>( w ); } );
 }
 
 inline int newline(cata_cursesport::WINDOW *win)

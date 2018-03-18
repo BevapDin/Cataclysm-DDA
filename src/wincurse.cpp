@@ -527,8 +527,8 @@ void catacurses::init_interface()
     }
     init_colors();
 
-    stdscr = newwin( get_option<int>( "TERMINAL_Y" ), get_option<int>( "TERMINAL_X" ),0,0 );
-    //newwin calls `new WINDOW`, and that will throw, but not return nullptr.
+    stdscr = window( get_option<int>( "TERMINAL_Y" ), get_option<int>( "TERMINAL_X" ),0,0 );
+    //that calls `new WINDOW`, and that will throw, but not return nullptr.
 }
 
 // A very accurate and responsive timer (NEVER use GetTickCount)

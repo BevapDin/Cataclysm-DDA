@@ -705,11 +705,11 @@ void color_manager::show_gui()
 
     const int iTotalCols = vLines.size();
 
-    catacurses::window w_colors_border = catacurses::newwin( FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
+    catacurses::window w_colors_border( FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
                                          iOffsetY, iOffsetX );
-    catacurses::window w_colors_header = catacurses::newwin( iHeaderHeight, FULL_SCREEN_WIDTH - 2,
+    catacurses::window w_colors_header( iHeaderHeight, FULL_SCREEN_WIDTH - 2,
                                          1 + iOffsetY, 1 + iOffsetX );
-    catacurses::window w_colors = catacurses::newwin( iContentHeight, FULL_SCREEN_WIDTH - 2,
+    catacurses::window w_colors( iContentHeight, FULL_SCREEN_WIDTH - 2,
                                   iHeaderHeight + 1 + iOffsetY, 1 + iOffsetX );
 
     draw_border( w_colors_border, BORDER_COLOR, _( " COLOR MANAGER " ) );

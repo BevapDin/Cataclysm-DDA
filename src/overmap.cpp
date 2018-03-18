@@ -1405,7 +1405,7 @@ bool overmap::inbounds( int x, int y, int z, int clearance )
 point overmap::display_notes(int z)
 {
     const overmapbuffer::t_notes_vector notes = overmap_buffer.get_all_notes(z);
-    catacurses::window w_notes = catacurses::newwin( FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
+    catacurses::window w_notes( FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
                               (TERMY > FULL_SCREEN_HEIGHT) ? (TERMY - FULL_SCREEN_HEIGHT) / 2 : 0,
                               (TERMX > FULL_SCREEN_WIDTH) ? (TERMX - FULL_SCREEN_WIDTH) / 2 : 0);
 
@@ -2584,12 +2584,12 @@ tripoint overmap::draw_zones( tripoint const &center, tripoint const &select, in
 //Start drawing the overmap on the screen using the (m)ap command.
 tripoint overmap::draw_overmap(const tripoint &orig, const draw_data_t &data)
 {
-    g->w_omlegend = catacurses::newwin( TERMY, 28, 0, TERMX - 28 );
-    g->w_overmap = catacurses::newwin( OVERMAP_WINDOW_HEIGHT, OVERMAP_WINDOW_WIDTH, 0, 0 );
+    g->w_omlegend = catacurses::window( TERMY, 28, 0, TERMX - 28 );
+    g->w_overmap = catacurses::window( OVERMAP_WINDOW_HEIGHT, OVERMAP_WINDOW_WIDTH, 0, 0 );
 
     // Draw black padding space to avoid gap between map and legend
     // also clears the pixel minimap in TILES
-    g->w_blackspace = catacurses::newwin( TERMY, TERMX, 0, 0 );
+    g->w_blackspace = catacurses::window( TERMY, TERMX, 0, 0 );
     mvwputch(g->w_blackspace, 0, 0, c_black, ' ');
     wrefresh(g->w_blackspace);
 
@@ -2744,7 +2744,7 @@ tripoint overmap::draw_overmap(const tripoint &orig, const draw_data_t &data)
             int i = 0;
             //Navigate through results
             tripoint tmp = curs;
-            catacurses::window w_search = catacurses::newwin(13, 27, 3, TERMX - 27);
+            catacurses::window w_search(13, 27, 3, TERMX - 27);
 
             input_context ctxt("OVERMAP_SEARCH");
             ctxt.register_leftright();
@@ -2812,7 +2812,7 @@ tripoint overmap::draw_overmap(const tripoint &orig, const draw_data_t &data)
             pmenu.query();
 
             if( pmenu.ret >= 0 ) {
-                catacurses::window w_editor = catacurses::newwin( 15, 27, 3, TERMX - 27 );
+                catacurses::window w_editor( 15, 27, 3, TERMX - 27 );
                 input_context ctxt( "OVERMAP_EDITOR" );
                 ctxt.register_directions();
                 ctxt.register_action( "CONFIRM" );

@@ -240,10 +240,10 @@ std::vector<std::string> main_menu::get_hotkeys( const std::string &s )
 void main_menu::display_credits()
 {
     // AStyle got this redundant indent
-    catacurses::window w_credits_border = catacurses::newwin( FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
+    catacurses::window w_credits_border( FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH,
                                           ( TERMY > FULL_SCREEN_HEIGHT ) ? ( TERMY - FULL_SCREEN_HEIGHT ) / 2 : 0,
                                           ( TERMX > FULL_SCREEN_WIDTH ) ? ( TERMX - FULL_SCREEN_WIDTH ) / 2 : 0 );
-    catacurses::window w_credits = catacurses::newwin( FULL_SCREEN_HEIGHT - 2, FULL_SCREEN_WIDTH - 2,
+    catacurses::window w_credits( FULL_SCREEN_HEIGHT - 2, FULL_SCREEN_WIDTH - 2,
                                    1 + ( int )( ( TERMY > FULL_SCREEN_HEIGHT ) ? ( TERMY - FULL_SCREEN_HEIGHT ) / 2 : 0 ),
                                    1 + ( int )( ( TERMX > FULL_SCREEN_WIDTH ) ? ( TERMX - FULL_SCREEN_WIDTH ) / 2 : 0 ) );
     draw_border( w_credits_border, BORDER_COLOR, _( " CREDITS " ) );
@@ -261,7 +261,7 @@ bool main_menu::opening_screen()
     world_generator->set_active_world( NULL );
     world_generator->init();
 
-    w_background = catacurses::newwin( TERMY, TERMX, 0, 0 );
+    w_background = catacurses::window( TERMY, TERMX, 0, 0 );
     werase( w_background );
     wrefresh( w_background );
 
@@ -278,7 +278,7 @@ bool main_menu::opening_screen()
     const int x0 = ( TERMX - total_w ) / 2;
     const int y0 = ( TERMY - total_h ) / 2;
 
-    w_open = catacurses::newwin( total_h, total_w, y0, x0 );
+    w_open = catacurses::window( total_h, total_w, y0, x0 );
 
     iMenuOffsetY = total_h - 3;
     // note: if iMenuOffset is changed,

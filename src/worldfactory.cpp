@@ -142,7 +142,7 @@ WORLDPTR worldfactory::make_new_world( bool show_prompt )
         const int iOffsetX = (TERMX > FULL_SCREEN_WIDTH) ? (TERMX - FULL_SCREEN_WIDTH) / 2 : 0;
         const int iOffsetY = (TERMY > FULL_SCREEN_HEIGHT) ? (TERMY - FULL_SCREEN_HEIGHT) / 2 : 0;
         // set up window
-        catacurses::window wf_win = catacurses::newwin(FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH, iOffsetY, iOffsetX);
+        catacurses::window wf_win(FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH, iOffsetY, iOffsetX);
 
         int curtab = 0;
         int lasttab; // give placement memory to menus, sorta.
@@ -433,10 +433,10 @@ WORLDPTR worldfactory::pick_world( bool show_prompt )
     }
     size_t sel = 0, selpage = 0;
 
-    catacurses::window w_worlds_border = catacurses::newwin( FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH, iOffsetY, iOffsetX );
-    catacurses::window w_worlds_tooltip = catacurses::newwin( iTooltipHeight, FULL_SCREEN_WIDTH - 2, 1 + iOffsetY, 1 + iOffsetX);
-    catacurses::window w_worlds_header = catacurses::newwin( 1, FULL_SCREEN_WIDTH - 2, 1 + iTooltipHeight + iOffsetY, 1 + iOffsetX);
-    catacurses::window w_worlds = catacurses::newwin( iContentHeight, FULL_SCREEN_WIDTH - 2, iTooltipHeight + 2 + iOffsetY, 1 + iOffsetX);
+    catacurses::window w_worlds_border( FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH, iOffsetY, iOffsetX );
+    catacurses::window w_worlds_tooltip( iTooltipHeight, FULL_SCREEN_WIDTH - 2, 1 + iOffsetY, 1 + iOffsetX);
+    catacurses::window w_worlds_header( 1, FULL_SCREEN_WIDTH - 2, 1 + iTooltipHeight + iOffsetY, 1 + iOffsetX);
+    catacurses::window w_worlds( iContentHeight, FULL_SCREEN_WIDTH - 2, iTooltipHeight + 2 + iOffsetY, 1 + iOffsetX);
 
     draw_border( w_worlds_border, BORDER_COLOR, _( " WORLD SELECTION " ) );
     mvwputch(w_worlds_border, 4, 0, BORDER_COLOR, LINE_XXXO); // |-
@@ -748,9 +748,9 @@ void worldfactory::show_active_world_mods( const std::vector<std::string> &world
     const int iOffsetX = ( TERMX > FULL_SCREEN_WIDTH ) ? ( TERMX - FULL_SCREEN_WIDTH ) / 2 : 0;
     const int iOffsetY = ( TERMY > FULL_SCREEN_HEIGHT ) ? ( TERMY - FULL_SCREEN_HEIGHT ) / 2 : 0;
 
-    catacurses::window w_border = catacurses::newwin( 13, FULL_SCREEN_WIDTH / 2 - 3, 4 + iOffsetY, iOffsetX );
+    catacurses::window w_border( 13, FULL_SCREEN_WIDTH / 2 - 3, 4 + iOffsetY, iOffsetX );
 
-    catacurses::window w_mods = catacurses::newwin( 11, FULL_SCREEN_WIDTH / 2 - 4, 5 + iOffsetY, iOffsetX );
+    catacurses::window w_mods( 11, FULL_SCREEN_WIDTH / 2 - 4, 5 + iOffsetY, iOffsetX );
 
     int start = 0;
     int cursor = 0;
@@ -823,12 +823,12 @@ int worldfactory::show_worldgen_tab_modselection( const catacurses::window &win,
     const int iOffsetY = (TERMY > FULL_SCREEN_HEIGHT) ? (TERMY - FULL_SCREEN_HEIGHT) / 2 : 0;
 
     // lots of small windows so that each section can be drawn to independently of the others as necessary
-    catacurses::window w_header1 = catacurses::newwin( 1, FULL_SCREEN_WIDTH / 2 - 5, 3 + iOffsetY, 1 + iOffsetX );
-    catacurses::window w_header2 = catacurses::newwin( 1, FULL_SCREEN_WIDTH / 2 - 4, 3 + iOffsetY, FULL_SCREEN_WIDTH / 2 + 3 + iOffsetX );
-    catacurses::window w_shift   = catacurses::newwin( 13, 5, 3 + iOffsetY, FULL_SCREEN_WIDTH / 2 - 3 + iOffsetX );
-    catacurses::window w_list    = catacurses::newwin( 11, FULL_SCREEN_WIDTH / 2 - 4, 5 + iOffsetY, iOffsetX );
-    catacurses::window w_active  = catacurses::newwin( 11, FULL_SCREEN_WIDTH / 2 - 4, 5 + iOffsetY, FULL_SCREEN_WIDTH / 2 + 2 + iOffsetX );
-    catacurses::window w_description = catacurses::newwin( 4, FULL_SCREEN_WIDTH - 2, 19 + iOffsetY, 1 + iOffsetX );
+    catacurses::window w_header1( 1, FULL_SCREEN_WIDTH / 2 - 5, 3 + iOffsetY, 1 + iOffsetX );
+    catacurses::window w_header2( 1, FULL_SCREEN_WIDTH / 2 - 4, 3 + iOffsetY, FULL_SCREEN_WIDTH / 2 + 3 + iOffsetX );
+    catacurses::window w_shift( 13, 5, 3 + iOffsetY, FULL_SCREEN_WIDTH / 2 - 3 + iOffsetX );
+    catacurses::window w_list( 11, FULL_SCREEN_WIDTH / 2 - 4, 5 + iOffsetY, iOffsetX );
+    catacurses::window w_active( 11, FULL_SCREEN_WIDTH / 2 - 4, 5 + iOffsetY, FULL_SCREEN_WIDTH / 2 + 2 + iOffsetX );
+    catacurses::window w_description( 4, FULL_SCREEN_WIDTH - 2, 19 + iOffsetY, 1 + iOffsetX );
 
     draw_modselection_borders(win, &ctxt);
     std::vector<std::string> headers;
@@ -1100,7 +1100,7 @@ int worldfactory::show_worldgen_tab_confirm( const catacurses::window &win, WORL
 
     const char* line_of_32_underscores = "________________________________";
 
-    catacurses::window w_confirmation = catacurses::newwin(iContentHeight, FULL_SCREEN_WIDTH - 2, iTooltipHeight + 2 + iOffsetY, 1 + iOffsetX);
+    catacurses::window w_confirmation(iContentHeight, FULL_SCREEN_WIDTH - 2, iTooltipHeight + 2 + iOffsetY, 1 + iOffsetX);
 
     int namebar_y = 1;
     int namebar_x = 3 + utf8_width(_("World Name:"));

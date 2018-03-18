@@ -914,7 +914,7 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
         top -= 1;
     }
 
-    catacurses::window w_target = catacurses::newwin( height, getmaxx( g->w_messages ), top, getbegx( g->w_messages ) );
+    catacurses::window w_target( height, getmaxx( g->w_messages ), top, getbegx( g->w_messages ) );
 
     input_context ctxt("TARGET");
     ctxt.set_iso(true);
