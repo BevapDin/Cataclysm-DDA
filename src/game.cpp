@@ -2605,7 +2605,7 @@ void game::move_save_to_graveyard()
 
         debugmsg( "could not rename file '%s' to '%s'", src_path.c_str(), dst_path.c_str() );
 
-        if( remove_file( src_path ) ) {
+        if( remove( cata::path( src_path ) ) ) {
             continue;
         }
 

@@ -80,17 +80,16 @@ bool cata::exists( const path &path )
     return stat( path.c_str(), &buffer ) == 0;
 }
 
+bool cata::remove( const path &path )
+{
+    //@todo handle errors
+    //@todo change to behaviour according to std::experimental::filesystem::remove
 #if (defined _WIN32 || defined __WIN32__)
-bool remove_file( const std::string &path )
-{
     return DeleteFile( path.c_str() ) != 0;
-}
 #else
-bool remove_file( const std::string &path )
-{
     return unlink( path.c_str() ) == 0;
-}
 #endif
+}
 
 #if (defined _WIN32 || defined __WIN32__)
 bool rename_file( const std::string &old_path, const std::string &new_path )
@@ -98,7 +97,7 @@ bool rename_file( const std::string &old_path, const std::string &new_path )
     // Windows rename function does not override existing targets, so we
     // have to remove the target to make it compatible with the Linux rename
     if( exists( cata::path( new_path ) ) ) {
-        if( !remove_file( new_path ) ) {
+        if( !remove( cata::path( new_path ) ) ) {
             return false;
         }
     }

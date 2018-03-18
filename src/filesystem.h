@@ -87,12 +87,17 @@ class path
  * object.
  */
 bool exists( const path &path );
+/**
+ * The file identified by the path is deleted.
+ * @return `true` if the file was deleted, `false` if it did not exist, or could
+ * not be deleted.
+ */
+bool remove( const path &path );
 } // namespace cata
 
 bool assure_dir_exist( std::string const &path );
 // Remove a file, does not remove folders,
 // returns true on success
-bool remove_file( const std::string &path );
 bool remove_directory( const std::string &path );
 // Rename a file, overriding the target!
 bool rename_file( const std::string &old_path, const std::string &new_path );

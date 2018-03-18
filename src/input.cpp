@@ -168,7 +168,7 @@ void input_manager::init()
     // Finally if we did import a file, and saved it to the new keybindings
     // file, delete the old keymap file to prevent re-importing it.
     if( !keymap_file_loaded_from.empty() ) {
-        remove_file( keymap_file_loaded_from );
+        remove( cata::path( keymap_file_loaded_from ) );
     }
 }
 

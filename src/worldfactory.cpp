@@ -1,4 +1,5 @@
 #include "worldfactory.h"
+#include "worldfactory.h"
 #include "filesystem.h"
 #include "char_validity_check.h"
 #include "mod_manager.h"
@@ -1462,7 +1463,7 @@ bool worldfactory::load_world_options( WORLDPTR &world )
     if( read_from_file_optional( legacy_path, std::bind( &WORLD::load_legacy_options, world, _1 ) ) ) {
         if( save_world( world ) ) {
             // Remove old file as the options have been saved to the new file.
-            remove_file( legacy_path );
+            remove( cata::path( legacy_path ) );
         }
         return true;
     }
@@ -1559,7 +1560,7 @@ void worldfactory::delete_world( const std::string &worldname, const bool delete
     }
 
     for( auto &file : file_paths ) {
-        remove_file( file );
+        remove( cata::path( file ) );
     }
     // Trying to remove a non-empty parent directory before a child
     // directory will fail.  Removing directories in reverse order

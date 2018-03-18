@@ -707,7 +707,7 @@ void auto_pickup::load( const bool bCharacter )
     } ) ) {
         if( load_legacy( bCharacter ) ) {
             if( save( bCharacter ) ) {
-                remove_file( sFile );
+                remove( cata::path( sFile ) );
             }
         }
     }

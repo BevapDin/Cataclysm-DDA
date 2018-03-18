@@ -2516,8 +2516,8 @@ void options_manager::load()
     } ) ) {
         if( load_legacy() ) {
             if( save() ) {
-                remove_file( FILENAMES["legacy_options"] );
-                remove_file( FILENAMES["legacy_options2"] );
+                remove( cata::path( FILENAMES["legacy_options"] ) );
+                remove( cata::path( FILENAMES["legacy_options2"] ) );
             }
         }
     }

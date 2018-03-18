@@ -390,7 +390,7 @@ void mod_manager::save_mods_list( WORLDPTR world ) const
     if( world->active_mod_order.empty() ) {
         // If we were called from load_mods_list to prune the list,
         // and it's empty now, delete the file.
-        remove_file( path );
+        remove( cata::path( path ) );
         return;
     }
     write_to_file( path, [&]( std::ostream & fout ) {
