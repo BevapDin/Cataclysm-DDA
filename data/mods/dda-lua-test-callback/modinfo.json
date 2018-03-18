@@ -1,0 +1,10 @@
+[
+  {
+    "type": "MOD_INFO",
+    "ident": "dda-lua-test-callback",
+    "name": "Dark Days Ahead: Lua Test: Callback",
+    "description": "Test of all callback Lua functions.",
+    "category": "content",
+    "dependencies": [ "dda" ]
+  }
+]
