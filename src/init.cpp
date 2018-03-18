@@ -364,7 +364,7 @@ void DynamicDataLoader::initialize()
 #endif
 }
 
-void DynamicDataLoader::load_data_from_path( const std::string &path, const std::string &src,
+void DynamicDataLoader::load_data_from_path( const cata::path &path, const std::string &src,
         loading_ui &ui )
 {
     assert( !finalized && "Can't load additional data after finalization. Must be unloaded first." );

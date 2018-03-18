@@ -3825,7 +3825,7 @@ void load_soundset() {
     current_soundpack_path = soundpack_path;
     try {
         loading_ui ui( false );
-        DynamicDataLoader::get_instance().load_data_from_path( soundpack_path, "core", ui );
+        DynamicDataLoader::get_instance().load_data_from_path( cata::path( soundpack_path ), "core", ui );
     } catch( const std::exception &err ) {
         dbg( D_ERROR ) << "failed to load sounds: " << err.what();
     }

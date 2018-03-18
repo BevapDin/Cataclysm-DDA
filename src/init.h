@@ -13,6 +13,11 @@ class loading_ui;
 class JsonObject;
 class JsonIn;
 
+namespace cata
+{
+class path;
+} // namespace cata
+
 /**
  * This class is used to load (and unload) the dynamic
  * (and moddable) data from json files.
@@ -127,7 +132,7 @@ class DynamicDataLoader
          * @throws std::exception on all kind of errors.
          */
         /*@{*/
-        void load_data_from_path( const std::string &path, const std::string &src, loading_ui &ui );
+        void load_data_from_path( const cata::path &path, const std::string &src, loading_ui &ui );
         /*@}*/
         /**
          * Deletes and unloads all the data previously loaded with

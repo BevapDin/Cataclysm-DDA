@@ -118,6 +118,11 @@ struct visibility_variables;
 class scent_map;
 class loading_ui;
 
+namespace cata
+{
+class path;
+} // namespace cata
+
 typedef std::function<bool( const item & )> item_filter;
 
 enum liquid_dest : int {
@@ -185,7 +190,7 @@ class game
 
     protected:
         /** Loads dynamic data from the given directory. May throw. */
-        void load_data_from_dir( const std::string &path, const std::string &src, loading_ui &ui );
+        void load_data_from_dir( const cata::path &path, const std::string &src, loading_ui &ui );
 
         // May be a bit hacky, but it's probably better than the header spaghetti
         pimpl<map> map_ptr;
