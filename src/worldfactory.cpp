@@ -229,7 +229,7 @@ WORLDPTR worldfactory::make_new_world( special_game_id special_type )
     return special_world;
 }
 
-WORLDPTR worldfactory::convert_to_world( const std::string &origin_path )
+WORLDPTR worldfactory::convert_to_world( const cata::path &origin_path )
 {
     // prompt for worldname? Nah, just make a worldname... the user can fix it later if they really don't want this as a name...
     std::string worldname = get_next_valid_worldname();
