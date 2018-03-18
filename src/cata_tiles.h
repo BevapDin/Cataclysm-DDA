@@ -27,6 +27,11 @@ class player;
 class JsonObject;
 struct visibility_variables;
 
+namespace cata
+{
+class path;
+} // namespace cata
+
 extern void set_displaybuffer_rendertarget();
 
 /** Structures */
@@ -344,7 +349,7 @@ class tileset_loader
          * Returns the number of tiles that have been loaded from this tileset image
          * @throw std::exception If the image can not be loaded.
          */
-        void load_tileset( std::string path );
+        void load_tileset( const cata::path &path );
         /**
          * Load tiles from json data.This expects a "tiles" array in
          * <B>config</B>. That array should contain all the tile definition that
