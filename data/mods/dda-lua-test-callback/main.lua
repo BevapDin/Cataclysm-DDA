@@ -155,17 +155,24 @@ MOD.DisplayCallbackMessages = function(s)
   }  
 
   if (game.add_msg) then
-    game.add_msg ("<color_cyan>     function: </color><color_ltcyan>"..tostring(s).."</color>")
-    game.add_msg ("callback_last: <color_yellow>"..tostring(callback_last).."</color>")
-    game.add_msg ("callback_arg_count: <color_red>"..tostring(callback_arg_count).."</color>")
+    MOD.MessageWithLog ("<color_cyan>     function: </color><color_ltcyan>"..tostring(s).."</color>")
+    MOD.MessageWithLog ("callback_last: <color_yellow>"..tostring(callback_last).."</color>")
+    MOD.MessageWithLog ("callback_arg_count: <color_red>"..tostring(callback_arg_count).."</color>")
     for k,v in pairs(callback_args) do
       local callback_arg = v
       local callback_arg_value = _G[callback_arg]
         if (callback_arg_value ~= nil) then
-          game.add_msg (callback_arg..": <color_green>"..tostring(callback_arg_value).."</color>")
+          MOD.MessageWithLog (callback_arg..": <color_green>"..tostring(callback_arg_value).."</color>")
         end  
     end
   end
+
+end
+
+MOD.MessageWithLog = function( s )
+
+    game.add_msg( s )
+    LOG.message( s )
 
 end
 
