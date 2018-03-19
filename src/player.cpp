@@ -9589,12 +9589,12 @@ void player::do_read( item &book )
                                           pgettext( "memorial_female", "Reached skill level %1$d in %2$s." ),
                                           skill_level.level(), skill_name );
                     }
-                    ArgsInfo lua_callback_args_info = {
-                        "string:skill_increased_source",
-                        "skill_id:skill_increased_id",
-                        "int:skill_increased_level"
-                    };
-                    lua_callback( "on_skill_increased", lua_callback_args_info, "book", skill, originalSkillLevel + 1 );
+                    CallbackArgumentContainer lua_callback_args_info;
+                    lua_callback_args_info.emplace_back( CallbackArgument( "skill_increased_source", "book" ) );
+                    lua_callback_args_info.emplace_back( CallbackArgument( "skill_increased_id", skill.str() ) );
+                    lua_callback_args_info.emplace_back( CallbackArgument( "skill_increased_level",
+                                                         originalSkillLevel + 1 ) );
+                    lua_callback( "on_skill_increased", lua_callback_args_info );
                 } else {
                     add_msg( m_good, _( "%s increases their %s level." ), learner->disp_name().c_str(), skill_name );
                 }
@@ -10732,12 +10732,11 @@ void player::practice( const skill_id &id, int amount, int cap )
         int newLevel = get_skill_level( id );
         if (is_player() && newLevel > oldLevel) {
             add_msg( m_good, _( "Your skill in %s has increased to %d!" ), skill_name, newLevel );
-            ArgsInfo lua_callback_args_info = {
-                "string:skill_increased_source",
-                "skill_id:skill_increased_id",
-                "int:skill_increased_level"
-            };
-            lua_callback( "on_skill_increased", lua_callback_args_info, "training", id, newLevel );
+            CallbackArgumentContainer lua_callback_args_info;
+            lua_callback_args_info.emplace_back( CallbackArgument( "skill_increased_source", "training" ) );
+            lua_callback_args_info.emplace_back( CallbackArgument( "skill_increased_id", id.str() ) );
+            lua_callback_args_info.emplace_back( CallbackArgument( "skill_increased_level", newLevel ) );
+            lua_callback( "on_skill_increased", lua_callback_args_info );
         }
         if(is_player() && newLevel > cap) {
             //inform player immediately that the current recipe can't be used to train further
@@ -11709,47 +11708,42 @@ bool player::has_item_with_flag( const std::string &flag ) const
 void player::on_mutation_gain( const trait_id &mid )
 {
     morale->on_mutation_gain( mid );
-    ArgsInfo lua_callback_args_info = {
-        "trait_id:mutation_gained"
-    };
-    lua_callback( "on_mutation_gain", lua_callback_args_info, mid );
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( CallbackArgument( "mutation_gained", mid.str() ) );
+    lua_callback( "on_mutation_gain", lua_callback_args_info );
 }
 
 void player::on_mutation_loss( const trait_id &mid )
 {
     morale->on_mutation_loss( mid );
-    ArgsInfo lua_callback_args_info = {
-        "trait_id:mutation_lost"
-    };
-    lua_callback( "on_mutation_loss", lua_callback_args_info, mid );
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( CallbackArgument( "mutation_lost", mid.str() ) );
+    lua_callback( "on_mutation_loss", lua_callback_args_info );
 }
 
 void player::on_stat_change( const std::string &stat, int value )
 {
     morale->on_stat_change( stat, value );
-    ArgsInfo lua_callback_args_info = {
-        "string:stat_changed",
-        "int:stat_value"
-    };
-    lua_callback( "on_stat_change", lua_callback_args_info, stat, value );
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( CallbackArgument( "stat_changed", stat ) );
+    lua_callback_args_info.emplace_back( CallbackArgument( "stat_value", value ) );
+    lua_callback( "on_stat_change", lua_callback_args_info );
 }
 
 void player::on_item_wear( const item &it )
 {
     morale->on_item_wear( it );
-    ArgsInfo lua_callback_args_info = {
-        "item:item_last_worn"
-    };
-    lua_callback( "on_item_wear", lua_callback_args_info, it );
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( CallbackArgument( "item_last_worn", it.display_name() ) );
+    lua_callback( "on_item_wear", lua_callback_args_info );
 }
 
 void player::on_item_takeoff( const item &it )
 {
     morale->on_item_takeoff( it );
-    ArgsInfo lua_callback_args_info = {
-        "item:item_last_taken_off"
-    };
-    lua_callback( "on_item_takeoff", lua_callback_args_info, it );
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( CallbackArgument( "item_last_taken_off", it.display_name() ) );
+    lua_callback( "on_item_takeoff", lua_callback_args_info );
 }
 
 void player::on_effect_int_change( const efftype_id &eid, int intensity, body_part bp )
@@ -11762,22 +11756,20 @@ void player::on_effect_int_change( const efftype_id &eid, int intensity, body_pa
     }
 
     morale->on_effect_int_change( eid, intensity, bp );
-    ArgsInfo lua_callback_args_info = {
-        "efftype_id:effect_changed",
-        "int:effect_intensity",
-        "body_part:effect_bodypart"
-    };
-    lua_callback( "on_effect_int_change", lua_callback_args_info, eid, intensity, bp );
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( CallbackArgument( "effect_changed", eid.str() ) );
+    lua_callback_args_info.emplace_back( CallbackArgument( "effect_intensity", intensity ) );
+    //lua_callback_args_info.emplace_back( CallbackArgument( "effect_bodypart", bp ) );
+    lua_callback( "on_effect_int_change", lua_callback_args_info );
 }
 
 void player::on_mission_assignment( mission &new_mission )
 {
     active_missions.push_back( &new_mission );
     set_active_mission( new_mission );
-    ArgsInfo lua_callback_args_info = {
-        "mission:mission_assigned"
-    };
-    lua_callback( "on_mission_assignment", lua_callback_args_info, new_mission );
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( CallbackArgument( "mission_assigned", new_mission.get_id() ) );
+    lua_callback( "on_mission_assignment", lua_callback_args_info );
 }
 
 void player::on_mission_finished( mission &cur_mission )
@@ -11802,10 +11794,9 @@ void player::on_mission_finished( mission &cur_mission )
             active_mission = active_missions.front();
         }
     }
-    ArgsInfo lua_callback_args_info = {
-        "mission:mission_finished"
-    };
-    lua_callback( "on_mission_finished", lua_callback_args_info, cur_mission );
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( CallbackArgument( "mission_finished", cur_mission.get_id() ) );
+    lua_callback( "on_mission_finished", lua_callback_args_info );
 }
 
 const targeting_data &player::get_targeting_data() {

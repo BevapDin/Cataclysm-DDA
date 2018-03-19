@@ -3,10 +3,89 @@
 #define CATALUA_H
 
 #include "int_id.h"
+#include "enums.h"
 
 #include <string>
 #include <sstream>
 #include <vector>
+#include <list>
+
+/**
+ * Class that contains callback argument name and argument value (in different types).
+ */
+class CallbackArgument
+{
+    private:
+        std::string name;
+        std::string type;
+        int value_integer;
+        double value_double;
+        float value_float;
+        std::string value_string;
+        tripoint value_tripoint;
+        const int *value_pointer;
+    public:
+        CallbackArgument( std::string arg_name, int arg_value ) {
+            name = arg_name;
+            type = "integer";
+            value_integer = arg_value;
+        };
+        CallbackArgument( std::string arg_name, double arg_value ) {
+            name = arg_name;
+            type = "double";
+            value_double = arg_value;
+        };
+        CallbackArgument( std::string arg_name, float arg_value ) {
+            name = arg_name;
+            type = "float";
+            value_float = arg_value;
+        };
+        CallbackArgument( std::string arg_name, std::string arg_value ) {
+            name = arg_name;
+            type = "string";
+            value_string = arg_value;
+        };
+        CallbackArgument( std::string arg_name, tripoint arg_value ) {
+            name = arg_name;
+            type = "tripoint";
+            value_tripoint = arg_value;
+        };
+        CallbackArgument( std::string arg_name, const int *arg_value ) {
+            name = arg_name;
+            type = "pointer";
+            value_pointer = arg_value;
+
+        };
+        std::string GetName() {
+            return name;
+        }
+        std::string GetType() {
+            return type;
+        }
+        int GetValueInt() {
+            return value_integer;
+        }
+        int GetValueDouble() {
+            return value_double;
+        }
+        int GetValueFloat() {
+            return value_float;
+        }
+        std::string GetValueString() {
+            return value_string;
+        }
+        tripoint GetValueTripoint() {
+            return value_tripoint;
+        }
+        int GetValuePointer() {
+            return *value_pointer;
+        }
+};
+
+/**
+ * Vector that contains several callback arguments.
+ */
+typedef std::list<CallbackArgument> CallbackArgumentContainer;
 
 class map;
 class monster;
@@ -36,15 +115,10 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &md, int t
 void lua_callback( const char *callback_name );
 
 /**
- * Vector that contains argument name and type in comma-separated string.
- */
-typedef std::vector<std::string> ArgsInfo;
-
-/**
  * Execute a callback that can be overridden by all mods,
  * storing provided callback arguments in _G.
  */
-void lua_callback( const char *callback_name, ArgsInfo callback_args_info, ... );
+void lua_callback( const char *callback_name, CallbackArgumentContainer callback_args );
 
 /**
  * Load the main file of a lua mod.
