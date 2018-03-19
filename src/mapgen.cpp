@@ -207,11 +207,13 @@ void mapgen_function_builtin::generate( map *m, const oter_id &terrain_type, con
 {
     (*fptr)( m, terrain_type, dat, t, d );
 
+    tripoint terrain_tripoint;
     ArgsInfo lua_callback_args_info = {
         "string:mapgen_generator_type",
-        "string:mapgen_terrain_type_id"
+        "oter_id:mapgen_terrain_type_id",
+        "tripoint:mapgen_terrain_coordinates"
     };
-    lua_callback( "on_mapgen_finished", lua_callback_args_info, "builtin", terrain_type.id() );
+    lua_callback( "on_mapgen_finished", lua_callback_args_info, "builtin", terrain_type, terrain_tripoint );
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1942,11 +1944,13 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
         mapgen_rotate(m, terrain_type, false );
     }
 
+    tripoint terrain_tripoint;
     ArgsInfo lua_callback_args_info = {
         "string:mapgen_generator_type",
-        "string:mapgen_terrain_type_id"
+        "oter_id:mapgen_terrain_type_id",
+        "tripoint:mapgen_terrain_coordinates"
     };
-    lua_callback( "on_mapgen_finished", lua_callback_args_info, "json", terrain_type.id() );
+    lua_callback( "on_mapgen_finished", lua_callback_args_info, "json", terrain_type, terrain_tripoint );
 }
 
 void mapgen_function_json_nested::nest( const mapgendata &dat, int offset_x, int offset_y, float density ) const
@@ -2023,12 +2027,14 @@ int lua_mapgen( map *m, const oter_id &id, const mapgendata &md, int t, float d,
 void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &dat, int t, float d ) {
     lua_mapgen( m, terrain_type, dat, t, d, scr );
 
+    tripoint terrain_tripoint;
     // possible callback args: mapgen_generator_type: builtin/json/lua, terrain_type (i.e. house_north)
     ArgsInfo lua_callback_args_info = {
         "string:mapgen_generator_type",
-        "string:mapgen_terrain_type_id"
+        "oter_id:mapgen_terrain_type_id",
+        "tripoint:mapgen_terrain_coordinates"
     };
-    lua_callback( "on_mapgen_finished", lua_callback_args_info, "lua", terrain_type.id() );
+    lua_callback( "on_mapgen_finished", lua_callback_args_info, "lua", terrain_type, terrain_tripoint );
 }
 
 /////////////

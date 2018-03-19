@@ -135,6 +135,7 @@ MOD.DisplayCallbackMessages = function(s)
 
     "mapgen_generator_type",
     "mapgen_terrain_type_id",
+    "mapgen_terrain_coordinates",
     "skill_increased_source",
     "skill_increased_id",
     "skill_increased_level",

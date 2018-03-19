@@ -836,6 +836,7 @@ void lua_callback_cleanup()
     lua_delete_global( "callback_arg_count" );
     lua_delete_global( "mapgen_generator_type" );
     lua_delete_global( "mapgen_terrain_type_id" );
+    lua_delete_global( "mapgen_terrain_coordinates" );
     lua_delete_global( "skill_increased_source" );
     lua_delete_global( "skill_increased_id" );
     lua_delete_global( "skill_increased_level" );
@@ -906,6 +907,14 @@ void lua_callback( const char *callback_name, ArgsInfo callback_args_info, ... )
         } else if( strcmp( callback_arg_type, "item" ) == 0 ){
             LuaReference<item>::push( L, va_arg( callback_arg, item ) );
         /*
+        } else if( strcmp( callback_arg_type, "oter_id" ) == 0 ){
+            LuaReference<item>::push( L, va_arg( callback_arg, oter_id ) );
+        } else if( strcmp( callback_arg_type, "tripoint" ) == 0 ){
+            LuaReference<item>::push( L, va_arg( callback_arg, tripoint ) );
+        } else if( strcmp( callback_arg_type, "weather_type" ) == 0 ){
+            LuaReference<item>::push( L, va_arg( callback_arg, weather_type ) );
+        } else if( strcmp( callback_arg_type, "skill_id" ) == 0 ){
+            LuaReference<item>::push( L, va_arg( callback_arg, skill_id ) );
         } else if( strcmp( callback_arg_type, "trait_id" ) == 0 ){
             LuaReference<item>::push( L, va_arg( callback_arg, trait_id ) );
         } else if( strcmp( callback_arg_type, "efftype_id" ) == 0 ){
