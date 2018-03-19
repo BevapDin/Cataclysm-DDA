@@ -1,6 +1,6 @@
 local log = {
 
-  output_path = "./dda-lua-test-callback.log",
+  output_path = "./config/dda-lua-test-callback.log",
   output_enabled = false,
   output_clear = false,
   datetime_format= "%Y-%m-%d %H:%M:%S"

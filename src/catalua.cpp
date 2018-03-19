@@ -886,12 +886,22 @@ void lua_callback( const char *callback_name, CallbackArgumentContainer callback
     lua_setglobal( L, "callback_arg_count" );
 
     for( CallbackArgument callback_arg : callback_args ) {
-        std::string callback_arg_name = callback_arg.GetName();
-        lua_setglobal( L, callback_arg_name.c_str() );
         std::string callback_arg_type = callback_arg.GetType();
         if( callback_arg_type == "string" ) {
              lua_pushstring( L, callback_arg.GetValueString().c_str() );
+        } else if ( callback_arg_type == "integer" ) {
+             lua_pushinteger(L, callback_arg.GetValueInt());
+        } else if ( callback_arg_type == "double" ) {
+             lua_pushnumber(L, callback_arg.GetValueDouble());
+        } else if ( callback_arg_type == "float" ) {
+             lua_pushnumber(L, callback_arg.GetValueFloat());
+        } else if ( callback_arg_type == "tripoint" ) {
+             LuaValue<tripoint>::push_reg( L, callback_arg.GetValueTripoint() );
+        } else {
+             lua_pushnil( L );
         }
+        std::string callback_arg_name = callback_arg.GetName();
+        lua_setglobal( L, callback_arg_name.c_str() );
     }
 
     lua_callback_savelast( callback_name );

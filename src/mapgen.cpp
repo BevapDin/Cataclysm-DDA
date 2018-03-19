@@ -211,7 +211,7 @@ void mapgen_function_builtin::generate( map *m, const oter_id &terrain_type, con
     CallbackArgumentContainer lua_callback_args_info;
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_generator_type", "builtin" ) );
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_terrain_type_id",
-                                         terrain_type.id().id() ) );
+                                         terrain_type.id().str() ) );
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_terrain_coordinates",
                                          terrain_tripoint ) );
     lua_callback( "on_mapgen_finished", lua_callback_args_info );
@@ -1949,7 +1949,7 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
     CallbackArgumentContainer lua_callback_args_info;
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_generator_type", "json" ) );
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_terrain_type_id",
-                                         terrain_type.id().id() ) );
+                                         terrain_type.id().str() ) );
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_terrain_coordinates",
                                          terrain_tripoint ) );
     lua_callback( "on_mapgen_finished", lua_callback_args_info );
@@ -2033,7 +2033,7 @@ void mapgen_function_lua::generate(map *m, const oter_id &terrain_type, const ma
     CallbackArgumentContainer lua_callback_args_info;
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_generator_type", "lua" ) );
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_terrain_type_id",
-                                         terrain_type.id().id() ) );
+                                         terrain_type.id().str() ) );
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_terrain_coordinates",
                                          terrain_tripoint ) );
     lua_callback( "on_mapgen_finished", lua_callback_args_info );
