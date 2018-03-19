@@ -1727,11 +1727,10 @@ void game::update_weather()
         //@todo: predict when the weather changes and use that time.
         nextweather = calendar::turn + 50_turns;
         if( weather != old_weather ){
-            ArgsInfo lua_callback_args_info = {
-                "weather_type:weather_new",
-                "weather_type:weather_old"
-            };
-            lua_callback( "on_weather_changed", lua_callback_args_info, weather, old_weather );
+            CallbackArgumentContainer lua_callback_args_info;
+            lua_callback_args_info.emplace_back(CallbackArgument("weather_new", weather_data( weather ).name ));
+            lua_callback_args_info.emplace_back(CallbackArgument("weather_old", weather_data( old_weather ).name ));
+            lua_callback( "on_weather_changed", lua_callback_args_info );
         }
         if (weather != old_weather && weather_data(weather).dangerous &&
             get_levz() >= 0 && m.is_outside(u.pos())

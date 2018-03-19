@@ -868,11 +868,11 @@ void lua_callback_savelast( const char *callback_name )
 
 void lua_callback( const char *callback_name )
 {
-    ArgsInfo callback_args_info;
-    lua_callback( callback_name, callback_args_info );
+    CallbackArgumentContainer callback_args;
+    lua_callback( callback_name, callback_args );
 }
 
-void lua_callback( const char *callback_name, ArgsInfo callback_args_info, ... )
+void lua_callback( const char *callback_name, CallbackArgumentContainer callback_args )
 {
     if( lua_state == nullptr ) {
         return;
@@ -880,62 +880,19 @@ void lua_callback( const char *callback_name, ArgsInfo callback_args_info, ... )
     lua_State *L = lua_state;
 
     lua_callback_cleanup();
-    int callback_arg_count = callback_args_info.size();
 
+    int callback_arg_count = callback_args.size();
     lua_pushnumber( L, callback_arg_count );
     lua_setglobal( L, "callback_arg_count" );
 
-    va_list callback_arg;
-    va_start( callback_arg, callback_args_info );
-    for( int i = 0; i < callback_arg_count; i++ ){
-        std::vector<std::string> callback_args_info_split;
-        wildcard_split( callback_args_info[i], ':', callback_args_info_split );
-
-        const char *callback_arg_type = callback_args_info_split[0].c_str();
-        const char *callback_arg_name = callback_args_info_split[1].c_str();
-
-        if( strcmp( callback_arg_type, "string" ) == 0 ){
-            lua_pushstring( L, va_arg( callback_arg, const char* ) );
-        } else if( strcmp( callback_arg_type, "int" ) == 0 ){
-            lua_pushnumber( L, va_arg( callback_arg, int ) );
-        } else if( strcmp( callback_arg_type, "number" ) == 0 ){
-            lua_pushnumber( L, va_arg( callback_arg, double ) );
-        } else if( strcmp( callback_arg_type, "float" ) == 0 ){
-            lua_pushnumber( L, va_arg( callback_arg, double ) );
-        } else if( strcmp( callback_arg_type, "double" ) == 0 ){
-            lua_pushnumber( L, va_arg( callback_arg, double ) );
-        } else if( strcmp( callback_arg_type, "item" ) == 0 ){
-            LuaReference<item>::push( L, va_arg( callback_arg, item ) );
-        /*
-        } else if( strcmp( callback_arg_type, "oter_id" ) == 0 ){
-            LuaReference<item>::push( L, va_arg( callback_arg, oter_id ) );
-        } else if( strcmp( callback_arg_type, "tripoint" ) == 0 ){
-            LuaReference<item>::push( L, va_arg( callback_arg, tripoint ) );
-        } else if( strcmp( callback_arg_type, "weather_type" ) == 0 ){
-            LuaReference<item>::push( L, va_arg( callback_arg, weather_type ) );
-        } else if( strcmp( callback_arg_type, "skill_id" ) == 0 ){
-            LuaReference<item>::push( L, va_arg( callback_arg, skill_id ) );
-        } else if( strcmp( callback_arg_type, "trait_id" ) == 0 ){
-            LuaReference<item>::push( L, va_arg( callback_arg, trait_id ) );
-        } else if( strcmp( callback_arg_type, "efftype_id" ) == 0 ){
-            LuaValue<efftype_id>::push( L, va_arg( callback_arg, efftype_id ) );
-        } else if( strcmp( callback_arg_type, "body_part" ) == 0 ){
-            va_arg( callback_arg, body_part );
-            lua_pushnil( L );
-        } else if( strcmp( callback_arg_type, "mission" ) == 0 ){
-            va_arg( callback_arg, mission );
-            lua_pushnil( L );
-        } else {
-            //va_arg(); // only strings or int or other known types!
-            lua_pushnil( L );
-        */
+    for( CallbackArgument callback_arg : callback_args ) {
+        std::string callback_arg_name = callback_arg.GetName();
+        lua_setglobal( L, callback_arg_name.c_str() );
+        std::string callback_arg_type = callback_arg.GetType();
+        if( callback_arg_type == "string" ) {
+             lua_pushstring( L, callback_arg.GetValueString().c_str() );
         }
-
-        lua_setglobal( L, callback_arg_name );
-
     }
-
-    va_end( callback_arg );
 
     lua_callback_savelast( callback_name );
     call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
