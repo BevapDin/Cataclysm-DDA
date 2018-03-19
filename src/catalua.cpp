@@ -1326,6 +1326,14 @@ void lua_loadmod( std::string, std::string )
 void game::init_lua()
 {
 }
+
+void lua_callback( const char*, CallbackArgumentContainer )
+{
+}
+void lua_callback( const char* )
+{
+}
+
 #endif
 
 void lua_callback( const char*, CallbackArgumentContainer );
