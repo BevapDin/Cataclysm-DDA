@@ -882,7 +882,7 @@ void lua_callback( const char *callback_name, CallbackArgumentContainer callback
     lua_callback_cleanup();
 
     int callback_arg_count = callback_args.size();
-    lua_pushnumber( L, callback_arg_count );
+    lua_pushinteger( L, callback_arg_count );
     lua_setglobal( L, "callback_arg_count" );
 
     for( CallbackArgument callback_arg : callback_args ) {
@@ -897,6 +897,8 @@ void lua_callback( const char *callback_name, CallbackArgumentContainer callback
              lua_pushnumber(L, callback_arg.GetValueFloat());
         } else if ( callback_arg_type == "tripoint" ) {
              LuaValue<tripoint>::push_reg( L, callback_arg.GetValueTripoint() );
+        } else if ( callback_arg_type == "item" ) {
+             LuaValue<item>::push_reg( L, callback_arg.GetValueItem() );
         } else {
              lua_pushnil( L );
         }

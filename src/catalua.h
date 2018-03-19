@@ -4,6 +4,7 @@
 
 #include "int_id.h"
 #include "enums.h"
+#include "item.h"
 
 #include <string>
 #include <sstream>
@@ -23,6 +24,7 @@ class CallbackArgument
         float value_float;
         std::string value_string;
         tripoint value_tripoint;
+        item value_item;
         const int *value_pointer;
     public:
         CallbackArgument( std::string arg_name, int arg_value ) {
@@ -50,6 +52,11 @@ class CallbackArgument
             type = "tripoint";
             value_tripoint = arg_value;
         };
+        CallbackArgument( std::string arg_name, item arg_value ) {
+            name = arg_name;
+            type = "item";
+            value_item = arg_value;
+        };
         CallbackArgument( std::string arg_name, const int *arg_value ) {
             name = arg_name;
             type = "pointer";
@@ -76,6 +83,9 @@ class CallbackArgument
         }
         tripoint GetValueTripoint() {
             return value_tripoint;
+        }
+        item GetValueItem() {
+            return value_item;
         }
         int GetValuePointer() {
             return *value_pointer;

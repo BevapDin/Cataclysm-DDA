@@ -11734,7 +11734,7 @@ void player::on_item_wear( const item &it )
 {
     morale->on_item_wear( it );
     CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( CallbackArgument( "item_last_worn", it.display_name() ) );
+    lua_callback_args_info.emplace_back( CallbackArgument( "item_last_worn", it ) );
     lua_callback( "on_item_wear", lua_callback_args_info );
 }
 
@@ -11742,7 +11742,7 @@ void player::on_item_takeoff( const item &it )
 {
     morale->on_item_takeoff( it );
     CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( CallbackArgument( "item_last_taken_off", it.display_name() ) );
+    lua_callback_args_info.emplace_back( CallbackArgument( "item_last_taken_off", it ) );
     lua_callback( "on_item_takeoff", lua_callback_args_info );
 }
 
