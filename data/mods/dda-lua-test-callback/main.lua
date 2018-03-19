@@ -7,13 +7,22 @@ local MOD = {
 
 mods[MOD.id] = MOD
 
-function MOD.on_game_loaded() 
+MOD.MessageWithLog = function( s )
+
+    LOG.message( s )
+    if (game.add_msg) then
+      game.add_msg( s )
+    end
+
+end
+
+MOD.on_game_loaded = function() 
 
   MOD.DisplayCallbackMessages("on_game_loaded")
 
 end
 
-function MOD.on_savegame_loaded()
+MOD.on_savegame_loaded = function()
 
   MOD.DisplayCallbackMessages("on_savegame_loaded")
 
@@ -27,153 +36,159 @@ function MOD.on_new_player_created()
 end
 ]]--
 
-function MOD.on_skill_increased()
+MOD.on_skill_increased = function()
 
   MOD.DisplayCallbackMessages("on_skill_increased")
 
 end
 
-function MOD.on_turn_passed()
+MOD.on_turn_passed = function()
 
   MOD.DisplayCallbackMessages("on_turn_passed")
 
 end
 
-function MOD.on_second_passed()
+MOD.on_second_passed = function()
 
   MOD.DisplayCallbackMessages("on_second_passed")
 
 end
 
-function MOD.on_minute_passed()
+MOD.on_minute_passed = function()
 
   MOD.DisplayCallbackMessages("on_minute_passed")
 
 end
 
-function MOD.on_hour_passed()
+MOD.on_hour_passed = function()
 
   MOD.DisplayCallbackMessages("on_hour_passed")
 
 end
 
-function MOD.on_day_passed()
+MOD.on_day_passed = function()
 
   MOD.DisplayCallbackMessages("on_day_passed")
 
 end
 
-function MOD.on_year_passed()
+MOD.on_year_passed = function()
 
   MOD.DisplayCallbackMessages("on_year_passed")
 
 end
 
-function MOD.on_mutation_gain()
+MOD.on_mutation_gain = function()
 
   MOD.DisplayCallbackMessages("on_mutation_gain")
 
 end
 
-function MOD.on_mutation_loss()
+MOD.on_mutation_loss = function()
 
   MOD.DisplayCallbackMessages("on_mutation_loss")
 
 end
 
-function MOD.on_stat_change()
+MOD.on_stat_change = function()
 
   MOD.DisplayCallbackMessages("on_stat_change")
 
 end
 
-function MOD.on_item_wear()
+MOD.on_item_wear = function()
 
   MOD.DisplayCallbackMessages("on_item_wear")
 
 end
 
-function MOD.on_item_takeoff()
+MOD.on_item_takeoff = function()
 
   MOD.DisplayCallbackMessages("on_item_takeoff")
 
 end
 
-function MOD.on_effect_int_changes()
+MOD.on_effect_int_changes = function()
 
   MOD.DisplayCallbackMessages("on_effect_int_change")
 
 end
 
-function MOD.on_mission_assignment()
+MOD.on_mission_assignment = function()
 
   MOD.DisplayCallbackMessages("on_mission_assignment")
 
 end
 
-function MOD.on_mission_finished()
+MOD.on_mission_finished = function()
 
   MOD.DisplayCallbackMessages("on_mission_finished")
 
 end
 
-function MOD.on_mapgen_finished() 
+MOD.on_mapgen_finished = function() 
 
   MOD.DisplayCallbackMessages("on_mapgen_finished")
 
 end
 
-function MOD.on_weather_changed()
+MOD.on_weather_changed = function()
 
   MOD.DisplayCallbackMessages("on_weather_changed")
+
+end
+
+MOD.lua_put_on = function(item)
+
+  MOD.MessageWithLog("LUA:You put on your "..tostring(item:display_name()))
+
+end
+
+MOD.lua_put_off = function(item)
+
+  MOD.MessageWithLog("LUA:You take off your "..tostring(item:display_name()))
 
 end
 
 MOD.DisplayCallbackMessages = function(s)
 
   local callback_args = {
+    { "mapgen_generator_type", nil },
+    { "mapgen_terrain_type_id", nil },
+    { "mapgen_terrain_coordinates", nil },
+    { "skill_increased_source", nil },
+    { "skill_increased_id", nil },
+    { "skill_increased_level", nil },
+    { "mutation_gained", nil },
+    { "mutation_lost", nil },
+    { "stat_changed", nil },
+    { "stat_value", nil },
+    { "item_last_worn", MOD.lua_put_on },
+    { "item_last_taken_off", MOD.lua_put_off },
+    { "effect_changed", nil },
+    { "effect_intensity", nil },
+    { "effect_bodypart", nil },
+    { "mission_finished", nil },
+    { "mission_assigned", nil },
+    { "weather_new", nil },
+    { "weather_old", nil }
+  }
 
-    "mapgen_generator_type",
-    "mapgen_terrain_type_id",
-    "mapgen_terrain_coordinates",
-    "skill_increased_source",
-    "skill_increased_id",
-    "skill_increased_level",
-    "mutation_gained",
-    "mutation_lost",
-    "stat_changed",
-    "stat_value",
-    "item_last_worn",
-    "item_last_taken_off",
-    "effect_changed",
-    "effect_intensity",
-    "effect_bodypart",
-    "mission_finished",
-    "mission_assigned",
-    "weather_new",
-    "weather_old"
-
-  }  
-
-  if (game.add_msg) then
-    MOD.MessageWithLog ("<color_cyan>     function: </color><color_ltcyan>"..tostring(s).."</color>")
-    MOD.MessageWithLog ("callback_last: <color_yellow>"..tostring(callback_last).."</color>")
-    MOD.MessageWithLog ("callback_arg_count: <color_red>"..tostring(callback_arg_count).."</color>")
-    for k,v in pairs(callback_args) do
-      local callback_arg = v
-      local callback_arg_value = _G[callback_arg]
-        if (callback_arg_value ~= nil) then
-          MOD.MessageWithLog (callback_arg..": <color_green>"..tostring(callback_arg_value).."</color>")
-        end  
+  MOD.MessageWithLog ("<color_cyan>     function: </color><color_ltcyan>"..tostring(s).."</color>")
+  MOD.MessageWithLog ("callback_last: <color_yellow>"..tostring(callback_last).."</color>")
+  MOD.MessageWithLog ("callback_arg_count: <color_red>"..tostring(callback_arg_count).."</color>")
+  for k,v in pairs(callback_args) do
+    local callback_arg = v[1]
+    local callback_arg_value = _G[callback_arg]
+    if (callback_arg_value ~= nil) then
+      MOD.MessageWithLog (callback_arg..": <color_green>"..tostring(callback_arg_value).."</color>")
+      local callback_arg_function = v[2]
+      if (callback_arg_function) then
+        MOD.MessageWithLog ("callback_function: <color_magenta>"..tostring(callback_arg_function).."</color>")
+        callback_arg_function(callback_arg_value)
+      end
     end
   end
-
-end
-
-MOD.MessageWithLog = function( s )
-
-    game.add_msg( s )
-    LOG.message( s )
 
 end
 
