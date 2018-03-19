@@ -147,11 +147,11 @@ void mod_manager::refresh_mod_list()
     load_mods_from( FILENAMES["moddir"] );
     load_mods_from( FILENAMES["user_moddir"] );
 
-    if( exists( cata::path( FILENAMES["mods-dev-default"] ) ) ) {
-        load_mod_info( cata::path( FILENAMES["mods-dev-default"] ) );
+    if( exists( FILENAMES["mods-dev-default"] ) ) {
+        load_mod_info( FILENAMES["mods-dev-default"] );
     }
-    if( exists( cata::path( FILENAMES["mods-user-default"] ) ) ) {
-        load_mod_info( cata::path( FILENAMES["mods-user-default"] ) );
+    if( exists( FILENAMES["mods-user-default"] ) ) {
+        load_mod_info( FILENAMES["mods-user-default"] );
     }
 
     if( set_default_mods( mod_id( "user:default" ) ) ) {

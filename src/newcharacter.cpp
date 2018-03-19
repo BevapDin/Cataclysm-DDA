@@ -2540,7 +2540,7 @@ void save_template( const player &u, const std::string &name, const points_left 
     }
 #endif
 
-    write_to_file( FILENAMES["templatedir"] + native + ".template", [&]( std::ostream & fout ) {
+    write_to_file( FILENAMES["templatedir"] / ( native + ".template" ), [&]( std::ostream & fout ) {
         JsonOut jsout( fout, true );
 
         jsout.start_array();

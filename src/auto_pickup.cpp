@@ -666,7 +666,7 @@ bool auto_pickup::save_global()
 bool auto_pickup::save( const bool bCharacter )
 {
     bChar = bCharacter;
-    auto savefile = FILENAMES["autopickup"];
+    cata::path savefile = FILENAMES["autopickup"];
 
     if( bCharacter ) {
         savefile = g->get_player_base_save_path() + ".apu.json";
@@ -697,7 +697,7 @@ void auto_pickup::load( const bool bCharacter )
 {
     bChar = bCharacter;
 
-    std::string sFile = FILENAMES["autopickup"];
+    cata::path sFile = FILENAMES["autopickup"];
     if( bCharacter ) {
         sFile = g->get_player_base_save_path() + ".apu.json";
     }
@@ -751,7 +751,7 @@ void auto_pickup::deserialize( JsonIn &jsin )
 
 bool auto_pickup::load_legacy( const bool bCharacter )
 {
-    std::string sFile = FILENAMES["legacy_autopickup2"];
+    cata::path sFile = FILENAMES["legacy_autopickup2"];
 
     if( bCharacter ) {
         sFile = g->get_player_base_save_path() + ".apu.txt";

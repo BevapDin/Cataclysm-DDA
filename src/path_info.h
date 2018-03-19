@@ -5,7 +5,12 @@
 #include <string>
 #include <map>
 
-extern std::map<std::string, std::string> FILENAMES;
+namespace cata
+{
+class path;
+} // namespace cata
+
+extern std::map<std::string, cata::path> FILENAMES;
 
 namespace PATH_INFO
 {

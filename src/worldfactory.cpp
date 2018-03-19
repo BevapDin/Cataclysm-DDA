@@ -326,7 +326,8 @@ void worldfactory::init()
     // get the master files. These determine the validity of a world
     // worlds exist by having an option file
     // create worlds
-    for( const auto &world_dir : get_directories_with( qualifiers, FILENAMES["savedir"], true ) ) {
+    for( const auto &world_dir : get_directories_with( qualifiers, FILENAMES["savedir"].native(),
+            true ) ) {
         // get the save files
         auto world_sav_files = get_files_from_path( SAVE_EXTENSION, world_dir, false );
         // the directory name is the name of the world
@@ -1528,7 +1529,7 @@ WORLDPTR worldfactory::get_world( const std::string &name )
 // Helper predicate to exclude files from deletion when resetting a world directory.
 static bool isForbidden( const std::string &candidate )
 {
-    if( candidate.find( FILENAMES["worldoptions"] ) != std::string::npos ||
+    if( candidate.find( FILENAMES["worldoptions"].native() ) != std::string::npos ||
         candidate.find( "mods.json" ) != std::string::npos ) {
         return true;
     }

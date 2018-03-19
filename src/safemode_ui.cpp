@@ -657,7 +657,7 @@ void safemode::load( const bool is_character_in )
     is_character = is_character_in;
 
     std::ifstream fin;
-    std::string file = FILENAMES["safemode"];
+    cata::path file = FILENAMES["safemode"];
     if( is_character ) {
         file = g->get_player_base_save_path() + ".sfm.json";
     }

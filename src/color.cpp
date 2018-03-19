@@ -964,7 +964,7 @@ void color_manager::show_gui()
 
 bool color_manager::save_custom()
 {
-    const auto savefile = FILENAMES["custom_colors"];
+    const cata::path savefile = FILENAMES["custom_colors"];
 
     return write_to_file_exclusive( savefile, [&]( std::ostream & fout ) {
         JsonOut jsout( fout );
@@ -974,7 +974,7 @@ bool color_manager::save_custom()
 
 void color_manager::load_custom( const std::string &sPath )
 {
-    const auto file = ( sPath.empty() ) ? FILENAMES["custom_colors"] : sPath;
+    const cata::path file = sPath.empty() ? FILENAMES["custom_colors"] : cata::path( sPath );
 
     read_from_file_optional_json( file, [this]( JsonIn & jsonin ) {
         deserialize( jsonin );

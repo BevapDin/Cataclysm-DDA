@@ -774,7 +774,7 @@ static std::vector<std::pair<std::string, std::string>> build_resource_list(
                                FILENAMES[dirname_label], true );
 
     for( auto &resource_dir : resource_dirs ) {
-        read_from_file( resource_dir + "/" + FILENAMES[filename_label], [&]( std::istream & fin ) {
+        read_from_file( resource_dir / FILENAMES[filename_label], [&]( std::istream & fin ) {
             std::string resource_name;
             std::string view_name;
             // should only have 2 values inside it, otherwise is going to only load the last 2 values
@@ -2491,7 +2491,7 @@ std::string options_manager::migrateOptionValue( const std::string &name,
 
 bool options_manager::save()
 {
-    const auto savefile = FILENAMES["options"];
+    const cata::path savefile = FILENAMES["options"];
 
     // cache to global due to heavy usage.
     trigdist = ::get_option<bool>( "CIRCLEDIST" );
@@ -2510,14 +2510,14 @@ bool options_manager::save()
 
 void options_manager::load()
 {
-    const auto file = FILENAMES["options"];
+    const cata::path file = FILENAMES["options"];
     if( !read_from_file_optional_json( file, [&]( JsonIn & jsin ) {
     deserialize( jsin );
     } ) ) {
         if( load_legacy() ) {
             if( save() ) {
-                remove( cata::path( FILENAMES["legacy_options"] ) );
-                remove( cata::path( FILENAMES["legacy_options2"] ) );
+                remove( FILENAMES["legacy_options"] );
+                remove( FILENAMES["legacy_options2"] );
             }
         }
     }

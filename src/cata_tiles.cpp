@@ -272,8 +272,8 @@ void cata_tiles::reinit_minimap()
 static void get_tile_information( std::string config_path, std::string &json_path,
                                   std::string &tileset_path )
 {
-    const std::string default_json = FILENAMES["defaulttilejson"];
-    const std::string default_tileset = FILENAMES["defaulttilepng"];
+    const cata::path default_json = FILENAMES["defaulttilejson"];
+    const cata::path default_tileset = FILENAMES["defaulttilepng"];
 
     // Get JSON and TILESET vars from config
     const auto reader = [&]( std::istream & fin ) {
@@ -582,7 +582,7 @@ void tileset_loader::load( const std::string &tileset_id, const bool precheck )
     if( tset_iter != TILESETS.end() ) {
         tileset_root = tset_iter->second;
         dbg( D_INFO ) << '"' << tileset_id << '"' << " tileset: found config file path: " << tileset_root;
-        get_tile_information( tileset_root + '/' + FILENAMES["tileset-conf"],
+        get_tile_information( tileset_root / FILENAMES["tileset-conf"],
                               json_conf, tileset_path );
         dbg( D_INFO ) << "Current tileset is: " << tileset_id;
     } else {

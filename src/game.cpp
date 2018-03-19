@@ -2584,7 +2584,7 @@ void game::death_screen()
 void game::move_save_to_graveyard()
 {
     const std::string &save_dir      = get_world_base_save_path();
-    const std::string &graveyard_dir = FILENAMES["graveyarddir"];
+    const cata::path &graveyard_dir = FILENAMES["graveyarddir"];
     const std::string &prefix        = base64_encode( u.name ) + ".";
 
     if( !assure_dir_exist( cata::path( graveyard_dir ) ) ) {
@@ -2892,9 +2892,9 @@ std::vector<std::string> game::list_active_characters()
  */
 void game::write_memorial_file( std::string sLastWords )
 {
-    const std::string &memorial_dir = FILENAMES["memorialdir"];
-    const std::string &memorial_active_world_dir = memorial_dir + utf8_to_native(
-                world_generator->active_world->world_name ) + "/";
+    const cata::path &memorial_dir = FILENAMES["memorialdir"];
+    const cata::path &memorial_active_world_dir = memorial_dir / utf8_to_native(
+                world_generator->active_world->world_name );
 
     //Check if both dirs exist. Nested assure_dir_exist fails if the first dir of the nested dir does not exist.
     if( !assure_dir_exist( cata::path( memorial_dir ) ) ) {

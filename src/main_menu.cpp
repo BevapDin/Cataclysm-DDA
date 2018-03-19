@@ -355,17 +355,17 @@ bool main_menu::opening_screen()
     init_strings();
     print_menu( w_open, 0, iMenuOffsetX, iMenuOffsetY );
 
-    if( !assure_dir_exist( cata::path( FILENAMES["config_dir"] ) ) ) {
+    if( !assure_dir_exist( FILENAMES["config_dir"] ) ) {
         popup( _( "Unable to make config directory. Check permissions." ) );
         return false;
     }
 
-    if( !assure_dir_exist( cata::path( FILENAMES["savedir"] ) ) ) {
+    if( !assure_dir_exist( FILENAMES["savedir"] ) ) {
         popup( _( "Unable to make save directory. Check permissions." ) );
         return false;
     }
 
-    if( !assure_dir_exist( cata::path( FILENAMES["templatedir"] ) ) ) {
+    if( !assure_dir_exist( FILENAMES["templatedir"] ) ) {
         popup( _( "Unable to make templates directory. Check permissions." ) );
         return false;
     }
@@ -767,7 +767,8 @@ bool main_menu::new_character_tab()
             } else if( !templates.empty() && action == "DELETE_TEMPLATE" ) {
                 if( query_yn( _( "Are you sure you want to delete %s?" ),
                               templates[sel3].c_str() ) ) {
-                    const auto path = FILENAMES["templatedir"] + utf8_to_native( templates[sel3] ) + ".template";
+                    const cata::path path = FILENAMES["templatedir"] / ( utf8_to_native( templates[sel3] ) +
+                                            ".template" );
                     if( std::remove( path.c_str() ) != 0 ) {
                         popup( _( "Sorry, something went wrong." ) );
                     } else {

@@ -112,17 +112,17 @@ void input_manager::init()
     try {
         load( FILENAMES["keybindings"], false );
     } catch( const JsonError &err ) {
-        throw std::runtime_error( FILENAMES["keybindings"] + ": " + err.what() );
+        throw std::runtime_error( FILENAMES["keybindings"].native() + ": " + err.what() );
     }
     try {
         load( FILENAMES["keybindings_vehicle"], false );
     } catch( const JsonError &err ) {
-        throw std::runtime_error( FILENAMES["keybindings_vehicle"] + ": " + err.what() );
+        throw std::runtime_error( FILENAMES["keybindings_vehicle"].native() + ": " + err.what() );
     }
     try {
         load( FILENAMES["user_keybindings"], true );
     } catch( const JsonError &err ) {
-        throw std::runtime_error( FILENAMES["user_keybindings"] + ": " + err.what() );
+        throw std::runtime_error( FILENAMES["user_keybindings"].native() + ": " + err.what() );
     }
 
     if( keymap_file_loaded_from.empty() || ( keymap.empty() && unbound_keymap.empty() ) ) {
