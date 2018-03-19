@@ -25,7 +25,6 @@ class CallbackArgument
         std::string value_string;
         tripoint value_tripoint;
         item value_item;
-        const int *value_pointer;
     public:
         CallbackArgument( std::string arg_name, int arg_value ) {
             name = arg_name;
@@ -57,12 +56,7 @@ class CallbackArgument
             type = "item";
             value_item = arg_value;
         };
-        CallbackArgument( std::string arg_name, const int *arg_value ) {
-            name = arg_name;
-            type = "pointer";
-            value_pointer = arg_value;
 
-        };
         std::string GetName() {
             return name;
         }
@@ -86,9 +80,6 @@ class CallbackArgument
         }
         item GetValueItem() {
             return value_item;
-        }
-        int GetValuePointer() {
-            return *value_pointer;
         }
 };
 
@@ -120,15 +111,15 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &md, int t
                 const std::string &scr );
 
 /**
- * Execute a callback that can be overridden by all mods.
- */
-void lua_callback( const char *callback_name );
-
-/**
  * Execute a callback that can be overridden by all mods,
  * storing provided callback arguments in _G.
  */
 void lua_callback( const char *callback_name, CallbackArgumentContainer callback_args );
+
+/**
+ * Execute a callback that can be overridden by all mods.
+ */
+void lua_callback( const char *callback_name );
 
 /**
  * Load the main file of a lua mod.

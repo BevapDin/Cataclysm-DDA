@@ -47,6 +47,9 @@ extern "C" {
 #define LUA_OK 0
 #endif
 
+//template void lua_callback( const char*, CallbackArgumentContainer );
+//template void lua_callback( const char* );
+
 using item_stack_iterator = std::list<item>::iterator;
 using volume = units::volume;
 using mass = units::mass;
@@ -866,12 +869,6 @@ void lua_callback_savelast( const char *callback_name )
     lua_setglobal( L, "callback_last" );
 }
 
-void lua_callback( const char *callback_name )
-{
-    CallbackArgumentContainer callback_args;
-    lua_callback( callback_name, callback_args );
-}
-
 void lua_callback( const char *callback_name, CallbackArgumentContainer callback_args )
 {
     if( lua_state == nullptr ) {
@@ -908,6 +905,12 @@ void lua_callback( const char *callback_name, CallbackArgumentContainer callback
 
     lua_callback_savelast( callback_name );
     call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
+}
+
+void lua_callback( const char *callback_name )
+{
+    CallbackArgumentContainer callback_args;
+    lua_callback( callback_name, callback_args );
 }
 
 //
