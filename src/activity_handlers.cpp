@@ -1349,13 +1349,11 @@ void activity_handlers::train_finish( player_activity *act, player *p )
                                 pgettext("memorial_female", "Reached skill level %1$d in %2$s."),
                                 new_skill_level, skill_name );
         }
-
-        ArgsInfo lua_callback_args_info = {
-            "string:skill_increased_source",
-            "skill_id:skill_increased_id",
-            "int:skill_increased_level"
-        };
-        lua_callback( "on_skill_increased", lua_callback_args_info, "training", sk, new_skill_level );
+        CallbackArgumentContainer lua_callback_args_info;
+        lua_callback_args_info.emplace_back( CallbackArgument( "skill_increased_source", "training" ) );
+        lua_callback_args_info.emplace_back( CallbackArgument( "skill_increased_id", sk.str() ) );
+        lua_callback_args_info.emplace_back( CallbackArgument( "skill_increased_level", new_skill_level ) );
+        lua_callback( "on_skill_increased", lua_callback_args_info );
         act->set_to_null();
         return;
     }
