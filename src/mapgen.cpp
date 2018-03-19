@@ -207,7 +207,7 @@ void mapgen_function_builtin::generate( map *m, const oter_id &terrain_type, con
 {
     (*fptr)( m, terrain_type, dat, t, d );
 
-    tripoint terrain_tripoint;
+    tripoint terrain_tripoint = sm_to_omt_copy( m->get_abs_sub() );
     CallbackArgumentContainer lua_callback_args_info;
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_generator_type", "builtin" ) );
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_terrain_type_id",
@@ -1945,7 +1945,7 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
         mapgen_rotate(m, terrain_type, false );
     }
 
-    tripoint terrain_tripoint;
+    tripoint terrain_tripoint = sm_to_omt_copy( m->get_abs_sub() );
     CallbackArgumentContainer lua_callback_args_info;
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_generator_type", "json" ) );
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_terrain_type_id",
@@ -2029,7 +2029,7 @@ int lua_mapgen( map *m, const oter_id &id, const mapgendata &md, int t, float d,
 void mapgen_function_lua::generate(map *m, const oter_id &terrain_type, const mapgendata &dat, int t, float d) {
     lua_mapgen(m, terrain_type, dat, t, d, scr);
 
-    tripoint terrain_tripoint;
+    tripoint terrain_tripoint = sm_to_omt_copy( m->get_abs_sub() );
     CallbackArgumentContainer lua_callback_args_info;
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_generator_type", "lua" ) );
     lua_callback_args_info.emplace_back( CallbackArgument( "mapgen_terrain_type_id",

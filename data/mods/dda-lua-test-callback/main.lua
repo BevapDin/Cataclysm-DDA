@@ -138,6 +138,12 @@ MOD.on_weather_changed = function()
 
 end
 
+MOD.lua_tripoint = function(tp)
+
+  MOD.MessageWithLog("LUA:tripoint is ["..tostring(tp.x)..";"..tostring(tp.y)..";"..tostring(tp.z).."]")
+
+end
+
 MOD.lua_put_on = function(item)
 
   MOD.MessageWithLog("LUA:You put on your "..tostring(item:display_name()))
@@ -155,7 +161,7 @@ MOD.DisplayCallbackMessages = function(s)
   local callback_args = {
     { "mapgen_generator_type", nil },
     { "mapgen_terrain_type_id", nil },
-    { "mapgen_terrain_coordinates", nil },
+    { "mapgen_terrain_coordinates", MOD.lua_tripoint },
     { "skill_increased_source", nil },
     { "skill_increased_id", nil },
     { "skill_increased_level", nil },

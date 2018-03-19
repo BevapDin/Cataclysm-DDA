@@ -1319,13 +1319,6 @@ int call_lua( std::string ) {
 }
 // Implemented in mapgen.cpp:
 // int lua_mapgen( map *, std::string, mapgendata, int, float, const std::string & )
-void lua_callback( const char * )
-{
-}
-
-template<typename ... Args> void lua_callback( const char *, Args...  )
-{
-}
 
 void lua_loadmod( std::string, std::string )
 {
