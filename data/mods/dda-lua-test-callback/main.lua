@@ -28,13 +28,11 @@ MOD.on_savegame_loaded = function()
 
 end
 
---[[
 function MOD.on_new_player_created()
 
   MOD.DisplayCallbackMessages("on_new_player_created")
 
 end
-]]--
 
 MOD.on_skill_increased = function()
 
@@ -156,7 +154,7 @@ MOD.lua_put_off = function(item)
 
 end
 
-MOD.DisplayCallbackMessages = function(s)
+MOD.DisplayCallbackMessages = function( callback_name )
 
   local callback_args = {
     { "mapgen_generator_type", nil },
@@ -180,8 +178,9 @@ MOD.DisplayCallbackMessages = function(s)
     { "weather_old", nil }
   }
 
-  MOD.MessageWithLog ("<color_cyan>     function: </color><color_ltcyan>"..tostring(s).."</color>")
-  MOD.MessageWithLog ("callback_last: <color_yellow>"..tostring(callback_last).."</color>")
+  MOD.MessageWithLog ("     callback_name: <color_ltcyan>"..tostring(callback_name).."</color>")
+  MOD.MessageWithLog ("     callback_last: <color_yellow>"..tostring(callback_last).."</color>")
+  MOD.MessageWithLog ("callback_arg_count: <color_red>"..tostring(callback_arg_count).."</color>")
   MOD.MessageWithLog ("callback_arg_count: <color_red>"..tostring(callback_arg_count).."</color>")
   for k,v in pairs(callback_args) do
     local callback_arg = v[1]
@@ -190,7 +189,7 @@ MOD.DisplayCallbackMessages = function(s)
       MOD.MessageWithLog (callback_arg..": <color_green>"..tostring(callback_arg_value).."</color>")
       local callback_arg_function = v[2]
       if (callback_arg_function) then
-        MOD.MessageWithLog ("callback_function: <color_magenta>"..tostring(callback_arg_function).."</color>")
+        MOD.MessageWithLog (" callback_function: <color_magenta>"..tostring(callback_arg_function).."</color>")
         callback_arg_function(callback_arg_value)
       end
     end
