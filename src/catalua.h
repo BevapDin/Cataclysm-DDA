@@ -87,62 +87,6 @@ class CallbackArgument
  */
 typedef std::list<CallbackArgument> CallbackArgumentContainer;
 
-/**
- * Class that contains callback argument name and argument value (in different types).
- */
-class CallbackArgument
-{
-    private:
-        std::string name;
-        std::string type;
-        int value_integer;
-        std::string value_string;
-        tripoint value_tripoint;
-        const int *value_pointer;
-    public:
-        CallbackArgument( std::string arg_name, int arg_value ) {
-            name = arg_name;
-            type = "integer";
-            value_integer = arg_value;
-        };
-        CallbackArgument( std::string arg_name, std::string arg_value ) {
-            name = arg_name;
-            type = "string";
-            value_string = arg_value;
-        };
-        CallbackArgument( std::string arg_name, tripoint arg_value ) {
-            name = arg_name;
-            type = "tripoint";
-            value_tripoint = arg_value;
-        };
-        CallbackArgument( std::string arg_name, const int *arg_value ) {
-            name = arg_name;
-            type = "pointer";
-            value_pointer = arg_value;
-
-        };
-        std::string GetName() {
-            return name;
-        }
-        std::string GetType() {
-            return type;
-        }
-        int GetValueInt() {
-            return value_integer;
-        }
-        std::string GetValueString() {
-            return value_string;
-        }
-        int GetValuePointer() {
-            return *value_pointer;
-        }
-};
-
-/**
- * Vector that contains several callback arguments.
- */
-typedef std::list<CallbackArgument> CallbackArgumentContainer;
-
 class map;
 class monster;
 struct mapgendata;
