@@ -153,10 +153,9 @@ int main( int argc, char *argv[] )
     PATH_INFO::init_user_dir( external_storage_path.c_str() );
 #else
 #if (defined USE_HOME_DIR || defined USE_XDG_DIR)
-    PATH_INFO::init_user_dir();
+    PATH_INFO::init_user_dir( cata::path( "" ) );
 #else
-    PATH_INFO::init_user_dir( "./" );
-#endif
+    PATH_INFO::init_user_dir( cata::path( "./" ) );
 #endif
     PATH_INFO::set_standard_filenames();
 
@@ -329,7 +328,7 @@ int main( int argc, char *argv[] )
                         {
                             return -1;
                         }
-                        PATH_INFO::init_user_dir( params[0] );
+                        PATH_INFO::init_user_dir( cata::path( params[0] ) );
                         PATH_INFO::set_standard_filenames();
                         return 1;
                     }

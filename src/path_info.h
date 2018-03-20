@@ -15,7 +15,7 @@ extern std::map<std::string, cata::path> FILENAMES;
 namespace PATH_INFO
 {
 void init_base_path( cata::path path );
-void init_user_dir( const char *ud = "" );
+void init_user_dir( cata::path ud );
 void update_datadir();
 void update_config_dir();
 void update_pathname( const std::string &name, const std::string &path );

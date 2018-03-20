@@ -24,33 +24,31 @@ void PATH_INFO::init_base_path( cata::path path )
     FILENAMES["base_path"] = path;
 }
 
-void PATH_INFO::init_user_dir( const char *ud )
+void PATH_INFO::init_user_dir( cata::path dir )
 {
-    std::string dir = std::string( ud );
-
-    if( dir.empty() ) {
+    if( dir.string().empty() ) {
         const char *user_dir;
 #if (defined _WIN32 || defined WINDOW)
         user_dir = getenv( "LOCALAPPDATA" );
         // On Windows userdir without dot
-        dir = std::string( user_dir ) + "/cataclysm-dda/";
+        dir = cata::path( user_dir ) / "cataclysm-dda/";
 #elif defined MACOSX
         user_dir = getenv( "HOME" );
-        dir = std::string( user_dir ) + "/Library/Application Support/Cataclysm/";
+        dir = cata::path( user_dir ) / "Library/Application Support/Cataclysm/";
 #elif (defined USE_XDG_DIR)
         if( ( user_dir = getenv( "XDG_DATA_HOME" ) ) ) {
-            dir = std::string( user_dir ) + "/cataclysm-dda/";
+            dir = cata::path( user_dir ) / "cataclysm-dda/";
         } else {
             user_dir = getenv( "HOME" );
-            dir = std::string( user_dir ) + "/.local/share/cataclysm-dda/";
+            dir = cata::path( user_dir ) / ".local/share/cataclysm-dda/";
         }
 #else
         user_dir = getenv( "HOME" );
-        dir = std::string( user_dir ) + "/.cataclysm-dda/";
+        dir = cata::path( user_dir ) / ".cataclysm-dda/";
 #endif
     }
 
-    FILENAMES["user_dir"] = cata::path( dir );
+    FILENAMES["user_dir"] = dir;
 }
 
 void PATH_INFO::update_pathname( const std::string &name, const std::string &path )
