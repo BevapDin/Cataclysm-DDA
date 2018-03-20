@@ -217,12 +217,12 @@ struct NullBuf : public std::streambuf {
 struct DebugFile {
     DebugFile();
     ~DebugFile();
-    void init( const std::string &filename );
+    void init( const cata::path &path );
     void deinit();
 
     std::ofstream &currentTime();
     std::ofstream file;
-    std::string filename;
+    cata::path path;
 };
 
 static NullBuf nullBuf;
@@ -252,19 +252,19 @@ void DebugFile::deinit()
     file.close();
 }
 
-void DebugFile::init( const std::string &filename )
+void DebugFile::init( const cata::path &path )
 {
-    this->filename = filename;
-    const std::string oldfile = filename + ".prev";
+    this->path = path;
+    const cata::path oldfile( path.string() + ".prev" );
     bool rename_failed = false;
     struct stat buffer;
-    if( stat( filename.c_str(), &buffer ) == 0 ) {
+    if( stat( path.c_str(), &buffer ) == 0 ) {
         // Continue with the old log file if it's smaller than 1 MiB
         if( buffer.st_size >= 1024 * 1024 ) {
-            rename_failed = !rename( cata::path( filename ), cata::path( oldfile ) );
+            rename_failed = !rename( path, oldfile );
         }
     }
-    file.open( filename.c_str(), std::ios::out | std::ios::app );
+    file.open( path.c_str(), std::ios::out | std::ios::app );
     file << "\n\n-----------------------------------------\n";
     currentTime() << " : Starting log.";
     if( rename_failed ) {
