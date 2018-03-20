@@ -12,17 +12,16 @@
 /** Map where we store filenames */
 std::map<std::string, cata::path> FILENAMES;
 
-void PATH_INFO::init_base_path( std::string path )
+void PATH_INFO::init_base_path( cata::path path )
 {
-    if( !path.empty() ) {
-        char ch = path.at( path.length() - 1 );
+    if( !path.string().empty() ) {
+        char ch = path.at( path.string().length() - 1 );
         if( ch != '/' && ch != '\\' ) {
-            path.push_back( '/' );
+            path = cata::path( path.string() + '/' );
         }
     }
 
-    //FILENAMES.insert(std::pair<std::string,std::string>("base_path", path));
-    FILENAMES["base_path"] = cata::path( path );
+    FILENAMES["base_path"] = path;
 }
 
 void PATH_INFO::init_user_dir( const char *ud )

@@ -138,16 +138,15 @@ int main( int argc, char *argv[] )
         external_storage_path += '/';
     }
 
-    PATH_INFO::init_base_path( external_storage_path );
+    PATH_INFO::init_base_path( cata::path( external_storage_path ) );
 #else
     // Set default file paths
 #ifdef PREFIX
 #define Q(STR) #STR
 #define QUOTE(STR) Q(STR)
-    PATH_INFO::init_base_path( std::string( QUOTE( PREFIX ) ) );
+    PATH_INFO::init_base_path( cata::path( QUOTE( PREFIX ) ) );
 #else
-    PATH_INFO::init_base_path( "" );
-#endif
+    PATH_INFO::init_base_path( cata::path( "" ) );
 #endif
 
 #ifdef __ANDROID__
@@ -256,7 +255,7 @@ int main( int argc, char *argv[] )
                         if( num_args < 1 ) {
                             return -1;
                         }
-                        PATH_INFO::init_base_path( params[0] );
+                        PATH_INFO::init_base_path( cata::path( params[0] ) );
                         PATH_INFO::set_standard_filenames();
                         return 1;
                     }
