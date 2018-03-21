@@ -11,9 +11,6 @@
 #include <vector>
 #include <list>
 
-/**
- * Class that contains callback argument name and argument value (in different types).
- */
 class CallbackArgument
 {
     private:
@@ -83,9 +80,6 @@ class CallbackArgument
         }
 };
 
-/**
- * Vector that contains several callback arguments.
- */
 typedef std::list<CallbackArgument> CallbackArgumentContainer;
 
 class map;
