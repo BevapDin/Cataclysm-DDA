@@ -48,7 +48,7 @@ class CallbackArgument
         CallbackArgument( const std::string &arg_name, double arg_value ) {
             name = arg_name;
             type = CallbackArgumentTypeNumber;
-            value_number = (float)arg_value;
+            value_number = ( float )arg_value;
         }
         CallbackArgument( const std::string &arg_name, const std::string &arg_value ) {
             name = arg_name;

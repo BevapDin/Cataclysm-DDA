@@ -824,37 +824,6 @@ int call_lua(std::string tocall)
     return err;
 }
 
-void lua_delete_global( const char* name ) {
-    lua_State *L = lua_state;
-    lua_pushnil( L );
-    lua_setglobal( L, name );
-}
-
-void lua_callback_cleanup()
-{
-    lua_delete_global( "callback_last" );
-    lua_delete_global( "callback_arg_count" );
-    lua_delete_global( "mapgen_generator_type" );
-    lua_delete_global( "mapgen_terrain_type_id" );
-    lua_delete_global( "mapgen_terrain_coordinates" );
-    lua_delete_global( "skill_increased_source" );
-    lua_delete_global( "skill_increased_id" );
-    lua_delete_global( "skill_increased_level" );
-    lua_delete_global( "mutation_gained" );
-    lua_delete_global( "mutation_lost" );
-    lua_delete_global( "stat_changed" );
-    lua_delete_global( "stat_value" );
-    lua_delete_global( "item_last_worn" );
-    lua_delete_global( "item_last_taken_off" );
-    lua_delete_global( "effect_changed" );
-    lua_delete_global( "effect_intensity" );
-    lua_delete_global( "effect_bodypart" );
-    lua_delete_global( "mission_finished" );
-    lua_delete_global( "mission_assigned" );
-    lua_delete_global( "weather_new" );
-    lua_delete_global( "weather_old" );
-}
-
 void lua_callback( const char *callback_name, const CallbackArgumentContainer &callback_args )
 {
     if( lua_state == nullptr ) {
@@ -862,12 +831,10 @@ void lua_callback( const char *callback_name, const CallbackArgumentContainer &c
     }
     lua_State *L = lua_state;
 
-    lua_callback_cleanup();
-
-    lua_pushinteger( L, callback_args.size() );
-    lua_setglobal( L, "callback_arg_count" );
-
+    lua_newtable( L );
+    int top = lua_gettop( L );
     for( auto callback_arg : callback_args ) {
+        lua_pushstring( L, callback_arg.GetName().c_str() );
         switch( callback_arg.GetType() ) {
             case CallbackArgumentTypeInteger:
                 lua_pushinteger(L, callback_arg.GetValueInteger() );
@@ -888,11 +855,9 @@ void lua_callback( const char *callback_name, const CallbackArgumentContainer &c
                 lua_pushnil( L );
                 break;
         }
-        lua_setglobal( L, callback_arg.GetName().c_str() );
+        lua_settable( L, top );
     }
-
-    lua_pushstring( L, callback_name );
-    lua_setglobal( L, "callback_last" );
+    lua_setglobal( L, "callback_data" );
 
     call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
 }

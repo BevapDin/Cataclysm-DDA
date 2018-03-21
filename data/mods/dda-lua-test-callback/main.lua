@@ -156,43 +156,27 @@ end
 
 MOD.DisplayCallbackMessages = function( callback_name )
 
-  local callback_args = {
-    { "mapgen_generator_type", nil },
-    { "mapgen_terrain_type_id", nil },
-    { "mapgen_terrain_coordinates", MOD.lua_tripoint },
-    { "skill_increased_source", nil },
-    { "skill_increased_id", nil },
-    { "skill_increased_level", nil },
-    { "mutation_gained", nil },
-    { "mutation_lost", nil },
-    { "stat_changed", nil },
-    { "stat_value", nil },
-    { "item_last_worn", MOD.lua_put_on },
-    { "item_last_taken_off", MOD.lua_put_off },
-    { "effect_changed", nil },
-    { "effect_intensity", nil },
-    { "effect_bodypart", nil },
-    { "mission_finished", nil },
-    { "mission_assigned", nil },
-    { "weather_new", nil },
-    { "weather_old", nil }
+  local callback_arg_functions = {
+    mapgen_terrain_coordinates = MOD.lua_tripoint,
+    item_last_worn = MOD.lua_put_on,
+    item_last_taken_off = MOD.lua_put_off
   }
 
-  MOD.MessageWithLog ("     callback_name: <color_ltcyan>"..tostring(callback_name).."</color>")
-  MOD.MessageWithLog ("     callback_last: <color_yellow>"..tostring(callback_last).."</color>")
-  MOD.MessageWithLog ("callback_arg_count: <color_red>"..tostring(callback_arg_count).."</color>")
-  MOD.MessageWithLog ("callback_arg_count: <color_red>"..tostring(callback_arg_count).."</color>")
-  for k,v in pairs(callback_args) do
-    local callback_arg = v[1]
-    local callback_arg_value = _G[callback_arg]
-    if (callback_arg_value ~= nil) then
-      MOD.MessageWithLog (callback_arg..": <color_green>"..tostring(callback_arg_value).."</color>")
-      local callback_arg_function = v[2]
+  MOD.MessageWithLog ("Callback name is <color_cyan>"..tostring(callback_name).."</color>")
+  local callback_data = _G["callback_data"]
+  local callback_data_length = table_length(callback_data) 
+  if callback_data_length > 0 then
+    MOD.MessageWithLog ("Callback data length is <color_blue>"..tostring(callback_data_length).."</color>")
+    for callback_arg_name,callback_arg_value in pairs(callback_data) do
+      MOD.MessageWithLog ("Callback argument <color_yellow>"..tostring(callback_arg_name).."</color> is <color_green>"..tostring(callback_arg_value).."</color>")
+      local callback_arg_function = callback_arg_functions[callback_arg_name]
       if (callback_arg_function) then
-        MOD.MessageWithLog (" callback_function: <color_magenta>"..tostring(callback_arg_function).."</color>")
+        MOD.MessageWithLog ("callback_function is <color_magenta>"..tostring(callback_arg_function).."</color>")
         callback_arg_function(callback_arg_value)
       end
     end
+  else
+    MOD.MessageWithLog ("Callback data is <color_red>empty</color>")
   end
 
 end
