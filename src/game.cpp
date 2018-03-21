@@ -2828,13 +2828,16 @@ bool game::save_player_data()
 {
     const std::string playerfile = get_player_base_save_path();
 
-    const bool saved_data = write_to_file( playerfile + ".sav", [&]( std::ostream & fout ) {
+    const bool saved_data = write_to_file( cata::path( playerfile + ".sav" ), [&](
+    std::ostream & fout ) {
         serialize( fout );
     }, _( "player data" ) );
-    const bool saved_weather = write_to_file( playerfile + ".weather", [&]( std::ostream & fout ) {
+    const bool saved_weather = write_to_file( cata::path( playerfile + ".weather" ), [&](
+    std::ostream & fout ) {
         save_weather( fout );
     }, _( "weather state" ) );
-    const bool saved_log = write_to_file( playerfile + ".log", [&]( std::ostream & fout ) {
+    const bool saved_log = write_to_file( cata::path( playerfile + ".log" ), [&](
+    std::ostream & fout ) {
         fout << u.dump_memorial();
     }, _( "player memorial" ) );
 #ifdef __ANDROID__
@@ -2944,8 +2947,7 @@ void game::write_memorial_file( std::string sLastWords )
 
     memorial_file_path << ".txt";
 
-    const std::string path_string = memorial_file_path.str();
-    write_to_file( memorial_file_path.str(), [&]( std::ostream & fout ) {
+    write_to_file( cata::path( memorial_file_path.str() ), [&]( std::ostream & fout ) {
         u.memorial( fout, sLastWords );
     }, _( "player memorial" ) );
 }

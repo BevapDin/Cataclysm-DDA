@@ -335,11 +335,11 @@ void ofstream_wrapper::close()
     }
 }
 
-bool write_to_file( const std::string &path, const std::function<void( std::ostream & )> &writer,
+bool write_to_file( const cata::path &path, const std::function<void( std::ostream & )> &writer,
                     const char *const fail_message )
 {
     try {
-        ofstream_wrapper fout( path );
+        ofstream_wrapper fout( path.string() );
         writer( fout.stream() );
         fout.close();
         return true;
@@ -376,11 +376,11 @@ void ofstream_wrapper_exclusive::close()
     }
 }
 
-bool write_to_file_exclusive( const std::string &path,
+bool write_to_file_exclusive( const cata::path &path,
                               const std::function<void( std::ostream & )> &writer, const char *const fail_message )
 {
     try {
-        ofstream_wrapper_exclusive fout( path );
+        ofstream_wrapper_exclusive fout( path.string() );
         writer( fout.stream() );
         fout.close();
         return true;

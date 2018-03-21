@@ -358,7 +358,7 @@ class ofstream_wrapper
  *
  * @return Whether saving succeeded (no error was caught).
  */
-bool write_to_file( const std::string &path, const std::function<void( std::ostream & )> &writer,
+bool write_to_file( const cata::path &path, const std::function<void( std::ostream & )> &writer,
                     const char *fail_message );
 class JsonDeserializer;
 /**
@@ -417,7 +417,7 @@ class ofstream_wrapper_exclusive
 };
 
 /** See @ref write_to_file, but uses the exclusive I/O functions. */
-bool write_to_file_exclusive( const std::string &path,
+bool write_to_file_exclusive( const cata::path &path,
                               const std::function<void( std::ostream & )> &writer,  const char *fail_message );
 
 std::istream &safe_getline( std::istream &ins, std::string &str );

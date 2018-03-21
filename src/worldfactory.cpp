@@ -279,7 +279,7 @@ bool worldfactory::save_world( WORLDPTR world, bool is_conversion )
     }
 
     if( !is_conversion ) {
-        const auto savefile = world->folder_path() / FILENAMES["worldoptions"];
+        const cata::path savefile = world->folder_path() / FILENAMES["worldoptions"];
         const bool saved = write_to_file( savefile, [&]( std::ostream & fout ) {
             JsonOut jout( fout );
 
