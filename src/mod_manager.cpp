@@ -327,16 +327,16 @@ bool mod_manager::copy_mod_contents( const t_mod_list &mods_to_copy,
         }
 
         // create needed directories
-        const std::string cur_mod_dir = output_base_path + "/" + string_format( "mod_%05d", i + 1 );
+        const cata::path cur_mod_dir = output_base_path / string_format( "mod_%05d", i + 1 );
 
-        std::queue<std::string> dir_to_make;
+        std::queue<cata::path> dir_to_make;
         dir_to_make.push( cur_mod_dir );
         for( auto &input_dir : input_dirs ) {
-            dir_to_make.push( cur_mod_dir + "/" + input_dir.substr( start_index ) );
+            dir_to_make.push( cur_mod_dir / input_dir.native().substr( start_index ) );
         }
 
         while( !dir_to_make.empty() ) {
-            if( !assure_dir_exist( cata::path( dir_to_make.front() ) ) ) {
+            if( !assure_dir_exist( dir_to_make.front() ) ) {
                 DebugLog( D_ERROR, DC_ALL ) << "Unable to create or open mod directory at [" <<
                                             dir_to_make.front() << "] for saving";
             }
@@ -346,7 +346,7 @@ bool mod_manager::copy_mod_contents( const t_mod_list &mods_to_copy,
 
         // trim file paths from full length down to just /data forward
         for( auto &input_file : input_files ) {
-            const cata::path output_path( cur_mod_dir + input_file.native().substr( start_index ) );
+            const cata::path output_path( cur_mod_dir / input_file.native().substr( start_index ) );
             copy_file( input_file, output_path );
         }
     }
