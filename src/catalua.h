@@ -33,14 +33,14 @@ enum CallbackArgumentType : int {
 class CallbackArgument
 {
     private:
-        std::string name;
-        CallbackArgumentType type;
+        std::string name = "";
+        CallbackArgumentType type = CallbackArgumentType::Undefined;
 
-        int value_integer;
-        float value_number;
-        std::string value_string;
-        tripoint value_tripoint;
-        item value_item;
+        int value_integer = 0;
+        float value_number = 0.0f;
+        std::string value_string = "";
+        tripoint value_tripoint = tripoint( 0, 0, 0 );
+        item value_item = item();
 
     public:
         CallbackArgument( const std::string &arg_name, int arg_value ) : name( arg_name ),
