@@ -35,35 +35,23 @@ class CallbackArgument
         item value_item;
 
     public:
-        CallbackArgument( const std::string &arg_name, int arg_value ) {
-            name = arg_name;
-            type = CallbackArgumentTypeInteger;
-            value_integer = arg_value;
+        CallbackArgument( const std::string &arg_name, int arg_value ) : name( arg_name ),
+            type( CallbackArgumentTypeInteger ), value_integer( arg_value ) {
         }
-        CallbackArgument( const std::string &arg_name, float arg_value ) {
-            name = arg_name;
-            type = CallbackArgumentTypeNumber;
-            value_number = arg_value;
+        CallbackArgument( const std::string &arg_name, double arg_value ) : name( arg_name ),
+            type( CallbackArgumentTypeNumber ), value_number( ( float ) arg_value ) {
         }
-        CallbackArgument( const std::string &arg_name, double arg_value ) {
-            name = arg_name;
-            type = CallbackArgumentTypeNumber;
-            value_number = ( float )arg_value;
+        CallbackArgument( const std::string &arg_name, float arg_value ) : name( arg_name ),
+            type( CallbackArgumentTypeNumber ), value_number( arg_value ) {
         }
-        CallbackArgument( const std::string &arg_name, const std::string &arg_value ) {
-            name = arg_name;
-            type = CallbackArgumentTypeString;
-            value_string = arg_value;
+        CallbackArgument( const std::string &arg_name, const std::string &arg_value ) : name( arg_name ),
+            type( CallbackArgumentTypeString ), value_string( arg_value ) {
         }
-        CallbackArgument( const std::string &arg_name, const tripoint &arg_value ) {
-            name = arg_name;
-            type = CallbackArgumentTypeTripoint;
-            value_tripoint = arg_value;
+        CallbackArgument( const std::string &arg_name, const tripoint &arg_value ) : name( arg_name ),
+            type( CallbackArgumentTypeTripoint ), value_tripoint( arg_value ) {
         }
-        CallbackArgument( const std::string &arg_name, const item &arg_value ) {
-            name = arg_name;
-            type = CallbackArgumentTypeItem;
-            value_item = arg_value;
+        CallbackArgument( const std::string &arg_name, const item &arg_value ) : name( arg_name ),
+            type( CallbackArgumentTypeItem ), value_item( arg_value ) {
         }
 
         const std::string GetName() {
