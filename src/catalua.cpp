@@ -1285,7 +1285,7 @@ void game::init_lua()
 {
 }
 
-void lua_callback( const char*, CallbackArgumentContainer )
+void lua_callback( const char*, const CallbackArgumentContainer& )
 {
 }
 void lua_callback( const char* )
@@ -1294,5 +1294,5 @@ void lua_callback( const char* )
 
 #endif
 
-void lua_callback( const char*, const &CallbackArgumentContainer );
+void lua_callback( const char*, const CallbackArgumentContainer& );
 void lua_callback( const char* );
