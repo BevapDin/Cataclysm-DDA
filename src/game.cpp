@@ -1413,8 +1413,7 @@ bool game::do_turn()
     events.process();
     mission::process_all();
 
-    if( calendar::once_every( 1_days ) )
-    {
+    if( calendar::once_every( 1_days ) ) {
         overmap_buffer.process_mongroups();
         if( calendar::turn.day_of_year() == 0 ) {
             lua_callback( "on_year_passed" );
@@ -1728,8 +1727,8 @@ void game::update_weather()
         nextweather = calendar::turn + 50_turns;
         if( weather != old_weather ){
             CallbackArgumentContainer lua_callback_args_info;
-            lua_callback_args_info.emplace_back(CallbackArgument("weather_new", weather_data( weather ).name ));
-            lua_callback_args_info.emplace_back(CallbackArgument("weather_old", weather_data( old_weather ).name ));
+            lua_callback_args_info.emplace_back( "weather_new", weather_data( weather ).name );
+            lua_callback_args_info.emplace_back( "weather_old", weather_data( old_weather ).name );
             lua_callback( "on_weather_changed", lua_callback_args_info );
         }
         if (weather != old_weather && weather_data(weather).dangerous &&
