@@ -35,11 +35,6 @@
 #include "filesystem.h"
 #include "string_input_popup.h"
 #include "mutation.h"
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
 
 #include <type_traits>
 
@@ -824,6 +819,33 @@ int call_lua(std::string tocall)
     return err;
 }
 
+
+void CallbackArgument::Save( lua_State *L, int top )
+{
+    lua_pushstring( L, name.c_str() );
+    switch( type ) {
+        case CallbackArgumentTypeInteger:
+            lua_pushinteger( L, value_integer );
+            break;
+        case CallbackArgumentTypeNumber:
+            lua_pushnumber( L, value_number );
+            break;
+        case CallbackArgumentTypeString:
+            lua_pushstring( L, value_string.c_str() );
+            break;
+        case CallbackArgumentTypeTripoint:
+            LuaValue<tripoint>::push_reg( L, value_tripoint );
+            break;
+        case CallbackArgumentTypeItem:
+                LuaValue<item>::push_reg( L, value_item );
+                break;
+            default:
+                    lua_pushnil( L );
+                    break;
+                }
+    lua_settable( L, top );
+}
+
 void lua_callback( const char *callback_name, const CallbackArgumentContainer &callback_args )
 {
     if( lua_state == nullptr ) {
@@ -834,28 +856,7 @@ void lua_callback( const char *callback_name, const CallbackArgumentContainer &c
     lua_newtable( L );
     int top = lua_gettop( L );
     for( auto callback_arg : callback_args ) {
-        lua_pushstring( L, callback_arg.GetName().c_str() );
-        switch( callback_arg.GetType() ) {
-            case CallbackArgumentTypeInteger:
-                lua_pushinteger(L, callback_arg.GetValueInteger() );
-                break;
-            case CallbackArgumentTypeNumber:
-                lua_pushnumber(L, callback_arg.GetValueNumber() );
-                break;
-            case CallbackArgumentTypeString:
-                lua_pushstring( L, callback_arg.GetValueString().c_str() );
-                break;
-            case CallbackArgumentTypeTripoint:
-                LuaValue<tripoint>::push_reg( L, callback_arg.GetValueTripoint() );
-                break;
-            case CallbackArgumentTypeItem:
-                LuaValue<item>::push_reg( L, callback_arg.GetValueItem() );
-                break;
-            default:
-                lua_pushnil( L );
-                break;
-        }
-        lua_settable( L, top );
+        callback_arg.Save( L, top );
     }
     lua_setglobal( L, "callback_data" );
 

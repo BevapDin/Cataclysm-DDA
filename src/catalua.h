@@ -11,6 +11,14 @@
 #include <vector>
 #include <list>
 
+#ifdef LUA
+extern "C" {
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+}
+#endif //LUA
+
 enum CallbackArgumentType : int {
     CallbackArgumentTypeUndefined = -1,
     CallbackArgumentTypeInteger = 0,
@@ -53,29 +61,9 @@ class CallbackArgument
         CallbackArgument( const std::string &arg_name, const item &arg_value ) : name( arg_name ),
             type( CallbackArgumentTypeItem ), value_item( arg_value ) {
         }
-
-        const std::string GetName() {
-            return name;
-        }
-        CallbackArgumentType GetType() {
-            return type;
-        }
-
-        int GetValueInteger() {
-            return value_integer;
-        }
-        float GetValueNumber() {
-            return value_number;
-        }
-        const std::string GetValueString() {
-            return value_string;
-        }
-        const tripoint GetValueTripoint() {
-            return value_tripoint;
-        }
-        const item GetValueItem() {
-            return value_item;
-        }
+#ifdef LUA
+        void Save( lua_State *L, int top );
+#endif //LUA
 };
 
 typedef std::list<CallbackArgument> CallbackArgumentContainer;
