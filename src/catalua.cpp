@@ -824,19 +824,19 @@ void CallbackArgument::Save( lua_State *L, int top )
 {
     lua_pushstring( L, name.c_str() );
     switch( type ) {
-        case CallbackArgumentTypeInteger:
+        case CallbackArgumentType::Integer:
             lua_pushinteger( L, value_integer );
             break;
-        case CallbackArgumentTypeNumber:
+        case CallbackArgumentType::Number:
             lua_pushnumber( L, value_number );
             break;
-        case CallbackArgumentTypeString:
+        case CallbackArgumentType::String:
             lua_pushstring( L, value_string.c_str() );
             break;
-        case CallbackArgumentTypeTripoint:
+        case CallbackArgumentType::Tripoint:
             LuaValue<tripoint>::push_reg( L, value_tripoint );
             break;
-        case CallbackArgumentTypeItem:
+        case CallbackArgumentType::Item:
                 LuaValue<item>::push_reg( L, value_item );
                 break;
             default:

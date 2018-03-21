@@ -20,14 +20,14 @@ extern "C" {
 #endif //LUA
 
 enum CallbackArgumentType : int {
-    CallbackArgumentTypeUndefined = -1,
-    CallbackArgumentTypeInteger = 0,
-    CallbackArgumentTypeNumber,
-    CallbackArgumentTypeDouble = CallbackArgumentTypeNumber,
-    CallbackArgumentTypeFloat = CallbackArgumentTypeNumber,
-    CallbackArgumentTypeString,
-    CallbackArgumentTypeTripoint,
-    CallbackArgumentTypeItem
+    Undefined = -1,
+    Integer = 0,
+    Number,
+    Double = Number,
+    Float = Number,
+    String,
+    Tripoint,
+    Item
 };
 
 class CallbackArgument
@@ -44,22 +44,22 @@ class CallbackArgument
 
     public:
         CallbackArgument( const std::string &arg_name, int arg_value ) : name( arg_name ),
-            type( CallbackArgumentTypeInteger ), value_integer( arg_value ) {
+            type( CallbackArgumentType::Integer ), value_integer( arg_value ) {
         }
         CallbackArgument( const std::string &arg_name, double arg_value ) : name( arg_name ),
-            type( CallbackArgumentTypeNumber ), value_number( ( float ) arg_value ) {
+            type( CallbackArgumentType::Number ), value_number( ( float ) arg_value ) {
         }
         CallbackArgument( const std::string &arg_name, float arg_value ) : name( arg_name ),
-            type( CallbackArgumentTypeNumber ), value_number( arg_value ) {
+            type( CallbackArgumentType::Number ), value_number( arg_value ) {
         }
         CallbackArgument( const std::string &arg_name, const std::string &arg_value ) : name( arg_name ),
-            type( CallbackArgumentTypeString ), value_string( arg_value ) {
+            type( CallbackArgumentType::String ), value_string( arg_value ) {
         }
         CallbackArgument( const std::string &arg_name, const tripoint &arg_value ) : name( arg_name ),
-            type( CallbackArgumentTypeTripoint ), value_tripoint( arg_value ) {
+            type( CallbackArgumentType::Tripoint ), value_tripoint( arg_value ) {
         }
         CallbackArgument( const std::string &arg_name, const item &arg_value ) : name( arg_name ),
-            type( CallbackArgumentTypeItem ), value_item( arg_value ) {
+            type( CallbackArgumentType::Item ), value_item( arg_value ) {
         }
 #ifdef LUA
         void Save( lua_State *L, int top );
