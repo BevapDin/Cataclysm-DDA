@@ -18,7 +18,7 @@ void init_base_path( cata::path path );
 void init_user_dir( cata::path ud );
 void update_datadir();
 void update_config_dir();
-void update_pathname( const std::string &name, const std::string &path );
+void update_pathname( const std::string &name, const cata::path &path );
 void set_standard_filenames();
 /**
  * Return a locale specific path, or if there is no path for the current

@@ -51,76 +51,76 @@ void PATH_INFO::init_user_dir( cata::path dir )
     FILENAMES["user_dir"] = dir;
 }
 
-void PATH_INFO::update_pathname( const std::string &name, const std::string &path )
+void PATH_INFO::update_pathname( const std::string &name, const cata::path &path )
 {
-    FILENAMES[name] = cata::path( path );
+    FILENAMES[name] = path;
 }
 
 void PATH_INFO::update_datadir()
 {
     // Shared dirs
-    update_pathname( "gfxdir", FILENAMES["datadir"].native() + "gfx/" );
-    update_pathname( "luadir", FILENAMES["datadir"].native() + "lua/" );
-    update_pathname( "fontdir", FILENAMES["datadir"].native() + "font/" );
-    update_pathname( "rawdir", FILENAMES["datadir"].native() + "raw/" );
-    update_pathname( "jsondir", FILENAMES["datadir"].native() + "core/" );
-    update_pathname( "moddir", FILENAMES["datadir"].native() + "mods/" );
-    update_pathname( "recycledir", FILENAMES["datadir"].native() + "recycling/" );
-    update_pathname( "namesdir", FILENAMES["datadir"].native() + "names/" );
-    update_pathname( "titledir", FILENAMES["datadir"].native() + "title/" );
-    update_pathname( "motddir", FILENAMES["datadir"].native() + "motd/" );
-    update_pathname( "creditsdir", FILENAMES["datadir"].native() + "credits/" );
-    update_pathname( "data_sound", FILENAMES["datadir"].native() + "sound" );
-    update_pathname( "helpdir", FILENAMES["datadir"].native() + "help/" );
+    update_pathname( "gfxdir", FILENAMES["datadir"] + "gfx/" );
+    update_pathname( "luadir", FILENAMES["datadir"] + "lua/" );
+    update_pathname( "fontdir", FILENAMES["datadir"] + "font/" );
+    update_pathname( "rawdir", FILENAMES["datadir"] + "raw/" );
+    update_pathname( "jsondir", FILENAMES["datadir"] + "core/" );
+    update_pathname( "moddir", FILENAMES["datadir"] + "mods/" );
+    update_pathname( "recycledir", FILENAMES["datadir"] + "recycling/" );
+    update_pathname( "namesdir", FILENAMES["datadir"] + "names/" );
+    update_pathname( "titledir", FILENAMES["datadir"] + "title/" );
+    update_pathname( "motddir", FILENAMES["datadir"] + "motd/" );
+    update_pathname( "creditsdir", FILENAMES["datadir"] + "credits/" );
+    update_pathname( "data_sound", FILENAMES["datadir"] + "sound" );
+    update_pathname( "helpdir", FILENAMES["datadir"] + "help/" );
 
     // Shared files
-    update_pathname( "autoexeclua", FILENAMES["luadir"].native() + "autoexec.lua" );
-    update_pathname( "class_defslua", FILENAMES["luadir"].native() + "class_definitions.lua" );
-    update_pathname( "title", FILENAMES["titledir"].native() + "en.title" );
-    update_pathname( "halloween", FILENAMES["titledir"].native() + "en.halloween" );
-    update_pathname( "motd", FILENAMES["motddir"].native() + "en.motd" );
-    update_pathname( "credits", FILENAMES["creditsdir"].native() + "en.credits" );
-    update_pathname( "names", FILENAMES["namesdir"].native() + "en.json" );
-    update_pathname( "colors", FILENAMES["rawdir"].native() + "colors.json" );
-    update_pathname( "keybindings", FILENAMES["rawdir"].native() + "keybindings.json" );
-    update_pathname( "keybindings_vehicle", FILENAMES["rawdir"].native() + "keybindings/vehicle.json" );
-    update_pathname( "legacy_fontdata", FILENAMES["datadir"].native() + "fontdata.json" );
-    update_pathname( "sokoban", FILENAMES["rawdir"].native() + "sokoban.txt" );
-    update_pathname( "defaulttilejson", FILENAMES["gfx"].native() + "tile_config.json" );
-    update_pathname( "defaulttilepng", FILENAMES["gfx"].native() + "tinytile.png" );
-    update_pathname( "mods-dev-default", FILENAMES["moddir"].native() + "default.json" );
-    update_pathname( "mods-replacements", FILENAMES["moddir"].native() + "replacements.json" );
-    update_pathname( "defaultsounddir", FILENAMES["datadir"].native() + "sound" );
-    update_pathname( "help", FILENAMES["helpdir"].native() + "texts.json" );
+    update_pathname( "autoexeclua", FILENAMES["luadir"] + "autoexec.lua" );
+    update_pathname( "class_defslua", FILENAMES["luadir"] + "class_definitions.lua" );
+    update_pathname( "title", FILENAMES["titledir"] + "en.title" );
+    update_pathname( "halloween", FILENAMES["titledir"] + "en.halloween" );
+    update_pathname( "motd", FILENAMES["motddir"] + "en.motd" );
+    update_pathname( "credits", FILENAMES["creditsdir"] + "en.credits" );
+    update_pathname( "names", FILENAMES["namesdir"] + "en.json" );
+    update_pathname( "colors", FILENAMES["rawdir"] + "colors.json" );
+    update_pathname( "keybindings", FILENAMES["rawdir"] + "keybindings.json" );
+    update_pathname( "keybindings_vehicle", FILENAMES["rawdir"] + "keybindings/vehicle.json" );
+    update_pathname( "legacy_fontdata", FILENAMES["datadir"] + "fontdata.json" );
+    update_pathname( "sokoban", FILENAMES["rawdir"] + "sokoban.txt" );
+    update_pathname( "defaulttilejson", FILENAMES["gfx"] + "tile_config.json" );
+    update_pathname( "defaulttilepng", FILENAMES["gfx"] + "tinytile.png" );
+    update_pathname( "mods-dev-default", FILENAMES["moddir"] + "default.json" );
+    update_pathname( "mods-replacements", FILENAMES["moddir"] + "replacements.json" );
+    update_pathname( "defaultsounddir", FILENAMES["datadir"] + "sound" );
+    update_pathname( "help", FILENAMES["helpdir"] + "texts.json" );
 }
 
 void PATH_INFO::update_config_dir()
 {
-    update_pathname( "options", FILENAMES["config_dir"].native() + "options.json" );
-    update_pathname( "keymap", FILENAMES["config_dir"].native() + "keymap.txt" );
-    update_pathname( "debug", FILENAMES["config_dir"].native() + "debug.log" );
-    update_pathname( "crash", FILENAMES["config_dir"].native() + "crash.log" );
-    update_pathname( "fontlist", FILENAMES["config_dir"].native() + "fontlist.txt" );
-    update_pathname( "fontdata", FILENAMES["config_dir"].native() + "fonts.json" );
-    update_pathname( "autopickup", FILENAMES["config_dir"].native() + "auto_pickup.json" );
-    update_pathname( "safemode", FILENAMES["config_dir"].native() + "safemode.json" );
-    update_pathname( "base_colors", FILENAMES["config_dir"].native() + "base_colors.json" );
-    update_pathname( "custom_colors", FILENAMES["config_dir"].native() + "custom_colors.json" );
-    update_pathname( "mods-user-default", FILENAMES["config_dir"].native() + "user-default-mods.json" );
+    update_pathname( "options", FILENAMES["config_dir"] + "options.json" );
+    update_pathname( "keymap", FILENAMES["config_dir"] + "keymap.txt" );
+    update_pathname( "debug", FILENAMES["config_dir"] + "debug.log" );
+    update_pathname( "crash", FILENAMES["config_dir"] + "crash.log" );
+    update_pathname( "fontlist", FILENAMES["config_dir"] + "fontlist.txt" );
+    update_pathname( "fontdata", FILENAMES["config_dir"] + "fonts.json" );
+    update_pathname( "autopickup", FILENAMES["config_dir"] + "auto_pickup.json" );
+    update_pathname( "safemode", FILENAMES["config_dir"] + "safemode.json" );
+    update_pathname( "base_colors", FILENAMES["config_dir"] + "base_colors.json" );
+    update_pathname( "custom_colors", FILENAMES["config_dir"] + "custom_colors.json" );
+    update_pathname( "mods-user-default", FILENAMES["config_dir"] + "user-default-mods.json" );
 }
 
 void PATH_INFO::set_standard_filenames()
 {
     // Special: data_dir lua_dir and gfx_dir
-    if( !FILENAMES["base_path"].native().empty() ) {
+    if( !FILENAMES["base_path"].empty() ) {
 #ifdef DATA_DIR_PREFIX
-        update_pathname( "datadir", FILENAMES["base_path"].native() + "share/cataclysm-dda/" );
-        update_pathname( "gfxdir", FILENAMES["datadir"].native() + "gfx/" );
-        update_pathname( "luadir", FILENAMES["datadir"].native() + "lua/" );
+        update_pathname( "datadir", FILENAMES["base_path"] + "share/cataclysm-dda/" );
+        update_pathname( "gfxdir", FILENAMES["datadir"] + "gfx/" );
+        update_pathname( "luadir", FILENAMES["datadir"] + "lua/" );
 #else
-        update_pathname( "datadir", FILENAMES["base_path"].native() + "data/" );
-        update_pathname( "gfxdir", FILENAMES["base_path"].native() + "gfx/" );
-        update_pathname( "luadir", FILENAMES["base_path"].native() + "lua/" );
+        update_pathname( "datadir", FILENAMES["base_path"] + "data/" );
+        update_pathname( "gfxdir", FILENAMES["base_path"] + "gfx/" );
+        update_pathname( "luadir", FILENAMES["base_path"] + "lua/" );
 #endif
     } else {
         update_pathname( "datadir", "data/" );
@@ -129,41 +129,41 @@ void PATH_INFO::set_standard_filenames()
     }
 
     // Shared dirs
-    update_pathname( "autoexeclua", FILENAMES["luadir"].native() + "autoexec.lua" );
-    update_pathname( "class_defslua", FILENAMES["luadir"].native() + "class_definitions.lua" );
-    update_pathname( "fontdir", FILENAMES["datadir"].native() + "font/" );
-    update_pathname( "rawdir", FILENAMES["datadir"].native() + "raw/" );
-    update_pathname( "jsondir", FILENAMES["datadir"].native() + "core/" );
-    update_pathname( "moddir", FILENAMES["datadir"].native() + "mods/" );
-    update_pathname( "namesdir", FILENAMES["datadir"].native() + "names/" );
-    update_pathname( "titledir", FILENAMES["datadir"].native() + "title/" );
-    update_pathname( "motddir", FILENAMES["datadir"].native() + "motd/" );
-    update_pathname( "creditsdir", FILENAMES["datadir"].native() + "credits/" );
-    update_pathname( "color_templates", FILENAMES["rawdir"].native() + "color_templates/" );
-    update_pathname( "data_sound", FILENAMES["datadir"].native() + "sound" );
-    update_pathname( "helpdir", FILENAMES["datadir"].native() + "help/" );
+    update_pathname( "autoexeclua", FILENAMES["luadir"] + "autoexec.lua" );
+    update_pathname( "class_defslua", FILENAMES["luadir"] + "class_definitions.lua" );
+    update_pathname( "fontdir", FILENAMES["datadir"] + "font/" );
+    update_pathname( "rawdir", FILENAMES["datadir"] + "raw/" );
+    update_pathname( "jsondir", FILENAMES["datadir"] + "core/" );
+    update_pathname( "moddir", FILENAMES["datadir"] + "mods/" );
+    update_pathname( "namesdir", FILENAMES["datadir"] + "names/" );
+    update_pathname( "titledir", FILENAMES["datadir"] + "title/" );
+    update_pathname( "motddir", FILENAMES["datadir"] + "motd/" );
+    update_pathname( "creditsdir", FILENAMES["datadir"] + "credits/" );
+    update_pathname( "color_templates", FILENAMES["rawdir"] + "color_templates/" );
+    update_pathname( "data_sound", FILENAMES["datadir"] + "sound" );
+    update_pathname( "helpdir", FILENAMES["datadir"] + "help/" );
 
     // Shared files
-    update_pathname( "title", FILENAMES["titledir"].native() + "en.title" );
-    update_pathname( "halloween", FILENAMES["titledir"].native() + "en.halloween" );
-    update_pathname( "motd", FILENAMES["motddir"].native() + "en.motd" );
-    update_pathname( "credits", FILENAMES["creditsdir"].native() + "en.credits" );
-    update_pathname( "names", FILENAMES["namesdir"].native() + "en.json" );
-    update_pathname( "colors", FILENAMES["rawdir"].native() + "colors.json" );
-    update_pathname( "keybindings", FILENAMES["rawdir"].native() + "keybindings.json" );
-    update_pathname( "keybindings_vehicle", FILENAMES["rawdir"].native() + "keybindings/vehicle.json" );
-    update_pathname( "sokoban", FILENAMES["rawdir"].native() + "sokoban.txt" );
-    update_pathname( "defaulttilejson", FILENAMES["gfx"].native() + "tile_config.json" );
-    update_pathname( "defaulttilepng", FILENAMES["gfx"].native() + "tinytile.png" );
-    update_pathname( "mods-dev-default", FILENAMES["moddir"].native() + "default.json" );
-    update_pathname( "mods-replacements", FILENAMES["moddir"].native() + "replacements.json" );
-    update_pathname( "defaultsounddir", FILENAMES["datadir"].native() + "sound" );
-    update_pathname( "help", FILENAMES["helpdir"].native() + "texts.json" );
+    update_pathname( "title", FILENAMES["titledir"] + "en.title" );
+    update_pathname( "halloween", FILENAMES["titledir"] + "en.halloween" );
+    update_pathname( "motd", FILENAMES["motddir"] + "en.motd" );
+    update_pathname( "credits", FILENAMES["creditsdir"] + "en.credits" );
+    update_pathname( "names", FILENAMES["namesdir"] + "en.json" );
+    update_pathname( "colors", FILENAMES["rawdir"] + "colors.json" );
+    update_pathname( "keybindings", FILENAMES["rawdir"] + "keybindings.json" );
+    update_pathname( "keybindings_vehicle", FILENAMES["rawdir"] + "keybindings/vehicle.json" );
+    update_pathname( "sokoban", FILENAMES["rawdir"] + "sokoban.txt" );
+    update_pathname( "defaulttilejson", FILENAMES["gfx"] + "tile_config.json" );
+    update_pathname( "defaulttilepng", FILENAMES["gfx"] + "tinytile.png" );
+    update_pathname( "mods-dev-default", FILENAMES["moddir"] + "default.json" );
+    update_pathname( "mods-replacements", FILENAMES["moddir"] + "replacements.json" );
+    update_pathname( "defaultsounddir", FILENAMES["datadir"] + "sound" );
+    update_pathname( "help", FILENAMES["helpdir"] + "texts.json" );
 
-    update_pathname( "savedir", FILENAMES["user_dir"].native() + "save/" );
-    update_pathname( "memorialdir", FILENAMES["user_dir"].native() + "memorial/" );
-    update_pathname( "templatedir", FILENAMES["user_dir"].native() + "templates/" );
-    update_pathname( "user_sound", FILENAMES["user_dir"].native() + "sound/" );
+    update_pathname( "savedir", FILENAMES["user_dir"] + "save/" );
+    update_pathname( "memorialdir", FILENAMES["user_dir"] + "memorial/" );
+    update_pathname( "templatedir", FILENAMES["user_dir"] + "templates/" );
+    update_pathname( "user_sound", FILENAMES["user_dir"] + "sound/" );
 #ifdef USE_XDG_DIR
     const char *user_dir;
     std::string dir;
@@ -175,32 +175,32 @@ void PATH_INFO::set_standard_filenames()
     }
     update_pathname( "config_dir", dir );
 #else
-    update_pathname( "config_dir", FILENAMES["user_dir"].native() + "config/" );
+    update_pathname( "config_dir", FILENAMES["user_dir"] + "config/" );
 #endif
-    update_pathname( "graveyarddir", FILENAMES["user_dir"].native() + "graveyard/" );
+    update_pathname( "graveyarddir", FILENAMES["user_dir"] + "graveyard/" );
 
-    update_pathname( "options", FILENAMES["config_dir"].native() + "options.json" );
-    update_pathname( "keymap", FILENAMES["config_dir"].native() + "keymap.txt" );
-    update_pathname( "user_keybindings", FILENAMES["config_dir"].native() + "keybindings.json" );
-    update_pathname( "debug", FILENAMES["config_dir"].native() + "debug.log" );
-    update_pathname( "crash", FILENAMES["config_dir"].native() + "crash.log" );
-    update_pathname( "fontlist", FILENAMES["config_dir"].native() + "fontlist.txt" );
-    update_pathname( "fontdata", FILENAMES["config_dir"].native() + "fonts.json" );
-    update_pathname( "autopickup", FILENAMES["config_dir"].native() + "auto_pickup.json" );
-    update_pathname( "safemode", FILENAMES["config_dir"].native() + "safemode.json" );
-    update_pathname( "base_colors", FILENAMES["config_dir"].native() + "base_colors.json" );
-    update_pathname( "custom_colors", FILENAMES["config_dir"].native() + "custom_colors.json" );
-    update_pathname( "mods-user-default", FILENAMES["config_dir"].native() + "user-default-mods.json" );
-    update_pathname( "user_moddir", FILENAMES["user_dir"].native() + "mods/" );
+    update_pathname( "options", FILENAMES["config_dir"] + "options.json" );
+    update_pathname( "keymap", FILENAMES["config_dir"] + "keymap.txt" );
+    update_pathname( "user_keybindings", FILENAMES["config_dir"] + "keybindings.json" );
+    update_pathname( "debug", FILENAMES["config_dir"] + "debug.log" );
+    update_pathname( "crash", FILENAMES["config_dir"] + "crash.log" );
+    update_pathname( "fontlist", FILENAMES["config_dir"] + "fontlist.txt" );
+    update_pathname( "fontdata", FILENAMES["config_dir"] + "fonts.json" );
+    update_pathname( "autopickup", FILENAMES["config_dir"] + "auto_pickup.json" );
+    update_pathname( "safemode", FILENAMES["config_dir"] + "safemode.json" );
+    update_pathname( "base_colors", FILENAMES["config_dir"] + "base_colors.json" );
+    update_pathname( "custom_colors", FILENAMES["config_dir"] + "custom_colors.json" );
+    update_pathname( "mods-user-default", FILENAMES["config_dir"] + "user-default-mods.json" );
+    update_pathname( "user_moddir", FILENAMES["user_dir"] + "mods/" );
     update_pathname( "worldoptions", "worldoptions.json" );
 
     // Needed to move files from these legacy locations to the new config directory.
     update_pathname( "legacy_options", "data/options.txt" );
-    update_pathname( "legacy_options2", FILENAMES["config_dir"].native() + "options.txt" );
+    update_pathname( "legacy_options2", FILENAMES["config_dir"] + "options.txt" );
     update_pathname( "legacy_keymap", "data/keymap.txt" );
     update_pathname( "legacy_autopickup", "data/auto_pickup.txt" );
-    update_pathname( "legacy_autopickup2", FILENAMES["config_dir"].native() + "auto_pickup.txt" );
-    update_pathname( "legacy_fontdata", FILENAMES["datadir"].native() + "fontdata.json" );
+    update_pathname( "legacy_autopickup2", FILENAMES["config_dir"] + "auto_pickup.txt" );
+    update_pathname( "legacy_fontdata", FILENAMES["datadir"] + "fontdata.json" );
     update_pathname( "legacy_worldoptions", "worldoptions.txt" );
 #ifdef TILES
     // Default tileset config file.

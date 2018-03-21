@@ -357,7 +357,7 @@ int main( int argc, char *argv[] )
                         {
                             return -1;
                         }
-                        PATH_INFO::update_pathname( "datadir", params[0] );
+                        PATH_INFO::update_pathname( "datadir", cata::path( params[0] ) );
                         PATH_INFO::update_datadir();
                         return 1;
                     }
@@ -371,7 +371,7 @@ int main( int argc, char *argv[] )
                         {
                             return -1;
                         }
-                        PATH_INFO::update_pathname( "savedir", params[0] );
+                        PATH_INFO::update_pathname( "savedir", cata::path( params[0] ) );
                         return 1;
                     }
                 },
@@ -384,7 +384,7 @@ int main( int argc, char *argv[] )
                         {
                             return -1;
                         }
-                        PATH_INFO::update_pathname( "config_dir", params[0] );
+                        PATH_INFO::update_pathname( "config_dir", cata::path( params[0] ) );
                         PATH_INFO::update_config_dir();
                         return 1;
                     }
@@ -398,7 +398,7 @@ int main( int argc, char *argv[] )
                         {
                             return -1;
                         }
-                        PATH_INFO::update_pathname( "memorialdir", params[0] );
+                        PATH_INFO::update_pathname( "memorialdir", cata::path( params[0] ) );
                         return 1;
                     }
                 },
@@ -411,7 +411,7 @@ int main( int argc, char *argv[] )
                         {
                             return -1;
                         }
-                        PATH_INFO::update_pathname( "options", params[0] );
+                        PATH_INFO::update_pathname( "options", cata::path( params[0] ) );
                         return 1;
                     }
                 },
@@ -424,7 +424,7 @@ int main( int argc, char *argv[] )
                         {
                             return -1;
                         }
-                        PATH_INFO::update_pathname( "keymap", params[0] );
+                        PATH_INFO::update_pathname( "keymap", cata::path( params[0] ) );
                         return 1;
                     }
                 },
@@ -437,7 +437,7 @@ int main( int argc, char *argv[] )
                         {
                             return -1;
                         }
-                        PATH_INFO::update_pathname( "autopickup", params[0] );
+                        PATH_INFO::update_pathname( "autopickup", cata::path( params[0] ) );
                         return 1;
                     }
                 },
@@ -450,7 +450,7 @@ int main( int argc, char *argv[] )
                         {
                             return -1;
                         }
-                        PATH_INFO::update_pathname( "motd", params[0] );
+                        PATH_INFO::update_pathname( "motd", cata::path( params[0] ) );
                         return 1;
                     }
                 },
