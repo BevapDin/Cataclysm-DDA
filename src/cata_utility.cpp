@@ -420,10 +420,10 @@ std::istream &safe_getline( std::istream &ins, std::string &str )
     }
 }
 
-bool read_from_file( const std::string &path, const std::function<void( std::istream & )> &reader )
+bool read_from_file( const cata::path &path, const std::function<void( std::istream & )> &reader )
 {
     try {
-        std::ifstream fin( path, std::ios::binary );
+        std::ifstream fin( path.string(), std::ios::binary );
         if( !fin ) {
             throw std::runtime_error( "opening file failed" );
         }
@@ -439,7 +439,7 @@ bool read_from_file( const std::string &path, const std::function<void( std::ist
     }
 }
 
-bool read_from_file_json( const std::string &path, const std::function<void( JsonIn & )> &reader )
+bool read_from_file_json( const cata::path &path, const std::function<void( JsonIn & )> &reader )
 {
     return read_from_file( path, [&reader]( std::istream & fin ) {
         JsonIn jsin( fin );
@@ -447,23 +447,23 @@ bool read_from_file_json( const std::string &path, const std::function<void( Jso
     } );
 }
 
-bool read_from_file( const std::string &path, JsonDeserializer &reader )
+bool read_from_file( const cata::path &path, JsonDeserializer &reader )
 {
     return read_from_file_json( path, [&reader]( JsonIn & jsin ) {
         reader.deserialize( jsin );
     } );
 }
 
-bool read_from_file_optional( const std::string &path,
+bool read_from_file_optional( const cata::path &path,
                               const std::function<void( std::istream & )> &reader )
 {
     // Note: slight race condition here, but we'll ignore it. Worst case: the file
     // exists and got removed before reading it -> reading fails with a message
     // Or file does not exists, than everything works fine because it's optional anyway.
-    return exists( cata::path( path ) ) && read_from_file( path, reader );
+    return exists( path ) && read_from_file( path, reader );
 }
 
-bool read_from_file_optional_json( const std::string &path,
+bool read_from_file_optional_json( const cata::path &path,
                                    const std::function<void( JsonIn & )> &reader )
 {
     return read_from_file_optional( path, [&reader]( std::istream & fin ) {
@@ -472,7 +472,7 @@ bool read_from_file_optional_json( const std::string &path,
     } );
 }
 
-bool read_from_file_optional( const std::string &path, JsonDeserializer &reader )
+bool read_from_file_optional( const cata::path &path, JsonDeserializer &reader )
 {
     return read_from_file_optional_json( path, [&reader]( JsonIn & jsin ) {
         reader.deserialize( jsin );

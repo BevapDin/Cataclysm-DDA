@@ -155,7 +155,7 @@ std::vector<std::string> main_menu::load_file( const std::string &path,
         const std::string &alt_text ) const
 {
     std::vector<std::string> result;
-    read_from_file_optional( path, [&result]( std::istream & fin ) {
+    read_from_file_optional( cata::path( path ), [&result]( std::istream & fin ) {
         std::string line;
         while( std::getline( fin, line ) ) {
             if( !line.empty() && line[0] == '#' ) {
@@ -236,8 +236,8 @@ void main_menu::init_strings()
 
     // Credits
     mmenu_credits.clear();
-    read_from_file_optional( PATH_INFO::find_translated_file( "creditsdir", ".credits",
-    "credits" ), [&buffer]( std::istream & stream ) {
+    read_from_file_optional( cata::path( PATH_INFO::find_translated_file( "creditsdir", ".credits",
+    "credits" ) ), [&buffer]( std::istream & stream ) {
         std::string line;
         while( std::getline( stream, line ) ) {
             if( line[0] != '#' ) {

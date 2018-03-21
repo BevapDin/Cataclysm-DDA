@@ -18,6 +18,10 @@ class quantity;
 class mass_in_gram_tag;
 using mass = quantity<int, mass_in_gram_tag>;
 }
+namespace cata
+{
+class path;
+} // namespace cata
 class JsonIn;
 class JsonOut;
 
@@ -377,15 +381,15 @@ class JsonDeserializer;
  * @return `true` is the file was read without any errors, `false` upon any error.
  */
 /**@{*/
-bool read_from_file( const std::string &path, const std::function<void( std::istream & )> &reader );
-bool read_from_file_json( const std::string &path, const std::function<void( JsonIn & )> &reader );
-bool read_from_file( const std::string &path, JsonDeserializer &reader );
+bool read_from_file( const cata::path &path, const std::function<void( std::istream & )> &reader );
+bool read_from_file_json( const cata::path &path, const std::function<void( JsonIn & )> &reader );
+bool read_from_file( const cata::path &path, JsonDeserializer &reader );
 
-bool read_from_file_optional( const std::string &path,
+bool read_from_file_optional( const cata::path &path,
                               const std::function<void( std::istream & )> &reader );
-bool read_from_file_optional_json( const std::string &path,
+bool read_from_file_optional_json( const cata::path &path,
                                    const std::function<void( JsonIn & )> &reader );
-bool read_from_file_optional( const std::string &path, JsonDeserializer &reader );
+bool read_from_file_optional( const cata::path &path, JsonDeserializer &reader );
 /**@}*/
 /**
  * Same as ofstream_wrapper, but uses exclusive I/O (@ref fopen_exclusive).

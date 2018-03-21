@@ -2658,19 +2658,19 @@ void game::load( const save_t &name )
     u.name = name.player_name();
     // This should be initialized more globally (in player/Character constructor)
     u.weapon = item( "null", 0 );
-    if( !read_from_file( playerfile, std::bind( &game::unserialize, this, _1 ) ) ) {
+    if( !read_from_file( cata::path( playerfile ), std::bind( &game::unserialize, this, _1 ) ) ) {
         return;
     }
 
-    read_from_file_optional( worldpath + name.base_path() + ".weather", std::bind( &game::load_weather,
-                             this, _1 ) );
+    read_from_file_optional( cata::path( worldpath + name.base_path() + ".weather" ),
+                             std::bind( &game::load_weather, this, _1 ) );
     nextweather = calendar::turn;
 
     read_from_file_optional( worldpath + name.base_path() + ".log",
                              std::bind( &player::load_memorial_file, &u, _1 ) );
 
 #ifdef __ANDROID__
-    read_from_file_optional( worldpath + name.base_path() + ".shortcuts",
+    read_from_file_optional( cata::path( worldpath + name.base_path() + ".shortcuts" ),
                              std::bind( &game::load_shortcuts, this, _1 ) );
 #endif
 

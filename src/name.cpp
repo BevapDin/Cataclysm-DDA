@@ -72,7 +72,7 @@ static void load( JsonIn &jsin )
 
 void load_from_file( std::string const &filename )
 {
-    read_from_file_json( filename, load );
+    read_from_file_json( cata::path( filename ), load );
 }
 
 // get name groups for which searchFlag is a subset.
