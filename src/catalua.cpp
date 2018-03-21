@@ -855,17 +855,6 @@ void lua_callback_cleanup()
     lua_delete_global( "weather_old" );
 }
 
-void lua_callback_savelast( const char *callback_name )
-{
-    if( lua_state == nullptr ) {
-        return;
-    }
-    lua_State *L = lua_state;
-
-    lua_pushstring( L, callback_name );
-    lua_setglobal( L, "callback_last" );
-}
-
 void lua_callback( const char *callback_name, const CallbackArgumentContainer &callback_args )
 {
     if( lua_state == nullptr ) {
@@ -875,11 +864,10 @@ void lua_callback( const char *callback_name, const CallbackArgumentContainer &c
 
     lua_callback_cleanup();
 
-    int callback_arg_count = callback_args.size();
-    lua_pushinteger( L, callback_arg_count );
+    lua_pushinteger( L, callback_args.size() );
     lua_setglobal( L, "callback_arg_count" );
 
-    for( CallbackArgument callback_arg : callback_args ) {
+    for( auto callback_arg : callback_args ) {
         switch( callback_arg.GetType() ) {
             case CallbackArgumentTypeInteger:
                 lua_pushinteger(L, callback_arg.GetValueInteger() );
@@ -900,11 +888,12 @@ void lua_callback( const char *callback_name, const CallbackArgumentContainer &c
                 lua_pushnil( L );
                 break;
         }
-        std::string callback_arg_name = callback_arg.GetName();
-        lua_setglobal( L, callback_arg_name.c_str() );
+        lua_setglobal( L, callback_arg.GetName().c_str() );
     }
 
-    lua_callback_savelast( callback_name );
+    lua_pushstring( L, callback_name );
+    lua_setglobal( L, "callback_last" );
+
     call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
 }
 
