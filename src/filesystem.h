@@ -39,6 +39,14 @@ class path
          */
         path filename() const;
         /**
+         * Returns the filename identified by the path stripped of its extension.
+         * Returns the substring from the beginning of @ref filename up to and not including
+         * the last period (.) character.
+         * If the filename is one of the special filesystem components dot or dot-dot, or
+         * if it has no periods, the function returns the entire filename().
+         */
+        path stem() const;
+        /**
          * Returns the directory name of the given path. Handles Windows and Unix
          * path separators. If the path does not contain a separator, an empty
          * string will be returned.

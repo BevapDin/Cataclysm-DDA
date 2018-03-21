@@ -429,6 +429,19 @@ cata::path cata::path::filename() const
     return path( data.substr( p + 1 ) );
 }
 
+cata::path cata::path::stem() const
+{
+    const path name = path.filename();
+    if( name.data == "." || name.data == ".." ) {
+        return path();
+    }
+    const std::string::size_type p = name.data.rfind( '.' );
+    if( p == std::string::npos ) {
+        return name;
+    }
+    return path( name.data.substr( 0, p ) );
+}
+
 cata::path cata::path::parent_path() const
 {
     const std::string::size_type p = data.find_last_of( "/\\" );

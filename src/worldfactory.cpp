@@ -329,12 +329,6 @@ void worldfactory::init()
     for( const auto &world_dir : get_directories_with( qualifiers, FILENAMES["savedir"], true ) ) {
         // get the save files
         auto world_sav_files = get_files_from_path( SAVE_EXTENSION, world_dir, false );
-        // split the save file names between the directory and the extension
-        for( auto &world_sav_file : world_sav_files ) {
-            size_t save_index = world_sav_file.find( SAVE_EXTENSION );
-            world_sav_file = world_sav_file.substr( world_dir.size() + 1,
-                                                    save_index - ( world_dir.size() + 1 ) );
-        }
         // the directory name is the name of the world
         const std::string worldname = native_to_utf8( cata::path( world_dir ).filename() );
 
@@ -344,7 +338,8 @@ void worldfactory::init()
         all_worlds[worldname]->world_name = worldname;
         // add sav files
         for( auto &world_sav_file : world_sav_files ) {
-            all_worlds[worldname]->world_saves.push_back( save_t::from_base_path( world_sav_file ) );
+            all_worlds[worldname]->world_saves.push_back( save_t::from_base_path( cata::path(
+                        world_sav_file ).stem() ) );
         }
         mman->load_mods_list( all_worlds[worldname] );
 
