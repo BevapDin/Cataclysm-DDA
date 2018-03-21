@@ -30,39 +30,36 @@ enum CallbackArgumentType : int {
     Item
 };
 
-class CallbackArgument
-{
-    private:
-        std::string name = "";
-        CallbackArgumentType type = CallbackArgumentType::Undefined;
+struct CallbackArgument {
+    std::string name = "";
+    CallbackArgumentType type = CallbackArgumentType::Undefined;
 
-        int value_integer = 0;
-        float value_number = 0.0f;
-        std::string value_string = "";
-        tripoint value_tripoint = tripoint( 0, 0, 0 );
-        item value_item = item();
+    int value_integer = 0;
+    float value_number = 0.0f;
+    std::string value_string = "";
+    tripoint value_tripoint = tripoint( 0, 0, 0 );
+    item value_item = item();
 
-    public:
-        CallbackArgument( const std::string &arg_name, int arg_value ) : name( arg_name ),
-            type( CallbackArgumentType::Integer ), value_integer( arg_value ) {
-        }
-        CallbackArgument( const std::string &arg_name, double arg_value ) : name( arg_name ),
-            type( CallbackArgumentType::Number ), value_number( ( float ) arg_value ) {
-        }
-        CallbackArgument( const std::string &arg_name, float arg_value ) : name( arg_name ),
-            type( CallbackArgumentType::Number ), value_number( arg_value ) {
-        }
-        CallbackArgument( const std::string &arg_name, const std::string &arg_value ) : name( arg_name ),
-            type( CallbackArgumentType::String ), value_string( arg_value ) {
-        }
-        CallbackArgument( const std::string &arg_name, const tripoint &arg_value ) : name( arg_name ),
-            type( CallbackArgumentType::Tripoint ), value_tripoint( arg_value ) {
-        }
-        CallbackArgument( const std::string &arg_name, const item &arg_value ) : name( arg_name ),
-            type( CallbackArgumentType::Item ), value_item( arg_value ) {
-        }
+    CallbackArgument( const std::string &arg_name, int arg_value ) : name( arg_name ),
+        type( CallbackArgumentType::Integer ), value_integer( arg_value ) {
+    }
+    CallbackArgument( const std::string &arg_name, double arg_value ) : name( arg_name ),
+        type( CallbackArgumentType::Number ), value_number( ( float ) arg_value ) {
+    }
+    CallbackArgument( const std::string &arg_name, float arg_value ) : name( arg_name ),
+        type( CallbackArgumentType::Number ), value_number( arg_value ) {
+    }
+    CallbackArgument( const std::string &arg_name, const std::string &arg_value ) : name( arg_name ),
+        type( CallbackArgumentType::String ), value_string( arg_value ) {
+    }
+    CallbackArgument( const std::string &arg_name, const tripoint &arg_value ) : name( arg_name ),
+        type( CallbackArgumentType::Tripoint ), value_tripoint( arg_value ) {
+    }
+    CallbackArgument( const std::string &arg_name, const item &arg_value ) : name( arg_name ),
+        type( CallbackArgumentType::Item ), value_item( arg_value ) {
+    }
 #ifdef LUA
-        void Save( lua_State *L, int top );
+    void Save( lua_State *L, int top );
 #endif //LUA
 };
 
