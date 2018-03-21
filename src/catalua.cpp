@@ -866,7 +866,7 @@ void lua_callback_savelast( const char *callback_name )
     lua_setglobal( L, "callback_last" );
 }
 
-void lua_callback( const char *callback_name, CallbackArgumentContainer callback_args )
+void lua_callback( const char *callback_name, const CallbackArgumentContainer &callback_args )
 {
     if( lua_state == nullptr ) {
         return;
@@ -880,21 +880,25 @@ void lua_callback( const char *callback_name, CallbackArgumentContainer callback
     lua_setglobal( L, "callback_arg_count" );
 
     for( CallbackArgument callback_arg : callback_args ) {
-        std::string callback_arg_type = callback_arg.GetType();
-        if( callback_arg_type == "string" ) {
-             lua_pushstring( L, callback_arg.GetValueString().c_str() );
-        } else if ( callback_arg_type == "integer" ) {
-             lua_pushinteger(L, callback_arg.GetValueInt());
-        } else if ( callback_arg_type == "double" ) {
-             lua_pushnumber(L, callback_arg.GetValueDouble());
-        } else if ( callback_arg_type == "float" ) {
-             lua_pushnumber(L, callback_arg.GetValueFloat());
-        } else if ( callback_arg_type == "tripoint" ) {
-             LuaValue<tripoint>::push_reg( L, callback_arg.GetValueTripoint() );
-        } else if ( callback_arg_type == "item" ) {
-             LuaValue<item>::push_reg( L, callback_arg.GetValueItem() );
-        } else {
-             lua_pushnil( L );
+        switch( callback_arg.GetType() ) {
+            case CallbackArgumentTypeInteger:
+                lua_pushinteger(L, callback_arg.GetValueInteger() );
+                break;
+            case CallbackArgumentTypeNumber:
+                lua_pushnumber(L, callback_arg.GetValueNumber() );
+                break;
+            case CallbackArgumentTypeString:
+                lua_pushstring( L, callback_arg.GetValueString().c_str() );
+                break;
+            case CallbackArgumentTypeTripoint:
+                LuaValue<tripoint>::push_reg( L, callback_arg.GetValueTripoint() );
+                break;
+            case CallbackArgumentTypeItem:
+                LuaValue<item>::push_reg( L, callback_arg.GetValueItem() );
+                break;
+            default:
+                lua_pushnil( L );
+                break;
         }
         std::string callback_arg_name = callback_arg.GetName();
         lua_setglobal( L, callback_arg_name.c_str() );
@@ -1336,5 +1340,5 @@ void lua_callback( const char* )
 
 #endif
 
-void lua_callback( const char*, CallbackArgumentContainer );
+void lua_callback( const char*, const &CallbackArgumentContainer );
 void lua_callback( const char* );

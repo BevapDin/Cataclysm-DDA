@@ -11,71 +11,81 @@
 #include <vector>
 #include <list>
 
+enum CallbackArgumentType : int {
+    CallbackArgumentTypeUndefined = -1,
+    CallbackArgumentTypeInteger = 0,
+    CallbackArgumentTypeNumber,
+    CallbackArgumentTypeDouble = CallbackArgumentTypeNumber,
+    CallbackArgumentTypeFloat = CallbackArgumentTypeNumber,
+    CallbackArgumentTypeString,
+    CallbackArgumentTypeTripoint,
+    CallbackArgumentTypeItem
+};
+
 class CallbackArgument
 {
     private:
         std::string name;
-        std::string type;
+        CallbackArgumentType type;
+
         int value_integer;
-        double value_double;
-        float value_float;
+        float value_number;
         std::string value_string;
         tripoint value_tripoint;
         item value_item;
-    public:
-        CallbackArgument( std::string arg_name, int arg_value ) {
-            name = arg_name;
-            type = "integer";
-            value_integer = arg_value;
-        };
-        CallbackArgument( std::string arg_name, double arg_value ) {
-            name = arg_name;
-            type = "double";
-            value_double = arg_value;
-        };
-        CallbackArgument( std::string arg_name, float arg_value ) {
-            name = arg_name;
-            type = "float";
-            value_float = arg_value;
-        };
-        CallbackArgument( std::string arg_name, std::string arg_value ) {
-            name = arg_name;
-            type = "string";
-            value_string = arg_value;
-        };
-        CallbackArgument( std::string arg_name, tripoint arg_value ) {
-            name = arg_name;
-            type = "tripoint";
-            value_tripoint = arg_value;
-        };
-        CallbackArgument( std::string arg_name, item arg_value ) {
-            name = arg_name;
-            type = "item";
-            value_item = arg_value;
-        };
 
-        std::string GetName() {
+    public:
+        CallbackArgument( const std::string &arg_name, int arg_value ) {
+            name = arg_name;
+            type = CallbackArgumentTypeInteger;
+            value_integer = arg_value;
+        }
+        CallbackArgument( const std::string &arg_name, float arg_value ) {
+            name = arg_name;
+            type = CallbackArgumentTypeNumber;
+            value_number = arg_value;
+        }
+        CallbackArgument( const std::string &arg_name, double arg_value ) {
+            name = arg_name;
+            type = CallbackArgumentTypeNumber;
+            value_number = (float)arg_value;
+        }
+        CallbackArgument( const std::string &arg_name, const std::string &arg_value ) {
+            name = arg_name;
+            type = CallbackArgumentTypeString;
+            value_string = arg_value;
+        }
+        CallbackArgument( const std::string &arg_name, const tripoint &arg_value ) {
+            name = arg_name;
+            type = CallbackArgumentTypeTripoint;
+            value_tripoint = arg_value;
+        }
+        CallbackArgument( const std::string &arg_name, const item &arg_value ) {
+            name = arg_name;
+            type = CallbackArgumentTypeItem;
+            value_item = arg_value;
+        }
+
+        const std::string GetName() {
             return name;
         }
-        std::string GetType() {
+        CallbackArgumentType GetType() {
             return type;
         }
-        int GetValueInt() {
+
+        int GetValueInteger() {
             return value_integer;
         }
-        int GetValueDouble() {
-            return value_double;
+        float GetValueNumber() {
+            return value_number;
         }
-        int GetValueFloat() {
-            return value_float;
-        }
-        std::string GetValueString() {
+        const std::string GetValueString() {
             return value_string;
         }
-        tripoint GetValueTripoint() {
+        const tripoint GetValueTripoint() {
             return value_tripoint;
         }
-        item GetValueItem() {
+        const item GetValueItem() {
             return value_item;
         }
 };
@@ -108,7 +118,7 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &md, int t
  * Execute a callback that can be overridden by all mods,
  * storing provided callback arguments in _G.
  */
-void lua_callback( const char *callback_name, CallbackArgumentContainer callback_args );
+void lua_callback( const char *callback_name, const CallbackArgumentContainer &callback_args );
 
 /**
  * Execute a callback that can be overridden by all mods.
