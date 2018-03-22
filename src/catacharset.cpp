@@ -109,6 +109,15 @@ unicode_code_point UTF8_getch( const std::string &src )
     return UTF8_getch( &ptr, &len );
 }
 
+void utf8_iterator::decode_next()
+{
+    const char *ptr = text->c_str() + index;
+    int len = text->length() - index;
+    current_ucp = UTF8_getch( &ptr, &len );
+    index = text->length() - len;
+}
+
+
 std::string value_as_utf8( const unicode_code_point &ucp )
 {
     std::uint32_t ch = value_as_uint32( ucp );
@@ -153,14 +162,12 @@ std::string value_as_utf8( const unicode_code_point &ucp )
 //Calculate width of a Unicode string
 //Latin characters have a width of 1
 //CJK characters have a width of 2, etc
-int utf8_width(const char *s, const bool ignore_tags)
+int utf8_width( const std::string &str, const bool ignore_tags )
 {
-    int len = strlen(s);
-    const char *ptr = s;
     int w = 0;
     bool inside_tag = false;
-    while(len > 0) {
-        const unicode_code_point ch = UTF8_getch(&ptr, &len);
+    for( utf8_iterator iter = utf8_begin( str ); iter != utf8_end( str ); ++iter ) {
+        const unicode_code_point ch = *iter;
         if( ch == unknown_unicode ) {
             continue;
         }
@@ -180,14 +187,9 @@ int utf8_width(const char *s, const bool ignore_tags)
     return w;
 }
 
-int utf8_width(const std::string &str, const bool ignore_tags)
-{
-    return utf8_width(str.c_str(), ignore_tags);
-}
-
 int utf8_width(const utf8_wrapper &str, const bool ignore_tags)
 {
-    return utf8_width(str.c_str(), ignore_tags);
+    return utf8_width(str.str(), ignore_tags);
 }
 
 //Convert cursor position to byte offset
@@ -435,7 +437,7 @@ std::string utf8_to_native( const std::string &str )
 int center_text_pos(const char *text, int start_pos, int end_pos)
 {
     int full_screen = end_pos - start_pos + 1;
-    int str_len = utf8_width(text);
+    int str_len = utf8_width( std::string( text ) );
     int position = (full_screen - str_len) / 2;
 
     if (position <= 0) {
@@ -468,13 +470,8 @@ int center_text_pos( const utf8_wrapper &text, int start_pos, int end_pos )
 // When we declare a hard dependency on gcc 4.7+, turn this back into a delegated constructor.
 void utf8_wrapper::init_utf8_wrapper()
 {
-    const char *utf8str = _data.c_str();
-    int len = _data.length();
-    while(len > 0) {
-        const unicode_code_point ch = UTF8_getch(&utf8str, &len);
-        if( ch == unknown_unicode ) {
-            continue;
-        }
+    for( utf8_iterator iter = utf8_begin( _data ); iter != utf8_end( _data ); ++iter ) {
+        const unicode_code_point ch = *iter;
         _length++;
         _display_width += mk_wcwidth(ch);
     }
@@ -496,16 +493,16 @@ size_t utf8_wrapper::byte_start(size_t bstart, size_t start) const
     if(bstart >= _data.length()) {
         return _data.length();
     }
-    const char *utf8str = _data.c_str() + bstart;
-    int len = _data.length() - bstart;
-    while(len > 0 && start > 0) {
-        const unicode_code_point ch = UTF8_getch(&utf8str, &len);
+    const utf8_iterator start_iter = utf8_iterator( _data, bstart );
+    utf8_iterator iter = start_iter;
+    for( ; start > 0 && iter != utf8_end( _data ); ++iter ) {
+        const unicode_code_point ch = *iter;
         if( ch == unknown_unicode ) {
             continue;
         }
         start--;
     }
-    return utf8str - _data.c_str();
+    return iter - start_iter;
 }
 
 size_t utf8_wrapper::byte_start_display(size_t bstart, size_t start) const

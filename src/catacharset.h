@@ -45,13 +45,58 @@ class unicode_code_point {
         friend std::string value_as_utf8( const unicode_code_point &ucp );
 };
 
+class utf8_iterator {
+    private:
+        const std::string *text;
+        std::string::size_type index;
+        unicode_code_point current_ucp;
+
+        void decode_next();
+
+    public:
+        utf8_iterator( const std::string &text, const std::string::size_type index ) : text( &text ), index( index ), current_ucp() { decode_next(); }
+        utf8_iterator( const utf8_iterator & ) = default;
+
+        utf8_iterator &operator=( const utf8_iterator & ) = default;
+
+        bool operator==( const utf8_iterator &rhs ) const {
+            return text == rhs.text && index == rhs.index;
+        }
+        bool operator!=( const utf8_iterator &rhs ) const {
+            return !operator==( rhs );
+        }
+
+        unicode_code_point operator*() const {
+            return current_ucp;
+        }
+
+        utf8_iterator &operator++() {
+            decode_next();
+            return *this;
+        }
+
+        friend utf8_iterator utf8_begin( const std::string &text ) {
+            return utf8_iterator( text, 0 );
+        }
+        friend utf8_iterator utf8_end( const std::string &text ) {
+            return utf8_iterator( text, text.length() );
+        }
+
+        friend std::string::size_type operator-( const utf8_iterator &lhs, const utf8_iterator &rhs ) {
+            return lhs.index - rhs.index;
+        }
+};
+
+utf8_iterator utf8_begin( const std::string &text );
+utf8_iterator utf8_end( const std::string &text );
+std::string::size_type operator-( const utf8_iterator &lhs, const utf8_iterator &rhs );
+
 std::string value_as_utf8( const unicode_code_point &ucp );
 
 static constexpr unicode_code_point unknown_unicode( static_cast<std::uint32_t>( 0xFFFD ) );
 
 // convert cursorx value to byte position
 int cursorx_to_position( const char *line, int cursorx );
-int utf8_width( const char *s, const bool ignore_tags = false );
 int utf8_width( const std::string &str, const bool ignore_tags = false );
 int utf8_width( const utf8_wrapper &str, const bool ignore_tags = false );
 
