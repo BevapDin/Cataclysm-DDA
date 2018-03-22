@@ -159,7 +159,7 @@ void trim_and_print( const catacurses::window &w, int begin_y, int begin_x, int 
 
             if( iLength > width ) {
                 sTempText = sTempText.substr( 0, cursorx_to_position( sTempText.c_str(),
-                                              iTempLen - ( iLength - width ) - 1, NULL, -1 ) ) + "\u2026";
+                                              iTempLen - ( iLength - width ) - 1 ) ) + "\u2026";
             }
 
             sText += sColor + sTempText;

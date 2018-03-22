@@ -184,14 +184,9 @@ int utf8_width(const utf8_wrapper &str, const bool ignore_tags)
 
 //Convert cursor position to byte offset
 //returns the first character position in bytes behind the cursor position.
-//If the cursor is not on the first half of the character,
-//prevpos (which points to the first byte of the cursor located char)
-// should be a different value.
-int cursorx_to_position(const char *line, int cursorx, int *prevpos, int maxlen)
+int cursorx_to_position( const char *line, int cursorx )
 {
-    int dummy;
-    int i = 0, c = 0, *p = prevpos ? prevpos : &dummy;
-    *p = 0;
+    int i = 0, c = 0;
     while(c < cursorx) {
         const char *utf8str = line + i;
         int len = ANY_LENGTH;
@@ -204,17 +199,11 @@ int cursorx_to_position(const char *line, int cursorx, int *prevpos, int maxlen)
         if( len <= 0 ) {
             len = 1;
         }
-        if(maxlen >= 0 && maxlen < (i + len)) {
-            break;
-        }
         i += len;
         if( cw <= 0 ) {
             cw = 0;
         }
         c += cw;
-        if( c <= cursorx ) {
-            *p = i;
-        }
     }
     return i;
 }
@@ -227,7 +216,7 @@ std::string utf8_truncate(std::string s, size_t length)
         return s;
     }
 
-    last_pos = cursorx_to_position(s.c_str(), length, NULL, -1);
+    last_pos = cursorx_to_position( s.c_str(), length );
 
     return s.substr(0, last_pos);
 }
