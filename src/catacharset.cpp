@@ -102,6 +102,13 @@ unicode_code_point UTF8_getch(const char **src, int *srclen)
     return ch;
 }
 
+unicode_code_point UTF8_getch( const std::string &src )
+{
+    const char *ptr = src.c_str();
+    int len = src.length();
+    return UTF8_getch( &ptr, &len );
+}
+
 std::string utf32_to_utf8(uint32_t ch)
 {
     char out[5];

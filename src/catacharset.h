@@ -14,6 +14,7 @@ class unicode_code_point;
 
 // get a Unicode character from a utf8 string
 unicode_code_point UTF8_getch( const char **src, int *srclen );
+unicode_code_point UTF8_getch( const std::string &src );
 // from wcwidth.c, return "cell" width of a Unicode char
 int mk_wcwidth( const unicode_code_point &ucs );
 
