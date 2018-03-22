@@ -582,7 +582,7 @@ input_event input_manager::get_input_event()
             return input_event( KEY_BACKSPACE, CATA_INPUT_KEYBOARD );
         }
         rval.type = CATA_INPUT_KEYBOARD;
-        rval.text = utf32_to_utf8( lastchar );
+        rval.text = value_as_utf8( static_cast<std::uint32_t>( lastchar ) );
         previously_pressed_key = lastchar;
         // for compatibility only add the first byte, not the code point
         // as it would  conflict with the special keys defined by ncurses

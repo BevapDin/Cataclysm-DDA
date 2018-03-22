@@ -1031,7 +1031,7 @@ bool Font::draw_window( const catacurses::window &w, const int offsetx, const in
     return update;
 }
 
-static long alt_buffer = 0;
+static std::uint32_t alt_buffer = 0;
 static bool alt_down = false;
 
 static void begin_alt_code()
@@ -1049,7 +1049,7 @@ static bool add_alt_code( char c )
     return false;
 }
 
-static long end_alt_code()
+static std::uint32_t end_alt_code()
 {
     alt_down = false;
     return alt_buffer;
@@ -1298,10 +1298,10 @@ void CheckMessages()
             case SDL_KEYUP:
             {
                 if( ev.key.keysym.sym == SDLK_LALT || ev.key.keysym.sym == SDLK_RALT ) {
-                    int code = end_alt_code();
+                    const std::uint32_t code = end_alt_code();
                     if( code ) {
                         last_input = input_event(code, CATA_INPUT_KEYBOARD);
-                        last_input.text = utf32_to_utf8(code);
+                        last_input.text = value_as_utf8( code );
                     }
                 }
             }

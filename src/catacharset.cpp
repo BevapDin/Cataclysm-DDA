@@ -109,8 +109,9 @@ unicode_code_point UTF8_getch( const std::string &src )
     return UTF8_getch( &ptr, &len );
 }
 
-std::string utf32_to_utf8(uint32_t ch)
+std::string value_as_utf8( const unicode_code_point &ucp )
 {
+    std::uint32_t ch = value_as_uint32( ucp );
     char out[5];
     char *buf = out;
     static const unsigned char utf8FirstByte[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };

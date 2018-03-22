@@ -42,7 +42,10 @@ class unicode_code_point {
         }
 
         friend std::uint32_t value_as_uint32( const unicode_code_point &ucp );
+        friend std::string value_as_utf8( const unicode_code_point &ucp );
 };
+
+std::string value_as_utf8( const unicode_code_point &ucp );
 
 static constexpr unicode_code_point unknown_unicode( static_cast<std::uint32_t>( 0xFFFD ) );
 
@@ -62,7 +65,6 @@ int utf8_width( const utf8_wrapper &str, const bool ignore_tags = false );
 int center_text_pos( const char *text, int start_pos, int end_pos );
 int center_text_pos( const std::string &text, int start_pos, int end_pos );
 int center_text_pos( const utf8_wrapper &text, int start_pos, int end_pos );
-std::string utf32_to_utf8( uint32_t ch );
 std::string utf8_truncate( std::string s, size_t length );
 
 std::string base64_encode( std::string str );
