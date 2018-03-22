@@ -296,14 +296,14 @@ input_event input_manager::get_input_event()
         // but we should only return *one* key, so return the code point of it.
         const char *utf8str = rval.text.c_str();
         int len = rval.text.length();
-        const uint32_t cp = UTF8_getch( &utf8str, &len );
-        if( cp == UNKNOWN_UNICODE ) {
+        const unicode_code_point cp = UTF8_getch( &utf8str, &len );
+        if( cp == unknown_unicode ) {
             // Invalid UTF-8 sequence, this should never happen, what now?
             // Maybe return any error instead?
             previously_pressed_key = key;
             return input_event( key, CATA_INPUT_KEYBOARD );
         }
-        previously_pressed_key = cp;
+        previously_pressed_key = value_as_uint32( cp );
         // for compatibility only add the first byte, not the code point
         // as it would  conflict with the special keys defined by ncurses
         rval.add_input( key );

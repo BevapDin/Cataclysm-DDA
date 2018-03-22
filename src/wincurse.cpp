@@ -324,7 +324,6 @@ void cata_cursesport::curses_drawwindow( const catacurses::window &w )
 {
     WINDOW *const win = w.get<WINDOW>();
     int i,j,drawx,drawy;
-    wchar_t tmp;
     RECT update = {win->x * fontwidth, -1,
                    (win->x + win->width) * fontwidth, -1};
 
@@ -363,8 +362,8 @@ void cata_cursesport::curses_drawwindow( const catacurses::window &w )
                 const char* utf8str = cell.ch.c_str();
                 int len = cell.ch.length();
 
-                tmp = UTF8_getch(&utf8str, &len);
-                if (tmp != UNKNOWN_UNICODE) {
+                const unicode_code_point tmp = UTF8_getch( &utf8str, &len );
+                if( tmp != unknown_unicode ) {
 
                     int color = RGB(windowsPalette[FG].rgbRed,windowsPalette[FG].rgbGreen,windowsPalette[FG].rgbBlue);
                     SetTextColor(backbuffer,color);

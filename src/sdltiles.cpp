@@ -608,7 +608,7 @@ void BitmapFont::OutputChar(std::string ch, int x, int y, unsigned char color)
 {
     int len = ch.length();
     const char *s = ch.c_str();
-    const long t = UTF8_getch(&s, &len);
+    const long t = value_as_uint32( UTF8_getch( &s, &len ) );
     BitmapFont::OutputChar(t, x, y, color);
 }
 
@@ -1009,10 +1009,10 @@ bool Font::draw_window( const catacurses::window &w, const int offsetx, const in
             }
             const char *utf8str = cell.ch.c_str();
             int len = cell.ch.length();
-            const int codepoint = UTF8_getch( &utf8str, &len );
+            const unicode_code_point codepoint = UTF8_getch( &utf8str, &len );
             const catacurses::base_color FG = cell.FG;
             const catacurses::base_color BG = cell.BG;
-            if( codepoint != UNKNOWN_UNICODE ) {
+            if( codepoint != unknown_unicode ) {
                 const int cw = utf8_width( cell.ch );
                 if( cw < 1 ) {
                     // utf8_width() may return a negative width
@@ -1314,7 +1314,7 @@ void CheckMessages()
                 if( !add_alt_code( *ev.text.text ) ) {
                     const char *c = ev.text.text;
                     int len = strlen(ev.text.text);
-                    const unsigned lc = UTF8_getch( &c, &len );
+                    const unsigned lc = value_as_uint32( UTF8_getch( &c, &len ) );
                     last_input = input_event( lc, CATA_INPUT_KEYBOARD );
                     last_input.text = ev.text.text;
                     text_refresh = true;
@@ -1324,7 +1324,7 @@ void CheckMessages()
             {
                 const char *c = ev.edit.text;
                 int len = strlen( ev.edit.text );
-                const unsigned lc = UTF8_getch( &c, &len );
+                const unsigned lc = value_as_uint32( UTF8_getch( &c, &len ) );
                 last_input = input_event( lc, CATA_INPUT_KEYBOARD );
                 last_input.edit = ev.edit.text;
                 last_input.edit_refresh = true;

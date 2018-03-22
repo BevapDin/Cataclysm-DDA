@@ -5,15 +5,46 @@
 #include <stdint.h>
 #include <string>
 #include <array>
+#include <cstdint>
+
 #define ANY_LENGTH 5
-#define UNKNOWN_UNICODE 0xFFFD
 
 class utf8_wrapper;
+class unicode_code_point;
 
 // get a Unicode character from a utf8 string
-uint32_t UTF8_getch( const char **src, int *srclen );
+unicode_code_point UTF8_getch( const char **src, int *srclen );
 // from wcwidth.c, return "cell" width of a Unicode char
-int mk_wcwidth( uint32_t ucs );
+int mk_wcwidth( const unicode_code_point &ucs );
+
+class unicode_code_point {
+    private:
+        std::uint32_t value_;
+
+    public:
+        constexpr unicode_code_point() : value_( 0 ) { }
+        constexpr unicode_code_point( const decltype( value_ ) v ) : value_( v ) { }
+        constexpr unicode_code_point( const char ascii_character ) : value_( ascii_character ) { }
+
+        template<typename T>
+        unicode_code_point( const T ) = delete;
+
+        bool operator==( const unicode_code_point &rhs ) const {
+            return value_ == rhs.value_;
+        }
+        bool operator!=( const unicode_code_point &rhs ) const {
+            return !operator==( rhs );
+        }
+
+        explicit operator bool() const {
+            return value_ != 0;
+        }
+
+        friend std::uint32_t value_as_uint32( const unicode_code_point &ucp );
+};
+
+static constexpr unicode_code_point unknown_unicode( static_cast<std::uint32_t>( 0xFFFD ) );
+
 // convert cursorx value to byte position
 int cursorx_to_position( const char *line, int cursorx, int *prevppos = NULL, int maxlen = -1 );
 int utf8_width( const char *s, const bool ignore_tags = false );

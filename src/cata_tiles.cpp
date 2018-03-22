@@ -1573,7 +1573,7 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
     }
 
     if( !tt ) {
-        uint32_t sym = UNKNOWN_UNICODE;
+        uint32_t sym = value_as_uint32( unknown_unicode );
         nc_color col = c_white;
         if (category == C_FURNITURE) {
             const furn_str_id fid( id );
@@ -1595,7 +1595,7 @@ bool cata_tiles::draw_from_id_string(std::string id, TILE_CATEGORY category,
                 const mtype &mt = mid.obj();
                 int len = mt.sym.length();
                 const char *s = mt.sym.c_str();
-                sym = UTF8_getch(&s, &len);
+                sym = value_as_uint32( UTF8_getch( &s, &len ) );
                 col = mt.color;
             }
         } else if (category == C_VEHICLE_PART) {

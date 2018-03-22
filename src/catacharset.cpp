@@ -9,18 +9,28 @@
 #include "mmsystem.h"
 #endif
 
+std::uint32_t value_as_uint32( const unicode_code_point &ucp )
+{
+    return ucp.value_;
+}
+
+int mk_wcwidth( const unicode_code_point &ucp )
+{
+    return ::mk_wcwidth( value_as_uint32( ucp ) );
+}
+
 //copied from SDL2_ttf code
 //except type changed from unsigned to uint32_t
-uint32_t UTF8_getch(const char **src, int *srclen)
+unicode_code_point UTF8_getch(const char **src, int *srclen)
 {
     const unsigned char *p = *(const unsigned char **)src;
     int left = 0;
     bool overlong = false;
     bool underflow = false;
-    uint32_t ch = UNKNOWN_UNICODE;
+    uint32_t ch = value_as_uint32( unknown_unicode );
 
     if (*srclen == 0) {
-        return UNKNOWN_UNICODE;
+        return unknown_unicode;
     }
     if (p[0] >= 0xFC) {
         if ((p[0] & 0xFE) == 0xFC) {
@@ -72,7 +82,7 @@ uint32_t UTF8_getch(const char **src, int *srclen)
     while (left > 0 && *srclen > 0) {
         ++p;
         if ((p[0] & 0xC0) != 0x80) {
-            ch = UNKNOWN_UNICODE;
+            ch = value_as_uint32( unknown_unicode );
             break;
         }
         ch <<= 6;
@@ -87,7 +97,7 @@ uint32_t UTF8_getch(const char **src, int *srclen)
     if (overlong || underflow ||
         (ch >= 0xD800 && ch <= 0xDFFF) ||
         (ch == 0xFFFE || ch == 0xFFFF) || ch > 0x10FFFF) {
-        ch = UNKNOWN_UNICODE;
+        return unknown_unicode;
     }
     return ch;
 }
@@ -108,7 +118,7 @@ std::string utf32_to_utf8(uint32_t ch)
         utf8Bytes = 4;
     } else {
         utf8Bytes = 3;
-        ch = UNKNOWN_UNICODE;
+        ch = value_as_uint32( unknown_unicode );
     }
 
     buf += utf8Bytes;
@@ -142,8 +152,8 @@ int utf8_width(const char *s, const bool ignore_tags)
     int w = 0;
     bool inside_tag = false;
     while(len > 0) {
-        uint32_t ch = UTF8_getch(&ptr, &len);
-        if (ch == UNKNOWN_UNICODE) {
+        const unicode_code_point ch = UTF8_getch(&ptr, &len);
+        if( ch == unknown_unicode ) {
             continue;
         }
         if (ignore_tags) {
@@ -188,7 +198,7 @@ int cursorx_to_position(const char *line, int cursorx, int *prevpos, int maxlen)
         if ( utf8str[0] == 0 ) {
             break;
         }
-        uint32_t ch = UTF8_getch(&utf8str, &len);
+        const unicode_code_point ch = UTF8_getch(&utf8str, &len);
         int cw = mk_wcwidth(ch);
         len = ANY_LENGTH - len;
         if( len <= 0 ) {
@@ -464,8 +474,8 @@ void utf8_wrapper::init_utf8_wrapper()
     const char *utf8str = _data.c_str();
     int len = _data.length();
     while(len > 0) {
-        const uint32_t ch = UTF8_getch(&utf8str, &len);
-        if(ch == UNKNOWN_UNICODE) {
+        const unicode_code_point ch = UTF8_getch(&utf8str, &len);
+        if( ch == unknown_unicode ) {
             continue;
         }
         _length++;
@@ -492,8 +502,8 @@ size_t utf8_wrapper::byte_start(size_t bstart, size_t start) const
     const char *utf8str = _data.c_str() + bstart;
     int len = _data.length() - bstart;
     while(len > 0 && start > 0) {
-        const uint32_t ch = UTF8_getch(&utf8str, &len);
-        if(ch == UNKNOWN_UNICODE) {
+        const unicode_code_point ch = UTF8_getch(&utf8str, &len);
+        if( ch == unknown_unicode ) {
             continue;
         }
         start--;
@@ -513,8 +523,8 @@ size_t utf8_wrapper::byte_start_display(size_t bstart, size_t start) const
     int len = _data.length() - bstart;
     while(len > 0) {
         const char *prevstart = utf8str;
-        const uint32_t ch = UTF8_getch(&utf8str, &len);
-        if(ch == UNKNOWN_UNICODE) {
+        const unicode_code_point ch = UTF8_getch(&utf8str, &len);
+        if( ch == unknown_unicode ) {
             continue;
         }
         const int width = mk_wcwidth(ch);
@@ -570,9 +580,9 @@ long utf8_wrapper::at(size_t start) const
     const char *utf8str = _data.c_str() + bstart;
     int len = _data.length() - bstart;
     while(len > 0) {
-        const uint32_t ch = UTF8_getch(&utf8str, &len);
-        if(ch != UNKNOWN_UNICODE) {
-            return ch;
+        const unicode_code_point ch = UTF8_getch(&utf8str, &len);
+        if( ch != unknown_unicode ) {
+            return value_as_uint32( ch );
         }
     }
     return 0;

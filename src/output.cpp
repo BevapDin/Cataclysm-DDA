@@ -1124,7 +1124,7 @@ std::string word_rewrap( const std::string &in, int width )
     for( int j = 0, x = 0; j < ( int )in.size(); ) {
         const char *ins = instr + j;
         int len = ANY_LENGTH;
-        uint32_t uc = UTF8_getch( &ins, &len );
+        const unicode_code_point uc = UTF8_getch( &ins, &len );
 
         if( uc == '<' ) { // maybe skip non-printing tag
             std::vector<size_t>::iterator it;
@@ -1159,7 +1159,7 @@ std::string word_rewrap( const std::string &in, int width )
             lastout = j = lastwb;
         }
 
-        if( uc == ' ' || uc >= 0x2E80 ) {
+        if( uc == ' ' || value_as_uint32( uc ) >= 0x2E80 ) {
             lastwb = j;
         }
     }
