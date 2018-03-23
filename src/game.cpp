@@ -2649,8 +2649,7 @@ void game::load( const save_t &name )
 {
     using namespace std::placeholders;
 
-    const std::string worldpath = get_world_base_save_path() + "/";
-    const std::string playerfile = worldpath + name.base_path() + ".sav";
+    const cata::path playerfile = get_world_base_save_path() / ( name.base_path() + ".sav" );
 
     // Now load up the master game data; factions (and more?)
     load_master();
@@ -2658,19 +2657,19 @@ void game::load( const save_t &name )
     u.name = name.player_name();
     // This should be initialized more globally (in player/Character constructor)
     u.weapon = item( "null", 0 );
-    if( !read_from_file( cata::path( playerfile ), std::bind( &game::unserialize, this, _1 ) ) ) {
+    if( !read_from_file( playerfile, std::bind( &game::unserialize, this, _1 ) ) ) {
         return;
     }
 
-    read_from_file_optional( cata::path( worldpath + name.base_path() + ".weather" ),
+    read_from_file_optional( get_world_base_save_path() / ( name.base_path() + ".weather" ),
                              std::bind( &game::load_weather, this, _1 ) );
     nextweather = calendar::turn;
 
-    read_from_file_optional( worldpath + name.base_path() + ".log",
+    read_from_file_optional( worldpath / ( name.base_path() + ".log" ),
                              std::bind( &player::load_memorial_file, &u, _1 ) );
 
 #ifdef __ANDROID__
-    read_from_file_optional( cata::path( worldpath + name.base_path() + ".shortcuts" ),
+    read_from_file_optional( worldpath / ( name.base_path() + ".shortcuts" ) ),
                              std::bind( &game::load_shortcuts, this, _1 ) );
 #endif
 
@@ -2679,7 +2678,7 @@ void game::load( const save_t &name )
     u.recalc_sight_limits();
 
     if( !gamemode ) {
-        gamemode.reset( new special_game() );
+    gamemode.reset( new special_game() );
     }
 
     safe_mode = get_option<bool>( "SAFEMODE" ) ? SAFE_MODE_ON : SAFE_MODE_OFF;
@@ -2689,7 +2688,7 @@ void game::load( const save_t &name )
     get_auto_pickup().load_character(); // Load character auto pickup rules
     get_safemode().load_character(); // Load character safemode rules
     zone_manager::get_manager().load_zones(); // Load character world zones
-    read_from_file_optional( get_world_base_save_path() + "/uistate.json", []( std::istream & stream ) {
+    read_from_file_optional( get_world_base_save_path() / "uistate.json", []( std::istream & stream ) {
         JsonIn jsin( stream );
         uistate.deserialize( jsin );
     } );
@@ -2826,17 +2825,15 @@ bool game::save_maps()
 
 bool game::save_player_data()
 {
-    const std::string playerfile = get_player_base_save_path();
-
-    const bool saved_data = write_to_file( cata::path( playerfile + ".sav" ), [&](
+    const bool saved_data = write_to_file( get_player_base_save_path() + ".sav", [&](
     std::ostream & fout ) {
         serialize( fout );
     }, _( "player data" ) );
-    const bool saved_weather = write_to_file( cata::path( playerfile + ".weather" ), [&](
+    const bool saved_weather = write_to_file( get_player_base_save_path() + ".weather", [&](
     std::ostream & fout ) {
         save_weather( fout );
     }, _( "weather state" ) );
-    const bool saved_log = write_to_file( cata::path( playerfile + ".log" ), [&](
+    const bool saved_log = write_to_file( get_player_base_save_path() + ".log", [&](
     std::ostream & fout ) {
         fout << u.dump_memorial();
     }, _( "player memorial" ) );
