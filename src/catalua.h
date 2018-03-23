@@ -10,14 +10,6 @@
 #include <sstream>
 #include <list>
 
-#ifdef LUA
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
-#endif //LUA
-
 enum CallbackArgumentType : int {
     Integer = 0,
     Number,
@@ -42,7 +34,7 @@ struct CallbackArgument {
         type( CallbackArgumentType::Integer ), value_integer( arg_value ) {
     }
     CallbackArgument( const std::string &arg_name, double arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::Number ), value_number( ( float ) arg_value ) {
+        type( CallbackArgumentType::Number ), value_number( arg_value ) {
     }
     CallbackArgument( const std::string &arg_name, float arg_value ) : name( arg_name ),
         type( CallbackArgumentType::Number ), value_number( arg_value ) {
@@ -57,7 +49,7 @@ struct CallbackArgument {
         type( CallbackArgumentType::Item ), value_item( arg_value ) {
     }
 #ifdef LUA
-    void Save( lua_State *L, int top );
+    void Save( int top );
 #endif //LUA
 };
 

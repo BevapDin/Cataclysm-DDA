@@ -35,6 +35,11 @@
 #include "filesystem.h"
 #include "string_input_popup.h"
 #include "mutation.h"
+extern "C" {
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+}
 
 #include <type_traits>
 
@@ -820,8 +825,9 @@ int call_lua(std::string tocall)
 }
 
 
-void CallbackArgument::Save( lua_State *L, int top )
+void CallbackArgument::Save( int top )
 {
+    lua_State * const L = lua_state;
     lua_pushstring( L, name.c_str() );
     switch( type ) {
         case CallbackArgumentType::Integer:
@@ -837,12 +843,12 @@ void CallbackArgument::Save( lua_State *L, int top )
             LuaValue<tripoint>::push_reg( L, value_tripoint );
             break;
         case CallbackArgumentType::Item:
-                LuaValue<item>::push_reg( L, value_item );
-                break;
-            default:
-                    lua_pushnil( L );
-                    break;
-                }
+            LuaValue<item>::push_reg( L, value_item );
+            break;
+        default:
+            lua_pushnil( L );
+            break;
+        }
     lua_settable( L, top );
 }
 
@@ -856,7 +862,7 @@ void lua_callback( const char *callback_name, const CallbackArgumentContainer &c
     lua_newtable( L );
     int top = lua_gettop( L );
     for( auto callback_arg : callback_args ) {
-        callback_arg.Save( L, top );
+        callback_arg.Save( top );
     }
     lua_setglobal( L, "callback_data" );
 
