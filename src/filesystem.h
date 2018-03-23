@@ -82,6 +82,9 @@ class path
         bool operator==( const path &p ) const {
             return native() == p.native();
         }
+        path operator/( const path &p ) const {
+            return path( string() + '/' + p.string() );
+        }
         bool operator==( const path &rhs ) const {
             return data == rhs.data;
         }

@@ -164,7 +164,7 @@ public:
     bool draw_window( const catacurses::window &win );
     bool draw_window( const catacurses::window &win, int offsetx, int offsety );
 
-    static std::unique_ptr<Font> load_font(const std::string &typeface, int fontsize, int fontwidth, int fontheight, bool fontblending);
+    static std::unique_ptr<Font> load_font( const cata::path &typeface, int fontsize, int fontwidth, int fontheight, bool fontblending );
 public:
 #ifdef __ANDROID__
     float opacity; // 0-1
@@ -180,7 +180,7 @@ public:
  */
 class CachedTTFFont : public Font {
 public:
-    CachedTTFFont( int w, int h, std::string typeface, int fontsize, bool fontblending );
+    CachedTTFFont( int w, int h, const cata::path &typeface, int fontsize, bool fontblending );
     ~CachedTTFFont() override = default;
 
     virtual void OutputChar(std::string ch, int x, int y, unsigned char color) override;
@@ -216,7 +216,7 @@ protected:
  */
 class BitmapFont : public Font {
 public:
-    BitmapFont( int w, int h, const std::string &path );
+    BitmapFont( int w, int h, const cata::path &path );
     ~BitmapFont() override = default;
 
     virtual void OutputChar(std::string ch, int x, int y, unsigned char color) override;
@@ -2908,19 +2908,13 @@ static void font_folder_list( std::ofstream& fout, const cata::path &path, std::
                         // First appearance of this font family
                         bitmap_fonts.insert(fami);
                     } else { // Font in set. Add filename to family string
-                        size_t start = f.string().find_last_of("/\\");
-                        size_t end = f.string().find_last_of(".");
-                        if (start != std::string::npos && end != std::string::npos) {
-                            fout << " [" << f.string().substr(start + 1, end - start - 1) + "]";
-                        } else {
-                            dbg( D_INFO ) << "Skipping wrong font file: " << f;
-                        }
+                        fout << " [" << stem( f ) + "]";
                     }
                 }
                 fout << std::endl;
 
                 // Add filename and font index
-                fout << f.string() << std::endl;
+                fout << f << std::endl;
                 fout << i << std::endl;
 
                 // We use only 1 style in bitmap fonts.
@@ -2958,16 +2952,14 @@ static void save_font_list()
     font_folder_list( fout, cata::path( "/usr/local/share/fonts" ), bitmap_fonts);
     char *home;
     if( ( home = getenv( "HOME" ) ) ) {
-        std::string userfontdir = home;
-        userfontdir += "/.fonts";
-        font_folder_list( fout, cata::path( userfontdir ), bitmap_fonts );
+        font_folder_list( fout, cata::path( home ) / ".fonts", bitmap_fonts );
     }
 #endif
 }
 
-static std::string find_system_font( const std::string &name, int& faceIndex )
+static cata::optional<cata::path> find_system_font( const cata::path &name, int& faceIndex )
 {
-    const std::string fontlist_path = FILENAMES["fontlist"];
+    const cata::path &fontlist_path = FILENAMES["fontlist"];
     std::ifstream fin(fontlist_path.c_str());
     if ( !fin.is_open() ) {
         // Try opening the fontlist at the old location.
@@ -2979,7 +2971,7 @@ static std::string find_system_font( const std::string &name, int& faceIndex )
             fin.open(fontlist_path.c_str());
             if( !fin ) {
                 dbg( D_ERROR ) << "Can't open or create fontlist file " << fontlist_path;
-                return "";
+                return {};
             }
         } else {
             // Write out fontlist to the new location.
@@ -2993,17 +2985,17 @@ static std::string find_system_font( const std::string &name, int& faceIndex )
         while( getline( fin, fname ) && getline( fin, fpath ) && getline( fin, iline ) ) {
             if (0 == strcasecmp(fname.c_str(), name.c_str())) {
                 faceIndex = atoi( iline.c_str() );
-                return fpath;
+                return cata::path( fpath );
             }
         }
     }
 
-    return "";
+    return {};
 }
 
 // bitmap font size test
 // return face index that has this size or below
-static int test_face_size( const std::string &f, int size, int faceIndex )
+static int test_face_size( const cata::path &f, const int size, const int faceIndex )
 {
     const TTF_Font_Ptr fnt( TTF_OpenFontIndex( f.c_str(), size, faceIndex ) );
     if( fnt ) {
@@ -3082,12 +3074,12 @@ void catacurses::init_interface()
     load_soundset();
 
     // Reset the font pointer
-    font = Font::load_font( fl.typeface, fl.fontsize, fl.fontwidth, fl.fontheight, fl.fontblending );
+    font = Font::load_font( cata::path( fl.typeface ), fl.fontsize, fl.fontwidth, fl.fontheight, fl.fontblending );
     if( !font ) {
         throw std::runtime_error( "loading font data failed" );
     }
-    map_font = Font::load_font( fl.map_typeface, fl.map_fontsize, fl.map_fontwidth, fl.map_fontheight, fl.fontblending );
-    overmap_font = Font::load_font( fl.overmap_typeface, fl.overmap_fontsize,
+    map_font = Font::load_font( cata::path( fl.map_typeface ), fl.map_fontsize, fl.map_fontwidth, fl.map_fontheight, fl.fontblending );
+    overmap_font = Font::load_font( cata::path( fl.overmap_typeface ), fl.overmap_fontsize,
                                     fl.overmap_fontwidth, fl.overmap_fontheight, fl.fontblending );
     stdscr = newwin(get_terminal_height(), get_terminal_width(),0,0);
     //newwin calls `new WINDOW`, and that will throw, but not return nullptr.
@@ -3108,13 +3100,13 @@ void load_tileset() {
     tilecontext->do_tile_loading_report();
 }
 
-std::unique_ptr<Font> Font::load_font(const std::string &typeface, int fontsize, int fontwidth, int fontheight, const bool fontblending )
+std::unique_ptr<Font> Font::load_font( const cata::path &typeface, int fontsize, int fontwidth, int fontheight, const bool fontblending )
 {
-    if( ends_with( cata::path( typeface ), ".bmp" ) || ends_with( cata::path( typeface ), ".png" ) ) {
+    if( ends_with( typeface, ".bmp" ) || ends_with( typeface, ".png" ) ) {
         // Seems to be an image file, not a font.
         // Try to load as bitmap font.
         try {
-            return std::unique_ptr<Font>( new BitmapFont( fontwidth, fontheight, FILENAMES["fontdir"].native() + typeface ) );
+            return std::unique_ptr<Font>( new BitmapFont( fontwidth, fontheight, FILENAMES["fontdir"] / typeface ) );
         } catch(std::exception &err) {
             dbg( D_ERROR ) << "Failed to load " << typeface << ": " << err.what();
             // Continue to load as truetype font
@@ -3122,7 +3114,7 @@ std::unique_ptr<Font> Font::load_font(const std::string &typeface, int fontsize,
     }
     // Not loaded as bitmap font (or it failed), try to load as truetype
     try {
-        return std::unique_ptr<Font>( new CachedTTFFont( fontwidth, fontheight, typeface, fontsize, fontblending ) );
+        return std::unique_ptr<Font>( new CachedTTFFont( fontwidth, fontheight, cata::path( typeface ), fontsize, fontblending ) );
     } catch(std::exception &err) {
         dbg( D_ERROR ) << "Failed to load " << typeface << ": " << err.what();
     }
@@ -3290,10 +3282,10 @@ int get_terminal_height() {
     return TERMINAL_HEIGHT;
 }
 
-BitmapFont::BitmapFont( const int w, const int h, const std::string &typeface )
+BitmapFont::BitmapFont( const int w, const int h, const cata::path &typeface )
 : Font( w, h )
 {
-    dbg( D_INFO ) << "Loading bitmap font [" + typeface + "]." ;
+    dbg( D_INFO ) << "Loading bitmap font " << typeface << "." ;
     SDL_Surface_Ptr asciiload( IMG_Load( typeface.c_str() ) );
     if( !asciiload ) {
         throw std::runtime_error(IMG_GetError());
@@ -3375,34 +3367,34 @@ void BitmapFont::draw_ascii_lines(unsigned char line_id, int drawx, int drawy, i
     }
 }
 
-CachedTTFFont::CachedTTFFont( const int w, const int h, std::string typeface, int fontsize, const bool fontblending )
+CachedTTFFont::CachedTTFFont( const int w, const int h, const cata::path &typeface_, int fontsize, const bool fontblending )
 : Font( w, h )
 , fontblending( fontblending )
 {
+    cata::path typeface = typeface_;
     int faceIndex = 0;
-    const std::string sysfnt = find_system_font(typeface, faceIndex);
-    if (!sysfnt.empty()) {
-        typeface = sysfnt;
-        dbg( D_INFO ) << "Using font [" + typeface + "]." ;
+    if( const auto sysfnt = find_system_font( typeface, faceIndex ) ) {
+        typeface = *sysfnt;
+        dbg( D_INFO ) << "Using font [" << typeface << "]." ;
     }
     //make fontdata compatible with wincurse
-    if( !exists( cata::path( typeface ) ) ) {
+    if( !exists( typeface ) ) {
         faceIndex = 0;
-        typeface = FILENAMES["fontdir"].native() + typeface + ".ttf";
-        dbg( D_INFO ) << "Using compatible font [" + typeface + "]." ;
+        typeface = FILENAMES["fontdir"] / ( typeface.native() + ".ttf" );
+        dbg( D_INFO ) << "Using compatible font [" << typeface << "]." ;
     }
     //different default font with wincurse
-    if( !exists( cata::path( typeface ) ) ) {
+    if( !exists( typeface ) ) {
         faceIndex = 0;
-        typeface = FILENAMES["fontdir"].native() + "fixedsys.ttf";
-        dbg( D_INFO ) << "Using fallback font [" + typeface + "]." ;
+        typeface = FILENAMES["fontdir"] / "fixedsys.ttf";
+        dbg( D_INFO ) << "Using fallback font [" << typeface << "]." ;
     }
-    dbg( D_INFO ) << "Loading truetype font [" + typeface + "]." ;
+    dbg( D_INFO ) << "Loading truetype font [" << typeface << "]." ;
     if(fontsize <= 0) {
         fontsize = fontheight - 1;
     }
     // SDL_ttf handles bitmap fonts size incorrectly
-    if( ends_with( cata::path( typeface ), ".fon" ) ) {
+    if( ends_with( typeface, ".fon" ) ) {
         faceIndex = test_face_size(typeface, fontsize, faceIndex);
     }
     font.reset( TTF_OpenFontIndex( typeface.c_str(), fontsize, faceIndex ) );
