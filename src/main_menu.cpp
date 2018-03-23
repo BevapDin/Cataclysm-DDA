@@ -769,7 +769,7 @@ bool main_menu::new_character_tab()
                               templates[sel3].c_str() ) ) {
                     const cata::path path = FILENAMES["templatedir"] / ( utf8_to_native( templates[sel3] ) +
                                             ".template" );
-                    if( std::remove( path.c_str() ) != 0 ) {
+                    if( !remove( path ) ) {
                         popup( _( "Sorry, something went wrong." ) );
                     } else {
                         templates.erase( templates.begin() + sel3 );
