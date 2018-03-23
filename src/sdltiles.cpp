@@ -116,7 +116,7 @@ struct music_playlist {
 
 std::map<std::string, music_playlist> playlists;
 
-std::string current_soundpack_path = "";
+cata::path current_soundpack_path;
 #endif
 
 struct SDL_Renderer_deleter {
@@ -3475,7 +3475,7 @@ void play_music_file( const std::string &filename, int volume ) {
         return;
     }
 
-    const std::string path = ( current_soundpack_path + "/" + filename );
+    const cata::path path = current_soundpack_path / filename;
     current_music = Mix_LoadMUS(path.c_str());
     if( current_music == nullptr ) {
         dbg( D_ERROR ) << "Failed to load audio file " << path << ": " << Mix_GetError();
@@ -3615,8 +3615,8 @@ void sfx::load_sound_effects( JsonObject &jsobj ) {
     while( jsarr.has_more() ) {
         sound_effect new_sound_effect;
         const std::string file = jsarr.next_string();
-        std::string path = ( current_soundpack_path + "/" + file );
-        new_sound_effect.chunk.reset( load_chunk( path ) );
+        const cata::path path = current_soundpack_path / file;
+        new_sound_effect.chunk.reset( load_chunk( path.string() ) );
         if( !new_sound_effect.chunk ) {
             dbg( D_ERROR ) << "Failed to load audio file " << path << ": " << Mix_GetError();
             continue; // don't want empty chunks in the map
@@ -3799,10 +3799,10 @@ void sfx::play_ambient_variant_sound( const std::string &id, const std::string &
 
 void load_soundset() {
 #ifdef SDL_SOUND
-    const std::string default_path = FILENAMES["defaultsounddir"];
+    const cata::path &default_path = FILENAMES["defaultsounddir"];
     const std::string default_soundpack = "basic";
     std::string current_soundpack = get_option<std::string>( "SOUNDPACKS" );
-    std::string soundpack_path;
+    cata::path soundpack_path;
 
     // Get current soundpack and it's directory path.
     if (current_soundpack.empty()) {
@@ -3811,10 +3811,10 @@ void load_soundset() {
         current_soundpack = default_soundpack;
     } else {
         dbg( D_INFO ) << "Current soundpack is: " << current_soundpack;
-        soundpack_path = SOUNDPACKS[current_soundpack];
+        soundpack_path = cata::path( SOUNDPACKS[current_soundpack] );
     }
 
-    if (soundpack_path.empty()) {
+    if (soundpack_path.string().empty()) {
         dbg( D_ERROR ) << "Soundpack with name " << current_soundpack << " can't be found or empty string";
         soundpack_path = default_path;
         current_soundpack = default_soundpack;
