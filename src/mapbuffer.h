@@ -7,6 +7,11 @@
 #include <memory>
 #include <string>
 #include "enums.h"
+
+namespace cata
+{
+class path;
+} // namespace cata
 struct point;
 struct tripoint;
 struct submap;
@@ -73,7 +78,7 @@ class mapbuffer
         void remove_submap( tripoint addr );
         submap *unserialize_submaps( const tripoint &p );
         void deserialize( JsonIn &jsin );
-        void save_quad( const std::string &dirname, const std::string &filename,
+        void save_quad( const cata::path &dirname, const cata::path &filename,
                         const tripoint &om_addr, std::list<tripoint> &submaps_to_delete,
                         bool delete_after_save );
         submap_map_t submaps;
