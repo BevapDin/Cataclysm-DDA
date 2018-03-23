@@ -8,7 +8,6 @@
 
 #include <string>
 #include <sstream>
-#include <vector>
 #include <list>
 
 #ifdef LUA
@@ -20,7 +19,6 @@ extern "C" {
 #endif //LUA
 
 enum CallbackArgumentType : int {
-    Undefined = -1,
     Integer = 0,
     Number,
     Double = Number,
@@ -31,14 +29,14 @@ enum CallbackArgumentType : int {
 };
 
 struct CallbackArgument {
-    std::string name = "";
-    CallbackArgumentType type = CallbackArgumentType::Undefined;
+    std::string name;
+    CallbackArgumentType type;
 
-    int value_integer = 0;
-    float value_number = 0.0f;
-    std::string value_string = "";
-    tripoint value_tripoint = tripoint( 0, 0, 0 );
-    item value_item = item();
+    int value_integer;
+    float value_number;
+    std::string value_string;
+    tripoint value_tripoint;
+    item value_item;
 
     CallbackArgument( const std::string &arg_name, int arg_value ) : name( arg_name ),
         type( CallbackArgumentType::Integer ), value_integer( arg_value ) {
