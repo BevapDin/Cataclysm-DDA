@@ -765,16 +765,16 @@ void options_manager::cOpt::setValue( std::string sSetIn )
  */
 static std::vector<std::pair<std::string, std::string>> build_resource_list(
             std::map<std::string, std::string> &resource_option, const std::string &operation_name,
-            const std::string &dirname_label, const std::string &filename_label )
+            const std::string &dirname_label, const std::string &filename )
 {
     std::vector<std::pair<std::string, std::string>> resource_names;
 
     resource_option.clear();
-    auto const resource_dirs = get_directories_with( FILENAMES[filename_label],
+    auto const resource_dirs = get_directories_with( filename,
                                FILENAMES[dirname_label], true );
 
     for( auto &resource_dir : resource_dirs ) {
-        read_from_file( resource_dir / FILENAMES[filename_label], [&]( std::istream & fin ) {
+        read_from_file( resource_dir / filename, [&]( std::istream & fin ) {
             std::string resource_name;
             std::string view_name;
             // should only have 2 values inside it, otherwise is going to only load the last 2 values
@@ -815,7 +815,7 @@ static std::vector<std::pair<std::string, std::string>> build_resource_list(
 std::vector<std::pair<std::string, std::string>> options_manager::build_tilesets_list()
 {
     auto tileset_names = build_resource_list( TILESETS, "tileset",
-                         "gfxdir", "tileset-conf" );
+                         "gfxdir", FILENAMES["tileset-conf"].string() );
 
     if( tileset_names.empty() ) {
         tileset_names.emplace_back( "hoder", translate_marker( "Hoder's" ) );
@@ -829,7 +829,8 @@ std::vector<std::pair<std::string, std::string>> options_manager::load_soundpack
 {
     // build_resource_list will clear &resource_option - first param
     std::map<std::string, std::string> local_soundpacks;
-    auto soundpack_names = build_resource_list( local_soundpacks, "soundpack", path, "soundpack-conf" );
+    auto soundpack_names = build_resource_list( local_soundpacks, "soundpack", path,
+                           FILENAMES["soundpack-conf"].string() );
 
     // Copy over found soundpacks
     SOUNDPACKS.insert( local_soundpacks.begin(), local_soundpacks.end() );
