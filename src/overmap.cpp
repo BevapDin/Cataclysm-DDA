@@ -3403,8 +3403,8 @@ void overmap::place_radios()
 
 void overmap::open( overmap_special_batch &enabled_specials )
 {
-    const cata::path plrfilename( overmapbuffer::player_filename( loc.x, loc.y ) );
-    const cata::path terfilename( overmapbuffer::terrain_filename( loc.x, loc.y ) );
+    const cata::path plrfilename = overmapbuffer::player_filename( loc.x, loc.y );
+    const cata::path terfilename = overmapbuffer::terrain_filename( loc.x, loc.y );
 
     using namespace std::placeholders;
     if( read_from_file_optional( terfilename, std::bind( &overmap::unserialize, this, _1 ) ) ) {
@@ -3428,14 +3428,14 @@ void overmap::open( overmap_special_batch &enabled_specials )
 // Note: this may throw io errors from std::ofstream
 void overmap::save() const
 {
-    std::string const plrfilename = overmapbuffer::player_filename( loc.x, loc.y );
-    std::string const terfilename = overmapbuffer::terrain_filename( loc.x, loc.y );
+    const cata::path plrfilename = overmapbuffer::player_filename( loc.x, loc.y );
+    const cata::path terfilename = overmapbuffer::terrain_filename( loc.x, loc.y );
 
-    ofstream_wrapper fout_player( plrfilename );
+    ofstream_wrapper fout_player( plrfilename.string() );
     serialize_view( fout_player );
     fout_player.close();
 
-    ofstream_wrapper_exclusive fout_terrain( terfilename );
+    ofstream_wrapper_exclusive fout_terrain( terfilename.string() );
     serialize( fout_terrain );
     fout_terrain.close();
 }

@@ -19,7 +19,10 @@ struct om_vehicle;
 
 struct oter_t;
 using oter_id = int_id<oter_t>;
-
+namespace cata
+{
+class path;
+} // namespace cata
 class overmap;
 class overmap_special;
 class overmap_special_batch;
@@ -60,8 +63,8 @@ class overmapbuffer
     public:
         overmapbuffer();
 
-        static std::string terrain_filename( int const x, int const y );
-        static std::string player_filename( int const x, int const y );
+        static cata::path terrain_filename( int const x, int const y );
+        static cata::path player_filename( int const x, int const y );
 
         /**
          * Uses overmap coordinates, that means x and y are directly
