@@ -1300,6 +1300,3 @@ void lua_callback( const char* )
 }
 
 #endif
-
-void lua_callback( const char*, const CallbackArgumentContainer& );
-void lua_callback( const char* );
