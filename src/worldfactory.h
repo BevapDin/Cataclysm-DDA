@@ -47,6 +47,11 @@ class world_data
 {
     public:
         options_manager::options_container WORLD_OPTIONS;
+        /**
+         * A (possibly empty) list of (idents of) mods that
+         * should be loaded for this world.
+         */
+        std::vector<std::string> active_mod_order;
 
         world_data();
 
@@ -60,11 +65,6 @@ struct WORLD : public world_data {
     std::string world_path;
     std::string world_name;
     std::vector<save_t> world_saves;
-    /**
-     * A (possibly empty) list of (idents of) mods that
-     * should be loaded for this world.
-     */
-    std::vector<std::string> active_mod_order;
 
     WORLD();
 
