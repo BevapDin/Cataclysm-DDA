@@ -69,7 +69,7 @@ struct WORLD : public world_data {
     WORLD();
 
         static WORLD *from_path( const std::string &dir );
-
+        static WORLD *create_special( const std::string &name );
 
     bool save_exists( const save_t &name ) const;
     void add_save( const save_t &name );

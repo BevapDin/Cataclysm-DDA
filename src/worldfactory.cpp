@@ -181,6 +181,18 @@ WORLDPTR worldfactory::make_new_world( bool show_prompt )
     return add_world( retworld );
 }
 
+WORLD *WORLD::create_special( const std::string &name )
+{
+    std::unique_ptr<WORLD> wptr( new WORLD() );
+    wptr->world_name = name;
+    wptr->WORLD_OPTIONS["DELETE_WORLD"].setValue("yes");
+    wptr->world_path = FILENAMES["savedir"] + utf8_to_native( wptr->world_name );
+    if( !wptr->save() ) {
+        return nullptr;
+    }
+    return wptr.release();
+}
+
 WORLDPTR worldfactory::make_new_world(special_game_id special_type)
 {
     std::string worldname;
@@ -201,26 +213,12 @@ WORLDPTR worldfactory::make_new_world(special_game_id special_type)
         return all_worlds[worldname];
     }
 
-    WORLDPTR special_world = new WORLD();
-    special_world->world_name = worldname;
-
-    special_world->WORLD_OPTIONS["DELETE_WORLD"].setValue("yes");
-
-    // add world to world list!
-    all_worlds[worldname] = special_world;
-
-    std::ostringstream path;
-    path << FILENAMES["savedir"] << utf8_to_native( worldname );
-    special_world->world_path = path.str();
-
-    if( !special_world->save() ) {
-        delete all_worlds[worldname];
-        delete special_world;
-        all_worlds.erase(worldname);
+    WORLD *const wptr = WORLD::create_special( worldname );
+    if( !wptr ) {
         return nullptr;
     }
-
-    return special_world;
+    all_worlds[wptr->world_name] = wptr;
+    return wptr;
 }
 
 WORLDPTR worldfactory::convert_to_world(std::string origin_path)
