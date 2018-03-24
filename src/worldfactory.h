@@ -43,10 +43,22 @@ class save_t
         save_t &operator=( const save_t & ) = default;
 };
 
-struct WORLD {
+class world_data
+{
+    public:
+        options_manager::options_container WORLD_OPTIONS;
+
+        world_data();
+
+        void load_options( JsonIn &jsin );
+        void load_legacy_options( std::istream &fin );
+
+        void save_options( JsonOut &jout ) const;
+};
+
+struct WORLD : public world_data {
     std::string world_path;
     std::string world_name;
-    options_manager::options_container WORLD_OPTIONS;
     std::vector<save_t> world_saves;
     /**
      * A (possibly empty) list of (idents of) mods that
@@ -58,11 +70,6 @@ struct WORLD {
 
     bool save_exists( const save_t &name ) const;
     void add_save( const save_t &name );
-
-    void load_options( JsonIn &jsin );
-    void load_legacy_options( std::istream &fin );
-
-    void save_options( JsonOut &jout ) const;
 };
 
 class mod_manager;

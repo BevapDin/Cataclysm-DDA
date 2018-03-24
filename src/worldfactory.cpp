@@ -58,13 +58,17 @@ std::string get_next_valid_worldname()
     return worldname;
 }
 
+world_data::world_data()
+    : WORLD_OPTIONS( get_options().get_world_defaults() )
+{
+}
+
 WORLD::WORLD()
 {
     world_name = get_next_valid_worldname();
     std::ostringstream path;
     path << FILENAMES["savedir"] << utf8_to_native( world_name );
     world_path = path.str();
-    WORLD_OPTIONS = get_options().get_world_defaults();
 
     world_saves.clear();
     active_mod_order = world_generator->get_mod_manager().get_default_mods();
@@ -1327,7 +1331,7 @@ bool worldfactory::valid_worldname(std::string name, bool automated)
     return false;
 }
 
-void WORLD::save_options( JsonOut &jout ) const
+void world_data::save_options( JsonOut &jout ) const
 {
     jout.start_array();
     for( auto &elem : WORLD_OPTIONS ) {
@@ -1343,7 +1347,7 @@ void WORLD::save_options( JsonOut &jout ) const
     jout.end_array();
 }
 
-void WORLD::load_options( JsonIn &jsin )
+void world_data::load_options( JsonIn &jsin )
 {
     // if core data version isn't specified then assume version 1
     int version = 1;
@@ -1373,7 +1377,7 @@ void WORLD::load_options( JsonIn &jsin )
     WORLD_OPTIONS[ "CORE_VERSION" ].setValue( version );
 }
 
-void WORLD::load_legacy_options( std::istream &fin )
+void world_data::load_legacy_options( std::istream &fin )
 {
     //load legacy txt
     std::string sLine;
@@ -1396,12 +1400,12 @@ bool worldfactory::load_world_options(WORLDPTR &world)
 
     using namespace std::placeholders;
     const auto path = world->world_path + "/" + FILENAMES["worldoptions"];
-    if( read_from_file_optional_json( path, std::bind( &WORLD::load_options, world, _1 ) ) ) {
+    if( read_from_file_optional_json( path, std::bind( &world_data::load_options, world, _1 ) ) ) {
         return true;
     }
 
     const auto legacy_path = world->world_path + "/" + FILENAMES["legacy_worldoptions"];
-    if( read_from_file_optional( legacy_path, std::bind( &WORLD::load_legacy_options, world, _1 ) ) ) {
+    if( read_from_file_optional( legacy_path, std::bind( &world_data::load_legacy_options, world, _1 ) ) ) {
         if( save_world( world ) ) {
             // Remove old file as the options have been saved to the new file.
             remove_file( legacy_path );
