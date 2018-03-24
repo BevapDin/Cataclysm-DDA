@@ -300,37 +300,8 @@ void worldfactory::init()
     // worlds exist by having an option file
     // create worlds
     for( const auto &world_dir : get_directories_with(qualifiers, FILENAMES["savedir"], true) ) {
-        // get the save files
-        auto world_sav_files = get_files_from_path( SAVE_EXTENSION, world_dir, false );
-        // split the save file names between the directory and the extension
-        for( auto &world_sav_file : world_sav_files ) {
-            size_t save_index = world_sav_file.find( SAVE_EXTENSION );
-            world_sav_file = world_sav_file.substr( world_dir.size() + 1,
-                                                    save_index - ( world_dir.size() + 1 ) );
-        }
-        // the directory name is the name of the world
-        std::string worldname;
-        size_t name_index = world_dir.find_last_of( "/\\" );
-        worldname = native_to_utf8( world_dir.substr( name_index + 1 ) );
-
-        // create and store the world
-        all_worlds[worldname] = new WORLD();
-        // give the world a name
-        all_worlds[worldname]->world_name = worldname;
-        // add sav files
-        for( auto &world_sav_file : world_sav_files ) {
-            all_worlds[worldname]->world_saves.push_back( save_t::from_base_path( world_sav_file ) );
-        }
-        // set world path
-        all_worlds[worldname]->world_path = world_dir;
-        mman->load_mods_list(all_worlds[worldname]);
-
-        // load options into the world
-        if ( !load_world_options(all_worlds[worldname]) ) {
-            all_worlds[worldname]->WORLD_OPTIONS = get_options().get_world_defaults();
-            all_worlds[worldname]->WORLD_OPTIONS["DELETE_WORLD"].setValue("yes");
-            all_worlds[worldname]->save();
-        }
+        WORLD *const w = WORLD::from_path( world_dir );
+        all_worlds[w->world_name] = w;
     }
 
     // check to see if there exists a worldname "save" which denotes that a world exists in the save
@@ -347,6 +318,30 @@ void worldfactory::init()
             all_worlds[converted_world->world_name] = converted_world;
         }
     }
+}
+
+WORLD *WORLD::from_path( const std::string &dir )
+{
+    std::unique_ptr<WORLD> wptr( new WORLD() );
+    wptr->world_name = native_to_utf8( dir.substr( dir.find_last_of( "/\\" ) + 1 ) );
+    wptr->world_path = dir;
+
+    const auto savs = get_files_from_path( SAVE_EXTENSION, dir, false );
+    for( auto &sav : savs ) {
+        const std::string base = sav.substr( dir.size() + 1, sav.find( SAVE_EXTENSION ) - dir.size() - 1 );
+        wptr->world_saves.push_back( save_t::from_base_path( base ) );
+    }
+
+    world_generator->get_mod_manager().load_mods_list( wptr.get() );
+
+    // load options into the world
+    if( !world_generator->load_world_options( wptr.get() ) ) {
+        wptr->WORLD_OPTIONS = get_options().get_world_defaults();
+        wptr->WORLD_OPTIONS["DELETE_WORLD"].setValue( "yes" );
+        wptr->save();
+    }
+
+    return wptr.release();
 }
 
 bool worldfactory::has_world( const std::string &name ) const

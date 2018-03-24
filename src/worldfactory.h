@@ -68,6 +68,9 @@ struct WORLD : public world_data {
 
     WORLD();
 
+        static WORLD *from_path( const std::string &dir );
+
+
     bool save_exists( const save_t &name ) const;
     void add_save( const save_t &name );
 
@@ -82,6 +85,7 @@ typedef WORLD *WORLDPTR;
 
 class worldfactory
 {
+        friend WORLD;
     public:
         worldfactory();
         ~worldfactory();
