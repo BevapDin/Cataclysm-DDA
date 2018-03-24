@@ -1385,7 +1385,7 @@ void world_data::load_legacy_options( std::istream &fin )
     }
 }
 
-bool worldfactory::load_world_options(WORLDPTR &world)
+bool worldfactory::load_world_options( const WORLDPTR world )
 {
     world->WORLD_OPTIONS = get_options().get_world_defaults();
 

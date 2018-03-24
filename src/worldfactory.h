@@ -141,7 +141,7 @@ class worldfactory
                             const std::vector<std::string> &mods, bool is_active_list, const std::string &text_if_empty,
                             const catacurses::window &w_shift );
 
-        bool load_world_options( WORLDPTR &world );
+        bool load_world_options( WORLDPTR world );
 
         WORLDPTR add_world( WORLDPTR world );
 
