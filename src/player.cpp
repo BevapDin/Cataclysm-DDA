@@ -9589,8 +9589,9 @@ void player::do_read( item &book )
                                           pgettext( "memorial_female", "Reached skill level %1$d in %2$s." ),
                                           skill_level.level(), skill_name );
                     }
+                    const std::string skill_increase_source = "book";
                     CallbackArgumentContainer lua_callback_args_info;
-                    lua_callback_args_info.emplace_back( "skill_increased_source", "book" );
+                    lua_callback_args_info.emplace_back( "skill_increased_source", skill_increase_source );
                     lua_callback_args_info.emplace_back( "skill_increased_id", skill.str() );
                     lua_callback_args_info.emplace_back( "skill_increased_level", originalSkillLevel + 1 );
                     lua_callback( "on_player_skill_increased", lua_callback_args_info );
@@ -10731,8 +10732,9 @@ void player::practice( const skill_id &id, int amount, int cap )
         int newLevel = get_skill_level( id );
         if (is_player() && newLevel > oldLevel) {
             add_msg( m_good, _( "Your skill in %s has increased to %d!" ), skill_name, newLevel );
+            const std::string skill_increase_source = "training";
             CallbackArgumentContainer lua_callback_args_info;
-            lua_callback_args_info.emplace_back( "skill_increased_source", "training" );
+            lua_callback_args_info.emplace_back( "skill_increased_source", skill_increase_source );
             lua_callback_args_info.emplace_back( "skill_increased_id", id.str() );
             lua_callback_args_info.emplace_back( "skill_increased_level", newLevel );
             lua_callback( "on_player_skill_increased", lua_callback_args_info );
