@@ -3727,6 +3727,10 @@ void player::on_dodge( Creature *source, float difficulty )
             melee_attack( *source, false, tec );
         }
     }
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( "source_dodge", source );
+    lua_callback_args_info.emplace_back( "difficulty_dodge", difficulty );
+    lua_callback( "on_player_dodge", lua_callback_args_info );
 }
 
 void player::on_hit( Creature *source, body_part bp_hit,
@@ -3801,6 +3805,11 @@ void player::on_hit( Creature *source, body_part bp_hit,
             source->add_effect( effect_blind, 2 );
         }
     }
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( "source_hit", source );
+    lua_callback_args_info.emplace_back( "body_part_hit", bp_hit );
+    //lua_callback_args_info.emplace_back( "dealt_projectile_attack", proj );
+    lua_callback( "on_player_hit", lua_callback_args_info );
 }
 
 void player::on_hurt( Creature *source, bool disturb /*= true*/ )
@@ -3826,6 +3835,10 @@ void player::on_hurt( Creature *source, bool disturb /*= true*/ )
     if( is_dead_state() ) {
         set_killer( source );
     }
+    CallbackArgumentContainer lua_callback_args_info;
+    lua_callback_args_info.emplace_back( "source_hurt", source );
+    lua_callback_args_info.emplace_back( "disturb", disturb );
+    lua_callback( "on_player_hurt", lua_callback_args_info );
 }
 
 bool player::immune_to( body_part bp, damage_unit dam ) const

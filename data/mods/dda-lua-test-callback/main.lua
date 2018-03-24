@@ -76,6 +76,24 @@ MOD.on_player_skill_increased = function()
 
 end
 
+MOD.on_player_dodge = function()
+
+  MOD.DisplayCallbackMessages("on_player_dodge")
+
+end
+
+MOD.on_player_hit = function()
+
+  MOD.DisplayCallbackMessages("on_player_hit")
+
+end
+
+MOD.on_player_hurt = function()
+
+  MOD.DisplayCallbackMessages("on_player_hurt")
+
+end
+
 MOD.on_player_mutation_gain = function()
 
   MOD.DisplayCallbackMessages("on_player_mutation_gain")
@@ -154,12 +172,33 @@ MOD.lua_put_off = function(item)
 
 end
 
+MOD.lua_dodge = function(creature)
+
+  MOD.MessageWithLog("LUA:You <color_red>have dodged</color> by <color_yellow>"..tostring(creature:get_name()).."</color>")
+
+end
+
+MOD.lua_hit = function(creature)
+
+  MOD.MessageWithLog("LUA:You <color_red>were hit</color> by <color_yellow>"..tostring(creature:get_name()).."</color>")
+
+end
+
+MOD.lua_hurt = function(creature)
+
+  MOD.MessageWithLog("LUA:You <color_red>were hurt</color> by <color_yellow>"..tostring(creature:get_name()).."</color>")
+
+end
+
 MOD.DisplayCallbackMessages = function( callback_name )
 
   local callback_arg_functions = {
     mapgen_terrain_coordinates = MOD.lua_tripoint,
     item_last_worn = MOD.lua_put_on,
-    item_last_taken_off = MOD.lua_put_off
+    item_last_taken_off = MOD.lua_put_off,
+    source_dodge = MOD.lua_dodge,
+    source_hit = MOD.lua_hit,
+    source_hurt = MOD.lua_hurt
   }
 
   MOD.MessageWithLog ("Callback name is <color_cyan>"..tostring(callback_name).."</color>")
