@@ -70,6 +70,8 @@ struct WORLD : public world_data {
 
     bool save_exists( const save_t &name ) const;
     void add_save( const save_t &name );
+
+        bool save( bool is_conversion = false ) const;
 };
 
 class mod_manager;
@@ -95,7 +97,6 @@ class worldfactory
         bool has_world( const std::string &name ) const;
 
         void set_active_world( WORLDPTR world );
-        bool save_world( WORLDPTR world = NULL, bool is_conversion = false );
 
         void init();
 
