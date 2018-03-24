@@ -278,23 +278,7 @@ bool worldfactory::save_world(WORLDPTR world, bool is_conversion)
         const auto savefile = world->world_path + "/" + FILENAMES["worldoptions"];
         const bool saved = write_to_file( savefile, [&]( std::ostream &fout ) {
             JsonOut jout( fout );
-
-            jout.start_array();
-
-            for( auto &elem : world->WORLD_OPTIONS ) {
-                if( elem.second.getDefaultText() != "" ) {
-                    jout.start_object();
-
-                    jout.member( "info", elem.second.getTooltip() );
-                    jout.member( "default", elem.second.getDefaultText( false ) );
-                    jout.member( "name", elem.first );
-                    jout.member( "value", elem.second.getValue() );
-
-                    jout.end_object();
-                }
-            }
-
-            jout.end_array();
+            world->save_options( jout );
         }, _( "world data" ) );
         if( !saved ) {
             return false;
@@ -1341,6 +1325,22 @@ bool worldfactory::valid_worldname(std::string name, bool automated)
         popup(msg, PF_GET_KEY);
     }
     return false;
+}
+
+void WORLD::save_options( JsonOut &jout ) const
+{
+    jout.start_array();
+    for( auto &elem : WORLD_OPTIONS ) {
+        if( !elem.second.getDefaultText().empty() ) {
+            jout.start_object();
+            jout.member( "info", elem.second.getTooltip() );
+            jout.member( "default", elem.second.getDefaultText( false ) );
+            jout.member( "name", elem.first );
+            jout.member( "value", elem.second.getValue() );
+            jout.end_object();
+        }
+    }
+    jout.end_array();
 }
 
 void WORLD::load_options( JsonIn &jsin )

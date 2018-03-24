@@ -61,6 +61,8 @@ struct WORLD {
 
     void load_options( JsonIn &jsin );
     void load_legacy_options( std::istream &fin );
+
+    void save_options( JsonOut &jout ) const;
 };
 
 class mod_manager;
