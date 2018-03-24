@@ -1353,7 +1353,7 @@ void activity_handlers::train_finish( player_activity *act, player *p )
         lua_callback_args_info.emplace_back( "skill_increased_source", "training" );
         lua_callback_args_info.emplace_back( "skill_increased_id", sk.str() );
         lua_callback_args_info.emplace_back( "skill_increased_level", new_skill_level );
-        lua_callback( "on_skill_increased", lua_callback_args_info );
+        lua_callback( "on_player_skill_increased", lua_callback_args_info );
         act->set_to_null();
         return;
     }

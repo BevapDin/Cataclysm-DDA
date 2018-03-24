@@ -34,12 +34,6 @@ function MOD.on_new_player_created()
 
 end
 
-MOD.on_skill_increased = function()
-
-  MOD.DisplayCallbackMessages("on_skill_increased")
-
-end
-
 MOD.on_turn_passed = function()
 
   MOD.DisplayCallbackMessages("on_turn_passed")
@@ -76,51 +70,57 @@ MOD.on_year_passed = function()
 
 end
 
-MOD.on_mutation_gain = function()
+MOD.on_player_skill_increased = function()
 
-  MOD.DisplayCallbackMessages("on_mutation_gain")
-
-end
-
-MOD.on_mutation_loss = function()
-
-  MOD.DisplayCallbackMessages("on_mutation_loss")
+  MOD.DisplayCallbackMessages("on_player_skill_increased")
 
 end
 
-MOD.on_stat_change = function()
+MOD.on_player_mutation_gain = function()
 
-  MOD.DisplayCallbackMessages("on_stat_change")
-
-end
-
-MOD.on_item_wear = function()
-
-  MOD.DisplayCallbackMessages("on_item_wear")
+  MOD.DisplayCallbackMessages("on_player_mutation_gain")
 
 end
 
-MOD.on_item_takeoff = function()
+MOD.on_player_mutation_loss = function()
 
-  MOD.DisplayCallbackMessages("on_item_takeoff")
-
-end
-
-MOD.on_effect_int_changes = function()
-
-  MOD.DisplayCallbackMessages("on_effect_int_change")
+  MOD.DisplayCallbackMessages("on_player_mutation_loss")
 
 end
 
-MOD.on_mission_assignment = function()
+MOD.on_player_stat_change = function()
 
-  MOD.DisplayCallbackMessages("on_mission_assignment")
+  MOD.DisplayCallbackMessages("on_player_stat_change")
 
 end
 
-MOD.on_mission_finished = function()
+MOD.on_player_item_wear = function()
 
-  MOD.DisplayCallbackMessages("on_mission_finished")
+  MOD.DisplayCallbackMessages("on_player_item_wear")
+
+end
+
+MOD.on_player_item_takeoff = function()
+
+  MOD.DisplayCallbackMessages("on_player_item_takeoff")
+
+end
+
+MOD.on_player_effect_int_changes = function()
+
+  MOD.DisplayCallbackMessages("on_player_effect_int_change")
+
+end
+
+MOD.on_player_mission_assignment = function()
+
+  MOD.DisplayCallbackMessages("on_player_mission_assignment")
+
+end
+
+MOD.on_player_mission_finished = function()
+
+  MOD.DisplayCallbackMessages("on_player_mission_finished")
 
 end
 
