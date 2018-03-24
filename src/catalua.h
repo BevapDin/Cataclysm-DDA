@@ -34,7 +34,7 @@ struct CallbackArgument {
     std::string value_string;
     tripoint value_tripoint;
     item value_item;
-    Creature* value_creature;
+    Creature *value_creature;
     body_part value_body_part;
 
     CallbackArgument( const std::string &arg_name, int arg_value ) : name( arg_name ),
@@ -58,7 +58,7 @@ struct CallbackArgument {
     CallbackArgument( const std::string &arg_name, const item &arg_value ) : name( arg_name ),
         type( CallbackArgumentType::Item ), value_item( arg_value ) {
     }
-    CallbackArgument( const std::string &arg_name, Creature* &arg_value ) : name( arg_name ),
+    CallbackArgument( const std::string &arg_name, Creature *&arg_value ) : name( arg_name ),
         type( CallbackArgumentType::Reference_Creature ), value_creature( arg_value ) {
     }
     CallbackArgument( const std::string &arg_name, const body_part &arg_value ) : name( arg_name ),
