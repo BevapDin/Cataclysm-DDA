@@ -11758,7 +11758,7 @@ void player::on_effect_int_change( const efftype_id &eid, int intensity, body_pa
     CallbackArgumentContainer lua_callback_args_info;
     lua_callback_args_info.emplace_back( "effect_changed", eid.str() );
     lua_callback_args_info.emplace_back( "effect_intensity", intensity );
-    //lua_callback_args_info.emplace_back( "effect_bodypart", bp );
+    lua_callback_args_info.emplace_back( "effect_bodypart", bp );
     lua_callback( "on_effect_int_change", lua_callback_args_info );
 }
 

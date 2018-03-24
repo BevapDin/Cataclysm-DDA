@@ -845,6 +845,9 @@ void CallbackArgument::Save( int top )
         case CallbackArgumentType::Item:
             LuaValue<item>::push_reg( L, value_item );
             break;
+        case CallbackArgumentType::BodyPart:
+            LuaEnum<body_part>::push( L, value_body_part );
+            break;
         default:
             lua_pushnil( L );
             break;

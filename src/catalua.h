@@ -17,7 +17,8 @@ enum CallbackArgumentType : int {
     Float = Number,
     String,
     Tripoint,
-    Item
+    Item,
+    BodyPart
 };
 
 struct CallbackArgument {
@@ -29,6 +30,7 @@ struct CallbackArgument {
     std::string value_string;
     tripoint value_tripoint;
     item value_item;
+    body_part value_body_part;
 
     CallbackArgument( const std::string &arg_name, int arg_value ) : name( arg_name ),
         type( CallbackArgumentType::Integer ), value_integer( arg_value ) {
@@ -47,6 +49,9 @@ struct CallbackArgument {
     }
     CallbackArgument( const std::string &arg_name, const item &arg_value ) : name( arg_name ),
         type( CallbackArgumentType::Item ), value_item( arg_value ) {
+    }
+    CallbackArgument( const std::string &arg_name, const body_part &arg_value ) : name( arg_name ),
+        type( CallbackArgumentType::BodyPart ), value_body_part( arg_value ) {
     }
 #ifdef LUA
     void Save( int top );
