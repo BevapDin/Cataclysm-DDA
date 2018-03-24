@@ -5,20 +5,23 @@
 #include "int_id.h"
 #include "enums.h"
 #include "item.h"
+#include "creature.h"
 
 #include <string>
 #include <sstream>
 #include <list>
 
 enum CallbackArgumentType : int {
-    Integer = 0,
+    Integer,
     Number,
     Double = Number,
     Float = Number,
+    Boolean,
     String,
     Tripoint,
     Item,
-    BodyPart
+    Reference_Creature,
+    Enum_BodyPart,
 };
 
 struct CallbackArgument {
@@ -27,9 +30,11 @@ struct CallbackArgument {
 
     int value_integer;
     float value_number;
+    bool value_boolean;
     std::string value_string;
     tripoint value_tripoint;
     item value_item;
+    Creature* value_creature;
     body_part value_body_part;
 
     CallbackArgument( const std::string &arg_name, int arg_value ) : name( arg_name ),
@@ -41,6 +46,9 @@ struct CallbackArgument {
     CallbackArgument( const std::string &arg_name, float arg_value ) : name( arg_name ),
         type( CallbackArgumentType::Number ), value_number( arg_value ) {
     }
+    CallbackArgument( const std::string &arg_name, bool arg_value ) : name( arg_name ),
+        type( CallbackArgumentType::Boolean ), value_boolean( arg_value ) {
+    }
     CallbackArgument( const std::string &arg_name, const std::string &arg_value ) : name( arg_name ),
         type( CallbackArgumentType::String ), value_string( arg_value ) {
     }
@@ -50,8 +58,11 @@ struct CallbackArgument {
     CallbackArgument( const std::string &arg_name, const item &arg_value ) : name( arg_name ),
         type( CallbackArgumentType::Item ), value_item( arg_value ) {
     }
+    CallbackArgument( const std::string &arg_name, Creature* &arg_value ) : name( arg_name ),
+        type( CallbackArgumentType::Reference_Creature ), value_creature( arg_value ) {
+    }
     CallbackArgument( const std::string &arg_name, const body_part &arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::BodyPart ), value_body_part( arg_value ) {
+        type( CallbackArgumentType::Enum_BodyPart ), value_body_part( arg_value ) {
     }
 #ifdef LUA
     void Save( int top );

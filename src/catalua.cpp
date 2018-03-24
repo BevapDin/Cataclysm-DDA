@@ -836,6 +836,9 @@ void CallbackArgument::Save( int top )
         case CallbackArgumentType::Number:
             lua_pushnumber( L, value_number );
             break;
+        case CallbackArgumentType::Boolean:
+            lua_pushboolean( L, value_boolean );
+            break;
         case CallbackArgumentType::String:
             lua_pushstring( L, value_string.c_str() );
             break;
@@ -845,7 +848,10 @@ void CallbackArgument::Save( int top )
         case CallbackArgumentType::Item:
             LuaValue<item>::push_reg( L, value_item );
             break;
-        case CallbackArgumentType::BodyPart:
+        case CallbackArgumentType::Reference_Creature:
+            LuaReference<Creature>::push( L, value_creature );
+            break;
+        case CallbackArgumentType::Enum_BodyPart:
             LuaEnum<body_part>::push( L, value_body_part );
             break;
         default:
