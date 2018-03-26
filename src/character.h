@@ -11,6 +11,7 @@
 #include "pldata.h"
 
 #include <map>
+#include <unordered_set>
 #include <vector>
 
 class Skill;

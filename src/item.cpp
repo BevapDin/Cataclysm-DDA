@@ -52,7 +52,6 @@
 #include <cmath> // floor
 #include <sstream>
 #include <algorithm>
-#include <unordered_set>
 #include <set>
 #include <array>
 #include <tuple>

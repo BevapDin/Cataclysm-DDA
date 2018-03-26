@@ -7,14 +7,13 @@
 #include <vector>
 #include <list>
 #include <bitset>
-#include <unordered_set>
+#include <functional>
 #include <set>
 #include <map>
 
 #include "visitable.h"
 #include "bodypart.h"
 #include "string_id.h"
-#include "item_location.h"
 #include "debug.h"
 #include "cata_utility.h"
 #include "calendar.h"
@@ -40,6 +39,7 @@ class game;
 class Character;
 class player;
 class npc;
+class item_location;
 struct itype;
 struct mtype;
 using mtype_id = string_id<mtype>;
