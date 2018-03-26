@@ -14,6 +14,7 @@
 #include "effect.h"
 #include "bionics.h"
 #include "gamemode.h"
+#include "reload_option.h"
 #include "mapbuffer.h"
 #include "map_item_stack.h"
 #include "debug.h"
@@ -10054,7 +10055,7 @@ bool game::plfire()
     // @todo: move handling "RELOAD_AND_SHOOT" flagged guns to a separate function.
     if( gun->has_flag( "RELOAD_AND_SHOOT" ) ) {
         if( !gun->ammo_remaining() ) {
-            item::reload_option opt = u.select_ammo( *gun );
+            reload_option opt = u.select_ammo( *gun );
             if( !opt ) {
                 // Menu canceled
                 return false;
@@ -10564,7 +10565,7 @@ void game::reload( item_location &loc, bool prompt )
         return;
     }
 
-    item::reload_option opt = u.select_ammo( *it, prompt );
+    reload_option opt = u.select_ammo( *it, prompt );
 
     if ( opt ) {
         u.assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
@@ -10581,7 +10582,7 @@ void game::reload()
         vehicle *veh = m.veh_at( u.pos() );
         turret_data turret;
         if( veh && ( turret = veh->turret_query( u.pos() ) ) && turret.can_reload() ) {
-            item::reload_option opt = g->u.select_ammo( *turret.base(), true );
+            reload_option opt = g->u.select_ammo( *turret.base(), true );
             if( opt ) {
                 g->u.assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
                 g->u.activity.targets.emplace_back( turret.base() );

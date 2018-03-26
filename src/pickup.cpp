@@ -9,6 +9,7 @@
 #include "input.h"
 #include "output.h"
 #include "options.h"
+#include "reload_option.h"
 #include "ui.h"
 #include "itype.h"
 #include "vehicle.h"
@@ -255,7 +256,7 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
         }
 
         case RELOAD_TURRET: {
-            item::reload_option opt = g->u.select_ammo( *turret.base(), true );
+            reload_option opt = g->u.select_ammo( *turret.base(), true );
             if( opt ) {
                 g->u.assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
                 g->u.activity.targets.emplace_back( turret.base() );

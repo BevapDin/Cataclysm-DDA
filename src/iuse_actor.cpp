@@ -17,6 +17,7 @@
 #include "material.h"
 #include "event.h"
 #include "crafting.h"
+#include "reload_option.h"
 #include "ui.h"
 #include "output.h"
 #include "itype.h"
@@ -2158,13 +2159,13 @@ bool bandolier_actor::reload( player &p, item &obj ) const
     }
 
     // convert these into reload options and display the selection prompt
-    std::vector<item::reload_option> opts;
+    std::vector<reload_option> opts;
     std::transform( std::make_move_iterator( found.begin() ), std::make_move_iterator( found.end() ),
                     std::back_inserter( opts ), [&]( item_location &&e ) {
-        return item::reload_option( &p, &obj, &obj, std::move( e ) );
+        return reload_option( &p, &obj, &obj, std::move( e ) );
     } );
 
-    item::reload_option sel = p.select_ammo( obj, std::move( opts ) );
+    reload_option sel = p.select_ammo( obj, std::move( opts ) );
     if( !sel ) {
         return false; // canceled menu
     }
@@ -2262,7 +2263,7 @@ long ammobelt_actor::use( player &p, item &, bool, const tripoint& ) const
         return 0;
     }
 
-    item::reload_option opt = p.select_ammo( mag, true );
+    reload_option opt = p.select_ammo( mag, true );
     if( opt ) {
         p.assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
         p.activity.targets.emplace_back( p, &p.i_add( mag ) );
