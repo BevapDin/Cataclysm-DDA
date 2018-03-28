@@ -72,7 +72,7 @@ class auto_pickup
     public:
         auto_pickup() : ready( false ) {}
 
-        bool has_rule( const std::string &sRule );
+        bool has_rule( const std::string &sRule ) const;
         void add_rule( const std::string &sRule );
         void remove_rule( const std::string &sRule );
         void create_rule( const std::string &to_match );
@@ -81,8 +81,8 @@ class auto_pickup
 
         void show();
         void show( const std::string &custom_name, bool is_autopickup = true );
-        bool save_character();
-        bool save_global();
+        bool save_character() const;
+        bool save_global() const;
         void load_character();
         void load_global();
 

@@ -467,7 +467,7 @@ void auto_pickup::test_pattern(const int iTab, const int iRow)
     }
 }
 
-bool auto_pickup::has_rule(const std::string &sRule)
+bool auto_pickup::has_rule(const std::string &sRule) const
 {
     for( auto &elem : vRules[CHARACTER_TAB] ) {
         if( sRule.length() == elem.sRule.length() && ci_find_substr( sRule, elem.sRule ) != -1 ) {
@@ -584,21 +584,21 @@ void auto_pickup::clear_character_rules()
     ready = false;
 }
 
-bool auto_pickup::save_character()
+bool auto_pickup::save_character() const
 {
-    std::string savefile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.json";
     const std::string player_save = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".sav";
     if( !file_exist( player_save ) ) {
         return true; //Character not saved yet.
     }
 
+    const std::string savefile = world_generator->active_world->world_path + "/" + base64_encode(g->u.name) + ".apu.json";
     return write_to_file( savefile, [&]( std::ostream &fout ) {
         JsonOut jout( fout, true );
         jout.write( vRules[CHARACTER_TAB] );
     }, _( "autopickup configuration" ) );
 }
 
-bool auto_pickup::save_global()
+bool auto_pickup::save_global() const
 {
     return write_to_file( FILENAMES["autopickup"], [&]( std::ostream &fout ) {
         JsonOut jout( fout, true );
