@@ -2861,10 +2861,9 @@ void CheckMessages()
     }
 }
 
-// Check if text ends with suffix
-static bool ends_with(const std::string &text, const std::string &suffix) {
-    return text.length() >= suffix.length() &&
-        strcasecmp(text.c_str() + text.length() - suffix.length(), suffix.c_str()) == 0;
+static bool ends_with( const cata::path &path, const std::string &suffix )
+{
+    return strcasecmp( path.extension().c_str(), suffix.c_str() ) == 0;
 }
 
 //***********************************
@@ -2898,7 +2897,7 @@ static void font_folder_list(std::ofstream& fout, const std::string &path, std::
 
                 // Add font style
                 char *style = TTF_FontFaceStyleName( fnt.get() );
-                bool isbitmap = ends_with(f, ".fon");
+                const bool isbitmap = ends_with( cata::path( f ), ".fon" );
                 if (style != NULL && !isbitmap && strcasecmp(style, "Regular") != 0) {
                     fout << " " << style;
                 }
@@ -3111,7 +3110,7 @@ void load_tileset() {
 
 std::unique_ptr<Font> Font::load_font(const std::string &typeface, int fontsize, int fontwidth, int fontheight, const bool fontblending )
 {
-    if (ends_with(typeface, ".bmp") || ends_with(typeface, ".png")) {
+    if( ends_with( cata::path( typeface ), ".bmp" ) || ends_with( cata::path( typeface ), ".png" ) ) {
         // Seems to be an image file, not a font.
         // Try to load as bitmap font.
         try {
@@ -3403,8 +3402,7 @@ CachedTTFFont::CachedTTFFont( const int w, const int h, std::string typeface, in
         fontsize = fontheight - 1;
     }
     // SDL_ttf handles bitmap fonts size incorrectly
-    if( typeface.length() > 4 &&
-        strcasecmp(typeface.substr(typeface.length() - 4).c_str(), ".fon") == 0 ) {
+    if( ends_with( cata::path( typeface ), ".fon" ) ) {
         faceIndex = test_face_size(typeface, fontsize, faceIndex);
     }
     font.reset( TTF_OpenFontIndex( typeface.c_str(), fontsize, faceIndex ) );

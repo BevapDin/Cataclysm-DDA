@@ -431,7 +431,7 @@ cata::path cata::path::filename() const
 
 cata::path cata::path::stem() const
 {
-    const path name = path.filename();
+    const path name = filename();
     if( name.data == "." || name.data == ".." ) {
         return path();
     }
@@ -440,6 +440,19 @@ cata::path cata::path::stem() const
         return name;
     }
     return path( name.data.substr( 0, p ) );
+}
+
+cata::path cata::path::extension() const
+{
+    const path name = filename();
+    if( name.data == "." || name.data == ".." ) {
+        return path();
+    }
+    const std::string::size_type p = name.data.rfind( '.' );
+    if( p == std::string::npos || p == 0 ) {
+        return path();
+    }
+    return path( name.data.substr( p ) );
 }
 
 cata::path cata::path::parent_path() const

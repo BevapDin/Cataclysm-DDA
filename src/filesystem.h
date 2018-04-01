@@ -47,6 +47,14 @@ class path
          */
         path stem() const;
         /**
+         * Returns the extension of the filename component of this path.
+         * That is: if the @ref filename contains a period ('.') and it's not the first
+         * character and the filename is not the special filesystem element "." or "..",
+         * this returns the (rightmost) period and everything after it.
+         * An empty path is returned otherwise.
+         */
+        path extension() const;
+        /**
          * Returns the directory name of the given path. Handles Windows and Unix
          * path separators. If the path does not contain a separator, an empty
          * string will be returned.
