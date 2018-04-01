@@ -1143,8 +1143,6 @@ bool game::cleanup_at_end()
             }
         }
 
-        std::string sTemp;
-
         int days_survived = calendar::turn.get_turn() / DAYS(1);
         int days_adventured = (calendar::turn.get_turn() - calendar::start.get_turn()) / DAYS(1);
 
@@ -1155,14 +1153,13 @@ bool game::cleanup_at_end()
                 continue;
             }
 
-            sTemp = lifespan ? _("Adventured:") : _("Survived:");
-            mvwprintz(w_rip, iInfoLine++, (FULL_SCREEN_WIDTH / 2) - 5, c_light_gray, (sTemp + " ").c_str());
+            const std::string timedesc = lifespan ? _( "Adventured:" ) : _( "Survived:" );
+            mvwprintz(w_rip, iInfoLine++, (FULL_SCREEN_WIDTH / 2) - 5, c_light_gray, timedesc);
 
             int iDays = lifespan ? days_adventured : days_survived;
-            wprintz(w_rip, c_magenta, "%d" iDays);
+            wprintz(w_rip, c_magenta, " %d " iDays);
 
-            sTemp = (iDays == 1) ? _("day") : _("days");
-            wprintz(w_rip, c_white, (" " + sTemp).c_str());
+            wprintz(w_rip, c_white, ngettext( "day", "days", iDays ) );
         }
 
         int iTotalKills = 0;
@@ -1173,11 +1170,10 @@ bool game::cleanup_at_end()
             }
         }
 
-        sTemp = _("Kills:");
-        mvwprintz(w_rip, 1 + iInfoLine++, (FULL_SCREEN_WIDTH / 2) - 5, c_light_gray, (sTemp + " ").c_str());
-        wprintz( w_rip, c_magenta, "%d", iTotalKills );
+        mvwprintz(w_rip, 1 + iInfoLine++, (FULL_SCREEN_WIDTH / 2) - 5, c_light_gray, _( "Kills:" ));
+        wprintz( w_rip, c_magenta, " %d", iTotalKills );
 
-        sTemp = _("In memory of:");
+        std::string sTemp = _("In memory of:");
         mvwprintz(w_rip, iNameLine++, (FULL_SCREEN_WIDTH / 2) - (sTemp.length() / 2), c_light_gray,
                   sTemp.c_str());
 
