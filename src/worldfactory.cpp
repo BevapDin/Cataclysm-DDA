@@ -77,9 +77,9 @@ void WORLD::COPY_WORLD( const WORLD *world_to_copy )
     active_mod_order = world_to_copy->active_mod_order;
 }
 
-std::string WORLD::folder_path() const
+cata::path WORLD::folder_path() const
 {
-    return FILENAMES["savedir"] + utf8_to_native( world_name );
+    return cata::path( FILENAMES["savedir"] + utf8_to_native( world_name ) );
 }
 
 bool WORLD::save_exists( const save_t &name ) const
@@ -273,14 +273,14 @@ bool worldfactory::save_world( WORLDPTR world, bool is_conversion )
         return false;
     }
 
-    if( !assure_dir_exist( cata::path( world->folder_path() ) ) ) {
+    if( !assure_dir_exist( world->folder_path() ) ) {
         DebugLog( D_ERROR, DC_ALL ) << "Unable to create or open world[" << world->world_name <<
                                     "] directory for saving";
         return false;
     }
 
     if( !is_conversion ) {
-        const auto savefile = world->folder_path() + "/" + FILENAMES["worldoptions"];
+        const auto savefile = world->folder_path() / FILENAMES["worldoptions"];
         const bool saved = write_to_file( savefile, [&]( std::ostream & fout ) {
             JsonOut jout( fout );
 
@@ -1454,12 +1454,12 @@ bool worldfactory::load_world_options( WORLDPTR &world )
     world->WORLD_OPTIONS = get_options().get_world_defaults();
 
     using namespace std::placeholders;
-    const auto path = world->folder_path() + "/" + FILENAMES["worldoptions"];
+    const auto path = world->folder_path() / FILENAMES["worldoptions"];
     if( read_from_file_optional_json( path, std::bind( &WORLD::load_options, world, _1 ) ) ) {
         return true;
     }
 
-    const auto legacy_path = world->folder_path() + "/" + FILENAMES["legacy_worldoptions"];
+    const auto legacy_path = world->folder_path() / FILENAMES["legacy_worldoptions"];
     if( read_from_file_optional( legacy_path, std::bind( &WORLD::load_legacy_options, world, _1 ) ) ) {
         if( save_world( world ) ) {
             // Remove old file as the options have been saved to the new file.
