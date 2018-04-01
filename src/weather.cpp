@@ -525,25 +525,24 @@ void weather_effect::acid()
  */
 std::string weather_forecast( point const &abs_sm_pos )
 {
-    std::ostringstream weather_report;
     // Local conditions
     const auto cref = overmap_buffer.closest_city( tripoint( abs_sm_pos, 0 ) );
     const std::string city_name = cref ? cref.city->name : std::string( _( "middle of nowhere" ) );
     // Current time
-    weather_report << string_format(
+    std::string weather_report = string_format(
                        _("The current time is %s Eastern Standard Time.  At %s in %s, it was %s. The temperature was %s. "),
                        calendar::turn.print_time().c_str(), calendar::turn.print_time(true).c_str(),
                        city_name.c_str(),
                        weather_data(g->weather).name.c_str(), print_temperature(g->temperature).c_str()
                    );
 
-    //weather_report << ", the dewpoint ???, and the relative humidity ???.  ";
-    //weather_report << "The wind was <direction> at ? mi/km an hour.  ";
-    //weather_report << "The pressure was ??? in/mm and steady/rising/falling.";
+    //weather_report += ", the dewpoint ???, and the relative humidity ???.  ";
+    //weather_report += "The wind was <direction> at ? mi/km an hour.  ";
+    //weather_report += "The pressure was ??? in/mm and steady/rising/falling.";
 
     // Regional conditions (simulated by choosing a random range containing the current conditions).
     // Adjusted for weather volatility based on how many weather changes are coming up.
-    //weather_report << "Across <region>, skies ranged from <cloudiest> to <clearest>.  ";
+    //weather_report += "Across <region>, skies ranged from <cloudiest> to <clearest>.  ";
     // TODO: Add fake reports for nearby cities
 
     // TODO: weather forecast
@@ -580,13 +579,13 @@ std::string weather_forecast( point const &abs_sm_pos )
         } else {
             day = c.day_of_week();
         }
-        weather_report << string_format(
+        weather_report += string_format(
                            _("%s... %s. Highs of %s. Lows of %s. "),
                            day.c_str(), weather_data(forecast).name.c_str(),
                            print_temperature(high).c_str(), print_temperature(low).c_str()
                        );
     }
-    return weather_report.str();
+    return weather_report;
 }
 
 /**

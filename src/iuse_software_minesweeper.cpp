@@ -9,7 +9,6 @@
 #include "string_input_popup.h"
 
 #include <string>
-#include <sstream>
 #include <vector>
 #include <cstdlib>
 
@@ -38,8 +37,7 @@ void minesweeper_game::new_level( const catacurses::window &w_minesweeper )
     mLevelReveal.clear();
 
     auto set_num = [&](const std::string sType, int &iVal, const int iMin, const int iMax) {
-        std::ostringstream ssTemp;
-        ssTemp << _("Min:") << iMin << " " << _("Max:") << " " << iMax;
+        const std::string desc = string_format( _( "Min: %d Max: %d" ), iMin, iMax );
 
         do {
             if ( iVal < iMin || iVal > iMax ) {
@@ -49,7 +47,7 @@ void minesweeper_game::new_level( const catacurses::window &w_minesweeper )
             string_input_popup()
             .title( sType )
             .width( 5 )
-            .description( ssTemp.str() )
+            .description( ssTemp )
             .edit( iVal );
         } while( iVal < iMin || iVal > iMax);
     };

@@ -6,7 +6,6 @@
 #include "ui.h"
 
 #include <algorithm>
-#include <sstream>
 #include <cassert>
 
 using namespace trait_group;
@@ -109,9 +108,7 @@ void trait_group::debug_spawn()
         menu2.return_invalid = true;
         menu2.text = _( "Result of 100 spawns:" );
         for( const auto &e : traitnames2 ) {
-            std::ostringstream buffer;
-            buffer << e.first << " x " << e.second << "\n";
-            menu2.entries.push_back( uimenu_entry( menu2.entries.size(), true, -2, buffer.str() ) );
+            menu2.addentry( menu2.entries.size(), true, -2, "%d x %s", e.first, e.second );
         }
         menu2.query();
     }

@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <sstream>
 #include <stdlib.h>
 
 overmapbuffer overmap_buffer;
@@ -39,22 +38,13 @@ int city_reference::get_distance_from_bounds() const {
 
 std::string overmapbuffer::terrain_filename(int const x, int const y)
 {
-    std::ostringstream filename;
-
-    filename << world_generator->active_world->world_path << "/";
-    filename << "o." << x << "." << y;
-
-    return filename.str();
+    return world_generator->active_world->world_path + "/" + string_format( "o.%d.%d", x, y );
 }
 
 std::string overmapbuffer::player_filename(int const x, int const y)
 {
-    std::ostringstream filename;
-
-    filename << world_generator->active_world->world_path << "/" << base64_encode(
-                 g->u.name) << ".seen." << x << "." << y;
-
-    return filename.str();
+    return world_generator->active_world->world_path + "/" + string_format( "%s.seen.%d.%d",
+            base64_encode( g->u.name ), x, y );
 }
 
 overmap &overmapbuffer::get( const int x, const int y )

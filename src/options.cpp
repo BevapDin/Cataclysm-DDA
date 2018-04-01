@@ -1716,8 +1716,6 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
     ctxt.register_action("CONFIRM");
     ctxt.register_action("HELP_KEYBINDINGS");
 
-    std::stringstream sTemp;
-
     while(true) {
         auto &cOPTIONS = ( ( ingame || world_options_only ) && iCurrentPage == iWorldOptPage ?
                            ACTIVE_WORLD_OPTIONS : OPTIONS );
@@ -1758,9 +1756,7 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
 
             line_pos = i - iStartPos;
 
-            sTemp.str("");
-            sTemp << i + 1 - iBlankOffset;
-            mvwprintz(w_options, line_pos, 1, c_white, sTemp.str().c_str());
+            mvwprintz(w_options, line_pos, 1, c_white, "%d", i + 1 - iBlankOffset );
 
             if (iCurrentLine == i) {
                 mvwprintz(w_options, line_pos, name_col, c_yellow, ">> ");

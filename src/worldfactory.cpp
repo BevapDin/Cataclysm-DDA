@@ -63,9 +63,7 @@ std::string get_next_valid_worldname()
 WORLD::WORLD()
 {
     world_name = get_next_valid_worldname();
-    std::ostringstream path;
-    path << FILENAMES["savedir"] << utf8_to_native( world_name );
-    world_path = path.str();
+    world_path = FILENAMES["savedir"] + utf8_to_native( world_name );
     WORLD_OPTIONS = get_options().get_world_defaults();
 
     world_saves.clear();
@@ -108,9 +106,7 @@ WORLDPTR worldfactory::add_world( WORLDPTR retworld )
     // add world to world list
     all_worlds[ retworld->world_name ] = retworld;
 
-    std::ostringstream path;
-    path << FILENAMES[ "savedir" ] << utf8_to_native( retworld->world_name );
-    retworld->world_path = path.str();
+    retworld->world_path = FILENAMES["savedir"] + utf8_to_native( retworld->world_name );
 
     if( !save_world( retworld ) ) {
         std::string worldname = retworld->world_name;
@@ -206,9 +202,7 @@ WORLDPTR worldfactory::make_new_world(special_game_id special_type)
     // add world to world list!
     all_worlds[worldname] = special_world;
 
-    std::ostringstream path;
-    path << FILENAMES["savedir"] << utf8_to_native( worldname );
-    special_world->world_path = path.str();
+    special_world->world_path = FILENAMES["savedir"] + utf8_to_native( worldname );
 
     if (!save_world(special_world)) {
         delete all_worlds[worldname];
@@ -231,9 +225,7 @@ WORLDPTR worldfactory::convert_to_world(std::string origin_path)
     WORLDPTR newworld = new WORLD();
     newworld->world_name = worldname;
 
-    std::ostringstream path;
-    path << FILENAMES["savedir"] << utf8_to_native( worldname );
-    newworld->world_path = path.str();
+    newworld->world_path = FILENAMES["savedir"] + utf8_to_native( worldname );
 
     // save world as conversion world
     if (save_world(newworld, true)) {
@@ -464,8 +456,6 @@ WORLDPTR worldfactory::pick_world( bool show_prompt )
     ctxt.register_action("PREV_TAB");
     ctxt.register_action("CONFIRM");
 
-    std::ostringstream sTemp;
-
     while(true) {
         //Clear the lines
         for (int i = 0; i < iContentHeight; i++) {
@@ -484,9 +474,7 @@ WORLDPTR worldfactory::pick_world( bool show_prompt )
 
         //Draw World Names
         for( size_t i = 0; i < world_pages[selpage].size(); ++i ) {
-            sTemp.str("");
-            sTemp << i + 1;
-            mvwprintz( w_worlds, (int)i, 0, c_white, sTemp.str() );
+            mvwprintz( w_worlds, (int)i, 0, c_white, "%d", i + 1 );
             wmove( w_worlds, (int)i, 4 );
 
             std::string world_name = (world_pages[selpage])[i];

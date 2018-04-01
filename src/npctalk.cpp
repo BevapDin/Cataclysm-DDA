@@ -1179,7 +1179,6 @@ std::string dialogue::dynamic_line( const talk_topic &the_topic ) const
         // TODO: this ignores the z-component
         const tripoint player_pos = p->global_omt_location();
         int dist = rl_dist( player_pos, p->goal );
-        std::ostringstream response;
         dist *= 100;
         if( dist >= 1300 ) {
             int miles = dist / 25; // *100, e.g. quarter mile is "25"
@@ -1188,11 +1187,10 @@ std::string dialogue::dynamic_line( const talk_topic &the_topic ) const
             if( fullmiles <= 0 ) {
                 fullmiles = 0;
             }
-            response << string_format( _( "%d.%d miles." ), fullmiles, miles );
+            return string_format( _( "%d.%d miles." ), fullmiles, miles );
         } else {
-            response << string_format( ngettext( "%d foot.", "%d feet.", dist ), dist );
+            return string_format( ngettext( "%d foot.", "%d feet.", dist ), dist );
         }
-        return response.str();
 
     } else if( topic == "TALK_FRIEND" ) {
         return _( "What is it?" );
@@ -1371,14 +1369,10 @@ std::string dialogue::dynamic_line( const talk_topic &the_topic ) const
         return info.str();
 
     } else if( topic == "TALK_LOOK_AT" ) {
-        std::stringstream look;
-        look << "&" << p->short_description();
-        return look.str();
+        return "&" + p->short_description();
 
     } else if( topic == "TALK_OPINION" ) {
-        std::stringstream opinion;
-        opinion << "&" << p->opinion_text();
-        return opinion.str();
+        return "&" + p->opinion_text();
 
     } else if( topic == "TALK_WAKE_UP" ) {
         if( p->has_effect( effect_sleep ) ) {
@@ -2150,17 +2144,17 @@ void dialogue::gen_responses( const talk_topic &the_topic )
     } else if( topic == "TALK_TRAIN" ) {
         if( !g->u.backlog.empty() && g->u.backlog.front().id() == activity_id( "ACT_TRAIN" ) ) {
             player_activity &backlog = g->u.backlog.front();
-            std::stringstream resume;
-            resume << _( "Yes, let's resume training " );
             const skill_id skillt( backlog.name );
             // TODO: This is potentially dangerous. A skill and a martial art could have the same ident!
             if( !skillt.is_valid() ) {
                 auto &style = matype_id( backlog.name ).obj();
-                resume << style.name;
-                add_response( resume.str(), "TALK_TRAIN_START", style );
+                //~ %s is a martial art style
+                const std::string text = string_format( _( "Yes, let's resume training %s." ), style.name );
+                add_response( text, "TALK_TRAIN_START", style );
             } else {
-                resume << skillt.obj().name();
-                add_response( resume.str(), "TALK_TRAIN_START", skillt );
+                //~ %s is a skill name
+                const std::string text = string_format( _( "Yes, let's resume training %s." ), skillt->name );
+                add_response( text, "TALK_TRAIN_START", skillt );
             }
         }
         std::vector<matype_id> styles = p->styles_offered_to( g->u );

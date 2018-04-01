@@ -10,7 +10,6 @@
 #include "string_formatter.h"
 
 #include <algorithm> //std::min
-#include <sstream>
 
 // '!', '-' and '=' are uses as default bindings in the menu
 const invlet_wrapper
@@ -106,13 +105,12 @@ std::string build_bionic_poweronly_string( bionic const &bio )
 //generates the string that show how much power a bionic uses
 std::string build_bionic_powerdesc_string( bionic const &bio )
 {
-    std::ostringstream power_desc;
     const std::string power_string = build_bionic_poweronly_string( bio );
-    power_desc << bio.id->name;
-    if( !power_string.empty() ) {
-        power_desc << ", " << power_string;
+    if( power_string.empty() ) {
+        return bio.id->name;
+    } else {
+        return bio.id->name + ", " + power_string;
     }
-    return power_desc.str();
 }
 
 void draw_bionics_tabs( const catacurses::window &win, const size_t active_num,

@@ -12,7 +12,6 @@
 
 #include <iostream>
 #include <iterator>
-#include <sstream>
 
 sokoban_game::sokoban_game()
 {
@@ -20,22 +19,11 @@ sokoban_game::sokoban_game()
 
 void sokoban_game::print_score( const catacurses::window &w_sokoban, int iScore, int iMoves )
 {
-    std::stringstream ssTemp;
-    ssTemp << string_format(_("Level: %d/%d"), iCurrentLevel + 1, iNumLevel) << "    ";
-    mvwprintz(w_sokoban, 1, 3, c_white, ssTemp.str().c_str());
-
-    ssTemp.str("");
-    ssTemp << string_format(_("Score: %d"), iScore);
-    mvwprintz(w_sokoban, 2, 3, c_white, ssTemp.str().c_str());
-
-    ssTemp.str("");
-    ssTemp << string_format(_("Moves: %d"), iMoves) << "    ";
-    mvwprintz(w_sokoban, 3, 3, c_white, ssTemp.str().c_str());
-
-    ssTemp.str("");
-    ssTemp << string_format(_("Total moves: %d"), iTotalMoves);
-    mvwprintz(w_sokoban, 4, 3, c_white, ssTemp.str().c_str());
-
+    mvwprintz( w_sokoban, 1, 3, c_white, string_format( _( "Level: %d/%d" ), iCurrentLevel + 1,
+               iNumLevel ) + "    " );
+    mvwprintz( w_sokoban, 2, 3, c_white, _( "Score: %d" ), iScore );
+    mvwprintz( w_sokoban, 3, 3, c_white, string_format( _( "Moves: %d" ), iMoves ) + "    " );
+    mvwprintz( w_sokoban, 4, 3, c_white, _( "Total moves: %d" ), iTotalMoves );
 }
 
 void sokoban_game::parse_level( std::istream &fin )

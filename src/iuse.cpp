@@ -2434,9 +2434,7 @@ int iuse::radio_on( player *p, item *it, bool t, const tripoint &pos )
 
             std::vector<std::string> segments = foldstring( message, RADIO_PER_TURN );
             int index = calendar::turn % segments.size();
-            std::stringstream messtream;
-            messtream << string_format( _( "radio: %s" ), segments[index].c_str() );
-            message = messtream.str();
+            message = string_format( _( "radio: %s" ), segments[index] );
         }
         sounds::ambient_sound( pos, 6, message );
     } else { // Activated
@@ -6681,10 +6679,7 @@ int iuse::radiocontrol(player *p, item *it, bool t, const tripoint& )
             }
         }
     } else if (choice > 2) {
-        std::string signal = "RADIOSIGNAL_";
-        std::stringstream choice_str;
-        choice_str << (choice - 2);
-        signal += choice_str.str();
+        const std::string signal = string_format( "RADIOSIGNAL_%d", choice - 2 );
 
         auto item_list = p->get_radio_items();
         for( auto &elem : item_list ) {

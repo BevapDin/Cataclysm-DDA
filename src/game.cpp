@@ -1144,7 +1144,6 @@ bool game::cleanup_at_end()
         }
 
         std::string sTemp;
-        std::stringstream ssTemp;
 
         int days_survived = calendar::turn.get_turn() / DAYS(1);
         int days_adventured = (calendar::turn.get_turn() - calendar::start.get_turn()) / DAYS(1);
@@ -1160,9 +1159,7 @@ bool game::cleanup_at_end()
             mvwprintz(w_rip, iInfoLine++, (FULL_SCREEN_WIDTH / 2) - 5, c_light_gray, (sTemp + " ").c_str());
 
             int iDays = lifespan ? days_adventured : days_survived;
-            ssTemp << iDays;
-            wprintz(w_rip, c_magenta, ssTemp.str().c_str());
-            ssTemp.str("");
+            wprintz(w_rip, c_magenta, "%d" iDays);
 
             sTemp = (iDays == 1) ? _("day") : _("days");
             wprintz(w_rip, c_white, (" " + sTemp).c_str());
@@ -1176,11 +1173,9 @@ bool game::cleanup_at_end()
             }
         }
 
-        ssTemp << iTotalKills;
-
         sTemp = _("Kills:");
         mvwprintz(w_rip, 1 + iInfoLine++, (FULL_SCREEN_WIDTH / 2) - 5, c_light_gray, (sTemp + " ").c_str());
-        wprintz(w_rip, c_magenta, ssTemp.str().c_str());
+        wprintz( w_rip, c_magenta, "%d", iTotalKills );
 
         sTemp = _("In memory of:");
         mvwprintz(w_rip, iNameLine++, (FULL_SCREEN_WIDTH / 2) - (sTemp.length() / 2), c_light_gray,
@@ -1232,14 +1227,12 @@ bool game::cleanup_at_end()
                 world_generator->delete_world( world_generator->active_world->world_name, true );
             }
         } else if (get_option<std::string>( "DELETE_WORLD" ) != "no") {
-            std::stringstream message;
             std::string tmpmessage;
             for( auto &character : characters ) {
                 tmpmessage += "\n  ";
                 tmpmessage += character;
             }
-            message << string_format(_("World retained. Characters remaining:%s"),tmpmessage.c_str());
-            popup(message.str(), PF_NONE);
+            popup( string_format( _( "World retained. Characters remaining:%s" ), tmpmessage ), PF_NONE );
         }
         if( gamemode ) {
             gamemode.reset( new special_game() ); // null gamemode or something..
@@ -4354,13 +4347,13 @@ void game::disp_kills()
         buffer.width( 0 );
         data.push_back( buffer.str() );
     }
-    std::ostringstream buffer;
+    std::string buffer;
     if( data.empty() ) {
-        buffer << _( "You haven't killed any monsters yet!" );
+        buffer = _( "You haven't killed any monsters yet!" );
     } else {
-        buffer << string_format( _( "KILL COUNT: %d" ), totalkills );
+        buffer = string_format( _( "KILL COUNT: %d" ), totalkills );
     }
-    display_table( w, buffer.str(), 3, data );
+    display_table( w, buffer, 3, data );
 
     refresh_all();
 }
@@ -10039,9 +10032,8 @@ void add_corpses_to_menu( uimenu &kmenu, map_stack &items,
         } else if( !salvage ) {
             kmenu.addentry( menu_index++, true, hotkey, it.tname());
         } else {
-            std::stringstream ss;
-            ss << _("Cut up") << " " << it.tname();
-            kmenu.addentry( menu_index++, true, hotkey, ss.str() );
+            //~%s is the item name that can be cut up
+            kmenu.addentry( menu_index++, true, hotkey, _("Cut up %s"), it.tname() );
         }
     }
 }

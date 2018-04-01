@@ -17,8 +17,6 @@
 #include "submap.h"
 #include "computer.h"
 
-#include <sstream>
-
 #define dbg(x) DebugLog((DebugLevel)(x),D_MAP) << __FILE__ << ":" << __LINE__ << ": "
 
 mapbuffer MAPBUFFER;
@@ -103,9 +101,8 @@ submap *mapbuffer::lookup_submap( const tripoint &p )
 
 void mapbuffer::save( bool delete_after_save )
 {
-    std::stringstream map_directory;
-    map_directory << world_generator->active_world->world_path << "/maps";
-    assure_dir_exist( map_directory.str() );
+    const std::string map_directory = world_generator->active_world->world_path + "/maps";
+    assure_dir_exist( map_directory );
 
     int num_saved_submaps = 0;
     int num_total_submaps = submaps.size();
@@ -138,19 +135,14 @@ void mapbuffer::save( bool delete_after_save )
         // A segment is a chunk of 32x32 submap quads.
         // We're breaking them into subdirectories so there aren't too many files per directory.
         // Might want to make a set for this one too so it's only checked once per save().
-        std::stringstream dirname;
-        tripoint segment_addr = omt_to_seg_copy( om_addr );
-        dirname << map_directory.str() << "/" << segment_addr.x << "." <<
-                segment_addr.y << "." << segment_addr.z;
-
-        std::stringstream quad_path;
-        quad_path << dirname.str() << "/" << om_addr.x << "." <<
-                  om_addr.y << "." << om_addr.z << ".map";
+        const tripoint segment_addr = omt_to_seg_copy( om_addr );
+        const std::string dirname = map_directory + "/" + string_format( "%d.%d.%d", segment_addr.x, segment_addr.y, segment_addr.z );
+        const std::string quad_path = dirname + "/" + string_format( "%d.%d.%d.map", om_addr.x, om_addr.y, om_addr.z );
 
         // delete_on_save deletes everything, otherwise delete submaps
         // outside the current map.
         const bool zlev_del = !map_has_zlevels && om_addr.z != g->get_levz();
-        save_quad( dirname.str(), quad_path.str(), om_addr, submaps_to_delete,
+        save_quad( dirname, quad_path, om_addr, submaps_to_delete,
                    delete_after_save || zlev_del ||
                    om_addr.x < map_origin.x || om_addr.y < map_origin.y ||
                    om_addr.x > map_origin.x + ( MAPSIZE / 2 ) ||
@@ -399,20 +391,19 @@ submap *mapbuffer::unserialize_submaps( const tripoint &p )
     // Map the tripoint to the submap quad that stores it.
     const tripoint om_addr = sm_to_omt_copy( p );
     const tripoint segment_addr = omt_to_seg_copy( om_addr );
-    std::stringstream quad_path;
-    quad_path << world_generator->active_world->world_path << "/maps/" <<
-              segment_addr.x << "." << segment_addr.y << "." << segment_addr.z << "/" <<
-              om_addr.x << "." << om_addr.y << "." << om_addr.z << ".map";
+    const std::string quad_path = world_generator->active_world->world_path + "/maps/" +
+        string_format( "%d.%d.%d", segment_addr.x, segment_addr.y, segment_addr.z ) + "/" +
+        string_format( "%d.%d.%d.map", om_addr.x, om_addr.y, om_addr.z );
 
     using namespace std::placeholders;
-    if( !read_from_file_optional_json( quad_path.str(),
+    if( !read_from_file_optional_json( quad_path,
                                        std::bind( &mapbuffer::deserialize, this, _1 ) ) ) {
         // If it doesn't exist, trigger generating it.
         return NULL;
     }
     if( submaps.count( p ) == 0 ) {
         debugmsg( "file %s did not contain the expected submap %d,%d,%d",
-                  quad_path.str().c_str(), p.x, p.y, p.z );
+                  quad_path, p.x, p.y, p.z );
         return NULL;
     }
     return submaps[ p ];

@@ -17,7 +17,6 @@
 #include "string_input_popup.h"
 
 #include <stdlib.h>
-#include <sstream>
 #include <string>
 #include <locale>
 
@@ -125,8 +124,6 @@ void auto_pickup::show( const std::string &custom_name, bool is_autopickup )
         ctxt.register_action("SWAP_RULE_GLOBAL_CHAR");
     }
 
-    std::ostringstream sTemp;
-
     while(true) {
         int locx = 17;
         locx += shortcut_print(w_header, 2, locx, c_white,
@@ -179,9 +176,7 @@ void auto_pickup::show( const std::string &custom_name, bool is_autopickup )
                 nc_color cLineColor = (vRules[iTab][i].bActive) ?
                                       c_white : c_light_gray;
 
-                sTemp.str("");
-                sTemp << i + 1;
-                mvwprintz( w, i - iStartPos, 1, cLineColor, sTemp.str() );
+                mvwprintz( w, i - iStartPos, 1, cLineColor, "%d", i + 1 );
                 mvwprintz(w, i - iStartPos, 5, cLineColor, "");
 
                 if (iLine == i) {
@@ -391,7 +386,6 @@ void auto_pickup::test_pattern(const int iTab, const int iRow)
     int iStartPos = 0;
     const int iContentHeight = FULL_SCREEN_HEIGHT - 8;
     const int iContentWidth = FULL_SCREEN_WIDTH - 30;
-    std::ostringstream sTemp;
 
     catacurses::window w_test_rule_border = catacurses::newwin( iContentHeight + 2, iContentWidth, iOffsetY, iOffsetX );
     catacurses::window w_test_rule_content = catacurses::newwin( iContentHeight, iContentWidth - 2, 1 + iOffsetY, 1 + iOffsetX );
@@ -432,9 +426,7 @@ void auto_pickup::test_pattern(const int iTab, const int iRow)
                                  iContentHeight)) {
                 nc_color cLineColor = c_white;
 
-                sTemp.str("");
-                sTemp << i + 1;
-                mvwprintz( w_test_rule_content, i - iStartPos, 0, cLineColor, sTemp.str() );
+                mvwprintz( w_test_rule_content, i - iStartPos, 0, cLineColor, "%d", i + 1 );
                 mvwprintz(w_test_rule_content, i - iStartPos, 4, cLineColor, "");
 
                 if (iLine == i) {

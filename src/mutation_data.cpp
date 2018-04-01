@@ -10,7 +10,6 @@
 #include "color.h"
 
 #include <map>
-#include <sstream>
 #include <set>
 #include <vector>
 
@@ -469,15 +468,11 @@ Trait_group& make_group_or_throw(const trait_group::Trait_group_tag &gid, bool i
     // Evidently, making the collection/distribution separation better has made the code for this check worse.
     if (is_collection) {
         if (dynamic_cast<Trait_group_distribution*>(found->second.get())) {
-            std::ostringstream buf;
-            buf << "item group \"" << gid.c_str() << "\" already defined with type \"distribution\"";
-            throw std::runtime_error( buf.str() );
+            throw std::runtime_error( "item group \"" + gid.str() + "\" already defined with type \"distribution\"" );
         }
     } else {
         if (dynamic_cast<Trait_group_collection*>(found->second.get())) {
-            std::ostringstream buf;
-            buf << "item group \"" << gid.c_str() << "\" already defined with type \"collection\"";
-            throw std::runtime_error( buf.str() );
+            throw std::runtime_error( "item group \"" + gid.str() + "\" already defined with type \"collection\"" );
         }
     }
     return *(found->second);

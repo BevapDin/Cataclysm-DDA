@@ -12,7 +12,6 @@
 #include <bitset>
 #include <cmath>
 #include <array>
-#include <sstream>
 
 template<typename V, typename B>
 inline units::quantity<V, B> rng( const units::quantity<V, B> &min, const units::quantity<V, B> &max )
@@ -644,9 +643,7 @@ std::string new_artifact()
                 if( !weapon.tag.empty() ) {
                     def.item_tags.insert(weapon.tag);
                 }
-                std::ostringstream newname;
-                newname << _( weapon.adjective.c_str() ) << " " << _( info.name.c_str() );
-                def.create_name(newname.str());
+                def.create_name( string_format( "%s %s", _( weapon.adjective.c_str() ), _( info.name.c_str() ) ) );
             }
         }
         def.description = string_format(
@@ -750,8 +747,7 @@ std::string new_artifact()
         def.armor->env_resist = info.env_resist;
         def.armor->warmth = info.warmth;
         def.armor->storage = info.storage;
-        std::ostringstream description;
-        description << string_format(info.plural ?
+        std::string description = string_format(info.plural ?
                                      _("This is the %s.\nThey are the only ones of their kind.") :
                                      _("This is the %s.\nIt is the only one of its kind."),
                                      def.nname(1).c_str());
@@ -801,14 +797,14 @@ std::string new_artifact()
                     def.armor->storage = 0;
                 }
 
-                description << string_format(info.plural ?
+                description += string_format(info.plural ?
                                              _("\nThey are %s") :
                                              _("\nIt is %s"),
                                              _( modinfo.name.c_str() ) );
             }
         }
 
-        def.description = description.str();
+        def.description = description;
 
         // Finally, pick some effects
         int num_good = 0, num_bad = 0, value = 0;
