@@ -41,36 +41,21 @@ size_t strnlen( const char *const start, size_t const maxlen )
 }
 #endif
 
-namespace
+bool assure_dir_exist( const cata::path &path )
 {
-
+    if( DIR *const dir = opendir( path.c_str() ) ) {
+        closedir( dir );
+        return true;
+    }
 #if (defined _WIN32 || defined __WIN32__)
-bool do_mkdir( std::string const &path, int const mode )
-{
-    ( void )mode; //not used on windows
 #ifdef _MSC_VER
     return _mkdir( path.c_str() ) == 0;
 #else
     return mkdir( path.c_str() ) == 0;
 #endif
-}
 #else
-bool do_mkdir( std::string const &path, int const mode )
-{
-    return mkdir( path.c_str(), mode ) == 0;
-}
+    return mkdir( path.c_str(), 0777 ) == 0;
 #endif
-
-} //anonymous namespace
-
-bool assure_dir_exist( const cata::path &path )
-{
-    DIR *dir = opendir( path.c_str() );
-    if( dir != nullptr ) {
-        closedir( dir );
-        return true;
-    }
-    return do_mkdir( path, 0777 );
 }
 
 bool cata::exists( const path &path )
