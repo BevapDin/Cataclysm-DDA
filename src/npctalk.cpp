@@ -3587,11 +3587,6 @@ talk_topic dialogue::opt( const talk_topic &topic )
 {
     std::string challenge = dynamic_line( topic );
     gen_responses( topic );
-    // Put quotes around challenge (unless it's an action)
-    if( challenge[0] != '*' && challenge[0] != '&' ) {
-        std::stringstream tmp;
-        tmp << "\"" << challenge << "\"";
-    }
 
     // Parse any tags in challenge
     parse_tags( challenge, *alpha, *beta );
