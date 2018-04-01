@@ -28,6 +28,7 @@
 
 #include <cmath>
 #include <list>
+#include <sstream>
 #include <functional>
 #include <iterator>
 #include <algorithm>
@@ -241,7 +242,7 @@ void veh_interact::set_title( const std::string &msg ) const
     wrefresh( w_mode );
 }
 
-bool veh_interact::format_reqs( std::ostringstream& msg, const requirement_data &reqs,
+bool veh_interact::format_reqs( std::ostream& msg, const requirement_data &reqs,
                                 const std::map<skill_id, int> &skills, int moves ) const {
 
     const auto inv = g->u.crafting_inventory();

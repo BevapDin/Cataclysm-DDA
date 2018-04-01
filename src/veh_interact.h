@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <sstream>
+#include <iosfwd>
 
 class vpart_info;
 using vpart_id = string_id<vpart_info>;
@@ -88,7 +88,7 @@ class veh_interact
         void set_title( const std::string &msg ) const;
 
         /** Format list of requirements returning true if all are met */
-        bool format_reqs( std::ostringstream &msg, const requirement_data &reqs,
+        bool format_reqs( std::ostream &msg, const requirement_data &reqs,
                           const std::map<skill_id, int> &skills, int moves ) const;
 
         int part_at( int dx, int dy );
