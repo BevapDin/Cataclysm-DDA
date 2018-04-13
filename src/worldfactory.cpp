@@ -19,6 +19,7 @@
 #include "json.h"
 
 #include <algorithm>
+#include <cctype>
 
 using namespace std::placeholders;
 
@@ -1088,6 +1089,19 @@ int worldfactory::show_worldgen_tab_modselection( const catacurses::window &win,
     return tab_output;
 }
 
+static bool is_char_allowed( long ch )
+{
+    if( !std::isprint( ch ) && ch <= 127 ) {
+        // above 127 are non-ASCII, therefore Unicode, therefore OK
+        return false;
+    }
+    if( ch == '\\' || ch == '/' ) {
+        // not valid in file names
+        return false;
+    }
+    return true;
+}
+
 int worldfactory::show_worldgen_tab_confirm( const catacurses::window &win, WORLDPTR world )
 {
     const int iTooltipHeight = 1;
@@ -1189,7 +1203,7 @@ to continue, or <color_yellow>%s</color> to go back and review your world."), ct
             const input_event ev = ctxt.get_raw_input();
             const long ch = ev.get_first_input();
             utf8_wrapper wrap(worldname);
-            utf8_wrapper newtext( ev.text );
+            const utf8_wrapper newtext( utf8_to_native( ev.text ) );
             if( ch == KEY_BACKSPACE ) {
                 if (!wrap.empty()) {
                     wrap.erase(wrap.length() - 1, 1);
@@ -1202,7 +1216,6 @@ to continue, or <color_yellow>%s</color> to go back and review your world."), ct
                     worldname.append(tmp);
                 }
             } else if( !newtext.empty() && is_char_allowed( newtext.at( 0 ) ) ) {
-                // No empty string, no slash, no backslash, no control sequence
                 wrap.append( newtext );
                 worldname = wrap.str();
             }
