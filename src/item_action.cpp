@@ -308,7 +308,7 @@ void game::item_action_menu()
 
     u.invoke_item( it, action );
 
-    u.inv.restack( u );
+    u.restack_inventory();
     u.inv.unsort();
 }
 

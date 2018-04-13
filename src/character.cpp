@@ -267,6 +267,11 @@ double Character::aim_speed_encumbrance_modifier() const
     return ( encumb( bp_hand_l ) + encumb( bp_hand_r ) ) / 10.0;
 }
 
+void Character::restack_inventory()
+{
+    inv.restack( dynamic_cast<player&>( *this ) );
+}
+
 double Character::aim_cap_from_volume( const item &gun ) const
 {
     skill_id gun_skill = gun.gun_skill();

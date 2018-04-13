@@ -1360,7 +1360,7 @@ void advanced_inventory::display()
 {
     init();
 
-    g->u.inv.restack( g->u );
+    g->u.restack_inventory();
 
     input_context ctxt( "ADVANCED_INVENTORY" );
     ctxt.register_action( "HELP_KEYBINDINGS" );
@@ -1638,7 +1638,7 @@ void advanced_inventory::display()
             // This is only reached when at least one item has been moved.
             g->u.mod_moves( -move_cost );
             // Just in case the items have moved from/to the inventory
-            g->u.inv.restack( g->u );
+            g->u.restack_inventory();
             // if dest was AIM_ALL then we used query_destination and should undo that
             if (restore_area) {
                 dpane.restore_area();
@@ -1718,7 +1718,7 @@ void advanced_inventory::display()
                 }
                 // Might have changed a stack (activated an item, repaired an item, etc.)
                 if( spane.get_area() == AIM_INVENTORY ) {
-                    g->u.inv.restack( g->u );
+                    g->u.restack_inventory();
                 }
                 recalc = true;
             } else {

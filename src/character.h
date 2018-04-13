@@ -614,6 +614,9 @@ class Character : public Creature, public visitable<Character>
         std::array<int, num_hp_parts> hp_cur, hp_max;
         bool nv_cached;
 
+        /// Invokes @ref inventory::restack, see there.
+        void restack_inventory();
+
         inventory inv;
         itype_id last_item;
         item weapon;
