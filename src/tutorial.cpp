@@ -60,9 +60,10 @@ bool tutorial_game::init()
     starting_om.clear_mon_groups();
 
     g->u.toggle_trait( trait_id( "QUICK" ) );
+    g->u.wear_item( item( "backpack" ), false );
     item lighter( "lighter", 0 );
     lighter.invlet = 'e';
-    g->u.inv.add_item( lighter, true, false );
+    g->u.i_add( lighter );
     g->u.set_skill_level( skill_id( "gun" ), 5 );
     g->u.set_skill_level( skill_id( "melee" ), 5 );
     g->load_map( omt_to_sm_copy( tripoint( lx, ly, 0 ) ) );
