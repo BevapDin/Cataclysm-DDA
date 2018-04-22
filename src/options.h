@@ -50,11 +50,14 @@ class options_manager
 
         static bool is_hidden( const copt_hide_t hide );
 
-        class cOpt
+        class cOpt_base
         {
                 friend class options_manager;
+            protected:
+                cOpt_base( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h ) : sName( n ), sPage( p ), sMenuText( m ), sTooltip( t ), hide( h ) { }
+
             public:
-                cOpt();
+                virtual ~cOpt_base() = default;
 
                 int getSortPos() const;
 
@@ -63,37 +66,35 @@ class options_manager
                  * returns the string that is to be stored. It should
                  * *not* be translated!
                  */
-                std::string get_legacy_value() const;
+                virtual std::string get_legacy_value() const = 0;
                 /**
                  * Reverse of @ref get_legacy_value. Converts the value into
                  * the internal type and stores it as the option value.
                  */
-                void set_from_legacy_value( const std::string &v );
+                virtual void set_from_legacy_value( const std::string &v ) = 0;
 
+                /// The *id* of this option.
                 std::string getName() const;
+                /// The id of the page this option belongs onto.
                 std::string getPage() const;
                 /// The translated displayed option name.
                 std::string getMenuText() const;
                 /// The translated displayed option tool tip.
                 std::string getTooltip() const;
-                std::string getType() const;
+                virtual std::string getType() const = 0;
 
                 /// The translated currently selected option value.
-                std::string getValueName() const;
-                std::string getDefaultText( const bool bTranslated = true ) const;
+                virtual std::string getValueName() const = 0;
+                virtual std::string getDefaultText( const bool bTranslated = true ) const = 0;
 
-                int getItemPos( const std::string sSearch ) const;
-                std::vector<std::pair<std::string, std::string>> getItems() const;
-                void add_value( const std::string &lval, const std::string &lvalname );
+                virtual void setNext() = 0;
+                virtual void setPrev() = 0;
+                virtual void setInteractive() = 0;
+                virtual void setValue( float fSetIn ) = 0;
+                virtual void setValue( int iSetIn ) = 0;
 
-                void setNext();
-                void setPrev();
-                void setInteractive();
-                void setValue( float fSetIn );
-                void setValue( int iSetIn );
-
-                bool operator==( const cOpt &rhs ) const;
-                bool operator!=( const cOpt &rhs ) const {
+                virtual bool operator==( const cOpt_base & ) const = 0;
+                bool operator!=( const cOpt_base &rhs ) const {
                     return !operator==( rhs );
                 }
 
@@ -103,25 +104,59 @@ class options_manager
 
                 void serialize( JsonOut &jsout ) const;
 
-                cOpt *clone() const {
+                // as required by poly_pimpl
+                virtual cOpt_base *clone() const = 0;
+
+            private:
+                // The *id* of this option.
+                std::string sName;
+                // The id of the page that this option belongs onto.
+                std::string sPage;
+                // The *untranslated* displayed option name (short string).
+                std::string sMenuText;
+                // The *untranslated* displayed option tool tip (longer string).
+                std::string sTooltip;
+                std::string sPrerequisite;
+                copt_hide_t hide = COPT_NO_HIDE;
+                int iSortPos;
+        };
+
+        class cOpt : public cOpt_base
+        {
+                friend class options_manager;
+            public:
+                cOpt( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h ) : cOpt_base( n, p, m, t, h ) { }
+                ~cOpt() override = default;
+
+                std::string get_legacy_value() const override;
+                void set_from_legacy_value( const std::string &v ) override;
+
+                std::string getType() const override;
+
+                std::string getValueName() const override;
+                std::string getDefaultText( const bool bTranslated = true ) const override;
+
+                int getItemPos( const std::string sSearch ) const;
+                std::vector<std::pair<std::string, std::string>> getItems() const;
+                void add_value( const std::string &lval, const std::string &lvalname );
+
+                void setNext() override;
+                void setPrev() override;
+                void setInteractive() override;
+                //set value
+                void setValue( float fSetIn ) override;
+                void setValue( int iSetIn ) override;
+
+                bool operator==( const cOpt_base &rhs ) const override;
+
+                cOpt_base *clone() const override {
                     return new cOpt(*this);
                 }
 
             private:
-                std::string sName;
-                std::string sPage;
-                // The *untranslated* displayed option name ( short string ).
-                std::string sMenuText;
-                // The *untranslated* displayed option tool tip ( longer string ).
-                std::string sTooltip;
                 std::string sType;
 
                 std::string format;
-
-                std::string sPrerequisite;
-
-                copt_hide_t hide;
-                int iSortPos;
 
                 //sType == "string"
                 std::string sSet;
@@ -150,7 +185,7 @@ class options_manager
                 float fStep;
         };
 
-        typedef std::unordered_map<std::string, poly_pimpl<cOpt>> options_container;
+        typedef std::unordered_map<std::string, poly_pimpl<cOpt_base>> options_container;
 
         void init();
         void load();

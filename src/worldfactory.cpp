@@ -273,7 +273,7 @@ bool worldfactory::save_world(WORLDPTR world, bool is_conversion)
             jout.start_array();
 
             for( auto &elem : world->WORLD_OPTIONS ) {
-                const options_manager::cOpt &opt = *elem.second;
+                const options_manager::cOpt_base &opt = *elem.second;
                 // Skip hidden option because it is set by mod and should not be saved
                 if( opt.getDefaultText() != "" && !opt.is_hidden() ) {
                     jout.write( opt );

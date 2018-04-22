@@ -88,7 +88,7 @@ void options_manager::add_value( const std::string &lvar, const std::string &lva
         if( ot == options.end() ) {
             return;
         }
-        cOpt &opt = *ot->second;
+        cOpt &opt = dynamic_cast<cOpt&>( *ot->second );
         opt.add_value( lval, lvalname );
         // our value was saved, then set to default, so set it again.
         if ( it->second == lval ) {
@@ -112,17 +112,11 @@ void options_manager::cOpt::add_value( const std::string &lval, const std::strin
     vItems.emplace_back( lval, lvalname.empty() ? lval : lvalname );
 }
 
-options_manager::cOpt::cOpt()
-{
-    sType = "VOID";
-    hide = COPT_NO_HIDE;
-}
-
 template<typename T>
 void options_manager::add( const T &opt )
 {
     const auto iter = options.emplace( opt.getName(), make_poly_pimpl<T>( opt ) );
-    cOpt &nopt = *iter.first->second;
+    cOpt_base &nopt = *iter.first->second;
 
     if( !is_hidden( nopt.hide ) ) {
         mOptionsSort[nopt.getPage()]++;
@@ -136,12 +130,8 @@ void options_manager::add_external( const std::string sNameIn, const std::string
                                     const std::string sType,
                                     const std::string sMenuTextIn, const std::string sTooltipIn )
 {
-    cOpt thisOpt;
+    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, COPT_ALWAYS_HIDE );
 
-    thisOpt.sName = sNameIn;
-    thisOpt.sPage = sPageIn;
-    thisOpt.sMenuText = sMenuTextIn;
-    thisOpt.sTooltip = sTooltipIn;
     thisOpt.sType = sType;
 
     thisOpt.iMin = INT_MIN;
@@ -160,15 +150,10 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
                            std::vector<std::pair<std::string, std::string>> sItemsIn, std::string sDefaultIn,
                            copt_hide_t opt_hide )
 {
-    cOpt thisOpt;
+    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
 
-    thisOpt.sName = sNameIn;
-    thisOpt.sPage = sPageIn;
-    thisOpt.sMenuText = sMenuTextIn;
-    thisOpt.sTooltip = sTooltipIn;
     thisOpt.sType = "string_select";
 
-    thisOpt.hide = opt_hide;
     thisOpt.vItems = sItemsIn;
 
     if( thisOpt.getItemPos( sDefaultIn ) == -1 ) {
@@ -186,15 +171,9 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sDefaultIn, const int iMaxLengthIn,
                             copt_hide_t opt_hide)
 {
-    cOpt thisOpt;
+    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
 
-    thisOpt.sName = sNameIn;
-    thisOpt.sPage = sPageIn;
-    thisOpt.sMenuText = sMenuTextIn;
-    thisOpt.sTooltip = sTooltipIn;
     thisOpt.sType = "string_input";
-
-    thisOpt.hide = opt_hide;
 
     thisOpt.iMaxLength = iMaxLengthIn;
     thisOpt.sDefault = (thisOpt.iMaxLength > 0) ? sDefaultIn.substr(0, thisOpt.iMaxLength) : sDefaultIn;
@@ -207,15 +186,9 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
                             const bool bDefaultIn, copt_hide_t opt_hide)
 {
-    cOpt thisOpt;
+    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
 
-    thisOpt.sName = sNameIn;
-    thisOpt.sPage = sPageIn;
-    thisOpt.sMenuText = sMenuTextIn;
-    thisOpt.sTooltip = sTooltipIn;
     thisOpt.sType = "bool";
-
-    thisOpt.hide = opt_hide;
 
     thisOpt.bDefault = bDefaultIn;
     thisOpt.bSet = bDefaultIn;
@@ -228,17 +201,11 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const int iMinIn, int iMaxIn, int iDefaultIn,
                             copt_hide_t opt_hide, const std::string &format )
 {
-    cOpt thisOpt;
+    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
 
-    thisOpt.sName = sNameIn;
-    thisOpt.sPage = sPageIn;
-    thisOpt.sMenuText = sMenuTextIn;
-    thisOpt.sTooltip = sTooltipIn;
     thisOpt.sType = "int";
 
     thisOpt.format = format;
-
-    thisOpt.hide = opt_hide;
 
     if (iMinIn > iMaxIn) {
         iMaxIn = iMinIn;
@@ -262,15 +229,9 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::map<int, std::string> mIntValuesIn, int iInitialIn,
                             int iDefaultIn, copt_hide_t opt_hide)
 {
-    cOpt thisOpt;
+    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
 
-    thisOpt.sName = sNameIn;
-    thisOpt.sPage = sPageIn;
-    thisOpt.sMenuText = sMenuTextIn;
-    thisOpt.sTooltip = sTooltipIn;
     thisOpt.sType = "int_map";
-
-    thisOpt.hide = opt_hide;
 
     thisOpt.mIntValues = mIntValuesIn;
 
@@ -295,17 +256,11 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const float fMinIn, float fMaxIn, float fDefaultIn,
                             float fStepIn, copt_hide_t opt_hide, const std::string &format )
 {
-    cOpt thisOpt;
+    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
 
-    thisOpt.sName = sNameIn;
-    thisOpt.sPage = sPageIn;
-    thisOpt.sMenuText = sMenuTextIn;
-    thisOpt.sTooltip = sTooltipIn;
     thisOpt.sType = "float";
 
     thisOpt.format = format;
-
-    thisOpt.hide = opt_hide;
 
     if (fMinIn > fMaxIn) {
         fMaxIn = fMinIn;
@@ -325,24 +280,24 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     add( thisOpt );
 }
 
-void options_manager::cOpt::setPrerequisite( const std::string &sOption )
+void options_manager::cOpt_base::setPrerequisite( const std::string &sOption )
 {
     if ( !get_options().has_option(sOption) ) {
-        debugmsg( "setPrerequisite: unknown option %s", sType.c_str() );
+        debugmsg( "setPrerequisite: unknown option %s", sOption );
 
     } else if ( get_options().get_option( sOption ).getType() != "bool" ) {
-        debugmsg( "setPrerequisite: option %s not of type bool", sType.c_str() );
+        debugmsg( "setPrerequisite: option %s not of type bool", sOption );
     }
 
     sPrerequisite = sOption;
 }
 
-std::string options_manager::cOpt::getPrerequisite() const
+std::string options_manager::cOpt_base::getPrerequisite() const
 {
     return sPrerequisite;
 }
 
-bool options_manager::cOpt::hasPrerequisite() const
+bool options_manager::cOpt_base::hasPrerequisite() const
 {
     if ( sPrerequisite.empty() ) {
         return true;
@@ -393,27 +348,27 @@ bool options_manager::is_hidden( const copt_hide_t hide )
     return false;
 }
 
-int options_manager::cOpt::getSortPos() const
+int options_manager::cOpt_base::getSortPos() const
 {
     return iSortPos;
 }
 
-std::string options_manager::cOpt::getName() const
+std::string options_manager::cOpt_base::getName() const
 {
     return sName;
 }
 
-std::string options_manager::cOpt::getPage() const
+std::string options_manager::cOpt_base::getPage() const
 {
     return sPage;
 }
 
-std::string options_manager::cOpt::getMenuText() const
+std::string options_manager::cOpt_base::getMenuText() const
 {
     return _( sMenuText.c_str() );
 }
 
-std::string options_manager::cOpt::getTooltip() const
+std::string options_manager::cOpt_base::getTooltip() const
 {
     return _( sTooltip.c_str() );
 }
@@ -423,8 +378,9 @@ std::string options_manager::cOpt::getType() const
     return sType;
 }
 
-bool options_manager::cOpt::operator==( const cOpt &rhs ) const
+bool options_manager::cOpt::operator==( const cOpt_base &rhs_ ) const
 {
+    const cOpt &rhs = dynamic_cast<const cOpt&>( rhs_ );
     if( sType != rhs.sType ) {
         return false;
     } else if( sType == "string_select" || sType == "string_input" ) {
@@ -600,10 +556,11 @@ void options_manager::cOpt::setNext()
         sSet = vItems[iNext].first;
 
     } else if (sType == "string_input") {
+        const std::string sMenuText = getMenuText();
         int iMenuTextLength = sMenuText.length();
         string_input_popup()
         .width( ( iMaxLength > 80 ) ? 80 : ( ( iMaxLength < iMenuTextLength ) ? iMenuTextLength : iMaxLength + 1) )
-        .description( _( sMenuText.c_str() ) )
+        .description( sMenuText )
         .max_length( iMaxLength )
         .edit( sSet );
 
@@ -1619,7 +1576,7 @@ void options_manager::init()
 
     for( auto &elem : options ) {
         for (unsigned i = 0; i < vPages.size(); ++i) {
-            const cOpt &opt = *elem.second;
+            const cOpt_base &opt = *elem.second;
             if( vPages[i].first == opt.getPage() && opt.getSortPos() > -1 ) {
                 mPageItems[i][opt.getSortPos()] = elem.first;
                 break;
@@ -1802,7 +1759,7 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
 
             int line_pos; // Current line position in window.
             nc_color cLineColor = c_light_green;
-            const cOpt &current_opt = *cOPTIONS.at( mPageItems[iCurrentPage][i] );
+            const cOpt_base &current_opt = *cOPTIONS.at( mPageItems[iCurrentPage][i] );
             bool hasPrerequisite = current_opt.hasPrerequisite();
 
             line_pos = i - iStartPos;
@@ -1860,7 +1817,7 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
 
         wrefresh(w_options_header);
 
-        cOpt &current_opt = *cOPTIONS.at( mPageItems[iCurrentPage][iCurrentLine] );
+        cOpt_base &current_opt = *cOPTIONS.at( mPageItems[iCurrentPage][iCurrentLine] );
 
 #if (defined TILES || defined _WIN32 || defined WINDOWS)
         if (mPageItems[iCurrentPage][iCurrentLine] == "TERMINAL_X") {
@@ -2044,7 +2001,7 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
     return "";
 }
 
-void options_manager::cOpt::serialize( JsonOut &json ) const
+void options_manager::cOpt_base::serialize( JsonOut &json ) const
 {
     json.start_object();
     json.member( "info", getTooltip() );
@@ -2069,9 +2026,9 @@ void options_manager::serialize(JsonOut &json) const
             }
             const auto iter = options.find( elem );
             if( iter != options.end() ) {
-                const cOpt &opt = *iter->second;
+                const cOpt_base &opt = *iter->second;
                 //Skip hidden option because it is set by mod and should not be saved
-                if ( opt.hide == COPT_ALWAYS_HIDE ) {
+                if( opt.hide == COPT_ALWAYS_HIDE ) {
                     continue;
                 }
                 json.write( opt );
@@ -2176,7 +2133,7 @@ options_manager::cOpt &options_manager::get_option( const std::string &name )
     if( main_iter == options.end() ) {
         debugmsg( "requested non-existing option %s", name.c_str() );
     }
-    cOpt &main_opt = *main_iter->second;
+    cOpt &main_opt = static_cast<cOpt&>( *main_iter->second );
     if( !world_generator || !world_generator->active_world ) {
         // Global options contains the default for new worlds, which is good enough here.
         return main_opt;
@@ -2184,7 +2141,7 @@ options_manager::cOpt &options_manager::get_option( const std::string &name )
     auto &wopts = world_generator->active_world->WORLD_OPTIONS;
     const auto world_iter = wopts.find( name );
     if( world_iter != wopts.end() ) {
-        return *world_iter->second;
+        return static_cast<cOpt&>( *world_iter->second );
     }
     if( main_opt.getPage() != "world_default" ) {
         // Requested a non-world option, deliver it.
@@ -2192,7 +2149,7 @@ options_manager::cOpt &options_manager::get_option( const std::string &name )
     }
     // May be a new option and an old world - import default from global options.
     const auto new_iter = wopts.emplace( name, make_poly_pimpl<cOpt>( main_opt ) ).first;
-    return *new_iter->second;
+    return static_cast<cOpt&>( *new_iter->second );
 }
 
 options_manager::options_container options_manager::get_world_defaults() const
