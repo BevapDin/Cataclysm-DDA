@@ -1416,13 +1416,13 @@ void load_world_option( JsonObject &jo )
 //load external option from json
 void load_external_option( JsonObject &jo )
 {
-    auto name = jo.get_string( "name" );
+    auto id = jo.get_string( "id" );
     auto stype = jo.get_string( "stype" );
     options_manager &opts = get_options();
-    if( !opts.has_option( name ) ) {
-        opts.add_external( name, "world_default", stype );
+    if( !opts.has_option( id ) ) {
+        opts.add_external( id, "world_default", stype );
     }
-    options_manager::cOpt &opt = opts.get_option( name );
+    options_manager::cOpt &opt = opts.get_option( id );
     if( stype == "float" ) {
         opt.setValue( static_cast<float>( jo.get_float( "value" ) ) );
     } else if( stype == "int" ) {

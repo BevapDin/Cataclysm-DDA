@@ -1,7 +1,7 @@
 [
   {
     "type": "EXTERNAL_OPTION",
-    "name": "DISPERSION_PER_GUN_DAMAGE",
+    "id": "DISPERSION_PER_GUN_DAMAGE",
     "//": "Value that adds to weapon dispersion per weapon damage value.",
     "stype": "int",
     "value": 60
