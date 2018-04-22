@@ -206,6 +206,44 @@ class options_manager
                 }
         };
 
+        class string_input_option : public cOpt_base
+        {
+            private:
+                std::string value_;
+                std::string default_value_;
+                int iMaxLength;
+
+            public:
+                string_input_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const std::string &d, const int l ) : cOpt_base( n, p, m, t, h ), value_( d ), default_value_( d ), iMaxLength( l ) { }
+                ~string_input_option() override = default;
+
+                std::string getType() const override {
+                    return "string_input";
+                }
+
+                std::string get_legacy_value() const override;
+                void set_from_legacy_value( const std::string &v ) override;
+                std::string getValueName() const override;
+                std::string getDefaultText( const bool bTranslated = true ) const override;
+
+                void setNext() override {
+                    setInteractive();
+                }
+                void setPrev() override {
+                    setInteractive();
+                }
+                void setInteractive() override;
+
+                bool operator==( const cOpt_base &rhs ) const override {
+                    const auto o = dynamic_cast<const string_input_option*>( &rhs );
+                    return o && value_ == o->value_;
+                }
+
+                cOpt_base *clone() const override {
+                    return new string_input_option(*this);
+                }
+        };
+
         class cOpt : public cOpt_base
         {
                 friend class options_manager;
@@ -250,8 +288,6 @@ class options_manager
                 // first is internal value, second is untranslated text
                 std::vector<std::pair<std::string, std::string>> vItems;
                 std::string sDefault;
-
-                int iMaxLength;
 
                 //sType == "int"
                 int iSet;

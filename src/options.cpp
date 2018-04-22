@@ -166,15 +166,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sDefaultIn, const int iMaxLengthIn,
                             copt_hide_t opt_hide)
 {
-    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
-
-    thisOpt.sType = "string_input";
-
-    thisOpt.iMaxLength = iMaxLengthIn;
-    thisOpt.sDefault = (thisOpt.iMaxLength > 0) ? sDefaultIn.substr(0, thisOpt.iMaxLength) : sDefaultIn;
-    thisOpt.sSet = thisOpt.sDefault;
-
-    add( thisOpt );
+    add( string_input_option( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide, sDefaultIn, iMaxLengthIn ) );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -350,7 +342,7 @@ bool options_manager::cOpt::operator==( const cOpt_base &rhs_ ) const
     const cOpt &rhs = dynamic_cast<const cOpt&>( rhs_ );
     if( sType != rhs.sType ) {
         return false;
-    } else if( sType == "string_select" || sType == "string_input" ) {
+    } else if( sType == "string_select" ) {
         return sSet == rhs.sSet;
     } else if( sType == "int" || sType == "int_map" ) {
         return iSet == rhs.iSet;
@@ -377,9 +369,14 @@ std::string options_manager::float_option::get_legacy_value() const
     return ssTemp.str();
 }
 
+std::string options_manager::string_input_option::get_legacy_value() const
+{
+    return value_;
+}
+
 std::string options_manager::cOpt::get_legacy_value() const
 {
-    if (sType == "string_select" || sType == "string_input") {
+    if (sType == "string_select") {
         return sSet;
 
     } else if (sType == "int" || sType == "int_map") {
@@ -393,7 +390,11 @@ std::string options_manager::cOpt::get_legacy_value() const
 template<>
 std::string value_as<std::string>( const options_manager::cOpt &opt )
 {
-    if( opt.getType() != "string_select" && opt.getType() != "string_input" ) {
+    const auto o = dynamic_cast<const options_manager::string_input_option *>( &opt );
+    if( o ) {
+        return o->value_;
+    }
+    if( opt.getType() != "string_select" ) {
         debugmsg( "%s tried to get string value from option of type %s", opt.getName(), opt.getType() );
     }
     return opt.sSet;
@@ -445,6 +446,11 @@ std::string options_manager::float_option::getValueName() const
     return ssTemp.str();
 }
 
+std::string options_manager::string_input_option::getValueName() const
+{
+    return value_;
+}
+
 std::string options_manager::cOpt::getValueName() const
 {
     if (sType == "string_select") {
@@ -457,9 +463,6 @@ std::string options_manager::cOpt::getValueName() const
 
     } else if ( sType == "int_map" ) {
         return string_format(_("%d: %s"), iSet, mIntValues.find( iSet )->second.c_str());
-
-    } else if( sType == "string_input" ) {
-        return sSet;
 
     } else if( sType == "int" ) {
         return string_format( format, iSet );
@@ -479,6 +482,11 @@ std::string options_manager::float_option::getDefaultText( const bool /*bTransla
                           max_value_ );
 }
 
+std::string options_manager::string_input_option::getDefaultText( const bool /*bTranslated*/ ) const
+{
+    return string_format( _( "Default: %s" ), default_value_ );
+}
+
 std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
 {
     if (sType == "string_select") {
@@ -494,9 +502,6 @@ std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
         }, false );
         return string_format( _( "Default: %s - Values: %s" ),
                               defaultName.c_str(), sItems.c_str() );
-
-    } else if (sType == "string_input") {
-        return string_format(_("Default: %s"), sDefault.c_str());
 
     } else if (sType == "int") {
         return string_format(_("Default: %d - Min: %d, Max: %d"), iDefault, iMin, iMax);
@@ -544,15 +549,6 @@ void options_manager::cOpt::setNext()
 
         sSet = vItems[iNext].first;
 
-    } else if (sType == "string_input") {
-        const std::string sMenuText = getMenuText();
-        int iMenuTextLength = sMenuText.length();
-        string_input_popup()
-        .width( ( iMaxLength > 80 ) ? 80 : ( ( iMaxLength < iMenuTextLength ) ? iMenuTextLength : iMaxLength + 1) )
-        .description( sMenuText )
-        .max_length( iMaxLength )
-        .edit( sSet );
-
     } else if (sType == "int") {
         iSet++;
         if (iSet > iMax) {
@@ -586,9 +582,6 @@ void options_manager::cOpt::setPrev()
         }
 
         sSet = vItems[iPrev].first;
-
-    } else if (sType == "string_input") {
-        setNext();
 
     } else if (sType == "int") {
         iSet--;
@@ -633,9 +626,20 @@ void options_manager::float_option::setInteractive()
     }
 }
 
+void options_manager::string_input_option::setInteractive()
+{
+    const std::string sMenuText = getMenuText();
+    const int iMenuTextLength = sMenuText.length();
+    string_input_popup()
+        .width( ( iMaxLength > 80 ) ? 80 : ( ( iMaxLength < iMenuTextLength ) ? iMenuTextLength : iMaxLength + 1 ) )
+        .description( sMenuText )
+        .max_length( iMaxLength )
+        .edit( value_ );
+}
+
 void options_manager::cOpt::setInteractive()
 {
-    if( sType == "string_select" || sType == "string_input" ) {
+    if( sType == "string_select" ) {
         setNext();
         return;
     }
@@ -693,15 +697,17 @@ void options_manager::float_option::set_from_legacy_value( const std::string &sS
     }
 }
 
+void options_manager::string_input_option::set_from_legacy_value( const std::string &sSetIn )
+{
+    value_ = (iMaxLength > 0) ? sSetIn.substr(0, iMaxLength) : sSetIn;
+}
+
 void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
 {
     if (sType == "string_select") {
         if (getItemPos(sSetIn) != -1) {
             sSet = sSetIn;
         }
-
-    } else if (sType == "string_input") {
-        sSet = (iMaxLength > 0) ? sSetIn.substr(0, iMaxLength) : sSetIn;
 
     } else if (sType == "int") {
         iSet = atoi(sSetIn.c_str());
