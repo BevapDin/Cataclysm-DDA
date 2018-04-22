@@ -54,6 +54,12 @@ class options_manager
                 int getSortPos() const;
 
                 /**
+                 * Option values are saved as strings in JSON, this function
+                 * returns the string that is to be stored. It should
+                 * *not* be translated!
+                 */
+                std::string get_legacy_value() const;
+                /**
                  * Option should be hidden in current build.
                  * @return true if option should be hidden, false if not.
                  */
@@ -67,7 +73,9 @@ class options_manager
                 std::string getTooltip() const;
                 std::string getType() const;
 
-                std::string getValue( bool classis_locale = false ) const;
+                /// The value formatted as string and already translated. This
+                /// will be displayed to the user.
+                std::string getValue() const;
                 /// The translated currently selected option value.
                 std::string getValueName() const;
                 std::string getDefaultText( const bool bTranslated = true ) const;

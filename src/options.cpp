@@ -443,7 +443,7 @@ bool options_manager::cOpt::operator==( const cOpt &rhs ) const
     }
 }
 
-std::string options_manager::cOpt::getValue( bool classis_locale ) const
+std::string options_manager::cOpt::getValue() const
 {
     if (sType == "string_select" || sType == "string_input") {
         return sSet;
@@ -456,7 +456,30 @@ std::string options_manager::cOpt::getValue( bool classis_locale ) const
 
     } else if (sType == "float") {
         std::ostringstream ssTemp;
-        ssTemp.imbue( classis_locale ? std::locale::classic() : std::locale() );
+        ssTemp.imbue( std::locale() );
+        ssTemp.precision( 2 );
+        ssTemp.setf( std::ios::fixed, std::ios::floatfield );
+        ssTemp << fSet;
+        return ssTemp.str();
+    }
+
+    return "";
+}
+
+std::string options_manager::cOpt::get_legacy_value() const
+{
+    if (sType == "string_select" || sType == "string_input") {
+        return sSet;
+
+    } else if (sType == "bool") {
+        return (bSet) ? "true" : "false";
+
+    } else if (sType == "int" || sType == "int_map") {
+        return string_format( format, iSet );
+
+    } else if (sType == "float") {
+        std::ostringstream ssTemp;
+        ssTemp.imbue( std::locale::classic() );
         ssTemp.precision( 2 );
         ssTemp.setf( std::ios::fixed, std::ios::floatfield );
         ssTemp << fSet;
@@ -2038,7 +2061,7 @@ void options_manager::cOpt::serialize( JsonOut &json ) const
     json.member( "info", getTooltip() );
     json.member( "default", getDefaultText( false ) );
     json.member( "name", sName );
-    json.member( "value", getValue( true ) );
+    json.member( "value", get_legacy_value() );
     json.end_object();
 }
 
