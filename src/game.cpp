@@ -3194,7 +3194,7 @@ bool game::handle_action()
 
         case ACTION_TOGGLE_AUTOSAFE: {
             auto &autosafemode_option = get_options().get_option( "AUTOSAFEMODE" );
-            add_msg(m_info, autosafemode_option.value_as<bool>()
+            add_msg(m_info, value_as<bool>( autosafemode_option )
                 ? _( "Auto safe mode OFF!" ) : _( "Auto safe mode ON!" ) );
             autosafemode_option.setNext();
             break;

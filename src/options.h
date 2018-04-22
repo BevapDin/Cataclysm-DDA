@@ -83,9 +83,6 @@ class options_manager
                 void setValue( float fSetIn );
                 void setValue( int iSetIn );
 
-                template<typename T>
-                T value_as() const;
-
                 bool operator==( const cOpt &rhs ) const;
                 bool operator!=( const cOpt &rhs ) const {
                     return !operator==( rhs );
@@ -227,9 +224,12 @@ extern std::map<std::string, std::string> SOUNDPACKS;
 options_manager &get_options();
 
 template<typename T>
+T value_as( const options_manager::cOpt &opt );
+
+template<typename T>
 inline T get_option( const std::string &name )
 {
-    return get_options().get_option( name ).value_as<T>();
+    return value_as<T>( get_options().get_option( name ) );
 }
 
 #endif

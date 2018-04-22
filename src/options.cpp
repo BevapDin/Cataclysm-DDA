@@ -467,39 +467,39 @@ std::string options_manager::cOpt::getValue( bool classis_locale ) const
 }
 
 template<>
-std::string options_manager::cOpt::value_as<std::string>() const
+std::string value_as<std::string>( const options_manager::cOpt_base &opt )
 {
-    if( sType != "string_select" && sType != "string_input" ) {
-        debugmsg( "%s tried to get string value from option of type %s", sName.c_str(), sType.c_str() );
+    if( opt.getType() != "string_select" && opt.getType() != "string_input" ) {
+        debugmsg( "%s tried to get string value from option of type %s", opt.getName(), opt.getType() );
     }
-    return sSet;
+    return opt.sSet;
 }
 
 template<>
-bool options_manager::cOpt::value_as<bool>() const
+bool value_as<bool>( const options_manager::cOpt_base &opt )
 {
-    if( sType != "bool" ) {
-        debugmsg( "%s tried to get boolean value from option of type %s", sName.c_str(), sType.c_str() );
+    if( opt.getType() != "bool" ) {
+        debugmsg( "%s tried to get boolean value from option of type %s", opt.getName(), opt.getType() );
     }
-    return bSet;
+    return opt.bSet;
 }
 
 template<>
-float options_manager::cOpt::value_as<float>() const
+float value_as<float>( const options_manager::cOpt_base &opt )
 {
-    if( sType != "float" ) {
-        debugmsg( "%s tried to get float value from option of type %s", sName.c_str(), sType.c_str() );
+    if( opt.getType() != "float" ) {
+        debugmsg( "%s tried to get float value from option of type %s", opt.getName(), opt.getType() );
     }
-    return fSet;
+    return opt.fSet;
 }
 
 template<>
-int options_manager::cOpt::value_as<int>() const
+int value_as<int>( const options_manager::cOpt_base &opt )
 {
-    if( sType != "int" && sType != "int_map" ) {
-        debugmsg( "%s tried to get integer value from option of type %s", sName.c_str(), sType.c_str() );
+    if( opt.getType() != "int" && opt.getType() != "int_map" ) {
+        debugmsg( "%s tried to get integer value from option of type %s", opt.getName(), opt.getType() );
     }
-    return iSet;
+    return opt.iSet;
 }
 
 std::string options_manager::cOpt::getValueName() const
