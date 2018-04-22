@@ -281,6 +281,44 @@ class options_manager
                 }
         };
 
+        class int_option : public cOpt_base
+        {
+            private:
+                int value_;
+                int default_value_;
+                int min_value_;
+                int max_value_;
+                std::string format_;
+
+            public:
+                int_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const int d, const int mi, const int ma, const std::string &f = "%i" ) : cOpt_base( n, p, m, t, h ), value_( d), default_value_(d), min_value_(mi), max_value_(ma), format_(f) { }
+                ~int_option() override = default;
+
+                std::string getType() const override {
+                    return "int";
+                }
+
+                std::string get_legacy_value() const override;
+                void set_from_legacy_value( const std::string &v ) override;
+                std::string getValueName() const override;
+                std::string getDefaultText( const bool bTranslated = true ) const override;
+
+                void setNext() override;
+                void setPrev() override;
+                void setInteractive() override;
+
+                void setValue( int v );
+
+                bool operator==( const cOpt_base &rhs ) const override {
+                    const auto o = dynamic_cast<const int_option*>( &rhs );
+                    return o && value_ == o->value_;
+                }
+
+                cOpt_base *clone() const override {
+                    return new int_option(*this);
+                }
+        };
+
         class cOpt : public cOpt_base
         {
                 friend class options_manager;
@@ -318,19 +356,11 @@ class options_manager
             private:
                 std::string sType;
 
-                std::string format;
-
                 //sType == "string"
                 std::string sSet;
                 // first is internal value, second is untranslated text
                 std::vector<std::pair<std::string, std::string>> vItems;
                 std::string sDefault;
-
-                //sType == "int"
-                int iSet;
-                int iMin;
-                int iMax;
-                int iDefault;
         };
 
         typedef std::unordered_map<std::string, poly_pimpl<cOpt_base>> options_container;
