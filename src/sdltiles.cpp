@@ -683,11 +683,8 @@ void find_videodisplays() {
         displays.insert( { i, SDL_GetDisplayName( i ) } );
     }
 
-    int current_display = get_option<int>( "DISPLAY" );
-    get_options().add("DISPLAY", "graphics", _("Display"),
-                      _("Sets which video display will be used to show the game. Requires restart."),
-                      displays, current_display, 0, options_manager::COPT_CURSES_HIDE
-                      );
+    auto &opt = dynamic_cast<options_manager::display_device_option&>( get_options().get_option( "DISPLAY" ) );
+    opt.set_displays( displays );
 }
 
 // line_id is one of the LINE_*_C constants

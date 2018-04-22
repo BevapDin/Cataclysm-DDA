@@ -244,6 +244,41 @@ class options_manager
                 }
         };
 
+        class display_device_option : public cOpt_base
+        {
+            private:
+                int value_;
+                std::map<int, std::string> displays_;
+
+            public:
+                display_device_option();
+                ~display_device_option() override = default;
+
+                std::string getType() const override {
+                    return "int_map";
+                }
+
+                std::string get_legacy_value() const override;
+                void set_from_legacy_value( const std::string &v ) override;
+                std::string getValueName() const override;
+                std::string getDefaultText( const bool bTranslated = true ) const override;
+
+                void setNext() override;
+                void setPrev() override;
+                void setInteractive() override;
+
+                void set_displays( const decltype( displays_ ) & displays );
+
+                bool operator==( const cOpt_base &rhs ) const override {
+                    const auto o = dynamic_cast<const display_device_option*>( &rhs );
+                    return o && value_ == o->value_;
+                }
+
+                cOpt_base *clone() const override {
+                    return new display_device_option(*this);
+                }
+        };
+
         class cOpt : public cOpt_base
         {
                 friend class options_manager;
@@ -294,7 +329,6 @@ class options_manager
                 int iMin;
                 int iMax;
                 int iDefault;
-                std::map<int, std::string> mIntValues;
         };
 
         typedef std::unordered_map<std::string, poly_pimpl<cOpt_base>> options_container;

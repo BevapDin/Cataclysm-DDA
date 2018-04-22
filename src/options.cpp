@@ -70,6 +70,14 @@ void options_manager::enable_json(const std::string &lvar)
     post_json_verify[ lvar ] = blank_value;
 }
 
+options_manager::display_device_option::display_device_option() : cOpt_base( "DISPLAY", "graphics",
+            translate_marker( "Display" ),
+            translate_marker( "Sets which video display will be used to show the game.  Requires restart." ),
+            options_manager::COPT_CURSES_HIDE ),
+            value_( 0 )
+{
+}
+
 void options_manager::add_retry(const std::string &lvar, const::std::string &lval)
 {
     std::map<std::string, std::string>::const_iterator it = post_json_verify.find(lvar);
@@ -344,7 +352,7 @@ bool options_manager::cOpt::operator==( const cOpt_base &rhs_ ) const
         return false;
     } else if( sType == "string_select" ) {
         return sSet == rhs.sSet;
-    } else if( sType == "int" || sType == "int_map" ) {
+    } else if( sType == "int" ) {
         return iSet == rhs.iSet;
     } else if( sType == "VOID" ) {
         return true;
@@ -374,12 +382,17 @@ std::string options_manager::string_input_option::get_legacy_value() const
     return value_;
 }
 
+std::string options_manager::display_device_option::get_legacy_value() const
+{
+    return to_string( value_ );
+}
+
 std::string options_manager::cOpt::get_legacy_value() const
 {
     if (sType == "string_select") {
         return sSet;
 
-    } else if (sType == "int" || sType == "int_map") {
+    } else if (sType == "int") {
         return string_format( format, iSet );
 
     }
@@ -425,7 +438,11 @@ float value_as<float>( const options_manager::cOpt &opt )
 template<>
 int value_as<int>( const options_manager::cOpt &opt )
 {
-    if( opt.getType() != "int" && opt.getType() != "int_map" ) {
+    const auto o = dynamic_cast<const options_manager::display_device_option *>( &opt );
+    if( o ) {
+        return o->value_;
+    }
+    if( opt.getType() != "int" ) {
         debugmsg( "%s tried to get integer value from option of type %s", opt.getName(), opt.getType() );
     }
     return opt.iSet;
@@ -451,6 +468,11 @@ std::string options_manager::string_input_option::getValueName() const
     return value_;
 }
 
+std::string options_manager::display_device_option::getValueName() const
+{
+    return string_format( _( "%d: %s" ), value_, displays_.at( value_ ) );
+}
+
 std::string options_manager::cOpt::getValueName() const
 {
     if (sType == "string_select") {
@@ -460,9 +482,6 @@ std::string options_manager::cOpt::getValueName() const
         if( iter != vItems.end() ) {
             return _( iter->second.c_str() );
         }
-
-    } else if ( sType == "int_map" ) {
-        return string_format(_("%d: %s"), iSet, mIntValues.find( iSet )->second.c_str());
 
     } else if( sType == "int" ) {
         return string_format( format, iSet );
@@ -487,6 +506,11 @@ std::string options_manager::string_input_option::getDefaultText( const bool /*b
     return string_format( _( "Default: %s" ), default_value_ );
 }
 
+std::string options_manager::display_device_option::getDefaultText( const bool /*bTranslated*/ ) const
+{
+    return string_format( _( "Default: %d: %s" ), displays_.begin()->first, displays_.begin()->second );
+}
+
 std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
 {
     if (sType == "string_select") {
@@ -505,9 +529,6 @@ std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
 
     } else if (sType == "int") {
         return string_format(_("Default: %d - Min: %d, Max: %d"), iDefault, iMin, iMax);
-
-    } else if (sType == "int_map") {
-        return string_format( _( "Default: %d: %s" ), iDefault, mIntValues.find( iDefault )->second.c_str() );
     }
 
     return "";
@@ -539,6 +560,22 @@ void options_manager::float_option::setNext()
     }
 }
 
+void options_manager::display_device_option::set_displays( const decltype( displays_ ) & displays )
+{
+    //@todo keep currently selected value
+    displays_ = displays;
+}
+
+void options_manager::display_device_option::setNext()
+{
+    const auto next = std::next( displays_.find( value_ ) );
+    if ( next == displays_.end() ) {
+        value_ = displays_.begin()->first;
+    } else {
+        value_ = next->first;
+    }
+}
+
 void options_manager::cOpt::setNext()
 {
     if (sType == "string_select") {
@@ -554,14 +591,6 @@ void options_manager::cOpt::setNext()
         if (iSet > iMax) {
             iSet = iMin;
         }
-
-    } else if (sType == "int_map") {
-        auto next = std::next( mIntValues.find( iSet ) );
-        if ( next == mIntValues.cend() ) {
-            iSet = mIntValues.cbegin()->first;
-        } else {
-            iSet = next->first;
-        }
     }
 }
 
@@ -570,6 +599,18 @@ void options_manager::float_option::setPrev()
     value_ -= step_;
     if( value_ < min_value_ ) {
         value_ = max_value_;
+    }
+}
+
+void options_manager::display_device_option::setPrev()
+{
+    const auto item = displays_.find( value_ );
+    if( item == displays_.begin() ) {
+        const auto prev = std::prev( displays_.end() );
+        value_ = prev->first;
+    } else {
+        const auto prev = std::prev( item );
+        value_ = prev->first;
     }
 }
 
@@ -587,16 +628,6 @@ void options_manager::cOpt::setPrev()
         iSet--;
         if (iSet < iMin) {
             iSet = iMax;
-        }
-
-    } else if (sType == "int_map") {
-        auto item = mIntValues.find( iSet );
-        if ( item == mIntValues.cbegin() ) {
-            auto prev = std::prev( mIntValues.cend() );
-            iSet = prev->first;
-        } else {
-            auto prev = std::prev( item );
-            iSet = prev->first;
         }
     }
 }
@@ -702,6 +733,14 @@ void options_manager::string_input_option::set_from_legacy_value( const std::str
     value_ = (iMaxLength > 0) ? sSetIn.substr(0, iMaxLength) : sSetIn;
 }
 
+void options_manager::display_device_option::set_from_legacy_value( const std::string &sSetIn )
+{
+    value_ = atoi(sSetIn.c_str());
+    if( !displays_.empty() && displays_.count( value_ ) == 0 ) {
+        value_ = displays_.begin()->first;
+    }
+}
+
 void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
 {
     if (sType == "string_select") {
@@ -716,13 +755,6 @@ void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
             iSet = iDefault;
         }
 
-    } else if (sType == "int_map") {
-        iSet = atoi(sSetIn.c_str());
-
-        auto item = mIntValues.find( iSet );
-        if ( item == mIntValues.cend() ) {
-            iSet = iDefault;
-        }
     }
 }
 
@@ -1287,11 +1319,8 @@ void options_manager::init()
 
     mOptionsSort["graphics"]++;
 
-
-    add( "DISPLAY", "graphics", translate_marker( "Display" ),
-        translate_marker( "Sets which video display will be used to show the game.  Requires restart." ),
-        0, 10000, 0, COPT_CURSES_HIDE
-        );
+    // Note: list of display devices is added later by SDL code
+    add( display_device_option() );
 
     add( "FULLSCREEN", "graphics", translate_marker( "Fullscreen" ),
         translate_marker( "Starts Cataclysm in one of the fullscreen modes.  Requires restart." ),
