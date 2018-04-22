@@ -599,15 +599,6 @@ std::vector<std::pair<std::string, std::string>> options_manager::cOpt::getItems
     return vItems;
 }
 
-int options_manager::cOpt::getMaxLength() const
-{
-    if (sType == "string_input") {
-        return iMaxLength;
-    }
-
-    return 0;
-}
-
 void options_manager::cOpt::setNext()
 {
     if (sType == "string_select") {

@@ -86,8 +86,6 @@ class options_manager
                 std::vector<std::pair<std::string, std::string>> getItems() const;
                 void add_value( const std::string &lval, const std::string &lvalname );
 
-                int getMaxLength() const;
-
                 void setNext();
                 void setPrev();
                 void setValue( float fSetIn );
