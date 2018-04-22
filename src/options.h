@@ -88,6 +88,7 @@ class options_manager
 
                 void setNext();
                 void setPrev();
+                void setInteractive();
                 void setValue( float fSetIn );
                 void setValue( int iSetIn );
 

@@ -682,6 +682,43 @@ void options_manager::cOpt::setPrev()
     }
 }
 
+void options_manager::cOpt::setInteractive()
+{
+    if( sType == "bool" || sType == "string_select" || sType == "string_input" ) {
+        setNext();
+        return;
+    }
+    const bool is_int = sType == "int";
+    const bool is_float = sType == "float";
+    const std::string old_opt_val = getValueName();
+    const std::string opt_val = string_input_popup()
+                                .title( getMenuText() )
+                                .width( 10 )
+                                .text( old_opt_val )
+                                .only_digits( is_int )
+                                .query_string();
+    if( !opt_val.empty() && opt_val != old_opt_val ) {
+        if( is_float ) {
+            std::istringstream ssTemp( opt_val );
+            // This uses the current locale, to allow the users
+            // to use their own decimal format.
+            float tmpFloat;
+            ssTemp >> tmpFloat;
+            if( ssTemp ) {
+                setValue( tmpFloat );
+
+            } else {
+                popup( _( "Invalid input: not a number" ) );
+            }
+        } else {
+            // option is of type "int": string_input_popup
+            // has taken care that the string contains
+            // only digits, parsing is done in set_from_legacy_value
+            set_from_legacy_value( opt_val );
+        }
+    }
+}
+
 void options_manager::cOpt::setValue(float fSetIn)
 {
     if (sType != "float") {
@@ -1931,39 +1968,7 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
             }
             sfx::play_variant_sound( "menu_move", "default", 100 );
         } else if (!mPageItems[iCurrentPage].empty() && action == "CONFIRM") {
-            if (current_opt.getType() == "bool" || current_opt.getType() == "string_select" || current_opt.getType() == "string_input" ) {
-                current_opt.setNext();
-            } else {
-                const bool is_int = current_opt.getType() == "int";
-                const bool is_float = current_opt.getType() == "float";
-                const std::string old_opt_val = current_opt.getValueName();
-                const std::string opt_val = string_input_popup()
-                .title( current_opt.getMenuText() )
-                                            .width( 10 )
-                                            .text( old_opt_val )
-                                            .only_digits( is_int )
-                                            .query_string();
-                if (!opt_val.empty() && opt_val != old_opt_val) {
-                    if (is_float) {
-                        std::istringstream ssTemp(opt_val);
-                        // This uses the current locale, to allow the users
-                        // to use their own decimal format.
-                        float tmpFloat;
-                        ssTemp >> tmpFloat;
-                        if (ssTemp) {
-                            current_opt.setValue(tmpFloat);
-
-                        } else {
-                            popup(_("Invalid input: not a number"));
-                        }
-                    } else {
-                        // option is of type "int": string_input_popup
-                        // has taken care that the string contains
-                        // only digits, parsing is done in set_from_legacy_value
-                        current_opt.set_from_legacy_value( opt_val );
-                    }
-                }
-            }
+            current_opt.setInteractive();
         } else if( action == "HELP_KEYBINDINGS" ) {
             // keybinding screen erased the internal borders of main menu, restore it:
             draw_borders_internal( w_options_header, mapLines );
