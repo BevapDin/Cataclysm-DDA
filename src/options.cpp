@@ -118,6 +118,13 @@ options_manager::cOpt::cOpt()
     hide = COPT_NO_HIDE;
 }
 
+template<typename T>
+void options_manager::add( const T &opt )
+{
+    const auto iter = options.emplace( opt.getName(), make_poly_pimpl<T>( opt ) );
+    iter.first->second->setSortPos( opt.getPage() );
+}
+
 void options_manager::add_external( const std::string sNameIn, const std::string sPageIn,
                                     const std::string sType,
                                     const std::string sMenuTextIn, const std::string sTooltipIn )
@@ -137,9 +144,8 @@ void options_manager::add_external( const std::string sNameIn, const std::string
     thisOpt.fMax = INT_MAX;
 
     thisOpt.hide = COPT_ALWAYS_HIDE;
-    thisOpt.setSortPos( sPageIn );
 
-    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
+    add( thisOpt );
 }
 
 void options_manager::add( const std::string sNameIn, const std::string sPageIn,
@@ -165,9 +171,7 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
     thisOpt.sDefault = sDefaultIn;
     thisOpt.sSet = sDefaultIn;
 
-    thisOpt.setSortPos( sPageIn );
-
-    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
+    add( thisOpt );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -189,9 +193,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     thisOpt.sDefault = (thisOpt.iMaxLength > 0) ? sDefaultIn.substr(0, thisOpt.iMaxLength) : sDefaultIn;
     thisOpt.sSet = thisOpt.sDefault;
 
-    thisOpt.setSortPos(sPageIn);
-
-    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
+    add( thisOpt );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -211,9 +213,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     thisOpt.bDefault = bDefaultIn;
     thisOpt.bSet = bDefaultIn;
 
-    thisOpt.setSortPos(sPageIn);
-
-    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
+    add( thisOpt );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -247,9 +247,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     thisOpt.iDefault = iDefaultIn;
     thisOpt.iSet = iDefaultIn;
 
-    thisOpt.setSortPos(sPageIn);
-
-    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
+    add( thisOpt );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -282,9 +280,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     thisOpt.iDefault = iDefaultIn;
     thisOpt.iSet = iInitialIn;
 
-    thisOpt.setSortPos(sPageIn);
-
-    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
+    add( thisOpt );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -319,9 +315,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     thisOpt.fDefault = fDefaultIn;
     thisOpt.fSet = fDefaultIn;
 
-    thisOpt.setSortPos(sPageIn);
-
-    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
+    add( thisOpt );
 }
 
 void options_manager::cOpt::setPrerequisite( const std::string &sOption )

@@ -29,6 +29,9 @@ class options_manager
         friend options_manager &get_options();
         options_manager();
 
+        template<typename T>
+        void add( const T &opt );
+
     public:
         enum copt_hide_t {
             /** Don't hide this option */
