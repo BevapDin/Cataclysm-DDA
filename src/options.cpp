@@ -1816,10 +1816,12 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
 
         wrefresh(w_options_header);
 
+        cOpt &current_opt = cOPTIONS[mPageItems[iCurrentPage][iCurrentLine]];
+
 #if (defined TILES || defined _WIN32 || defined WINDOWS)
         if (mPageItems[iCurrentPage][iCurrentLine] == "TERMINAL_X") {
             int new_terminal_x, new_window_width;
-            std::stringstream value_conversion(OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getValueName());
+            std::stringstream value_conversion(current_opt.getValueName());
 
             value_conversion >> new_terminal_x;
             new_window_width = projected_window_width(new_terminal_x);
@@ -1828,12 +1830,12 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
                            ngettext("%s #%s -- The window will be %d pixel wide with the selected value.",
                                     "%s #%s -- The window will be %d pixels wide with the selected value.",
                                     new_window_width),
-                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip().c_str(),
-                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getDefaultText().c_str(),
+                           current_opt.getTooltip().c_str(),
+                           current_opt.getDefaultText().c_str(),
                            new_window_width);
         } else if (mPageItems[iCurrentPage][iCurrentLine] == "TERMINAL_Y") {
             int new_terminal_y, new_window_height;
-            std::stringstream value_conversion(OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getValueName());
+            std::stringstream value_conversion(current_opt.getValueName());
 
             value_conversion >> new_terminal_y;
             new_window_height = projected_window_height(new_terminal_y);
@@ -1842,15 +1844,15 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
                            ngettext("%s #%s -- The window will be %d pixel tall with the selected value.",
                                     "%s #%s -- The window will be %d pixels tall with the selected value.",
                                     new_window_height),
-                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip().c_str(),
-                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getDefaultText().c_str(),
+                           current_opt.getTooltip().c_str(),
+                           current_opt.getDefaultText().c_str(),
                            new_window_height);
         } else
 #endif
         {
             fold_and_print(w_options_tooltip, 0, 0, 78, c_white, "%s #%s",
-                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getTooltip().c_str(),
-                           OPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getDefaultText().c_str());
+                           current_opt.getTooltip().c_str(),
+                           current_opt.getDefaultText().c_str());
         }
 
         if ( iCurrentPage != iLastPage ) {
@@ -1870,8 +1872,6 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
         if( world_options_only && ( action == "NEXT_TAB" || action == "PREV_TAB" || action == "QUIT" ) ) {
             return action;
         }
-
-        cOpt &current_opt = cOPTIONS[mPageItems[iCurrentPage][iCurrentLine]];
 
         if ( !current_opt.hasPrerequisite() &&
             ( action == "RIGHT" || action == "LEFT" || action == "CONFIRM" ) ) {
