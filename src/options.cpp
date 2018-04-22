@@ -2032,6 +2032,16 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
     return "";
 }
 
+void options_manager::cOpt::serialize( JsonOut &json ) const
+{
+    json.start_object();
+    json.member( "info", getTooltip() );
+    json.member( "default", getDefaultText( false ) );
+    json.member( "name", sName );
+    json.member( "value", getValue( true ) );
+    json.end_object();
+}
+
 void options_manager::serialize(JsonOut &json) const
 {
     json.start_array();
@@ -2052,14 +2062,7 @@ void options_manager::serialize(JsonOut &json) const
                 if ( opt.hide == COPT_ALWAYS_HIDE ) {
                     continue;
                 }
-                json.start_object();
-
-                json.member( "info", opt.getTooltip() );
-                json.member( "default", opt.getDefaultText( false ) );
-                json.member( "name", elem );
-                json.member( "value", opt.getValue( true ) );
-
-                json.end_object();
+                json.write( opt );
             }
         }
     }

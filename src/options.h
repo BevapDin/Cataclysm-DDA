@@ -95,6 +95,8 @@ class options_manager
                 std::string getPrerequisite() const;
                 bool hasPrerequisite() const;
 
+                void serialize( JsonOut &jsout ) const;
+
             private:
                 std::string sName;
                 std::string sPage;

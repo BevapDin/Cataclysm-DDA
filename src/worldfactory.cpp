@@ -273,16 +273,10 @@ bool worldfactory::save_world(WORLDPTR world, bool is_conversion)
             jout.start_array();
 
             for( auto &elem : world->WORLD_OPTIONS ) {
+                const options_manager::cOpt &opt = elem.second;
                 // Skip hidden option because it is set by mod and should not be saved
-                if( elem.second.getDefaultText() != "" && !elem.second.is_hidden() ) {
-                    jout.start_object();
-
-                    jout.member( "info", elem.second.getTooltip() );
-                    jout.member( "default", elem.second.getDefaultText( false ) );
-                    jout.member( "name", elem.first );
-                    jout.member( "value", elem.second.getValue() );
-
-                    jout.end_object();
+                if( opt.getDefaultText() != "" && !opt.is_hidden() ) {
+                    jout.write( opt );
                 }
             }
 
