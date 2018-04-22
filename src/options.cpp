@@ -107,10 +107,6 @@ void options_manager::add_value( const std::string &lvar, const std::string &lva
 
 void options_manager::cOpt::add_value( const std::string &lval, const std::string &lvalname )
 {
-    if( sType != "string_select" ) {
-        debugmsg( "tried to add value %s to option of type %s", lval, getType() );
-        return;
-    }
     for( auto eit = vItems.begin(); eit != vItems.end(); ++eit) {
         if( eit->first == lval ) { // already in
             return;
@@ -135,12 +131,10 @@ void options_manager::add( const T &opt )
 }
 
 void options_manager::add_external( const std::string sNameIn, const std::string sPageIn,
-                                    const std::string sType,
+                                    const std::string /*sType*/,
                                     const std::string sMenuTextIn, const std::string sTooltipIn )
 {
     cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, COPT_ALWAYS_HIDE );
-
-    thisOpt.sType = sType;
 
     thisOpt.min_value_ = INT_MIN;
     thisOpt.max_value_ = INT_MAX;
@@ -154,8 +148,6 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
                            copt_hide_t opt_hide )
 {
     cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
-
-    thisOpt.sType = "string_select";
 
     thisOpt.vItems = sItemsIn;
 
@@ -293,24 +285,10 @@ std::string options_manager::cOpt_base::getTooltip() const
     return _( sTooltip.c_str() );
 }
 
-std::string options_manager::cOpt::getType() const
-{
-    return sType;
-}
-
 bool options_manager::cOpt::operator==( const cOpt_base &rhs_ ) const
 {
     const cOpt &rhs = dynamic_cast<const cOpt&>( rhs_ );
-    if( sType != rhs.sType ) {
-        return false;
-    } else if( sType == "string_select" ) {
-        return sSet == rhs.sSet;
-    } else if( sType == "VOID" ) {
-        return true;
-    } else {
-        debugmsg( "unknown option type %s", sType.c_str() );
-        return false;
-    }
+    return sSet == rhs.sSet;
 }
 
 std::string options_manager::bool_option::get_legacy_value() const
@@ -345,11 +323,7 @@ std::string options_manager::int_option::get_legacy_value() const
 
 std::string options_manager::cOpt::get_legacy_value() const
 {
-    if (sType == "string_select") {
-        return sSet;
-    }
-
-    return "";
+    return sSet;
 }
 
 template<>
@@ -359,10 +333,12 @@ std::string value_as<std::string>( const options_manager::cOpt &opt )
     if( o ) {
         return o->value_;
     }
-    if( opt.getType() != "string_select" ) {
+    const auto p = dynamic_cast<const options_manager::cOpt *>( &opt );
+    if( !p ) {
         debugmsg( "%s tried to get string value from option of type %s", opt.getName(), opt.getType() );
+        return std::string();
     }
-    return opt.sSet;
+    return p->sSet;
 }
 
 template<>
@@ -437,16 +413,10 @@ std::string options_manager::int_option::getValueName() const
 
 std::string options_manager::cOpt::getValueName() const
 {
-    if (sType == "string_select") {
-        const auto iter = std::find_if( vItems.begin(), vItems.end(), [&]( const std::pair<std::string, std::string> &e ) {
-            return e.first == sSet;
-        } );
-        if( iter != vItems.end() ) {
-            return _( iter->second.c_str() );
-        }
-    }
-
-    return std::string();
+    const auto iter = std::find_if( vItems.begin(), vItems.end(), [&]( const std::pair<std::string, std::string> &e ) {
+        return e.first == sSet;
+    } );
+    return _( iter->second.c_str() );
 }
 
 std::string options_manager::bool_option::getDefaultText( const bool /*bTranslated*/ ) const
@@ -481,34 +451,27 @@ std::string options_manager::int_option::getDefaultText(const bool /*bTranslated
 
 std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
 {
-    if (sType == "string_select") {
-        const auto iter = std::find_if( vItems.begin(), vItems.end(),
-        [this]( const std::pair<std::string, std::string> &elem ) {
-            return elem.first == sDefault;
-        } );
-        const std::string defaultName = iter == vItems.end() ? std::string() :
-                                        ( bTranslated ? _( iter->second.c_str() ) : iter->first );
-        const std::string sItems = enumerate_as_string( vItems.begin(), vItems.end(),
-        [bTranslated]( const std::pair<std::string, std::string> &elem ) {
-            return bTranslated ? _( elem.second.c_str() ) : elem.first;
-        }, false );
-        return string_format( _( "Default: %s - Values: %s" ),
-                              defaultName.c_str(), sItems.c_str() );
-    }
-
-    return "";
+    const auto iter = std::find_if( vItems.begin(), vItems.end(),
+    [this]( const std::pair<std::string, std::string> &elem ) {
+        return elem.first == sDefault;
+    } );
+    const std::string defaultName = iter == vItems.end() ? std::string() :
+                                    ( bTranslated ? _( iter->second.c_str() ) : iter->first );
+    const std::string sItems = enumerate_as_string( vItems.begin(), vItems.end(),
+    [bTranslated]( const std::pair<std::string, std::string> &elem ) {
+        return bTranslated ? _( elem.second.c_str() ) : elem.first;
+    }, false );
+    return string_format( _( "Default: %s - Values: %s" ),
+                          defaultName.c_str(), sItems.c_str() );
 }
 
 int options_manager::cOpt::getItemPos(const std::string sSearch) const
 {
-    if (sType == "string_select") {
-        for (size_t i = 0; i < vItems.size(); i++) {
-            if( vItems[i].first == sSearch ) {
-                return i;
-            }
+    for (size_t i = 0; i < vItems.size(); i++) {
+        if( vItems[i].first == sSearch ) {
+            return i;
         }
     }
-
     return -1;
 }
 
@@ -559,14 +522,12 @@ void options_manager::int_option::setNext()
 
 void options_manager::cOpt::setNext()
 {
-    if (sType == "string_select") {
-        int iNext = getItemPos(sSet) + 1;
-        if (iNext >= (int)vItems.size()) {
-            iNext = 0;
-        }
-
-        sSet = vItems[iNext].first;
+    int iNext = getItemPos(sSet) + 1;
+    if (iNext >= (int)vItems.size()) {
+        iNext = 0;
     }
+
+    sSet = vItems[iNext].first;
 }
 
 void options_manager::float_option::setPrev()
@@ -601,13 +562,9 @@ void options_manager::int_option::setPrev()
 
 void options_manager::cOpt::setPrev()
 {
-    if (sType == "string_select") {
-        int iPrev = getItemPos(sSet) - 1;
-        if (iPrev < 0) {
-            iPrev = vItems.size() - 1;
-        }
-
-        sSet = vItems[iPrev].first;
+    int iPrev = getItemPos(sSet) - 1;
+    if (iPrev < 0) {
+        iPrev = vItems.size() - 1;
     }
 }
 
@@ -666,10 +623,7 @@ void options_manager::int_option::setInteractive()
 
 void options_manager::cOpt::setInteractive()
 {
-    if( sType == "string_select" ) {
-        setNext();
-        return;
-    }
+    setNext();
 }
 
 void options_manager::float_option::setValue( const float fSetIn )
@@ -727,10 +681,8 @@ void options_manager::int_option::set_from_legacy_value( const std::string &sSet
 
 void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
 {
-    if (sType == "string_select") {
-        if (getItemPos(sSetIn) != -1) {
-            sSet = sSetIn;
-        }
+    if (getItemPos(sSetIn) != -1) {
+        sSet = sSetIn;
     }
 }
 

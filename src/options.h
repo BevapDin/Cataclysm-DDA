@@ -329,7 +329,9 @@ class options_manager
                 std::string get_legacy_value() const override;
                 void set_from_legacy_value( const std::string &v ) override;
 
-                std::string getType() const override;
+                std::string getType() const override {
+                    return "string_select";
+                }
 
                 std::string getValueName() const override;
                 std::string getDefaultText( const bool bTranslated = true ) const override;
@@ -354,9 +356,6 @@ class options_manager
                 }
 
             private:
-                std::string sType;
-
-                //sType == "string"
                 std::string sSet;
                 // first is internal value, second is untranslated text
                 std::vector<std::pair<std::string, std::string>> vItems;
