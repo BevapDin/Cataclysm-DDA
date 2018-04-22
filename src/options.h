@@ -84,6 +84,7 @@ class options_manager
 
                 int getItemPos( const std::string sSearch ) const;
                 std::vector<std::pair<std::string, std::string>> getItems() const;
+                void add_value( const std::string &lval, const std::string &lvalname );
 
                 int getMaxLength() const;
 

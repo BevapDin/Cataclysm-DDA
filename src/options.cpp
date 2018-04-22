@@ -84,22 +84,32 @@ void options_manager::add_value( const std::string &lvar, const std::string &lva
 {
     std::map<std::string, std::string>::const_iterator it = post_json_verify.find(lvar);
     if ( it != post_json_verify.end() ) {
-        auto ot = options.find( lvar );
-        if( ot != options.end() && ot->second.sType == "string_select" ) {
-            for( auto eit = ot->second.vItems.begin();
-                eit != ot->second.vItems.end(); ++eit) {
-                if( eit->first == lval ) { // already in
-                    return;
-                }
-            }
-            ot->second.vItems.emplace_back( lval, lvalname.empty() ? lval : lvalname );
-            // our value was saved, then set to default, so set it again.
-            if ( it->second == lval ) {
-                options[ lvar ].set_from_legacy_value( lval );
-            }
+        const auto ot = options.find( lvar );
+        if( ot == options.end() ) {
+            return;
+        }
+        cOpt &opt = ot->second;
+        opt.add_value( lval, lvalname );
+        // our value was saved, then set to default, so set it again.
+        if ( it->second == lval ) {
+            opt.set_from_legacy_value( lval );
+        }
+    }
+}
+
+void options_manager::cOpt::add_value( const std::string &lval, const std::string &lvalname )
+{
+    if( sType != "string_select" ) {
+        debugmsg( "tried to add value %s to option of type %s", lval, getType() );
+        return;
+    }
+    for( auto eit = vItems.begin(); eit != vItems.end(); ++eit) {
+        if( eit->first == lval ) { // already in
+            return;
         }
 
     }
+    vItems.emplace_back( lval, lvalname.empty() ? lval : lvalname );
 }
 
 options_manager::cOpt::cOpt()
@@ -467,7 +477,7 @@ std::string options_manager::cOpt::get_legacy_value() const
 }
 
 template<>
-std::string value_as<std::string>( const options_manager::cOpt_base &opt )
+std::string value_as<std::string>( const options_manager::cOpt &opt )
 {
     if( opt.getType() != "string_select" && opt.getType() != "string_input" ) {
         debugmsg( "%s tried to get string value from option of type %s", opt.getName(), opt.getType() );
@@ -476,7 +486,7 @@ std::string value_as<std::string>( const options_manager::cOpt_base &opt )
 }
 
 template<>
-bool value_as<bool>( const options_manager::cOpt_base &opt )
+bool value_as<bool>( const options_manager::cOpt &opt )
 {
     if( opt.getType() != "bool" ) {
         debugmsg( "%s tried to get boolean value from option of type %s", opt.getName(), opt.getType() );
@@ -485,7 +495,7 @@ bool value_as<bool>( const options_manager::cOpt_base &opt )
 }
 
 template<>
-float value_as<float>( const options_manager::cOpt_base &opt )
+float value_as<float>( const options_manager::cOpt &opt )
 {
     if( opt.getType() != "float" ) {
         debugmsg( "%s tried to get float value from option of type %s", opt.getName(), opt.getType() );
@@ -494,7 +504,7 @@ float value_as<float>( const options_manager::cOpt_base &opt )
 }
 
 template<>
-int value_as<int>( const options_manager::cOpt_base &opt )
+int value_as<int>( const options_manager::cOpt &opt )
 {
     if( opt.getType() != "int" && opt.getType() != "int_map" ) {
         debugmsg( "%s tried to get integer value from option of type %s", opt.getName(), opt.getType() );
