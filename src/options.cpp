@@ -137,11 +137,6 @@ void options_manager::add_external( const std::string sNameIn, const std::string
     thisOpt.iMin = INT_MIN;
     thisOpt.iMax = INT_MAX;
 
-    thisOpt.fMin = INT_MIN;
-    thisOpt.fMax = INT_MAX;
-
-    thisOpt.hide = COPT_ALWAYS_HIDE;
-
     add( thisOpt );
 }
 
@@ -247,30 +242,9 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
                             const float fMinIn, float fMaxIn, float fDefaultIn,
-                            float fStepIn, copt_hide_t opt_hide, const std::string &format )
+                            float fStepIn, copt_hide_t opt_hide )
 {
-    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
-
-    thisOpt.sType = "float";
-
-    thisOpt.format = format;
-
-    if (fMinIn > fMaxIn) {
-        fMaxIn = fMinIn;
-    }
-
-    thisOpt.fMin = fMinIn;
-    thisOpt.fMax = fMaxIn;
-    thisOpt.fStep = fStepIn;
-
-    if (fDefaultIn < fMinIn || fDefaultIn > fMaxIn) {
-        fDefaultIn = fMinIn ;
-    }
-
-    thisOpt.fDefault = fDefaultIn;
-    thisOpt.fSet = fDefaultIn;
-
-    add( thisOpt );
+    add( float_option( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide, fDefaultIn, fMinIn, fMaxIn, fStepIn ) );
 }
 
 void options_manager::cOpt_base::setPrerequisite( const std::string &sOption )
@@ -380,8 +354,6 @@ bool options_manager::cOpt::operator==( const cOpt_base &rhs_ ) const
         return sSet == rhs.sSet;
     } else if( sType == "int" || sType == "int_map" ) {
         return iSet == rhs.iSet;
-    } else if( sType == "float" ) {
-        return fSet == rhs.fSet;
     } else if( sType == "VOID" ) {
         return true;
     } else {
@@ -395,6 +367,16 @@ std::string options_manager::bool_option::get_legacy_value() const
     return value_ ? "true" : "false";
 }
 
+std::string options_manager::float_option::get_legacy_value() const
+{
+    std::ostringstream ssTemp;
+    ssTemp.imbue( std::locale::classic() );
+    ssTemp.precision( 2 );
+    ssTemp.setf( std::ios::fixed, std::ios::floatfield );
+    ssTemp << value_;
+    return ssTemp.str();
+}
+
 std::string options_manager::cOpt::get_legacy_value() const
 {
     if (sType == "string_select" || sType == "string_input") {
@@ -403,13 +385,6 @@ std::string options_manager::cOpt::get_legacy_value() const
     } else if (sType == "int" || sType == "int_map") {
         return string_format( format, iSet );
 
-    } else if (sType == "float") {
-        std::ostringstream ssTemp;
-        ssTemp.imbue( std::locale::classic() );
-        ssTemp.precision( 2 );
-        ssTemp.setf( std::ios::fixed, std::ios::floatfield );
-        ssTemp << fSet;
-        return ssTemp.str();
     }
 
     return "";
@@ -438,10 +413,12 @@ bool value_as<bool>( const options_manager::cOpt &opt )
 template<>
 float value_as<float>( const options_manager::cOpt &opt )
 {
-    if( opt.getType() != "float" ) {
+    const auto o = dynamic_cast<const options_manager::float_option *>( &opt );
+    if( !o ) {
         debugmsg( "%s tried to get float value from option of type %s", opt.getName(), opt.getType() );
+        return 0.0f;
     }
-    return opt.fSet;
+    return o->value_;
 }
 
 template<>
@@ -456,6 +433,16 @@ int value_as<int>( const options_manager::cOpt &opt )
 std::string options_manager::bool_option::getValueName() const
 {
     return value_ ? _( "True" ) : _( "False" );
+}
+
+std::string options_manager::float_option::getValueName() const
+{
+    std::ostringstream ssTemp;
+    ssTemp.imbue( std::locale() );
+    ssTemp.precision( 2 );
+    ssTemp.setf( std::ios::fixed, std::ios::floatfield );
+    ssTemp << value_;
+    return ssTemp.str();
 }
 
 std::string options_manager::cOpt::getValueName() const
@@ -476,14 +463,6 @@ std::string options_manager::cOpt::getValueName() const
 
     } else if( sType == "int" ) {
         return string_format( format, iSet );
-
-    } else if( sType == "float" ) {
-        std::ostringstream ssTemp;
-        ssTemp.imbue( std::locale() );
-        ssTemp.precision( 2 );
-        ssTemp.setf( std::ios::fixed, std::ios::floatfield );
-        ssTemp << fSet;
-        return ssTemp.str();
     }
 
     return std::string();
@@ -492,6 +471,12 @@ std::string options_manager::cOpt::getValueName() const
 std::string options_manager::bool_option::getDefaultText( const bool /*bTranslated*/ ) const
 {
     return default_value_ ? _( "Default: True" ) : _( "Default: False" );
+}
+
+std::string options_manager::float_option::getDefaultText( const bool /*bTranslated*/ ) const
+{
+    return string_format( _( "Default: %.2f - Min: %.2f, Max: %.2f" ), default_value_, min_value_,
+                          max_value_ );
 }
 
 std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
@@ -518,9 +503,6 @@ std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
 
     } else if (sType == "int_map") {
         return string_format( _( "Default: %d: %s" ), iDefault, mIntValues.find( iDefault )->second.c_str() );
-
-    } else if (sType == "float") {
-        return string_format(_("Default: %.2f - Min: %.2f, Max: %.2f"), fDefault, fMin, fMax);
     }
 
     return "";
@@ -542,6 +524,14 @@ int options_manager::cOpt::getItemPos(const std::string sSearch) const
 std::vector<std::pair<std::string, std::string>> options_manager::cOpt::getItems() const
 {
     return vItems;
+}
+
+void options_manager::float_option::setNext()
+{
+    value_ += step_;
+    if( value_ > max_value_ ) {
+        value_ = min_value_;
+    }
 }
 
 void options_manager::cOpt::setNext()
@@ -576,12 +566,14 @@ void options_manager::cOpt::setNext()
         } else {
             iSet = next->first;
         }
+    }
+}
 
-    } else if (sType == "float") {
-        fSet += fStep;
-        if (fSet > fMax) {
-            fSet = fMin;
-        }
+void options_manager::float_option::setPrev()
+{
+    value_ -= step_;
+    if( value_ < min_value_ ) {
+        value_ = max_value_;
     }
 }
 
@@ -613,12 +605,31 @@ void options_manager::cOpt::setPrev()
             auto prev = std::prev( item );
             iSet = prev->first;
         }
+    }
+}
 
-    } else if (sType == "float") {
-        fSet -= fStep;
-        if (fSet < fMin) {
-            fSet = fMax;
-        }
+void options_manager::float_option::setInteractive()
+{
+    const std::string old_opt_val = getValueName();
+    const std::string opt_val = string_input_popup()
+                                .title( getMenuText() )
+                                .width( 10 )
+                                .text( old_opt_val )
+                                .only_digits( false )
+                                .query_string();
+    if( opt_val.empty() || opt_val == old_opt_val ) {
+        return;
+    }
+    std::istringstream ssTemp( opt_val );
+    // This uses the current locale, to allow the users
+    // to use their own decimal format.
+    float tmpFloat;
+    ssTemp >> tmpFloat;
+    if( ssTemp ) {
+        setValue( tmpFloat );
+
+    } else {
+        popup( _( "Invalid input: not a number" ) );
     }
 }
 
@@ -629,7 +640,6 @@ void options_manager::cOpt::setInteractive()
         return;
     }
     const bool is_int = sType == "int";
-    const bool is_float = sType == "float";
     const std::string old_opt_val = getValueName();
     const std::string opt_val = string_input_popup()
                                 .title( getMenuText() )
@@ -638,36 +648,18 @@ void options_manager::cOpt::setInteractive()
                                 .only_digits( is_int )
                                 .query_string();
     if( !opt_val.empty() && opt_val != old_opt_val ) {
-        if( is_float ) {
-            std::istringstream ssTemp( opt_val );
-            // This uses the current locale, to allow the users
-            // to use their own decimal format.
-            float tmpFloat;
-            ssTemp >> tmpFloat;
-            if( ssTemp ) {
-                setValue( tmpFloat );
-
-            } else {
-                popup( _( "Invalid input: not a number" ) );
-            }
-        } else {
-            // option is of type "int": string_input_popup
-            // has taken care that the string contains
-            // only digits, parsing is done in set_from_legacy_value
-            set_from_legacy_value( opt_val );
-        }
+        // option is of type "int": string_input_popup
+        // has taken care that the string contains
+        // only digits, parsing is done in set_from_legacy_value
+        set_from_legacy_value( opt_val );
     }
 }
 
-void options_manager::cOpt::setValue(float fSetIn)
+void options_manager::float_option::setValue( const float fSetIn )
 {
-    if (sType != "float") {
-        debugmsg("tried to set a float value to a %s option", sType.c_str());
-        return;
-    }
-    fSet = fSetIn;
-    if ( fSet < fMin || fSet > fMax ) {
-        fSet = fDefault;
+    value_ = fSetIn;
+    if( value_ < min_value_ || value_ > max_value_ ) {
+        value_ = default_value_;
     }
 }
 
@@ -686,6 +678,19 @@ void options_manager::cOpt::setValue( int iSetIn )
 void options_manager::bool_option::set_from_legacy_value( const std::string &sSetIn )
 {
     value_ = sSetIn == "True" || sSetIn == "true" || sSetIn == "T" || sSetIn == "t";
+}
+
+void options_manager::float_option::set_from_legacy_value( const std::string &sSetIn )
+{
+    std::istringstream ssTemp( sSetIn );
+    ssTemp.imbue( std::locale::classic() );
+    float tmpFloat;
+    ssTemp >> tmpFloat;
+    if( ssTemp ) {
+        setValue( tmpFloat );
+    } else {
+        debugmsg( "invalid floating point option: %s", sSetIn.c_str() );
+    }
 }
 
 void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
@@ -711,17 +716,6 @@ void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
         auto item = mIntValues.find( iSet );
         if ( item == mIntValues.cend() ) {
             iSet = iDefault;
-        }
-
-    } else if (sType == "float") {
-        std::istringstream ssTemp(sSetIn);
-        ssTemp.imbue(std::locale::classic());
-        float tmpFloat;
-        ssTemp >> tmpFloat;
-        if(ssTemp) {
-            setValue(tmpFloat);
-        } else {
-            debugmsg("invalid floating point option: %s", sSetIn.c_str());
         }
     }
 }

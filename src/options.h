@@ -165,6 +165,47 @@ class options_manager
                 }
         };
 
+        class float_option : public cOpt_base
+        {
+            private:
+                float value_;
+                float default_value_;
+                float min_value_;
+                float max_value_;
+                float step_;
+
+            public:
+                float_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const float d, const float mi, const float ma, const float s ) : cOpt_base( n, p, m, t, h ), value_( d), default_value_(d), min_value_(mi), max_value_(ma), step_(s) { }
+                ~float_option() override = default;
+
+                std::string getType() const override {
+                    return "float";
+                }
+
+                std::string get_legacy_value() const override;
+                void set_from_legacy_value( const std::string &v ) override;
+                std::string getValueName() const override;
+                std::string getDefaultText( const bool bTranslated = true ) const override;
+
+                void setNext() override;
+                void setPrev() override;
+                void setInteractive() override;
+
+                void setValue( float fSetIn ) override;
+                void setValue( int ) override {
+                    throw std::logic_error( "tried to set an int to a float option" );
+                }
+
+                bool operator==( const cOpt_base &rhs ) const override {
+                    const auto o = dynamic_cast<const float_option*>( &rhs );
+                    return o && value_ == o->value_;
+                }
+
+                cOpt_base *clone() const override {
+                    return new float_option(*this);
+                }
+        };
+
         class cOpt : public cOpt_base
         {
                 friend class options_manager;
@@ -188,7 +229,9 @@ class options_manager
                 void setPrev() override;
                 void setInteractive() override;
                 //set value
-                void setValue( float fSetIn ) override;
+                void setValue( float ) override {
+                    throw std::logic_error( "tried to set a float to a non-float option" );
+                }
                 void setValue( int iSetIn ) override;
 
                 bool operator==( const cOpt_base &rhs ) const override;
@@ -216,13 +259,6 @@ class options_manager
                 int iMax;
                 int iDefault;
                 std::map<int, std::string> mIntValues;
-
-                //sType == "float"
-                float fSet;
-                float fMin;
-                float fMax;
-                float fDefault;
-                float fStep;
         };
 
         typedef std::unordered_map<std::string, poly_pimpl<cOpt_base>> options_container;
@@ -285,8 +321,7 @@ class options_manager
                   const std::string sMenuTextIn, const std::string sTooltipIn,
                   const float fMinIn, float fMaxIn,
                   float fDefaultIn, float fStepIn,
-                  copt_hide_t opt_hide = COPT_NO_HIDE,
-                  const std::string &format = "%.2f" );
+                  copt_hide_t opt_hide = COPT_NO_HIDE );
 
     private:
         options_container options;
