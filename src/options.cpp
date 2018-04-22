@@ -110,15 +110,16 @@ options_manager::cOpt::cOpt()
 
 //add hidden external option with value
 void options_manager::add_external( const std::string sNameIn, const std::string sPageIn,
-                                    const std::string sType,
-                                    const std::string sMenuTextIn, const std::string sTooltipIn )
+                                    const std::string sType )
 {
     cOpt thisOpt;
 
     thisOpt.sName = sNameIn;
     thisOpt.sPage = sPageIn;
-    thisOpt.sMenuText = sMenuTextIn;
-    thisOpt.sTooltip = sTooltipIn;
+    // sMenuText and sTooltip should never be seen by the user as the option
+    // is always hidden, therefor they don't need to be set manually.
+    thisOpt.sMenuText = "External option " + sNameIn;
+    thisOpt.sTooltip = "External option " + sNameIn;
     thisOpt.sType = sType;
 
     thisOpt.iMin = INT_MIN;
