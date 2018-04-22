@@ -186,14 +186,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
                             const bool bDefaultIn, copt_hide_t opt_hide)
 {
-    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
-
-    thisOpt.sType = "bool";
-
-    thisOpt.bDefault = bDefaultIn;
-    thisOpt.bSet = bDefaultIn;
-
-    add( thisOpt );
+    add( bool_option( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide, bDefaultIn ) );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -285,7 +278,7 @@ void options_manager::cOpt_base::setPrerequisite( const std::string &sOption )
     if ( !get_options().has_option(sOption) ) {
         debugmsg( "setPrerequisite: unknown option %s", sOption );
 
-    } else if ( get_options().get_option( sOption ).getType() != "bool" ) {
+    } else if( !dynamic_cast<const bool_option*>( &get_options().get_option( sOption ) ) ) {
         debugmsg( "setPrerequisite: option %s not of type bool", sOption );
     }
 
@@ -385,8 +378,6 @@ bool options_manager::cOpt::operator==( const cOpt_base &rhs_ ) const
         return false;
     } else if( sType == "string_select" || sType == "string_input" ) {
         return sSet == rhs.sSet;
-    } else if( sType == "bool" ) {
-        return bSet == rhs.bSet;
     } else if( sType == "int" || sType == "int_map" ) {
         return iSet == rhs.iSet;
     } else if( sType == "float" ) {
@@ -399,13 +390,15 @@ bool options_manager::cOpt::operator==( const cOpt_base &rhs_ ) const
     }
 }
 
+std::string options_manager::bool_option::get_legacy_value() const
+{
+    return value_ ? "true" : "false";
+}
+
 std::string options_manager::cOpt::get_legacy_value() const
 {
     if (sType == "string_select" || sType == "string_input") {
         return sSet;
-
-    } else if (sType == "bool") {
-        return (bSet) ? "true" : "false";
 
     } else if (sType == "int" || sType == "int_map") {
         return string_format( format, iSet );
@@ -434,10 +427,12 @@ std::string value_as<std::string>( const options_manager::cOpt &opt )
 template<>
 bool value_as<bool>( const options_manager::cOpt &opt )
 {
-    if( opt.getType() != "bool" ) {
+    const auto o = dynamic_cast<const options_manager::bool_option *>( &opt );
+    if( !o ) {
         debugmsg( "%s tried to get boolean value from option of type %s", opt.getName(), opt.getType() );
+        return false;
     }
-    return opt.bSet;
+    return o->value_;
 }
 
 template<>
@@ -458,6 +453,11 @@ int value_as<int>( const options_manager::cOpt &opt )
     return opt.iSet;
 }
 
+std::string options_manager::bool_option::getValueName() const
+{
+    return value_ ? _( "True" ) : _( "False" );
+}
+
 std::string options_manager::cOpt::getValueName() const
 {
     if (sType == "string_select") {
@@ -467,9 +467,6 @@ std::string options_manager::cOpt::getValueName() const
         if( iter != vItems.end() ) {
             return _( iter->second.c_str() );
         }
-
-    } else if (sType == "bool") {
-        return (bSet) ? _("True") : _("False");
 
     } else if ( sType == "int_map" ) {
         return string_format(_("%d: %s"), iSet, mIntValues.find( iSet )->second.c_str());
@@ -492,6 +489,11 @@ std::string options_manager::cOpt::getValueName() const
     return std::string();
 }
 
+std::string options_manager::bool_option::getDefaultText( const bool /*bTranslated*/ ) const
+{
+    return default_value_ ? _( "Default: True" ) : _( "Default: False" );
+}
+
 std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
 {
     if (sType == "string_select") {
@@ -510,9 +512,6 @@ std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
 
     } else if (sType == "string_input") {
         return string_format(_("Default: %s"), sDefault.c_str());
-
-    } else if (sType == "bool") {
-        return (bDefault) ? _("Default: True") : _("Default: False");
 
     } else if (sType == "int") {
         return string_format(_("Default: %d - Min: %d, Max: %d"), iDefault, iMin, iMax);
@@ -564,9 +563,6 @@ void options_manager::cOpt::setNext()
         .max_length( iMaxLength )
         .edit( sSet );
 
-    } else if (sType == "bool") {
-        bSet = !bSet;
-
     } else if (sType == "int") {
         iSet++;
         if (iSet > iMax) {
@@ -602,9 +598,6 @@ void options_manager::cOpt::setPrev()
     } else if (sType == "string_input") {
         setNext();
 
-    } else if (sType == "bool") {
-        bSet = !bSet;
-
     } else if (sType == "int") {
         iSet--;
         if (iSet < iMin) {
@@ -631,7 +624,7 @@ void options_manager::cOpt::setPrev()
 
 void options_manager::cOpt::setInteractive()
 {
-    if( sType == "bool" || sType == "string_select" || sType == "string_input" ) {
+    if( sType == "string_select" || sType == "string_input" ) {
         setNext();
         return;
     }
@@ -690,6 +683,11 @@ void options_manager::cOpt::setValue( int iSetIn )
     }
 }
 
+void options_manager::bool_option::set_from_legacy_value( const std::string &sSetIn )
+{
+    value_ = sSetIn == "True" || sSetIn == "true" || sSetIn == "T" || sSetIn == "t";
+}
+
 void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
 {
     if (sType == "string_select") {
@@ -699,9 +697,6 @@ void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
 
     } else if (sType == "string_input") {
         sSet = (iMaxLength > 0) ? sSetIn.substr(0, iMaxLength) : sSetIn;
-
-    } else if (sType == "bool") {
-        bSet = (sSetIn == "True" || sSetIn == "true" || sSetIn == "T" || sSetIn == "t");
 
     } else if (sType == "int") {
         iSet = atoi(sSetIn.c_str());

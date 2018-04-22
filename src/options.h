@@ -121,6 +121,50 @@ class options_manager
                 int iSortPos;
         };
 
+        class bool_option : public cOpt_base
+        {
+            private:
+                bool value_;
+                bool default_value_;
+
+            public:
+                bool_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const bool def ) : cOpt_base( n, p, m, t, h ), value_( def ), default_value_( def ) { }
+                ~bool_option() override = default;
+
+                std::string getType() const override {
+                    return "bool";
+                }
+
+                std::string get_legacy_value() const override;
+                void set_from_legacy_value( const std::string &v ) override;
+                std::string getValueName() const override;
+                std::string getDefaultText( const bool bTranslated = true ) const override;
+
+                void setNext() override {
+                    value_ = !value_;
+                }
+                void setPrev() override {
+                    value_ = !value_;
+                }
+                void setInteractive() override {
+                    // Don't need interactivity here, there is only one thing the user
+                    // can change the value to.
+                    value_ = !value_;
+                }
+
+                void setValue( float fSetIn ) override;
+                void setValue( int iSetIn ) override;
+
+                bool operator==( const cOpt_base &rhs ) const override {
+                    const auto o = dynamic_cast<const bool_option*>( &rhs );
+                    return o && value_ == o->value_;
+                }
+
+                cOpt_base *clone() const override {
+                    return new bool_option( *this );
+                }
+        };
+
         class cOpt : public cOpt_base
         {
                 friend class options_manager;
@@ -165,10 +209,6 @@ class options_manager
                 std::string sDefault;
 
                 int iMaxLength;
-
-                //sType == "bool"
-                bool bSet;
-                bool bDefault;
 
                 //sType == "int"
                 int iSet;
