@@ -73,9 +73,6 @@ class options_manager
                 std::string getTooltip() const;
                 std::string getType() const;
 
-                /// The value formatted as string and already translated. This
-                /// will be displayed to the user.
-                std::string getValue() const;
                 /// The translated currently selected option value.
                 std::string getValueName() const;
                 std::string getDefaultText( const bool bTranslated = true ) const;

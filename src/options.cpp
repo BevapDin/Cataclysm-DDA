@@ -443,29 +443,6 @@ bool options_manager::cOpt::operator==( const cOpt &rhs ) const
     }
 }
 
-std::string options_manager::cOpt::getValue() const
-{
-    if (sType == "string_select" || sType == "string_input") {
-        return sSet;
-
-    } else if (sType == "bool") {
-        return (bSet) ? "true" : "false";
-
-    } else if (sType == "int" || sType == "int_map") {
-        return string_format( format, iSet );
-
-    } else if (sType == "float") {
-        std::ostringstream ssTemp;
-        ssTemp.imbue( std::locale() );
-        ssTemp.precision( 2 );
-        ssTemp.setf( std::ios::fixed, std::ios::floatfield );
-        ssTemp << fSet;
-        return ssTemp.str();
-    }
-
-    return "";
-}
-
 std::string options_manager::cOpt::get_legacy_value() const
 {
     if (sType == "string_select" || sType == "string_input") {
@@ -540,9 +517,23 @@ std::string options_manager::cOpt::getValueName() const
 
     } else if ( sType == "int_map" ) {
         return string_format(_("%d: %s"), iSet, mIntValues.find( iSet )->second.c_str());
+
+    } else if( sType == "string_input" ) {
+        return sSet;
+
+    } else if( sType == "int" ) {
+        return string_format( format, iSet );
+
+    } else if( sType == "float" ) {
+        std::ostringstream ssTemp;
+        ssTemp.imbue( std::locale() );
+        ssTemp.precision( 2 );
+        ssTemp.setf( std::ios::fixed, std::ios::floatfield );
+        ssTemp << fSet;
+        return ssTemp.str();
     }
 
-    return getValue();
+    return std::string();
 }
 
 std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
