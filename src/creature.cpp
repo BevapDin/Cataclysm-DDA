@@ -1371,11 +1371,6 @@ units::mass Creature::get_weight() const
 /*
  * Drawing-related functions
  */
-void Creature::draw( const catacurses::window &w, int player_x, int player_y, bool inverted ) const
-{
-    draw( w, tripoint( player_x, player_y, posz() ), inverted );
-}
-
 void Creature::draw( const catacurses::window &w, const tripoint &p, bool inverted ) const
 {
     if (is_draw_tiles_mode()) {

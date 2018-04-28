@@ -4709,7 +4709,7 @@ void game::draw_critter( const Creature &critter, const tripoint &center )
         return;
     }
     if( u.sees( critter ) || &critter == &u ) {
-        critter.draw( w_terrain, center.x, center.y, false );
+        critter.draw( w_terrain, center, false );
         return;
     }
 

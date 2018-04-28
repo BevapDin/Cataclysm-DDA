@@ -466,7 +466,6 @@ class Creature
         int moves;
         bool underwater;
 
-        void draw( const catacurses::window &w, int plx, int ply, bool inv ) const;
         void draw( const catacurses::window &w, const tripoint &plp, bool inv ) const;
         /**
          * Write information about this creature.
