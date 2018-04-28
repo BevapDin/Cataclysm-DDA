@@ -202,7 +202,7 @@ public:
             default:
                 return;
             }
-            if( !u.activity.is_null() ) {
+            if( u.has_activity() ) {
                 break;
             }
             g->draw();

@@ -321,7 +321,7 @@ void veh_interact::do_main_loop()
             redraw = do_siphon( msg );
             // Siphoning may have started a player activity. If so, we should close the
             // vehicle dialog and continue with the activity.
-            finish = !g->u.activity.is_null();
+            finish = g->u.has_activity;
             if( !finish ) {
                 // it's possible we just invalidated our crafting inventory
                 cache_tool_availability();

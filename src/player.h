@@ -1179,6 +1179,7 @@ class player : public Character
         /** Assigns activity to player, possibly resuming old activity if it's similar enough. */
         void assign_activity( const player_activity &act, bool allow_resume = true );
         bool has_activity( const activity_id type ) const;
+        bool has_activity() const;
         void cancel_activity();
 
         int get_morale_level() const; // Modified by traits, &c

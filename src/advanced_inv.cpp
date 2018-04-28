@@ -1225,7 +1225,7 @@ bool advanced_inventory::move_all_items( bool nested_call )
         // restore the pane to its former glory
         panes[src] = shadow;
         // make it auto loop back, if not already doing so
-        if( !done && !g->u.activity ) {
+        if( !done && !g->u.has_activity() ) {
             do_return_entry();
         }
         return true;

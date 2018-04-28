@@ -1567,7 +1567,7 @@ bool game::do_turn()
                 cleanup_dead();
                 // Process any new sounds the player caused during their turn.
                 sounds::process_sound_markers( &u );
-                if( !u.activity && uquit != QUIT_WATCH ) {
+                if( !u.has_activity() && uquit != QUIT_WATCH ) {
                     draw();
                 }
 
@@ -1583,7 +1583,7 @@ bool game::do_turn()
                 if( uquit == QUIT_WATCH ) {
                     break;
                 }
-                if( u.activity ) {
+                if( u.has_activity() ) {
                     process_activity();
                 }
             }
@@ -1715,7 +1715,7 @@ void game::set_driving_view_offset( const point &p )
 
 void game::process_activity()
 {
-    if( !u.activity ) {
+    if( !u.has_activity() ) {
         return;
     }
 
@@ -1724,7 +1724,7 @@ void game::process_activity()
         refresh_display();
     }
 
-    while( u.moves > 0 && u.activity ) {
+    while( u.moves > 0 && u.has_activity() ) {
         u.activity.do_turn( u );
     }
 }
@@ -1759,7 +1759,7 @@ bool cancel_auto_move( player &p, const std::string &text )
 
 bool game::cancel_activity_or_ignore_query( const distraction_type type, const std::string &text )
 {
-    if( cancel_auto_move( u, text ) || !u.activity || u.activity.is_distraction_ignored( type ) ) {
+    if( cancel_auto_move( u, text ) || !u.has_activity() || u.activity.is_distraction_ignored( type ) ) {
         return false;
     }
 
@@ -1800,7 +1800,7 @@ bool game::cancel_activity_or_ignore_query( const distraction_type type, const s
 
 bool game::cancel_activity_query( const std::string &text )
 {
-    if( cancel_auto_move( u, text ) || !u.activity ) {
+    if( cancel_auto_move( u, text ) || !u.has_activity() ) {
         return false;
     }
 
@@ -2018,7 +2018,7 @@ void game::handle_key_blocking_activity()
 {
     // If player is performing a task and a monster is dangerously close, warn them
     // regardless of previous safemode warnings
-    if( u.activity && !u.has_activity( activity_id( "ACT_AIM" ) ) &&
+    if( u.has_activity() && !u.has_activity( activity_id( "ACT_AIM" ) ) &&
         u.activity.moves_left > 0 &&
         !u.activity.is_distraction_ignored( distraction_type::hostile_spotted ) ) {
         Creature *hostile_critter = is_hostile_very_close();
@@ -2031,7 +2031,7 @@ void game::handle_key_blocking_activity()
         }
     }
 
-    if( u.activity && u.activity.moves_left > 0 ) {
+    if( u.has_activity() && u.activity.moves_left > 0 ) {
         input_context ctxt = get_default_mode_input_context();
         const std::string action = ctxt.handle_input( 0 );
         if( action == "pause" ) {
@@ -5664,7 +5664,7 @@ bool game::forced_door_closing( const tripoint &p, const ter_id door_type, int b
         } else if( npc_or_player->is_player() ) {
             add_msg( m_bad, _( "The %s hits you." ), door_name.c_str() );
         }
-        if( npc_or_player->activity ) {
+        if( npc_or_player->has_activity() ) {
             npc_or_player->cancel_activity();
         }
         // TODO: make the npc angry?
@@ -8852,7 +8852,7 @@ bool game::plfire_check( const targeting_data &args )
             u.moves -= rng( 2, 5 ) * 10;
             add_msg( m_bad, _( "You can't fire your weapon, it's too heavy..." ) );
             // break a possible loop when aiming
-            if( u.activity ) {
+            if( u.has_activity() ) {
                 u.cancel_activity();
             }
 
