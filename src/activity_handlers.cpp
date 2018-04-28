@@ -2692,11 +2692,6 @@ void activity_handlers::disassemble_finish( player_activity *, player *p )
     p->complete_disassemble();
 }
 
-void activity_handlers::build_finish( player_activity *, player * )
-{
-    complete_construction();
-}
-
 void activity_handlers::vibe_finish( player_activity *act, player *p )
 {
     p->add_msg_if_player( m_good, _( "You feel much better." ) );

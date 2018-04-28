@@ -797,10 +797,12 @@ void place_construction( const std::string &desc )
     g->u.activity.placement = dirp;
 }
 
-void complete_construction()
+void activity_handlers::build_finish( player_activity *act, player *p )
 {
-    player &u = g->u;
-    const construction &built = constructions[u.activity.index];
+    player &u = *p;
+    const construction &built = constructions[act->index];
+    const tripoint terp = act->placement;
+    act->set_to_null();
 
     const auto award_xp = [&]( player & c ) {
         for( const auto &pr : built.required_skills ) {
@@ -831,7 +833,6 @@ void complete_construction()
     }
 
     // Make the terrain change
-    const tripoint terp = u.activity.placement;
     if( !built.post_terrain.empty() ) {
         if( built.post_is_furniture ) {
             g->m.furn_set( terp, furn_str_id( built.post_terrain ) );
@@ -841,9 +842,6 @@ void complete_construction()
     }
 
     add_msg( m_info, _( "You finish your construction: %s." ), built.desc() );
-
-    // clear the activity
-    u.activity.set_to_null();
 
     // This comes after clearing the activity, in case the function interrupts
     // activities

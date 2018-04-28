@@ -64,7 +64,6 @@ void standardize_construction_times( int time );
 void load_construction( JsonObject &jsobj );
 void reset_constructions();
 void construction_menu();
-void complete_construction();
 void check_constructions();
 void finalize_constructions();
 
