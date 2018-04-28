@@ -1648,7 +1648,7 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
 
             std::vector<std::string> recipe_list;
             for( auto const &elem : book.recipes ) {
-                const bool knows_it = g->u.knows_recipe( elem.recipe );
+                const bool knows_it = g->u.knows_recipe( *elem.recipe );
                 // If the player knows it, they recognize it even if it's not clearly stated.
                 if( elem.is_hidden() && !knows_it ) {
                     continue;

@@ -9570,7 +9570,7 @@ void player::do_read( item &book )
         std::vector<std::string> recipe_list;
         for( auto const & elem : reading->recipes ) {
             // If the player knows it, they recognize it even if it's not clearly stated.
-            if( elem.is_hidden() && !knows_recipe( elem.recipe ) ) {
+            if( elem.is_hidden() && !knows_recipe( *elem.recipe ) ) {
                 continue;
             }
             recipe_list.push_back( elem.name );
@@ -9777,7 +9777,7 @@ bool player::studied_all_recipes(const itype &book) const
         return true;
     }
     for( auto &elem : book.book->recipes ) {
-        if( !knows_recipe( elem.recipe ) ) {
+        if( !knows_recipe( *elem.recipe ) ) {
             return false;
         }
     }
@@ -10999,9 +10999,9 @@ bool player::can_decomp_learn( const recipe &rec ) const
            meets_skill_requirements( rec.learn_by_disassembly );
 }
 
-bool player::knows_recipe(const recipe *rec) const
+bool player::knows_recipe( const recipe &rec) const
 {
-    return get_learned_recipes().contains( rec );
+    return get_learned_recipes().contains( &rec );
 }
 
 int player::has_recipe( const recipe *r, const inventory &crafting_inv,
@@ -11011,7 +11011,7 @@ int player::has_recipe( const recipe *r, const inventory &crafting_inv,
         return 0;
     }
 
-    if( knows_recipe( r ) ) {
+    if( knows_recipe( *r ) ) {
         return r->difficulty;
     }
 

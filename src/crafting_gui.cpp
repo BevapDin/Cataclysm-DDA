@@ -483,7 +483,7 @@ const recipe *select_crafting_recipe( int &batch_size )
             component_print_buffer.insert( component_print_buffer.end(), tools.begin(), tools.end() );
             component_print_buffer.insert( component_print_buffer.end(), comps.begin(), comps.end() );
 
-            if( !g->u.knows_recipe( current[line] ) ) {
+            if( !g->u.knows_recipe( *current[line] ) ) {
                 component_print_buffer.push_back( _( "Recipe not memorized yet" ) );
                 auto books_with_recipe = g->u.get_books_for_recipe( crafting_inv, current[line] );
                 std::string enumerated_books =

@@ -1268,7 +1268,7 @@ class player : public Character
         // Returns -1 to indicate recipe not found, otherwise difficulty to learn.
         int has_recipe( const recipe *r, const inventory &crafting_inv,
                         const std::vector<npc *> &helpers ) const;
-        bool knows_recipe( const recipe *rec ) const;
+        bool knows_recipe( const recipe &rec ) const;
         void learn_recipe( const recipe *rec );
         int exceeds_recipe_requirements( const recipe &rec ) const;
         bool has_recipe_requirements( const recipe &rec ) const;

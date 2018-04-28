@@ -2569,7 +2569,7 @@ int repair_item_actor::repair_recipe_difficulty( const player &pl,
         }
 
         int cur_difficulty = r.difficulty;
-        if( !training && !pl.knows_recipe( &r ) ) {
+        if( !training && !pl.knows_recipe( r ) ) {
             cur_difficulty++;
         }
 
