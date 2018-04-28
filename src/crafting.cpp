@@ -1207,15 +1207,17 @@ bool player::disassemble( item &obj, int /*pos*/, bool ground, bool interactive 
         }
     }
 
-    if( activity.id() != activity_id( "ACT_DISASSEMBLE" ) ) {
-        assign_activity( activity_id( "ACT_DISASSEMBLE" ), r.time );
-    } else if( activity.moves_left <= 0 ) {
-        activity.moves_left = r.time;
+    player_activity act( activity_id( "ACT_DISASSEMBLE" ), r.time );
+    if( activity.id() == act.id() ) {
+        act = activity;
+        if( act.move_left <= 0 ) {
+            act.moves_left = r.time;
+        }
     }
-
-    activity.values.push_back( get_item_position( &obj ) );
-    activity.coords.push_back( ground ? this->pos() : tripoint_min );
-    activity.str_values.push_back( r.result() );
+    act.values.push_back( get_item_position( &obj ) );
+    act.coords.push_back( ground ? this->pos() : tripoint_min );
+    act.str_values.push_back( r.result() );
+    assign_activity( act );
 
     return true;
 }
