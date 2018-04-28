@@ -501,7 +501,7 @@ void player::complete_craft()
         skill_dice = get_skill_level( making->skill_used ) * 4;
     }
 
-    auto helpers = g->u.get_crafting_helpers();
+    auto helpers = get_crafting_helpers();
     for( const npc *np : helpers ) {
         if( np->get_skill_level( making->skill_used ) >=
             get_skill_level( making->skill_used ) ) {
