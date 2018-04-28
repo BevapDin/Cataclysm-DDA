@@ -1173,7 +1173,7 @@ bool player::disassemble( int dis_pos )
     return disassemble( i_at( dis_pos ), dis_pos, false );
 }
 
-bool player::disassemble( item &obj, int pos, bool ground, bool interactive )
+bool player::disassemble( item &obj, int /*pos*/, bool ground, bool interactive )
 {
     const auto ret = can_disassemble( obj, crafting_inventory() );
 
@@ -1213,7 +1213,7 @@ bool player::disassemble( item &obj, int pos, bool ground, bool interactive )
         activity.moves_left = r.time;
     }
 
-    activity.values.push_back( pos );
+    activity.values.push_back( get_item_position( &obj ) );
     activity.coords.push_back( ground ? this->pos() : tripoint_min );
     activity.str_values.push_back( r.result() );
 
