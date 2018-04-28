@@ -193,7 +193,7 @@ static void eff_fun_bleed( player &u, effect &it )
     // on the wound or otherwise suppressing the flow. (Kits contain either
     // QuikClot or bandages per the recipe.)
     const int intense = it.get_intensity();
-    if( one_in( 6 / intense ) && u.activity.id() != activity_id( "ACT_FIRSTAID" ) ) {
+    if( one_in( 6 / intense ) && !u.has_activity( activity_id( "ACT_FIRSTAID" ) ) ) {
         u.add_msg_player_or_npc( m_bad, _( "You lose some blood." ),
                                  _( "<npcname> loses some blood." ) );
         // Prolonged hemorrhage is a significant risk for developing anemia

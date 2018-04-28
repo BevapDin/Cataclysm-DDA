@@ -904,7 +904,7 @@ void player::update_mental_focus()
     }
 
     // Moved from calc_focus_equilibrium, because it is now const
-    if( activity.id() == activity_id( "ACT_READ" ) ) {
+    if( has_activity( activity_id( "ACT_READ" ) ) ) {
         const item *book = activity.targets[0].get_item();
         if( get_item_position( book ) == INT_MIN || !book->is_book() ) {
             add_msg_if_player( m_bad, _( "You lost your book! You stop reading." ) );
@@ -919,7 +919,7 @@ int player::calc_focus_equilibrium() const
 {
     int focus_gain_rate = 100;
 
-    if( activity.id() == activity_id( "ACT_READ" ) ) {
+    if( has_activity( activity_id( "ACT_READ" ) ) ) {
         const item &book = *activity.targets[0].get_item();
         if( book.is_book() && get_item_position( &book ) != INT_MIN ) {
             auto &bt = *book.type->book;

@@ -8989,7 +8989,7 @@ bool game::plfire()
     std::vector<tripoint> trajectory = target_handler().target_ui( u, args );
 
     if( trajectory.empty() ) {
-        bool not_aiming = u.activity.id() != activity_id( "ACT_AIM" );
+        bool not_aiming = !u.has_activity( activity_id( "ACT_AIM" ) );
         if( not_aiming && gun->has_flag( "RELOAD_AND_SHOOT" ) ) {
             const auto previous_moves = u.moves;
             unload( *gun );

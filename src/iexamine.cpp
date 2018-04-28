@@ -214,7 +214,7 @@ private:
 
     options choose_option()
     {
-        if( u.activity.id() == activity_id( "ACT_ATM" ) ) {
+        if( u.has_activity( activity_id( "ACT_ATM" ) ) ) {
             return static_cast<options>( u.activity.index );
         }
         amenu.query();
@@ -353,7 +353,7 @@ private:
     //!Move the money from all the cash cards in inventory to a single card.
     bool do_transfer_all_money() {
         item *dst;
-        if( u.activity.id() == activity_id( "ACT_ATM" ) ) {
+        if( u.has_activity( activity_id( "ACT_ATM" ) ) ) {
             u.activity.set_to_null(); // stop for now, if required, it will be created again.
             dst = &u.i_at( u.activity.position );
             if( dst->is_null() || dst->typeId() != "cash_card" ) {

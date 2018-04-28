@@ -3224,7 +3224,7 @@ hp_part heal_actor::use_healing_item( player &healer, player &patient, item &it,
         }
     } else if( patient.is_player() ) {
         // Player healing self - let player select
-        if( healer.activity.id() != activity_id( "ACT_FIRSTAID" ) ) {
+        if( !healer.has_activity( activity_id( "ACT_FIRSTAID" ) ) ) {
             const std::string menu_header = it.tname();
             bool is_bandages = bandages_power;
             bool is_disinfectant = disinfectant_power;
@@ -3236,10 +3236,10 @@ hp_part heal_actor::use_healing_item( player &healer, player &patient, item &it,
             }
         }
         // Brick healing if using a first aid kit for the first time.
-        if( long_action && healer.activity.id() != activity_id( "ACT_FIRSTAID" ) ) {
+        if( long_action && !healer.has_activity( activity_id( "ACT_FIRSTAID" ) ) ) {
             // Cancel and wait for activity completion.
             return healed;
-        } else if( healer.activity.id() == activity_id( "ACT_FIRSTAID" ) ) {
+        } else if( healer.has_activity( activity_id( "ACT_FIRSTAID" ) ) ) {
             // Completed activity, extract body part from it.
             healed = ( hp_part )healer.activity.values[0];
         }

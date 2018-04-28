@@ -1189,7 +1189,7 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
         catacurses::refresh();
 
         std::string action;
-        if( pc.activity.id() == activity_id( "ACT_AIM" ) && pc.activity.str_values[0] != "AIM" ) {
+        if( pc.has_activity( activity_id( "ACT_AIM" ) ) && pc.activity.str_values[0] != "AIM" ) {
             // If we're in 'aim and shoot' mode,
             // skip retrieving input and go straight to the action.
             action = pc.activity.str_values[0];

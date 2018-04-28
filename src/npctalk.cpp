@@ -296,11 +296,11 @@ void npc::talk_to_u( bool text_only )
     } while( !d.done );
     g->refresh_all();
 
-    if( g->u.activity.id() == activity_id( "ACT_AIM" ) && !g->u.has_weapon() ) {
+    if( g->u.has_activity( activity_id( "ACT_AIM" ) ) && !g->u.has_weapon() ) {
         g->u.cancel_activity();
 
         // Don't query if we're training the player
-    } else if( g->u.activity.id() != activity_id( "ACT_TRAIN" ) || g->u.activity.index != getID() ) {
+    } else if( !g->u.has_activity( activity_id( "ACT_TRAIN" ) ) || g->u.activity.index != getID() ) {
         g->cancel_activity_or_ignore_query( distraction_type::talked_to,  string_format( _( "%s talked to you." ), name.c_str() ) );
     }
 }
