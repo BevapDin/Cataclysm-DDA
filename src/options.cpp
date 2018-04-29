@@ -108,7 +108,6 @@ options_manager::cOpt::cOpt()
     hide = COPT_NO_HIDE;
 }
 
-//add hidden external option with value
 void options_manager::add_external( const std::string sNameIn, const std::string sPageIn,
                                     const std::string sType,
                                     const std::string sMenuTextIn, const std::string sTooltipIn )
@@ -133,7 +132,6 @@ void options_manager::add_external( const std::string sNameIn, const std::string
     options[sNameIn] = thisOpt;
 }
 
-//add string select option
 void options_manager::add( const std::string sNameIn, const std::string sPageIn,
                            const std::string sMenuTextIn, const std::string sTooltipIn,
                            std::vector<std::pair<std::string, std::string>> sItemsIn, std::string sDefaultIn,
@@ -162,7 +160,6 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
     options[sNameIn] = thisOpt;
 }
 
-//add string input option
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
                             const std::string sDefaultIn, const int iMaxLengthIn,
@@ -187,7 +184,6 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     options[sNameIn] = thisOpt;
 }
 
-//add bool option
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
                             const bool bDefaultIn, copt_hide_t opt_hide)
@@ -210,7 +206,6 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     options[sNameIn] = thisOpt;
 }
 
-//add int option
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
                             const int iMinIn, int iMaxIn, int iDefaultIn,
@@ -247,7 +242,6 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     options[sNameIn] = thisOpt;
 }
 
-//add int map option
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
                             const std::map<int, std::string> mIntValuesIn, int iInitialIn,
@@ -283,7 +277,6 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     options[sNameIn] = thisOpt;
 }
 
-//add float option
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
                             const float fMinIn, float fMaxIn, float fDefaultIn,
@@ -347,7 +340,6 @@ bool options_manager::cOpt::hasPrerequisite() const
     return ::get_option<bool>(sPrerequisite);
 }
 
-//helper functions
 bool options_manager::cOpt::is_hidden() const
 {
     switch( hide ) {
@@ -592,7 +584,6 @@ int options_manager::cOpt::getMaxLength() const
     return 0;
 }
 
-//set to next item
 void options_manager::cOpt::setNext()
 {
     if (sType == "string_select") {
@@ -636,7 +627,6 @@ void options_manager::cOpt::setNext()
     }
 }
 
-//set to previous item
 void options_manager::cOpt::setPrev()
 {
     if (sType == "string_select") {
@@ -677,7 +667,6 @@ void options_manager::cOpt::setPrev()
     }
 }
 
-//set value
 void options_manager::cOpt::setValue(float fSetIn)
 {
     if (sType != "float") {
@@ -690,7 +679,6 @@ void options_manager::cOpt::setValue(float fSetIn)
     }
 }
 
-//set value
 void options_manager::cOpt::setValue( int iSetIn )
 {
     if( sType != "int" ) {
@@ -703,7 +691,6 @@ void options_manager::cOpt::setValue( int iSetIn )
     }
 }
 
-//set value
 void options_manager::cOpt::setValue(std::string sSetIn)
 {
     if (sType == "string_select") {
