@@ -1351,10 +1351,10 @@ void WORLD::load_options( JsonIn &jsin )
     }
     // for legacy saves, try to simulate old city_size based density
     if( WORLD_OPTIONS.count( "CITY_SPACING" ) == 0 ) {
-        WORLD_OPTIONS.at( "CITY_SPACING" )->setValue( 5 - get_option<int>( "CITY_SIZE" ) / 3 );
+        dynamic_cast<options_manager::typed_option<int>&>( *WORLD_OPTIONS.at( "CITY_SPACING" ) ).value( 5 - get_option<int>( "CITY_SIZE" ) / 3 );
     }
 
-    WORLD_OPTIONS.at( "CORE_VERSION" )->setValue( version );
+    dynamic_cast<options_manager::typed_option<int>&>( *WORLD_OPTIONS.at( "CORE_VERSION" ) ).value( version );
 }
 
 void WORLD::load_legacy_options( std::istream &fin )
@@ -1419,17 +1419,13 @@ void load_external_option( JsonObject &jo )
     }
     options_manager::cOpt &opt = opts.get_option( name );
     if( stype == "float" ) {
-        opt.setValue( static_cast<float>( jo.get_float( "value" ) ) );
+        dynamic_cast<options_manager::typed_option<float>&>( opt ).value( jo.get_float( "value" ) );
     } else if( stype == "int" ) {
-        opt.setValue( jo.get_int( "value" ) );
+        dynamic_cast<options_manager::typed_option<int>&>( opt ).value( jo.get_int( "value" ) );
     } else if( stype == "bool" ) {
-        if( jo.get_bool( "value" ) ) {
-            opt.set_from_legacy_value( "true" );
-        } else {
-            opt.set_from_legacy_value( "false" );
-        }
+        dynamic_cast<options_manager::typed_option<bool>&>( opt ).value( jo.get_bool( "value" ) );
     } else if( stype == "string" ) {
-        opt.set_from_legacy_value( jo.get_string( "value" ) );
+        dynamic_cast<options_manager::typed_option<std::string>&>( opt ).value( jo.get_string( "value" ) );
     } else {
         jo.throw_error( "Unknown or unsupported stype for external option", "stype" );
     }

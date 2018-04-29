@@ -92,8 +92,6 @@ class options_manager
                 virtual void setNext() = 0;
                 virtual void setPrev() = 0;
                 virtual void setInteractive() = 0;
-                virtual void setValue( float fSetIn ) = 0;
-                virtual void setValue( int iSetIn ) = 0;
 
                 template<typename T>
                 T value_as() const;
@@ -140,6 +138,7 @@ class options_manager
             public:
                 ~typed_option() override = default;
                 virtual T value() const = 0;
+                virtual void value( const T &v ) = 0;
 
                 std::string getType() const override {
                     return typeid(T).name();
@@ -159,6 +158,9 @@ class options_manager
                 bool value() const override {
                     return value_;
                 }
+                void value( const bool &v ) override {
+                    value_ = v;
+                }
 
                 std::string get_legacy_value() const override;
                 void set_from_legacy_value( const std::string &v ) override;
@@ -176,9 +178,6 @@ class options_manager
                     // can change the value to.
                     value_ = !value_;
                 }
-
-                void setValue( float fSetIn ) override;
-                void setValue( int iSetIn ) override;
 
                 bool operator==( const cOpt_base &rhs ) const override {
                     const auto o = dynamic_cast<const bool_option*>( &rhs );
@@ -206,6 +205,10 @@ class options_manager
                 float value() const override {
                     return value_;
                 }
+                void value( const float &v ) override {
+                    //@todo maybe throw instead of clamping? Or use default value?
+                    value_ = std::max( min_value_, std::min( max_value_, v ) );
+                }
 
                 std::string get_legacy_value() const override;
                 void set_from_legacy_value( const std::string &v ) override;
@@ -215,11 +218,6 @@ class options_manager
                 void setNext() override;
                 void setPrev() override;
                 void setInteractive() override;
-
-                void setValue( float fSetIn ) override;
-                void setValue( int ) override {
-                    throw std::logic_error( "tried to set an int to a float option" );
-                }
 
                 bool operator==( const cOpt_base &rhs ) const override {
                     const auto o = dynamic_cast<const float_option*>( &rhs );
@@ -244,6 +242,10 @@ class options_manager
 
                 std::string value() const override {
                     return value_;
+                }
+                void value( const std::string &v ) override {
+                    //@todo maybe throw instead of clamping? Or use default value?
+                    value_ = v.substr( 0, iMaxLength );
                 }
 
                 std::string get_legacy_value() const override;
@@ -284,6 +286,7 @@ class options_manager
                 int value() const override {
                     return value_;
                 }
+                void value( const int &v ) override;
 
                 std::string get_legacy_value() const override;
                 void set_from_legacy_value( const std::string &v ) override;
@@ -322,6 +325,10 @@ class options_manager
                 int value() const override {
                     return value_;
                 }
+                void value( const int &v ) override {
+                    //@todo maybe throw instead of clamping? Or use default value?
+                    value_ = std::max( min_value_, std::min( max_value_, v ) );
+                }
 
                 std::string get_legacy_value() const override;
                 void set_from_legacy_value( const std::string &v ) override;
@@ -331,8 +338,6 @@ class options_manager
                 void setNext() override;
                 void setPrev() override;
                 void setInteractive() override;
-
-                void setValue( int v );
 
                 bool operator==( const cOpt_base &rhs ) const override {
                     const auto o = dynamic_cast<const int_option*>( &rhs );
@@ -357,6 +362,7 @@ class options_manager
                 std::string value() const override {
                     return sSet;
                 }
+                void value( const std::string &v ) override;
 
                 std::string getValueName() const override;
                 std::string getDefaultText( const bool bTranslated = true ) const override;
@@ -368,11 +374,6 @@ class options_manager
                 void setNext() override;
                 void setPrev() override;
                 void setInteractive() override;
-                //set value
-                void setValue( float ) override {
-                    throw std::logic_error( "tried to set a float to a non-float option" );
-                }
-                void setValue( int iSetIn ) override;
 
                 bool operator==( const cOpt_base &rhs ) const override;
 

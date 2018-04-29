@@ -326,6 +326,12 @@ std::string options_manager::cOpt::get_legacy_value() const
     return sSet;
 }
 
+void options_manager::cOpt::value( const std::string &v ) const
+{
+    //@todo verify
+    sSet = v;
+}
+
 std::string options_manager::bool_option::getValueName() const
 {
     return value_ ? _( "True" ) : _( "False" );
@@ -446,6 +452,12 @@ void options_manager::display_device_option::set_displays( const decltype( displ
     assert( displays_.empty() || displays_.count( value_ ) > 0 );
 }
 
+void options_manager::display_device_option::value( const int &v )
+{
+    //@todo validate
+    value_ = v;
+}
+
 void options_manager::display_device_option::setNext()
 {
     if( displays_.size() <= 1 ) {
@@ -535,7 +547,8 @@ void options_manager::float_option::setInteractive()
     float tmpFloat;
     ssTemp >> tmpFloat;
     if( ssTemp ) {
-        setValue( tmpFloat );
+        //@todo maybe throw instead of clamping? Or use default value?
+        value( tmpFloat );
 
     } else {
         popup( _( "Invalid input: not a number" ) );
@@ -575,22 +588,6 @@ void options_manager::cOpt::setInteractive()
     setNext();
 }
 
-void options_manager::float_option::setValue( const float fSetIn )
-{
-    value_ = fSetIn;
-    if( value_ < min_value_ || value_ > max_value_ ) {
-        value_ = default_value_;
-    }
-}
-
-void options_manager::int_option::setValue( int iSetIn )
-{
-    value_ = iSetIn;
-    if( value_ < min_value_ || value_ > max_value_ ) {
-        value_ = default_value_;
-    }
-}
-
 void options_manager::bool_option::set_from_legacy_value( const std::string &sSetIn )
 {
     value_ = sSetIn == "True" || sSetIn == "true" || sSetIn == "T" || sSetIn == "t";
@@ -603,7 +600,8 @@ void options_manager::float_option::set_from_legacy_value( const std::string &sS
     float tmpFloat;
     ssTemp >> tmpFloat;
     if( ssTemp ) {
-        setValue( tmpFloat );
+        //@todo maybe throw instead of clamping? Or use default value?
+        value( tmpFloat );
     } else {
         debugmsg( "invalid floating point option: %s", sSetIn.c_str() );
     }
@@ -625,7 +623,7 @@ void options_manager::display_device_option::set_from_legacy_value( const std::s
 
 void options_manager::int_option::set_from_legacy_value( const std::string &sSetIn )
 {
-    setValue( atoi( sSetIn.c_str() ) );
+    value( atoi( sSetIn.c_str() ) );
 }
 
 void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
