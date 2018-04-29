@@ -166,14 +166,6 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
     add(int_option( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide, iDefaultIn, iMinIn, iMaxIn, format ) );
 }
 
-void options_manager::add(const std::string sNameIn, const std::string sPageIn,
-                            const std::string sMenuTextIn, const std::string sTooltipIn,
-                            const float fMinIn, float fMaxIn, float fDefaultIn,
-                            float fStepIn, copt_hide_t opt_hide )
-{
-    add( float_option( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide, fDefaultIn, fMinIn, fMaxIn, fStepIn ) );
-}
-
 void options_manager::cOpt_base::setPrerequisite( const std::string &sOption )
 {
     if ( !get_options().has_option(sOption) ) {
@@ -808,10 +800,10 @@ void options_manager::init()
 
     mOptionsSort["general"]++;
 
-    add( "TURN_DURATION", "general", translate_marker( "Realtime turn progression" ),
-        translate_marker( "If enabled, monsters will take periodic gameplay turns.  This value is the delay between each turn, in seconds.  Works best with Safe Mode disabled.  0 = disabled." ),
-        0.0, 10.0, 0.0, 0.05
-        );
+    add( float_option( "TURN_DURATION", "general",
+                       translate_marker( "Realtime turn progression" ),
+                       translate_marker( "If enabled, monsters will take periodic gameplay turns.  This value is the delay between each turn, in seconds.  Works best with Safe Mode disabled.  0 = disabled." ),
+                       COPT_NO_HIDE, 0.0f, 0.0f, 10.0f, 0.05f ) );
 
     mOptionsSort["general"]++;
 
@@ -1236,10 +1228,10 @@ void options_manager::init()
 
     mOptionsSort["debug"]++;
 
-    add( "SKILL_TRAINING_SPEED", "debug", translate_marker( "Skill training speed" ),
-        translate_marker( "Scales experience gained from practicing skills and reading books.  0.5 is half as fast as default, 2.0 is twice as fast, 0.0 disables skill training except for NPC training." ),
-        0.0, 100.0, 1.0, 0.1
-        );
+    add( float_option( "SKILL_TRAINING_SPEED", "debug",
+                       translate_marker( "Skill training speed" ),
+                       translate_marker( "Scales experience gained from practicing skills and reading books.  0.5 is half as fast as default, 2.0 is twice as fast, 0.0 disables skill training except for NPC training." ),
+                       COPT_NO_HIDE, 1.0f, 0.0f, 100.0f, 0.1f ) );
 
     mOptionsSort["debug"]++;
 
@@ -1293,25 +1285,25 @@ void options_manager::init()
         0, 8, 4
         );
 
-    add( "SPAWN_DENSITY", "world_default", translate_marker( "Spawn rate scaling factor" ),
-        translate_marker( "A scaling factor that determines density of monster spawns." ),
-        0.0, 50.0, 1.0, 0.1
-        );
+    add( float_option( "SPAWN_DENSITY", "world_default",
+                       translate_marker( "Spawn rate scaling factor" ),
+                       translate_marker( "A scaling factor that determines density of monster spawns." ),
+                       COPT_NO_HIDE, 1.0f, 0.0f, 50.0f, 0.1f ) );
 
-    add( "ITEM_SPAWNRATE", "world_default", translate_marker( "Item spawn scaling factor" ),
-        translate_marker( "A scaling factor that determines density of item spawns." ),
-        0.01, 10.0, 1.0, 0.01
-        );
+    add( float_option( "ITEM_SPAWNRATE", "world_default",
+                       translate_marker( "Item spawn scaling factor" ),
+                       translate_marker( "A scaling factor that determines density of item spawns." ),
+                       COPT_NO_HIDE, 1.0f, 0.01f, 10.0, 0.01f ) );
 
-    add( "NPC_DENSITY", "world_default", translate_marker( "NPC spawn rate scaling factor" ),
-        translate_marker( "A scaling factor that determines density of dynamic NPC spawns." ),
-        0.0, 100.0, 0.1, 0.01
-        );
+    add( float_option( "NPC_DENSITY", "world_default",
+                       translate_marker( "NPC spawn rate scaling factor" ),
+                       translate_marker( "A scaling factor that determines density of dynamic NPC spawns." ),
+                       COPT_NO_HIDE, 0.1f, 0.0f, 100.0f, 0.01f ) );
 
-    add( "MONSTER_UPGRADE_FACTOR", "world_default", translate_marker( "Monster evolution scaling factor" ),
-        translate_marker( "A scaling factor that determines the time between monster upgrades.  A higher number means slower evolution.  Set to 0.00 to turn off monster upgrades." ),
-        0.0, 100, 4.0, 0.01
-        );
+    add( float_option( "MONSTER_UPGRADE_FACTOR", "world_default",
+                       translate_marker( "Monster evolution scaling factor" ),
+                       translate_marker( "A scaling factor that determines the time between monster upgrades.  A higher number means slower evolution.  Set to 0.00 to turn off monster upgrades." ),
+                       COPT_NO_HIDE, 4.0f,  0.0f, 100.0f, 0.01f ) );
 
     mOptionsSort["world_default"]++;
 

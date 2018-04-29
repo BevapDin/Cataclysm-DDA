@@ -433,12 +433,6 @@ class options_manager
                   copt_hide_t opt_hide = COPT_NO_HIDE,
                   const std::string &format = "%i" );
 
-        void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
-                  const float fMinIn, float fMaxIn,
-                  float fDefaultIn, float fStepIn,
-                  copt_hide_t opt_hide = COPT_NO_HIDE );
-
     private:
         options_container options;
         // first is page id, second is untranslated page name
