@@ -124,7 +124,7 @@ void options_manager::add( const T &opt )
     const auto iter = options.emplace( opt.getName(), make_poly_pimpl<T>( opt ) );
     cOpt &nopt = *iter.first->second;
 
-    if( !nopt.is_hidden() ) {
+    if( !is_hidden( nopt.hide ) ) {
         mOptionsSort[nopt.getPage()]++;
         nopt.iSortPos = mOptionsSort[nopt.getPage()] - 1;
     } else {
@@ -351,7 +351,7 @@ bool options_manager::cOpt::hasPrerequisite() const
     return ::get_option<bool>(sPrerequisite);
 }
 
-bool options_manager::cOpt::is_hidden() const
+bool options_manager::is_hidden( const copt_hide_t hide )
 {
     switch( hide ) {
     case COPT_NO_HIDE:

@@ -48,6 +48,8 @@ class options_manager
             COPT_ALWAYS_HIDE
         };
 
+        static bool is_hidden( const copt_hide_t hide );
+
         class cOpt
         {
                 friend class options_manager;
@@ -67,11 +69,6 @@ class options_manager
                  * the internal type and stores it as the option value.
                  */
                 void set_from_legacy_value( const std::string &v );
-                /**
-                 * Option should be hidden in current build.
-                 * @return true if option should be hidden, false if not.
-                 */
-                bool is_hidden() const;
 
                 std::string getName() const;
                 std::string getPage() const;
