@@ -60,6 +60,11 @@ class options_manager
                  */
                 std::string get_legacy_value() const;
                 /**
+                 * Reverse of @ref get_legacy_value. Converts the value into
+                 * the internal type and stores it as the option value.
+                 */
+                void set_from_legacy_value( const std::string &v );
+                /**
                  * Option should be hidden in current build.
                  * @return true if option should be hidden, false if not.
                  */
@@ -84,7 +89,6 @@ class options_manager
 
                 void setNext();
                 void setPrev();
-                void setValue( std::string sSetIn );
                 void setValue( float fSetIn );
                 void setValue( int iSetIn );
 

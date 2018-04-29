@@ -129,7 +129,7 @@ void select_language()
     }
     sm.query();
 
-    get_options().get_option( "USE_LANG" ).setValue( languages[sm.ret].first );
+    get_options().get_option( "USE_LANG" ).set_from_legacy_value( languages[sm.ret].first );
     get_options().save();
 }
 

@@ -95,7 +95,7 @@ void options_manager::add_value( const std::string &lvar, const std::string &lva
             ot->second.vItems.emplace_back( lval, lvalname.empty() ? lval : lvalname );
             // our value was saved, then set to default, so set it again.
             if ( it->second == lval ) {
-                options[ lvar ].setValue( lval );
+                options[ lvar ].set_from_legacy_value( lval );
             }
         }
 
@@ -705,7 +705,7 @@ void options_manager::cOpt::setValue( int iSetIn )
     }
 }
 
-void options_manager::cOpt::setValue(std::string sSetIn)
+void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
 {
     if (sType == "string_select") {
         if (getItemPos(sSetIn) != -1) {
@@ -1958,8 +1958,8 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
                     } else {
                         // option is of type "int": string_input_popup
                         // has taken care that the string contains
-                        // only digits, parsing is done in setValue
-                        current_opt.setValue(opt_val);
+                        // only digits, parsing is done in set_from_legacy_value
+                        current_opt.set_from_legacy_value( opt_val );
                     }
                 }
             }
@@ -2096,7 +2096,7 @@ void options_manager::deserialize(JsonIn &jsin)
         const std::string value = joOptions.get_string("value");
 
         add_retry(name, value);
-        options[ name ].setValue( value );
+        options[ name ].set_from_legacy_value( value );
     }
 }
 
@@ -2155,7 +2155,7 @@ bool options_manager::load_legacy()
                 // option with values from post init() might get clobbered
                 add_retry(loadedvar, loadedval); // stash it until update();
 
-                options[ loadedvar ].setValue( loadedval );
+                options[ loadedvar ].set_from_legacy_value( loadedval );
             }
         }
     };

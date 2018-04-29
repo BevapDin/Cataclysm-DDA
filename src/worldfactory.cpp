@@ -199,7 +199,7 @@ WORLDPTR worldfactory::make_new_world(special_game_id special_type)
     WORLDPTR special_world = new WORLD();
     special_world->world_name = worldname;
 
-    special_world->WORLD_OPTIONS["DELETE_WORLD"].setValue("yes");
+    special_world->WORLD_OPTIONS["DELETE_WORLD"].set_from_legacy_value( "yes" );
 
     // add world to world list!
     all_worlds[worldname] = special_world;
@@ -333,7 +333,7 @@ void worldfactory::init()
         // load options into the world
         if ( !load_world_options(all_worlds[worldname]) ) {
             all_worlds[worldname]->WORLD_OPTIONS = get_options().get_world_defaults();
-            all_worlds[worldname]->WORLD_OPTIONS["DELETE_WORLD"].setValue("yes");
+            all_worlds[worldname]->WORLD_OPTIONS["DELETE_WORLD"].set_from_legacy_value( "yes" );
             save_world(all_worlds[worldname]);
         }
     }
@@ -1346,7 +1346,7 @@ void WORLD::load_options( JsonIn &jsin )
         }
 
         if( opts.has_option( name ) && opts.get_option( name ).getPage() == "world_default" ) {
-            WORLD_OPTIONS[ name ].setValue( value );
+            WORLD_OPTIONS[ name ].set_from_legacy_value( value );
         }
     }
     // for legacy saves, try to simulate old city_size based density
@@ -1368,7 +1368,7 @@ void WORLD::load_legacy_options( std::istream &fin )
             // make sure that the option being loaded is part of the world_default page in OPTIONS
             // In 0.C some lines consisted of a space and nothing else
             if( ipos != 0 && get_options().get_option( sLine.substr( 0, ipos ) ).getPage() == "world_default" ) {
-                WORLD_OPTIONS[sLine.substr( 0, ipos )].setValue( sLine.substr( ipos + 1, sLine.length() ) );
+                WORLD_OPTIONS[sLine.substr( 0, ipos )].set_from_legacy_value( sLine.substr( ipos + 1, sLine.length() ) );
             }
         }
     }
@@ -1403,7 +1403,7 @@ void load_world_option( JsonObject &jo )
         jo.throw_error( "no options specified", "options" );
     }
     while( arr.has_more() ) {
-        get_options().get_option( arr.next_string() ).setValue( "true" );
+        get_options().get_option( arr.next_string() ).set_from_legacy_value( "true" );
     }
 }
 
@@ -1424,12 +1424,12 @@ void load_external_option( JsonObject &jo )
         opt.setValue( jo.get_int( "value" ) );
     } else if( stype == "bool" ) {
         if( jo.get_bool( "value" ) ) {
-            opt.setValue( "true" );
+            opt.set_from_legacy_value( "true" );
         } else {
-            opt.setValue( "false" );
+            opt.set_from_legacy_value( "false" );
         }
     } else if( stype == "string" ) {
-        opt.setValue( jo.get_string( "value" ) );
+        opt.set_from_legacy_value( jo.get_string( "value" ) );
     } else {
         jo.throw_error( "Unknown or unsupported stype for external option", "stype" );
     }
