@@ -427,12 +427,6 @@ class options_manager
                   std::vector<std::pair<std::string, std::string>> sItemsIn, std::string sDefaultIn,
                   copt_hide_t opt_hide = COPT_NO_HIDE );
 
-        void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
-                  const int iMinIn, int iMaxIn, int iDefaultIn,
-                  copt_hide_t opt_hide = COPT_NO_HIDE,
-                  const std::string &format = "%i" );
-
     private:
         options_container options;
         // first is page id, second is untranslated page name

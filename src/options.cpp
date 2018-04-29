@@ -158,14 +158,6 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
     add( thisOpt );
 }
 
-void options_manager::add(const std::string sNameIn, const std::string sPageIn,
-                            const std::string sMenuTextIn, const std::string sTooltipIn,
-                            const int iMinIn, int iMaxIn, int iDefaultIn,
-                            copt_hide_t opt_hide, const std::string &format )
-{
-    add(int_option( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide, iDefaultIn, iMinIn, iMaxIn, format ) );
-}
-
 void options_manager::cOpt_base::setPrerequisite( const std::string &sOption )
 {
     if ( !get_options().has_option(sOption) ) {
@@ -292,7 +284,7 @@ std::string options_manager::display_device_option::get_legacy_value() const
 
 std::string options_manager::int_option::get_legacy_value() const
 {
-    return string_format( "%d", value_ );
+    return to_string( value_ );
 }
 
 std::string options_manager::string_map_option::get_legacy_value() const
@@ -722,17 +714,17 @@ void options_manager::init()
 
     get_option("AUTO_PICKUP_ADJACENT").setPrerequisite("AUTO_PICKUP");
 
-    add( "AUTO_PICKUP_WEIGHT_LIMIT", "general", translate_marker( "Auto pickup weight limit" ),
-        translate_marker( "Auto pickup items with weight less than or equal to [option] * 50 grams.  You must also set the small items option.  '0' disables this option" ),
-        0, 20, 0
-        );
+    add( int_option( "AUTO_PICKUP_WEIGHT_LIMIT", "general",
+                     translate_marker( "Auto pickup weight limit" ),
+                     translate_marker( "Auto pickup items with weight less than or equal to [option] * 50 grams.  You must also set the small items option.  '0' disables this option" ),
+                     COPT_NO_HIDE, 0, 0, 20 ) );
 
     get_option("AUTO_PICKUP_WEIGHT_LIMIT").setPrerequisite("AUTO_PICKUP");
 
-    add( "AUTO_PICKUP_VOL_LIMIT", "general", translate_marker( "Auto pickup volume limit" ),
-        translate_marker( "Auto pickup items with volume less than or equal to [option] * 50 milliliters.  You must also set the light items option.  '0' disables this option" ),
-        0, 20, 0
-        );
+    add( int_option( "AUTO_PICKUP_VOL_LIMIT", "general",
+                     translate_marker( "Auto pickup volume limit" ),
+                     translate_marker( "Auto pickup items with volume less than or equal to [option] * 50 milliliters.  You must also set the light items option.  '0' disables this option" ),
+                     COPT_NO_HIDE, 0, 0, 20 ) );
 
     get_option("AUTO_PICKUP_VOL_LIMIT").setPrerequisite("AUTO_PICKUP");
 
@@ -778,10 +770,10 @@ void options_manager::init()
                       translate_marker( "If true, will hold the game and display a warning if a hostile monster/npc is approaching." ),
                       COPT_NO_HIDE, true ) );
 
-    add( "SAFEMODEPROXIMITY", "general", translate_marker( "Safe mode proximity distance" ),
-         translate_marker( "If safe mode is enabled, distance to hostiles at which safe mode should show a warning.  0 = Max player view distance." ),
-         0, MAX_VIEW_DISTANCE, 0
-    );
+    add( int_option( "SAFEMODEPROXIMITY", "general",
+                     translate_marker( "Safe mode proximity distance" ),
+                     translate_marker( "If safe mode is enabled, distance to hostiles at which safe mode should show a warning.  0 = Max player view distance." ),
+                     COPT_NO_HIDE, 0, 0, MAX_VIEW_DISTANCE ) );
 
     add( bool_option( "SAFEMODEVEH", "general",
                       translate_marker( "Safe mode when driving" ),
@@ -793,10 +785,10 @@ void options_manager::init()
                       translate_marker( "If true, safe mode will automatically reactivate after a certain number of turns.  See option 'Turns to auto reactivate safe mode.'" ),
                       COPT_NO_HIDE, false ) );
 
-    add( "AUTOSAFEMODETURNS", "general", translate_marker( "Turns to auto reactivate safe mode" ),
-        translate_marker( "Number of turns after which safe mode is reactivated. Will only reactivate if no hostiles are in 'Safe mode proximity distance.'" ),
-        1, 100, 50
-        );
+    add( int_option( "AUTOSAFEMODETURNS", "general",
+                     translate_marker( "Turns to auto reactivate safe mode" ),
+                     translate_marker( "Number of turns after which safe mode is reactivated. Will only reactivate if no hostiles are in 'Safe mode proximity distance.'" ),
+                     COPT_NO_HIDE, 50, 1, 100 ) );
 
     mOptionsSort["general"]++;
 
@@ -812,17 +804,17 @@ void options_manager::init()
                       translate_marker( "If true, game will periodically save the map.  Autosaves occur based on in-game turns or real-time minutes, whichever is larger." ),
                       COPT_NO_HIDE, false ) );
 
-    add( "AUTOSAVE_TURNS", "general", translate_marker( "Game turns between autosaves" ),
-        translate_marker( "Number of game turns between autosaves" ),
-        10, 1000, 50
-        );
+    add( int_option( "AUTOSAVE_TURNS", "general",
+                     translate_marker( "Game turns between autosaves" ),
+                     translate_marker( "Number of game turns between autosaves" ),
+                     COPT_NO_HIDE, 50, 10, 1000 ) );
 
     get_option("AUTOSAVE_TURNS").setPrerequisite("AUTOSAVE");
 
-    add( "AUTOSAVE_MINUTES", "general", translate_marker( "Real minutes between autosaves" ),
-        translate_marker( "Number of real time minutes between autosaves" ),
-        0, 127, 5
-        );
+    add( int_option( "AUTOSAVE_MINUTES", "general",
+                     translate_marker( "Real minutes between autosaves" ),
+                     translate_marker( "Number of real time minutes between autosaves" ),
+                     COPT_NO_HIDE, 5, 0, 127 ) );
 
     get_option("AUTOSAVE_MINUTES").setPrerequisite("AUTOSAVE");
 
@@ -855,15 +847,15 @@ void options_manager::init()
         build_soundpacks_list(), "basic", COPT_NO_SOUND_HIDE
         ); // populate the options dynamically
 
-    add( "MUSIC_VOLUME", "general", translate_marker( "Music volume" ),
-        translate_marker( "Adjust the volume of the music being played in the background." ),
-        0, 200, 100, COPT_NO_SOUND_HIDE
-        );
+    add( int_option( "MUSIC_VOLUME", "general",
+                     translate_marker( "Music volume" ),
+                     translate_marker( "Adjust the volume of the music being played in the background." ),
+                     COPT_NO_SOUND_HIDE, 100, 0, 200 ) );
 
-    add( "SOUND_EFFECT_VOLUME", "general", translate_marker( "Sound effect volume" ),
-        translate_marker( "Adjust the volume of sound effects being played by the game." ),
-        0, 200, 100, COPT_NO_SOUND_HIDE
-        );
+    add( int_option( "SOUND_EFFECT_VOLUME", "general",
+                     translate_marker( "Sound effect volume" ),
+                     translate_marker( "Adjust the volume of sound effects being played by the game." ),
+                     COPT_NO_SOUND_HIDE, 100, 0, 200 ) );
 
     ////////////////////////////INTERFACE////////////////////////
     // TODO: scan for languages like we do for tilesets.
@@ -1000,10 +992,10 @@ void options_manager::init()
         { { "new_top", translate_marker( "Top" ) }, { "new_bottom", translate_marker( "Bottom" ) } }, "new_bottom"
         );
 
-    add( "MESSAGE_TTL", "interface", translate_marker( "Sidebar log message display duration" ),
-        translate_marker( "Number of turns after which a message will be removed from the sidebar log.  '0' disables this option." ),
-        0, 1000, 0
-        );
+    add( int_option( "MESSAGE_TTL", "interface",
+                     translate_marker( "Sidebar log message display duration" ),
+                     translate_marker( "Number of turns after which a message will be removed from the sidebar log.  '0' disables this option." ),
+                     COPT_NO_HIDE, 0, 0, 1000 ) );
 
     add( "ACCURACY_DISPLAY", "interface", translate_marker( "Aim window display style" ),
         translate_marker( "How should confidence and steadiness be communicated to the player." ),
@@ -1019,10 +1011,10 @@ void options_manager::init()
 
     mOptionsSort["interface"]++;
 
-    add( "MOVE_VIEW_OFFSET", "interface", translate_marker( "Move view offset" ),
-        translate_marker( "Move view by how many squares per keypress." ),
-        1, 50, 1
-        );
+    add( int_option( "MOVE_VIEW_OFFSET", "interface",
+                     translate_marker( "Move view offset" ),
+                     translate_marker( "Move view by how many squares per keypress." ),
+                     COPT_NO_HIDE, 1, 1, 50 ) );
 
     add( bool_option( "MENU_SCROLL", "interface",
                       translate_marker( "Centered menu scrolling" ),
@@ -1086,10 +1078,10 @@ void options_manager::init()
 
     get_option("ANIMATION_SCT").setPrerequisite("ANIMATIONS");
 
-    add( "ANIMATION_DELAY", "graphics", translate_marker( "Animation delay" ),
-        translate_marker( "The amount of time to pause between animation frames in ms." ),
-        0, 100, 10
-        );
+    add( int_option( "ANIMATION_DELAY", "graphics",
+                     translate_marker( "Animation delay" ),
+                     translate_marker( "The amount of time to pause between animation frames in ms." ),
+                     COPT_NO_HIDE, 10, 0, 100 ) );
 
     get_option("ANIMATION_DELAY").setPrerequisite("ANIMATIONS");
 
@@ -1100,15 +1092,15 @@ void options_manager::init()
 
     mOptionsSort["graphics"]++;
 
-    add( "TERMINAL_X", "graphics", translate_marker( "Terminal width" ),
-        translate_marker( "Set the size of the terminal along the X axis.  Requires restart." ),
-        80, 960, 80, COPT_POSIX_CURSES_HIDE
-        );
+    add( int_option( "TERMINAL_X", "graphics",
+                     translate_marker( "Terminal width" ),
+                     translate_marker( "Set the size of the terminal along the X axis.  Requires restart." ),
+                     COPT_POSIX_CURSES_HIDE, 80, 80, 960 ) );
 
-    add( "TERMINAL_Y", "graphics", translate_marker( "Terminal height" ),
-        translate_marker( "Set the size of the terminal along the Y axis.  Requires restart." ),
-        24, 270, 24, COPT_POSIX_CURSES_HIDE
-        );
+    add( int_option( "TERMINAL_Y", "graphics",
+                     translate_marker( "Terminal height" ),
+                     translate_marker( "Set the size of the terminal along the Y axis.  Requires restart." ),
+                     COPT_POSIX_CURSES_HIDE, 24, 24, 270 ) );
 
     mOptionsSort["graphics"]++;
 
@@ -1138,17 +1130,17 @@ void options_manager::init()
 
     get_option("PIXEL_MINIMAP_MODE").setPrerequisite("PIXEL_MINIMAP");
 
-    add( "PIXEL_MINIMAP_BRIGHTNESS", "graphics", translate_marker( "Pixel minimap brightness" ),
-        translate_marker( "Overall brightness of pixel-detail minimap." ),
-        10, 300, 100, COPT_CURSES_HIDE
-        );
+    add( int_option( "PIXEL_MINIMAP_BRIGHTNESS", "graphics",
+                     translate_marker( "Pixel minimap brightness" ),
+                     translate_marker( "Overall brightness of pixel-detail minimap." ),
+                     COPT_CURSES_HIDE, 100, 10, 300 ) );
 
     get_option("PIXEL_MINIMAP_BRIGHTNESS").setPrerequisite("PIXEL_MINIMAP");
 
-    add( "PIXEL_MINIMAP_HEIGHT", "graphics", translate_marker( "Pixel minimap height" ),
-        translate_marker( "Height of pixel-detail minimap, measured in terminal rows.  Set to 0 for default spacing." ),
-        0, 100, 0, COPT_CURSES_HIDE
-        );
+    add( int_option( "PIXEL_MINIMAP_HEIGHT", "graphics",
+                     translate_marker( "Pixel minimap height" ),
+                     translate_marker( "Height of pixel-detail minimap, measured in terminal rows.  Set to 0 for default spacing." ),
+                     COPT_CURSES_HIDE, 0, 0, 100 ) );
 
     get_option("PIXEL_MINIMAP_HEIGHT").setPrerequisite("PIXEL_MINIMAP");
 
@@ -1159,10 +1151,10 @@ void options_manager::init()
 
     get_option("PIXEL_MINIMAP_RATIO").setPrerequisite("PIXEL_MINIMAP");
 
-    add( "PIXEL_MINIMAP_BLINK", "graphics", translate_marker( "Enemy beacon blink speed" ),
-        translate_marker( "Controls how fast the enemy beacons blink on the pixel minimap.  Value is multiplied by 200 ms.  Set to 0 to disable." ),
-        0, 50, 10, COPT_CURSES_HIDE
-        );
+    add( int_option( "PIXEL_MINIMAP_BLINK", "graphics",
+                     translate_marker( "Enemy beacon blink speed" ),
+                     translate_marker( "Controls how fast the enemy beacons blink on the pixel minimap.  Value is multiplied by 200 ms.  Set to 0 to disable." ),
+                     COPT_CURSES_HIDE, 10, 0, 50 ) );
 
     get_option("PIXEL_MINIMAP_BLINK").setPrerequisite("PIXEL_MINIMAP");
 
@@ -1199,32 +1191,32 @@ void options_manager::init()
         "none", COPT_CURSES_HIDE );
 
     ////////////////////////////DEBUG////////////////////////////
-    add( "DISTANCE_INITIAL_VISIBILITY", "debug", translate_marker( "Distance initial visibility" ),
-        translate_marker( "Determines the scope, which is known in the beginning of the game." ),
-        3, 20, 15
-        );
+    add( int_option( "DISTANCE_INITIAL_VISIBILITY", "debug",
+                     translate_marker( "Distance initial visibility" ),
+                     translate_marker( "Determines the scope, which is known in the beginning of the game." ),
+                     COPT_NO_HIDE, 15, 3, 20 ) );
 
     mOptionsSort["debug"]++;
 
-    add( "INITIAL_STAT_POINTS", "debug", translate_marker( "Initial stat points" ),
-        translate_marker( "Initial points available to spend on stats on character generation." ),
-        0, 1000, 6
-        );
+    add( int_option( "INITIAL_STAT_POINTS", "debug",
+                     translate_marker( "Initial stat points" ),
+                     translate_marker( "Initial points available to spend on stats on character generation." ),
+                     COPT_NO_HIDE, 6, 0, 1000 ) );
 
-    add( "INITIAL_TRAIT_POINTS", "debug", translate_marker( "Initial trait points" ),
-        translate_marker( "Initial points available to spend on traits on character generation." ),
-        0, 1000, 0
-        );
+    add( int_option( "INITIAL_TRAIT_POINTS", "debug",
+                     translate_marker( "Initial trait points" ),
+                     translate_marker( "Initial points available to spend on traits on character generation." ),
+                     COPT_NO_HIDE, 0, 0, 1000 ) );
 
-    add( "INITIAL_SKILL_POINTS", "debug", translate_marker( "Initial skill points" ),
-        translate_marker( "Initial points available to spend on skills on character generation." ),
-        0, 1000, 2
-        );
+    add( int_option( "INITIAL_SKILL_POINTS", "debug",
+                     translate_marker( "Initial skill points" ),
+                     translate_marker( "Initial points available to spend on skills on character generation." ),
+                     COPT_NO_HIDE, 2, 0, 1000 ) );
 
-    add( "MAX_TRAIT_POINTS", "debug", translate_marker( "Maximum trait points" ),
-            translate_marker( "Maximum trait points available for character generation." ),
-            0, 1000, 12
-            );
+    add( int_option( "MAX_TRAIT_POINTS", "debug",
+                     translate_marker( "Maximum trait points" ),
+                     translate_marker( "Maximum trait points available for character generation." ),
+                     COPT_NO_HIDE, 12, 0, 1000 ) );
 
     mOptionsSort["debug"]++;
 
@@ -1261,10 +1253,10 @@ void options_manager::init()
                       COPT_NO_HIDE, true ) );
 
     ////////////////////////////WORLD DEFAULT////////////////////
-    add( "CORE_VERSION", "world_default", translate_marker( "Core version data" ),
-        translate_marker( "Controls what migrations are applied for legacy worlds" ),
-        1, core_version, core_version, COPT_ALWAYS_HIDE
-        );
+    add( int_option( "CORE_VERSION", "world_default",
+                     translate_marker( "Core version data" ),
+                     translate_marker( "Controls what migrations are applied for legacy worlds" ),
+                     COPT_ALWAYS_HIDE, core_version, 1, core_version ) );
 
     mOptionsSort["world_default"]++;
 
@@ -1275,15 +1267,15 @@ void options_manager::init()
 
     mOptionsSort["world_default"]++;
 
-    add( "CITY_SIZE", "world_default", translate_marker( "Size of cities" ),
-        translate_marker( "A number determining how large cities are.  0 disables cities, roads and any scenario requiring a city start." ),
-        0, 16, 4
-        );
+    add( int_option( "CITY_SIZE", "world_default",
+                     translate_marker( "Size of cities" ),
+                     translate_marker( "A number determining how large cities are.  0 disables cities, roads and any scenario requiring a city start." ),
+                     COPT_NO_HIDE, 4, 0, 16 ) );
 
-    add( "CITY_SPACING", "world_default", translate_marker( "City spacing" ),
-        translate_marker( "A number determining how far apart cities are.  Warning, small numbers lead to very slow mapgen." ),
-        0, 8, 4
-        );
+    add( int_option( "CITY_SPACING", "world_default",
+                     translate_marker( "City spacing" ),
+                     translate_marker( "A number determining how far apart cities are.  Warning, small numbers lead to very slow mapgen." ),
+                     COPT_NO_HIDE, 4, 0, 8 ) );
 
     add( float_option( "SPAWN_DENSITY", "world_default",
                        translate_marker( "Spawn rate scaling factor" ),
@@ -1307,15 +1299,15 @@ void options_manager::init()
 
     mOptionsSort["world_default"]++;
 
-    add( "MONSTER_SPEED", "world_default", translate_marker( "Monster speed" ),
-        translate_marker( "Determines the movement rate of monsters.  A higher value increases monster speed and a lower reduces it." ),
-        1, 1000, 100, COPT_NO_HIDE, "%i%%"
-        );
+    add( int_option( "MONSTER_SPEED", "world_default",
+                     translate_marker( "Monster speed" ),
+                     translate_marker( "Determines the movement rate of monsters.  A higher value increases monster speed and a lower reduces it." ),
+                     COPT_NO_HIDE, 100, 1, 1000, "%i%%" ) );
 
-    add( "MONSTER_RESILIENCE", "world_default", translate_marker( "Monster resilience" ),
-        translate_marker( "Determines how much damage monsters can take.  A higher value makes monsters more resilient and a lower makes them more flimsy." ),
-        1, 1000, 100, COPT_NO_HIDE, "%i%%"
-        );
+    add( int_option( "MONSTER_RESILIENCE", "world_default",
+                     translate_marker( "Monster resilience" ),
+                     translate_marker( "Determines how much damage monsters can take.  A higher value makes monsters more resilient and a lower makes them more flimsy." ),
+                     COPT_NO_HIDE, 100, 1, 1000, "%i%%" ) );
 
     mOptionsSort["world_default"]++;
 
@@ -1326,25 +1318,25 @@ void options_manager::init()
 
     mOptionsSort["world_default"]++;
 
-    add( "INITIAL_TIME", "world_default", translate_marker( "Initial time" ),
-        translate_marker( "Initial starting time of day on character generation." ),
-        0, 23, 8
-        );
+    add( int_option( "INITIAL_TIME", "world_default",
+                     translate_marker( "Initial time" ),
+                     translate_marker( "Initial starting time of day on character generation." ),
+                     COPT_NO_HIDE, 8, 0, 23 ) );
 
     add( "INITIAL_SEASON", "world_default", translate_marker( "Initial season" ),
         translate_marker( "Season the player starts in.  Options other than the default delay spawn of the character, so food decay and monster spawns will have advanced." ),
         { { "spring", translate_marker( "Spring" ) }, { "summer", translate_marker( "Summer" ) }, { "autumn", translate_marker( "Autumn" ) }, { "winter", translate_marker( "Winter" ) } }, "spring"
         );
 
-    add( "SEASON_LENGTH", "world_default", translate_marker( "Season length" ),
-        translate_marker( "Season length, in days." ),
-        14, 127, 14
-        );
+    add( int_option( "SEASON_LENGTH", "world_default",
+                     translate_marker( "Season length" ),
+                     translate_marker( "Season length, in days." ),
+                     COPT_NO_HIDE, 14, 14, 127 ) );
 
-    add( "CONSTRUCTION_SCALING", "world_default", translate_marker( "Construction scaling" ),
-        translate_marker( "Sets the time of construction in percents.  '50' is two times faster than default, '200' is two times longer.  '0' automatically scales construction time to match the world's season length." ),
-        0, 1000, 100
-        );
+    add( int_option( "CONSTRUCTION_SCALING", "world_default",
+                     translate_marker( "Construction scaling" ),
+                     translate_marker( "Sets the time of construction in percents.  '50' is two times faster than default, '200' is two times longer.  '0' automatically scales construction time to match the world's season length." ),
+                     COPT_NO_HIDE, 100, 0, 1000 ) );
 
     add( bool_option( "ETERNAL_SEASON", "world_default",
                       translate_marker( "Eternal season" ),
