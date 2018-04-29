@@ -160,14 +160,6 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
-                            const std::string sDefaultIn, const int iMaxLengthIn,
-                            copt_hide_t opt_hide)
-{
-    add( string_input_option( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide, sDefaultIn, iMaxLengthIn ) );
-}
-
-void options_manager::add(const std::string sNameIn, const std::string sPageIn,
-                            const std::string sMenuTextIn, const std::string sTooltipIn,
                             const bool bDefaultIn, copt_hide_t opt_hide)
 {
     add( bool_option( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide, bDefaultIn ) );
@@ -726,10 +718,9 @@ void options_manager::init()
     }
 
     ////////////////////////////GENERAL//////////////////////////
-    add( "DEF_CHAR_NAME", "general", translate_marker( "Default character name" ),
-        translate_marker( "Set a default character name that will be used instead of a random name on character creation." ),
-        "", 30
-        );
+    add( string_input_option( "DEF_CHAR_NAME", "general", translate_marker( "Default character name" ),
+                              translate_marker( "Set a default character name that will be used instead of a random name on character creation." ),
+                              COPT_NO_HIDE, "", 30 ) );
 
     mOptionsSort["general"]++;
 
