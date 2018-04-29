@@ -88,7 +88,7 @@ void options_manager::add_value( const std::string &lvar, const std::string &lva
         if( ot == options.end() ) {
             return;
         }
-        cOpt &opt = ot->second;
+        cOpt &opt = *ot->second;
         opt.add_value( lval, lvalname );
         // our value was saved, then set to default, so set it again.
         if ( it->second == lval ) {
@@ -139,7 +139,7 @@ void options_manager::add_external( const std::string sNameIn, const std::string
     thisOpt.hide = COPT_ALWAYS_HIDE;
     thisOpt.setSortPos( sPageIn );
 
-    options[sNameIn] = thisOpt;
+    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
 }
 
 void options_manager::add( const std::string sNameIn, const std::string sPageIn,
@@ -167,7 +167,7 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
 
     thisOpt.setSortPos( sPageIn );
 
-    options[sNameIn] = thisOpt;
+    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -191,7 +191,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 
     thisOpt.setSortPos(sPageIn);
 
-    options[sNameIn] = thisOpt;
+    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -213,7 +213,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 
     thisOpt.setSortPos(sPageIn);
 
-    options[sNameIn] = thisOpt;
+    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -249,7 +249,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 
     thisOpt.setSortPos(sPageIn);
 
-    options[sNameIn] = thisOpt;
+    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -284,7 +284,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 
     thisOpt.setSortPos(sPageIn);
 
-    options[sNameIn] = thisOpt;
+    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
 }
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
@@ -321,7 +321,7 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 
     thisOpt.setSortPos(sPageIn);
 
-    options[sNameIn] = thisOpt;
+    options.emplace( sNameIn, make_poly_pimpl<cOpt>( thisOpt ) );
 }
 
 void options_manager::cOpt::setPrerequisite( const std::string &sOption )
@@ -1629,9 +1629,9 @@ void options_manager::init()
 
     for( auto &elem : options ) {
         for (unsigned i = 0; i < vPages.size(); ++i) {
-            if( vPages[i].first == ( elem.second ).getPage() &&
-                ( elem.second ).getSortPos() > -1 ) {
-                mPageItems[i][( elem.second ).getSortPos()] = elem.first;
+            const cOpt &opt = *elem.second;
+            if( vPages[i].first == opt.getPage() && opt.getSortPos() > -1 ) {
+                mPageItems[i][opt.getSortPos()] = elem.first;
                 break;
             }
         }
@@ -1812,7 +1812,7 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
 
             int line_pos; // Current line position in window.
             nc_color cLineColor = c_light_green;
-            const cOpt &current_opt = cOPTIONS[mPageItems[iCurrentPage][i]];
+            const cOpt &current_opt = *cOPTIONS.at( mPageItems[iCurrentPage][i] );
             bool hasPrerequisite = current_opt.hasPrerequisite();
 
             line_pos = i - iStartPos;
@@ -1870,7 +1870,7 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
 
         wrefresh(w_options_header);
 
-        cOpt &current_opt = cOPTIONS[mPageItems[iCurrentPage][iCurrentLine]];
+        cOpt &current_opt = *cOPTIONS.at( mPageItems[iCurrentPage][iCurrentLine] );
 
 #if (defined TILES || defined _WIN32 || defined WINDOWS)
         if (mPageItems[iCurrentPage][iCurrentLine] == "TERMINAL_X") {
@@ -1939,14 +1939,14 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
                 if (iCurrentLine >= (int)mPageItems[iCurrentPage].size()) {
                     iCurrentLine = 0;
                 }
-            } while( cOPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getMenuText().empty() );
+            } while( cOPTIONS.count( mPageItems[iCurrentPage][iCurrentLine] ) == 0 );
         } else if (action == "UP") {
             do {
                 iCurrentLine--;
                 if (iCurrentLine < 0) {
                     iCurrentLine = mPageItems[iCurrentPage].size() - 1;
                 }
-            } while( cOPTIONS[mPageItems[iCurrentPage][iCurrentLine]].getMenuText().empty() );
+            } while( cOPTIONS.count( mPageItems[iCurrentPage][iCurrentLine] ) == 0 );
         } else if (!mPageItems[iCurrentPage].empty() && action == "RIGHT") {
             current_opt.setNext();
         } else if (!mPageItems[iCurrentPage].empty() && action == "LEFT") {
@@ -1986,10 +1986,10 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
     bool sidebar_style_changed = false;
 
     for (auto &iter : OPTIONS_OLD) {
-        if ( iter.second != OPTIONS[iter.first] ) {
+        if ( iter.second != OPTIONS.at(iter.first) ) {
             options_changed = true;
 
-            if ( iter.second.getPage() == "world_default" ) {
+            if ( iter.second->getPage() == "world_default" ) {
                 world_options_changed = true;
             }
 
@@ -2012,7 +2012,7 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
         }
     }
     for( auto &iter : WOPTIONS_OLD ) {
-        if( iter.second != ACTIVE_WORLD_OPTIONS[iter.first] ) {
+        if( iter.second != ACTIVE_WORLD_OPTIONS.at( iter.first ) ) {
             options_changed = true;
             world_options_changed = true;
         }
@@ -2079,7 +2079,7 @@ void options_manager::serialize(JsonOut &json) const
             }
             const auto iter = options.find( elem );
             if( iter != options.end() ) {
-                const auto &opt = iter->second;
+                const cOpt &opt = *iter->second;
                 //Skip hidden option because it is set by mod and should not be saved
                 if ( opt.hide == COPT_ALWAYS_HIDE ) {
                     continue;
@@ -2102,7 +2102,7 @@ void options_manager::deserialize(JsonIn &jsin)
         const std::string value = joOptions.get_string("value");
 
         add_retry(name, value);
-        options[ name ].set_from_legacy_value( value );
+        options.at( name )->set_from_legacy_value( value );
     }
 }
 
@@ -2161,7 +2161,7 @@ bool options_manager::load_legacy()
                 // option with values from post init() might get clobbered
                 add_retry(loadedvar, loadedval); // stash it until update();
 
-                options[ loadedvar ].set_from_legacy_value( loadedval );
+                options.at( loadedvar )->set_from_legacy_value( loadedval );
             }
         }
     };
@@ -2182,31 +2182,34 @@ bool options_manager::has_option( const std::string &name ) const
 
 options_manager::cOpt &options_manager::get_option( const std::string &name )
 {
-    if( options.count( name ) == 0 ) {
+    const auto main_iter = options.find( name );
+    if( main_iter == options.end() ) {
         debugmsg( "requested non-existing option %s", name.c_str() );
     }
+    cOpt &main_opt = *main_iter->second;
     if( !world_generator || !world_generator->active_world ) {
         // Global options contains the default for new worlds, which is good enough here.
-        return options[name];
+        return main_opt;
     }
     auto &wopts = world_generator->active_world->WORLD_OPTIONS;
-    if( wopts.count( name ) == 0 ) {
-        auto &opt = options[name];
-        if( opt.getPage() != "world_default" ) {
-            // Requested a non-world option, deliver it.
-            return opt;
-        }
-        // May be a new option and an old world - import default from global options.
-        wopts[name] = opt;
+    const auto world_iter = wopts.find( name );
+    if( world_iter != wopts.end() ) {
+        return *world_iter->second;
     }
-    return wopts[name];
+    if( main_opt.getPage() != "world_default" ) {
+        // Requested a non-world option, deliver it.
+        return main_opt;
+    }
+    // May be a new option and an old world - import default from global options.
+    const auto new_iter = wopts.emplace( name, make_poly_pimpl<cOpt>( main_opt ) ).first;
+    return *new_iter->second;
 }
 
 options_manager::options_container options_manager::get_world_defaults() const
 {
-    std::unordered_map<std::string, cOpt> result;
+    options_container result;
     for( auto &elem : options ) {
-        if( elem.second.getPage() == "world_default" ) {
+        if( elem.second->getPage() == "world_default" ) {
             result.insert( elem );
         }
     }

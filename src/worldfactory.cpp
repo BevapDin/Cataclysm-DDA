@@ -199,7 +199,7 @@ WORLDPTR worldfactory::make_new_world(special_game_id special_type)
     WORLDPTR special_world = new WORLD();
     special_world->world_name = worldname;
 
-    special_world->WORLD_OPTIONS["DELETE_WORLD"].set_from_legacy_value( "yes" );
+    special_world->WORLD_OPTIONS.at( "DELETE_WORLD" )->set_from_legacy_value( "yes" );
 
     // add world to world list!
     all_worlds[worldname] = special_world;
@@ -273,7 +273,7 @@ bool worldfactory::save_world(WORLDPTR world, bool is_conversion)
             jout.start_array();
 
             for( auto &elem : world->WORLD_OPTIONS ) {
-                const options_manager::cOpt &opt = elem.second;
+                const options_manager::cOpt &opt = *elem.second;
                 // Skip hidden option because it is set by mod and should not be saved
                 if( opt.getDefaultText() != "" && !opt.is_hidden() ) {
                     jout.write( opt );
@@ -333,7 +333,7 @@ void worldfactory::init()
         // load options into the world
         if ( !load_world_options(all_worlds[worldname]) ) {
             all_worlds[worldname]->WORLD_OPTIONS = get_options().get_world_defaults();
-            all_worlds[worldname]->WORLD_OPTIONS["DELETE_WORLD"].set_from_legacy_value( "yes" );
+            all_worlds[worldname]->WORLD_OPTIONS.at( "DELETE_WORLD" )->set_from_legacy_value( "yes" );
             save_world(all_worlds[worldname]);
         }
     }
@@ -1346,15 +1346,15 @@ void WORLD::load_options( JsonIn &jsin )
         }
 
         if( opts.has_option( name ) && opts.get_option( name ).getPage() == "world_default" ) {
-            WORLD_OPTIONS[ name ].set_from_legacy_value( value );
+            WORLD_OPTIONS.at( name )->set_from_legacy_value( value );
         }
     }
     // for legacy saves, try to simulate old city_size based density
     if( WORLD_OPTIONS.count( "CITY_SPACING" ) == 0 ) {
-        WORLD_OPTIONS["CITY_SPACING"].setValue( 5 - get_option<int>( "CITY_SIZE" ) / 3 );
+        WORLD_OPTIONS.at( "CITY_SPACING" )->setValue( 5 - get_option<int>( "CITY_SIZE" ) / 3 );
     }
 
-    WORLD_OPTIONS[ "CORE_VERSION" ].setValue( version );
+    WORLD_OPTIONS.at( "CORE_VERSION" )->setValue( version );
 }
 
 void WORLD::load_legacy_options( std::istream &fin )
@@ -1368,7 +1368,7 @@ void WORLD::load_legacy_options( std::istream &fin )
             // make sure that the option being loaded is part of the world_default page in OPTIONS
             // In 0.C some lines consisted of a space and nothing else
             if( ipos != 0 && get_options().get_option( sLine.substr( 0, ipos ) ).getPage() == "world_default" ) {
-                WORLD_OPTIONS[sLine.substr( 0, ipos )].set_from_legacy_value( sLine.substr( ipos + 1, sLine.length() ) );
+                WORLD_OPTIONS.at( sLine.substr( 0, ipos ) )->set_from_legacy_value( sLine.substr( ipos + 1, sLine.length() ) );
             }
         }
     }

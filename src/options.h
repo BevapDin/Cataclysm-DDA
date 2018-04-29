@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "poly_pimpl.h"
+
 class JsonIn;
 class JsonOut;
 
@@ -103,6 +105,10 @@ class options_manager
 
                 void serialize( JsonOut &jsout ) const;
 
+                cOpt *clone() const {
+                    return new cOpt(*this);
+                }
+
             private:
                 std::string sName;
                 std::string sPage;
@@ -146,7 +152,7 @@ class options_manager
                 float fStep;
         };
 
-        typedef std::unordered_map<std::string, cOpt> options_container;
+        typedef std::unordered_map<std::string, poly_pimpl<cOpt>> options_container;
 
         void init();
         void load();
