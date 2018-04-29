@@ -4,11 +4,13 @@
 
 #include <string>
 #include <map>
+#include <typeinfo>
 #include <utility>
 #include <unordered_map>
 #include <vector>
 
 #include "poly_pimpl.h"
+#include "debug.h"
 
 class JsonIn;
 class JsonOut;
@@ -120,19 +122,39 @@ class options_manager
                 copt_hide_t hide = COPT_NO_HIDE;
                 int iSortPos;
         };
+        /**
+         * Basic type safe option container. Provides a function to get the option
+         * value in the type that is used in the code.
+         * All option classes should derive from this instead of from cOpt_base.
+         */
+        template<typename T>
+        class typed_option : public cOpt_base
+        {
+            protected:
+                template<class... Args>
+                typed_option( Args &&... args ) : cOpt_base( std::forward<Args>( args )... ) { }
 
-        class bool_option : public cOpt_base
+            public:
+                ~typed_option() override = default;
+                virtual T value() const = 0;
+
+                std::string getType() const override {
+                    return typeid(T).name();
+                }
+        };
+
+        class bool_option : public typed_option<bool>
         {
             private:
                 bool value_;
                 bool default_value_;
 
             public:
-                bool_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const bool def ) : cOpt_base( n, p, m, t, h ), value_( def ), default_value_( def ) { }
+                bool_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const bool def ) : typed_option<bool>( n, p, m, t, h ), value_( def ), default_value_( def ) { }
                 ~bool_option() override = default;
 
-                std::string getType() const override {
-                    return "bool";
+                bool value() const override {
+                    return value_;
                 }
 
                 std::string get_legacy_value() const override;
@@ -165,7 +187,7 @@ class options_manager
                 }
         };
 
-        class float_option : public cOpt_base
+        class float_option : public typed_option<float>
         {
             private:
                 float value_;
@@ -175,11 +197,11 @@ class options_manager
                 float step_;
 
             public:
-                float_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const float d, const float mi, const float ma, const float s ) : cOpt_base( n, p, m, t, h ), value_( d), default_value_(d), min_value_(mi), max_value_(ma), step_(s) { }
+                float_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const float d, const float mi, const float ma, const float s ) : typed_option<float>( n, p, m, t, h ), value_( d), default_value_(d), min_value_(mi), max_value_(ma), step_(s) { }
                 ~float_option() override = default;
 
-                std::string getType() const override {
-                    return "float";
+                float value() const override {
+                    return value_;
                 }
 
                 std::string get_legacy_value() const override;
@@ -206,7 +228,7 @@ class options_manager
                 }
         };
 
-        class string_input_option : public cOpt_base
+        class string_input_option : public typed_option<std::string>
         {
             private:
                 std::string value_;
@@ -214,11 +236,11 @@ class options_manager
                 int iMaxLength;
 
             public:
-                string_input_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const std::string &d, const int l ) : cOpt_base( n, p, m, t, h ), value_( d ), default_value_( d ), iMaxLength( l ) { }
+                string_input_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const std::string &d, const int l ) : typed_option<std::string>( n, p, m, t, h ), value_( d ), default_value_( d ), iMaxLength( l ) { }
                 ~string_input_option() override = default;
 
-                std::string getType() const override {
-                    return "string_input";
+                std::string value() const override {
+                    return value_;
                 }
 
                 std::string get_legacy_value() const override;
@@ -244,7 +266,7 @@ class options_manager
                 }
         };
 
-        class display_device_option : public cOpt_base
+        class display_device_option : public typed_option<int>
         {
             private:
                 // As long as the @ref displays_ is not empty, this is always
@@ -256,8 +278,8 @@ class options_manager
                 display_device_option();
                 ~display_device_option() override = default;
 
-                std::string getType() const override {
-                    return "int_map";
+                int value() const override {
+                    return value_;
                 }
 
                 std::string get_legacy_value() const override;
@@ -281,7 +303,7 @@ class options_manager
                 }
         };
 
-        class int_option : public cOpt_base
+        class int_option : public typed_option<int>
         {
             private:
                 int value_;
@@ -291,11 +313,11 @@ class options_manager
                 std::string format_;
 
             public:
-                int_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const int d, const int mi, const int ma, const std::string &f = "%i" ) : cOpt_base( n, p, m, t, h ), value_( d), default_value_(d), min_value_(mi), max_value_(ma), format_(f) { }
+                int_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const int d, const int mi, const int ma, const std::string &f = "%i" ) : typed_option<int>( n, p, m, t, h ), value_( d), default_value_(d), min_value_(mi), max_value_(ma), format_(f) { }
                 ~int_option() override = default;
 
-                std::string getType() const override {
-                    return "int";
+                int value() const override {
+                    return value_;
                 }
 
                 std::string get_legacy_value() const override;
@@ -319,18 +341,18 @@ class options_manager
                 }
         };
 
-        class cOpt : public cOpt_base
+        class cOpt : public typed_option<std::string>
         {
                 friend class options_manager;
             public:
-                cOpt( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h ) : cOpt_base( n, p, m, t, h ) { }
+                cOpt( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h ) : typed_option<std::string>( n, p, m, t, h ) { }
                 ~cOpt() override = default;
 
                 std::string get_legacy_value() const override;
                 void set_from_legacy_value( const std::string &v ) override;
 
-                std::string getType() const override {
-                    return "string_select";
+                std::string value() const override {
+                    return sSet;
                 }
 
                 std::string getValueName() const override;
@@ -443,7 +465,15 @@ extern std::map<std::string, std::string> SOUNDPACKS;
 options_manager &get_options();
 
 template<typename T>
-T value_as( const options_manager::cOpt &opt );
+T value_as( const options_manager::cOpt &opt )
+{
+    const auto o = dynamic_cast<const options_manager::typed_option<T> *>( &opt );
+    if( o ) {
+        return o->value();
+    }
+    debugmsg( "Tried to get %s value from option %s of type %s", typeid(T).name(), opt.getName(), opt.getType() );
+    return T();
+}
 
 template<typename T>
 inline T get_option( const std::string &name )

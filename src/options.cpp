@@ -70,7 +70,7 @@ void options_manager::enable_json(const std::string &lvar)
     post_json_verify[ lvar ] = blank_value;
 }
 
-options_manager::display_device_option::display_device_option() : cOpt_base( "DISPLAY", "graphics",
+options_manager::display_device_option::display_device_option() : typed_option<int>( "DISPLAY", "graphics",
             translate_marker( "Display" ),
             translate_marker( "Sets which video display will be used to show the game.  Requires restart." ),
             options_manager::COPT_CURSES_HIDE ),
@@ -324,57 +324,6 @@ std::string options_manager::int_option::get_legacy_value() const
 std::string options_manager::cOpt::get_legacy_value() const
 {
     return sSet;
-}
-
-template<>
-std::string value_as<std::string>( const options_manager::cOpt &opt )
-{
-    const auto o = dynamic_cast<const options_manager::string_input_option *>( &opt );
-    if( o ) {
-        return o->value_;
-    }
-    const auto p = dynamic_cast<const options_manager::cOpt *>( &opt );
-    if( !p ) {
-        debugmsg( "%s tried to get string value from option of type %s", opt.getName(), opt.getType() );
-        return std::string();
-    }
-    return p->sSet;
-}
-
-template<>
-bool value_as<bool>( const options_manager::cOpt &opt )
-{
-    const auto o = dynamic_cast<const options_manager::bool_option *>( &opt );
-    if( !o ) {
-        debugmsg( "%s tried to get boolean value from option of type %s", opt.getName(), opt.getType() );
-        return false;
-    }
-    return o->value_;
-}
-
-template<>
-float value_as<float>( const options_manager::cOpt &opt )
-{
-    const auto o = dynamic_cast<const options_manager::float_option *>( &opt );
-    if( !o ) {
-        debugmsg( "%s tried to get float value from option of type %s", opt.getName(), opt.getType() );
-        return 0.0f;
-    }
-    return o->value_;
-}
-
-template<>
-int value_as<int>( const options_manager::cOpt &opt )
-{
-    const auto o = dynamic_cast<const options_manager::display_device_option *>( &opt );
-    if( o ) {
-        return o->value_;
-    }
-    const auto p = dynamic_cast<const options_manager::int_option *>( &opt );
-    if( !p ) {
-        debugmsg( "%s tried to get integer value from option of type %s", opt.getName(), opt.getType() );
-    }
-    return p->value_;
 }
 
 std::string options_manager::bool_option::getValueName() const
