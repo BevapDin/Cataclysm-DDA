@@ -95,6 +95,9 @@ class options_manager
                 virtual void setValue( float fSetIn ) = 0;
                 virtual void setValue( int iSetIn ) = 0;
 
+                template<typename T>
+                T value_as() const;
+
                 virtual bool operator==( const cOpt_base & ) const = 0;
                 bool operator!=( const cOpt_base &rhs ) const {
                     return !operator==( rhs );
@@ -465,9 +468,9 @@ extern std::map<std::string, std::string> SOUNDPACKS;
 options_manager &get_options();
 
 template<typename T>
-T value_as( const options_manager::cOpt &opt )
+inline T options_manager::cOpt_base::value_as() const
 {
-    const auto o = dynamic_cast<const options_manager::typed_option<T> *>( &opt );
+    const auto o = dynamic_cast<const options_manager::typed_option<T> *>( this );
     if( o ) {
         return o->value();
     }
@@ -478,7 +481,7 @@ T value_as( const options_manager::cOpt &opt )
 template<typename T>
 inline T get_option( const std::string &name )
 {
-    return value_as<T>( get_options().get_option( name ) );
+    return get_options().get_option( name ).value_as<T>();
 }
 
 #endif
