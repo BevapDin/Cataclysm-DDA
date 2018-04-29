@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "poly_pimpl.h"
-#include "debug.h"
 
 class JsonIn;
 class JsonOut;
@@ -109,6 +108,10 @@ class options_manager
 
                 // as required by poly_pimpl
                 virtual cOpt_base *clone() const = 0;
+
+            protected:
+                // Wrapper for debugmsg so we don't have to include "debug.h" in this header.
+                void report_type_error( const std::string &expected ) const;
 
             private:
                 // The *id* of this option.
@@ -475,7 +478,7 @@ inline T options_manager::cOpt_base::value_as() const
     if( o ) {
         return o->value();
     }
-    debugmsg( "Tried to get %s value from option %s of type %s", typeid(T).name(), opt.getName(), opt.getType() );
+    report_type_error( typeid( T ).name() );
     return T();
 }
 

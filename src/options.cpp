@@ -2068,3 +2068,8 @@ std::vector<std::string> options_manager::getWorldOptPageItems() const
     auto temp = mPageItems;
     return temp[iWorldOptPage];
 }
+
+void options_manager::cOpt_base::report_type_error( const std::string &expected ) const
+{
+    debugmsg( "Tried to get %s value from option %s of type %s", expected, getName(), getType() );
+}
