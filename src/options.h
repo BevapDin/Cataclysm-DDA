@@ -54,8 +54,6 @@ class options_manager
             public:
                 cOpt();
 
-                void setSortPos( const std::string sPageIn );
-
                 int getSortPos() const;
 
                 /**

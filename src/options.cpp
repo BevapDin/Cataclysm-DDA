@@ -122,7 +122,14 @@ template<typename T>
 void options_manager::add( const T &opt )
 {
     const auto iter = options.emplace( opt.getName(), make_poly_pimpl<T>( opt ) );
-    iter.first->second->setSortPos( opt.getPage() );
+    cOpt &nopt = *iter.first->second;
+
+    if( !nopt.is_hidden() ) {
+        mOptionsSort[nopt.getPage()]++;
+        nopt.iSortPos = mOptionsSort[nopt.getPage()] - 1;
+    } else {
+        nopt.iSortPos = -1;
+    }
 }
 
 void options_manager::add_external( const std::string sNameIn, const std::string sPageIn,
@@ -384,17 +391,6 @@ bool options_manager::cOpt::is_hidden() const
     }
     // Make compiler happy, this is unreachable.
     return false;
-}
-
-void options_manager::cOpt::setSortPos(const std::string sPageIn)
-{
-    if (!is_hidden()) {
-        mOptionsSort[sPageIn]++;
-        iSortPos = mOptionsSort[sPageIn] - 1;
-
-    } else {
-        iSortPos = -1;
-    }
 }
 
 int options_manager::cOpt::getSortPos() const
