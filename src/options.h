@@ -429,10 +429,6 @@ class options_manager
 
         void add( const std::string sNameIn, const std::string sPageIn,
                   const std::string sMenuTextIn, const std::string sTooltipIn,
-                  const bool bDefaultIn, copt_hide_t opt_hide = COPT_NO_HIDE );
-
-        void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
                   const int iMinIn, int iMaxIn, int iDefaultIn,
                   copt_hide_t opt_hide = COPT_NO_HIDE,
                   const std::string &format = "%i" );

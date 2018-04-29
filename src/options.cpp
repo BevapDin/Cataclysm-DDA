@@ -160,13 +160,6 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
-                            const bool bDefaultIn, copt_hide_t opt_hide)
-{
-    add( bool_option( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide, bDefaultIn ) );
-}
-
-void options_manager::add(const std::string sNameIn, const std::string sPageIn,
-                            const std::string sMenuTextIn, const std::string sTooltipIn,
                             const int iMinIn, int iMaxIn, int iDefaultIn,
                             copt_hide_t opt_hide, const std::string &format )
 {
@@ -718,21 +711,22 @@ void options_manager::init()
     }
 
     ////////////////////////////GENERAL//////////////////////////
-    add( string_input_option( "DEF_CHAR_NAME", "general", translate_marker( "Default character name" ),
+    add( string_input_option( "DEF_CHAR_NAME", "general",
+                              translate_marker( "Default character name" ),
                               translate_marker( "Set a default character name that will be used instead of a random name on character creation." ),
                               COPT_NO_HIDE, "", 30 ) );
 
     mOptionsSort["general"]++;
 
-    add( "AUTO_PICKUP", "general", translate_marker( "Auto pickup enabled" ),
-        translate_marker( "Enable item auto pickup.  Change pickup rules with the Auto Pickup Manager." ),
-        false
-        );
+    add( bool_option( "AUTO_PICKUP", "general",
+                      translate_marker( "Auto pickup enabled" ),
+                      translate_marker( "Enable item auto pickup.  Change pickup rules with the Auto Pickup Manager." ),
+                      COPT_NO_HIDE, false ) );
 
-    add( "AUTO_PICKUP_ADJACENT", "general", translate_marker( "Auto pickup adjacent" ),
-        translate_marker( "If true, will enable to pickup items one tile around to the player.  You can assign No Auto Pickup zones with the Zones Manager 'Y' key for e.g.  your homebase." ),
-        false
-        );
+    add( bool_option( "AUTO_PICKUP_ADJACENT", "general",
+                      translate_marker( "Auto pickup adjacent" ),
+                      translate_marker( "If true, will enable to pickup items one tile around to the player.  You can assign No Auto Pickup zones with the Zones Manager 'Y' key for e.g.  your homebase." ),
+                      COPT_NO_HIDE, false ) );
 
     get_option("AUTO_PICKUP_ADJACENT").setPrerequisite("AUTO_PICKUP");
 
@@ -750,26 +744,26 @@ void options_manager::init()
 
     get_option("AUTO_PICKUP_VOL_LIMIT").setPrerequisite("AUTO_PICKUP");
 
-    add( "AUTO_PICKUP_SAFEMODE", "general", translate_marker( "Auto pickup safe mode" ),
-        translate_marker( "Auto pickup is disabled as long as you can see monsters nearby.  This is affected by 'Safe Mode proximity distance'." ),
-        false
-        );
+    add( bool_option( "AUTO_PICKUP_SAFEMODE", "general",
+                      translate_marker( "Auto pickup safe mode" ),
+                      translate_marker( "Auto pickup is disabled as long as you can see monsters nearby.  This is affected by 'Safe Mode proximity distance'." ),
+                      COPT_NO_HIDE, false ) );
 
     get_option("AUTO_PICKUP_SAFEMODE").setPrerequisite("AUTO_PICKUP");
 
-    add( "NO_AUTO_PICKUP_ZONES_LIST_ITEMS", "general", translate_marker( "List items within no auto pickup zones" ),
-        translate_marker( "If false, you will not see messages about items, you step on, within no auto pickup zones." ),
-        true
-        );
+    add( bool_option( "NO_AUTO_PICKUP_ZONES_LIST_ITEMS", "general",
+                      translate_marker( "List items within no auto pickup zones" ),
+                      translate_marker( "If false, you will not see messages about items, you step on, within no auto pickup zones." ),
+                      COPT_NO_HIDE, true ) );
 
     get_option("NO_AUTO_PICKUP_ZONES_LIST_ITEMS").setPrerequisite("AUTO_PICKUP");
 
     mOptionsSort["general"]++;
 
-    add( "AUTO_PULP_BUTCHER", "general", translate_marker( "Auto pulp or butcher" ),
-         translate_marker( "If true, enables auto pulping resurrecting corpses or auto butchering any corpse.  Never pulps acidic corpses.  Disabled as long as any enemy monster is seen." ),
-         false
-    );
+    add( bool_option( "AUTO_PULP_BUTCHER", "general",
+                      translate_marker( "Auto pulp or butcher" ),
+                      translate_marker( "If true, enables auto pulping resurrecting corpses or auto butchering any corpse.  Never pulps acidic corpses.  Disabled as long as any enemy monster is seen." ),
+                      COPT_NO_HIDE, false ) );
 
     add( "AUTO_PULP_BUTCHER_ACTION", "general", translate_marker( "Auto pulp or butcher action" ),
          translate_marker( "Action to perform when 'Auto pulp or butcher' is enabled.  Pulp: Pulp corpses you stand on.  - Pulp Adjacent: Also pulp corpses adjacent from you.  - Butcher: Butcher corpses you stand on." ),
@@ -780,32 +774,32 @@ void options_manager::init()
 
     mOptionsSort["general"]++;
 
-    add( "DANGEROUS_PICKUPS", "general", translate_marker( "Dangerous pickups" ),
-        translate_marker( "If false, will cause player to drop new items that cause them to exceed the weight limit." ),
-        false
-        );
+    add( bool_option( "DANGEROUS_PICKUPS", "general",
+                      translate_marker( "Dangerous pickups" ),
+                      translate_marker( "If false, will cause player to drop new items that cause them to exceed the weight limit." ),
+                      COPT_NO_HIDE, false ) );
 
     mOptionsSort["general"]++;
 
-    add( "SAFEMODE", "general", translate_marker( "Safe mode" ),
-         translate_marker( "If true, will hold the game and display a warning if a hostile monster/npc is approaching." ),
-         true
-    );
+    add( bool_option( "SAFEMODE", "general",
+                      translate_marker( "Safe mode" ),
+                      translate_marker( "If true, will hold the game and display a warning if a hostile monster/npc is approaching." ),
+                      COPT_NO_HIDE, true ) );
 
     add( "SAFEMODEPROXIMITY", "general", translate_marker( "Safe mode proximity distance" ),
          translate_marker( "If safe mode is enabled, distance to hostiles at which safe mode should show a warning.  0 = Max player view distance." ),
          0, MAX_VIEW_DISTANCE, 0
     );
 
-    add( "SAFEMODEVEH", "general", translate_marker( "Safe mode when driving" ),
-         translate_marker( "When true, safe mode will alert you of hostiles while you are driving a vehicle." ),
-         false
-    );
+    add( bool_option( "SAFEMODEVEH", "general",
+                      translate_marker( "Safe mode when driving" ),
+                      translate_marker( "When true, safe mode will alert you of hostiles while you are driving a vehicle." ),
+                      COPT_NO_HIDE, false ) );
 
-    add( "AUTOSAFEMODE", "general", translate_marker( "Auto reactivate safe mode" ),
-        translate_marker( "If true, safe mode will automatically reactivate after a certain number of turns.  See option 'Turns to auto reactivate safe mode.'" ),
-        false
-        );
+    add( bool_option( "AUTOSAFEMODE", "general",
+                      translate_marker( "Auto reactivate safe mode" ),
+                      translate_marker( "If true, safe mode will automatically reactivate after a certain number of turns.  See option 'Turns to auto reactivate safe mode.'" ),
+                      COPT_NO_HIDE, false ) );
 
     add( "AUTOSAFEMODETURNS", "general", translate_marker( "Turns to auto reactivate safe mode" ),
         translate_marker( "Number of turns after which safe mode is reactivated. Will only reactivate if no hostiles are in 'Safe mode proximity distance.'" ),
@@ -821,10 +815,10 @@ void options_manager::init()
 
     mOptionsSort["general"]++;
 
-    add( "AUTOSAVE", "general", translate_marker( "Autosave" ),
-        translate_marker( "If true, game will periodically save the map.  Autosaves occur based on in-game turns or real-time minutes, whichever is larger." ),
-        false
-        );
+    add( bool_option( "AUTOSAVE", "general",
+                      translate_marker( "Autosave" ),
+                      translate_marker( "If true, game will periodically save the map.  Autosaves occur based on in-game turns or real-time minutes, whichever is larger." ),
+                      COPT_NO_HIDE, false ) );
 
     add( "AUTOSAVE_TURNS", "general", translate_marker( "Game turns between autosaves" ),
         translate_marker( "Number of game turns between autosaves" ),
@@ -842,20 +836,20 @@ void options_manager::init()
 
     mOptionsSort["general"]++;
 
-    add( "CIRCLEDIST", "general", translate_marker( "Circular distances" ),
-        translate_marker( "If true, the game will calculate range in a realistic way: light sources will be circles, diagonal movement will cover more ground and take longer.  If disabled, everything is square: moving to the northwest corner of a building takes as long as moving to the north wall." ),
-        false
-        );
+    add( bool_option( "CIRCLEDIST", "general",
+                      translate_marker( "Circular distances" ),
+                      translate_marker( "If true, the game will calculate range in a realistic way: light sources will be circles, diagonal movement will cover more ground and take longer.  If disabled, everything is square: moving to the northwest corner of a building takes as long as moving to the north wall." ),
+                      COPT_NO_HIDE, false ) );
 
     add( "DROP_EMPTY", "general", translate_marker( "Drop empty containers" ),
         translate_marker( "Set to drop empty containers after use.  No: Don't drop any. - Watertight: All except watertight containers. - All: Drop all containers." ),
         { { "no", translate_marker( "No" ) }, { "watertight", translate_marker( "Watertight" ) }, { "all", translate_marker( "All" ) } }, "no"
         );
 
-    add( "AUTO_NOTES", "general", translate_marker( "Auto notes" ),
-        translate_marker( "If true, automatically sets notes on places that have stairs that go up or down" ),
-        true
-        );
+    add( bool_option( "AUTO_NOTES", "general",
+                      translate_marker( "Auto notes" ),
+                      translate_marker( "If true, automatically sets notes on places that have stairs that go up or down" ),
+                      COPT_NO_HIDE, true ) );
 
     add( "DEATHCAM", "general", translate_marker( "DeathCam" ),
         translate_marker( "Always: Always start deathcam.  Ask: Query upon death.  Never: Never show deathcam." ),
@@ -935,64 +929,64 @@ void options_manager::init()
 
     mOptionsSort["interface"]++;
 
-    add( "FORCE_CAPITAL_YN", "interface", translate_marker( "Force Y/N in prompts" ),
-        translate_marker( "If true, Y/N prompts are case-sensitive and y and n are not accepted." ),
-        true
-        );
+    add( bool_option( "FORCE_CAPITAL_YN", "interface",
+                      translate_marker( "Force Y/N in prompts" ),
+                      translate_marker( "If true, Y/N prompts are case-sensitive and y and n are not accepted." ),
+                      COPT_NO_HIDE, true ) );
+    
+    add( bool_option( "SNAP_TO_TARGET", "interface",
+                      translate_marker( "Snap to target" ),
+                      translate_marker( "If true, automatically follow the crosshair when firing/throwing." ),
+                      COPT_NO_HIDE, false ) );
 
-    add( "SNAP_TO_TARGET", "interface", translate_marker( "Snap to target" ),
-        translate_marker( "If true, automatically follow the crosshair when firing/throwing." ),
-        false
-        );
+    add( bool_option( "QUERY_DISASSEMBLE", "interface",
+                      translate_marker( "Query on disassembly" ),
+                      translate_marker( "If true, will query before disassembling items." ),
+                      COPT_NO_HIDE, true ) );
 
-    add( "QUERY_DISASSEMBLE", "interface", translate_marker( "Query on disassembly" ),
-        translate_marker( "If true, will query before disassembling items." ),
-        true
-        );
+    add( bool_option( "QUERY_KEYBIND_REMOVAL", "interface",
+                      translate_marker( "Query on keybinding removal" ),
+                      translate_marker( "If true, will query before removing a keybinding from a hotkey." ),
+                      COPT_NO_HIDE, true ) );
 
-    add( "QUERY_KEYBIND_REMOVAL", "interface", translate_marker( "Query on keybinding removal" ),
-        translate_marker( "If true, will query before removing a keybinding from a hotkey." ),
-        true
-        );
+    add( bool_option( "CLOSE_ADV_INV", "interface",
+                      translate_marker( "Close advanced inventory on move all" ),
+                      translate_marker( "If true, will close the advanced inventory when the move all items command is used." ),
+                      COPT_NO_HIDE, false ) );
 
-    add( "CLOSE_ADV_INV", "interface", translate_marker( "Close advanced inventory on move all" ),
-        translate_marker( "If true, will close the advanced inventory when the move all items command is used." ),
-        false
-        );
+    add( bool_option( "OPEN_DEFAULT_ADV_INV", "interface",
+                      translate_marker( "Open default advanced inventory layout" ),
+                      translate_marker( "Open default advanced inventory layout instead of last opened layout" ),
+                      COPT_NO_HIDE, false ) );
 
-    add( "OPEN_DEFAULT_ADV_INV", "interface", translate_marker( "Open default advanced inventory layout" ),
-        translate_marker( "Open default advanced inventory layout instead of last opened layout" ),
-        false
-        );
-
-    add( "INV_USE_ACTION_NAMES", "interface", translate_marker( "Display actions in Use Item menu" ),
-        translate_marker( "If true, actions ( like \"Read\", \"Smoke\", \"Wrap tighter\" ) will be displayed next to the corresponding items." ),
-        true
-        );
-
-    mOptionsSort["interface"]++;
-
-    add( "DIAG_MOVE_WITH_MODIFIERS", "interface", translate_marker( "Diagonal movement with cursor keys and modifiers" ),
-        translate_marker( "If true, allows diagonal movement with cursor keys using CTRL and SHIFT modifiers.  Diagonal movement action keys are taken from keybindings, so you need these to be configured." ),
-        true, COPT_CURSES_HIDE
-        );
+    add( bool_option( "INV_USE_ACTION_NAMES", "interface",
+                      translate_marker( "Display actions in Use Item menu" ),
+                      translate_marker( "If true, actions ( like \"Read\", \"Smoke\", \"Wrap tighter\" ) will be displayed next to the corresponding items." ),
+                      COPT_NO_HIDE, true ) );
 
     mOptionsSort["interface"]++;
 
-    add( "VEHICLE_ARMOR_COLOR", "interface", translate_marker( "Vehicle plating changes part color" ),
-        translate_marker( "If true, vehicle parts will change color if they are armor plated" ),
-        true
-        );
+    add( bool_option( "DIAG_MOVE_WITH_MODIFIERS", "interface",
+                      translate_marker( "Diagonal movement with cursor keys and modifiers" ),
+                      translate_marker( "If true, allows diagonal movement with cursor keys using CTRL and SHIFT modifiers.  Diagonal movement action keys are taken from keybindings, so you need these to be configured." ),
+                      COPT_CURSES_HIDE, true ) );
 
-    add( "DRIVING_VIEW_OFFSET", "interface", translate_marker( "Auto-shift the view while driving" ),
-        translate_marker( "If true, view will automatically shift towards the driving direction" ),
-        true
-        );
+    mOptionsSort["interface"]++;
 
-    add( "VEHICLE_DIR_INDICATOR", "interface", translate_marker( "Draw vehicle facing indicator" ),
-        translate_marker( "If true, when controlling a vehicle, a white 'X' ( in curses version ) or a crosshair ( in tiles version ) at distance 10 from the center will display its current facing." ),
-        true
-        );
+    add( bool_option( "VEHICLE_ARMOR_COLOR", "interface",
+                      translate_marker( "Vehicle plating changes part color" ),
+                      translate_marker( "If true, vehicle parts will change color if they are armor plated" ),
+                      COPT_NO_HIDE, true ) );
+
+    add( bool_option( "DRIVING_VIEW_OFFSET", "interface",
+                      translate_marker( "Auto-shift the view while driving" ),
+                      translate_marker( "If true, view will automatically shift towards the driving direction" ),
+                      COPT_NO_HIDE, true ) );
+
+    add( bool_option( "VEHICLE_DIR_INDICATOR", "interface",
+                      translate_marker( "Draw vehicle facing indicator" ),
+                      translate_marker( "If true, when controlling a vehicle, a white 'X' ( in curses version ) or a crosshair ( in tiles version ) at distance 10 from the center will display its current facing." ),
+                      COPT_NO_HIDE, true ) );
 
     mOptionsSort["interface"]++;
 
@@ -1038,37 +1032,37 @@ void options_manager::init()
         1, 50, 1
         );
 
-    add( "MENU_SCROLL", "interface", translate_marker( "Centered menu scrolling" ),
-        translate_marker( "If true, menus will start scrolling in the center of the list, and keep the list centered." ),
-        true
-        );
+    add( bool_option( "MENU_SCROLL", "interface",
+                      translate_marker( "Centered menu scrolling" ),
+                      translate_marker( "If true, menus will start scrolling in the center of the list, and keep the list centered." ),
+                      COPT_NO_HIDE, true ) );
 
     add( "SHIFT_LIST_ITEM_VIEW", "interface", translate_marker( "Shift list item view" ),
         translate_marker( "Centered or to edge, shift the view toward the selected item if it is outside of your current viewport." ),
         { { "false", translate_marker( "False" ) }, { "centered", translate_marker( "Centered" ) }, { "edge", translate_marker( "To edge" ) } },  "centered"
         );
 
-    add( "AUTO_INV_ASSIGN", "interface", translate_marker( "Auto inventory letters" ),
-        translate_marker( "If false, new inventory items will only get letters assigned if they had one before." ),
-        true
-        );
+    add( bool_option( "AUTO_INV_ASSIGN", "interface",
+                      translate_marker( "Auto inventory letters" ),
+                      translate_marker( "If false, new inventory items will only get letters assigned if they had one before." ),
+                      COPT_NO_HIDE, true ) );
 
-    add( "ITEM_HEALTH_BAR", "interface", translate_marker( "Show item health bars" ),
-        translate_marker( "If true, show item health bars instead of reinforced, scratched etc. text." ),
-        true
-        );
+    add( bool_option( "ITEM_HEALTH_BAR", "interface",
+                      translate_marker( "Show item health bars" ),
+                      translate_marker( "If true, show item health bars instead of reinforced, scratched etc. text." ),
+                      COPT_NO_HIDE, true ) );
 
-    add( "ITEM_SYMBOLS", "interface", translate_marker( "Show item symbols" ),
-        translate_marker( "If true, show item symbols in inventory and pick up menu." ),
-        false
-        );
+    add( bool_option( "ITEM_SYMBOLS", "interface",
+                      translate_marker( "Show item symbols" ),
+                      translate_marker( "If true, show item symbols in inventory and pick up menu." ),
+                      COPT_NO_HIDE, false ) );
 
     mOptionsSort["interface"]++;
 
-    add( "ENABLE_JOYSTICK", "interface", translate_marker( "Enable joystick" ),
-        translate_marker( "Enable input from joystick." ),
-        true, COPT_CURSES_HIDE
-        );
+    add( bool_option( "ENABLE_JOYSTICK", "interface",
+                      translate_marker( "Enable joystick" ),
+                      translate_marker( "Enable input from joystick." ),
+                      COPT_CURSES_HIDE, true ) );
 
     add( "HIDE_CURSOR", "interface", translate_marker( "Hide mouse cursor" ),
         translate_marker( "Show: Cursor is always shown.  Hide: Cursor is hidden.  HideKB: Cursor is hidden on keyboard input and unhidden on mouse movement." ),
@@ -1081,22 +1075,22 @@ void options_manager::init()
         "show", COPT_CURSES_HIDE );
 
     ////////////////////////////GRAPHICS/////////////////////////
-    add( "ANIMATIONS", "graphics", translate_marker( "Animations" ),
-        translate_marker( "If true, will display enabled animations." ),
-        true
-        );
+    add( bool_option( "ANIMATIONS", "graphics",
+                      translate_marker( "Animations" ),
+                      translate_marker( "If true, will display enabled animations." ),
+                      COPT_NO_HIDE, true ) );
 
-    add( "ANIMATION_RAIN", "graphics", translate_marker( "Rain animation" ),
-        translate_marker( "If true, will display weather animations." ),
-        true
-        );
+    add( bool_option( "ANIMATION_RAIN", "graphics",
+                      translate_marker( "Rain animation" ),
+                      translate_marker( "If true, will display weather animations." ),
+                      COPT_NO_HIDE, true ) );
 
     get_option("ANIMATION_RAIN").setPrerequisite("ANIMATIONS");
 
-    add( "ANIMATION_SCT", "graphics", translate_marker( "SCT animation" ),
-        translate_marker( "If true, will display scrolling combat text animations." ),
-        true
-        );
+    add( bool_option( "ANIMATION_SCT", "graphics",
+                      translate_marker( "SCT animation" ),
+                      translate_marker( "If true, will display scrolling combat text animations." ),
+                      COPT_NO_HIDE, true ) );
 
     get_option("ANIMATION_SCT").setPrerequisite("ANIMATIONS");
 
@@ -1107,10 +1101,10 @@ void options_manager::init()
 
     get_option("ANIMATION_DELAY").setPrerequisite("ANIMATIONS");
 
-    add( "FORCE_REDRAW", "graphics", translate_marker( "Force redraw" ),
-        translate_marker( "If true, forces the game to redraw at least once per turn." ),
-        true
-        );
+    add( bool_option( "FORCE_REDRAW", "graphics",
+                      translate_marker( "Force redraw" ),
+                      translate_marker( "If true, forces the game to redraw at least once per turn." ),
+                      COPT_NO_HIDE, true ) );
 
     mOptionsSort["graphics"]++;
 
@@ -1126,10 +1120,10 @@ void options_manager::init()
 
     mOptionsSort["graphics"]++;
 
-    add( "USE_TILES", "graphics", translate_marker( "Use tiles" ),
-        translate_marker( "If true, replaces some TTF rendered text with tiles." ),
-        true, COPT_CURSES_HIDE
-        );
+    add( bool_option( "USE_TILES", "graphics",
+                      translate_marker( "Use tiles" ),
+                      translate_marker( "If true, replaces some TTF rendered text with tiles." ),
+                      COPT_CURSES_HIDE, true ) );
 
     add( "TILES", "graphics", translate_marker( "Choose tileset" ),
         translate_marker( "Choose the tileset you want to use." ),
@@ -1138,10 +1132,10 @@ void options_manager::init()
 
     get_option("TILES").setPrerequisite("USE_TILES");
 
-    add( "PIXEL_MINIMAP", "graphics", translate_marker( "Pixel minimap" ),
-        translate_marker( "If true, shows the pixel-detail minimap in game after the save is loaded.  Use the 'Toggle Pixel Minimap' action key to change its visibility during gameplay." ),
-        true, COPT_CURSES_HIDE
-        );
+    add( bool_option( "PIXEL_MINIMAP", "graphics",
+                      translate_marker( "Pixel minimap" ),
+                      translate_marker( "If true, shows the pixel-detail minimap in game after the save is loaded.  Use the 'Toggle Pixel Minimap' action key to change its visibility during gameplay." ),
+                      COPT_CURSES_HIDE, true ) );
 
     add( "PIXEL_MINIMAP_MODE", "graphics", translate_marker( "Pixel minimap drawing mode" ),
         translate_marker( "Specified the mode in which the minimap drawn." ), {
@@ -1166,10 +1160,10 @@ void options_manager::init()
 
     get_option("PIXEL_MINIMAP_HEIGHT").setPrerequisite("PIXEL_MINIMAP");
 
-    add( "PIXEL_MINIMAP_RATIO", "graphics", translate_marker( "Maintain pixel minimap aspect ratio" ),
-        translate_marker( "Preserves the square shape of tiles shown on the pixel minimap." ),
-        true, COPT_CURSES_HIDE
-        );
+    add( bool_option( "PIXEL_MINIMAP_RATIO", "graphics",
+                      translate_marker( "Maintain pixel minimap aspect ratio" ),
+                      translate_marker( "Preserves the square shape of tiles shown on the pixel minimap." ),
+                      COPT_CURSES_HIDE, true ) );
 
     get_option("PIXEL_MINIMAP_RATIO").setPrerequisite("PIXEL_MINIMAP");
 
@@ -1190,15 +1184,15 @@ void options_manager::init()
         { { "no", translate_marker( "No" ) }, { "fullscreen", translate_marker( "Fullscreen" ) }, { "windowedbl", translate_marker( "Windowed borderless" ) } }, "no", COPT_CURSES_HIDE
         );
 
-    add( "SOFTWARE_RENDERING", "graphics", translate_marker( "Software rendering" ),
-        translate_marker( "Use software renderer instead of graphics card acceleration.  Requires restart." ),
-        false, COPT_CURSES_HIDE
-        );
+    add( bool_option( "SOFTWARE_RENDERING", "graphics",
+                      translate_marker( "Software rendering" ),
+                      translate_marker( "Use software renderer instead of graphics card acceleration.  Requires restart." ),
+                      COPT_CURSES_HIDE, false ) );
 
-    add( "FRAMEBUFFER_ACCEL", "graphics", translate_marker( "Software framebuffer acceleration" ),
-        translate_marker( "Use hardware acceleration for the framebuffer when using software rendering.  Requires restart." ),
-        false, COPT_CURSES_HIDE
-        );
+    add( bool_option( "FRAMEBUFFER_ACCEL", "graphics",
+                      translate_marker( "Software framebuffer acceleration" ),
+                      translate_marker( "Use hardware acceleration for the framebuffer when using software rendering.  Requires restart." ),
+                      COPT_CURSES_HIDE, false ) );
 
     get_option("FRAMEBUFFER_ACCEL").setPrerequisite("SOFTWARE_RENDERING");
 
@@ -1264,15 +1258,15 @@ void options_manager::init()
 
     mOptionsSort["debug"]++;
 
-    add( "FOV_3D", "debug", translate_marker( "Experimental 3D field of vision" ),
-        translate_marker( "If false, vision is limited to current z-level.  If true and the world is in z-level mode, the vision will extend beyond current z-level.  Currently very bugged!" ),
-        false
-        );
+    add( bool_option( "FOV_3D", "debug",
+                      translate_marker( "Experimental 3D field of vision" ),
+                      translate_marker( "If false, vision is limited to current z-level.  If true and the world is in z-level mode, the vision will extend beyond current z-level.  Currently very bugged!" ),
+                      COPT_NO_HIDE, false ) );
 
-    add( "ENCODING_CONV", "debug", translate_marker( "Experimental path name encoding conversion" ),
-        translate_marker( "If true, file path names are going to be transcoded from system encoding to UTF-8 when reading and will be transcoded back when writing.  Mainly for CJK Windows users." ),
-        true
-        );
+    add( bool_option( "ENCODING_CONV", "debug",
+                      translate_marker( "Experimental path name encoding conversion" ),
+                      translate_marker( "If true, file path names are going to be transcoded from system encoding to UTF-8 when reading and will be transcoded back when writing.  Mainly for CJK Windows users." ),
+                      COPT_NO_HIDE, true ) );
 
     ////////////////////////////WORLD DEFAULT////////////////////
     add( "CORE_VERSION", "world_default", translate_marker( "Core version data" ),
@@ -1360,60 +1354,60 @@ void options_manager::init()
         0, 1000, 100
         );
 
-    add( "ETERNAL_SEASON", "world_default", translate_marker( "Eternal season" ),
-        translate_marker( "Keep the initial season for ever." ),
-        false
-        );
+    add( bool_option( "ETERNAL_SEASON", "world_default",
+                      translate_marker( "Eternal season" ),
+                      translate_marker( "Keep the initial season for ever." ),
+                      COPT_NO_HIDE, false ) );
 
     mOptionsSort["world_default"]++;
 
-    add( "WANDER_SPAWNS", "world_default", translate_marker( "Wander spawns" ),
-        translate_marker( "Emulation of zombie hordes.  Zombie spawn points wander around cities and may go to noise.  Must reset world directory after changing for it to take effect." ),
-        false
-        );
+    add( bool_option( "WANDER_SPAWNS", "world_default",
+                      translate_marker( "Wander spawns" ),
+                      translate_marker( "Emulation of zombie hordes.  Zombie spawn points wander around cities and may go to noise.  Must reset world directory after changing for it to take effect." ),
+                      COPT_NO_HIDE, false ) );
 
-    add( "CLASSIC_ZOMBIES", "world_default", translate_marker( "Classic zombies" ),
-        translate_marker( "Only spawn classic zombies and natural wildlife.  Requires a reset of save folder to take effect.  This disables certain buildings." ),
-        false
-        );
+    add( bool_option( "CLASSIC_ZOMBIES", "world_default",
+                      translate_marker( "Classic zombies" ),
+                      translate_marker( "Only spawn classic zombies and natural wildlife.  Requires a reset of save folder to take effect.  This disables certain buildings." ),
+                      COPT_NO_HIDE, false ) );
 
-    add( "BLACK_ROAD", "world_default", translate_marker( "Surrounded start" ),
-        translate_marker( "If true, spawn zombies at shelters.  Makes the starting game a lot harder." ),
-        false
-        );
-
-    mOptionsSort["world_default"]++;
-
-    add( "STATIC_NPC", "world_default", translate_marker( "Static NPCs" ),
-        translate_marker( "If true, static NPCs will spawn at pre-defined locations. Requires world reset." ),
-        false
-        );
-
-    add( "RANDOM_NPC", "world_default", translate_marker( "Random NPCs" ),
-        translate_marker( "If true, the game will randomly spawn NPCs during gameplay." ),
-        false
-        );
+    add( bool_option( "BLACK_ROAD", "world_default",
+                      translate_marker( "Surrounded start" ),
+                      translate_marker( "If true, spawn zombies at shelters.  Makes the starting game a lot harder." ),
+                      COPT_NO_HIDE, false ) );
 
     mOptionsSort["world_default"]++;
 
-    add( "RAD_MUTATION", "world_default", translate_marker( "Mutations by radiation" ),
-        translate_marker( "If true, radiation causes the player to mutate." ),
-        true
-        );
+    add( bool_option( "STATIC_NPC", "world_default",
+                      translate_marker( "Static NPCs" ),
+                      translate_marker( "If true, static NPCs will spawn at pre-defined locations. Requires world reset." ),
+                      COPT_NO_HIDE, false ) );
+
+    add( bool_option( "RANDOM_NPC", "world_default",
+                      translate_marker( "Random NPCs" ),
+                      translate_marker( "If true, the game will randomly spawn NPCs during gameplay." ),
+                      COPT_NO_HIDE, false ) );
 
     mOptionsSort["world_default"]++;
 
-    add( "ZLEVELS", "world_default", translate_marker( "Experimental z-levels" ),
-        translate_marker( "If true, experimental z-level maps will be enabled.  This feature is not finished yet and turning it on will only slow the game down." ),
-        false
-        );
+    add( bool_option( "RAD_MUTATION", "world_default",
+                      translate_marker( "Mutations by radiation" ),
+                      translate_marker( "If true, radiation causes the player to mutate." ),
+                      COPT_NO_HIDE, true ) );
 
     mOptionsSort["world_default"]++;
 
-    add( "ALIGN_STAIRS", "world_default", translate_marker( "Align up and down stairs" ),
-        translate_marker( "If true, downstairs will be placed directly above upstairs, even if this results in uglier maps." ),
-        false
-        );
+    add( bool_option( "ZLEVELS", "world_default",
+                      translate_marker( "Experimental z-levels" ),
+                      translate_marker( "If true, experimental z-level maps will be enabled.  This feature is not finished yet and turning it on will only slow the game down." ),
+                      COPT_NO_HIDE, false ) );
+
+    mOptionsSort["world_default"]++;
+
+    add( bool_option( "ALIGN_STAIRS", "world_default",
+                      translate_marker( "Align up and down stairs" ),
+                      translate_marker( "If true, downstairs will be placed directly above upstairs, even if this results in uglier maps." ),
+                      COPT_NO_HIDE, false ) );
 
     mOptionsSort["world_default"]++;
 
@@ -1424,38 +1418,38 @@ void options_manager::init()
 
     mOptionsSort["world_default"]++;
 
-    add( "NO_FAULTS", "world_default", translate_marker( "Disables vehicle part faults." ),
-        translate_marker( "If true, disables vehicle part faults, vehicle parts will be totally reliable unless destroyed, and can only be repaired via replacement." ),
-        false, COPT_ALWAYS_HIDE
-        );
+    add( bool_option( "NO_FAULTS", "world_default",
+                      translate_marker( "Disables vehicle part faults." ),
+                      translate_marker( "If true, disables vehicle part faults, vehicle parts will be totally reliable unless destroyed, and can only be repaired via replacement." ),
+                      COPT_ALWAYS_HIDE, false ) );
 
     mOptionsSort["world_default"]++;
 
-    add( "FILTHY_MORALE", "world_default", translate_marker( "Morale penalty for filthy clothing." ),
-        translate_marker( "If true, wearing filthy clothing will cause morale penalties." ),
-        false, COPT_ALWAYS_HIDE
-        );
+    add( bool_option( "FILTHY_MORALE", "world_default",
+                      translate_marker( "Morale penalty for filthy clothing." ),
+                      translate_marker( "If true, wearing filthy clothing will cause morale penalties." ),
+                      COPT_ALWAYS_HIDE, false ) );
 
     mOptionsSort["world_default"]++;
 
-    add( "FILTHY_WOUNDS", "world_default", translate_marker( "Infected wounds from filthy clothing." ),
-        translate_marker( "If true, getting hit in a body part covered in filthy clothing may cause infections." ),
-        false, COPT_ALWAYS_HIDE
-        );
+    add( bool_option( "FILTHY_WOUNDS", "world_default",
+                      translate_marker( "Infected wounds from filthy clothing." ),
+                      translate_marker( "If true, getting hit in a body part covered in filthy clothing may cause infections." ),
+                      COPT_ALWAYS_HIDE, false ) );
 
     mOptionsSort["world_default"]++;
 
-    add( "NO_VITAMINS", "world_default", translate_marker( "Disables tracking vitamins in food items." ),
-        translate_marker( "If true, disables vitamin tracking and vitamin disorders." ),
-        false, COPT_ALWAYS_HIDE
-        );
+    add( bool_option( "NO_VITAMINS", "world_default",
+                      translate_marker( "Disables tracking vitamins in food items." ),
+                      translate_marker( "If true, disables vitamin tracking and vitamin disorders." ),
+                      COPT_ALWAYS_HIDE, false ) );
 
     mOptionsSort["world_default"]++;
 
-    add( "NO_NPC_FOOD", "world_default", translate_marker( "Disables tracking food, thirst and ( partially ) fatigue for NPCs." ),
-        translate_marker( "If true, NPCs won't need to eat or drink and will only get tired enough to sleep, not to get penalties." ),
-        false, COPT_ALWAYS_HIDE
-        );
+    add( bool_option( "NO_NPC_FOOD", "world_default",
+                      translate_marker( "Disables tracking food, thirst and ( partially ) fatigue for NPCs." ),
+                      translate_marker( "If true, NPCs won't need to eat or drink and will only get tired enough to sleep, not to get penalties." ),
+                      COPT_ALWAYS_HIDE, false ) );
 
     for (unsigned i = 0; i < vPages.size(); ++i) {
         mPageItems[i].resize(mOptionsSort[vPages[i].first]);
