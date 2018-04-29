@@ -1795,7 +1795,9 @@ std::string options_manager::show(bool ingame, const bool world_options_only)
             if ( !hasPrerequisite ) {
                 cLineColor = c_light_gray;
 
-            } else if (current_opt.getValue() == "false") {
+            // get_legacy_value returns an untranslated representation of the
+            // option value, the comparison with a raw string is fine
+            } else if( current_opt.get_legacy_value() == "false" ) {
                 cLineColor = c_light_red;
             }
 
