@@ -229,10 +229,10 @@ std::string to_string( const time_duration &d )
     if( turns > MINUTES( 1 ) && turns < calendar::INDEFINITELY_LONG ) {
         if( turns < HOURS( 1 ) ) {
             divider = MINUTES( 1 );
-        } else if( turns < DAYS( 1 ) ) {
+        } else if( turns < HOURS( 24 ) ) {
             divider = HOURS( 1 );
         } else {
-            divider = DAYS( 1 );
+            divider = HOURS( 24 );
         }
     }
 
@@ -257,8 +257,8 @@ std::string to_string_approx( const time_duration &d, const bool verbose )
     int divider = 0;
     int vicinity = 0;
 
-    if( turns > DAYS( 1 ) ) {
-        divider = DAYS( 1 );
+    if( turns > HOURS( 24 ) ) {
+        divider = HOURS( 24 );
         vicinity = HOURS( 2 );
     } else if( turns > HOURS( 1 ) ) {
         divider = HOURS( 1 );
