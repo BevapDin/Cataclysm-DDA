@@ -363,7 +363,7 @@ class options_manager
                 void set_from_legacy_value( const std::string &v ) override;
 
                 std::string value() const override {
-                    return sSet;
+                    return value_;
                 }
                 void value( const std::string &v ) override;
 
@@ -385,7 +385,7 @@ class options_manager
                 }
 
             private:
-                std::string sSet;
+                std::string value_;
                 // first is internal value, second is untranslated text
                 std::vector<std::pair<std::string, std::string>> vItems;
                 std::string sDefault;

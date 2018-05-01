@@ -156,7 +156,7 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
     }
 
     thisOpt.sDefault = sDefaultIn;
-    thisOpt.sSet = sDefaultIn;
+    thisOpt.value_ = sDefaultIn;
 
     add( thisOpt );
 }
@@ -288,7 +288,7 @@ std::string options_manager::cOpt_base::getTooltip() const
 bool options_manager::cOpt::operator==( const cOpt_base &rhs_ ) const
 {
     const cOpt &rhs = dynamic_cast<const cOpt&>( rhs_ );
-    return sSet == rhs.sSet;
+    return value_ == rhs.value_;
 }
 
 std::string options_manager::bool_option::get_legacy_value() const
@@ -323,13 +323,13 @@ std::string options_manager::int_option::get_legacy_value() const
 
 std::string options_manager::cOpt::get_legacy_value() const
 {
-    return sSet;
+    return value_;
 }
 
 void options_manager::cOpt::value( const std::string &v ) const
 {
     //@todo verify
-    sSet = v;
+    value_ = v;
 }
 
 std::string options_manager::bool_option::getValueName() const
@@ -369,7 +369,7 @@ std::string options_manager::int_option::getValueName() const
 std::string options_manager::cOpt::getValueName() const
 {
     const auto iter = std::find_if( vItems.begin(), vItems.end(), [&]( const std::pair<std::string, std::string> &e ) {
-        return e.first == sSet;
+        return e.first == value_;
     } );
     return _( iter->second.c_str() );
 }
@@ -483,12 +483,12 @@ void options_manager::int_option::setNext()
 
 void options_manager::cOpt::setNext()
 {
-    int iNext = getItemPos(sSet) + 1;
+    int iNext = getItemPos(value_) + 1;
     if (iNext >= (int)vItems.size()) {
         iNext = 0;
     }
 
-    sSet = vItems[iNext].first;
+    value_ = vItems[iNext].first;
 }
 
 void options_manager::float_option::setPrev()
@@ -523,7 +523,7 @@ void options_manager::int_option::setPrev()
 
 void options_manager::cOpt::setPrev()
 {
-    int iPrev = getItemPos(sSet) - 1;
+    int iPrev = getItemPos(value_) - 1;
     if (iPrev < 0) {
         iPrev = vItems.size() - 1;
     }
@@ -629,7 +629,7 @@ void options_manager::int_option::set_from_legacy_value( const std::string &sSet
 void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
 {
     if (getItemPos(sSetIn) != -1) {
-        sSet = sSetIn;
+        value_ = sSetIn;
     }
 }
 
