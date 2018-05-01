@@ -388,7 +388,7 @@ class options_manager
                 std::string value_;
                 // first is internal value, second is untranslated text
                 std::vector<std::pair<std::string, std::string>> vItems;
-                std::string sDefault;
+                std::string default_value_;
         };
 
         typedef std::unordered_map<std::string, poly_pimpl<cOpt_base>> options_container;

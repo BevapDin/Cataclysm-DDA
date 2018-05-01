@@ -152,7 +152,7 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
         sDefaultIn = thisOpt.vItems[0].first;
     }
 
-    thisOpt.sDefault = sDefaultIn;
+    thisOpt.default_value_ = sDefaultIn;
     thisOpt.value_ = sDefaultIn;
 
     add( thisOpt );
@@ -405,7 +405,7 @@ std::string options_manager::string_map_option::getDefaultText(const bool bTrans
 {
     const auto iter = std::find_if( vItems.begin(), vItems.end(),
     [this]( const std::pair<std::string, std::string> &elem ) {
-        return elem.first == sDefault;
+        return elem.first == default_value_;
     } );
     const std::string defaultName = iter == vItems.end() ? std::string() :
                                     ( bTranslated ? _( iter->second.c_str() ) : iter->first );
