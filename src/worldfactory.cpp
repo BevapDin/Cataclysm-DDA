@@ -1417,7 +1417,7 @@ void load_external_option( JsonObject &jo )
         auto sinfo = jo.get_string( "info" );
         opts.add_external( name, "world_default", stype, sinfo, sinfo );
     }
-    options_manager::cOpt &opt = opts.get_option( name );
+    options_manager::cOpt_base &opt = opts.get_option( name );
     if( stype == "float" ) {
         dynamic_cast<options_manager::typed_option<float>&>( opt ).value( jo.get_float( "value" ) );
     } else if( stype == "int" ) {

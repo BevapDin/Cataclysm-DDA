@@ -352,12 +352,12 @@ class options_manager
                 }
         };
 
-        class cOpt : public typed_option<std::string>
+        class string_map_option : public typed_option<std::string>
         {
                 friend class options_manager;
             public:
-                cOpt( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h ) : typed_option<std::string>( n, p, m, t, h ) { }
-                ~cOpt() override = default;
+                string_map_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h ) : typed_option<std::string>( n, p, m, t, h ) { }
+                ~string_map_option() override = default;
 
                 std::string get_legacy_value() const override;
                 void set_from_legacy_value( const std::string &v ) override;
@@ -381,7 +381,7 @@ class options_manager
                 bool operator==( const cOpt_base &rhs ) const override;
 
                 cOpt_base *clone() const override {
-                    return new cOpt(*this);
+                    return new string_map_option(*this);
                 }
 
             private:
@@ -416,7 +416,7 @@ class options_manager
         /** Check if an option exists? */
         bool has_option( const std::string &name ) const;
 
-        cOpt &get_option( const std::string &name );
+        cOpt_base &get_option( const std::string &name );
 
         void add_external( const std::string sNameIn, const std::string sPageIn, const std::string sType,
                            const std::string sMenuTextIn, const std::string sTooltipIn );

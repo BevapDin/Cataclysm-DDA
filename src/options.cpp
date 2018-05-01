@@ -96,7 +96,7 @@ void options_manager::add_value( const std::string &lvar, const std::string &lva
         if( ot == options.end() ) {
             return;
         }
-        cOpt &opt = dynamic_cast<cOpt&>( *ot->second );
+        string_map_option &opt = dynamic_cast<string_map_option&>( *ot->second );
         opt.add_value( lval, lvalname );
         // our value was saved, then set to default, so set it again.
         if ( it->second == lval ) {
@@ -105,7 +105,7 @@ void options_manager::add_value( const std::string &lvar, const std::string &lva
     }
 }
 
-void options_manager::cOpt::add_value( const std::string &lval, const std::string &lvalname )
+void options_manager::string_map_option::add_value( const std::string &lval, const std::string &lvalname )
 {
     for( auto eit = vItems.begin(); eit != vItems.end(); ++eit) {
         if( eit->first == lval ) { // already in
@@ -134,10 +134,7 @@ void options_manager::add_external( const std::string sNameIn, const std::string
                                     const std::string /*sType*/,
                                     const std::string sMenuTextIn, const std::string sTooltipIn )
 {
-    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, COPT_ALWAYS_HIDE );
-
-    thisOpt.min_value_ = INT_MIN;
-    thisOpt.max_value_ = INT_MAX;
+    string_map_option thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, COPT_ALWAYS_HIDE );
 
     add( thisOpt );
 }
@@ -147,7 +144,7 @@ void options_manager::add( const std::string sNameIn, const std::string sPageIn,
                            std::vector<std::pair<std::string, std::string>> sItemsIn, std::string sDefaultIn,
                            copt_hide_t opt_hide )
 {
-    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
+    string_map_option thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
 
     thisOpt.vItems = sItemsIn;
 
@@ -285,9 +282,9 @@ std::string options_manager::cOpt_base::getTooltip() const
     return _( sTooltip.c_str() );
 }
 
-bool options_manager::cOpt::operator==( const cOpt_base &rhs_ ) const
+bool options_manager::string_map_option::operator==( const cOpt_base &rhs_ ) const
 {
-    const cOpt &rhs = dynamic_cast<const cOpt&>( rhs_ );
+    const string_map_option &rhs = dynamic_cast<const string_map_option&>( rhs_ );
     return value_ == rhs.value_;
 }
 
@@ -321,12 +318,12 @@ std::string options_manager::int_option::get_legacy_value() const
     return string_format( "%d", value_ );
 }
 
-std::string options_manager::cOpt::get_legacy_value() const
+std::string options_manager::string_map_option::get_legacy_value() const
 {
     return value_;
 }
 
-void options_manager::cOpt::value( const std::string &v ) const
+void options_manager::string_map_option::value( const std::string &v )
 {
     //@todo verify
     value_ = v;
@@ -366,7 +363,7 @@ std::string options_manager::int_option::getValueName() const
     return string_format( format_, value_ );
 }
 
-std::string options_manager::cOpt::getValueName() const
+std::string options_manager::string_map_option::getValueName() const
 {
     const auto iter = std::find_if( vItems.begin(), vItems.end(), [&]( const std::pair<std::string, std::string> &e ) {
         return e.first == value_;
@@ -404,7 +401,7 @@ std::string options_manager::int_option::getDefaultText(const bool /*bTranslated
     return string_format(_("Default: %d - Min: %d, Max: %d"), default_value_, min_value_, max_value_);
 }
 
-std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
+std::string options_manager::string_map_option::getDefaultText(const bool bTranslated) const
 {
     const auto iter = std::find_if( vItems.begin(), vItems.end(),
     [this]( const std::pair<std::string, std::string> &elem ) {
@@ -420,7 +417,7 @@ std::string options_manager::cOpt::getDefaultText(const bool bTranslated) const
                           defaultName.c_str(), sItems.c_str() );
 }
 
-int options_manager::cOpt::getItemPos(const std::string sSearch) const
+int options_manager::string_map_option::getItemPos(const std::string sSearch) const
 {
     for (size_t i = 0; i < vItems.size(); i++) {
         if( vItems[i].first == sSearch ) {
@@ -430,7 +427,7 @@ int options_manager::cOpt::getItemPos(const std::string sSearch) const
     return -1;
 }
 
-std::vector<std::pair<std::string, std::string>> options_manager::cOpt::getItems() const
+std::vector<std::pair<std::string, std::string>> options_manager::string_map_option::getItems() const
 {
     return vItems;
 }
@@ -481,7 +478,7 @@ void options_manager::int_option::setNext()
     }
 }
 
-void options_manager::cOpt::setNext()
+void options_manager::string_map_option::setNext()
 {
     int iNext = getItemPos(value_) + 1;
     if (iNext >= (int)vItems.size()) {
@@ -521,7 +518,7 @@ void options_manager::int_option::setPrev()
     }
 }
 
-void options_manager::cOpt::setPrev()
+void options_manager::string_map_option::setPrev()
 {
     int iPrev = getItemPos(value_) - 1;
     if (iPrev < 0) {
@@ -583,7 +580,7 @@ void options_manager::int_option::setInteractive()
     }
 }
 
-void options_manager::cOpt::setInteractive()
+void options_manager::string_map_option::setInteractive()
 {
     setNext();
 }
@@ -626,7 +623,7 @@ void options_manager::int_option::set_from_legacy_value( const std::string &sSet
     value( atoi( sSetIn.c_str() ) );
 }
 
-void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
+void options_manager::string_map_option::set_from_legacy_value( const std::string &sSetIn )
 {
     if (getItemPos(sSetIn) != -1) {
         value_ = sSetIn;
@@ -637,7 +634,7 @@ void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )
  * Scans all directories in FILENAMES[dirname_label] directory for
  * a file named FILENAMES[filename_label].
  * All found values added to resource_option as name, resource_dir.
- * Furthermore, it builds possible values list for cOpt class.
+ * Furthermore, it builds possible values list for string_map_option class.
  */
 static std::vector<std::pair<std::string, std::string>> build_resource_list(
     std::map<std::string, std::string> &resource_option, std::string operation_name,
@@ -2026,13 +2023,13 @@ bool options_manager::has_option( const std::string &name ) const
     return options.count( name );
 }
 
-options_manager::cOpt &options_manager::get_option( const std::string &name )
+options_manager::cOpt_base &options_manager::get_option( const std::string &name )
 {
     const auto main_iter = options.find( name );
     if( main_iter == options.end() ) {
         debugmsg( "requested non-existing option %s", name.c_str() );
     }
-    cOpt &main_opt = static_cast<cOpt&>( *main_iter->second );
+    cOpt_base &main_opt = *main_iter->second;
     if( !world_generator || !world_generator->active_world ) {
         // Global options contains the default for new worlds, which is good enough here.
         return main_opt;
@@ -2040,15 +2037,15 @@ options_manager::cOpt &options_manager::get_option( const std::string &name )
     auto &wopts = world_generator->active_world->WORLD_OPTIONS;
     const auto world_iter = wopts.find( name );
     if( world_iter != wopts.end() ) {
-        return static_cast<cOpt&>( *world_iter->second );
+        return *world_iter->second;
     }
     if( main_opt.getPage() != "world_default" ) {
         // Requested a non-world option, deliver it.
         return main_opt;
     }
     // May be a new option and an old world - import default from global options.
-    const auto new_iter = wopts.emplace( name, make_poly_pimpl<cOpt>( main_opt ) ).first;
-    return static_cast<cOpt&>( *new_iter->second );
+    const auto new_iter = wopts.emplace( name, main_iter->second ).first;
+    return *new_iter->second;
 }
 
 options_manager::options_container options_manager::get_world_defaults() const
