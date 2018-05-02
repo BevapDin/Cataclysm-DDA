@@ -11,20 +11,6 @@ class JsonIn;
 class JsonObject;
 
 /**
- * Convert turns to ticks
- *
- * "Moves" is time for an unmodified player to move one square.  This function converts that value
- * to 'ticks', which is the time taken up by one displayed movement point.
- *
- * @param n Time in six-second turns
- * @returns Time in ticks
- */
-constexpr int MOVES( int n )
-{
-    return n * 100;
-}
-
-/**
  * Convert seconds to six-second turns
  *
  * @param n Time in seconds
@@ -187,6 +173,8 @@ template<typename T>
 constexpr T to_hours( const time_duration duration );
 template<typename T>
 constexpr T to_days( const time_duration duration );
+template<typename T>
+constexpr T to_moves( const time_duration duration );
 
 template<typename T>
 constexpr T to_turn( const time_point point );
@@ -293,6 +281,10 @@ class time_duration
         template<typename T>
         friend constexpr T to_days( const time_duration duration ) {
             return static_cast<T>( duration.turns_ ) / static_cast<T>( 10 * 60 * 24 );
+        }
+        template<typename T>
+        friend constexpr T to_moves( const time_duration duration ) {
+            return to_turns<int>( duration ) * 100;
         }
         /**@{*/
 
