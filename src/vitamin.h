@@ -17,9 +17,12 @@ using efftype_id = string_id<effect_type>;
 
 class vitamin
 {
-    public:
-        vitamin() : id_( vitamin_id( "null" ) ) {}
+    private:
+        friend vitamin_id;
 
+        vitamin() = default;
+
+    public:
         const vitamin_id &id() const {
             return id_;
         }

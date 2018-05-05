@@ -69,7 +69,7 @@ void vitamin::load_vitamin( JsonObject &jo )
     if( vitamins_all.find( vit.id_ ) != vitamins_all.end() ) {
         jo.throw_error( "parsed vitamin overwrites existing definition", "id" );
     } else {
-        vitamins_all[ vit.id_ ] = vit;
+        vitamins_all.emplace( vit.id_, vit );
     }
 }
 
