@@ -335,4 +335,20 @@ std::enable_if<std::is_same<typename std::decay<T>::type, time_duration>::value,
     return true;
 }
 
+namespace cata
+{
+template<typename T>
+class optional;
+} // namespace cata
+
+template<typename T, typename... Args>
+bool assign( JsonObject &jo, const std::string &name, cata::optional<T> &val, Args &&... args )
+{
+    if( !jo.has_member( name ) ) {
+        return false;
+    }
+    val.emplace(); // @todo this requires a default constructor, it may not be available
+    return assign( jo, name, *val, std::forward<Args>( args )... );
+}
+
 #endif

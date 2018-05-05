@@ -3,6 +3,7 @@
 #define VITAMIN_H
 
 #include "string_id.h"
+#include "optional.h"
 
 #include <string>
 #include <map>
@@ -37,7 +38,7 @@ class vitamin
         }
 
         /** Disease effect with increasing intensity proportional to vitamin excess */
-        const efftype_id &excess() const {
+        const cata::optional<efftype_id> &excess() const {
             return excess_;
         }
 
@@ -79,7 +80,7 @@ class vitamin
         vitamin_id id_;
         std::string name_;
         efftype_id deficiency_;
-        efftype_id excess_;
+        cata::optional<efftype_id> excess_;
         int min_;
         int max_;
         int rate_;

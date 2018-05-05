@@ -4,6 +4,7 @@
 
 #include "debug.h"
 #include "json.h"
+#include "assign.h"
 #include "translations.h"
 #include "calendar.h"
 
@@ -51,7 +52,7 @@ void vitamin::load_vitamin( JsonObject &jo )
     vit.id_ = vitamin_id( jo.get_string( "id" ) );
     vit.name_ = _( jo.get_string( "name" ).c_str() );
     vit.deficiency_ = efftype_id( jo.get_string( "deficiency" ) );
-    vit.excess_ = efftype_id( jo.get_string( "excess", "null" ) );
+    assign( jo, "excess", vit.excess_ );
     vit.min_ = jo.get_int( "min" );
     vit.max_ = jo.get_int( "max", 0 );
     vit.rate_ = jo.get_int( "rate", MINUTES( 60 ) );
@@ -85,8 +86,8 @@ void vitamin::check_consistency()
             debugmsg( "vitamin %s has unknown deficiency %s", v.second.id_.c_str(),
                       v.second.deficiency_.c_str() );
         }
-        if( !( v.second.excess_.is_null() || v.second.excess_.is_valid() ) ) {
-            debugmsg( "vitamin %s has unknown excess %s", v.second.id_.c_str(), v.second.excess_.c_str() );
+        if( v.second.excess_ && !v.second.excess_->is_valid() ) {
+            debugmsg( "vitamin %s has unknown excess %s", v.second.id_.c_str(), v.second.excess_->c_str() );
         }
     }
 }
