@@ -1732,5 +1732,7 @@ enum hint_rating {
  */
 item &null_item_reference();
 
-#endif
+class json_flag_manager;
+extern json_flag_manager item_flag_manager;
 
+#endif

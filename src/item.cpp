@@ -61,6 +61,8 @@
 #include <iterator>
 #include <cassert>
 
+json_flag_manager item_flag_manager;
+
 static const std::string GUN_MODE_VAR_NAME( "item::mode" );
 
 const skill_id skill_survival( "survival" );
@@ -1652,7 +1654,7 @@ std::string item::info( bool showtext, std::vector<iteminfo> &info, int batch ) 
 
         // ...and display those which have an info description
         for( const auto &e : flags ) {
-            auto &f = json_flag::get( e );
+            auto &f = item_flag_manager.get( e );
             if( !f.info().empty() ) {
                 info.emplace_back( "DESCRIPTION", string_format( "* %s", _( f.info().c_str() ) ) );
             }
@@ -2734,7 +2736,7 @@ bool item::has_flag( const std::string &f ) const
 {
     bool ret = false;
 
-    if( json_flag::get( f ).inherit() ) {
+    if( item_flag_manager.get( f ).inherit() ) {
         for( const auto e : is_gun() ? gunmods() : toolmods() ) {
             // gunmods fired separately do not contribute to base gun flags
             if( !e->is_gun() && e->has_flag( f ) ) {

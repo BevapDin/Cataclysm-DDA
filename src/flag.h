@@ -3,18 +3,40 @@
 #define FLAG_H
 
 #include <set>
+#include <map>
 #include <string>
 
 class JsonObject;
+class json_flag;
+
+class json_flag_manager {
+    private:
+        friend class DynamicDataLoader;
+
+        std::map<std::string, json_flag> all_;
+
+    public:
+        json_flag_manager() = default;
+
+        /** Fetches flag definition (or null flag if not found) */
+        const json_flag &get( const std::string &id );
+
+        /** Load flag definition from JSON */
+        void load( JsonObject &jo );
+
+        /** Check consistency of all loaded flags */
+        void check_consistency();
+
+        /** Clear all loaded flags (invalidating any pointers) */
+        void reset();
+
+};
 
 class json_flag
 {
-        friend class DynamicDataLoader;
+        friend json_flag_manager;
 
     public:
-        /** Fetches flag definition (or null flag if not found) */
-        static const json_flag &get( const std::string &id );
-
         /** Get identifier of flag as specified in JSON */
         const std::string &id() const {
             return id_;
@@ -42,15 +64,6 @@ class json_flag
         bool inherit_ = true;
 
         json_flag( const std::string &id = std::string() ) : id_( id ) {}
-
-        /** Load flag definition from JSON */
-        static void load( JsonObject &jo );
-
-        /** Check consistency of all loaded flags */
-        static void check_consistency();
-
-        /** Clear all loaded flags (invalidating any pointers) */
-        static void reset();
 };
 
 #endif

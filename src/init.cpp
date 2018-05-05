@@ -158,7 +158,7 @@ void DynamicDataLoader::initialize()
     // all of the applicable types that can be loaded, along with their loading functions
     // Add to this as needed with new StaticFunctionAccessors or new ClassFunctionAccessors for new applicable types
     // Static Function Access
-    add( "json_flag", &json_flag::load );
+    add( "json_flag", []( JsonObject &jo ) { item_flag_manager.load( jo ); } );
     add( "fault", &fault::load_fault );
     add( "emit", &emit::load_emit );
     add( "activity_type", &activity_type::load );
@@ -344,7 +344,7 @@ void DynamicDataLoader::unload_data()
 {
     finalized = false;
 
-    json_flag::reset();
+    item_flag_manager.reset();
     requirement_data::reset();
     vitamin::reset();
     emit::reset();
@@ -465,7 +465,7 @@ void DynamicDataLoader::check_consistency( loading_ui &ui )
 
     using named_entry = std::pair<std::string, std::function<void()>>;
     const std::vector<named_entry> entries = {{
-        { _( "Flags" ), &json_flag::check_consistency },
+        { _( "Flags" ), []() { item_flag_manager.check_consistency(); } },
         { _( "Crafting requirements" ), []() { requirement_data::check_consistency(); } },
         { _( "Vitamins" ), &vitamin::check_consistency },
         { _( "Emissions" ), &emit::check_consistency },
