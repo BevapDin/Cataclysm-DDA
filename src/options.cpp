@@ -443,6 +443,10 @@ std::string options_manager::string_input_option::getValueName() const
 
 std::string options_manager::display_device_option::getValueName() const
 {
+    if( displays_.empty() ) {
+        return to_string( value_ );
+    }
+    assert( displays_.count( value_ ) > 0 );
     return string_format( _( "%d: %s" ), value_, displays_.at( value_ ) );
 }
 
@@ -481,6 +485,9 @@ std::string options_manager::string_input_option::getDefaultText( const bool /*b
 
 std::string options_manager::display_device_option::getDefaultText( const bool /*bTranslated*/ ) const
 {
+    if( displays_.empty() ) {
+        return _( "Default: none" );
+    }
     return string_format( _( "Default: %d: %s" ), displays_.begin()->first, displays_.begin()->second );
 }
 
@@ -535,14 +542,22 @@ void options_manager::float_option::setNext()
 
 void options_manager::display_device_option::set_displays( const decltype( displays_ ) & displays )
 {
-    //@todo keep currently selected value
     displays_ = displays;
+    if( !displays_.empty() && displays_.count( value_ ) == 0 ) {
+        value_ = displays_.begin()->first;
+    }
+    assert( displays_.empty() || displays_.count( value_ ) > 0 );
 }
 
 void options_manager::display_device_option::setNext()
 {
-    const auto next = std::next( displays_.find( value_ ) );
-    if ( next == displays_.end() ) {
+    if( displays_.size() <= 1 ) {
+        return;
+    }
+    const auto iter = displays_.find( value_ );
+    assert( iter != displays_.end() );
+    const auto next = std::next( iter );
+    if( next == displays_.end() ) {
         value_ = displays_.begin()->first;
     } else {
         value_ = next->first;
@@ -577,13 +592,15 @@ void options_manager::float_option::setPrev()
 
 void options_manager::display_device_option::setPrev()
 {
-    const auto item = displays_.find( value_ );
-    if( item == displays_.begin() ) {
-        const auto prev = std::prev( displays_.end() );
-        value_ = prev->first;
+    if( displays_.size() <= 1 ) {
+        return;
+    }
+    const auto iter = displays_.find( value_ );
+    assert( iter != displays_.end() );
+    if( iter == displays_.begin() ) {
+        value_ = std::prev( displays_.end() )->first;
     } else {
-        const auto prev = std::prev( item );
-        value_ = prev->first;
+        value_ = std::prev( iter )->first;
     }
 }
 
@@ -708,10 +725,11 @@ void options_manager::string_input_option::set_from_legacy_value( const std::str
 
 void options_manager::display_device_option::set_from_legacy_value( const std::string &sSetIn )
 {
-    value_ = atoi(sSetIn.c_str());
+    value_ = atoi( sSetIn.c_str() );
     if( !displays_.empty() && displays_.count( value_ ) == 0 ) {
         value_ = displays_.begin()->first;
     }
+    assert( displays_.empty() || displays_.count( value_ ) > 0 );
 }
 
 void options_manager::cOpt::set_from_legacy_value( const std::string &sSetIn )

@@ -247,6 +247,8 @@ class options_manager
         class display_device_option : public cOpt_base
         {
             private:
+                // As long as the @ref displays_ is not empty, this is always
+                // a valid index into it.
                 int value_;
                 std::map<int, std::string> displays_;
 
