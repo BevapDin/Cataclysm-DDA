@@ -5,11 +5,12 @@
 #include "int_id.h"
 #include "enums.h"
 #include "item.h"
-#include "creature.h"
 
 #include <string>
 #include <sstream>
 #include <list>
+
+class Creature;
 
 enum CallbackArgumentType : int {
     Integer,
