@@ -214,33 +214,6 @@ void options_manager::add(const std::string sNameIn, const std::string sPageIn,
 
 void options_manager::add(const std::string sNameIn, const std::string sPageIn,
                             const std::string sMenuTextIn, const std::string sTooltipIn,
-                            const std::map<int, std::string> mIntValuesIn, int iInitialIn,
-                            int iDefaultIn, copt_hide_t opt_hide)
-{
-    cOpt thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
-
-    thisOpt.sType = "int_map";
-
-    thisOpt.mIntValues = mIntValuesIn;
-
-    auto item = mIntValuesIn.find( iInitialIn );
-    if ( item == mIntValuesIn.cend() ) {
-        iInitialIn = mIntValuesIn.cbegin()->first;
-    }
-
-    item = mIntValuesIn.find( iDefaultIn );
-    if ( item == mIntValuesIn.cend() ) {
-        iDefaultIn = mIntValuesIn.cbegin()->first;
-    }
-
-    thisOpt.iDefault = iDefaultIn;
-    thisOpt.iSet = iInitialIn;
-
-    add( thisOpt );
-}
-
-void options_manager::add(const std::string sNameIn, const std::string sPageIn,
-                            const std::string sMenuTextIn, const std::string sTooltipIn,
                             const float fMinIn, float fMaxIn, float fDefaultIn,
                             float fStepIn, copt_hide_t opt_hide )
 {

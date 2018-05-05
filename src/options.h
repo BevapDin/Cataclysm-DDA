@@ -384,11 +384,6 @@ class options_manager
 
         void add( const std::string sNameIn, const std::string sPageIn,
                   const std::string sMenuTextIn, const std::string sTooltipIn,
-                  const std::map<int, std::string> mIntValuesIn, int iInitialIn,
-                  int iDefaultIn, copt_hide_t opt_hide = COPT_NO_HIDE );
-
-        void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
                   const float fMinIn, float fMaxIn,
                   float fDefaultIn, float fStepIn,
                   copt_hide_t opt_hide = COPT_NO_HIDE );
