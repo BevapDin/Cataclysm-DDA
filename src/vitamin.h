@@ -27,10 +27,6 @@ class vitamin
             return id_;
         }
 
-        bool is_null() const {
-            return id_ == vitamin_id( "null" );
-        }
-
         const std::string &name() const {
             return name_;
         }
