@@ -1415,7 +1415,23 @@ void load_external_option( JsonObject &jo )
     options_manager &opts = get_options();
     if( !opts.has_option( name ) ) {
         auto sinfo = jo.get_string( "info" );
-        opts.add_external( name, "world_default", stype, sinfo, sinfo );
+        if( stype == "float" ) {
+            opts.add( options_manager::float_option( name, "world_default", name, info,
+                      options_manager::COPT_ALWAYS_HIDE, 0.0f, std::numeric_limits<float>::min(),
+                      std::numeric_limits<float>::max(), 1.0f ) );
+        } else if( stype == "int" ) {
+            opts.add( options_manager::int_option( name, "world_default", name, info,
+                                                   options_manager::COPT_ALWAYS_HIDE, 0, std::numeric_limits<int>::min(),
+                                                   std::numeric_limits<int>::max() ) );
+        } else if( stype == "bool" ) {
+            opts.add( options_manager::bool_option( name, "world_default", name, info,
+                                                    options_manager::COPT_ALWAYS_HIDE, true ) );
+        } else if( stype == "string" ) {
+            opts.add( options_manager::string_input_option( name, "world_default", name, info,
+                      options_manager::COPT_ALWAYS_HIDE, "", std::numeric_limits<int>::max() ) );
+        } else {
+            jo.throw_error( "Unknown or unsupported stype for external option", "stype" );
+        }
     }
     options_manager::cOpt_base &opt = opts.get_option( name );
     if( stype == "float" ) {

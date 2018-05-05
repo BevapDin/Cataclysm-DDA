@@ -30,9 +30,6 @@ class options_manager
         friend options_manager &get_options();
         options_manager();
 
-        template<typename T>
-        void add( const T &opt );
-
     public:
         enum copt_hide_t {
             /** Don't hide this option */
@@ -419,8 +416,8 @@ class options_manager
 
         cOpt_base &get_option( const std::string &name );
 
-        void add_external( const std::string sNameIn, const std::string sPageIn, const std::string sType,
-                           const std::string sMenuTextIn, const std::string sTooltipIn );
+        template<typename T>
+        void add( const T &opt );
 
     private:
         options_container options;

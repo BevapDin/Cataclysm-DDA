@@ -143,15 +143,6 @@ void options_manager::add( const T &opt )
     }
 }
 
-void options_manager::add_external( const std::string sNameIn, const std::string sPageIn,
-                                    const std::string /*sType*/,
-                                    const std::string sMenuTextIn, const std::string sTooltipIn )
-{
-    string_map_option thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, COPT_ALWAYS_HIDE );
-
-    add( thisOpt );
-}
-
 void options_manager::cOpt_base::setPrerequisite( const std::string &sOption )
 {
     if ( !get_options().has_option(sOption) ) {
