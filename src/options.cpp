@@ -1910,10 +1910,14 @@ void options_manager::deserialize(JsonIn &jsin)
         JsonObject joOptions = jsin.get_object();
 
         const std::string name = joOptions.get_string("name");
+        const auto iter = options.find( name );
+        if( iter == options.end() ) {
+            joOptions.throw_error( "option does not exist", "name" );
+        }
         const std::string value = joOptions.get_string("value");
 
         add_retry(name, value);
-        options.at( name )->set_from_legacy_value( value );
+        iter->set_from_legacy_value( value );
     }
 }
 
@@ -1967,12 +1971,16 @@ bool options_manager::load_legacy()
 
             if( !sLine.empty() && sLine[0] != '#' && std::count(sLine.begin(), sLine.end(), ' ') == 1) {
                 int iPos = sLine.find(' ');
-                const std::string loadedvar = sLine.substr(0, iPos);
+                const std::string name = sLine.substr(0, iPos);
+                const auto iter = options.find( name );
+                if( iter == options.end() ) {
+                    throw std::runtime_error( string_format( "option %s does not exist", name ) );
+                }
                 const std::string loadedval = sLine.substr(iPos + 1, sLine.length());
                 // option with values from post init() might get clobbered
                 add_retry(loadedvar, loadedval); // stash it until update();
 
-                options.at( loadedvar )->set_from_legacy_value( loadedval );
+                iter->set_from_legacy_value( loadedval );
             }
         }
     };
