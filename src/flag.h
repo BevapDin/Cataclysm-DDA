@@ -7,19 +7,25 @@
 #include <string>
 
 class JsonObject;
+template<typename TagType>
 class json_flag;
 
+/**
+ * @tparam TagType A type to define where the flags are applied to, e.g. an
+ * item flag and an item type flag are different classes.
+ */
+template<typename TagType>
 class json_flag_manager {
     private:
         friend class DynamicDataLoader;
 
-        std::map<std::string, json_flag> all_;
+        std::map<std::string, json_flag<TagType>> all_;
 
     public:
         json_flag_manager() = default;
 
         /** Fetches flag definition (or null flag if not found) */
-        const json_flag &get( const std::string &id );
+        const json_flag<TagType> &get( const std::string &id );
 
         /** Load flag definition from JSON */
         void load( JsonObject &jo );
@@ -32,9 +38,10 @@ class json_flag_manager {
 
 };
 
+template<typename TagType>
 class json_flag
 {
-        friend json_flag_manager;
+        friend json_flag_manager<TagType>;
 
     public:
         /** Get identifier of flag as specified in JSON */

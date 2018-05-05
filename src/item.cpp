@@ -61,7 +61,7 @@
 #include <iterator>
 #include <cassert>
 
-json_flag_manager item_flag_manager;
+json_flag_manager<item> item_flag_manager;
 
 static const std::string GUN_MODE_VAR_NAME( "item::mode" );
 

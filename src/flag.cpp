@@ -6,28 +6,31 @@
 #include <map>
 #include <algorithm>
 
-const json_flag &json_flag_manager::get( const std::string &id )
+template<typename T>
+const json_flag<T> &json_flag_manager<T>::get( const std::string &id )
 {
-    static json_flag null_flag;
+    static json_flag<T> null_flag;
     auto iter = all_.find( id );
     return iter != all_.end() ? iter->second : null_flag;
 }
 
-void json_flag_manager::load( JsonObject &jo )
+template<typename T>
+void json_flag_manager<T>::load( JsonObject &jo )
 {
     auto id = jo.get_string( "id" );
-    auto &f = all_.emplace( id, json_flag( id ) ).first->second;
+    auto &f = all_.emplace( id, json_flag<T>( id ) ).first->second;
 
     jo.read( "info", f.info_ );
     jo.read( "conflicts", f.conflicts_ );
     jo.read( "inherit", f.inherit_ );
 }
 
-void json_flag_manager::check_consistency()
+template<typename T>
+void json_flag_manager<T>::check_consistency()
 {
     std::vector<std::string> flags;
     std::transform( all_.begin(), all_.end(), std::back_inserter( flags ),
-    []( const std::pair<std::string, json_flag> &e ) {
+    []( const std::pair<std::string, json_flag<T>> &e ) {
         return e.first;
     } );
 
@@ -39,7 +42,11 @@ void json_flag_manager::check_consistency()
     }
 }
 
-void json_flag_manager::reset()
+template<typename T>
+void json_flag_manager<T>::reset()
 {
     all_.clear();
 }
+
+class item;
+template class json_flag_manager<item>;
