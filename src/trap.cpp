@@ -173,7 +173,7 @@ bool trap::is_null() const
 
 bool trap::triggered_by_item( const item &itm ) const
 {
-    return !is_null() && itm.weight() >= trigger_weight;
+    return !is_null() && trigger_weight && itm.weight() >= *trigger_weight;
 }
 
 bool trap::is_funnel() const
