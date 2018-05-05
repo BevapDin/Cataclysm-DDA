@@ -82,7 +82,7 @@ struct trap {
          * If an item with this weight or more is thrown onto the trap, it triggers.
          */
         cata::optional<units::mass> trigger_weight;
-        int funnel_radius_mm;
+        cata::optional<int> funnel_radius_mm;
         std::vector<itype_id> components; // For disassembly?
     public:
         std::string name() const;
@@ -160,7 +160,7 @@ struct trap {
         /**
          * @name Funnels
          *
-         * Traps can act as funnels, for this they need a @ref trap::funnel_radius_mm > 0.
+         * Traps can act as funnels, for this they need a @ref trap::funnel_radius_mm.
          * Funnels are usual not hidden at all (@ref trap::visibility == 0), are @ref trap::benign and can
          * be picked up easily (@ref trap::difficulty == 0).
          * The funnel filling is handled in weather.cpp. is_funnel is used the check whether the

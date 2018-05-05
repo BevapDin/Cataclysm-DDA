@@ -105,7 +105,7 @@ void trap::load( JsonObject &jo, const std::string & )
     act = trap_function_from_string( jo.get_string( "action" ) );
 
     optional( jo, was_loaded, "benign", benign, false );
-    optional( jo, was_loaded, "funnel_radius", funnel_radius_mm, 0 );
+    assign( jo, "funnel_radius", funnel_radius_mm );
     assign( jo, "trigger_weight", trigger_weight );
     optional( jo, was_loaded, "drops", components );
 }
@@ -178,7 +178,7 @@ bool trap::triggered_by_item( const item &itm ) const
 
 bool trap::is_funnel() const
 {
-    return !is_null() && funnel_radius_mm > 0;
+    return !is_null() && funnel_radius_mm;
 }
 
 bool trap::is_3x3_trap() const

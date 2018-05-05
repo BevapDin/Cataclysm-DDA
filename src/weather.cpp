@@ -264,7 +264,7 @@ double trap::funnel_turns_per_charge( double rain_depth_mm_per_hour ) const
         return 0.0;
     }
 
-    const double surface_area_mm2 = M_PI * (funnel_radius_mm * funnel_radius_mm);
+    const double surface_area_mm2 = M_PI * ( *funnel_radius_mm * *funnel_radius_mm );
     const double charges_per_turn = funnel_charges_per_turn( surface_area_mm2, rain_depth_mm_per_hour );
 
     if( charges_per_turn > 0.0 ) {
