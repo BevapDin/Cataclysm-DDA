@@ -356,7 +356,8 @@ class options_manager
         {
                 friend class options_manager;
             public:
-                string_map_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h ) : typed_option<std::string>( n, p, m, t, h ) { }
+                /// @param i see @ref vItems
+                string_map_option( const std::string &n, const std::string &p, const std::string &m, const std::string &t, const copt_hide_t h, const std::string &d, const std::vector<std::pair<std::string, std::string>> &i );
                 ~string_map_option() override = default;
 
                 std::string get_legacy_value() const override;
@@ -420,12 +421,6 @@ class options_manager
 
         void add_external( const std::string sNameIn, const std::string sPageIn, const std::string sType,
                            const std::string sMenuTextIn, const std::string sTooltipIn );
-
-        void add( const std::string sNameIn, const std::string sPageIn,
-                  const std::string sMenuTextIn, const std::string sTooltipIn,
-                  // first is option value, second is display name of that value
-                  std::vector<std::pair<std::string, std::string>> sItemsIn, std::string sDefaultIn,
-                  copt_hide_t opt_hide = COPT_NO_HIDE );
 
     private:
         options_container options;

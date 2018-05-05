@@ -78,6 +78,19 @@ options_manager::display_device_option::display_device_option() : typed_option<i
 {
 }
 
+options_manager::string_map_option::string_map_option( const std::string &n, const std::string &p,
+        const std::string &m, const std::string &t, const copt_hide_t h, const std::string &d,
+        const std::vector<std::pair<std::string, std::string>> &i ) : typed_option<std::string>( n, p, m, t,
+                    h ), value_( d ), vItems( i ), default_value_( d )
+{
+    if( !vItems.empty() && getItemPos( d ) == -1 ) {
+        debugmsg( "default value \"%s\" for option %s is not in the list of options", d, getName() );
+        value_ = default_value_ = vItems[0].first;
+    }
+    // If the list is empty, the default is invalid anyway, but that's probably
+    // fine as the option values are added later.
+}
+
 void options_manager::add_retry(const std::string &lvar, const::std::string &lval)
 {
     std::map<std::string, std::string>::const_iterator it = post_json_verify.find(lvar);
@@ -135,25 +148,6 @@ void options_manager::add_external( const std::string sNameIn, const std::string
                                     const std::string sMenuTextIn, const std::string sTooltipIn )
 {
     string_map_option thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, COPT_ALWAYS_HIDE );
-
-    add( thisOpt );
-}
-
-void options_manager::add( const std::string sNameIn, const std::string sPageIn,
-                           const std::string sMenuTextIn, const std::string sTooltipIn,
-                           std::vector<std::pair<std::string, std::string>> sItemsIn, std::string sDefaultIn,
-                           copt_hide_t opt_hide )
-{
-    string_map_option thisOpt( sNameIn, sPageIn, sMenuTextIn, sTooltipIn, opt_hide );
-
-    thisOpt.vItems = sItemsIn;
-
-    if( thisOpt.getItemPos( sDefaultIn ) == -1 ) {
-        sDefaultIn = thisOpt.vItems[0].first;
-    }
-
-    thisOpt.default_value_ = sDefaultIn;
-    thisOpt.value_ = sDefaultIn;
 
     add( thisOpt );
 }
@@ -749,10 +743,10 @@ void options_manager::init()
                       translate_marker( "If true, enables auto pulping resurrecting corpses or auto butchering any corpse.  Never pulps acidic corpses.  Disabled as long as any enemy monster is seen." ),
                       COPT_NO_HIDE, false ) );
 
-    add( "AUTO_PULP_BUTCHER_ACTION", "general", translate_marker( "Auto pulp or butcher action" ),
-         translate_marker( "Action to perform when 'Auto pulp or butcher' is enabled.  Pulp: Pulp corpses you stand on.  - Pulp Adjacent: Also pulp corpses adjacent from you.  - Butcher: Butcher corpses you stand on." ),
-         { { "pulp", translate_marker( "Pulp" ) }, { "pulp_adjacent", translate_marker( "Pulp Adjacent" ) }, { "butcher", translate_marker( "Butcher" ) } }, "butcher"
-        );
+    add( string_map_option( "AUTO_PULP_BUTCHER_ACTION", "general",
+                            translate_marker( "Auto pulp or butcher action" ),
+                            translate_marker( "Action to perform when 'Auto pulp or butcher' is enabled.  Pulp: Pulp corpses you stand on.  - Pulp Adjacent: Also pulp corpses adjacent from you.  - Butcher: Butcher corpses you stand on." ),
+    COPT_NO_HIDE, "butcher", { { "pulp", translate_marker( "Pulp" ) }, { "pulp_adjacent", translate_marker( "Pulp Adjacent" ) }, { "butcher", translate_marker( "Butcher" ) } } ) );
 
     get_option("AUTO_PULP_BUTCHER_ACTION").setPrerequisite("AUTO_PULP_BUTCHER");
 
@@ -825,27 +819,27 @@ void options_manager::init()
                       translate_marker( "If true, the game will calculate range in a realistic way: light sources will be circles, diagonal movement will cover more ground and take longer.  If disabled, everything is square: moving to the northwest corner of a building takes as long as moving to the north wall." ),
                       COPT_NO_HIDE, false ) );
 
-    add( "DROP_EMPTY", "general", translate_marker( "Drop empty containers" ),
-        translate_marker( "Set to drop empty containers after use.  No: Don't drop any. - Watertight: All except watertight containers. - All: Drop all containers." ),
-        { { "no", translate_marker( "No" ) }, { "watertight", translate_marker( "Watertight" ) }, { "all", translate_marker( "All" ) } }, "no"
-        );
+    add( string_map_option( "DROP_EMPTY", "general",
+                            translate_marker( "Drop empty containers" ),
+                            translate_marker( "Set to drop empty containers after use.  No: Don't drop any. - Watertight: All except watertight containers. - All: Drop all containers." ),
+    COPT_NO_HIDE, "no", { { "no", translate_marker( "No" ) }, { "watertight", translate_marker( "Watertight" ) }, { "all", translate_marker( "All" ) } } ) );
 
     add( bool_option( "AUTO_NOTES", "general",
                       translate_marker( "Auto notes" ),
                       translate_marker( "If true, automatically sets notes on places that have stairs that go up or down" ),
                       COPT_NO_HIDE, true ) );
 
-    add( "DEATHCAM", "general", translate_marker( "DeathCam" ),
-        translate_marker( "Always: Always start deathcam.  Ask: Query upon death.  Never: Never show deathcam." ),
-        { { "always", translate_marker( "Always" ) }, { "ask", translate_marker( "Ask" ) }, { "never", translate_marker( "Never" ) } }, "ask"
-        );
+    add( string_map_option( "DEATHCAM", "general",
+                            translate_marker( "DeathCam" ),
+                            translate_marker( "Always: Always start deathcam.  Ask: Query upon death.  Never: Never show deathcam." ),
+    COPT_NO_HIDE, "ask", { { "always", translate_marker( "Always" ) }, { "ask", translate_marker( "Ask" ) }, { "never", translate_marker( "Never" ) } } ) );
 
     mOptionsSort["general"]++;
 
-    add( "SOUNDPACKS", "general", translate_marker( "Choose soundpack" ),
-        translate_marker( "Choose the soundpack you want to use." ),
-        build_soundpacks_list(), "basic", COPT_NO_SOUND_HIDE
-        ); // populate the options dynamically
+    add( string_map_option( "SOUNDPACKS", "general",
+                            translate_marker( "Choose soundpack" ),
+                            translate_marker( "Choose the soundpack you want to use." ),
+                            COPT_NO_SOUND_HIDE, "basic", build_soundpacks_list() ) );
 
     add( int_option( "MUSIC_VOLUME", "general",
                      translate_marker( "Music volume" ),
@@ -859,57 +853,62 @@ void options_manager::init()
 
     ////////////////////////////INTERFACE////////////////////////
     // TODO: scan for languages like we do for tilesets.
-    add( "USE_LANG", "interface", translate_marker( "Language" ), translate_marker( "Switch Language." ),
-        { { "", translate_marker( "System language" ) },
+    add( string_map_option( "USE_LANG", "interface",
+                            translate_marker( "Language" ),
+                            translate_marker( "Switch Language." ),
+    COPT_NO_HIDE, "", {
+        { "", translate_marker( "System language" ) },
         // Note: language names are in their own language and are *not* translated at all.
         // Note: Somewhere in Github PR was better link to msdn.microsoft.com with language names.
         // http://en.wikipedia.org/wiki/List_of_language_names
-          { "en", R"( English )" },
-          { "fr",  R"( Français )" },
-          { "de", R"( Deutsch )" },
-          { "it_IT", R"( Italiano )" },
-          { "es_AR", R"( Español ( Argentina ) )" },
-          { "es_ES", R"( Español ( España ) )" },
-          { "ja", R"( 日本語 )" },
-          { "ko", R"( 한국어 )" },
-          { "pl", R"( Polskie )" },
-          { "pt_BR", R"( Português ( Brasil ) )" },
-          { "ru", R"( Русский )" },
-          { "zh_CN", R"( 中文( 天朝 ) )" },
-          { "zh_TW", R"( 中文( 台灣 ) )" },
-        }, "" );
+        { "en", R"( English )" },
+        { "fr",  R"( Français )" },
+        { "de", R"( Deutsch )" },
+        { "it_IT", R"( Italiano )" },
+        { "es_AR", R"( Español ( Argentina ) )" },
+        { "es_ES", R"( Español ( España ) )" },
+        { "ja", R"( 日本語 )" },
+        { "ko", R"( 한국어 )" },
+        { "pl", R"( Polskie )" },
+        { "pt_BR", R"( Português ( Brasil ) )" },
+        { "ru", R"( Русский )" },
+        { "zh_CN", R"( 中文( 天朝 ) )" },
+        { "zh_TW", R"( 中文( 台灣 ) )" },
+    } ) );
 
     mOptionsSort["interface"]++;
 
-    add( "USE_CELSIUS", "interface", translate_marker( "Temperature units" ),
-        translate_marker( "Switch between Celsius and Fahrenheit." ),
-        { { "fahrenheit", translate_marker( "Fahrenheit" ) }, { "celsius", translate_marker( "Celsius" ) } }, "fahrenheit"
-        );
+    add( string_map_option( "USE_CELSIUS", "interface",
+                            translate_marker( "Temperature units" ),
+                            translate_marker( "Switch between Celsius and Fahrenheit." ),
+    COPT_NO_HIDE, "fahrenheit", { { "fahrenheit", translate_marker( "Fahrenheit" ) }, { "celsius", translate_marker( "Celsius" ) } } ) );
 
-    add( "USE_METRIC_SPEEDS", "interface", translate_marker( "Speed units" ),
-        translate_marker( "Switch between km/h and mph." ),
-        { { "mph", translate_marker( "mph" ) }, { "km/h", translate_marker( "km/h" ) } }, "mph"
-        );
+    add( string_map_option( "USE_METRIC_SPEEDS", "interface",
+                            translate_marker( "Speed units" ),
+                            translate_marker( "Switch between km/h and mph." ),
+    COPT_NO_HIDE, "mph", { { "mph", translate_marker( "mph" ) }, { "km/h", translate_marker( "km/h" ) } } ) );
 
-    add( "USE_METRIC_WEIGHTS", "interface", translate_marker( "Mass units" ),
-        translate_marker( "Switch between kg and lbs." ),
-        { { "lbs", translate_marker( "lbs" ) }, { "kg", translate_marker( "kg" ) } }, "lbs"
-        );
+    add( string_map_option( "USE_METRIC_WEIGHTS", "interface",
+                            translate_marker( "Mass units" ),
+                            translate_marker( "Switch between kg and lbs." ),
+    COPT_NO_HIDE, "lbs", { { "lbs", translate_marker( "lbs" ) }, { "kg", translate_marker( "kg" ) } } ) );
 
-    add( "VOLUME_UNITS", "interface", translate_marker( "Volume units" ),
-        translate_marker( "Switch between the Cup ( c ), Liter ( L ) or Quart ( qt )." ),
-        { { "c", translate_marker( "Cup" ) }, { "l", translate_marker( "Liter" ) }, { "qt", translate_marker( "Quart" ) } }, "l"
-        );
+    add( string_map_option( "VOLUME_UNITS", "interface",
+                            translate_marker( "Volume units" ),
+                            translate_marker( "Switch between the Cup ( c ), Liter ( L ) or Quart ( qt )." ),
+    COPT_NO_HIDE, "l", { { "c", translate_marker( "Cup" ) }, { "l", translate_marker( "Liter" ) }, { "qt", translate_marker( "Quart" ) } } ) );
 
-    add( "24_HOUR", "interface", translate_marker( "Time format" ),
-        translate_marker( "12h: AM/PM, e.g. 7:31 AM - Military: 24h Military, e.g. 0731 - 24h: Normal 24h, e.g. 7:31" ),
-        //~ 12h time, e.g.  11:59pm
-        { { "12h", translate_marker( "12h" ) },
+    add( string_map_option( "24_HOUR", "interface",
+                            translate_marker( "Time format" ),
+                            translate_marker( "12h: AM/PM, e.g. 7:31 AM - Military: 24h Military, e.g. 0731 - 24h: Normal 24h, e.g. 7:31" ),
+                            COPT_NO_HIDE, "12h",
+                            //~ 12h time, e.g.  11:59pm
+    {   { "12h", translate_marker( "12h" ) },
         //~ Military time, e.g.  2359
-          { "military", translate_marker( "Military" ) },
+        { "military", translate_marker( "Military" ) },
         //~ 24h time, e.g.  23:59
-          { "24h", translate_marker( "24h" ) } },
-        "12h" );
+        { "24h", translate_marker( "24h" ) }
+    } ) );
 
     mOptionsSort["interface"]++;
 
@@ -974,40 +973,40 @@ void options_manager::init()
 
     mOptionsSort["interface"]++;
 
-    add( "SIDEBAR_POSITION", "interface", translate_marker( "Sidebar position" ),
-        translate_marker( "Switch between sidebar on the left or on the right side.  Requires restart." ),
-        //~ sidebar position
-        { { "left", translate_marker( "Left" ) }, { "right", translate_marker( "Right" ) } }, "right"
-        );
+    add( string_map_option( "SIDEBAR_POSITION", "interface",
+                            translate_marker( "Sidebar position" ),
+                            translate_marker( "Switch between sidebar on the left or on the right side.  Requires restart." ),
+                            //~ sidebar position
+    COPT_NO_HIDE, "right", { { "left", translate_marker( "Left" ) }, { "right", translate_marker( "Right" ) } } ) );
 
-    add( "SIDEBAR_STYLE", "interface", translate_marker( "Sidebar style" ),
-        translate_marker( "Switch between a narrower or wider sidebar." ),
-        //~ sidebar style
-        { { "wider", translate_marker( "Wider" ) }, { "narrow", translate_marker( "Narrow" ) } }, "narrow"
-        );
+    add( string_map_option( "SIDEBAR_STYLE", "interface",
+                            translate_marker( "Sidebar style" ),
+                            translate_marker( "Switch between a narrower or wider sidebar." ),
+                            //~ sidebar style
+    COPT_NO_HIDE, "narrow", { { "wider", translate_marker( "Wider" ) }, { "narrow", translate_marker( "Narrow" ) } } ) );
 
-    add( "LOG_FLOW", "interface", translate_marker( "Message log flow" ),
-        translate_marker( "Where new log messages should show." ),
-        //~ sidebar/message log flow direction
-        { { "new_top", translate_marker( "Top" ) }, { "new_bottom", translate_marker( "Bottom" ) } }, "new_bottom"
-        );
+    add( string_map_option( "LOG_FLOW", "interface",
+                            translate_marker( "Message log flow" ),
+                            translate_marker( "Where new log messages should show." ),
+                            //~ sidebar/message log flow direction
+    COPT_NO_HIDE, "new_bottom", { { "new_top", translate_marker( "Top" ) }, { "new_bottom", translate_marker( "Bottom" ) } } ) );
 
     add( int_option( "MESSAGE_TTL", "interface",
                      translate_marker( "Sidebar log message display duration" ),
                      translate_marker( "Number of turns after which a message will be removed from the sidebar log.  '0' disables this option." ),
                      COPT_NO_HIDE, 0, 0, 1000 ) );
 
-    add( "ACCURACY_DISPLAY", "interface", translate_marker( "Aim window display style" ),
-        translate_marker( "How should confidence and steadiness be communicated to the player." ),
-        //~ aim bar style - bars or numbers
-        { { "numbers", translate_marker( "Numbers" ) }, { "bars", translate_marker( "Bars" ) } }, "bars"
-        );
+    add( string_map_option( "ACCURACY_DISPLAY", "interface",
+                            translate_marker( "Aim window display style" ),
+                            translate_marker( "How should confidence and steadiness be communicated to the player." ),
+                            //~ aim bar style - bars or numbers
+    COPT_NO_HIDE, "bars", { { "numbers", translate_marker( "Numbers" ) }, { "bars", translate_marker( "Bars" ) } } ) );
 
-    add( "MORALE_STYLE", "interface", translate_marker( "Morale style" ),
-        translate_marker( "Morale display style in sidebar." ),
-        //~ aim bar style - bars or numbers
-        { { "vertical", translate_marker( "Vertical" ) }, { "horizontal", translate_marker( "Horizontal" ) } }, "Vertical"
-        );
+    add( string_map_option( "MORALE_STYLE", "interface",
+                            translate_marker( "Morale style" ),
+                            translate_marker( "Morale display style in sidebar." ),
+                            //~ aim bar style - bars or numbers
+    COPT_NO_HIDE, "Vertical", { { "vertical", translate_marker( "Vertical" ) }, { "horizontal", translate_marker( "Horizontal" ) } } ) );
 
     mOptionsSort["interface"]++;
 
@@ -1021,10 +1020,10 @@ void options_manager::init()
                       translate_marker( "If true, menus will start scrolling in the center of the list, and keep the list centered." ),
                       COPT_NO_HIDE, true ) );
 
-    add( "SHIFT_LIST_ITEM_VIEW", "interface", translate_marker( "Shift list item view" ),
-        translate_marker( "Centered or to edge, shift the view toward the selected item if it is outside of your current viewport." ),
-        { { "false", translate_marker( "False" ) }, { "centered", translate_marker( "Centered" ) }, { "edge", translate_marker( "To edge" ) } },  "centered"
-        );
+    add( string_map_option( "SHIFT_LIST_ITEM_VIEW", "interface",
+                            translate_marker( "Shift list item view" ),
+                            translate_marker( "Centered or to edge, shift the view toward the selected item if it is outside of your current viewport." ),
+    COPT_NO_HIDE, "centered", { { "false", translate_marker( "False" ) }, { "centered", translate_marker( "Centered" ) }, { "edge", translate_marker( "To edge" ) } } ) );
 
     add( bool_option( "AUTO_INV_ASSIGN", "interface",
                       translate_marker( "Auto inventory letters" ),
@@ -1048,15 +1047,17 @@ void options_manager::init()
                       translate_marker( "Enable input from joystick." ),
                       COPT_CURSES_HIDE, true ) );
 
-    add( "HIDE_CURSOR", "interface", translate_marker( "Hide mouse cursor" ),
-        translate_marker( "Show: Cursor is always shown.  Hide: Cursor is hidden.  HideKB: Cursor is hidden on keyboard input and unhidden on mouse movement." ),
+    add( string_map_option( "HIDE_CURSOR", "interface",
+                            translate_marker( "Hide mouse cursor" ),
+                            translate_marker( "Show: Cursor is always shown.  Hide: Cursor is hidden.  HideKB: Cursor is hidden on keyboard input and unhidden on mouse movement." ),
+    COPT_CURSES_HIDE, "show", {
         //~ show mouse cursor
-        { { "show", translate_marker( "Show" ) },
+        { "show", translate_marker( "Show" ) },
         //~ hide mouse cursor
-          { "hide", translate_marker( "Hide" ) },
+        { "hide", translate_marker( "Hide" ) },
         //~ hide mouse cursor when keyboard is used
-          { "hidekb", translate_marker( "HideKB" ) } },
-        "show", COPT_CURSES_HIDE );
+        { "hidekb", translate_marker( "HideKB" ) }
+    } ) );
 
     ////////////////////////////GRAPHICS/////////////////////////
     add( bool_option( "ANIMATIONS", "graphics",
@@ -1109,10 +1110,10 @@ void options_manager::init()
                       translate_marker( "If true, replaces some TTF rendered text with tiles." ),
                       COPT_CURSES_HIDE, true ) );
 
-    add( "TILES", "graphics", translate_marker( "Choose tileset" ),
-        translate_marker( "Choose the tileset you want to use." ),
-        build_tilesets_list(), "ChestHole", COPT_CURSES_HIDE
-        ); // populate the options dynamically
+    add( string_map_option( "TILES", "graphics",
+                            translate_marker( "Choose tileset" ),
+                            translate_marker( "Choose the tileset you want to use." ),
+                            COPT_CURSES_HIDE, "ChestHole", build_tilesets_list() ) );
 
     get_option("TILES").setPrerequisite("USE_TILES");
 
@@ -1121,12 +1122,14 @@ void options_manager::init()
                       translate_marker( "If true, shows the pixel-detail minimap in game after the save is loaded.  Use the 'Toggle Pixel Minimap' action key to change its visibility during gameplay." ),
                       COPT_CURSES_HIDE, true ) );
 
-    add( "PIXEL_MINIMAP_MODE", "graphics", translate_marker( "Pixel minimap drawing mode" ),
-        translate_marker( "Specified the mode in which the minimap drawn." ), {
-            { "solid", translate_marker( "Solid" ) },
-            { "squares", translate_marker( "Squares" ) },
-            { "dots", translate_marker( "Dots" ) } }, "dots", COPT_CURSES_HIDE
-        );
+    add( string_map_option( "PIXEL_MINIMAP_MODE", "graphics",
+                            translate_marker( "Pixel minimap drawing mode" ),
+                            translate_marker( "Specified the mode in which the minimap drawn." ),
+    COPT_CURSES_HIDE, "dots", {
+        { "solid", translate_marker( "Solid" ) },
+        { "squares", translate_marker( "Squares" ) },
+        { "dots", translate_marker( "Dots" ) }
+    } ) );
 
     get_option("PIXEL_MINIMAP_MODE").setPrerequisite("PIXEL_MINIMAP");
 
@@ -1163,10 +1166,11 @@ void options_manager::init()
     // Note: list of display devices is added later by SDL code
     add( display_device_option() );
 
-    add( "FULLSCREEN", "graphics", translate_marker( "Fullscreen" ),
-        translate_marker( "Starts Cataclysm in one of the fullscreen modes.  Requires restart." ),
-        { { "no", translate_marker( "No" ) }, { "fullscreen", translate_marker( "Fullscreen" ) }, { "windowedbl", translate_marker( "Windowed borderless" ) } }, "no", COPT_CURSES_HIDE
-        );
+    add( string_map_option( "FULLSCREEN", "graphics",
+                            translate_marker( "Fullscreen" ),
+                            translate_marker( "Starts Cataclysm in one of the fullscreen modes.  Requires restart." ),
+                            COPT_CURSES_HIDE, "no",
+    { { "no", translate_marker( "No" ) }, { "fullscreen", translate_marker( "Fullscreen" ) }, { "windowedbl", translate_marker( "Windowed borderless" ) } } ) );
 
     add( bool_option( "SOFTWARE_RENDERING", "graphics",
                       translate_marker( "Software rendering" ),
@@ -1180,15 +1184,17 @@ void options_manager::init()
 
     get_option("FRAMEBUFFER_ACCEL").setPrerequisite("SOFTWARE_RENDERING");
 
-    add( "SCALING_MODE", "graphics", translate_marker( "Scaling mode" ),
-        translate_marker( "Sets the scaling mode, 'none' ( default ) displays at the game's native resolution, 'nearest'  uses low-quality but fast scaling, and 'linear' provides high-quality scaling." ),
+    add( string_map_option( "SCALING_MODE", "graphics",
+                            translate_marker( "Scaling mode" ),
+                            translate_marker( "Sets the scaling mode, 'none' ( default ) displays at the game's native resolution, 'nearest'  uses low-quality but fast scaling, and 'linear' provides high-quality scaling." ),
+    COPT_CURSES_HIDE, "none", {
         //~ Do not scale the game image to the window size.
-        { { "none", translate_marker( "No scaling" ) },
+        { "none", translate_marker( "No scaling" ) },
         //~ An algorithm for image scaling.
-          { "nearest", translate_marker( "Nearest neighbor" ) },
+        { "nearest", translate_marker( "Nearest neighbor" ) },
         //~ An algorithm for image scaling.
-          { "linear", translate_marker( "Linear filtering" ) } },
-        "none", COPT_CURSES_HIDE );
+        { "linear", translate_marker( "Linear filtering" ) }
+    } ) );
 
     ////////////////////////////DEBUG////////////////////////////
     add( int_option( "DISTANCE_INITIAL_VISIBILITY", "debug",
@@ -1227,18 +1233,20 @@ void options_manager::init()
 
     mOptionsSort["debug"]++;
 
-    add( "SKILL_RUST", "debug", translate_marker( "Skill rust" ),
-        translate_marker( "Set the level of skill rust.  Vanilla: Vanilla Cataclysm - Capped: Capped at skill levels 2 - Int: Intelligence dependent - IntCap: Intelligence dependent, capped - Off: None at all." ),
+    add( string_map_option( "SKILL_RUST", "debug",
+                            translate_marker( "Skill rust" ),
+                            translate_marker( "Set the level of skill rust.  Vanilla: Vanilla Cataclysm - Capped: Capped at skill levels 2 - Int: Intelligence dependent - IntCap: Intelligence dependent, capped - Off: None at all." ),
+    COPT_NO_HIDE, "off", {
         //~ plain, default, normal
-        { { "vanilla", translate_marker( "Vanilla" ) },
+        { "vanilla", translate_marker( "Vanilla" ) },
         //~ capped at a value
-          { "capped", translate_marker( "Capped" ) },
+        { "capped", translate_marker( "Capped" ) },
         //~ based on intelligence
-          { "int", translate_marker( "Int" ) },
+        { "int", translate_marker( "Int" ) },
         //~ based on intelligence and capped
-          { "intcap", translate_marker( "IntCap" ) },
-          { "off", translate_marker( "Off" ) } },
-        "off" );
+        { "intcap", translate_marker( "IntCap" ) },
+        { "off", translate_marker( "Off" ) }
+    } ) );
 
     mOptionsSort["debug"]++;
 
@@ -1260,10 +1268,10 @@ void options_manager::init()
 
     mOptionsSort["world_default"]++;
 
-    add( "DELETE_WORLD", "world_default", translate_marker( "Delete world" ),
-        translate_marker( "Delete the world when the last active character dies." ),
-        { { "no", translate_marker( "No" ) }, { "yes", translate_marker( "Yes" ) }, { "query", translate_marker( "Query" ) } }, "no"
-        );
+    add( string_map_option( "DELETE_WORLD", "world_default",
+                            translate_marker( "Delete world" ),
+                            translate_marker( "Delete the world when the last active character dies." ),
+    COPT_NO_HIDE, "no", { { "no", translate_marker( "No" ) }, { "yes", translate_marker( "Yes" ) }, { "query", translate_marker( "Query" ) } } ) );
 
     mOptionsSort["world_default"]++;
 
@@ -1311,10 +1319,10 @@ void options_manager::init()
 
     mOptionsSort["world_default"]++;
 
-    add( "DEFAULT_REGION", "world_default", translate_marker( "Default region type" ),
-        translate_marker( "( WIP feature ) Determines terrain, shops, plants, and more." ),
-        { { "default", "default" } }, "default"
-        );
+    add( string_map_option( "DEFAULT_REGION", "world_default",
+                            translate_marker( "Default region type" ),
+                            translate_marker( "( WIP feature ) Determines terrain, shops, plants, and more." ),
+    COPT_NO_HIDE, "default", { { "default", "default" } } ) );
 
     mOptionsSort["world_default"]++;
 
@@ -1323,10 +1331,10 @@ void options_manager::init()
                      translate_marker( "Initial starting time of day on character generation." ),
                      COPT_NO_HIDE, 8, 0, 23 ) );
 
-    add( "INITIAL_SEASON", "world_default", translate_marker( "Initial season" ),
-        translate_marker( "Season the player starts in.  Options other than the default delay spawn of the character, so food decay and monster spawns will have advanced." ),
-        { { "spring", translate_marker( "Spring" ) }, { "summer", translate_marker( "Summer" ) }, { "autumn", translate_marker( "Autumn" ) }, { "winter", translate_marker( "Winter" ) } }, "spring"
-        );
+    add( string_map_option( "INITIAL_SEASON", "world_default",
+                            translate_marker( "Initial season" ),
+                            translate_marker( "Season the player starts in.  Options other than the default delay spawn of the character, so food decay and monster spawns will have advanced." ),
+    COPT_NO_HIDE, "spring", { { "spring", translate_marker( "Spring" ) }, { "summer", translate_marker( "Summer" ) }, { "autumn", translate_marker( "Autumn" ) }, { "winter", translate_marker( "Winter" ) } } ) );
 
     add( int_option( "SEASON_LENGTH", "world_default",
                      translate_marker( "Season length" ),
@@ -1395,10 +1403,10 @@ void options_manager::init()
 
     mOptionsSort["world_default"]++;
 
-    add( "CHARACTER_POINT_POOLS", "world_default", translate_marker( "Character point pools" ),
-        translate_marker( "Allowed point pools for character generation." ),
-        { { "any", translate_marker( "Any" ) }, { "multi_pool", translate_marker( "Multi-pool only" ) }, { "no_freeform", translate_marker( "No freeform" ) } }, "any"
-        );
+    add( string_map_option( "CHARACTER_POINT_POOLS", "world_default",
+                            translate_marker( "Character point pools" ),
+                            translate_marker( "Allowed point pools for character generation." ),
+    COPT_NO_HIDE, "any", { { "any", translate_marker( "Any" ) }, { "multi_pool", translate_marker( "Multi-pool only" ) }, { "no_freeform", translate_marker( "No freeform" ) } } ) );
 
     mOptionsSort["world_default"]++;
 
