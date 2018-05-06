@@ -4,76 +4,69 @@
 
 #include "int_id.h"
 #include "enums.h"
-#include "item.h"
 
 #include <string>
 #include <sstream>
 #include <list>
 
 class Creature;
-
-enum CallbackArgumentType : int {
-    Integer,
-    Number,
-    Double = Number,
-    Float = Number,
-    Boolean,
-    String,
-    Tripoint,
-    Item,
-    Reference_Creature,
-    Enum_BodyPart,
-};
-
-struct CallbackArgument {
-    std::string name;
-    CallbackArgumentType type;
-
-    int value_integer;
-    float value_number;
-    bool value_boolean;
-    std::string value_string;
-    tripoint value_tripoint;
-    item value_item;
-    Creature *value_creature;
-    body_part value_body_part;
-
-    CallbackArgument( const std::string &arg_name, int arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::Integer ), value_integer( arg_value ) {
-    }
-    CallbackArgument( const std::string &arg_name, double arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::Number ), value_number( arg_value ) {
-    }
-    CallbackArgument( const std::string &arg_name, float arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::Number ), value_number( arg_value ) {
-    }
-    CallbackArgument( const std::string &arg_name, bool arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::Boolean ), value_boolean( arg_value ) {
-    }
-    CallbackArgument( const std::string &arg_name, const std::string &arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::String ), value_string( arg_value ) {
-    }
-    CallbackArgument( const std::string &arg_name, const tripoint &arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::Tripoint ), value_tripoint( arg_value ) {
-    }
-    CallbackArgument( const std::string &arg_name, const item &arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::Item ), value_item( arg_value ) {
-    }
-    CallbackArgument( const std::string &arg_name, Creature *&arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::Reference_Creature ), value_creature( arg_value ) {
-    }
-    CallbackArgument( const std::string &arg_name, const body_part &arg_value ) : name( arg_name ),
-        type( CallbackArgumentType::Enum_BodyPart ), value_body_part( arg_value ) {
-    }
-#ifdef LUA
-    void Save( int top );
-#endif //LUA
-};
-
-typedef std::list<CallbackArgument> CallbackArgumentContainer;
-
-class map;
+class player;
 class monster;
+enum body_part : int;
+struct tripoint;
+class item;
+
+class CallbackArgumentContainer
+{
+    private:
+        // counts how many things we have pushed on the stack
+        int stack_size;
+
+        // List all the types that can be pushed to Lua
+        // @todo automatically generate the list?
+        void push_value( const item &v );
+        void push_value( double v );
+        void push_value( int v );
+        void push_value( bool v );
+        void push_value( const tripoint &v );
+        void push_value( const char *v );
+        void push_value( const std::string &v ) {
+            push_value( v.c_str() ); // Lua uses 0-terminated strings always and has no binary strings
+        }
+        void push_value( const Creature &v );
+        void push_value( const player &v );
+        void push_value( const monster &v );
+        void push_value( body_part v );
+
+        void push_all() {
+        }
+        template<typename Head, typename... Args>
+        void push_all( Head &&head, Args &&... args ) {
+            // if you get an error that no suitable push_value function could be found,
+            // ensure the type is actually exported to Lua and add an function for it
+            // (see existing implementations).
+            push_value( head );
+            stack_size++;
+            push_all( std::forward<Args>( args )... );
+        }
+
+        void push_callback_function();
+
+    public:
+        template<typename... Args>
+        CallbackArgumentContainer( const char *name, Args &&... args ) {
+            push_callback_function();
+            push_value( name );
+            stack_size = 1; // the just pushed name of the callback
+            push_all( std::forward<Args>( args )... );
+        }
+
+        CallbackArgumentContainer( const CallbackArgumentContainer & ) = delete;
+
+        void call();
+};
+    
+class map;
 struct mapgendata;
 struct oter_t;
 
@@ -98,12 +91,17 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &md, int t
  * Execute a callback that can be overridden by all mods,
  * storing provided callback arguments in _G.
  */
-void lua_callback( const char *callback_name, const CallbackArgumentContainer &callback_args );
-
-/**
- * Execute a callback that can be overridden by all mods.
- */
-void lua_callback( const char *callback_name );
+#ifdef LUA
+template<typename... Args>
+inline void lua_callback( const char *callback_name, Args &&... args )
+{
+    CallbackArgumentContainer arguments( callback_name, std::forward<Args>( args )... );
+    arguments.call();
+}
+#else
+template<typename... Args>
+inline void lua_callback( const char */*callback_name*/, Args &&... /*args*/ ) { }
+#endif
 
 /**
  * Load the main file of a lua mod.

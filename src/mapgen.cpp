@@ -209,11 +209,7 @@ void mapgen_function_builtin::generate( map *m, const oter_id &terrain_type, con
 
     const std::string mapgen_generator_type = "builtin";
     const tripoint terrain_tripoint = sm_to_omt_copy( m->get_abs_sub() );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( "mapgen_generator_type", mapgen_generator_type );
-    lua_callback_args_info.emplace_back( "mapgen_terrain_type_id", terrain_type.id().str() );
-    lua_callback_args_info.emplace_back( "mapgen_terrain_coordinates", terrain_tripoint );
-    lua_callback( "on_mapgen_finished", lua_callback_args_info );
+    lua_callback( "on_mapgen_finished", "builtin", terrain_type.id().str(), terrain_tripoint );
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1946,11 +1942,7 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
 
     const std::string mapgen_generator_type = "json";
     const tripoint terrain_tripoint = sm_to_omt_copy( m->get_abs_sub() );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( "mapgen_generator_type", mapgen_generator_type );
-    lua_callback_args_info.emplace_back( "mapgen_terrain_type_id", terrain_type.id().str() );
-    lua_callback_args_info.emplace_back( "mapgen_terrain_coordinates", terrain_tripoint );
-    lua_callback( "on_mapgen_finished", lua_callback_args_info );
+    lua_callback( "on_mapgen_finished", "json", terrain_type.id().str(), terrain_tripoint );
 }
 
 void mapgen_function_json_nested::nest( const mapgendata &dat, int offset_x, int offset_y, float density ) const
@@ -2029,11 +2021,7 @@ void mapgen_function_lua::generate(map *m, const oter_id &terrain_type, const ma
 
     const std::string mapgen_generator_type = "lua";
     const tripoint terrain_tripoint = sm_to_omt_copy( m->get_abs_sub() );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( "mapgen_generator_type", mapgen_generator_type );
-    lua_callback_args_info.emplace_back( "mapgen_terrain_type_id", terrain_type.id().str() );
-    lua_callback_args_info.emplace_back( "mapgen_terrain_coordinates", terrain_tripoint );
-    lua_callback( "on_mapgen_finished", lua_callback_args_info );
+    lua_callback( "on_mapgen_finished", "lua", terrain_type.id().str(), terrain_tripoint );
 }
 
 /////////////

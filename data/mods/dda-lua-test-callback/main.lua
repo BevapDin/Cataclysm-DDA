@@ -70,87 +70,87 @@ MOD.on_year_passed = function()
 
 end
 
-MOD.on_player_skill_increased = function()
+MOD.on_player_skill_increased = function(source, skill, level)
 
-  MOD.DisplayCallbackMessages("on_player_skill_increased")
+  MOD.DisplayCallbackMessages("Your skill " .. skill .. " was increased by " .. source .. " to " .. tostring(level))
 
 end
 
-MOD.on_player_dodge = function()
+MOD.on_player_dodge = function(source, diff)
 
   MOD.DisplayCallbackMessages("on_player_dodge")
 
 end
 
-MOD.on_player_hit = function()
+MOD.on_player_hit = function(source, bp_hit)
 
   MOD.DisplayCallbackMessages("on_player_hit")
 
 end
 
-MOD.on_player_hurt = function()
+MOD.on_player_hurt = function(source, disturb)
 
   MOD.DisplayCallbackMessages("on_player_hurt")
 
 end
 
-MOD.on_player_mutation_gain = function()
+MOD.on_player_mutation_gain = function(mut)
 
-  MOD.DisplayCallbackMessages("on_player_mutation_gain")
+  MOD.DisplayCallbackMessages("Player has gained mutation " .. mut)
 
 end
 
 MOD.on_player_mutation_loss = function()
 
-  MOD.DisplayCallbackMessages("on_player_mutation_loss")
+  MOD.DisplayCallbackMessages("Player has lost mutation " .. mut)
 
 end
 
-MOD.on_player_stat_change = function()
+MOD.on_player_stat_change = function(stat, value)
 
   MOD.DisplayCallbackMessages("on_player_stat_change")
 
 end
 
-MOD.on_player_item_wear = function()
+MOD.on_player_item_wear = function(item)
 
-  MOD.DisplayCallbackMessages("on_player_item_wear")
-
-end
-
-MOD.on_player_item_takeoff = function()
-
-  MOD.DisplayCallbackMessages("on_player_item_takeoff")
+  MOD.DisplayCallbackMessages("Player wears a " .. item:tname())
 
 end
 
-MOD.on_player_effect_int_changes = function()
+MOD.on_player_item_takeoff = function(item)
+
+  MOD.DisplayCallbackMessages("Player has taken off a " .. item:tname())
+
+end
+
+MOD.on_player_effect_int_changes = function(eff, intensity, bp)
 
   MOD.DisplayCallbackMessages("on_player_effect_int_change")
 
 end
 
-MOD.on_player_mission_assignment = function()
+MOD.on_player_mission_assignment = function(id)
 
-  MOD.DisplayCallbackMessages("on_player_mission_assignment")
-
-end
-
-MOD.on_player_mission_finished = function()
-
-  MOD.DisplayCallbackMessages("on_player_mission_finished")
+  MOD.DisplayCallbackMessages("on_player_mission_assignment: " .. tostring(id))
 
 end
 
-MOD.on_mapgen_finished = function() 
+MOD.on_player_mission_finished = function(id)
 
-  MOD.DisplayCallbackMessages("on_mapgen_finished")
+  MOD.DisplayCallbackMessages("on_player_mission_finished: " .. tostring(id))
 
 end
 
-MOD.on_weather_changed = function()
+MOD.on_mapgen_finished = function(type_, terrain, pos) 
 
-  MOD.DisplayCallbackMessages("on_weather_changed")
+  MOD.DisplayCallbackMessages("Mapgen for " .. terrain .. " via " .. type_ .. " has finished at ("..tostring(pos.x)..","..tostring(tp.y)..","..tostring(tp.z)..")")
+
+end
+
+MOD.on_weather_changed = function(new, old)
+
+  MOD.DisplayCallbackMessages("Weather changed from " .. old .. " to " .. new)
 
 end
 

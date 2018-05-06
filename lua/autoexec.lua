@@ -13,10 +13,13 @@ outdated_metatable = {
 -- table containing our mods
 mods = { }
 
-function mod_callback(callback_name)
+function mod_callback(callback_name, ...)
+    -- global unpack function has been moved to table in Lua 5.3
+    local unpack = table.unpack or unpack
+    local t = {...}
     for modname, mod_instance in pairs(mods) do
         if type(mod_instance[callback_name]) == "function" then
-            mod_instance[callback_name]()
+            mod_instance[callback_name](unpack(t))
         end
     end
 end

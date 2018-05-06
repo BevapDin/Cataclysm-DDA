@@ -824,64 +824,70 @@ int call_lua(std::string tocall)
     return err;
 }
 
-
-void CallbackArgument::Save( int top )
+void CallbackArgumentContainer::push_value( const double v )
 {
-    lua_State * const L = lua_state;
-    lua_pushstring( L, name.c_str() );
-    switch( type ) {
-        case CallbackArgumentType::Integer:
-            lua_pushinteger( L, value_integer );
-            break;
-        case CallbackArgumentType::Number:
-            lua_pushnumber( L, value_number );
-            break;
-        case CallbackArgumentType::Boolean:
-            lua_pushboolean( L, value_boolean );
-            break;
-        case CallbackArgumentType::String:
-            lua_pushstring( L, value_string.c_str() );
-            break;
-        case CallbackArgumentType::Tripoint:
-            LuaValue<tripoint>::push_reg( L, value_tripoint );
-            break;
-        case CallbackArgumentType::Item:
-            LuaValue<item>::push_reg( L, value_item );
-            break;
-        case CallbackArgumentType::Reference_Creature:
-            LuaReference<Creature>::push( L, value_creature );
-            break;
-        case CallbackArgumentType::Enum_BodyPart:
-            LuaEnum<body_part>::push( L, value_body_part );
-            break;
-        default:
-            lua_pushnil( L );
-            break;
-        }
-    lua_settable( L, top );
+    lua_pushnumber( lua_state, v );
+}
+void CallbackArgumentContainer::push_value( const int v )
+{
+    lua_pushinteger( lua_state, v );
+}
+void CallbackArgumentContainer::push_value( const bool v )
+{
+    lua_pushboolean( lua_state, v );
+}
+void CallbackArgumentContainer::push_value( const tripoint &v )
+{
+    LuaValue<tripoint>::push( lua_state, v );
+}
+void CallbackArgumentContainer::push_value( const char *const v )
+{
+    lua_pushstring( lua_state, v );
+}
+void CallbackArgumentContainer::push_value( const item &v )
+{
+    LuaReference<item>::push( lua_state, const_cast<item&>( v ) ); // Lua has no notion of constness
+}
+void CallbackArgumentContainer::push_value( const Creature &v )
+{
+    LuaReference<Creature>::push( lua_state, const_cast<Creature&>( v ) ); // Lua has no notion of constness
+}
+void CallbackArgumentContainer::push_value( const player &v )
+{
+    LuaReference<player>::push( lua_state, const_cast<player&>( v ) ); // Lua has no notion of constness
+}
+void CallbackArgumentContainer::push_value( const monster &v )
+{
+    LuaReference<monster>::push( lua_state, const_cast<monster&>( v ) ); // Lua has no notion of constness
+}
+void CallbackArgumentContainer::push_value( const body_part v )
+{
+    LuaEnum<body_part>::push( lua_state, v );
 }
 
-void lua_callback( const char *callback_name, const CallbackArgumentContainer &callback_args )
+void CallbackArgumentContainer::push_callback_function()
 {
     if( lua_state == nullptr ) {
         return;
     }
-    lua_State *L = lua_state;
+    // This must be before all other pushing as it modifies the stack
+    // @todo make update_globals not change the stack
+    update_globals( lua_state );
 
-    lua_newtable( L );
-    int top = lua_gettop( L );
-    for( auto callback_arg : callback_args ) {
-        callback_arg.Save( top );
-    }
-    lua_setglobal( L, "callback_data" );
-
-    call_lua( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
+    lua_getglobal( lua_state, "mod_callback" );
 }
 
-void lua_callback( const char *callback_name )
+void CallbackArgumentContainer::call()
 {
-    CallbackArgumentContainer callback_args;
-    lua_callback( callback_name, callback_args );
+    if( lua_state == nullptr ) {
+        return;
+    }
+
+    // @todo handle return values
+    const int ret = lua_pcall( lua_state, stack_size, 0, 0 );
+    if( ret != 0 ) {
+        DebugLog( D_ERROR, DC_ALL ) << "Error from Lua: " << lua_tostring_wrapper( lua_state, -1 );
+    }
 }
 
 //
