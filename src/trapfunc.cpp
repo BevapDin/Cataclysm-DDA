@@ -1232,7 +1232,7 @@ void trapfunc::snake( Creature *c, const tripoint &p )
 
         if( tries < 5 ) { // @todo: tries increment is missing, so this expression is always true
             add_msg( m_warning, _( "A shadowy snake forms nearby." ) );
-            g->summon_mon( mon_shadow_snake, p );
+            g->summon_mon( mon_shadow_snake, monp );
             g->m.remove_trap( p );
         }
     }
