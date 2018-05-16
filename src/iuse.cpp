@@ -4770,10 +4770,8 @@ int iuse::artifact(player *p, item *it, bool, const tripoint& )
                         }
                     }
                 }
-                if (num_spawned > 1) {
-                    p->add_msg_if_player(m_warning, _("Shadows form around you."));
-                } else if (num_spawned == 1) {
-                    p->add_msg_if_player(m_warning, _("A shadow forms nearby."));
+                if( num_spawned > 0 ) {
+                    p->add_msg_if_player( m_warning, ngettext( "A shadow forms nearby.", "Shadows form around you.", num_spawned ) );
                 }
             }
             break;
