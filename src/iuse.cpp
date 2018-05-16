@@ -3106,17 +3106,11 @@ int iuse::teleport(player *p, item *it, bool, const tripoint& )
 int iuse::can_goo(player *p, item *it, bool, const tripoint& )
 {
     it->convert( "canister_empty" );
-    int tries = 0;
-    tripoint goop;
-    goop.z = p->posz();
-    do {
-        goop.x = p->posx() + rng(-2, 2);
-        goop.y = p->posy() + rng(-2, 2);
-        tries++;
-    } while (g->m.impassable(goop) && tries < 10);
-    if (tries == 10) {
+    const cata::optional<tripoint> goop_ = random_point( g->m.points_in_radius(p->pos(), 2), [](const tripoint &p ) { return g->m.passable(p); } );
+    if( !goop_ ) {
         return 0;
     }
+    const tripoint goop = *goop_;
     if( monster *const mon_ptr = g->critter_at<monster>( goop ) ) {
         monster &critter = *mon_ptr;
         if (g->u.sees(goop)) {
@@ -3135,22 +3129,13 @@ int iuse::can_goo(player *p, item *it, bool, const tripoint& )
             goo->friendly = -1;
         }
     }
-    tries = 0;
-    while (!one_in(4) && tries < 10) {
-        tries = 0;
-        do {
-            goop.x = p->posx() + rng(-2, 2);
-            goop.y = p->posy() + rng(-2, 2);
-            tries++;
-        } while (g->m.impassable(goop) &&
-                 g->m.tr_at(goop).is_null() && tries < 10);
-        if (tries < 10) {
-            if (g->u.sees(goop)) {
+    if (!one_in(4)) {
+        const cata::optional<tripoint> goop2 = random_point( g->m.points_in_radius(p->pos(), 2), [](const tripoint &p ) { return g->m.passable(p) && g->m.tr_at(p).is_null(); } );
+        if(goop2) {
+            if (g->u.sees(*goop2)) {
                 add_msg(m_warning, _("A nearby splatter of goo forms into a goo pit."));
             }
-            g->m.trap_set(goop, tr_goo);
-        } else {
-            return 0;
+            g->m.trap_set(*goop2, tr_goo);
         }
     }
     return it->type->charges_to_use();
@@ -4751,20 +4736,9 @@ int iuse::artifact(player *p, item *it, bool, const tripoint& )
                 int num_shadows = rng(4, 8);
                 int num_spawned = 0;
                 for (int j = 0; j < num_shadows; j++) {
-                    int tries = 0;
-                    tripoint monp = p->pos();
-                    do {
-                        if (one_in(2)) {
-                            monp.x = rng(p->posx() - 5, p->posx() + 5);
-                            monp.y = (one_in(2) ? p->posy() - 5 : p->posy() + 5);
-                        } else {
-                            monp.x = (one_in(2) ? p->posx() - 5 : p->posx() + 5);
-                            monp.y = rng(p->posy() - 5, p->posy() + 5);
-                        }
-                    } while (tries < 5 && !g->is_empty(monp) &&
-                             !g->m.sees(monp, p->pos(), 10));
-                    if (tries < 5) { // @todo: tries increment is missing, so this expression is always true
-                        if( monster * const  spawned = g->summon_mon( mon_shadow, monp ) ) {
+                    const cata::optional<tripoint> monp = random_point( g->m.points_in_radius(p->pos(), 5), [&](const tripoint &pt ) { return g->is_empty(pt) && g->m.sees(pt, p->pos(),10); } );
+                    if(monp) {
+                        if( monster * const  spawned = g->summon_mon( mon_shadow, *monp ) ) {
                             num_spawned++;
                             spawned->reset_special_rng("DISAPPEAR");
                         }

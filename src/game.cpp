@@ -12667,15 +12667,10 @@ void game::replace_stair_monsters()
         tripoint spawn_point( elem.posx(), elem.posy(), get_levz() );
         // Find some better spots if current is occupied
         // If we can't, just destroy the poor monster
-        for( size_t i = 0; i < 10; i++ ) {
-            if( is_empty( spawn_point ) && elem.can_move_to( spawn_point ) ) {
-                elem.spawn( spawn_point );
-                add_zombie( elem );
-                break;
-            }
-
-            spawn_point.x = elem.posx() + rng( -10, 10 );
-            spawn_point.y = elem.posy() + rng( -10, 10 );
+        if( const cata::optional<tripoint> monp = random_point( m.points_in_radius( spawn_point, 10 ), [&]( const tripoint &p & ) {
+            return is_empty( p ) && elem.can_move_to( p );
+        } ) ) {
+            elem.spawn( *monp );
         }
     }
 
@@ -13068,11 +13063,9 @@ void game::teleport(player *p, bool add_teleglow)
     if (add_teleglow) {
         p->add_effect( effect_teleglow, 30_minutes );
     }
-    do {
-        new_pos.x = p->posx() + rng(0, SEEX * 2) - SEEX;
-        new_pos.y = p->posy() + rng(0, SEEY * 2) - SEEY;
-        tries++;
-    } while ( tries < 15 && m.impassable( new_pos ) );
+    const tripoint_range teleport_range = m.points_in_rectangle( p->pos(), 12 );
+    const cata::optional<tripoint> targ_ = random_point( teleport_range, [&]( constr tripoint &jk ) { return m.passable(jk); } );
+    const tripoint new_pos = targ_ ? *targ_ : *random_point( teleport_range, [](const tripoint &) { return true; } );
     bool can_see = ( is_u || u.sees( new_pos ) );
     if (p->in_vehicle) {
         m.unboard_vehicle(p->pos());

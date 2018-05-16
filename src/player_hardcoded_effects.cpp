@@ -536,14 +536,8 @@ void player::hardcoded_effects( effect &it )
     } else if( id == effect_attention ) {
         if( one_in( 100000 / to_turns<int>( dur ) ) && one_in( 100000 / to_turns<int>( dur ) ) &&
             one_in( 250 ) ) {
-            tripoint dest( 0, 0, posz() );
-            int tries = 0;
-            do {
-                dest.x = posx() + rng( -4, 4 );
-                dest.y = posy() + rng( -4, 4 );
-                tries++;
-            } while( g->critter_at( dest ) && tries < 10 );
-            if( tries < 10 ) {
+            if( const cata::optional<tripoint> dest_ = random_point( g->m.points_in_radius( pos(), 4 ), []( const tripoint &jk ) { return !g->critter_at( jk ); } ) ) {
+                const tripoint dest = *dest_;
                 if( g->m.impassable( dest ) ) {
                     g->m.make_rubble( dest, f_rubble_rock, true );
                 }
@@ -617,19 +611,8 @@ void player::hardcoded_effects( effect &it )
         if( dur > 6_hours ) {
             // 12 teleports
             if( one_in( 4000 - ( dur - 360_minutes ) / 4_turns ) ) {
-                tripoint dest( 0, 0, posz() );
-                int &x = dest.x;
-                int &y = dest.y;
-                int tries = 0;
-                do {
-                    x = posx() + rng( -4, 4 );
-                    y = posy() + rng( -4, 4 );
-                    tries++;
-                    if( tries >= 10 ) {
-                        break;
-                    }
-                } while( g->critter_at( dest ) );
-                if( tries < 10 ) {
+                if( const cata::optional<tripoint> dest_ = random_point( g->m.points_in_radius( pos(), 4 ), []( const tripoint &jk ) { return !g->critter_at( jk ); } ) ) {
+                    const tripoint dest = *dest_;
                     if( g->m.impassable( dest ) ) {
                         g->m.make_rubble( dest, f_rubble_rock, true );
                     }

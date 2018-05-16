@@ -1222,17 +1222,10 @@ void iexamine::pedestal_wyrm(player &p, const tripoint &examp)
                          pgettext("memorial_female", "Awoke a group of dark wyrms!"));
     int num_wyrms = rng(1, 4);
     for (int i = 0; i < num_wyrms; i++) {
-        int tries = 0;
-        tripoint monp = examp;
-        do {
-            monp.x = rng(0, SEEX * MAPSIZE);
-            monp.y = rng(0, SEEY * MAPSIZE);
-            tries++;
-        } while (tries < 10 && !g->is_empty( monp ) &&
-                    rl_dist( p.pos(), monp ) <= 2);
-        if (tries < 10) {
-            g->m.ter_set( monp, t_rock_floor);
-            g->summon_mon(mon_dark_wyrm, monp);
+        const cata::optional<tripoint> mp = random_point( points_in_range( g->m ), [&p]( const tripoint &pt ) { return g->is_empty( pt ) && rl_dist( p.pos(), pt ) > 2; } );
+        if( mp ) {
+            g->m.ter_set( *mp, t_rock_floor );
+            g->summon_mon( mon_dark_wyrm, *mp );
         }
     }
     add_msg(_("The pedestal sinks into the ground, with an ominous grinding noise..."));

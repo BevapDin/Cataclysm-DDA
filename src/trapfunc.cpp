@@ -197,14 +197,8 @@ void trapfunc::tripwire( Creature *c, const tripoint &p )
                 z->apply_damage( nullptr, bp_torso, rng( 1, 4 ) );
             }
         } else if( n != nullptr ) {
-            std::vector<tripoint> valid;
-            for( const tripoint &jk : g->m.points_in_radius( p, 1 ) ) {
-                if( g->is_empty( jk ) ) {
-                    valid.push_back( jk );
-                }
-            }
-            if( !valid.empty() ) {
-                n->setpos( random_entry( valid ) );
+            if( const cata::optional<tripoint> pnt = random_point( g->m.points_in_radius( p, 1 ), []( const tripoint &jk ) { return g->is_empty( jk ); } ) ) {
+                n->setpos( *pnt );
             }
             n->moves -= 150;
             ///\EFFECT_DEX decreases chance of taking damage from a tripwire trap
@@ -538,24 +532,19 @@ void trapfunc::telepad( Creature *c, const tripoint &p )
                 add_msg( _( "The air shimmers around the %s..." ), z->name().c_str() );
             }
 
-            int tries = 0;
-            int newposx, newposy;
-            do {
-                newposx = rng( z->posx() - SEEX, z->posx() + SEEX );
-                newposy = rng( z->posy() - SEEY, z->posy() + SEEY );
-                tries++;
-            } while( g->m.impassable( newposx, newposy ) && tries != 10 );
-
-            if( tries == 10 ) {
+            const int radius = 12; // arbitrary number
+            const tripoint_range range = g->m.points_in_radius( z->pos(), radius );
+            const cata::optional<tripoint> pnt = random_point( range, []( const tripoint &p ) { return g->m.passable( p ); } );
+            if( !pnt ) {
                 z->die_in_explosion( nullptr );
-            } else if( monster *const mon_hit = g->critter_at<monster>( {newposx, newposy, z->posz()} ) ) {
+            } else if( monster *const mon_hit = g->critter_at<monster>( *pnt ) ) {
                 if( g->u.sees( *z ) ) {
                     add_msg( m_good, _( "The %1$s teleports into a %2$s, killing them both!" ),
                              z->name().c_str(), mon_hit->name().c_str() );
                 }
                 mon_hit->die_in_explosion( z );
             } else {
-                z->setpos( {newposx, newposy, z->posz()} );
+                z->setpos( *pnt );
             }
         }
     }
@@ -900,13 +889,10 @@ static bool sinkhole_safety_roll( player *p, const std::string &itemname, const 
         return false;
     }
 
-    std::vector<tripoint> safe;
-    for( const tripoint &tmp : g->m.points_in_radius( p->pos(), 1 ) ) {
-        if( g->m.passable( tmp ) && g->m.tr_at( tmp ).loadid != tr_pit ) {
-            safe.push_back( tmp );
-        }
-    }
-    if( safe.empty() ) {
+    const cata::optional<tripoint> safe = random_point( g->m.points_in_radius( p->pos(), 1 ), []( const tripoint &tmp ) {
+        return g->m.passable( tmp ) && g->m.tr_at( tmp ).loadid != tr_pit;
+    } );
+    if( !safe ) {
         p->add_msg_if_player( m_bad, _( "There's nowhere to pull yourself to, and you sink!" ) );
         p->use_amount( itemname, 1 );
         g->m.spawn_item( random_neighbor( p->pos() ), itemname );
@@ -914,7 +900,7 @@ static bool sinkhole_safety_roll( player *p, const std::string &itemname, const 
     } else {
         p->add_msg_player_or_npc( m_good, _( "You pull yourself to safety!" ),
                                   _( "<npcname> steps on a sinkhole, but manages to pull themselves to safety." ) );
-        p->setpos( random_entry( safe ) );
+        p->setpos( *safe );
         if( p == &g->u ) {
             g->update_map( *p );
         }
@@ -1012,18 +998,14 @@ void trapfunc::ledge( Creature *c, const tripoint &p )
             return;
         }
 
-        std::vector<tripoint> valid;
-        for( const tripoint &pt : g->m.points_in_radius( below, 1 ) ) {
-            if( g->is_empty( pt ) ) {
-                valid.push_back( pt );
-            }
-        }
-
-        if( valid.empty() ) {
+        const cata::optional<tripoint> pnt = random_point( g->m.points_in_radius( below, 1 ), []( const tripoint &jk ) {
+            return g->is_empty( jk );
+        } );
+        if( !pnt ) {
             critter->setpos( c->pos() );
             add_msg( m_bad, _( "You fall down under %s!" ), critter->disp_name().c_str() );
         } else {
-            critter->setpos( random_entry( valid ) );
+            critter->setpos( *pnt );
         }
 
         height++;
@@ -1164,26 +1146,19 @@ void trapfunc::shadow( Creature *c, const tripoint &p )
     // Monsters and npcs are completely ignored here, should they?
     g->u.add_memorial_log( pgettext( "memorial_male", "Triggered a shadow trap." ),
                            pgettext( "memorial_female", "Triggered a shadow trap." ) );
-    int tries = 0;
-    tripoint monp = p;
-    do {
-        if( one_in( 2 ) ) {
-            monp.x = rng( g->u.posx() - 5, g->u.posx() + 5 );
-            monp.y = ( one_in( 2 ) ? g->u.posy() - 5 : g->u.posy() + 5 );
-        } else {
-            monp.x = ( one_in( 2 ) ? g->u.posx() - 5 : g->u.posx() + 5 );
-            monp.y = rng( g->u.posy() - 5, g->u.posy() + 5 );
-        }
-    } while( tries < 5 && !g->is_empty( monp ) &&
-             !g->m.sees( monp, g->u.pos(), 10 ) );
-
-    if( tries < 5 ) { // @todo: tries increment is missing, so this expression is always true
-        if( monster *const spawned = g->summon_mon( mon_shadow, monp ) ) {
-            add_msg( m_warning, _( "A shadow forms nearby." ) );
-            spawned->reset_special_rng( "DISAPPEAR" );
-        }
-        g->m.remove_trap( p );
+    const int radius = 5; // arbitrary number
+    const tripoint_range range = g->m.points_in_radius( g->u.pos(), radius );
+    const cata::optional<tripoint> pnt = random_point( range, []( const tripoint &p ) {
+        return g->is_empty( p ) && g->m.sees( p, g->u.pos(), 10 );
+    } );
+    if( !pnt ) {
+        return;
     }
+    if( monster *const spawned = g->summon_mon( mon_shadow, *pnt ) ) {
+        add_msg( m_warning, _( "A shadow forms nearby." ) );
+        spawned->reset_special_rng( "DISAPPEAR" );
+    }
+    g->m.remove_trap( p );
 }
 
 void trapfunc::drain( Creature *c, const tripoint & )
@@ -1215,24 +1190,15 @@ void trapfunc::snake( Creature *c, const tripoint &p )
                              pgettext( "memorial_female", "Triggered a shadow snake trap." ) );
     }
     if( one_in( 3 ) ) {
-        int tries = 0;
-        tripoint monp = p;
+        const int radius = 5; // arbitrary number
+        const tripoint_range range = g->m.points_in_radius( g->u.pos(), radius );
         // This spawns snakes only when the player can see them, why?
-        do {
-            tries++;
-            if( one_in( 2 ) ) {
-                monp.x = rng( g->u.posx() - 5, g->u.posx() + 5 );
-                monp.y = ( one_in( 2 ) ? g->u.posy() - 5 : g->u.posy() + 5 );
-            } else {
-                monp.x = ( one_in( 2 ) ? g->u.posx() - 5 : g->u.posx() + 5 );
-                monp.y = rng( g->u.posy() - 5, g->u.posy() + 5 );
-            }
-        } while( tries < 5 && !g->is_empty( monp ) &&
-                 !g->m.sees( monp, g->u.pos(), 10 ) );
-
-        if( tries < 5 ) { // @todo: tries increment is missing, so this expression is always true
+        const cata::optional<tripoint> pnt = random_point( range, []( const tripoint &p ) {
+            return g->is_empty( p ) && g->m.sees( p, g->u.pos(), 10 );
+        } );
+        if( pnt ) {
             add_msg( m_warning, _( "A shadowy snake forms nearby." ) );
-            g->summon_mon( mon_shadow_snake, monp );
+            g->summon_mon( mon_shadow_snake, *pnt );
             g->m.remove_trap( p );
         }
     }

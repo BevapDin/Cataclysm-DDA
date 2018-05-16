@@ -1230,16 +1230,10 @@ void computer::activate_failure(computer_failure_type fail)
     case COMPFAIL_MANHACKS: {
         int num_robots = rng(4, 8);
         for (int i = 0; i < num_robots; i++) {
-            tripoint mp( 0, 0, g->u.posz() );
-            int tries = 0;
-            do {
-                mp.x = rng(g->u.posx() - 3, g->u.posx() + 3);
-                mp.y = rng(g->u.posy() - 3, g->u.posy() + 3);
-                tries++;
-            } while (!g->is_empty( mp ) && tries < 10);
-            if (tries != 10) {
+            const cata::optional<tripoint> mp = random_point( g->m.points_in_radius(g->u.pos(), 3), [](const tripoint &p ) { return g->is_empty(p); } );
+            if(mp) {
                 add_msg(m_warning, _("Manhacks drop from compartments in the ceiling."));
-                g->summon_mon( mon_manhack, mp );
+                g->summon_mon( mon_manhack, *mp );
             }
         }
     }
@@ -1248,16 +1242,10 @@ void computer::activate_failure(computer_failure_type fail)
     case COMPFAIL_SECUBOTS: {
         int num_robots = 1;
         for (int i = 0; i < num_robots; i++) {
-            tripoint mp( 0, 0, g->u.posz() );
-            int tries = 0;
-            do {
-                mp.x = rng(g->u.posx() - 3, g->u.posx() + 3);
-                mp.y = rng(g->u.posy() - 3, g->u.posy() + 3);
-                tries++;
-            } while (!g->is_empty(mp) && tries < 10);
-            if (tries != 10) {
+            const cata::optional<tripoint> mp = random_point( g->m.points_in_radius( g->u.pos(), 3 ), [](const tripoint &p ) { return g->is_empty(p); } );
+            if( mp ) {
                 add_msg(m_warning, _("Secubots emerge from compartments in the floor."));
-                g->summon_mon(mon_secubot, mp);
+                g->summon_mon( mon_secubot, *mp );
             }
         }
     }

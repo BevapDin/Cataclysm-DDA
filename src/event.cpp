@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "line.h"
 #include "rng.h"
+#include "map_iterator.h"
 #include "output.h"
 #include "options.h"
 #include "translations.h"
@@ -62,17 +63,9 @@ void event::actualize()
                                 pgettext("memorial_female", "Drew the attention of more dark wyrms!"));
         int num_wyrms = rng(1, 4);
         for (int i = 0; i < num_wyrms; i++) {
-            int tries = 0;
-            tripoint monp = g->u.pos();
-            do {
-                monp.x = rng(0, SEEX * MAPSIZE);
-                monp.y = rng(0, SEEY * MAPSIZE);
-                tries++;
-            } while (tries < 10 && !g->is_empty(monp) &&
-                    rl_dist(g->u.pos(), monp) <= 2);
-            if (tries < 10) {
-                g->m.ter_set(monp, t_rock_floor);
-                g->summon_mon(mon_dark_wyrm, monp);
+            if( const cata::optional<tripoint> monp = random_point( points_in_range( g->m ), []( const tripoint &monp ) { return g->is_empty(monp) && rl_dist(g->u.pos(), monp) > 2; } ) ) {
+                g->m.ter_set(*monp, t_rock_floor);
+                g->summon_mon(mon_dark_wyrm, *monp);
             }
         }
         // You could drop the flag, you know.
@@ -102,30 +95,14 @@ void event::actualize()
                 break;
             }
         }
+        const int z = fault.z;
+        const int o = 2 * SEEX - 8;
+        const tripoint_range range = horizontal ?
+            g->m.points_in_rectangle( tripoint(fault.x, fault.y - 1, z), tripoint(fault.x + o, fault.y + 1, z) ) :
+            g->m.points_in_rectangle( tripoint(fault.x - 1, fault.y, z), tripoint(fault.x + 1, fault.y + o, z) );
         for (int i = 0; i < num_horrors; i++) {
-            int tries = 0;
-            int monx = -1, mony = -1;
-            do {
-                if (horizontal) {
-                    monx = rng(fault.x, fault.x + 2 * SEEX - 8);
-                    for (int n = -1; n <= 1; n++) {
-                        if (g->m.ter(monx, fault.y + n) == t_rock_floor) {
-                            mony = fault.y + n;
-                        }
-                    }
-                } else { // Vertical fault
-                    mony = rng(fault.y, fault.y + 2 * SEEY - 8);
-                    for (int n = -1; n <= 1; n++) {
-                        if (g->m.ter(fault.x + n, mony) == t_rock_floor) {
-                            monx = fault.x + n;
-                        }
-                    }
-                }
-                tries++;
-            } while ((monx == -1 || mony == -1 || !g->is_empty({monx, mony, g->u.posz()})) &&
-                        tries < 10);
-            if (tries < 10) {
-                g->summon_mon(mon_amigara_horror, tripoint(monx, mony, g->u.posz()));
+            if( const cata::optional<tripoint> monp = random_point( range, [](const tripoint &jk) { return g->is_empty(jk)&& g->m.ter(jk) == t_rock_floor; })) {
+                g->summon_mon(mon_amigara_horror, *monp);
             }
         }
     } break;
@@ -223,15 +200,8 @@ void event::actualize()
             mon_sewer_snake, mon_dermatik, mon_spider_widow_giant, mon_spider_cellar_giant
         } };
         const mtype_id &montype = random_entry( temple_monsters );
-        int tries = 0, x, y;
-        do {
-            x = rng(g->u.posx() - 5, g->u.posx() + 5);
-            y = rng(g->u.posy() - 5, g->u.posy() + 5);
-            tries++;
-        } while (tries < 20 && !g->is_empty({x, y, g->u.posz()}) &&
-                    rl_dist(x, y, g->u.posx(), g->u.posy()) <= 2);
-        if (tries < 20) {
-            g->summon_mon(montype, tripoint(x, y, g->u.posz()));
+        if( const cata::optional<tripoint> monp = random_point( g->m.points_in_radius( g->u.pos(), 5 ), []( const tripoint &monp ) { return g->is_empty(monp) && rl_dist(g->u.pos(), monp) > 2; } ) ) {
+            g->summon_mon(montype, *monp);
         }
     } break;
 
