@@ -1724,9 +1724,7 @@ void game::process_activity()
         refresh_display();
     }
 
-    while( u.moves > 0 && u.has_activity() ) {
-        u.activity.do_turn( u );
-    }
+    u.do_activity();
 }
 
 void game::catch_a_monster( std::vector<monster *> &catchables, const tripoint &pos, player *p,
@@ -1759,7 +1757,8 @@ bool cancel_auto_move( player &p, const std::string &text )
 
 bool game::cancel_activity_or_ignore_query( const distraction_type type, const std::string &text )
 {
-    if( cancel_auto_move( u, text ) || !u.has_activity() || u.activity.is_distraction_ignored( type ) ) {
+    if( cancel_auto_move( u, text ) || !u.has_activity() ||
+        u.activity.is_distraction_ignored( type ) ) {
         return false;
     }
 

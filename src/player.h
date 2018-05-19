@@ -20,6 +20,10 @@
 
 static const std::string DEFAULT_HOTKEYS( "1234567890abcdefghijklmnopqrstuvwxyz" );
 
+class activity;
+class activity_wrapper;
+class activity_type;
+using activity_id = string_id<activity_type>;
 class craft_command;
 class recipe_subset;
 enum action_id : int;
@@ -1178,9 +1182,11 @@ class player : public Character
                               const std::string &name = "" );
         /** Assigns activity to player, possibly resuming old activity if it's similar enough. */
         void assign_activity( const player_activity &act, bool allow_resume = true );
+        void assign_activity( std::unique_ptr<activity> ptr, bool allow_resume = true );
         bool has_activity( const activity_id type ) const;
         bool has_activity() const;
         void cancel_activity();
+        void do_activity();
 
         int get_morale_level() const; // Modified by traits, &c
         void add_morale( morale_type type, int bonus, int max_bonus = 0, time_duration duration = 6_minutes,
@@ -1673,6 +1679,8 @@ class player : public Character
 
     private:
         friend class debug_menu::mission_debug;
+
+        pimpl<activity_wrapper> activities;
 
         // Items the player has identified.
         std::unordered_set<std::string> items_identified;

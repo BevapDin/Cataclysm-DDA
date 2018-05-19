@@ -12,6 +12,9 @@
 #include "map.h"
 #include "filesystem.h"
 #include "fungal_effects.h"
+#include "activity.h"
+#include "player_activity.h"
+#include "player_activity_wrapper.h"
 #include "debug.h"
 #include "addiction.h"
 #include "inventory.h"
@@ -9538,7 +9541,7 @@ void player::do_read( item &book )
 {
     const auto &reading = book.type->book;
     if( !reading ) {
-        activity.set_to_null();
+        activities->aborted();
         return;
     }
     const skill_id &skill = reading->skill;
@@ -9587,7 +9590,7 @@ void player::do_read( item &book )
         if( recipe_list.size() != reading->recipes.size() ) {
             add_msg( m_info, _( "It might help you figuring out some more recipes." ) );
         }
-        activity.set_to_null();
+        activities->aborted();
         return;
     }
 
@@ -9750,7 +9753,7 @@ void player::do_read( item &book )
     }
 
     if( continuous ) {
-        activity.set_to_null();
+        activities->aborted();
         read( get_item_position( &book ), true );
         if( activity ) {
             return;
@@ -9763,7 +9766,7 @@ void player::do_read( item &book )
         m->second.call( *this, book, false, pos() );
     }
 
-    activity.set_to_null();
+    activities->aborted();
 }
 
 bool player::has_identified( const std::string &item_id ) const
@@ -11034,8 +11037,15 @@ void player::assign_activity( const activity_id &type, int moves, int index, int
 
 void player::assign_activity( const player_activity &act, bool allow_resume )
 {
-    if( allow_resume && !backlog.empty() && backlog.front().can_resume_with( act, *this ) ) {
+    assign_activity( std::unique_ptr<activity>( new ( act ) ), allow_resume );
+}
+
+void player::assign_activity( std::unique_ptr<activity> act, const bool allow_resume )
+{
+    if( allow_resume && activities->resume_with( *act ) ) {
+        // @todo task specific message?
         add_msg_if_player( _("You resume your task.") );
+<<<<<<< HEAD
         activity = backlog.front();
         backlog.pop_front();
     } else {
@@ -11044,13 +11054,27 @@ void player::assign_activity( const player_activity &act, bool allow_resume )
         }
 
         activity = act;
+=======
+        return;
+>>>>>>> New player activity wrapper implementation
     }
+    activities->assign( std::move( act ) );
+    activities->current().warned_of_proximity = false;
 
+<<<<<<< HEAD
     activity.allow_distractions();
 
     if( activity.rooted() ) {
+=======
+    if( activities->current().rooted() ) {
+>>>>>>> New player activity wrapper implementation
         rooted_message();
     }
+}
+
+void player::assign_activity( player_activity act, bool allow_resume )
+{
+    assign_activity( player_activity_wrapper( std::move( act ) ), allow_resume );
 }
 
 bool player::has_activity() const
@@ -11065,6 +11089,7 @@ bool player::has_activity(const activity_id type) const
 
 void player::cancel_activity()
 {
+<<<<<<< HEAD
     if( has_activity( activity_id( "ACT_MOVE_ITEMS" ) ) && is_hauling() ) {
         stop_hauling();
     }
@@ -11079,7 +11104,9 @@ void player::cancel_activity()
     if( activity && activity.is_suspendable() ) {
         backlog.push_front( activity );
     }
-    activity = player_activity();
+=======
+>>>>>>> New player activity wrapper implementation
+    activities->cancel();
 }
 
 bool player::has_gun_for_ammo( const ammotype &at ) const
@@ -12327,5 +12354,21 @@ void player::do_skill_rust()
         if( newSkill < oldSkillLevel ) {
             add_msg_if_player( m_bad, _( "Your skill in %s has reduced to %d!" ), aSkill.name(), newSkill );
         }
+    }
+}
+
+player_activity &player::old_act()
+{
+    return dynamic_cast<player_activity_wrapper&>( activities->current() );
+}
+
+const player_activity &player::old_act() const
+{
+    return dynamic_cast<const player_activity_wrapper&>( activities->current() );
+}
+
+void player::do_activity() {
+    while( moves > 0 && *activities ) {
+        activities->do_turn( u );
     }
 }
