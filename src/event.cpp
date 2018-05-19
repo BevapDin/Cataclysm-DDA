@@ -92,15 +92,14 @@ void event::actualize()
         g->u.add_memorial_log(pgettext("memorial_male", "Angered a group of amigara horrors!"),
                               pgettext("memorial_female", "Angered a group of amigara horrors!"));
         int num_horrors = rng(3, 5);
-        int faultx = -1, faulty = -1;
+        tripoint fault;
         bool horizontal = false;
-        for (int x = 0; x < SEEX * MAPSIZE && faultx == -1; x++) {
-            for (int y = 0; y < SEEY * MAPSIZE && faulty == -1; y++) {
-                if (g->m.ter(x, y) == t_fault) {
-                    faultx = x;
-                    faulty = y;
-                    horizontal = (g->m.ter(x - 1, y) == t_fault || g->m.ter(x + 1, y) == t_fault);
-                }
+        static const tripoint horizontal_vector( 1, 0, 0 );
+        for( const tripoint &p : points_in_range( g->m ) ) {
+            if (g->m.ter(p) == t_fault) {
+                fault = p;
+                horizontal = (g->m.ter(p - horizontal_vector) == t_fault || g->m.ter(p+horizontal_vector) == t_fault);
+                break;
             }
         }
         for (int i = 0; i < num_horrors; i++) {
@@ -108,17 +107,17 @@ void event::actualize()
             int monx = -1, mony = -1;
             do {
                 if (horizontal) {
-                    monx = rng(faultx, faultx + 2 * SEEX - 8);
+                    monx = rng(fault.x, fault.x + 2 * SEEX - 8);
                     for (int n = -1; n <= 1; n++) {
-                        if (g->m.ter(monx, faulty + n) == t_rock_floor) {
-                            mony = faulty + n;
+                        if (g->m.ter(monx, fault.y + n) == t_rock_floor) {
+                            mony = fault.y + n;
                         }
                     }
                 } else { // Vertical fault
-                    mony = rng(faulty, faulty + 2 * SEEY - 8);
+                    mony = rng(fault.y, fault.y + 2 * SEEY - 8);
                     for (int n = -1; n <= 1; n++) {
-                        if (g->m.ter(faultx + n, mony) == t_rock_floor) {
-                            monx = faultx + n;
+                        if (g->m.ter(fault.x + n, mony) == t_rock_floor) {
+                            monx = fault.x + n;
                         }
                     }
                 }
