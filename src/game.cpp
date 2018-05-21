@@ -1600,7 +1600,7 @@ void game::set_driving_view_offset(const point &p)
 
 void game::process_activity()
 {
-    if( !u.activity ) {
+    if( !u.activity && !*u.activity_ ) {
         return;
     }
 
@@ -1608,6 +1608,8 @@ void game::process_activity()
         draw();
         refresh_display();
     }
+
+    u.activitiy_->do_turn();
 
     while( u.moves > 0 && u.activity ) {
         u.activity.do_turn( u );

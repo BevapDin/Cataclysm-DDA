@@ -18,6 +18,7 @@
 
 static const std::string DEFAULT_HOTKEYS("1234567890abcdefghijklmnopqrstuvwxyz");
 
+class activity_wrapper;
 class craft_command;
 class recipe_subset;
 enum action_id : int;
@@ -1578,6 +1579,8 @@ class player : public Character
 
     private:
         friend class debug_menu::mission_debug;
+
+        pimpl<activity_wrapper> activitiy_;
 
         // Items the player has identified.
         std::unordered_set<std::string> items_identified;
