@@ -110,27 +110,31 @@ void event::actualize()
   case EVENT_ROOTS_DIE:
    g->u.add_memorial_log(pgettext("memorial_male", "Destroyed a triffid grove."),
                          pgettext("memorial_female", "Destroyed a triffid grove."));
-   for (int x = 0; x < SEEX * MAPSIZE; x++) {
-    for (int y = 0; y < SEEY * MAPSIZE; y++) {
-     if (g->m.ter(x, y) == t_root_wall && one_in(3))
-      g->m.ter_set(x, y, t_underbrush);
-    }
-   }
+            for( const tripoint &p : points_in_range( g->m ) ) {
+                if( p.z != g->get_levz() ) {
+                    continue; // @todo handle Z-levels
+                }
+                if( g->m.ter( p ) == t_root_wall && one_in( 3 ) ) {
+                    g->m.ter_set( p, t_underbrush );
+                }
+            }
    break;
 
   case EVENT_TEMPLE_OPEN: {
    g->u.add_memorial_log(pgettext("memorial_male", "Opened a strange temple."),
                          pgettext("memorial_female", "Opened a strange temple."));
    bool saw_grate = false;
-   for (int x = 0; x < SEEX * MAPSIZE; x++) {
-    for (int y = 0; y < SEEY * MAPSIZE; y++) {
-     if (g->m.ter(x, y) == t_grate) {
-      g->m.ter_set(x, y, t_stairs_down);
-      if (!saw_grate && g->u.sees(tripoint(x, y,g->get_levz())))
-       saw_grate = true;
-     }
-    }
-   }
+            for( const tripoint &p : points_in_range( g->m ) ) {
+                if( p.z != g->get_levz() ) {
+                    continue; // @todo handle Z-levels
+                }
+                if( g->m.ter( p ) == t_grate ) {
+                    g->m.ter_set( p, t_stairs_down );
+                    if( !saw_grate && g->u.sees( p ) ) {
+                        saw_grate = true;
+                    }
+                }
+            }
    if (saw_grate)
     add_msg(_("The nearby grates open to reveal a staircase!"));
   } break;
