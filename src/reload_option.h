@@ -13,7 +13,7 @@ class reload_option
         reload_option( const reload_option & );
         reload_option &operator=( const reload_option & );
 
-        reload_option( const player *who, const item *target, const item *parent, item_location &&ammo );
+        reload_option( const player &who, const item &target, const item &parent, item_location &&ammo );
 
         const player *who;
         const item *target;

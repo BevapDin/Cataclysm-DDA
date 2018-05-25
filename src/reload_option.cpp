@@ -22,8 +22,8 @@ reload_option &reload_option::operator=( const reload_option &rhs )
     return *this;
 }
 
-reload_option::reload_option( const player *who, const item *target, const item *parent,
-                              item_location &&ammo ) : who( who ), target( target ), ammo( std::move( ammo ) ), parent( parent )
+reload_option::reload_option( const player &who, const item &target, const item &parent,
+                              item_location &&ammo ) : who( &who ), target( &target ), ammo( std::move( ammo ) ), parent( &parent )
 {
     if( this->target->is_ammo_belt() && this->target->type->magazine->linkage != "NULL" ) {
         max_qty = this->who->charges_of( this->target->type->magazine->linkage );

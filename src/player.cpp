@@ -7000,7 +7000,7 @@ cata::optional<reload_option> player::select_ammo( const item& base, bool prompt
                 }
             }
             if( can_reload( *e, id ) || e->has_flag( "RELOAD_AND_SHOOT" ) ) {
-                ammo_list.emplace_back( this, e, &base, std::move( ammo ) );
+                ammo_list.emplace_back( *this, *e, base, std::move( ammo ) );
             }
         }
     }

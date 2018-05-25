@@ -2156,7 +2156,7 @@ bool bandolier_actor::reload( player &p, item &obj ) const
     std::vector<reload_option> opts;
     std::transform( std::make_move_iterator( found.begin() ), std::make_move_iterator( found.end() ),
                     std::back_inserter( opts ), [&]( item_location &&e ) {
-        return reload_option( &p, &obj, &obj, std::move( e ) );
+        return reload_option( p, obj, obj, std::move( e ) );
     } );
 
     cata::optional<reload_option> sel_ = p.select_ammo( obj, std::move( opts ) );
