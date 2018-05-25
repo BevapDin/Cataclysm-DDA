@@ -22,6 +22,7 @@ class craft_command;
 class recipe_subset;
 enum action_id : int;
 struct bionic;
+class reload_option;
 class JsonObject;
 class JsonIn;
 class JsonOut;
@@ -814,10 +815,10 @@ class player : public Character
          * @param base Item to select ammo for
          * @param prompt force display of the menu even if only one choice
          */
-        item::reload_option select_ammo( const item& base, bool prompt = false ) const;
+        reload_option select_ammo( const item& base, bool prompt = false ) const;
 
         /** Select ammo from the provided options */
-        item::reload_option select_ammo( const item &base, std::vector<item::reload_option> opts ) const;
+        reload_option select_ammo( const item &base, std::vector<reload_option> opts ) const;
 
         /** Check player strong enough to lift an object unaided by equipment (jacks, levers etc) */
         template <typename T>

@@ -22,6 +22,7 @@
 #include "effect.h"
 #include "vehicle.h"
 #include "mtype.h"
+#include "reload_option.h"
 #include "field.h"
 #include "sounds.h"
 #include "gates.h"
@@ -3265,7 +3266,7 @@ bool npc::complain()
 
 void npc::do_reload( item &it )
 {
-    item::reload_option reload_opt = select_ammo( it );
+    reload_option reload_opt = select_ammo( it );
 
     if( !reload_opt ) {
         debugmsg( "do_reload failed: no usable ammo for %s", it.tname().c_str() );

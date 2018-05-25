@@ -17,6 +17,7 @@
 #include "inventory.h"
 #include "skill.h"
 #include "options.h"
+#include "reload_option.h"
 #include "weather.h"
 #include "item.h"
 #include "material.h"
@@ -6764,10 +6765,8 @@ void player::rooted()
     }
 }
 
-item::reload_option player::select_ammo( const item &base, std::vector<item::reload_option> opts ) const
+reload_option player::select_ammo( const item &base, std::vector<reload_option> opts ) const
 {
-    using reload_option = item::reload_option;
-
     if( opts.empty() ) {
         add_msg_if_player( m_info, _( "Never mind." ) );
         return reload_option();
@@ -6914,13 +6913,13 @@ item::reload_option player::select_ammo( const item &base, std::vector<item::rel
 
     struct reload_callback : public uimenu_callback {
         public:
-            std::vector<item::reload_option> &opts;
+            std::vector<reload_option> &opts;
             const std::function<std::string( int )> draw_row;
             int last_key;
             const int default_to;
             const bool can_partial_reload;
 
-            reload_callback( std::vector<item::reload_option> &_opts,
+            reload_callback( std::vector<reload_option> &_opts,
                              std::function<std::string( int )> _draw_row,
                              int _last_key, int _default_to, bool _can_partial_reload ) :
                            opts( _opts ), draw_row( _draw_row ),
@@ -6971,9 +6970,8 @@ item::reload_option player::select_ammo( const item &base, std::vector<item::rel
     return std::move( opts[ menu.ret ] );
 }
 
-item::reload_option player::select_ammo( const item& base, bool prompt ) const
+reload_option player::select_ammo( const item& base, bool prompt ) const
 {
-    using reload_option = item::reload_option;
     std::vector<reload_option> ammo_list;
 
     auto opts = base.gunmods();

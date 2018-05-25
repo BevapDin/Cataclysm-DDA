@@ -12,7 +12,6 @@
 
 #include "visitable.h"
 #include "string_id.h"
-#include "item_location.h"
 #include "debug.h"
 #include "cata_utility.h"
 #include "calendar.h"
@@ -21,6 +20,7 @@ class nc_color;
 class JsonObject;
 class JsonIn;
 class JsonOut;
+class item_location;
 template<typename T>
 class ret_val;
 namespace units
@@ -352,34 +352,6 @@ class item : public visitable<item>
 
     // Returns the category of this item.
     const item_category &get_category() const;
-
-    class reload_option {
-        public:
-            reload_option() = default;
-
-            reload_option( const reload_option & );
-            reload_option &operator=( const reload_option & );
-
-            reload_option( const player *who, const item *target, const item *parent, item_location&& ammo );
-
-            const player *who = nullptr;
-            const item *target = nullptr;
-            item_location ammo;
-
-            long qty() const { return qty_; }
-            void qty( long val );
-
-            int moves() const;
-
-            explicit operator bool() const {
-                return who && target && ammo && qty_ > 0;
-            }
-
-        private:
-            long qty_ = 0;
-            long max_qty = LONG_MAX;
-            const item *parent = nullptr;
-    };
 
     /**
      * Reload item using ammo from location returning true if successful

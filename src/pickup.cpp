@@ -17,6 +17,7 @@
 #include "cata_utility.h"
 #include "string_formatter.h"
 #include "debug.h"
+#include "reload_option.h"
 #include "vehicle_selector.h"
 #include "veh_interact.h"
 #include "item_search.h"
@@ -256,7 +257,7 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
         }
 
         case RELOAD_TURRET: {
-            item::reload_option opt = g->u.select_ammo( *turret.base(), true );
+            reload_option opt = g->u.select_ammo( *turret.base(), true );
             if( opt ) {
                 g->u.assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
                 g->u.activity.targets.emplace_back( turret.base() );
