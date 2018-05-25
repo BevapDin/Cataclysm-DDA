@@ -1340,21 +1340,19 @@ void computer::activate_failure(computer_failure_type fail)
 
     case COMPFAIL_DESTROY_DATA:
         print_error(_("ERROR: ACCESSING DATA MALFUNCTION"));
-        for (int x = 0; x <= 23; x++) {
-            for (int y = 0; y <= 23; y++) {
-                if (g->m.ter(x, y) == t_floor_blue) {
-                    if (g->m.i_at(x, y).empty()) {
-                        print_error(_("ERROR: Please place memory bank in scan area."));
-                    } else if (g->m.i_at(x, y).size() > 1) {
-                        print_error(_("ERROR: Please only scan one item at a time."));
-                    } else if (g->m.i_at(x, y)[0].typeId() != "usb_drive") {
-                        print_error(_("ERROR: Memory bank destroyed or not present."));
-                    } else if (g->m.i_at(x, y)[0].contents.empty()) {
-                        print_error(_("ERROR: Memory bank is empty."));
-                    } else {
-                        print_error(_("ERROR: Data bank destroyed."));
-                        g->m.i_clear( x, y );
-                    }
+        for( const tripoint &dest : g->m.points_in_radius( g->u.pos(), 2 ) ) {
+            if (g->m.ter( dest ) == t_floor_blue) {
+                if (g->m.i_at( dest ).empty()) {
+                    print_error(_("ERROR: Please place memory bank in scan area."));
+                } else if (g->m.i_at( dest ).size() > 1) {
+                    print_error(_("ERROR: Please only scan one item at a time."));
+                } else if (g->m.i_at( dest )[0].typeId() != "usb_drive") {
+                    print_error(_("ERROR: Memory bank destroyed or not present."));
+                } else if (g->m.i_at( dest )[0].contents.empty()) {
+                    print_error(_("ERROR: Memory bank is empty."));
+                } else {
+                    print_error(_("ERROR: Data bank destroyed."));
+                    g->m.i_clear( dest );
                 }
             }
         }
