@@ -10,6 +10,7 @@
 #include "vpart_position.h"
 #include "effect.h"
 #include "mtype.h"
+#include "map_iterator.h"
 #include "npc.h"
 #include "itype.h"
 #include "vehicle.h"
@@ -202,14 +203,9 @@ bool Creature::sees( const tripoint &t, bool is_player ) const
 // Maybe TODO: If this is too slow, precalculate a bounding box and clip the tested area to it
 bool overlaps_vehicle( const std::set<tripoint> &veh_area, const tripoint &pos, const int area )
 {
-    tripoint tmp = pos;
-    int &x = tmp.x;
-    int &y = tmp.y;
-    for( x = pos.x - area; x < pos.x + area; x++ ) {
-        for( y = pos.y - area; y < pos.y + area; y++ ) {
-            if( veh_area.count( tmp ) > 0 ) {
-                return true;
-            }
+    for( const tripoint &tmp : g->m.points_in_radius( pos, area ) ) {
+        if( veh_area.count( tmp ) > 0 ) {
+            return true;
         }
     }
 
