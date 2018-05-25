@@ -1091,8 +1091,8 @@ item &npc::find_reloadable()
         if( !wants_to_reload( *this, *node ) ) {
             return VisitResponse::NEXT;
         }
-        const auto it_loc = select_ammo( *node ).ammo;
-        if( it_loc && wants_to_reload_with( *node, *it_loc ) ) {
+        const cata::optional<reload_option> it_loc = select_ammo( *node );
+        if( it_loc && wants_to_reload_with( *node, *it_loc->ammo ) ) {
             reloadable = node;
             return VisitResponse::ABORT;
         }
@@ -1127,8 +1127,8 @@ item_location npc::find_usable_ammo( const item &weap )
         return item_location();
     }
 
-    auto loc = select_ammo( weap ).ammo;
-    if( !loc || !wants_to_reload_with( weap, *loc ) ) {
+    const cata::optional<reload_option> loc = select_ammo( weap );
+    if( !loc || !wants_to_reload_with( weap, *loc->ammo ) ) {
         return item_location();
     }
 
@@ -3266,12 +3266,13 @@ bool npc::complain()
 
 void npc::do_reload( item &it )
 {
-    reload_option reload_opt = select_ammo( it );
+    const cata::optional<reload_option> reload_opt_ = select_ammo( it );
 
     if( !reload_opt ) {
         debugmsg( "do_reload failed: no usable ammo for %s", it.tname().c_str() );
         return;
     }
+    reload_option &reload_opt = *reload_opt_;
 
     // Note: we may be reloading the magazine inside, not the gun itself
     // Maybe @todo: allow reload functions to understand such reloads instead of const casts

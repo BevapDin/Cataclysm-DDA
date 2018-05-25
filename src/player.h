@@ -815,10 +815,10 @@ class player : public Character
          * @param base Item to select ammo for
          * @param prompt force display of the menu even if only one choice
          */
-        reload_option select_ammo( const item& base, bool prompt = false ) const;
+        cata::optional<reload_option> select_ammo( const item& base, bool prompt = false ) const;
 
         /** Select ammo from the provided options */
-        reload_option select_ammo( const item &base, std::vector<reload_option> opts ) const;
+        cata::optional<reload_option> select_ammo( const item &base, std::vector<reload_option> opts ) const;
 
         /** Check player strong enough to lift an object unaided by equipment (jacks, levers etc) */
         template <typename T>

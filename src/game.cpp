@@ -9737,13 +9737,13 @@ bool game::plfire()
     // @todo: move handling "RELOAD_AND_SHOOT" flagged guns to a separate function.
     if( gun->has_flag( "RELOAD_AND_SHOOT" ) ) {
         if( !gun->ammo_remaining() ) {
-            reload_option opt = u.select_ammo( *gun );
+            cata::optional<reload_option opt> = u.select_ammo( *gun );
             if( !opt ) {
                 // Menu canceled
                 return false;
             }
-            reload_time += opt.moves();
-            if( !gun->reload( u, std::move( opt.ammo ), 1 ) ) {
+            reload_time += opt->moves();
+            if( !gun->reload( u, std::move( opt->ammo ), 1 ) ) {
                 // Reload not allowed
                 return false;
             }
@@ -10247,12 +10247,12 @@ void game::reload( item_location &loc, bool prompt )
         return;
     }
 
-    reload_option opt = u.select_ammo( *it, prompt );
+    cata::optional<reload_option> opt = u.select_ammo( *it, prompt );
 
-    if ( opt ) {
-        u.assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
-        u.activity.targets.emplace_back( u, const_cast<item *>( opt.target ) );
-        u.activity.targets.push_back( std::move( opt.ammo ) );
+    if( opt ) {
+        u.assign_activity( activity_id( "ACT_RELOAD" ), opt->moves(), opt->qty() );
+        u.activity.targets.emplace_back( u, const_cast<item *>( opt->target ) );
+        u.activity.targets.push_back( std::move( opt->ammo ) );
     }
 
     refresh_all();
@@ -10264,11 +10264,11 @@ void game::reload()
         vehicle *veh = veh_pointer_or_null( m.veh_at( u.pos() ) );
         turret_data turret;
         if( veh && ( turret = veh->turret_query( u.pos() ) ) && turret.can_reload() ) {
-            reload_option opt = g->u.select_ammo( *turret.base(), true );
+            cata::optional<reload_option> opt = g->u.select_ammo( *turret.base(), true );
             if( opt ) {
-                g->u.assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
+                g->u.assign_activity( activity_id( "ACT_RELOAD" ), opt->moves(), opt->qty() );
                 g->u.activity.targets.emplace_back( turret.base() );
-                g->u.activity.targets.push_back( std::move( opt.ammo ) );
+                g->u.activity.targets.push_back( std::move( opt->ammo ) );
             }
             return;
         }

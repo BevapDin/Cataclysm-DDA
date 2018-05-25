@@ -6765,11 +6765,11 @@ void player::rooted()
     }
 }
 
-reload_option player::select_ammo( const item &base, std::vector<reload_option> opts ) const
+cata::optional<reload_option> player::select_ammo( const item &base, std::vector<reload_option> opts ) const
 {
     if( opts.empty() ) {
         add_msg_if_player( m_info, _( "Never mind." ) );
-        return reload_option();
+        return cata::nullopt;
     }
 
     uimenu menu;
@@ -6962,7 +6962,7 @@ reload_option player::select_ammo( const item &base, std::vector<reload_option> 
     menu.query();
     if( menu.ret < 0 || menu.ret >= ( int ) opts.size() ) {
         add_msg_if_player( m_info, _( "Never mind." ) );
-        return reload_option();
+        return cata::nullopt;
     }
 
     const item_location& sel = opts[ menu.ret ].ammo;
@@ -6970,7 +6970,7 @@ reload_option player::select_ammo( const item &base, std::vector<reload_option> 
     return std::move( opts[ menu.ret ] );
 }
 
-reload_option player::select_ammo( const item& base, bool prompt ) const
+cata::optional<reload_option> player::select_ammo( const item& base, bool prompt ) const
 {
     std::vector<reload_option> ammo_list;
 
@@ -7023,7 +7023,7 @@ reload_option player::select_ammo( const item& base, bool prompt ) const
             add_msg_if_player( m_info, _( "You don't have any %s to reload your %s!" ),
                                name.c_str(), base.tname() );
         }
-        return reload_option();
+        return cata::nullopt;
     }
 
     // sort in order of move cost (ascending), then remaining ammo (descending) with empty magazines always last
