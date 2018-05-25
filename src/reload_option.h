@@ -4,8 +4,6 @@
 
 #include "item_location.h"
 
-#include <climits>
-
 class player;
 class item;
 
@@ -17,8 +15,8 @@ class reload_option
 
         reload_option( const player *who, const item *target, const item *parent, item_location &&ammo );
 
-        const player *who = nullptr;
-        const item *target = nullptr;
+        const player *who;
+        const item *target;
         item_location ammo;
 
         long qty() const {
@@ -29,9 +27,9 @@ class reload_option
         int moves() const;
 
     private:
-        long qty_ = 0;
-        long max_qty = LONG_MAX;
-        const item *parent = nullptr;
+        long qty_;
+        long max_qty;
+        const item *parent;
 };
 
 #endif

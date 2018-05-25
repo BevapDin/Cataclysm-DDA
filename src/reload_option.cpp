@@ -5,6 +5,7 @@
 #include "player.h"
 
 #include <algorithm>
+#include <climits>
 
 reload_option::reload_option( const reload_option &rhs ) : who( rhs.who ), target( rhs.target ),
     ammo( rhs.ammo.clone() ), qty_( rhs.qty_ ), max_qty( rhs.max_qty ), parent( rhs.parent ) { }
@@ -26,6 +27,8 @@ reload_option::reload_option( const player *who, const item *target, const item 
 {
     if( this->target->is_ammo_belt() && this->target->type->magazine->linkage != "NULL" ) {
         max_qty = this->who->charges_of( this->target->type->magazine->linkage );
+    } else {
+        max_qty = LONG_MAX;
     }
     qty( max_qty );
 }
