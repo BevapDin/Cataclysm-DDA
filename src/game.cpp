@@ -1440,8 +1440,6 @@ bool game::do_turn()
         m.spawn_monsters( false );
     }
 
-    u.update_body();
-
     // Auto-save if autosave is enabled
     if( get_option<bool>( "AUTOSAVE" ) &&
         calendar::once_every( 1_turns * get_option<int>( "AUTOSAVE_TURNS" ) ) &&
@@ -1572,6 +1570,7 @@ bool game::do_turn()
 
     player_was_sleeping = player_is_sleeping;
 
+    u.update_body();
     u.update_bodytemp();
     u.update_body_wetness( *weather_precise );
     u.apply_wetness_morale( temperature );
