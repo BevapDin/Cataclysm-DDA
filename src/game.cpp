@@ -1395,6 +1395,16 @@ void game::calc_driving_offset(vehicle *veh)
     set_driving_view_offset(point(offset.x, offset.y));
 }
 
+void lua_do_turn_callbacks()
+{
+    if( calendar::once_every( 1_days ) ) {
+        lua_callback( "on_day_passed" );
+    }
+    if( calendar::once_every( 1_minutes ) ) {
+        lua_callback( "on_minute_passed" );
+    }
+}
+
 // MAIN GAME LOOP
 // Returns true if game is over (death, saved, quit, etc)
 bool game::do_turn()
@@ -1410,6 +1420,8 @@ bool game::do_turn()
         calendar::turn.increment();
     }
 
+    lua_do_turn_callbacks();
+
     if( npcs_dirty ) {
         load_npcs();
     }
@@ -1418,12 +1430,6 @@ bool game::do_turn()
     mission::process_all();
     if( calendar::once_every( 1_days ) ) { // Midnight!
         overmap_buffer.process_mongroups();
-        lua_callback("on_day_passed");
-    }
-
-    // Run a LUA callback once per minute
-    if( calendar::once_every( 1_minutes ) ) {
-        lua_callback("on_minute_passed");
     }
 
     // Move hordes every 5 min
