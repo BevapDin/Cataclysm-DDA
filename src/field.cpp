@@ -595,6 +595,37 @@ void map::create_hot_air( const tripoint &p, const int density )
     }
 }
 
+std::array<maptile, 8> map::get_neighbors( const tripoint &pt ) const
+{
+    // Wrapper to allow skipping bound checks except at the edges of the map
+    const auto maptile_has_bounds = [this]( const tripoint & pt, const bool bounds_checked ) {
+        if( bounds_checked ) {
+            // We know that the point is in bounds
+            return maptile_at_internal( pt );
+        }
+
+        return maptile_at( pt );
+    };
+
+    // Find out which edges are in the bubble
+    // Where possible, do just one bounds check for all the neighbors
+    const bool west = pt.x > 0;
+    const bool north = pt.y > 0;
+    const bool east = pt.x < SEEX * my_MAPSIZE - 1;
+    const bool south = pt.y < SEEY * my_MAPSIZE - 1;
+    return std::array<maptile, 8> { {
+            maptile_has_bounds( {pt.x - 1, pt.y - 1, pt.z}, west &&north ),
+            maptile_has_bounds( {pt.x, pt.y - 1, pt.z}, north ),
+            maptile_has_bounds( {pt.x + 1, pt.y - 1, pt.z}, east &&north ),
+            maptile_has_bounds( {pt.x - 1, pt.y, pt.z}, west ),
+            maptile_has_bounds( {pt.x + 1, pt.y, pt.z}, east ),
+            maptile_has_bounds( {pt.x - 1, pt.y + 1, pt.z}, west &&south ),
+            maptile_has_bounds( {pt.x, pt.y + 1, pt.z}, south ),
+            maptile_has_bounds( {pt.x + 1, pt.y + 1, pt.z}, east &&south ),
+        }
+    };
+}
+
 /*
 Function: process_fields_in_submap
 Iterates over every field on every tile of the given submap given as parameter.
@@ -604,36 +635,7 @@ If you need to insert a new field behavior per unit time add a case statement in
 bool map::process_fields_in_submap( submap *const current_submap,
                                     const int submap_x, const int submap_y, const int submap_z )
 {
-    const auto get_neighbors = [this]( const tripoint &pt ) {
-        // Wrapper to allow skipping bound checks except at the edges of the map
-        const auto maptile_has_bounds = [this]( const tripoint &pt, const bool bounds_checked ) {
-            if( bounds_checked ) {
-                // We know that the point is in bounds
-                return maptile_at_internal( pt );
-            }
-
-            return maptile_at( pt );
-        };
-
-        // Find out which edges are in the bubble
-        // Where possible, do just one bounds check for all the neighbors
-        const bool west = pt.x > 0;
-        const bool north = pt.y > 0;
-        const bool east = pt.x < SEEX * my_MAPSIZE - 1;
-        const bool south = pt.y < SEEY * my_MAPSIZE - 1;
-        return std::array< maptile, 8 > { {
-            maptile_has_bounds( {pt.x - 1, pt.y - 1, pt.z}  , west && north ),
-            maptile_has_bounds( {pt.x, pt.y - 1, pt.z}      , north ),
-            maptile_has_bounds( {pt.x + 1, pt.y - 1, pt.z}  , east && north ),
-            maptile_has_bounds( {pt.x - 1, pt.y, pt.z}      , west ),
-            maptile_has_bounds( {pt.x + 1, pt.y, pt.z}      , east ),
-            maptile_has_bounds( {pt.x - 1, pt.y + 1, pt.z}  , west && south ),
-            maptile_has_bounds( {pt.x, pt.y + 1, pt.z}      , south ),
-            maptile_has_bounds( {pt.x + 1, pt.y + 1, pt.z}  , east && south ),
-        } };
-    };
-
-    const auto spread_gas = [this, &get_neighbors] (
+    const auto spread_gas = [this] (
         field_entry &cur, const tripoint &p, field_id curtype,
         int percent_spread, const time_duration outdoor_age_speedup ) {
         // Reset nearby scents to zero

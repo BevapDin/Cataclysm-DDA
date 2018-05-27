@@ -1504,6 +1504,7 @@ class map
         /*@}*/
 
         void create_hot_air( const tripoint &p, int density );
+        std::array<maptile, 8> get_neighbors( const tripoint &pt ) const;
 
         /**
          * The list of currently loaded submaps. The size of this should not be changed.
