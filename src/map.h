@@ -1503,6 +1503,8 @@ class map
         void function_over( int stx, int sty, int stz, int enx, int eny, int enz, Functor fun ) const;
         /*@}*/
 
+        void create_hot_air( const tripoint &p, int density );
+
         /**
          * The list of currently loaded submaps. The size of this should not be changed.
          * After calling @ref load or @ref generate, it should only contain non-null pointers.

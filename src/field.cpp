@@ -568,6 +568,33 @@ bool at_edge( const size_t x, const size_t y )
     return x == 0 || x == SEEX || y == 0 || y == SEEY;
 }
 
+void map::create_hot_air( const tripoint &p, const int density )
+{
+    field_id hot_air;
+    switch( density ) {
+        case 1:
+            hot_air = fd_hot_air1;
+            break;
+        case 2:
+            hot_air = fd_hot_air2;
+            break;
+        case 3:
+            hot_air = fd_hot_air3;
+            break;
+        case 4:
+            hot_air = fd_hot_air4;
+            break;
+        default:
+            debugmsg( "Tried to spread hot air with density %d", density );
+            return;
+    }
+
+    for( int counter = 0; counter < 5; counter++ ) {
+        tripoint dst( p.x + rng( -1, 1 ), p.y + rng( -1, 1 ), p.z );
+        add_field( dst, hot_air, 1 );
+    }
+}
+
 /*
 Function: process_fields_in_submap
 Iterates over every field on every tile of the given submap given as parameter.
@@ -688,37 +715,6 @@ bool map::process_fields_in_submap( submap *const current_submap,
             if( can_spread_to( up_tile, curtype ) && valid_move( p, up, true, true ) ) {
                 spread_to( up_tile );
             }
-        }
-    };
-
-    /*
-    Function: create_hot_air
-    Helper function that encapsulates the logic involved in creating hot air.
-    */
-    const auto create_hot_air = [this] ( const tripoint &p, int density )
-    {
-        field_id hot_air;
-        switch( density ) {
-        case 1:
-            hot_air = fd_hot_air1;
-            break;
-        case 2:
-            hot_air = fd_hot_air2;
-            break;
-        case 3:
-            hot_air = fd_hot_air3;
-            break;
-        case 4:
-            hot_air = fd_hot_air4;
-            break;
-        default:
-            debugmsg( "Tried to spread hot air with density %d", density );
-            return;
-        }
-
-        for( int counter = 0; counter < 5; counter++ ) {
-            tripoint dst( p.x + rng( -1, 1 ), p.y + rng( -1, 1 ), p.z );
-            add_field( dst, hot_air, 1 );
         }
     };
 
