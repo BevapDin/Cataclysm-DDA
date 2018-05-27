@@ -626,6 +626,65 @@ std::array<maptile, 8> map::get_neighbors( const tripoint &pt ) const
     };
 }
 
+fire_data map::consume_items_by_fire( field_entry &cur, const tripoint &p )
+{
+    fire_data frd{ cur.getFieldDensity(), 0.0f, 0.0f };
+
+    if( !fire_can_access_items( p ) ) {
+        return frd;
+    }
+
+    auto items_here = i_at( p );
+    std::vector<item> new_content;
+    for( auto iter = items_here.begin(); iter != items_here.end(); ) {
+        if( iter->will_explode_in_fire() ) {
+            // We need to make a copy because the iterator validity is not predictable
+            item copy = *iter;
+            iter = items_here.erase( iter );
+            if( copy.detonate( p, new_content ) ) {
+                // Need to restart, iterators may not be valid
+                iter = items_here.begin();
+            }
+        } else {
+            ++iter;
+        }
+    }
+
+    // The highest # of items this fire can remove in one turn
+    const int max_consume = cur.getFieldDensity() * 2;
+    const bool can_spread = fire_can_spread( p );
+    int consumed = 0;
+
+    for( auto fuel = items_here.begin(); fuel != items_here.end() && consumed < max_consume; ) {
+        if( fuel->burn( frd, can_spread ) ) {
+            create_burnproducts( p, *fuel );
+            // If we decided the item was destroyed by fire, remove it.
+            // But remember its contents
+            std::copy( fuel->contents.begin(), fuel->contents.end(), std::back_inserter( new_content ) );
+            fuel = items_here.erase( fuel );
+            consumed++;
+        } else {
+            ++fuel;
+        }
+    }
+
+    spawn_items( p, new_content );
+
+    return frd;
+}
+
+bool map::fire_can_access_items( const tripoint &p ) const
+{
+    const ter_t &t = *ter( p );
+    const furn_t &f = *furn( p );
+    return !ter_furn_has_flag( t, f, TFLAG_SEALED ) || ter_furn_has_flag( t, f, TFLAG_ALLOW_FIELD_EFFECT );
+}
+
+bool map::fire_can_spread( const tripoint &p ) const
+{
+    return !ter_furn_has_flag( *ter( p ), *furn( p ), TFLAG_FIRE_CONTAINER );
+}
+
 bool map::handle_fire( maptile &map_tile, field_entry &cur, const tripoint &p )
 {
     bool dirty_transparency_cache = false;
@@ -633,61 +692,16 @@ bool map::handle_fire( maptile &map_tile, field_entry &cur, const tripoint &p )
     const auto &ter = map_tile.get_ter_t();
     const auto &frn = map_tile.get_furn_t();
 
-    // We've got ter/furn cached, so let's use that
-    const bool is_sealed = ter_furn_has_flag( ter, frn, TFLAG_SEALED ) &&
-                           !ter_furn_has_flag( ter, frn, TFLAG_ALLOW_FIELD_EFFECT );
-    // Smoke generation probability, consumed items count
-    int smoke = 0;
-    int consumed = 0;
-    // How much time to add to the fire's life due to burned items/terrain/furniture
-    time_duration time_added = 0_turns;
     // Checks if the fire can spread
     // If the flames are in furniture with fire_container flag like brazier or oven,
     // they're fully contained, so skip consuming terrain
-    const bool can_spread = !ter_furn_has_flag( ter, frn, TFLAG_FIRE_CONTAINER );
-    // The huge indent below should probably be somehow moved away from here
-    // without forcing the function to use i_at( p ) for fires without items
-    if( !is_sealed && map_tile.get_item_count() > 0 ) {
-        auto items_here = i_at( p );
-        std::vector<item> new_content;
-        for( auto explosive = items_here.begin(); explosive != items_here.end(); ) {
-            if( explosive->will_explode_in_fire() ) {
-                // We need to make a copy because the iterator validity is not predictable
-                item copy = *explosive;
-                explosive = items_here.erase( explosive );
-                if( copy.detonate( p, new_content ) ) {
-                    // Need to restart, iterators may not be valid
-                    explosive = items_here.begin();
-                }
-            } else {
-                ++explosive;
-            }
-        }
+    const bool can_spread = fire_can_spread( p );
 
-        fire_data frd{ cur.getFieldDensity(), 0.0f, 0.0f };
-        // The highest # of items this fire can remove in one turn
-        int max_consume = cur.getFieldDensity() * 2;
-
-        for( auto fuel = items_here.begin(); fuel != items_here.end() && consumed < max_consume; ) {
-
-            bool destroyed = fuel->burn( frd, can_spread );
-
-            if( destroyed ) {
-                create_burnproducts( p, *fuel );
-                // If we decided the item was destroyed by fire, remove it.
-                // But remember its contents
-                std::copy( fuel->contents.begin(), fuel->contents.end(), std::back_inserter( new_content ) );
-                fuel = items_here.erase( fuel );
-                consumed++;
-            } else {
-                ++fuel;
-            }
-        }
-
-        spawn_items( p, new_content );
-        smoke = roll_remainder( frd.smoke_produced );
-        time_added = 1_turns * roll_remainder( frd.fuel_produced );
-    }
+    const fire_data result_from_items = consume_items_by_fire( cur, p );
+    // Smoke generation probability
+    int smoke = roll_remainder( result_from_items.smoke_produced );
+    // How much time to add to the fire's life due to burned items/terrain/furniture
+    time_duration time_added = 1_turns * roll_remainder( result_from_items.fuel_produced );
 
     //Get the part of the vehicle in the fire.
     int part = -1;

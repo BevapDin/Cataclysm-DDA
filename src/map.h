@@ -66,6 +66,7 @@ template<typename T>
 class visitable;
 struct regional_settings;
 struct mongroup;
+struct fire_data;
 struct ter_t;
 using ter_id = int_id<ter_t>;
 using ter_str_id = string_id<ter_t>;
@@ -1506,6 +1507,9 @@ class map
         bool handle_fire( maptile &map_tile, field_entry &cur, const tripoint &p );
         void create_hot_air( const tripoint &p, int density );
         std::array<maptile, 8> get_neighbors( const tripoint &pt ) const;
+        fire_data consume_items_by_fire( field_entry &cur, const tripoint &p );
+        bool fire_can_spread( const tripoint &p ) const;
+        bool fire_can_access_items( const tripoint &p ) const;
 
         /**
          * The list of currently loaded submaps. The size of this should not be changed.
