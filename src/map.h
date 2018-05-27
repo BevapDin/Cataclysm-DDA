@@ -1503,6 +1503,7 @@ class map
         void function_over( int stx, int sty, int stz, int enx, int eny, int enz, Functor fun ) const;
         /*@}*/
 
+        bool handle_fire( maptile &map_tile, field_entry &cur, const tripoint &p );
         void create_hot_air( const tripoint &p, int density );
         std::array<maptile, 8> get_neighbors( const tripoint &pt ) const;
 
