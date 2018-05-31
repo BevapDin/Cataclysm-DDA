@@ -6,6 +6,7 @@
 #include "map.h"
 #include "output.h"
 #include "action.h"
+#include "input.h"
 #include "overmapbuffer.h"
 #include "translations.h"
 #include "map_iterator.h"
