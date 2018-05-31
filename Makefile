@@ -142,6 +142,8 @@ ODIR = $(BUILD_PREFIX)obj
 ODIRTILES = $(BUILD_PREFIX)obj/tiles
 W32ODIR = $(BUILD_PREFIX)objwin
 W32ODIRTILES = $(W32ODIR)/tiles
+LUA_ODIR = $(ODIR)/lua
+CATALUA = $(ODIR)/libcatalua.a
 
 ifdef AUTO_BUILD_PREFIX
   BUILD_PREFIX = $(if $(RELEASE),release-)$(if $(TILES),tiles-)$(if $(SOUND),sound-)$(if $(LOCALIZE),local-)$(if $(BACKTRACE),back-)$(if $(MAPSIZE),map-$(MAPSIZE)-)$(if $(LUA),lua-)$(if $(USE_XDG_DIR),xdg-)$(if $(USE_HOME_DIR),home-)$(if $(DYNAMIC_LINKING),dynamic-)$(if $(MSYS2),msys2-)
@@ -654,6 +656,15 @@ ifeq ($(TARGETSYSTEM),WINDOWS)
 endif
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
+DUMMY_LUA_SOURCES = $(SRC_DIR)/lua/dummy_lua.cpp
+ifdef LUA
+  LUA_SOURCES = $(filter-out $(DUMMY_LUA_SOURCES),$(wildcard $(SRC_DIR)/lua/*.cpp))
+else
+  LUA_SOURCES = $(DUMMY_LUA_SOURCES)
+endif
+_CATALUA_OBJS = $(LUA_SOURCES:$(SRC_DIR)/lua/%.cpp=%.o)
+CATALUA_OBJS = $(patsubst %,$(LUA_ODIR)/%,$(_CATALUA_OBJS))
+
 ifdef LANGUAGES
   L10N = localization
 endif
@@ -694,13 +705,16 @@ endif
 all: version $(CHECKS) $(TARGET) $(L10N) tests
 	@
 
-$(TARGET): $(ODIR) $(OBJS)
-	+$(LD) $(W32FLAGS) -o $(TARGET) $(OBJS) $(LDFLAGS)
+$(TARGET): $(ODIR) $(LUA_ODIR) $(OBJS) $(CATALUA)
+	+$(LD) $(W32FLAGS) -o $(TARGET) $(OBJS) $(LDFLAGS) $(CATALUA)
 ifdef RELEASE
   ifndef DEBUG_SYMBOLS
 	$(STRIP) $(TARGET)
   endif
 endif
+
+$(CATALUA): $(CATALUA_OBJS)
+	$(AR) rcs $(CATALUA) $(CATALUA_OBJS)
 
 $(BUILD_PREFIX)$(TARGET_NAME).a: $(ODIR) $(OBJS)
 	$(AR) rcs $(BUILD_PREFIX)$(TARGET_NAME).a $(filter-out $(ODIR)/main.o $(ODIR)/messages.o,$(OBJS))
@@ -718,8 +732,14 @@ json-verify:
 $(ODIR):
 	mkdir -p $(ODIR)
 
+$(LUA_ODIR):
+	mkdir -p $(LUA_ODIR)
+
 $(ODIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CPPFLAGS) $(DEFINES) $(CXXFLAGS) -c $< -o $@
+
+$(LUA_ODIR)/%.o: $(SRC_DIR)/lua/%.cpp
+	$(CXX) -I $(LUA_ODIR) $(CPPFLAGS) $(DEFINES) -I $(SRC_DIR) $(CXXFLAGS) -c $< -o $@
 
 $(ODIR)/%.o: $(SRC_DIR)/%.rc
 	$(RC) $(RFLAGS) $< -o $@

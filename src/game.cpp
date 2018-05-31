@@ -15,6 +15,7 @@
 #include "auto_pickup.h"
 #include "effect.h"
 #include "bionics.h"
+#include "lua/lua_engine.h"
 #include "gamemode.h"
 #include "mapbuffer.h"
 #include "map_item_stack.h"
@@ -386,8 +387,11 @@ void game::load_core_data( loading_ui &ui )
     // core data can be loaded only once and must be first
     // anyway.
     DynamicDataLoader::get_instance().unload_data();
-
-    init_lua();
+    try {
+        lua_engine_ptr->init();
+    } catch( const std::exception &err ) {
+        debugmsg( "%s. Lua scripting won't be available.", err.what() );
+    }
     load_data_from_dir( FILENAMES[ "jsondir" ], "core", ui );
 }
 

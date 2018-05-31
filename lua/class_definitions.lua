@@ -43,10 +43,6 @@ array) should have the following values:
 - args (an array of strings): the types (see below) of the parameters to the function (in order).
 - rval (can be nil when the function returns void): the type (see below) that the function returns.
 
-The global_functions table is basically the same as the class functions table, but it has
-(currently) the function name as key of the table (this disallows function overloading, and should
-be considered a bug). TODO: fix it
-
 Types can be built in types: int, float, bool, string (std::string in C++), cstring (const char* in C++)
 Or any class defined in the classes table.
 
@@ -83,6 +79,7 @@ no connection at all to the monster.
 
 classes = {
     gun_mode = {
+        headers = { "gun_mode.h" },
         string_id = "gun_mode_id",
         attributes = {
         },
@@ -90,6 +87,7 @@ classes = {
         }
     },
     effect_type = {
+        headers = { "effect.h" },
         string_id = "efftype_id",
         attributes = {
         },
@@ -97,6 +95,7 @@ classes = {
         }
     },
     calendar = {
+        headers = { "calendar.h" },
         new = {
             { "calendar" },
             { "int" },
@@ -116,6 +115,7 @@ classes = {
         }
     },
     mutation_branch = {
+        headers = { "mutation.h" },
         string_id = "trait_id",
         attributes = {
             activated = { type = "bool", writable = true },
@@ -144,6 +144,7 @@ classes = {
         }
     },
     Character = {
+        headers = { "character.h" },
         parent = "Creature",
         attributes = {
             dex_cur = { type = "int", writable = true },
@@ -275,6 +276,7 @@ classes = {
         }
     },
     item_stack_iterator = {
+        header = { "item.h" },
         by_value = true,
         has_equal = true,
         new = {
@@ -288,6 +290,7 @@ classes = {
         }
     },
     map_stack = {
+        headers = { "map.h" },
         by_value = true,
         attributes = {
         },
@@ -301,6 +304,7 @@ classes = {
         }
     },
     game = {
+        headers = { "game.h" },
         attributes = {
             lightning_active = { type = "bool", writable = true },
         },
@@ -387,6 +391,7 @@ classes = {
         }
     },
     encumbrance_data = {
+        headers = { "character.h" },
         by_value = true,
         new = {
             { "encumbrance_data" },
@@ -400,6 +405,7 @@ classes = {
         }
     },
     stats = {
+        headers = { "player.h" },
         attributes = {
             damage_healed = { type = "int", writable = true },
             damage_taken = { type = "int", writable = true },
@@ -410,6 +416,7 @@ classes = {
         }
     },
     player = {
+        headers = { "player.h" },
         parent = "Character",
         attributes = {
             blocks_left = { type = "int", writable = true },
@@ -807,6 +814,7 @@ classes = {
         }
     },
     item = {
+        headers = { "item.h" },
         new = {
             { },
             { "item" },
@@ -1024,6 +1032,7 @@ classes = {
         }
     },
     item_location = {
+        headers = { "item_location.h" },
         attributes = {
         },
         by_value = true,
@@ -1039,6 +1048,7 @@ classes = {
         }
     },
     point = {
+        headers = { "enums.h" },
         by_value = true,
         has_equal = true,
         attributes = {
@@ -1059,6 +1069,7 @@ classes = {
         }
     },
     tripoint = {
+        headers = { "enums.h" },
         by_value = true,
         has_equal = true,
         attributes = {
@@ -1083,6 +1094,7 @@ classes = {
         }
     },
     uimenu = {
+        headers = { "ui.h" },
         attributes = {
             title = {
                 type = "string",
@@ -1100,6 +1112,7 @@ classes = {
         }
     },
     field_entry = {
+        headers = { "field.h" },
         attributes = {
         },
         functions = {
@@ -1116,6 +1129,7 @@ classes = {
         }
     },
     field = {
+        headers = { "field.h" },
         attributes = {
         },
         functions = {
@@ -1131,6 +1145,7 @@ classes = {
         }
     },
     map = {
+        headers = { "map.h" },
         attributes = {
         },
         functions = {
@@ -1327,6 +1342,7 @@ classes = {
         }
     },
     ter_t = {
+        headers = { "mapdata.h" },
         int_id = "ter_id",
         string_id = "ter_str_id",
 
@@ -1346,6 +1362,7 @@ classes = {
         }
     },
     furn_t = {
+        headers = { "mapdata.h" },
         int_id = "furn_id",
         string_id = "furn_str_id",
 
@@ -1365,6 +1382,7 @@ classes = {
         }
     },
     Creature = {
+        headers = { "creature.h" },
         attributes = {
         },
         functions = {
@@ -1523,6 +1541,7 @@ classes = {
         }
     },
     monster = {
+        headers = { "monster.h" },
         parent = "Creature",
         attributes = {
             anger = { type = "int", writable = true },
@@ -1666,6 +1685,7 @@ classes = {
         }
     },
     recipe = {
+        headers = { "recipe.h" },
         string_id = "recipe_id",
         attributes = {
         },
@@ -1673,6 +1693,7 @@ classes = {
         }
     },
     martialart = {
+        headers = { "martialarts.h" },
         string_id = "matype_id",
         attributes = {
         },
@@ -1680,6 +1701,7 @@ classes = {
         }
     },
     material_type = {
+        headers = { "material.h" },
         string_id = "material_id",
         attributes = {
         },
@@ -1687,6 +1709,7 @@ classes = {
         }
     },
     start_location = {
+        headers = { "start_location.h" },
         string_id = "start_location_id",
         attributes = {
         },
@@ -1694,6 +1717,7 @@ classes = {
         }
     },
     ma_buff = {
+        headers = { "martialarts.h" },
         string_id = "mabuff_id",
         attributes = {
         },
@@ -1701,6 +1725,7 @@ classes = {
         }
     },
     ma_technique = {
+        headers = { "martialarts.h" },
         string_id = "matec_id",
         attributes = {
         },
@@ -1708,6 +1733,7 @@ classes = {
         }
     },
     Skill = {
+        headers = { "skill.h" },
         string_id = "skill_id",
         attributes = {
         },
@@ -1715,6 +1741,7 @@ classes = {
         }
     },
     quality = {
+        headers = { "requirements.h" },
         string_id = "quality_id",
         attributes = {
             name = { type = "string", writable = false }
@@ -1723,6 +1750,7 @@ classes = {
         }
     },
     npc_template = {
+        headers = { "npc.h" },
         string_id = "npc_template_id",
         attributes = {
         },
@@ -1730,6 +1758,7 @@ classes = {
         }
     },
     species_type = {
+        headers = { "monstergenerator.h" },
         string_id = "species_id",
         attributes = {
         },
@@ -1737,6 +1766,7 @@ classes = {
         }
     },
     ammunition_type = {
+        headers = { "ammo.h" },
         string_id = "ammotype",
         attributes = {
         },
@@ -1744,6 +1774,7 @@ classes = {
         }
     },
     MonsterGroup = {
+        headers = { "mongroup.h" },
         string_id = "mongroup_id",
         attributes = {
             defaultMonster = { type = "mtype_id", writable = true },
@@ -1758,6 +1789,7 @@ classes = {
         }
     },
     mtype = {
+        headers = { "mtype.h" },
         string_id = "mtype_id",
         attributes = {
             agro = { type = "int", writable = true },
@@ -1807,6 +1839,7 @@ classes = {
         }
     },
     mongroup = {
+        headers = { "mongroup.h" },
         attributes = {
             pos = { type = "tripoint", writable = false },
             target = { type = "tripoint", writable = false },
@@ -1824,6 +1857,7 @@ classes = {
         }
     },
     overmap = {
+        headers = { "overmap.h" },
         attributes = {
         },
         functions = {
@@ -1837,6 +1871,7 @@ classes = {
         }
     },
     volume = {
+        headers = { "units.h" },
         by_value = true,
         attributes = {
         },
@@ -1845,6 +1880,7 @@ classes = {
         },
     },
     mass = {
+        headers = { "units.h" },
         by_value = true,
         attributes = {
         },
@@ -1853,6 +1889,7 @@ classes = {
         },
     },
     nc_color = {
+        headers = { "color.h" },
         by_value = true,
         attributes = {
         },
@@ -1860,6 +1897,7 @@ classes = {
         },
     },
     time_duration = {
+        headers = { "calendar.h" },
         by_value = true,
         attributes = {
         },
@@ -1867,6 +1905,7 @@ classes = {
         },
     },
     time_point = {
+        headers = { "calendar.h" },
         by_value = true,
         attributes = {
         },
@@ -1874,6 +1913,7 @@ classes = {
         },
     },
     itype = {
+        headers = { "itype.h" },
         attributes = {
             color = { type = "nc_color", writable = true },
             default_container = { type = "string", writable = true },
@@ -1912,6 +1952,7 @@ classes = {
         }
     },
     trap = {
+        headers = { "trap.h" },
         int_id = "trap_id",
         string_id = "trap_str_id",
         attributes = {
@@ -1937,6 +1978,7 @@ classes = {
         }
     },
     w_point = {
+        headers = { "weather_gen.h" },
         attributes = {
             temperature = { type = "float" },
             humidity = { type = "float" },
@@ -2077,71 +2119,8 @@ enums = {
         "num_fields",
     }
 }
-
-global_functions = {
-    add_msg = {
-        cpp_name = "add_msg_wrapper",
-        args     = { "string" },
-        argnames = { "message" },
-        rval = nil,
-        desc = "Write a message to the game's standard message window."
-    },
-    popup = {
-        cpp_name = "popup_wrapper",
-        args = { "string" },
-        rval = nil
-    },
-    string_input_popup = {
-        cpp_name = "string_input_popup_wrapper",
-        args = { "string", "int", "string" },
-        rval = "string"
-    },
-    create_uimenu = {
-        cpp_name = "create_uimenu",
-        args = {},
-        rval = "uimenu&"
-    },
-    get_terrain_type = {
-        cpp_name = "get_terrain_type",
-        args = {"int"},
-        rval = "ter_t&"
-    },
-    rng = {
-        cpp_name = "rng",
-        args = {"int", "int"},
-        rval = "int"
-    },
-    one_in = {
-        cpp_name = "one_in",
-        args = {"int"},
-        rval = "bool"
-    },
-    distance = {
-        cpp_name = "rl_dist",
-        args = {"int", "int", "int", "int"},
-        rval = "int"
-    },
-    trig_dist = {
-        cpp_name = "trig_dist",
-        args = {"int", "int", "int", "int"},
-        rval = "int"
-    },
-    add_item_to_group = {
-        cpp_name = "item_controller->add_item_to_group",
-        args = { "string", "string", "int" },
-        rval = "bool"
-    },
-    create_monster = {
-        cpp_name = "create_monster",
-        args = { "mtype_id", "tripoint" },
-        rval = "monster&",
-        desc = "Creates and spawns a new monster of given type. Returns a refernce to it, *or* nil if it could not be spawned."
-    },
-    get_calendar_turn = {
-        cpp_name = "get_calendar_turn_wrapper",
-        args = {},
-        rval = "calendar&"
-    }
+enums_headers = {
+    "field.h", "bodypart.h", "itype.h", "creature.h", "output.h", "calendar.h", "pldata.h"
 }
 
 --[[
@@ -2189,9 +2168,13 @@ end
 -- In the class definition: add "int_id" = "XXX" (XXX is the typedef id that is used by C++).
 new_classes = {}
 for name, value in pairs(classes) do
+    -- @todo could be a struct!
+    value.forward_declaration = "class " .. name .. ";"
     if value.int_id then
         -- This is the common int_id<T> interface:
         local t = {
+            forward_declaration = value.forward_declaration .. "using " .. value.int_id .. " = int_id<" .. name .. ">;",
+            headers = value.headers,
             by_value = true,
             has_equal = true,
             -- IDs *could* be constructed from int, but where does the Lua script get the int from?
@@ -2216,6 +2199,8 @@ for name, value in pairs(classes) do
     -- Very similar to int_id above
     if value.string_id then
         local t = {
+            forward_declaration = value.forward_declaration .. "using " .. value.string_id .. " = string_id<" .. name .. ">;",
+            headers = value.headers,
             by_value = true,
             has_equal = true,
             -- Copy and default constructor and construct from plain string.
