@@ -83,6 +83,22 @@ no connection at all to the monster.
 
 classes['tripoint'].has_equal = true
 classes['point'].has_equal = true
+classes['units::volume'] = {
+	by_value = true,
+	attributes = {
+	},
+	functions = {
+		{ name = "value", rval = "int", args = { } },
+	},
+}
+classes['units::mass'] = {
+	by_value = true,
+	attributes = {
+	},
+	functions = {
+		{ name = "value", rval = "int", args = { } },
+	},
+}
 
 global_functions = {
     add_msg = {
