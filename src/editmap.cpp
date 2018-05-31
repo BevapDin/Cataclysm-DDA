@@ -421,10 +421,10 @@ tripoint editmap::edit()
             uimenu men;
             men.text = "Positive values: removed from map, negative values: added to map";
             for( auto &e : ter_delta ) {
-                men.addentry("%d x %s", -e.second, e.first.obj().name());
+                men.addentry(string_format("%d x %s", -e.second, e.first.obj().name()));
             }
             for( auto &e : furn_delta ) {
-                men.addentry("%d x %s", -e.second, e.first.obj().name());
+                men.addentry(string_format("%d x %s", -e.second, e.first.obj().name()));
             }
             men.addentry("Reset the stats");
             men.addentry("Cancel");
