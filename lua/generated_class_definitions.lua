@@ -49,7 +49,6 @@ classes = {
             { name = "encumb", rval = "int", args = { "body_part" } },
             { name = "enumerate_unmet_requirements", rval = "std::string", args = { "item", "item" } },
             { name = "exclusive_flag_coverage", rval = nil, args = { "std::string" } },
-            { name = "find_ammo", rval = "std::vector<item_location>", args = { "item", "bool", "int" } },
             { name = "get_aim_types", rval = nil, args = { "item" } },
             { name = "get_ammo", rval = nil, args = { "ammotype" } },
             { name = "get_base_traits", rval = "std::vector<trait_id>", args = { } },
@@ -1076,7 +1075,6 @@ classes = {
             { name = "put_in", rval = nil, args = { "item" } },
             { name = "reach_range", rval = "int", args = { "player" } },
             { name = "ready_to_revive", rval = "bool", args = { "tripoint" } },
-            { name = "reload", rval = "bool", args = { "player", "item_location", "int" } },
             { name = "repaired_with", rval = nil, args = { } },
             { name = "reset_cable", rval = nil, args = { "player" } },
             { name = "rotten", rval = "bool", args = { } },
@@ -1114,35 +1112,6 @@ classes = {
             { name = "weight", rval = "units::mass", args = { "bool" } },
             { name = "wheel_area", rval = "int", args = { } },
             { name = "will_explode_in_fire", rval = "bool", args = { } },
-        }
-    },
-    item_location = {
-        new = {
-            -- item_location::item_location ignored because: unhandled type const map_cursor &[CXType_LValueReference] as argument (const map_cursor &[CXType_LValueReference]),
-            -- item_location::item_location ignored because: unhandled type const vehicle_cursor &[CXType_LValueReference] as argument (const vehicle_cursor &[CXType_LValueReference]),
-            -- item_location::item_location ignored because: unhandled type item_location &&[CXType_RValueReference] as argument (item_location &&[CXType_RValueReference]),
-            { "Character", "item" },
-            { "item_location" },
-            { },
-        },
-        by_value = true,
-        has_equal = true,
-        functions = {
-            -- item_location::deserialize ignored because: unhandled type JsonIn &[CXType_LValueReference] as argument (JsonIn &[CXType_LValueReference]),
-            -- item_location::operator!= ignored because: operator,
-            -- item_location::operator* ignored because: operator,
-            -- item_location::operator-> ignored because: operator,
-            -- item_location::operator= ignored because: operator,
-            -- item_location::operator= ignored because: unhandled type item_location &&[CXType_RValueReference] as argument (item_location &&[CXType_RValueReference]),
-            -- item_location::serialize ignored because: unhandled type JsonOut &[CXType_LValueReference] as argument (JsonOut &[CXType_LValueReference]),
-            { name = "clone", rval = "item_location", args = { } },
-            { name = "describe", rval = "std::string", args = { "Character" } },
-            { name = "get_item", rval = "item&", args = { } },
-            { name = "obtain", rval = "int", args = { "Character", "int" } },
-            { name = "obtain_cost", rval = "int", args = { "Character", "int" } },
-            { name = "position", rval = "tripoint", args = { } },
-            { name = "remove_item", rval = nil, args = { } },
-            { name = "where", rval = nil, args = { } },
         }
     },
     itype = {
@@ -1439,7 +1408,6 @@ classes = {
             { name = "furnname", rval = "std::string", args = { "tripoint" } },
             { name = "generate", rval = nil, args = { "int", "int", "int", "time_point" } },
             { name = "get_abs_sub", rval = "tripoint", args = { } },
-            { name = "get_active_items_in_radius", rval = "std::list<item_location>", args = { "tripoint", "int" } },
             { name = "get_cache_ref", rval = nil, args = { "int" } },
             { name = "get_dir_circle", rval = "std::vector<tripoint>", args = { "tripoint", "tripoint" } },
             { name = "get_field", rval = "field_entry&", args = { "tripoint", "field_id" } },
@@ -1517,7 +1485,6 @@ classes = {
             { name = "light_at", rval = nil, args = { "tripoint" } },
             { name = "light_transparency", rval = "float", args = { "tripoint" } },
             { name = "load", rval = nil, args = { "int", "int", "int", "bool" } },
-            { name = "make_active", rval = nil, args = { "item_location" } },
             { name = "make_rubble", rval = nil, args = { "tripoint" } },
             { name = "make_rubble", rval = nil, args = { "tripoint", "furn_id", "bool" } },
             { name = "make_rubble", rval = nil, args = { "tripoint", "furn_id", "bool", "ter_id", "bool" } },
@@ -1799,7 +1766,6 @@ classes = {
             { name = "make_friendly", rval = nil, args = { } },
             { name = "make_fungus", rval = "bool", args = { } },
             { name = "melee_attack", rval = nil, args = { "Creature" } },
-            { name = "melee_attack", rval = nil, args = { "Creature", "bool" } },
             { name = "melee_attack", rval = nil, args = { "Creature", "float" } },
             { name = "move", rval = nil, args = { } },
             { name = "move_target", rval = "tripoint", args = { } },
@@ -2046,7 +2012,6 @@ classes = {
             -- npc::add_new_mission ignored because: unhandled type mission *[CXType_Pointer] as argument (mission *[CXType_Pointer]),
             -- npc::confident_gun_mode_range ignored because: unhandled type const gun_mode &[CXType_LValueReference] as argument (const gun_mode &[CXType_LValueReference]),
             -- npc::deserialize ignored because: unhandled type JsonIn &[CXType_LValueReference] as argument (JsonIn &[CXType_LValueReference]),
-            -- npc::dispose_item ignored because: unhandled type item_location &&[CXType_RValueReference] as argument (item_location &&[CXType_RValueReference]),
             -- npc::execute_action ignored because: unhandled type npc_action[CXType_Enum] as argument (npc_action[CXType_Enum]),
             -- npc::fac_has_job ignored because: unhandled type faction_job[CXType_Enum] as argument (faction_job[CXType_Enum]),
             -- npc::fac_has_value ignored because: unhandled type faction_value[CXType_Enum] as argument (faction_value[CXType_Enum]),
@@ -2098,8 +2063,6 @@ classes = {
             { name = "find_item", rval = nil, args = { } },
             { name = "find_reloadable", rval = "item", args = { } },
             { name = "find_reloadable", rval = nil, args = { } },
-            { name = "find_usable_ammo", rval = "const item_location", args = { "item" } },
-            { name = "find_usable_ammo", rval = "item_location", args = { "item" } },
             { name = "follow_distance", rval = "int", args = { } },
             { name = "form_opinion", rval = nil, args = { "player" } },
             { name = "get_attitude", rval = nil, args = { } },
@@ -2334,7 +2297,6 @@ classes = {
             -- player::deal_damage ignored because: unhandled type const damage_instance &[CXType_LValueReference] as argument (const damage_instance &[CXType_LValueReference]),
             -- player::deserialize ignored because: unhandled type JsonIn &[CXType_LValueReference] as argument (JsonIn &[CXType_LValueReference]),
             -- player::disp_status ignored because: unhandled type const catacurses::window &[CXType_LValueReference] as argument (const catacurses::window &[CXType_LValueReference]),
-            -- player::dispose_item ignored because: unhandled type item_location &&[CXType_RValueReference] as argument (item_location &&[CXType_RValueReference]),
             -- player::drench ignored because: unhandled type const body_part_set &[CXType_LValueReference] as argument (const body_part_set &[CXType_LValueReference]),
             -- player::drop ignored because: unhandled type const std::list<std::pair<int, int> > &[CXType_LValueReference] as argument (const std::__cxx11::list<std::pair<int, int>, std::allocator<std::pair<int, int> > > &[CXType_LValueReference]),
             -- player::exceeds_recipe_requirements ignored because: unhandled type const recipe &[CXType_LValueReference] as argument (const recipe &[CXType_LValueReference]),
@@ -2354,7 +2316,6 @@ classes = {
             -- player::load_memorial_file ignored because: unhandled type std::istream &[CXType_LValueReference] as argument (std::basic_istream<char> &[CXType_LValueReference]),
             -- player::melee_special_effects ignored because: unhandled type damage_instance &[CXType_LValueReference] as argument (damage_instance &[CXType_LValueReference]),
             -- player::memorial ignored because: unhandled type std::ostream &[CXType_LValueReference] as argument (std::basic_ostream<char> &[CXType_LValueReference]),
-            -- player::mend_item ignored because: unhandled type item_location &&[CXType_RValueReference] as argument (item_location &&[CXType_RValueReference]),
             -- player::morale_crafting_speed_multiplier ignored because: unhandled type const recipe &[CXType_LValueReference] as argument (const recipe &[CXType_LValueReference]),
             -- player::on_hit ignored because: unhandled type const dealt_projectile_attack *const[CXType_Pointer] as argument (const dealt_projectile_attack *const[CXType_Pointer]),
             -- player::on_mission_assignment ignored because: unhandled type mission &[CXType_LValueReference] as argument (mission &[CXType_LValueReference]),
@@ -2696,7 +2657,6 @@ classes = {
             { name = "throw_item", rval = nil, args = { "tripoint", "item" } },
             { name = "time_to_read", rval = "int", args = { "item", "player", "player" } },
             { name = "toggle_move_mode", rval = nil, args = { } },
-            { name = "toolmod_add", rval = nil, args = { "item_location", "item_location" } },
             { name = "try_to_sleep", rval = nil, args = { } },
             { name = "unarmed_attack", rval = "bool", args = { } },
             { name = "unarmed_value", rval = "float", args = { } },
@@ -3123,7 +3083,6 @@ classes = {
             { name = "lift_strength", rval = "int", args = { } },
             { name = "lights", rval = nil, args = { "bool" } },
             { name = "local_center_of_mass", rval = "point", args = { } },
-            { name = "make_active", rval = nil, args = { "item_location" } },
             { name = "max_velocity", rval = "int", args = { "bool" } },
             { name = "max_volume", rval = "units::volume", args = { "int" } },
             { name = "mod_hp", rval = "bool", args = { "vehicle_part", "int", "damage_type" } },
@@ -3140,7 +3099,6 @@ classes = {
             { name = "operate_reaper", rval = nil, args = { } },
             { name = "operate_scoop", rval = nil, args = { } },
             { name = "part_at", rval = "int", args = { "int", "int" } },
-            { name = "part_base", rval = "item_location", args = { "int" } },
             { name = "part_collision", rval = nil, args = { "int", "tripoint", "bool", "bool" } },
             { name = "part_color", rval = "nc_color", args = { "int", "bool" } },
             { name = "part_displayed_at", rval = "int", args = { "int", "int" } },
@@ -3835,7 +3793,6 @@ volume_min = { cpp_name = "units::volume_min", type = "units::volume" },
 }
 
 make_list_class("item")
-make_list_class("item_location")
 make_set_class("body_part")
 make_set_class("emit_id")
 make_set_class("fault_id")
@@ -3847,7 +3804,6 @@ make_set_class("tripoint")
 make_vector_class("body_part")
 make_vector_class("efftype_id")
 make_vector_class("item")
-make_vector_class("item_location")
 make_vector_class("mabuff_id")
 make_vector_class("matec_id")
 make_vector_class("material_id")

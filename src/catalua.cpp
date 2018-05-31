@@ -50,6 +50,14 @@
 #include "vitamin.h"
 #include "npc.h"
 #include "weather.h"
+#include "effect.h"
+#include "ammo.h"
+#include "projectile.h"
+#include "dispersion.h"
+#include "submap.h"
+#include "vpart_position.h"
+#include "map_iterator.h"
+#include "input.h"
 extern "C" {
 #include "lua.h"
 #include "lualib.h"
@@ -62,9 +70,8 @@ extern "C" {
 #define LUA_OK 0
 #endif
 
-using item_stack_iterator = std::list<item>::iterator;
-using volume = units::volume;
-using mass = units::mass;
+using trait_group::Trait_group_tag;
+//using item_stack_iterator = std::list<item>::iterator;
 using npc_template_id = string_id<npc_template>;
 using overmap_direction = om_direction::type;
 
