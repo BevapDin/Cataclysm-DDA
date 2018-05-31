@@ -1299,7 +1299,7 @@ macro_controller &get_macro_controller() {
 
 } // namespace
 
-input_event input_manager::get_input_event( WINDOW *const win, const std::string &category )
+input_event input_manager::get_input_event( const catacurses::window &win, const std::string &category )
 {
     input_event result;
     while( true ) {

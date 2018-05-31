@@ -260,8 +260,8 @@ class input_manager
         /**
          * curses getch() replacement.
          */
-        input_event get_input_event( WINDOW *win, const std::string &category );
-        input_event get_input_event( WINDOW *win );
+        input_event get_input_event( const catacurses::window &win, const std::string &category );
+        input_event get_input_event( const catacurses::window &win );
         input_event get_input_event();
 
         /**
