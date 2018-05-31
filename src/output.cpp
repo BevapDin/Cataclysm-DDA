@@ -761,7 +761,7 @@ input_event popup( const std::string &text, PopupFlags flags )
 {
     if( test_mode ) {
         std::cerr << text << std::endl;
-        return 0;
+        return input_event();
     }
 
     catacurses::window w = create_popup_window( text, flags );
