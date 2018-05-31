@@ -8623,32 +8623,31 @@ void player::use( item_location loc )
     } else if ( used.type->has_use() ) {
         invoke_item( &used, loc.position() );
 
-    } else if( used->is_container() && used->contents.empty() ) {
-        const auto filter = [used]( const item &i ) {
-            return i.type->default_container == used->typeId();
+    } else if( used.is_container() && used.contents.empty() ) {
+        const auto filter = [&used]( const item &i ) {
+            return i.type->default_container == used.typeId();
         };
         auto nc = g->inv_map_splice( filter, _("Put something into the container:"), 1 );
         if( !nc ) {
             return;
         }
-        auto &new_content = *nc;
-        if( new_content.type->default_container != used->typeId() ) {
-            add_msg( _("The %s does not belong into a %s."), new_content.type_name().c_str(),
-                     used->type_name().c_str() );
+        item &new_content = *nc;
+        if( new_content.type->default_container != used.typeId() ) {
+            add_msg( _("The %s does not belong into a %s."), new_content.type_name(),
+                     used.type_name() );
             return;
         }
 
         const long def_charges = new_content.type->charges_default();
-        used->contents.push_back( new_content );
+        used.contents.push_back( new_content );
         if( new_content.count_by_charges() && new_content.charges > def_charges ) {
             new_content.charges -= def_charges;
-            used->contents.back().charges = def_charges;
+            used.contents.back().charges = def_charges;
         } else {
             nc.remove_item();
         }
 
-        inv.unsort();
-        inv.restack();
+        inv.restack( *this );
         return;
 
     } else {
