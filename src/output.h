@@ -376,11 +376,8 @@ typedef enum {
     PF_NO_WAIT_ON_TOP = PF_NO_WAIT | PF_ON_TOP,
 } PopupFlags;
 
-template<typename ...Args>
-inline input_event popup_getkey( const char *const mes, Args &&... args )
-{
-    return popup( string_format( mes, std::forward<Args>( args )... ), PF_GET_KEY );
-}
+input_event popup_getkey( const std::string &msg );
+
 template<typename ...Args>
 inline void popup_top( const char *const mes, Args &&... args )
 {

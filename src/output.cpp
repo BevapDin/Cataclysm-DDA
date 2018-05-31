@@ -792,6 +792,11 @@ input_event popup( const std::string &text, PopupFlags flags )
     return result;
 }
 
+input_event popup_getkey( const std::string &msg )
+{
+    return popup( msg, PF_GET_KEY );
+}
+
 void popup_status( const char *const title, const std::string &fmt )
 {
     std::string text;

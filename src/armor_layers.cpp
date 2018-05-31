@@ -572,7 +572,7 @@ void player::sort_armor()
                 }
             }
         } else if( action == "USAGE_HELP" ) {
-            popup_getkey( _( "\
+            popup_getkey( string_format( _( "\
 Use the arrow- or keypad keys to navigate the left list.\n\
 Press [%s] to select highlighted armor for reordering.\n\
 Use   [%s] / [%s] to scroll the right list.\n\
@@ -592,7 +592,7 @@ The sum of these values is the effective encumbrance value your character has fo
                           ctxt.get_desc( "CHANGE_SIDE" ).c_str(),
                           ctxt.get_desc( "EQUIP_ARMOR" ).c_str(),
                           ctxt.get_desc( "REMOVE_ARMOR" ).c_str()
-                        );
+                        ) );
             draw_grid( w_sort_armor, left_w, middle_w );
         } else if( action == "HELP_KEYBINDINGS" ) {
             draw_grid( w_sort_armor, left_w, middle_w );

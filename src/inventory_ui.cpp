@@ -1806,8 +1806,8 @@ std::list<std::pair<int, int>> inventory_iuse_selector::execute()
             count = 0;
         } else if( input.action == "CONFIRM" ) {
             if( to_use.empty() ) {
-                popup_getkey( _( "No items were selected.  Use %s to select them." ),
-                              ctxt.get_desc( "RIGHT" ).c_str() );
+                popup_getkey( string_format( _( "No items were selected.  Use %s to select them." ),
+                              ctxt.get_desc( "RIGHT" ) ) );
                 continue;
             }
             break;
