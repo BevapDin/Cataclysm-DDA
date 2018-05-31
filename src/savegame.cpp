@@ -13,6 +13,7 @@
 #include "map.h"
 #include "output.h"
 #include "artifact.h"
+#include "input.h"
 #include "mission.h"
 #include "faction.h"
 #include "overmapbuffer.h"
