@@ -158,38 +158,6 @@ function generate_setter(class_name, member_name, member_type, cpp_name)
     return text
 end
 
--- Generates a function wrapper for a global function. "function_to_call" can be any string
--- that works as a "function", including expressions like "g->add_msg"
-function generate_global_function_wrapper(function_name, function_to_call, args, rval)
-    local text = "static int global_"..function_name.."(lua_State *L) {"..br
-
-    for i, arg in ipairs(args) do
-        text = text .. tab .. check_lua_value(arg, i)..br
-        -- Needs to be auto, can be a proxy object, a real reference, or a POD.
-        -- This will be resolved when the functin is called. The C++ compiler will convert
-        -- the auto to the expected parameter type.
-        text = text .. tab .. "auto && parameter"..i .. " = " .. retrieve_lua_value(arg, i)..";"..br
-    end
-
-    local func_invoc = function_to_call .. "("
-    for i, arg in ipairs(args) do
-        func_invoc = func_invoc .. "parameter"..i
-        if next(args, i) then func_invoc = func_invoc .. ", " end
-    end
-    func_invoc = func_invoc .. ")"
-
-    if rval then
-        text = text .. tab .. push_lua_value(func_invoc, rval)..br
-        text = text .. tab .. "return 1; // 1 return values"..br
-    else
-        text = text .. tab .. func_invoc .. ";"..br
-        text = text .. tab .. "return 0; // 0 return values"..br
-    end
-    text = text .. "}"..br
-
-    return text
-end
-
 --[[
 To allow function overloading, we need to create a function that somehow detects the input
 types and calls the matching C++ overload.
@@ -509,11 +477,6 @@ for _, class_name in ipairs(sorted_keys(classes)) do
     end
 end
 
-for _, name in ipairs(global_functions) do
-    local func = global_functions[name]
-    cpp_output = cpp_output .. generate_global_function_wrapper(name, func.cpp_name, func.args, func.rval)
-end
-
 -- luaL_Reg is the name of the struct in C which this creates and returns.
 function luaL_Reg(cpp_name, lua_name)
     return tab .. '{"' .. lua_name .. '", ' .. cpp_name .. '},' .. br
@@ -662,15 +625,6 @@ for _, enum_name in ipairs(sorted_keys(enums)) do
     end
     cpp_output = cpp_output .. "};" .. br
 end
-
--- Create a lua registry with the global functions
-cpp_output = cpp_output .. "static const struct luaL_Reg gamelib [] = {"..br
-
-for _, name in ipairs(global_functions) do
-    cpp_output = cpp_output .. tab .. '{"'..name..'", global_'..name..'},'..br
-end
-
-cpp_output = cpp_output .. tab .. "{NULL, NULL}"..br.."};"..br
 
 -- We generated our binding, now write it to a .cpp file for inclusion in
 -- the main source code.

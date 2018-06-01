@@ -43,10 +43,6 @@ array) should have the following values:
 - args (an array of strings): the types (see below) of the parameters to the function (in order).
 - rval (can be nil when the function returns void): the type (see below) that the function returns.
 
-The global_functions table is basically the same as the class functions table, but it has
-(currently) the function name as key of the table (this disallows function overloading, and should
-be considered a bug). TODO: fix it
-
 Types can be built in types: int, float, bool, string (std::string in C++), cstring (const char* in C++)
 Or any class defined in the classes table.
 
@@ -2110,99 +2106,6 @@ enums = {
         "fd_hot_air4",
         "fd_fungicidal_gas",
         "num_fields",
-    }
-}
-
-global_functions = {
-    add_msg = {
-        cpp_name = "add_msg_wrapper",
-        args     = { "string" },
-        argnames = { "message" },
-        rval = nil,
-        desc = "Write a message to the game's standard message window."
-    },
-    query_yn = {
-        cpp_name = "query_yn_wrapper",
-        args     = { "string" },
-        argnames = { "message" },
-        rval = "bool"
-    },
-    popup = {
-        cpp_name = "popup_wrapper",
-        args = { "string" },
-        rval = nil
-    },
-    string_input_popup = {
-        cpp_name = "string_input_popup_wrapper",
-        args = { "string", "int", "string" },
-        rval = "string"
-    },
-    create_uimenu = {
-        cpp_name = "create_uimenu",
-        args = {},
-        rval = "uimenu&"
-    },
-    get_terrain_type = {
-        cpp_name = "get_terrain_type",
-        args = {"int"},
-        rval = "ter_t&"
-    },
-    rng = {
-        cpp_name = "rng",
-        args = {"int", "int"},
-        rval = "int"
-    },
-    one_in = {
-        cpp_name = "one_in",
-        args = {"int"},
-        rval = "bool"
-    },
-    distance = {
-        cpp_name = "rl_dist",
-        args = {"int", "int", "int", "int"},
-        rval = "int"
-    },
-    trig_dist = {
-        cpp_name = "trig_dist",
-        args = {"int", "int", "int", "int"},
-        rval = "int"
-    },
-    add_item_to_group = {
-        cpp_name = "item_controller->add_item_to_group",
-        args = { "string", "string", "int" },
-        rval = "bool"
-    },
-    create_monster = {
-        cpp_name = "create_monster",
-        args = { "mtype_id", "tripoint" },
-        rval = "monster&",
-        desc = "Creates and spawns a new monster of given type. Returns a refernce to it, *or* nil if it could not be spawned."
-    },
-    get_calendar_turn = {
-        cpp_name = "get_calendar_turn_wrapper",
-        args = {},
-        rval = "calendar&"
-    },
-    get_time_duration = {
-        cpp_name = "get_time_duration_wrapper",
-        args = { "int" },
-        rval = "time_duration",
-        desc = "Constructs `time_duration` with given `int` value (which is number of turns). You can also use TURNS(n), MINUTES(n), HOURS(n) and DAYS(n) wrapper functions from `autoexec.lua`."
-    },
-	-- Returns id of overmap terrain on given overmap with given tripoint in global overmap terrain coordinates.
-	-- Use `game.get_omt_id (g:get_cur_om(), player:global_omt_location())` to return id of overmap terrain of current player location.
-    get_omt_id = {
-        cpp_name = "get_omt_id",
-        args = { "overmap", "tripoint" },
-        rval = "string"
-    },
-	-- Returns enum, indicating direction of overmap terrain on given overmap with given tripoint in global overmap terrain coordinates.
-	-- Possible return values are in `overmap_direction` in `enums` section above.
-	-- Use `game.get_omt_dir (g:get_cur_om(), player:global_omt_location())` to return direction of overmap terrain of current player location.
-    get_omt_dir = {
-        cpp_name = "get_omt_dir",
-        args = { "overmap", "tripoint" },
-        rval = "overmap_direction"
     }
 }
 

@@ -263,69 +263,165 @@ int lua_mapgen(map *m, const oter_id &terrain_type, const mapgendata &, const ti
     return err;
 }
 
-// Custom functions that are to be wrapped from lua.
-// -------------------------------------------------
-static std::unique_ptr<uimenu> uimenu_instance;
-uimenu *create_uimenu()
+static int global_add_msg( lua_State *const L )
 {
-    uimenu_instance = std::unique_ptr<uimenu>(new uimenu());
-    return uimenu_instance.get();
+    LuaType<std::string>::check( L, 1 );
+    auto &&parameter1 = LuaType<std::string>::get( L, 1 );
+    add_msg( parameter1 );
+    return 0;
 }
 
-const ter_t &get_terrain_type(int id)
+static int global_popup( lua_State *const L )
 {
-    return ter_id( id ).obj();
+    LuaType<std::string>::check( L, 1 );
+    auto &&parameter1 = LuaType<std::string>::get( L, 1 );
+    popup( "%s", parameter1.c_str() );
+    return 0;
 }
 
-static calendar &get_calendar_turn_wrapper() {
-    return calendar::turn;
-}
-
-static time_duration get_time_duration_wrapper( const int t )
+static int global_distance( lua_State *const L )
 {
-    return time_duration::from_turns( t );
+    LuaType<int>::check( L, 1 );
+    auto &&parameter1 = LuaType<int>::get( L, 1 );
+    LuaType<int>::check( L, 2 );
+    auto &&parameter2 = LuaType<int>::get( L, 2 );
+    LuaType<int>::check( L, 3 );
+    auto &&parameter3 = LuaType<int>::get( L, 3 );
+    LuaType<int>::check( L, 4 );
+    auto &&parameter4 = LuaType<int>::get( L, 4 );
+    LuaType<int>::push( L, rl_dist( parameter1, parameter2, parameter3, parameter4 ) );
+    return 1;
 }
 
-static std::string get_omt_id( const overmap &om, const tripoint &p )
+static int global_get_time_duration_wrapper( lua_State *const L )
 {
-    return om.get_ter( p ).id().str();
+    LuaType<int>::check( L, 1 );
+    auto &&parameter1 = LuaType<int>::get( L, 1 );
+    LuaValue<time_duration>::push( L, time_duration::from_turns( parameter1 ) );
+    return 1;
 }
 
-static overmap_direction get_omt_dir( const overmap &om, const tripoint &p )
+static int global_get_omt_id( lua_State *const L )
 {
-   return om.get_ter( p ).obj().get_dir();
+    LuaReference<overmap>::check( L, 1 );
+    auto &&parameter1 = LuaReference<overmap>::get( L, 1 );
+    LuaValue<tripoint>::check( L, 2 );
+    auto &&parameter2 = LuaValue<tripoint>::get( L, 2 );
+    LuaType<std::string>::push( L, parameter1.get_ter( parameter2 ).id().str() );
+    return 1;
 }
 
-static std::string string_input_popup_wrapper( const std::string &title, int width, const std::string &desc ) {
-    return string_input_popup().title(title).width(width).description(desc).query_string();
-}
-
-/** Create a new monster of the given type. */
-monster *create_monster( const mtype_id &mon_type, const tripoint &p )
+static int global_get_omt_dir( lua_State *const L )
 {
-    monster new_monster( mon_type, p );
-    if(!g->add_zombie(new_monster)) {
-        return NULL;
+    LuaReference<overmap>::check( L, 1 );
+    auto &&parameter1 = LuaReference<overmap>::get( L, 1 );
+    LuaValue<tripoint>::check( L, 2 );
+    auto &&parameter2 = LuaValue<tripoint>::get( L, 2 );
+    LuaEnum<get_omt_dir>::push( L, parameter1.get_ter( parameter2 ).obj().get_dir() );
+    return 1;
+}
+
+static int global_create_uimenu( lua_State *const L )
+{
+    static std::unique_ptr<uimenu> uimenu_instance;
+    uimenu_instance.reset( new uimenu() );
+    LuaReference<uimenu>::push( L, uimenu_instance.get() );
+    return 1;
+}
+
+static int global_string_input_popup( lua_State *const L )
+{
+    LuaType<std::string>::check( L, 1 );
+    auto &&parameter1 = LuaType<std::string>::get( L, 1 );
+    LuaType<int>::check( L, 2 );
+    auto &&parameter2 = LuaType<int>::get( L, 2 );
+    LuaType<std::string>::check( L, 3 );
+    auto &&parameter3 = LuaType<std::string>::get( L, 3 );
+    LuaType<std::string>::push( L,
+                                string_input_popup().title( parameter1 ).width( parameter2 ).description(
+                                    parameter3 ).query_string() );
+    return 1;
+}
+
+static int global_one_in( lua_State *const L )
+{
+    LuaType<int>::check( L, 1 );
+    auto &&parameter1 = LuaType<int>::get( L, 1 );
+    LuaType<bool>::push( L, one_in( parameter1 ) );
+    return 1;
+}
+
+static int global_get_calendar_turn( lua_State *const L )
+{
+    LuaReference<calendar>::push( L, calendar::turn );
+    return 1;
+}
+
+static int global_create_monster( lua_State *const L )
+{
+    LuaValue<mtype_id>::check( L, 1 );
+    auto &&parameter1 = LuaValue<mtype_id>::get( L, 1 );
+    LuaValue<tripoint>::check( L, 2 );
+    auto &&parameter2 = LuaValue<tripoint>::get( L, 2 );
+    monster new_monster( parameter1, parameter2 );
+    if( !g->add_zombie( new_monster ) ) {
+        lua_pushnil( L );
     } else {
-        return g->critter_at<monster>( p );
+        LuaReference<monster>::push( L, g->critter_at<monster>( parameter2 ) );
     }
+    return 1;
 }
 
-// Manually implemented lua functions
-//
-// Most lua functions are generated by src/lua/generate_bindings.lua,
-// these generated functions can be found in src/lua/catabindings.cpp
-
-static void popup_wrapper(const std::string &text) {
-    popup( "%s", text.c_str() );
+static int global_add_item_to_group( lua_State *const L )
+{
+    LuaType<std::string>::check( L, 1 );
+    auto &&parameter1 = LuaType<std::string>::get( L, 1 );
+    LuaType<std::string>::check( L, 2 );
+    auto &&parameter2 = LuaType<std::string>::get( L, 2 );
+    LuaType<int>::check( L, 3 );
+    auto &&parameter3 = LuaType<int>::get( L, 3 );
+    LuaType<bool>::push( L, item_controller->add_item_to_group( parameter1, parameter2, parameter3 ) );
+    return 1;
 }
 
-static void add_msg_wrapper(const std::string &text) {
-    add_msg( text );
+static int global_trig_dist( lua_State *const L )
+{
+    LuaType<int>::check( L, 1 );
+    auto &&parameter1 = LuaType<int>::get( L, 1 );
+    LuaType<int>::check( L, 2 );
+    auto &&parameter2 = LuaType<int>::get( L, 2 );
+    LuaType<int>::check( L, 3 );
+    auto &&parameter3 = LuaType<int>::get( L, 3 );
+    LuaType<int>::check( L, 4 );
+    auto &&parameter4 = LuaType<int>::get( L, 4 );
+    LuaType<int>::push( L, trig_dist( parameter1, parameter2, parameter3, parameter4 ) );
+    return 1;
 }
 
-static bool query_yn_wrapper(const std::string &text) {
-    return query_yn( text );
+static int global_get_terrain_type( lua_State *const L )
+{
+    LuaType<int>::check( L, 1 );
+    auto &&parameter1 = LuaType<int>::get( L, 1 );
+    LuaReference<ter_t>::push( L, ter_id( parameter1 ).obj() );
+    return 1;
+}
+
+static int global_rng( lua_State *const L )
+{
+    LuaType<int>::check( L, 1 );
+    auto &&parameter1 = LuaType<int>::get( L, 1 );
+    LuaType<int>::check( L, 2 );
+    auto &&parameter2 = LuaType<int>::get( L, 2 );
+    LuaType<int>::push( L, rng( parameter1, parameter2 ) );
+    return 1;
+}
+
+static int global_query_yn_wrapper( lua_State *const L )
+{
+    LuaType<std::string>::check( L, 1 );
+    auto &&parameter1 = LuaType<std::string>::get( L, 1 );
+    LuaType<bool>::push( L, query_yn( parameter1 ) );
+    return 1;
 }
 
 // items = game.items_at(x, y)
@@ -533,6 +629,26 @@ static const struct luaL_Reg global_funcs [] = {
     {"dofile", game_dofile},
     {"get_monster_types", game_get_monster_types},
     {"get_item_groups", game_get_item_groups},
+    {NULL, NULL}
+};
+
+static const struct luaL_Reg gamelib [] = {
+    {"add_msg", global_add_msg},
+    {"popup", global_popup},
+    {"distance", global_distance},
+    {"create_uimenu", global_create_uimenu},
+    {"string_input_popup", global_string_input_popup},
+    {"one_in", global_one_in},
+    {"get_calendar_turn", global_get_calendar_turn},
+    {"create_monster", global_create_monster},
+    {"add_item_to_group", global_add_item_to_group},
+    {"trig_dist", global_trig_dist},
+    {"get_terrain_type", global_get_terrain_type},
+    {"rng", global_rng},
+    {"query_yn", global_query_yn_wrapper},
+    {"get_time_duration_wrapper", global_get_time_duration_wrapper},
+    {"get_omt_id", global_get_omt_id},
+    {"get_omt_dir", global_get_omt_dir},
     {NULL, NULL}
 };
 
