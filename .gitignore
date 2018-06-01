@@ -152,3 +152,5 @@ stage
 # Eclipse IDE
 .cproject
 .settings/
+
+lua-ex/lua-exporter
