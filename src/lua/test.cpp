@@ -16,8 +16,8 @@ void test_lua_scripting( const lua_engine &e )
 
         // Note: this won't compile because std::ofstream is not exported to Lua:
         //catalua::call<void>( e, "", log );
-        // Sadly, this will compile, but not link
-        catalua::call<std::ofstream&>( e, "" );
+        // Sadly, this will compile, but not link, because the pop-from-stack function is a template
+        //catalua::call<std::ofstream&>( e, "" );
 
         player pl;
         pl.weapon = item( "water" );
