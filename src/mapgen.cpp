@@ -2077,32 +2077,6 @@ void jmapgen_objects::apply( const mapgendata &dat, int offset_x, int offset_y, 
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-///// lua mapgen functions
-// wip: need more bindings. Basic stuff works
-
-#ifndef LUA
-int lua_mapgen( map *m, const oter_id &id, const mapgendata &md, const time_point &t, float d, const std::string & )
-{
-    mapgen_crater( m, id, md, to_turn<int>( t ), d );
-    mapf::formatted_set_simple(m, 0, 6,
-"\
-    *   *  ***\n\
-    **  * *   *\n\
-    * * * *   *\n\
-    *  ** *   *\n\
-    *   *  ***\n\
-\n\
- *     *   *   *\n\
- *     *   *  * *\n\
- *     *   *  ***\n\
- *     *   * *   *\n\
- *****  ***  *   *\n\
-", mapf::ter_bind("*", t_paper), mapf::furn_bind("*", f_null));
-    return 0;
-}
-#endif
-
 void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &dat, const time_point &t, float d ) {
     g->lua_engine_ptr->mapgen( m, terrain_type, dat, t, d, scr );
 }
