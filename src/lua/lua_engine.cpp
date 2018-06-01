@@ -36,6 +36,8 @@
 
 // @todo get rid of most of the above (keep only those not related to game handling)^^
 
+#include "call.h"
+
 extern "C" {
 #include <lua.h>
 #include <lauxlib.h>
@@ -71,6 +73,8 @@ static void luaL_setfuncs( lua_State *const L, const luaL_Reg arrary[], int cons
 #endif
 
 void lua_dofile( lua_State *L, const char *path );
+
+lua_State *get_lua_state( const lua_engine &e );
 
 // Given a Lua return code and a file that it happened in, print a debugmsg with the error and path.
 // Returns true if there was an error, false if there was no error at all.
@@ -174,6 +178,10 @@ class lua_iuse_wrapper : public iuse_actor
             return new lua_iuse_wrapper( *this );
         }
 
+        static lua_State *state( const lua_engine &e ) {
+            return e.state;
+        }
+
         void load( JsonObject & ) override {}
 };
 
@@ -235,12 +243,13 @@ void MonsterGenerator::register_monattack_lua( const std::string &name, int lua_
 // Call the given string directly, used in the lua debug command.
 int lua_engine::call( const std::string &tocall )
 {
-    lua_State *const L = state;
-
-    update_globals( L );
-    int err = luaL_dostring( L, tocall.c_str() );
-    lua_report_error( L, err, tocall.c_str(), true );
-    return err;
+    try {
+        catalua::call<void>( *this, tocall );
+        return 0;
+    } catch( ... ) {
+        //@todo handle this
+        return -1;
+    }
 }
 
 void CallbackArgument::Save()
@@ -344,6 +353,51 @@ int lua_engine::mapgen( map *m, const oter_id &terrain_type, const mapgendata &,
     //    luah_remove_from_registry(L, function_index); // @todo: make use of this
 
     return err;
+}
+
+void catalua::stack::push_value( const lua_engine &engine, const char *const value )
+{
+    lua_pushstring( get_lua_state( engine ), value );
+}
+
+void catalua::stack::push_value( const lua_engine &engine, const std::string &value )
+{
+    lua_pushstring( get_lua_state( engine ), value.c_str() ); // @ŧodo handle embeded nul-characters
+}
+
+void catalua::stack::push_value( const lua_engine &engine, const bool value )
+{
+    lua_pushboolean( get_lua_state( engine ), value );
+}
+
+void catalua::stack::push_integer( const lua_engine &engine, const long long int value )
+{
+    lua_pushinteger( get_lua_state( engine ), value );
+}
+
+void catalua::stack::push_float( const lua_engine &engine, const long double value )
+{
+    lua_pushnumber( get_lua_state( engine ), value );
+}
+
+std::string catalua::stack::get_string( const lua_engine &engine, const int index )
+{
+    return LuaType<std::string>::get( get_lua_state( engine ), index );
+}
+
+bool catalua::stack::get_bool( const lua_engine &engine, const int index )
+{
+    return LuaType<bool>::get( get_lua_state( engine ), index );
+}
+
+long long int catalua::stack::get_integer( const lua_engine &engine, const int index )
+{
+    return LuaType<int>::get( get_lua_state( engine ), index );
+}
+
+long double catalua::stack::get_float( const lua_engine &engine, const int index )
+{
+    return LuaType<float>::get( get_lua_state( engine ), index );
 }
 
 // Custom functions that are to be wrapped from lua.
@@ -699,5 +753,39 @@ lua_engine::~lua_engine()
 {
     if( state ) {
         lua_close( state );
+    }
+}
+
+lua_State *get_lua_state( const lua_engine &e )
+{
+    return lua_iuse_wrapper::state( e );
+}
+
+void catalua::stack::push_script( const lua_engine &engine, const std::string &script )
+{
+    lua_State *const L = get_lua_state( engine );
+    const int err = luaL_loadstring( L, script.c_str() );
+    if( lua_report_error( L, err, script.c_str() ) ) {
+        throw std::runtime_error( "failed to load script" );
+    }
+}
+
+void catalua::stack::call_void_function( const lua_engine &engine, const int args )
+{
+    lua_State *const L = get_lua_state( engine );
+    update_globals( L );
+    const int err = lua_pcall( L, args, 0, 0 );
+    if( lua_report_error( L, err, "inline script" ) ) {
+        throw std::runtime_error( "failed to call function" );
+    }
+}
+
+void catalua::stack::call_non_void_function( const lua_engine &engine, const int args )
+{
+    lua_State *const L = get_lua_state( engine );
+    update_globals( L );
+    const int err = lua_pcall( L, args, 1, 0 );
+    if( lua_report_error( L, err, "inline script" ) ) {
+        throw std::runtime_error( "failed to call function" );
     }
 }
