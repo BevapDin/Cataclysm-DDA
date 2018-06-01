@@ -43,7 +43,7 @@
 #include "npc.h"
 #include "vehicle.h"
 #include "vehicle_group.h"
-#include "catalua.h"
+#include "lua/lua_engine.h"
 #include "text_snippets.h"
 
 #define dbg(x) DebugLog((DebugLevel)(x),D_MAP_GEN) << __FILE__ << ":" << __LINE__ << ": "
@@ -1924,7 +1924,7 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
         elem.apply( md, 0, 0 );
     }
     if ( ! luascript.empty() ) {
-        lua_mapgen( m, terrain_type, md, t, d, luascript );
+        g->lua_engine_ptr->mapgen( m, terrain_type, md, t, d, luascript );
     }
 
     objects.apply( md, 0, 0, d );
@@ -2008,7 +2008,7 @@ int lua_mapgen( map *m, const oter_id &id, const mapgendata &md, const time_poin
 #endif
 
 void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &dat, const time_point &t, float d ) {
-    lua_mapgen( m, terrain_type, dat, t, d, scr );
+    g->lua_engine_ptr->mapgen( m, terrain_type, dat, t, d, scr );
 }
 
 /////////////

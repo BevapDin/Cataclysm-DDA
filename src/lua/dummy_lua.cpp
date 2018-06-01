@@ -1,26 +1,35 @@
-#include "catalua.h"
-#include "mapgen.h"
-#include "output.h"
-#include "translations.h"
-#include "game.h"
+#include "lua_engine.h"
 
-int call_lua( const std::string & )
-{
-    popup( _( "This binary was not compiled with Lua support." ) );
-    return 0;
-}
+#include "filesystem.h"
+#include "debug.h"
 
-// Implemented in mapgen.cpp:
-// int lua_mapgen( map *, std::string, mapgendata, int, float, const std::string & )
-
-void lua_callback( const char * )
+lua_engine::lua_engine() : state( nullptr )
 {
 }
 
-void lua_loadmod( const std::string &, const std::string & )
+lua_engine::~lua_engine()
 {
 }
 
-void game::init_lua()
+int lua_engine::call( const std::string &script )
+{
+    debugmsg( "Tried to call a Lua script \"%s\" in a build without Lua support.", script.substr( 0,
+              1000 ) );
+}
+
+void lua_engine::callback( const char *const /*name*/ )
+{
+    // This behaves the same as if no mod has registered callbacks - it does nothing.
+}
+
+void lua_engine::loadmod( const std::string &base_path, const std::string &main_file_name )
+{
+    const std::string full_path = base_path + "/" + main_file_name;
+    if( file_exist( full_path ) ) {
+        debugmsg( "Tried to load Lua script \"%s\" in a build without Lua support.", full_path );
+    }
+}
+
+void lua_engine::init()
 {
 }
