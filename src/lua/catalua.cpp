@@ -24,7 +24,6 @@
 #include "omdata.h"
 #include "overmap.h"
 
-#ifdef LUA
 #include "ui.h"
 #include "mongroup.h"
 #include "itype.h"
@@ -59,14 +58,6 @@ using mass = units::mass;
 using npc_template_id = string_id<npc_template>;
 using overmap_direction = om_direction::type;
 
-lua_State *lua_state = nullptr;
-
-// Keep track of the current mod from which we are executing, so that
-// we know where to load files from.
-std::string lua_file_path = "";
-
-std::stringstream lua_output_stream;
-std::stringstream lua_error_stream;
 
 // Not used in the C++ code, but implicitly required by the Lua bindings.
 // Gun modes need to be created via an actual item.
@@ -731,34 +722,3 @@ void game::init_lua()
     lua_dofile( lua_state, FILENAMES["class_defslua"].c_str() );
     lua_dofile( lua_state, FILENAMES["autoexeclua"].c_str() );
 }
-
-#endif // #ifdef LUA
-
-#ifndef LUA
-/* Empty functions for builds without Lua: */
-int lua_monster_move( monster * )
-{
-    return 0;
-}
-int call_lua( std::string )
-{
-    popup( _( "This binary was not compiled with Lua support." ) );
-    return 0;
-}
-// Implemented in mapgen.cpp:
-// int lua_mapgen( map *, std::string, mapgendata, int, float, const std::string & )
-void lua_loadmod( const std::string &, const std::string & )
-{
-}
-void game::init_lua()
-{
-}
-
-void lua_callback( const char *, const CallbackArgumentContainer & )
-{
-}
-void lua_callback( const char * )
-{
-}
-
-#endif
