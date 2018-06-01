@@ -14,6 +14,11 @@ void test_lua_scripting( const lua_engine &e )
     try {
         catalua::script<item, player &> scr( "local pl = ... ; pl:weapon.charges = 100; return pl:weapon" );
 
+        // Note: this won't compile because std::ofstream is not exported to Lua:
+        //catalua::call<void>( e, "", log );
+        // Sadly, this will compile, but not link
+        catalua::call<std::ofstream&>( e, "" );
+
         player pl;
         pl.weapon = item( "water" );
         const item w = scr( e, pl );
