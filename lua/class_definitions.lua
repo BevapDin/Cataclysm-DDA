@@ -3370,6 +3370,7 @@ classes = {
     },
 }
 classes["units::mass"] = {
+        forward_declaration = "",
         headers = { "units.h" },
         by_value = true,
         attributes = {
@@ -3378,6 +3379,7 @@ classes["units::mass"] = {
         },
     }
 classes["units::volume"] = {
+        forward_declaration = "",
         headers = { "units.h" },
         by_value = true,
         attributes = {
@@ -3556,6 +3558,10 @@ for class_name, value in pairs(classes) do
             i = i + 1
         end
     end
+    if not value.forward_declaration then
+        -- @todo could be a struct!
+        value.forward_declaration = "class " .. class_name .. ";"
+    end
 end
 
 -- This adds the int_id wrappers from the class definition as real classes.
@@ -3564,8 +3570,6 @@ end
 -- In the class definition: add "int_id" = "XXX" (XXX is the typedef id that is used by C++).
 new_classes = {}
 for name, value in pairs(classes) do
-    -- @todo could be a struct!
-    value.forward_declaration = "class " .. name .. ";"
     if value.int_id then
         -- This is the common int_id<T> interface:
         local t = {
