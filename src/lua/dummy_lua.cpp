@@ -17,6 +17,14 @@ int lua_engine::call( const std::string &script )
               1000 ) );
 }
 
+int lua_engine::mapgen( map *const /*m*/, const oter_id &/*terrain_type*/,
+                        const mapgendata &/*data*/, const time_point &/*t*/, const float /*density*/,
+                        const std::string &scr )
+{
+    debugmsg( "Tried to call a Lua mapgen script \"%s\" in a build without Lua support.", scr.substr( 0,
+              1000 ) );
+}
+
 void lua_engine::callback( const char *const /*name*/ )
 {
     // This behaves the same as if no mod has registered callbacks - it does nothing.
