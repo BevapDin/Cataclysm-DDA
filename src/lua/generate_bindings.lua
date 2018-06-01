@@ -215,7 +215,7 @@ function generate_overload_tree(classes)
         local functions_by_name = {}
         for _, func in ipairs(value.functions) do
             if not func.name then
-                print("Every function of " .. class_name .. " needs a name, doesn't it?")
+                error("Every function of " .. class_name .. " needs a name, doesn't it?")
             end
             -- Create the table now. In the next loop below, we can simply assume it already exists
             functions_by_name[func.name] = {}
