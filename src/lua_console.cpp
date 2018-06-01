@@ -1,6 +1,8 @@
 #include "lua_console.h"
 
 #include "lua/lua_engine.h"
+// @todo make the lua_engine a parameter.
+#include "game.h"
 #include "catacharset.h"
 #include "input.h"
 #include "string_input_popup.h"
