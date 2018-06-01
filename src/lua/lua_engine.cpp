@@ -26,6 +26,10 @@
 #include "ui.h"
 #include "action.h"
 
+// @todo get rid of those above^^
+
+#include "call.h"
+
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -178,6 +182,10 @@ public:
         return new lua_iuse_wrapper( *this );
     }
 
+    static lua_State *state( const lua_engine &e ) {
+        return e.state;
+    }
+
     void load( JsonObject & ) override {}
 };
 
@@ -194,12 +202,13 @@ void Item_factory::register_iuse_lua(const std::string &name, int lua_function)
 // Call the given string directly, used in the lua debug command.
 int lua_engine::call( const std::string &tocall )
 {
-    lua_State *const L = state;
-
-    update_globals(L);
-    int err = luaL_dostring(L, tocall.c_str());
-    lua_report_error(L, err, tocall.c_str(), true);
-    return err;
+    try {
+        catalua::call<void>( *this, tocall );
+        return 0;
+    } catch( ... ) {
+        //@todo handle this
+        return -1;
+    }
 }
 
 void lua_engine::callback( const char *const callback_name )
@@ -609,10 +618,47 @@ void lua_engine::init() {
     // Load lua-side metatables etc.
     lua_dofile(state, FILENAMES["class_defslua"].c_str());
     lua_dofile(state, FILENAMES["autoexeclua"].c_str());
+
+    void test_lua_scripting( const lua_engine & );
+    test_lua_scripting( *this );
 }
 
 lua_engine::~lua_engine() {
     if( state ) {
         lua_close( state );
+    }
+}
+
+//@todo move all into the namespace
+lua_State *get_lua_state( const lua_engine &e ) {
+    return lua_iuse_wrapper::state( e );
+}
+
+void catalua::push_script( const lua_engine &engine, const std::string &script )
+{
+    lua_State *const L = get_lua_state( engine );
+    const int err = luaL_loadstring( L, script.c_str() );
+    if( lua_report_error( L, err, script.c_str() ) ) {
+        throw std::runtime_error( "failed to load script" );
+    }
+}
+
+void catalua::call_void_function( const lua_engine &engine, const int args )
+{
+    lua_State *const L = get_lua_state( engine );
+    update_globals( L );
+    const int err = lua_pcall( L, args, 0, 0 );
+    if( lua_report_error( L, err, "inline script" ) ) {
+        throw std::runtime_error( "failed to call function" );
+    }
+}
+
+void catalua::call_non_void_function( const lua_engine &engine, const int args )
+{
+    lua_State *const L = get_lua_state( engine );
+    update_globals( L );
+    const int err = lua_pcall( L, args, 1, 0 );
+    if( lua_report_error( L, err, "inline script" ) ) {
+        throw std::runtime_error( "failed to call function" );
     }
 }
