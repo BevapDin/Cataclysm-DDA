@@ -706,7 +706,7 @@ all: version $(CHECKS) $(TARGET) $(L10N) tests
 	@
 
 $(TARGET): $(ODIR) $(LUA_ODIR) $(OBJS) $(CATALUA)
-	+$(LD) $(W32FLAGS) -o $(TARGET) $(OBJS) $(LDFLAGS) $(CATALUA)
+	+$(LD) $(W32FLAGS) -o $(TARGET) $(OBJS) $(CATALUA) $(LDFLAGS)
 ifdef RELEASE
   ifndef DEBUG_SYMBOLS
 	$(STRIP) $(TARGET)
