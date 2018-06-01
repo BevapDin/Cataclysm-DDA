@@ -706,7 +706,7 @@ function generate_main_init_function()
         cpp_output = cpp_output .. "template<>" .. br
         cpp_output = cpp_output .. "const "..cpp_name.."::EMap "..cpp_name.."::BINDINGS = {"..br
         for _, name in ipairs(values) do
-            cpp_output = cpp_output .. tab.."{\""..name.."\", "..name.."},"..br
+            cpp_output = cpp_output .. tab.."{\""..name.."\", "..enum_name.."::"..name.."},"..br
         end
         cpp_output = cpp_output .. "};" .. br
     end
