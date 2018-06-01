@@ -1,0 +1,333 @@
+#include "Parser.h"
+
+#include "common-clang.h"
+#include "Matcher.h"
+#include "CppClass.h"
+#include "CppEnum.h"
+#include "CppFreeFunction.h"
+#include "CppVariable.h"
+#include "Cursor.h"
+#include "Type.h"
+#include "TranslationUnit.h"
+#include "Exporter.h"
+
+#include <iostream>
+
+static const bool export_all = false;
+
+std::string Parser::fully_qualifid( const std::string &ns, const std::string &name )
+{
+    return ns.empty() ? name : ( ns + "::" + name );
+}
+
+/**
+ * Check if given identifier (without namespace) is a reserved word.
+ */
+static bool is_reserved( const std::string &name )
+{
+    if( name.compare( 0, 2, "__" ) == 0 ) {
+        return true;
+    }
+    if( name.length() >= 2 && name[0] == '_' && name[1] >= 'A' && name[1] <= 'Z' ) {
+        return true;
+    }
+    return false;
+}
+/**
+ * Check whether some identifier should be skipped without issuing a message about it
+ * (e.g. because it's common or reserved).
+ */
+static bool skip_silently( const Cursor &cursor )
+{
+    // Just a declaration, skip the actual parsing as it requires a proper definition.
+    if( !cursor.is_definition() ) {
+        return true;
+    }
+    // Don't export anything that is in the standard library namespace. For now. Maybe later.
+    if( ( cursor.fully_qualifid() + "::" ).compare( 0, 5, "std::" ) == 0 ) {
+        return true;
+    }
+    if( is_reserved( cursor.spelling() ) ) {
+        return true;
+    }
+    // anonymous object, can't be exported because it has no name
+    if( cursor.spelling().empty() ) {
+        return true;
+    }
+    return false;
+}
+
+Parser::Parser( Exporter &e ) : exporter( e )
+{
+}
+
+Parser::~Parser() = default;
+
+void Parser::skipped( const std::string &what, const std::string &name, const std::string &why )
+{
+    const std::string id = what + "!" + name;
+    // Register what things have been skipped, so we can avoid showing this
+    // message again for the same thing. what+!+name is a unique id for it.
+    if( skipped_entities.count( id ) == 0 ) {
+        debug_message( "Skipping " + what + " " + name + " (" + why + ")" );
+        skipped_entities.insert( id );
+    }
+}
+
+void Parser::parse_typedef( const Cursor &cursor )
+{
+    exporter.register_id_typedef( cursor );
+}
+
+void Parser::parse_enum( const Cursor &cursor )
+{
+    if( skip_silently( cursor ) ) {
+        return;
+    }
+    const std::string name = cursor.fully_qualifid();
+    if( !exporter.export_enabled( cursor.type() ) ) {
+        if(export_all && cursor.fully_qualifid().find("::") == std::string::npos){
+        exporter.add_export_enumeration(cursor.spelling());
+    } else {
+        skipped( "enum", name, "not exported" );
+        return;
+    }
+    }
+    if( contains( name, enums ) ) {
+        return;
+    }
+    enums.emplace_back( *this, cursor );
+}
+
+void Parser::parse_class( const Cursor &cursor )
+{
+    if( skip_silently( cursor ) ) {
+        return;
+    }
+    const std::string name = cursor.fully_qualifid();
+    const Type t = cursor.type();
+    if( !exporter.export_enabled( t ) ) {
+        if(export_all && cursor.fully_qualifid().find("::") == std::string::npos){
+        exporter.add_export_by_value_and_reference(cursor.spelling());
+    } else {
+        skipped( "class", name, "not exported" );
+        return;
+    }
+    }
+    if( !exporter.export_by_reference( t ) && !exporter.export_by_value( t ) ) {
+        throw std::runtime_error( "Class " + name +
+                                  " should be exported, but is not marked as by-value nor as by-reference!" );
+    }
+    get_or_add_class( cursor );
+}
+
+void Parser::parse_union( const Cursor &cursor )
+{
+    if( skip_silently( cursor ) ) {
+        return;
+    }
+    const std::string name = cursor.fully_qualifid();
+    skipped( "union", name, "not supported" );
+    //@todo maybe implement it?
+}
+
+void Parser::parse_function( const Cursor &cursor )
+{
+    if( skip_silently( cursor ) ) {
+        return;
+    }
+    //@todo handle blocking
+    functions.emplace_back( cursor );
+}
+
+void Parser::parse_namespace( const Cursor &cursor )
+{
+    if( is_reserved( cursor.spelling() ) || cursor.spelling() == "" ) {
+        return;
+    }
+    if( cursor.spelling() == "std" ) {
+        return;
+    }
+    parse( cursor );
+}
+
+void Parser::parse_variable( const Cursor &cursor )
+{
+    if( skip_silently( cursor ) ) {
+        return;
+    }
+    //@todo handle blocking
+    variables.emplace_back( cursor );
+}
+
+void Parser::parse( const std::vector<std::string> &headers )
+{
+    std::string text;
+    for( const std::string &header : headers ) {
+        text += "#include \"" + header + "\"\n";
+    }
+    // @todo the include path should not be fixed!
+    const std::vector<const char *> args = { {
+            "-x", "c++",
+            "-std=c++11",
+            "-fsyntax-only",
+            "-Wno-pragma-once-outside-header",
+            "-isystem", "/usr/lib/clang/3.3/include",
+            "-isystem", "/usr/lib/clang/4.0.0/include",
+            "-isystem", "/usr/lib/clang/6.0.0/include",
+            "foo.h",
+        }
+    };
+    const unsigned opts = CXTranslationUnit_None | CXTranslationUnit_SkipFunctionBodies |
+                          CXTranslationUnit_Incomplete;
+    tus.emplace_back( index, args, text, opts );
+
+    const auto diagnostics = tus.back().get_diagnostics();
+    for( const std::string &msg : diagnostics ) {
+        info_message( msg );
+    }
+    if( !diagnostics.empty() ) {
+        throw std::runtime_error("Errors / warnings while parsing header" );
+    }
+    
+    for( const std::string &file : tus.back().get_includes() ) {
+        visited_files.insert( file );
+    }
+
+    parse( tus.back().cursor() );
+}
+
+void Parser::parse( const std::string &header )
+{
+    if( visited_files.count( header ) > 0 ) {
+        info_message( "Skipping file " + header + " as it was already included by another file" );
+        return;
+    }
+    // @todo the include path should not be fixed!
+    const std::vector<const char *> args = { {
+            "-x", "c++",
+            "-std=c++11",
+            "-fsyntax-only",
+            "-Wno-pragma-once-outside-header",
+            "-isystem", "/usr/lib/clang/3.3/include",
+            "-isystem", "/usr/lib/clang/4.0.0/include",
+            "-isystem", "/usr/lib/clang/6.0.0/include",
+            header.c_str(),
+        }
+    };
+    const unsigned opts = CXTranslationUnit_None | CXTranslationUnit_SkipFunctionBodies |
+                          CXTranslationUnit_Incomplete;
+    tus.emplace_back( index, args, opts );
+
+    const auto diagnostics = tus.back().get_diagnostics();
+    for( const std::string &msg : diagnostics ) {
+        info_message( msg );
+    }
+    if( !diagnostics.empty() ) {
+        throw std::runtime_error("Errors / warnings while parsing header" );
+    }
+
+    for( const std::string &file : tus.back().get_includes() ) {
+        visited_files.insert( file );
+    }
+
+    parse( tus.back().cursor() );
+}
+
+void Parser::parse( const Cursor &c ) {
+    c.visit_children( [this]( const Cursor & cursor, const Cursor &/*parent*/ ) {
+        const auto k = cursor.kind();
+        if( k == CXCursor_StructDecl || k == CXCursor_ClassDecl ) {
+            parse_class( cursor );
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_ClassTemplate ) {
+            skipped( "class template", cursor.fully_qualifid(), "not supported" );
+            //@todo handle this?
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_ClassTemplatePartialSpecialization ) {
+            skipped( "class template partial specialization", cursor.fully_qualifid(), "not supported" );
+            //@todo handle this?
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_UnionDecl ) {
+            parse_union( cursor );
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_EnumDecl ) {
+            parse_enum( cursor );
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_TypedefDecl || k == CXCursor_TypeAliasDecl ||
+                   k == CXCursor_UsingDeclaration ) {
+            parse_typedef( cursor );
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_VarDecl ) {
+            parse_variable( cursor );
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_FunctionTemplate ) {
+            skipped( "function template", cursor.fully_qualifid(), "not supported" );
+            //@todo handle this?
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_FunctionDecl ) {
+            parse_function( cursor );
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_Namespace ) {
+            parse_namespace( cursor );
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_TypeAliasTemplateDecl ) {
+            // Too complicated, and probably not needed.
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_UnexposedDecl ) {
+            // Don't even know what this is.
+            return CXChildVisit_Continue;
+        } else if( k == CXCursor_TranslationUnit ) {
+            return CXChildVisit_Recurse;
+        }
+        cursor.dump( "main parse function" );
+        return CXChildVisit_Continue;
+    } );
+}
+
+void Parser::debug_message( const std::string &message ) const
+{
+    std::cout << message << std::endl;
+}
+
+void Parser::info_message( const std::string &message ) const
+{
+    std::cout << message << std::endl;
+}
+
+void Parser::error_message( const std::string &message ) const
+{
+    std::cerr << message << std::endl;
+}
+
+const CppClass *Parser::get_class( const std::string &full_name ) const
+{
+    return get_from( full_name, classes );
+}
+
+bool Parser::contains_class( const std::string &full_name ) const
+{
+    return contains( full_name, classes );
+}
+
+CppClass &Parser::add_class( const Cursor &c )
+{
+    classes.emplace_back( *this, c );
+    return classes.back();
+}
+
+CppClass &Parser::get_or_add_class( const Cursor &c )
+{
+    CppClass *const ptr = const_cast<CppClass *>( get_from( c.fully_qualifid(), classes ) );
+    return ptr ? *ptr : add_class( c );
+}
+
+const CppEnum *Parser::get_enum( const std::string &full_name ) const
+{
+    return get_from( full_name, enums );
+}
+
+bool Parser::contains_enum( const std::string &full_name ) const
+{
+    return contains( full_name, enums );
+}
