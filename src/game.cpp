@@ -15,7 +15,6 @@
 #include "auto_pickup.h"
 #include "effect.h"
 #include "bionics.h"
-#include "lua/lua_engine.h"
 #include "gamemode.h"
 #include "mapbuffer.h"
 #include "map_item_stack.h"
@@ -57,7 +56,7 @@
 #include "weather_gen.h"
 #include "start_location.h"
 #include "debug.h"
-#include "catalua.h"
+#include "lua/lua_engine.h"
 #include "lua_console.h"
 #include "sounds.h"
 #include "iuse_actor.h"
@@ -400,13 +399,13 @@ void game::load_data_from_dir( const std::string &path, const std::string &src, 
     // Process a preload file before the .json files,
     // so that custom IUSE's can be defined before
     // the items that need them are parsed
-    lua_loadmod( path, "preload.lua" );
+    lua_engine_ptr->loadmod( path, "preload.lua" );
 
     DynamicDataLoader::get_instance().load_data_from_path( path, src, ui );
 
     // main.lua will be executed after JSON, allowing to
     // work with items defined by mod's JSON
-    lua_loadmod( path, "main.lua" );
+    lua_engine_ptr->loadmod( path, "main.lua" );
 }
 
 game::~game()
@@ -907,7 +906,7 @@ bool game::start_game()
     u.add_memorial_log(pgettext("memorial_male", "%s began their journey into the Cataclysm."),
                        pgettext("memorial_female", "%s began their journey into the Cataclysm."),
                        u.name.c_str());
-   lua_callback("on_new_player_created");
+    lua_engine_ptr->callback("on_new_player_created");
 
     return true;
 }
@@ -1422,12 +1421,12 @@ bool game::do_turn()
     mission::process_all();
     if( calendar::once_every( 1_days ) ) { // Midnight!
         overmap_buffer.process_mongroups();
-        lua_callback("on_day_passed");
+        lua_engine_ptr->callback("on_day_passed");
     }
 
     // Run a LUA callback once per minute
     if( calendar::once_every( 1_minutes ) ) {
-        lua_callback("on_minute_passed");
+        lua_engine_ptr->callback("on_minute_passed");
     }
 
     // Move hordes every 5 min
