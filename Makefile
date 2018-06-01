@@ -135,7 +135,7 @@ BINDIST_DIR = $(BUILD_PREFIX)bindist
 BUILD_DIR = $(CURDIR)
 SRC_DIR = src
 LUA_DIR = lua
-LUASRC_DIR = $(SRC_DIR)/$(LUA_DIR)
+CATALUA_SRC_DIR = $(SRC_DIR)/$(LUA_DIR)
 # if you have LUAJIT installed, try make LUA_BINARY=luajit for extra speed
 LUA_BINARY = lua
 LOCALIZE = 1
@@ -167,6 +167,8 @@ ODIR = $(BUILD_PREFIX)obj
 ODIRTILES = $(BUILD_PREFIX)obj/tiles
 W32ODIR = $(BUILD_PREFIX)objwin
 W32ODIRTILES = $(W32ODIR)/tiles
+CATALUA_ODIR = $(ODIR)/lua
+CATALUA_LIB = $(ODIR)/libcatalua.a
 
 ifdef AUTO_BUILD_PREFIX
   BUILD_PREFIX = $(if $(RELEASE),release-)$(if $(TILES),tiles-)$(if $(SOUND),sound-)$(if $(LOCALIZE),local-)$(if $(BACKTRACE),back-)$(if $(MAPSIZE),map-$(MAPSIZE)-)$(if $(LUA),lua-)$(if $(USE_XDG_DIR),xdg-)$(if $(USE_HOME_DIR),home-)$(if $(DYNAMIC_LINKING),dynamic-)$(if $(MSYS2),msys2-)
@@ -511,8 +513,8 @@ ifdef LUA
   CXXFLAGS += $(LUA_CFLAGS)
 
   CXXFLAGS += -DLUA
-  LUA_DEPENDENCIES = $(LUASRC_DIR)/catabindings.cpp
   BINDIST_EXTRAS  += $(LUA_DIR)
+  CXXFLAGS += -I src
 endif
 
 ifdef SDL
@@ -699,6 +701,18 @@ ifeq ($(TARGETSYSTEM),WINDOWS)
 endif
 OBJS = $(sort $(patsubst %,$(ODIR)/%,$(_OBJS)))
 
+# This file contains dummy implementation that are used in non-Lua builds.
+# Lua builds contain all other cpp files in the Lua source directory.
+DUMMY_CATALUA_SOURCES = $(CATALUA_SRC_DIR)/dummy_lua.cpp
+ifdef LUA
+  $(shell cd src/lua && lua generate_bindings.lua)
+  CATALUA_SOURCES = $(filter-out $(DUMMY_CATALUA_SOURCES),$(wildcard $(CATALUA_SRC_DIR)/*.cpp))
+else
+  CATALUA_SOURCES = $(DUMMY_CATALUA_SOURCES)
+endif
+_CATALUA_OBJS = $(CATALUA_SOURCES:$(CATALUA_SRC_DIR)/%.cpp=%.o)
+CATALUA_OBJS = $(patsubst %,$(CATALUA_ODIR)/%,$(_CATALUA_OBJS))
+
 ifdef LANGUAGES
   L10N = localization
 endif
@@ -756,16 +770,19 @@ endif
 all: version $(CHECKS) $(TARGET) $(L10N) $(TESTS)
 	@
 
-$(TARGET): $(ODIR) $(OBJS)
-	+$(LD) $(W32FLAGS) -o $(TARGET) $(OBJS) $(LDFLAGS)
+$(TARGET): $(ODIR) $(CATALUA_ODIR) $(OBJS) $(CATALUA_LIB)
+	+$(LD) $(W32FLAGS) -o $(TARGET) $(OBJS) $(CATALUA_LIB) $(LDFLAGS)
 ifdef RELEASE
   ifndef DEBUG_SYMBOLS
 	$(STRIP) $(TARGET)
   endif
 endif
 
-$(BUILD_PREFIX)$(TARGET_NAME).a: $(ODIR) $(OBJS)
-	$(AR) rcs $(BUILD_PREFIX)$(TARGET_NAME).a $(filter-out $(ODIR)/main.o $(ODIR)/messages.o,$(OBJS))
+$(CATALUA_LIB): $(CATALUA_OBJS)
+	$(AR) rcs $(CATALUA_LIB) $(CATALUA_OBJS)
+
+$(BUILD_PREFIX)$(TARGET_NAME).a: $(ODIR) $(CATALUA_ODIR) $(OBJS) $(CATALUA_OBJS)
+	$(AR) rcs $(BUILD_PREFIX)$(TARGET_NAME).a $(filter-out $(ODIR)/main.o $(ODIR)/messages.o,$(OBJS)) $(CATALUA_OBJS)
 
 .PHONY: version json-verify
 version:
@@ -780,8 +797,14 @@ json-verify:
 $(ODIR):
 	mkdir -p $(ODIR)
 
+$(CATALUA_ODIR):
+	mkdir -p $(CATALUA_ODIR)
+
 $(ODIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CPPFLAGS) $(DEFINES) $(CXXFLAGS) -c $< -o $@
+
+$(CATALUA_ODIR)/%.o: $(CATALUA_SRC_DIR)/%.cpp
+	$(CXX) $(CPPFLAGS) $(DEFINES) -I $(SRC_DIR) -I $(CATALUA_SRC_DIR) $(CXXFLAGS) -c $< -o $@
 
 $(ODIR)/%.o: $(SRC_DIR)/%.rc
 	$(RC) $(RFLAGS) $< -o $@
@@ -789,11 +812,6 @@ $(ODIR)/%.o: $(SRC_DIR)/%.rc
 src/version.h: version
 
 src/version.cpp: src/version.h
-
-$(LUASRC_DIR)/catabindings.cpp: $(LUA_DIR)/class_definitions.lua $(LUASRC_DIR)/generate_bindings.lua
-	cd $(LUASRC_DIR) && $(LUA_BINARY) generate_bindings.lua
-
-$(SRC_DIR)/catalua.cpp: $(LUA_DEPENDENCIES)
 
 localization:
 	lang/compile_mo.sh $(LANGUAGES)
@@ -809,8 +827,9 @@ clean: clean-tests
 	rm -rf *$(TILES_TARGET_NAME).exe *$(TARGET_NAME).exe *$(TARGET_NAME).a
 	rm -rf *obj *objwin
 	rm -rf *$(BINDIST_DIR) *cataclysmdda-*.tar.gz *cataclysmdda-*.zip
-	rm -f $(SRC_DIR)/version.h $(LUASRC_DIR)/catabindings.cpp
+	rm -f $(SRC_DIR)/version.h
 	rm -f $(CHKJSON_BIN)
+	rm -f $(CATALUA_SRC_DIR)/generate_bindings.lua
 
 distclean:
 	rm -rf *$(BINDIST_DIR)
@@ -1069,3 +1088,4 @@ clean-tests:
 
 -include $(SOURCES:$(SRC_DIR)/%.cpp=$(DEPDIR)/%.P)
 -include ${OBJS:.o=.d}
+-include ${CATALUA_OBJS:.o=.d}
