@@ -79,7 +79,7 @@ no connection at all to the monster.
 
 classes = {
     Character = {
-        headers = { "character.h" },
+        headers = { "character.h", "color.h", "units.h", "player.h" },
         parent = "Creature",
         attributes = {
             -- Character::hp_cur ignored because: unhandled type std::array<int, num_hp_parts>[CXType_Elaborated] as member (std::array<int, 6>[CXType_Record]),
@@ -254,7 +254,7 @@ classes = {
         }
     },
     Creature = {
-        headers = { "creature.h" },
+        headers = { "creature.h", "calendar.h", "color.h", "units.h", "character.h", "monster.h", "enums.h" },
         attributes = {
             moves = { type = "int", writable = true },
             underwater = { type = "bool", writable = true },
@@ -449,7 +449,7 @@ classes = {
         }
     },
     Skill = {
-        headers = { "" },
+        headers = { "skill.h" },
         string_id = "skill_id",
         attributes = {
         },
@@ -457,7 +457,7 @@ classes = {
         }
     },
     ammunition_type = {
-        headers = { "ammo.h" },
+        headers = { "ammo.h", "itype.h" },
         string_id = "ammotype",
         attributes = {
         },
@@ -692,7 +692,7 @@ classes = {
         }
     },
     game = {
-        headers = { "game.h" },
+        headers = { "game.h", "item.h", "color.h" },
         attributes = {
             -- game::critter_tracker ignored because: unhandled type pimpl<Creature_tracker>[CXType_Unexposed] as member (pimpl<Creature_tracker>[CXType_Record]),
             -- game::events ignored because: unhandled type event_manager &[CXType_LValueReference] as member (event_manager &[CXType_LValueReference]),
@@ -893,7 +893,7 @@ classes = {
         }
     },
     item = {
-        headers = { "item.h" },
+        headers = { "item.h", "color.h", "units.h", "gun_mode.h", "ret_val.h", "damage.h", "itype.h", "bodypart.h" },
         new = {
             -- item::item ignored because: unhandled type item &&[CXType_RValueReference] as argument (item &&[CXType_RValueReference]),
             -- item::item ignored because: unhandled type item::default_charges_tag[CXType_Record] as argument (item::default_charges_tag[CXType_Record]),
@@ -1347,7 +1347,7 @@ classes = {
         }
     },
     map = {
-        headers = { "map.h" },
+        headers = { "map.h", "units.h", "item.h", "vpart_position.h", "map_iterator.h", "submap.h" },
         attributes = {
         },
         functions = {
@@ -1446,7 +1446,6 @@ classes = {
             { name = "destroy", rval = nil, args = { "tripoint", "bool" } },
             { name = "destroy_furn", rval = nil, args = { "tripoint", "bool" } },
             { name = "destroy_vehicle", rval = nil, args = { "vehicle" } },
-            { name = "detach_vehicle", rval = nil, args = { "vehicle" } },
             { name = "disarm_trap", rval = nil, args = { "tripoint" } },
             { name = "disp_name", rval = "string", args = { "tripoint" } },
             { name = "displace_vehicle", rval = "vehicle&", args = { "tripoint", "tripoint" } },
@@ -1554,7 +1553,6 @@ classes = {
             { name = "light_at", rval = nil, args = { "tripoint" } },
             { name = "light_transparency", rval = "float", args = { "tripoint" } },
             { name = "load", rval = nil, args = { "int", "int", "int", "bool" } },
-            { name = "make_rubble", rval = nil, args = { "int", "int", "furn_id", "bool", "ter_id", "bool" } },
             { name = "make_rubble", rval = nil, args = { "tripoint" } },
             { name = "make_rubble", rval = nil, args = { "tripoint", "furn_id", "bool" } },
             { name = "make_rubble", rval = nil, args = { "tripoint", "furn_id", "bool", "ter_id", "bool" } },
@@ -1768,7 +1766,7 @@ classes = {
         }
     },
     monster = {
-        headers = { "monster.h" },
+        headers = { "monster.h", "units.h", "color.h", "item.h" },
         parent = "Creature",
         attributes = {
             -- monster::ammo ignored because: unhandled type std::map<std::string, int>[CXType_Elaborated] as member (std::map<std::__cxx11::basic_string<char>, int, std::less<std::__cxx11::basic_string<char> >, std::allocator<std::pair<const std::__cxx11::basic_string<char>, int> > >[CXType_Record]),
@@ -1836,12 +1834,10 @@ classes = {
             { name = "init_from_item", rval = nil, args = { "item" } },
             { name = "is_dead", rval = "bool", args = { } },
             { name = "is_fleeing", rval = "bool", args = { "player" } },
-            { name = "made_of", rval = "bool", args = { "phase_id" } },
             { name = "make_ally", rval = nil, args = { "monster" } },
             { name = "make_friendly", rval = nil, args = { } },
             { name = "make_fungus", rval = "bool", args = { } },
             { name = "melee_attack", rval = nil, args = { "Creature" } },
-            { name = "melee_attack", rval = nil, args = { "Creature", "bool" } },
             { name = "melee_attack", rval = nil, args = { "Creature", "float" } },
             { name = "move", rval = nil, args = { } },
             { name = "move_target", rval = "tripoint", args = { } },
@@ -1944,7 +1940,7 @@ classes = {
         }
     },
     mutation_branch = {
-        headers = { "mutation.h" },
+        headers = { "mutation.h", "color.h" },
         string_id = "trait_id",
         attributes = {
             -- mutation_branch::armor ignored because: unhandled type std::map<body_part, resistances>[CXType_Elaborated] as member (std::map<body_part, resistances, std::less<body_part>, std::allocator<std::pair<const body_part, resistances> > >[CXType_Record]),
@@ -2033,7 +2029,7 @@ classes = {
         }
     },
     npc = {
-        headers = { "npc.h" },
+        headers = { "npc.h", "units.h", "color.h", "projectile.h", "dispersion.h" },
         parent = "player",
         attributes = {
             -- npc::chatbin ignored because: unhandled type npc_chatbin[CXType_Record] as member (npc_chatbin[CXType_Record]),
@@ -2132,7 +2128,6 @@ classes = {
             { name = "get_companion_mission", rval = "string", args = { } },
             { name = "get_healing_item", rval = "item&", args = { "bool", "bool", "bool", "bool" } },
             { name = "get_monster_faction", rval = nil, args = { } },
-            { name = "get_pathfinding_settings", rval = nil, args = { "bool" } },
             { name = "go_to_destination", rval = nil, args = { } },
             { name = "guaranteed_hostile", rval = "bool", args = { } },
             { name = "guard_current_pos", rval = nil, args = { } },
@@ -2266,7 +2261,7 @@ classes = {
         }
     },
     player = {
-        headers = { "player.h" },
+        headers = { "player.h", "color.h", "projectile.h", "units.h", "npc.h", "dispersion.h" },
         parent = "Character",
         attributes = {
             -- player::activity ignored because: unhandled type player_activity[CXType_Record] as member (player_activity[CXType_Record]),
@@ -2305,7 +2300,6 @@ classes = {
             scent = { type = "int", writable = true },
             slow_rad = { type = "int", writable = true },
             stamina = { type = "int", writable = true },
-            start_location = { type = "start_location_id", writable = true },
             stim = { type = "int", writable = true },
             style_selected = { type = "matype_id", writable = true },
             tank_plut = { type = "int", writable = true },
@@ -2747,32 +2741,11 @@ classes = {
         }
     },
     quality = {
-        headers = { "" },
+        headers = { "requirements.h" },
         string_id = "quality_id",
         attributes = {
         },
         functions = {
-        }
-    },
-    start_location = {
-        headers = { "start_location.h" },
-        string_id = "start_location_id",
-        attributes = {
-        },
-        functions = {
-            -- static start_location::load_location ignored because: unhandled type JsonObject &[CXType_LValueReference] as argument (JsonObject &[CXType_LValueReference]),
-            -- static start_location::reset skipped because it's blocked,
-            { name = "add_map_special", rval = nil, args = { "tripoint", "string" } },
-            { name = "burn", rval = nil, args = { "tripoint", "int", "int" } },
-            { name = "find_player_initial_location", rval = "tripoint", args = { } },
-            { name = "get_all", static = true, rval = nil, args = { } },
-            { name = "handle_heli_crash", rval = nil, args = { "player" } },
-            { name = "ident", rval = nil, args = { } },
-            { name = "name", rval = "string", args = { } },
-            { name = "place_player", rval = nil, args = { "player" } },
-            { name = "prepare_map", rval = nil, args = { "tripoint" } },
-            { name = "surround_with_monsters", rval = nil, args = { "tripoint", "mongroup_id", "float" } },
-            { name = "target", rval = "string", args = { } },
         }
     },
     stats = {
@@ -2993,7 +2966,7 @@ classes = {
         }
     },
     vehicle = {
-        headers = { "vehicle.h" },
+        headers = { "vehicle.h", "npc.h", "color.h" },
         attributes = {
             -- vehicle::active_items skipped because it's blocked,
             -- vehicle::face ignored because: unhandled type tileray[CXType_Record] as member (tileray[CXType_Record]),
@@ -3331,7 +3304,7 @@ classes = {
         }
     },
     vpart_info = {
-        headers = { "veh_type.h" },
+        headers = { "veh_type.h", "requirements.h" },
         string_id = "vpart_id",
         attributes = {
             -- vpart_info::damage_reduction ignored because: unhandled type std::array<float, NUM_DT>[CXType_Elaborated] as member (std::array<float, 10>[CXType_Record]),
@@ -3543,7 +3516,7 @@ enums = {
     },
 }
 enums_headers = {
-    "field.h", "bodypart.h", "itype.h", "creature.h", "output.h", "calendar.h", "pldata.h"
+    "field.h", "bodypart.h", "itype.h", "creature.h", "output.h", "calendar.h", "pldata.h", "units.h"
 }
 
 --[[
