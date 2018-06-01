@@ -110,6 +110,8 @@ tests/data/jsionized_overmap.sav
 # static library used to link the test executable
 cataclysm.a
 
+lex/lua-exporter
+
 # coredumps
 *.core
 
