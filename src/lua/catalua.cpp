@@ -52,9 +52,6 @@ extern "C" {
 #define LUA_OK 0
 #endif
 
-using item_stack_iterator = std::list<item>::iterator;
-using volume = units::volume;
-using mass = units::mass;
 using npc_template_id = string_id<npc_template>;
 using overmap_direction = om_direction::type;
 

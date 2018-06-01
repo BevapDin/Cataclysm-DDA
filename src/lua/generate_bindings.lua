@@ -48,11 +48,11 @@ function member_type_to_cpp_type(member_type)
         for class_name, class in pairs(classes) do
             if class_name == member_type then
                 if class.by_value then
-                    return "LuaValue<" .. member_type .. ">"
+                    return "LuaValue<" .. class.cpp_name .. ">"
                 elseif class.by_value_and_reference then
-                    return "LuaValueOrReference<" .. member_type .. ">"
+                    return "LuaValueOrReference<" .. class.cpp_name .. ">"
                 else
-                    return "LuaReference<" .. member_type .. ">"
+                    return "LuaReference<" .. class.cpp_name .. ">"
                 end
             end
         end
@@ -72,8 +72,7 @@ function load_instance(class_name)
     if not classes[class_name] then
         error("'"..class_name.."' is not defined in class_definitions.lua")
     end
-
-	return class_name .. "& instance = " .. retrieve_lua_value(class_name, 1) .. ";"
+    return classes[class_name].cpp_name .. "& instance = " .. retrieve_lua_value(class_name, 1) .. ";"
 end
 
 -- Returns a full statement that checks whether the given stack item has the given value.
@@ -106,7 +105,7 @@ function push_lua_value(in_variable, value_type)
             if classes[t].by_value_and_reference then
                 -- special case becaus member_type_to_cpp_type would return LuaValueOrReference,
                 -- which does not have a push function.
-                wrapper = "LuaReference<" .. t .. ">"
+                wrapper = "LuaReference<" .. classes[t].cpp_name .. ">"
             else
                 wrapper = member_type_to_cpp_type(t)
             end
@@ -116,7 +115,7 @@ function push_lua_value(in_variable, value_type)
     elseif classes[value_type] then
         -- Not a native Lua type, but it's not a reference, so we *have* to copy it (the value would
         -- go out of scope otherwise). Copy semantic means using LuaValue.
-        wrapper = "LuaValue<" .. value_type .. ">"
+        wrapper = "LuaValue<" .. classes[value_type].cpp_name .. ">"
     else
         -- Either an undefined type or a native Lua type, both is handled in member_type_to_cpp_type
         wrapper = member_type_to_cpp_type(value_type)
@@ -360,7 +359,7 @@ function generate_class_function_wrapper(class_name, function_name, func, cur_cl
             This won't work: B b; b.f();
             But this will:   B b; static_cast<A&>(b).f()
             --]]
-            func_invoc = "static_cast<"..cur_class_name.."&>(instance)"
+            func_invoc = "static_cast<"..classes[cur_class_name].cpp_name.."&>(instance)"
         end
         func_invoc = func_invoc .. "."..function_to_call .. "("
 
@@ -389,6 +388,7 @@ function generate_class_function_wrapper(class_name, function_name, func, cur_cl
 end
 
 function generate_constructor(class_name, args)
+    local cpp_name = classes[class_name].cpp_name
     local text = "static int new_" .. class_name .. "(lua_State *L) {"..br
 
     local cbc = function(indentation, stack_index, rval, function_to_call)
@@ -396,7 +396,7 @@ function generate_constructor(class_name, args)
 
         -- Push is always done on a value, never on a pointer/reference, therefor don't use
         -- `push_lua_value` (which uses member_type_to_cpp_type to get either LuaValue or LuaReference).
-        local text = tab .. "LuaValue<" .. class_name .. ">::push(L"
+        local text = tab .. "LuaValue<" .. cpp_name .. ">::push(L"
 
         for i = 1,stack_index do
             text = text .. ", parameter"..i
@@ -407,7 +407,7 @@ function generate_constructor(class_name, args)
         return text
     end
 
-    text = text .. insert_overload_resolution(class_name .. "::" .. class_name, args, cbc, 1, 1)
+    text = text .. insert_overload_resolution(cpp_name .. "::" .. cpp_name, args, cbc, 1, 1)
 
     text = text .. "}"..br
 
@@ -416,18 +416,19 @@ end
 
 function generate_destructor(class_name, class)
     local cpp_output = ""
+    local cpp_class_name = class.cpp_name
     if class.by_value or class.by_value_and_reference then
         cpp_output = cpp_output .. "template<>" .. br
-        cpp_output = cpp_output .. "void LuaValue<" .. class_name .. ">::call_destructor( " .. class_name .. " &object ) {" .. br
-        -- This avoids problems where class_name is actually "foo::bar<some>" and the destructor call
+        cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. ">::call_destructor( " .. cpp_class_name .. " &object ) {" .. br
+        -- This avoids problems where cpp_class_name is actually "foo::bar<some>" and the destructor call
         -- would be `object.~foo::bar<some>`, which causes compiler errors.
-        cpp_output = cpp_output .. tab .. "using T = " .. class_name .. ";" .. br
+        cpp_output = cpp_output .. tab .. "using T = " .. cpp_class_name .. ";" .. br
         cpp_output = cpp_output .. tab .. "object.~T();" .. br
         cpp_output = cpp_output .. "}" .. br
     end
     if not class.by_value or class.by_value_and_reference then
         cpp_output = cpp_output .. "template<>" .. br
-        cpp_output = cpp_output .. "void LuaValue<" .. class_name .. "*>::call_destructor( " .. class_name .. " *&object ) {" .. br
+        cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. "*>::call_destructor( " .. cpp_class_name .. " *&object ) {" .. br
         -- Don't need an actual deconstructor call here because it's only a pointer, its deconstruction won't do anything.
         cpp_output = cpp_output .. tab .. "static_cast<void>( object );" .. br
         cpp_output = cpp_output .. "}" .. br
@@ -436,10 +437,11 @@ function generate_destructor(class_name, class)
 end
 
 function generate_operator(class_name, operator_id, cppname)
+    local cpp_class_name = classes[class_name].cpp_name
     local text = "static int op_" .. class_name .. "_" .. operator_id .. "(lua_State *L) {"..br
 
-    text = text .. tab .. "const " .. class_name .. " &lhs = " .. retrieve_lua_value(class_name, 1) .. ";"..br
-    text = text .. tab .. "const " .. class_name .. " &rhs = " .. retrieve_lua_value(class_name, 2) .. ";"..br
+    text = text .. tab .. "const " .. cpp_class_name .. " &lhs = " .. retrieve_lua_value(class_name, 1) .. ";"..br
+    text = text .. tab .. "const " .. cpp_class_name .. " &rhs = " .. retrieve_lua_value(class_name, 2) .. ";"..br
 
     text = text .. tab .. "bool rval = "
 
@@ -581,18 +583,20 @@ end
 -- The static constant is always define in LuaValue (LuaReference gets it via inheritance)
 -- But LuaReference inherits from LuaValue<T*>!
 function wrapper_base_class(class_name)
+    local cpp_class_name = classes[class_name].cpp_name
     -- This must not be LuaReference because it is used for declaring/defining the static members
     -- and those should onloy exist for LuaValue.
     if classes[class_name].by_value then
-        return "LuaValue<" .. class_name .. ">"
+        return "LuaValue<" .. cpp_class_name .. ">"
     else
-        return "LuaValue<" .. class_name .. "*>"
+        return "LuaValue<" .. cpp_class_name .. "*>"
     end
 end
 
 function generate_LuaValue_constants(class_name, class, by_value_and_reference)
     local cpp_name = ""
     local metatable_name = ""
+    local cpp_class_name = class.cpp_name
     if by_value_and_reference then
         -- A different metatable name, to allow the C++ wrappers to detect what the
         -- object from Lua refers to. The wrappers can thereby be used by both types
@@ -600,7 +604,7 @@ function generate_LuaValue_constants(class_name, class, by_value_and_reference)
         -- can be called on a value that was pushed to Lua via `Lua<foo>::push` (and is a value),
         -- and values pushed via `LuaReference<foo>::push` (which is a pointer).
         metatable_name = "value_of_" .. class_name .. "_metatable"
-        cpp_name = "LuaValue<" .. class_name .. ">"
+        cpp_name = "LuaValue<" .. cpp_class_name .. ">"
     else
         metatable_name = class_name .. "_metatable"
         cpp_name = wrapper_base_class(class_name)

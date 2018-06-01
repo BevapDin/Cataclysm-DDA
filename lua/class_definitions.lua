@@ -280,6 +280,7 @@ classes = {
         }
     },
     item_stack_iterator = {
+        cpp_name = "std::list<item>::iterator",
         by_value = true,
         has_equal = true,
         new = {
@@ -1904,6 +1905,7 @@ classes = {
         }
     },
     volume = {
+        cpp_name = "units::volume",
         by_value = true,
         attributes = {
         },
@@ -1912,6 +1914,7 @@ classes = {
         },
     },
     mass = {
+        cpp_name = "units::mass",
         by_value = true,
         attributes = {
         },
@@ -2368,6 +2371,13 @@ for class_name, value in pairs(classes) do
     end
 end
 
+-- Fill in default values for optional properties
+for class_name, value in pairs(classes) do
+    if not value.cpp_name then
+        value.cpp_name = class_name
+    end
+end
+
 -- This adds the int_id wrappers from the class definition as real classes.
 -- All int_id<T>s have the same interface, so we only need to add some mark to T, that this class
 -- T has an int_id of some name.
@@ -2379,6 +2389,7 @@ for name, value in pairs(classes) do
         local t = {
             by_value = true,
             has_equal = true,
+            cpp_name = "int_id<" .. value.cpp_name .. ">",
             -- IDs *could* be constructed from int, but where does the Lua script get the int from?
             -- The int is only exposed as int_id<T>, so Lua should never know about it.
             attributes = { },
@@ -2403,6 +2414,7 @@ for name, value in pairs(classes) do
         local t = {
             by_value = true,
             has_equal = true,
+            cpp_name = "string_id<" .. value.cpp_name .. ">",
             -- Copy and default constructor and construct from plain string.
             new = { { value.string_id }, { }, { "string" } },
             attributes = { },
