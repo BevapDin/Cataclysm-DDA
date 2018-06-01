@@ -106,46 +106,7 @@ void lua_dofile( lua_State *L, const char *path );
 // Helper functions for making working with the lua API more straightforward.
 // --------------------------------------------------------------------------
 
-// Stores item at the given stack position into the registry.
-int luah_store_in_registry( lua_State *L, int stackpos )
-{
-    lua_pushvalue( L, stackpos );
-    return luaL_ref( L, LUA_REGISTRYINDEX );
-}
-
-// Removes item from registry and pushes on the top of stack.
-void luah_remove_from_registry( lua_State *L, int item_index )
-{
-    lua_rawgeti( L, LUA_REGISTRYINDEX, item_index );
-    luaL_unref( L, LUA_REGISTRYINDEX, item_index );
-}
-
-// Sets the metatable for the element on top of the stack.
-void luah_setmetatable( lua_State *L, const char *metatable_name )
-{
-    // Push the metatable on top of the stack.
-    lua_getglobal( L, metatable_name );
-
-    // The element we want to set the metatable for is now below the top.
-    lua_setmetatable( L, -2 );
-}
-
-void luah_setglobal( lua_State *L, const char *name, int index )
-{
-    lua_pushvalue( L, index );
-    lua_setglobal( L, name );
-}
-
-/** Safe wrapper to get a Lua string as std::string. Handles nullptr and binary data. */
-std::string lua_tostring_wrapper( lua_State *const L, int const stack_position )
-{
-    size_t length = 0;
-    const char *const result = lua_tolstring( L, stack_position, &length );
-    if( result == nullptr || length == 0 ) {
-        return std::string{};
-    }
-    return std::string( result, length );
-}
+#include "lua/common.h"
 
 // Given a Lua return code and a file that it happened in, print a debugmsg with the error and path.
 // Returns true if there was an error, false if there was no error at all.
