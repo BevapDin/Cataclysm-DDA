@@ -16,6 +16,7 @@ cataclysmdda-*
 objwin/
 src/version.h
 src/lua/*.gen.cpp
+src/lua/*.gen.h
 tools/format/json_formatter.cgi
 CataclysmWin.cscope_file_list
 CataclysmWin.depend
