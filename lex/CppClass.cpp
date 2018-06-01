@@ -214,6 +214,7 @@ std::string CppClass::export_( Exporter &p ) const
 
     // @todo properly pick all required headers
     r = r + "        headers = { \"" + source_file_ + "\" },\n";
+	// @todo export forward declarations
 
     for( const CppClass &pc : parents ) {
         p.debug_message("Parent of " + full_name() + " is " + pc.full_name());

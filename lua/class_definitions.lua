@@ -26,6 +26,13 @@ Optional values are:
   "ter_id"). At the end of this file, this will be used to create an actual entry in the classes
   table for the type name given here.
   This is done because all the int_id objects have essentially the same functions.
+- headers (optional, an array of strings), a list of headers that is required to compile the
+  generated wrapper functions for this type. This usually includes at least the header for the
+  type itself, but may require more includes in order to (implicitly) call copy constructors
+  when calling member functions. If a header is missing, you'll get a compiler error.
+- forward_declaration (optional, a string), how to forward declare the type. E.g. "class foo;"
+  (for simple types) or (for template instances):
+  "template<typename N> class wrapper;class foo;using foo_wrapper = wrapper<foo>;"
 
 The attributes table contains the members of the C++ class. Each key is the name of the member,
 it maps to a map with the following values:
@@ -79,6 +86,7 @@ no connection at all to the monster.
 
 classes = {
     Character = {
+        headers = { "character.h", "color.h", "units.h", "player.h" },
         parent = "Creature",
         attributes = {
             dex_cur = { type = "int", writable = true },
@@ -240,6 +248,7 @@ classes = {
         }
     },
     Creature = {
+        headers = { "creature.h", "calendar.h", "color.h", "units.h", "character.h", "monster.h", "enums.h" },
         attributes = {
             moves = { type = "int", writable = true },
             underwater = { type = "bool", writable = true },
@@ -402,6 +411,7 @@ classes = {
         }
     },
     MonsterGroup = {
+        headers = { "mongroup.h" },
         string_id = "mongroup_id",
         attributes = {
             defaultMonster = { type = "mtype_id", writable = true },
@@ -416,6 +426,7 @@ classes = {
         }
     },
     Skill = {
+        headers = { "skill.h" },
         string_id = "skill_id",
         attributes = {
         },
@@ -423,6 +434,7 @@ classes = {
         }
     },
     ammunition_type = {
+        headers = { "ammo.h", "itype.h" },
         string_id = "ammotype",
         attributes = {
         },
@@ -432,6 +444,7 @@ classes = {
         }
     },
     calendar = {
+        headers = { "calendar.h" },
         new = {
             { "calendar" },
             { "int" },
@@ -461,6 +474,7 @@ classes = {
         }
     },
     effect = {
+        headers = { "effect.h" },
         attributes = {
         },
         functions = {
@@ -504,6 +518,7 @@ classes = {
         }
     },
     effect_type = {
+        headers = { "effect.h" },
         string_id = "efftype_id",
         attributes = {
             id = { type = "efftype_id", writable = true },
@@ -524,6 +539,7 @@ classes = {
         }
     },
     encumbrance_data = {
+        headers = { "character.h" },
         new = {
         },
         by_value = true,
@@ -538,6 +554,7 @@ classes = {
         }
     },
     fault = {
+        headers = { "fault.h" },
         string_id = "fault_id",
         attributes = {
         },
@@ -553,6 +570,7 @@ classes = {
         }
     },
     field = {
+        headers = { "field.h" },
         attributes = {
         },
         functions = {
@@ -568,6 +586,7 @@ classes = {
         }
     },
     field_entry = {
+        headers = { "field.h" },
         attributes = {
         },
         functions = {
@@ -588,6 +607,7 @@ classes = {
         }
     },
     furn_t = {
+        headers = { "mapdata.h" },
         string_id = "furn_str_id",
         int_id = "furn_id",
         attributes = {
@@ -620,6 +640,7 @@ classes = {
         }
     },
     game = {
+        headers = { "game.h", "item.h", "color.h" },
         attributes = {
             driving_view_offset = { type = "point", writable = true },
             fullscreen = { type = "bool", writable = true },
@@ -767,6 +788,7 @@ classes = {
         }
     },
     item = {
+        headers = { "item.h", "color.h", "units.h", "gun_mode.h", "ret_val.h", "damage.h", "itype.h", "bodypart.h" },
         new = {
             { "item" },
             { "itype", "time_point", "int" },
@@ -1046,6 +1068,7 @@ classes = {
         }
     },
     itype = {
+        headers = { "itype.h" },
         attributes = {
             color = { type = "nc_color", writable = true },
             countdown_destroy = { type = "bool", writable = true },
@@ -1091,6 +1114,7 @@ classes = {
         }
     },
     ma_buff = {
+        headers = { "martialarts.h" },
         string_id = "mabuff_id",
         attributes = {
             blocks_bonus = { type = "int", writable = true },
@@ -1126,6 +1150,7 @@ classes = {
         }
     },
     ma_technique = {
+        headers = { "martialarts.h" },
         string_id = "matec_id",
         attributes = {
             aoe = { type = "string", writable = true },
@@ -1159,6 +1184,7 @@ classes = {
         }
     },
     map = {
+        headers = { "map.h", "units.h", "item.h", "vpart_position.h", "map_iterator.h", "submap.h" },
         attributes = {
         },
         functions = {
@@ -1429,6 +1455,7 @@ classes = {
         }
     },
     map_stack = {
+        headers = { "map.h", "units.h" },
         new = {
         },
         by_value = true,
@@ -1452,6 +1479,7 @@ classes = {
         }
     },
     martialart = {
+        headers = { "martialarts.h" },
         string_id = "matype_id",
         attributes = {
             arm_block = { type = "int", writable = true },
@@ -1478,6 +1506,7 @@ classes = {
         }
     },
     material_type = {
+        headers = { "material.h" },
         string_id = "material_id",
         attributes = {
             id = { type = "material_id", writable = true },
@@ -1507,6 +1536,7 @@ classes = {
         }
     },
     mongroup = {
+        headers = { "mongroup.h" },
         attributes = {
             diffuse = { type = "bool", writable = true },
             dying = { type = "bool", writable = true },
@@ -1531,6 +1561,7 @@ classes = {
         }
     },
     monster = {
+        headers = { "monster.h", "units.h", "color.h", "item.h" },
         parent = "Creature",
         attributes = {
             anger = { type = "int", writable = true },
@@ -1616,6 +1647,7 @@ classes = {
         }
     },
     mtype = {
+        headers = { "mtype.h" },
         string_id = "mtype_id",
         attributes = {
             agro = { type = "int", writable = true },
@@ -1667,6 +1699,7 @@ classes = {
         }
     },
     mutation_branch = {
+        headers = { "mutation.h", "color.h" },
         string_id = "trait_id",
         attributes = {
             activated = { type = "bool", writable = true },
@@ -1718,6 +1751,7 @@ classes = {
         }
     },
     nc_color = {
+        headers = { "color.h" },
         new = {
             { },
         },
@@ -1738,6 +1772,7 @@ classes = {
         }
     },
     npc = {
+        headers = { "npc.h", "units.h", "color.h", "projectile.h", "dispersion.h" },
         parent = "player",
         attributes = {
             companion_mission_time = { type = "time_point", writable = true },
@@ -1886,6 +1921,7 @@ classes = {
         new = {
             { "int", "int" },
         },
+        headers = { "overmap.h" },
         attributes = {
         },
         functions = {
@@ -1926,6 +1962,7 @@ classes = {
         }
     },
     player = {
+        headers = { "player.h", "color.h", "projectile.h", "units.h", "npc.h", "dispersion.h" },
         parent = "Character",
         attributes = {
             blocks_left = { type = "int", writable = true },
@@ -2301,6 +2338,7 @@ classes = {
         }
     },
     point = {
+        headers = { "enums.h" },
         new = {
             { "int", "int" },
             { },
@@ -2314,6 +2352,7 @@ classes = {
         }
     },
     quality = {
+        headers = { "requirements.h" },
         string_id = "quality_id",
         attributes = {
         },
@@ -2321,6 +2360,7 @@ classes = {
         }
     },
     stats = {
+        headers = { "player.h" },
         attributes = {
             damage_healed = { type = "int", writable = true },
             damage_taken = { type = "int", writable = true },
@@ -2331,6 +2371,7 @@ classes = {
         }
     },
     ter_t = {
+        headers = { "mapdata.h" },
         string_id = "ter_str_id",
         int_id = "ter_id",
         attributes = {
@@ -2362,6 +2403,7 @@ classes = {
         }
     },
     time_duration = {
+        headers = { "calendar.h" },
         new = {
             { "time_duration" },
         },
@@ -2375,6 +2417,7 @@ classes = {
     time_point = {
         by_value = true,
         has_equal = true,
+        headers = { "calendar.h" },
         new = {
             { "calendar" },
             { "int" },
@@ -2387,6 +2430,7 @@ classes = {
         }
     },
     trap = {
+        headers = { "trap.h" },
         string_id = "trap_str_id",
         int_id = "trap_id",
         attributes = {
@@ -2415,6 +2459,7 @@ classes = {
         }
     },
     tripoint = {
+        headers = { "enums.h" },
         new = {
             { "int", "int", "int" },
             { "point", "int" },
@@ -2430,6 +2475,7 @@ classes = {
         }
     },
     uimenu = {
+        headers = { "ui.h" },
         attributes = {
             border = { type = "bool", writable = true },
             border_color = { type = "nc_color", writable = true },
@@ -2494,6 +2540,7 @@ classes = {
         }
     },
     vehicle = {
+        headers = { "vehicle.h", "npc.h", "color.h" },
         attributes = {
             alarm_epower = { type = "int", writable = true },
             alternator_load = { type = "float", writable = true },
@@ -2707,6 +2754,7 @@ classes = {
         }
     },
     vehicle_part = {
+        headers = { "vehicle.h" },
         new = {
             { },
         },
@@ -2760,6 +2808,7 @@ classes = {
         }
     },
     vehicle_stack = {
+        headers = { "vehicle.h" },
         new = {
         },
         by_value = true,
@@ -2783,6 +2832,7 @@ classes = {
         }
     },
     vitamin = {
+        headers = { "vitamin.h" },
         string_id = "vitamin_id",
         attributes = {
         },
@@ -2800,6 +2850,7 @@ classes = {
         }
     },
     vpart_info = {
+        headers = { "veh_type.h", "requirements.h" },
         string_id = "vpart_id",
         attributes = {
             bonus = { type = "int", writable = true },
@@ -2843,6 +2894,7 @@ classes = {
         }
     },
     w_point = {
+        headers = { "weather_gen.h" },
         attributes = {
             acidic = { type = "bool", writable = true },
             humidity = { type = "float", writable = true },
@@ -2853,21 +2905,25 @@ classes = {
         functions = {
         }
     },
-    mass = {
-        by_value = true,
-        attributes = {
-        },
-        functions = {
-        },
-    },
-    volume = {
-        by_value = true,
-        attributes = {
-        },
-        functions = {
-        },
-    },
 }
+classes["units::mass"] = {
+        forward_declaration = "",
+        headers = { "units.h" },
+        by_value = true,
+        attributes = {
+        },
+        functions = {
+        },
+    }
+classes["units::volume"] = {
+        forward_declaration = "",
+        headers = { "units.h" },
+        by_value = true,
+        attributes = {
+        },
+        functions = {
+        },
+    }
 
 enums = {
     add_type = {
@@ -2998,6 +3054,10 @@ enums = {
         "RIGHT",
     },
 }
+-- Headers that are required in order to compile the wrappers for the enum classes.
+enums_headers = {
+    "field.h", "bodypart.h", "itype.h", "creature.h", "output.h", "calendar.h", "pldata.h", "units.h"
+}
 
 --[[
 Currently, for each function in each class, the bindings generator creates a matching function in
@@ -3014,7 +3074,7 @@ functions in the subclasses.
 
 for class_name, value in pairs(classes) do
     -- Collect all defined functions of the *parent* classes in this table
-    local existing = { };
+    local existing = { }
     value = classes[value.parent]
     while value do
         for _, func in ipairs(value.functions) do
@@ -3036,6 +3096,10 @@ for class_name, value in pairs(classes) do
             i = i + 1
         end
     end
+    if not value.forward_declaration then
+        -- @todo could be a struct!
+        value.forward_declaration = "class " .. class_name .. ";"
+    end
 end
 
 -- This adds the int_id wrappers from the class definition as real classes.
@@ -3047,6 +3111,8 @@ for name, value in pairs(classes) do
     if value.int_id then
         -- This is the common int_id<T> interface:
         local t = {
+            forward_declaration = value.forward_declaration .. "using " .. value.int_id .. " = int_id<" .. name .. ">;",
+            headers = value.headers,
             by_value = true,
             has_equal = true,
             -- IDs *could* be constructed from int, but where does the Lua script get the int from?
@@ -3071,6 +3137,8 @@ for name, value in pairs(classes) do
     -- Very similar to int_id above
     if value.string_id then
         local t = {
+            forward_declaration = value.forward_declaration .. "using " .. value.string_id .. " = string_id<" .. name .. ">;",
+            headers = value.headers,
             by_value = true,
             has_equal = true,
             -- Copy and default constructor and construct from plain string.
