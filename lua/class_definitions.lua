@@ -2059,9 +2059,9 @@ enums = {
         "num_hp_parts",
     },
     side = {
-        "side::BOTH",
-        "side::LEFT",
-        "side::RIGHT"
+        "BOTH",
+        "LEFT",
+        "RIGHT"
     },
     phase_id = {
         "PNULL",
