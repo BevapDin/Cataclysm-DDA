@@ -319,7 +319,8 @@ function insert_overload_resolution(function_name, args, cbc, indentation, stack
     -- If more is false, there was no branching (no `if` statement) generated, but a return
     -- statement had already been made, so this error would be unreachable code.
     if more then
-        text = text .. ind .. "return luaL_argerror(L, "..stack_index..", \"Unexpected type, expected are "..valid_types:sub(5).."\");"..br
+        valid_types = valid_types:sub(5) -- removes the initial " or "
+        text = text .. ind .. "return luaL_argerror(L, "..stack_index..", \"Unexpected type, expected are "..valid_types.."\");"..br
     end
     return text
 end
