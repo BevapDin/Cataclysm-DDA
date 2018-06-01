@@ -662,24 +662,6 @@ function generate_code_for(class_name, class)
     return cpp_output
 end
 
-function write_to_file(path, content)
-    content = cpp_header .. content
-    local file = io.open(path, "r")
-    if file then
-        local existing_content = file:read("*a")
-        if existing_content == content then
-            return
-        end
-        file:close()
-    end
-    file = io.open(path, "wb")
-    if not file then
-        error("could not open " .. path)
-    end
-    file:write(content)
-    file:close()
-end
-
 function generate_global_functions()
     local cpp_output = ""
     for name, func in pairs(global_functions) do
@@ -690,10 +672,6 @@ end
 
 function file_for_class(class_name)
     return class_name:gsub(":", "") .. ".gen.cpp"
-end
-
-for class_name, class in pairs(classes) do
-    write_to_file(file_for_class(class_name), generate_code_for(class_name, class))
 end
 
 function generate_main_init_function()
@@ -796,4 +774,26 @@ function generate_push_interface()
     return cpp_output
 end
 
-write_to_file("push_value_onto_stack.gen.h", generate_push_interface())
+function writeFile(path,data)
+    data = cpp_header .. data
+    local file = io.open(path, "r")
+    if file then
+        local existing_content = file:read("*a")
+        file:close()
+        if existing_content == data then
+            return
+        end
+    end
+    file = io.open(path, "wb")
+    if not file then
+        error("could not open " .. path)
+    end
+    file:write(data)
+    file:close()
+end
+
+for class_name, class in pairs(classes) do
+    writeFile(file_for_class(class_name), generate_code_for(class_name, class))
+end
+
+writeFile("push_value_onto_stack.gen.h", generate_push_interface())
