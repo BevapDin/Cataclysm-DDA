@@ -2,7 +2,9 @@
 #ifndef TYPE_H
 #define TYPE_H
 
+extern "C" {
 #include <lua.h>
+}
 
 #include "value.h"
 #include "reference.h"

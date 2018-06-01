@@ -2,7 +2,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+extern "C" {
 #include <lua.h>
+}
 
 #include <string>
 

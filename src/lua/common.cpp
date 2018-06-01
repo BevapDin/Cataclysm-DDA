@@ -1,6 +1,8 @@
 #include "common.h"
 
+extern "C" {
 #include <lauxlib.h>
+}
 
 int luah_store_in_registry( lua_State *L, int stackpos )
 {

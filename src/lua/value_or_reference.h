@@ -2,7 +2,9 @@
 #ifndef VALUE_OR_REFERENCE_H
 #define VALUE_OR_REFERENCE_H
 
+extern "C" {
 #include <lua.h>
+}
 
 #include "value.h"
 #include "reference.h"

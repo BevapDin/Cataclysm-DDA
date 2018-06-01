@@ -4,7 +4,9 @@
 
 #include "type.h"
 
+extern "C" {
 #include <lua.h>
+}
 
 // @todo move into namespace catalua and rename to just "value"
 

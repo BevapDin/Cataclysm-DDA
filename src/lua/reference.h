@@ -5,8 +5,10 @@
 #include "value.h"
 #include "common.h"
 
+extern "C" {
 #include <lua.h>
 #include <lauxlib.h>
+}
 
 // @todo move into namespace catalua and rename to just "value"
 
