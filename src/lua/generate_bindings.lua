@@ -20,6 +20,15 @@
 local br = "\n"
 local tab = "    "
 
+function sorted_keys(t)
+    local res = { }
+    for k, _ in pairs(t) do
+        table.insert(res, k)
+    end
+    table.sort(res)
+    return res;
+end
+
 -- Generic helpers to generate C++ source code chunks for use in our lua binding.
 ---------------------------------------------------------------------------------
 
@@ -279,7 +288,8 @@ function insert_overload_resolution(function_name, args, cbc, indentation, stack
     local ni = more and (indentation + 1) or indentation -- next indentation
     local mind = more and (ind .. tab) or ind -- more indentation
     local valid_types = "" -- list of acceptable types, for the error message
-    for arg_type, more_args in pairs(args) do
+    for _, arg_type in ipairs(sorted_keys(args)) do
+        local more_args = args[arg_type]
         if arg_type == "r" then
             -- handled outside this loop
         else
@@ -447,10 +457,11 @@ dofile "../../lua/class_definitions.lua"
 
 generate_overload_tree(classes)
 
-function generate_accessors(class, class_name)
+function generate_accessors(attributes, class_name)
     local cpp_output = ""
     -- Generate getters and setters for our player attributes.
-    for key, attribute in pairs(class) do
+    for _, key in ipairs(sorted_keys(attributes)) do
+        local attribute = attributes[key]
         cpp_output = cpp_output .. generate_getter(class_name, key, attribute.type, attribute.cpp_name or key)
         if attribute.writable then
             cpp_output = cpp_output .. generate_setter(class_name, key, attribute.type, attribute.cpp_name or key)
@@ -462,8 +473,9 @@ end
 
 function generate_class_function_wrappers(functions, class_name, cur_class_name)
     local cpp_output = ""
-    for index, func in pairs(functions) do
-        cpp_output = cpp_output .. generate_class_function_wrapper(class_name, index, func, cur_class_name)
+    for _, function_name in ipairs(sorted_keys(functions)) do
+        local func = functions[function_name]
+        cpp_output = cpp_output .. generate_class_function_wrapper(class_name, function_name, func, cur_class_name)
     end
     return cpp_output
 end
@@ -478,7 +490,7 @@ function generate_functions_static(cpp_type, class, class_name)
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const luaL_Reg " .. cpp_type .. "::FUNCTIONS[] = {" .. br
     while class do
-        for name, _ in pairs(class.functions) do
+        for _, name in ipairs(sorted_keys(class.functions)) do
             cpp_output = cpp_output .. luaL_Reg("func_" .. class_name .. "_" .. name, name)
         end
         if class.new then
@@ -500,7 +512,7 @@ function generate_read_members_static(cpp_type, class, class_name)
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const " .. cpp_type .. "::MRMap " .. cpp_type .. "::READ_MEMBERS{" .. br
     while class do
-        for key, attribute in pairs(class.attributes) do
+        for _, key in ipairs(sorted_keys(class.attributes)) do
             local function_name = "get_" .. class_name .. "_" .. key
             cpp_output = cpp_output .. tab .. "{\"" .. key .. "\", " .. function_name .. "}," .. br
         end
@@ -516,7 +528,8 @@ function generate_write_members_static(cpp_type, class, class_name)
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const " .. cpp_type .. "::MWMap " .. cpp_type .. "::WRITE_MEMBERS{" .. br
     while class do
-        for key, attribute in pairs(class.attributes) do
+        for _, key in ipairs(sorted_keys(class.attributes)) do
+            local attribute = class.attributes[key]
             if attribute.writable then
                 local function_name = "set_" .. class_name .. "_" .. key
                 cpp_output = cpp_output .. tab .. "{\"" .. key .. "\", " .. function_name .. "}," .. br
@@ -560,7 +573,8 @@ function generate_LuaValue_constants(class_name, class, by_value_and_reference)
     cpp_output = cpp_output .. "const char * const " .. cpp_name .. "::METATABLE_NAME = \"" .. metatable_name .. "\";" .. br
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. cpp_name.."::Type *"..cpp_name.."::get_subclass( lua_State* const S, int const i) {"..br
-    for child, class in pairs(classes) do
+    for _, child in ipairs(sorted_keys(classes)) do
+        local class = classes[child]
         -- Note: while the function get_subclass resides in LuaValue<T>, this calls into LuaValue or
         -- LuaReference, that way we get a simple pointer. Unconditionally calling LuaValue<T>::get,
         -- would result in returning monster** (LuaValue<T>::get returns a T&, applying `&` gives T*).
@@ -608,7 +622,7 @@ end
 function generate_code_for(class_name, class)
     local cpp_output = ""
     if class.headers then
-        for _, h in pairs(class.headers) do
+        for _, h in ipairs(class.headers) do
             cpp_output = cpp_output .. "#include \"" .. h .. "\"" .. br
         end
     end
@@ -656,18 +670,20 @@ end
 function generate_main_init_function()
     local cpp_output = ""
     cpp_output = cpp_output .. "#include \"enum.h\"" .. br
-    for _, h in pairs(enums_headers) do
+    for _, h in ipairs(enums_headers) do
         cpp_output = cpp_output .. "#include \"" .. h .. "\"" .. br
     end
     cpp_output = cpp_output .. "#include \"string_id.h\"" .. br
     cpp_output = cpp_output .. "#include \"int_id.h\"" .. br
-    for class_name, class in pairs(classes) do
+    for _, class_name in ipairs(sorted_keys(classes)) do
+        local class = classes[class_name]
         cpp_output = cpp_output .. class.forward_declaration .. br
     end
     -- Create a function that calls load_metatable on all the registered LuaValue's
     cpp_output = cpp_output .. "void load_metatables(lua_State* const L) {" .. br
 
-    for class_name, class in pairs(classes) do
+    for _, class_name in ipairs(sorted_keys(classes)) do
+        local class = classes[class_name]
         local cpp_name = wrapper_base_class(class_name)
         -- If the class has a constructor, it should be exposed via a global name (which is the class name)
         if class.new then
@@ -679,7 +695,8 @@ function generate_main_init_function()
     cpp_output = cpp_output .. "}" .. br
 
     -- Create bindings lists for enums
-    for enum_name, values in pairs(enums) do
+    for _, enum_name in ipairs(sorted_keys(enums)) do
+        local values = enums[enum_name]
         local cpp_name = "LuaEnum<"..enum_name..">"
         cpp_output = cpp_output .. "template<>" .. br
         cpp_output = cpp_output .. "const "..cpp_name.."::EMap "..cpp_name.."::BINDINGS = {"..br
