@@ -612,6 +612,57 @@ function generate_code_for(class_name, class)
         cpp_output = cpp_output .. generate_LuaValue_constants(class_name, class, true)
     end
 
+    cpp_output = cpp_output .. "#include <stdexcept>" .. br
+    cpp_output = cpp_output .. "class lua_engine;" .. br
+    cpp_output = cpp_output .. "lua_State *get_lua_state( const lua_engine & );" .. br
+    cpp_output = cpp_output .. "template<typename T> T pop_from_stack( const lua_engine &, int );" .. br
+
+    if class.by_value then
+        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
+        cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
+        cpp_output = cpp_output .. "}" .. br
+        cpp_output = cpp_output .. "template<> " .. class_name .. " pop_from_stack<" .. class_name .. ">( const lua_engine &engine, const int index ) {" .. br
+        cpp_output = cpp_output .. "    if( LuaValue<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+        cpp_output = cpp_output .. "        return LuaValue<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+        cpp_output = cpp_output .. "    }" .. br
+        cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
+        cpp_output = cpp_output .. "}" .. br
+    elseif class.by_value_and_reference then
+        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
+        cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
+        cpp_output = cpp_output .. "}" .. br
+        cpp_output = cpp_output .. "template<> " .. class_name .. " pop_from_stack<" .. class_name .. ">( const lua_engine &engine, const int index ) {" .. br
+        cpp_output = cpp_output .. "    if( LuaValue<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+        cpp_output = cpp_output .. "        return LuaValue<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+        cpp_output = cpp_output .. "    }" .. br
+        cpp_output = cpp_output .. "    if( LuaReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+        cpp_output = cpp_output .. "        return LuaReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+        cpp_output = cpp_output .. "    }" .. br
+        cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
+        cpp_output = cpp_output .. "}" .. br
+        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, " .. class_name .. " &val ) {" .. br
+        cpp_output = cpp_output .. "    LuaReference<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
+        cpp_output = cpp_output .. "}" .. br
+        -- Don't return a reference to an object managed by Lua (created by value) as we can't know its
+        -- lifetime from within the calling C++ code.
+        cpp_output = cpp_output .. "template<> " .. class_name .. " &pop_from_stack<" .. class_name .. "&>( const lua_engine &engine, const int index ) {" .. br
+        cpp_output = cpp_output .. "    if( LuaReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+        cpp_output = cpp_output .. "        return LuaReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+        cpp_output = cpp_output .. "    }" .. br
+        cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
+        cpp_output = cpp_output .. "}" .. br
+    else
+        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
+        cpp_output = cpp_output .. "    LuaReference<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
+        cpp_output = cpp_output .. "}" .. br
+        cpp_output = cpp_output .. "template<> " .. class_name .. " &pop_from_stack<" .. class_name .. "&>( const lua_engine &engine, const int index ) {" .. br
+        cpp_output = cpp_output .. "    if( LuaReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+        cpp_output = cpp_output .. "        return LuaReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+        cpp_output = cpp_output .. "    }" .. br
+        cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
+        cpp_output = cpp_output .. "}" .. br
+    end
+
     return cpp_output
 end
 
@@ -651,6 +702,11 @@ function generate_main_init_function()
     end
     cpp_output = cpp_output .. "}" .. br
 
+    cpp_output = cpp_output .. "#include <stdexcept>" .. br
+    cpp_output = cpp_output .. "class lua_engine;" .. br
+    cpp_output = cpp_output .. "lua_State *get_lua_state( const lua_engine & );" .. br
+    cpp_output = cpp_output .. "template<typename T> T pop_from_stack( const lua_engine &, int );" .. br
+
     -- Create bindings lists for enums
     for _, enum_name in ipairs(sorted_keys(enums)) do
         local values = enums[enum_name]
@@ -661,8 +717,63 @@ function generate_main_init_function()
             cpp_output = cpp_output .. tab.."{\""..name.."\", "..enum_name.."::"..name.."},"..br
         end
         cpp_output = cpp_output .. "};" .. br
+        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. enum_name .. " val ) {" .. br
+        cpp_output = cpp_output .. "    " .. cpp_name .. "::push( get_lua_state( engine ), val );" .. br
+        cpp_output = cpp_output .. "}" .. br
+
+        cpp_output = cpp_output .. "template<> " .. enum_name .. " pop_from_stack<" .. enum_name .. ">( const lua_engine &engine, const int index ) {" .. br
+        cpp_output = cpp_output .. "    if( !" .. cpp_name .. "::has( get_lua_state( engine ), index ) ) {" .. br
+        cpp_output = cpp_output .. "        throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
+        cpp_output = cpp_output .. "    }" .. br
+        cpp_output = cpp_output .. "    return " .. cpp_name .. "::get( get_lua_state( engine ), index );" .. br
+        cpp_output = cpp_output .. "}" .. br
     end
 
+    return cpp_output
+end
+
+function generate_push_interface()
+    local cpp_output = "// This file was automatically generated by lua/generate_bindings.lua"..br
+    cpp_output = cpp_output .. "#pragma once" .. br
+    cpp_output = cpp_output .. "#ifndef PUSH_VALUE_ONTO_STACK_H" .. br
+    cpp_output = cpp_output .. "#define PUSH_VALUE_ONTO_STACK_H" .. br
+    cpp_output = cpp_output .. "extern \"C\" {"..br
+    cpp_output = cpp_output .. "#include <lua.h>"..br
+    cpp_output = cpp_output .. "}"..br
+    cpp_output = cpp_output .. "#include \"type.h\""..br
+    cpp_output = cpp_output .. "#include \"enum.h\""..br
+    cpp_output = cpp_output .. "#include \"value_or_reference.h\""..br
+    cpp_output = cpp_output .. "template<typename T> class string_id;" .. br
+    cpp_output = cpp_output .. "template<typename T> class int_id;" .. br
+    cpp_output = cpp_output .. "class lua_engine;" .. br
+    cpp_output = cpp_output .. "template<typename T> T pop_from_stack( const lua_engine &, int );" .. br
+
+    -- @todo replace with forward declaration
+    for _, h in ipairs(enums_headers) do
+        cpp_output = cpp_output .. "#include \"" .. h .. "\"" .. br
+    end
+
+    for _, class_name in ipairs(sorted_keys(classes)) do
+        local class = classes[class_name]
+        cpp_output = cpp_output .. class.forward_declaration .. br
+    end
+
+    for _, class_name in ipairs(sorted_keys(classes)) do
+        local class = classes[class_name]
+        if class.by_value then
+            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
+        elseif class.by_value_and_reference then
+            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
+            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, " .. class_name .. " & );" .. br
+        else
+            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
+        end
+    end
+
+    for _, enum_name in ipairs(sorted_keys(enums)) do
+        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, " .. enum_name .. " );" .. br
+    end
+    cpp_output = cpp_output .. "#endif" .. br
     return cpp_output
 end
 
@@ -688,3 +799,4 @@ for class_name, class in pairs(classes) do
 end
 
 writeFile("catabindings.gen.cpp", generate_main_init_function())
+writeFile("push_value_onto_stack.gen.h", generate_push_interface())
