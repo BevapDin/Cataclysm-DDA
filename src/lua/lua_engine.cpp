@@ -240,18 +240,6 @@ void MonsterGenerator::register_monattack_lua( const std::string &name, int lua_
     add_attack( mtype_special_attack( new lua_mattack_wrapper( name, lua_function ) ) );
 }
 
-// Call the given string directly, used in the lua debug command.
-int lua_engine::call( const std::string &tocall )
-{
-    try {
-        catalua::call<void>( *this, tocall );
-        return 0;
-    } catch( ... ) {
-        //@todo handle this
-        return -1;
-    }
-}
-
 void catalua::stack::push_mod_callback_call( const lua_engine &engine  )
 {
     lua_getglobal( get_lua_state( engine ), "mod_callback" );

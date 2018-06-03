@@ -15,19 +15,6 @@ lua_engine::~lua_engine()
 {
 }
 
-void CallbackArgument::Save()
-{
-}
-
-// Note: lua_engine::mapgen is implemented in mapgen.cpp
-
-int lua_engine::call( const std::string &script )
-{
-    debugmsg( "Tried to call a Lua script \"%s\" in a build without Lua support.", script.substr( 0,
-              1000 ) );
-    return 0; // @todo
-}
-
 int lua_engine::mapgen( map *const /*m*/, const oter_id &/*terrain_type*/,
                         const mapgendata &/*data*/, const time_point &/*t*/, const float /*density*/,
                         const std::string &scr )
