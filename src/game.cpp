@@ -58,6 +58,7 @@
 #include "start_location.h"
 #include "debug.h"
 #include "lua/lua_engine.h"
+#include "lua/call.h"
 #include "sounds.h"
 #include "iuse_actor.h"
 #include "mutation.h"
@@ -940,7 +941,7 @@ bool game::start_game()
     u.add_memorial_log(pgettext("memorial_male", "%s began their journey into the Cataclysm."),
                        pgettext("memorial_female", "%s began their journey into the Cataclysm."),
                        u.name.c_str());
-    lua_engine_ptr->callback("on_new_player_created");
+    catalua::mod_callback( *lua_engine_ptr, "on_new_player_created" );
 
     return true;
 }
@@ -1455,12 +1456,12 @@ bool game::do_turn()
     mission::process_all();
     if( calendar::once_every( 1_days ) ) { // Midnight!
         overmap_buffer.process_mongroups();
-        lua_engine_ptr->callback("on_day_passed");
+        catalua::mod_callback( *lua_engine_ptr, "on_day_passed" );
     }
 
     // Run a LUA callback once per minute
     if( calendar::once_every( 1_minutes ) ) {
-        lua_engine_ptr->callback("on_minute_passed");
+        catalua::mod_callback( *lua_engine_ptr, "on_minute_passed" );
     }
 
     // Move hordes every 5 min

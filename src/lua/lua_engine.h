@@ -56,7 +56,6 @@ class lua_engine
         void run_console();
 
         int call( const std::string &script );
-        void callback( const char *name );
 
         // This is a legacy function, ideally code would use `catalua::call` instead,
         // but for mapgen we do a bit more than just call the script.

@@ -31,6 +31,8 @@ namespace catalua
 {
 
 // Don't call this directly.
+void push_mod_callback_call( const lua_engine & );
+// Don't call this directly.
 void push_script( const lua_engine &, const std::string & );
 // Don't call this directly.
 void call_void_function( const lua_engine &, int );
@@ -103,6 +105,25 @@ template<typename value_type, typename ... Args>
 inline value_type call( const lua_engine &engine, const std::string &script, Args &&... args )
 {
     return detail::call_wrapper<value_type>::call( engine, script, std::forward<Args>( args )... );
+}
+
+/**
+ * Invokes a callback that can be registered by each mod. The callback is invoked for each mod.
+ * The function does *not* return anything as it may result in several calls (for several mods),
+ * or in no call at all (no mod has registered the callback).
+ * @param name Name of the callback. Should be a simple constant identifier name. Make sure to
+ * document the callbacks.
+ */
+//@todo where to document the callbacks?
+template<typename ... Args>
+inline void mod_callback( const lua_engine &engine, const char *const name, Args &&... args )
+{
+    push_mod_callback_call( engine );
+    // This pushes a reference to a function in Lua onto the stack, that function
+    // dispatches this callback to all registered mods.
+    // The name of the callback is pushed together with the arguments below.
+    const int cnt = push_onto_stack( engine, name, std::forward<Args>( args )... );
+    call_void_function( engine, cnt );
 }
 
 } // namespace catalua
