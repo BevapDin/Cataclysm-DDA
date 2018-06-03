@@ -1,6 +1,6 @@
 #pragma once
-#ifndef LUA_CONSOLE_H
-#define LUA_CONSOLE_H
+#ifndef CONSOLE_H
+#define CONSOLE_H
 
 #include "output.h"
 #include "cursesdef.h"
@@ -11,11 +11,13 @@
 
 class nc_color;
 
-class lua_console
+namespace catalua {
+
+class console
 {
     public:
-        lua_console();
-        ~lua_console();
+        console();
+        ~console();
         void run();
     private:
         const int width = TERMX;
@@ -40,4 +42,6 @@ class lua_console
         void scroll_down();
 };
 
-#endif // LUA_CONSOLE_H
+} // namespace catalua
+
+#endif
