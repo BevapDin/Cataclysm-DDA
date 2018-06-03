@@ -355,6 +355,15 @@ for class_name, value in pairs(classes) do
     if not value.output_path then
         value.output_path = class_name:gsub("[^%w_.]", "") .. ".gen.cpp"
     end
+    -- Only have `by_value` and `by_reference` attributes, not `by_value_and_reference`,
+    -- One can always combine the first two attributes: `if foo.by_value and foo.by_reference`
+    if value.by_value_and_reference then
+        value.by_reference = true
+        value.by_value = true
+        value.by_value_and_reference = nil
+    elseif not value.by_value then
+        value.by_reference = true
+    end
 end
 
 -- This adds the int_id wrappers from the class definition as real classes.
