@@ -1,8 +1,6 @@
 #include "console.h"
 
 #include "lua_engine.h"
-// @todo make the lua_engine a parameter.
-#include "game.h"
 #include "catacharset.h"
 #include "input.h"
 #include "string_input_popup.h"
@@ -13,12 +11,12 @@ using namespace catalua;
 
 void lua_engine::run_console()
 {
-    console c;
+    console c( *this );
     c.run();
 }
 
-console::console() : cWin( catacurses::newwin( lines, width, 0, 0 ) ),
-    iWin( catacurses::newwin( 1, width, lines, 0 ) )
+console::console( const lua_engine &e ) : engine( e ), cWin( catacurses::newwin( lines, width, 0,
+            0 ) ), iWin( catacurses::newwin( 1, width, lines, 0 ) )
 {
     text_stack.push_back( {_( "Welcome to the Lua console! Here you can enter Lua code." ), c_green} );
     text_stack.push_back( {_( "Press [Esc] to close the Lua console." ), c_blue} );
@@ -109,9 +107,9 @@ void console::run()
 
         std::string input = get_input();
 
-        g->lua_engine_ptr->call( input );
+        engine.call( input );
 
-        read_stream( g->lua_engine_ptr->output_stream, c_white );
-        read_stream( g->lua_engine_ptr->error_stream, c_red );
+        read_stream( const_cast<std::stringstream&>( engine.output_stream ), c_white );
+        read_stream( const_cast<std::stringstream&>( engine.error_stream ), c_red );
     }
 }
