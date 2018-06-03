@@ -1,6 +1,7 @@
 #include "console.h"
 
 #include "lua_engine.h"
+#include "call.h"
 #include "catacharset.h"
 #include "input.h"
 #include "string_input_popup.h"
@@ -107,7 +108,7 @@ void console::run()
 
         std::string input = get_input();
 
-        engine.call( input );
+        catalua::call<void>( engine, input );
 
         read_stream( engine.output_stream, c_white );
         read_stream( engine.error_stream, c_red );
