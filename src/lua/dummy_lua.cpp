@@ -2,6 +2,7 @@
 
 #include "filesystem.h"
 #include "debug.h"
+#include "output.h"
 
 lua_engine::lua_engine() : state( nullptr )
 {
@@ -40,4 +41,9 @@ void lua_engine::loadmod( const std::string &base_path, const std::string &main_
 
 void lua_engine::init()
 {
+}
+
+void lua_engine::run_console()
+{
+    popup( _( "This build does not support Lua." ) );
 }
