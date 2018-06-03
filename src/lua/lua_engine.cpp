@@ -151,26 +151,11 @@ class lua_iuse_wrapper : public iuse_actor
             // TODO: also pass the player object, because of NPCs and all
             //       I guess
 
-            // Push the item on top of the stack.
-            const int item_in_registry = LuaReference<item>::push_reg( L, it );
-            // Push the "active" parameter on top of the stack.
-            lua_pushboolean( L, a );
-            // Push the location of the item.
-            const int tripoint_in_registry = LuaValue<tripoint>::push_reg( L, pos );
+            const int cnt = catalua::stack::push_all( *g->lua_engine_ptr, it, a, pos );
+            catalua::stack::call_non_void_function( *g->lua_engine_ptr, cnt );
 
-            // Call the iuse function
-            int err = lua_pcall( L, 3, 1, 0 );
-            lua_report_error( L, err, "iuse function" );
-
-            // Make sure the now outdated parameters we passed to lua aren't
-            // being used anymore by setting a metatable that will error on
-            // access.
-            luah_remove_from_registry( L, item_in_registry );
-            luah_setmetatable( L, "outdated_metatable" );
-            luah_remove_from_registry( L, tripoint_in_registry );
-            luah_setmetatable( L, "outdated_metatable" );
-
-            return lua_tointeger( L, -1 );
+            const int result = catalua::stack::get_value<int>( *g->lua_engine_ptr, -1 );
+            return result;
         }
         iuse_actor *clone() const override {
             return new lua_iuse_wrapper( *this );
