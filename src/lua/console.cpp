@@ -1,6 +1,6 @@
-#include "lua_console.h"
+#include "console.h"
 
-#include "lua/lua_engine.h"
+#include "lua_engine.h"
 // @todo make the lua_engine a parameter.
 #include "game.h"
 #include "catacharset.h"
@@ -9,7 +9,9 @@
 
 #include <map>
 
-lua_console::lua_console() : cWin( catacurses::newwin( lines, width, 0, 0 ) ),
+using namespace catalua;
+
+console::console() : cWin( catacurses::newwin( lines, width, 0, 0 ) ),
     iWin( catacurses::newwin( 1, width, lines, 0 ) )
 {
 #ifndef LUA
@@ -20,9 +22,9 @@ lua_console::lua_console() : cWin( catacurses::newwin( lines, width, 0, 0 ) ),
     text_stack.push_back( {_( "Press [Esc] to close the Lua console." ), c_blue} );
 }
 
-lua_console::~lua_console() = default;
+console::~console() = default;
 
-std::string lua_console::get_input()
+std::string console::get_input()
 {
     std::map<long, std::function<bool()>> callbacks {
         {
@@ -55,7 +57,7 @@ std::string lua_console::get_input()
     return popup.text();
 }
 
-void lua_console::draw()
+void console::draw()
 {
     werase( cWin );
 
@@ -69,24 +71,24 @@ void lua_console::draw()
     wrefresh( cWin );
 }
 
-void lua_console::quit()
+void console::quit()
 {
     done = true;
 }
 
-void lua_console::scroll_down()
+void console::scroll_down()
 {
     scroll = std::min( std::max( ( ( int ) text_stack.size() ) - lines, 0 ), scroll + 1 );
     draw();
 }
 
-void lua_console::scroll_up()
+void console::scroll_up()
 {
     scroll = std::max( 0, scroll - 1 );
     draw();
 }
 
-void lua_console::read_stream( std::stringstream &stream, nc_color text_color )
+void console::read_stream( std::stringstream &stream, nc_color text_color )
 {
     std::string line;
     while( std::getline( stream, line ) ) {
@@ -98,7 +100,7 @@ void lua_console::read_stream( std::stringstream &stream, nc_color text_color )
     stream.clear();
 }
 
-void lua_console::run()
+void console::run()
 {
     while( !done ) {
         draw();
