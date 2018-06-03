@@ -3,8 +3,25 @@
 #include "push_value_onto_stack.gen.h"
 
 #include <string>
+#include <type_traits>
 
 class lua_engine;
+
+void push_value_onto_stack( const lua_engine &engine, const char * const value );
+void push_value_onto_stack( const lua_engine &engine, const std::string &value );
+void push_value_onto_stack( const lua_engine &engine, bool value );
+void push_integer_onto_stack( const lua_engine &engine, long long int value );
+void push_float_onto_stack( const lua_engine &engine, long double value );
+
+template<typename T>
+inline typename std::enable_if<!std::is_same<T, bool>::value && std::is_arithmetic<T>::value && !std::is_floating_point<T>::value, void>::type push_value_onto_stack( const lua_engine &engine, const T &value ) {
+    return push_integer_onto_stack( engine, value );
+}
+
+template<typename T>
+inline typename std::enable_if<!std::is_same<T, bool>::value && std::is_arithmetic<T>::value && std::is_floating_point<T>::value, void>::type push_value_onto_stack( const lua_engine &engine, const T &value ) {
+    return push_float_onto_stack( engine, value );
+}
 
 // Don't call this directly.
 template<typename T>

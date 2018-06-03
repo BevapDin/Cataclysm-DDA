@@ -250,6 +250,31 @@ int lua_engine::mapgen( map *m, const oter_id &terrain_type, const mapgendata &,
     return err;
 }
 
+void push_value_onto_stack( const lua_engine &engine, const char *const value )
+{
+    lua_pushstring( get_lua_state( engine ), value );
+}
+
+void push_value_onto_stack( const lua_engine &engine, const std::string &value )
+{
+    lua_pushstring( get_lua_state( engine ), value.c_str() ); // @ŧodo handle embeded nul-characters
+}
+
+void push_value_onto_stack( const lua_engine &engine, const bool value )
+{
+    lua_pushbol( get_lua_state( engine ), value );
+}
+
+void push_integer_onto_stack( const lua_engine &engine, long long int value )
+{
+    lua_pushinteger( get_lua_state( engine ), value );
+}
+
+void push_float_onto_stack( const lua_engine &engine, long double value )
+{
+    lua_pushnumber( get_lua_state( engine ), value );
+}
+
 // Custom functions that are to be wrapped from lua.
 // -------------------------------------------------
 
