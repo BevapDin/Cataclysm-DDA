@@ -10,16 +10,19 @@
 #include <utility>
 
 class nc_color;
+class lua_engine;
 
 namespace catalua {
 
 class console
 {
     public:
-        console();
+        console( const lua_engine &engine );
         ~console();
         void run();
     private:
+        const lua_engine &engine;
+
         const int width = TERMX;
         const int lines = 10;
 
