@@ -15,12 +15,6 @@ lua_engine::~lua_engine()
 {
 }
 
-int lua_engine::call( const std::string &script )
-{
-    debugmsg( "Tried to call a Lua script \"%s\" in a build without Lua support.", script.substr( 0,
-              1000 ) );
-}
-
 int lua_engine::mapgen( map *const /*m*/, const oter_id &/*terrain_type*/,
                         const mapgendata &/*data*/, const time_point &/*t*/, const float /*density*/,
                         const std::string &scr )
