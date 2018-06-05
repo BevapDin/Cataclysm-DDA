@@ -61,8 +61,6 @@ static void luaL_setfuncs( lua_State *const L, const luaL_Reg arrary[], int cons
 }
 #endif
 
-void lua_dofile( lua_State *L, const char *path );
-
 // Helper functions for making working with the lua API more straightforward.
 // --------------------------------------------------------------------------
 
@@ -497,7 +495,7 @@ void lua_engine::loadmod( const std::string &base_path, const std::string &main_
     std::string full_path = base_path + "/" + main_file_name;
     if( file_exist( full_path ) ) {
         lua_file_path = base_path;
-        lua_dofile( state, full_path.c_str() );
+        run_file( full_path );
         lua_file_path.clear();
     }
     // debugmsg("Loading from %s", full_path.c_str());
@@ -532,11 +530,10 @@ static int traceback( lua_State *L )
     return 1;
 }
 
-// Load an arbitrary lua file
-void lua_dofile( lua_State *L, const char *path )
+void lua_engine::run_file( const std::string &path )
 {
     lua_pushcfunction( L, &traceback );
-    int err = luaL_loadfile( L, path );
+    const int err = luaL_loadfile( L, path );
     if( lua_report_error( L, err, path ) ) {
         return;
     }
@@ -551,10 +548,9 @@ void lua_dofile( lua_State *L, const char *path )
 static int game_dofile( lua_State *L )
 {
     const char *path = luaL_checkstring( L, 1 );
-
     std::string full_path = g->lua_engine_ptr->lua_file_path + "/" + path;
-    lua_dofile( L, full_path.c_str() );
-    return 0;
+    g->lua_engine_ptr->run_file( full_path );
+    return 0
 }
 
 static int game_myPrint( lua_State *L )
@@ -639,8 +635,8 @@ void lua_engine::init()
     lua_register( state, "print", game_myPrint );
 
     // Load lua-side metatables etc.
-    lua_dofile( state, FILENAMES["class_defslua"].c_str() );
-    lua_dofile( state, FILENAMES["autoexeclua"].c_str() );
+    run_file( FILENAMES["class_defslua"] );
+    run_file( FILENAMES["autoexeclua"] );
 
     void test_lua_scripting( const lua_engine & );
     test_lua_scripting( *this );
