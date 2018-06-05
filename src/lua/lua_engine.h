@@ -49,6 +49,8 @@ class lua_engine
 
         ~lua_engine();
 
+        void run_file( const std::string &path );
+
         /// @throws when initialization fails
         void init();
         void loadmod( const std::string &base_path, const std::string &main_file_name );

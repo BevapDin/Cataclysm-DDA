@@ -65,8 +65,6 @@ static void luaL_setfuncs( lua_State *const L, const luaL_Reg arrary[], int cons
 }
 #endif
 
-void lua_dofile( lua_State *L, const char *path );
-
 lua_State *get_lua_state( const lua_engine &e );
 
 // Given a Lua return code and a file that it happened in, print a debugmsg with the error and path.
@@ -450,7 +448,7 @@ void lua_engine::loadmod( const std::string &base_path, const std::string &main_
     std::string full_path = base_path + "/" + main_file_name;
     if( file_exist( full_path ) ) {
         lua_file_path = base_path;
-        lua_dofile( state, full_path.c_str() );
+        run_file( full_path );
         lua_file_path.clear();
     }
     // debugmsg("Loading from %s", full_path.c_str());
@@ -485,16 +483,15 @@ static int traceback( lua_State *L )
     return 1;
 }
 
-// Load an arbitrary lua file
-void lua_dofile( lua_State *L, const char *path )
+void lua_engine::run_file( const std::string &path )
 {
-    lua_pushcfunction( L, &traceback );
-    int err = luaL_loadfile( L, path );
-    if( lua_report_error( L, err, path ) ) {
+    lua_pushcfunction( state, &traceback );
+    const int err = luaL_loadfile( state, path.c_str() );
+    if( lua_report_error( state, err, path.c_str() ) ) {
         return;
     }
-    err = lua_pcall( L, 0, LUA_MULTRET, -2 );
-    lua_report_error( L, err, path );
+    const int err2 = lua_pcall( state, 0, LUA_MULTRET, -2 );
+    lua_report_error( state, err2, path.c_str() );
 }
 
 // game.dofile(file)
@@ -504,9 +501,8 @@ void lua_dofile( lua_State *L, const char *path )
 static int game_dofile( lua_State *L )
 {
     const char *path = luaL_checkstring( L, 1 );
-
     std::string full_path = g->lua_engine_ptr->lua_file_path + "/" + path;
-    lua_dofile( L, full_path.c_str() );
+    g->lua_engine_ptr->run_file( full_path );
     return 0;
 }
 
@@ -577,8 +573,8 @@ void lua_engine::init()
     lua_register( state, "print", game_myPrint );
 
     // Load lua-side metatables etc.
-    lua_dofile( state, FILENAMES["class_defslua"].c_str() );
-    lua_dofile( state, FILENAMES["autoexeclua"].c_str() );
+    run_file( FILENAMES["class_defslua"] );
+    run_file( FILENAMES["autoexeclua"] );
 }
 
 lua_engine::lua_engine() : state( nullptr )
