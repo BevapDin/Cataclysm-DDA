@@ -107,9 +107,10 @@ class LuaValue
         }
         /*@}*/
 
+        static void call_destructor( T *object );
         static int gc( lua_State *const L ) {
             T *object = static_cast<T *>( lua_touserdata( L, 1 ) );
-            object->T::~T();
+            call_destructor( object );
             lua_pop( L, 1 );
             return 0;
         }
