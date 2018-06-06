@@ -3100,6 +3100,15 @@ for class_name, value in pairs(classes) do
         -- @todo could be a struct!
         value.forward_declaration = "class " .. class_name .. ";"
     end
+    -- Only have `by_value` and `by_reference` attributes, not `by_value_and_reference`,
+    -- One can always combine the first two attributes: `if foo.by_value and foo.by_reference`
+    if value.by_value_and_reference then
+        value.by_reference = true
+        value.by_value = true
+        value.by_value_and_reference = nil
+    elseif not value.by_value then
+        value.by_reference = true
+    end
 end
 
 -- This adds the int_id wrappers from the class definition as real classes.

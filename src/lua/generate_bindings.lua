@@ -47,11 +47,11 @@ function member_type_to_cpp_type(member_type)
     else
         for class_name, class in pairs(classes) do
             if class_name == member_type then
-                if class.by_value then
-                    return "LuaValue<" .. member_type .. ">"
-                elseif class.by_value_and_reference then
+                if class.by_value and class.by_reference then
                     return "LuaValueOrReference<" .. member_type .. ">"
-                else
+                elseif class.by_value then
+                    return "LuaValue<" .. member_type .. ">"
+                elseif class.by_reference then
                     return "LuaReference<" .. member_type .. ">"
                 end
             end
@@ -103,7 +103,7 @@ function push_lua_value(in_variable, value_type)
         -- be a reference to a global game object).
         local t = value_type:sub(1, -2)
         if classes[t] then
-            if classes[t].by_value_and_reference then
+            if classes[t].by_value and classes[t].by_reference then
                 -- special case becaus member_type_to_cpp_type would return LuaValueOrReference,
                 -- which does not have a push function.
                 wrapper = "LuaReference<" .. t .. ">"
@@ -385,13 +385,13 @@ end
 function generate_destructor(class_name, class)
     local cpp_output = ""
     local cpp_name = ""
-    if class.by_value or class.by_value_and_reference then
+    if class.by_value then
         cpp_output = cpp_output .. "template<>" .. br
         cpp_output = cpp_output .. "void LuaValue<" .. class_name .. ">::call_destructor( " .. class_name .. " *const ptr ) {" .. br
         cpp_output = cpp_output .. tab .. "delete ptr;" .. br
         cpp_output = cpp_output .. "}" .. br
     end
-    if not class.by_value or class.by_value_and_reference then
+    if class.by_reference then
         cpp_output = cpp_output .. "template<>" .. br
         cpp_output = cpp_output .. "void LuaValue<" .. class_name .. "*>::call_destructor( " .. class_name .. " **const ptr ) {" .. br
         cpp_output = cpp_output .. tab .. "delete ptr;" .. br
@@ -408,11 +408,11 @@ function generate_operator(class_name, operator_id, cppname)
 
     text = text .. tab .. "bool rval = "
 
-    if classes[class_name].by_value then
-        text = text .. "lhs " .. cppname .. " rhs";
-    else
+    if classes[class_name].by_reference then
         -- Both objects are pointers, they need to point to the same object to be equal.
         text = text .. "&lhs " .. cppname .. " &rhs";
+    else
+        text = text .. "lhs " .. cppname .. " rhs";
     end
     text = text .. ";"..br
 
@@ -518,10 +518,10 @@ end
 function wrapper_base_class(class_name)
     -- This must not be LuaReference because it is used for declaring/defining the static members
     -- and those should onloy exist for LuaValue.
-    if classes[class_name].by_value then
-        return "LuaValue<" .. class_name .. ">"
-    else
+    if classes[class_name].by_reference then
         return "LuaValue<" .. class_name .. "*>"
+    else
+        return "LuaValue<" .. class_name .. ">"
     end
 end
 
@@ -605,10 +605,7 @@ function generate_code_for(class_name, class)
     end
     cpp_output = cpp_output .. generate_functions_for_class(class_name, class)
     cpp_output = cpp_output .. generate_LuaValue_constants(class_name, class, false)
-    if class.by_value_and_reference then
-        if class.by_value then
-            error("by_value_and_reference only works with classes that have `by_value = false`")
-        end
+    if class.by_value and class.by_reference then
         cpp_output = cpp_output .. generate_LuaValue_constants(class_name, class, true)
     end
 
@@ -617,17 +614,7 @@ function generate_code_for(class_name, class)
     cpp_output = cpp_output .. "lua_State *get_lua_state( const lua_engine & );" .. br
     cpp_output = cpp_output .. "template<typename T> T pop_from_stack( const lua_engine &, int );" .. br
 
-    if class.by_value then
-        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
-        cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
-        cpp_output = cpp_output .. "}" .. br
-        cpp_output = cpp_output .. "template<> " .. class_name .. " pop_from_stack<" .. class_name .. ">( const lua_engine &engine, const int index ) {" .. br
-        cpp_output = cpp_output .. "    if( LuaValue<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
-        cpp_output = cpp_output .. "        return LuaValue<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
-        cpp_output = cpp_output .. "    }" .. br
-        cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
-        cpp_output = cpp_output .. "}" .. br
-    elseif class.by_value_and_reference then
+    if class.by_value and class.by_reference then
         cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
         cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
         cpp_output = cpp_output .. "}" .. br
@@ -651,7 +638,17 @@ function generate_code_for(class_name, class)
         cpp_output = cpp_output .. "    }" .. br
         cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
         cpp_output = cpp_output .. "}" .. br
-    else
+    elseif class.by_value then
+        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
+        cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
+        cpp_output = cpp_output .. "}" .. br
+        cpp_output = cpp_output .. "template<> " .. class_name .. " pop_from_stack<" .. class_name .. ">( const lua_engine &engine, const int index ) {" .. br
+        cpp_output = cpp_output .. "    if( LuaValue<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+        cpp_output = cpp_output .. "        return LuaValue<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+        cpp_output = cpp_output .. "    }" .. br
+        cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
+        cpp_output = cpp_output .. "}" .. br
+    elseif class.by_reference then
         cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
         cpp_output = cpp_output .. "    LuaReference<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
         cpp_output = cpp_output .. "}" .. br
@@ -760,12 +757,12 @@ function generate_push_interface()
 
     for _, class_name in ipairs(sorted_keys(classes)) do
         local class = classes[class_name]
-        if class.by_value then
-            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
-        elseif class.by_value_and_reference then
+        if class.by_value and class.by_reference then
             cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
             cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, " .. class_name .. " & );" .. br
-        else
+        elseif class.by_value then
+            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
+        elseif class.by_reference then
             cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
         end
     end
