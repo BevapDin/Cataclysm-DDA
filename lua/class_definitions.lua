@@ -3121,7 +3121,7 @@ for name, value in pairs(classes) do
         -- This is the common int_id<T> interface:
         local t = {
             forward_declaration = value.forward_declaration .. "using " .. value.int_id .. " = int_id<" .. name .. ">;",
-            headers = value.headers,
+            int_id_of = name,
             by_value = true,
             has_equal = true,
             -- IDs *could* be constructed from int, but where does the Lua script get the int from?
@@ -3147,7 +3147,7 @@ for name, value in pairs(classes) do
     if value.string_id then
         local t = {
             forward_declaration = value.forward_declaration .. "using " .. value.string_id .. " = string_id<" .. name .. ">;",
-            headers = value.headers,
+            string_id_of = name,
             by_value = true,
             has_equal = true,
             -- Copy and default constructor and construct from plain string.
