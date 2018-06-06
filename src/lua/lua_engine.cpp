@@ -82,12 +82,6 @@ void luah_setmetatable( lua_State *L, const char *metatable_name )
     lua_setmetatable( L, -2 );
 }
 
-void luah_setglobal( lua_State *L, const char *name, int index )
-{
-    lua_pushvalue( L, index );
-    lua_setglobal( L, name );
-}
-
 // Given a Lua return code and a file that it happened in, print a debugmsg with the error and path.
 // Returns true if there was an error, false if there was no error at all.
 bool lua_report_error( lua_State *L, int err, const char *path, bool simple = false )
@@ -127,13 +121,13 @@ bool lua_report_error( lua_State *L, int err, const char *path, bool simple = fa
 void update_globals( lua_State *L )
 {
     LuaReference<player>::push( L, g->u );
-    luah_setglobal( L, "player", -1 );
+    lua_setglobal( L, "player" );
 
     LuaReference<map>::push( L, g->m );
-    luah_setglobal( L, "map", -1 );
+    lua_setglobal( L, "map" );
 
     LuaReference<game>::push( L, g );
-    luah_setglobal( L, "g", -1 );
+    lua_setglobal( L, "g" );
 }
 
 class lua_iuse_wrapper : public iuse_actor
@@ -208,7 +202,7 @@ int lua_engine::mapgen( map *m, const oter_id &terrain_type, const mapgendata &,
     }
     lua_State *L = state;
     LuaReference<map>::push( L, m );
-    luah_setglobal( L, "map", -1 );
+    lua_setglobal( L, "map" );
 
     int err = luaL_loadstring( L, scr.c_str() );
     if( lua_report_error( L, err, scr.c_str() ) ) {
