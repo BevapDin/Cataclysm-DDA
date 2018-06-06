@@ -414,6 +414,27 @@ function generate_constructor(class_name, args)
     return text
 end
 
+function generate_destructor(class_name, class)
+    local cpp_output = ""
+    if class.by_value or class.by_value_and_reference then
+        cpp_output = cpp_output .. "template<>" .. br
+        cpp_output = cpp_output .. "void LuaValue<" .. class_name .. ">::call_destructor( " .. class_name .. " &object ) {" .. br
+        -- This avoids problems where class_name is actually "foo::bar<some>" and the destructor call
+        -- would be `object.~foo::bar<some>`, which causes compiler errors.
+        cpp_output = cpp_output .. tab .. "using T = " .. class_name .. ";" .. br
+        cpp_output = cpp_output .. tab .. "object.~T();" .. br
+        cpp_output = cpp_output .. "}" .. br
+    end
+    if not class.by_value or class.by_value_and_reference then
+        cpp_output = cpp_output .. "template<>" .. br
+        cpp_output = cpp_output .. "void LuaValue<" .. class_name .. "*>::call_destructor( " .. class_name .. " *&object ) {" .. br
+        -- Don't need an actual deconstructor call here because it's only a pointer, its deconstruction won't do anything.
+        cpp_output = cpp_output .. tab .. "static_cast<void>( object );" .. br
+        cpp_output = cpp_output .. "}" .. br
+    end
+    return cpp_output
+end
+
 function generate_operator(class_name, operator_id, cppname)
     local text = "static int op_" .. class_name .. "_" .. operator_id .. "(lua_State *L) {"..br
 
@@ -476,6 +497,7 @@ end
 for _, class_name in ipairs(sorted_keys(classes)) do
     local class = classes[class_name]
     local cur_class_name = class_name
+    cpp_output = cpp_output .. generate_destructor(class_name, class)
     while class do
         generate_class_function_wrappers(class.functions, class_name, cur_class_name)
         if class.new then
