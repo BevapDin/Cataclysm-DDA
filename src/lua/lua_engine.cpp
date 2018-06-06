@@ -118,18 +118,6 @@ bool lua_report_error( lua_State *L, int err, const char *path, bool simple = fa
     return true;
 }
 
-void update_globals( lua_State *L )
-{
-    LuaReference<player>::push( L, g->u );
-    lua_setglobal( L, "player" );
-
-    LuaReference<map>::push( L, g->m );
-    lua_setglobal( L, "map" );
-
-    LuaReference<game>::push( L, g );
-    lua_setglobal( L, "g" );
-}
-
 class lua_iuse_wrapper : public iuse_actor
 {
     private:
@@ -144,8 +132,6 @@ class lua_iuse_wrapper : public iuse_actor
             // If it's a lua function, the arguments have to be wrapped in
             // lua userdata's and passed on the lua stack.
             // We will now call the function f(player, item, active)
-
-            update_globals( L );
 
             // Push the lua function on top of the stack
             lua_rawgeti( L, LUA_REGISTRYINDEX, lua_function );
@@ -628,6 +614,15 @@ void lua_engine::init()
     // override default print to our version
     lua_register( state, "print", game_myPrint );
 
+    LuaReference<player>::push( state, g->u );
+    lua_setglobal( state, "player" );
+
+    LuaReference<map>::push( state, g->m );
+    lua_setglobal( state, "map" );
+
+    LuaReference<game>::push( state, g );
+    lua_setglobal( state, "g" );
+
     // Load lua-side metatables etc.
     run_file( FILENAMES["class_defslua"] );
     run_file( FILENAMES["autoexeclua"] );
@@ -661,7 +656,6 @@ void catalua::push_script( const lua_engine &engine, const std::string &script )
 void catalua::call_void_function( const lua_engine &engine, const int args )
 {
     lua_State *const L = get_lua_state( engine );
-    update_globals( L );
     const int err = lua_pcall( L, args, 0, 0 );
     if( lua_report_error( L, err, "inline script" ) ) {
         throw std::runtime_error( "failed to call function" );
@@ -671,7 +665,6 @@ void catalua::call_void_function( const lua_engine &engine, const int args )
 void catalua::call_non_void_function( const lua_engine &engine, const int args )
 {
     lua_State *const L = get_lua_state( engine );
-    update_globals( L );
     const int err = lua_pcall( L, args, 1, 0 );
     if( lua_report_error( L, err, "inline script" ) ) {
         throw std::runtime_error( "failed to call function" );
