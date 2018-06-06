@@ -20,10 +20,15 @@
 local br = "\n"
 local tab = "    "
 
-function sorted_keys(t)
+function sorted_keys(t, condition)
+    if not condition then
+        condition = function() return true; end
+    end
     local res = { }
     for k, _ in pairs(t) do
-        table.insert(res, k)
+        if condition(k) then
+            table.insert(res, k)
+        end
     end
     table.sort(res)
     return res;
@@ -124,37 +129,23 @@ function push_lua_value(in_variable, value_type)
     return wrapper .. "::push(L, " .. in_variable .. ");"
 end
 
--- Generates a getter function for a specific class and member variable.
-function generate_getter(class_name, member_name, member_type, cpp_name)
-    local function_name = "get_" .. class_name .. "_" .. member_name
-    local text = "static int "..function_name.."(lua_State *L) {"..br
-
-    text = text .. tab .. load_instance(class_name)..br
-
+function generate_getter_code(name, attribute, tab)
+    local cpp_name = attribute.cpp_name or name
+    local cpp_output = ""
     -- adding the "&" to the type, so push_lua_value knows it's a reference.
-    text = text .. tab .. push_lua_value("instance."..cpp_name, member_type .. "&")..br
-
-    text = text .. tab .. "return 1;  // 1 return value"..br
-    text = text .. "}" .. br
-
-    return text
+    cpp_output = cpp_output .. tab .. "    " .. push_lua_value("instance." .. cpp_name, attribute.type .. "&") .. br
+    cpp_output = cpp_output .. tab .. "    " .. "return 1;" .. br
+    return cpp_output
 end
 
--- Generates a setter function for a specific class and member variable.
-function generate_setter(class_name, member_name, member_type, cpp_name)
-    local function_name = "set_" .. class_name .. "_" .. member_name
-
-    local text = "static int "..function_name.."(lua_State *L) {"..br
-
-    text = text .. tab .. load_instance(class_name)..br
-
-    text = text .. tab .. check_lua_value(member_type, 2)..";"..br
-    text = text .. tab .. "instance."..cpp_name.." = " .. retrieve_lua_value(member_type, 2)..";"..br
-
-    text = text .. tab .. "return 0;  // 0 return values"..br
-    text = text .. "}" .. br
-
-    return text
+function generate_setter_code(name, attribute, tab)
+    local cpp_name = attribute.cpp_name or name
+    local member_type = attribute.type
+    local cpp_output = ""
+    cpp_output = cpp_output .. tab .. "    " .. check_lua_value(member_type, 3) .. ";" .. br
+    cpp_output = cpp_output .. tab .. "    " .. "instance." .. cpp_name .. " = " .. retrieve_lua_value(member_type, 3) .. ";" .. br
+    cpp_output = cpp_output .. tab .. "    " .. "return 0;" .. br
+    return cpp_output
 end
 
 -- Generates a function wrapper for a global function. "function_to_call" can be any string
@@ -463,20 +454,6 @@ dofile "../../lua/class_definitions.lua"
 
 generate_overload_tree(classes)
 
-function generate_accessors(attributes, class_name)
-    local cpp_output = ""
-    -- Generate getters and setters for our player attributes.
-    for _, key in ipairs(sorted_keys(attributes)) do
-        local attribute = attributes[key]
-        cpp_output = cpp_output .. generate_getter(class_name, key, attribute.type, attribute.cpp_name or key)
-        if attribute.writable then
-            cpp_output = cpp_output .. generate_setter(class_name, key, attribute.type, attribute.cpp_name or key)
-        end
-    end
-    return cpp_output
-end
-
-
 function generate_class_function_wrappers(functions, class_name, cur_class_name)
     local cpp_output = ""
     for _, function_name in ipairs(sorted_keys(functions)) do
@@ -516,42 +493,49 @@ function generate_functions_static(cpp_type, class, class_name)
     cpp_output = cpp_output .. "};" .. br
     return cpp_output
 end
--- Creates the LuaValue<T>::READ_MEMBERS map, containing the getters. Example:
--- const LuaValue<foo>::MRMap LuaValue<foo>::READ_MEMBERS{ { "id", foo_get_id }, ... };
-function generate_read_members_static(cpp_type, class, class_name)
+function generate_accessors_impl(attributes, names, lower, upper, indentation, cbc)
+    local pivot = math.floor(lower + (upper - lower) / 2)
+    local name = names[pivot]
+    local tab = string.rep("    ", indentation)
+
     local cpp_output = ""
-    cpp_output = cpp_output .. "template<>" .. br
-    cpp_output = cpp_output .. "const " .. cpp_type .. "::MRMap " .. cpp_type .. "::READ_MEMBERS{" .. br
-    while class do
-        for _, key in ipairs(sorted_keys(class.attributes)) do
-            local function_name = "get_" .. class_name .. "_" .. key
-            cpp_output = cpp_output .. tab .. "{\"" .. key .. "\", " .. function_name .. "}," .. br
-        end
-        class = classes[class.parent]
+    cpp_output = cpp_output .. tab .. "const int c = std::strcmp( name, \"" .. name .. "\" );" .. br
+    if lower < pivot then
+        cpp_output = cpp_output .. tab .. "if( c < 0 ) {" .. br
+        cpp_output = cpp_output .. generate_accessors_impl(attributes, names, lower, pivot - 1, indentation + 1, cbc)
+        cpp_output = cpp_output .. tab .. "}" .. br
     end
-    cpp_output = cpp_output .. "};" .. br
-    return cpp_output
-end
--- Creates the LuaValue<T>::READ_MEMBERS map, containing the setters. Example:
--- const LuaValue<foo>::MWMap LuaValue<foo>::WRITE_MEMBERS{ { "id", foo_set_id }, ... };
-function generate_write_members_static(cpp_type, class, class_name)
-    local cpp_output = ""
-    cpp_output = cpp_output .. "template<>" .. br
-    cpp_output = cpp_output .. "const " .. cpp_type .. "::MWMap " .. cpp_type .. "::WRITE_MEMBERS{" .. br
-    while class do
-        for _, key in ipairs(sorted_keys(class.attributes)) do
-            local attribute = class.attributes[key]
-            if attribute.writable then
-                local function_name = "set_" .. class_name .. "_" .. key
-                cpp_output = cpp_output .. tab .. "{\"" .. key .. "\", " .. function_name .. "}," .. br
-            end
-        end
-        class = classes[class.parent]
+
+    cpp_output = cpp_output .. tab .. "if( c == 0 ) {" .. br
+    cpp_output = cpp_output .. cbc(name, attributes[name], tab)
+
+    cpp_output = cpp_output .. tab .. "}" .. br
+
+    if upper > pivot then
+        cpp_output = cpp_output .. tab .. "if( c > 0 ) {" .. br
+        cpp_output = cpp_output .. generate_accessors_impl(attributes, names, pivot + 1, upper, indentation + 1, cbc)
+        cpp_output = cpp_output .. tab .. "}" .. br
     end
-    cpp_output = cpp_output .. "};" .. br
+
     return cpp_output
 end
 
+function generate_accessors(class_name, value_type_name, function_name, attributes, cbc)
+    local names = sorted_keys(attributes, function(name) return function_name == "get_member" or attributes[name].writable; end)
+    local cpp_output = ""
+
+    cpp_output = cpp_output .. "template<>" .. br
+    cpp_output = cpp_output .. "int LuaValue<" .. value_type_name .. ">::" .. function_name .. "( lua_State *const L, const char *const name ) {" .. br
+    if #names == 0 then
+        cpp_output = cpp_output .. "    static_cast<void>( name ); // unused as there are no exported members" .. br
+    else
+        cpp_output = cpp_output .. "    " .. load_instance(class_name) .. br
+        cpp_output = cpp_output .. generate_accessors_impl(attributes, names, 1, #names, 1, cbc)
+    end
+    cpp_output = cpp_output .. "    " .. "return luaL_error( L, \"unknown attribute\" );" .. br
+    cpp_output = cpp_output .. "}" .. br
+    return cpp_output
+end
 -- The static constant is always define in LuaValue (LuaReference gets it via inheritance)
 -- But LuaReference inherits from LuaValue<T*>!
 function wrapper_base_class(class_name)
@@ -606,8 +590,6 @@ function generate_LuaValue_constants(class_name, class, by_value_and_reference)
     cpp_output = cpp_output .. tab .. "return nullptr;" .. br
     cpp_output = cpp_output .. "}" .. br
     cpp_output = cpp_output .. generate_functions_static(cpp_name, class, class_name)
-    cpp_output = cpp_output .. generate_read_members_static(cpp_name, class, class_name)
-    cpp_output = cpp_output .. generate_write_members_static(cpp_name, class, class_name)
     return cpp_output
 end
 
@@ -615,8 +597,24 @@ function generate_functions_for_class(class_name, class)
     local cur_class_name = class_name
     local cpp_output = ""
     cpp_output = cpp_output .. generate_destructor(class_name, class)
+    local attributes = class.attributes
+    local parent_class = class.parent
+    while parent_class do
+        local class = classes[parent_class]
+        for k,v in pairs(class.attributes) do
+            attributes[k] = v
+        end
+        parent_class = class.parent
+    end
+    if class.by_value then
+        cpp_output = cpp_output .. generate_accessors(class_name, class_name, "get_member", attributes, generate_getter_code)
+        cpp_output = cpp_output .. generate_accessors(class_name, class_name, "set_member", attributes, generate_setter_code)
+    end
+    if class.by_reference then
+        cpp_output = cpp_output .. generate_accessors(class_name, class_name .. "*", "get_member", attributes, generate_getter_code)
+        cpp_output = cpp_output .. generate_accessors(class_name, class_name .. "*", "set_member", attributes, generate_setter_code)
+    end
     while class do
-        cpp_output = cpp_output .. generate_accessors(class.attributes, class_name)
         cpp_output = cpp_output .. generate_class_function_wrappers(class.functions, class_name, cur_class_name)
         if class.new then
             cpp_output = cpp_output .. generate_constructor(class_name, class.new)
@@ -643,6 +641,8 @@ function generate_code_for(class_name, class)
     cpp_output = cpp_output .. "#include <stdexcept>" .. br
     -- Needed for `std::reference_wrapper`
     cpp_output = cpp_output .. "#include <functional>" .. br
+    -- Required for std::strcmp as used by the generate_accessors_impl function
+    cpp_output = cpp_output .. "#include <cstring>"..br
     cpp_output = cpp_output .. br
     cpp_output = cpp_output .. "class lua_engine;" .. br
     cpp_output = cpp_output .. "lua_State *get_lua_state( const lua_engine & );" .. br
