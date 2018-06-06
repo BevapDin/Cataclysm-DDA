@@ -809,7 +809,7 @@ classes = {
             note = { type = "int", writable = true },
             player_id = { type = "int", writable = true },
             poison = { type = "int", writable = true },
-            type = { type = "itype", writable = true },
+            type = { type = "itype" },
         },
         functions = {
             { name = "acid_resist", rval = "int", args = { "bool" } },
