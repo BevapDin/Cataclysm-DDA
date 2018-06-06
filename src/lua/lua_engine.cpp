@@ -107,13 +107,13 @@ bool lua_report_error( lua_State *L, int err, const char *path, bool simple = fa
 void update_globals( lua_State *L )
 {
     LuaReference<player>::push( L, g->u );
-    luah_setglobal( L, "player", -1 );
+    lua_setglobal( L, "player" );
 
     LuaReference<map>::push( L, g->m );
-    luah_setglobal( L, "map", -1 );
+    lua_setglobal( L, "map" );
 
     LuaReference<game>::push( L, g );
-    luah_setglobal( L, "g", -1 );
+    lua_setglobal( L, "g" );
 }
 
 class lua_iuse_wrapper : public iuse_actor
