@@ -9,7 +9,6 @@ extern "C" {
 #include <lauxlib.h>
 }
 
-#include <map>
 #include <string>
 
 // @todo move into namespace catalua and rename to just "value"
@@ -43,12 +42,6 @@ class LuaValue
         static const char *const METATABLE_NAME;
         /** Defined by generate_bindings.lua in catabindings.cpp */
         static const luaL_Reg FUNCTIONS[];
-        /** Defined by generate_bindings.lua in catabindings.cpp */
-        using MRMap = std::map<std::string, int( * )( lua_State * )>;
-        static const MRMap READ_MEMBERS;
-        /** Defined by generate_bindings.lua in catabindings.cpp */
-        using MWMap = std::map<std::string, int( * )( lua_State * )>;
-        static const MWMap WRITE_MEMBERS;
 
         /*@{*/
         /**
@@ -116,6 +109,8 @@ class LuaValue
             lua_pop( L, 1 );
             return 0;
         }
+        static int get_member( lua_State *L, const char *name );
+        static int set_member( lua_State *L, const char *name );
         /**
          * Wrapper for the Lua __index entry in the metatable of the userdata.
          * It queries the actual metatable in case the call goes to a function (and does not request
@@ -137,15 +132,7 @@ class LuaValue
                 // -1 is now the things we have gotten from luaL_getmetafield, return it.
                 return 1;
             }
-            const auto iter = READ_MEMBERS.find( key );
-            if( iter == READ_MEMBERS.end() ) {
-                // No such member or function
-                lua_pushnil( L );
-                return 1;
-            }
-            lua_remove( L, -1 ); // remove key
-            // userdata is still there (now on -1, where it is expected by the getter)
-            return iter->second( L );
+            return get_member( L, key );
         }
         /**
          * Wrapper for the Lua __newindex entry in the metatable of the userdata.
@@ -158,12 +145,7 @@ class LuaValue
             if( key == nullptr ) {
                 luaL_error( L, "Invalid input to __newindex: key is not a string." );
             }
-            const auto iter = WRITE_MEMBERS.find( key );
-            if( iter == WRITE_MEMBERS.end() ) {
-                luaL_error( L, "Unknown attribute" );
-            }
-            lua_remove( L, -2 ); // key, userdata is still there, but now on -2, and the value is on -1
-            return iter->second( L );
+            return set_member( L, key );
         }
         /**
          * This loads the metatable (and adds the available functions) and pushes it on the stack.
