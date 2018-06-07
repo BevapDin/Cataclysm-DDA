@@ -56,10 +56,6 @@ class lua_engine
         void loadmod( const std::string &base_path, const std::string &main_file_name );
 
         void run_console();
-
-        // This is a legacy function, ideally code would use `catalua::call` instead,
-        // but for mapgen we do a bit more than just call the script.
-        int mapgen( map *m, const oter_id &terrain_type, const mapgendata &, const time_point &t, float, const std::string &scr );
 };
 
 #endif
