@@ -16,7 +16,7 @@ class CppCallable
 {
     protected:
         Cursor cursor;
-        std::vector<Cursor> arguments;
+        std::vector<Cursor> arguments_;
         // The min number of arguments. May differ from total number of
         // arguments some parameters are optional.
         size_t min_arguments = 0;
@@ -48,4 +48,8 @@ class CppCallable
         std::string cpp_name() const;
 
         bool has_same_arguments( const CppCallable &other ) const;
+
+        const std::vector<Cursor> &arguments() const {
+            return arguments_;
+        }
 };

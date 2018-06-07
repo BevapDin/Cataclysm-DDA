@@ -222,33 +222,11 @@ std::string Exporter::translate_argument_type( const Type &t ) const
 
 void Exporter::export_( const Parser &parser, const std::string &lua_file )
 {
-    // Export "dummy" class definitions for classes that are used in string/int ids.
-    for( auto &elem : string_ids ) {
-        const auto &base_type = elem.second;
-        if( !parser.contains_class( base_type ) ) {
-            const_cast<Parser &>( parser ).classes.emplace_back( "", base_type );
-            if( types_to_export.count( base_type ) == 0 ) {
-                assert( valid_cpp_identifer( base_type ) );
-                types_to_export.insert( base_type );
-            }
-        }
-    }
-    for( auto &elem : int_ids ) {
-        const auto &base_type = elem.second;
-        if( !parser.contains_enum( base_type ) ) {
-            const_cast<Parser &>( parser ).classes.emplace_back( "", base_type );
-            if( types_to_export.count( base_type ) == 0 ) {
-                assert( valid_cpp_identifer( base_type ) );
-                types_to_export.insert( base_type );
-            }
-        }
-    }
-
     std::set<std::string> handled_types;
     std::ofstream f( lua_file.c_str() );
-    f << "classes = {\n" ;
+    f << "classes = {\n";
     for( const auto &c : types_to_export ) {
-        if( const auto obj = parser.get_class( c ) ) {
+        if( const CppClass *const obj = parser.get_class( c ) ) {
             f << obj->export_( *this ) << ",\n";
             handled_types.insert( c );
         }
@@ -258,7 +236,7 @@ void Exporter::export_( const Parser &parser, const std::string &lua_file )
     f << "\n";
     f << "enums = {\n";
     for( const auto &e : types_to_export ) {
-        if( const auto obj = parser.get_enum( e ) ) {
+        if( const CppEnum *const obj = parser.get_enum( e ) ) {
             f << obj->export_( *this ) << ",\n";
             handled_types.insert( e );
         }
@@ -563,7 +541,7 @@ std::string Exporter::escape_to_lua_string( const std::string &text ) const
         if( c == '"' || c == '\\' ) {
             result += '\\';
         } else if( c == '\n' ) {
-            result += ' ';
+            result += "\\\\n";
             continue;
         }
         result += c;
@@ -653,4 +631,24 @@ void Exporter::add_export_enumeration( const std::string &cpp_name )
 {
     assert( valid_cpp_identifer( cpp_name ) );
     add_export_by_value( cpp_name );
+}
+
+std::string Exporter::get_header_for_argument( const Cursor &c ) const
+{
+    const Type t = c.type();
+    if( !build_in_lua_type( t ).empty() ) {
+        // build in type is either a build in in C++ as well (e.g. numeric) or
+        // it's string, and we assume the header for string is always included.
+        return {};
+    }
+    if( t.kind() == CXType_LValueReference || t.kind() == CXType_Pointer ) {
+        // reference or pointer, both just need a forward declaration, which has
+        // already been done by the one declaring the function.
+        return {};
+    }
+    if( t.kind() == CXType_Typedef ) {
+        return get_header_for_argument( t.get_declaration().get_underlying_type() );
+    }
+
+    return t.get_declaration().location_file();
 }

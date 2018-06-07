@@ -5,9 +5,9 @@
 #include "exceptions.h"
 #include "common.h"
 
-CppCallable::CppCallable( const Cursor &c ) : cursor( c ), arguments( cursor.get_arguments() )
+CppCallable::CppCallable( const Cursor &c ) : cursor( c ), arguments_( cursor.get_arguments() )
 {
-    for( const Cursor &arg : arguments ) {
+    for( const Cursor &arg : arguments_ ) {
         if( arg.has_default_value() ) {
             break;
         } else {
@@ -23,9 +23,9 @@ std::string CppCallable::export_argument_list( Exporter &p, size_t m ) const
     if( m == 0 ) {
         return "{ }";
     }
-    auto end = arguments.begin();
-    std::advance( end, std::min( m, arguments.size() ) );
-    return enumerate( "{ ", std::vector<Cursor>( arguments.begin(), end ), [&p]( const Cursor & a ) {
+    auto end = arguments_.begin();
+    std::advance( end, std::min( m, arguments_.size() ) );
+    return enumerate( "{ ", std::vector<Cursor>( arguments_.begin(), end ), [&p]( const Cursor & a ) {
         return p.translate_argument_type( a.type() );
     }, ", ", " }" );
 }
@@ -39,7 +39,7 @@ std::list<std::string> CppCallable::export_cb( Exporter &p,
     std::list<std::string> result;
     try {
         size_t m = min_arguments;
-        while( m <= arguments.size() ) {
+        while( m <= arguments_.size() ) {
             const std::string str = callback( export_argument_list( p, m ) );
             if( !str.empty() ) {
                 result.push_back( str );
@@ -83,8 +83,8 @@ std::string CppCallable::operator_name() const
 
 bool CppCallable::has_same_arguments( const CppCallable &other ) const
 {
-    const auto &fargs = arguments;
-    const auto &oargs = other.arguments;
+    const auto &fargs = arguments_;
+    const auto &oargs = other.arguments_;
     if( fargs.size() != oargs.size() ) {
         return false;
     }
@@ -105,7 +105,7 @@ std::string CppCallable::full_name() const
 
 std::string CppCallable::full_name_with_args() const
 {
-    const std::string args = enumerate( "", arguments, [&]( const Cursor & a ) {
+    const std::string args = enumerate( "", arguments_, [&]( const Cursor & a ) {
         return a.type().spelling();
     }, ", ", "" );
     return full_name() + "(" + args + ")";

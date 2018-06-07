@@ -4,7 +4,7 @@
 
 #include <string>
 #include <list>
-#include <set>
+#include <vector>
 #include <functional>
 
 class CppFunction;
@@ -16,26 +16,23 @@ class Exporter;
 class CppClass
 {
     private:
-        std::string full_name_;
-        std::string cpp_name_;
+        Cursor cursor_;
 
         std::list<CppFunction> functions;
         std::list<CppAttribute> attributes;
         std::list<CppConstructor> constructors;
         std::list<std::reference_wrapper<const CppClass>> parents;
-        std::set<std::string> headers_;
 
         bool has_equal = false;
-        std::string source_file_;
 
         bool has_non_const_overload( const CppFunction &func ) const;
 
-        void gather_parent( Exporter &p, std::vector<const CppFunction *> &functions,
-                            std::vector<const CppAttribute *> &attributes ) const;
+        void gather_parent( Exporter &p, std::vector<std::reference_wrapper<const CppFunction>> &functions, std::vector<std::reference_wrapper<const CppAttribute>> &attributes ) const;
+
+        std::vector<std::string> get_headers() const;
 
     public:
         CppClass( Parser &p, const Cursor &cursor );
-        CppClass( const std::string &ns, const std::string &n );
         CppClass( const CppClass & ) = delete;
 
         ~CppClass();
