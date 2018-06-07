@@ -202,7 +202,12 @@ void mutation_branch::load( JsonObject &jsobj )
 
     JsonArray jsarr;
     new_mut.name = _(jsobj.get_string("name").c_str());
-    new_mut.description = _(jsobj.get_string("description").c_str());
+    jsobj.read( "description", new_mut.description );
+    if( !new_mut.description.has_script() ) {
+        // If it's a pure value (not a script), it needs to be translated.
+        // Scripts must take care of that on their own.
+        new_mut.description.set_value( _( new_mut.description.actual_value().c_str() ) );
+    }
     new_mut.points = jsobj.get_int("points");
     new_mut.visibility = jsobj.get_int("visibility", 0);
     new_mut.ugliness = jsobj.get_int("ugliness", 0);

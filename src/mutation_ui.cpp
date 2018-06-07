@@ -307,7 +307,7 @@ You cannot activate %s!  To read a description of \
                 draw_exam_window( wBio, DESCRIPTION_LINE_Y );
                 // Clear the lines first
                 werase( w_description );
-                fold_and_print( w_description, 0, 0, WIDTH - 2, c_light_blue, mut_data.description );
+                fold_and_print( w_description, 0, 0, WIDTH - 2, c_light_blue, mut_data.description.value( *g->lua_engine_ptr, *this ) );
                 wrefresh( w_description );
             }
         }
