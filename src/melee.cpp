@@ -1720,6 +1720,8 @@ std::vector<special_attack> player::mutation_attacks( Creature &t ) const
             // Attack starts here
             if( mut_atk.hardcoded_effect ) {
                 tmp.damage = hardcoded_mutation_attack( *this, pr.first );
+            } else if( mut_atk.script ) {
+                tmp.damage = ( *mut_atk.script )( *g->lua_engine_ptr, *this, pr.first );
             } else {
                 damage_instance dam = mut_atk.base_damage;
                 damage_instance scaled = mut_atk.strength_damage;

@@ -76,6 +76,17 @@
         "points" : 3,
         "description" : "You're just generally quick!  You get a 10% bonus to action points.",
         "starting_trait" : true,
+        "attacks" : [
+            {
+                "attack_text_u" : "You sink your fangs into %s",
+                "attack_text_npc" : "%1$s sinks their fangs into %2$s",
+                "blocker_mutations" : [ "MUZZLE", "MUZZLE_LONG", "MUZZLE_RAT" ],
+                "body_part" : "MOUTH",
+                "chance" : 20,
+                "base_damage" : { "damage_type" : "stab", "amount" : 20 },
+                "script": "local p = ...; game.add_msg(p:disp_name(false) .. \" is attacking\"); return damage_instance();"
+            }
+        ],
         "category" : ["FISH", "BIRD", "INSECT", "TROGLOBITE", "CHIMERA", "RAPTOR", "MOUSE"]
     },{
         "type" : "mutation",

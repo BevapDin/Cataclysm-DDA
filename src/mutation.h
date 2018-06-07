@@ -8,6 +8,8 @@
 #include "damage.h"
 #include "calendar.h"
 #include "string_id.h"
+#include "lua/script.h"
+#include "optional.h"
 #include <string>
 #include <vector>
 #include <utility>
@@ -80,6 +82,8 @@ struct mut_attack {
 
     /** Should be true when and only when this attack needs hardcoded handling */
     bool hardcoded_effect = false;
+
+    cata::optional<catalua::script<damage_instance, std::reference_wrapper<const player>, trait_id>> script;
 };
 
 struct mutation_branch {
