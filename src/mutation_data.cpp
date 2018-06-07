@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "translations.h"
 #include "trait_group.h"
+#include "game.h"
 
 #include "color.h"
 
@@ -250,7 +251,7 @@ void mutation_branch::load( JsonObject &jsobj )
 
     JsonArray jsarr;
     new_mut.raw_name = jsobj.get_string( "name" );
-    new_mut.raw_desc = jsobj.get_string( "description" );
+    jsobj.read( "description", new_mut.raw_desc );
     new_mut.points = jsobj.get_int( "points" );
     new_mut.visibility = jsobj.get_int( "visibility", 0 );
     new_mut.ugliness = jsobj.get_int( "ugliness", 0 );
@@ -423,9 +424,14 @@ std::string mutation_branch::name() const
     return _( raw_name.c_str() );
 }
 
-std::string mutation_branch::desc() const
+std::string mutation_branch::desc( const player &u ) const
 {
-    return _( raw_desc.c_str() );
+    if( !raw_desc.has_script() ) {
+        // If it's a pure value (not a script), it needs to be translated.
+        // Scripts must take care of that on their own.
+        return _( raw_desc.actual_value().c_str() );
+    }
+    return raw_desc.value( *g->lua_engine_ptr, u );
 }
 
 static void check_consistency( const std::vector<trait_id> &mvec, const trait_id &mid,

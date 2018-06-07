@@ -74,7 +74,8 @@
         "id" : "QUICK",
         "name" : "Quick",
         "points" : 3,
-        "description" : "You're just generally quick!  You get a 10% bonus to action points.",
+        "description" : {
+            "lua-script": "local p = ... ; return p:disp_name(false) .. \" gets a quick trait\"" },
         "starting_trait" : true,
         "attacks" : [
             {

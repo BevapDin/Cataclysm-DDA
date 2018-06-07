@@ -169,8 +169,7 @@ class wish_mutate_callback: public uimenu_callback
                      );
             line2 += 2;
 
-            std::vector<std::string> desc = foldstring( mdata.desc(),
-                                            menu->pad_right - 1 );
+            std::vector<std::string> desc = foldstring( mdata.desc( *p ), menu->pad_right - 1 );
             for( auto &elem : desc ) {
                 mvwprintz( menu->window, line2, startx, c_light_gray, elem );
                 line2++;

@@ -1143,7 +1143,7 @@ tab_direction set_traits( const catacurses::window &w, player &u, points_left &p
                                points );
                     fold_and_print( w_description, 0, 0,
                                     TERMX - 2, col_tr,
-                                    mdata.desc() );
+                                    mdata.desc( u ) );
                 }
 
                 nc_color cLine = col_off_pas;
