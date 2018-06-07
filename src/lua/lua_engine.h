@@ -120,6 +120,9 @@ class lua_engine
         int monster_move( monster *m );
 
         void run_console();
+
+        /// @throws Given a Lua error code, throw if it's not ERR_OK.
+        void throw_upon_lua_error( const int err, const char *path ) const;
 };
 
 #endif

@@ -73,40 +73,24 @@ static void luaL_setfuncs( lua_State *const L, const luaL_Reg arrary[], int cons
 
 lua_State *get_lua_state( const lua_engine &e );
 
-// Given a Lua return code and a file that it happened in, print a debugmsg with the error and path.
-// Returns true if there was an error, false if there was no error at all.
-bool lua_report_error( lua_State *L, int err, const char *path, bool simple = false )
+void lua_engine::throw_upon_lua_error( const int err, const char *const path ) const
 {
-    std::ostream &error_stream = g->lua_engine_ptr->error_stream;
     if( err == LUA_OK || err == LUA_ERRRUN ) {
         // No error or error message already shown via traceback function.
-        return err != LUA_OK;
+        return;
     }
-    const std::string error = lua_tostring_wrapper( L, -1 );
+    const char *const error_messsage = lua_tostring( state, -1 /*index @todo */ );
+    const char *const error = error_messsage ? error_messsage : "";
     switch( err ) {
         case LUA_ERRSYNTAX:
-            if( !simple ) {
-                error_stream << "Lua returned syntax error for "  << path  << std::endl;
-            }
-            error_stream << error;
-            break;
+            throw std::runtime_error( string_format( "Lua returned syntax error for \"%s\": %s", path, error ) );
         case LUA_ERRMEM:
-            error_stream << "Lua is out of memory";
-            break;
+            throw std::runtime_error( string_format( "Lua returned out of memory for \"%s\": %s", path, error ) );
         case LUA_ERRFILE:
-            if( !simple ) {
-                error_stream << "Lua returned file io error for " << path << std::endl;
-            }
-            error_stream << error;
-            break;
+            throw std::runtime_error( string_format( "Lua returned file io error for \"%s\": %s", path, error ) );
         default:
-            if( !simple ) {
-                error_stream << string_format( "Lua returned unknown error %d for ", err ) << path << std::endl;
-            }
-            error_stream << error;
-            break;
+            throw std::runtime_error( string_format( "Lua returned unknown error %d for \"%s\": %s", err, path, error ) );
     }
-    return true;
 }
 
 class lua_iuse_wrapper : public iuse_actor
@@ -504,11 +488,9 @@ void lua_engine::run_file( const std::string &path )
 {
     lua_pushcfunction( state, &traceback );
     const int err = luaL_loadfile( state, path.c_str() );
-    if( lua_report_error( state, err, path.c_str() ) ) {
-        return;
-    }
+    throw_upon_lua_error( err, path.c_str() );
     const int err2 = lua_pcall( state, 0, LUA_MULTRET, -2 );
-    lua_report_error( state, err2, path.c_str() );
+    throw_upon_lua_error( err2, path.c_str() );
 }
 
 // game.dofile(file)
@@ -624,25 +606,19 @@ void catalua::stack::push_script( const lua_engine &engine, const std::string &s
 {
     lua_State *const L = get_lua_state( engine );
     const int err = luaL_loadstring( L, script.c_str() );
-    if( lua_report_error( L, err, script.c_str() ) ) {
-        throw std::runtime_error( "failed to load script" );
-    }
+    engine.throw_upon_lua_error( err, script.c_str() );
 }
 
 void catalua::stack::call_void_function( const lua_engine &engine, const int args )
 {
     lua_State *const L = get_lua_state( engine );
     const int err = lua_pcall( L, args, 0, 0 );
-    if( lua_report_error( L, err, "inline script" ) ) {
-        throw std::runtime_error( "failed to call function" );
-    }
+    engine.throw_upon_lua_error( err, "<inline script>" );
 }
 
 void catalua::stack::call_non_void_function( const lua_engine &engine, const int args )
 {
     lua_State *const L = get_lua_state( engine );
     const int err = lua_pcall( L, args, 1, 0 );
-    if( lua_report_error( L, err, "inline script" ) ) {
-        throw std::runtime_error( "failed to call function" );
-    }
+    engine.throw_upon_lua_error( err, "<inline script>" );
 }
