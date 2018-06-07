@@ -597,7 +597,7 @@ function generate_code_for(class_name, class)
         cpp_output = cpp_output .. generate_LuaValue_constants(class_name, class, true)
     end
 
-    if class.by_value and class.by_reference then
+    if class.by_value then
         cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
         cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
         cpp_output = cpp_output .. "}" .. br
@@ -605,36 +605,21 @@ function generate_code_for(class_name, class)
         cpp_output = cpp_output .. "    if( LuaValue<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
         cpp_output = cpp_output .. "        return LuaValue<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
         cpp_output = cpp_output .. "    }" .. br
-        cpp_output = cpp_output .. "    if( LuaReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
-        cpp_output = cpp_output .. "        return LuaReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
-        cpp_output = cpp_output .. "    }" .. br
+        -- If the Lua value is a reference, we can still return it as value, but not the other way round (see below).
+        if class.by_reference then
+            cpp_output = cpp_output .. "    if( LuaReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+            cpp_output = cpp_output .. "        return LuaReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+            cpp_output = cpp_output .. "    }" .. br
+        end
         cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
         cpp_output = cpp_output .. "}" .. br
-        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, " .. class_name .. " &val ) {" .. br
+    end
+    if class.by_reference then
+        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const std::reference_wrapper<" .. class_name .. "> val ) {" .. br
         cpp_output = cpp_output .. "    LuaReference<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
         cpp_output = cpp_output .. "}" .. br
         -- Don't return a reference to an object managed by Lua (created by value) as we can't know its
         -- lifetime from within the calling C++ code.
-        cpp_output = cpp_output .. "template<> " .. class_name .. " &pop_from_stack<" .. class_name .. "&>( const lua_engine &engine, const int index ) {" .. br
-        cpp_output = cpp_output .. "    if( LuaReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
-        cpp_output = cpp_output .. "        return LuaReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
-        cpp_output = cpp_output .. "    }" .. br
-        cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
-        cpp_output = cpp_output .. "}" .. br
-    elseif class.by_value then
-        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
-        cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
-        cpp_output = cpp_output .. "}" .. br
-        cpp_output = cpp_output .. "template<> " .. class_name .. " pop_from_stack<" .. class_name .. ">( const lua_engine &engine, const int index ) {" .. br
-        cpp_output = cpp_output .. "    if( LuaValue<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
-        cpp_output = cpp_output .. "        return LuaValue<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
-        cpp_output = cpp_output .. "    }" .. br
-        cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
-        cpp_output = cpp_output .. "}" .. br
-    elseif class.by_reference then
-        cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
-        cpp_output = cpp_output .. "    LuaReference<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
-        cpp_output = cpp_output .. "}" .. br
         cpp_output = cpp_output .. "template<> " .. class_name .. " &pop_from_stack<" .. class_name .. "&>( const lua_engine &engine, const int index ) {" .. br
         cpp_output = cpp_output .. "    if( LuaReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
         cpp_output = cpp_output .. "        return LuaReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
@@ -740,13 +725,11 @@ function generate_push_interface()
 
     for _, class_name in ipairs(sorted_keys(classes)) do
         local class = classes[class_name]
-        if class.by_value and class.by_reference then
+        if class.by_value then
             cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
-            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, " .. class_name .. " & );" .. br
-        elseif class.by_value then
-            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
-        elseif class.by_reference then
-            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
+        end
+        if class.by_reference then
+            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, std::reference_wrapper<" .. class_name .. "> ref );" .. br
         end
     end
 

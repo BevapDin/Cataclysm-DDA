@@ -12,7 +12,7 @@ void test_lua_scripting( const lua_engine &e )
 {
     std::ofstream log( "lua.log", std::ios::app );
     try {
-        catalua::script<item, player &> scr( "local pl = ... ; pl:weapon.charges = 100; return pl:weapon" );
+        catalua::script<item, std::reference_wrapper<player>> scr( "local pl = ... ; pl.weapon.charges = 100; return pl.weapon" );
 
         // Note: this won't compile because std::ofstream is not exported to Lua:
         //catalua::call<void>( e, "", log );

@@ -12,6 +12,7 @@ extern "C" {
 
 #include <string>
 #include <type_traits>
+#include <functional>
 
 // @todo move into namespace catalua and rename to just "reference"
 
@@ -62,6 +63,10 @@ template<typename T>
 class LuaReference : private LuaValue<T *>
 {
     public:
+        template<typename U>
+        static void push( lua_State *const L, const std::reference_wrapper<U> &value ) {
+            return push( L, value.get() );
+        }
         template<typename U = T>
         static void push( lua_State *const L, T *const value,
                           typename std::enable_if < !std::is_const<U>::value >::value_type * = nullptr ) {
