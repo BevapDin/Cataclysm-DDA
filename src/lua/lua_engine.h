@@ -48,6 +48,9 @@ class lua_engine
         void loadmod( const std::string &base_path, const std::string &main_file_name );
 
         void run_console();
+
+        /// @throws Given a Lua error code, throw if it's not ERR_OK.
+        void throw_upon_lua_error( const int err, const char *path ) const;
 };
 
 #endif
