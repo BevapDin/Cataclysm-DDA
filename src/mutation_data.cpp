@@ -143,6 +143,9 @@ static mut_attack load_mutation_attack( JsonObject &jo )
     jo.read( "required_mutations", ret.required_mutations );
     jo.read( "blocker_mutations", ret.blocker_mutations );
     jo.read( "hardcoded_effect", ret.hardcoded_effect );
+    if( jo.has_member( "script" ) ) {
+        ret.script = jo.get_string( "script" );
+    }
 
     if( jo.has_string( "body_part" ) ) {
         ret.bp = get_body_part_token( jo.get_string( "body_part" ) );
