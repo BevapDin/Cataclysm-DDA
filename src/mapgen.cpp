@@ -44,7 +44,6 @@
 #include "npc.h"
 #include "vehicle.h"
 #include "vehicle_group.h"
-#include "lua/lua_engine.h"
 #include "text_snippets.h"
 
 #define dbg(x) DebugLog((DebugLevel)(x),D_MAP_GEN) << __FILE__ << ":" << __LINE__ << ": "
@@ -1720,12 +1719,13 @@ bool mapgen_function_json::setup_internal( JsonObject &jo )
     if( jo.has_string("lua") ) { // minified into one\nline
         luascript = jo.get_string("lua");
     } else if( jo.has_array("lua") ) { // or 1 line per entry array
-        luascript.clear();
+        std::string scr;
         JsonArray jascr = jo.get_array("lua");
         while ( jascr.has_more() ) {
-            luascript += jascr.next_string();
-            luascript += "\n";
+            scr += jascr.next_string();
+            scr += "\n";
         }
+        luascript = scr;
     }
 
     if( jo.has_member( "rotation" ) ) {
@@ -2014,9 +2014,8 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
     for( auto &elem : setmap_points ) {
         elem.apply( md, 0, 0 );
     }
-    if ( ! luascript.empty() ) {
-        g->lua_engine_ptr->mapgen( m, terrain_type, md, t, d, luascript );
-    }
+
+    luascript( *g->lua_engine_ptr, *m, terrain_type.id().str(), t );
 
     place_stairs( m, terrain_type, md );
 
@@ -2077,8 +2076,8 @@ void jmapgen_objects::apply( const mapgendata &dat, int offset_x, int offset_y, 
     }
 }
 
-void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &dat, const time_point &t, float d ) {
-    g->lua_engine_ptr->mapgen( m, terrain_type, dat, t, d, scr );
+void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &/*dat*/, const time_point &t, float /*d*/ ) {
+    scr( *g->lua_engine_ptr, *m, terrain_type.id().str(), t );
 }
 
 /////////////
