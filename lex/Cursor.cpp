@@ -422,6 +422,25 @@ std::string Cursor::location() const
     return s + ":" + std::to_string( line ) + ":" + std::to_string( column );
 }
 
+std::string Cursor::location_path() const
+{
+    CXSourceLocation sl = clang_getCursorLocation( cursor_ );
+    CXString filename;
+    unsigned line;
+    unsigned column;
+    clang_getPresumedLocation( sl, &filename, &line, &column );
+    std::string s( clang_getCString( filename ) );
+    clang_disposeString( filename );
+    return s;
+}
+
+std::string Cursor::location_file() const
+{
+    const std::string p = location_path();
+    const size_t n = p.find_last_of("\\//");
+    return n != std::string::npos ? p.substr( n + 1 ) : p;
+}
+
 void Cursor::dump( const std::string &msg ) const{
     std::set<Cursor> cursors;
     std::set<Type> types;

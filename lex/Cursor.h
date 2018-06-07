@@ -41,6 +41,8 @@ class Cursor
         std::string raw_comment() const;
 
         std::string location() const;
+        std::string location_path() const;
+        std::string location_file() const;
 
         std::vector<Cursor> get_arguments() const;
         std::vector<Type> get_template_arguments() const;

@@ -7,15 +7,13 @@
 #include "CppConstructor.h"
 #include "Type.h"
 #include "Cursor.h"
+#include "common.h"
 
 #include <algorithm>
 #include <vector>
 
-CppClass::CppClass( Parser &p, const Cursor &cursor ) : full_name_(cursor.fully_qualifid()), cpp_name_( cursor.spelling()), source_file_(cursor.location())
+CppClass::CppClass( Parser &p, const Cursor &cursor ) : full_name_(cursor.fully_qualifid()), cpp_name_( cursor.spelling()), source_file_(cursor.location_path())
 {
-    source_file_.erase(0, source_file_.find_last_of("\\//") + 1);
-    source_file_.erase(source_file_.find_first_of(":"), source_file_.length());
-    
     p.debug_message( "Parsing class " + full_name() + " at " + cursor.location() );
     cursor.visit_children( [this, &p]( const Cursor &c, const Cursor &/*parent*/ ) {
         if( !c.is_public() ) {
