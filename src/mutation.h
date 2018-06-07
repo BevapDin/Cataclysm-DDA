@@ -9,6 +9,7 @@
 #include "calendar.h"
 #include "string_id.h"
 #include "lua/script.h"
+#include "lua/scriptable_value.h"
 #include "optional.h"
 #include <string>
 #include <vector>
@@ -168,7 +169,7 @@ struct mutation_branch {
     std::vector<matype_id>
     initial_ma_styles; // Martial art styles that can be chosen upon character generation
     std::string name;
-    std::string description;
+    catalua::scriptable_value<std::string, std::reference_wrapper<const player>> description;
     /**
      * Returns the color to display the mutation name with.
      */
