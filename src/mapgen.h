@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "int_id.h"
+#include "lua/script.h"
 
 class time_point;
 struct ter_t;
@@ -302,7 +303,8 @@ class mapgen_function_json : public mapgen_function_json_base, public virtual ma
         ~mapgen_function_json() override = default;
 
         ter_id fill_ter;
-        std::string luascript;
+        // @todo string should be a terrain_type instance, but that is not exported to Lua?
+        catalua::script<void, std::reference_wrapper<map>, std::string, time_point> luascript;
 
     protected:
         bool setup_internal( JsonObject &jo ) override;
@@ -331,7 +333,7 @@ class mapgen_function_json_nested : public mapgen_function_json_base
 class mapgen_function_lua : public virtual mapgen_function
 {
     public:
-        const std::string scr;
+        const catalua::script<void, std::reference_wrapper<map>, std::string, time_point> scr;
         mapgen_function_lua( std::string s, int w = 1000 ) : mapgen_function( w ), scr( s ) {
             // scr = s; // @todo: if ( luaL_loadstring(L, scr.c_str() ) ) { error }
         }

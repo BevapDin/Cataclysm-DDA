@@ -78,14 +78,6 @@ using oter_id = int_id<oter_t>;
 //@todo hide this
 class lua_iuse_wrapper;
 
-template<typename T>
-class int_id;
-class map;
-class time_point;
-struct mapgendata;
-struct oter_t;
-using oter_id = int_id<oter_t>;
-
 class lua_engine
 {
     private:
@@ -128,10 +120,6 @@ class lua_engine
         int monster_move( monster *m );
 
         void run_console();
-
-        // This is a legacy function, ideally code would use `catalua::call` instead,
-        // but for mapgen we do a bit more than just call the script.
-        int mapgen( map *m, const oter_id &terrain_type, const mapgendata &, const time_point &t, float, const std::string &scr );
 };
 
 #endif
