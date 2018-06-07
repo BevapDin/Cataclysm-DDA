@@ -14,6 +14,7 @@
 
 CppClass::CppClass( Parser &p, const Cursor &cursor ) : full_name_(cursor.fully_qualifid()), cpp_name_( cursor.spelling()), source_file_(cursor.location_path())
 {
+    headers_.insert( source_file_ );
     p.debug_message( "Parsing class " + full_name() + " at " + cursor.location() );
     cursor.visit_children( [this, &p]( const Cursor &c, const Cursor &/*parent*/ ) {
         if( !c.is_public() ) {
@@ -40,6 +41,7 @@ CppClass::CppClass( Parser &p, const Cursor &cursor ) : full_name_(cursor.fully_
             return CXChildVisit_Continue;
         } else if( k == CXCursor_CXXBaseSpecifier ) {
             parents.emplace_back( p.get_or_add_class( c.get_definition() ) );
+            headers_.insert( parents.back().headers_.begin(), parents.back().headers_.end() );
             return CXChildVisit_Continue;
         } else if( k == CXCursor_CXXAccessSpecifier ) {
             return CXChildVisit_Continue;
@@ -84,7 +86,6 @@ CppClass::CppClass( Parser &p, const Cursor &cursor ) : full_name_(cursor.fully_
             // the implicitly constructed one anyway.
             return CXChildVisit_Continue;
         }
-        c.dump( "Cursor kind not handled upon parsing class definition" );
         return CXChildVisit_Recurse;
     } );
 
@@ -107,6 +108,9 @@ CppClass::CppClass( Parser &p, const Cursor &cursor ) : full_name_(cursor.fully_
         } else {
             ++iter;
         }
+    }
+    for( const CppFunction &func : functions ) {
+        
     }
 }
 
@@ -211,8 +215,7 @@ std::string CppClass::export_( Exporter &p ) const
     r = r + "    " + cpp_name() + " = {\n";
 
     // @todo properly pick all required headers
-    r = r + "        headers = { \"" + source_file_ + "\" },\n";
-	// @todo export forward declarations
+    r = r + "        headers = { " + enumerate( "", headers_, []( const std::string &h ) { return "\"" + h + "\""; }, ", ", "" ) + " },\n";
 
     for( const CppClass &pc : parents ) {
         p.debug_message("Parent of " + full_name() + " is " + pc.full_name());

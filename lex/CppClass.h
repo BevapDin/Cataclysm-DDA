@@ -4,6 +4,7 @@
 
 #include <string>
 #include <list>
+#include <set>
 #include <functional>
 
 class CppFunction;
@@ -22,6 +23,7 @@ class CppClass
         std::list<CppAttribute> attributes;
         std::list<CppConstructor> constructors;
         std::list<std::reference_wrapper<const CppClass>> parents;
+        std::set<std::string> headers_;
 
         bool has_equal = false;
         std::string source_file_;
