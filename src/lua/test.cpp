@@ -23,6 +23,9 @@ void test_lua_scripting( const lua_engine &e )
         pl.weapon = item( "water" );
         const item w = scr( e, pl );
         log << "weapon: " << w.display_name() << "\n";
+
+        // Won't work because it will attempt to push the player by-value, which is not enabled.
+        //catalua::call<void>( e, "", pl );
     } catch( const std::exception &err ) {
         log << "Error: " << err.what() << "\n";
     }

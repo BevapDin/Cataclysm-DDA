@@ -727,6 +727,8 @@ function generate_push_interface()
         local class = classes[class_name]
         if class.by_value then
             cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & );" .. br
+        else
+            cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, const " .. class_name .. " & ) = delete;" .. br
         end
         if class.by_reference then
             cpp_output = cpp_output .. "void push_value_onto_stack( const lua_engine &, std::reference_wrapper<" .. class_name .. "> ref );" .. br
