@@ -10,7 +10,6 @@
 #include "action.h"
 #include "item_factory.h"
 #include "item.h"
-#include "mapgen.h"
 #include "map.h"
 #include "output.h"
 #include "path_info.h"
@@ -170,36 +169,6 @@ void Item_factory::register_iuse_lua( const std::string &name, int lua_function 
 void catalua::stack::push_mod_callback_call( const lua_engine &engine  )
 {
     lua_getglobal( get_lua_state( engine ), "mod_callback" );
-}
-
-int lua_engine::mapgen( map *m, const oter_id &terrain_type, const mapgendata &,
-                        const time_point &t, float, const std::string &scr )
-{
-    if( !state ) {
-        return 0;
-    }
-    lua_State *L = state;
-    LuaReference<map>::push( L, m );
-    luah_setglobal( L, "map", -1 );
-
-    int err = luaL_loadstring( L, scr.c_str() );
-    if( lua_report_error( L, err, scr.c_str() ) ) {
-        return err;
-    }
-    //    int function_index = luaL_ref(L, LUA_REGISTRYINDEX); // @todo; make use of this
-    //    lua_rawgeti(L, LUA_REGISTRYINDEX, function_index);
-
-    lua_pushstring( L, terrain_type.id().c_str() );
-    lua_setglobal( L, "tertype" );
-    lua_pushinteger( L, to_turn<int>( t ) );
-    lua_setglobal( L, "turn" );
-
-    err = lua_pcall( L, 0, LUA_MULTRET, 0 );
-    lua_report_error( L, err, scr.c_str() );
-
-    //    luah_remove_from_registry(L, function_index); // @todo: make use of this
-
-    return err;
 }
 
 void catalua::stack::push_value( const lua_engine &engine, const char *const value )
