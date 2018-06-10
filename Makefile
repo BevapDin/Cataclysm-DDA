@@ -514,6 +514,7 @@ ifdef LUA
 
   CXXFLAGS += -DLUA
   BINDIST_EXTRAS  += $(LUA_DIR)
+  CXXFLAGS += -I src
 endif
 
 ifdef SDL
