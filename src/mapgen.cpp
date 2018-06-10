@@ -1980,7 +1980,7 @@ void jmapgen_objects::apply( const mapgendata &dat, int offset_x, int offset_y, 
     }
 }
 
-void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &dat, const time_point &t, float d ) {
+void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &/*dat*/, const time_point &t, float /*d*/ ) {
     scr( *g->lua_engine_ptr, *m, terrain_type.id().str(), t );
 }
 
