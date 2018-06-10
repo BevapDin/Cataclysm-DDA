@@ -29,6 +29,7 @@ class item_stack
 
     public:
         item_stack( std::list<item> *mystack ) : mystack( mystack ) { }
+        virtual ~item_stack() = default;
 
         size_t size() const;
         bool empty() const;
