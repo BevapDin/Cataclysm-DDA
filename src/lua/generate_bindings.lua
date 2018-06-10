@@ -478,15 +478,15 @@ function generate_functions_static(cpp_type, class, class_name)
     local cpp_output = ""
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const luaL_Reg " .. cpp_type .. "::FUNCTIONS[] = {" .. br
+    if class.new then
+        cpp_output = cpp_output .. luaL_Reg("new_" .. class_name, "__call")
+    end
+    if class.has_equal then
+        cpp_output = cpp_output .. luaL_Reg("op_" .. class_name .. "_eq", "__eq")
+    end
     while class do
         for _, name in ipairs(sorted_keys(class.functions)) do
             cpp_output = cpp_output .. luaL_Reg("func_" .. class_name .. "_" .. name, name)
-        end
-        if class.new then
-            cpp_output = cpp_output .. luaL_Reg("new_" .. class_name, "__call")
-        end
-        if class.has_equal then
-            cpp_output = cpp_output .. luaL_Reg("op_" .. class_name .. "_eq", "__eq")
         end
         class = classes[class.parent]
     end
@@ -615,14 +615,14 @@ function generate_functions_for_class(class_name, class)
         cpp_output = cpp_output .. generate_accessors(class_name, class_name .. "*", "get_member", attributes, generate_getter_code)
         cpp_output = cpp_output .. generate_accessors(class_name, class_name .. "*", "set_member", attributes, generate_setter_code)
     end
+    if class.new then
+        cpp_output = cpp_output .. generate_constructor(class_name, class.new)
+    end
+    if class.has_equal then
+        cpp_output = cpp_output .. generate_operator(class_name, "eq", "==")
+    end
     while class do
         cpp_output = cpp_output .. generate_class_function_wrappers(class.functions, class_name, cur_class_name)
-        if class.new then
-            cpp_output = cpp_output .. generate_constructor(class_name, class.new)
-        end
-        if class.has_equal then
-            cpp_output = cpp_output .. generate_operator(class_name, "eq", "==")
-        end
         cur_class_name = class.parent
         class = classes[class.parent]
     end
