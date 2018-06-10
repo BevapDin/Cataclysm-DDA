@@ -189,14 +189,6 @@ void push_float_onto_stack( const lua_engine &engine, long double value )
 
 // Custom functions that are to be wrapped from lua.
 // -------------------------------------------------
-
-static int global_create_uimenu( lua_State *L )
-{
-    static std::unique_ptr<uimenu> uimenu_instance;
-    uimenu_instance.reset( new uimenu() );
-    LuaReference<uimenu>::push( L, uimenu_instance.get() );
-    return 1; // 1 return values
-}
 static int global_add_item_to_group( lua_State *L )
 {
     LuaType<std::string>::check( L, 1 );
@@ -506,7 +498,6 @@ static const struct luaL_Reg gamelib [] = {
     {"add_msg", global_add_msg},
     {"popup", global_popup},
     {"distance", global_distance},
-    {"create_uimenu", global_create_uimenu},
     {"string_input_popup", global_string_input_popup},
     {"one_in", global_one_in},
     {"get_calendar_turn", global_get_calendar_turn},

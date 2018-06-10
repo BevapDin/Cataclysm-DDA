@@ -2476,6 +2476,10 @@ classes = {
     },
     uimenu = {
         headers = { "ui.h" },
+        new = {
+            { },
+        },
+        by_value = true,
         attributes = {
             border = { type = "bool", writable = true },
             border_color = { type = "nc_color", writable = true },
