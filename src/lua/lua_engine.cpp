@@ -247,13 +247,6 @@ static int global_popup( lua_State *L )
     popup( "%s", parameter1.c_str() );
     return 0; // 0 return values
 }
-static int global_get_terrain_type( lua_State *L )
-{
-    LuaType<int>::check( L, 1 );
-    auto &&parameter1 = LuaType<int>::get( L, 1 );
-    LuaReference<ter_t>::push( L, ter_id( parameter1 ).obj() );
-    return 1; // 1 return values
-}
 static int global_create_monster( lua_State *L )
 {
     LuaValue<mtype_id>::check( L, 1 );
@@ -504,7 +497,6 @@ static const struct luaL_Reg gamelib [] = {
     {"create_monster", global_create_monster},
     {"add_item_to_group", global_add_item_to_group},
     {"trig_dist", global_trig_dist},
-    {"get_terrain_type", global_get_terrain_type},
     {"rng", global_rng},
     {nullptr, nullptr}
 };
