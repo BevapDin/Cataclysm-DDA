@@ -212,13 +212,15 @@ function generate_overload_tree(classes)
         -- and the final table (the leaf) has a `r` entry.
         for _, func in ipairs(function_list) do
             local base = functions_by_name[func.name]
-            -- non-static functions have an implicit first argument `this` of type class_name
-            if not base[class_name] then
-                base[class_name] = { }
+            if not func.static then
+                -- non-static functions have an implicit first argument `this` of type class_name
+                if not base[class_name] then
+                    base[class_name] = { }
+                end
+                base = base[class_name]
             end
-            base = base[class_name]
             local leaf = generate_overload_path(base, func.args)
-            leaf.r = { rval = func.rval, cpp_name = func.cpp_name or func.name, class_name = class_name }
+            leaf.r = { rval = func.rval, cpp_name = func.cpp_name or func.name, class_name = class_name, static = func.static }
         end
         return functions_by_name
     end
@@ -333,10 +335,20 @@ function generate_class_function_wrapper(class_name, function_name, func)
         This won't work: B b; b.f();
         But this will:   B b; static_cast<A&>(b).f()
         --]]
-        func_invoc = "static_cast<"..data.class_name.."&>(parameter0)"
-        func_invoc = func_invoc .. "."..data.cpp_name .. "("
+        -- The actual C++ function parameters start at different stack index:
+        -- Static: `foo::func(parameter0, parameter1, parameter2, ...)`
+        -- Non-static: `parameter0.func(parameter1, parameter2, ...)`
+        local start_index
+        if data.static then
+            func_invoc = data.class_name .. '::' .. data.cpp_name .. '('
+            start_index = 0
+        else
+            func_invoc = "static_cast<"..data.class_name.."&>(parameter0)"
+            func_invoc = func_invoc .. "."..data.cpp_name .. "("
+            start_index = 1
+        end
 
-        for i = 1,stack_index do
+        for i = start_index,stack_index do
             func_invoc = func_invoc .. "parameter"..i
             if i < stack_index then func_invoc = func_invoc .. ", " end
         end
