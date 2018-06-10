@@ -696,6 +696,7 @@ OBJS = $(sort $(patsubst %,$(ODIR)/%,$(_OBJS)))
 # Lua builds contain all other cpp files in the Lua source directory.
 DUMMY_CATALUA_SOURCES = $(CATALUA_SRC_DIR)/dummy_lua.cpp
 ifdef LUA
+  $(shell cd src/lua && lua generate_bindings.lua)
   CATALUA_SOURCES = $(filter-out $(DUMMY_CATALUA_SOURCES),$(wildcard $(CATALUA_SRC_DIR)/*.cpp))
 else
   CATALUA_SOURCES = $(DUMMY_CATALUA_SOURCES)
