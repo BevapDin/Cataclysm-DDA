@@ -4223,8 +4223,7 @@ void game::debug()
 
         case 24:
             lua_engine_ptr->run_console();
-        }
-        break;
+			break;
         case 25:
             overmap::draw_weather();
             break;
