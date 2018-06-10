@@ -80,7 +80,7 @@ void luah_setmetatable( lua_State *L, const char *metatable_name )
     lua_setmetatable( L, -2 );
 }
 
-void lua_engine::throw_upon_lua_error( const int err, const char *char path ) const
+void lua_engine::throw_upon_lua_error( const int err, const char *const path ) const
 {
     if( err == LUA_OK || err == LUA_ERRRUN ) {
         // No error or error message already shown via traceback function.

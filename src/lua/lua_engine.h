@@ -58,7 +58,7 @@ class lua_engine
         void run_console();
 
         /// @throws Given a Lua error code, throw if it's not ERR_OK.
-        void throw_upon_lua_error( const int err, const char *char path ) const;
+        void throw_upon_lua_error( const int err, const char *path ) const;
 };
 
 #endif
