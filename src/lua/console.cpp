@@ -16,7 +16,7 @@ void lua_engine::run_console()
     c.run();
 }
 
-console::console( const lua_engine &e ) : engine( e ) cWin( catacurses::newwin( lines, width, 0,
+console::console( const lua_engine &e ) : engine( e ), cWin( catacurses::newwin( lines, width, 0,
             0 ) ), iWin( catacurses::newwin( 1, width, lines, 0 ) )
 {
     text_stack.push_back( {_( "Welcome to the Lua console! Here you can enter Lua code." ), c_green} );
@@ -110,7 +110,7 @@ void console::run()
 
         catalua::call<void>( engine, input );
 
-        read_stream( engine.output_stream, c_white );
-        read_stream( engine.error_stream, c_red );
+        read_stream( const_cast<std::stringstream&>( engine.output_stream ), c_white );
+        read_stream( const_cast<std::stringstream&>( engine.error_stream ), c_red );
     }
 }
