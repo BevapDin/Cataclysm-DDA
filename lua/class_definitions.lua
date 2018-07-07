@@ -2676,7 +2676,6 @@ classes = {
             { name = "next_part_to_close", rval = "int", args = { "int", "bool" } },
             { name = "next_part_to_open", rval = "int", args = { "int", "bool" } },
             { name = "noise_and_smoke", rval = nil, args = { "float", "float" } },
-            { name = "obstacle_at_part", rval = "int", args = { "int" } },
             { name = "on_move", rval = nil, args = { } },
             { name = "open", rval = nil, args = { "int" } },
             { name = "open_all_at", rval = nil, args = { "int" } },
