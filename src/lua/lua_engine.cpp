@@ -12,6 +12,7 @@
 #include "rng.h"
 #include "line.h"
 #include "mtype.h"
+#include "map.h"
 #include "string_input_popup.h"
 #include "monster.h"
 #include "iuse.h"
@@ -59,6 +60,8 @@ static void luaL_setfuncs( lua_State *const L, const luaL_Reg arrary[], int cons
 }
 #endif
 
+lua_State *get_lua_state( const lua_engine &e );
+
 // Helper functions for making working with the lua API more straightforward.
 // --------------------------------------------------------------------------
 
@@ -84,9 +87,9 @@ void lua_engine::throw_upon_lua_error( const int err, const char *const path ) c
 {
     if( err == LUA_OK || err == LUA_ERRRUN ) {
         // No error or error message already shown via traceback function.
-        return err != LUA_OK;
+        return;
     }
-    const char *const error_messsage = lua_tostring( state, index );
+    const char *const error_messsage = lua_tostring( state, -1 /*index @todo */ );
     const char *const error = error_messsage ? error_messsage : "";
     switch( err ) {
         case LUA_ERRSYNTAX:
@@ -122,18 +125,9 @@ class lua_iuse_wrapper : public iuse_actor
             //       I guess
 
             const int cnt = catalua::push_onto_stack( *g->lua_engine_ptr, it, a, pos );
-            call_non_void_function( *g->lua_engine_ptr, cnt );
+            catalua::call_non_void_function( *g->lua_engine_ptr, cnt );
 
             const int result = pop_from_stack<int>( *g->lua_engine_ptr, -1 );
-
-            // Make sure the now outdated parameters we passed to lua aren't
-            // being used anymore by setting a metatable that will error on
-            // access.
-            luah_remove_from_registry( L, item_in_registry );
-            luah_setmetatable( L, "outdated_metatable" );
-            luah_remove_from_registry( L, tripoint_in_registry );
-            luah_setmetatable( L, "outdated_metatable" );
-
             return result;
         }
         iuse_actor *clone() const override {
@@ -157,7 +151,7 @@ void Item_factory::register_iuse_lua( const std::string &name, int lua_function 
     iuse_function_list[name] = use_function( new lua_iuse_wrapper( lua_function, name ) );
 }
 
-void catalua::push_callback_call( const lua_engine &engine  )
+void catalua::push_mod_callback_call( const lua_engine &engine  )
 {
     lua_getglobal( get_lua_state( engine ), "mod_callback" );
 }
@@ -174,7 +168,7 @@ void push_value_onto_stack( const lua_engine &engine, const std::string &value )
 
 void push_value_onto_stack( const lua_engine &engine, const bool value )
 {
-    lua_pushbol( get_lua_state( engine ), value );
+    lua_pushboolean( get_lua_state( engine ), value );
 }
 
 void push_integer_onto_stack( const lua_engine &engine, long long int value )
@@ -309,7 +303,7 @@ static int game_items_at( lua_State *L )
         // lua_rawset then does t[k] = v and pops v and k from the stack
 
         lua_pushnumber( L, i++ + 1 );
-        LuaReference<item>::push( L, *an_item );
+        LuaReference<item>::push( L, an_item );
         lua_rawset( L, -3 );
     }
 
@@ -446,11 +440,11 @@ static int traceback( lua_State *L )
 
 void lua_engine::run_file( const std::string &path )
 {
-    lua_pushcfunction( L, &traceback );
-    const int err = luaL_loadfile( L, path );
-    throw_upon_lua_error( err, path );
-    const int err2 = lua_pcall( L, 0, LUA_MULTRET, -2 );
-    throw_upon_lua_error( err2, path );
+    lua_pushcfunction( state, &traceback );
+    const int err = luaL_loadfile( state, path.c_str() );
+    throw_upon_lua_error( err, path.c_str() );
+    const int err2 = lua_pcall( state, 0, LUA_MULTRET, -2 );
+    throw_upon_lua_error( err2, path.c_str() );
 }
 
 // game.dofile(file)
@@ -462,7 +456,7 @@ static int game_dofile( lua_State *L )
     const char *path = luaL_checkstring( L, 1 );
     std::string full_path = g->lua_engine_ptr->lua_file_path + "/" + path;
     g->lua_engine_ptr->run_file( full_path );
-    return 0
+    return 0;
 }
 
 static int game_myPrint( lua_State *L )
@@ -578,7 +572,7 @@ void catalua::push_script( const lua_engine &engine, const std::string &script )
 {
     lua_State *const L = get_lua_state( engine );
     const int err = luaL_loadstring( L, script.c_str() );
-    engine.throw_upon_lua_error( err, script );
+    engine.throw_upon_lua_error( err, script.c_str() );
 }
 
 void catalua::call_void_function( const lua_engine &engine, const int args )
