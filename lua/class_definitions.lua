@@ -2178,7 +2178,7 @@ classes = {
             { name = "is_snuggling", rval = "string", args = { } },
             { name = "is_throw_immune", rval = "bool", args = { } },
             { name = "is_wearing_helmet", rval = "bool", args = { } },
-            { name = "is_wearing_shoes", rval = "bool", args = { "side" } },
+            { name = "is_wearing_shoes", rval = "bool", args = { "string" } },
             { name = "is_wielding", rval = "bool", args = { "item" } },
             { name = "item_handling_cost", rval = "int", args = { "item", "bool", "int" } },
             { name = "item_reload_cost", rval = "int", args = { "item", "item", "int" } },
