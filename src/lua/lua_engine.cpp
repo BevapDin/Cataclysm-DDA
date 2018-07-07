@@ -62,26 +62,14 @@ static void luaL_setfuncs( lua_State *const L, const luaL_Reg arrary[], int cons
 
 lua_State *get_lua_state( const lua_engine &e );
 
+template<>
+int pop_from_stack<int>( const lua_engine &engine, const int index )
+{
+    return LuaType<int>::get( get_lua_state( engine ), index );
+}
+
 // Helper functions for making working with the lua API more straightforward.
 // --------------------------------------------------------------------------
-
-
-// Removes item from registry and pushes on the top of stack.
-void luah_remove_from_registry( lua_State *L, int item_index )
-{
-    lua_rawgeti( L, LUA_REGISTRYINDEX, item_index );
-    luaL_unref( L, LUA_REGISTRYINDEX, item_index );
-}
-
-// Sets the metatable for the element on top of the stack.
-void luah_setmetatable( lua_State *L, const char *metatable_name )
-{
-    // Push the metatable on top of the stack.
-    lua_getglobal( L, metatable_name );
-
-    // The element we want to set the metatable for is now below the top.
-    lua_setmetatable( L, -2 );
-}
 
 void lua_engine::throw_upon_lua_error( const int err, const char *const path ) const
 {
@@ -553,6 +541,10 @@ void lua_engine::init()
 
     void test_lua_scripting( const lua_engine & );
     test_lua_scripting( *this );
+}
+
+lua_engine::lua_engine() : state( nullptr )
+{
 }
 
 lua_engine::~lua_engine()
