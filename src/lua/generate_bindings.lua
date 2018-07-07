@@ -464,6 +464,7 @@ function merge_parent_class_functions(derived_functions, parent_functions)
             if not derived_functions.r then
                 derived_functions.r = {
                     rval = func.rval,
+                    static = func.static,
                     cpp_name = func.cpp_name,
                     class_name = func.class_name
                 }
@@ -647,11 +648,7 @@ function generate_functions_for_class(class_name, class)
     if class.has_equal then
         cpp_output = cpp_output .. generate_operator(class_name, "eq", "==")
     end
-    while class do
-        cpp_output = cpp_output .. generate_class_function_wrappers(class.functions, class_name, cur_class_name)
-        cur_class_name = class.parent
-        class = classes[class.parent]
-    end
+    cpp_output = cpp_output .. generate_class_function_wrappers(class.functions, class_name, cur_class_name)
     return cpp_output
 end
 
