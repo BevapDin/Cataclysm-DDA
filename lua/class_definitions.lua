@@ -1913,7 +1913,7 @@ classes = {
         new = {
             { "int", "int" },
         },
-        headers = { "overmap.h" },
+        headers = { "overmap.h", "mongroup.h" },
         attributes = {
         },
         functions = {
