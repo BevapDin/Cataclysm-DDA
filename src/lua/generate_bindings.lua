@@ -41,7 +41,7 @@ end
 -- e.g. `LuaType<std::string>`. The wrapper class has various static functions:
 -- `get` to get a value of that type from Lua stack.
 -- `push` to push a value of that type to Lua stack.
--- `check` and `has` to check for a value of that type on the stack.
+-- `has` to check for a value of that type on the stack.
 -- See catalua.h for their implementation.
 function member_type_to_cpp_type(member_type)
     if member_type == "bool" then return "LuaType<bool>"
@@ -79,12 +79,6 @@ function load_instance(class_name)
     end
 
 	return class_name .. "& instance = " .. retrieve_lua_value(class_name, 1) .. ";"
-end
-
--- Returns a full statement that checks whether the given stack item has the given value.
--- The statement does not return if the check fails (long jump back into the Lua error handling).
-function check_lua_value(value_type, stack_position)
-    return member_type_to_cpp_type(value_type).."::check(L, " .. stack_position .. ");"
 end
 
 -- Returns an expression that evaluates to `true` if the stack has an object of the given type
@@ -143,7 +137,6 @@ function generate_setter_code(name, attribute, tab)
     local cpp_name = attribute.cpp_name or name
     local member_type = attribute.type
     local cpp_output = ""
-    cpp_output = cpp_output .. tab .. "    " .. check_lua_value(member_type, 2) .. ";" .. br
     cpp_output = cpp_output .. tab .. "    " .. "instance." .. cpp_name .. " = " .. retrieve_lua_value(member_type, 2) .. ";" .. br
     cpp_output = cpp_output .. tab .. "    " .. "return 0;" .. br
     return cpp_output
@@ -273,11 +266,7 @@ function insert_overload_resolution(function_name, args, cbc, indentation, stack
             -- handled outside this loop
         else
             if more then
-                -- Either check the type here (and continue when it's fine)
                 text = text..ind.."if("..has_lua_value(arg_type, nsi)..") {"..br
-            else
-                -- or check it here and let Lua bail out.
-                text = text..ind..check_lua_value(arg_type, nsi)..br
             end
             -- Needs to be auto, can be a proxy object, a real reference, or a POD.
             -- This will be resolved when the functin is called. The C++ compiler will convert

@@ -141,6 +141,7 @@ void Item_factory::register_iuse_lua( const std::string &name, int lua_function 
 
 void catalua::push_mod_callback_call( const lua_engine &engine  )
 {
+    // @todo check for errors
     lua_getglobal( get_lua_state( engine ), "mod_callback" );
 }
 
@@ -460,26 +461,25 @@ static int game_myPrint( lua_State *L )
 // Registry containing all the game functions exported to lua.
 // -----------------------------------------------------------
 static const struct luaL_Reg global_funcs [] = {
-    {"register_iuse", game_register_iuse},
-    //{"get_monsters", game_get_monsters},
-    {"items_at", game_items_at},
-    {"choose_adjacent", game_choose_adjacent},
-    {"dofile", game_dofile},
-    {"get_monster_types", game_get_monster_types},
-    {"get_item_groups", game_get_item_groups},
+    {"register_iuse", lua_call_wrapper<game_register_iuse>},
+    {"items_at", lua_call_wrapper<game_items_at>},
+    {"choose_adjacent", lua_call_wrapper<game_choose_adjacent>},
+    {"dofile", lua_call_wrapper<game_dofile},
+    {"get_monster_types", lua_call_wrapper<game_get_monster_types>},
+    {"get_item_groups", lua_call_wrapper<game_get_item_groups>},
     {nullptr, nullptr}
 };
 static const struct luaL_Reg gamelib [] = {
-    {"add_msg", global_add_msg},
-    {"popup", global_popup},
-    {"distance", global_distance},
-    {"string_input_popup", global_string_input_popup},
-    {"one_in", global_one_in},
-    {"get_calendar_turn", global_get_calendar_turn},
-    {"create_monster", global_create_monster},
-    {"add_item_to_group", global_add_item_to_group},
-    {"trig_dist", global_trig_dist},
-    {"rng", global_rng},
+    {"add_msg", lua_call_wrapper<global_add_msg>},
+    {"popup", lua_call_wrapper<global_popup>},
+    {"distance", lua_call_wrapper<global_distance>},
+    {"string_input_popup", lua_call_wrapper<global_string_input_popup>},
+    {"one_in", lua_call_wrapper<global_one_in>},
+    {"get_calendar_turn", lua_call_wrapper<global_get_calendar_turn>},
+    {"create_monster", lua_call_wrapper<global_create_monster>},
+    {"add_item_to_group", lua_call_wrapper<global_add_item_to_group>},
+    {"trig_dist", lua_call_wrapper<global_trig_dist>},
+    {"rng", lua_call_wrapper<global_rng>},
     {nullptr, nullptr}
 };
 

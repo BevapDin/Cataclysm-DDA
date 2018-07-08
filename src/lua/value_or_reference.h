@@ -31,12 +31,6 @@ class LuaValueOrReference
             }
             return LuaReference<T>::get( L, stack_index );
         }
-        static void check( lua_State *const L, int const stack_index ) {
-            if( LuaValue<T>::has( L, stack_index ) ) {
-                return;
-            }
-            LuaValue<T *>::check( L, stack_index );
-        }
         static bool has( lua_State *const L, int const stack_index ) {
             return LuaValue<T>::has( L, stack_index ) || LuaValue<T *>::has( L, stack_index );
         }

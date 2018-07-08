@@ -207,7 +207,7 @@ std::string CppClass::export_( Exporter &p ) const
     }
 
     std::vector<std::string> headers;
-    headers.emplace_back( cursor_.location_path() ); // path of header containing this class
+    headers.emplace_back( cursor_.location_file() ); // path of header containing this class
     const auto add_header = [&headers]( const std::string &h ) {
         if( std::find( headers.begin(), headers.end(), h ) != headers.end() ) {
             return false;

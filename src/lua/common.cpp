@@ -1,8 +1,12 @@
 #include "common.h"
 
+#include "debug.h"
+
 extern "C" {
 #include <lauxlib.h>
 }
+
+#include <stdexcept>
 
 int luah_store_in_registry( lua_State *L, int stackpos )
 {
@@ -39,4 +43,14 @@ void luah_setglobal( lua_State *const L, const char *const name, const int index
 {
     lua_pushvalue( L, index );
     lua_setglobal( L, name );
+}
+
+int catch_exception_for_lua( int( *func )( lua_State * ), lua_State *const L )
+{
+    try {
+        return func( L );
+    } catch( const std::exception &err ) {
+        lua_pushstring( L, err.what() );
+    }
+    return lua_error( L );
 }

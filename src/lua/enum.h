@@ -63,12 +63,6 @@ class LuaEnum : private LuaType<std::string>
         static bool has( lua_State *const L, int const stack_index ) {
             return Parent::has( L, stack_index ) && has( Parent::get( L, stack_index ) );
         }
-        static void check( lua_State *const L, int const stack_index ) {
-            Parent::check( L, stack_index );
-            if( !has( Parent::get( L, stack_index ) ) ) {
-                luaL_argerror( L, stack_index, "invalid value for enum" );
-            }
-        }
         static E get( lua_State *const L, int const stack_index ) {
             return from_string( Parent::get( L, stack_index ) );
         }

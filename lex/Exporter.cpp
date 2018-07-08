@@ -648,6 +648,20 @@ std::string Exporter::get_header_for_argument( const Type &t ) const
     if( t.kind() == CXType_Typedef ) {
         return get_header_for_argument( t.get_declaration().get_underlying_type() );
     }
+    if( t.kind() == CXType_Enum ) {
+        // forward declaration is enough
+        return {};
+    }
+    const std::string sp = remove_const( t.spelling() );
+    if( !extract_templates( "std::list", sp ).empty() ) {
+        return "list";
+    }
+    if( !extract_templates( "std::vector", sp ).empty() ) {
+        return "vector";
+    }
+    if( !extract_templates( "std::set", sp ).empty() ) {
+        return "set";
+    }
 
     return t.get_declaration().location_file();
 }
