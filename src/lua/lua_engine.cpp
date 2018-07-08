@@ -544,14 +544,6 @@ lua_engine::lua_engine() : state( nullptr )
 {
 }
 
-lua_engine::lua_engine() : state( nullptr )
-{
-}
-
-lua_engine::lua_engine() : state( nullptr )
-{
-}
-
 lua_engine::~lua_engine()
 {
     if( state ) {
