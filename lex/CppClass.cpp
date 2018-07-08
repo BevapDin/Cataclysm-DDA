@@ -209,17 +209,21 @@ std::string CppClass::export_( Exporter &p ) const
     std::vector<std::string> headers;
     headers.emplace_back( cursor_.location_path() ); // path of header containing this class
     const auto add_header = [&headers]( const std::string &h ) {
-        if( h.empty() ) {
-            return;
-        }
         if( std::find( headers.begin(), headers.end(), h ) != headers.end() ) {
-            return;
+            return false;
         }
         headers.emplace_back( h );
+        return true;
     };
     for( const CppFunction &f : functions ) {
         for( const Cursor &c : f.arguments() ) {
-            add_header( p.get_header_for_argument( c ) );
+            const std::string h = p.get_header_for_argument( c.type() );
+            if( h.empty() ) {
+                continue;
+            }
+            if( add_header( h ) ) {
+                p.info_message( "Argument " + c.spelling() + " requires header " + h );
+            }
         }
     }
 

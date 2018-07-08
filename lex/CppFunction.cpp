@@ -16,7 +16,7 @@ CppFunction::CppFunction( CppClass &/*p*/, const Cursor &c ) : CppCallable( c )
             return CXChildVisit_Continue;
         }
         //@todo handle delete attribute?
-        c.dump( "Cursor kind not handled upon parsing class function definition" );
+//        c.dump( "Cursor kind not handled upon parsing class function definition" );
         return CXChildVisit_Continue;
     } );
 }

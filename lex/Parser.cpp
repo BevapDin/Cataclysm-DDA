@@ -224,7 +224,7 @@ void Parser::parse( const std::string &header )
         info_message( msg );
     }
     if( !diagnostics.empty() ) {
-        throw std::runtime_error("Errors / warnings while parsing header" );
+//        throw std::runtime_error("Errors / warnings while parsing header" );
     }
 
     for( const std::string &file : tus.back().get_includes() ) {

@@ -76,7 +76,7 @@ class Exporter
         std::string translate_result_type( const Type &t ) const;
         ///@}
 
-        std::string get_header_for_argument( const Cursor &c ) const;
+        std::string get_header_for_argument( const Type &t ) const;
 
         void add_export_for_string_id( const std::string &id_name, const std::string &cpp_name );
         void add_export_by_value( const std::string &cpp_name );

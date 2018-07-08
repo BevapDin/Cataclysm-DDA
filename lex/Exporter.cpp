@@ -633,9 +633,8 @@ void Exporter::add_export_enumeration( const std::string &cpp_name )
     add_export_by_value( cpp_name );
 }
 
-std::string Exporter::get_header_for_argument( const Cursor &c ) const
+std::string Exporter::get_header_for_argument( const Type &t ) const
 {
-    const Type t = c.type();
     if( !build_in_lua_type( t ).empty() ) {
         // build in type is either a build in in C++ as well (e.g. numeric) or
         // it's string, and we assume the header for string is always included.
