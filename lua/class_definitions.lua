@@ -701,7 +701,7 @@ classes = {
             { name = "get_levz", rval = "int", args = { } },
             { name = "get_player_base_save_path", rval = "string", args = { } },
             { name = "get_seed", rval = "int", args = { } },
-            { name = "get_temperature", rval = "int", args = { } },
+            { name = "get_temperature", rval = "int", args = { "tripoint" } },
             { name = "get_user_action_counter", rval = "int", args = { } },
             { name = "get_veh_dir_indicator_location", rval = "tripoint", args = { "bool" } },
             { name = "get_world_base_save_path", rval = "string", args = { } },
