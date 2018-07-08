@@ -15,6 +15,7 @@ class CppAttribute
         std::string parent_name_;
         std::string cpp_name_;
         bool const_qualified_;
+        bool public_;
 
         Type type_;
 
@@ -30,4 +31,6 @@ class CppAttribute
         std::string cpp_name() const;
         /// Whether it's declared as const member.
         bool is_const() const;
+        /// Whether it's declared as public member.
+        bool is_public() const;
 };

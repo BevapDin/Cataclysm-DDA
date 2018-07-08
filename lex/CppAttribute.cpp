@@ -6,7 +6,8 @@
 #include "Exporter.h"
 
 CppAttribute::CppAttribute( CppClass &p, const Cursor &c ) : parent_name_( p.full_name() ),
-    cpp_name_( c.spelling() ), const_qualified_( c.type().is_const_qualified() ), type_( c.type() )
+    cpp_name_( c.spelling() ), const_qualified_( c.type().is_const_qualified() ),
+    public_( c.is_public() ), type_( c.type() )
 {
 }
 
@@ -23,6 +24,11 @@ std::string CppAttribute::cpp_name() const
 bool CppAttribute::is_const() const
 {
     return const_qualified_;
+}
+
+bool CppAttribute::is_public() const
+{
+    return public_;
 }
 
 std::list<std::string> CppAttribute::export_( Exporter &p ) const

@@ -18,4 +18,6 @@ class CppConstructor : public CppCallable
         CppConstructor( const CppConstructor & ) = delete;
 
         std::list<std::string> export_( Exporter &p ) const;
+
+        bool is_public() const;
 };

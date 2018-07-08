@@ -21,6 +21,7 @@ class CppFunction : public CppCallable
 
         bool is_const_method() const;
         bool is_static() const;
+        bool is_public() const;
 
         std::string full_name() const override;
 };

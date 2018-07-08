@@ -99,14 +99,6 @@ CppClass::CppClass( Parser &p, const Cursor &cursor ) : cursor_( cursor )
         const CppFunction &f = *iter;
         if( f.is_const_method() && has_non_const_overload( f ) ) {
             iter = functions.erase( iter );
-        } else if( f.operator_name() == "==" ) {
-            // Note: this assumes any `operator==` compares with the same class type,
-            // and not with a different type.
-            // @todo: check the arguments for this assumption.
-            has_equal = true;
-            // Remove the function as it is exported via Lua's own comparison system
-            iter = functions.erase( iter );
-            //@todo handle more operators
         } else {
             ++iter;
         }
@@ -137,24 +129,30 @@ bool CppClass::has_non_const_overload( const CppFunction &func ) const
 }
 
 template<typename O, typename C>
-static std::string print_objects( Exporter &p, const C &objects, const std::string &prefix,
-                                  const std::string &postfix )
+static std::set<std::string> print_objects( Exporter &p, const C &objects )
 {
-    std::list<std::string> lines;
+    std::set<std::string> lines;
     for( const O &o : objects ) {
+        if( !o.is_public() ) {
+            continue;
+        }
         for( const auto &line : o.export_( p ) ) {
             if( line.compare( 0, 2, "--" ) == 0 ) {
-                lines.push_back( line );
+                lines.insert( line );
                 //@todo print the comment?
                 // fprintf( stdout, "%s", line.c_str() );
             } else {
-                lines.push_back( line );
+                lines.insert( line );
             }
         }
     }
+    return lines;
+}
 
+static std::string print_set( const std::set<std::string> &lines, const std::string &prefix, const std::string &postfix )
+{
     std::string r = prefix;
-    for( const std::string &l : std::set<std::string>( lines.begin(), lines.end() ) ) {
+    for( const std::string &l : lines ) {
         r = r + std::string( 12, ' ' ) + l + ",\n";
     }
     r = r + postfix;
@@ -227,6 +225,15 @@ std::string CppClass::export_( Exporter &p ) const
         }
     }
 
+    for( const CppClass &pc : parents ) {
+        //@todo should be full_name, not cpp_name
+        if( !p.export_enabled( pc.cpp_name() ) ) {
+            // Parent class is not exported directly, but we still have to include its
+            // functions and attributes
+            pc.gather_parent( p, functions, attributes );
+        }
+    }
+
     std::string r;
     //@todo lua name
     r = r + "    " + cpp_name() + " = {\n";
@@ -241,16 +248,12 @@ std::string CppClass::export_( Exporter &p ) const
         //@todo should be full_name, not cpp_name
         if( p.export_enabled( pc.cpp_name() ) ) {
             r = r + tab + "parent = \"" + pc.full_name() + "\",\n";
-        } else {
-            // Parent class is not exported directly, but we still have to include its
-            // functions and attributes
-            pc.gather_parent( p, functions, attributes );
         }
     }
 
     // Exporting the constructor only makes sense for types that can have by-value semantic
     if( p.export_by_value( cpp_name() ) ) {
-        r = r + print_objects<CppConstructor>( p, constructors, tab + "new = {\n", tab + "},\n" );
+        r = r + print_set( print_objects<CppConstructor>( p, constructors ), tab + "new = {\n", tab + "},\n" );
     }
 
     const std::string sid = p.get_string_id_for( cpp_name() );
@@ -270,12 +273,12 @@ std::string CppClass::export_( Exporter &p ) const
         // by reference is the default.
     }
 
-    if( has_equal ) {
+    if( has_equal() ) {
         r = r + tab + "has_equal = true,\n";
     }
 
-    r = r + print_objects<CppAttribute>( p, attributes, tab + "attributes = {\n", tab + "},\n" );
-    r = r + print_objects<CppFunction>( p, functions, tab + "functions = {\n", tab + "}\n" );
+    r = r + print_set( print_objects<CppAttribute>( p, attributes ), tab + "attributes = {\n", tab + "},\n" );
+    r = r + print_set( print_objects<CppFunction>( p, functions ), tab + "functions = {\n", tab + "}\n" );
 
     r = r + "    }";
 
@@ -290,4 +293,14 @@ std::string CppClass::full_name() const
 std::string CppClass::cpp_name() const
 {
     return cursor_.spelling();
+}
+
+bool CppClass::has_equal() const
+{
+    for( const CppFunction &f : functions ) {
+        if( f.operator_name() == "==" ) {
+            return true;
+        }
+    }
+    return false;
 }

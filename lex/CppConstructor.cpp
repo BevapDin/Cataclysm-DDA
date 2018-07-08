@@ -14,3 +14,8 @@ std::list<std::string> CppConstructor::export_( Exporter &p ) const
         return args;
     } );
 }
+
+bool CppConstructor::is_public() const
+{
+    return cursor.is_public();
+}

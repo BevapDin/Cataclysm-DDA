@@ -82,3 +82,8 @@ std::string CppFunction::full_name() const
 {
     return ( is_static() ? "static " : "" ) + CppCallable::full_name();
 }
+
+bool CppFunction::is_public() const
+{
+    return cursor.is_public();
+}

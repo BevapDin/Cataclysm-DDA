@@ -23,8 +23,6 @@ class CppClass
         std::list<CppConstructor> constructors;
         std::list<std::reference_wrapper<const CppClass>> parents;
 
-        bool has_equal = false;
-
         bool has_non_const_overload( const CppFunction &func ) const;
 
         void gather_parent( Exporter &p, std::vector<std::reference_wrapper<const CppFunction>> &functions, std::vector<std::reference_wrapper<const CppAttribute>> &attributes ) const;
@@ -41,4 +39,6 @@ class CppClass
 
         std::string cpp_name() const;
         std::string full_name() const;
+
+        bool has_equal() const;
 };
