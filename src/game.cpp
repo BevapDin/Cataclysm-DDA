@@ -779,6 +779,9 @@ void game::setup()
 
     load_world_modfiles( ui );
 
+    void test_lua_scripting( const lua_engine & );
+    test_lua_scripting( *lua_engine_ptr );
+
     m =  map( get_option<bool>( "ZLEVELS" ) );
 
     next_npc_id = 1;

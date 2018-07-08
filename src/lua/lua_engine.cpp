@@ -538,9 +538,6 @@ void lua_engine::init()
     // Load lua-side metatables etc.
     run_file( FILENAMES["class_defslua"] );
     run_file( FILENAMES["autoexeclua"] );
-
-    void test_lua_scripting( const lua_engine & );
-    test_lua_scripting( *this );
 }
 
 lua_engine::lua_engine() : state( nullptr )
