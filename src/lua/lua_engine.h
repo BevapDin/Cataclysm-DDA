@@ -111,18 +111,21 @@ class lua_engine
 
         ~lua_engine();
 
+        /// @throws upon syntax or similar errors
         void run_file( const std::string &path );
 
         /// @throws when initialization fails
         void init();
+        /// @throws upon syntax or similar errors
         void loadmod( const std::string &base_path, const std::string &main_file_name );
 
         int monster_move( monster *m );
 
+        /// May throw, but syntax errors from user input is handled by the console itself.
         void run_console();
 
         /// @throws Given a Lua error code, throw if it's not ERR_OK.
-        void throw_upon_lua_error( const int err, const char *path ) const;
+        void throw_upon_lua_error( int err, const char *path ) const;
 };
 
 #endif

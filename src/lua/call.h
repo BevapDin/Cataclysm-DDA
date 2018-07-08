@@ -171,17 +171,22 @@ inline value_type call( const lua_engine &engine, const std::string &script, Arg
  * Besides the fixed return type, it behaves like @ref call.
  * @param name Name of the callback. Should be a simple constant identifier name. Make sure to
  * document the callbacks.
+ * @throws No errors from Lua, those are reported a different way.
  */
 //@todo where to document the callbacks?
 template<typename ... Args>
 inline void mod_callback( const lua_engine &engine, const char *const name, Args &&... args )
 {
-    stack::push_mod_callback_call( engine );
-    // This pushes a reference to a function in Lua onto the stack, that function
-    // dispatches this callback to all registered mods.
-    // The name of the callback is pushed together with the arguments below.
-    const int cnt = stack::push_all( engine, name, std::forward<Args>( args )... );
-    stack::call_void_function( engine, cnt );
+    try {
+        stack::push_mod_callback_call( engine );
+        // This pushes a reference to a function in Lua onto the stack, that function
+        // dispatches this callback to all registered mods.
+        // The name of the callback is pushed together with the arguments below.
+        const int cnt = stack::push_all( engine, name, std::forward<Args>( args )... );
+        stack::call_void_function( engine, cnt );
+    } catch( ... ) {
+        // @todo handle this
+    }
 }
 
 } // namespace catalua

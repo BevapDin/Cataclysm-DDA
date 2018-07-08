@@ -108,7 +108,13 @@ void console::run()
 
         std::string input = get_input();
 
-        catalua::call<void>( engine, input );
+        try {
+            catalua::call<void>( engine, input );
+        } catch( const std::exception &err ) {
+            for( const std::string &line : foldstring( err.what(), width ) ) {
+                text_stack.emplace_back( line, c_red );
+            }
+        }
 
         read_stream( const_cast<std::stringstream&>( engine.output_stream ), c_white );
         read_stream( const_cast<std::stringstream&>( engine.error_stream ), c_red );

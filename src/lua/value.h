@@ -11,6 +11,7 @@ extern "C" {
 
 #include <map>
 #include <string>
+#include <stdexcept>
 
 // @todo move into namespace catalua and rename to just "value"
 
@@ -128,7 +129,7 @@ class LuaValue
             // -2 is the userdata, -1 is the key (function to call)
             const char *const key = lua_tostring( L, -1 );
             if( key == nullptr ) {
-                luaL_error( L, "Invalid input to __index: key is not a string." );
+                throw std::runtime_error( "Invalid input to __index: key is not a string." );
             }
             if( luaL_getmetafield( L, -2, key ) != 0 ) {
                 // There is an entry of that name, return it.
@@ -156,11 +157,11 @@ class LuaValue
             // -3 is the userdata, -2 is the key (name of the member), -1 is the value
             const char *const key = lua_tostring( L, -2 );
             if( key == nullptr ) {
-                luaL_error( L, "Invalid input to __newindex: key is not a string." );
+                throw std::runtime_error( "Invalid input to __newindex: key is not a string." );
             }
             const auto iter = WRITE_MEMBERS.find( key );
             if( iter == WRITE_MEMBERS.end() ) {
-                luaL_error( L, "Unknown attribute" );
+                std::runtime_error( "Unknown attribute" );
             }
             lua_remove( L, -2 ); // key, userdata is still there, but now on -2, and the value is on -1
             return iter->second( L );
@@ -184,12 +185,12 @@ class LuaValue
             luaL_setfuncs( L, &FUNCTIONS[0], 0 );
 
             // Push function pointer
-            lua_pushcfunction( L, &gc );
+            lua_pushcfunction( L, &catch_exception_for_lua_wrapper<&LuaValue<T>::gc> );
             // -1 would be the function pointer, -2 is the metatable, the function pointer is popped
             lua_setfield( L, -2, "__gc" );
-            lua_pushcfunction( L, &index );
+            lua_pushcfunction( L, &catch_exception_for_lua_wrapper<&LuaValue<T>::index> );
             lua_setfield( L, -2, "__index" );
-            lua_pushcfunction( L, &newindex );
+            lua_pushcfunction( L, &catch_exception_for_lua_wrapper<&LuaValue<T>::newindex> );
             lua_setfield( L, -2, "__newindex" );
         }
         /**
@@ -239,16 +240,14 @@ class LuaValue
             luaL_checktype( L, stack_index, LUA_TUSERDATA );
             T *user_data = static_cast<T *>( lua_touserdata( L, stack_index ) );
             if( user_data == nullptr ) {
-                // luaL_error does not return at all.
-                luaL_error( L, "First argument to function is not a class" );
+                throw std::runtime_error( "value is not a user defined type" );
             }
             if( has_matching_metatable( L, stack_index ) ) {
                 return cast( *user_data );
             }
             Type *const subobject = get_subclass( L, stack_index );
             if( subobject == nullptr ) {
-                // luaL_argerror does not return at all.
-                luaL_argerror( L, stack_index, METATABLE_NAME );
+                throw std::runtime_error( "value is of incompatible type" );
             }
             return *subobject;
         }
@@ -261,14 +260,6 @@ class LuaValue
                 return true;
             }
             return get_subclass( L, stack_index ) != nullptr;
-        }
-        /** Raises a Lua error if the type of the value at stack_index is not compatible with T. */
-        static void check( lua_State *const L, int const stack_index ) {
-            luaL_checktype( L, stack_index, LUA_TUSERDATA );
-            if( !has( L, stack_index ) ) {
-                // METATABLE_NAME is used here as the name of the type we expect.
-                luaL_argerror( L, stack_index, METATABLE_NAME );
-            }
         }
 };
 
