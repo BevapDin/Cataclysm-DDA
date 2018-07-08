@@ -2015,7 +2015,11 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
         elem.apply( md, 0, 0 );
     }
 
-    luascript( *g->lua_engine_ptr, *m, terrain_type.id().str(), t );
+    try {
+        luascript( *g->lua_engine_ptr, *m, terrain_type.id().str(), t );
+    } catch( const std::exception &err ) {
+        debugmsg( "Error upon Lua mapgen script: %s", err.what() );
+    }
 
     place_stairs( m, terrain_type, md );
 
@@ -2076,8 +2080,12 @@ void jmapgen_objects::apply( const mapgendata &dat, int offset_x, int offset_y, 
     }
 }
 
-void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &/*dat*/, const time_point &t, float /*d*/ ) {
-    scr( *g->lua_engine_ptr, *m, terrain_type.id().str(), t );
+void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &/*dat*/, const time_point &t, const float /*d*/ ) {
+    try {
+        scr( *g->lua_engine_ptr, *m, terrain_type.id().str(), t );
+    } catch( const std::exception &err ) {
+        debugmsg( "Error upon Lua mapgen script: %s", err.what() );
+    }
 }
 
 /////////////
