@@ -70,13 +70,14 @@ lua_State *get_lua_state( const lua_engine &e );
 
 void lua_engine::throw_upon_lua_error( const int err, const char *const path ) const
 {
-    if( err == LUA_OK || err == LUA_ERRRUN ) {
-        // No error or error message already shown via traceback function.
+    if( err == LUA_OK ) {
         return;
     }
     const char *const error_messsage = lua_tostring( state, -1 /*index @todo */ );
     const char *const error = error_messsage ? error_messsage : "";
     switch( err ) {
+        case LUA_ERRRUN:
+            throw std::runtime_error( string_format( "Lua error for \"%s\": %s", path, error ) );
         case LUA_ERRSYNTAX:
             throw std::runtime_error( string_format( "Lua returned syntax error for \"%s\": %s", path, error ) );
         case LUA_ERRMEM:
@@ -138,6 +139,7 @@ void Item_factory::register_iuse_lua( const std::string &name, int lua_function 
 
 void catalua::stack::push_mod_callback_call( const lua_engine &engine  )
 {
+    // @todo check for errors
     lua_getglobal( get_lua_state( engine ), "mod_callback" );
 }
 
@@ -349,7 +351,7 @@ static int game_register_iuse( lua_State *L )
     // Make sure the first argument is a string.
     const char *name = luaL_checkstring( L, 1 );
     if( !name ) {
-        return luaL_error( L, "First argument to game.register_iuse is not a string." );
+        throw std::runtime_error( "First argument to game.register_iuse is not a string." );
     }
 
     // Make sure the second argument is a function
@@ -440,13 +442,12 @@ static int game_myPrint( lua_State *L )
 // Registry containing all the game functions exported to lua.
 // -----------------------------------------------------------
 static const struct luaL_Reg global_funcs [] = {
-    {"register_iuse", game_register_iuse},
-    //{"get_monsters", game_get_monsters},
-    {"items_at", game_items_at},
-    {"choose_adjacent", game_choose_adjacent},
-    {"dofile", game_dofile},
-    {"get_monster_types", game_get_monster_types},
-    {"get_item_groups", game_get_item_groups},
+    {"register_iuse", catch_exception_for_lua_wrapper<game_register_iuse>},
+    {"items_at", catch_exception_for_lua_wrapper<game_items_at>},
+    {"choose_adjacent", catch_exception_for_lua_wrapper<game_choose_adjacent>},
+    {"dofile", catch_exception_for_lua_wrapper<game_dofile>},
+    {"get_monster_types", catch_exception_for_lua_wrapper<game_get_monster_types>},
+    {"get_item_groups", catch_exception_for_lua_wrapper<game_get_item_groups>},
     {nullptr, nullptr}
 };
 
@@ -542,4 +543,14 @@ void catalua::stack::call_non_void_function( const lua_engine &engine, const int
     lua_State *const L = get_lua_state( engine );
     const int err = lua_pcall( L, args, 1, 0 );
     engine.throw_upon_lua_error( err, "<inline script>" );
+}
+
+void catalua::report_exception( const lua_engine &engine )
+{
+    try {
+        throw;
+    } catch( const std::exception &err ) {
+        debugmsg( "Erro in Lua: %s", err.what() );
+        const_cast<lua_engine&>( engine ).error_stream << err.what() << "\n";
+    }
 }

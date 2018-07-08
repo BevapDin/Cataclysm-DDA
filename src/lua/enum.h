@@ -3,6 +3,7 @@
 #define ENUM_H
 
 #include "type.h"
+#include "common.h"
 
 extern "C" {
 #include <lua.h>
@@ -10,6 +11,7 @@ extern "C" {
 
 #include <string>
 #include <map>
+#include <stdexcept>
 
 // @todo move into namespace catalua and rename to just "enum"
 
@@ -47,11 +49,11 @@ class LuaEnum : private LuaType<std::string>
             // -1 is the key (function to call)
             const char *const key = lua_tostring( L, -1 );
             if( key == nullptr ) {
-                luaL_error( L, "Invalid input to __index: key is not a string." );
+                throw std::runtime_error( "Invalid input to __index: key is not a string." );
             }
             const auto iter = BINDINGS.find( key );
             if( iter == BINDINGS.end() ) {
-                return luaL_error( L, "Invalid enum value." );
+                throw std::runtime_error( "Invalid enum value." );
             }
             lua_remove( L, -1 ); // remove key
             // Push the enum as string, it will be converted back to the enum later. This way, it can
@@ -62,12 +64,6 @@ class LuaEnum : private LuaType<std::string>
     public:
         static bool has( lua_State *const L, int const stack_index ) {
             return Parent::has( L, stack_index ) && has( Parent::get( L, stack_index ) );
-        }
-        static void check( lua_State *const L, int const stack_index ) {
-            Parent::check( L, stack_index );
-            if( !has( Parent::get( L, stack_index ) ) ) {
-                luaL_argerror( L, stack_index, "invalid value for enum" );
-            }
         }
         static E get( lua_State *const L, int const stack_index ) {
             return from_string( Parent::get( L, stack_index ) );
@@ -82,7 +78,7 @@ class LuaEnum : private LuaType<std::string>
             // Set the new table to have itself as metatable
             lua_setmetatable( L, -2 ); // -1
             // Setup the __index entry, which will translate the entry to a enum value
-            lua_pushcfunction( L, &index ); // +1
+            lua_pushcfunction( L, &catch_exception_for_lua_wrapper<&LuaEnum<E>::index> ); // +1
             lua_setfield( L, -2, "__index" ); // -1
             // And register as a global value
             lua_setglobal( L, global_name ); // -1

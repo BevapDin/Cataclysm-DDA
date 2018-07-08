@@ -403,13 +403,21 @@ void game::load_data_from_dir( const std::string &path, const std::string &src, 
     // Process a preload file before the .json files,
     // so that custom IUSE's can be defined before
     // the items that need them are parsed
-    lua_engine_ptr->loadmod( path, "preload.lua" );
+    try {
+        lua_engine_ptr->loadmod( path, "preload.lua" );
+    } catch( const std::exception &err ) {
+        debugmsg( "%s. Lua scripting won't be available.", err.what() );
+    }
 
     DynamicDataLoader::get_instance().load_data_from_path( path, src, ui );
 
     // main.lua will be executed after JSON, allowing to
     // work with items defined by mod's JSON
-    lua_engine_ptr->loadmod( path, "main.lua" );
+    try {
+        lua_engine_ptr->loadmod( path, "main.lua" );
+    } catch( const std::exception &err ) {
+        debugmsg( "%s. Lua scripting won't be available.", err.what() );
+    }
 }
 
 game::~game()
@@ -4251,7 +4259,7 @@ void game::debug()
 
         case 24:
             lua_engine_ptr->run_console();
-			break;
+            break;
         case 25:
             ui::omap::display_weather();
             break;

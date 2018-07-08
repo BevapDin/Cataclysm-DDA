@@ -115,7 +115,6 @@ class LuaReference : private LuaValue<T *>
             return proxy{ &LuaValue<T *>::get( L, stack_position ) };
         }
         using LuaValue<T *>::has;
-        using LuaValue<T *>::check;
 };
 
 #endif

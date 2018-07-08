@@ -21,7 +21,6 @@ extern "C" {
  *
  * Each implementation contains function like the LuaValue has:
  * - @ref has checks whether the object at given stack index is of the requested type.
- * - @ref check calls @ref has and issues a Lua error if the types is not as requested.
  * - @ref get returns the value at given stack_index. This is like @ref LuaValue::get.
  *   If you need to store the value, use \code auto && val = LuaType<X>::get(...); \endcode
  * - @ref push puts the value on the stack, like @ref LuaValue::push
@@ -34,10 +33,10 @@ struct LuaType<int> {
     static bool has( lua_State *const L, int const stack_index ) {
         return lua_isnumber( L, stack_index );
     }
-    static void check( lua_State *const L, int const stack_index ) {
-        luaL_checktype( L, stack_index, LUA_TNUMBER );
-    }
     static int get( lua_State *const L, int const stack_index ) {
+        if( !has( L, stack_index ) ) {
+            throw std::runtime_error( "Unexpected value on stack" );
+        }
         return lua_tonumber( L, stack_index );
     }
     static void push( lua_State *const L, int const value ) {
@@ -50,10 +49,10 @@ struct LuaType<bool> {
     static bool has( lua_State *const L, int const stack_index ) {
         return lua_isboolean( L, stack_index );
     }
-    static void check( lua_State *const L, int const stack_index ) {
-        luaL_checktype( L, stack_index, LUA_TBOOLEAN );
-    }
     static bool get( lua_State *const L, int const stack_index ) {
+        if( !has( L, stack_index ) ) {
+            throw std::runtime_error( "Unexpected value on stack" );
+        }
         return lua_toboolean( L, stack_index );
     }
     static void push( lua_State *const L, bool const value ) {
@@ -66,10 +65,10 @@ struct LuaType<std::string> {
     static bool has( lua_State *const L, int const stack_index ) {
         return lua_isstring( L, stack_index );
     }
-    static void check( lua_State *const L, int const stack_index ) {
-        luaL_checktype( L, stack_index, LUA_TSTRING );
-    }
     static std::string get( lua_State *const L, int const stack_index ) {
+        if( !has( L, stack_index ) ) {
+            throw std::runtime_error( "Unexpected value on stack" );
+        }
         return lua_tostring_wrapper( L, stack_index );
     }
     static void push( lua_State *const L, const std::string &value ) {
@@ -85,6 +84,9 @@ struct LuaType<std::string> {
 template<>
 struct LuaType<float> : public LuaType<int> { // inherit checking because it's all the same to Lua
     static float get( lua_State *const L, int const stack_index ) {
+        if( !has( L, stack_index ) ) {
+            throw std::runtime_error( "Unexpected value on stack" );
+        }
         return lua_tonumber( L, stack_index );
     }
     static void push( lua_State *const L, float const value ) {
