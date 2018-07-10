@@ -974,13 +974,6 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &, const t
 
 // Custom functions that are to be wrapped from lua.
 // -------------------------------------------------
-static std::unique_ptr<uimenu> uimenu_instance;
-uimenu *create_uimenu()
-{
-    uimenu_instance = std::unique_ptr<uimenu>( new uimenu() );
-    return uimenu_instance.get();
-}
-
 const ter_t &get_terrain_type( int id )
 {
     return ter_id( id ).obj();

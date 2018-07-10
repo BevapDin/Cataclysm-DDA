@@ -1192,6 +1192,10 @@ classes = {
         }
     },
     uimenu = {
+        new = {
+            { },
+        },
+        by_value = true,
         attributes = {
             title = {
                 type = "string",
@@ -2199,11 +2203,6 @@ global_functions = {
         cpp_name = "string_input_popup_wrapper",
         args = { "string", "int", "string" },
         rval = "string"
-    },
-    create_uimenu = {
-        cpp_name = "create_uimenu",
-        args = {},
-        rval = "uimenu&"
     },
     get_terrain_type = {
         cpp_name = "get_terrain_type",
