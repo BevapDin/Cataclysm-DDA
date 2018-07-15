@@ -201,14 +201,6 @@ global_functions = {
         args = { "overmap", "tripoint" },
         rval = "std::string"
     },
-	-- Returns enum, indicating direction of overmap terrain on given overmap with given tripoint in global overmap terrain coordinates.
-	-- Possible return values are in `overmap_direction` in `enums` section above.
-	-- Use `game.get_omt_dir (g:get_cur_om(), player:global_omt_location())` to return direction of overmap terrain of current player location.
-    get_omt_dir = {
-        cpp_name = "get_omt_dir",
-        args = { "overmap", "tripoint" },
-        rval = "overmap_direction"
-    }
 }
 
 function table_unpack_wrapper(args)
