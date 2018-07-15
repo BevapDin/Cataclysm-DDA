@@ -110,7 +110,7 @@ global_functions = {
     },
     query_yn = {
         cpp_name = "query_yn_wrapper",
-        args     = { "string" },
+        args     = { "std::string" },
         argnames = { "message" },
         rval = "bool"
     },
@@ -199,7 +199,7 @@ global_functions = {
     get_omt_id = {
         cpp_name = "get_omt_id",
         args = { "overmap", "tripoint" },
-        rval = "string"
+        rval = "std::string"
     },
 	-- Returns enum, indicating direction of overmap terrain on given overmap with given tripoint in global overmap terrain coordinates.
 	-- Possible return values are in `overmap_direction` in `enums` section above.
