@@ -806,6 +806,13 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
             info.emplace_back( "BASE", _( "<bold>Rigid</bold>: " ), _( "No (contents increase volume)" ) );
         }
 
+        const recipe_subset &rcs = g->u.get_learned_recipes();
+        if( std::find_if( rcs.begin(), rcs.end(), [&]( const recipe *const r ) {
+            return r->result() == this->typeId();
+        } ) != rcs.end() ) {
+            info.emplace_back( "BASE", "You known <good>how to do create</good> this." );
+        }
+
         int dmg_bash = damage_melee( DT_BASH );
         int dmg_cut  = damage_melee( DT_CUT );
         int dmg_stab = damage_melee( DT_STAB );
