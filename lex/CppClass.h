@@ -38,7 +38,6 @@ class CppClass
 
         std::string export_( Exporter &p ) const;
 
-        std::string cpp_name() const;
         FullyQualifiedId full_name() const;
 
         bool has_equal() const;

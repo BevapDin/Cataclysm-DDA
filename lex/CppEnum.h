@@ -17,11 +17,9 @@ class CppEnum
 
     public:
         CppEnum( Parser &p, const Cursor &cursor );
-//        CppEnum( const std::string &ns, const std::string &n );
         CppEnum( const CppEnum & ) = delete;
 
         std::string export_( Exporter &p ) const;
 
-        std::string cpp_name() const;
         FullyQualifiedId full_name() const;
 };

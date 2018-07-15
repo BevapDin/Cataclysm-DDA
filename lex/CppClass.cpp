@@ -234,9 +234,13 @@ std::string CppClass::export_( Exporter &p ) const
         }
     }
 
+    const std::string lua_name = p.lua_name( full_name() );
+
     std::string r;
-    //@todo lua name
-    r = r + "    " + cpp_name() + " = {\n";
+    r = r + "    " + lua_name + " = {\n";
+    if( lua_name != full_name().as_string() ) {
+        r = r + tab + "cpp_name = \"" + full_name() + "\",\n";
+    }
 
     // @todo properly pick all required headers
     r = r + "        headers = { " + enumerate( "", headers, []( const std::string & h ) {
@@ -246,8 +250,7 @@ std::string CppClass::export_( Exporter &p ) const
     for( const CppClass &pc : parents ) {
         p.debug_message( "Parent of " + full_name() + " is " + pc.full_name() );
         if( p.export_enabled( pc.full_name() ) ) {
-            //@todo should be lua_name, not full_name
-            r = r + tab + "parent = \"" + pc.full_name() + "\",\n";
+            r = r + tab + "parent = \"" + p.lua_name( pc.full_name() ) + "\",\n";
         }
     }
 
@@ -288,11 +291,6 @@ std::string CppClass::export_( Exporter &p ) const
 FullyQualifiedId CppClass::full_name() const
 {
     return cursor_.fully_qualifid();
-}
-
-std::string CppClass::cpp_name() const
-{
-    return cursor_.spelling();
 }
 
 bool CppClass::has_equal() const

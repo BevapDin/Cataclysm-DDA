@@ -46,7 +46,6 @@ class CppCallable
 
         virtual FullyQualifiedId full_name() const;
         std::string full_name_with_args() const;
-        std::string cpp_name() const;
 
         bool has_same_arguments( const CppCallable &other ) const;
 

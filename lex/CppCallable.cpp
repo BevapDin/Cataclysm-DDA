@@ -112,7 +112,3 @@ std::string CppCallable::full_name_with_args() const
     }, ", ", "" );
     return full_name() + "(" + args + ")";
 }
-
-std::string CppCallable::cpp_name() const {
-    return cursor.spelling();
-}

@@ -158,4 +158,6 @@ class Exporter
         void debug_message( const std::string &message ) const;
         void info_message( const std::string &message ) const;
         void error_message( const std::string &message ) const;
+
+        std::string lua_name( const FullyQualifiedId &full_name ) const;
 };

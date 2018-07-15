@@ -30,10 +30,10 @@ std::string CppVariable::export_( Exporter &p ) const
         }
 
         std::string line;
-        const std::string lua_name = p.translate_identifier( cursor_.spelling() );
+        const std::string lua_name = p.lua_name( full_name() );
         line = line + lua_name + " = { ";
-        if( lua_name != cursor_.spelling() ) {
-            line = line + "cpp_name = \"" + cursor_.spelling() + "\", ";
+        if( lua_name != full_name().as_string() ) {
+            line = line + "cpp_name = \"" + full_name() + "\", ";
         }
         line = line + "type = " + p.translate_member_type( type() );
         if( !is_const() && !p.is_readonly( full_name() ) ) {

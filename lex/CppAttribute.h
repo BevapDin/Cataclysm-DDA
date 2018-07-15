@@ -14,7 +14,7 @@ class CppAttribute
 {
     private:
         FullyQualifiedId parent_name_;
-        std::string cpp_name_;
+        FullyQualifiedId full_name_;
         bool const_qualified_;
         bool public_;
 
@@ -28,8 +28,6 @@ class CppAttribute
 
         /// Fully qualified name in C++.
         FullyQualifiedId full_name() const;
-        /// Simple name as it appears in C++.
-        std::string cpp_name() const;
         /// Whether it's declared as const member.
         bool is_const() const;
         /// Whether it's declared as public member.

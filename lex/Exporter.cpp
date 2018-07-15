@@ -653,3 +653,8 @@ std::string Exporter::get_header_for_argument( const Type &t ) const
 
     return t.get_declaration().location_file();
 }
+
+std::string Exporter::lua_name( const FullyQualifiedId &full_name ) const
+{
+    return translate_identifier( full_name.back() );
+}

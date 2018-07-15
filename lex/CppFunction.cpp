@@ -49,14 +49,14 @@ std::list<std::string> CppFunction::export_( Exporter &p ) const
 
         std::string line;
         line = line + "{ ";
-        const std::string lua_name = p.translate_identifier( cpp_name() );
+        const std::string lua_name = p.lua_name( full_name() );
         line = line + "name = \"" + lua_name + "\", ";
         if( cursor.is_static_method() ) {
             line = line + "static = true, ";
         }
         line = line + "rval = " + result + ", ";
-        if( lua_name != cpp_name() ) {
-            line = line + "cpp_name = \"" + cpp_name() + "\", ";
+        if( lua_name != full_name().as_string() ) {
+            line = line + "cpp_name = \"" + full_name() + "\", ";
         }
         const std::string comment = cursor.raw_comment();
         if( !comment.empty()  && p.export_comments ) {
