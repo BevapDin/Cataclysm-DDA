@@ -23,7 +23,7 @@ std::string CppEnum::export_( Exporter &p ) const
     const std::string lua_name = p.lua_name( full_name() );
     std::string r;
     //@todo cpp name
-    r = r + "    " + lua_name() + " = {\n";
+    r = r + "    " + lua_name + " = {\n";
     for( const std::string &a : values ) {
         r = r + "        \"" + a + "\",\n";
     }
