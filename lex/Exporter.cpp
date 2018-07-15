@@ -190,13 +190,16 @@ std::string Exporter::translate_argument_type( const Type &t ) const
         if( export_by_value( pt ) ) {
             return "\"" + remove_const( pt.spelling() ) + "\"";
         }
+        debug_message( "X1: " + pt.spelling() + "  " + derived_class( pt ) );
         if( export_by_reference( pt ) ) {
             return "\"" + remove_const( pt.spelling() ) + "\"";
         }
+        debug_message( "X2: " + pt.spelling() + "  " + derived_class( pt ) );
         res = const_cast<Exporter &>( *this ).register_generic( pt );
         if( !res.empty() ) {
             return res;
         }
+        debug_message( "Could not choose how to translate L-value-reference " + pt.spelling() );
     }
 
     if( t.kind() == CXType_Pointer ) {
@@ -571,7 +574,8 @@ bool Exporter::add_id_typedef( const Cursor &cursor, const std::string &id_type,
     // A id itself is always handled by value. It's basically a std::string/int.
     assert( valid_cpp_identifer( typedef_name ) );
     types_exported_by_value.insert( FullyQualifiedId( typedef_name ) );
-    //    debug_message( "Automatically added " + typedef_name + " as " + id_type + "<" + base_type + ">" );
+    types_exported_by_value.insert( FullyQualifiedId( id_type + "<" + base_type + ">" ) );
+    debug_message( "Automatically added " + typedef_name + " as " + id_type + "<" + base_type + ">" );
     return true;
 }
 
