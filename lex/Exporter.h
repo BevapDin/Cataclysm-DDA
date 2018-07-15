@@ -10,6 +10,7 @@
 class MultiMatcher;
 class Cursor;
 class Type;
+class CppClass;
 class Parser;
 
 bool valid_cpp_identifer( const std::string &ident );
@@ -53,9 +54,13 @@ class Exporter
         std::unique_ptr<MultiMatcher> ignore_result_of_those;
         std::unique_ptr<MultiMatcher> is_readonly_identifiers;
 
+        std::string export_all_in_path_;
+
     public:
         Exporter();
         ~Exporter();
+
+        void export_all_in( const std::string &path );
 
         bool export_comments = false;
 
@@ -88,19 +93,12 @@ class Exporter
 
         FullyQualifiedId derived_class( const Type &t ) const;
 
-        bool export_enabled( const FullyQualifiedId name ) const {
-            return types_to_export.count( name ) > 0;
-        }
-        bool export_enabled( const Type &name ) const {
-            return export_enabled( derived_class( name ) );
-        }
-        bool export_by_value( const FullyQualifiedId &name ) const {
-            return types_exported_by_value.count( name ) > 0;
-        }
+        bool export_enabled( const FullyQualifiedId name ) const;
+        bool export_enabled( const Type &name, const std::string &path ) const;
+
+        bool export_by_value( const FullyQualifiedId &name ) const;
         bool export_by_value( const Type &name ) const;
-        bool export_by_reference( const FullyQualifiedId &name ) const {
-            return types_exported_by_reference.count( name ) > 0;
-        }
+        bool export_by_reference( const FullyQualifiedId &name ) const;
         bool export_by_reference( const Type &name ) const;
 
         bool add_id_typedef( const Cursor &cursor, const std::string &id_type,

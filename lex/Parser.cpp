@@ -13,8 +13,6 @@
 
 #include <iostream>
 
-static const bool export_all = false;
-
 /**
  * Check if given identifier (without namespace) is a reserved word.
  */
@@ -80,7 +78,7 @@ void Parser::parse_enum( const Cursor &cursor )
         return;
     }
     const FullyQualifiedId name = cursor.fully_qualifid();
-    if( !export_all && !exporter.export_enabled( cursor.type() ) ) {
+    if( !exporter.export_enabled( cursor.type(), cursor.location_path() ) ) {
         skipped( "enum", name, "not exported" );
         return;
     }
@@ -97,7 +95,7 @@ void Parser::parse_class( const Cursor &cursor )
     }
     const FullyQualifiedId name = cursor.fully_qualifid();
     const Type t = cursor.type();
-    if( !export_all && !exporter.export_enabled( cursor.type() ) ) {
+    if( !exporter.export_enabled( cursor.type(), cursor.location_path() ) ) {
         skipped( "class", name, "not exported" );
         return;
     }

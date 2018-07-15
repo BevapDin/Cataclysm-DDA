@@ -505,14 +505,37 @@ std::string Exporter::register_generic( const Type &t )
     return std::string();
 }
 
+bool Exporter::export_enabled( const FullyQualifiedId name ) const
+{
+    return types_to_export.count( name ) > 0;
+}
+bool Exporter::export_enabled( const Type &name, const std::string &path ) const
+{
+    if( !export_all_in_path_.empty() && export_all_in_path_.compare( 0, export_all_in_path_.length(), path ) == 0 ) {
+        return true;
+    }
+    if( !export_all_in_path_.empty() ) {
+        debug_message( "Not exported: " + name.spelling() + " (" + path + " vs " + path.substr(0,export_all_in_path_.length()) + ")" );
+    }
+    return export_enabled( derived_class( name ) );
+}
+
 bool Exporter::export_by_value( const Type &name ) const
 {
     return export_by_value( derived_class( name ) );
+}
+bool Exporter::export_by_value( const FullyQualifiedId &name ) const
+{
+    return types_exported_by_value.count( name ) > 0;
 }
 
 bool Exporter::export_by_reference( const Type &name ) const
 {
     return export_by_reference( derived_class( name ) );
+}
+bool Exporter::export_by_reference( const FullyQualifiedId &name ) const
+{
+    return types_exported_by_reference.count( name ) > 0;
 }
 
 void Exporter::debug_message( const std::string &message ) const
@@ -661,4 +684,9 @@ std::string Exporter::get_header_for_argument( const Type &t ) const
 std::string Exporter::lua_name( const FullyQualifiedId &full_name ) const
 {
     return translate_identifier( full_name.back() );
+}
+
+void Exporter::export_all_in( const std::string &path )
+{
+    export_all_in_path_ = path;
 }

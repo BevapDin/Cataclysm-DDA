@@ -227,7 +227,7 @@ std::string CppClass::export_( Exporter &p ) const
     }
 
     for( const CppClass &pc : parents ) {
-        if( !p.export_enabled( pc.full_name() ) ) {
+        if( !p.export_enabled( pc.cursor_.type(), pc.cursor_.location_path() ) ) {
             // Parent class is not exported directly, but we still have to include its
             // functions and attributes
             pc.gather_parent( p, functions, attributes );
@@ -249,7 +249,7 @@ std::string CppClass::export_( Exporter &p ) const
 
     for( const CppClass &pc : parents ) {
         p.debug_message( "Parent of " + full_name() + " is " + pc.full_name() );
-        if( p.export_enabled( pc.full_name() ) ) {
+        if( p.export_enabled( pc.cursor_.type(), pc.cursor_.location_path() ) ) {
             r = r + tab + "parent = \"" + p.lua_name( pc.full_name() ) + "\",\n";
         }
     }
