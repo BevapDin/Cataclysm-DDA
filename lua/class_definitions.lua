@@ -227,6 +227,9 @@ end
 --     { name = "add_effect", rval = nil, args = { "efftype_id", "time_duration", "body_part", "bool", "int", "bool" } },
 for class_name, value in pairs(classes) do
     local new_functions = { }
+	if not value.functions then
+		value.functions = { }
+	end
     for _, func in ipairs(value.functions) do
         if func.optional_args then
             local i = 0
