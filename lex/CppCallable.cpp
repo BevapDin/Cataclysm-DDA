@@ -4,6 +4,7 @@
 #include "Type.h"
 #include "exceptions.h"
 #include "common.h"
+#include "FullyQualifiedId.h"
 
 CppCallable::CppCallable( const Cursor &c ) : cursor( c ), arguments_( cursor.get_arguments() )
 {
@@ -33,7 +34,8 @@ std::string CppCallable::export_argument_list( Exporter &p, size_t m ) const
 std::list<std::string> CppCallable::export_cb( Exporter &p,
         const std::function<std::string( const std::string & )> &callback )const
 {
-    if( p.is_blocked( full_name_with_args() ) ) {
+    //@todo add an overload in Exporter for string
+    if( p.is_blocked( FullyQualifiedId( full_name_with_args() ) ) ) {
         return std::list<std::string> { { "-- " + full_name() + " skipped because it's blocked" } };
     }
     std::list<std::string> result;
@@ -98,7 +100,7 @@ bool CppCallable::has_same_arguments( const CppCallable &other ) const
     return true;
 }
 
-std::string CppCallable::full_name() const
+FullyQualifiedId CppCallable::full_name() const
 {
     return cursor.fully_qualifid();
 }

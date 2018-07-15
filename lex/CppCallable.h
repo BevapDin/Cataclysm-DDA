@@ -8,6 +8,7 @@
 #include <string>
 
 class Exporter;
+class FullyQualifiedId;
 
 /**
  * Generic callable thing, it contains an argument list and can export the list.
@@ -43,7 +44,7 @@ class CppCallable
             return !operator_name().empty();
         }
 
-        virtual std::string full_name() const;
+        virtual FullyQualifiedId full_name() const;
         std::string full_name_with_args() const;
         std::string cpp_name() const;
 

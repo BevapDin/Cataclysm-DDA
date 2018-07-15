@@ -1,5 +1,7 @@
 #pragma once
 
+#include "FullyQualifiedId.h"
+
 #include <string>
 #include <memory>
 #include <set>
@@ -19,32 +21,32 @@ class Exporter
         friend class Parser;
         /**
          * All the C++ types that should be exported to Lua. This should contain the
-         * real type, not a type alias. It can contain enumeration || class types.
+         * real type, not a type alias. It can contain enumeration or class types.
          * Enumerations are automatically added to types_exported_by_value. Class types
          * must be added manually to types_exported_by_value or types_exported_by_reference
          * or to both.
          */
-        std::set<std::string> types_to_export;
+        std::set<FullyQualifiedId> types_to_export;
         /**
          * C++ types that should be exported by-value. They must support copy-construction
          * and copy-assignment. Use the plain C++ name of their type. Note: enumerations
          * and string_id and int_id are automatically exported as value, they don't need to
          * be listed here.
          */
-        std::set<std::string> types_exported_by_value;
+        std::set<FullyQualifiedId> types_exported_by_value;
         /**
          * C++ types that should be exported by-reference. They don't need to support
          * copy-construction nor copy-assignment. Types may be exported by-value and
          * by-reference.
          */
-        std::set<std::string> types_exported_by_reference;
+        std::set<FullyQualifiedId> types_exported_by_reference;
 
         std::map<std::string, std::string> generic_types;
 
         // key is the string_id typedef name (e.g. "mtype_id") and value is the
         // name of the objects it identifiers (e.g. "mtype").
-        std::map<std::string, std::string> string_ids;
-        std::map<std::string, std::string> int_ids;
+        std::map<std::string, FullyQualifiedId> string_ids;
+        std::map<std::string, FullyQualifiedId> int_ids;
 
         std::unique_ptr<MultiMatcher> readonly_identifiers;
         std::unique_ptr<MultiMatcher> blocked_identifiers;
@@ -59,9 +61,9 @@ class Exporter
 
         Exporter( const Exporter & ) = delete;
 
-        bool is_blocked( const std::string &name ) const;
-        bool is_readonly( const std::string &name ) const;
-        bool ignore_result_of( const std::string &name ) const;
+        bool is_blocked( const FullyQualifiedId &name ) const;
+        bool is_readonly( const FullyQualifiedId &name ) const;
+        bool ignore_result_of( const FullyQualifiedId &name ) const;
 
         /**
          * Translate the given type to a string that is usable in Lua as name for the
@@ -78,31 +80,31 @@ class Exporter
 
         std::string get_header_for_argument( const Type &t ) const;
 
-        void add_export_for_string_id( const std::string &id_name, const std::string &cpp_name );
-        void add_export_by_value( const std::string &cpp_name );
-        void add_export_by_reference( const std::string &cpp_name );
-        void add_export_by_value_and_reference( const std::string &cpp_name );
-        void add_export_enumeration( const std::string &cpp_name );
+        void add_export_for_string_id( const std::string &id_name, const FullyQualifiedId &full_name );
+        void add_export_by_value( const FullyQualifiedId &full_name );
+        void add_export_by_reference( const FullyQualifiedId &full_name );
+        void add_export_by_value_and_reference( const FullyQualifiedId &full_name );
+        void add_export_enumeration( const FullyQualifiedId &full_name );
 
-        std::string derived_class( const Type &t ) const;
+        FullyQualifiedId derived_class( const Type &t ) const;
 
-        bool export_enabled( const std::string name ) const {
+        bool export_enabled( const FullyQualifiedId name ) const {
             return types_to_export.count( name ) > 0;
         }
         bool export_enabled( const Type &name ) const {
             return export_enabled( derived_class( name ) );
         }
-        bool export_by_value( const std::string &name ) const {
+        bool export_by_value( const FullyQualifiedId &name ) const {
             return types_exported_by_value.count( name ) > 0;
         }
         bool export_by_value( const Type &name ) const;
-        bool export_by_reference( const std::string &name ) const {
+        bool export_by_reference( const FullyQualifiedId &name ) const {
             return types_exported_by_reference.count( name ) > 0;
         }
         bool export_by_reference( const Type &name ) const;
 
         bool add_id_typedef( const Cursor &cursor, const std::string &id_type,
-                             std::map<std::string, std::string> &ids_map );
+                             std::map<std::string, FullyQualifiedId> &ids_map );
 
         bool register_id_typedef( const Cursor &cursor );
 
@@ -115,7 +117,7 @@ class Exporter
          */
         std::string translate_identifier( const std::string &name ) const;
 
-        std::string get_string_id_for( const std::string &name ) const {
+        std::string get_string_id_for( const FullyQualifiedId &name ) const {
             for( const auto &elem : string_ids ) {
                 if( elem.second == name ) {
                     return elem.first;
@@ -123,7 +125,7 @@ class Exporter
             }
             return std::string();
         }
-        std::string get_int_id_for( const std::string &name ) const {
+        std::string get_int_id_for( const FullyQualifiedId &name ) const {
             for( const auto &elem : int_ids ) {
                 if( elem.second == name ) {
                     return elem.first;

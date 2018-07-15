@@ -15,11 +15,6 @@
 
 static const bool export_all = false;
 
-std::string Parser::fully_qualifid( const std::string &ns, const std::string &name )
-{
-    return ns.empty() ? name : ( ns + "::" + name );
-}
-
 /**
  * Check if given identifier (without namespace) is a reserved word.
  */
@@ -44,7 +39,7 @@ static bool skip_silently( const Cursor &cursor )
         return true;
     }
     // Don't export anything that is in the standard library namespace. For now. Maybe later.
-    if( ( cursor.fully_qualifid() + "::" ).compare( 0, 5, "std::" ) == 0 ) {
+    if( cursor.fully_qualifid().is_in_namespace( Parser::cpp_standard_namespace ) ) {
         return true;
     }
     if( is_reserved( cursor.spelling() ) ) {
@@ -63,7 +58,7 @@ Parser::Parser( Exporter &e ) : exporter( e )
 
 Parser::~Parser() = default;
 
-void Parser::skipped( const std::string &what, const std::string &name, const std::string &why )
+void Parser::skipped( const std::string &what, const FullyQualifiedId &name, const std::string &why )
 {
     const std::string id = what + "!" + name;
     // Register what things have been skipped, so we can avoid showing this
@@ -84,14 +79,10 @@ void Parser::parse_enum( const Cursor &cursor )
     if( skip_silently( cursor ) ) {
         return;
     }
-    const std::string name = cursor.fully_qualifid();
-    if( !exporter.export_enabled( cursor.type() ) ) {
-        if(export_all && cursor.fully_qualifid().find("::") == std::string::npos){
-        exporter.add_export_enumeration(cursor.spelling());
-    } else {
+    const FullyQualifiedId name = cursor.fully_qualifid();
+    if( !export_all && !exporter.export_enabled( cursor.type() ) ) {
         skipped( "enum", name, "not exported" );
         return;
-    }
     }
     if( contains( name, enums ) ) {
         return;
@@ -104,19 +95,14 @@ void Parser::parse_class( const Cursor &cursor )
     if( skip_silently( cursor ) ) {
         return;
     }
-    const std::string name = cursor.fully_qualifid();
+    const FullyQualifiedId name = cursor.fully_qualifid();
     const Type t = cursor.type();
-    if( !exporter.export_enabled( t ) ) {
-        if(export_all && cursor.fully_qualifid().find("::") == std::string::npos){
-        exporter.add_export_by_value_and_reference(cursor.spelling());
-    } else {
+    if( !export_all && !exporter.export_enabled( cursor.type() ) ) {
         skipped( "class", name, "not exported" );
         return;
     }
-    }
     if( !exporter.export_by_reference( t ) && !exporter.export_by_value( t ) ) {
-        throw std::runtime_error( "Class " + name +
-                                  " should be exported, but is not marked as by-value nor as by-reference!" );
+        throw std::runtime_error( "Class " + name + " should be exported, but is not marked as by-value nor as by-reference!" );
     }
     get_or_add_class( cursor );
 }
@@ -126,7 +112,7 @@ void Parser::parse_union( const Cursor &cursor )
     if( skip_silently( cursor ) ) {
         return;
     }
-    const std::string name = cursor.fully_qualifid();
+    const FullyQualifiedId name = cursor.fully_qualifid();
     skipped( "union", name, "not supported" );
     //@todo maybe implement it?
 }
@@ -142,10 +128,10 @@ void Parser::parse_function( const Cursor &cursor )
 
 void Parser::parse_namespace( const Cursor &cursor )
 {
-    if( is_reserved( cursor.spelling() ) || cursor.spelling() == "" ) {
+    if( is_reserved( cursor.spelling() ) || cursor.spelling().empty() ) {
         return;
     }
-    if( cursor.spelling() == "std" ) {
+    if( cursor.fully_qualifid().is_in_namespace( cpp_standard_namespace ) ) {
         return;
     }
     parse( cursor );
@@ -300,12 +286,12 @@ void Parser::error_message( const std::string &message ) const
     std::cerr << message << std::endl;
 }
 
-const CppClass *Parser::get_class( const std::string &full_name ) const
+const CppClass *Parser::get_class( const FullyQualifiedId &full_name ) const
 {
     return get_from( full_name, classes );
 }
 
-bool Parser::contains_class( const std::string &full_name ) const
+bool Parser::contains_class( const FullyQualifiedId &full_name ) const
 {
     return contains( full_name, classes );
 }
@@ -322,12 +308,15 @@ CppClass &Parser::get_or_add_class( const Cursor &c )
     return ptr ? *ptr : add_class( c );
 }
 
-const CppEnum *Parser::get_enum( const std::string &full_name ) const
+const CppEnum *Parser::get_enum( const FullyQualifiedId &full_name ) const
 {
     return get_from( full_name, enums );
 }
 
-bool Parser::contains_enum( const std::string &full_name ) const
+bool Parser::contains_enum( const FullyQualifiedId &full_name ) const
 {
     return contains( full_name, enums );
 }
+
+const FullyQualifiedId Parser::cpp_standard_namespace( "std" );
+

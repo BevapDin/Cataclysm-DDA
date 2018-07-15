@@ -4,7 +4,7 @@
 #include "Parser.h"
 #include "Exporter.h"
 
-CppEnum::CppEnum( Parser &p, const Cursor &cursor ) : full_name_( cursor.fully_qualifid() ), cpp_name_( cursor.spelling() )
+CppEnum::CppEnum( Parser &p, const Cursor &cursor ) : full_name_( cursor.fully_qualifid() )
 {
     p.debug_message( "Parsing enum " + full_name() + " at " + cursor.location() );
     cursor.visit_children( [this]( const Cursor & c, const Cursor &/*parent*/ ) {
@@ -17,8 +17,8 @@ CppEnum::CppEnum( Parser &p, const Cursor &cursor ) : full_name_( cursor.fully_q
     } );
 }
 
-CppEnum::CppEnum( const std::string &ns, const std::string &n ) : full_name_( Parser::fully_qualifid(ns, n)), cpp_name_(n)
-{ }
+//CppEnum::CppEnum( const std::string &ns, const std::string &n ) : full_name_( Parser::fully_qualifid(ns, n)), cpp_name_(n)
+//{ }
 
 std::string CppEnum::export_( Exporter &p ) const
 {
@@ -35,10 +35,10 @@ std::string CppEnum::export_( Exporter &p ) const
 
 std::string CppEnum::cpp_name() const
 {
-    return cpp_name_;
+    return full_name_.back();
 }
 
-std::string CppEnum::full_name() const
+FullyQualifiedId CppEnum::full_name() const
 {
     return full_name_;
 }

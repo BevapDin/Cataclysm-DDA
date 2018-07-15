@@ -7,6 +7,7 @@
 #include <functional>
 
 class Type;
+class FullyQualifiedId;
 
 /**
  * Simple wrapper over @ref CXCursor.
@@ -50,7 +51,7 @@ class Cursor
         Cursor get_definition() const;
         Cursor get_semantic_parent() const;
 
-        std::string fully_qualifid() const;
+        FullyQualifiedId fully_qualifid() const;
 
         void dump( const std::string &msg ) const;
 

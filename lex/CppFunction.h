@@ -23,5 +23,5 @@ class CppFunction : public CppCallable
         bool is_static() const;
         bool is_public() const;
 
-        std::string full_name() const override;
+        FullyQualifiedId full_name() const override;
 };

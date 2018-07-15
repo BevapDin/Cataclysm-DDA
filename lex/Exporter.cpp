@@ -68,19 +68,19 @@ static const std::set<int> numeric_floating_pints = { {
     }
 };
 
-bool Exporter::is_blocked( const std::string &name ) const
+bool Exporter::is_blocked( const FullyQualifiedId &name ) const
 {
-    return blocked_identifiers->match( name );
+    return blocked_identifiers->match( name.as_string() );
 }
 
-bool Exporter::ignore_result_of( const std::string &name ) const
+bool Exporter::ignore_result_of( const FullyQualifiedId &name ) const
 {
-    return ignore_result_of_those->match( name );
+    return ignore_result_of_those->match( name.as_string() );
 }
 
-bool Exporter::is_readonly( const std::string &name ) const
+bool Exporter::is_readonly( const FullyQualifiedId &name ) const
 {
-    return is_readonly_identifiers->match( name );
+    return is_readonly_identifiers->match( name.as_string() );
 }
 
 std::string Exporter::translate_identifier( const std::string &name ) const
@@ -94,15 +94,15 @@ std::string Exporter::translate_identifier( const std::string &name ) const
     return iter != function_name_translation_table.end() ?  iter->second : name;
 }
 
-std::string Exporter::derived_class( const Type &t ) const
+FullyQualifiedId Exporter::derived_class( const Type &t ) const
 {
     if( t.kind() == CXType_Typedef ) {
         return derived_class( t.get_declaration().get_underlying_type() );
     }
     if( t.kind() == CXType_Record || t.kind() == CXType_Enum ) {
-        return remove_const( t.spelling() );
+        return FullyQualifiedId( remove_const( t.spelling() ) );
     }
-    return remove_const( t.spelling() );
+    return FullyQualifiedId( remove_const( t.spelling() ) );
 }
 
 Exporter::Exporter() : readonly_identifiers( new MultiMatcher() ),
@@ -222,7 +222,7 @@ std::string Exporter::translate_argument_type( const Type &t ) const
 
 void Exporter::export_( const Parser &parser, const std::string &lua_file )
 {
-    std::set<std::string> handled_types;
+    std::set<FullyQualifiedId> handled_types;
     std::ofstream f( lua_file.c_str() );
     f << "classes = {\n";
     for( const auto &c : types_to_export ) {
@@ -433,8 +433,7 @@ std::string extract_templates( const std::string &template_name, const std::stri
 std::string Exporter::register_std_iterator( const std::string &name, const Type &t )
 {
     const std::string sp = remove_const( t.spelling() );
-    std::string element_type = extract_templates( Parser::fully_qualifid( "std", name ), sp,
-                               "::iterator" );
+    std::string element_type = extract_templates( FullyQualifiedId( Parser::cpp_standard_namespace, name ).as_string(), sp, "::iterator" );
     if( element_type.empty() ) {
         if( t.kind() == CXType_Typedef ) {
             return register_std_iterator( name, t.get_declaration().get_underlying_type() );
@@ -444,7 +443,7 @@ std::string Exporter::register_std_iterator( const std::string &name, const Type
 
     if( build_in_lua_type( element_type ) == "std::string" ) {
         element_type = "std::string";
-    } else if( export_by_value( element_type ) ) {
+    } else if( export_by_value( FullyQualifiedId( element_type ) ) ) {
         // pass
     } else {
         debug_message( sp + " is a " + name + " based on " + element_type + ", but is not exported" );
@@ -462,7 +461,7 @@ std::string Exporter::register_std_container( const std::string name, const Type
         return res;
     }
     const std::string sp = remove_const( t.spelling() );
-    std::string element_type = extract_templates( Parser::fully_qualifid( "std", name ), sp );
+    std::string element_type = extract_templates( FullyQualifiedId( Parser::cpp_standard_namespace, name ).as_string(), sp );
     if( element_type.empty() ) {
         if( t.kind() == CXType_Typedef ) {
             return register_std_container( name, t.get_declaration().get_underlying_type() );
@@ -472,7 +471,7 @@ std::string Exporter::register_std_container( const std::string name, const Type
 
     if( build_in_lua_type( element_type ) == "std::string" ) {
         element_type = "std::string";
-    } else if( export_by_value( element_type ) ) {
+    } else if( export_by_value( FullyQualifiedId( element_type ) ) ) {
         // pass
     } else {
         debug_message( sp + " is a " + name + " based on " + element_type +
@@ -505,17 +504,11 @@ std::string Exporter::register_generic( const Type &t )
 
 bool Exporter::export_by_value( const Type &name ) const
 {
-    if( export_by_value( remove_const( name.spelling() ) ) ) {
-        return true;
-    }
     return export_by_value( derived_class( name ) );
 }
 
 bool Exporter::export_by_reference( const Type &name ) const
 {
-    if( export_by_reference( remove_const( name.spelling() ) ) ) {
-        return true;
-    }
     return export_by_reference( derived_class( name ) );
 }
 
@@ -550,7 +543,7 @@ std::string Exporter::escape_to_lua_string( const std::string &text ) const
 }
 
 bool Exporter::add_id_typedef( const Cursor &cursor, const std::string &id_type,
-                               std::map<std::string, std::string> &ids_map )
+                               std::map<std::string, FullyQualifiedId> &ids_map )
 {
     const Type t = cursor.get_underlying_type();
     const std::string base_type = remove_const( extract_templates( id_type,
@@ -564,7 +557,7 @@ bool Exporter::add_id_typedef( const Cursor &cursor, const std::string &id_type,
         return true;
     }
 
-    if( !export_enabled( base_type ) ) {
+    if( !export_enabled( FullyQualifiedId( base_type ) ) ) {
         // Don't add base_type to be exported, as not all (string|int)_id functions
         // may be available. This requires the user to manually enable
         // id types to be exported.
@@ -574,10 +567,10 @@ bool Exporter::add_id_typedef( const Cursor &cursor, const std::string &id_type,
         return false;
     }
 
-    ids_map.emplace( typedef_name, base_type );
+    ids_map.emplace( typedef_name, FullyQualifiedId( base_type ) );
     // A id itself is always handled by value. It's basically a std::string/int.
     assert( valid_cpp_identifer( typedef_name ) );
-    types_exported_by_value.insert( typedef_name );
+    types_exported_by_value.insert( FullyQualifiedId( typedef_name ) );
     //    debug_message( "Automatically added " + typedef_name + " as " + id_type + "<" + base_type + ">" );
     return true;
 }
@@ -596,41 +589,36 @@ bool Exporter::register_id_typedef( const Cursor &cursor )
     return false;
 }
 
-void Exporter::add_export_for_string_id( const std::string &id_name, const std::string &cpp_name )
+void Exporter::add_export_for_string_id( const std::string &id_name, const FullyQualifiedId &full_name )
 {
-    assert( valid_cpp_identifer( cpp_name ) );
     assert( valid_cpp_identifer( id_name ) );
-    string_ids.emplace( id_name, cpp_name );
-    types_to_export.insert( cpp_name );
-    types_exported_by_value.insert( id_name );
+    string_ids.emplace( id_name, full_name );
+    types_to_export.insert( FullyQualifiedId( full_name ) );
+    types_exported_by_value.insert( FullyQualifiedId( id_name ) );
 }
 
-void Exporter::add_export_by_value( const std::string &cpp_name )
+void Exporter::add_export_by_value( const FullyQualifiedId &full_name )
 {
-    assert( valid_cpp_identifer( cpp_name ) );
-    types_exported_by_value.insert( cpp_name );
-    types_to_export.insert( cpp_name );
+    types_exported_by_value.insert( full_name );
+    types_to_export.insert( full_name );
 }
 
-void Exporter::add_export_by_reference( const std::string &cpp_name )
+void Exporter::add_export_by_reference( const FullyQualifiedId &full_name )
 {
-    assert( valid_cpp_identifer( cpp_name ) );
-    types_exported_by_reference.insert( cpp_name );
-    types_to_export.insert( cpp_name );
+    types_exported_by_reference.insert( full_name );
+    types_to_export.insert( full_name );
 }
 
-void Exporter::add_export_by_value_and_reference( const std::string &cpp_name )
+void Exporter::add_export_by_value_and_reference( const FullyQualifiedId &full_name )
 {
-    assert( valid_cpp_identifer( cpp_name ) );
-    types_exported_by_value.insert( cpp_name );
-    types_exported_by_reference.insert( cpp_name );
-    types_to_export.insert( cpp_name );
+    types_exported_by_value.insert( full_name );
+    types_exported_by_reference.insert( full_name );
+    types_to_export.insert( full_name );
 }
 
-void Exporter::add_export_enumeration( const std::string &cpp_name )
+void Exporter::add_export_enumeration( const FullyQualifiedId &full_name )
 {
-    assert( valid_cpp_identifer( cpp_name ) );
-    add_export_by_value( cpp_name );
+    add_export_by_value( full_name );
 }
 
 std::string Exporter::get_header_for_argument( const Type &t ) const

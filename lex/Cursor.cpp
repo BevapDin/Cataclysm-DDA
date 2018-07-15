@@ -4,6 +4,7 @@
 #include "common.h"
 #include "Type.h"
 #include "Parser.h"
+#include "FullyQualifiedId.h"
 
 #include <cstring>
 #include <set>
@@ -340,12 +341,12 @@ Cursor Cursor::get_semantic_parent() const {
     return clang_getCursorSemanticParent(cursor_);
 }
 
-std::string Cursor::fully_qualifid() const
+FullyQualifiedId Cursor::fully_qualifid() const
 {
     if( kind() == CXCursor_TranslationUnit ) {
-        return std::string();
+        return FullyQualifiedId();
     }
-    std::string result = spelling();
+    FullyQualifiedId result( spelling() );
     Cursor p = get_semantic_parent();
     while( true ) {
         const CXCursorKind k = p.kind();
@@ -354,7 +355,7 @@ std::string Cursor::fully_qualifid() const
         } else if(k==CXCursor_FirstInvalid) {
             break;
         } else if( k == CXCursor_Namespace || k == CXCursor_ClassDecl || k == CXCursor_StructDecl ) {
-            result = Parser::fully_qualifid( p.fully_qualifid(), result );
+            result = FullyQualifiedId( p.fully_qualifid(), result.as_string() );
         }
         p = p.get_semantic_parent();
     }
@@ -394,7 +395,7 @@ void dump( std::ostream &stream, const std::string &msg, const Cursor &c, size_t
     cursors.insert(c);
     i++;
 
-    stream << tab << "fully qualified: " << c.fully_qualifid() << "\n";
+    stream << tab << "fully qualified: " << c.fully_qualifid().as_string() << "\n";
     stream << tab << "location: " << c.location() << "\n";
 
     dump(stream, "parent", c.get_semantic_parent(), i, cursors, types);

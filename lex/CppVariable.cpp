@@ -8,7 +8,7 @@ CppVariable::CppVariable( const Cursor &c ) : cursor_( c )
 {
 }
 
-std::string CppVariable::full_name() const
+FullyQualifiedId CppVariable::full_name() const
 {
     return cursor_.fully_qualifid();
 }
@@ -32,8 +32,8 @@ std::string CppVariable::export_( Exporter &p ) const
         std::string line;
         const std::string lua_name = p.translate_identifier( cursor_.spelling() );
         line = line + lua_name + " = { ";
-        if( lua_name != cursor_.fully_qualifid() ) {
-            line = line + "cpp_name = \"" + cursor_.fully_qualifid() + "\", ";
+        if( lua_name != cursor_.spelling() ) {
+            line = line + "cpp_name = \"" + cursor_.spelling() + "\", ";
         }
         line = line + "type = " + p.translate_member_type( type() );
         if( !is_const() && !p.is_readonly( full_name() ) ) {

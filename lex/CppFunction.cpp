@@ -39,7 +39,8 @@ std::list<std::string> CppFunction::export_( Exporter &p ) const
         try {
             result = p.translate_result_type( cursor.get_result_type() );
         } catch( const TypeTranslationError & ) {
-            if( p.ignore_result_of( full_name_with_args() ) ) {
+            //@todo
+            if( p.ignore_result_of( FullyQualifiedId( full_name_with_args() ) ) ) {
                 throw;
             }
             // Otherwise just make the wrapper ignore the result of the function call
@@ -78,9 +79,10 @@ bool CppFunction::is_static() const
     return cursor.is_static_method();
 }
 
-std::string CppFunction::full_name() const
+FullyQualifiedId CppFunction::full_name() const
 {
-    return ( is_static() ? "static " : "" ) + CppCallable::full_name();
+    // @todo
+    return FullyQualifiedId( ( is_static() ? "static " : "" ) + CppCallable::full_name() );
 }
 
 bool CppFunction::is_public() const

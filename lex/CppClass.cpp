@@ -8,6 +8,7 @@
 #include "Type.h"
 #include "Cursor.h"
 #include "common.h"
+#include "FullyQualifiedId.h"
 
 #include <algorithm>
 #include <vector>
@@ -187,7 +188,7 @@ void CppClass::gather_parent( Exporter &e,
 
 std::string CppClass::export_( Exporter &p ) const
 {
-    p.debug_message( "Exporting class " + cpp_name() );
+    p.debug_message( "Exporting class " + full_name() );
     static const std::string tab( 8, ' ' );
     // Both lists will include the functions of parent classes
     std::vector<std::reference_wrapper<const CppFunction>> functions;
@@ -226,8 +227,7 @@ std::string CppClass::export_( Exporter &p ) const
     }
 
     for( const CppClass &pc : parents ) {
-        //@todo should be full_name, not cpp_name
-        if( !p.export_enabled( pc.cpp_name() ) ) {
+        if( !p.export_enabled( pc.full_name() ) ) {
             // Parent class is not exported directly, but we still have to include its
             // functions and attributes
             pc.gather_parent( p, functions, attributes );
@@ -245,29 +245,29 @@ std::string CppClass::export_( Exporter &p ) const
 
     for( const CppClass &pc : parents ) {
         p.debug_message( "Parent of " + full_name() + " is " + pc.full_name() );
-        //@todo should be full_name, not cpp_name
-        if( p.export_enabled( pc.cpp_name() ) ) {
+        if( p.export_enabled( pc.full_name() ) ) {
+            //@todo should be lua_name, not full_name
             r = r + tab + "parent = \"" + pc.full_name() + "\",\n";
         }
     }
 
     // Exporting the constructor only makes sense for types that can have by-value semantic
-    if( p.export_by_value( cpp_name() ) ) {
+    if( p.export_by_value( full_name() ) ) {
         r = r + print_set( print_objects<CppConstructor>( p, constructors ), tab + "new = {\n", tab + "},\n" );
     }
 
-    const std::string sid = p.get_string_id_for( cpp_name() );
+    const std::string sid = p.get_string_id_for( full_name() );
     if( !sid.empty() ) {
         r = r + tab + "string_id = \"" + sid + "\",\n";
     }
-    const std::string iid = p.get_int_id_for( cpp_name() );
+    const std::string iid = p.get_int_id_for( full_name() );
     if( !iid.empty() ) {
         r = r + tab + "int_id = \"" + iid + "\",\n";
     }
 
-    if( p.export_by_value( cpp_name() ) && p.export_by_reference( cpp_name() ) ) {
+    if( p.export_by_value( full_name() ) && p.export_by_reference( full_name() ) ) {
         r = r + tab + "by_value_and_reference = true,\n";
-    } else if( p.export_by_value( cpp_name() ) ) {
+    } else if( p.export_by_value( full_name() ) ) {
         r = r + tab + "by_value = true,\n";
     } else {
         // by reference is the default.
@@ -285,7 +285,7 @@ std::string CppClass::export_( Exporter &p ) const
     return r;
 }
 
-std::string CppClass::full_name() const
+FullyQualifiedId CppClass::full_name() const
 {
     return cursor_.fully_qualifid();
 }

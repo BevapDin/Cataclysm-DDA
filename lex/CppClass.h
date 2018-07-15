@@ -12,6 +12,7 @@ class CppAttribute;
 class CppConstructor;
 class Parser;
 class Exporter;
+class FullyQualifiedId;
 
 class CppClass
 {
@@ -38,7 +39,7 @@ class CppClass
         std::string export_( Exporter &p ) const;
 
         std::string cpp_name() const;
-        std::string full_name() const;
+        FullyQualifiedId full_name() const;
 
         bool has_equal() const;
 };

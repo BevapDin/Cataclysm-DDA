@@ -11,9 +11,9 @@ CppAttribute::CppAttribute( CppClass &p, const Cursor &c ) : parent_name_( p.ful
 {
 }
 
-std::string CppAttribute::full_name() const
+FullyQualifiedId CppAttribute::full_name() const
 {
-    return parent_name_ + "::" + cpp_name();
+    return FullyQualifiedId( parent_name_, cpp_name() );
 }
 
 std::string CppAttribute::cpp_name() const

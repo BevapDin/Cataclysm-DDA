@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Cursor.h"
+#include "FullyQualifiedId.h"
 
 #include <string>
 
@@ -19,7 +20,7 @@ class CppVariable
 
         Type type() const;
         /// Fully qualified name in C++.
-        std::string full_name() const;
+        FullyQualifiedId full_name() const;
         /// Whether it's declared as const.
         bool is_const() const;
 };

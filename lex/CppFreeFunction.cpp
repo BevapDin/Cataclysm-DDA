@@ -26,7 +26,8 @@ std::list<std::string> CppFreeFunction::export_( Exporter &p ) const
         try {
             result = p.translate_result_type( cursor.get_result_type() );
         } catch( const TypeTranslationError & ) {
-            if( p.ignore_result_of( full_name_with_args() ) ) {
+            //@todo
+            if( p.ignore_result_of( FullyQualifiedId( full_name_with_args() ) ) ) {
                 throw;
             }
             // Otherwise just make the wrapper ignore the result of the function call
@@ -38,8 +39,8 @@ std::list<std::string> CppFreeFunction::export_( Exporter &p ) const
         const std::string lua_name = p.translate_identifier( cpp_name() );
         line = line + "name = \"" + lua_name + "\", ";
         line = line + "rval = " + result + ", ";
-        if( lua_name != full_name() ) {
-            line = line + "cpp_name = \"" + full_name() + "\", ";
+        if( lua_name != cpp_name() ) {
+            line = line + "cpp_name = \"" + cpp_name() + "\", ";
         }
         const std::string comment = cursor.raw_comment();
         if( !comment.empty()  && p.export_comments ) {
