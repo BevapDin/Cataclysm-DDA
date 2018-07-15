@@ -4,7 +4,11 @@ This is implemented via [Lua](https://www.lua.org/). It's currently optional, ma
 
 ## Lua side
 
-See [Lua usage](LUA_USAGE.md) on how to use Lua in the game.
+See [Lua usage](LUA_USAGE.md) on how to use Lua in the game. The game exports a strict subset of its C++ classes and functions to Lua. This means function calls in Lua are forwarded directly to the matching C++ function. Documentation for the C++ code also applies to the exported things (especially restrictions on input and output).
+
+If in doubt, look at the C++ code of the same name.
+
+@todo add a Lua documentation generator
 
 ## C++ side
 
