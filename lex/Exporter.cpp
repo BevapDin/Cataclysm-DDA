@@ -511,11 +511,8 @@ bool Exporter::export_enabled( const FullyQualifiedId name ) const
 }
 bool Exporter::export_enabled( const Type &name, const std::string &path ) const
 {
-    if( !export_all_in_path_.empty() && export_all_in_path_.compare( 0, export_all_in_path_.length(), path ) == 0 ) {
+    if( !export_all_in_path_.empty() && path.compare( 0, export_all_in_path_.length(), export_all_in_path_ ) == 0 ) {
         return true;
-    }
-    if( !export_all_in_path_.empty() ) {
-        debug_message( "Not exported: " + name.spelling() + " (" + path + " vs " + path.substr(0,export_all_in_path_.length()) + ")" );
     }
     return export_enabled( derived_class( name ) );
 }

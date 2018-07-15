@@ -100,7 +100,8 @@ void Parser::parse_class( const Cursor &cursor )
         return;
     }
     if( !exporter.export_by_reference( t ) && !exporter.export_by_value( t ) ) {
-        throw std::runtime_error( "Class " + name + " should be exported, but is not marked as by-value nor as by-reference!" );
+        exporter.add_export_by_value_and_reference( name );
+//        throw std::runtime_error( "Class " + name + " should be exported, but is not marked as by-value nor as by-reference!" );
     }
     get_or_add_class( cursor );
 }
