@@ -55,7 +55,7 @@ inline int push_onto_stack( const lua_engine &/*engine*/ )
 template<typename Head, typename ... Args>
 inline int push_onto_stack( const lua_engine &engine, Head &&head, Args &&... args )
 {
-    push_value_onto_stack( engine, std::forward<Head>( head ) );
+    catalua::push::push_value_onto_stack( engine, std::forward<Head>( head ) );
     return 1 + push_onto_stack( engine, std::forward<Args>( args )... );
 }
 
