@@ -55,7 +55,7 @@ class scriptable_value
             if( !script_ ) {
                 return value_type();
             }
-            return ( *script_ )( engine, std::forward<ActualArgs>( args )... );
+            return script_->invoke_with_catch( engine, std::forward<ActualArgs>( args )... );
         }
         template<typename Stream>
         void deserialize( Stream &jsin ) {
