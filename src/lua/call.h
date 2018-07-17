@@ -173,6 +173,12 @@ inline value_type call( const lua_engine &engine, const script_reference &script
 }
 
 /**
+ * Expects an active exception and reports it to some error log/stream/...
+ * Basically an error handler that can be used to swallow the exception.
+ */
+void report_exception( const lua_engine &engine );
+
+/**
  * Invokes a callback that can be registered by each mod. The callback is invoked
  * in an arbitrary order for each mod. If no mod has registered the callback, nothing
  * will happen.
@@ -195,7 +201,7 @@ inline void mod_callback( const lua_engine &engine, const char *const name, Args
         const int cnt = stack::push_all( engine, name, std::forward<Args>( args )... );
         stack::call_void_function( engine, cnt );
     } catch( ... ) {
-        // @todo handle this
+        report_exception( engine );
     }
 }
 
