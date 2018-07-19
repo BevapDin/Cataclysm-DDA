@@ -5,6 +5,10 @@
         "name" : "Repair cotton/leather/wool/Nomex/fur"
     },{
         "type" : "item_action",
+        "id" : "lua",
+        "name" : "Some Lua script"
+    },{
+        "type" : "item_action",
         "id" : "repair_metal",
         "name" : "Repair metal/plastic/kevlar"
     },{

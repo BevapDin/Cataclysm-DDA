@@ -125,16 +125,6 @@ class lua_iuse_wrapper : public iuse_actor
         void load( JsonObject & ) override {}
 };
 
-// iuse abstraction to make iuse's both in lua and C++ possible
-// ------------------------------------------------------------
-void Item_factory::register_iuse_lua( const std::string &name, int lua_function )
-{
-    if( iuse_function_list.count( name ) > 0 ) {
-        DebugLog( D_INFO, D_MAIN ) << "lua iuse function " << name << " overrides existing iuse function";
-    }
-    iuse_function_list[name] = use_function( new lua_iuse_wrapper( lua_function, name ) );
-}
-
 void catalua::stack::push_mod_callback_call( const lua_engine &engine  )
 {
     // @todo check for errors
@@ -343,28 +333,6 @@ static int game_choose_adjacent( lua_State *L )
     }
 }
 
-// game.register_iuse(string, function_object)
-static int game_register_iuse( lua_State *L )
-{
-    // Make sure the first argument is a string.
-    const char *name = luaL_checkstring( L, 1 );
-    if( !name ) {
-        throw std::runtime_error( "First argument to game.register_iuse is not a string." );
-    }
-
-    // Make sure the second argument is a function
-    luaL_checktype( L, 2, LUA_TFUNCTION );
-
-    // function_object is at the top of the stack, so we can just pop
-    // it with luaL_ref
-    int function_index = luaL_ref( L, LUA_REGISTRYINDEX );
-
-    // Now register function_object with our iuse's
-    item_controller->register_iuse_lua( name, function_index );
-
-    return 0; // 0 return values
-}
-
 // Load the main file of a mod
 void lua_engine::loadmod( const std::string &base_path, const std::string &main_file_name )
 {
@@ -440,7 +408,6 @@ static int game_myPrint( lua_State *L )
 // Registry containing all the game functions exported to lua.
 // -----------------------------------------------------------
 static const struct luaL_Reg global_funcs [] = {
-    {"register_iuse", catch_exception_for_lua_wrapper<game_register_iuse>},
     {"items_at", catch_exception_for_lua_wrapper<game_items_at>},
     {"choose_adjacent", catch_exception_for_lua_wrapper<game_choose_adjacent>},
     {"dofile", catch_exception_for_lua_wrapper<game_dofile>},

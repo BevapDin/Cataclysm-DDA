@@ -29,6 +29,8 @@
 #include "ui.h"
 #include "veh_type.h"
 #include "field.h"
+#include "lua/script.h"
+#include "game.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -472,6 +474,30 @@ Item_factory::Item_factory()
     init();
 }
 
+class iuse_script_wrapper : public iuse_actor
+{
+    public:
+        using script_type = catalua::script<int, std::reference_wrapper<player>, std::reference_wrapper<item>, bool, tripoint>;
+
+    private:
+        script_type script_;
+
+    public:
+        iuse_script_wrapper( const std::string &type = "lua" ) : iuse_actor( type ) { }
+
+        ~iuse_script_wrapper() override = default;
+        long use( player &p, item &it, bool a, const tripoint &pos ) const override {
+            return script_.invoke_with_catch( *g->lua_engine_ptr, p, it, a, pos );
+        }
+        iuse_actor *clone() const override {
+            return new iuse_script_wrapper( *this );
+        }
+
+        void load( JsonObject &obj ) override {
+            obj.read( "script", script_ );
+        }
+};
+
 class iuse_function_wrapper : public iuse_actor
 {
     private:
@@ -726,6 +752,7 @@ void Item_factory::init()
     add_actor( new detach_gunmods_actor() );
     add_actor( new mutagen_actor() );
     add_actor( new mutagen_iv_actor() );
+    add_actor( new iuse_script_wrapper() );
     // An empty dummy group, it will not spawn anything. However, it makes that item group
     // id valid, so it can be used all over the place without need to explicitly check for it.
     m_template_groups["EMPTY_GROUP"].reset( new Item_group( Item_group::G_COLLECTION, 100, 0, 0 ) );
@@ -2085,7 +2112,6 @@ void Item_factory::clear()
 
     categories.clear();
 
-    // Also clear functions referring to lua
     iuse_function_list.clear();
 
     m_templates.clear();
