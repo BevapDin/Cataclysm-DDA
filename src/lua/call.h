@@ -15,6 +15,8 @@ void push_wrapped_onto_stack( const lua_engine &engine, const T &value );
 namespace catalua
 {
 
+class script_reference;
+
 /**
  * Don't call anything in this namespace directly, except:
  * @ref push_value and @ref get_value.
@@ -109,6 +111,7 @@ inline int push_all( const lua_engine &engine, Head &&head, Args &&... args )
 
 void push_mod_callback_call( const lua_engine & );
 void push_script( const lua_engine &, const std::string & );
+void push_script( const lua_engine &, const script_reference & );
 
 void call_void_function( const lua_engine &, int );
 void call_non_void_function( const lua_engine &, int );
@@ -155,6 +158,14 @@ item result = catalua::call<item>( *g->lua_engine_ptr, "some lua script that ret
  */
 template<typename value_type, typename ... Args>
 inline value_type call( const lua_engine &engine, const std::string &script, Args &&... args )
+{
+    stack::push_script( engine, script );
+    const int cnt = stack::push_all( engine, std::forward<Args>( args )... );
+    return stack::call_wrapper<value_type>::call( engine, cnt );
+}
+
+template<typename value_type, typename ... Args>
+inline value_type call( const lua_engine &engine, const script_reference &script, Args &&... args )
 {
     stack::push_script( engine, script );
     const int cnt = stack::push_all( engine, std::forward<Args>( args )... );

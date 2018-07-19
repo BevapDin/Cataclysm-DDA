@@ -3,6 +3,9 @@
 #define SCRIPT_H
 
 #include "call.h"
+#include "script_reference.h"
+
+#include "../optional.h"
 
 #include <string>
 
@@ -15,14 +18,18 @@ template<typename value_type, typename ...Args>
 class script
 {
     private:
-        std::string script_;
+        cata::optional<script_reference> internal_script_reference_;
 
     public:
         script() = default;
-        script( const std::string &s ) : script_( s ) { }
+        script( const std::string &s ) : internal_script_reference_( s ) { }
 
         value_type operator()( const lua_engine &engine, Args ... args ) const {
-            return call<value_type>( engine, script_, std::forward<Args>( args )... );
+            if( internal_script_reference_ ) {
+                return call<value_type>( engine, *internal_script_reference_, std::forward<Args>( args )... );
+            } else {
+                return call<value_type>( engine, std::string(), std::forward<Args>( args )... );
+            }
         }
         template<typename ...ActualArgs>
         value_type invoke_with_catch( const lua_engine &engine, ActualArgs &&... args ) const {
