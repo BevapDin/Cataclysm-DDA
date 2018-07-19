@@ -64,14 +64,6 @@ class Item_factory
          */
         void check_definitions() const;
         /**
-         * Registers a LUA based iuse function.
-         * @param name The name that is used in the json data to refer to the LUA function.
-         * It is stored in @ref iuse_function_list
-         * @param lua_function The LUA id of the LUA function.
-         */
-        void register_iuse_lua( const std::string &name, int lua_function );
-
-        /**
          * @name Item groups
          *
          * Item groups are used to spawn random items (in random amounts).

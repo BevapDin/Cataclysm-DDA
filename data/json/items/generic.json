@@ -741,6 +741,10 @@
     "color": "light_gray",
     "name": "toaster",
     "description": "A small two slice toaster, not much use as anything but spare parts",
+    "use_action": {
+      "type": "lua",
+      "script": "local p, it, act, pos = ...; game.add_msg(p:disp_name(false) .. \" is using the \" .. it:tname()); return 0;"
+    },
     "price": 1000,
     "material": [ "aluminum", "plastic" ],
     "weight": 725,
