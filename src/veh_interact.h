@@ -64,6 +64,7 @@ class veh_interact
 
         const vpart_info *sel_vpart_info = nullptr;
         char sel_cmd = ' '; //Command currently being run by the player
+        int middle_display_scroll = 0;
 
         const vehicle_part *sel_vehicle_part = nullptr;
 

@@ -194,6 +194,8 @@ veh_interact::veh_interact( vehicle &veh, int x, int y )
     main_context.register_action( "HELP_KEYBINDINGS" );
     main_context.register_action( "FILTER" );
     main_context.register_action( "CHANGE_ORIGIN" );
+    main_context.register_action( "PAGE_UP" );
+    main_context.register_action( "PAGE_DOWN" );
 
     countDurability();
     cache_tool_availability();
@@ -304,6 +306,12 @@ void veh_interact::do_main_loop()
             move_cursor( dx, dy );
         } else if( action == "QUIT" ) {
             finish = true;
+        } else if( action == "PAGE_DOWN" ) {
+            middle_display_scroll--;
+            redraw = true;
+        } else if( action == "PAGE_UP" ) {
+            middle_display_scroll++;
+            redraw = true;
         } else if( action == "CHANGE_ORIGIN" ) {
             const int vp = part_at( 0, 0 );
             if( vp > -1 ) {
@@ -1260,7 +1268,7 @@ bool veh_interact::overview( std::function<bool( const vehicle_part &pt )> enabl
     while( true ) {
         werase( w_list );
         std::string last;
-        int y = 0;
+        int y = middle_display_scroll;
         if( overview_offset ) {
             trim_and_print( w_list, y, 1, getmaxx( w_list ) - 1,
                             c_yellow, _( "'{' to scroll up" ) );
