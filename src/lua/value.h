@@ -110,8 +110,8 @@ class LuaValue
             lua_pop( L, 1 );
             return 0;
         }
-        static int get_member( lua_State *L, const char *name );
-        static int set_member( lua_State *L, const char *name );
+        static int get_member( lua_State *L, const Type &instance, const char *name );
+        static int set_member( lua_State *L, Type &instance, const char *name );
         /**
          * Wrapper for the Lua __index entry in the metatable of the userdata.
          * It queries the actual metatable in case the call goes to a function (and does not request
@@ -133,7 +133,8 @@ class LuaValue
                 // -1 is now the things we have gotten from luaL_getmetafield, return it.
                 return 1;
             }
-            return get_member( L, key );
+            const Type &instance = get( L, 1 );
+            return get_member( L, instance, key );
         }
         /**
          * Wrapper for the Lua __newindex entry in the metatable of the userdata.
@@ -146,7 +147,8 @@ class LuaValue
             if( key == nullptr ) {
                 throw std::runtime_error( "Invalid input to __newindex: key is not a string." );
             }
-            return set_member( L, key );
+            Type &instance = const_cast<Type&>( get( L, 1 ) );
+            return set_member( L, instance, key );
         }
         /**
          * This loads the metatable (and adds the available functions) and pushes it on the stack.

@@ -71,15 +71,6 @@ function member_type_to_cpp_type(member_type)
     end
 end
 
--- Loads an instance of class_name (which must be the first thing on the stack) into a local
--- variable, named "instance". Only use for classes (not enums/primitives).
-function load_instance(class_name)
-    if not classes[class_name] then
-        error("'"..class_name.."' is not defined in class_definitions.lua")
-    end
-    return classes[class_name].cpp_name .. "& instance = " .. retrieve_lua_value(class_name, 1) .. ";"
-end
-
 -- Returns an expression that evaluates to `true` if the stack has an object of the given type
 -- at the given position.
 function has_lua_value(value_type, stack_position)
@@ -590,14 +581,18 @@ end
 function generate_accessors(class_name, value_type_name, function_name, attributes, cbc)
     local names = sorted_keys(attributes, function(name) return function_name == "get_member" or attributes[name].writable; end)
     local cpp_output = ""
+    local instance_type = "const " .. classe[class_name].cpp_name
+    if function_name == "set_member" then
+        instance_type = classe[class_name].cpp_name
+    end
 
     cpp_output = cpp_output .. "template<>" .. br
-    cpp_output = cpp_output .. "int LuaValue<" .. value_type_name .. ">::" .. function_name .. "( lua_State *const L, const char *const name ) {" .. br
+    cpp_output = cpp_output .. "int LuaValue<" .. value_type_name .. ">::" .. function_name .. "( lua_State *const L, " .. instance_type .. " &instance, const char *const name ) {" .. br
     if #names == 0 then
+        cpp_output = cpp_output .. "    static_cast<void>( instance ); // unused as there are no exported members" .. br
         cpp_output = cpp_output .. "    static_cast<void>( name ); // unused as there are no exported members" .. br
         cpp_output = cpp_output .. "    static_cast<void>( L ); // unused as there are no exported members" .. br
     else
-        cpp_output = cpp_output .. "    " .. load_instance(class_name) .. br
         cpp_output = cpp_output .. generate_accessors_impl(attributes, names, 1, #names, 1, cbc)
     end
     cpp_output = cpp_output .. "    " .. "throw std::runtime_error( \"unknown attribute\" );" .. br
