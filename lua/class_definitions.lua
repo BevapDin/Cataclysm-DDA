@@ -76,6 +76,134 @@ variable can be used long after `some_monster` has been killed and removed from 
 no connection at all to the monster.
 --]]
 
+function ref_or_val(t)
+    if classes[t] then
+        return t .. '&'
+    else
+        return t
+    end
+end
+
+function container_output_path(t)
+    if classes[t] then
+        return classes[t].output_path
+    else
+        return nil
+    end
+end
+
+-- Adds the declaration for an C++ iterator class to the exported classes.
+-- @param container_type The C++ type id of the container class.
+-- @param element_type The C++ type of the container elements. This type must be exported
+-- as well. Dereferencing the iterator will give a reference to that type.
+function make_std_iterator_class(container_type, element_type)
+    local iterator_type = container_type .. '::iterator'
+    if not classes[iterator_type] then
+        classes[iterator_type] = {
+            has_equal = true,
+            -- @todo check what other members are needed
+            output_path = container_output_path(element_type),
+            new = {
+                { iterator_type },
+            },
+            attributes = {
+            },
+            functions = {
+                { name = "elem", rval = ref_or_val(element_type), cpp_name = "operator*", args = { } },
+                { name = "inc", rval = nil, cpp_name = "operator++", args = { } },
+            },
+        }
+    end
+    local t = classes[iterator_type]
+    -- @todo maybe add more data to this?
+    return iterator_type
+end
+
+function make_std_list_class(element_type)
+    local container_type = "std::list<" .. element_type .. ">"
+    local iterator_type = make_std_iterator_class(container_type, element_type)
+    if not classes[container_type] then
+        classes[container_type] = {
+            -- @todo check what other members are needed
+            output_path = container_output_path(element_type),
+            new = {
+                { },
+                { container_type },
+            },
+            attributes = {
+            },
+            functions = {
+                { name = "size", rval = "int", args = { } },
+                { name = "erase", rval = iterator_type, args = { iterator_type } },
+                { name = "push_back", rval = nil, args = { element_type } },
+                { name = "insert", rval = nil, args = { iterator_type, element_type } },
+                { name = "cppbegin", rval = iterator_type, cpp_name = "begin", args = { } },
+                { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
+            },
+        }
+    end
+    local t = classes[container_type]
+    -- @todo maybe add more data to this?
+    return container_type
+end
+
+function make_std_vector_class(element_type)
+    local container_type = "std::vector<" .. element_type .. ">"
+    local iterator_type = make_std_iterator_class(container_type, element_type)
+    if not classes[container_type] then
+        classes[container_type] = {
+            -- @todo check what other members are needed
+            output_path = container_output_path(element_type),
+            new = {
+                { },
+                { container_type },
+            },
+            attributes = {
+            },
+            functions = {
+                { name = "at", rval = element_type, args = { "int" } },
+                { name = "size", rval = "int", args = { } },
+                { name = "erase", rval = iterator_type, args = { iterator_type } },
+                { name = "push_back", rval = nil, args = { element_type } },
+                { name = "insert", rval = nil, args = { iterator_type, element_type } },
+                { name = "cppbegin", rval = iterator_type, cpp_name = "begin", args = { } },
+                { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
+            },
+        }
+    end
+    local t = classes[container_type]
+    -- @todo maybe add more data to this?
+    return container_type
+end
+
+function make_std_set_class(element_type)
+    local container_type = "std::set<" .. element_type .. ">"
+    local iterator_type = make_std_iterator_class(container_type, element_type)
+    if not classes[container_type] then
+        classes[container_type] = {
+            -- @todo check what other members are needed
+            output_path = container_output_path(element_type),
+            new = {
+                { },
+                { container_type },
+            },
+            attributes = {
+            },
+            functions = {
+                { name = "size", rval = "int", args = { } },
+                { name = "erase", rval = iterator_type, args = { iterator_type } },
+                { name = "insert", rval = nil, args = { element_type } },
+                { name = "count", rval = "int", args = { element_type } },
+                { name = "cppbegin", rval = iterator_type, cpp_name = "begin", args = { } },
+                { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
+            },
+        }
+    end
+    local t = classes[container_type]
+    -- @todo maybe add more data to this?
+    return container_type
+end
+
 function dofile_if_exists(f)
     local o = io.open(f, "r")
     if o ~= nil then
@@ -114,7 +242,7 @@ classes["volume"] = {
     code_prepend = "#include \"units.h\"",
     output_path = "units.gen.cpp",
     attributes = {
-    },
+        },
     functions = {
         { name = "value", rval = "int", args = { } },
     },
