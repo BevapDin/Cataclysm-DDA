@@ -117,6 +117,10 @@ std::string Exporter::translate_member_type( const Type &t ) const
         return "\"" + lua_name( FullyQualifiedId( remove_const( t.spelling() ) ) ) + "\"";
     }
 
+    if( const auto res = const_cast<Exporter &>( *this ).register_generic( t ) ) {
+        return *res;
+    }
+
     if( t.kind() == CXType_LValueReference ) {
         const Type pt = t.get_pointee();
         if( export_enabled( pt ) ) {
@@ -150,6 +154,10 @@ std::string Exporter::translate_argument_type( const Type &t ) const
         return "\"" + lua_name( FullyQualifiedId( remove_const( t.spelling() ) ) ) + "\"";
     }
 
+    if( const auto res = const_cast<Exporter &>( *this ).register_generic( t ) ) {
+        return *res;
+    }
+
     if( t.kind() == CXType_LValueReference ) {
         const Type pt = t.get_pointee();
         if( pt.is_const_qualified() ) {
@@ -175,6 +183,9 @@ std::string Exporter::translate_argument_type( const Type &t ) const
             return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "\"";
         }
         debug_message( "X2: " + pt.spelling() + "  " + derived_class( pt ) );
+        if( const auto res = const_cast<Exporter &>( *this ).register_generic( pt ) ) {
+            return *res;
+        }
         debug_message( "Could not choose how to translate L-value-reference " + pt.spelling() );
     }
 
@@ -182,6 +193,9 @@ std::string Exporter::translate_argument_type( const Type &t ) const
         const Type pt = t.get_pointee();
         if( export_enabled( pt ) ) {
             return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "\"";
+        }
+        if( const auto res = const_cast<Exporter &>( *this ).register_generic( pt ) ) {
+            return *res;
         }
     }
     if( t.kind() == CXType_Typedef ) {
@@ -251,6 +265,14 @@ void Exporter::export_( const Parser &parser, const std::string &lua_file )
     }
     f << "}\n";
 
+    f << "\n";
+    std::set<std::string> tmp;
+    for( const auto &e : generic_types ) {
+        tmp.insert( e.second );
+    }
+    for( const auto &e : tmp ) {
+        f << e << "\n";
+    }
     f.close();
     //@todo check for IO errors
 
@@ -320,6 +342,10 @@ std::string Exporter::translate_result_type( const Type &t )const
         return "\"" + lua_name( FullyQualifiedId( remove_const( t.spelling() ) ) ) + "\"";
     }
 
+    if( const auto res = const_cast<Exporter &>( *this ).register_generic( t ) ) {
+        return *res;
+    }
+
     // Only allowed as result type, therefor hard coded here.
     if( t.get_canonical_type().kind() == CXType_Void ) {
         return "nil";
@@ -337,6 +363,11 @@ std::string Exporter::translate_result_type( const Type &t )const
         // const and non-const reference){
         if( export_enabled( pt ) ) {
             return "\"" + lua_name( FullyQualifiedId( remove_const( spt ) ) ) + "&\"";
+        }
+
+        // Generic types are exported as values and as reference
+        if( const auto res = const_cast<Exporter &>( *this ).register_generic( pt ) ) {
+            return *res;
         }
     }
     if( t.kind() == CXType_Pointer ) {
@@ -382,6 +413,74 @@ std::string extract_templates( const std::string &template_name, const std::stri
         return std::string();
     }
     return extract_templates( template_name, name.substr( 0, name.length() - postfix.length() ) );
+}
+
+cata::optional<std::string> Exporter::register_std_iterator( const std::string &name, const Type &t )
+{
+    const std::string sp = remove_const( t.spelling() );
+    std::string element_type = extract_templates( FullyQualifiedId( Parser::cpp_standard_namespace, name ).as_string(), sp, "::iterator" );
+    if( element_type.empty() ) {
+        if( t.kind() == CXType_Typedef ) {
+            return register_std_iterator( name, t.get_declaration().get_underlying_type() );
+        }
+        return {};
+    }
+
+    if( build_in_lua_type( element_type ).value_or( "" ) == "std::string" ) {
+        element_type = "std::string";
+    } else if( export_enabled( FullyQualifiedId( element_type ) ) ) {
+        // pass
+    } else {
+        debug_message( sp + " is a " + name + " based on " + element_type + ", but is not exported" );
+        return {};
+    }
+
+    generic_types[sp] = "make_std_iterator_class(\"" + element_type + "\")";
+    return "\"std::" + name + "<" + element_type + ">::iterator\"";
+}
+
+cata::optional<std::string> Exporter::register_std_container( const std::string name, const Type &t )
+{
+    if( const auto res = register_std_iterator( name, t ) ) {
+        return res;
+    }
+    const std::string sp = remove_const( t.spelling() );
+    std::string element_type = extract_templates( FullyQualifiedId( Parser::cpp_standard_namespace, name ).as_string(), sp );
+    if( element_type.empty() ) {
+        if( t.kind() == CXType_Typedef ) {
+            return register_std_container( name, t.get_declaration().get_underlying_type() );
+        }
+        return {};
+    }
+
+    if( build_in_lua_type( element_type ).value_or( "" ) == "std::string" ) {
+        element_type = "std::string";
+    } else if( export_enabled( FullyQualifiedId( element_type ) ) ) {
+        // pass
+    } else {
+        debug_message( sp + " is a " + name + " based on " + element_type +
+                       ", but is not exported" );
+        return {};
+    }
+
+    debug_message( sp + " is a " + name + " based on " + element_type );
+    generic_types[sp] = "make_std_" + name + "_class(\"" + element_type + "\")";
+    return "\"std::" + name + "<" + element_type + ">\"";
+}
+
+cata::optional<std::string> Exporter::register_generic( const Type &t )
+{
+    if( const auto res = register_std_container( "list", t ) ) {
+        return res;
+    }
+    if( const auto res = register_std_container( "vector", t ) ) {
+        return res;
+    }
+    if( const auto res = register_std_container( "set", t ) ) {
+        return res;
+    }
+    // @todo add more
+    return {};
 }
 
 bool Exporter::export_enabled( const FullyQualifiedId name ) const
@@ -517,6 +616,15 @@ cata::optional<std::string> Exporter::get_header_for_argument( const Type &t ) c
     }
     if( t.kind() == CXType_Void ) {
         return {};
+    }
+    if( t.spelling().compare( 0, 12, "std::vector<" ) == 0 ) {
+        return std::string( "#include <vector>" );
+    }
+    if( t.spelling().compare( 0, 10, "std::list<" ) == 0 ) {
+        return std::string( "#include <list>" );
+    }
+    if( t.spelling().compare( 0, 9, "std::set<" ) == 0 ) {
+        return std::string( "#include <set>" );
     }
     const std::string header = t.get_declaration().location_file();
     if( !header.empty() ) {
