@@ -34,6 +34,8 @@ class Exporter
          */
         std::map<FullyQualifiedId, std::string> types_to_export;
 
+        std::map<std::string, std::string> generic_types;
+
         // key is the string_id typedef name (e.g. "mtype_id") and value is the
         // name of the objects it identifiers (e.g. "mtype").
         std::map<std::string, FullyQualifiedId> string_ids;
@@ -131,6 +133,10 @@ class Exporter
         cata::optional<std::string> build_in_lua_type( const std::string &t ) const;
         cata::optional<std::string> build_in_lua_type( const Type &t ) const;
         ///@}
+
+        cata::optional<std::string> register_std_container( const std::string name, const Type &t );
+        cata::optional<std::string> register_std_iterator( const std::string &name, const Type &t );
+        cata::optional<std::string> register_generic( const Type &t );
 
         void export_( const Parser &parser, const std::string &lua_file );
 
