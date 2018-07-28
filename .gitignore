@@ -15,7 +15,7 @@ bindist/
 cataclysmdda-*
 objwin/
 src/version.h
-src/lua/catabindings.cpp
+src/lua/*.gen.cpp
 tools/format/json_formatter.cgi
 CataclysmWin.cscope_file_list
 CataclysmWin.depend

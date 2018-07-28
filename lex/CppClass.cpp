@@ -128,9 +128,21 @@ bool CppClass::has_non_const_overload( const CppFunction &func ) const
     }
     return false;
 }
+
+void add_header( std::vector<std::string> &headers, const cata::optional<std::string> &header )
+{
+    if( !header ) {
+        return;
+    }
+    if( std::find( headers.begin(), headers.end(), *header ) != headers.end() ) {
+        return;
+    }
+    headers.emplace_back( *header );
+}
+
 template<typename O>
 static std::set<std::string> print_objects( Exporter &p,
-        const std::vector<std::reference_wrapper<const O>> &objects )
+        const std::vector<std::reference_wrapper<const O>> &objects, std::vector<std::string> &headers )
 {
     std::set<std::string> lines;
     for( const O &o : objects ) {
@@ -139,6 +151,10 @@ static std::set<std::string> print_objects( Exporter &p,
         }
         try {
             lines.insert( o.export_( p ) );
+            for( const Cursor &c : o.arguments() ) {
+                add_header( headers, p.get_header_for_argument( c.type() ) );
+            }
+            add_header( headers, p.get_header_for_argument( o.result_type() ) );
         } catch( const TypeTranslationError &e ) {
             lines.insert( "-- " + o.full_name() + " ignored because: " + e.what() );
         } catch( const SkippedObjectError &e ) {
@@ -222,6 +238,9 @@ std::string CppClass::export_( Exporter &p ) const
         constructors.push_back( c );
     }
 
+    std::vector<std::string> headers;
+    headers.emplace_back( "#include \"" + cursor_.location_file() + "\"" ); // path of header containing this class
+
     for( const CppClass &pc : parents ) {
         if( !p.export_enabled( pc.cursor_.type(), pc.cursor_.location_path() ) ) {
             // Parent class is not exported directly, but we still have to include its
@@ -246,8 +265,13 @@ std::string CppClass::export_( Exporter &p ) const
         r = r + tab + "cpp_name = \"" + full_name() + "\",\n";
     }
 
-    const auto printed_constructors = print_objects<CppConstructor>( p, constructors );
-    const auto printed_functions = print_objects<CppFunction>( p, functions );
+    const auto printed_constructors = print_objects<CppConstructor>( p, constructors, headers );
+    const auto printed_functions = print_objects<CppFunction>( p, functions, headers );
+
+    r = r + "        code_prepend = \"" + Exporter::escape_to_lua_string( enumerate( "",
+    headers, []( const std::string & h ) {
+        return h + "\n";
+    }, "", "" ) ) + "\",\n";
 
     for( const CppClass &pc : parents ) {
         // @todo handle multiple parents
