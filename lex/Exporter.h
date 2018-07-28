@@ -72,6 +72,8 @@ class Exporter
         std::string translate_result_type( const Type &t ) const;
         ///@}
 
+        cata::optional<std::string> get_header_for_argument( const Type &t ) const;
+
         void add_export_for_string_id( const std::string &id_name, const FullyQualifiedId &full_name );
         void add_export_by_value( const FullyQualifiedId &full_name );
         void add_export_by_value( const FullyQualifiedId &full_name, const std::string &lua_name );
