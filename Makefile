@@ -864,7 +864,7 @@ clean: clean-tests
 	rm -rf *$(BINDIST_DIR) *cataclysmdda-*.tar.gz *cataclysmdda-*.zip
 	rm -f $(SRC_DIR)/version.h
 	rm -f $(CHKJSON_BIN)
-	rm -f $(CATALUA_SRC_DIR)/generate_bindings.lua
+	rm -f $(CATALUA_SRC_DIR)/*.gen.cpp
 
 distclean:
 	rm -rf *$(BINDIST_DIR)

@@ -26,6 +26,14 @@ Optional values are:
   "ter_id"). At the end of this file, this will be used to create an actual entry in the classes
   table for the type name given here.
   This is done because all the int_id objects have essentially the same functions.
+- code_prepend (optional, a string), arbitrary code that is required to compile the generated
+  wrapper functions for this type. This usually contains include statements for at least the
+  header for the type itself, but may require more includes in order to (implicitly) call
+  copy constructors when calling member functions. If a header is missing, you'll get a compiler
+  error.
+- forward_declaration (optional, a string), how to forward declare the type. E.g. "class foo;"
+  (for simple types) or (for template instances):
+  "template<typename N> class wrapper;class foo;using foo_wrapper = wrapper<foo>;"
 
 The attributes table contains the members of the C++ class. Each key is the name of the member,
 it maps to a map with the following values:
@@ -99,6 +107,7 @@ classes["item_stack_iterator"] = {
     by_value = true,
     has_equal = true,
     cpp_name = "std::list<item>::iterator",
+    code_prepend = "#include \"item.h\"\n#include <list>",
     new = {
         { "item_stack_iterator" },
     },
@@ -113,6 +122,7 @@ classes["item_stack_iterator"] = {
 classes["volume"] = {
     by_value = true,
     cpp_name = "units::volume",
+    code_prepend = "#include \"units.h\"",
     attributes = {
     },
     functions = {
@@ -123,12 +133,16 @@ classes["volume"] = {
 classes["mass"] = {
     by_value = true,
     cpp_name = "units::mass",
+    code_prepend = "#include \"units.h\"",
     attributes = {
     },
     functions = {
         { name = "value", rval = "int", args = { } },
     },
 }
+
+-- Headers that are required in order to compile the wrappers for the enum classes.
+enums_code_prepend = "#include \"field.h\"\n#include \"bodypart.h\"\n#include \"itype.h\"\n#include \"creature.h\"\n#include \"output.h\"\n#include \"calendar.h\"\n#include \"pldata.h\"\n#include \"units.h\""
 
 global_functions = {
     add_msg = {
@@ -320,6 +334,13 @@ end
 
 -- Fill in default values for optional properties
 for class_name, value in pairs(classes) do
+    if not value.forward_declaration then
+        -- @todo could be a struct!
+        value.forward_declaration = "class " .. class_name .. ";"
+    end
+    if not value.code_prepend then
+        value.code_prepend = ""
+    end
     if not value.cpp_name then
         value.cpp_name = class_name
     end
@@ -334,6 +355,8 @@ for name, value in pairs(classes) do
     if value.int_id then
         -- This is the common int_id<T> interface:
         local t = {
+            forward_declaration = value.forward_declaration .. "using " .. value.int_id .. " = int_id<" .. name .. ">;",
+            code_prepend = value.code_prepend,
             by_value = true,
             has_equal = true,
             cpp_name = "int_id<" .. value.cpp_name .. ">",
@@ -359,6 +382,8 @@ for name, value in pairs(classes) do
     -- Very similar to int_id above
     if value.string_id then
         local t = {
+            forward_declaration = value.forward_declaration .. "using " .. value.string_id .. " = string_id<" .. name .. ">;",
+            code_prepend = value.code_prepend,
             by_value = true,
             has_equal = true,
             cpp_name = "string_id<" .. value.cpp_name .. ">",

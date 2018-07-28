@@ -484,6 +484,37 @@ void Exporter::add_export_by_value_and_reference( const FullyQualifiedId &full_n
     types_to_export.emplace( full_name, lua_name );
 }
 
+cata::optional<std::string> Exporter::get_header_for_argument( const Type &t ) const
+{
+    if( build_in_lua_type( t ) ) {
+        // build in type is either a build in in C++ as well (e.g. numeric) or
+        // it's string, and we assume the header for string is always included.
+        return {};
+    }
+    if( t.kind() == CXType_LValueReference || t.kind() == CXType_Pointer ) {
+        // reference or pointer, both just need a forward declaration, which has
+        // already been done by the one declaring the function.
+        return {};
+    }
+    if( t.kind() == CXType_Typedef ) {
+        return get_header_for_argument( t.get_declaration().get_underlying_type() );
+    }
+    if( t.kind() == CXType_Enum ) {
+        // forward declaration is enough
+        return {};
+    }
+    if( t.kind() == CXType_Void ) {
+        return {};
+    }
+    const std::string header = t.get_declaration().location_file();
+    if( !header.empty() ) {
+        debug_message( "Type " + t.spelling() + " has header " + header );
+        return "#include \"" + header + "\"";
+    }
+    debug_message( "Type " + t.spelling() + " has empty source file" );
+    return {};
+}
+
 std::string Exporter::lua_name( const FullyQualifiedId &full_name ) const
 {
     const auto iter = types_to_export.find( full_name );
