@@ -7782,3 +7782,41 @@ int iuse::magnesium_tablet( player *p, item *it, bool, const tripoint & )
     p->add_effect( effect_magnesium_supplements, 16_hours );
     return it->type->charges_to_use();
 }
+
+use_function::use_function( const use_function &other ) : actor( other.actor ? other.actor->clone()
+            : nullptr )
+{
+}
+
+use_function &use_function::operator=( iuse_actor *const f )
+{
+    return operator=( use_function( f ) );
+}
+
+use_function &use_function::operator=( const use_function &other )
+{
+    actor.reset( other.actor ? other.actor->clone() : nullptr );
+    return *this;
+}
+
+void use_function::dump_info( const item &it, std::vector<iteminfo> &dump ) const
+{
+    if( actor ) {
+        actor->info( it, dump );
+    }
+}
+
+ret_val<bool> use_function::can_call( const player &p, const item &it, const bool active,
+                                      const tripoint &pos ) const
+{
+    if( !actor ) {
+        return ret_val<bool>::make_failure( _( "You can't do anything interesting with your %s." ),
+                                            it.tname() );
+    }
+    return actor->can_use( p, it, active, pos );
+}
+
+long use_function::call( player &p, item &it, const bool active, const tripoint &pos ) const
+{
+    return actor->use( p, it, active, pos );
+}
