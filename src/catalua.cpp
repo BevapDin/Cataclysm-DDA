@@ -974,11 +974,6 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &, const t
 
 // Custom functions that are to be wrapped from lua.
 // -------------------------------------------------
-const ter_t &get_terrain_type( int id )
-{
-    return ter_id( id ).obj();
-}
-
 static calendar &get_calendar_turn_wrapper()
 {
     return calendar::turn;

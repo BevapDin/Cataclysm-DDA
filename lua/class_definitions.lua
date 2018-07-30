@@ -2204,11 +2204,6 @@ global_functions = {
         args = { "string", "int", "string" },
         rval = "string"
     },
-    get_terrain_type = {
-        cpp_name = "get_terrain_type",
-        args = {"int"},
-        rval = "ter_t&"
-    },
     rng = {
         cpp_name = "rng",
         args = {"int", "int"},
