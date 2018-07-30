@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CATALUA_H
-#define CATALUA_H
+#ifndef LUA_ENGINE_H
+#define LUA_ENGINE_H
 
 #include "int_id.h"
 #include "enums.h"
@@ -63,9 +63,7 @@ struct CallbackArgument {
     CallbackArgument( const body_part &arg_value ) :
         type( CallbackArgumentType::Enum_BodyPart ), value_body_part( arg_value ) {
     }
-#ifdef LUA
     void Save();
-#endif //LUA
 };
 
 typedef std::list<CallbackArgument> CallbackArgumentContainer;
@@ -75,39 +73,66 @@ class monster;
 class time_point;
 struct mapgendata;
 struct oter_t;
-
 using oter_id = int_id<oter_t>;
 
-extern std::stringstream lua_output_stream;
-extern std::stringstream lua_error_stream;
+//@todo hide this
+class lua_iuse_wrapper;
 
-/** If this returns 0, no lua function was defined to override behavior.
- *  If this returns 1, lua behavior was called and regular behavior should be omitted.
- */
-int lua_monster_move( monster *m );
+template<typename T>
+class int_id;
+class map;
+class time_point;
+struct mapgendata;
+struct oter_t;
+using oter_id = int_id<oter_t>;
 
-/**
- * Call the given string as lua code, used for interactive debugging.
- */
-int call_lua( const std::string &tocall );
-int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &md, const time_point &t,
-                float d, const std::string &scr );
+class lua_engine
+{
+    private:
+        friend class lua_iuse_wrapper;
 
-/**
- * Execute a callback that can be overridden by all mods with optional accessible arguments.
- */
-void lua_callback( const char *callback_name, const CallbackArgumentContainer &callback_args );
-void lua_callback( const char *callback_name );
+        // Wrapper for anonymous pointer so we can store
+        // lua_state without having a definition of it in this header.
+        class pointer_wrapper
+        {
+            private:
+                void *ptr;
+            public:
+                pointer_wrapper( void *const p ): ptr( p ) { }
+                template<typename T>
+                operator T *() const {
+                    return static_cast<T *>( ptr );
+                }
+                explicit operator bool() const {
+                    return ptr;
+                }
+        } state;
 
-std::string lua_callback_getstring( const char *callback_name,
-                                    const CallbackArgumentContainer &callback_args );
+    public://@todo make private
+        std::string lua_file_path;
+        std::stringstream output_stream;
+        std::stringstream error_stream;
 
-/**
- * Load the main file of a lua mod.
- *
- * @param base_path The base path of the mod.
- * @param main_file_name The file name of the lua file, usually "main.lua"
- */
-void lua_loadmod( const std::string &base_path, const std::string &main_file_name );
+    public:
+        lua_engine();
+        lua_engine( const lua_engine & ) = delete;
+
+        ~lua_engine();
+
+        /// @throws when initialization fails
+        void init();
+        void loadmod( const std::string &base_path, const std::string &main_file_name );
+
+        int monster_move( monster *m );
+
+        int call( const std::string &script );
+        void callback( const char *name );
+        void callback( const char *name, const CallbackArgumentContainer &callback_args );
+        std::string callback_getstring( const char *callback_name, const CallbackArgumentContainer &callback_args );
+
+        // This is a legacy function, ideally code would use `catalua::call` instead,
+        // but for mapgen we do a bit more than just call the script.
+        int mapgen( map *m, const oter_id &terrain_type, const mapgendata &, const time_point &t, float, const std::string &scr );
+};
 
 #endif

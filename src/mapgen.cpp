@@ -45,7 +45,7 @@
 #include "npc.h"
 #include "vehicle.h"
 #include "vehicle_group.h"
-#include "catalua.h"
+#include "lua/lua_engine.h"
 #include "text_snippets.h"
 
 #define dbg(x) DebugLog((DebugLevel)(x),D_MAP_GEN) << __FILE__ << ":" << __LINE__ << ": "
@@ -222,7 +222,7 @@ void mapgen_function_builtin::generate( map *m, const oter_id &terrain_type, con
     lua_callback_args_info.emplace_back( mapgen_generator_type );
     lua_callback_args_info.emplace_back( terrain_type.id().str() );
     lua_callback_args_info.emplace_back( terrain_tripoint );
-    lua_callback( "on_mapgen_finished", lua_callback_args_info );
+    g->lua_engine_ptr->callback( "on_mapgen_finished", lua_callback_args_info );
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -2090,8 +2090,8 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
     for( auto &elem : setmap_points ) {
         elem.apply( md, 0, 0 );
     }
-    if( ! luascript.empty() ) {
-        lua_mapgen( m, terrain_type, md, t, d, luascript );
+    if( !luascript.empty() ) {
+        g->lua_engine_ptr->mapgen( m, terrain_type, md, t, d, luascript );
     }
 
     place_stairs( m, terrain_type, md );
@@ -2110,7 +2110,7 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
     lua_callback_args_info.emplace_back( mapgen_generator_type );
     lua_callback_args_info.emplace_back( terrain_type.id().str() );
     lua_callback_args_info.emplace_back( terrain_tripoint );
-    lua_callback( "on_mapgen_finished", lua_callback_args_info );
+    g->lua_engine_ptr->callback( "on_mapgen_finished", lua_callback_args_info );
 }
 
 void mapgen_function_json_nested::nest( const mapgendata &dat, int offset_x, int offset_y,
@@ -2170,8 +2170,7 @@ void jmapgen_objects::apply( const mapgendata &dat, int offset_x, int offset_y,
 // wip: need more bindings. Basic stuff works
 
 #ifndef LUA
-int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &mgd, const time_point &t,
-                float d, const std::string & )
+int lua_engine::mapgen( map *m, const oter_id &terrain_type, const mapgendata &mgd, const time_point &t, float d, const std::string & )
 {
     mapgen_crater( m, terrain_type, mgd, to_turn<int>( t ), d );
     mapf::formatted_set_simple( m, 0, 6,
@@ -2195,7 +2194,7 @@ int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &mgd, cons
 void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const mapgendata &mgd,
                                     const time_point &t, float d )
 {
-    lua_mapgen( m, terrain_type, mgd, t, d, scr );
+    g->mapgen( m, terrain_type, mgd, t, d, scr );
 
     const std::string mapgen_generator_type = "lua";
     const tripoint terrain_tripoint = sm_to_omt_copy( m->get_abs_sub() );
@@ -2203,7 +2202,7 @@ void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const m
     lua_callback_args_info.emplace_back( mapgen_generator_type );
     lua_callback_args_info.emplace_back( terrain_type.id().str() );
     lua_callback_args_info.emplace_back( terrain_tripoint );
-    lua_callback( "on_mapgen_finished", lua_callback_args_info );
+    g->lua_engine_ptr->callback( "on_mapgen_finished", lua_callback_args_info );
 }
 
 /////////////

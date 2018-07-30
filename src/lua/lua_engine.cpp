@@ -1,74 +1,55 @@
-#include "catalua.h"
+#include "lua_engine.h"
 
-#include <memory>
+#include "common.h"
+#include "value.h"
+#include "reference.h"
+#include "value_or_reference.h"
+#include "enum.h"
+#include "type.h"
 
 #include "game.h"
-#include "player.h"
 #include "action.h"
 #include "item_factory.h"
 #include "item.h"
-#include "pldata.h"
 #include "mapgen.h"
-#include "mapgen_functions.h"
 #include "map.h"
 #include "output.h"
-#include "string_formatter.h"
 #include "path_info.h"
 #include "monstergenerator.h"
 #include "messages.h"
 #include "debug.h"
-#include "translations.h"
 #include "line.h"
 #include "requirements.h"
-#include "weather_gen.h"
-#include "omdata.h"
 #include "overmap.h"
-
 #include "ui.h"
-#include "mongroup.h"
-#include "itype.h"
-#include "morale_types.h"
 #include "trap.h"
-#include "overmap.h"
-#include "gun_mode.h"
-#include "mapdata.h"
 #include "mtype.h"
-#include "field.h"
 #include "filesystem.h"
 #include "string_input_popup.h"
 #include "mutation.h"
 #include "npc.h"
 #include "bionics.h"
 #include "activity_type.h"
+#include "rng.h"
+#include "monster.h"
+#include "iuse.h"
+
+// @todo get rid of most of the above (keep only those not related to game handling)^^
+
 extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 }
 
-#include <type_traits>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <iostream>
 
 #if LUA_VERSION_NUM < 502
 #define LUA_OK 0
 #endif
-
-using npc_template_id = string_id<npc_template>;
-using overmap_direction = om_direction::type;
-
-
-// Not used in the C++ code, but implicitly required by the Lua bindings.
-// Gun modes need to be created via an actual item.
-template<>
-const gun_mode &string_id<gun_mode>::obj() const
-{
-    static const gun_mode dummy{};
-    return dummy;
-}
-template<>
-bool string_id<gun_mode>::is_valid() const
-{
-    return false;
-}
 
 #if LUA_VERSION_NUM < 502
 // Compatibility, for before Lua 5.2, which does not have luaL_setfuncs
@@ -91,15 +72,11 @@ static void luaL_setfuncs( lua_State *const L, const luaL_Reg arrary[], int cons
 
 void lua_dofile( lua_State *L, const char *path );
 
-// Helper functions for making working with the lua API more straightforward.
-// --------------------------------------------------------------------------
-
-#include "lua/common.h"
-
 // Given a Lua return code and a file that it happened in, print a debugmsg with the error and path.
 // Returns true if there was an error, false if there was no error at all.
 bool lua_report_error( lua_State *L, int err, const char *path, bool simple = false )
 {
+    std::ostream &error_stream = g->lua_engine_ptr->error_stream;
     if( err == LUA_OK || err == LUA_ERRRUN ) {
         // No error or error message already shown via traceback function.
         return err != LUA_OK;
@@ -108,34 +85,28 @@ bool lua_report_error( lua_State *L, int err, const char *path, bool simple = fa
     switch( err ) {
         case LUA_ERRSYNTAX:
             if( !simple ) {
-                lua_error_stream << "Lua returned syntax error for "  << path  << std::endl;
+                error_stream << "Lua returned syntax error for "  << path  << std::endl;
             }
-            lua_error_stream << error;
+            error_stream << error;
             break;
         case LUA_ERRMEM:
-            lua_error_stream << "Lua is out of memory";
+            error_stream << "Lua is out of memory";
             break;
         case LUA_ERRFILE:
             if( !simple ) {
-                lua_error_stream << "Lua returned file io error for " << path << std::endl;
+                error_stream << "Lua returned file io error for " << path << std::endl;
             }
-            lua_error_stream << error;
+            error_stream << error;
             break;
         default:
             if( !simple ) {
-                lua_error_stream << string_format( "Lua returned unknown error %d for ", err ) << path << std::endl;
+                error_stream << string_format( "Lua returned unknown error %d for ", err ) << path << std::endl;
             }
-            lua_error_stream << error;
+            error_stream << error;
             break;
     }
     return true;
 }
-
-#include "lua/value.h"
-#include "lua/reference.h"
-#include "lua/type.h"
-#include "lua/enum.h"
-#include "lua/value_or_reference.h"
 
 void update_globals( lua_State *L )
 {
@@ -164,7 +135,7 @@ class lua_iuse_wrapper : public iuse_actor
         ~lua_iuse_wrapper() override = default;
         long use( player &, item &it, bool a, const tripoint &pos ) const override {
             // We'll be using lua_state a lot!
-            lua_State *const L = lua_state;
+            lua_State *const L = g->lua_engine_ptr->state;
 
             // If it's a lua function, the arguments have to be wrapped in
             // lua userdata's and passed on the lua stack.
@@ -229,7 +200,7 @@ class lua_mattack_wrapper : public mattack_actor
         ~lua_mattack_wrapper() override = default;
 
         bool call( monster &m ) const override {
-            lua_State *const L = lua_state;
+            lua_State *const L = g->lua_engine_ptr->state;
             // If it's a lua function, the arguments have to be wrapped in
             // lua userdata's and passed on the lua stack.
             // We will now call the function f(monster)
@@ -262,9 +233,9 @@ void MonsterGenerator::register_monattack_lua( const std::string &name, int lua_
 }
 
 // Call the given string directly, used in the lua debug command.
-int call_lua( const std::string &tocall )
+int lua_engine::call( const std::string &tocall )
 {
-    lua_State *L = lua_state;
+    lua_State *const L = state;
 
     update_globals( L );
     int err = luaL_dostring( L, tocall.c_str() );
@@ -274,7 +245,7 @@ int call_lua( const std::string &tocall )
 
 void CallbackArgument::Save()
 {
-    lua_State *const L = lua_state;
+    lua_State *const L = g->lua_engine_ptr->state;
     switch( type ) {
         case CallbackArgumentType::Integer:
             lua_pushinteger( L, value_integer );
@@ -309,10 +280,10 @@ void CallbackArgument::Save()
 void lua_callback_helper( const char *callback_name, const CallbackArgumentContainer &callback_args,
                           int retsize = 0 )
 {
-    if( lua_state == nullptr ) {
+    lua_State *L = g->lua_engine_ptr->state;
+    if( L == nullptr ) {
         return;
     }
-    lua_State *L = lua_state;
     update_globals( L );
     lua_getglobal( L, "mod_callback" );
     lua_pushstring( L, callback_name );
@@ -324,36 +295,34 @@ void lua_callback_helper( const char *callback_name, const CallbackArgumentConta
     lua_report_error( L, err, err_function.c_str(), true );
 }
 
-void lua_callback( const char *callback_name, const CallbackArgumentContainer &callback_args )
+void lua_engine::callback( const char *callback_name, const CallbackArgumentContainer &callback_args )
 {
     lua_callback_helper( callback_name, callback_args );
 }
 
-void lua_callback( const char *callback_name )
+void lua_engine::callback( const char *callback_name )
 {
     CallbackArgumentContainer callback_args;
-    lua_callback( callback_name, callback_args );
+    callback( callback_name, callback_args );
 }
 
-std::string lua_callback_getstring( const char *callback_name,
-                                    const CallbackArgumentContainer &callback_args )
+std::string lua_engine::callback_getstring( const char *callback_name, const CallbackArgumentContainer &callback_args )
 {
     lua_callback_helper( callback_name, callback_args, 1 );
-    lua_State *L = lua_state;
+    lua_State *L = g->lua_engine_ptr->state;
     size_t len;
     const char *tmp = lua_tolstring( L, -1, &len );
     std::string retval = tmp ? tmp : "";
     return retval;
 }
 
-//
-int lua_mapgen( map *m, const oter_id &terrain_type, const mapgendata &, const time_point &t, float,
-                const std::string &scr )
+int lua_engine::mapgen( map *m, const oter_id &terrain_type, const mapgendata &,
+                        const time_point &t, float, const std::string &scr )
 {
-    if( lua_state == nullptr ) {
+    if( !state ) {
         return 0;
     }
-    lua_State *L = lua_state;
+    lua_State *L = state;
     LuaReference<map>::push( L, m );
     luah_setglobal( L, "map", -1 );
 
@@ -585,12 +554,12 @@ static int game_register_monattack( lua_State *L )
 #include "lua/catabindings.cpp"
 
 // Load the main file of a mod
-void lua_loadmod( const std::string &base_path, const std::string &main_file_name )
+void lua_engine::loadmod( const std::string &base_path, const std::string &main_file_name )
 {
     std::string full_path = base_path + "/" + main_file_name;
     if( file_exist( full_path ) ) {
         lua_file_path = base_path;
-        lua_dofile( lua_state, full_path.c_str() );
+        lua_dofile( state, full_path.c_str() );
         lua_file_path.clear();
     }
     // debugmsg("Loading from %s", full_path.c_str());
@@ -645,7 +614,7 @@ static int game_dofile( lua_State *L )
 {
     const char *path = luaL_checkstring( L, 1 );
 
-    std::string full_path = lua_file_path + "/" + path;
+    std::string full_path = g->lua_engine_ptr->lua_file_path + "/" + path;
     lua_dofile( L, full_path.c_str() );
     return 0;
 }
@@ -654,9 +623,9 @@ static int game_myPrint( lua_State *L )
 {
     int argc = lua_gettop( L );
     for( int i = argc; i > 0; i-- ) {
-        lua_output_stream << lua_tostring_wrapper( L, -i );
+        g->lua_engine_ptr->output_stream << lua_tostring_wrapper( L, -i );
     }
-    lua_output_stream << std::endl;
+    g->lua_engine_ptr->output_stream << std::endl;
     return 0;
 }
 
@@ -671,29 +640,31 @@ static const struct luaL_Reg global_funcs [] = {
     {"dofile", game_dofile},
     {"get_monster_types", game_get_monster_types},
     {"get_item_groups", game_get_item_groups},
-    {NULL, NULL}
+    {nullptr, nullptr}
 };
 
-// Lua initialization.
-void game::init_lua()
+// Created by the bindings generator
+void load_metatables( lua_State * );
+
+void lua_engine::init()
 {
     // This is called on each new-game, the old state (if any) is closed to dispose any data
     // introduced by mods of the previously loaded world.
-    if( lua_state != nullptr ) {
-        lua_close( lua_state );
+    if( state ) {
+        lua_close( state );
+        state = nullptr;
     }
-    lua_state = luaL_newstate();
-    if( lua_state == nullptr ) {
-        debugmsg( "Failed to start Lua. Lua scripting won't be available." );
-        return;
+    state = luaL_newstate();
+    if( !state ) {
+        throw std::runtime_error( "Failed to start Lua" );
     }
 
-    luaL_openlibs( lua_state ); // Load standard lua libs
+    luaL_openlibs( state ); // Load standard lua libs
 
     // Load our custom "game" module
 #if LUA_VERSION_NUM < 502
-    luaL_register( lua_state, "game", gamelib );
-    luaL_register( lua_state, "game", global_funcs );
+    luaL_register( state, "game", gamelib );
+    luaL_register( state, "game", global_funcs );
 #else
     std::vector<luaL_Reg> lib_funcs;
     for( auto x = gamelib; x->name != nullptr; ++x ) {
@@ -702,20 +673,31 @@ void game::init_lua()
     for( auto x = global_funcs; x->name != nullptr; ++x ) {
         lib_funcs.push_back( *x );
     }
-    lib_funcs.push_back( luaL_Reg { NULL, NULL } );
-    luaL_newmetatable( lua_state, "game" );
-    lua_pushvalue( lua_state, -1 );
-    luaL_setfuncs( lua_state, &lib_funcs.front(), 0 );
-    lua_setglobal( lua_state, "game" );
+    lib_funcs.push_back( luaL_Reg { nullptr, nullptr } );
+    luaL_newmetatable( state, "game" );
+    lua_pushvalue( state, -1 );
+    luaL_setfuncs( state, &lib_funcs.front(), 0 );
+    lua_setglobal( state, "game" );
 #endif
 
-    load_metatables( lua_state );
-    LuaEnum<body_part>::export_global( lua_state, "body_part" );
+    load_metatables( state );
+    LuaEnum<body_part>::export_global( state, "body_part" );
 
     // override default print to our version
-    lua_register( lua_state, "print", game_myPrint );
+    lua_register( state, "print", game_myPrint );
 
     // Load lua-side metatables etc.
-    lua_dofile( lua_state, FILENAMES["class_defslua"].c_str() );
-    lua_dofile( lua_state, FILENAMES["autoexeclua"].c_str() );
+    lua_dofile( state, FILENAMES["class_defslua"].c_str() );
+    lua_dofile( state, FILENAMES["autoexeclua"].c_str() );
+}
+
+lua_engine::lua_engine() : state( nullptr )
+{
+}
+
+lua_engine::~lua_engine()
+{
+    if( state ) {
+        lua_close( state );
+    }
 }

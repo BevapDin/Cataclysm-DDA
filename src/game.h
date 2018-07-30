@@ -65,6 +65,7 @@ enum weather_type : int;
 enum action_id : int;
 enum target_mode : int;
 
+class lua_engine;
 class item_location;
 class item;
 struct targeting_data;
@@ -242,6 +243,7 @@ class game
 
         pimpl<Creature_tracker> critter_tracker;
         pimpl<faction_manager> faction_manager_ptr;
+        pimpl<lua_engine> lua_engine_ptr;
 
         /** Create explosion at p of intensity (power) with (shrapnel) chunks of shrapnel.
             Explosion intensity formula is roughly power*factor^distance.
@@ -883,7 +885,6 @@ class game
 #endif
         // Data Initialization
         void init_autosave();     // Initializes autosave parameters
-        void init_lua();          // Initializes lua interpreter.
         void create_starting_npcs(); // Creates NPCs that start near you
 
         // V Menu Functions and helpers:

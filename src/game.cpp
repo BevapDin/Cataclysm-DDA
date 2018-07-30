@@ -58,7 +58,7 @@
 #include "weather_gen.h"
 #include "start_location.h"
 #include "debug.h"
-#include "catalua.h"
+#include "lua/lua_engine.h"
 #include "lua_console.h"
 #include "sounds.h"
 #include "iuse_actor.h"
@@ -373,8 +373,11 @@ void game::load_core_data( loading_ui &ui )
     // core data can be loaded only once and must be first
     // anyway.
     DynamicDataLoader::get_instance().unload_data();
-
-    init_lua();
+    try {
+        lua_engine_ptr->init();
+    } catch( const std::exception &err ) {
+        debugmsg( "%s. Lua scripting won't be available.", err.what() );
+    }
     load_data_from_dir( FILENAMES[ "jsondir" ], "core", ui );
 }
 
@@ -383,13 +386,13 @@ void game::load_data_from_dir( const std::string &path, const std::string &src, 
     // Process a preload file before the .json files,
     // so that custom IUSE's can be defined before
     // the items that need them are parsed
-    lua_loadmod( path, "preload.lua" );
+    lua_engine_ptr->loadmod( path, "preload.lua" );
 
     DynamicDataLoader::get_instance().load_data_from_path( path, src, ui );
 
     // main.lua will be executed after JSON, allowing to
     // work with items defined by mod's JSON
-    lua_loadmod( path, "main.lua" );
+    lua_engine_ptr->loadmod( path, "main.lua" );
 }
 
 game::~game()
@@ -984,7 +987,7 @@ bool game::start_game()
                         u.name.c_str() );
     CallbackArgumentContainer lua_callback_args_info;
     lua_callback_args_info.emplace_back( u.getID() );
-    lua_callback( "on_new_player_created", lua_callback_args_info );
+    g->lua_engine_ptr->callback( "on_new_player_created", lua_callback_args_info );
 
     return true;
 }
@@ -1514,20 +1517,20 @@ bool game::do_turn()
     if( calendar::once_every( 1_days ) ) {
         overmap_buffer.process_mongroups();
         if( calendar::turn.day_of_year() == 0 ) {
-            lua_callback( "on_year_passed" );
+            lua_engine_ptr->callback( "on_year_passed" );
         }
-        lua_callback( "on_day_passed" );
+        lua_engine_ptr->callback( "on_day_passed" );
     }
 
     if( calendar::once_every( 1_hours ) ) {
-        lua_callback( "on_hour_passed" );
+        lua_engine_ptr->callback( "on_hour_passed" );
     }
 
     if( calendar::once_every( 1_minutes ) ) {
-        lua_callback( "on_minute_passed" );
+        lua_engine_ptr->callback( "on_minute_passed" );
     }
 
-    lua_callback( "on_turn_passed" );
+    lua_engine_ptr->callback( "on_turn_passed" );
 
     // Move hordes every 2.5 min
     if( calendar::once_every( time_duration::from_minutes( 2.5 ) ) ) {
@@ -1858,7 +1861,7 @@ void game::update_weather()
             CallbackArgumentContainer lua_callback_args_info;
             lua_callback_args_info.emplace_back( weather_data( weather ).name );
             lua_callback_args_info.emplace_back( weather_data( old_weather ).name );
-            lua_callback( "on_weather_changed", lua_callback_args_info );
+            lua_engine_ptr->callback( "on_weather_changed", lua_callback_args_info );
         }
         if( weather != old_weather && weather_data( weather ).dangerous &&
             get_levz() >= 0 && m.is_outside( u.pos() )
@@ -2717,7 +2720,7 @@ void game::load( const save_t &name )
     u.reset();
     draw();
 
-    lua_callback( "on_savegame_loaded" );
+    lua_engine_ptr->callback( "on_savegame_loaded" );
 }
 
 void game::load_world_modfiles( loading_ui &ui )
