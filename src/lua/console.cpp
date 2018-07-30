@@ -11,14 +11,16 @@
 
 using namespace catalua;
 
+void lua_engine::run_console()
+{
+    console c;
+    c.run();
+}
+
 console::console() : cWin( catacurses::newwin( lines, width, 0, 0 ) ),
     iWin( catacurses::newwin( 1, width, lines, 0 ) )
 {
-#ifndef LUA
-    text_stack.push_back( {_( "This build does not support Lua." ), c_red} );
-#else
     text_stack.push_back( {_( "Welcome to the Lua console! Here you can enter Lua code." ), c_green} );
-#endif
     text_stack.push_back( {_( "Press [Esc] to close the Lua console." ), c_blue} );
 }
 
@@ -107,14 +109,9 @@ void console::run()
 
         std::string input = get_input();
 
-#ifdef LUA
         g->lua_engine_ptr->call( input );
 
         read_stream( g->lua_engine_ptr->output_stream, c_white );
         read_stream( g->lua_engine_ptr->error_stream, c_red );
-#else
-        text_stack.push_back( {_( "This build does not support Lua." ), c_red} );
-        text_stack.push_back( {_( "Press [Esc] to close the Lua console." ), c_blue} );
-#endif // LUA
     }
 }

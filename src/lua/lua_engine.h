@@ -53,6 +53,8 @@ class lua_engine
         void init();
         void loadmod( const std::string &base_path, const std::string &main_file_name );
 
+        void run_console();
+
         int call( const std::string &script );
         void callback( const char *name );
 
