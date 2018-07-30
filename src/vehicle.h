@@ -782,7 +782,6 @@ class vehicle
         // Seek a vehicle part which obstructs tile with given coordinates relative to vehicle position
         int part_at( int dx, int dy ) const;
         int global_part_at( int x, int y ) const;
-        int global_part_at( const tripoint &p ) const;
         int part_displayed_at( int local_x, int local_y ) const;
         int roof_at_part( int p ) const;
 
@@ -1196,8 +1195,6 @@ class vehicle
          */
         void open_all_at( int p );
 
-        // upgrades/refilling/etc. see veh_interact.cpp
-        void interact();
         // Honk the vehicle's horn, if there are any
         void honk_horn();
         void beeper_sound();
@@ -1244,8 +1241,6 @@ class vehicle
         //returns true if there's another engine with the same exclusion list; conflict_type holds
         //the exclusion
         bool has_engine_conflict( const vpart_info *possible_engine, std::string &conflict_type ) const;
-        //prints message relating to vehicle start failure
-        void msg_start_engine_fail();
         //if necessary, damage this engine
         void do_engine_damage( size_t p, int strain );
         //remotely open/close doors
