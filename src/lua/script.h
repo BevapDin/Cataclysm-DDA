@@ -24,6 +24,15 @@ class script
         value_type operator()( const lua_engine &engine, Args ... args ) const {
             return call<value_type>( engine, script_, std::forward<Args>( args )... );
         }
+        template<typename ...ActualArgs>
+        value_type invoke_with_catch( const lua_engine &engine, ActualArgs &&... args ) const {
+            try {
+                return operator()( engine, std::forward<ActualArgs>( args )... );
+            } catch( ... ) {
+                catalua::report_exception( engine );
+                return value_type();
+            }
+        }
 
         template<typename Stream>
         void deserialize( Stream &s ) {
