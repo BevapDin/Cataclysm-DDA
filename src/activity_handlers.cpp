@@ -30,7 +30,7 @@
 #include "ui.h"
 #include "map_iterator.h"
 #include "gates.h"
-#include "lua/lua_engine.h"
+#include "lua/call.h"
 #include "fault.h"
 #include "construction.h"
 #include "harvest.h"
@@ -1904,7 +1904,7 @@ void activity_handlers::train_finish( player_activity *act, player *p )
                                 new_skill_level, skill.name().c_str());
         }
 
-        g->lua_engine_ptr->callback("on_skill_increased");
+        catalua::mod_callback( *g->lua_engine_ptr, "on_skill_increased" );
         act->set_to_null();
         return;
     }

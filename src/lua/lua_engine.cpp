@@ -194,9 +194,9 @@ int lua_engine::call( const std::string &tocall )
     }
 }
 
-void lua_engine::callback( const char *const callback_name )
+void catalua::stack::push_mod_callback_call( const lua_engine &engine  )
 {
-    call( std::string( "mod_callback(\"" ) + std::string( callback_name ) + "\")" );
+    lua_getglobal( get_lua_state( engine ), "mod_callback" );
 }
 
 int lua_engine::mapgen( map *m, const oter_id &terrain_type, const mapgendata &,
