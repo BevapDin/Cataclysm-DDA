@@ -252,77 +252,9 @@ int lua_engine::call( const std::string &tocall )
     }
 }
 
-void CallbackArgument::Save()
+void catalua::stack::push_mod_callback_call( const lua_engine &engine  )
 {
-    lua_State *const L = g->lua_engine_ptr->state;
-    switch( type ) {
-        case CallbackArgumentType::Integer:
-            lua_pushinteger( L, value_integer );
-            break;
-        case CallbackArgumentType::Number:
-            lua_pushnumber( L, value_number );
-            break;
-        case CallbackArgumentType::Boolean:
-            lua_pushboolean( L, value_boolean );
-            break;
-        case CallbackArgumentType::String:
-            lua_pushstring( L, value_string.c_str() );
-            break;
-        case CallbackArgumentType::Tripoint:
-            LuaValue<tripoint>::push( L, value_tripoint );
-            break;
-        case CallbackArgumentType::Item:
-            LuaValue<item>::push( L, value_item );
-            break;
-        case CallbackArgumentType::Reference_Creature:
-            LuaReference<Creature>::push( L, value_creature );
-            break;
-        case CallbackArgumentType::Enum_BodyPart:
-            LuaEnum<body_part>::push( L, value_body_part );
-            break;
-        default:
-            lua_pushnil( L );
-            break;
-    }
-}
-
-void lua_callback_helper( const char *callback_name, const CallbackArgumentContainer &callback_args,
-                          int retsize = 0 )
-{
-    lua_State *L = g->lua_engine_ptr->state;
-    if( L == nullptr ) {
-        return;
-    }
-    update_globals( L );
-    lua_getglobal( L, "mod_callback" );
-    lua_pushstring( L, callback_name );
-    for( auto callback_arg : callback_args ) {
-        callback_arg.Save();
-    }
-    int err = lua_pcall( L, callback_args.size() + 1, retsize, 0 );
-    std::string err_function = "mod_callback(\"" + std::string( callback_name ) + "\")";
-    lua_report_error( L, err, err_function.c_str(), true );
-}
-
-void lua_engine::callback( const char *callback_name, const CallbackArgumentContainer &callback_args )
-{
-    lua_callback_helper( callback_name, callback_args );
-}
-
-void lua_engine::callback( const char *callback_name )
-{
-    CallbackArgumentContainer callback_args;
-    callback( callback_name, callback_args );
-}
-
-std::string lua_engine::callback_getstring( const char *callback_name, const CallbackArgumentContainer &callback_args )
-{
-    lua_callback_helper( callback_name, callback_args, 1 );
-    lua_State *L = g->lua_engine_ptr->state;
-    size_t len;
-    const char *tmp = lua_tolstring( L, -1, &len );
-    std::string retval = tmp ? tmp : "";
-    return retval;
+    lua_getglobal( get_lua_state( engine ), "mod_callback" );
 }
 
 int lua_engine::mapgen( map *m, const oter_id &terrain_type, const mapgendata &,

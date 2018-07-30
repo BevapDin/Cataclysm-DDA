@@ -24,10 +24,9 @@ outdated_metatable = {
 mods = { }
 
 function mod_callback(callback_name, ...)
-    rval = nil
     for modname, mod_instance in pairs(mods) do
         if type(mod_instance[callback_name]) == "function" then
-            rval = mod_instance[callback_name](...)
+            mod_instance[callback_name](unpack(arg))
         end
     end
     return rval

@@ -59,7 +59,7 @@
 #include "weather_gen.h"
 #include "cata_utility.h"
 #include "iuse_actor.h"
-#include "lua/lua_engine.h"
+#include "lua/call.h"
 #include "npc.h"
 #include "overlay_ordering.h"
 #include "vitamin.h"
@@ -3194,11 +3194,7 @@ void player::on_dodge( Creature *source, float difficulty )
             melee_attack( *source, false, tec );
         }
     }
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( source );
-    lua_callback_args_info.emplace_back( difficulty );
-    g->lua_engine_ptr->callback( "on_player_dodge", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_dodge", getID(), source, difficulty );
 }
 
 void player::on_hit( Creature *source, body_part bp_hit,
@@ -3273,12 +3269,7 @@ void player::on_hit( Creature *source, body_part bp_hit,
             source->add_effect( effect_blind, 2_turns );
         }
     }
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( source );
-    lua_callback_args_info.emplace_back( bp_hit );
-    //lua_callback_args_info.emplace_back( proj );
-    g->lua_engine_ptr->callback( "on_player_hit", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_hit", getID(), source, bp_hit/*, proj*/ );
 }
 
 void player::on_hurt( Creature *source, bool disturb /*= true*/ )
@@ -3305,11 +3296,7 @@ void player::on_hurt( Creature *source, bool disturb /*= true*/ )
     if( is_dead_state() ) {
         set_killer( source );
     }
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( source );
-    lua_callback_args_info.emplace_back( disturb );
-    g->lua_engine_ptr->callback( "on_player_hurt", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_hurt", getID(), source, disturb );
 }
 
 bool player::immune_to( body_part bp, damage_unit dam ) const
@@ -9689,13 +9676,8 @@ void player::do_read( item &book )
                                           skill_level.level(), skill_name );
                     }
                     const std::string skill_increase_source = "book";
-                    CallbackArgumentContainer lua_callback_args_info;
-                    lua_callback_args_info.emplace_back( getID() );
-                    lua_callback_args_info.emplace_back( skill_increase_source );
-                    lua_callback_args_info.emplace_back( skill.str() );
-                    lua_callback_args_info.emplace_back( originalSkillLevel + 1 );
-                    g->lua_engine_ptr->callback( "on_player_skill_increased", lua_callback_args_info );
-                    g->lua_engine_ptr->callback( "on_skill_increased" ); // Legacy callback
+                    catalua::mod_callback( *g->lua_engine_ptr, "on_player_skill_increased", getID(), skill_increase_source, skill.str(), originalSkillLevel + 1 );
+                    catalua::mod_callback( *g->lua_engine_ptr, "on_skill_increased" ); // Legacy callback
                 } else {
                     add_msg( m_good, _( "%s increases their %s level." ), learner->disp_name().c_str(), skill_name );
                 }
@@ -10955,13 +10937,8 @@ void player::practice( const skill_id &id, int amount, int cap )
         if (is_player() && newLevel > oldLevel) {
             add_msg( m_good, _( "Your skill in %s has increased to %d!" ), skill_name, newLevel );
             const std::string skill_increase_source = "training";
-            CallbackArgumentContainer lua_callback_args_info;
-            lua_callback_args_info.emplace_back( getID() );
-            lua_callback_args_info.emplace_back( skill_increase_source );
-            lua_callback_args_info.emplace_back( id.str() );
-            lua_callback_args_info.emplace_back( newLevel );
-            g->lua_engine_ptr->callback( "on_player_skill_increased", lua_callback_args_info );
-            g->lua_engine_ptr->callback( "on_skill_increased" ); //Legacy callback
+            catalua::mod_callback( *g->lua_engine_ptr, "on_player_skill_increased", getID(), skill_increase_source, id.str(), newLevel );
+            catalua::mod_callback( *g->lua_engine_ptr, "on_skill_increased" ); //Legacy callback
         }
         if(is_player() && newLevel > cap) {
             //inform player immediately that the current recipe can't be used to train further
@@ -12223,47 +12200,31 @@ bool player::has_item_with_flag( const std::string &flag ) const
 void player::on_mutation_gain( const trait_id &mid )
 {
     morale->on_mutation_gain( mid );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( mid.str() );
-    g->lua_engine_ptr->callback( "on_player_mutation_gain", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_mutation_gain", getID(), mid.str() );
 }
 
 void player::on_mutation_loss( const trait_id &mid )
 {
     morale->on_mutation_loss( mid );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( mid.str() );
-    g->lua_engine_ptr->callback( "on_player_mutation_loss", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_mutation_loss", getID(), mid.str() );
 }
 
 void player::on_stat_change( const std::string &stat, int value )
 {
     morale->on_stat_change( stat, value );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( stat );
-    lua_callback_args_info.emplace_back( value );
-    g->lua_engine_ptr->callback( "on_player_stat_change", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_stat_change", getID(), stat, value );
 }
 
 void player::on_item_wear( const item &it )
 {
     morale->on_item_wear( it );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( it );
-    g->lua_engine_ptr->callback( "on_player_item_wear", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_item_wear", getID(), it );
 }
 
 void player::on_item_takeoff( const item &it )
 {
     morale->on_item_takeoff( it );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( it );
-    g->lua_engine_ptr->callback( "on_player_item_takeoff", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_item_takeoff", getID(), it );
 }
 
 void player::on_worn_item_washed( const item &it )
@@ -12283,22 +12244,14 @@ void player::on_effect_int_change( const efftype_id &eid, int intensity, body_pa
     }
 
     morale->on_effect_int_change( eid, intensity, bp );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( eid.str() );
-    lua_callback_args_info.emplace_back( intensity );
-    lua_callback_args_info.emplace_back( bp );
-    g->lua_engine_ptr->callback( "on_player_effect_int_change", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_effect_int_change", getID(), eid.str(), intensity, bp );
 }
 
 void player::on_mission_assignment( mission &new_mission )
 {
     active_missions.push_back( &new_mission );
     set_active_mission( new_mission );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( new_mission.get_id() );
-    g->lua_engine_ptr->callback( "on_player_mission_assignment", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_mission_assignment", getID(), new_mission.get_id() );
 }
 
 void player::on_mission_finished( mission &cur_mission )
@@ -12323,10 +12276,7 @@ void player::on_mission_finished( mission &cur_mission )
             active_mission = active_missions.front();
         }
     }
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( getID() );
-    lua_callback_args_info.emplace_back( cur_mission.get_id() );
-    g->lua_engine_ptr->callback( "on_player_mission_finished", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_player_mission_finished", getID(), cur_mission.get_id() );
 }
 
 const targeting_data &player::get_targeting_data() {

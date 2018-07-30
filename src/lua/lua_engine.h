@@ -128,9 +128,6 @@ class lua_engine
         void run_console();
 
         int call( const std::string &script );
-        void callback( const char *name );
-        void callback( const char *name, const CallbackArgumentContainer &callback_args );
-        std::string callback_getstring( const char *callback_name, const CallbackArgumentContainer &callback_args );
 
         // This is a legacy function, ideally code would use `catalua::call` instead,
         // but for mapgen we do a bit more than just call the script.

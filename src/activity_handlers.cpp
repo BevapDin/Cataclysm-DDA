@@ -30,7 +30,7 @@
 #include "ui.h"
 #include "map_iterator.h"
 #include "gates.h"
-#include "lua/lua_engine.h"
+#include "lua/call.h"
 #include "fault.h"
 #include "construction.h"
 #include "harvest.h"
@@ -1987,13 +1987,8 @@ void activity_handlers::train_finish( player_activity *act, player *p )
                                  new_skill_level, skill_name );
         }
         const std::string skill_increase_source = "training";
-        CallbackArgumentContainer lua_callback_args_info;
-        lua_callback_args_info.emplace_back( p->getID() );
-        lua_callback_args_info.emplace_back( skill_increase_source );
-        lua_callback_args_info.emplace_back( sk.str() );
-        lua_callback_args_info.emplace_back( new_skill_level );
-        g->lua_engine_ptr->callback( "on_player_skill_increased", lua_callback_args_info );
-        g->lua_engine_ptr->callback( "on_skill_increased" ); // legacy callback without arguments
+        catalua::mod_callback( *g->lua_engine_ptr, "on_player_skill_increased", p->getID(), skill_increase_source, sk.str(), new_skill_level );
+        catalua::mod_callback( *g->lua_engine_ptr, "on_skill_increased" ); // legacy callback without arguments
         act->set_to_null();
         return;
     }

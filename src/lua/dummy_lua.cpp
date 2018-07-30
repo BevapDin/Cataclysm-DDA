@@ -36,21 +36,6 @@ int lua_engine::mapgen( map *const /*m*/, const oter_id &/*terrain_type*/,
     return 0; // @todo caller should not care about this
 }
 
-void lua_engine::callback( const char *const /*name*/ )
-{
-    // This behaves the same as if no mod has registered callbacks - it does nothing.
-}
-
-void lua_engine::callback( const char *, const CallbackArgumentContainer & )
-{
-    // This behaves the same as if no mod has registered callbacks - it does nothing.
-}
-
-std::string lua_engine::callback_getstring( const char *, const CallbackArgumentContainer & )
-{
-    return {}; // @todo
-}
-
 void lua_engine::loadmod( const std::string &base_path, const std::string &main_file_name )
 {
     const std::string full_path = base_path + "/" + main_file_name;

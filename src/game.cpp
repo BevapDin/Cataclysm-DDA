@@ -59,6 +59,7 @@
 #include "start_location.h"
 #include "debug.h"
 #include "lua/lua_engine.h"
+#include "lua/call.h"
 #include "sounds.h"
 #include "iuse_actor.h"
 #include "mutation.h"
@@ -984,9 +985,7 @@ bool game::start_game()
     u.add_memorial_log( pgettext( "memorial_male", "%s began their journey into the Cataclysm." ),
                         pgettext( "memorial_female", "%s began their journey into the Cataclysm." ),
                         u.name.c_str() );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( u.getID() );
-    g->lua_engine_ptr->callback( "on_new_player_created", lua_callback_args_info );
+    catalua::mod_callback( *lua_engine_ptr, "on_new_player_created", u.getID() );
 
     return true;
 }
@@ -1516,20 +1515,20 @@ bool game::do_turn()
     if( calendar::once_every( 1_days ) ) {
         overmap_buffer.process_mongroups();
         if( calendar::turn.day_of_year() == 0 ) {
-            lua_engine_ptr->callback( "on_year_passed" );
+            catalua::mod_callback( *lua_engine_ptr, "on_year_passed" );
         }
-        lua_engine_ptr->callback( "on_day_passed" );
+        catalua::mod_callback( *lua_engine_ptr, "on_day_passed" );
     }
 
     if( calendar::once_every( 1_hours ) ) {
-        lua_engine_ptr->callback( "on_hour_passed" );
+        catalua::mod_callback( *lua_engine_ptr, "on_hour_passed" );
     }
 
     if( calendar::once_every( 1_minutes ) ) {
-        lua_engine_ptr->callback( "on_minute_passed" );
+        catalua::mod_callback( *lua_engine_ptr, "on_minute_passed" );
     }
 
-    lua_engine_ptr->callback( "on_turn_passed" );
+    catalua::mod_callback( *lua_engine_ptr, "on_turn_passed" );
 
     // Move hordes every 2.5 min
     if( calendar::once_every( time_duration::from_minutes( 2.5 ) ) ) {
@@ -1857,10 +1856,7 @@ void game::update_weather()
         //@todo: predict when the weather changes and use that time.
         nextweather = calendar::turn + 50_turns;
         if( weather != old_weather ) {
-            CallbackArgumentContainer lua_callback_args_info;
-            lua_callback_args_info.emplace_back( weather_data( weather ).name );
-            lua_callback_args_info.emplace_back( weather_data( old_weather ).name );
-            lua_engine_ptr->callback( "on_weather_changed", lua_callback_args_info );
+            catalua::mod_callback( *lua_engine_ptr, "on_weather_changed", weather_data( weather ).name, weather_data( old_weather ).name );
         }
         if( weather != old_weather && weather_data( weather ).dangerous &&
             get_levz() >= 0 && m.is_outside( u.pos() )
@@ -2719,7 +2715,7 @@ void game::load( const save_t &name )
     u.reset();
     draw();
 
-    lua_engine_ptr->callback( "on_savegame_loaded" );
+    catalua::mod_callback( *lua_engine_ptr, "on_savegame_loaded" );
 }
 
 void game::load_world_modfiles( loading_ui &ui )

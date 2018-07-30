@@ -108,6 +108,7 @@ inline int push_all( const lua_engine &engine, Head &&head, Args &&... args )
     return 1 + push_all( engine, std::forward<Args>( args )... );
 }
 
+void push_mod_callback_call( const lua_engine & );
 void push_script( const lua_engine &, const std::string & );
 
 void call_void_function( const lua_engine &, int );
@@ -159,6 +160,28 @@ inline value_type call( const lua_engine &engine, const std::string &script, Arg
     stack::push_script( engine, script );
     const int cnt = stack::push_all( engine, std::forward<Args>( args )... );
     return stack::call_wrapper<value_type>::call( engine, cnt );
+}
+
+/**
+ * Invokes a callback that can be registered by each mod. The callback is invoked
+ * in an arbitrary order for each mod. If no mod has registered the callback, nothing
+ * will happen.
+ * The function does *not* return anything as it may result in several calls (for several mods),
+ * or in no call at all (no mod has registered the callback).
+ * Besides the fixed return type, it behaves like @ref call.
+ * @param name Name of the callback. Should be a simple constant identifier name. Make sure to
+ * document the callbacks.
+ */
+//@todo where to document the callbacks?
+template<typename ... Args>
+inline void mod_callback( const lua_engine &engine, const char *const name, Args &&... args )
+{
+    stack::push_mod_callback_call( engine );
+    // This pushes a reference to a function in Lua onto the stack, that function
+    // dispatches this callback to all registered mods.
+    // The name of the callback is pushed together with the arguments below.
+    const int cnt = stack::push_all( engine, name, std::forward<Args>( args )... );
+    stack::call_void_function( engine, cnt );
 }
 
 } // namespace catalua

@@ -218,11 +218,7 @@ void mapgen_function_builtin::generate( map *m, const oter_id &terrain_type, con
 
     const std::string mapgen_generator_type = "builtin";
     const tripoint terrain_tripoint = sm_to_omt_copy( m->get_abs_sub() );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( mapgen_generator_type );
-    lua_callback_args_info.emplace_back( terrain_type.id().str() );
-    lua_callback_args_info.emplace_back( terrain_tripoint );
-    g->lua_engine_ptr->callback( "on_mapgen_finished", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_mapgen_finished", mapgen_generator_type, terrain_type.id().str(), terrain_tripoint );
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -2106,11 +2102,7 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
 
     const std::string mapgen_generator_type = "json";
     const tripoint terrain_tripoint = sm_to_omt_copy( m->get_abs_sub() );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( mapgen_generator_type );
-    lua_callback_args_info.emplace_back( terrain_type.id().str() );
-    lua_callback_args_info.emplace_back( terrain_tripoint );
-    g->lua_engine_ptr->callback( "on_mapgen_finished", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_mapgen_finished", mapgen_generator_type, terrain_type.id().str(), terrain_tripoint );
 }
 
 void mapgen_function_json_nested::nest( const mapgendata &dat, int offset_x, int offset_y,
@@ -2172,11 +2164,7 @@ void mapgen_function_lua::generate( map *m, const oter_id &terrain_type, const m
 
     const std::string mapgen_generator_type = "lua";
     const tripoint terrain_tripoint = sm_to_omt_copy( m->get_abs_sub() );
-    CallbackArgumentContainer lua_callback_args_info;
-    lua_callback_args_info.emplace_back( mapgen_generator_type );
-    lua_callback_args_info.emplace_back( terrain_type.id().str() );
-    lua_callback_args_info.emplace_back( terrain_tripoint );
-    g->lua_engine_ptr->callback( "on_mapgen_finished", lua_callback_args_info );
+    catalua::mod_callback( *g->lua_engine_ptr, "on_mapgen_finished", mapgen_generator_type, terrain_type.id().str(), terrain_tripoint );
 }
 
 /////////////
