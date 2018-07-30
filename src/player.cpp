@@ -58,7 +58,7 @@
 #include "weather_gen.h"
 #include "cata_utility.h"
 #include "iuse_actor.h"
-#include "catalua.h"
+#include "lua/lua_engine.h"
 #include "npc.h"
 #include "overlay_ordering.h"
 #include "vitamin.h"
@@ -9497,7 +9497,7 @@ void player::do_read( item &book )
                                           pgettext( "memorial_female", "Reached skill level %1$d in %2$s." ),
                                           skill_level.level(), skill->name() );
                     }
-                    lua_callback( "on_skill_increased" );
+                    g->lua_engine_ptr->callback( "on_skill_increased" );
                 } else {
                     add_msg( m_good, _( "%s increases their %s level." ), learner->disp_name().c_str(),
                              skill.obj().name().c_str() );
@@ -10643,7 +10643,7 @@ void player::practice( const skill_id &id, int amount, int cap )
         int newLevel = get_skill_level( id );
         if (is_player() && newLevel > oldLevel) {
             add_msg(m_good, _("Your skill in %s has increased to %d!"), skill.name().c_str(), newLevel);
-            lua_callback("on_skill_increased");
+            g->lua_engine_ptr->callback("on_skill_increased");
         }
         if(is_player() && newLevel > cap) {
             //inform player immediately that the current recipe can't be used to train further

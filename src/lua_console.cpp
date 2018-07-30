@@ -1,6 +1,8 @@
 #include "lua_console.h"
 
-#include "catalua.h"
+#include "lua/lua_engine.h"
+// @todo make the lua_engine a parameter.
+#include "game.h"
 #include "catacharset.h"
 #include "input.h"
 #include "string_input_popup.h"
@@ -104,10 +106,10 @@ void lua_console::run()
         std::string input = get_input();
 
 #ifdef LUA
-        call_lua( input );
+        g->lua_engine_ptr->call( input );
 
-        read_stream( lua_output_stream, c_white );
-        read_stream( lua_error_stream, c_red );
+        read_stream( g->lua_engine_ptr->output_stream, c_white );
+        read_stream( g->lua_engine_ptr->error_stream, c_red );
 #else
         text_stack.push_back( {_( "This build does not support Lua." ), c_red} );
         text_stack.push_back( {_( "Press [Esc] to close the Lua console." ), c_blue} );
