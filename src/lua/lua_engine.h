@@ -125,6 +125,8 @@ class lua_engine
 
         int monster_move( monster *m );
 
+        void run_console();
+
         int call( const std::string &script );
         void callback( const char *name );
         void callback( const char *name, const CallbackArgumentContainer &callback_args );

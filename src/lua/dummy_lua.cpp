@@ -2,6 +2,7 @@
 
 #include "filesystem.h"
 #include "debug.h"
+#include "output.h"
 
 lua_engine::lua_engine() : state( nullptr )
 {
@@ -64,4 +65,7 @@ int lua_engine::monster_move( monster * )
     return 0;
 }
 
-#endif
+void lua_engine::run_console()
+{
+    popup( _( "This build does not support Lua." ) );
+}
