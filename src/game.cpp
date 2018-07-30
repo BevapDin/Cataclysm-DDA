@@ -58,7 +58,6 @@
 #include "start_location.h"
 #include "debug.h"
 #include "lua/lua_engine.h"
-#include "lua/console.h"
 #include "sounds.h"
 #include "iuse_actor.h"
 #include "mutation.h"
@@ -4369,11 +4368,9 @@ void game::debug()
         }
         break;
 
-        case 24: {
-            catalua::console console;
-            console.run();
-        }
-        break;
+        case 24:
+            lua_engine_ptr->run_console();
+			break;
         case 25:
             ui::omap::display_weather();
             break;
