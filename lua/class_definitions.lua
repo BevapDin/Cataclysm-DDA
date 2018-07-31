@@ -297,7 +297,7 @@ for class_name, value in pairs(classes) do
         value.cpp_name = class_name
     end
     if not value.output_path then
-        value.output_path = class_name .. ".gen.cpp"
+        value.output_path = class_name:gsub("[^%w_.]", "") .. ".gen.cpp"
     end
 end
 
