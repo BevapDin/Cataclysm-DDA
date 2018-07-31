@@ -287,24 +287,13 @@ std::string CppClass::export_( Exporter &p ) const
         }
     }
 
-    // Exporting the constructor only makes sense for types that can have by-value semantic
-    if( p.export_by_value( full_name() ) ) {
-        r = r + print_set( printed_constructors, tab + "new = {\n", tab + "},\n" );
-    }
+    r = r + print_set( printed_constructors, tab + "new = {\n", tab + "},\n" );
 
     if( const auto sid = p.get_string_id_for( full_name() ) ) {
         r = r + tab + "string_id = \"" + *sid + "\",\n";
     }
     if( const auto iid = p.get_int_id_for( full_name() ) ) {
         r = r + tab + "int_id = \"" + *iid + "\",\n";
-    }
-
-    if( p.export_by_value( full_name() ) && p.export_by_reference( full_name() ) ) {
-        r = r + tab + "by_value_and_reference = true,\n";
-    } else if( p.export_by_value( full_name() ) ) {
-        r = r + tab + "by_value = true,\n";
-    } else {
-        // by reference is the default.
     }
 
     if( has_equal() ) {

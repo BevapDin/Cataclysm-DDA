@@ -28,26 +28,11 @@ class Exporter
         /**
          * All the C++ types that should be exported to Lua. This should contain the
          * real type, not a type alias. It can contain enumeration or class types.
-         * Enumerations are automatically added to types_exported_by_value. Class types
-         * must be added manually to types_exported_by_value or types_exported_by_reference
-         * or to both.
+         * Enumerations are automatically added to types_exported_by_value.
          * Key is the actual type name as it appears in C++, value is the name it will
          * have in Lua.
          */
         std::map<FullyQualifiedId, std::string> types_to_export;
-        /**
-         * C++ types that should be exported by-value. They must support copy-construction
-         * and copy-assignment. Use the plain C++ name of their type. Note: enumerations
-         * and string_id and int_id are automatically exported as value, they don't need to
-         * be listed here.
-         */
-        std::set<FullyQualifiedId> types_exported_by_value;
-        /**
-         * C++ types that should be exported by-reference. They don't need to support
-         * copy-construction nor copy-assignment. Types may be exported by-value and
-         * by-reference.
-         */
-        std::set<FullyQualifiedId> types_exported_by_reference;
 
         // key is the string_id typedef name (e.g. "mtype_id") and value is the
         // name of the objects it identifiers (e.g. "mtype").
@@ -87,23 +72,14 @@ class Exporter
         cata::optional<std::string> get_header_for_argument( const Type &t ) const;
 
         void add_export_for_string_id( const std::string &id_name, const FullyQualifiedId &full_name );
-        void add_export_by_value( const FullyQualifiedId &full_name );
-        void add_export_by_value( const FullyQualifiedId &full_name, const std::string &lua_name );
-        void add_export_by_reference( const FullyQualifiedId &full_name );
-        void add_export_by_reference( const FullyQualifiedId &full_name, const std::string &lua_name );
-        void add_export_by_value_and_reference( const FullyQualifiedId &full_name );
-        void add_export_by_value_and_reference( const FullyQualifiedId &full_name, const std::string &lua_name );
-        void add_export_enumeration( const FullyQualifiedId &full_name );
+        void add_export( const FullyQualifiedId &full_name );
+        void add_export( const FullyQualifiedId &full_name, const std::string &lua_name );
 
         FullyQualifiedId derived_class( const Type &t ) const;
 
         bool export_enabled( const FullyQualifiedId name ) const;
         bool export_enabled( const Type &name, const std::string &path ) const;
-
-        bool export_by_value( const FullyQualifiedId &name ) const;
-        bool export_by_value( const Type &name ) const;
-        bool export_by_reference( const FullyQualifiedId &name ) const;
-        bool export_by_reference( const Type &name ) const;
+        bool export_enabled( const Type &name ) const;
 
         bool add_id_typedef( const Cursor &cursor, const std::string &id_type,
                              std::map<std::string, FullyQualifiedId> &ids_map );

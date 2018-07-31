@@ -113,25 +113,20 @@ std::string Exporter::translate_member_type( const Type &t ) const
         return "\"" + *res + "\"";
     }
 
-    if( export_by_reference( t ) ) {
-        return "\"" + lua_name( FullyQualifiedId( remove_const( t.spelling() ) ) ) + "\"";
-    }
-    if( export_by_value( t ) ) {
+    if( export_enabled( t ) ) {
         return "\"" + lua_name( FullyQualifiedId( remove_const( t.spelling() ) ) ) + "\"";
     }
 
     if( t.kind() == CXType_LValueReference ) {
         const Type pt = t.get_pointee();
-        // We can return a reference to the member in Lua, therefor allow types that
-        // support by-reference semantic.
-        if( export_by_reference( pt ) ) {
+        if( export_enabled( pt ) ) {
             return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "\"";
         }
     }
 
     if( t.kind() == CXType_Pointer ) {
         const Type pt = t.get_pointee();
-        if( export_by_reference( pt ) ) {
+        if( export_enabled( pt ) ) {
             return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "\"";
         }
     }
@@ -151,7 +146,7 @@ std::string Exporter::translate_argument_type( const Type &t ) const
         return "\"" + *res + "\"";
     }
 
-    if( export_by_value( t ) ) {
+    if( export_enabled( t ) ) {
         return "\"" + lua_name( FullyQualifiedId( remove_const( t.spelling() ) ) ) + "\"";
     }
 
@@ -172,11 +167,11 @@ std::string Exporter::translate_argument_type( const Type &t ) const
             throw TypeTranslationError( "type " + t.spelling() + " (a non-const reference to a build-in value) as argument" );
         }
         // "const foo &" and "foo &" can be satisfied by an exported object.
-        if( export_by_value( pt ) ) {
+        if( export_enabled( pt ) ) {
             return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "\"";
         }
         debug_message( "X1: " + pt.spelling() + "  " + derived_class( pt ) );
-        if( export_by_reference( pt ) ) {
+        if( export_enabled( pt ) ) {
             return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "\"";
         }
         debug_message( "X2: " + pt.spelling() + "  " + derived_class( pt ) );
@@ -185,9 +180,7 @@ std::string Exporter::translate_argument_type( const Type &t ) const
 
     if( t.kind() == CXType_Pointer ) {
         const Type pt = t.get_pointee();
-        // "const foo *" and "foo *" can be satisfied with by-reference values, they
-        // have an overload that provides the pointer. It does not work for(  by-value objects.
-        if( export_by_reference( pt ) ) {
+        if( export_enabled( pt ) ) {
             return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "\"";
         }
     }
@@ -327,7 +320,7 @@ std::string Exporter::translate_result_type( const Type &t )const
         return "\"" + *res + "\"";
     }
 
-    if( export_by_value( t ) ) {
+    if( export_enabled( t ) ) {
         return "\"" + lua_name( FullyQualifiedId( remove_const( t.spelling() ) ) ) + "\"";
     }
 
@@ -344,13 +337,9 @@ std::string Exporter::translate_result_type( const Type &t )const
             if( const auto res = build_in_lua_type( pt ) ) {
                 return "\"" + *res + "\"";
             }
-
-            if( export_by_value( pt ) ) {
-                return "\"" + lua_name( FullyQualifiedId( remove_const( spt ) ) ) + "\"";
-            }
         }
         // const and non-const reference){
-        if( export_by_reference( pt ) ) {
+        if( export_enabled( pt ) ) {
             return "\"" + lua_name( FullyQualifiedId( remove_const( spt ) ) ) + "&\"";
         }
     }
@@ -358,7 +347,7 @@ std::string Exporter::translate_result_type( const Type &t )const
         const Type pt = t.get_pointee();
         const std::string spt = pt.spelling();
         // "const foo *" and "foo *" can be satisfied by an by-reference object.
-        if( export_by_reference( pt ) ) {
+        if( export_enabled( pt ) ) {
             return "\"" + lua_name( FullyQualifiedId( remove_const( spt ) ) ) + "&\"";
         }
     }
@@ -408,25 +397,9 @@ bool Exporter::export_enabled( const Type &name, const std::string &path ) const
     return export_enabled( derived_class( name ) );
 }
 
-bool Exporter::export_by_value( const Type &name ) const
+bool Exporter::export_enabled( const Type &name ) const
 {
-    if( export_by_value( FullyQualifiedId( remove_const( name.spelling() ) ) ) ) {
-        return true;
-    }
-    return export_by_value( derived_class( name ) );
-}
-bool Exporter::export_by_value( const FullyQualifiedId &name ) const
-{
-    return types_exported_by_value.count( name ) > 0;
-}
-
-bool Exporter::export_by_reference( const Type &name ) const
-{
-    return export_by_reference( derived_class( name ) );
-}
-bool Exporter::export_by_reference( const FullyQualifiedId &name ) const
-{
-    return types_exported_by_reference.count( name ) > 0;
+    return export_enabled( name, name.get_declaration().location_path() );
 }
 
 void Exporter::debug_message( const std::string &message ) const
@@ -487,8 +460,8 @@ bool Exporter::add_id_typedef( const Cursor &cursor, const std::string &id_type,
     ids_map.emplace( typedef_name, FullyQualifiedId( base_type ) );
     // A id itself is always handled by value. It's basically a std::string/int.
     assert( valid_cpp_identifer( typedef_name ) );
-    types_exported_by_value.insert( FullyQualifiedId( typedef_name ) );
-    types_exported_by_value.insert( FullyQualifiedId( id_type + "<" + base_type + ">" ) );
+    types_to_export.emplace( FullyQualifiedId( typedef_name ), typedef_name );
+    types_to_export.emplace( FullyQualifiedId( id_type + "<" + base_type + ">" ), id_type + "<" + base_type + ">" );
     debug_message( "Automatically added " + typedef_name + " as " + id_type + "<" + base_type + ">" );
     return true;
 }
@@ -512,51 +485,16 @@ void Exporter::add_export_for_string_id( const std::string &id_name, const Fully
     assert( valid_cpp_identifer( id_name ) );
     string_ids.emplace( id_name, full_name );
     types_to_export.emplace( full_name, full_name.as_string() );
-    types_exported_by_value.insert( FullyQualifiedId( id_name ) );
 }
 
-void Exporter::add_export_by_value( const FullyQualifiedId &full_name )
+void Exporter::add_export( const FullyQualifiedId &full_name )
 {
-    add_export_by_value( full_name, full_name.as_string() );
+    add_export( full_name, full_name.as_string() );
 }
 
-void Exporter::add_export_by_value( const FullyQualifiedId &full_name, const std::string &lua_name )
+void Exporter::add_export( const FullyQualifiedId &full_name, const std::string &lua_name )
 {
-    types_exported_by_value.insert( full_name );
     types_to_export.emplace( full_name, lua_name );
-}
-
-void Exporter::add_export_by_reference( const FullyQualifiedId &full_name )
-{
-    add_export_by_reference( full_name, full_name.as_string() );
-}
-
-void Exporter::add_export_by_reference( const FullyQualifiedId &full_name, const std::string &lua_name )
-{
-    types_exported_by_reference.insert( full_name );
-    types_to_export.emplace( full_name, lua_name );
-}
-
-void Exporter::add_export_by_value_and_reference( const FullyQualifiedId &full_name )
-{
-    add_export_by_value_and_reference( full_name, full_name.as_string() );
-}
-
-void Exporter::add_export_by_value_and_reference( const FullyQualifiedId &full_name, const std::string &lua_name )
-{
-    types_exported_by_value.insert( full_name );
-    types_exported_by_reference.insert( full_name );
-    types_to_export.emplace( full_name, lua_name );
-}
-
-void Exporter::add_export_enumeration( const FullyQualifiedId &full_name )
-{
-    add_export_enumeration( full_name, full_name.as_string() );
-}
-
-void Exporter::add_export_enumeration( const FullyQualifiedId &full_name, const std::string &lua_name )
-{
-    add_export_by_value( full_name, lua_name );
 }
 
 cata::optional<std::string> Exporter::get_header_for_argument( const Type &t ) const

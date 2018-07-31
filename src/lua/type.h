@@ -7,7 +7,6 @@ extern "C" {
 }
 
 #include "value.h"
-#include "reference.h"
 
 #include <string>
 
@@ -96,10 +95,6 @@ struct LuaType<float> : public LuaType<int> { // inherit checking because it's a
 
 template<typename T>
 struct LuaType<LuaValue<T>> : public LuaValue<T> {
-};
-
-template<typename T>
-struct LuaType<LuaReference<T>> : public LuaReference<T> {
 };
 
 #endif
