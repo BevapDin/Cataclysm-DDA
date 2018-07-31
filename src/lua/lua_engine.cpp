@@ -2,7 +2,7 @@
 
 #include "common.h"
 #include "value.h"
-#include "reference.h"
+#include "value_or_reference.h"
 #include "enum.h"
 #include "type.h"
 
@@ -261,7 +261,7 @@ static int game_items_at( lua_State *L )
         // lua_rawset then does t[k] = v and pops v and k from the stack
 
         lua_pushnumber( L, i++ + 1 );
-        LuaReference<item>::push( L, an_item );
+        LuaValue<item>::push_ref( L, an_item );
         lua_rawset( L, -3 );
     }
 
@@ -459,13 +459,13 @@ void lua_engine::init()
     // override default print to our version
     lua_register( state, "print", game_myPrint );
 
-    LuaReference<player>::push( state, g->u );
+    LuaValue<player>::push_ref( state, g->u );
     lua_setglobal( state, "player" );
 
-    LuaReference<map>::push( state, g->m );
+    LuaValue<map>::push_ref( state, g->m );
     lua_setglobal( state, "map" );
 
-    LuaReference<game>::push( state, g );
+    LuaValue<game>::push_ref( state, g );
     lua_setglobal( state, "g" );
 
     // Load lua-side metatables etc.

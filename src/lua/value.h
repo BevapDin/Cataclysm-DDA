@@ -39,6 +39,7 @@ template<typename T>
 class LuaValue
 {
     private:
+        friend class LuaValue<T*>;
         /** Defined by generate_bindings.lua in catabindings.cpp */
         static const char *const METATABLE_NAME;
         /** Defined by generate_bindings.lua in catabindings.cpp */
@@ -150,6 +151,15 @@ class LuaValue
             Type &instance = const_cast<Type&>( get( L, 1 ) );
             return set_member( L, instance, key );
         }
+        template<typename U = T>
+        static const char *get_metatable_name( typename std::enable_if<std::is_pointer<U>::value>::type * = nullptr ) {
+            static const std::string name = LuaValue<typename std::remove_pointer<T>::type>::get_metatable_name() + std::string( "*" );
+            return name.c_str();
+        }
+        template<typename U = T>
+        static const char *get_metatable_name( typename std::enable_if<!std::is_pointer<U>::value>::type * = nullptr ) {
+            return METATABLE_NAME;
+        }
         /**
          * This loads the metatable (and adds the available functions) and pushes it on the stack.
          */
@@ -157,7 +167,7 @@ class LuaValue
             // Create table (if it does not already exist), pushes it on the stack.
             // If the table already exists, we have already filled it, so we can return
             // without doing it again.
-            if( luaL_newmetatable( L, METATABLE_NAME ) == 0 ) {
+            if( luaL_newmetatable( L, get_metatable_name() ) == 0 ) {
                 return;
             }
             // Push the metatable itself, the stack now contains two pointers to the same metatable
@@ -215,6 +225,15 @@ class LuaValue
             lua_setmetatable( L, -2 );
             // This is where the copy happens:
             new( value_in_lua ) T( std::forward<Args>( args )... );
+        }
+        /**
+         * Pushes a *reference* to the given object to Lua. It does *not* copy the object.
+         */
+        static void push_ref( lua_State *const L, const T &ref ) {
+            LuaValue<T*>::push( L, const_cast<T*>( &ref ) );
+        }
+        static void push_ref( lua_State *const L, const T *ref ) {
+            LuaValue<T*>::push( L, const_cast<T*>( ref ) );
         }
         static int push_reg( lua_State *const L, const T &value ) {
             push( L, value );

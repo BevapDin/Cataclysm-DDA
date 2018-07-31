@@ -52,13 +52,7 @@ function member_type_to_cpp_type(member_type)
     else
         for class_name, class in pairs(classes) do
             if class_name == member_type then
-                if class.by_value and class.by_reference then
-                    return "LuaValueOrReference<" .. class.cpp_name .. ">"
-                elseif class.by_value then
-                    return "LuaValue<" .. class.cpp_name .. ">"
-                elseif class.by_reference then
-                    return "LuaReference<" .. class.cpp_name .. ">"
-                end
+                return "LuaValueOrReference<" .. class.cpp_name .. ">"
             end
         end
         for enum_name, _ in pairs(enums) do
@@ -86,32 +80,23 @@ end
 -- Returns code to take a C++ variable of the given type and push a lua version
 -- of it onto the stack.
 function push_lua_value(in_variable, value_type)
-    local wrapper
     if value_type:sub(-1) == "&" then
         -- A reference is to be pushed. Copying the referred to object may not be allowed  (it may
         -- be a reference to a global game object).
         local t = value_type:sub(1, -2)
         if classes[t] then
-            if classes[t].by_value and classes[t].by_reference then
-                -- special case becaus member_type_to_cpp_type would return LuaValueOrReference,
-                -- which does not have a push function.
-                wrapper = "LuaReference<" .. classes[t].cpp_name .. ">"
-            else
-                wrapper = member_type_to_cpp_type(t)
-            end
-        else
-            wrapper = member_type_to_cpp_type(t)
+            return "LuaValue<" .. classes[t].cpp_name .. ">::push_ref( L, " .. in_variable .. " );"
         end
-    elseif classes[value_type] then
-        -- Not a native Lua type, but it's not a reference, so we *have* to copy it (the value would
-        -- go out of scope otherwise). Copy semantic means using LuaValue.
-        wrapper = "LuaValue<" .. classes[value_type].cpp_name .. ">"
-    else
-        -- Either an undefined type or a native Lua type, both is handled in member_type_to_cpp_type
-        wrapper = member_type_to_cpp_type(value_type)
+        value_type = t
     end
-
-    return wrapper .. "::push(L, " .. in_variable .. ");"
+    if classes[value_type] then
+        return "LuaValue<" .. value_type .. ">::push( L, " .. in_variable .. " );"
+    end
+    if enums[value_type] then
+        return "LuaEnum<" .. value_type .. ">::push( L, " .. in_variable .. " );"
+    end
+    -- A native Lua type.
+    return member_type_to_cpp_type(value_type) .. "::push( L, " .. in_variable .. " );"
 end
 
 function generate_getter_code(name, attribute, tab)
@@ -354,7 +339,7 @@ function generate_class_function_wrapper(class_name, function_name, func)
             func_invoc = classes[data.class_name].cpp_name .. '::' .. data.cpp_name .. '('
             start_index = 0
         else
-            func_invoc = "static_cast<"..classes[data.class_name].cpp_name.."&>(parameter0)"
+            func_invoc = "static_cast<"..classes[data.class_name].cpp_name.."&>( parameter0 )"
             func_invoc = func_invoc .. "."..data.cpp_name .. "("
             start_index = 1
         end
@@ -390,8 +375,6 @@ function generate_constructor(class_name, args)
     local cbc = function(indentation, stack_index, data)
         local tab = string.rep("    ", indentation)
 
-        -- Push is always done on a value, never on a pointer/reference, therefor don't use
-        -- `push_lua_value` (which uses member_type_to_cpp_type to get either LuaValue or LuaReference).
         local text = tab .. "LuaValue<" .. cpp_name .. ">::push(L"
 
         for i = 1,stack_index do
@@ -412,20 +395,16 @@ end
 
 function generate_destructor(class_name, class)
     local cpp_output = ""
-    local cpp_name = class.cpp_name
-    if class.by_value then
-        cpp_output = cpp_output .. "template<>" .. br
-        cpp_output = cpp_output .. "void LuaValue<" .. cpp_name .. ">::call_destructor( " .. cpp_name .. " &object ) {" .. br
-        cpp_output = cpp_output .. tab .. "object.~" .. cpp_name .. "();" .. br
-        cpp_output = cpp_output .. "}" .. br
-    end
-    if class.by_reference then
-        cpp_output = cpp_output .. "template<>" .. br
-        cpp_output = cpp_output .. "void LuaValue<" .. cpp_name .. "*>::call_destructor( " .. cpp_name .. " *&object ) {" .. br
-        -- Don't need an actual deconstructor call here because it's only a pointer, its deconstruction won't do anything.
-        cpp_output = cpp_output .. tab .. "static_cast<void>( object );" .. br
-        cpp_output = cpp_output .. "}" .. br
-    end
+    local cpp_class_name = class.cpp_name
+    cpp_output = cpp_output .. "template<>" .. br
+    cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. ">::call_destructor( " .. cpp_class_name .. " &object ) {" .. br
+    cpp_output = cpp_output .. tab .. "object.~" .. cpp_class_name .. "();" .. br
+    cpp_output = cpp_output .. "}" .. br
+    cpp_output = cpp_output .. "template<>" .. br
+    cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. "*>::call_destructor( " .. cpp_class_name .. " *&object ) {" .. br
+    -- Don't need an actual deconstructor call here because it's only a pointer, its deconstruction won't do anything.
+    cpp_output = cpp_output .. tab .. "static_cast<void>( object );" .. br
+    cpp_output = cpp_output .. "}" .. br
     return cpp_output
 end
 
@@ -438,11 +417,7 @@ function generate_operator(class_name, operator_id, cppname)
 
     text = text .. tab .. "bool rval = "
 
-    if classes[class_name].by_reference then
-        -- Both objects are pointers, they need to point to the same object to be equal.
-        text = text .. "&lhs " .. cppname .. " &rhs";
-    else
-        text = text .. "lhs " .. cppname .. " rhs";
+    text = text .. "( &lhs " .. cppname .. " &rhs ) || ( lhs " .. cppname .. " rhs )";
     end
     text = text .. ";"..br
 
@@ -581,9 +556,9 @@ end
 function generate_accessors(class_name, value_type_name, function_name, attributes, cbc)
     local names = sorted_keys(attributes, function(name) return function_name == "get_member" or attributes[name].writable; end)
     local cpp_output = ""
-    local instance_type = "const " .. classe[class_name].cpp_name
+    local instance_type = "const " .. classes[class_name].cpp_name
     if function_name == "set_member" then
-        instance_type = classe[class_name].cpp_name
+        instance_type = classes[class_name].cpp_name
     end
 
     cpp_output = cpp_output .. "template<>" .. br
@@ -599,49 +574,18 @@ function generate_accessors(class_name, value_type_name, function_name, attribut
     cpp_output = cpp_output .. "}" .. br
     return cpp_output
 end
--- The static constant is always define in LuaValue (LuaReference gets it via inheritance)
--- But LuaReference inherits from LuaValue<T*>!
-function wrapper_base_class(class_name)
-    local cpp_class_name = classes[class_name].cpp_name
-    -- This must not be LuaReference because it is used for declaring/defining the static members
-    -- and those should onloy exist for LuaValue.
-    if classes[class_name].by_reference then
-        return "LuaValue<" .. cpp_class_name .. "*>"
-    else
-        return "LuaValue<" .. cpp_class_name .. ">"
-    end
-end
 
-function generate_LuaValue_constants(class_name, class, by_value_and_reference)
+function generate_LuaValue_constants(class_name, class)
     local cpp_output = ""
-    local cpp_name = ""
-    local metatable_name = ""
     local cpp_class_name = class.cpp_name
-    if by_value_and_reference then
-        -- A different metatable name, to allow the C++ wrappers to detect what the
-        -- object from Lua refers to. The wrappers can thereby be used by both types
-        -- at the same type. In other words: the created static functions `get_foo_member`
-        -- can be called on a value that was pushed to Lua via `Lua<foo>::push` (and is a value),
-        -- and values pushed via `LuaReference<foo>::push` (which is a pointer).
-        metatable_name = "value_of_" .. class_name .. "_metatable"
-        cpp_name = "LuaValue<" .. cpp_class_name .. ">"
-    else
-        metatable_name = class_name .. "_metatable"
-        cpp_name = wrapper_base_class(class_name)
-    end
+    local cpp_name = "LuaValue<" .. cpp_class_name .. ">"
+    local metatable_name = class_name .. "_metatable"
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const char * const " .. cpp_name .. "::METATABLE_NAME = \"" .. metatable_name .. "\";" .. br
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. cpp_name.."::Type *"..cpp_name.."::get_subclass( lua_State* const S, int const i) {"..br
     for _, child in ipairs(sorted_keys(classes)) do
         local class = classes[child]
-        -- Note: while the function get_subclass resides in LuaValue<T>, this calls into LuaValue or
-        -- LuaReference, that way we get a simple pointer. Unconditionally calling LuaValue<T>::get,
-        -- would result in returning monster** (LuaValue<T>::get returns a T&, applying `&` gives T*).
-        -- Now consider that T is already a pointer for LuaValue<monster*>, so T* would be monster**
-        -- And that can not be converted to Creature**!
-        -- In the end, this function does not return T*. but std::remove_pointer<T>::type* and that
-        -- is basically T* (if T is not a pointer) or T (if T is already a pointer).
         local cpp_child_name = member_type_to_cpp_type(child);
         if class.parent == class_name then
             cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
@@ -669,14 +613,8 @@ function generate_functions_for_class(class_name, class)
         end
         parent_class = class.parent
     end
-    if class.by_value then
-        cpp_output = cpp_output .. generate_accessors(class_name, class_name, "get_member", attributes, generate_getter_code)
-        cpp_output = cpp_output .. generate_accessors(class_name, class_name, "set_member", attributes, generate_setter_code)
-    end
-    if class.by_reference then
-        cpp_output = cpp_output .. generate_accessors(class_name, class_name .. "*", "get_member", attributes, generate_getter_code)
-        cpp_output = cpp_output .. generate_accessors(class_name, class_name .. "*", "set_member", attributes, generate_setter_code)
-    end
+    cpp_output = cpp_output .. generate_accessors(class_name, class_name, "get_member", attributes, generate_getter_code)
+    cpp_output = cpp_output .. generate_accessors(class_name, class_name, "set_member", attributes, generate_setter_code)
     if class.new then
         cpp_output = cpp_output .. generate_constructor(class_name, class.new)
     end
@@ -710,48 +648,50 @@ function generate_code_for(class_name, class)
     cpp_output = cpp_output .. br
     cpp_output = cpp_output .. class.code_prepend .. br
     cpp_output = cpp_output .. generate_functions_for_class(class_name, class)
-    cpp_output = cpp_output .. generate_LuaValue_constants(class_name, class, false)
-    if class.by_value and class.by_reference then
-        cpp_output = cpp_output .. generate_LuaValue_constants(class_name, class, true)
+    cpp_output = cpp_output .. generate_LuaValue_constants(class_name, class)
+
+    -- Checks whether we have a copy constructor, note that `new` is now in the format
+    -- of the overload resolution tree, see generate_overload_tree
+    function can_copy()
+        if class.new then
+            if class.new[class_name] then
+                if class.new[class_name].r then
+                    return true
+                end
+            end
+        end
+        return false
     end
 
-    if class.by_value then
+    if can_copy() then
         cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
         cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
         cpp_output = cpp_output .. "}" .. br
 
         cpp_output = cpp_output .. "template<> " .. class_name .. " get_wrapped_from_stack<" .. class_name .. ">( const lua_engine &engine, const int index ) {" .. br
-        cpp_output = cpp_output .. "    if( LuaValue<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
-        cpp_output = cpp_output .. "        return LuaValue<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
-        cpp_output = cpp_output .. "    }" .. br
-        -- If the Lua value is a reference, we can still return it as value, but not the other way round (see below).
-        if class.by_reference then
-            cpp_output = cpp_output .. "    if( LuaReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
-            cpp_output = cpp_output .. "        return LuaReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
-            cpp_output = cpp_output .. "    }" .. br
-        end
-        cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
-        cpp_output = cpp_output .. "}" .. br
-    end
-
-    if class.by_reference then
-        -- Allow pushing references to const and to non-const values alike (Lua doesn't have the concept of "const").
-        cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<const " .. class_name .. "> &val ) {" .. br
-        cpp_output = cpp_output .. "    LuaReference<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
-        cpp_output = cpp_output .. "}" .. br
-        cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<" .. class_name .. "> &val ) {" .. br
-        cpp_output = cpp_output .. "    LuaReference<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
-        cpp_output = cpp_output .. "}" .. br
-
-        -- Don't return a reference to an object managed by Lua (created by value) as we can't know its
-        -- lifetime from within the calling C++ code.
-        cpp_output = cpp_output .. "template<> " .. class_name .. " &get_wrapped_from_stack<" .. class_name .. "&>( const lua_engine &engine, const int index ) {" .. br
-        cpp_output = cpp_output .. "    if( LuaReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
-        cpp_output = cpp_output .. "        return LuaReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+        cpp_output = cpp_output .. "    if( LuaValueOrReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+        cpp_output = cpp_output .. "        return LuaValueOrReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
         cpp_output = cpp_output .. "    }" .. br
         cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
         cpp_output = cpp_output .. "}" .. br
     end
+
+    -- Allow pushing references to const and to non-const values alike (Lua doesn't have the concept of "const").
+    cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<const " .. class_name .. "> &val ) {" .. br
+    cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push_ref( get_lua_state( engine ), val );" .. br
+    cpp_output = cpp_output .. "}" .. br
+    cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<" .. class_name .. "> &val ) {" .. br
+    cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push_ref( get_lua_state( engine ), val );" .. br
+    cpp_output = cpp_output .. "}" .. br
+
+    -- Don't return a reference to an object managed by Lua (created by value) as we can't know its
+    -- lifetime from within the calling C++ code.
+    cpp_output = cpp_output .. "template<> " .. class_name .. " &get_wrapped_from_stack<" .. class_name .. "&>( const lua_engine &engine, const int index ) {" .. br
+    cpp_output = cpp_output .. "    if( LuaValueOrReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+    cpp_output = cpp_output .. "        return LuaValueOrReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+    cpp_output = cpp_output .. "    }" .. br
+    cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
+    cpp_output = cpp_output .. "}" .. br
 
     return cpp_output
 end
@@ -776,7 +716,7 @@ function generate_main_init_function()
 
     for _, class_name in ipairs(sorted_keys(classes)) do
         local class = classes[class_name]
-        local cpp_name = wrapper_base_class(class_name)
+        local cpp_name = "LuaValue<" .. class_name .. ">"
         -- If the class has a constructor, it should be exposed via a global name (which is the class name)
         if class.new then
             cpp_output = cpp_output .. tab .. cpp_name .. "::load_metatable( L, \"" .. class_name .. "\" );" .. br
