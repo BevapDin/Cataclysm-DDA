@@ -9,16 +9,9 @@ typedef in catalua.cpp, e.g. `using cppstring = std::string;`, than add a class 
 
 Each class requires at least the attributes and the functions table (they can be empty).
 Optional values are:
-- by_value (boolean, default: false): if true, copy the C++ object into memory managed by Lua
-  (the copy may outlive the source C++ object), otherwise only a pointer to the C++ object
-  is stored in Lua and it *needs* to stay valid in C++ until the Lua object is gone.
-- by_value_and_reference (boolean, default: false): if true, the class is can be exported to Lua
-  as value (copy of the object, managed by Lua) *and* as reference (to an object managed by C++
-  code). This flag implies "by_value", "by_value" should therefor not be specified explicitly.
 - has_equal (boolean, default: false): If true, generate the __eq entry in the metatable which
   will map to the C++ using the operator==.
-- new (an array of parameter lists): defines the constructor of the object. This is only useful for
-  by_value objects, it allows to create an instance of it in Lua. The entry should be an array,
+- new (an array of parameter lists): defines the constructor of the object. The entry should be an array,
   each element of it represents one overload of the constructor. Each element should be a list of
   parameters to those overloads (same as the list of arguments to member functions).
 - int_id (optional, a string): if the class has an associated int_id (e.g. ter_t has int_id<ter_t>,
@@ -61,23 +54,14 @@ be considered a bug). TODO: fix it
 Types can be built in types: int, float, bool, string (std::string in C++), cstring (const char* in C++)
 Or any class defined in the classes table.
 
-Regarding reference and the by_value setting:
-Instances of the itype class are created by C++ (specifically by the Item_factory). They are
-never created elsewhere and once created each instance will stay valid (and at the same address)
-until the game has ended. Furthermore it's actually important that each item id maps to exactly
-one instance of itype. Similar for mtype.
-Therefor those objects are exported as pointer only (by_value is false).
-
-Other objects (e.g. tripoint) can be constructed as values in Lua (by_value is true).
-
 The return value of functions ("rval") behaves a bit special:
-- If it ends with a '&', as in `rval = "item&"`, it is assumed the function returns a reference.
-  The by_value setting will determine whether to copy the referred object (to Lua memory), or
-  to store only a reference in Lua memory.
+- If it ends with a '&', as in `rval = "item&"`, it is assumed the function returns a reference and
+  the reference is stored in Lua. Note that the C++ function may return a reference, but the Lua
+  wrappers may handle it as a value.
   Using '&' on native Lua types is not allowed.
 - If the return type is a class type (has an entry in classes), it is copied to Lua memory. This
   will fail (when the generated bindings are compiled or when they get linked) if the type does not
-  support copying. One should either add `by_value = true` or `by_value_and_reference = true` to the type.
+  support copying.
 - Otherwise it should be a native Lua type, which will be copied.
 
 Example: (Creature::pos returns a const reference to tripoint, game::zombie returns a reference to monster)
@@ -263,15 +247,6 @@ for class_name, value in pairs(classes) do
     if not value.output_path then
         value.output_path = class_name:gsub("[^%w_.]", "") .. ".gen.cpp"
     end
-    -- Only have `by_value` and `by_reference` attributes, not `by_value_and_reference`,
-    -- One can always combine the first two attributes: `if foo.by_value and foo.by_reference`
-    if value.by_value_and_reference then
-        value.by_reference = true
-        value.by_value = true
-        value.by_value_and_reference = nil
-    elseif not value.by_value then
-        value.by_reference = true
-    end
 end
 
 -- This adds the int_id wrappers from the class definition as real classes.
@@ -286,7 +261,6 @@ for name, value in pairs(classes) do
             forward_declaration = value.forward_declaration .. "using " .. value.int_id .. " = int_id<" .. name .. ">;",
             code_prepend = value.code_prepend,
             output_path = value.output_path,
-            by_value = true,
             has_equal = true,
             cpp_name = "int_id<" .. value.cpp_name .. ">",
             -- IDs *could* be constructed from int, but where does the Lua script get the int from?
@@ -314,7 +288,6 @@ for name, value in pairs(classes) do
             forward_declaration = value.forward_declaration .. "using " .. value.string_id .. " = string_id<" .. name .. ">;",
             code_prepend = value.code_prepend,
             output_path = value.output_path,
-            by_value = true,
             has_equal = true,
             cpp_name = "string_id<" .. value.cpp_name .. ">",
             -- Copy and default constructor and construct from plain string.

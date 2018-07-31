@@ -94,13 +94,9 @@ void Parser::parse_class( const Cursor &cursor )
         return;
     }
     const FullyQualifiedId name = cursor.fully_qualifid();
-    const Type t = cursor.type();
     if( !exporter.export_enabled( cursor.type(), cursor.location_path() ) ) {
         skipped( "class", name, "not exported" );
         return;
-    }
-    if( !exporter.export_by_reference( t ) && !exporter.export_by_value( t ) ) {
-        throw std::runtime_error( "Class " + name + " should be exported, but is not marked as by-value nor as by-reference!" );
     }
     get_or_add_class( cursor );
 }
