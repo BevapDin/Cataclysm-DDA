@@ -34,6 +34,9 @@ Optional values are:
 - forward_declaration (optional, a string), how to forward declare the type. E.g. "class foo;"
   (for simple types) or (for template instances):
   "template<typename N> class wrapper;class foo;using foo_wrapper = wrapper<foo>;"
+- output_path (optional, a string), the path where to write the generated C++ code. The default
+  is based on the class name. Several classes can have the same output path, the generated
+  content is put together in that file.
 
 The attributes table contains the members of the C++ class. Each key is the name of the member,
 it maps to a map with the following values:
@@ -123,6 +126,7 @@ classes["volume"] = {
     by_value = true,
     cpp_name = "units::volume",
     code_prepend = "#include \"units.h\"",
+    output_path = "units.gen.cpp",
     attributes = {
     },
     functions = {
@@ -134,12 +138,16 @@ classes["mass"] = {
     by_value = true,
     cpp_name = "units::mass",
     code_prepend = "#include \"units.h\"",
+    output_path = "units.gen.cpp",
     attributes = {
     },
     functions = {
         { name = "value", rval = "int", args = { } },
     },
 }
+
+classes["ter_t"].output_path = "mapdata.gen.cpp"
+classes["furn_t"].output_path = "mapdata.gen.cpp"
 
 -- Headers that are required in order to compile the wrappers for the enum classes.
 enums_code_prepend = "#include \"field.h\"\n#include \"bodypart.h\"\n#include \"itype.h\"\n#include \"creature.h\"\n#include \"output.h\"\n#include \"calendar.h\"\n#include \"pldata.h\"\n#include \"units.h\""
@@ -288,6 +296,9 @@ for class_name, value in pairs(classes) do
     if not value.cpp_name then
         value.cpp_name = class_name
     end
+    if not value.output_path then
+        value.output_path = class_name .. ".gen.cpp"
+    end
 end
 
 -- This adds the int_id wrappers from the class definition as real classes.
@@ -301,6 +312,7 @@ for name, value in pairs(classes) do
         local t = {
             forward_declaration = value.forward_declaration .. "using " .. value.int_id .. " = int_id<" .. name .. ">;",
             code_prepend = value.code_prepend,
+            output_path = value.output_path,
             by_value = true,
             has_equal = true,
             cpp_name = "int_id<" .. value.cpp_name .. ">",
@@ -328,6 +340,7 @@ for name, value in pairs(classes) do
         local t = {
             forward_declaration = value.forward_declaration .. "using " .. value.string_id .. " = string_id<" .. name .. ">;",
             code_prepend = value.code_prepend,
+            output_path = value.output_path,
             by_value = true,
             has_equal = true,
             cpp_name = "string_id<" .. value.cpp_name .. ">",
