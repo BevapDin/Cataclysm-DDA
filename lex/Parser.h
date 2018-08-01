@@ -55,6 +55,8 @@ class Parser
             return get_from( what, where ) != nullptr;
         }
 
+        std::vector<std::string> additional_args;
+
     public:
         static const FullyQualifiedId cpp_standard_namespace;
 
@@ -83,6 +85,8 @@ class Parser
         void parse_function( const Cursor &cursor );
         void parse_union( const Cursor &cursor );
         void parse_namespace( const Cursor &cursor );
+
+        void add_include_path( const std::string &path );
 
         void debug_message( const std::string &message ) const;
         void info_message( const std::string &message ) const;
