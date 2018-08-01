@@ -146,18 +146,18 @@ void Parser::parse( const std::vector<std::string> &headers )
     for( const std::string &header : headers ) {
         text += "#include \"" + header + "\"\n";
     }
-    // @todo the include path should not be fixed!
-    const std::vector<const char *> args = { {
+    std::vector<const char *> args = { {
             "-x", "c++",
             "-std=c++11",
             "-fsyntax-only",
             "-Wno-pragma-once-outside-header",
-            "-isystem", "/usr/lib/clang/3.3/include",
-            "-isystem", "/usr/lib/clang/4.0.0/include",
-            "-isystem", "/usr/lib/clang/6.0.0/include",
-            "foo.h",
         }
     };
+    for( const std::string &arg : additional_args ) {
+        args.emplace_back( arg.c_str() );
+    }
+    args.emplace_back( "foo.h" );
+
     const unsigned opts = CXTranslationUnit_None | CXTranslationUnit_SkipFunctionBodies |
                           CXTranslationUnit_Incomplete;
     tus.emplace_back( index, args, text, opts );
@@ -183,18 +183,18 @@ void Parser::parse( const std::string &header )
         info_message( "Skipping file " + header + " as it was already included by another file" );
         return;
     }
-    // @todo the include path should not be fixed!
-    const std::vector<const char *> args = { {
+    std::vector<const char *> args = { {
             "-x", "c++",
             "-std=c++11",
             "-fsyntax-only",
             "-Wno-pragma-once-outside-header",
-            "-isystem", "/usr/lib/clang/3.3/include",
-            "-isystem", "/usr/lib/clang/4.0.0/include",
-            "-isystem", "/usr/lib/clang/6.0.0/include",
-            header.c_str(),
         }
     };
+    for( const std::string &arg : additional_args ) {
+        args.emplace_back( arg.c_str() );
+    }
+    args.emplace_back( header.c_str() );
+
     const unsigned opts = CXTranslationUnit_None | CXTranslationUnit_SkipFunctionBodies |
                           CXTranslationUnit_Incomplete;
     tus.emplace_back( index, args, opts );
@@ -310,6 +310,12 @@ const CppEnum *Parser::get_enum( const FullyQualifiedId &full_name ) const
 bool Parser::contains_enum( const FullyQualifiedId &full_name ) const
 {
     return contains( full_name, enums );
+}
+
+void Parser::add_include_path( const std::string &path )
+{
+    additional_args.emplace_back( "-isystem" );
+    additional_args.emplace_back( path );
 }
 
 const FullyQualifiedId Parser::cpp_standard_namespace( "std" );
