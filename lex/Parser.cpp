@@ -151,14 +151,16 @@ void Parser::parse( const std::vector<std::string> &headers )
             "-std=c++11",
             "-fsyntax-only",
             "-Wno-pragma-once-outside-header",
-            "-isystem", "/usr/lib/clang/3.3/include",
-            "-isystem", "/usr/lib/clang/4.0.0/include",
-            "-isystem", "/usr/lib/clang/6.0.0/include",
             "-stdlib=libc++",
             "-x", "c++",
             "foo.h",
         }
     };
+    for( const std::string &arg : additional_args ) {
+        args.emplace_back( arg.c_str() );
+    }
+    args.emplace_back( "foo.h" );
+
     const unsigned opts = CXTranslationUnit_None | CXTranslationUnit_SkipFunctionBodies |
                           CXTranslationUnit_Incomplete;
     tus.emplace_back( index, args, text, opts );
@@ -189,14 +191,16 @@ void Parser::parse( const std::string &header )
             "-std=c++11",
             "-fsyntax-only",
             "-Wno-pragma-once-outside-header",
-            "-isystem", "/usr/lib/clang/3.3/include",
-            "-isystem", "/usr/lib/clang/4.0.0/include",
-            "-isystem", "/usr/lib/clang/6.0.0/include",
             "-stdlib=libc++",
             "-x", "c++",
             header.c_str(),
         }
     };
+    for( const std::string &arg : additional_args ) {
+        args.emplace_back( arg.c_str() );
+    }
+    args.emplace_back( header.c_str() );
+
     const unsigned opts = CXTranslationUnit_None | CXTranslationUnit_SkipFunctionBodies |
                           CXTranslationUnit_Incomplete;
     tus.emplace_back( index, args, opts );
@@ -312,6 +316,12 @@ const CppEnum *Parser::get_enum( const FullyQualifiedId &full_name ) const
 bool Parser::contains_enum( const FullyQualifiedId &full_name ) const
 {
     return contains( full_name, enums );
+}
+
+void Parser::add_include_path( const std::string &path )
+{
+    additional_args.emplace_back( "-isystem" );
+    additional_args.emplace_back( path );
 }
 
 const FullyQualifiedId Parser::cpp_standard_namespace( "std" );

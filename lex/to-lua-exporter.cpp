@@ -42,6 +42,9 @@ int main( int argc, const char *argv[] )
             } else if( arg == "--config" && i + 1 != args.end() ) {
                 i = args.erase( i );
                 config_path = *i;
+            } else if( arg == "--include" && i + 1 != args.end() ) {
+                i = args.erase( i );
+                parser.add_include_path( *i );
             } else if( arg == "-o" && i + 1 != args.end() ) {
                 i = args.erase( i );
                 output_path = *i;
@@ -50,6 +53,7 @@ int main( int argc, const char *argv[] )
                 exporter.export_all_in( *i );
             } else if( arg == "-?" || arg == "--help" ) {
                 std::cout << "--config <path> ... path to the configuration JSON file\n";
+                std::cout << "--include <path> ... additional include path\n";
                 std::cout << "--one-header ... Put all includes into one header and parse that (should be faster)\n";
                 std::cout << "--export-comments ... Export comments from C++\n";
                 std::cout << "-s <dir> ... directory containing the source files\n";
