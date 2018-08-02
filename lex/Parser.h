@@ -31,6 +31,8 @@ class Parser
         Index index;
         std::list<TranslationUnit> tus;
 
+        std::set<std::string> visited_files;
+
         std::set<std::string> skipped_entities;
 
         std::list<CppEnum> enums;
