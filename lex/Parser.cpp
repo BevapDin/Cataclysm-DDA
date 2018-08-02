@@ -133,6 +133,44 @@ void Parser::parse_namespace( const Cursor &cursor )
     parse( cursor );
 }
 
+void Parser::parse( const std::vector<std::string> &headers )
+{
+    std::string text;
+    for( const std::string &header : headers ) {
+        text += "#include \"" + header + "\"\n";
+    }
+    // @todo the include path should not be fixed!
+    const std::vector<const char *> args = { {
+            "-std=c++11",
+            "-fsyntax-only",
+            "-Wno-pragma-once-outside-header",
+            "-isystem", "/usr/lib/clang/3.3/include",
+            "-isystem", "/usr/lib/clang/4.0.0/include",
+            "-isystem", "/usr/lib/clang/6.0.0/include",
+            "-stdlib=libc++",
+            "-x", "c++",
+            "foo.h",
+        }
+    };
+    const unsigned opts = CXTranslationUnit_None | CXTranslationUnit_SkipFunctionBodies |
+                          CXTranslationUnit_Incomplete;
+    tus.emplace_back( index, args, text, opts );
+
+    const auto diagnostics = tus.back().get_diagnostics();
+    for( const std::string &msg : diagnostics ) {
+        info_message( msg );
+    }
+    if( !diagnostics.empty() ) {
+        throw std::runtime_error("Errors / warnings while parsing header" );
+    }
+    
+    for( const std::string &file : tus.back().get_includes() ) {
+        visited_files.insert( file );
+    }
+
+    parse( tus.back().cursor() );
+}
+
 void Parser::parse( const std::string &header )
 {
     if( visited_files.count( header ) > 0 ) {
