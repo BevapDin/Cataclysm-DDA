@@ -3,6 +3,7 @@
 #include "common-clang.h"
 #include "exceptions.h"
 #include "CppClass.h"
+#include "CppEnum.h"
 #include "Cursor.h"
 #include "Type.h"
 #include "TranslationUnit.h"
@@ -193,6 +194,16 @@ void Exporter::export_( const Parser &parser, const std::string &lua_file )
         if( const CppClass *const obj = parser.get_class( t ) ) {
             f << obj->export_( *this ) << ",\n";
             handled_types.insert( t );
+        }
+    }
+    f << "}\n";
+
+    f << "\n";
+    f << "enums = {\n";
+    for( const auto &e : types_to_export ) {
+        if( const CppEnum *const obj = parser.get_enum( e.first ) ) {
+            f << obj->export_( *this ) << ",\n";
+            handled_types.insert( e.first );
         }
     }
     f << "}\n";
@@ -482,6 +493,16 @@ void Exporter::add_export_by_value_and_reference( const FullyQualifiedId &full_n
     types_exported_by_value.insert( full_name );
     types_exported_by_reference.insert( full_name );
     types_to_export.emplace( full_name, lua_name );
+}
+
+void Exporter::add_export_enumeration( const FullyQualifiedId &full_name )
+{
+    add_export_enumeration( full_name, full_name.as_string() );
+}
+
+void Exporter::add_export_enumeration( const FullyQualifiedId &full_name, const std::string &lua_name )
+{
+    add_export_by_value( full_name, lua_name );
 }
 
 cata::optional<std::string> Exporter::get_header_for_argument( const Type &t ) const
