@@ -3,6 +3,7 @@
 #include "common-clang.h"
 #include "CppClass.h"
 #include "CppEnum.h"
+#include "CppFreeFunction.h"
 #include "Cursor.h"
 #include "Type.h"
 #include "TranslationUnit.h"
@@ -112,6 +113,15 @@ void Parser::parse_union( const Cursor &cursor )
     //@todo maybe implement it?
 }
 
+void Parser::parse_function( const Cursor &cursor )
+{
+    if( skip_silently( cursor ) ) {
+        return;
+    }
+    //@todo handle blocking
+    CppCallable::create_multiple_from( cursor, functions );
+}
+
 void Parser::parse_namespace( const Cursor &cursor )
 {
     if( is_reserved( cursor.spelling() ) || cursor.spelling().empty() ) {
@@ -185,7 +195,7 @@ void Parser::parse( const Cursor &c ) {
             //@todo handle this?
             return CXChildVisit_Continue;
         } else if( k == CXCursor_FunctionDecl ) {
-            // @todo
+            parse_function( cursor );
             return CXChildVisit_Continue;
         } else if( k == CXCursor_Namespace ) {
             parse_namespace( cursor );
