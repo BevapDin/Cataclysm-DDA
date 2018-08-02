@@ -80,6 +80,18 @@ int main( int argc, const char *argv[] )
         exporter.add_export_by_reference( FullyQualifiedId( "w_point" ) );
         exporter.add_export_by_reference( FullyQualifiedId( "gun_mode" ) );
 
+        // Enums that should be available in Lua.
+        exporter.add_export_enumeration( FullyQualifiedId( "body_part" ) );
+        exporter.add_export_enumeration( FullyQualifiedId( "hp_part" ) );
+        exporter.add_export_enumeration( FullyQualifiedId( "side" ) );
+        exporter.add_export_enumeration( FullyQualifiedId( "phase_id" ) );
+        exporter.add_export_enumeration( FullyQualifiedId( "m_size" ) );
+        //exporter.add_export_enumeration( FullyQualifiedId( "game_message_type" ) );
+        exporter.add_export_enumeration( FullyQualifiedId( "season_type" ) );
+        exporter.add_export_enumeration( FullyQualifiedId( "add_type" ) );
+        exporter.add_export_enumeration( FullyQualifiedId( "field_id" ) );
+        exporter.add_export_enumeration( FullyQualifiedId( "damage_type" ) );
+
         std::string source_directory = "../src/";
         std::string output_path = "generated_class_definitions.lua";
         for( auto i = args.begin(); i != args.end(); ) {

@@ -34,7 +34,7 @@ CppClass::CppClass( Parser &p, const Cursor &cursor ) : cursor_( cursor )
             // @todo
             return CXChildVisit_Continue;
         } else if( k == CXCursor_EnumDecl ) {
-            // @todo
+            p.parse_enum( c );
             return CXChildVisit_Continue;
 
         } else if( k == CXCursor_CXXMethod ) {
