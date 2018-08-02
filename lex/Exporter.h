@@ -47,6 +47,8 @@ class Exporter
         Exporter();
         ~Exporter();
 
+        bool export_comments = false;
+
         Exporter( const Exporter & ) = delete;
 
         bool is_blocked( const CppConstructor &obj ) const;
