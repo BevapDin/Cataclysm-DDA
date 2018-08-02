@@ -94,15 +94,19 @@ int main( int argc, const char *argv[] )
 
         std::string source_directory = "../src/";
         std::string output_path = "generated_class_definitions.lua";
+        bool parse_via_one_header = false;
         for( auto i = args.begin(); i != args.end(); ) {
             const std::string &arg = *i;
-            if( arg == "-s" && i + 1 != args.end() ) {
+            if( arg == "--one-header" ) {
+                parse_via_one_header = true;
+            } else if( arg == "-s" && i + 1 != args.end() ) {
                 i = args.erase( i );
                 source_directory = *i + "/"; // may create a double slash at the end, but it'l work anyway
             } else if( arg == "-o" && i + 1 != args.end() ) {
                 i = args.erase( i );
                 output_path = *i;
             } else if( arg == "-?" || arg == "--help" ) {
+                std::cout << "--one-header ... Put all includes into one header and parse that (should be faster)\n";
                 std::cout << "-s <dir> ... directory containing the source files\n";
                 std::cout << "-o <path> ... path to the output file\n";
                 return 1;
@@ -112,8 +116,17 @@ int main( int argc, const char *argv[] )
             i = args.erase( i );
         }
 
-        for( const std::string &header : headers ) {
-            parser.parse( source_directory + header );
+        if( parse_via_one_header ) {
+            auto copy = headers;
+            for( std::string &header : copy ) {
+                header = source_directory + header;
+            }
+            copy.push_back("foo.h");
+            parser.parse(copy);
+        } else {
+            for( const std::string &header : headers ) {
+                parser.parse( source_directory + header );
+            }
         }
 
         exporter.export_( parser, output_path );
