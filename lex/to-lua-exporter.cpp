@@ -45,12 +45,16 @@ int main( int argc, const char *argv[] )
             } else if( arg == "-o" && i + 1 != args.end() ) {
                 i = args.erase( i );
                 output_path = *i;
+            } else if( arg == "--export-all" && i + 1 != args.end() ) {
+                i = args.erase( i );
+                exporter.export_all_in( *i );
             } else if( arg == "-?" || arg == "--help" ) {
                 std::cout << "--config <path> ... path to the configuration JSON file\n";
                 std::cout << "--one-header ... Put all includes into one header and parse that (should be faster)\n";
                 std::cout << "--export-comments ... Export comments from C++\n";
                 std::cout << "-s <dir> ... directory containing the source files\n";
                 std::cout << "-o <path> ... path to the output file\n";
+                std::cout << "--export-all <directory> ... Export all things declared in a file inside the given directory.\n";
                 return 1;
             } else {
                 throw std::runtime_error( "Unknown argument '" + arg + "'" );

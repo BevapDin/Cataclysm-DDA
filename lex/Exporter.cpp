@@ -394,6 +394,9 @@ bool Exporter::export_enabled( const FullyQualifiedId name ) const
 }
 bool Exporter::export_enabled( const Type &name, const std::string &path ) const
 {
+    if( export_all_in_path_ && path.compare( 0, export_all_in_path_->length(), *export_all_in_path_ ) == 0 ) {
+        return true;
+    }
     return export_enabled( derived_class( name ) );
 }
 
@@ -535,4 +538,9 @@ std::string Exporter::lua_name( const FullyQualifiedId &full_name ) const
         return iter->second;
     }
     return translate_identifier( full_name.back() );
+}
+
+void Exporter::export_all_in( const std::string &path )
+{
+    export_all_in_path_ = path;
 }
