@@ -2,6 +2,7 @@
 
 #include "common-clang.h"
 #include "CppClass.h"
+#include "CppEnum.h"
 #include "Cursor.h"
 #include "Type.h"
 #include "TranslationUnit.h"
@@ -66,6 +67,22 @@ void Parser::skipped( const std::string &what, const FullyQualifiedId &name, con
 void Parser::parse_typedef( const Cursor &cursor )
 {
     exporter.register_id_typedef( cursor );
+}
+
+void Parser::parse_enum( const Cursor &cursor )
+{
+    if( skip_silently( cursor ) ) {
+        return;
+    }
+    const FullyQualifiedId name = cursor.fully_qualifid();
+    if( !exporter.export_enabled( cursor.type(), cursor.location_path() ) ) {
+        skipped( "enum", name, "not exported" );
+        return;
+    }
+    if( contains( name, enums ) ) {
+        return;
+    }
+    enums.emplace_back( *this, cursor );
 }
 
 void Parser::parse_class( const Cursor &cursor )
@@ -153,7 +170,7 @@ void Parser::parse( const Cursor &c ) {
             parse_union( cursor );
             return CXChildVisit_Continue;
         } else if( k == CXCursor_EnumDecl ) {
-            // @todo
+            parse_enum( cursor );
             return CXChildVisit_Continue;
         } else if( k == CXCursor_TypedefDecl || k == CXCursor_TypeAliasDecl ||
                    k == CXCursor_UsingDeclaration ) {
@@ -221,6 +238,16 @@ CppClass &Parser::get_or_add_class( const Cursor &c )
 {
     CppClass *const ptr = const_cast<CppClass *>( get_from( c.fully_qualifid(), classes ) );
     return ptr ? *ptr : add_class( c );
+}
+
+const CppEnum *Parser::get_enum( const FullyQualifiedId &full_name ) const
+{
+    return get_from( full_name, enums );
+}
+
+bool Parser::contains_enum( const FullyQualifiedId &full_name ) const
+{
+    return contains( full_name, enums );
 }
 
 const FullyQualifiedId Parser::cpp_standard_namespace( "std" );

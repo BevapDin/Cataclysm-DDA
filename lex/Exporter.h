@@ -27,8 +27,9 @@ class Exporter
         friend class Parser;
         /**
          * All the C++ types that should be exported to Lua. This should contain the
-         * real type, not a type alias.
-         * Class types must be added manually to types_exported_by_value or types_exported_by_reference
+         * real type, not a type alias. It can contain enumeration or class types.
+         * Enumerations are automatically added to types_exported_by_value. Class types
+         * must be added manually to types_exported_by_value or types_exported_by_reference
          * or to both.
          * Key is the actual type name as it appears in C++, value is the name it will
          * have in Lua.
@@ -36,8 +37,8 @@ class Exporter
         std::map<FullyQualifiedId, std::string> types_to_export;
         /**
          * C++ types that should be exported by-value. They must support copy-construction
-         * and copy-assignment. Use the plain C++ name of their type. Note:
-         * string_id and int_id are automatically exported as value, they don't need to
+         * and copy-assignment. Use the plain C++ name of their type. Note: enumerations
+         * and string_id and int_id are automatically exported as value, they don't need to
          * be listed here.
          */
         std::set<FullyQualifiedId> types_exported_by_value;
@@ -81,6 +82,7 @@ class Exporter
         void add_export_by_reference( const FullyQualifiedId &full_name, const std::string &lua_name );
         void add_export_by_value_and_reference( const FullyQualifiedId &full_name );
         void add_export_by_value_and_reference( const FullyQualifiedId &full_name, const std::string &lua_name );
+        void add_export_enumeration( const FullyQualifiedId &full_name );
 
         FullyQualifiedId derived_class( const Type &t ) const;
 

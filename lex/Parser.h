@@ -16,6 +16,7 @@ class TranslationUnit;
 class MultiMatcher;
 class Cursor;
 class Type;
+class CppEnum;
 class CppClass;
 class Exporter;
 
@@ -31,6 +32,7 @@ class Parser
 
         std::set<std::string> skipped_entities;
 
+        std::list<CppEnum> enums;
         std::list<CppClass> classes;
 
         template<typename C>
@@ -60,12 +62,16 @@ class Parser
         CppClass &add_class( const Cursor &c );
         CppClass &get_or_add_class( const Cursor &c );
 
+        const CppEnum *get_enum( const FullyQualifiedId &full_name ) const;
+        bool contains_enum( const FullyQualifiedId &full_name ) const;
+
         void skipped( const std::string &what, const FullyQualifiedId &name, const std::string &why );
 
         void parse( const std::string &header );
         void parse( const Cursor &cursor );
         void parse_typedef( const Cursor &cursor);
         void parse_class( const Cursor &cursor );
+        void parse_enum( const Cursor &cursor );
         void parse_union( const Cursor &cursor );
         void parse_namespace( const Cursor &cursor );
 
