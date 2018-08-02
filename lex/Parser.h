@@ -71,6 +71,7 @@ class Parser
 
         void skipped( const std::string &what, const FullyQualifiedId &name, const std::string &why );
 
+        void parse( const std::vector<std::string> &headers );
         void parse( const std::string &header );
         void parse( const Cursor &cursor );
         void parse_typedef( const Cursor &cursor);
