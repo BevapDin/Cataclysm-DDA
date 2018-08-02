@@ -4,6 +4,7 @@
 #include "exceptions.h"
 #include "CppClass.h"
 #include "CppEnum.h"
+#include "CppFreeFunction.h"
 #include "Cursor.h"
 #include "Type.h"
 #include "TranslationUnit.h"
@@ -204,6 +205,25 @@ void Exporter::export_( const Parser &parser, const std::string &lua_file )
         if( const CppEnum *const obj = parser.get_enum( e.first ) ) {
             f << obj->export_( *this ) << ",\n";
             handled_types.insert( e.first );
+        }
+    }
+    f << "}\n";
+
+    f << "\n";
+    f << "global_functions = {\n";
+    {
+        std::set<std::string> funcs;
+        for( const CppFreeFunction &func : parser.functions ) {
+            try {
+                funcs.insert( func.export_( *this ) );
+            } catch( const TypeTranslationError &e ) {
+                funcs.insert( "-- " + func.full_name() + " ignored because: " + e.what() );
+            } catch( const SkippedObjectError &e ) {
+                funcs.insert( "-- " + func.full_name() + " ignored because: " + e.what() );
+            }
+        }
+        for( const std::string &line : funcs ) {
+            f << line << ",\n";
         }
     }
     f << "}\n";

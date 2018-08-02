@@ -27,7 +27,7 @@ CppClass::CppClass( Parser &p, const Cursor &cursor ) : cursor_( cursor )
 
         } else if( k == CXCursor_FunctionDecl ) {
             // A free function declared inside the class (friend function most likely).
-            // @todo
+            p.parse_function( c );
             return CXChildVisit_Continue;
         } else if( k == CXCursor_VarDecl ) {
             // A static variable (therefor global).
