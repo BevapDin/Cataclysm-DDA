@@ -5,6 +5,7 @@
 #include "CppFunction.h"
 #include "CppAttribute.h"
 #include "CppConstructor.h"
+#include "Matcher.h"
 #include "Type.h"
 #include "Cursor.h"
 #include "common.h"
@@ -150,6 +151,9 @@ static std::set<std::string> print_objects( Exporter &p,
             continue;
         }
         try {
+            if( p.is_blocked( o ) ) {
+                throw SkippedObjectError( "blocked" );
+            }
             lines.insert( o.export_( p ) );
             for( const Cursor &c : o.arguments() ) {
                 add_header( headers, p.get_header_for_argument( c.type() ) );
@@ -173,6 +177,9 @@ static std::set<std::string> print_objects( Exporter &p,
             continue;
         }
         try {
+            if( p.is_blocked( o ) ) {
+                throw SkippedObjectError( "blocked" );
+            }
             lines.insert( o.export_( p ) );
         } catch( const TypeTranslationError &e ) {
             lines.insert( "-- " + o.full_name() + " ignored because: " + e.what() );
@@ -325,4 +332,19 @@ bool CppClass::has_equal() const
         }
     }
     return false;
+}
+
+bool Exporter::is_blocked( const CppFunction &obj ) const
+{
+    return blocked_identifiers->match( obj.full_name_with_args() );
+}
+
+bool Exporter::is_blocked( const CppConstructor &obj ) const
+{
+    return blocked_identifiers->match( obj.full_name_with_args() );
+}
+
+bool Exporter::is_blocked( const CppAttribute &obj ) const
+{
+    return blocked_identifiers->match( obj.full_name().as_string() );
 }
