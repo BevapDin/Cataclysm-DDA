@@ -32,7 +32,7 @@ CppClass::CppClass( Parser &p, const Cursor &cursor ) : cursor_( cursor )
             return CXChildVisit_Continue;
         } else if( k == CXCursor_VarDecl ) {
             // A static variable (therefor global).
-            // @todo
+            p.parse_variable( c );
             return CXChildVisit_Continue;
         } else if( k == CXCursor_EnumDecl ) {
             p.parse_enum( c );

@@ -19,6 +19,7 @@ class Type;
 class CppEnum;
 class CppClass;
 class CppFreeFunction;
+class CppVariable;
 class Exporter;
 
 class Parser
@@ -38,6 +39,7 @@ class Parser
         std::list<CppEnum> enums;
         std::list<CppClass> classes;
         std::list<CppFreeFunction> functions;
+        std::list<CppVariable> variables;
 
         template<typename C>
         static const typename C::value_type *get_from( const FullyQualifiedId &what, const C &where ) {
@@ -77,6 +79,7 @@ class Parser
         void parse_typedef( const Cursor &cursor);
         void parse_class( const Cursor &cursor );
         void parse_enum( const Cursor &cursor );
+        void parse_variable( const Cursor &cursor);
         void parse_function( const Cursor &cursor );
         void parse_union( const Cursor &cursor );
         void parse_namespace( const Cursor &cursor );
