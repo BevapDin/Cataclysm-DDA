@@ -5,6 +5,7 @@
 #include "CppClass.h"
 #include "CppEnum.h"
 #include "CppFreeFunction.h"
+#include "CppVariable.h"
 #include "Cursor.h"
 #include "Type.h"
 #include "TranslationUnit.h"
@@ -134,6 +135,15 @@ void Parser::parse_namespace( const Cursor &cursor )
     parse( cursor );
 }
 
+void Parser::parse_variable( const Cursor &cursor )
+{
+    if( skip_silently( cursor ) ) {
+        return;
+    }
+    //@todo handle blocking
+    variables.emplace_back( cursor );
+}
+
 void Parser::parse( const std::vector<std::string> &headers )
 {
     std::string text;
@@ -235,7 +245,7 @@ void Parser::parse( const Cursor &c ) {
             parse_typedef( cursor );
             return CXChildVisit_Continue;
         } else if( k == CXCursor_VarDecl ) {
-            // @todo
+            parse_variable( cursor );
             return CXChildVisit_Continue;
         } else if( k == CXCursor_FunctionTemplate ) {
             skipped( "function template", cursor.fully_qualifid(), "not supported" );

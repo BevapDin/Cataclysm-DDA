@@ -6,6 +6,7 @@
 #include "CppClass.h"
 #include "CppEnum.h"
 #include "CppFreeFunction.h"
+#include "CppVariable.h"
 #include "Cursor.h"
 #include "Type.h"
 #include "TranslationUnit.h"
@@ -237,6 +238,25 @@ void Exporter::export_( const Parser &parser, const std::string &lua_file )
             }
         }
         for( const std::string &line : funcs ) {
+            f << line << ",\n";
+        }
+    }
+    f << "}\n";
+
+    f << "\n";
+    f << "variables = {\n";
+    {
+        std::set<std::string> vars;
+        for( const CppVariable &var : parser.variables ) {
+            try {
+                vars.insert( var.export_( *this ) );
+            } catch( const TypeTranslationError &e ) {
+                vars.insert( "-- " + var.full_name() + " ignored because: " + e.what() );
+            } catch( const SkippedObjectError &e ) {
+                vars.insert( "-- " + var.full_name() + " ignored because: " + e.what() );
+            }
+        }
+        for( const std::string &line : vars ) {
             f << line << ",\n";
         }
     }
