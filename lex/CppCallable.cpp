@@ -108,5 +108,14 @@ Type CppCallable::result_type() const{
 
 std::string CppCallable::result_type_as_lua_string( Exporter &p ) const
 {
-    return p.translate_result_type( result_type() );
+    try {
+        return p.translate_result_type( result_type() );
+    } catch( const TypeTranslationError & ) {
+        if( p.ignore_result_of( FullyQualifiedId( full_name_with_args() ) ) ) {
+            // Make the wrapper ignore the result of the function call.
+            return "nil";
+        } else {
+            throw;
+        }
+    }
 }
