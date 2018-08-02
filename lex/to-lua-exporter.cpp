@@ -93,6 +93,14 @@ int main( int argc, const char *argv[] )
         exporter.add_export_enumeration( FullyQualifiedId( "field_id" ) );
         exporter.add_export_enumeration( FullyQualifiedId( "damage_type" ) );
 
+        // Data members are checked against `readonly_identifiers` to see whether
+        // they should be writable from Lua. Const members are always non-writable.
+
+        // Not writable to avoid messing things up (can be changed via JSON):
+        exporter.readonly_identifiers->emplace_back<RegexMatcher>(".*::id$");
+        exporter.readonly_identifiers->emplace_back<RegexMatcher>(".*::loadid$");
+
+
         // One can block specific members from being exported:
         // The given string or regex is matched against the C++ name of the member.
         // This includes the parameter list (only type names) for function.
