@@ -135,6 +135,8 @@ int main( int argc, const char *argv[] )
             const std::string &arg = *i;
             if( arg == "--one-header" ) {
                 parse_via_one_header = true;
+            } else if( arg == "--export-comments" ) {
+                exporter.export_comments = true;
             } else if( arg == "-s" && i + 1 != args.end() ) {
                 i = args.erase( i );
                 source_directory = *i + "/"; // may create a double slash at the end, but it'l work anyway
@@ -143,6 +145,7 @@ int main( int argc, const char *argv[] )
                 output_path = *i;
             } else if( arg == "-?" || arg == "--help" ) {
                 std::cout << "--one-header ... Put all includes into one header and parse that (should be faster)\n";
+                std::cout << "--export-comments ... Export comments from C++\n";
                 std::cout << "-s <dir> ... directory containing the source files\n";
                 std::cout << "-o <path> ... path to the output file\n";
                 return 1;

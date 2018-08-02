@@ -50,6 +50,11 @@ std::string CppFunction::export_( Exporter &p ) const
     if( lua_name != full_name().back() ) {
         line = line + "cpp_name = \"" + full_name().back() + "\", ";
     }
+    const std::string comment = cursor.raw_comment();
+    if( !comment.empty()  && p.export_comments ) {
+        //@todo remove doxygen like formatting from the string
+        line = line + "comment = \"" + Exporter::escape_to_lua_string( comment ) + "\", ";
+    }
     line = line + "args = " + export_arguments( p );
     line = line + " }";
     return line;
