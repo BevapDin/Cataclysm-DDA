@@ -113,6 +113,13 @@ int main( int argc, const char *argv[] )
         exporter.blocked_identifiers->emplace_back<RegexMatcher>("static .*::check_consistency\\(\\)");
         exporter.blocked_identifiers->emplace_back<RegexMatcher>("static .*::finalize\\(\\)");
 
+
+        // Some functions can be used even if the return type can not be exported (their
+        // side effects are still useful). Functions listed here will be exported as returning
+        // "void", if their actual result type can not be exported directly.
+        exporter.ignore_result_of_those->emplace_back<RegexMatcher>("game::explosion\\(.*\\)");
+        exporter.ignore_result_of_those->emplace_back<RegexMatcher>("map::put_items_from_loc\\(.*\\)");
+
         std::string source_directory = "../src/";
         std::string output_path = "generated_class_definitions.lua";
         bool parse_via_one_header = false;

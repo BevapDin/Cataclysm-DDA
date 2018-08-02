@@ -67,6 +67,11 @@ static const std::set<int> numeric_floating_pints = { {
     }
 };
 
+bool Exporter::ignore_result_of( const FullyQualifiedId &name ) const
+{
+    return ignore_result_of_those->match( name.as_string() );
+}
+
 std::string Exporter::translate_identifier( const std::string &name ) const
 {
     static const std::map<std::string, std::string> function_name_translation_table = { {
@@ -89,7 +94,8 @@ FullyQualifiedId Exporter::derived_class( const Type &t ) const
     return FullyQualifiedId( remove_const( t.spelling() ) );
 }
 
-Exporter::Exporter() : blocked_identifiers( new MultiMatcher() )
+Exporter::Exporter() : blocked_identifiers( new MultiMatcher() ),
+    ignore_result_of_those( new MultiMatcher() )
 {
 }
 
