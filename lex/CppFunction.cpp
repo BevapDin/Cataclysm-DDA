@@ -43,7 +43,7 @@ std::string CppFunction::export_( Exporter &p ) const
     const std::string lua_name = p.lua_name( full_name() );
     line = line + "name = \"" + lua_name + "\", ";
     if( cursor.is_static_method() ) {
-        throw SkippedObjectError( "static member function, not supported" );
+        line = line + "static = true, ";
     }
     line = line + "rval = " + result_type_as_lua_string( p ) + ", ";
     // .back because full_name itself includes the name of the class
@@ -60,9 +60,15 @@ bool CppFunction::is_const_method() const
     return cursor.is_const_method();
 }
 
+bool CppFunction::is_static() const
+{
+    return cursor.is_static_method();
+}
+
 FullyQualifiedId CppFunction::full_name() const
 {
-    return CppCallable::full_name();
+    // @todo
+    return FullyQualifiedId( ( is_static() ? "static " : "" ) + CppCallable::full_name() );
 }
 
 bool CppFunction::is_public() const
