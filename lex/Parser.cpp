@@ -1,6 +1,7 @@
 #include "Parser.h"
 
 #include "common-clang.h"
+#include "Matcher.h"
 #include "CppClass.h"
 #include "CppEnum.h"
 #include "CppFreeFunction.h"
