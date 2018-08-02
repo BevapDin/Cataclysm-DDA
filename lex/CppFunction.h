@@ -20,6 +20,7 @@ class CppFunction : public CppCallable
         std::string export_( Exporter &p ) const;
 
         bool is_const_method() const;
+        bool is_static() const;
         bool is_public() const;
         bool is_overriden() const {
             return overridden;
