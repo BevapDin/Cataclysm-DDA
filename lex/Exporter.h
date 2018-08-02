@@ -43,9 +43,13 @@ class Exporter
         std::unique_ptr<MultiMatcher> blocked_identifiers;
         std::unique_ptr<MultiMatcher> ignore_result_of_those;
 
+        cata::optional<std::string> export_all_in_path_;
+
     public:
         Exporter();
         ~Exporter();
+
+        void export_all_in( const std::string &path );
 
         bool export_comments = false;
 
