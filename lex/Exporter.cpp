@@ -1,6 +1,7 @@
 #include "Exporter.h"
 
 #include "common-clang.h"
+#include "Matcher.h"
 #include "exceptions.h"
 #include "CppClass.h"
 #include "CppEnum.h"
@@ -88,7 +89,9 @@ FullyQualifiedId Exporter::derived_class( const Type &t ) const
     return FullyQualifiedId( remove_const( t.spelling() ) );
 }
 
-Exporter::Exporter() = default;
+Exporter::Exporter() : blocked_identifiers( new MultiMatcher() )
+{
+}
 
 Exporter::~Exporter() = default;
 

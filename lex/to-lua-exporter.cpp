@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Parser.h"
+#include "Matcher.h"
 #include "Exporter.h"
 
 int main( int argc, const char *argv[] )
@@ -91,6 +92,26 @@ int main( int argc, const char *argv[] )
         exporter.add_export_enumeration( FullyQualifiedId( "add_type" ) );
         exporter.add_export_enumeration( FullyQualifiedId( "field_id" ) );
         exporter.add_export_enumeration( FullyQualifiedId( "damage_type" ) );
+
+        // One can block specific members from being exported:
+        // The given string or regex is matched against the C++ name of the member.
+        // This includes the parameter list (only type names) for function.
+
+        // Exported to Lua via a global variables:
+        exporter.blocked_identifiers->emplace_back<SimpleMatcher>( "game::m" );
+        exporter.blocked_identifiers->emplace_back<SimpleMatcher>( "game::u" );
+        // Never exported, internal usage only:
+        exporter.blocked_identifiers->emplace_back<RegexMatcher>(".*::was_loaded");
+        exporter.blocked_identifiers->emplace_back<RegexMatcher>(".*::active_items");
+        // Stack objects are created by the containing class and not by anyone else.
+        exporter.blocked_identifiers->emplace_back<RegexMatcher>("map_stack::map_stack\\(.*\\)");
+        exporter.blocked_identifiers->emplace_back<RegexMatcher>("vehicle_stack::vehicle_stack\\(.*\\)");
+        // Those are used during loading from JSON and should not be used any other time.
+        exporter.blocked_identifiers->emplace_back<RegexMatcher>("static .*::load\\(.*JsonObject.*\\)");
+        exporter.blocked_identifiers->emplace_back<RegexMatcher>("static .*::load_.*\\(.*JsonObject.*\\)");
+        exporter.blocked_identifiers->emplace_back<RegexMatcher>("static .*::reset\\(\\)");
+        exporter.blocked_identifiers->emplace_back<RegexMatcher>("static .*::check_consistency\\(\\)");
+        exporter.blocked_identifiers->emplace_back<RegexMatcher>("static .*::finalize\\(\\)");
 
         std::string source_directory = "../src/";
         std::string output_path = "generated_class_definitions.lua";

@@ -54,11 +54,17 @@ class Exporter
         std::map<std::string, FullyQualifiedId> string_ids;
         std::map<std::string, FullyQualifiedId> int_ids;
 
+        std::unique_ptr<MultiMatcher> blocked_identifiers;
+
     public:
         Exporter();
         ~Exporter();
 
         Exporter( const Exporter & ) = delete;
+
+        bool is_blocked( const CppConstructor &obj ) const;
+        bool is_blocked( const CppFunction &obj ) const;
+        bool is_blocked( const CppAttribute &obj ) const;
 
         /**
          * Translate the given type to a string that is usable in Lua as name for the
