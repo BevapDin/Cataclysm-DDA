@@ -31,7 +31,7 @@ std::string CppAttribute::export_( Exporter &p ) const
     const std::string lua_name = p.lua_name( full_name() );
     line = line + lua_name + " = { ";
     line = line + "type = " + p.translate_member_type( type_ );
-    if( !is_const() ) {
+    if( !is_const() && !p.is_readonly( full_name() ) ) {
         line = line + ", writable = true";
     }
     // .back because full_name itself includes the name of the class

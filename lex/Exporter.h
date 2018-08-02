@@ -54,6 +54,7 @@ class Exporter
         std::map<std::string, FullyQualifiedId> string_ids;
         std::map<std::string, FullyQualifiedId> int_ids;
 
+        std::unique_ptr<MultiMatcher> readonly_identifiers;
         std::unique_ptr<MultiMatcher> blocked_identifiers;
         std::unique_ptr<MultiMatcher> ignore_result_of_those;
 
@@ -67,6 +68,7 @@ class Exporter
         bool is_blocked( const CppFunction &obj ) const;
         bool is_blocked( const CppAttribute &obj ) const;
 
+        bool is_readonly( const FullyQualifiedId &name ) const;
         bool ignore_result_of( const FullyQualifiedId &name ) const;
 
         /**
