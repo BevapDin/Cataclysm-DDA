@@ -135,6 +135,10 @@ void Parser::parse_namespace( const Cursor &cursor )
 
 void Parser::parse( const std::string &header )
 {
+    if( visited_files.count( header ) > 0 ) {
+        info_message( "Skipping file " + header + " as it was already included by another file" );
+        return;
+    }
     // @todo the include path should not be fixed!
     const std::vector<const char *> args = { {
             "-x", "c++",
@@ -157,6 +161,10 @@ void Parser::parse( const std::string &header )
     }
     if( !diagnostics.empty() ) {
         throw std::runtime_error("Errors / warnings while parsing header" );
+    }
+
+    for( const std::string &file : tus.back().get_includes() ) {
+        visited_files.insert( file );
     }
 
     parse( tus.back().cursor() );
