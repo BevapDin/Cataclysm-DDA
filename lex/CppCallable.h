@@ -46,6 +46,7 @@ class CppCallable
         std::string operator_name() const;
         /// Returns whether this function represents a C++ operator.
         bool is_operator() const;
+        bool is_deleted() const;
         /**
          * The name of the function (without arguments). Inheriting classes
          * may add their own prefix if needed.

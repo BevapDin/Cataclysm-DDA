@@ -5,6 +5,7 @@
 #include "common.h"
 #include "exceptions.h"
 #include "FullyQualifiedId.h"
+#include "TokenRange.h"
 
 CppCallable::CppCallable( const Cursor &c ) : cursor( c ), arguments_( c.get_arguments() )
 {
@@ -118,4 +119,13 @@ std::string CppCallable::result_type_as_lua_string( Exporter &p ) const
             throw;
         }
     }
+}
+
+bool CppCallable::is_deleted() const {
+    for( const Token &t : cursor.tokens() ) {
+        if( t.spelling() == "delete" ) {
+            return true;
+        }
+    }
+    return false;
 }

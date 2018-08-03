@@ -242,6 +242,9 @@ std::string CppClass::export_( Exporter &p ) const
     // this is only for compatibility with the print_objects function
     std::vector<std::reference_wrapper<const CppConstructor>> constructors;
     for( const CppConstructor &c : this->constructors ) {
+        if( c.is_deleted() ) {
+            continue;
+        }
         constructors.push_back( c );
     }
 
