@@ -1,0 +1,100 @@
+{
+    "headers": [
+        "npc.h", "map.h", "game.h", "item.h",
+        "creature.h", "monster.h", "character.h", "player.h", "effect.h",
+        "enums.h", "calendar.h", "mtype.h", "itype.h", "bodypart.h",
+        "ui.h", "martialarts.h", "trap.h", "field.h", "overmap.h",
+        "mutation.h", "material.h", "start_location.h", "ammo.h",
+        "monstergenerator.h", "item_stack.h", "mongroup.h", "weather_gen.h",
+        "damage.h", "skill.h", "recipe.h", "requirements.h", "gun_mode.h"
+    ],
+    "types": [
+        "effect_type",
+        "calendar",
+        "mutation_branch",
+        "Character",
+        "map_stack",
+        "game",
+        "species_type",
+        "encumbrance_data",
+        { "lua_name": "item_stack_iterator", "cpp_name": "std::list<item>::iterator" },
+        "stats",
+        "player",
+        "item",
+        "point",
+        "tripoint",
+        "uimenu",
+        "field_entry",
+        "field",
+        "map",
+        "ter_t",
+        "furn_t",
+        "Creature",
+        "monster",
+        "martialart",
+        "material_type",
+        "start_location",
+        "ma_buff",
+        "ma_technique",
+        "Skill",
+        "quality",
+        "npc_template",
+        "ammunition_type",
+        "MonsterGroup",
+        "mtype",
+        "mongroup",
+        "overmap",
+        "recipe",
+        { "lua_name": "mass", "cpp_name": "units::mass" },
+        { "lua_name": "volume", "cpp_name": "units::volume" },
+        "nc_color",
+        "time_duration",
+        "time_point",
+        "itype",
+        "trap",
+        "w_point",
+        "gun_mode",
+        "body_part",
+        "hp_part",
+        "side",
+        "phase_id",
+        "m_size",
+        "season_type",
+        "add_type",
+        "field_id",
+        "damage_type"
+    ],
+    "readonly_identifiers": {
+		"regex": [
+			".*::id$",
+			".*::loadid$"
+		],
+		"string": [
+		]
+	},
+	"blocked_identifiers": {
+		"regex": [
+			".*::was_loaded",
+			".*::active_items",
+			"map_stack::map_stack\\(.*\\)",
+			"vehicle_stack::vehicle_stack\\(.*\\)",
+			"static .*::load\\(.*JsonObject.*\\)",
+			"static .*::load_.*\\(.*JsonObject.*\\)",
+			"static .*::reset\\(\\)",
+			"static .*::check_consistency\\(\\)",
+			"static .*::finalize\\(\\)"
+		],
+		"string": [
+			"game::m",
+			"game::u"
+		]
+	},
+	"ignore_result_of_those": {
+		"regex": [
+			"game::explosion\\(.*\\)",
+			"map::put_items_from_loc\\(.*\\)"
+		],
+		"string": [
+		]
+    }
+}
