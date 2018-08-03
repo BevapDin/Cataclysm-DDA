@@ -1,0 +1,38 @@
+? [ ] parser::skipped entities
+
+[+] add extraction support for classes
+
+[+] add extraction support for enums
+[+] add extraction support for global functions
+
+[+] handle repeated includes only once
+[+] parse all headers at once
+
+[+] allow blocking entries
+[+] allow ignoring result of specific function calls
+[+] specific readonly members
+
+!! In combination with C++ cataclysm code:
+
+[+] add extraction support for static member functions
+[+] add extraction support for global variables
+
+[+] export code_prepend values
+[+] remove by_value/by_reference distincition
+
+!! Independent of C++ cataclysm code
+
+[+] exporting of comments
+[+] lex configuation from JSON
+[+] exporting of *all* data / types
+[+] include path via command argument
+
+!! later
+
+[ ] add support for std::vector
+[ ] add support for std::list
+[ ] add support for std::set
+
+!! much later
+
+[ ] add Lua script to generate API documentation
