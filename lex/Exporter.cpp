@@ -460,8 +460,8 @@ bool Exporter::add_id_typedef( const Cursor &cursor, const std::string &id_type,
     ids_map.emplace( typedef_name, FullyQualifiedId( base_type ) );
     // A id itself is always handled by value. It's basically a std::string/int.
     assert( valid_cpp_identifer( typedef_name ) );
-    types_to_export.insert( FullyQualifiedId( typedef_name ) );
-    types_to_export.insert( FullyQualifiedId( id_type + "<" + base_type + ">" ) );
+    types_to_export.emplace( FullyQualifiedId( typedef_name ), typedef_name );
+    types_to_export.emplace( FullyQualifiedId( id_type + "<" + base_type + ">" ), id_type + "<" + base_type + ">" );
     debug_message( "Automatically added " + typedef_name + " as " + id_type + "<" + base_type + ">" );
     return true;
 }
