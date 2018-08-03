@@ -485,7 +485,6 @@ void Exporter::add_export_for_string_id( const std::string &id_name, const Fully
     assert( valid_cpp_identifer( id_name ) );
     string_ids.emplace( id_name, full_name );
     types_to_export.emplace( full_name, full_name.as_string() );
-    types_exported_by_value.insert( FullyQualifiedId( id_name ) );
 }
 
 void Exporter::add_export( const FullyQualifiedId &full_name )
