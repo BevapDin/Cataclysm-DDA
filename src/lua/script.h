@@ -43,7 +43,7 @@ class script
 
         template<typename Stream>
         void deserialize( Stream &s ) {
-            *this = s.get_string();
+            internal_script_reference_.emplace( s );
         }
 };
 
