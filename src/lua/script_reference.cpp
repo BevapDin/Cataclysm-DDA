@@ -3,6 +3,7 @@
 #include "call.h"
 #include "lua_engine.h"
 #include "game.h"
+#include "json.h"
 
 extern "C" {
 #include <lua.h>
@@ -17,6 +18,23 @@ catalua::script_reference::script_reference( const std::string &script )
     lua_State *const L = get_lua_state( engine );
     const int err = luaL_loadstring( L, script.c_str() );
     engine.throw_upon_lua_error( err, script.c_str() );
+    id_ = luaL_ref( L, LUA_REGISTRYINDEX );
+}
+
+catalua::script_reference::script_reference( JsonIn &jsin )
+{
+    const lua_engine &engine = *g->lua_engine_ptr;
+    lua_State *const L = get_lua_state( engine );
+    if( jsin.test_string() ) {
+        const std::string script = jsin.get_string();
+        const int err = luaL_loadstring( L, script.c_str() );
+        engine.throw_upon_lua_error( err, script.c_str() );
+    } else {
+        JsonObject jobj = jsin.get_object();
+        const std::string path = jobj.get_string( "file" );
+        const int err = luaL_loadfile( L, path.c_str() );
+        engine.throw_upon_lua_error( err, path.c_str() );
+    }
     id_ = luaL_ref( L, LUA_REGISTRYINDEX );
 }
 
