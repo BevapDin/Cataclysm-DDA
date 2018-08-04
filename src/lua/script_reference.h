@@ -8,6 +8,8 @@
 
 class lua_engine;
 
+class JsonIn;
+
 namespace catalua
 {
 
@@ -20,6 +22,7 @@ class script_reference
         script_reference( const std::string &script );
         script_reference( const script_reference & ) = default;
         script_reference &operator=( const script_reference & ) = default;
+        script_reference( JsonIn &jsin );
 
         int id() const {
             return id_;
