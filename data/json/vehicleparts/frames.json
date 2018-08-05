@@ -89,7 +89,7 @@
     "description": "A heavy metal framework.  Other vehicle components can be mounted on it, and it can be attached to other frames to increase the vehicle's size.  Increased mass makes it more resistant to damage in collisions.",
     "breaks_into": "ig_vp_hdframe",
     "requirements": {
-      "install": { "skills": [ [ "mechanics", 3 ] ], "time": 240000, "using": [ [ "welding_standard", 20 ] ] },
+      "install": { "skills": [ [ "mechanics", 3 ] ], "time": 24000, "using": [ [ "welding_standard", 20 ] ] },
       "removal": { "skills": [ [ "mechanics", 1 ] ], "using": "vehicle_weld_removal" },
       "repair": { "skills": [ [ "mechanics", 3 ] ], "time": 60000, "using": [ [ "welding_standard", 10 ] ] }
     },
