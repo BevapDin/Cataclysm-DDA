@@ -29,6 +29,15 @@ catalua::script_reference::script_reference( JsonIn &jsin )
         const std::string script = jsin.get_string();
         const int err = luaL_loadstring( L, script.c_str() );
         engine.throw_upon_lua_error( err, script.c_str() );
+    } else if( jsin.test_array() ) {
+        std::string script;
+        JsonArray jarr = jsin.get_array();
+        while( jarr.has_more() ) {
+            script.append( jarr.next_string() );
+            script.append( "\n" );
+        }
+        const int err = luaL_loadstring( L, script.c_str() );
+        engine.throw_upon_lua_error( err, script.c_str() );
     } else {
         JsonObject jobj = jsin.get_object();
         const std::string path = jobj.get_string( "file" );
