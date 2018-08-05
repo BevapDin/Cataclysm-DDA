@@ -2,7 +2,7 @@
   {
     "id": "2lcanteen",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "2.5L canteen",
     "description": "A large plastic water canteen, with a 2.5 liter capacity and carrying strap.",
     "weight": 155,
@@ -27,7 +27,7 @@
   {
     "id": "30gal_barrel",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "30 gallon barrel",
     "description": "A huge plastic barrel with a resealable lid.",
     "weight": 6800,
@@ -45,7 +45,7 @@
   {
     "id": "30gal_drum",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "steel drum (100L)",
     "name_plural": "steel drums (100L)",
     "description": "A huge steel barrel with a resealable lid.",
@@ -65,7 +65,7 @@
   {
     "id": "55gal_drum",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "steel drum (200L)",
     "name_plural": "steel drums (200L)",
     "description": "A massive steel barrel with a resealable lid.",
@@ -85,7 +85,7 @@
   {
     "id": "bag_canvas",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "canvas sack",
     "description": "A large and sturdy canvas sack.  Smells faintly of earth and hard work.",
     "weight": 415,
@@ -102,7 +102,7 @@
   {
     "id": "bag_canvas_small",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "canvas bag",
     "description": "Small bag made of canvas.  Looks fine to store dried herbs in.",
     "weight": 5,
@@ -119,7 +119,7 @@
   {
     "id": "bag_plastic",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "plastic bag",
     "description": "A small, open plastic bag.  Essentially trash.",
     "weight": 2,
@@ -136,7 +136,7 @@
   {
     "id": "bottle_glass",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "glass bottle",
     "description": "A resealable glass bottle, holds 750 ml of liquid.",
     "weight": 200,
@@ -155,7 +155,7 @@
   {
     "id": "bottle_plastic",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "plastic bottle",
     "description": "A resealable plastic bottle, holds 500 ml of liquid.",
     "weight": 13,
@@ -172,7 +172,7 @@
   {
     "id": "bottle_plastic_small",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "small plastic bottle",
     "description": "A resealable plastic bottle, holds 250 ml of liquid.",
     "weight": 7,
@@ -189,7 +189,7 @@
   {
     "id": "bowl_clay",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "clay bowl",
     "description": "A clay bowl with a waterproofed hide lid.  Can be used as a container or as a tool.  Holds 250 ml of liquid.",
     "weight": 60,
@@ -207,7 +207,7 @@
   {
     "id": "bowl_pewter",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "pewter bowl",
     "description": "A pewter bowl without a lid.  Can be used as a container or as a tool.  Holds 250 ml of liquid.",
     "weight": 50,
@@ -224,7 +224,7 @@
   {
     "id": "bowl_plastic",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "plastic bowl",
     "description": "A plastic bowl.  Can be used as a container or as a tool.  Holds 250 ml of liquid.",
     "weight": 80,
@@ -241,7 +241,7 @@
   {
     "id": "box_cigarette",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "pack",
     "name_plural": "packs",
     "description": "SURGEON GENERAL'S WARNING: Smoking Causes Lung Cancer, Heart Disease, Emphysema And May Complicate Pregnancy.",
@@ -256,7 +256,7 @@
   {
     "id": "box_small",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "cardboard box",
     "name_plural": "cardboard boxes",
     "description": "A small cardboard box.  No bigger than a foot in dimension.",
@@ -271,7 +271,7 @@
   {
     "id": "bucket",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "bucket",
     "name_plural": "buckets",
     "description": "A galvanized bucket for peanuts, chilled wine, iced beer, lobster, crab legs, French fries, animal feed, farm use, tailgating, crafts, planting flowers, holding gift baskets, containing a fruit basket and herbs, loose item storage or as an ice bucket.",
@@ -288,7 +288,7 @@
   {
     "id": "camelbak",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "hydration pack",
     "description": "A slim and lightweight insulated plastic bladder worn on the back.  It has a large pocket and a capped mouth for filling with liquid with a hose that allows the wearer to drink hands-free.",
     "weight": 286,
@@ -313,7 +313,7 @@
   {
     "id": "can_drink",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "aluminum can",
     "description": "An aluminum can, like what soda comes in.",
     "weight": 13,
@@ -344,7 +344,7 @@
   {
     "id": "can_food",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "tin can",
     "description": "A tin can, like what beans come in.",
     "weight": 400,
@@ -373,7 +373,7 @@
   {
     "id": "canteen",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "plastic canteen",
     "description": "A military-style water canteen with a 1.5 liter capacity.  Commonly worn at the hip.",
     "weight": 155,
@@ -449,7 +449,7 @@
   {
     "id": "clay_canister",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "clay canister",
     "description": "A fragile clay vessel.  It can be used to make crude impact grenades or to store liquid.",
     "weight": 268,
@@ -467,7 +467,7 @@
   {
     "id": "clay_hydria",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "clay hydria",
     "description": "A 15-liter clay pot with three handles for carrying and for pouring.",
     "weight": 1955,
@@ -485,7 +485,7 @@
   {
     "id": "clay_watercont",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "large clay pot",
     "description": "A bulky and heavy clay pot with a waterproofed hide lid, meant to store water, but can carry other liquids in a pinch.",
     "weight": 4887,
@@ -502,7 +502,7 @@
   {
     "id": "cup_plastic",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "plastic cup",
     "description": "A small, vacuum formed cup.",
     "weight": 6,
@@ -529,7 +529,7 @@
   {
     "id": "flask_glass",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "glass flask",
     "description": "A 250 ml laboratory conical flask, with a rubber bung.",
     "weight": 48,
@@ -548,7 +548,7 @@
   {
     "id": "flask_hip",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "hip flask",
     "description": "A 250 ml metal flask with a hinged screw-on lid, commonly used to discreetly transport alcohol.",
     "weight": 120,
@@ -608,6 +608,7 @@
   {
     "id": "jar_3l_glass",
     "type": "CONTAINER",
+    "category": "containers",
     "name": "3L glass jar",
     "description": "A three-liter glass jar with a metal screw top lid, used for canning.",
     "weight": 365,
@@ -627,7 +628,6 @@
     "id": "jar_3l_glass_sealed",
     "copy-from": "jar_3l_glass",
     "type": "CONTAINER",
-    "category": "other",
     "name": "sealed 3L glass jar",
     "description": "A three-liter glass jar with a metal screw top lid, used for canning.  Sealed tightly to preserve contents from rot.",
     "symbol": ")",
@@ -639,7 +639,7 @@
   {
     "id": "jar_glass",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "glass jar",
     "description": "A half-liter glass jar with a metal screw top lid, used for canning.",
     "weight": 150,
@@ -670,7 +670,7 @@
   {
     "id": "jerrycan",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "plastic jerrycan",
     "description": "A bulky plastic jerrycan, meant to carry fuel, but can carry other liquids in a pinch.",
     "weight": 1587,
@@ -687,7 +687,7 @@
   {
     "id": "jerrycan_big",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "steel jerrycan",
     "description": "A steel jerrycan, meant to carry fuel, but can carry other liquids in a pinch.",
     "weight": 4815,
@@ -723,7 +723,7 @@
   {
     "id": "jug_plastic",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "gallon jug",
     "description": "A standard plastic jug used for milk and household cleaning chemicals.",
     "weight": 190,
@@ -740,7 +740,7 @@
   {
     "id": "keg",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "aluminum keg",
     "description": "A reusable lightweight aluminum keg, used for shipping beer.  It has a capacity of 50 liters.",
     "weight": 5040,
@@ -759,7 +759,7 @@
   {
     "id": "keg_steel",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "steel keg",
     "description": "A reusable heavy steel keg, used for shipping beer.  It has a capacity of 50 liters.",
     "weight": 12600,
@@ -778,7 +778,7 @@
   {
     "id": "large_stomach_sealed",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "large sealed stomach",
     "description": "The stomach of a large creature, cleaned and sealed with strings.  It can hold 3 liters of water.",
     "weight": 783,
@@ -797,7 +797,7 @@
   {
     "id": "metal_tank",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "metal tank (60L)",
     "name_plural": "metal tanks (60L)",
     "description": "A large metal tank for holding liquids.  Useful for crafting.",
@@ -817,7 +817,7 @@
   {
     "id": "metal_tank_little",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "metal tank (2L)",
     "name_plural": "metal tanks (2L)",
     "description": "A small metal tank for gas or liquids.  Useful for crafting.",
@@ -837,7 +837,7 @@
   {
     "id": "stomach_sealed",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "sealed stomach",
     "description": "The stomach of a creature, cleaned and sealed with a string.  It can hold 1.5 liters of water.",
     "weight": 453,
@@ -856,7 +856,7 @@
   {
     "id": "waterskin",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "small waterskin",
     "description": "A small watertight leather bag with a carrying strap, can hold 1.5 liters of water.",
     "weight": 453,
@@ -881,7 +881,7 @@
   {
     "id": "waterskin2",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "waterskin",
     "description": "A watertight leather bag with a carrying strap, can hold 3 liters of water.",
     "weight": 783,
@@ -906,7 +906,7 @@
   {
     "id": "waterskin3",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "large waterskin",
     "description": "A large watertight leather bag with a carrying strap, can hold 5 liters of water.",
     "weight": 990,
@@ -931,7 +931,7 @@
   {
     "id": "wooden_barrel",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "wooden barrel",
     "description": "Traditionally made of white oak; these vessels are known for delivering delicious whiskey to the future.  It has a capacity of 100 liters.",
     "weight": 42408,
@@ -949,7 +949,7 @@
   {
     "id": "wrapper",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "paper wrapper",
     "description": "Just a piece of butcher's paper.  Good for starting fires.",
     "weight": 3,

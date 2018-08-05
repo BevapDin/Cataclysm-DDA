@@ -6,6 +6,12 @@
     "sort_rank": -22
   },
   {
+    "id": "containers",
+    "type": "ITEM_CATEGORY",
+    "name": "CONTAINERS",
+    "sort_rank": -12
+  },
+  {
     "id": "magazines",
     "type": "ITEM_CATEGORY",
     "name": "MAGAZINES",

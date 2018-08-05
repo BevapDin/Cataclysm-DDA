@@ -131,7 +131,7 @@
   {
     "id": "bottle_metal",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "steel bottle",
     "description": "A stainless steel water bottle, holds 750ml of liquid.",
     "weight": 200,
@@ -403,7 +403,7 @@
   {
     "id": "foil_alum",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "aluminum foil wrap",
     "name_plural": "aluminum foil wraps",
     "//": "Dummied out way back when.",
@@ -442,7 +442,7 @@
   {
     "id": "bottle_folding",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "foldable plastic bottle",
     "description": "A non-rigid plastic bottle for easy storage, holds 500 ml of liquid.",
     "weight": 13,
@@ -519,7 +519,7 @@
   {
     "id": "canteen_wood",
     "type": "CONTAINER",
-    "category": "other",
+    "category": "containers",
     "name": "wooden canteen",
     "description": "A water canteen made from wood, secured by metal bands and sealed with wax or pitch.  Holds 1.5 liters and has a simple carry strap.",
     "weight": 232,

@@ -430,6 +430,7 @@
   {
     "id": "gloople_tank",
     "type": "CONTAINER",
+    "category": "containers",
     "name": "gelatinous tank",
     "name_plural": "gelatinous tanks",
     "description": "While the blob is very eager to be fed, it's not as enthusiastic about giving up liquids.  A few alterations are necessary.",
@@ -582,6 +583,7 @@
   {
     "id": "gray_tank",
     "type": "CONTAINER",
+    "category": "containers",
     "name": "gray tank",
     "name_plural": "gray tanks",
     "description": "While the blob is very eager to be fed, it's not as enthusiastic about giving up liquids.  A few alterations are necessary.",
@@ -847,6 +849,7 @@
   {
     "id": "oozle_tank",
     "type": "CONTAINER",
+    "category": "containers",
     "name": "oozing tank",
     "name_plural": "oozing tanks",
     "description": "While the blob is very eager to be fed, it's not as enthusiastic about giving up liquids.  A few alterations are necessary.",
