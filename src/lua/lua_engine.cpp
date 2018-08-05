@@ -64,8 +64,6 @@ static void luaL_setfuncs( lua_State *const L, const luaL_Reg arrary[], int cons
 }
 #endif
 
-void lua_dofile( lua_State *L, const char *path );
-
 lua_State *get_lua_state( const lua_engine &e );
 
 void lua_engine::throw_upon_lua_error( const int err, const char *const path ) const
