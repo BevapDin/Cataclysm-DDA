@@ -730,7 +730,7 @@ function generate_main_init_function()
 
     -- Create bindings lists for enums
     for _, enum_name in ipairs(sorted_keys(enums)) do
-        local values = enums[enum_name]
+        local values = enums[enum_name].values
         local cpp_name = "LuaEnum<"..enum_name..">"
         cpp_output = cpp_output .. "template<>" .. br
         cpp_output = cpp_output .. "const "..cpp_name.."::EMap "..cpp_name.."::BINDINGS = {"..br
