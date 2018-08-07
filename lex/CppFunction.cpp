@@ -18,8 +18,6 @@ CppFunction::CppFunction( CppClass &/*p*/, const Cursor &c, const size_t arg_cou
             overridden = true;
             return CXChildVisit_Continue;
         }
-        //@todo handle delete attribute?
-//        c.dump( "Cursor kind not handled upon parsing class function definition" );
         return CXChildVisit_Continue;
     } );
 }
@@ -31,6 +29,9 @@ std::string CppFunction::export_( Exporter &p ) const
     // @todo: add support for *some* operators
     if( is_operator() ) {
         throw SkippedObjectError( "operator" );
+    }
+    if( is_deleted() ) {
+        throw SkippedObjectError( "deleted" );
     }
     // Overridden methods are ignored because the parent class already contains
     // them and we scan the parent class and include it in the output anyway.
