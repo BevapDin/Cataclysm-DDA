@@ -84,6 +84,10 @@ function ref_or_val(t)
     end
 end
 
+function output_path_for_id(id)
+    return id:gsub("[^%w_.]", "") .. ".gen.cpp"
+end
+
 function container_output_path(t)
     if classes[t] then
         return classes[t].output_path
@@ -263,8 +267,8 @@ classes["mass"] = {
 classes["ter_t"].output_path = "mapdata.gen.cpp"
 classes["furn_t"].output_path = "mapdata.gen.cpp"
 
--- Headers that are required in order to compile the wrappers for the enum classes.
-enums_code_prepend = "#include \"field.h\"\n#include \"bodypart.h\"\n#include \"itype.h\"\n#include \"creature.h\"\n#include \"output.h\"\n#include \"calendar.h\"\n#include \"pldata.h\"\n#include \"units.h\""
+-- Headers that are required in order to compile the global functions wrapper
+global_functions_code_prepend = "#include \"field.h\"\n#include \"bodypart.h\"\n#include \"itype.h\"\n#include \"creature.h\"\n#include \"output.h\"\n#include \"calendar.h\"\n#include \"pldata.h\"\n#include \"units.h\""
 
 global_functions = {
     add_msg = {
@@ -361,9 +365,9 @@ global_functions = {
     }
 }
 
+-- Add missing, but optional members, so the scripts using this data
+-- can just assume it's there and don't need to handle missing entries.
 for class_name, value in pairs(classes) do
-    -- Add missing, but optional members, so the scripts using this data
-    -- can just assume it's there and don't need to handle missing entries.
     if not value.forward_declaration then
         -- @todo could be a struct!
         value.forward_declaration = "class " .. class_name .. ";"
@@ -375,9 +379,26 @@ for class_name, value in pairs(classes) do
         value.cpp_name = class_name
     end
     if not value.output_path then
-        value.output_path = class_name:gsub("[^%w_.]", "") .. ".gen.cpp"
+        value.output_path = output_path_for_id(class_name)
     end
 end
+-- same for enumerations
+for enum_name, value in pairs(enums) do
+    if not value.forward_declaration then
+        -- @todo could be different underlying type
+        value.forward_declaration = "enum " .. enum_name .. " : int;"
+    end
+    if not value.code_prepend then
+        value.code_prepend = ""
+    end
+    if not value.cpp_name then
+        value.cpp_name = enum_name
+    end
+    if not value.output_path then
+        value.output_path = output_path_for_id(enum_name)
+    end
+end
+
 
 -- This adds the int_id wrappers from the class definition as real classes.
 -- All int_id<T>s have the same interface, so we only need to add some mark to T, that this class
