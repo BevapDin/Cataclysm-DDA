@@ -274,7 +274,9 @@ void Exporter::export_( const Parser &parser, const std::string &lua_file )
         f << e << "\n";
     }
     f.close();
-    //@todo check for IO errors
+    if( !f ) {
+        throw std::runtime_error( "writing to " + lua_file + " failed" );
+    }
 
     for( const auto &e : types_to_export ) {
         const FullyQualifiedId &t = e.first;
