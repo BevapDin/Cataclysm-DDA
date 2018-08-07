@@ -20,12 +20,8 @@ CppClass::CppClass( Parser &p, const Cursor &cursor ) : cursor_( cursor )
     cursor.visit_children( [this, &p]( const Cursor & c, const Cursor &/*parent*/ ) {
         const CXCursorKind k = c.kind();
         if( k == CXCursor_StructDecl || k == CXCursor_ClassDecl ) {
-            // Inner classes.
-            // @todo
-            // p.parse_class( c );
-            p.skipped( "inner class", c.fully_qualifid(), "not supported" );
+            p.parse_class( c );
             return CXChildVisit_Continue;
-
         } else if( k == CXCursor_FunctionDecl ) {
             // A free function declared inside the class (friend function most likely).
             p.parse_function( c );
