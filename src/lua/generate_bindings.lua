@@ -395,7 +395,7 @@ end
 
 function generate_destructor(class_name, class)
     local cpp_output = ""
-    local cpp_name = class.cpp_class_name
+    local cpp_class_name = class.cpp_name
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. ">::call_destructor( " .. cpp_class_name .. " &object ) {" .. br
     cpp_output = cpp_output .. tab .. "object.~" .. cpp_class_name .. "();" .. br
@@ -551,9 +551,9 @@ end
 function generate_accessors(class_name, value_type_name, function_name, attributes, cbc)
     local names = sorted_keys(attributes, function(name) return function_name == "get_member" or attributes[name].writable; end)
     local cpp_output = ""
-    local instance_type = "const " .. classe[class_name].cpp_name
+    local instance_type = "const " .. classes[class_name].cpp_name
     if function_name == "set_member" then
-        instance_type = classe[class_name].cpp_name
+        instance_type = classes[class_name].cpp_name
     end
 
     cpp_output = cpp_output .. "template<>" .. br
