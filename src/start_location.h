@@ -19,13 +19,15 @@ template<typename T>
 class generic_factory;
 struct MonsterGroup;
 using mongroup_id = string_id<MonsterGroup>;
+class start_location;
+using start_location_id = string_id<start_location>;
 
 class start_location
 {
     public:
         start_location();
 
-        const string_id<start_location> &ident() const;
+        const start_location_id &ident() const;
         std::string name() const;
         std::string target() const;
         const std::set<std::string> &flags() const;
@@ -75,7 +77,7 @@ class start_location
                                      float expected_points ) const;
     private:
         friend class generic_factory<start_location>;
-        string_id<start_location> id;
+        start_location_id id;
         bool was_loaded = false;
         std::string _name;
         std::string _target;
