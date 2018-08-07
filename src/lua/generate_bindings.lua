@@ -415,13 +415,8 @@ function generate_operator(class_name, operator_id, cppname)
     text = text .. tab .. "const " .. cpp_class_name .. " &lhs = " .. retrieve_lua_value(class_name, 1) .. ";"..br
     text = text .. tab .. "const " .. cpp_class_name .. " &rhs = " .. retrieve_lua_value(class_name, 2) .. ";"..br
 
-    text = text .. tab .. "bool rval = "
+    text = text .. tab .. push_lua_value("( &lhs " .. cppname .. " &rhs ) || ( lhs " .. cppname .. " rhs )", "bool") .. br;
 
-    text = text .. "( &lhs " .. cppname .. " &rhs ) || ( lhs " .. cppname .. " rhs )";
-    end
-    text = text .. ";"..br
-
-    text = text .. tab .. push_lua_value("rval", "bool")..br
     text = text .. tab .. "return 1; // 1 return values"..br
     text = text .. "}"..br
 
