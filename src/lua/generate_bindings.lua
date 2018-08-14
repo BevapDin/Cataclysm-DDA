@@ -398,7 +398,10 @@ function generate_destructor(class_name, class)
     local cpp_class_name = class.cpp_name
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. ">::call_destructor( " .. cpp_class_name .. " &object ) {" .. br
-    cpp_output = cpp_output .. tab .. "object.~" .. cpp_class_name .. "();" .. br
+    -- This avoids problems where cpp_class_name is actually "foo::bar<some>" and the destructor call
+    -- would be `object.~foo::bar<some>`, which causes compiler errors.
+    cpp_output = cpp_output .. tab .. "using T = " .. cpp_class_name .. ";" .. br
+    cpp_output = cpp_output .. tab .. "object.~T();" .. br
     cpp_output = cpp_output .. "}" .. br
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. "*>::call_destructor( " .. cpp_class_name .. " *&object ) {" .. br
