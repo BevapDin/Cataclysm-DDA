@@ -1487,7 +1487,7 @@ bool game::do_turn()
         catalua::mod_callback( *lua_engine_ptr, "on_minute_passed" );
     }
 
-    catalua::mod_calback( *lua_engine_ptr, "on_turn_passed" );
+    catalua::mod_callback( *lua_engine_ptr, "on_turn_passed" );
 
     // Move hordes every 5 min
     if( calendar::once_every( 5_minutes ) ) {
