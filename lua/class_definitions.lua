@@ -84,6 +84,8 @@ function dofile_if_exists(f)
     end
 end
 
+classes = {}
+enums = {}
 -- Both are the same file, but this script might get run from the root directory
 -- (the first path would work) or from within "src/lua" (the second path would work).
 -- @todo fix this

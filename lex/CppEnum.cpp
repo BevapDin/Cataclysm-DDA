@@ -19,15 +19,16 @@ CppEnum::CppEnum( Parser &p, const Cursor &cursor ) : full_name_( cursor.fully_q
 
 std::string CppEnum::export_( Exporter &p ) const
 {
+    static const std::string tab( 4, ' ' );
     p.debug_message( "Exporting enum " + full_name() );
     const std::string lua_name = p.lua_name( full_name() );
     std::string r;
     //@todo cpp name
-    r = r + "    " + lua_name + " = {\n";
+    r = r + "enums[\"" + lua_name + "\"] = {\n";
     for( const std::string &a : values ) {
-        r = r + "        \"" + a + "\",\n";
+        r = r + tab + "\"" + a + "\",\n";
     }
-    r = r + "    }";
+    r = r + "}";
     return r;
 }
 

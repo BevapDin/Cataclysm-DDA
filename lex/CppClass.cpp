@@ -229,7 +229,7 @@ void CppClass::gather_parent( Exporter &e,
 
 std::string CppClass::export_( Exporter &p ) const
 {
-    static const std::string tab( 8, ' ' );
+    static const std::string tab( 4, ' ' );
     // Both lists will include the functions of parent classes
     std::vector<std::reference_wrapper<const CppFunction>> functions;
     for( const CppFunction &f : this->functions ) {
@@ -267,7 +267,7 @@ std::string CppClass::export_( Exporter &p ) const
 
     std::string r;
     const std::string lua_name = p.lua_name( full_name() );
-    r = r + "    " + lua_name + " = {\n";
+    r = r + "classes[\"" + lua_name + "\"] = {\n";
     if( lua_name != full_name().as_string() ) {
         r = r + tab + "cpp_name = \"" + full_name() + "\",\n";
     }
@@ -303,7 +303,7 @@ std::string CppClass::export_( Exporter &p ) const
     r = r + print_set( print_objects( p, attributes ), tab + "attributes = {\n", tab + "},\n" );
     r = r + print_set( printed_functions, tab + "functions = {\n", tab + "}\n" );
 
-    r = r + "    }";
+    r = r + "}";
 
     return r;
 }
