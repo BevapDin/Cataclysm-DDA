@@ -334,23 +334,6 @@ enums = {}
 dofile_if_exists("lua/generated_class_definitions.lua")
 dofile_if_exists("../../lua/generated_class_definitions.lua")
 
-classes["item_stack_iterator"] = {
-    by_value = true,
-    has_equal = true,
-    forward_declaration = "#include \"item.h\"\n#include <list>",
-    cpp_name = "std::list<item>::iterator",
-    code_prepend = "#include \"item.h\"\n#include <list>",
-    new = {
-        { "item_stack_iterator" },
-    },
-    attributes = {
-    },
-    functions = {
-        { name = "inc", cpp_name = "operator++", rval = nil, args = { } },
-        { name = "elem", cpp_name = "operator*", rval = "item&", args = { } },
-    },
-}
-
 classes["volume"] = {
     by_value = true,
     forward_declaration = "#include \"units.h\"",
@@ -381,6 +364,7 @@ classes["ter_t"].output_path = "mapdata.gen.cpp"
 classes["furn_t"].output_path = "mapdata.gen.cpp"
 
 classes["recipe"].code_prepend = classes["recipe"].code_prepend .. "\n#include \"item.h\""
+classes["map_stack"].code_prepend = classes["map_stack"].code_prepend .. "\n#include \"units.h\""
 
 -- Headers that are required in order to compile the global functions wrapper
 global_functions_code_prepend = "#include \"field.h\"\n#include \"bodypart.h\"\n#include \"itype.h\"\n#include \"creature.h\"\n#include \"output.h\"\n#include \"calendar.h\"\n#include \"pldata.h\"\n#include \"units.h\""
