@@ -103,6 +103,9 @@ end
 -- Returns an expression that evaluates to `true` if the stack has an object of the given type
 -- at the given position.
 function has_lua_value(value_type, stack_position)
+    if value_type:sub(-1) == "*" then
+        return "LuaValueOrReference<" .. get_type(value_type:sub(1, -2)):get_cpp_name() .. ">::has_pointer(L, " .. stack_position .. ")"
+    end
     return get_type(value_type):member_type_to_cpp_type() .. "::has(L, " .. stack_position .. ")"
 end
 
@@ -113,6 +116,27 @@ function retrieve_lua_value(value_type, stack_position)
         return get_type(value_type:sub(1, -2)):member_type_to_cpp_type() .. "::get_pointer(L, " .. stack_position .. ")"
     end
     return get_type(value_type):retrieve_lua_value(stack_position)
+end
+function retrieve_lua_value_to_variable(var_name, value_type, stack_position)
+    function type_to_cpp_type(t)
+        if t == "bool" then return "bool"
+        elseif t == "cstring" then return "const char *"
+        elseif t == "string" then return "std::string"
+        elseif t == "int" then return "int"
+        elseif t == "float" then return "float"
+        elseif t:sub(-1) == "*" and has_type(t:sub(1, -2)) then
+            return get_type(t:sub(1, -2)):get_cpp_name() .. " *"
+        elseif has_type(t) then
+            local t = get_type(t)
+            if getmetatable(t) == Class then
+                return t:get_cpp_name() .. " &"
+            else
+                return t:get_cpp_name()
+            end
+        end
+        error("'"..t.."' is not a build-in type and is not defined in class_definitions.lua")
+    end
+    return type_to_cpp_type(value_type) .. " " .. var_name .. " = " .. retrieve_lua_value(value_type, stack_position) .. ";"
 end
 
 -- Returns code to take a C++ variable of the given type and push a lua version
@@ -130,6 +154,13 @@ function BuildInTypeBase:push_lua_value(in_variable)
     return "LuaType<" .. self.cpp_name .. ">::push( L, " .. in_variable .. " );"
 end
 function push_lua_value(in_variable, value_type)
+    if value_type:sub(-2) == "*&" then
+        return "LuaValue<" .. get_type(value_type:sub(1, -3)):get_cpp_name() .. ">::push_ref( L, " .. in_variable .. " );"
+    end
+    if value_type:sub(-1) == "*" then
+        return "LuaValue<" .. get_type(value_type:sub(1, -2)):get_cpp_name() .. ">::push_ref( L, " .. in_variable .. " );"
+    end
+
     if value_type:sub(-1) == "&" then
         -- A reference is to be pushed. Copying the referred to object may not be allowed  (it may
         -- be a reference to a global game object).
@@ -176,7 +207,7 @@ function generate_global_function_wrapper(function_name, function_to_call, args,
         -- Needs to be auto, can be a proxy object, a real reference, or a POD.
         -- This will be resolved when the functin is called. The C++ compiler will convert
         -- the auto to the expected parameter type.
-        text = text .. tab .. "auto && parameter"..i .. " = " .. retrieve_lua_value(arg, i)..";"..br
+        text = text .. tab .. retrieve_lua_value_to_variable( "parameter" .. i, arg, i) .. br
     end
 
     local func_invoc = function_to_call .. "("
@@ -328,7 +359,7 @@ function insert_overload_resolution(function_name, args, cbc, indentation, stack
             -- Needs to be auto, can be a proxy object, a real reference, or a POD.
             -- This will be resolved when the functin is called. The C++ compiler will convert
             -- the auto to the expected parameter type.
-            text = text..mind.."auto && parameter"..stack_index.." = "..retrieve_lua_value(arg_type, nsi)..";"..br
+            text = text..mind..retrieve_lua_value_to_variable("parameter"..stack_index, arg_type, nsi)..br
             text = text..insert_overload_resolution(function_name, more_args, cbc, ni, nsi)
             if more then
                 text = text..ind.."}"..br
