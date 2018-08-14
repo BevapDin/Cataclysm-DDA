@@ -94,7 +94,7 @@ function push_lua_value(in_variable, value_type)
         value_type = t
     end
     if classes[value_type] then
-        return "LuaValue<" .. value_type .. ">::push( L, " .. in_variable .. " );"
+        return "LuaValue<" .. classes[value_type].cpp_name .. ">::push( L, " .. in_variable .. " );"
     end
     if enums[value_type] then
         return "LuaEnum<" .. enums[value_type].cpp_name .. ">::push( L, " .. in_variable .. " );"
