@@ -767,7 +767,7 @@ function generate_main_init_function()
     for _, enum_name in ipairs(sorted_keys(enums)) do
         local enum = enums[enum_name]
         -- Enumerations are always exported globally
-        cpp_output = cpp_output .. tab .. "LuaEnum<" .. enum.cpp_name .. ">::load_metatable( L, \"" .. enum_name .. "\" );" .. br
+        cpp_output = cpp_output .. tab .. "LuaEnum<" .. enum.cpp_name .. ">::export_global( L, \"" .. enum_name .. "\" );" .. br
     end
     cpp_output = cpp_output .. "}" .. br
 
