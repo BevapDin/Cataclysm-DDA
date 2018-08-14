@@ -1,5 +1,5 @@
 classes["Character"] = {
-        code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n",
+        code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
     parent = "Creature",
     new = {
     },
@@ -17,6 +17,7 @@ classes["Character"] = {
             str_cur = { type = "int", writable = true },
             str_max = { type = "int", writable = true },
             weapon = { type = "item", writable = true },
+            worn = { type = "std::list<item>", writable = true },
     },
     functions = {
             { name = "add_traits", rval = nil, args = { } },
@@ -43,6 +44,7 @@ classes["Character"] = {
             { name = "encumb", rval = "int", args = { "body_part" } },
             { name = "enumerate_unmet_requirements", rval = "string", args = { "item" } },
             { name = "enumerate_unmet_requirements", rval = "string", args = { "item", "item" } },
+            { name = "get_base_traits", rval = "std::vector<trait_id>", args = { } },
             { name = "get_dex", rval = "int", args = { } },
             { name = "get_dex_base", rval = "int", args = { } },
             { name = "get_dex_bonus", rval = "int", args = { } },
@@ -55,6 +57,7 @@ classes["Character"] = {
             { name = "get_int_bonus", rval = "int", args = { } },
             { name = "get_item_position", rval = "int", args = { "item" } },
             { name = "get_most_accurate_sight", rval = "int", args = { "item" } },
+            { name = "get_mutations", rval = "std::vector<trait_id>", args = { } },
             { name = "get_per", rval = "int", args = { } },
             { name = "get_per_base", rval = "int", args = { } },
             { name = "get_per_bonus", rval = "int", args = { } },
@@ -164,7 +167,7 @@ classes["Character"] = {
     }
 }
 classes["Creature"] = {
-        code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n",
+        code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n#include <vector>\n#include <set>\n",
     new = {
     },
     attributes = {
@@ -203,6 +206,8 @@ classes["Creature"] = {
             { name = "dodge_roll", rval = "float", args = { } },
             { name = "extended_description", rval = "string", args = { } },
             { name = "fall_damage_mod", rval = "float", args = { } },
+            { name = "get_all_body_parts", rval = "std::vector<body_part>", args = { "bool" } },
+            { name = "get_all_body_parts", rval = "std::vector<body_part>", args = { } },
             { name = "get_armor_bash", rval = "int", args = { "body_part" } },
             { name = "get_armor_bash_base", rval = "int", args = { "body_part" } },
             { name = "get_armor_bash_bonus", rval = "int", args = { } },
@@ -241,6 +246,7 @@ classes["Creature"] = {
             { name = "get_num_dodges", rval = "int", args = { } },
             { name = "get_num_dodges_bonus", rval = "int", args = { } },
             { name = "get_pain", rval = "int", args = { } },
+            { name = "get_path_avoid", rval = "std::set<tripoint>", args = { } },
             { name = "get_perceived_pain", rval = "int", args = { } },
             { name = "get_random_body_part", rval = "body_part", args = { "bool" } },
             { name = "get_random_body_part", rval = "body_part", args = { } },
@@ -540,11 +546,12 @@ classes["furn_t"] = {
     }
 }
 classes["game"] = {
-        code_prepend = "#include \"game.h\"\n#include \"enums.h\"\n#include \"item_location.h\"\n#include \"stl_list.h\"\n#include \"cursesdef.h\"\n#include \"int_id.h\"\n",
+        code_prepend = "#include \"game.h\"\n#include \"enums.h\"\n#include <vector>\n#include \"item_location.h\"\n#include <list>\n#include \"cursesdef.h\"\n#include \"int_id.h\"\n",
     new = {
             { },
     },
     attributes = {
+            coming_to_stairs = { type = "std::vector<monster>", writable = true },
             driving_view_offset = { type = "point", writable = true },
             fullscreen = { type = "bool", writable = true },
             lightning_active = { type = "bool", writable = true },
@@ -578,11 +585,14 @@ classes["game"] = {
             { name = "do_blast", rval = nil, args = { "tripoint", "float", "float", "bool" } },
             { name = "do_turn", rval = "bool", args = { } },
             { name = "draw", rval = nil, args = { } },
+            { name = "draw_bullet", rval = nil, args = { "tripoint", "int", "std::vector<tripoint>", "int" } },
             { name = "draw_critter", rval = nil, args = { "Creature", "tripoint" } },
             { name = "draw_explosion", rval = nil, args = { "tripoint", "int", "nc_color" } },
             { name = "draw_hit_mon", rval = nil, args = { "tripoint", "monster" } },
             { name = "draw_hit_mon", rval = nil, args = { "tripoint", "monster", "bool" } },
             { name = "draw_hit_player", rval = nil, args = { "player", "int" } },
+            { name = "draw_line", rval = nil, args = { "tripoint", "std::vector<tripoint>" } },
+            { name = "draw_line", rval = nil, args = { "tripoint", "tripoint", "std::vector<tripoint>" } },
             { name = "draw_sct", rval = nil, args = { } },
             { name = "draw_ter", rval = nil, args = { "bool" } },
             { name = "draw_ter", rval = nil, args = { "tripoint" } },
@@ -646,6 +656,7 @@ classes["game"] = {
             { name = "is_sheltered", rval = "bool", args = { "tripoint" } },
             { name = "kill_count", rval = "int", args = { "mtype_id" } },
             { name = "kill_count", rval = "int", args = { "species_id" } },
+            { name = "knockback", rval = nil, args = { "std::vector<tripoint>", "int", "int", "int" } },
             { name = "knockback", rval = nil, args = { "tripoint", "tripoint", "int", "int", "int" } },
             { name = "light_level", rval = "int", args = { "int" } },
             { name = "load", rval = "bool", args = { "string" } },
@@ -683,6 +694,8 @@ classes["game"] = {
             { name = "set_npcs_dirty", rval = nil, args = { } },
             { name = "setup", rval = nil, args = { } },
             { name = "shockwave", rval = nil, args = { "tripoint", "int", "int", "int", "int", "bool" } },
+            { name = "shrapnel", rval = "std::vector<tripoint>", args = { "tripoint", "int", "int", "float" } },
+            { name = "shrapnel", rval = "std::vector<tripoint>", args = { "tripoint", "int", "int", "float", "int" } },
             { name = "spawn_hallucination", rval = "bool", args = { "tripoint" } },
             { name = "spawn_hallucination", rval = "bool", args = { } },
             { name = "start_calendar", rval = nil, args = { } },
@@ -728,7 +741,7 @@ classes["gun_mode"] = {
     }
 }
 classes["item"] = {
-        code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"int_id.h\"\n",
+        code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
     new = {
             { "item" },
             { "itype" },
@@ -743,6 +756,8 @@ classes["item"] = {
             active = { type = "bool", writable = true },
             burnt = { type = "int", writable = true },
             charges = { type = "int", writable = true },
+            components = { type = "std::vector<item>", writable = true },
+            contents = { type = "std::list<item>", writable = true },
             frequency = { type = "int", writable = true },
             fridge = { type = "time_point", writable = true },
             invlet = { type = "int", writable = true },
@@ -819,6 +834,7 @@ classes["item"] = {
             { name = "deactivate", rval = "item&", args = { "Character", "bool" } },
             { name = "deactivate", rval = "item&", args = { } },
             { name = "destroyed_at_zero_charges", rval = "bool", args = { } },
+            { name = "detonate", rval = "bool", args = { "tripoint", "std::vector<item>" } },
             { name = "display_money", rval = "string", args = { "int", "int" } },
             { name = "display_name", rval = "string", args = { "int" } },
             { name = "display_name", rval = "string", args = { } },
@@ -861,6 +877,7 @@ classes["item"] = {
             { name = "get_rot", rval = "time_duration", args = { } },
             { name = "get_side", rval = "side", args = { } },
             { name = "get_storage", rval = "volume", args = { } },
+            { name = "get_techniques", rval = "std::set<matec_id>", args = { } },
             { name = "get_thickness", rval = "int", args = { } },
             { name = "get_usable_item", rval = "item&", args = { "string" } },
             { name = "get_var", rval = "float", args = { "string", "float" } },
@@ -959,6 +976,9 @@ classes["item"] = {
             { name = "load_info", rval = nil, args = { "string" } },
             { name = "made_of", rval = "bool", args = { "material_id" } },
             { name = "made_of", rval = "bool", args = { "phase_id" } },
+            { name = "made_of", rval = "std::vector<material_id>", args = { } },
+            { name = "made_of_any", rval = "bool", args = { "std::set<material_id>" } },
+            { name = "magazine_convert", rval = "std::vector<item>", args = { } },
             { name = "magazine_current", rval = "item&", args = { } },
             { name = "magazine_default", rval = "string", args = { "bool" } },
             { name = "magazine_default", rval = "string", args = { } },
@@ -987,6 +1007,7 @@ classes["item"] = {
             { name = "on_wear", rval = nil, args = { "Character" } },
             { name = "on_wield", rval = nil, args = { "player" } },
             { name = "on_wield", rval = nil, args = { "player", "int" } },
+            { name = "only_made_of", rval = "bool", args = { "std::set<material_id>" } },
             { name = "precise_damage", rval = "float", args = { } },
             { name = "price", rval = "int", args = { "bool" } },
             { name = "process", rval = "bool", args = { "player", "tripoint", "bool" } },
@@ -1059,6 +1080,7 @@ classes["itype"] = {
             looks_like = { type = "string", writable = true },
             m_to_hit = { type = "int", writable = true },
             magazine_well = { type = "volume", writable = true },
+            materials = { type = "std::vector<material_id>", writable = true },
             min_dex = { type = "int", writable = true },
             min_int = { type = "int", writable = true },
             min_per = { type = "int", writable = true },
@@ -1071,6 +1093,7 @@ classes["itype"] = {
             stack_size = { type = "int", writable = true },
             stackable = { type = "bool", writable = true },
             sym = { type = "string", writable = true },
+            techniques = { type = "std::set<matec_id>", writable = true },
             volume = { type = "volume", writable = true },
             weight = { type = "mass", writable = true },
     },
@@ -1163,7 +1186,7 @@ classes["ma_technique"] = {
     }
 }
 classes["map"] = {
-        code_prepend = "#include \"map.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"calendar.h\"\n#include \"stl_list.h\"\n#include \"item_stack.h\"\n#include \"stl_vector.h\"\n",
+        code_prepend = "#include \"map.h\"\n#include <vector>\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"calendar.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
             { "bool" },
             { "int" },
@@ -1268,6 +1291,7 @@ classes["map"] = {
             { name = "features", rval = "string", args = { "int", "int" } },
             { name = "features", rval = "string", args = { "tripoint" } },
             { name = "field_at", rval = "field&", args = { "tripoint" } },
+            { name = "find_clear_path", rval = "std::vector<tripoint>", args = { "tripoint", "tripoint" } },
             { name = "flammable_items_at", rval = "bool", args = { "tripoint" } },
             { name = "flammable_items_at", rval = "bool", args = { "tripoint", "int" } },
             { name = "free_volume", rval = "volume", args = { "tripoint" } },
@@ -1279,6 +1303,7 @@ classes["map"] = {
             { name = "furnname", rval = "string", args = { "tripoint" } },
             { name = "generate", rval = nil, args = { "int", "int", "int", "time_point" } },
             { name = "get_abs_sub", rval = "tripoint", args = { } },
+            { name = "get_dir_circle", rval = "std::vector<tripoint>", args = { "tripoint", "tripoint" } },
             { name = "get_field", rval = "field_entry&", args = { "tripoint", "field_id" } },
             { name = "get_field_age", rval = "time_duration", args = { "tripoint", "field_id" } },
             { name = "get_field_strength", rval = "int", args = { "tripoint", "field_id" } },
@@ -1425,6 +1450,7 @@ classes["map"] = {
             { name = "spawn_item", rval = nil, args = { "tripoint", "string", "int", "int" } },
             { name = "spawn_item", rval = nil, args = { "tripoint", "string", "int", "int", "time_point" } },
             { name = "spawn_item", rval = nil, args = { "tripoint", "string", "int", "int", "time_point", "int" } },
+            { name = "spawn_items", rval = nil, args = { "int", "int", "std::vector<item>" } },
             { name = "spawn_monsters", rval = nil, args = { "bool" } },
             { name = "stored_volume", rval = "volume", args = { "tripoint" } },
             { name = "supports_above", rval = "bool", args = { "tripoint" } },
@@ -1438,6 +1464,7 @@ classes["map"] = {
             { name = "trans", rval = "bool", args = { "tripoint" } },
             { name = "translate", rval = nil, args = { "ter_id", "ter_id" } },
             { name = "translate_radius", rval = nil, args = { "ter_id", "ter_id", "float", "tripoint" } },
+            { name = "trap_locations", rval = "std::vector<tripoint>", args = { "trap_id" } },
             { name = "trap_set", rval = nil, args = { "tripoint", "trap_id" } },
             { name = "trigger_rc_items", rval = nil, args = { "string" } },
             { name = "unboard_vehicle", rval = nil, args = { "tripoint" } },
@@ -1453,7 +1480,7 @@ classes["map"] = {
     }
 }
 classes["map_stack"] = {
-        code_prepend = "#include \"map.h\"\n#include \"stl_list.h\"\n#include \"item_stack.h\"\n",
+        code_prepend = "#include \"map.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
     },
     attributes = {
@@ -1490,7 +1517,15 @@ classes["martialart"] = {
             leg_block = { type = "int", writable = true },
             leg_block_with_bio_armor_legs = { type = "bool", writable = true },
             name = { type = "string", writable = true },
+            onattack_buffs = { type = "std::vector<mabuff_id>", writable = true },
+            onblock_buffs = { type = "std::vector<mabuff_id>", writable = true },
+            ondodge_buffs = { type = "std::vector<mabuff_id>", writable = true },
+            ongethit_buffs = { type = "std::vector<mabuff_id>", writable = true },
+            onhit_buffs = { type = "std::vector<mabuff_id>", writable = true },
+            onmove_buffs = { type = "std::vector<mabuff_id>", writable = true },
+            static_buffs = { type = "std::vector<mabuff_id>", writable = true },
             strictly_unarmed = { type = "bool", writable = true },
+            techniques = { type = "std::set<matec_id>", writable = true },
     },
     functions = {
             { name = "apply_onattack_buffs", rval = nil, args = { "player" } },
@@ -1548,6 +1583,7 @@ classes["mongroup"] = {
             horde = { type = "bool", writable = true },
             horde_behaviour = { type = "string", writable = true },
             interest = { type = "int", writable = true },
+            monsters = { type = "std::vector<monster>", writable = true },
             population = { type = "int", writable = true },
             pos = { type = "tripoint", writable = true },
             radius = { type = "int", writable = true },
@@ -1580,6 +1616,7 @@ classes["monster"] = {
             friendly = { type = "int", writable = true },
             hallucination = { type = "bool", writable = true },
             ignoring = { type = "int", writable = true },
+            inv = { type = "std::vector<item>", writable = true },
             last_baby = { type = "int", writable = true },
             last_biosig = { type = "int", writable = true },
             last_updated = { type = "time_point", writable = true },
@@ -1630,7 +1667,6 @@ classes["monster"] = {
             { name = "make_friendly", rval = nil, args = { } },
             { name = "make_fungus", rval = "bool", args = { } },
             { name = "melee_attack", rval = nil, args = { "Creature" } },
-            { name = "melee_attack", rval = nil, args = { "Creature", "bool" } },
             { name = "melee_attack", rval = nil, args = { "Creature", "float" } },
             { name = "move", rval = nil, args = { } },
             { name = "move_target", rval = "tripoint", args = { } },
@@ -1701,6 +1737,7 @@ classes["mtype"] = {
             id = { type = "mtype_id", writable = true },
             looks_like = { type = "string", writable = true },
             luminance = { type = "float", writable = true },
+            mat = { type = "std::vector<material_id>", writable = true },
             melee_dice = { type = "int", writable = true },
             melee_sides = { type = "int", writable = true },
             melee_skill = { type = "int", writable = true },
@@ -1710,6 +1747,7 @@ classes["mtype"] = {
             revert_to_itype = { type = "string", writable = true },
             size = { type = "m_size", writable = true },
             sk_dodge = { type = "int", writable = true },
+            species = { type = "std::set<species_id>", writable = true },
             speed = { type = "int", writable = true },
             sym = { type = "string", writable = true },
             upgrade_group = { type = "mongroup_id", writable = true },
@@ -1743,10 +1781,12 @@ classes["mutation_branch"] = {
     string_id = "trait_id",
     attributes = {
             activated = { type = "bool", writable = true },
+            additions = { type = "std::vector<trait_id>", writable = true },
             allow_soft_gear = { type = "bool", writable = true },
             bodytemp_max = { type = "int", writable = true },
             bodytemp_min = { type = "int", writable = true },
             bodytemp_sleep = { type = "int", writable = true },
+            cancels = { type = "std::vector<trait_id>", writable = true },
             cooldown = { type = "int", writable = true },
             cost = { type = "int", writable = true },
             destroys_gear = { type = "bool", writable = true },
@@ -1759,12 +1799,17 @@ classes["mutation_branch"] = {
             hp_modifier = { type = "float", writable = true },
             hp_modifier_secondary = { type = "float", writable = true },
             hunger = { type = "bool", writable = true },
+            initial_ma_styles = { type = "std::vector<matype_id>", writable = true },
             metabolism_modifier = { type = "float", writable = true },
             mixed_effect = { type = "bool", writable = true },
             name = { type = "string", writable = true },
             points = { type = "int", writable = true },
+            prereqs = { type = "std::vector<trait_id>", writable = true },
+            prereqs2 = { type = "std::vector<trait_id>", writable = true },
             profession = { type = "bool", writable = true },
             purifiable = { type = "bool", writable = true },
+            replacements = { type = "std::vector<trait_id>", writable = true },
+            restricts_gear = { type = "std::set<body_part>", writable = true },
             spawn_item = { type = "string", writable = true },
             spawn_item_message = { type = "string", writable = true },
             stamina_regen_modifier = { type = "float", writable = true },
@@ -1773,6 +1818,7 @@ classes["mutation_branch"] = {
             thirst = { type = "bool", writable = true },
             thirst_modifier = { type = "float", writable = true },
             threshold = { type = "bool", writable = true },
+            threshreq = { type = "std::vector<trait_id>", writable = true },
             ugliness = { type = "int", writable = true },
             valid = { type = "bool", writable = true },
             visibility = { type = "int", writable = true },
@@ -1817,7 +1863,7 @@ classes["npc_template"] = {
     }
 }
 classes["overmap"] = {
-        code_prepend = "#include \"overmap.h\"\n#include \"enums.h\"\n",
+        code_prepend = "#include \"overmap.h\"\n#include \"enums.h\"\n#include <vector>\n",
     new = {
             { "int", "int" },
             { "overmap" },
@@ -1829,7 +1875,9 @@ classes["overmap"] = {
             { name = "add_note", rval = nil, args = { "int", "int", "int", "string" } },
             { name = "clear_mon_groups", rval = nil, args = { } },
             { name = "delete_note", rval = nil, args = { "int", "int", "int" } },
+            { name = "find_notes", rval = "std::vector<point>", args = { "int", "string" } },
             { name = "find_random_omt", rval = "tripoint", args = { "string" } },
+            { name = "find_terrain", rval = "std::vector<point>", args = { "string", "int" } },
             { name = "global_base_point", rval = "point", args = { } },
             { name = "has_note", rval = "bool", args = { "int", "int", "int" } },
             { name = "inbounds", static = true, rval = "bool", args = { "int", "int", "int" } },
@@ -1845,7 +1893,7 @@ classes["overmap"] = {
     }
 }
 classes["player"] = {
-        code_prepend = "#include \"player.h\"\n#include \"creature.h\"\n#include \"int_id.h\"\n#include \"enums.h\"\n#include \"item.h\"\n",
+        code_prepend = "#include \"player.h\"\n#include \"creature.h\"\n#include \"int_id.h\"\n#include <vector>\n#include \"enums.h\"\n#include \"item.h\"\n#include <list>\n",
     parent = "Character",
     new = {
             { "player" },
@@ -1866,6 +1914,7 @@ classes["player"] = {
             lastconsumed = { type = "string", writable = true },
             lastrecipe = { type = "recipe_id", writable = true },
             lifetime_stats = { type = "stats", writable = true },
+            ma_styles = { type = "std::vector<matype_id>", writable = true },
             max_power_level = { type = "int", writable = true },
             move_mode = { type = "string", writable = true },
             movecounter = { type = "int", writable = true },
@@ -1949,6 +1998,8 @@ classes["player"] = {
             { name = "complete_disassemble", rval = nil, args = { } },
             { name = "consume", rval = "bool", args = { "int" } },
             { name = "consume_charges", rval = "bool", args = { "item", "int" } },
+            { name = "consume_components_for_craft", rval = "std::list<item>", args = { "recipe", "int" } },
+            { name = "consume_components_for_craft", rval = "std::list<item>", args = { "recipe", "int", "bool" } },
             { name = "consume_effects", rval = nil, args = { "item" } },
             { name = "consume_item", rval = "bool", args = { "item" } },
             { name = "cough", rval = nil, args = { "bool" } },
@@ -1991,8 +2042,10 @@ classes["player"] = {
             { name = "getID", rval = "int", args = { } },
             { name = "get_acquirable_energy", rval = "int", args = { "item" } },
             { name = "get_active_mission_target", rval = "tripoint", args = { } },
+            { name = "get_all_techniques", rval = "std::vector<matec_id>", args = { "item" } },
             { name = "get_armor_acid", rval = "int", args = { "body_part" } },
             { name = "get_armor_fire", rval = "int", args = { "body_part" } },
+            { name = "get_auto_move_route", rval = "std::vector<tripoint>", args = { } },
             { name = "get_category_dream", rval = "string", args = { "string", "int" } },
             { name = "get_combat_style", rval = "martialart&", args = { } },
             { name = "get_comestible_from", rval = "item&", args = { "item" } },
@@ -2178,6 +2231,7 @@ classes["player"] = {
             { name = "search_surroundings", rval = nil, args = { } },
             { name = "sees_with_infrared", rval = "bool", args = { "Creature" } },
             { name = "setID", rval = nil, args = { "int" } },
+            { name = "set_destination", rval = nil, args = { "std::vector<tripoint>" } },
             { name = "set_highest_cat_level", rval = nil, args = { } },
             { name = "set_painkiller", rval = nil, args = { "int" } },
             { name = "set_underwater", rval = nil, args = { "bool" } },
@@ -2202,6 +2256,7 @@ classes["player"] = {
             { name = "swim_speed", rval = "int", args = { } },
             { name = "takeoff", rval = "bool", args = { "int" } },
             { name = "takeoff", rval = "bool", args = { "item" } },
+            { name = "takeoff", rval = "bool", args = { "item", "std::list<item>" } },
             { name = "talk_skill", rval = "int", args = { } },
             { name = "temp_equalizer", rval = nil, args = { "body_part", "body_part" } },
             { name = "thirst_speed_penalty", static = true, rval = "int", args = { "int" } },
@@ -2222,6 +2277,8 @@ classes["player"] = {
             { name = "update_needs", rval = nil, args = { "int" } },
             { name = "update_stamina", rval = nil, args = { "int" } },
             { name = "use", rval = nil, args = { "int" } },
+            { name = "use_amount", rval = "std::list<item>", args = { "string", "int" } },
+            { name = "use_charges", rval = "std::list<item>", args = { "string", "int" } },
             { name = "use_charges_if_avail", rval = "bool", args = { "string", "int" } },
             { name = "use_wielded", rval = nil, args = { } },
             { name = "visibility", rval = "int", args = { "bool" } },
@@ -2274,7 +2331,7 @@ classes["quality"] = {
     }
 }
 classes["recipe"] = {
-        code_prepend = "#include \"recipe.h\"\n",
+        code_prepend = "#include \"recipe.h\"\n#include <vector>\n",
     new = {
             { },
     },
@@ -2290,7 +2347,11 @@ classes["recipe"] = {
     },
     functions = {
             { name = "batch_time", rval = "int", args = { "int", "float", "int" } },
+            { name = "create_byproducts", rval = "std::vector<item>", args = { "int" } },
+            { name = "create_byproducts", rval = "std::vector<item>", args = { } },
             { name = "create_result", rval = "item", args = { } },
+            { name = "create_results", rval = "std::vector<item>", args = { "int" } },
+            { name = "create_results", rval = "std::vector<item>", args = { } },
             { name = "finalize", rval = nil, args = { } },
             { name = "get_consistency_error", rval = "string", args = { } },
             { name = "has_byproducts", rval = "bool", args = { } },
@@ -2326,8 +2387,9 @@ classes["start_location"] = {
             { name = "add_map_special", rval = nil, args = { "tripoint", "string" } },
             { name = "burn", rval = nil, args = { "tripoint", "int", "int" } },
             { name = "find_player_initial_location", rval = "tripoint", args = { } },
+            { name = "get_all", static = true, rval = "std::vector<start_location>", args = { } },
             { name = "handle_heli_crash", rval = nil, args = { "player" } },
-            { name = "ident", rval = "string_id<start_location>&", args = { } },
+            { name = "ident", rval = "start_location_id&", args = { } },
             { name = "name", rval = "string", args = { } },
             { name = "place_player", rval = nil, args = { "player" } },
             { name = "prepare_map", rval = nil, args = { "tripoint" } },
@@ -2538,133 +2600,142 @@ classes["w_point"] = {
 }
 
 enums["add_type"] = {
-    "ADD_NULL",
-    "ADD_CAFFEINE",
-    "ADD_ALCOHOL",
-    "ADD_SLEEP",
-    "ADD_PKILLER",
-    "ADD_SPEED",
-    "ADD_CIG",
-    "ADD_COKE",
-    "ADD_CRACK",
-    "ADD_MUTAGEN",
-    "ADD_DIAZEPAM",
-    "ADD_MARLOSS_R",
-    "ADD_MARLOSS_B",
-    "ADD_MARLOSS_Y",
-}
+    values = {
+        "ADD_NULL",
+        "ADD_CAFFEINE",
+        "ADD_ALCOHOL",
+        "ADD_SLEEP",
+        "ADD_PKILLER",
+        "ADD_SPEED",
+        "ADD_CIG",
+        "ADD_COKE",
+        "ADD_CRACK",
+        "ADD_MUTAGEN",
+        "ADD_DIAZEPAM",
+        "ADD_MARLOSS_R",
+        "ADD_MARLOSS_B",
+        "ADD_MARLOSS_Y",
+    }}
 enums["body_part"] = {
-    "bp_torso",
-    "bp_head",
-    "bp_eyes",
-    "bp_mouth",
-    "bp_arm_l",
-    "bp_arm_r",
-    "bp_hand_l",
-    "bp_hand_r",
-    "bp_leg_l",
-    "bp_leg_r",
-    "bp_foot_l",
-    "bp_foot_r",
-    "num_bp",
-}
+    values = {
+        "bp_torso",
+        "bp_head",
+        "bp_eyes",
+        "bp_mouth",
+        "bp_arm_l",
+        "bp_arm_r",
+        "bp_hand_l",
+        "bp_hand_r",
+        "bp_leg_l",
+        "bp_leg_r",
+        "bp_foot_l",
+        "bp_foot_r",
+        "num_bp",
+    }}
 enums["damage_type"] = {
-    "DT_NULL",
-    "DT_TRUE",
-    "DT_BIOLOGICAL",
-    "DT_BASH",
-    "DT_CUT",
-    "DT_ACID",
-    "DT_STAB",
-    "DT_HEAT",
-    "DT_COLD",
-    "DT_ELECTRIC",
-    "NUM_DT",
-}
+    values = {
+        "DT_NULL",
+        "DT_TRUE",
+        "DT_BIOLOGICAL",
+        "DT_BASH",
+        "DT_CUT",
+        "DT_ACID",
+        "DT_STAB",
+        "DT_HEAT",
+        "DT_COLD",
+        "DT_ELECTRIC",
+        "NUM_DT",
+    }}
 enums["field_id"] = {
-    "fd_null",
-    "fd_blood",
-    "fd_bile",
-    "fd_gibs_flesh",
-    "fd_gibs_veggy",
-    "fd_web",
-    "fd_slime",
-    "fd_acid",
-    "fd_sap",
-    "fd_sludge",
-    "fd_fire",
-    "fd_rubble",
-    "fd_smoke",
-    "fd_toxic_gas",
-    "fd_tear_gas",
-    "fd_nuke_gas",
-    "fd_gas_vent",
-    "fd_fire_vent",
-    "fd_flame_burst",
-    "fd_electricity",
-    "fd_fatigue",
-    "fd_push_items",
-    "fd_shock_vent",
-    "fd_acid_vent",
-    "fd_plasma",
-    "fd_laser",
-    "fd_spotlight",
-    "fd_dazzling",
-    "fd_blood_veggy",
-    "fd_blood_insect",
-    "fd_blood_invertebrate",
-    "fd_gibs_insect",
-    "fd_gibs_invertebrate",
-    "fd_cigsmoke",
-    "fd_weedsmoke",
-    "fd_cracksmoke",
-    "fd_methsmoke",
-    "fd_bees",
-    "fd_incendiary",
-    "fd_relax_gas",
-    "fd_fungal_haze",
-    "fd_hot_air1",
-    "fd_hot_air2",
-    "fd_hot_air3",
-    "fd_hot_air4",
-    "fd_fungicidal_gas",
-    "fd_smoke_vent",
-    "num_fields",
-}
+    values = {
+        "fd_null",
+        "fd_blood",
+        "fd_bile",
+        "fd_gibs_flesh",
+        "fd_gibs_veggy",
+        "fd_web",
+        "fd_slime",
+        "fd_acid",
+        "fd_sap",
+        "fd_sludge",
+        "fd_fire",
+        "fd_rubble",
+        "fd_smoke",
+        "fd_toxic_gas",
+        "fd_tear_gas",
+        "fd_nuke_gas",
+        "fd_gas_vent",
+        "fd_fire_vent",
+        "fd_flame_burst",
+        "fd_electricity",
+        "fd_fatigue",
+        "fd_push_items",
+        "fd_shock_vent",
+        "fd_acid_vent",
+        "fd_plasma",
+        "fd_laser",
+        "fd_spotlight",
+        "fd_dazzling",
+        "fd_blood_veggy",
+        "fd_blood_insect",
+        "fd_blood_invertebrate",
+        "fd_gibs_insect",
+        "fd_gibs_invertebrate",
+        "fd_cigsmoke",
+        "fd_weedsmoke",
+        "fd_cracksmoke",
+        "fd_methsmoke",
+        "fd_bees",
+        "fd_incendiary",
+        "fd_relax_gas",
+        "fd_fungal_haze",
+        "fd_hot_air1",
+        "fd_hot_air2",
+        "fd_hot_air3",
+        "fd_hot_air4",
+        "fd_fungicidal_gas",
+        "fd_smoke_vent",
+        "num_fields",
+    }}
 enums["hp_part"] = {
-    "hp_head",
-    "hp_torso",
-    "hp_arm_l",
-    "hp_arm_r",
-    "hp_leg_l",
-    "hp_leg_r",
-    "num_hp_parts",
-}
+    values = {
+        "hp_head",
+        "hp_torso",
+        "hp_arm_l",
+        "hp_arm_r",
+        "hp_leg_l",
+        "hp_leg_r",
+        "num_hp_parts",
+    }}
 enums["m_size"] = {
-    "MS_TINY",
-    "MS_SMALL",
-    "MS_MEDIUM",
-    "MS_LARGE",
-    "MS_HUGE",
-}
+    values = {
+        "MS_TINY",
+        "MS_SMALL",
+        "MS_MEDIUM",
+        "MS_LARGE",
+        "MS_HUGE",
+    }}
 enums["phase_id"] = {
-    "PNULL",
-    "SOLID",
-    "LIQUID",
-    "GAS",
-    "PLASMA",
-}
+    values = {
+        "PNULL",
+        "SOLID",
+        "LIQUID",
+        "GAS",
+        "PLASMA",
+    }}
 enums["season_type"] = {
-    "SPRING",
-    "SUMMER",
-    "AUTUMN",
-    "WINTER",
-}
+    values = {
+        "SPRING",
+        "SUMMER",
+        "AUTUMN",
+        "WINTER",
+    }}
 enums["side"] = {
-    "BOTH",
-    "LEFT",
-    "RIGHT",
-}
+    values = {
+        "BOTH",
+        "LEFT",
+        "RIGHT",
+    }}
 
 global_functions = {
 { name = "DAYS", rval = "int", args = { "int" } },
@@ -2691,3 +2762,21 @@ size = { cpp_name = "om_direction::size", type = "int" },
 tripoint_min = { type = "tripoint" },
 tripoint_zero = { type = "tripoint" },
 }
+
+make_std_list_class("item")
+make_std_set_class("body_part")
+make_std_set_class("matec_id")
+make_std_set_class("material_id")
+make_std_set_class("species_id")
+make_std_set_class("tripoint")
+make_std_vector_class("body_part")
+make_std_vector_class("item")
+make_std_vector_class("mabuff_id")
+make_std_vector_class("matec_id")
+make_std_vector_class("material_id")
+make_std_vector_class("matype_id")
+make_std_vector_class("monster")
+make_std_vector_class("point")
+make_std_vector_class("start_location")
+make_std_vector_class("trait_id")
+make_std_vector_class("tripoint")
