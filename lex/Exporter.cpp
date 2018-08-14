@@ -131,7 +131,7 @@ std::string Exporter::translate_member_type( const Type &t ) const
     if( t.kind() == CXType_Pointer ) {
         const Type pt = t.get_pointee();
         if( export_enabled( pt ) ) {
-            return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "\"";
+            return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "*\"";
         }
     }
 
@@ -192,10 +192,11 @@ std::string Exporter::translate_argument_type( const Type &t ) const
     if( t.kind() == CXType_Pointer ) {
         const Type pt = t.get_pointee();
         if( export_enabled( pt ) ) {
-            return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "\"";
+            return "\"" + lua_name( FullyQualifiedId( remove_const( pt.spelling() ) ) ) + "*\"";
         }
         if( const auto res = const_cast<Exporter &>( *this ).register_generic( pt ) ) {
-            return *res;
+            // add a '*' before the closing '"'
+            return res->substr( 0, res->length() - 1 ) + "*\"";
         }
     }
     if( t.kind() == CXType_Typedef ) {
