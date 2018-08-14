@@ -232,6 +232,9 @@ class LuaValue
         static void push_ref( lua_State *const L, const T &ref ) {
             LuaValue<T*>::push( L, const_cast<T*>( &ref ) );
         }
+        static void push_ref( lua_State *const L, const T *ref ) {
+            LuaValue<T*>::push( L, const_cast<T*>( ref ) );
+        }
         static int push_reg( lua_State *const L, const T &value ) {
             push( L, value );
             return luah_store_in_registry( L, -1 );
