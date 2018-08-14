@@ -97,7 +97,7 @@ function push_lua_value(in_variable, value_type)
         return "LuaValue<" .. classes[value_type].cpp_name .. ">::push( L, " .. in_variable .. " );"
     end
     if enums[value_type] then
-        return "LuaEnum<" .. value_type .. ">::push( L, " .. in_variable .. " );"
+        return "LuaEnum<" .. enums[value_type].cpp_name .. ">::push( L, " .. in_variable .. " );"
     end
     -- A native Lua type.
     return member_type_to_cpp_type(value_type) .. "::push( L, " .. in_variable .. " );"
