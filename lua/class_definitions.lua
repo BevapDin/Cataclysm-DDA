@@ -92,18 +92,25 @@ function container_output_path(t)
     if classes[t] then
         if classes[t].output_path then
             return classes[t].output_path
-        else
-            return output_path_for_id(t)
         end
-    else
-        return nil
     end
+    if enums[t] then
+        if enums[t].output_path then
+            return enums[t].output_path
+        end
+    end
+    return output_path_for_id(t)
 end
 
 function container_code_prepend(t)
     if classes[t] then
         if classes[t].code_prepend then
             return classes[t].code_prepend
+        end
+    end
+    if enums[t] then
+        if enums[t].code_prepend then
+            return enums[t].code_prepend
         end
     end
     return ""
@@ -113,6 +120,11 @@ function container_cpp_name(t)
     if classes[t] then
         if classes[t].cpp_name then
             return classes[t].cpp_name
+        end
+    end
+    if enums[t] then
+        if enums[t].cpp_name then
+            return enums[t].cpp_name
         end
     end
     return t
