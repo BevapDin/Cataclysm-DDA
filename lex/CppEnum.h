@@ -11,7 +11,7 @@ class Exporter;
 class CppEnum
 {
     private:
-        Cursor cursor;
+        Cursor cursor_;
         std::list<std::string> values;
 
     public:

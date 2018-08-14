@@ -4,7 +4,7 @@
 #include "Parser.h"
 #include "Exporter.h"
 
-CppEnum::CppEnum( Parser &p, const Cursor &cursor ) : cursor_( cursor )
+CppEnum::CppEnum( Parser &/*p*/, const Cursor &cursor ) : cursor_( cursor )
 {
     cursor.visit_children( [this]( const Cursor & c, const Cursor &/*parent*/ ) {
         if( c.kind() == CXCursor_EnumConstantDecl ) {
