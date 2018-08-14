@@ -1,18 +1,17 @@
 #pragma once
 
-#include "FullyQualifiedId.h"
+#include "Cursor.h"
 
 #include <list>
 #include <string>
 
 class Parser;
 class Exporter;
-class Cursor;
 
 class CppEnum
 {
     private:
-        FullyQualifiedId full_name_;
+        Cursor cursor;
         std::list<std::string> values;
 
     public:
