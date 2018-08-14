@@ -105,6 +105,26 @@ CppClass::CppClass( Parser &p, const Cursor &cursor ) : cursor_( cursor )
 
 CppClass::~CppClass() = default;
 
+std::string CppClass::forward_declaration() const
+{
+    std::string result = ( cursor_.kind() == CXCursor_ClassDecl ? "class " : "struct " ) + cursor_.spelling() + ";";
+    Cursor c = cursor_;
+    while( true ) {
+        const Cursor parent = c.get_semantic_parent();
+        const CXCursorKind k = parent.kind();
+        if( k == CXCursor_Namespace ) {
+            result = "namespace " + parent.spelling() + " {" + result + "}";
+            c = parent;
+        } else if( k == CXCursor_ClassDecl || k == CXCursor_StructDecl ) {
+            // *this is a inner class, we can not forward declare it, so just include the header containing it.
+            return "#include \"" + parent.location_file() + "\"\n";
+        } else {
+            break;
+        }
+    }
+    return result + "\n";
+}
+
 bool CppClass::has_non_const_overload( const CppFunction &func ) const
 {
     for( const CppFunction &f : functions ) {
@@ -270,6 +290,7 @@ std::string CppClass::export_( Exporter &p ) const
     if( lua_name != full_name().as_string() ) {
         r = r + tab + "cpp_name = \"" + full_name() + "\",\n";
     }
+    r = r + tab + "forward_declaration = \"" + Exporter::escape_to_lua_string( forward_declaration() ) + "\",\n";
 
     const auto printed_constructors = print_objects<CppConstructor>( p, constructors, headers );
     const auto printed_functions = print_objects<CppFunction>( p, functions, headers );

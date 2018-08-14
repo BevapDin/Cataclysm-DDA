@@ -24,7 +24,7 @@ Optional values are:
   header for the type itself, but may require more includes in order to (implicitly) call
   copy constructors when calling member functions. If a header is missing, you'll get a compiler
   error.
-- forward_declaration (optional, a string), how to forward declare the type. E.g. "class foo;"
+- forward_declaration (a string), how to forward declare the type. E.g. "class foo;"
   (for simple types) or (for template instances):
   "template<typename N> class wrapper;class foo;using foo_wrapper = wrapper<foo>;"
 - output_path (optional, a string), the path where to write the generated C++ code. The default
@@ -132,11 +132,12 @@ end
 
 function container_forward_declaration(t)
     if classes[t] then
-        if classes[t].forward_declaration then
-            return classes[t].forward_declaration
-        end
+        return classes[t].forward_declaration
     end
-    return ""
+    if enums[t] then
+        return enums[t].forward_declaration
+    end
+    return nil
 end
 
 -- Adds the declaration for an C++ iterator class to the exported classes.
@@ -149,6 +150,7 @@ function make_std_iterator_class(container_type, element_type)
         classes[iterator_type] = {
             has_equal = true,
             -- @todo check what other members are needed
+            forward_declaration = container_forward_declaration(container_type),
             output_path = container_output_path(element_type),
             new = {
                 { iterator_type },
@@ -168,10 +170,11 @@ end
 
 function make_std_list_class(element_type)
     local container_type = "std::list<" .. element_type .. ">"
-    local iterator_type = make_std_iterator_class(container_type, element_type)
     if not classes[container_type] then
+        local iterator_type = container_type .. "::iterator"
         classes[container_type] = {
             -- @todo check what other members are needed
+            forward_declaration = container_forward_declaration(element_type) .. "\n#include <list>",
             output_path = container_output_path(element_type),
             code_prepend = container_code_prepend(element_type) .. "\n#include <list>",
             new = {
@@ -189,6 +192,7 @@ function make_std_list_class(element_type)
                 { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
             },
         }
+        make_std_iterator_class(container_type, element_type)
     end
     local t = classes[container_type]
     -- @todo maybe add more data to this?
@@ -197,10 +201,11 @@ end
 
 function make_std_vector_class(element_type)
     local container_type = "std::vector<" .. element_type .. ">"
-    local iterator_type = make_std_iterator_class(container_type, element_type)
     if not classes[container_type] then
+        local iterator_type = container_type .. "::iterator"
         classes[container_type] = {
             -- @todo check what other members are needed
+            forward_declaration = container_forward_declaration(element_type) .. "\n#include <vector>",
             output_path = container_output_path(element_type),
             code_prepend = container_code_prepend(element_type) .. "\n#include <vector>",
             new = {
@@ -219,6 +224,7 @@ function make_std_vector_class(element_type)
                 { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
             },
         }
+        make_std_iterator_class(container_type, element_type)
     end
     local t = classes[container_type]
     -- @todo maybe add more data to this?
@@ -227,10 +233,11 @@ end
 
 function make_std_set_class(element_type)
     local container_type = "std::set<" .. element_type .. ">"
-    local iterator_type = make_std_iterator_class(container_type, element_type)
     if not classes[container_type] then
+        local iterator_type = container_type .. "::iterator"
         classes[container_type] = {
             -- @todo check what other members are needed
+            forward_declaration = container_forward_declaration(element_type) .. "\n#include <set>",
             output_path = container_output_path(element_type),
             code_prepend = container_code_prepend(element_type) .. "\n#include <set>",
             new = {
@@ -248,6 +255,7 @@ function make_std_set_class(element_type)
                 { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
             },
         }
+        make_std_iterator_class(container_type, element_type)
     end
     local t = classes[container_type]
     -- @todo maybe add more data to this?
@@ -329,6 +337,7 @@ dofile_if_exists("../../lua/generated_class_definitions.lua")
 classes["item_stack_iterator"] = {
     by_value = true,
     has_equal = true,
+    forward_declaration = "#include \"item.h\"\n#include <list>",
     cpp_name = "std::list<item>::iterator",
     code_prepend = "#include \"item.h\"\n#include <list>",
     new = {
@@ -344,6 +353,7 @@ classes["item_stack_iterator"] = {
 
 classes["volume"] = {
     by_value = true,
+    forward_declaration = "#include \"units.h\"",
     cpp_name = "units::volume",
     code_prepend = "#include \"units.h\"",
     output_path = "units.gen.cpp",
@@ -356,6 +366,7 @@ classes["volume"] = {
 
 classes["mass"] = {
     by_value = true,
+    forward_declaration = "#include \"units.h\"",
     cpp_name = "units::mass",
     code_prepend = "#include \"units.h\"",
     output_path = "units.gen.cpp",
@@ -472,10 +483,6 @@ global_functions = {
 -- Add missing, but optional members, so the scripts using this data
 -- can just assume it's there and don't need to handle missing entries.
 for class_name, value in pairs(classes) do
-    if not value.forward_declaration then
-        -- @todo could be a struct!
-        value.forward_declaration = "class " .. class_name .. ";"
-    end
     if not value.code_prepend then
         value.code_prepend = ""
     end
