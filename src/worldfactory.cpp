@@ -15,6 +15,8 @@
 #include "catacharset.h"
 #include "cata_utility.h"
 #include "calendar.h"
+#include "lua/lua_engine.h"
+#include "game.h"
 #include "name.h"
 #include "json.h"
 
@@ -173,18 +175,16 @@ WORLDPTR worldfactory::make_new_world( bool show_prompt, const std::string &worl
             return nullptr;
         }
     } else { // 'Play NOW'
-#ifndef LUA
         // Silently remove all Lua mods set by default.
         for( auto mod_it = retworld->active_mod_order.begin(); mod_it != retworld->active_mod_order.end();
            ) {
             const MOD_INFORMATION &minfo = **mod_it;
-            if( minfo.need_lua() ) {
+            if( minfo.need_lua() && !g->lua_engine_ptr->enabled() ) {
                 mod_it = retworld->active_mod_order.erase( mod_it );
             } else {
                 mod_it++;
             }
         }
-#endif
     }
 
     return add_world( retworld );
@@ -696,15 +696,11 @@ void worldfactory::draw_mod_list( const catacurses::window &w, int &start, size_
                     }
 
                     const MOD_INFORMATION &mod = **iter;
-#ifndef LUA
-                    if( mod.need_lua() ) {
+                    if( mod.need_lua() && !g->lua_engine_ptr->enabled() ) {
                         trim_and_print( w, iNum - start, 4, wwidth, c_dark_gray, mod.name() );
                     } else {
                         trim_and_print( w, iNum - start, 4, wwidth, c_white, mod.name() );
                     }
-#else
-                    trim_and_print( w, iNum - start, 4, wwidth, c_white, mod.name() );
-#endif
 
                     if( w_shift ) {
                         // get shift information for the active item
@@ -1018,15 +1014,13 @@ int worldfactory::show_worldgen_tab_modselection( const catacurses::window &win,
             active_header = prev_header;
         } else if( action == "CONFIRM" ) {
             if( active_header == 0 && !current_tab_mods.empty() ) {
-#ifndef LUA
-                if( current_tab_mods[cursel[0]]->need_lua() ) {
+                if( current_tab_mods[cursel[0]]->need_lua() && !g->lua_engine_ptr->enabled() ) {
                     popup( _( "Can't add mod. This mod requires Lua support." ) );
                     redraw_active = true;
                     draw_modselection_borders( win, ctxt );
                     redraw_description = true;
                     continue;
                 }
-#endif
                 // try-add
                 mman_ui->try_add( current_tab_mods[cursel[0]], active_mod_order );
                 redraw_active = true;
@@ -1188,15 +1182,13 @@ to continue, or <color_yellow>%s</color> to go back and review your world." ),
 
         const std::string action = ctxt.handle_input();
         if( action == "NEXT_TAB" ) {
-#ifndef LUA
             for( const mod_id &mod : world->active_mod_order ) {
                 const MOD_INFORMATION &temp = *mod;
-                if( temp.need_lua() ) {
+                if( temp.need_lua() && !g->lua_engine_ptr->enabled() ) {
                     popup( _( "Mod '%s' requires Lua support." ), temp.name() );
                     return -2; // Move back to modselect tab.
                 }
             }
-#endif
             if( worldname.empty() ) {
                 mvwprintz( w_confirmation, namebar_y, namebar_x, h_light_gray,
                            _( "________NO NAME ENTERED!________" ) );
@@ -1368,20 +1360,19 @@ void worldfactory::draw_worldgen_tabs( const catacurses::window &w, size_t curre
 
 bool worldfactory::world_need_lua_build( std::string world_name )
 {
-#ifndef LUA
+    if( g->lua_engine_ptr->enabled() ) {
+        return false;
+    }
     WORLDPTR world = get_world( world_name );
 
     if( world == nullptr ) {
         return false;
     }
     for( const mod_id &mod : world->active_mod_order ) {
-        if( mod.is_valid() && mod->need_lua() ) {
+        if( mod.is_valid() && mod->need_lua() && g->lua_engine_ptr->enabled() ) {
             return true;
         }
     }
-#endif
-    // Prevent unused var error when LUA and RELEASE enabled.
-    world_name.size();
     return false;
 }
 

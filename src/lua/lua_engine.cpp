@@ -422,6 +422,11 @@ void lua_engine::loadmod( const std::string &base_path, const std::string &main_
     // debugmsg("Loading from %s", full_path.c_str());
 }
 
+bool lua_engine::enabled() const
+{
+    return state == static_cast<void*>( nullptr );
+}
+
 // Custom error handler
 static int traceback( lua_State *L )
 {
