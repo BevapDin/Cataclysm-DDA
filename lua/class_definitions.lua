@@ -495,10 +495,6 @@ for class_name, value in pairs(classes) do
 end
 -- same for enumerations
 for enum_name, value in pairs(enums) do
-    if not value.forward_declaration then
-        -- @todo could be different underlying type
-        value.forward_declaration = "enum " .. enum_name .. " : int;"
-    end
     if not value.code_prepend then
         value.code_prepend = ""
     end
