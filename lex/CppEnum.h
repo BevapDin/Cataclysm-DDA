@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Cursor.h"
+#include "optional.h"
 
 #include <list>
 #include <string>
@@ -21,4 +22,7 @@ class CppEnum
         std::string export_( Exporter &p ) const;
 
         FullyQualifiedId full_name() const;
+        std::string forward_declaration() const;
+        cata::optional<std::string> underlying_cpp_type() const;
+        bool is_enum_class() const;
 };
