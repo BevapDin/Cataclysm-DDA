@@ -756,7 +756,7 @@ function generate_main_init_function()
     cpp_output = cpp_output .. "void load_metatables(lua_State* const L) {" .. br
     for _, class_name in ipairs(sorted_keys(classes)) do
         local class = classes[class_name]
-        local cpp_name = "LuaValue<" .. class_name .. ">"
+        local cpp_name = "LuaValue<" .. class.cpp_name .. ">"
         -- If the class has a constructor, it should be exposed via a global name (which is the class name)
         if class.new then
             cpp_output = cpp_output .. tab .. cpp_name .. "::load_metatable( L, \"" .. class_name .. "\" );" .. br
